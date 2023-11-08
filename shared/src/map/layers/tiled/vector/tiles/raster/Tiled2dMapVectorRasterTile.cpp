@@ -16,7 +16,7 @@
 #include "Tiled2dMapVectorStyleParser.h"
 
 Tiled2dMapVectorRasterTile::Tiled2dMapVectorRasterTile(const std::weak_ptr<MapInterface> &mapInterface,
-                                                       const Tiled2dMapTileInfo &tileInfo,
+                                                       const Tiled2dMapVersionedTileInfo &tileInfo,
                                                        const WeakActor<Tiled2dMapVectorLayerTileCallbackInterface> &tileCallbackInterface,
                                                        const std::shared_ptr<RasterVectorLayerDescription> &description,
                                                        const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
@@ -34,7 +34,7 @@ Tiled2dMapVectorRasterTile::Tiled2dMapVectorRasterTile(const std::weak_ptr<MapIn
         quad->asGraphicsObject()->setDebugLabel(description->identifier);
 #endif
         tileObject = std::make_shared<Textured2dLayerObject>(quad, shader, pMapInterface);
-        tileObject->setRectCoord(tileInfo.bounds);
+        tileObject->setRectCoord(tileInfo.tileInfo.bounds);
     }
 }
 
@@ -55,8 +55,8 @@ void Tiled2dMapVectorRasterTile::update() {
     }
     
     double zoomIdentifier = layerConfig->getZoomIdentifier(camera->getZoom());
-    zoomIdentifier = std::max(zoomIdentifier, (double) tileInfo.zoomIdentifier);
-    
+    zoomIdentifier = std::max(zoomIdentifier, (double) tileInfo.tileInfo.zoomIdentifier);
+
     auto rasterDescription = std::static_pointer_cast<RasterVectorLayerDescription>(description);
     bool inZoomRange = (rasterDescription->maxZoom >= zoomIdentifier || zoomInfo.overzoom) && (rasterDescription->minZoom <= zoomIdentifier || zoomInfo.underzoom);
 

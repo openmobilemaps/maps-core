@@ -15,6 +15,7 @@
 #include "LambdaTask.h"
 #include "MapConfig.h"
 #include "PrioritizedTiled2dMapTileInfo.h"
+#include "Tiled2dMapVersionedTileInfo.h"
 #include "SchedulerInterface.h"
 #include "Tiled2dMapLayerConfig.h"
 #include "Tiled2dMapSourceInterface.h"
@@ -60,7 +61,7 @@ class Tiled2dMapSourceReadyInterface {
 public:
     virtual ~Tiled2dMapSourceReadyInterface() = default;
 
-    virtual void setTileReady(const Tiled2dMapTileInfo &tile) = 0;
+    virtual void setTileReady(const Tiled2dMapVersionedTileInfo &tile) = 0;
 };
 
 
@@ -107,10 +108,10 @@ public:
 
     virtual void reloadTiles();
 
-    void setTileReady(const Tiled2dMapTileInfo &tile) override;
+    void setTileReady(const Tiled2dMapVersionedTileInfo &tile) override;
 
-    void setTilesReady(const std::vector<Tiled2dMapTileInfo> &tiles);
-            
+    void setTilesReady(const std::vector<Tiled2dMapVersionedTileInfo> &tiles);
+
     virtual void cancelLoad(Tiled2dMapTileInfo tile, size_t loaderIndex) = 0;
             
     virtual ::djinni::Future<L> loadDataAsync(Tiled2dMapTileInfo tile, size_t loaderIndex) = 0;

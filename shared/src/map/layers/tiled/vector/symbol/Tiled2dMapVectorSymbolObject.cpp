@@ -22,7 +22,7 @@
 Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<MapInterface> &mapInterface,
                                                            const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
                                                            const WeakActor<Tiled2dMapVectorFontProvider> &fontProvider,
-                                                           const Tiled2dMapTileInfo &tileInfo,
+                                                           const Tiled2dMapVersionedTileInfo &tileInfo,
                                                            const std::string &layerIdentifier,
                                                            const std::shared_ptr<SymbolVectorLayerDescription> &description,
                                                            const std::shared_ptr<FeatureContext> featureContext,
@@ -59,7 +59,7 @@ symbolTileIndex(symbolTileIndex) {
         return;
     }
     
-    const auto evalContext = EvaluationContext(tileInfo.zoomIdentifier, featureContext, featureStateManager);
+    const auto evalContext = EvaluationContext(tileInfo.tileInfo.zoomIdentifier, featureContext, featureStateManager);
     std::string iconName = description->style.getIconImage(evalContext);
     contentHash = std::hash<std::tuple<std::string, std::string, std::string>>()(std::tuple<std::string, std::string, std::string>(layerIdentifier, iconName, fullText));
     
@@ -68,8 +68,8 @@ symbolTileIndex(symbolTileIndex) {
     renderCoordinate = converter->convertToRenderSystem(coordinate);
     initialRenderCoordinateVec = Vec2D(renderCoordinate.x, renderCoordinate.y);
     
-    evaluateStyleProperties(tileInfo.zoomIdentifier);
-    
+    evaluateStyleProperties(tileInfo.tileInfo.zoomIdentifier);
+
     iconRotationAlignment = description->style.getIconRotationAlignment(evalContext);
     
     if (hasIcon && !hideIcon) {
@@ -86,10 +86,10 @@ symbolTileIndex(symbolTileIndex) {
     const size_t contentHash = usedKeys.getHash(evalContext);
 
     crossTileIdentifier = std::hash<std::tuple<std::string, std::string, bool, size_t>>()(std::tuple<std::string, std::string, bool, size_t>(fullText, layerIdentifier, hasIcon, contentHash));
-    double xTolerance = std::ceil(std::abs(tileInfo.bounds.bottomRight.x - tileInfo.bounds.topLeft.x) / 4096.0);
-    double yTolerance = std::ceil(std::abs(tileInfo.bounds.bottomRight.y - tileInfo.bounds.topLeft.y) / 4096.0);
+    double xTolerance = std::ceil(std::abs(tileInfo.tileInfo.bounds.bottomRight.x - tileInfo.tileInfo.bounds.topLeft.x) / 4096.0);
+    double yTolerance = std::ceil(std::abs(tileInfo.tileInfo.bounds.bottomRight.y - tileInfo.tileInfo.bounds.topLeft.y) / 4096.0);
 
-    animationCoordinator = animationCoordinatorMap->getOrAddAnimationController(crossTileIdentifier, coordinate, tileInfo.zoomIdentifier, xTolerance, yTolerance, description->style.getTransitionDuration(), description->style.getTransitionDelay());
+    animationCoordinator = animationCoordinatorMap->getOrAddAnimationController(crossTileIdentifier, coordinate, tileInfo.tileInfo.zoomIdentifier, xTolerance, yTolerance, description->style.getTransitionDuration(), description->style.getTransitionDelay());
     animationCoordinator->increaseUsage();
     if (!animationCoordinator->isOwned.test_and_set()) {
         isCoordinateOwner = true;

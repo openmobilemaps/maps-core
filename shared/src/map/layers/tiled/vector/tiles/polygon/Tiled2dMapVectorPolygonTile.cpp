@@ -20,7 +20,7 @@
 
 
 Tiled2dMapVectorPolygonTile::Tiled2dMapVectorPolygonTile(const std::weak_ptr<MapInterface> &mapInterface,
-                                                         const Tiled2dMapTileInfo &tileInfo,
+                                                         const Tiled2dMapVersionedTileInfo &tileInfo,
                                                          const WeakActor<Tiled2dMapVectorLayerTileCallbackInterface> &tileCallbackInterface,
                                                          const std::shared_ptr<PolygonVectorLayerDescription> &description,
                                                          const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
@@ -77,7 +77,7 @@ void Tiled2dMapVectorPolygonTile::update() {
     }
 
     double zoomIdentifier = layerConfig->getZoomIdentifier(camera->getZoom());
-    zoomIdentifier = std::max(zoomIdentifier, (double) tileInfo.zoomIdentifier);
+    zoomIdentifier = std::max(zoomIdentifier, (double) tileInfo.tileInfo.zoomIdentifier);
 
     auto polygonDescription = std::static_pointer_cast<PolygonVectorLayerDescription>(description);
     bool inZoomRange = polygonDescription->maxZoom >= zoomIdentifier && polygonDescription->minZoom <= zoomIdentifier;
@@ -157,7 +157,7 @@ void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDa
 
             if (featureContext->geomType != vtzero::GeomType::POLYGON) { continue; }
 
-            EvaluationContext evalContext = EvaluationContext(tileInfo.zoomIdentifier, featureContext, featureStateManager);
+            EvaluationContext evalContext = EvaluationContext(tileInfo.tileInfo.zoomIdentifier, featureContext, featureStateManager);
             if (description->filter == nullptr || description->filter->evaluateOr(evalContext, false)) {
 
                 int styleIndex = -1;

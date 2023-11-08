@@ -16,7 +16,7 @@
 #include "Tiled2dMapVectorStyleParser.h"
 
 Tiled2dMapVectorLineTile::Tiled2dMapVectorLineTile(const std::weak_ptr<MapInterface> &mapInterface,
-                                                         const Tiled2dMapTileInfo &tileInfo,
+                                                         const Tiled2dMapVersionedTileInfo &tileInfo,
                                                          const WeakActor<Tiled2dMapVectorLayerTileCallbackInterface> &tileCallbackInterface,
                                                          const std::shared_ptr<LineVectorLayerDescription> &description,
                                                    const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
@@ -75,7 +75,7 @@ void Tiled2dMapVectorLineTile::update() {
 
     const double cameraZoom = camera->getZoom();
      double zoomIdentifier = layerConfig->getZoomIdentifier(cameraZoom);
-    zoomIdentifier = std::max(zoomIdentifier, (double) tileInfo.zoomIdentifier);
+    zoomIdentifier = std::max(zoomIdentifier, (double) tileInfo.tileInfo.zoomIdentifier);
 
     auto zoom = layerConfig->getZoomFactorAtIdentifier(floor(zoomIdentifier));
     auto scalingFactor = (camera->asCameraInterface()->getScalingFactor() / cameraZoom) * zoom;
@@ -239,7 +239,7 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
             
             if (featureContext->geomType != vtzero::GeomType::POLYGON && featureContext->geomType != vtzero::GeomType::LINESTRING) { continue; }
 
-            EvaluationContext evalContext = EvaluationContext(tileInfo.zoomIdentifier, featureContext, featureStateManager);
+            EvaluationContext evalContext = EvaluationContext(tileInfo.tileInfo.zoomIdentifier, featureContext, featureStateManager);
             if ((description->filter == nullptr || description->filter->evaluateOr(evalContext, false))) {
                 int styleGroupIndex = -1;
                 int styleIndex = -1;

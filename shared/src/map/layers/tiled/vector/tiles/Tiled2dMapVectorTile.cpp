@@ -14,7 +14,7 @@
 #include "RenderObject.h"
 
 Tiled2dMapVectorTile::Tiled2dMapVectorTile(const std::weak_ptr<MapInterface> &mapInterface,
-                                           const Tiled2dMapTileInfo &tileInfo,
+                                           const Tiled2dMapVersionedTileInfo &tileInfo,
                                            const std::shared_ptr<VectorLayerDescription> &description,
                                            const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
                                            const WeakActor<Tiled2dMapVectorLayerTileCallbackInterface> &tileReadyInterface,

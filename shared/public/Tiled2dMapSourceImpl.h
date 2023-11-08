@@ -574,7 +574,7 @@ void Tiled2dMapSource<T, L, R>::updateTileMasks() {
         return;
     }
 
-    if (currentTiles.empty()) {
+    if (currentTiles.empty() && outdatedTiles.empty()) {
         return;
     }
 
@@ -693,13 +693,13 @@ void Tiled2dMapSource<T, L, R>::updateTileMasks() {
 }
 
 template<class T, class L, class R>
-void Tiled2dMapSource<T, L, R>::setTileReady(const Tiled2dMapTileInfo &tile) {
+void Tiled2dMapSource<T, L, R>::setTileReady(const Tiled2dMapVersionedTileInfo &tile) {
     bool needsUpdate = false;
     
-    if (readyTiles.count(tile) == 0) {
-        if (currentTiles.count(tile) != 0){
-            readyTiles.insert(tile);
-            outdatedTiles.erase(tile);
+    if (readyTiles.count(tile.tileInfo) == 0) {
+        if (currentTiles.count(tile.tileInfo) != 0){
+            readyTiles.insert(tile.tileInfo);
+            outdatedTiles.erase(tile.tileInfo);
             needsUpdate = true;
         }
     }
@@ -712,14 +712,14 @@ void Tiled2dMapSource<T, L, R>::setTileReady(const Tiled2dMapTileInfo &tile) {
 }
 
 template<class T, class L, class R>
-void Tiled2dMapSource<T, L, R>::setTilesReady(const std::vector<Tiled2dMapTileInfo> &tiles) {
+void Tiled2dMapSource<T, L, R>::setTilesReady(const std::vector<Tiled2dMapVersionedTileInfo> &tiles) {
     bool needsUpdate = false;
     
     for (auto const &tile: tiles) {
-        if (readyTiles.count(tile) == 0) {
-            if (currentTiles.count(tile) != 0){
-                readyTiles.insert(tile);
-                outdatedTiles.erase(tile);
+        if (readyTiles.count(tile.tileInfo) == 0 || outdatedTiles.count(tile.tileInfo) > 0) {
+            if (currentTiles.count(tile.tileInfo) != 0){
+                readyTiles.insert(tile.tileInfo);
+                outdatedTiles.erase(tile.tileInfo);
                 needsUpdate = true;
             }
         }
@@ -823,5 +823,6 @@ void Tiled2dMapSource<T, L, R>::reloadTiles() {
     currentlyLoading.clear();
     errorTiles.clear();
 
+    lastVisibleTilesHash = -1;
     onVisibleTilesChanged(currentPyramid, currentKeepZoomLevelOffset);
 }

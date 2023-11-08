@@ -11,7 +11,7 @@
 #pragma once
 
 #include "Actor.h"
-#include "Tiled2dMapTileInfo.h"
+#include "Tiled2dMapVersionedTileInfo.h"
 #include "Value.h"
 #include "MapInterface.h"
 #include "VectorTileGeometryHandler.h"
@@ -33,7 +33,7 @@ class Tiled2dMapVectorTile : public ActorObject,
                              public SimpleTouchInterface {
 public:
     Tiled2dMapVectorTile(const std::weak_ptr<MapInterface> &mapInterface,
-                         const Tiled2dMapTileInfo &tileInfo,
+                         const Tiled2dMapVersionedTileInfo &tileInfo,
                          const std::shared_ptr<VectorLayerDescription> &description,
                          const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
                          const WeakActor<Tiled2dMapVectorLayerTileCallbackInterface> &tileReadyInterface,
@@ -67,7 +67,7 @@ public:
 
 protected:
     const std::weak_ptr<MapInterface> mapInterface;
-    const Tiled2dMapTileInfo tileInfo;
+    const Tiled2dMapVersionedTileInfo tileInfo;
     std::shared_ptr<VectorLayerDescription> description;
     std::shared_ptr<Tiled2dMapVectorLayerConfig> layerConfig;
     const WeakActor<Tiled2dMapVectorLayerTileCallbackInterface> tileCallbackInterface;

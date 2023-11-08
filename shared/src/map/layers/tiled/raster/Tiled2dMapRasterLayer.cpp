@@ -183,7 +183,7 @@ void Tiled2dMapRasterLayer::onTilesUpdated(const std::string &layerName, std::un
 
             std::unordered_set<Tiled2dMapRasterTileInfo> tilesToAdd;
             for (const auto &rasterTileInfo : currentTileInfos) {
-                if (shouldLoadTile(rasterTileInfo.tileInfo)) {
+                if (shouldLoadTile(rasterTileInfo.tileInfo.tileInfo)) {
                     auto it = tileObjectMap.find(rasterTileInfo);
                     if (it == tileObjectMap.end()) {
                         bool found = std::any_of(this->tilesToSetup.begin(), this->tilesToSetup.end(), [&rasterTileInfo](const auto& tilePair) {
@@ -197,12 +197,12 @@ void Tiled2dMapRasterLayer::onTilesUpdated(const std::string &layerName, std::un
                 }
             }
 
-            std::unordered_map<Tiled2dMapTileInfo, Tiled2dMapLayerMaskWrapper> newTileMasks;
+            std::unordered_map<Tiled2dMapVersionedTileInfo, Tiled2dMapLayerMaskWrapper> newTileMasks;
 
             std::unordered_set<Tiled2dMapRasterTileInfo> tilesToRemove;
             for (const auto &tileEntry : tileObjectMap) {
                 auto currentTileInfosIt = currentTileInfos.find(tileEntry.first);
-                if (currentTileInfosIt == currentTileInfos.end() || !shouldLoadTile(tileEntry.first.tileInfo)){
+                if (currentTileInfosIt == currentTileInfos.end() || !shouldLoadTile(tileEntry.first.tileInfo.tileInfo)){
                     tilesToRemove.insert(tileEntry.first);
                 } else {
                     if (tileEntry.first.state != currentTileInfosIt->state) {
@@ -258,7 +258,7 @@ void Tiled2dMapRasterLayer::onTilesUpdated(const std::string &layerName, std::un
                     
                     tileObject->beginStyleAnimation(startStyle, style, 150);
                 }
-                tileObject->setRectCoord(tile.tileInfo.bounds);
+                tileObject->setRectCoord(tile.tileInfo.tileInfo.bounds);
                 tilesToSetup.emplace_back(std::make_pair(tile, tileObject));
 
                 tileObjectMap[tile] = tileObject;
@@ -312,7 +312,7 @@ void Tiled2dMapRasterLayer::setupTiles() {
         return;
     }
 
-    std::vector<Tiled2dMapTileInfo> tilesReady;
+    std::vector<Tiled2dMapVersionedTileInfo> tilesReady;
     {
         std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
 
@@ -394,7 +394,7 @@ void Tiled2dMapRasterLayer::generateRenderPasses() {
         std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
 
         for (const auto &entry : tileObjectMap) {
-            if (entry.first.tileInfo.t != curT) {
+            if (entry.first.tileInfo.tileInfo.t != curT) {
                 continue;
             }
 

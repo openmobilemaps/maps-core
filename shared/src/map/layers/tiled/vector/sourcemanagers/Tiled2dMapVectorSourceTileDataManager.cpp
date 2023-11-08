@@ -193,7 +193,7 @@ void Tiled2dMapVectorSourceTileDataManager::updateMaskObjects() {
             tileRenderObjectsMap.erase(tileToRemove);
         }
 
-        std::unordered_set<Tiled2dMapTileInfo> localToRemove = std::unordered_set(tilesToRemove);
+        std::unordered_set<Tiled2dMapVersionedTileInfo> localToRemove = std::unordered_set(tilesToRemove);
         tilesToRemove.clear();
         readyManager.syncAccess([localToRemove](auto manager) {
             manager->remove(localToRemove);
@@ -205,7 +205,7 @@ void Tiled2dMapVectorSourceTileDataManager::updateMaskObjects() {
     mapInterface->invalidate();
 }
 
-Actor<Tiled2dMapVectorTile> Tiled2dMapVectorSourceTileDataManager::createTileActor(const Tiled2dMapTileInfo &tileInfo,
+Actor<Tiled2dMapVectorTile> Tiled2dMapVectorSourceTileDataManager::createTileActor(const Tiled2dMapVersionedTileInfo &tileInfo,
                                                                                    const std::shared_ptr<VectorLayerDescription> &layerDescription) {
     Actor<Tiled2dMapVectorTile> actor;
 
@@ -279,7 +279,7 @@ Actor<Tiled2dMapVectorTile> Tiled2dMapVectorSourceTileDataManager::createTileAct
     return actor;
 }
 
-void Tiled2dMapVectorSourceTileDataManager::tileIsReady(const Tiled2dMapTileInfo &tile,
+void Tiled2dMapVectorSourceTileDataManager::tileIsReady(const Tiled2dMapVersionedTileInfo &tile,
                                                         const std::string &layerIdentifier,
                                                         const WeakActor<Tiled2dMapVectorTile> &tileActor) {
     if (!tileActor) {

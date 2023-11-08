@@ -22,8 +22,7 @@ Tiled2dMapVectorSymbolGroup::Tiled2dMapVectorSymbolGroup(uint32_t groupId,
                                                          const std::weak_ptr<MapInterface> &mapInterface,
                                                          const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
                                                          const WeakActor<Tiled2dMapVectorFontProvider> &fontProvider,
-                                                         const Tiled2dMapTileInfo &tileInfo,
-                                                         const int64_t tileVersion,
+                                                         const Tiled2dMapVersionedTileInfo &tileInfo,
                                                          const std::string &layerIdentifier,
                                                          const std::shared_ptr<SymbolVectorLayerDescription> &layerDescription,
                                                          const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager)
@@ -31,7 +30,6 @@ Tiled2dMapVectorSymbolGroup::Tiled2dMapVectorSymbolGroup(uint32_t groupId,
           mapInterface(mapInterface),
           layerConfig(layerConfig),
           tileInfo(tileInfo),
-          tileVersion(tileVersion),
           layerIdentifier(layerIdentifier),
           layerDescription(layerDescription),
           fontProvider(fontProvider),
@@ -48,19 +46,20 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
 
     auto features = weakFeatures.lock();
     if (!features) {
-        symbolManagerActor.message(&Tiled2dMapVectorSourceSymbolDataManager::onSymbolGroupInitialized, false, tileInfo, 0, layerIdentifier, selfActor);
+        symbolManagerActor.message(&Tiled2dMapVectorSourceSymbolDataManager::onSymbolGroupInitialized, false, tileInfo, layerIdentifier, selfActor);
         return;
     }
+
 
     auto strongMapInterface = this->mapInterface.lock();
     auto camera = strongMapInterface ? strongMapInterface->getCamera() : nullptr;
     if (!strongMapInterface || !camera) {
-        symbolManagerActor.message(&Tiled2dMapVectorSourceSymbolDataManager::onSymbolGroupInitialized, false, tileInfo, tileVersion, layerIdentifier, selfActor);
+        symbolManagerActor.message(&Tiled2dMapVectorSourceSymbolDataManager::onSymbolGroupInitialized, false, tileInfo, layerIdentifier, selfActor);
         return;
     }
 
     const double tilePixelFactor =
-            (0.0254 / camera->getScreenDensityPpi()) * layerConfig->getZoomFactorAtIdentifier(tileInfo.zoomIdentifier - 1);
+            (0.0254 / camera->getScreenDensityPpi()) * layerConfig->getZoomFactorAtIdentifier(tileInfo.tileInfo.zoomIdentifier - 1);
 
     std::unordered_map<std::string, std::vector<Coord>> textPositionMap;
 
@@ -69,7 +68,7 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
     for (auto it = features->rbegin() + featuresRBase; it != features->rbegin() + featuresRBase + featuresCount; it++) {
         featureTileIndex++;
         auto const &[context, geometry] = *it;
-        const auto evalContext = EvaluationContext(tileInfo.zoomIdentifier, context, featureStateManager);
+        const auto evalContext = EvaluationContext(tileInfo.tileInfo.zoomIdentifier, context, featureStateManager);
 
         if ((layerDescription->filter != nullptr && !layerDescription->filter->evaluateOr(evalContext, false))) {
             continue;
@@ -299,7 +298,7 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
     }
 
     if (symbolObjects.empty()) {
-        symbolManagerActor.message(&Tiled2dMapVectorSourceSymbolDataManager::onSymbolGroupInitialized, false, tileInfo, tileVersion, layerIdentifier, selfActor);
+        symbolManagerActor.message(&Tiled2dMapVectorSourceSymbolDataManager::onSymbolGroupInitialized, false, tileInfo, layerIdentifier, selfActor);
         return;
     }
 
@@ -403,7 +402,7 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
 
     setAlpha(alpha);
 
-    symbolManagerActor.message(&Tiled2dMapVectorSourceSymbolDataManager::onSymbolGroupInitialized, true, tileInfo, tileVersion, layerIdentifier, selfActor);
+    symbolManagerActor.message(&Tiled2dMapVectorSourceSymbolDataManager::onSymbolGroupInitialized, true, tileInfo, layerIdentifier, selfActor);
 }
 
 void Tiled2dMapVectorSymbolGroup::updateLayerDescription(const std::shared_ptr<SymbolVectorLayerDescription> layerDescription) {
@@ -429,12 +428,12 @@ void Tiled2dMapVectorSymbolGroup::setupObjects(const std::shared_ptr<SpriteData>
 
     for (auto const &object: symbolObjects) {
         if (spriteTexture && spriteData) {
-            object->setupIconProperties(iconPositions, iconRotations, iconTextureCoordinates, iconOffset, tileInfo.zoomIdentifier,
+            object->setupIconProperties(iconPositions, iconRotations, iconTextureCoordinates, iconOffset, tileInfo.tileInfo.zoomIdentifier,
                                         spriteTexture, spriteData);
             object->setupStretchIconProperties(stretchedIconPositions, stretchedIconTextureCoordinates, stretchedIconOffset,
-                                               tileInfo.zoomIdentifier, spriteTexture, spriteData);
+                                               tileInfo.tileInfo.zoomIdentifier, spriteTexture, spriteData);
         }
-        object->setupTextProperties(textTextureCoordinates, textStyleIndices, textOffset, textStyleOffset, tileInfo.zoomIdentifier);
+        object->setupTextProperties(textTextureCoordinates, textStyleIndices, textOffset, textStyleOffset, tileInfo.tileInfo.zoomIdentifier);
     }
 
     if (spriteTexture && spriteData && iconInstancedObject) {
@@ -480,7 +479,7 @@ void Tiled2dMapVectorSymbolGroup::setupObjects(const std::shared_ptr<SpriteData>
 
     if (symbolDataManager.has_value()) {
         auto selfActor = WeakActor<Tiled2dMapVectorSymbolGroup>(mailbox, shared_from_this());
-        symbolDataManager->message(&Tiled2dMapVectorSourceSymbolDataManager::onSymbolGroupInitialized, true, tileInfo, tileVersion,
+        symbolDataManager->message(&Tiled2dMapVectorSourceSymbolDataManager::onSymbolGroupInitialized, true, tileInfo,
                                    layerIdentifier, selfActor);
     }
 }
@@ -679,7 +678,7 @@ Tiled2dMapVectorSymbolGroup::getPositioning(std::vector<::Coord>::const_iterator
 }
 
 std::shared_ptr<Tiled2dMapVectorSymbolObject>
-Tiled2dMapVectorSymbolGroup::createSymbolObject(const Tiled2dMapTileInfo &tileInfo,
+Tiled2dMapVectorSymbolGroup::createSymbolObject(const Tiled2dMapVersionedTileInfo &tileInfo,
                                                 const std::string &layerIdentifier,
                                                 const std::shared_ptr<SymbolVectorLayerDescription> &description,
                                                 const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,

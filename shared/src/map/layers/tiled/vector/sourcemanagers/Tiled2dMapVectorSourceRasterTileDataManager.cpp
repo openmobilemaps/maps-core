@@ -41,9 +41,9 @@ void Tiled2dMapVectorSourceRasterTileDataManager::onRasterTilesUpdated(const std
 
         std::unordered_set<Tiled2dMapRasterTileInfo> tilesToAdd;
         std::unordered_set<Tiled2dMapRasterTileInfo> tilesToKeep;
-        std::unordered_set<Tiled2dMapTileInfo> tilesToRemove;
-        std::unordered_map<Tiled2dMapTileInfo, TileState> tileStateUpdates;
-        std::unordered_map<Tiled2dMapTileInfo, Tiled2dMapLayerMaskWrapper> newTileMasks;
+        std::unordered_set<Tiled2dMapVersionedTileInfo> tilesToRemove;
+        std::unordered_map<Tiled2dMapVersionedTileInfo, TileState> tileStateUpdates;
+        std::unordered_map<Tiled2dMapVersionedTileInfo, Tiled2dMapLayerMaskWrapper> newTileMasks;
 
         {
             std::lock_guard<std::recursive_mutex> updateLock(updateMutex);
@@ -114,7 +114,7 @@ void Tiled2dMapVectorSourceRasterTileDataManager::onRasterTilesUpdated(const std
                         continue;
                     }
 
-                    if (!(layer->minZoom <= tile.tileInfo.zoomIdentifier && layer->maxZoom >= tile.tileInfo.zoomIdentifier)) {
+                    if (!(layer->minZoom <= tile.tileInfo.tileInfo.zoomIdentifier && layer->maxZoom >= tile.tileInfo.tileInfo.zoomIdentifier)) {
                         continue;
                     }
                     const auto data = tile.textureHolder;
@@ -144,9 +144,9 @@ void Tiled2dMapVectorSourceRasterTileDataManager::onRasterTilesUpdated(const std
                 readyManager.message(&Tiled2dMapVectorReadyManager::didProcessData, readyManagerIndex, tile.tileInfo, indexControlSet.empty() ? 0 : 1);
             }
 
-            this->tileMasksToSetup = std::unordered_map<Tiled2dMapTileInfo, Tiled2dMapLayerMaskWrapper>(newTileMasks);
-            this->tilesToRemove = std::unordered_set<Tiled2dMapTileInfo>(tilesToRemove);
-            this->tileStateUpdates = std::unordered_map<Tiled2dMapTileInfo, TileState>(tileStateUpdates);
+            this->tileMasksToSetup = std::unordered_map<Tiled2dMapVersionedTileInfo, Tiled2dMapLayerMaskWrapper>(newTileMasks);
+            this->tilesToRemove = std::unordered_set<Tiled2dMapVersionedTileInfo>(tilesToRemove);
+            this->tileStateUpdates = std::unordered_map<Tiled2dMapVersionedTileInfo, TileState>(tileStateUpdates);
         }
 
         auto castedMe = std::static_pointer_cast<Tiled2dMapVectorSourceTileDataManager>(shared_from_this());
@@ -158,7 +158,7 @@ void Tiled2dMapVectorSourceRasterTileDataManager::onRasterTilesUpdated(const std
 
 }
 
-void Tiled2dMapVectorSourceRasterTileDataManager::onTileCompletelyReady(const Tiled2dMapTileInfo tileInfo) {
+void Tiled2dMapVectorSourceRasterTileDataManager::onTileCompletelyReady(const Tiled2dMapVersionedTileInfo tileInfo) {
     readyManager.message(&Tiled2dMapVectorReadyManager::setReady, readyManagerIndex, tileInfo, 1);
 }
 
@@ -197,7 +197,7 @@ void Tiled2dMapVectorSourceRasterTileDataManager::updateLayerDescription(std::sh
             }
 
             // Re-evaluate criteria for the tile creation of this specific sublayer
-            if (!(layerDescription->minZoom <= tileData.tileInfo.zoomIdentifier && layerDescription->maxZoom >= tileData.tileInfo.zoomIdentifier)) {
+            if (!(layerDescription->minZoom <= tileData.tileInfo.tileInfo.zoomIdentifier && layerDescription->maxZoom >= tileData.tileInfo.tileInfo.zoomIdentifier)) {
                 continue;
             }
 

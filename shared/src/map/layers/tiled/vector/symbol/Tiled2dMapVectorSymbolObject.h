@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "Tiled2dMapTileInfo.h"
+#include "Tiled2dMapVersionedTileInfo.h"
 #include "SymbolVectorLayerDescription.h"
 #include "Value.h"
 #include "SymbolInfo.h"
@@ -30,7 +30,7 @@ public:
     Tiled2dMapVectorSymbolObject(const std::weak_ptr<MapInterface> &mapInterface,
                                  const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
                                  const WeakActor<Tiled2dMapVectorFontProvider> &fontProvider,
-                                 const Tiled2dMapTileInfo &tileInfo,
+                                 const Tiled2dMapVersionedTileInfo &tileInfo,
                                  const std::string &layerIdentifier,
                                  const std::shared_ptr<SymbolVectorLayerDescription> &description,
                                  const std::shared_ptr<FeatureContext> featureContext,
