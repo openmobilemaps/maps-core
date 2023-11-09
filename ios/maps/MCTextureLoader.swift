@@ -43,8 +43,16 @@ open class MCTextureLoader: MCLoaderInterface {
             semaphore.signal()
             return nil
         }
-        semaphore.wait()
-        return result!
+
+        if semaphore.wait(timeout: .now() + 30.0) == .timedOut {
+            return MCTextureLoaderResult(data: nil, etag: nil, status: .ERROR_TIMEOUT, errorCode: "SEMTIM")
+        }
+
+        if let result {
+            return result
+        }
+
+        return MCTextureLoaderResult(data: nil, etag: nil, status: .ERROR_OTHER, errorCode: "NRES")
     }
 
     open func loadTextureAsnyc(_ url: String, etag: String?) -> DJFuture<MCTextureLoaderResult> {
@@ -182,7 +190,16 @@ open class MCTextureLoader: MCLoaderInterface {
             return nil
         }
         semaphore.wait()
-        return result!
+
+        if semaphore.wait(timeout: .now() + 30.0) == .timedOut {
+            return MCDataLoaderResult(data: nil, etag: nil, status: .ERROR_TIMEOUT, errorCode: "SEMTIM")
+        }
+
+        if let result {
+            return result
+        }
+
+        return MCDataLoaderResult(data: nil, etag: nil, status: .ERROR_OTHER, errorCode: "NRES")
     }
 
     open func loadDataAsync(_ url: String, etag: String?) -> DJFuture<MCDataLoaderResult> {
