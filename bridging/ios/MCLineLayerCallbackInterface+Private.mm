@@ -5,6 +5,7 @@
 #import "MCLineLayerCallbackInterface.h"
 #import "DJICppWrapperCache+Private.h"
 #import "DJIError.h"
+#import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
 #import "MCLineInfoInterface+Private.h"
 #include <exception>

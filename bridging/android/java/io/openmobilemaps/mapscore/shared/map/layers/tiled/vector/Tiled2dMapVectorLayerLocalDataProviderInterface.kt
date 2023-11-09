@@ -8,13 +8,11 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class Tiled2dMapVectorLayerLocalDataProviderInterface {
 
-    abstract fun getStyleJson(): String
+    abstract fun getStyleJson(): String?
 
     abstract fun loadSpriteAsync(scale: Int): com.snapchat.djinni.Future<io.openmobilemaps.mapscore.shared.map.loader.TextureLoaderResult>
 
     abstract fun loadSpriteJsonAsync(scale: Int): com.snapchat.djinni.Future<io.openmobilemaps.mapscore.shared.map.loader.DataLoaderResult>
-
-    abstract fun providesGeojsonData(url: String): Boolean
 
     abstract fun loadGeojson(url: String): com.snapchat.djinni.Future<io.openmobilemaps.mapscore.shared.map.loader.DataLoaderResult>
 
@@ -33,11 +31,11 @@ abstract class Tiled2dMapVectorLayerLocalDataProviderInterface {
             external fun nativeDestroy(nativeRef: Long)
         }
 
-        override fun getStyleJson(): String {
+        override fun getStyleJson(): String? {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             return native_getStyleJson(this.nativeRef)
         }
-        private external fun native_getStyleJson(_nativeRef: Long): String
+        private external fun native_getStyleJson(_nativeRef: Long): String?
 
         override fun loadSpriteAsync(scale: Int): com.snapchat.djinni.Future<io.openmobilemaps.mapscore.shared.map.loader.TextureLoaderResult> {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
@@ -50,12 +48,6 @@ abstract class Tiled2dMapVectorLayerLocalDataProviderInterface {
             return native_loadSpriteJsonAsync(this.nativeRef, scale)
         }
         private external fun native_loadSpriteJsonAsync(_nativeRef: Long, scale: Int): com.snapchat.djinni.Future<io.openmobilemaps.mapscore.shared.map.loader.DataLoaderResult>
-
-        override fun providesGeojsonData(url: String): Boolean {
-            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            return native_providesGeojsonData(this.nativeRef, url)
-        }
-        private external fun native_providesGeojsonData(_nativeRef: Long, url: String): Boolean
 
         override fun loadGeojson(url: String): com.snapchat.djinni.Future<io.openmobilemaps.mapscore.shared.map.loader.DataLoaderResult> {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

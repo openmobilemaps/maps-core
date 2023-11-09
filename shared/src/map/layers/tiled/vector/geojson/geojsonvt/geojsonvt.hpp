@@ -77,17 +77,18 @@ public:
     std::vector<std::shared_ptr<::djinni::Promise<std::shared_ptr<DataLoaderResult>>>> waitingPromises;
     WeakActor<GeoJSONTileDelegate> delegate;
 
-    void load() {
+    void load(bool fromLocal = true) {
         auto weakSelf = weak_from_this();
 
         std::shared_ptr<::djinni::Future<::DataLoaderResult>> jsonLoaderFuture = nullptr;
-        if(localDataProvider && localDataProvider->providesGeojsonData(geoJsonUrl)) {
+        if(localDataProvider && fromLocal) {
             jsonLoaderFuture = std::make_shared<::djinni::Future<::DataLoaderResult>>(localDataProvider->loadGeojson(geoJsonUrl));
         } else {
             jsonLoaderFuture = std::make_shared<::djinni::Future<::DataLoaderResult>>(LoaderHelper::loadDataAsync(geoJsonUrl, std::nullopt, loaders));
         }
 
-        jsonLoaderFuture->then([weakSelf](auto resultFuture){
+        jsonLoaderFuture->then([weakSelf, fromLocal](auto resultFuture){
+
             auto self = weakSelf.lock();
             if (!self) return;
             auto result = resultFuture.get();
@@ -95,6 +96,10 @@ public:
             if (result.status != LoaderStatus::OK) {
                 LogError <<= "Unable to load geoJson";
 
+                // if we fail to load from local provider we try to load from remote
+                if (fromLocal) {
+                    self->load(false);
+                }
             } else {
                 auto string = std::string((char*)result.data->buf(), result.data->len());
                 nlohmann::json json;

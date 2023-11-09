@@ -669,7 +669,7 @@ void Tiled2dMapVectorLayer::onTilesUpdated(const std::string &sourceName, std::u
     }
 }
 
-void Tiled2dMapVectorLayer::loadSpriteData() {
+void Tiled2dMapVectorLayer::loadSpriteData(bool fromLocal) {
     auto lockSelfPtr = shared_from_this();
     auto mapInterface = this->mapInterface;
     auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
@@ -699,7 +699,7 @@ void Tiled2dMapVectorLayer::loadSpriteData() {
     auto context = std::make_shared<Context>(2);
 
     std::shared_ptr<::djinni::Future<::DataLoaderResult>> jsonLoaderFuture;
-    if(localDataProvider) {
+    if(localDataProvider && fromLocal) {
         jsonLoaderFuture = std::make_shared<::djinni::Future<::DataLoaderResult>>(localDataProvider->loadSpriteJsonAsync(scale2x ? 2 : 1));
     } else {
         jsonLoaderFuture = std::make_shared<::djinni::Future<::DataLoaderResult>>(LoaderHelper::loadDataAsync(urlData, std::nullopt, loaders));
@@ -753,8 +753,16 @@ void Tiled2dMapVectorLayer::loadSpriteData() {
     });
 
     auto castedMe = std::static_pointer_cast<Tiled2dMapVectorLayer>(shared_from_this());
+    std::weak_ptr<Tiled2dMapVectorLayer> weakSelf = castedMe;
     auto selfActor = WeakActor<Tiled2dMapVectorLayer>(mailbox, castedMe);
-    context->promise.getFuture().then([context, selfActor] (auto result) {
+    context->promise.getFuture().then([context, selfActor, fromLocal, weakSelf] (auto result) {
+        if (!context->spriteData && !context->spriteTexture && fromLocal) {
+            auto self = weakSelf.lock();
+            if (self) {
+                self->loadSpriteData(false);
+                return;
+            }
+        }
         selfActor.message(&Tiled2dMapVectorLayer::didLoadSpriteData, context->spriteData, context->spriteTexture);
     });
 }

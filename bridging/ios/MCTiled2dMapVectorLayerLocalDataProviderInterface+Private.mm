@@ -34,10 +34,10 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     return self;
 }
 
-- (nonnull NSString *)getStyleJson {
+- (nullable NSString *)getStyleJson {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->getStyleJson();
-        return ::djinni::String::fromCpp(objcpp_result_);
+        return ::djinni::Optional<std::optional, ::djinni::String>::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -52,13 +52,6 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     try {
         auto objcpp_result_ = _cppRefHandle.get()->loadSpriteJsonAsync(::djinni::I32::toCpp(scale));
         return ::djinni::FutureAdaptor<::djinni_generated::DataLoaderResult>::fromCpp(std::move(objcpp_result_));
-    } DJINNI_TRANSLATE_EXCEPTIONS()
-}
-
-- (BOOL)providesGeojsonData:(nonnull NSString *)url {
-    try {
-        auto objcpp_result_ = _cppRefHandle.get()->providesGeojsonData(::djinni::String::toCpp(url));
-        return ::djinni::Bool::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -78,11 +71,11 @@ class Tiled2dMapVectorLayerLocalDataProviderInterface::ObjcProxy final
     friend class ::djinni_generated::Tiled2dMapVectorLayerLocalDataProviderInterface;
 public:
     using ObjcProxyBase::ObjcProxyBase;
-    std::string getStyleJson() override
+    std::optional<std::string> getStyleJson() override
     {
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getStyleJson];
-            return ::djinni::String::toCpp(objcpp_result_);
+            return ::djinni::Optional<std::optional, ::djinni::String>::toCpp(objcpp_result_);
         }
     }
     ::djinni::Future<::TextureLoaderResult> loadSpriteAsync(int32_t c_scale) override
@@ -97,13 +90,6 @@ public:
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() loadSpriteJsonAsync:(::djinni::I32::fromCpp(c_scale))];
             return ::djinni::FutureAdaptor<::djinni_generated::DataLoaderResult>::toCpp(objcpp_result_);
-        }
-    }
-    bool providesGeojsonData(const std::string & c_url) override
-    {
-        @autoreleasepool {
-            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() providesGeojsonData:(::djinni::String::fromCpp(c_url))];
-            return ::djinni::Bool::toCpp(objcpp_result_);
         }
     }
     ::djinni::Future<::DataLoaderResult> loadGeojson(const std::string & c_url) override

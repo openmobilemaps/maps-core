@@ -9,13 +9,11 @@
 
 @protocol MCTiled2dMapVectorLayerLocalDataProviderInterface
 
-- (nonnull NSString *)getStyleJson;
+- (nullable NSString *)getStyleJson;
 
 - (nonnull DJFuture<MCTextureLoaderResult *> *)loadSpriteAsync:(int32_t)scale;
 
 - (nonnull DJFuture<MCDataLoaderResult *> *)loadSpriteJsonAsync:(int32_t)scale;
-
-- (BOOL)providesGeojsonData:(nonnull NSString *)url;
 
 - (nonnull DJFuture<MCDataLoaderResult *> *)loadGeojson:(nonnull NSString *)url;
 
