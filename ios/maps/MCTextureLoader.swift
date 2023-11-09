@@ -43,8 +43,16 @@ open class MCTextureLoader: MCLoaderInterface {
             semaphore.signal()
             return nil
         }
-        semaphore.wait()
-        return result!
+
+        if semaphore.wait(timeout: .now() + 30.0) == .timedOut {
+            return MCTextureLoaderResult(data: nil, etag: nil, status: .ERROR_TIMEOUT, errorCode: "SEMTIM")
+        }
+
+        if let result {
+            return result
+        }
+
+        return MCTextureLoaderResult(data: nil, etag: nil, status: .ERROR_OTHER, errorCode: "NRES")
     }
 
     open func loadTextureAsnyc(_ url: String, etag: String?) -> DJFuture<MCTextureLoaderResult> {
@@ -82,6 +90,11 @@ open class MCTextureLoader: MCLoaderInterface {
                 print("Failed to load \(url): Timeout")
                 #endif
                 promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_TIMEOUT, errorCode: (error?.code).stringOrNil))
+                return
+            }
+
+            if error?.domain == NSURLErrorDomain, error?.code == NSURLErrorCancelled {
+                // Do nothing, since the result is dropped anyway (setting a LoaderStatus will cause the SharedLib to do further computing)
                 return
             }
 
@@ -177,7 +190,16 @@ open class MCTextureLoader: MCLoaderInterface {
             return nil
         }
         semaphore.wait()
-        return result!
+
+        if semaphore.wait(timeout: .now() + 30.0) == .timedOut {
+            return MCDataLoaderResult(data: nil, etag: nil, status: .ERROR_TIMEOUT, errorCode: "SEMTIM")
+        }
+
+        if let result {
+            return result
+        }
+
+        return MCDataLoaderResult(data: nil, etag: nil, status: .ERROR_OTHER, errorCode: "NRES")
     }
 
     open func loadDataAsync(_ url: String, etag: String?) -> DJFuture<MCDataLoaderResult> {
@@ -213,7 +235,7 @@ open class MCTextureLoader: MCLoaderInterface {
             }
 
             if error?.domain == NSURLErrorDomain, error?.code == NSURLErrorCancelled {
-                promise.setValue(.init(data: nil, etag: nil, status: .OK, errorCode: nil))
+                // Do nothing, since the result is dropped anyway (setting a LoaderStatus will cause the SharedLib to do further computing)
                 return
             }
 
