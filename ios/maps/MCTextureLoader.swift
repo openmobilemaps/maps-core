@@ -85,6 +85,11 @@ open class MCTextureLoader: MCLoaderInterface {
                 return
             }
 
+            if error?.domain == NSURLErrorDomain, error?.code == NSURLErrorCancelled {
+                // Do nothing, since the result is dropped anyway (setting a LoaderStatus will cause the SharedLib to do further computing)
+                return
+            }
+
             if response?.statusCode == 404 {
                 #if DEBUG
                 print("Failed to load \(url): 404, \(data.map { String(data: $0, encoding: .utf8) ?? "?" } ?? "?")")
@@ -213,7 +218,7 @@ open class MCTextureLoader: MCLoaderInterface {
             }
 
             if error?.domain == NSURLErrorDomain, error?.code == NSURLErrorCancelled {
-                promise.setValue(.init(data: nil, etag: nil, status: .OK, errorCode: nil))
+                // Do nothing, since the result is dropped anyway (setting a LoaderStatus will cause the SharedLib to do further computing)
                 return
             }
 

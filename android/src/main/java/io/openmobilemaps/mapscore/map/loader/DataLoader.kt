@@ -115,8 +115,14 @@ open class DataLoader(
             }
 
 			override fun onFailure(call: Call, e: IOException) {
-				result.setValue(TextureLoaderResult(null, null, LoaderStatus.ERROR_NETWORK, null))
-			}
+                when {
+                    call.isCanceled() -> {
+                        // Do nothing, since the result is dropped anyway (setting a LoaderStatus will cause the SharedLib to do further computing)
+                    }
+                    e is SocketTimeoutException -> result.setValue(TextureLoaderResult(null, null, LoaderStatus.ERROR_TIMEOUT, null))
+                    else -> result.setValue(TextureLoaderResult(null, null, LoaderStatus.ERROR_NETWORK, null))
+                }
+            }
 		})
 		return result.future
 	}
@@ -143,8 +149,14 @@ open class DataLoader(
 		val result = Promise<DataLoaderResult>()
 		okHttpClient.newCall(request).enqueue(object : Callback {
 			override fun onFailure(call: Call, e: IOException) {
-				result.setValue(DataLoaderResult(null, null, LoaderStatus.ERROR_NETWORK, null))
-			}
+                when {
+                    call.isCanceled() -> {
+                        // Do nothing, since the result is dropped anyway (setting a LoaderStatus will cause the SharedLib to do further computing)
+                    }
+                    e is SocketTimeoutException -> result.setValue(DataLoaderResult(null, null, LoaderStatus.ERROR_TIMEOUT, null))
+                    else -> result.setValue(DataLoaderResult(null, null, LoaderStatus.ERROR_NETWORK, null))
+                }
+            }
 
 			override fun onResponse(call: Call, response: Response) {
 				val bytes: ByteArray? = response.body?.bytes()
