@@ -184,7 +184,7 @@ protected:
 
     virtual std::shared_ptr<Tiled2dMapVectorLayerConfig> getLayerConfig(const std::shared_ptr<VectorMapSourceDescription> &source);
 
-    virtual void loadSpriteData();
+    virtual void loadSpriteData(bool fromLocal = true);
 
     virtual void didLoadSpriteData(std::shared_ptr<SpriteData> spriteData, std::shared_ptr<::TextureHolderInterface> spriteTexture);
 

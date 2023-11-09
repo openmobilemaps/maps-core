@@ -34,10 +34,16 @@ Tiled2dMapVectorLayerInterface::createExplicitly(const std::string &layerName,
 
     if ((localStyleJson.has_value() && *localStyleJson) || localDataProvider) {
         std::optional<Tiled2dMapVectorLayerParserResult> parserResult = std::nullopt;
-        if (styleJson.has_value()) {
+
+        if (localDataProvider) {
+            auto localProvidedStyleJson = localDataProvider->getStyleJson();
+            if (localProvidedStyleJson) {
+                parserResult = Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromString(layerName, *localProvidedStyleJson, localDataProvider, loaders);
+            }
+        }
+
+        if (!parserResult && styleJson.has_value()) {
             parserResult = Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromString(layerName, *styleJson, nullptr, loaders);
-        } else if (localDataProvider) {
-            parserResult = Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromString(layerName, localDataProvider->getStyleJson(), localDataProvider, loaders);
         }
 
         if (parserResult.has_value() && parserResult->status == LoaderStatus::OK) {

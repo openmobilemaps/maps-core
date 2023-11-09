@@ -459,28 +459,27 @@ void Tiled2dMapVectorSymbolGroup::setupObjects(const std::shared_ptr<SpriteData>
     uint16_t textStyleOffset = 0;
 
     for (auto const &object: symbolObjects) {
-        if (spriteTexture && spriteData) {
-            if (!object->hasCustomTexture) {
-                object->setupIconProperties(iconPositions, iconRotations, iconTextureCoordinates, iconOffset, tileInfo.zoomIdentifier,
-                                            spriteTexture, spriteData, std::nullopt);
-            } else {
-                for (size_t i = 0; i != customTextures.size(); i++) {
-                    auto identifier = object->stringIdentifier;
-                    auto uvIt = customTextures[i].featureIdentifiersUv.find(identifier);
-                    if (uvIt != customTextures[i].featureIdentifiersUv.end()) {
-                        object->customTexturePage = i;
-                        object->customTextureOffset = (int)std::distance(customTextures[i].featureIdentifiersUv.begin(),uvIt);
+        if (!object->hasCustomTexture && spriteTexture && spriteData) {
+            object->setupIconProperties(iconPositions, iconRotations, iconTextureCoordinates, iconOffset, tileInfo.zoomIdentifier,
+                                        spriteTexture, spriteData, std::nullopt);
+        } else {
+            for (size_t i = 0; i != customTextures.size(); i++) {
+                auto identifier = object->stringIdentifier;
+                auto uvIt = customTextures[i].featureIdentifiersUv.find(identifier);
+                if (uvIt != customTextures[i].featureIdentifiersUv.end()) {
+                    object->customTexturePage = i;
+                    object->customTextureOffset = (int)std::distance(customTextures[i].featureIdentifiersUv.begin(),uvIt);
 
-                        int offset = object->customTextureOffset;
-                        assert(offset < customTextures[i].iconRotations.size());
-                        object->setupIconProperties(customTextures[i].iconPositions, customTextures[i].iconRotations, customTextures[i].iconTextureCoordinates, offset, tileInfo.zoomIdentifier, customTextures[i].texture, nullptr, uvIt->second);
-                        break;
-                    }
+                    int offset = object->customTextureOffset;
+                    assert(offset < customTextures[i].iconRotations.size());
+                    object->setupIconProperties(customTextures[i].iconPositions, customTextures[i].iconRotations, customTextures[i].iconTextureCoordinates, offset, tileInfo.zoomIdentifier, customTextures[i].texture, nullptr, uvIt->second);
+                    break;
                 }
             }
-            object->setupStretchIconProperties(stretchedIconPositions, stretchedIconTextureCoordinates, stretchedIconOffset,
-                                               tileInfo.zoomIdentifier, spriteTexture, spriteData);
         }
+        object->setupStretchIconProperties(stretchedIconPositions, stretchedIconTextureCoordinates, stretchedIconOffset,
+                                           tileInfo.zoomIdentifier, spriteTexture, spriteData);
+
         object->setupTextProperties(textTextureCoordinates, textStyleIndices, textOffset, textStyleOffset, tileInfo.zoomIdentifier);
     }
 
