@@ -189,7 +189,6 @@ open class MCTextureLoader: MCLoaderInterface {
             semaphore.signal()
             return nil
         }
-        semaphore.wait()
 
         if semaphore.wait(timeout: .now() + 30.0) == .timedOut {
             return MCDataLoaderResult(data: nil, etag: nil, status: .ERROR_TIMEOUT, errorCode: "SEMTIM")
