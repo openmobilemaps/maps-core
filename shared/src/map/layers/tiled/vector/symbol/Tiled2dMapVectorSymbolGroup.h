@@ -162,6 +162,8 @@ private:
 
     bool anyInteractable = false;
 
+    bool isInitialized = false;
+
     const std::shared_ptr<Tiled2dMapVectorStateManager> featureStateManager;
     const std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> &symbolDelegate;
 
