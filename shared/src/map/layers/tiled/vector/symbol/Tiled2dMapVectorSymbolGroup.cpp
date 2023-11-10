@@ -539,9 +539,14 @@ void Tiled2dMapVectorSymbolGroup::setupObjects(const std::shared_ptr<SpriteData>
         symbolDataManager->message(&Tiled2dMapVectorSourceSymbolDataManager::onSymbolGroupInitialized, true, tileInfo,
                                    layerIdentifier, selfActor);
     }
+
+    isInitialized = true;
 }
 
 void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const double rotation, const double scaleFactor, long long now) {
+    if (!isInitialized) {
+        return;
+    }
     // icons
     if (!symbolObjects.empty()) {
 
