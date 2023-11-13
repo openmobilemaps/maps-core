@@ -119,7 +119,7 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
         // This is because a GeoJSON with only points inherently has zoomLevel 0, and restricting the zoom level
         // in such cases wouldn't be meaningful. Therefore, we skip the zoom level checks when startZoomLayer
         // and endZoomLevel are both zero.
-        if (startZoomLayer != 0 && endZoomLevel != 0) {
+        if (!(startZoomLayer == 0 && endZoomLevel == 0)) {
             if (minZoomLevelIdentifier.has_value() && zoomLevelInfo.zoomLevelIdentifier < minZoomLevelIdentifier) {
                 continue;
             }
