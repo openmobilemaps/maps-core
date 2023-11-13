@@ -55,9 +55,11 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (nonnull DJFuture<MCDataLoaderResult *> *)loadGeojson:(nonnull NSString *)url {
+- (nonnull DJFuture<MCDataLoaderResult *> *)loadGeojson:(nonnull NSString *)sourceName
+                                                    url:(nonnull NSString *)url {
     try {
-        auto objcpp_result_ = _cppRefHandle.get()->loadGeojson(::djinni::String::toCpp(url));
+        auto objcpp_result_ = _cppRefHandle.get()->loadGeojson(::djinni::String::toCpp(sourceName),
+                                                               ::djinni::String::toCpp(url));
         return ::djinni::FutureAdaptor<::djinni_generated::DataLoaderResult>::fromCpp(std::move(objcpp_result_));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
@@ -92,10 +94,11 @@ public:
             return ::djinni::FutureAdaptor<::djinni_generated::DataLoaderResult>::toCpp(objcpp_result_);
         }
     }
-    ::djinni::Future<::DataLoaderResult> loadGeojson(const std::string & c_url) override
+    ::djinni::Future<::DataLoaderResult> loadGeojson(const std::string & c_sourceName, const std::string & c_url) override
     {
         @autoreleasepool {
-            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() loadGeojson:(::djinni::String::fromCpp(c_url))];
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() loadGeojson:(::djinni::String::fromCpp(c_sourceName))
+                                                                                    url:(::djinni::String::fromCpp(c_url))];
             return ::djinni::FutureAdaptor<::djinni_generated::DataLoaderResult>::toCpp(objcpp_result_);
         }
     }
