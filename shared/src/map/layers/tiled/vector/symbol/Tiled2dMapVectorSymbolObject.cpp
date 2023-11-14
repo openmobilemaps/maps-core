@@ -437,14 +437,14 @@ void Tiled2dMapVectorSymbolObject::setupStretchIconProperties(std::vector<float>
 
     const auto evalContext = EvaluationContext(zoomIdentifier, dpFactor, featureContext, featureStateManager);
 
-    const auto textureWidth = (double) spriteTexture->getImageWidth();
-    const auto textureHeight = (double) spriteTexture->getImageHeight();
-    
     auto iconImage = description->style.getIconImage(evalContext);
 
     if (iconImage.empty() || !spriteTexture) {
         // TODO: make sure icon is not rendered
     } else {
+        const auto textureWidth = (double) spriteTexture->getImageWidth();
+        const auto textureHeight = (double) spriteTexture->getImageHeight();
+
         renderCoordinate = getRenderCoordinates(iconAnchor, 0.0, textureWidth, textureHeight);
 
         const auto spriteIt = spriteData->sprites.find(iconImage);
