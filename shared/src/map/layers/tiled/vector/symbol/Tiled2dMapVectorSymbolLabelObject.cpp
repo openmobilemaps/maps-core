@@ -56,12 +56,14 @@ Tiled2dMapVectorSymbolLabelObject::Tiled2dMapVectorSymbolLabelObject(const std::
           animationCoordinator(animationCoordinator),
           stateManager(featureStateManager),
           dpFactor(dpFactor) {
-    auto spaceIt = std::find_if(fontResult->fontData->glyphs.begin(), fontResult->fontData->glyphs.end(), [](const auto &d) {
-        return d.charCode == " ";
-    });
 
-    if (spaceIt != fontResult->fontData->glyphs.end()) {
-        spaceAdvance = spaceIt->advance.x;
+    for(auto i=0; i<fontResult->fontData->glyphs.size(); ++i) {
+        auto& letter = fontResult->fontData->glyphs[i];
+        if(letter.charCode == " ") {
+            spaceAdvance = letter.advance.x;
+            spaceIndex = i;
+            break;
+        }
     }
 
     std::vector<BreakResult> breaks = {};
@@ -326,25 +328,24 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
     for(const auto &i : splittedTextInfo) {
         if(i.glyphIndex >= 0) {
             auto &d = fontResult->fontData->glyphs[i.glyphIndex];
-            auto size = Vec2D(d.boundingBoxSize.x * fontSize * i.scale, d.boundingBoxSize.y * fontSize * i.scale);
-            auto bearing = Vec2D(d.bearing.x * fontSize * i.scale, d.bearing.y * fontSize * i.scale);
-            auto advance = Vec2D(d.advance.x * fontSize * i.scale, d.advance.y * fontSize * i.scale);
-            
-            if(d.charCode != " ") {
+
+            auto scale = fontSize * i.scale;
+            auto size = Vec2D(d.boundingBoxSize.x * scale, d.boundingBoxSize.y * scale);
+            auto bearing = Vec2D(d.bearing.x * scale, d.bearing.y * scale);
+            auto advance = Vec2D(d.advance.x * scale, d.advance.y * scale);
+
+            if(i.glyphIndex != spaceIndex) {
                 auto x = pen.x + bearing.x;
                 auto y = pen.y - bearing.y;
                 auto xw = x + size.x;
                 auto yh = y + size.y;
                 
-                Quad2dD quad = Quad2dD(Vec2D(x, yh), Vec2D(xw, yh), Vec2D(xw, y), Vec2D(x, y));
+                baseLines.emplace_back(yh);
 
-                baseLines.push_back(yh);
-
-                boxMin.x = std::min(boxMin.x, std::min(quad.topLeft.x, std::min(quad.topRight.x, std::min(quad.bottomLeft.x, quad.bottomRight.x))));
-                boxMin.y = std::min(boxMin.y, std::min(quad.topLeft.y, std::min(quad.topRight.y, std::min(quad.bottomLeft.y, quad.bottomRight.y))));
-
-                boxMax.x = std::max(boxMax.x, std::max(quad.topLeft.x, std::max(quad.topRight.x, std::max(quad.bottomLeft.x, quad.bottomRight.x))));
-                boxMax.y = std::max(boxMax.y, std::max(quad.topLeft.y, std::max(quad.topRight.y, std::max(quad.bottomLeft.y, quad.bottomRight.y))));
+                boxMin.x = std::min(boxMin.x, x);
+                boxMax.x = std::max(boxMax.x, xw);
+                boxMin.y = std::min(boxMin.y, y);
+                boxMax.y = std::max(boxMax.y, yh);
 
                 if (pen.x == 0.0 && pen.y == 0.0) {
                     // only look at first character for offset

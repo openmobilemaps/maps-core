@@ -170,6 +170,7 @@ private:
     int characterCount = 0;
     std::vector<SplitInfo> splittedTextInfo;
     int numSymbols;
+    int spaceIndex = -1;
 
     const std::string fullText;
 
