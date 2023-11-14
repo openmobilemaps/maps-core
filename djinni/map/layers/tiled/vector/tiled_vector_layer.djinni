@@ -3,20 +3,45 @@
 @extern "../../../../yaml/layer_interface.yaml"
 @extern "../../../../yaml/tiled_2d_map_raster_layer_interface.yaml"
 @extern "../../../../yaml/font_loader_interface.yaml"
+@extern "../../../../yaml/texture_holder_interface.yaml"
 @extern "../../../../yaml/color.yaml"
 @extern "../../../../yaml/coord.yaml"
+@extern "../../../../yaml/rect_i.yaml"
 
 @extern "../../../../yaml/texture_loader_result.yaml"
 @extern "../../../../yaml/data_loader_result.yaml"
 
-
 @extern "../../../../../external/djinni/support-lib/future.yaml"
 
 tiled_2d_map_vector_layer_interface = interface +c {
-    static create_from_style_json(layer_name: string, path: string, loaders: list<loader_interface>, font_loader: font_loader_interface, dpFactor: f64): tiled_2d_map_vector_layer_interface;
-    static create_from_local_style_json(layer_name: string, style_json: string, loaders: list<loader_interface>, font_loader: font_loader_interface, dpFactor: f64): tiled_2d_map_vector_layer_interface;
 
-    static create_custom(layer_name: string, style_url: optional<string>, style_json: optional<string>, local_data_provider: optional<tiled_2d_map_vector_layer_local_data_provider_interface>, loaders: list<loader_interface>, font_loader: font_loader_interface, dpFactor: f64, zoom_info: optional<tiled_2d_map_zoom_info>, sourceUrlParams: optional<map<string, string>>): tiled_2d_map_vector_layer_interface;
+    # Creator method for a vector layer specified by a url to a style json and the compulsory loader interfaces
+    static create_from_style_json(layer_name: string,
+                                style_json_url: string,
+                                loaders: list<loader_interface>,
+                                font_loader: font_loader_interface): tiled_2d_map_vector_layer_interface;
+
+    # Create a vector layer instance by fully providing a combination of properties, specifying the functionality of the layer. Non-optionals
+    # are strictly needed in every case.
+    # @param    layer_name  name for the created layer
+    # @param    style_json  Optional string to specify a url to a style json or a style json string itself (see parameter "local_style_json")
+    # @param    local_style_json  Optional flag to indicate whether parameter "style_json" is local style json string or the url to a style json. Default is false.
+    # @param    loaders Mandatory list of data loaders, which are used in the provided order
+    # @param    font_loader Mandatory interface to load font data
+    # @param    local_data_provider When provided, the vector layer loads the style json, geojsons and the sprite infos via this interface
+    # @param    custom_zoom_info    Optionally specify a custom zoom info
+    # @param    symbol_delegate Optional texture provider, when layers in the style use the flag "icon-image-custom-provider"
+    # @return   the interface to the newly configured layer
+    static create_explicitly(layer_name: string,
+                                  style_json: optional<string>,
+                                  local_style_json: optional<bool>,
+                                  loaders: list<loader_interface>,
+                                  font_loader: font_loader_interface,
+                                  local_data_provider: optional<tiled_2d_map_vector_layer_local_data_provider_interface>,
+                                  custom_zoom_info: optional<tiled_2d_map_zoom_info>,
+                                  symbol_delegate: optional<tiled_2d_map_vector_layer_symbol_delegate_interface>,
+sourceUrlParams: optional<map<string, string>>
+): tiled_2d_map_vector_layer_interface;
 
     set_selection_delegate(selection_delegate: optional<tiled_2d_map_vector_layer_selection_callback_interface>);
 
@@ -68,9 +93,18 @@ tiled_2d_map_vector_layer_selection_callback_interface = interface +c +j +o {
 }
 
 tiled_2d_map_vector_layer_local_data_provider_interface = interface +c +j +o {
-    get_style_json(): string;
+    get_style_json(): optional<string>;
 
     load_sprite_async(scale: i32): future<texture_loader_result>;
     load_sprite_json_async(scale: i32): future<data_loader_result>;
-    load_geojson(): future<data_loader_result>;
+    load_geojson(source_name: string, url: string): future<data_loader_result>;
+}
+
+tiled_2d_map_vector_asset_info = record {
+    feature_identifiers_uv: map<string, rect_i>;
+    texture: optional<texture_holder_interface>;
+}
+
+tiled_2d_map_vector_layer_symbol_delegate_interface = interface +c +j +o {
+    get_custom_assets_for(feature_infos: list<vector_layer_feature_info>, layer_identifier: string): list<tiled_2d_map_vector_asset_info>;
 }

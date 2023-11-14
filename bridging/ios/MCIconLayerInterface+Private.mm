@@ -59,9 +59,33 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)removeList:(nonnull NSArray<MCIconInfoInterface *> *)icons {
+    try {
+        _cppRefHandle.get()->removeList(::djinni::List<::djinni_generated::IconInfoInterface>::toCpp(icons));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)removeIdentifier:(nonnull NSString *)identifier {
+    try {
+        _cppRefHandle.get()->removeIdentifier(::djinni::String::toCpp(identifier));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)removeIdentifierList:(nonnull NSArray<NSString *> *)identifiers {
+    try {
+        _cppRefHandle.get()->removeIdentifierList(::djinni::List<::djinni::String>::toCpp(identifiers));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (void)add:(nullable MCIconInfoInterface *)icon {
     try {
         _cppRefHandle.get()->add(::djinni_generated::IconInfoInterface::toCpp(icon));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)addList:(nonnull NSArray<MCIconInfoInterface *> *)icons {
+    try {
+        _cppRefHandle.get()->addList(::djinni::List<::djinni_generated::IconInfoInterface>::toCpp(icons));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

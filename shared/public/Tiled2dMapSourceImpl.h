@@ -130,11 +130,17 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
     for (int i = startZoomLayer; i <= endZoomLevel; i++) {
         const Tiled2dMapZoomLevelInfo &zoomLevelInfo = zoomLevelInfos.at(i);
 
-        if (minZoomLevelIdentifier.has_value() && zoomLevelInfo.zoomLevelIdentifier < minZoomLevelIdentifier) {
-            continue;
-        }
-        if (maxZoomLevelIdentifier.has_value() && zoomLevelInfo.zoomLevelIdentifier > maxZoomLevelIdentifier) {
-            continue;
+        // If there is only one zoom level (zoomLevel 0), we disregard the min and max zoomLevel settings.
+        // This is because a GeoJSON with only points inherently has zoomLevel 0, and restricting the zoom level
+        // in such cases wouldn't be meaningful. Therefore, we skip the zoom level checks when startZoomLayer
+        // and endZoomLevel are both zero.
+        if (!(startZoomLayer == 0 && endZoomLevel == 0)) {
+            if (minZoomLevelIdentifier.has_value() && zoomLevelInfo.zoomLevelIdentifier < minZoomLevelIdentifier) {
+                continue;
+            }
+            if (maxZoomLevelIdentifier.has_value() && zoomLevelInfo.zoomLevelIdentifier > maxZoomLevelIdentifier) {
+                continue;
+            }
         }
 
         VisibleTilesLayer curVisibleTiles(i - targetZoomLayer);

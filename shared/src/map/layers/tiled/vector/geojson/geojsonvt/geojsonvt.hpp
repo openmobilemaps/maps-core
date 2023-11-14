@@ -57,12 +57,14 @@ public:
         splitTile(geoJson->geometries, 0, 0, 0);
     }
 
-    GeoJSONVT(const std::string &geoJsonUrl,
+    GeoJSONVT(const std::string &sourceName,
+              const std::string &geoJsonUrl,
               const std::vector<std::shared_ptr<::LoaderInterface>> &loaders,
               const std::shared_ptr<Tiled2dMapVectorLayerLocalDataProviderInterface> &localDataProvider,
               const Options& options_ = Options())
-    : options(options_), geoJsonUrl(geoJsonUrl), loaders(loaders), localDataProvider(localDataProvider) {}
+    : options(options_), sourceName(sourceName), geoJsonUrl(geoJsonUrl), loaders(loaders), localDataProvider(localDataProvider) {}
 
+    const std::string sourceName;
     const std::string geoJsonUrl;
     std::vector<std::shared_ptr<::LoaderInterface>> loaders;
     std::shared_ptr<Tiled2dMapVectorLayerLocalDataProviderInterface> localDataProvider;
@@ -71,17 +73,18 @@ public:
     std::vector<std::shared_ptr<::djinni::Promise<std::shared_ptr<DataLoaderResult>>>> waitingPromises;
     WeakActor<GeoJSONTileDelegate> delegate;
 
-    void load() {
+    void load(bool fromLocal = true) {
         auto weakSelf = weak_from_this();
 
-        std::shared_ptr<::djinni::Future<::DataLoaderResult>> jsonLoaderFuture;
-        if(localDataProvider) {
-            jsonLoaderFuture = std::make_shared<::djinni::Future<::DataLoaderResult>>(localDataProvider->loadGeojson());
+        std::shared_ptr<::djinni::Future<::DataLoaderResult>> jsonLoaderFuture = nullptr;
+        if(localDataProvider && fromLocal) {
+            jsonLoaderFuture = std::make_shared<::djinni::Future<::DataLoaderResult>>(localDataProvider->loadGeojson(sourceName, geoJsonUrl));
         } else {
             jsonLoaderFuture = std::make_shared<::djinni::Future<::DataLoaderResult>>(LoaderHelper::loadDataAsync(geoJsonUrl, std::nullopt, loaders));
         }
 
-        jsonLoaderFuture->then([weakSelf](auto resultFuture){
+        jsonLoaderFuture->then([weakSelf, fromLocal](auto resultFuture){
+
             auto self = weakSelf.lock();
             if (!self) return;
             auto result = resultFuture.get();
@@ -89,6 +92,10 @@ public:
             if (result.status != LoaderStatus::OK) {
                 LogError <<= "Unable to load geoJson";
 
+                // if we fail to load from local provider we try to load from remote
+                if (fromLocal) {
+                    self->load(false);
+                }
             } else {
                 auto string = std::string((char*)result.data->buf(), result.data->len());
                 nlohmann::json json;

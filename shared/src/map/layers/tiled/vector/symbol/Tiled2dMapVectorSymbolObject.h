@@ -47,7 +47,9 @@ public:
                                  std::shared_ptr<SymbolAnimationCoordinatorMap> animationCoordinatorMap,
                                  const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager,
                                  const UsedKeysCollection &usedKeys,
-                                 const size_t symbolTileIndex);
+                                 const size_t symbolTileIndex,
+                                 const bool hasCustomTexture,
+                                 const double dpFactor);
 
     ~Tiled2dMapVectorSymbolObject() {
         if (animationCoordinator) {
@@ -72,7 +74,8 @@ public:
 
     const SymbolObjectInstanceCounts getInstanceCounts() const;
 
-    void setupIconProperties(std::vector<float> &positions, std::vector<float> &rotations, std::vector<float> &textureCoordinates, int &countOffset, const double zoomIdentifier, const std::shared_ptr<TextureHolderInterface> spriteTexture, const std::shared_ptr<SpriteData> spriteData);
+    void setupIconProperties(std::vector<float> &positions, std::vector<float> &rotations, std::vector<float> &textureCoordinates, int &countOffset, const double zoomIdentifier, const std::shared_ptr<TextureHolderInterface> spriteTexture, const std::shared_ptr<SpriteData> spriteData, const std::optional<RectI> customUv);
+
     void updateIconProperties(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &alphas, int &countOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, long long now);
 
     void setupTextProperties(std::vector<float> &textureCoordinates, std::vector<uint16_t> &styleIndices, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier);
@@ -106,7 +109,16 @@ public:
     void updateLayerDescription(const std::shared_ptr<SymbolVectorLayerDescription> layerDescription, const UsedKeysCollection &usedKeys);
 
     std::shared_ptr<SymbolAnimationCoordinator> animationCoordinator;
+
     bool isCoordinateOwner = false;
+
+    const std::shared_ptr<FeatureContext> featureContext;
+
+    bool hasCustomTexture;
+
+    size_t customTexturePage = 0;
+    int customTextureOffset = 0;
+    std::string stringIdentifier;
 private:
     double lastZoomEvaluation = -1;
     void evaluateStyleProperties(const double zoomIdentifier);
@@ -116,8 +128,6 @@ private:
     std::shared_ptr<Tiled2dMapVectorLayerConfig> layerConfig;
 
     std::shared_ptr<Tiled2dMapVectorSymbolLabelObject> labelObject;
-
-    const std::shared_ptr<FeatureContext> featureContext;
 
     std::shared_ptr<SymbolInfo> textInfo;
 
@@ -160,6 +170,7 @@ private:
     bool textAllowOverlap;
     bool iconAllowOverlap;
 
+    double dpFactor = 1.0;
     float alpha = 1.0;
     bool isIconOpaque = true;
     bool isStretchIconOpaque = true;

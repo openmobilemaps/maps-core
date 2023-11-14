@@ -12,6 +12,7 @@
 #include "CoordinateSystemIdentifiers.h"
 #include "QuadCoord.h"
 #include "RenderObject.h"
+#include "MapCamera2dInterface.h"
 
 Tiled2dMapVectorTile::Tiled2dMapVectorTile(const std::weak_ptr<MapInterface> &mapInterface,
                                            const Tiled2dMapVersionedTileInfo &tileInfo,
@@ -20,7 +21,12 @@ Tiled2dMapVectorTile::Tiled2dMapVectorTile(const std::weak_ptr<MapInterface> &ma
                                            const WeakActor<Tiled2dMapVectorLayerTileCallbackInterface> &tileReadyInterface,
                                            const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager)
         : mapInterface(mapInterface), tileInfo(tileInfo), tileCallbackInterface(tileReadyInterface), description(description),
-          layerConfig(layerConfig), featureStateManager(featureStateManager) {}
+          layerConfig(layerConfig), featureStateManager(featureStateManager) {
+
+    if (auto strongMapInterface = mapInterface.lock()) {
+        dpFactor = strongMapInterface->getCamera()->getScreenDensityPpi() / 160.0;
+    }
+}
 
 void Tiled2dMapVectorTile::updateVectorLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
                                                   const Tiled2dMapVectorTileDataVector &layerData) {

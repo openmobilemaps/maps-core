@@ -8,13 +8,13 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class Tiled2dMapVectorLayerLocalDataProviderInterface {
 
-    abstract fun getStyleJson(): String
+    abstract fun getStyleJson(): String?
 
     abstract fun loadSpriteAsync(scale: Int): com.snapchat.djinni.Future<io.openmobilemaps.mapscore.shared.map.loader.TextureLoaderResult>
 
     abstract fun loadSpriteJsonAsync(scale: Int): com.snapchat.djinni.Future<io.openmobilemaps.mapscore.shared.map.loader.DataLoaderResult>
 
-    abstract fun loadGeojson(): com.snapchat.djinni.Future<io.openmobilemaps.mapscore.shared.map.loader.DataLoaderResult>
+    abstract fun loadGeojson(sourceName: String, url: String): com.snapchat.djinni.Future<io.openmobilemaps.mapscore.shared.map.loader.DataLoaderResult>
 
     private class CppProxy : Tiled2dMapVectorLayerLocalDataProviderInterface {
         private val nativeRef: Long
@@ -31,11 +31,11 @@ abstract class Tiled2dMapVectorLayerLocalDataProviderInterface {
             external fun nativeDestroy(nativeRef: Long)
         }
 
-        override fun getStyleJson(): String {
+        override fun getStyleJson(): String? {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             return native_getStyleJson(this.nativeRef)
         }
-        private external fun native_getStyleJson(_nativeRef: Long): String
+        private external fun native_getStyleJson(_nativeRef: Long): String?
 
         override fun loadSpriteAsync(scale: Int): com.snapchat.djinni.Future<io.openmobilemaps.mapscore.shared.map.loader.TextureLoaderResult> {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
@@ -49,10 +49,10 @@ abstract class Tiled2dMapVectorLayerLocalDataProviderInterface {
         }
         private external fun native_loadSpriteJsonAsync(_nativeRef: Long, scale: Int): com.snapchat.djinni.Future<io.openmobilemaps.mapscore.shared.map.loader.DataLoaderResult>
 
-        override fun loadGeojson(): com.snapchat.djinni.Future<io.openmobilemaps.mapscore.shared.map.loader.DataLoaderResult> {
+        override fun loadGeojson(sourceName: String, url: String): com.snapchat.djinni.Future<io.openmobilemaps.mapscore.shared.map.loader.DataLoaderResult> {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            return native_loadGeojson(this.nativeRef)
+            return native_loadGeojson(this.nativeRef, sourceName, url)
         }
-        private external fun native_loadGeojson(_nativeRef: Long): com.snapchat.djinni.Future<io.openmobilemaps.mapscore.shared.map.loader.DataLoaderResult>
+        private external fun native_loadGeojson(_nativeRef: Long, sourceName: String, url: String): com.snapchat.djinni.Future<io.openmobilemaps.mapscore.shared.map.loader.DataLoaderResult>
     }
 }

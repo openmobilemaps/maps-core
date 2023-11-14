@@ -11,6 +11,7 @@
 #pragma once
 
 #include "IconInfoInterface.h"
+#include <mutex>
 
 class IconInfo : public IconInfoInterface {
   public:
@@ -40,6 +41,7 @@ class IconInfo : public IconInfoInterface {
     virtual ::BlendMode getBlendMode() override;
 
   private:
+    std::mutex dataMutex;
     std::string identifier;
     Coord coordinate;
     std::shared_ptr<::TextureHolderInterface> texture;

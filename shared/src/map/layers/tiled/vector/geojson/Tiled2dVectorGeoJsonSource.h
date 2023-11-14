@@ -22,11 +22,12 @@
 #include "geojsonvt.hpp"
 #include "Tiled2dMapVectorSource.h"
 #include "VectorMapSourceDescription.h"
-#include "Tiled2dMapVectorLayerConfig.h"
+#include "Tiled2dMapVectorGeoJSONLayerConfig.h"
 
 class Tiled2dVectorGeoJsonSource : public Tiled2dMapVectorSource, public GeoJSONTileDelegate  {
 public:
-    Tiled2dVectorGeoJsonSource(const MapConfig &mapConfig,
+    Tiled2dVectorGeoJsonSource(const std::shared_ptr<::MapCamera2dInterface> &camera,
+                               const MapConfig &mapConfig,
                                const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig,
                                const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                                const std::shared_ptr<SchedulerInterface> &scheduler,
@@ -38,7 +39,7 @@ public:
                                std::shared_ptr<GeoJSONVTInterface> geoJson,
                                std::string layerName) :
     Tiled2dMapVectorSource(mapConfig, layerConfig, conversionHelper, scheduler, tileLoaders, listener, layersToDecode, sourceName, screenDensityPpi, layerName),
-    geoJson(geoJson) {}
+    geoJson(geoJson), camera(camera) {}
 
     std::unordered_set<Tiled2dMapVectorTileInfo> getCurrentTiles() {
         std::unordered_set<Tiled2dMapVectorTileInfo> currentTileInfos;
@@ -60,7 +61,13 @@ public:
     };
 
     void didLoad(uint8_t maxZoom) override {
-        layerConfig = std::make_shared<Tiled2dMapVectorLayerConfig>(VectorMapSourceDescription::geoJsonDescription(maxZoom));
+        zoomLevelInfos = layerConfig->getZoomLevelInfos();
+        if (auto camera = this->camera.lock()) {
+            auto bounds = camera->getVisibleRect();
+            auto zoom = camera->getZoom();
+            // there is no concept of curT for geoJSON, therefore we just set it to 0
+            onVisibleBoundsChanged(bounds, 0, zoom);
+        }
     }
 protected:
 
@@ -89,4 +96,5 @@ protected:
 
 private:
     const std::shared_ptr<GeoJSONVTInterface> geoJson;
+    const std::weak_ptr<::MapCamera2dInterface> camera;
 };

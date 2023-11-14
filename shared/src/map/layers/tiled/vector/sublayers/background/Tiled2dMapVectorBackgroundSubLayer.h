@@ -55,6 +55,8 @@ public:
 private:
     std::shared_ptr<BackgroundVectorLayerDescription> description;
 
+    double dpFactor = 1.0;
+
     std::shared_ptr<RenderObject> renderObject;
 
     std::vector<std::shared_ptr<RenderPassInterface>> renderPasses;

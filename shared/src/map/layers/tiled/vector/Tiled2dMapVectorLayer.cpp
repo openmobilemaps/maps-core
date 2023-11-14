@@ -45,75 +45,85 @@
 #include "Tiled2dMapVectorReadyManager.h"
 #include "Tiled2dVectorGeoJsonSource.h"
 #include "Tiled2dMapVectorStyleParser.h"
+#include "Tiled2dMapVectorGeoJSONLayerConfig.h"
 #include "GeoJsonVTFactory.h"
 
 Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
                                              const std::string &remoteStyleJsonUrl,
                                              const std::vector<std::shared_ptr<::LoaderInterface>> &loaders,
                                              const std::shared_ptr<::FontLoaderInterface> &fontLoader,
-                                             double dpFactor,
                                              const std::optional<Tiled2dMapZoomInfo> &customZoomInfo,
-                                             const std::unordered_map<std::string, std::string> & sourceUrlParams) :
+                                             const std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> &symbolDelegate,
+                                             const std::unordered_map<std::string, std::string> & sourceUrlParams
+                                             ) :
         Tiled2dMapLayer(),
         layerName(layerName),
         remoteStyleJsonUrl(remoteStyleJsonUrl),
         loaders(loaders),
         fontLoader(fontLoader),
-        dpFactor(dpFactor),
         customZoomInfo(customZoomInfo),
         featureStateManager(std::make_shared<Tiled2dMapVectorStateManager>()),
+        symbolDelegate(symbolDelegate),
         sourceUrlParams(sourceUrlParams)
-         {}
-
+        {}
 
 Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
                                              const std::string &remoteStyleJsonUrl,
                                              const std::string &fallbackStyleJsonString,
                                              const std::vector<std::shared_ptr<::LoaderInterface>> &loaders,
                                              const std::shared_ptr<::FontLoaderInterface> &fontLoader,
-                                             double dpFactor,
                                              const std::optional<Tiled2dMapZoomInfo> &customZoomInfo,
-                                             const std::unordered_map<std::string, std::string> & sourceUrlParams) :
+                                             const std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> &symbolDelegate,
+                                             const std::unordered_map<std::string, std::string> & sourceUrlParams
+                                             ) :
         Tiled2dMapLayer(),
         layerName(layerName),
         remoteStyleJsonUrl(remoteStyleJsonUrl),
         fallbackStyleJsonString(fallbackStyleJsonString),
         loaders(loaders),
         fontLoader(fontLoader),
-        dpFactor(dpFactor),
         customZoomInfo(customZoomInfo),
         featureStateManager(std::make_shared<Tiled2dMapVectorStateManager>()),
+        symbolDelegate(symbolDelegate),
         sourceUrlParams(sourceUrlParams)
         {}
+
 
 Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
                                              const std::shared_ptr<VectorMapDescription> &mapDescription,
                                              const std::vector<std::shared_ptr<::LoaderInterface>> &loaders,
                                              const std::shared_ptr<::FontLoaderInterface> &fontLoader,
                                              const std::optional<Tiled2dMapZoomInfo> &customZoomInfo,
-                                             const std::unordered_map<std::string, std::string> & sourceUrlParams) :
+                                             const std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> &symbolDelegate,
+                                             const std::shared_ptr<Tiled2dMapVectorLayerLocalDataProviderInterface> &localDataProvider,
+                                             const std::unordered_map<std::string, std::string> & sourceUrlParams
+                                             ) :
         Tiled2dMapLayer(),
         layerName(layerName),
         loaders(loaders),
         fontLoader(fontLoader),
         customZoomInfo(customZoomInfo),
         featureStateManager(std::make_shared<Tiled2dMapVectorStateManager>()),
-        sourceUrlParams(sourceUrlParams)
-        {
-            setMapDescription(mapDescription);
-        }
+        symbolDelegate(symbolDelegate),
+        localDataProvider(localDataProvider),
+		sourceUrlParams(sourceUrlParams) {
+    	setMapDescription(mapDescription);
+}
 
 Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
                                              const std::vector<std::shared_ptr<::LoaderInterface>> &loaders,
                                              const std::shared_ptr<::FontLoaderInterface> &fontLoader,
                                              const std::optional<Tiled2dMapZoomInfo> &customZoomInfo,
-                                             const std::unordered_map<std::string, std::string> & sourceUrlParams) :
+                                             const std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> &symbolDelegate,
+                                             const std::unordered_map<std::string, std::string> & sourceUrlParams
+                                             ) :
         Tiled2dMapLayer(),
         layerName(layerName),
         loaders(loaders),
         fontLoader(fontLoader),
         customZoomInfo(customZoomInfo),
         featureStateManager(std::make_shared<Tiled2dMapVectorStateManager>()),
+        symbolDelegate(symbolDelegate),
         sourceUrlParams(sourceUrlParams)
         {}
 
@@ -168,11 +178,10 @@ std::optional<TiledLayerError> Tiled2dMapVectorLayer::loadStyleJson() {
 
 std::optional<TiledLayerError> Tiled2dMapVectorLayer::loadStyleJsonRemotely() {
     auto remoteStyleJsonUrl = this->remoteStyleJsonUrl;
-    auto dpFactor = this->dpFactor;
-    if (!remoteStyleJsonUrl.has_value() || !dpFactor.has_value()) {
+    if (!remoteStyleJsonUrl.has_value()) {
         return std::nullopt;
     }
-    auto parseResult = Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromUrl(layerName, *remoteStyleJsonUrl, *dpFactor, localDataProvider, loaders, sourceUrlParams);
+    auto parseResult = Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromUrl(layerName, *remoteStyleJsonUrl, localDataProvider, loaders, sourceUrlParams);
     if (parseResult.status == LoaderStatus::OK) {
         setMapDescription(parseResult.mapDescription);
         metadata = parseResult.metadata;
@@ -185,12 +194,7 @@ std::optional<TiledLayerError> Tiled2dMapVectorLayer::loadStyleJsonRemotely() {
 }
 
 std::optional<TiledLayerError> Tiled2dMapVectorLayer::loadStyleJsonLocally(std::string styleJsonString) {
-    auto dpFactor = this->dpFactor;
-    if (!dpFactor.has_value()) {
-        return std::nullopt;
-    }
-
-    auto parseResult = Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromString(layerName, styleJsonString, *dpFactor, localDataProvider, loaders, sourceUrlParams);
+    auto parseResult = Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromString(layerName, styleJsonString, localDataProvider, loaders, sourceUrlParams);
 
     if (parseResult.status == LoaderStatus::OK) {
         setMapDescription(parseResult.mapDescription);
@@ -208,6 +212,12 @@ Tiled2dMapVectorLayer::getLayerConfig(const std::shared_ptr<VectorMapSourceDescr
                                       : std::make_shared<Tiled2dMapVectorLayerConfig>(source);
 }
 
+std::shared_ptr<Tiled2dMapVectorLayerConfig>
+Tiled2dMapVectorLayer::getGeoJSONLayerConfig(const std::string &sourceName, const std::shared_ptr<GeoJSONVTInterface> &source) {
+    return customZoomInfo.has_value() ? std::make_shared<Tiled2dMapVectorGeoJSONLayerConfig>(sourceName, source, *customZoomInfo)
+                                      : std::make_shared<Tiled2dMapVectorGeoJSONLayerConfig>(sourceName, source);
+}
+
 void Tiled2dMapVectorLayer::setMapDescription(const std::shared_ptr<VectorMapDescription> &mapDescription) {
     std::lock_guard<std::recursive_mutex> lock(mapDescriptionMutex);
     this->mapDescription = mapDescription;
@@ -217,7 +227,7 @@ void Tiled2dMapVectorLayer::setMapDescription(const std::shared_ptr<VectorMapDes
         layerConfigs[source->identifier] = getLayerConfig(source);
     }
     for (auto const &[source, geoJson]: mapDescription->geoJsonSources) {
-        layerConfigs[source] = getLayerConfig(VectorMapSourceDescription::geoJsonDescription(geoJson->getMaxZoom()));
+        layerConfigs[source] = getGeoJSONLayerConfig(source, geoJson);
     }
     
     initializeVectorLayer();
@@ -333,6 +343,7 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
         Actor<Tiled2dMapVectorSource> vectorSource;
         if (mapDescription->geoJsonSources.count(source) != 0) {
             auto geoJsonSource = Actor<Tiled2dVectorGeoJsonSource>(sourceMailbox,
+                                                                   mapInterface->getCamera(),
                                                                    mapInterface->getMapConfig(),
                                                                    layerConfig,
                                                                    mapInterface->getCoordinateConverterHelper(),
@@ -390,7 +401,8 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
                                                                         fontLoader,
                                                                         vectorSource.weakActor<Tiled2dMapVectorSource>(),
                                                                         readyManager,
-                                                                        featureStateManager);
+                                                                        featureStateManager,
+                                                                        symbolDelegate);
             actor.unsafe()->setAlpha(alpha);
             symbolSourceDataManagers[source] = actor;
             interactionDataManagers[source].push_back(actor.weakActor<Tiled2dMapVectorSourceDataManager>());
@@ -739,7 +751,7 @@ void Tiled2dMapVectorLayer::onTilesUpdated(const std::string &sourceName, std::u
     tilesStillValid.clear();
 }
 
-void Tiled2dMapVectorLayer::loadSpriteData() {
+void Tiled2dMapVectorLayer::loadSpriteData(bool fromLocal) {
     auto lockSelfPtr = shared_from_this();
     auto mapInterface = this->mapInterface;
     auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
@@ -769,7 +781,7 @@ void Tiled2dMapVectorLayer::loadSpriteData() {
     auto context = std::make_shared<Context>(2);
 
     std::shared_ptr<::djinni::Future<::DataLoaderResult>> jsonLoaderFuture;
-    if(localDataProvider) {
+    if(localDataProvider && fromLocal) {
         jsonLoaderFuture = std::make_shared<::djinni::Future<::DataLoaderResult>>(localDataProvider->loadSpriteJsonAsync(scale2x ? 2 : 1));
     } else {
         jsonLoaderFuture = std::make_shared<::djinni::Future<::DataLoaderResult>>(LoaderHelper::loadDataAsync(urlData, std::nullopt, loaders));
@@ -823,8 +835,16 @@ void Tiled2dMapVectorLayer::loadSpriteData() {
     });
 
     auto castedMe = std::static_pointer_cast<Tiled2dMapVectorLayer>(shared_from_this());
+    std::weak_ptr<Tiled2dMapVectorLayer> weakSelf = castedMe;
     auto selfActor = WeakActor<Tiled2dMapVectorLayer>(mailbox, castedMe);
-    context->promise.getFuture().then([context, selfActor] (auto result) {
+    context->promise.getFuture().then([context, selfActor, fromLocal, weakSelf] (auto result) {
+        if (!context->spriteData && !context->spriteTexture && fromLocal) {
+            auto self = weakSelf.lock();
+            if (self) {
+                self->loadSpriteData(false);
+                return;
+            }
+        }
         selfActor.message(&Tiled2dMapVectorLayer::didLoadSpriteData, context->spriteData, context->spriteTexture);
     });
 }

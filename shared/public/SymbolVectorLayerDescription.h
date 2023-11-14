@@ -47,6 +47,7 @@ public:
                       std::shared_ptr<Value> symbolPlacement,
                       std::shared_ptr<Value> iconRotationAlignment,
                       std::shared_ptr<Value> iconImage,
+                      std::shared_ptr<Value> iconImageCustomProvider,
                       std::shared_ptr<Value> iconAnchor,
                       std::shared_ptr<Value> iconOffset,
                       std::shared_ptr<Value> iconSize,
@@ -64,8 +65,7 @@ public:
                       std::shared_ptr<Value> blendMode,
                       std::shared_ptr<Value> symbolZOrder,
                       int64_t transitionDuration,
-                      int64_t transitionDelay,
-                      double dpFactor):
+                      int64_t transitionDelay):
     textSize(textSize),
     textFont(textFont),
     textField(textField),
@@ -79,6 +79,7 @@ public:
     symbolSortKey(symbolSortKey),
     symbolPlacement(symbolPlacement),
     iconImage(iconImage),
+    iconImageCustomProvider(iconImageCustomProvider),
     iconAnchor(iconAnchor),
     iconOffset(iconOffset),
     textAnchor(textAnchor),
@@ -106,8 +107,7 @@ public:
     blendMode(blendMode),
     symbolZOrder(symbolZOrder),
     transitionDuration(transitionDuration),
-    transitionDelay(transitionDelay),
-    dpFactor(dpFactor) {}
+    transitionDelay(transitionDelay) {}
 
     SymbolVectorStyle(SymbolVectorStyle &style)
             : textSize(style.textSize),
@@ -123,6 +123,7 @@ public:
               symbolSortKey(style.symbolSortKey),
               symbolPlacement(style.symbolPlacement),
               iconImage(style.iconImage),
+              iconImageCustomProvider(style.iconImageCustomProvider),
               iconAnchor(style.iconAnchor),
               iconOffset(style.iconOffset),
               textAnchor(style.textAnchor),
@@ -150,8 +151,7 @@ public:
               blendMode(style.blendMode),
               symbolZOrder(style.symbolZOrder),
               transitionDuration(style.transitionDuration),
-              transitionDelay(style.transitionDelay),
-              dpFactor(style.dpFactor) {}
+              transitionDelay(style.transitionDelay) {}
 
     UsedKeysCollection getUsedKeys() const {
 
@@ -163,7 +163,7 @@ public:
             iconSize, textLineHeight, textLetterSpacing, textAllowOverlap, iconAllowOverlap,
             iconPadding, textOpacity, iconOpacity, iconRotationAlignment, textRotationAlignment,
             iconTextFit, iconTextFitPadding, textMaxWidth, textMaxAngle, iconRotate, blendMode,
-            textOptional, iconOptional, symbolZOrder
+            textOptional, iconOptional, symbolZOrder, iconImageCustomProvider
         };
 
         for (auto const &value: values) {
@@ -183,7 +183,7 @@ public:
     double getTextSize(const EvaluationContext &context) {
         static const double defaultValue = 16.0;
         double value = textSizeEvaluator.getResult(textSize, context, defaultValue);
-        return value * dpFactor;
+        return value * context.dpFactor;
     }
 
     std::vector<std::string> getTextFont(const EvaluationContext &context) {
@@ -231,7 +231,7 @@ public:
 
     double getTextHaloWidth(const EvaluationContext &context) {
         static double defaultValue = 0.0;
-        double width = textHaloWidthEvaluator.getResult(textHaloWidth, context, defaultValue) * dpFactor;
+        double width = textHaloWidthEvaluator.getResult(textHaloWidth, context, defaultValue) * context.dpFactor;
 
         double size = getTextSize(context);
 
@@ -246,13 +246,13 @@ public:
     double getTextPadding(const EvaluationContext &context) {
         static const double defaultValue = 2.0;
         double value = textPaddingEvaluator.getResult(textPadding, context, defaultValue);
-        return value * dpFactor;
+        return value * context.dpFactor;
     }
 
     double getIconPadding(const EvaluationContext &context) {
         static const double defaultValue = 2.0;
         double value = iconPaddingEvaluator.getResult(iconPadding, context, defaultValue);
-        return value * dpFactor;
+        return value * context.dpFactor;
     }
 
     double getTextLetterSpacing(const EvaluationContext &context) {
@@ -285,8 +285,13 @@ public:
         return iconImageEvaluator.getResult(iconImage, context, defaultValue);
     }
 
+    bool getIconImageCustomProvider(const EvaluationContext &context) {
+        static const bool defaultValue = false;
+        return iconImageCustomProviderEvaluator.getResult(iconImageCustomProvider, context, defaultValue);
+    }
+
     bool hasIconImagePotentially() {
-        return iconImage ? true : false;
+        return (iconImage || iconImageCustomProvider) ? true : false;
     }
 
     Anchor getIconAnchor(const EvaluationContext &context) {
@@ -297,7 +302,7 @@ public:
     Vec2F getIconOffset(const EvaluationContext &context) {
         static const Vec2F defaultValue(0.0, 0.0);
         const auto result = iconOffsetEvaluator.getResult(iconOffset, context, defaultValue);
-        return Vec2F(result.x * dpFactor, result.y * dpFactor);
+        return Vec2F(result.x * context.dpFactor, result.x * context.dpFactor);
     }
 
     bool getIconOptional(const EvaluationContext &context) {
@@ -430,6 +435,7 @@ public:
     std::shared_ptr<Value> symbolSpacing;
     std::shared_ptr<Value> symbolPlacement;
     std::shared_ptr<Value> iconImage;
+    std::shared_ptr<Value> iconImageCustomProvider;
     std::shared_ptr<Value> iconAnchor;
     std::shared_ptr<Value> iconOffset;
     std::shared_ptr<Value> iconSize;
@@ -466,6 +472,7 @@ private:
     ValueEvaluator<bool> textAllowOverlapEvaluator;
     ValueEvaluator<int64_t> symbolSortKeyEvaluator;
     ValueEvaluator<std::string> iconImageEvaluator;
+    ValueEvaluator<bool> iconImageCustomProviderEvaluator;
     ValueEvaluator<Anchor> iconAnchorEvaluator;
     ValueEvaluator<Vec2F> iconOffsetEvaluator;
     ValueEvaluator<bool> iconOptionalEvaluator;
@@ -487,9 +494,6 @@ private:
     ValueEvaluator<IconTextFit> iconTextFitEvaluator;
     ValueEvaluator<std::vector<float>> iconTextFitPaddingEvaluator;
     ValueEvaluator<SymbolZOrder> symbolZOrderEvaluator;
-    double dpFactor;
-
-
 };
 
 class SymbolVectorLayerDescription: public VectorLayerDescription {

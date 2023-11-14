@@ -10,13 +10,10 @@ abstract class Tiled2dMapVectorLayerInterface {
 
     companion object {
         @JvmStatic
-        external fun createFromStyleJson(layerName: String, path: String, loaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>, fontLoader: io.openmobilemaps.mapscore.shared.map.loader.FontLoaderInterface, dpFactor: Double): Tiled2dMapVectorLayerInterface
+        external fun createFromStyleJson(layerName: String, styleJsonUrl: String, loaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>, fontLoader: io.openmobilemaps.mapscore.shared.map.loader.FontLoaderInterface): Tiled2dMapVectorLayerInterface
 
         @JvmStatic
-        external fun createFromLocalStyleJson(layerName: String, styleJson: String, loaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>, fontLoader: io.openmobilemaps.mapscore.shared.map.loader.FontLoaderInterface, dpFactor: Double): Tiled2dMapVectorLayerInterface
-
-        @JvmStatic
-        external fun createCustom(layerName: String, styleUrl: String?, styleJson: String?, localDataProvider: Tiled2dMapVectorLayerLocalDataProviderInterface?, loaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>, fontLoader: io.openmobilemaps.mapscore.shared.map.loader.FontLoaderInterface, dpFactor: Double, zoomInfo: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapZoomInfo?, sourceUrlParams: HashMap<String, String>?): Tiled2dMapVectorLayerInterface
+        external fun createExplicitly(layerName: String, styleJson: String?, localStyleJson: Boolean?, loaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>, fontLoader: io.openmobilemaps.mapscore.shared.map.loader.FontLoaderInterface, localDataProvider: Tiled2dMapVectorLayerLocalDataProviderInterface?, customZoomInfo: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapZoomInfo?, symbolDelegate: Tiled2dMapVectorLayerSymbolDelegateInterface?, sourceUrlParams: HashMap<String, String>?): Tiled2dMapVectorLayerInterface
     }
 
     abstract fun setSelectionDelegate(selectionDelegate: Tiled2dMapVectorLayerSelectionCallbackInterface?)

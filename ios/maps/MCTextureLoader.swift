@@ -11,6 +11,10 @@
 import DjinniSupport
 import MapCoreSharedModule
 import UIKit
+import OSLog
+
+@available(iOS 14.0, *)
+private let logger = Logger(subsystem: "maps-core", category: "MCTextureLoader")
 
 open class MCTextureLoader: MCLoaderInterface {
     private let session: URLSession
@@ -43,8 +47,16 @@ open class MCTextureLoader: MCLoaderInterface {
             semaphore.signal()
             return nil
         }
-        semaphore.wait()
-        return result!
+
+        if semaphore.wait(timeout: .now() + 30.0) == .timedOut {
+            return MCTextureLoaderResult(data: nil, etag: nil, status: .ERROR_TIMEOUT, errorCode: "SEMTIM")
+        }
+
+        if let result {
+            return result
+        }
+
+        return MCTextureLoaderResult(data: nil, etag: nil, status: .ERROR_OTHER, errorCode: "NRES")
     }
 
     open func loadTextureAsnyc(_ url: String, etag: String?) -> DJFuture<MCTextureLoaderResult> {
@@ -78,36 +90,37 @@ open class MCTextureLoader: MCLoaderInterface {
             let error: NSError? = error_ as NSError?
 
             if error?.domain == NSURLErrorDomain, error?.code == NSURLErrorTimedOut {
-                #if DEBUG
-                print("Failed to load \(url): Timeout")
-                #endif
+                if #available(iOS 14.0, *) {
+                    logger.debug("Failed to load \(url, privacy: .public): Timeout")
+                }
                 promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_TIMEOUT, errorCode: (error?.code).stringOrNil))
                 return
             }
 
             if error?.domain == NSURLErrorDomain, error?.code == NSURLErrorCancelled {
+                // Do nothing, since the result is dropped anyway (setting a LoaderStatus will cause the SharedLib to do further computing)
                 return
             }
 
             if response?.statusCode == 404 {
-                #if DEBUG
-                print("Failed to load \(url): 404, \(data.map { String(data: $0, encoding: .utf8) ?? "?" } ?? "?")")
-                #endif
+                if #available(iOS 14.0, *) {
+                    logger.debug("Failed to load \(url, privacy: .public): 404, \(data.map { String(data: $0, encoding: .utf8)?.prefix(1024) ?? "?" } ?? "?")")
+                }
                 promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_404, errorCode: (response?.statusCode).stringOrNil))
                 return
             } else if response?.statusCode == 400 {
-                #if DEBUG
-                print("Failed to load \(url): 400, \(data.map { String(data: $0, encoding: .utf8) ?? "?" } ?? "?")")
-                #endif
+                if #available(iOS 14.0, *) {
+                    logger.debug("Failed to load \(url, privacy: .public): 400, \(data.map { String(data: $0, encoding: .utf8)?.prefix(1024) ?? "?" } ?? "?")")
+                }
                 promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_400, errorCode: (response?.statusCode).stringOrNil))
                 return
             } else if response?.statusCode == 204 {
                 promise.setValue(.init(data: nil, etag: response?.etag, status: .OK, errorCode: nil))
                 return
             } else if response?.statusCode != 200 {
-                #if DEBUG
-                print("Failed to load \(url): \(response?.statusCode ?? 0), \(data.map { String(data: $0, encoding: .utf8) ?? "?" } ?? "?")")
-                #endif
+                if #available(iOS 14.0, *) {
+                    logger.debug("Failed to load \(url, privacy: .public): \(response?.statusCode ?? 0, privacy: .public), \(data.map { String(data: $0, encoding: .utf8)?.prefix(1024) ?? "?" } ?? "?")")
+                }
                 promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_NETWORK, errorCode: (response?.statusCode).stringOrNil))
                 return
             }
@@ -183,8 +196,16 @@ open class MCTextureLoader: MCLoaderInterface {
             semaphore.signal()
             return nil
         }
-        semaphore.wait()
-        return result!
+
+        if semaphore.wait(timeout: .now() + 30.0) == .timedOut {
+            return MCDataLoaderResult(data: nil, etag: nil, status: .ERROR_TIMEOUT, errorCode: "SEMTIM")
+        }
+
+        if let result {
+            return result
+        }
+
+        return MCDataLoaderResult(data: nil, etag: nil, status: .ERROR_OTHER, errorCode: "NRES")
     }
 
     open func loadDataAsync(_ url: String, etag: String?) -> DJFuture<MCDataLoaderResult> {
@@ -212,36 +233,37 @@ open class MCTextureLoader: MCLoaderInterface {
             let error: NSError? = error_ as NSError?
 
             if error?.domain == NSURLErrorDomain, error?.code == NSURLErrorTimedOut {
-                #if DEBUG
-                print("Failed to load \(url): Timeout")
-                #endif
+                if #available(iOS 14.0, *) {
+                    logger.debug("Failed to load \(url, privacy: .public): Timeout")
+                }
                 promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_TIMEOUT, errorCode: (error?.code).stringOrNil))
                 return
             }
 
             if error?.domain == NSURLErrorDomain, error?.code == NSURLErrorCancelled {
+                // Do nothing, since the result is dropped anyway (setting a LoaderStatus will cause the SharedLib to do further computing)
                 return
             }
 
             if response?.statusCode == 404 {
-                #if DEBUG
-                print("Failed to load \(url): 404, \(data.map { String(data: $0, encoding: .utf8) ?? "?" } ?? "?")")
-                #endif
+                if #available(iOS 14.0, *) {
+                    logger.debug("Failed to load \(url, privacy: .public): 404, \(data.map { String(data: $0, encoding: .utf8)?.prefix(1024) ?? "?" } ?? "?")")
+                }
                 promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_404, errorCode: (response?.statusCode).stringOrNil))
                 return
             } else if response?.statusCode == 400 {
-                #if DEBUG
-                print("Failed to load \(url): 400, \(data.map { String(data: $0, encoding: .utf8) ?? "?" } ?? "?")")
-                #endif
+                if #available(iOS 14.0, *) {
+                    logger.debug("Failed to load \(url, privacy: .public): 400, \(data.map { String(data: $0, encoding: .utf8)?.prefix(1024) ?? "?" } ?? "?")")
+                }
                 promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_400, errorCode: (response?.statusCode).stringOrNil))
                 return
             } else if response?.statusCode == 204 {
                 promise.setValue(.init(data: nil, etag: response?.etag, status: .OK, errorCode: nil))
                 return
             } else if response?.statusCode != 200 {
-                #if DEBUG
-                print("Failed to load \(url): \(response?.statusCode ?? 0), \(data.map { String(data: $0, encoding: .utf8) ?? "?" } ?? "?")")
-                #endif
+                if #available(iOS 14.0, *) {
+                    logger.debug("Failed to load \(url, privacy: .public): \(response?.statusCode ?? 0, privacy: .public), \(data.map { String(data: $0, encoding: .utf8)?.prefix(1024) ?? "?" } ?? "?")")
+                }
                 promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_NETWORK, errorCode: (response?.statusCode).stringOrNil))
                 return
             }

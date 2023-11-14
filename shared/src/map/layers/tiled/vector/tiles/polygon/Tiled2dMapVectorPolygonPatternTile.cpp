@@ -106,7 +106,7 @@ void Tiled2dMapVectorPolygonPatternTile::update() {
         int index = 0;
         for (const auto &[hash, feature]: featureGroups.at(styleGroupId)) {
             if (inZoomRange) {
-                const auto &ec = EvaluationContext(zoomIdentifier, feature, featureStateManager);
+                const auto &ec = EvaluationContext(zoomIdentifier, dpFactor, feature, featureStateManager);
                 const auto &opacity = polygonDescription->style.getFillOpacity(ec);
                 opacities[styleGroupId][index] = alpha * opacity;
             } else {
@@ -176,7 +176,7 @@ void Tiled2dMapVectorPolygonPatternTile::setVectorTileData(const Tiled2dMapVecto
 
             if (featureContext->geomType != vtzero::GeomType::POLYGON) { continue; }
 
-            EvaluationContext evalContext = EvaluationContext(tileInfo.tileInfo.zoomIdentifier, featureContext, featureStateManager);
+            EvaluationContext evalContext = EvaluationContext(tileInfo.tileInfo.zoomIdentifier, dpFactor, featureContext, featureStateManager);
             if (description->filter == nullptr || description->filter->evaluateOr(evalContext, false)) {
 
                 std::vector<Coord> positions;
@@ -203,7 +203,7 @@ void Tiled2dMapVectorPolygonPatternTile::setVectorTileData(const Tiled2dMapVecto
                             styleIndex = 0;
                             auto shader = shaderFactory->createPolygonPatternGroupShader();
                             auto polygonDescription = std::static_pointer_cast<PolygonVectorLayerDescription>(description);
-                            shader->asShaderProgramInterface()->setBlendMode(polygonDescription->style.getBlendMode(EvaluationContext(0.0, std::make_shared<FeatureContext>(), featureStateManager)));
+                            shader->asShaderProgramInterface()->setBlendMode(polygonDescription->style.getBlendMode(EvaluationContext(0.0, dpFactor, std::make_shared<FeatureContext>(), featureStateManager)));
                             shaders.push_back(shader);
                             featureGroups.push_back(std::vector<std::tuple<size_t, std::shared_ptr<FeatureContext>>>{{hash, featureContext}});
                             styleGroupNewPolygonsMap[styleGroupIndex].push_back({{},{}});
@@ -374,7 +374,7 @@ void Tiled2dMapVectorPolygonPatternTile::setupTextureCoordinates() {
         textureCoordinates.push_back(std::vector<float>(styleGroupedFeatureGroups.size() * 5));
         int index = 0;
         for (auto const &[hash, feature]: styleGroupedFeatureGroups) {
-            const auto &ec = EvaluationContext(zoomIdentifier, feature, featureStateManager);
+            const auto &ec = EvaluationContext(zoomIdentifier, dpFactor, feature, featureStateManager);
             const auto &patternName = polygonDescription->style.getFillPattern(ec);
 
             const auto spriteIt = spriteData->sprites.find(patternName);

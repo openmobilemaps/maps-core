@@ -23,7 +23,9 @@
 #include "TextInstancedInterface.h"
 #include "Quad2dStretchedInstancedInterface.h"
 #include "PolygonGroup2dLayerObject.h"
+#include "Tiled2dMapVectorLayerSymbolDelegateInterface.h"
 #include "CollisionGrid.h"
+#include "RenderObjectInterface.h"
 #include "SymbolObjectCollisionWrapper.h"
 
 //#define DRAW_TEXT_BOUNDING_BOX
@@ -40,7 +42,8 @@ public:
                                 const Tiled2dMapVersionedTileInfo &tileInfo,
                                 const std::string &layerIdentifier,
                                 const std::shared_ptr<SymbolVectorLayerDescription> &layerDescription,
-                                const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager);
+                                const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager,
+                                const std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> &symbolDelegate);
 
     void initialize(std::weak_ptr<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>> weakFeatures,
                     int32_t featuresBase,
@@ -52,16 +55,10 @@ public:
     void update(const double zoomIdentifier, const double rotation, const double scaleFactor, long long now);
 
     void setupObjects(const std::shared_ptr<SpriteData> &spriteData, const std::shared_ptr<TextureHolderInterface> &spriteTexture, const std::optional<WeakActor<Tiled2dMapVectorSourceSymbolDataManager>> &symbolDataManager = std::nullopt);
-    
-    std::shared_ptr<Quad2dInstancedInterface> iconInstancedObject;
-    std::shared_ptr<Quad2dStretchedInstancedInterface> stretchedInstancedObject;
-    std::shared_ptr<TextInstancedInterface> textInstancedObject;
 
     std::vector<SymbolObjectCollisionWrapper> getSymbolObjectsForCollision();
 
     std::optional<std::tuple<Coord, VectorLayerFeatureInfo>> onClickConfirmed(const CircleD &clickHitCircle);
-
-    std::shared_ptr<PolygonGroup2dLayerObject> boundingBoxLayerObject;
 
     void setAlpha(float alpha);
 
@@ -70,6 +67,8 @@ public:
     void clear();
 
     void updateLayerDescription(const std::shared_ptr<SymbolVectorLayerDescription> layerDescription);
+
+    std::vector<std::shared_ptr< ::RenderObjectInterface>> getRenderObjects();
 private:
 
     inline std::optional<Tiled2dMapVectorSymbolSubLayerPositioningWrapper>
@@ -91,7 +90,8 @@ private:
                                                                             const TextSymbolPlacement &textSymbolPlacement,
                                                                             const bool hideIcon,
                                                                             std::shared_ptr<SymbolAnimationCoordinatorMap> animationCoordinatorMap,
-                                                                            const size_t symbolTileIndex);
+                                                                            const size_t symbolTileIndex,
+                                                                            const bool hasCustomTexture);
 
 public:
     uint32_t groupId;
@@ -105,8 +105,37 @@ private:
     std::shared_ptr<SymbolVectorLayerDescription> layerDescription;
     const WeakActor<Tiled2dMapVectorFontProvider> fontProvider;
 
+    std::shared_ptr<Quad2dInstancedInterface> iconInstancedObject;
+    std::shared_ptr<Quad2dStretchedInstancedInterface> stretchedInstancedObject;
+    std::shared_ptr<TextInstancedInterface> textInstancedObject;
+    std::shared_ptr<PolygonGroup2dLayerObject> boundingBoxLayerObject;
+
     std::shared_ptr<TextureHolderInterface> spriteTexture;
     std::shared_ptr<SpriteData> spriteData;
+
+    struct CustomIconDescriptor {
+        std::vector<float> iconPositions;
+        std::vector<float> iconScales;
+        std::vector<float> iconRotations;
+        std::vector<float> iconAlphas;
+        std::vector<float> iconTextureCoordinates;
+        std::shared_ptr<TextureHolderInterface> texture;
+        std::shared_ptr<Quad2dInstancedInterface> renderObject;
+        std::unordered_map<std::string, ::RectI> featureIdentifiersUv;
+
+        CustomIconDescriptor(std::shared_ptr<TextureHolderInterface> texture, std::shared_ptr<Quad2dInstancedInterface> renderObject, std::unordered_map<std::string, ::RectI> featureIdentifiersUv): texture(texture), renderObject(renderObject), featureIdentifiersUv(featureIdentifiersUv) {
+            auto count = featureIdentifiersUv.size();
+
+            iconAlphas.resize(count, 0.0);
+            iconRotations.resize(count, 0.0);
+            iconScales.resize(count * 2, 0.0);
+            iconPositions.resize(count * 2, 0.0);
+            iconTextureCoordinates.resize(count * 4, 0.0);
+        }
+    };
+
+    std::vector<CustomIconDescriptor> customTextures;
+
 
     std::vector<float> iconPositions;
     std::vector<float> iconScales;
@@ -130,10 +159,14 @@ private:
     std::vector<float> stretchedIconTextureCoordinates;
 
     float alpha = 1.0;
+    double dpFactor = 1.0;
 
     bool anyInteractable = false;
 
+    bool isInitialized = false;
+
     const std::shared_ptr<Tiled2dMapVectorStateManager> featureStateManager;
+    const std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> &symbolDelegate;
 
 #ifdef DRAW_TEXT_BOUNDING_BOX
     TextSymbolPlacement textSymbolPlacement;

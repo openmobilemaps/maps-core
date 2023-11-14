@@ -30,7 +30,6 @@
 
 Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromUrl(const std::string &layerName,
                                                         const std::string &styleJsonUrl,
-                                                        const double &dpFactor,
                                                         const std::shared_ptr<Tiled2dMapVectorLayerLocalDataProviderInterface> &localDataProvider,
                                                         const std::vector<std::shared_ptr<::LoaderInterface>> &loaders, const std::unordered_map<std::string, std::string> & sourceUrlParams) {
     DataLoaderResult result = LoaderHelper::loadData(styleJsonUrl, std::nullopt, loaders);
@@ -40,7 +39,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
     }
     auto string = std::string((char*)result.data->buf(), result.data->len());
 
-    return parseStyleJsonFromString(layerName, string, dpFactor, localDataProvider, loaders, sourceUrlParams);
+    return parseStyleJsonFromString(layerName, string, localDataProvider, loaders, sourceUrlParams);
 };
 
 std::string Tiled2dMapVectorLayerParserHelper::replaceUrlParams(const std::string & url, const std::unordered_map<std::string, std::string> & sourceUrlParams) {
@@ -55,7 +54,6 @@ std::string Tiled2dMapVectorLayerParserHelper::replaceUrlParams(const std::strin
 
 Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromString(const std::string &layerName,
                                                         const std::string &styleJsonString,
-                                                        const double &dpFactor,
                                                         const std::shared_ptr<Tiled2dMapVectorLayerLocalDataProviderInterface> &localDataProvider,
                                                         const std::vector<std::shared_ptr<::LoaderInterface>> &loaders, const std::unordered_map<std::string, std::string> & sourceUrlParams) {
 
@@ -165,7 +163,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
         } else if (type == "geojson") {
             nlohmann::json geojson;
             if (val["data"].is_string()) {
-                geojsonSources[key] = GeoJsonVTFactory::getGeoJsonVt(replaceUrlParams(val["data"].get<std::string>(), sourceUrlParams), loaders, localDataProvider);
+                geojsonSources[key] = GeoJsonVTFactory::getGeoJsonVt(key, replaceUrlParams(val["data"].get<std::string>(), sourceUrlParams), loaders, localDataProvider);
             } else {
                 assert(val["data"].is_object());
                 geojsonSources[key] = GeoJsonVTFactory::getGeoJsonVt(GeoJsonParser::getGeoJson(val["data"]));
@@ -272,8 +270,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                     parser.parseValue(val["paint"]["line-blur"]),
                     parser.parseValue(val["layout"]["line-cap"]),
                     parser.parseValue(val["paint"]["line-offset"]),
-                    blendMode,
-                    dpFactor
+                    blendMode
             );
             auto layerDesc = std::make_shared<LineVectorLayerDescription>(
                     val["id"],
@@ -313,6 +310,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                                     parser.parseValue(val["layout"]["symbol-placement"]),
                                     parser.parseValue(val["layout"]["icon-rotation-alignment"]),
                                     parser.parseValue(val["layout"]["icon-image"]),
+                                    parser.parseValue(val["layout"]["icon-image-custom-provider"]),
                                     parser.parseValue(val["layout"]["icon-anchor"]),
                                     parser.parseValue(val["layout"]["icon-offset"]),
                                     parser.parseValue(val["layout"]["icon-size"]),
@@ -330,8 +328,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                                     parser.parseValue(val["layout"]["symbol-z-order"]),
                                     blendMode,
                                     transitionDuration,
-                                    transitionDelay,
-                                    dpFactor);
+                                    transitionDelay);
 
             std::shared_ptr<Value> filter = parser.parseValue(val["filter"]);
 

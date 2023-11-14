@@ -5,6 +5,7 @@
 
 #include "LayerInterface.h"
 #include <memory>
+#include <string>
 #include <vector>
 
 class IconInfoInterface;
@@ -22,7 +23,15 @@ public:
 
     virtual void remove(const /*not-null*/ std::shared_ptr<IconInfoInterface> & icon) = 0;
 
+    virtual void removeList(const std::vector</*not-null*/ std::shared_ptr<IconInfoInterface>> & icons) = 0;
+
+    virtual void removeIdentifier(const std::string & identifier) = 0;
+
+    virtual void removeIdentifierList(const std::vector<std::string> & identifiers) = 0;
+
     virtual void add(const /*not-null*/ std::shared_ptr<IconInfoInterface> & icon) = 0;
+
+    virtual void addList(const std::vector</*not-null*/ std::shared_ptr<IconInfoInterface>> & icons) = 0;
 
     virtual void clear() = 0;
 
