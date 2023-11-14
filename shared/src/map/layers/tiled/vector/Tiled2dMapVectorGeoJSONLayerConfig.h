@@ -28,7 +28,7 @@ public:
         if (auto geoJSON = this->geoJSON.lock()){
             maxZoom = geoJSON->getMaxZoom();
         }
-        return getDefaultEpsg3857ZoomLevels(maxZoom);
+        return getDefaultEpsg3857ZoomLevels(0, maxZoom);
     }
 
     std::string getLayerName() override {
@@ -38,15 +38,4 @@ public:
 protected:
     std::weak_ptr<GeoJSONVTInterface> geoJSON;
     const std::string sourceName;
-
-    std::vector<Tiled2dMapZoomLevelInfo> getDefaultEpsg3857ZoomLevels(int maxZoom) {
-        std::vector<Tiled2dMapZoomLevelInfo> infos;
-        for (int i = 0; i <= maxZoom; i++) {
-            double factor = pow(2, i);
-            double zoom = baseValueZoom / factor;
-            double width = baseValueWidth / factor;
-            infos.push_back(Tiled2dMapZoomLevelInfo(zoom, width, factor, factor, 1, i, epsg3857Bounds));
-        }
-        return infos;
-    }
 };
