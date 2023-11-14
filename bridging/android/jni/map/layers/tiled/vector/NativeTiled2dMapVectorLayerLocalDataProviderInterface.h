@@ -36,7 +36,7 @@ private:
         std::optional<std::string> getStyleJson() override;
         ::djinni::Future<::TextureLoaderResult> loadSpriteAsync(int32_t scale) override;
         ::djinni::Future<::DataLoaderResult> loadSpriteJsonAsync(int32_t scale) override;
-        ::djinni::Future<::DataLoaderResult> loadGeojson(const std::string & url) override;
+        ::djinni::Future<::DataLoaderResult> loadGeojson(const std::string & sourceName, const std::string & url) override;
 
     private:
         friend ::djinni::JniInterface<::Tiled2dMapVectorLayerLocalDataProviderInterface, ::djinni_generated::NativeTiled2dMapVectorLayerLocalDataProviderInterface>;
@@ -46,7 +46,7 @@ private:
     const jmethodID method_getStyleJson { ::djinni::jniGetMethodID(clazz.get(), "getStyleJson", "()Ljava/lang/String;") };
     const jmethodID method_loadSpriteAsync { ::djinni::jniGetMethodID(clazz.get(), "loadSpriteAsync", "(I)Lcom/snapchat/djinni/Future;") };
     const jmethodID method_loadSpriteJsonAsync { ::djinni::jniGetMethodID(clazz.get(), "loadSpriteJsonAsync", "(I)Lcom/snapchat/djinni/Future;") };
-    const jmethodID method_loadGeojson { ::djinni::jniGetMethodID(clazz.get(), "loadGeojson", "(Ljava/lang/String;)Lcom/snapchat/djinni/Future;") };
+    const jmethodID method_loadGeojson { ::djinni::jniGetMethodID(clazz.get(), "loadGeojson", "(Ljava/lang/String;Ljava/lang/String;)Lcom/snapchat/djinni/Future;") };
 };
 
 } // namespace djinni_generated

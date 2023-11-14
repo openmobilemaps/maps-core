@@ -63,12 +63,14 @@ public:
         splitTile(geoJson->geometries, 0, 0, 0);
     }
 
-    GeoJSONVT(const std::string &geoJsonUrl,
+    GeoJSONVT(const std::string &sourceName,
+              const std::string &geoJsonUrl,
               const std::vector<std::shared_ptr<::LoaderInterface>> &loaders,
               const std::shared_ptr<Tiled2dMapVectorLayerLocalDataProviderInterface> &localDataProvider,
               const Options& options_ = Options())
-    : options(options_), geoJsonUrl(geoJsonUrl), loaders(loaders), localDataProvider(localDataProvider) {}
+    : options(options_), sourceName(sourceName), geoJsonUrl(geoJsonUrl), loaders(loaders), localDataProvider(localDataProvider) {}
 
+    const std::string sourceName;
     const std::string geoJsonUrl;
     std::vector<std::shared_ptr<::LoaderInterface>> loaders;
     std::shared_ptr<Tiled2dMapVectorLayerLocalDataProviderInterface> localDataProvider;
@@ -82,7 +84,7 @@ public:
 
         std::shared_ptr<::djinni::Future<::DataLoaderResult>> jsonLoaderFuture = nullptr;
         if(localDataProvider && fromLocal) {
-            jsonLoaderFuture = std::make_shared<::djinni::Future<::DataLoaderResult>>(localDataProvider->loadGeojson(geoJsonUrl));
+            jsonLoaderFuture = std::make_shared<::djinni::Future<::DataLoaderResult>>(localDataProvider->loadGeojson(sourceName, geoJsonUrl));
         } else {
             jsonLoaderFuture = std::make_shared<::djinni::Future<::DataLoaderResult>>(LoaderHelper::loadDataAsync(geoJsonUrl, std::nullopt, loaders));
         }

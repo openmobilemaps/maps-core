@@ -45,6 +45,7 @@
 #include "Tiled2dMapVectorReadyManager.h"
 #include "Tiled2dVectorGeoJsonSource.h"
 #include "Tiled2dMapVectorStyleParser.h"
+#include "Tiled2dMapVectorGeoJSONLayerConfig.h"
 
 Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
                                              const std::string &remoteStyleJsonUrl,
@@ -195,6 +196,12 @@ Tiled2dMapVectorLayer::getLayerConfig(const std::shared_ptr<VectorMapSourceDescr
                                       : std::make_shared<Tiled2dMapVectorLayerConfig>(source);
 }
 
+std::shared_ptr<Tiled2dMapVectorLayerConfig>
+Tiled2dMapVectorLayer::getGeoJSONLayerConfig(const std::string &sourceName, const std::shared_ptr<GeoJSONVTInterface> &source) {
+    return customZoomInfo.has_value() ? std::make_shared<Tiled2dMapVectorGeoJSONLayerConfig>(sourceName, source, *customZoomInfo)
+                                      : std::make_shared<Tiled2dMapVectorGeoJSONLayerConfig>(sourceName, source);
+}
+
 void Tiled2dMapVectorLayer::setMapDescription(const std::shared_ptr<VectorMapDescription> &mapDescription) {
     std::lock_guard<std::recursive_mutex> lock(mapDescriptionMutex);
     this->mapDescription = mapDescription;
@@ -204,7 +211,7 @@ void Tiled2dMapVectorLayer::setMapDescription(const std::shared_ptr<VectorMapDes
         layerConfigs[source->identifier] = getLayerConfig(source);
     }
     for (auto const &[source, geoJson]: mapDescription->geoJsonSources) {
-        layerConfigs[source] = getLayerConfig(VectorMapSourceDescription::geoJsonDescription(geoJson->getMaxZoom()));
+        layerConfigs[source] = getGeoJSONLayerConfig(source, geoJson);
     }
     
     initializeVectorLayer();
@@ -319,6 +326,7 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
         Actor<Tiled2dMapVectorSource> vectorSource;
         if (mapDescription->geoJsonSources.count(source) != 0) {
             auto geoJsonSource = Actor<Tiled2dVectorGeoJsonSource>(sourceMailbox,
+                                                                   mapInterface->getCamera(),
                                                                    mapInterface->getMapConfig(),
                                                                    layerConfig,
                                                                    mapInterface->getCoordinateConverterHelper(),

@@ -21,8 +21,8 @@ public:
         return std::static_pointer_cast<GeoJSONVTInterface>(std::make_shared<GeoJSONVT>(geoJson));
     }
 
-    static std::shared_ptr<GeoJSONVTInterface> getGeoJsonVt(const std::string &geoJsonUrl, const std::vector<std::shared_ptr<::LoaderInterface>> &loaders, const std::shared_ptr<Tiled2dMapVectorLayerLocalDataProviderInterface> &localDataProvider) {
-        std::shared_ptr<GeoJSONVT> vt = std::make_shared<GeoJSONVT>(geoJsonUrl, loaders, localDataProvider);
+    static std::shared_ptr<GeoJSONVTInterface> getGeoJsonVt(const std::string &sourceName, const std::string &geoJsonUrl, const std::vector<std::shared_ptr<::LoaderInterface>> &loaders, const std::shared_ptr<Tiled2dMapVectorLayerLocalDataProviderInterface> &localDataProvider) {
+        std::shared_ptr<GeoJSONVT> vt = std::make_shared<GeoJSONVT>(sourceName, geoJsonUrl, loaders, localDataProvider);
         vt->load();
         return vt;
     }

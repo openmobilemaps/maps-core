@@ -44,7 +44,7 @@ public:
     }
 
     std::vector<Tiled2dMapZoomLevelInfo> getZoomLevelInfos() override {
-        return getDefaultEpsg3857ZoomLevels();
+        return getDefaultEpsg3857ZoomLevels(sourceDescription->minZoom, sourceDescription->maxZoom);
     }
 
     Tiled2dMapZoomInfo getZoomInfo() override {
@@ -66,23 +66,12 @@ public:
     double getZoomFactorAtIdentifier(double zoomIdentifier) {
         double factor = pow(2, zoomIdentifier);
         return baseValueZoom * zoomInfo.zoomLevelScaleFactor / factor;
+
     }
 
-protected:
-    std::shared_ptr<VectorMapSourceDescription> sourceDescription;
-    Tiled2dMapZoomInfo zoomInfo;
-
-    static constexpr double baseValueZoom = 500000000.0;
-    const double baseValueWidth = 40075016.0;
-    const int32_t epsg3857Id = CoordinateSystemIdentifiers::EPSG3857();
-    const RectCoord epsg3857Bounds = RectCoord(
-            Coord(epsg3857Id, -20037508.34, 20037508.34, 0.0),
-            Coord(epsg3857Id, 20037508.34, -20037508.34, 0.0)
-    );
-
-    virtual std::vector<Tiled2dMapZoomLevelInfo> getDefaultEpsg3857ZoomLevels() {
+    static std::vector<Tiled2dMapZoomLevelInfo> getDefaultEpsg3857ZoomLevels(int minZoom, int maxZoom) {
         std::vector<Tiled2dMapZoomLevelInfo> infos;
-        for (int i = sourceDescription->minZoom; i <= sourceDescription->maxZoom; i++) {
+        for (int i = minZoom; i <= maxZoom; i++) {
             double factor = pow(2, i);
             double zoom = baseValueZoom / factor;
             double width = baseValueWidth / factor;
@@ -90,4 +79,18 @@ protected:
         }
         return infos;
     }
+
+protected:
+    std::shared_ptr<VectorMapSourceDescription> sourceDescription;
+    Tiled2dMapZoomInfo zoomInfo;
+
+    static constexpr double baseValueZoom = 500000000.0;
+    static constexpr double baseValueWidth = 40075016.0;
+    static const inline int32_t epsg3857Id = CoordinateSystemIdentifiers::EPSG3857();
+    static const inline RectCoord epsg3857Bounds = RectCoord(
+            Coord(epsg3857Id, -20037508.34, 20037508.34, 0.0),
+            Coord(epsg3857Id, 20037508.34, -20037508.34, 0.0)
+    );
+
+
 };

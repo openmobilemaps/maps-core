@@ -43,11 +43,12 @@ std::optional<std::string> NativeTiled2dMapVectorLayerLocalDataProviderInterface
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni::FutureAdaptor<::djinni_generated::NativeDataLoaderResult>::toCpp(jniEnv, jret);
 }
-::djinni::Future<::DataLoaderResult> NativeTiled2dMapVectorLayerLocalDataProviderInterface::JavaProxy::loadGeojson(const std::string & c_url) {
+::djinni::Future<::DataLoaderResult> NativeTiled2dMapVectorLayerLocalDataProviderInterface::JavaProxy::loadGeojson(const std::string & c_sourceName, const std::string & c_url) {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
     const auto& data = ::djinni::JniClass<::djinni_generated::NativeTiled2dMapVectorLayerLocalDataProviderInterface>::get();
     auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_loadGeojson,
+                                         ::djinni::get(::djinni::String::fromCpp(jniEnv, c_sourceName)),
                                          ::djinni::get(::djinni::String::fromCpp(jniEnv, c_url)));
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni::FutureAdaptor<::djinni_generated::NativeDataLoaderResult>::toCpp(jniEnv, jret);
@@ -87,11 +88,12 @@ CJNIEXPORT ::djinni::FutureAdaptor<::djinni_generated::NativeDataLoaderResult>::
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT ::djinni::FutureAdaptor<::djinni_generated::NativeDataLoaderResult>::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_vector_Tiled2dMapVectorLayerLocalDataProviderInterface_00024CppProxy_native_1loadGeojson(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jstring j_url)
+CJNIEXPORT ::djinni::FutureAdaptor<::djinni_generated::NativeDataLoaderResult>::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_vector_Tiled2dMapVectorLayerLocalDataProviderInterface_00024CppProxy_native_1loadGeojson(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jstring j_sourceName, jstring j_url)
 {
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapVectorLayerLocalDataProviderInterface>(nativeRef);
-        auto r = ref->loadGeojson(::djinni::String::toCpp(jniEnv, j_url));
+        auto r = ref->loadGeojson(::djinni::String::toCpp(jniEnv, j_sourceName),
+                                  ::djinni::String::toCpp(jniEnv, j_url));
         return ::djinni::release(::djinni::FutureAdaptor<::djinni_generated::NativeDataLoaderResult>::fromCpp(jniEnv, std::move(r)));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }

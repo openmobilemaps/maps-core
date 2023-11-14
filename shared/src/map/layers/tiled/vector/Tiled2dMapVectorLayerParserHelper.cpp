@@ -144,7 +144,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
         } else if (type == "geojson") {
             nlohmann::json geojson;
             if (val["data"].is_string()) {
-                geojsonSources[key] = GeoJsonVTFactory::getGeoJsonVt(val["data"].get<std::string>(), loaders, localDataProvider);
+                geojsonSources[key] = GeoJsonVTFactory::getGeoJsonVt(key, val["data"].get<std::string>(), loaders, localDataProvider);
             } else {
                 assert(val["data"].is_object());
                 geojsonSources[key] = GeoJsonVTFactory::getGeoJsonVt(GeoJsonParser::getGeoJson(val["data"]));

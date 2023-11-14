@@ -183,6 +183,7 @@ protected:
     void setMapDescription(const std::shared_ptr<VectorMapDescription> &mapDescription);
 
     virtual std::shared_ptr<Tiled2dMapVectorLayerConfig> getLayerConfig(const std::shared_ptr<VectorMapSourceDescription> &source);
+    virtual std::shared_ptr<Tiled2dMapVectorLayerConfig> getGeoJSONLayerConfig(const std::string &sourceName, const std::shared_ptr<GeoJSONVTInterface> &source);
 
     virtual void loadSpriteData(bool fromLocal = true);
 
