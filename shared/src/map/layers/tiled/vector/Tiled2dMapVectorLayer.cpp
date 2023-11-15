@@ -54,8 +54,8 @@ Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
                                              const std::shared_ptr<::FontLoaderInterface> &fontLoader,
                                              const std::optional<Tiled2dMapZoomInfo> &customZoomInfo,
                                              const std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> &symbolDelegate,
-                                             const std::unordered_map<std::string, std::string> & sourceUrlParams
-                                             ) :
+                                             const std::unordered_map<std::string, std::string> & sourceUrlParams,
+                                             const std::shared_ptr<Tiled2dMapVectorLayerLocalDataProviderInterface> &localDataProvider) :
         Tiled2dMapLayer(),
         layerName(layerName),
         remoteStyleJsonUrl(remoteStyleJsonUrl),
@@ -64,7 +64,8 @@ Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
         customZoomInfo(customZoomInfo),
         featureStateManager(std::make_shared<Tiled2dMapVectorStateManager>()),
         symbolDelegate(symbolDelegate),
-        sourceUrlParams(sourceUrlParams)
+        sourceUrlParams(sourceUrlParams),
+        localDataProvider(localDataProvider)
         {}
 
 Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
@@ -74,8 +75,8 @@ Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
                                              const std::shared_ptr<::FontLoaderInterface> &fontLoader,
                                              const std::optional<Tiled2dMapZoomInfo> &customZoomInfo,
                                              const std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> &symbolDelegate,
-                                             const std::unordered_map<std::string, std::string> & sourceUrlParams
-                                             ) :
+                                             const std::unordered_map<std::string, std::string> & sourceUrlParams,
+                                             const std::shared_ptr<Tiled2dMapVectorLayerLocalDataProviderInterface> &localDataProvider) :
         Tiled2dMapLayer(),
         layerName(layerName),
         remoteStyleJsonUrl(remoteStyleJsonUrl),
@@ -85,7 +86,8 @@ Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
         customZoomInfo(customZoomInfo),
         featureStateManager(std::make_shared<Tiled2dMapVectorStateManager>()),
         symbolDelegate(symbolDelegate),
-        sourceUrlParams(sourceUrlParams)
+        sourceUrlParams(sourceUrlParams),
+        localDataProvider(localDataProvider)
         {}
 
 

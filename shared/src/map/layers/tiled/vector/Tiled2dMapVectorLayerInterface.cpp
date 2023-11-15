@@ -45,6 +45,10 @@ Tiled2dMapVectorLayerInterface::createExplicitly(const std::string &layerName,
             }
         }
 
+        if (!(localStyleJson.has_value() && *localStyleJson) && !parserResult) {
+            return std::make_shared<Tiled2dMapVectorLayer>(layerName, *styleJson, loaders, fontLoader, customZoomInfo, symbolDelegate, urlParams, localDataProvider);
+        }
+
         if (!parserResult && styleJson.has_value()) {
             parserResult = Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromString(layerName, *styleJson, nullptr, loaders, urlParams);
         }
