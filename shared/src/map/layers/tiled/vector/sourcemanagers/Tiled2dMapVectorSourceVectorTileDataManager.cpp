@@ -42,9 +42,9 @@ void Tiled2dMapVectorSourceVectorTileDataManager::onVectorTilesUpdated(const std
         // Just insert pointers here since we will only access the objects inside this method where we know that currentTileInfos is retained
         std::vector<const Tiled2dMapVectorTileInfo*> tilesToAdd;
         std::vector<const Tiled2dMapVectorTileInfo*> tilesToKeep;
-        std::unordered_set<Tiled2dMapTileInfo> tilesToRemove;
-        std::unordered_map<Tiled2dMapTileInfo, TileState> tileStateUpdates;
-        std::unordered_map<Tiled2dMapTileInfo, Tiled2dMapLayerMaskWrapper> newTileMasks;
+        std::unordered_set<Tiled2dMapVersionedTileInfo> tilesToRemove;
+        std::unordered_map<Tiled2dMapVersionedTileInfo, TileState> tileStateUpdates;
+        std::unordered_map<Tiled2dMapVersionedTileInfo, Tiled2dMapLayerMaskWrapper> newTileMasks;
 
         {
             std::lock_guard<std::recursive_mutex> updateLock(updateMutex);
@@ -148,9 +148,9 @@ void Tiled2dMapVectorSourceVectorTileDataManager::onVectorTilesUpdated(const std
                                      indexControlSet.empty() ? 0 : 1);
             }
 
-            this->tileMasksToSetup = std::unordered_map<Tiled2dMapTileInfo, Tiled2dMapLayerMaskWrapper>(newTileMasks);
-            this->tilesToRemove = std::unordered_set<Tiled2dMapTileInfo>(tilesToRemove);
-            this->tileStateUpdates = std::unordered_map<Tiled2dMapTileInfo, TileState>(tileStateUpdates);
+            this->tileMasksToSetup = std::unordered_map<Tiled2dMapVersionedTileInfo, Tiled2dMapLayerMaskWrapper>(newTileMasks);
+            this->tilesToRemove = std::unordered_set<Tiled2dMapVersionedTileInfo>(tilesToRemove);
+            this->tileStateUpdates = std::unordered_map<Tiled2dMapVersionedTileInfo, TileState>(tileStateUpdates);
         }
 
         auto castedMe = std::static_pointer_cast<Tiled2dMapVectorSourceTileDataManager>(shared_from_this());
@@ -162,7 +162,7 @@ void Tiled2dMapVectorSourceVectorTileDataManager::onVectorTilesUpdated(const std
 }
 
 
-void Tiled2dMapVectorSourceVectorTileDataManager::onTileCompletelyReady(const Tiled2dMapTileInfo tileInfo) {
+void Tiled2dMapVectorSourceVectorTileDataManager::onTileCompletelyReady(const Tiled2dMapVersionedTileInfo tileInfo) {
     readyManager.message(&Tiled2dMapVectorReadyManager::setReady, readyManagerIndex, tileInfo, 1);
 }
 

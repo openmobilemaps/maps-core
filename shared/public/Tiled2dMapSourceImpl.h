@@ -23,7 +23,8 @@ Tiled2dMapSource<T, L, R>::Tiled2dMapSource(const MapConfig &mapConfig, const st
                                          const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                                          const std::shared_ptr<SchedulerInterface> &scheduler,
                                          float screenDensityPpi,
-                                         size_t loaderCount)
+                                         size_t loaderCount,
+                                         std::string layerName)
     : mapConfig(mapConfig)
     , layerConfig(layerConfig)
     , conversionHelper(conversionHelper)
@@ -32,7 +33,8 @@ Tiled2dMapSource<T, L, R>::Tiled2dMapSource(const MapConfig &mapConfig, const st
     , zoomInfo(layerConfig->getZoomInfo())
     , layerSystemId(layerConfig->getCoordinateSystemIdentifier())
     , isPaused(false)
-    , screenDensityPpi(screenDensityPpi) {
+    , screenDensityPpi(screenDensityPpi)
+    , layerName(layerName) {
     std::sort(zoomLevelInfos.begin(), zoomLevelInfos.end(),
               [](const Tiled2dMapZoomLevelInfo &a, const Tiled2dMapZoomLevelInfo &b) -> bool { return a.zoom > b.zoom; });
 }
@@ -45,6 +47,13 @@ bool Tiled2dMapSource<T, L, R>::isTileVisible(const Tiled2dMapTileInfo &tileInfo
     return currentVisibleTiles.count(tileInfo) > 0;
 }
 
+template <typename T>
+static void hash_combine(size_t& seed, const T& value) {
+    std::hash<T> hasher;
+    auto v = hasher(value);
+    seed ^= v + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+}
+
 template<class T, class L, class R>
 void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibleBounds, int curT, double zoom) {
     if (isPaused) {
@@ -54,6 +63,8 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
     std::vector<PrioritizedTiled2dMapTileInfo> visibleTilesVec;
 
     RectCoord visibleBoundsLayer = conversionHelper->convertRect(layerSystemId, visibleBounds);
+
+    const auto extent = layerConfig->getExtent();
 
     double centerVisibleX = visibleBoundsLayer.topLeft.x + 0.5 * (visibleBoundsLayer.bottomRight.x - visibleBoundsLayer.topLeft.x);
     double centerVisibleY = visibleBoundsLayer.topLeft.y + 0.5 * (visibleBoundsLayer.bottomRight.y - visibleBoundsLayer.topLeft.y);
@@ -112,6 +123,10 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
     const double visibleBottom = visibleBoundsLayer.bottomRight.y - signHeight * viewboundsPadding;
     visibleHeight = std::abs(visibleHeight) + 2 * viewboundsPadding;
 
+
+
+    size_t visibleTileHash = 0;
+
     for (int i = startZoomLayer; i <= endZoomLevel; i++) {
         const Tiled2dMapZoomLevelInfo &zoomLevelInfo = zoomLevelInfos.at(i);
 
@@ -143,19 +158,47 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
         const double tileHeightAdj = topToBottom ? tileWidth : -tileWidth;
 
         const double boundsLeft = layerBounds.topLeft.x;
-        const int startTileLeft =
+        int startTileLeft =
                 std::floor(std::max(leftToRight ? (visibleLeft - boundsLeft) : (boundsLeft - visibleLeft), 0.0) / tileWidth);
-        const int maxTileLeft = std::floor(
+        int maxTileLeft = std::floor(
                 std::max(leftToRight ? (visibleRight - boundsLeft) : (boundsLeft - visibleRight), 0.0) / tileWidth);
 
         const double boundsTop = layerBounds.topLeft.y;
-        const int startTileTop = std::floor(std::max(topToBottom ? (visibleTop - boundsTop) : (boundsTop - visibleTop), 0.0) / tileWidth);
-        const int maxTileTop = std::floor(
+        int startTileTop = std::floor(std::max(topToBottom ? (visibleTop - boundsTop) : (boundsTop - visibleTop), 0.0) / tileWidth);
+        int maxTileTop = std::floor(
                 std::max(topToBottom ? (visibleBottom - boundsTop) : (boundsTop - visibleBottom), 0.0) / tileWidth);
+
+        if (extent.has_value() && extent->size() == 4) {
+
+            const double extentLeft = leftToRight ? extent->at(0) : extent->at(2);
+            const double extentRight = leftToRight ? extent->at(2) : extent->at(0);
+            const double extentTop = leftToRight ? extent->at(3) : extent->at(1);
+            const double extentBottom = leftToRight ? extent->at(1) : extent->at(3);
+
+            int extentTileLeft =
+            std::floor(std::max(leftToRight ? (extentLeft - boundsLeft) : (boundsLeft - extentLeft), 0.0) / tileWidth);
+            int extentTileRight = std::floor(
+                                         std::max(leftToRight ? (extentRight - boundsLeft) : (boundsLeft - extentRight), 0.0) / tileWidth);
+            int extentTileTop = std::floor(std::max(topToBottom ? (extentTop - boundsTop) : (boundsTop - extentTop), 0.0) / tileWidth);
+            int extentTileBottom = std::floor(
+                                        std::max(topToBottom ? (extentBottom - boundsTop) : (boundsTop - extentBottom), 0.0) / tileWidth);
+
+            startTileLeft = std::max(startTileLeft, extentTileLeft);
+            maxTileLeft = std::min(maxTileLeft, extentTileRight);
+            startTileTop = std::max(startTileTop, extentTileTop);
+            maxTileTop = std::min(maxTileTop, extentTileBottom);
+        }
 
         const double maxDisCenterX = visibleWidth * 0.5 + tileWidth;
         const double maxDisCenterY = visibleHeight * 0.5 + tileWidth;
         const double maxDisCenter = std::sqrt(maxDisCenterX * maxDisCenterX + maxDisCenterY * maxDisCenterY);
+
+        hash_combine(visibleTileHash, std::hash<int>{}(i));
+        hash_combine(visibleTileHash, std::hash<int>{}(startTileLeft));
+        hash_combine(visibleTileHash, std::hash<int>{}(maxTileLeft));
+        hash_combine(visibleTileHash, std::hash<int>{}(startTileTop));
+        hash_combine(visibleTileHash, std::hash<int>{}(maxTileTop));
+        hash_combine(visibleTileHash, std::hash<int>{}(zoomLevelInfo.numTilesT));
 
         for (int x = startTileLeft; x <= maxTileLeft && x < zoomLevelInfo.numTilesX; x++) {
             for (int y = startTileTop; y <= maxTileTop && y < zoomLevelInfo.numTilesY; y++) {
@@ -198,7 +241,10 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
         currentZoomLevelIdentifier = targetZoomLevelIdentifier;
     }
 
-    onVisibleTilesChanged(layers, keepZoomLevelOffset);
+    if (lastVisibleTilesHash != visibleTileHash) {
+        lastVisibleTilesHash = visibleTileHash;
+        onVisibleTilesChanged(layers, keepZoomLevelOffset);
+    }
     currentViewBounds = visibleBoundsLayer;
 }
 
@@ -227,6 +273,7 @@ void Tiled2dMapSource<T, L, R>::onVisibleTilesChanged(const std::vector<VisibleT
     }
 
     currentPyramid = pyramid;
+    currentKeepZoomLevelOffset = keepZoomLevelOffset;
 
     // we only remove tiles that are not visible anymore directly
     // tile from upper zoom levels will be removed as soon as the correct tiles are loaded if mask tiles is enabled
@@ -435,7 +482,7 @@ void Tiled2dMapSource<T, L, R>::didFailToLoad(Tiled2dMapTileInfo tile, size_t lo
             if (errorManager) {
                 errorManager->addTiledLayerError(TiledLayerError(status,
                                                                  errorCode,
-                                                                 layerConfig->getLayerName(),
+                                                                 layerName,
                                                                  layerConfig->getTileUrl(tile.x, tile.y, tile.t,tile.zoomIdentifier),
                                                                  false,
                                                                  tile.bounds));
@@ -533,7 +580,7 @@ void Tiled2dMapSource<T, L, R>::updateTileMasks() {
         return;
     }
 
-    if (currentTiles.empty()) {
+    if (currentTiles.empty() && outdatedTiles.empty()) {
         return;
     }
 
@@ -652,12 +699,13 @@ void Tiled2dMapSource<T, L, R>::updateTileMasks() {
 }
 
 template<class T, class L, class R>
-void Tiled2dMapSource<T, L, R>::setTileReady(const Tiled2dMapTileInfo &tile) {
+void Tiled2dMapSource<T, L, R>::setTileReady(const Tiled2dMapVersionedTileInfo &tile) {
     bool needsUpdate = false;
     
-    if (readyTiles.count(tile) == 0) {
-        if (currentTiles.count(tile) != 0){
-            readyTiles.insert(tile);
+    if (readyTiles.count(tile.tileInfo) == 0) {
+        if (currentTiles.count(tile.tileInfo) != 0){
+            readyTiles.insert(tile.tileInfo);
+            outdatedTiles.erase(tile.tileInfo);
             needsUpdate = true;
         }
     }
@@ -670,13 +718,14 @@ void Tiled2dMapSource<T, L, R>::setTileReady(const Tiled2dMapTileInfo &tile) {
 }
 
 template<class T, class L, class R>
-void Tiled2dMapSource<T, L, R>::setTilesReady(const std::vector<Tiled2dMapTileInfo> &tiles) {
+void Tiled2dMapSource<T, L, R>::setTilesReady(const std::vector<Tiled2dMapVersionedTileInfo> &tiles) {
     bool needsUpdate = false;
     
     for (auto const &tile: tiles) {
-        if (readyTiles.count(tile) == 0) {
-            if (currentTiles.count(tile) != 0){
-                readyTiles.insert(tile);
+        if (readyTiles.count(tile.tileInfo) == 0 || outdatedTiles.count(tile.tileInfo) > 0) {
+            if (currentTiles.count(tile.tileInfo) != 0){
+                readyTiles.insert(tile.tileInfo);
+                outdatedTiles.erase(tile.tileInfo);
                 needsUpdate = true;
             }
         }
@@ -764,4 +813,22 @@ void Tiled2dMapSource<T, L, R>::forceReload() {
         }
     }
 
+}
+
+template<class T, class L, class R>
+void Tiled2dMapSource<T, L, R>::reloadTiles() {
+    outdatedTiles.clear();
+    outdatedTiles.insert(currentTiles.begin(), currentTiles.end());
+    
+    currentTiles.clear();
+    readyTiles.clear();
+
+    for (auto it = currentlyLoading.begin(); it != currentlyLoading.end();) {
+        cancelLoad(it->first, it->second);
+    }
+    currentlyLoading.clear();
+    errorTiles.clear();
+
+    lastVisibleTilesHash = -1;
+    onVisibleTilesChanged(currentPyramid, currentKeepZoomLevelOffset);
 }

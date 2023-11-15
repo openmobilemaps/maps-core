@@ -30,7 +30,7 @@ public:
 
     virtual void setAlpha(float alpha) override;
 
-    virtual void tileIsReady(const Tiled2dMapTileInfo &tile,
+    virtual void tileIsReady(const Tiled2dMapVersionedTileInfo &tile,
                              const std::string &layerIdentifier,
                              const WeakActor<Tiled2dMapVectorTile> &tileActor) override;
 
@@ -57,27 +57,27 @@ public:
     virtual void reloadLayerContent(const std::vector<std::tuple<std::shared_ptr<VectorLayerDescription>, int32_t>> &descriptionLayerIndexPairs) = 0;
 
 protected:
-    Actor<Tiled2dMapVectorTile> createTileActor(const Tiled2dMapTileInfo &tileInfo,
+    Actor<Tiled2dMapVectorTile> createTileActor(const Tiled2dMapVersionedTileInfo &tileInfo,
                                                 const std::shared_ptr<VectorLayerDescription> &layerDescription);
 
     void setupExistingTilesWithSprite();
 
     virtual void pregenerateRenderPasses();
 
-    virtual void onTileCompletelyReady(const Tiled2dMapTileInfo tileInfo) = 0;
+    virtual void onTileCompletelyReady(const Tiled2dMapVersionedTileInfo tileInfo) = 0;
 
-    std::unordered_map<Tiled2dMapTileInfo, std::vector<std::tuple<int32_t, std::vector<std::shared_ptr<RenderObjectInterface>>>>> tileRenderObjectsMap;
-    std::unordered_map<Tiled2dMapTileInfo, std::vector<std::tuple<int32_t, std::string, Actor<Tiled2dMapVectorTile>>>> tiles;
-    std::unordered_map<Tiled2dMapTileInfo, Tiled2dMapLayerMaskWrapper> tileMaskMap;
-    std::unordered_map<Tiled2dMapTileInfo, TileState> tileStateMap;
-    std::unordered_set<Tiled2dMapTileInfo> tilesReady;
-    std::unordered_map<Tiled2dMapTileInfo, std::unordered_set<int32_t>> tilesReadyControlSet;
+    std::unordered_map<Tiled2dMapVersionedTileInfo, std::vector<std::tuple<int32_t, std::vector<std::shared_ptr<RenderObjectInterface>>>>> tileRenderObjectsMap;
+    std::unordered_map<Tiled2dMapVersionedTileInfo, std::vector<std::tuple<int32_t, std::string, Actor<Tiled2dMapVectorTile>>>> tiles;
+    std::unordered_map<Tiled2dMapVersionedTileInfo, Tiled2dMapLayerMaskWrapper> tileMaskMap;
+    std::unordered_map<Tiled2dMapVersionedTileInfo, TileState> tileStateMap;
+    std::unordered_set<Tiled2dMapVersionedTileInfo> tilesReady;
+    std::unordered_map<Tiled2dMapVersionedTileInfo, std::unordered_set<int32_t>> tilesReadyControlSet;
 
     std::atomic_flag updateFlag = ATOMIC_FLAG_INIT;
     std::recursive_mutex updateMutex;
-    std::unordered_map<Tiled2dMapTileInfo, Tiled2dMapLayerMaskWrapper> tileMasksToSetup;
-    std::unordered_set<Tiled2dMapTileInfo> tilesToRemove;
-    std::unordered_map<Tiled2dMapTileInfo, TileState> tileStateUpdates;
+    std::unordered_map<Tiled2dMapVersionedTileInfo, Tiled2dMapLayerMaskWrapper> tileMasksToSetup;
+    std::unordered_set<Tiled2dMapVersionedTileInfo> tilesToRemove;
+    std::unordered_map<Tiled2dMapVersionedTileInfo, TileState> tileStateUpdates;
 
     std::unordered_set<std::string> interactableLayers;
 

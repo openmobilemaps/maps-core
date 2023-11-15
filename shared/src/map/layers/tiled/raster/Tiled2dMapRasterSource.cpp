@@ -20,9 +20,10 @@ Tiled2dMapRasterSource::Tiled2dMapRasterSource(const MapConfig &mapConfig,
                                                const std::shared_ptr<SchedulerInterface> &scheduler,
                                                const std::vector<std::shared_ptr<::LoaderInterface>> & loaders,
                                                const WeakActor<Tiled2dMapRasterSourceListener> &listener,
-                                               float screenDensityPpi)
+                                               float screenDensityPpi,
+                                               std::string layerName)
     : Tiled2dMapSource<TextureHolderInterface, std::shared_ptr<TextureLoaderResult>, std::shared_ptr<::TextureHolderInterface>>(
-          mapConfig, layerConfig, conversionHelper, scheduler, screenDensityPpi, loaders.size())
+          mapConfig, layerConfig, conversionHelper, scheduler, screenDensityPpi, loaders.size(), layerName)
 , loaders(loaders)
 , rasterLayerActor(listener){}
 
@@ -60,7 +61,7 @@ std::unordered_set<Tiled2dMapRasterTileInfo> Tiled2dMapRasterSource::getCurrentT
     std::transform(currentTiles.rbegin(), currentTiles.rend(), std::inserter(currentTileInfos, currentTileInfos.end()),
         [](const auto& tilePair) {
             const auto& [tileInfo, tileWrapper] = tilePair;
-            return Tiled2dMapRasterTileInfo(std::move(tileInfo), std::move(tileWrapper.result), std::move(tileWrapper.masks), std::move(tileWrapper.state));
+            return Tiled2dMapRasterTileInfo(Tiled2dMapVersionedTileInfo(std::move(tileInfo), (size_t)tileWrapper.result.get()), std::move(tileWrapper.result), std::move(tileWrapper.masks), std::move(tileWrapper.state));
         }
     );
     return currentTileInfos;

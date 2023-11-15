@@ -3,14 +3,14 @@
 enum class TileState : int {
     IN_SETUP = 0, // The tile is in the setup phase, it is not rendered.
     VISIBLE = 1, // The tile is currently visible.
-    CACHED = 2 // The tile is cached or stored for later use.
+    CACHED = 2, // The tile is cached or stored for later use.
 };
 
 constexpr const char* toString(TileState e) noexcept {
     constexpr const char* names[] = {
         "IN_SETUP",
         "VISIBLE",
-        "CACHED"
+        "CACHED",
     };
     return names[static_cast<int>(e)];
 }

@@ -396,6 +396,8 @@ float TextLayerObject::layoutLine(float scale, bool updateObject) {
     int indicesStart = 0;
     int index = 0;
     double lastAngle = 0.0;
+    double preLastAngle = 0.0;
+
 
     double lineCenteringParameter = -fontData.info.base / fontData.info.lineHeight;
 
@@ -403,6 +405,7 @@ float TextLayerObject::layoutLine(float scale, bool updateObject) {
         if(i.glyphIndex < 0) {
             currentIndex = indexAtDistance(currentIndex, spaceAdvance * fontSize * i.scale);
             lastAngle = 0;
+            preLastAngle = 0;
             index = 0;
         } else {
             auto& d = fontData.glyphs[i.glyphIndex];
@@ -420,16 +423,25 @@ float TextLayerObject::layoutLine(float scale, bool updateObject) {
             double angle = atan2((before.y - after.y), -(before.x - after.x));
             angle *= (180.0 / M_PI);
 
-            if(index > 1) {
+            if(index > 0) {
                 auto diff = fabs(lastAngle - angle);
                 auto min = std::min(360.0 - diff, diff);
-
                 if(min > maxCharacterAngle) {
                     vertices.clear();
                     break;
                 }
             }
 
+            if(index > 1) {
+                auto diff = fabs(preLastAngle - angle);
+                auto min = std::min(360.0 - diff, diff);
+                if(min > maxCharacterAngle) {
+                    vertices.clear();
+                    break;
+                }
+            }
+
+            preLastAngle = lastAngle;
             lastAngle = angle;
 
             auto x = p.x + bearing.x;

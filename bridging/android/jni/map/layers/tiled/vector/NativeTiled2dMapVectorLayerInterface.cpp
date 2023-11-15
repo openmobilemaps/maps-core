@@ -37,7 +37,7 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_til
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_vector_Tiled2dMapVectorLayerInterface_createExplicitly(JNIEnv* jniEnv, jobject /*this*/, jstring j_layerName, jstring j_styleJson, jobject j_localStyleJson, jobject j_loaders, ::djinni_generated::NativeFontLoaderInterface::JniType j_fontLoader, jobject j_localDataProvider, ::djinni_generated::NativeTiled2dMapZoomInfo::Boxed::JniType j_customZoomInfo, jobject j_symbolDelegate)
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_vector_Tiled2dMapVectorLayerInterface_createExplicitly(JNIEnv* jniEnv, jobject /*this*/, jstring j_layerName, jstring j_styleJson, jobject j_localStyleJson, jobject j_loaders, ::djinni_generated::NativeFontLoaderInterface::JniType j_fontLoader, jobject j_localDataProvider, ::djinni_generated::NativeTiled2dMapZoomInfo::Boxed::JniType j_customZoomInfo, jobject j_symbolDelegate, jobject j_sourceUrlParams)
 {
     try {
         auto r = ::Tiled2dMapVectorLayerInterface::createExplicitly(::djinni::String::toCpp(jniEnv, j_layerName),
@@ -47,7 +47,8 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_til
                                                                     ::djinni_generated::NativeFontLoaderInterface::toCpp(jniEnv, j_fontLoader),
                                                                     ::djinni::Optional<std::optional, ::djinni_generated::NativeTiled2dMapVectorLayerLocalDataProviderInterface>::toCpp(jniEnv, j_localDataProvider),
                                                                     ::djinni::Optional<std::optional, ::djinni_generated::NativeTiled2dMapZoomInfo>::toCpp(jniEnv, j_customZoomInfo),
-                                                                    ::djinni::Optional<std::optional, ::djinni_generated::NativeTiled2dMapVectorLayerSymbolDelegateInterface>::toCpp(jniEnv, j_symbolDelegate));
+                                                                    ::djinni::Optional<std::optional, ::djinni_generated::NativeTiled2dMapVectorLayerSymbolDelegateInterface>::toCpp(jniEnv, j_symbolDelegate),
+                                                                    ::djinni::Optional<std::optional, ::djinni::Map<::djinni::String, ::djinni::String>>::toCpp(jniEnv, j_sourceUrlParams));
         return ::djinni::release(::djinni_generated::NativeTiled2dMapVectorLayerInterface::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
@@ -126,6 +127,23 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapVectorLayerInterface>(nativeRef);
         ref->setGlobalState(::djinni::Map<::djinni::String, ::djinni_generated::NativeVectorLayerFeatureInfoValue>::toCpp(jniEnv, j_properties));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_vector_Tiled2dMapVectorLayerInterface_00024CppProxy_native_1reloadDataSource(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jstring j_sourceName)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapVectorLayerInterface>(nativeRef);
+        ref->reloadDataSource(::djinni::String::toCpp(jniEnv, j_sourceName));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_vector_Tiled2dMapVectorLayerInterface_00024CppProxy_native_1reloadLocalDataSource(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jstring j_sourceName, jstring j_geoJson)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapVectorLayerInterface>(nativeRef);
+        ref->reloadLocalDataSource(::djinni::String::toCpp(jniEnv, j_sourceName),
+                                   ::djinni::String::toCpp(jniEnv, j_geoJson));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

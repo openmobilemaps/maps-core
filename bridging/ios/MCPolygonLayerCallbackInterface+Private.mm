@@ -5,7 +5,6 @@
 #import "MCPolygonLayerCallbackInterface.h"
 #import "DJICppWrapperCache+Private.h"
 #import "DJIError.h"
-#import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
 #import "MCPolygonInfo+Private.h"
 #include <exception>

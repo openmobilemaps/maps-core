@@ -69,6 +69,15 @@ public:
 
     }
 
+	std::optional<std::vector<double>> getExtent() override {
+        if (sourceDescription) {
+            return sourceDescription->extent;
+        }
+        else {
+            return std::nullopt;
+        }
+    }
+
     static std::vector<Tiled2dMapZoomLevelInfo> getDefaultEpsg3857ZoomLevels(int minZoom, int maxZoom) {
         std::vector<Tiled2dMapZoomLevelInfo> infos;
         for (int i = minZoom; i <= maxZoom; i++) {
@@ -79,6 +88,7 @@ public:
         }
         return infos;
     }
+
 
 protected:
     std::shared_ptr<VectorMapSourceDescription> sourceDescription;

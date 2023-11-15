@@ -19,7 +19,7 @@ size_t Tiled2dMapVectorReadyManager::registerManager() {
     return newVal;
 }
 
-void Tiled2dMapVectorReadyManager::didProcessData(size_t managerIndex, const Tiled2dMapTileInfo &tile, const size_t notReadyCount) {
+void Tiled2dMapVectorReadyManager::didProcessData(size_t managerIndex, const Tiled2dMapVersionedTileInfo &tile, const size_t notReadyCount) {
     auto tileProcessIt = tileDataProcessCount.find(tile);
     if (tileProcessIt != tileDataProcessCount.end()){
         tileProcessIt->second |= managerIndex;
@@ -48,7 +48,7 @@ void Tiled2dMapVectorReadyManager::didProcessData(size_t managerIndex, const Til
     }
 }
 
-void Tiled2dMapVectorReadyManager::setReady(size_t managerIndex, const Tiled2dMapTileInfo &tile, const size_t readyCount) {
+void Tiled2dMapVectorReadyManager::setReady(size_t managerIndex, const Tiled2dMapVersionedTileInfo &tile, const size_t readyCount) {
     auto tileIt = tileNotReadyCount.find(tile);
     if (tileIt != tileNotReadyCount.end()){
         tileIt->second -= readyCount;
@@ -61,9 +61,10 @@ void Tiled2dMapVectorReadyManager::setReady(size_t managerIndex, const Tiled2dMa
             }
         }
     }
+    
 }
 
-void Tiled2dMapVectorReadyManager::remove(const std::unordered_set<Tiled2dMapTileInfo> &tilesToRemove) {
+void Tiled2dMapVectorReadyManager::remove(const std::unordered_set<Tiled2dMapVersionedTileInfo> &tilesToRemove) {
     for (const auto &tile: tilesToRemove) {
         auto tileIt = tileNotReadyCount.find(tile);
         if (tileIt != tileNotReadyCount.end()){

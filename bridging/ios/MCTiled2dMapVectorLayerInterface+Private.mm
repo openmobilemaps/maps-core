@@ -58,7 +58,8 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
                                                      fontLoader:(nullable id<MCFontLoaderInterface>)fontLoader
                                               localDataProvider:(nullable id<MCTiled2dMapVectorLayerLocalDataProviderInterface>)localDataProvider
                                                  customZoomInfo:(nullable MCTiled2dMapZoomInfo *)customZoomInfo
-                                                 symbolDelegate:(nullable id<MCTiled2dMapVectorLayerSymbolDelegateInterface>)symbolDelegate {
+                                                 symbolDelegate:(nullable id<MCTiled2dMapVectorLayerSymbolDelegateInterface>)symbolDelegate
+                                                sourceUrlParams:(nullable NSDictionary<NSString *, NSString *> *)sourceUrlParams {
     try {
         auto objcpp_result_ = ::Tiled2dMapVectorLayerInterface::createExplicitly(::djinni::String::toCpp(layerName),
                                                                                  ::djinni::Optional<std::optional, ::djinni::String>::toCpp(styleJson),
@@ -67,7 +68,8 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
                                                                                  ::djinni_generated::FontLoaderInterface::toCpp(fontLoader),
                                                                                  ::djinni::Optional<std::optional, ::djinni_generated::Tiled2dMapVectorLayerLocalDataProviderInterface>::toCpp(localDataProvider),
                                                                                  ::djinni::Optional<std::optional, ::djinni_generated::Tiled2dMapZoomInfo>::toCpp(customZoomInfo),
-                                                                                 ::djinni::Optional<std::optional, ::djinni_generated::Tiled2dMapVectorLayerSymbolDelegateInterface>::toCpp(symbolDelegate));
+                                                                                 ::djinni::Optional<std::optional, ::djinni_generated::Tiled2dMapVectorLayerSymbolDelegateInterface>::toCpp(symbolDelegate),
+                                                                                 ::djinni::Optional<std::optional, ::djinni::Map<::djinni::String, ::djinni::String>>::toCpp(sourceUrlParams));
         return ::djinni_generated::Tiled2dMapVectorLayerInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
@@ -129,6 +131,20 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 - (void)setGlobalState:(nonnull NSDictionary<NSString *, MCVectorLayerFeatureInfoValue *> *)properties {
     try {
         _cppRefHandle.get()->setGlobalState(::djinni::Map<::djinni::String, ::djinni_generated::VectorLayerFeatureInfoValue>::toCpp(properties));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)reloadDataSource:(nonnull NSString *)sourceName {
+    try {
+        _cppRefHandle.get()->reloadDataSource(::djinni::String::toCpp(sourceName));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)reloadLocalDataSource:(nonnull NSString *)sourceName
+                      geoJson:(nonnull NSString *)geoJson {
+    try {
+        _cppRefHandle.get()->reloadLocalDataSource(::djinni::String::toCpp(sourceName),
+                                                   ::djinni::String::toCpp(geoJson));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

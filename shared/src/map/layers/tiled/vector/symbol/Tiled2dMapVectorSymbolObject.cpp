@@ -22,7 +22,7 @@
 Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<MapInterface> &mapInterface,
                                                            const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
                                                            const WeakActor<Tiled2dMapVectorFontProvider> &fontProvider,
-                                                           const Tiled2dMapTileInfo &tileInfo,
+                                                           const Tiled2dMapVersionedTileInfo &tileInfo,
                                                            const std::string &layerIdentifier,
                                                            const std::shared_ptr<SymbolVectorLayerDescription> &description,
                                                            const std::shared_ptr<FeatureContext> featureContext,
@@ -63,7 +63,7 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
         return;
     }
     
-    const auto evalContext = EvaluationContext(tileInfo.zoomIdentifier, dpFactor, featureContext, featureStateManager);
+    const auto evalContext = EvaluationContext(tileInfo.tileInfo.zoomIdentifier, dpFactor, featureContext, featureStateManager);
     std::string iconName = description->style.getIconImage(evalContext);
     contentHash = std::hash<std::tuple<std::string, std::string, std::string>>()(std::tuple<std::string, std::string, std::string>(layerIdentifier, iconName, fullText));
     
@@ -72,8 +72,8 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
     renderCoordinate = converter->convertToRenderSystem(coordinate);
     initialRenderCoordinateVec = Vec2D(renderCoordinate.x, renderCoordinate.y);
     
-    evaluateStyleProperties(tileInfo.zoomIdentifier);
-    
+    evaluateStyleProperties(tileInfo.tileInfo.zoomIdentifier);
+
     iconRotationAlignment = description->style.getIconRotationAlignment(evalContext);
 
     stringIdentifier = std::to_string(featureContext->identifier);
@@ -92,10 +92,10 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
     const size_t contentHash = usedKeys.getHash(evalContext);
 
     crossTileIdentifier = std::hash<std::tuple<std::string, std::string, bool, size_t>>()(std::tuple<std::string, std::string, bool, size_t>(fullText, layerIdentifier, hasIcon, contentHash));
-    double xTolerance = std::ceil(std::abs(tileInfo.bounds.bottomRight.x - tileInfo.bounds.topLeft.x) / 4096.0);
-    double yTolerance = std::ceil(std::abs(tileInfo.bounds.bottomRight.y - tileInfo.bounds.topLeft.y) / 4096.0);
+    double xTolerance = std::ceil(std::abs(tileInfo.tileInfo.bounds.bottomRight.x - tileInfo.tileInfo.bounds.topLeft.x) / 4096.0);
+    double yTolerance = std::ceil(std::abs(tileInfo.tileInfo.bounds.bottomRight.y - tileInfo.tileInfo.bounds.topLeft.y) / 4096.0);
 
-    animationCoordinator = animationCoordinatorMap->getOrAddAnimationController(crossTileIdentifier, coordinate, tileInfo.zoomIdentifier, xTolerance, yTolerance, description->style.getTransitionDuration(), description->style.getTransitionDelay());
+    animationCoordinator = animationCoordinatorMap->getOrAddAnimationController(crossTileIdentifier, coordinate, tileInfo.tileInfo.zoomIdentifier, xTolerance, yTolerance, description->style.getTransitionDuration(), description->style.getTransitionDelay());
     animationCoordinator->increaseUsage();
     if (!animationCoordinator->isOwned.test_and_set()) {
         isCoordinateOwner = true;
@@ -539,16 +539,14 @@ void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(std::vector<float
     const float bottomPadding = iconTextFitPadding[2] * stretchSpriteInfo->pixelRatio * densityOffset * scaleFactor;
     const float leftPadding = iconTextFitPadding[3] * stretchSpriteInfo->pixelRatio * densityOffset * scaleFactor;
 
-    double textWidth = 0.0;
-    double textHeight = 0.0;
-
+    auto scaleX = 1.0;
+    auto scaleY = 1.0;
     if (labelObject) {
-        textWidth = labelObject->dimensions.x + (leftPadding + rightPadding);
-        textHeight = labelObject->dimensions.y + (topPadding + bottomPadding);
+        const double textWidth = labelObject->dimensions.x + (leftPadding + rightPadding);
+        const double textHeight = labelObject->dimensions.y + (topPadding + bottomPadding);
+        scaleX = std::max(1.0, textWidth / (spriteWidth * iconSize));
+        scaleY = std::max(1.0, textHeight / (spriteHeight * iconSize));
     }
-
-    const auto scaleX = std::max(1.0, textWidth / (spriteWidth * iconSize));
-    const auto scaleY = std::max(1.0, textHeight / (spriteHeight * iconSize));
 
     if (iconTextFit == IconTextFit::WIDTH || iconTextFit == IconTextFit::BOTH) {
         spriteWidth *= scaleX;

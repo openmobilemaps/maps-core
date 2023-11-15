@@ -15,6 +15,7 @@
 #include "LambdaTask.h"
 #include "MapConfig.h"
 #include "PrioritizedTiled2dMapTileInfo.h"
+#include "Tiled2dMapVersionedTileInfo.h"
 #include "SchedulerInterface.h"
 #include "Tiled2dMapLayerConfig.h"
 #include "Tiled2dMapSourceInterface.h"
@@ -60,7 +61,7 @@ class Tiled2dMapSourceReadyInterface {
 public:
     virtual ~Tiled2dMapSourceReadyInterface() = default;
 
-    virtual void setTileReady(const Tiled2dMapTileInfo &tile) = 0;
+    virtual void setTileReady(const Tiled2dMapVersionedTileInfo &tile) = 0;
 };
 
 
@@ -78,7 +79,8 @@ public:
                      const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                      const std::shared_ptr<SchedulerInterface> &scheduler,
                      float screenDensityPpi,
-                     size_t loaderCount);
+                     size_t loaderCount,
+                     std::string layerName);
 
     virtual void onVisibleBoundsChanged(const ::RectCoord &visibleBounds, int curT, double zoom) override;
 
@@ -104,10 +106,12 @@ public:
 
     virtual void forceReload() override;
 
-    void setTileReady(const Tiled2dMapTileInfo &tile) override;
+    virtual void reloadTiles();
 
-    void setTilesReady(const std::vector<Tiled2dMapTileInfo> &tiles);
-            
+    void setTileReady(const Tiled2dMapVersionedTileInfo &tile) override;
+
+    void setTilesReady(const std::vector<Tiled2dMapVersionedTileInfo> &tiles);
+
     virtual void cancelLoad(Tiled2dMapTileInfo tile, size_t loaderIndex) = 0;
             
     virtual ::djinni::Future<L> loadDataAsync(Tiled2dMapTileInfo tile, size_t loaderIndex) = 0;
@@ -137,12 +141,14 @@ public:
     std::optional<int32_t> maxZoomLevelIdentifier;
 
     std::map<Tiled2dMapTileInfo, TileWrapper<R>> currentTiles;
+    std::map<Tiled2dMapTileInfo, TileWrapper<R>> outdatedTiles;
 
     int currentZoomLevelIdentifier = 0;
 
     std::unordered_set<Tiled2dMapTileInfo> currentVisibleTiles;
 
     std::vector<VisibleTilesLayer> currentPyramid;
+    int currentKeepZoomLevelOffset;
 
     RectCoord currentViewBounds = RectCoord(Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(), 0.0, 0.0, 0.0),
                                             Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(), 0.0, 0.0, 0.0));
@@ -153,10 +159,13 @@ public:
     float screenDensityPpi;
     std::set<Tiled2dMapTileInfo> readyTiles;
 
+    size_t lastVisibleTilesHash;
+            
+    void onVisibleTilesChanged(const std::vector<VisibleTilesLayer> &pyramid, int keepZoomLevelOffset = 0);
+
 private:
     void performLoadingTask(Tiled2dMapTileInfo tile, size_t loaderIndex);
 
-    void onVisibleTilesChanged(const std::vector<VisibleTilesLayer> &pyramid, int keepZoomLevelOffset = 0);
 
     void updateTileMasks();
 
@@ -174,6 +183,9 @@ private:
     std::optional<long long> nextDelayTaskExecution;
 
     std::unordered_set<Tiled2dMapTileInfo> notFoundTiles;
+
+    std::string layerName;
+
 };
 
 #include "Tiled2dMapSourceImpl.h"

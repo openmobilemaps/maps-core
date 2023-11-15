@@ -41,7 +41,8 @@
                                                      fontLoader:(nullable id<MCFontLoaderInterface>)fontLoader
                                               localDataProvider:(nullable id<MCTiled2dMapVectorLayerLocalDataProviderInterface>)localDataProvider
                                                  customZoomInfo:(nullable MCTiled2dMapZoomInfo *)customZoomInfo
-                                                 symbolDelegate:(nullable id<MCTiled2dMapVectorLayerSymbolDelegateInterface>)symbolDelegate;
+                                                 symbolDelegate:(nullable id<MCTiled2dMapVectorLayerSymbolDelegateInterface>)symbolDelegate
+                                                sourceUrlParams:(nullable NSDictionary<NSString *, NSString *> *)sourceUrlParams;
 
 - (void)setSelectionDelegate:(nullable id<MCTiled2dMapVectorLayerSelectionCallbackInterface>)selectionDelegate;
 
@@ -61,5 +62,10 @@
              properties:(nonnull NSDictionary<NSString *, MCVectorLayerFeatureInfoValue *> *)properties;
 
 - (void)setGlobalState:(nonnull NSDictionary<NSString *, MCVectorLayerFeatureInfoValue *> *)properties;
+
+- (void)reloadDataSource:(nonnull NSString *)sourceName;
+
+- (void)reloadLocalDataSource:(nonnull NSString *)sourceName
+                      geoJson:(nonnull NSString *)geoJson;
 
 @end

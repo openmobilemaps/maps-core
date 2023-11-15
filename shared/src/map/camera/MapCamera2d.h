@@ -40,7 +40,7 @@ class MapCamera2d : public MapCamera2dInterface,
     virtual void moveToCenterPosition(const ::Coord &centerPosition, bool animated) override;
 
     virtual void moveToBoundingBox(const ::RectCoord &boundingBox, float paddingPc, bool animated,
-                                   std::optional<double> maxZoom) override;
+                                   std::optional<double> minZoom, std::optional<double> maxZoom) override;
 
     virtual ::Coord getCenterPosition() override;
 

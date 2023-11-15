@@ -595,6 +595,7 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
 
     int index = 0;
     double lastAngle = 0.0;
+    double preLastAngle = 0.0;
     double lastAngleDiffs = 0.0;
 
     double lineCenteringParameter = -fontResult->fontData->info.base / fontResult->fontData->info.lineHeight;
@@ -633,6 +634,16 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
                 lastAngleDiffs = 0.5 * lastAngleDiffs + min;
             }
 
+            if(index > 1) {
+                auto diff = fabs(preLastAngle - angleDeg);
+                auto min = std::min(360.0 - diff, diff);
+                if(min + lastAngleDiffs > maxCharacterAngle) {
+                    centerPositions.clear();
+                    break;
+                }
+            }
+
+            preLastAngle = lastAngle;
             lastAngle = angleDeg;
 
             auto x = p.x + bearing.x + yOffset.x;

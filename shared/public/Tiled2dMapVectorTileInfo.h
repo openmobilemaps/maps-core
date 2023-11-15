@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "Tiled2dMapTileInfo.h"
+#include "Tiled2dMapVersionedTileInfo.h"
 #include "Value.h"
 #include "PolygonCoord.h"
 #include "VectorTileGeometryHandler.h"
@@ -21,12 +21,12 @@ struct Tiled2dMapVectorTileInfo {
     using FeatureTuple = std::tuple<const std::shared_ptr<FeatureContext>, const std::shared_ptr<VectorTileGeometryHandler>>;
     using FeatureMap = std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<std::vector<FeatureTuple>>>>;
 
-    const Tiled2dMapTileInfo tileInfo;
+    const Tiled2dMapVersionedTileInfo tileInfo;
     const FeatureMap layerFeatureMaps;
     const std::vector<::PolygonCoord> masks;
     const TileState state;
 
-    Tiled2dMapVectorTileInfo(Tiled2dMapTileInfo tileInfo,
+    Tiled2dMapVectorTileInfo(Tiled2dMapVersionedTileInfo tileInfo,
                              const FeatureMap &layerFeatureMaps,
                              const std::vector<::PolygonCoord> &masks,
                              const TileState state)
@@ -35,7 +35,7 @@ struct Tiled2dMapVectorTileInfo {
         , masks(masks)
         , state(state) {}
 
-    bool operator==(const Tiled2dMapVectorTileInfo &o) const { return tileInfo == o.tileInfo; }
+    bool operator==(const Tiled2dMapVectorTileInfo &o) const { return tileInfo == o.tileInfo && layerFeatureMaps.get() == o.layerFeatureMaps.get(); }
 
     bool operator<(const Tiled2dMapVectorTileInfo &o) const { return tileInfo < o.tileInfo; }
 };
@@ -43,7 +43,7 @@ struct Tiled2dMapVectorTileInfo {
 namespace std {
 template <> struct hash<Tiled2dMapVectorTileInfo> {
     inline size_t operator()(const Tiled2dMapVectorTileInfo &tileInfo) const {
-        return std::hash<Tiled2dMapTileInfo>()(tileInfo.tileInfo);
+        return std::hash<Tiled2dMapVersionedTileInfo>()(tileInfo.tileInfo);
     }
 };
 } // namespace std

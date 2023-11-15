@@ -56,6 +56,7 @@ public:
             options.maxZoom = 0;
         }
 
+
         const uint32_t z2 = 1u << options.maxZoom;
 
         convert(geoJson->geometries, (options.tolerance / options.extent) / z2);
@@ -110,8 +111,12 @@ public:
                     auto geoJson = GeoJsonParser::getGeoJson(json);
                     if (geoJson) {
 
+                        // If the GeoJSON contains only points, there is no need to split it into smaller tiles,
+                        // as there are no opportunities for simplification, merging, or meaningful point reduction.
                         if (geoJson->hasOnlyPoints) {
                             self->options.maxZoom = 0;
+                        } else {
+                            self->options.maxZoom = 18;
                         }
 
                         const uint32_t z2 = 1u << self->options.maxZoom;
@@ -148,6 +153,33 @@ public:
     uint8_t getMaxZoom() override {
         return options.maxZoom;
     }
+
+	void reload(const std::vector<std::shared_ptr<::LoaderInterface>> &loaders) override {
+        std::lock_guard<std::recursive_mutex> lock(mutex);
+        auto self = shared_from_this();
+        self->loadingResult = std::nullopt;
+        self->loaders = loaders;
+        self->tiles.clear();
+        load();
+    }
+
+    void reload(const std::shared_ptr<GeoJson> &geoJson) override {
+        // If the GeoJSON contains only points, there is no need to split it into smaller tiles,
+        // as there are no opportunities for simplification, merging, or meaningful point reduction.
+        if (geoJson->hasOnlyPoints) {
+            options.maxZoom = 0;
+        } else {
+            options.maxZoom = 18;
+        }
+
+        const uint32_t z2 = 1u << options.maxZoom;
+
+        convert(geoJson->geometries, (options.tolerance / options.extent) / z2);
+
+        tiles.clear();
+        splitTile(geoJson->geometries, 0, 0, 0);
+    }
+
 
     void waitIfNotLoaded(std::shared_ptr<::djinni::Promise<std::shared_ptr<DataLoaderResult>>> promise) override {
         std::lock_guard<std::recursive_mutex> lock(mutex);

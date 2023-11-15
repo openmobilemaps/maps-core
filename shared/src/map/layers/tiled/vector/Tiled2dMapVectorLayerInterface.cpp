@@ -19,8 +19,9 @@ Tiled2dMapVectorLayerInterface::createFromStyleJson(const std::string &layerName
                                                     const std::string &path,
                                                     const std::vector <std::shared_ptr<::LoaderInterface>> &loaders,
                                                     const std::shared_ptr<::FontLoaderInterface> &fontLoader) {
-    return std::make_shared<Tiled2dMapVectorLayer>(layerName, path, loaders, fontLoader, std::nullopt);
+    return createExplicitly(layerName, path, std::nullopt, loaders, fontLoader, nullptr, std::nullopt, nullptr, std::nullopt);
 }
+
 
 std::shared_ptr<Tiled2dMapVectorLayerInterface>
 Tiled2dMapVectorLayerInterface::createExplicitly(const std::string &layerName,
@@ -30,7 +31,9 @@ Tiled2dMapVectorLayerInterface::createExplicitly(const std::string &layerName,
                                                  const std::shared_ptr<::FontLoaderInterface> &fontLoader,
                                                  const std::shared_ptr<Tiled2dMapVectorLayerLocalDataProviderInterface> &localDataProvider,
                                                  const std::optional<::Tiled2dMapZoomInfo> &customZoomInfo,
-                                                 const std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> &symbolDelegate) {
+                                                 const std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> &symbolDelegate, const std::optional<std::unordered_map<std::string, std::string>> & sourceUrlParams) {
+
+	const auto urlParams = sourceUrlParams.value_or(std::unordered_map<std::string, std::string>());
 
     if ((localStyleJson.has_value() && *localStyleJson) || localDataProvider) {
         std::optional<Tiled2dMapVectorLayerParserResult> parserResult = std::nullopt;
@@ -38,23 +41,27 @@ Tiled2dMapVectorLayerInterface::createExplicitly(const std::string &layerName,
         if (localDataProvider) {
             auto localProvidedStyleJson = localDataProvider->getStyleJson();
             if (localProvidedStyleJson) {
-                parserResult = Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromString(layerName, *localProvidedStyleJson, localDataProvider, loaders);
+                parserResult = Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromString(layerName, *localProvidedStyleJson, localDataProvider, loaders, urlParams);
             }
         }
 
+        if (!(localStyleJson.has_value() && *localStyleJson) && !parserResult) {
+            return std::make_shared<Tiled2dMapVectorLayer>(layerName, *styleJson, loaders, fontLoader, customZoomInfo, symbolDelegate, urlParams, localDataProvider);
+        }
+
         if (!parserResult && styleJson.has_value()) {
-            parserResult = Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromString(layerName, *styleJson, nullptr, loaders);
+            parserResult = Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromString(layerName, *styleJson, nullptr, loaders, urlParams);
         }
 
         if (parserResult.has_value() && parserResult->status == LoaderStatus::OK) {
-            return std::make_shared<Tiled2dMapVectorLayer>(layerName, parserResult->mapDescription, loaders, fontLoader, customZoomInfo, symbolDelegate, localDataProvider);
+            return std::make_shared<Tiled2dMapVectorLayer>(layerName, parserResult->mapDescription, loaders, fontLoader, customZoomInfo, symbolDelegate, localDataProvider, urlParams);
         } else {
             return nullptr;
         }
     }
 
     if (styleJson.has_value()) {
-        return std::make_shared<Tiled2dMapVectorLayer>(layerName, *styleJson, loaders, fontLoader, customZoomInfo, symbolDelegate);
+        return std::make_shared<Tiled2dMapVectorLayer>(layerName, *styleJson, loaders, fontLoader, customZoomInfo, symbolDelegate, urlParams);
     }
 
     return nullptr;

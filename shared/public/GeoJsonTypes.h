@@ -18,6 +18,7 @@
 #include "DataLoaderResult.h"
 #include "Future.hpp"
 #include "Actor.h"
+#include "LoaderInterface.h"
 
 class GeoJsonGeometry {
 public:
@@ -68,11 +69,19 @@ public:
     virtual void didLoad(uint8_t maxZoom) = 0;
 };
 
+class GeoJson {
+public:
+    std::vector<std::shared_ptr<GeoJsonGeometry>> geometries;
+    bool hasOnlyPoints = true;
+};
+
 class GeoJSONVTInterface {
 public:
     virtual const GeoJSONTileInterface& getTile(const uint8_t z, const uint32_t x_, const uint32_t y) = 0;
     virtual void waitIfNotLoaded(std::shared_ptr<::djinni::Promise<std::shared_ptr<DataLoaderResult>>> promise) = 0;
     virtual uint8_t getMaxZoom() = 0;
+    virtual void reload(const std::vector<std::shared_ptr<::LoaderInterface>> &loaders) = 0;
+    virtual void reload(const std::shared_ptr<GeoJson> &geoJson) = 0;
     virtual void setDelegate(const WeakActor<GeoJSONTileDelegate> delegate) = 0;
 };
 
@@ -125,9 +134,5 @@ inline Coord intersect<1>(const Coord& a, const Coord& b, const double y, const 
     return { a.systemIdentifier, x, y, 1.0 };
 }
 
-class GeoJson {
-public:
-    std::vector<std::shared_ptr<GeoJsonGeometry>> geometries;
-    bool hasOnlyPoints = true;
-};
+
 

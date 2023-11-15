@@ -83,7 +83,7 @@ public:
 
     void collisionDetection(std::vector<std::string> layerIdentifiers, std::shared_ptr<CollisionGrid> collisionGrid);
 
-    void update(long long now);
+    bool update(long long now);
 
     void setSprites(std::shared_ptr<SpriteData> spriteData, std::shared_ptr<TextureHolderInterface> spriteTexture) override;
 
@@ -99,16 +99,16 @@ public:
 
     void clearTouch() override;
 
-    void onSymbolGroupInitialized(bool success, const Tiled2dMapTileInfo &tileInfo, const std::string &layerIdentifier, const WeakActor<Tiled2dMapVectorSymbolGroup> &symbolGroup);
+    void onSymbolGroupInitialized(bool success, const Tiled2dMapVersionedTileInfo &tileInfo, const std::string &layerIdentifier, const WeakActor<Tiled2dMapVectorSymbolGroup> &symbolGroup);
 
     void setSymbolDelegate(const /*not-null*/ std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> & symbolDelegate);
 
 private:
     std::vector<Actor<Tiled2dMapVectorSymbolGroup>>
-    createSymbolGroups(const Tiled2dMapTileInfo &tileInfo, const std::string &layerIdentifier,
+    createSymbolGroups(const Tiled2dMapVersionedTileInfo &tileInfo, const std::string &layerIdentifier,
                        std::shared_ptr<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>> features);
 
-    void setupSymbolGroups(const Tiled2dMapTileInfo &tileInfo, const std::string &layerIdentifier);
+    void setupSymbolGroups(const Tiled2dMapVersionedTileInfo &tileInfo, const std::string &layerIdentifier);
 
     void updateSymbolGroups();
 
@@ -118,14 +118,14 @@ private:
 
     const WeakActor<Tiled2dMapVectorSource> vectorSource;
 
-    std::unordered_map<Tiled2dMapTileInfo, std::unordered_map<std::string, std::tuple<InstanceCounter, std::vector<Actor<Tiled2dMapVectorSymbolGroup>>>>> tileSymbolGroupMap;
-    std::unordered_map<Tiled2dMapTileInfo, TileState> tileStateMap;
+    std::unordered_map<Tiled2dMapVersionedTileInfo, std::unordered_map<std::string, std::tuple<InstanceCounter, std::vector<Actor<Tiled2dMapVectorSymbolGroup>>>>> tileSymbolGroupMap;
+    std::unordered_map<Tiled2dMapVersionedTileInfo, TileState> tileStateMap;
 
     std::atomic_flag updateFlag = ATOMIC_FLAG_INIT;
     std::recursive_mutex updateMutex;
     std::vector<Actor<Tiled2dMapVectorSymbolGroup>> tilesToClear;
-    std::unordered_set<Tiled2dMapTileInfo> tileStatesToRemove;
-    std::unordered_map<Tiled2dMapTileInfo, TileState> tileStateUpdates;
+    std::unordered_set<Tiled2dMapVersionedTileInfo> tileStatesToRemove;
+    std::unordered_map<Tiled2dMapVersionedTileInfo, TileState> tileStateUpdates;
 
     std::unordered_map<std::string, std::shared_ptr<SymbolVectorLayerDescription>> layerDescriptions;
 

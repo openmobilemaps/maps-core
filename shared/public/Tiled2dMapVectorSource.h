@@ -32,7 +32,8 @@ public:
                            const WeakActor<Tiled2dMapVectorSourceListener> &listener,
                            const std::unordered_set<std::string> &layersToDecode,
                            const std::string &sourceName,
-                           float screenDensityPpi);
+                           float screenDensityPpi,
+                           std::string layerName);
 
     std::unordered_set<Tiled2dMapVectorTileInfo> getCurrentTiles();
 
@@ -41,6 +42,8 @@ public:
     virtual void resume() override;
 
     virtual void notifyTilesUpdates() override;
+
+    std::string getSourceName();
 protected:
     
     virtual void cancelLoad(Tiled2dMapTileInfo tile, size_t loaderIndex) override;

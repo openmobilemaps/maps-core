@@ -24,7 +24,7 @@ Tiled2dMapVectorSymbolGroup::Tiled2dMapVectorSymbolGroup(uint32_t groupId,
                                                          const std::weak_ptr<MapInterface> &mapInterface,
                                                          const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
                                                          const WeakActor<Tiled2dMapVectorFontProvider> &fontProvider,
-                                                         const Tiled2dMapTileInfo &tileInfo,
+                                                         const Tiled2dMapVersionedTileInfo &tileInfo,
                                                          const std::string &layerIdentifier,
                                                          const std::shared_ptr<SymbolVectorLayerDescription> &layerDescription,
                                                          const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager,
@@ -69,7 +69,7 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
     auto alphaInstancedShader = strongMapInterface->getShaderFactory()->createAlphaInstancedShader()->asShaderProgramInterface();
 
     const double tilePixelFactor =
-            (0.0254 / camera->getScreenDensityPpi()) * layerConfig->getZoomFactorAtIdentifier(tileInfo.zoomIdentifier - 1);
+            (0.0254 / camera->getScreenDensityPpi()) * layerConfig->getZoomFactorAtIdentifier(tileInfo.tileInfo.zoomIdentifier - 1);
 
     std::unordered_map<std::string, std::vector<Coord>> textPositionMap;
 
@@ -80,7 +80,7 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
     for (auto it = features->rbegin() + featuresRBase; it != features->rbegin() + featuresRBase + featuresCount; it++) {
         featureTileIndex++;
         auto const &[context, geometry] = *it;
-        const auto evalContext = EvaluationContext(tileInfo.zoomIdentifier, dpFactor, context, featureStateManager);
+        const auto evalContext = EvaluationContext(tileInfo.tileInfo.zoomIdentifier, dpFactor, context, featureStateManager);
 
         if ((layerDescription->filter != nullptr && !layerDescription->filter->evaluateOr(evalContext, false))) {
             continue;
@@ -460,7 +460,7 @@ void Tiled2dMapVectorSymbolGroup::setupObjects(const std::shared_ptr<SpriteData>
 
     for (auto const &object: symbolObjects) {
         if (!object->hasCustomTexture && spriteTexture && spriteData) {
-            object->setupIconProperties(iconPositions, iconRotations, iconTextureCoordinates, iconOffset, tileInfo.zoomIdentifier,
+            object->setupIconProperties(iconPositions, iconRotations, iconTextureCoordinates, iconOffset, tileInfo.tileInfo.zoomIdentifier,
                                         spriteTexture, spriteData, std::nullopt);
         } else {
             for (size_t i = 0; i != customTextures.size(); i++) {
@@ -472,15 +472,15 @@ void Tiled2dMapVectorSymbolGroup::setupObjects(const std::shared_ptr<SpriteData>
 
                     int offset = object->customTextureOffset;
                     assert(offset < customTextures[i].iconRotations.size());
-                    object->setupIconProperties(customTextures[i].iconPositions, customTextures[i].iconRotations, customTextures[i].iconTextureCoordinates, offset, tileInfo.zoomIdentifier, customTextures[i].texture, nullptr, uvIt->second);
+                    object->setupIconProperties(customTextures[i].iconPositions, customTextures[i].iconRotations, customTextures[i].iconTextureCoordinates, offset, tileInfo.tileInfo.zoomIdentifier, customTextures[i].texture, nullptr, uvIt->second);
                     break;
                 }
             }
         }
         object->setupStretchIconProperties(stretchedIconPositions, stretchedIconTextureCoordinates, stretchedIconOffset,
-                                           tileInfo.zoomIdentifier, spriteTexture, spriteData);
+                                           tileInfo.tileInfo.zoomIdentifier, spriteTexture, spriteData);
 
-        object->setupTextProperties(textTextureCoordinates, textStyleIndices, textOffset, textStyleOffset, tileInfo.zoomIdentifier);
+        object->setupTextProperties(textTextureCoordinates, textStyleIndices, textOffset, textStyleOffset, tileInfo.tileInfo.zoomIdentifier);
     }
 
     for (const auto &customDescriptor: customTextures) {
@@ -759,7 +759,7 @@ Tiled2dMapVectorSymbolGroup::getPositioning(std::vector<::Coord>::const_iterator
 }
 
 std::shared_ptr<Tiled2dMapVectorSymbolObject>
-Tiled2dMapVectorSymbolGroup::createSymbolObject(const Tiled2dMapTileInfo &tileInfo,
+Tiled2dMapVectorSymbolGroup::createSymbolObject(const Tiled2dMapVersionedTileInfo &tileInfo,
                                                 const std::string &layerIdentifier,
                                                 const std::shared_ptr<SymbolVectorLayerDescription> &description,
                                                 const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,

@@ -13,6 +13,7 @@
 #include "Tiled2dMapVectorSymbolObject.h"
 #include "MapInterface.h"
 #include "Tiled2dMapTileInfo.h"
+#include "Tiled2dMapVersionedTileInfo.h"
 #include "SymbolVectorLayerDescription.h"
 #include "Tiled2dMapVectorTileInfo.h"
 #include "Tiled2dMapVectorSymbolSubLayerPositioningWrapper.h"
@@ -38,7 +39,7 @@ public:
                                 const std::weak_ptr<MapInterface> &mapInterface,
                                 const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
                                 const WeakActor<Tiled2dMapVectorFontProvider> &fontProvider,
-                                const Tiled2dMapTileInfo &tileInfo,
+                                const Tiled2dMapVersionedTileInfo &tileInfo,
                                 const std::string &layerIdentifier,
                                 const std::shared_ptr<SymbolVectorLayerDescription> &layerDescription,
                                 const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager,
@@ -73,7 +74,7 @@ private:
     inline std::optional<Tiled2dMapVectorSymbolSubLayerPositioningWrapper>
     getPositioning(std::vector<::Coord>::const_iterator &iterator, const std::vector<::Coord> &collection, const double interpolationValue);
 
-    inline std::shared_ptr<Tiled2dMapVectorSymbolObject> createSymbolObject(const Tiled2dMapTileInfo &tileInfo,
+    inline std::shared_ptr<Tiled2dMapVectorSymbolObject> createSymbolObject(const Tiled2dMapVersionedTileInfo &tileInfo,
                                                                             const std::string &layerIdentifier,
                                                                             const std::shared_ptr<SymbolVectorLayerDescription> &description,
                                                                             const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
@@ -99,7 +100,7 @@ private:
 
     const std::weak_ptr<MapInterface> mapInterface;
     std::shared_ptr<Tiled2dMapVectorLayerConfig> layerConfig;
-    const Tiled2dMapTileInfo tileInfo;
+    const Tiled2dMapVersionedTileInfo tileInfo;
     const std::string layerIdentifier;
     std::shared_ptr<SymbolVectorLayerDescription> layerDescription;
     const WeakActor<Tiled2dMapVectorFontProvider> fontProvider;

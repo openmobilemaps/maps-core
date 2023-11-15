@@ -39,7 +39,7 @@ public:
      * @param    symbolDelegate Optional texture provider, when layers in the style use the flag "icon-image-custom-provider"
      * @return   the interface to the newly configured layer
      */
-    static /*not-null*/ std::shared_ptr<Tiled2dMapVectorLayerInterface> createExplicitly(const std::string & layerName, const std::optional<std::string> & styleJson, std::optional<bool> localStyleJson, const std::vector</*not-null*/ std::shared_ptr<::LoaderInterface>> & loaders, const /*not-null*/ std::shared_ptr<::FontLoaderInterface> & fontLoader, const /*nullable*/ std::shared_ptr<Tiled2dMapVectorLayerLocalDataProviderInterface> & localDataProvider, const std::optional<::Tiled2dMapZoomInfo> & customZoomInfo, const /*nullable*/ std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> & symbolDelegate);
+    static /*not-null*/ std::shared_ptr<Tiled2dMapVectorLayerInterface> createExplicitly(const std::string & layerName, const std::optional<std::string> & styleJson, std::optional<bool> localStyleJson, const std::vector</*not-null*/ std::shared_ptr<::LoaderInterface>> & loaders, const /*not-null*/ std::shared_ptr<::FontLoaderInterface> & fontLoader, const /*nullable*/ std::shared_ptr<Tiled2dMapVectorLayerLocalDataProviderInterface> & localDataProvider, const std::optional<::Tiled2dMapZoomInfo> & customZoomInfo, const /*nullable*/ std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> & symbolDelegate, const std::optional<std::unordered_map<std::string, std::string>> & sourceUrlParams);
 
     virtual void setSelectionDelegate(const /*nullable*/ std::shared_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> & selectionDelegate) = 0;
 
@@ -58,4 +58,8 @@ public:
     virtual void setFeatureState(const std::string & identifier, const std::unordered_map<std::string, VectorLayerFeatureInfoValue> & properties) = 0;
 
     virtual void setGlobalState(const std::unordered_map<std::string, VectorLayerFeatureInfoValue> & properties) = 0;
+
+    virtual void reloadDataSource(const std::string & sourceName) = 0;
+
+    virtual void reloadLocalDataSource(const std::string & sourceName, const std::string & geoJson) = 0;
 };

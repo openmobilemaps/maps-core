@@ -5,7 +5,6 @@
 #import "MCPolygonPatternGroupShaderInterface.h"
 #import "DJICppWrapperCache+Private.h"
 #import "DJIError.h"
-#import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
 #import "MCShaderProgramInterface+Private.h"
 #include <exception>

@@ -114,6 +114,9 @@ open class MCTextureLoader: MCLoaderInterface {
                 }
                 promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_400, errorCode: (response?.statusCode).stringOrNil))
                 return
+            } else if response?.statusCode == 204 {
+                promise.setValue(.init(data: nil, etag: response?.etag, status: .OK, errorCode: nil))
+                return
             } else if response?.statusCode != 200 {
                 if #available(iOS 14.0, *) {
                     logger.debug("Failed to load \(url, privacy: .public): \(response?.statusCode ?? 0, privacy: .public), \(data.map { String(data: $0, encoding: .utf8)?.prefix(1024) ?? "?" } ?? "?")")
@@ -253,6 +256,9 @@ open class MCTextureLoader: MCLoaderInterface {
                     logger.debug("Failed to load \(url, privacy: .public): 400, \(data.map { String(data: $0, encoding: .utf8)?.prefix(1024) ?? "?" } ?? "?")")
                 }
                 promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_400, errorCode: (response?.statusCode).stringOrNil))
+                return
+            } else if response?.statusCode == 204 {
+                promise.setValue(.init(data: nil, etag: response?.etag, status: .OK, errorCode: nil))
                 return
             } else if response?.statusCode != 200 {
                 if #available(iOS 14.0, *) {

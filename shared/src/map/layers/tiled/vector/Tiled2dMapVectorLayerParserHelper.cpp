@@ -31,7 +31,7 @@
 Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromUrl(const std::string &layerName,
                                                         const std::string &styleJsonUrl,
                                                         const std::shared_ptr<Tiled2dMapVectorLayerLocalDataProviderInterface> &localDataProvider,
-                                                        const std::vector<std::shared_ptr<::LoaderInterface>> &loaders) {
+                                                        const std::vector<std::shared_ptr<::LoaderInterface>> &loaders, const std::unordered_map<std::string, std::string> & sourceUrlParams) {
     DataLoaderResult result = LoaderHelper::loadData(styleJsonUrl, std::nullopt, loaders);
     if (result.status != LoaderStatus::OK) {
         LogError <<= "Unable to Load style.json from " + styleJsonUrl + " errorCode: " + (result.errorCode ? *result.errorCode : "");
@@ -39,14 +39,23 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
     }
     auto string = std::string((char*)result.data->buf(), result.data->len());
 
-    return parseStyleJsonFromString(layerName, string, localDataProvider, loaders);
+    return parseStyleJsonFromString(layerName, string, localDataProvider, loaders, sourceUrlParams);
 };
 
+std::string Tiled2dMapVectorLayerParserHelper::replaceUrlParams(const std::string & url, const std::unordered_map<std::string, std::string> & sourceUrlParams) {
+    std::string replaced = url;
+    for (const auto & param : sourceUrlParams) {
+        size_t xIndex = replaced.find("{" + param.first + "}", 0);
+        if (xIndex == std::string::npos) continue;;
+        replaced = replaced.replace(xIndex, param.first.size() + 2, param.second);
+    }
+    return replaced;
+}
 
 Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromString(const std::string &layerName,
                                                         const std::string &styleJsonString,
                                                         const std::shared_ptr<Tiled2dMapVectorLayerLocalDataProviderInterface> &localDataProvider,
-                                                        const std::vector<std::shared_ptr<::LoaderInterface>> &loaders) {
+                                                        const std::vector<std::shared_ptr<::LoaderInterface>> &loaders, const std::unordered_map<std::string, std::string> & sourceUrlParams) {
 
     nlohmann::json json;
 
@@ -83,6 +92,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
 
             int minZoom = val.value("minzoom", 0);
             int maxZoom = val.value("maxzoom", 22);
+            std::optional<std::vector<double>> extent;
 
             if (val["tiles"].is_array()) {
                 auto str = val.dump();
@@ -92,7 +102,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                 maskTiles = val.value("maskTiles", maskTiles);
                 zoomLevelScaleFactor = val.value("zoomLevelScaleFactor", zoomLevelScaleFactor);
             } else if (val["url"].is_string()) {
-                auto result = LoaderHelper::loadData(val["url"].get<std::string>(), std::nullopt, loaders);
+                auto result = LoaderHelper::loadData(replaceUrlParams(val["url"].get<std::string>(), sourceUrlParams), std::nullopt, loaders);
                 if (result.status != LoaderStatus::OK) {
                     return Tiled2dMapVectorLayerParserResult(nullptr, result.status, result.errorCode, std::nullopt);
                 }
@@ -105,6 +115,13 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                     return Tiled2dMapVectorLayerParserResult(nullptr, LoaderStatus::ERROR_OTHER, "", std::nullopt);
                 }
                 url = json["tiles"].begin()->get<std::string>();
+
+                if (json.contains("extent")) {
+                    extent = std::vector<double>();
+                    for (auto &el: json["extent"].items()) {
+                        extent->push_back(el.value().get<double>());
+                    }
+                }
 
                 minZoom = json.value("minzoom", 0);
                 maxZoom = json.value("maxzoom", 22);
@@ -124,10 +141,12 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                                                                                  std::nullopt,
                                                                                  nullptr,
                                                                                  underzoom,
-                                                                                 overzoom);
+                                                                                 overzoom,
+                                                                                 extent
+                                                                                 );
 
         } else if (type == "vector" && val["url"].is_string()) {
-            auto result = LoaderHelper::loadData(val["url"].get<std::string>(), std::nullopt, loaders);
+            auto result = LoaderHelper::loadData(replaceUrlParams(val["url"].get<std::string>(), sourceUrlParams), std::nullopt, loaders);
             if (result.status != LoaderStatus::OK) {
                 return Tiled2dMapVectorLayerParserResult(nullptr, result.status, result.errorCode, std::nullopt);
             }
@@ -144,7 +163,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
         } else if (type == "geojson") {
             nlohmann::json geojson;
             if (val["data"].is_string()) {
-                geojsonSources[key] = GeoJsonVTFactory::getGeoJsonVt(key, val["data"].get<std::string>(), loaders, localDataProvider);
+                geojsonSources[key] = GeoJsonVTFactory::getGeoJsonVt(key, replaceUrlParams(val["data"].get<std::string>(), sourceUrlParams), loaders, localDataProvider);
             } else {
                 assert(val["data"].is_object());
                 geojsonSources[key] = GeoJsonVTFactory::getGeoJsonVt(GeoJsonParser::getGeoJson(val["data"]));
@@ -216,6 +235,14 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                                                         parser.parseValue(val["paint"]["raster-saturation"]),
                                                         parser.parseValue(val["metadata"]["raster-gamma"]),
                                                         blendMode);
+            std::optional<std::vector<double>> extent;
+            if (json.contains("extent")) {
+                extent = std::vector<double>();
+                for (auto &el: json["extent"].items()) {
+                    extent->push_back(el.value().get<double>());
+                }
+            }
+
             auto newLayer = std::make_shared<RasterVectorLayerDescription>(val["id"],
                                                                            val["source"],
                                                                            val.value("minzoom", layer->minZoom),
@@ -229,7 +256,8 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                                                                            layer->renderPassIndex,
                                                                            interactable,
                                                                            layer->underzoom,
-                                                                           layer->overzoom);
+                                                                           layer->overzoom,
+                                                                           extent);
             layers.push_back(newLayer);
         } else if (val["type"] == "line") {
 
@@ -339,10 +367,21 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
 
     std::vector<std::shared_ptr<VectorMapSourceDescription>> sourceDescriptions;
     for (auto const &[identifier, tileJson]: tileJsons) {
-        sourceDescriptions.push_back(std::make_shared<VectorMapSourceDescription>(identifier,
-                                                               tileJson["tiles"].begin()->get<std::string>(),
-                                                               tileJson["minzoom"].get<int>(),
-                                                                                 tileJson["maxzoom"].get<int>()));
+        std::optional<std::vector<double>> extent;
+        if (tileJson.contains("extent")) {
+            extent = std::vector<double>();;
+            for (auto &el: tileJson["extent"].items()) {
+                double d = el.value().get<double>();
+                extent->push_back(d);
+            }
+        }
+        sourceDescriptions.push_back(
+                std::make_shared<VectorMapSourceDescription>(identifier,
+                                                             tileJson["tiles"].begin()->get<std::string>(),
+                                                             tileJson["minzoom"].get<int>(),
+                                                             tileJson["maxzoom"].get<int>(),
+                                                             extent
+                ));
     }
 
 

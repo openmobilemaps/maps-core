@@ -28,6 +28,7 @@
 - (void)moveToBoundingBox:(nonnull MCRectCoord *)boundingBox
                 paddingPc:(float)paddingPc
                  animated:(BOOL)animated
+                  minZoom:(nullable NSNumber *)minZoom
                   maxZoom:(nullable NSNumber *)maxZoom;
 
 - (nonnull MCCoord *)getCenterPosition;

@@ -33,7 +33,9 @@ class WmtsTiled2dMapLayerConfig : public Tiled2dMapLayerConfig {
 
     virtual std::optional<Tiled2dMapVectorSettings> getVectorSettings() override;
 
-  private:
+    std::optional<std::vector<double>> getExtent() override;
+
+private:
     const WmtsLayerDescription description;
     std::vector<Tiled2dMapZoomLevelInfo> zoomLevelInfo;
     const Tiled2dMapZoomInfo zoomInfo;

@@ -22,8 +22,9 @@ Tiled2dMapVectorSource::Tiled2dMapVectorSource(const MapConfig &mapConfig,
                                                const WeakActor<Tiled2dMapVectorSourceListener> &listener,
                                                const std::unordered_set<std::string> &layersToDecode,
                                                const std::string &sourceName,
-                                               float screenDensityPpi)
-        : Tiled2dMapSource<std::shared_ptr<djinni::DataRef>, std::shared_ptr<DataLoaderResult>, Tiled2dMapVectorTileInfo::FeatureMap>(mapConfig, layerConfig, conversionHelper, scheduler, screenDensityPpi, tileLoaders.size()),
+                                               float screenDensityPpi,
+                                               std::string layerName)
+        : Tiled2dMapSource<std::shared_ptr<djinni::DataRef>, std::shared_ptr<DataLoaderResult>, Tiled2dMapVectorTileInfo::FeatureMap>(mapConfig, layerConfig, conversionHelper, scheduler, screenDensityPpi, tileLoaders.size(), layerName),
 loaders(tileLoaders), layersToDecode(layersToDecode), listener(listener), sourceName(sourceName) {}
 
 ::djinni::Future<std::shared_ptr<DataLoaderResult>> Tiled2dMapVectorSource::loadDataAsync(Tiled2dMapTileInfo tile, size_t loaderIndex) {
@@ -93,9 +94,14 @@ std::unordered_set<Tiled2dMapVectorTileInfo> Tiled2dMapVectorSource::getCurrentT
     std::unordered_set<Tiled2dMapVectorTileInfo> currentTileInfos;
     std::transform(currentTiles.begin(), currentTiles.end(), std::inserter(currentTileInfos, currentTileInfos.end()), [](const auto& tilePair) {
             const auto& [tileInfo, tileWrapper] = tilePair;
-            return Tiled2dMapVectorTileInfo(std::move(tileInfo), std::move(tileWrapper.result), std::move(tileWrapper.masks), std::move(tileWrapper.state));
+            return Tiled2dMapVectorTileInfo(Tiled2dMapVersionedTileInfo(std::move(tileInfo), (size_t)tileWrapper.result.get()), std::move(tileWrapper.result), std::move(tileWrapper.masks), std::move(tileWrapper.state));
         }
     );
+    std::transform(outdatedTiles.begin(), outdatedTiles.end(), std::inserter(currentTileInfos, currentTileInfos.end()), [](const auto& tilePair) {
+        const auto& [tileInfo, tileWrapper] = tilePair;
+        return Tiled2dMapVectorTileInfo(Tiled2dMapVersionedTileInfo(std::move(tileInfo), (size_t)tileWrapper.result.get()), std::move(tileWrapper.result), std::move(tileWrapper.masks), std::move(tileWrapper.state));
+    }
+                   );
     return currentTileInfos;
 }
 
@@ -106,3 +112,8 @@ void Tiled2dMapVectorSource::pause() {
 void Tiled2dMapVectorSource::resume() {
     // TODO: Reload textures of current tiles
 }
+
+std::string Tiled2dMapVectorSource::getSourceName() {
+    return sourceName;
+}
+

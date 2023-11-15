@@ -13,7 +13,7 @@ abstract class Tiled2dMapVectorLayerInterface {
         external fun createFromStyleJson(layerName: String, styleJsonUrl: String, loaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>, fontLoader: io.openmobilemaps.mapscore.shared.map.loader.FontLoaderInterface): Tiled2dMapVectorLayerInterface
 
         @JvmStatic
-        external fun createExplicitly(layerName: String, styleJson: String?, localStyleJson: Boolean?, loaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>, fontLoader: io.openmobilemaps.mapscore.shared.map.loader.FontLoaderInterface, localDataProvider: Tiled2dMapVectorLayerLocalDataProviderInterface?, customZoomInfo: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapZoomInfo?, symbolDelegate: Tiled2dMapVectorLayerSymbolDelegateInterface?): Tiled2dMapVectorLayerInterface
+        external fun createExplicitly(layerName: String, styleJson: String?, localStyleJson: Boolean?, loaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>, fontLoader: io.openmobilemaps.mapscore.shared.map.loader.FontLoaderInterface, localDataProvider: Tiled2dMapVectorLayerLocalDataProviderInterface?, customZoomInfo: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapZoomInfo?, symbolDelegate: Tiled2dMapVectorLayerSymbolDelegateInterface?, sourceUrlParams: HashMap<String, String>?): Tiled2dMapVectorLayerInterface
     }
 
     abstract fun setSelectionDelegate(selectionDelegate: Tiled2dMapVectorLayerSelectionCallbackInterface?)
@@ -33,6 +33,10 @@ abstract class Tiled2dMapVectorLayerInterface {
     abstract fun setFeatureState(identifier: String, properties: HashMap<String, VectorLayerFeatureInfoValue>)
 
     abstract fun setGlobalState(properties: HashMap<String, VectorLayerFeatureInfoValue>)
+
+    abstract fun reloadDataSource(sourceName: String)
+
+    abstract fun reloadLocalDataSource(sourceName: String, geoJson: String)
 
     private class CppProxy : Tiled2dMapVectorLayerInterface {
         private val nativeRef: Long
@@ -102,5 +106,17 @@ abstract class Tiled2dMapVectorLayerInterface {
             native_setGlobalState(this.nativeRef, properties)
         }
         private external fun native_setGlobalState(_nativeRef: Long, properties: HashMap<String, VectorLayerFeatureInfoValue>)
+
+        override fun reloadDataSource(sourceName: String) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_reloadDataSource(this.nativeRef, sourceName)
+        }
+        private external fun native_reloadDataSource(_nativeRef: Long, sourceName: String)
+
+        override fun reloadLocalDataSource(sourceName: String, geoJson: String) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_reloadLocalDataSource(this.nativeRef, sourceName, geoJson)
+        }
+        private external fun native_reloadLocalDataSource(_nativeRef: Long, sourceName: String, geoJson: String)
     }
 }
