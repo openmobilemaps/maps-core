@@ -50,6 +50,13 @@ public:
               const Options& options_ = Options())
     : options(options_), loadingResult(DataLoaderResult(std::nullopt, std::nullopt, LoaderStatus::OK, std::nullopt)) {
 
+        // If the GeoJSON contains only points, there is no need to split it into smaller tiles,
+        // as there are no opportunities for simplification, merging, or meaningful point reduction.
+        if (geoJson->hasOnlyPoints) {
+            options.maxZoom = 0;
+        }
+
+
         const uint32_t z2 = 1u << options.maxZoom;
 
         convert(geoJson->geometries, (options.tolerance / options.extent) / z2);
@@ -104,6 +111,14 @@ public:
                     auto geoJson = GeoJsonParser::getGeoJson(json);
                     if (geoJson) {
 
+                        // If the GeoJSON contains only points, there is no need to split it into smaller tiles,
+                        // as there are no opportunities for simplification, merging, or meaningful point reduction.
+                        if (geoJson->hasOnlyPoints) {
+                            self->options.maxZoom = 0;
+                        } else {
+                            self->options.maxZoom = 18;
+                        }
+
                         const uint32_t z2 = 1u << self->options.maxZoom;
 
                         convert(geoJson->geometries, (self->options.tolerance / self->options.extent) / z2);
@@ -149,6 +164,14 @@ public:
     }
 
     void reload(const std::shared_ptr<GeoJson> &geoJson) override {
+        // If the GeoJSON contains only points, there is no need to split it into smaller tiles,
+        // as there are no opportunities for simplification, merging, or meaningful point reduction.
+        if (geoJson->hasOnlyPoints) {
+            options.maxZoom = 0;
+        } else {
+            options.maxZoom = 18;
+        }
+
         const uint32_t z2 = 1u << options.maxZoom;
 
         convert(geoJson->geometries, (options.tolerance / options.extent) / z2);
