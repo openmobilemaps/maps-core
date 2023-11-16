@@ -446,8 +446,10 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
         sourceTileManager.second.message(&Tiled2dMapVectorSourceTileDataManager::onAdded, mapInterface);
     }
 
+    auto scale = mapInterface->getCamera()->getScreenDensityPpi() > 326.0 ? 3 : (mapInterface->getCamera()->getScreenDensityPpi() >= 264.0 ? 2 : 1);
+
     if (mapDescription->spriteBaseUrl) {
-        loadSpriteData();
+        loadSpriteData(scale);
     }
 
     auto backgroundLayerDesc = std::find_if(mapDescription->layers.begin(), mapDescription->layers.end(), [](auto const &layer){
@@ -753,7 +755,7 @@ void Tiled2dMapVectorLayer::onTilesUpdated(const std::string &sourceName, std::u
     tilesStillValid.clear();
 }
 
-void Tiled2dMapVectorLayer::loadSpriteData(bool fromLocal) {
+void Tiled2dMapVectorLayer::loadSpriteData(int scale, bool fromLocal) {
     auto lockSelfPtr = shared_from_this();
     auto mapInterface = this->mapInterface;
     auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
@@ -762,19 +764,19 @@ void Tiled2dMapVectorLayer::loadSpriteData(bool fromLocal) {
         return;
     }
 
-    bool scale2x = camera->getScreenDensityPpi() >= 264.0;
+    std::string scalePrefix = (scale == 3 ? "@3x" : (scale == 2 ? "@2x" : ""));
     std::stringstream ssTexture;
-    ssTexture << *mapDescription->spriteBaseUrl << (scale2x ? "@2x" : "") << ".png";
+    ssTexture << *mapDescription->spriteBaseUrl << scalePrefix << ".png";
     std::string urlTexture = ssTexture.str();
     std::stringstream ssData;
-    ssData << *mapDescription->spriteBaseUrl << (scale2x ? "@2x" : "") << ".json";
+    ssData << *mapDescription->spriteBaseUrl << scalePrefix << ".json";
     std::string urlData = ssData.str();
 
     struct Context {
         std::atomic<size_t> counter;
 
-        std::shared_ptr<SpriteData> spriteData;
-        std::shared_ptr<::TextureHolderInterface> spriteTexture;
+        std::shared_ptr<DataLoaderResult> jsonResult;
+        std::shared_ptr<TextureLoaderResult> textureResult;
 
         djinni::Promise<void> promise;
         Context(size_t c) : counter(c) {}
@@ -784,15 +786,56 @@ void Tiled2dMapVectorLayer::loadSpriteData(bool fromLocal) {
 
     std::shared_ptr<::djinni::Future<::DataLoaderResult>> jsonLoaderFuture;
     if(localDataProvider && fromLocal) {
-        jsonLoaderFuture = std::make_shared<::djinni::Future<::DataLoaderResult>>(localDataProvider->loadSpriteJsonAsync(scale2x ? 2 : 1));
+        jsonLoaderFuture = std::make_shared<::djinni::Future<::DataLoaderResult>>(localDataProvider->loadSpriteJsonAsync(scale));
     } else {
         jsonLoaderFuture = std::make_shared<::djinni::Future<::DataLoaderResult>>(LoaderHelper::loadDataAsync(urlData, std::nullopt, loaders));
     }
 
-    jsonLoaderFuture->then([context] (auto result) {
-        auto dataResult = result.get();
-        if (dataResult.status == LoaderStatus::OK) {
-            auto string = std::string((char*)dataResult.data->buf(), dataResult.data->len());
+    auto castedMe = std::static_pointer_cast<Tiled2dMapVectorLayer>(shared_from_this());
+    std::weak_ptr<Tiled2dMapVectorLayer> weakSelf = castedMe;
+    jsonLoaderFuture->then([context, scale, weakSelf, fromLocal] (auto result) {
+        context->jsonResult =  std::make_shared<DataLoaderResult>(result.get());
+        
+        if (--(context->counter) == 0) {
+            context->promise.setValue();
+        }
+    });
+
+    std::shared_ptr<::djinni::Future<::TextureLoaderResult>> textureLoaderFuture;
+    if(localDataProvider) {
+        textureLoaderFuture = std::make_shared<::djinni::Future<::TextureLoaderResult>>(localDataProvider->loadSpriteAsync(scale));
+    } else {
+        textureLoaderFuture = std::make_shared<::djinni::Future<::TextureLoaderResult>>(LoaderHelper::loadTextureAsync(urlTexture, std::nullopt, loaders));
+    }
+
+    textureLoaderFuture->then([context] (auto result) {
+        context->textureResult = std::make_shared<TextureLoaderResult>(result.get());
+
+        if (--(context->counter) == 0) {
+            context->promise.setValue();
+        }
+    });
+
+    auto selfActor = WeakActor<Tiled2dMapVectorLayer>(mailbox, castedMe);
+    context->promise.getFuture().then([context, selfActor, fromLocal, weakSelf, scale] (auto result) {
+        auto jsonResultStatus = context->jsonResult->status;
+        auto textureResultStatus = context->textureResult->status;
+
+        if (scale == 3 && (jsonResultStatus == LoaderStatus::ERROR_NETWORK || textureResultStatus == LoaderStatus::ERROR_NETWORK)) {
+            LogInfo <<= "This device would benefit from @3x assets, but none could be found. Please add @3x assets for crispy icons!";
+            // 3@x assets are not available, so we try @2x
+            auto self = weakSelf.lock();
+            if (self) {
+                self->loadSpriteData(2, fromLocal);
+                return;
+            }
+        }
+        
+        std::shared_ptr<SpriteData> jsonData;
+        std::shared_ptr<::TextureHolderInterface> spriteTexture;
+        
+        if (jsonResultStatus == LoaderStatus::OK) {
+            auto string = std::string((char*)context->jsonResult->data->buf(), context->jsonResult->data->len());
             nlohmann::json json;
             try
             {
@@ -805,49 +848,28 @@ void Tiled2dMapVectorLayer::loadSpriteData(bool fromLocal) {
                     sprites.insert({key, val.get<SpriteDesc>()});
                 }
 
-                context->spriteData = std::make_shared<SpriteData>(sprites);
+                jsonData = std::make_shared<SpriteData>(sprites);
             }
             catch (nlohmann::json::parse_error& ex)
             {
                 LogError <<= ex.what();
             }
         }
-
-        if (--(context->counter) == 0) {
-            context->promise.setValue();
+        
+        if (textureResultStatus == LoaderStatus::OK) {
+            spriteTexture = context->textureResult->data;
         }
-    });
-
-    std::shared_ptr<::djinni::Future<::TextureLoaderResult>> textureLoaderFuture;
-    if(localDataProvider) {
-        textureLoaderFuture = std::make_shared<::djinni::Future<::TextureLoaderResult>>(localDataProvider->loadSpriteAsync(scale2x ? 2 : 1));
-    } else {
-        textureLoaderFuture = std::make_shared<::djinni::Future<::TextureLoaderResult>>(LoaderHelper::loadTextureAsync(urlTexture, std::nullopt, loaders));
-    }
-
-    textureLoaderFuture->then([context] (auto result) {
-        auto textureResult = result.get();
-        if (textureResult.status == LoaderStatus::OK) {
-            context->spriteTexture = textureResult.data;
-        }
-
-        if (--(context->counter) == 0) {
-            context->promise.setValue();
-        }
-    });
-
-    auto castedMe = std::static_pointer_cast<Tiled2dMapVectorLayer>(shared_from_this());
-    std::weak_ptr<Tiled2dMapVectorLayer> weakSelf = castedMe;
-    auto selfActor = WeakActor<Tiled2dMapVectorLayer>(mailbox, castedMe);
-    context->promise.getFuture().then([context, selfActor, fromLocal, weakSelf] (auto result) {
-        if (!context->spriteData && !context->spriteTexture && fromLocal) {
+       
+        if (!jsonData && !spriteTexture && fromLocal) {
             auto self = weakSelf.lock();
             if (self) {
-                self->loadSpriteData(false);
+                self->loadSpriteData(scale, false);
                 return;
             }
         }
-        selfActor.message(&Tiled2dMapVectorLayer::didLoadSpriteData, context->spriteData, context->spriteTexture);
+        
+        
+        selfActor.message(&Tiled2dMapVectorLayer::didLoadSpriteData, jsonData, spriteTexture);
     });
 }
 
