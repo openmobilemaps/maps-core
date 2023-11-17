@@ -124,9 +124,6 @@ android {
 		}
 	}
 
-	packagingOptions {
-		exclude('**/libc++_shared.so')
-	}
 }
 
 project.tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
@@ -204,7 +201,7 @@ dependencies {
 	ksp 'com.squareup.moshi:moshi-kotlin-codegen:1.15.0'
 	implementation 'com.squareup.okhttp3:okhttp:4.11.0'
 
-	implementation 'ch.ubique.android:djinni-support-lib:1.0.4'
+	implementation 'ch.ubique.android:djinni-support-lib:1.0.6'
 
 	testImplementation 'junit:junit:4.13.2'
 	androidTestImplementation 'androidx.test.ext:junit:1.1.5'
