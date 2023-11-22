@@ -71,10 +71,13 @@ public:
 
     virtual void invalidate() = 0;
 
+    /** Must be called on the rendering thread! */
     virtual void drawFrame() = 0;
 
+    /** Must be called on the rendering thread! */
     virtual void resume() = 0;
 
+    /** Must be called on the rendering thread! */
     virtual void pause() = 0;
 
     virtual void destroy() = 0;

@@ -4,5 +4,5 @@
 package io.openmobilemaps.mapscore.shared.graphics
 
 data class RenderPassConfig(
-    var renderPassIndex: Int,
+    val renderPassIndex: Int,
 )

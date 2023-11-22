@@ -4,10 +4,10 @@
 package io.openmobilemaps.mapscore.shared.map
 
 data class TiledLayerError(
-    var status: io.openmobilemaps.mapscore.shared.map.loader.LoaderStatus,
-    var errorCode: String?,
-    var layerName: String,
-    var url: String,
-    var isRecoverable: Boolean,
-    var bounds: io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord?,
+    val status: io.openmobilemaps.mapscore.shared.map.loader.LoaderStatus,
+    val errorCode: String?,
+    val layerName: String,
+    val url: String,
+    val isRecoverable: Boolean,
+    val bounds: io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord?,
 )

@@ -148,6 +148,8 @@ void Quad2dInstancedOpenGl::removeTextureCoordsGlBuffers() {
 void Quad2dInstancedOpenGl::loadTexture(const std::shared_ptr<::RenderingContextInterface> &context,
                                const std::shared_ptr<TextureHolderInterface> &textureHolder) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
+    removeTexture();
+
     if (textureHolder != nullptr) {
         texturePointer = textureHolder->attachToGraphics();
 

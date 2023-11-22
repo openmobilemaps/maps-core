@@ -4,9 +4,9 @@
 package io.openmobilemaps.mapscore.shared.map.loader
 
 data class FontGlyph(
-    var charCode: String,
-    var advance: io.openmobilemaps.mapscore.shared.graphics.common.Vec2D,
-    var boundingBoxSize: io.openmobilemaps.mapscore.shared.graphics.common.Vec2D,
-    var bearing: io.openmobilemaps.mapscore.shared.graphics.common.Vec2D,
-    var uv: io.openmobilemaps.mapscore.shared.graphics.common.Quad2dD,
+    val charCode: String,
+    val advance: io.openmobilemaps.mapscore.shared.graphics.common.Vec2D,
+    val boundingBoxSize: io.openmobilemaps.mapscore.shared.graphics.common.Vec2D,
+    val bearing: io.openmobilemaps.mapscore.shared.graphics.common.Vec2D,
+    val uv: io.openmobilemaps.mapscore.shared.graphics.common.Quad2dD,
 )

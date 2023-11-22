@@ -4,6 +4,6 @@
 package io.openmobilemaps.mapscore.shared.graphics.objects
 
 data class RenderLineDescription(
-    var positions: ArrayList<io.openmobilemaps.mapscore.shared.graphics.common.Vec2D>,
-    var styleIndex: Int,
+    val positions: ArrayList<io.openmobilemaps.mapscore.shared.graphics.common.Vec2D>,
+    val styleIndex: Int,
 )

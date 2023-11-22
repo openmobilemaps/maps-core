@@ -4,11 +4,11 @@
 package io.openmobilemaps.mapscore.shared.map.layers.tiled
 
 data class Tiled2dMapZoomLevelInfo(
-    var zoom: Double,
-    var tileWidthLayerSystemUnits: Float,
-    var numTilesX: Int,
-    var numTilesY: Int,
-    var numTilesT: Int,
-    var zoomLevelIdentifier: Int,
-    var bounds: io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord,
+    val zoom: Double,
+    val tileWidthLayerSystemUnits: Float,
+    val numTilesX: Int,
+    val numTilesY: Int,
+    val numTilesT: Int,
+    val zoomLevelIdentifier: Int,
+    val bounds: io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord,
 )

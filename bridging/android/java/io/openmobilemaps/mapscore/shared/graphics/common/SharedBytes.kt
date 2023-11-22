@@ -4,7 +4,7 @@
 package io.openmobilemaps.mapscore.shared.graphics.common
 
 data class SharedBytes(
-    var address: Long,
-    var elementCount: Int,
-    var bytesPerElement: Int,
+    val address: Long,
+    val elementCount: Int,
+    val bytesPerElement: Int,
 )

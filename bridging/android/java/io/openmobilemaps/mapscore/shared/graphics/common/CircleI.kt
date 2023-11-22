@@ -4,7 +4,7 @@
 package io.openmobilemaps.mapscore.shared.graphics.common
 
 data class CircleI(
-    var x: Int,
-    var y: Int,
-    var radius: Int,
+    val x: Int,
+    val y: Int,
+    val radius: Int,
 )

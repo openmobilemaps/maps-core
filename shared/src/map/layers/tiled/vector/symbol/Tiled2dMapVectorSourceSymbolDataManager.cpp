@@ -554,7 +554,9 @@ void Tiled2dMapVectorSourceSymbolDataManager::updateSymbolGroups() {
         });
 
         for (const auto &symbolGroup: tilesToClear) {
-            symbolGroup.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorSymbolGroup::clear);
+            symbolGroup.syncAccess([](auto symbolGroup) {
+                symbolGroup->clear();
+            });
         }
 
         if (!tilesToClear.empty()) {

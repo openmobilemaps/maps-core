@@ -375,36 +375,29 @@ void MapScene::drawFrame() {
 }
 
 void MapScene::resume() {
-    std::weak_ptr<MapScene> weakSelfPtr = weak_from_this();
-    scheduler->addTask(
-        std::make_shared<LambdaTask>(TaskConfig("MapScene_resume", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS), [weakSelfPtr] {
-            auto selfPtr = weakSelfPtr.lock();
-            if (!selfPtr) { return; }
+    if (isResumed) {
+        return;
+    }
 
-            std::lock_guard<std::recursive_mutex> lock(selfPtr->layersMutex);
-            for (const auto &layer : selfPtr->layers) {
-                layer.second->resume();
-            }
+    std::lock_guard<std::recursive_mutex> lock(layersMutex);
+    for (const auto &layer : layers) {
+        layer.second->resume();
+    }
 
-            selfPtr->isResumed = true;
-            selfPtr->callbackHandler->onMapResumed();
-        }));
+    isResumed = true;
+    callbackHandler->onMapResumed();
 }
 
 void MapScene::pause() {
+    if (!isResumed) {
+        return;
+    }
     isResumed = false;
 
-    std::weak_ptr<MapScene> weakSelfPtr = weak_from_this();
-    scheduler->addTask(
-        std::make_shared<LambdaTask>(TaskConfig("MapScene_pause", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS), [weakSelfPtr] {
-            auto selfPtr = weakSelfPtr.lock();
-            if (!selfPtr) { return; }
-
-            std::lock_guard<std::recursive_mutex> lock(selfPtr->layersMutex);
-            for (const auto &layer : selfPtr->layers) {
-                layer.second->pause();
-            }
-        }));
+    std::lock_guard<std::recursive_mutex> lock(layersMutex);
+    for (const auto &layer : layers) {
+        layer.second->pause();
+    }
 }
 
 void MapScene::destroy() {

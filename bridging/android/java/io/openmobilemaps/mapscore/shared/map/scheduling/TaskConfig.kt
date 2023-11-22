@@ -4,8 +4,8 @@
 package io.openmobilemaps.mapscore.shared.map.scheduling
 
 data class TaskConfig(
-    var id: String,
-    var delay: Long,
-    var priority: TaskPriority,
-    var executionEnvironment: ExecutionEnvironment,
+    val id: String,
+    val delay: Long,
+    val priority: TaskPriority,
+    val executionEnvironment: ExecutionEnvironment,
 )

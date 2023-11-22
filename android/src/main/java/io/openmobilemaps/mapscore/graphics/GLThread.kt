@@ -27,7 +27,10 @@ import kotlin.math.max
 import kotlin.math.min
 
 class GLThread constructor(
-	var onDrawCallback: (() -> Unit)? = null
+	var onDrawCallback: (() -> Unit)? = null,
+	var onResumeCallback: (() -> Unit)? = null,
+	var onPauseCallback: (() -> Unit)? = null,
+	var onFinishingCallback: (() -> Unit)? = null
 ) :
 	Thread(TAG) {
 
@@ -75,6 +78,7 @@ class GLThread constructor(
 
 	@Volatile
 	private var finished = false
+	private var isPaused = true
 	private var egl: EGL10? = null
 	private var eglDisplay: EGLDisplay? = null
 	private var eglConfig: EGLConfig? = null
@@ -92,6 +96,9 @@ class GLThread constructor(
 		val gl10 = gl as GL10?
 		val renderer = renderer ?: throw IllegalStateException("No renderer attached to GlTextureView")
 		renderer.onSurfaceCreated(gl10, eglConfig)
+		if (!isPaused) {
+			onResumeCallback?.invoke()
+		}
 		while (!finished) {
 			val timestampStartRender = System.nanoTime()
 			checkCurrent()
@@ -105,7 +112,6 @@ class GLThread constructor(
 				glRunList.poll()?.invoke()
 				i++
 			}
-			val renderStart = System.nanoTime()
 
 			renderer.onDrawFrame(gl10)
 			if (BuildConfig.DEBUG) {
@@ -124,7 +130,6 @@ class GLThread constructor(
 
 			onDrawCallback?.invoke()
 
-			//Log.d("UBCM: RENDER_TIME", "${(System.nanoTime() - renderStart) / 1000000}ms")
 			if (targetFrameRate > 0) {
 				val renderTime = (System.nanoTime() - timestampStartRender) / 1000000
 				try {
@@ -134,17 +139,29 @@ class GLThread constructor(
 					// Ignore
 				}
 			}
-			if (!isDirty.get()) {
-				try {
-					synchronized(runNotifier) { runNotifier.wait(1000) }
-				} catch (e: InterruptedException) {
-					e.printStackTrace()
+			if (!isDirty.get() && glRunList.isEmpty() || isPaused) {
+				var wasPaused = false
+				do {
+					if (isPaused) {
+						if (!wasPaused) {
+							onPauseCallback?.invoke()
+						}
+						wasPaused = true
+					}
+					try {
+						synchronized(runNotifier) { runNotifier.wait(1000) }
+					} catch (e: InterruptedException) {
+						e.printStackTrace()
+					}
+				} while (isPaused)
+				if (wasPaused) {
+					onResumeCallback?.invoke()
 				}
 			}
-			if (glRunList.isEmpty()) {
-				isDirty.set(false)
-			}
+			isDirty.set(false)
 		}
+		onPauseCallback?.invoke()
+		onFinishingCallback?.invoke()
 		finishGL()
 	}
 
@@ -258,6 +275,7 @@ class GLThread constructor(
 		egl?.eglTerminate(eglDisplay)
 		egl?.eglDestroySurface(eglDisplay, eglSurface)
 		surface?.release()
+		surface = null
 	}
 
 	private fun initGL() {
@@ -310,13 +328,21 @@ class GLThread constructor(
 		return config
 	}
 
-
 	private fun getEglConfigs(useMSAA: Boolean = false): Array<IntArray> {
 		return if (useMSAA) arrayOf(msaaConfig, defaultConfig) else arrayOf(defaultConfig)
 	}
 
 	fun finish() {
 		finished = true
+		synchronized(runNotifier) { runNotifier.notify() }
+	}
+
+	fun doPause() {
+		isPaused = true
+	}
+
+	fun doResume() {
+		isPaused = false
 		synchronized(runNotifier) { runNotifier.notify() }
 	}
 

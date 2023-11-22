@@ -4,5 +4,5 @@
 package io.openmobilemaps.mapscore.shared.graphics
 
 data class RectanglePackerPage(
-    var uvs: HashMap<String, io.openmobilemaps.mapscore.shared.graphics.common.RectI>,
+    val uvs: HashMap<String, io.openmobilemaps.mapscore.shared.graphics.common.RectI>,
 )

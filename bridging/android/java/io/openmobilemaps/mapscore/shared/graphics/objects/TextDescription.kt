@@ -4,5 +4,5 @@
 package io.openmobilemaps.mapscore.shared.graphics.objects
 
 data class TextDescription(
-    var glyphs: ArrayList<GlyphDescription>,
+    val glyphs: ArrayList<GlyphDescription>,
 )

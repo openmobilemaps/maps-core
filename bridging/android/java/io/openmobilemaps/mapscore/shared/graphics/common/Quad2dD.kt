@@ -4,8 +4,8 @@
 package io.openmobilemaps.mapscore.shared.graphics.common
 
 data class Quad2dD(
-    var topLeft: Vec2D,
-    var topRight: Vec2D,
-    var bottomRight: Vec2D,
-    var bottomLeft: Vec2D,
+    val topLeft: Vec2D,
+    val topRight: Vec2D,
+    val bottomRight: Vec2D,
+    val bottomLeft: Vec2D,
 )

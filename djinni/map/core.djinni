@@ -51,8 +51,12 @@ map_interface = interface +c {
     set_background_color(color: color);
 
     invalidate();
+
+    # Must be called on the rendering thread!
     draw_frame();
+    # Must be called on the rendering thread!
     resume();
+    # Must be called on the rendering thread!
     pause();
     destroy();
 

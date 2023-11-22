@@ -4,6 +4,6 @@
 package io.openmobilemaps.mapscore.shared.graphics.common
 
 data class Vec2I(
-    var x: Int,
-    var y: Int,
+    val x: Int,
+    val y: Int,
 )

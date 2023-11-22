@@ -56,10 +56,13 @@ abstract class MapInterface {
 
     abstract fun invalidate()
 
+    /** Must be called on the rendering thread! */
     abstract fun drawFrame()
 
+    /** Must be called on the rendering thread! */
     abstract fun resume()
 
+    /** Must be called on the rendering thread! */
     abstract fun pause()
 
     abstract fun destroy()

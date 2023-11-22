@@ -4,6 +4,6 @@
 package io.openmobilemaps.mapscore.shared.map.coordinates
 
 data class PolygonCoord(
-    var positions: ArrayList<Coord>,
-    var holes: ArrayList<ArrayList<Coord>>,
+    val positions: ArrayList<Coord>,
+    val holes: ArrayList<ArrayList<Coord>>,
 )

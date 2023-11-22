@@ -4,12 +4,12 @@
 package io.openmobilemaps.mapscore.shared.graphics.shader
 
 data class RasterShaderStyle(
-    var opacity: Float,
-    var brightnessMin: Float,
-    var brightnessMax: Float,
-    var contrast: Float,
-    var saturation: Float,
-    var gamma: Float,
+    val opacity: Float,
+    val brightnessMin: Float,
+    val brightnessMax: Float,
+    val contrast: Float,
+    val saturation: Float,
+    val gamma: Float,
 ) : Comparable<RasterShaderStyle> {
 
     companion object {

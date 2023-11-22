@@ -4,6 +4,6 @@
 package io.openmobilemaps.mapscore.shared.graphics.objects
 
 data class RenderVerticesDescription(
-    var vertices: ArrayList<io.openmobilemaps.mapscore.shared.graphics.common.Vec2D>,
-    var styleIndex: Int,
+    val vertices: ArrayList<io.openmobilemaps.mapscore.shared.graphics.common.Vec2D>,
+    val styleIndex: Int,
 )

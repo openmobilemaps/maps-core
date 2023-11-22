@@ -8,8 +8,8 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class RectCoord(
-    var topLeft: Coord,
-    var bottomRight: Coord,
+    val topLeft: Coord,
+    val bottomRight: Coord,
 ) : Comparable<RectCoord>, Parcelable {
 
     override fun compareTo(other: RectCoord): Int {

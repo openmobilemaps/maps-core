@@ -4,5 +4,5 @@
 package io.openmobilemaps.mapscore.shared.map.layers.tiled
 
 data class Tiled2dMapVectorSettings(
-    var tileOrigin: Tiled2dMapVectorTileOrigin,
+    val tileOrigin: Tiled2dMapVectorTileOrigin,
 )

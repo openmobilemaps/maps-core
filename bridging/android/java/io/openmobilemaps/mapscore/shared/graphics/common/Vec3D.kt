@@ -4,7 +4,7 @@
 package io.openmobilemaps.mapscore.shared.graphics.common
 
 data class Vec3D(
-    var x: Double,
-    var y: Double,
-    var z: Double,
+    val x: Double,
+    val y: Double,
+    val z: Double,
 )

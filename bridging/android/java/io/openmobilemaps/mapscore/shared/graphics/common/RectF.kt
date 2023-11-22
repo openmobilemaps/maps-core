@@ -4,8 +4,8 @@
 package io.openmobilemaps.mapscore.shared.graphics.common
 
 data class RectF(
-    var x: Float,
-    var y: Float,
-    var width: Float,
-    var height: Float,
+    val x: Float,
+    val y: Float,
+    val width: Float,
+    val height: Float,
 )

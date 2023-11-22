@@ -4,8 +4,8 @@
 package io.openmobilemaps.mapscore.shared.map.layers.text
 
 data class FormattedStringEntry(
-    var text: String,
-    var scale: Float,
+    val text: String,
+    val scale: Float,
 ) : Comparable<FormattedStringEntry> {
 
     override fun compareTo(other: FormattedStringEntry): Int {

@@ -11,6 +11,7 @@
 package io.openmobilemaps.mapscore.map.view
 
 import android.content.Context
+import android.graphics.SurfaceTexture
 import android.opengl.GLSurfaceView
 import android.util.AttributeSet
 import android.view.MotionEvent
@@ -52,6 +53,7 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 	private var saveFrameSpec: SaveFrameSpec? = null
 	private var saveFrameCallback: SaveFrameCallback? = null
 
+	private var lifecycleResumed = false
 	private val mapViewStateMutable = MutableStateFlow(MapViewState.UNINITIALIZED)
 	val mapViewState = mapViewStateMutable.asStateFlow()
 
@@ -104,13 +106,31 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 
 	@OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
 	open fun onResume() {
-		requireMapInterface().resume()
+		lifecycleResumed = true
+		resumeGlThread()
 	}
 
 	@OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
 	open fun onPause() {
-		mapViewStateMutable.value = MapViewState.PAUSED
-		requireMapInterface().pause()
+		lifecycleResumed = false
+		pauseGlThread()
+	}
+
+	override fun onGlThreadResume() {
+		if (lifecycleResumed) {
+			mapInterface?.resume()
+		}
+	}
+
+	override fun onGlThreadPause() {
+		if (mapViewStateMutable.value != MapViewState.PAUSED) {
+			mapViewStateMutable.value = MapViewState.PAUSED
+			requireMapInterface().pause()
+		}
+	}
+
+	override fun onGlThreadFinishing() {
+		super.onGlThreadFinishing()
 	}
 
 	@OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)

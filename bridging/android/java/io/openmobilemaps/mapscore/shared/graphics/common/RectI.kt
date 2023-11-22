@@ -4,8 +4,8 @@
 package io.openmobilemaps.mapscore.shared.graphics.common
 
 data class RectI(
-    var x: Int,
-    var y: Int,
-    var width: Int,
-    var height: Int,
+    val x: Int,
+    val y: Int,
+    val width: Int,
+    val height: Int,
 )

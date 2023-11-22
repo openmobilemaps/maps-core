@@ -4,7 +4,7 @@
 package io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.wmts
 
 data class WmtsTileMatrixSet(
-    var identifier: String,
-    var coordinateSystemIdentifier: Int,
-    var matrices: ArrayList<WmtsTileMatrix>,
+    val identifier: String,
+    val coordinateSystemIdentifier: Int,
+    val matrices: ArrayList<WmtsTileMatrix>,
 )
