@@ -116,6 +116,12 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 		pauseGlThread()
 	}
 
+	@OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+	open fun onDestroy() {
+		mapViewStateMutable.value = MapViewState.DESTROYED
+		finishGlThread()
+	}
+
 	override fun onGlThreadResume() {
 		if (lifecycleResumed) {
 			mapInterface?.resume()
@@ -130,17 +136,11 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 	}
 
 	override fun onGlThreadFinishing() {
-		super.onGlThreadFinishing()
-	}
-
-	@OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-	open fun onDestroy() {
-		mapViewStateMutable.value = MapViewState.DESTROYED
 		setRenderer(null)
 		val map = mapInterface
 		mapInterface = null
 		touchHandler = null
-		map?.let { Thread { it.destroy() }.start() }
+		map?.destroy()
 	}
 
 	fun setTouchEnabled(enabled: Boolean) {

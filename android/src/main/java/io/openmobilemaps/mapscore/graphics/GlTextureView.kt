@@ -64,8 +64,7 @@ open class GlTextureView @JvmOverloads constructor(context: Context, attrs: Attr
 
 	override fun onSurfaceTextureDestroyed(surface: SurfaceTexture): Boolean {
 		surfaceAvailable = false
-		glThread?.finish()
-		glThread = null
+		finishGlThread()
 		return false
 	}
 
@@ -106,5 +105,11 @@ open class GlTextureView @JvmOverloads constructor(context: Context, attrs: Attr
 	fun resumeGlThread() {
 		glThread?.doResume()
 		shouldResume = true
+	}
+
+	fun finishGlThread() {
+		val glThread = glThread
+		this.glThread = null
+		glThread?.finish()
 	}
 }
