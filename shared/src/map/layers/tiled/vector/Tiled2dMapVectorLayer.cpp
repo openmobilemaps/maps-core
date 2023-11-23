@@ -821,7 +821,7 @@ void Tiled2dMapVectorLayer::loadSpriteData(int scale, bool fromLocal) {
         auto jsonResultStatus = context->jsonResult->status;
         auto textureResultStatus = context->textureResult->status;
 
-        if (scale == 3 && (jsonResultStatus == LoaderStatus::ERROR_NETWORK || textureResultStatus == LoaderStatus::ERROR_NETWORK)) {
+        if (scale == 3 && (jsonResultStatus != LoaderStatus::OK || textureResultStatus != LoaderStatus::OK)) {
             LogInfo <<= "This device would benefit from @3x assets, but none could be found. Please add @3x assets for crispy icons!";
             // 3@x assets are not available, so we try @2x
             auto self = weakSelf.lock();
