@@ -99,6 +99,7 @@ class GLThread constructor(
 
 		if (!isPaused) {
 			onResumeCallback?.invoke()
+			isDirty.set(true)
 		}
 
 		while (!finished) {
