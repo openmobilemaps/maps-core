@@ -105,10 +105,8 @@ class GLThread constructor(
 			if ((!isDirty.get() && glRunList.isEmpty()) || isPaused) {
 				var wasPaused = false
 				do {
-					if (isPaused) {
-						if (!wasPaused) {
-							onPauseCallback?.invoke()
-						}
+					if (isPaused && !wasPaused) {
+						onPauseCallback?.invoke()
 						wasPaused = true
 					}
 					try {

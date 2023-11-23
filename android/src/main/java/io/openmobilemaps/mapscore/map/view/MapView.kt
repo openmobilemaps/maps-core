@@ -11,7 +11,6 @@
 package io.openmobilemaps.mapscore.map.view
 
 import android.content.Context
-import android.graphics.SurfaceTexture
 import android.opengl.GLSurfaceView
 import android.util.AttributeSet
 import android.view.MotionEvent
@@ -124,7 +123,7 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 
 	override fun onGlThreadResume() {
 		if (lifecycleResumed) {
-			mapInterface?.resume()
+			requireMapInterface().resume()
 		}
 	}
 
