@@ -47,10 +47,10 @@ open class GlTextureView @JvmOverloads constructor(context: Context, attrs: Attr
 			useMSAA = this@GlTextureView.useMSAA
 			renderer = this@GlTextureView.renderer
 			targetFrameRate = pendingTargetFrameRate
-			start()
 			if (shouldResume) {
 				doResume()
 			}
+			start()
 		}
 		while (pendingTaskQueue.isNotEmpty()) {
 			pendingTaskQueue.removeFirstOrNull()?.let { queueEvent(it.first, it.second) }

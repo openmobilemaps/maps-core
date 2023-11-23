@@ -49,8 +49,8 @@ open class OffscreenMapRenderer(val sizePx: Vec2I, val density: Float = 72f) : G
 			this.useMSAA = useMSAA
 			onWindowResize(sizePx.x, sizePx.y)
 			renderer = this@OffscreenMapRenderer
-			start()
 			doResume()
+			start()
 		}
 	}
 

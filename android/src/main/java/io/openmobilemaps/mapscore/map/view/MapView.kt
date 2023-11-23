@@ -136,11 +136,13 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 	}
 
 	override fun onGlThreadFinishing() {
-		setRenderer(null)
-		val map = mapInterface
-		mapInterface = null
-		touchHandler = null
-		map?.destroy()
+		if (mapViewState.value == MapViewState.DESTROYED) {
+			val map = mapInterface
+			setRenderer(null)
+			mapInterface = null
+			touchHandler = null
+			map?.destroy()
+		}
 	}
 
 	fun setTouchEnabled(enabled: Boolean) {

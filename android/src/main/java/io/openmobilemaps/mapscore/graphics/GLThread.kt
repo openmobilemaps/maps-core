@@ -96,10 +96,35 @@ class GLThread constructor(
 		val gl10 = gl as GL10?
 		val renderer = renderer ?: throw IllegalStateException("No renderer attached to GlTextureView")
 		renderer.onSurfaceCreated(gl10, eglConfig)
+
 		if (!isPaused) {
 			onResumeCallback?.invoke()
 		}
+
 		while (!finished) {
+			if ((!isDirty.get() && glRunList.isEmpty()) || isPaused) {
+				var wasPaused = false
+				do {
+					if (isPaused) {
+						if (!wasPaused) {
+							onPauseCallback?.invoke()
+						}
+						wasPaused = true
+					}
+					try {
+						synchronized(runNotifier) { runNotifier.wait(1000) }
+					} catch (e: InterruptedException) {
+						e.printStackTrace()
+					}
+				} while (isPaused && !finished)
+				if (finished) {
+					break
+				} else if (wasPaused) {
+					onResumeCallback?.invoke()
+				}
+			}
+			isDirty.set(false)
+
 			val timestampStartRender = System.nanoTime()
 			checkCurrent()
 			if (sizeChanged) {
@@ -139,26 +164,6 @@ class GLThread constructor(
 					// Ignore
 				}
 			}
-			if (!isDirty.get() && glRunList.isEmpty() || isPaused) {
-				var wasPaused = false
-				do {
-					if (isPaused) {
-						if (!wasPaused) {
-							onPauseCallback?.invoke()
-						}
-						wasPaused = true
-					}
-					try {
-						synchronized(runNotifier) { runNotifier.wait(1000) }
-					} catch (e: InterruptedException) {
-						e.printStackTrace()
-					}
-				} while (isPaused)
-				if (wasPaused) {
-					onResumeCallback?.invoke()
-				}
-			}
-			isDirty.set(false)
 		}
 		onPauseCallback?.invoke()
 		onFinishingCallback?.invoke()
