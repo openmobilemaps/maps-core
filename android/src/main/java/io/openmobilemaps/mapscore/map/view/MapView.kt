@@ -52,6 +52,7 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 	private var saveFrameSpec: SaveFrameSpec? = null
 	private var saveFrameCallback: SaveFrameCallback? = null
 
+	private var lifecycleResumed = false
 	private val mapViewStateMutable = MutableStateFlow(MapViewState.UNINITIALIZED)
 	val mapViewState = mapViewStateMutable.asStateFlow()
 
@@ -104,23 +105,43 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 
 	@OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
 	open fun onResume() {
-		requireMapInterface().resume()
+		lifecycleResumed = true
+		resumeGlThread()
 	}
 
 	@OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
 	open fun onPause() {
-		mapViewStateMutable.value = MapViewState.PAUSED
-		requireMapInterface().pause()
+		lifecycleResumed = false
+		pauseGlThread()
 	}
 
 	@OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
 	open fun onDestroy() {
 		mapViewStateMutable.value = MapViewState.DESTROYED
-		setRenderer(null)
-		val map = mapInterface
-		mapInterface = null
-		touchHandler = null
-		map?.let { Thread { it.destroy() }.start() }
+		finishGlThread()
+	}
+
+	override fun onGlThreadResume() {
+		if (lifecycleResumed) {
+			requireMapInterface().resume()
+		}
+	}
+
+	override fun onGlThreadPause() {
+		if (mapViewStateMutable.value != MapViewState.PAUSED) {
+			mapViewStateMutable.value = MapViewState.PAUSED
+			requireMapInterface().pause()
+		}
+	}
+
+	override fun onGlThreadFinishing() {
+		if (mapViewState.value == MapViewState.DESTROYED) {
+			val map = mapInterface
+			setRenderer(null)
+			mapInterface = null
+			touchHandler = null
+			map?.destroy()
+		}
 	}
 
 	fun setTouchEnabled(enabled: Boolean) {

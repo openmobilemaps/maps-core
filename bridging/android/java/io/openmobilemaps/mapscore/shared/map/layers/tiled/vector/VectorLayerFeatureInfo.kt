@@ -4,6 +4,6 @@
 package io.openmobilemaps.mapscore.shared.map.layers.tiled.vector
 
 data class VectorLayerFeatureInfo(
-    var identifier: String,
-    var properties: HashMap<String, VectorLayerFeatureInfoValue>,
+    val identifier: String,
+    val properties: HashMap<String, VectorLayerFeatureInfoValue>,
 )

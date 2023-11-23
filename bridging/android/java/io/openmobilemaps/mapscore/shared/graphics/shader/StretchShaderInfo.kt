@@ -4,15 +4,15 @@
 package io.openmobilemaps.mapscore.shared.graphics.shader
 
 data class StretchShaderInfo(
-    var scaleX: Float,
-    var stretchX0Begin: Float,
-    var stretchX0End: Float,
-    var stretchX1Begin: Float,
-    var stretchX1End: Float,
-    var scaleY: Float,
-    var stretchY0Begin: Float,
-    var stretchY0End: Float,
-    var stretchY1Begin: Float,
-    var stretchY1End: Float,
-    var uv: io.openmobilemaps.mapscore.shared.graphics.common.RectD,
+    val scaleX: Float,
+    val stretchX0Begin: Float,
+    val stretchX0End: Float,
+    val stretchX1Begin: Float,
+    val stretchX1End: Float,
+    val scaleY: Float,
+    val stretchY0Begin: Float,
+    val stretchY0End: Float,
+    val stretchY1Begin: Float,
+    val stretchY1End: Float,
+    val uv: io.openmobilemaps.mapscore.shared.graphics.common.RectD,
 )

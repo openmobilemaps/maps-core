@@ -85,7 +85,9 @@ void Tiled2dMapVectorSourceTileDataManager::pause() {
 
     for (const auto &[tileInfo, subTiles] : tiles) {
         for (const auto &[index, identifier, tile]: subTiles) {
-            tile.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorTile::clear);
+            tile.syncAccess([](const auto &tile) {
+                tile->clear();
+            });
         }
     }
 
@@ -115,7 +117,9 @@ void Tiled2dMapVectorSourceTileDataManager::resume() {
         std::unordered_set<int32_t> controlSet = {};
         for (const auto &[index, identifier, tile]: subTiles) {
             controlSet.insert(index);
-            tile.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorTile::setup);
+            tile.syncAccess([](const auto &tile) {
+                tile->setup();
+            });
         }
 
         tilesReadyControlSet[tileInfo] = controlSet;

@@ -8,10 +8,10 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class Coord(
-    var systemIdentifier: Int,
-    var x: Double,
-    var y: Double,
-    var z: Double,
+    val systemIdentifier: Int,
+    val x: Double,
+    val y: Double,
+    val z: Double,
 ) : Comparable<Coord>, Parcelable {
 
     override fun compareTo(other: Coord): Int {

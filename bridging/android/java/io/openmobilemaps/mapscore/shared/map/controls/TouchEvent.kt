@@ -4,6 +4,6 @@
 package io.openmobilemaps.mapscore.shared.map.controls
 
 data class TouchEvent(
-    var pointers: ArrayList<io.openmobilemaps.mapscore.shared.graphics.common.Vec2F>,
-    var touchAction: TouchAction,
+    val pointers: ArrayList<io.openmobilemaps.mapscore.shared.graphics.common.Vec2F>,
+    val touchAction: TouchAction,
 )

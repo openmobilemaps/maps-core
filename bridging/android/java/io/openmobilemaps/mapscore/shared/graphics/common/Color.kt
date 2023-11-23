@@ -4,10 +4,10 @@
 package io.openmobilemaps.mapscore.shared.graphics.common
 
 data class Color(
-    var r: Float,
-    var g: Float,
-    var b: Float,
-    var a: Float,
+    val r: Float,
+    val g: Float,
+    val b: Float,
+    val a: Float,
 ) : Comparable<Color> {
 
     override fun compareTo(other: Color): Int {

@@ -4,8 +4,8 @@
 package io.openmobilemaps.mapscore.shared.map.layers.polygon
 
 data class PolygonInfo(
-    var identifier: String,
-    var coordinates: io.openmobilemaps.mapscore.shared.map.coordinates.PolygonCoord,
-    var color: io.openmobilemaps.mapscore.shared.graphics.common.Color,
-    var highlightColor: io.openmobilemaps.mapscore.shared.graphics.common.Color,
+    val identifier: String,
+    val coordinates: io.openmobilemaps.mapscore.shared.map.coordinates.PolygonCoord,
+    val color: io.openmobilemaps.mapscore.shared.graphics.common.Color,
+    val highlightColor: io.openmobilemaps.mapscore.shared.graphics.common.Color,
 )

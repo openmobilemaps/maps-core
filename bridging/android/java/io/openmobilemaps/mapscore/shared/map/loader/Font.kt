@@ -4,5 +4,5 @@
 package io.openmobilemaps.mapscore.shared.map.loader
 
 data class Font(
-    var name: String,
+    val name: String,
 )

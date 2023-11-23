@@ -4,13 +4,13 @@
 package io.openmobilemaps.mapscore.shared.map.layers.line
 
 data class LineStyle(
-    var color: io.openmobilemaps.mapscore.shared.map.layers.ColorStateList,
-    var gapColor: io.openmobilemaps.mapscore.shared.map.layers.ColorStateList,
-    var opacity: Float,
-    var blur: Float,
-    var widthType: io.openmobilemaps.mapscore.shared.map.layers.SizeType,
-    var width: Float,
-    var dashArray: ArrayList<Float>,
-    var lineCap: LineCapType,
-    var offset: Float,
+    val color: io.openmobilemaps.mapscore.shared.map.layers.ColorStateList,
+    val gapColor: io.openmobilemaps.mapscore.shared.map.layers.ColorStateList,
+    val opacity: Float,
+    val blur: Float,
+    val widthType: io.openmobilemaps.mapscore.shared.map.layers.SizeType,
+    val width: Float,
+    val dashArray: ArrayList<Float>,
+    val lineCap: LineCapType,
+    val offset: Float,
 )

@@ -4,6 +4,6 @@
 package io.openmobilemaps.mapscore.shared.graphics.objects
 
 data class GlyphDescription(
-    var frame: io.openmobilemaps.mapscore.shared.graphics.common.Quad2dD,
-    var textureCoordinates: io.openmobilemaps.mapscore.shared.graphics.common.Quad2dD,
+    val frame: io.openmobilemaps.mapscore.shared.graphics.common.Quad2dD,
+    val textureCoordinates: io.openmobilemaps.mapscore.shared.graphics.common.Quad2dD,
 )

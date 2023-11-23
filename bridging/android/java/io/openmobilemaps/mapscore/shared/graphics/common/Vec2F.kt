@@ -4,8 +4,8 @@
 package io.openmobilemaps.mapscore.shared.graphics.common
 
 data class Vec2F(
-    var x: Float,
-    var y: Float,
+    val x: Float,
+    val y: Float,
 ) : Comparable<Vec2F> {
 
     override fun compareTo(other: Vec2F): Int {

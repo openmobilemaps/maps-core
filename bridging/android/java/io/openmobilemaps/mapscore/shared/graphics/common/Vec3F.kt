@@ -4,7 +4,7 @@
 package io.openmobilemaps.mapscore.shared.graphics.common
 
 data class Vec3F(
-    var x: Float,
-    var y: Float,
-    var z: Float,
+    val x: Float,
+    val y: Float,
+    val z: Float,
 )

@@ -29,24 +29,33 @@ open class GlTextureView @JvmOverloads constructor(context: Context, attrs: Attr
 
 	private var renderer: GLSurfaceView.Renderer? = null
 	private var glThread: GLThread? = null
+	protected var surfaceAvailable = false
+		private set
 
 	private var useMSAA = false
 
 	private val pendingTaskQueue = ArrayDeque<Pair<Boolean, () -> Unit>>()
 	private var pendingTargetFrameRate = -1
+	private var shouldResume = false
 
 	override fun onSurfaceTextureAvailable(surfaceTexture: SurfaceTexture, width: Int, height: Int) {
-		glThread = GLThread().apply {
+		glThread = GLThread(onResumeCallback = this::onGlThreadResume,
+			onPauseCallback = this::onGlThreadPause,
+			onFinishingCallback = this::onGlThreadFinishing).apply {
 			surface = surfaceTexture
 			onWindowResize(getWidth(), getHeight())
 			useMSAA = this@GlTextureView.useMSAA
 			renderer = this@GlTextureView.renderer
 			targetFrameRate = pendingTargetFrameRate
+			if (shouldResume) {
+				doResume()
+			}
 			start()
 		}
 		while (pendingTaskQueue.isNotEmpty()) {
 			pendingTaskQueue.removeFirstOrNull()?.let { queueEvent(it.first, it.second) }
 		}
+		surfaceAvailable = true
 	}
 
 	override fun onSurfaceTextureSizeChanged(surface: SurfaceTexture, width: Int, height: Int) {
@@ -54,10 +63,16 @@ open class GlTextureView @JvmOverloads constructor(context: Context, attrs: Attr
 	}
 
 	override fun onSurfaceTextureDestroyed(surface: SurfaceTexture): Boolean {
-		glThread?.finish()
-		glThread = null
+		surfaceAvailable = false
+		finishGlThread()
 		return false
 	}
+
+	protected open fun onGlThreadResume() {}
+
+	protected open fun onGlThreadPause() {}
+
+	protected open fun onGlThreadFinishing() {}
 
 	override fun onSurfaceTextureUpdated(surface: SurfaceTexture) {}
 
@@ -80,5 +95,21 @@ open class GlTextureView @JvmOverloads constructor(context: Context, attrs: Attr
 	fun setTargetFrameRate(frameRate: Int) {
 		pendingTargetFrameRate = frameRate
 		glThread?.targetFrameRate = frameRate
+	}
+
+	fun pauseGlThread() {
+		shouldResume = false
+		glThread?.doPause()
+	}
+
+	fun resumeGlThread() {
+		glThread?.doResume()
+		shouldResume = true
+	}
+
+	fun finishGlThread() {
+		val glThread = glThread
+		this.glThread = null
+		glThread?.finish()
 	}
 }

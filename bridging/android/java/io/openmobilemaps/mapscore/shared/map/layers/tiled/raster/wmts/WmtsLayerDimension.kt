@@ -4,7 +4,7 @@
 package io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.wmts
 
 data class WmtsLayerDimension(
-    var identifier: String,
-    var defaultValue: String,
-    var values: ArrayList<String>,
+    val identifier: String,
+    val defaultValue: String,
+    val values: ArrayList<String>,
 )

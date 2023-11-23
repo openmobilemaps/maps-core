@@ -43,14 +43,28 @@ open class OffscreenMapRenderer(val sizePx: Vec2I, val density: Float = 72f) : G
 		mapInterface.setBackgroundColor(Color(1f, 1f, 1f, 1f))
 		this.mapInterface = mapInterface
 
-		glThread = GLThread().apply {
+		glThread = GLThread(onResumeCallback = this::onGlThreadResume,
+			onPauseCallback = this::onGlThreadPause,
+			onFinishingCallback = this::onGlThreadFinishing).apply {
 			this.useMSAA = useMSAA
 			onWindowResize(sizePx.x, sizePx.y)
 			renderer = this@OffscreenMapRenderer
+			doResume()
 			start()
 		}
+	}
 
-		resume()
+	protected open fun onGlThreadFinishing() {
+		glThread.renderer = null
+		mapInterface = null
+	}
+
+	protected open fun onGlThreadPause() {
+		requireMapInterface().pause()
+	}
+
+	protected open fun onGlThreadResume() {
+		requireMapInterface().resume()
 	}
 
 	fun setOnDrawCallback(onDrawCallback: (() -> Unit)? = null) {
@@ -77,14 +91,12 @@ open class OffscreenMapRenderer(val sizePx: Vec2I, val density: Float = 72f) : G
 	}
 
 	fun resume() {
-		requireMapInterface().resume()
+		glThread.doResume()
 	}
 
 	fun destroy() {
-		requireMapInterface().pause()
+		glThread.doPause()
 		glThread.finish()
-		glThread.renderer = null
-		mapInterface = null
 	}
 
 	override fun setBackgroundColor(color: Color) {

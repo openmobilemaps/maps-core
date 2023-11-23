@@ -4,8 +4,8 @@
 package io.openmobilemaps.mapscore.shared.graphics.common
 
 data class RectD(
-    var x: Double,
-    var y: Double,
-    var width: Double,
-    var height: Double,
+    val x: Double,
+    val y: Double,
+    val width: Double,
+    val height: Double,
 )

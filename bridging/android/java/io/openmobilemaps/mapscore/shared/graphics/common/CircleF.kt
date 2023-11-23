@@ -4,7 +4,7 @@
 package io.openmobilemaps.mapscore.shared.graphics.common
 
 data class CircleF(
-    var x: Float,
-    var y: Float,
-    var radius: Float,
+    val x: Float,
+    val y: Float,
+    val radius: Float,
 )

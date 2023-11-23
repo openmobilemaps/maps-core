@@ -4,6 +4,6 @@
 package io.openmobilemaps.mapscore.shared.map.layers.tiled.vector
 
 data class Tiled2dMapVectorAssetInfo(
-    var featureIdentifiersUv: HashMap<String, io.openmobilemaps.mapscore.shared.graphics.common.RectI>,
-    var texture: io.openmobilemaps.mapscore.shared.graphics.objects.TextureHolderInterface?,
+    val featureIdentifiersUv: HashMap<String, io.openmobilemaps.mapscore.shared.graphics.common.RectI>,
+    val texture: io.openmobilemaps.mapscore.shared.graphics.objects.TextureHolderInterface?,
 )

@@ -4,12 +4,12 @@
 package io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.wmts
 
 data class WmtsTileMatrix(
-    var identifier: String,
-    var scaleDenominator: Double,
-    var topLeftCornerX: Double,
-    var topLeftCornerY: Double,
-    var tileWidth: Int,
-    var tileHeight: Int,
-    var matrixWidth: Int,
-    var matrixHeight: Int,
+    val identifier: String,
+    val scaleDenominator: Double,
+    val topLeftCornerX: Double,
+    val topLeftCornerY: Double,
+    val tileWidth: Int,
+    val tileHeight: Int,
+    val matrixWidth: Int,
+    val matrixHeight: Int,
 )

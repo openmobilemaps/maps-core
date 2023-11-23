@@ -4,10 +4,10 @@
 package io.openmobilemaps.mapscore.shared.map.layers.tiled
 
 data class Tiled2dMapZoomInfo(
-    var zoomLevelScaleFactor: Float,
-    var numDrawPreviousLayers: Int,
-    var adaptScaleToScreen: Boolean,
-    var maskTile: Boolean,
-    var underzoom: Boolean,
-    var overzoom: Boolean,
+    val zoomLevelScaleFactor: Float,
+    val numDrawPreviousLayers: Int,
+    val adaptScaleToScreen: Boolean,
+    val maskTile: Boolean,
+    val underzoom: Boolean,
+    val overzoom: Boolean,
 )

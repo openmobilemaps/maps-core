@@ -74,10 +74,13 @@
 
 - (void)invalidate;
 
+/** Must be called on the rendering thread! */
 - (void)drawFrame;
 
+/** Must be called on the rendering thread! */
 - (void)resume;
 
+/** Must be called on the rendering thread! */
 - (void)pause;
 
 - (void)destroy;

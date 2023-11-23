@@ -4,9 +4,9 @@
 package io.openmobilemaps.mapscore.shared.map.loader
 
 data class FontWrapper(
-    var name: String,
-    var lineHeight: Double,
-    var base: Double,
-    var bitmapSize: io.openmobilemaps.mapscore.shared.graphics.common.Vec2D,
-    var size: Double,
+    val name: String,
+    val lineHeight: Double,
+    val base: Double,
+    val bitmapSize: io.openmobilemaps.mapscore.shared.graphics.common.Vec2D,
+    val size: Double,
 )
