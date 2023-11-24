@@ -141,6 +141,11 @@ void Tiled2dMapRasterLayer::resume() {
             tileMask.second.getGraphicsObject()->setup(renderingContext);
         }
     }
+
+    for (const auto &source : sourceInterfaces) {
+        source.message(&Tiled2dMapSourceInterface::notifyTilesUpdates);
+    }
+
 }
 
 void Tiled2dMapRasterLayer::setT(int32_t t) {

@@ -706,6 +706,10 @@ void Tiled2dMapVectorLayer::resume() {
             manager->resume();
         });
     }
+
+    for (const auto &source: sourceInterfaces) {
+        source.message(&Tiled2dMapSourceInterface::notifyTilesUpdates);
+    }
 }
 
 void Tiled2dMapVectorLayer::setAlpha(float alpha) {
