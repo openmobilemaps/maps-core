@@ -52,6 +52,7 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 	private var saveFrameSpec: SaveFrameSpec? = null
 	private var saveFrameCallback: SaveFrameCallback? = null
 
+	protected var lifecycle: Lifecycle? = null
 	private var lifecycleResumed = false
 	private val mapViewStateMutable = MutableStateFlow(MapViewState.UNINITIALIZED)
 	val mapViewState = mapViewStateMutable.asStateFlow()
@@ -82,6 +83,7 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 
 	fun registerLifecycle(lifecycle: Lifecycle) {
 		lifecycle.addObserver(this)
+		this.lifecycle = lifecycle
 	}
 
 	override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
@@ -117,6 +119,7 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 
 	@OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
 	open fun onDestroy() {
+		lifecycle = null
 		mapViewStateMutable.value = MapViewState.DESTROYED
 		finishGlThread()
 	}
