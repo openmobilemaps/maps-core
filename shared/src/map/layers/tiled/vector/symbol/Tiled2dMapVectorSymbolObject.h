@@ -119,6 +119,9 @@ public:
     size_t customTexturePage = 0;
     int customTextureOffset = 0;
     std::string stringIdentifier;
+
+    double minCollisionFreeZoom;
+
 private:
     double lastZoomEvaluation = -1;
     void evaluateStyleProperties(const double zoomIdentifier);
@@ -187,6 +190,8 @@ private:
     IconTextFit iconTextFit = IconTextFit::NONE;
 
     size_t contentHash = 0;
+
+    double maxCollisionZoom = -1;
 
     bool isPlaced();
 

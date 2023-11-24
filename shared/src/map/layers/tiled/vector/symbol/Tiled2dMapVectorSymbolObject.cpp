@@ -811,7 +811,7 @@ void Tiled2dMapVectorSymbolObject::collisionDetection(const double zoomIdentifie
         return;
     }
 
-    if (!(description->minZoom <= zoomIdentifier && description->maxZoom >= zoomIdentifier) || !getIsOpaque() || !isPlaced()) {
+    if (!(description->minZoom <= zoomIdentifier && description->maxZoom >= zoomIdentifier) || !getIsOpaque() || !isPlaced() || (minCollisionFreeZoom != -1 && minCollisionFreeZoom > zoomIdentifier)) {
         // not visible
         animationCoordinator->setColliding(true);
         lastIconUpdateScaleFactor = -1;
@@ -841,11 +841,17 @@ void Tiled2dMapVectorSymbolObject::collisionDetection(const double zoomIdentifie
         }
     }
 
+    if (willCollide && (minCollisionFreeZoom == -1 || minCollisionFreeZoom < zoomIdentifier)) {
+        minCollisionFreeZoom = zoomIdentifier;
+    }
+
     if (animationCoordinator->setColliding(willCollide)) {
         lastIconUpdateScaleFactor = -1;
         lastStretchIconUpdateScaleFactor = -1;
         lastTextUpdateScaleFactor = -1;
     }
+
+    return willCollide;
 
 }
 
