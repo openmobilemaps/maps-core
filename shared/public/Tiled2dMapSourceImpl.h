@@ -823,7 +823,7 @@ void Tiled2dMapSource<T, L, R>::reloadTiles() {
     currentTiles.clear();
     readyTiles.clear();
 
-    for (auto it = currentlyLoading.begin(); it != currentlyLoading.end();) {
+    for (auto it = currentlyLoading.begin(); it != currentlyLoading.end(); ++it ) {
         cancelLoad(it->first, it->second);
     }
     currentlyLoading.clear();
