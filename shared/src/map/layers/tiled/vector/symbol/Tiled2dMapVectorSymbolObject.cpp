@@ -805,6 +805,13 @@ bool Tiled2dMapVectorSymbolObject::isPlaced() {
     return false;
 }
 
+void Tiled2dMapVectorSymbolObject::hideFromCollision() {
+    animationCoordinator->setColliding(true);
+    lastIconUpdateScaleFactor = -1;
+    lastStretchIconUpdateScaleFactor = -1;
+    lastTextUpdateScaleFactor = -1;
+}
+
 void Tiled2dMapVectorSymbolObject::collisionDetection(const double zoomIdentifier, const double rotation, const double scaleFactor, std::shared_ptr<CollisionGrid> collisionGrid) {
 
     if (!isCoordinateOwner) {
@@ -813,10 +820,7 @@ void Tiled2dMapVectorSymbolObject::collisionDetection(const double zoomIdentifie
 
     if (!(description->minZoom <= zoomIdentifier && description->maxZoom >= zoomIdentifier) || !getIsOpaque() || !isPlaced() || (minCollisionFreeZoom != -1 && minCollisionFreeZoom > zoomIdentifier)) {
         // not visible
-        animationCoordinator->setColliding(true);
-        lastIconUpdateScaleFactor = -1;
-        lastStretchIconUpdateScaleFactor = -1;
-        lastTextUpdateScaleFactor = -1;
+
         return;
     }
 

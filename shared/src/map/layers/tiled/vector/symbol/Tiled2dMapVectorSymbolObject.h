@@ -91,7 +91,7 @@ public:
         return nullptr;
     }
 
-    int64_t symbolSortKey;
+    double symbolSortKey;
     const size_t symbolTileIndex;
 
     std::optional<CollisionRectF> getViewportAlignedBoundingBox(double zoomIdentifier, bool considerSymbolSpacing, bool considerOverlapFlag);
@@ -99,6 +99,8 @@ public:
     std::optional<std::vector<CollisionCircleF>> getMapAlignedBoundingCircles(double zoomIdentifier, bool considerSymbolSpacing, bool considerOverlapFlag);
 
     bool getIsOpaque();
+
+    void hideFromCollision();
 
     void collisionDetection(const double zoomIdentifier, const double rotation, const double scaleFactor, std::shared_ptr<CollisionGrid> collisionGrid);
 
