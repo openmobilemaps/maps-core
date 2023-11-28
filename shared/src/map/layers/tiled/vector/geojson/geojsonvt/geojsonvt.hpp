@@ -181,6 +181,11 @@ public:
     }
 
 
+    bool isLoaded() override {
+        std::lock_guard<std::recursive_mutex> lock(mutex);
+        return loadingResult != std::nullopt && loadingResult->status == LoaderStatus::OK;
+    }
+
     void waitIfNotLoaded(std::shared_ptr<::djinni::Promise<std::shared_ptr<DataLoaderResult>>> promise) override {
         std::lock_guard<std::recursive_mutex> lock(mutex);
         if (loadingResult) {

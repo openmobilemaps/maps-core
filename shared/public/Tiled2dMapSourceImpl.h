@@ -774,7 +774,7 @@ void Tiled2dMapSource<T, L, R>::resume() {
 
 template<class T, class L, class R>
 ::LayerReadyState Tiled2dMapSource<T, L, R>::isReadyToRenderOffscreen() {
-    if(notFoundTiles.size() > 0) {
+    if (notFoundTiles.size() > 0) {
         return LayerReadyState::ERROR;
     }
 
@@ -784,12 +784,15 @@ template<class T, class L, class R>
         }
     }
 
-    if(!currentlyLoading.empty()) {
+    if (!currentlyLoading.empty()) {
         return LayerReadyState::NOT_READY;
     }
 
-    for(auto& visible : currentVisibleTiles) {
-        if(currentTiles.count(visible) == 0) {
+    for (const auto& visible : currentVisibleTiles) {
+        if (currentTiles.count(visible) == 0) {
+            return LayerReadyState::NOT_READY;
+        }
+        if (readyTiles.count(visible) == 0) {
             return LayerReadyState::NOT_READY;
         }
     }

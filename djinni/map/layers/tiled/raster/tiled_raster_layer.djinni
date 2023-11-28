@@ -5,6 +5,7 @@
 @extern "../../../../yaml/masking_object_interface.yaml"
 @extern "../../../../yaml/shader_program_interface.yaml"
 @extern "../../../../yaml/raster_shader_style.yaml"
+@extern "../../../../yaml/tiled_2d_map_ready_state_listener.yaml"
 
 tiled_2d_map_raster_layer_interface = interface +c {
     # the loaders are tried in their respective order, if the first loader returns the error code NOOP the second will be tried and so on
@@ -32,6 +33,8 @@ tiled_2d_map_raster_layer_interface = interface +c {
     get_max_zoom_level_identifier(): optional<i32>;
 
     set_t(t:i32);
+
+    set_ready_state_listener(listener: tiled_2d_map_ready_state_listener);
 
     get_config() : tiled_2d_map_layer_config;
 }

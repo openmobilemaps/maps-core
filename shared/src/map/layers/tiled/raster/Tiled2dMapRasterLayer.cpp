@@ -381,6 +381,8 @@ void Tiled2dMapRasterLayer::setupTiles() {
     
     rasterSource.message(&Tiled2dMapRasterSource::setTilesReady, tilesReady);
 
+    updateReadyStateListenerIfNeeded();
+
     mapInterface->invalidate();
 
 }
@@ -544,4 +546,20 @@ LayerReadyState Tiled2dMapRasterLayer::isReadyToRenderOffscreen() {
 
 std::shared_ptr<::Tiled2dMapLayerConfig> Tiled2dMapRasterLayer::getConfig() {
     return layerConfig;
+}
+
+void Tiled2dMapRasterLayer::setReadyStateListener(const /*not-null*/ std::shared_ptr<::Tiled2dMapReadyStateListener> & listener) {
+    readyStateListener = listener;
+}
+
+void Tiled2dMapRasterLayer::updateReadyStateListenerIfNeeded() {
+    const auto listener = readyStateListener;
+    if (!listener) {
+        return;
+    }
+    const auto newState = isReadyToRenderOffscreen();
+    if (newState != lastReadyState) {
+        listener->stateUpdate(newState);
+        lastReadyState = newState;
+    }
 }

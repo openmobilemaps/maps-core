@@ -7,6 +7,7 @@
 #import "MCRasterShaderStyle.h"
 #import "MCShaderProgramInterface.h"
 #import "MCTiled2dMapLayerConfig.h"
+#import "MCTiled2dMapReadyStateListener.h"
 #import <Foundation/Foundation.h>
 @class MCTiled2dMapRasterLayerInterface;
 @protocol MCTiled2dMapRasterLayerCallbackInterface;
@@ -53,6 +54,8 @@
 - (nullable NSNumber *)getMaxZoomLevelIdentifier;
 
 - (void)setT:(int32_t)t;
+
+- (void)setReadyStateListener:(nullable id<MCTiled2dMapReadyStateListener>)listener;
 
 - (nullable id<MCTiled2dMapLayerConfig>)getConfig;
 

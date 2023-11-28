@@ -4,6 +4,7 @@
 #import "MCFontLoaderInterface.h"
 #import "MCLayerInterface.h"
 #import "MCLoaderInterface.h"
+#import "MCTiled2dMapReadyStateListener.h"
 #import "MCTiled2dMapZoomInfo.h"
 #import "MCVectorLayerFeatureInfoValue.h"
 #import <Foundation/Foundation.h>
@@ -62,6 +63,8 @@
              properties:(nonnull NSDictionary<NSString *, MCVectorLayerFeatureInfoValue *> *)properties;
 
 - (void)setGlobalState:(nonnull NSDictionary<NSString *, MCVectorLayerFeatureInfoValue *> *)properties;
+
+- (void)setReadyStateListener:(nullable id<MCTiled2dMapReadyStateListener>)listener;
 
 - (void)reloadDataSource:(nonnull NSString *)sourceName;
 

@@ -45,6 +45,8 @@ abstract class Tiled2dMapRasterLayerInterface {
 
     abstract fun setT(t: Int)
 
+    abstract fun setReadyStateListener(listener: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapReadyStateListener)
+
     abstract fun getConfig(): io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig
 
     private class CppProxy : Tiled2dMapRasterLayerInterface {
@@ -139,6 +141,12 @@ abstract class Tiled2dMapRasterLayerInterface {
             native_setT(this.nativeRef, t)
         }
         private external fun native_setT(_nativeRef: Long, t: Int)
+
+        override fun setReadyStateListener(listener: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapReadyStateListener) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setReadyStateListener(this.nativeRef, listener)
+        }
+        private external fun native_setReadyStateListener(_nativeRef: Long, listener: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapReadyStateListener)
 
         override fun getConfig(): io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

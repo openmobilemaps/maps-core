@@ -6,6 +6,7 @@
 #include "FontLoaderInterface.h"
 #include "LayerInterface.h"
 #include "LoaderInterface.h"
+#include "Tiled2dMapReadyStateListener.h"
 #include "Tiled2dMapZoomInfo.h"
 #include <cstdint>
 #include <memory>
@@ -58,6 +59,8 @@ public:
     virtual void setFeatureState(const std::string & identifier, const std::unordered_map<std::string, VectorLayerFeatureInfoValue> & properties) = 0;
 
     virtual void setGlobalState(const std::unordered_map<std::string, VectorLayerFeatureInfoValue> & properties) = 0;
+
+    virtual void setReadyStateListener(const /*not-null*/ std::shared_ptr<::Tiled2dMapReadyStateListener> & listener) = 0;
 
     virtual void reloadDataSource(const std::string & sourceName) = 0;
 

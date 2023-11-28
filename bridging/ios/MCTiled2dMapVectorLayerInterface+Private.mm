@@ -9,6 +9,7 @@
 #import "MCFontLoaderInterface+Private.h"
 #import "MCLayerInterface+Private.h"
 #import "MCLoaderInterface+Private.h"
+#import "MCTiled2dMapReadyStateListener+Private.h"
 #import "MCTiled2dMapVectorLayerLocalDataProviderInterface+Private.h"
 #import "MCTiled2dMapVectorLayerSelectionCallbackInterface+Private.h"
 #import "MCTiled2dMapVectorLayerSymbolDelegateInterface+Private.h"
@@ -131,6 +132,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 - (void)setGlobalState:(nonnull NSDictionary<NSString *, MCVectorLayerFeatureInfoValue *> *)properties {
     try {
         _cppRefHandle.get()->setGlobalState(::djinni::Map<::djinni::String, ::djinni_generated::VectorLayerFeatureInfoValue>::toCpp(properties));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)setReadyStateListener:(nullable id<MCTiled2dMapReadyStateListener>)listener {
+    try {
+        _cppRefHandle.get()->setReadyStateListener(::djinni_generated::Tiled2dMapReadyStateListener::toCpp(listener));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

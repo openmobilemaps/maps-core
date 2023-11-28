@@ -23,6 +23,10 @@ tiled_2d_map_zoom_level_info = record {
     bounds: rect_coord;
 }
 
+tiled_2d_map_ready_state_listener = interface +c +j +o {
+    state_update(state: layer_ready_state);
+}
+
 tiled_2d_map_vector_settings = record {
     tile_origin: tiled_2d_map_vector_tile_origin;
 }
