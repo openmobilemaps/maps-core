@@ -137,7 +137,7 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 
 - (void)setReadyStateListener:(nullable id<MCTiled2dMapReadyStateListener>)listener {
     try {
-        _cppRefHandle.get()->setReadyStateListener(::djinni_generated::Tiled2dMapReadyStateListener::toCpp(listener));
+        _cppRefHandle.get()->setReadyStateListener(::djinni::Optional<std::optional, ::djinni_generated::Tiled2dMapReadyStateListener>::toCpp(listener));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

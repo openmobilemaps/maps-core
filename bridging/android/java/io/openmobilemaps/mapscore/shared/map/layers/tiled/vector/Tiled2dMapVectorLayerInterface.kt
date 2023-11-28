@@ -34,7 +34,7 @@ abstract class Tiled2dMapVectorLayerInterface {
 
     abstract fun setGlobalState(properties: HashMap<String, VectorLayerFeatureInfoValue>)
 
-    abstract fun setReadyStateListener(listener: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapReadyStateListener)
+    abstract fun setReadyStateListener(listener: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapReadyStateListener?)
 
     abstract fun reloadDataSource(sourceName: String)
 
@@ -109,11 +109,11 @@ abstract class Tiled2dMapVectorLayerInterface {
         }
         private external fun native_setGlobalState(_nativeRef: Long, properties: HashMap<String, VectorLayerFeatureInfoValue>)
 
-        override fun setReadyStateListener(listener: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapReadyStateListener) {
+        override fun setReadyStateListener(listener: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapReadyStateListener?) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             native_setReadyStateListener(this.nativeRef, listener)
         }
-        private external fun native_setReadyStateListener(_nativeRef: Long, listener: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapReadyStateListener)
+        private external fun native_setReadyStateListener(_nativeRef: Long, listener: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapReadyStateListener?)
 
         override fun reloadDataSource(sourceName: String) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

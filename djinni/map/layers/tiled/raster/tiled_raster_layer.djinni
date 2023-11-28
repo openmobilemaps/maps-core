@@ -34,7 +34,7 @@ tiled_2d_map_raster_layer_interface = interface +c {
 
     set_t(t:i32);
 
-    set_ready_state_listener(listener: tiled_2d_map_ready_state_listener);
+    set_ready_state_listener(listener: optional<tiled_2d_map_ready_state_listener>);
 
     get_config() : tiled_2d_map_layer_config;
 }

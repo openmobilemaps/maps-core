@@ -131,11 +131,11 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_vector_Tiled2dMapVectorLayerInterface_00024CppProxy_native_1setReadyStateListener(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeTiled2dMapReadyStateListener::JniType j_listener)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_vector_Tiled2dMapVectorLayerInterface_00024CppProxy_native_1setReadyStateListener(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeTiled2dMapReadyStateListener::Boxed::JniType j_listener)
 {
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapVectorLayerInterface>(nativeRef);
-        ref->setReadyStateListener(::djinni_generated::NativeTiled2dMapReadyStateListener::toCpp(jniEnv, j_listener));
+        ref->setReadyStateListener(::djinni::Optional<std::optional, ::djinni_generated::NativeTiled2dMapReadyStateListener>::toCpp(jniEnv, j_listener));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
