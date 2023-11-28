@@ -277,7 +277,10 @@ private:
 
     std::shared_ptr<Tiled2dMapVectorStateManager> featureStateManager;
     std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> symbolDelegate;
-c
+
+    void updateReadyStateListenerIfNeeded();
+    std::optional<LayerReadyState> lastReadyState;
+    std::shared_ptr<::Tiled2dMapReadyStateListener> readyStateListener;
 };
 
 
