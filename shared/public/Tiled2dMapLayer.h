@@ -71,7 +71,7 @@ class Tiled2dMapLayer : public SimpleLayerInterface,
 protected:
     std::shared_ptr<MapInterface> mapInterface;
     std::shared_ptr< ::ErrorManager> errorManager;
-    std::recursive_mutex sourcesMutex;
+    std::atomic_bool sourcesSet;
     std::vector<WeakActor<Tiled2dMapSourceInterface>> sourceInterfaces;
 
     bool isHidden = false;

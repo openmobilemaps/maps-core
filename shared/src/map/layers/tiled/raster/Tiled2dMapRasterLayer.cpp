@@ -150,9 +150,10 @@ void Tiled2dMapRasterLayer::resume() {
 
 void Tiled2dMapRasterLayer::setT(int32_t t) {
     Tiled2dMapLayer::setT(t);
-    std::lock_guard<std::recursive_mutex> lock(sourcesMutex);
-    for (const auto &sourceInterface : sourceInterfaces) {
-        sourceInterface.message(&Tiled2dMapSourceInterface::notifyTilesUpdates);
+    if (sourcesSet) {
+        for (const auto &sourceInterface: sourceInterfaces) {
+            sourceInterface.message(&Tiled2dMapSourceInterface::notifyTilesUpdates);
+        }
     }
 }
 
