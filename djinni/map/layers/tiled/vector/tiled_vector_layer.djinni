@@ -7,6 +7,7 @@
 @extern "../../../../yaml/color.yaml"
 @extern "../../../../yaml/coord.yaml"
 @extern "../../../../yaml/rect_i.yaml"
+@extern "../../../../yaml/tiled_2d_map_ready_state_listener.yaml"
 
 @extern "../../../../yaml/texture_loader_result.yaml"
 @extern "../../../../yaml/data_loader_result.yaml"
@@ -57,6 +58,8 @@ sourceUrlParams: optional<map<string, string>>
 
     set_feature_state(identifier: string, properties: map<string, vector_layer_feature_info_value>);
     set_global_state(properties: map<string, vector_layer_feature_info_value>);
+
+    set_ready_state_listener(listener: optional<tiled_2d_map_ready_state_listener>);
 
     reload_data_source(source_name: string);
     reload_local_data_source(source_name: string, geo_json: string);

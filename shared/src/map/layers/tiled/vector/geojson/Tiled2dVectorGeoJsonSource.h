@@ -69,6 +69,14 @@ public:
             onVisibleBoundsChanged(bounds, 0, zoom);
         }
     }
+
+    virtual ::LayerReadyState isReadyToRenderOffscreen() override {
+        if (geoJson->isLoaded()) {
+            return Tiled2dMapVectorSource::isReadyToRenderOffscreen();
+        }
+        return LayerReadyState::NOT_READY;
+    }
+
 protected:
 
     virtual void cancelLoad(Tiled2dMapTileInfo tile, size_t loaderIndex) override {};

@@ -6,6 +6,7 @@
 #include "NativeFontLoaderInterface.h"
 #include "NativeLayerInterface.h"
 #include "NativeLoaderInterface.h"
+#include "NativeTiled2dMapReadyStateListener.h"
 #include "NativeTiled2dMapVectorLayerLocalDataProviderInterface.h"
 #include "NativeTiled2dMapVectorLayerSelectionCallbackInterface.h"
 #include "NativeTiled2dMapVectorLayerSymbolDelegateInterface.h"
@@ -127,6 +128,14 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapVectorLayerInterface>(nativeRef);
         ref->setGlobalState(::djinni::Map<::djinni::String, ::djinni_generated::NativeVectorLayerFeatureInfoValue>::toCpp(jniEnv, j_properties));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_vector_Tiled2dMapVectorLayerInterface_00024CppProxy_native_1setReadyStateListener(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeTiled2dMapReadyStateListener::Boxed::JniType j_listener)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapVectorLayerInterface>(nativeRef);
+        ref->setReadyStateListener(::djinni::Optional<std::optional, ::djinni_generated::NativeTiled2dMapReadyStateListener>::toCpp(jniEnv, j_listener));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

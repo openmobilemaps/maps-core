@@ -189,6 +189,8 @@ public:
 
 	virtual void reloadLocalDataSource(const std::string & sourceName, const std::string & geoJson) override;
 
+    virtual void setReadyStateListener(const /*not-null*/ std::shared_ptr<::Tiled2dMapReadyStateListener> & listener) override;
+
 	protected:
     virtual void setMapDescription(const std::shared_ptr<VectorMapDescription> &mapDescription);
 
@@ -275,6 +277,10 @@ private:
 
     std::shared_ptr<Tiled2dMapVectorStateManager> featureStateManager;
     std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> symbolDelegate;
+
+    void updateReadyStateListenerIfNeeded();
+    std::optional<LayerReadyState> lastReadyState;
+    std::shared_ptr<::Tiled2dMapReadyStateListener> readyStateListener;
 };
 
 

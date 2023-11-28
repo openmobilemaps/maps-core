@@ -103,6 +103,8 @@ public:
     virtual std::shared_ptr<::Tiled2dMapLayerConfig> getConfig() override;
                                   
     void onTilesUpdated(const std::string &layerName, std::unordered_set<Tiled2dMapRasterTileInfo> currentTileInfos) override;
+
+    virtual void setReadyStateListener(const /*not-null*/ std::shared_ptr<::Tiled2dMapReadyStateListener> & listener) override;
 private:
     virtual void enableAnimations(bool enabled) override;
 
@@ -137,4 +139,8 @@ protected:
     std::vector<std::pair<Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>>> tilesToSetup;
     std::vector<std::pair<Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>>> tilesToClean;
     std::vector<Tiled2dMapRasterTileInfo> tileStateUpdates;
+
+    void updateReadyStateListenerIfNeeded();
+    std::optional<LayerReadyState> lastReadyState;
+    std::shared_ptr<::Tiled2dMapReadyStateListener> readyStateListener;
 };

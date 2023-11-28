@@ -13,6 +13,7 @@
 #import "MCShaderProgramInterface+Private.h"
 #import "MCTiled2dMapLayerConfig+Private.h"
 #import "MCTiled2dMapRasterLayerCallbackInterface+Private.h"
+#import "MCTiled2dMapReadyStateListener+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -149,6 +150,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 - (void)setT:(int32_t)t {
     try {
         _cppRefHandle.get()->setT(::djinni::I32::toCpp(t));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)setReadyStateListener:(nullable id<MCTiled2dMapReadyStateListener>)listener {
+    try {
+        _cppRefHandle.get()->setReadyStateListener(::djinni::Optional<std::optional, ::djinni_generated::Tiled2dMapReadyStateListener>::toCpp(listener));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

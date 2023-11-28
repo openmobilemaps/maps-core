@@ -9,6 +9,7 @@
 #include "RasterShaderStyle.h"
 #include "ShaderProgramInterface.h"
 #include "Tiled2dMapLayerConfig.h"
+#include "Tiled2dMapReadyStateListener.h"
 #include <cstdint>
 #include <memory>
 #include <optional>
@@ -54,6 +55,8 @@ public:
     virtual std::optional<int32_t> getMaxZoomLevelIdentifier() = 0;
 
     virtual void setT(int32_t t) = 0;
+
+    virtual void setReadyStateListener(const /*nullable*/ std::shared_ptr<::Tiled2dMapReadyStateListener> & listener) = 0;
 
     virtual /*not-null*/ std::shared_ptr<::Tiled2dMapLayerConfig> getConfig() = 0;
 };

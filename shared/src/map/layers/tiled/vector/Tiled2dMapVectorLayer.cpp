@@ -577,6 +577,7 @@ void Tiled2dMapVectorLayer::onRenderPassUpdate(const std::string &source, bool i
         sourceRenderDescriptionMap[source].renderDescriptions = renderDescription;
     }
     pregenerateRenderPasses();
+    updateReadyStateListenerIfNeeded();
     prevCollisionStillValid.clear();
 }
 
@@ -1211,4 +1212,20 @@ std::optional<int32_t> Tiled2dMapVectorLayer::getMaxZoomLevelIdentifier() {
 
 void Tiled2dMapVectorLayer::invalidateCollisionState() {
     prevCollisionStillValid.clear();
+}
+
+void Tiled2dMapVectorLayer::setReadyStateListener(const /*not-null*/ std::shared_ptr<::Tiled2dMapReadyStateListener> & listener) {
+    readyStateListener = listener;
+}
+
+void Tiled2dMapVectorLayer::updateReadyStateListenerIfNeeded() {
+    const auto listener = readyStateListener;
+    if (!listener) {
+        return;
+    }
+    const auto newState = isReadyToRenderOffscreen();
+    if (newState != lastReadyState) {
+        listener->stateUpdate(newState);
+        lastReadyState = newState;
+    }
 }
