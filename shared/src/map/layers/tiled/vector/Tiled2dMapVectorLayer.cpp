@@ -457,6 +457,9 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
     });
     if (backgroundLayerDesc != mapDescription->layers.end()) {
         backgroundLayer = std::make_shared<Tiled2dMapVectorBackgroundSubLayer>(std::static_pointer_cast<BackgroundVectorLayerDescription>(*backgroundLayerDesc), featureStateManager);
+        if (spriteData && spriteTexture) {
+            backgroundLayer->setSprites(spriteData, spriteTexture);
+        }
         backgroundLayer->onAdded(mapInterface, layerIndex);
     }
 
@@ -888,6 +891,10 @@ void Tiled2dMapVectorLayer::didLoadSpriteData(std::shared_ptr<SpriteData> sprite
 
     for (const auto &[source, manager] : sourceDataManagers) {
         manager.message(&Tiled2dMapVectorSourceTileDataManager::setSprites, spriteData, spriteTexture);
+    }
+
+    if (backgroundLayer) {
+        backgroundLayer->setSprites(spriteData, spriteTexture);
     }
 }
 

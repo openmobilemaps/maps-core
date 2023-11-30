@@ -16,13 +16,15 @@
 
 class BackgroundVectorStyle {
 public:
-    BackgroundVectorStyle(std::shared_ptr<Value> color, std::shared_ptr<Value> blendMode): color(color), blendMode(blendMode) {}
+    BackgroundVectorStyle(std::shared_ptr<Value> backgroundColor,
+                          std::shared_ptr<Value> backgroundPattern,
+                          std::shared_ptr<Value> blendMode): backgroundColor(backgroundColor), backgroundPattern(backgroundPattern), blendMode(blendMode) {}
 
     UsedKeysCollection getUsedKeys() const {
 
         UsedKeysCollection usedKeys;
         std::vector<std::shared_ptr<Value>> values = {
-            color, blendMode
+            backgroundColor, backgroundPattern, blendMode
         };
 
         for (auto const &value: values) {
@@ -39,13 +41,18 @@ public:
         return blendMode ? blendMode->evaluateOr(context, defaultValue) : defaultValue;
     }
 
-    Color getColor(const EvaluationContext &context){
+    Color getColor(const EvaluationContext &context) {
         static const Color defaultValue = ColorUtil::c(0, 0, 0, 1.0);
-        return color ? color->evaluateOr(context, defaultValue) : defaultValue;
+        return backgroundColor ? backgroundColor->evaluateOr(context, defaultValue) : defaultValue;
     }
 
-private:
-    std::shared_ptr<Value> color;
+    std::string getPattern(const EvaluationContext &context) {
+         static const std::string defaultValue = "";
+         return backgroundPattern ? backgroundPattern->evaluateOr(context, defaultValue) : defaultValue;
+     }
+
+    std::shared_ptr<Value> backgroundColor;
+    std::shared_ptr<Value> backgroundPattern;
     std::shared_ptr<Value> blendMode;
 };
 

@@ -37,6 +37,7 @@ private:
         void setOpacities(const ::SharedBytes & values) override;
         void setTextureCoordinates(const ::SharedBytes & values) override;
         void setScalingFactor(float factor) override;
+        void setScalingFactors(const ::Vec2F & factor) override;
         void loadTexture(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & context, const /*not-null*/ std::shared_ptr<::TextureHolderInterface> & textureHolder) override;
         void removeTexture() override;
         /*not-null*/ std::shared_ptr<::GraphicsObjectInterface> asGraphicsObject() override;
@@ -50,6 +51,7 @@ private:
     const jmethodID method_setOpacities { ::djinni::jniGetMethodID(clazz.get(), "setOpacities", "(Lio/openmobilemaps/mapscore/shared/graphics/common/SharedBytes;)V") };
     const jmethodID method_setTextureCoordinates { ::djinni::jniGetMethodID(clazz.get(), "setTextureCoordinates", "(Lio/openmobilemaps/mapscore/shared/graphics/common/SharedBytes;)V") };
     const jmethodID method_setScalingFactor { ::djinni::jniGetMethodID(clazz.get(), "setScalingFactor", "(F)V") };
+    const jmethodID method_setScalingFactors { ::djinni::jniGetMethodID(clazz.get(), "setScalingFactors", "(Lio/openmobilemaps/mapscore/shared/graphics/common/Vec2F;)V") };
     const jmethodID method_loadTexture { ::djinni::jniGetMethodID(clazz.get(), "loadTexture", "(Lio/openmobilemaps/mapscore/shared/graphics/RenderingContextInterface;Lio/openmobilemaps/mapscore/shared/graphics/objects/TextureHolderInterface;)V") };
     const jmethodID method_removeTexture { ::djinni::jniGetMethodID(clazz.get(), "removeTexture", "()V") };
     const jmethodID method_asGraphicsObject { ::djinni::jniGetMethodID(clazz.get(), "asGraphicsObject", "()Lio/openmobilemaps/mapscore/shared/graphics/objects/GraphicsObjectInterface;") };

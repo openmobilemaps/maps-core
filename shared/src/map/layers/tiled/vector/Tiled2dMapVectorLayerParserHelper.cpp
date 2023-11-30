@@ -217,10 +217,10 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
             transitionDelay = val["transition"].value("delay", transitionDelay);
         }
 
-        if (val["type"] == "background" && !val["paint"]["background-color"].is_null()) {
+        if (val["type"] == "background") {
             auto layerDesc = std::make_shared<BackgroundVectorLayerDescription>(val["id"],
-                                                                                BackgroundVectorStyle(parser.parseValue(
-                                                                                        val["paint"]["background-color"]),
+                                                                                BackgroundVectorStyle(parser.parseValue(val["paint"]["background-color"]),
+                                                                                                      parser.parseValue(val["paint"]["background-pattern"]),
                                                                                                       blendMode),
                                                                                 renderPassIndex,
                                                                                 interactable);

@@ -145,7 +145,7 @@ void PolygonPatternGroup2dOpenGl::render(const std::shared_ptr<::RenderingContex
     glUniform2f(textureFactorHandle, factorWidth, factorHeight);
 
     auto scalingFactorHandle = glGetUniformLocation(program, "uScalingFactor");
-    glUniform1f(scalingFactorHandle, scalingFactor);
+    glUniform2f(scalingFactorHandle, scalingFactor.x, scalingFactor.y);
 
     int textureCoordinatesHandle = glGetUniformLocation(program, "textureCoordinates");
     glUniform1fv(textureCoordinatesHandle, sizeTextureCoordinatesValuesArray, &textureCoordinates[0]);
@@ -197,6 +197,11 @@ void PolygonPatternGroup2dOpenGl::prepareTextureDraw(int program) {
 }
 
 void PolygonPatternGroup2dOpenGl::setScalingFactor(float factor) {
+    this->scalingFactor.x = factor;
+    this->scalingFactor.y = factor;
+}
+
+void PolygonPatternGroup2dOpenGl::setScalingFactors(const ::Vec2F & factor) {
     this->scalingFactor = factor;
 }
 

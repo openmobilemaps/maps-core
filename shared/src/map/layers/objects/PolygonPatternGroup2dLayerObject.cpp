@@ -66,6 +66,10 @@ void PolygonPatternGroup2dLayerObject::setScalingFactor(float factor) {
     polygon->setScalingFactor(factor);
 }
 
+void PolygonPatternGroup2dLayerObject::setScalingFactor(Vec2F factor) {
+    polygon->setScalingFactors(factor);
+}
+
 void PolygonPatternGroup2dLayerObject::loadTexture(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & context, const /*not-null*/ std::shared_ptr<TextureHolderInterface> & textureHolder) {
     polygon->loadTexture(context, textureHolder);
 }

@@ -5,6 +5,7 @@
 
 #include "RenderingContextInterface.h"
 #include "SharedBytes.h"
+#include "Vec2F.h"
 #include <memory>
 
 class GraphicsObjectInterface;
@@ -22,6 +23,8 @@ public:
     virtual void setTextureCoordinates(const ::SharedBytes & values) = 0;
 
     virtual void setScalingFactor(float factor) = 0;
+
+    virtual void setScalingFactors(const ::Vec2F & factor) = 0;
 
     virtual void loadTexture(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & context, const /*not-null*/ std::shared_ptr<TextureHolderInterface> & textureHolder) = 0;
 

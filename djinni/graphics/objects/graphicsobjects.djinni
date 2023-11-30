@@ -4,6 +4,7 @@
 @extern "../../yaml/rect_d.yaml"
 @extern "../../yaml/quad_2d_d.yaml"
 @extern "../../yaml/vec_2_d.yaml"
+@extern "../../yaml/vec_2_f.yaml"
 @extern "../../yaml/shared_bytes.yaml"
 
 graphics_object_interface = interface +c +j +o {
@@ -137,6 +138,7 @@ polygon_pattern_group_2d_interface = interface +c +j +o {
     # 4 floats (x, y, width and height) in uv space and 2 uint_16 values for the pixel with and height for each instanced
     set_texture_coordinates(values: shared_bytes);
     set_scaling_factor(factor: f32);
+    set_scaling_factors(factor: vec_2_f);
     load_texture(context: rendering_context_interface, texture_holder: texture_holder_interface);
     remove_texture();
     as_graphics_object(): graphics_object_interface;

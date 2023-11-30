@@ -61,6 +61,8 @@ class PolygonPatternGroup2dOpenGl : public GraphicsObjectInterface,
 
     void setScalingFactor(float factor) override;
 
+    void setScalingFactors(const ::Vec2F & factor) override;
+
 protected:
     virtual void prepareTextureDraw(int mProgram);
 
@@ -93,7 +95,7 @@ protected:
 
     bool isMaskInversed = false;
 
-    float scalingFactor = 1.0;
+    ::Vec2F scalingFactor = Vec2F(1.0, 1.0);
     std::vector<GLfloat> opacities;
     std::vector<GLfloat> textureCoordinates;
     GLuint textureCoordinatesBuffer;
