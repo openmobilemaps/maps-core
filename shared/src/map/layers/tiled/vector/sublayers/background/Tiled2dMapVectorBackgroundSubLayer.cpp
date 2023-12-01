@@ -105,7 +105,7 @@ std::vector<std::shared_ptr<RenderPassInterface>> Tiled2dMapVectorBackgroundSubL
         Vec2I viewportSize = mapInterface->getRenderingContext()->getViewportSize();
         patternObject->setScalingFactor(Vec2F(1.0 / viewportSize.x, 1.0 / viewportSize.y));
     }
-    
+
     return renderPasses;
 }
 
@@ -176,7 +176,7 @@ void Tiled2dMapVectorBackgroundSubLayer::setSprites(std::shared_ptr<SpriteData> 
     std::lock_guard<std::recursive_mutex> lck(mutex);
     this->spriteData = spriteData;
     this->spriteTexture = spriteTexture;
-    if (mapInterface && patternObject && !patternName.empty()) {
+    if (spriteData && spriteTexture && mapInterface && patternObject && !patternName.empty()) {
         const auto spriteIt = spriteData->sprites.find(patternName);
         if (spriteIt != spriteData->sprites.end()) {
             std::vector<float> textureCoordinates(5);
