@@ -401,8 +401,9 @@ void Tiled2dMapSource<T, L, R>::performLoadingTask(Tiled2dMapTileInfo tile, size
                                 [tile, loaderIndex, weakSelfPtr, weakActor, res] {
                                     auto strongSelf = weakSelfPtr.lock();
                                     if (strongSelf) {
+                                        auto parsed = strongSelf->postLoadingTask(res, tile);
                                         weakActor.message(&Tiled2dMapSource::didLoad, tile, loaderIndex,
-                                                          strongSelf->postLoadingTask(res, tile));
+                                                          parsed);
                                     }
                                 }));
                     }

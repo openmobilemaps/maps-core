@@ -45,7 +45,7 @@ void Tiled2dMapVectorPolygonTile::updateVectorLayerDescription(const std::shared
         auto selfActor = WeakActor(mailbox, shared_from_this()->weak_from_this());
         selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorPolygonTile::update);
 
-        tileCallbackInterface.message(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsReady, tileInfo, description->identifier, WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this()));
+        tileCallbackInterface.syncMessage(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsReady, tileInfo, description->identifier, WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this()));
     } else {
         usedKeys = std::move(newUsedKeys);
         featureGroups.clear();
@@ -129,7 +129,7 @@ void Tiled2dMapVectorPolygonTile::setup() {
     }
 
     auto selfActor = WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this());
-    tileCallbackInterface.message(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsReady, tileInfo, description->identifier, selfActor);
+    tileCallbackInterface.syncMessage(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsReady, tileInfo, description->identifier, selfActor);
 
 }
 
@@ -241,7 +241,7 @@ void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDa
         addPolygons(styleGroupNewPolygonsMap);
     } else {
         auto selfActor = WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this());
-        tileCallbackInterface.message(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsReady, tileInfo, description->identifier, selfActor);
+        tileCallbackInterface.syncMessage(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsReady, tileInfo, description->identifier, selfActor);
     }
 }
 
@@ -249,7 +249,7 @@ void Tiled2dMapVectorPolygonTile::addPolygons(const std::unordered_map<int, std:
 
     if (styleGroupNewPolygonsMap.empty()) {
         auto selfActor = WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this());
-        tileCallbackInterface.message(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsReady, tileInfo, description->identifier, selfActor);
+        tileCallbackInterface.syncMessage(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsReady, tileInfo, description->identifier, selfActor);
         return;
     }
 
@@ -303,7 +303,7 @@ void Tiled2dMapVectorPolygonTile::setupPolygons(const std::vector<std::shared_pt
     }
 
     auto selfActor = WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this());
-    tileCallbackInterface.message(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsReady, tileInfo, description->identifier, selfActor);
+    tileCallbackInterface.syncMessage(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsReady, tileInfo, description->identifier, selfActor);
 }
 
 std::vector<std::shared_ptr<RenderObjectInterface>> Tiled2dMapVectorPolygonTile::generateRenderObjects() {

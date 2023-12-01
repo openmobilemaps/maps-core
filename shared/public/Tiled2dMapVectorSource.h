@@ -47,7 +47,10 @@ public:
 protected:
     
     virtual void cancelLoad(Tiled2dMapTileInfo tile, size_t loaderIndex) override;
-    
+
+    std::unordered_set<Tiled2dMapTileInfo> loadingTiles;
+    std::mutex loadingTilesMutex;
+
     virtual ::djinni::Future<std::shared_ptr<DataLoaderResult>> loadDataAsync(Tiled2dMapTileInfo tile, size_t loaderIndex) override;
 
     virtual bool hasExpensivePostLoadingTask() override;
