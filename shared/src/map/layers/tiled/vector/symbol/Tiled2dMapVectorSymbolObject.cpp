@@ -681,7 +681,7 @@ void Tiled2dMapVectorSymbolObject::setupTextProperties(std::vector<float> &textu
 }
 
 void Tiled2dMapVectorSymbolObject::updateTextProperties(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, long long now) {
-    if (!labelObject) {
+    if (instanceCounts.textCharacters ==  0 || !labelObject) {
         return;
     }
 
@@ -695,14 +695,7 @@ void Tiled2dMapVectorSymbolObject::updateTextProperties(std::vector<float> &posi
         }
     }
 
-
     if (lastTextUpdateScaleFactor == scaleFactor && lastTextUpdateRotation == rotation && !isStyleZoomDependant) {
-        styleOffset += instanceCounts.textCharacters == 0 ? 0 : 1;
-        countOffset += instanceCounts.textCharacters;
-        return;
-    }
-
-    if ((instanceCounts.textCharacters ==  0 || !labelObject) && !isStyleZoomDependant) {
         styleOffset += instanceCounts.textCharacters == 0 ? 0 : 1;
         countOffset += instanceCounts.textCharacters;
         return;
