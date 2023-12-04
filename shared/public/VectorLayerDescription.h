@@ -31,7 +31,7 @@ public:
 
     virtual UsedKeysCollection getUsedKeys() const {
         UsedKeysCollection usedKeys;
-        std::vector<std::shared_ptr<Value>> values = { filter, interactable };
+        std::shared_ptr<Value> values[] = { filter, interactable };
 
         for (auto const &value: values) {
             if (!value) continue;

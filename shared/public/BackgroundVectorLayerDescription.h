@@ -23,8 +23,8 @@ public:
     UsedKeysCollection getUsedKeys() const {
 
         UsedKeysCollection usedKeys;
-        std::vector<std::shared_ptr<Value>> values = {
-            backgroundColor, backgroundPattern, blendMode
+        std::shared_ptr<Value> values[] = {
+                backgroundColor, backgroundPattern, blendMode
         };
 
         for (auto const &value: values) {

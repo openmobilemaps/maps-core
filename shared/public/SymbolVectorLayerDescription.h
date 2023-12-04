@@ -156,7 +156,7 @@ public:
     UsedKeysCollection getUsedKeys() const {
 
         UsedKeysCollection usedKeys;
-        std::vector<std::shared_ptr<Value>> values = {
+        std::shared_ptr<Value> values[] = {
             textSize, textFont, textField, textTransform, textOffset, textRadialOffset,
             textColor, textHaloColor, textPadding, symbolSortKey, symbolPlacement, iconImage,
             iconAnchor, iconOffset, textAnchor, textVariableAnchor, textRotate, symbolSpacing,

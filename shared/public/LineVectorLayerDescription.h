@@ -46,7 +46,7 @@ public:
 
     UsedKeysCollection getUsedKeys() const {
         UsedKeysCollection usedKeys;
-        std::vector<std::shared_ptr<Value>> values = { lineColor, lineOpacity, lineWidth, lineBlur, lineDashArray, lineCap, blendMode };
+        std::shared_ptr<Value> values[] = { lineColor, lineOpacity, lineWidth, lineBlur, lineDashArray, lineCap, blendMode };
 
         for (auto const &value: values) {
             if (!value) continue;

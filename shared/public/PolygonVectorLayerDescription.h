@@ -35,7 +35,7 @@ public:
     UsedKeysCollection getUsedKeys() const {
 
         UsedKeysCollection usedKeys;
-        std::vector<std::shared_ptr<Value>> values = {
+        std::shared_ptr<Value> values[] = {
             fillColor, fillOpacity, fillPattern
         };
 
