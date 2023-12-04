@@ -57,9 +57,9 @@ struct PolygonPatternGroupVertexOut {
 vertex PolygonPatternGroupVertexOut
 polygonPatternGroupVertexShader(const PolygonGroupVertexIn vertexIn [[stage_in]],
                                 constant float4x4 &mvpMatrix [[buffer(1)]],
-                                constant float &scalingFactor [[buffer(2)]])
+                                constant float2 &scalingFactor [[buffer(2)]])
 {
-  float2 pixelPosition = vertexIn.position.xy * float2(1 / scalingFactor, 1 / scalingFactor);
+  float2 pixelPosition = vertexIn.position.xy *  float2(1 / scalingFactor.x, 1 / scalingFactor.y);
 
   PolygonPatternGroupVertexOut out {
         .position = mvpMatrix * float4(vertexIn.position.xy, 0.0, 1.0),

@@ -44,13 +44,13 @@ std::string PolygonPatternGroup2dShaderOpenGl::getVertexShader() {
                                       in float vStyleIndex;
 
                                       uniform mat4 uMVPMatrix;
-                                      uniform float uScalingFactor;
+                                      uniform vec2 uScalingFactor;
 
                                       out vec2 pixelPosition;
                                       out flat uint styleIndex;
 
                                       void main() {
-                                          pixelPosition = vPosition.xy * vec2(1.0 / uScalingFactor, 1.0 / uScalingFactor);
+                                          pixelPosition = vPosition.xy * vec2(1.0 / uScalingFactor.x, 1.0 / uScalingFactor.y);
                                           styleIndex = uint(floor(vStyleIndex + 0.5));
                                           gl_Position = uMVPMatrix * vec4(vPosition, 0.0, 1.0);
                                       }

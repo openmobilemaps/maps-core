@@ -11,6 +11,7 @@
 #import "MCRenderingContextInterface+Private.h"
 #import "MCSharedBytes+Private.h"
 #import "MCTextureHolderInterface+Private.h"
+#import "MCVec2F+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -58,6 +59,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 - (void)setScalingFactor:(float)factor {
     try {
         _cppRefHandle.get()->setScalingFactor(::djinni::F32::toCpp(factor));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)setScalingFactors:(nonnull MCVec2F *)factor {
+    try {
+        _cppRefHandle.get()->setScalingFactors(::djinni_generated::Vec2F::toCpp(factor));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -114,6 +121,12 @@ public:
     {
         @autoreleasepool {
             [djinni_private_get_proxied_objc_object() setScalingFactor:(::djinni::F32::fromCpp(c_factor))];
+        }
+    }
+    void setScalingFactors(const ::Vec2F & c_factor) override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() setScalingFactors:(::djinni_generated::Vec2F::fromCpp(c_factor))];
         }
     }
     void loadTexture(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & c_context, const /*not-null*/ std::shared_ptr<::TextureHolderInterface> & c_textureHolder) override

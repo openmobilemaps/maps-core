@@ -17,6 +17,8 @@ abstract class PolygonPatternGroup2dInterface {
 
     abstract fun setScalingFactor(factor: Float)
 
+    abstract fun setScalingFactors(factor: io.openmobilemaps.mapscore.shared.graphics.common.Vec2F)
+
     abstract fun loadTexture(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, textureHolder: TextureHolderInterface)
 
     abstract fun removeTexture()
@@ -61,6 +63,12 @@ abstract class PolygonPatternGroup2dInterface {
             native_setScalingFactor(this.nativeRef, factor)
         }
         private external fun native_setScalingFactor(_nativeRef: Long, factor: Float)
+
+        override fun setScalingFactors(factor: io.openmobilemaps.mapscore.shared.graphics.common.Vec2F) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setScalingFactors(this.nativeRef, factor)
+        }
+        private external fun native_setScalingFactors(_nativeRef: Long, factor: io.openmobilemaps.mapscore.shared.graphics.common.Vec2F)
 
         override fun loadTexture(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, textureHolder: TextureHolderInterface) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

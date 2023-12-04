@@ -15,6 +15,11 @@
 #include "ColorShaderInterface.h"
 #include "RenderObject.h"
 #include "Tiled2dMapVectorTileInfo.h"
+#include "PolygonPatternGroupShaderInterface.h"
+#include "SpriteData.h"
+#include "TextureHolderInterface.h"
+#include "PolygonGroup2dLayerObject.h"
+#include "PolygonPatternGroup2dLayerObject.h"
 
 class Tiled2dMapVectorBackgroundSubLayer : public Tiled2dMapVectorSubLayer, public std::enable_shared_from_this<Tiled2dMapVectorBackgroundSubLayer> {
 public:
@@ -52,15 +57,23 @@ public:
 
     virtual std::string getLayerDescriptionIdentifier() override;
 
+    void setSprites(std::shared_ptr<SpriteData> spriteData, std::shared_ptr<TextureHolderInterface> spriteTexture);
+
 private:
     std::shared_ptr<BackgroundVectorLayerDescription> description;
 
     double dpFactor = 1.0;
 
-    std::shared_ptr<RenderObject> renderObject;
-
     std::vector<std::shared_ptr<RenderPassInterface>> renderPasses;
-    std::shared_ptr<::ColorShaderInterface> shader;
+
+    std::string patternName;
+    std::shared_ptr<PolygonPatternGroup2dLayerObject> patternObject;
+    std::shared_ptr<PolygonGroup2dLayerObject> polygonObject;
 
     const std::shared_ptr<Tiled2dMapVectorStateManager> featureStateManager;
+
+    std::recursive_mutex mutex;
+
+    std::shared_ptr<SpriteData> spriteData;
+    std::shared_ptr<TextureHolderInterface> spriteTexture;
 };

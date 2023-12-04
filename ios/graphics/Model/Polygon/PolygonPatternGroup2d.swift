@@ -27,7 +27,7 @@ final class PolygonPatternGroup2d: BaseGraphicsObject {
     private var texture: MTLTexture?
 
     private var screenPixelFactor: Float = 0
-    private var customScreenPixelFactor: Float = 0
+    var customScreenPixelFactor = SIMD2<Float>([0.0, 0.0])
 
     init(shader: MCShaderProgramInterface, metalContext: MetalContext) {
         guard let shader = shader as? PolygonPatternGroupShader else {
@@ -94,11 +94,11 @@ final class PolygonPatternGroup2d: BaseGraphicsObject {
         if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mvpMatrix)) {
             encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
         }
-        if customScreenPixelFactor != 0 {
-            encoder.setVertexBytes(&customScreenPixelFactor, length: MemoryLayout<Float>.stride, index: 2)
+        if customScreenPixelFactor.x != 0 {
+            encoder.setVertexBytes(&customScreenPixelFactor, length: MemoryLayout<SIMD2<Float>>.stride, index: 2)
         } else {
-            screenPixelFactor = Float(screenPixelAsRealMeterFactor)
-            encoder.setVertexBytes(&screenPixelFactor, length: MemoryLayout<Float>.stride, index: 2)
+            var factors = SIMD2<Float>([screenPixelAsRealMeterFactor, screenPixelAsRealMeterFactor])
+            encoder.setVertexBytes(&factors, length: MemoryLayout<SIMD2<Float>>.stride, index: 2)
         }
 
         encoder.setFragmentTexture(texture, index: 0)
@@ -150,9 +150,17 @@ extension PolygonPatternGroup2d: MCPolygonPatternGroup2dInterface {
         }
     }
 
+    func setScalingFactors(_ factor: MCVec2F) {
+        lock.withCritical {
+            customScreenPixelFactor.x = factor.x
+            customScreenPixelFactor.y = factor.y
+        }
+    }
+
     func setScalingFactor(_ factor: Float) {
         lock.withCritical {
-            customScreenPixelFactor = factor
+            customScreenPixelFactor.x = factor
+            customScreenPixelFactor.y = factor
         }
     }
 

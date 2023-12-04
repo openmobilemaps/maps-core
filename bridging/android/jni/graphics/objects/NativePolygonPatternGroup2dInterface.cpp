@@ -7,6 +7,7 @@
 #include "NativeRenderingContextInterface.h"
 #include "NativeSharedBytes.h"
 #include "NativeTextureHolderInterface.h"
+#include "NativeVec2F.h"
 
 namespace djinni_generated {
 
@@ -49,6 +50,14 @@ void NativePolygonPatternGroup2dInterface::JavaProxy::setScalingFactor(float c_f
     const auto& data = ::djinni::JniClass<::djinni_generated::NativePolygonPatternGroup2dInterface>::get();
     jniEnv->CallVoidMethod(Handle::get().get(), data.method_setScalingFactor,
                            ::djinni::get(::djinni::F32::fromCpp(jniEnv, c_factor)));
+    ::djinni::jniExceptionCheck(jniEnv);
+}
+void NativePolygonPatternGroup2dInterface::JavaProxy::setScalingFactors(const ::Vec2F & c_factor) {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativePolygonPatternGroup2dInterface>::get();
+    jniEnv->CallVoidMethod(Handle::get().get(), data.method_setScalingFactors,
+                           ::djinni::get(::djinni_generated::NativeVec2F::fromCpp(jniEnv, c_factor)));
     ::djinni::jniExceptionCheck(jniEnv);
 }
 void NativePolygonPatternGroup2dInterface::JavaProxy::loadTexture(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & c_context, const /*not-null*/ std::shared_ptr<::TextureHolderInterface> & c_textureHolder) {
@@ -113,6 +122,14 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::PolygonPatternGroup2dInterface>(nativeRef);
         ref->setScalingFactor(::djinni::F32::toCpp(jniEnv, j_factor));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_PolygonPatternGroup2dInterface_00024CppProxy_native_1setScalingFactors(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeVec2F::JniType j_factor)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::PolygonPatternGroup2dInterface>(nativeRef);
+        ref->setScalingFactors(::djinni_generated::NativeVec2F::toCpp(jniEnv, j_factor));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

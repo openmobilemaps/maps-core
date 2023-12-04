@@ -41,6 +41,8 @@ class PolygonPatternGroup2dLayerObject : public LayerObjectInterface {
 
     void setScalingFactor(float factor);
 
+    void setScalingFactor(Vec2F factor);
+
     void loadTexture(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & context, const /*not-null*/ std::shared_ptr<TextureHolderInterface> & textureHolder);
 
     std::shared_ptr<GraphicsObjectInterface> getPolygonObject();

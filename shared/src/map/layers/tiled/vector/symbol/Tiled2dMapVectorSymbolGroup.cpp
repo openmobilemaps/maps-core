@@ -407,8 +407,8 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
     }
 
 #ifdef DRAW_TEXT_BOUNDING_BOX
-    textSymbolPlacement = layerDescription->style.getTextSymbolPlacement(EvaluationContext(0.0, std::make_shared<FeatureContext>(), stateManager));
-    labelRotationAlignment = layerDescription->style.getTextRotationAlignment(EvaluationContext(0.0, std::make_shared<FeatureContext>(), stateManager));
+    textSymbolPlacement = layerDescription->style.getTextSymbolPlacement(EvaluationContext(0.0, dpFactor, std::make_shared<FeatureContext>(), featureStateManager));
+    labelRotationAlignment = layerDescription->style.getTextRotationAlignment(EvaluationContext(0.0, dpFactor, std::make_shared<FeatureContext>(), featureStateManager));
     if (labelRotationAlignment == SymbolAlignment::AUTO) {
         switch (textSymbolPlacement) {
             case TextSymbolPlacement::POINT:

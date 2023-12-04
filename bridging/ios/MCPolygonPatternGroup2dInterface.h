@@ -3,6 +3,7 @@
 
 #import "MCRenderingContextInterface.h"
 #import "MCSharedBytes.h"
+#import "MCVec2F.h"
 #import <Foundation/Foundation.h>
 @protocol MCGraphicsObjectInterface;
 @protocol MCTextureHolderInterface;
@@ -19,6 +20,8 @@
 - (void)setTextureCoordinates:(nonnull MCSharedBytes *)values;
 
 - (void)setScalingFactor:(float)factor;
+
+- (void)setScalingFactors:(nonnull MCVec2F *)factor;
 
 - (void)loadTexture:(nullable id<MCRenderingContextInterface>)context
       textureHolder:(nullable id<MCTextureHolderInterface>)textureHolder;
