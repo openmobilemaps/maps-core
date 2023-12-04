@@ -396,7 +396,7 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &posi
     positions[2 * countOffset + 1] = renderCoordinate.y + iconOffset.y * scaleFactor * iconSize;
 
     iconBoundingBoxViewportAligned.x = (renderCoordinate.x - iconWidth * 0.5) - scaledIconPadding;
-    iconBoundingBoxViewportAligned.y = (renderCoordinate.y - iconWidth * 0.5) - scaledIconPadding;
+    iconBoundingBoxViewportAligned.y = (renderCoordinate.y - iconHeight * 0.5) - scaledIconPadding;
     iconBoundingBoxViewportAligned.width = iconWidth + 2.0 * scaledIconPadding;
     iconBoundingBoxViewportAligned.height = iconHeight + 2.0 * scaledIconPadding;
 
