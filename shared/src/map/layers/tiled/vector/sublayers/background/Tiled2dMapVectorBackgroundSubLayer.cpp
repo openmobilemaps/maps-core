@@ -115,7 +115,6 @@ std::vector<std::shared_ptr<RenderPassInterface>> Tiled2dMapVectorBackgroundSubL
 
 void Tiled2dMapVectorBackgroundSubLayer::onRemoved() {
     Tiled2dMapVectorSubLayer::onRemoved();
-    pause();
 }
 
 void Tiled2dMapVectorBackgroundSubLayer::pause() {
@@ -142,6 +141,9 @@ void Tiled2dMapVectorBackgroundSubLayer::resume() {
     }
     if (patternObject && !patternObject->getPolygonObject()->isReady()) {
         patternObject->getPolygonObject()->setup(renderingContext);
+        if (spriteTexture) {
+            patternObject->loadTexture(renderingContext, spriteTexture);
+        }
     }
 }
 
@@ -197,7 +199,7 @@ void Tiled2dMapVectorBackgroundSubLayer::setSprites(std::shared_ptr<SpriteData> 
             scheduler->addTask(std::make_shared<LambdaTask>(
                                                             TaskConfig("Tiled2dMapVectorBackgroundSubLayer setSprites", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS), [weakSelfPtr] {
                                                                 auto selfPtr = weakSelfPtr.lock();
-                                                                if (!selfPtr) {
+                                                                if (!selfPtr || !selfPtr->spriteTexture) {
                                                                     return;
                                                                 }
                                                                 auto mapInterface = selfPtr->mapInterface;
