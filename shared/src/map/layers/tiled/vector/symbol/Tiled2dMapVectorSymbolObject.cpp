@@ -826,13 +826,17 @@ void Tiled2dMapVectorSymbolObject::collisionDetection(const double zoomIdentifie
 
 
     bool willCollide = true;
+    bool outside = true;
     if (boundingBoxRotationAlignment == SymbolAlignment::VIEWPORT) {
         std::optional<CollisionRectF> boundingRect = getViewportAlignedBoundingBox(zoomIdentifier, false, true);
         // Collide, if no valid boundingRect
         if (boundingRect.has_value()) {
-            willCollide = collisionGrid->addAndCheckCollisionAlignedRect(*boundingRect);
+            auto check = collisionGrid->addAndCheckCollisionAlignedRect(*boundingRect);
+            willCollide = check == 1;
+            outside = check == 2;
         } else {
             willCollide = false;
+            outside = false;
         }
 
     } else {
@@ -843,13 +847,14 @@ void Tiled2dMapVectorSymbolObject::collisionDetection(const double zoomIdentifie
         } else {
             willCollide = false;
         }
+        outside = false;
     }
 
     if (willCollide && (minCollisionFreeZoom == -1 || minCollisionFreeZoom < zoomIdentifier)) {
         minCollisionFreeZoom = zoomIdentifier;
     }
 
-    if (animationCoordinator->setColliding(willCollide)) {
+    if (animationCoordinator->setColliding(willCollide || outside)) {
         lastIconUpdateScaleFactor = -1;
         lastStretchIconUpdateScaleFactor = -1;
         lastTextUpdateScaleFactor = -1;

@@ -75,7 +75,7 @@ public:
         RectF projectedRectangle = getProjectedRectangle(rectangle);
         IndexRange indexRange = getIndexRangeForRectangle(projectedRectangle);
         if (!indexRange.isValid(numCellsX - 1, numCellsY - 1)) {
-            // return 2; // Fully outside of bounds - not relevant
+            return 2; // Fully outside of bounds - not relevant
         }
 
         if (rectangle.contentHash != 0 && rectangle.symbolSpacing > 0) {
