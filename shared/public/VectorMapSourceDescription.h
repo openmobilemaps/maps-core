@@ -20,14 +20,14 @@ public:
     std::string vectorUrl;
     int minZoom;
     int maxZoom;
-    std::optional<std::vector<double>> extent;
+    std::optional<std::vector<double>> bounds;
 
     VectorMapSourceDescription(std::string identifier,
                          std::string vectorUrl,
                          int minZoom,
                          int maxZoom,
-                        std::optional<std::vector<double>> extent):
-    identifier(identifier), vectorUrl(vectorUrl), minZoom(minZoom), maxZoom(maxZoom), extent(extent) {}
+                        std::optional<std::vector<double>> bounds):
+    identifier(identifier), vectorUrl(vectorUrl), minZoom(minZoom), maxZoom(maxZoom), bounds(bounds) {}
     };
 
 class VectorMapDescription {

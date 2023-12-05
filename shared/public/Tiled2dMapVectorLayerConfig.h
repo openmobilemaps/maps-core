@@ -69,9 +69,9 @@ public:
 
     }
 
-	std::optional<std::vector<double>> getExtent() override {
+	std::optional<std::vector<double>> getBounds() override {
         if (sourceDescription) {
-            return sourceDescription->extent;
+            return sourceDescription->bounds;
         }
         else {
             return std::nullopt;

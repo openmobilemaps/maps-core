@@ -28,5 +28,5 @@ public:
 
     virtual std::optional<Tiled2dMapVectorSettings> getVectorSettings() = 0;
 
-    virtual std::optional<std::vector<double>> getExtent() = 0;
+    virtual std::optional<std::vector<double>> getBounds() = 0;
 };

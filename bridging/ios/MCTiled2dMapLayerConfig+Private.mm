@@ -82,9 +82,9 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (nullable NSArray<NSNumber *> *)getExtent {
+- (nullable NSArray<NSNumber *> *)getBounds {
     try {
-        auto objcpp_result_ = _cppRefHandle.get()->getExtent();
+        auto objcpp_result_ = _cppRefHandle.get()->getBounds();
         return ::djinni::Optional<std::optional, ::djinni::List<::djinni::F64>>::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
@@ -143,10 +143,10 @@ public:
             return ::djinni::Optional<std::optional, ::djinni_generated::Tiled2dMapVectorSettings>::toCpp(objcpp_result_);
         }
     }
-    std::optional<std::vector<double>> getExtent() override
+    std::optional<std::vector<double>> getBounds() override
     {
         @autoreleasepool {
-            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getExtent];
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getBounds];
             return ::djinni::Optional<std::optional, ::djinni::List<::djinni::F64>>::toCpp(objcpp_result_);
         }
     }

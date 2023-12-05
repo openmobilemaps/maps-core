@@ -127,7 +127,7 @@ public:
     double zoomLevelScaleFactor;
     bool overzoom;
     bool underzoom;
-    std::optional<std::vector<double>> extent;
+    std::optional<std::vector<double>> bounds;
 
     RasterVectorLayerDescription(std::string identifier,
                                  std::string source,
@@ -143,10 +143,10 @@ public:
                                  std::shared_ptr<Value> interactable,
                                  bool underzoom,
                                  bool overzoom,
-                                 std::optional<std::vector<double>> extent):
+                                 std::optional<std::vector<double>> bounds):
     VectorLayerDescription(identifier, source, "", minZoom, maxZoom, nullptr, renderPassIndex, interactable),
     style(style), url(url), underzoom(underzoom), overzoom(overzoom), adaptScaleToScreen(adaptScaleToScreen), numDrawPreviousLayers(numDrawPreviousLayers),
-    maskTiles(maskTiles), zoomLevelScaleFactor(zoomLevelScaleFactor), extent(extent) {};
+    maskTiles(maskTiles), zoomLevelScaleFactor(zoomLevelScaleFactor), bounds(bounds) {};
 
 
     std::unique_ptr<VectorLayerDescription> clone() override {
@@ -164,7 +164,7 @@ public:
                                             interactable ? interactable->clone() : nullptr,
                                             underzoom,
                                             overzoom,
-                                            extent);
+                                            bounds);
     }
 
     virtual UsedKeysCollection getUsedKeys() const override {
