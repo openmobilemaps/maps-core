@@ -806,10 +806,11 @@ bool Tiled2dMapVectorSymbolObject::isPlaced() {
 }
 
 void Tiled2dMapVectorSymbolObject::hideFromCollision() {
-    animationCoordinator->setColliding(true);
-    lastIconUpdateScaleFactor = -1;
-    lastStretchIconUpdateScaleFactor = -1;
-    lastTextUpdateScaleFactor = -1;
+    if(animationCoordinator->setColliding(true)) {
+        lastIconUpdateScaleFactor = -1;
+        lastStretchIconUpdateScaleFactor = -1;
+        lastTextUpdateScaleFactor = -1;
+    }
 }
 
 void Tiled2dMapVectorSymbolObject::collisionDetection(const double zoomIdentifier, const double rotation, const double scaleFactor, std::shared_ptr<CollisionGrid> collisionGrid) {
@@ -818,7 +819,7 @@ void Tiled2dMapVectorSymbolObject::collisionDetection(const double zoomIdentifie
         return;
     }
 
-    if (!(description->minZoom <= zoomIdentifier && description->maxZoom >= zoomIdentifier) || !getIsOpaque() || !isPlaced() || (minCollisionFreeZoom != -1 && minCollisionFreeZoom > zoomIdentifier)) {
+    if (!(description->minZoom <= zoomIdentifier && description->maxZoom >= zoomIdentifier) || !getIsOpaque() || !isPlaced()) {
         // not visible
 
         return;
@@ -850,8 +851,11 @@ void Tiled2dMapVectorSymbolObject::collisionDetection(const double zoomIdentifie
         outside = false;
     }
 
-    if (willCollide && (minCollisionFreeZoom == -1 || minCollisionFreeZoom < zoomIdentifier)) {
-        minCollisionFreeZoom = zoomIdentifier;
+    if (!willCollide && !outside && zoomIdentifier < smallestVisibleZoom) {
+        smallestVisibleZoom = zoomIdentifier;
+    }
+    else if (willCollide && (largestCollisionZoom == -1 || zoomIdentifier > largestCollisionZoom)) {
+        largestCollisionZoom = zoomIdentifier;
     }
 
     if (animationCoordinator->setColliding(willCollide || outside)) {
