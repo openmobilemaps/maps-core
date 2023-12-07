@@ -92,7 +92,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
 
             int minZoom = val.value("minzoom", 0);
             int maxZoom = val.value("maxzoom", 22);
-            std::optional<std::vector<double>> bounds;
+            std::optional<::RectCoord> bounds;
 
             if (val["tiles"].is_array()) {
                 auto str = val.dump();
@@ -103,9 +103,14 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                 zoomLevelScaleFactor = val.value("zoomLevelScaleFactor", zoomLevelScaleFactor);
 
                 if (val.contains("bounds")) {
-                    bounds = std::vector<double>();
+                    auto tmpBounds = std::vector<double>();
                     for (auto &el: val["bounds"].items()) {
-                        bounds->push_back(el.value().get<double>());
+                        tmpBounds.push_back(el.value().get<double>());
+                    }
+                    if (tmpBounds.size() == 4) {
+                        const auto topLeft = Coord(CoordinateSystemIdentifiers::EPSG4326(), tmpBounds.at(0), tmpBounds.at(1), 0);
+                        const auto bottomRight = Coord(CoordinateSystemIdentifiers::EPSG4326(), tmpBounds.at(2), tmpBounds.at(3), 0);
+                        bounds = RectCoord(topLeft, bottomRight);
                     }
                 }
 
@@ -125,9 +130,14 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                 url = json["tiles"].begin()->get<std::string>();
 
                 if (json.contains("bounds")) {
-                    bounds = std::vector<double>();
+                    auto tmpBounds = std::vector<double>();
                     for (auto &el: json["bounds"].items()) {
-                        bounds->push_back(el.value().get<double>());
+                        tmpBounds.push_back(el.value().get<double>());
+                    }
+                    if (tmpBounds.size() == 4) {
+                        const auto topLeft = Coord(CoordinateSystemIdentifiers::EPSG4326(), tmpBounds.at(0), tmpBounds.at(1), 0);
+                        const auto bottomRight = Coord(CoordinateSystemIdentifiers::EPSG4326(), tmpBounds.at(2), tmpBounds.at(3), 0);
+                        bounds = RectCoord(topLeft, bottomRight);
                     }
                 }
 
@@ -368,12 +378,17 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
 
     std::vector<std::shared_ptr<VectorMapSourceDescription>> sourceDescriptions;
     for (auto const &[identifier, tileJson]: tileJsons) {
-        std::optional<std::vector<double>> bounds;
+        std::optional<::RectCoord> bounds;
         if (tileJson.contains("bounds")) {
-            bounds = std::vector<double>();;
+            auto tmpBounds = std::vector<double>();
             for (auto &el: tileJson["bounds"].items()) {
                 double d = el.value().get<double>();
-                bounds->push_back(d);
+                tmpBounds.push_back(d);
+            }
+            if (tmpBounds.size() == 4) {
+                const auto topLeft = Coord(CoordinateSystemIdentifiers::EPSG4326(), tmpBounds.at(0), tmpBounds.at(1), 0);
+                const auto bottomRight = Coord(CoordinateSystemIdentifiers::EPSG4326(), tmpBounds.at(2), tmpBounds.at(3), 0);
+                bounds = RectCoord(topLeft, bottomRight);
             }
         }
         sourceDescriptions.push_back(

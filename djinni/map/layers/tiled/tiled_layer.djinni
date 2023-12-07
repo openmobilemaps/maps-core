@@ -10,7 +10,7 @@ tiled_2d_map_layer_config = interface +c +j +o {
     get_zoom_info(): tiled_2d_map_zoom_info;
     get_layer_name() : string;
     get_vector_settings(): optional<tiled_2d_map_vector_settings>;
-    get_bounds(): optional<list<f64>>;
+    get_bounds(): optional<rect_coord>;
 }
 
 tiled_2d_map_zoom_level_info = record {

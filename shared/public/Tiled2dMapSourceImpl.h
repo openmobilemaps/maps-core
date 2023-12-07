@@ -168,20 +168,18 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
         int maxTileTop = std::floor(
                 std::max(topToBottom ? (visibleBottom - boundsTop) : (boundsTop - visibleBottom), 0.0) / tileWidth);
 
-        if (bounds.has_value() && bounds->size() == 4) {
-
-            const auto topLeft = conversionHelper->convert(CoordinateSystemIdentifiers::EPSG3857(), Coord(CoordinateSystemIdentifiers::EPSG4326(), bounds->at(0), bounds->at(1), 0 ));
-            const auto bottomRight = conversionHelper->convert(CoordinateSystemIdentifiers::EPSG3857(), Coord(CoordinateSystemIdentifiers::EPSG4326(), bounds->at(2), bounds->at(3), 0 ));
+        if (bounds.has_value()) {
+            const auto converted = conversionHelper->convertRect(CoordinateSystemIdentifiers::EPSG3857(), *bounds);
 
             const double tLength = zoomLevelInfo.tileWidthLayerSystemUnits / 256;
 
-            int min_left_pixel = floor((topLeft.x - zoomLevelInfo.bounds.topLeft.x) / tLength);
+            int min_left_pixel = floor((converted.topLeft.x - zoomLevelInfo.bounds.topLeft.x) / tLength);
             int min_left = std::max(0, min_left_pixel / 256);
-            int max_top_pixel = floor((zoomLevelInfo.bounds.topLeft.y - topLeft.y) / tLength);
+            int max_top_pixel = floor((zoomLevelInfo.bounds.topLeft.y - converted.topLeft.y) / tLength);
             int max_top = std::min(zoomLevelInfo.numTilesY, max_top_pixel / 256);
-            int max_left_pixel = floor((bottomRight.x - zoomLevelInfo.bounds.topLeft.x) / tLength);
+            int max_left_pixel = floor((converted.bottomRight.x - zoomLevelInfo.bounds.topLeft.x) / tLength);
             int max_left = std::min(zoomLevelInfo.numTilesX, max_left_pixel / 256);
-            int min_top_pixel = floor((zoomLevelInfo.bounds.topLeft.y - bottomRight.y) / tLength);
+            int min_top_pixel = floor((zoomLevelInfo.bounds.topLeft.y - converted.bottomRight.y) / tLength);
             int min_top = min_top_pixel / 256;
             min_top = std::max(0, min_top);
 

@@ -13,6 +13,7 @@
 #include "VectorLayerDescription.h"
 #include "Color.h"
 #include "GeoJsonTypes.h"
+#include "RectCoord.h"
 
 class VectorMapSourceDescription {
 public:
@@ -20,15 +21,15 @@ public:
     std::string vectorUrl;
     int minZoom;
     int maxZoom;
-    std::optional<std::vector<double>> bounds;
+    std::optional<::RectCoord> bounds;
 
     VectorMapSourceDescription(std::string identifier,
                          std::string vectorUrl,
                          int minZoom,
                          int maxZoom,
-                        std::optional<std::vector<double>> bounds):
+                               std::optional<::RectCoord> bounds):
     identifier(identifier), vectorUrl(vectorUrl), minZoom(minZoom), maxZoom(maxZoom), bounds(bounds) {}
-    };
+};
 
 class VectorMapDescription {
 public:

@@ -39,7 +39,7 @@ private:
         ::Tiled2dMapZoomInfo getZoomInfo() override;
         std::string getLayerName() override;
         std::optional<::Tiled2dMapVectorSettings> getVectorSettings() override;
-        std::optional<std::vector<double>> getBounds() override;
+        std::optional<::RectCoord> getBounds() override;
 
     private:
         friend ::djinni::JniInterface<::Tiled2dMapLayerConfig, ::djinni_generated::NativeTiled2dMapLayerConfig>;
@@ -52,7 +52,7 @@ private:
     const jmethodID method_getZoomInfo { ::djinni::jniGetMethodID(clazz.get(), "getZoomInfo", "()Lio/openmobilemaps/mapscore/shared/map/layers/tiled/Tiled2dMapZoomInfo;") };
     const jmethodID method_getLayerName { ::djinni::jniGetMethodID(clazz.get(), "getLayerName", "()Ljava/lang/String;") };
     const jmethodID method_getVectorSettings { ::djinni::jniGetMethodID(clazz.get(), "getVectorSettings", "()Lio/openmobilemaps/mapscore/shared/map/layers/tiled/Tiled2dMapVectorSettings;") };
-    const jmethodID method_getBounds { ::djinni::jniGetMethodID(clazz.get(), "getBounds", "()Ljava/util/ArrayList;") };
+    const jmethodID method_getBounds { ::djinni::jniGetMethodID(clazz.get(), "getBounds", "()Lio/openmobilemaps/mapscore/shared/map/coordinates/RectCoord;") };
 };
 
 } // namespace djinni_generated

@@ -69,7 +69,7 @@ public:
 
     }
 
-	std::optional<std::vector<double>> getBounds() override {
+    std::optional<::RectCoord> getBounds() override {
         if (sourceDescription) {
             return sourceDescription->bounds;
         }

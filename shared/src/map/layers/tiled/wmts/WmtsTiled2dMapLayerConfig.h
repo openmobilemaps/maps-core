@@ -33,7 +33,7 @@ class WmtsTiled2dMapLayerConfig : public Tiled2dMapLayerConfig {
 
     virtual std::optional<Tiled2dMapVectorSettings> getVectorSettings() override;
 
-    std::optional<std::vector<double>> getBounds() override;
+    std::optional<::RectCoord> getBounds() override;
 
 private:
     const WmtsLayerDescription description;
