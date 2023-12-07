@@ -3,6 +3,7 @@
 
 #include "NativeTiled2dMapLayerConfig.h"  // my header
 #include "Marshal.hpp"
+#include "NativeRectCoord.h"
 #include "NativeTiled2dMapVectorSettings.h"
 #include "NativeTiled2dMapZoomInfo.h"
 #include "NativeTiled2dMapZoomLevelInfo.h"
@@ -69,13 +70,13 @@ std::optional<::Tiled2dMapVectorSettings> NativeTiled2dMapLayerConfig::JavaProxy
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni::Optional<std::optional, ::djinni_generated::NativeTiled2dMapVectorSettings>::toCpp(jniEnv, jret);
 }
-std::optional<std::vector<double>> NativeTiled2dMapLayerConfig::JavaProxy::getExtent() {
+std::optional<::RectCoord> NativeTiled2dMapLayerConfig::JavaProxy::getBounds() {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
     const auto& data = ::djinni::JniClass<::djinni_generated::NativeTiled2dMapLayerConfig>::get();
-    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_getExtent);
+    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_getBounds);
     ::djinni::jniExceptionCheck(jniEnv);
-    return ::djinni::Optional<std::optional, ::djinni::List<::djinni::F64>>::toCpp(jniEnv, jret);
+    return ::djinni::Optional<std::optional, ::djinni_generated::NativeRectCoord>::toCpp(jniEnv, jret);
 }
 
 CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_Tiled2dMapLayerConfig_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
@@ -142,12 +143,12 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_til
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_Tiled2dMapLayerConfig_00024CppProxy_native_1getExtent(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT ::djinni_generated::NativeRectCoord::Boxed::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_Tiled2dMapLayerConfig_00024CppProxy_native_1getBounds(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapLayerConfig>(nativeRef);
-        auto r = ref->getExtent();
-        return ::djinni::release(::djinni::Optional<std::optional, ::djinni::List<::djinni::F64>>::fromCpp(jniEnv, r));
+        auto r = ref->getBounds();
+        return ::djinni::release(::djinni::Optional<std::optional, ::djinni_generated::NativeRectCoord>::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 

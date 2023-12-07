@@ -64,7 +64,7 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
 
     RectCoord visibleBoundsLayer = conversionHelper->convertRect(layerSystemId, visibleBounds);
 
-    const auto extent = layerConfig->getExtent();
+    const auto bounds = layerConfig->getBounds();
 
     double centerVisibleX = visibleBoundsLayer.topLeft.x + 0.5 * (visibleBoundsLayer.bottomRight.x - visibleBoundsLayer.topLeft.x);
     double centerVisibleY = visibleBoundsLayer.topLeft.y + 0.5 * (visibleBoundsLayer.bottomRight.y - visibleBoundsLayer.topLeft.y);
@@ -168,25 +168,25 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
         int maxTileTop = std::floor(
                 std::max(topToBottom ? (visibleBottom - boundsTop) : (boundsTop - visibleBottom), 0.0) / tileWidth);
 
-        if (extent.has_value() && extent->size() == 4) {
+        if (bounds.has_value()) {
+            const auto converted = conversionHelper->convertRect(CoordinateSystemIdentifiers::EPSG3857(), *bounds);
 
-            const double extentLeft = leftToRight ? extent->at(0) : extent->at(2);
-            const double extentRight = leftToRight ? extent->at(2) : extent->at(0);
-            const double extentTop = leftToRight ? extent->at(3) : extent->at(1);
-            const double extentBottom = leftToRight ? extent->at(1) : extent->at(3);
+            const double tLength = zoomLevelInfo.tileWidthLayerSystemUnits / 256;
 
-            int extentTileLeft =
-            std::floor(std::max(leftToRight ? (extentLeft - boundsLeft) : (boundsLeft - extentLeft), 0.0) / tileWidth);
-            int extentTileRight = std::floor(
-                                         std::max(leftToRight ? (extentRight - boundsLeft) : (boundsLeft - extentRight), 0.0) / tileWidth);
-            int extentTileTop = std::floor(std::max(topToBottom ? (extentTop - boundsTop) : (boundsTop - extentTop), 0.0) / tileWidth);
-            int extentTileBottom = std::floor(
-                                        std::max(topToBottom ? (extentBottom - boundsTop) : (boundsTop - extentBottom), 0.0) / tileWidth);
+            int min_left_pixel = floor((converted.topLeft.x - zoomLevelInfo.bounds.topLeft.x) / tLength);
+            int min_left = std::max(0, min_left_pixel / 256);
+            int max_top_pixel = floor((zoomLevelInfo.bounds.topLeft.y - converted.topLeft.y) / tLength);
+            int max_top = std::min(zoomLevelInfo.numTilesY, max_top_pixel / 256);
+            int max_left_pixel = floor((converted.bottomRight.x - zoomLevelInfo.bounds.topLeft.x) / tLength);
+            int max_left = std::min(zoomLevelInfo.numTilesX, max_left_pixel / 256);
+            int min_top_pixel = floor((zoomLevelInfo.bounds.topLeft.y - converted.bottomRight.y) / tLength);
+            int min_top = min_top_pixel / 256;
+            min_top = std::max(0, min_top);
 
-            startTileLeft = std::max(startTileLeft, extentTileLeft);
-            maxTileLeft = std::min(maxTileLeft, extentTileRight);
-            startTileTop = std::max(startTileTop, extentTileTop);
-            maxTileTop = std::min(maxTileTop, extentTileBottom);
+            startTileLeft = std::max(min_left, startTileLeft);
+            maxTileLeft = std::min(max_left, maxTileLeft);
+            startTileTop = std::max(min_top, startTileTop);
+            maxTileTop = std::min(max_top, maxTileTop);
         }
 
         const double maxDisCenterX = visibleWidth * 0.5 + tileWidth;

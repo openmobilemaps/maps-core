@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "RectCoord.h"
 #include <cstdint>
 #include <optional>
 #include <string>
@@ -28,5 +29,5 @@ public:
 
     virtual std::optional<Tiled2dMapVectorSettings> getVectorSettings() = 0;
 
-    virtual std::optional<std::vector<double>> getExtent() = 0;
+    virtual std::optional<::RectCoord> getBounds() = 0;
 };
