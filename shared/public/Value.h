@@ -767,6 +767,7 @@ public:
         }
         return false;
     };
+
 private:
     const std::string key;
 };
