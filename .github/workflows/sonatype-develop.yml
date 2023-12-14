@@ -2,7 +2,7 @@ name: Upload AAR to Sonatype Nexus
 
 on:
   push:
-    branches: [ develop ]
+    branches: [ develop, feature/persist-zoom-priority ]
 
 jobs:
   build:
