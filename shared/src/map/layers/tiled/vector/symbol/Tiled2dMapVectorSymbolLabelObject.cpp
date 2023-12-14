@@ -365,7 +365,8 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
                 scales[2 * (countOffset + numberOfCharacters) + 0] = size.x;
                 scales[2 * (countOffset + numberOfCharacters) + 1] = size.y;
                 rotations[countOffset + numberOfCharacters] = -angle;
-                centerPositions[numberOfCharacters] = Vec2D(x + size.x * 0.5, y + size.y * 0.5);
+                centerPositions[numberOfCharacters].x = x + size.x * 0.5;
+                centerPositions[numberOfCharacters].y = y + size.y * 0.5;
                 ++numberOfCharacters;
             }
 
@@ -494,15 +495,20 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
     const auto dxRot = referencePoint.x + anchorOffsetRot.x;
     const auto dyRot = referencePoint.y + anchorOffsetRot.y;
 
+    const double sinAngle = sin(angle * M_PI / 180.0);
+    const double cosAngle = cos(angle * M_PI / 180.0);
+
     assert(numberOfCharacters == characterCount);
 
     float maxSymbolRadius = 0.0;
     for(int i=0; i<numberOfCharacters; ++i) {
         auto& cp = centerPositions[i];
-        auto rotated = Vec2DHelper::rotate(cp, Vec2D(0, 0), angle);
 
-        positions[2 * countOffset + 0] = rotated.x + dxRot;
-        positions[2 * countOffset + 1] = rotated.y + dyRot;
+        const double rX = cp.x * cosAngle - cp.y * sinAngle;
+        const double rY = cp.x * sinAngle + cp.y * cosAngle;
+
+        positions[2 * countOffset + 0] = rX + dxRot;
+        positions[2 * countOffset + 1] = rY + dyRot;
 
         const float scaleXH = scales[2 * countOffset + 0] / 2.0;
         const float scaleYH = scales[2 * countOffset + 1] / 2.0;
