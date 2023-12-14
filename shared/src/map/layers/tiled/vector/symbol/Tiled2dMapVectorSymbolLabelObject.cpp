@@ -292,10 +292,7 @@ void Tiled2dMapVectorSymbolLabelObject::updateProperties(std::vector<float> &pos
 void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const double rotation) {
     
     const auto evalContext = EvaluationContext(zoomIdentifier, dpFactor, featureContext, stateManager);
-    
     const float fontSize = scaleFactor * textSize;
-    
-    auto pen = Vec2D(0.0, 0.0);
 
     Vec2D boxMin(std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
     Vec2D boxMax(std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest());
@@ -310,6 +307,8 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
 
     static std::vector<size_t> lineEndIndices;
     lineEndIndices.clear();
+
+    auto pen = zero;
 
     float angle;
     if (textAlignment == SymbolAlignment::MAP) {
@@ -374,7 +373,7 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
 
         } else if(i.glyphIndex == -1) {
             if (numberOfCharacters > 0) {
-                lineEndIndices.push_back(centerPositions.size() - 1);
+                lineEndIndices.push_back(numberOfCharacters - 1);
             }
             pen.x = 0.0;
             pen.y += fontSize * lineHeight;
@@ -555,7 +554,7 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
         std::vector<CircleD> circles;
         Vec2D origin = Vec2D(dx, dy);
         Vec2D lastCirclePosition = Vec2D(0, 0);
-        size_t count = centerPositions.size();
+        size_t count = numberOfCharacters;
         for (int i = 0; i < count; i++) {
             Vec2D newPos = centerPositions[i];
             newPos = Vec2DHelper::rotate(newPos, Vec2D(0, 0), angle);
