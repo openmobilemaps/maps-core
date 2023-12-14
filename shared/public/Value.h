@@ -652,12 +652,15 @@ public:
             return *staticValue;
         }
 
-        if (isStateDependant && !context.featureStateManager->empty()) {
-            // TODO: maybe we can hash the feature-state or something
+        if(isStateDependant && isZoomDependent && !context.featureStateManager->empty()) {
             return value->evaluateOr(context, defaultValue);
         }
 
-        const auto identifier = (context.feature->identifier << 12) | (uint64_t)((isZoomDependent ? context.zoomLevel : 0.f) * 100);
+
+        auto identifier = (context.feature->identifier << 12) | (uint64_t)((isZoomDependent ? context.zoomLevel : 0.f) * 100);
+        if(isStateDependant && !context.featureStateManager->empty()) {
+            identifier = (context.feature->identifier << 32) | (uint64_t)(context.featureStateManager->getCurrentState());
+        }
 
         const auto lastResultIt = lastResults.find(identifier);
         if (lastResultIt != lastResults.end()) {
