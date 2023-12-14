@@ -652,12 +652,15 @@ public:
             return *staticValue;
         }
 
-        if (isStateDependant && !context.featureStateManager->empty()) {
-            // TODO: maybe we can hash the feature-state or something
+        if(isStateDependant && isZoomDependent && !context.featureStateManager->empty()) {
             return value->evaluateOr(context, defaultValue);
         }
 
-        const auto identifier = (context.feature->identifier << 12) | (uint64_t)((isZoomDependent ? context.zoomLevel : 0.f) * 100);
+
+        auto identifier = (context.feature->identifier << 12) | (uint64_t)((isZoomDependent ? context.zoomLevel : 0.f) * 100);
+        if(isStateDependant && !context.featureStateManager->empty()) {
+            identifier = (context.feature->identifier << 32) | (uint64_t)(context.featureStateManager->getCurrentState());
+        }
 
         const auto lastResultIt = lastResults.find(identifier);
         if (lastResultIt != lastResults.end()) {
@@ -767,6 +770,7 @@ public:
         }
         return false;
     };
+
 private:
     const std::string key;
 };
@@ -828,7 +832,7 @@ public:
             return UsedKeysCollection(usedKeys);
 
         } else if (std::holds_alternative<std::vector<std::string>>(value)) {
-            std::vector<std::string> res = std::get<std::vector<std::string>>(value);
+            const auto& res = std::get<std::vector<std::string>>(value);
             if (!res.empty() && *res.begin() == "zoom") {
                 return UsedKeysCollection({ "zoom" });
             }
@@ -871,7 +875,7 @@ public:
             return res;
 
         } else if (std::holds_alternative<std::vector<std::string>>(value)) {
-            std::vector<std::string> res = std::get<std::vector<std::string>>(value);
+            const auto& res = std::get<std::vector<std::string>>(value);
             if (!res.empty() && *res.begin() == "zoom") {
                 return context.zoomLevel ? context.zoomLevel : 0.0;
             }
@@ -2062,11 +2066,11 @@ public:
                 return false;
             }
 
-            auto const dynamicVariants = dynamicValues->evaluate(context);
+            auto const &dynamicVariants = dynamicValues->evaluate(context);
 
             if (isString && std::holds_alternative<std::vector<std::string>>(dynamicVariants)) {
-                const std::string stringValue = std::get<std::string>(value);
-                const std::vector<std::string> strings = std::get<std::vector<std::string>>(dynamicVariants);
+                const auto& stringValue = std::get<std::string>(value);
+                const auto& strings = std::get<std::vector<std::string>>(dynamicVariants);
                 for (auto const &string: strings) {
                     if (string == stringValue) {
                         return true;
@@ -2080,7 +2084,7 @@ public:
                     doubleValue = std::get<int64_t>(value);
                 }
 
-                const std::vector<float> floats = std::get<std::vector<float>>(dynamicVariants);
+                const auto& floats = std::get<std::vector<float>>(dynamicVariants);
                 for (auto const &f: floats) {
                     if (f == doubleValue) {
                         return true;
@@ -2155,8 +2159,8 @@ public:
             auto const dynamicVariants = dynamicValues->evaluate(context);
 
             if (isString && std::holds_alternative<std::vector<std::string>>(dynamicVariants)) {
-                const std::string stringValue = std::get<std::string>(value);
-                const std::vector<std::string> strings = std::get<std::vector<std::string>>(dynamicVariants);
+                const auto &stringValue = std::get<std::string>(value);
+                const auto &strings = std::get<std::vector<std::string>>(dynamicVariants);
                 for (auto const &string: strings) {
                     if (string == stringValue) {
                         return false;
@@ -2170,7 +2174,7 @@ public:
                     doubleValue = std::get<int64_t>(value);
                 }
 
-                const std::vector<float> floats = std::get<std::vector<float>>(dynamicVariants);
+                const auto& floats = std::get<std::vector<float>>(dynamicVariants);
                 for (auto const &f: floats) {
                     if (f == doubleValue) {
                         return false;
