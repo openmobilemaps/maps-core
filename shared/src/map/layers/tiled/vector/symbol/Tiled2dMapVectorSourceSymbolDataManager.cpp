@@ -629,7 +629,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::collisionDetection(std::vector<std
                                 allObjects.push_back(std::move(object));
                             }
                             else {
-                                object.symbolObject->hideFromCollision();
+                                object.symbolObject->setHideFromCollision(true);
                             }
                         }
                     });

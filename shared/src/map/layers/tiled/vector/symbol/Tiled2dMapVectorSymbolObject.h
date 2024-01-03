@@ -100,7 +100,7 @@ public:
 
     bool getIsOpaque();
 
-    void hideFromCollision();
+    void setHideFromCollision(bool hide);
 
     void collisionDetection(const double zoomIdentifier, const double rotation, const double scaleFactor, std::shared_ptr<CollisionGrid> collisionGrid);
 
@@ -163,9 +163,9 @@ private:
     bool isStyleStateDependant = true;
 
     // the following flags are all optional, if they are set to -1 it is not set
-    double lastIconUpdateScaleFactor;
-    double lastIconUpdateRotation;
-    float lastIconUpdateAlpha;
+    double lastIconUpdateScaleFactor = -1;
+    double lastIconUpdateRotation = -1;
+    float lastIconUpdateAlpha = -1;
 
     double lastStretchIconUpdateScaleFactor;
     double lastStretchIconUpdateRotation;
