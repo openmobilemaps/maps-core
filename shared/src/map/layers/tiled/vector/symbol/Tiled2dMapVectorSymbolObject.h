@@ -49,7 +49,8 @@ public:
                                  const UsedKeysCollection &usedKeys,
                                  const size_t symbolTileIndex,
                                  const bool hasCustomTexture,
-                                 const double dpFactor);
+                                 const double dpFactor,
+                                 const bool persistingSymbolPlacement);
 
     ~Tiled2dMapVectorSymbolObject() {
         if (animationCoordinator) {
@@ -175,6 +176,8 @@ private:
 
     bool textAllowOverlap;
     bool iconAllowOverlap;
+
+    bool persistingSymbolPlacement = false;
 
     double dpFactor = 1.0;
     float alpha = 1.0;

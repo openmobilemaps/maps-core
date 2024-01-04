@@ -41,7 +41,8 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
                                                            const UsedKeysCollection &usedKeys,
                                                            const size_t symbolTileIndex,
                                                            const bool hasCustomTexture,
-                                                           const double dpFactor) :
+                                                           const double dpFactor,
+                                                           const bool persistingSymbolPlacement) :
     description(description),
     layerConfig(layerConfig),
     coordinate(coordinate),
@@ -53,7 +54,8 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
     featureStateManager(featureStateManager),
     symbolTileIndex(symbolTileIndex),
     hasCustomTexture(hasCustomTexture),
-    dpFactor(dpFactor) {
+    dpFactor(dpFactor),
+    persistingSymbolPlacement(persistingSymbolPlacement) {
     auto strongMapInterface = mapInterface.lock();
     auto objectFactory = strongMapInterface ? strongMapInterface->getGraphicsObjectFactory() : nullptr;
     auto camera = strongMapInterface ? strongMapInterface->getCamera() : nullptr;
@@ -851,11 +853,12 @@ void Tiled2dMapVectorSymbolObject::collisionDetection(const double zoomIdentifie
         outside = false;
     }
 
-    if (!willCollide && !outside && zoomIdentifier < smallestVisibleZoom) {
-        smallestVisibleZoom = zoomIdentifier;
-    }
-    else if (willCollide && (largestCollisionZoom == -1 || zoomIdentifier > largestCollisionZoom)) {
-        largestCollisionZoom = zoomIdentifier;
+    if (persistingSymbolPlacement) {
+        if (!willCollide && !outside && zoomIdentifier < smallestVisibleZoom) {
+            smallestVisibleZoom = zoomIdentifier;
+        } else if (willCollide && (largestCollisionZoom == -1 || zoomIdentifier > largestCollisionZoom)) {
+            largestCollisionZoom = zoomIdentifier;
+        }
     }
 
     setHideFromCollision(willCollide || outside);

@@ -43,7 +43,8 @@ public:
                                 const std::string &layerIdentifier,
                                 const std::shared_ptr<SymbolVectorLayerDescription> &layerDescription,
                                 const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager,
-                                const std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> &symbolDelegate);
+                                const std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> &symbolDelegate,
+                                const bool persistingSymbolPlacement);
 
     void initialize(std::weak_ptr<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>> weakFeatures,
                     int32_t featuresBase,
@@ -104,6 +105,7 @@ private:
     const std::string layerIdentifier;
     std::shared_ptr<SymbolVectorLayerDescription> layerDescription;
     const WeakActor<Tiled2dMapVectorFontProvider> fontProvider;
+    const bool persistingSymbolPlacement = false;
 
     std::shared_ptr<Quad2dInstancedInterface> iconInstancedObject;
     std::shared_ptr<Quad2dStretchedInstancedInterface> stretchedInstancedObject;

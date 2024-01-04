@@ -25,9 +25,13 @@ Tiled2dMapVectorSourceSymbolDataManager::Tiled2dMapVectorSourceSymbolDataManager
                                                                                  const WeakActor<Tiled2dMapVectorSource> &vectorSource,
                                                                                  const Actor<Tiled2dMapVectorReadyManager> &readyManager,
                                                                                  const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager,
-                                                                                 const std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> &symbolDelegate)
+                                                                                 const std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> &symbolDelegate,
+                                                                                 bool persistingSymbolPlacement)
         : Tiled2dMapVectorSourceDataManager(vectorLayer, mapDescription, layerConfig, source, readyManager, featureStateManager),
-        fontLoader(fontLoader), vectorSource(vectorSource), animationCoordinatorMap(std::make_shared<SymbolAnimationCoordinatorMap>()), symbolDelegate(symbolDelegate) {
+        fontLoader(fontLoader), vectorSource(vectorSource),
+        animationCoordinatorMap(std::make_shared<SymbolAnimationCoordinatorMap>()),
+        symbolDelegate(symbolDelegate),
+        persistingSymbolPlacement(persistingSymbolPlacement) {
 
     for (const auto &layer: mapDescription->layers) {
         if (layer->getType() == VectorLayerType::symbol && layer->source == source) {
@@ -455,7 +459,8 @@ std::vector<Actor<Tiled2dMapVectorSymbolGroup>> Tiled2dMapVectorSourceSymbolData
                                                                                                  layerDescriptions.at(
                                                                                                          layerIdentifier),
                                                                                                  featureStateManager,
-                                                                                                 symbolDelegate);
+                                                                                                 symbolDelegate,
+                                                                                                 persistingSymbolPlacement);
         symbolGroupActor.message(&Tiled2dMapVectorSymbolGroup::initialize, features, featuresBase,
                                  std::min(featuresBase + maxNumFeaturesPerGroup, numFeatures) - featuresBase,
                                  animationCoordinatorMap, selfActor, alpha);
@@ -621,16 +626,21 @@ void Tiled2dMapVectorSourceSymbolDataManager::collisionDetection(std::vector<std
             const auto objectsIt = symbolGroupsMap.find(layerIdentifier);
             if (objectsIt != symbolGroupsMap.end()) {
                 for (auto &symbolGroup: std::get<1>(objectsIt->second)) {
-
-                    symbolGroup.syncAccess([&allObjects, zoomIdentifier, rotation, scaleFactor, &collisionGrid](auto group){
+                    symbolGroup.syncAccess([&allObjects, zoomIdentifier, persistingPlacement = persistingSymbolPlacement](auto group){
                         auto objects = group->getSymbolObjectsForCollision();
-                        for (auto &object : objects) {
-                            if (object.symbolObject->largestCollisionZoom == -1 || object.symbolObject->largestCollisionZoom < zoomIdentifier) {
-                                allObjects.push_back(std::move(object));
+                        if (persistingPlacement) {
+                            for (auto &object : objects) {
+                                if (object.symbolObject->largestCollisionZoom == -1 || object.symbolObject->largestCollisionZoom < zoomIdentifier) {
+                                    allObjects.push_back(std::move(object));
+                                }
+                                else {
+                                    object.symbolObject->setHideFromCollision(true);
+                                }
                             }
-                            else {
-                                object.symbolObject->setHideFromCollision(true);
-                            }
+                        } else {
+                            allObjects.reserve(allObjects.size() + objects.size());
+                            allObjects.insert(allObjects.end(), std::make_move_iterator(objects.begin()),
+                                              std::make_move_iterator(objects.end()));
                         }
                     });
                 }

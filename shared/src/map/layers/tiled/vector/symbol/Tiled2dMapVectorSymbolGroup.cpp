@@ -28,7 +28,8 @@ Tiled2dMapVectorSymbolGroup::Tiled2dMapVectorSymbolGroup(uint32_t groupId,
                                                          const std::string &layerIdentifier,
                                                          const std::shared_ptr<SymbolVectorLayerDescription> &layerDescription,
                                                          const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager,
-                                                         const std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> &symbolDelegate)
+                                                         const std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> &symbolDelegate,
+                                                         const bool persistingSymbolPlacement)
         : groupId(groupId),
           mapInterface(mapInterface),
           layerConfig(layerConfig),
@@ -38,7 +39,8 @@ Tiled2dMapVectorSymbolGroup::Tiled2dMapVectorSymbolGroup(uint32_t groupId,
           fontProvider(fontProvider),
           featureStateManager(featureStateManager),
           symbolDelegate(symbolDelegate),
-          usedKeys(layerDescription->getUsedKeys()) {
+          usedKeys(layerDescription->getUsedKeys()),
+          persistingSymbolPlacement(persistingSymbolPlacement) {
     if (auto strongMapInterface = mapInterface.lock()) {
         dpFactor = strongMapInterface->getCamera()->getScreenDensityPpi() / 160.0;
     }
@@ -779,7 +781,8 @@ Tiled2dMapVectorSymbolGroup::createSymbolObject(const Tiled2dMapVersionedTileInf
                                                 const bool hasCustomTexture) {
     auto symbolObject = std::make_shared<Tiled2dMapVectorSymbolObject>(mapInterface, layerConfig, fontProvider, tileInfo, layerIdentifier,
                                                           description, featureContext, text, fullText, coordinate, lineCoordinates,
-                                                          fontList, textAnchor, angle, textJustify, textSymbolPlacement, hideIcon, animationCoordinatorMap, featureStateManager, usedKeys, symbolTileIndex, hasCustomTexture, dpFactor);
+                                                          fontList, textAnchor, angle, textJustify, textSymbolPlacement, hideIcon, animationCoordinatorMap,
+                                                          featureStateManager, usedKeys, symbolTileIndex, hasCustomTexture, dpFactor, persistingSymbolPlacement);
     symbolObject->setAlpha(alpha);
     const auto counts = symbolObject->getInstanceCounts();
     if (counts.icons + counts.stretchedIcons + counts.textCharacters == 0) {
