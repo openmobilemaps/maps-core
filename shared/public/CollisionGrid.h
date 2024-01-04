@@ -69,12 +69,13 @@ public:
     /**
      * Add a collision grid aligned rectangle (when projected with the provided vpMatrix) and receive the feedback,
      * if it has collided with the previous content of the grid. Only added, when not colliding!
+     * return true (1) if collision, or true (2) if outside of bounds
      */
-    bool addAndCheckCollisionAlignedRect(const CollisionRectF &rectangle) {
+    uint8_t addAndCheckCollisionAlignedRect(const CollisionRectF &rectangle) {
         RectF projectedRectangle = getProjectedRectangle(rectangle);
         IndexRange indexRange = getIndexRangeForRectangle(projectedRectangle);
         if (!indexRange.isValid(numCellsX - 1, numCellsY - 1)) {
-            return true; // Fully outside of bounds - not relevant
+            return 2; // Fully outside of bounds - not relevant
         }
 
         if (rectangle.contentHash != 0 && rectangle.symbolSpacing > 0) {
@@ -83,7 +84,7 @@ public:
                 for (const auto &other : equalRects->second) {
                     // Assume equal symbol spacing for all primitives with matching content
                     if (CollisionUtil::checkRectCollision(projectedRectangle, other, rectangle.symbolSpacing)) {
-                        return true;
+                        return 1;
                     }
                 }
             }
@@ -92,7 +93,7 @@ public:
                 for (const auto &other : equalCircles->second) {
                     // Assume equal symbol spacing for all primitives with matching content
                     if (CollisionUtil::checkRectCircleCollision(projectedRectangle, other, rectangle.symbolSpacing)) {
-                        return true;
+                        return 1;
                     }
                 }
             }
@@ -101,12 +102,12 @@ public:
             for (int16_t x = indexRange.xMin; x <= indexRange.xMax; x++) {
                     for (const auto &rect : gridRects[y][x]) {
                         if (CollisionUtil::checkRectCollision(projectedRectangle, rect)) {
-                            return true;
+                            return 1;
                         }
                     }
                     for (const auto &circle : gridCircles[y][x]) {
                         if (CollisionUtil::checkRectCircleCollision(projectedRectangle, circle)) {
-                            return true;
+                            return 1;
                         }
                     }
 
@@ -123,7 +124,7 @@ public:
         if (rectangle.contentHash != 0 && rectangle.symbolSpacing > 0) {
             spacedRects[rectangle.contentHash].push_back(projectedRectangle);
         }
-        return false;
+        return 0;
     }
 
     /**

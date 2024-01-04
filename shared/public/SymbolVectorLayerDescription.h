@@ -275,8 +275,8 @@ public:
         return textAllowOverlapEvaluator.getResult(textAllowOverlap, context, defaultValue);
     }
 
-    int64_t getSymbolSortKey(const EvaluationContext &context) {
-        static const int64_t defaultValue = 0.0;
+    double getSymbolSortKey(const EvaluationContext &context) {
+        static const double defaultValue = 0.0;
         return symbolSortKeyEvaluator.getResult(symbolSortKey, context, defaultValue);
     }
 
@@ -470,7 +470,7 @@ private:
     ValueEvaluator<double> textOpacityEvaluator;
     ValueEvaluator<double> iconOpacityEvaluator;
     ValueEvaluator<bool> textAllowOverlapEvaluator;
-    ValueEvaluator<int64_t> symbolSortKeyEvaluator;
+    ValueEvaluator<double> symbolSortKeyEvaluator;
     ValueEvaluator<std::string> iconImageEvaluator;
     ValueEvaluator<bool> iconImageCustomProviderEvaluator;
     ValueEvaluator<Anchor> iconAnchorEvaluator;

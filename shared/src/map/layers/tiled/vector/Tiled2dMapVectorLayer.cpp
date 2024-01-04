@@ -404,7 +404,8 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
                                                                         vectorSource.weakActor<Tiled2dMapVectorSource>(),
                                                                         readyManager,
                                                                         featureStateManager,
-                                                                        symbolDelegate);
+                                                                        symbolDelegate,
+                                                                        mapDescription->persistingSymbolPlacement);
             actor.unsafe()->setAlpha(alpha);
             symbolSourceDataManagers[source] = actor;
             interactionDataManagers[source].push_back(actor.weakActor<Tiled2dMapVectorSourceDataManager>());

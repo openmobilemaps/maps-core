@@ -2391,11 +2391,11 @@ public:
     }
 
     ValueVariant evaluate(const EvaluationContext &context) const override {
-        auto const lhsValue = lhs->evaluateOr(context, (int64_t) 0);
-        auto const rhsValue = rhs ? rhs->evaluateOr(context, (int64_t) 0) : 0;
+        auto const lhsValue = lhs->evaluateOr(context, (double) 0.0);
+        auto const rhsValue = rhs ? rhs->evaluateOr(context, (double) 0.0) : 0;
         switch (operation) {
             case MathOperation::MINUS:
-                if (!rhs) { return 0 - lhsValue; }
+                if (!rhs) { return 0.0 - lhsValue; }
                 return lhsValue - rhsValue;
             case MathOperation::PLUS:
                 return lhsValue + rhsValue;
@@ -2404,7 +2404,7 @@ public:
             case MathOperation::DIVIDE:
                 return lhsValue / rhsValue;
             case MathOperation::MODULO:
-                return lhsValue % rhsValue;
+                return std::fmod(lhsValue, rhsValue);
             case MathOperation::POWER:
                 return std::pow(lhsValue,  rhsValue);
         }

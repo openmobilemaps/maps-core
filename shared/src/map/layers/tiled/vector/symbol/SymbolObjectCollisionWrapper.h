@@ -15,7 +15,7 @@
 class SymbolObjectCollisionWrapper {
 public:
     std::shared_ptr<Tiled2dMapVectorSymbolObject> symbolObject;
-    int64_t symbolSortKey;
+    double symbolSortKey;
     size_t symbolTileIndex;
     bool isColliding;
 
@@ -44,6 +44,9 @@ public:
     bool operator<(const SymbolObjectCollisionWrapper &o) const {
         if (isColliding != o.isColliding) {
             return isColliding;
+        }
+        if (symbolObject->smallestVisibleZoom != o.symbolObject->smallestVisibleZoom) {
+            return symbolObject->smallestVisibleZoom > o.symbolObject->smallestVisibleZoom;
         }
         if (symbolSortKey == o.symbolSortKey) {
             return symbolTileIndex > o.symbolTileIndex;

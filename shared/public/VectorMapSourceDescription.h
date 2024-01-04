@@ -38,11 +38,14 @@ public:
     std::vector<std::shared_ptr<VectorLayerDescription>> layers;
     std::optional<std::string> spriteBaseUrl;
     std::map<std::string, std::shared_ptr<GeoJSONVTInterface>> geoJsonSources;
+    bool persistingSymbolPlacement;
 
     VectorMapDescription(std::string identifier,
                          std::vector<std::shared_ptr<VectorMapSourceDescription>> vectorSources,
                          std::vector<std::shared_ptr<VectorLayerDescription>> layers,
                          std::optional<std::string> spriteBaseUrl,
-                         std::map<std::string, std::shared_ptr<GeoJSONVTInterface>> geoJsonSources):
-    identifier(identifier), vectorSources(vectorSources), layers(layers), spriteBaseUrl(spriteBaseUrl), geoJsonSources(geoJsonSources) {}
+                         std::map<std::string, std::shared_ptr<GeoJSONVTInterface>> geoJsonSources,
+                         bool persistingSymbolPlacement):
+    identifier(identifier), vectorSources(vectorSources), layers(layers), spriteBaseUrl(spriteBaseUrl),
+    geoJsonSources(geoJsonSources), persistingSymbolPlacement(persistingSymbolPlacement) {}
 };

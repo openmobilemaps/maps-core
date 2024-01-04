@@ -52,16 +52,17 @@ class Tiled2dMapVectorSourceSymbolDataManager:
         public std::enable_shared_from_this<Tiled2dMapVectorSourceSymbolDataManager> {
 public:
     Tiled2dMapVectorSourceSymbolDataManager(const WeakActor<Tiled2dMapVectorLayer> &vectorLayer,
-                                          const std::shared_ptr<VectorMapDescription> &mapDescription,
-                                          const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
-                                          const std::string &source,
-                                          const std::shared_ptr<FontLoaderInterface> &fontLoader,
-                                          const WeakActor<Tiled2dMapVectorSource> &vectorSource,
+                                            const std::shared_ptr<VectorMapDescription> &mapDescription,
+                                            const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
+                                            const std::string &source,
+                                            const std::shared_ptr<FontLoaderInterface> &fontLoader,
+                                            const WeakActor<Tiled2dMapVectorSource> &vectorSource,
                                             const Actor<Tiled2dMapVectorReadyManager> &readyManager,
                                             const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager,
-                                            const std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> &symbolDelegate);
+                                            const std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> &symbolDelegate,
+                                            bool persistingSymbolPlacement);
 
-    void onAdded(const std::weak_ptr< ::MapInterface> &mapInterface) override;
+    void onAdded(const std::weak_ptr<::MapInterface> &mapInterface) override;
 
     void onRemoved() override;
 
@@ -142,6 +143,8 @@ private:
 
     std::shared_ptr<SymbolAnimationCoordinatorMap> animationCoordinatorMap;
     std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> symbolDelegate;
+
+    bool persistingSymbolPlacement = false;
 
 #ifdef __ANDROID__
     // Higher counts may cause issues for instanced text rendering

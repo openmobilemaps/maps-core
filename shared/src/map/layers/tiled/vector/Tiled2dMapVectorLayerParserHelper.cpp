@@ -193,18 +193,20 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
 
     std::optional<std::string> metadata;
     std::shared_ptr<Value> globalIsInteractable;
+    bool persistingSymbolPlacement = false;
 
     if(json["metadata"].is_object()) {
         metadata = json["metadata"].dump();
         globalIsInteractable = parser.parseValue(json["metadata"]["interactable"]);
+        persistingSymbolPlacement = json["metadata"].value("persistingSymbolPlacement", false);
     }
+    LogDebug << "UBCM: " << layerName << " persisting placement: " <<= (persistingSymbolPlacement ? "true" : "false");
 
     int64_t globalTransitionDuration = 300;
     int64_t globalTransitionDelay = 0;
     if(json["transition"].is_object()) {
         globalTransitionDuration = json["transition"].value("duration", globalTransitionDuration);
         globalTransitionDelay = json["transition"].value("delay", globalTransitionDelay);
-
     }
 
     for (auto&[key, val]: json["layers"].items()) {
@@ -410,6 +412,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                                                           sourceDescriptions,
                                                           layers,
                                                           sprite,
-                                                          geojsonSources);
+                                                          geojsonSources,
+                                                          persistingSymbolPlacement);
     return Tiled2dMapVectorLayerParserResult(mapDesc, LoaderStatus::OK, "", metadata);
 };

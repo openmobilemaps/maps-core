@@ -49,7 +49,8 @@ public:
                                  const UsedKeysCollection &usedKeys,
                                  const size_t symbolTileIndex,
                                  const bool hasCustomTexture,
-                                 const double dpFactor);
+                                 const double dpFactor,
+                                 const bool persistingSymbolPlacement);
 
     ~Tiled2dMapVectorSymbolObject() {
         if (animationCoordinator) {
@@ -91,7 +92,7 @@ public:
         return nullptr;
     }
 
-    int64_t symbolSortKey;
+    double symbolSortKey;
     const size_t symbolTileIndex;
 
     std::optional<CollisionRectF> getViewportAlignedBoundingBox(double zoomIdentifier, bool considerSymbolSpacing, bool considerOverlapFlag);
@@ -99,6 +100,8 @@ public:
     std::optional<std::vector<CollisionCircleF>> getMapAlignedBoundingCircles(double zoomIdentifier, bool considerSymbolSpacing, bool considerOverlapFlag);
 
     bool getIsOpaque();
+
+    void setHideFromCollision(bool hide);
 
     void collisionDetection(const double zoomIdentifier, const double rotation, const double scaleFactor, std::shared_ptr<CollisionGrid> collisionGrid);
 
@@ -119,6 +122,10 @@ public:
     size_t customTexturePage = 0;
     int customTextureOffset = 0;
     std::string stringIdentifier;
+
+    double smallestVisibleZoom = 999;
+    double largestCollisionZoom = -1;
+
 private:
     double lastZoomEvaluation = -1;
     void evaluateStyleProperties(const double zoomIdentifier);
@@ -157,9 +164,9 @@ private:
     bool isStyleStateDependant = true;
 
     // the following flags are all optional, if they are set to -1 it is not set
-    double lastIconUpdateScaleFactor;
-    double lastIconUpdateRotation;
-    float lastIconUpdateAlpha;
+    double lastIconUpdateScaleFactor = -1;
+    double lastIconUpdateRotation = -1;
+    float lastIconUpdateAlpha = -1;
 
     double lastStretchIconUpdateScaleFactor;
     double lastStretchIconUpdateRotation;
@@ -169,6 +176,8 @@ private:
 
     bool textAllowOverlap;
     bool iconAllowOverlap;
+
+    bool persistingSymbolPlacement = false;
 
     double dpFactor = 1.0;
     float alpha = 1.0;
@@ -187,6 +196,8 @@ private:
     IconTextFit iconTextFit = IconTextFit::NONE;
 
     size_t contentHash = 0;
+
+    double maxCollisionZoom = -1;
 
     bool isPlaced();
 
