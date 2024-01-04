@@ -200,7 +200,6 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
         globalIsInteractable = parser.parseValue(json["metadata"]["interactable"]);
         persistingSymbolPlacement = json["metadata"].value("persistingSymbolPlacement", false);
     }
-    LogDebug << "UBCM: " << layerName << " persisting placement: " <<= (persistingSymbolPlacement ? "true" : "false");
 
     int64_t globalTransitionDuration = 300;
     int64_t globalTransitionDelay = 0;
