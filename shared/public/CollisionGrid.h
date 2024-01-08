@@ -98,32 +98,29 @@ public:
                 }
             }
         }
+
+        bool collision = false;
         for (int16_t y = indexRange.yMin; y <= indexRange.yMax; y++) {
             for (int16_t x = indexRange.xMin; x <= indexRange.xMax; x++) {
+                if (!collision) {
                     for (const auto &rect : gridRects[y][x]) {
                         if (CollisionUtil::checkRectCollision(projectedRectangle, rect)) {
-                            return 1;
+                            collision = true;
                         }
                     }
                     for (const auto &circle : gridCircles[y][x]) {
                         if (CollisionUtil::checkRectCircleCollision(projectedRectangle, circle)) {
-                            return 1;
+                            collision = true;
                         }
                     }
-
-            }
-        }
-
-        // Only insert, when not colliding
-        for (int16_t y = indexRange.yMin; y <= indexRange.yMax; y++) {
-            for (int16_t x = indexRange.xMin; x <= indexRange.xMax; x++) {
+                }
                 gridRects[y][x].push_back(projectedRectangle);
             }
         }
-
         if (rectangle.contentHash != 0 && rectangle.symbolSpacing > 0) {
             spacedRects[rectangle.contentHash].push_back(projectedRectangle);
         }
+        if (collision) return 1;
         return 0;
     }
 
