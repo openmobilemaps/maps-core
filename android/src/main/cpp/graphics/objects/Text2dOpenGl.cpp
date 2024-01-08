@@ -137,17 +137,15 @@ void Text2dOpenGl::prepareGlData(int program) {
         textureCoordinateHandle = glGetAttribLocation(program, "texCoordinate");
     }
 
-    if (!hasVertexBuffer) {
+    if (!glDataBuffersGenerated) {
         glGenBuffers(1, &vertexAttribBuffer);
-        hasVertexBuffer = true;
     }
     glBindBuffer(GL_ARRAY_BUFFER, vertexAttribBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * textVertexAttributes.size(), &textVertexAttributes[0], GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    if (!hasIndexBuffer) {
+    if (!glDataBuffersGenerated) {
         glGenBuffers(1, &indexBuffer);
-        hasIndexBuffer = true;
     }
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort) * textIndices.size(), &textIndices[0], GL_STATIC_DRAW);
@@ -159,17 +157,16 @@ void Text2dOpenGl::prepareGlData(int program) {
     if (textureCoordScaleFactorHandle < 0) {
         textureCoordScaleFactorHandle = glGetUniformLocation(program, "textureCoordScaleFactor");
     }
+
+    glDataBuffersGenerated = true;
 }
 
 void Text2dOpenGl::removeGlBuffers() {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
-    if (hasVertexBuffer) {
+    if (glDataBuffersGenerated) {
         glDeleteBuffers(1, &vertexAttribBuffer);
-        hasVertexBuffer = false;
-    }
-    if (hasIndexBuffer) {
         glDeleteBuffers(1, &indexBuffer);
-        hasIndexBuffer = false;
+        glDataBuffersGenerated = false;
     }
 }
 

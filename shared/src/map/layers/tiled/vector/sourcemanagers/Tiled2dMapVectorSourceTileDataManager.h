@@ -73,6 +73,7 @@ protected:
     std::unordered_set<Tiled2dMapVersionedTileInfo> tilesReady;
     std::unordered_map<Tiled2dMapVersionedTileInfo, std::unordered_set<int32_t>> tilesReadyControlSet;
 
+    std::atomic_flag noPendingUpdateMasks = ATOMIC_FLAG_INIT;
     std::atomic_flag updateFlag = ATOMIC_FLAG_INIT;
     std::recursive_mutex updateMutex;
     std::unordered_map<Tiled2dMapVersionedTileInfo, Tiled2dMapLayerMaskWrapper> tileMasksToSetup;

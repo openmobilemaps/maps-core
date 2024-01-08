@@ -60,12 +60,16 @@ void LineGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface>
     segmentStartLPosHandle = glGetAttribLocation(program, "vSegmentStartLPos");
     styleInfoHandle = glGetAttribLocation(program, "vStyleInfo");
 
-    glGenBuffers(1, &vertexAttribBuffer);
+    if (!glDataBuffersGenerated) {
+        glGenBuffers(1, &vertexAttribBuffer);
+    }
     glBindBuffer(GL_ARRAY_BUFFER, vertexAttribBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * lineAttributes.size(), &lineAttributes[0], GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    glGenBuffers(1, &indexBuffer);
+    if (!glDataBuffersGenerated) {
+        glGenBuffers(1, &indexBuffer);
+    }
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * lineIndices.size(), &lineIndices[0], GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -74,6 +78,7 @@ void LineGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface>
     scaleFactorHandle = glGetUniformLocation(program, "scaleFactor");
 
     ready = true;
+    glDataBuffersGenerated = true;
 }
 
 void LineGroup2dOpenGl::clear() {
@@ -85,8 +90,11 @@ void LineGroup2dOpenGl::clear() {
 }
 
 void LineGroup2dOpenGl::removeGlBuffers() {
-    glDeleteBuffers(1, &vertexAttribBuffer);
-    glDeleteBuffers(1, &indexBuffer);
+    if (glDataBuffersGenerated) {
+        glDeleteBuffers(1, &vertexAttribBuffer);
+        glDeleteBuffers(1, &indexBuffer);
+        glDataBuffersGenerated = false;
+    }
 }
 
 void LineGroup2dOpenGl::setIsInverseMasked(bool inversed) { isMaskInversed = inversed; }

@@ -40,6 +40,7 @@
 #include "SymbolZOrder.h"
 #include "ValueVariant.h"
 #include "Tiled2dMapVectorStateManager.h"
+#include "Logger.h"
 #include <mutex>
 #include <iomanip>
 
@@ -652,10 +653,9 @@ public:
             return *staticValue;
         }
 
-        if((isStateDependant && !context.featureStateManager->empty()) || isZoomDependent) {
+        if (isZoomDependent || (isStateDependant && !context.featureStateManager->empty())) {
             return value->evaluateOr(context, defaultValue);
         }
-
 
         auto identifier = context.feature->identifier;
         if(isStateDependant && !context.featureStateManager->empty()) {
@@ -712,8 +712,6 @@ public:
 private:
     const std::string key;
 };
-
-#include "Logger.h"
 
 class FeatureStateValue : public Value {
 public:

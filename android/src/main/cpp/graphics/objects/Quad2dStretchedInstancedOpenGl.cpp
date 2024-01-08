@@ -82,31 +82,37 @@ void Quad2dStretchedInstancedOpenGl::prepareGlData(int program) {
     glUseProgram(program);
 
     positionHandle = glGetAttribLocation(program, "vPosition");
-    glGenBuffers(1, &vertexBuffer);
+    if (!glDataBuffersGenerated) {
+        glGenBuffers(1, &vertexBuffer);
+    }
     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    glGenBuffers(1, &indexBuffer);
+    if (!glDataBuffersGenerated) {
+        glGenBuffers(1, &indexBuffer);
+    }
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLubyte) * indices.size(), &indices[0], GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
+    if (!glDataBuffersGenerated) {
+        glGenBuffers(1, &positionsBuffer);
+        glGenBuffers(1, &textureCoordinatesListBuffer);
+        glGenBuffers(1, &scalesBuffer);
+        glGenBuffers(1, &rotationsBuffer);
+        glGenBuffers(1, &alphasBuffer);
+        glGenBuffers(1, &stretchInfoBuffer);
+    }
     instPositionsHandle = glGetAttribLocation(program, "aPosition");
-    glGenBuffers(1, &positionsBuffer);
     instTextureCoordinatesHandle = glGetAttribLocation(program, "aTexCoordinate");
-    glGenBuffers(1, &textureCoordinatesListBuffer);
     instScalesHandle = glGetAttribLocation(program, "aScale");
-    glGenBuffers(1, &scalesBuffer);
     instRotationsHandle = glGetAttribLocation(program, "aRotation");
-    glGenBuffers(1, &rotationsBuffer);
     instAlphasHandle = glGetAttribLocation(program, "aAlpha");
-    glGenBuffers(1, &alphasBuffer);
     instStretchScalesHandle = glGetAttribLocation(program, "aStretchScales");
     instStretchXsHandle = glGetAttribLocation(program, "aStretchX");
     instStretchYsHandle = glGetAttribLocation(program, "aStretchY");
-    glGenBuffers(1, &stretchInfoBuffer);
 
     mvpMatrixHandle = glGetUniformLocation(program, "uMVPMatrix");
 }
@@ -133,8 +139,11 @@ void Quad2dStretchedInstancedOpenGl::prepareTextureCoordsGlData(int program) {
 }
 
 void Quad2dStretchedInstancedOpenGl::removeGlBuffers() {
-    glDeleteBuffers(1, &vertexBuffer);
-    glDeleteBuffers(1, &indexBuffer);
+    if (glDataBuffersGenerated) {
+        glDeleteBuffers(1, &vertexBuffer);
+        glDeleteBuffers(1, &indexBuffer);
+        glDataBuffersGenerated = false;
+    }
 
     glDeleteBuffers(1, &positionsBuffer);
     glDeleteBuffers(1, &alphasBuffer);

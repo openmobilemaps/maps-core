@@ -61,13 +61,17 @@ void Polygon2dOpenGl::prepareGlData(int program) {
     glUseProgram(program);
 
     positionHandle = glGetAttribLocation(program, "vPosition");
-    glGenBuffers(1, &vertexBuffer);
+    if (!glDataBuffersGenerated) {
+        glGenBuffers(1, &vertexBuffer);
+    }
     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    glGenBuffers(1, &indexBuffer);
+    if (!glDataBuffersGenerated) {
+        glGenBuffers(1, &indexBuffer);
+    }
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort) * indices.size(), &indices[0], GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -84,8 +88,11 @@ void Polygon2dOpenGl::clear() {
 }
 
 void Polygon2dOpenGl::removeGlBuffers() {
-    glDeleteBuffers(1, &vertexBuffer);
-    glDeleteBuffers(1, &indexBuffer);
+    if (glDataBuffersGenerated) {
+        glDeleteBuffers(1, &vertexBuffer);
+        glDeleteBuffers(1, &indexBuffer);
+        glDataBuffersGenerated = false;
+    }
 }
 
 void Polygon2dOpenGl::setIsInverseMasked(bool inversed) { isMaskInversed = inversed; }

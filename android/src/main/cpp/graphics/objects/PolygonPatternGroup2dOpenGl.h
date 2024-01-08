@@ -81,6 +81,7 @@ protected:
     std::vector<GLfloat> vertices;
     GLuint indexBuffer;
     std::vector<GLushort> indices;
+    bool glDataBuffersGenerated = false;
 
     std::shared_ptr<TextureHolderInterface> textureHolder;
     int texturePointer;

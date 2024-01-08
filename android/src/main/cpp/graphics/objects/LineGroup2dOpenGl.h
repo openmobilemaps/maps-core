@@ -64,10 +64,11 @@ protected:
     int vertexIndexHandle;
     int segmentStartLPosHandle;
     int styleInfoHandle;
-    GLuint vertexAttribBuffer;
+    GLuint vertexAttribBuffer = -1;
     std::vector<GLfloat> lineAttributes;
-    GLuint indexBuffer;
+    GLuint indexBuffer = -1;
     std::vector<GLuint> lineIndices;
+    bool glDataBuffersGenerated = false;
 
     bool ready = false;
     bool dataReady = false;

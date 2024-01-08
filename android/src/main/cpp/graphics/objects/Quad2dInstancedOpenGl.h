@@ -94,6 +94,7 @@ class Quad2dInstancedOpenGl : public GraphicsObjectInterface,
     std::vector<GLfloat> textureCoords;
     GLuint indexBuffer;
     std::vector<GLubyte> indices;
+    bool glDataBuffersGenerated = false;
 
     std::shared_ptr<TextureHolderInterface> textureHolder;
     int texturePointer;

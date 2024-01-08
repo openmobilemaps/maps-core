@@ -17,6 +17,10 @@
 #include "RenderPass.h"
 
 void Tiled2dMapVectorSourceTileDataManager::update() {
+    if (!noPendingUpdateMasks.test_and_set()) {
+        updateMaskObjects();
+    }
+
     for (const auto &[tileInfo, subTiles] : tiles) {
         const auto tileState = tileStateMap.find(tileInfo);
 

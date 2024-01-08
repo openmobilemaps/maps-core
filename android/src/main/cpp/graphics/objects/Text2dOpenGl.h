@@ -71,11 +71,10 @@ protected:
     int positionHandle = -1;
     int textureCoordinateHandle = -1;
     GLuint vertexAttribBuffer = -1;
-    bool hasVertexBuffer = false;
     std::vector<GLfloat> textVertexAttributes;
     GLuint indexBuffer = -1;
-    bool hasIndexBuffer = false;
     std::vector<GLushort> textIndices;
+    bool glDataBuffersGenerated = false;
 
     std::shared_ptr<TextureHolderInterface> textureHolder;
     int texturePointer;
