@@ -122,9 +122,11 @@ void Quad2dOpenGl::prepareTextureCoordsGlData(int program) {
 }
 
 void Quad2dOpenGl::removeGlBuffers() {
-    glDeleteBuffers(1, &vertexBuffer);
-    glDeleteBuffers(1, &indexBuffer);
-    glDataBuffersGenerated = false;
+    if (glDataBuffersGenerated) {
+        glDeleteBuffers(1, &vertexBuffer);
+        glDeleteBuffers(1, &indexBuffer);
+        glDataBuffersGenerated = false;
+    }
 }
 
 void Quad2dOpenGl::removeTextureCoordsGlBuffers() {

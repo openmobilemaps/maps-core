@@ -81,29 +81,37 @@ void Quad2dInstancedOpenGl::prepareGlData(int program) {
     glUseProgram(program);
 
     positionHandle = glGetAttribLocation(program, "vPosition");
-    glGenBuffers(1, &vertexBuffer);
+    if (!glDataBuffersGenerated) {
+        glGenBuffers(1, &vertexBuffer);
+    }
     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    glGenBuffers(1, &indexBuffer);
+    if (!glDataBuffersGenerated) {
+        glGenBuffers(1, &indexBuffer);
+    }
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLubyte) * indices.size(), &indices[0], GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
+    if (!glDataBuffersGenerated) {
+        glGenBuffers(1, &positionsBuffer);
+        glGenBuffers(1, &rotationsBuffer);
+        glGenBuffers(1, &textureCoordinatesListBuffer);
+        glGenBuffers(1, &scalesBuffer);
+        glGenBuffers(1, &alphasBuffer);
+    }
     instPositionsHandle = glGetAttribLocation(program, "aPosition");
-    glGenBuffers(1, &positionsBuffer);
     instRotationsHandle = glGetAttribLocation(program, "aRotation");
-    glGenBuffers(1, &rotationsBuffer);
     instTextureCoordinatesHandle = glGetAttribLocation(program, "aTexCoordinate");
-    glGenBuffers(1, &textureCoordinatesListBuffer);
     instScalesHandle = glGetAttribLocation(program, "aScale");
-    glGenBuffers(1, &scalesBuffer);
     instAlphasHandle = glGetAttribLocation(program, "aAlpha");
-    glGenBuffers(1, &alphasBuffer);
 
     mvpMatrixHandle = glGetUniformLocation(program, "uMVPMatrix");
+
+    glDataBuffersGenerated = true;
 }
 
 void Quad2dInstancedOpenGl::prepareTextureCoordsGlData(int program) {
@@ -128,14 +136,16 @@ void Quad2dInstancedOpenGl::prepareTextureCoordsGlData(int program) {
 }
 
 void Quad2dInstancedOpenGl::removeGlBuffers() {
-    glDeleteBuffers(1, &vertexBuffer);
-    glDeleteBuffers(1, &indexBuffer);
-
-    glDeleteBuffers(1, &positionsBuffer);
-    glDeleteBuffers(1, &alphasBuffer);
-    glDeleteBuffers(1, &scalesBuffer);
-    glDeleteBuffers(1, &textureCoordinatesListBuffer);
-    glDeleteBuffers(1, &rotationsBuffer);
+    if (glDataBuffersGenerated) {
+        glDeleteBuffers(1, &vertexBuffer);
+        glDeleteBuffers(1, &indexBuffer);
+        glDeleteBuffers(1, &positionsBuffer);
+        glDeleteBuffers(1, &alphasBuffer);
+        glDeleteBuffers(1, &scalesBuffer);
+        glDeleteBuffers(1, &textureCoordinatesListBuffer);
+        glDeleteBuffers(1, &rotationsBuffer);
+        glDataBuffersGenerated = false;
+    }
 }
 
 void Quad2dInstancedOpenGl::removeTextureCoordsGlBuffers() {

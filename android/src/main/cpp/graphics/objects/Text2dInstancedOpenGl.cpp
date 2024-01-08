@@ -79,30 +79,36 @@ void Text2dInstancedOpenGl::prepareGlData(int program) {
     glUseProgram(program);
 
     positionHandle = glGetAttribLocation(program, "vPosition");
-    glGenBuffers(1, &vertexBuffer);
+    if (!glDataBuffersGenerated) {
+        glGenBuffers(1, &vertexBuffer);
+    }
     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    glGenBuffers(1, &indexBuffer);
+    if (!glDataBuffersGenerated) {
+        glGenBuffers(1, &indexBuffer);
+    }
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLubyte) * indices.size(), &indices[0], GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-    instPositionsHandle = glGetAttribLocation(program, "aPosition");
-    glGenBuffers(1, &positionsBuffer);
-    instTextureCoordinatesHandle = glGetAttribLocation(program, "aTexCoordinate");
-    glGenBuffers(1, &textureCoordinatesListBuffer);
-    instScalesHandle = glGetAttribLocation(program, "aScale");
-    glGenBuffers(1, &scalesBuffer);
-    instRotationsHandle = glGetAttribLocation(program, "aRotation");
-    glGenBuffers(1, &rotationsBuffer);
-    instStyleIndicesHandle = glGetAttribLocation(program, "aStyleIndex");
-    glGenBuffers(1, &styleIndicesBuffer);
-    styleBufferHandle = glGetProgramResourceIndex(program, GL_SHADER_STORAGE_BLOCK, "textInstancedStyleBuffer");
-    glGenBuffers(1, &styleBuffer);
+    if (!glDataBuffersGenerated) {
+        glGenBuffers(1, &positionsBuffer);
+        glGenBuffers(1, &textureCoordinatesListBuffer);
+        glGenBuffers(1, &scalesBuffer);
+        glGenBuffers(1, &rotationsBuffer);
+        glGenBuffers(1, &styleIndicesBuffer);
+        glGenBuffers(1, &styleBuffer);
+    }
 
+    instPositionsHandle = glGetAttribLocation(program, "aPosition");
+    instTextureCoordinatesHandle = glGetAttribLocation(program, "aTexCoordinate");
+    instScalesHandle = glGetAttribLocation(program, "aScale");
+    instRotationsHandle = glGetAttribLocation(program, "aRotation");
+    instStyleIndicesHandle = glGetAttribLocation(program, "aStyleIndex");
+    styleBufferHandle = glGetProgramResourceIndex(program, GL_SHADER_STORAGE_BLOCK, "textInstancedStyleBuffer");
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -131,8 +137,11 @@ void Text2dInstancedOpenGl::prepareTextureCoordsGlData(int program) {
 }
 
 void Text2dInstancedOpenGl::removeGlBuffers() {
-    glDeleteBuffers(1, &vertexBuffer);
-    glDeleteBuffers(1, &indexBuffer);
+    if (glDataBuffersGenerated) {
+        glDeleteBuffers(1, &vertexBuffer);
+        glDeleteBuffers(1, &indexBuffer);
+        glDataBuffersGenerated = false;
+    }
 
     glDeleteBuffers(1, &positionsBuffer);
     glDeleteBuffers(1, &styleIndicesBuffer);
