@@ -654,7 +654,8 @@ public:
         }
 
         if (isZoomDependent || (isStateDependant && !context.featureStateManager->empty())) {
-            return value->evaluateOr(context, defaultValue);
+            auto result = value->evaluateOr(context, defaultValue);
+            return result;
         }
 
         auto identifier = context.feature->identifier;

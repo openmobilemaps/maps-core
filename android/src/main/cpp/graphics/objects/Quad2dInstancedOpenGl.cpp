@@ -102,6 +102,13 @@ void Quad2dInstancedOpenGl::prepareGlData(int program) {
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLubyte) * indices.size(), &indices[0], GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
+    if (!glDataBuffersGenerated) {
+        glGenBuffers(1, &positionsBuffer);
+        glGenBuffers(1, &rotationsBuffer);
+        glGenBuffers(1, &textureCoordinatesListBuffer);
+        glGenBuffers(1, &scalesBuffer);
+        glGenBuffers(1, &alphasBuffer);
+    }
     instPositionsHandle = glGetAttribLocation(program, "aPosition");
     instRotationsHandle = glGetAttribLocation(program, "aRotation");
     instTextureCoordinatesHandle = glGetAttribLocation(program, "aTexCoordinate");

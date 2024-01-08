@@ -101,6 +101,15 @@ void Text2dInstancedOpenGl::prepareGlData(int program) {
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLubyte) * indices.size(), &indices[0], GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
+    if (!glDataBuffersGenerated) {
+        glGenBuffers(1, &positionsBuffer);
+        glGenBuffers(1, &textureCoordinatesListBuffer);
+        glGenBuffers(1, &scalesBuffer);
+        glGenBuffers(1, &rotationsBuffer);
+        glGenBuffers(1, &styleIndicesBuffer);
+        glGenBuffers(1, &styleBuffer);
+    }
+
     instPositionsHandle = glGetAttribLocation(program, "aPosition");
     instTextureCoordinatesHandle = glGetAttribLocation(program, "aTexCoordinate");
     instScalesHandle = glGetAttribLocation(program, "aScale");
