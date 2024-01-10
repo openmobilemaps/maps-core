@@ -47,10 +47,10 @@ void ColorCircleShaderOpenGl::preRender(const std::shared_ptr<::RenderingContext
 
 void ColorCircleShaderOpenGl::setColor(float red, float green, float blue, float alpha) {
     std::lock_guard<std::mutex> lock(dataMutex);
-    color.at(0) = red;
-    color.at(1) = green;
-    color.at(2) = blue;
-    color.at(3) = alpha;
+    color[0] = red;
+    color[1] = green;
+    color[2] = blue;
+    color[3] = alpha;
 }
 
 std::string ColorCircleShaderOpenGl::getFragmentShader() {
