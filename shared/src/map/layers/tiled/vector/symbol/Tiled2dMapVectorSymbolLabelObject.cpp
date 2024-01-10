@@ -609,7 +609,7 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
         }
     }
 
-    currentIndex = indexAtDistance(currentIndex, -size * 0.5);
+    currentIndex = indexAtDistance(currentIndex, -size * 0.5, std::nullopt);
     auto yOffset = Vec2D(0.0, offset.y * fontSize);
 
     if (wasReversed) {
@@ -630,7 +630,7 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
 
     for(auto &i : splittedTextInfo) {
         if(i.glyphIndex < 0) {
-            currentIndex = indexAtDistance(currentIndex, spaceAdvance * fontSize * i.scale);
+            currentIndex = indexAtDistance(currentIndex, spaceAdvance * fontSize * i.scale, std::nullopt);
             index = 0;
         } else {
             auto& d = fontResult->fontData->glyphs[i.glyphIndex];
@@ -644,8 +644,8 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
             const auto &p = pointAtIndex(currentIndex, true);
 
             // get before and after to calculate angle
-            const auto &before = pointAtIndex(indexAtDistance(currentIndex, -halfSpace), false);
-            const auto &after = pointAtIndex(indexAtDistance(currentIndex, halfSpace), false);
+            const auto &before = pointAtIndex(indexAtDistance(currentIndex, -halfSpace, p), false);
+            const auto &after = pointAtIndex(indexAtDistance(currentIndex, halfSpace, p), false);
 
             double angleRad = atan2_approximation((before.y - after.y), -(before.x - after.x));
             double angleDeg = angleRad * (180.0 / M_PI);
@@ -682,7 +682,7 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
             auto yh = y + charSize.y;
 
             auto lastIndex = currentIndex;
-            currentIndex = indexAtDistance(currentIndex, advance.x * (1.0 + letterSpacing));
+            currentIndex = indexAtDistance(currentIndex, advance.x * (1.0 + letterSpacing), p);
 
             // if we are at the end, and we were at the end (lastIndex), then clear and skip
             if(currentIndex.first == renderLineCoordinatesCount - 1 && lastIndex.first == currentIndex.first && (lastIndex.second == currentIndex.second)) {

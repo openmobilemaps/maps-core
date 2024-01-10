@@ -78,7 +78,7 @@ class TextLayerObject : public LayerObjectInterface {
 
     std::pair<int, double> findReferencePointIndices();
     Coord pointAtIndex(const std::pair<int, double> &index, bool useRender = true);
-    std::pair<int, double> indexAtDistance(const std::pair<int, double> &index, double distance);
+    std::pair<int, double> indexAtDistance(const std::pair<int, double> &index, double distance, const std::optional<Coord> &indexCoord);
 
   private:
     std::shared_ptr<TextInterface> text;
