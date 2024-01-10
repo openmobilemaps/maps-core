@@ -42,7 +42,7 @@ public:
         }
     }
 
-    bool isValid(int16_t maxX, int16_t maxY) {
+    bool isValid(int16_t maxX, int16_t maxY) const {
         return xMin <= maxX && xMax >= 0 && yMin <= maxY && yMax >= 0;
     }
 };
@@ -72,8 +72,8 @@ public:
      * return true (1) if collision, or true (2) if outside of bounds
      */
     uint8_t addAndCheckCollisionAlignedRect(const CollisionRectF &rectangle) {
-        RectF projectedRectangle = getProjectedRectangle(rectangle);
-        IndexRange indexRange = getIndexRangeForRectangle(projectedRectangle);
+        const RectF &projectedRectangle = getProjectedRectangle(rectangle);
+        const IndexRange &indexRange = getIndexRangeForRectangle(projectedRectangle);
         if (!indexRange.isValid(numCellsX - 1, numCellsY - 1)) {
             return 2; // Fully outside of bounds - not relevant
         }
@@ -215,22 +215,22 @@ private:
         temp2[2] = 0.0;
         temp2[3] = 1.0;
         Matrix::multiply(vpMatrix, temp2, temp1);
-        float originX = ((temp1.at(0) / temp1.at(3)) * halfWidth + halfWidth);
-        float originY = ((temp1.at(1) / temp1.at(3)) * halfHeight + halfHeight);
+        float originX = ((temp1[0] / temp1[3]) * halfWidth + halfWidth);
+        float originY = ((temp1[1] / temp1[3]) * halfHeight + halfHeight);
         temp2[0] = rectangle.width * cosNegGridAngle;
         temp2[1] = rectangle.width * sinNegGridAngle;
         temp2[2] = 0.0;
         temp2[3] = 0.0;
         Matrix::multiply(vpMatrix, temp2, temp1);
-        float w = temp1.at(0);
-        float h = temp1.at(1);
+        float w = temp1[0];
+        float h = temp1[1];
         temp2[0] = -rectangle.height * sinNegGridAngle;
         temp2[1] = rectangle.height * cosNegGridAngle;
         temp2[2] = 0.0;
         temp2[3] = 0.0;
         Matrix::multiply(vpMatrix, temp2, temp1);
-        w += temp1.at(0);
-        h += temp1.at(1);
+        w += temp1[0];
+        h += temp1[1];
         float width = (w * halfWidth); // by assumption aligned with projected space
         float height = (h * halfHeight); // by assumption aligned with projected space
         originX = std::min(originX, originX + width);
@@ -245,16 +245,16 @@ private:
         temp2[2] = 0.0;
         temp2[3] = 1.0;
         Matrix::multiply(vpMatrix, temp2, temp1);
-        float originX = ((temp1.at(0) / temp1.at(3)) * halfWidth + halfWidth);
-        float originY = ((temp1.at(1) / temp1.at(3)) * halfHeight + halfHeight);
+        float originX = ((temp1[0] / temp1[3]) * halfWidth + halfWidth);
+        float originY = ((temp1[1] / temp1[3]) * halfHeight + halfHeight);
         temp2[0] = circle.radius;
         temp2[1] = circle.radius;
         temp2[2] = 0.0;
         temp2[3] = 0.0;
         Matrix::multiply(vpMatrix, temp2, temp1);
-        temp1.at(0) = temp1.at(0) * halfWidth;
-        temp1.at(1) = temp1.at(1) * halfHeight;
-        float iRadius = std::abs((std::sqrt(temp1.at(0) * temp1.at(0) + temp1.at(1) + temp1.at(1))));
+        temp1[0] = temp1[0] * halfWidth;
+        temp1[1] = temp1[1] * halfHeight;
+        float iRadius = std::sqrt(temp1[0] * temp1[0] + temp1[1] * temp1[1]);
         return {originX, originY, iRadius};
     }
 
