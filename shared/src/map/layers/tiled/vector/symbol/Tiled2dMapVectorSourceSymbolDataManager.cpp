@@ -558,16 +558,17 @@ void Tiled2dMapVectorSourceSymbolDataManager::updateSymbolGroups() {
             manager->remove(localToRemove);
         });
 
+        bool clearCoordinator = !tilesToClear.empty();
         for (const auto &symbolGroup: tilesToClear) {
             symbolGroup.syncAccess([](auto symbolGroup) {
                 symbolGroup->clear();
             });
         }
+        tilesToClear.clear();
 
-        if (!tilesToClear.empty()) {
+        if (clearCoordinator) {
             animationCoordinatorMap->clearAnimationCoordinators();
         }
-        tilesToClear.clear();
     }
 
     pregenerateRenderPasses();
