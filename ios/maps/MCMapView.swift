@@ -150,7 +150,7 @@ extension MCMapView: MTKViewDelegate {
             return
         }
 
-//        framesToRender -= 1
+        framesToRender -= 1
 
         guard let renderPassDescriptor = view.currentRenderPassDescriptor,
               let commandBuffer = MetalContext.current.commandQueue.makeCommandBuffer(),
