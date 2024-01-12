@@ -108,8 +108,8 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                         tmpBounds.push_back(el.value().get<double>());
                     }
                     if (tmpBounds.size() == 4) {
-                        const auto topLeft = Coord(CoordinateSystemIdentifiers::EPSG4326(), tmpBounds.at(0), tmpBounds.at(1), 0);
-                        const auto bottomRight = Coord(CoordinateSystemIdentifiers::EPSG4326(), tmpBounds.at(2), tmpBounds.at(3), 0);
+                        const auto topLeft = Coord(CoordinateSystemIdentifiers::EPSG4326(), tmpBounds[0], tmpBounds[1], 0);
+                        const auto bottomRight = Coord(CoordinateSystemIdentifiers::EPSG4326(), tmpBounds[2], tmpBounds[3], 0);
                         bounds = RectCoord(topLeft, bottomRight);
                     }
                 }
@@ -135,8 +135,8 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                         tmpBounds.push_back(el.value().get<double>());
                     }
                     if (tmpBounds.size() == 4) {
-                        const auto topLeft = Coord(CoordinateSystemIdentifiers::EPSG4326(), tmpBounds.at(0), tmpBounds.at(1), 0);
-                        const auto bottomRight = Coord(CoordinateSystemIdentifiers::EPSG4326(), tmpBounds.at(2), tmpBounds.at(3), 0);
+                        const auto topLeft = Coord(CoordinateSystemIdentifiers::EPSG4326(), tmpBounds[0], tmpBounds[1], 0);
+                        const auto bottomRight = Coord(CoordinateSystemIdentifiers::EPSG4326(), tmpBounds[2], tmpBounds[3], 0);
                         bounds = RectCoord(topLeft, bottomRight);
                     }
                 }
@@ -254,7 +254,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
             layers.push_back(layerDesc);
 
         } else if (val["type"] == "raster" && rasterLayerMap.count(val["source"]) != 0) {
-            auto layer = rasterLayerMap.at(val["source"]);
+            auto layer = rasterLayerMap[val["source"]];
             RasterVectorStyle style = RasterVectorStyle(parser.parseValue(val["paint"]["raster-opacity"]),
                                                         parser.parseValue(val["paint"]["raster-brightness-min"]),
                                                         parser.parseValue(val["paint"]["raster-brightness-max"]),
@@ -395,8 +395,8 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                 tmpBounds.push_back(d);
             }
             if (tmpBounds.size() == 4) {
-                const auto topLeft = Coord(CoordinateSystemIdentifiers::EPSG4326(), tmpBounds.at(0), tmpBounds.at(1), 0);
-                const auto bottomRight = Coord(CoordinateSystemIdentifiers::EPSG4326(), tmpBounds.at(2), tmpBounds.at(3), 0);
+                const auto topLeft = Coord(CoordinateSystemIdentifiers::EPSG4326(), tmpBounds[0], tmpBounds[1], 0);
+                const auto bottomRight = Coord(CoordinateSystemIdentifiers::EPSG4326(), tmpBounds[2], tmpBounds[3], 0);
                 bounds = RectCoord(topLeft, bottomRight);
             }
         }

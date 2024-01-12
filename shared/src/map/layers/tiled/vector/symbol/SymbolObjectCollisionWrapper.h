@@ -19,11 +19,11 @@ public:
     size_t symbolTileIndex;
     bool isColliding;
 
-    SymbolObjectCollisionWrapper(const std::shared_ptr<Tiled2dMapVectorSymbolObject> object)
+    SymbolObjectCollisionWrapper(const std::shared_ptr<Tiled2dMapVectorSymbolObject> &object)
             : symbolObject(object), symbolSortKey(object->symbolSortKey), symbolTileIndex(object->symbolTileIndex),
               isColliding(object->animationCoordinator->isColliding()) {};
 
-    SymbolObjectCollisionWrapper(SymbolObjectCollisionWrapper&& other) noexcept
+    SymbolObjectCollisionWrapper(const SymbolObjectCollisionWrapper& other) noexcept
             : symbolObject(std::move(other.symbolObject)),
               symbolSortKey(other.symbolSortKey),
               symbolTileIndex(other.symbolTileIndex),

@@ -630,7 +630,7 @@ public:
 template<class ResultType>
 class ValueEvaluator {
 public:
-    inline ResultType getResult(const std::shared_ptr<Value> &value, const EvaluationContext &context, const ResultType defaultValue) {
+    inline ResultType getResult(const std::shared_ptr<Value> &value, const EvaluationContext &context, const ResultType &defaultValue) {
         std::lock_guard<std::mutex> lock(mutex);
         if (!value) {
             return defaultValue;
@@ -638,7 +638,7 @@ public:
         if (lastValuePtr != value.get()) {
             lastResults.clear();
             staticValue = std::nullopt;
-            const auto usedKeysCollection = value->getUsedKeys();
+            const auto &usedKeysCollection = value->getUsedKeys();
             isStatic = usedKeysCollection.empty();
             if (isStatic) {
                 staticValue = value->evaluateOr(context, defaultValue);
@@ -653,9 +653,8 @@ public:
             return *staticValue;
         }
 
-        if (isZoomDependent || (isStateDependant && !context.featureStateManager->empty())) {
-            auto result = value->evaluateOr(context, defaultValue);
-            return result;
+        if((isStateDependant && !context.featureStateManager->empty()) || isZoomDependent) {
+            return value->evaluateOr(context, defaultValue);
         }
 
         auto identifier = (context.feature->identifier << 12) | (uint64_t) ((isZoomDependent ? context.zoomLevel : 0.f) * 100);

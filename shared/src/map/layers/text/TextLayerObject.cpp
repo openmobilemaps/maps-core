@@ -388,7 +388,7 @@ float TextLayerObject::layoutLine(float scale, bool updateObject) {
         }
     }
 
-    currentIndex = indexAtDistance(currentIndex, -size * 0.5);
+    currentIndex = indexAtDistance(currentIndex, -size * 0.5, std::nullopt);
 
     int total = 0;
     int rotated = 0;
@@ -403,7 +403,7 @@ float TextLayerObject::layoutLine(float scale, bool updateObject) {
 
     for(auto &i : splittedTextInfo) {
         if(i.glyphIndex < 0) {
-            currentIndex = indexAtDistance(currentIndex, spaceAdvance * fontSize * i.scale);
+            currentIndex = indexAtDistance(currentIndex, spaceAdvance * fontSize * i.scale, std::nullopt);
             lastAngle = 0;
             preLastAngle = 0;
             index = 0;
@@ -417,8 +417,8 @@ float TextLayerObject::layoutLine(float scale, bool updateObject) {
             auto p = pointAtIndex(currentIndex);
 
             // get before and after to calculate angle
-            auto before = pointAtIndex(indexAtDistance(currentIndex, -size.x * 0.5), false);
-            auto after = pointAtIndex(indexAtDistance(currentIndex, size.x * 0.5), false);
+            auto before = pointAtIndex(indexAtDistance(currentIndex, -size.x * 0.5, p), false);
+            auto after = pointAtIndex(indexAtDistance(currentIndex, size.x * 0.5, p), false);
 
             double angle = atan2((before.y - after.y), -(before.x - after.x));
             angle *= (180.0 / M_PI);
@@ -454,7 +454,7 @@ float TextLayerObject::layoutLine(float scale, bool updateObject) {
             auto yh = y + size.y;
 
             auto lastIndex = currentIndex;
-            currentIndex = indexAtDistance(currentIndex, advance.x * (1.0 + letterSpacing));
+            currentIndex = indexAtDistance(currentIndex, advance.x * (1.0 + letterSpacing), p);
 
             // if we are at the end, and we were at the end (lastIndex), then clear and skip
             if(currentIndex.first == renderLineCoordinates.size() - 1 && lastIndex.first == currentIndex.first && (lastIndex.second == currentIndex.second)) {
@@ -553,19 +553,20 @@ std::pair<int, double> TextLayerObject::findReferencePointIndices() {
     int iMin = 0;
 
     for(int i=1; i<renderLineCoordinates.size(); ++i) {
-        auto start = renderLineCoordinates[i-1];
-        auto end = renderLineCoordinates[i];
+        const auto& start = renderLineCoordinates[i-1];
+        const auto& end = renderLineCoordinates[i];
 
-        auto length = Vec2DHelper::distance(Vec2D(start.x, start.y), Vec2D(end.x, end.y));
+        auto lengthSquared = Vec2DHelper::distanceSquared(Vec2D(start.x, start.y), Vec2D(end.x, end.y));
+        auto dir = Vec2D(end.x - start.x, end.y - start.y);
 
         double t = 0.0;
-        if(length > 0) {
-            auto dot = Vec2D(point.x - start.x, point.y - start.y) * Vec2D(end.x - start.x, end.y - start.y);
-            t = dot / (length * length);
+        if(lengthSquared > 0) {
+            auto dot = Vec2D(point.x - start.x, point.y - start.y) * dir;
+            t = dot / lengthSquared;
         }
 
-        auto proj = Vec2D(start.x + t * (end.x - start.x), start.y + t * (end.y - start.y));
-        auto dist = Vec2DHelper::distance(proj, Vec2D(point.x, point.y));
+        auto proj = Vec2D(start.x + t * dir.x, start.y + t * dir.y);
+        auto dist = Vec2DHelper::distanceSquared(proj, Vec2D(point.x, point.y));
 
         if(dist < distance && t >= 0.0 && t <= 1.0) {
             tMin = t;
@@ -583,8 +584,8 @@ Coord TextLayerObject::pointAtIndex(const std::pair<int, double> &index, bool us
     return Coord(s.systemIdentifier, s.x + (e.x - s.x) * index.second, s.y + (e.y - s.y) * index.second, s.z + (e.z - s.z) * index.second);
 }
 
-std::pair<int, double> TextLayerObject::indexAtDistance(const std::pair<int, double> &index, double distance) {
-    auto current = pointAtIndex(index);
+std::pair<int, double> TextLayerObject::indexAtDistance(const std::pair<int, double> &index, double distance, const std::optional<Coord> &indexCoord) {
+    auto current = indexCoord ? *indexCoord : pointAtIndex(index);
     auto currentIndex = index;
     auto dist = std::abs(distance);
 
