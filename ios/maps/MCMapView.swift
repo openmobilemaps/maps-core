@@ -83,7 +83,7 @@ open class MCMapView: MTKView {
 
         preferredFramesPerSecond = 120
 
-        sampleCount = 4 // samples per pixel
+        sampleCount = 1 // samples per pixel
 
         callbackHandler.invalidateCallback = { [weak self] in
             self?.invalidate()
@@ -150,7 +150,7 @@ extension MCMapView: MTKViewDelegate {
             return
         }
 
-        framesToRender -= 1
+//        framesToRender -= 1
 
         guard let renderPassDescriptor = view.currentRenderPassDescriptor,
               let commandBuffer = MetalContext.current.commandQueue.makeCommandBuffer(),
