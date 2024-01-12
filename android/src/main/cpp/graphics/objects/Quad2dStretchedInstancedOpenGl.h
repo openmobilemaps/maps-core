@@ -96,6 +96,7 @@ class Quad2dStretchedInstancedOpenGl : public GraphicsObjectInterface,
     std::vector<GLfloat> textureCoords;
     GLuint indexBuffer;
     std::vector<GLubyte> indices;
+    bool glDataBuffersGenerated = false;
 
     std::shared_ptr<TextureHolderInterface> textureHolder;
     int texturePointer;
@@ -116,21 +117,26 @@ class Quad2dStretchedInstancedOpenGl : public GraphicsObjectInterface,
 
     int instanceCount = 0;
 
+    GLuint dynamicInstanceDataBuffer;
     int instPositionsHandle;
-    GLuint positionsBuffer;
     int instRotationsHandle;
-    GLuint rotationsBuffer;
     int instScalesHandle;
-    GLuint scalesBuffer;
     int instAlphasHandle;
-    GLuint alphasBuffer;
     int instStretchScalesHandle;
     int instStretchXsHandle;
     int instStretchYsHandle;
-    GLuint stretchInfoBuffer;
     int instTextureCoordinatesHandle;
-    GLuint textureCoordinatesListBuffer;
+
+    static const int instPositionsOffsetBytes = sizeof(GLfloat) * 0;
+    static const int instTextureCoordinatesOffsetBytes = sizeof(GLfloat) * 2;
+    static const int instScalesOffsetBytes = sizeof(GLfloat) * 6;
+    static const int instRotationsOffsetBytes = sizeof(GLfloat) * 8;
+    static const int instAlphasOffsetBytes = sizeof(GLfloat) * 9;
+    static const int instStretchInfoOffsetBytes = sizeof(GLfloat) * 10;
+    static const int instStretchXsAddOffsetBytes = sizeof(GLfloat) * 2;
+    static const int instStretchYsAddOffsetBytes = sizeof(GLfloat) * 6;
+    static const int instValuesSizeBytes = sizeof(GLfloat) * 20;
 
 private:
-    bool writeToBuffer(const ::SharedBytes &data, GLuint target);
+    bool writeToDynamicInstanceDataBuffer(const ::SharedBytes &data, GLuint targetOffsetBytes);
 };

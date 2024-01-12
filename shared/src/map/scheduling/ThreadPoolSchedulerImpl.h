@@ -57,8 +57,8 @@ private:
     std::condition_variable defaultCv;
 
     bool separateGraphicsQueue;
-    static const uint8_t MAX_NUM_GRAPHICS_TASKS = 12;
-    static const uint64_t MAX_TIME_GRAPHICS_TASKS_MS = 4;
+    static const uint8_t MAX_NUM_GRAPHICS_TASKS = 128;
+    static const uint64_t MAX_TIME_GRAPHICS_TASKS_MS = 6;
     std::mutex graphicsMutex;
 
     std::deque<std::shared_ptr<TaskInterface>> graphicsQueue;

@@ -66,13 +66,17 @@ void PolygonPatternGroup2dOpenGl::prepareGlData(int program) {
 
     positionHandle = glGetAttribLocation(program, "vPosition");
     styleIndexHandle = glGetAttribLocation(program, "vStyleIndex");
-    glGenBuffers(1, &vertexBuffer);
+    if (!glDataBuffersGenerated) {
+        glGenBuffers(1, &vertexBuffer);
+    }
     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    glGenBuffers(1, &indexBuffer);
+    if (!glDataBuffersGenerated) {
+        glGenBuffers(1, &indexBuffer);
+    }
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort) * indices.size(), &indices[0], GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -92,8 +96,11 @@ void PolygonPatternGroup2dOpenGl::clear() {
 }
 
 void PolygonPatternGroup2dOpenGl::removeGlBuffers() {
-    glDeleteBuffers(1, &vertexBuffer);
-    glDeleteBuffers(1, &indexBuffer);
+    if (glDataBuffersGenerated) {
+        glDeleteBuffers(1, &vertexBuffer);
+        glDeleteBuffers(1, &indexBuffer);
+        glDataBuffersGenerated = false;
+    }
 }
 
 void PolygonPatternGroup2dOpenGl::loadTexture(const std::shared_ptr<::RenderingContextInterface> &context,

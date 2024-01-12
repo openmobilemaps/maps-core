@@ -50,7 +50,7 @@ void ColorLineGroup2dShaderOpenGl::preRender(const std::shared_ptr<::RenderingCo
             return;
         }
         int lineStylesHandle = glGetUniformLocation(program, "lineValues");
-        glUniform1fv(lineStylesHandle, sizeLineValuesArray, &lineValues[0]);
+        glUniform1fv(lineStylesHandle, numStyles * sizeLineValues, &lineValues[0]);
         int numStylesHandle = glGetUniformLocation(program, "numStyles");
         glUniform1i(numStylesHandle, numStyles);
         int dashingScaleFactorHandle = glGetUniformLocation(program, "dashingScaleFactor");

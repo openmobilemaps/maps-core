@@ -53,7 +53,7 @@ void ColorPolygonGroup2dShaderOpenGl::preRender(const std::shared_ptr<::Renderin
             return;
         }
         int lineStylesHandle = glGetUniformLocation(program, "polygonStyles");
-        glUniform1fv(lineStylesHandle, sizeStyleValuesArray, &polygonStyles[0]);
+        glUniform1fv(lineStylesHandle, numStyles * sizeStyleValues, &polygonStyles[0]);
         int numStylesHandle = glGetUniformLocation(program, "numStyles");
         glUniform1i(numStylesHandle, numStyles);
     }
@@ -66,6 +66,7 @@ void ColorPolygonGroup2dShaderOpenGl::setStyles(const ::SharedBytes & styles) {
             std::memcpy(this->polygonStyles.data(), (void *) styles.address,
                     styles.elementCount * styles.bytesPerElement);
         }
+
         this->numStyles = styles.elementCount;
     }
 }

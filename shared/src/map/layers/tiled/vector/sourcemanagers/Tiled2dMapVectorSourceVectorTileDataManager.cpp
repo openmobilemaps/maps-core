@@ -155,8 +155,7 @@ void Tiled2dMapVectorSourceVectorTileDataManager::onVectorTilesUpdated(const std
 
         auto castedMe = std::static_pointer_cast<Tiled2dMapVectorSourceTileDataManager>(shared_from_this());
         auto selfActor = WeakActor<Tiled2dMapVectorSourceTileDataManager>(mailbox, castedMe);
-        selfActor.messagePrecisely(MailboxDuplicationStrategy::replaceNewest, MailboxExecutionEnvironment::graphics,
-                                   &Tiled2dMapVectorSourceTileDataManager::updateMaskObjects);
+        noPendingUpdateMasks.clear();
     }
     mapInterface->invalidate();
 }
