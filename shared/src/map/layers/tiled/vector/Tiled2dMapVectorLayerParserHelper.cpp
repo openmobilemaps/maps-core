@@ -180,11 +180,19 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
             tileJsons[key] = val;
         } else if (type == "geojson") {
             nlohmann::json geojson;
+            Options options;
+
+            if (val["minzoom"].is_number_integer()) {
+                options.minZoom = val["minzoom"].get<u_int8_t>();
+            }
+            if (val["maxzoom"].is_number_integer()) {
+                options.maxZoom = val["maxzoom"].get<int>();
+            }
             if (val["data"].is_string()) {
-                geojsonSources[key] = GeoJsonVTFactory::getGeoJsonVt(key, replaceUrlParams(val["data"].get<std::string>(), sourceUrlParams), loaders, localDataProvider);
+                geojsonSources[key] = GeoJsonVTFactory::getGeoJsonVt(key, replaceUrlParams(val["data"].get<std::string>(), sourceUrlParams), loaders, localDataProvider, options);
             } else {
                 assert(val["data"].is_object());
-                geojsonSources[key] = GeoJsonVTFactory::getGeoJsonVt(GeoJsonParser::getGeoJson(val["data"]));
+                geojsonSources[key] = GeoJsonVTFactory::getGeoJsonVt(GeoJsonParser::getGeoJson(val["data"]), options);
             }
         }
     }

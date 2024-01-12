@@ -26,6 +26,9 @@ struct TileOptions {
 };
 
 struct Options : TileOptions {
+    // min zoom to will be visible
+    uint8_t minZoom = 0;
+
     // max zoom to preserve detail on
     uint8_t maxZoom = 18;
 
@@ -53,7 +56,7 @@ public:
         // If the GeoJSON contains only points, there is no need to split it into smaller tiles,
         // as there are no opportunities for simplification, merging, or meaningful point reduction.
         if (geoJson->hasOnlyPoints) {
-            options.maxZoom = 0;
+            options.maxZoom = options.minZoom;
         }
 
 
@@ -114,7 +117,7 @@ public:
                         // If the GeoJSON contains only points, there is no need to split it into smaller tiles,
                         // as there are no opportunities for simplification, merging, or meaningful point reduction.
                         if (geoJson->hasOnlyPoints) {
-                            self->options.maxZoom = 0;
+                            self->options.maxZoom = self->options.minZoom;
                         } else {
                             self->options.maxZoom = 18;
                         }
@@ -150,6 +153,10 @@ public:
         }
     }
 
+    uint8_t getMinZoom() override {
+        return options.minZoom;
+    }
+
     uint8_t getMaxZoom() override {
         return options.maxZoom;
     }
@@ -167,7 +174,7 @@ public:
         // If the GeoJSON contains only points, there is no need to split it into smaller tiles,
         // as there are no opportunities for simplification, merging, or meaningful point reduction.
         if (geoJson->hasOnlyPoints) {
-            options.maxZoom = 0;
+            options.maxZoom = options.minZoom;
         } else {
             options.maxZoom = 18;
         }
@@ -317,6 +324,11 @@ private:
         
         // if we sliced further down, no need to keep source geometry
         tile.source_features.clear();
+
+        if (z < options.minZoom) {
+            // if z smaller than min zoom, no need to keep tile
+            tiles.erase(it);
+        }
     }
 
     void resolveAllWaitingPromises() {
