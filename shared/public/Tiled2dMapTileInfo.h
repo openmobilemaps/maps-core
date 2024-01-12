@@ -47,6 +47,10 @@ struct Tiled2dMapTileInfo {
     std::string to_string() const {
         return "Tiled2dMapTileInfo(" + std::to_string(zoomIdentifier) + "/" + std::to_string(x)  + "/" + std::to_string(y) + "/" + std::to_string(t) + ")";
     }
+
+    std::string to_string_short() const {
+        return std::to_string(zoomIdentifier) + "/" + std::to_string(x)  + "/" + std::to_string(y) + "/" + std::to_string(t);
+    }
 };
 
 namespace std {

@@ -115,18 +115,21 @@ class Quad2dInstancedOpenGl : public GraphicsObjectInterface,
 
     int instanceCount = 0;
 
+    GLuint dynamicInstanceDataBuffer;
     int instPositionsHandle;
-    GLuint positionsBuffer;
     int instRotationsHandle;
-    GLuint rotationsBuffer;
     int instScalesHandle;
-    GLuint scalesBuffer;
     int instAlphasHandle;
-    GLuint alphasBuffer;
     int instTextureCoordinatesHandle;
-    GLuint textureCoordinatesListBuffer;
+
+    static const int instPositionsOffsetBytes = sizeof(GLfloat) * 0;
+    static const int instRotationsOffsetBytes = sizeof(GLfloat) * 2;
+    static const int instTextureCoordinatesOffsetBytes = sizeof(GLfloat) * 3;
+    static const int instScalesOffsetBytes = sizeof(GLfloat) * 7;
+    static const int instAlphasOffsetBytes = sizeof(GLfloat) * 9;
+    static const int instValuesSizeBytes = sizeof(GLfloat) * 10;
 
 private:
-    bool writeToBuffer(const ::SharedBytes &data, GLuint target);
+    bool writeToDynamicInstanceDataBuffer(const ::SharedBytes &data, int targetOffsetBytes);
 
 };
