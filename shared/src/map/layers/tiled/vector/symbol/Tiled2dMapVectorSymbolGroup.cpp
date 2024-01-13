@@ -841,6 +841,12 @@ void Tiled2dMapVectorSymbolGroup::placedInCache() {
     }
 }
 
+void Tiled2dMapVectorSymbolGroup::removeFromCache() {
+    for (auto const object: symbolObjects) {
+        object->removeFromCache();
+    }
+}
+
 
 std::vector<std::shared_ptr< ::RenderObjectInterface>> Tiled2dMapVectorSymbolGroup::getRenderObjects() {
     std::vector<std::shared_ptr< ::RenderObjectInterface>> renderObjects;

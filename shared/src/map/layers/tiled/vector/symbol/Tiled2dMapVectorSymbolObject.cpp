@@ -161,6 +161,32 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
     isStyleStateDependant = usedKeys.isStateDependant();
 }
 
+Tiled2dMapVectorSymbolObject::~Tiled2dMapVectorSymbolObject() {
+    if (animationCoordinator) {
+        if (isCoordinateOwner) {
+            animationCoordinator->isOwned.clear();
+            isCoordinateOwner = false;
+        }
+        animationCoordinator->decreaseUsage();
+    }
+}
+
+void Tiled2dMapVectorSymbolObject::placedInCache() {
+    if (animationCoordinator) {
+        if (isCoordinateOwner) {
+            animationCoordinator->isOwned.clear();
+            isCoordinateOwner = false;
+        }
+        animationCoordinator->increaseCache();
+    }
+}
+
+void Tiled2dMapVectorSymbolObject::removeFromCache() {
+    if (animationCoordinator) {
+        animationCoordinator->decreaseCache();
+    }
+}
+
 void Tiled2dMapVectorSymbolObject::updateLayerDescription(const std::shared_ptr<SymbolVectorLayerDescription> layerDescription, const UsedKeysCollection &usedKeys) {
     this->description = layerDescription;
     if (labelObject) {

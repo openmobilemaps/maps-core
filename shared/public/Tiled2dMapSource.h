@@ -159,7 +159,7 @@ public:
     float screenDensityPpi;
     std::set<Tiled2dMapTileInfo> readyTiles;
 
-    size_t lastVisibleTilesHash;
+    size_t lastVisibleTilesHash = -1;
             
     void onVisibleTilesChanged(const std::vector<VisibleTilesLayer> &pyramid, int keepZoomLevelOffset = 0);
 
