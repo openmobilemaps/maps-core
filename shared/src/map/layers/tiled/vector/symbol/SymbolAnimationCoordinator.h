@@ -52,7 +52,17 @@ public:
     }
 
     bool isAnimating() {
-        return isIconAnimating() || isStretchIconAnimating() || isTextAnimating();
+        if (cacheCount >= usageCount) {
+            return false;
+            
+        }
+        if (isIconAnimating() || isStretchIconAnimating() || isTextAnimating()) {
+            // printf("Animate %p: %d, %d, %d, %d: %f|%f\n", static_cast<void*>(this), isIconAnimating(), isStretchIconAnimating(), isTextAnimating(), isUsed(), coordinate.x, coordinate.y);
+            return true;
+        }
+        else {
+            return false;
+        }
     }
 
     bool isIconAnimating() {
@@ -81,6 +91,14 @@ public:
 
     int decreaseUsage() {
         return --usageCount;
+    }
+
+    int increaseCache() {;
+        return ++cacheCount;
+    }
+
+    int decreaseCache() {
+        return --cacheCount;
     }
 
     std::atomic_flag isOwned = ATOMIC_FLAG_INIT;
@@ -112,6 +130,7 @@ private:
     float lastTextAlpha = 0;
 
     std::atomic_int usageCount = 0;
+    std::atomic_int cacheCount = 0;
 
     bool collides = true;
 

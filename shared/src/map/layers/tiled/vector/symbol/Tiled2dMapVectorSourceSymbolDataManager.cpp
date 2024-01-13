@@ -530,6 +530,18 @@ void Tiled2dMapVectorSourceSymbolDataManager::updateSymbolGroups() {
             if (tileStateIt == tileStateMap.end()) {
                 tileStateMap[tile] = state;
             } else {
+                if (tileStateIt->second == TileState::CACHED && state != TileState::CACHED) {
+                    auto tileSymbolGroupMapIt = tileSymbolGroupMap.find(tile);
+                    if (tileSymbolGroupMapIt != tileSymbolGroupMap.end()) {
+                        for (const auto &[layerIdentifier, symbolGroups]: tileSymbolGroupMapIt->second) {
+                            for (auto &symbolGroup: std::get<1>(symbolGroups)) {
+                                symbolGroup.syncAccess([&](auto group) {
+                                    group->removeFromCache();
+                                });
+                            }
+                        }
+                    }
+                }
                 tileStateIt->second = state;
             }
             if (state == TileState::CACHED) {
