@@ -78,7 +78,10 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
     if (!zoomInfo.underzoom
         && (zoomLevelInfos.empty() || zoomLevelInfos[0].zoom * zoomInfo.zoomLevelScaleFactor * screenScaleFactor < zoom)
         && (zoomLevelInfos.empty() || zoomLevelInfos[0].zoomLevelIdentifier != 0)) { // enable underzoom if the first zoomLevel is zoomLevelIdentifier == 0
-        onVisibleTilesChanged({});
+        if (lastVisibleTilesHash != 0) {
+            lastVisibleTilesHash = 0;
+            onVisibleTilesChanged({});
+        }
         return;
     }
 

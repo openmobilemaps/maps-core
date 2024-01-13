@@ -177,6 +177,13 @@ void Tiled2dMapVectorSymbolObject::placedInCache() {
             animationCoordinator->isOwned.clear();
             isCoordinateOwner = false;
         }
+        animationCoordinator->increaseCache();
+    }
+}
+
+void Tiled2dMapVectorSymbolObject::removeFromCache() {
+    if (animationCoordinator) {
+        animationCoordinator->decreaseCache();
     }
 }
 

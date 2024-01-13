@@ -65,6 +65,8 @@ public:
 
     void placedInCache();
 
+    void removeFromCache();
+
     void clear();
 
     void updateLayerDescription(const std::shared_ptr<SymbolVectorLayerDescription> layerDescription);

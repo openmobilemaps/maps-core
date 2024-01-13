@@ -541,7 +541,9 @@ void Tiled2dMapVectorLayer::update() {
         auto now = DateHelper::currentTimeMillis();
         bool newIsAnimating = false;
         bool tilesChanged = !tilesStillValid.test_and_set();
-        if (abs(newZoom-lastDataManagerZoom) / std::max(newZoom, 1.0) > 0.001 || now - lastDataManagerUpdate > 1000 || isAnimating || tilesChanged) {
+        double zoomChange = abs(newZoom-lastDataManagerZoom) / std::max(newZoom, 1.0);
+        double timeDiff = now - lastDataManagerUpdate;
+        if (zoomChange > 0.001 || timeDiff > 2000 || isAnimating || tilesChanged) {
             lastDataManagerUpdate = now;
             lastDataManagerZoom = newZoom;
 
@@ -556,7 +558,7 @@ void Tiled2dMapVectorLayer::update() {
                 newIsAnimating |= a;
             }
             isAnimating = newIsAnimating;
-            if (now - lastCollitionCheck > 2000 || tilesChanged) {
+            if (now - lastCollitionCheck > 3000 || tilesChanged) {
                 lastCollitionCheck = now;
                 bool enforceUpdate = !prevCollisionStillValid.test_and_set();
                 collisionManager.syncAccess([&vpMatrix, &viewportSize, viewportRotation, enforceUpdate](const auto &manager) {
