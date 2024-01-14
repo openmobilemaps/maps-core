@@ -22,8 +22,10 @@ open class MCMapView: MTKView {
     private var saveDrawable = false
     private lazy var renderToImageQueue = DispatchQueue(label: "io.openmobilemaps.renderToImagQueue", qos: .userInteractive)
 
-    private var framesToRender: UInt = 1
-    private let framesToRenderAfterInvalidate: UInt = 25
+    private var framesToRender: Int = 1
+    private let framesToRenderAfterInvalidate: Int = 25
+    private var lastInvalidate = Date()
+    private let renderAfterInvalidate: TimeInterval = 3 // Collision detection might be delayed 3s
 
     private let touchHandler: MCMapViewTouchHandler
     private let callbackHandler = MCMapViewCallbackHandler()
@@ -131,6 +133,7 @@ open class MCMapView: MTKView {
     public func invalidate() {
         isPaused = false
         framesToRender = framesToRenderAfterInvalidate
+        lastInvalidate = Date()
     }
 }
 
@@ -145,7 +148,7 @@ extension MCMapView: MTKViewDelegate {
             return // don't execute metal calls in background
         }
 
-        guard framesToRender != 0 else {
+        guard framesToRender > 0 || -lastInvalidate.timeIntervalSinceNow < renderAfterInvalidate else {
             isPaused = true
             return
         }
