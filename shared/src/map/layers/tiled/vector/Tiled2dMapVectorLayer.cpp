@@ -562,6 +562,7 @@ void Tiled2dMapVectorLayer::update() {
                 collisionManager.syncAccess([&vpMatrix, &viewportSize, viewportRotation, enforceUpdate](const auto &manager) {
                     manager->collisionDetection(*vpMatrix, viewportSize, viewportRotation, enforceUpdate);
                 });
+                isAnimating = true;
             }
         }
 
@@ -1003,6 +1004,8 @@ void Tiled2dMapVectorLayer::updateLayerDescriptions(const std::vector<std::share
         }
     }
 
+    tilesStillValid.clear();
+    mapInterface->invalidate();
 }
 
 void Tiled2dMapVectorLayer::updateLayerDescription(std::shared_ptr<VectorLayerDescription> layerDescription) {
@@ -1198,6 +1201,7 @@ void Tiled2dMapVectorLayer::applyGlobalOrFeatureStateIfPossible(StateType type) 
         }
     }
 
+    tilesStillValid.clear();
     mapInterface->invalidate();
 }
 
