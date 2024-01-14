@@ -192,8 +192,16 @@ std::string ColorLineGroup2dShaderOpenGl::getFragmentShader() {
                                            int iCapType = int(floor(lineValues[int(fStyleIndexBase) + 12] + 0.5));
                                            float lineLength = length(pointBDeltaA);
                                            float t = dot(pointDeltaA, normalize(pointBDeltaA)) / lineLength;
+
+                                           int dashBase = int(fStyleIndexBase) + 13;
+                                           // dash values: {int numDashInfo, vec4 dashArray} -> stride = 5
+                                           int numDashInfos = int(floor(lineValues[dashBase] + 0.5));
+
                                            float d;
                                            if (t < 0.0 || t > 1.0) {
+                                               if (numDashInfos > 0) {
+                                                   discard;
+                                               }
                                                if (segmentType == 0 || iCapType == 1 || (segmentType == 2 && t < 0.0) || (segmentType == 1 && t > 1.0)) {
                                                    d = min(length(pointDeltaA), length(pointDeltaA - pointBDeltaA));
                                                } else if (iCapType == 2) {
@@ -216,9 +224,6 @@ std::string ColorLineGroup2dShaderOpenGl::getFragmentShader() {
                                            vec4 fragColor = color;
                                            float opacity = lineValues[int(fStyleIndexBase) + 10];
 
-                                           int dashBase = int(fStyleIndexBase) + 13;
-                                           // dash values: {int numDashInfo, vec4 dashArray} -> stride = 5
-                                           int numDashInfos = int(floor(lineValues[dashBase] + 0.5));
                                            if (numDashInfos > 0) {
                                                int gapColorIndexBase = int(fStyleIndexBase) + 5;
                                                vec4 gapColor = vec4(lineValues[gapColorIndexBase], lineValues[gapColorIndexBase + 1],
