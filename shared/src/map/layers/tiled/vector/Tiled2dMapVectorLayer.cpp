@@ -510,6 +510,9 @@ void Tiled2dMapVectorLayer::reloadLocalDataSource(const std::string &sourceName,
             source->reloadTiles();
         });
     }
+
+    tilesStillValid.clear();
+    mapInterface->invalidate();
 }
 
 std::shared_ptr<::LayerInterface> Tiled2dMapVectorLayer::asLayerInterface() {
@@ -1050,6 +1053,9 @@ void Tiled2dMapVectorLayer::updateLayerDescription(std::shared_ptr<VectorLayerDe
             }
         }
     }
+
+    tilesStillValid.clear();
+    mapInterface->invalidate();
 }
 
 std::optional<std::shared_ptr<FeatureContext>> Tiled2dMapVectorLayer::getFeatureContext(int64_t identifier) {
