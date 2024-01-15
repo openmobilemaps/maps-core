@@ -278,9 +278,11 @@ private:
         
         auto& tile = it->second;
         
-        if (geometries.empty())
+        if (geometries.empty()) {
+            tiles.erase(it);
             return;
-        
+        }
+
         //if it's the first-pass tiling
         if (cz == 0u) {
             // stop tiling if we reached max zoom, or if the tile is too simple
