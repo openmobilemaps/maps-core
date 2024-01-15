@@ -127,6 +127,7 @@ class GLThread constructor(
 						hasFinishedSinceDirty = true
 						finishDuration = System.currentTimeMillis() - finishDuration
 					}
+					val finishDuration = System.currentTimeMillis() - preFinish
 
 					try {
 						if (finishDuration < BREAK_RENDER_INTERVAL) {
