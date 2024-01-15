@@ -358,15 +358,40 @@ void Tiled2dMapSource<T, L, R>::onVisibleTilesChanged(const std::vector<VisibleT
         }
     }
 
-    std::sort(toAdd.begin(), toAdd.end());
-
-    for (const auto &addedTile : toAdd) {
-        performLoadingTask(addedTile.tileInfo, 0);
+    if (auto strongScheduler = scheduler.lock()) {
+        std::lock_guard<std::recursive_mutex> lock(mailbox->receivingMutex);
+        std::weak_ptr<Tiled2dMapSource> weakSelfPtr = std::dynamic_pointer_cast<Tiled2dMapSource>(
+                shared_from_this());
+        std::sort(toAdd.begin(), toAdd.end());
+        if (toAdd != pendingTilesToLoad) {
+            long newId = ++currentNewTilesUpdateId;
+            pendingTilesToLoad = toAdd;
+            strongScheduler->addTask(std::make_shared<LambdaTask>(
+                    TaskConfig("DebounceNewTilesLoad_" + std::to_string(newId), PENDING_NEW_TILE_DEBOUNCE_MS, TaskPriority::NORMAL,
+                               ExecutionEnvironment::COMPUTATION),
+                    [weakSelfPtr, newId] {
+                        if (auto strongSelf = weakSelfPtr.lock()) {
+                            strongSelf->onStableTriggerNewTileLoading(newId);
+                        }
+                    }));
+        }
     }
+
     //if we removed tiles, we potentially need to update the tilemasks - also if no new tile is loaded
     updateTileMasks();
     
     notifyTilesUpdates();
+}
+
+template<class T, class L, class R>
+void Tiled2dMapSource<T, L, R>::onStableTriggerNewTileLoading(uint64_t updateId) {
+    for (const auto &tileToLoad : pendingTilesToLoad) {
+        std::lock_guard<std::recursive_mutex> lock(mailbox->receivingMutex);
+        if (updateId != currentNewTilesUpdateId) {
+            break;
+        }
+        performLoadingTask(tileToLoad.tileInfo, 0);
+    }
 }
 
 template<class T, class L, class R>
