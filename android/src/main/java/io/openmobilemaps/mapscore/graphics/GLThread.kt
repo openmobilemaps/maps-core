@@ -16,6 +16,7 @@ import android.util.Log
 import io.openmobilemaps.mapscore.BuildConfig
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicLong
 import javax.microedition.khronos.egl.*
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.egl.EGLContext
@@ -69,6 +70,8 @@ class GLThread constructor(
 	val runNotifier = Object()
 	var glRunList = ConcurrentLinkedQueue<() -> Unit>()
 	val isDirty = AtomicBoolean(false)
+	val lastDirtyTimestamp = AtomicLong(0)
+	var hasFinishedSinceDirty = false
 
 	var renderer: GLSurfaceView.Renderer? = null
 	var surface: SurfaceTexture? = null
@@ -106,12 +109,23 @@ class GLThread constructor(
 			if ((!isDirty.get() && glRunList.isEmpty()) || isPaused) {
 				var wasPaused = false
 				do {
+					var firstPause = false
 					if (isPaused && !wasPaused) {
 						onPauseCallback?.invoke()
 						wasPaused = true
+						firstPause = true
 					}
+					val preFinish = System.currentTimeMillis()
+					if (firstPause || (!hasFinishedSinceDirty && preFinish - lastDirtyTimestamp.get() > 500)) {
+						GLES32.glFinish()
+						hasFinishedSinceDirty = true
+					}
+					val finishDuration = System.currentTimeMillis() - preFinish
+
 					try {
-						synchronized(runNotifier) { runNotifier.wait(1000) }
+						if (finishDuration < 1000) {
+							synchronized(runNotifier) { runNotifier.wait(if (isPaused) 30000 else 1000 - finishDuration) }
+						}
 					} catch (e: InterruptedException) {
 						e.printStackTrace()
 					}
@@ -360,7 +374,10 @@ class GLThread constructor(
 	}
 
 	fun requestRender() {
+		lastDirtyTimestamp.set(System.currentTimeMillis())
 		isDirty.set(true)
+		hasFinishedSinceDirty = false
+
 		synchronized(runNotifier) { runNotifier.notify() }
 	}
 
