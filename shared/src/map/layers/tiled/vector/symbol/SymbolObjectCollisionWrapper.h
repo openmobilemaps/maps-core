@@ -24,7 +24,7 @@ public:
               isColliding(object->animationCoordinator->isColliding()) {};
 
     SymbolObjectCollisionWrapper(const SymbolObjectCollisionWrapper& other) noexcept
-            : symbolObject(std::move(other.symbolObject)),
+            : symbolObject(other.symbolObject),
               symbolSortKey(other.symbolSortKey),
               symbolTileIndex(other.symbolTileIndex),
               isColliding(other.isColliding) {}
