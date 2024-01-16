@@ -861,7 +861,10 @@ void Tiled2dMapVectorSymbolObject::collisionDetection(const double zoomIdentifie
         }
     }
 
-    setHideFromCollision(willCollide || outside);
+    if (!outside) {
+        setHideFromCollision(willCollide);
+    }
+
 }
 
 std::optional<std::tuple<Coord, VectorLayerFeatureInfo>> Tiled2dMapVectorSymbolObject::onClickConfirmed(const CircleD &clickHitCircle) {
