@@ -21,7 +21,7 @@ public enum PipelineDescriptorFactory {
         pipelineDescriptor.colorAttachments[0].pixelFormat = MetalContext.current.colorPixelFormat
         pipelineDescriptor.vertexDescriptor = vertexDescriptor
 
-        pipelineDescriptor.rasterSampleCount = 4 // samples per pixel
+        pipelineDescriptor.rasterSampleCount = 1 // samples per pixel
 
         let renderbufferAttachment = pipelineDescriptor.colorAttachments[0]
         renderbufferAttachment?.pixelFormat = MetalContext.current.colorPixelFormat
