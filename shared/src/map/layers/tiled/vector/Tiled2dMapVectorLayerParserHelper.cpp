@@ -223,6 +223,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
 
         std::optional<int32_t> renderPassIndex;
         std::shared_ptr<Value> interactable = globalIsInteractable;
+        bool layerMultiselect = false;
 
         std::shared_ptr<Value> blendMode;
         if (val["metadata"].is_object()) {
@@ -231,6 +232,9 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
             }
             if (!val["metadata"]["interactable"].is_null()) {
                 interactable = parser.parseValue(val["metadata"]["interactable"]);
+            }
+            if (!val["metadata"]["multiselect"].is_null()) {
+                layerMultiselect = val["metadata"].value("multiselect", false);
             }
             if (!val["metadata"]["blend-mode"].is_null()) {
                 blendMode = parser.parseValue(val["metadata"]["blend-mode"]);
@@ -301,7 +305,8 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                     filter,
                     style,
                     renderPassIndex,
-                    interactable);
+                    interactable,
+                    layerMultiselect);
 
             layers.push_back(layerDesc);
 
@@ -360,7 +365,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                                                                             filter,
                                                                             style,
                                                                             renderPassIndex,
-                                                                            interactable);
+                                                                            interactable); // in-layer layerMultiselect not yet supported
             layers.push_back(layerDesc);
         } else if (val["type"] == "fill") {
 
@@ -379,7 +384,8 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                                                                              filter,
                                                                              style,
                                                                              renderPassIndex,
-                                                                             interactable);
+                                                                             interactable,
+                                                                             layerMultiselect);
 
             layers.push_back(layerDesc);
         }

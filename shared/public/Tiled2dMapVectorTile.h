@@ -77,6 +77,7 @@ protected:
     double dpFactor = 1.0;
 
     std::weak_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> selectionDelegate;
+    bool multiselect = false;
 
     const std::shared_ptr<Tiled2dMapVectorStateManager> featureStateManager;
 };

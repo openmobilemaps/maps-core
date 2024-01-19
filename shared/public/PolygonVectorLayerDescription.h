@@ -98,14 +98,15 @@ public:
                                   std::shared_ptr<Value> filter,
                                   PolygonVectorStyle style,
                                   std::optional<int32_t> renderPassIndex,
-                                  std::shared_ptr<Value> interactable):
-    VectorLayerDescription(identifier, source, sourceId, minZoom, maxZoom, filter, renderPassIndex, interactable),
+                                  std::shared_ptr<Value> interactable,
+                                  bool multiselect):
+    VectorLayerDescription(identifier, source, sourceId, minZoom, maxZoom, filter, renderPassIndex, interactable, multiselect),
     style(style) {};
 
     std::unique_ptr<VectorLayerDescription> clone() override {
         return std::make_unique<PolygonVectorLayerDescription>(identifier, source, sourceLayer, minZoom, maxZoom,
                                                                filter ? filter->clone() : nullptr, style, renderPassIndex,
-                                                               interactable ? interactable->clone() : nullptr);
+                                                               interactable ? interactable->clone() : nullptr, multiselect);
     }
 
     virtual UsedKeysCollection getUsedKeys() const override {
