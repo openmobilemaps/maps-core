@@ -23,6 +23,7 @@ const std::string Tiled2dMapVectorStyleParser::anyExpression = "any";
 const std::string Tiled2dMapVectorStyleParser::caseExpression = "case";
 const std::string Tiled2dMapVectorStyleParser::matchExpression = "match";
 const std::string Tiled2dMapVectorStyleParser::toStringExpression = "to-string";
+const std::string Tiled2dMapVectorStyleParser::toBooleanExpression = "to-boolean";
 const std::string Tiled2dMapVectorStyleParser::toNumberExpression = "to-number";
 const std::string Tiled2dMapVectorStyleParser::stopsExpression = "stops";
 const std::string Tiled2dMapVectorStyleParser::stepExpression = "step";
