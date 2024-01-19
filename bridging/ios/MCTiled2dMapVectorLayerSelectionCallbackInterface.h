@@ -12,6 +12,10 @@
          layerIdentifier:(nonnull NSString *)layerIdentifier
                    coord:(nonnull MCCoord *)coord;
 
+- (BOOL)didMultiSelectLayerFeatures:(nonnull NSArray<MCVectorLayerFeatureInfo *> *)featureInfos
+                    layerIdentifier:(nonnull NSString *)layerIdentifier
+                              coord:(nonnull MCCoord *)coord;
+
 - (BOOL)didClickBackgroundConfirmed:(nonnull MCCoord *)coord;
 
 @end

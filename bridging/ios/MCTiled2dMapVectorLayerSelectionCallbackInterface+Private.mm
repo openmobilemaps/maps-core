@@ -44,6 +44,17 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (BOOL)didMultiSelectLayerFeatures:(nonnull NSArray<MCVectorLayerFeatureInfo *> *)featureInfos
+                    layerIdentifier:(nonnull NSString *)layerIdentifier
+                              coord:(nonnull MCCoord *)coord {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->didMultiSelectLayerFeatures(::djinni::List<::djinni_generated::VectorLayerFeatureInfo>::toCpp(featureInfos),
+                                                                               ::djinni::String::toCpp(layerIdentifier),
+                                                                               ::djinni_generated::Coord::toCpp(coord));
+        return ::djinni::Bool::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (BOOL)didClickBackgroundConfirmed:(nonnull MCCoord *)coord {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->didClickBackgroundConfirmed(::djinni_generated::Coord::toCpp(coord));
@@ -66,6 +77,15 @@ public:
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() didSelectFeature:(::djinni_generated::VectorLayerFeatureInfo::fromCpp(c_featureInfo))
                                                                              layerIdentifier:(::djinni::String::fromCpp(c_layerIdentifier))
                                                                                        coord:(::djinni_generated::Coord::fromCpp(c_coord))];
+            return ::djinni::Bool::toCpp(objcpp_result_);
+        }
+    }
+    bool didMultiSelectLayerFeatures(const std::vector<::VectorLayerFeatureInfo> & c_featureInfos, const std::string & c_layerIdentifier, const ::Coord & c_coord) override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() didMultiSelectLayerFeatures:(::djinni::List<::djinni_generated::VectorLayerFeatureInfo>::fromCpp(c_featureInfos))
+                                                                                        layerIdentifier:(::djinni::String::fromCpp(c_layerIdentifier))
+                                                                                                  coord:(::djinni_generated::Coord::fromCpp(c_coord))];
             return ::djinni::Bool::toCpp(objcpp_result_);
         }
     }

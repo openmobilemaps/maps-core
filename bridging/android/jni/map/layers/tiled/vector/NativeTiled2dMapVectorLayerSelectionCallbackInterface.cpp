@@ -27,6 +27,17 @@ bool NativeTiled2dMapVectorLayerSelectionCallbackInterface::JavaProxy::didSelect
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni::Bool::toCpp(jniEnv, jret);
 }
+bool NativeTiled2dMapVectorLayerSelectionCallbackInterface::JavaProxy::didMultiSelectLayerFeatures(const std::vector<::VectorLayerFeatureInfo> & c_featureInfos, const std::string & c_layerIdentifier, const ::Coord & c_coord) {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeTiled2dMapVectorLayerSelectionCallbackInterface>::get();
+    auto jret = jniEnv->CallBooleanMethod(Handle::get().get(), data.method_didMultiSelectLayerFeatures,
+                                          ::djinni::get(::djinni::List<::djinni_generated::NativeVectorLayerFeatureInfo>::fromCpp(jniEnv, c_featureInfos)),
+                                          ::djinni::get(::djinni::String::fromCpp(jniEnv, c_layerIdentifier)),
+                                          ::djinni::get(::djinni_generated::NativeCoord::fromCpp(jniEnv, c_coord)));
+    ::djinni::jniExceptionCheck(jniEnv);
+    return ::djinni::Bool::toCpp(jniEnv, jret);
+}
 bool NativeTiled2dMapVectorLayerSelectionCallbackInterface::JavaProxy::didClickBackgroundConfirmed(const ::Coord & c_coord) {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
@@ -51,6 +62,17 @@ CJNIEXPORT jboolean JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_ti
         auto r = ref->didSelectFeature(::djinni_generated::NativeVectorLayerFeatureInfo::toCpp(jniEnv, j_featureInfo),
                                        ::djinni::String::toCpp(jniEnv, j_layerIdentifier),
                                        ::djinni_generated::NativeCoord::toCpp(jniEnv, j_coord));
+        return ::djinni::release(::djinni::Bool::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT jboolean JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_vector_Tiled2dMapVectorLayerSelectionCallbackInterface_00024CppProxy_native_1didMultiSelectLayerFeatures(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_featureInfos, jstring j_layerIdentifier, ::djinni_generated::NativeCoord::JniType j_coord)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapVectorLayerSelectionCallbackInterface>(nativeRef);
+        auto r = ref->didMultiSelectLayerFeatures(::djinni::List<::djinni_generated::NativeVectorLayerFeatureInfo>::toCpp(jniEnv, j_featureInfos),
+                                                  ::djinni::String::toCpp(jniEnv, j_layerIdentifier),
+                                                  ::djinni_generated::NativeCoord::toCpp(jniEnv, j_coord));
         return ::djinni::release(::djinni::Bool::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
