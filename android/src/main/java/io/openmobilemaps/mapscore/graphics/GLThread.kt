@@ -110,7 +110,7 @@ class GLThread constructor(
 		}
 
 		while (!finished) {
-			if ((!isDirty.get() && glRunList.isEmpty()) || isPaused) {
+			if ((!isDirty.get() && glRunList.isEmpty()) && (isPaused || System.currentTimeMillis() - lastDirtyTimestamp.get() > BREAK_MIN_FINISH_MS)) {
 				var wasPaused = false
 				do {
 					var firstPause = false
@@ -119,12 +119,13 @@ class GLThread constructor(
 						wasPaused = true
 						firstPause = true
 					}
-					val preFinish = System.currentTimeMillis()
-					if (firstPause || (!hasFinishedSinceDirty && preFinish - lastDirtyTimestamp.get() > BREAK_MIN_FINISH_MS)) {
+					var finishDuration = 0L
+					if (firstPause || !hasFinishedSinceDirty) {
+						finishDuration = System.currentTimeMillis()
 						GLES32.glFinish()
 						hasFinishedSinceDirty = true
+						finishDuration = System.currentTimeMillis() - finishDuration
 					}
-					val finishDuration = System.currentTimeMillis() - preFinish
 
 					try {
 						if (finishDuration < BREAK_RENDER_INTERVAL) {
@@ -154,7 +155,6 @@ class GLThread constructor(
 				glRunList.poll()?.invoke()
 				i++
 			}
-
 			renderer.onDrawFrame(gl10)
 			if (BuildConfig.DEBUG) {
 				GLES32.glGetError().let {
@@ -381,7 +381,6 @@ class GLThread constructor(
 		lastDirtyTimestamp.set(System.currentTimeMillis())
 		hasFinishedSinceDirty = false
 		isDirty.set(true)
-
 		synchronized(runNotifier) { runNotifier.notify() }
 	}
 
