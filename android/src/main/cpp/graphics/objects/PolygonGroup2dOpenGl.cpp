@@ -55,12 +55,16 @@ void PolygonGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterfa
     positionHandle = glGetAttribLocation(program, "vPosition");
     styleIndexHandle = glGetAttribLocation(program, "vStyleIndex");
 
-    glGenBuffers(1, &attribBuffer);
+    if (!glDataBuffersGenerated) {
+        glGenBuffers(1, &attribBuffer);
+    }
     glBindBuffer(GL_ARRAY_BUFFER, attribBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * polygonAttributes.size(), &polygonAttributes[0], GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    glGenBuffers(1, &indexBuffer);
+    if (!glDataBuffersGenerated) {
+        glGenBuffers(1, &indexBuffer);
+    }
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort) * polygonIndices.size(), &polygonIndices[0], GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -68,6 +72,7 @@ void PolygonGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterfa
     mvpMatrixHandle = glGetUniformLocation(program, "uMVPMatrix");
 
     ready = true;
+    glDataBuffersGenerated = true;
 }
 
 void PolygonGroup2dOpenGl::clear() {
@@ -79,8 +84,11 @@ void PolygonGroup2dOpenGl::clear() {
 }
 
 void PolygonGroup2dOpenGl::removeGlBuffers() {
-    glDeleteBuffers(1, &attribBuffer);
-    glDeleteBuffers(1, &indexBuffer);
+    if (glDataBuffersGenerated) {
+        glDeleteBuffers(1, &attribBuffer);
+        glDeleteBuffers(1, &indexBuffer);
+        glDataBuffersGenerated = false;
+    }
 }
 
 void PolygonGroup2dOpenGl::setIsInverseMasked(bool inversed) { isMaskInversed = inversed; }

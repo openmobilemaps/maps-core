@@ -59,10 +59,11 @@ protected:
     int mvpMatrixHandle;
     int positionHandle;
     int styleIndexHandle;
-    GLuint attribBuffer;
+    GLuint attribBuffer = -1;
     std::vector<GLfloat> polygonAttributes;
-    GLuint indexBuffer;
+    GLuint indexBuffer = -1;
     std::vector<GLushort> polygonIndices;
+    bool glDataBuffersGenerated = false;
 
     bool dataReady = false;
     bool ready = false;

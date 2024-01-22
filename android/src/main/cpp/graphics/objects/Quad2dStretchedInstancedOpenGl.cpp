@@ -82,31 +82,35 @@ void Quad2dStretchedInstancedOpenGl::prepareGlData(int program) {
     glUseProgram(program);
 
     positionHandle = glGetAttribLocation(program, "vPosition");
-    glGenBuffers(1, &vertexBuffer);
+    if (!glDataBuffersGenerated) {
+        glGenBuffers(1, &vertexBuffer);
+    }
     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
 
+    if (!glDataBuffersGenerated) {
+        glGenBuffers(1, &dynamicInstanceDataBuffer);
+    }
+    glBindBuffer(GL_ARRAY_BUFFER, dynamicInstanceDataBuffer);
+    glBufferData(GL_ARRAY_BUFFER, instanceCount * instValuesSizeBytes, nullptr, GL_DYNAMIC_DRAW);
+
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    glGenBuffers(1, &indexBuffer);
+    if (!glDataBuffersGenerated) {
+        glGenBuffers(1, &indexBuffer);
+    }
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLubyte) * indices.size(), &indices[0], GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     instPositionsHandle = glGetAttribLocation(program, "aPosition");
-    glGenBuffers(1, &positionsBuffer);
     instTextureCoordinatesHandle = glGetAttribLocation(program, "aTexCoordinate");
-    glGenBuffers(1, &textureCoordinatesListBuffer);
     instScalesHandle = glGetAttribLocation(program, "aScale");
-    glGenBuffers(1, &scalesBuffer);
     instRotationsHandle = glGetAttribLocation(program, "aRotation");
-    glGenBuffers(1, &rotationsBuffer);
     instAlphasHandle = glGetAttribLocation(program, "aAlpha");
-    glGenBuffers(1, &alphasBuffer);
     instStretchScalesHandle = glGetAttribLocation(program, "aStretchScales");
     instStretchXsHandle = glGetAttribLocation(program, "aStretchX");
     instStretchYsHandle = glGetAttribLocation(program, "aStretchY");
-    glGenBuffers(1, &stretchInfoBuffer);
 
     mvpMatrixHandle = glGetUniformLocation(program, "uMVPMatrix");
 }
@@ -133,15 +137,12 @@ void Quad2dStretchedInstancedOpenGl::prepareTextureCoordsGlData(int program) {
 }
 
 void Quad2dStretchedInstancedOpenGl::removeGlBuffers() {
-    glDeleteBuffers(1, &vertexBuffer);
-    glDeleteBuffers(1, &indexBuffer);
-
-    glDeleteBuffers(1, &positionsBuffer);
-    glDeleteBuffers(1, &alphasBuffer);
-    glDeleteBuffers(1, &scalesBuffer);
-    glDeleteBuffers(1, &textureCoordinatesListBuffer);
-    glDeleteBuffers(1, &rotationsBuffer);
-    glDeleteBuffers(1, &stretchInfoBuffer);
+    if (glDataBuffersGenerated) {
+        glDeleteBuffers(1, &vertexBuffer);
+        glDeleteBuffers(1, &indexBuffer);
+        glDeleteBuffers(1, &dynamicInstanceDataBuffer);
+        glDataBuffersGenerated = false;
+    }
 }
 
 void Quad2dStretchedInstancedOpenGl::removeTextureCoordsGlBuffers() {
@@ -220,42 +221,31 @@ void Quad2dStretchedInstancedOpenGl::render(const std::shared_ptr<::RenderingCon
         glUniform2f(textureFactorHandle, factorWidth, factorHeight);
     }
 
-    glBindBuffer(GL_ARRAY_BUFFER, positionsBuffer);
-    glVertexAttribPointer(instPositionsHandle, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+    glBindBuffer(GL_ARRAY_BUFFER, dynamicInstanceDataBuffer);
+    glVertexAttribPointer(instPositionsHandle, 2, GL_FLOAT, GL_FALSE, 0, (float *)(instPositionsOffsetBytes * instanceCount));
     glEnableVertexAttribArray(instPositionsHandle);
     glVertexAttribDivisor(instPositionsHandle, 1);
-
-    glBindBuffer(GL_ARRAY_BUFFER, textureCoordinatesListBuffer);
-    glVertexAttribPointer(instTextureCoordinatesHandle, 4, GL_FLOAT, GL_FALSE, 0, nullptr);
+    glVertexAttribPointer(instTextureCoordinatesHandle, 4, GL_FLOAT, GL_FALSE, 0, (float *)(instTextureCoordinatesOffsetBytes * instanceCount));
     glEnableVertexAttribArray(instTextureCoordinatesHandle);
     glVertexAttribDivisor(instTextureCoordinatesHandle, 1);
-
-    glBindBuffer(GL_ARRAY_BUFFER, scalesBuffer);
-    glVertexAttribPointer(instScalesHandle, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+    glVertexAttribPointer(instScalesHandle, 2, GL_FLOAT, GL_FALSE, 0, (float *)(instScalesOffsetBytes * instanceCount));
     glEnableVertexAttribArray(instScalesHandle);
     glVertexAttribDivisor(instScalesHandle, 1);
-
-    glBindBuffer(GL_ARRAY_BUFFER, rotationsBuffer);
-    glVertexAttribPointer(instRotationsHandle, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
+    glVertexAttribPointer(instRotationsHandle, 1, GL_FLOAT, GL_FALSE, 0, (float *)(instRotationsOffsetBytes * instanceCount));
     glEnableVertexAttribArray(instRotationsHandle);
     glVertexAttribDivisor(instRotationsHandle, 1);
-
-    glBindBuffer(GL_ARRAY_BUFFER, alphasBuffer);
-    glVertexAttribPointer(instAlphasHandle, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
+    glVertexAttribPointer(instAlphasHandle, 1, GL_FLOAT, GL_FALSE, 0, (float *)(instAlphasOffsetBytes * instanceCount));
     glEnableVertexAttribArray(instAlphasHandle);
     glVertexAttribDivisor(instAlphasHandle, 1);
-
-    glBindBuffer(GL_ARRAY_BUFFER, stretchInfoBuffer);
-    glVertexAttribPointer(instStretchScalesHandle, 2, GL_FLOAT, GL_FALSE, 10 * sizeof(GLfloat), nullptr);
+    glVertexAttribPointer(instStretchScalesHandle, 2, GL_FLOAT, GL_FALSE, 10 * sizeof(GLfloat), (float *)(instStretchInfoOffsetBytes * instanceCount));
     glEnableVertexAttribArray(instStretchScalesHandle);
     glVertexAttribDivisor(instStretchScalesHandle, 1);
-    glVertexAttribPointer(instStretchXsHandle, 4, GL_FLOAT, GL_FALSE, 10 * sizeof(GLfloat), (float*) (2 * sizeof(GLfloat)));
+    glVertexAttribPointer(instStretchXsHandle, 4, GL_FLOAT, GL_FALSE, 10 * sizeof(GLfloat), (float *)(instStretchInfoOffsetBytes * instanceCount + instStretchXsAddOffsetBytes));
     glEnableVertexAttribArray(instStretchXsHandle);
     glVertexAttribDivisor(instStretchXsHandle, 1);
-    glVertexAttribPointer(instStretchYsHandle, 4, GL_FLOAT, GL_FALSE, 10 * sizeof(GLfloat), (float*) (6 * sizeof(GLfloat)));
+    glVertexAttribPointer(instStretchYsHandle, 4, GL_FLOAT, GL_FALSE, 10 * sizeof(GLfloat), (float *)(instStretchInfoOffsetBytes * instanceCount + instStretchYsAddOffsetBytes));
     glEnableVertexAttribArray(instStretchYsHandle);
     glVertexAttribDivisor(instStretchYsHandle, 1);
-
 
     shaderProgram->preRender(context);
 
@@ -283,8 +273,6 @@ void Quad2dStretchedInstancedOpenGl::render(const std::shared_ptr<::RenderingCon
     glVertexAttribDivisor(instStretchScalesHandle, 0);
     glVertexAttribDivisor(instStretchXsHandle, 0);
     glVertexAttribDivisor(instStretchYsHandle, 0);
-
-
 
     // Disable vertex array
     glDisableVertexAttribArray(positionHandle);
@@ -327,54 +315,53 @@ void Quad2dStretchedInstancedOpenGl::setInstanceCount(int count) {
 
 void Quad2dStretchedInstancedOpenGl::setPositions(const SharedBytes &positions) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
-    if (writeToBuffer(positions, positionsBuffer)) {
+    if (writeToDynamicInstanceDataBuffer(positions, instPositionsOffsetBytes)) {
         buffersNotReady &= ~(1);
     }
 }
 
 void Quad2dStretchedInstancedOpenGl::setRotations(const SharedBytes &rotations) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
-    if (writeToBuffer(rotations, rotationsBuffer)) {
+    if (writeToDynamicInstanceDataBuffer(rotations, instRotationsOffsetBytes)) {
         buffersNotReady &= ~(1 << 1);
     }
 }
 
 void Quad2dStretchedInstancedOpenGl::setScales(const SharedBytes &scales) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
-    if (writeToBuffer(scales, scalesBuffer)) {
+    if (writeToDynamicInstanceDataBuffer(scales, instScalesOffsetBytes)) {
         buffersNotReady &= ~(1 << 2);
     }
  }
 
 void Quad2dStretchedInstancedOpenGl::setTextureCoordinates(const SharedBytes &textureCoordinates) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
-    if (writeToBuffer(textureCoordinates, textureCoordinatesListBuffer)) {
+    if (writeToDynamicInstanceDataBuffer(textureCoordinates, instTextureCoordinatesOffsetBytes)) {
         buffersNotReady &= ~(1 << 3);
     }
 }
 
 void Quad2dStretchedInstancedOpenGl::setAlphas(const SharedBytes &values) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
-    if (writeToBuffer(values, alphasBuffer)) {
+    if (writeToDynamicInstanceDataBuffer(values, instAlphasOffsetBytes)) {
         buffersNotReady &= ~(1 << 4);
     }
 }
 
 void Quad2dStretchedInstancedOpenGl::setStretchInfos(const ::SharedBytes &values) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
-    if (writeToBuffer(values, stretchInfoBuffer)) {
+    if (writeToDynamicInstanceDataBuffer(values, instStretchInfoOffsetBytes)) {
         buffersNotReady &= ~(1 << 5);
     }
 }
 
-bool Quad2dStretchedInstancedOpenGl::writeToBuffer(const ::SharedBytes &data, GLuint target) {
+bool Quad2dStretchedInstancedOpenGl::writeToDynamicInstanceDataBuffer(const ::SharedBytes &data, GLuint targetOffsetBytes) {
     if(!ready){
         // Writing to buffer before it was created
         return false;
     }
-
-    glBindBuffer(GL_ARRAY_BUFFER, target);
-    glBufferData(GL_ARRAY_BUFFER, data.elementCount * data.bytesPerElement, (void *) data.address, GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, dynamicInstanceDataBuffer);
+    glBufferSubData(GL_ARRAY_BUFFER, targetOffsetBytes * instanceCount, data.elementCount * data.bytesPerElement, (void *) data.address);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     return true;
 }

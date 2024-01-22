@@ -66,6 +66,8 @@ protected:
     std::vector<GLfloat> vertices;
     GLuint indexBuffer;
     std::vector<GLushort> indices;
+    bool glDataBuffersGenerated = false;
+
 
     bool dataReady = false;
     bool ready = false;

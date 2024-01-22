@@ -52,24 +52,9 @@ public:
                                  const double dpFactor,
                                  const bool persistingSymbolPlacement);
 
-    ~Tiled2dMapVectorSymbolObject() {
-        if (animationCoordinator) {
-            if (isCoordinateOwner) {
-                animationCoordinator->isOwned.clear();
-                isCoordinateOwner = false;
-            }
-            animationCoordinator->decreaseUsage();
-        }
-    }
+    ~Tiled2dMapVectorSymbolObject();
 
-    void placedInCache() {
-        if (animationCoordinator) {
-            if (isCoordinateOwner) {
-                animationCoordinator->isOwned.clear();
-                isCoordinateOwner = false;
-            }
-        }
-    }
+    void placedInCache();
 
     struct SymbolObjectInstanceCounts { int icons, textCharacters, stretchedIcons; };
 
