@@ -510,6 +510,9 @@ void Tiled2dMapVectorLayer::reloadLocalDataSource(const std::string &sourceName,
             source->reloadTiles();
         });
     }
+
+    tilesStillValid.clear();
+    mapInterface->invalidate();
 }
 
 std::shared_ptr<::LayerInterface> Tiled2dMapVectorLayer::asLayerInterface() {
@@ -538,7 +541,7 @@ void Tiled2dMapVectorLayer::update() {
         auto now = DateHelper::currentTimeMillis();
         bool newIsAnimating = false;
         bool tilesChanged = !tilesStillValid.test_and_set();
-        if (abs(newZoom-lastDataManagerZoom) / std::max(newZoom, 1.0) > 0.001 || now - lastDataManagerUpdate > 1000*0 || isAnimating || tilesChanged) {
+        if (abs(newZoom-lastDataManagerZoom) / std::max(newZoom, 1.0) > 0.001 || now - lastDataManagerUpdate > 1000 || isAnimating || tilesChanged) {
             lastDataManagerUpdate = now;
             lastDataManagerZoom = newZoom;
 
@@ -553,12 +556,13 @@ void Tiled2dMapVectorLayer::update() {
                 newIsAnimating |= a;
             }
             isAnimating = newIsAnimating;
-            if (now - lastCollitionCheck > 2000*0 || tilesChanged) {
+            if (now - lastCollitionCheck > 2000 || tilesChanged) {
                 lastCollitionCheck = now;
                 bool enforceUpdate = !prevCollisionStillValid.test_and_set();
                 collisionManager.syncAccess([&vpMatrix, &viewportSize, viewportRotation, enforceUpdate](const auto &manager) {
                     manager->collisionDetection(*vpMatrix, viewportSize, viewportRotation, enforceUpdate);
                 });
+                isAnimating = true;
             }
         }
 
@@ -1000,6 +1004,8 @@ void Tiled2dMapVectorLayer::updateLayerDescriptions(const std::vector<std::share
         }
     }
 
+    tilesStillValid.clear();
+    mapInterface->invalidate();
 }
 
 void Tiled2dMapVectorLayer::updateLayerDescription(std::shared_ptr<VectorLayerDescription> layerDescription) {
@@ -1048,6 +1054,9 @@ void Tiled2dMapVectorLayer::updateLayerDescription(std::shared_ptr<VectorLayerDe
             }
         }
     }
+
+    tilesStillValid.clear();
+    mapInterface->invalidate();
 }
 
 std::optional<std::shared_ptr<FeatureContext>> Tiled2dMapVectorLayer::getFeatureContext(int64_t identifier) {
@@ -1192,6 +1201,7 @@ void Tiled2dMapVectorLayer::applyGlobalOrFeatureStateIfPossible(StateType type) 
         }
     }
 
+    tilesStillValid.clear();
     mapInterface->invalidate();
 }
 
