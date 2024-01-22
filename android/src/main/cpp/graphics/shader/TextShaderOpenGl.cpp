@@ -16,21 +16,21 @@ const std::string TextShaderOpenGl::programName = "UBMAP_TextShaderOpenGl";
 
 std::string TextShaderOpenGl::getProgramName() { return programName; }
 
-void TextShaderOpenGl::setColor(const ::Color & color) {
+void TextShaderOpenGl::setColor(const ::Color & c) {
     std::lock_guard<std::mutex> lock(dataMutex);
-    this->color.at(0) = color.r;
-    this->color.at(1) = color.g;
-    this->color.at(2) = color.b;
-    this->color.at(3) = color.a;
+    color[0] = c.r;
+    color[1] = c.g;
+    color[2] = c.b;
+    color[3] = c.a;
 }
 
 void TextShaderOpenGl::setHaloColor(const ::Color & color, double width) {
     std::lock_guard<std::mutex> lock(dataMutex);
-    haloColor.at(0) = color.r;
-    haloColor.at(1) = color.g;
-    haloColor.at(2) = color.b;
-    haloColor.at(3) = color.a;
-    this->haloWidth = width;
+    haloColor[0] = color.r;
+    haloColor[1] = color.g;
+    haloColor[2] = color.b;
+    haloColor[3] = color.a;
+    haloWidth = width;
 }
 
 void TextShaderOpenGl::setOpacity(float opacity) { this->opacity = opacity; }

@@ -89,8 +89,8 @@ private:
         return Vec2D(s.x + (e.x - s.x) * index.second, s.y + (e.y - s.y) * index.second);
     }
 
-    inline std::pair<int, double> indexAtDistance(const std::pair<int, double> &index, double distance) {
-        auto current = pointAtIndex(index, true);
+    inline std::pair<int, double> indexAtDistance(const std::pair<int, double> &index, double distance, const std::optional<Vec2D> &indexCoord) {
+        auto current = indexCoord ? *indexCoord : pointAtIndex(index, true);
         auto currentIndex = index;
         auto dist = std::abs(distance);
 

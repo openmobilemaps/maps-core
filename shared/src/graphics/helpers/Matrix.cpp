@@ -570,8 +570,8 @@ std::vector<float> Matrix::multiply(const std::vector<float> &M, const std::vect
 }
 
 void Matrix::multiply(const std::vector<float> &M, const std::vector<float> &x, std::vector<float> &result) {
-    result[0] = M[I(0, 0)] * x[0] + M[I(1, 0)] * x[1] + M[I(2, 0)] * x[2] + M[I(3, 0)] * x[3];
-    result[1] = M[I(0, 1)] * x[0] + M[I(1, 1)] * x[1] + M[I(2, 1)] * x[2] + M[I(3, 1)] * x[3];
-    result[2] = M[I(0, 2)] * x[0] + M[I(1, 2)] * x[1] + M[I(2, 2)] * x[2] + M[I(3, 2)] * x[3];
-    result[3] = M[I(0, 3)] * x[0] + M[I(1, 3)] * x[1] + M[I(2, 3)] * x[2] + M[I(3, 3)] * x[3];
+    result[0] = M[0] * x[0] + M[4] * x[1] +  M[8] * x[2] + M[12] * x[3];
+    result[1] = M[1] * x[0] + M[5] * x[1] +  M[9] * x[2] + M[13] * x[3];
+    result[2] = M[2] * x[0] + M[6] * x[1] + M[10] * x[2] + M[14] * x[3];
+    result[3] = M[3] * x[0] + M[7] * x[1] + M[11] * x[2] + M[15] * x[3];
 }
