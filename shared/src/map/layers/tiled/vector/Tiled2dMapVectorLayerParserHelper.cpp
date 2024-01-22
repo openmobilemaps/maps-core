@@ -183,10 +183,10 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
             Options options;
 
             if (val["minzoom"].is_number_integer()) {
-                options.minZoom = val["minzoom"].get<u_int8_t>();
+                options.minZoom = val["minzoom"].get<uint8_t>();
             }
             if (val["maxzoom"].is_number_integer()) {
-                options.maxZoom = val["maxzoom"].get<int>();
+                options.maxZoom = val["maxzoom"].get<uint8_t>();
             }
             if (val["data"].is_string()) {
                 geojsonSources[key] = GeoJsonVTFactory::getGeoJsonVt(key, replaceUrlParams(val["data"].get<std::string>(), sourceUrlParams), loaders, localDataProvider, options);
