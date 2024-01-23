@@ -84,6 +84,7 @@ protected:
 
     std::unordered_map<std::string, int32_t> layerNameIndexMap;
     std::unordered_set<int32_t> modifyingMaskLayers;
+    std::unordered_set<int32_t> selfMaskedLayers;
 
     std::optional<::RectI> scissorRect = std::nullopt;
 

@@ -721,6 +721,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::pregenerateRenderPasses() {
         }
         for (const auto &[layerIdentifier, symbolGroups]: symbolGroupsMap) {
             const int32_t index = layerNameIndexMap.at(layerIdentifier);
+            bool selfMasked = selfMaskedLayers.find(index) != selfMaskedLayers.end();
 
             std::vector<std::shared_ptr< ::RenderObjectInterface>> renderObjects;
             for (const auto &group: std::get<1>(symbolGroups)) {
@@ -732,7 +733,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::pregenerateRenderPasses() {
 
             const auto optRenderPassIndex = mapDescription->layers[index]->renderPassIndex;
             const int32_t renderPassIndex = optRenderPassIndex ? *optRenderPassIndex : 0;
-            renderDescriptions.push_back(std::make_shared<Tiled2dMapVectorLayer::TileRenderDescription>(Tiled2dMapVectorLayer::TileRenderDescription{index, renderObjects, nullptr, false, renderPassIndex}));
+            renderDescriptions.push_back(std::make_shared<Tiled2dMapVectorLayer::TileRenderDescription>(Tiled2dMapVectorLayer::TileRenderDescription{index, renderObjects, nullptr, false, selfMasked, renderPassIndex}));
         }
     }
 
