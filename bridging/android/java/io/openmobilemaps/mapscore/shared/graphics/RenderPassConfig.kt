@@ -5,4 +5,5 @@ package io.openmobilemaps.mapscore.shared.graphics
 
 data class RenderPassConfig(
     val renderPassIndex: Int,
+    val isPassMasked: Boolean,
 )

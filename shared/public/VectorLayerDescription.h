@@ -27,6 +27,7 @@ public:
     std::shared_ptr<Value> filter;
     std::optional<int32_t> renderPassIndex;
     bool multiselect;
+    bool selfMasked;
 
     virtual VectorLayerType getType() = 0;
 
@@ -60,7 +61,8 @@ public:
                            std::shared_ptr<Value> filter,
                            std::optional<int32_t> renderPassIndex,
                            std::shared_ptr<Value> interactable,
-                           bool multiselect):
+                           bool multiselect,
+                           bool selfMasked):
             identifier(identifier),
             source(source),
             sourceLayer(sourceId),
@@ -69,7 +71,8 @@ public:
             filter(filter),
             renderPassIndex(renderPassIndex),
             interactable(interactable),
-            multiselect(multiselect) {}
+            multiselect(multiselect),
+            selfMasked(selfMasked) {}
 
     virtual ~VectorLayerDescription() = default;
 

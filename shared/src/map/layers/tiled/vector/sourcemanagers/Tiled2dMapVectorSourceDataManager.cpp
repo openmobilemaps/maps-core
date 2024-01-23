@@ -34,6 +34,9 @@ Tiled2dMapVectorSourceDataManager::Tiled2dMapVectorSourceDataManager(const WeakA
             if (layerDescription->getType() == VectorLayerType::line) {
                 modifyingMaskLayers.insert(index);
             }
+            if (layerDescription->selfMasked) {
+                selfMaskedLayers.insert(index);
+            }
         }
     }
 

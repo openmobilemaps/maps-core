@@ -76,7 +76,7 @@ void Tiled2dMapVectorBackgroundSubLayer::onAdded(const std::shared_ptr<MapInterf
         renderObjects.push_back(std::make_shared<RenderObject>(patternObject->getPolygonObject(), true));
     }
 
-    auto renderPass = std::make_shared<RenderPass>(RenderPassConfig(0), renderObjects );
+    auto renderPass = std::make_shared<RenderPass>(RenderPassConfig(0, false), renderObjects );
     renderPasses = {
         renderPass
     };

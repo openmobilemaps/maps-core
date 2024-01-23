@@ -10,12 +10,14 @@ namespace djinni_generated {
 auto RenderPassConfig::toCpp(ObjcType obj) -> CppType
 {
     assert(obj);
-    return {::djinni::I32::toCpp(obj.renderPassIndex)};
+    return {::djinni::I32::toCpp(obj.renderPassIndex),
+            ::djinni::Bool::toCpp(obj.isPassMasked)};
 }
 
 auto RenderPassConfig::fromCpp(const CppType& cpp) -> ObjcType
 {
-    return [[MCRenderPassConfig alloc] initWithRenderPassIndex:(::djinni::I32::fromCpp(cpp.renderPassIndex))];
+    return [[MCRenderPassConfig alloc] initWithRenderPassIndex:(::djinni::I32::fromCpp(cpp.renderPassIndex))
+                                                  isPassMasked:(::djinni::Bool::fromCpp(cpp.isPassMasked))];
 }
 
 } // namespace djinni_generated

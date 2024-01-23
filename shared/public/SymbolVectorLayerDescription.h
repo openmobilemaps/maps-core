@@ -509,14 +509,15 @@ public:
                                std::shared_ptr<Value> filter,
                                  SymbolVectorStyle style,
                                  std::optional<int32_t> renderPassIndex,
-                                 std::shared_ptr<Value> interactable):
-    VectorLayerDescription(identifier, source, sourceId, minZoom, maxZoom, filter, renderPassIndex, interactable, false),
+                                 std::shared_ptr<Value> interactable,
+                                 bool selfMasked):
+    VectorLayerDescription(identifier, source, sourceId, minZoom, maxZoom, filter, renderPassIndex, interactable, false, selfMasked),
     style(style) {};
 
     std::unique_ptr<VectorLayerDescription> clone() override {
         return std::make_unique<SymbolVectorLayerDescription>(identifier, source, sourceLayer, minZoom, maxZoom,
                                                               filter ? filter->clone() : nullptr, style, renderPassIndex,
-                                                              interactable ? interactable : nullptr);
+                                                              interactable ? interactable : nullptr, selfMasked);
     }
 
     virtual UsedKeysCollection getUsedKeys() const override {

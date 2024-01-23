@@ -99,14 +99,15 @@ public:
                                   PolygonVectorStyle style,
                                   std::optional<int32_t> renderPassIndex,
                                   std::shared_ptr<Value> interactable,
-                                  bool multiselect):
-    VectorLayerDescription(identifier, source, sourceId, minZoom, maxZoom, filter, renderPassIndex, interactable, multiselect),
+                                  bool multiselect,
+                                  bool selfMasked):
+    VectorLayerDescription(identifier, source, sourceId, minZoom, maxZoom, filter, renderPassIndex, interactable, multiselect, selfMasked),
     style(style) {};
 
     std::unique_ptr<VectorLayerDescription> clone() override {
         return std::make_unique<PolygonVectorLayerDescription>(identifier, source, sourceLayer, minZoom, maxZoom,
                                                                filter ? filter->clone() : nullptr, style, renderPassIndex,
-                                                               interactable ? interactable->clone() : nullptr, multiselect);
+                                                               interactable ? interactable->clone() : nullptr, multiselect, selfMasked);
     }
 
     virtual UsedKeysCollection getUsedKeys() const override {
