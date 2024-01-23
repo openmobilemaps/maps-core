@@ -39,6 +39,7 @@ private:
         void clear() override;
         void pause() override;
         void resume() override;
+        void destroy() override;
 
     private:
         friend ::djinni::JniInterface<::SchedulerInterface, ::djinni_generated::NativeSchedulerInterface>;
@@ -51,6 +52,7 @@ private:
     const jmethodID method_clear { ::djinni::jniGetMethodID(clazz.get(), "clear", "()V") };
     const jmethodID method_pause { ::djinni::jniGetMethodID(clazz.get(), "pause", "()V") };
     const jmethodID method_resume { ::djinni::jniGetMethodID(clazz.get(), "resume", "()V") };
+    const jmethodID method_destroy { ::djinni::jniGetMethodID(clazz.get(), "destroy", "()V") };
 };
 
 }  // namespace djinni_generated

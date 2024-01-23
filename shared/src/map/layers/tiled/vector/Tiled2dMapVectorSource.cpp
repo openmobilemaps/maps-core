@@ -28,7 +28,7 @@ Tiled2dMapVectorSource::Tiled2dMapVectorSource(const MapConfig &mapConfig,
 IntermediateResult Tiled2dMapVectorSource::loadTile(Tiled2dMapTileInfo tile, size_t loaderIndex) {
     std::unordered_map<std::string, DataLoaderResult> results;
     for(auto const &[source, config]: layerConfigs) {
-        if (layersToDecode.count(source) == 0) {
+        if (!layersToDecode.empty() && layersToDecode.count(source) == 0) {
             continue;
         }
         results.insert({source, loaders[loaderIndex]->loadData(config->getTileUrl(tile.x, tile.y, tile.t, tile.zoomIdentifier), std::nullopt)});

@@ -1,5 +1,29 @@
 # Changelog for Open Mobile Maps
 
+## Version 1.5.3 (16.05.2023)
+- Improved MapInterface teardown
+
+## Version 1.5.2 (02.05.2023)
+- Fix for Android context memory leak
+
+## Version 1.5.1 (14.04.2023)
+- Fix for XCode 14.3.0
+- Convenience function for RectCoord to PolygonCoord conversion
+
+## Version 1.5.0 (23.03.2023)
+- implements vector icon anchor
+- evaluate color from feature context 
+- expose bounding box in djinni
+- fixes touch propagation in VectorLayer
+- iOS: fixes graphics object race conditions  
+- fixes vector tile origin 
+- adds option to enable/disable underzoom and overzoom
+- adds exception logger 
+- adds network activity manager
+- adds two finger zoom out gesture 
+- adds option to specify multiple loaders
+- many improvements and bugfixes
+
 ## Version 1.4.1 (16.08.2022)
 - iOS: updates device to ppi mapping
 - iOS: fixes masked line groups

@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class MapInterface {
 
-    abstract fun setCallbackHandler(callbackInterface: MapCallbackInterface)
+    abstract fun setCallbackHandler(callbackInterface: MapCallbackInterface?)
 
     abstract fun getGraphicsObjectFactory(): io.openmobilemaps.mapscore.shared.graphics.objects.GraphicsObjectFactoryInterface
 
@@ -53,6 +53,8 @@ abstract class MapInterface {
 
     abstract fun pause()
 
+    abstract fun destroy()
+
     /**
      * changes bounds to bounds, checks all layers for readiness, and updates callbacks, timeout in
      * seconds, always draw the frame when state is updated in the ready callbacks
@@ -91,11 +93,11 @@ abstract class MapInterface {
             _djinni_private_destroy()
         }
 
-        override fun setCallbackHandler(callbackInterface: MapCallbackInterface) {
+        override fun setCallbackHandler(callbackInterface: MapCallbackInterface?) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             native_setCallbackHandler(this.nativeRef, callbackInterface)
         }
-        private external fun native_setCallbackHandler(_nativeRef: Long, callbackInterface: MapCallbackInterface)
+        private external fun native_setCallbackHandler(_nativeRef: Long, callbackInterface: MapCallbackInterface?)
 
         override fun getGraphicsObjectFactory(): io.openmobilemaps.mapscore.shared.graphics.objects.GraphicsObjectFactoryInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
@@ -228,6 +230,12 @@ abstract class MapInterface {
             native_pause(this.nativeRef)
         }
         private external fun native_pause(_nativeRef: Long)
+
+        override fun destroy() {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_destroy(this.nativeRef)
+        }
+        private external fun native_destroy(_nativeRef: Long)
 
         override fun drawReadyFrame(bounds: io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord, timeout: Float, callbacks: MapReadyCallbackInterface) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

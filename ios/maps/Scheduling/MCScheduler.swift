@@ -122,6 +122,10 @@ open class MCScheduler: MCSchedulerInterface {
             self.graphicsQueue.isSuspended = false
         }
     }
+
+    public func destroy() {
+        // not used
+    }
 }
 
 private extension OperationQueue {

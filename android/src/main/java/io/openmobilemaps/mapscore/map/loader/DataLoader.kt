@@ -20,15 +20,14 @@ import io.openmobilemaps.mapscore.map.loader.networking.UserAgentInterceptor
 import io.openmobilemaps.mapscore.shared.map.loader.*
 import okhttp3.*
 import java.io.File
-import java.util.*
 import java.util.concurrent.TimeUnit
 
 open class DataLoader(
-	private val context: Context,
+	context: Context,
 	private var cacheDirectory: File,
 	private var cacheSize: Long,
 	private var referrer: String,
-	private var userAgent: String? = null
+	private var userAgent: String = RequestUtils.getDefaultUserAgent(context)
 ) : LoaderInterface() {
 
 	companion object {
@@ -38,7 +37,7 @@ open class DataLoader(
 	protected var okHttpClient = initializeClient()
 
 	protected open fun createClient(): OkHttpClient = OkHttpClient.Builder()
-		.addInterceptor(UserAgentInterceptor(userAgent ?: RequestUtils.getDefaultUserAgent(context)))
+		.addInterceptor(UserAgentInterceptor(userAgent))
 		.addInterceptor(RefererInterceptor(referrer))
 		.connectionPool(ConnectionPool(8, 5000L, TimeUnit.MILLISECONDS))
 		.cache(Cache(cacheDirectory, cacheSize))

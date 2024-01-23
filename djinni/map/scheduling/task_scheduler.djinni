@@ -5,6 +5,7 @@ scheduler_interface = interface +c +j +o {
     clear();
     pause();
     resume();
+    destroy();
 }
 
 task_interface = interface +c +j +o {

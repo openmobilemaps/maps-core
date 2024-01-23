@@ -72,6 +72,8 @@ class MapScene : public MapInterface, public SceneCallbackInterface, public std:
 
     virtual void pause() override;
 
+    virtual void destroy() override;
+
     virtual void drawReadyFrame(const ::RectCoord &bounds, float timeout,
                                 const std::shared_ptr<MapReadyCallbackInterface> &callbacks) override;
 

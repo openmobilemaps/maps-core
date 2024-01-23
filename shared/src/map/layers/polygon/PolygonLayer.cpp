@@ -89,16 +89,16 @@ void PolygonLayer::addAll(const std::vector<PolygonInfo> &polygons) {
 
     auto lockSelfPtr = shared_from_this();
     auto mapInterface = lockSelfPtr ? lockSelfPtr->mapInterface : nullptr;
-    if (!mapInterface) {
+    auto objectFactory = mapInterface ? mapInterface->getGraphicsObjectFactory() : nullptr;
+    auto shaderFactory = mapInterface ? mapInterface->getShaderFactory() : nullptr;
+    auto scheduler = mapInterface ? mapInterface->getScheduler() : nullptr;
+    if (!objectFactory || !shaderFactory || !scheduler) {
         std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
         for (const auto &polygon : polygons) {
             addingQueue.push_back(polygon);
         }
         return;
     }
-
-    auto objectFactory = mapInterface->getGraphicsObjectFactory();
-    auto shaderFactory = mapInterface->getShaderFactory();
 
     std::vector<std::shared_ptr<Polygon2dInterface>> polygonGraphicsObjects;
 
@@ -121,7 +121,7 @@ void PolygonLayer::addAll(const std::vector<PolygonInfo> &polygons) {
     }
 
     std::weak_ptr<PolygonLayer> weakSelfPtr = std::dynamic_pointer_cast<PolygonLayer>(shared_from_this());
-    mapInterface->getScheduler()->addTask(
+    scheduler->addTask(
         std::make_shared<LambdaTask>(TaskConfig("PolygonLayer_setup_" + polygons[0].identifier + ",...", 0, TaskPriority::NORMAL,
                                                 ExecutionEnvironment::GRAPHICS),
                                      [weakSelfPtr, polygonGraphicsObjects] {
