@@ -866,11 +866,13 @@ void Tiled2dMapVectorSymbolObject::collisionDetection(const double zoomIdentifie
         std::optional<std::vector<CollisionCircleF>> boundingCircles = getMapAlignedBoundingCircles(zoomIdentifier, textSymbolPlacement != TextSymbolPlacement::POINT, true);
         // Collide, if no valid boundingCircles
         if (boundingCircles.has_value()) {
-            willCollide = collisionGrid->addAndCheckCollisionCircles(*boundingCircles);
+            auto check = collisionGrid->addAndCheckCollisionCircles(*boundingCircles);
+            willCollide = check == 1;
+            outside = check == 2;
         } else {
             willCollide = false;
+            outside = false;
         }
-        outside = false;
     }
 
     if (persistingSymbolPlacement) {

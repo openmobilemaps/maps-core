@@ -627,10 +627,10 @@ void Tiled2dMapVectorSourceSymbolDataManager::collisionDetection(std::vector<std
             const auto objectsIt = symbolGroupsMap.find(layerIdentifier);
             if (objectsIt != symbolGroupsMap.end()) {
                 for (auto &symbolGroup: std::get<1>(objectsIt->second)) {
-                    symbolGroup.syncAccess([&allObjects, zoomIdentifier](auto group){
-                        auto objects = group->getSymbolObjectsForCollision();
-                        allObjects.reserve(allObjects.size() + objects.size());
-                        allObjects.insert(allObjects.end(), std::make_move_iterator(objects.begin()), std::make_move_iterator(objects.end()));
+                    symbolGroup.syncAccess([&allObjects](auto group){
+                        for(auto& o : group->getSymbolObjectsForCollision()) {
+                            allObjects.push_back(o);
+                        }
                     });
                 }
             }
