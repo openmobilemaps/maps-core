@@ -118,8 +118,6 @@ public:
                         // as there are no opportunities for simplification, merging, or meaningful point reduction.
                         if (geoJson->hasOnlyPoints) {
                             self->options.maxZoom = self->options.minZoom;
-                        } else {
-                            self->options.maxZoom = 18;
                         }
 
                         const uint32_t z2 = 1u << self->options.maxZoom;
@@ -175,8 +173,6 @@ public:
         // as there are no opportunities for simplification, merging, or meaningful point reduction.
         if (geoJson->hasOnlyPoints) {
             options.maxZoom = options.minZoom;
-        } else {
-            options.maxZoom = 18;
         }
 
         const uint32_t z2 = 1u << options.maxZoom;
