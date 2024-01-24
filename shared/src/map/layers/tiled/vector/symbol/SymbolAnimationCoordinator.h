@@ -57,7 +57,6 @@ public:
             
         }
         if (isIconAnimating() || isStretchIconAnimating() || isTextAnimating()) {
-            // printf("Animate %p: %d, %d, %d, %d: %f|%f\n", static_cast<void*>(this), isIconAnimating(), isStretchIconAnimating(), isTextAnimating(), isUsed(), coordinate.x, coordinate.y);
             return true;
         }
         else {
