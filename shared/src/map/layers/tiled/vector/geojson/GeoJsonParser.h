@@ -86,7 +86,11 @@ public:
 
             const auto properties = parseProperties(feature["properties"]);
 
-            geometry->featureContext = std::make_shared<FeatureContext>(geomType, properties, generator.generateUUID());
+            if(feature["id"].is_string()) {
+                geometry->featureContext = std::make_shared<FeatureContext>(geomType, properties, feature["id"].get<std::string>());
+            } else {
+                geometry->featureContext = std::make_shared<FeatureContext>(geomType, properties, generator.generateUUID());
+            }
 
             geoJson->geometries.push_back(geometry);
         }
@@ -125,6 +129,7 @@ private:
                 }
             }
         }
+
         return propertyMap;
     }
 

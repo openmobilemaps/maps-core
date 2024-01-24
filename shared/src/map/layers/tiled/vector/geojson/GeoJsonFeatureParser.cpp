@@ -11,7 +11,7 @@
 #include "GeoJsonFeatureParser.h"
 #include "GeoJsonFeatureParserInterface.h"
 #include "GeoJsonParser.h"
-
+#include "GeoJsonPoint.h"
 
 GeoJsonFeatureParser::GeoJsonFeatureParser() {}
 
@@ -25,6 +25,24 @@ std::optional<std::vector<::VectorLayerFeatureInfo>> GeoJsonFeatureParser::parse
             features.push_back(geometry->featureContext->getFeatureInfo());
         }
         return features;
+    }
+    catch (nlohmann::json::parse_error &ex) {
+        return std::nullopt;
+    }
+}
+
+std::optional<std::vector<GeoJsonPoint>> GeoJsonFeatureParser::parseWithPointGeometry(const std::string & geoJson) {
+    nlohmann::json json;
+    try {
+        json = nlohmann::json::parse(geoJson);
+        auto geoJsonObject = GeoJsonParser::getGeoJson(json);
+        std::vector<::GeoJsonPoint> points;
+        for (auto &geometry: geoJsonObject->geometries) {
+            if(geometry->coordinates.size() == 1 && geometry->coordinates.front().size() == 1) {
+                points.emplace_back(geometry->coordinates.front().front(), geometry->featureContext->getFeatureInfo());
+            }
+        }
+        return points;
     }
     catch (nlohmann::json::parse_error &ex) {
         return std::nullopt;

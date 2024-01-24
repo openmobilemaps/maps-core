@@ -1,7 +1,14 @@
-
 @extern "../../../yaml/vector_layer_feature_info.yaml"
+@extern "../../../yaml/coord.yaml"
 
 geo_json_feature_parser_interface = interface +c {
     static create() : geo_json_feature_parser_interface;
     parse(geo_json: string): optional<list<vector_layer_feature_info>>;
+
+    parseWithPointGeometry(geo_json: string): optional<list<geo_json_point>>;
+}
+
+geo_json_point = record {
+    point: coord;
+    feature_info: vector_layer_feature_info;
 }
