@@ -875,14 +875,6 @@ void Tiled2dMapVectorSymbolObject::collisionDetection(const double zoomIdentifie
         }
     }
 
-    if (persistingSymbolPlacement) {
-        if (!willCollide && !outside && zoomIdentifier < smallestVisibleZoom) {
-            smallestVisibleZoom = zoomIdentifier;
-        } else if (willCollide && (largestCollisionZoom == -1 || zoomIdentifier > largestCollisionZoom)) {
-            largestCollisionZoom = zoomIdentifier;
-        }
-    }
-
     if (!outside) {
         setHideFromCollision(willCollide);
     }
