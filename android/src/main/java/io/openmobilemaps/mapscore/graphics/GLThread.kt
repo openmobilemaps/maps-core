@@ -16,6 +16,7 @@ import android.util.Log
 import io.openmobilemaps.mapscore.BuildConfig
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicLong
 import javax.microedition.khronos.egl.*
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.egl.EGLContext
@@ -37,6 +38,10 @@ class GLThread constructor(
 	companion object {
 		private const val TAG = "GLThread"
 		private const val EGL_OPENGL_ES3_BIT = 0x00000040
+
+		private const val PAUSE_RENDER_INTERVAL = 30000L
+		private const val BREAK_RENDER_INTERVAL = 1000L
+		private const val BREAK_MIN_FINISH_MS = BREAK_RENDER_INTERVAL / 2
 
 		const val MAX_NUM_GRAPHICS_PRE_TASKS = 16
 
@@ -69,6 +74,8 @@ class GLThread constructor(
 	val runNotifier = Object()
 	var glRunList = ConcurrentLinkedQueue<() -> Unit>()
 	val isDirty = AtomicBoolean(false)
+	val lastDirtyTimestamp = AtomicLong(0)
+	var hasFinishedSinceDirty = false
 
 	var renderer: GLSurfaceView.Renderer? = null
 	var surface: SurfaceTexture? = null
@@ -103,15 +110,28 @@ class GLThread constructor(
 		}
 
 		while (!finished) {
-			if ((!isDirty.get() && glRunList.isEmpty()) || isPaused) {
+			val isAfterBreakMinThreshold = System.currentTimeMillis() - lastDirtyTimestamp.get() > BREAK_MIN_FINISH_MS
+			if ((!isDirty.get() && glRunList.isEmpty() && isAfterBreakMinThreshold) || isPaused) {
 				var wasPaused = false
 				do {
+					var firstPause = false
 					if (isPaused && !wasPaused) {
 						onPauseCallback?.invoke()
 						wasPaused = true
+						firstPause = true
 					}
+					var finishDuration = 0L
+					if (firstPause || !hasFinishedSinceDirty) {
+						finishDuration = System.currentTimeMillis()
+						GLES32.glFinish()
+						hasFinishedSinceDirty = true
+						finishDuration = System.currentTimeMillis() - finishDuration
+					}
+
 					try {
-						synchronized(runNotifier) { runNotifier.wait(1000) }
+						if (finishDuration < BREAK_RENDER_INTERVAL) {
+							synchronized(runNotifier) { runNotifier.wait(if (isPaused) PAUSE_RENDER_INTERVAL else BREAK_RENDER_INTERVAL - finishDuration) }
+						}
 					} catch (e: InterruptedException) {
 						e.printStackTrace()
 					}
@@ -136,7 +156,6 @@ class GLThread constructor(
 				glRunList.poll()?.invoke()
 				i++
 			}
-
 			renderer.onDrawFrame(gl10)
 			if (BuildConfig.DEBUG) {
 				GLES32.glGetError().let {
@@ -360,6 +379,8 @@ class GLThread constructor(
 	}
 
 	fun requestRender() {
+		lastDirtyTimestamp.set(System.currentTimeMillis())
+		hasFinishedSinceDirty = false
 		isDirty.set(true)
 		synchronized(runNotifier) { runNotifier.notify() }
 	}
