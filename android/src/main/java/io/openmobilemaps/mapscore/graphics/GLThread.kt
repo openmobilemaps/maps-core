@@ -110,7 +110,8 @@ class GLThread constructor(
 		}
 
 		while (!finished) {
-			if ((!isDirty.get() && glRunList.isEmpty()) && (isPaused || System.currentTimeMillis() - lastDirtyTimestamp.get() > BREAK_MIN_FINISH_MS)) {
+			val isAfterBreakMinThreshold = System.currentTimeMillis() - lastDirtyTimestamp.get() > BREAK_MIN_FINISH_MS
+			if ((!isDirty.get() && glRunList.isEmpty() && isAfterBreakMinThreshold) || isPaused) {
 				var wasPaused = false
 				do {
 					var firstPause = false
