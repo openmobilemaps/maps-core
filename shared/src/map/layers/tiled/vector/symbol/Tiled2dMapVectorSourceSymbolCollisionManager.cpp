@@ -11,7 +11,7 @@
 #include "Tiled2dMapVectorSourceSymbolCollisionManager.h"
 #include "CollisionGrid.h"
 
-void Tiled2dMapVectorSourceSymbolCollisionManager::collisionDetection(const std::vector<float> &vpMatrix, const Vec2I &viewportSize, float viewportRotation, bool enforceRecomputation) {
+void Tiled2dMapVectorSourceSymbolCollisionManager::collisionDetection(const std::vector<float> &vpMatrix, const Vec2I &viewportSize, float viewportRotation, bool enforceRecomputation, bool persistingPlacement) {
     std::vector<std::string> layers;
     std::string currentSource;
 
@@ -21,7 +21,7 @@ void Tiled2dMapVectorSourceSymbolCollisionManager::collisionDetection(const std:
     }
     lastVpMatrix = vpMatrix;
 
-    auto collisionGrid = std::make_shared<CollisionGrid>(vpMatrix, viewportSize, viewportRotation);
+    auto collisionGrid = std::make_shared<CollisionGrid>(vpMatrix, viewportSize, viewportRotation, persistingPlacement);
 
     const auto lambda = [&collisionGrid, &layers](auto manager){
         if (auto strongManager = manager.lock()) {

@@ -561,9 +561,12 @@ void Tiled2dMapVectorLayer::update() {
             if (now - lastCollitionCheck > 3000 || tilesChanged) {
                 lastCollitionCheck = now;
                 bool enforceUpdate = !prevCollisionStillValid.test_and_set();
-                collisionManager.syncAccess([&vpMatrix, &viewportSize, viewportRotation, enforceUpdate](const auto &manager) {
-                    manager->collisionDetection(*vpMatrix, viewportSize, viewportRotation, enforceUpdate);
-                });
+                collisionManager.syncAccess(
+                        [&vpMatrix, &viewportSize, viewportRotation, enforceUpdate, persistingPlacement = mapDescription->persistingSymbolPlacement](
+                                const auto &manager) {
+                            manager->collisionDetection(*vpMatrix, viewportSize, viewportRotation, enforceUpdate,
+                                                        persistingPlacement);
+                        });
                 isAnimating = true;
             }
         }

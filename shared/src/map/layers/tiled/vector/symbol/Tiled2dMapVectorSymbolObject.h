@@ -110,9 +110,6 @@ public:
     int customTextureOffset = 0;
     std::string stringIdentifier;
 
-    double smallestVisibleZoom = 999;
-    double largestCollisionZoom = -1;
-
 private:
     double lastZoomEvaluation = -1;
     void evaluateStyleProperties(const double zoomIdentifier);

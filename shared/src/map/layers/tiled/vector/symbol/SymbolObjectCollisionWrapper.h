@@ -42,12 +42,6 @@ public:
     }
 
     bool operator<(const SymbolObjectCollisionWrapper &o) const {
-        if (isColliding != o.isColliding) {
-            return isColliding;
-        }
-        if (symbolObject->smallestVisibleZoom != o.symbolObject->smallestVisibleZoom) {
-            return symbolObject->smallestVisibleZoom > o.symbolObject->smallestVisibleZoom;
-        }
         if (symbolSortKey == o.symbolSortKey) {
             return symbolTileIndex > o.symbolTileIndex;
         }

@@ -49,10 +49,11 @@ public:
 
 class CollisionGrid {
 public:
-    CollisionGrid(const std::vector<float> &vpMatrix, const Vec2I &size, float gridAngle)
+    CollisionGrid(const std::vector<float> &vpMatrix, const Vec2I &size, float gridAngle, bool alwaysInsert)
             : vpMatrix(vpMatrix), size(size),
               sinNegGridAngle(std::sin(-gridAngle * M_PI / 180.0)),
-              cosNegGridAngle(std::cos(-gridAngle * M_PI / 180.0)) {
+              cosNegGridAngle(std::cos(-gridAngle * M_PI / 180.0)),
+              alwaysInsert(alwaysInsert) {
         cellSize = std::min(size.x, size.y) / (float) numCellsMinDim;
         numCellsX = std::ceil(size.x / cellSize) + 2 * numCellsPadding;
         numCellsY = std::ceil(size.y / cellSize) + 2 * numCellsPadding;
@@ -98,47 +99,26 @@ public:
                 }
             }
         }
-        for (int16_t y = indexRange.yMin; y <= indexRange.yMax; y++) {
-            for (int16_t x = indexRange.xMin; x <= indexRange.xMax; x++) {
-                    for (const auto &rect : gridRects[y][x]) {
-                        if (CollisionUtil::checkRectCollision(projectedRectangle, rect)) {
-                            return 1;
-                        }
-                    }
-                    for (const auto &circle : gridCircles[y][x]) {
-                        if (CollisionUtil::checkRectCircleCollision(projectedRectangle, circle)) {
-                            return 1;
-                        }
-                    }
 
-            }
+        if (alwaysInsert) {
+            return checkRectInsertAlways(rectangle, projectedRectangle, indexRange);
+        } else {
+            return checkRectInsertOnCollision(rectangle, projectedRectangle, indexRange);
         }
-
-        // Only insert, when not colliding
-        for (int16_t y = indexRange.yMin; y <= indexRange.yMax; y++) {
-            for (int16_t x = indexRange.xMin; x <= indexRange.xMax; x++) {
-                gridRects[y][x].push_back(projectedRectangle);
-            }
-        }
-
-        if (rectangle.contentHash != 0 && rectangle.symbolSpacing > 0) {
-            spacedRects[rectangle.contentHash].push_back(projectedRectangle);
-        }
-        return 0;
     }
 
     /**
     * Add a vector of circles (which are then projected with the provided vpMatrix) and receive the feedback, if they have collided
     * with the previous content of the grid. Assumed to remain circles in the projected space. Only added, when not colliding!
     */
-    bool addAndCheckCollisionCircles(const std::vector<CollisionCircleF> &circles) {
+    uint8_t addAndCheckCollisionCircles(const std::vector<CollisionCircleF> &circles) {
         if (circles.empty()) {
-            // No circles -> no collision
-            return false;
+            // No circles -> no colliding
+            return 0;
         }
 
         std::vector<std::tuple<CircleF, IndexRange, size_t, int16_t>> projectedCircles;
-        for (const auto &circle : circles) {
+        for (const auto &circle: circles) {
             auto projectedCircle = getProjectedCircle(circle);
             IndexRange indexRange = getIndexRangeForCircle(projectedCircle);
             if (indexRange.isValid(numCellsX - 1, numCellsY - 1)) {
@@ -148,50 +128,116 @@ public:
 
         if (projectedCircles.empty()) {
             // no valid IndexRanges
-            return true;
+            return 2;
         }
 
-        for (const auto &[projectedCircle, indexRange, contentHash, symbolSpacing] : projectedCircles) {
+        for (const auto &[projectedCircle, indexRange, contentHash, symbolSpacing]: projectedCircles) {
 
             if (contentHash != 0 && symbolSpacing > 0) {
                 const auto &equalRects = spacedRects.find(contentHash);
                 if (equalRects != spacedRects.end()) {
-                    for (const auto &other : equalRects->second) {
+                    for (const auto &other: equalRects->second) {
                         // Assume equal symbol spacing for all primitives with matching content
                         if (CollisionUtil::checkRectCircleCollision(other, projectedCircle, symbolSpacing)) {
-                            return true;
+                            return 1;
+
                         }
                     }
                 }
                 const auto &equalCircles = spacedCircles.find(contentHash);
                 if (equalCircles != spacedCircles.end()) {
-                    for (const auto &other : equalCircles->second) {
+                    for (const auto &other: equalCircles->second) {
                         // Assume equal symbol spacing for all primitives with matching content
                         if (CollisionUtil::checkCircleCollision(projectedCircle, other, symbolSpacing)) {
-                            return true;
-                        }
-                    }
-                }
-            }
-
-            for (int16_t y = indexRange.yMin; y <= indexRange.yMax; y++) {
-                for (int16_t x = indexRange.xMin; x <= indexRange.xMax; x++) {
-                    for (const auto &rect : gridRects[y][x]) {
-                        if (CollisionUtil::checkRectCircleCollision(rect, projectedCircle)) {
-                            return true;
-                        }
-                    }
-                    for (const auto &circle : gridCircles[y][x]) {
-                        if (CollisionUtil::checkCircleCollision(projectedCircle, circle)) {
-                            return true;
+                            return 1;
                         }
                     }
                 }
             }
         }
 
-        // Only insert when none colliding
+        if (alwaysInsert) {
+            return checkCirclesInsertAlways(circles, projectedCircles);
+        } else {
+            return checkCirclesInsertOnCollision(circles, projectedCircles);
+        }
+    }
+
+private:
+    uint8_t checkRectInsertOnCollision(const CollisionRectF &rectangle, const RectF &projectedRectangle, const IndexRange &indexRange) {
+        for (int16_t y = indexRange.yMin; y <= indexRange.yMax; y++) {
+            for (int16_t x = indexRange.xMin; x <= indexRange.xMax; x++) {
+                for (const auto &rect: gridRects[y][x]) {
+                    if (CollisionUtil::checkRectCollision(projectedRectangle, rect)) {
+                        return 1;
+                    }
+                }
+                for (const auto &circle: gridCircles[y][x]) {
+                    if (CollisionUtil::checkRectCircleCollision(projectedRectangle, circle)) {
+                        return 1;
+                    }
+                }
+            }
+        }
+
+        for (int16_t y = indexRange.yMin; y <= indexRange.yMax; y++) {
+            for (int16_t x = indexRange.xMin; x <= indexRange.xMax; x++) {
+                gridRects[y][x].push_back(projectedRectangle);
+            }
+        }
+        if (rectangle.contentHash != 0 && rectangle.symbolSpacing > 0) {
+            spacedRects[rectangle.contentHash].push_back(projectedRectangle);
+        }
+
+        return 0;
+    }
+
+    uint8_t checkRectInsertAlways(const CollisionRectF &rectangle, const RectF &projectedRectangle, const IndexRange &indexRange) {
+        bool colliding = false;
+        for (int16_t y = indexRange.yMin; y <= indexRange.yMax; y++) {
+            for (int16_t x = indexRange.xMin; x <= indexRange.xMax; x++) {
+                if (!colliding) {
+                    for (const auto &rect: gridRects[y][x]) {
+                        if (CollisionUtil::checkRectCollision(projectedRectangle, rect)) {
+                            colliding = true;
+                        }
+                    }
+                    for (const auto &circle: gridCircles[y][x]) {
+                        if (CollisionUtil::checkRectCircleCollision(projectedRectangle, circle)) {
+                            colliding = true;
+                        }
+                    }
+                }
+                gridRects[y][x].push_back(projectedRectangle);
+            }
+        }
+
+        if (rectangle.contentHash != 0 && rectangle.symbolSpacing > 0) {
+            spacedRects[rectangle.contentHash].push_back(projectedRectangle);
+        }
+
+        return colliding ? 1 : 0;
+    }
+
+    uint8_t checkCirclesInsertOnCollision(const std::vector<CollisionCircleF> &circles, const std::vector<std::tuple<CircleF, IndexRange, size_t, int16_t>> &projectedCircles) {
         for (const auto &[projectedCircle, indexRange, contentHash, symbolSpacing] : projectedCircles) {
+            for (int16_t y = indexRange.yMin; y <= indexRange.yMax; y++) {
+                for (int16_t x = indexRange.xMin; x <= indexRange.xMax; x++) {
+                    for (const auto &rect : gridRects[y][x]) {
+                        if (CollisionUtil::checkRectCircleCollision(rect, projectedCircle)) {
+                            return 1;
+                        }
+                    }
+                    for (const auto &circle : gridCircles[y][x]) {
+                        if (CollisionUtil::checkCircleCollision(projectedCircle, circle)) {
+                            return 1;
+                        }
+                    }
+                }
+            }
+        }
+
+        for (const auto &[projectedCircle, indexRange, contentHash, symbolSpacing]: projectedCircles) {
             for (int16_t y = indexRange.yMin; y <= indexRange.yMax; y++) {
                 for (int16_t x = indexRange.xMin; x <= indexRange.xMax; x++) {
                     gridCircles[y][x].push_back(projectedCircle);
@@ -201,10 +247,38 @@ public:
                 spacedCircles[contentHash].push_back(projectedCircle);
             }
         }
-        return false;
+
+        return 0;
     }
 
-private:
+    uint8_t checkCirclesInsertAlways(const std::vector<CollisionCircleF> &circles, const std::vector<std::tuple<CircleF, IndexRange, size_t, int16_t>> &projectedCircles) {
+        bool colliding = false;
+        for (const auto &[projectedCircle, indexRange, contentHash, symbolSpacing]: projectedCircles) {
+            for (int16_t y = indexRange.yMin; y <= indexRange.yMax; y++) {
+                for (int16_t x = indexRange.xMin; x <= indexRange.xMax; x++) {
+                    if (!colliding) {
+                        for (const auto &rect: gridRects[y][x]) {
+                            if (CollisionUtil::checkRectCircleCollision(rect, projectedCircle)) {
+                                colliding = true;
+                            }
+                        }
+                        for (const auto &circle: gridCircles[y][x]) {
+                            if (CollisionUtil::checkCircleCollision(projectedCircle, circle)) {
+                                colliding = true;
+                            }
+                        }
+                    }
+                    gridCircles[y][x].push_back(projectedCircle);
+                }
+            }
+            if (contentHash != 0 && symbolSpacing > 0) {
+                spacedCircles[contentHash].push_back(projectedCircle);
+            }
+        }
+
+        return colliding ? 1 : 0;
+    }
+
     RectF getProjectedRectangle(const CollisionRectF &rectangle) {
         temp2[0] = rectangle.x - rectangle.anchorX; // move x to the anchor
         temp2[1] = rectangle.y - rectangle.anchorY;
@@ -303,6 +377,8 @@ private:
     std::vector<std::vector<std::vector<CircleF>>> gridCircles; // vector of circles in a 2-dimensional gridCircles[y][x]
     std::unordered_map<size_t, std::vector<RectF>> spacedRects;
     std::unordered_map<size_t, std::vector<CircleF>> spacedCircles;
+
+    bool alwaysInsert = false;
 
     std::vector<float> temp1 = {0, 0, 0, 0}, temp2 = {0, 0, 0, 0};
 };
