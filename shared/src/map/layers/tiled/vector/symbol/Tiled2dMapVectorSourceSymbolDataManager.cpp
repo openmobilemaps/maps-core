@@ -439,6 +439,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::onVectorTilesUpdated(const std::st
     auto selfActor = WeakActor(mailbox, weak_from_this());
     selfActor.messagePrecisely(MailboxDuplicationStrategy::replaceNewest, MailboxExecutionEnvironment::graphics,
                                &Tiled2dMapVectorSourceSymbolDataManager::updateSymbolGroups);
+    vectorLayer.message(&Tiled2dMapVectorLayer::invalidateCollisionState);
 }
 
 std::vector<Actor<Tiled2dMapVectorSymbolGroup>> Tiled2dMapVectorSourceSymbolDataManager::createSymbolGroups(const Tiled2dMapVersionedTileInfo &tileInfo,
@@ -584,6 +585,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::updateSymbolGroups() {
     }
 
     pregenerateRenderPasses();
+    vectorLayer.message(&Tiled2dMapVectorLayer::invalidateCollisionState);
 }
 
 void Tiled2dMapVectorSourceSymbolDataManager::setSprites(std::shared_ptr<SpriteData> spriteData, std::shared_ptr<TextureHolderInterface> spriteTexture) {

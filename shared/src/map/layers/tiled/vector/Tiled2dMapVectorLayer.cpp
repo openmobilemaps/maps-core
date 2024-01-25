@@ -473,6 +473,12 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
             rasterSource.message(&Tiled2dMapRasterSource::resume);
         }
     }
+
+    {
+        std::unique_lock<std::mutex> lock(setupMutex);
+        setupReady = true;
+    }
+    setupCV.notify_all();
 }
 
 void Tiled2dMapVectorLayer::reloadDataSource(const std::string &sourceName) {
@@ -492,6 +498,11 @@ void Tiled2dMapVectorLayer::reloadDataSource(const std::string &sourceName) {
 }
 
 void Tiled2dMapVectorLayer::reloadLocalDataSource(const std::string &sourceName, const std::string &geoJson) {
+
+    if (!mapInterface) {
+        return;
+    }
+
     if (const auto &geoSource = mapDescription->geoJsonSources[sourceName]) {
 
         nlohmann::json json;
@@ -511,6 +522,7 @@ void Tiled2dMapVectorLayer::reloadLocalDataSource(const std::string &sourceName,
         });
     }
 
+    prevCollisionStillValid.clear();
     tilesStillValid.clear();
     mapInterface->invalidate();
 }
@@ -543,7 +555,7 @@ void Tiled2dMapVectorLayer::update() {
         bool tilesChanged = !tilesStillValid.test_and_set();
         double zoomChange = abs(newZoom-lastDataManagerZoom) / std::max(newZoom, 1.0);
         double timeDiff = now - lastDataManagerUpdate;
-        if (zoomChange > 0.001 || timeDiff > 2000 || isAnimating || tilesChanged) {
+        if (zoomChange > 0.001 || timeDiff > 1000 || isAnimating || tilesChanged) {
             lastDataManagerUpdate = now;
             lastDataManagerZoom = newZoom;
 
@@ -558,7 +570,7 @@ void Tiled2dMapVectorLayer::update() {
                 newIsAnimating |= a;
             }
             isAnimating = newIsAnimating;
-            if (now - lastCollitionCheck > 3000 || tilesChanged) {
+            if (now - lastCollitionCheck > 1000 || tilesChanged) {
                 lastCollitionCheck = now;
                 bool enforceUpdate = !prevCollisionStillValid.test_and_set();
                 collisionManager.syncAccess(
@@ -754,6 +766,10 @@ void Tiled2dMapVectorLayer::forceReload() {
 }
 
 void Tiled2dMapVectorLayer::onTilesUpdated(const std::string &layerName, std::unordered_set<Tiled2dMapRasterTileInfo> currentTileInfos) {
+
+    std::unique_lock<std::mutex> lock(setupMutex);
+    setupCV.wait(lock, [this]{ return setupReady; });
+
     auto sourceManager = sourceDataManagers.find(layerName);
     if (sourceManager != sourceDataManagers.end()) {
         sourceManager->second.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorSourceTileDataManager::onRasterTilesUpdated, layerName, currentTileInfos);
@@ -762,6 +778,10 @@ void Tiled2dMapVectorLayer::onTilesUpdated(const std::string &layerName, std::un
 }
 
 void Tiled2dMapVectorLayer::onTilesUpdated(const std::string &sourceName, std::unordered_set<Tiled2dMapVectorTileInfo> currentTileInfos) {
+
+    std::unique_lock<std::mutex> lock(setupMutex);
+    setupCV.wait(lock, [this]{ return setupReady; });
+
     auto sourceManager = sourceDataManagers.find(sourceName);
     if (sourceManager != sourceDataManagers.end()) {
         sourceManager->second.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorSourceTileDataManager::onVectorTilesUpdated, sourceName, currentTileInfos);
@@ -1235,6 +1255,10 @@ std::optional<int32_t> Tiled2dMapVectorLayer::getMaxZoomLevelIdentifier() {
 
 void Tiled2dMapVectorLayer::invalidateCollisionState() {
     prevCollisionStillValid.clear();
+    tilesStillValid.clear();
+    if (mapInterface) {
+        mapInterface->invalidate();
+    }
 }
 
 void Tiled2dMapVectorLayer::setReadyStateListener(const /*not-null*/ std::shared_ptr<::Tiled2dMapReadyStateListener> & listener) {

@@ -281,6 +281,10 @@ private:
     void updateReadyStateListenerIfNeeded();
     std::optional<LayerReadyState> lastReadyState;
     std::shared_ptr<::Tiled2dMapReadyStateListener> readyStateListener;
+
+   std::mutex setupMutex;
+   std::condition_variable setupCV;
+   bool setupReady = false;
 };
 
 
