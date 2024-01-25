@@ -76,6 +76,8 @@ private:
     std::optional<double> lastZoom = std::nullopt;
     std::optional<bool> lastInZoomRange = std::nullopt;
 
+    bool fadeInPattern = false;
+
     std::shared_ptr<SpriteData> spriteData;
     std::shared_ptr<TextureHolderInterface> spriteTexture;
 
