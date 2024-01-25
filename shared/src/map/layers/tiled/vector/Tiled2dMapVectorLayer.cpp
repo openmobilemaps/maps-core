@@ -522,6 +522,7 @@ void Tiled2dMapVectorLayer::reloadLocalDataSource(const std::string &sourceName,
         });
     }
 
+    prevCollisionStillValid.clear();
     tilesStillValid.clear();
     mapInterface->invalidate();
 }
@@ -554,7 +555,7 @@ void Tiled2dMapVectorLayer::update() {
         bool tilesChanged = !tilesStillValid.test_and_set();
         double zoomChange = abs(newZoom-lastDataManagerZoom) / std::max(newZoom, 1.0);
         double timeDiff = now - lastDataManagerUpdate;
-        if (zoomChange > 0.001 || timeDiff > 2000 || isAnimating || tilesChanged) {
+        if (zoomChange > 0.001 || timeDiff > 1000 || isAnimating || tilesChanged) {
             lastDataManagerUpdate = now;
             lastDataManagerZoom = newZoom;
 
@@ -569,7 +570,7 @@ void Tiled2dMapVectorLayer::update() {
                 newIsAnimating |= a;
             }
             isAnimating = newIsAnimating;
-            if (now - lastCollitionCheck > 3000 || tilesChanged) {
+            if (now - lastCollitionCheck > 1000 || tilesChanged) {
                 lastCollitionCheck = now;
                 bool enforceUpdate = !prevCollisionStillValid.test_and_set();
                 collisionManager.syncAccess(
