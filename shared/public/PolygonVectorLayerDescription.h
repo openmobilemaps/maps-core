@@ -20,17 +20,20 @@ public:
     PolygonVectorStyle(std::shared_ptr<Value> fillColor,
                        std::shared_ptr<Value> fillOpacity,
                        std::shared_ptr<Value> fillPattern,
-                       std::shared_ptr<Value> blendMode):
+                       std::shared_ptr<Value> blendMode,
+                       bool fadeInPattern):
     fillColor(fillColor),
     fillOpacity(fillOpacity),
     fillPattern(fillPattern),
-    blendMode(blendMode) {}
+    blendMode(blendMode),
+    fadeInPattern(fadeInPattern) {}
 
     PolygonVectorStyle(PolygonVectorStyle &style)
     : fillColor(style.fillColor),
       fillOpacity(style.fillOpacity),
       fillPattern(style.fillPattern),
-      blendMode(style.blendMode) {}
+      blendMode(style.blendMode),
+      fadeInPattern(style.fadeInPattern) {}
 
     UsedKeysCollection getUsedKeys() const {
 
@@ -77,7 +80,8 @@ public:
     std::shared_ptr<Value> fillOpacity;
     std::shared_ptr<Value> fillPattern;
     std::shared_ptr<Value> blendMode;
-    
+    bool fadeInPattern;
+
 private:
     ValueEvaluator<Color> fillColorEvaluator;
     ValueEvaluator<double> fillOpacityEvaluator;

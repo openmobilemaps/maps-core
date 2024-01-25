@@ -42,7 +42,7 @@ void Tiled2dMapVectorBackgroundSubLayer::onAdded(const std::shared_ptr<MapInterf
 
     patternName = description->style.getPattern(evalContext);
     if (!patternName.empty()) {
-        auto shader = mapInterface->getShaderFactory()->createPolygonPatternGroupShader();
+        auto shader = mapInterface->getShaderFactory()->createPolygonPatternGroupShader(false);
 
         shader->asShaderProgramInterface()->setBlendMode(description->style.getBlendMode(evalContext));
 

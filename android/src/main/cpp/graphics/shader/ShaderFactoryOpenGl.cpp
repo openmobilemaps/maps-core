@@ -50,8 +50,8 @@ std::shared_ptr<PolygonGroupShaderInterface> ShaderFactoryOpenGl::createPolygonG
     return std::make_shared<ColorPolygonGroup2dShaderOpenGl>();
 }
 
-std::shared_ptr<PolygonPatternGroupShaderInterface> ShaderFactoryOpenGl::createPolygonPatternGroupShader() {
-    return std::make_shared<PolygonPatternGroup2dShaderOpenGl>();
+std::shared_ptr<PolygonPatternGroupShaderInterface> ShaderFactoryOpenGl::createPolygonPatternGroupShader(bool fadeInPattern) {
+    return std::make_shared<PolygonPatternGroup2dShaderOpenGl>(fadeInPattern);
 }
 
 std::shared_ptr<TextShaderInterface> ShaderFactoryOpenGl::createTextShader() {

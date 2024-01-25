@@ -27,7 +27,7 @@ public:
 
     std::shared_ptr<PolygonGroupShaderInterface> createPolygonGroupShader() override;
 
-    std::shared_ptr<PolygonPatternGroupShaderInterface> createPolygonPatternGroupShader() override;
+    std::shared_ptr<PolygonPatternGroupShaderInterface> createPolygonPatternGroupShader(bool fadeInPattern) override;
 
     std::shared_ptr<TextShaderInterface> createTextShader() override;
 

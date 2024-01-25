@@ -30,7 +30,7 @@
 
 - (nullable id<MCPolygonGroupShaderInterface>)createPolygonGroupShader;
 
-- (nullable id<MCPolygonPatternGroupShaderInterface>)createPolygonPatternGroupShader;
+- (nullable id<MCPolygonPatternGroupShaderInterface>)createPolygonPatternGroupShader:(BOOL)fadeInPattern;
 
 - (nullable id<MCTextShaderInterface>)createTextShader;
 

@@ -28,7 +28,8 @@ Tiled2dMapVectorPolygonPatternTile::Tiled2dMapVectorPolygonPatternTile(const std
                                                                        const std::shared_ptr<SpriteData> &spriteData,
                                                                        const std::shared_ptr<TextureHolderInterface> &spriteTexture,
                                                                        const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager)
-        : Tiled2dMapVectorTile(mapInterface, tileInfo, description, layerConfig, tileCallbackInterface, featureStateManager), spriteData(spriteData), spriteTexture(spriteTexture), usedKeys(description->getUsedKeys()) {
+        : Tiled2dMapVectorTile(mapInterface, tileInfo, description, layerConfig, tileCallbackInterface, featureStateManager),
+          spriteData(spriteData), spriteTexture(spriteTexture), usedKeys(description->getUsedKeys()), fadeInPattern(description->style.fadeInPattern) {
     isStyleZoomDependant = usedKeys.containsUsedKey(Tiled2dMapVectorStyleParser::zoomExpression);
     isStyleStateDependant = usedKeys.isStateDependant();
 }
@@ -202,7 +203,7 @@ void Tiled2dMapVectorPolygonPatternTile::setVectorTileData(const Tiled2dMapVecto
                         } else {
                             styleGroupIndex = (int) featureGroups.size();
                             styleIndex = 0;
-                            auto shader = shaderFactory->createPolygonPatternGroupShader();
+                            auto shader = shaderFactory->createPolygonPatternGroupShader(fadeInPattern);
                             auto polygonDescription = std::static_pointer_cast<PolygonVectorLayerDescription>(description);
                             shader->asShaderProgramInterface()->setBlendMode(polygonDescription->style.getBlendMode(EvaluationContext(0.0, dpFactor, std::make_shared<FeatureContext>(), featureStateManager)));
                             shaders.push_back(shader);

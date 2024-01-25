@@ -166,6 +166,11 @@ void PolygonPatternGroup2dOpenGl::render(const std::shared_ptr<::RenderingContex
     auto scalingFactorHandle = glGetUniformLocation(program, "uScalingFactor");
     glUniform2f(scalingFactorHandle, scalingFactor.x, scalingFactor.y);
 
+    auto screenPixelAsRealMeterFactorHandle = glGetUniformLocation(program, "uScreenPixelAsRealMeterFactor");
+    if (screenPixelAsRealMeterFactorHandle >= 0) {
+        glUniform1f(screenPixelAsRealMeterFactorHandle, screenPixelAsRealMeterFactor);
+    }
+
     int textureCoordinatesHandle = glGetUniformLocation(program, "textureCoordinates");
     glUniform1fv(textureCoordinatesHandle, sizeTextureCoordinatesValuesArray, &textureCoordinates[0]);
     int opacitiesHandle = glGetUniformLocation(program, "opacities");
