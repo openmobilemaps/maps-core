@@ -1525,20 +1525,78 @@ public:
     }
 };
 
-class ToBoolValue: public Value {
+class ToBooleanValue: public Value {
+    const std::shared_ptr<Value> value;
+
+public:
+    ToBooleanValue(const std::shared_ptr<Value> value): value(value) {}
+
+    std::unique_ptr<Value> clone() override {
+        return std::make_unique<ToBooleanValue>(value->clone());
+    }
+
+    UsedKeysCollection getUsedKeys() const override {
+        return value->getUsedKeys();
+    }
+
+    ValueVariant evaluate(const EvaluationContext &context) const override {
+        return std::visit(overloaded {
+                [](const std::string &val){
+                    return !val.empty();
+                },
+                [](double val){
+                    return val != 0.0 && !isnan(val);
+                },
+                [](int64_t val){
+                    return val != 0 && !isnan(val);
+                },
+                [](bool val){
+                    return val;
+                },
+                [](const Color &val){
+                    return true;
+                },
+                [](const std::vector<float> &val){
+                    return true;
+                },
+                [](const std::vector<std::string> &val){
+                    return true;
+                },
+                [](const std::vector<FormattedStringEntry> &val){
+                    return true;
+                },
+                [](const std::monostate &val) {
+                    return false;
+                }
+        }, value->evaluate(context));
+    };
+
+    bool isEqual(const std::shared_ptr<Value>& other) const override {
+        if (auto casted = std::dynamic_pointer_cast<ToBooleanValue>(other)) {
+            // Compare the value member
+            if (value && casted->value && !value->isEqual(casted->value)) {
+                return false;
+            }
+            return true; // All members are equal
+        }
+        return false; // Not the same type or nullptr
+    }
+};
+
+class BooleanValue: public Value {
     const std::vector<std::shared_ptr<Value>> values;
 
 public:
-    ToBoolValue(const std::shared_ptr<Value> value): values({ value }) {}
+    BooleanValue(const std::shared_ptr<Value> value): values({value }) {}
 
-    ToBoolValue(const std::vector<std::shared_ptr<Value>> values): values(values) {}
+    BooleanValue(const std::vector<std::shared_ptr<Value>> values): values(values) {}
 
     std::unique_ptr<Value> clone() override {
         std::vector<std::shared_ptr<Value>> clonedValues;
         for (const auto &value: values) {
             clonedValues.push_back(value->clone());
         }
-        return std::make_unique<ToBoolValue>(clonedValues);
+        return std::make_unique<BooleanValue>(clonedValues);
     }
 
     UsedKeysCollection getUsedKeys() const override {
@@ -1561,7 +1619,7 @@ public:
     };
 
     bool isEqual(const std::shared_ptr<Value>& other) const override {
-        if (auto casted = std::dynamic_pointer_cast<ToBoolValue>(other)) {
+        if (auto casted = std::dynamic_pointer_cast<BooleanValue>(other)) {
             // Compare the value members
             for (const auto &value: values) {
                 bool found = false;

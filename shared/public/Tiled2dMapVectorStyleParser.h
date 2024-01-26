@@ -36,6 +36,7 @@ public:
     static const std::string caseExpression;
     static const std::string matchExpression;
     static const std::string toStringExpression;
+    static const std::string toBooleanExpression;
     static const std::string toNumberExpression;
     static const std::string stopsExpression;
     static const std::string stepExpression;
@@ -209,8 +210,14 @@ public:
 
             // Example: ["to-number",["get","rank"]]
             else if (isExpression(json[0], toNumberExpression)) {
-                auto toStringValue = std::make_shared<ToNumberValue>(parseValue(json[1]));
-                return toStringValue;
+                auto toNumberValue = std::make_shared<ToNumberValue>(parseValue(json[1]));
+                return toNumberValue;
+            }
+
+            // Example: ["to-boolean",["get","rank"]]
+            else if (isExpression(json[0], toBooleanExpression)) {
+                auto toBooleanValue = std::make_shared<ToBooleanValue>(parseValue(json[1]));
+                return toBooleanValue;
             }
 
             // Example: [ "interpolate", ["linear"], [ "zoom" ], 13, 0.3, 15, [ "match", [ "get", "class" ], "river", 0.1, 0.3 ] ]
@@ -331,7 +338,7 @@ public:
                 for (auto it = json.begin() + 1; it != json.end(); it += 1) {
                     values.push_back(parseValue(*it));
                 }
-                return std::make_shared<ToBoolValue>(values);
+                return std::make_shared<BooleanValue>(values);
             }
 
             // Example: [ "coalesce", ["get", "name_de"], ["get", "name_en"], ["get", "name"]]
