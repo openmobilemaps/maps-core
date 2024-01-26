@@ -410,13 +410,20 @@ bool Tiled2dMapVectorPolygonPatternTile::onClickConfirmed(const Vec2F &posScreen
     }
     auto point = camera->coordFromScreenPosition(posScreen);
 
+    std::vector<VectorLayerFeatureInfo> featureInfos;
     for (auto const &[polygon, featureContext]: hitDetectionPolygons) {
         if (VectorTileGeometryHandler::isPointInTriangulatedPolygon(point, polygon, converter)) {
-            if (strongSelectionDelegate->didSelectFeature(featureContext->getFeatureInfo(), description->identifier,
-                                                          converter->convert(CoordinateSystemIdentifiers::EPSG4326(), point))) {
+            if (multiselect) {
+                featureInfos.push_back(featureContext->getFeatureInfo());
+            } else if (strongSelectionDelegate->didSelectFeature(featureContext->getFeatureInfo(), description->identifier,
+                                                                 converter->convert(CoordinateSystemIdentifiers::EPSG4326(),point))) {
                 return true;
             }
         }
+    }
+
+    if (multiselect && !featureInfos.empty()) {
+        return strongSelectionDelegate->didMultiSelectLayerFeatures(featureInfos, description->identifier, converter->convert(CoordinateSystemIdentifiers::EPSG4326(), point));
     }
 
     return false;

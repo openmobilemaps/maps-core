@@ -409,17 +409,23 @@ bool Tiled2dMapVectorLineTile::onClickConfirmed(const Vec2F &posScreen) {
 
     auto lineDescription = std::static_pointer_cast<LineVectorLayerDescription>(description);
 
+    std::vector<VectorLayerFeatureInfo> featureInfos;
     for (auto const &[lineCoordinateVector, featureContext]: hitDetection) {
         for (auto const &coordinates: lineCoordinateVector) {
             auto lineWidth = lineDescription->style.getLineWidth(EvaluationContext(zoomIdentifier, dpFactor, featureContext, featureStateManager));
             if (LineHelper::pointWithin(coordinates, point, lineWidth, coordinateConverter)) {
-                if (strongSelectionDelegate->didSelectFeature(featureContext->getFeatureInfo(), description->identifier, point)) {
+                if (multiselect) {
+                    featureInfos.push_back(featureContext->getFeatureInfo());
+                } else if (strongSelectionDelegate->didSelectFeature(featureContext->getFeatureInfo(), description->identifier, point)) {
                     return true;
                 }
             }
         }
     }
 
+    if (multiselect && !featureInfos.empty()) {
+        return strongSelectionDelegate->didMultiSelectLayerFeatures(featureInfos, description->identifier, point);
+    }
 
     return false;
 }

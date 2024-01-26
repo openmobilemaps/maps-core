@@ -5,6 +5,7 @@
 
 #include "Coord.h"
 #include <string>
+#include <vector>
 
 struct VectorLayerFeatureInfo;
 
@@ -13,6 +14,8 @@ public:
     virtual ~Tiled2dMapVectorLayerSelectionCallbackInterface() = default;
 
     virtual bool didSelectFeature(const VectorLayerFeatureInfo & featureInfo, const std::string & layerIdentifier, const ::Coord & coord) = 0;
+
+    virtual bool didMultiSelectLayerFeatures(const std::vector<VectorLayerFeatureInfo> & featureInfos, const std::string & layerIdentifier, const ::Coord & coord) = 0;
 
     virtual bool didClickBackgroundConfirmed(const ::Coord & coord) = 0;
 };

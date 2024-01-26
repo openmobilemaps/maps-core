@@ -26,6 +26,8 @@ Tiled2dMapVectorTile::Tiled2dMapVectorTile(const std::weak_ptr<MapInterface> &ma
     if (auto strongMapInterface = mapInterface.lock()) {
         dpFactor = strongMapInterface->getCamera()->getScreenDensityPpi() / 160.0;
     }
+
+    multiselect = description->multiselect;
 }
 
 void Tiled2dMapVectorTile::updateVectorLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,

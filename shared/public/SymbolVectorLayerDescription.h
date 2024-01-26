@@ -510,7 +510,7 @@ public:
                                  SymbolVectorStyle style,
                                  std::optional<int32_t> renderPassIndex,
                                  std::shared_ptr<Value> interactable):
-    VectorLayerDescription(identifier, source, sourceId, minZoom, maxZoom, filter, renderPassIndex, interactable),
+    VectorLayerDescription(identifier, source, sourceId, minZoom, maxZoom, filter, renderPassIndex, interactable, false),
     style(style) {};
 
     std::unique_ptr<VectorLayerDescription> clone() override {

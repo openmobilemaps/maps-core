@@ -92,6 +92,7 @@ vector_layer_feature_info = record {
 
 tiled_2d_map_vector_layer_selection_callback_interface = interface +c +j +o {
     did_select_feature(feature_info: vector_layer_feature_info, layer_identifier: string, coord: coord): bool;
+    did_multi_select_layer_features(feature_infos: list<vector_layer_feature_info>, layer_identifier: string, coord: coord): bool;
     did_click_background_confirmed(coord: coord) : bool;
 }
 

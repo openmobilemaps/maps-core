@@ -26,6 +26,7 @@ public:
     int maxZoom;
     std::shared_ptr<Value> filter;
     std::optional<int32_t> renderPassIndex;
+    bool multiselect;
 
     virtual VectorLayerType getType() = 0;
 
@@ -58,7 +59,8 @@ public:
                            int maxZoom,
                            std::shared_ptr<Value> filter,
                            std::optional<int32_t> renderPassIndex,
-                           std::shared_ptr<Value> interactable):
+                           std::shared_ptr<Value> interactable,
+                           bool multiselect):
             identifier(identifier),
             source(source),
             sourceLayer(sourceId),
@@ -66,7 +68,8 @@ public:
             maxZoom(maxZoom),
             filter(filter),
             renderPassIndex(renderPassIndex),
-            interactable(interactable) {}
+            interactable(interactable),
+            multiselect(multiselect) {}
 
     virtual ~VectorLayerDescription() = default;
 

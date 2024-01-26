@@ -65,7 +65,7 @@ public:
                                      BackgroundVectorStyle style,
                                      std::optional<int32_t> renderPassIndex,
                                      std::shared_ptr<Value> interactable):
-    VectorLayerDescription(identifier, "", "", 0, 0, nullptr, renderPassIndex, interactable),
+    VectorLayerDescription(identifier, "", "", 0, 0, nullptr, renderPassIndex, interactable, false),
     style(style) {};
 
     std::unique_ptr<VectorLayerDescription> clone() override {
