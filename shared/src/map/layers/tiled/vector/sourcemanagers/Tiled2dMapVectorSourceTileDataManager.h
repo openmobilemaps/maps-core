@@ -14,10 +14,11 @@
 #include "SpriteData.h"
 
 class Tiled2dMapVectorLayer;
+
 class Tiled2dMapVectorTile;
 
 class Tiled2dMapVectorSourceTileDataManager : public Tiled2dMapVectorLayerTileCallbackInterface,
-                                               public Tiled2dMapVectorSourceDataManager,
+                                              public Tiled2dMapVectorSourceDataManager,
                                               public std::enable_shared_from_this<Tiled2dMapVectorSourceTileDataManager> {
 public:
     using Tiled2dMapVectorSourceDataManager::Tiled2dMapVectorSourceDataManager;
@@ -51,6 +52,8 @@ public:
     bool onTwoFingerClick(const std::unordered_set<std::string> &layers, const Vec2F &posScreen1, const Vec2F &posScreen2) override;
 
     void clearTouch() override;
+
+    bool performClick(const std::unordered_set<std::string> &layers, const Coord &coord) override;
 
     void setSprites(std::shared_ptr<SpriteData> spriteData, std::shared_ptr<TextureHolderInterface> spriteTexture) override;
 

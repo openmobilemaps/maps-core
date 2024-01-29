@@ -6,6 +6,7 @@
 #import "DJICppWrapperCache+Private.h"
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
+#import "MCCoord+Private.h"
 #import "MCFontLoaderInterface+Private.h"
 #import "MCLayerInterface+Private.h"
 #import "MCLoaderInterface+Private.h"
@@ -152,6 +153,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     try {
         _cppRefHandle.get()->reloadLocalDataSource(::djinni::String::toCpp(sourceName),
                                                    ::djinni::String::toCpp(geoJson));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)performClick:(nonnull MCCoord *)coord {
+    try {
+        _cppRefHandle.get()->performClick(::djinni_generated::Coord::toCpp(coord));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

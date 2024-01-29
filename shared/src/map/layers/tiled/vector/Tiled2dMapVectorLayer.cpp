@@ -1120,6 +1120,18 @@ bool Tiled2dMapVectorLayer::onClickConfirmed(const Vec2F &posScreen) {
     return false;
 }
 
+void Tiled2dMapVectorLayer::performClick(const Coord &coord) {
+    const auto mapInterface = this->mapInterface;
+    const auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
+
+    if (!camera) {
+        return;
+    }
+    
+    const auto screenPos = camera->screenPosFromCoord(coord);
+    onClickConfirmed(screenPos);
+}
+
 bool Tiled2dMapVectorLayer::onDoubleClick(const Vec2F &posScreen) {
     return interactionManager->onDoubleClick(posScreen);
 }

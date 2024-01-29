@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "Coord.h"
 #include "FontLoaderInterface.h"
 #include "LayerInterface.h"
 #include "LoaderInterface.h"
@@ -65,4 +66,6 @@ public:
     virtual void reloadDataSource(const std::string & sourceName) = 0;
 
     virtual void reloadLocalDataSource(const std::string & sourceName, const std::string & geoJson) = 0;
+
+    virtual void performClick(const ::Coord & coord) = 0;
 };

@@ -77,6 +77,8 @@ public:
 
     virtual ::Coord coordFromScreenPosition(const ::Vec2F & posScreen) = 0;
 
+    virtual ::Vec2F screenPosFromCoord(const ::Coord & coord) = 0;
+
     virtual double mapUnitsFromPixels(double distancePx) = 0;
 
     virtual void setRotationEnabled(bool enabled) = 0;

@@ -3,6 +3,7 @@
 
 #include "NativeTiled2dMapVectorLayerInterface.h"  // my header
 #include "Marshal.hpp"
+#include "NativeCoord.h"
 #include "NativeFontLoaderInterface.h"
 #include "NativeLayerInterface.h"
 #include "NativeLoaderInterface.h"
@@ -153,6 +154,14 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_
         const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapVectorLayerInterface>(nativeRef);
         ref->reloadLocalDataSource(::djinni::String::toCpp(jniEnv, j_sourceName),
                                    ::djinni::String::toCpp(jniEnv, j_geoJson));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_vector_Tiled2dMapVectorLayerInterface_00024CppProxy_native_1performClick(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeCoord::JniType j_coord)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapVectorLayerInterface>(nativeRef);
+        ref->performClick(::djinni_generated::NativeCoord::toCpp(jniEnv, j_coord));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

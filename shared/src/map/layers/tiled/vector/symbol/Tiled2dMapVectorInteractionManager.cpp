@@ -100,6 +100,16 @@ void Tiled2dMapVectorInteractionManager::clearTouch() {
     }
 }
 
+void Tiled2dMapVectorInteractionManager::performClick(const Coord &coord) {
+    const auto lambda = [&coord](std::unordered_set<std::string> &layers, auto &manager) -> bool {
+        if (auto strongManager = manager.lock()) {
+            return strongManager->performClick(layers, coord);
+        }
+        return false;
+    };
+    callInReverseOrder(lambda);
+}
+
 template<typename F>
 bool Tiled2dMapVectorInteractionManager::callInReverseOrder(F&& managerLambda) {
     if (!mapDescription) {

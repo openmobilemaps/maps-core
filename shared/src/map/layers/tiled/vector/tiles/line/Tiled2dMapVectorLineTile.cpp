@@ -403,13 +403,23 @@ std::vector<std::shared_ptr<RenderObjectInterface>> Tiled2dMapVectorLineTile::ge
 bool Tiled2dMapVectorLineTile::onClickConfirmed(const Vec2F &posScreen) {
     const auto mapInterface = this->mapInterface.lock();
     const auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
+    if (!camera) {
+        return false;
+    }
+
+    auto point = camera->coordFromScreenPosition(posScreen);
+    return performClick(point);
+}
+
+bool Tiled2dMapVectorLineTile::performClick(const Coord &coord) {
+    const auto mapInterface = this->mapInterface.lock();
+    const auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
     const auto coordinateConverter = mapInterface ? mapInterface->getCoordinateConverterHelper() : nullptr;
     auto strongSelectionDelegate = selectionDelegate.lock();
     if (!camera || !strongSelectionDelegate || !coordinateConverter) {
         return false;
     }
 
-    auto point = camera->coordFromScreenPosition(posScreen);
     double zoomIdentifier = layerConfig->getZoomIdentifier(camera->getZoom());
 
     auto lineDescription = std::static_pointer_cast<LineVectorLayerDescription>(description);
@@ -418,10 +428,10 @@ bool Tiled2dMapVectorLineTile::onClickConfirmed(const Vec2F &posScreen) {
     for (auto const &[lineCoordinateVector, featureContext]: hitDetection) {
         for (auto const &coordinates: lineCoordinateVector) {
             auto lineWidth = lineDescription->style.getLineWidth(EvaluationContext(zoomIdentifier, dpFactor, featureContext, featureStateManager));
-            if (LineHelper::pointWithin(coordinates, point, lineWidth, coordinateConverter)) {
+            if (LineHelper::pointWithin(coordinates, coord, lineWidth, coordinateConverter)) {
                 if (multiselect) {
                     featureInfos.push_back(featureContext->getFeatureInfo());
-                } else if (strongSelectionDelegate->didSelectFeature(featureContext->getFeatureInfo(), description->identifier, point)) {
+                } else if (strongSelectionDelegate->didSelectFeature(featureContext->getFeatureInfo(), description->identifier, coord)) {
                     return true;
                 }
             }
@@ -429,7 +439,7 @@ bool Tiled2dMapVectorLineTile::onClickConfirmed(const Vec2F &posScreen) {
     }
 
     if (multiselect && !featureInfos.empty()) {
-        return strongSelectionDelegate->didMultiSelectLayerFeatures(featureInfos, description->identifier, point);
+        return strongSelectionDelegate->didMultiSelectLayerFeatures(featureInfos, description->identifier, coord);
     }
 
     return false;

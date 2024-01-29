@@ -19,6 +19,7 @@
 #include "Vec2D.h"
 #include "Vec2DHelper.h"
 #include "Vec2FHelper.h"
+#include "Logger.h"
 
 #define DEFAULT_ANIM_LENGTH 300
 #define ROTATION_THRESHOLD 20
@@ -731,6 +732,35 @@ Coord MapCamera2d::coordFromScreenPosition(const ::Vec2F &posScreen) {
     double adjYDiff = xDiffToCenter * sinAng + yDiffToCenter * cosAng;
 
     return Coord(centerPosition.systemIdentifier, centerPosition.x + adjXDiff, centerPosition.y - adjYDiff, centerPosition.z);
+}
+
+::Vec2F MapCamera2d::screenPosFromCoord(const Coord &coord) {
+    const auto mapInterface = this->mapInterface;
+    const auto conversionHelper = mapInterface ? mapInterface->getCoordinateConverterHelper() : nullptr;
+    const auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
+    if (!conversionHelper || !renderingContext) {
+        return Vec2F(0.0, 0.0);
+    }
+
+    const auto mapCoord = conversionHelper->convert(mapCoordinateSystem.identifier, coord);
+
+    double angRad = -angle * M_PI / 180.0;
+    double sinAng = std::sin(angRad);
+    double cosAng = std::cos(angRad);
+
+    double coordXDiffToCenter = mapCoord.x - centerPosition.x;
+    double coordYDiffToCenter = mapCoord.y - centerPosition.y;
+
+    double screenXDiffToCenter = coordXDiffToCenter * cosAng - coordYDiffToCenter * sinAng;
+    double screenYDiffToCenter = coordXDiffToCenter * sinAng + coordYDiffToCenter * cosAng;
+
+    const Vec2I sizeViewport = renderingContext->getViewportSize();
+
+    double zoomFactor = screenPixelAsRealMeterFactor * zoom;
+    double posScreenX = (screenXDiffToCenter / zoomFactor) + ((double)sizeViewport.x / 2.0);
+    double posScreenY = ((double)sizeViewport.y / 2.0) - (screenYDiffToCenter / zoomFactor);
+
+    return Vec2F(posScreenX, posScreenY);
 }
 
 double MapCamera2d::mapUnitsFromPixels(double distancePx) { return distancePx * screenPixelAsRealMeterFactor * zoom; }

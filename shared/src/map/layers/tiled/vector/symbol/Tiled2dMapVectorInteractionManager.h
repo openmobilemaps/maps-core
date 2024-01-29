@@ -43,6 +43,8 @@ public:
 
     void clearTouch() override;
 
+    void performClick(const Coord &coord);
+
 private:
     template<typename F>
     inline bool callInReverseOrder(F&& managerLambda);
