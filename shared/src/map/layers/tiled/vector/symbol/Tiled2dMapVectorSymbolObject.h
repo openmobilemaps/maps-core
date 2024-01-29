@@ -152,14 +152,14 @@ private:
     double lastIconUpdateRotation = -1;
     float lastIconUpdateAlpha = -1;
 
-    double lastStretchIconUpdateScaleFactor;
-    double lastStretchIconUpdateRotation;
+    double lastStretchIconUpdateScaleFactor = -1;
+    double lastStretchIconUpdateRotation = -1;
 
-    double lastTextUpdateScaleFactor;
-    double lastTextUpdateRotation;
+    double lastTextUpdateScaleFactor = -1;
+    double lastTextUpdateRotation = -1;
 
-    bool textAllowOverlap;
-    bool iconAllowOverlap;
+    bool textAllowOverlap = false;
+    bool iconAllowOverlap = false;
 
     bool persistingSymbolPlacement = false;
 
@@ -168,14 +168,14 @@ private:
     bool isIconOpaque = true;
     bool isStretchIconOpaque = true;
 
-    float iconOpacity;
-    float iconRotate;
-    float iconSize;
+    float iconOpacity = 0;
+    float iconRotate = 0;
+    float iconSize = 0;
     std::vector<float> iconTextFitPadding;
     TextSymbolPlacement textSymbolPlacement;
     SymbolAlignment boundingBoxRotationAlignment = SymbolAlignment::AUTO;
     float iconPadding = 0;
-    Anchor iconAnchor;
+    Anchor iconAnchor = Anchor::CENTER;
     Vec2F iconOffset = Vec2F(0.0, 0.0);
     IconTextFit iconTextFit = IconTextFit::NONE;
 
