@@ -14,6 +14,7 @@
 #include <random>
 #include "simplify.hpp"
 #include "CoordinateSystemIdentifiers.h"
+#include "GeoJsonPoint.h"
 
 class UUIDGenerator {
 private:
@@ -45,15 +46,15 @@ public:
         UUIDGenerator generator;
 
         std::shared_ptr<GeoJson> geoJson = std::make_shared<GeoJson>();
-        for (const auto feature: geojson["features"]) {
+        for (const auto &feature: geojson["features"]) {
             if (!feature["geometry"].is_object() ||
                 !feature["geometry"]["type"].is_string() ||
                 !feature["geometry"]["coordinates"].is_array()) {
                 LogError <<= "Geojson feature is not valid";
                 continue;
             }
-            const auto geometryType = feature["geometry"]["type"];
-            const auto coordinates = feature["geometry"]["coordinates"];
+            const auto &geometryType = feature["geometry"]["type"];
+            const auto &coordinates = feature["geometry"]["coordinates"];
             std::shared_ptr<GeoJsonGeometry> geometry;
             vtzero::GeomType geomType;
             if (geometryType == "Point") {
@@ -84,7 +85,7 @@ public:
                 continue;
             }
 
-            const auto properties = parseProperties(feature["properties"]);
+            const auto &properties = parseProperties(feature["properties"]);
 
             if(feature["id"].is_string()) {
                 geometry->featureContext = std::make_shared<FeatureContext>(geomType, properties, feature["id"].get<std::string>());
@@ -98,39 +99,121 @@ public:
         return geoJson;
     }
 
+    static std::vector<::GeoJsonPoint> getPointsWithProperties(const nlohmann::json &geojson) {
+        // preconditions
+        std::vector<::GeoJsonPoint> points;
+
+        if (!geojson["type"].is_string() ||
+            geojson["type"] != "FeatureCollection" ||
+            !geojson["features"].is_array()) {
+            LogError <<= "Geojson is not valid";
+            assert(false);
+            return points;
+        }
+
+        UUIDGenerator generator;
+
+        std::shared_ptr<GeoJson> geoJson = std::make_shared<GeoJson>();
+        for (const auto &feature: geojson["features"]) {
+            if (!feature["geometry"].is_object() ||
+                !feature["geometry"]["type"].is_string() ||
+                !feature["geometry"]["coordinates"].is_array()) {
+                LogError <<= "Geojson feature is not valid";
+                continue;
+            }
+
+            const auto &geometryType = feature["geometry"]["type"];
+            const auto &coordinates = feature["geometry"]["coordinates"];
+            std::shared_ptr<GeoJsonGeometry> geometry;
+            vtzero::GeomType geomType;
+            if (geometryType == "Point") {
+                geometry = parsePoint(coordinates);
+                geomType = vtzero::GeomType::POINT;
+            }
+
+            if(!geometry || geometry->coordinates.size() != 1 || geometry->coordinates.front().size() != 1) {
+                continue;
+            }
+
+            if(!feature["id"].is_string()) {
+                continue;
+            }
+
+            points.emplace_back(geometry->coordinates.front().front(), GeoJsonParser::getFeatureInfo(feature["properties"], feature["id"].get<std::string>()));
+        }
+
+        return points;
+    }
+
 private:
     static FeatureContext::mapType parseProperties(const nlohmann::json &properties) {
         FeatureContext::mapType propertyMap;
         if (properties.is_object()) {
-            for (auto&[key, val]: properties.items()) {
+            for (const auto &[key, val] : properties.items()) {
                 if (val.is_string()){
-                    propertyMap.push_back(std::make_pair(std::string(key), FeatureContext::valueType(val.get<std::string>())));
+                    propertyMap.emplace_back(key, val.get<std::string>());
                 } else if (val.is_number_integer()){
-                    propertyMap.push_back(std::make_pair(std::string(key), FeatureContext::valueType(val.get<int64_t>())));
+                    propertyMap.emplace_back(key, val.get<int64_t>());
                 } else if (val.is_number_float()){
-                    propertyMap.push_back(std::make_pair(std::string(key), FeatureContext::valueType(val.get<float>())));
+                    propertyMap.emplace_back(key, val.get<float>());
                 } else if (val.is_boolean()){
-                    propertyMap.push_back(std::make_pair(std::string(key), FeatureContext::valueType(val.get<bool>())));
+                    propertyMap.emplace_back(key, val.get<bool>());
                 } else if (val.is_array() && !val.empty() && val[0].is_number()){
                     std::vector<float> valueArray;
                     valueArray.reserve(val.size());
-                    for(const auto value: val) {
-                        valueArray.push_back(value.get<float>());
+                    for(const auto &value: val) {
+                        valueArray.emplace_back(value.get<float>());
                     }
-                    propertyMap.push_back(std::make_pair(std::string(key), FeatureContext::valueType(valueArray)));
+                    propertyMap.emplace_back(key, FeatureContext::valueType(valueArray));
                 } else if (val.is_array() && !val.empty() && val[0].is_string()){
                     std::vector<std::string> valueArray;
                     valueArray.reserve(val.size());
-                    for(const auto value: val) {
+                    for(const auto &value: val) {
                         valueArray.push_back(value.get<std::string>());
                     }
-                    propertyMap.push_back(std::make_pair(std::string(key), FeatureContext::valueType(valueArray)));
-
+                    propertyMap.emplace_back(key, valueArray);
                 }
             }
         }
 
         return propertyMap;
+    }
+
+    static VectorLayerFeatureInfo getFeatureInfo(const nlohmann::json &properties, const std::string& identifier) {
+
+        auto info = VectorLayerFeatureInfo(identifier, {});
+        
+        if (properties.is_object()) {
+            for (const auto &[key, val] : properties.items()) {
+                if (val.is_string()){
+                    info.properties.insert({ key, VectorLayerFeatureInfoValue(val.get<std::string>(), std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt) });
+                } else if (val.is_number_integer()) {
+                    info.properties.insert({ key, VectorLayerFeatureInfoValue(std::nullopt, std::nullopt, val.get<int64_t>(), std::nullopt, std::nullopt, std::nullopt, std::nullopt) });
+                } else if (val.is_number_float()){
+                    info.properties.insert({ key, VectorLayerFeatureInfoValue(std::nullopt, val.get<float>(), std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt) });
+                } else if (val.is_boolean()){
+                    info.properties.insert({ key, VectorLayerFeatureInfoValue(std::nullopt, std::nullopt, std::nullopt, val.get<bool>(), std::nullopt, std::nullopt, std::nullopt) });
+                } else if (val.is_array() && !val.empty() && val[0].is_number()){
+                    std::vector<float> valueArray;
+                    valueArray.reserve(val.size());
+                    for(const auto &value: val) {
+                        valueArray.emplace_back(value.get<float>());
+                    }
+
+                    info.properties.insert({ key, VectorLayerFeatureInfoValue(std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, valueArray, std::nullopt) });
+                } else if (val.is_array() && !val.empty() && val[0].is_string()){
+                    std::vector<std::string> valueArray;
+                    valueArray.reserve(val.size());
+                    for(const auto &value: val) {
+                        valueArray.push_back(value.get<std::string>());
+                    }
+
+                    info.properties.insert({ key, VectorLayerFeatureInfoValue(std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, valueArray) });
+                }
+            }
+        }
+
+        return info;
     }
 
     static std::shared_ptr<GeoJsonGeometry> parsePoint(const nlohmann::json &coordinates) {
