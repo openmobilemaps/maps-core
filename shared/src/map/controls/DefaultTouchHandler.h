@@ -63,6 +63,8 @@ private:
 
     void handleMoreThanTwoFingers();
 
+    std::recursive_mutex stateMutex;
+
     void checkState();
 
     int32_t TWO_FINGER_TOUCH_TIMEOUT = 100;
