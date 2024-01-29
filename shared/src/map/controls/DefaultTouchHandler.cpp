@@ -416,38 +416,46 @@ void DefaultTouchHandler::handleMoreThanTwoFingers() {
 
 void DefaultTouchHandler::checkState() {
 
-    std::lock_guard<std::recursive_mutex> lock(stateMutex);
+    bool onClickConfirmed = false;
+    bool onLongPress = false;
 
-    if (state == ONE_FINGER_UP_AFTER_CLICK && stateTime <= DateHelper::currentTimeMillis() - DOUBLE_TAP_TIMEOUT) {
+    { // begin lock stateMutex
+        std::lock_guard<std::recursive_mutex> lock(stateMutex);
+
+        if (state == ONE_FINGER_UP_AFTER_CLICK && stateTime <= DateHelper::currentTimeMillis() - DOUBLE_TAP_TIMEOUT) {
 #ifdef ENABLE_TOUCH_LOGGING
-        LogDebug <<= "TouchHandler: confirmed click detected";
+            LogDebug <<= "TouchHandler: confirmed click detected";
 #endif
-        {
-            std::lock_guard<std::recursive_mutex> lock(listenerMutex);
-            for (auto &[index, listener]: listeners) {
-                if (listener->onClickConfirmed(touchPosition)) {
-                    break;
-                }
+            onClickConfirmed = true;
+            state = IDLE;
+            stateTime = DateHelper::currentTimeMillis();
+        } else if (state == ONE_FINGER_DOWN && stateTime <= DateHelper::currentTimeMillis() - LONG_PRESS_TIMEOUT) {
+#ifdef ENABLE_TOUCH_LOGGING
+            LogDebug <<= "TouchHandler: long press detected";
+#endif
+            onLongPress = true;
+            state = ONE_FINGER_MOVING; // prevents further single click and allows to transition from long press to moving
+            stateTime = DateHelper::currentTimeMillis();
+        } else if (state == TWO_FINGER_DOWN && stateTime <= DateHelper::currentTimeMillis() - LONG_PRESS_TIMEOUT) {
+            state = TWO_FINGER_MOVING;
+            stateTime = DateHelper::currentTimeMillis();
+        }
+    } // end lock stateMutex
+
+    if (onClickConfirmed) {
+        std::lock_guard<std::recursive_mutex> lock(listenerMutex);
+        for (auto &[index, listener]: listeners) {
+            if (listener->onClickConfirmed(touchPosition)) {
+                break;
             }
         }
-        state = IDLE;
-        stateTime = DateHelper::currentTimeMillis();
-    } else if (state == ONE_FINGER_DOWN && stateTime <= DateHelper::currentTimeMillis() - LONG_PRESS_TIMEOUT) {
-#ifdef ENABLE_TOUCH_LOGGING
-        LogDebug <<= "TouchHandler: long press detected";
-#endif
-        {
-            std::lock_guard<std::recursive_mutex> lock(listenerMutex);
-            for (auto &[index, listener]: listeners) {
-                if (listener->onLongPress(touchPosition)) {
-                    break;
-                }
+    }
+    else if (onLongPress) {
+        std::lock_guard<std::recursive_mutex> lock(listenerMutex);
+        for (auto &[index, listener]: listeners) {
+            if (listener->onLongPress(touchPosition)) {
+                break;
             }
         }
-        state = ONE_FINGER_MOVING; // prevents further single click and allows to transition from long press to moving
-        stateTime = DateHelper::currentTimeMillis();
-    } else if (state == TWO_FINGER_DOWN && stateTime <= DateHelper::currentTimeMillis() - LONG_PRESS_TIMEOUT) {
-        state = TWO_FINGER_MOVING;
-        stateTime = DateHelper::currentTimeMillis();
     }
 }
