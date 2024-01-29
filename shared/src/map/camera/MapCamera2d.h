@@ -20,6 +20,7 @@
 #include "MapCoordinateSystem.h"
 #include "SimpleTouchInterface.h"
 #include "Vec2I.h"
+#include "Vec2F.h"
 #include <mutex>
 #include <optional>
 #include <set>
@@ -119,6 +120,8 @@ class MapCamera2d : public MapCamera2dInterface,
     virtual RectCoord getPaddingAdjustedVisibleRect() override;
 
     virtual ::Coord coordFromScreenPosition(const ::Vec2F &posScreen) override;
+
+    Vec2F screenPosFromCoord(const Coord &coord) override;
 
     virtual double mapUnitsFromPixels(double distancePx) override;
 

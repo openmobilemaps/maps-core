@@ -40,6 +40,8 @@ abstract class Tiled2dMapVectorLayerInterface {
 
     abstract fun reloadLocalDataSource(sourceName: String, geoJson: String)
 
+    abstract fun performClick(coord: io.openmobilemaps.mapscore.shared.map.coordinates.Coord)
+
     private class CppProxy : Tiled2dMapVectorLayerInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -126,5 +128,11 @@ abstract class Tiled2dMapVectorLayerInterface {
             native_reloadLocalDataSource(this.nativeRef, sourceName, geoJson)
         }
         private external fun native_reloadLocalDataSource(_nativeRef: Long, sourceName: String, geoJson: String)
+
+        override fun performClick(coord: io.openmobilemaps.mapscore.shared.map.coordinates.Coord) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_performClick(this.nativeRef, coord)
+        }
+        private external fun native_performClick(_nativeRef: Long, coord: io.openmobilemaps.mapscore.shared.map.coordinates.Coord)
     }
 }

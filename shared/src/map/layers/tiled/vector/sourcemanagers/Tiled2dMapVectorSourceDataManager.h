@@ -72,6 +72,8 @@ public:
 
     virtual void clearTouch() = 0;
 
+    virtual bool performClick(const std::unordered_set<std::string> &layers, const Coord &coord) = 0;
+
     virtual void setSprites(std::shared_ptr<SpriteData> spriteData, std::shared_ptr<TextureHolderInterface> spriteTexture) {}
 
 protected:

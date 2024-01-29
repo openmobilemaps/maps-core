@@ -407,27 +407,35 @@ void Tiled2dMapVectorPolygonPatternTile::setupTextureCoordinates() {
 bool Tiled2dMapVectorPolygonPatternTile::onClickConfirmed(const Vec2F &posScreen) {
     auto mapInterface = this->mapInterface.lock();
     auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
-    auto converter = mapInterface ? mapInterface->getCoordinateConverterHelper() : nullptr;
-    auto strongSelectionDelegate = selectionDelegate.lock();
-    if (!camera || !strongSelectionDelegate || !converter) {
+    if (!camera) {
         return false;
     }
     auto point = camera->coordFromScreenPosition(posScreen);
+    return performClick(point);
+}
+
+bool Tiled2dMapVectorPolygonPatternTile::performClick(const Coord &coord) {
+    auto mapInterface = this->mapInterface.lock();
+    auto converter = mapInterface ? mapInterface->getCoordinateConverterHelper() : nullptr;
+    auto strongSelectionDelegate = selectionDelegate.lock();
+    if (!strongSelectionDelegate || !converter) {
+        return false;
+    }
 
     std::vector<VectorLayerFeatureInfo> featureInfos;
     for (auto const &[polygon, featureContext]: hitDetectionPolygons) {
-        if (VectorTileGeometryHandler::isPointInTriangulatedPolygon(point, polygon, converter)) {
+        if (VectorTileGeometryHandler::isPointInTriangulatedPolygon(coord, polygon, converter)) {
             if (multiselect) {
                 featureInfos.push_back(featureContext->getFeatureInfo());
             } else if (strongSelectionDelegate->didSelectFeature(featureContext->getFeatureInfo(), description->identifier,
-                                                                 converter->convert(CoordinateSystemIdentifiers::EPSG4326(),point))) {
+                                                                 converter->convert(CoordinateSystemIdentifiers::EPSG4326(),coord))) {
                 return true;
             }
         }
     }
 
     if (multiselect && !featureInfos.empty()) {
-        return strongSelectionDelegate->didMultiSelectLayerFeatures(featureInfos, description->identifier, converter->convert(CoordinateSystemIdentifiers::EPSG4326(), point));
+        return strongSelectionDelegate->didMultiSelectLayerFeatures(featureInfos, description->identifier, converter->convert(CoordinateSystemIdentifiers::EPSG4326(), coord));
     }
 
     return false;

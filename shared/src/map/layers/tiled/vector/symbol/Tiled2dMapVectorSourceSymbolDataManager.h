@@ -100,6 +100,8 @@ public:
 
     void clearTouch() override;
 
+    bool performClick(const std::unordered_set<std::string> &layers, const Coord &coord) override;
+
     void onSymbolGroupInitialized(bool success, const Tiled2dMapVersionedTileInfo &tileInfo, const std::string &layerIdentifier, const WeakActor<Tiled2dMapVectorSymbolGroup> &symbolGroup);
 
     void setSymbolDelegate(const /*not-null*/ std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> & symbolDelegate);

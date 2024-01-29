@@ -42,6 +42,8 @@ public:
 
     bool onClickConfirmed(const Vec2F &posScreen) override;
 
+    bool performClick(const Coord &coord) override;
+
 private:
 
     struct ObjectDescriptions {

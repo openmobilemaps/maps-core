@@ -150,3 +150,7 @@ void Tiled2dMapVectorRasterTile::setupTile(const Tiled2dMapVectorTileDataRaster 
 std::vector<std::shared_ptr<RenderObjectInterface>> Tiled2dMapVectorRasterTile::generateRenderObjects() {
     return {tileObject->getRenderObject()};
 }
+
+bool Tiled2dMapVectorRasterTile::performClick(const Coord &coord) {
+    return false;
+}

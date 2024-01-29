@@ -84,6 +84,8 @@
 
 - (nonnull MCCoord *)coordFromScreenPosition:(nonnull MCVec2F *)posScreen;
 
+- (nonnull MCVec2F *)screenPosFromCoord:(nonnull MCCoord *)coord;
+
 - (double)mapUnitsFromPixels:(double)distancePx;
 
 - (void)setRotationEnabled:(BOOL)enabled;

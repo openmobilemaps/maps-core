@@ -65,6 +65,8 @@ public:
 
     void setSelectionDelegate(const std::weak_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> &selectionDelegate);
 
+    virtual bool performClick(const Coord &coord) = 0;
+
 protected:
     const std::weak_ptr<MapInterface> mapInterface;
     const Tiled2dMapVersionedTileInfo tileInfo;

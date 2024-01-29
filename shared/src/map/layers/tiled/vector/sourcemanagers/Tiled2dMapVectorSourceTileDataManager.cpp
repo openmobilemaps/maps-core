@@ -417,6 +417,31 @@ Tiled2dMapVectorSourceTileDataManager::onClickConfirmed(const std::unordered_set
     return false;
 }
 
+bool Tiled2dMapVectorSourceTileDataManager::performClick(const std::unordered_set<std::string> &layers, const Coord &coord) {
+    if (interactableLayers.empty()) {
+        return false;
+    }
+    for (const auto &[tileInfo, subTiles]: tiles) {
+        const auto tileState = tileStateMap.find(tileInfo);
+        if (tileState == tileStateMap.end() || tileState->second != TileState::VISIBLE) {
+            continue;
+        }
+        for (auto rIter = subTiles.rbegin(); rIter != subTiles.rend(); rIter++) {
+            if (interactableLayers.count(std::get<1>(*rIter)) == 0 || layers.count(std::get<1>(*rIter)) == 0) {
+                continue;
+            }
+            bool hit = std::get<2>(*rIter).syncAccess([coord](auto tile) {
+                return tile->performClick(coord);
+            });
+            if (hit) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+
 bool Tiled2dMapVectorSourceTileDataManager::onDoubleClick(const std::unordered_set<std::string> &layers, const Vec2F &posScreen) {
     if (interactableLayers.empty()) {
         return false;
