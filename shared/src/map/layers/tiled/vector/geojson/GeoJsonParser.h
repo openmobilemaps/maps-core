@@ -111,27 +111,16 @@ public:
             return points;
         }
 
-        UUIDGenerator generator;
-
-        std::shared_ptr<GeoJson> geoJson = std::make_shared<GeoJson>();
         for (const auto &feature: geojson["features"]) {
-            if (!feature["geometry"].is_object() ||
-                !feature["geometry"]["type"].is_string() ||
-                !feature["geometry"]["coordinates"].is_array()) {
+            const auto &geometry = feature["geometry"];
+
+            if (!geometry.is_object()) { 
                 LogError <<= "Geojson feature is not valid";
                 continue;
             }
 
-            const auto &geometryType = feature["geometry"]["type"];
-            const auto &coordinates = feature["geometry"]["coordinates"];
-            std::shared_ptr<GeoJsonGeometry> geometry;
-            vtzero::GeomType geomType;
-            if (geometryType == "Point") {
-                geometry = parsePoint(coordinates);
-                geomType = vtzero::GeomType::POINT;
-            }
-
-            if(!geometry || geometry->coordinates.size() != 1 || geometry->coordinates.front().size() != 1) {
+            const auto &geometryType = geometry["type"];
+            if (!geometryType.is_string() || geometryType != "Point") {
                 continue;
             }
 
@@ -139,7 +128,13 @@ public:
                 continue;
             }
 
-            points.emplace_back(geometry->coordinates.front().front(), GeoJsonParser::getFeatureInfo(feature["properties"], feature["id"].get<std::string>()));
+            const auto &coordinates = geometry["coordinates"];
+
+            if(!coordinates.is_array()) {
+                continue;
+            }
+
+            points.emplace_back(getPoint(coordinates), GeoJsonParser::getFeatureInfo(feature["properties"], feature["id"].get<std::string>()));
         }
 
         return points;
@@ -220,6 +215,10 @@ private:
         auto geometry = std::make_shared<GeoJsonGeometry>();
         geometry->coordinates.emplace_back(std::vector<Coord>{parseCoordinate(coordinates)});
         return geometry;
+    }
+
+    static Coord getPoint(const nlohmann::json &coordinates) {
+        return parseCoordinate(coordinates);
     }
 
     static std::shared_ptr<GeoJsonGeometry> parseMultiPoint(const nlohmann::json &coordinates) {
