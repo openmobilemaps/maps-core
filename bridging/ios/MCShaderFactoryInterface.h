@@ -28,7 +28,7 @@
 
 - (nullable id<MCColorCircleShaderInterface>)createColorCircleShader;
 
-- (nullable id<MCPolygonGroupShaderInterface>)createPolygonGroupShader;
+- (nullable id<MCPolygonGroupShaderInterface>)createPolygonGroupShader:(BOOL)isStriped;
 
 - (nullable id<MCPolygonPatternGroupShaderInterface>)createPolygonPatternGroupShader:(BOOL)fadeInPattern;
 

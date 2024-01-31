@@ -78,9 +78,9 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (nullable id<MCPolygonGroupShaderInterface>)createPolygonGroupShader {
+- (nullable id<MCPolygonGroupShaderInterface>)createPolygonGroupShader:(BOOL)isStriped {
     try {
-        auto objcpp_result_ = _cppRefHandle.get()->createPolygonGroupShader();
+        auto objcpp_result_ = _cppRefHandle.get()->createPolygonGroupShader(::djinni::Bool::toCpp(isStriped));
         return ::djinni_generated::PolygonGroupShaderInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
@@ -171,10 +171,10 @@ public:
             return ::djinni_generated::ColorCircleShaderInterface::toCpp(objcpp_result_);
         }
     }
-    /*not-null*/ std::shared_ptr<::PolygonGroupShaderInterface> createPolygonGroupShader() override
+    /*not-null*/ std::shared_ptr<::PolygonGroupShaderInterface> createPolygonGroupShader(bool c_isStriped) override
     {
         @autoreleasepool {
-            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createPolygonGroupShader];
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createPolygonGroupShader:(::djinni::Bool::fromCpp(c_isStriped))];
             return ::djinni_generated::PolygonGroupShaderInterface::toCpp(objcpp_result_);
         }
     }

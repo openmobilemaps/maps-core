@@ -18,7 +18,7 @@ abstract class ShaderFactoryInterface {
 
     abstract fun createColorCircleShader(): ColorCircleShaderInterface
 
-    abstract fun createPolygonGroupShader(): PolygonGroupShaderInterface
+    abstract fun createPolygonGroupShader(isStriped: Boolean): PolygonGroupShaderInterface
 
     abstract fun createPolygonPatternGroupShader(fadeInPattern: Boolean): PolygonPatternGroupShaderInterface
 
@@ -77,11 +77,11 @@ abstract class ShaderFactoryInterface {
         }
         private external fun native_createColorCircleShader(_nativeRef: Long): ColorCircleShaderInterface
 
-        override fun createPolygonGroupShader(): PolygonGroupShaderInterface {
+        override fun createPolygonGroupShader(isStriped: Boolean): PolygonGroupShaderInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            return native_createPolygonGroupShader(this.nativeRef)
+            return native_createPolygonGroupShader(this.nativeRef, isStriped)
         }
-        private external fun native_createPolygonGroupShader(_nativeRef: Long): PolygonGroupShaderInterface
+        private external fun native_createPolygonGroupShader(_nativeRef: Long, isStriped: Boolean): PolygonGroupShaderInterface
 
         override fun createPolygonPatternGroupShader(fadeInPattern: Boolean): PolygonPatternGroupShaderInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

@@ -25,7 +25,8 @@ Tiled2dMapVectorPolygonTile::Tiled2dMapVectorPolygonTile(const std::weak_ptr<Map
                                                          const std::shared_ptr<PolygonVectorLayerDescription> &description,
                                                          const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
                                                          const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager)
-        : Tiled2dMapVectorTile(mapInterface, tileInfo, description, layerConfig, tileCallbackInterface, featureStateManager), usedKeys(std::move(description->getUsedKeys())) {
+        : Tiled2dMapVectorTile(mapInterface, tileInfo, description, layerConfig, tileCallbackInterface, featureStateManager),
+          usedKeys(std::move(description->getUsedKeys())), isStriped(description->style.isStripedPotentially()) {
     isStyleZoomDependant = usedKeys.containsUsedKey(Tiled2dMapVectorStyleParser::zoomExpression);
     isStyleStateDependant = usedKeys.isStateDependant();
 }
@@ -106,8 +107,13 @@ void Tiled2dMapVectorPolygonTile::update() {
             shaderStyles.push_back(color.b);
             shaderStyles.push_back(color.a);
             shaderStyles.push_back(opacity * alpha);
+            if (isStriped) {
+                const auto stripeWidth = inZoomRange ? polygonDescription->style.getStripeWidth(ec) : std::vector<float>{0.0, 0.0};
+                shaderStyles.push_back(stripeWidth[0]);
+                shaderStyles.push_back(stripeWidth[1]);
+            }
         }
-        auto s = SharedBytes((int64_t)shaderStyles.data(), (int32_t)featureGroups.at(styleGroupId).size(), 5 * (int32_t)sizeof(float));
+        auto s = SharedBytes((int64_t)shaderStyles.data(), (int32_t)featureGroups.at(styleGroupId).size(), (isStriped ? 7 : 5) * (int32_t)sizeof(float));
         shaders[styleGroupId]->setStyles(s);
     }
 }
@@ -180,7 +186,7 @@ void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDa
                         } else {
                             styleGroupIndex = (int) featureGroups.size();
                             styleIndex = 0;
-                            auto shader = shaderFactory->createPolygonGroupShader();
+                            auto shader = shaderFactory->createPolygonGroupShader(isStriped);
                             auto polygonDescription = std::static_pointer_cast<PolygonVectorLayerDescription>(description);
                             shader->asShaderProgramInterface()->setBlendMode(polygonDescription->style.getBlendMode(EvaluationContext(0.0, dpFactor, std::make_shared<FeatureContext>(), featureStateManager)));
                             shaders.push_back(shader);
