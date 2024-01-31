@@ -58,7 +58,7 @@ void Tiled2dMapVectorBackgroundSubLayer::onAdded(const std::shared_ptr<MapInterf
         }
     }
 
-    auto shader = mapInterface->getShaderFactory()->createPolygonGroupShader();
+    auto shader = mapInterface->getShaderFactory()->createPolygonGroupShader(false);
     auto object = mapInterface->getGraphicsObjectFactory()->createPolygonGroup(shader->asShaderProgramInterface());
     object->asGraphicsObject()->setDebugLabel(description->identifier);
     polygonObject = std::make_shared<PolygonGroup2dLayerObject>(mapInterface->getCoordinateConverterHelper(), object, shader);

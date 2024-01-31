@@ -70,6 +70,7 @@ void PolygonGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterfa
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     mvpMatrixHandle = glGetUniformLocation(program, "uMVPMatrix");
+    scaleFactorHandle = glGetUniformLocation(program, "scaleFactors");
 
     ready = true;
     glDataBuffersGenerated = true;
@@ -119,6 +120,10 @@ void PolygonGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterf
     glUseProgram(program);
 
     glUniformMatrix4fv(mvpMatrixHandle, 1, false, (GLfloat *)mvpMatrix);
+    if (scaleFactorHandle >= 0) {
+        glUniform2f(scaleFactorHandle, screenPixelAsRealMeterFactor,
+                    pow(2.0, ceil(log2(screenPixelAsRealMeterFactor))));
+    }
 
     shaderProgram->preRender(context);
 
