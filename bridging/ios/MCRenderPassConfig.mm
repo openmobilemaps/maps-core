@@ -7,22 +7,26 @@
 @implementation MCRenderPassConfig
 
 - (nonnull instancetype)initWithRenderPassIndex:(int32_t)renderPassIndex
+                                   isPassMasked:(BOOL)isPassMasked
 {
     if (self = [super init]) {
         _renderPassIndex = renderPassIndex;
+        _isPassMasked = isPassMasked;
     }
     return self;
 }
 
 + (nonnull instancetype)renderPassConfigWithRenderPassIndex:(int32_t)renderPassIndex
+                                               isPassMasked:(BOOL)isPassMasked
 {
-    return [[self alloc] initWithRenderPassIndex:renderPassIndex];
+    return [[self alloc] initWithRenderPassIndex:renderPassIndex
+                                    isPassMasked:isPassMasked];
 }
 
 #ifndef DJINNI_DISABLE_DESCRIPTION_METHODS
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@ %p renderPassIndex:%@>", self.class, (void *)self, @(self.renderPassIndex)];
+    return [NSString stringWithFormat:@"<%@ %p renderPassIndex:%@ isPassMasked:%@>", self.class, (void *)self, @(self.renderPassIndex), @(self.isPassMasked)];
 }
 
 #endif

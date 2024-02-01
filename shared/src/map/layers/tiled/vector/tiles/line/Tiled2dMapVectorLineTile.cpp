@@ -229,8 +229,8 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
 
     if (!tileData->empty()) {
         std::unordered_map<int, int> subGroupCoordCount;
-        std::unordered_map<int, std::vector<std::vector<std::tuple<std::vector<Coord>, int>>>> styleGroupNewLinesMap;
-        std::unordered_map<int, std::vector<std::tuple<std::vector<Coord>, int>>> styleGroupLineSubGroupMap;
+        std::vector<std::vector<std::vector<std::tuple<std::vector<Coord>, int>>>> styleGroupNewLinesVector;
+        std::vector<std::vector<std::tuple<std::vector<Coord>, int>>> styleGroupLineSubGroupVector;
 
         bool anyInteractable = false;
 
@@ -267,6 +267,8 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
                             shader->asShaderProgramInterface()->setBlendMode(lineDescription->style.getBlendMode(EvaluationContext(0.0, dpFactor, std::make_shared<FeatureContext>(), featureStateManager)));
                             shaders.push_back(shader);
                             reusableLineStyles.push_back({ reusableStyle });
+                            styleGroupLineSubGroupVector.push_back(std::vector<std::tuple<std::vector<Coord>, int>>());
+                            styleGroupNewLinesVector.push_back({});
                             featureGroups.push_back(std::vector<std::tuple<size_t, std::shared_ptr<FeatureContext>>>{{hash, featureContext}});
                         }
                         styleHashToGroupMap.insert({hash, {styleGroupIndex, styleIndex}});
@@ -286,13 +288,13 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
                     int numCoords = (int)lineCoordinates.size();
                     int coordCount = subGroupCoordCount[styleGroupIndex];
                     if (coordCount + numCoords > maxNumLinePoints
-                        && !styleGroupLineSubGroupMap[styleGroupIndex].empty()) {
-                        styleGroupNewLinesMap[styleGroupIndex].push_back(styleGroupLineSubGroupMap[styleGroupIndex]);
-                        styleGroupLineSubGroupMap[styleGroupIndex] = std::vector<std::tuple<std::vector<Coord>, int>>();
+                        && !styleGroupLineSubGroupVector[styleGroupIndex].empty()) {
+                        styleGroupNewLinesVector[styleGroupIndex].push_back(styleGroupLineSubGroupVector[styleGroupIndex]);
+                        styleGroupLineSubGroupVector.push_back(std::vector<std::tuple<std::vector<Coord>, int>>());
                         subGroupCoordCount[styleGroupIndex] = 0;
                     }
 
-                    styleGroupLineSubGroupMap[styleGroupIndex].push_back({lineCoordinates, std::min(maxStylesPerGroup - 1, styleIndex)});
+                    styleGroupLineSubGroupVector[styleGroupIndex].push_back({lineCoordinates, std::min(maxStylesPerGroup - 1, styleIndex)});
                     subGroupCoordCount[styleGroupIndex] = (int)subGroupCoordCount[styleGroupIndex] + numCoords;
                     lineCoordinatesVector.push_back(lineCoordinates);
                 }
@@ -304,15 +306,18 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
             }
         }
 
-        for (const auto &[groupIndex, lineSubGroup] : styleGroupLineSubGroupMap) {
-            if (!lineSubGroup.empty() && subGroupCoordCount[groupIndex] > 0) styleGroupNewLinesMap[groupIndex].push_back(lineSubGroup);
+        for (int styleGroupIndex = 0; styleGroupIndex < styleGroupLineSubGroupVector.size(); styleGroupIndex++) {
+            const auto &lineSubGroup = styleGroupLineSubGroupVector[styleGroupIndex];
+            if (!lineSubGroup.empty() && subGroupCoordCount[styleGroupIndex] > 0) {
+                styleGroupNewLinesVector[styleGroupIndex].push_back(lineSubGroup);
+            }
         }
 
         if (anyInteractable) {
             tileCallbackInterface.message(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsInteractable, description->identifier);
         }
 
-        addLines(styleGroupNewLinesMap);
+        addLines(styleGroupNewLinesVector);
     } else {
         auto selfActor = WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this());
         tileCallbackInterface.message(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsReady, tileInfo, description->identifier, selfActor);
@@ -320,8 +325,8 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
 }
 
 
-void Tiled2dMapVectorLineTile::addLines(const std::unordered_map<int, std::vector<std::vector<std::tuple<std::vector<Coord>, int>>>> &styleIdLinesMap) {
-    if (styleIdLinesMap.empty()) {
+void Tiled2dMapVectorLineTile::addLines(const std::vector<std::vector<std::vector<std::tuple<std::vector<Coord>, int>>>> &styleIdLinesVector) {
+    if (styleIdLinesVector.empty()) {
         auto selfActor = WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this());
         tileCallbackInterface.message(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsReady, tileInfo, description->identifier, selfActor);
         return;
@@ -337,8 +342,8 @@ void Tiled2dMapVectorLineTile::addLines(const std::unordered_map<int, std::vecto
     std::vector<std::shared_ptr<LineGroup2dLayerObject>> lineGroupObjects;
     std::vector<std::shared_ptr<GraphicsObjectInterface>> newGraphicObjects;
 
-    for (const auto &[styleGroupIndex, styleLines]: styleIdLinesMap) {
-        for (const auto &lineSubGroup: styleLines) {
+    for (int styleGroupIndex = 0; styleGroupIndex < styleIdLinesVector.size(); styleGroupIndex++) {
+        for (const auto &lineSubGroup: styleIdLinesVector[styleGroupIndex]) {
             const auto &shader = shaders.at(styleGroupIndex);
             auto lineGroupGraphicsObject = objectFactory->createLineGroup(shader->asShaderProgramInterface());
 

@@ -20,6 +20,8 @@ final class PolygonGroup2d: BaseGraphicsObject {
     private var indicesCount: Int = 0
 
     private var stencilState: MTLDepthStencilState?
+    private var renderPassStencilState: MTLDepthStencilState?
+
 
     init(shader: MCShaderProgramInterface, metalContext: MetalContext) {
         guard let shader = shader as? PolygonGroupShader else {
@@ -31,25 +33,9 @@ final class PolygonGroup2d: BaseGraphicsObject {
                    label: "PolygonGroup2d")
     }
 
-    private func setupStencilStates() {
-        let ss2 = MTLStencilDescriptor()
-        ss2.stencilCompareFunction = .equal
-        ss2.stencilFailureOperation = .zero
-        ss2.depthFailureOperation = .keep
-        ss2.depthStencilPassOperation = .keep
-        ss2.readMask = 0b1111_1111
-        ss2.writeMask = 0b0000_0000
-
-        let s2 = MTLDepthStencilDescriptor()
-        s2.frontFaceStencil = ss2
-        s2.backFaceStencil = ss2
-
-        stencilState = device.makeDepthStencilState(descriptor: s2)
-    }
-
     override func render(encoder: MTLRenderCommandEncoder,
                          context: RenderingContext,
-                         renderPass _: MCRenderPassConfig,
+                         renderPass pass: MCRenderPassConfig,
                          mvpMatrix: Int64,
                          isMasked: Bool,
                          screenPixelAsRealMeterFactor _: Double) {
@@ -70,9 +56,18 @@ final class PolygonGroup2d: BaseGraphicsObject {
 
         if isMasked {
             if stencilState == nil {
-                setupStencilStates()
+                stencilState = self.maskStencilState()
             }
             encoder.setDepthStencilState(stencilState)
+            encoder.setStencilReferenceValue(0b1100_0000)
+        }
+
+        if pass.isPassMasked {
+            if renderPassStencilState == nil {
+                renderPassStencilState = self.renderPassMaskStencilState()
+            }
+
+            encoder.setDepthStencilState(renderPassStencilState)
             encoder.setStencilReferenceValue(0b1100_0000)
         }
 

@@ -6,9 +6,13 @@
 @interface MCRenderPassConfig : NSObject
 - (nonnull instancetype)init NS_UNAVAILABLE;
 + (nonnull instancetype)new NS_UNAVAILABLE;
-- (nonnull instancetype)initWithRenderPassIndex:(int32_t)renderPassIndex NS_DESIGNATED_INITIALIZER;
-+ (nonnull instancetype)renderPassConfigWithRenderPassIndex:(int32_t)renderPassIndex;
+- (nonnull instancetype)initWithRenderPassIndex:(int32_t)renderPassIndex
+                                   isPassMasked:(BOOL)isPassMasked NS_DESIGNATED_INITIALIZER;
++ (nonnull instancetype)renderPassConfigWithRenderPassIndex:(int32_t)renderPassIndex
+                                               isPassMasked:(BOOL)isPassMasked;
 
 @property (nonatomic, readonly) int32_t renderPassIndex;
+
+@property (nonatomic, readonly) BOOL isPassMasked;
 
 @end

@@ -105,6 +105,7 @@ public:
         std::vector<std::shared_ptr<::RenderObjectInterface>> renderObjects;
         std::shared_ptr<MaskingObjectInterface> maskingObject;
         bool isModifyingMask;
+        bool selfMasked;
         int32_t renderPassIndex;
     };
 

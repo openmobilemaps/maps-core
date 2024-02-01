@@ -98,9 +98,21 @@ void PolygonGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterf
     if (!ready)
         return;
 
+    GLuint stencilMask = 0;
+    GLuint validTarget = 0;
+    GLenum zpass = GL_KEEP;
     if (isMasked) {
-        glStencilFunc(GL_EQUAL, isMaskInversed ? 0 : 128, 128);
-        glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+        stencilMask += 128;
+        validTarget = isMaskInversed ? 0 : 128;
+    }
+    if (renderPass.isPassMasked) {
+        stencilMask += 127;
+        zpass = GL_INCR;
+    }
+
+    if (stencilMask != 0) {
+        glStencilFunc(GL_EQUAL, validTarget, stencilMask);
+        glStencilOp(GL_KEEP, GL_KEEP, zpass);
     }
 
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);

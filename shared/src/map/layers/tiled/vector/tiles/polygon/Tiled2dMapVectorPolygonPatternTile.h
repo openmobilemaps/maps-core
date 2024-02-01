@@ -53,7 +53,7 @@ private:
         std::vector<uint16_t> indices;
     };
 
-    void addPolygons(const std::unordered_map<int, std::vector<ObjectDescriptions>> &styleGroupNewPolygonsMap);
+    void addPolygons(const std::vector<std::vector<ObjectDescriptions>> &styleGroupNewPolygonsVector);
 
     void setupPolygons(const std::vector<std::shared_ptr<GraphicsObjectInterface>> &newPolygonObjects);
 
@@ -67,6 +67,7 @@ private:
 
     std::vector<std::shared_ptr<PolygonPatternGroupShaderInterface>> shaders;
     std::unordered_map<int, std::vector<std::shared_ptr<PolygonPatternGroup2dLayerObject>>> styleGroupPolygonsMap;
+    std::vector<std::shared_ptr<PolygonPatternGroup2dLayerObject>> polygonRenderOrder;
     std::vector<std::vector<std::tuple<size_t, std::shared_ptr<FeatureContext>>>> featureGroups;
     std::unordered_map<size_t, std::pair<int, int>> styleHashToGroupMap;
     UsedKeysCollection usedKeys;

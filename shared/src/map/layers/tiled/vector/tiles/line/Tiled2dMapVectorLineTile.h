@@ -43,7 +43,7 @@ public:
     bool onClickConfirmed(const Vec2F &posScreen) override;
 
 private:
-    void addLines(const std::unordered_map<int, std::vector<std::vector<std::tuple<std::vector<Coord>, int>>>> &styleIdLinesMap);
+    void addLines(const std::vector<std::vector<std::vector<std::tuple<std::vector<Coord>, int>>>> &styleIdLinesVector);
 
     void setupLines(const std::vector<std::shared_ptr<GraphicsObjectInterface>> &newLineGraphicsObjects);
 

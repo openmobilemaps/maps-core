@@ -8,9 +8,11 @@
 
 struct RenderPassConfig final {
     int32_t renderPassIndex;
+    bool isPassMasked;
 
-    //NOLINTNEXTLINE(google-explicit-constructor)
-    RenderPassConfig(int32_t renderPassIndex_)
+    RenderPassConfig(int32_t renderPassIndex_,
+                     bool isPassMasked_)
     : renderPassIndex(std::move(renderPassIndex_))
+    , isPassMasked(std::move(isPassMasked_))
     {}
 };

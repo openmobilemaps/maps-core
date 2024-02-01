@@ -109,11 +109,7 @@ void LineGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface
 
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
     if (isMasked) {
-        if (isMaskInversed) {
-            glStencilFunc(GL_EQUAL, 0, 255);
-        } else {
-            glStencilFunc(GL_EQUAL, 128, 255);
-        }
+        glStencilFunc(GL_EQUAL, isMaskInversed ? 0 : 128, 255);
     } else {
         glEnable(GL_STENCIL_TEST);
         glStencilMask(0xFF);

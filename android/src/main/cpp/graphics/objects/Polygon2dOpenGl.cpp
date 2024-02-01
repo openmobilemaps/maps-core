@@ -104,14 +104,23 @@ void Polygon2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> 
 
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
 
+    GLuint stencilMask = 0;
+    GLuint validTarget = 0;
+    GLenum zpass = GL_KEEP;
     if (isMasked) {
-        if (isMaskInversed) {
-            glStencilFunc(GL_EQUAL, 0, 255);
-        } else {
-            glStencilFunc(GL_EQUAL, 128, 255);
-        }
+        stencilMask += 128;
+        validTarget = isMaskInversed ? 0 : 128;
     }
-    glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
+    if (renderPass.isPassMasked) {
+        stencilMask += 127;
+        zpass = GL_INCR;
+    }
+
+    if (stencilMask != 0) {
+        glStencilFunc(GL_EQUAL, validTarget, stencilMask);
+        glStencilOp(GL_KEEP, GL_KEEP, zpass);
+    }
+
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
     drawPolygon(openGlContext, program, mvpMatrix);
