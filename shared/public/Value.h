@@ -122,6 +122,18 @@ public:
         initialize();
     }
 
+    FeatureContext(vtzero::GeomType geomType,
+                   mapType propertiesMap,
+                   const std::string &stringIdentifier):
+    propertiesMap(std::move(propertiesMap)),
+    geomType(geomType) {
+        size_t hash = 0;
+        std::hash_combine(hash, std::hash<std::string>{}(stringIdentifier));
+        identifier = hash;
+
+        initialize();
+    }
+
     FeatureContext(vtzero::feature const &feature) {
         geomType = feature.geometry_type();
 

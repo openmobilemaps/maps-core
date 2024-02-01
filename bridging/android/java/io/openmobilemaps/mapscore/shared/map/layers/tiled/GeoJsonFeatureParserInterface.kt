@@ -15,6 +15,8 @@ abstract class GeoJsonFeatureParserInterface {
 
     abstract fun parse(geoJson: String): ArrayList<io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.VectorLayerFeatureInfo>?
 
+    abstract fun parseWithPointGeometry(geoJson: String): ArrayList<GeoJsonPoint>?
+
     private class CppProxy : GeoJsonFeatureParserInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -35,5 +37,11 @@ abstract class GeoJsonFeatureParserInterface {
             return native_parse(this.nativeRef, geoJson)
         }
         private external fun native_parse(_nativeRef: Long, geoJson: String): ArrayList<io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.VectorLayerFeatureInfo>?
+
+        override fun parseWithPointGeometry(geoJson: String): ArrayList<GeoJsonPoint>? {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_parseWithPointGeometry(this.nativeRef, geoJson)
+        }
+        private external fun native_parseWithPointGeometry(_nativeRef: Long, geoJson: String): ArrayList<GeoJsonPoint>?
     }
 }

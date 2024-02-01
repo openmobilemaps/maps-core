@@ -18,4 +18,6 @@ public:
     GeoJsonFeatureParser();
     
     std::optional<std::vector<::VectorLayerFeatureInfo>> parse(const std::string & geoJson) override;
+
+    std::optional<std::vector<GeoJsonPoint>> parseWithPointGeometry(const std::string & geoJson) override;
 };
