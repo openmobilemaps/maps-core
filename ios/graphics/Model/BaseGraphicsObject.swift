@@ -78,4 +78,38 @@ extension BaseGraphicsObject: MCGraphicsObjectInterface {
                isMasked: isMasked,
                screenPixelAsRealMeterFactor: screenPixelAsRealMeterFactor)
     }
+
+    // MARK: - Stencil
+
+    func maskStencilState(readMask: UInt32 = 0b1111_1111, writeMask: UInt32 = 0b0000_0000) -> MTLDepthStencilState? {
+        let s = MTLStencilDescriptor()
+        s.stencilCompareFunction = .equal
+        s.stencilFailureOperation = .zero
+        s.depthFailureOperation = .keep
+        s.depthStencilPassOperation = .keep
+        s.readMask = readMask
+        s.writeMask = writeMask
+
+        let desc = MTLDepthStencilDescriptor()
+        desc.frontFaceStencil = s
+        desc.backFaceStencil = s
+
+        return device.makeDepthStencilState(descriptor: desc)
+    }
+
+    func renderPassMaskStencilState() -> MTLDepthStencilState? {
+        let s = MTLStencilDescriptor()
+        s.stencilCompareFunction = .equal
+        s.stencilFailureOperation = .keep
+        s.depthFailureOperation = .keep
+        s.depthStencilPassOperation = .incrementWrap
+        s.readMask = 0b1111_1111
+        s.writeMask = 0b0000_0001
+
+        let desc = MTLDepthStencilDescriptor()
+        desc.frontFaceStencil = s
+        desc.backFaceStencil = s
+
+        return device.makeDepthStencilState(descriptor: desc)
+    }
 }

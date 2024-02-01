@@ -85,7 +85,7 @@ public class RenderingContext: NSObject {
         guard let encoder else { return }
         stencilClearQuad.render(encoder: encoder,
                                 context: self,
-                                renderPass: .init(renderPass: 0),
+                                renderPass: .init(renderPass: 0, isPassMasked: false),
                                 mvpMatrix: 0,
                                 isMasked: false,
                                 screenPixelAsRealMeterFactor: 1)
