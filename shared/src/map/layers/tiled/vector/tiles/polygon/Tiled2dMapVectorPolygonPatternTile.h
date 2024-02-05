@@ -47,6 +47,8 @@ public:
 
     bool onClickConfirmed(const Vec2F &posScreen) override;
 
+    bool performClick(const Coord &coord) override;
+
 private:
     struct ObjectDescriptions {
         std::vector<float> vertices;
@@ -75,6 +77,8 @@ private:
     bool isStyleStateDependant = true;
     std::optional<double> lastZoom = std::nullopt;
     std::optional<bool> lastInZoomRange = std::nullopt;
+
+    bool fadeInPattern = false;
 
     std::shared_ptr<SpriteData> spriteData;
     std::shared_ptr<TextureHolderInterface> spriteTexture;

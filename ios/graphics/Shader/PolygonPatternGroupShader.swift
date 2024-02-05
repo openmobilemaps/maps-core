@@ -14,13 +14,25 @@ import Metal
 import UIKit
 
 class PolygonPatternGroupShader: BaseShader {
-    override init() {
+    // MARK: - Variables
+
+    let fadeInPattern : Bool
+
+    // MARK: - Init
+
+    init(fadeInPattern: Bool) {
+        self.fadeInPattern = fadeInPattern
+        super.init()
     }
 
+    // MARK: - Setup
+
     override func setupProgram(_: MCRenderingContextInterface?) {
-        if pipeline == nil {
-            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: .polygonPatternGroupShader, blendMode: blendMode).json)
-        }
+        guard pipeline == nil else { return }
+
+        let t : PipelineType = fadeInPattern ? .polygonPatternFadeInGroupShader : .polygonPatternGroupShader
+        let pl = Pipeline(type: t, blendMode: blendMode)
+        pipeline = MetalContext.current.pipelineLibrary.value(pl.json)
     }
 
     override func preRender(encoder: MTLRenderCommandEncoder, context: RenderingContext) {

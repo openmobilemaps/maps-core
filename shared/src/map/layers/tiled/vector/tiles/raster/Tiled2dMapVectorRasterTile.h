@@ -42,6 +42,8 @@ public:
 
     void setupTile(const Tiled2dMapVectorTileDataRaster tileData);
 
+    bool performClick(const Coord &coord) override;
+
 private:
     std::shared_ptr<Textured2dLayerObject> tileObject;
     std::shared_ptr<TextureHolderInterface> tileData;

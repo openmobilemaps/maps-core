@@ -25,7 +25,7 @@ shader_factory_interface = interface +c +j +o {
     create_color_shader() : color_shader_interface;
     create_color_circle_shader() : color_circle_shader_interface;
     create_polygon_group_shader(): polygon_group_shader_interface;
-    create_polygon_pattern_group_shader(): polygon_pattern_group_shader_interface;
+    create_polygon_pattern_group_shader(fade_in_pattern: bool): polygon_pattern_group_shader_interface;
 
     create_text_shader() : text_shader_interface;
     create_text_instanced_shader(): text_instanced_shader_interface;

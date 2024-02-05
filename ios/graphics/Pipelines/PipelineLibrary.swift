@@ -121,6 +121,7 @@ public enum PipelineType: String, CaseIterable, Codable {
     case lineGroupShader
     case polygonGroupShader
     case polygonPatternGroupShader
+    case polygonPatternFadeInGroupShader
     case colorShader
     case roundColorShader
     case clearStencilShader
@@ -137,6 +138,7 @@ public enum PipelineType: String, CaseIterable, Codable {
             case .lineGroupShader: return "Line Group shader"
             case .polygonGroupShader: return "Polygon Group shader"
             case .polygonPatternGroupShader: return "Polygon Group Pattern shader"
+            case .polygonPatternFadeInGroupShader: return "Polygon Group Pattern (fade in) shader"
             case .colorShader: return "Color shader"
             case .roundColorShader: return "Round color shader"
             case .clearStencilShader: return "Clear stencil shader"
@@ -155,6 +157,7 @@ public enum PipelineType: String, CaseIterable, Codable {
             case .lineGroupShader: return "lineGroupVertexShader"
             case .polygonGroupShader: return "polygonGroupVertexShader"
             case .polygonPatternGroupShader: return "polygonPatternGroupVertexShader"
+            case .polygonPatternFadeInGroupShader: return "polygonPatternGroupVertexShader"
             case .colorShader: return "colorVertexShader"
             case .roundColorShader: return "colorVertexShader"
             case .clearStencilShader: return "stencilClearVertexShader"
@@ -173,6 +176,7 @@ public enum PipelineType: String, CaseIterable, Codable {
             case .lineGroupShader: return "lineGroupFragmentShader"
             case .polygonGroupShader: return "polygonGroupFragmentShader"
             case .polygonPatternGroupShader: return "polygonPatternGroupFragmentShader"
+            case .polygonPatternFadeInGroupShader: return "polygonPatternGroupFadeInFragmentShader"
             case .colorShader: return "colorFragmentShader"
             case .roundColorShader: return "roundColorFragmentShader"
             case .clearStencilShader: return "stencilClearFragmentShader"
@@ -186,9 +190,12 @@ public enum PipelineType: String, CaseIterable, Codable {
 
     var vertexDescriptor: MTLVertexDescriptor {
         switch self {
-            case .lineGroupShader: return LineVertex.descriptor
-            case .polygonGroupShader, .polygonPatternGroupShader: return PolygonVertex.descriptor
-            default: return Vertex.descriptor
+            case .lineGroupShader:
+                return LineVertex.descriptor
+            case .polygonGroupShader, .polygonPatternGroupShader, .polygonPatternFadeInGroupShader:
+                return PolygonVertex.descriptor
+            default: 
+                return Vertex.descriptor
         }
     }
 }

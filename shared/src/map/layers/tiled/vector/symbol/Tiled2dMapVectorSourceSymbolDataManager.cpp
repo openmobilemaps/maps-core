@@ -745,13 +745,26 @@ bool Tiled2dMapVectorSourceSymbolDataManager::onClickConfirmed(const std::unorde
     auto mapInterface = lockSelfPtr ? lockSelfPtr->mapInterface.lock() : nullptr;
     auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
     auto conversionHelper = mapInterface ? mapInterface->getCoordinateConverterHelper() : nullptr;
+    if (!camera || !conversionHelper) {
+        return false;
+    }
+
+    Coord clickCoords = camera->coordFromScreenPosition(posScreen);
+
+    return performClick(layers, clickCoords);
+}
+
+bool Tiled2dMapVectorSourceSymbolDataManager::performClick(const std::unordered_set<std::string> &layers, const Coord &coord) {
+    auto lockSelfPtr = shared_from_this();
+    auto mapInterface = lockSelfPtr ? lockSelfPtr->mapInterface.lock() : nullptr;
+    auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
+    auto conversionHelper = mapInterface ? mapInterface->getCoordinateConverterHelper() : nullptr;
     auto strongSelectionDelegate = selectionDelegate.lock();
     if (!camera || !conversionHelper || !strongSelectionDelegate) {
         return false;
     }
 
-    Coord clickCoords = camera->coordFromScreenPosition(posScreen);
-    Coord clickCoordsRenderCoord = conversionHelper->convertToRenderSystem(clickCoords);
+    Coord clickCoordsRenderCoord = conversionHelper->convertToRenderSystem(coord);
 
     double clickPadding = camera->mapUnitsFromPixels(16);
     CircleD clickHitCircle(clickCoordsRenderCoord.x, clickCoordsRenderCoord.y, clickPadding);
@@ -762,7 +775,7 @@ bool Tiled2dMapVectorSourceSymbolDataManager::onClickConfirmed(const std::unorde
             continue;
         }
         for (const auto &[layerIdentifier, symbolGroups] : symbolGroupsMap) {
-            if (interactableLayers.count(layerIdentifier) == 0) {
+            if (interactableLayers.find(layerIdentifier) == interactableLayers.end() || layers.find(layerIdentifier) == layers.end()) {
                 continue;
             }
             for (const auto &symbolGroup : std::get<1>(symbolGroups)) {
@@ -778,7 +791,6 @@ bool Tiled2dMapVectorSourceSymbolDataManager::onClickConfirmed(const std::unorde
         }
     }
     return false;
-
 }
 
 bool Tiled2dMapVectorSourceSymbolDataManager::onDoubleClick(const std::unordered_set<std::string> &layers, const Vec2F &posScreen) {

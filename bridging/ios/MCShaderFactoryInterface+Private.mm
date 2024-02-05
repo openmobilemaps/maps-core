@@ -85,9 +85,9 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (nullable id<MCPolygonPatternGroupShaderInterface>)createPolygonPatternGroupShader {
+- (nullable id<MCPolygonPatternGroupShaderInterface>)createPolygonPatternGroupShader:(BOOL)fadeInPattern {
     try {
-        auto objcpp_result_ = _cppRefHandle.get()->createPolygonPatternGroupShader();
+        auto objcpp_result_ = _cppRefHandle.get()->createPolygonPatternGroupShader(::djinni::Bool::toCpp(fadeInPattern));
         return ::djinni_generated::PolygonPatternGroupShaderInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
@@ -178,10 +178,10 @@ public:
             return ::djinni_generated::PolygonGroupShaderInterface::toCpp(objcpp_result_);
         }
     }
-    /*not-null*/ std::shared_ptr<::PolygonPatternGroupShaderInterface> createPolygonPatternGroupShader() override
+    /*not-null*/ std::shared_ptr<::PolygonPatternGroupShaderInterface> createPolygonPatternGroupShader(bool c_fadeInPattern) override
     {
         @autoreleasepool {
-            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createPolygonPatternGroupShader];
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createPolygonPatternGroupShader:(::djinni::Bool::fromCpp(c_fadeInPattern))];
             return ::djinni_generated::PolygonPatternGroupShaderInterface::toCpp(objcpp_result_);
         }
     }

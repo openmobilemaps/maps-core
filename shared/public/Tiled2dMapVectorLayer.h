@@ -155,6 +155,8 @@ public:
 
     std::optional<int32_t> getMaxZoomLevelIdentifier() override;
 
+    void performClick(const Coord &coord) override;
+
     // Touch Interface
     bool onTouchDown(const Vec2F &posScreen) override;
 

@@ -156,6 +156,7 @@ map_camera_2d_interface = interface +c {
     remove_listener(listener: map_camera_2d_listener_interface);
 
     coord_from_screen_position(pos_screen: vec_2_f): coord;
+    screen_pos_from_coord(coord: coord): vec_2_f;
     map_units_from_pixels(distancePx: f64): f64;
 
     set_rotation_enabled(enabled: bool);

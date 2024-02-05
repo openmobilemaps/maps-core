@@ -39,7 +39,7 @@ private:
         /*not-null*/ std::shared_ptr<::ColorShaderInterface> createColorShader() override;
         /*not-null*/ std::shared_ptr<::ColorCircleShaderInterface> createColorCircleShader() override;
         /*not-null*/ std::shared_ptr<::PolygonGroupShaderInterface> createPolygonGroupShader() override;
-        /*not-null*/ std::shared_ptr<::PolygonPatternGroupShaderInterface> createPolygonPatternGroupShader() override;
+        /*not-null*/ std::shared_ptr<::PolygonPatternGroupShaderInterface> createPolygonPatternGroupShader(bool fadeInPattern) override;
         /*not-null*/ std::shared_ptr<::TextShaderInterface> createTextShader() override;
         /*not-null*/ std::shared_ptr<::TextInstancedShaderInterface> createTextInstancedShader() override;
         /*not-null*/ std::shared_ptr<::RasterShaderInterface> createRasterShader() override;
@@ -57,7 +57,7 @@ private:
     const jmethodID method_createColorShader { ::djinni::jniGetMethodID(clazz.get(), "createColorShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/ColorShaderInterface;") };
     const jmethodID method_createColorCircleShader { ::djinni::jniGetMethodID(clazz.get(), "createColorCircleShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/ColorCircleShaderInterface;") };
     const jmethodID method_createPolygonGroupShader { ::djinni::jniGetMethodID(clazz.get(), "createPolygonGroupShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/PolygonGroupShaderInterface;") };
-    const jmethodID method_createPolygonPatternGroupShader { ::djinni::jniGetMethodID(clazz.get(), "createPolygonPatternGroupShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/PolygonPatternGroupShaderInterface;") };
+    const jmethodID method_createPolygonPatternGroupShader { ::djinni::jniGetMethodID(clazz.get(), "createPolygonPatternGroupShader", "(Z)Lio/openmobilemaps/mapscore/shared/graphics/shader/PolygonPatternGroupShaderInterface;") };
     const jmethodID method_createTextShader { ::djinni::jniGetMethodID(clazz.get(), "createTextShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/TextShaderInterface;") };
     const jmethodID method_createTextInstancedShader { ::djinni::jniGetMethodID(clazz.get(), "createTextInstancedShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/TextInstancedShaderInterface;") };
     const jmethodID method_createRasterShader { ::djinni::jniGetMethodID(clazz.get(), "createRasterShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/RasterShaderInterface;") };

@@ -20,8 +20,8 @@ class ShaderFactory: MCShaderFactoryInterface {
         PolygonGroupShader()
     }
 
-    func createPolygonPatternGroupShader() -> MCPolygonPatternGroupShaderInterface? {
-        PolygonPatternGroupShader()
+    func createPolygonPatternGroupShader(_ fadeInPattern: Bool) -> MCPolygonPatternGroupShaderInterface? {
+        PolygonPatternGroupShader(fadeInPattern: fadeInPattern)
     }
 
     func createColorCircleShader() -> MCColorCircleShaderInterface? {

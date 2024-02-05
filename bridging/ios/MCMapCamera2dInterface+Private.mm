@@ -247,6 +247,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (nonnull MCVec2F *)screenPosFromCoord:(nonnull MCCoord *)coord {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->screenPosFromCoord(::djinni_generated::Coord::toCpp(coord));
+        return ::djinni_generated::Vec2F::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (double)mapUnitsFromPixels:(double)distancePx {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->mapUnitsFromPixels(::djinni::F64::toCpp(distancePx));

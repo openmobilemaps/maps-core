@@ -390,6 +390,7 @@ class GLThread constructor(
 		width = w
 		height = h
 		sizeChanged = true
+		requestRender()
 	}
 
 }

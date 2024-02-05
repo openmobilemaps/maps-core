@@ -28,7 +28,8 @@ Tiled2dMapVectorPolygonPatternTile::Tiled2dMapVectorPolygonPatternTile(const std
                                                                        const std::shared_ptr<SpriteData> &spriteData,
                                                                        const std::shared_ptr<TextureHolderInterface> &spriteTexture,
                                                                        const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager)
-        : Tiled2dMapVectorTile(mapInterface, tileInfo, description, layerConfig, tileCallbackInterface, featureStateManager), spriteData(spriteData), spriteTexture(spriteTexture), usedKeys(description->getUsedKeys()) {
+        : Tiled2dMapVectorTile(mapInterface, tileInfo, description, layerConfig, tileCallbackInterface, featureStateManager),
+          spriteData(spriteData), spriteTexture(spriteTexture), usedKeys(description->getUsedKeys()), fadeInPattern(description->style.fadeInPattern) {
     isStyleZoomDependant = usedKeys.containsUsedKey(Tiled2dMapVectorStyleParser::zoomExpression);
     isStyleStateDependant = usedKeys.isStateDependant();
 }
@@ -202,7 +203,7 @@ void Tiled2dMapVectorPolygonPatternTile::setVectorTileData(const Tiled2dMapVecto
                         } else {
                             styleGroupIndex = (int) featureGroups.size();
                             styleIndex = 0;
-                            auto shader = shaderFactory->createPolygonPatternGroupShader();
+                            auto shader = shaderFactory->createPolygonPatternGroupShader(fadeInPattern);
                             auto polygonDescription = std::static_pointer_cast<PolygonVectorLayerDescription>(description);
                             shader->asShaderProgramInterface()->setBlendMode(polygonDescription->style.getBlendMode(EvaluationContext(0.0, dpFactor, std::make_shared<FeatureContext>(), featureStateManager)));
                             shaders.push_back(shader);
@@ -406,27 +407,35 @@ void Tiled2dMapVectorPolygonPatternTile::setupTextureCoordinates() {
 bool Tiled2dMapVectorPolygonPatternTile::onClickConfirmed(const Vec2F &posScreen) {
     auto mapInterface = this->mapInterface.lock();
     auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
-    auto converter = mapInterface ? mapInterface->getCoordinateConverterHelper() : nullptr;
-    auto strongSelectionDelegate = selectionDelegate.lock();
-    if (!camera || !strongSelectionDelegate || !converter) {
+    if (!camera) {
         return false;
     }
     auto point = camera->coordFromScreenPosition(posScreen);
+    return performClick(point);
+}
+
+bool Tiled2dMapVectorPolygonPatternTile::performClick(const Coord &coord) {
+    auto mapInterface = this->mapInterface.lock();
+    auto converter = mapInterface ? mapInterface->getCoordinateConverterHelper() : nullptr;
+    auto strongSelectionDelegate = selectionDelegate.lock();
+    if (!strongSelectionDelegate || !converter) {
+        return false;
+    }
 
     std::vector<VectorLayerFeatureInfo> featureInfos;
     for (auto const &[polygon, featureContext]: hitDetectionPolygons) {
-        if (VectorTileGeometryHandler::isPointInTriangulatedPolygon(point, polygon, converter)) {
+        if (VectorTileGeometryHandler::isPointInTriangulatedPolygon(coord, polygon, converter)) {
             if (multiselect) {
                 featureInfos.push_back(featureContext->getFeatureInfo());
             } else if (strongSelectionDelegate->didSelectFeature(featureContext->getFeatureInfo(), description->identifier,
-                                                                 converter->convert(CoordinateSystemIdentifiers::EPSG4326(),point))) {
+                                                                 converter->convert(CoordinateSystemIdentifiers::EPSG4326(),coord))) {
                 return true;
             }
         }
     }
 
     if (multiselect && !featureInfos.empty()) {
-        return strongSelectionDelegate->didMultiSelectLayerFeatures(featureInfos, description->identifier, converter->convert(CoordinateSystemIdentifiers::EPSG4326(), point));
+        return strongSelectionDelegate->didMultiSelectLayerFeatures(featureInfos, description->identifier, converter->convert(CoordinateSystemIdentifiers::EPSG4326(), coord));
     }
 
     return false;

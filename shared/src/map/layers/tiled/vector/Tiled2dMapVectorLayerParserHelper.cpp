@@ -380,7 +380,8 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
             PolygonVectorStyle style(parser.parseValue(val["paint"]["fill-color"]),
                                      parser.parseValue(val["paint"]["fill-opacity"]),
                                      parser.parseValue(val["paint"]["fill-pattern"]),
-                                     blendMode);
+                                     blendMode,
+                                     (!val["layout"]["fadeInPattern"].is_null()) && val["layout"].value("fadeInPattern", false));
 
             auto layerDesc = std::make_shared<PolygonVectorLayerDescription>(val["id"],
                                                                              val["source"],
