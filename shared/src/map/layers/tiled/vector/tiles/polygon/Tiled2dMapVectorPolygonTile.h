@@ -68,6 +68,7 @@ private:
     UsedKeysCollection usedKeys;
     bool isStyleZoomDependant = true;
     bool isStyleStateDependant = true;
+    bool isStriped = false;
 
     std::optional<double> lastZoom = std::nullopt;
     std::optional<bool> lastInZoomRange = std::nullopt;

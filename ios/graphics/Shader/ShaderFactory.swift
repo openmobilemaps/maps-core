@@ -12,12 +12,13 @@ import Foundation
 import MapCoreSharedModule
 
 class ShaderFactory: MCShaderFactoryInterface {
+    
     func createTextShader() -> MCTextShaderInterface? {
         TextShader()
     }
 
-    func createPolygonGroupShader() -> MCPolygonGroupShaderInterface? {
-        PolygonGroupShader()
+    func createPolygonGroupShader(_ isStriped: Bool) -> MCPolygonGroupShaderInterface? {
+        PolygonGroupShader(isStriped: isStriped)
     }
 
     func createPolygonPatternGroupShader(_ fadeInPattern: Bool) -> MCPolygonPatternGroupShaderInterface? {

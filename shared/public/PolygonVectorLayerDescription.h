@@ -21,25 +21,28 @@ public:
                        std::shared_ptr<Value> fillOpacity,
                        std::shared_ptr<Value> fillPattern,
                        std::shared_ptr<Value> blendMode,
-                       bool fadeInPattern):
+                       bool fadeInPattern,
+                       std::shared_ptr<Value> stripeWidth):
     fillColor(fillColor),
     fillOpacity(fillOpacity),
     fillPattern(fillPattern),
     blendMode(blendMode),
-    fadeInPattern(fadeInPattern) {}
+    fadeInPattern(fadeInPattern),
+    stripeWidth(stripeWidth) {}
 
     PolygonVectorStyle(PolygonVectorStyle &style)
     : fillColor(style.fillColor),
       fillOpacity(style.fillOpacity),
       fillPattern(style.fillPattern),
       blendMode(style.blendMode),
-      fadeInPattern(style.fadeInPattern) {}
+      fadeInPattern(style.fadeInPattern),
+      stripeWidth(style.stripeWidth) {}
 
     UsedKeysCollection getUsedKeys() const {
 
         UsedKeysCollection usedKeys;
         std::shared_ptr<Value> values[] = {
-            fillColor, fillOpacity, fillPattern
+            fillColor, fillOpacity, fillPattern, stripeWidth
         };
 
         for (auto const &value: values) {
@@ -75,18 +78,33 @@ public:
         return fillPattern ? true : false;
     }
 
+    std::vector<float> getStripeWidth(const EvaluationContext &context) {
+        static const std::vector<float> defaultValue = {1.0, 1.0};
+        auto stripeInfo = stripeWidthEvaluator.getResult(stripeWidth, context, defaultValue);
+        for (int i = 0; i < stripeInfo.size(); ++i) {
+            stripeInfo[i] = stripeInfo[i] * context.dpFactor;
+        }
+        return stripeInfo;
+    }
+
+    bool isStripedPotentially() {
+        return stripeWidth ? true : false;
+    }
+
 public:
     std::shared_ptr<Value> fillColor;
     std::shared_ptr<Value> fillOpacity;
     std::shared_ptr<Value> fillPattern;
     std::shared_ptr<Value> blendMode;
     bool fadeInPattern;
+    std::shared_ptr<Value> stripeWidth;
 
 private:
     ValueEvaluator<Color> fillColorEvaluator;
     ValueEvaluator<double> fillOpacityEvaluator;
     ValueEvaluator<std::string> fillPatternEvaluator;
     ValueEvaluator<BlendMode> blendModeEvaluator;
+    ValueEvaluator<std::vector<float>> stripeWidthEvaluator;
 };
 
 class PolygonVectorLayerDescription: public VectorLayerDescription {

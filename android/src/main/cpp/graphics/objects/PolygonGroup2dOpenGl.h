@@ -57,6 +57,7 @@ protected:
     int program = 0;
 
     int mvpMatrixHandle;
+    int scaleFactorHandle;
     int positionHandle;
     int styleIndexHandle;
     GLuint attribBuffer = -1;

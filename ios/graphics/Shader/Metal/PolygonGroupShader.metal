@@ -18,6 +18,7 @@ struct PolygonGroupVertexIn {
 
 struct PolygonGroupVertexOut {
     float4 position [[ position ]];
+    float2 uv;
     float stylingIndex;
 };
 
@@ -26,6 +27,12 @@ struct PolygonGroupStyling {
     float opacity;
 };
 
+struct PolygonGroupStripeStyling {
+    float color[4];
+    float opacity;
+    float stripeInfoX;
+    float stripeInfoY;
+};
 
 vertex PolygonGroupVertexOut
 polygonGroupVertexShader(const PolygonGroupVertexIn vertexIn [[stage_in]],
@@ -33,6 +40,7 @@ polygonGroupVertexShader(const PolygonGroupVertexIn vertexIn [[stage_in]],
 {
     PolygonGroupVertexOut out {
         .position = mvpMatrix * float4(vertexIn.position.xy, 0.0, 1.0),
+        .uv = float2(0.0, 0.0),
         .stylingIndex = vertexIn.stylingIndex,
     };
 
@@ -53,6 +61,37 @@ struct PolygonPatternGroupVertexOut {
     float2 pixelPosition;
 };
 
+vertex PolygonGroupVertexOut
+polygonStripedGroupVertexShader(const PolygonGroupVertexIn vertexIn [[stage_in]],
+                                constant float4x4 &mvpMatrix [[buffer(1)]],
+                                constant float2 &posOffset [[buffer(2)]])
+{
+    PolygonGroupVertexOut out {
+        .position = mvpMatrix * float4(vertexIn.position.xy, 0.0, 1.0),
+        .uv = vertexIn.position.xy - posOffset,
+        .stylingIndex = vertexIn.stylingIndex,
+    };
+
+    return out;
+}
+
+
+fragment float4
+polygonGroupStripedFragmentShader(PolygonGroupVertexOut in [[stage_in]],
+                                  constant PolygonGroupStripeStyling *styling [[buffer(1)]],
+                                  constant float2 &scaleFactors [[buffer(2)]])
+{
+    PolygonGroupStripeStyling s = styling[int(in.stylingIndex)];
+
+    float disPx = ((in.uv.x - 1100000.0) + (in.uv.y + 6000000.0)) / scaleFactors.y;
+    float totalPx = s.stripeInfoX + s.stripeInfoY;
+    float adjLineWPx = s.stripeInfoX / scaleFactors.y * scaleFactors.x;
+    if (fmod(disPx, totalPx) > adjLineWPx) {
+        return float4(0.0, 1.0, 0.0, 0.0);
+    }
+
+    return float4(s.color[0], s.color[1], s.color[2], 1.0) * s.opacity * s.color[3];
+}
 
 vertex PolygonPatternGroupVertexOut
 polygonPatternGroupVertexShader(const PolygonGroupVertexIn vertexIn [[stage_in]],
