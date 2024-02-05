@@ -23,11 +23,15 @@ final class PolygonPatternGroup2d: BaseGraphicsObject {
     private var textureCoordinatesBuffer: MTLBuffer?
 
     private var stencilState: MTLDepthStencilState?
+    private var renderPassStencilState: MTLDepthStencilState?
 
     private var texture: MTLTexture?
 
     private var screenPixelFactor: Float = 0
     var customScreenPixelFactor = SIMD2<Float>([0.0, 0.0])
+    
+    var posOffset = SIMD2<Float>([0.0, 0.0])
+
 
     init(shader: MCShaderProgramInterface, metalContext: MetalContext) {
         guard let shader = shader as? PolygonPatternGroupShader else {
@@ -39,25 +43,9 @@ final class PolygonPatternGroup2d: BaseGraphicsObject {
                    label: "PolygonPatternGroup2d")
     }
 
-    private func setupStencilStates() {
-        let ss2 = MTLStencilDescriptor()
-        ss2.stencilCompareFunction = .equal
-        ss2.stencilFailureOperation = .zero
-        ss2.depthFailureOperation = .keep
-        ss2.depthStencilPassOperation = .keep
-        ss2.readMask = 0b1111_1111
-        ss2.writeMask = 0b0000_0000
-
-        let s2 = MTLDepthStencilDescriptor()
-        s2.frontFaceStencil = ss2
-        s2.backFaceStencil = ss2
-
-        stencilState = device.makeDepthStencilState(descriptor: s2)
-    }
-
     override func render(encoder: MTLRenderCommandEncoder,
                          context: RenderingContext,
-                         renderPass _: MCRenderPassConfig,
+                         renderPass pass: MCRenderPassConfig,
                          mvpMatrix: Int64,
                          isMasked: Bool,
                          screenPixelAsRealMeterFactor: Double) {
@@ -70,7 +58,9 @@ final class PolygonPatternGroup2d: BaseGraphicsObject {
               let indicesBuffer,
               let opacitiesBuffer,
               let textureCoordinatesBuffer,
-              let texture else { return }
+              let texture else {
+            return
+        }
 
         #if DEBUG
             encoder.pushDebugGroup(label)
@@ -81,9 +71,19 @@ final class PolygonPatternGroup2d: BaseGraphicsObject {
 
         if isMasked {
             if stencilState == nil {
-                setupStencilStates()
+                self.stencilState = self.maskStencilState()
             }
+
             encoder.setDepthStencilState(stencilState)
+            encoder.setStencilReferenceValue(0b1100_0000)
+        }
+
+        if pass.isPassMasked {
+            if renderPassStencilState == nil {
+                renderPassStencilState = self.renderPassMaskStencilState()
+            }
+
+            encoder.setDepthStencilState(renderPassStencilState)
             encoder.setStencilReferenceValue(0b1100_0000)
         }
 
@@ -94,13 +94,24 @@ final class PolygonPatternGroup2d: BaseGraphicsObject {
         if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mvpMatrix)) {
             encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
         }
-        if customScreenPixelFactor.x != 0 {
-            encoder.setVertexBytes(&customScreenPixelFactor, length: MemoryLayout<SIMD2<Float>>.stride, index: 2)
+
+        // scale factors for shaders
+        var pixelFactor : Float = Float(screenPixelAsRealMeterFactor)
+
+        if self.shader.fadeInPattern {
+            var scaleFactors = SIMD2<Float>([pixelFactor, pixelFactor])
+            encoder.setVertexBytes(&scaleFactors, length: MemoryLayout<SIMD2<Float>>.stride, index: 2)
+            encoder.setVertexBytes(&posOffset, length: MemoryLayout<SIMD2<Float>>.stride, index: 3)
+
+            scaleFactors = customScreenPixelFactor.x != 0 ? customScreenPixelFactor :  SIMD2<Float>([pixelFactor, pixelFactor])
+            encoder.setFragmentBytes(&pixelFactor, length: MemoryLayout<Float>.stride, index: 2)
+            encoder.setFragmentBytes(&scaleFactors, length: MemoryLayout<SIMD2<Float>>.stride, index: 3)
         } else {
-            var factors = SIMD2<Float>([screenPixelAsRealMeterFactor, screenPixelAsRealMeterFactor])
-            encoder.setVertexBytes(&factors, length: MemoryLayout<SIMD2<Float>>.stride, index: 2)
+            var scaleFactors = customScreenPixelFactor.x != 0 ? customScreenPixelFactor :  SIMD2<Float>([pixelFactor, pixelFactor])
+            encoder.setVertexBytes(&scaleFactors, length: MemoryLayout<SIMD2<Float>>.stride, index: 2)
         }
 
+        // texture
         encoder.setFragmentTexture(texture, index: 0)
         encoder.setFragmentSamplerState(sampler, index: 0)
 
@@ -135,6 +146,23 @@ extension PolygonPatternGroup2d: MCPolygonPatternGroup2dInterface {
             self.indicesCount = Int(indices.elementCount)
             self.verticesBuffer = verticesBuffer
             self.indicesBuffer = indicesBuffer
+
+            if let p = UnsafeRawPointer(bitPattern: Int(vertices.address)) {
+                var minX = Float.greatestFiniteMagnitude
+                var minY = Float.greatestFiniteMagnitude
+
+                for i in 0..<vertices.elementCount {
+                    if i % 3 == 0 {
+                        let x = (p + 4 * Int(i)).load(as: Float.self)
+                        let y = (p + 4 * (Int(i) + 1)).load(as: Float.self)
+                        minX = min(x, minX)
+                        minY = min(y, minY)
+                    }
+                }
+
+                self.posOffset.x = minX;
+                self.posOffset.y = minY;
+            }
         }
     }
 
