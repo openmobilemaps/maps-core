@@ -16,12 +16,17 @@ import UIKit
 class PolygonGroupShader: BaseShader {
     var polygonStyleBuffer: MTLBuffer?
 
-    override init() {
+    let isStriped : Bool
+
+    init(isStriped: Bool) {
+        self.isStriped = isStriped
+        super.init()
     }
 
     override func setupProgram(_: MCRenderingContextInterface?) {
         if pipeline == nil {
-            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: .polygonGroupShader, blendMode: blendMode).json)
+            let t : PipelineType = isStriped ? .polygonStripedGroupShader : .polygonGroupShader
+            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: t, blendMode: blendMode).json)
         }
     }
 
@@ -30,7 +35,6 @@ class PolygonGroupShader: BaseShader {
               let pipeline else { return }
 
         context.setRenderPipelineStateIfNeeded(pipeline)
-
         encoder.setFragmentBuffer(polygonStyleBuffer, offset: 0, index: 1)
     }
 }

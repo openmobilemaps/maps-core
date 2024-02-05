@@ -21,7 +21,7 @@ final class PolygonGroup2d: BaseGraphicsObject {
 
     private var stencilState: MTLDepthStencilState?
     private var renderPassStencilState: MTLDepthStencilState?
-
+    private var posOffset = SIMD2<Float>([0.0, 0.0])
 
     init(shader: MCShaderProgramInterface, metalContext: MetalContext) {
         guard let shader = shader as? PolygonGroupShader else {
@@ -38,7 +38,7 @@ final class PolygonGroup2d: BaseGraphicsObject {
                          renderPass pass: MCRenderPassConfig,
                          mvpMatrix: Int64,
                          isMasked: Bool,
-                         screenPixelAsRealMeterFactor _: Double) {
+                         screenPixelAsRealMeterFactor: Double) {
         lock.lock()
         defer {
             lock.unlock()
@@ -79,6 +79,14 @@ final class PolygonGroup2d: BaseGraphicsObject {
             encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
         }
 
+        if self.shader.isStriped {
+            encoder.setVertexBytes(&posOffset, length: MemoryLayout<SIMD2<Float>>.stride, index: 2)
+
+            let p : Float = Float(screenPixelAsRealMeterFactor)
+            var scaleFactors = SIMD2<Float>([p, pow(2.0, ceil(log2(p)))])
+            encoder.setFragmentBytes(&scaleFactors, length: MemoryLayout<SIMD2<Float>>.stride, index: 2)
+        }
+
         encoder.drawIndexedPrimitives(type: .triangle,
                                       indexCount: indicesCount,
                                       indexType: .uint16,
@@ -107,6 +115,25 @@ extension PolygonGroup2d: MCPolygonGroup2dInterface {
             self.indicesCount = Int(indices.elementCount)
             self.verticesBuffer = verticesBuffer
             self.indicesBuffer = indicesBuffer
+
+            if shader.isStriped {
+                if let p = UnsafeRawPointer(bitPattern: Int(vertices.address)) {
+                    var minX = Float.greatestFiniteMagnitude
+                    var minY = Float.greatestFiniteMagnitude
+
+                    for i in 0..<vertices.elementCount {
+                        if i % 3 == 0 {
+                            let x = (p + 4 * Int(i)).load(as: Float.self)
+                            let y = (p + 4 * (Int(i) + 1)).load(as: Float.self)
+                            minX = min(x, minX)
+                            minY = min(y, minY)
+                        }
+                    }
+
+                    self.posOffset.x = minX;
+                    self.posOffset.y = minY;
+                }
+            }
         }
     }
 

@@ -120,6 +120,7 @@ public enum PipelineType: String, CaseIterable, Codable {
     case alphaInstancedShader
     case lineGroupShader
     case polygonGroupShader
+    case polygonStripedGroupShader
     case polygonPatternGroupShader
     case polygonPatternFadeInGroupShader
     case colorShader
@@ -137,6 +138,7 @@ public enum PipelineType: String, CaseIterable, Codable {
             case .alphaInstancedShader: return "Alpha instanced shader with texture"
             case .lineGroupShader: return "Line Group shader"
             case .polygonGroupShader: return "Polygon Group shader"
+            case .polygonStripedGroupShader: return "Polygon Group (striped) shader"
             case .polygonPatternGroupShader: return "Polygon Group Pattern shader"
             case .polygonPatternFadeInGroupShader: return "Polygon Group Pattern (fade in) shader"
             case .colorShader: return "Color shader"
@@ -156,6 +158,7 @@ public enum PipelineType: String, CaseIterable, Codable {
             case .alphaInstancedShader: return "alphaInstancedVertexShader"
             case .lineGroupShader: return "lineGroupVertexShader"
             case .polygonGroupShader: return "polygonGroupVertexShader"
+            case .polygonStripedGroupShader: return "polygonStripedGroupVertexShader"
             case .polygonPatternGroupShader: return "polygonPatternGroupVertexShader"
             case .polygonPatternFadeInGroupShader: return "polygonPatternGroupVertexShader"
             case .colorShader: return "colorVertexShader"
@@ -175,6 +178,7 @@ public enum PipelineType: String, CaseIterable, Codable {
             case .alphaInstancedShader: return "alphaInstancedFragmentShader"
             case .lineGroupShader: return "lineGroupFragmentShader"
             case .polygonGroupShader: return "polygonGroupFragmentShader"
+            case .polygonStripedGroupShader: return "polygonGroupStripedFragmentShader"
             case .polygonPatternGroupShader: return "polygonPatternGroupFragmentShader"
             case .polygonPatternFadeInGroupShader: return "polygonPatternGroupFadeInFragmentShader"
             case .colorShader: return "colorFragmentShader"
@@ -192,7 +196,7 @@ public enum PipelineType: String, CaseIterable, Codable {
         switch self {
             case .lineGroupShader:
                 return LineVertex.descriptor
-            case .polygonGroupShader, .polygonPatternGroupShader, .polygonPatternFadeInGroupShader:
+        case .polygonGroupShader, .polygonPatternGroupShader, .polygonPatternFadeInGroupShader, .polygonStripedGroupShader:
                 return PolygonVertex.descriptor
             default: 
                 return Vertex.descriptor
