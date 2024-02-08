@@ -17,6 +17,7 @@
 #include <optional>
 #include <vector>
 
+class IndexedLayerInterface;
 class LayerInterface;
 class MapCallbackInterface;
 class MapCamera2dInterface;
@@ -54,6 +55,8 @@ public:
     virtual /*not-null*/ std::shared_ptr<::TouchHandlerInterface> getTouchHandler() = 0;
 
     virtual std::vector</*not-null*/ std::shared_ptr<LayerInterface>> getLayers() = 0;
+
+    virtual std::vector</*not-null*/ std::shared_ptr<IndexedLayerInterface>> getLayersIndexed() = 0;
 
     virtual void addLayer(const /*not-null*/ std::shared_ptr<LayerInterface> & layer) = 0;
 

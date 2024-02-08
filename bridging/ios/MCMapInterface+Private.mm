@@ -9,6 +9,7 @@
 #import "MCColor+Private.h"
 #import "MCCoordinateConversionHelperInterface+Private.h"
 #import "MCGraphicsObjectFactoryInterface+Private.h"
+#import "MCIndexedLayerInterface+Private.h"
 #import "MCLayerInterface+Private.h"
 #import "MCMapCallbackInterface+Private.h"
 #import "MCMapCamera2dInterface+Private.h"
@@ -148,6 +149,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     try {
         auto objcpp_result_ = _cppRefHandle.get()->getLayers();
         return ::djinni::List<::djinni_generated::LayerInterface>::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nonnull NSArray<id<MCIndexedLayerInterface>> *)getLayersIndexed {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getLayersIndexed();
+        return ::djinni::List<::djinni_generated::IndexedLayerInterface>::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

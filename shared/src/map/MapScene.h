@@ -47,6 +47,8 @@ class MapScene : public MapInterface, public SceneCallbackInterface, public Sche
 
     virtual std::vector<std::shared_ptr<LayerInterface>> getLayers() override;
 
+    std::vector<std::shared_ptr<IndexedLayerInterface>> getLayersIndexed() override;
+
     virtual void addLayer(const std::shared_ptr<::LayerInterface> &layer) override;
 
     virtual void insertLayerAt(const std::shared_ptr<LayerInterface> &layer, int32_t atIndex) override;

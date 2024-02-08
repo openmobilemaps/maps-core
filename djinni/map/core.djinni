@@ -39,6 +39,7 @@ map_interface = interface +c {
     get_touch_handler() : touch_handler_interface;
 
     get_layers(): list<layer_interface>;
+    get_layers_indexed(): list<indexed_layer_interface>;
 
     add_layer(layer: layer_interface);
     insert_layer_at(layer: layer_interface, at_index: i32);
@@ -65,6 +66,11 @@ map_interface = interface +c {
     draw_ready_frame(bounds: rect_coord, timeout: f32, callbacks: map_ready_callback_interface);
 
     force_reload();
+}
+
+indexed_layer_interface = interface +c +j +o {
+	get_layer_interface() : layer_interface;
+	get_index() : i32;
 }
 
 map_callback_interface = interface +c +j +o {

@@ -14,6 +14,7 @@
 #import <Foundation/Foundation.h>
 @class MCMapCamera2dInterface;
 @class MCMapInterface;
+@protocol MCIndexedLayerInterface;
 @protocol MCLayerInterface;
 @protocol MCMapCallbackInterface;
 @protocol MCMapReadyCallbackInterface;
@@ -54,6 +55,8 @@
 - (nullable id<MCTouchHandlerInterface>)getTouchHandler;
 
 - (nonnull NSArray<id<MCLayerInterface>> *)getLayers;
+
+- (nonnull NSArray<id<MCIndexedLayerInterface>> *)getLayersIndexed;
 
 - (void)addLayer:(nullable id<MCLayerInterface>)layer;
 

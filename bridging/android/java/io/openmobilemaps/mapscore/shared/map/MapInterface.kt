@@ -40,6 +40,8 @@ abstract class MapInterface {
 
     abstract fun getLayers(): ArrayList<LayerInterface>
 
+    abstract fun getLayersIndexed(): ArrayList<IndexedLayerInterface>
+
     abstract fun addLayer(layer: LayerInterface)
 
     abstract fun insertLayerAt(layer: LayerInterface, atIndex: Int)
@@ -161,6 +163,12 @@ abstract class MapInterface {
             return native_getLayers(this.nativeRef)
         }
         private external fun native_getLayers(_nativeRef: Long): ArrayList<LayerInterface>
+
+        override fun getLayersIndexed(): ArrayList<IndexedLayerInterface> {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getLayersIndexed(this.nativeRef)
+        }
+        private external fun native_getLayersIndexed(_nativeRef: Long): ArrayList<IndexedLayerInterface>
 
         override fun addLayer(layer: LayerInterface) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
