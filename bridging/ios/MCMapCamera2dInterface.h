@@ -92,6 +92,8 @@
 
 - (void)setSnapToNorthEnabled:(BOOL)enabled;
 
+- (void)setBoundsRestrictWholeVisibleRect:(BOOL)enabled;
+
 - (nullable id<MCCameraInterface>)asCameraInterface;
 
 - (nullable NSArray<NSNumber *> *)getLastVpMatrix;

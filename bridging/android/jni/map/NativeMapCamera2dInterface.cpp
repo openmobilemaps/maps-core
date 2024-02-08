@@ -314,6 +314,14 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dIn
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1setBoundsRestrictWholeVisibleRect(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jboolean j_enabled)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::MapCamera2dInterface>(nativeRef);
+        ref->setBoundsRestrictWholeVisibleRect(::djinni::Bool::toCpp(jniEnv, j_enabled));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
 CJNIEXPORT ::djinni_generated::NativeCameraInterface::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1asCameraInterface(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
