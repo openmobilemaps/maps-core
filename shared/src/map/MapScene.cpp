@@ -18,6 +18,7 @@
 #include "MapCamera2dInterface.h"
 #include "MapReadyCallbackInterface.h"
 #include "TouchInterface.h"
+#include "IndexedLayer.h"
 #include "Logger.h"
 #include <algorithm>
 
@@ -93,6 +94,14 @@ std::vector<std::shared_ptr<LayerInterface>> MapScene::getLayers() {
     }
     return layersList;
 };
+
+std::vector<std::shared_ptr<IndexedLayerInterface>> MapScene::getLayersIndexed() {
+    std::vector<std::shared_ptr<IndexedLayerInterface>> layersList;
+    for (const auto &l : layers) {
+        layersList.emplace_back(std::make_shared<IndexedLayer>(l.first, l.second));
+    }
+    return layersList;
+}
 
 void MapScene::addLayer(const std::shared_ptr<::LayerInterface> &layer) {
     removeLayer(layer);

@@ -131,6 +131,8 @@ class MapCamera2d : public MapCamera2dInterface,
 
     virtual void setSnapToNorthEnabled(bool enabled) override;
 
+    void setBoundsRestrictWholeVisibleRect(bool centerOnly) override;
+
     virtual float getScreenDensityPpi() override;
 
   protected:
@@ -178,6 +180,7 @@ class MapCamera2d : public MapCamera2dInterface,
         bool twoFingerZoomEnabled = true;
         bool moveEnabled = true;
         bool snapToNorthEnabled = true;
+        bool boundsRestrictWholeVisibleRect = false;
     };
 
     long long currentDragTimestamp = 0;
@@ -217,7 +220,7 @@ class MapCamera2d : public MapCamera2dInterface,
     std::shared_ptr<DoubleAnimation> rotationAnimation;
 
     Coord adjustCoordForPadding(const Coord &coords, double targetZoom);
-    Coord getBoundsCorrectedCoords(const Coord &coords);
+    std::tuple<Coord, double> getBoundsCorrectedCoords(const Coord &position, double zoom);
 
     RectCoord getPaddingCorrectedBounds();
     void clampCenterToPaddingCorrectedBounds();

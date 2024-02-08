@@ -78,6 +78,8 @@ abstract class MapCamera2dInterface {
 
     abstract fun setSnapToNorthEnabled(enabled: Boolean)
 
+    abstract fun setBoundsRestrictWholeVisibleRect(enabled: Boolean)
+
     abstract fun asCameraInterface(): io.openmobilemaps.mapscore.shared.graphics.CameraInterface
 
     abstract fun getLastVpMatrix(): ArrayList<Float>?
@@ -294,6 +296,12 @@ abstract class MapCamera2dInterface {
             native_setSnapToNorthEnabled(this.nativeRef, enabled)
         }
         private external fun native_setSnapToNorthEnabled(_nativeRef: Long, enabled: Boolean)
+
+        override fun setBoundsRestrictWholeVisibleRect(enabled: Boolean) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setBoundsRestrictWholeVisibleRect(this.nativeRef, enabled)
+        }
+        private external fun native_setBoundsRestrictWholeVisibleRect(_nativeRef: Long, enabled: Boolean)
 
         override fun asCameraInterface(): io.openmobilemaps.mapscore.shared.graphics.CameraInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

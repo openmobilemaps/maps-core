@@ -85,6 +85,8 @@ public:
 
     virtual void setSnapToNorthEnabled(bool enabled) = 0;
 
+    virtual void setBoundsRestrictWholeVisibleRect(bool enabled) = 0;
+
     virtual /*not-null*/ std::shared_ptr<::CameraInterface> asCameraInterface() = 0;
 
     virtual std::optional<std::vector<float>> getLastVpMatrix() = 0;

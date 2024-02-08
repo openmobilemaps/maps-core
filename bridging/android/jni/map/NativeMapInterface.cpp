@@ -6,6 +6,7 @@
 #include "NativeColor.h"
 #include "NativeCoordinateConversionHelperInterface.h"
 #include "NativeGraphicsObjectFactoryInterface.h"
+#include "NativeIndexedLayerInterface.h"
 #include "NativeLayerInterface.h"
 #include "NativeMapCallbackInterface.h"
 #include "NativeMapCamera2dInterface.h"
@@ -156,6 +157,15 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapInterfa
         const auto& ref = ::djinni::objectFromHandleAddress<::MapInterface>(nativeRef);
         auto r = ref->getLayers();
         return ::djinni::release(::djinni::List<::djinni_generated::NativeLayerInterface>::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapInterface_00024CppProxy_native_1getLayersIndexed(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::MapInterface>(nativeRef);
+        auto r = ref->getLayersIndexed();
+        return ::djinni::release(::djinni::List<::djinni_generated::NativeIndexedLayerInterface>::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
