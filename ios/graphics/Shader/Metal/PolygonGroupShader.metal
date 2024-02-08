@@ -87,7 +87,7 @@ polygonGroupStripedFragmentShader(PolygonGroupVertexOut in [[stage_in]],
     float totalPx = s.stripeInfoX + s.stripeInfoY;
     float adjLineWPx = s.stripeInfoX / scaleFactors.y * scaleFactors.x;
     if (fmod(disPx, totalPx) > adjLineWPx) {
-        return float4(0.0, 1.0, 0.0, 0.0);
+        return float4(0.0, 0.0, 0.0, 0.0);
     }
 
     return float4(s.color[0], s.color[1], s.color[2], 1.0) * s.opacity * s.color[3];
