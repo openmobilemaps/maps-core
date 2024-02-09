@@ -494,6 +494,7 @@ bool MapCamera2d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
         double newZoom = zoom * (1.0 - (deltaScreen.y * 0.003));
 
         zoom = std::max(std::min(newZoom, zoomMin), zoomMax);
+        clampCenterToPaddingCorrectedBounds();
 
         notifyListeners(ListenerType::BOUNDS | ListenerType::MAP_INTERACTION);
         mapInterface->invalidate();
