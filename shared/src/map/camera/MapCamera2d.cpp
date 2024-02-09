@@ -31,7 +31,7 @@ MapCamera2d::MapCamera2d(const std::shared_ptr<MapInterface> &mapInterface, floa
     , conversionHelper(mapInterface->getCoordinateConverterHelper())
     , mapCoordinateSystem(mapInterface->getMapConfig().mapCoordinateSystem)
     , screenDensityPpi(screenDensityPpi)
-    , screenPixelAsRealMeterFactor(0.0254 / screenDensityPpi)
+    , screenPixelAsRealMeterFactor(0.0254 / screenDensityPpi * mapCoordinateSystem.unitToScreenMeterFactor)
     , centerPosition(mapCoordinateSystem.identifier, 0, 0, 0)
     , bounds(mapCoordinateSystem.bounds) {
     auto mapConfig = mapInterface->getMapConfig();
