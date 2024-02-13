@@ -46,6 +46,10 @@ coordinate_system_identifiers = interface +c {
     # https://epsg.io/21781
     static EPSG21781(): i32;
 
+    # Unit Sphere Cartesian
+    # x, y, z with reference to earth as unit sphere
+    static UnitSphereCart(): i32;
+
     # e.g. urn:ogc:def:crs:EPSG:21781
     static from_crs_identifier(identifier: string): i32;
 }

@@ -28,6 +28,12 @@ int32_t CoordinateSystemIdentifiers::EPSG2056() { return 2056; };
 // https://epsg.io/21781
 int32_t CoordinateSystemIdentifiers::EPSG21781() { return 21781; };
 
+// Unit Sphere Cartesian
+// x, y, z with reference to earth as unit sphere
+int32_t CoordinateSystemIdentifiers::UnitSphereCart() {
+    return 0x80000000 | 1;
+}
+
 int32_t CoordinateSystemIdentifiers::fromCrsIdentifier(const std::string &identifier) {
     if (identifier == "urn:ogc:def:crs:EPSG:3857" || identifier == "urn:ogc:def:crs:EPSG::3857" || identifier == "EPSG:3857" ||
         identifier == "urn:ogc:def:crs:EPSG:6.3:3857" || identifier == "urn:ogc:def:crs:EPSG:6.18.3:3857")
@@ -41,4 +47,4 @@ int32_t CoordinateSystemIdentifiers::fromCrsIdentifier(const std::string &identi
         return EPSG21781();
 
     return -1;
-};
+}
