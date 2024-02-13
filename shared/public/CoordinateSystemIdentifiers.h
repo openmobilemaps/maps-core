@@ -36,6 +36,12 @@ public:
      */
     static int32_t EPSG21781();
 
+    /**
+     * Unit Sphere Cartesian
+     * x, y, z with reference to earth as unit sphere
+     */
+    static int32_t UnitSphereCart();
+
     /** e.g. urn:ogc:def:crs:EPSG:21781 */
     static int32_t fromCrsIdentifier(const std::string & identifier);
 };
