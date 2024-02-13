@@ -87,7 +87,7 @@ public:
 
             const auto &properties = parseProperties(feature["properties"]);
 
-            if(feature["id"].is_string()) {
+            if(feature.contains("id") && feature["id"].is_string()) {
                 geometry->featureContext = std::make_shared<FeatureContext>(geomType, properties, feature["id"].get<std::string>());
             } else {
                 geometry->featureContext = std::make_shared<FeatureContext>(geomType, properties, generator.generateUUID());
@@ -124,7 +124,7 @@ public:
                 continue;
             }
 
-            if(!feature["id"].is_string()) {
+            if(!feature.contains("id") || !feature["id"].is_string()) {
                 continue;
             }
 
