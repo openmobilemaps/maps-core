@@ -32,7 +32,7 @@ open class MCMapView: MTKView {
 
     public weak var sizeDelegate: MCMapSizeDelegate?
 
-    public init(mapConfig: MCMapConfig, pixelsPerInch: Float? = nil) {
+    public init(mapConfig: MCMapConfig = MCMapConfig(mapCoordinateSystem: MCCoordinateSystemFactory.getEpsg3857System()), pixelsPerInch: Float? = nil) {
         let renderingContext = RenderingContext()
         guard let mapInterface = MCMapInterface.create(GraphicsFactory(),
                                                        shaderFactory: ShaderFactory(),
@@ -288,6 +288,26 @@ public extension MCMapView {
 
     func remove(layer: MCLayerInterface?) {
         mapInterface.removeLayer(layer)
+    }
+
+    func add(layer: Layer) {
+        mapInterface.addLayer(layer.interface)
+    }
+
+    func insert(layer: Layer, at index: Int) {
+        mapInterface.insertLayer(at: layer.interface, at: Int32(index))
+    }
+
+    func insert(layer: Layer, above: MCLayerInterface?) {
+        mapInterface.insertLayer(above: layer.interface, above: above)
+    }
+
+    func insert(layer: Layer, below: MCLayerInterface?) {
+        mapInterface.insertLayer(below: layer.interface, below: below)
+    }
+
+    func remove(layer: Layer) {
+        mapInterface.removeLayer(layer.interface)
     }
 }
 

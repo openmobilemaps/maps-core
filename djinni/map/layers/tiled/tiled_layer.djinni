@@ -13,6 +13,10 @@ tiled_2d_map_layer_config = interface +c +j +o {
     get_bounds(): optional<rect_coord>;
 }
 
+default_tiled_2d_map_layer_configs = interface +c {
+    static web_mercator(layerName: string, urlFormat: string): tiled_2d_map_layer_config;
+}
+
 tiled_2d_map_zoom_level_info = record {
 	zoom: f64;
 	tile_width_layer_system_units: f32;
