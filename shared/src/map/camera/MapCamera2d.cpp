@@ -195,6 +195,13 @@ void MapCamera2d::moveToBoundingBox(const RectCoord &boundingBox, float paddingP
 void MapCamera2d::setZoom(double zoom, bool animated) {
     if (cameraFrozen)
         return;
+
+    if (zoomMin == -1) {
+        // Viewport has not beed set yet
+        this->zoom = zoom;
+        return;
+    }
+
     double targetZoom = std::clamp(zoom, zoomMax, zoomMin);
 
     if (animated) {
@@ -493,7 +500,7 @@ bool MapCamera2d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
     if (doubleClick) {
         double newZoom = zoom * (1.0 - (deltaScreen.y * 0.003));
 
-        zoom = std::max(std::min(newZoom, zoomMin), zoomMax);
+        zoom = std::clamp(newZoom, zoomMax, zoomMin);
         clampCenterToPaddingCorrectedBounds();
 
         notifyListeners(ListenerType::BOUNDS | ListenerType::MAP_INTERACTION);
@@ -591,7 +598,7 @@ bool MapCamera2d::onDoubleClick(const ::Vec2F &posScreen) {
 
     auto targetZoom = zoom / 2;
 
-    targetZoom = std::max(std::min(targetZoom, zoomMin), zoomMax);
+    targetZoom = std::clamp(targetZoom, zoomMax, zoomMin);
 
     auto position = coordFromScreenPosition(posScreen);
 
@@ -619,7 +626,7 @@ bool MapCamera2d::onTwoFingerClick(const ::Vec2F &posScreen1, const ::Vec2F &pos
 
     auto targetZoom = zoom * 2;
 
-    targetZoom = std::max(std::min(targetZoom, zoomMin), zoomMax);
+    targetZoom = std::clamp(targetZoom, zoomMax, zoomMin);
 
     auto position = coordFromScreenPosition(Vec2FHelper::midpoint(posScreen1, posScreen2));
 
