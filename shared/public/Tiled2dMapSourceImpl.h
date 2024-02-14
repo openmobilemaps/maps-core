@@ -172,19 +172,30 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
                 std::max(topToBottom ? (visibleBottom - boundsTop) : (boundsTop - visibleBottom), 0.0) / tileWidth);
 
         if (bounds.has_value()) {
-            const auto converted = conversionHelper->convertRect(CoordinateSystemIdentifiers::EPSG3857(), *bounds);
+            const auto availableTiles = conversionHelper->convertRect(layerSystemId, *bounds);
 
             const double tLength = zoomLevelInfo.tileWidthLayerSystemUnits / 256;
+            const double tWidthAdj = leftToRight ? tLength : tLength;
+            const double tHeightAdj = topToBottom ? tLength : tLength;
+            const double originX = leftToRight ? zoomLevelInfo.bounds.topLeft.x : zoomLevelInfo.bounds.bottomRight.x;
+            const double originY = topToBottom ? zoomLevelInfo.bounds.topLeft.y : zoomLevelInfo.bounds.bottomRight.y;
+            const double minAvailableX = leftToRight ? availableTiles.topLeft.x : availableTiles.bottomRight.x;
+            const double minAvailableY = topToBottom ? availableTiles.topLeft.y : availableTiles.bottomRight.y;
+            const double maxAvailableX = leftToRight ? availableTiles.bottomRight.x : availableTiles.topLeft.x;
+            const double maxAvailableY = topToBottom ? availableTiles.bottomRight.y : availableTiles.topLeft.y;
 
-            int min_left_pixel = floor((converted.topLeft.x - zoomLevelInfo.bounds.topLeft.x) / tLength);
+
+            int min_left_pixel = floor((minAvailableX - originX) / tWidthAdj);
             int min_left = std::max(0, min_left_pixel / 256);
-            int max_top_pixel = floor((zoomLevelInfo.bounds.topLeft.y - converted.topLeft.y) / tLength);
-            int max_top = std::min(zoomLevelInfo.numTilesY, max_top_pixel / 256);
-            int max_left_pixel = floor((converted.bottomRight.x - zoomLevelInfo.bounds.topLeft.x) / tLength);
+
+            int max_left_pixel = floor((maxAvailableX - originX) / tWidthAdj);
             int max_left = std::min(zoomLevelInfo.numTilesX, max_left_pixel / 256);
-            int min_top_pixel = floor((zoomLevelInfo.bounds.topLeft.y - converted.bottomRight.y) / tLength);
-            int min_top = min_top_pixel / 256;
-            min_top = std::max(0, min_top);
+
+            int min_top_pixel = floor((minAvailableY - originY) / tHeightAdj);
+            int min_top = std::max(0, min_top_pixel / 256);
+
+            int max_top_pixel = floor((maxAvailableY - originY) / tHeightAdj);
+            int max_top = std::min(zoomLevelInfo.numTilesY, max_top_pixel / 256);
 
             startTileLeft = std::max(min_left, startTileLeft);
             maxTileLeft = std::min(max_left, maxTileLeft);
