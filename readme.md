@@ -56,7 +56,7 @@ Get started using Open Mobiles Maps by integrating a map into an Android or iOS 
 
 ## Architecture
 
-[Architecture](./architecture.md) describes, how C++ is used to shared most of the codebase between the two platforms.
+[Architecture](./docs/architecture.md) describes, how C++ is used to shared most of the codebase between the two platforms.
 
 ## License
 This project is licensed under the terms of the MPL 2 license. See the [LICENSE](LICENSE) file.
