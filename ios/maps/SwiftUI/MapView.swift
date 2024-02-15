@@ -15,7 +15,7 @@ public struct MapView: UIViewRepresentable {
         case user
     }
 
-    struct Updatable<T: Equatable>: Equatable {
+    public struct Updatable<T: Equatable>: Equatable {
         let mode: UpdateMode
         let value: T?
 
@@ -36,9 +36,9 @@ public struct MapView: UIViewRepresentable {
     }
 
     public struct Camera: Equatable {
-        var center: Updatable<MCCoord>
-        var zoom: Updatable<Double>
-        var visibleRect: Updatable<MCRectCoord>
+        public var center: Updatable<MCCoord>
+        public var zoom: Updatable<Double>
+        public var visibleRect: Updatable<MCRectCoord>
 
         init(center: Updatable<MCCoord> = .init(),
              zoom: Updatable<Double> = .init(),
@@ -60,7 +60,7 @@ public struct MapView: UIViewRepresentable {
             self.visibleRect = .init()
         }
 
-        var centerCoordinate: CLLocationCoordinate2D? {
+        public var centerCoordinate: CLLocationCoordinate2D? {
             guard let center = center.value else {
                 return nil
             }
