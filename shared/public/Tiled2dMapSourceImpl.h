@@ -179,10 +179,10 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
             const double tHeightAdj = topToBottom ? tLength : -tLength;
             const double originX = leftToRight ? zoomLevelInfo.bounds.topLeft.x : -zoomLevelInfo.bounds.bottomRight.x;
             const double originY = topToBottom ? zoomLevelInfo.bounds.bottomRight.y : -zoomLevelInfo.bounds.topLeft.y;
-            const double minAvailableX = leftToRight ? availableTiles.topLeft.x : -availableTiles.bottomRight.x;
-            const double minAvailableY = topToBottom ? availableTiles.bottomRight.y : -availableTiles.topLeft.y;
-            const double maxAvailableX = leftToRight ? availableTiles.bottomRight.x : -availableTiles.topLeft.x;
-            const double maxAvailableY = topToBottom ? availableTiles.topLeft.y : -availableTiles.bottomRight.y;
+            const double minAvailableX = leftToRight ? std::min(availableTiles.topLeft.x, availableTiles.bottomRight.x) : -std::max(availableTiles.topLeft.x, availableTiles.bottomRight.x);
+            const double minAvailableY = topToBottom ? std::min(availableTiles.topLeft.y, availableTiles.bottomRight.y) : -std::max(availableTiles.topLeft.y, availableTiles.bottomRight.y);
+            const double maxAvailableX = leftToRight ? std::max(availableTiles.topLeft.x, availableTiles.bottomRight.x) : -std::min(availableTiles.topLeft.x, availableTiles.bottomRight.x);
+            const double maxAvailableY = topToBottom ? std::max(availableTiles.topLeft.y, availableTiles.bottomRight.y) : -std::min(availableTiles.topLeft.y, availableTiles.bottomRight.y);
 
 
             int min_left_pixel = floor((minAvailableX - originX) / tLength);

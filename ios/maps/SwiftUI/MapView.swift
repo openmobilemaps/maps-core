@@ -10,26 +10,26 @@ import SwiftUI
 
 @available(iOS 17.0, *)
 public struct MapView: UIViewRepresentable {
-    enum UpdateMode: Equatable {
+    public enum UpdateMode: Equatable {
         case map
         case user
     }
 
     public struct Updatable<T: Equatable>: Equatable {
-        let mode: UpdateMode
-        let value: T?
+        public let mode: UpdateMode
+        public let value: T?
 
-        init() {
+        public init() {
             mode = .map
             value = nil
         }
 
-        init(mode: UpdateMode) {
+        public init(mode: UpdateMode) {
             self.mode = mode
             value = nil
         }
 
-        init(mode: UpdateMode, value: T?) {
+        public init(mode: UpdateMode, value: T?) {
             self.mode = mode
             self.value = value
         }
@@ -40,7 +40,7 @@ public struct MapView: UIViewRepresentable {
         public var zoom: Updatable<Double>
         public var visibleRect: Updatable<MCRectCoord>
 
-        init(center: Updatable<MCCoord> = .init(),
+        public init(center: Updatable<MCCoord> = .init(),
              zoom: Updatable<Double> = .init(),
              visibleRect: Updatable<MCRectCoord> = .init()) {
             self.center = center
@@ -60,15 +60,8 @@ public struct MapView: UIViewRepresentable {
             self.visibleRect = .init()
         }
 
-        public var centerCoordinate: CLLocationCoordinate2D? {
-            guard let center = center.value else {
-                return nil
-            }
-            guard let converter = MCCoordinateConversionHelperInterface.independentInstance() else {
-                return nil
-            }
-            let gpsCenter = converter.convert(MCCoordinateSystemIdentifiers.epsg4326(), coordinate: center)
-            return CLLocationCoordinate2D(latitude: gpsCenter.y, longitude: gpsCenter.x)
+        public var centerCoordinate: MCCoord? {
+            center.value
         }
 
         public static func == (lhs: Camera, rhs: Camera) -> Bool {
