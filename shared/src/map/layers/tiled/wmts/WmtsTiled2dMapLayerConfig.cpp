@@ -64,6 +64,5 @@ std::optional<Tiled2dMapVectorSettings> WmtsTiled2dMapLayerConfig::getVectorSett
 }
 
 std::optional<::RectCoord> WmtsTiled2dMapLayerConfig::getBounds() {
-    LogInfo <<= "WARNING: WmtsTiled2dMapLayerConfig not implemented";
-    return std::nullopt;
+    return description.bounds;
 }

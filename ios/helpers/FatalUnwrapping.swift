@@ -15,3 +15,10 @@ public func !!<T>(wrapped: T?, failureMessage: @autoclosure () -> Never) -> T {
     }
     return unwrapped
 }
+
+public func !!<T>(wrapped: T?, failureMessage: @autoclosure () -> Error) throws -> T {
+    guard let unwrapped = wrapped else {
+        throw failureMessage()
+    }
+    return unwrapped
+}

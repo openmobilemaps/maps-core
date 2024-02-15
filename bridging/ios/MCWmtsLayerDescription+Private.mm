@@ -16,7 +16,7 @@ auto WmtsLayerDescription::toCpp(ObjcType obj) -> CppType
             ::djinni::Optional<std::optional, ::djinni::String>::toCpp(obj.title),
             ::djinni::Optional<std::optional, ::djinni::String>::toCpp(obj.abstractText),
             ::djinni::List<::djinni_generated::WmtsLayerDimension>::toCpp(obj.dimensions),
-            ::djinni_generated::RectCoord::toCpp(obj.bounds),
+            ::djinni::Optional<std::optional, ::djinni_generated::RectCoord>::toCpp(obj.bounds),
             ::djinni::String::toCpp(obj.tileMatrixSetLink),
             ::djinni::String::toCpp(obj.resourceTemplate),
             ::djinni::String::toCpp(obj.resourceFormat)};
@@ -28,7 +28,7 @@ auto WmtsLayerDescription::fromCpp(const CppType& cpp) -> ObjcType
                                                         title:(::djinni::Optional<std::optional, ::djinni::String>::fromCpp(cpp.title))
                                                  abstractText:(::djinni::Optional<std::optional, ::djinni::String>::fromCpp(cpp.abstractText))
                                                    dimensions:(::djinni::List<::djinni_generated::WmtsLayerDimension>::fromCpp(cpp.dimensions))
-                                                       bounds:(::djinni_generated::RectCoord::fromCpp(cpp.bounds))
+                                                       bounds:(::djinni::Optional<std::optional, ::djinni_generated::RectCoord>::fromCpp(cpp.bounds))
                                             tileMatrixSetLink:(::djinni::String::fromCpp(cpp.tileMatrixSetLink))
                                              resourceTemplate:(::djinni::String::fromCpp(cpp.resourceTemplate))
                                                resourceFormat:(::djinni::String::fromCpp(cpp.resourceFormat))];

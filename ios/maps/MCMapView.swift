@@ -290,23 +290,28 @@ public extension MCMapView {
         mapInterface.removeLayer(layer)
     }
 
-    func add(layer: Layer) {
+    @available(iOS 13.0, *)
+    func add(layer: any Layer) {
         mapInterface.addLayer(layer.interface)
     }
 
-    func insert(layer: Layer, at index: Int) {
+    @available(iOS 13.0, *)
+    func insert(layer: any Layer, at index: Int) {
         mapInterface.insertLayer(at: layer.interface, at: Int32(index))
     }
 
-    func insert(layer: Layer, above: MCLayerInterface?) {
+    @available(iOS 13.0, *)
+    func insert(layer: any Layer, above: MCLayerInterface?) {
         mapInterface.insertLayer(above: layer.interface, above: above)
     }
 
-    func insert(layer: Layer, below: MCLayerInterface?) {
+    @available(iOS 13.0, *)
+    func insert(layer: any Layer, below: MCLayerInterface?) {
         mapInterface.insertLayer(below: layer.interface, below: below)
     }
 
-    func remove(layer: Layer) {
+    @available(iOS 13.0, *)
+    func remove(layer: any Layer) {
         mapInterface.removeLayer(layer.interface)
     }
 }

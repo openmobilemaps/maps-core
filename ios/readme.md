@@ -42,7 +42,7 @@ dependencies: [
 
 ### MapView
 
-The framework provides a view that can be filled with layers. The simplest case is to add a raster layer. Tiled2dMapRasterLayer provides a convenience initializer to create raster layer with web mercator tiles.
+The framework provides a view that can be filled with layers. The simplest case is to add a raster layer. TiledRasterLayer provides a convenience initializer to create raster layer with web mercator tiles.
  
 
 ```swift
@@ -55,7 +55,7 @@ class MapViewController: UIViewController {
   override func viewDidLoad() {
     super.viewDidLoad()
       
-    mapView.add(layer: Tiled2dMapRasterLayer("osm", webMercatorUrlFormat: "https://tiles.sample.org/{z}/{x}/{y}.png"))
+    mapView.add(layer: TiledRasterLayer("osm", webMercatorUrlFormat: "https://tiles.sample.org/{z}/{x}/{y}.png"))
 
     mapView.camera.move(toCenterPositionZoom: MCCoord(lat: 46.962592372639634, lon: 8.378232525377973), zoom: 1000000, animated: true)
   }

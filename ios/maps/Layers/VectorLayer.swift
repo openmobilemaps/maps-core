@@ -8,7 +8,8 @@
 import Foundation
 import MapCoreSharedModule
 
-open class VectorLayer {
+@available(iOS 13.0, *)
+open class VectorLayer: Layer, ObservableObject {
 
     public init(_ layerName: String, styleURL: String) throws {
         guard let layer = MCTiled2dMapVectorLayerInterface.createExplicitly(layerName, styleJson: styleURL, localStyleJson: nil, loaders: [MCTextureLoader()], fontLoader: MCFontLoader(bundle: .main), localDataProvider: nil, customZoomInfo: nil, symbolDelegate: nil, sourceUrlParams: nil) else {
@@ -23,8 +24,8 @@ open class VectorLayer {
     enum VectorLayerError: Error {
         case createFailed
     }
+
+    public var interface: MCLayerInterface? { layerInterface.asLayerInterface() !! fatalError("asLayerInterface is non-null") }
 }
 
-extension VectorLayer: Layer {
-    public var interface: MCLayerInterface { layerInterface.asLayerInterface() !! fatalError("asLayerInterface is non-null") }
-}
+

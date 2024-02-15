@@ -9,5 +9,5 @@ import Foundation
 import MapCoreSharedModule
 
 public protocol Layer {
-    var interface: MCLayerInterface { get }
+    var interface: MCLayerInterface? { get }
 }
