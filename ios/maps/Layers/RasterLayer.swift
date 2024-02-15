@@ -19,7 +19,7 @@ open class TiledRasterLayer: ObservableObject {
     /// - Parameters:
     ///   - layerName: Identifier for layer
     ///   - urlFormat: URL for tile with placeholders, e.g. https://www.sample.org/{z}/{x}/{y}.png
-    public convenience init(_ layerName: String, webMercatorUrlFormat: String) {
+    public convenience init(_ layerName: String = UUID().uuidString, webMercatorUrlFormat: String) {
         self.init(config: MCDefaultTiled2dMapLayerConfigs.webMercator(layerName, urlFormat: webMercatorUrlFormat) !! fatalError("default configs are non-null"))
     }
 
