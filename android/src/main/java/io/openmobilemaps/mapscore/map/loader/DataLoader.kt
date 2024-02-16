@@ -33,7 +33,7 @@ open class DataLoader(
 	context: Context,
 	private var cacheDirectory: File,
 	private var cacheSize: Long,
-	private var referrer: String,
+	private var referrer: String = "",
 	private var userAgent: String = RequestUtils.getDefaultUserAgent(context)
 ) : LoaderInterface() {
 
