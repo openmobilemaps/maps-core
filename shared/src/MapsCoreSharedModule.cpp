@@ -10,4 +10,4 @@
 
 #include "MapsCoreSharedModule.h"
 
-std::string MapsCoreSharedModule::version() { return "1.5.3"; }
+std::string MapsCoreSharedModule::version() { return "2.0.0"; }
