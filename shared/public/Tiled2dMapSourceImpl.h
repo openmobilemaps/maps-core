@@ -55,6 +55,24 @@ static void hash_combine(size_t& seed, const T& value) {
 }
 
 template<class T, class L, class R>
+void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMatrix, const std::vector<float> &projectionMatrix,
+                                               float verticalFov, float horizontalFov, float width, float height,
+                                               float focusPointAltitude) {
+    // TODO Implement new source algorithm - fixed level of tiles for now
+    if (!layerConfig) {
+        return;
+    }
+    double zoom = 0;
+    for (const auto zoomLevelInfo : layerConfig->getZoomLevelInfos()) {
+        if (zoomLevelInfo.numTilesX >= 2) {
+            zoom = zoomLevelInfo.zoom;
+            break;
+        }
+    }
+    onVisibleBoundsChanged(mapConfig.mapCoordinateSystem.bounds, 0, zoom);
+}
+
+template<class T, class L, class R>
 void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibleBounds, int curT, double zoom) {
     if (isPaused) {
         return;

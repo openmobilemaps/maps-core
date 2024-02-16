@@ -9,6 +9,7 @@
  */
 
 #include "Matrix.h"
+#include <sstream>
 
 /**
  * Transposes a 4 x 4 matrix.
@@ -574,4 +575,26 @@ void Matrix::multiply(const std::vector<float> &M, const std::vector<float> &x, 
     result[1] = M[1] * x[0] + M[5] * x[1] +  M[9] * x[2] + M[13] * x[3];
     result[2] = M[2] * x[0] + M[6] * x[1] + M[10] * x[2] + M[14] * x[3];
     result[3] = M[3] * x[0] + M[7] * x[1] + M[11] * x[2] + M[15] * x[3];
+}
+
+std::string Matrix::toMatrixString(std::vector<float> &M) {
+    std::stringstream ss;
+    ss << "[ " << M[0] << ", " << M[4] << ", " << M[8] << ", " << M[12] << "; "
+            << M[1] << ", " << M[5] << ", " << M[9] << ", " << M[13] << "; "
+            << M[2] << ", " << M[6] << ", " << M[10] << ", " << M[14] << "; "
+            << M[3] << ", " << M[7] << ", " << M[11] << ", " << M[15] << " ]";
+    return ss.str();
+}
+
+std::string Matrix::toVectorString(std::vector<float> &v) {
+    std::stringstream ss;
+    ss << "[ ";
+    for (int i = 0; i < v.size(); i++) {
+        ss << v[i];
+        if (i < v.size() - 1) {
+            ss << "; ";
+        }
+    }
+    ss << " ]";
+    return ss.str();
 }

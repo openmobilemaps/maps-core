@@ -76,4 +76,8 @@ public:
     static void multiply(const std::vector<float> &M, const std::vector<float> &x, std::vector<float> &result);
 
     static std::vector<float> sTemp;
+
+    static std::string toMatrixString(std::vector<float> &M);
+
+    static std::string toVectorString(std::vector<float> &v);
 };

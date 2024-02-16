@@ -13,6 +13,14 @@
                           curT:(int32_t)curT
                           zoom:(double)zoom;
 
+- (void)onCameraChange:(nonnull NSArray<NSNumber *> *)viewMatrix
+      projectionMatrix:(nonnull NSArray<NSNumber *> *)projectionMatrix
+           verticalFov:(float)verticalFov
+         horizontalFov:(float)horizontalFov
+                 width:(float)width
+                height:(float)height
+    focusPointAltitude:(float)focusPointAltitude;
+
 - (void)setMinZoomLevelIdentifier:(nullable NSNumber *)value;
 
 - (nullable NSNumber *)getMinZoomLevelIdentifier;

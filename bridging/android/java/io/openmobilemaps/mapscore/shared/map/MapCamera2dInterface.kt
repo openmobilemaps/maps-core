@@ -10,7 +10,7 @@ abstract class MapCamera2dInterface {
 
     companion object {
         @JvmStatic
-        external fun create(mapInterface: MapInterface, screenDensityPpi: Float): MapCamera2dInterface
+        external fun create(mapInterface: MapInterface, screenDensityPpi: Float, is3D: Boolean): MapCamera2dInterface
     }
 
     abstract fun freeze(freeze: Boolean)

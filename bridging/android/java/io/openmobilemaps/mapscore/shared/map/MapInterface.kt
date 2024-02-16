@@ -10,10 +10,10 @@ abstract class MapInterface {
 
     companion object {
         @JvmStatic
-        external fun create(graphicsFactory: io.openmobilemaps.mapscore.shared.graphics.objects.GraphicsObjectFactoryInterface, shaderFactory: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderFactoryInterface, renderingContext: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, mapConfig: MapConfig, scheduler: io.openmobilemaps.mapscore.shared.map.scheduling.SchedulerInterface, pixelDensity: Float): MapInterface
+        external fun create(graphicsFactory: io.openmobilemaps.mapscore.shared.graphics.objects.GraphicsObjectFactoryInterface, shaderFactory: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderFactoryInterface, renderingContext: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, mapConfig: MapConfig, scheduler: io.openmobilemaps.mapscore.shared.map.scheduling.SchedulerInterface, pixelDensity: Float, is3D: Boolean): MapInterface
 
         @JvmStatic
-        external fun createWithOpenGl(mapConfig: MapConfig, pixelDensity: Float): MapInterface
+        external fun createWithOpenGl(mapConfig: MapConfig, pixelDensity: Float, is3D: Boolean): MapInterface
     }
 
     abstract fun setCallbackHandler(callbackInterface: MapCallbackInterface?)

@@ -33,7 +33,7 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapInterface_
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapInterface_create(JNIEnv* jniEnv, jobject /*this*/, ::djinni_generated::NativeGraphicsObjectFactoryInterface::JniType j_graphicsFactory, ::djinni_generated::NativeShaderFactoryInterface::JniType j_shaderFactory, ::djinni_generated::NativeRenderingContextInterface::JniType j_renderingContext, jobject j_mapConfig, ::djinni_generated::NativeSchedulerInterface::JniType j_scheduler, jfloat j_pixelDensity)
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapInterface_create(JNIEnv* jniEnv, jobject /*this*/, ::djinni_generated::NativeGraphicsObjectFactoryInterface::JniType j_graphicsFactory, ::djinni_generated::NativeShaderFactoryInterface::JniType j_shaderFactory, ::djinni_generated::NativeRenderingContextInterface::JniType j_renderingContext, jobject j_mapConfig, ::djinni_generated::NativeSchedulerInterface::JniType j_scheduler, jfloat j_pixelDensity, jboolean j_is3D)
 {
     try {
         auto r = ::MapInterface::create(::djinni_generated::NativeGraphicsObjectFactoryInterface::toCpp(jniEnv, j_graphicsFactory),
@@ -41,16 +41,18 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapInterfa
                                         ::djinni_generated::NativeRenderingContextInterface::toCpp(jniEnv, j_renderingContext),
                                         ::djinni_generated::NativeMapConfig::toCpp(jniEnv, j_mapConfig),
                                         ::djinni_generated::NativeSchedulerInterface::toCpp(jniEnv, j_scheduler),
-                                        ::djinni::F32::toCpp(jniEnv, j_pixelDensity));
+                                        ::djinni::F32::toCpp(jniEnv, j_pixelDensity),
+                                        ::djinni::Bool::toCpp(jniEnv, j_is3D));
         return ::djinni::release(::djinni_generated::NativeMapInterface::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapInterface_createWithOpenGl(JNIEnv* jniEnv, jobject /*this*/, jobject j_mapConfig, jfloat j_pixelDensity)
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapInterface_createWithOpenGl(JNIEnv* jniEnv, jobject /*this*/, jobject j_mapConfig, jfloat j_pixelDensity, jboolean j_is3D)
 {
     try {
         auto r = ::MapInterface::createWithOpenGl(::djinni_generated::NativeMapConfig::toCpp(jniEnv, j_mapConfig),
-                                                  ::djinni::F32::toCpp(jniEnv, j_pixelDensity));
+                                                  ::djinni::F32::toCpp(jniEnv, j_pixelDensity),
+                                                  ::djinni::Bool::toCpp(jniEnv, j_is3D));
         return ::djinni::release(::djinni_generated::NativeMapInterface::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }

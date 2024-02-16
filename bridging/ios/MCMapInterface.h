@@ -27,10 +27,12 @@
                    renderingContext:(nullable id<MCRenderingContextInterface>)renderingContext
                           mapConfig:(nonnull MCMapConfig *)mapConfig
                           scheduler:(nullable id<MCSchedulerInterface>)scheduler
-                       pixelDensity:(float)pixelDensity;
+                       pixelDensity:(float)pixelDensity
+                               is3D:(BOOL)is3D;
 
 + (nullable MCMapInterface *)createWithOpenGl:(nonnull MCMapConfig *)mapConfig
-                                 pixelDensity:(float)pixelDensity;
+                                 pixelDensity:(float)pixelDensity
+                                         is3D:(BOOL)is3D;
 
 - (void)setCallbackHandler:(nullable id<MCMapCallbackInterface>)callbackInterface;
 

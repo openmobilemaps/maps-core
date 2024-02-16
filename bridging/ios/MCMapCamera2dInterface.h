@@ -14,7 +14,8 @@
 @interface MCMapCamera2dInterface : NSObject
 
 + (nullable MCMapCamera2dInterface *)create:(nullable MCMapInterface *)mapInterface
-                           screenDensityPpi:(float)screenDensityPpi;
+                           screenDensityPpi:(float)screenDensityPpi
+                                       is3D:(BOOL)is3D;
 
 - (void)freeze:(BOOL)freeze;
 

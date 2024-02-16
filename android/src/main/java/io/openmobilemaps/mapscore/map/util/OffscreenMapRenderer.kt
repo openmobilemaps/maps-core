@@ -28,7 +28,8 @@ open class OffscreenMapRenderer(val sizePx: Vec2I, val density: Float = 72f) : G
 	open fun setupMap(coroutineScope: CoroutineScope, mapConfig: MapConfig, useMSAA: Boolean = false) {
 		val mapInterface = MapInterface.createWithOpenGl(
 			mapConfig,
-			density
+			density,
+			false
 		)
 		mapInterface.setCallbackHandler(object : MapCallbackInterface() {
 			override fun invalidate() {

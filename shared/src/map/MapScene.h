@@ -21,7 +21,7 @@
 class MapScene : public MapInterface, public SceneCallbackInterface, public SchedulerGraphicsTaskCallbacks, public std::enable_shared_from_this<MapScene> {
   public:
     MapScene(std::shared_ptr<SceneInterface> scene, const MapConfig &mapConfig,
-             const std::shared_ptr<::SchedulerInterface> &scheduler, float pixelDensity);
+             const std::shared_ptr<::SchedulerInterface> &scheduler, float pixelDensity, bool is3D);
 
     virtual std::shared_ptr<::GraphicsObjectFactoryInterface> getGraphicsObjectFactory() override;
 
