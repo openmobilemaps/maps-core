@@ -37,7 +37,6 @@ buildscript {
 
 repositories {
 	google()
-	maven ubiqueMaven
 	mavenCentral()
 }
 
