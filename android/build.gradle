@@ -160,10 +160,10 @@ publishing {
 	repositories {
 		maven {
 			name = "UbiqueMaven"
-			url = ubiqueUrl
+			url = System.getenv('UBIQUE_ARTIFACTORY_URL') ?: readPropertyWithDefault('ubiqueArtifactoryUrl', '')
 			credentials {
-				username = ubiqueUser
-				password = ubiquePass
+				username = System.getenv('UBIQUE_ARTIFACTORY_USER') ?: readPropertyWithDefault('ubiqueArtifactoryUser', '')
+				password = System.getenv('UBIQUE_ARTIFACTORY_PASS') ?: readPropertyWithDefault('ubiqueArtifactoryPass', '')
 			}
 		}
 	}
