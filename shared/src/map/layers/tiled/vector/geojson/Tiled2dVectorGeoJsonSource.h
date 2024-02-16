@@ -70,7 +70,14 @@ public:
         }
     }
 
+    void failedToLoad() override {
+        loadFailed = true;
+    }
+
     virtual ::LayerReadyState isReadyToRenderOffscreen() override {
+        if (loadFailed) {
+            return LayerReadyState::ERROR;
+        }
         if (geoJson->isLoaded()) {
             return Tiled2dMapVectorSource::isReadyToRenderOffscreen();
         }
@@ -105,4 +112,6 @@ protected:
 private:
     const std::shared_ptr<GeoJSONVTInterface> geoJson;
     const std::weak_ptr<::MapCamera2dInterface> camera;
+
+    bool loadFailed = false;
 };

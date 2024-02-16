@@ -333,6 +333,7 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
 
     for(const auto &i : splittedTextInfo) {
         if(i.glyphIndex >= 0) {
+            assert(i.glyphIndex < fontResult->fontData->glyphs.size());
             auto &d = fontResult->fontData->glyphs[i.glyphIndex];
 
             auto scale = fontSize * i.scale;
@@ -380,6 +381,9 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
             pen.y += fontSize * lineHeight;
 
             baseLineStartIndex = numberOfCharacters;
+        }
+        else {
+            assert(false);
         }
     }
 
