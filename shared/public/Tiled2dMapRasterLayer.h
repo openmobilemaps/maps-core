@@ -16,6 +16,7 @@
 #include "Tiled2dMapRasterLayerCallbackInterface.h"
 #include "Tiled2dMapRasterLayerInterface.h"
 #include "Tiled2dMapRasterSource.h"
+#include "Tiled2dMapRasterSourceListener.h"
 #include "Tiled2dMapRasterLayerCallbackInterface.h"
 #include "PolygonMaskObject.h"
 #include "ShaderProgramInterface.h"
@@ -24,11 +25,14 @@
 #include <unordered_map>
 #include <map>
 #include <atomic>
+#include "Actor.h"
 
 
 class Tiled2dMapRasterLayer : public Tiled2dMapLayer,
                               public SimpleTouchInterface,
-                              public Tiled2dMapRasterLayerInterface {
+                              public Tiled2dMapRasterLayerInterface,
+                              public ActorObject,
+                              public Tiled2dMapRasterSourceListener {
 public:
     Tiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
                           const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders,
@@ -58,11 +62,7 @@ public:
 
     virtual void resume() override;
 
-    virtual void onTilesUpdated() override;
-
-    virtual void setupTiles(
-            const std::vector<const std::pair<const Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>>> &tilesToSetup,
-            const std::vector<const std::pair<const Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>>> &tilesToClean);
+    virtual void setupTiles();
 
     virtual void generateRenderPasses();
 
@@ -101,11 +101,11 @@ public:
     bool shouldLoadTile(const Tiled2dMapTileInfo &tileInfo);
 
     virtual std::shared_ptr<::Tiled2dMapLayerConfig> getConfig() override;
+                                  
+    void onTilesUpdated(const std::string &layerName, std::unordered_set<Tiled2dMapRasterTileInfo> currentTileInfos) override;
 
+    virtual void setReadyStateListener(const /*not-null*/ std::shared_ptr<::Tiled2dMapReadyStateListener> & listener) override;
 private:
-    virtual void updateMaskObjects(const std::vector<const std::shared_ptr<MaskingObjectInterface>> &newMaskObjects,
-                                   const std::vector<const std::shared_ptr<MaskingObjectInterface>> &obsoleteMaskObjects);
-
     virtual void enableAnimations(bool enabled) override;
 
     virtual LayerReadyState isReadyToRenderOffscreen() override;
@@ -118,12 +118,13 @@ protected:
 
     const std::vector<std::shared_ptr<::LoaderInterface>> tileLoaders;
     std::shared_ptr<ShaderProgramInterface> shader;
-    std::shared_ptr<Tiled2dMapRasterSource> rasterSource;
 
+    Actor<Tiled2dMapRasterSource> rasterSource;
+                                  
     std::atomic_flag updateFlag = ATOMIC_FLAG_INIT;
     std::recursive_mutex updateMutex;
     std::map<Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>> tileObjectMap;
-    std::unordered_map<Tiled2dMapTileInfo, Tiled2dMapLayerMaskWrapper> tileMaskMap;
+    std::unordered_map<Tiled2dMapVersionedTileInfo, Tiled2dMapLayerMaskWrapper> tileMaskMap;
     std::recursive_mutex renderPassMutex;
     std::vector<std::shared_ptr<RenderPassInterface>> renderPasses;
 
@@ -132,4 +133,14 @@ protected:
     ::RasterShaderStyle style = RasterShaderStyle::DEFAULT_STYLE;
     bool animationsEnabled = true;
     bool registerToTouchHandler = true;
+
+    std::vector<std::shared_ptr<MaskingObjectInterface>> newMaskObjects;
+    std::vector<std::shared_ptr<MaskingObjectInterface>> obsoleteMaskObjects;
+    std::vector<std::pair<Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>>> tilesToSetup;
+    std::vector<std::pair<Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>>> tilesToClean;
+    std::vector<Tiled2dMapRasterTileInfo> tileStateUpdates;
+
+    void updateReadyStateListenerIfNeeded();
+    std::optional<LayerReadyState> lastReadyState;
+    std::shared_ptr<::Tiled2dMapReadyStateListener> readyStateListener;
 };

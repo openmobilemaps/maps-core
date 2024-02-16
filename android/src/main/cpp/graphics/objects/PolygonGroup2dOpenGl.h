@@ -46,18 +46,25 @@ class PolygonGroup2dOpenGl : public GraphicsObjectInterface,
 
     virtual void setIsInverseMasked(bool inversed) override;
 
+    void setDebugLabel(const std::string &label) override;
+
 protected:
 
     virtual void removeGlBuffers();
 
     std::shared_ptr<ShaderProgramInterface> shaderProgram;
+    std::string programName;
+    int program = 0;
+
     int mvpMatrixHandle;
+    int scaleFactorHandle;
     int positionHandle;
     int styleIndexHandle;
-    GLuint attribBuffer;
+    GLuint attribBuffer = -1;
     std::vector<GLfloat> polygonAttributes;
-    GLuint indexBuffer;
+    GLuint indexBuffer = -1;
     std::vector<GLushort> polygonIndices;
+    bool glDataBuffersGenerated = false;
 
     bool dataReady = false;
     bool ready = false;

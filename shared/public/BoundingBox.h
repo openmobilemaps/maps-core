@@ -19,8 +19,10 @@ class BoundingBox: public BoundingBoxInterface, public std::enable_shared_from_t
   public:
     BoundingBox();
 
-    BoundingBox(const std::string &systemIdentifier);
+    BoundingBox(const int32_t systemIdentifier);
     BoundingBox(const Coord& p);
+
+    operator bool();
 
     void addPoint(const double x, const double y, const double z);
     void addPoint(const Coord& p);
@@ -31,10 +33,10 @@ class BoundingBox: public BoundingBoxInterface, public std::enable_shared_from_t
     Coord getCenter();
     Coord getMin();
     Coord getMax();
-    std::string getSystemIdentifier();
+    int32_t getSystemIdentifier();
 
     Coord center() const;
     Coord min;
     Coord max;
-    std::string systemIdentifier;
+    int32_t systemIdentifier;
 };

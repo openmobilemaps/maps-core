@@ -22,7 +22,7 @@ rect_d = record {
 vec_2_f = record {
     x: f32;
     y: f32;
-}
+} deriving (eq, ord)
 
 vec_3_f = record {
     x: f32;
@@ -44,7 +44,7 @@ vec_3_i = record {
 vec_2_d = record {
     x: f64;
     y: f64;
-}
+} deriving (eq, ord)
 
 vec_3_d = record {
     x: f64;
@@ -57,6 +57,24 @@ quad_2d_d = record {
     top_right: vec_2_d;
     bottom_right: vec_2_d;
     bottom_left: vec_2_d;
+}
+
+circle_d = record {
+    x: f64;
+    y: f64;
+    radius: f64;
+}
+
+circle_f = record {
+    x: f32;
+    y: f32;
+    radius: f32;
+}
+
+circle_i = record {
+    x: i32;
+    y: i32;
+    radius: i32;
 }
 
 color = record {

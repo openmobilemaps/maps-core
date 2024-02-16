@@ -6,7 +6,7 @@
   <img width="200" height="45" src="../logo.svg" />
   <br />
   <br />
-  The lightweight and modern Map SDK for Android (6.0+) and iOS (10+)
+  The lightweight and modern Map SDK for Android (8.0+, OpenGl ES 3.2) and iOS (10+)
   <br />
   <br />
   <a href="https://openmobilemaps.io/">openmobilemaps.io</a>
@@ -65,7 +65,7 @@ This library is available on MavenCentral. To add it to your Android project, ad
 
 ```
 dependencies {
-  implementation 'io.openmobilemaps:mapscore:1.5.3'
+  implementation 'io.openmobilemaps:mapscore:2.0.0'
 }
 ```
 
@@ -84,10 +84,10 @@ implementation fileTree(dir: 'libs', include: ['*.aar'])
 When Open Maps Mobile is included as .aar (and not as JCenter dependency), the following dependencies in the apps `build.gradle` are necessary:
 
 ```
-implementation "androidx.activity:activity-ktx:1.1.0"
-implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.2.0"
-implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.2"
-implementation 'com.squareup.okhttp3:okhttp:4.7.2' // used for the default TextureLoader
+implementation "androidx.activity:activity-ktx:1.8.2"
+implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.7.0"
+implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3"
+implementation 'com.squareup.okhttp3:okhttp:4.12.0' // used for the default DataLoader
 ```
 
 <h2>How to use</h2>
@@ -95,108 +95,43 @@ implementation 'com.squareup.okhttp3:okhttp:4.7.2' // used for the default Textu
 ### Initializing the library
 
 To use the library, it needs to be initialized as early as possible, e.g. in the oOnCreate(), of the hosting Application by calling:
+
 ```kotlin
 MapsCore.initialize()
 ```
 
 ### MapView
 
-The main ui element to use Open Mobile Maps is the MapView provided with it. To use it, the following steps are necessary to set it up:
-
-```kotlin
-val mapView = findViewById<MapView>(R.id.mapView)
-mapView.setupMap(MapConfig(...))
-mapView.registerLifecycle(lifecycle)
-```
-
-The map needs to be initialized with a `MapConfig`, which specifies the coordinate system used and the respective bounds and zoom levels that the camera operates in. Additionally, the `MapView` needs to be registered to a lifecycle that also provides a coroutine context, in which the maps tasks can be scheduled (e.g. for tile loading).
-
-### Displaying a Tiled Raster Map
-
-A standard use-case is to display content from a tile-server as a layer in the map, e.g. one containing data from [OpenStreetMap](https://wiki.openstreetmap.org/). In this example case, the map is a projection in the EPSG:3857 system. Thus the `MapView` is recommended to be initialized with a matching `MapConfig`.
+The main ui element to use Open Mobile Maps is the MapView provided with it. To use it, the following steps are necessary to set it up, after retrieving a reference to it:
 
 ```kotlin
 mapView.setupMap(MapConfig(CoordinateSystemFactory.getEpsg3857System()))
+mapView.registerLifecycle(lifecycle)
 ```
 
-To display the tiles, a Tiled2dMapRasterLayer must be created with both a Tiled2dMapLayerConfig and the implementation of a TextureLoader.
+The map needs to be initialized with a `MapConfig`, which specifies the coordinate system that the camera operates in. A popular default is the web-mercator system (EPSG 3857). Additionally, the `MapView` needs to be registered to a lifecycle.
+
+### Displaying a Tiled Raster Map
+
+This MapView can be filled with layers. The simplest case is to add a raster layer (e.g. one containing the data from [OpenStreetMap](https://wiki.openstreetmap.org/)), for which the Tiled2dMapRasterLayer provides a convenience initializer to create raster layer with web mercator tiles.
 
 ```kotlin
-val tiledLayer = Tiled2dMapRasterLayerInterface.create(layerConfig, textureLoader)
+val tiledRasterLayer = TiledRasterLayer()
 ```
 
-Open Maps Mobile provides a default implementation for a `DataLoader`, which uses OkHttp to load a bitmap from a given URL. Of course, a custom implementation of the `LoaderInterface` can be used as well.
+Per default, the above constructor uses the default implementation of the `DataLoader` with some default parameters, which uses OkHttp to load a bitmap from a given URL. It can be instantiated and supplied to the `TiledRasterLayer` with additional parameter configurations. Of course, even a fully custom implementation of the `LoaderInterface` can be used as well. For example:
 
 ```kotlin
-val textureLoader = DataLoader(this, cacheDir, 50L * 1024L * 1024L)
+val dataLoader = DataLoader(this, cacheDir, 50L * 1024L * 1024L, "example-referrer")
 ```
 
-The `LayerConfig` contains the information needed for the layer to compute the visible tiles in the current camera configuration, as well as to load and display them.
+For a more custom layer creation, you can directly use the methods provided within the `Tiled2dRasterLayerInterface`. Finally, the layer reference can be added to the MapView.
 
 ```kotlin
-val layerConfig = object : Tiled2dMapLayerConfig() {
-			// Defines the bounds of the layer and implicitly the coordinate system used by the layer as well
-			val epsg3857Bounds: RectCoord = RectCoord(
-				Coord(CoordinateSystemIdentifiers.EPSG3857(), -20037508.34, 20037508.34, 0.0),
-				Coord(CoordinateSystemIdentifiers.EPSG3857(), 20037508.34, -20037508.34, 0.0)
-			)
-    
-			// Defines to map coordinate system of the layer
-			override fun getCoordinateSystemIdentifier() : String = CoordinateSystemIdentifiers.EPSG3857()
-
-	        // Name of the layer
-			override fun getLayerName(): String = "OSMLayer"
-
-			// Defines the url-pattern to load tiles. Enter a valid OSM tile server here
-			override fun getTileUrl(x: Int, y: Int, zoom: Int): String = 
-				"https://add-osm-web-server-address-here/$zoom/$x/$y.png"
-
-			// Defines both an additional scale factor for the tiles, as well as how many
-			// layers above the ideal one should be loaded an displayed as well.
-			override fun getZoomInfo(): Tiled2dMapZoomInfo = Tiled2dMapZoomInfo(
-				zoomLevelScaleFactor = 0.6f,
-				numDrawPreviousLayers = 2,
-				adaptScaleToScreen = true
-			)
-
-			// List of valid zoom-levels and their target zoom-value, the tile size in
-			// the layers coordinate system, the number of tiles on that level and the
-			// zoom identifier used for the tile-url (see getTileUrl above)
-			override fun getZoomLevelInfos(): ArrayList<Tiled2dMapZoomLevelInfo> = ArrayList(
-					listOf(
-						Tiled2dMapZoomLevelInfo(559082264.029, 40075016f, 1, 1, 1, 0, epsg3857Bounds),
-						Tiled2dMapZoomLevelInfo(279541132.015, 20037508f, 2, 2, 1, 1, epsg3857Bounds),
-						Tiled2dMapZoomLevelInfo(139770566.007, 10018754f, 4, 4, 1, 2, epsg3857Bounds),
-						Tiled2dMapZoomLevelInfo(69885283.0036, 5009377.1f, 8, 8, 1, 3, epsg3857Bounds),
-						Tiled2dMapZoomLevelInfo(34942641.5018, 2504688.5f, 16, 16, 1, 4, epsg3857Bounds),
-						Tiled2dMapZoomLevelInfo(17471320.7509, 1252344.3f, 32, 32, 1, 5, epsg3857Bounds),
-						Tiled2dMapZoomLevelInfo(8735660.37545, 626172.1f, 64, 64, 1, 6, epsg3857Bounds),
-						Tiled2dMapZoomLevelInfo(4367830.18773, 313086.1f, 128, 128, 1, 7, epsg3857Bounds),
-						Tiled2dMapZoomLevelInfo(2183915.09386, 156543f, 256, 256, 1, 8, epsg3857Bounds),
-						Tiled2dMapZoomLevelInfo(1091957.54693, 78271.5f, 512, 512, 1, 9, epsg3857Bounds),
-						Tiled2dMapZoomLevelInfo(545978.773466, 39135.8f, 1024, 1024, 1, 10, epsg3857Bounds),
-						Tiled2dMapZoomLevelInfo(272989.386733, 19567.9f, 2048, 2048, 1, 11, epsg3857Bounds),
-						Tiled2dMapZoomLevelInfo(136494.693366, 9783.94f, 4096, 4096, 1, 12, epsg3857Bounds),
-						Tiled2dMapZoomLevelInfo(68247.3466832, 4891.97f, 8192, 8192, 1, 13, epsg3857Bounds),
-						Tiled2dMapZoomLevelInfo(34123.6733416, 2445.98f, 16384, 16384, 1, 14, epsg3857Bounds),
-						Tiled2dMapZoomLevelInfo(17061.8366708, 1222.99f, 32768, 32768, 1, 15, epsg3857Bounds),
-						Tiled2dMapZoomLevelInfo(8530.91833540, 611.496f, 65536, 65536, 1, 16, epsg3857Bounds),
-						Tiled2dMapZoomLevelInfo(4265.45916770, 305.748f, 131072, 131072, 1, 17, epsg3857Bounds),
-						Tiled2dMapZoomLevelInfo(2132.72958385, 152.874f, 262144, 262144, 1, 18, epsg3857Bounds),
-						Tiled2dMapZoomLevelInfo(1066.36479193, 76.437f, 524288, 524288, 1, 19, epsg3857Bounds),
-						Tiled2dMapZoomLevelInfo(533.18239597, 38.2185, 1_048_576, 1_048_576, 1, 19, epsg3857Bounds)
-					)
-				)
-			}
+mapView.addLayer(tiledRasterLayer)
 ```
 
-Finally, the layer can be added to the MapView.
-
-```kotlin
-mapView.addLayer(tiledLayer.asLayerInterface())
-```
-
-### Parsing a WMTS Capability 
+#### Parsing a WMTS Capability 
 
 Open Mobile Maps supports the [WMTS standard](https://en.wikipedia.org/wiki/Web_Map_Tile_Service) and can parse their Capability XML file to generate raster layer configurations.
 
@@ -206,11 +141,96 @@ val ressource = WmtsCapabilitiesResource.create(xml)
 The created resource object is then capable of creating a layer object with a given identifier.
 
 ```kotlin
-val layer = ressource.createLayer("identifier", textureLoader)
+val layer = ressource.createLayer("identifier", dataLoader)
 mapView.addLayer(layer.asLayerInterface())
 ```
 
 This feature is still being improved to support a wider range of WMTS capabilities.
+
+#### Custom Tiled2dLayerConfig
+
+To use different raster tile services with different tile pyramids, you can create your own layer config. The layer config contains the information needed for the layer to compute the visible tiles in the current camera configuration, as well as to load and display them.
+
+```kotlin
+        private val customConfig = object : Tiled2dMapLayerConfig() {
+            // Defines the bounds of the layer and implicitly the coordinate system used by the layer as well
+            val epsg3857Bounds: RectCoord = RectCoord(
+                Coord(CoordinateSystemIdentifiers.EPSG3857(), -20037508.34, 20037508.34, 0.0),
+                Coord(CoordinateSystemIdentifiers.EPSG3857(), 20037508.34, -20037508.34, 0.0)
+            )
+
+            // Defines to map coordinate system of the layer
+            override fun getCoordinateSystemIdentifier() : Int = CoordinateSystemIdentifiers.EPSG3857()
+
+            // The layer's name
+            override fun getLayerName(): String = "OSM_Layer"
+
+            // Defines the url-pattern to load tiles. Enter a valid OSM tile server here
+            override fun getTileUrl(x: Int, y: Int, t: Int, zoom: Int): String {
+                return "https://a.tile.openstreetmap.org/$zoom/$x/$y.png"
+            }
+
+            // Defines origin corner of the data in vector tiles
+            override fun getVectorSettings(): Tiled2dMapVectorSettings? = null
+
+            // Defines the extent (in layer system coordinates) that defines the bounds of this layer
+            override fun getBounds(): RectCoord? = null
+
+            // Defines both an additional scale factor for the tiles (and if they are scaled to match the target
+            // devices screen density), how many layers above the ideal one should be loaded an displayed as well,
+            // as well as if the layer is drawn, when the zoom is smaller/larger than the valid range
+			override fun getZoomInfo(): Tiled2dMapZoomInfo {
+				return Tiled2dMapZoomInfo(
+					zoomLevelScaleFactor = 0.6667f,
+					numDrawPreviousLayers = 10,
+					adaptScaleToScreen = true,
+					maskTile = false,
+					underzoom = true,
+					overzoom = true
+				)
+			}
+
+            // List of valid zoom-levels and their target zoom-value, the tile size in
+            // the layers coordinate system, the number of tiles on that level and the
+            // zoom identifier used for the tile-url (see getTileUrl above)
+            override fun getZoomLevelInfos(): ArrayList<Tiled2dMapZoomLevelInfo> = ArrayList(
+                listOf(
+                    Tiled2dMapZoomLevelInfo(559082264.029, 40075016f, 1, 1, 1, 0, epsg3857Bounds),
+                    Tiled2dMapZoomLevelInfo(279541132.015, 20037508f, 2, 2, 1, 1, epsg3857Bounds),
+                    Tiled2dMapZoomLevelInfo(139770566.007, 10018754f, 4, 4, 1, 2, epsg3857Bounds),
+                    Tiled2dMapZoomLevelInfo(69885283.0036, 5009377.1f, 8, 8, 1, 3, epsg3857Bounds),
+                    Tiled2dMapZoomLevelInfo(34942641.5018, 2504688.5f, 16, 16, 1, 4, epsg3857Bounds),
+                    Tiled2dMapZoomLevelInfo(17471320.7509, 1252344.3f, 32, 32, 1, 5, epsg3857Bounds),
+                    Tiled2dMapZoomLevelInfo(8735660.37545, 626172.1f, 64, 64, 1, 6, epsg3857Bounds),
+                    Tiled2dMapZoomLevelInfo(4367830.18773, 313086.1f, 128, 128, 1, 7, epsg3857Bounds),
+                    Tiled2dMapZoomLevelInfo(2183915.09386, 156543f, 256, 256, 1, 8, epsg3857Bounds),
+                    Tiled2dMapZoomLevelInfo(1091957.54693, 78271.5f, 512, 512, 1, 9, epsg3857Bounds),
+                    Tiled2dMapZoomLevelInfo(545978.773466, 39135.8f, 1024, 1024, 1, 10, epsg3857Bounds),
+                    Tiled2dMapZoomLevelInfo(272989.386733, 19567.9f, 2048, 2048, 1, 11, epsg3857Bounds),
+                    Tiled2dMapZoomLevelInfo(136494.693366, 9783.94f, 4096, 4096, 1, 12, epsg3857Bounds),
+                    Tiled2dMapZoomLevelInfo(68247.3466832, 4891.97f, 8192, 8192, 1, 13, epsg3857Bounds),
+                    Tiled2dMapZoomLevelInfo(34123.6733416, 2445.98f, 16384, 16384, 1, 14, epsg3857Bounds),
+                    Tiled2dMapZoomLevelInfo(17061.8366708, 1222.99f, 32768, 32768, 1, 15, epsg3857Bounds),
+                    Tiled2dMapZoomLevelInfo(8530.91833540, 611.496f, 65536, 65536, 1, 16, epsg3857Bounds),
+                    Tiled2dMapZoomLevelInfo(4265.45916770, 305.748f, 131072, 131072, 1, 17, epsg3857Bounds),
+                    Tiled2dMapZoomLevelInfo(2132.72958385, 152.874f, 262144, 262144, 1, 18, epsg3857Bounds),
+                    Tiled2dMapZoomLevelInfo(1066.36479193, 76.437f, 524288, 524288, 1, 19, epsg3857Bounds),
+                    Tiled2dMapZoomLevelInfo(533.18239597, 38.2185f, 1048576, 1048576, 1, 20, epsg3857Bounds)
+                )
+            )
+        }
+```
+
+### Displaying a Tiled Vector Map
+
+Open Mobile Maps supports most of the [Vector tiles standard](https://docs.mapbox.com/data/tilesets/guides/vector-tiles-standards/). To add a layer simply reference the style URL.
+
+```kotlin
+val tiledVectorLayer = TiledVectorLayer(context, "https://www.sample.org/base-map/style.json")
+mapView.add(tiledVectorLayer)
+```
+
+Additional features and differences will be documented soon.
 
 ### Polygon layer
 
@@ -228,17 +248,21 @@ polygonLayer.add(
 		highlightColor = Color(1.0f, 0.4f, 0.4f, 0.7f),
 	)
 )
+
+// Optional click interaction
+polygonLayer.setLayerClickable(true)
 polygonLayer.setCallbackHandler(object : PolygonLayerCallbackInterface(){
 	override fun onClickConfirmed(polygon: PolygonInfo) {
 		// React
 	}
 })
+
 mapView.addLayer(polygonLayer.asLayerInterface())
 ```
 
 ### Icon layer
 
-A simple icon layer is implemented as well. This supports displaying textures at the given coordinates. A scale parameter has to be provided which specifies how the icon should be affected by camera movements. In case of user interaction, the given callback handler will be called.
+A simple icon layer is implemented as well. This supports displaying textures at the given coordinates. A scale parameter has to be provided which specifies how the icon should be affected by camera movements. In case of user interaction, the given callback handler will be called. Via the method `setCoordinate(...)` in the IconInfoInterface created by the IconFactory, you can update the position of the icon.`
 
 ```kotlin
 val iconLayer = IconLayerInterface.create()
@@ -248,15 +272,35 @@ val icon = IconFactory.createIcon(
 	coordinate = coordinate,
 	texture = texture,
 	iconSize = Vec2F(iconSize, iconSize),
-	scaleType = IconType.INVARIANT
+	scaleType = IconType.INVARIANT,
+    blendMode = BlendMode.NORMAL
+)
+val iconWithCustomAnchor = IconFactory.createIconWithAnchor(
+	"Icon with a custom Anchor",
+	coordinate = coordinate,
+	texture = texture,
+	iconSize = Vec2F(iconSize, iconSize),
+	scaleType = IconType.INVARIANT,
+	blendMode = BlendMode.NORMAL,
+	iconAnchor = Vec2F(0.5f, 1.0f) // e.g. horizontally centered at the bottom
 )
 iconLayer.add(icon)
+iconLayer.add(iconWithCustomAnchor)
+
+// Optional interaction
+iconLayer.setLayerClickable(true)
 iconLayer.setCallbackHandler(object : IconLayerCallbackInterface(){
 	override fun onClickConfirmed(icons: ArrayList<IconInfoInterface>): Boolean {
 		// React and return true if handled
 		return true
 	}
+
+	override fun onLongPress(icons: ArrayList<IconInfoInterface>): Boolean {
+		// React and return true if handled
+		return true
+	}
 })
+
 mapView.addLayer(iconLayer.asLayerInterface())
 ```
 
@@ -273,13 +317,24 @@ val line = LineFactory.createLine(
 		color = ColorStateList(normal = Color(1.0f, 0.0f, 0.0f, 1.0f), highlighted = Color(1.0f, 0.5f, 0.0f, 1.0f)),
 		gapColor = ColorStateList(normal = Color(0.0f, 0.0f, 0.0f, 0.0f), highlighted = Color(0.0f, 0.0f, 0.0f, 0.0f)),
 		opacity = 1.0f,
+        blur = 0.0f,
 		widthType = SizeType.SCREEN_PIXEL,
 		width = lineWidth,
 		dashArray = arrayListOf(4.0f, 2.0f),
-		lineCap = LineCapType.SQUARE
+		lineCap = LineCapType.SQUARE,
+        offset = 0f
 	)
 )
 lineLayer.add(line)
+
+// Optional click interaction
+lineLayer.setLayerClickable(true)
+lineLayer.setCallbackHandler(object : LineLayerCallbackInterface() {
+	override fun onLineClickConfirmed(line: LineInfoInterface) {
+		// React
+	}
+})
+
 mapView.addLayer(lineLayer.asLayerInterface())
 ```
 
@@ -298,6 +353,8 @@ In the camera, one can also override the default zoom limits with:
 mapView.getCamera().setMinZoom(5000000.0)
 mapView.getCamera().setMaxZoom(300.0)
 ```
+
+Please note, that the MapView must be ready and running to be able to properly compute the requested view bounds. To this end, it provides the `mapViewState` StateFlow that communicates its current `MapViewState`.
 
 ## License
 

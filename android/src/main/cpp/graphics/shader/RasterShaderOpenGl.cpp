@@ -11,13 +11,14 @@
 #include "RasterShaderOpenGl.h"
 #include "OpenGlContext.h"
 
+const std::string RasterShaderOpenGl::programName = "UBMAP_RasterShaderOpenGl";
+
 std::string RasterShaderOpenGl::getProgramName() {
-    return "UBMAP_RasterShaderOpenGl";
+    return programName;
 }
 
 void RasterShaderOpenGl::setupProgram(const std::shared_ptr<::RenderingContextInterface> &context) {
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
-    std::string programName = getProgramName();
 
     int vertexShader = loadShader(GL_VERTEX_SHADER, getVertexShader());
     int fragmentShader = loadShader(GL_FRAGMENT_SHADER, getFragmentShader());
@@ -35,9 +36,13 @@ void RasterShaderOpenGl::setupProgram(const std::shared_ptr<::RenderingContextIn
 }
 
 void RasterShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context) {
+    BaseShaderProgramOpenGl::preRender(context);
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
-    int styleValuesLocation = glGetUniformLocation(openGlContext->getProgram(getProgramName()), "styleValues");
-    glUniform1fv(styleValuesLocation, (GLsizei) styleValues.size(), &styleValues[0]);
+    int styleValuesLocation = glGetUniformLocation(openGlContext->getProgram(programName), "styleValues");
+    {
+        std::lock_guard<std::mutex> lock(dataMutex);
+        glUniform1fv(styleValuesLocation, (GLsizei) styleValues.size(), &styleValues[0]);
+    }
 }
 
 std::shared_ptr<ShaderProgramInterface> RasterShaderOpenGl::asShaderProgramInterface() {
@@ -45,32 +50,38 @@ std::shared_ptr<ShaderProgramInterface> RasterShaderOpenGl::asShaderProgramInter
 }
 
 void RasterShaderOpenGl::setStyle(const RasterShaderStyle &style) {
+    std::lock_guard<std::mutex> lock(dataMutex);
      styleValues[0] = style.opacity;
      styleValues[1] = style.contrast > 0.0f ? (1.0f / (1.0f - style.contrast)) : (1.0f + style.contrast);
      styleValues[2] = style.saturation > 0.0f ? (1.0f - 1.0f / (1.001f - style.saturation)) : (-style.saturation);
      styleValues[3] = style.brightnessMin;
      styleValues[4] = style.brightnessMax;
+     styleValues[5] = style.gamma;
 }
 
 std::string RasterShaderOpenGl::getFragmentShader() {
-    return UBRendererShaderCode(precision mediump float;
-                                        uniform sampler2D texture;
-                                        varying vec2 v_texcoord;
-                                        // [0] opacity, 0-1 | [1] contrast, 0-1 | [2] saturation, 1-0 | [3] brightnessMin, 0-1 | [4] brightnessMax, 0-1
-                                        uniform highp float styleValues[5];
+    return OMMVersionedGlesShaderCode(320 es,
+                                      precision mediump float;
+                                      uniform sampler2D textureSampler;
+                                      // [0] opacity, 0-1 | [1] contrast, 0-1 | [2] saturation, 1-0 | [3] brightnessMin, 0-1 | [4] brightnessMax, 0-1 | [5] gamma, 0.1-10
+                                      uniform highp float styleValues[6];
+                                      in vec2 v_texcoord;
+                                      out vec4 fragmentColor;
 
-                                        void main() {
-                                            vec4 color = texture2D(texture, v_texcoord);
-                                            if (styleValues[0] == 0.0) {
-                                                discard;
-                                            }
-                                            color.a *= styleValues[0];
-                                            float average = (color.r + color.g + color.b) / 3.0;
-                                            vec3 rgb = color.rgb + (vec3(average) - color.rgb) * styleValues[2];
-                                            rgb = (rgb - vec3(0.5)) * styleValues[1] + 0.5;
+                                      void main() {
+                                          vec4 color = texture(textureSampler, v_texcoord);
+                                          if (styleValues[0] == 0.0 || color.a == 0.0) {
+                                              discard;
+                                          }
+                                          float average = (color.r + color.g + color.b) / 3.0;
+                                          vec3 rgb = color.rgb + (vec3(average) - color.rgb) * styleValues[2];
+                                          rgb = (rgb - vec3(0.5)) * styleValues[1] + 0.5;
 
-                                            vec3 brightnessMin = vec3(styleValues[3]);
-                                            vec3 brightnessMax = vec3(styleValues[4]);
-                                            gl_FragColor = vec4(mix(brightnessMin, brightnessMax, rgb) * color.a, color.a);
-                                        });
+                                          vec3 brightnessMin = vec3(styleValues[3]);
+                                          vec3 brightnessMax = vec3(styleValues[4]);
+
+                                          rgb = pow(rgb, vec3(1.0 / styleValues[5]));
+                                          rgb = mix(brightnessMin, brightnessMax, min(rgb / color.a, vec3(1.0)));
+                                          fragmentColor = vec4(rgb * color.a, color.a) * styleValues[0];
+                                      });
 }

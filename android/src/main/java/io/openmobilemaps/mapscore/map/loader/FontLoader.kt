@@ -3,6 +3,7 @@ package io.openmobilemaps.mapscore.map.loader
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.util.Log
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.Moshi
 import io.openmobilemaps.mapscore.graphics.BitmapTextureHolder
@@ -10,83 +11,154 @@ import io.openmobilemaps.mapscore.shared.graphics.common.Quad2dD
 import io.openmobilemaps.mapscore.shared.graphics.common.Vec2D
 import io.openmobilemaps.mapscore.shared.map.loader.*
 
-open class FontLoader(context: Context, private val dpFactor: Float) : FontLoaderInterface() {
+open class FontLoader(context: Context, private val dpFactor: Float = context.resources.displayMetrics.density) : FontLoaderInterface() {
 
-    private val moshi = Moshi.Builder().build();
-    private val moshiFontAdapter = moshi.adapter(FontDataJson::class.java)
+	/**
+	 * Create a FontLoader that loads all fonts from the provided asset folder (e.g. "fonts/"). For each available font, there is
+	 * expected to be a .json File with the glyph descriptions and a .png with the font texture.
+	 */
+	constructor(context: Context, fontAssetFolder: String, dpFactor: Float = context.resources.displayMetrics.density)
+			: this(context, dpFactor) {
+		val assetFiles = context.assets.list(fontAssetFolder)?.mapNotNull { it.split('.').firstOrNull() }?.toSet()?.toList() ?: return
+		assetFiles.forEach { fontPath ->
+			val jsonString =
+				context.resources.assets.open("$fontAssetFolder$fontPath.json").bufferedReader().use { it.readText() }
+			val fontAtlas = BitmapFactory.decodeStream(context.resources.assets.open("$fontAssetFolder$fontPath.png"))
+			addFont(jsonString, fontAtlas)
+		}
+	}
 
-    private val fontMap: MutableMap<String, FontDataHolder> = mutableMapOf()
+	constructor(context: Context, fonts: List<FontDescription>, dpFactor: Float = context.resources.displayMetrics.density)
+			: this(context, dpFactor) {
+		fonts.forEach { font -> addFont(font.fontJson, font.fontTexture) }
+	}
 
-    fun addFont(fontDataJson: String, fontAtlas: Bitmap) {
+	private val moshi = Moshi.Builder().build();
+	private val moshiFontAdapter = moshi.adapter(FontDataJson::class.java)
 
-        val fontJson =
-            moshiFontAdapter.fromJson(fontDataJson) ?: throw IllegalArgumentException("Invalid json format for font data!")
+	private val fontMap: MutableMap<String, FontDataHolder> = mutableMapOf()
 
-        val fontWrapper = FontWrapper(
-            fontJson.name,
-            fontJson.ascender,
-            fontJson.descender,
-            fontJson.space_advance,
-            Vec2D(fontJson.bitmap_width.toDouble(), fontJson.bitmap_height.toDouble()),
-            fontJson.size.toDouble() * dpFactor
-        )
-        val glyphs = fontJson.glyph_data.map { glyphEntry ->
-            val glyphJson = glyphEntry.value
-            FontGlyph(
-                glyphJson.charcode,
-                Vec2D(glyphJson.advance_x, glyphJson.advance_y ?: 0.0),
-                Vec2D(glyphJson.bbox_width, glyphJson.bbox_height),
-                Vec2D(glyphJson.bearing_x, glyphJson.bearing_y),
-                Quad2dD(
-                    Vec2D(glyphJson.s0, 1.0 - glyphJson.t0),
-                    Vec2D(glyphJson.s1, 1.0 - glyphJson.t0),
-                    Vec2D(glyphJson.s1, 1.0 - glyphJson.t1),
-                    Vec2D(glyphJson.s0, 1.0 - glyphJson.t1)
-                )
-            )
-        }.toCollection(ArrayList())
-        fontMap[fontJson.name] = FontDataHolder(BitmapTextureHolder(fontAtlas), FontData(fontWrapper, glyphs))
-    }
+	fun addFont(fontDataJson: String, fontAtlas: Bitmap) {
+		val fontJson =
+			moshiFontAdapter.fromJson(fontDataJson) ?: throw IllegalArgumentException("Invalid json format for font data!")
 
-    fun addFont(fontData: FontData, fontAtlas: BitmapTextureHolder) {
-        fontMap[fontData.info.name] = FontDataHolder(fontAtlas, fontData)
-    }
+		val imageSize = fontJson.common.scaleW.toDouble()
+		val size = fontJson.info.size.toDouble()
 
-    override fun loadFont(font: Font): FontLoaderResult =
-        fontMap[font.name]?.let { fontDataHolder ->
-            FontLoaderResult(fontDataHolder.fontTexture, fontDataHolder.fontData, LoaderStatus.OK)
-        } ?: FontLoaderResult(null, null, LoaderStatus.ERROR_OTHER)
+		val fontWrapper = FontWrapper(
+			fontJson.info.face,
+			fontJson.common.lineHeight.toDouble() / size,
+			fontJson.common.base.toDouble() / size,
+			Vec2D(imageSize, imageSize),
+			size * dpFactor
+		)
 
+		val glyphs = fontJson.chars.map { glyphEntry ->
+			var s0 = glyphEntry.x.toDouble()
+			var s1 = s0 + glyphEntry.width.toDouble()
+			var t0 = glyphEntry.y.toDouble()
+			var t1 = t0 + glyphEntry.height.toDouble()
 
-    private data class FontDataHolder(val fontTexture: BitmapTextureHolder, val fontData: FontData)
+			s0 = s0 / imageSize
+			s1 = s1 / imageSize
+			t0 = t0 / imageSize
+			t1 = t1 / imageSize
 
-    @JsonClass(generateAdapter = true)
-    data class FontDataJson(
-        val name: String,
-        val bitmap_height: Int,
-        val bitmap_width: Int,
-        val size: Int,
-        val height: Double,
-        val ascender: Double,
-        val descender: Double,
-        val space_advance: Double,
-        val max_advance: Double,
-        val glyph_data: Map<String, FontGlyphJsonData>
-    )
+			val bearing = Vec2D(glyphEntry.xoffset.toDouble() / size, -glyphEntry.yoffset.toDouble() / size)
+			val advance = Vec2D(glyphEntry.xadvance.toDouble() / size, 0.0)
+			val bbox = Vec2D(glyphEntry.width.toDouble() / size, glyphEntry.height.toDouble() / size)
 
-    @JsonClass(generateAdapter = true)
-    data class FontGlyphJsonData(
-        val advance_x: Double,
-        val advance_y: Double?,
-        val bbox_height: Double,
-        val bbox_width: Double,
-        val bearing_x: Double,
-        val bearing_y: Double,
-        val charcode: String,
-        val s0: Double,
-        val s1: Double,
-        val t0: Double,
-        val t1: Double
-    )
+			FontGlyph(
+				glyphEntry.char,
+				advance,
+				bbox,
+				bearing,
+				Quad2dD(
+					Vec2D(s0, t1),
+					Vec2D(s1, t1),
+					Vec2D(s1, t0),
+					Vec2D(s0, t0)
+				)
+			)
+		}.toCollection(ArrayList())
+		fontMap[fontJson.info.face] = FontDataHolder(BitmapTextureHolder(fontAtlas), FontData(fontWrapper, glyphs))
+	}
 
+	fun addFont(fontData: FontData, fontAtlas: BitmapTextureHolder) {
+		fontMap[fontData.info.name] = FontDataHolder(fontAtlas, fontData)
+	}
+
+	override fun loadFont(font: Font): FontLoaderResult {
+		val fontDataHolder = fontMap[font.name]
+		return if (fontDataHolder != null) {
+			FontLoaderResult(fontDataHolder.fontTexture, fontDataHolder.fontData, LoaderStatus.OK)
+		} else {
+			Log.e(FontLoader::class.java.canonicalName, "Couldn't load font name: ${font.name}!")
+			FontLoaderResult(null, null, LoaderStatus.ERROR_OTHER)
+		}
+	}
+
+	private data class FontDataHolder(val fontTexture: BitmapTextureHolder, val fontData: FontData)
+
+	@JsonClass(generateAdapter = true)
+	data class FontDataJson(
+		val chars: List<FontGlyphJsonData>,
+		val pages: List<String>, // unused
+		val info: FontInfoData,
+		val common: FontCommonData,
+	)
+
+	@JsonClass(generateAdapter = true)
+	data class FontGlyphJsonData(
+		val id: Int,
+		val index: Int,
+		val char: String,
+		val width: Int,
+		val height: Int,
+		val xoffset: Int,
+		val yoffset: Int,
+		val xadvance: Int,
+		val chnl: Int, // unused
+		val x: Int,
+		val y: Int,
+	)
+
+	@JsonClass(generateAdapter = true)
+	data class FontInfoData(
+		val face: String,
+		val size: Int,
+		val bold: Int, // unused
+		val italic: Int, // unused
+		val charset: List<String>, // unused
+		val unicode: Int, // unused
+		val stretchH: Int, // unused
+		val aa: Int, // unused
+		val padding: List<Int>,
+		val spacing: List<Int>,
+		val outline: Int,
+	)
+
+	@JsonClass(generateAdapter = true)
+	data class FontCommonData(
+		val lineHeight: Int,
+		val base: Int,
+		val scaleW: Int,
+		val scaleH: Int,
+		val pages: Int, // unused
+		val packed: Int, // unused
+		val alphaChnl: Int, // unused
+		val redChnl: Int, // unused
+		val blueChnl: Int, // unused
+		val greenChnl: Int, // unused
+		val distanceField: DistanceFieldData? = null, // unused
+		val kernings: List<Int>? = null, // unused
+	)
+
+	@JsonClass(generateAdapter = true)
+	data class DistanceFieldData(
+		val fieldType: String,
+		val distanceRange: Int,
+	)
+
+	data class FontDescription(val fontJson: String, val fontTexture: Bitmap)
 }

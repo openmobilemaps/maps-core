@@ -53,22 +53,26 @@ class Quad2dOpenGl : public GraphicsObjectInterface,
 
     virtual void setIsInverseMasked(bool inversed) override;
 
-  protected:
+    void setDebugLabel(const std::string &label) override;
+
+protected:
     virtual void adjustTextureCoordinates();
 
-    virtual void prepareTextureDraw(std::shared_ptr<OpenGlContext> &openGLContext, int mProgram);
+    virtual void prepareTextureDraw(int mProgram);
 
-    void prepareGlData(const std::shared_ptr<OpenGlContext> &openGlContext, const int &programHandle);
+    void prepareGlData(int program);
 
-    void prepareTextureCoordsGlData(const std::shared_ptr<OpenGlContext> &openGlContext, const int &programHandle);
+    void prepareTextureCoordsGlData(int program);
 
     void removeGlBuffers();
 
     void removeTextureCoordsGlBuffers();
 
     std::shared_ptr<ShaderProgramInterface> shaderProgram;
+    std::string programName;
+    int program;
 
-    int programHandle;
+    bool glDataBuffersGenerated = false;
     int mvpMatrixHandle;
     int positionHandle;
     GLuint vertexBuffer;

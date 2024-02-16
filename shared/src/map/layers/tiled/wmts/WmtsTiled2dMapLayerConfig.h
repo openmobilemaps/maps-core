@@ -17,11 +17,11 @@
 
 class WmtsTiled2dMapLayerConfig : public Tiled2dMapLayerConfig {
   public:
-    WmtsTiled2dMapLayerConfig(const WmtsLayerDescription &description, std::vector<Tiled2dMapZoomLevelInfo> zoomLevelInfo,
-                              const Tiled2dMapZoomInfo &zoomInfo, const std::string &coordinateSystemIdentifier,
+    WmtsTiled2dMapLayerConfig(const WmtsLayerDescription &description, const std::vector<Tiled2dMapZoomLevelInfo> &zoomLevelInfo,
+                              const Tiled2dMapZoomInfo &zoomInfo, const int32_t coordinateSystemIdentifier,
                               const std::string &matrixSetIdentifier);
 
-    virtual std::string getCoordinateSystemIdentifier() override;
+    virtual int32_t getCoordinateSystemIdentifier() override;
 
     virtual std::string getTileUrl(int32_t x, int32_t y, int32_t t, int32_t zoom) override;
 
@@ -33,10 +33,12 @@ class WmtsTiled2dMapLayerConfig : public Tiled2dMapLayerConfig {
 
     virtual std::optional<Tiled2dMapVectorSettings> getVectorSettings() override;
 
-  private:
+    std::optional<::RectCoord> getBounds() override;
+
+private:
     const WmtsLayerDescription description;
     std::vector<Tiled2dMapZoomLevelInfo> zoomLevelInfo;
     const Tiled2dMapZoomInfo zoomInfo;
-    const std::string coordinateSystemIdentifier;
+    const int32_t coordinateSystemIdentifier;
     const std::string matrixSetIdentifier;
 };

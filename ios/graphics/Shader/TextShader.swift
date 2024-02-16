@@ -13,48 +13,43 @@ import MapCoreSharedModule
 import Metal
 
 class TextShader: BaseShader {
-    private var pipeline: MTLRenderPipelineState?
-    private var referencePoint = SIMD2<Float>([0.0, 0.0])
-    private var scaleFactor: Float = 1.0
+    private var opacity: Float = 1.0
     private var color = SIMD4<Float>([0.0, 0.0, 0.0, 0.0])
     private var haloColor = SIMD4<Float>([0.0, 0.0, 0.0, 0.0])
+    private var haloWidth: Float = 0.0
 
     override func setupProgram(_: MCRenderingContextInterface?) {
         if pipeline == nil {
-            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline.textShader.rawValue)
+            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: .textShader, blendMode: blendMode).json)
         }
     }
 
-    override func preRender(encoder: MTLRenderCommandEncoder, context _: RenderingContext) {
-        guard let pipeline = pipeline else { return }
+    override func preRender(encoder: MTLRenderCommandEncoder, context: RenderingContext) {
+        guard let pipeline else { return }
 
-        encoder.setRenderPipelineState(pipeline)
-
-        encoder.setVertexBytes(&referencePoint, length: MemoryLayout<SIMD2<Float>>.stride, index: 3)
-
-        encoder.setVertexBytes(&scaleFactor, length: MemoryLayout<Float>.stride, index: 2)
+        context.setRenderPipelineStateIfNeeded(pipeline)
 
         encoder.setFragmentBytes(&color, length: MemoryLayout<SIMD4<Float>>.stride, index: 1)
 
         encoder.setFragmentBytes(&haloColor, length: MemoryLayout<SIMD4<Float>>.stride, index: 2)
+
+        encoder.setFragmentBytes(&opacity, length: MemoryLayout<Float>.stride, index: 3)
+        encoder.setFragmentBytes(&haloWidth, length: MemoryLayout<Float>.stride, index: 4)
     }
 }
 
 extension TextShader: MCTextShaderInterface {
-    func setReferencePoint(_ point: MCVec3D) {
-        referencePoint = SIMD2<Float>([point.x, point.y])
-    }
-
-    func setScale(_ scale: Float) {
-        scaleFactor = scale
+    func setOpacity(_ opacity: Float) {
+        self.opacity = opacity
     }
 
     func setColor(_ color: MCColor) {
         self.color = color.simdValues
     }
 
-    func setHaloColor(_ color: MCColor) {
+    func setHaloColor(_ color: MCColor, width: Double) {
         self.haloColor = color.simdValues
+        self.haloWidth = Float(width)
     }
 
     func asShaderProgram() -> MCShaderProgramInterface? {

@@ -12,18 +12,22 @@
 
 #include "TextureHolderInterface.h"
 #include "PolygonCoord.h"
+#include "Tiled2dMapVersionedTileInfo.h"
 #include "Tiled2dMapTileInfo.h"
 #include <functional>
+#include "TileState.h"
 
 struct Tiled2dMapRasterTileInfo {
-    Tiled2dMapTileInfo tileInfo;
+    Tiled2dMapVersionedTileInfo tileInfo;
     std::shared_ptr<TextureHolderInterface> textureHolder;
     std::vector<::PolygonCoord> masks;
+    TileState state;
 
-    Tiled2dMapRasterTileInfo(Tiled2dMapTileInfo tileInfo, const std::shared_ptr<TextureHolderInterface> textureHolder, const std::vector<::PolygonCoord> & masks)
+    Tiled2dMapRasterTileInfo(Tiled2dMapVersionedTileInfo tileInfo, const std::shared_ptr<TextureHolderInterface> textureHolder, const std::vector<::PolygonCoord> masks, const TileState state)
         : tileInfo(tileInfo)
         , textureHolder(textureHolder)
-        , masks(masks) {}
+        , masks(masks)
+        , state(state){}
 
     void updateMasks(const std::vector<::PolygonCoord> & masks){
         this->masks = masks;
@@ -37,7 +41,7 @@ struct Tiled2dMapRasterTileInfo {
 namespace std {
 template <> struct hash<Tiled2dMapRasterTileInfo> {
     inline size_t operator()(const Tiled2dMapRasterTileInfo &tileInfo) const {
-        return std::hash<Tiled2dMapTileInfo>()(tileInfo.tileInfo);
+        return std::hash<Tiled2dMapVersionedTileInfo>()(tileInfo.tileInfo);
     }
 };
 } // namespace std

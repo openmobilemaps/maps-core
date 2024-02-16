@@ -12,11 +12,9 @@
 #include <vector>
 
 int BaseShaderProgramOpenGl::loadShader(int type, std::string shaderCode) {
-    // create a vertex shader type (GLES20.GL_VERTEX_SHADER)
-    // or a fragment shader type (GLES20.GL_FRAGMENT_SHADER)
+    // create a vertex shader type (GL_VERTEX_SHADER)
+    // or a fragment shader type (GL_FRAGMENT_SHADER)
     int shader = glCreateShader(type);
-
-    // LogInfo << "Compiling Shader Code: " <<= shaderCode;
 
     // add the source code to the shader and compile it
     const char *code = shaderCode.c_str();
@@ -42,7 +40,6 @@ int BaseShaderProgramOpenGl::loadShader(int type, std::string shaderCode) {
 
         LogError <<= ".";
     }
-
     return shader;
 }
 
@@ -69,17 +66,46 @@ void BaseShaderProgramOpenGl::checkGlProgramLinking(GLuint program) {
 }
 
 std::string BaseShaderProgramOpenGl::getVertexShader() {
-    return UBRendererShaderCode(uniform mat4 uMVPMatrix; attribute vec4 vPosition; attribute vec2 texCoordinate;
-                                varying vec2 v_texcoord;
+    return OMMVersionedGlesShaderCode(320 es,
+                                      uniform mat4 uMVPMatrix;
+                                      in vec4 vPosition;
+                                      in vec2 texCoordinate;
+                                      out vec2 v_texcoord;
 
-                                void main() {
-                                    gl_Position = uMVPMatrix * vPosition;
-                                    v_texcoord = texCoordinate;
-                                });
+                                      void main() {
+                                          gl_Position = uMVPMatrix * vPosition;
+                                          v_texcoord = texCoordinate;
+                                      }
+    );
 }
 
 std::string BaseShaderProgramOpenGl::getFragmentShader() {
-    return UBRendererShaderCode(precision mediump float; uniform sampler2D texture; varying vec2 v_texcoord;
+    return OMMVersionedGlesShaderCode(320 es,
+                                      precision mediump float;
+                                      uniform sampler2D textureSampler;
+                                      in vec2 v_texcoord;
+                                      out vec4 fragmentColor;
 
-                                void main() { gl_FragColor = texture2D(texture, v_texcoord); });
+                                      void main() {
+                                          fragmentColor = texture(textureSampler, v_texcoord);
+                                      }
+    );
+}
+
+void BaseShaderProgramOpenGl::setBlendMode(BlendMode blendMode) {
+    this->blendMode = blendMode;
+}
+
+void BaseShaderProgramOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context) {
+    glEnable(GL_BLEND);
+    switch (blendMode) {
+        case BlendMode::NORMAL: {
+            glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+            break;
+        }
+        case BlendMode::MULTIPLY: {
+            glBlendFuncSeparate(GL_DST_COLOR, GL_ONE_MINUS_SRC_ALPHA, GL_DST_ALPHA, GL_ONE_MINUS_CONSTANT_ALPHA);
+            break;
+        }
+    }
 }

@@ -11,28 +11,56 @@
 #include "IconInfo.h"
 
 IconInfo::IconInfo(const std::string &identifier, const Coord &coordinate, const std::shared_ptr<::TextureHolderInterface> &texture,
-                   const Vec2F &iconSize, IconType type, const ::Vec2F &anchor)
-    : identifier(identifier)
-    , coordinate(coordinate)
-    , texture(texture)
-    , iconSize(iconSize)
-    , type(type)
-    , anchor(anchor) {}
+                   const Vec2F &iconSize, IconType type, const ::Vec2F &anchor, BlendMode blendMode)
+        : identifier(identifier), coordinate(coordinate), texture(texture), iconSize(iconSize), type(type), anchor(anchor),
+          blendMode(blendMode) {}
 
-std::string IconInfo::getIdentifier() { return identifier; }
+std::string IconInfo::getIdentifier() {
+    // Immutable
+    return identifier;
+}
 
-std::shared_ptr<::TextureHolderInterface> IconInfo::getTexture() { return texture; }
+std::shared_ptr<::TextureHolderInterface> IconInfo::getTexture() {
+    // Immutable
+    return texture;
+}
 
-void IconInfo::setCoordinate(const Coord &coord) { this->coordinate = coord; }
+void IconInfo::setCoordinate(const Coord &coord) {
+    std::lock_guard<std::mutex> dataLock(dataMutex);
+    this->coordinate = coord;
+}
 
-::Coord IconInfo::getCoordinate() { return coordinate; }
+::Coord IconInfo::getCoordinate() {
+    std::lock_guard<std::mutex> dataLock(dataMutex);
+    return coordinate;
+}
 
-void IconInfo::setIconSize(const Vec2F &size) { this->iconSize = size; }
+void IconInfo::setIconSize(const Vec2F &size) {
+    std::lock_guard<std::mutex> dataLock(dataMutex);
+    this->iconSize = size;
+}
 
-::Vec2F IconInfo::getIconSize() { return iconSize; }
+::Vec2F IconInfo::getIconSize() {
+    std::lock_guard<std::mutex> dataLock(dataMutex);
+    return iconSize;
+}
 
-void IconInfo::setType(IconType type) { this->type = type; }
+void IconInfo::setType(IconType type) {
+    std::lock_guard<std::mutex> dataLock(dataMutex);
+    this->type = type;
+}
 
-IconType IconInfo::getType() { return type; }
+IconType IconInfo::getType() {
+    std::lock_guard<std::mutex> dataLock(dataMutex);
+    return type;
+}
 
-::Vec2F IconInfo::getIconAnchor() { return anchor; }
+::Vec2F IconInfo::getIconAnchor() {
+    // Immutable
+    return anchor;
+}
+
+BlendMode IconInfo::getBlendMode() {
+    // Immutable
+    return blendMode;
+}

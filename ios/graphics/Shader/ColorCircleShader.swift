@@ -17,17 +17,15 @@ class ColorCircleShader: BaseShader {
 
     private var miter: Float = 0.0
 
-    private var pipeline: MTLRenderPipelineState?
-
     override func setupProgram(_: MCRenderingContextInterface?) {
         if pipeline == nil {
-            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline.roundColorShader.rawValue)
+            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: .roundColorShader, blendMode: blendMode).json)
         }
     }
 
-    override func preRender(encoder: MTLRenderCommandEncoder, context _: RenderingContext) {
-        guard let pipeline = pipeline else { return }
-        encoder.setRenderPipelineState(pipeline)
+    override func preRender(encoder: MTLRenderCommandEncoder, context: RenderingContext) {
+        guard let pipeline else { return }
+        context.setRenderPipelineStateIfNeeded(pipeline)
         encoder.setFragmentBytes(&color, length: MemoryLayout<SIMD4<Float>>.stride, index: 1)
     }
 }

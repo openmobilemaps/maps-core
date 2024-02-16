@@ -5,9 +5,9 @@
         "package": "DjinniSupport",
         "repositoryURL": "https://github.com/UbiqueInnovation/djinni.git",
         "state": {
-          "branch": null,
-          "revision": "ff7ec9c42552b023b761c2e1a3a6c9ebbff20e29",
-          "version": "1.0.0"
+          "branch": "master",
+          "revision": "f803f3674e7632ce3c8cba414f0b1378b188dab7",
+          "version": null
         }
       }
     ]

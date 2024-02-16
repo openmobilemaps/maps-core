@@ -20,7 +20,7 @@
 
 map_interface = interface +c {
     static create(graphics_factory: graphics_object_factory_interface, shader_factory: shader_factory_interface, rendering_context: rendering_context_interface, map_config: map_config, scheduler: scheduler_interface, pixel_density: f32) : map_interface;
-    static createWithOpenGl(map_config: map_config, scheduler: scheduler_interface, pixel_density: f32) : map_interface;
+    static createWithOpenGl(map_config: map_config, pixel_density: f32) : map_interface;
 
     set_callback_handler(callback_interface: optional<map_callback_interface>);
 
@@ -39,6 +39,7 @@ map_interface = interface +c {
     get_touch_handler() : touch_handler_interface;
 
     get_layers(): list<layer_interface>;
+    get_layers_indexed(): list<indexed_layer_interface>;
 
     add_layer(layer: layer_interface);
     insert_layer_at(layer: layer_interface, at_index: i32);
@@ -51,8 +52,12 @@ map_interface = interface +c {
     set_background_color(color: color);
 
     invalidate();
+
+    # Must be called on the rendering thread!
     draw_frame();
+    # Must be called on the rendering thread!
     resume();
+    # Must be called on the rendering thread!
     pause();
     destroy();
 
@@ -63,8 +68,14 @@ map_interface = interface +c {
     force_reload();
 }
 
+indexed_layer_interface = interface +c +j +o {
+	get_layer_interface() : layer_interface;
+	get_index() : i32;
+}
+
 map_callback_interface = interface +c +j +o {
     invalidate();
+    on_map_resumed();
 }
 
 map_ready_callback_interface = interface +j +o {
@@ -113,7 +124,7 @@ map_camera_2d_interface = interface +c {
 
     move_to_center_position_zoom(center_position: coord, zoom: f64, animated: bool);
     move_to_center_position(center_position: coord, animated: bool);
-    move_to_bounding_box(bounding_box: rect_coord, padding_pc: f32, animated: bool, max_zoom: optional<f64>);
+    move_to_bounding_box(bounding_box: rect_coord, padding_pc: f32, animated: bool, min_zoom: optional<f64>, max_zoom: optional<f64>);
     get_center_position(): coord;
 
     set_zoom(zoom: f64, animated: bool);
@@ -151,13 +162,16 @@ map_camera_2d_interface = interface +c {
     remove_listener(listener: map_camera_2d_listener_interface);
 
     coord_from_screen_position(pos_screen: vec_2_f): coord;
+    screen_pos_from_coord(coord: coord): vec_2_f;
     map_units_from_pixels(distancePx: f64): f64;
 
     set_rotation_enabled(enabled: bool);
     set_snap_to_north_enabled(enabled: bool);
+    set_bounds_restrict_whole_visible_rect(enabled: bool);
 
     as_camera_interface(): camera_interface;
 
+    get_last_vp_matrix() : optional<list<f32>>;
     get_last_vp_matrix_view_bounds() : optional<rect_coord>;
     get_last_vp_matrix_rotation() : optional<f32>;
     get_last_vp_matrix_zoom() : optional<f32>;

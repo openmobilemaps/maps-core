@@ -58,6 +58,7 @@ render_pass_interface = interface +c +j +o {
 
 render_pass_config = record {
     render_pass_index: i32;
+    is_pass_masked: bool;
 }
 
 renderer_interface = interface +c +j +o {

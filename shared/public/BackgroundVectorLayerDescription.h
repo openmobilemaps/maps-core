@@ -16,31 +16,44 @@
 
 class BackgroundVectorStyle {
 public:
-    BackgroundVectorStyle(std::shared_ptr<Value> color): color(color) {}
+    BackgroundVectorStyle(std::shared_ptr<Value> backgroundColor,
+                          std::shared_ptr<Value> backgroundPattern,
+                          std::shared_ptr<Value> blendMode): backgroundColor(backgroundColor), backgroundPattern(backgroundPattern), blendMode(blendMode) {}
 
-    std::unordered_set<std::string> getUsedKeys() {
+    UsedKeysCollection getUsedKeys() const {
 
-        std::unordered_set<std::string> usedKeys;
-        std::vector<std::shared_ptr<Value>> values = {
-            color
+        UsedKeysCollection usedKeys;
+        std::shared_ptr<Value> values[] = {
+                backgroundColor, backgroundPattern, blendMode
         };
 
         for (auto const &value: values) {
             if (!value) continue;
-            auto const setKeys = value->getUsedKeys();
-            usedKeys.insert(setKeys.begin(), setKeys.end());
+            auto const keys = value->getUsedKeys();
+            usedKeys.includeOther(keys);
         }
 
         return usedKeys;
     };
 
-    Color getColor(const EvaluationContext &context){
-        static const Color defaultValue = ColorUtil::c(0, 0, 0, 1.0);
-        return color ? color->evaluateOr(context, defaultValue) : defaultValue;
+    BlendMode getBlendMode(const EvaluationContext &context) const {
+        static const BlendMode defaultValue = BlendMode::NORMAL;
+        return blendMode ? blendMode->evaluateOr(context, defaultValue) : defaultValue;
     }
 
-private:
-    std::shared_ptr<Value> color;
+    Color getColor(const EvaluationContext &context) {
+        static const Color defaultValue = ColorUtil::c(0, 0, 0, 1.0);
+        return backgroundColor ? backgroundColor->evaluateOr(context, defaultValue) : defaultValue;
+    }
+
+    std::string getPattern(const EvaluationContext &context) {
+         static const std::string defaultValue = "";
+         return backgroundPattern ? backgroundPattern->evaluateOr(context, defaultValue) : defaultValue;
+     }
+
+    std::shared_ptr<Value> backgroundColor;
+    std::shared_ptr<Value> backgroundPattern;
+    std::shared_ptr<Value> blendMode;
 };
 
 class BackgroundVectorLayerDescription: public VectorLayerDescription {
@@ -50,18 +63,24 @@ public:
 
     BackgroundVectorLayerDescription(std::string identifier,
                                      BackgroundVectorStyle style,
-                                     std::optional<int32_t> renderPassIndex):
-    VectorLayerDescription(identifier, "", "", 0, 0, nullptr, renderPassIndex),
+                                     std::optional<int32_t> renderPassIndex,
+                                     std::shared_ptr<Value> interactable):
+    VectorLayerDescription(identifier, "", "", 0, 0, nullptr, renderPassIndex, interactable, false, false),
     style(style) {};
 
-    virtual std::unordered_set<std::string> getUsedKeys() override {
-        std::unordered_set<std::string> usedKeys;
+    std::unique_ptr<VectorLayerDescription> clone() override {
+        return std::make_unique<BackgroundVectorLayerDescription>(identifier, style, renderPassIndex,
+                                                                  interactable ? interactable->clone() : nullptr);
+    }
+
+    virtual UsedKeysCollection getUsedKeys() const override {
+        UsedKeysCollection usedKeys;
 
         auto parentKeys = VectorLayerDescription::getUsedKeys();
-        usedKeys.insert(parentKeys.begin(), parentKeys.end());
+        usedKeys.includeOther(parentKeys);
 
         auto styleKeys = style.getUsedKeys();
-        usedKeys.insert(styleKeys.begin(), styleKeys.end());
+        usedKeys.includeOther(styleKeys);
 
         return usedKeys;
     };

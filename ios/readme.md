@@ -31,27 +31,146 @@ For App integration within XCode, add this package to your App target. To do thi
 Once you have your Swift package set up, adding Open Mobile Maps as a dependency is as easy as adding it to the dependencies value of your Package.swift.
 ```swift
 dependencies: [
-    .package(url: "https://github.com/openmobilemaps/maps-core.git", .upToNextMajor(from: "1.5.3"))
+    .package(url: "https://github.com/openmobilemaps/maps-core.git", .upToNextMajor(from: "2.0.0"))
 ]
 ```
 
-### iOS 10
-Unfortunately, Swift package is only supported starting with iOS 11. If you need iOS 10 support you have to compile the library as a framework yourself.
 
 ## How to use
 
-### Display tiled raster map in [EPSG3857](https://epsg.io/3857) system
+
+
+### MapView
+
+The framework provides a view that can be filled with layers. The simplest case is to add a raster layer. TiledRasterLayer provides a convenience initializer to create raster layer with web mercator tiles.
+ 
+
+```swift
+import MapCore
+
+class MapViewController: UIViewController {
+  lazy var mapView = MCMapView()
+  override func loadView() { view = mapView }
+  
+  override func viewDidLoad() {
+    super.viewDidLoad()
+      
+    mapView.add(layer: TiledRasterLayer("osm", webMercatorUrlFormat: "https://tiles.sample.org/{z}/{x}/{y}.png"))
+
+    mapView.camera.move(toCenterPositionZoom: MCCoord(lat: 46.962592372639634, lon: 8.378232525377973), zoom: 1000000, animated: true)
+  }
+}
+```
+
+
+#### Parsing a WMTS Capability 
+
+Open Mobile Maps supports the [WMTS standard](https://en.wikipedia.org/wiki/Web_Map_Tile_Service) and can parse their Capability XML file to generate raster layer configurations.
+
+```swift
+let resource = MCWmtsCapabilitiesResource.create(xml)!
+```
+The created resource object is then capable of creating a layer object with a given identifier.
+
+```swift
+let layer = resource.createLayer("identifier", tileLoader: loader)
+mapView.add(layer: layer?.asLayerInterface())
+```
+This feature is still being improved to support a wider range of WMTS capabilities.
+
+For this example, we also use the default implementation of the [TextureLoader](https://github.com/openmobilemaps/maps-core/blob/develop/ios/maps/MCTextureLoader.swift), but this can also be implemented by the app itself.
+
+
+### Vector Tiles
+
+Open Mobile Maps supports most of the [Vector tiles standard](https://docs.mapbox.com/data/tilesets/guides/vector-tiles-standards/). To add a layer simply reference the style URL.
+
+```swift
+mapView.add(layer: try! VectorLayer("base-map", styleURL: "https://www.sample.org/base-map/style.json")
+```
+
+Additional features and differences will be documented soon.
+
+
+
+### Overlays
+
+#### Polygon layer
+
+Open Mobile Maps provides a simple interface to create a polygon layer. The layer handles the rendering of the given polygons and calls the callback handler in case of user interaction.
+
+``` swift
+let coords : [MCCoord] = [
+    /// coordinates
+]
+let polygonLayer = MCPolygonLayerInterface.create()
+let polygonInfo = MCPolygonInfo(identifier: "switzerland",
+                                coordinates: MCPolygonCoord(positions: coords, holes: []),
+                                color: UIColor.red.mapCoreColor,
+                                highlight: UIColor.red.withAlphaComponent(0.2).mapCoreColor)
+
+polygonLayer?.add(polygonInfo)
+polygonLayer?.setCallbackHandler(handler)
+mapView.add(layer: polygonLayer?.asLayerInterface())
+```
+
+#### Icon layer
+
+A simple icon layer is implemented as well. This supports displaying textures at the given coordinates. A scale parameter has to be provided which specifies how the icon should be affected by camera movements. In case of user interaction, the given callback handler will be called.
+
+```swift
+let iconLayer = MCIconLayerInterface.create()
+let image = UIImage(named: "image")
+let texture = try! TextureHolder(image!.cgImage!)
+let icon = MCIconFactory.createIcon("icon",
+                         coordinate: coordinate,
+                         texture: texture,
+                         iconSize: .init(x: Float(texture.getImageWidth()), y: Float(texture.getImageHeight())),
+                         scale: .FIXED,
+                         blendMode: .NORMAL)
+iconLayer?.add(icon)
+iconLayer?.setCallbackHandler(handler)
+mapView.add(layer: iconLayer?.asLayerInterface())
+```
+
+#### Line layer
+A line layer can be added to the mapView as well. Using the MCLineFactory a LineInfo object can be created. The width can be specified in either SCREEN_PIXEL or MAP_UNIT.
+
+```swift
+let lineLayer = MCLineLayerInterface.create()
+
+lineLayer?.add(MCLineFactory.createLine("lineIdentifier",
+                                        coordinates: coords,
+                                        style: MCLineStyle(color: MCColorStateList(normal: UIColor.systemPink.withAlphaComponent(0.5).mapCoreColor,
+                                                                                   highlighted: UIColor.blue.withAlphaComponent(0.5).mapCoreColor),
+                                                           gapColor: MCColorStateList(normal: UIColor.red.withAlphaComponent(0.5).mapCoreColor,
+                                                                                      highlighted: UIColor.gray.withAlphaComponent(0.5).mapCoreColor),
+                                                           opacity: 1.0,
+                                                           widthType: .SCREEN_PIXEL,
+                                                           width: 50,
+                                                           dashArray: [1,1],
+                                                           lineCap: .BUTT,
+                                                           offset: 0.0)))
+                                                           
+    mapView.add(layer: lineLayer?.asLayerInterface())
+```
+
+
+
+### Customisation
 
 #### MCTiled2dMapLayerConfig
 
-To display a map, you first need to add a layer config for your project. The layer config contains the information needed for the layer to compute the visible tiles in the current camera configuration, as well as to load and display them.
+To use different raster tile services, create your own layer config. The layer config contains the information needed for the layer to compute the visible tiles in the current camera configuration, as well as to load and display them.
 
 ```swift
 import MapCore
 
 class TiledLayerConfig: MCTiled2dMapLayerConfig {
-    // Defines both an additional scale factor for the tiles, as well as how many
- 		// layers above the ideal one should be loaded an displayed as well.
+    // Defines both an additional scale factor for the tiles (and if they are scaled 
+    // to match the target devices screen density), how many layers above the ideal 
+    // one should be loaded an displayed as well, as well as if the layer is drawn,
+    // when the zoom is smaller/larger than the valid range
     func getZoomInfo() -> MCTiled2dMapZoomInfo {
       MCTiled2dMapZoomInfo(zoomLevelScaleFactor: 0.65,
                            numDrawPreviousLayers: 1,
@@ -59,7 +178,7 @@ class TiledLayerConfig: MCTiled2dMapLayerConfig {
     }
 
     // Defines to map coordinate system of the layer
-    public func getCoordinateSystemIdentifier() -> String {
+    public func getCoordinateSystemIdentifier() -> Int32 {
       MCCoordinateSystemIdentifiers.epsg3857()
     }
 
@@ -118,117 +237,15 @@ class TiledLayerConfig: MCTiled2dMapLayerConfig {
 }
 ```
 
-#### MapViewController
+#### Change map projection
 
-Once we have the layer config, we can add a map view to our view controller.
-
-The library provides a factory for the [EPSG3857](https://epsg.io/4326) Coordinate system, which we can use to initialize the map view. For this example, we also use the default implementation of the [TextureLoader](https://github.com/openmobilemaps/maps-core/blob/develop/ios/maps/MCTextureLoader.swift), but this can also be implemented by the app itself.
+To render the map using a different coordinate system, initialize the map view with a Map Config. The library provides a factory for the [EPSG3857](https://epsg.io/4326) Coordinate system and others, which we can use to initialize the map view. Layers can have a different projection than the map view itself.
 
 ```swift
-import MapCore
-import MapCoreSharedModule
+MCMapView(mapConfig: .init(mapCoordinateSystem: MCCoordinateSystemFactory.getEpsg2056System()))
+``
 
-class MapViewController: UIViewController {
-  var mapConfig = MCMapConfig(mapCoordinateSystem: MCCoordinateSystemFactory.getEpsg3857System())
 
-  lazy var mapView = MCMapView(mapConfig: mapConfig)
-  
-  lazy var loader = MCTextureLoader()
-
-  lazy var rasterLayer = MCTiled2dMapRasterLayerInterface.create(TiledLayerConfig(),
-                                                    loader: loader)
-  
-  override func loadView() { view = mapView }
-  
-  override func viewDidLoad() {
-    super.viewDidLoad()
-      
-    mapView.add(layer: rasterLayer?.asLayerInterface())
-  }
-}
-```
-
-### Parsing a WMTS Capability 
-
-Open Mobile Maps supports the [WMTS standard](https://en.wikipedia.org/wiki/Web_Map_Tile_Service) and can parse their Capability XML file to generate raster layer configurations.
-
-```swift
-let resource = MCWmtsCapabilitiesResource.create(xml)!
-```
-The created resource object is then capable of creating a layer object with a given identifier.
-
-```swift
-let layer = resource.createLayer("identifier", tileLoader: loader)
-mapView.add(layer: layer?.asLayerInterface())
-```
-This feature is still being improved to support a wider range of WMTS capabilities.
-
-### Polygon layer
-
-Open Mobile Maps provides a simple interface to create a polygon layer. The layer handles the rendering of the given polygons and calls the callback handler in case of user interaction.
-
-``` swift
-let coords : [MCCoord] = [
-    /// coordinates
-]
-let polygonLayer = MCPolygonLayerInterface.create()
-let polygonInfo = MCPolygonInfo(identifier: "switzerland",
-                                coordinates: MCPolygonCoord(positions: coords, holes: []),
-                                color: UIColor.red.mapCoreColor,
-                                highlight: UIColor.red.withAlphaComponent(0.2).mapCoreColor)
-
-polygonLayer?.add(polygonInfo)
-polygonLayer?.setCallbackHandler(handler)
-mapView.add(layer: polygonLayer?.asLayerInterface())
-```
-
-### Icon layer
-
-A simple icon layer is implemented as well. This supports displaying textures at the given coordinates. A scale parameter has to be provided which specifies how the icon should be affected by camera movements. In case of user interaction, the given callback handler will be called.
-
-```swift
-let iconLayer = MCIconLayerInterface.create()
-let image = UIImage(named: "image")
-let texture = try! TextureHolder(image!.cgImage!)
-let icon = MCIconFactory.createIcon("icon",
-                         coordinate: coordinate,
-                         texture: texture,
-                         iconSize: .init(x: Float(texture.getImageWidth()), y: Float(texture.getImageHeight())),
-                         scale: .FIXED)
-iconLayer?.add(icon)
-iconLayer?.setCallbackHandler(handler)
-mapView.add(layer: iconLayer?.asLayerInterface())
-```
-
-### Line layer
-A line layer can be added to the mapView as well. Using the MCLineFactory a LineInfo object can be created. The width can be specified in either SCREEN_PIXEL or MAP_UNIT.
-
-```swift
-let lineLayer = MCLineLayerInterface.create()
-
-lineLayer?.add(MCLineFactory.createLine("lineIdentifier",
-                                        coordinates: coords,
-                                        style: MCLineStyle(color: MCColorStateList(normal: UIColor.systemPink.withAlphaComponent(0.5).mapCoreColor,
-                                                                                   highlighted: UIColor.blue.withAlphaComponent(0.5).mapCoreColor),
-                                                           gapColor: MCColorStateList(normal: UIColor.red.withAlphaComponent(0.5).mapCoreColor,
-                                                                                      highlighted: UIColor.gray.withAlphaComponent(0.5).mapCoreColor),
-                                                           opacity: 1.0,
-                                                           widthType: .SCREEN_PIXEL,
-                                                           width: 50,
-                                                           dashArray: [1,1],
-                                                           lineCap: .BUTT)))
-                                                           
-    mapView.add(layer: lineLayer?.asLayerInterface())
-```
-
-#### Adjusting the Camera
-
-The camera position can easily be adjusted by manipulating the Camera2dInterface received from the map. E.g. to set a custom location:
-```swift
-mapView.camera.move(toCenterPosition: .init(systemIdentifier: MCCoordinateSystemIdentifiers.epsg4326(),
-                                                x: 8.378232525377973,
-                                                y: 46.962592372639634,
-                                                z: 0), animated: true)
 ```
 
 ## How to build

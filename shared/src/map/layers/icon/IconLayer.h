@@ -38,9 +38,19 @@ class IconLayer : public IconLayerInterface,
 
     virtual void remove(const std::shared_ptr<IconInfoInterface> &icon) override;
 
+    virtual void removeList(const std::vector</*not-null*/ std::shared_ptr<IconInfoInterface>> & iconsToRemove) override;
+
     virtual void add(const std::shared_ptr<IconInfoInterface> &icon) override;
 
-    virtual void addIcons(const std::vector<std::shared_ptr<IconInfoInterface>> &icons);
+    virtual void removeIdentifier(const std::string & identifier) override;
+
+    virtual void removeIdentifierList(const std::vector<std::string> & identifiers) override;
+
+    void removeIdentifierSet(const std::unordered_set<std::string> &identifiersToRemove);
+
+    virtual void addList(const std::vector</*not-null*/ std::shared_ptr<IconInfoInterface>> &iconsToAdd) override;
+
+    virtual void addIcons(const std::vector<std::shared_ptr<IconInfoInterface>> &iconsToAdd);
 
     virtual void clear() override;
 
@@ -72,6 +82,8 @@ class IconLayer : public IconLayerInterface,
 
     virtual bool onClickConfirmed(const ::Vec2F &posScreen) override;
 
+    virtual bool onLongPress(const ::Vec2F &posScreen) override;
+
     void setLayerClickable(bool isLayerClickable) override;
 
     virtual void setAlpha(float alpha) override;
@@ -79,9 +91,17 @@ class IconLayer : public IconLayerInterface,
     virtual float getAlpha() override;
 
   private:
+    void updateIconPosition(const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
+                            const std::shared_ptr<IconInfoInterface> &iconInfo,
+                            const std::shared_ptr<Textured2dLayerObject> &iconObject);
+
+    virtual void clearSync(const std::vector<std::pair<std::shared_ptr<IconInfoInterface>, std::shared_ptr<Textured2dLayerObject>>> &iconsToClear);
+
     void
-    setupIconObjects(const std::vector<std::tuple<const std::shared_ptr<IconInfoInterface>, std::shared_ptr<Textured2dLayerObject>>>
+    setupIconObjects(const std::vector<std::pair<std::shared_ptr<IconInfoInterface>, std::shared_ptr<Textured2dLayerObject>>>
                          &iconObjects);
+
+    std::vector<std::shared_ptr<IconInfoInterface>> getIconsAtPosition(const ::Vec2F &posScreen);
 
     std::shared_ptr<MapInterface> mapInterface;
 

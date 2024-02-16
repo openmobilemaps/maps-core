@@ -22,21 +22,23 @@ open class MCMapView: MTKView {
     private var saveDrawable = false
     private lazy var renderToImageQueue = DispatchQueue(label: "io.openmobilemaps.renderToImagQueue", qos: .userInteractive)
 
-    private var framesToRender: UInt = 1
-    private let framesToRenderAfterInvalidate: UInt = 25
+    private var framesToRender: Int = 1
+    private let framesToRenderAfterInvalidate: Int = 25
+    private var lastInvalidate = Date()
+    private let renderAfterInvalidate: TimeInterval = 3 // Collision detection might be delayed 3s
 
     private let touchHandler: MCMapViewTouchHandler
     private let callbackHandler = MCMapViewCallbackHandler()
 
     public weak var sizeDelegate: MCMapSizeDelegate?
 
-    public init(mapConfig: MCMapConfig, pixelsPerInch: Float? = nil) {
+    public init(mapConfig: MCMapConfig = MCMapConfig(mapCoordinateSystem: MCCoordinateSystemFactory.getEpsg3857System()), pixelsPerInch: Float? = nil) {
         let renderingContext = RenderingContext()
         guard let mapInterface = MCMapInterface.create(GraphicsFactory(),
                                                        shaderFactory: ShaderFactory(),
                                                        renderingContext: renderingContext,
                                                        mapConfig: mapConfig,
-                                                       scheduler: MCScheduler(),
+                                                       scheduler: MCThreadPoolScheduler.create(),
                                                        pixelDensity: pixelsPerInch ?? Float(UIScreen.pixelsPerInch)) else {
             fatalError("Can't create MCMapInterface")
         }
@@ -52,6 +54,17 @@ open class MCMapView: MTKView {
         fatalError("init(coder:) has not been implemented")
     }
 
+    deinit {
+        if Thread.isMainThread {
+            // make sure the mapInterface is destroyed from a background thread
+            DispatchQueue.global().async { [mapInterface] in
+                mapInterface.destroy()
+            }
+        } else {
+            mapInterface.destroy()
+        }
+    }
+
     private func setup() {
         renderingContext.sceneView = self
 
@@ -63,14 +76,16 @@ open class MCMapView: MTKView {
         delegate = self
 
         depthStencilPixelFormat = .stencil8
-        
-        //if #available(iOS 16.0, *) {
+
+        // if #available(iOS 16.0, *) {
         //   depthStencilStorageMode = .private
-        //}
+        // }
 
         isMultipleTouchEnabled = true
 
         preferredFramesPerSecond = 120
+
+        sampleCount = 1 // samples per pixel
 
         callbackHandler.invalidateCallback = { [weak self] in
             self?.invalidate()
@@ -118,6 +133,7 @@ open class MCMapView: MTKView {
     public func invalidate() {
         isPaused = false
         framesToRender = framesToRenderAfterInvalidate
+        lastInvalidate = Date()
     }
 }
 
@@ -132,7 +148,7 @@ extension MCMapView: MTKViewDelegate {
             return // don't execute metal calls in background
         }
 
-        guard framesToRender != 0 else {
+        guard framesToRender > 0 || -lastInvalidate.timeIntervalSinceNow < renderAfterInvalidate else {
             isPaused = true
             return
         }
@@ -272,6 +288,31 @@ public extension MCMapView {
 
     func remove(layer: MCLayerInterface?) {
         mapInterface.removeLayer(layer)
+    }
+
+    @available(iOS 13.0, *)
+    func add(layer: any Layer) {
+        mapInterface.addLayer(layer.interface)
+    }
+
+    @available(iOS 13.0, *)
+    func insert(layer: any Layer, at index: Int) {
+        mapInterface.insertLayer(at: layer.interface, at: Int32(index))
+    }
+
+    @available(iOS 13.0, *)
+    func insert(layer: any Layer, above: MCLayerInterface?) {
+        mapInterface.insertLayer(above: layer.interface, above: above)
+    }
+
+    @available(iOS 13.0, *)
+    func insert(layer: any Layer, below: MCLayerInterface?) {
+        mapInterface.insertLayer(below: layer.interface, below: below)
+    }
+
+    @available(iOS 13.0, *)
+    func remove(layer: any Layer) {
+        mapInterface.removeLayer(layer.interface)
     }
 }
 

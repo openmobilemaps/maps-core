@@ -12,6 +12,7 @@
 
 #include "RectCoord.h"
 #include <stdint.h>
+#include <string>
 
 struct Tiled2dMapTileInfo {
     RectCoord bounds;
@@ -41,6 +42,14 @@ struct Tiled2dMapTileInfo {
         return zoomIdentifier < o.zoomIdentifier || (zoomIdentifier == o.zoomIdentifier && x < o.x) ||
                (zoomIdentifier == o.zoomIdentifier && x == o.x && y < o.y) ||
                 (zoomIdentifier == o.zoomIdentifier && x == o.x && y == o.y && t < o.t);
+    }
+
+    std::string to_string() const {
+        return "Tiled2dMapTileInfo(" + std::to_string(zoomIdentifier) + "/" + std::to_string(x)  + "/" + std::to_string(y) + "/" + std::to_string(t) + ")";
+    }
+
+    std::string to_string_short() const {
+        return std::to_string(zoomIdentifier) + "/" + std::to_string(x)  + "/" + std::to_string(y) + "/" + std::to_string(t);
     }
 };
 

@@ -24,62 +24,56 @@ class EPSG2056ToEPSG4326Converter : public CoordinateConverterInterface {
 
     virtual Coord convert(const Coord &coordinate) override {
 
-        auto y = CHtoWGSlat(coordinate);
-        auto x = CHtoWGSlng(coordinate);
-        auto z = CHtoWGSalt(coordinate);
+        const auto y = CHtoWGSlat(coordinate);
+        const auto x = CHtoWGSlng(coordinate);
+        const auto z = CHtoWGSalt(coordinate);
 
         return Coord(getTo(), x, y, z);
     }
 
-    virtual std::string getFrom() override { return CoordinateSystemIdentifiers::EPSG2056(); }
+    virtual int32_t getFrom() override { return CoordinateSystemIdentifiers::EPSG2056(); }
 
-    virtual std::string getTo() override { return CoordinateSystemIdentifiers::EPSG4326(); }
+    virtual int32_t getTo() override { return CoordinateSystemIdentifiers::EPSG4326(); }
 
   private:
     // Convert CH y/x to WGS lat
-    double CHtoWGSlat(const Coord &coordinate) {
+    inline double CHtoWGSlat(const Coord &coordinate) {
         // Converts militar to civil and to unit = 1000km
         // Axiliary values (% Bern)
-        double y_aux = (coordinate.x - 2600000) / 1000000;
-        double x_aux = (coordinate.y - 1200000) / 1000000;
+        const double y_aux = (coordinate.x - 2600000) / 1000000;
+        const double x_aux = (coordinate.y - 1200000) / 1000000;
 
         // Process lat
-        double lat = (16.9023892 + (3.238272 * x_aux)) - (0.270978 * pow(y_aux, 2)) - (0.002528 * pow(x_aux, 2)) -
-                     (0.0447 * pow(y_aux, 2) * x_aux) - (0.0140 * pow(x_aux, 3));
-
         // Unit 10000" to 1 " and converts seconds to degrees (dec)
-        lat = (lat * 100) / 36;
+        const double lat = (((16.9023892 + (3.238272 * x_aux)) - (0.270978 * pow(y_aux, 2)) - (0.002528 * pow(x_aux, 2)) -
+                     (0.0447 * pow(y_aux, 2) * x_aux) - (0.0140 * pow(x_aux, 3))) * 100) / 36;
 
         return lat;
     }
 
     // Convert CH y/x to WGS long
-    double CHtoWGSlng(const Coord &coordinate) {
+    inline double CHtoWGSlng(const Coord &coordinate) {
         // Converts militar to civil and to unit = 1000km
         // Axiliary values (% Bern)
-        double y_aux = (coordinate.x - 2600000) / 1000000;
-        double x_aux = (coordinate.y - 1200000) / 1000000;
+        const double y_aux = (coordinate.x - 2600000) / 1000000;
+        const double x_aux = (coordinate.y - 1200000) / 1000000;
 
         // Process long
-        double lng = (2.6779094 + (4.728982 * y_aux) + (0.791484 * y_aux * x_aux) + (0.1306 * y_aux * pow(x_aux, 2))) -
-                     (0.0436 * pow(y_aux, 3));
-
         // Unit 10000" to 1 " and converts seconds to degrees (dec)
-        lng = (lng * 100) / 36;
+        const double lng = (((2.6779094 + (4.728982 * y_aux) + (0.791484 * y_aux * x_aux) + (0.1306 * y_aux * pow(x_aux, 2))) -
+                     (0.0436 * pow(y_aux, 3))) * 100) / 36;
 
         return lng;
     }
 
     // Convert CH y/x to WGS long
-    double CHtoWGSalt(const Coord &coordinate) {
+    inline double CHtoWGSalt(const Coord &coordinate) {
         // Converts militar to civil and to unit = 1000km
         // Axiliary values (% Bern)
-        double y_aux = (coordinate.x - 2600000) / 1000000;
-        double x_aux = (coordinate.y - 1200000) / 1000000;
+        const double y_aux = (coordinate.x - 2600000) / 1000000;
+        const double x_aux = (coordinate.y - 1200000) / 1000000;
 
         // Process long
-        double alt = coordinate.z + 49.55 - (12.6 * y_aux) - (22.64 * x_aux);
-
-        return alt;
+        return coordinate.z + 49.55 - (12.6 * y_aux) - (22.64 * x_aux);
     }
 };

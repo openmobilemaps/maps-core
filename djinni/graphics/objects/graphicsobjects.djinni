@@ -4,6 +4,7 @@
 @extern "../../yaml/rect_d.yaml"
 @extern "../../yaml/quad_2d_d.yaml"
 @extern "../../yaml/vec_2_d.yaml"
+@extern "../../yaml/vec_2_f.yaml"
 @extern "../../yaml/shared_bytes.yaml"
 
 graphics_object_interface = interface +c +j +o {
@@ -17,6 +18,8 @@ graphics_object_interface = interface +c +j +o {
     # if setting this flag the masked is applied inversly
     set_is_inverse_masked(inversed: bool);
     # Render the graphics object; ensure calling on graphics thread
+
+    set_debug_label(label: string);
     render(context: rendering_context_interface, render_pass: render_pass_config, mvp_matrix: i64, is_masked: bool, screenPixelAsRealMeterFactor: f64);
 }
 
@@ -27,16 +30,20 @@ masking_object_interface = interface +c +j +o {
 
 graphics_object_factory_interface = interface +c +j +o {
     create_quad(shader: shader_program_interface) : quad_2d_interface;
-    create_line(shader: shader_program_interface) : line_2d_interface;
     create_polygon(shader: shader_program_interface) : polygon_2d_interface;
 
+    create_quad_instanced(shader: shader_program_interface): quad_2d_instanced_interface;
+    create_quad_stretched_instanced(shader: shader_program_interface): quad_2d_stretched_instanced_interface;
     create_line_group(shader: shader_program_interface): line_group_2d_interface;
     create_polygon_group(shader: shader_program_interface): polygon_group_2d_interface;
+    create_polygon_pattern_group(shader: shader_program_interface): polygon_pattern_group_2d_interface;
 
     create_quad_mask() : quad_2d_interface;
     create_polygon_mask() : polygon_2d_interface;
 
     create_text(shader: shader_program_interface) : text_interface;
+
+    create_text_instanced(shader: shader_program_interface): text_instanced_interface;
 }
 
 quad_2d_interface = interface +c +j +o {
@@ -47,9 +54,55 @@ quad_2d_interface = interface +c +j +o {
     as_masking_object(): masking_object_interface;
 }
 
-line_2d_interface = interface +c +j +o {
-    set_line(line: shared_bytes, indices: shared_bytes);
+quad_2d_instanced_interface = interface +c +j +o {
+    set_frame(frame: quad_2d_d);
+
+    set_instance_count(count: i32);
+    set_positions(positions: shared_bytes);
+    set_scales(scales: shared_bytes);
+    set_rotations(rotations: shared_bytes);
+    set_alphas(values: shared_bytes);
+
+    set_texture_coordinates(textureCoordinates: shared_bytes);
+
+    load_texture(context: rendering_context_interface, texture_holder: texture_holder_interface);
+    remove_texture();
+
     as_graphics_object(): graphics_object_interface;
+    as_masking_object(): masking_object_interface;
+}
+
+    quad_2d_stretched_instanced_interface = interface +c +j +o {
+    set_frame(frame: quad_2d_d);
+
+    set_instance_count(count: i32);
+    set_positions(positions: shared_bytes);
+    set_scales(scales: shared_bytes);
+    set_rotations(rotations: shared_bytes);
+    set_alphas(values: shared_bytes);
+
+    # stretch infos consists of:
+    # scaleX: f32;
+    #  all stretch infos are between 0 and 1
+    # stretchX0Begin: f32;
+    # stretchX0End: f32;
+    # stretchX1Begin: f32;
+    # stretchX1End: f32;
+    # scaleY: f32;
+    # stretchY0Begin: f32;
+    # stretchY0End: f32;
+    # stretchY1Begin: f32;
+    # stretchY1End: f32;
+    # so a total of 10 floats for each instance
+    set_stretch_infos(values: shared_bytes);
+
+    set_texture_coordinates(textureCoordinates: shared_bytes);
+
+    load_texture(context: rendering_context_interface, texture_holder: texture_holder_interface);
+    remove_texture();
+
+    as_graphics_object(): graphics_object_interface;
+    as_masking_object(): masking_object_interface;
 }
 
 render_line_description = record {
@@ -79,6 +132,18 @@ polygon_group_2d_interface = interface +c +j +o {
     as_graphics_object(): graphics_object_interface;
 }
 
+polygon_pattern_group_2d_interface = interface +c +j +o {
+    set_vertices(vertices: shared_bytes, indices: shared_bytes);
+    set_opacities(values: shared_bytes);
+    # 4 floats (x, y, width and height) in uv space and 2 uint_16 values for the pixel with and height for each instanced
+    set_texture_coordinates(values: shared_bytes);
+    set_scaling_factor(factor: f32);
+    set_scaling_factors(factor: vec_2_f);
+    load_texture(context: rendering_context_interface, texture_holder: texture_holder_interface);
+    remove_texture();
+    as_graphics_object(): graphics_object_interface;
+}
+
 texture_holder_interface = interface +j +o {
     get_image_width() : i32;
     get_image_height() : i32;
@@ -89,7 +154,41 @@ texture_holder_interface = interface +j +o {
 }
 
 text_interface = interface +c +j +o {
-    set_texts(texts: list<text_description>);
+    set_texts_shared(vertices: shared_bytes, indices: shared_bytes);
+
+    load_texture(context: rendering_context_interface, texture_holder: texture_holder_interface);
+    remove_texture();
+    as_graphics_object(): graphics_object_interface;
+}
+
+text_instanced_interface = interface +c +j +o {
+    # set the frame of the root object
+    set_frame(frame: quad_2d_d);
+
+    set_instance_count(count: i32);
+
+    # 2 floats (x and y) for each instance
+    set_positions(positions: shared_bytes);
+
+    # 4 floats (x, y, width and height) for each instanced
+    set_texture_coordinates(textureCoordinates: shared_bytes);
+
+    # 2 floats for width and height scale for each instance
+    set_scales(scales: shared_bytes);
+
+    # one float for each instance in degree
+    set_rotations(rotations: shared_bytes);
+
+    # one uint16 for each instance
+    set_style_indices(indices: shared_bytes);
+
+    # a style contains of:
+    # color RGBA
+    # halo-color RGBA
+    # halo=width
+    # so a total of 9 floats for each style
+    set_styles(values: shared_bytes);
+
     load_texture(context: rendering_context_interface, texture_holder: texture_holder_interface);
     remove_texture();
     as_graphics_object(): graphics_object_interface;

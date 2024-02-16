@@ -58,6 +58,16 @@ public class RenderingContext: NSObject {
 
     var isScissoringDirty = false
 
+    var currentPipeline: MTLRenderPipelineState?
+
+    open func setRenderPipelineStateIfNeeded(_ pipelineState: MTLRenderPipelineState) {
+        guard currentPipeline?.hash != pipelineState.hash else {
+            return
+        }
+        currentPipeline = pipelineState
+        encoder?.setRenderPipelineState(pipelineState)
+    }
+
     /// a Quad that fills the whole viewport
     /// this is needed to clear the stencilbuffer
     lazy var stencilClearQuad: Quad2d = {
@@ -66,16 +76,16 @@ public class RenderingContext: NSObject {
                             topRight: .init(x: 1, y: 1),
                             bottomRight: .init(x: 1, y: -1),
                             bottomLeft: .init(x: -1, y: -1)),
-                      textureCoordinates: .init())
+                      textureCoordinates: .init(x: 0, y: 0, width: 0, height: 0))
         quad.setup(self)
         return quad
     }()
 
     public func clearStencilBuffer() {
-        guard let encoder = encoder else { return }
+        guard let encoder else { return }
         stencilClearQuad.render(encoder: encoder,
                                 context: self,
-                                renderPass: .init(),
+                                renderPass: .init(renderPass: 0, isPassMasked: false),
                                 mvpMatrix: 0,
                                 isMasked: false,
                                 screenPixelAsRealMeterFactor: 1)
@@ -91,6 +101,7 @@ extension RenderingContext: MCRenderingContextInterface {
     }
 
     public func setupDrawFrame() {
+        currentPipeline = nil
     }
 
     public func onSurfaceCreated() {

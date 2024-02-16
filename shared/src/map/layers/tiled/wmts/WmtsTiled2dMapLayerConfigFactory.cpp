@@ -13,7 +13,7 @@
 
 std::shared_ptr<::Tiled2dMapLayerConfig> WmtsTiled2dMapLayerConfigFactory::create(
     const WmtsLayerDescription &wmtsLayerDescription, const std::vector<::Tiled2dMapZoomLevelInfo> &zoomLevelInfo,
-    const ::Tiled2dMapZoomInfo &zoomInfo, const std::string &coordinateSystemIdentifier, const std::string &matrixSetIdentifier) {
+    const ::Tiled2dMapZoomInfo &zoomInfo, const int32_t coordinateSystemIdentifier, const std::string &matrixSetIdentifier) {
     return std::make_shared<WmtsTiled2dMapLayerConfig>(wmtsLayerDescription, zoomLevelInfo, zoomInfo, coordinateSystemIdentifier,
                                                        matrixSetIdentifier);
 }

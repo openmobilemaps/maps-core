@@ -8,5 +8,6 @@
   ~  SPDX-License-Identifier: MPL-2.0
   -->
 
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-	package="io.openmobilemaps.mapscore" />
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+	<uses-feature android:glEsVersion="0x00030002" android:required="true" />
+</manifest>

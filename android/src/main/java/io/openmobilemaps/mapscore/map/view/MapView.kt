@@ -17,9 +17,9 @@ import android.view.MotionEvent
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
-import androidx.lifecycle.coroutineScope
 import io.openmobilemaps.mapscore.graphics.GlTextureView
-import io.openmobilemaps.mapscore.map.scheduling.AndroidScheduler
+import io.openmobilemaps.mapscore.map.layers.TiledRasterLayer
+import io.openmobilemaps.mapscore.map.layers.TiledVectorLayer
 import io.openmobilemaps.mapscore.map.scheduling.AndroidSchedulerCallback
 import io.openmobilemaps.mapscore.map.util.MapViewInterface
 import io.openmobilemaps.mapscore.map.util.SaveFrameCallback
@@ -33,6 +33,8 @@ import io.openmobilemaps.mapscore.shared.map.controls.TouchAction
 import io.openmobilemaps.mapscore.shared.map.controls.TouchEvent
 import io.openmobilemaps.mapscore.shared.map.controls.TouchHandlerInterface
 import io.openmobilemaps.mapscore.shared.map.scheduling.TaskInterface
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.microedition.khronos.egl.EGLConfig
@@ -44,8 +46,6 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 
 	var mapInterface: MapInterface? = null
 		private set
-	protected var scheduler: AndroidScheduler? = null
-		private set
 
 	private var touchHandler: TouchHandlerInterface? = null
 	private var touchDisabled = false
@@ -54,30 +54,38 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 	private var saveFrameSpec: SaveFrameSpec? = null
 	private var saveFrameCallback: SaveFrameCallback? = null
 
-	open fun setupMap(mapConfig: MapConfig, scheduler: AndroidScheduler = AndroidScheduler(this), useMSAA: Boolean = false) {
+	protected var lifecycle: Lifecycle? = null
+	private var lifecycleResumed = false
+	private val mapViewStateMutable = MutableStateFlow(MapViewState.UNINITIALIZED)
+	val mapViewState = mapViewStateMutable.asStateFlow()
+
+	open fun setupMap(mapConfig: MapConfig, useMSAA: Boolean = false) {
 		val densityExact = resources.displayMetrics.xdpi
 
 		configureGL(useMSAA)
 		setRenderer(this)
 		val mapInterface = MapInterface.createWithOpenGl(
 			mapConfig,
-			scheduler,
 			densityExact
 		)
 		mapInterface.setCallbackHandler(object : MapCallbackInterface() {
 			override fun invalidate() {
-				scheduler.launchCoroutine { requestRender() }
+				requestRender()
+			}
+
+			override fun onMapResumed() {
+				mapViewStateMutable.value = MapViewState.RESUMED
 			}
 		})
 		mapInterface.setBackgroundColor(Color(1f, 1f, 1f, 1f))
 		touchHandler = mapInterface.getTouchHandler()
 		this.mapInterface = mapInterface
-		this.scheduler = scheduler
+		mapViewStateMutable.value = MapViewState.INITIALIZED
 	}
 
 	fun registerLifecycle(lifecycle: Lifecycle) {
-		requireScheduler().setCoroutineScope(lifecycle.coroutineScope)
 		lifecycle.addObserver(this)
+		this.lifecycle = lifecycle
 	}
 
 	override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
@@ -99,33 +107,46 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 		queueEvent { task.run() }
 	}
 
-	@OnLifecycleEvent(Lifecycle.Event.ON_START)
-	open fun onStart() {
-		requireScheduler().resume()
-	}
-
 	@OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
 	open fun onResume() {
-		requireMapInterface().resume()
+		lifecycleResumed = true
+		resumeGlThread()
 	}
 
 	@OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
 	open fun onPause() {
-		requireMapInterface().pause()
-	}
-
-	@OnLifecycleEvent(Lifecycle.Event.ON_STOP)
-	open fun onStop() {
-		requireScheduler().pause()
+		lifecycleResumed = false
+		pauseGlThread()
 	}
 
 	@OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
 	open fun onDestroy() {
-		setRenderer(null)
-		mapInterface?.destroy()
-		mapInterface = null
-		scheduler = null
-		touchHandler = null
+		lifecycle = null
+		mapViewStateMutable.value = MapViewState.DESTROYED
+		finishGlThread()
+	}
+
+	override fun onGlThreadResume() {
+		if (lifecycleResumed) {
+			requireMapInterface().resume()
+		}
+	}
+
+	override fun onGlThreadPause() {
+		if (mapViewStateMutable.value != MapViewState.PAUSED) {
+			mapViewStateMutable.value = MapViewState.PAUSED
+			requireMapInterface().pause()
+		}
+	}
+
+	override fun onGlThreadFinishing() {
+		if (mapViewState.value == MapViewState.DESTROYED) {
+			val map = mapInterface
+			setRenderer(null)
+			mapInterface = null
+			touchHandler = null
+			map?.destroy()
+		}
 	}
 
 	fun setTouchEnabled(enabled: Boolean) {
@@ -164,8 +185,24 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 		requireMapInterface().addLayer(layer)
 	}
 
+	fun addLayer(layer: TiledRasterLayer) {
+		requireMapInterface().addLayer(layer.layerInterface())
+	}
+
+	fun addLayer(layer: TiledVectorLayer) {
+		requireMapInterface().addLayer(layer.layerInterface())
+	}
+
 	override fun insertLayerAt(layer: LayerInterface, at: Int) {
 		requireMapInterface().insertLayerAt(layer, at)
+	}
+
+	fun insertLayerAt(layer: TiledRasterLayer, at: Int) {
+		requireMapInterface().insertLayerAt(layer.layerInterface(), at)
+	}
+
+	fun insertLayerAt(layer: TiledVectorLayer, at: Int) {
+		requireMapInterface().insertLayerAt(layer.layerInterface(), at)
 	}
 
 	override fun insertLayerAbove(layer: LayerInterface, above: LayerInterface) {
@@ -179,6 +216,15 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 	override fun removeLayer(layer: LayerInterface) {
 		requireMapInterface().removeLayer(layer)
 	}
+
+	fun removeLayer(layer: TiledRasterLayer) {
+		requireMapInterface().removeLayer(layer.layerInterface())
+	}
+
+	fun removeLayer(layer: TiledVectorLayer) {
+		requireMapInterface().removeLayer(layer.layerInterface())
+	}
+
 
 	override fun getCamera(): MapCamera2dInterface {
 		return requireMapInterface().getCamera()
@@ -200,5 +246,4 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 	}
 
 	override fun requireMapInterface(): MapInterface = mapInterface ?: throw IllegalStateException("Map is not setup or already destroyed!")
-	override fun requireScheduler(): AndroidScheduler = scheduler ?: throw IllegalStateException("Map is not setup or already destroyed!")
 }

@@ -12,11 +12,12 @@
 #include "OpenGlContext.h"
 #include "OpenGlHelper.h"
 
-std::string ColorCircleShaderOpenGl::getProgramName() { return "UBMAP_ColorCircleShaderOpenGl"; }
+const std::string ColorCircleShaderOpenGl::programName = "UBMAP_ColorCircleShaderOpenGl";
+
+std::string ColorCircleShaderOpenGl::getProgramName() { return programName; }
 
 void ColorCircleShaderOpenGl::setupProgram(const std::shared_ptr<::RenderingContextInterface> &context) {
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
-    std::string programName = getProgramName();
     // prepare shaders and OpenGL program
     int vertexShader = loadShader(GL_VERTEX_SHADER, getVertexShader());
     int fragmentShader = loadShader(GL_FRAGMENT_SHADER, getFragmentShader());
@@ -33,32 +34,45 @@ void ColorCircleShaderOpenGl::setupProgram(const std::shared_ptr<::RenderingCont
 }
 
 void ColorCircleShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context) {
+    BaseShaderProgramOpenGl::preRender(context);
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
-    int program = openGlContext->getProgram(getProgramName());
+    int program = openGlContext->getProgram(programName);
 
     int mColorHandle = glGetUniformLocation(program, "vColor");
-    glUniform4fv(mColorHandle, 1, &color[0]);
+    {
+        std::lock_guard<std::mutex> lock(dataMutex);
+        glUniform4fv(mColorHandle, 1, &color[0]);
+    }
 }
 
 void ColorCircleShaderOpenGl::setColor(float red, float green, float blue, float alpha) {
-    color = std::vector<float>{red, green, blue, alpha};
+    std::lock_guard<std::mutex> lock(dataMutex);
+    color[0] = red;
+    color[1] = green;
+    color[2] = blue;
+    color[3] = alpha;
 }
 
 std::string ColorCircleShaderOpenGl::getFragmentShader() {
-    return UBRendererShaderCode(precision mediump float; uniform vec4 vColor; varying vec2 v_texcoord;
+    return OMMVersionedGlesShaderCode(320 es,
+                                      precision mediump float;
+                                      uniform vec4 vColor;
+                                      in vec2 v_texcoord;
+                                      out vec4 fragmentColor;
 
-                                void main() {
-                                    highp vec2 circleCenter = vec2(0.5, 0.5);
-                                    highp float dist = distance(v_texcoord, circleCenter);
+                                      void main() {
+                                          highp
+                                          vec2 circleCenter = vec2(0.5, 0.5);
+                                          highp float dist = distance(v_texcoord, circleCenter);
 
-                                    if (dist > 0.5) {
-                                        discard;
-                                    }
+                                          if (dist > 0.5) {
+                                              discard;
+                                          }
 
-                                    gl_FragColor = vColor;
-                                    gl_FragColor.a = 1.0;
-                                    gl_FragColor *= vColor.a;
-                                });
+                                          fragmentColor = vColor;
+                                          fragmentColor.a = 1.0;
+                                          fragmentColor *= vColor.a;
+                                      });
 }
 
 std::shared_ptr<ShaderProgramInterface> ColorCircleShaderOpenGl::asShaderProgramInterface() { return shared_from_this(); }

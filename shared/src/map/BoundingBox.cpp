@@ -13,27 +13,33 @@
 #include "CoordinateConversionHelperInterface.h"
 #include "CoordinateSystemIdentifiers.h"
 
-std::shared_ptr<BoundingBoxInterface> BoundingBoxInterface::create(const std::string & systemIdentifier) {
+std::shared_ptr<BoundingBoxInterface> BoundingBoxInterface::create(int32_t systemIdentifier) {
     return std::make_shared<BoundingBox>(systemIdentifier);
 }
 
 BoundingBox::BoundingBox()
     : systemIdentifier(CoordinateSystemIdentifiers::RENDERSYSTEM())
-    , min(systemIdentifier, std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max())
-    , max(systemIdentifier, std::numeric_limits<float>::min(), std::numeric_limits<float>::min(),
-      std::numeric_limits<float>::min()) {}
+    , min(CoordinateSystemIdentifiers::RENDERSYSTEM(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max())
+    , max(CoordinateSystemIdentifiers::RENDERSYSTEM(), std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest(),
+      std::numeric_limits<float>::lowest()) {}
 
-BoundingBox::BoundingBox(const std::string &systemIdentifier)
+BoundingBox::BoundingBox(const int32_t systemIdentifier)
     : systemIdentifier(systemIdentifier)
     , min(systemIdentifier, std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max())
-    , max(systemIdentifier, std::numeric_limits<float>::min(), std::numeric_limits<float>::min(),
-          std::numeric_limits<float>::min()) {}
-
+    , max(systemIdentifier, std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest(),
+          std::numeric_limits<float>::lowest()) {}
 
 BoundingBox::BoundingBox(const Coord& p):
     systemIdentifier(p.systemIdentifier),
     min(p),
     max(p) {}
+
+BoundingBox::operator bool() {
+    return min.x != std::numeric_limits<float>::max() ||
+           min.y != std::numeric_limits<float>::max() ||
+           max.x != std::numeric_limits<float>::min() ||
+           max.y != std::numeric_limits<float>::min();
+}
 
 void BoundingBox::addPoint(const Coord &p) {
     auto const &conv = CoordinateConversionHelperInterface::independentInstance()->convert(systemIdentifier, p);
@@ -78,9 +84,9 @@ Coord BoundingBox::getMin() {
 }
 
 Coord BoundingBox::getMax() {
-    return min;
+    return max;
 }
 
-std::string BoundingBox::getSystemIdentifier() {
+int32_t BoundingBox::getSystemIdentifier() {
     return systemIdentifier;
 }

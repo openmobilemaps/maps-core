@@ -17,31 +17,44 @@
 
 class RasterVectorStyle {
 public:
-
     RasterVectorStyle(std::shared_ptr<Value> rasterOpacity,
                       std::shared_ptr<Value> rasterBrightnessMin,
                       std::shared_ptr<Value> rasterBrightnessMax,
                       std::shared_ptr<Value> rasterContrast,
-                      std::shared_ptr<Value> rasterSaturation):
-    rasterOpacity(rasterOpacity), rasterBrightnessMin(rasterBrightnessMin), rasterBrightnessMax(rasterBrightnessMax), rasterContrast(rasterContrast), rasterSaturation(rasterSaturation) {}
+                      std::shared_ptr<Value> rasterSaturation,
+                      std::shared_ptr<Value> rasterGamma,
+                      std::shared_ptr<Value> blendMode) :
+            rasterOpacity(rasterOpacity), rasterBrightnessMin(rasterBrightnessMin), rasterBrightnessMax(rasterBrightnessMax),
+            rasterContrast(rasterContrast), rasterSaturation(rasterSaturation), rasterGamma(rasterGamma), blendMode(blendMode) {}
 
-    std::unordered_set<std::string> getUsedKeys() {
-        std::unordered_set<std::string> usedKeys;
-        std::vector<std::shared_ptr<Value>> values = { 
+    RasterVectorStyle(RasterVectorStyle &style) :
+            rasterOpacity(style.rasterOpacity), rasterBrightnessMin(style.rasterBrightnessMin), rasterBrightnessMax(style.rasterBrightnessMax),
+            rasterContrast(style.rasterContrast), rasterSaturation(style.rasterSaturation), rasterGamma(style.rasterGamma), blendMode(style.blendMode) {}
+
+    UsedKeysCollection getUsedKeys() const {
+        UsedKeysCollection usedKeys;
+        std::shared_ptr<Value> values[] = { 
             rasterOpacity, 
             rasterBrightnessMin,
             rasterBrightnessMax,
             rasterContrast,
-            rasterSaturation 
+            rasterSaturation,
+            rasterGamma,
+            blendMode
         };
 
         for (auto const &value: values) {
             if (!value) continue;
             auto const setKeys = value->getUsedKeys();
-            usedKeys.insert(setKeys.begin(), setKeys.end());
+            usedKeys.includeOther(setKeys);
         }
 
         return usedKeys;
+    }
+
+    BlendMode getBlendMode(const EvaluationContext &context) {
+        static const BlendMode defaultValue = BlendMode::NORMAL;
+        return blendMode ? blendMode->evaluateOr(context, defaultValue) : defaultValue;
     }
     
     RasterShaderStyle getRasterStyle(const EvaluationContext &context) {
@@ -50,41 +63,56 @@ public:
             (float) getRasterBrightnessMin(context),
             (float) getRasterBrightnessMax(context),
             (float) getRasterContrast(context),
-            (float) getRasterSaturation(context)
+            (float) getRasterSaturation(context),
+            (float) getRasterGamma(context)
         };
     }
 
     double getRasterOpacity(const EvaluationContext &context) {
         double defaultValue = 1.0;
-        return rasterOpacity ? rasterOpacity->evaluateOr(context, defaultValue) : defaultValue;
+        return rasterOpacityEvaluator.getResult(rasterOpacity, context, defaultValue);
     }
     
     double getRasterBrightnessMin(const EvaluationContext &context) {
         double defaultValue = 0.0;
-        return rasterBrightnessMin ? rasterBrightnessMin->evaluateOr(context, defaultValue) : defaultValue;
+        return rasterBrightnessMinEvaluator.getResult(rasterBrightnessMin, context, defaultValue);
     }
     
     double getRasterBrightnessMax(const EvaluationContext &context) {
         double defaultValue = 1.0;
-        return rasterBrightnessMax ? rasterBrightnessMax->evaluateOr(context, defaultValue) : defaultValue;
+        return rasterBrightnessMaxEvaluator.getResult(rasterBrightnessMax, context, defaultValue);
     }
     
     double getRasterContrast(const EvaluationContext &context) {
         double defaultValue = 0.0;
-        return rasterContrast ? rasterContrast->evaluateOr(context, defaultValue) : defaultValue;
+        return rasterContrastEvaluator.getResult(rasterContrast, context, defaultValue);
     }
-    
+
     double getRasterSaturation(const EvaluationContext &context) {
         double defaultValue = 0.0;
-        return rasterSaturation ? rasterSaturation->evaluateOr(context, defaultValue) : defaultValue;
+        return rasterSaturationEvaluator.getResult(rasterSaturation, context, defaultValue);
     }
-    
-private:
+
+    double getRasterGamma(const EvaluationContext &context) {
+        double defaultValue = 1.0;
+        return rasterGammaEvaluator.getResult(rasterGamma, context, defaultValue);
+    }
+
     std::shared_ptr<Value> rasterOpacity;
     std::shared_ptr<Value> rasterBrightnessMin;
     std::shared_ptr<Value> rasterBrightnessMax;
     std::shared_ptr<Value> rasterContrast;
     std::shared_ptr<Value> rasterSaturation;
+    std::shared_ptr<Value> rasterGamma;
+    std::shared_ptr<Value> blendMode;
+private:
+    ValueEvaluator<double> rasterOpacityEvaluator;
+    ValueEvaluator<double> rasterBrightnessMinEvaluator;
+    ValueEvaluator<double> rasterBrightnessMaxEvaluator;
+    ValueEvaluator<double> rasterContrastEvaluator;
+    ValueEvaluator<double> rasterSaturationEvaluator;
+    ValueEvaluator<double> rasterGammaEvaluator;
+    ValueEvaluator<BlendMode> blendModeEvaluator;
 };
 
 class RasterVectorLayerDescription: public VectorLayerDescription  {
@@ -99,8 +127,10 @@ public:
     double zoomLevelScaleFactor;
     bool overzoom;
     bool underzoom;
+    std::optional<::RectCoord> bounds;
 
     RasterVectorLayerDescription(std::string identifier,
+                                 std::string source,
                                  int minZoom,
                                  int maxZoom,
                                  std::string url,
@@ -110,19 +140,41 @@ public:
                                  bool maskTiles,
                                  double zoomLevelScaleFactor,
                                  std::optional<int32_t> renderPassIndex,
+                                 std::shared_ptr<Value> interactable,
+                                 bool underzoom,
                                  bool overzoom,
-                                 bool underzoom):
-    VectorLayerDescription(identifier, "", "", minZoom, maxZoom, nullptr, renderPassIndex),
-    style(style), url(url), adaptScaleToScreen(adaptScaleToScreen), numDrawPreviousLayers(numDrawPreviousLayers), maskTiles(maskTiles), zoomLevelScaleFactor(zoomLevelScaleFactor), overzoom(overzoom), underzoom(underzoom)  {};
+                                 std::optional<::RectCoord> bounds):
+    VectorLayerDescription(identifier, source, "", minZoom, maxZoom, nullptr, renderPassIndex, interactable, false, false),
+    style(style), url(url), underzoom(underzoom), overzoom(overzoom), adaptScaleToScreen(adaptScaleToScreen), numDrawPreviousLayers(numDrawPreviousLayers),
+    maskTiles(maskTiles), zoomLevelScaleFactor(zoomLevelScaleFactor), bounds(bounds) {};
 
-    virtual std::unordered_set<std::string> getUsedKeys() override {
-        std::unordered_set<std::string> usedKeys;
+
+    std::unique_ptr<VectorLayerDescription> clone() override {
+        return std::make_unique<RasterVectorLayerDescription>(identifier,
+                                            source,
+                                            minZoom,
+                                            maxZoom,
+                                            url,
+                                            style,
+                                            adaptScaleToScreen,
+                                            numDrawPreviousLayers,
+                                            maskTiles,
+                                            zoomLevelScaleFactor,
+                                            renderPassIndex,
+                                            interactable ? interactable->clone() : nullptr,
+                                            underzoom,
+                                            overzoom,
+                                            bounds);
+    }
+
+    virtual UsedKeysCollection getUsedKeys() const override {
+        UsedKeysCollection usedKeys;
 
         auto parentKeys = VectorLayerDescription::getUsedKeys();
-        usedKeys.insert(parentKeys.begin(), parentKeys.end());
+        usedKeys.includeOther(parentKeys);
 
         auto styleKeys = style.getUsedKeys();
-        usedKeys.insert(styleKeys.begin(), styleKeys.end());
+        usedKeys.includeOther(styleKeys);
 
         return usedKeys;
     };

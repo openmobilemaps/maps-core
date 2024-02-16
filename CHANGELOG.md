@@ -1,5 +1,10 @@
 # Changelog for Open Mobile Maps
 
+## Version 2.0.0 (16.02.2023)
+- Major improvements in vector map performance, stability, and rendering, alongside expanded options for style specifications and GeoJSON support.
+- Enhanced stability and performance for raster, icon, polygon, and line layers.
+- Many additional improvements and bug fixes.
+
 ## Version 1.5.3 (16.05.2023)
 - Improved MapInterface teardown
 

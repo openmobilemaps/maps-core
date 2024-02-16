@@ -46,9 +46,10 @@ void Quad2dOpenGl::setFrame(const Quad2dD &frame, const RectD &textureCoordinate
 }
 
 void Quad2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface> &context) {
-    if (ready)
-        return;
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
+    if (ready) {
+        return;
+    }
 
     float frameZ = 0;
     vertices = {
@@ -63,44 +64,50 @@ void Quad2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface> &con
     adjustTextureCoordinates();
 
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
-    if (openGlContext->getProgram(shaderProgram->getProgramName()) == 0) {
+    programName = shaderProgram->getProgramName();
+    program = openGlContext->getProgram(programName);
+    if (program == 0) {
         shaderProgram->setupProgram(openGlContext);
+        program = openGlContext->getProgram(programName);
     }
 
-    int program = openGlContext->getProgram(shaderProgram->getProgramName());
-    prepareGlData(openGlContext, program);
-    prepareTextureCoordsGlData(openGlContext, program);
+    prepareGlData(program);
+    prepareTextureCoordsGlData(program);
 
-    programHandle = program;
     ready = true;
 }
 
-void Quad2dOpenGl::prepareGlData(const std::shared_ptr<OpenGlContext> &openGlContext, const int &programHandle) {
-    glUseProgram(programHandle);
+void Quad2dOpenGl::prepareGlData(int program) {
+    glUseProgram(program);
 
-    positionHandle = glGetAttribLocation(programHandle, "vPosition");
-    glGenBuffers(1, &vertexBuffer);
+    positionHandle = glGetAttribLocation(program, "vPosition");
+    if (!glDataBuffersGenerated) {
+        glGenBuffers(1, &vertexBuffer);
+    }
     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    glGenBuffers(1, &indexBuffer);
+    if (!glDataBuffersGenerated) {
+        glGenBuffers(1, &indexBuffer);
+    }
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLubyte) * indices.size(), &indices[0], GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-    mvpMatrixHandle = glGetUniformLocation(programHandle, "uMVPMatrix");
+    mvpMatrixHandle = glGetUniformLocation(program, "uMVPMatrix");
+    glDataBuffersGenerated = true;
 }
 
-void Quad2dOpenGl::prepareTextureCoordsGlData(const std::shared_ptr<OpenGlContext> &openGlContext, const int &programHandle) {
-    glUseProgram(programHandle);
+void Quad2dOpenGl::prepareTextureCoordsGlData(int program) {
+    glUseProgram(program);
 
     if (textureCoordsReady) {
         removeTextureCoordsGlBuffers();
     }
 
-    textureCoordinateHandle = glGetAttribLocation(programHandle, "texCoordinate");
+    textureCoordinateHandle = glGetAttribLocation(program, "texCoordinate");
     if (textureCoordinateHandle < 0) {
         usesTextureCoords = false;
         return;
@@ -115,8 +122,11 @@ void Quad2dOpenGl::prepareTextureCoordsGlData(const std::shared_ptr<OpenGlContex
 }
 
 void Quad2dOpenGl::removeGlBuffers() {
-    glDeleteBuffers(1, &vertexBuffer);
-    glDeleteBuffers(1, &indexBuffer);
+    if (glDataBuffersGenerated) {
+        glDeleteBuffers(1, &vertexBuffer);
+        glDeleteBuffers(1, &indexBuffer);
+        glDataBuffersGenerated = false;
+    }
 }
 
 void Quad2dOpenGl::removeTextureCoordsGlBuffers() {
@@ -129,6 +139,10 @@ void Quad2dOpenGl::removeTextureCoordsGlBuffers() {
 void Quad2dOpenGl::loadTexture(const std::shared_ptr<::RenderingContextInterface> &context,
                                const std::shared_ptr<TextureHolderInterface> &textureHolder) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
+    if (this->textureHolder != nullptr) {
+        removeTexture();
+    }
+
     if (textureHolder != nullptr) {
         texturePointer = textureHolder->attachToGraphics();
 
@@ -137,9 +151,7 @@ void Quad2dOpenGl::loadTexture(const std::shared_ptr<::RenderingContextInterface
         adjustTextureCoordinates();
 
         if (ready) {
-            std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
-            int program = openGlContext->getProgram(shaderProgram->getProgramName());
-            prepareTextureCoordsGlData(openGlContext, program);
+            prepareTextureCoordsGlData(program);
         }
         this->textureHolder = textureHolder;
     }
@@ -175,22 +187,31 @@ void Quad2dOpenGl::renderAsMask(const std::shared_ptr<::RenderingContextInterfac
 
 void Quad2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
                           int64_t mvpMatrix, bool isMasked, double screenPixelAsRealMeterFactor) {
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
     if (!ready || (usesTextureCoords && !textureCoordsReady))
         return;
 
-    glUseProgram(programHandle);
+    glUseProgram(program);
 
+    GLuint stencilMask = 0;
+    GLuint validTarget = 0;
+    GLenum zpass = GL_KEEP;
     if (isMasked) {
-        glStencilFunc(GL_EQUAL, isMaskInversed ? 0 : 128, 128);
-        glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+        stencilMask += 128;
+        validTarget = isMaskInversed ? 0 : 128;
+    }
+    if (renderPass.isPassMasked) {
+        stencilMask += 127;
+        zpass = GL_INCR;
     }
 
-    std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
-    int mProgram = openGlContext->getProgram(shaderProgram->getProgramName());
-    glUseProgram(mProgram);
+    if (stencilMask != 0) {
+        glStencilFunc(GL_EQUAL, validTarget, stencilMask);
+        glStencilOp(GL_KEEP, GL_KEEP, zpass);
+    }
 
     if (usesTextureCoords) {
-        prepareTextureDraw(openGlContext, programHandle);
+        prepareTextureDraw(program);
 
         glEnableVertexAttribArray(textureCoordinateHandle);
         glBindBuffer(GL_ARRAY_BUFFER, textureCoordsBuffer);
@@ -209,15 +230,9 @@ void Quad2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &co
     // Apply the projection and view transformation
     glUniformMatrix4fv(mvpMatrixHandle, 1, false, (GLfloat *)mvpMatrix);
 
-    // Enable blending
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-
     // Draw the triangles
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, nullptr);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
@@ -231,7 +246,7 @@ void Quad2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &co
     glDisable(GL_BLEND);
 }
 
-void Quad2dOpenGl::prepareTextureDraw(std::shared_ptr<OpenGlContext> &openGLContext, int programHandle) {
+void Quad2dOpenGl::prepareTextureDraw(int program) {
     if (!textureHolder) {
         return;
     }
@@ -243,6 +258,10 @@ void Quad2dOpenGl::prepareTextureDraw(std::shared_ptr<OpenGlContext> &openGLCont
     glBindTexture(GL_TEXTURE_2D, (unsigned int)texturePointer);
 
     // Tell the texture uniform sampler to use this texture in the shader by binding to texture unit 0.
-    int textureUniformHandle = glGetUniformLocation(programHandle, "texture");
+    int textureUniformHandle = glGetUniformLocation(program, "textureSampler");
     glUniform1i(textureUniformHandle, 0);
+}
+
+void Quad2dOpenGl::setDebugLabel(const std::string &label) {
+    // not used
 }

@@ -47,22 +47,27 @@ class Polygon2dOpenGl : public GraphicsObjectInterface,
 
     virtual void setIsInverseMasked(bool inversed) override;
 
-  protected:
-    void prepareGlData(const std::shared_ptr<OpenGlContext> &openGlContext);
+    void setDebugLabel(const std::string &label) override;
+
+protected:
+    void prepareGlData(int program);
 
     void removeGlBuffers();
 
-    void drawPolygon(std::shared_ptr<OpenGlContext> openGlContext, int program, int64_t mvpMatrix);
+    inline void drawPolygon(const std::shared_ptr<::RenderingContextInterface> &context, int program, int64_t mvpMatrix);
 
     std::shared_ptr<ShaderProgramInterface> shaderProgram;
+    std::string programName;
+    int program = 0;
 
-    int programHandle;
     int mvpMatrixHandle;
     int positionHandle;
     GLuint vertexBuffer;
     std::vector<GLfloat> vertices;
     GLuint indexBuffer;
     std::vector<GLushort> indices;
+    bool glDataBuffersGenerated = false;
+
 
     bool dataReady = false;
     bool ready = false;

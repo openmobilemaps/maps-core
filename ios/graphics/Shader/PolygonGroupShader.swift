@@ -14,39 +14,34 @@ import Metal
 import UIKit
 
 class PolygonGroupShader: BaseShader {
-    private var polygonStyleBuffer: MTLBuffer
+    var polygonStyleBuffer: MTLBuffer?
 
-    static let styleBufferSize: Int = 32
-    static let polygonStyleSize : Int = 5
+    let isStriped : Bool
 
-    private var pipeline: MTLRenderPipelineState?
-
-    override init() {
-        guard let buffer = MetalContext.current.device.makeBuffer(length: MemoryLayout<Float>.stride * Self.styleBufferSize * Self.polygonStyleSize, options: []) else { fatalError("Could not create buffer") }
-        polygonStyleBuffer = buffer
+    init(isStriped: Bool) {
+        self.isStriped = isStriped
+        super.init()
     }
 
     override func setupProgram(_: MCRenderingContextInterface?) {
         if pipeline == nil {
-            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline.polygonGroupShader.rawValue)
+            let t : PipelineType = isStriped ? .polygonStripedGroupShader : .polygonGroupShader
+            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: t, blendMode: blendMode).json)
         }
     }
 
     override func preRender(encoder: MTLRenderCommandEncoder, context: RenderingContext) {
         guard let encoder = context.encoder,
-              let pipeline = pipeline else { return }
+              let pipeline else { return }
 
-        encoder.setRenderPipelineState(pipeline)
-
+        context.setRenderPipelineStateIfNeeded(pipeline)
         encoder.setFragmentBuffer(polygonStyleBuffer, offset: 0, index: 1)
     }
 }
 
 extension PolygonGroupShader: MCPolygonGroupShaderInterface {
     func setStyles(_ styles: MCSharedBytes) {
-        guard styles.elementCount < Self.styleBufferSize else { fatalError("polygon style error exceeds buffer size") }
-
-        polygonStyleBuffer.copyMemory(from: styles)
+        polygonStyleBuffer.copyOrCreate(from: styles, device: MetalContext.current.device)
     }
 
     func asShaderProgram() -> MCShaderProgramInterface? {

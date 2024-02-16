@@ -24,53 +24,46 @@ class EPSG4326ToEPSG2056Converter : public CoordinateConverterInterface {
 
     virtual Coord convert(const Coord &coordinate) override {
 
-        // Converts degrees dec to sex
-        double lat = DECtoSEX(coordinate.y);
-        double lng = DECtoSEX(coordinate.x);
-
-        // Converts degrees to seconds (sex)
-        lat = DEGtoSEC(lat);
-        lng = DEGtoSEC(lng);
+        // Converts degrees dec to sex and Converts degrees to seconds (sex)
+        double lat = DEGtoSEC(DECtoSEX(coordinate.y));
+        double lng = DEGtoSEC(DECtoSEX(coordinate.x));
 
         // Axiliary values (% Bern)
-        double lat_aux = (lat - 169028.66) / 10000.;
-        double lng_aux = (lng - 26782.5) / 10000.;
+        const double lat_aux = (lat - 169028.66) / 10000.;
+        const double lng_aux = (lng - 26782.5) / 10000.;
 
-        double x = 600072.37 + 211455.93 * lng_aux - 10938.51 * lng_aux * lat_aux - 0.36 * lng_aux * (lat_aux * lat_aux) -
-                   44.54 * (lng_aux * lng_aux * lng_aux);
+        const double x = (600072.37 + 211455.93 * lng_aux - 10938.51 * lng_aux * lat_aux - 0.36 * lng_aux * (lat_aux * lat_aux) -
+                   44.54 * (lng_aux * lng_aux * lng_aux)) + 2000000;
 
-        double y = 200147.07 + 308807.95 * lat_aux + 3745.25 * lng_aux * lng_aux + 76.63 * lat_aux * lat_aux -
-                   194.56 * lng_aux * lng_aux * lat_aux + 119.79 * lat_aux * lat_aux * lat_aux;
+        const double y = (200147.07 + 308807.95 * lat_aux + 3745.25 * lng_aux * lng_aux + 76.63 * lat_aux * lat_aux -
+                   194.56 * lng_aux * lng_aux * lat_aux + 119.79 * lat_aux * lat_aux * lat_aux) + 1000000;
 
-        y += 1000000;
-        x += 2000000;
-
-        double z = coordinate.z - 49.55 + 2.73 * lng_aux + 6.94 * lat_aux;
+        const double z = coordinate.z - 49.55 + 2.73 * lng_aux + 6.94 * lat_aux;
 
         return Coord(getTo(), x, y, z);
     }
 
-    virtual std::string getFrom() override { return CoordinateSystemIdentifiers::EPSG4326(); }
+    virtual int32_t getFrom() override { return CoordinateSystemIdentifiers::EPSG4326(); }
 
-    virtual std::string getTo() override { return CoordinateSystemIdentifiers::EPSG2056(); }
+    virtual int32_t getTo() override { return CoordinateSystemIdentifiers::EPSG2056(); }
 
   private:
-    double DECtoSEX(double angle) {
+    inline double DECtoSEX(double angle) const {
         // Extract DMS
-        double deg = angle;
-        double min = (angle - deg) * 60;
-        double sec = (((angle - deg) * 60) - min) * 60;
+        const double deg = angle;
+        const double min = (angle - deg) * 60;
+        const double sec = (((angle - deg) * 60) - min) * 60;
 
         // Result in degrees sex (dd.mmss)
         return deg + min / 100 + sec / 10000;
     }
 
     // Convert Degrees angle to seconds
-    double DEGtoSEC(double angle) {
+    inline double DEGtoSEC(double angle) const {
         // Extract DMS
-        double deg = angle;
-        double min = (angle - deg) * 100;
-        double sec = (((angle - deg) * 100) - min) * 100;
+        const double deg = angle;
+        const double min = (angle - deg) * 100;
+        const double sec = (((angle - deg) * 100) - min) * 100;
 
         // Result in degrees sex (dd.mmss)
         return sec + min * 60 + deg * 3600;

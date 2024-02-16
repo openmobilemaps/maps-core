@@ -12,7 +12,6 @@
 #include "CoordinateConversionHelper.h"
 #include "CoordinateSystemIdentifiers.h"
 #include "Tiled2dMapRasterLayerInterface.h"
-#include "WmtsLayerConfiguration.h"
 #include "WmtsLayerDescription.h"
 #include "WmtsLayerDimension.h"
 #include "WmtsTileMatrixSet.h"
@@ -75,9 +74,9 @@ int32_t numZ) override {
 
         std::vector<::Tiled2dMapZoomLevelInfo> zoomLevels;
 
-        std::string coordinateSystem = matrixSet.coordinateSystemIdentifier;
+        int32_t coordinateSystem = matrixSet.coordinateSystemIdentifier;
 
-        auto bounds = RectCoord(Coord("", 0, 0, 0), Coord("", 0, 0, 0));
+        auto bounds = RectCoord(Coord(0, 0, 0, 0), Coord(0, 0, 0, 0));
 
         for (auto &matrix : matrixSet.matrices) {
             int32_t zoomLevelIdentifier = stoi(matrix.identifier);
@@ -181,8 +180,11 @@ int32_t numZ) override {
             c4 = std::stod(upperCorner.substr(lowerCorner.find(" ")));
         }
 
-        auto bounds = RectCoord(Coord(CoordinateSystemIdentifiers::EPSG4326(), c1, c2, 0),
-                                Coord(CoordinateSystemIdentifiers::EPSG4326(), c3, c4, 0));
+        std::optional<RectCoord> bounds;
+        if (c1 != 0 && c2 != 0 && c3 != 0 && c4 != 0) {
+            bounds = RectCoord(Coord(CoordinateSystemIdentifiers::EPSG4326(), c1, c2, 0),
+                                 Coord(CoordinateSystemIdentifiers::EPSG4326(), c3, c4, 0));
+        }
         std::string tileMatrixSetLink = layer.child("TileMatrixSetLink").child_value("TileMatrixSet");
         std::string resourceTemplate = layer.child("ResourceURL").attribute("template").as_string();
         std::string resourceFormat = layer.child("ResourceURL").attribute("format").as_string();
@@ -196,10 +198,9 @@ int32_t numZ) override {
         std::string identifier = tileMatrixSet.child_value("ows:Identifier");
 
         std::string supportedCRS = tileMatrixSet.child_value("ows:SupportedCRS");
-        std::string coordinateSystem = CoordinateSystemIdentifiers::fromCrsIdentifier(supportedCRS);
-        if (coordinateSystem == "") {
+        auto coordinateSystem = CoordinateSystemIdentifiers::fromCrsIdentifier(supportedCRS);
+        if (coordinateSystem == -1) {
             printf("unknown coordinate system %s\n", supportedCRS.c_str());
-            coordinateSystem = supportedCRS;
         }
         std::vector<WmtsTileMatrix> matrices;
 

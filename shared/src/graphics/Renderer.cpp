@@ -41,7 +41,6 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
             if (hasMask) {
                 renderingContext->preRenderStencilMask();
                 maskObject->renderAsMask(renderingContext, pass->getRenderPassConfig(), vpMatrixPointer, factor);
-                //LogDebug << "Has mask and mask is: " <<= (maskObject->asGraphicsObject()->isReady() ? "ready" : "not ready");
             }
 
             for (const auto &renderObject : renderObjects) {

@@ -20,6 +20,7 @@
 #include "MapCoordinateSystem.h"
 #include "SimpleTouchInterface.h"
 #include "Vec2I.h"
+#include "Vec2F.h"
 #include <mutex>
 #include <optional>
 #include <set>
@@ -40,7 +41,7 @@ class MapCamera2d : public MapCamera2dInterface,
     virtual void moveToCenterPosition(const ::Coord &centerPosition, bool animated) override;
 
     virtual void moveToBoundingBox(const ::RectCoord &boundingBox, float paddingPc, bool animated,
-                                   std::optional<double> maxZoom) override;
+                                   std::optional<double> minZoom, std::optional<double> maxZoom) override;
 
     virtual ::Coord getCenterPosition() override;
 
@@ -82,6 +83,8 @@ class MapCamera2d : public MapCamera2dInterface,
 
     virtual std::vector<float> getVpMatrix() override;
 
+    std::optional<std::vector<float>> getLastVpMatrix() override;
+
     std::optional<::RectCoord> getLastVpMatrixViewBounds() override;
 
     std::optional<float> getLastVpMatrixRotation() override;
@@ -118,6 +121,8 @@ class MapCamera2d : public MapCamera2dInterface,
 
     virtual ::Coord coordFromScreenPosition(const ::Vec2F &posScreen) override;
 
+    Vec2F screenPosFromCoord(const Coord &coord) override;
+
     virtual double mapUnitsFromPixels(double distancePx) override;
 
     virtual double getScalingFactor() override;
@@ -125,6 +130,8 @@ class MapCamera2d : public MapCamera2dInterface,
     virtual void setRotationEnabled(bool enabled) override;
 
     virtual void setSnapToNorthEnabled(bool enabled) override;
+
+    void setBoundsRestrictWholeVisibleRect(bool centerOnly) override;
 
     virtual float getScreenDensityPpi() override;
 
@@ -173,6 +180,7 @@ class MapCamera2d : public MapCamera2dInterface,
         bool twoFingerZoomEnabled = true;
         bool moveEnabled = true;
         bool snapToNorthEnabled = true;
+        bool boundsRestrictWholeVisibleRect = false;
     };
 
     long long currentDragTimestamp = 0;
@@ -212,7 +220,7 @@ class MapCamera2d : public MapCamera2dInterface,
     std::shared_ptr<DoubleAnimation> rotationAnimation;
 
     Coord adjustCoordForPadding(const Coord &coords, double targetZoom);
-    Coord getBoundsCorrectedCoords(const Coord &coords);
+    std::tuple<Coord, double> getBoundsCorrectedCoords(const Coord &position, double zoom);
 
     RectCoord getPaddingCorrectedBounds();
     void clampCenterToPaddingCorrectedBounds();

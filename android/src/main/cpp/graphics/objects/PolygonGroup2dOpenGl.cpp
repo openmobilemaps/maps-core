@@ -43,29 +43,37 @@ void PolygonGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterfa
         return;
 
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
-    if (openGlContext->getProgram(shaderProgram->getProgramName()) == 0) {
+    programName = shaderProgram->getProgramName();
+    program = openGlContext->getProgram(programName);
+    if (program == 0) {
         shaderProgram->setupProgram(openGlContext);
+        program = openGlContext->getProgram(programName);
     }
 
-    int program = openGlContext->getProgram(shaderProgram->getProgramName());
     glUseProgram(program);
 
     positionHandle = glGetAttribLocation(program, "vPosition");
     styleIndexHandle = glGetAttribLocation(program, "vStyleIndex");
 
-    glGenBuffers(1, &attribBuffer);
+    if (!glDataBuffersGenerated) {
+        glGenBuffers(1, &attribBuffer);
+    }
     glBindBuffer(GL_ARRAY_BUFFER, attribBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * polygonAttributes.size(), &polygonAttributes[0], GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    glGenBuffers(1, &indexBuffer);
+    if (!glDataBuffersGenerated) {
+        glGenBuffers(1, &indexBuffer);
+    }
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort) * polygonIndices.size(), &polygonIndices[0], GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     mvpMatrixHandle = glGetUniformLocation(program, "uMVPMatrix");
+    scaleFactorHandle = glGetUniformLocation(program, "scaleFactors");
 
     ready = true;
+    glDataBuffersGenerated = true;
 }
 
 void PolygonGroup2dOpenGl::clear() {
@@ -77,8 +85,11 @@ void PolygonGroup2dOpenGl::clear() {
 }
 
 void PolygonGroup2dOpenGl::removeGlBuffers() {
-    glDeleteBuffers(1, &attribBuffer);
-    glDeleteBuffers(1, &indexBuffer);
+    if (glDataBuffersGenerated) {
+        glDeleteBuffers(1, &attribBuffer);
+        glDeleteBuffers(1, &indexBuffer);
+        glDataBuffersGenerated = false;
+    }
 }
 
 void PolygonGroup2dOpenGl::setIsInverseMasked(bool inversed) { isMaskInversed = inversed; }
@@ -88,19 +99,31 @@ void PolygonGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterf
     if (!ready)
         return;
 
+    GLuint stencilMask = 0;
+    GLuint validTarget = 0;
+    GLenum zpass = GL_KEEP;
     if (isMasked) {
-        glStencilFunc(GL_EQUAL, isMaskInversed ? 0 : 128, 128);
-        glStencilOp(GL_ZERO, GL_ZERO, GL_ZERO);
+        stencilMask += 128;
+        validTarget = isMaskInversed ? 0 : 128;
+    }
+    if (renderPass.isPassMasked) {
+        stencilMask += 127;
+        zpass = GL_INCR;
+    }
+
+    if (stencilMask != 0) {
+        glStencilFunc(GL_EQUAL, validTarget, stencilMask);
+        glStencilOp(GL_KEEP, GL_KEEP, zpass);
     }
 
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
-    int mProgram = openGlContext->getProgram(shaderProgram->getProgramName());
-    glUseProgram(mProgram);
-
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+    glUseProgram(program);
 
     glUniformMatrix4fv(mvpMatrixHandle, 1, false, (GLfloat *)mvpMatrix);
+    if (scaleFactorHandle >= 0) {
+        glUniform2f(scaleFactorHandle, screenPixelAsRealMeterFactor,
+                    pow(2.0, ceil(log2(screenPixelAsRealMeterFactor))));
+    }
 
     shaderProgram->preRender(context);
 
@@ -122,4 +145,10 @@ void PolygonGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterf
     // Disable vertex array
     glDisableVertexAttribArray(positionHandle);
     glDisableVertexAttribArray(styleIndexHandle);
+
+    glDisable(GL_BLEND);
+}
+
+void PolygonGroup2dOpenGl::setDebugLabel(const std::string &label) {
+    // not used
 }

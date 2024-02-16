@@ -11,34 +11,43 @@
 package io.openmobilemaps.mapscore.graphics
 
 import android.graphics.SurfaceTexture
-import android.opengl.EGL14
-import android.opengl.GLES20
-import android.opengl.GLSurfaceView
-import android.opengl.GLUtils
+import android.opengl.*
 import android.util.Log
 import io.openmobilemaps.mapscore.BuildConfig
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicLong
 import javax.microedition.khronos.egl.*
+import javax.microedition.khronos.egl.EGLConfig
+import javax.microedition.khronos.egl.EGLContext
+import javax.microedition.khronos.egl.EGLDisplay
+import javax.microedition.khronos.egl.EGLSurface
 import javax.microedition.khronos.opengles.GL
 import javax.microedition.khronos.opengles.GL10
 import kotlin.math.max
 import kotlin.math.min
 
 class GLThread constructor(
-	var onDrawCallback: (() -> Unit)? = null
+	var onDrawCallback: (() -> Unit)? = null,
+	var onResumeCallback: (() -> Unit)? = null,
+	var onPauseCallback: (() -> Unit)? = null,
+	var onFinishingCallback: (() -> Unit)? = null
 ) :
-	Thread("GLThread") {
+	Thread(TAG) {
 
 	companion object {
 		private const val TAG = "GLThread"
-		private const val EGL_CONTEXT_CLIENT_VERSION = 0x3098
-		private const val EGL_OPENGL_ES2_BIT = 4
+		private const val EGL_OPENGL_ES3_BIT = 0x00000040
+
+		private const val PAUSE_RENDER_INTERVAL = 30000L
+		private const val BREAK_RENDER_INTERVAL = 1000L
+		private const val BREAK_MIN_FINISH_MS = BREAK_RENDER_INTERVAL / 2
 
 		const val MAX_NUM_GRAPHICS_PRE_TASKS = 16
 
 		private val defaultConfig = intArrayOf(
-			EGL10.EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+			EGL10.EGL_RENDERABLE_TYPE,
+			EGL_OPENGL_ES3_BIT,
 			EGL10.EGL_RED_SIZE, 8,
 			EGL10.EGL_GREEN_SIZE, 8,
 			EGL10.EGL_BLUE_SIZE, 8,
@@ -48,7 +57,8 @@ class GLThread constructor(
 			EGL10.EGL_NONE
 		)
 		private val msaaConfig = intArrayOf(
-			EGL10.EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+			EGL10.EGL_RENDERABLE_TYPE,
+			EGL_OPENGL_ES3_BIT,
 			EGL10.EGL_RED_SIZE, 8,
 			EGL10.EGL_GREEN_SIZE, 8,
 			EGL10.EGL_BLUE_SIZE, 8,
@@ -64,6 +74,8 @@ class GLThread constructor(
 	val runNotifier = Object()
 	var glRunList = ConcurrentLinkedQueue<() -> Unit>()
 	val isDirty = AtomicBoolean(false)
+	val lastDirtyTimestamp = AtomicLong(0)
+	var hasFinishedSinceDirty = false
 
 	var renderer: GLSurfaceView.Renderer? = null
 	var surface: SurfaceTexture? = null
@@ -73,6 +85,7 @@ class GLThread constructor(
 
 	@Volatile
 	private var finished = false
+	private var isPaused = true
 	private var egl: EGL10? = null
 	private var eglDisplay: EGLDisplay? = null
 	private var eglConfig: EGLConfig? = null
@@ -90,7 +103,47 @@ class GLThread constructor(
 		val gl10 = gl as GL10?
 		val renderer = renderer ?: throw IllegalStateException("No renderer attached to GlTextureView")
 		renderer.onSurfaceCreated(gl10, eglConfig)
+
+		if (!isPaused) {
+			onResumeCallback?.invoke()
+			isDirty.set(true)
+		}
+
 		while (!finished) {
+			val isAfterBreakMinThreshold = System.currentTimeMillis() - lastDirtyTimestamp.get() > BREAK_MIN_FINISH_MS
+			if ((!isDirty.get() && glRunList.isEmpty() && isAfterBreakMinThreshold) || isPaused) {
+				var wasPaused = false
+				do {
+					var firstPause = false
+					if (isPaused && !wasPaused) {
+						onPauseCallback?.invoke()
+						wasPaused = true
+						firstPause = true
+					}
+					var finishDuration = 0L
+					if (firstPause || !hasFinishedSinceDirty) {
+						finishDuration = System.currentTimeMillis()
+						GLES32.glFinish()
+						hasFinishedSinceDirty = true
+						finishDuration = System.currentTimeMillis() - finishDuration
+					}
+
+					try {
+						if (finishDuration < BREAK_RENDER_INTERVAL) {
+							synchronized(runNotifier) { runNotifier.wait(if (isPaused) PAUSE_RENDER_INTERVAL else BREAK_RENDER_INTERVAL - finishDuration) }
+						}
+					} catch (e: InterruptedException) {
+						e.printStackTrace()
+					}
+				} while (isPaused && !finished)
+				if (finished) {
+					break
+				} else if (wasPaused) {
+					onResumeCallback?.invoke()
+				}
+			}
+			isDirty.set(false)
+
 			val timestampStartRender = System.nanoTime()
 			checkCurrent()
 			if (sizeChanged) {
@@ -103,12 +156,10 @@ class GLThread constructor(
 				glRunList.poll()?.invoke()
 				i++
 			}
-			val renderStart = System.nanoTime()
-
 			renderer.onDrawFrame(gl10)
 			if (BuildConfig.DEBUG) {
-				GLES20.glGetError().let {
-					if (it != GLES20.GL_NO_ERROR) {
+				GLES32.glGetError().let {
+					if (it != GLES32.GL_NO_ERROR) {
 						Log.e(TAG, "OpenGL Render Error: $it")
 					}
 				}
@@ -122,7 +173,6 @@ class GLThread constructor(
 
 			onDrawCallback?.invoke()
 
-			//Log.d("RENDER_TIME", "${(System.nanoTime() - renderStart) / 1000000}ms")
 			if (targetFrameRate > 0) {
 				val renderTime = (System.nanoTime() - timestampStartRender) / 1000000
 				try {
@@ -132,17 +182,9 @@ class GLThread constructor(
 					// Ignore
 				}
 			}
-			if (!isDirty.get()) {
-				try {
-					synchronized(runNotifier) { runNotifier.wait(1000) }
-				} catch (e: InterruptedException) {
-					e.printStackTrace()
-				}
-			}
-			if (glRunList.isEmpty()) {
-				isDirty.set(false)
-			}
 		}
+		onPauseCallback?.invoke()
+		onFinishingCallback?.invoke()
 		finishGL()
 	}
 
@@ -200,9 +242,9 @@ class GLThread constructor(
 			*   If no window surface is provided, create a matching one
 			 */
 			val surfAttr = intArrayOf(
-					EGL14.EGL_WIDTH, width,
-					EGL14.EGL_HEIGHT, height,
-					EGL14.EGL_NONE
+					EGL10.EGL_WIDTH, width,
+					EGL10.EGL_HEIGHT, height,
+					EGL10.EGL_NONE
 			)
 			eglSurface = egl?.eglCreatePbufferSurface(eglDisplay, eglConfig, surfAttr)
 		}
@@ -256,6 +298,7 @@ class GLThread constructor(
 		egl?.eglTerminate(eglDisplay)
 		egl?.eglDestroySurface(eglDisplay, eglSurface)
 		surface?.release()
+		surface = null
 	}
 
 	private fun initGL() {
@@ -278,10 +321,17 @@ class GLThread constructor(
 		if (!egl.eglMakeCurrent(eglDisplay, eglSurface, eglSurface, eglContext)) {
 			throw RuntimeException("eglMakeCurrent failed " + GLUtils.getEGLErrorString(egl.eglGetError()))
 		}
+
+		val glVersion = IntArray(2)
+		GLES32.glGetIntegerv(GLES32.GL_MAJOR_VERSION, glVersion, 0)
+		GLES32.glGetIntegerv(GLES32.GL_MINOR_VERSION, glVersion, 1)
+		if (glVersion[0] != 3 || glVersion[1] != 2) {
+			Log.e(TAG, "OpenGL ES 3.2. is not supported on this device! (${glVersion[0]}.${glVersion[1]})")
+		}
 	}
 
 	fun createContext(egl: EGL10, eglDisplay: EGLDisplay?, eglConfig: EGLConfig?): EGLContext? {
-		val attrib_list = intArrayOf(EGL_CONTEXT_CLIENT_VERSION, 2, EGL10.EGL_NONE)
+		val attrib_list = intArrayOf(EGL14.EGL_CONTEXT_CLIENT_VERSION, 3, EGL10.EGL_NONE)
 		return egl.eglCreateContext(eglDisplay, eglConfig, EGL10.EGL_NO_CONTEXT, attrib_list)
 	}
 
@@ -301,13 +351,21 @@ class GLThread constructor(
 		return config
 	}
 
-
 	private fun getEglConfigs(useMSAA: Boolean = false): Array<IntArray> {
 		return if (useMSAA) arrayOf(msaaConfig, defaultConfig) else arrayOf(defaultConfig)
 	}
 
 	fun finish() {
 		finished = true
+		synchronized(runNotifier) { runNotifier.notify() }
+	}
+
+	fun doPause() {
+		isPaused = true
+	}
+
+	fun doResume() {
+		isPaused = false
 		synchronized(runNotifier) { runNotifier.notify() }
 	}
 
@@ -321,6 +379,8 @@ class GLThread constructor(
 	}
 
 	fun requestRender() {
+		lastDirtyTimestamp.set(System.currentTimeMillis())
+		hasFinishedSinceDirty = false
 		isDirty.set(true)
 		synchronized(runNotifier) { runNotifier.notify() }
 	}
@@ -330,6 +390,7 @@ class GLThread constructor(
 		width = w
 		height = h
 		sizeChanged = true
+		requestRender()
 	}
 
 }

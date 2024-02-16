@@ -13,14 +13,16 @@ import MapCoreSharedModule
 import Metal
 
 open class BaseGraphicsObject {
-    private var context: MCRenderingContextInterface!
+    private weak var context: MCRenderingContextInterface!
 
     public let device: MTLDevice
 
     public let sampler: MTLSamplerState
 
+    public var label: String
+
     var maskInverse = false
-    var ready = false
+    public var ready = false
 
     var isReadyFlag = false
 
@@ -28,9 +30,10 @@ open class BaseGraphicsObject {
     // therefore it has to be held for the shortest time possible
     public let lock = OSLock()
 
-    public init(device: MTLDevice, sampler: MTLSamplerState) {
+    public init(device: MTLDevice, sampler: MTLSamplerState, label: String = "") {
         self.device = device
         self.sampler = sampler
+        self.label = label
     }
 
     open func render(encoder _: MTLRenderCommandEncoder,
@@ -53,7 +56,11 @@ extension BaseGraphicsObject: MCGraphicsObjectInterface {
         self.ready = false
     }
 
-    public func isReady() -> Bool { ready }
+    open func isReady() -> Bool { ready }
+
+    open func setDebugLabel(_ label: String) {
+        self.label += ": \(label)"
+    }
 
     public func setIsInverseMasked(_ inversed: Bool) {
         maskInverse = inversed
@@ -70,5 +77,39 @@ extension BaseGraphicsObject: MCGraphicsObjectInterface {
                mvpMatrix: mvpMatrix,
                isMasked: isMasked,
                screenPixelAsRealMeterFactor: screenPixelAsRealMeterFactor)
+    }
+
+    // MARK: - Stencil
+
+    func maskStencilState(readMask: UInt32 = 0b1111_1111, writeMask: UInt32 = 0b0000_0000) -> MTLDepthStencilState? {
+        let s = MTLStencilDescriptor()
+        s.stencilCompareFunction = .equal
+        s.stencilFailureOperation = .zero
+        s.depthFailureOperation = .keep
+        s.depthStencilPassOperation = .keep
+        s.readMask = readMask
+        s.writeMask = writeMask
+
+        let desc = MTLDepthStencilDescriptor()
+        desc.frontFaceStencil = s
+        desc.backFaceStencil = s
+
+        return device.makeDepthStencilState(descriptor: desc)
+    }
+
+    func renderPassMaskStencilState() -> MTLDepthStencilState? {
+        let s = MTLStencilDescriptor()
+        s.stencilCompareFunction = .equal
+        s.stencilFailureOperation = .keep
+        s.depthFailureOperation = .keep
+        s.depthStencilPassOperation = .incrementWrap
+        s.readMask = 0b1111_1111
+        s.writeMask = 0b0000_0001
+
+        let desc = MTLDepthStencilDescriptor()
+        desc.frontFaceStencil = s
+        desc.backFaceStencil = s
+
+        return device.makeDepthStencilState(descriptor: desc)
     }
 }

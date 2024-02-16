@@ -18,6 +18,7 @@
 #include "PolygonGroup2dInterface.h"
 #include "RenderConfig.h"
 #include "Vec2D.h"
+#include "Vec2F.h"
 
 class PolygonGroup2dLayerObject : public LayerObjectInterface {
   public:
@@ -30,7 +31,9 @@ class PolygonGroup2dLayerObject : public LayerObjectInterface {
 
     virtual std::vector<std::shared_ptr<RenderConfigInterface>> getRenderConfig() override;
 
-    void setVertices(const std::vector<std::tuple<std::vector<::Coord>, int>> & vertices, const std::vector<int32_t> & indices);
+    void setVertices(const std::vector<std::tuple<std::vector<::Coord>, int>> & vertices, const std::vector<uint16_t> & indices);
+
+    void setVertices(const std::vector<float> &verticesBuffer, const std::vector<uint16_t> & indices);
 
     void setStyles(const std::vector<PolygonStyle> &styles);
 

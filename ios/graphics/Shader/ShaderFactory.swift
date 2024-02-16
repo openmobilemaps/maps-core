@@ -12,12 +12,17 @@ import Foundation
 import MapCoreSharedModule
 
 class ShaderFactory: MCShaderFactoryInterface {
+    
     func createTextShader() -> MCTextShaderInterface? {
         TextShader()
     }
 
-    func createPolygonGroupShader() -> MCPolygonGroupShaderInterface? {
-        PolygonGroupShader()
+    func createPolygonGroupShader(_ isStriped: Bool) -> MCPolygonGroupShaderInterface? {
+        PolygonGroupShader(isStriped: isStriped)
+    }
+
+    func createPolygonPatternGroupShader(_ fadeInPattern: Bool) -> MCPolygonPatternGroupShaderInterface? {
+        PolygonPatternGroupShader(fadeInPattern: fadeInPattern)
     }
 
     func createColorCircleShader() -> MCColorCircleShaderInterface? {
@@ -28,8 +33,8 @@ class ShaderFactory: MCShaderFactoryInterface {
         AlphaShader()
     }
 
-    func createColorLineShader() -> MCColorLineShaderInterface? {
-        LineGroupShader(styleBufferSize: 1)
+    func createAlphaInstancedShader() -> MCAlphaInstancedShaderInterface? {
+        AlphaInstancedShader()
     }
 
     func createLineGroupShader() -> MCLineGroupShaderInterface? {
@@ -39,8 +44,20 @@ class ShaderFactory: MCShaderFactoryInterface {
     func createColorShader() -> MCColorShaderInterface? {
         ColorShader()
     }
-    
+
     func createRasterShader() -> MCRasterShaderInterface? {
         RasterShader()
+    }
+
+    func createStretchShader() -> MCStretchShaderInterface? {
+        StretchShader()
+    }
+
+    func createTextInstancedShader() -> MCTextInstancedShaderInterface? {
+        TextInstancedShader()
+    }
+
+    func createStretchInstancedShader() -> MCStretchInstancedShaderInterface? {
+        StretchInstancedShader()
     }
 }

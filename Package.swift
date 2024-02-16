@@ -6,7 +6,7 @@ let package = Package(
     name: "MapCore",
     platforms: [
         .iOS(.v11),
-        .macOS(.v10_13)
+        .macOS(.v10_13),
     ],
     products: [
         .library(
@@ -23,9 +23,7 @@ let package = Package(
         ),
     ],
     dependencies: [
-        .package(name: "DjinniSupport",
-                 url: "https://github.com/UbiqueInnovation/djinni.git",
-                 .upToNextMajor(from: "1.0.0")),
+        .package(url: "https://github.com/UbiqueInnovation/djinni.git", branch: "master"),
     ],
     targets: [
         .target(
@@ -117,19 +115,24 @@ let package = Package(
             path: "ios",
             exclude: ["readme.md"],
             resources: [
-                .process("graphics/Shader/Metal/")
+                .process("graphics/Shader/Metal/"),
             ]
         ),
         .target(
             name: "MapCoreSharedModule",
-            dependencies: ["DjinniSupport",
-                           "MapCoreSharedModuleCpp"],
+            dependencies: [
+                "MapCoreSharedModuleCpp"
+            ],
             path: "bridging/ios",
             publicHeadersPath: ""
         ),
         .target(
             name: "MapCoreSharedModuleCpp",
-            dependencies: ["vtzero", "earcut"],
+            dependencies: [
+                "vtzero",
+                "earcut",
+                .product(name: "DjinniSupport", package: "djinni"),
+            ],
             path: "shared",
             sources: ["src", "public"],
             publicHeadersPath: "public",
@@ -150,12 +153,15 @@ let package = Package(
                 .headerSearchPath("src/map/layers/tiled/raster"),
                 .headerSearchPath("src/map/layers/tiled/wmts"),
                 .headerSearchPath("src/map/layers/tiled/vector"),
-                .headerSearchPath("src/map/layers/tiled/vector/parsing"),
+                .headerSearchPath("src/map/layers/tiled/vector/geojson"),
+                .headerSearchPath("src/map/layers/tiled/vector/geojson/geojsonvt"),
+                .headerSearchPath("src/map/layers/tiled/vector/sourcemanagers"),
+                .headerSearchPath("src/map/layers/tiled/vector/tiles"),
+                .headerSearchPath("src/map/layers/tiled/vector/tiles/line"),
+                .headerSearchPath("src/map/layers/tiled/vector/tiles/polygon"),
+                .headerSearchPath("src/map/layers/tiled/vector/tiles/raster"),
+                .headerSearchPath("src/map/layers/tiled/vector/symbol"),
                 .headerSearchPath("src/map/layers/tiled/vector/sublayers"),
-                .headerSearchPath("src/map/layers/tiled/vector/sublayers/raster"),
-                .headerSearchPath("src/map/layers/tiled/vector/sublayers/line"),
-                .headerSearchPath("src/map/layers/tiled/vector/sublayers/polygon"),
-                .headerSearchPath("src/map/layers/tiled/vector/sublayers/symbol"),
                 .headerSearchPath("src/map/layers/tiled/vector/sublayers/background"),
                 .headerSearchPath("src/map/scheduling"),
                 .headerSearchPath("src/map"),
@@ -163,8 +169,8 @@ let package = Package(
                 .headerSearchPath("src/external/pugixml"),
                 .define("DEBUG", to: "1", .when(configuration: .debug)),
                 .define("NDEBUG", to: "1", .when(configuration: .release)),
-                .define("_LIBCPP_DISABLE_AVAILABILITY", to: "1",.when(configuration: .debug)),
-                .define("_LIBCPP_DISABLE_AVAILABILITY", to: "1",.when(configuration: .release))
+                .define("_LIBCPP_DISABLE_AVAILABILITY", to: "1", .when(configuration: .debug)),
+                .define("_LIBCPP_DISABLE_AVAILABILITY", to: "1", .when(configuration: .release)),
             ]
         ),
     ],

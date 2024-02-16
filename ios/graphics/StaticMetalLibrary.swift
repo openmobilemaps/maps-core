@@ -34,11 +34,11 @@ public class StaticMetalLibrary<Key: Hashable, Value>: Library {
         storage[key] = value
     }
 
-    public final func value(_ key: Key) -> Value {
-        storage[key]!
+    public final func value(_ key: Key) -> Value? {
+        storage[key]
     }
 
-    public final subscript(_ key: Key) -> Value {
+    public final subscript(_ key: Key) -> Value? {
         value(key)
     }
 }

@@ -45,24 +45,30 @@ class LineGroup2dOpenGl : public GraphicsObjectInterface,
 
     virtual void setIsInverseMasked(bool inversed) override;
 
+    void setDebugLabel(const std::string &label) override;
+
 protected:
 
     virtual void removeGlBuffers();
 
     std::shared_ptr<ShaderProgramInterface> shaderProgram;
+    std::string programName;
+    int program = 0;
+
     int mvpMatrixHandle;
     int scaleFactorHandle;
     int positionHandle;
     int widthNormalHandle;
-    int lengthNormalHandle;
     int pointAHandle;
     int pointBHandle;
+    int vertexIndexHandle;
     int segmentStartLPosHandle;
     int styleInfoHandle;
-    GLuint vertexAttribBuffer;
+    GLuint vertexAttribBuffer = -1;
     std::vector<GLfloat> lineAttributes;
-    GLuint indexBuffer;
+    GLuint indexBuffer = -1;
     std::vector<GLuint> lineIndices;
+    bool glDataBuffersGenerated = false;
 
     bool ready = false;
     bool dataReady = false;

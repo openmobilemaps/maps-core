@@ -15,6 +15,7 @@
 #include "EPSG2056ToEPSG4326Converter.h"
 #include "EPSG21781ToEPGS2056Converter.h"
 #include "EPSG3857ToEPSG4326Converter.h"
+#include "EPSG3857ToEPSG2056Converter.h"
 #include "EPSG4326ToEPSG2056Converter.h"
 #include "EPSG4326ToEPSG3857Converter.h"
 
@@ -31,7 +32,7 @@ std::shared_ptr<CoordinateConversionHelperInterface> CoordinateConversionHelperI
 }
 
 CoordinateConversionHelper::CoordinateConversionHelper(MapCoordinateSystem mapCoordinateSystem)
-    : mapCoordinateSystemIdentier(mapCoordinateSystem.identifier)
+    : mapCoordinateSystemIdentifier(mapCoordinateSystem.identifier)
     , renderSystemConverter(std::make_shared<DefaultSystemToRenderConverter>(mapCoordinateSystem)) {
     registerConverter(renderSystemConverter);
     addDefaultConverters();
@@ -46,6 +47,7 @@ CoordinateConversionHelper::CoordinateConversionHelper() { addDefaultConverters(
 void CoordinateConversionHelper::addDefaultConverters() {
     registerConverter(std::make_shared<EPSG4326ToEPSG3857Converter>());
     registerConverter(std::make_shared<EPSG3857ToEPSG4326Converter>());
+    registerConverter(std::make_shared<EPSG3857ToEPSG2056Converter>());
     registerConverter(std::make_shared<EPSG2056ToEPSG4326Converter>());
     registerConverter(std::make_shared<EPSG4326ToEPSG2056Converter>());
     registerConverter(std::make_shared<EPSG2056ToEPGS21781Converter>());
@@ -58,12 +60,12 @@ void CoordinateConversionHelper::registerConverter(const std::shared_ptr<Coordin
     precomputeConverterHelper();
 }
 
-Coord CoordinateConversionHelper::convert(const std::string &to, const Coord &coordinate) {
+Coord CoordinateConversionHelper::convert(const int32_t to, const Coord &coordinate) {
     if (coordinate.systemIdentifier == to) {
         return coordinate;
     }
 
-    const auto tuple = std::tuple<std::string, std::string>(coordinate.systemIdentifier, to);
+    const auto tuple = std::tuple<int32_t, int32_t>(coordinate.systemIdentifier, to);
 
     // first try if we can directly convert
     auto c = fromToConverterMap.find(tuple);
@@ -84,11 +86,11 @@ Coord CoordinateConversionHelper::convert(const std::string &to, const Coord &co
         return intermediateCoord;
     }
 
-    throw std::invalid_argument("Could not find an eligible converter from: \'" + coordinate.systemIdentifier + "\' to \'" + to +
+    throw std::invalid_argument("Could not find an eligible converter from: \'" + std::to_string(coordinate.systemIdentifier) + "\' to \'" + std::to_string(to) +
                                 "\'");
 }
 
-RectCoord CoordinateConversionHelper::convertRect(const std::string &to, const RectCoord &rect) {
+RectCoord CoordinateConversionHelper::convertRect(const int32_t to, const RectCoord &rect) {
     return RectCoord(convert(to, rect.topLeft), convert(to, rect.bottomRight));
 }
 
@@ -99,14 +101,14 @@ RectCoord CoordinateConversionHelper::convertRectToRenderSystem(const RectCoord 
 }
 
 Coord CoordinateConversionHelper::convertToRenderSystem(const Coord &coordinate) {
-    if (coordinate.systemIdentifier == mapCoordinateSystemIdentier) {
+    if (coordinate.systemIdentifier == mapCoordinateSystemIdentifier) {
         return renderSystemConverter->convert(coordinate);
     } else {
         return convert(CoordinateSystemIdentifiers::RENDERSYSTEM(), coordinate);
     }
 }
 
-QuadCoord CoordinateConversionHelper::convertQuad(const std::string &to, const QuadCoord &quad) {
+QuadCoord CoordinateConversionHelper::convertQuad(const int32_t to, const QuadCoord &quad) {
     Coord topLeft = convert(to, quad.topLeft);
     Coord topRight = convert(to, quad.topRight);
     Coord bottomRight = convert(to, quad.bottomRight);

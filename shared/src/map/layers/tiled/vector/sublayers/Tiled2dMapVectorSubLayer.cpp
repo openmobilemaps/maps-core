@@ -15,6 +15,7 @@
 #include "RenderObject.h"
 #include "RenderPass.h"
 #include "LambdaTask.h"
+#include "Tiled2dMapVectorTileInfo.h"
 
 void Tiled2dMapVectorSubLayer::update() {
 
@@ -63,7 +64,7 @@ void Tiled2dMapVectorSubLayer::show() {
 
 
 void Tiled2dMapVectorSubLayer::updateTileData(const Tiled2dMapTileInfo &tileInfo, const std::shared_ptr<MaskingObjectInterface> &tileMask,
-                            const std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>> &layerFeatures) {
+                            const std::vector<Tiled2dMapVectorTileInfo::FeatureTuple> &layerFeatures) {
     if (!mapInterface) return;
 
     std::lock_guard<std::recursive_mutex> lock(maskMutex);
@@ -93,26 +94,9 @@ void Tiled2dMapVectorSubLayer::clearTileData(const Tiled2dMapTileInfo &tileInfo)
 
 void Tiled2dMapVectorSubLayer::setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> & maskingObject) {}
 
-void Tiled2dMapVectorSubLayer::setTilesReadyDelegate(const std::weak_ptr<Tiled2dMapVectorLayerReadyInterface> readyDelegate) {
+void Tiled2dMapVectorSubLayer::setTilesReadyDelegate(const std::weak_ptr<Tiled2dMapVectorLayerTileCallbackInterface> readyDelegate) {
     this->readyDelegate = readyDelegate;
 }
-
-
-void Tiled2dMapVectorSubLayer::setSelectionDelegate(const std::weak_ptr<Tiled2dMapVectorLayerSelectionInterface> selectionDelegate) {
-    this->selectionDelegate = selectionDelegate;
-}
-
-void Tiled2dMapVectorSubLayer::setSelectedFeatureIdentfier(std::optional<int64_t> identifier) {
-    {
-        std::lock_guard<std::recursive_mutex> lock(selectedFeatureIdentifierMutex);
-        selectedFeatureIdentifier = identifier;
-    }
-    auto mapInterface = this->mapInterface;
-    if (mapInterface) {
-        mapInterface->invalidate();
-    }
-}
-
 
 void Tiled2dMapVectorSubLayer::setAlpha(float alpha) {
     if (this->alpha == alpha) {

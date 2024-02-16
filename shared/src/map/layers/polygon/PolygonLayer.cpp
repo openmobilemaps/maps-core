@@ -55,7 +55,7 @@ std::vector<PolygonInfo> PolygonLayer::getPolygons() {
 
 void PolygonLayer::remove(const PolygonInfo &polygon) {
     auto equal = std::equal_to<PolygonInfo>();
-
+    auto mapInterface = this->mapInterface;
     if (!mapInterface) {
         std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
         addingQueue.erase(std::remove_if(addingQueue.begin(), addingQueue.end(), [&](const auto &p) { return equal(p, polygon); }),
@@ -65,20 +65,34 @@ void PolygonLayer::remove(const PolygonInfo &polygon) {
     {
         std::lock_guard<std::recursive_mutex> lock(polygonsMutex);
 
+        std::vector<std::shared_ptr<Polygon2dLayerObject>> polygonsToClear;
         for (auto pit = polygons.begin(); pit != polygons.end(); pit++) {
             if (pit->first == polygon.identifier) {
                 for (auto it = pit->second.begin(); it != pit->second.end(); ++it) {
                     if (equal(it->first, polygon)) {
+                        polygonsToClear.push_back(it->second);
                         pit->second.erase(it);
                         break;
                     }
                 }
             }
         }
+
+        auto scheduler = mapInterface->getScheduler();
+        if (scheduler) {
+            scheduler->addTask(std::make_shared<LambdaTask>(
+                    TaskConfig("PolygonLayer_clearPolygon", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
+                    [polygonsToClear] {
+                        for (const auto polygon: polygonsToClear) {
+                            if (polygon->getPolygonObject()->isReady()) {
+                                polygon->getPolygonObject()->clear();
+                            }
+                        }
+                    }));
+        }
     }
     generateRenderPasses();
-    if (mapInterface)
-        mapInterface->invalidate();
+    mapInterface->invalidate();
 }
 
 void PolygonLayer::add(const PolygonInfo &polygon) { addAll({polygon}); }
@@ -159,6 +173,19 @@ void PolygonLayer::clear() {
     }
     {
         std::lock_guard<std::recursive_mutex> lock(polygonsMutex);
+        auto scheduler = mapInterface->getScheduler();
+        if (scheduler) {
+            auto polygonsToClear = polygons;
+            scheduler->addTask(std::make_shared<LambdaTask>(TaskConfig("LineLayer_clearLines", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS), [polygonsToClear]{
+                for (const auto &polygon : polygonsToClear) {
+                    for (const auto &p : polygon.second) {
+                        if (p.second->getPolygonObject()->isReady()) {
+                            p.second->getPolygonObject()->clear();
+                        }
+                    }
+                }
+            }));
+        }
         polygons.clear();
         highlightedPolygon = std::nullopt;
         selectedPolygon = std::nullopt;
@@ -173,7 +200,9 @@ void PolygonLayer::pause() {
     std::lock_guard<std::recursive_mutex> overlayLock(polygonsMutex);
     for (const auto &polygon : polygons) {
         for (auto &p : polygon.second) {
-            p.second->getPolygonObject()->clear();
+            if (p.second->getPolygonObject()->isReady()) {
+                p.second->getPolygonObject()->clear();
+            }
         }
     }
     if (mask) {
@@ -221,7 +250,7 @@ void PolygonLayer::generateRenderPasses() {
     std::vector<std::shared_ptr<RenderPassInterface>> newRenderPasses;
     for (const auto &passEntry : renderPassObjectMap) {
         std::shared_ptr<RenderPass> renderPass =
-            std::make_shared<RenderPass>(RenderPassConfig(passEntry.first), passEntry.second, mask);
+            std::make_shared<RenderPass>(RenderPassConfig(passEntry.first, false), passEntry.second, mask);
         newRenderPasses.push_back(renderPass);
     }
     {

@@ -4,12 +4,17 @@
 @extern "../../../yaml/error_manager.yaml"
 
 tiled_2d_map_layer_config = interface +c +j +o {
-    get_coordinate_system_identifier(): string;
+    get_coordinate_system_identifier(): i32;
     get_tile_url(x:i32, y:i32, t:i32, zoom:i32): string;
     get_zoom_level_infos() : list<tiled_2d_map_zoom_level_info>;
     get_zoom_info(): tiled_2d_map_zoom_info;
     get_layer_name() : string;
     get_vector_settings(): optional<tiled_2d_map_vector_settings>;
+    get_bounds(): optional<rect_coord>;
+}
+
+default_tiled_2d_map_layer_configs = interface +c {
+    static web_mercator(layerName: string, urlFormat: string): tiled_2d_map_layer_config;
 }
 
 tiled_2d_map_zoom_level_info = record {
@@ -20,6 +25,10 @@ tiled_2d_map_zoom_level_info = record {
 	num_tiles_t: i32;
 	zoom_level_identifier: i32;
     bounds: rect_coord;
+}
+
+tiled_2d_map_ready_state_listener = interface +c +j +o {
+    state_update(state: layer_ready_state);
 }
 
 tiled_2d_map_vector_settings = record {
@@ -61,5 +70,7 @@ tiled_2d_map_source_interface = interface +c {
 
     set_error_manager(error_manager: error_manager);
     force_reload();
+
+    notify_tiles_updates();
 }
 

@@ -9,7 +9,6 @@
  */
 
 #include "Scene.h"
-#include "ColorLineShaderInterface.h"
 #include "ColorShaderInterface.h"
 #include "RenderPass.h"
 #include "Renderer.h"

@@ -13,16 +13,15 @@
 #include "LayerReadyState.h"
 #include "MapConfig.h"
 #include "MapInterface.h"
+#include "SchedulerGraphicsTaskCallbacks.h"
 #include "Scene.h"
 #include <map>
 #include <mutex>
 
-class MapScene : public MapInterface, public SceneCallbackInterface, public std::enable_shared_from_this<MapScene> {
+class MapScene : public MapInterface, public SceneCallbackInterface, public SchedulerGraphicsTaskCallbacks, public std::enable_shared_from_this<MapScene> {
   public:
     MapScene(std::shared_ptr<SceneInterface> scene, const MapConfig &mapConfig,
              const std::shared_ptr<::SchedulerInterface> &scheduler, float pixelDensity);
-
-    virtual ~MapScene();
 
     virtual std::shared_ptr<::GraphicsObjectFactoryInterface> getGraphicsObjectFactory() override;
 
@@ -47,6 +46,8 @@ class MapScene : public MapInterface, public SceneCallbackInterface, public std:
     virtual std::shared_ptr<::TouchHandlerInterface> getTouchHandler() override;
 
     virtual std::vector<std::shared_ptr<LayerInterface>> getLayers() override;
+
+    std::vector<std::shared_ptr<IndexedLayerInterface>> getLayersIndexed() override;
 
     virtual void addLayer(const std::shared_ptr<::LayerInterface> &layer) override;
 
@@ -78,6 +79,8 @@ class MapScene : public MapInterface, public SceneCallbackInterface, public std:
                                 const std::shared_ptr<MapReadyCallbackInterface> &callbacks) override;
 
     virtual void forceReload() override;
+
+    virtual void requestGraphicsTaskExecution() override;
 
   private:
     LayerReadyState getLayersReadyState();

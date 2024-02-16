@@ -23,11 +23,13 @@ class SymbolInfo : public TextInfoInterface {
 public:
     SymbolInfo(const std::vector<FormattedStringEntry> &text,
                const ::Coord &coordinate,
+               const std::optional<std::vector<Coord>> &lineCoordinates,
                const ::Font &font,
                Anchor textAnchor,
                std::optional<double> angle,
-               TextJustify textJustify)
-            : text(text), coordinate(coordinate), font(font), textAnchor(textAnchor), angle(angle), textJustify(textJustify) {};
+               TextJustify textJustify,
+               TextSymbolPlacement textSymbolPlacement)
+            : text(text), coordinate(coordinate), font(font), textAnchor(textAnchor), angle(angle), textJustify(textJustify), lineCoordinates(lineCoordinates), textSymbolPlacement(textSymbolPlacement) {};
 
     // Text Interface
     virtual ~SymbolInfo() {};
@@ -42,6 +44,10 @@ public:
 
     virtual TextJustify getTextJustify() { return textJustify; };
 
+    virtual TextSymbolPlacement getSymbolPlacement() { return textSymbolPlacement; }
+
+    virtual std::optional<std::vector<::Coord>> getLineCoordinates() { return lineCoordinates; }
+
     std::optional<double> angle;
 
 private:
@@ -50,4 +56,6 @@ private:
     ::Coord coordinate;
     ::Anchor textAnchor;
     ::TextJustify textJustify;
+    ::TextSymbolPlacement textSymbolPlacement;
+    std::optional<std::vector<Coord>> lineCoordinates;
 };

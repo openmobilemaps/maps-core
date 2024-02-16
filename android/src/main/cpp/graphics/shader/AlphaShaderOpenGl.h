@@ -16,7 +16,6 @@
 #include "ShaderProgramInterface.h"
 
 class AlphaShaderOpenGl : public BaseShaderProgramOpenGl,
-                          public ShaderProgramInterface,
                           public AlphaShaderInterface,
                           public std::enable_shared_from_this<ShaderProgramInterface> {
 
@@ -35,5 +34,7 @@ class AlphaShaderOpenGl : public BaseShaderProgramOpenGl,
     virtual std::string getFragmentShader() override;
 
   private:
+    const static std::string programName;
+
     float alpha = 1;
 };

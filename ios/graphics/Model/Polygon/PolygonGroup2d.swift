@@ -20,6 +20,8 @@ final class PolygonGroup2d: BaseGraphicsObject {
     private var indicesCount: Int = 0
 
     private var stencilState: MTLDepthStencilState?
+    private var renderPassStencilState: MTLDepthStencilState?
+    private var posOffset = SIMD2<Float>([0.0, 0.0])
 
     init(shader: MCShaderProgramInterface, metalContext: MetalContext) {
         guard let shader = shader as? PolygonGroupShader else {
@@ -27,51 +29,45 @@ final class PolygonGroup2d: BaseGraphicsObject {
         }
         self.shader = shader
         super.init(device: metalContext.device,
-                   sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue))
-    }
-
-    private func setupStencilStates() {
-        let ss2 = MTLStencilDescriptor()
-        ss2.stencilCompareFunction = .equal
-        ss2.stencilFailureOperation = .zero
-        ss2.depthFailureOperation = .keep
-        ss2.depthStencilPassOperation = .keep
-        ss2.readMask = 0b1111_1111
-        ss2.writeMask = 0b0000_0000
-
-        let s2 = MTLDepthStencilDescriptor()
-        s2.frontFaceStencil = ss2
-        s2.backFaceStencil = ss2
-
-        stencilState = device.makeDepthStencilState(descriptor: s2)
+                   sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue)!,
+                   label: "PolygonGroup2d")
     }
 
     override func render(encoder: MTLRenderCommandEncoder,
                          context: RenderingContext,
-                         renderPass _: MCRenderPassConfig,
+                         renderPass pass: MCRenderPassConfig,
                          mvpMatrix: Int64,
                          isMasked: Bool,
-                         screenPixelAsRealMeterFactor _: Double) {
+                         screenPixelAsRealMeterFactor: Double) {
         lock.lock()
         defer {
             lock.unlock()
         }
 
-        guard let verticesBuffer = verticesBuffer,
-              let indicesBuffer = indicesBuffer else { return }
+        guard let verticesBuffer,
+              let indicesBuffer, shader.polygonStyleBuffer != nil else { return }
 
         #if DEBUG
-        encoder.pushDebugGroup("PolygonGroup2d")
-        defer {
-            encoder.popDebugGroup()
-        }
+            encoder.pushDebugGroup(label)
+            defer {
+                encoder.popDebugGroup()
+            }
         #endif
 
         if isMasked {
             if stencilState == nil {
-                setupStencilStates()
+                stencilState = self.maskStencilState()
             }
             encoder.setDepthStencilState(stencilState)
+            encoder.setStencilReferenceValue(0b1100_0000)
+        }
+
+        if pass.isPassMasked {
+            if renderPassStencilState == nil {
+                renderPassStencilState = self.renderPassMaskStencilState()
+            }
+
+            encoder.setDepthStencilState(renderPassStencilState)
             encoder.setStencilReferenceValue(0b1100_0000)
         }
 
@@ -83,12 +79,19 @@ final class PolygonGroup2d: BaseGraphicsObject {
             encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
         }
 
+        if self.shader.isStriped {
+            encoder.setVertexBytes(&posOffset, length: MemoryLayout<SIMD2<Float>>.stride, index: 2)
+
+            let p : Float = Float(screenPixelAsRealMeterFactor)
+            var scaleFactors = SIMD2<Float>([p, pow(2.0, ceil(log2(p)))])
+            encoder.setFragmentBytes(&scaleFactors, length: MemoryLayout<SIMD2<Float>>.stride, index: 2)
+        }
+
         encoder.drawIndexedPrimitives(type: .triangle,
                                       indexCount: indicesCount,
-                                      indexType: .uint32,
+                                      indexType: .uint16,
                                       indexBuffer: indicesBuffer,
                                       indexBufferOffset: 0)
-
     }
 }
 
@@ -112,6 +115,25 @@ extension PolygonGroup2d: MCPolygonGroup2dInterface {
             self.indicesCount = Int(indices.elementCount)
             self.verticesBuffer = verticesBuffer
             self.indicesBuffer = indicesBuffer
+
+            if shader.isStriped {
+                if let p = UnsafeRawPointer(bitPattern: Int(vertices.address)) {
+                    var minX = Float.greatestFiniteMagnitude
+                    var minY = Float.greatestFiniteMagnitude
+
+                    for i in 0..<vertices.elementCount {
+                        if i % 3 == 0 {
+                            let x = (p + 4 * Int(i)).load(as: Float.self)
+                            let y = (p + 4 * (Int(i) + 1)).load(as: Float.self)
+                            minX = min(x, minX)
+                            minY = min(y, minY)
+                        }
+                    }
+
+                    self.posOffset.x = minX;
+                    self.posOffset.y = minY;
+                }
+            }
         }
     }
 

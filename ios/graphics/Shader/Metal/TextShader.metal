@@ -14,16 +14,10 @@ using namespace metal;
 
 vertex VertexOut
 textVertexShader(const VertexIn vertexIn [[stage_in]],
-                 constant float4x4 &mvpMatrix [[buffer(1)]],
-                 constant float &scale [[buffer(2)]],
-                 constant float2 &reference [[buffer(3)]])
+                 constant float4x4 &mvpMatrix [[buffer(1)]])
 {
-    float2 pos = (mvpMatrix * float4(vertexIn.position.xy, 0.0, 1.0)).xy;
-    float2 ref = (mvpMatrix * float4(reference.xy, 0.0, 1.0)).xy;
-    pos = ref.xy + (pos.xy - ref.xy) * scale;
-
     VertexOut out {
-        .position = float4(pos.xy, 0.0, 1.0),
+        .position = float4((mvpMatrix * float4(vertexIn.position.xy, 0.0, 1.0)).xy, 0.0, 1.0),
         .uv = vertexIn.uv
     };
 
@@ -34,21 +28,31 @@ fragment float4
 textFragmentShader(VertexOut in [[stage_in]],
                        constant float4 &color [[buffer(1)]],
                        constant float4 &haloColor [[buffer(2)]],
+                       constant float &opacity [[buffer(3)]],
+                       constant float &haloWidth [[buffer(4)]],
                        texture2d<float> texture0 [[ texture(0)]],
                        sampler textureSampler [[sampler(0)]])
 {
     float4 dist = texture0.sample(textureSampler, in.uv);
-    if (haloColor.a == 0.0 && dist.x <= 0.5) {
-        discard_fragment();
+
+    if (opacity == 0) {
+      discard_fragment();
     }
 
-    float delta = 0.1;
-    float alpha = smoothstep(0.5 - delta, 0.5 + delta, dist.x);
+    float median = max(min(dist.r, dist.g), min(max(dist.r, dist.g), dist.b)) / dist.a;
+    float w = fwidth(median);
+    float alpha = smoothstep(0.5 - w, 0.5 + w, median);
 
-    float4 glyphColor = float4(color.r, color.g, color.b, color.a * alpha);
+    float4 mixed = mix(haloColor, color, alpha);
 
-    float4 mixed = mix(haloColor, glyphColor, alpha);
+    if(haloWidth > 0) {
+      float start = (0.0 + 0.5 * (1.0 - haloWidth)) - w;
+      float end = start + w;
+      float a2 = smoothstep(start, end, median) * opacity;
+      return float4(mixed.r * a2, mixed.g * a2, mixed.b * a2, a2);
+    } else {
+      return mixed;
+    }
 
-    float a2 = smoothstep(0.40, 0.5, sqrt(dist.x));
-    return float4(mixed.r * a2, mixed.g * a2, mixed.b * a2, a2);
+    return mixed;
 }

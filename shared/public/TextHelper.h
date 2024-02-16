@@ -15,22 +15,49 @@
 #include "TextInfoInterface.h"
 #include "TextLayerObject.h"
 #include "Vec2F.h"
-
+#include "Quad2dD.h"
+#include "SymbolAlignment.h"
+#include "Vec2DHelper.h"
 #include <optional>
+
+struct BreakResult {
+    BreakResult(int index, bool keepLetter) : index(index), keepLetter(keepLetter) {};
+    int index;
+    bool keepLetter;
+};
 
 class TextHelper {
   public:
+    TextHelper() {};
     TextHelper(const std::shared_ptr<MapInterface> &mapInterface);
+
+    void setMapInterface(const std::weak_ptr< ::MapInterface> &mapInterface);
 
     virtual std::shared_ptr<TextLayerObject> textLayerObject(const std::shared_ptr<TextInfoInterface> &text,
                                                              std::optional<FontData> fontData,
                                                              Vec2F offset,
                                                              double lineHeight,
                                                              double letterSpacing,
-                                                             int64_t maxCharacterWidth);
+                                                             int64_t maxCharacterWidth,
+                                                             double maxCharacterAngle,
+                                                             SymbolAlignment rotationAlignment);
 
     static std::string uppercase(const std::string &string);
 
+    inline static Quad2dD rotateQuad2d(const Quad2dD &quad, const Vec2D &aroundPoint, double angleDegrees) {
+        return Quad2dD(Vec2DHelper::rotate(quad.topLeft, aroundPoint, angleDegrees),
+                       Vec2DHelper::rotate(quad.topRight, aroundPoint, angleDegrees),
+                       Vec2DHelper::rotate(quad.bottomRight, aroundPoint, angleDegrees),
+                       Vec2DHelper::rotate(quad.bottomLeft, aroundPoint, angleDegrees));
+    }
+
+    static std::vector<std::string> splitWstring(const std::string &word);
+
+    static std::vector<BreakResult> bestBreakIndices(std::vector<std::string> &letters, int64_t maxCharacterWidth);
+
   private:
-    std::shared_ptr<MapInterface> mapInterface;
+    static std::vector<BreakResult> bestBreakIndicesSub(std::vector<std::string> &letters, int64_t maxCharacterWidth);
+
+  private:
+    std::weak_ptr<MapInterface> mapInterface;
 };

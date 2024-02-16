@@ -46,31 +46,37 @@ void Polygon2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface> &
         return;
 
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
-    if (openGlContext->getProgram(shaderProgram->getProgramName()) == 0) {
+    programName = shaderProgram->getProgramName();
+    program = openGlContext->getProgram(programName);
+    if (program == 0) {
         shaderProgram->setupProgram(openGlContext);
+        program = openGlContext->getProgram(programName);
     }
-    programHandle = openGlContext->getProgram(shaderProgram->getProgramName());
 
-    prepareGlData(openGlContext);
+    prepareGlData(program);
     ready = true;
 }
 
-void Polygon2dOpenGl::prepareGlData(const std::shared_ptr<OpenGlContext> &openGlContext) {
-    glUseProgram(programHandle);
+void Polygon2dOpenGl::prepareGlData(int program) {
+    glUseProgram(program);
 
-    positionHandle = glGetAttribLocation(programHandle, "vPosition");
-    glGenBuffers(1, &vertexBuffer);
+    positionHandle = glGetAttribLocation(program, "vPosition");
+    if (!glDataBuffersGenerated) {
+        glGenBuffers(1, &vertexBuffer);
+    }
     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    glGenBuffers(1, &indexBuffer);
+    if (!glDataBuffersGenerated) {
+        glGenBuffers(1, &indexBuffer);
+    }
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort) * indices.size(), &indices[0], GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-    mvpMatrixHandle = glGetUniformLocation(programHandle, "uMVPMatrix");
+    mvpMatrixHandle = glGetUniformLocation(program, "uMVPMatrix");
 }
 
 void Polygon2dOpenGl::clear() {
@@ -82,8 +88,11 @@ void Polygon2dOpenGl::clear() {
 }
 
 void Polygon2dOpenGl::removeGlBuffers() {
-    glDeleteBuffers(1, &vertexBuffer);
-    glDeleteBuffers(1, &indexBuffer);
+    if (glDataBuffersGenerated) {
+        glDeleteBuffers(1, &vertexBuffer);
+        glDeleteBuffers(1, &indexBuffer);
+        glDataBuffersGenerated = false;
+    }
 }
 
 void Polygon2dOpenGl::setIsInverseMasked(bool inversed) { isMaskInversed = inversed; }
@@ -95,24 +104,33 @@ void Polygon2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> 
 
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
 
+    GLuint stencilMask = 0;
+    GLuint validTarget = 0;
+    GLenum zpass = GL_KEEP;
     if (isMasked) {
-        if (isMaskInversed) {
-            glStencilFunc(GL_EQUAL, 0, 255);
-        } else {
-            glStencilFunc(GL_EQUAL, 128, 255);
-        }
+        stencilMask += 128;
+        validTarget = isMaskInversed ? 0 : 128;
     }
-    glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
+    if (renderPass.isPassMasked) {
+        stencilMask += 127;
+        zpass = GL_INCR;
+    }
+
+    if (stencilMask != 0) {
+        glStencilFunc(GL_EQUAL, validTarget, stencilMask);
+        glStencilOp(GL_KEEP, GL_KEEP, zpass);
+    }
+
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
-    drawPolygon(openGlContext, programHandle, mvpMatrix);
+    drawPolygon(openGlContext, program, mvpMatrix);
 }
 
-void Polygon2dOpenGl::drawPolygon(std::shared_ptr<OpenGlContext> openGlContext, int program, int64_t mvpMatrix) {
+void Polygon2dOpenGl::drawPolygon(const std::shared_ptr<::RenderingContextInterface> &context, int program, int64_t mvpMatrix) {
     // Add program to OpenGL environment
     glUseProgram(program);
 
-    shaderProgram->preRender(openGlContext);
+    shaderProgram->preRender(context);
 
     glEnableVertexAttribArray(positionHandle);
     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
@@ -122,10 +140,6 @@ void Polygon2dOpenGl::drawPolygon(std::shared_ptr<OpenGlContext> openGlContext, 
 
     // Apply the projection and view transformation
     glUniformMatrix4fv(mvpMatrixHandle, 1, false, (GLfloat *)mvpMatrix);
-
-    // Enable blending
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
     // Draw the triangle
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
@@ -147,6 +161,10 @@ void Polygon2dOpenGl::renderAsMask(const std::shared_ptr<::RenderingContextInter
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
 
     glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-    drawPolygon(openGlContext, programHandle, mvpMatrix);
+    drawPolygon(openGlContext, program, mvpMatrix);
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+}
+
+void Polygon2dOpenGl::setDebugLabel(const std::string &label) {
+    // not used
 }

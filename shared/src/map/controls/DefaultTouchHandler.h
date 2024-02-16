@@ -63,6 +63,8 @@ private:
 
     void handleMoreThanTwoFingers();
 
+    std::recursive_mutex stateMutex;
+
     void checkState();
 
     int32_t TWO_FINGER_TOUCH_TIMEOUT = 100;
@@ -76,7 +78,7 @@ private:
     std::recursive_mutex listenerMutex;
     std::list<ListenerEntry> listeners; // ordered by the decreasing index
 
-    const std::shared_ptr<SchedulerInterface> scheduler;
+    const std::weak_ptr<SchedulerInterface> scheduler;
 
     TouchHandlingState state;
     long long stateTime;

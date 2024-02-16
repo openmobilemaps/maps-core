@@ -17,9 +17,10 @@
 
 class ColorLineGroup2dShaderOpenGl : public BaseShaderProgramOpenGl,
                                      public LineGroupShaderInterface,
-                                     public ShaderProgramInterface,
                                      public std::enable_shared_from_this<ShaderProgramInterface> {
   public:
+    ColorLineGroup2dShaderOpenGl();
+
     virtual std::shared_ptr<ShaderProgramInterface> asShaderProgramInterface() override;
 
     virtual std::string getProgramName() override;
@@ -28,29 +29,30 @@ class ColorLineGroup2dShaderOpenGl : public BaseShaderProgramOpenGl,
 
     virtual void preRender(const std::shared_ptr<::RenderingContextInterface> &context) override;
 
-    virtual void setStyles(const std::vector<::LineStyle> &lineStyles) override;
+    virtual void setStyles(const ::SharedBytes & styles) override;
 
-  protected:
+    void setDashingScaleFactor(float factor) override;
+
+protected:
     virtual std::string getVertexShader() override;
 
     virtual std::string getFragmentShader() override;
 
   private:
-    std::recursive_mutex styleMutex;
-    std::vector<GLfloat> lineStyles;
-    std::vector<GLfloat> lineColors;
-    std::vector<GLfloat> lineGapColors;
-    std::vector<GLfloat> lineDashValues;
-    GLint numStyles;
+    static const std::string programName;
 
-    const int maxNumStyles = 48;
-    const int sizeStyleValues = 3;
-    const int sizeStyleValuesArray = sizeStyleValues * maxNumStyles;
-    const int sizeColorValues = 4;
-    const int sizeColorValuesArray = sizeColorValues * maxNumStyles;
-    const int sizeGapColorValues = 4;
-    const int sizeGapColorValuesArray = sizeGapColorValues * maxNumStyles;
-    const int maxNumDashValues = 4;
-    const int sizeDashValues = maxNumDashValues + 1;
-    const int sizeDashValuesArray = sizeDashValues * maxNumStyles;
+    std::recursive_mutex styleMutex;
+    std::vector<GLfloat> lineValues;
+    GLint numStyles = 0;
+
+    float dashingScaleFactor = 1.0;
+
+    const int maxNumStyles = 32;
+    //const int sizeStyleValues = 3;
+    //const int sizeColorValues = 4;
+    //const int sizeGapColorValues = 4;
+    //const int maxNumDashValues = 4;
+   // const int sizeDashValues = maxNumDashValues + 1;
+    const int sizeLineValues = 19;//sizeStyleValues + sizeColorValues + sizeGapColorValues + sizeDashValues + 1;
+    const int sizeLineValuesArray = sizeLineValues * maxNumStyles;
 };

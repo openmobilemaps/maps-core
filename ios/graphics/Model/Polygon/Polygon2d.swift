@@ -24,7 +24,8 @@ final class Polygon2d: BaseGraphicsObject {
     init(shader: MCShaderProgramInterface, metalContext: MetalContext) {
         self.shader = shader
         super.init(device: metalContext.device,
-                   sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue))
+                   sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue)!,
+                   label: "Polygon2d")
     }
 
     override func render(encoder: MTLRenderCommandEncoder,
@@ -37,15 +38,15 @@ final class Polygon2d: BaseGraphicsObject {
         defer {
             lock.unlock()
         }
-        
-        guard let verticesBuffer = verticesBuffer,
-              let indicesBuffer = indicesBuffer else { return }
+
+        guard let verticesBuffer,
+              let indicesBuffer else { return }
 
         #if DEBUG
-        encoder.pushDebugGroup("Polygon2d")
-        defer {
-            encoder.popDebugGroup()
-        }
+            encoder.pushDebugGroup(label)
+            defer {
+                encoder.popDebugGroup()
+            }
         #endif
 
         if isMasked {
@@ -73,7 +74,6 @@ final class Polygon2d: BaseGraphicsObject {
                                       indexType: .uint16,
                                       indexBuffer: indicesBuffer,
                                       indexBufferOffset: 0)
-
     }
 
     private func setupStencilStates() {
@@ -107,15 +107,15 @@ extension Polygon2d: MCMaskingObjectInterface {
             lock.unlock()
         }
 
-        guard let verticesBuffer = verticesBuffer,
-              let indicesBuffer = indicesBuffer
+        guard let verticesBuffer,
+              let indicesBuffer
         else { return }
 
         #if DEBUG
-        encoder.pushDebugGroup("Polygon2dMask")
-        defer {
-            encoder.popDebugGroup()
-        }
+            encoder.pushDebugGroup("Polygon2dMask")
+            defer {
+                encoder.popDebugGroup()
+            }
         #endif
 
         if let mask = context.polygonMask {
@@ -137,7 +137,6 @@ extension Polygon2d: MCMaskingObjectInterface {
                                       indexType: .uint16,
                                       indexBuffer: indicesBuffer,
                                       indexBufferOffset: 0)
-
     }
 }
 

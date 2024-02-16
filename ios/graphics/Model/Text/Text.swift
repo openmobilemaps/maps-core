@@ -26,7 +26,8 @@ final class Text: BaseGraphicsObject {
     init(shader: MCShaderProgramInterface, metalContext: MetalContext) {
         self.shader = shader as! TextShader
         super.init(device: metalContext.device,
-                   sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue))
+                   sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue)!,
+                   label: "Text")
     }
 
     private func setupStencilStates() {
@@ -56,8 +57,8 @@ final class Text: BaseGraphicsObject {
             lock.unlock()
         }
 
-        guard let verticesBuffer = verticesBuffer,
-              let indicesBuffer = indicesBuffer else { return }
+        guard let verticesBuffer,
+              let indicesBuffer else { return }
 
         if isMasked {
             if stencilState == nil {
@@ -70,10 +71,10 @@ final class Text: BaseGraphicsObject {
         }
 
         #if DEBUG
-        encoder.pushDebugGroup("Text")
-        defer {
-            encoder.popDebugGroup()
-        }
+            encoder.pushDebugGroup(label)
+            defer {
+                encoder.popDebugGroup()
+            }
         #endif
 
         shader.setupProgram(context)
@@ -86,7 +87,7 @@ final class Text: BaseGraphicsObject {
 
         encoder.setFragmentSamplerState(sampler, index: 0)
 
-        if let texture = texture {
+        if let texture {
             encoder.setFragmentTexture(texture, index: 0)
         }
 
@@ -95,62 +96,26 @@ final class Text: BaseGraphicsObject {
                                       indexType: .uint16,
                                       indexBuffer: indicesBuffer,
                                       indexBufferOffset: 0)
-
     }
 }
 
 extension Text: MCTextInterface {
-    func setTexts(_ texts: [MCTextDescription]) {
-        var vertices: [Vertex] = []
-        var indices: [UInt16] = []
-
-        var indicesStart: UInt16 = 0
-        for t in texts {
-            for f in t.glyphs {
-                let frame = f.frame
-                let textureCoordinates = f.textureCoordinates
-                /*
-                 The quad is made out of 4 vertices as following
-                 B----C
-                 |    |
-                 |    |
-                 A----D
-                 Where A-C are joined to form two triangles
-                 */
-                let v: [Vertex] = [
-                    Vertex(position: frame.bottomLeft, textureU: textureCoordinates.bottomLeft.xF, textureV: textureCoordinates.bottomLeft.yF), // A
-                    Vertex(position: frame.topLeft, textureU: textureCoordinates.topLeft.xF, textureV: textureCoordinates.topLeft.yF), // B
-                    Vertex(position: frame.topRight, textureU: textureCoordinates.topRight.xF, textureV: textureCoordinates.topRight.yF), // C
-                    Vertex(position: frame.bottomRight, textureU: textureCoordinates.bottomRight.xF, textureV: textureCoordinates.bottomRight.yF), // D
-                ]
-
-                vertices.append(contentsOf: v)
-
-                let i: [UInt16] = [
-                    0 + indicesStart, 1 + indicesStart, 2 + indicesStart, // ABC
-                    0 + indicesStart, 2 + indicesStart, 3 + indicesStart, // ACD
-                ]
-
-                indices.append(contentsOf: i)
-
-                indicesStart += 4
-            }
-        }
-
-        guard !vertices.isEmpty else {
+    func setTextsShared(_ vertices: MCSharedBytes, indices: MCSharedBytes) {
+        guard let verticesBuffer = device.makeBuffer(from: vertices),
+              let indicesBuffer = device.makeBuffer(from: indices),
+              indices.elementCount > 0
+        else {
             lock.withCritical {
                 indicesCount = 0
-                self.verticesBuffer = nil
-                self.indicesBuffer = nil
+                verticesBuffer = nil
+                indicesBuffer = nil
             }
+
             return
         }
 
-        guard let verticesBuffer = device.makeBuffer(bytes: vertices, length: MemoryLayout<Vertex>.stride * vertices.count, options: []), let indicesBuffer = device.makeBuffer(bytes: indices, length: MemoryLayout<UInt16>.stride * indices.count, options: []) else {
-            fatalError("Cannot allocate buffers")
-        }
         lock.withCritical {
-            indicesCount = indices.count
+            self.indicesCount = Int(indices.elementCount)
             self.verticesBuffer = verticesBuffer
             self.indicesBuffer = indicesBuffer
         }
@@ -164,7 +129,8 @@ extension Text: MCTextInterface {
         texture = textureHolder.texture
     }
 
-    func removeTexture() {}
+    func removeTexture() {
+    }
 
     func asGraphicsObject() -> MCGraphicsObjectInterface? {
         self

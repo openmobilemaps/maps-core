@@ -23,67 +23,101 @@ public:
                     std::shared_ptr<Value> lineDashArray = nullptr,
                     std::shared_ptr<Value> lineBlur = nullptr,
                     std::shared_ptr<Value> lineCap = nullptr,
-                    double dpFactor = 1.0):
-    lineColor(lineColor),
-    lineOpacity(lineOpacity),
-    lineWidth(lineWidth),
-    lineDashArray(lineDashArray),
-    lineBlur(lineBlur),
-    lineCap(lineCap),
-    dpFactor(dpFactor) {}
+                    std::shared_ptr<Value> lineOffset = nullptr,
+                    std::shared_ptr<Value> blendMode = nullptr)
+            : lineColor(lineColor),
+              lineOpacity(lineOpacity),
+              lineWidth(lineWidth),
+              lineDashArray(lineDashArray),
+              lineBlur(lineBlur),
+              lineCap(lineCap),
+              lineOffset(lineOffset),
+              blendMode(blendMode) {}
 
-    std::unordered_set<std::string> getUsedKeys() {
-        std::unordered_set<std::string> usedKeys;
-        std::vector<std::shared_ptr<Value>> values = { lineColor, lineOpacity, lineWidth, lineBlur, lineDashArray, lineCap };
+    LineVectorStyle(LineVectorStyle &style)
+            : lineColor(style.lineColor),
+              lineOpacity(style.lineOpacity),
+              lineWidth(style.lineWidth),
+              lineDashArray(style.lineDashArray),
+              lineBlur(style.lineBlur),
+              lineCap(style.lineCap),
+              lineOffset(style.lineOffset),
+              blendMode(style.blendMode) {}
+
+    UsedKeysCollection getUsedKeys() const {
+        UsedKeysCollection usedKeys;
+        std::shared_ptr<Value> values[] = { lineColor, lineOpacity, lineWidth, lineBlur, lineDashArray, lineCap, blendMode };
 
         for (auto const &value: values) {
             if (!value) continue;
             auto const setKeys = value->getUsedKeys();
-            usedKeys.insert(setKeys.begin(), setKeys.end());
+            usedKeys.includeOther(setKeys);
         }
 
         return usedKeys;
     };
 
+    BlendMode getBlendMode(const EvaluationContext &context) {
+        static const BlendMode defaultValue = BlendMode::NORMAL;
+        return blendModeEvaluator.getResult(blendMode, context, defaultValue);
+    }
+
     Color getLineColor(const EvaluationContext &context){
         static const Color defaultValue = ColorUtil::c(0, 0, 0, 1.0);
-        return lineColor ? lineColor->evaluateOr(context, defaultValue) : defaultValue;
+        return lineColorEvaluator.getResult(lineColor, context, defaultValue);
     }
 
     double getLineOpacity(const EvaluationContext &context){
         static const double defaultValue = 1.0;
-        return lineOpacity ? lineOpacity->evaluateOr(context, defaultValue) : defaultValue;
+        return lineOpacityEvaluator.getResult(lineOpacity, context, defaultValue);
     }
 
     double getLineBlur(const EvaluationContext &context){
         static const double defaultValue = 0.0;
-        return lineBlur ? lineBlur->evaluateOr(context, defaultValue) : defaultValue;
+        double value = lineBlurEvaluator.getResult(lineBlur, context, defaultValue);
+        return value * context.dpFactor;
     }
 
     double getLineWidth(const EvaluationContext &context){
         static const double defaultValue = 1.0;
-        double value = lineWidth ? lineWidth->evaluateOr(context, defaultValue) : defaultValue;
-        return value * dpFactor;
+        double value = lineWidthEvaluator.getResult(lineWidth, context, defaultValue);
+        return value * context.dpFactor;
     }
 
     std::vector<float> getLineDashArray(const EvaluationContext &context){
         static const std::vector<float> defaultValue = {};
-        return lineDashArray ? lineDashArray->evaluateOr(context, defaultValue) : defaultValue;
+        return lineDashArrayEvaluator.getResult(lineDashArray, context, defaultValue);
     }
 
     LineCapType getLineCap(const EvaluationContext &context){
         static const LineCapType defaultValue = LineCapType::BUTT;
-        return lineCap ? lineCap->evaluateOr(context, defaultValue) : defaultValue;
+        return lineCapEvaluator.getResult(lineCap, context, defaultValue);
     }
 
-private:
+    double getLineOffset(const EvaluationContext &context) {
+        static const double defaultValue = 0.0;
+        double offset = lineOffsetEvaluator.getResult(lineOffset, context, defaultValue);
+        return std::min(offset * context.dpFactor, getLineWidth(context) * 0.5);
+    }
+
     std::shared_ptr<Value> lineColor;
     std::shared_ptr<Value> lineOpacity;
     std::shared_ptr<Value> lineBlur;
     std::shared_ptr<Value> lineWidth;
     std::shared_ptr<Value> lineDashArray;
     std::shared_ptr<Value> lineCap;
-    double dpFactor;
+    std::shared_ptr<Value> lineOffset;
+    std::shared_ptr<Value> blendMode;
+
+private:
+    ValueEvaluator<Color> lineColorEvaluator;
+    ValueEvaluator<double> lineOpacityEvaluator;
+    ValueEvaluator<double> lineBlurEvaluator;
+    ValueEvaluator<double> lineWidthEvaluator;
+    ValueEvaluator<std::vector<float>> lineDashArrayEvaluator;
+    ValueEvaluator<LineCapType> lineCapEvaluator;
+    ValueEvaluator<double> lineOffsetEvaluator;
+    ValueEvaluator<BlendMode> blendModeEvaluator;
 };
 
 class LineVectorLayerDescription: public VectorLayerDescription {
@@ -98,19 +132,27 @@ public:
                                int maxZoom,
                                std::shared_ptr<Value> filter,
                                LineVectorStyle style,
-                               std::optional<int32_t> renderPassIndex):
-    VectorLayerDescription(identifier, source, sourceId, minZoom, maxZoom, filter, renderPassIndex),
+                               std::optional<int32_t> renderPassIndex,
+                               std::shared_ptr<Value> interactable,
+                               bool multiselect,
+                               bool selfMasked):
+    VectorLayerDescription(identifier, source, sourceId, minZoom, maxZoom, filter, renderPassIndex, interactable, multiselect, selfMasked),
     style(style) {};
 
+    std::unique_ptr<VectorLayerDescription> clone() override {
+        return std::make_unique<LineVectorLayerDescription>(identifier, source, sourceLayer, minZoom, maxZoom,
+                                                            filter ? filter->clone() : nullptr, style, renderPassIndex,
+                                                            interactable ? interactable->clone() : nullptr, multiselect, selfMasked);
+    }
 
-    virtual std::unordered_set<std::string> getUsedKeys() override {
-        std::unordered_set<std::string> usedKeys;
+    virtual UsedKeysCollection getUsedKeys() const override {
+        UsedKeysCollection usedKeys;
 
         auto parentKeys = VectorLayerDescription::getUsedKeys();
-        usedKeys.insert(parentKeys.begin(), parentKeys.end());
+        usedKeys.includeOther(parentKeys);
 
         auto styleKeys = style.getUsedKeys();
-        usedKeys.insert(styleKeys.begin(), styleKeys.end());
+        usedKeys.includeOther(styleKeys);
 
         return usedKeys;
     };

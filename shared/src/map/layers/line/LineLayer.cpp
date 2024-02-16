@@ -9,7 +9,6 @@
  */
 
 #include "LineLayer.h"
-#include "ColorLineShaderInterface.h"
 #include "GraphicsObjectInterface.h"
 #include "LambdaTask.h"
 #include "LineHelper.h"
@@ -49,6 +48,7 @@ std::vector<std::shared_ptr<LineInfoInterface>> LineLayer::getLines() {
 }
 
 void LineLayer::remove(const std::shared_ptr<LineInfoInterface> &line) {
+    auto mapInterface = this->mapInterface;
     if (!mapInterface) {
         std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
         addingQueue.erase(std::remove(addingQueue.begin(), addingQueue.end(), line), addingQueue.end());
@@ -58,14 +58,24 @@ void LineLayer::remove(const std::shared_ptr<LineInfoInterface> &line) {
         std::lock_guard<std::recursive_mutex> lock(linesMutex);
         for (auto it = lines.begin(); it != lines.end(); it++) {
             if (it->first->getIdentifier() == line->getIdentifier()) {
+                auto linePtr = it->second;
+                auto scheduler = mapInterface->getScheduler();
+                if (scheduler) {
+                    scheduler->addTask(std::make_shared<LambdaTask>(
+                            TaskConfig("IconLayer_clearLine", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
+                            [linePtr] {
+                                if (linePtr) {
+                                    linePtr->getLineObject()->clear();
+                                }
+                            }));
+                }
                 lines.erase(it);
                 break;
             }
         }
     }
     generateRenderPasses();
-    if (mapInterface)
-        mapInterface->invalidate();
+    mapInterface->invalidate();
 }
 
 void LineLayer::add(const std::shared_ptr<LineInfoInterface> &line) {
@@ -80,8 +90,8 @@ void LineLayer::add(const std::shared_ptr<LineInfoInterface> &line) {
         return;
     }
 
-    auto shader = shaderFactory->createColorLineShader();
-    auto lineGraphicsObject = objectFactory->createLine(shader->asShaderProgramInterface());
+    auto shader = shaderFactory->createLineGroupShader();
+    auto lineGraphicsObject = objectFactory->createLineGroup(shader->asShaderProgramInterface());
 
     auto lineObject = std::make_shared<Line2dLayerObject>(mapInterface->getCoordinateConverterHelper(), lineGraphicsObject, shader);
 
@@ -105,7 +115,7 @@ void LineLayer::add(const std::shared_ptr<LineInfoInterface> &line) {
     generateRenderPasses();
 }
 
-void LineLayer::setupLine(const std::shared_ptr<Line2dInterface> &line) {
+void LineLayer::setupLine(const std::shared_ptr<LineGroup2dInterface> &line) {
     auto mapInterface = this->mapInterface;
     auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
     if (!renderingContext) {
@@ -122,6 +132,7 @@ void LineLayer::setupLine(const std::shared_ptr<Line2dInterface> &line) {
 }
 
 void LineLayer::clear() {
+    auto mapInterface = this->mapInterface;
     if (!mapInterface) {
         std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
         addingQueue.clear();
@@ -129,11 +140,21 @@ void LineLayer::clear() {
     }
     {
         std::lock_guard<std::recursive_mutex> lock(linesMutex);
+        auto scheduler = mapInterface->getScheduler();
+        if (scheduler) {
+            auto linesToClear = lines;
+            scheduler->addTask(std::make_shared<LambdaTask>(TaskConfig("LineLayer_clearLines", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS), [linesToClear]{
+                for (const auto &line : linesToClear) {
+                    if (line.second->getLineObject()->isReady()) {
+                        line.second->getLineObject()->clear();
+                    }
+                }
+            }));
+        }
         lines.clear();
     }
     generateRenderPasses();
-    if (mapInterface)
-        mapInterface->invalidate();
+    mapInterface->invalidate();
 }
 
 void LineLayer::setCallbackHandler(const std::shared_ptr<LineLayerCallbackInterface> &handler) { callbackHandler = handler; }
@@ -164,7 +185,7 @@ void LineLayer::generateRenderPasses() {
     std::vector<std::shared_ptr<RenderPassInterface>> newRenderPasses;
     for (const auto &passEntry : renderPassObjectMap) {
         std::shared_ptr<RenderPass> renderPass =
-            std::make_shared<RenderPass>(RenderPassConfig(passEntry.first), passEntry.second, mask);
+            std::make_shared<RenderPass>(RenderPassConfig(passEntry.first, false), passEntry.second, mask);
         newRenderPasses.push_back(renderPass);
     }
     {

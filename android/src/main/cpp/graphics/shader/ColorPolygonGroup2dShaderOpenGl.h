@@ -17,9 +17,10 @@
 
 class ColorPolygonGroup2dShaderOpenGl : public BaseShaderProgramOpenGl,
                                         public PolygonGroupShaderInterface,
-                                        public ShaderProgramInterface,
                                         public std::enable_shared_from_this<ShaderProgramInterface> {
   public:
+    ColorPolygonGroup2dShaderOpenGl(bool isStriped);
+
     virtual std::shared_ptr<ShaderProgramInterface> asShaderProgramInterface() override;
 
     virtual std::string getProgramName() override;
@@ -36,10 +37,13 @@ class ColorPolygonGroup2dShaderOpenGl : public BaseShaderProgramOpenGl,
     virtual std::string getFragmentShader() override;
 
   private:
+    bool isStriped = false;
+    const std::string programName;
+
     std::recursive_mutex styleMutex;
     std::vector<GLfloat> polygonStyles;
-    GLint numStyles;
+    GLint numStyles = 0;
 
-    const int sizeStyleValues = 5;
-    const int sizeStyleValuesArray = sizeStyleValues * 32;
+    const int sizeStyleValues = isStriped ? 7 : 5;
+    const int sizeStyleValuesArray = sizeStyleValues * 16;
 };

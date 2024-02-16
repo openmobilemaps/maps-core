@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "VectorMapDescription.h"
+#include "VectorMapSourceDescription.h"
 #include "LoaderStatus.h"
 #include <memory>
 #include <optional>
@@ -21,11 +21,15 @@ struct Tiled2dMapVectorLayerParserResult {
     std::shared_ptr<VectorMapDescription> mapDescription;
     LoaderStatus status;
     std::optional<std::string> errorCode;
+    std::optional<std::string> metadata;
 
-    Tiled2dMapVectorLayerParserResult(std::shared_ptr<VectorMapDescription> mapDescription_, LoaderStatus status_,
-                                      std::optional<std::string> errorCode_)
-            : mapDescription(std::move(mapDescription_)),
-              status(std::move(status_)),
-              errorCode(std::move(errorCode_)) {}
-
+    Tiled2dMapVectorLayerParserResult(std::shared_ptr<VectorMapDescription> mapDescription,
+                                      LoaderStatus status,
+                                      std::optional<std::string> errorCode,
+                                      std::optional<std::string> metadata)
+            : mapDescription(std::move(mapDescription)),
+              status(std::move(status)),
+              errorCode(std::move(errorCode)),
+              metadata(std::move(metadata))
+        {}
 };

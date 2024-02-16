@@ -89,8 +89,6 @@ void TextLayer::onRemoved() {
         std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
         addingQueue.clear();
     }
-
-    pause();
 }
 
 void TextLayer::pause() {
@@ -102,7 +100,9 @@ void TextLayer::pause() {
         }
     }
 
-    clear();
+    std::lock_guard<std::recursive_mutex> lock(textMutex);
+    clearSync(texts);
+    texts.clear();
 }
 
 void TextLayer::resume() {
@@ -144,11 +144,12 @@ void TextLayer::clear() {
 
     {
         std::lock_guard<std::recursive_mutex> lock(textMutex);
+        std::weak_ptr<TextLayer> weakSelfPtr = std::dynamic_pointer_cast<TextLayer>(shared_from_this());
         auto textsToClear = texts;
         scheduler->addTask(std::make_shared<LambdaTask>(
-            TaskConfig("TextLayer_clear", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS), [=] {
-                for (auto &text : textsToClear) {
-                    text.second->getTextObject()->asGraphicsObject()->clear();
+            TaskConfig("TextLayer_clear", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS), [weakSelfPtr, textsToClear] {
+                if (auto self = weakSelfPtr.lock()) {
+                    self->clearSync(textsToClear);
                 }
             }));
         texts.clear();
@@ -159,6 +160,20 @@ void TextLayer::clear() {
     }
 
     mapInterface->invalidate();
+}
+
+void TextLayer::clearSync(const std::unordered_map<std::shared_ptr<TextInfoInterface>, std::shared_ptr<TextLayerObject>> &textsToClear) {
+    for (auto &text : textsToClear) {
+        if (text.second->getTextGraphicsObject()->isReady())
+        text.second->getTextGraphicsObject()->clear();
+        text.second->getTextObject()->removeTexture();
+    }
+}
+
+void TextLayer::update() {
+    for (auto const &textTuple : texts) {
+        textTuple.second->update();
+    }
 }
 
 void TextLayer::generateRenderPasses() {
@@ -175,7 +190,7 @@ void TextLayer::generateRenderPasses() {
 
     std::vector<std::shared_ptr<RenderPassInterface>> newRenderPasses;
     for (const auto &passEntry : renderPassObjectMap) {
-        std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(RenderPassConfig(passEntry.first), passEntry.second);
+        std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(RenderPassConfig(passEntry.first, false), passEntry.second);
         newRenderPasses.push_back(renderPass);
     }
 
@@ -205,7 +220,7 @@ void TextLayer::addTexts(const std::vector<std::shared_ptr<TextInfoInterface>> &
 
     for (const auto &text : texts) {
         auto fontData = fontLoader->loadFont(text->getFont()).fontData;
-        auto textObject = textHelper.textLayerObject(text, fontData, Vec2F(0.0, 0.0), 1.2, 0.0, 15);
+        auto textObject = textHelper.textLayerObject(text, fontData, Vec2F(0.0, 0.0), 1.2, 0.0, 15, 45.0, SymbolAlignment::AUTO);
 
         if (textObject) {
             textObjects.push_back(std::make_tuple(text, textObject));

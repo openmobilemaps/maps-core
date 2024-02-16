@@ -17,40 +17,94 @@
 class PolygonVectorStyle {
 public:
 
-    PolygonVectorStyle(std::shared_ptr<Value> fillColor = nullptr,
-                       std::shared_ptr<Value> fillOpacity = nullptr):
+    PolygonVectorStyle(std::shared_ptr<Value> fillColor,
+                       std::shared_ptr<Value> fillOpacity,
+                       std::shared_ptr<Value> fillPattern,
+                       std::shared_ptr<Value> blendMode,
+                       bool fadeInPattern,
+                       std::shared_ptr<Value> stripeWidth):
     fillColor(fillColor),
-    fillOpacity(fillOpacity) {}
+    fillOpacity(fillOpacity),
+    fillPattern(fillPattern),
+    blendMode(blendMode),
+    fadeInPattern(fadeInPattern),
+    stripeWidth(stripeWidth) {}
 
-    std::unordered_set<std::string> getUsedKeys() {
+    PolygonVectorStyle(PolygonVectorStyle &style)
+    : fillColor(style.fillColor),
+      fillOpacity(style.fillOpacity),
+      fillPattern(style.fillPattern),
+      blendMode(style.blendMode),
+      fadeInPattern(style.fadeInPattern),
+      stripeWidth(style.stripeWidth) {}
 
-        std::unordered_set<std::string> usedKeys;
-        std::vector<std::shared_ptr<Value>> values = {
-            fillColor, fillOpacity
+    UsedKeysCollection getUsedKeys() const {
+
+        UsedKeysCollection usedKeys;
+        std::shared_ptr<Value> values[] = {
+            fillColor, fillOpacity, fillPattern, stripeWidth
         };
 
         for (auto const &value: values) {
             if (!value) continue;
             auto const setKeys = value->getUsedKeys();
-            usedKeys.insert(setKeys.begin(), setKeys.end());
+            usedKeys.includeOther(setKeys);
         }
 
         return usedKeys;
     };
 
-    Color getFillColor(const EvaluationContext &context){
+    BlendMode getBlendMode(const EvaluationContext &context) {
+        static const BlendMode defaultValue = BlendMode::NORMAL;
+        return blendModeEvaluator.getResult(blendMode, context, defaultValue);
+    }
+
+    Color getFillColor(const EvaluationContext &context) {
         static const Color defaultValue = ColorUtil::c(0, 0, 0, 1.0);
-        return fillColor ? fillColor->evaluateOr(context, defaultValue) : defaultValue;
+        return fillColorEvaluator.getResult(fillColor, context, defaultValue);
     }
 
-    double getFillOpacity(const EvaluationContext &context){
+    double getFillOpacity(const EvaluationContext &context) {
         static const double defaultValue = 1.0;
-        return fillOpacity ? fillOpacity->evaluateOr(context, defaultValue) : defaultValue;
+        return fillOpacityEvaluator.getResult(fillOpacity, context, defaultValue);
     }
 
-private:
+    std::string getFillPattern(const EvaluationContext &context) {
+        static const std::string defaultValue = "";
+        return fillPatternEvaluator.getResult(fillPattern, context, defaultValue);
+    }
+
+    bool hasPatternPotentially() {
+        return fillPattern ? true : false;
+    }
+
+    std::vector<float> getStripeWidth(const EvaluationContext &context) {
+        static const std::vector<float> defaultValue = {1.0, 1.0};
+        auto stripeInfo = stripeWidthEvaluator.getResult(stripeWidth, context, defaultValue);
+        for (int i = 0; i < stripeInfo.size(); ++i) {
+            stripeInfo[i] = stripeInfo[i] * context.dpFactor;
+        }
+        return stripeInfo;
+    }
+
+    bool isStripedPotentially() {
+        return stripeWidth ? true : false;
+    }
+
+public:
     std::shared_ptr<Value> fillColor;
     std::shared_ptr<Value> fillOpacity;
+    std::shared_ptr<Value> fillPattern;
+    std::shared_ptr<Value> blendMode;
+    bool fadeInPattern;
+    std::shared_ptr<Value> stripeWidth;
+
+private:
+    ValueEvaluator<Color> fillColorEvaluator;
+    ValueEvaluator<double> fillOpacityEvaluator;
+    ValueEvaluator<std::string> fillPatternEvaluator;
+    ValueEvaluator<BlendMode> blendModeEvaluator;
+    ValueEvaluator<std::vector<float>> stripeWidthEvaluator;
 };
 
 class PolygonVectorLayerDescription: public VectorLayerDescription {
@@ -65,18 +119,27 @@ public:
                                   int maxZoom,
                                   std::shared_ptr<Value> filter,
                                   PolygonVectorStyle style,
-                                  std::optional<int32_t> renderPassIndex):
-    VectorLayerDescription(identifier, source, sourceId, minZoom, maxZoom, filter, renderPassIndex),
+                                  std::optional<int32_t> renderPassIndex,
+                                  std::shared_ptr<Value> interactable,
+                                  bool multiselect,
+                                  bool selfMasked):
+    VectorLayerDescription(identifier, source, sourceId, minZoom, maxZoom, filter, renderPassIndex, interactable, multiselect, selfMasked),
     style(style) {};
 
-    virtual std::unordered_set<std::string> getUsedKeys() override {
-        std::unordered_set<std::string> usedKeys;
+    std::unique_ptr<VectorLayerDescription> clone() override {
+        return std::make_unique<PolygonVectorLayerDescription>(identifier, source, sourceLayer, minZoom, maxZoom,
+                                                               filter ? filter->clone() : nullptr, style, renderPassIndex,
+                                                               interactable ? interactable->clone() : nullptr, multiselect, selfMasked);
+    }
+
+    virtual UsedKeysCollection getUsedKeys() const override {
+        UsedKeysCollection usedKeys;
 
         auto parentKeys = VectorLayerDescription::getUsedKeys();
-        usedKeys.insert(parentKeys.begin(), parentKeys.end());
+        usedKeys.includeOther(parentKeys);
 
         auto styleKeys = style.getUsedKeys();
-        usedKeys.insert(styleKeys.begin(), styleKeys.end());
+        usedKeys.includeOther(styleKeys);
 
         return usedKeys;
     };

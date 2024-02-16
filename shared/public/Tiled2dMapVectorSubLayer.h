@@ -19,9 +19,9 @@
 #include "QuadMaskObject.h"
 #include "VectorTileGeometryHandler.h"
 #include "VectorLayerDescription.h"
-#include "Tiled2dMapVectorLayerReadyInterface.h"
-#include "Tiled2dMapVectorLayerSelectionInterface.h"
+#include "Tiled2dMapVectorLayerTileCallbackInterface.h"
 #include "Textured2dLayerObject.h"
+#include "Tiled2dMapVectorTileInfo.h"
 
 class Tiled2dMapVectorSubLayer : public SimpleLayerInterface {
 public:
@@ -50,7 +50,7 @@ public:
     virtual void setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> &maskingObject) override;
 
     virtual void updateTileData(const Tiled2dMapTileInfo &tileInfo, const std::shared_ptr<MaskingObjectInterface> &tileMask,
-                   const std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>> &layerFeatures);
+                   const std::vector<Tiled2dMapVectorTileInfo::FeatureTuple> &layerFeatures);
 
     virtual void updateTileMask(const Tiled2dMapTileInfo &tileInfo, const std::shared_ptr<MaskingObjectInterface> &tileMask);
 
@@ -58,11 +58,7 @@ public:
 
     virtual std::string getLayerDescriptionIdentifier() { return ""; };
 
-    void setTilesReadyDelegate(const std::weak_ptr<Tiled2dMapVectorLayerReadyInterface> readyDelegate);
-
-    void setSelectionDelegate(const std::weak_ptr<Tiled2dMapVectorLayerSelectionInterface> selectionDelegate);
-
-    virtual void setSelectedFeatureIdentfier(std::optional<int64_t> identifier);
+    void setTilesReadyDelegate(const std::weak_ptr<Tiled2dMapVectorLayerTileCallbackInterface> readyDelegate);
 
 protected:
     void setupGraphicsObject(const std::shared_ptr<Textured2dLayerObject> &object, const std::shared_ptr<TextureHolderInterface> &texture);
@@ -77,11 +73,7 @@ protected:
 
     std::unordered_map<Tiled2dMapTileInfo, std::vector<std::shared_ptr<RenderPassInterface>>> renderPasses;
 
-    std::weak_ptr<Tiled2dMapVectorLayerReadyInterface> readyDelegate;
+    std::weak_ptr<Tiled2dMapVectorLayerTileCallbackInterface> readyDelegate;
 
-    std::weak_ptr<Tiled2dMapVectorLayerSelectionInterface> selectionDelegate;
-
-    std::recursive_mutex selectedFeatureIdentifierMutex;
-    std::optional<int64_t> selectedFeatureIdentifier;
     float alpha = 1.0;
 };

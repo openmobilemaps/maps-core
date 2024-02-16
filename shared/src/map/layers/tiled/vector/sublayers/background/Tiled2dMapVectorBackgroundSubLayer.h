@@ -14,10 +14,17 @@
 #include "BackgroundVectorLayerDescription.h"
 #include "ColorShaderInterface.h"
 #include "RenderObject.h"
+#include "Tiled2dMapVectorTileInfo.h"
+#include "PolygonPatternGroupShaderInterface.h"
+#include "SpriteData.h"
+#include "TextureHolderInterface.h"
+#include "PolygonGroup2dLayerObject.h"
+#include "PolygonPatternGroup2dLayerObject.h"
 
 class Tiled2dMapVectorBackgroundSubLayer : public Tiled2dMapVectorSubLayer, public std::enable_shared_from_this<Tiled2dMapVectorBackgroundSubLayer> {
 public:
-    Tiled2dMapVectorBackgroundSubLayer(const std::shared_ptr<BackgroundVectorLayerDescription> &description): description(description) {};
+    Tiled2dMapVectorBackgroundSubLayer(const std::shared_ptr<BackgroundVectorLayerDescription> &description,
+                                       const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager): description(description), featureStateManager(featureStateManager) {};
 
     ~Tiled2dMapVectorBackgroundSubLayer() {}
 
@@ -42,21 +49,31 @@ public:
     virtual std::vector<std::shared_ptr<RenderPassInterface>> buildRenderPasses(const std::unordered_set<Tiled2dMapTileInfo> &tiles) override;
 
     virtual void updateTileData(const Tiled2dMapTileInfo &tileInfo, const std::shared_ptr<MaskingObjectInterface> &tileMask,
-                                const std::vector<std::tuple<const FeatureContext, const VectorTileGeometryHandler>> &layerFeatures) override {};
+                                const std::vector<Tiled2dMapVectorTileInfo::FeatureTuple> &layerFeatures) override {};
 
     void updateTileMask(const Tiled2dMapTileInfo &tileInfo, const std::shared_ptr<MaskingObjectInterface> &tileMask) override {};
 
     virtual void clearTileData(const Tiled2dMapTileInfo &tileInfo) override {};
 
-    virtual void setScissorRect(const std::optional<::RectI> &scissorRect) override;
-
     virtual std::string getLayerDescriptionIdentifier() override;
+
+    void setSprites(std::shared_ptr<SpriteData> spriteData, std::shared_ptr<TextureHolderInterface> spriteTexture);
 
 private:
     std::shared_ptr<BackgroundVectorLayerDescription> description;
 
-    std::shared_ptr<RenderObject> renderObject;
+    double dpFactor = 1.0;
 
     std::vector<std::shared_ptr<RenderPassInterface>> renderPasses;
-    std::shared_ptr<::ColorShaderInterface> shader;
+
+    std::string patternName;
+    std::shared_ptr<PolygonPatternGroup2dLayerObject> patternObject;
+    std::shared_ptr<PolygonGroup2dLayerObject> polygonObject;
+
+    const std::shared_ptr<Tiled2dMapVectorStateManager> featureStateManager;
+
+    std::recursive_mutex mutex;
+
+    std::shared_ptr<SpriteData> spriteData;
+    std::shared_ptr<TextureHolderInterface> spriteTexture;
 };

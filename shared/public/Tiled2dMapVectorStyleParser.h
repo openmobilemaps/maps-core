@@ -19,30 +19,38 @@
 #include <cstring>
 #include <variant>
 #include <unordered_set>
+#include "Logger.h"
 
 class Tiled2dMapVectorStyleParser {
-    const std::string literalExpression = "literal";
-    const std::string getExpression = "get";
-    const std::string hasExpression = "has";
-    const std::string inExpression = "in";
-    const std::string notInExpression = "!in";
-    const std::unordered_set<std::string> compareExpression = { "==", "!=", "<", "<=", ">", ">="};
-    const std::unordered_set<std::string> mathExpression = { "-", "+", "/", "*", "%", "^"};
-    const std::string allExpression = "all";
-    const std::string anyExpression = "any";
-    const std::string caseExpression = "case";
-    const std::string matchExpression = "match";
-    const std::string toStringExpression = "to-string";
-    const std::string toNumberExpression = "to-number";
-    const std::string stopsExpression = "stops";
-    const std::string stepExpression = "step";
-    const std::string interpolateExpression = "interpolate";
-    const std::string formatExpression = "format";
-    const std::string concatExpression = "concat";
-    const std::string lengthExpression = "length";
-    const std::string notExpression = "!";
-
 public:
+    static const std::string literalExpression;
+    static const std::string getExpression;
+    static const std::string hasExpression;
+    static const std::string hasNotExpression;
+    static const std::string inExpression;
+    static const std::string notInExpression;
+    static const std::unordered_set<std::string> compareExpression;
+    static const std::unordered_set<std::string> mathExpression;
+    static const std::string allExpression;
+    static const std::string anyExpression;
+    static const std::string caseExpression;
+    static const std::string matchExpression;
+    static const std::string toStringExpression;
+    static const std::string toBooleanExpression;
+    static const std::string toNumberExpression;
+    static const std::string stopsExpression;
+    static const std::string stepExpression;
+    static const std::string interpolateExpression;
+    static const std::string formatExpression;
+    static const std::string numberFormatExpression;
+    static const std::string concatExpression;
+    static const std::string lengthExpression;
+    static const std::string notExpression;
+    static const std::string zoomExpression;
+    static const std::string booleanExpression;
+    static const std::string featureStateExpression;
+    static const std::string globalStateExpression;
+    static const std::string coalesceExpression;
 
     std::shared_ptr<Value> parseValue(nlohmann::json json) {
         if (json.is_array()) {
@@ -58,20 +66,41 @@ public:
                 }
                 return std::make_shared<GetPropertyValue>(key);
 
-                // Example: [ "has", "ref" ]
-            } else if (isExpression(json[0], hasExpression) && json.size() == 2 && json[1].is_string()) {
-                return std::make_shared<HasPropertyValue>(json[1].get<std::string>());
+                // Example: [ "feature-state", "hover" ]
+            } else if (isExpression(json[0], featureStateExpression) && json.size() == 2 && json[1].is_string()) {
+                auto key = json[1].get<std::string>();
+                return std::make_shared<FeatureStateValue>(key);
+
+                // Example: [ "global-state",  "hover" ]
+            } else if (isExpression(json[0], globalStateExpression) && json.size() == 2 && json[1].is_string()) {
+                auto key = json[1].get<std::string>();
+                return std::make_shared<GlobalStateValue>(key);
+
+                // Example: [ "has",  "ref" ]
+                //          [ "!has", "ref"]
+            } else if ((isExpression(json[0], hasExpression) || isExpression(json[0], hasNotExpression)) && json.size() == 2 && json[1].is_string()) {
+                if (isExpression(json[0], hasExpression)) {
+                    return std::make_shared<HasPropertyValue>(json[1].get<std::string>());
+                }
+                else {
+                    return std::make_shared<HasNotPropertyValue>(json[1].get<std::string>());
+                }
 
                 // Example: [ "in", "admin_level", 2, 4 ]
                 //          [ "in", ["get", "subclass"], ["literal", ["allotments", "forest", "glacier", "golf_course", "park"]]]
             } else if ((isExpression(json[0], inExpression) || isExpression(json[0], notInExpression)) && (json[1].is_string() || (json[1].is_array() && json[1][0] == getExpression))) {
                 std::unordered_set<ValueVariant> values;
+                std::shared_ptr<Value> dynamicValues;
+
 
                 if (json[2].is_array()){
                     if (json[2][0] == literalExpression && json[2][1].is_array()) {
                         for (auto it = json[2][1].begin(); it != json[2][1].end(); it++) {
                             values.insert(getVariant(*it));
                         }
+                    // Example:  ["in", ["get", "plz"], ["global-state", "favoritesPlz"]],
+                    } else if ((json[2][0] == globalStateExpression || json[2][0] == featureStateExpression ) && json[2][1].is_string()) {
+                        dynamicValues = parseValue(json[2]);
                     } else {
                         for (auto it = json[2].begin(); it != json[2].end(); it++) {
                             values.insert(getVariant(*it));
@@ -91,9 +120,9 @@ public:
                 }
 
                 if (isExpression(json[0], inExpression)) {
-                    return std::make_shared<InFilter>(key,values);
+                    return std::make_shared<InFilter>(key, values, dynamicValues);
                 } else {
-                    return std::make_shared<NotInFilter>(key,values);
+                    return std::make_shared<NotInFilter>(key, values, dynamicValues);
                 }
 
             // Example: [ "!=", "intermittent", 1 ]
@@ -114,6 +143,9 @@ public:
                     if (v != nullptr) {
                         values.push_back(v);
                     }
+                }
+                if (values.empty()) {
+                    return nullptr;
                 }
                 return std::make_shared<AllValue>(values);
             }
@@ -178,8 +210,14 @@ public:
 
             // Example: ["to-number",["get","rank"]]
             else if (isExpression(json[0], toNumberExpression)) {
-                auto toStringValue = std::make_shared<ToNumberValue>(parseValue(json[1]));
-                return toStringValue;
+                auto toNumberValue = std::make_shared<ToNumberValue>(parseValue(json[1]));
+                return toNumberValue;
+            }
+
+            // Example: ["to-boolean",["get","rank"]]
+            else if (isExpression(json[0], toBooleanExpression)) {
+                auto toBooleanValue = std::make_shared<ToBooleanValue>(parseValue(json[1]));
+                return toBooleanValue;
             }
 
             // Example: [ "interpolate", ["linear"], [ "zoom" ], 13, 0.3, 15, [ "match", [ "get", "class" ], "river", 0.1, 0.3 ] ]
@@ -218,7 +256,7 @@ public:
                 for (auto it = json.begin() + 1; it != json.end(); it += 1) {
                     auto const &value = parseValue(*it);
                     float scale = 1.0;
-                    if ((it + 1)->is_object()) {
+                    if (it + 1 != json.end() && (it + 1)->is_object()) {
                         for (auto const &[key, value] : (it + 1)->items()) {
                             if (key == "font-scale") {
                                 scale = value.get<float>();
@@ -232,6 +270,18 @@ public:
                 }
 
                 return std::make_shared<FormatValue>(values);
+            }
+
+            // Example: ["number-format",["get","temperature"], { "min-fraction-digits": 1, "max-fraction-digits": 1}]
+            else if (isExpression(json[0], numberFormatExpression)) {
+                const auto &value = parseValue(json[1]);
+                int minFractionDigits = 0;
+                int maxFractionDigits = 0;
+                if (json[2].is_object()) {
+                    minFractionDigits = json[2].value("min-fraction-digits", 0);
+                    maxFractionDigits = json[2].value("max-fraction-digits", 0);
+                }
+                return std::make_shared<NumberFormatValue>(value, minFractionDigits, maxFractionDigits);
             }
 
             // Example: ["concat",["get","ele"],"\n\n",["get","lake_depth"]]
@@ -248,7 +298,7 @@ public:
 
             // Example: ["length",["to-string",["get","ele"]]]
             else if (isExpression(json[0], lengthExpression)) {
-                return std::make_shared<LenghtValue>(parseValue(json[1]));
+                return std::make_shared<LengthValue>(parseValue(json[1]));
             }
 
             // Example: ["!",["has","population"]]
@@ -282,6 +332,24 @@ public:
                 return std::make_shared<MathValue>(parseValue(json[1]), parseValue(json[2]), getMathOperation(json[0]));
             }
 
+            // Example: ["boolean", ["feature-state", "hover"], false]
+            else if (isExpression(json[0], booleanExpression)) {
+                std::vector<std::shared_ptr<Value>> values;
+                for (auto it = json.begin() + 1; it != json.end(); it += 1) {
+                    values.push_back(parseValue(*it));
+                }
+                return std::make_shared<BooleanValue>(values);
+            }
+
+            // Example: [ "coalesce", ["get", "name_de"], ["get", "name_en"], ["get", "name"]]
+            else if (isExpression(json[0], coalesceExpression)) {
+                std::vector<std::shared_ptr<Value>> values;
+                for (auto it = json.begin() + 1; it != json.end(); it += 1) {
+                    values.push_back(parseValue(*it));
+                }
+                return std::make_shared<CoalesceValue>(values);
+            }
+
             // Example: [0.3, 1.0, 5.0]
             else if (!json[0].is_null()) {
                 return std::make_shared<StaticValue>(getVariant(json));
@@ -295,7 +363,7 @@ public:
                 steps.push_back({stop[0].get<double>(), parseValue(stop[1])});
             }
 
-            return std::make_shared<StopValue>(steps);
+            return std::make_shared<InterpolatedValue>(1.0, steps);
 
         } else if (!json.is_null() && json.is_primitive()) {
             return std::make_shared<StaticValue>(getVariant(json));
@@ -309,6 +377,9 @@ public:
     };
 
     ValueVariant getVariant(const nlohmann::json &json) {
+        if (json == "–") {
+            LogDebug <<= "break";
+        }
         if (json.is_number_float()) {
             return json.get<float>();
         } else if (json.is_number_integer()) {
@@ -351,9 +422,7 @@ public:
         return "";
     }
 
-
 private:
-
 
     bool isExpression(const nlohmann::json &json, const std::string expression) {
         return json.is_string() && toLower(json) == expression;

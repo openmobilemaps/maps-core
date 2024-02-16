@@ -1,15 +1,37 @@
 buildscript {
-	ext.kotlin_version = "1.8.0"
+	ext.readProperty = { paramName -> readPropertyWithDefault(paramName, null) }
+	ext.readPropertyWithDefault = { paramName, defaultValue ->
+		if (project.hasProperty(paramName)) {
+			return project.getProperties().get(paramName)
+		} else {
+			Properties properties = new Properties()
+			if (project.rootProject.file('local.properties').exists()) {
+				properties.load(project.rootProject.file('local.properties').newDataInputStream())
+			}
+			if (properties.getProperty(paramName) != null) {
+				return properties.getProperty(paramName)
+			} else {
+				return defaultValue
+			}
+		}
+	}
+
+	ext{
+		agp_version = "8.1.4"
+		kotlin_version = "1.9.20"
+		ksp_version = "1.9.20-1.0.13"
+	}
 	repositories {
 		google()
 		mavenCentral()
 	}
 	dependencies {
-		classpath "com.android.tools.build:gradle:7.4.0"
+		classpath "com.android.tools.build:gradle:$agp_version"
+		classpath "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:$ksp_version"
 		classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
 
-		classpath 'com.vanniktech:gradle-maven-publish-plugin:0.24.0'
-		classpath 'org.jetbrains.dokka:dokka-gradle-plugin:1.7.10'
+		classpath 'com.vanniktech:gradle-maven-publish-plugin:0.25.3'
+		classpath 'org.jetbrains.dokka:dokka-gradle-plugin:1.9.10'
 	}
 }
 
@@ -21,16 +43,19 @@ repositories {
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'com.vanniktech.maven.publish'
-apply plugin: 'kotlin-kapt'
+apply plugin: 'com.google.devtools.ksp'
+apply plugin: 'kotlin-parcelize'
 
 import com.vanniktech.maven.publish.SonatypeHost
 
 android {
-	compileSdkVersion 33
+	namespace 'io.openmobilemaps.mapscore'
+
+	compileSdk 34
 
 	defaultConfig {
-		minSdkVersion 23
-		targetSdkVersion 33
+		minSdk 26
+		targetSdk 34
 		versionName VERSION_NAME
 		versionCode Integer.parseInt(VERSION_CODE)
 
@@ -39,7 +64,7 @@ android {
 		externalNativeBuild {
 			cmake {
 				arguments "-DANDROID_STL=c++_shared"
-				cppFlags "-std=c++17 -frtti -fexceptions -O3"
+				cppFlags "-std=c++17 -frtti -fexceptions -O2"
 			}
 		}
 	}
@@ -57,6 +82,11 @@ android {
 				srcDir '../bridging/android/java'
 			}
 		}
+	}
+
+	compileOptions {
+		sourceCompatibility JavaVersion.VERSION_11
+		targetCompatibility JavaVersion.VERSION_11
 	}
 
 	buildFeatures {
@@ -77,6 +107,11 @@ android {
 			}
 		}
 	}
+
+}
+
+project.tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+	compilerOptions.jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11
 }
 
 task copyHeaders() {
@@ -125,10 +160,10 @@ publishing {
 	repositories {
 		maven {
 			name = "UbiqueMaven"
-			url = System.getenv('UBIQUE_ARTIFACTORY_URL') ?: ''
+			url = System.getenv('UBIQUE_ARTIFACTORY_URL') ?: readPropertyWithDefault('ubiqueArtifactoryUrl', '')
 			credentials {
-				username = System.getenv('UBIQUE_ARTIFACTORY_USER') ?: ''
-				password = System.getenv('UBIQUE_ARTIFACTORY_PASS') ?: ''
+				username = System.getenv('UBIQUE_ARTIFACTORY_USER') ?: readPropertyWithDefault('ubiqueArtifactoryUser', '')
+				password = System.getenv('UBIQUE_ARTIFACTORY_PASS') ?: readPropertyWithDefault('ubiqueArtifactoryPass', '')
 			}
 		}
 	}
@@ -142,13 +177,15 @@ mavenPublishing {
 dependencies {
 	implementation fileTree(dir: 'libs', include: ['*.jar'])
 	implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-	implementation "androidx.annotation:annotation:1.5.0"
-	implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.5.1"
-	implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4"
+	implementation 'androidx.annotation:annotation:1.7.1'
+	implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.7.0'
+	implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3'
 
-	implementation "com.squareup.moshi:moshi:1.14.0"
-	kapt "com.squareup.moshi:moshi-kotlin-codegen:1.14.0"
-	implementation 'com.squareup.okhttp3:okhttp:4.10.0'
+	implementation 'com.squareup.moshi:moshi:1.15.0'
+	ksp 'com.squareup.moshi:moshi-kotlin-codegen:1.15.0'
+	implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+
+	implementation 'ch.ubique.android:djinni-support-lib:1.0.6'
 
 	testImplementation 'junit:junit:4.13.2'
 	androidTestImplementation 'androidx.test.ext:junit:1.1.5'
@@ -158,4 +195,5 @@ dependencies {
 clean.doLast {
 	project.delete("${projectDir}/build")
 	project.delete("${projectDir}/.cxx")
+	project.delete("${projectDir}/.gradle")
 }

@@ -2,10 +2,11 @@
 @extern "../../../yaml/coord.yaml"
 @extern "../../../yaml/texture_holder_interface.yaml"
 @extern "../../../yaml/vec_2_f.yaml"
+@extern "../../../yaml/blend_mode.yaml"
 
 icon_factory = interface +c {
-    static create_icon(identifier: string, coordinate: coord, texture: texture_holder_interface, icon_size: vec_2_f, scale_type: icon_type) : icon_info_interface;
-    static create_icon_with_anchor(identifier: string, coordinate: coord, texture: texture_holder_interface, icon_size: vec_2_f, scale_type: icon_type, icon_anchor: vec_2_f) : icon_info_interface;
+    static create_icon(identifier: string, coordinate: coord, texture: texture_holder_interface, icon_size: vec_2_f, scale_type: icon_type, blend_mode: blend_mode) : icon_info_interface;
+    static create_icon_with_anchor(identifier: string, coordinate: coord, texture: texture_holder_interface, icon_size: vec_2_f, scale_type: icon_type, blend_mode: blend_mode, icon_anchor: vec_2_f) : icon_info_interface;
 }
 
 icon_info_interface = interface +c {
@@ -18,6 +19,7 @@ icon_info_interface = interface +c {
     set_type(scale_type: icon_type);
     get_type() : icon_type;
     get_icon_anchor() : vec_2_f;
+    get_blend_mode() : blend_mode;
 }
 
 icon_type = enum {
@@ -29,6 +31,7 @@ icon_type = enum {
 
 icon_layer_callback_interface = interface +c +j +o {
     on_click_confirmed(icons: list<icon_info_interface>) : bool;
+    on_long_press(icons: list<icon_info_interface>) : bool;
 }
 
 icon_layer_interface = interface +c {
@@ -36,7 +39,11 @@ icon_layer_interface = interface +c {
     set_icons(icons: list<icon_info_interface>);
     get_icons(): list<icon_info_interface>;
     remove(icon: icon_info_interface);
+    remove_list(icons: list<icon_info_interface>);
+    remove_identifier(identifier: string);
+    remove_identifier_list(identifiers: list<string>);
     add(icon: icon_info_interface);
+    add_list(icons: list<icon_info_interface>);
     clear();
     set_callback_handler(handler: icon_layer_callback_interface);
     asLayerInterface(): layer_interface;

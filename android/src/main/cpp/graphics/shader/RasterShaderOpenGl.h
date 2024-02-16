@@ -18,7 +18,6 @@
 #include <vector>
 
 class RasterShaderOpenGl : public BaseShaderProgramOpenGl,
-                           public ShaderProgramInterface,
                            public RasterShaderInterface,
                            public std::enable_shared_from_this<ShaderProgramInterface> {
 public:
@@ -37,6 +36,9 @@ protected:
     std::string getFragmentShader() override;
 
 private:
-    std::vector<GLfloat> styleValues = {1.0, 1.0, 1.0, 0.0, 1.0};
+    const static std::string programName;
+
+    std::mutex dataMutex;
+    std::vector<GLfloat> styleValues = {1.0, 1.0, 1.0, 0.0, 1.0, 1.0};
 };
 

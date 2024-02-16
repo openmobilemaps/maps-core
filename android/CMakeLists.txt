@@ -25,9 +25,12 @@ file(GLOB_RECURSE cpp_SRC
         "../shared/*.hpp"
         "src/main/cpp/*.h"
         "src/main/cpp/*.cpp"
-        "../external/djinni/support-lib/*.h"
-        "../external/djinni/support-lib/*.hpp"
-        "../external/djinni/support-lib/*.cpp"
+        "../external/djinni/support-lib/cpp/*.h"
+        "../external/djinni/support-lib/cpp/*.hpp"
+        "../external/djinni/support-lib/cpp/*.cpp"
+        "../external/djinni/support-lib/jni/*.h"
+        "../external/djinni/support-lib/jni/*.hpp"
+        "../external/djinni/support-lib/jni/*.cpp"
         "../external/protozero/protozero/include/*.hpp"
         "../external/vtzero/vtzero/include/*.hpp"
         "../external/earcut/earcut/include/*.hpp"
@@ -41,7 +44,8 @@ add_library( # Sets the name of the library.
 
         ${cpp_SRC})
 
-include_directories(../external/djinni/support-lib)
+include_directories(../external/djinni/support-lib/)
+include_directories(../external/djinni/support-lib/cpp)
 include_directories(../external/djinni/support-lib/jni)
 include_directories(../external/protozero/protozero/include/)
 include_directories(../external/vtzero/vtzero/include/)
@@ -82,12 +86,20 @@ include_directories(../shared/src/map/layers/tiled)
 include_directories(../shared/src/map/layers/tiled/raster)
 include_directories(../shared/src/map/layers/tiled/wmts)
 include_directories(../shared/src/map/layers/tiled/vector)
+include_directories(../shared/src/map/layers/tiled/vector/geojson)
+include_directories(../shared/src/map/layers/tiled/vector/geojson/geojsonvt)
+include_directories(../shared/src/map/layers/tiled/vector/tiles)
+include_directories(../shared/src/map/layers/tiled/vector/tiles/raster)
+include_directories(../shared/src/map/layers/tiled/vector/tiles/polygon)
+include_directories(../shared/src/map/layers/tiled/vector/tiles/line)
+include_directories(../shared/src/map/layers/tiled/vector/sourcemanagers)
 include_directories(../shared/src/map/layers/tiled/vector/sublayers)
 include_directories(../shared/src/map/layers/tiled/vector/sublayers/raster)
 include_directories(../shared/src/map/layers/tiled/vector/sublayers/line)
 include_directories(../shared/src/map/layers/tiled/vector/sublayers/polygon)
 include_directories(../shared/src/map/layers/tiled/vector/sublayers/symbol)
 include_directories(../shared/src/map/layers/tiled/vector/sublayers/background)
+include_directories(../shared/src/map/layers/tiled/vector/symbol)
 include_directories(../shared/src/map/layers/tiled/vector/description)
 include_directories(../shared/src/map/layers/tiled/vector/parsing)
 include_directories(../shared/src/map/layers/polygon)
@@ -100,6 +112,7 @@ include_directories(src/main/cpp)
 include_directories(src/main/cpp/graphics)
 include_directories(src/main/cpp/graphics/objects)
 include_directories(src/main/cpp/graphics/shader)
+include_directories(src/main/cpp/scheduling)
 
 
 # Searches for a specified prebuilt library and stores the path as a
@@ -126,8 +139,5 @@ target_link_libraries( # Specifies the target library.
         # included in the NDK.
         ${log-lib})
 
-find_library(opengl-lib
-        GLESv2)
-
-target_link_libraries(mapscore
-        ${opengl-lib})
+find_library(opengl-lib GLESv3)
+target_link_libraries(mapscore ${opengl-lib})
