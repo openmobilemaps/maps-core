@@ -18,6 +18,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
 import io.openmobilemaps.mapscore.graphics.GlTextureView
+import io.openmobilemaps.mapscore.map.layers.TiledRasterLayer
+import io.openmobilemaps.mapscore.map.layers.TiledVectorLayer
 import io.openmobilemaps.mapscore.map.scheduling.AndroidSchedulerCallback
 import io.openmobilemaps.mapscore.map.util.MapViewInterface
 import io.openmobilemaps.mapscore.map.util.SaveFrameCallback
@@ -183,8 +185,24 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 		requireMapInterface().addLayer(layer)
 	}
 
+	fun addLayer(layer: TiledRasterLayer) {
+		requireMapInterface().addLayer(layer.layerInterface())
+	}
+
+	fun addLayer(layer: TiledVectorLayer) {
+		requireMapInterface().addLayer(layer.layerInterface())
+	}
+
 	override fun insertLayerAt(layer: LayerInterface, at: Int) {
 		requireMapInterface().insertLayerAt(layer, at)
+	}
+
+	fun insertLayerAt(layer: TiledRasterLayer, at: Int) {
+		requireMapInterface().insertLayerAt(layer.layerInterface(), at)
+	}
+
+	fun insertLayerAt(layer: TiledVectorLayer, at: Int) {
+		requireMapInterface().insertLayerAt(layer.layerInterface(), at)
 	}
 
 	override fun insertLayerAbove(layer: LayerInterface, above: LayerInterface) {
@@ -198,6 +216,15 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 	override fun removeLayer(layer: LayerInterface) {
 		requireMapInterface().removeLayer(layer)
 	}
+
+	fun removeLayer(layer: TiledRasterLayer) {
+		requireMapInterface().removeLayer(layer.layerInterface())
+	}
+
+	fun removeLayer(layer: TiledVectorLayer) {
+		requireMapInterface().removeLayer(layer.layerInterface())
+	}
+
 
 	override fun getCamera(): MapCamera2dInterface {
 		return requireMapInterface().getCamera()

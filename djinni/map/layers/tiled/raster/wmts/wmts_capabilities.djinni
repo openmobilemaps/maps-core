@@ -31,7 +31,7 @@ wmts_layer_description = record {
     title: optional<string>;
     abstractText: optional<string>;
     dimensions: list<wmts_layer_dimension>;
-    bounds: rect_coord;
+    bounds: optional<rect_coord>;
     tile_matrix_set_link: string;
     resource_template: string;
     resource_format: string;

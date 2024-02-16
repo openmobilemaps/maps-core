@@ -8,7 +8,7 @@ data class WmtsLayerDescription(
     val title: String?,
     val abstractText: String?,
     val dimensions: ArrayList<WmtsLayerDimension>,
-    val bounds: io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord,
+    val bounds: io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord?,
     val tileMatrixSetLink: String,
     val resourceTemplate: String,
     val resourceFormat: String,
