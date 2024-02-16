@@ -10,6 +10,8 @@ abstract class Tiled2dMapSourceInterface {
 
     abstract fun onVisibleBoundsChanged(visibleBounds: io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord, curT: Int, zoom: Double)
 
+    abstract fun onCameraChange(viewMatrix: ArrayList<Float>, projectionMatrix: ArrayList<Float>, verticalFov: Float, horizontalFov: Float, width: Float, height: Float, focusPointAltitude: Float)
+
     abstract fun setMinZoomLevelIdentifier(value: Int?)
 
     abstract fun getMinZoomLevelIdentifier(): Int?
@@ -50,6 +52,12 @@ abstract class Tiled2dMapSourceInterface {
             native_onVisibleBoundsChanged(this.nativeRef, visibleBounds, curT, zoom)
         }
         private external fun native_onVisibleBoundsChanged(_nativeRef: Long, visibleBounds: io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord, curT: Int, zoom: Double)
+
+        override fun onCameraChange(viewMatrix: ArrayList<Float>, projectionMatrix: ArrayList<Float>, verticalFov: Float, horizontalFov: Float, width: Float, height: Float, focusPointAltitude: Float) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_onCameraChange(this.nativeRef, viewMatrix, projectionMatrix, verticalFov, horizontalFov, width, height, focusPointAltitude)
+        }
+        private external fun native_onCameraChange(_nativeRef: Long, viewMatrix: ArrayList<Float>, projectionMatrix: ArrayList<Float>, verticalFov: Float, horizontalFov: Float, width: Float, height: Float, focusPointAltitude: Float)
 
         override fun setMinZoomLevelIdentifier(value: Int?) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

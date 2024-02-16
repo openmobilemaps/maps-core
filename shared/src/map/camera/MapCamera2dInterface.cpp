@@ -8,9 +8,16 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
+#include "MapCamera3d.h"
 #include "MapCamera2d.h"
 
 std::shared_ptr<MapCamera2dInterface> MapCamera2dInterface::create(const std::shared_ptr<MapInterface> &mapInterface,
-                                                                   float screenDensityPpi) {
-    return std::make_shared<MapCamera2d>(mapInterface, screenDensityPpi);
+                                                                   float screenDensityPpi, bool is3D) {
+    std::shared_ptr<MapCamera2dInterface> camera = nullptr;
+    if (is3D) {
+        camera = std::make_shared<MapCamera3d>(mapInterface, screenDensityPpi);
+    } else {
+        camera = std::make_shared<MapCamera2d>(mapInterface, screenDensityPpi);
+    }
+    return camera;
 }

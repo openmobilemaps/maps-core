@@ -25,7 +25,7 @@
 #include "Tiled2dMapRasterLayer.h"
 
 MapScene::MapScene(std::shared_ptr<SceneInterface> scene, const MapConfig &mapConfig,
-                   const std::shared_ptr<::SchedulerInterface> &scheduler, float pixelDensity)
+                   const std::shared_ptr<::SchedulerInterface> &scheduler, float pixelDensity, bool is3D)
     : scene(scene)
     , mapConfig(mapConfig)
     , scheduler(scheduler)
@@ -39,7 +39,7 @@ MapScene::MapScene(std::shared_ptr<SceneInterface> scene, const MapConfig &mapCo
     scheduler->setSchedulerGraphicsTaskCallbacks(ptr);
 
     // add default camera
-    setCamera(MapCamera2dInterface::create(ptr, pixelDensity));
+    setCamera(MapCamera2dInterface::create(ptr, pixelDensity, is3D));
 }
 
 std::shared_ptr<::GraphicsObjectFactoryInterface> MapScene::getGraphicsObjectFactory() { return scene->getGraphicsFactory(); }

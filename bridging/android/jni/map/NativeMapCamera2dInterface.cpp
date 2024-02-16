@@ -24,11 +24,12 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dIn
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dInterface_create(JNIEnv* jniEnv, jobject /*this*/, jobject j_mapInterface, jfloat j_screenDensityPpi)
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dInterface_create(JNIEnv* jniEnv, jobject /*this*/, jobject j_mapInterface, jfloat j_screenDensityPpi, jboolean j_is3D)
 {
     try {
         auto r = ::MapCamera2dInterface::create(::djinni_generated::NativeMapInterface::toCpp(jniEnv, j_mapInterface),
-                                                ::djinni::F32::toCpp(jniEnv, j_screenDensityPpi));
+                                                ::djinni::F32::toCpp(jniEnv, j_screenDensityPpi),
+                                                ::djinni::Bool::toCpp(jniEnv, j_is3D));
         return ::djinni::release(::djinni_generated::NativeMapCamera2dInterface::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }

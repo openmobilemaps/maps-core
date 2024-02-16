@@ -18,7 +18,7 @@ class MapCamera2dInterface {
 public:
     virtual ~MapCamera2dInterface() = default;
 
-    static /*not-null*/ std::shared_ptr<MapCamera2dInterface> create(const /*not-null*/ std::shared_ptr<MapInterface> & mapInterface, float screenDensityPpi);
+    static /*not-null*/ std::shared_ptr<MapCamera2dInterface> create(const /*not-null*/ std::shared_ptr<MapInterface> & mapInterface, float screenDensityPpi, bool is3D);
 
     virtual void freeze(bool freeze) = 0;
 

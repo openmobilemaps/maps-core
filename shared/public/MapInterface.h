@@ -28,9 +28,9 @@ class MapInterface {
 public:
     virtual ~MapInterface() = default;
 
-    static /*not-null*/ std::shared_ptr<MapInterface> create(const /*not-null*/ std::shared_ptr<::GraphicsObjectFactoryInterface> & graphicsFactory, const /*not-null*/ std::shared_ptr<::ShaderFactoryInterface> & shaderFactory, const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & renderingContext, const MapConfig & mapConfig, const /*not-null*/ std::shared_ptr<::SchedulerInterface> & scheduler, float pixelDensity);
+    static /*not-null*/ std::shared_ptr<MapInterface> create(const /*not-null*/ std::shared_ptr<::GraphicsObjectFactoryInterface> & graphicsFactory, const /*not-null*/ std::shared_ptr<::ShaderFactoryInterface> & shaderFactory, const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & renderingContext, const MapConfig & mapConfig, const /*not-null*/ std::shared_ptr<::SchedulerInterface> & scheduler, float pixelDensity, bool is3D);
 
-    static /*not-null*/ std::shared_ptr<MapInterface> createWithOpenGl(const MapConfig & mapConfig, float pixelDensity);
+    static /*not-null*/ std::shared_ptr<MapInterface> createWithOpenGl(const MapConfig & mapConfig, float pixelDensity, bool is3D);
 
     virtual void setCallbackHandler(const /*nullable*/ std::shared_ptr<MapCallbackInterface> & callbackInterface) = 0;
 

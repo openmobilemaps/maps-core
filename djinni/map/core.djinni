@@ -19,8 +19,8 @@
 @extern "../yaml/error_manager.yaml"
 
 map_interface = interface +c {
-    static create(graphics_factory: graphics_object_factory_interface, shader_factory: shader_factory_interface, rendering_context: rendering_context_interface, map_config: map_config, scheduler: scheduler_interface, pixel_density: f32) : map_interface;
-    static createWithOpenGl(map_config: map_config, pixel_density: f32) : map_interface;
+    static create(graphics_factory: graphics_object_factory_interface, shader_factory: shader_factory_interface, rendering_context: rendering_context_interface, map_config: map_config, scheduler: scheduler_interface, pixel_density: f32, is_3_d: bool) : map_interface;
+    static createWithOpenGl(map_config: map_config, pixel_density: f32, is_3_d: bool) : map_interface;
 
     set_callback_handler(callback_interface: optional<map_callback_interface>);
 
@@ -118,7 +118,7 @@ layer_interface = interface +c +j +o {
 }
 
 map_camera_2d_interface = interface +c {
-    static create(map_interface: map_interface, screen_density_ppi: f32): map_camera_2d_interface;
+    static create(map_interface: map_interface, screen_density_ppi: f32, is_3_d: bool): map_camera_2d_interface;
 
 	freeze(freeze: bool);
 
