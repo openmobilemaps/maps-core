@@ -164,8 +164,9 @@ public:
     void onVisibleTilesChanged(const std::vector<VisibleTilesLayer> &pyramid, int keepZoomLevelOffset = 0);
 
 private:
-    void performLoadingTask(Tiled2dMapTileInfo tile, size_t loaderIndex);
+    void onStableTriggerNewTileLoading(uint64_t updateId);
 
+    void performLoadingTask(Tiled2dMapTileInfo tile, size_t loaderIndex);
 
     void updateTileMasks();
 
@@ -181,11 +182,14 @@ private:
 
     std::unordered_map<size_t, std::map<Tiled2dMapTileInfo, ErrorInfo>> errorTiles;
     std::optional<long long> nextDelayTaskExecution;
+    std::vector<PrioritizedTiled2dMapTileInfo> pendingTilesToLoad;
 
     std::unordered_set<Tiled2dMapTileInfo> notFoundTiles;
 
     std::string layerName;
 
+    uint64_t currentNewTilesUpdateId = 0;
+    const static int64_t PENDING_NEW_TILE_DEBOUNCE_MS = 200;
 };
 
 #include "Tiled2dMapSourceImpl.h"
