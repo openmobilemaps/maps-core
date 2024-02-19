@@ -180,8 +180,11 @@ int32_t numZ) override {
             c4 = std::stod(upperCorner.substr(lowerCorner.find(" ")));
         }
 
-        auto bounds = RectCoord(Coord(CoordinateSystemIdentifiers::EPSG4326(), c1, c2, 0),
-                                Coord(CoordinateSystemIdentifiers::EPSG4326(), c3, c4, 0));
+        std::optional<RectCoord> bounds;
+        if (c1 != 0 && c2 != 0 && c3 != 0 && c4 != 0) {
+            bounds = RectCoord(Coord(CoordinateSystemIdentifiers::EPSG4326(), c1, c2, 0),
+                                 Coord(CoordinateSystemIdentifiers::EPSG4326(), c3, c4, 0));
+        }
         std::string tileMatrixSetLink = layer.child("TileMatrixSetLink").child_value("TileMatrixSet");
         std::string resourceTemplate = layer.child("ResourceURL").attribute("template").as_string();
         std::string resourceFormat = layer.child("ResourceURL").attribute("format").as_string();

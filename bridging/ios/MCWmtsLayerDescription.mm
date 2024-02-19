@@ -10,7 +10,7 @@
                                      title:(nullable NSString *)title
                               abstractText:(nullable NSString *)abstractText
                                 dimensions:(nonnull NSArray<MCWmtsLayerDimension *> *)dimensions
-                                    bounds:(nonnull MCRectCoord *)bounds
+                                    bounds:(nullable MCRectCoord *)bounds
                          tileMatrixSetLink:(nonnull NSString *)tileMatrixSetLink
                           resourceTemplate:(nonnull NSString *)resourceTemplate
                             resourceFormat:(nonnull NSString *)resourceFormat
@@ -32,7 +32,7 @@
                                                      title:(nullable NSString *)title
                                               abstractText:(nullable NSString *)abstractText
                                                 dimensions:(nonnull NSArray<MCWmtsLayerDimension *> *)dimensions
-                                                    bounds:(nonnull MCRectCoord *)bounds
+                                                    bounds:(nullable MCRectCoord *)bounds
                                          tileMatrixSetLink:(nonnull NSString *)tileMatrixSetLink
                                           resourceTemplate:(nonnull NSString *)resourceTemplate
                                             resourceFormat:(nonnull NSString *)resourceFormat
