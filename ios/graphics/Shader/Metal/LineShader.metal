@@ -58,6 +58,7 @@ struct LineStyling {
   float numDashValues; // 13
   float dashArray[4]; // 14 15 16 17
   float offset; // 18
+  bool dotted; // 19
 };
 
 /**
@@ -74,7 +75,7 @@ lineGroupVertexShader(const LineVertexIn vertexIn [[stage_in]],
                       constant float &dashingScalingFactor [[buffer(3)]],
                       constant float *styling [[buffer(4)]])
 {
-    int styleIndex = (int(vertexIn.stylingIndex) & 0xFF) * 19;
+    int styleIndex = (int(vertexIn.stylingIndex) & 0xFF) * 20;
 
     // extend position in width direction and in length direction by width / 2.0
     float width = styling[styleIndex] / 2.0;
@@ -173,7 +174,9 @@ lineGroupFragmentShader(LineVertexOut in [[stage_in]],
 
   float a = colorA * opacity;
   float aGap = colorAGap * opacity;
-
+    
+  bool dottedLine = styling[in.stylingIndex + 19];
+    
   if(in.scaledBlur > 0 && t > 0.0 && t < 1.0) {
     float nonBlurRange = (in.width - in.scaledBlur);
     if (d > nonBlurRange) {
@@ -181,7 +184,19 @@ lineGroupFragmentShader(LineVertexOut in [[stage_in]],
     }
   }
 
-  if(numDash > 0) {
+  if (dottedLine) {
+    half factorToT = (in.width * 2) / lineLength;
+    half dashTotalDotted = 2.0 * factorToT;
+    half offset = half(in.lengthPrefix) / lineLength;
+    half startOffsetSegmentDotted = fmod(offset, dashTotalDotted);
+    half pos = t + startOffsetSegmentDotted;
+
+    half intraDashPosDotted = fmod(pos, dashTotalDotted);
+    if ((intraDashPosDotted > 1.0 * factorToT && intraDashPosDotted < dashTotalDotted) ||
+                            (length(half2(min(abs(intraDashPosDotted - 0.5 * factorToT), 0.5 * factorToT + dashTotalDotted - intraDashPosDotted) / (0.5 * factorToT), d / in.width)) > 1.0)) {
+        discard_fragment();
+    }
+  } else if(numDash > 0) {
     float dashArray[4] = { styling[in.stylingIndex + 14],
                            styling[in.stylingIndex + 15],
                            styling[in.stylingIndex + 16],
