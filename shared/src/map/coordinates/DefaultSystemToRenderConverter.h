@@ -29,9 +29,10 @@ class DefaultSystemToRenderConverter : public CoordinateConverterInterface {
     }
 
     virtual Coord convert(const Coord &coordinate) override {
-        double x = (boundsRight < boundsLeft) ? -coordinate.x + boundsRight : (coordinate.x - boundsLeft);
+/*        double x = (boundsRight < boundsLeft) ? -coordinate.x + boundsRight : (coordinate.x - boundsLeft);
         double y = (boundsBottom < boundsTop) ? -coordinate.y + boundsBottom : (coordinate.y - boundsTop);
-        return Coord(getTo(), x - halfWidth, y - halfHeight, coordinate.z);
+        return Coord(getTo(), x - halfWidth, y - halfHeight, coordinate.z);*/ // TODO: Reactivate?
+        return Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(), coordinate.x, coordinate.y, coordinate.z);
     }
 
     virtual int32_t getFrom() override { return mapCoordinateSystemIdentifier; }

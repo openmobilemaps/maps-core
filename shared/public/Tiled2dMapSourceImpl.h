@@ -59,6 +59,7 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
                                                float verticalFov, float horizontalFov, float width, float height,
                                                float focusPointAltitude) {
     // TODO Implement new source algorithm - fixed level of tiles for now
+    LogDebug <<= "UBCM: onCameraChange in Source";
     if (!layerConfig) {
         return;
     }
@@ -66,6 +67,7 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
     for (const auto zoomLevelInfo : layerConfig->getZoomLevelInfos()) {
         if (zoomLevelInfo.numTilesX >= 2) {
             zoom = zoomLevelInfo.zoom;
+            LogDebug << "UBCM: target zoom: " <<= zoomLevelInfo.zoomLevelIdentifier;
             break;
         }
     }
@@ -79,8 +81,11 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
     }
 
     std::vector<PrioritizedTiled2dMapTileInfo> visibleTilesVec;
-
-    RectCoord visibleBoundsLayer = conversionHelper->convertRect(layerSystemId, visibleBounds);
+    RectCoord visBounds = RectCoord(
+            Coord(CoordinateSystemIdentifiers::EPSG3857(), -20037508.34, 20037508.34, 0.0),
+            Coord(CoordinateSystemIdentifiers::EPSG3857(), 20037508.34, -20037508.34, 0.0)
+    );
+    RectCoord visibleBoundsLayer = conversionHelper->convertRect(layerSystemId, visBounds);
 
     const auto bounds = layerConfig->getBounds();
 
@@ -117,6 +122,9 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
         }
         targetZoomLayer = (int) numZoomLevels - 1;
     }
+
+    targetZoomLayer = 4;
+
     int targetZoomLevelIdentifier = zoomLevelInfos.at(targetZoomLayer).zoomLevelIdentifier;
     int startZoomLayer = 0;
     int endZoomLevel = std::min((int) numZoomLevels - 1, targetZoomLayer + 2);
@@ -762,7 +770,11 @@ void Tiled2dMapSource<T, L, R>::setTilesReady(const std::vector<Tiled2dMapVersio
     
     for (auto const &tile: tiles) {
         if (readyTiles.count(tile.tileInfo) == 0 || outdatedTiles.count(tile.tileInfo) > 0) {
-            if (currentTiles.count(tile.tileInfo) != 0){
+            const auto &tileEntry = currentTiles.find(tile.tileInfo);
+            if (tileEntry != currentTiles.end()){
+                if (!zoomInfo.maskTile) {
+                    tileEntry->second.state = TileState::VISIBLE;
+                }
                 readyTiles.insert(tile.tileInfo);
                 outdatedTiles.erase(tile.tileInfo);
                 needsUpdate = true;

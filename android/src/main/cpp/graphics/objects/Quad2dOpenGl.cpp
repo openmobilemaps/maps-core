@@ -51,12 +51,11 @@ void Quad2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface> &con
         return;
     }
 
-    float frameZ = 0;
     vertices = {
-        (float)frame.topLeft.x,     (float)frame.topLeft.y,     frameZ,
-        (float)frame.bottomLeft.x,  (float)frame.bottomLeft.y,  frameZ,
-        (float)frame.bottomRight.x, (float)frame.bottomRight.y, frameZ,
-        (float)frame.topRight.x,    (float)frame.topRight.y,    frameZ,
+        (float)frame.topLeft.x,     (float)frame.topLeft.y,     0,
+        (float)frame.bottomLeft.x,  (float)frame.bottomLeft.y,  0,
+        (float)frame.bottomRight.x, (float)frame.bottomRight.y, 0,
+        (float)frame.topRight.x,    (float)frame.topRight.y,    0,
     };
     indices = {
         0, 1, 2, 0, 2, 3,
