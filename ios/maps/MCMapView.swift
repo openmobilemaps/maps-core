@@ -32,14 +32,16 @@ open class MCMapView: MTKView {
 
     public weak var sizeDelegate: MCMapSizeDelegate?
 
-    public init(mapConfig: MCMapConfig = MCMapConfig(mapCoordinateSystem: MCCoordinateSystemFactory.getEpsg3857System()), pixelsPerInch: Float? = nil) {
+    public init(mapConfig: MCMapConfig = MCMapConfig(mapCoordinateSystem: MCCoordinateSystemFactory.getEpsg3857System()), pixelsPerInch: Float? = nil, is3D: Bool = false) {
+
         let renderingContext = RenderingContext()
         guard let mapInterface = MCMapInterface.create(GraphicsFactory(),
                                                        shaderFactory: ShaderFactory(),
                                                        renderingContext: renderingContext,
                                                        mapConfig: mapConfig,
                                                        scheduler: MCThreadPoolScheduler.create(),
-                                                       pixelDensity: pixelsPerInch ?? Float(UIScreen.pixelsPerInch)) else {
+                                                       pixelDensity: pixelsPerInch ?? Float(UIScreen.pixelsPerInch), 
+                                                       is3D: is3D) else {
             fatalError("Can't create MCMapInterface")
         }
         self.mapInterface = mapInterface
