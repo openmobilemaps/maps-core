@@ -35,6 +35,7 @@ shader_line_style = record {
     dash_value_2: f32;
     dash_value_3: f32;
     offset: f32;
+    dotted: bool;
 }
 
 line_style = record {
@@ -47,6 +48,7 @@ line_style = record {
     dash_array: list<f32>;
     line_cap: line_cap_type;
     offset: f32;
+    dotted: bool;
 }
 
 line_info_interface = interface +c {

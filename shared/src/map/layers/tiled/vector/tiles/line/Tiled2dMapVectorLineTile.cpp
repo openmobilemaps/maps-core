@@ -253,7 +253,7 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
                     }
 
                     if (styleIndex == -1) {
-                        auto reusableStyle = ShaderLineStyle(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+                        auto reusableStyle = ShaderLineStyle(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, false);
                         if (!featureGroups.empty() && featureGroups.back().size() < maxStylesPerGroup) {
                             styleGroupIndex = (int) featureGroups.size() - 1;
                             styleIndex = (int) featureGroups.back().size();
