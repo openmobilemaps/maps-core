@@ -27,7 +27,7 @@ public:
         const double lat = atan(exp(coordinate.y * M_PI / 20037508.34)) * 360.0 / M_PI - 90.0;
 
         const double phi = (lon - 180.0) * M_PI / 180.0; // [-2 * pi, 0)
-        const double th = (lat - 90.0) * M_PI / 180.0 + M_PI; // [-pi, 0]
+        const double th = (lat - 90.0) * M_PI / 180.0; // [-pi, 0]
         const double r = 1.0 + coordinate.z / 6378137.0;
 
         const double x = r * sin(th) * cos(phi);

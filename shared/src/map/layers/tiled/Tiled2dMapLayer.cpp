@@ -10,6 +10,7 @@
 
 #include "Tiled2dMapLayer.h"
 #include "MapCamera2dInterface.h"
+#include "CoordinateSystemIdentifiers.h"
 
 Tiled2dMapLayer::Tiled2dMapLayer()
     : curT(0) {}
@@ -115,7 +116,15 @@ void Tiled2dMapLayer::onVisibleBoundsChanged(const ::RectCoord &visibleBounds, d
 void Tiled2dMapLayer::onCameraChange(const std::vector<float> &viewMatrix, const std::vector<float> &projectionMatrix, float verticalFov,
                                 float horizontalFov, float width, float height, float focusPointAltitude) {
     std::lock_guard<std::recursive_mutex> lock(sourcesMutex);
+    LogDebug << "UBCM: onCameraChange in TiledLayer with " <<= sourceInterfaces.size();
+
     for (const auto &sourceInterface: sourceInterfaces) {
+        LogDebug <<= "UBCM: onCameraChange messaging in TiledLayer";
+        /*sourceInterface.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapSourceInterface::onVisibleBoundsChanged,
+                                RectCoord(
+                                        Coord(CoordinateSystemIdentifiers::EPSG3857(), -20037508.34, 20037508.34, 0.0),
+                                        Coord(CoordinateSystemIdentifiers::EPSG3857(), 20037508.34, -20037508.34, 0.0)
+                                ), curT, 139770566.0);*/
         sourceInterface.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapSourceInterface::onCameraChange,
                                 viewMatrix, projectionMatrix, verticalFov, horizontalFov, width, height, focusPointAltitude);
     }

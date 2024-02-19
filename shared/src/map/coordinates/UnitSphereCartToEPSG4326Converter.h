@@ -24,7 +24,7 @@ public:
     virtual Coord convert(const Coord &coordinate) override {
 
         const double r = sqrt(coordinate.x * coordinate.x + coordinate.y * coordinate.y + coordinate.z * coordinate.z);
-        const double th = -acos(coordinate.y / r);
+        const double th = acos(coordinate.y / r);
         const double phi = ((coordinate.z < 0.0) - (coordinate.z > 0.0)) * acos(coordinate.x / sqrt(coordinate.x * coordinate.x + coordinate.z * coordinate.z));
 
         const double x = phi * 180.0 / M_PI;
