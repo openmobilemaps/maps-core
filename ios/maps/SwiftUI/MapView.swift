@@ -249,6 +249,10 @@ public class MapViewCoordinator: MCMapCamera2dListenerInterface {
     }
 
     nonisolated
+    public func onCameraChange(_ viewMatrix: [NSNumber], projectionMatrix: [NSNumber], verticalFov: Float, horizontalFov: Float, width: Float, height: Float, focusPointAltitude: Float) {}
+
+
+    nonisolated
     public func onRotationChanged(_ angle: Float) {
     }
 
