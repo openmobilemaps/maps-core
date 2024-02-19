@@ -337,7 +337,7 @@ std::vector<float> MapCamera3d::getVpMatrix() {
     cameraPitch = 0;//90.0;
 
     focusPointAltitude = focusPointPosition.z;
-    cameraDistance = 1.5;//(currentZoom * 0.98) / R;
+    cameraDistance = 6;//(currentZoom * 0.98) / R;
     float maxD = cameraDistance * 1.3;
     float minD = 100.0 / R;
 
@@ -506,6 +506,7 @@ void MapCamera3d::notifyListeners(const int &listenerType) {
     std::lock_guard<std::recursive_mutex> lock(listenerMutex);
     for (auto listener : listeners) {
         if (listenerType & ListenerType::BOUNDS) {
+            LogDebug <<= "UBCM: onCameraChange in camera";
             listener->onCameraChange(viewMatrix, projectionMatrix, verticalFov, horizontalFov, width, height, focusPointAltitude);
         }
         if (listenerType & ListenerType::ROTATION) {
