@@ -341,8 +341,6 @@ std::vector<float> MapCamera3d::getVpMatrix() {
     float maxD = cameraDistance * 1.3;
     float minD = 100.0 / R;
 
-    Matrix::setIdentityM(newProjectionMatrix, 0);
-
     float fov = 45.0; // zoom / 70800;
 
     // aspect ratio
@@ -351,16 +349,19 @@ std::vector<float> MapCamera3d::getVpMatrix() {
         fov /= vpr;
     }
 
+    Matrix::setIdentityM(newProjectionMatrix, 0);
     Matrix::perspectiveM(newProjectionMatrix, 0, fov, vpr, minD, maxD);
 
     Matrix::setIdentityM(newViewMatrix, 0);
+    // Apply scaling to flip the scene across the Y-axis
+    Matrix::scaleM(newViewMatrix, 0, 1.0, -1.0, 1.0); // This line is added to flip the scene
 
     Matrix::translateM(newViewMatrix, 0, 0, 0, -cameraDistance);
     Matrix::rotateM(newViewMatrix, 0, -cameraPitch, 1.0, 0.0, 0.0);
     Matrix::rotateM(newViewMatrix, 0, -angle, 0, 0, 1);
     Matrix::translateM(newViewMatrix, 0, 0, 0, 0/*-1 - focusPointAltitude / R*/);
-    Matrix::rotateM(newViewMatrix, 0.0, longitude, 1.0, 0.0, 0.0);
-    Matrix::rotateM(newViewMatrix, 0.0, -latitude, 0.0, 1.0, 0.0);
+    Matrix::rotateM(newViewMatrix, 0.0, -longitude, 0.0, 1.0, 0.0);
+    Matrix::rotateM(newViewMatrix, 0.0, -latitude, 1.0, 0.0, 0.0);
     std::vector<float> newVpMatrix(16, 0.0);
     Matrix::multiplyMM(newVpMatrix, 0, newProjectionMatrix, 0, newViewMatrix, 0);
 
