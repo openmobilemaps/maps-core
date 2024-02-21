@@ -15,11 +15,11 @@
 #include "Tiled2dMapZoomLevelInfo.h"
 #include "WmtsLayerDescription.h"
 
-class WebMercatorTiled2dMapLayerConfig : public Tiled2dMapLayerConfig {
+class Epsg4326Tiled2dMapLayerConfig : public Tiled2dMapLayerConfig {
   public:
-    WebMercatorTiled2dMapLayerConfig(std::string layerName, std::string urlFormat);
+    Epsg4326Tiled2dMapLayerConfig(std::string layerName, std::string urlFormat);
 
-    WebMercatorTiled2dMapLayerConfig(std::string layerName, std::string urlFormat, const Tiled2dMapZoomInfo &zoomInfo, int32_t minZoomLevel, int32_t maxZoomLevel);
+    Epsg4326Tiled2dMapLayerConfig(std::string layerName, std::string urlFormat, const Tiled2dMapZoomInfo &zoomInfo, int32_t minZoomLevel, int32_t maxZoomLevel);
 
     virtual int32_t getCoordinateSystemIdentifier() override;
 

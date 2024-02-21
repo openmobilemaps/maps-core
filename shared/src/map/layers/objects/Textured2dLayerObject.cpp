@@ -16,26 +16,36 @@
 #include <cmath>
 #include <cassert>
 
-Textured2dLayerObject::Textured2dLayerObject(std::shared_ptr<Quad2dInterface> quad, const std::shared_ptr<AlphaShaderInterface> &shader,
-                                             const std::shared_ptr<MapInterface> &mapInterface)
-        : quad(quad), shader(shader), rasterShader(nullptr), mapInterface(mapInterface), conversionHelper(mapInterface->getCoordinateConverterHelper()),
-renderConfig(std::make_shared<RenderConfig>(quad->asGraphicsObject(), 0)), graphicsObject(quad->asGraphicsObject()), renderObject(std::make_shared<RenderObject>(graphicsObject))
- {}
+Textured2dLayerObject::Textured2dLayerObject(std::shared_ptr<Quad2dInterface> quad,
+                                             const std::shared_ptr<AlphaShaderInterface> &shader,
+                                             const std::shared_ptr<MapInterface> &mapInterface,
+                                             bool is3d)
+        : quad(quad), shader(shader), rasterShader(nullptr), mapInterface(mapInterface),
+          conversionHelper(mapInterface->getCoordinateConverterHelper()),
+          renderConfig(std::make_shared<RenderConfig>(quad->asGraphicsObject(), 0)), graphicsObject(quad->asGraphicsObject()),
+          renderObject(std::make_shared<RenderObject>(graphicsObject)),
+          is3d(is3d) {}
 
 
-Textured2dLayerObject::Textured2dLayerObject(std::shared_ptr<Quad2dInterface> quad, 
-                      const std::shared_ptr<RasterShaderInterface> &rasterShader,
-                      const std::shared_ptr<MapInterface> &mapInterface)
-: quad(quad), shader(nullptr), rasterShader(rasterShader), mapInterface(mapInterface), conversionHelper(mapInterface->getCoordinateConverterHelper()),
-renderConfig(std::make_shared<RenderConfig>(quad->asGraphicsObject(), 0)), graphicsObject(quad->asGraphicsObject()), renderObject(std::make_shared<RenderObject>(graphicsObject))
- {}
+Textured2dLayerObject::Textured2dLayerObject(std::shared_ptr<Quad2dInterface> quad,
+                                             const std::shared_ptr<RasterShaderInterface> &rasterShader,
+                                             const std::shared_ptr<MapInterface> &mapInterface,
+                                             bool is3d)
+        : quad(quad), shader(nullptr), rasterShader(rasterShader), mapInterface(mapInterface),
+          conversionHelper(mapInterface->getCoordinateConverterHelper()),
+          renderConfig(std::make_shared<RenderConfig>(quad->asGraphicsObject(), 0)), graphicsObject(quad->asGraphicsObject()),
+          renderObject(std::make_shared<RenderObject>(graphicsObject)),
+          is3d(is3d) {}
 
 
-Textured2dLayerObject::Textured2dLayerObject(std::shared_ptr<Quad2dInterface> quad, 
-                                             const std::shared_ptr<MapInterface> &mapInterface) 
-: quad(quad), shader(nullptr), rasterShader(nullptr), mapInterface(mapInterface), conversionHelper(mapInterface->getCoordinateConverterHelper()),
-renderConfig(std::make_shared<RenderConfig>(quad->asGraphicsObject(), 0)), graphicsObject(quad->asGraphicsObject()), renderObject(std::make_shared<RenderObject>(graphicsObject))
- {}
+Textured2dLayerObject::Textured2dLayerObject(std::shared_ptr<Quad2dInterface> quad,
+                                             const std::shared_ptr<MapInterface> &mapInterface,
+                                             bool is3d)
+        : quad(quad), shader(nullptr), rasterShader(nullptr), mapInterface(mapInterface),
+          conversionHelper(mapInterface->getCoordinateConverterHelper()),
+          renderConfig(std::make_shared<RenderConfig>(quad->asGraphicsObject(), 0)), graphicsObject(quad->asGraphicsObject()),
+          renderObject(std::make_shared<RenderObject>(graphicsObject)),
+          is3d(is3d) {}
 
 void Textured2dLayerObject::setRectCoord(const ::RectCoord &rectCoord) {
     auto width = rectCoord.bottomRight.x - rectCoord.topLeft.x;
@@ -51,10 +61,10 @@ void Textured2dLayerObject::setPosition(const ::Coord &coord, double width, doub
 
 void Textured2dLayerObject::setPositions(const ::QuadCoord &coords) {
     QuadCoord renderCoords = conversionHelper->convertQuadToRenderSystem(coords);
-    setFrame(Quad3dD(Vec3D(renderCoords.topLeft.x, renderCoords.topLeft.y, renderCoords.topLeft.z),
-                     Vec3D(renderCoords.topRight.x, renderCoords.topRight.y, renderCoords.topRight.z),
-                     Vec3D(renderCoords.bottomRight.x, renderCoords.bottomRight.y, renderCoords.bottomRight.z),
-                     Vec3D(renderCoords.bottomLeft.x, renderCoords.bottomLeft.y, renderCoords.bottomLeft.z)));
+    setFrame(Quad3dD(Vec3D(renderCoords.topLeft.x, renderCoords.topLeft.y, is3d ? renderCoords.topLeft.z : 0.0),
+                     Vec3D(renderCoords.topRight.x, renderCoords.topRight.y, is3d ? renderCoords.topRight.z : 0.0),
+                     Vec3D(renderCoords.bottomRight.x, renderCoords.bottomRight.y, is3d ? renderCoords.bottomRight.z : 0.0),
+                     Vec3D(renderCoords.bottomLeft.x, renderCoords.bottomLeft.y, is3d ? renderCoords.bottomLeft.z : 0.0)));
 }
 
 void Textured2dLayerObject::setFrame(const ::Quad3dD &frame) { quad->setFrame(frame, RectD(0, 0, 1, 1)); }

@@ -15,6 +15,9 @@ tiled_2d_map_layer_config = interface +c +j +o {
 
 default_tiled_2d_map_layer_configs = interface +c {
     static web_mercator(layerName: string, urlFormat: string): tiled_2d_map_layer_config;
+    static web_mercator_custom(layerName: string, urlFormat: string, zoom_info: tiled_2d_map_zoom_info, min_zoom_level: i32, max_zoom_level: i32): tiled_2d_map_layer_config;
+    static epsg_4326(layerName: string, urlFormat: string): tiled_2d_map_layer_config;
+    static epsg_4326_custom(layerName: string, urlFormat: string, zoom_info: tiled_2d_map_zoom_info, min_zoom_level: i32, max_zoom_level: i32): tiled_2d_map_layer_config;
 }
 
 tiled_2d_map_zoom_level_info = record {
