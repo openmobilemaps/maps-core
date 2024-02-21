@@ -31,14 +31,17 @@ class Textured2dLayerObject : public LayerObjectInterface {
   public:
     Textured2dLayerObject(std::shared_ptr<Quad2dInterface> quad,
                           const std::shared_ptr<AlphaShaderInterface> &shader,
-                          const std::shared_ptr<MapInterface> &mapInterface);
+                          const std::shared_ptr<MapInterface> &mapInterface,
+                          bool is3d = false);
     
     Textured2dLayerObject(std::shared_ptr<Quad2dInterface> quad, 
                           const std::shared_ptr<RasterShaderInterface> &rasterShader,
-                          const std::shared_ptr<MapInterface> &mapInterface);
+                          const std::shared_ptr<MapInterface> &mapInterface,
+                          bool is3d = false);
     
     Textured2dLayerObject(std::shared_ptr<Quad2dInterface> quad, 
-                          const std::shared_ptr<MapInterface> &mapInterface);
+                          const std::shared_ptr<MapInterface> &mapInterface,
+                          bool is3d = false);
 
     virtual ~Textured2dLayerObject() override {}
 
@@ -84,4 +87,5 @@ class Textured2dLayerObject : public LayerObjectInterface {
     std::shared_ptr<AnimationInterface> animation;
 
     float alpha = 1.0;
+    bool is3d = false;
 };

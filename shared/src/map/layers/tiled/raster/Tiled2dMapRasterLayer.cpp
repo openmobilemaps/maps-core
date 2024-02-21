@@ -251,11 +251,11 @@ void Tiled2dMapRasterLayer::onTilesUpdated(const std::string &layerName, std::un
                 }
                 std::shared_ptr<Textured2dLayerObject> tileObject;
                 if (shader) {
-                    tileObject = std::make_shared<Textured2dLayerObject>(graphicsFactory->createQuad(shader), mapInterface);
+                    tileObject = std::make_shared<Textured2dLayerObject>(graphicsFactory->createQuad(shader), mapInterface, is3d);
                 } else {
                     auto rasterShader = is3d ? shaderFactory->createUnitSphereRasterShader() : shaderFactory->createRasterShader();
                     tileObject = std::make_shared<Textured2dLayerObject>(
-                            graphicsFactory->createQuad(rasterShader->asShaderProgramInterface()), rasterShader, mapInterface);
+                            graphicsFactory->createQuad(rasterShader->asShaderProgramInterface()), rasterShader, mapInterface, is3d);
                 }
                 if (is3d) {
                     tileObject->getQuadObject()->setSubdivisionFactor(SUBDIVISION_FACTOR_3D);
