@@ -22,11 +22,26 @@ struct RasterStyle {
 };
 
 vertex VertexOut
-rasterVertexShader(const VertexIn vertexIn [[stage_in]],
+unitSphereRasterVertexShader(const Vertex3DIn vertexIn [[stage_in]],
+                 constant float4x4 &mvpMatrix [[buffer(1)]])
+{
+
+    float4 adjPos = float4(1.0 / length(vertexIn.position.xyz) * vertexIn.position.xyz, 1.0);
+
+    VertexOut out {
+        .position = mvpMatrix * adjPos,
+        .uv = vertexIn.uv
+    };
+
+    return out;
+}
+
+vertex VertexOut
+rasterVertexShader(const Vertex3DIn vertexIn [[stage_in]],
                  constant float4x4 &mvpMatrix [[buffer(1)]])
 {
     VertexOut out {
-        .position = mvpMatrix * float4(vertexIn.position.xy, 0.0, 1.0),
+        .position = mvpMatrix * float4(vertexIn.position.xyz, 1.0),
         .uv = vertexIn.uv
     };
     

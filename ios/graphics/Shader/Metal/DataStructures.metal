@@ -16,6 +16,11 @@ struct VertexIn {
     float2 uv [[attribute(1)]];
 };
 
+struct Vertex3DIn {
+    float3 position [[attribute(0)]];
+    float2 uv [[attribute(1)]];
+};
+
 struct VertexOut {
     float4 position [[ position ]];
     float2 uv;
