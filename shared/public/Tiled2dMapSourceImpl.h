@@ -59,7 +59,6 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
                                                float verticalFov, float horizontalFov, float width, float height,
                                                float focusPointAltitude) {
     // TODO Implement new source algorithm - fixed level of tiles for now
-    LogDebug <<= "UBCM: onCameraChange in Source";
     if (!layerConfig) {
         return;
     }
@@ -67,7 +66,6 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
     for (const auto zoomLevelInfo : layerConfig->getZoomLevelInfos()) {
         if (zoomLevelInfo.numTilesX >= 2) {
             zoom = zoomLevelInfo.zoom;
-            LogDebug << "UBCM: target zoom: " <<= zoomLevelInfo.zoomLevelIdentifier;
             break;
         }
     }

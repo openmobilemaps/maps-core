@@ -374,10 +374,6 @@ std::vector<float> MapCamera3d::getVpMatrix() {
     horizontalFov = fov * vpr;
     validVpMatrix = true;
 
-    LogDebug << "UBCM: new vpMatrix: " <<= Matrix::toMatrixString(vpMatrix);
-    LogDebug << "UBCM: new viewMatrix: " <<= Matrix::toMatrixString(viewMatrix);
-    LogDebug << "UBCM: new projectionMatrix: " <<= Matrix::toMatrixString(projectionMatrix);
-
     return newVpMatrix;
 }
 
@@ -505,7 +501,6 @@ void MapCamera3d::notifyListeners(const int &listenerType) {
     std::lock_guard<std::recursive_mutex> lock(listenerMutex);
     for (auto listener : listeners) {
         if (listenerType & ListenerType::BOUNDS) {
-            LogDebug <<= "UBCM: onCameraChange in camera";
             listener->onCameraChange(viewMatrix, projectionMatrix, verticalFov, horizontalFov, width, height, focusPointAltitude);
         }
         if (listenerType & ListenerType::ROTATION) {
