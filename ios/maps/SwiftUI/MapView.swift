@@ -71,6 +71,8 @@ public struct MapView: UIViewRepresentable {
         }
     }
 
+    let is3D: Bool
+
     let mapConfig: MCMapConfig
 
     let layers: [(any Layer)?]
@@ -79,15 +81,16 @@ public struct MapView: UIViewRepresentable {
 
     var paddingInset: EdgeInsets
 
-    public init(camera: Binding<Camera>, mapConfig: MCMapConfig = MCMapConfig(mapCoordinateSystem: MCCoordinateSystemFactory.getEpsg3857System()), paddingInset: EdgeInsets = .init(), layers: [(any Layer)?]) {
+    public init(camera: Binding<Camera>, mapConfig: MCMapConfig = MCMapConfig(mapCoordinateSystem: MCCoordinateSystemFactory.getEpsg3857System()), paddingInset: EdgeInsets = .init(), layers: [(any Layer)?], is3D: Bool = false) {
         self.layers = layers
         self.mapConfig = mapConfig
         self._camera = camera
         self.paddingInset = paddingInset
+        self.is3D = is3D
     }
 
     public func makeUIView(context: Context) -> MCMapView {
-        let mapView = MCMapView(mapConfig: mapConfig)
+        let mapView = MCMapView(mapConfig: mapConfig, is3D: is3D)
         mapView.backgroundColor = .clear
         mapView.camera.addListener(context.coordinator)
         mapView.camera.setRotationEnabled(false)
