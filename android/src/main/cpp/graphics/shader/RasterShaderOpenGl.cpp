@@ -11,7 +11,10 @@
 #include "RasterShaderOpenGl.h"
 #include "OpenGlContext.h"
 
-const std::string RasterShaderOpenGl::programName = "UBMAP_RasterShaderOpenGl";
+
+RasterShaderOpenGl::RasterShaderOpenGl(bool projectOntoUnitSphere)
+        : programName(projectOntoUnitSphere ? "UBMAP_RasterShaderUnitSphereOpenGl" : "UBMAP_RasterShaderOpenGl"),
+          projectOntoUnitSphere(projectOntoUnitSphere) {}
 
 std::string RasterShaderOpenGl::getProgramName() {
     return programName;
@@ -57,6 +60,34 @@ void RasterShaderOpenGl::setStyle(const RasterShaderStyle &style) {
      styleValues[3] = style.brightnessMin;
      styleValues[4] = style.brightnessMax;
      styleValues[5] = style.gamma;
+}
+
+std::string RasterShaderOpenGl::getVertexShader() {
+    return projectOntoUnitSphere
+           // Project vertices onto unit sphere
+           ? OMMVersionedGlesShaderCode(320 es,
+                                        uniform mat4 uMVPMatrix;
+                                                in vec4 vPosition;
+                                                in vec2 texCoordinate;
+                                                out vec2 v_texcoord;
+
+                                                void main() {
+                                                    vec4 adjPos = vec4(1.0 / length(vPosition.xyz) * vPosition.xyz, 1.0);
+                                                    gl_Position = uMVPMatrix * adjPos;
+                                                    v_texcoord = texCoordinate;
+                                                })
+           // Default vertex shader
+           : OMMVersionedGlesShaderCode(320 es,
+                                        uniform mat4 uMVPMatrix;
+                                                in vec4 vPosition;
+                                                in vec2 texCoordinate;
+                                                out vec2 v_texcoord;
+
+                                                void main() {
+                                                    gl_Position = uMVPMatrix * vPosition;
+                                                    v_texcoord = texCoordinate;
+                                                }
+           );
 }
 
 std::string RasterShaderOpenGl::getFragmentShader() {

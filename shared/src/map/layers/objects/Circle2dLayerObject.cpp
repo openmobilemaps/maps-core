@@ -26,8 +26,8 @@ void Circle2dLayerObject::setColor(Color color) { shader->setColor(color.r, colo
 
 void Circle2dLayerObject::setPosition(Coord position, double radius) {
     Coord renderPos = conversionHelper->convertToRenderSystem(position);
-    quad->setFrame(Quad2dD(Vec2D(renderPos.x - radius, renderPos.y - radius), Vec2D(renderPos.x + radius, renderPos.y - radius),
-                           Vec2D(renderPos.x + radius, renderPos.y + radius), Vec2D(renderPos.x - radius, renderPos.y + radius)),
+    quad->setFrame(Quad3dD(Vec3D(renderPos.x - radius, renderPos.y - radius, 0.0), Vec3D(renderPos.x + radius, renderPos.y - radius, 0.0),
+                           Vec3D(renderPos.x + radius, renderPos.y + radius, 0.0), Vec3D(renderPos.x - radius, renderPos.y + radius, 0.0)),
                    RectD(0, 0, 1, 1));
 }
 

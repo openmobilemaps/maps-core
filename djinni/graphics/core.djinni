@@ -36,12 +36,20 @@ rendering_context_interface = interface +c +j +o {
     set_viewport_size(size: vec_2_i);
     get_viewport_size() : vec_2_i;
     set_background_color(color: color);
+	set_culling(mode: rendering_cull_mode);
+
     setupDrawFrame();
     pre_render_stencil_mask();
     post_render_stencil_mask();
 
     # optional rectangle, remove scissoring when not set
     apply_scissor_rect(scissor_rect: optional<rect_i>);
+}
+
+rendering_cull_mode = enum {
+	front;
+	back;
+	none;
 }
 
 render_object_interface = interface +c +j +o {

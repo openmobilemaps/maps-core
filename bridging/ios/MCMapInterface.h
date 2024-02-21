@@ -77,6 +77,8 @@
 
 - (void)setBackgroundColor:(nonnull MCColor *)color;
 
+- (BOOL)is3d;
+
 - (void)invalidate;
 
 - (void)prepare;

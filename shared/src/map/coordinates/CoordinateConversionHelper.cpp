@@ -35,9 +35,10 @@ std::shared_ptr<CoordinateConversionHelperInterface> CoordinateConversionHelperI
     return singleton;
 }
 
-CoordinateConversionHelper::CoordinateConversionHelper(MapCoordinateSystem mapCoordinateSystem)
-    : mapCoordinateSystemIdentifier(mapCoordinateSystem.identifier)
-    , renderSystemConverter(std::make_shared<DefaultSystemToRenderConverter>(mapCoordinateSystem)) {
+CoordinateConversionHelper::CoordinateConversionHelper(MapCoordinateSystem mapCoordinateSystem, bool enforceLtrTtb)
+    : mapCoordinateSystemIdentifier(mapCoordinateSystem.identifier),
+    renderSystemConverter(std::make_shared<DefaultSystemToRenderConverter>(mapCoordinateSystem, enforceLtrTtb)),
+    enforceLtrTtb(enforceLtrTtb) {
     registerConverter(renderSystemConverter);
     addDefaultConverters();
 }
@@ -121,6 +122,7 @@ QuadCoord CoordinateConversionHelper::convertQuad(const int32_t to, const QuadCo
     Coord topRight = convert(to, quad.topRight);
     Coord bottomRight = convert(to, quad.bottomRight);
     Coord bottomLeft = convert(to, quad.bottomLeft);
+    if (enforceLtrTtb) {
     bool ltr = topRight.x > topLeft.x;
     bool ttb = bottomLeft.y > topLeft.y;
     if (ltr) {
@@ -135,6 +137,9 @@ QuadCoord CoordinateConversionHelper::convertQuad(const int32_t to, const QuadCo
         } else {
             return QuadCoord(bottomRight, bottomLeft, topLeft, topRight);
         }
+    }
+    } else {
+        return QuadCoord(topLeft, topRight, bottomRight, bottomLeft);
     }
 }
 

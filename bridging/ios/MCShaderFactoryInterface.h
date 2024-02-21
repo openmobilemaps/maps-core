@@ -38,6 +38,8 @@
 
 - (nullable id<MCRasterShaderInterface>)createRasterShader;
 
+- (nullable id<MCRasterShaderInterface>)createUnitSphereRasterShader;
+
 - (nullable id<MCStretchShaderInterface>)createStretchShader;
 
 - (nullable id<MCStretchInstancedShaderInterface>)createStretchInstancedShader;

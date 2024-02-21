@@ -8,6 +8,8 @@
 #include "Vec2I.h"
 #include <optional>
 
+enum class RenderingCullMode;
+
 class RenderingContextInterface {
 public:
     virtual ~RenderingContextInterface() = default;
@@ -21,6 +23,8 @@ public:
     virtual ::Vec2I getViewportSize() = 0;
 
     virtual void setBackgroundColor(const ::Color & color) = 0;
+
+    virtual void setCulling(RenderingCullMode mode) = 0;
 
     virtual void setupDrawFrame() = 0;
 

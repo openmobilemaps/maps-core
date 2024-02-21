@@ -20,16 +20,17 @@
 #include "TouchInterface.h"
 #include "IndexedLayer.h"
 #include "Logger.h"
+#include "RenderingCullMode.h"
 #include <algorithm>
 
 #include "Tiled2dMapRasterLayer.h"
 
 MapScene::MapScene(std::shared_ptr<SceneInterface> scene, const MapConfig &mapConfig,
                    const std::shared_ptr<::SchedulerInterface> &scheduler, float pixelDensity, bool is3D)
-    : scene(scene)
-    , mapConfig(mapConfig)
-    , scheduler(scheduler)
-    , conversionHelper(std::make_shared<CoordinateConversionHelper>(mapConfig.mapCoordinateSystem)) {
+    : scene(scene), mapConfig(mapConfig), mapIs3d(is3D), scheduler(scheduler),
+    conversionHelper(std::make_shared<CoordinateConversionHelper>(mapConfig.mapCoordinateSystem, !is3D))
+    // TODO: Fix unnecessary vertical flip in MapCamera2d (and corresponding issues with rotation and orienation e.g. in the VectorLayer symbols)
+    {
     // add default touch handler
     setTouchHandler(DefaultTouchHandlerInterface::create(scheduler, pixelDensity));
 
@@ -40,6 +41,8 @@ MapScene::MapScene(std::shared_ptr<SceneInterface> scene, const MapConfig &mapCo
 
     // add default camera
     setCamera(MapCamera2dInterface::create(ptr, pixelDensity, is3D));
+
+    scene->getRenderingContext()->setCulling(RenderingCullMode::BACK);
 }
 
 std::shared_ptr<::GraphicsObjectFactoryInterface> MapScene::getGraphicsObjectFactory() { return scene->getGraphicsFactory(); }
@@ -505,4 +508,8 @@ void MapScene::forceReload() {
 
 void MapScene::requestGraphicsTaskExecution() {
     invalidate();
+}
+
+bool MapScene::is3d() {
+    return mapIs3d;
 }

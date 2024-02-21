@@ -51,12 +51,13 @@ void Textured2dLayerObject::setPosition(const ::Coord &coord, double width, doub
 
 void Textured2dLayerObject::setPositions(const ::QuadCoord &coords) {
     QuadCoord renderCoords = conversionHelper->convertQuadToRenderSystem(coords);
-    setFrame(Quad2dD(Vec2D(renderCoords.topLeft.x, renderCoords.topLeft.y), Vec2D(renderCoords.topRight.x, renderCoords.topRight.y),
-                     Vec2D(renderCoords.bottomRight.x, renderCoords.bottomRight.y),
-                     Vec2D(renderCoords.bottomLeft.x, renderCoords.bottomLeft.y)));
+    setFrame(Quad3dD(Vec3D(renderCoords.topLeft.x, renderCoords.topLeft.y, renderCoords.topLeft.z),
+                     Vec3D(renderCoords.topRight.x, renderCoords.topRight.y, renderCoords.topRight.z),
+                     Vec3D(renderCoords.bottomRight.x, renderCoords.bottomRight.y, renderCoords.bottomRight.z),
+                     Vec3D(renderCoords.bottomLeft.x, renderCoords.bottomLeft.y, renderCoords.bottomLeft.z)));
 }
 
-void Textured2dLayerObject::setFrame(const ::Quad2dD &frame) { quad->setFrame(frame, RectD(0, 0, 1, 1)); }
+void Textured2dLayerObject::setFrame(const ::Quad3dD &frame) { quad->setFrame(frame, RectD(0, 0, 1, 1)); }
 
 void Textured2dLayerObject::update() {
     if (animation) {
