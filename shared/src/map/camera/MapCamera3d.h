@@ -158,7 +158,7 @@ class MapCamera3d : public MapCamera2dInterface,
     double cameraRoll = 0;
     double cameraYaw = 0;
 
-    double zoom = 0;
+    double zoom = 6;
     double angle = 0;
     double tempAngle = 0;
     bool isRotationThresholdReached = false;
@@ -170,8 +170,8 @@ class MapCamera3d : public MapCamera2dInterface,
     double paddingRight = 0;
     double paddingBottom = 0;
 
-    double zoomMin = -1;
-    double zoomMax = 200.0;
+    double zoomMin = 30;
+    double zoomMax = 1.0;
 
     RectCoord bounds;
 
