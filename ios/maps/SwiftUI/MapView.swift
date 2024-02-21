@@ -181,7 +181,7 @@ public struct MapView: UIViewRepresentable {
     public func updateUIView(_ mapView: MapCore.MCMapView, context: Context) {
         updateLayers(context, mapView)
 
-        updateCamera(mapView, context.coordinator)
+//        updateCamera(mapView, context.coordinator)
     }
 }
 
@@ -271,7 +271,7 @@ extension MapViewCoordinator: MCMapSizeDelegate {
         Task { @MainActor in
             hasSizeChanged = true
             if let mapView = mapView {
-                parent.updateCamera(mapView, self)
+//                parent.updateCamera(mapView, self)
             }
         }
     }

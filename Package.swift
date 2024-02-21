@@ -147,6 +147,7 @@ let package = Package(
                 .headerSearchPath("src/map/coordinates"),
                 .headerSearchPath("src/map/layers/objects"),
                 .headerSearchPath("src/map/layers/icon"),
+                .headerSearchPath("src/map/layers/icosahedron"),
                 .headerSearchPath("src/map/layers/line"),
                 .headerSearchPath("src/map/layers/text"),
                 .headerSearchPath("src/map/layers/tiled"),

@@ -1,0 +1,11 @@
+@extern "../../../yaml/layer_interface.yaml"
+@extern "../../../../external/djinni/support-lib/dataref.yaml"
+
+icosahedron_layer_callback_interface = interface +c +j +o {
+    get_data(): DataRef;
+}
+
+icosahedron_layer_interface = interface +c {
+    static create(callback_handler: icosahedron_layer_callback_interface) : icosahedron_layer_interface;
+    as_layer_interface(): layer_interface;
+}
