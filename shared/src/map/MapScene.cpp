@@ -42,7 +42,9 @@ MapScene::MapScene(std::shared_ptr<SceneInterface> scene, const MapConfig &mapCo
     // add default camera
     setCamera(MapCamera2dInterface::create(ptr, pixelDensity, is3D));
 
-    scene->getRenderingContext()->setCulling(RenderingCullMode::BACK);
+    if (is3D) {
+        scene->getRenderingContext()->setCulling(RenderingCullMode::BACK);
+    }
 }
 
 std::shared_ptr<::GraphicsObjectFactoryInterface> MapScene::getGraphicsObjectFactory() { return scene->getGraphicsFactory(); }
