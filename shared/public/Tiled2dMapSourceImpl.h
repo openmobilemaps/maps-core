@@ -175,7 +175,10 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
         VisibleTilesLayer curVisibleTiles(i - targetZoomLayer);
         std::vector<PrioritizedTiled2dMapTileInfo> curVisibleTilesVec;
 
+        const double boundsRatio = std::abs((zoomLevelInfo.bounds.bottomRight.y  - zoomLevelInfo.bounds.topLeft.y) / (zoomLevelInfo.bounds.bottomRight.x  - zoomLevelInfo.bounds.topLeft.x));
+
         const double tileWidth = zoomLevelInfo.tileWidthLayerSystemUnits;
+        const double tileHeight = zoomLevelInfo.tileWidthLayerSystemUnits * boundsRatio;
         int zoomDistanceFactor = std::abs(zoomLevelInfo.zoomLevelIdentifier - targetZoomLevelIdentifier);
 
         RectCoord layerBounds = zoomLevelInfo.bounds;
@@ -184,7 +187,7 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
         const bool leftToRight = layerBounds.topLeft.x < layerBounds.bottomRight.x;
         const bool topToBottom = layerBounds.topLeft.y < layerBounds.bottomRight.y;
         const double tileWidthAdj = leftToRight ? tileWidth : -tileWidth;
-        const double tileHeightAdj = topToBottom ? tileWidth : -tileWidth;
+        const double tileHeightAdj = (topToBottom ? tileHeight : -tileHeight);
 
         const double boundsLeft = layerBounds.topLeft.x;
         int startTileLeft =
@@ -193,16 +196,17 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
                 std::max(leftToRight ? (visibleRight - boundsLeft) : (boundsLeft - visibleRight), 0.0) / tileWidth);
 
         const double boundsTop = layerBounds.topLeft.y;
-        int startTileTop = std::floor(std::max(topToBottom ? (visibleTop - boundsTop) : (boundsTop - visibleTop), 0.0) / tileWidth);
+        int startTileTop = std::floor(std::max(topToBottom ? (visibleTop - boundsTop) : (boundsTop - visibleTop), 0.0) / tileHeight);
         int maxTileTop = std::floor(
-                std::max(topToBottom ? (visibleBottom - boundsTop) : (boundsTop - visibleBottom), 0.0) / tileWidth);
+                std::max(topToBottom ? (visibleBottom - boundsTop) : (boundsTop - visibleBottom), 0.0) / tileHeight);
 
         if (bounds.has_value()) {
             const auto availableTiles = conversionHelper->convertRect(layerSystemId, *bounds);
 
-            const double tLength = zoomLevelInfo.tileWidthLayerSystemUnits / 256;
+            const double tLength = tileWidth / 256;
+            const double tHeight = tileHeight / 256;
             const double tWidthAdj = leftToRight ? tLength : -tLength;
-            const double tHeightAdj = topToBottom ? tLength : -tLength;
+            const double tHeightAdj = topToBottom ? tHeight : -tHeight;
             const double originX = leftToRight ? zoomLevelInfo.bounds.topLeft.x : -zoomLevelInfo.bounds.bottomRight.x;
             const double originY = topToBottom ? zoomLevelInfo.bounds.bottomRight.y : -zoomLevelInfo.bounds.topLeft.y;
             const double minAvailableX = leftToRight ? std::min(availableTiles.topLeft.x, availableTiles.bottomRight.x) : -std::max(availableTiles.topLeft.x, availableTiles.bottomRight.x);
@@ -217,10 +221,10 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
             int max_left_pixel = floor((maxAvailableX - originX) / tLength);
             int max_left = std::min(zoomLevelInfo.numTilesX, max_left_pixel / 256);
 
-            int min_top_pixel = floor((minAvailableY - originY) / tLength);
+            int min_top_pixel = floor((minAvailableY - originY) / tHeight);
             int min_top = std::max(0, min_top_pixel / 256);
 
-            int max_top_pixel = floor((maxAvailableY - originY) / tLength);
+            int max_top_pixel = floor((maxAvailableY - originY) / tHeight);
             int max_top = std::min(zoomLevelInfo.numTilesY, max_top_pixel / 256);
 
             startTileLeft = std::max(min_left, startTileLeft);
@@ -230,7 +234,7 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
         }
 
         const double maxDisCenterX = visibleWidth * 0.5 + tileWidth;
-        const double maxDisCenterY = visibleHeight * 0.5 + tileWidth;
+        const double maxDisCenterY = visibleHeight * 0.5 + tileHeight;
         const double maxDisCenter = std::sqrt(maxDisCenterX * maxDisCenterX + maxDisCenterY * maxDisCenterY);
 
         hash_combine(visibleTileHash, std::hash<int>{}(i));
