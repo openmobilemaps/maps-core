@@ -337,7 +337,7 @@ std::vector<float> MapCamera3d::getVpMatrix() {
     cameraPitch = 0;//90.0;
 
     focusPointAltitude = focusPointPosition.z;
-    cameraDistance = 6;//(currentZoom * 0.98) / R;
+    cameraDistance = currentZoom;
     float maxD = cameraDistance * 1.3;
     float minD = 100.0 / R;
 
@@ -358,7 +358,7 @@ std::vector<float> MapCamera3d::getVpMatrix() {
     Matrix::rotateM(newViewMatrix, 0, -cameraPitch, 1.0, 0.0, 0.0);
     Matrix::rotateM(newViewMatrix, 0, -angle, 0, 0, 1);
     Matrix::translateM(newViewMatrix, 0, 0, 0, 0/*-1 - focusPointAltitude / R*/);
-    Matrix::rotateM(newViewMatrix, 0.0, -longitude, 0.0, 1.0, 0.0);
+    Matrix::rotateM(newViewMatrix, 0.0, longitude, 0.0, 1.0, 0.0);
     Matrix::rotateM(newViewMatrix, 0.0, latitude, 1.0, 0.0, 0.0);
     std::vector<float> newVpMatrix(16, 0.0);
     Matrix::multiplyMM(newVpMatrix, 0, newProjectionMatrix, 0, newViewMatrix, 0);
@@ -547,8 +547,8 @@ bool MapCamera3d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
     float xDiffMap = xDiff * zoom * screenPixelAsRealMeterFactor * (mapSystemRtl ? -1 : 1);
     float yDiffMap = yDiff * zoom * screenPixelAsRealMeterFactor * (mapSystemTtb ? -1 : 1);
 
-    focusPointPosition.x += xDiffMap * 5 * 0.000001;
-    focusPointPosition.y += yDiffMap * 5 * 0.000001;
+    focusPointPosition.x += xDiffMap * 0.00001;
+    focusPointPosition.y += yDiffMap * 0.00001;
 
     if (currentDragTimestamp == 0) {
         currentDragTimestamp = DateHelper::currentTimeMicros();
@@ -608,10 +608,13 @@ void MapCamera3d::inertiaStep() {
 
     const auto adjustedPosition = getBoundsCorrectedCoords(
             Coord(CoordinateSystemIdentifiers::EPSG4326(),
-                  focusPointPosition.x + xDiffMap * 5 * 0.0000001,
-                  focusPointPosition.y + yDiffMap * 5 * 0.0000001,
+                  focusPointPosition.x + xDiffMap * 0.000001,
+                  focusPointPosition.y + yDiffMap * 0.000001,
                   focusPointPosition.z));
-    focusPointPosition = adjustedPosition;
+    focusPointPosition = Coord(CoordinateSystemIdentifiers::EPSG4326(),
+                               focusPointPosition.x + xDiffMap * 0.000001,
+                               focusPointPosition.y + yDiffMap * 0.000001,
+                               focusPointPosition.z);
 
     notifyListeners(ListenerType::BOUNDS);
     mapInterface->invalidate();
