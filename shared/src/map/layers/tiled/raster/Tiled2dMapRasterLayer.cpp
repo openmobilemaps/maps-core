@@ -171,6 +171,8 @@ void Tiled2dMapRasterLayer::onTilesUpdated(const std::string &layerName, std::un
         return;
     }
 
+    bool is3d = mapInterface->is3d();
+
     {
         if (updateFlag.test_and_set()) {
             return;
@@ -251,9 +253,12 @@ void Tiled2dMapRasterLayer::onTilesUpdated(const std::string &layerName, std::un
                 if (shader) {
                     tileObject = std::make_shared<Textured2dLayerObject>(graphicsFactory->createQuad(shader), mapInterface);
                 } else {
-                    auto rasterShader = shaderFactory->createRasterShader();
+                    auto rasterShader = is3d ? shaderFactory->createUnitSphereRasterShader() : shaderFactory->createRasterShader();
                     tileObject = std::make_shared<Textured2dLayerObject>(
                             graphicsFactory->createQuad(rasterShader->asShaderProgramInterface()), rasterShader, mapInterface);
+                }
+                if (is3d) {
+                    tileObject->getQuadObject()->setSubdivisionFactor(SUBDIVISION_FACTOR_3D);
                 }
                 if (zoomInfo.numDrawPreviousLayers == 0 || !animationsEnabled || zoomInfo.maskTile) {
                     tileObject->setStyle(style);

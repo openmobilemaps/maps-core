@@ -28,6 +28,8 @@ abstract class ShaderFactoryInterface {
 
     abstract fun createRasterShader(): RasterShaderInterface
 
+    abstract fun createUnitSphereRasterShader(): RasterShaderInterface
+
     abstract fun createStretchShader(): StretchShaderInterface
 
     abstract fun createStretchInstancedShader(): StretchInstancedShaderInterface
@@ -106,6 +108,12 @@ abstract class ShaderFactoryInterface {
             return native_createRasterShader(this.nativeRef)
         }
         private external fun native_createRasterShader(_nativeRef: Long): RasterShaderInterface
+
+        override fun createUnitSphereRasterShader(): RasterShaderInterface {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_createUnitSphereRasterShader(this.nativeRef)
+        }
+        private external fun native_createUnitSphereRasterShader(_nativeRef: Long): RasterShaderInterface
 
         override fun createStretchShader(): StretchShaderInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

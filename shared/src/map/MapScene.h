@@ -61,6 +61,8 @@ class MapScene : public MapInterface, public SceneCallbackInterface, public Sche
 
     virtual void removeLayer(const std::shared_ptr<::LayerInterface> &layer) override;
 
+    bool is3d() override;
+
     virtual void setViewportSize(const ::Vec2I &size) override;
 
     virtual void setBackgroundColor(const Color &color) override;
@@ -105,4 +107,5 @@ class MapScene : public MapInterface, public SceneCallbackInterface, public Sche
 
     bool isResumed = false;
     std::atomic_flag isInvalidated = ATOMIC_FLAG_INIT;
+    bool mapIs3d = false;
 };

@@ -72,6 +72,8 @@ public:
 
     virtual void setBackgroundColor(const ::Color & color) = 0;
 
+    virtual bool is3d() = 0;
+
     virtual void invalidate() = 0;
 
     /** Must be called on the rendering thread! */

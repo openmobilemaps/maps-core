@@ -67,7 +67,7 @@ class Textured2dLayerObject : public LayerObjectInterface {
     void beginStyleAnimation(RasterShaderStyle start, RasterShaderStyle target, long long duration);
 
   protected:
-    void setFrame(const ::Quad2dD &frame);
+    void setFrame(const ::Quad3dD &frame);
 
   private:
     std::shared_ptr<Quad2dInterface> quad;

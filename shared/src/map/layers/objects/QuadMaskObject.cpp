@@ -38,10 +38,10 @@ void QuadMaskObject::setPosition(const ::Coord &coord, double width, double heig
 
 void QuadMaskObject::setPositions(const QuadCoord &coords) {
     QuadCoord renderCoords = conversionHelper->convertQuadToRenderSystem(coords);
-    quad->setFrame(Quad2dD(Vec2D(renderCoords.topLeft.x, renderCoords.topLeft.y),
-                           Vec2D(renderCoords.topRight.x, renderCoords.topRight.y),
-                           Vec2D(renderCoords.bottomRight.x, renderCoords.bottomRight.y),
-                           Vec2D(renderCoords.bottomLeft.x, renderCoords.bottomLeft.y)),
+    quad->setFrame(Quad3dD(Vec3D(renderCoords.topLeft.x, renderCoords.topLeft.y, renderCoords.topLeft.z),
+                           Vec3D(renderCoords.topRight.x, renderCoords.topRight.y, renderCoords.topRight.z),
+                           Vec3D(renderCoords.bottomRight.x, renderCoords.bottomRight.y, renderCoords.bottomRight.z),
+                           Vec3D(renderCoords.bottomLeft.x, renderCoords.bottomLeft.y, renderCoords.bottomLeft.z)),
                    RectD(0, 0, 1, 1));
 }
 

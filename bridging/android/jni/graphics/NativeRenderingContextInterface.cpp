@@ -5,6 +5,7 @@
 #include "Marshal.hpp"
 #include "NativeColor.h"
 #include "NativeRectI.h"
+#include "NativeRenderingCullMode.h"
 #include "NativeVec2I.h"
 
 namespace djinni_generated {
@@ -46,6 +47,14 @@ void NativeRenderingContextInterface::JavaProxy::setBackgroundColor(const ::Colo
     const auto& data = ::djinni::JniClass<::djinni_generated::NativeRenderingContextInterface>::get();
     jniEnv->CallVoidMethod(Handle::get().get(), data.method_setBackgroundColor,
                            ::djinni::get(::djinni_generated::NativeColor::fromCpp(jniEnv, c_color)));
+    ::djinni::jniExceptionCheck(jniEnv);
+}
+void NativeRenderingContextInterface::JavaProxy::setCulling(::RenderingCullMode c_mode) {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeRenderingContextInterface>::get();
+    jniEnv->CallVoidMethod(Handle::get().get(), data.method_setCulling,
+                           ::djinni::get(::djinni_generated::NativeRenderingCullMode::fromCpp(jniEnv, c_mode)));
     ::djinni::jniExceptionCheck(jniEnv);
 }
 void NativeRenderingContextInterface::JavaProxy::setupDrawFrame() {
@@ -115,6 +124,14 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_Renderin
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::RenderingContextInterface>(nativeRef);
         ref->setBackgroundColor(::djinni_generated::NativeColor::toCpp(jniEnv, j_color));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_RenderingContextInterface_00024CppProxy_native_1setCulling(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_mode)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::RenderingContextInterface>(nativeRef);
+        ref->setCulling(::djinni_generated::NativeRenderingCullMode::toCpp(jniEnv, j_mode));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

@@ -40,7 +40,9 @@ class Quad2dOpenGl : public GraphicsObjectInterface,
     virtual void render(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
                         int64_t mvpMatrix, bool isMasked, double screenPixelAsRealMeterFactor) override;
 
-    virtual void setFrame(const ::Quad2dD &frame, const ::RectD &textureCoordinates) override;
+    virtual void setFrame(const ::Quad3dD &frame, const ::RectD &textureCoordinates) override;
+
+    void setSubdivisionFactor(int32_t factor) override;
 
     virtual void loadTexture(const std::shared_ptr<::RenderingContextInterface> &context,
                              const std::shared_ptr<TextureHolderInterface> &textureHolder) override;
@@ -56,9 +58,7 @@ class Quad2dOpenGl : public GraphicsObjectInterface,
     void setDebugLabel(const std::string &label) override;
 
 protected:
-    virtual void adjustTextureCoordinates();
-
-    virtual void prepareTextureDraw(int mProgram);
+    void computeGeometry(bool texCoordsOnly);
 
     void prepareGlData(int program);
 
@@ -67,6 +67,8 @@ protected:
     void removeGlBuffers();
 
     void removeTextureCoordsGlBuffers();
+
+    virtual void prepareTextureDraw(int mProgram);
 
     std::shared_ptr<ShaderProgramInterface> shaderProgram;
     std::string programName;
@@ -88,7 +90,8 @@ protected:
 
     bool usesTextureCoords = false;
 
-    Quad2dD frame = Quad2dD(Vec2D(0.0, 0.0), Vec2D(0.0, 0.0), Vec2D(0.0, 0.0), Vec2D(0.0, 0.0));
+    int32_t subdivisionFactor = 0;
+    Quad3dD frame = Quad3dD(Vec3D(0.0, 0.0, 0.0), Vec3D(0.0, 0.0, 0.0), Vec3D(0.0, 0.0, 0.0), Vec3D(0.0, 0.0, 0.0));
     RectD textureCoordinates = RectD(0.0, 0.0, 0.0, 0.0);
     double factorHeight = 1.0;
     double factorWidth = 1.0;

@@ -43,6 +43,7 @@ private:
         /*not-null*/ std::shared_ptr<::TextShaderInterface> createTextShader() override;
         /*not-null*/ std::shared_ptr<::TextInstancedShaderInterface> createTextInstancedShader() override;
         /*not-null*/ std::shared_ptr<::RasterShaderInterface> createRasterShader() override;
+        /*not-null*/ std::shared_ptr<::RasterShaderInterface> createUnitSphereRasterShader() override;
         /*not-null*/ std::shared_ptr<::StretchShaderInterface> createStretchShader() override;
         /*not-null*/ std::shared_ptr<::StretchInstancedShaderInterface> createStretchInstancedShader() override;
 
@@ -61,6 +62,7 @@ private:
     const jmethodID method_createTextShader { ::djinni::jniGetMethodID(clazz.get(), "createTextShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/TextShaderInterface;") };
     const jmethodID method_createTextInstancedShader { ::djinni::jniGetMethodID(clazz.get(), "createTextInstancedShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/TextInstancedShaderInterface;") };
     const jmethodID method_createRasterShader { ::djinni::jniGetMethodID(clazz.get(), "createRasterShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/RasterShaderInterface;") };
+    const jmethodID method_createUnitSphereRasterShader { ::djinni::jniGetMethodID(clazz.get(), "createUnitSphereRasterShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/RasterShaderInterface;") };
     const jmethodID method_createStretchShader { ::djinni::jniGetMethodID(clazz.get(), "createStretchShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/StretchShaderInterface;") };
     const jmethodID method_createStretchInstancedShader { ::djinni::jniGetMethodID(clazz.get(), "createStretchInstancedShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/StretchInstancedShaderInterface;") };
 };

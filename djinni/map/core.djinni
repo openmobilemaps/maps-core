@@ -51,6 +51,8 @@ map_interface = interface +c {
     set_viewport_size(size: vec_2_i);
     set_background_color(color: color);
 
+	is_3d(): bool;
+
     invalidate();
 
     # Must be called on the rendering thread!

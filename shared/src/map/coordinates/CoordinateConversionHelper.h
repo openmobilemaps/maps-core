@@ -23,7 +23,7 @@
 
 class CoordinateConversionHelper : public CoordinateConversionHelperInterface {
   public:
-    CoordinateConversionHelper(MapCoordinateSystem mapCoordinateSystem);
+    CoordinateConversionHelper(MapCoordinateSystem mapCoordinateSystem, bool enforceLtrTtb);
 
     /**
      * This instance is independent of the map and does not know about the rendering system.
@@ -56,6 +56,7 @@ class CoordinateConversionHelper : public CoordinateConversionHelperInterface {
     std::shared_ptr<CoordinateConverterInterface> renderSystemConverter;
 
     int32_t mapCoordinateSystemIdentifier;
+    bool enforceLtrTtb = false;
 
     std::recursive_mutex converterMutex;
 

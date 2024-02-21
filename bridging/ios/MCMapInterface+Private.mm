@@ -211,6 +211,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (BOOL)is3d {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->is3d();
+        return ::djinni::Bool::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (void)invalidate {
     try {
         _cppRefHandle.get()->invalidate();

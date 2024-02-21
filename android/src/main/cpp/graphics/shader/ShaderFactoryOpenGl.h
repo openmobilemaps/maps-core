@@ -35,6 +35,8 @@ public:
 
     std::shared_ptr<RasterShaderInterface> createRasterShader() override;
 
+    std::shared_ptr<RasterShaderInterface> createUnitSphereRasterShader() override;
+
     std::shared_ptr<StretchShaderInterface> createStretchShader() override;
 
     std::shared_ptr<StretchInstancedShaderInterface> createStretchInstancedShader() override;

@@ -56,6 +56,8 @@ abstract class MapInterface {
 
     abstract fun setBackgroundColor(color: io.openmobilemaps.mapscore.shared.graphics.common.Color)
 
+    abstract fun is3d(): Boolean
+
     abstract fun invalidate()
 
     /** Must be called on the rendering thread! */
@@ -211,6 +213,12 @@ abstract class MapInterface {
             native_setBackgroundColor(this.nativeRef, color)
         }
         private external fun native_setBackgroundColor(_nativeRef: Long, color: io.openmobilemaps.mapscore.shared.graphics.common.Color)
+
+        override fun is3d(): Boolean {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_is3d(this.nativeRef)
+        }
+        private external fun native_is3d(_nativeRef: Long): Boolean
 
         override fun invalidate() {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

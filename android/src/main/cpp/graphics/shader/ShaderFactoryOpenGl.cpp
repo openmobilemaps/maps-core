@@ -31,7 +31,11 @@ std::shared_ptr<AlphaInstancedShaderInterface> ShaderFactoryOpenGl::createAlphaI
 }
 
 std::shared_ptr<RasterShaderInterface> ShaderFactoryOpenGl::createRasterShader() {
-    return std::make_shared<RasterShaderOpenGl>();
+    return std::make_shared<RasterShaderOpenGl>(false);
+}
+
+std::shared_ptr<RasterShaderInterface> ShaderFactoryOpenGl::createUnitSphereRasterShader() {
+    return std::make_shared<RasterShaderOpenGl>(true);
 }
 
 std::shared_ptr<LineGroupShaderInterface> ShaderFactoryOpenGl::createLineGroupShader() {

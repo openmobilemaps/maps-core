@@ -18,8 +18,8 @@
 
 class DefaultSystemToRenderConverter : public CoordinateConverterInterface {
   public:
-    DefaultSystemToRenderConverter(const MapCoordinateSystem &mapCoordinateSystem)
-        : mapCoordinateSystemIdentifier(mapCoordinateSystem.identifier) {
+    DefaultSystemToRenderConverter(const MapCoordinateSystem &mapCoordinateSystem, bool enforceLtrTtb)
+        : mapCoordinateSystemIdentifier(mapCoordinateSystem.identifier), enforceLtrTtb(enforceLtrTtb) {
         boundsLeft = mapCoordinateSystem.bounds.topLeft.x;
         boundsTop = mapCoordinateSystem.bounds.topLeft.y;
         boundsRight = mapCoordinateSystem.bounds.bottomRight.x;
@@ -29,9 +29,13 @@ class DefaultSystemToRenderConverter : public CoordinateConverterInterface {
     }
 
     virtual Coord convert(const Coord &coordinate) override {
-        double x = (boundsRight < boundsLeft) ? -coordinate.x + boundsRight : (coordinate.x - boundsLeft);
-        double y = (boundsBottom < boundsTop) ? -coordinate.y + boundsBottom : (coordinate.y - boundsTop);
-        return Coord(getTo(), x - halfWidth, y - halfHeight, coordinate.z);
+        if (enforceLtrTtb) {
+            double x = (boundsRight < boundsLeft) ? -coordinate.x + boundsRight : (coordinate.x - boundsLeft);
+            double y = (boundsBottom < boundsTop) ? -coordinate.y + boundsBottom : (coordinate.y - boundsTop);
+            return Coord(getTo(), x - halfWidth, y - halfHeight, coordinate.z);
+        } else {
+            return Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(), coordinate.x, coordinate.y, coordinate.z);
+        }
     }
 
     virtual int32_t getFrom() override { return mapCoordinateSystemIdentifier; }
@@ -45,6 +49,7 @@ class DefaultSystemToRenderConverter : public CoordinateConverterInterface {
     double boundsBottom;
     double halfWidth;
     double halfHeight;
+    bool enforceLtrTtb;
 
     int32_t mapCoordinateSystemIdentifier;
 };
