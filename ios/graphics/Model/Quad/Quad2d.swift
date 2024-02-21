@@ -28,6 +28,8 @@ final class Quad2d: BaseGraphicsObject {
 
     private var renderAsMask = false
 
+    private var subdivisionFactor: Int32 = 0
+
     init(shader: MCShaderProgramInterface, metalContext: MetalContext, label: String = "Quad2d") {
         self.shader = shader
         super.init(device: metalContext.device,
@@ -141,25 +143,79 @@ extension Quad2d: MCMaskingObjectInterface {
 }
 
 extension Quad2d: MCQuad2dInterface {
-    func setFrame(_ frame: MCQuad2dD, textureCoordinates: MCRectD) {
-        /*
-         The quad is made out of 4 vertices as following
-         B----C
-         |    |
-         |    |
-         A----D
-         Where A-C are joined to form two triangles
-         */
-        let vertices: [Vertex] = [
-            Vertex(position: frame.bottomLeft, textureU: textureCoordinates.xF, textureV: textureCoordinates.yF + textureCoordinates.heightF), // A
-            Vertex(position: frame.topLeft, textureU: textureCoordinates.xF, textureV: textureCoordinates.yF), // B
-            Vertex(position: frame.topRight, textureU: textureCoordinates.xF + textureCoordinates.widthF, textureV: textureCoordinates.yF), // C
-            Vertex(position: frame.bottomRight, textureU: textureCoordinates.xF + textureCoordinates.widthF, textureV: textureCoordinates.yF + textureCoordinates.heightF), // D
-        ]
-        let indices: [UInt16] = [
-            0, 1, 2, // ABC
-            0, 2, 3, // ACD
-        ]
+
+    func setSubdivisionFactor(_ factor: Int32) {
+        self.subdivisionFactor = factor
+    }
+
+
+    func setFrame(_ frame: MCQuad3dD, textureCoordinates: MCRectD) {
+
+        var vertices: [Vertex3D] = []
+        var indices: [UInt16] = []
+
+        if subdivisionFactor == 0 {
+            /*
+             The quad is made out of 4 vertices as following
+             B----C
+             |    |
+             |    |
+             A----D
+             Where A-C are joined to form two triangles
+             */
+            vertices = [
+                Vertex3D(position: frame.bottomLeft, textureU: textureCoordinates.xF, textureV: textureCoordinates.yF + textureCoordinates.heightF), // A
+                Vertex3D(position: frame.topLeft, textureU: textureCoordinates.xF, textureV: textureCoordinates.yF), // B
+                Vertex3D(position: frame.topRight, textureU: textureCoordinates.xF + textureCoordinates.widthF, textureV: textureCoordinates.yF), // C
+                Vertex3D(position: frame.bottomRight, textureU: textureCoordinates.xF + textureCoordinates.widthF, textureV: textureCoordinates.yF + textureCoordinates.heightF), // D
+            ]
+            indices = [
+                0, 1, 2, // ABC
+                0, 2, 3, // ACD
+            ]
+
+        } else {
+
+            let numSubd = Int(pow(2.0, Double(subdivisionFactor)))
+
+            let deltaRTop = MCVec3F(x: Float(frame.topRight.x - frame.topLeft.x),
+                                    y: Float(frame.topRight.y - frame.topLeft.y),
+                                    z: Float(frame.topRight.z - frame.topLeft.z))
+            let deltaDLeft = MCVec3F(x: Float(frame.bottomLeft.x - frame.topLeft.x),
+                                     y: Float(frame.bottomLeft.y - frame.topLeft.y),
+                                     z: Float(frame.bottomLeft.z - frame.topLeft.z))
+            let deltaDRight = MCVec3F(x: Float(frame.bottomRight.x - frame.topRight.x),
+                                      y: Float(frame.bottomRight.y - frame.topRight.y),
+                                      z: Float(frame.bottomRight.z - frame.topRight.z))
+
+            for iR in 0...numSubd {
+                let pcR = Float(iR) / Float(numSubd)
+                let originX = frame.topLeft.xF + pcR * deltaRTop.x
+                let originY = frame.topLeft.yF + pcR * deltaRTop.y
+                let originZ = frame.topLeft.zF + pcR * deltaRTop.z
+                for iD in 0...numSubd {
+                    let pcD = Float(iD) / Float(numSubd)
+                    let deltaDX = pcD * ((1.0 - pcR) * deltaDLeft.x + pcR * deltaDRight.x)
+                    let deltaDY = pcD * ((1.0 - pcR) * deltaDLeft.y + pcR * deltaDRight.y)
+                    let deltaDZ = pcD * ((1.0 - pcR) * deltaDLeft.z + pcR * deltaDRight.z)
+
+                    let u: Float = Float(textureCoordinates.xF + pcR * textureCoordinates.widthF)
+                    let v: Float = Float(textureCoordinates.yF + pcD * textureCoordinates.heightF)
+
+                    vertices.append(Vertex3D(x: originX + deltaDX, y: originY + deltaDY, z: originZ + deltaDZ, textureU: u, textureV: v))
+
+                    if iR < numSubd && iD < numSubd {
+                        let baseInd = UInt16(iD + (iR * (numSubd + 1)))
+                        let baseIndNextCol = UInt16(baseInd + UInt16(numSubd + 1))
+                        indices.append(contentsOf: [baseInd, baseInd + 1, baseIndNextCol + 1, baseInd, baseIndNextCol + 1, baseIndNextCol])
+                    }
+                }
+            }
+        }
+
+        guard let verticesBuffer = device.makeBuffer(bytes: vertices, length: MemoryLayout<Vertex3D>.stride * vertices.count, options: []), let indicesBuffer = device.makeBuffer(bytes: indices, length: MemoryLayout<UInt16>.stride * indices.count, options: []) else {
+            fatalError("Cannot allocate buffers")
+        }
 
         lock.withCritical {
             self.verticesBuffer.copyOrCreate(bytes: vertices, length: MemoryLayout<Vertex>.stride * vertices.count, device: device)

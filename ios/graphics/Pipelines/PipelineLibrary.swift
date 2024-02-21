@@ -131,6 +131,7 @@ public enum PipelineType: String, CaseIterable, Codable {
     case rasterShader
     case stretchShader
     case stretchInstancedShader
+    case unitSphereRasterShader
 
     var label: String {
         switch self {
@@ -149,6 +150,7 @@ public enum PipelineType: String, CaseIterable, Codable {
             case .rasterShader: return "Raster shader"
             case .stretchShader: return "Stretch shader"
             case .stretchInstancedShader: return "Stretch Instanced shader"
+            case .unitSphereRasterShader: return "Unit Sphere Raster Shader"
         }
     }
 
@@ -169,6 +171,7 @@ public enum PipelineType: String, CaseIterable, Codable {
             case .rasterShader: return "rasterVertexShader"
             case .stretchShader: return "stretchVertexShader"
             case .stretchInstancedShader: return "stretchInstancedVertexShader"
+            case .unitSphereRasterShader: return "unitSphereRasterVertexShader"
         }
     }
 
@@ -189,6 +192,7 @@ public enum PipelineType: String, CaseIterable, Codable {
             case .rasterShader: return "rasterFragmentShader"
             case .stretchShader: return "stretchFragmentShader"
             case .stretchInstancedShader: return "stretchInstancedFragmentShader"
+            case .unitSphereRasterShader: return "rasterFragmentShader"
         }
     }
 
@@ -196,9 +200,11 @@ public enum PipelineType: String, CaseIterable, Codable {
         switch self {
             case .lineGroupShader:
                 return LineVertex.descriptor
-        case .polygonGroupShader, .polygonPatternGroupShader, .polygonPatternFadeInGroupShader, .polygonStripedGroupShader:
+            case .polygonGroupShader, .polygonPatternGroupShader, .polygonPatternFadeInGroupShader, .polygonStripedGroupShader:
                 return PolygonVertex.descriptor
-            default: 
+            case .rasterShader, .unitSphereRasterShader:
+                return Vertex3D.descriptor
+            default:
                 return Vertex.descriptor
         }
     }

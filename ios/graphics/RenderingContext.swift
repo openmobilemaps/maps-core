@@ -19,6 +19,8 @@ public class RenderingContext: NSObject {
     public weak var computeEncoder: MTLComputeCommandEncoder?
     public weak var sceneView: MCMapView?
 
+    public var cullMode: MCRenderingCullMode = .NONE
+
     public lazy var mask: MTLDepthStencilState? = {
         let descriptor = MTLStencilDescriptor()
         descriptor.stencilCompareFunction = .always
@@ -73,10 +75,10 @@ public class RenderingContext: NSObject {
     /// this is needed to clear the stencilbuffer
     lazy var stencilClearQuad: Quad2d = {
         let quad = Quad2d(shader: ClearStencilShader(), metalContext: .current, label: "ClearStencil")
-        quad.setFrame(.init(topLeft: .init(x: -1, y: 1),
-                            topRight: .init(x: 1, y: 1),
-                            bottomRight: .init(x: 1, y: -1),
-                            bottomLeft: .init(x: -1, y: -1)),
+        quad.setFrame(.init(topLeft: .init(x: -1, y: 1, z: 0),
+                            topRight: .init(x: 1, y: 1, z: 0),
+                            bottomRight: .init(x: 1, y: -1, z: 0),
+                            bottomLeft: .init(x: -1, y: -1, z: 0)),
                       textureCoordinates: .init(x: 0, y: 0, width: 0, height: 0))
         quad.setup(self)
         return quad
@@ -94,6 +96,10 @@ public class RenderingContext: NSObject {
 }
 
 extension RenderingContext: MCRenderingContextInterface {
+    public func setCulling(_ mode: MCRenderingCullMode) {
+        self.cullMode = mode
+    }
+    
     public func preRenderStencilMask() {
     }
 
@@ -103,6 +109,15 @@ extension RenderingContext: MCRenderingContextInterface {
 
     public func setupDrawFrame() {
         currentPipeline = nil
+
+        switch cullMode {
+            case .BACK:
+                encoder?.setCullMode(.back)
+            case .FRONT:
+                encoder?.setCullMode(.front)
+            case .NONE:
+                encoder?.setCullMode(.none)
+        }
     }
 
     public func onSurfaceCreated() {

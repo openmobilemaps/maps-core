@@ -12,7 +12,10 @@ import Foundation
 import MapCoreSharedModule
 
 class ShaderFactory: MCShaderFactoryInterface {
-    
+    func createUnitSphereRasterShader() -> MCRasterShaderInterface? {
+        RasterShader(shader: .unitSphereRasterShader)
+    }
+
     func createTextShader() -> MCTextShaderInterface? {
         TextShader()
     }
