@@ -67,7 +67,6 @@ open class MCTextureLoader: MCLoaderInterface {
         }
 
         var urlRequest = URLRequest(url: url)
-        urlRequest.cachePolicy = .reloadIgnoringLocalAndRemoteCacheData
 
         modifyUrlRequest(request: &urlRequest)
 

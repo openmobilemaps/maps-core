@@ -18,7 +18,7 @@ public class RenderingContext: NSObject {
     public weak var encoder: MTLRenderCommandEncoder?
     public weak var sceneView: MCMapView?
 
-    public var cullMode: MCRenderingCullMode = .NONE
+    public var cullMode: MCRenderingCullMode?
 
     public lazy var mask: MTLDepthStencilState? = {
         let descriptor = MTLStencilDescriptor()
@@ -108,14 +108,18 @@ extension RenderingContext: MCRenderingContextInterface {
 
     public func setupDrawFrame() {
         currentPipeline = nil
-
-        switch cullMode {
-            case .BACK:
-                encoder?.setCullMode(.back)
-            case .FRONT:
-                encoder?.setCullMode(.front)
-            case .NONE:
-                encoder?.setCullMode(.none)
+        if let cullMode {
+            /*
+             Set the cullMode inverse in order to be consistent with opengl
+             */
+            switch cullMode {
+                case .BACK:
+                    encoder?.setCullMode(.front)
+                case .FRONT:
+                    encoder?.setCullMode(.back)
+                case .NONE:
+                    encoder?.setCullMode(.none)
+            }
         }
     }
 
