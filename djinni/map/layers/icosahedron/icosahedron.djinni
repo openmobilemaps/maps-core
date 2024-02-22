@@ -1,8 +1,9 @@
 @extern "../../../yaml/layer_interface.yaml"
 @extern "../../../../external/djinni/support-lib/dataref.yaml"
+@extern "../../../../external/djinni/support-lib/future.yaml"
 
 icosahedron_layer_callback_interface = interface +c +j +o {
-    get_data(): DataRef;
+    get_data(): future<DataRef>;
 }
 
 icosahedron_layer_interface = interface +c {

@@ -3,6 +3,7 @@
 
 #include "NativeIcosahedronLayerCallbackInterface.h"  // my header
 #include "DataRef_jni.hpp"
+#include "Future_jni.hpp"
 
 namespace djinni_generated {
 
@@ -14,13 +15,13 @@ NativeIcosahedronLayerCallbackInterface::JavaProxy::JavaProxy(JniType j) : Handl
 
 NativeIcosahedronLayerCallbackInterface::JavaProxy::~JavaProxy() = default;
 
-::djinni::DataRef NativeIcosahedronLayerCallbackInterface::JavaProxy::getData() {
+::djinni::Future<::djinni::DataRef> NativeIcosahedronLayerCallbackInterface::JavaProxy::getData() {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
     const auto& data = ::djinni::JniClass<::djinni_generated::NativeIcosahedronLayerCallbackInterface>::get();
     auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_getData);
     ::djinni::jniExceptionCheck(jniEnv);
-    return ::djinni::NativeDataRef::toCpp(jniEnv, jret);
+    return ::djinni::FutureAdaptor<::djinni::NativeDataRef>::toCpp(jniEnv, jret);
 }
 
 CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_icosahedron_IcosahedronLayerCallbackInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
@@ -30,12 +31,12 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_icosah
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT ::djinni::NativeDataRef::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_icosahedron_IcosahedronLayerCallbackInterface_00024CppProxy_native_1getData(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT ::djinni::FutureAdaptor<::djinni::NativeDataRef>::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_icosahedron_IcosahedronLayerCallbackInterface_00024CppProxy_native_1getData(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::IcosahedronLayerCallbackInterface>(nativeRef);
         auto r = ref->getData();
-        return ::djinni::release(::djinni::NativeDataRef::fromCpp(jniEnv, r));
+        return ::djinni::release(::djinni::FutureAdaptor<::djinni::NativeDataRef>::fromCpp(jniEnv, std::move(r)));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 

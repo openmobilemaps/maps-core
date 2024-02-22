@@ -8,6 +8,7 @@
 #import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
 #import "DataRef_objc.hpp"
+#import "Future_objc.hpp"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -32,10 +33,10 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     return self;
 }
 
-- (nonnull NSData *)getData {
+- (nonnull DJFuture<NSData *> *)getData {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->getData();
-        return ::djinni::NativeDataRef::fromCpp(objcpp_result_);
+        return ::djinni::FutureAdaptor<::djinni::NativeDataRef>::fromCpp(std::move(objcpp_result_));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -48,11 +49,11 @@ class IcosahedronLayerCallbackInterface::ObjcProxy final
     friend class ::djinni_generated::IcosahedronLayerCallbackInterface;
 public:
     using ObjcProxyBase::ObjcProxyBase;
-    ::djinni::DataRef getData() override
+    ::djinni::Future<::djinni::DataRef> getData() override
     {
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getData];
-            return ::djinni::NativeDataRef::toCpp(objcpp_result_);
+            return ::djinni::FutureAdaptor<::djinni::NativeDataRef>::toCpp(objcpp_result_);
         }
     }
 };
