@@ -40,7 +40,7 @@ struct LineVertexOut {
     float2 lineB;
     int stylingIndex;
     float width;
-    int segmentType;
+    int segmentType; // (0 inner, 1 start, 2 end, 3 single segment
     float lengthPrefix;
     float scalingFactor;
     float dashingSize;
@@ -48,23 +48,23 @@ struct LineVertexOut {
 };
 
 struct LineStyling {
-  float width; // 0
-  float4 color; // 1 2 3 4
-  float4 gapColor; // 5 6 7 8
-  float widthAsPixels; // 9
-  float opacity; // 10
-  float blur; // 11
-  float capType; // 12
-  float numDashValues; // 13
-  float dashArray[4]; // 14 15 16 17
-  float offset; // 18
-  bool dotted; // 19
+    float width; // 0
+    float4 color; // 1 2 3 4
+    float4 gapColor; // 5 6 7 8
+    float widthAsPixels; // 9
+    float opacity; // 10
+    float blur; // 11
+    float capType; // 12
+    float numDashValues; // 13
+    float dashArray[4]; // 14 15 16 17
+    float offset; // 18
+    float dashCapType; // 19
 };
 
 /**
-
+ 
  var numDashValues: char
-
+ 
  var dashArray: [Float]
  */
 
@@ -76,43 +76,43 @@ lineGroupVertexShader(const LineVertexIn vertexIn [[stage_in]],
                       constant float *styling [[buffer(4)]])
 {
     int styleIndex = (int(vertexIn.stylingIndex) & 0xFF) * 20;
-
+    
     // extend position in width direction and in length direction by width / 2.0
     float width = styling[styleIndex] / 2.0;
     float dashingSize = styling[styleIndex];
-
+    
     float blur = styling[styleIndex + 11];
-
+    
     if (styling[styleIndex + 9] > 0.0) {
         blur *= scalingFactor;
         width *= scalingFactor;
         dashingSize *= dashingScalingFactor;
     }
-
+    
     float2 widthNormal = vertexIn.widthNormal;
     float2 lengthNormal = float2(widthNormal.y, -widthNormal.x);
-
+    
     int index = int(vertexIn.vertexIndex);
     if(index == 0) {
-      lengthNormal *= -1.0;
-      widthNormal *= -1.0;
+        lengthNormal *= -1.0;
+        widthNormal *= -1.0;
     } else if(index == 1) {
-      lengthNormal *= -1.0;
+        lengthNormal *= -1.0;
     } else if(index == 2) {
-      // all fine
+        // all fine
     } else if(index == 3) {
-      widthNormal *= -1.0;
+        widthNormal *= -1.0;
     }
-
+    
     float o = styling[styleIndex + 18] * scalingFactor;
     float4 offset = float4(vertexIn.widthNormal.x * o, vertexIn.widthNormal.y * o, 0.0, 0.0);
-
+    
     float4 extendedPosition = float4(vertexIn.position.xy, 0.0, 1.0) +
-                              float4((lengthNormal + widthNormal).xy, 0.0,0.0)
-                              * float4(width, width, width, 0.0) + offset;
-
-  int segmentType = int(vertexIn.stylingIndex) >> 8;// / 256.0;
-
+    float4((lengthNormal + widthNormal).xy, 0.0,0.0)
+    * float4(width, width, width, 0.0) + offset;
+    
+    int segmentType = int(vertexIn.stylingIndex) >> 8;// / 256.0;
+    
     LineVertexOut out {
         .position = mvpMatrix * extendedPosition,
         .uv = extendedPosition.xy,
@@ -126,7 +126,7 @@ lineGroupVertexShader(const LineVertexIn vertexIn [[stage_in]],
         .dashingSize = dashingSize,
         .scaledBlur = blur
     };
-
+    
     return out;
 }
 
@@ -134,99 +134,164 @@ fragment float4
 lineGroupFragmentShader(LineVertexOut in [[stage_in]],
                         constant float *styling [[buffer(1)]])
 {
-  float lineLength = length(in.lineB);
-  float t = dot(in.lineA, normalize(in.lineB) / lineLength);
-
-  int capType = int(styling[in.stylingIndex + 12]);
-  char segmentType = in.segmentType;
-
-  float numDash = styling[in.stylingIndex + 13];
-
-  float d;
-
-  if (t < 0.0 || t > 1.0) {
-    if (numDash > 0) {
-      discard_fragment();
-    }
-    if (segmentType == 0 || capType == 1 || (segmentType == 2 && t < 0.0) || (segmentType == 1 && t > 1.0)) {
-      d = min(length(in.lineA), length(in.lineA - in.lineB));
-    } else if (capType == 2) {
-      float dLen = t < 0.0 ? -t * lineLength : (t - 1.0) * lineLength;
-      float2 intersectPt = t * in.lineB;
-      float dOrth = abs(length(in.lineA - intersectPt));
-      d = max(dLen, dOrth);
+    float lineLength = length(in.lineB);
+    float t = dot(in.lineA, normalize(in.lineB) / lineLength);
+    
+    int capType = int(styling[in.stylingIndex + 12]);
+    char segmentType = in.segmentType;
+    
+    float numDash = styling[in.stylingIndex + 13];
+    
+    float d;
+    
+    if (t < 0.0 || t > 1.0) {
+        if ((segmentType == 0 || capType == 1 || (segmentType == 2 && t < 0.0) || (segmentType == 1 && t > 1.0))) {
+            d = min(length(in.lineA), length(in.lineA - in.lineB));
+        } else if (capType == 2) {
+            float dLen = t < 0.0 ? -t * lineLength : (t - 1.0) * lineLength;
+            float2 intersectPt = t * in.lineB;
+            float dOrth = abs(length(in.lineA - intersectPt));
+            d = max(dLen, dOrth);
+        } else {
+            d = 0;
+            discard_fragment();
+        }
     } else {
-      d = 0;
-      discard_fragment();
+        float2 intersectPt = t * in.lineB;
+        d = abs(length(in.lineA - intersectPt));
     }
-  } else {
-    float2 intersectPt = t * in.lineB;
-    d = abs(length(in.lineA - intersectPt));
-  }
-
-  if (d > in.width) {
-    discard_fragment();
-  }
-
-  float opacity = styling[in.stylingIndex + 10];
-  float colorA = styling[in.stylingIndex + 4];
-  float colorAGap = styling[in.stylingIndex + 8];
-
-  float a = colorA * opacity;
-  float aGap = colorAGap * opacity;
     
-  bool dottedLine = styling[in.stylingIndex + 19];
-    
-  if(in.scaledBlur > 0 && t > 0.0 && t < 1.0) {
-    float nonBlurRange = (in.width - in.scaledBlur);
-    if (d > nonBlurRange) {
-      a *= clamp(1 - max(0.0, d - nonBlurRange) / (in.scaledBlur) ,0.0, 1.0);
-    }
-  }
-
-  if (dottedLine) {
-    half factorToT = (in.width * 2) / lineLength;
-    half dashTotalDotted = 2.0 * factorToT;
-    half offset = half(in.lengthPrefix) / lineLength;
-    half startOffsetSegmentDotted = fmod(offset, dashTotalDotted);
-    half pos = t + startOffsetSegmentDotted;
-
-    half intraDashPosDotted = fmod(pos, dashTotalDotted);
-    if ((intraDashPosDotted > 1.0 * factorToT && intraDashPosDotted < dashTotalDotted) ||
-                            (length(half2(min(abs(intraDashPosDotted - 0.5 * factorToT), 0.5 * factorToT + dashTotalDotted - intraDashPosDotted) / (0.5 * factorToT), d / in.width)) > 1.0)) {
+    if (d > in.width) {
         discard_fragment();
     }
-  } else if(numDash > 0) {
-    float dashArray[4] = { styling[in.stylingIndex + 14],
-                           styling[in.stylingIndex + 15],
-                           styling[in.stylingIndex + 16],
-                           styling[in.stylingIndex + 17] };
-
-    float factorToT = (in.width * 2) / lineLength;
-    float dashTotal = dashArray[3] * factorToT;
-    float startOffsetSegment = fmod(in.lengthPrefix / lineLength, dashTotal);
-    float intraDashPos = fmod(t + startOffsetSegment, dashTotal);
-
-    if ((intraDashPos > dashArray[0] * factorToT && intraDashPos < dashArray[1] * factorToT) ||
-        (intraDashPos > dashArray[2] * factorToT && intraDashPos < dashArray[3] * factorToT)) {
-
-      if(aGap == 0) {
-        discard_fragment();
-      }
-
-      return float4(styling[in.stylingIndex + 5],
-                    styling[in.stylingIndex + 6],
-                    styling[in.stylingIndex + 7],
-                    1.0) * aGap;
+    
+    float opacity = styling[in.stylingIndex + 10];
+    float colorA = styling[in.stylingIndex + 4];
+    float colorAGap = styling[in.stylingIndex + 8];
+    
+    float a = colorA * opacity;
+    float aGap = colorAGap * opacity;
+    
+    if(in.scaledBlur > 0 && t > 0.0 && t < 1.0) {
+        float nonBlurRange = (in.width - in.scaledBlur);
+        if (d > nonBlurRange) {
+            a *= clamp(1 - max(0.0, d - nonBlurRange) / (in.scaledBlur) ,0.0, 1.0);
+        }
     }
-  }
 
-  if(a == 0) {
-    discard_fragment();
-  }
+    if(numDash > 0) {
+        float dashArray[4] = { styling[in.stylingIndex + 14],
+            styling[in.stylingIndex + 15],
+            styling[in.stylingIndex + 16],
+            styling[in.stylingIndex + 17] };
+        
+        float factorToT = (in.width * 2) / lineLength;
+        
+        float dashTotal = dashArray[3] * factorToT;
+        float startOffsetSegment = fmod(half(in.lengthPrefix) / lineLength, dashTotal);
+        float intraDashPos = fmod(t + startOffsetSegment, dashTotal);
 
-  return float4(styling[in.stylingIndex + 1],
-                styling[in.stylingIndex + 2],
-                styling[in.stylingIndex + 3],
-                1.0) * a;
+        if ((intraDashPos > dashArray[0] * factorToT && intraDashPos < dashArray[1] * factorToT) ||
+            (intraDashPos > dashArray[2] * factorToT && intraDashPos < dashArray[3] * factorToT)) {
+            
+            if(aGap == 0) {
+                discard_fragment();
+            }
+            
+            return float4(styling[in.stylingIndex + 5],
+                          styling[in.stylingIndex + 6],
+                          styling[in.stylingIndex + 7],
+                          1.0) * aGap;
+        } else {
+            // inside segment
+            int dashedCapType = int(styling[in.stylingIndex + 19]);
+            
+            // Rounded dash caps
+            if (dashedCapType == 0) {
+                float s = factorToT / 2; //
+          
+                float R = in.width;
+                float mid = R - (intraDashPos) + t * lineLength;
+                float start = in.lengthPrefix;
+                float end = in.lengthPrefix + lineLength;
+
+                if (intraDashPos < s) {
+                    // Linke seite
+                    float dy = d / in.width;
+                    float dx = 1 - intraDashPos / s;
+                    
+                 
+                    
+//                    if (mid > start) {
+//                      //  discard_fragment();
+//
+//                        return float4(1,
+//                                      1,
+//                                      0,
+//                                      0.3) * a;
+//                    }
+                    if (dy * dy + dx * dx >  0.99 && dy * dy + dx * dx <  1.01) {
+                        return float4(0, 0,0,1);
+
+                    } else if (dy * dy + dx * dx > 1) {
+//                        return float4(1,
+//                                      0,
+//                                      1,
+//                                      0.8) * a;
+                        discard_fragment();
+                    } else {
+                        return float4(styling[in.stylingIndex + 1],
+                                      styling[in.stylingIndex + 2],
+                                      styling[in.stylingIndex + 3],
+                                      1.0) * a;
+                    }
+                    
+                } else if (intraDashPos > dashArray[0] * factorToT - s && intraDashPos < dashArray[0] * factorToT) {
+                  //  discard_fragment();
+
+                    
+//                    if (mid < end) {
+//                        return float4(1,
+//                                      0,
+//                                      1,
+//                                      0.3) * a;
+//                    }
+                    
+                    float dy = d / in.width;
+                    float dx = 1 - (dashArray[0] * factorToT - intraDashPos) / s;
+                    
+                    if (dy * dy + dx * dx >  0.99 && dy * dy + dx * dx <  1.01) {
+                        return float4(0, 0,0,1);
+
+                    } else if (dy * dy + dx * dx > 1) {
+                        discard_fragment();
+                    } else {
+                        return float4(styling[in.stylingIndex + 1],
+                                      styling[in.stylingIndex + 2],
+                                      styling[in.stylingIndex + 3],
+                                      1.0) * a;
+                    }
+                } else {
+                    return float4(styling[in.stylingIndex + 1],
+                                  styling[in.stylingIndex + 2],
+                                  styling[in.stylingIndex + 3],
+                                  1.0) * a;
+                }
+            }
+            
+            return float4(0,
+                          0,
+                          0,
+                          1.0);
+        }
+    }
+    
+    if(a == 0) {
+        discard_fragment();
+    }
+    
+    return float4(styling[in.stylingIndex + 1],
+                  styling[in.stylingIndex + 2],
+                  styling[in.stylingIndex + 3],
+                  1.0) * a;
 }
