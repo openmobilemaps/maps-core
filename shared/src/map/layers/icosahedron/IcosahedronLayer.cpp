@@ -28,6 +28,7 @@ void IcosahedronLayer::onAdded(const std::shared_ptr<MapInterface> & mapInterfac
 
     
     shader = mapInterface->getShaderFactory()->createIcosahedronColorShader();
+    shader->setColor(1.0, 0.0, 0.0, 1.0);
     object = mapInterface->getGraphicsObjectFactory()->createIcosahedronObject(shader->asShaderProgramInterface());
 
     auto renderObject =  std::make_shared<RenderObject>(object->asGraphicsObject());
