@@ -63,4 +63,8 @@ class ShaderFactory: MCShaderFactoryInterface {
     func createStretchInstancedShader() -> MCStretchInstancedShaderInterface? {
         StretchInstancedShader()
     }
+
+    func createIcosahedronColorShader() -> MCColorShaderInterface? {
+        nil
+    }
 }

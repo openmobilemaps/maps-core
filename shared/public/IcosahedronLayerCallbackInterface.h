@@ -4,10 +4,11 @@
 #pragma once
 
 #include "DataRef.hpp"
+#include "Future.hpp"
 
 class IcosahedronLayerCallbackInterface {
 public:
     virtual ~IcosahedronLayerCallbackInterface() = default;
 
-    virtual ::djinni::DataRef getData() = 0;
+    virtual ::djinni::Future<::djinni::DataRef> getData() = 0;
 };

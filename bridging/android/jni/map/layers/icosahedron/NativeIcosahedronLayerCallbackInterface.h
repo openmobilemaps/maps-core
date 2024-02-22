@@ -33,14 +33,14 @@ private:
         JavaProxy(JniType j);
         ~JavaProxy();
 
-        ::djinni::DataRef getData() override;
+        ::djinni::Future<::djinni::DataRef> getData() override;
 
     private:
         friend ::djinni::JniInterface<::IcosahedronLayerCallbackInterface, ::djinni_generated::NativeIcosahedronLayerCallbackInterface>;
     };
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/map/layers/icosahedron/IcosahedronLayerCallbackInterface") };
-    const jmethodID method_getData { ::djinni::jniGetMethodID(clazz.get(), "getData", "()Ljava/nio/ByteBuffer;") };
+    const jmethodID method_getData { ::djinni::jniGetMethodID(clazz.get(), "getData", "()Lcom/snapchat/djinni/Future;") };
 };
 
 } // namespace djinni_generated

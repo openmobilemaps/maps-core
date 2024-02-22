@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class IcosahedronLayerCallbackInterface {
 
-    abstract fun getData(): java.nio.ByteBuffer
+    abstract fun getData(): com.snapchat.djinni.Future<java.nio.ByteBuffer>
 
     private class CppProxy : IcosahedronLayerCallbackInterface {
         private val nativeRef: Long
@@ -25,10 +25,10 @@ abstract class IcosahedronLayerCallbackInterface {
             external fun nativeDestroy(nativeRef: Long)
         }
 
-        override fun getData(): java.nio.ByteBuffer {
+        override fun getData(): com.snapchat.djinni.Future<java.nio.ByteBuffer> {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             return native_getData(this.nativeRef)
         }
-        private external fun native_getData(_nativeRef: Long): java.nio.ByteBuffer
+        private external fun native_getData(_nativeRef: Long): com.snapchat.djinni.Future<java.nio.ByteBuffer>
     }
 }
