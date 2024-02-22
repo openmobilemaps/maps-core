@@ -132,6 +132,7 @@ public enum PipelineType: String, CaseIterable, Codable {
     case stretchShader
     case stretchInstancedShader
     case unitSphereRasterShader
+    case icosahedronColorShader
 
     var label: String {
         switch self {
@@ -151,6 +152,7 @@ public enum PipelineType: String, CaseIterable, Codable {
             case .stretchShader: return "Stretch shader"
             case .stretchInstancedShader: return "Stretch Instanced shader"
             case .unitSphereRasterShader: return "Unit Sphere Raster Shader"
+            case .icosahedronColorShader: return "Icosahedron Color Shader"
         }
     }
 
@@ -172,6 +174,7 @@ public enum PipelineType: String, CaseIterable, Codable {
             case .stretchShader: return "stretchVertexShader"
             case .stretchInstancedShader: return "stretchInstancedVertexShader"
             case .unitSphereRasterShader: return "unitSphereRasterVertexShader"
+            case .icosahedronColorShader: return "icosahedronVertexShader"
         }
     }
 
@@ -193,6 +196,7 @@ public enum PipelineType: String, CaseIterable, Codable {
             case .stretchShader: return "stretchFragmentShader"
             case .stretchInstancedShader: return "stretchInstancedFragmentShader"
             case .unitSphereRasterShader: return "rasterFragmentShader"
+            case .icosahedronColorShader: return "icosahedronFragmentShader"
         }
     }
 
@@ -204,6 +208,8 @@ public enum PipelineType: String, CaseIterable, Codable {
                 return PolygonVertex.descriptor
             case .rasterShader, .unitSphereRasterShader:
                 return Vertex3D.descriptor
+            case.icosahedronColorShader:
+                return IcosahedronVertex.descriptor
             default:
                 return Vertex.descriptor
         }

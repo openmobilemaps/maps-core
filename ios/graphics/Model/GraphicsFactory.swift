@@ -66,6 +66,7 @@ class GraphicsFactory: MCGraphicsObjectFactoryInterface {
     }
 
     func createIcosahedronObject(_ shader: MCShaderProgramInterface?) -> MCIcosahedronInterface? {
-        nil
+        guard let shader else { fatalError("No Shader provided") }
+        return Icosahedron(shader: shader, metalContext: .current)
     }
 }

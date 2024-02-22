@@ -65,6 +65,6 @@ class ShaderFactory: MCShaderFactoryInterface {
     }
 
     func createIcosahedronColorShader() -> MCColorShaderInterface? {
-        nil
+        IcosahedronShader()
     }
 }
