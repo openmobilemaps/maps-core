@@ -724,8 +724,8 @@ bool MapCamera3d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, cons
         double diffCenterX = -leftDiff * newZoom * screenPixelAsRealMeterFactor;
         double diffCenterY = topDiff * newZoom * screenPixelAsRealMeterFactor;
 
-        focusPointPosition.y += diffCenterX;
-        focusPointPosition.x += diffCenterY;
+        /*focusPointPosition.y += diffCenterX;
+        focusPointPosition.x += diffCenterY;*/
         this->zoom = newZoom;
 
         if (config.rotationEnabled) {
