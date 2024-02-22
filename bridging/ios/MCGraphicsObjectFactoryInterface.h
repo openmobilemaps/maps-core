@@ -3,6 +3,7 @@
 
 #import "MCShaderProgramInterface.h"
 #import <Foundation/Foundation.h>
+@protocol MCIcosahedronInterface;
 @protocol MCLineGroup2dInterface;
 @protocol MCPolygon2dInterface;
 @protocol MCPolygonGroup2dInterface;
@@ -19,6 +20,8 @@
 - (nullable id<MCQuad2dInterface>)createQuad:(nullable id<MCShaderProgramInterface>)shader;
 
 - (nullable id<MCPolygon2dInterface>)createPolygon:(nullable id<MCShaderProgramInterface>)shader;
+
+- (nullable id<MCIcosahedronInterface>)createIcosahedronObject:(nullable id<MCShaderProgramInterface>)shader;
 
 - (nullable id<MCQuad2dInstancedInterface>)createQuadInstanced:(nullable id<MCShaderProgramInterface>)shader;
 

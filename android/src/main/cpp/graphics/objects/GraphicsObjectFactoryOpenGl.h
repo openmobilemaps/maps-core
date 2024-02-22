@@ -35,4 +35,6 @@ public:
     std::shared_ptr<Quad2dInstancedInterface> createQuadInstanced(const std::shared_ptr< ::ShaderProgramInterface> &shader) override;
 
     std::shared_ptr<Quad2dStretchedInstancedInterface> createQuadStretchedInstanced(const std::shared_ptr<::ShaderProgramInterface> &shader) override;
+
+    std::shared_ptr<IcosahedronInterface> createIcosahedronObject(const std::shared_ptr<::ShaderProgramInterface> &shader) override;
 };

@@ -32,6 +32,7 @@ masking_object_interface = interface +c +j +o {
 graphics_object_factory_interface = interface +c +j +o {
     create_quad(shader: shader_program_interface) : quad_2d_interface;
     create_polygon(shader: shader_program_interface) : polygon_2d_interface;
+    create_icosahedron_object(shader: shader_program_interface) : icosahedron_interface;
 
     create_quad_instanced(shader: shader_program_interface): quad_2d_instanced_interface;
     create_quad_stretched_instanced(shader: shader_program_interface): quad_2d_stretched_instanced_interface;
@@ -74,7 +75,7 @@ quad_2d_instanced_interface = interface +c +j +o {
     as_masking_object(): masking_object_interface;
 }
 
-    quad_2d_stretched_instanced_interface = interface +c +j +o {
+quad_2d_stretched_instanced_interface = interface +c +j +o {
     set_frame(frame: quad_2d_d);
 
     set_instance_count(count: i32);
@@ -203,4 +204,9 @@ text_description = record {
 glyph_description = record {
     frame: quad_2d_d;
     texture_coordinates: quad_2d_d;
+}
+
+icosahedron_interface = interface +c +j +o {
+    set_vertices(vertices: shared_bytes, indices: shared_bytes);
+    as_graphics_object(): graphics_object_interface;
 }

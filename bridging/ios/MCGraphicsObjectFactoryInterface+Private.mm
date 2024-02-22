@@ -7,6 +7,7 @@
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
+#import "MCIcosahedronInterface+Private.h"
 #import "MCLineGroup2dInterface+Private.h"
 #import "MCPolygon2dInterface+Private.h"
 #import "MCPolygonGroup2dInterface+Private.h"
@@ -52,6 +53,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     try {
         auto objcpp_result_ = _cppRefHandle.get()->createPolygon(::djinni_generated::ShaderProgramInterface::toCpp(shader));
         return ::djinni_generated::Polygon2dInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nullable id<MCIcosahedronInterface>)createIcosahedronObject:(nullable id<MCShaderProgramInterface>)shader {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->createIcosahedronObject(::djinni_generated::ShaderProgramInterface::toCpp(shader));
+        return ::djinni_generated::IcosahedronInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -139,6 +147,13 @@ public:
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createPolygon:(::djinni_generated::ShaderProgramInterface::fromCpp(c_shader))];
             return ::djinni_generated::Polygon2dInterface::toCpp(objcpp_result_);
+        }
+    }
+    /*not-null*/ std::shared_ptr<::IcosahedronInterface> createIcosahedronObject(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & c_shader) override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createIcosahedronObject:(::djinni_generated::ShaderProgramInterface::fromCpp(c_shader))];
+            return ::djinni_generated::IcosahedronInterface::toCpp(objcpp_result_);
         }
     }
     /*not-null*/ std::shared_ptr<::Quad2dInstancedInterface> createQuadInstanced(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & c_shader) override

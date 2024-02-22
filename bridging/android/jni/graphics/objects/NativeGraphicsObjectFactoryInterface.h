@@ -35,6 +35,7 @@ private:
 
         /*not-null*/ std::shared_ptr<::Quad2dInterface> createQuad(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & shader) override;
         /*not-null*/ std::shared_ptr<::Polygon2dInterface> createPolygon(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & shader) override;
+        /*not-null*/ std::shared_ptr<::IcosahedronInterface> createIcosahedronObject(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & shader) override;
         /*not-null*/ std::shared_ptr<::Quad2dInstancedInterface> createQuadInstanced(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & shader) override;
         /*not-null*/ std::shared_ptr<::Quad2dStretchedInstancedInterface> createQuadStretchedInstanced(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & shader) override;
         /*not-null*/ std::shared_ptr<::LineGroup2dInterface> createLineGroup(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & shader) override;
@@ -52,6 +53,7 @@ private:
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/graphics/objects/GraphicsObjectFactoryInterface") };
     const jmethodID method_createQuad { ::djinni::jniGetMethodID(clazz.get(), "createQuad", "(Lio/openmobilemaps/mapscore/shared/graphics/shader/ShaderProgramInterface;)Lio/openmobilemaps/mapscore/shared/graphics/objects/Quad2dInterface;") };
     const jmethodID method_createPolygon { ::djinni::jniGetMethodID(clazz.get(), "createPolygon", "(Lio/openmobilemaps/mapscore/shared/graphics/shader/ShaderProgramInterface;)Lio/openmobilemaps/mapscore/shared/graphics/objects/Polygon2dInterface;") };
+    const jmethodID method_createIcosahedronObject { ::djinni::jniGetMethodID(clazz.get(), "createIcosahedronObject", "(Lio/openmobilemaps/mapscore/shared/graphics/shader/ShaderProgramInterface;)Lio/openmobilemaps/mapscore/shared/graphics/objects/IcosahedronInterface;") };
     const jmethodID method_createQuadInstanced { ::djinni::jniGetMethodID(clazz.get(), "createQuadInstanced", "(Lio/openmobilemaps/mapscore/shared/graphics/shader/ShaderProgramInterface;)Lio/openmobilemaps/mapscore/shared/graphics/objects/Quad2dInstancedInterface;") };
     const jmethodID method_createQuadStretchedInstanced { ::djinni::jniGetMethodID(clazz.get(), "createQuadStretchedInstanced", "(Lio/openmobilemaps/mapscore/shared/graphics/shader/ShaderProgramInterface;)Lio/openmobilemaps/mapscore/shared/graphics/objects/Quad2dStretchedInstancedInterface;") };
     const jmethodID method_createLineGroup { ::djinni::jniGetMethodID(clazz.get(), "createLineGroup", "(Lio/openmobilemaps/mapscore/shared/graphics/shader/ShaderProgramInterface;)Lio/openmobilemaps/mapscore/shared/graphics/objects/LineGroup2dInterface;") };

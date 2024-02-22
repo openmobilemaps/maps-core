@@ -35,6 +35,8 @@ shader_factory_interface = interface +c +j +o {
 
     create_stretch_shader(): stretch_shader_interface;
     create_stretch_instanced_shader(): stretch_instanced_shader_interface;
+
+    create_icosahedron_color_shader(): color_shader_interface;
 }
 
 raster_shader_style = record {

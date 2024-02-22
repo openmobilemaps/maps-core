@@ -44,4 +44,6 @@
 
 - (nullable id<MCStretchInstancedShaderInterface>)createStretchInstancedShader;
 
+- (nullable id<MCColorShaderInterface>)createIcosahedronColorShader;
+
 @end

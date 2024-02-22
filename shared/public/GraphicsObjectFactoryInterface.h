@@ -6,6 +6,7 @@
 #include "ShaderProgramInterface.h"
 #include <memory>
 
+class IcosahedronInterface;
 class LineGroup2dInterface;
 class Polygon2dInterface;
 class PolygonGroup2dInterface;
@@ -23,6 +24,8 @@ public:
     virtual /*not-null*/ std::shared_ptr<Quad2dInterface> createQuad(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & shader) = 0;
 
     virtual /*not-null*/ std::shared_ptr<Polygon2dInterface> createPolygon(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & shader) = 0;
+
+    virtual /*not-null*/ std::shared_ptr<IcosahedronInterface> createIcosahedronObject(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & shader) = 0;
 
     virtual /*not-null*/ std::shared_ptr<Quad2dInstancedInterface> createQuadInstanced(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & shader) = 0;
 

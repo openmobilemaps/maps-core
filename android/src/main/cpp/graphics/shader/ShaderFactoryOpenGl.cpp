@@ -21,6 +21,7 @@
 #include "StretchShaderOpenGl.h"
 #include "AlphaInstancedShaderOpenGl.h"
 #include "StretchInstancedShaderOpenGl.h"
+#include "IcosahedronColorShaderOpenGl.h"
 
 std::shared_ptr<AlphaShaderInterface> ShaderFactoryOpenGl::createAlphaShader() {
     return std::make_shared<AlphaShaderOpenGl>();
@@ -72,4 +73,8 @@ std::shared_ptr<StretchShaderInterface> ShaderFactoryOpenGl::createStretchShader
 
 std::shared_ptr<StretchInstancedShaderInterface> ShaderFactoryOpenGl::createStretchInstancedShader() {
     return std::make_shared<StretchInstancedShaderOpenGl>();
+}
+
+std::shared_ptr<ColorShaderInterface> ShaderFactoryOpenGl::createIcosahedronColorShader() {
+    return std::make_shared<IcosahedronColorShaderOpenGl>();
 }
