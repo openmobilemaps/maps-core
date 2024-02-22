@@ -73,7 +73,7 @@ final class Icosahedron: BaseGraphicsObject {
 
         encoder.drawIndexedPrimitives(type: .triangle,
                                       indexCount: indicesCount,
-                                      indexType: .uint16,
+                                      indexType: .uint32,
                                       indexBuffer: indicesBuffer,
                                       indexBufferOffset: 0)
     }
