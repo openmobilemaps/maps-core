@@ -134,6 +134,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (nullable id<MCColorShaderInterface>)createIcosahedronColorShader {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->createIcosahedronColorShader();
+        return ::djinni_generated::ColorShaderInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 namespace djinni_generated {
 
 class ShaderFactoryInterface::ObjcProxy final
@@ -232,6 +239,13 @@ public:
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createStretchInstancedShader];
             return ::djinni_generated::StretchInstancedShaderInterface::toCpp(objcpp_result_);
+        }
+    }
+    /*not-null*/ std::shared_ptr<::ColorShaderInterface> createIcosahedronColorShader() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createIcosahedronColorShader];
+            return ::djinni_generated::ColorShaderInterface::toCpp(objcpp_result_);
         }
     }
 };

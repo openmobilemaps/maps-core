@@ -40,4 +40,6 @@ public:
     std::shared_ptr<StretchShaderInterface> createStretchShader() override;
 
     std::shared_ptr<StretchInstancedShaderInterface> createStretchInstancedShader() override;
+
+    std::shared_ptr<ColorShaderInterface> createIcosahedronColorShader() override;
 };

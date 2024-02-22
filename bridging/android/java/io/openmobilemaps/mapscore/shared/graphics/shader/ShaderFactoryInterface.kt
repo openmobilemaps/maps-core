@@ -34,6 +34,8 @@ abstract class ShaderFactoryInterface {
 
     abstract fun createStretchInstancedShader(): StretchInstancedShaderInterface
 
+    abstract fun createIcosahedronColorShader(): ColorShaderInterface
+
     private class CppProxy : ShaderFactoryInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -126,5 +128,11 @@ abstract class ShaderFactoryInterface {
             return native_createStretchInstancedShader(this.nativeRef)
         }
         private external fun native_createStretchInstancedShader(_nativeRef: Long): StretchInstancedShaderInterface
+
+        override fun createIcosahedronColorShader(): ColorShaderInterface {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_createIcosahedronColorShader(this.nativeRef)
+        }
+        private external fun native_createIcosahedronColorShader(_nativeRef: Long): ColorShaderInterface
     }
 }

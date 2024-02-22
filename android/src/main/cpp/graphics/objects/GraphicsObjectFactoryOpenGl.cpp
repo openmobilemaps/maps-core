@@ -19,6 +19,7 @@
 #include "Text2dOpenGl.h"
 #include "Text2dInstancedOpenGl.h"
 #include "Quad2dStretchedInstancedOpenGl.h"
+#include "IcosahedronOpenGl.h"
 
 std::shared_ptr<Quad2dInterface> GraphicsObjectFactoryOpenGl::createQuad(const std::shared_ptr<::ShaderProgramInterface> &shader) {
     return std::make_shared<Quad2dOpenGl>(shader);
@@ -69,4 +70,9 @@ std::shared_ptr<Quad2dInstancedInterface> GraphicsObjectFactoryOpenGl::createQua
 std::shared_ptr<Quad2dStretchedInstancedInterface>
 GraphicsObjectFactoryOpenGl::createQuadStretchedInstanced(const std::shared_ptr<::ShaderProgramInterface> &shader) {
     return std::make_shared<Quad2dStretchedInstancedOpenGl>(shader);
+}
+
+std::shared_ptr<IcosahedronInterface>
+GraphicsObjectFactoryOpenGl::createIcosahedronObject(const std::shared_ptr<::ShaderProgramInterface> &shader) {
+    return std::make_shared<IcosahedronOpenGl>(shader);
 }
