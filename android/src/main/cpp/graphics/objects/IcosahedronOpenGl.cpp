@@ -58,7 +58,7 @@ void IcosahedronOpenGl::setup(const std::shared_ptr<::RenderingContextInterface>
 void IcosahedronOpenGl::prepareGlData(int program) {
     glUseProgram(program);
 
-    positionHandle = glGetAttribLocation(program, "vLongLat");
+    positionHandle = glGetAttribLocation(program, "vLatLon");
     valueHandle = glGetAttribLocation(program, "vValue");
     if (!glDataBuffersGenerated) {
         glGenBuffers(1, &vertexBuffer);
@@ -72,7 +72,7 @@ void IcosahedronOpenGl::prepareGlData(int program) {
         glGenBuffers(1, &indexBuffer);
     }
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort) * indices.size(), &indices[0], GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * indices.size(), &indices[0], GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     mvpMatrixHandle = glGetUniformLocation(program, "uMVPMatrix");
@@ -120,8 +120,6 @@ void IcosahedronOpenGl::render(const std::shared_ptr<::RenderingContextInterface
         glStencilOp(GL_KEEP, GL_KEEP, zpass);
     }
 
-    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-
     // Add program to OpenGL environment
     glUseProgram(program);
 
@@ -130,10 +128,8 @@ void IcosahedronOpenGl::render(const std::shared_ptr<::RenderingContextInterface
     glEnableVertexAttribArray(positionHandle);
     glEnableVertexAttribArray(valueHandle);
     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-    size_t stride = sizeof(GLfloat) * 3;
-    size_t offsetPos = sizeof(GLfloat) * 2;
-    glVertexAttribPointer(positionHandle, 2, GL_FLOAT, false, stride, nullptr);
-    glVertexAttribPointer(positionHandle, 1, GL_FLOAT, false, stride, (float *) offsetPos);
+    glVertexAttribPointer(positionHandle, 2, GL_FLOAT, false, sizeof(GLfloat) * 3, nullptr);
+    glVertexAttribPointer(valueHandle, 1, GL_FLOAT, false, sizeof(GLfloat) * 3, (float *) (sizeof(GLfloat) * 2));
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -142,7 +138,7 @@ void IcosahedronOpenGl::render(const std::shared_ptr<::RenderingContextInterface
 
     // Draw the triangle
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-    glDrawElements(GL_TRIANGLES, (unsigned int)indices.size(), GL_UNSIGNED_INT, nullptr);
+    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 

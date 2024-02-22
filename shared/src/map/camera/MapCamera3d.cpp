@@ -358,8 +358,8 @@ std::vector<float> MapCamera3d::getVpMatrix() {
     Matrix::rotateM(newViewMatrix, 0, -cameraPitch, 1.0, 0.0, 0.0);
     Matrix::rotateM(newViewMatrix, 0, -angle, 0, 0, 1);
     Matrix::translateM(newViewMatrix, 0, 0, 0, 0/*-1 - focusPointAltitude / R*/);
-    Matrix::rotateM(newViewMatrix, 0.0, -longitude, 0.0, 1.0, 0.0);
     Matrix::rotateM(newViewMatrix, 0.0, latitude, 1.0, 0.0, 0.0);
+    Matrix::rotateM(newViewMatrix, 0.0, -longitude - 90.0, 0.0, 1.0, 0.0);
     std::vector<float> newVpMatrix(16, 0.0);
     Matrix::multiplyMM(newVpMatrix, 0, newProjectionMatrix, 0, newViewMatrix, 0);
 
@@ -885,7 +885,7 @@ bool MapCamera3d::isInBounds(const Coord &coords) {
 }
 
 Coord MapCamera3d::getBoundsCorrectedCoords(const Coord &position) {
-    auto const bounds = this->bounds;
+    /*auto const bounds = this->bounds;
 
     Coord newPosition = Coord(position.systemIdentifier,
                               std::clamp(position.x,
@@ -895,13 +895,13 @@ Coord MapCamera3d::getBoundsCorrectedCoords(const Coord &position) {
                                          std::min(bounds.topLeft.y, bounds.bottomRight.y),
                                          std::max(bounds.topLeft.y, bounds.bottomRight.y)),
                               position.z);
-    return newPosition;
-
+    return newPosition;*/ // TODO: not needed for circular system (4326), otherwise fix
+    return position;
 }
 
 void MapCamera3d::clampCenterToBounds() {
-    const auto newPosition = getBoundsCorrectedCoords(focusPointPosition);
-    focusPointPosition = newPosition;
+    /*const auto newPosition = getBoundsCorrectedCoords(focusPointPosition);
+    focusPointPosition = newPosition;*/
 }
 
 void MapCamera3d::setRotationEnabled(bool enabled) { config.rotationEnabled = enabled; }

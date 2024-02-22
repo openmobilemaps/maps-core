@@ -57,19 +57,19 @@ std::string IcosahedronColorShaderOpenGl::getVertexShader() {
     return OMMVersionedGlesShaderCode(320 es,
                                       precision highp float;
                                       uniform mat4 uMVPMatrix;
-                                      in vec2 vLongLat;
+                                      in vec3 vLatLon;
                                       in float vValue;
-                                      out float value;
+                                      out float gridValue;
 
                                       void main() {
-                                          const double phi = (vLongLat.x - 180.0) * M_PI / 180.0;
-                                          const double th = (vLongLat.y - 90.0) * M_PI / 180.0;
+                                          float phi = (vLatLon.y - 180.0) * 3.1415926536 / 180.0;
+                                          float th = (vLatLon.x - 90.0) * 3.1415926536 / 180.0;
 
                                           vec4 adjPos = vec4(1.0 * sin(th) * cos(phi),
                                                              1.0 * cos(th),
                                                              -1.0 * sin(th) * sin(phi),
                                                              1.0);
-                                          value = vValue;
+                                          gridValue = vValue;
                                           gl_Position = uMVPMatrix * adjPos;
                                       }
     );
@@ -80,12 +80,12 @@ std::string IcosahedronColorShaderOpenGl::getFragmentShader() {
     return OMMVersionedGlesShaderCode(320 es,
                                 precision mediump float;
                                 uniform vec4 vColor;
-                                in float value;
+                                in float gridValue;
                                 out vec4 fragmentColor;
 
                                 void main() {
                                     fragmentColor = vColor;
-                                    fragmentColor.a = value;
+                                    fragmentColor.a = gridValue;
                                     fragmentColor *= vColor.a;
                                 });
 }
