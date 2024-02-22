@@ -46,7 +46,38 @@ fragment float4
 icosahedronFragmentShader(IcosahedronVertexOut in [[stage_in]],
                           constant float4 &color [[buffer(1)]])
 {
-    return float4(1 * (in.value - 253.15) / 50.0,0,0,0.1);
-    float a = color.a * in.value;
-    return float4(color.r * a, color.g * a, color.b * a, a);
+    // Temperature in Kelvin
+    float temperature = in.value;
+
+    // Normalize temperature to a 0.0 - 1.0 range based on expected min/max values
+    // Adjust minTemp and maxTemp based on your application's expected temperature range
+    float minTemp = 253.15; // -20°C, adjust as needed
+    float maxTemp = 323.15; // 50°C, adjust as needed
+    float normalizedTemp = (temperature - minTemp) / (maxTemp - minTemp);
+
+    // Clamp value between 0.0 and 1.0 to ensure it stays within the gradient bounds
+    normalizedTemp = clamp(normalizedTemp, 0.0, 1.0);
+
+    // Define colors for cold (blue), medium (green), and hot (red)
+    float4 coldColor = float4(0, 0, 1, 1); // Blue
+    float4 mediumColor = float4(0, 1, 0, 1); // Green
+    float4 hotColor = float4(1, 0, 0, 1); // Red
+
+    // Interpolate between colors based on the normalized temperature
+    float4 colorRes;
+    if (normalizedTemp < 0.5)
+    {
+        // Transition from cold to medium
+        float t = normalizedTemp * 2.0; // Scale to 0.0 - 1.0 range
+        colorRes = mix(coldColor, mediumColor, t);
+    }
+    else
+    {
+        // Transition from medium to hot
+        float t = (normalizedTemp - 0.5) * 2.0; // Scale to 0.0 - 1.0 range
+        colorRes = mix(mediumColor, hotColor, t);
+    }
+
+    // Return the interpolated color with the original alpha value
+    return float4(colorRes.rgb, 0.9);
 }
