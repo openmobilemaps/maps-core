@@ -5,6 +5,7 @@
 
 #include "ColorStateList.h"
 #include "LineCapType.h"
+#include "LineDashCapType.h"
 #include "SizeType.h"
 #include <utility>
 #include <vector>
@@ -19,7 +20,7 @@ struct LineStyle final {
     std::vector<float> dashArray;
     LineCapType lineCap;
     float offset;
-    bool dotted;
+    LineDashCapType lineDashCap;
 
     LineStyle(::ColorStateList color_,
               ::ColorStateList gapColor_,
@@ -30,7 +31,7 @@ struct LineStyle final {
               std::vector<float> dashArray_,
               LineCapType lineCap_,
               float offset_,
-              bool dotted_)
+              LineDashCapType lineDashCap_)
     : color(std::move(color_))
     , gapColor(std::move(gapColor_))
     , opacity(std::move(opacity_))
@@ -40,6 +41,6 @@ struct LineStyle final {
     , dashArray(std::move(dashArray_))
     , lineCap(std::move(lineCap_))
     , offset(std::move(offset_))
-    , dotted(std::move(dotted_))
+    , lineDashCap(std::move(lineDashCap_))
     {}
 };

@@ -3,6 +3,7 @@
 
 #import "MCColorStateList.h"
 #import "MCLineCapType.h"
+#import "MCLineDashCapType.h"
 #import "MCSizeType.h"
 #import <Foundation/Foundation.h>
 
@@ -18,7 +19,7 @@
                             dashArray:(nonnull NSArray<NSNumber *> *)dashArray
                               lineCap:(MCLineCapType)lineCap
                                offset:(float)offset
-                               dotted:(BOOL)dotted NS_DESIGNATED_INITIALIZER;
+                          lineDashCap:(MCLineDashCapType)lineDashCap NS_DESIGNATED_INITIALIZER;
 + (nonnull instancetype)lineStyleWithColor:(nonnull MCColorStateList *)color
                                   gapColor:(nonnull MCColorStateList *)gapColor
                                    opacity:(float)opacity
@@ -28,7 +29,7 @@
                                  dashArray:(nonnull NSArray<NSNumber *> *)dashArray
                                    lineCap:(MCLineCapType)lineCap
                                     offset:(float)offset
-                                    dotted:(BOOL)dotted;
+                               lineDashCap:(MCLineDashCapType)lineDashCap;
 
 @property (nonatomic, readonly, nonnull) MCColorStateList * color;
 
@@ -48,6 +49,6 @@
 
 @property (nonatomic, readonly) float offset;
 
-@property (nonatomic, readonly) BOOL dotted;
+@property (nonatomic, readonly) MCLineDashCapType lineDashCap;
 
 @end

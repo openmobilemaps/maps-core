@@ -25,7 +25,7 @@
                            dashValue2:(float)dashValue2
                            dashValue3:(float)dashValue3
                                offset:(float)offset
-                               dotted:(BOOL)dotted
+                          lineDashCap:(float)lineDashCap
 {
     if (self = [super init]) {
         _width = width;
@@ -47,7 +47,7 @@
         _dashValue2 = dashValue2;
         _dashValue3 = dashValue3;
         _offset = offset;
-        _dotted = dotted;
+        _lineDashCap = lineDashCap;
     }
     return self;
 }
@@ -71,7 +71,7 @@
                                       dashValue2:(float)dashValue2
                                       dashValue3:(float)dashValue3
                                           offset:(float)offset
-                                          dotted:(BOOL)dotted
+                                     lineDashCap:(float)lineDashCap
 {
     return [[self alloc] initWithWidth:width
                                 colorR:colorR
@@ -92,13 +92,13 @@
                             dashValue2:dashValue2
                             dashValue3:dashValue3
                                 offset:offset
-                                dotted:dotted];
+                           lineDashCap:lineDashCap];
 }
 
 #ifndef DJINNI_DISABLE_DESCRIPTION_METHODS
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@ %p width:%@ colorR:%@ colorG:%@ colorB:%@ colorA:%@ gapColorR:%@ gapColorG:%@ gapColorB:%@ gapColorA:%@ widthAsPixel:%@ opacity:%@ blur:%@ lineCap:%@ numDashValue:%@ dashValue0:%@ dashValue1:%@ dashValue2:%@ dashValue3:%@ offset:%@ dotted:%@>", self.class, (void *)self, @(self.width), @(self.colorR), @(self.colorG), @(self.colorB), @(self.colorA), @(self.gapColorR), @(self.gapColorG), @(self.gapColorB), @(self.gapColorA), @(self.widthAsPixel), @(self.opacity), @(self.blur), @(self.lineCap), @(self.numDashValue), @(self.dashValue0), @(self.dashValue1), @(self.dashValue2), @(self.dashValue3), @(self.offset), @(self.dotted)];
+    return [NSString stringWithFormat:@"<%@ %p width:%@ colorR:%@ colorG:%@ colorB:%@ colorA:%@ gapColorR:%@ gapColorG:%@ gapColorB:%@ gapColorA:%@ widthAsPixel:%@ opacity:%@ blur:%@ lineCap:%@ numDashValue:%@ dashValue0:%@ dashValue1:%@ dashValue2:%@ dashValue3:%@ offset:%@ lineDashCap:%@>", self.class, (void *)self, @(self.width), @(self.colorR), @(self.colorG), @(self.colorB), @(self.colorA), @(self.gapColorR), @(self.gapColorG), @(self.gapColorB), @(self.gapColorA), @(self.widthAsPixel), @(self.opacity), @(self.blur), @(self.lineCap), @(self.numDashValue), @(self.dashValue0), @(self.dashValue1), @(self.dashValue2), @(self.dashValue3), @(self.offset), @(self.lineDashCap)];
 }
 
 #endif

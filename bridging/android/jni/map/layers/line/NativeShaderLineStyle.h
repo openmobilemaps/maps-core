@@ -25,7 +25,7 @@ private:
     friend ::djinni::JniClass<NativeShaderLineStyle>;
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/map/layers/line/ShaderLineStyle") };
-    const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(FFFFFFFFFFFFFFFFFFFZ)V") };
+    const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(FFFFFFFFFFFFFFFFFFFF)V") };
     const jfieldID field_width { ::djinni::jniGetFieldID(clazz.get(), "width", "F") };
     const jfieldID field_colorR { ::djinni::jniGetFieldID(clazz.get(), "colorR", "F") };
     const jfieldID field_colorG { ::djinni::jniGetFieldID(clazz.get(), "colorG", "F") };
@@ -45,7 +45,7 @@ private:
     const jfieldID field_dashValue2 { ::djinni::jniGetFieldID(clazz.get(), "dashValue2", "F") };
     const jfieldID field_dashValue3 { ::djinni::jniGetFieldID(clazz.get(), "dashValue3", "F") };
     const jfieldID field_offset { ::djinni::jniGetFieldID(clazz.get(), "offset", "F") };
-    const jfieldID field_dotted { ::djinni::jniGetFieldID(clazz.get(), "dotted", "Z") };
+    const jfieldID field_lineDashCap { ::djinni::jniGetFieldID(clazz.get(), "lineDashCap", "F") };
 };
 
 } // namespace djinni_generated
