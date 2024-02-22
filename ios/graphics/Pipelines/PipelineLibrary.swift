@@ -209,7 +209,7 @@ public enum PipelineType: String, CaseIterable, Codable {
             case .rasterShader, .unitSphereRasterShader:
                 return Vertex3D.descriptor
             case.icosahedronColorShader:
-                return IcosahedronVertex.descriptor
+                return PolygonVertex.descriptor
             default:
                 return Vertex.descriptor
         }

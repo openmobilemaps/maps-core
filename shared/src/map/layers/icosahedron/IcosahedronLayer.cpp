@@ -40,7 +40,7 @@ void IcosahedronLayer::onAdded(const std::shared_ptr<MapInterface> & mapInterfac
         protozero::pbf_reader pbfData((char *)data.buf(), data.len());
 
         std::vector<float> verticesBuffer;
-        std::vector<float> indicesBuffer;
+        std::vector<uint32_t> indicesBuffer;
 
         int32_t currentIndex = 0;
 

@@ -11,7 +11,6 @@
 #include <metal_stdlib>
 using namespace metal;
 
-
 struct IcosahedronVertexIn {
     float2 position [[attribute(0)]];
     float value [[attribute(1)]];
@@ -27,8 +26,8 @@ icosahedronVertexShader(const IcosahedronVertexIn vertexIn [[stage_in]],
                  constant float4x4 &mvpMatrix [[buffer(1)]])
 {
 
-    const float phi = (vertexIn.position.x - 180.0) * M_PI_F / 180.0;
-    const float th = (vertexIn.position.y - 90.0) * M_PI_F / 180.0;
+    const float phi = ((vertexIn.position.x * 180.0 / M_PI_F) - 180.0) * M_PI_F / 180.0;
+    const float th = ((vertexIn.position.y * 180.0 / M_PI_F) - 90.0) * M_PI_F / 180.0;
 
     float4 adjPos = float4(1.0 * sin(th) * cos(phi),
                        1.0 * cos(th),
@@ -47,6 +46,7 @@ fragment float4
 icosahedronFragmentShader(IcosahedronVertexOut in [[stage_in]],
                           constant float4 &color [[buffer(1)]])
 {
+    return float4(1 * (in.value - 253.15) / 50.0,0,0,0.1);
     float a = color.a * in.value;
     return float4(color.r * a, color.g * a, color.b * a, a);
 }
