@@ -25,9 +25,8 @@ vertex IcosahedronVertexOut
 icosahedronVertexShader(const IcosahedronVertexIn vertexIn [[stage_in]],
                  constant float4x4 &mvpMatrix [[buffer(1)]])
 {
-
-    const float phi = ((vertexIn.position.x * 180.0 / M_PI_F) - 180.0) * M_PI_F / 180.0;
-    const float th = ((vertexIn.position.y * 180.0 / M_PI_F) - 90.0) * M_PI_F / 180.0;
+    const float phi = (vertexIn.position.y - 180.0) * M_PI_F / 180.0;
+    const float th = (vertexIn.position.x - 90.0) * M_PI_F / 180.0;
 
     float4 adjPos = float4(1.0 * sin(th) * cos(phi),
                        1.0 * cos(th),
@@ -79,5 +78,5 @@ icosahedronFragmentShader(IcosahedronVertexOut in [[stage_in]],
     }
 
     // Return the interpolated color with the original alpha value
-    return float4(colorRes.rgb, 0.9);
+    return float4(colorRes.rgb * 0.5, 0.5);
 }

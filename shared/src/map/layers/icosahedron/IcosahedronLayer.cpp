@@ -56,12 +56,12 @@ void IcosahedronLayer::onAdded(const std::shared_ptr<MapInterface> & mapInterfac
                             switch (vertex.tag()) {
                                 case 1: {
                                     auto lat = vertex.get_float();
-                                    verticesBuffer.push_back(lat);
+                                    verticesBuffer.push_back(lat * 180 / M_PI);
                                     break;
                                 }
                                 case 2: {
                                     auto lon = vertex.get_float();
-                                    verticesBuffer.push_back(lon);
+                                    verticesBuffer.push_back(lon * 180 / M_PI);
                                     break;
                                 }
                                 case 3: {
@@ -75,9 +75,9 @@ void IcosahedronLayer::onAdded(const std::shared_ptr<MapInterface> & mapInterfac
                         }
                     }
                     assert(count == 3);
-                    indicesBuffer.push_back(currentIndex);
-                    indicesBuffer.push_back(currentIndex + 1);
                     indicesBuffer.push_back(currentIndex + 2);
+                    indicesBuffer.push_back(currentIndex + 1);
+                    indicesBuffer.push_back(currentIndex);
                     currentIndex += count;
                 }
             }
