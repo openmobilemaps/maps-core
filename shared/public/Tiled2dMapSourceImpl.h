@@ -83,7 +83,7 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
             Coord(CoordinateSystemIdentifiers::EPSG3857(), -20037508.34, 20037508.34, 0.0),
             Coord(CoordinateSystemIdentifiers::EPSG3857(), 20037508.34, -20037508.34, 0.0)
     );
-    RectCoord visibleBoundsLayer = conversionHelper->convertRect(layerSystemId, visBounds);
+    RectCoord visibleBoundsLayer = conversionHelper->convertRect(layerSystemId, visibleBounds);
 
     const auto bounds = layerConfig->getBounds();
 
@@ -120,8 +120,6 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
         }
         targetZoomLayer = (int) numZoomLevels - 1;
     }
-
-    targetZoomLayer = 4;
 
     int targetZoomLevelIdentifier = zoomLevelInfos.at(targetZoomLayer).zoomLevelIdentifier;
     int startZoomLayer = 0;
