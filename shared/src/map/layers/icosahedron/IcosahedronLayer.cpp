@@ -12,6 +12,7 @@
 #include "Logger.h"
 #include "RenderPass.h"
 #include "RenderObject.h"
+#include "BlendMode.h"
 #include <protozero/pbf_reader.hpp>
 
 IcosahedronLayer::IcosahedronLayer(const /*not-null*/ std::shared_ptr<IcosahedronLayerCallbackInterface> & callbackHandler): callbackHandler(callbackHandler) {
@@ -29,6 +30,7 @@ void IcosahedronLayer::onAdded(const std::shared_ptr<MapInterface> & mapInterfac
     
     shader = mapInterface->getShaderFactory()->createIcosahedronColorShader();
     shader->setColor(1.0, 0.0, 0.0, 1.0);
+    shader->asShaderProgramInterface()->setBlendMode(BlendMode::MULTIPLY);
     object = mapInterface->getGraphicsObjectFactory()->createIcosahedronObject(shader->asShaderProgramInterface());
 
     auto renderObject =  std::make_shared<RenderObject>(object->asGraphicsObject());
