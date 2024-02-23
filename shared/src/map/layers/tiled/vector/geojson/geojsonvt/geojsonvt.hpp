@@ -327,8 +327,8 @@ private:
         tile.source_features.clear();
 
         if (z < options.minZoom) {
-            // if z smaller than min zoom, no need to keep tile
-            tiles.erase(it);
+            // if z smaller than min zoom, no need to keep tile, but we keep it
+            // otherwise some loading states are never resolved
         }
     }
 
