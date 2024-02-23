@@ -323,9 +323,12 @@ private class MCMapViewMapReadyCallbacks: MCMapReadyCallbackInterface {
     public weak var delegate: MCMapView?
     public var callback: ((UIImage?, MCLayerReadyState) -> Void)?
     public var callbackQueue: DispatchQueue?
+    public let semaphore = DispatchSemaphore(value: 1)
 
     func stateDidUpdate(_ state: MCLayerReadyState) {
         guard let delegate = self.delegate else { return }
+
+        semaphore.wait()
 
         delegate.draw(in: delegate)
 
@@ -340,6 +343,7 @@ private class MCMapViewMapReadyCallbacks: MCMapReadyCallbackInterface {
                 @unknown default:
                     break
             }
+            self.semaphore.signal()
         }
     }
 }
