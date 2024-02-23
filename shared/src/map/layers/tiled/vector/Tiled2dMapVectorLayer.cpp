@@ -482,15 +482,16 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
 }
 
 void Tiled2dMapVectorLayer::reloadDataSource(const std::string &sourceName) {
-    if (const auto &geoSource = mapDescription->geoJsonSources[sourceName]) {
-        geoSource->reload(loaders);
-        auto promise = std::make_shared<::djinni::Promise<std::shared_ptr<DataLoaderResult>>>();
-        geoSource->waitIfNotLoaded(promise);
-        promise->getFuture().wait();
-    }
+    auto &source = vectorTileSources[sourceName];
+    const auto &geoSource = mapDescription->geoJsonSources[sourceName];
+    if (source && geoSource) {
+        source.syncAccess([&,geoSource](const auto &source) {
 
-    if (auto &source = vectorTileSources[sourceName]) {
-        source.syncAccess([](const auto &source) {
+            geoSource->reload(loaders);
+            auto promise = std::make_shared<::djinni::Promise<std::shared_ptr<DataLoaderResult>>>();
+            geoSource->waitIfNotLoaded(promise);
+            promise->getFuture().wait();
+
             source->reloadTiles();
         });
     }
