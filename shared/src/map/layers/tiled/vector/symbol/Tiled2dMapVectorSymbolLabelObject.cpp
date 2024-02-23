@@ -305,7 +305,7 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
         centerPositions.push_back(zero);
     }
 
-    static std::vector<size_t> lineEndIndices;
+    std::vector<size_t> lineEndIndices;
     lineEndIndices.clear();
 
     auto pen = zero;
@@ -376,6 +376,7 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
         } else if(i.glyphIndex == -1) {
             if (numberOfCharacters > 0) {
                 lineEndIndices.push_back(numberOfCharacters - 1);
+                assert((countOffset + numberOfCharacters-1)*2 < scales.size());
             }
             pen.x = 0.0;
             pen.y += fontSize * lineHeight;
@@ -402,6 +403,7 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
 
     if (numberOfCharacters > 0) {
         lineEndIndices.push_back(numberOfCharacters - 1);
+        assert((countOffset + numberOfCharacters-1)*2 < scales.size());
     }
 
     const Vec2D size((boxMax.x - boxMin.x), (medianLastBaseLine - boxMin.y));
@@ -415,10 +417,18 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
         case TextJustify::RIGHT:
         case TextJustify::CENTER: {
             size_t lineStart = 0;
+            size_t centerPositionsSize = centerPositions.size();
             for (auto const lineEndIndex: lineEndIndices) {
+                if (lineStart >= centerPositionsSize || lineEndIndex >= centerPositionsSize) {
+                    continue;
+                }
                 auto factor = textJustify == TextJustify::CENTER ? 2.0 : 1.0;
-                double startFirst = centerPositions[lineStart].x - scales[2 * (countOffset + lineStart)] * 0.5;
-                double endLast = centerPositions[lineEndIndex].x + scales[2 * (countOffset + lineEndIndex)] * 0.5;
+                const auto idx = 2 * (countOffset + lineEndIndex);
+                assert(idx >= 0 && idx < scales.size());
+                assert(lineStart < centerPositions.size());
+                assert(lineEndIndex < centerPositions.size());
+                double startFirst = centerPositions[lineStart].x - scales[idx] * 0.5;
+                double endLast = centerPositions[lineEndIndex].x + scales[idx] * 0.5;
                 double lineWidth = endLast - startFirst;
                 double delta = (size.x - lineWidth) / factor;
 
