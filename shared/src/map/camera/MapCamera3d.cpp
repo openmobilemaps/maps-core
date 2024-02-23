@@ -563,6 +563,8 @@ bool MapCamera3d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
     focusPointPosition.x += xDiffMap * 0.00001;
     focusPointPosition.y += yDiffMap * 0.00001;
 
+    focusPointPosition.y = std::clamp(focusPointPosition.y, -90.0, 90.0);
+
     if (currentDragTimestamp == 0) {
         currentDragTimestamp = DateHelper::currentTimeMicros();
         currentDragVelocity.x = 0;
@@ -619,15 +621,12 @@ void MapCamera3d::inertiaStep() {
     float yDiffMap = (inertia->velocity.y) * factor * deltaPrev;
     inertia->timestampUpdate = now;
 
-    const auto adjustedPosition = getBoundsCorrectedCoords(
-            Coord(CoordinateSystemIdentifiers::EPSG4326(),
-                  focusPointPosition.x + xDiffMap * 0.000001,
-                  focusPointPosition.y + yDiffMap * 0.000001,
-                  focusPointPosition.z));
     focusPointPosition = Coord(CoordinateSystemIdentifiers::EPSG4326(),
                                focusPointPosition.x + xDiffMap * 0.000001,
                                focusPointPosition.y + yDiffMap * 0.000001,
                                focusPointPosition.z);
+
+    focusPointPosition.y = std::clamp(focusPointPosition.y, -90.0, 90.0);
 
     notifyListeners(ListenerType::BOUNDS);
     mapInterface->invalidate();
