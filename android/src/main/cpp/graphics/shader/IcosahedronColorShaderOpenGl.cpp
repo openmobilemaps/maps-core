@@ -31,6 +31,8 @@ void IcosahedronColorShaderOpenGl::setupProgram(const std::shared_ptr<::Renderin
     glLinkProgram(program); // create OpenGL program executables
 
     openGlContext->storeProgram(programName, program);
+
+    blendMode = BlendMode::MULTIPLY;
 }
 
 void IcosahedronColorShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context) {
@@ -84,9 +86,44 @@ std::string IcosahedronColorShaderOpenGl::getFragmentShader() {
                                 out vec4 fragmentColor;
 
                                 void main() {
-                                    fragmentColor = vColor;
-                                    fragmentColor.a = gridValue;
-                                    fragmentColor *= vColor.a;
+                                    /*float temperature = gridValue;
+                                    // Normalize temperature to a 0.0 - 1.0 range based on expected min/max values
+                                    // Adjust minTemp and maxTemp based on your application's expected temperature range
+                                    float minTemp = 253.15; // -20°C, adjust as needed
+                                    float maxTemp = 323.15; // 50°C, adjust as needed
+                                    float normalizedTemp = (temperature - minTemp) / (maxTemp - minTemp);
+
+                                    // Clamp value between 0.0 and 1.0 to ensure it stays within the gradient bounds
+                                    normalizedTemp = clamp(normalizedTemp, 0.0, 1.0);
+
+                                    // Define colors for cold (blue), medium (green), and hot (red)
+                                    vec4 coldColor = vec4(0.0, 0.0, 1.0, 1.0); // Blue
+                                    vec4 mediumColor = vec4(0.0, 1.0, 0.0, 1.0); // Green
+                                    vec4 hotColor = vec4(1.0, 0.0, 0.0, 1.0); // Red
+
+                                    // Interpolate between colors based on the normalized temperature
+                                    vec4 colorRes;
+                                    if (normalizedTemp < 0.5)
+                                    {
+                                        // Transition from cold to medium
+                                        float t = normalizedTemp * 2.0; // Scale to 0.0 - 1.0 range
+                                        colorRes = mix(coldColor, mediumColor, t);
+                                    }
+                                    else
+                                    {
+                                        // Transition from medium to hot
+                                        float t = (normalizedTemp - 0.5) * 2.0; // Scale to 0.0 - 1.0 range
+                                        colorRes = mix(mediumColor, hotColor, t);
+                                    }
+
+                                    // Return the interpolated color with the original alpha value
+                                    fragmentColor = vec4(colorRes.rgb * 0.5, 0.5);*/
+                                    float precipFloat = clamp(gridValue/* * 3600.0 / 100.0*/, 0.0, 1.0);
+                                    if (gridValue < 0.01) {
+                                        discard;
+                                    }
+                                    float alpha = 0.5;
+                                    fragmentColor = mix(vec4(vec3(0.149, 0.0, 0.941/*0.29, 0.56, 0.27*/) * alpha, alpha), vec4(vec3(0.51, 1.0, 0.36/*0.99, 1.0, 0.36*/) * alpha, alpha), precipFloat);
                                 });
 }
 

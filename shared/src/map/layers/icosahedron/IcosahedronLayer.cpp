@@ -76,9 +76,9 @@ void IcosahedronLayer::onAdded(const std::shared_ptr<MapInterface> & mapInterfac
                         }
                     }
                     assert(count == 3);
-                    indicesBuffer.push_back(currentIndex + 2);
-                    indicesBuffer.push_back(currentIndex + 1);
                     indicesBuffer.push_back(currentIndex);
+                    indicesBuffer.push_back(currentIndex + 1);
+                    indicesBuffer.push_back(currentIndex + 2);
                     currentIndex += count;
                 }
             }
