@@ -334,14 +334,14 @@ std::vector<float> MapCamera3d::getVpMatrix() {
     float R = 6378137.0;
     float longitude = focusPointPosition.x; //  px / R;
     float latitude = focusPointPosition.y; // 2*atan(exp(py / R)) - 3.1415926 / 2;
-    cameraPitch = 0;//90.0;
+    cameraPitch = 0.0;//90.0;
 
     focusPointAltitude = focusPointPosition.z;
     cameraDistance = currentZoom;
     float maxD = cameraDistance * 1.3;
     float minD = 100.0 / R;
 
-    float fov = 45.0; // zoom / 70800;
+    float fov = 70.0; // 45 // zoom / 70800;
 
     // aspect ratio
     float vpr = (float) sizeViewport.x / (float) sizeViewport.y;
@@ -354,12 +354,25 @@ std::vector<float> MapCamera3d::getVpMatrix() {
 
     Matrix::setIdentityM(newViewMatrix, 0);
 
+/*
     Matrix::translateM(newViewMatrix, 0, 0, 0, -cameraDistance);
     Matrix::rotateM(newViewMatrix, 0, -cameraPitch, 1.0, 0.0, 0.0);
     Matrix::rotateM(newViewMatrix, 0, -angle, 0, 0, 1);
-    Matrix::translateM(newViewMatrix, 0, 0, 0, 0/*-1 - focusPointAltitude / R*/);
+    Matrix::translateM(newViewMatrix, 0, 0, 0, 0*//*-1 - focusPointAltitude / R*//*);
     Matrix::rotateM(newViewMatrix, 0.0, latitude, 1.0, 0.0, 0.0);
     Matrix::rotateM(newViewMatrix, 0.0, -longitude - 90.0, 0.0, 1.0, 0.0);
+    std::vector<float> newVpMatrix(16, 0.0);
+    Matrix::multiplyMM(newVpMatrix, 0, newProjectionMatrix, 0, newViewMatrix, 0);*/
+
+    Coord testFocusPos = focusPointPosition;
+
+    Matrix::rotateM(newViewMatrix, 0, -25.0/*cameraPitch*/, 1.0, 0.0, 0.0);
+    double vCameraSpace = (1500.0 / (R / 1000.0)); // km
+    double hCameraSpace = atan(2.0 / 180.0 * M_PI); // degr
+    Matrix::translateM(newViewMatrix, 0, 0, hCameraSpace, -(1.0 + vCameraSpace));
+    Matrix::rotateM(newViewMatrix, 0.0, testFocusPos.y, 1.0, 0.0, 0.0);
+    Matrix::rotateM(newViewMatrix, 0.0, -testFocusPos.x - 90.0, 0.0, 1.0, 0.0);
+
     std::vector<float> newVpMatrix(16, 0.0);
     Matrix::multiplyMM(newVpMatrix, 0, newProjectionMatrix, 0, newViewMatrix, 0);
 
