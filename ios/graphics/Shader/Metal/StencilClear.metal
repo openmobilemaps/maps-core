@@ -13,7 +13,7 @@
 using namespace metal;
 
 vertex VertexOut
-stencilClearVertexShader(const VertexIn vertexIn [[stage_in]],
+stencilClearVertexShader(const Vertex3DIn vertexIn [[stage_in]],
                     constant float4x4 &mvpMatrix [[buffer(1)]])
 {
     VertexOut out {
