@@ -52,7 +52,7 @@ protected:
 
     virtual bool hasExpensivePostLoadingTask() override;
     
-    virtual Tiled2dMapVectorTileInfo::FeatureMap postLoadingTask(const std::shared_ptr<DataLoaderResult> &loadedData, const Tiled2dMapTileInfo &tile) override;
+    virtual Tiled2dMapVectorTileInfo::FeatureMap postLoadingTask(std::shared_ptr<DataLoaderResult> loadedData, Tiled2dMapTileInfo tile) override;
 
     const std::vector<std::shared_ptr<::LoaderInterface>> loaders;
     const std::unordered_set<std::string> layersToDecode;

@@ -45,8 +45,15 @@ bool Tiled2dMapVectorSource::hasExpensivePostLoadingTask() {
     return true;
 }
 
-Tiled2dMapVectorTileInfo::FeatureMap Tiled2dMapVectorSource::postLoadingTask(const std::shared_ptr<DataLoaderResult> &loadedData, const Tiled2dMapTileInfo &tile) {
+Tiled2dMapVectorTileInfo::FeatureMap Tiled2dMapVectorSource::postLoadingTask(std::shared_ptr<DataLoaderResult> loadedData, Tiled2dMapTileInfo tile) {
     auto layerFeatureMap = std::make_shared<std::unordered_map<std::string, std::shared_ptr<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>>>>();
+    
+    if (!loadedData->data.has_value()) {
+        LogError <<= "postLoadingTask, but data has no value for " + layerConfig->getLayerName() + ": " + std::to_string(tile.zoomIdentifier) + "/" +
+        std::to_string(tile.x) + "/" + std::to_string(tile.y);
+        return layerFeatureMap;
+    }
+
     try {
         vtzero::vector_tile tileData((char*)loadedData->data->buf(), loadedData->data->len());
 
