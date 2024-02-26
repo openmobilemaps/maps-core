@@ -62,19 +62,14 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
     if (!layerConfig) {
         return;
     }
-    double zoom = 0;
-    /*for (const auto zoomLevelInfo : layerConfig->getZoomLevelInfos()) {
-        if (zoomLevelInfo.numTilesX >= 2) {
-            zoom = zoomLevelInfo.zoom;
-            break;
-        }
-    }*/
 
     RectCoord visBounds = RectCoord(
-            Coord(CoordinateSystemIdentifiers::EPSG3857(), -20037508.34, 20037508.34, 0.0),
-            Coord(CoordinateSystemIdentifiers::EPSG3857(), 20037508.34, -20037508.34, 0.0)
+            Coord(CoordinateSystemIdentifiers::EPSG4326(), -180.0, 90.0, 0.0),
+            Coord(CoordinateSystemIdentifiers::EPSG4326(), 18.0, -90.0, 0.0)
     );
-    double targetZoom = layerConfig->getZoomLevelInfos().at(1).zoom;
+
+    const float screenScaleFactor = zoomInfo.adaptScaleToScreen ? screenDensityPpi / (0.0254 / 0.00028) : 1.0;
+    double targetZoom = zoomInfo.zoomLevelScaleFactor * screenScaleFactor * layerConfig->getZoomLevelInfos().at(4).zoom;
 
     onVisibleBoundsChanged(visBounds, 0, targetZoom);
 }
@@ -131,7 +126,7 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
     int keepZoomLevelOffset = std::max(zoomLevelInfos.at(startZoomLayer).zoomLevelIdentifier,
                                        zoomLevelInfos.at(endZoomLevel).zoomLevelIdentifier + ALWAYS_KEEP_LEVEL_TARGET_ZOOM_OFFSET) -
                               targetZoomLevelIdentifier;
-    LogDebug << "UBCM: " <<= targetZoomLayer;
+
     int distanceWeight = 100;
     int zoomLevelWeight = 1000 * zoomLevelInfos.at(0).numTilesT;
     int zDistanceWeight = 100000 * zoomLevelInfos.at(0).numTilesT;
