@@ -340,6 +340,12 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
 
 
         auto layerConfig = layerConfigs[source];
+
+        if (!layerConfig) {
+            LogError << "Missing layer config for " << source <<= ", layer will be ignored.";
+            continue;
+        }
+
         auto sourceMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
 
         Actor<Tiled2dMapVectorSource> vectorSource;
