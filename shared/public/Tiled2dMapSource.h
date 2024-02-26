@@ -36,6 +36,7 @@
 #include "Future.hpp"
 #include "LoaderStatus.h"
 #include "TileState.h"
+#include "Vec3D.h"
 
 template<class R>
 struct TileWrapper {
@@ -129,6 +130,9 @@ public:
     virtual bool hasExpensivePostLoadingTask() = 0;
 
     virtual R postLoadingTask(const L &loadedData, const Tiled2dMapTileInfo &tile) = 0;
+
+    ::Vec3D transformToView(const ::Coord & position, const std::vector<float> & vpMatrix);
+    ::Vec3D projectToScreen(const ::Vec3D & point, const std::vector<float> & vpMatrix);
 
     MapConfig mapConfig;
     std::shared_ptr<Tiled2dMapLayerConfig> layerConfig;
