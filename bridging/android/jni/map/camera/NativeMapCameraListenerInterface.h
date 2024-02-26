@@ -3,31 +3,31 @@
 
 #pragma once
 
-#include "MapCamera2dListenerInterface.h"
+#include "MapCameraListenerInterface.h"
 #include "djinni_support.hpp"
 
 namespace djinni_generated {
 
-class NativeMapCamera2dListenerInterface final : ::djinni::JniInterface<::MapCamera2dListenerInterface, NativeMapCamera2dListenerInterface> {
+class NativeMapCameraListenerInterface final : ::djinni::JniInterface<::MapCameraListenerInterface, NativeMapCameraListenerInterface> {
 public:
-    using CppType = std::shared_ptr<::MapCamera2dListenerInterface>;
-    using CppOptType = std::shared_ptr<::MapCamera2dListenerInterface>;
+    using CppType = std::shared_ptr<::MapCameraListenerInterface>;
+    using CppOptType = std::shared_ptr<::MapCameraListenerInterface>;
     using JniType = jobject;
 
-    using Boxed = NativeMapCamera2dListenerInterface;
+    using Boxed = NativeMapCameraListenerInterface;
 
-    ~NativeMapCamera2dListenerInterface();
+    ~NativeMapCameraListenerInterface();
 
-    static CppType toCpp(JNIEnv* jniEnv, JniType j) { return ::djinni::JniClass<NativeMapCamera2dListenerInterface>::get()._fromJava(jniEnv, j); }
-    static ::djinni::LocalRef<JniType> fromCppOpt(JNIEnv* jniEnv, const CppOptType& c) { return {jniEnv, ::djinni::JniClass<NativeMapCamera2dListenerInterface>::get()._toJava(jniEnv, c)}; }
+    static CppType toCpp(JNIEnv* jniEnv, JniType j) { return ::djinni::JniClass<NativeMapCameraListenerInterface>::get()._fromJava(jniEnv, j); }
+    static ::djinni::LocalRef<JniType> fromCppOpt(JNIEnv* jniEnv, const CppOptType& c) { return {jniEnv, ::djinni::JniClass<NativeMapCameraListenerInterface>::get()._toJava(jniEnv, c)}; }
     static ::djinni::LocalRef<JniType> fromCpp(JNIEnv* jniEnv, const CppType& c) { return fromCppOpt(jniEnv, c); }
 
 private:
-    NativeMapCamera2dListenerInterface();
-    friend ::djinni::JniClass<NativeMapCamera2dListenerInterface>;
-    friend ::djinni::JniInterface<::MapCamera2dListenerInterface, NativeMapCamera2dListenerInterface>;
+    NativeMapCameraListenerInterface();
+    friend ::djinni::JniClass<NativeMapCameraListenerInterface>;
+    friend ::djinni::JniInterface<::MapCameraListenerInterface, NativeMapCameraListenerInterface>;
 
-    class JavaProxy final : ::djinni::JavaProxyHandle<JavaProxy>, public ::MapCamera2dListenerInterface
+    class JavaProxy final : ::djinni::JavaProxyHandle<JavaProxy>, public ::MapCameraListenerInterface
     {
     public:
         JavaProxy(JniType j);
@@ -39,10 +39,10 @@ private:
         void onCameraChange(const std::vector<float> & viewMatrix, const std::vector<float> & projectionMatrix, float verticalFov, float horizontalFov, float width, float height, float focusPointAltitude) override;
 
     private:
-        friend ::djinni::JniInterface<::MapCamera2dListenerInterface, ::djinni_generated::NativeMapCamera2dListenerInterface>;
+        friend ::djinni::JniInterface<::MapCameraListenerInterface, ::djinni_generated::NativeMapCameraListenerInterface>;
     };
 
-    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/map/camera/MapCamera2dListenerInterface") };
+    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/map/camera/MapCameraListenerInterface") };
     const jmethodID method_onVisibleBoundsChanged { ::djinni::jniGetMethodID(clazz.get(), "onVisibleBoundsChanged", "(Lio/openmobilemaps/mapscore/shared/map/coordinates/RectCoord;D)V") };
     const jmethodID method_onRotationChanged { ::djinni::jniGetMethodID(clazz.get(), "onRotationChanged", "(F)V") };
     const jmethodID method_onMapInteraction { ::djinni::jniGetMethodID(clazz.get(), "onMapInteraction", "()V") };

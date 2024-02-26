@@ -11,7 +11,7 @@
 #pragma once
 
 #include "SimpleLayerInterface.h"
-#include "MapCamera2dListenerInterface.h"
+#include "MapCameraListenerInterface.h"
 #include "MapInterface.h"
 #include "RenderPassInterface.h"
 #include "Tiled2dMapLayerConfig.h"
@@ -21,7 +21,7 @@
 #include <mutex>
 
 class Tiled2dMapLayer : public SimpleLayerInterface,
-                        public MapCamera2dListenerInterface,
+                        public MapCameraListenerInterface,
                         public std::enable_shared_from_this<Tiled2dMapLayer> {
   public:
     Tiled2dMapLayer();

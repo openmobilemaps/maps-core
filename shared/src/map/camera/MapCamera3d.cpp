@@ -296,14 +296,14 @@ void MapCamera3d::setPaddingBottom(float padding) {
     }
 }
 
-void MapCamera3d::addListener(const std::shared_ptr<MapCamera2dListenerInterface> &listener) {
+void MapCamera3d::addListener(const std::shared_ptr<MapCameraListenerInterface> &listener) {
     std::lock_guard<std::recursive_mutex> lock(listenerMutex);
     if (listeners.count(listener) == 0) {
         listeners.insert(listener);
     }
 }
 
-void MapCamera3d::removeListener(const std::shared_ptr<MapCamera2dListenerInterface> &listener) {
+void MapCamera3d::removeListener(const std::shared_ptr<MapCameraListenerInterface> &listener) {
     std::lock_guard<std::recursive_mutex> lock(listenerMutex);
     if (listeners.count(listener) > 0) {
         listeners.erase(listener);
@@ -341,7 +341,7 @@ std::vector<float> MapCamera3d::getVpMatrix() {
     float maxD = cameraDistance * 1.3;
     float minD = 100.0 / R;
 
-    float fov = 70.0; // 45 // zoom / 70800;
+    float fov = 60.0; // 45 // zoom / 70800;
 
     // aspect ratio
     float vpr = (float) sizeViewport.x / (float) sizeViewport.y;
@@ -354,24 +354,27 @@ std::vector<float> MapCamera3d::getVpMatrix() {
 
     Matrix::setIdentityM(newViewMatrix, 0);
 
-/*
-    Matrix::translateM(newViewMatrix, 0, 0, 0, -cameraDistance);
-    Matrix::rotateM(newViewMatrix, 0, -cameraPitch, 1.0, 0.0, 0.0);
-    Matrix::rotateM(newViewMatrix, 0, -angle, 0, 0, 1);
-    Matrix::translateM(newViewMatrix, 0, 0, 0, 0*//*-1 - focusPointAltitude / R*//*);
-    Matrix::rotateM(newViewMatrix, 0.0, latitude, 1.0, 0.0, 0.0);
-    Matrix::rotateM(newViewMatrix, 0.0, -longitude - 90.0, 0.0, 1.0, 0.0);
-    std::vector<float> newVpMatrix(16, 0.0);
-    Matrix::multiplyMM(newVpMatrix, 0, newProjectionMatrix, 0, newViewMatrix, 0);*/
+    if (mode == CameraMode3d::GLOBE) {
 
-    Coord testFocusPos = focusPointPosition;
+        Matrix::translateM(newViewMatrix, 0, 0, 0, -cameraDistance);
+        Matrix::rotateM(newViewMatrix, 0, -cameraPitch, 1.0, 0.0, 0.0);
+        Matrix::rotateM(newViewMatrix, 0, -angle, 0, 0, 1);
+        Matrix::translateM(newViewMatrix, 0, 0, 0, 0 - 1 - focusPointAltitude / R);
+        Matrix::rotateM(newViewMatrix, 0.0, latitude, 1.0, 0.0, 0.0);
+        Matrix::rotateM(newViewMatrix, 0.0, -longitude - 90.0, 0.0, 1.0, 0.0);
+        std::vector<float> newVpMatrix(16, 0.0);
+        Matrix::multiplyMM(newVpMatrix, 0, newProjectionMatrix, 0, newViewMatrix, 0);
 
-    Matrix::rotateM(newViewMatrix, 0, -20.0/*cameraPitch*/, 1.0, 0.0, 0.0);
-    double vCameraSpace = (3000.0 / (R / 1000.0)); // km
-    double hCameraSpace = atan(3.0 / 180.0 * M_PI); // degr
-    Matrix::translateM(newViewMatrix, 0, 0, hCameraSpace, -(1.0 + vCameraSpace));
-    Matrix::rotateM(newViewMatrix, 0.0, testFocusPos.y, 1.0, 0.0, 0.0);
-    Matrix::rotateM(newViewMatrix, 0.0, -testFocusPos.x - 90.0, 0.0, 1.0, 0.0);
+    } else if (mode == CameraMode3d::TILTED_ORBITAL) {
+
+        Matrix::rotateM(newViewMatrix, 0, -17.5, 1.0, 0.0, 0.0);
+        double vCameraSpace = (4000.0 / (R / 1000.0)); // km
+        double hCameraSpace = atan(4.5 / 180.0 * M_PI); // degr
+        Matrix::translateM(newViewMatrix, 0, 0, hCameraSpace, -(1.0 + vCameraSpace));
+        Matrix::rotateM(newViewMatrix, 0.0, latitude, 1.0, 0.0, 0.0);
+        Matrix::rotateM(newViewMatrix, 0.0, -longitude - 90.0, 0.0, 1.0, 0.0);
+
+    }
 
     std::vector<float> newVpMatrix(16, 0.0);
     Matrix::multiplyMM(newVpMatrix, 0, newProjectionMatrix, 0, newViewMatrix, 0);
@@ -928,4 +931,12 @@ float MapCamera3d::getScreenDensityPpi() { return screenDensityPpi; }
 
 double MapCamera3d::getCameraDistanceFromZoom(double zoom) {
     return zoom / 70.0;
+}
+
+std::shared_ptr<MapCamera3dInterface> MapCamera3d::asMapCamera3d() {
+    return shared_from_this();
+}
+
+void MapCamera3d::setCameraMode(CameraMode3d mode) {
+    this->mode = mode;
 }

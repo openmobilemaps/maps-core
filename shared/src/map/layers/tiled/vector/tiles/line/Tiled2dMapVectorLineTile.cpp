@@ -9,7 +9,7 @@
  */
 
 #include "Tiled2dMapVectorLineTile.h"
-#include "MapCamera2dInterface.h"
+#include "MapCameraInterface.h"
 #include "RenderObject.h"
 #include "LineHelper.h"
 #include "Tiled2dMapVectorLayerConfig.h"

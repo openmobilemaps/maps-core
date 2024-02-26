@@ -12,7 +12,7 @@
 #import "MCTouchHandlerInterface.h"
 #import "MCVec2I.h"
 #import <Foundation/Foundation.h>
-@class MCMapCamera2dInterface;
+@class MCMapCameraInterface;
 @class MCMapInterface;
 @protocol MCIndexedLayerInterface;
 @protocol MCLayerInterface;
@@ -48,9 +48,9 @@
 
 - (nullable MCCoordinateConversionHelperInterface *)getCoordinateConverterHelper;
 
-- (void)setCamera:(nullable MCMapCamera2dInterface *)camera;
+- (void)setCamera:(nullable MCMapCameraInterface *)camera;
 
-- (nullable MCMapCamera2dInterface *)getCamera;
+- (nullable MCMapCameraInterface *)getCamera;
 
 - (void)setTouchHandler:(nullable id<MCTouchHandlerInterface>)touchHandler;
 

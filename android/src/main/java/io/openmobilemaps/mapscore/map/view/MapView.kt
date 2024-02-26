@@ -228,7 +228,7 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 	}
 
 
-	override fun getCamera(): MapCamera2dInterface {
+	override fun getCamera(): MapCameraInterface {
 		return requireMapInterface().getCamera()
 	}
 

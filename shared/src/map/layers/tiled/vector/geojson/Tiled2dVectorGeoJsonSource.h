@@ -26,7 +26,7 @@
 
 class Tiled2dVectorGeoJsonSource : public Tiled2dMapVectorSource, public GeoJSONTileDelegate  {
 public:
-    Tiled2dVectorGeoJsonSource(const std::shared_ptr<::MapCamera2dInterface> &camera,
+    Tiled2dVectorGeoJsonSource(const std::shared_ptr<::MapCameraInterface> &camera,
                                const MapConfig &mapConfig,
                                const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig,
                                const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
@@ -104,5 +104,5 @@ protected:
 
 private:
     const std::shared_ptr<GeoJSONVTInterface> geoJson;
-    const std::weak_ptr<::MapCamera2dInterface> camera;
+    const std::weak_ptr<::MapCameraInterface> camera;
 };

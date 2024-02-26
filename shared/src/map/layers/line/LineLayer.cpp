@@ -13,7 +13,7 @@
 #include "LambdaTask.h"
 #include "LineHelper.h"
 #include "LineStyle.h"
-#include "MapCamera2dInterface.h"
+#include "MapCameraInterface.h"
 #include "MapInterface.h"
 #include "RenderObject.h"
 #include "RenderPass.h"

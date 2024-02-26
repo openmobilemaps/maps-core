@@ -21,7 +21,7 @@
 #include "Tiled2dMapVectorBackgroundSubLayer.h"
 #include "Tiled2dMapVectorRasterSubLayerConfig.h"
 #include "Polygon2dInterface.h"
-#include "MapCamera2dInterface.h"
+#include "MapCameraInterface.h"
 #include "QuadMaskObject.h"
 #include "PolygonMaskObject.h"
 #include "CoordinatesUtil.h"

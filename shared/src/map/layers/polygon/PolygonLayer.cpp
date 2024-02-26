@@ -12,7 +12,7 @@
 #include "ColorShaderInterface.h"
 #include "GraphicsObjectInterface.h"
 #include "LambdaTask.h"
-#include "MapCamera2dInterface.h"
+#include "MapCameraInterface.h"
 #include "MapInterface.h"
 #include "PolygonHelper.h"
 #include "RenderObject.h"

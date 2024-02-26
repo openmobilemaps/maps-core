@@ -11,7 +11,7 @@
 #include "IconLayer.h"
 #include "CameraInterface.h"
 #include "LambdaTask.h"
-#include "MapCamera2dInterface.h"
+#include "MapCameraInterface.h"
 #include "RenderObject.h"
 #include "RenderPass.h"
 #include "BlendMode.h"

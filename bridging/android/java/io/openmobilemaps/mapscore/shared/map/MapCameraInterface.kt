@@ -6,11 +6,11 @@ package io.openmobilemaps.mapscore.shared.map
 import com.snapchat.djinni.NativeObjectManager
 import java.util.concurrent.atomic.AtomicBoolean
 
-abstract class MapCamera2dInterface {
+abstract class MapCameraInterface {
 
     companion object {
         @JvmStatic
-        external fun create(mapInterface: MapInterface, screenDensityPpi: Float, is3D: Boolean): MapCamera2dInterface
+        external fun create(mapInterface: MapInterface, screenDensityPpi: Float, is3D: Boolean): MapCameraInterface
     }
 
     abstract fun freeze(freeze: Boolean)
@@ -64,9 +64,9 @@ abstract class MapCamera2dInterface {
 
     abstract fun getInvariantModelMatrix(coordinate: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, scaleInvariant: Boolean, rotationInvariant: Boolean): ArrayList<Float>
 
-    abstract fun addListener(listener: io.openmobilemaps.mapscore.shared.map.camera.MapCamera2dListenerInterface)
+    abstract fun addListener(listener: io.openmobilemaps.mapscore.shared.map.camera.MapCameraListenerInterface)
 
-    abstract fun removeListener(listener: io.openmobilemaps.mapscore.shared.map.camera.MapCamera2dListenerInterface)
+    abstract fun removeListener(listener: io.openmobilemaps.mapscore.shared.map.camera.MapCameraListenerInterface)
 
     abstract fun coordFromScreenPosition(posScreen: io.openmobilemaps.mapscore.shared.graphics.common.Vec2F): io.openmobilemaps.mapscore.shared.map.coordinates.Coord
 
@@ -90,7 +90,9 @@ abstract class MapCamera2dInterface {
 
     abstract fun getLastVpMatrixZoom(): Float?
 
-    private class CppProxy : MapCamera2dInterface {
+    abstract fun asMapCamera3d(): MapCamera3dInterface?
+
+    private class CppProxy : MapCameraInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 
@@ -255,17 +257,17 @@ abstract class MapCamera2dInterface {
         }
         private external fun native_getInvariantModelMatrix(_nativeRef: Long, coordinate: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, scaleInvariant: Boolean, rotationInvariant: Boolean): ArrayList<Float>
 
-        override fun addListener(listener: io.openmobilemaps.mapscore.shared.map.camera.MapCamera2dListenerInterface) {
+        override fun addListener(listener: io.openmobilemaps.mapscore.shared.map.camera.MapCameraListenerInterface) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             native_addListener(this.nativeRef, listener)
         }
-        private external fun native_addListener(_nativeRef: Long, listener: io.openmobilemaps.mapscore.shared.map.camera.MapCamera2dListenerInterface)
+        private external fun native_addListener(_nativeRef: Long, listener: io.openmobilemaps.mapscore.shared.map.camera.MapCameraListenerInterface)
 
-        override fun removeListener(listener: io.openmobilemaps.mapscore.shared.map.camera.MapCamera2dListenerInterface) {
+        override fun removeListener(listener: io.openmobilemaps.mapscore.shared.map.camera.MapCameraListenerInterface) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             native_removeListener(this.nativeRef, listener)
         }
-        private external fun native_removeListener(_nativeRef: Long, listener: io.openmobilemaps.mapscore.shared.map.camera.MapCamera2dListenerInterface)
+        private external fun native_removeListener(_nativeRef: Long, listener: io.openmobilemaps.mapscore.shared.map.camera.MapCameraListenerInterface)
 
         override fun coordFromScreenPosition(posScreen: io.openmobilemaps.mapscore.shared.graphics.common.Vec2F): io.openmobilemaps.mapscore.shared.map.coordinates.Coord {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
@@ -332,5 +334,11 @@ abstract class MapCamera2dInterface {
             return native_getLastVpMatrixZoom(this.nativeRef)
         }
         private external fun native_getLastVpMatrixZoom(_nativeRef: Long): Float?
+
+        override fun asMapCamera3d(): MapCamera3dInterface? {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_asMapCamera3d(this.nativeRef)
+        }
+        private external fun native_asMapCamera3d(_nativeRef: Long): MapCamera3dInterface?
     }
 }

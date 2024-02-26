@@ -15,8 +15,8 @@
 #include "CoordAnimation.h"
 #include "CoordinateConversionHelperInterface.h"
 #include "DoubleAnimation.h"
-#include "MapCamera2dInterface.h"
-#include "MapCamera2dListenerInterface.h"
+#include "MapCameraInterface.h"
+#include "MapCameraListenerInterface.h"
 #include "MapCoordinateSystem.h"
 #include "SimpleTouchInterface.h"
 #include "Vec2I.h"
@@ -25,7 +25,7 @@
 #include <optional>
 #include <set>
 
-class MapCamera2d : public MapCamera2dInterface,
+class MapCamera2d : public MapCameraInterface,
                     public CameraInterface,
                     public SimpleTouchInterface,
                     public std::enable_shared_from_this<CameraInterface> {
@@ -75,9 +75,9 @@ class MapCamera2d : public MapCamera2dInterface,
 
     virtual void setPaddingBottom(float padding) override;
 
-    virtual void addListener(const std::shared_ptr<MapCamera2dListenerInterface> &listener) override;
+    virtual void addListener(const std::shared_ptr<MapCameraListenerInterface> &listener) override;
 
-    virtual void removeListener(const std::shared_ptr<MapCamera2dListenerInterface> &listener) override;
+    virtual void removeListener(const std::shared_ptr<MapCameraListenerInterface> &listener) override;
 
     virtual std::shared_ptr<::CameraInterface> asCameraInterface() override;
 
@@ -135,11 +135,13 @@ class MapCamera2d : public MapCamera2dInterface,
 
     virtual float getScreenDensityPpi() override;
 
-  protected:
+    std::shared_ptr<MapCamera3dInterface> asMapCamera3d() override;
+
+protected:
     virtual void setupInertia();
 
     std::recursive_mutex listenerMutex;
-    std::set<std::shared_ptr<MapCamera2dListenerInterface>> listeners;
+    std::set<std::shared_ptr<MapCameraListenerInterface>> listeners;
 
     std::shared_ptr<MapInterface> mapInterface;
     std::shared_ptr<CoordinateConversionHelperInterface> conversionHelper;

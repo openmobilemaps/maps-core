@@ -6,7 +6,7 @@ package io.openmobilemaps.mapscore.shared.map.camera
 import com.snapchat.djinni.NativeObjectManager
 import java.util.concurrent.atomic.AtomicBoolean
 
-abstract class MapCamera2dListenerInterface {
+abstract class MapCameraListenerInterface {
 
     abstract fun onVisibleBoundsChanged(visibleBounds: io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord, zoom: Double)
 
@@ -16,7 +16,7 @@ abstract class MapCamera2dListenerInterface {
 
     abstract fun onCameraChange(viewMatrix: ArrayList<Float>, projectionMatrix: ArrayList<Float>, verticalFov: Float, horizontalFov: Float, width: Float, height: Float, focusPointAltitude: Float)
 
-    private class CppProxy : MapCamera2dListenerInterface {
+    private class CppProxy : MapCameraListenerInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

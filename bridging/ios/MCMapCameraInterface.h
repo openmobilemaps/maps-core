@@ -3,19 +3,20 @@
 
 #import "MCCameraInterface.h"
 #import "MCCoord.h"
-#import "MCMapCamera2dListenerInterface.h"
+#import "MCMapCameraListenerInterface.h"
 #import "MCRectCoord.h"
 #import "MCVec2F.h"
 #import <Foundation/Foundation.h>
-@class MCMapCamera2dInterface;
+@class MCMapCamera3dInterface;
+@class MCMapCameraInterface;
 @class MCMapInterface;
 
 
-@interface MCMapCamera2dInterface : NSObject
+@interface MCMapCameraInterface : NSObject
 
-+ (nullable MCMapCamera2dInterface *)create:(nullable MCMapInterface *)mapInterface
-                           screenDensityPpi:(float)screenDensityPpi
-                                       is3D:(BOOL)is3D;
++ (nullable MCMapCameraInterface *)create:(nullable MCMapInterface *)mapInterface
+                         screenDensityPpi:(float)screenDensityPpi
+                                     is3D:(BOOL)is3D;
 
 - (void)freeze:(BOOL)freeze;
 
@@ -79,9 +80,9 @@
                                           scaleInvariant:(BOOL)scaleInvariant
                                        rotationInvariant:(BOOL)rotationInvariant;
 
-- (void)addListener:(nullable id<MCMapCamera2dListenerInterface>)listener;
+- (void)addListener:(nullable id<MCMapCameraListenerInterface>)listener;
 
-- (void)removeListener:(nullable id<MCMapCamera2dListenerInterface>)listener;
+- (void)removeListener:(nullable id<MCMapCameraListenerInterface>)listener;
 
 - (nonnull MCCoord *)coordFromScreenPosition:(nonnull MCVec2F *)posScreen;
 
@@ -104,5 +105,7 @@
 - (nullable NSNumber *)getLastVpMatrixRotation;
 
 - (nullable NSNumber *)getLastVpMatrixZoom;
+
+- (nullable MCMapCamera3dInterface *)asMapCamera3d;
 
 @end

@@ -5,7 +5,7 @@
 #import <Foundation/Foundation.h>
 
 
-@protocol MCMapCamera2dListenerInterface
+@protocol MCMapCameraListenerInterface
 
 - (void)onVisibleBoundsChanged:(nonnull MCRectCoord *)visibleBounds
                           zoom:(double)zoom;

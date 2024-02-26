@@ -9,7 +9,7 @@
  */
 
 #include "Tiled2dMapLayer.h"
-#include "MapCamera2dInterface.h"
+#include "MapCameraInterface.h"
 #include "CoordinateSystemIdentifiers.h"
 
 Tiled2dMapLayer::Tiled2dMapLayer()
@@ -40,7 +40,7 @@ void Tiled2dMapLayer::onAdded(const std::shared_ptr<::MapInterface> &mapInterfac
         }
     }
 
-    auto camera = std::dynamic_pointer_cast<MapCamera2dInterface>(mapInterface->getCamera());
+    auto camera = std::dynamic_pointer_cast<MapCameraInterface>(mapInterface->getCamera());
     if (camera) {
         camera->addListener(shared_from_this());
         onVisibleBoundsChanged(camera->getVisibleRect(), camera->getZoom());
@@ -49,7 +49,7 @@ void Tiled2dMapLayer::onAdded(const std::shared_ptr<::MapInterface> &mapInterfac
 
 void Tiled2dMapLayer::onRemoved() {
     if (mapInterface) {
-        auto camera = std::dynamic_pointer_cast<MapCamera2dInterface>(mapInterface->getCamera());
+        auto camera = std::dynamic_pointer_cast<MapCameraInterface>(mapInterface->getCamera());
         if (camera) {
             camera->removeListener(shared_from_this());
         }
@@ -206,7 +206,7 @@ void Tiled2dMapLayer::setT(int t) {
 
     auto mapInterface = this->mapInterface;
     if (mapInterface) {
-        auto camera = std::dynamic_pointer_cast<MapCamera2dInterface>(mapInterface->getCamera());
+        auto camera = std::dynamic_pointer_cast<MapCameraInterface>(mapInterface->getCamera());
         if (camera) {
             onVisibleBoundsChanged(camera->getVisibleRect(), camera->getZoom());
         }

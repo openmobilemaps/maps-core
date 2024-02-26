@@ -37,9 +37,9 @@ class MapScene : public MapInterface, public SceneCallbackInterface, public Sche
 
     virtual void setCallbackHandler(const std::shared_ptr<MapCallbackInterface> &callbackInterface) override;
 
-    virtual void setCamera(const std::shared_ptr<::MapCamera2dInterface> &camera) override;
+    virtual void setCamera(const std::shared_ptr<::MapCameraInterface> &camera) override;
 
-    virtual std::shared_ptr<::MapCamera2dInterface> getCamera() override;
+    virtual std::shared_ptr<::MapCameraInterface> getCamera() override;
 
     virtual void setTouchHandler(const std::shared_ptr<::TouchHandlerInterface> &touchHandler) override;
 
@@ -96,7 +96,7 @@ class MapScene : public MapInterface, public SceneCallbackInterface, public Sche
 
     std::shared_ptr<SceneInterface> scene;
 
-    std::shared_ptr<MapCamera2dInterface> camera;
+    std::shared_ptr<MapCameraInterface> camera;
 
     std::recursive_mutex layersMutex;
     std::map<int, std::shared_ptr<LayerInterface>> layers;

@@ -11,24 +11,27 @@
 #pragma once
 
 #include "CameraInterface.h"
+#include "MapCamera3dInterface.h"
 #include "Coord.h"
 #include "CoordAnimation.h"
 #include "CoordinateConversionHelperInterface.h"
 #include "DoubleAnimation.h"
-#include "MapCamera2dInterface.h"
-#include "MapCamera2dListenerInterface.h"
+#include "MapCameraInterface.h"
+#include "MapCameraListenerInterface.h"
 #include "MapCoordinateSystem.h"
 #include "SimpleTouchInterface.h"
 #include "Vec2I.h"
 #include "Vec2F.h"
+#include "CameraMode3d.h"
 #include <mutex>
 #include <optional>
 #include <set>
 
-class MapCamera3d : public MapCamera2dInterface,
+class MapCamera3d : public MapCameraInterface,
+                    public MapCamera3dInterface,
                     public CameraInterface,
                     public SimpleTouchInterface,
-                    public std::enable_shared_from_this<CameraInterface> {
+                    public std::enable_shared_from_this<MapCamera3d> {
   public:
     MapCamera3d(const std::shared_ptr<MapInterface> &mapInterface, float screenDensityPpi);
 
@@ -75,9 +78,9 @@ class MapCamera3d : public MapCamera2dInterface,
 
     virtual void setPaddingBottom(float padding) override;
 
-    virtual void addListener(const std::shared_ptr<MapCamera2dListenerInterface> &listener) override;
+    virtual void addListener(const std::shared_ptr<MapCameraListenerInterface> &listener) override;
 
-    virtual void removeListener(const std::shared_ptr<MapCamera2dListenerInterface> &listener) override;
+    virtual void removeListener(const std::shared_ptr<MapCameraListenerInterface> &listener) override;
 
     virtual std::shared_ptr<::CameraInterface> asCameraInterface() override;
 
@@ -135,13 +138,17 @@ class MapCamera3d : public MapCamera2dInterface,
 
     virtual float getScreenDensityPpi() override;
 
-  protected:
+    std::shared_ptr<MapCamera3dInterface> asMapCamera3d() override;
+
+    void setCameraMode(CameraMode3d mode) override;
+
+protected:
     virtual void setupInertia();
 
     static double getCameraDistanceFromZoom(double zoom);
 
     std::recursive_mutex listenerMutex;
-    std::set<std::shared_ptr<MapCamera2dListenerInterface>> listeners;
+    std::set<std::shared_ptr<MapCameraListenerInterface>> listeners;
 
     std::shared_ptr<MapInterface> mapInterface;
     std::shared_ptr<CoordinateConversionHelperInterface> conversionHelper;
@@ -150,6 +157,8 @@ class MapCamera3d : public MapCamera2dInterface,
     bool mapSystemTtb;
     float screenDensityPpi;
     double screenPixelAsRealMeterFactor;
+
+    CameraMode3d mode = CameraMode3d::GLOBE;
 
     Coord focusPointPosition;
     double focusPointAltitude = 0;
