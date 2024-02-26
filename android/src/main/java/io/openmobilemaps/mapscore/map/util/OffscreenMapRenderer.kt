@@ -6,6 +6,7 @@ import io.openmobilemaps.mapscore.map.scheduling.AndroidSchedulerCallback
 import io.openmobilemaps.mapscore.shared.graphics.common.Color
 import io.openmobilemaps.mapscore.shared.graphics.common.Vec2I
 import io.openmobilemaps.mapscore.shared.map.*
+import io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateConversionHelperInterface
 import io.openmobilemaps.mapscore.shared.map.scheduling.TaskInterface
 import kotlinx.coroutines.CoroutineScope
 import java.util.concurrent.atomic.AtomicBoolean
@@ -130,6 +131,10 @@ open class OffscreenMapRenderer(val sizePx: Vec2I, val density: Float = 72f) : G
 
 	override fun getCamera(): MapCamera2dInterface {
 		return requireMapInterface().getCamera()
+	}
+
+	override fun getCoordinateConversionHelper(): CoordinateConversionHelperInterface {
+		return requireMapInterface().getCoordinateConverterHelper()
 	}
 
 	fun saveFrame(saveFrameSpec: SaveFrameSpec, saveFrameCallback: SaveFrameCallback) {
