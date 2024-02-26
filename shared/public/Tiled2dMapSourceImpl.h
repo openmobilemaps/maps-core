@@ -17,6 +17,30 @@
 #include <iostream>
 #include "gpc.h"
 #include "Logger.h"
+#include "Matrix.h"
+#include "Vec2DHelper.h"
+
+struct VisibleTileCandidate {
+    int x; int y;
+    int levelIndex;
+    bool operator==(const VisibleTileCandidate& other) const {
+        return x == other.x && y == other.y && levelIndex == other.levelIndex;
+    }
+};
+
+namespace std {
+    template <>
+    struct hash<VisibleTileCandidate> {
+        size_t operator()(const VisibleTileCandidate& candidate) const {
+            size_t h1 = hash<int>()(candidate.x);
+            size_t h2 = hash<int>()(candidate.y);
+            size_t h3 = hash<int>()(candidate.levelIndex);
+
+            // Combine hashes using a simple combining function, based on the one from Boost library
+            return h1 ^ (h2 << 1) ^ (h3 << 2);
+        }
+    };
+}
 
 template<class T, class L, class R>
 Tiled2dMapSource<T, L, R>::Tiled2dMapSource(const MapConfig &mapConfig, const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig,
@@ -55,23 +79,417 @@ static void hash_combine(size_t& seed, const T& value) {
 }
 
 template<class T, class L, class R>
+::Vec3D Tiled2dMapSource<T, L, R>::transformToView(const ::Coord & position, const std::vector<float> & viewMatrix) {
+    Coord mapCoord(-1, 0,0,0);
+    if (mapConfig.mapCoordinateSystem.identifier == CoordinateSystemIdentifiers::UnitSphereCart()) {
+        mapCoord = conversionHelper->convert(mapConfig.mapCoordinateSystem.identifier, position);
+    }
+    else {
+        mapCoord = conversionHelper->convertToRenderSystem(position);
+    }
+    std::vector<float> inVec = {(float)mapCoord.x, (float)mapCoord.y, (float)mapCoord.z, 1.0};
+    std::vector<float> outVec = {0, 0, 0, 0};
+
+    Matrix::multiply(viewMatrix, inVec, outVec);
+
+    auto point2d = Vec3D(outVec[0] / outVec[3], outVec[1] / outVec[3], outVec[2] / outVec[3]);
+    return point2d;
+}
+
+template<class T, class L, class R>
+::Vec3D Tiled2dMapSource<T, L, R>::projectToScreen(const ::Vec3D & position, const std::vector<float> & projectionMatrix) {
+    std::vector<float> inVec = {(float)position.x, (float)position.y, (float)position.z, 1.0};
+    std::vector<float> outVec = {0, 0, 0, 0};
+
+    Matrix::multiply(projectionMatrix, inVec, outVec);
+
+    auto point2d = Vec3D(outVec[0] / outVec[3], outVec[1] / outVec[3], outVec[2] / outVec[3]);
+    return point2d;
+}
+
+template<class T, class L, class R>
 void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMatrix, const std::vector<float> &projectionMatrix,
                                                float verticalFov, float horizontalFov, float width, float height,
                                                float focusPointAltitude) {
-    // TODO Implement new source algorithm - fixed level of tiles for now
-    if (!layerConfig) {
+
+    if (isPaused) {
         return;
     }
 
-    RectCoord visBounds = RectCoord(
-            Coord(CoordinateSystemIdentifiers::EPSG4326(), -180.0, 90.0, 0.0),
-            Coord(CoordinateSystemIdentifiers::EPSG4326(), 180.0, -90.0, 0.0)
-    );
+    if (width <= 0 || height <= 0) {
+        return;
+    }
 
-    const float screenScaleFactor = zoomInfo.adaptScaleToScreen ? screenDensityPpi / (0.0254 / 0.00028) : 1.0;
-    double targetZoom = zoomInfo.zoomLevelScaleFactor * screenScaleFactor * layerConfig->getZoomLevelInfos().at(4).zoom;
 
-    onVisibleBoundsChanged(visBounds, 0, targetZoom);
+    std::queue<VisibleTileCandidate> candidates;
+    std::unordered_set<VisibleTileCandidate> candidatesSet;
+
+    Coord viewBoundsTopLeft(-1, 0, 0, 0);
+    Coord viewBoundsBottomRight(-1, 0, 0, 0);
+    bool validViewBounds = false;
+
+    int initialLevel = 0;
+    const Tiled2dMapZoomLevelInfo &zoomLevelInfo0 = zoomLevelInfos.at(initialLevel);
+    for (int x = 0; x < zoomLevelInfo0.numTilesX; x++) {
+        for (int y = 0; y < zoomLevelInfo0.numTilesY; y++) {
+            VisibleTileCandidate c;
+            c.levelIndex = initialLevel;
+            c.x = x;
+            c.y = y;
+            candidates.push(c);
+        }
+    }
+
+    std::vector<std::pair<VisibleTileCandidate, PrioritizedTiled2dMapTileInfo>> visibleTilesVec;
+
+    int maxLevel = initialLevel;
+    auto maxLevelAvailable = zoomLevelInfos.size() - 1;
+
+    int candidateChecks = 0;
+
+    float longestEdge = 0;
+
+
+
+    while (candidates.size() > 0) {
+        VisibleTileCandidate candidate = candidates.front();
+        candidates.pop();
+        candidatesSet.erase(candidate);
+
+        candidateChecks++;
+
+
+        const Tiled2dMapZoomLevelInfo &zoomLevelInfo = zoomLevelInfos.at(candidate.levelIndex);
+
+        const double tileWidth = zoomLevelInfo.tileWidthLayerSystemUnits;
+
+        RectCoord layerBounds = zoomLevelInfo.bounds;
+        layerBounds = conversionHelper->convertRect(layerSystemId, layerBounds);
+
+        const bool leftToRight = layerBounds.topLeft.x < layerBounds.bottomRight.x;
+        const bool topToBottom = layerBounds.topLeft.y < layerBounds.bottomRight.y;
+        const double tileWidthAdj = leftToRight ? tileWidth : -tileWidth;
+        const double tileHeightAdj = topToBottom ? tileWidth : -tileWidth;
+
+        const double boundsLeft = layerBounds.topLeft.x;
+        const double boundsTop = layerBounds.topLeft.y;
+        const Coord topLeft = Coord(layerSystemId, candidate.x * tileWidthAdj + boundsLeft, candidate.y * tileHeightAdj + boundsTop, focusPointAltitude);
+
+        const double heightRange = 1000;
+
+        const Coord topRight = Coord(layerSystemId, topLeft.x + tileWidthAdj, topLeft.y, focusPointAltitude - heightRange / 2.0);
+        const Coord bottomLeft = Coord(layerSystemId, topLeft.x, topLeft.y + tileHeightAdj, focusPointAltitude- heightRange / 2.0);
+        const Coord bottomRight = Coord(layerSystemId, topLeft.x + tileWidthAdj, topLeft.y + tileHeightAdj, focusPointAltitude- heightRange / 2.0);
+
+        const Coord topLeftHigh = Coord(layerSystemId, topLeft.x, topLeft.y, focusPointAltitude + heightRange / 2.0);
+        const Coord topRightHigh = Coord(layerSystemId, topRight.x , topRight.y, focusPointAltitude + heightRange / 2.0);
+        const Coord bottomLeftHigh = Coord(layerSystemId, bottomLeft.x, bottomLeft.y, focusPointAltitude + heightRange / 2.0);
+        const Coord bottomRightHigh = Coord(layerSystemId, bottomRight.x, bottomRight.y, focusPointAltitude + heightRange / 2.0);
+
+        auto topLeftView = transformToView(topLeft, viewMatrix);
+        auto topRightView = transformToView(topRight, viewMatrix);
+        auto bottomLeftView = transformToView(bottomLeft, viewMatrix);
+        auto bottomRightView = transformToView(bottomRight, viewMatrix);
+
+        auto topLeftHighView = transformToView(topLeftHigh, viewMatrix);
+        auto topRightHighView = transformToView(topRightHigh, viewMatrix);
+        auto bottomLeftHighView = transformToView(bottomLeftHigh, viewMatrix);
+        auto bottomRightHighView = transformToView(bottomRightHigh, viewMatrix);
+
+        float centerZ = (topLeftView.z + topRightView.z + bottomLeftView.z + bottomRightView.z) / 4.0;
+
+        if (mapConfig.mapCoordinateSystem.identifier == CoordinateSystemIdentifiers::UnitSphereCart()) {
+            // v(0,0,+1) = unit-vector out of screen
+            float topLeftHA = 180.0 / M_PI * atan2(topLeftView.x, -topLeftView.z);
+            float topLeftVA = 180.0 / M_PI * atan2(topLeftView.y, -topLeftView.z);
+            float topRightHA = 180.0 / M_PI * atan2(topRightView.x, -topRightView.z);
+            float topRightVA = 180.0 / M_PI * atan2(topRightView.y, -topRightView.z);
+            float bottomLeftHA = 180.0 / M_PI * atan2(bottomLeftView.x, -bottomLeftView.z);
+            float bottomLeftVA = 180.0 / M_PI * atan2(bottomLeftView.y, -bottomLeftView.z);
+            float bottomRightHA = 180.0 / M_PI * atan2(bottomRightView.x, -bottomRightView.z);
+            float bottomRightVA = 180.0 / M_PI * atan2(bottomRightView.y, -bottomRightView.z);
+
+            float topLeftHighHA = 180.0 / M_PI * atan2(topLeftHighView.x, -topLeftHighView.z);
+            float topLeftHighVA = 180.0 / M_PI * atan2(topLeftHighView.y, -topLeftHighView.z);
+            float topRightHighHA = 180.0 / M_PI * atan2(topRightHighView.x, -topRightHighView.z);
+            float topRightHighVA = 180.0 / M_PI * atan2(topRightHighView.y, -topRightHighView.z);
+            float bottomLeftHighHA = 180.0 / M_PI * atan2(bottomLeftHighView.x, -bottomLeftHighView.z);
+            float bottomLeftHighVA = 180.0 / M_PI * atan2(bottomLeftHighView.y, -bottomLeftHighView.z);
+            float bottomRightHighHA = 180.0 / M_PI * atan2(bottomRightHighView.x, -bottomRightHighView.z);
+            float bottomRightHighVA = 180.0 / M_PI * atan2(bottomRightHighView.y, -bottomRightHighView.z);
+
+            // 0.5: half of view on each side of center
+            // 1.02: increase angle with padding
+            float fovFactor = 0.5 * 1.0;
+
+            if (topLeftVA < -verticalFov * fovFactor && topRightVA < -verticalFov * fovFactor && bottomLeftVA < -verticalFov * fovFactor && bottomRightVA < -verticalFov * fovFactor &&
+                topLeftHighVA < -verticalFov * fovFactor && topRightHighVA < -verticalFov * fovFactor && bottomLeftHighVA < -verticalFov * fovFactor && bottomRightHighVA < -verticalFov * fovFactor
+                    ) {
+                continue;
+            }
+            if (topLeftHA < -horizontalFov * fovFactor && topRightHA < -horizontalFov * fovFactor && bottomLeftHA < -horizontalFov * fovFactor && bottomRightHA < -horizontalFov * fovFactor &&
+                topLeftHighHA < -horizontalFov * fovFactor && topRightHighHA < -horizontalFov * fovFactor && bottomLeftHighHA < -horizontalFov * fovFactor && bottomRightHighHA < -horizontalFov * fovFactor
+                    ) {
+                continue;
+            }
+            if (topLeftVA > verticalFov * fovFactor && topRightVA > verticalFov * fovFactor && bottomLeftVA > verticalFov * fovFactor && bottomRightVA > verticalFov * fovFactor &&
+                topLeftHighVA > verticalFov * fovFactor && topRightHighVA > verticalFov * fovFactor && bottomLeftHighVA > verticalFov * fovFactor && bottomRightHighVA > verticalFov * fovFactor
+                    ) {
+                continue;
+            }
+            if (topLeftHA > horizontalFov * fovFactor && topRightHA > horizontalFov * fovFactor && bottomLeftHA > horizontalFov * fovFactor && bottomRightHA > horizontalFov * fovFactor &&
+                topLeftHighHA > horizontalFov * fovFactor && topRightHighHA > horizontalFov * fovFactor && bottomLeftHighHA > horizontalFov * fovFactor && bottomRightHighHA > horizontalFov * fovFactor
+                    ) {
+                continue;
+            }
+        }
+        else {
+            if (topLeftView.x < -width / 2.0 && topRightView.x < -width / 2.0 && bottomLeftView.x < -width / 2.0 && bottomRightView.x < -width / 2.0) {
+                continue;
+            }
+            if (topLeftView.y < -height / 2.0 && topRightView.y < -height / 2.0 && bottomLeftView.y < -height / 2.0 && bottomRightView.y < -height / 2.0) {
+                continue;
+            }
+            if (topLeftView.x > width / 2.0 && topRightView.x > width / 2.0 && bottomLeftView.x > width / 2.0 && bottomRightView.x > width / 2.0) {
+                continue;
+            }
+            if (topLeftView.y > height / 2.0 && topRightView.y > height / 2.0 && bottomLeftView.y > height / 2.0 && bottomRightView.y > height / 2.0) {
+                continue;
+            }
+        }
+
+        if (!validViewBounds) {
+            viewBoundsTopLeft = topLeft;
+            viewBoundsBottomRight = bottomRight;
+            validViewBounds = true;
+        }
+
+        if (leftToRight) {
+            if (topLeft.x < viewBoundsTopLeft.x) {
+                viewBoundsTopLeft.x = topLeft.x;
+            }
+            if (bottomRight.x > viewBoundsBottomRight.x) {
+                viewBoundsBottomRight.x = bottomRight.x;
+            }
+        }
+        else {
+            if (topLeft.x > viewBoundsTopLeft.x) {
+                viewBoundsTopLeft.x = topLeft.x;
+            }
+            if (bottomRight.x < viewBoundsBottomRight.x) {
+                viewBoundsBottomRight.x = bottomRight.x;
+            }
+        }
+        if (topToBottom) {
+            if (topLeft.y > viewBoundsTopLeft.y) {
+                viewBoundsTopLeft.y = topLeft.y;
+            }
+            if (bottomRight.y < viewBoundsBottomRight.y) {
+                viewBoundsBottomRight.y = bottomRight.y;
+            }
+        }
+        else {
+
+            if (topLeft.y < viewBoundsTopLeft.y) {
+                viewBoundsTopLeft.y = topLeft.y;
+            }
+            if (bottomRight.y > viewBoundsBottomRight.y) {
+                viewBoundsBottomRight.y = bottomRight.y;
+            }
+        }
+
+
+        auto topLeftScreen = projectToScreen(topLeftView, projectionMatrix);
+        auto topRightScreen = projectToScreen(topRightView, projectionMatrix);
+        auto bottomLeftScreen = projectToScreen(bottomLeftView, projectionMatrix);
+        auto bottomRightScreen = projectToScreen(bottomRightView, projectionMatrix);
+
+        Vec2D topLeftScreenPx(topLeftScreen.x * (width / 2.0), topLeftScreen.y * (height / 2.0));
+        Vec2D topRightScreenPx(topRightScreen.x * (width / 2.0), topRightScreen.y * (height / 2.0));
+        Vec2D bottomLeftScreenPx(bottomLeftScreen.x * (width / 2.0), bottomLeftScreen.y * (height / 2.0));
+        Vec2D bottomRightScreenPx(bottomRightScreen.x * (width / 2.0), bottomRightScreen.y * (height / 2.0));
+
+        double topLengthPx = Vec2DHelper::distance(topLeftScreenPx, topRightScreenPx);
+        double bottomLengthPx = Vec2DHelper::distance(bottomLeftScreenPx, bottomRightScreenPx);
+        double leftLengthPx = Vec2DHelper::distance(topLeftScreenPx, bottomLeftScreenPx);
+        double rightLengthPx = Vec2DHelper::distance(topRightScreenPx, bottomRightScreenPx);
+
+        const double maxLength = 512 * 1.0;
+
+
+        bool preciseEnough = topLengthPx <= maxLength && bottomLengthPx <= maxLength && leftLengthPx <= maxLength && rightLengthPx <= maxLength;
+//        preciseEnough = candidate.levelIndex == 21;
+        bool lastLevel = candidate.levelIndex == maxLevelAvailable;
+        if (preciseEnough || lastLevel) {
+
+            // Berechnen der Fläche mit der Shoelace-Formel
+            double minX = std::min(std::min(topLeftScreen.x, bottomLeftScreen.x), std::min(topRightScreen.x, bottomRightScreen.x));
+            double minY = std::min(std::min(topLeftScreen.y, bottomLeftScreen.y), std::min(topRightScreen.y, bottomRightScreen.y));
+            double area1 = 0;
+            area1 += (topLeftScreen.x-minX) * (bottomLeftScreen.y-minY) - (bottomLeftScreen.x-minX) * (topLeftScreen.y-minY);
+            area1 += (bottomLeftScreen.x-minX) * (topRightScreen.y-minY) - (topRightScreen.x-minX) * (bottomLeftScreen.y-minY);
+            area1 += (topRightScreen.x-minX) * (topLeftScreen.y-minY) - (topLeftScreen.x-minX) * (topRightScreen.y-minY);
+            double area2 = 0;
+            area2 += (bottomLeftScreen.x-minX) * (bottomRightScreen.y-minY) - (bottomRightScreen.x-minX) * (bottomLeftScreen.y-minY);
+            area2 += (bottomRightScreen.x-minX) * (topRightScreen.y-minY) - (topRightScreen.x-minX) * (bottomRightScreen.y-minY);
+            area2 += (topRightScreen.x-minX) * (bottomLeftScreen.y-minY) - (bottomLeftScreen.x-minX) * (topRightScreen.y-minY);
+            if (area1 < 0 && area2 < 0) {
+                // both triangles are facing backwards
+                continue;
+            }
+
+            const RectCoord rect(topLeft, bottomRight);
+            int t = 0;
+            double priority = -centerZ * 100000;
+            visibleTilesVec.push_back(std::make_pair(candidate, PrioritizedTiled2dMapTileInfo(
+                    Tiled2dMapTileInfo(rect, candidate.x, candidate.y, t, zoomLevelInfo.zoomLevelIdentifier, zoomLevelInfo.zoom),
+                    priority)));
+
+            maxLevel = std::max(maxLevel, zoomLevelInfo.zoomLevelIdentifier);
+
+//            printf("USE TILE %d|%d|%d:\n%f|%f|%f -> %f|%f -> %f, %f\n%f|%f|%f -> %f|%f -> %f, %f\n%f|%f|%f -> %f|%f -> %f, %f\n%f|%f|%f -> %f|%f -> %f, %f\n\n", zoomLevelInfo.zoomLevelIdentifier, candidate.x, candidate.y,
+//                   topLeftView.x, topLeftView.y, topLeftView.z, topLeftScreen.x, topLeftScreen.y, topLeftVA, topLeftHA,
+//                   topRightView.x, topRightView.y, topRightView.z, topRightScreen.x, topRightScreen.y, topRightVA, topRightHA,
+//                   bottomLeftView.x, bottomLeftView.y, bottomLeftView.z,bottomLeftScreen.x, bottomLeftScreen.y, bottomLeftVA, bottomLeftHA,
+//                   bottomRightView.x, bottomRightView.y, bottomRightView.z,bottomRightScreen.x, bottomRightScreen.y, bottomRightVA, bottomRightHA);
+//
+//            printf("%d|%d|%d @ %f -> %f, %f, %f, %f\n", zoomLevelInfo.zoomLevelIdentifier, candidate.x, candidate.y, tileWidth, topLengthPx, bottomLengthPx, leftLengthPx, rightLengthPx);
+
+            if (topLengthPx > longestEdge) {
+                longestEdge = topLengthPx;
+            }
+            if (bottomLengthPx > longestEdge) {
+                longestEdge = bottomLengthPx;
+            }
+            if (leftLengthPx > longestEdge) {
+                longestEdge = leftLengthPx;
+            }
+            if (rightLengthPx > longestEdge) {
+                longestEdge = rightLengthPx;
+            }
+
+        }
+        else {
+
+            const Tiled2dMapZoomLevelInfo &zoomLevelInfo = zoomLevelInfos.at(candidate.levelIndex + 1);
+
+            const double tileWidth = zoomLevelInfo.tileWidthLayerSystemUnits;
+
+            RectCoord layerBounds = zoomLevelInfo.bounds;
+            layerBounds = conversionHelper->convertRect(layerSystemId, layerBounds);
+
+            const bool leftToRight = layerBounds.topLeft.x < layerBounds.bottomRight.x;
+            const bool topToBottom = layerBounds.topLeft.y < layerBounds.bottomRight.y;
+            const double tileWidthAdj = leftToRight ? tileWidth : -tileWidth;
+            const double tileHeightAdj = topToBottom ? tileWidth : -tileWidth;
+
+            const double boundsLeft = layerBounds.topLeft.x;
+            const double boundsTop = layerBounds.topLeft.y;
+
+            int nextCandidateXMin = floor((topLeft.x - boundsLeft) / tileWidthAdj);
+            int nextCandidateXMax = ceil((topRight.x - boundsLeft) / tileWidthAdj) - 1;
+
+            int nextCandidateYMin = floor((topLeft.y - boundsTop) / tileHeightAdj);
+            int nextCandidateYMax = ceil((bottomLeft.y - boundsTop) / tileHeightAdj) - 1;
+
+//            printf("SPLIT %d|%d|%d: ", candidate.levelIndex, candidate.x, candidate.y);
+
+            for (int nextX = nextCandidateXMin; nextX <= nextCandidateXMax; nextX++) {
+                for (int nextY = nextCandidateYMin; nextY <= nextCandidateYMax; nextY++) {
+                    VisibleTileCandidate cNext;
+                    cNext.levelIndex = candidate.levelIndex + 1;
+                    cNext.x = nextX;
+                    cNext.y = nextY;
+                    if (candidatesSet.find(cNext) == candidatesSet.end()) {
+                        candidates.push(cNext);
+                        candidatesSet.insert(cNext);
+                    }
+
+//                    printf("%d|%d|%d, ", cNext.levelIndex, cNext.x, cNext.y);
+                }
+            }
+//            printf("\n");
+
+
+
+        }
+    }
+
+    if (!validViewBounds) {
+        printf("ERROR: No valid ViewBounds, this can't happen\n");
+        return;
+    }
+    currentViewBounds = RectCoord(viewBoundsTopLeft, viewBoundsBottomRight);
+
+//    printf("%d checks at %.0fx%.0f, %ld visible, max %d (of %d), edge %.0fpx\n", candidateChecks, width, height, visibleTilesVec.size(), maxLevel, maxLevelAvailable, longestEdge);
+
+//    printf("%ld visible base tiles\n", visibleTilesVec.size());
+
+
+//    VisibleTilesLayer nextVisibleTiles(-1);
+
+    std::vector<VisibleTilesLayer> layers;
+
+    for (int previousLayerOffset = 0; previousLayerOffset <= zoomInfo.numDrawPreviousLayers; previousLayerOffset++) {
+
+        VisibleTilesLayer curVisibleTiles(-previousLayerOffset);
+
+        std::vector<std::pair<VisibleTileCandidate, PrioritizedTiled2dMapTileInfo>> nextVisibleTilesVec;
+
+        for (const auto & tile : visibleTilesVec) {
+            curVisibleTiles.visibleTiles.insert(tile.second);
+
+            if (tile.first.levelIndex > 0 && previousLayerOffset < zoomInfo.numDrawPreviousLayers) {
+
+                const Tiled2dMapZoomLevelInfo &zoomLevelInfo = zoomLevelInfos.at(tile.first.levelIndex - 1);
+
+                const double tileWidth = zoomLevelInfo.tileWidthLayerSystemUnits;
+
+                RectCoord layerBounds = zoomLevelInfo.bounds;
+                layerBounds = conversionHelper->convertRect(layerSystemId, layerBounds);
+
+                const bool leftToRight = layerBounds.topLeft.x < layerBounds.bottomRight.x;
+                const bool topToBottom = layerBounds.topLeft.y < layerBounds.bottomRight.y;
+                const double tileWidthAdj = leftToRight ? tileWidth : -tileWidth;
+                const double tileHeightAdj = topToBottom ? tileWidth : -tileWidth;
+
+                const double boundsLeft = layerBounds.topLeft.x;
+                const double boundsTop = layerBounds.topLeft.y;
+
+                VisibleTileCandidate parent;
+                parent.levelIndex = tile.first.levelIndex - 1;
+                parent.x = floor((tile.second.tileInfo.bounds.topLeft.x - boundsLeft) / tileWidthAdj);
+                parent.y = floor((tile.second.tileInfo.bounds.topLeft.y - boundsTop) / tileHeightAdj);
+
+                const Coord topLeft = Coord(layerSystemId, parent.x * tileWidthAdj + boundsLeft, parent.y * tileHeightAdj + boundsTop, focusPointAltitude);
+                const Coord bottomRight = Coord(layerSystemId, topLeft.x + tileWidthAdj, topLeft.y + tileHeightAdj, focusPointAltitude);
+
+                const RectCoord rect(topLeft, bottomRight);
+                int t = 0;
+                double priority = previousLayerOffset * 100000 + tile.second.priority;
+                nextVisibleTilesVec.push_back(std::make_pair(parent, PrioritizedTiled2dMapTileInfo(
+                        Tiled2dMapTileInfo(rect, parent.x, parent.y, t, zoomLevelInfo.zoomLevelIdentifier, zoomLevelInfo.zoom),
+                        priority)));
+            }
+            visibleTilesVec = nextVisibleTilesVec;
+        }
+
+        layers.push_back(curVisibleTiles);
+    }
+
+
+//    curVisibleTiles.visibleTiles.insert(visibleTilesVec.begin(), visibleTilesVec.end());
+
+
+
+
+
+//    std::unordered_set<PrioritizedTiled2dMapTileInfo> visibleTiles(visibleTilesVec.begin(), visibleTilesVec.end());
+//    layers.push_back(curVisibleTiles);
+//    layers.push_back(nextVisibleTiles);
+
+    onVisibleTilesChanged(layers);
+
 }
 
 template<class T, class L, class R>
