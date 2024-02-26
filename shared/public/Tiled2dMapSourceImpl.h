@@ -65,7 +65,7 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
 
     RectCoord visBounds = RectCoord(
             Coord(CoordinateSystemIdentifiers::EPSG4326(), -180.0, 90.0, 0.0),
-            Coord(CoordinateSystemIdentifiers::EPSG4326(), 18.0, -90.0, 0.0)
+            Coord(CoordinateSystemIdentifiers::EPSG4326(), 180.0, -90.0, 0.0)
     );
 
     const float screenScaleFactor = zoomInfo.adaptScaleToScreen ? screenDensityPpi / (0.0254 / 0.00028) : 1.0;
