@@ -9,7 +9,7 @@
  */
 
 #include "Tiled2dMapVectorRasterTile.h"
-#include "MapCamera2dInterface.h"
+#include "MapCameraInterface.h"
 #include "Tiled2dMapVectorLayerConfig.h"
 #include "RasterShaderInterface.h"
 #include "RenderPass.h"

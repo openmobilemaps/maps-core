@@ -129,7 +129,7 @@ open class OffscreenMapRenderer(val sizePx: Vec2I, val density: Float = 72f) : G
 		requireMapInterface().removeLayer(layer)
 	}
 
-	override fun getCamera(): MapCamera2dInterface {
+	override fun getCamera(): MapCameraInterface {
 		return requireMapInterface().getCamera()
 	}
 

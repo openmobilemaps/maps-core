@@ -209,7 +209,7 @@ extension MCCoord {
 
 @available(iOS 17.0, *)
 @MainActor
-public class MapViewCoordinator: MCMapCamera2dListenerInterface {
+public class MapViewCoordinator: MCMapCameraListenerInterface {
     var parent: MapView
     init(parent: MapView) {
         self.parent = parent

@@ -5,20 +5,21 @@
 
 #include "CameraInterface.h"
 #include "Coord.h"
-#include "MapCamera2dListenerInterface.h"
+#include "MapCameraListenerInterface.h"
 #include "RectCoord.h"
 #include "Vec2F.h"
 #include <memory>
 #include <optional>
 #include <vector>
 
+class MapCamera3dInterface;
 class MapInterface;
 
-class MapCamera2dInterface {
+class MapCameraInterface {
 public:
-    virtual ~MapCamera2dInterface() = default;
+    virtual ~MapCameraInterface() = default;
 
-    static /*not-null*/ std::shared_ptr<MapCamera2dInterface> create(const /*not-null*/ std::shared_ptr<MapInterface> & mapInterface, float screenDensityPpi, bool is3D);
+    static /*not-null*/ std::shared_ptr<MapCameraInterface> create(const /*not-null*/ std::shared_ptr<MapInterface> & mapInterface, float screenDensityPpi, bool is3D);
 
     virtual void freeze(bool freeze) = 0;
 
@@ -71,9 +72,9 @@ public:
 
     virtual std::vector<float> getInvariantModelMatrix(const ::Coord & coordinate, bool scaleInvariant, bool rotationInvariant) = 0;
 
-    virtual void addListener(const /*not-null*/ std::shared_ptr<::MapCamera2dListenerInterface> & listener) = 0;
+    virtual void addListener(const /*not-null*/ std::shared_ptr<::MapCameraListenerInterface> & listener) = 0;
 
-    virtual void removeListener(const /*not-null*/ std::shared_ptr<::MapCamera2dListenerInterface> & listener) = 0;
+    virtual void removeListener(const /*not-null*/ std::shared_ptr<::MapCameraListenerInterface> & listener) = 0;
 
     virtual ::Coord coordFromScreenPosition(const ::Vec2F & posScreen) = 0;
 
@@ -100,4 +101,6 @@ public:
     virtual std::optional<float> getLastVpMatrixRotation() = 0;
 
     virtual std::optional<float> getLastVpMatrixZoom() = 0;
+
+    virtual /*nullable*/ std::shared_ptr<MapCamera3dInterface> asMapCamera3d() = 0;
 };

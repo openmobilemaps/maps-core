@@ -20,7 +20,7 @@
 class IndexedLayerInterface;
 class LayerInterface;
 class MapCallbackInterface;
-class MapCamera2dInterface;
+class MapCameraInterface;
 class MapReadyCallbackInterface;
 struct MapConfig;
 
@@ -46,9 +46,9 @@ public:
 
     virtual /*not-null*/ std::shared_ptr<::CoordinateConversionHelperInterface> getCoordinateConverterHelper() = 0;
 
-    virtual void setCamera(const /*not-null*/ std::shared_ptr<MapCamera2dInterface> & camera) = 0;
+    virtual void setCamera(const /*not-null*/ std::shared_ptr<MapCameraInterface> & camera) = 0;
 
-    virtual /*not-null*/ std::shared_ptr<MapCamera2dInterface> getCamera() = 0;
+    virtual /*not-null*/ std::shared_ptr<MapCameraInterface> getCamera() = 0;
 
     virtual void setTouchHandler(const /*not-null*/ std::shared_ptr<::TouchHandlerInterface> & touchHandler) = 0;
 

@@ -11,7 +11,7 @@
 #include "TextHelper.h"
 
 #include "GlyphDescription.h"
-#include "MapCamera2dInterface.h"
+#include "MapCameraInterface.h"
 #include "Quad2dD.h"
 #include "TextDescription.h"
 #include "BoundingBox.h"

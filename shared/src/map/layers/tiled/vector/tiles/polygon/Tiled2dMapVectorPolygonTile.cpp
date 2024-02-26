@@ -11,7 +11,7 @@
 #include "Tiled2dMapVectorPolygonTile.h"
 #include "Tiled2dMapVectorLayerConfig.h"
 #include "RenderObject.h"
-#include "MapCamera2dInterface.h"
+#include "MapCameraInterface.h"
 #include "earcut.hpp"
 #include "Logger.h"
 #include "PolygonHelper.h"

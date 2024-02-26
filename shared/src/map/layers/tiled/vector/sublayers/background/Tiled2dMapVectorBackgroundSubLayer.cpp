@@ -17,7 +17,7 @@
 #include "SchedulerInterface.h"
 #include "LambdaTask.h"
 #include "PolygonPatternGroup2dInterface.h"
-#include "MapCamera2dInterface.h"
+#include "MapCameraInterface.h"
 #include "PolygonGroupShaderInterface.h"
 
 void Tiled2dMapVectorBackgroundSubLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface, int32_t layerIndex) {

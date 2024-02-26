@@ -1,6 +1,5 @@
 @extern "../yaml/rect_coord.yaml"
 @extern "../yaml/loader_status.yaml"
-@extern "../yaml/map_camera_2d_interface.yaml"
 
 error_manager = interface +c
 {

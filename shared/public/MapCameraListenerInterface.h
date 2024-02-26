@@ -6,9 +6,9 @@
 #include "RectCoord.h"
 #include <vector>
 
-class MapCamera2dListenerInterface {
+class MapCameraListenerInterface {
 public:
-    virtual ~MapCamera2dListenerInterface() = default;
+    virtual ~MapCameraListenerInterface() = default;
 
     virtual void onVisibleBoundsChanged(const ::RectCoord & visibleBounds, double zoom) = 0;
 

@@ -354,14 +354,14 @@ void MapCamera2d::setPaddingBottom(float padding) {
     }
 }
 
-void MapCamera2d::addListener(const std::shared_ptr<MapCamera2dListenerInterface> &listener) {
+void MapCamera2d::addListener(const std::shared_ptr<MapCameraListenerInterface> &listener) {
     std::lock_guard<std::recursive_mutex> lock(listenerMutex);
     if (listeners.count(listener) == 0) {
         listeners.insert(listener);
     }
 }
 
-void MapCamera2d::removeListener(const std::shared_ptr<MapCamera2dListenerInterface> &listener) {
+void MapCamera2d::removeListener(const std::shared_ptr<MapCameraListenerInterface> &listener) {
     std::lock_guard<std::recursive_mutex> lock(listenerMutex);
     if (listeners.count(listener) > 0) {
         listeners.erase(listener);
@@ -1025,3 +1025,7 @@ void MapCamera2d::setBoundsRestrictWholeVisibleRect(bool enabled) {
 }
 
 float MapCamera2d::getScreenDensityPpi() { return screenDensityPpi; }
+
+std::shared_ptr<MapCamera3dInterface> MapCamera2d::asMapCamera3d() {
+    return nullptr;
+}

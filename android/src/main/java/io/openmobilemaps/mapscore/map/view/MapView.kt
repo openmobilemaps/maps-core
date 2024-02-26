@@ -230,7 +230,7 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 		requireMapInterface().removeLayer(layer.layerInterface())
 	}
 
-	override fun getCamera(): MapCamera2dInterface {
+	override fun getCamera(): MapCameraInterface {
 		return requireMapInterface().getCamera()
 	}
 

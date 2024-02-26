@@ -9,7 +9,7 @@
 #include "NativeIndexedLayerInterface.h"
 #include "NativeLayerInterface.h"
 #include "NativeMapCallbackInterface.h"
-#include "NativeMapCamera2dInterface.h"
+#include "NativeMapCameraInterface.h"
 #include "NativeMapConfig.h"
 #include "NativeMapReadyCallbackInterface.h"
 #include "NativeRectCoord.h"
@@ -123,7 +123,7 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapInterface_
 {
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::MapInterface>(nativeRef);
-        ref->setCamera(::djinni_generated::NativeMapCamera2dInterface::toCpp(jniEnv, j_camera));
+        ref->setCamera(::djinni_generated::NativeMapCameraInterface::toCpp(jniEnv, j_camera));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
@@ -132,7 +132,7 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapInterfa
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::MapInterface>(nativeRef);
         auto r = ref->getCamera();
-        return ::djinni::release(::djinni_generated::NativeMapCamera2dInterface::fromCpp(jniEnv, r));
+        return ::djinni::release(::djinni_generated::NativeMapCameraInterface::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 

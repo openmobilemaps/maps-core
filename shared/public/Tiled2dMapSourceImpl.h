@@ -63,13 +63,20 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
         return;
     }
     double zoom = 0;
-    for (const auto zoomLevelInfo : layerConfig->getZoomLevelInfos()) {
+    /*for (const auto zoomLevelInfo : layerConfig->getZoomLevelInfos()) {
         if (zoomLevelInfo.numTilesX >= 2) {
             zoom = zoomLevelInfo.zoom;
             break;
         }
-    }
-    onVisibleBoundsChanged(mapConfig.mapCoordinateSystem.bounds, 0, zoom);
+    }*/
+
+    RectCoord visBounds = RectCoord(
+            Coord(CoordinateSystemIdentifiers::EPSG3857(), -20037508.34, 20037508.34, 0.0),
+            Coord(CoordinateSystemIdentifiers::EPSG3857(), 20037508.34, -20037508.34, 0.0)
+    );
+    double targetZoom = layerConfig->getZoomLevelInfos().at(1).zoom;
+
+    onVisibleBoundsChanged(visBounds, 0, targetZoom);
 }
 
 template<class T, class L, class R>
@@ -79,11 +86,8 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
     }
 
     std::vector<PrioritizedTiled2dMapTileInfo> visibleTilesVec;
-    RectCoord visBounds = RectCoord(
-            Coord(CoordinateSystemIdentifiers::EPSG3857(), -20037508.34, 20037508.34, 0.0),
-            Coord(CoordinateSystemIdentifiers::EPSG3857(), 20037508.34, -20037508.34, 0.0)
-    );
-    RectCoord visibleBoundsLayer = conversionHelper->convertRect(layerSystemId, visBounds);
+
+    RectCoord visibleBoundsLayer = conversionHelper->convertRect(layerSystemId, visibleBounds);
 
     const auto bounds = layerConfig->getBounds();
 
@@ -121,15 +125,13 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
         targetZoomLayer = (int) numZoomLevels - 1;
     }
 
-    targetZoomLayer = 4;
-
     int targetZoomLevelIdentifier = zoomLevelInfos.at(targetZoomLayer).zoomLevelIdentifier;
     int startZoomLayer = 0;
     int endZoomLevel = std::min((int) numZoomLevels - 1, targetZoomLayer + 2);
     int keepZoomLevelOffset = std::max(zoomLevelInfos.at(startZoomLayer).zoomLevelIdentifier,
                                        zoomLevelInfos.at(endZoomLevel).zoomLevelIdentifier + ALWAYS_KEEP_LEVEL_TARGET_ZOOM_OFFSET) -
                               targetZoomLevelIdentifier;
-
+    LogDebug << "UBCM: " <<= targetZoomLayer;
     int distanceWeight = 100;
     int zoomLevelWeight = 1000 * zoomLevelInfos.at(0).numTilesT;
     int zDistanceWeight = 100000 * zoomLevelInfos.at(0).numTilesT;

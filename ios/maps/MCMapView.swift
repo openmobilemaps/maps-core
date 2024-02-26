@@ -284,7 +284,7 @@ public extension MCMapView {
 }
 
 public extension MCMapView {
-    var camera: MCMapCamera2dInterface {
+    var camera: MCMapCameraInterface {
         mapInterface.getCamera()!
     }
 

@@ -30,9 +30,9 @@ abstract class MapInterface {
 
     abstract fun getCoordinateConverterHelper(): io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateConversionHelperInterface
 
-    abstract fun setCamera(camera: MapCamera2dInterface)
+    abstract fun setCamera(camera: MapCameraInterface)
 
-    abstract fun getCamera(): MapCamera2dInterface
+    abstract fun getCamera(): MapCameraInterface
 
     abstract fun setTouchHandler(touchHandler: io.openmobilemaps.mapscore.shared.map.controls.TouchHandlerInterface)
 
@@ -141,17 +141,17 @@ abstract class MapInterface {
         }
         private external fun native_getCoordinateConverterHelper(_nativeRef: Long): io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateConversionHelperInterface
 
-        override fun setCamera(camera: MapCamera2dInterface) {
+        override fun setCamera(camera: MapCameraInterface) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             native_setCamera(this.nativeRef, camera)
         }
-        private external fun native_setCamera(_nativeRef: Long, camera: MapCamera2dInterface)
+        private external fun native_setCamera(_nativeRef: Long, camera: MapCameraInterface)
 
-        override fun getCamera(): MapCamera2dInterface {
+        override fun getCamera(): MapCameraInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             return native_getCamera(this.nativeRef)
         }
-        private external fun native_getCamera(_nativeRef: Long): MapCamera2dInterface
+        private external fun native_getCamera(_nativeRef: Long): MapCameraInterface
 
         override fun setTouchHandler(touchHandler: io.openmobilemaps.mapscore.shared.map.controls.TouchHandlerInterface) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

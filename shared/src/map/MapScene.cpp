@@ -15,7 +15,7 @@
 #include "LambdaTask.h"
 #include "LayerInterface.h"
 #include "MapCallbackInterface.h"
-#include "MapCamera2dInterface.h"
+#include "MapCameraInterface.h"
 #include "MapReadyCallbackInterface.h"
 #include "TouchInterface.h"
 #include "IndexedLayer.h"
@@ -40,7 +40,7 @@ MapScene::MapScene(std::shared_ptr<SceneInterface> scene, const MapConfig &mapCo
     scheduler->setSchedulerGraphicsTaskCallbacks(ptr);
 
     // add default camera
-    setCamera(MapCamera2dInterface::create(ptr, pixelDensity, is3D));
+    setCamera(MapCameraInterface::create(ptr, pixelDensity, is3D));
 
     if (is3D) {
         scene->getRenderingContext()->setCulling(RenderingCullMode::BACK);
@@ -64,7 +64,7 @@ void MapScene::setCallbackHandler(const std::shared_ptr<MapCallbackInterface> &c
     callbackHandler = callbackInterface;
 }
 
-void MapScene::setCamera(const std::shared_ptr<::MapCamera2dInterface> &camera) {
+void MapScene::setCamera(const std::shared_ptr<::MapCameraInterface> &camera) {
     if (touchHandler && std::dynamic_pointer_cast<TouchInterface>(camera)) {
         auto prevCamera = std::dynamic_pointer_cast<TouchInterface>(scene->getCamera());
         if (prevCamera) {
@@ -77,7 +77,7 @@ void MapScene::setCamera(const std::shared_ptr<::MapCamera2dInterface> &camera) 
     scene->setCamera(camera->asCameraInterface());
 }
 
-std::shared_ptr<::MapCamera2dInterface> MapScene::getCamera() { return camera; }
+std::shared_ptr<::MapCameraInterface> MapScene::getCamera() { return camera; }
 
 void MapScene::setTouchHandler(const std::shared_ptr<::TouchHandlerInterface> &touchHandler) {
     auto currentCamera = std::dynamic_pointer_cast<TouchInterface>(scene->getCamera());

@@ -11,9 +11,9 @@
 #include "MapCamera3d.h"
 #include "MapCamera2d.h"
 
-std::shared_ptr<MapCamera2dInterface> MapCamera2dInterface::create(const std::shared_ptr<MapInterface> &mapInterface,
+std::shared_ptr<MapCameraInterface> MapCameraInterface::create(const std::shared_ptr<MapInterface> &mapInterface,
                                                                    float screenDensityPpi, bool is3D) {
-    std::shared_ptr<MapCamera2dInterface> camera = nullptr;
+    std::shared_ptr<MapCameraInterface> camera = nullptr;
     if (is3D) {
         camera = std::make_shared<MapCamera3d>(mapInterface, screenDensityPpi);
     } else {

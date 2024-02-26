@@ -10,7 +10,7 @@
 
 #include "Tiled2dMapRasterLayer.h"
 #include "LambdaTask.h"
-#include "MapCamera2dInterface.h"
+#include "MapCameraInterface.h"
 #include "MapConfig.h"
 #include "RenderConfigInterface.h"
 #include "RenderObject.h"
