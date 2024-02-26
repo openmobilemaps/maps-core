@@ -512,6 +512,10 @@ void MapCamera3d::notifyListeners(const int &listenerType) {
             verticalFov = this->verticalFov;
             focusPointAltitude = this->focusPointAltitude;
         }
+
+        Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
+        width = sizeViewport.x;
+        height = sizeViewport.y;
     }
 
     std::lock_guard<std::recursive_mutex> lock(listenerMutex);
