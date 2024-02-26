@@ -32,6 +32,7 @@ import io.openmobilemaps.mapscore.shared.map.*
 import io.openmobilemaps.mapscore.shared.map.controls.TouchAction
 import io.openmobilemaps.mapscore.shared.map.controls.TouchEvent
 import io.openmobilemaps.mapscore.shared.map.controls.TouchHandlerInterface
+import io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateConversionHelperInterface
 import io.openmobilemaps.mapscore.shared.map.scheduling.TaskInterface
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -229,6 +230,10 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 
 	override fun getCamera(): MapCamera2dInterface {
 		return requireMapInterface().getCamera()
+	}
+
+	override fun getCoordinateConversionHelper(): CoordinateConversionHelperInterface {
+		return requireMapInterface().getCoordinateConverterHelper()
 	}
 
 	fun saveFrame(saveFrameSpec: SaveFrameSpec, saveFrameCallback: SaveFrameCallback) {
