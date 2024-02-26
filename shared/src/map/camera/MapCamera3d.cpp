@@ -366,9 +366,9 @@ std::vector<float> MapCamera3d::getVpMatrix() {
 
     Coord testFocusPos = focusPointPosition;
 
-    Matrix::rotateM(newViewMatrix, 0, -25.0/*cameraPitch*/, 1.0, 0.0, 0.0);
-    double vCameraSpace = (1500.0 / (R / 1000.0)); // km
-    double hCameraSpace = atan(2.0 / 180.0 * M_PI); // degr
+    Matrix::rotateM(newViewMatrix, 0, -20.0/*cameraPitch*/, 1.0, 0.0, 0.0);
+    double vCameraSpace = (3000.0 / (R / 1000.0)); // km
+    double hCameraSpace = atan(3.0 / 180.0 * M_PI); // degr
     Matrix::translateM(newViewMatrix, 0, 0, hCameraSpace, -(1.0 + vCameraSpace));
     Matrix::rotateM(newViewMatrix, 0.0, testFocusPos.y, 1.0, 0.0, 0.0);
     Matrix::rotateM(newViewMatrix, 0.0, -testFocusPos.x - 90.0, 0.0, 1.0, 0.0);
