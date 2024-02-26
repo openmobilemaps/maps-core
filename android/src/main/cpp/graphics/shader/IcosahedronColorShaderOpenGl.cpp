@@ -118,7 +118,8 @@ std::string IcosahedronColorShaderOpenGl::getFragmentShader() {
 
                                     // Return the interpolated color with the original alpha value
                                     fragmentColor = vec4(colorRes.rgb * 0.5, 0.5);*/
-                                    float precipFloat = clamp(gridValue/* * 3600.0 / 100.0*/, 0.0, 1.0);
+                                    float precipFloat = clamp(gridValue * 0.75/* * 3600.0 / 100.0*/, 0.0, 1.0);
+                                    //precipFloat = precipFloat * precipFloat;
                                     if (gridValue < 0.01) {
                                         discard;
                                     }

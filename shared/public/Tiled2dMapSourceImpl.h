@@ -121,7 +121,7 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
         targetZoomLayer = (int) numZoomLevels - 1;
     }
 
-    targetZoomLayer = 5;
+    targetZoomLayer = 4;
 
     int targetZoomLevelIdentifier = zoomLevelInfos.at(targetZoomLayer).zoomLevelIdentifier;
     int startZoomLayer = 0;
