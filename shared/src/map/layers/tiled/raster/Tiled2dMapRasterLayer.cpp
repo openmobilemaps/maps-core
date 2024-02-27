@@ -193,13 +193,18 @@ void Tiled2dMapRasterLayer::onTilesUpdated(const std::string &layerName, std::un
                 if (shouldLoadTile(rasterTileInfo.tileInfo.tileInfo)) {
                     auto it = tileObjectMap.find(rasterTileInfo);
                     if (it == tileObjectMap.end()) {
-                        bool found = std::any_of(this->tilesToSetup.begin(), this->tilesToSetup.end(), [&rasterTileInfo](const auto& tilePair) {
+                        auto found = std::find_if(this->tilesToSetup.begin(), this->tilesToSetup.end(), [&rasterTileInfo](const auto& tilePair) {
                             return tilePair.first == rasterTileInfo;
                         });
 
-                        if (!found) {
+                        if (found == this->tilesToSetup.end()) {
                             tilesToAdd.insert(rasterTileInfo);
+                        } else if (is3d) {
+                            found->second->getQuadObject()->setSubdivisionFactor(SUBDIVISION_FACTOR_3D + rasterTileInfo.tileInfo.tileInfo.tessellationFactor);
                         }
+                    } else if (is3d) {
+                        it->second->getQuadObject()->setSubdivisionFactor(SUBDIVISION_FACTOR_3D + rasterTileInfo.tileInfo.tileInfo.tessellationFactor);
+                        tilesToSetup.emplace_back(rasterTileInfo, it->second);
                     }
                 }
             }
@@ -258,7 +263,7 @@ void Tiled2dMapRasterLayer::onTilesUpdated(const std::string &layerName, std::un
                             graphicsFactory->createQuad(rasterShader->asShaderProgramInterface()), rasterShader, mapInterface, is3d);
                 }
                 if (is3d) {
-                    tileObject->getQuadObject()->setSubdivisionFactor(SUBDIVISION_FACTOR_3D);
+                    tileObject->getQuadObject()->setSubdivisionFactor(SUBDIVISION_FACTOR_3D + tile.tileInfo.tileInfo.tessellationFactor);
                 }
                 if (zoomInfo.numDrawPreviousLayers == 0 || !animationsEnabled || zoomInfo.maskTile) {
                     tileObject->setStyle(style);
@@ -356,7 +361,7 @@ void Tiled2dMapRasterLayer::setupTiles() {
         for (const auto &tile : tilesToSetup) {
             const auto &tileInfo = tile.first;
             const auto &tileObject = tile.second;
-            if (!tileObject) {
+            if (!tileObject || tileObject->getGraphicsObject()->isReady()) {
                 continue;
             }
 
@@ -428,8 +433,8 @@ void Tiled2dMapRasterLayer::generateRenderPasses() {
             } else if (mask) {
                 //TODO: general mask would no longer work now, we would have to merge the tile-mask with the layer-mask
                 std::shared_ptr<RenderPass> renderPass =
-                std::make_shared<RenderPass>(RenderPassConfig(0, false),
-                                             std::vector<std::shared_ptr<::RenderObjectInterface>>{renderObject}, mask);
+                        std::make_shared<RenderPass>(RenderPassConfig(0, false),
+                                                     std::vector<std::shared_ptr<::RenderObjectInterface>>{renderObject}, mask);
                 renderPass->setScissoringRect(scissorRect);
                 newRenderPasses.push_back(renderPass);
             } else {
