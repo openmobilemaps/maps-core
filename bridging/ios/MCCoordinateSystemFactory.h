@@ -11,6 +11,10 @@
 
 + (nonnull MCMapCoordinateSystem *)getEpsg3857System;
 
++ (nonnull MCMapCoordinateSystem *)getEpsg4326System;
+
 + (nonnull MCMapCoordinateSystem *)getEpsg21781System;
+
++ (nonnull MCMapCoordinateSystem *)getUnitSphereSystem;
 
 @end
