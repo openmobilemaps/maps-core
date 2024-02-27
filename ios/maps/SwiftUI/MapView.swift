@@ -39,25 +39,35 @@ public struct MapView: UIViewRepresentable {
         public var center: Updatable<MCCoord>
         public var zoom: Updatable<Double>
         public var visibleRect: Updatable<MCRectCoord>
+        public var mode: MCCameraMode3d = .GLOBE
 
         public init(center: Updatable<MCCoord> = .init(),
              zoom: Updatable<Double> = .init(),
-             visibleRect: Updatable<MCRectCoord> = .init()) {
+             visibleRect: Updatable<MCRectCoord> = .init(),
+                    mode: MCCameraMode3d = .GLOBE) {
             self.center = center
             self.zoom = zoom
             self.visibleRect = visibleRect
+            self.mode = mode
         }
 
-        public init(location: CLLocationCoordinate2D, zoom: Double?) {
+        public init(location: CLLocationCoordinate2D, 
+                    zoom: Double?,
+                    mode: MCCameraMode3d = .GLOBE) {
             self.center = .init(mode: .user, value: MCCoord(systemIdentifier: MCCoordinateSystemIdentifiers.epsg4326(), x: location.longitude, y: location.latitude, z: 0))
             self.zoom = .init(mode: .user, value: zoom)
             self.visibleRect = .init()
+            self.mode = mode
         }
 
-        public init(latitude: Double, longitude: Double, zoom: Double?) {
+        public init(latitude: Double, 
+                    longitude: Double,
+                    zoom: Double?,
+                    mode: MCCameraMode3d = .GLOBE) {
             self.center = .init(mode: .user, value: MCCoord(systemIdentifier: MCCoordinateSystemIdentifiers.epsg4326(), x: longitude, y: latitude, z: 0))
             self.zoom = .init(mode: .user, value: zoom)
             self.visibleRect = .init()
+            self.mode = mode
         }
 
         public var centerCoordinate: MCCoord? {
@@ -68,6 +78,7 @@ public struct MapView: UIViewRepresentable {
             lhs.zoom == rhs.zoom
                 && lhs.visibleRect == rhs.visibleRect
                 && lhs.center == rhs.center
+            && lhs.mode == rhs.mode
         }
     }
 
@@ -94,6 +105,7 @@ public struct MapView: UIViewRepresentable {
         mapView.backgroundColor = .clear
         mapView.camera.addListener(context.coordinator)
         mapView.camera.setRotationEnabled(false)
+        mapView.camera.asMapCamera3d()?.setCameraMode(camera.mode)
         mapView.sizeDelegate = context.coordinator
 //        MapActivityHandler.shared.mapView = mapView
         context.coordinator.mapView = mapView
@@ -133,6 +145,8 @@ public struct MapView: UIViewRepresentable {
         } else if let visibleRect = camera.visibleRect.value, camera.visibleRect.mode == .user {
             mapView.camera.move(toBoundingBox: visibleRect, paddingPc: 0, animated: animated, minZoom: nil, maxZoom: nil)
         }
+
+        mapView.camera.asMapCamera3d()?.setCameraMode(camera.mode)
 
         coordinator.ignoreCallbacks = false
         coordinator.lastWrittenCamera = camera
