@@ -299,7 +299,8 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                     parser.parseValue(val["layout"]["line-cap"]),
                     parser.parseValue(val["paint"]["line-offset"]),
                     blendMode,
-                    parser.parseValue(val["paint"]["line-dotted"])
+                    parser.parseValue(val["paint"]["line-dotted"]),
+                    parser.parseValue(val["paint"]["line-dotted-gap"])
             );
             auto layerDesc = std::make_shared<LineVectorLayerDescription>(
                     val["id"],

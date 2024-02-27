@@ -177,7 +177,9 @@ void LineGroup2dLayerObject::setStyles(const std::vector<LineStyle> &styles) {
         auto dValue2 = (dn > 2 ? s.dashArray[2] : 0.0) + dValue1;
         auto dValue3 = (dn > 3 ? s.dashArray[3] : 0.0) + dValue2;
 
-        shaderLineStyles.emplace_back(s.width, s.color.normal.r, s.color.normal.g, s.color.normal.b, s.color.normal.a, s.gapColor.normal.r, s.gapColor.normal.g, s.gapColor.normal.b, s.gapColor.normal.a, s.widthType == SizeType::SCREEN_PIXEL ? 1.0 : 0.0, s.opacity, s.blur, cap, dn, dValue0, dValue1, dValue2, dValue3, s.offset, s.dotted);
+        float dotted = s.dotted ? 0 : 1;
+
+        shaderLineStyles.emplace_back(s.width, s.color.normal.r, s.color.normal.g, s.color.normal.b, s.color.normal.a, s.gapColor.normal.r, s.gapColor.normal.g, s.gapColor.normal.b, s.gapColor.normal.a, s.widthType == SizeType::SCREEN_PIXEL ? 1.0 : 0.0, s.opacity, s.blur, cap, dn, dValue0, dValue1, dValue2, dValue3, s.offset, s.dotted, s.dottedGap);
     }
 
     auto bytes = SharedBytes((int64_t)shaderLineStyles.data(), (int)shaderLineStyles.size(), 20 * sizeof(float));

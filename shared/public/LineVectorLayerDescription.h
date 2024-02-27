@@ -25,7 +25,8 @@ public:
                     std::shared_ptr<Value> lineCap = nullptr,
                     std::shared_ptr<Value> lineOffset = nullptr,
                     std::shared_ptr<Value> blendMode = nullptr,
-                    std::shared_ptr<Value> lineDotted = nullptr)
+                    std::shared_ptr<Value> lineDotted = nullptr,
+                    std::shared_ptr<Value> lineDottedGap = nullptr)
             : lineColor(lineColor),
               lineOpacity(lineOpacity),
               lineWidth(lineWidth),
@@ -34,7 +35,8 @@ public:
               lineCap(lineCap),
               lineOffset(lineOffset),
               blendMode(blendMode),
-              lineDotted(lineDotted) {}
+              lineDotted(lineDotted),
+              lineDottedGap(lineDottedGap) {}
 
     LineVectorStyle(LineVectorStyle &style)
             : lineColor(style.lineColor),
@@ -45,7 +47,8 @@ public:
               lineCap(style.lineCap),
               lineOffset(style.lineOffset),
               blendMode(style.blendMode),
-              lineDotted(style.lineDotted) {}
+              lineDotted(style.lineDotted),
+              lineDottedGap(style.lineDottedGap) {}
 
     UsedKeysCollection getUsedKeys() const {
         UsedKeysCollection usedKeys;
@@ -107,6 +110,11 @@ public:
         static const bool defaultValue = false;
         return lineDottedEvaluator.getResult(lineDotted, context, defaultValue);
     }
+    
+    float getLineDottedGap(const EvaluationContext &context) {
+        static const bool defaultValue = 1.0;
+        return lineDottedGapEvaluator.getResult(lineDottedGap, context, defaultValue);
+    }
 
     std::shared_ptr<Value> lineColor;
     std::shared_ptr<Value> lineOpacity;
@@ -117,6 +125,7 @@ public:
     std::shared_ptr<Value> lineOffset;
     std::shared_ptr<Value> blendMode;
     std::shared_ptr<Value> lineDotted;
+    std::shared_ptr<Value> lineDottedGap;
 
 private:
     ValueEvaluator<Color> lineColorEvaluator;
@@ -128,6 +137,7 @@ private:
     ValueEvaluator<double> lineOffsetEvaluator;
     ValueEvaluator<BlendMode> blendModeEvaluator;
     ValueEvaluator<bool> lineDottedEvaluator;
+    ValueEvaluator<double> lineDottedGapEvaluator;
 };
 
 class LineVectorLayerDescription: public VectorLayerDescription {

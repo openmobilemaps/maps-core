@@ -20,6 +20,7 @@ struct LineStyle final {
     LineCapType lineCap;
     float offset;
     bool dotted;
+    float dottedGap;
 
     LineStyle(::ColorStateList color_,
               ::ColorStateList gapColor_,
@@ -30,7 +31,8 @@ struct LineStyle final {
               std::vector<float> dashArray_,
               LineCapType lineCap_,
               float offset_,
-              bool dotted_)
+              bool dotted_,
+              float dottedGap_)
     : color(std::move(color_))
     , gapColor(std::move(gapColor_))
     , opacity(std::move(opacity_))
@@ -41,5 +43,6 @@ struct LineStyle final {
     , lineCap(std::move(lineCap_))
     , offset(std::move(offset_))
     , dotted(std::move(dotted_))
+    , dottedGap(std::move(dottedGap_))
     {}
 };

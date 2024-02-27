@@ -58,7 +58,8 @@ struct LineStyling {
   float numDashValues; // 13
   float dashArray[4]; // 14 15 16 17
   float offset; // 18
-  bool dotted; // 19
+  float dotted; // 19
+  float dottedGap; // 20
 };
 
 /**
@@ -75,7 +76,7 @@ lineGroupVertexShader(const LineVertexIn vertexIn [[stage_in]],
                       constant float &dashingScalingFactor [[buffer(3)]],
                       constant float *styling [[buffer(4)]])
 {
-    int styleIndex = (int(vertexIn.stylingIndex) & 0xFF) * 20;
+    int styleIndex = (int(vertexIn.stylingIndex) & 0xFF) * 21;
 
     // extend position in width direction and in length direction by width / 2.0
     float width = styling[styleIndex] / 2.0;
@@ -145,9 +146,9 @@ lineGroupFragmentShader(LineVertexOut in [[stage_in]],
   float d;
 
   if (t < 0.0 || t > 1.0) {
-    if (numDash > 0) {
-      discard_fragment();
-    }
+//    if (numDash > 0) {
+//      discard_fragment();
+//    }
     if (segmentType == 0 || capType == 1 || (segmentType == 2 && t < 0.0) || (segmentType == 1 && t > 1.0)) {
       d = min(length(in.lineA), length(in.lineA - in.lineB));
     } else if (capType == 2) {
@@ -175,18 +176,21 @@ lineGroupFragmentShader(LineVertexOut in [[stage_in]],
   float a = colorA * opacity;
   float aGap = colorAGap * opacity;
     
-  bool dottedLine = styling[in.stylingIndex + 19];
+  int dottedLine = int(styling[in.stylingIndex + 19]);
     
-  if(in.scaledBlur > 0 && t > 0.0 && t < 1.0) {
+  if (in.scaledBlur > 0 && t > 0.0 && t < 1.0) {
     float nonBlurRange = (in.width - in.scaledBlur);
     if (d > nonBlurRange) {
-      a *= clamp(1 - max(0.0, d - nonBlurRange) / (in.scaledBlur) ,0.0, 1.0);
+      a *= clamp(1 - max(0.0, d - nonBlurRange) / (in.scaledBlur), 0.0, 1.0);
     }
   }
 
-  if (dottedLine) {
+  if (dottedLine == 1) {
+    float gapFactor = styling[in.stylingIndex + 20];
+
+      
     half factorToT = (in.width * 2) / lineLength;
-    half dashTotalDotted = 2.0 * factorToT;
+    half dashTotalDotted =  factorToT + gapFactor * factorToT;
     half offset = half(in.lengthPrefix) / lineLength;
     half startOffsetSegmentDotted = fmod(offset, dashTotalDotted);
     half pos = t + startOffsetSegmentDotted;

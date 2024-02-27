@@ -25,7 +25,8 @@ struct ShaderLineStyle final {
     float dashValue2;
     float dashValue3;
     float offset;
-    bool dotted;
+    float dotted;
+    float dottedGap;
 
     ShaderLineStyle(float width_,
                     float colorR_,
@@ -46,7 +47,8 @@ struct ShaderLineStyle final {
                     float dashValue2_,
                     float dashValue3_,
                     float offset_,
-                    bool dotted_)
+                    float dotted_,
+                    float dottedGap_)
     : width(std::move(width_))
     , colorR(std::move(colorR_))
     , colorG(std::move(colorG_))
@@ -67,5 +69,6 @@ struct ShaderLineStyle final {
     , dashValue3(std::move(dashValue3_))
     , offset(std::move(offset_))
     , dotted(std::move(dotted_))
+    , dottedGap(std::move(dottedGap_))
     {}
 };

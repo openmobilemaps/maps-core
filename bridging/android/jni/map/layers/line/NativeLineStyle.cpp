@@ -25,13 +25,14 @@ auto NativeLineStyle::fromCpp(JNIEnv* jniEnv, const CppType& c) -> ::djinni::Loc
                                                            ::djinni::get(::djinni::List<::djinni::F32>::fromCpp(jniEnv, c.dashArray)),
                                                            ::djinni::get(::djinni_generated::NativeLineCapType::fromCpp(jniEnv, c.lineCap)),
                                                            ::djinni::get(::djinni::F32::fromCpp(jniEnv, c.offset)),
-                                                           ::djinni::get(::djinni::Bool::fromCpp(jniEnv, c.dotted)))};
+                                                           ::djinni::get(::djinni::Bool::fromCpp(jniEnv, c.dotted)),
+                                                           ::djinni::get(::djinni::F32::fromCpp(jniEnv, c.dottedGap)))};
     ::djinni::jniExceptionCheck(jniEnv);
     return r;
 }
 
 auto NativeLineStyle::toCpp(JNIEnv* jniEnv, JniType j) -> CppType {
-    ::djinni::JniLocalScope jscope(jniEnv, 11);
+    ::djinni::JniLocalScope jscope(jniEnv, 12);
     assert(j != nullptr);
     const auto& data = ::djinni::JniClass<NativeLineStyle>::get();
     return {::djinni_generated::NativeColorStateList::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_color)),
@@ -43,7 +44,8 @@ auto NativeLineStyle::toCpp(JNIEnv* jniEnv, JniType j) -> CppType {
             ::djinni::List<::djinni::F32>::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_dashArray)),
             ::djinni_generated::NativeLineCapType::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_lineCap)),
             ::djinni::F32::toCpp(jniEnv, jniEnv->GetFloatField(j, data.field_offset)),
-            ::djinni::Bool::toCpp(jniEnv, jniEnv->GetBooleanField(j, data.field_dotted))};
+            ::djinni::Bool::toCpp(jniEnv, jniEnv->GetBooleanField(j, data.field_dotted)),
+            ::djinni::F32::toCpp(jniEnv, jniEnv->GetFloatField(j, data.field_dottedGap))};
 }
 
 } // namespace djinni_generated

@@ -16,6 +16,7 @@
                               lineCap:(MCLineCapType)lineCap
                                offset:(float)offset
                                dotted:(BOOL)dotted
+                            dottedGap:(float)dottedGap
 {
     if (self = [super init]) {
         _color = color;
@@ -28,6 +29,7 @@
         _lineCap = lineCap;
         _offset = offset;
         _dotted = dotted;
+        _dottedGap = dottedGap;
     }
     return self;
 }
@@ -42,6 +44,7 @@
                                    lineCap:(MCLineCapType)lineCap
                                     offset:(float)offset
                                     dotted:(BOOL)dotted
+                                 dottedGap:(float)dottedGap
 {
     return [[self alloc] initWithColor:color
                               gapColor:gapColor
@@ -52,13 +55,14 @@
                              dashArray:dashArray
                                lineCap:lineCap
                                 offset:offset
-                                dotted:dotted];
+                                dotted:dotted
+                             dottedGap:dottedGap];
 }
 
 #ifndef DJINNI_DISABLE_DESCRIPTION_METHODS
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@ %p color:%@ gapColor:%@ opacity:%@ blur:%@ widthType:%@ width:%@ dashArray:%@ lineCap:%@ offset:%@ dotted:%@>", self.class, (void *)self, self.color, self.gapColor, @(self.opacity), @(self.blur), @(self.widthType), @(self.width), self.dashArray, @(self.lineCap), @(self.offset), @(self.dotted)];
+    return [NSString stringWithFormat:@"<%@ %p color:%@ gapColor:%@ opacity:%@ blur:%@ widthType:%@ width:%@ dashArray:%@ lineCap:%@ offset:%@ dotted:%@ dottedGap:%@>", self.class, (void *)self, self.color, self.gapColor, @(self.opacity), @(self.blur), @(self.widthType), @(self.width), self.dashArray, @(self.lineCap), @(self.offset), @(self.dotted), @(self.dottedGap)];
 }
 
 #endif
