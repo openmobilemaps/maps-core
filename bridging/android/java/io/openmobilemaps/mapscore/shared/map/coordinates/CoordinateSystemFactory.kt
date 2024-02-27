@@ -16,7 +16,13 @@ abstract class CoordinateSystemFactory {
         external fun getEpsg3857System(): MapCoordinateSystem
 
         @JvmStatic
+        external fun getEpsg4326System(): MapCoordinateSystem
+
+        @JvmStatic
         external fun getEpsg21781System(): MapCoordinateSystem
+
+        @JvmStatic
+        external fun getUnitSphereSystem(): MapCoordinateSystem
     }
 
     private class CppProxy : CoordinateSystemFactory {
