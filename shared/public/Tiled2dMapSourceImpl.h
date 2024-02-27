@@ -127,6 +127,7 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
     bool validViewBounds = false;
 
     int maxLevel = 0;
+    int minZoomLevelIndex = 0;
     for (int index = 0; index < zoomLevelInfos.size(); ++index) {
         const auto &level = zoomLevelInfos[index];
         if (level.numTilesX > 1 && level.numTilesY > 1) {
@@ -140,6 +141,7 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
                 }
             }
             maxLevel = level.zoomLevelIdentifier;
+            minZoomLevelIndex = level.zoomLevelIdentifier;
             break;
         }
     }
@@ -208,7 +210,9 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
         auto diffCenterViewBottomLeft = bottomLeftView - earthCenterView;
         auto diffCenterViewBottomRight = bottomRightView - earthCenterView;
 
-        if (diffCenterViewTopLeft.z < 0.0 && diffCenterViewTopRight.z < 0.0 && diffCenterViewBottomLeft.z < 0.0 &&
+        bool isKeptLevel = candidate.levelIndex == minZoomLevelIndex;
+
+        if (!isKeptLevel && diffCenterViewTopLeft.z < 0.0 && diffCenterViewTopRight.z < 0.0 && diffCenterViewBottomLeft.z < 0.0 &&
             diffCenterViewBottomRight.z < 0.0) {
             continue;
         }
@@ -332,7 +336,8 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
 
         bool preciseEnough = topLengthPx <= maxLength && bottomLengthPx <= maxLength && leftLengthPx <= maxLength && rightLengthPx <= maxLength;
         bool lastLevel = candidate.levelIndex == maxLevelAvailable;
-        if (preciseEnough || lastLevel) {
+
+        if (preciseEnough || lastLevel || isKeptLevel) {
             const RectCoord rect(topLeft, bottomRight);
             int t = 0;
             double priority = -centerZ * 100000;
@@ -354,10 +359,9 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
             if (rightLengthPx > longestEdge) {
                 longestEdge = rightLengthPx;
             }
-
         }
-        else {
 
+        if (!preciseEnough && !lastLevel) {
             const Tiled2dMapZoomLevelInfo &zoomLevelInfo = zoomLevelInfos.at(candidate.levelIndex + 1);
 
             const double tileWidth = zoomLevelInfo.tileWidthLayerSystemUnits;
@@ -380,8 +384,6 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
             int nextCandidateYMin = floor((topLeft.y - boundsTop) / tileHeightAdj);
             int nextCandidateYMax = ceil((bottomLeft.y - boundsTop) / tileHeightAdj) - 1;
 
-//            printf("SPLIT %d|%d|%d: ", candidate.levelIndex, candidate.x, candidate.y);
-
             for (int nextX = nextCandidateXMin; nextX <= nextCandidateXMax; nextX++) {
                 for (int nextY = nextCandidateYMin; nextY <= nextCandidateYMax; nextY++) {
                     VisibleTileCandidate cNext;
@@ -392,14 +394,8 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
                         candidates.push(cNext);
                         candidatesSet.insert(cNext);
                     }
-
-//                    printf("%d|%d|%d, ", cNext.levelIndex, cNext.x, cNext.y);
                 }
             }
-//            printf("\n");
-
-
-
         }
     }
 
@@ -425,7 +421,7 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
         std::vector<std::pair<VisibleTileCandidate, PrioritizedTiled2dMapTileInfo>> nextVisibleTilesVec;
 
         for (auto &tile : visibleTilesVec) {
-            tile.second.tileInfo.tessellationFactor = std::max(0, maxLevel - tile.second.tileInfo.zoomIdentifier);
+            tile.second.tileInfo.tessellationFactor = std::min(std::max(0, maxLevel - tile.second.tileInfo.zoomIdentifier), 4);
             curVisibleTiles.visibleTiles.insert(tile.second);
 
             if (tile.first.levelIndex > 0 && previousLayerOffset < zoomInfo.numDrawPreviousLayers) {
