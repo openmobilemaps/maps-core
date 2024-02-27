@@ -25,6 +25,7 @@ final class Quad2d: BaseGraphicsObject {
     private var shader: MCShaderProgramInterface
 
     private var stencilState: MTLDepthStencilState?
+    private var renderPassStencilState: MTLDepthStencilState?
 
     private var renderAsMask = false
 
@@ -66,7 +67,7 @@ final class Quad2d: BaseGraphicsObject {
 
     override func render(encoder: MTLRenderCommandEncoder,
                          context: RenderingContext,
-                         renderPass _: MCRenderPassConfig,
+                         renderPass: MCRenderPassConfig,
                          mvpMatrix: Int64,
                          isMasked: Bool,
                          screenPixelAsRealMeterFactor _: Double) {
@@ -101,6 +102,15 @@ final class Quad2d: BaseGraphicsObject {
             encoder.setStencilReferenceValue(0b1100_0000)
         } else {
             encoder.setDepthStencilState(context.defaultMask)
+        }
+
+        if renderPass.isPassMasked {
+            if renderPassStencilState == nil {
+                renderPassStencilState = self.renderPassMaskStencilState()
+            }
+
+            encoder.setDepthStencilState(renderPassStencilState)
+            encoder.setStencilReferenceValue(0b0000_0000)
         }
 
         shader.setupProgram(context)

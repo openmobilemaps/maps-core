@@ -180,7 +180,7 @@ protected:
     double paddingBottom = 0;
 
     double zoomMin = 30;
-    double zoomMax = 0.2;
+    double zoomMax = 0.02;
 
     RectCoord bounds;
 
