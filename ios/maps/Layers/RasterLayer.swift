@@ -11,8 +11,9 @@ import MapCoreSharedModule
 @available(iOS 13.0, *)
 open class TiledRasterLayer: ObservableObject {
 
-    public init(config: MCTiled2dMapLayerConfig, loaders: [MCLoaderInterface] = [MCTextureLoader()]) {
+    public init(config: MCTiled2dMapLayerConfig, loaders: [MCLoaderInterface] = [MCTextureLoader()], callbackHandler: MCTiled2dMapRasterLayerCallbackInterface? = nil) {
         self.tiledLayerInterface = MCTiled2dMapRasterLayerInterface.create(config, loaders: loaders) !! fatalError("create is non-null")
+        self.tiledLayerInterface.setCallbackHandler(callbackHandler)
     }
 
     /// Create a default layer using a web mercator layer config
