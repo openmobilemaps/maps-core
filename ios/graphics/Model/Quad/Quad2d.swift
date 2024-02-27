@@ -100,17 +100,15 @@ final class Quad2d: BaseGraphicsObject {
         } else if let mask = context.mask, renderAsMask {
             encoder.setDepthStencilState(mask)
             encoder.setStencilReferenceValue(0b1100_0000)
-        } else {
-            encoder.setDepthStencilState(context.defaultMask)
-        }
-
-        if renderPass.isPassMasked {
+        } else if renderPass.isPassMasked {
             if renderPassStencilState == nil {
                 renderPassStencilState = self.renderPassMaskStencilState()
             }
 
             encoder.setDepthStencilState(renderPassStencilState)
             encoder.setStencilReferenceValue(0b0000_0000)
+        } else {
+            encoder.setDepthStencilState(context.defaultMask)
         }
 
         shader.setupProgram(context)
