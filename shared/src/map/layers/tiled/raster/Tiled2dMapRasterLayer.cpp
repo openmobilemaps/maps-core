@@ -200,10 +200,12 @@ void Tiled2dMapRasterLayer::onTilesUpdated(const std::string &layerName, std::un
                         if (found == this->tilesToSetup.end()) {
                             tilesToAdd.insert(rasterTileInfo);
                         } else if (is3d) {
-                            found->second->getQuadObject()->setSubdivisionFactor(SUBDIVISION_FACTOR_3D + rasterTileInfo.tileInfo.tileInfo.tessellationFactor);
+                            LogDebug << rasterTileInfo.tileInfo.tileInfo.to_string_short() << " factor: " <<= SUBDIVISION_FACTOR_3D + rasterTileInfo.tessellationFactor;
+                            found->second->getQuadObject()->setSubdivisionFactor(SUBDIVISION_FACTOR_3D + rasterTileInfo.tessellationFactor);
                         }
                     } else if (is3d) {
-                        it->second->getQuadObject()->setSubdivisionFactor(SUBDIVISION_FACTOR_3D + rasterTileInfo.tileInfo.tileInfo.tessellationFactor);
+                        LogDebug << rasterTileInfo.tileInfo.tileInfo.to_string_short() << " factor: " <<= SUBDIVISION_FACTOR_3D + rasterTileInfo.tessellationFactor;
+                        it->second->getQuadObject()->setSubdivisionFactor(SUBDIVISION_FACTOR_3D + rasterTileInfo.tessellationFactor);
                         tilesToSetup.emplace_back(rasterTileInfo, it->second);
                     }
                 }
@@ -263,7 +265,8 @@ void Tiled2dMapRasterLayer::onTilesUpdated(const std::string &layerName, std::un
                             graphicsFactory->createQuad(rasterShader->asShaderProgramInterface()), rasterShader, mapInterface, is3d);
                 }
                 if (is3d) {
-                    tileObject->getQuadObject()->setSubdivisionFactor(SUBDIVISION_FACTOR_3D + tile.tileInfo.tileInfo.tessellationFactor);
+                    LogDebug << tile.tileInfo.tileInfo.to_string_short() << " factor: " <<= SUBDIVISION_FACTOR_3D + tile.tessellationFactor;
+                    tileObject->getQuadObject()->setSubdivisionFactor(SUBDIVISION_FACTOR_3D + tile.tessellationFactor);
                 }
                 if (zoomInfo.numDrawPreviousLayers == 0 || !animationsEnabled || zoomInfo.maskTile) {
                     tileObject->setStyle(style);
