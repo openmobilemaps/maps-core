@@ -134,8 +134,8 @@ fragment float4
 lineGroupFragmentShader(LineVertexOut in [[stage_in]],
                         constant float *styling [[buffer(1)]])
 {
-    float lineLength = length(in.lineB);
-    float t = dot(in.lineA, normalize(in.lineB) / lineLength);
+    float lineLength = length(in.lineB); // segment length in meter
+    float t = dot(in.lineA, normalize(in.lineB) / lineLength); //
     
     int capType = int(styling[in.stylingIndex + 12]);
     char segmentType = in.segmentType;
@@ -145,9 +145,12 @@ lineGroupFragmentShader(LineVertexOut in [[stage_in]],
     float d;
     
     if (t < 0.0 || t > 1.0) {
-        if ((segmentType == 0 || capType == 1 || (segmentType == 2 && t < 0.0) || (segmentType == 1 && t > 1.0))) {
+//        if (numDash > 0) {
+//            discard_fragment();
+//        }
+        if ((segmentType == 0 /* Inner */ || capType == 1 /* Round */ || (segmentType == 2 /* End */ && t < 0.0) || (segmentType == 1 /* Start */ && t > 1.0))) {
             d = min(length(in.lineA), length(in.lineA - in.lineB));
-        } else if (capType == 2) {
+        } else if (capType == 2 /* Butt */) {
             float dLen = t < 0.0 ? -t * lineLength : (t - 1.0) * lineLength;
             float2 intersectPt = t * in.lineB;
             float dOrth = abs(length(in.lineA - intersectPt));
@@ -180,16 +183,18 @@ lineGroupFragmentShader(LineVertexOut in [[stage_in]],
     }
 
     if(numDash > 0) {
+      
+        
         float dashArray[4] = { styling[in.stylingIndex + 14],
             styling[in.stylingIndex + 15],
             styling[in.stylingIndex + 16],
             styling[in.stylingIndex + 17] };
         
-        float factorToT = (in.width * 2) / lineLength;
+        float factorToT = (in.width * 2) / lineLength; // linienbreite / meter
         
-        float dashTotal = dashArray[3] * factorToT;
-        float startOffsetSegment = fmod(half(in.lengthPrefix) / lineLength, dashTotal);
-        float intraDashPos = fmod(t + startOffsetSegment, dashTotal);
+        float dashTotal = dashArray[3] /* LInienbreite*/ * factorToT; // Länge des ganzen pattern in points / meter
+        float startOffsetSegment = fmod(half(in.lengthPrefix) / lineLength, dashTotal); // in t
+        float intraDashPos = fmod(t + startOffsetSegment, dashTotal); // in t
 
         if ((intraDashPos > dashArray[0] * factorToT && intraDashPos < dashArray[1] * factorToT) ||
             (intraDashPos > dashArray[2] * factorToT && intraDashPos < dashArray[3] * factorToT)) {
@@ -203,14 +208,17 @@ lineGroupFragmentShader(LineVertexOut in [[stage_in]],
                           styling[in.stylingIndex + 7],
                           1.0) * aGap;
         } else {
+
             // inside segment
             int dashedCapType = int(styling[in.stylingIndex + 19]);
             
+            
+
             // Rounded dash caps
-            if (dashedCapType == 0) {
-                float s = factorToT / 2; //
+            if (true) { //dashedCapType == 0) {
+                float s = in.width / lineLength; //
           
-                float R = in.width;
+                float R = s; // Radius in t
                 float mid = R - (intraDashPos) + t * lineLength;
                 float start = in.lengthPrefix;
                 float end = in.lengthPrefix + lineLength;
@@ -220,10 +228,11 @@ lineGroupFragmentShader(LineVertexOut in [[stage_in]],
                     float dy = d / in.width;
                     float dx = 1 - intraDashPos / s;
                     
-                 
                     
+                    
+                    float a = t + half(in.lengthPrefix) - s;
 //                    if (mid > start) {
-//                      //  discard_fragment();
+//                      discard_fragment();
 //
 //                        return float4(1,
 //                                      1,
@@ -247,8 +256,10 @@ lineGroupFragmentShader(LineVertexOut in [[stage_in]],
                     }
                     
                 } else if (intraDashPos > dashArray[0] * factorToT - s && intraDashPos < dashArray[0] * factorToT) {
-                  //  discard_fragment();
-
+                   //discard_fragment();
+//                    if (t + s > 1.0) {
+//                        discard_fragment();
+//                    }
                     
 //                    if (mid < end) {
 //                        return float4(1,
@@ -279,10 +290,6 @@ lineGroupFragmentShader(LineVertexOut in [[stage_in]],
                 }
             }
             
-            return float4(0,
-                          0,
-                          0,
-                          1.0);
         }
     }
     
