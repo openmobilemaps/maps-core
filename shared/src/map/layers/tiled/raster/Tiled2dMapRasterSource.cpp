@@ -61,7 +61,7 @@ std::unordered_set<Tiled2dMapRasterTileInfo> Tiled2dMapRasterSource::getCurrentT
     std::transform(currentTiles.rbegin(), currentTiles.rend(), std::inserter(currentTileInfos, currentTileInfos.end()),
         [](const auto& tilePair) {
             const auto& [tileInfo, tileWrapper] = tilePair;
-            return Tiled2dMapRasterTileInfo(Tiled2dMapVersionedTileInfo(std::move(tileInfo), (size_t)tileWrapper.result.get()), std::move(tileWrapper.result), std::move(tileWrapper.masks), std::move(tileWrapper.state));
+            return Tiled2dMapRasterTileInfo(Tiled2dMapVersionedTileInfo(std::move(tileInfo), (size_t)tileWrapper.result.get()), std::move(tileWrapper.result), std::move(tileWrapper.masks), std::move(tileWrapper.state), tileWrapper.tessellationFactor);
         }
     );
     return currentTileInfos;

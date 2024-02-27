@@ -27,11 +27,7 @@ public:
         const double th = (coordinate.y - 90.0) * M_PI / 180.0;
         const double r = 1.0 + coordinate.z / 6378137.0;
 
-        const double x = r * sin(th) * cos(phi);
-        const double y = r * cos(th);
-        const double z = -r * sin(th) * sin(phi);
-
-        return Coord(getTo(), x, y, z);
+        return Coord(getTo(), phi, th, r);
     }
 
     virtual int32_t getFrom() override { return CoordinateSystemIdentifiers::EPSG4326(); }

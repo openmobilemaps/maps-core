@@ -30,6 +30,9 @@ final class Quad2d: BaseGraphicsObject {
 
     private var subdivisionFactor: Int32 = 0
 
+    private var frame: MCQuad3dD?
+    private var textureCoordinates: MCRectD?
+
     init(shader: MCShaderProgramInterface, metalContext: MetalContext, label: String = "Quad2d") {
         self.shader = shader
         super.init(device: metalContext.device,
@@ -145,11 +148,20 @@ extension Quad2d: MCMaskingObjectInterface {
 extension Quad2d: MCQuad2dInterface {
 
     func setSubdivisionFactor(_ factor: Int32) {
-        self.subdivisionFactor = factor
+        if subdivisionFactor != factor {
+            self.subdivisionFactor = factor
+
+            if let frame,
+               let textureCoordinates {
+                setFrame(frame, textureCoordinates: textureCoordinates)
+            }
+        }
     }
 
 
     func setFrame(_ frame: MCQuad3dD, textureCoordinates: MCRectD) {
+        self.frame = frame
+        self.textureCoordinates = textureCoordinates
 
         var vertices: [Vertex3D] = []
         var indices: [UInt16] = []

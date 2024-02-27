@@ -46,15 +46,18 @@ public:
     const PolygonCoord tileBounds;
     gpc_polygon tilePolygon;
     TileState state = TileState::IN_SETUP;
+    int tessellationFactor;
 
     TileWrapper(const R &result,
                 const std::vector<::PolygonCoord> & masks,
                 const PolygonCoord & tileBounds,
-                const gpc_polygon &tilePolygon) :
+                const gpc_polygon &tilePolygon,
+                int tessellationFactor) :
     result(std::move(result)),
     masks(std::move(masks)),
     tileBounds(std::move(tileBounds)),
-    tilePolygon(std::move(tilePolygon)) {};
+    tilePolygon(std::move(tilePolygon)),
+    tessellationFactor(tessellationFactor) {};
 };
 
 

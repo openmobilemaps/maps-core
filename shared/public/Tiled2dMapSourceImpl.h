@@ -739,7 +739,7 @@ void Tiled2dMapSource<T, L, R>::onVisibleTilesChanged(const std::vector<VisibleT
 
     int currentZoomLevelIdentifier = this->currentZoomLevelIdentifier;
     bool onlyCurrent = !zoomInfo.maskTile && zoomInfo.numDrawPreviousLayers == 0;
-    for (const auto &[tileInfo, tileWrapper] : currentTiles) {
+    for (auto &[tileInfo, tileWrapper] : currentTiles) {
         bool found = false;
 
         if ((!onlyCurrent && tileInfo.zoomIdentifier <= currentZoomLevelIdentifier)
@@ -750,6 +750,7 @@ void Tiled2dMapSource<T, L, R>::onVisibleTilesChanged(const std::vector<VisibleT
                 for (auto const &tile: layer.visibleTiles) {
                     if (tileInfo == tile.tileInfo) {
                         found = true;
+                        tileWrapper.tessellationFactor = tile.tileInfo.tessellationFactor;
                         break;
                     }
                 }
@@ -906,7 +907,7 @@ void Tiled2dMapSource<T, L, R>::didLoad(Tiled2dMapTileInfo tile, size_t loaderIn
     gpc_polygon tilePolygon;
     gpc_set_polygon({mask}, &tilePolygon);
 
-    currentTiles.insert({tile, TileWrapper<R>(result, std::vector<::PolygonCoord>{  }, mask, tilePolygon)});
+    currentTiles.insert({tile, TileWrapper<R>(result, std::vector<::PolygonCoord>{  }, mask, tilePolygon, tile.tessellationFactor)});
 
     errorTiles[loaderIndex].erase(tile);
 
