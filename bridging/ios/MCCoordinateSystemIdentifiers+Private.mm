@@ -65,9 +65,9 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-+ (int32_t)UnitSphereCart {
++ (int32_t)UnitSphere {
     try {
-        auto objcpp_result_ = ::CoordinateSystemIdentifiers::UnitSphereCart();
+        auto objcpp_result_ = ::CoordinateSystemIdentifiers::UnitSphere();
         return ::djinni::I32::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }

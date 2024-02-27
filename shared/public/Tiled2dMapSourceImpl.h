@@ -81,7 +81,7 @@ static void hash_combine(size_t& seed, const T& value) {
 template<class T, class L, class R>
 ::Vec3D Tiled2dMapSource<T, L, R>::transformToView(const ::Coord & position, const std::vector<float> & viewMatrix) {
     Coord mapCoord(-1, 0,0,0);
-    if (mapConfig.mapCoordinateSystem.identifier == CoordinateSystemIdentifiers::UnitSphereCart()) {
+    if (mapConfig.mapCoordinateSystem.identifier == CoordinateSystemIdentifiers::UnitSphere()) {
         mapCoord = conversionHelper->convert(mapConfig.mapCoordinateSystem.identifier, position);
     }
     else {
@@ -198,7 +198,7 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
 
         float centerZ = (topLeftView.z + topRightView.z + bottomLeftView.z + bottomRightView.z) / 4.0;
 
-        if (mapConfig.mapCoordinateSystem.identifier == CoordinateSystemIdentifiers::UnitSphereCart()) {
+        if (mapConfig.mapCoordinateSystem.identifier == CoordinateSystemIdentifiers::UnitSphere()) {
             // v(0,0,+1) = unit-vector out of screen
             float topLeftHA = 180.0 / M_PI * atan2(topLeftView.x, -topLeftView.z);
             float topLeftVA = 180.0 / M_PI * atan2(topLeftView.y, -topLeftView.z);

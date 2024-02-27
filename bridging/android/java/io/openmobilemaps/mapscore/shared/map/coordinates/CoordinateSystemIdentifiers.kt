@@ -25,7 +25,7 @@ abstract class CoordinateSystemIdentifiers {
         external fun EPSG21781(): Int
 
         @JvmStatic
-        external fun UnitSphereCart(): Int
+        external fun UnitSphere(): Int
 
         @JvmStatic
         external fun fromCrsIdentifier(identifier: String): Int
