@@ -567,8 +567,8 @@ bool MapCamera3d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
     float xDiffMap = xDiff * zoom * screenPixelAsRealMeterFactor * (mapSystemRtl ? -1 : 1);
     float yDiffMap = yDiff * zoom * screenPixelAsRealMeterFactor * (mapSystemTtb ? -1 : 1);
 
-    focusPointPosition.x += xDiffMap * 0.00001;
-    focusPointPosition.y += yDiffMap * 0.00001;
+    focusPointPosition.x += xDiffMap;
+    focusPointPosition.y += yDiffMap;
 
     focusPointPosition.y = std::clamp(focusPointPosition.y, -90.0, 90.0);
 
@@ -629,8 +629,8 @@ void MapCamera3d::inertiaStep() {
     inertia->timestampUpdate = now;
 
     focusPointPosition = Coord(CoordinateSystemIdentifiers::EPSG4326(),
-                               focusPointPosition.x + xDiffMap * 0.000001,
-                               focusPointPosition.y + yDiffMap * 0.000001,
+                               focusPointPosition.x + xDiffMap,
+                               focusPointPosition.y + yDiffMap,
                                focusPointPosition.z);
 
     focusPointPosition.y = std::clamp(focusPointPosition.y, -90.0, 90.0);

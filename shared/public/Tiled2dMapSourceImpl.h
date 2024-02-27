@@ -79,15 +79,12 @@ static void hash_combine(size_t& seed, const T& value) {
 }
 
 template<class T, class L, class R>
-::Vec3D Tiled2dMapSource<T, L, R>::transformToView(const ::Coord & position, const std::vector<float> & viewMatrix) {
-    Coord mapCoord(-1, 0,0,0);
-    if (mapConfig.mapCoordinateSystem.identifier == CoordinateSystemIdentifiers::UnitSphere()) {
-        mapCoord = conversionHelper->convert(mapConfig.mapCoordinateSystem.identifier, position);
-    }
-    else {
-        mapCoord = conversionHelper->convertToRenderSystem(position);
-    }
-    std::vector<float> inVec = {(float)mapCoord.x, (float)mapCoord.y, (float)mapCoord.z, 1.0};
+::Vec3D Tiled2dMapSource<T, L, R>::transformToView(const ::Coord &position, const std::vector<float> &viewMatrix) {
+    Coord mapCoord = conversionHelper->convertToRenderSystem(position);
+    std::vector<float> inVec = {(float) (mapCoord.z * sin(mapCoord.y) * cos(mapCoord.x)),
+                                (float) (mapCoord.z * cos(mapCoord.y)),
+                                (float) (-mapCoord.z * sin(mapCoord.y) * sin(mapCoord.x)),
+                                1.0};
     std::vector<float> outVec = {0, 0, 0, 0};
 
     Matrix::multiply(viewMatrix, inVec, outVec);
@@ -297,7 +294,6 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
                 viewBoundsBottomRight.y = bottomRight.y;
             }
         }
-
 
         auto topLeftScreen = projectToScreen(topLeftView, projectionMatrix);
         auto topRightScreen = projectToScreen(topRightView, projectionMatrix);
