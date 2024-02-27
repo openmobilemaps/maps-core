@@ -19,6 +19,7 @@
 #include "Logger.h"
 #include "Matrix.h"
 #include "Vec2DHelper.h"
+#include "Vec3DHelper.h"
 
 struct VisibleTileCandidate {
     int x; int y;
@@ -146,6 +147,8 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
 
     float longestEdge = 0;
 
+    auto earthCenterView = transformToView(Coord(CoordinateSystemIdentifiers::UnitSphere(), 0.0, 0.0, 0.0), viewMatrix);
+
     while (candidates.size() > 0) {
         VisibleTileCandidate candidate = candidates.front();
         candidates.pop();
@@ -195,7 +198,17 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
 
         float centerZ = (topLeftView.z + topRightView.z + bottomLeftView.z + bottomRightView.z) / 4.0;
 
-        if (mapConfig.mapCoordinateSystem.identifier == CoordinateSystemIdentifiers::UnitSphere()) {
+        auto diffCenterViewTopLeft = topLeftView - earthCenterView;
+        auto diffCenterViewTopRight = topRightView - earthCenterView;
+        auto diffCenterViewBottomLeft = bottomLeftView - earthCenterView;
+        auto diffCenterViewBottomRight = bottomRightView - earthCenterView;
+
+        if (diffCenterViewTopLeft.z < 0.0 && diffCenterViewTopRight.z < 0.0 && diffCenterViewBottomLeft.z < 0.0 &&
+            diffCenterViewBottomRight.z < 0.0) {
+            continue;
+        }
+
+        /*if (mapConfig.mapCoordinateSystem.identifier == CoordinateSystemIdentifiers::UnitSphere()) {
             // v(0,0,+1) = unit-vector out of screen
             float topLeftHA = 180.0 / M_PI * atan2(topLeftView.x, -topLeftView.z);
             float topLeftVA = 180.0 / M_PI * atan2(topLeftView.y, -topLeftView.z);
@@ -253,7 +266,7 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
             if (topLeftView.y > height / 2.0 && topRightView.y > height / 2.0 && bottomLeftView.y > height / 2.0 && bottomRightView.y > height / 2.0) {
                 continue;
             }
-        }
+        }*/
 
         if (!validViewBounds) {
             viewBoundsTopLeft = topLeft;
@@ -313,26 +326,8 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
         const double maxLength = std::min(width, height) * 0.5;
 
         bool preciseEnough = topLengthPx <= maxLength && bottomLengthPx <= maxLength && leftLengthPx <= maxLength && rightLengthPx <= maxLength;
-//        preciseEnough = candidate.levelIndex == 21;
         bool lastLevel = candidate.levelIndex == maxLevelAvailable;
         if (preciseEnough || lastLevel) {
-
-            // Berechnen der Fläche mit der Shoelace-Formel
-            double minX = std::min(std::min(topLeftScreen.x, bottomLeftScreen.x), std::min(topRightScreen.x, bottomRightScreen.x));
-            double minY = std::min(std::min(topLeftScreen.y, bottomLeftScreen.y), std::min(topRightScreen.y, bottomRightScreen.y));
-            double area1 = 0;
-            area1 += (topLeftScreen.x-minX) * (bottomLeftScreen.y-minY) - (bottomLeftScreen.x-minX) * (topLeftScreen.y-minY);
-            area1 += (bottomLeftScreen.x-minX) * (topRightScreen.y-minY) - (topRightScreen.x-minX) * (bottomLeftScreen.y-minY);
-            area1 += (topRightScreen.x-minX) * (topLeftScreen.y-minY) - (topLeftScreen.x-minX) * (topRightScreen.y-minY);
-            double area2 = 0;
-            area2 += (bottomLeftScreen.x-minX) * (bottomRightScreen.y-minY) - (bottomRightScreen.x-minX) * (bottomLeftScreen.y-minY);
-            area2 += (bottomRightScreen.x-minX) * (topRightScreen.y-minY) - (topRightScreen.x-minX) * (bottomRightScreen.y-minY);
-            area2 += (topRightScreen.x-minX) * (bottomLeftScreen.y-minY) - (bottomLeftScreen.x-minX) * (topRightScreen.y-minY);
-            if (area1 < 0 && area2 < 0) {
-                // both triangles are facing backwards
-                continue;
-            }
-
             const RectCoord rect(topLeft, bottomRight);
             int t = 0;
             double priority = -centerZ * 100000;
@@ -341,14 +336,6 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
                     priority)));
 
             maxLevel = std::max(maxLevel, zoomLevelInfo.zoomLevelIdentifier);
-
-//            printf("USE TILE %d|%d|%d:\n%f|%f|%f -> %f|%f -> %f, %f\n%f|%f|%f -> %f|%f -> %f, %f\n%f|%f|%f -> %f|%f -> %f, %f\n%f|%f|%f -> %f|%f -> %f, %f\n\n", zoomLevelInfo.zoomLevelIdentifier, candidate.x, candidate.y,
-//                   topLeftView.x, topLeftView.y, topLeftView.z, topLeftScreen.x, topLeftScreen.y, topLeftVA, topLeftHA,
-//                   topRightView.x, topRightView.y, topRightView.z, topRightScreen.x, topRightScreen.y, topRightVA, topRightHA,
-//                   bottomLeftView.x, bottomLeftView.y, bottomLeftView.z,bottomLeftScreen.x, bottomLeftScreen.y, bottomLeftVA, bottomLeftHA,
-//                   bottomRightView.x, bottomRightView.y, bottomRightView.z,bottomRightScreen.x, bottomRightScreen.y, bottomRightVA, bottomRightHA);
-//
-//            printf("%d|%d|%d @ %f -> %f, %f, %f, %f\n", zoomLevelInfo.zoomLevelIdentifier, candidate.x, candidate.y, tileWidth, topLengthPx, bottomLengthPx, leftLengthPx, rightLengthPx);
 
             if (topLengthPx > longestEdge) {
                 longestEdge = topLengthPx;
