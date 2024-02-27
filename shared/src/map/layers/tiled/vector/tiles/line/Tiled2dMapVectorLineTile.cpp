@@ -185,21 +185,6 @@ void Tiled2dMapVectorLineTile::update() {
                 style.offset = offset;
                 needsUpdate = true;
             }
-            
-            // dash line caps
-            auto dashLineCap = lineDescription->style.getLineDashCap(context);
-
-            auto dashCap = 1;
-            switch(dashLineCap){
-                case LineDashCapType::ROUND: { dashCap = 0; break; }
-                case LineDashCapType::SQUARE: { dashCap = 1; break; }
-                default: { dashCap = 1; }
-            }
-
-            if (dashCap != style.lineDashCap) {
-                style.lineDashCap = dashCap;
-                needsUpdate = true;
-            }
 
             i++;
         }
@@ -268,7 +253,7 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
                     }
 
                     if (styleIndex == -1) {
-                        auto reusableStyle = ShaderLineStyle(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+                        auto reusableStyle = ShaderLineStyle(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, false);
                         if (!featureGroups.empty() && featureGroups.back().size() < maxStylesPerGroup) {
                             styleGroupIndex = (int) featureGroups.size() - 1;
                             styleIndex = (int) featureGroups.back().size();

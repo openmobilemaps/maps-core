@@ -15,7 +15,7 @@
                             dashArray:(nonnull NSArray<NSNumber *> *)dashArray
                               lineCap:(MCLineCapType)lineCap
                                offset:(float)offset
-                          lineDashCap:(MCLineDashCapType)lineDashCap
+                               dotted:(BOOL)dotted
 {
     if (self = [super init]) {
         _color = color;
@@ -27,7 +27,7 @@
         _dashArray = [dashArray copy];
         _lineCap = lineCap;
         _offset = offset;
-        _lineDashCap = lineDashCap;
+        _dotted = dotted;
     }
     return self;
 }
@@ -41,7 +41,7 @@
                                  dashArray:(nonnull NSArray<NSNumber *> *)dashArray
                                    lineCap:(MCLineCapType)lineCap
                                     offset:(float)offset
-                               lineDashCap:(MCLineDashCapType)lineDashCap
+                                    dotted:(BOOL)dotted
 {
     return [[self alloc] initWithColor:color
                               gapColor:gapColor
@@ -52,13 +52,13 @@
                              dashArray:dashArray
                                lineCap:lineCap
                                 offset:offset
-                           lineDashCap:lineDashCap];
+                                dotted:dotted];
 }
 
 #ifndef DJINNI_DISABLE_DESCRIPTION_METHODS
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@ %p color:%@ gapColor:%@ opacity:%@ blur:%@ widthType:%@ width:%@ dashArray:%@ lineCap:%@ offset:%@ lineDashCap:%@>", self.class, (void *)self, self.color, self.gapColor, @(self.opacity), @(self.blur), @(self.widthType), @(self.width), self.dashArray, @(self.lineCap), @(self.offset), @(self.lineDashCap)];
+    return [NSString stringWithFormat:@"<%@ %p color:%@ gapColor:%@ opacity:%@ blur:%@ widthType:%@ width:%@ dashArray:%@ lineCap:%@ offset:%@ dotted:%@>", self.class, (void *)self, self.color, self.gapColor, @(self.opacity), @(self.blur), @(self.widthType), @(self.width), self.dashArray, @(self.lineCap), @(self.offset), @(self.dotted)];
 }
 
 #endif

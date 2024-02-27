@@ -15,11 +15,6 @@ line_cap_type = enum {
 	SQUARE;
 }
 
-line_dash_cap_type = enum {
-    SQUARE;
-    ROUND;
-}
-
 shader_line_style = record {
     width: f32;
     color_r: f32;
@@ -40,7 +35,7 @@ shader_line_style = record {
     dash_value_2: f32;
     dash_value_3: f32;
     offset: f32;
-    line_dash_cap: f32;
+    dotted: bool;
 }
 
 line_style = record {
@@ -53,7 +48,7 @@ line_style = record {
     dash_array: list<f32>;
     line_cap: line_cap_type;
     offset: f32;
-    line_dash_cap: line_dash_cap_type;
+    dotted: bool;
 }
 
 line_info_interface = interface +c {
