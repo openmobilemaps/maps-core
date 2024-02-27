@@ -28,7 +28,6 @@
 #include "TextJustify.h"
 #include "FormattedStringEntry.h"
 #include "LineCapType.h"
-#include "LineDashCapType.h"
 #include "TextTransform.h"
 #include "TextSymbolPlacement.h"
 #include <sstream>
@@ -634,26 +633,6 @@ public:
         }
         if (!result.empty()) {
             return result;
-        }
-        return alternative;
-    }
-    
-    std::optional<LineDashCapType> dashCapTypeFromString(const std::string &value) const {
-        if (value == "round") {
-            return LineDashCapType::ROUND;
-        } else if (value == "square") {
-            return LineDashCapType::SQUARE;
-        }
-
-        return std::nullopt;
-    }
-
-    template<>
-    LineDashCapType evaluateOr(const EvaluationContext &context, const LineDashCapType &alternative) const {
-        auto const &value = evaluateOr(context, std::string(""));
-        auto type = dashCapTypeFromString(value);
-        if (type) {
-            return *type;
         }
         return alternative;
     }

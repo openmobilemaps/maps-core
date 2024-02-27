@@ -13,5 +13,5 @@ data class LineStyle(
     val dashArray: ArrayList<Float>,
     val lineCap: LineCapType,
     val offset: Float,
-    val lineDashCap: LineDashCapType,
+    val dotted: Boolean,
 )

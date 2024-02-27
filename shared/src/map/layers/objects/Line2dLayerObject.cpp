@@ -17,7 +17,7 @@ Line2dLayerObject::Line2dLayerObject(const std::shared_ptr<CoordinateConversionH
     : conversionHelper(conversionHelper)
     , line(line)
     , shader(shader)
-    , style(ColorStateList(Color(0.0f,0.0f,0.0f,0.0f), Color(0.0f,0.0f,0.0f,0.0f)), ColorStateList(Color(0.0f,0.0f,0.0f,0.0f), Color(0.0f,0.0f,0.0f,0.0f)), 0.0, 0.0, SizeType::SCREEN_PIXEL, 0.0, std::vector<float>(), LineCapType::BUTT, 0.0, LineDashCapType::SQUARE)
+    , style(ColorStateList(Color(0.0f,0.0f,0.0f,0.0f), Color(0.0f,0.0f,0.0f,0.0f)), ColorStateList(Color(0.0f,0.0f,0.0f,0.0f), Color(0.0f,0.0f,0.0f,0.0f)), 0.0, 0.0, SizeType::SCREEN_PIXEL, 0.0, std::vector<float>(), LineCapType::BUTT, 0.0, false)
     , highlighted(false)
 {
     renderConfig = {std::make_shared<RenderConfig>(line->asGraphicsObject(), 0)};
@@ -163,7 +163,7 @@ void Line2dLayerObject::setHighlighted(bool highlighted_) {
 }
 
 void Line2dLayerObject::setStyle(const LineStyle &style, bool highlighted) {
-    ShaderLineStyle s(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+    ShaderLineStyle s(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, false);
 
     s.colorR = highlighted ? style.color.highlighted.r : style.color.normal.r;
     s.colorG = highlighted ? style.color.highlighted.g : style.color.normal.g;
@@ -208,17 +208,7 @@ void Line2dLayerObject::setStyle(const LineStyle &style, bool highlighted) {
     s.lineCap = cap;
     s.offset = style.offset;
 
-    // line dash cap
-    auto dashCap = 1;
-    auto lineDashCap = style.lineDashCap;
-
-    switch(lineDashCap){
-        case LineDashCapType::ROUND: { dashCap = 0; break; }
-        case LineDashCapType::SQUARE: { dashCap = 1; break; }
-        default: { dashCap = 1; }
-    }
-    
-    s.lineDashCap = dashCap;
+    s.dotted = style.dotted;
     
     auto buffer = SharedBytes((int64_t)&s, 1, 20 * sizeof(float));
     shader->setStyles(buffer);

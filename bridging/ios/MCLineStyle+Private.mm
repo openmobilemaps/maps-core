@@ -5,7 +5,6 @@
 #import "DJIMarshal+Private.h"
 #import "MCColorStateList+Private.h"
 #import "MCLineCapType+Private.h"
-#import "MCLineDashCapType+Private.h"
 #import "MCSizeType+Private.h"
 #include <cassert>
 
@@ -23,7 +22,7 @@ auto LineStyle::toCpp(ObjcType obj) -> CppType
             ::djinni::List<::djinni::F32>::toCpp(obj.dashArray),
             ::djinni::Enum<::LineCapType, MCLineCapType>::toCpp(obj.lineCap),
             ::djinni::F32::toCpp(obj.offset),
-            ::djinni::Enum<::LineDashCapType, MCLineDashCapType>::toCpp(obj.lineDashCap)};
+            ::djinni::Bool::toCpp(obj.dotted)};
 }
 
 auto LineStyle::fromCpp(const CppType& cpp) -> ObjcType
@@ -37,7 +36,7 @@ auto LineStyle::fromCpp(const CppType& cpp) -> ObjcType
                                     dashArray:(::djinni::List<::djinni::F32>::fromCpp(cpp.dashArray))
                                       lineCap:(::djinni::Enum<::LineCapType, MCLineCapType>::fromCpp(cpp.lineCap))
                                        offset:(::djinni::F32::fromCpp(cpp.offset))
-                                  lineDashCap:(::djinni::Enum<::LineDashCapType, MCLineDashCapType>::fromCpp(cpp.lineDashCap))];
+                                       dotted:(::djinni::Bool::fromCpp(cpp.dotted))];
 }
 
 } // namespace djinni_generated
