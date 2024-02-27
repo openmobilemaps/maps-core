@@ -217,65 +217,78 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
             continue;
         }
 
-        /*if (mapConfig.mapCoordinateSystem.identifier == CoordinateSystemIdentifiers::UnitSphere()) {
-            // v(0,0,+1) = unit-vector out of screen
-            float topLeftHA = 180.0 / M_PI * atan2(topLeftView.x, -topLeftView.z);
-            float topLeftVA = 180.0 / M_PI * atan2(topLeftView.y, -topLeftView.z);
-            float topRightHA = 180.0 / M_PI * atan2(topRightView.x, -topRightView.z);
-            float topRightVA = 180.0 / M_PI * atan2(topRightView.y, -topRightView.z);
-            float bottomLeftHA = 180.0 / M_PI * atan2(bottomLeftView.x, -bottomLeftView.z);
-            float bottomLeftVA = 180.0 / M_PI * atan2(bottomLeftView.y, -bottomLeftView.z);
-            float bottomRightHA = 180.0 / M_PI * atan2(bottomRightView.x, -bottomRightView.z);
-            float bottomRightVA = 180.0 / M_PI * atan2(bottomRightView.y, -bottomRightView.z);
+        if (!isKeptLevel) {
+            if (mapConfig.mapCoordinateSystem.identifier == CoordinateSystemIdentifiers::UnitSphere()) {
+                // v(0,0,+1) = unit-vector out of screen
+                float topLeftHA = 180.0 / M_PI * atan2(topLeftView.x, -topLeftView.z);
+                float topLeftVA = 180.0 / M_PI * atan2(topLeftView.y, -topLeftView.z);
+                float topRightHA = 180.0 / M_PI * atan2(topRightView.x, -topRightView.z);
+                float topRightVA = 180.0 / M_PI * atan2(topRightView.y, -topRightView.z);
+                float bottomLeftHA = 180.0 / M_PI * atan2(bottomLeftView.x, -bottomLeftView.z);
+                float bottomLeftVA = 180.0 / M_PI * atan2(bottomLeftView.y, -bottomLeftView.z);
+                float bottomRightHA = 180.0 / M_PI * atan2(bottomRightView.x, -bottomRightView.z);
+                float bottomRightVA = 180.0 / M_PI * atan2(bottomRightView.y, -bottomRightView.z);
 
-            float topLeftHighHA = 180.0 / M_PI * atan2(topLeftHighView.x, -topLeftHighView.z);
-            float topLeftHighVA = 180.0 / M_PI * atan2(topLeftHighView.y, -topLeftHighView.z);
-            float topRightHighHA = 180.0 / M_PI * atan2(topRightHighView.x, -topRightHighView.z);
-            float topRightHighVA = 180.0 / M_PI * atan2(topRightHighView.y, -topRightHighView.z);
-            float bottomLeftHighHA = 180.0 / M_PI * atan2(bottomLeftHighView.x, -bottomLeftHighView.z);
-            float bottomLeftHighVA = 180.0 / M_PI * atan2(bottomLeftHighView.y, -bottomLeftHighView.z);
-            float bottomRightHighHA = 180.0 / M_PI * atan2(bottomRightHighView.x, -bottomRightHighView.z);
-            float bottomRightHighVA = 180.0 / M_PI * atan2(bottomRightHighView.y, -bottomRightHighView.z);
+                float topLeftHighHA = 180.0 / M_PI * atan2(topLeftHighView.x, -topLeftHighView.z);
+                float topLeftHighVA = 180.0 / M_PI * atan2(topLeftHighView.y, -topLeftHighView.z);
+                float topRightHighHA = 180.0 / M_PI * atan2(topRightHighView.x, -topRightHighView.z);
+                float topRightHighVA = 180.0 / M_PI * atan2(topRightHighView.y, -topRightHighView.z);
+                float bottomLeftHighHA = 180.0 / M_PI * atan2(bottomLeftHighView.x, -bottomLeftHighView.z);
+                float bottomLeftHighVA = 180.0 / M_PI * atan2(bottomLeftHighView.y, -bottomLeftHighView.z);
+                float bottomRightHighHA = 180.0 / M_PI * atan2(bottomRightHighView.x, -bottomRightHighView.z);
+                float bottomRightHighVA = 180.0 / M_PI * atan2(bottomRightHighView.y, -bottomRightHighView.z);
 
-            // 0.5: half of view on each side of center
-            // 1.02: increase angle with padding
-            float fovFactor = 0.5 * 1.0;
+                // 0.5: half of view on each side of center
+                // 1.02: increase angle with padding
+                float fovFactor = 0.5 * 1.0;
 
-            if (topLeftVA < -verticalFov * fovFactor && topRightVA < -verticalFov * fovFactor && bottomLeftVA < -verticalFov * fovFactor && bottomRightVA < -verticalFov * fovFactor &&
-                topLeftHighVA < -verticalFov * fovFactor && topRightHighVA < -verticalFov * fovFactor && bottomLeftHighVA < -verticalFov * fovFactor && bottomRightHighVA < -verticalFov * fovFactor
-                    ) {
-                continue;
-            }
-            if (topLeftHA < -horizontalFov * fovFactor && topRightHA < -horizontalFov * fovFactor && bottomLeftHA < -horizontalFov * fovFactor && bottomRightHA < -horizontalFov * fovFactor &&
-                topLeftHighHA < -horizontalFov * fovFactor && topRightHighHA < -horizontalFov * fovFactor && bottomLeftHighHA < -horizontalFov * fovFactor && bottomRightHighHA < -horizontalFov * fovFactor
-                    ) {
-                continue;
-            }
-            if (topLeftVA > verticalFov * fovFactor && topRightVA > verticalFov * fovFactor && bottomLeftVA > verticalFov * fovFactor && bottomRightVA > verticalFov * fovFactor &&
-                topLeftHighVA > verticalFov * fovFactor && topRightHighVA > verticalFov * fovFactor && bottomLeftHighVA > verticalFov * fovFactor && bottomRightHighVA > verticalFov * fovFactor
-                    ) {
-                continue;
-            }
-            if (topLeftHA > horizontalFov * fovFactor && topRightHA > horizontalFov * fovFactor && bottomLeftHA > horizontalFov * fovFactor && bottomRightHA > horizontalFov * fovFactor &&
-                topLeftHighHA > horizontalFov * fovFactor && topRightHighHA > horizontalFov * fovFactor && bottomLeftHighHA > horizontalFov * fovFactor && bottomRightHighHA > horizontalFov * fovFactor
-                    ) {
-                continue;
+                if (topLeftVA < -verticalFov * fovFactor && topRightVA < -verticalFov * fovFactor &&
+                    bottomLeftVA < -verticalFov * fovFactor && bottomRightVA < -verticalFov * fovFactor &&
+                    topLeftHighVA < -verticalFov * fovFactor && topRightHighVA < -verticalFov * fovFactor &&
+                    bottomLeftHighVA < -verticalFov * fovFactor && bottomRightHighVA < -verticalFov * fovFactor
+                        ) {
+                    continue;
+                }
+                if (topLeftHA < -horizontalFov * fovFactor && topRightHA < -horizontalFov * fovFactor &&
+                    bottomLeftHA < -horizontalFov * fovFactor && bottomRightHA < -horizontalFov * fovFactor &&
+                    topLeftHighHA < -horizontalFov * fovFactor && topRightHighHA < -horizontalFov * fovFactor &&
+                    bottomLeftHighHA < -horizontalFov * fovFactor && bottomRightHighHA < -horizontalFov * fovFactor
+                        ) {
+                    continue;
+                }
+                if (topLeftVA > verticalFov * fovFactor && topRightVA > verticalFov * fovFactor &&
+                    bottomLeftVA > verticalFov * fovFactor && bottomRightVA > verticalFov * fovFactor &&
+                    topLeftHighVA > verticalFov * fovFactor && topRightHighVA > verticalFov * fovFactor &&
+                    bottomLeftHighVA > verticalFov * fovFactor && bottomRightHighVA > verticalFov * fovFactor
+                        ) {
+                    continue;
+                }
+                if (topLeftHA > horizontalFov * fovFactor && topRightHA > horizontalFov * fovFactor &&
+                    bottomLeftHA > horizontalFov * fovFactor && bottomRightHA > horizontalFov * fovFactor &&
+                    topLeftHighHA > horizontalFov * fovFactor && topRightHighHA > horizontalFov * fovFactor &&
+                    bottomLeftHighHA > horizontalFov * fovFactor && bottomRightHighHA > horizontalFov * fovFactor
+                        ) {
+                    continue;
+                }
+            } else {
+                if (topLeftView.x < -width / 2.0 && topRightView.x < -width / 2.0 && bottomLeftView.x < -width / 2.0 &&
+                    bottomRightView.x < -width / 2.0) {
+                    continue;
+                }
+                if (topLeftView.y < -height / 2.0 && topRightView.y < -height / 2.0 && bottomLeftView.y < -height / 2.0 &&
+                    bottomRightView.y < -height / 2.0) {
+                    continue;
+                }
+                if (topLeftView.x > width / 2.0 && topRightView.x > width / 2.0 && bottomLeftView.x > width / 2.0 &&
+                    bottomRightView.x > width / 2.0) {
+                    continue;
+                }
+                if (topLeftView.y > height / 2.0 && topRightView.y > height / 2.0 && bottomLeftView.y > height / 2.0 &&
+                    bottomRightView.y > height / 2.0) {
+                    continue;
+                }
             }
         }
-        else {
-            if (topLeftView.x < -width / 2.0 && topRightView.x < -width / 2.0 && bottomLeftView.x < -width / 2.0 && bottomRightView.x < -width / 2.0) {
-                continue;
-            }
-            if (topLeftView.y < -height / 2.0 && topRightView.y < -height / 2.0 && bottomLeftView.y < -height / 2.0 && bottomRightView.y < -height / 2.0) {
-                continue;
-            }
-            if (topLeftView.x > width / 2.0 && topRightView.x > width / 2.0 && bottomLeftView.x > width / 2.0 && bottomRightView.x > width / 2.0) {
-                continue;
-            }
-            if (topLeftView.y > height / 2.0 && topRightView.y > height / 2.0 && bottomLeftView.y > height / 2.0 && bottomRightView.y > height / 2.0) {
-                continue;
-            }
-        }*/
 
         if (!validViewBounds) {
             viewBoundsTopLeft = topLeft;
@@ -405,13 +418,6 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
     }
     currentViewBounds = RectCoord(viewBoundsTopLeft, viewBoundsBottomRight);
 
-//    printf("%d checks at %.0fx%.0f, %ld visible, max %d (of %d), edge %.0fpx\n", candidateChecks, width, height, visibleTilesVec.size(), maxLevel, maxLevelAvailable, longestEdge);
-
-//    printf("%ld visible base tiles\n", visibleTilesVec.size());
-
-
-//    VisibleTilesLayer nextVisibleTiles(-1);
-
     std::vector<VisibleTilesLayer> layers;
 
     for (int previousLayerOffset = 0; previousLayerOffset <= zoomInfo.numDrawPreviousLayers; previousLayerOffset++) {
@@ -462,17 +468,6 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
 
         layers.push_back(curVisibleTiles);
     }
-
-
-//    curVisibleTiles.visibleTiles.insert(visibleTilesVec.begin(), visibleTilesVec.end());
-
-
-
-
-
-//    std::unordered_set<PrioritizedTiled2dMapTileInfo> visibleTiles(visibleTilesVec.begin(), visibleTilesVec.end());
-//    layers.push_back(curVisibleTiles);
-//    layers.push_back(nextVisibleTiles);
 
     onVisibleTilesChanged(layers, true);
 
