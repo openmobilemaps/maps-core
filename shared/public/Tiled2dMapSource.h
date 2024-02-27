@@ -168,7 +168,7 @@ public:
 
     size_t lastVisibleTilesHash = -1;
             
-    void onVisibleTilesChanged(const std::vector<VisibleTilesLayer> &pyramid, int keepZoomLevelOffset = 0);
+    void onVisibleTilesChanged(const std::vector<VisibleTilesLayer> &pyramid, bool keepMultipleLevels, int keepZoomLevelOffset = 0);
 
 private:
     void performLoadingTask(Tiled2dMapTileInfo tile, size_t loaderIndex);

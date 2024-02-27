@@ -46,7 +46,10 @@ void Quad2dOpenGl::setFrame(const Quad3dD &frame, const RectD &textureCoordinate
 }
 
 void Quad2dOpenGl::setSubdivisionFactor(int32_t factor) {
-    subdivisionFactor = factor;
+    if (factor != subdivisionFactor) {
+        subdivisionFactor = factor;
+        ready = false;
+    }
 }
 
 void Quad2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface> &context) {
@@ -213,6 +216,10 @@ void Quad2dOpenGl::removeTextureCoordsGlBuffers() {
 void Quad2dOpenGl::loadTexture(const std::shared_ptr<::RenderingContextInterface> &context,
                                const std::shared_ptr<TextureHolderInterface> &textureHolder) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
+    if (this->textureHolder == textureHolder) {
+        return;
+    }
+
     if (this->textureHolder != nullptr) {
         removeTexture();
     }

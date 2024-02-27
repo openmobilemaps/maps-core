@@ -21,6 +21,7 @@ struct Tiled2dMapTileInfo {
     int t;
     int zoomIdentifier;
     int zoomLevel;
+    int tessellationFactor = 0;
 
     Tiled2dMapTileInfo(RectCoord bounds, int x, int y, int z, int zoomIdentifier, int zoomLevel)
         : bounds(bounds)
