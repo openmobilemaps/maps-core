@@ -51,6 +51,7 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
             if (usesStencil) {
                 renderingContext->preRenderStencilMask();
             }
+
             if (hasMask) {
                 maskObject->renderAsMask(renderingContext, pass->getRenderPassConfig(), vpMatrixPointer, factor);
             }

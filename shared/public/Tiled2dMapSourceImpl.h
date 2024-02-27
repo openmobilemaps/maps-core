@@ -126,21 +126,26 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
     Coord viewBoundsBottomRight(-1, 0, 0, 0);
     bool validViewBounds = false;
 
-    int initialLevel = 1;
-    const Tiled2dMapZoomLevelInfo &zoomLevelInfo0 = zoomLevelInfos.at(initialLevel);
-    for (int x = 0; x < zoomLevelInfo0.numTilesX; x++) {
-        for (int y = 0; y < zoomLevelInfo0.numTilesY; y++) {
-            VisibleTileCandidate c;
-            c.levelIndex = initialLevel;
-            c.x = x;
-            c.y = y;
-            candidates.push(c);
+    int maxLevel = 0;
+    for (int index = 0; index < zoomLevelInfos.size(); ++index) {
+        const auto &level = zoomLevelInfos[index];
+        if (level.numTilesX > 1 && level.numTilesY > 1) {
+            for (int x = 0; x < level.numTilesX; x++) {
+                for (int y = 0; y < level.numTilesY; y++) {
+                    VisibleTileCandidate c;
+                    c.levelIndex = index;
+                    c.x = x;
+                    c.y = y;
+                    candidates.push(c);
+                }
+            }
+            maxLevel = level.zoomLevelIdentifier;
+            break;
         }
     }
 
     std::vector<std::pair<VisibleTileCandidate, PrioritizedTiled2dMapTileInfo>> visibleTilesVec;
 
-    int maxLevel = initialLevel;
     auto maxLevelAvailable = zoomLevelInfos.size() - 1;
 
     int candidateChecks = 0;

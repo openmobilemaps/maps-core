@@ -83,7 +83,7 @@ protected:
     GLuint textureCoordsBuffer;
     std::vector<GLfloat> textureCoords;
     GLuint indexBuffer;
-    std::vector<GLubyte> indices;
+    std::vector<GLushort> indices;
 
     std::shared_ptr<TextureHolderInterface> textureHolder;
     int texturePointer;

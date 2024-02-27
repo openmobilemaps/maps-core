@@ -145,5 +145,5 @@ protected:
     std::shared_ptr<::Tiled2dMapReadyStateListener> readyStateListener;
 
 private:
-    const static int32_t SUBDIVISION_FACTOR_3D = 2;
+    const static int32_t SUBDIVISION_FACTOR_3D = 3;
 };

@@ -170,7 +170,7 @@ void Quad2dOpenGl::prepareGlData(int program) {
         glGenBuffers(1, &indexBuffer);
     }
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLubyte) * indices.size(), &indices[0], GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort ) * indices.size(), &indices[0], GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     mvpMatrixHandle = glGetUniformLocation(program, "uMVPMatrix");
@@ -304,7 +304,7 @@ void Quad2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &co
 
     // Draw the triangles
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_BYTE, nullptr);
+    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_SHORT, nullptr);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
