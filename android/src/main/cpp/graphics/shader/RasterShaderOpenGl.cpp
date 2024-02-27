@@ -72,8 +72,10 @@ std::string RasterShaderOpenGl::getVertexShader() {
                                                 out vec2 v_texcoord;
 
                                                 void main() {
-                                                    vec4 adjPos = vec4(1.0 / length(vPosition.xyz) * vPosition.xyz, 1.0);
-                                                    gl_Position = uMVPMatrix * adjPos;
+                                                    gl_Position = uMVPMatrix * vec4(vPosition.z * sin(vPosition.y) * cos(vPosition.x),
+                                                                                    vPosition.z * cos(vPosition.y),
+                                                                                    -vPosition.z * sin(vPosition.y) * sin(vPosition.x),
+                                                                                    1.0);
                                                     v_texcoord = texCoordinate;
                                                 })
            // Default vertex shader

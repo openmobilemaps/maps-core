@@ -16,15 +16,15 @@
 #include "CoordinateSystemIdentifiers.h"
 #include "MapCoordinateSystem.h"
 
-// Convert EPSG:4326 coordinates to the unit sphere in cartesian coordinates (0/0/EARTH_RADIUS maps to 1/0/0)
-class EPSG4326ToUnitSphereCartConverter : public CoordinateConverterInterface {
+// Convert EPSG:4326 coordinates to the unit sphere in polar coordinates (0/0/EARTH_RADIUS maps to 0/0/1)
+class EPSG4326ToUnitSphereConverter : public CoordinateConverterInterface {
 public:
-    EPSG4326ToUnitSphereCartConverter() {}
+    EPSG4326ToUnitSphereConverter() {}
 
     virtual Coord convert(const Coord &coordinate) override {
 
         const double phi = (coordinate.x - 180.0) * M_PI / 180.0; // [-2 * pi, 0)
-        const double th = (coordinate.y - 90.0) * M_PI / 180.0;
+        const double th = (coordinate.y - 90.0) * M_PI / 180.0; // [0, -pi]
         const double r = 1.0 + coordinate.z / 6378137.0;
 
         return Coord(getTo(), phi, th, r);
@@ -32,5 +32,5 @@ public:
 
     virtual int32_t getFrom() override { return CoordinateSystemIdentifiers::EPSG4326(); }
 
-    virtual int32_t getTo() override { return CoordinateSystemIdentifiers::UnitSphereCart(); }
+    virtual int32_t getTo() override { return CoordinateSystemIdentifiers::UnitSphere(); }
 };

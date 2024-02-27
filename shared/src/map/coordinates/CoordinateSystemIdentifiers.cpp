@@ -28,9 +28,9 @@ int32_t CoordinateSystemIdentifiers::EPSG2056() { return 2056; };
 // https://epsg.io/21781
 int32_t CoordinateSystemIdentifiers::EPSG21781() { return 21781; };
 
-// Unit Sphere Cartesian
+// Unit Sphere Polar
 // x, y, z with reference to earth as unit sphere
-int32_t CoordinateSystemIdentifiers::UnitSphereCart() {
+int32_t CoordinateSystemIdentifiers::UnitSphere() {
     return 0x80000000 | 1;
 }
 

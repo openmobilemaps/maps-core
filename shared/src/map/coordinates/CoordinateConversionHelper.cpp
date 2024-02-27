@@ -18,10 +18,10 @@
 #include "EPSG3857ToEPSG2056Converter.h"
 #include "EPSG4326ToEPSG2056Converter.h"
 #include "EPSG4326ToEPSG3857Converter.h"
-#include "EPSG4326ToUnitSphereCartConverter.h"
-#include "UnitSphereCartToEPSG4326Converter.h"
-#include "EPSG3857ToUnitSphereCartConverter.h"
-#include "UnitSphereCartToEPSG3857Converter.h"
+#include "EPSG4326ToUnitSphereConverter.h"
+#include "UnitSphereToEPSG4326Converter.h"
+#include "EPSG3857ToUnitSphereConverter.h"
+#include "UnitSphereToEPSG3857Converter.h"
 
 /**
  * This instance is independent of the map and does not know about the rendering system.
@@ -57,10 +57,10 @@ void CoordinateConversionHelper::addDefaultConverters() {
     registerConverter(std::make_shared<EPSG4326ToEPSG2056Converter>());
     registerConverter(std::make_shared<EPSG2056ToEPGS21781Converter>());
     registerConverter(std::make_shared<EPSG21781ToEPGS2056Converter>());
-    registerConverter(std::make_shared<EPSG4326ToUnitSphereCartConverter>());
-    registerConverter(std::make_shared<UnitSphereCartToEPSG4326Converter>());
-    registerConverter(std::make_shared<EPSG3857ToUnitSphereCartConverter>());
-    registerConverter(std::make_shared<UnitSphereCartToEPSG3857Converter>());
+    registerConverter(std::make_shared<EPSG4326ToUnitSphereConverter>());
+    registerConverter(std::make_shared<UnitSphereToEPSG4326Converter>());
+    registerConverter(std::make_shared<EPSG3857ToUnitSphereConverter>());
+    registerConverter(std::make_shared<UnitSphereToEPSG3857Converter>());
 }
 
 void CoordinateConversionHelper::registerConverter(const std::shared_ptr<CoordinateConverterInterface> &converter) {
