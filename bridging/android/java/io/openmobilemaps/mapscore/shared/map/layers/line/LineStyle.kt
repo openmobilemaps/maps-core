@@ -14,4 +14,5 @@ data class LineStyle(
     val lineCap: LineCapType,
     val offset: Float,
     val dotted: Boolean,
+    val dottedGap: Float,
 )

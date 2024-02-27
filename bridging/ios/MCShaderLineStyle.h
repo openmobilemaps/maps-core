@@ -25,7 +25,8 @@
                            dashValue2:(float)dashValue2
                            dashValue3:(float)dashValue3
                                offset:(float)offset
-                               dotted:(BOOL)dotted NS_DESIGNATED_INITIALIZER;
+                               dotted:(float)dotted
+                            dottedGap:(float)dottedGap NS_DESIGNATED_INITIALIZER;
 + (nonnull instancetype)shaderLineStyleWithWidth:(float)width
                                           colorR:(float)colorR
                                           colorG:(float)colorG
@@ -45,7 +46,8 @@
                                       dashValue2:(float)dashValue2
                                       dashValue3:(float)dashValue3
                                           offset:(float)offset
-                                          dotted:(BOOL)dotted;
+                                          dotted:(float)dotted
+                                       dottedGap:(float)dottedGap;
 
 @property (nonatomic, readonly) float width;
 
@@ -85,6 +87,8 @@
 
 @property (nonatomic, readonly) float offset;
 
-@property (nonatomic, readonly) BOOL dotted;
+@property (nonatomic, readonly) float dotted;
+
+@property (nonatomic, readonly) float dottedGap;
 
 @end

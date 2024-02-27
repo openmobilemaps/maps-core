@@ -185,18 +185,32 @@ void Tiled2dMapVectorLineTile::update() {
                 style.offset = offset;
                 needsUpdate = true;
             }
+            
+            // dotted
+            bool lineDotted = lineDescription->style.getLineDotted(context);
 
+            auto dotted = lineDotted ? 1 : 0;
+            if(dotted != style.dotted) {
+                style.dotted = dotted;
+                needsUpdate = true;
+            }
+            
+            // dotted gap
+            auto dottedGap = lineDescription->style.getLineDottedGap(context);
+            if(dottedGap != style.dottedGap) {
+                style.dottedGap = dottedGap;
+                needsUpdate = true;
+            }
+            
             i++;
         }
 
         if (needsUpdate) {
             auto &styles = reusableLineStyles[styleGroupId];
-            auto buffer = SharedBytes((int64_t)styles.data(), (int)styles.size(), 19 * sizeof(float));
+            auto buffer = SharedBytes((int64_t)styles.data(), (int)styles.size(), 21 * sizeof(float));
             shaders[styleGroupId]->setStyles(buffer);
         }
     }
-
-
 }
 
 void Tiled2dMapVectorLineTile::clear() {
@@ -253,7 +267,7 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
                     }
 
                     if (styleIndex == -1) {
-                        auto reusableStyle = ShaderLineStyle(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, false);
+                        auto reusableStyle = ShaderLineStyle(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
                         if (!featureGroups.empty() && featureGroups.back().size() < maxStylesPerGroup) {
                             styleGroupIndex = (int) featureGroups.size() - 1;
                             styleIndex = (int) featureGroups.back().size();
