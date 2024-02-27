@@ -580,7 +580,7 @@ bool MapCamera3d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
         long long newTimestamp = DateHelper::currentTimeMicros();
         long long deltaMcs = std::max(newTimestamp - currentDragTimestamp, 8000ll);
         float averageFactor = currentDragVelocity.x == 0 && currentDragVelocity.y == 0 ? 1.0 : 0.5;
-        float fasterIneratia = 10.0f;
+        float fasterIneratia = 5.0 + zoom / 3.0;
         currentDragVelocity.x = (1 - averageFactor) * currentDragVelocity.x + averageFactor * xDiffMap / (deltaMcs / 16000.0) * fasterIneratia;
         currentDragVelocity.y = (1 - averageFactor) * currentDragVelocity.y + averageFactor * yDiffMap / (deltaMcs / 16000.0) * fasterIneratia;
         currentDragTimestamp = newTimestamp;
