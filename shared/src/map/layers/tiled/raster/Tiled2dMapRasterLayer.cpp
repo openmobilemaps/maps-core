@@ -403,8 +403,10 @@ void Tiled2dMapRasterLayer::generateRenderPasses() {
     auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
     if (!renderingContext)
         return;
+    const bool is3d = mapInterface->is3d();
 
     std::vector<std::shared_ptr<RenderPassInterface>> newRenderPasses;
+    std::vector<std::shared_ptr<::RenderObjectInterface>> renderObjects;
 
     {
         std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
@@ -420,13 +422,7 @@ void Tiled2dMapRasterLayer::generateRenderPasses() {
 
             auto const &renderObject = entry.second->getRenderObject();
 
-            if (mapInterface->is3d()) {
-                std::shared_ptr<RenderPass> renderPass =
-                std::make_shared<RenderPass>(RenderPassConfig(0, true),
-                                             std::vector<std::shared_ptr<::RenderObjectInterface>>{renderObject}, nullptr);
-                renderPass->setScissoringRect(scissorRect);
-                newRenderPasses.push_back(renderPass);
-            } else if (layerConfig->getZoomInfo().maskTile) {
+            if (layerConfig->getZoomInfo().maskTile) {
                 const auto &mask = tileMaskMap.at(entry.first.tileInfo);
 
                 mask.getGraphicsObject()->setup(renderingContext);
@@ -435,28 +431,23 @@ void Tiled2dMapRasterLayer::generateRenderPasses() {
                                              std::vector<std::shared_ptr<::RenderObjectInterface>>{renderObject}, mask.getGraphicsMaskObject());
                 renderPass->setScissoringRect(scissorRect);
                 newRenderPasses.push_back(renderPass);
-            } else if (mask) {
-                //TODO: general mask would no longer work now, we would have to merge the tile-mask with the layer-mask
-                std::shared_ptr<RenderPass> renderPass =
-                        std::make_shared<RenderPass>(RenderPassConfig(0, false),
-                                                     std::vector<std::shared_ptr<::RenderObjectInterface>>{renderObject}, mask);
-                renderPass->setScissoringRect(scissorRect);
-                newRenderPasses.push_back(renderPass);
             } else {
-                std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(RenderPassConfig(0, false),
-                                                                                      std::vector<std::shared_ptr<::RenderObjectInterface>>{
-                    renderObject});
-                renderPass->setScissoringRect(scissorRect);
-
-                newRenderPasses.push_back(renderPass);
+                renderObjects.push_back(renderObject);
             }
 
         }
 
-    }
+        if (!renderObjects.empty()) {
+            if (is3d) {
+                std::reverse(renderObjects.begin(), renderObjects.end());
+            }
 
-    if (mapInterface->is3d()) {
-        std::reverse(newRenderPasses.begin(), newRenderPasses.end());
+            auto config = RenderPassConfig(0, is3d);
+            std::shared_ptr<RenderPass> renderPass =
+                    std::make_shared<RenderPass>(config, renderObjects, mask);
+            renderPass->setScissoringRect(scissorRect);
+            newRenderPasses.push_back(renderPass);
+        }
     }
 
 
