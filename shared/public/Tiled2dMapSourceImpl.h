@@ -347,6 +347,9 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
 
         const double maxLength = std::min(width, height) * 0.5 / zoomInfo.zoomLevelScaleFactor;
 
+        /*
+         This approach only works with sufficiently small tiles. If tiles are wider than the screen space, the measured lengths depend on the orientation of the globe since they wrap around the globe. Therefore, it is not guaranteed to have a uniform resolution from all viewing angles.
+         */
         bool preciseEnough = topLengthPx <= maxLength && bottomLengthPx <= maxLength && leftLengthPx <= maxLength && rightLengthPx <= maxLength;
         bool lastLevel = candidate.levelIndex == maxLevelAvailable;
 
