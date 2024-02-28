@@ -49,7 +49,7 @@ std::vector<Tiled2dMapZoomLevelInfo> Epsg4326Tiled2dMapLayerConfig::getZoomLevel
     double baseZoom = 500000000.0;
     std::vector<Tiled2dMapZoomLevelInfo> levels;
 
-    for (int32_t i = minZoomLevel; i < maxZoomLevel; ++i) {
+    for (int32_t i = minZoomLevel; i <= maxZoomLevel; ++i) {
         int32_t tileCount = pow(2,i);
         double zoom = baseZoom / tileCount;
         levels.emplace_back(zoom, 360.0 / tileCount, tileCount, tileCount, 1, i, bounds);
