@@ -632,10 +632,11 @@ void Tiled2dMapVectorLayer::pregenerateRenderPasses() {
         if (description->renderObjects.empty()) {
             continue;
         }
-        if (description->maskingObject != lastMask && !renderObjects.empty()) {
-            newPasses.emplace_back(std::make_shared<RenderPass>(RenderPassConfig(description->renderPassIndex, false), renderObjects, lastMask));
+        if ((description->renderPassIndex != lastRenderPassIndex || description->maskingObject != lastMask) && !renderObjects.empty()) {
+            newPasses.emplace_back(std::make_shared<RenderPass>(RenderPassConfig(lastRenderPassIndex, false), renderObjects, lastMask));
             renderObjects.clear();
             lastMask = nullptr;
+            lastRenderPassIndex = 0;
         }
 
         if (description->isModifyingMask || description->selfMasked) {
