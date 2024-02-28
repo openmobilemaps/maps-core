@@ -105,6 +105,9 @@ public:
     void onTilesUpdated(const std::string &layerName, std::unordered_set<Tiled2dMapRasterTileInfo> currentTileInfos) override;
 
     virtual void setReadyStateListener(const /*not-null*/ std::shared_ptr<::Tiled2dMapReadyStateListener> & listener) override;
+
+    void set3dSubdivisionFactor(int32_t factor) override;
+
 private:
     virtual void enableAnimations(bool enabled) override;
 
@@ -145,5 +148,7 @@ protected:
     std::shared_ptr<::Tiled2dMapReadyStateListener> readyStateListener;
 
 private:
-    const static int32_t SUBDIVISION_FACTOR_3D = 3;
+    const static int32_t SUBDIVISION_FACTOR_3D_DEFAULT = 3;
+
+    int32_t subdivisionFactor = SUBDIVISION_FACTOR_3D_DEFAULT;
 };

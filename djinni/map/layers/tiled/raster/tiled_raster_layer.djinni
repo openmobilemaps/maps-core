@@ -37,6 +37,8 @@ tiled_2d_map_raster_layer_interface = interface +c {
     set_ready_state_listener(listener: optional<tiled_2d_map_ready_state_listener>);
 
     get_config() : tiled_2d_map_layer_config;
+
+    set_3d_subdivision_factor(factor: i32);
 }
 
 tiled_2d_map_raster_layer_callback_interface = interface +c +j +o {

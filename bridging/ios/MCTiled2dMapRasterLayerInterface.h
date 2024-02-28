@@ -59,4 +59,6 @@
 
 - (nullable id<MCTiled2dMapLayerConfig>)getConfig;
 
+- (void)set3dSubdivisionFactor:(int32_t)factor;
+
 @end
