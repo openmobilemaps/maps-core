@@ -68,6 +68,8 @@ abstract class MapCameraInterface {
 
     abstract fun removeListener(listener: io.openmobilemaps.mapscore.shared.map.camera.MapCameraListenerInterface)
 
+    abstract fun notifyListenerBoundsChange()
+
     abstract fun coordFromScreenPosition(posScreen: io.openmobilemaps.mapscore.shared.graphics.common.Vec2F): io.openmobilemaps.mapscore.shared.map.coordinates.Coord
 
     abstract fun coordFromScreenPositionZoom(posScreen: io.openmobilemaps.mapscore.shared.graphics.common.Vec2F, zoom: Float): io.openmobilemaps.mapscore.shared.map.coordinates.Coord
@@ -272,6 +274,12 @@ abstract class MapCameraInterface {
             native_removeListener(this.nativeRef, listener)
         }
         private external fun native_removeListener(_nativeRef: Long, listener: io.openmobilemaps.mapscore.shared.map.camera.MapCameraListenerInterface)
+
+        override fun notifyListenerBoundsChange() {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_notifyListenerBoundsChange(this.nativeRef)
+        }
+        private external fun native_notifyListenerBoundsChange(_nativeRef: Long)
 
         override fun coordFromScreenPosition(posScreen: io.openmobilemaps.mapscore.shared.graphics.common.Vec2F): io.openmobilemaps.mapscore.shared.map.coordinates.Coord {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

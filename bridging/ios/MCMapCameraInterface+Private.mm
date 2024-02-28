@@ -243,6 +243,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)notifyListenerBoundsChange {
+    try {
+        _cppRefHandle.get()->notifyListenerBoundsChange();
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (nonnull MCCoord *)coordFromScreenPosition:(nonnull MCVec2F *)posScreen {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->coordFromScreenPosition(::djinni_generated::Vec2F::toCpp(posScreen));

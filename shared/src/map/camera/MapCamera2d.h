@@ -91,6 +91,8 @@ class MapCamera2d : public MapCameraInterface,
 
     std::optional<float> getLastVpMatrixZoom() override;
 
+    void notifyListenerBoundsChange() override;
+
     /** this method is called just before the update methods on all layers */
     virtual void update() override;
 

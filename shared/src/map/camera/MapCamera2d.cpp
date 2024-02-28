@@ -1029,3 +1029,7 @@ float MapCamera2d::getScreenDensityPpi() { return screenDensityPpi; }
 std::shared_ptr<MapCamera3dInterface> MapCamera2d::asMapCamera3d() {
     return nullptr;
 }
+
+void MapCamera2d::notifyListenerBoundsChange() {
+    notifyListeners(ListenerType::BOUNDS);
+}

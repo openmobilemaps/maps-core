@@ -273,6 +273,14 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCameraInte
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCameraInterface_00024CppProxy_native_1notifyListenerBoundsChange(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::MapCameraInterface>(nativeRef);
+        ref->notifyListenerBoundsChange();
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
 CJNIEXPORT ::djinni_generated::NativeCoord::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCameraInterface_00024CppProxy_native_1coordFromScreenPosition(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeVec2F::JniType j_posScreen)
 {
     try {

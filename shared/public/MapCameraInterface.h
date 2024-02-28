@@ -76,6 +76,8 @@ public:
 
     virtual void removeListener(const /*not-null*/ std::shared_ptr<::MapCameraListenerInterface> & listener) = 0;
 
+    virtual void notifyListenerBoundsChange() = 0;
+
     virtual ::Coord coordFromScreenPosition(const ::Vec2F & posScreen) = 0;
 
     virtual ::Coord coordFromScreenPositionZoom(const ::Vec2F & posScreen, float zoom) = 0;

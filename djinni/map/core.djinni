@@ -172,6 +172,7 @@ map_camera_interface = interface +c {
 
     add_listener(listener: map_camera_listener_interface);
     remove_listener(listener: map_camera_listener_interface);
+    notify_listener_bounds_change();
 
     coord_from_screen_position(pos_screen: vec_2_f): coord;
     coord_from_screen_position_zoom(pos_screen: vec_2_f, zoom: f32): coord;

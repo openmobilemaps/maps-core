@@ -84,6 +84,8 @@
 
 - (void)removeListener:(nullable id<MCMapCameraListenerInterface>)listener;
 
+- (void)notifyListenerBoundsChange;
+
 - (nonnull MCCoord *)coordFromScreenPosition:(nonnull MCVec2F *)posScreen;
 
 - (nonnull MCCoord *)coordFromScreenPositionZoom:(nonnull MCVec2F *)posScreen

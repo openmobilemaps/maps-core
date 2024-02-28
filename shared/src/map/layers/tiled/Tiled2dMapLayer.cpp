@@ -43,7 +43,7 @@ void Tiled2dMapLayer::onAdded(const std::shared_ptr<::MapInterface> &mapInterfac
     auto camera = std::dynamic_pointer_cast<MapCameraInterface>(mapInterface->getCamera());
     if (camera) {
         camera->addListener(shared_from_this());
-        onVisibleBoundsChanged(camera->getVisibleRect(), camera->getZoom());
+        camera->notifyListenerBoundsChange();
     }
 }
 
