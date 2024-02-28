@@ -680,7 +680,7 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
 
     if (lastVisibleTilesHash != visibleTileHash) {
         lastVisibleTilesHash = visibleTileHash;
-        onVisibleTilesChanged(layers, keepZoomLevelOffset, false);
+        onVisibleTilesChanged(layers, false, keepZoomLevelOffset);
     }
     currentViewBounds = visibleBoundsLayer;
 }
