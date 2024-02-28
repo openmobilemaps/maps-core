@@ -345,7 +345,7 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
         double leftLengthPx = Vec2DHelper::distance(topLeftScreenPx, bottomLeftScreenPx);
         double rightLengthPx = Vec2DHelper::distance(topRightScreenPx, bottomRightScreenPx);
 
-        const double maxLength = std::min(width, height) * 0.5;
+        const double maxLength = std::min(width, height) * 0.5 / zoomInfo.zoomLevelScaleFactor;
 
         bool preciseEnough = topLengthPx <= maxLength && bottomLengthPx <= maxLength && leftLengthPx <= maxLength && rightLengthPx <= maxLength;
         bool lastLevel = candidate.levelIndex == maxLevelAvailable;
