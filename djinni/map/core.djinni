@@ -162,6 +162,7 @@ map_camera_interface = interface +c {
 
     add_listener(listener: map_camera_listener_interface);
     remove_listener(listener: map_camera_listener_interface);
+    notify_listener_bounds_change();
 
     coord_from_screen_position(pos_screen: vec_2_f): coord;
     screen_pos_from_coord(coord: coord): vec_2_f;

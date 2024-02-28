@@ -142,6 +142,8 @@ class MapCamera3d : public MapCameraInterface,
 
     void setCameraMode(CameraMode3d mode) override;
 
+    void notifyListenerBoundsChange() override;
+
 protected:
     virtual void setupInertia();
 

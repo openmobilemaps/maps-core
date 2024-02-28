@@ -944,3 +944,7 @@ std::shared_ptr<MapCamera3dInterface> MapCamera3d::asMapCamera3d() {
 void MapCamera3d::setCameraMode(CameraMode3d mode) {
     this->mode = mode;
 }
+
+void MapCamera3d::notifyListenerBoundsChange() {
+    notifyListeners(ListenerType::BOUNDS);
+}
