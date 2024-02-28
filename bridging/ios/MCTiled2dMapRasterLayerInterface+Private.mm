@@ -166,6 +166,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)set3dSubdivisionFactor:(int32_t)factor {
+    try {
+        _cppRefHandle.get()->set3dSubdivisionFactor(::djinni::I32::toCpp(factor));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 namespace djinni_generated {
 
 auto Tiled2dMapRasterLayerInterface::toCpp(ObjcType objc) -> CppType

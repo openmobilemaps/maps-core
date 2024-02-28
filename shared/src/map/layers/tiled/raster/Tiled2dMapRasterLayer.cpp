@@ -200,10 +200,10 @@ void Tiled2dMapRasterLayer::onTilesUpdated(const std::string &layerName, std::un
                         if (found == this->tilesToSetup.end()) {
                             tilesToAdd.insert(rasterTileInfo);
                         } else if (is3d) {
-                            found->second->getQuadObject()->setSubdivisionFactor(std::clamp(SUBDIVISION_FACTOR_3D + rasterTileInfo.tessellationFactor, 0, 5));
+                            found->second->getQuadObject()->setSubdivisionFactor(std::clamp(subdivisionFactor + rasterTileInfo.tessellationFactor, 0, 5));
                         }
                     } else if (is3d) {
-                        it->second->getQuadObject()->setSubdivisionFactor(std::clamp(SUBDIVISION_FACTOR_3D + rasterTileInfo.tessellationFactor, 0, 5));
+                        it->second->getQuadObject()->setSubdivisionFactor(std::clamp(subdivisionFactor + rasterTileInfo.tessellationFactor, 0, 5));
                         tilesToSetup.emplace_back(rasterTileInfo, it->second);
                     }
                 }
@@ -263,7 +263,7 @@ void Tiled2dMapRasterLayer::onTilesUpdated(const std::string &layerName, std::un
                             graphicsFactory->createQuad(rasterShader->asShaderProgramInterface()), rasterShader, mapInterface, is3d);
                 }
                 if (is3d) {
-                    tileObject->getQuadObject()->setSubdivisionFactor(std::clamp(SUBDIVISION_FACTOR_3D + tile.tessellationFactor, 0, 5));
+                    tileObject->getQuadObject()->setSubdivisionFactor(std::clamp(subdivisionFactor + tile.tessellationFactor, 0, 5));
                 }
                 if (zoomInfo.numDrawPreviousLayers == 0 || !animationsEnabled || zoomInfo.maskTile || is3d) {
                     tileObject->setStyle(style);
@@ -573,4 +573,8 @@ void Tiled2dMapRasterLayer::updateReadyStateListenerIfNeeded() {
         listener->stateUpdate(newState);
         lastReadyState = newState;
     }
+}
+
+void Tiled2dMapRasterLayer::set3dSubdivisionFactor(int32_t factor) {
+    this->subdivisionFactor = factor;
 }
