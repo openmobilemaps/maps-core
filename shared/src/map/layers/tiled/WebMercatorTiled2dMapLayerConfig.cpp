@@ -53,7 +53,7 @@ std::vector<Tiled2dMapZoomLevelInfo> WebMercatorTiled2dMapLayerConfig::getZoomLe
     double baseWidth = 40075016;
     std::vector<Tiled2dMapZoomLevelInfo> levels;
 
-    for (int32_t i = minZoomLevel; i < maxZoomLevel; ++i) {
+    for (int32_t i = minZoomLevel; i <= maxZoomLevel; ++i) {
         int32_t tileCount = pow(2,i);
         double zoom = baseZoom / tileCount;
         levels.emplace_back(zoom, baseWidth / tileCount, tileCount, tileCount, 1, i, bounds);
