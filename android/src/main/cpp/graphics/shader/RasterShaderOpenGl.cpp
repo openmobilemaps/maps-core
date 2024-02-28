@@ -104,7 +104,8 @@ std::string RasterShaderOpenGl::getFragmentShader() {
                                       void main() {
                                           vec4 color = texture(textureSampler, v_texcoord);
                                           if (styleValues[0] == 0.0 || color.a == 0.0) {
-                                              discard;
+                                              fragmentColor = vec4(0.0);
+                                              return;
                                           }
                                           float average = (color.r + color.g + color.b) / 3.0;
                                           vec3 rgb = color.rgb + (vec3(average) - color.rgb) * styleValues[2];
