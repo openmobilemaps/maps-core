@@ -36,7 +36,7 @@ private:
     const jfieldID field_lineCap { ::djinni::jniGetFieldID(clazz.get(), "lineCap", "Lio/openmobilemaps/mapscore/shared/map/layers/line/LineCapType;") };
     const jfieldID field_offset { ::djinni::jniGetFieldID(clazz.get(), "offset", "F") };
     const jfieldID field_dotted { ::djinni::jniGetFieldID(clazz.get(), "dotted", "Z") };
-    const jfieldID field_dottedGap { ::djinni::jniGetFieldID(clazz.get(), "dottedGap", "F") };
+    const jfieldID field_dottedSkew { ::djinni::jniGetFieldID(clazz.get(), "dottedSkew", "F") };
 };
 
 } // namespace djinni_generated

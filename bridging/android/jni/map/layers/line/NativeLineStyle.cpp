@@ -26,7 +26,7 @@ auto NativeLineStyle::fromCpp(JNIEnv* jniEnv, const CppType& c) -> ::djinni::Loc
                                                            ::djinni::get(::djinni_generated::NativeLineCapType::fromCpp(jniEnv, c.lineCap)),
                                                            ::djinni::get(::djinni::F32::fromCpp(jniEnv, c.offset)),
                                                            ::djinni::get(::djinni::Bool::fromCpp(jniEnv, c.dotted)),
-                                                           ::djinni::get(::djinni::F32::fromCpp(jniEnv, c.dottedGap)))};
+                                                           ::djinni::get(::djinni::F32::fromCpp(jniEnv, c.dottedSkew)))};
     ::djinni::jniExceptionCheck(jniEnv);
     return r;
 }
@@ -45,7 +45,7 @@ auto NativeLineStyle::toCpp(JNIEnv* jniEnv, JniType j) -> CppType {
             ::djinni_generated::NativeLineCapType::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_lineCap)),
             ::djinni::F32::toCpp(jniEnv, jniEnv->GetFloatField(j, data.field_offset)),
             ::djinni::Bool::toCpp(jniEnv, jniEnv->GetBooleanField(j, data.field_dotted)),
-            ::djinni::F32::toCpp(jniEnv, jniEnv->GetFloatField(j, data.field_dottedGap))};
+            ::djinni::F32::toCpp(jniEnv, jniEnv->GetFloatField(j, data.field_dottedSkew))};
 }
 
 } // namespace djinni_generated

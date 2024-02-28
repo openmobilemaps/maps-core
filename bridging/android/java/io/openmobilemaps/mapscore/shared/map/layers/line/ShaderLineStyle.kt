@@ -24,5 +24,5 @@ data class ShaderLineStyle(
     val dashValue3: Float,
     val offset: Float,
     val dotted: Float,
-    val dottedGap: Float,
+    val dottedSkew: Float,
 )

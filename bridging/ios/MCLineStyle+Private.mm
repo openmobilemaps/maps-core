@@ -23,7 +23,7 @@ auto LineStyle::toCpp(ObjcType obj) -> CppType
             ::djinni::Enum<::LineCapType, MCLineCapType>::toCpp(obj.lineCap),
             ::djinni::F32::toCpp(obj.offset),
             ::djinni::Bool::toCpp(obj.dotted),
-            ::djinni::F32::toCpp(obj.dottedGap)};
+            ::djinni::F32::toCpp(obj.dottedSkew)};
 }
 
 auto LineStyle::fromCpp(const CppType& cpp) -> ObjcType
@@ -38,7 +38,7 @@ auto LineStyle::fromCpp(const CppType& cpp) -> ObjcType
                                       lineCap:(::djinni::Enum<::LineCapType, MCLineCapType>::fromCpp(cpp.lineCap))
                                        offset:(::djinni::F32::fromCpp(cpp.offset))
                                        dotted:(::djinni::Bool::fromCpp(cpp.dotted))
-                                    dottedGap:(::djinni::F32::fromCpp(cpp.dottedGap))];
+                                   dottedSkew:(::djinni::F32::fromCpp(cpp.dottedSkew))];
 }
 
 } // namespace djinni_generated

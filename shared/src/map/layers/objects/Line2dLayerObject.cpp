@@ -210,7 +210,7 @@ void Line2dLayerObject::setStyle(const LineStyle &style, bool highlighted) {
 
     s.dotted = style.dotted;
     
-    s.dottedGap = style.dottedGap;
+    s.dottedSkew = style.dottedSkew;
 
     auto buffer = SharedBytes((int64_t)&s, 1, 21 * sizeof(float));
     shader->setStyles(buffer);

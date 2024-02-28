@@ -195,10 +195,10 @@ void Tiled2dMapVectorLineTile::update() {
                 needsUpdate = true;
             }
             
-            // dotted gap
-            auto dottedGap = lineDescription->style.getLineDottedGap(context);
-            if(dottedGap != style.dottedGap) {
-                style.dottedGap = dottedGap;
+            // dotted skew
+            auto dottedSkew = lineDescription->style.getLineDottedSkew(context);
+            if(dottedSkew != style.dottedSkew) {
+                style.dottedSkew = dottedSkew;
                 needsUpdate = true;
             }
             
