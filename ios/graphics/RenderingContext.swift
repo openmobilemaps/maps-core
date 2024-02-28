@@ -75,10 +75,10 @@ public class RenderingContext: NSObject {
     /// this is needed to clear the stencilbuffer
     lazy var stencilClearQuad: Quad2d = {
         let quad = Quad2d(shader: ClearStencilShader(), metalContext: .current, label: "ClearStencil")
-        quad.setFrame(.init(topLeft: .init(x: -1, y: 1, z: 0),
-                            topRight: .init(x: 1, y: 1, z: 0),
-                            bottomRight: .init(x: 1, y: -1, z: 0),
-                            bottomLeft: .init(x: -1, y: -1, z: 0)),
+        quad.setFrame(.init(topLeft: .init(x: 1, y: 1, z: 0),
+                            topRight: .init(x: -1, y: 1, z: 0),
+                            bottomRight: .init(x: -1, y: -1, z: 0),
+                            bottomLeft: .init(x: 1, y: -1, z: 0)),
                       textureCoordinates: .init(x: 0, y: 0, width: 0, height: 0))
         quad.setup(self)
         return quad
