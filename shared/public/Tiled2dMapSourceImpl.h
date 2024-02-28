@@ -118,7 +118,6 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
         return;
     }
 
-
     std::queue<VisibleTileCandidate> candidates;
     std::unordered_set<VisibleTileCandidate> candidatesSet;
 
@@ -471,6 +470,8 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
 
         layers.push_back(curVisibleTiles);
     }
+
+    currentZoomLevelIdentifier = maxLevel;
 
     onVisibleTilesChanged(layers, true);
 
