@@ -46,7 +46,7 @@ private:
     const jfieldID field_dashValue3 { ::djinni::jniGetFieldID(clazz.get(), "dashValue3", "F") };
     const jfieldID field_offset { ::djinni::jniGetFieldID(clazz.get(), "offset", "F") };
     const jfieldID field_dotted { ::djinni::jniGetFieldID(clazz.get(), "dotted", "F") };
-    const jfieldID field_dottedGap { ::djinni::jniGetFieldID(clazz.get(), "dottedGap", "F") };
+    const jfieldID field_dottedSkew { ::djinni::jniGetFieldID(clazz.get(), "dottedSkew", "F") };
 };
 
 } // namespace djinni_generated

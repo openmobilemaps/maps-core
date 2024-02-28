@@ -33,7 +33,7 @@ auto NativeShaderLineStyle::fromCpp(JNIEnv* jniEnv, const CppType& c) -> ::djinn
                                                            ::djinni::get(::djinni::F32::fromCpp(jniEnv, c.dashValue3)),
                                                            ::djinni::get(::djinni::F32::fromCpp(jniEnv, c.offset)),
                                                            ::djinni::get(::djinni::F32::fromCpp(jniEnv, c.dotted)),
-                                                           ::djinni::get(::djinni::F32::fromCpp(jniEnv, c.dottedGap)))};
+                                                           ::djinni::get(::djinni::F32::fromCpp(jniEnv, c.dottedSkew)))};
     ::djinni::jniExceptionCheck(jniEnv);
     return r;
 }
@@ -62,7 +62,7 @@ auto NativeShaderLineStyle::toCpp(JNIEnv* jniEnv, JniType j) -> CppType {
             ::djinni::F32::toCpp(jniEnv, jniEnv->GetFloatField(j, data.field_dashValue3)),
             ::djinni::F32::toCpp(jniEnv, jniEnv->GetFloatField(j, data.field_offset)),
             ::djinni::F32::toCpp(jniEnv, jniEnv->GetFloatField(j, data.field_dotted)),
-            ::djinni::F32::toCpp(jniEnv, jniEnv->GetFloatField(j, data.field_dottedGap))};
+            ::djinni::F32::toCpp(jniEnv, jniEnv->GetFloatField(j, data.field_dottedSkew))};
 }
 
 } // namespace djinni_generated

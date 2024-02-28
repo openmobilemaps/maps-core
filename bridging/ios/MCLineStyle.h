@@ -19,7 +19,7 @@
                               lineCap:(MCLineCapType)lineCap
                                offset:(float)offset
                                dotted:(BOOL)dotted
-                            dottedGap:(float)dottedGap NS_DESIGNATED_INITIALIZER;
+                           dottedSkew:(float)dottedSkew NS_DESIGNATED_INITIALIZER;
 + (nonnull instancetype)lineStyleWithColor:(nonnull MCColorStateList *)color
                                   gapColor:(nonnull MCColorStateList *)gapColor
                                    opacity:(float)opacity
@@ -30,7 +30,7 @@
                                    lineCap:(MCLineCapType)lineCap
                                     offset:(float)offset
                                     dotted:(BOOL)dotted
-                                 dottedGap:(float)dottedGap;
+                                dottedSkew:(float)dottedSkew;
 
 @property (nonatomic, readonly, nonnull) MCColorStateList * color;
 
@@ -52,6 +52,6 @@
 
 @property (nonatomic, readonly) BOOL dotted;
 
-@property (nonatomic, readonly) float dottedGap;
+@property (nonatomic, readonly) float dottedSkew;
 
 @end

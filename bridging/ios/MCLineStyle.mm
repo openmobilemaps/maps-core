@@ -16,7 +16,7 @@
                               lineCap:(MCLineCapType)lineCap
                                offset:(float)offset
                                dotted:(BOOL)dotted
-                            dottedGap:(float)dottedGap
+                           dottedSkew:(float)dottedSkew
 {
     if (self = [super init]) {
         _color = color;
@@ -29,7 +29,7 @@
         _lineCap = lineCap;
         _offset = offset;
         _dotted = dotted;
-        _dottedGap = dottedGap;
+        _dottedSkew = dottedSkew;
     }
     return self;
 }
@@ -44,7 +44,7 @@
                                    lineCap:(MCLineCapType)lineCap
                                     offset:(float)offset
                                     dotted:(BOOL)dotted
-                                 dottedGap:(float)dottedGap
+                                dottedSkew:(float)dottedSkew
 {
     return [[self alloc] initWithColor:color
                               gapColor:gapColor
@@ -56,13 +56,13 @@
                                lineCap:lineCap
                                 offset:offset
                                 dotted:dotted
-                             dottedGap:dottedGap];
+                            dottedSkew:dottedSkew];
 }
 
 #ifndef DJINNI_DISABLE_DESCRIPTION_METHODS
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@ %p color:%@ gapColor:%@ opacity:%@ blur:%@ widthType:%@ width:%@ dashArray:%@ lineCap:%@ offset:%@ dotted:%@ dottedGap:%@>", self.class, (void *)self, self.color, self.gapColor, @(self.opacity), @(self.blur), @(self.widthType), @(self.width), self.dashArray, @(self.lineCap), @(self.offset), @(self.dotted), @(self.dottedGap)];
+    return [NSString stringWithFormat:@"<%@ %p color:%@ gapColor:%@ opacity:%@ blur:%@ widthType:%@ width:%@ dashArray:%@ lineCap:%@ offset:%@ dotted:%@ dottedSkew:%@>", self.class, (void *)self, self.color, self.gapColor, @(self.opacity), @(self.blur), @(self.widthType), @(self.width), self.dashArray, @(self.lineCap), @(self.offset), @(self.dotted), @(self.dottedSkew)];
 }
 
 #endif
