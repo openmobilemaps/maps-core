@@ -58,6 +58,10 @@ class Vec2DHelper {
         return (B.x - A.x) * (C.y - A.y) - (B.y - A.y) * (C.x - A.x);
     }
 
+    static inline double crossProduct(const Vec2D& A, const Vec2D& B) {
+        return (A.x * B.y) - (A.y * B.x);
+    }
+
     static inline ::Vec2D rotate(const ::Vec2D &p, const ::Vec2D &origin, double angleDegree) {
         const double sinAngle = sin(angleDegree * M_PI / 180.0);
         const double cosAngle = cos(angleDegree * M_PI / 180.0);

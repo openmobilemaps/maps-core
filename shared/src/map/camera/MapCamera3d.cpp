@@ -19,13 +19,18 @@
 #include "Vec2D.h"
 #include "Vec2DHelper.h"
 #include "Vec2FHelper.h"
+#include "Vec3DHelper.h"
 #include "Logger.h"
 #include "CoordinateSystemIdentifiers.h"
+
+#include "MapCamera3DHelper.h"
 
 #define DEFAULT_ANIM_LENGTH 300
 #define ROTATION_THRESHOLD 20
 #define ROTATION_LOCKING_ANGLE 10
 #define ROTATION_LOCKING_FACTOR 1.5
+
+#define FIELD_OF_VIEW 60.0
 
 MapCamera3d::MapCamera3d(const std::shared_ptr<MapInterface> &mapInterface, float screenDensityPpi)
     : mapInterface(mapInterface)
@@ -38,7 +43,8 @@ MapCamera3d::MapCamera3d(const std::shared_ptr<MapInterface> &mapInterface, floa
       cameraDistance(10000),
       cameraPitch(0),
       cameraRoll(0),
-      cameraYaw(0)
+      cameraYaw(0),
+      lastOnTouchDownPoint(0.0, 0.0)
     , bounds(mapCoordinateSystem.bounds) {
     mapSystemRtl = mapCoordinateSystem.bounds.bottomRight.x > mapCoordinateSystem.bounds.topLeft.x;
     mapSystemTtb = mapCoordinateSystem.bounds.bottomRight.y > mapCoordinateSystem.bounds.topLeft.y;
@@ -341,7 +347,7 @@ std::vector<float> MapCamera3d::getVpMatrix() {
     float maxD = 3.0;//cameraDistance * 1.3;
     float minD = 1.0 / (R * 1000.0);// 0.0000001568 //100.0 / R;
 
-    float fov = 60.0; // 45 // zoom / 70800;
+    float fov = FIELD_OF_VIEW; // 45 // zoom / 70800;
 
     // aspect ratio
     float vpr = (float) sizeViewport.x / (float) sizeViewport.y;
@@ -359,7 +365,7 @@ std::vector<float> MapCamera3d::getVpMatrix() {
         Matrix::translateM(newViewMatrix, 0, 0, 0, -cameraDistance);
         Matrix::rotateM(newViewMatrix, 0, -cameraPitch, 1.0, 0.0, 0.0);
         Matrix::rotateM(newViewMatrix, 0, -angle, 0, 0, 1);
-        Matrix::translateM(newViewMatrix, 0, 0, 0, 0 - 1 - focusPointAltitude / R);
+        //Matrix::translateM(newViewMatrix, 0, 0, 0, 0 - 1 - focusPointAltitude / R);
         Matrix::rotateM(newViewMatrix, 0.0, latitude, 1.0, 0.0, 0.0);
         Matrix::rotateM(newViewMatrix, 0.0, -longitude - 90.0, 0.0, 1.0, 0.0);
         std::vector<float> newVpMatrix(16, 0.0);
@@ -534,10 +540,12 @@ void MapCamera3d::notifyListeners(const int &listenerType) {
 
 bool MapCamera3d::onTouchDown(const ::Vec2F &posScreen) {
     inertia = std::nullopt;
+    lastOnTouchDownPoint = posScreen;
     return true;
 }
 
 bool MapCamera3d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleClick) {
+
     if (!config.moveEnabled || cameraFrozen)
         return false;
 
@@ -555,20 +563,44 @@ bool MapCamera3d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
         return true;
     }
 
+    auto viewport = mapInterface->getRenderingContext()->getViewportSize();
+
     float dx = deltaScreen.x;
     float dy = deltaScreen.y;
+    auto viewportHalf = Vec2D(viewport.x * 0.5, viewport.y * 0.5);
 
-    float sinAngle = sin(angle * M_PI / 180.0);
-    float cosAngle = cos(angle * M_PI / 180.0);
+    auto halfWidth = MapCamera3DHelper::halfWidth(cameraDistance, FIELD_OF_VIEW, viewport.x, viewport.y);
+    auto halfHeight = MapCamera3DHelper::halfHeight(cameraDistance, FIELD_OF_VIEW);
 
-    float xDiff = (cosAngle * dx + sinAngle * dy);
-    float yDiff = (-sinAngle * dx + cosAngle * dy);
+    auto tdx = ((lastOnTouchDownPoint.x - viewportHalf.x) / viewportHalf.x) * halfWidth;
+    auto tdy = ((lastOnTouchDownPoint.y - viewportHalf.y) / viewportHalf.y) * halfHeight;
+    auto oldPoint = MapCamera3DHelper::raySphereIntersection(Vec3D(0.0, 0.0, 0.0), Vec3D(tdx, tdy, cameraDistance), Vec3D(0.0, 0.0, cameraDistance), 1.0);
 
-    float xDiffMap = xDiff * zoom * screenPixelAsRealMeterFactor * (mapSystemRtl ? -1 : 1);
-    float yDiffMap = yDiff * zoom * screenPixelAsRealMeterFactor * (mapSystemTtb ? -1 : 1);
+    tdx = (((lastOnTouchDownPoint.x + dx) - viewportHalf.x) / viewportHalf.x) * halfWidth;
+    tdy = (((lastOnTouchDownPoint.y + dy) - viewportHalf.y) / viewportHalf.y) * halfHeight;
 
-    focusPointPosition.x += xDiffMap;
-    focusPointPosition.y += yDiffMap;
+    auto newPoint = MapCamera3DHelper::raySphereIntersection(Vec3D(0.0, 0.0, 0.0), Vec3D(tdx, tdy, cameraDistance), Vec3D(0.0, 0.0, cameraDistance), 1.0);
+
+    oldPoint = Vec3DHelper::normalize(oldPoint - Vec3D(0.0, 0.0, cameraDistance));
+    newPoint = Vec3DHelper::normalize(newPoint - Vec3D(0.0, 0.0, cameraDistance));
+
+    float oldPhi = std::atan2(oldPoint.z, oldPoint.x);
+    float oldTheta = std::acos(oldPoint.y / 1.0);
+
+    // NEW:
+    float newPhi = std::atan2(newPoint.z, newPoint.x);
+    float newTheta = std::acos(newPoint.y / 1.0);
+
+    // DELTA CALCULATION
+
+    float dPhi = (newPhi - oldPhi) * (180.0 / M_PI) * (mapSystemRtl ? -1 : 1);
+    float dTheta = (newTheta - oldTheta) * (180.0 / M_PI) * (mapSystemTtb ? 1 : -1);
+
+    focusPointPosition.x += dPhi;
+    focusPointPosition.y += dTheta;
+
+    lastOnTouchDownPoint.x = lastOnTouchDownPoint.x + dx;
+    lastOnTouchDownPoint.y = lastOnTouchDownPoint.y + dy;
 
     focusPointPosition.y = std::clamp(focusPointPosition.y, -90.0, 90.0);
 
@@ -580,9 +612,8 @@ bool MapCamera3d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
         long long newTimestamp = DateHelper::currentTimeMicros();
         long long deltaMcs = std::max(newTimestamp - currentDragTimestamp, 8000ll);
         float averageFactor = currentDragVelocity.x == 0 && currentDragVelocity.y == 0 ? 1.0 : 0.5;
-        float fasterIneratia = 5.0 + zoom / 3.0;
-        currentDragVelocity.x = (1 - averageFactor) * currentDragVelocity.x + averageFactor * xDiffMap / (deltaMcs / 16000.0) * fasterIneratia;
-        currentDragVelocity.y = (1 - averageFactor) * currentDragVelocity.y + averageFactor * yDiffMap / (deltaMcs / 16000.0) * fasterIneratia;
+        currentDragVelocity.x = (1 - averageFactor) * currentDragVelocity.x + averageFactor * dPhi / (deltaMcs / 16000.0);
+        currentDragVelocity.y = (1 - averageFactor) * currentDragVelocity.y + averageFactor * dTheta / (deltaMcs / 16000.0);
         currentDragTimestamp = newTimestamp;
     }
 
