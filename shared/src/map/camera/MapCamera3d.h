@@ -250,4 +250,6 @@ protected:
     float verticalFov;
     float horizontalFov;
     bool validVpMatrix = false;
+                        
+    ::Vec2F lastOnTouchDownPoint;
 };
