@@ -125,7 +125,7 @@ public:
   protected:
     virtual bool hasExpensivePostLoadingTask() = 0;
 
-    virtual R postLoadingTask(const L &loadedData, const Tiled2dMapTileInfo &tile) = 0;
+    virtual R postLoadingTask(L loadedData, Tiled2dMapTileInfo tile) = 0;
 
     MapConfig mapConfig;
     std::shared_ptr<Tiled2dMapLayerConfig> layerConfig;

@@ -45,8 +45,8 @@ bool Tiled2dMapRasterSource::hasExpensivePostLoadingTask() {
     return false;
 }
 
-std::shared_ptr<::TextureHolderInterface> Tiled2dMapRasterSource::postLoadingTask(const std::shared_ptr<TextureLoaderResult> &loadedData,
-                                                                                  const Tiled2dMapTileInfo &tile) {
+std::shared_ptr<::TextureHolderInterface> Tiled2dMapRasterSource::postLoadingTask(std::shared_ptr<TextureLoaderResult> loadedData,
+                                                                                  Tiled2dMapTileInfo tile) {
     return loadedData->data;
 }
 
