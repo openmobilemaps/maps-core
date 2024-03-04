@@ -59,11 +59,11 @@ public:
         return std::nullopt;
     }
 
-    double getZoomIdentifier(double zoom) {
+    virtual double getZoomIdentifier(double zoom) {
         return std::round(log(baseValueZoom * zoomInfo.zoomLevelScaleFactor / zoom) / log(2) * 100) / 100;
     }
 
-    double getZoomFactorAtIdentifier(double zoomIdentifier) {
+    virtual double getZoomFactorAtIdentifier(double zoomIdentifier) {
         double factor = pow(2, zoomIdentifier);
         return baseValueZoom * zoomInfo.zoomLevelScaleFactor / factor;
 
