@@ -437,12 +437,13 @@ bool Tiled2dMapVectorLineTile::performClick(const Coord &coord) {
     double zoomIdentifier = layerConfig->getZoomIdentifier(camera->getZoom());
 
     auto lineDescription = std::static_pointer_cast<LineVectorLayerDescription>(description);
-
+    
     std::vector<VectorLayerFeatureInfo> featureInfos;
     for (auto const &[lineCoordinateVector, featureContext]: hitDetection) {
         for (auto const &coordinates: lineCoordinateVector) {
             auto lineWidth = lineDescription->style.getLineWidth(EvaluationContext(zoomIdentifier, dpFactor, featureContext, featureStateManager));
-            if (LineHelper::pointWithin(coordinates, coord, lineWidth, coordinateConverter)) {
+            auto lineWidthInMapUnits = camera->mapUnitsFromPixels(lineWidth);
+            if (LineHelper::pointWithin(coordinates, coord, lineWidthInMapUnits, coordinateConverter)) {
                 if (multiselect) {
                     featureInfos.push_back(featureContext->getFeatureInfo());
                 } else if (strongSelectionDelegate->didSelectFeature(featureContext->getFeatureInfo(), description->identifier, coord)) {
