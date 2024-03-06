@@ -1,6 +1,9 @@
 # Changelog for Open Mobile Maps
 
-## Version 2.0.0 (16.02.2023)
+## Version 2.0.1 (tbd)
+- Fixed WGS84 bounding box parsing for WMTS layers
+
+## Version 2.0.0 (16.02.2024)
 - Major improvements in vector map performance, stability, and rendering, alongside expanded options for style specifications and GeoJSON support.
 - Enhanced stability and performance for raster, icon, polygon, and line layers.
 - Many additional improvements and bug fixes.
