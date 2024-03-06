@@ -858,18 +858,26 @@ bool MapCamera2d::isInBounds(const Coord &coords) {
 std::tuple<Coord, double> MapCamera2d::getBoundsCorrectedCoords(const Coord &position, double zoom) {
     auto const &paddingCorrectedBounds = getPaddingCorrectedBounds();
 
+    auto const clampedPosition = [&paddingCorrectedBounds](const Coord& position) -> Coord {
+         return Coord(position.systemIdentifier,
+                      std::clamp(position.x,
+                                 std::min(paddingCorrectedBounds.topLeft.x, paddingCorrectedBounds.bottomRight.x),
+                                 std::max(paddingCorrectedBounds.topLeft.x, paddingCorrectedBounds.bottomRight.x)),
+                      std::clamp(position.y,
+                                 std::min(paddingCorrectedBounds.topLeft.y, paddingCorrectedBounds.bottomRight.y),
+                                 std::max(paddingCorrectedBounds.topLeft.y, paddingCorrectedBounds.bottomRight.y)),
+                      position.z);
+     };
+
     if (!config.boundsRestrictWholeVisibleRect) {
-        Coord newPosition = Coord(position.systemIdentifier,
-                                  std::clamp(position.x,
-                                             std::min(paddingCorrectedBounds.topLeft.x, paddingCorrectedBounds.bottomRight.x),
-                                             std::max(paddingCorrectedBounds.topLeft.x, paddingCorrectedBounds.bottomRight.x)),
-                                  std::clamp(position.y,
-                                             std::min(paddingCorrectedBounds.topLeft.y, paddingCorrectedBounds.bottomRight.y),
-                                             std::max(paddingCorrectedBounds.topLeft.y, paddingCorrectedBounds.bottomRight.y)),
-                                  position.z);
-        return {newPosition, zoom};
+        return {clampedPosition(position), zoom};
     } else {
         Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
+
+        // fallback if the viewport size is not set yet
+        if (sizeViewport.x == 0 && sizeViewport.y == 0) {
+            return {clampedPosition(position), zoom};
+        }
 
         double zoomFactor = screenPixelAsRealMeterFactor * zoom;
 
