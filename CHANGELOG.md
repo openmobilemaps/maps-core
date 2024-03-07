@@ -1,5 +1,10 @@
 # Changelog for Open Mobile Maps
 
+## Version 2.1.0 (07.03.2024)
+- Adds dotted line style (line-dotted boolean and an optional skewFactor, defaulting to 1.0 and denoting the stretch factor)
+- Fixes style for short dashes
+- Fixes line touch area
+
 ## Version 2.0.1 (07.03.2024)
 - Fixed WGS84 bounding box parsing for WMTS layers
 - Fix deadlock in renderToImage on iOS
