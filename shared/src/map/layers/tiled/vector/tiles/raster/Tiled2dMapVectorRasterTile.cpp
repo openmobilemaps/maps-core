@@ -31,7 +31,7 @@ Tiled2dMapVectorRasterTile::Tiled2dMapVectorRasterTile(const std::weak_ptr<MapIn
         shader->asShaderProgramInterface()->setBlendMode(description->style.getBlendMode(EvaluationContext(0.0, dpFactor, std::make_shared<FeatureContext>(), featureStateManager)));
         auto quad = pMapInterface->getGraphicsObjectFactory()->createQuad(shader->asShaderProgramInterface());
 #if DEBUG
-        quad->asGraphicsObject()->setDebugLabel(description->identifier);
+        quad->asGraphicsObject()->setDebugLabel(description->identifier + "_" + tileInfo.tileInfo.to_string_short());
 #endif
         tileObject = std::make_shared<Textured2dLayerObject>(quad, shader, pMapInterface);
         tileObject->setRectCoord(tileInfo.tileInfo.bounds);
