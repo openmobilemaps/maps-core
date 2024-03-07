@@ -1,6 +1,18 @@
 # Changelog for Open Mobile Maps
 
-## Version 2.0.0 (16.02.2023)
+## Version 2.0.1 (07.03.2024)
+- Fixed WGS84 bounding box parsing for WMTS layers
+- Fix deadlock in renderToImage on iOS
+- Fix crash for geojsons without type
+- Fix renderToImage for vector layers
+- Reference djinni by version on iOS
+- Fix crash on certain polygon patters on iOS
+- Fix constant loading for some geojsons
+- Fix crash of symbol objects
+- Fix crash from race condition in geojson reload
+- Fix deallocation on OffscreenMapRenderer on Android
+
+## Version 2.0.0 (16.02.2024)
 - Major improvements in vector map performance, stability, and rendering, alongside expanded options for style specifications and GeoJSON support.
 - Enhanced stability and performance for raster, icon, polygon, and line layers.
 - Many additional improvements and bug fixes.

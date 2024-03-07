@@ -169,21 +169,27 @@ int32_t numZ) override {
         double c2 = 0;
         std::string lowerCorner = boundingBox.child_value("ows:LowerCorner");
         if (lowerCorner.size() > 0) {
-            c1 = std::stod(lowerCorner.substr(0, lowerCorner.find(" ")));
-            c2 = std::stod(lowerCorner.substr(lowerCorner.find(" ")));
+            auto delimiterIndex = lowerCorner.find(" ");
+            if (delimiterIndex != std::string::npos) {
+                c1 = std::stod(lowerCorner.substr(0, delimiterIndex));
+                c2 = std::stod(lowerCorner.substr(delimiterIndex + 1));
+            }
         }
         double c3 = 0;
         double c4 = 0;
         std::string upperCorner = boundingBox.child_value("ows:UpperCorner");
         if (upperCorner.size() > 0) {
-            c3 = std::stod(upperCorner.substr(0, lowerCorner.find(" ")));
-            c4 = std::stod(upperCorner.substr(lowerCorner.find(" ")));
+            auto delimiterIndex = upperCorner.find(" ");
+            if (delimiterIndex != std::string::npos) {
+                c3 = std::stod(upperCorner.substr(0, delimiterIndex));
+                c4 = std::stod(upperCorner.substr(delimiterIndex + 1));
+            }
         }
 
         std::optional<RectCoord> bounds;
         if (c1 != 0 && c2 != 0 && c3 != 0 && c4 != 0) {
-            bounds = RectCoord(Coord(CoordinateSystemIdentifiers::EPSG4326(), c1, c2, 0),
-                                 Coord(CoordinateSystemIdentifiers::EPSG4326(), c3, c4, 0));
+            bounds = RectCoord(Coord(CoordinateSystemIdentifiers::EPSG4326(), c1, c4, 0),
+                                 Coord(CoordinateSystemIdentifiers::EPSG4326(), c3, c2, 0));
         }
         std::string tileMatrixSetLink = layer.child("TileMatrixSetLink").child_value("TileMatrixSet");
         std::string resourceTemplate = layer.child("ResourceURL").attribute("template").as_string();

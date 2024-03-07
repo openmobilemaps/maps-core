@@ -150,7 +150,7 @@ polygonPatternGroupFadeInFragmentShader(PolygonPatternGroupVertexOut in [[stage_
     const float scalingFactorFactor = (scalingFactor.x / screenPixelAsRealMeterFactor) - 1.0;
     const float2 spacing = pixelSize * scalingFactorFactor;
     const float2 totalSize = pixelSize + spacing;
-    const float2 adjustedPixelPosition = in.pixelPosition + totalSize * 0.5; // in other project pixelSize
+    const float2 adjustedPixelPosition = in.pixelPosition + pixelSize * 0.5; // in other project pixelSize
     float2 uvTot = fmod(adjustedPixelPosition, totalSize);
 
     const int yIndex = int(adjustedPixelPosition.y / totalSize.y) % 2;

@@ -109,6 +109,7 @@ final class PolygonPatternGroup2d: BaseGraphicsObject {
         } else {
             var scaleFactors = customScreenPixelFactor.x != 0 ? customScreenPixelFactor :  SIMD2<Float>([pixelFactor, pixelFactor])
             encoder.setVertexBytes(&scaleFactors, length: MemoryLayout<SIMD2<Float>>.stride, index: 2)
+            encoder.setVertexBytes(&posOffset, length: MemoryLayout<SIMD2<Float>>.stride, index: 3)
         }
 
         // texture

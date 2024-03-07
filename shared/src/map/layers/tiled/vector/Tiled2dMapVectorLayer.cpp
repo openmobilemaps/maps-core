@@ -340,6 +340,12 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
 
 
         auto layerConfig = layerConfigs[source];
+
+        if (!layerConfig) {
+            LogError << "Missing layer config for " << source <<= ", layer will be ignored.";
+            continue;
+        }
+
         auto sourceMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
 
         Actor<Tiled2dMapVectorSource> vectorSource;
@@ -482,15 +488,16 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
 }
 
 void Tiled2dMapVectorLayer::reloadDataSource(const std::string &sourceName) {
-    if (const auto &geoSource = mapDescription->geoJsonSources[sourceName]) {
-        geoSource->reload(loaders);
-        auto promise = std::make_shared<::djinni::Promise<std::shared_ptr<DataLoaderResult>>>();
-        geoSource->waitIfNotLoaded(promise);
-        promise->getFuture().wait();
-    }
+    auto &source = vectorTileSources[sourceName];
+    const auto &geoSource = mapDescription->geoJsonSources[sourceName];
+    if (source && geoSource) {
+        source.syncAccess([&,geoSource](const auto &source) {
 
-    if (auto &source = vectorTileSources[sourceName]) {
-        source.syncAccess([](const auto &source) {
+            geoSource->reload(loaders);
+            auto promise = std::make_shared<::djinni::Promise<std::shared_ptr<DataLoaderResult>>>();
+            geoSource->waitIfNotLoaded(promise);
+            promise->getFuture().wait();
+
             source->reloadTiles();
         });
     }
@@ -632,10 +639,11 @@ void Tiled2dMapVectorLayer::pregenerateRenderPasses() {
         if (description->renderObjects.empty()) {
             continue;
         }
-        if (description->maskingObject != lastMask && !renderObjects.empty()) {
-            newPasses.emplace_back(std::make_shared<RenderPass>(RenderPassConfig(description->renderPassIndex, false), renderObjects, lastMask));
+        if ((description->renderPassIndex != lastRenderPassIndex || description->maskingObject != lastMask) && !renderObjects.empty()) {
+            newPasses.emplace_back(std::make_shared<RenderPass>(RenderPassConfig(lastRenderPassIndex, false), renderObjects, lastMask));
             renderObjects.clear();
             lastMask = nullptr;
+            lastRenderPassIndex = 0;
         }
 
         if (description->isModifyingMask || description->selfMasked) {

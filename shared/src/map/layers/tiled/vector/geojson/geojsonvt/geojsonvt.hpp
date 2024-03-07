@@ -106,6 +106,9 @@ public:
                 if (fromLocal) {
                     self->load(false);
                 }
+                else {
+                    self->delegate.message(&GeoJSONTileDelegate::failedToLoad);
+                }
             } else {
                 auto string = std::string((char*)result.data->buf(), result.data->len());
                 nlohmann::json json;
@@ -275,7 +278,7 @@ private:
         auto& tile = it->second;
         
         if (geometries.empty()) {
-            tiles.erase(it);
+            // We need to keep empty tiles, otherwise getTile will throw an error
             return;
         }
 
@@ -324,8 +327,8 @@ private:
         tile.source_features.clear();
 
         if (z < options.minZoom) {
-            // if z smaller than min zoom, no need to keep tile
-            tiles.erase(it);
+            // if z smaller than min zoom, no need to keep tile, but we keep it
+            // otherwise some loading states are never resolved
         }
     }
 

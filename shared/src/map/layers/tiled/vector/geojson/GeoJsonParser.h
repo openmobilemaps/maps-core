@@ -35,11 +35,10 @@ class GeoJsonParser {
 public:
     static std::shared_ptr<GeoJson> getGeoJson(const nlohmann::json &geojson) {
         // preconditions
-        if (!geojson["type"].is_string() ||
+        if (!geojson.contains("type") || (!geojson["type"].is_string() ||
             geojson["type"] != "FeatureCollection" ||
-            !geojson["features"].is_array()) {
+            !geojson["features"].is_array())) {
             LogError <<= "Geojson is not valid";
-            assert(false);
             return nullptr;
         }
 
