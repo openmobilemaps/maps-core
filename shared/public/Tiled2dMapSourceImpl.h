@@ -126,9 +126,7 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
     const double visibleBottom = visibleBoundsLayer.bottomRight.y - signHeight * viewboundsPadding;
     visibleHeight = std::abs(visibleHeight) + 2 * viewboundsPadding;
 
-
-
-    size_t visibleTileHash = 0;
+    size_t visibleTileHash = targetZoomLevelIdentifier;
 
     for (int i = startZoomLayer; i <= endZoomLevel; i++) {
         const Tiled2dMapZoomLevelInfo &zoomLevelInfo = zoomLevelInfos.at(i);
