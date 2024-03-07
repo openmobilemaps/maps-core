@@ -397,17 +397,9 @@ void Tiled2dMapSource<T, L, R>::performLoadingTask(Tiled2dMapTileInfo tile, size
 
     currentlyLoading.insert({tile, loaderIndex});
     std::string layerName = layerConfig->getLayerName();
-    if (layerName == "uzh_test_building_lines") {
-        LogDebug << "performLoadingTask " << layerName<< ": " << tile.zoomIdentifier << "/" << tile.x << "/" <<= tile.y;
-    }
     readyTiles.erase(tile);
 
     loadDataAsync(tile, loaderIndex).then([weakActor, loaderIndex, tile, weakSelfPtr, layerName](::djinni::Future<L> result) {
-
-        if (layerName == "uzh_test_building_lines") {
-            LogDebug << "loaded " << layerName << ": " << tile.zoomIdentifier << "/" << tile.x << "/" <<= tile.y;
-        }
-
         auto strongSelf = weakSelfPtr.lock();
         if (strongSelf) {
             auto res = result.get();
@@ -439,10 +431,6 @@ template<class T, class L, class R>
 void Tiled2dMapSource<T, L, R>::didLoad(Tiled2dMapTileInfo tile, size_t loaderIndex, const R &result) {
     currentlyLoading.erase(tile);
     std::string layerName = layerConfig->getLayerName();
-    if (layerName == "uzh_test_building_lines") {
-        LogDebug << "didLoad " << layerConfig->getLayerName() << ": " << tile.zoomIdentifier << "/" << tile.x << "/" <<= tile.y;
-    }
-
     const bool isVisible = currentVisibleTiles.count(tile);
     if (!isVisible) {
         errorTiles[loaderIndex].erase(tile);

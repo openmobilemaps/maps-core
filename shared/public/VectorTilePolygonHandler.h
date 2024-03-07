@@ -23,9 +23,6 @@ public:
     void ring_begin(uint32_t count) {
         currentRing = std::vector<::Coord>();
         currentRing.reserve(count);
-        /*LogDebug <<= "        new Polygon with TopLeft: (" + tileCoords.topLeft.systemIdentifier + ": " + std::to_string(tileCoords.topLeft.x) + ", " + std::to_string(tileCoords.topLeft.y) + ")";
-        LogDebug <<= "                     BottomRight: (" + tileCoords.bottomRight.systemIdentifier + ": " + std::to_string(tileCoords.bottomRight.x) + ", " + std::to_string(tileCoords.bottomRight.y) + ")";
-        LogDebug <<= "                and width/height: (" + std::to_string(tileWidth) + ", " + std::to_string(tileHeight) + ")";*/
     }
 
     void ring_point(vtzero::point point) noexcept {
@@ -33,8 +30,6 @@ public:
         double y = tileCoords.topLeft.y + tileHeight * (point.y / extent);
         Coord newCoord = Coord(tileCoords.topLeft.systemIdentifier, x, y, 0.0);
         currentRing.push_back(newCoord);
-        /*LogDebug <<= "        -> new point: (" + std::to_string(point.x) + ", " + std::to_string(point.y) + ") in extent " + std::to_string(extent);
-        LogDebug <<= "            -> coord (" + newCoord.systemIdentifier + ": " + std::to_string(newCoord.x) + ", " + std::to_string(newCoord.y) + ")";*/
     }
 
     void ring_end(vtzero::ring_type ringType) noexcept {
