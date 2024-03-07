@@ -357,7 +357,7 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
                 layerDescription->style.getBlendMode(EvaluationContext(0.0, dpFactor, std::make_shared<FeatureContext>(), featureStateManager)));
         iconInstancedObject = strongMapInterface->getGraphicsObjectFactory()->createQuadInstanced(alphaInstancedShader);
 #if DEBUG
-        iconInstancedObject->asGraphicsObject()->setDebugLabel(layerDescription->identifier);
+        iconInstancedObject->asGraphicsObject()->setDebugLabel(layerDescription->identifier + "_" + tileInfo.tileInfo.to_string_short());
 #endif
 
         iconInstancedObject->setInstanceCount(instanceCounts.icons);
@@ -376,7 +376,7 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
                 layerDescription->style.getBlendMode(EvaluationContext(0.0, dpFactor, std::make_shared<FeatureContext>(), featureStateManager)));
         stretchedInstancedObject = strongMapInterface->getGraphicsObjectFactory()->createQuadStretchedInstanced(shader);
 #if DEBUG
-        stretchedInstancedObject->asGraphicsObject()->setDebugLabel(layerDescription->identifier);
+        stretchedInstancedObject->asGraphicsObject()->setDebugLabel(layerDescription->identifier + "_" + tileInfo.tileInfo.to_string_short());
 #endif
 
         stretchedInstancedObject->setInstanceCount(instanceCounts.stretchedIcons);
@@ -395,7 +395,7 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
                 layerDescription->style.getBlendMode(EvaluationContext(0.0, dpFactor, std::make_shared<FeatureContext>(), featureStateManager)));
         textInstancedObject = strongMapInterface->getGraphicsObjectFactory()->createTextInstanced(shader);
 #if DEBUG
-        textInstancedObject->asGraphicsObject()->setDebugLabel(layerDescription->identifier);
+        textInstancedObject->asGraphicsObject()->setDebugLabel(layerDescription->identifier + "_" + tileInfo.tileInfo.to_string_short());
 #endif
 
         textInstancedObject->setInstanceCount(instanceCounts.textCharacters);
