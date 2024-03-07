@@ -170,16 +170,20 @@ int32_t numZ) override {
         std::string lowerCorner = boundingBox.child_value("ows:LowerCorner");
         if (lowerCorner.size() > 0) {
             auto delimiterIndex = lowerCorner.find(" ");
-            c1 = std::stod(lowerCorner.substr(0, delimiterIndex));
-            c2 = std::stod(lowerCorner.substr(delimiterIndex));
+            if (delimiterIndex != std::string::npos) {
+                c1 = std::stod(lowerCorner.substr(0, delimiterIndex));
+                c2 = std::stod(lowerCorner.substr(delimiterIndex + 1));
+            }
         }
         double c3 = 0;
         double c4 = 0;
         std::string upperCorner = boundingBox.child_value("ows:UpperCorner");
         if (upperCorner.size() > 0) {
             auto delimiterIndex = upperCorner.find(" ");
-            c3 = std::stod(upperCorner.substr(0, delimiterIndex));
-            c4 = std::stod(upperCorner.substr(delimiterIndex));
+            if (delimiterIndex != std::string::npos) {
+                c3 = std::stod(upperCorner.substr(0, delimiterIndex));
+                c4 = std::stod(upperCorner.substr(delimiterIndex + 1));
+            }
         }
 
         std::optional<RectCoord> bounds;
