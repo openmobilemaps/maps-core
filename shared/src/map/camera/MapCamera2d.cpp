@@ -142,6 +142,12 @@ void MapCamera2d::moveToCenterPosition(const ::Coord &centerPosition, bool anima
 void MapCamera2d::moveToBoundingBox(const RectCoord &boundingBox, float paddingPc, bool animated, std::optional<double> minZoom, std::optional<double> maxZoom) {
     if (cameraFrozen)
         return;
+
+    Vec2I viewSize = mapInterface->getRenderingContext()->getViewportSize();
+    if (viewSize.x == 0 && viewSize.y == 0) {
+        return;
+    }
+
     RectCoord mapSystemBBox = conversionHelper->convertRect(mapCoordinateSystem.identifier, boundingBox);
     float newLeft = mapSystemBBox.topLeft.x + paddingPc * (mapSystemBBox.topLeft.x - mapSystemBBox.bottomRight.x);
     float newRight = mapSystemBBox.bottomRight.x + paddingPc * (mapSystemBBox.bottomRight.x - mapSystemBBox.topLeft.x);
@@ -164,8 +170,6 @@ void MapCamera2d::moveToBoundingBox(const RectCoord &boundingBox, float paddingP
     float caXSpan = caMaxX - caMinX;
     float caYSpan = caMaxY - caMinY;
 
-    Vec2I viewSize = mapInterface->getRenderingContext()->getViewportSize();
-
     double caZoomX = caXSpan / ((viewSize.x - paddingLeft - paddingRight) * screenPixelAsRealMeterFactor);
     double caZoomY = caYSpan / ((viewSize.y - paddingTop - paddingBottom) * screenPixelAsRealMeterFactor);
     double targetZoom = std::max(caZoomX, caZoomY);
@@ -177,6 +181,7 @@ void MapCamera2d::moveToBoundingBox(const RectCoord &boundingBox, float paddingP
         targetZoom = std::min(targetZoom, *maxZoom);
     }
 
+    LogDebug << "targetCenterNotBC.x = " << targetCenterNotBC.x << " targetCenterNotBC.y: " << targetCenterNotBC.y << " targetZoom: " <<= targetZoom;
     moveToCenterPositionZoom(targetCenterNotBC, targetZoom, animated);
 }
 
