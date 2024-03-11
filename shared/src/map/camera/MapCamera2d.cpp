@@ -36,7 +36,7 @@ MapCamera2d::MapCamera2d(const std::shared_ptr<MapInterface> &mapInterface, floa
     , bounds(mapCoordinateSystem.bounds) {
     auto mapConfig = mapInterface->getMapConfig();
     mapCoordinateSystem = mapConfig.mapCoordinateSystem;
-    mapSystemRtl = mapCoordinateSystem.bounds.bottomRight.x > mapCoordinateSystem.bounds.topLeft.x;
+    mapSystemRtl = mapCoordinateSystem.bounds.topLeft.x > mapCoordinateSystem.bounds.bottomRight.x;
     mapSystemTtb = mapCoordinateSystem.bounds.bottomRight.y > mapCoordinateSystem.bounds.topLeft.y;
     centerPosition.x = bounds.topLeft.x + 0.5 * (bounds.bottomRight.x - bounds.topLeft.x);
     centerPosition.y = bounds.topLeft.y + 0.5 * (bounds.bottomRight.y - bounds.topLeft.y);
@@ -218,7 +218,7 @@ void MapCamera2d::setZoom(double zoom, bool animated) {
         const auto [adjPosition, adjZoom] =
                 getBoundsCorrectedCoords(adjustCoordForPadding(centerPosition, targetZoom), targetZoom);
         centerPosition = adjPosition;
-        zoom = adjZoom;
+        this->zoom = adjZoom;
         notifyListeners(ListenerType::BOUNDS);
         mapInterface->invalidate();
     }
@@ -521,7 +521,7 @@ bool MapCamera2d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
     float xDiff = (cosAngle * dx + sinAngle * dy);
     float yDiff = (-sinAngle * dx + cosAngle * dy);
 
-    float xDiffMap = xDiff * zoom * screenPixelAsRealMeterFactor * (mapSystemRtl ? -1 : 1);
+    float xDiffMap = xDiff * zoom * screenPixelAsRealMeterFactor * (mapSystemRtl ? 1 : -1);
     float yDiffMap = yDiff * zoom * screenPixelAsRealMeterFactor * (mapSystemTtb ? -1 : 1);
 
     centerPosition.x += xDiffMap;
@@ -963,8 +963,8 @@ Coord MapCamera2d::adjustCoordForPadding(const Coord &coords, double targetZoom)
 RectCoord MapCamera2d::getPaddingCorrectedBounds(double zoom) {
     double const factor = screenPixelAsRealMeterFactor * zoom;
 
-    double const addRight = (mapSystemRtl ? 1.0 : -1.0) * paddingRight * factor;
-    double const addLeft = (mapSystemRtl ? -1.0 : 1.0) * paddingLeft * factor;
+    double const addRight = (mapSystemRtl ? -1.0 : 1.0) * paddingRight * factor;
+    double const addLeft = (mapSystemRtl ? 1.0 : -1.0) * paddingLeft * factor;
     double const addTop = (mapSystemTtb ? -1.0 : 1.0) * paddingTop * factor;
     double const addBottom = (mapSystemTtb ? 1.0 : -1.0) * paddingBottom * factor;
 
