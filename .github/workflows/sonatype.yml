@@ -23,9 +23,9 @@ jobs:
         id: vars
         run: |
           artifactId=$(sed -n -e 's/^POM_ARTIFACT_ID=//p' android/gradle.properties)
-          echo ::set-output name=artifactId::$artifactId
+          echo "artifactId=$artifactId" >> "$GITHUB_OUTPUT"
           version=$(sed -n -e 's/^VERSION_NAME=//p' android/gradle.properties)
-          echo ::set-output name=version::$version
+          echo "version=$version" >> "$GITHUB_OUTPUT"
       - name: Build and Upload to Ubique Maven
         env:
           SIGNING_KEY_ARMOR: ${{secrets.MAVEN_SIGNING_KEY_ARMOR_BASE64}}
@@ -62,3 +62,39 @@ jobs:
               echo "| Git Commit | Artifact ID | Maven Version |" >> $GITHUB_STEP_SUMMARY
               echo "| --- | --- | --- |" >> $GITHUB_STEP_SUMMARY
               echo "| $GITHUB_SHA | ${{ steps.vars.outputs.artifactId }} | ${{ steps.vars.outputs.version }} |" >> $GITHUB_STEP_SUMMARY
+
+  create_sub_repo_prs:
+    name: "Create version PRs in sub-repos"
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Trigger sub-repo workflow
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.UBIQUE_JENKINS_PAT }}
+          script: |
+            let subrepos = "${{ vars.SUB_REPOS }}".split(",");
+            for (let i in subrepos) {
+              let subrepo = subrepos[i];
+              let organization = subrepo.split("/")[0];
+              let repoName = subrepo.split("/")[1];
+              let inputs = {
+                "mapsCoreBranch": "${{ github.ref_name }}",
+                "mapsCoreCommitHash": "${{ github.sha }}", 
+                "mapsCoreArtifactId": "${{ needs.build.outputs.artifactId }}", 
+                "mapsCoreArtifactVersion": "${{ needs.build.outputs.version }}"
+              }
+
+              const result = await github.rest.actions.createWorkflowDispatch({
+                owner: organization,
+                repo: repoName,
+                workflow_id: 'dependencies-pr.yml',
+                ref: 'develop',
+                inputs: inputs
+              });
+
+              if (result.status > 299) {
+                console.log(result);
+              }
+            }
