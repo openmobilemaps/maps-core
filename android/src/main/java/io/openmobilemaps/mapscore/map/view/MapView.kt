@@ -60,15 +60,12 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 	private val mapViewStateMutable = MutableStateFlow(MapViewState.UNINITIALIZED)
 	val mapViewState = mapViewStateMutable.asStateFlow()
 
-	open fun setupMap(mapConfig: MapConfig, useMSAA: Boolean = false, is3D: Boolean = false) {
-		val densityExact = resources.displayMetrics.xdpi
-
+	open fun setupMap(mapConfig: MapConfig, density: Float = resources.displayMetrics.xdpi, useMSAA: Boolean = false, is3D: Boolean = false) {
 		configureGL(useMSAA)
 		setRenderer(this)
 		val mapInterface = MapInterface.createWithOpenGl(
 			mapConfig,
-			densityExact,
-			is3D
+			density
 		)
 		mapInterface.setCallbackHandler(object : MapCallbackInterface() {
 			override fun invalidate() {

@@ -2,7 +2,6 @@ package io.openmobilemaps.mapscore.map.util
 
 import android.opengl.GLSurfaceView
 import io.openmobilemaps.mapscore.graphics.GLThread
-import io.openmobilemaps.mapscore.map.scheduling.AndroidScheduler
 import io.openmobilemaps.mapscore.map.scheduling.AndroidSchedulerCallback
 import io.openmobilemaps.mapscore.shared.graphics.common.Color
 import io.openmobilemaps.mapscore.shared.graphics.common.Vec2I
@@ -58,6 +57,7 @@ open class OffscreenMapRenderer(val sizePx: Vec2I, val density: Float = 72f) : G
 
 	protected open fun onGlThreadFinishing() {
 		glThread.renderer = null
+		mapInterface?.destroy()
 		mapInterface = null
 	}
 

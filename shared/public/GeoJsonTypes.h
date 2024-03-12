@@ -67,6 +67,7 @@ public:
 class GeoJSONTileDelegate {
 public:
     virtual void didLoad(uint8_t maxZoom) = 0;
+    virtual void failedToLoad() = 0;
 };
 
 class GeoJson {

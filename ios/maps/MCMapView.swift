@@ -191,15 +191,18 @@ extension MCMapView: MTKViewDelegate {
         }
     }
 
-    public func renderToImage(size: CGSize, timeout: Float, bounds: MCRectCoord, callback: @escaping (UIImage?, MCLayerReadyState) -> Void) {
+    public func renderToImage(size: CGSize, timeout: Float, bounds: MCRectCoord, callbackQueue: DispatchQueue = .main, callback: @escaping (UIImage?, MCLayerReadyState) -> Void) {
         renderToImageQueue.async {
-            self.frame = CGRect(origin: .zero, size: .init(width: size.width / UIScreen.main.scale, height: size.height / UIScreen.main.scale))
-            self.setNeedsLayout()
-            self.layoutIfNeeded()
+            DispatchQueue.main.sync {
+                self.frame = CGRect(origin: .zero, size: .init(width: size.width / UIScreen.main.scale, height: size.height / UIScreen.main.scale))
+                self.setNeedsLayout()
+                self.layoutIfNeeded()
+            }
 
             let mapReadyCallbacks = MCMapViewMapReadyCallbacks()
             mapReadyCallbacks.delegate = self
             mapReadyCallbacks.callback = callback
+            mapReadyCallbacks.callbackQueue = callbackQueue
 
             self.mapInterface.drawReadyFrame(bounds, timeout: timeout, callbacks: mapReadyCallbacks)
         }
@@ -320,13 +323,17 @@ public extension MCMapView {
 private class MCMapViewMapReadyCallbacks: MCMapReadyCallbackInterface {
     public weak var delegate: MCMapView?
     public var callback: ((UIImage?, MCLayerReadyState) -> Void)?
+    public var callbackQueue: DispatchQueue?
+    public let semaphore = DispatchSemaphore(value: 1)
 
     func stateDidUpdate(_ state: MCLayerReadyState) {
         guard let delegate = self.delegate else { return }
 
+        semaphore.wait()
+
         delegate.draw(in: delegate)
 
-        DispatchQueue.main.async {
+        callbackQueue?.async {
             switch state {
                 case .NOT_READY:
                     break
@@ -337,6 +344,7 @@ private class MCMapViewMapReadyCallbacks: MCMapReadyCallbackInterface {
                 @unknown default:
                     break
             }
+            self.semaphore.signal()
         }
     }
 }

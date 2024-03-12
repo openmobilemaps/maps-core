@@ -70,7 +70,14 @@ public:
         }
     }
 
+    void failedToLoad() override {
+        loadFailed = true;
+    }
+
     virtual ::LayerReadyState isReadyToRenderOffscreen() override {
+        if (loadFailed) {
+            return LayerReadyState::ERROR;
+        }
         if (geoJson->isLoaded()) {
             return Tiled2dMapVectorSource::isReadyToRenderOffscreen();
         }
@@ -89,7 +96,7 @@ protected:
 
     virtual bool hasExpensivePostLoadingTask() override { return false; };
 
-    virtual Tiled2dMapVectorTileInfo::FeatureMap postLoadingTask(const std::shared_ptr<DataLoaderResult> &loadedData, const Tiled2dMapTileInfo &tile) override {
+    virtual Tiled2dMapVectorTileInfo::FeatureMap postLoadingTask(std::shared_ptr<DataLoaderResult> loadedData, Tiled2dMapTileInfo tile) override {
         const auto &geoJsonTile = geoJson->getTile(tile.zoomIdentifier, tile.x, tile.y);
         Tiled2dMapVectorTileInfo::FeatureMap featureMap = std::make_shared<std::unordered_map<std::string, std::shared_ptr<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>>>>();
         std::shared_ptr<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>> features = std::make_shared<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>>();
@@ -104,5 +111,7 @@ protected:
 
 private:
     const std::shared_ptr<GeoJSONVTInterface> geoJson;
-    const std::weak_ptr<::MapCameraInterface> camera;
+    const std::weak_ptr<::MapCamera2dInterface> camera;
+
+    bool loadFailed = false;
 };

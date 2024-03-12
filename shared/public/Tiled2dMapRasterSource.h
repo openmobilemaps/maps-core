@@ -40,8 +40,8 @@ class Tiled2dMapRasterSource
 
     virtual bool hasExpensivePostLoadingTask() override;
 
-    virtual std::shared_ptr<::TextureHolderInterface> postLoadingTask(const std::shared_ptr<TextureLoaderResult> &loadedData,
-                                                                      const Tiled2dMapTileInfo &tile) override;
+    virtual std::shared_ptr<::TextureHolderInterface> postLoadingTask(std::shared_ptr<TextureLoaderResult> loadedData,
+                                                                      Tiled2dMapTileInfo tile) override;
 
 
   private:

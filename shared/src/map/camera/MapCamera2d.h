@@ -226,7 +226,7 @@ protected:
     Coord adjustCoordForPadding(const Coord &coords, double targetZoom);
     std::tuple<Coord, double> getBoundsCorrectedCoords(const Coord &position, double zoom);
 
-    RectCoord getPaddingCorrectedBounds();
+    RectCoord getPaddingCorrectedBounds(double zoom);
     void clampCenterToPaddingCorrectedBounds();
 
     RectCoord getRectFromViewport(const Vec2I &sizeViewport, const Coord &center);

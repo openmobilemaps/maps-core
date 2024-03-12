@@ -132,7 +132,7 @@ public:
   protected:
     virtual bool hasExpensivePostLoadingTask() = 0;
 
-    virtual R postLoadingTask(const L &loadedData, const Tiled2dMapTileInfo &tile) = 0;
+    virtual R postLoadingTask(L loadedData, Tiled2dMapTileInfo tile) = 0;
 
     ::Vec3D transformToView(const ::Coord & position, const std::vector<float> & vpMatrix);
     ::Vec3D projectToScreen(const ::Vec3D & point, const std::vector<float> & vpMatrix);

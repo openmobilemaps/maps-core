@@ -377,9 +377,6 @@ public:
     };
 
     ValueVariant getVariant(const nlohmann::json &json) {
-        if (json == "–") {
-            LogDebug <<= "break";
-        }
         if (json.is_number_float()) {
             return json.get<float>();
         } else if (json.is_number_integer()) {

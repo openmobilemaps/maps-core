@@ -550,9 +550,7 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
     const double visibleBottom = visibleBoundsLayer.bottomRight.y - signHeight * viewboundsPadding;
     visibleHeight = std::abs(visibleHeight) + 2 * viewboundsPadding;
 
-
-
-    size_t visibleTileHash = 0;
+    size_t visibleTileHash = targetZoomLevelIdentifier;
 
     for (int i = startZoomLayer; i <= endZoomLevel; i++) {
         const Tiled2dMapZoomLevelInfo &zoomLevelInfo = zoomLevelInfos.at(i);
@@ -826,10 +824,10 @@ void Tiled2dMapSource<T, L, R>::performLoadingTask(Tiled2dMapTileInfo tile, size
     auto weakActor = WeakActor<Tiled2dMapSource>(mailbox, std::static_pointer_cast<Tiled2dMapSource>(shared_from_this()));
 
     currentlyLoading.insert({tile, loaderIndex});
+    std::string layerName = layerConfig->getLayerName();
     readyTiles.erase(tile);
 
-    loadDataAsync(tile, loaderIndex).then([weakActor, loaderIndex, tile, weakSelfPtr](::djinni::Future<L> result) {
-
+    loadDataAsync(tile, loaderIndex).then([weakActor, loaderIndex, tile, weakSelfPtr, layerName](::djinni::Future<L> result) {
         auto strongSelf = weakSelfPtr.lock();
         if (strongSelf) {
             auto res = result.get();
@@ -860,7 +858,7 @@ void Tiled2dMapSource<T, L, R>::performLoadingTask(Tiled2dMapTileInfo tile, size
 template<class T, class L, class R>
 void Tiled2dMapSource<T, L, R>::didLoad(Tiled2dMapTileInfo tile, size_t loaderIndex, const R &result) {
     currentlyLoading.erase(tile);
-
+    std::string layerName = layerConfig->getLayerName();
     const bool isVisible = currentVisibleTiles.count(tile);
     if (!isVisible) {
         errorTiles[loaderIndex].erase(tile);
