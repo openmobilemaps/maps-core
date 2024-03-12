@@ -36,7 +36,7 @@ MapCamera2d::MapCamera2d(const std::shared_ptr<MapInterface> &mapInterface, floa
     , bounds(mapCoordinateSystem.bounds) {
     auto mapConfig = mapInterface->getMapConfig();
     mapCoordinateSystem = mapConfig.mapCoordinateSystem;
-    mapSystemRtl = mapCoordinateSystem.bounds.bottomRight.x > mapCoordinateSystem.bounds.topLeft.x;
+    mapSystemRtl = mapCoordinateSystem.bounds.topLeft.x > mapCoordinateSystem.bounds.bottomRight.x;
     mapSystemTtb = mapCoordinateSystem.bounds.bottomRight.y > mapCoordinateSystem.bounds.topLeft.y;
     centerPosition.x = bounds.topLeft.x + 0.5 * (bounds.bottomRight.x - bounds.topLeft.x);
     centerPosition.y = bounds.topLeft.y + 0.5 * (bounds.bottomRight.y - bounds.topLeft.y);
@@ -76,11 +76,11 @@ void MapCamera2d::moveToCenterPositionZoom(const ::Coord &centerPosition, double
         return;
     Coord currentCenter = this->centerPosition;
     inertia = std::nullopt;
-    const auto [positionMapSystem, adjustedZoom] = getBoundsCorrectedCoords(adjustCoordForPadding(centerPosition, zoom), zoom);
+    const auto [targetPosition, adjustedZoom] = getBoundsCorrectedCoords(adjustCoordForPadding(centerPosition, zoom), zoom);
     if (animated) {
         std::lock_guard<std::recursive_mutex> lock(animationMutex);
         coordAnimation = std::make_shared<CoordAnimation>(
-            DEFAULT_ANIM_LENGTH, currentCenter, positionMapSystem, centerPosition, InterpolatorFunction::EaseInOut,
+            DEFAULT_ANIM_LENGTH, currentCenter, targetPosition, centerPosition, InterpolatorFunction::EaseInOut,
             [=](Coord positionMapSystem) {
                 this->centerPosition.x = positionMapSystem.x;
                 this->centerPosition.y = positionMapSystem.y;
@@ -98,8 +98,7 @@ void MapCamera2d::moveToCenterPositionZoom(const ::Coord &centerPosition, double
         setZoom(adjustedZoom, true);
         mapInterface->invalidate();
     } else {
-        this->centerPosition.x = positionMapSystem.x;
-        this->centerPosition.y = positionMapSystem.y;
+        this->centerPosition = targetPosition;
         this->zoom = adjustedZoom;
         notifyListeners(ListenerType::BOUNDS);
         mapInterface->invalidate();
@@ -111,11 +110,11 @@ void MapCamera2d::moveToCenterPosition(const ::Coord &centerPosition, bool anima
         return;
     Coord currentCenter = this->centerPosition;
     inertia = std::nullopt;
-    const auto [positionMapSystem, adjustedZoom] = getBoundsCorrectedCoords(adjustCoordForPadding(centerPosition, zoom), zoom);
+    const auto [targetPosition, adjustedZoom] = getBoundsCorrectedCoords(adjustCoordForPadding(centerPosition, zoom), zoom);
     if (animated) {
         std::lock_guard<std::recursive_mutex> lock(animationMutex);
         coordAnimation = std::make_shared<CoordAnimation>(
-            DEFAULT_ANIM_LENGTH, currentCenter, positionMapSystem, centerPosition, InterpolatorFunction::EaseInOut,
+            DEFAULT_ANIM_LENGTH, currentCenter, targetPosition, centerPosition, InterpolatorFunction::EaseInOut,
             [=](Coord positionMapSystem) {
                 this->centerPosition.x = positionMapSystem.x;
                 this->centerPosition.y = positionMapSystem.y;
@@ -132,8 +131,8 @@ void MapCamera2d::moveToCenterPosition(const ::Coord &centerPosition, bool anima
         coordAnimation->start();
         mapInterface->invalidate();
     } else {
-        this->centerPosition.x = positionMapSystem.x;
-        this->centerPosition.y = positionMapSystem.y;
+        this->centerPosition.x = targetPosition.x;
+        this->centerPosition.y = targetPosition.y;
         notifyListeners(ListenerType::BOUNDS);
         mapInterface->invalidate();
     }
@@ -219,7 +218,7 @@ void MapCamera2d::setZoom(double zoom, bool animated) {
         const auto [adjPosition, adjZoom] =
                 getBoundsCorrectedCoords(adjustCoordForPadding(centerPosition, targetZoom), targetZoom);
         centerPosition = adjPosition;
-        zoom = adjZoom;
+        this->zoom = adjZoom;
         notifyListeners(ListenerType::BOUNDS);
         mapInterface->invalidate();
     }
@@ -522,7 +521,7 @@ bool MapCamera2d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
     float xDiff = (cosAngle * dx + sinAngle * dy);
     float yDiff = (-sinAngle * dx + cosAngle * dy);
 
-    float xDiffMap = xDiff * zoom * screenPixelAsRealMeterFactor * (mapSystemRtl ? -1 : 1);
+    float xDiffMap = xDiff * zoom * screenPixelAsRealMeterFactor * (mapSystemRtl ? 1 : -1);
     float yDiffMap = yDiff * zoom * screenPixelAsRealMeterFactor * (mapSystemTtb ? -1 : 1);
 
     centerPosition.x += xDiffMap;
@@ -845,7 +844,7 @@ RectCoord MapCamera2d::getBounds() { return bounds; }
 bool MapCamera2d::isInBounds(const Coord &coords) {
     Coord mapCoords = mapInterface->getCoordinateConverterHelper()->convert(mapCoordinateSystem.identifier, coords);
 
-    auto const &paddingCorrectedBounds = getPaddingCorrectedBounds();
+    auto const &paddingCorrectedBounds = getPaddingCorrectedBounds(zoom);
 
     double minHor = std::min(paddingCorrectedBounds.topLeft.x, paddingCorrectedBounds.bottomRight.x);
     double maxHor = std::max(paddingCorrectedBounds.topLeft.x, paddingCorrectedBounds.bottomRight.x);
@@ -856,7 +855,7 @@ bool MapCamera2d::isInBounds(const Coord &coords) {
 }
 
 std::tuple<Coord, double> MapCamera2d::getBoundsCorrectedCoords(const Coord &position, double zoom) {
-    auto const &paddingCorrectedBounds = getPaddingCorrectedBounds();
+    auto const &paddingCorrectedBounds = getPaddingCorrectedBounds(zoom);
 
     auto const clampedPosition = [&paddingCorrectedBounds](const Coord& position) -> Coord {
          return Coord(position.systemIdentifier,
@@ -961,11 +960,11 @@ Coord MapCamera2d::adjustCoordForPadding(const Coord &coords, double targetZoom)
     return coordinates;
 }
 
-RectCoord MapCamera2d::getPaddingCorrectedBounds() {
+RectCoord MapCamera2d::getPaddingCorrectedBounds(double zoom) {
     double const factor = screenPixelAsRealMeterFactor * zoom;
 
-    double const addRight = (mapSystemRtl ? 1.0 : -1.0) * paddingRight * factor;
-    double const addLeft = (mapSystemRtl ? -1.0 : 1.0) * paddingLeft * factor;
+    double const addRight = (mapSystemRtl ? -1.0 : 1.0) * paddingRight * factor;
+    double const addLeft = (mapSystemRtl ? 1.0 : -1.0) * paddingLeft * factor;
     double const addTop = (mapSystemTtb ? -1.0 : 1.0) * paddingTop * factor;
     double const addBottom = (mapSystemTtb ? 1.0 : -1.0) * paddingBottom * factor;
 
