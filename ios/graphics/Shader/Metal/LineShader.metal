@@ -146,7 +146,7 @@ lineGroupFragmentShader(LineVertexOut in [[stage_in]],
   float d;
 
   if (t < 0.0 || t > 1.0) {
-    if (numDash > 0 && styling[in.stylingIndex + 14] < 1.0) {
+    if (numDash > 0 && styling[in.stylingIndex + 14] < 1.0 && styling[in.stylingIndex + 14] > 0.0) {
       discard_fragment();
     }
     if (segmentType == 0 || capType == 1 || (segmentType == 2 && t < 0.0) || (segmentType == 1 && t > 1.0)) {

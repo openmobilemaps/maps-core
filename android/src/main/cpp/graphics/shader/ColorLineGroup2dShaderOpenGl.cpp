@@ -201,10 +201,9 @@ std::string ColorLineGroup2dShaderOpenGl::getFragmentShader() {
 
                                            float d;
                                            if (t < 0.0 || t > 1.0) {
-                                               // TODO Commenting this should help with gaps on dashed line curves
-//                                               if (numDashInfos > 0) {
-//                                                   discard;
-//                                               }
+                                               if (numDashInfos > 0 && lineValues[int(fStyleIndexBase) + 14] < 1.0 && lineValues[int(fStyleIndexBase) + 14] > 0.0) {
+                                                   discard;
+                                               }
                                                if (segmentType == 0 || iCapType == 1 || (segmentType == 2 && t < 0.0) || (segmentType == 1 && t > 1.0)) {
                                                    d = min(length(pointDeltaA), length(pointDeltaA - pointBDeltaA));
                                                } else if (iCapType == 2) {
