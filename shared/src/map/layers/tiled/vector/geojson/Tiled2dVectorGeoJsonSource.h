@@ -111,6 +111,7 @@ protected:
 
 private:
     const std::shared_ptr<GeoJSONVTInterface> geoJson;
+
     bool loadFailed = false;
     const std::weak_ptr<::MapCameraInterface> camera;
 
