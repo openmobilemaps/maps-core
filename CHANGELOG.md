@@ -1,5 +1,11 @@
 # Changelog for Open Mobile Maps
 
+## Version 2.0.2 (12.03.2024)
+- Fixes a bug in iOS Polygon Pattern Shader
+- Fixes a bug in camera restricted bounds calculations
+- iOS Quad2dInstanced setup bugfix
+- Adds density enforcement for android map view
+
 ## Version 2.0.1 (07.03.2024)
 - Fixed WGS84 bounding box parsing for WMTS layers
 - Fix deadlock in renderToImage on iOS
