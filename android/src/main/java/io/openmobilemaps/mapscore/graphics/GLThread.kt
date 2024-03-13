@@ -103,6 +103,7 @@ class GLThread constructor(
 		val gl10 = gl as GL10?
 		val renderer = renderer ?: throw IllegalStateException("No renderer attached to GlTextureView")
 		renderer.onSurfaceCreated(gl10, eglConfig)
+		renderer.onSurfaceChanged(gl10, width, height)
 
 		if (!isPaused) {
 			onResumeCallback?.invoke()
