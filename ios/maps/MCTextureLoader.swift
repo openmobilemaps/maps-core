@@ -17,12 +17,12 @@ import OSLog
 private let logger = Logger(subsystem: "maps-core", category: "MCTextureLoader")
 
 open class MCTextureLoader: MCLoaderInterface {
-    private let session: URLSession
+    public let session: URLSession
 
     public var isRasterDebugModeEnabled: Bool
 
-    var taskQueue = DispatchQueue(label: "MCTextureLoader.tasks")
-    var tasks: [String: URLSessionTask] = [:]
+    public var taskQueue = DispatchQueue(label: "MCTextureLoader.tasks")
+    public var tasks: [String: URLSessionTask] = [:]
 
     public let urlCache = URLCache(memoryCapacity: 100 * 1024 * 1024, diskCapacity: 500 * 1024 * 1024, diskPath: "ch.openmobilemaps.urlcache")
 
@@ -329,7 +329,7 @@ open class MCTextureLoader: MCLoaderInterface {
 }
 
 extension HTTPURLResponse {
-    var etag: String? {
+    public var etag: String? {
         let etag: String?
         if #available(iOS 13.0, *) {
             etag = value(forHTTPHeaderField: "ETag")
@@ -340,7 +340,7 @@ extension HTTPURLResponse {
     }
 }
 
-private extension Int? {
+public extension Int? {
     var stringOrNil: String {
         switch self {
             case .none:
