@@ -17,8 +17,6 @@ public struct Vertex: Equatable {
     var position: SIMD2<Float>
     /// The texture coordinates mapped to the vertex in U-V coordinate space
     var textureCoordinate: SIMD2<Float>
-    /// Normal
-    var normal: SIMD2<Float>
 
     /// Returns the descriptor to use when passed to a metal shader
     public static let descriptor: MTLVertexDescriptor = {
@@ -38,19 +36,12 @@ public struct Vertex: Equatable {
         vertexDescriptor.attributes[1].offset = offset
         offset += MemoryLayout<SIMD2<Float>>.stride
 
-        // Normal
-        vertexDescriptor.attributes[2].bufferIndex = bufferIndex
-        vertexDescriptor.attributes[2].format = .float2
-        vertexDescriptor.attributes[2].offset = offset
-        offset += MemoryLayout<SIMD2<Float>>.stride
-
         vertexDescriptor.layouts[0].stride = MemoryLayout<Vertex>.stride
         return vertexDescriptor
     }()
 
     public init(x: Float, y: Float) {
         position = SIMD2([x, y])
-        normal = SIMD2([0.0, 0.0])
         textureCoordinate = SIMD2([0.0, 0.0])
     }
 
@@ -62,16 +53,9 @@ public struct Vertex: Equatable {
     ///   - textureV: The texture V-coordinate mapping
     public init(x: Float, y: Float, textureU: Float, textureV: Float) {
         position = SIMD2([x, y])
-        normal = SIMD2([0.0, 0.0])
         textureCoordinate = SIMD2([textureU, textureV])
     }
-
-    public init(x: Float, y: Float, normalX: Float, normalY: Float) {
-        position = SIMD2([x, y])
-        normal = SIMD2([normalX, normalY])
-        textureCoordinate = SIMD2([0.0, 0.0])
-    }
-
+    
     public init(position: MCVec2D, textureU: Float, textureV: Float) {
         self.init(x: position.xF, y: position.yF, textureU: textureU, textureV: textureV)
     }
@@ -86,13 +70,10 @@ extension Vertex {
     var textureU: Float { textureCoordinate.x }
     /// The texture V-coordinate mapping
     var textureV: Float { textureCoordinate.x }
-
-    var normalX: Float { normal.x }
-    var normalY: Float { normal.y }
 }
 
 extension Vertex: CustomDebugStringConvertible {
     public var debugDescription: String {
-        "<XY: (\(x), \(y)), UV: (\(textureU), \(textureV)), n: (\(normalX), \(normalY))>"
+        "<XY: (\(x), \(y)), UV: (\(textureU), \(textureV))>"
     }
 }

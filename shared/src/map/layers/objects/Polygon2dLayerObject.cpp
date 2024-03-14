@@ -66,9 +66,7 @@ void Polygon2dLayerObject::setPolygons(const std::vector<PolygonCoord> &polygons
                 // fill for android z
                 vertices.push_back(0.0);
 #ifdef __APPLE__
-                // are needed to fill metal vertex property (position, uv, normal)
-                vertices.push_back(0.0);
-                vertices.push_back(0.0);
+                // are needed to fill metal vertex property (uv.y)
                 vertices.push_back(0.0);
 #endif
             }
