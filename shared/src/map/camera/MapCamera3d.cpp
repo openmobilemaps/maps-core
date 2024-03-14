@@ -42,12 +42,11 @@ MapCamera3d::MapCamera3d(const std::shared_ptr<MapInterface> &mapInterface, floa
       focusPointAltitude(0),
       cameraDistance(10000),
       cameraPitch(0),
-      cameraRoll(0),
-      cameraYaw(0),
       lastOnTouchDownPoint(0.0, 0.0)
     , bounds(mapCoordinateSystem.bounds) {
     mapSystemRtl = mapCoordinateSystem.bounds.bottomRight.x > mapCoordinateSystem.bounds.topLeft.x;
     mapSystemTtb = mapCoordinateSystem.bounds.bottomRight.y > mapCoordinateSystem.bounds.topLeft.y;
+    updateZoom(zoomMin);
 }
 
 void MapCamera3d::viewportSizeChanged() {
@@ -58,8 +57,7 @@ void MapCamera3d::viewportSizeChanged() {
         double widthDeviceM = screenPixelAsRealMeterFactor * viewportSize.x;
         double heightDeviceM = screenPixelAsRealMeterFactor * viewportSize.y;
         zoomMin = std::max(boundsHeightM / heightDeviceM, boundsWidthM / widthDeviceM);
-        zoom = std::clamp(zoom, zoomMax, zoomMin);
-        cameraDistance = getCameraDistanceFromZoom(zoom);
+        updateZoom(zoom);
     }
 
     notifyListeners(ListenerType::BOUNDS);
@@ -105,7 +103,7 @@ void MapCamera3d::moveToCenterPositionZoom(const ::Coord &centerPosition, double
         mapInterface->invalidate();
     } else {
         this->focusPointPosition = focusPosition;
-        this->zoom = zoom;
+        updateZoom(zoom);
         notifyListeners(ListenerType::BOUNDS);
         mapInterface->invalidate();
     }
@@ -187,8 +185,10 @@ void MapCamera3d::moveToBoundingBox(const RectCoord &boundingBox, float paddingP
 }
 
 void MapCamera3d::setZoom(double zoom, bool animated) {
-    if (cameraFrozen)
+    if (cameraFrozen) {
         return;
+    }
+
     double targetZoom = std::clamp(zoom, zoomMax, zoomMin);
 
     if (animated) {
@@ -198,13 +198,12 @@ void MapCamera3d::setZoom(double zoom, bool animated) {
             [=](double zoom) { this->setZoom(zoom, false); },
             [=] {
                 this->setZoom(targetZoom, false);
-                this->cameraDistance = getCameraDistanceFromZoom(this->zoom);
                 this->zoomAnimation = nullptr;
             });
         zoomAnimation->start();
         mapInterface->invalidate();
     } else {
-        this->zoom = targetZoom;
+        updateZoom(zoom);
         notifyListeners(ListenerType::BOUNDS);
         mapInterface->invalidate();
     }
@@ -340,12 +339,13 @@ std::vector<float> MapCamera3d::getVpMatrix() {
     float R = 6378137.0;
     float longitude = focusPointPosition.x; //  px / R;
     float latitude = focusPointPosition.y; // 2*atan(exp(py / R)) - 3.1415926 / 2;
-    cameraPitch = 0.0;//90.0;
 
     focusPointAltitude = focusPointPosition.z;
-    cameraDistance = currentZoom;
-    float maxD = 3.0;//cameraDistance * 1.3;
-    float minD = 1.0 / (R * 1000.0);// 0.0000001568 //100.0 / R;
+    cameraDistance = getCameraDistanceFromZoom(zoom);
+    cameraPitch = getCameraPitchFromZoom(zoom);
+    cameraVerticalDisplacement = getCameraVerticalDisplacementFromZoom(zoom);
+    float maxD = 3.0;
+    float minD = 1.0 / (R * 1000.0);
 
     float fov = FIELD_OF_VIEW; // 45 // zoom / 70800;
 
@@ -361,25 +361,16 @@ std::vector<float> MapCamera3d::getVpMatrix() {
     Matrix::setIdentityM(newViewMatrix, 0);
 
     if (mode == CameraMode3d::GLOBE) {
-
         Matrix::translateM(newViewMatrix, 0, 0, 0, -cameraDistance);
-        Matrix::rotateM(newViewMatrix, 0, -cameraPitch, 1.0, 0.0, 0.0);
-        Matrix::rotateM(newViewMatrix, 0, -angle, 0, 0, 1);
-        //Matrix::translateM(newViewMatrix, 0, 0, 0, 0 - 1 - focusPointAltitude / R);
         Matrix::rotateM(newViewMatrix, 0.0, latitude, 1.0, 0.0, 0.0);
         Matrix::rotateM(newViewMatrix, 0.0, -longitude - 90.0, 0.0, 1.0, 0.0);
         std::vector<float> newVpMatrix(16, 0.0);
         Matrix::multiplyMM(newVpMatrix, 0, newProjectionMatrix, 0, newViewMatrix, 0);
-
     } else if (mode == CameraMode3d::TILTED_ORBITAL) {
-
-        Matrix::rotateM(newViewMatrix, 0, -17.5, 1.0, 0.0, 0.0);
-        double vCameraSpace = (4000.0 / (R / 1000.0)); // km
-        double hCameraSpace = atan(4.5 / 180.0 * M_PI); // degr
-        Matrix::translateM(newViewMatrix, 0, 0, hCameraSpace, -(1.0 + vCameraSpace));
+        Matrix::rotateM(newViewMatrix, 0, -cameraPitch, 1.0, 0.0, 0.0);
+        Matrix::translateM(newViewMatrix, 0, 0, cameraVerticalDisplacement, -cameraDistance);
         Matrix::rotateM(newViewMatrix, 0.0, latitude, 1.0, 0.0, 0.0);
         Matrix::rotateM(newViewMatrix, 0.0, -longitude - 90.0, 0.0, 1.0, 0.0);
-
     }
 
     std::vector<float> newVpMatrix(16, 0.0);
@@ -553,10 +544,7 @@ bool MapCamera3d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
 
     if (doubleClick) {
         double newZoom = zoom * (1.0 - (deltaScreen.y * 0.003));
-
-        newZoom = std::max(std::min(newZoom, zoomMin), zoomMax);
-        zoom = newZoom;
-        cameraDistance = getCameraDistanceFromZoom(newZoom);
+        updateZoom(newZoom);
 
         notifyListeners(ListenerType::BOUNDS | ListenerType::MAP_INTERACTION);
         mapInterface->invalidate();
@@ -565,36 +553,97 @@ bool MapCamera3d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
 
     auto viewport = mapInterface->getRenderingContext()->getViewportSize();
 
+    float dPhi = 0.0;
+    float dTheta = 0.0;
+
     float dx = deltaScreen.x;
     float dy = deltaScreen.y;
-    auto viewportHalf = Vec2D(viewport.x * 0.5, viewport.y * 0.5);
 
-    auto halfWidth = MapCamera3DHelper::halfWidth(cameraDistance, FIELD_OF_VIEW, viewport.x, viewport.y);
-    auto halfHeight = MapCamera3DHelper::halfHeight(cameraDistance, FIELD_OF_VIEW);
+    switch(mode) {
+        case CameraMode3d::GLOBE: {
 
-    auto tdx = ((lastOnTouchDownPoint.x - viewportHalf.x) / viewportHalf.x) * halfWidth;
-    auto tdy = ((lastOnTouchDownPoint.y - viewportHalf.y) / viewportHalf.y) * halfHeight;
-    auto oldPoint = MapCamera3DHelper::raySphereIntersection(Vec3D(0.0, 0.0, 0.0), Vec3D(tdx, tdy, cameraDistance), Vec3D(0.0, 0.0, cameraDistance), 1.0);
+            auto viewportHalf = Vec2D(viewport.x * 0.5, viewport.y * 0.5);
 
-    tdx = (((lastOnTouchDownPoint.x + dx) - viewportHalf.x) / viewportHalf.x) * halfWidth;
-    tdy = (((lastOnTouchDownPoint.y + dy) - viewportHalf.y) / viewportHalf.y) * halfHeight;
+            auto halfWidth = MapCamera3DHelper::halfWidth(cameraDistance, FIELD_OF_VIEW, viewport.x, viewport.y);
+            auto halfHeight = MapCamera3DHelper::halfHeight(cameraDistance, FIELD_OF_VIEW);
 
-    auto newPoint = MapCamera3DHelper::raySphereIntersection(Vec3D(0.0, 0.0, 0.0), Vec3D(tdx, tdy, cameraDistance), Vec3D(0.0, 0.0, cameraDistance), 1.0);
+            auto tdx = ((lastOnTouchDownPoint.x - viewportHalf.x) / viewportHalf.x) * halfWidth;
+            auto tdy = ((lastOnTouchDownPoint.y - viewportHalf.y) / viewportHalf.y) * halfHeight;
 
-    oldPoint = Vec3DHelper::normalize(oldPoint - Vec3D(0.0, 0.0, cameraDistance));
-    newPoint = Vec3DHelper::normalize(newPoint - Vec3D(0.0, 0.0, cameraDistance));
+            bool didHit = true;
+            auto oldPoint = MapCamera3DHelper::raySphereIntersection(Vec3D(0.0, 0.0, 0.0), Vec3D(tdx, tdy, cameraDistance), Vec3D(0.0, cameraVerticalDisplacement, cameraDistance), 1.0, didHit);
 
-    float oldPhi = std::atan2(oldPoint.z, oldPoint.x);
-    float oldTheta = std::acos(oldPoint.y / 1.0);
+            tdx = (((lastOnTouchDownPoint.x + dx) - viewportHalf.x) / viewportHalf.x) * halfWidth;
+            tdy = (((lastOnTouchDownPoint.y + dy) - viewportHalf.y) / viewportHalf.y) * halfHeight;
 
-    // NEW:
-    float newPhi = std::atan2(newPoint.z, newPoint.x);
-    float newTheta = std::acos(newPoint.y / 1.0);
+            auto newPoint = MapCamera3DHelper::raySphereIntersection(Vec3D(0.0, 0.0, 0.0), Vec3D(tdx, tdy, cameraDistance), Vec3D(0.0, cameraVerticalDisplacement, cameraDistance), 1.0, didHit);
 
-    // DELTA CALCULATION
+            if(!didHit) {
+                return false;
+            }
 
-    float dPhi = (newPhi - oldPhi) * (180.0 / M_PI) * (mapSystemRtl ? -1 : 1);
-    float dTheta = (newTheta - oldTheta) * (180.0 / M_PI) * (mapSystemTtb ? 1 : -1);
+            oldPoint = Vec3DHelper::normalize(oldPoint - Vec3D(0.0, 0.0, cameraDistance));
+            newPoint = Vec3DHelper::normalize(newPoint - Vec3D(0.0, 0.0, cameraDistance));
+
+            float oldPhi = std::atan2(oldPoint.z, oldPoint.x);
+            float oldTheta = std::acos(oldPoint.y / 1.0);
+
+            // NEW:
+            float newPhi = std::atan2(newPoint.z, newPoint.x);
+            float newTheta = std::acos(newPoint.y / 1.0);
+
+            // DELTA CALCULATION
+            dPhi = (newPhi - oldPhi) * (180.0 / M_PI) * (mapSystemRtl ? -1 : 1);
+            dTheta = (newTheta - oldTheta) * (180.0 / M_PI) * (mapSystemTtb ? 1 : -1);
+            break;
+        }
+        case CameraMode3d::TILTED_ORBITAL: {
+            auto fovWithPitch = 2.0 * (0.5 * FIELD_OF_VIEW + cameraPitch);
+            auto fovWithoutPitch = 2.0 * (0.5 * FIELD_OF_VIEW - cameraPitch);
+
+            // horizontal
+            auto halfWidth = MapCamera3DHelper::halfWidth(cameraDistance * cos(cameraPitch * M_PI / 180.0), FIELD_OF_VIEW, viewport.x, viewport.y);
+            auto viewPortHalfX = viewport.x * 0.5;
+
+            // vertical
+            auto halfHeightTop = MapCamera3DHelper::halfHeight(cameraDistance * cos(cameraPitch * M_PI / 180.0), fovWithPitch);
+            auto halfHeightBottom = MapCamera3DHelper::halfHeight(cameraDistance * cos(cameraPitch * M_PI / 180.0), fovWithoutPitch);
+            auto h = halfHeightTop + halfHeightBottom;
+
+            auto centerY = viewport.y * (halfHeightTop / h);
+
+            auto tdx = ((lastOnTouchDownPoint.x - viewPortHalfX) / viewPortHalfX) * halfWidth;
+            auto tdy = ((centerY - lastOnTouchDownPoint.y) / centerY) * halfHeightTop;
+
+            bool didHit = false;
+            auto oldPoint = MapCamera3DHelper::raySphereIntersection(Vec3D(0.0, 0.0, 0.0), Vec3D(tdx, tdy * cos(cameraPitch * M_PI / 180.0), cameraDistance), Vec3D(0.0, cameraVerticalDisplacement, cameraDistance), 1.00, didHit);
+
+            tdx = (((lastOnTouchDownPoint.x + dx) - viewPortHalfX) / viewPortHalfX) * halfWidth;
+            tdy = ((centerY - (lastOnTouchDownPoint.y - dy)) / centerY) * halfHeightTop;
+
+            auto newPoint = MapCamera3DHelper::raySphereIntersection(Vec3D(0.0, 0.0, 0.0), Vec3D(tdx, tdy * cos(cameraPitch * M_PI / 180.0), cameraDistance), Vec3D(0.0, cameraVerticalDisplacement, cameraDistance), 1.0, didHit);
+
+            if(!didHit) {
+                LogError <<= "DID NOT HIT!";
+                return false;
+            }
+
+            oldPoint = Vec3DHelper::normalize(oldPoint - Vec3D(0.0, 0.0, cameraDistance));
+            newPoint = Vec3DHelper::normalize(newPoint - Vec3D(0.0, 0.0, cameraDistance));
+
+            float oldPhi = std::atan2(oldPoint.z, oldPoint.x);
+            float oldTheta = std::acos(oldPoint.y / 1.0);
+
+            // NEW:
+            float newPhi = std::atan2(newPoint.z, newPoint.x);
+            float newTheta = std::acos(newPoint.y / 1.0);
+
+            // DELTA CALCULATION
+            dPhi = (newPhi - oldPhi) * (180.0 / M_PI) * (mapSystemRtl ? -1 : 1);
+            dTheta = (newTheta - oldTheta) * (180.0 / M_PI) * (mapSystemTtb ? 1 : -1);
+            break;
+        }
+    }
 
     focusPointPosition.x += dPhi;
     focusPointPosition.y += dTheta;
@@ -671,13 +720,13 @@ void MapCamera3d::inertiaStep() {
 }
 
 bool MapCamera3d::onDoubleClick(const ::Vec2F &posScreen) {
-    if (!config.doubleClickZoomEnabled || cameraFrozen)
+    if (!config.doubleClickZoomEnabled || cameraFrozen) {
         return false;
+    }
 
     inertia = std::nullopt;
 
     auto targetZoom = zoom / 2;
-
     targetZoom = std::max(std::min(targetZoom, zoomMin), zoomMax);
 
     auto position = coordFromScreenPosition(posScreen);
@@ -750,59 +799,56 @@ bool MapCamera3d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, cons
             Vec2FHelper::distance(posScreenNew[0], posScreenNew[1]) / Vec2FHelper::distance(posScreenOld[0], posScreenOld[1]);
         double newZoom = zoom / scaleFactor;
 
-        newZoom = std::clamp(newZoom, zoomMax, zoomMin);
-        cameraDistance = newZoom / 70;
-
         if (newZoom > startZoom * ROTATION_LOCKING_FACTOR || newZoom < startZoom / ROTATION_LOCKING_FACTOR) {
             rotationPossible = false;
         }
 
-        auto midpoint = Vec2FHelper::midpoint(posScreenNew[0], posScreenNew[1]);
-        auto oldMidpoint = Vec2FHelper::midpoint(posScreenOld[0], posScreenOld[1]);
-        Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
-        auto centerScreen = Vec2F(sizeViewport.x * 0.5f, sizeViewport.y * 0.5f);
-
-        float dx = -(scaleFactor - 1) * (midpoint.x - centerScreen.x) + (midpoint.x - oldMidpoint.x);
-        float dy = -(scaleFactor - 1) * (midpoint.y - centerScreen.y) + (midpoint.y - oldMidpoint.y);
-
-        float sinAngle = sin(angle * M_PI / 180.0);
-        float cosAngle = cos(angle * M_PI / 180.0);
-
-        float leftDiff = (cosAngle * dx + sinAngle * dy);
-        float topDiff = (-sinAngle * dx + cosAngle * dy);
-
-        double diffCenterX = -leftDiff * newZoom * screenPixelAsRealMeterFactor;
-        double diffCenterY = topDiff * newZoom * screenPixelAsRealMeterFactor;
+//        auto midpoint = Vec2FHelper::midpoint(posScreenNew[0], posScreenNew[1]);
+//        auto oldMidpoint = Vec2FHelper::midpoint(posScreenOld[0], posScreenOld[1]);
+//        Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
+//        auto centerScreen = Vec2F(sizeViewport.x * 0.5f, sizeViewport.y * 0.5f);
+//
+//        float dx = -(scaleFactor - 1) * (midpoint.x - centerScreen.x) + (midpoint.x - oldMidpoint.x);
+//        float dy = -(scaleFactor - 1) * (midpoint.y - centerScreen.y) + (midpoint.y - oldMidpoint.y);
+//
+//        float sinAngle = sin(angle * M_PI / 180.0);
+//        float cosAngle = cos(angle * M_PI / 180.0);
+//
+//        float leftDiff = (cosAngle * dx + sinAngle * dy);
+//        float topDiff = (-sinAngle * dx + cosAngle * dy);
+//
+//        double diffCenterX = -leftDiff * newZoom * screenPixelAsRealMeterFactor;
+//        double diffCenterY = topDiff * newZoom * screenPixelAsRealMeterFactor;
 
         /*focusPointPosition.y += diffCenterX;
         focusPointPosition.x += diffCenterY;*/
-        this->zoom = newZoom;
+        updateZoom(newZoom);
 
-        if (config.rotationEnabled) {
-            float olda = atan2(posScreenOld[0].x - posScreenOld[1].x, posScreenOld[0].y - posScreenOld[1].y);
-            float newa = atan2(posScreenNew[0].x - posScreenNew[1].x, posScreenNew[0].y - posScreenNew[1].y);
-            if (isRotationThresholdReached) {
-                angle = fmod((angle + (olda - newa) / M_PI * 180.0) + 360.0, 360.0);
-
-                // Update focusPointPosition such that the midpoint is the rotation center
-                double centerXDiff = (centerScreen.x - midpoint.x) * cos(newa - olda) -
-                                     (centerScreen.y - midpoint.y) * sin(newa - olda) + midpoint.x - centerScreen.x;
-                double centerYDiff = (centerScreen.y - midpoint.y) * cos(newa - olda) -
-                                     (centerScreen.x - midpoint.x) * sin(newa - olda) + midpoint.y - centerScreen.y;
-                double rotDiffX = (cosAngle * centerXDiff - sinAngle * centerYDiff);
-                double rotDiffY = (cosAngle * centerYDiff + sinAngle * centerXDiff);
-                focusPointPosition.x += rotDiffX * zoom * screenPixelAsRealMeterFactor;
-                focusPointPosition.y += rotDiffY * zoom * screenPixelAsRealMeterFactor;
-
-                listenerType |= ListenerType::ROTATION;
-            } else {
-                tempAngle = fmod((tempAngle + (olda - newa) / M_PI * 180.0) + 360.0, 360.0);
-                auto diff = std::min(std::abs(tempAngle - angle), std::abs(360.0 - (tempAngle - angle)));
-                if (diff >= ROTATION_THRESHOLD && rotationPossible) {
-                    isRotationThresholdReached = true;
-                }
-            }
-        }
+//        if (config.rotationEnabled) {
+//            float olda = atan2(posScreenOld[0].x - posScreenOld[1].x, posScreenOld[0].y - posScreenOld[1].y);
+//            float newa = atan2(posScreenNew[0].x - posScreenNew[1].x, posScreenNew[0].y - posScreenNew[1].y);
+//            if (isRotationThresholdReached) {
+//                angle = fmod((angle + (olda - newa) / M_PI * 180.0) + 360.0, 360.0);
+//
+//                // Update focusPointPosition such that the midpoint is the rotation center
+//                double centerXDiff = (centerScreen.x - midpoint.x) * cos(newa - olda) -
+//                                     (centerScreen.y - midpoint.y) * sin(newa - olda) + midpoint.x - centerScreen.x;
+//                double centerYDiff = (centerScreen.y - midpoint.y) * cos(newa - olda) -
+//                                     (centerScreen.x - midpoint.x) * sin(newa - olda) + midpoint.y - centerScreen.y;
+//                double rotDiffX = (cosAngle * centerXDiff - sinAngle * centerYDiff);
+//                double rotDiffY = (cosAngle * centerYDiff + sinAngle * centerXDiff);
+//                focusPointPosition.x += rotDiffX * zoom * screenPixelAsRealMeterFactor;
+//                focusPointPosition.y += rotDiffY * zoom * screenPixelAsRealMeterFactor;
+//
+//                listenerType |= ListenerType::ROTATION;
+//            } else {
+//                tempAngle = fmod((tempAngle + (olda - newa) / M_PI * 180.0) + 360.0, 360.0);
+//                auto diff = std::min(std::abs(tempAngle - angle), std::abs(360.0 - (tempAngle - angle)));
+//                if (diff >= ROTATION_THRESHOLD && rotationPossible) {
+//                    isRotationThresholdReached = true;
+//                }
+//            }
+//        }
 
         auto mapConfig = mapInterface->getMapConfig();
 
@@ -890,8 +936,7 @@ double MapCamera3d::getScalingFactor() { return mapUnitsFromPixels(1.0); }
 void MapCamera3d::setMinZoom(double zoomMin) {
     this->zoomMin = zoomMin;
     if (zoom > zoomMin) {
-        zoom = zoomMin;
-        cameraDistance = getCameraDistanceFromZoom(zoomMin);
+        updateZoom(zoomMin);
     }
     mapInterface->invalidate();
 }
@@ -899,8 +944,7 @@ void MapCamera3d::setMinZoom(double zoomMin) {
 void MapCamera3d::setMaxZoom(double zoomMax) {
     this->zoomMax = zoomMax;
     if (zoom < zoomMax) {
-        zoom = zoomMax;
-        cameraDistance = getCameraDistanceFromZoom(zoomMax);
+        updateZoom(zoomMax);
     }
     mapInterface->invalidate();
 }
@@ -964,10 +1008,6 @@ void MapCamera3d::setBoundsRestrictWholeVisibleRect(bool enabled) {
 
 float MapCamera3d::getScreenDensityPpi() { return screenDensityPpi; }
 
-double MapCamera3d::getCameraDistanceFromZoom(double zoom) {
-    return zoom / 70.0;
-}
-
 std::shared_ptr<MapCamera3dInterface> MapCamera3d::asMapCamera3d() {
     return shared_from_this();
 }
@@ -978,4 +1018,34 @@ void MapCamera3d::setCameraMode(CameraMode3d mode) {
 
 void MapCamera3d::notifyListenerBoundsChange() {
     notifyListeners(ListenerType::BOUNDS);
+}
+
+void MapCamera3d::updateZoom(double zoom_) {
+    auto zoomMin = getMinZoom();
+    auto zoomMax = getMaxZoom();
+
+    auto newZoom = std::max(std::min(zoom_, zoomMin), zoomMax);
+    zoom = newZoom;
+
+    cameraDistance = getCameraDistanceFromZoom(zoom);
+    cameraVerticalDisplacement = getCameraVerticalDisplacementFromZoom(zoom);
+    cameraPitch = getCameraPitchFromZoom(zoom);
+}
+
+double MapCamera3d::getCameraVerticalDisplacementFromZoom(double zoom) {
+    auto z = (zoom - getMaxZoom()) / (getMinZoom() - getMaxZoom());
+    return 0.35 - (1.0 - z) * 0.35;
+}
+
+double MapCamera3d::getCameraPitchFromZoom(double zoom) {
+    auto z = (zoom - getMaxZoom()) / (getMinZoom() - getMaxZoom());
+    return 17.5 - (1.0 - z) * 17.5;
+}
+
+double MapCamera3d::getCameraDistanceFromZoom(double zoom) {
+    auto z = (zoom - getMaxZoom()) / (getMinZoom() - getMaxZoom());
+
+    auto max = 1.8;
+    auto min = 1.2;
+    return min + (z * (max - min));
 }

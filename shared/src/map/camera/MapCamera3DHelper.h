@@ -29,7 +29,7 @@ public:
         return cameraDistance * tan((fovy * 0.5) * (M_PI / 180.0));
     }
 
-    static Vec3D raySphereIntersection(const Vec3D& rayStart, const Vec3D &rayEnd, const Vec3D &sphereCenter, float radius) {
+    static Vec3D raySphereIntersection(const Vec3D& rayStart, const Vec3D &rayEnd, const Vec3D &sphereCenter, float radius, bool &didHit) {
 
         // https://www.khoury.northeastern.edu/home/fell/CS4300/Lectures/Ray-TracingFormulas.pdf
         float dx = rayEnd.x - rayStart.x;
@@ -51,9 +51,11 @@ public:
         auto disc = b*b - 4*a*c;
 
         if(disc > 0) {
+            didHit = true;
             auto t = (-b - sqrt(b*b - 4*a*c)) / (2*a);
             return Vec3D(x0 + t * dx, y0 + t * dy, z0 + t * dz);
         } else {
+            didHit = false;
             return rayEnd;
         }
     }
