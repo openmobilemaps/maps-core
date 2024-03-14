@@ -41,6 +41,8 @@ public struct MapView: UIViewRepresentable {
         public var visibleRect: Updatable<MCRectCoord>
         public var mode: MCCameraMode3d = .GLOBE
 
+        public var restrictedBounds: MCRectCoord? = nil
+
         public init(center: Updatable<MCCoord> = .init(),
              zoom: Updatable<Double> = .init(),
              visibleRect: Updatable<MCRectCoord> = .init(),
@@ -67,6 +69,15 @@ public struct MapView: UIViewRepresentable {
             self.center = .init(mode: .user, value: MCCoord(systemIdentifier: MCCoordinateSystemIdentifiers.epsg4326(), x: longitude, y: latitude, z: 0))
             self.zoom = .init(mode: .user, value: zoom)
             self.visibleRect = .init()
+            self.mode = mode
+        }
+
+        public init(restrictedBounds: MCRectCoord,
+                    mode: MCCameraMode3d = .GLOBE) {
+            self.center = .init()
+            self.zoom = .init()
+            self.visibleRect = .init()
+            self.restrictedBounds = restrictedBounds
             self.mode = mode
         }
 
@@ -136,7 +147,12 @@ public struct MapView: UIViewRepresentable {
 
         coordinator.ignoreCallbacks = true
         let animated = coordinator.lastWrittenCamera != nil
-        if let center = camera.center.value, let zoom = camera.zoom.value, camera.center.mode == .user, camera.zoom.mode == .user {
+        if let restrictedBounds = camera.restrictedBounds {
+           mapView.camera.setBounds(restrictedBounds)
+           mapView.camera.setBoundsRestrictWholeVisibleRect(true)
+           mapView.camera.move(toBoundingBox: restrictedBounds, paddingPc: 0.0, animated: false, minZoom: nil, maxZoom: nil)
+           camera.restrictedBounds = nil
+       } else if let center = camera.center.value, let zoom = camera.zoom.value, camera.center.mode == .user, camera.zoom.mode == .user {
             mapView.camera.move(toCenterPositionZoom: center, zoom: zoom, animated: animated)
         } else if let center = camera.center.value, camera.center.mode == .user {
             mapView.camera.move(toCenterPosition: center, animated: animated)
