@@ -37,7 +37,10 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
             double factor = camera->getScalingFactor();
             const auto &renderObjects = pass->getRenderObjects();
 
-            renderingContext->applyScissorRect(pass->getScissoringRect());
+            auto scissoringRect = pass->getScissoringRect();
+            if (scissoringRect) {
+                renderingContext->applyScissorRect(scissoringRect);
+            }
 
             if (usesStencil) {
                 renderingContext->preRenderStencilMask();
@@ -62,6 +65,10 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
 
             if (usesStencil) {
                 renderingContext->postRenderStencilMask();
+            }
+
+            if (scissoringRect) {
+                renderingContext->applyScissorRect(std::nullopt);
             }
         }
     }
