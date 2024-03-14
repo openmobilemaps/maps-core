@@ -253,5 +253,5 @@ protected:
     float horizontalFov;
     bool validVpMatrix = false;
                         
-    ::Vec2F lastOnTouchDownPoint;
+    std::optional<::Vec2F> lastOnTouchDownPoint;
 };

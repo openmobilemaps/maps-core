@@ -30,7 +30,7 @@
 #define ROTATION_LOCKING_ANGLE 10
 #define ROTATION_LOCKING_FACTOR 1.5
 
-#define FIELD_OF_VIEW 60.0
+#define FIELD_OF_VIEW 22.5
 
 MapCamera3d::MapCamera3d(const std::shared_ptr<MapInterface> &mapInterface, float screenDensityPpi)
     : mapInterface(mapInterface)
@@ -42,7 +42,7 @@ MapCamera3d::MapCamera3d(const std::shared_ptr<MapInterface> &mapInterface, floa
       focusPointAltitude(0),
       cameraDistance(10000),
       cameraPitch(0),
-      lastOnTouchDownPoint(0.0, 0.0)
+      lastOnTouchDownPoint(std::nullopt)
     , bounds(mapCoordinateSystem.bounds) {
     mapSystemRtl = mapCoordinateSystem.bounds.bottomRight.x > mapCoordinateSystem.bounds.topLeft.x;
     mapSystemTtb = mapCoordinateSystem.bounds.bottomRight.y > mapCoordinateSystem.bounds.topLeft.y;
@@ -536,9 +536,9 @@ bool MapCamera3d::onTouchDown(const ::Vec2F &posScreen) {
 }
 
 bool MapCamera3d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleClick) {
-
-    if (!config.moveEnabled || cameraFrozen)
+    if (!config.moveEnabled || cameraFrozen || (lastOnTouchDownPoint == std::nullopt)) {
         return false;
+    }
 
     inertia = std::nullopt;
 
@@ -567,18 +567,19 @@ bool MapCamera3d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
             auto halfWidth = MapCamera3DHelper::halfWidth(cameraDistance, FIELD_OF_VIEW, viewport.x, viewport.y);
             auto halfHeight = MapCamera3DHelper::halfHeight(cameraDistance, FIELD_OF_VIEW);
 
-            auto tdx = ((lastOnTouchDownPoint.x - viewportHalf.x) / viewportHalf.x) * halfWidth;
-            auto tdy = ((lastOnTouchDownPoint.y - viewportHalf.y) / viewportHalf.y) * halfHeight;
+            auto tdx = ((lastOnTouchDownPoint->x - viewportHalf.x) / viewportHalf.x) * halfWidth;
+            auto tdy = ((lastOnTouchDownPoint->y - viewportHalf.y) / viewportHalf.y) * halfHeight;
 
             bool didHit = true;
             auto oldPoint = MapCamera3DHelper::raySphereIntersection(Vec3D(0.0, 0.0, 0.0), Vec3D(tdx, tdy, cameraDistance), Vec3D(0.0, cameraVerticalDisplacement, cameraDistance), 1.0, didHit);
 
-            tdx = (((lastOnTouchDownPoint.x + dx) - viewportHalf.x) / viewportHalf.x) * halfWidth;
-            tdy = (((lastOnTouchDownPoint.y + dy) - viewportHalf.y) / viewportHalf.y) * halfHeight;
+            tdx = (((lastOnTouchDownPoint->x + dx) - viewportHalf.x) / viewportHalf.x) * halfWidth;
+            tdy = (((lastOnTouchDownPoint->y + dy) - viewportHalf.y) / viewportHalf.y) * halfHeight;
 
             auto newPoint = MapCamera3DHelper::raySphereIntersection(Vec3D(0.0, 0.0, 0.0), Vec3D(tdx, tdy, cameraDistance), Vec3D(0.0, cameraVerticalDisplacement, cameraDistance), 1.0, didHit);
 
             if(!didHit) {
+                lastOnTouchDownPoint = std::nullopt;
                 return false;
             }
 
@@ -612,19 +613,20 @@ bool MapCamera3d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
 
             auto centerY = viewport.y * (halfHeightTop / h);
 
-            auto tdx = ((lastOnTouchDownPoint.x - viewPortHalfX) / viewPortHalfX) * halfWidth;
-            auto tdy = ((centerY - lastOnTouchDownPoint.y) / centerY) * halfHeightTop;
+            auto tdx = ((lastOnTouchDownPoint->x - viewPortHalfX) / viewPortHalfX) * halfWidth;
+            auto tdy = ((centerY - lastOnTouchDownPoint->y) / centerY) * halfHeightTop;
 
             bool didHit = false;
             auto oldPoint = MapCamera3DHelper::raySphereIntersection(Vec3D(0.0, 0.0, 0.0), Vec3D(tdx, tdy * cos(cameraPitch * M_PI / 180.0), cameraDistance), Vec3D(0.0, cameraVerticalDisplacement, cameraDistance), 1.00, didHit);
 
-            tdx = (((lastOnTouchDownPoint.x + dx) - viewPortHalfX) / viewPortHalfX) * halfWidth;
-            tdy = ((centerY - (lastOnTouchDownPoint.y - dy)) / centerY) * halfHeightTop;
+            tdx = (((lastOnTouchDownPoint->x + dx) - viewPortHalfX) / viewPortHalfX) * halfWidth;
+            tdy = ((centerY - (lastOnTouchDownPoint->y - dy)) / centerY) * halfHeightTop;
 
             auto newPoint = MapCamera3DHelper::raySphereIntersection(Vec3D(0.0, 0.0, 0.0), Vec3D(tdx, tdy * cos(cameraPitch * M_PI / 180.0), cameraDistance), Vec3D(0.0, cameraVerticalDisplacement, cameraDistance), 1.0, didHit);
 
             if(!didHit) {
-                LogError <<= "DID NOT HIT!";
+                lastOnTouchDownPoint = std::nullopt;
+                inertia = std::nullopt;
                 return false;
             }
 
@@ -638,9 +640,23 @@ bool MapCamera3d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
             float newPhi = std::atan2(newPoint.z, newPoint.x);
             float newTheta = std::acos(newPoint.y / 1.0);
 
+            if(std::abs(oldPoint.z) < 0.01) {
+                oldPhi = newPhi;
+            } else if(std::abs(newPoint.z) < 0.01) {
+                newPhi = oldPhi;
+            }
+
+
             // DELTA CALCULATION
             dPhi = (newPhi - oldPhi) * (180.0 / M_PI) * (mapSystemRtl ? -1 : 1);
             dTheta = (newTheta - oldTheta) * (180.0 / M_PI) * (mapSystemTtb ? 1 : -1);
+
+            if(std::abs(dTheta) > 20 || std::abs(dPhi) > 20) {
+                lastOnTouchDownPoint = std::nullopt;
+                inertia = std::nullopt;
+                return false;
+            }
+
             break;
         }
     }
@@ -648,8 +664,8 @@ bool MapCamera3d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
     focusPointPosition.x += dPhi;
     focusPointPosition.y += dTheta;
 
-    lastOnTouchDownPoint.x = lastOnTouchDownPoint.x + dx;
-    lastOnTouchDownPoint.y = lastOnTouchDownPoint.y + dy;
+    lastOnTouchDownPoint->x = lastOnTouchDownPoint->x + dx;
+    lastOnTouchDownPoint->y = lastOnTouchDownPoint->y + dy;
 
     focusPointPosition.y = std::clamp(focusPointPosition.y, -90.0, 90.0);
 
@@ -688,8 +704,9 @@ void MapCamera3d::setupInertia() {
 }
 
 void MapCamera3d::inertiaStep() {
-    if (inertia == std::nullopt)
+    if (inertia == std::nullopt) {
         return;
+    }
 
     long long now = DateHelper::currentTimeMicros();
     double delta = (now - inertia->timestampStart) / 16000.0;
@@ -1034,18 +1051,17 @@ void MapCamera3d::updateZoom(double zoom_) {
 
 double MapCamera3d::getCameraVerticalDisplacementFromZoom(double zoom) {
     auto z = (zoom - getMaxZoom()) / (getMinZoom() - getMaxZoom());
-    return 0.35 - (1.0 - z) * 0.35;
+    return 0.05 - (1.0 - z) * 0.4;
 }
 
 double MapCamera3d::getCameraPitchFromZoom(double zoom) {
     auto z = (zoom - getMaxZoom()) / (getMinZoom() - getMaxZoom());
-    return 17.5 - (1.0 - z) * 17.5;
+    return 15.0 - (1.0 - z) * 10.0;
 }
 
 double MapCamera3d::getCameraDistanceFromZoom(double zoom) {
     auto z = (zoom - getMaxZoom()) / (getMinZoom() - getMaxZoom());
-
-    auto max = 1.8;
+    auto max = 2.5;
     auto min = 1.2;
     return min + (z * (max - min));
 }
