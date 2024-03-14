@@ -145,9 +145,12 @@ class MapCamera3d : public MapCameraInterface,
     void notifyListenerBoundsChange() override;
 
 protected:
+    void updateZoom(double zoom);
     virtual void setupInertia();
 
-    static double getCameraDistanceFromZoom(double zoom);
+    double getCameraDistanceFromZoom(double zoom);
+    double getCameraVerticalDisplacementFromZoom(double zoom);
+    double getCameraPitchFromZoom(double zoom);
 
     std::recursive_mutex listenerMutex;
     std::set<std::shared_ptr<MapCameraListenerInterface>> listeners;
@@ -165,11 +168,10 @@ protected:
     Coord focusPointPosition;
     double focusPointAltitude = 0;
     double cameraDistance = 0;
+    double cameraVerticalDisplacement = 0.0;
     double cameraPitch = 0; // looking up or down
-    double cameraRoll = 0;
-    double cameraYaw = 0;
 
-    double zoom = 6;
+    double zoom;
     double angle = 0;
     double tempAngle = 0;
     bool isRotationThresholdReached = false;
