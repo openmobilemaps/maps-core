@@ -8,10 +8,10 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-#ifndef MapCamera3DHelper_hpp
-#define MapCamera3DHelper_hpp
+#pragma once
 
 #include "Vec3D.h"
+#include <cmath>
 
 class MapCamera3DHelper {
 public:
@@ -60,5 +60,3 @@ public:
         }
     }
 };
-
-#endif /* MapCamera3DHelper_hpp */
