@@ -877,6 +877,19 @@ void Tiled2dMapVectorLayer::loadSpriteData(int scale, bool fromLocal) {
         auto jsonResultStatus = context->jsonResult->status;
         auto textureResultStatus = context->textureResult->status;
         
+#if DEBUG
+        auto self = weakSelf.lock();
+        if (self) {
+            if (scale == 3 && self->mapDescription->use3xSprites.has_value() == false && (jsonResultStatus != LoaderStatus::OK || textureResultStatus != LoaderStatus::OK)) {
+                // We tried to load @3x sprite even though the user has not specified any use3xSprite flag
+                // We do this to notify him ion case he or she forgot to set the flag
+                // Since we could not find the @3x sprite we now load the @2x sprites
+                self->loadSpriteData(2, fromLocal);
+                return;
+            }
+        }
+#endif
+        
         std::shared_ptr<SpriteData> jsonData;
         std::shared_ptr<::TextureHolderInterface> spriteTexture;
         
