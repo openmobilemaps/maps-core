@@ -46,11 +46,14 @@ public struct MapView: UIViewRepresentable {
         public init(center: Updatable<MCCoord> = .init(),
              zoom: Updatable<Double> = .init(),
              visibleRect: Updatable<MCRectCoord> = .init(),
-                    mode: MCCameraMode3d = .GLOBE) {
+                    mode: MCCameraMode3d = .GLOBE,
+                    restrictedBounds: MCRectCoord? = nil
+        ) {
             self.center = center
             self.zoom = zoom
             self.visibleRect = visibleRect
             self.mode = mode
+            self.restrictedBounds = restrictedBounds
         }
 
         public init(location: CLLocationCoordinate2D, 
@@ -116,7 +119,9 @@ public struct MapView: UIViewRepresentable {
         mapView.backgroundColor = .clear
         mapView.camera.addListener(context.coordinator)
         mapView.camera.setRotationEnabled(false)
-        mapView.camera.asMapCamera3d()?.setCameraMode(camera.mode)
+        if is3D {
+            mapView.camera.asMapCamera3d()?.setCameraMode(camera.mode)
+        }
         mapView.sizeDelegate = context.coordinator
 //        MapActivityHandler.shared.mapView = mapView
         context.coordinator.mapView = mapView
@@ -162,7 +167,9 @@ public struct MapView: UIViewRepresentable {
             mapView.camera.move(toBoundingBox: visibleRect, paddingPc: 0, animated: animated, minZoom: nil, maxZoom: nil)
         }
 
-        mapView.camera.asMapCamera3d()?.setCameraMode(camera.mode)
+        if is3D {
+            mapView.camera.asMapCamera3d()?.setCameraMode(camera.mode)
+        }
 
         coordinator.ignoreCallbacks = false
         coordinator.lastWrittenCamera = camera
@@ -210,7 +217,6 @@ public struct MapView: UIViewRepresentable {
 
     public func updateUIView(_ mapView: MapCore.MCMapView, context: Context) {
         updateLayers(context, mapView)
-
 //        updateCamera(mapView, context.coordinator)
     }
 }
@@ -274,7 +280,9 @@ public class MapViewCoordinator: MCMapCameraListenerInterface {
             parent.camera = MapView.Camera(
                 center: .init(mode: .map, value: mapView?.camera.getCenterPosition()),
                 zoom: .init(mode: .map, value: mapView?.camera.getZoom()),
-                visibleRect: .init(mode: .map, value: mapView?.camera.getPaddingAdjustedVisibleRect())
+                visibleRect: .init(mode: .map, value: mapView?.camera.getPaddingAdjustedVisibleRect()),
+                mode: parent.camera.mode,
+                restrictedBounds: parent.camera.restrictedBounds
             )
 
             lastWrittenCamera = parent.camera
