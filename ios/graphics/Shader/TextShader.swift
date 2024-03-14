@@ -19,8 +19,10 @@ class TextShader: BaseShader {
     private var haloWidth: Float = 0.0
 
     override func setupProgram(_: MCRenderingContextInterface?) {
-        if pipeline == nil {
-            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: .textShader, blendMode: blendMode).json)
+        pipelineAccessQueue.sync {
+            if pipeline == nil {
+                pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: .textShader, blendMode: blendMode).json)
+            }
         }
     }
 

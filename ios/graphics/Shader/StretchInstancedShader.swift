@@ -20,8 +20,10 @@ class StretchInstancedShader: BaseShader {
     }
 
     override func setupProgram(_: MCRenderingContextInterface?) {
-        if pipeline == nil {
-            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: shader, blendMode: blendMode).json)
+        pipelineAccessQueue.sync {
+            if pipeline == nil {
+                pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: shader, blendMode: blendMode).json)
+            }
         }
     }
 
