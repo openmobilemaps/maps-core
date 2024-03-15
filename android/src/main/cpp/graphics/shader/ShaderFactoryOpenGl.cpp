@@ -24,7 +24,11 @@
 #include "IcosahedronColorShaderOpenGl.h"
 
 std::shared_ptr<AlphaShaderInterface> ShaderFactoryOpenGl::createAlphaShader() {
-    return std::make_shared<AlphaShaderOpenGl>();
+    return std::make_shared<AlphaShaderOpenGl>(false);
+}
+
+std::shared_ptr<AlphaShaderInterface> ShaderFactoryOpenGl::createUnitSphereAlphaShader() {
+    return std::make_shared<AlphaShaderOpenGl>(true);
 }
 
 std::shared_ptr<AlphaInstancedShaderInterface> ShaderFactoryOpenGl::createAlphaInstancedShader() {
