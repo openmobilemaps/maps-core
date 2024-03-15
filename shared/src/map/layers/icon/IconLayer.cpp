@@ -292,10 +292,13 @@ void IconLayer::updateIconPosition(const std::shared_ptr<CoordinateConversionHel
     Vec2F iconSize = iconInfo->getIconSize();
     Coord iconPosRender = conversionHelper->convertToRenderSystem(iconInfo->getCoordinate());
 
-    if (iconInfo->getType() != IconType::FIXED) {
+    const auto &iconType = iconInfo->getType();
+    if (iconType != IconType::FIXED) {
         iconPosRender.x = 0;
         iconPosRender.y = 0;
-    } else {
+    }
+
+    if (iconType != IconType::INVARIANT && iconType != IconType::SCALE_INVARIANT){
         // Size is expected in meters
         float meterToMapUnit = mapInterface->getMapConfig().mapCoordinateSystem.unitToScreenMeterFactor;
         iconSize = iconSize * meterToMapUnit;
@@ -310,11 +313,6 @@ void IconLayer::updateIconPosition(const std::shared_ptr<CoordinateConversionHel
     float bottomH = iconSize.y * (1.0f - ratioTopBottom);
 
     if (is3D) {
-        // Scale size due distance from equator
-/*
-        float scaleFactorTop = abs(cos(iconPosRender.y + topH + (M_PI / 2.0)));
-        float scaleFactorBottom = abs(cos(iconPosRender.y - bottomH + (M_PI / 2.0)));
-*/
         float scaleFactor = 1.0 / abs(cos(iconPosRender.y + (M_PI / 2.0)));
         leftW *= scaleFactor;
         rightW *= scaleFactor;
