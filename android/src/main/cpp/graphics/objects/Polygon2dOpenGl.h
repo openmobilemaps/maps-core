@@ -34,10 +34,10 @@ class Polygon2dOpenGl : public GraphicsObjectInterface,
     virtual void clear() override;
 
     virtual void render(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
-                        int64_t mvpMatrix, bool isMasked, double screenPixelAsRealMeterFactor) override;
+                        int64_t vpMatrix, int64_t mMatrix, bool isMasked, double screenPixelAsRealMeterFactor) override;
 
     virtual void renderAsMask(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
-                              int64_t mvpMatrix, double screenPixelAsRealMeterFactor) override;
+                              int64_t vpMatrix, int64_t mMatrix, double screenPixelAsRealMeterFactor) override;
 
     virtual void setVertices(const ::SharedBytes & vertices, const ::SharedBytes & indices) override;
 
@@ -54,13 +54,14 @@ protected:
 
     void removeGlBuffers();
 
-    inline void drawPolygon(const std::shared_ptr<::RenderingContextInterface> &context, int program, int64_t mvpMatrix);
+    inline void drawPolygon(const std::shared_ptr<::RenderingContextInterface> &context, int program, int64_t vpMatrix, int64_t mMatrix);
 
     std::shared_ptr<ShaderProgramInterface> shaderProgram;
     std::string programName;
     int program = 0;
 
-    int mvpMatrixHandle;
+    int vpMatrixHandle;
+    int mMatrixHandle;
     int positionHandle;
     GLuint vertexBuffer;
     std::vector<GLfloat> vertices;

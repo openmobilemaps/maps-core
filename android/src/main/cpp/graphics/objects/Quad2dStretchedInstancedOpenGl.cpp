@@ -112,7 +112,8 @@ void Quad2dStretchedInstancedOpenGl::prepareGlData(int program) {
     instStretchXsHandle = glGetAttribLocation(program, "aStretchX");
     instStretchYsHandle = glGetAttribLocation(program, "aStretchY");
 
-    mvpMatrixHandle = glGetUniformLocation(program, "uMVPMatrix");
+    vpMatrixHandle = glGetUniformLocation(program, "uvpMatrix");
+    mMatrixHandle = glGetUniformLocation(program, "umMatrix");
 }
 
 void Quad2dStretchedInstancedOpenGl::prepareTextureCoordsGlData(int program) {
@@ -191,14 +192,14 @@ void Quad2dStretchedInstancedOpenGl::adjustTextureCoordinates() {
 }
 
 void Quad2dStretchedInstancedOpenGl::renderAsMask(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
-                                int64_t mvpMatrix, double screenPixelAsRealMeterFactor) {
+                                int64_t vpMatrix, int64_t mMatrix, double screenPixelAsRealMeterFactor) {
     glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-    render(context, renderPass, mvpMatrix, false, screenPixelAsRealMeterFactor);
+    render(context, renderPass, vpMatrix, mMatrix, false, screenPixelAsRealMeterFactor);
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 }
 
 void Quad2dStretchedInstancedOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
-                          int64_t mvpMatrix, bool isMasked, double screenPixelAsRealMeterFactor) {
+                          int64_t vpMatrix, int64_t mMatrix, bool isMasked, double screenPixelAsRealMeterFactor) {
     if (!ready || (usesTextureCoords && !textureCoordsReady) || instanceCount == 0 || buffersNotReady) {
         return;
     }
@@ -269,7 +270,8 @@ void Quad2dStretchedInstancedOpenGl::render(const std::shared_ptr<::RenderingCon
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     // Apply the projection and view transformation
-    glUniformMatrix4fv(mvpMatrixHandle, 1, false, (GLfloat *)mvpMatrix);
+    glUniformMatrix4fv(vpMatrixHandle, 1, false, (GLfloat *)vpMatrix);
+    glUniformMatrix4fv(mMatrixHandle, 1, false, (GLfloat *)mMatrix);
 
     // Draw the triangles
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);

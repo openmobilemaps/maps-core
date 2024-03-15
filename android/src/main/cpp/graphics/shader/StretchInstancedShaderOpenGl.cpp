@@ -40,7 +40,7 @@ void StretchInstancedShaderOpenGl::setupProgram(const std::shared_ptr<::Renderin
 
 std::string StretchInstancedShaderOpenGl::getVertexShader() {
     return OMMVersionedGlesShaderCode(320 es,
-                                      uniform mat4 uMVPMatrix;
+                                      uniform mat4 uvpMatrix;
 
                                       in vec4 vPosition;
                                       in vec2 texCoordinate;
@@ -70,7 +70,7 @@ std::string StretchInstancedShaderOpenGl::getVertexShader() {
                                                   vec4(aPosition.x, aPosition.y, 1.0, 1)
                                           );
 
-                                          mat4 matrix = uMVPMatrix * model_matrix;
+                                          mat4 matrix = uvpMatrix * model_matrix;
 
                                           gl_Position = matrix * vPosition;
                                           v_texCoordInstance = aTexCoordinate;

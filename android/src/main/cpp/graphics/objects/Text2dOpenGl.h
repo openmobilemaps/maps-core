@@ -37,10 +37,10 @@ class Text2dOpenGl : public GraphicsObjectInterface,
     virtual void clear() override;
 
     virtual void renderAsMask(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
-                              int64_t mvpMatrix, double screenPixelAsRealMeterFactor) override;
+                              int64_t vpMatrix, int64_t mMatrix, double screenPixelAsRealMeterFactor) override;
 
     virtual void render(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
-                        int64_t mvpMatrix, bool isMasked, double screenPixelAsRealMeterFactor) override;
+                        int64_t vpMatrix, int64_t mMatrix, bool isMasked, double screenPixelAsRealMeterFactor) override;
 
     void setTextsShared(const SharedBytes &vertices, const SharedBytes &indices) override;
 
@@ -67,7 +67,8 @@ protected:
     std::string programName;
     int program;
 
-    int mvpMatrixHandle = -1;
+    int vpMatrixHandle = -1;
+    int mMatrixHandle = -1;
     int positionHandle = -1;
     int textureCoordinateHandle = -1;
     GLuint vertexAttribBuffer = -1;

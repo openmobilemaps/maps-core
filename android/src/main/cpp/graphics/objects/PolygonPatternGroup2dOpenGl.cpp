@@ -81,7 +81,8 @@ void PolygonPatternGroup2dOpenGl::prepareGlData(int program) {
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort) * indices.size(), &indices[0], GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-    mvpMatrixHandle = glGetUniformLocation(program, "uMVPMatrix");
+    vpMatrixHandle = glGetUniformLocation(program, "uvpMatrix");
+    mMatrixHandle = glGetUniformLocation(program, "umMatrix");
 }
 
 void PolygonPatternGroup2dOpenGl::clear() {
@@ -126,14 +127,14 @@ void PolygonPatternGroup2dOpenGl::removeTexture() {
 }
 
 void PolygonPatternGroup2dOpenGl::renderAsMask(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
-                                int64_t mvpMatrix, double screenPixelAsRealMeterFactor) {
+                                int64_t vpMatrix, int64_t mMatrix, double screenPixelAsRealMeterFactor) {
     glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-    render(context, renderPass, mvpMatrix, false, screenPixelAsRealMeterFactor);
+    render(context, renderPass, vpMatrix, mMatrix, false, screenPixelAsRealMeterFactor);
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 }
 
 void PolygonPatternGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
-                          int64_t mvpMatrix, bool isMasked, double screenPixelAsRealMeterFactor) {
+                          int64_t vpMatrix, int64_t mMatrix, bool isMasked, double screenPixelAsRealMeterFactor) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
     if (!ready || buffersNotReady || !textureHolder) {
         return;
@@ -190,7 +191,8 @@ void PolygonPatternGroup2dOpenGl::render(const std::shared_ptr<::RenderingContex
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     // Apply the projection and view transformation
-    glUniformMatrix4fv(mvpMatrixHandle, 1, false, (GLfloat *)mvpMatrix);
+    glUniformMatrix4fv(vpMatrixHandle, 1, false, (GLfloat *)vpMatrix);
+    glUniformMatrix4fv(mMatrixHandle, 1, false, (GLfloat *)mMatrix);
 
     // Draw the triangles
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);

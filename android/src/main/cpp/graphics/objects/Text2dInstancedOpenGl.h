@@ -34,7 +34,7 @@ public:
     virtual void clear() override;
 
     virtual void render(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
-                        int64_t mvpMatrix, bool isMasked, double screenPixelAsRealMeterFactor) override;
+                        int64_t vpMatrix, int64_t mMatrix, bool isMasked, double screenPixelAsRealMeterFactor) override;
 
     virtual void setFrame(const ::Quad2dD &frame) override;
 
@@ -80,7 +80,8 @@ protected:
     std::string programName;
     int program;
 
-    int mvpMatrixHandle;
+    int vpMatrixHandle;
+    int mMatrixHandle;
     int positionHandle;
     GLuint vertexBuffer;
     std::vector<GLfloat> vertices;

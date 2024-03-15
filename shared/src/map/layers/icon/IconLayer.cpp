@@ -158,7 +158,7 @@ void IconLayer::addIcons(const std::vector<std::shared_ptr<IconInfoInterface>> &
             quadObject->setSubdivisionFactor(SUBDIVISION_FACTOR_3D_DEFAULT);
         }
 
-        auto iconObject = std::make_shared<Textured2dLayerObject>(quadObject, shader, mapInterface);
+        auto iconObject = std::make_shared<Textured2dLayerObject>(quadObject, shader, mapInterface, is3D);
 
         updateIconPosition(conversionHelper, icon, iconObject);
         iconObjects.push_back(std::make_pair(icon, iconObject));

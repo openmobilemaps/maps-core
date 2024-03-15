@@ -76,7 +76,7 @@ std::string ColorPolygonGroup2dShaderOpenGl::getVertexShader() {
                 // Striped Shader
                 precision highp float;
 
-                uniform mat4 uMVPMatrix;
+                uniform mat4 uvpMatrix;
                 in vec2 vPosition;
                 in float vStyleIndex;
                 // polygonStyles: {vec4 color, float opacity, stripe width, gap width} - stride = 7
@@ -99,13 +99,13 @@ std::string ColorPolygonGroup2dShaderOpenGl::getVertexShader() {
                                polygonStyles[styleIndex + 2], polygonStyles[styleIndex + 3] * polygonStyles[styleIndex + 4]);
                   stripeInfo = vec2(polygonStyles[styleIndex + 5], polygonStyles[styleIndex + 6]);
                   uv = vPosition;
-                  gl_Position = uMVPMatrix * vec4(vPosition, 0.0, 1.0);
+                  gl_Position = uvpMatrix * vec4(vPosition, 0.0, 1.0);
                 }
             ) : OMMVersionedGlesShaderCode(320 es,
                 // Default Color Shader
                 precision highp float;
 
-                uniform mat4 uMVPMatrix;
+                uniform mat4 uvpMatrix;
                 in vec2 vPosition;
                 in float vStyleIndex;
                 // polygonStyles: {vec4 color, float opacity} - stride = 5
@@ -124,7 +124,7 @@ std::string ColorPolygonGroup2dShaderOpenGl::getVertexShader() {
                     styleIndex = styleIndex * 5;
                     color = vec4(polygonStyles[styleIndex], polygonStyles[styleIndex + 1],
                                  polygonStyles[styleIndex + 2], polygonStyles[styleIndex + 3] * polygonStyles[styleIndex + 4]);
-                    gl_Position = uMVPMatrix * vec4(vPosition, 0.0, 1.0);
+                    gl_Position = uvpMatrix * vec4(vPosition, 0.0, 1.0);
                 });
 }
 

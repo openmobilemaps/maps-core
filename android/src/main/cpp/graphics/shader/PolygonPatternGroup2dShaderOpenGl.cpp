@@ -49,7 +49,7 @@ std::string PolygonPatternGroup2dShaderOpenGl::getVertexShader() {
                                       in vec2 vPosition;
                                       in float vStyleIndex;
 
-                                      uniform mat4 uMVPMatrix;
+                                      uniform mat4 uvpMatrix;
                                       uniform vec2 uScalingFactor;
     ) + (fadeInPattern ? OMMShaderCode(uniform float uScreenPixelAsRealMeterFactor;) : "")
     + OMMShaderCode(
@@ -66,7 +66,7 @@ std::string PolygonPatternGroup2dShaderOpenGl::getVertexShader() {
                                         pixelPosition = vPosition.xy / uScalingFactor;
     )) + OMMShaderCode(
                                         styleIndex = uint(floor(vStyleIndex + 0.5));
-                                        gl_Position = uMVPMatrix * vec4(vPosition, 0.0, 1.0);
+                                        gl_Position = uvpMatrix * vec4(vPosition, 0.0, 1.0);
                                       }
     );
 }

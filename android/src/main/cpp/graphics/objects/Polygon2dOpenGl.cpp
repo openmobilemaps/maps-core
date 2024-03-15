@@ -76,7 +76,8 @@ void Polygon2dOpenGl::prepareGlData(int program) {
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort) * indices.size(), &indices[0], GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-    mvpMatrixHandle = glGetUniformLocation(program, "uMVPMatrix");
+    vpMatrixHandle = glGetUniformLocation(program, "uvpMatrix");
+    mMatrixHandle = glGetUniformLocation(program, "umMatrix");
 }
 
 void Polygon2dOpenGl::clear() {
@@ -98,7 +99,7 @@ void Polygon2dOpenGl::removeGlBuffers() {
 void Polygon2dOpenGl::setIsInverseMasked(bool inversed) { isMaskInversed = inversed; }
 
 void Polygon2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
-                             int64_t mvpMatrix, bool isMasked, double screenPixelAsRealMeterFactor) {
+                             int64_t vpMatrix, int64_t mMatrix, bool isMasked, double screenPixelAsRealMeterFactor) {
     if (!ready)
         return;
 
@@ -123,10 +124,10 @@ void Polygon2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> 
 
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
-    drawPolygon(openGlContext, program, mvpMatrix);
+    drawPolygon(openGlContext, program, vpMatrix, mMatrix);
 }
 
-void Polygon2dOpenGl::drawPolygon(const std::shared_ptr<::RenderingContextInterface> &context, int program, int64_t mvpMatrix) {
+void Polygon2dOpenGl::drawPolygon(const std::shared_ptr<::RenderingContextInterface> &context, int program, int64_t vpMatrix, int64_t mMatrix) {
     // Add program to OpenGL environment
     glUseProgram(program);
 
@@ -139,7 +140,8 @@ void Polygon2dOpenGl::drawPolygon(const std::shared_ptr<::RenderingContextInterf
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     // Apply the projection and view transformation
-    glUniformMatrix4fv(mvpMatrixHandle, 1, false, (GLfloat *)mvpMatrix);
+    glUniformMatrix4fv(vpMatrixHandle, 1, false, (GLfloat *)vpMatrix);
+    glUniformMatrix4fv(mMatrixHandle, 1, false, (GLfloat *)mMatrix);
 
     // Draw the triangle
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
@@ -154,14 +156,14 @@ void Polygon2dOpenGl::drawPolygon(const std::shared_ptr<::RenderingContextInterf
 }
 
 void Polygon2dOpenGl::renderAsMask(const std::shared_ptr<::RenderingContextInterface> &context,
-                                   const ::RenderPassConfig &renderPass, int64_t mvpMatrix, double screenPixelAsRealMeterFactor) {
+                                   const ::RenderPassConfig &renderPass, int64_t vpMatrix, int64_t mMatrix, double screenPixelAsRealMeterFactor) {
     if (!ready)
         return;
 
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
 
     glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-    drawPolygon(openGlContext, program, mvpMatrix);
+    drawPolygon(openGlContext, program, vpMatrix, mMatrix);
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 }
 

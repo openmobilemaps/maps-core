@@ -40,7 +40,7 @@ void AlphaInstancedShaderOpenGl::setupProgram(const std::shared_ptr<::RenderingC
 
 std::string AlphaInstancedShaderOpenGl::getVertexShader() {
     return OMMVersionedGlesShaderCode(320 es,
-                                      uniform mat4 uMVPMatrix;
+                                      uniform mat4 uvpMatrix;
 
                                       in vec3 vPosition;
                                       in vec2 vTexCoordinate;
@@ -64,7 +64,7 @@ std::string AlphaInstancedShaderOpenGl::getVertexShader() {
                                                   vec4(aPosition.x, aPosition.y, 1.0, 1)
                                           );
 
-                                          mat4 matrix = uMVPMatrix * model_matrix;
+                                          mat4 matrix = uvpMatrix * model_matrix;
 
                                           gl_Position = matrix * vec4(vPosition, 1.0);
                                           v_texcoordInstance = aTexCoordinate;
