@@ -5,7 +5,9 @@
 @extern "../../../yaml/blend_mode.yaml"
 
 icon_factory = interface +c {
+# iconSize is in meters when scaleType is scale invariant(i.e. FIXED or ROTATION_INVARIANT), screen pixels otherwise
     static create_icon(identifier: string, coordinate: coord, texture: texture_holder_interface, icon_size: vec_2_f, scale_type: icon_type, blend_mode: blend_mode) : icon_info_interface;
+# iconSize is in meters when scaleType is scale invariant(i.e. FIXED or ROTATION_INVARIANT), screen pixels otherwise
     static create_icon_with_anchor(identifier: string, coordinate: coord, texture: texture_holder_interface, icon_size: vec_2_f, scale_type: icon_type, blend_mode: blend_mode, icon_anchor: vec_2_f) : icon_info_interface;
 }
 
@@ -14,7 +16,9 @@ icon_info_interface = interface +c {
     get_texture() : texture_holder_interface;
     set_coordinate(coord: coord);
     get_coordinate() : coord;
+# iconSize is in meters when scaleType is scale invariant(i.e. FIXED or ROTATION_INVARIANT), screen pixels otherwise
     set_icon_size(size: vec_2_f);
+# iconSize is in meters when scaleType is scale invariant(i.e. FIXED or ROTATION_INVARIANT), screen pixels otherwise
     get_icon_size() : vec_2_f;
     set_type(scale_type: icon_type);
     get_type() : icon_type;

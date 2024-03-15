@@ -18,6 +18,8 @@
 #include "Logger.h"
 #include "CoordinateSystemIdentifiers.h"
 #include "Matrix.h"
+#include "MapConfig.h"
+#include "Vec2FHelper.h"
 #include <IconType.h>
 
 IconLayer::IconLayer()
@@ -281,21 +283,46 @@ void IconLayer::update() {
 void IconLayer::updateIconPosition(const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                                    const std::shared_ptr<IconInfoInterface> &iconInfo,
                                    const std::shared_ptr<Textured2dLayerObject> &iconObject) {
+    auto mapInterface = this->mapInterface;
+    auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
+    if (!camera) {
+        return;
+    }
+
+    Vec2F iconSize = iconInfo->getIconSize();
     Coord iconPosRender = conversionHelper->convertToRenderSystem(iconInfo->getCoordinate());
+
     if (iconInfo->getType() != IconType::FIXED) {
         iconPosRender.x = 0;
         iconPosRender.y = 0;
+    } else {
+        // Size is expected in meters
+        float meterToMapUnit = mapInterface->getMapConfig().mapCoordinateSystem.unitToScreenMeterFactor;
+        iconSize = iconSize * meterToMapUnit;
     }
+
     const Vec2F &anchor = iconInfo->getIconAnchor();
     float ratioLeftRight = std::clamp(anchor.x, 0.0f, 1.0f);
     float ratioTopBottom = std::clamp(anchor.y, 0.0f, 1.0f);
-    float leftW = iconInfo->getIconSize().x * ratioLeftRight;
-    float topH = iconInfo->getIconSize().y * ratioTopBottom;
-    float rightW = iconInfo->getIconSize().x * (1.0f - ratioLeftRight);
-    float bottomH = iconInfo->getIconSize().y * (1.0f - ratioTopBottom);
+    float leftW = iconSize.x * ratioLeftRight;
+    float topH = iconSize.y * ratioTopBottom;
+    float rightW = iconSize.x * (1.0f - ratioLeftRight);
+    float bottomH = iconSize.y * (1.0f - ratioTopBottom);
+
+    if (is3D) {
+        // Scale size due distance from equator
+/*
+        float scaleFactorTop = abs(cos(iconPosRender.y + topH + (M_PI / 2.0)));
+        float scaleFactorBottom = abs(cos(iconPosRender.y - bottomH + (M_PI / 2.0)));
+*/
+        float scaleFactor = 1.0 / abs(cos(iconPosRender.y + (M_PI / 2.0)));
+        leftW *= scaleFactor;
+        rightW *= scaleFactor;
+    }
+
     iconObject->setRectCoord(
-            RectCoord(Coord(iconPosRender.systemIdentifier, iconPosRender.x - leftW, iconPosRender.y - topH, iconPosRender.y),
-                      Coord(iconPosRender.systemIdentifier, iconPosRender.x + rightW, iconPosRender.y + bottomH, iconPosRender.y)));
+            RectCoord(Coord(iconPosRender.systemIdentifier, iconPosRender.x - leftW, iconPosRender.y + topH, iconPosRender.z),
+                      Coord(iconPosRender.systemIdentifier, iconPosRender.x + rightW, iconPosRender.y - bottomH, iconPosRender.z)));
 }
 
 std::vector<std::shared_ptr<::RenderPassInterface>> IconLayer::buildRenderPasses() {

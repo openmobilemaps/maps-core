@@ -17,7 +17,9 @@ class IconFactory {
 public:
     virtual ~IconFactory() = default;
 
+    /** iconSize is in meters when scaleType is scale invariant(i.e. FIXED or ROTATION_INVARIANT), screen pixels otherwise */
     static /*not-null*/ std::shared_ptr<IconInfoInterface> createIcon(const std::string & identifier, const ::Coord & coordinate, const /*not-null*/ std::shared_ptr<::TextureHolderInterface> & texture, const ::Vec2F & iconSize, IconType scaleType, ::BlendMode blendMode);
 
+    /** iconSize is in meters when scaleType is scale invariant(i.e. FIXED or ROTATION_INVARIANT), screen pixels otherwise */
     static /*not-null*/ std::shared_ptr<IconInfoInterface> createIconWithAnchor(const std::string & identifier, const ::Coord & coordinate, const /*not-null*/ std::shared_ptr<::TextureHolderInterface> & texture, const ::Vec2F & iconSize, IconType scaleType, ::BlendMode blendMode, const ::Vec2F & iconAnchor);
 };
