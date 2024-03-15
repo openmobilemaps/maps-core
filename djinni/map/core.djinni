@@ -184,6 +184,7 @@ map_camera_interface = interface +c {
 
 map_camera_3d_interface = interface +c {
 	set_camera_mode(mode: camera_mode_3d);
+	pixel_to_map_unit_factor(coord: coord): f64;
 }
 
 camera_mode_3d = enum {

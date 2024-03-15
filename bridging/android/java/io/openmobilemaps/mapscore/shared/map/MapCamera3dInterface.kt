@@ -10,6 +10,8 @@ abstract class MapCamera3dInterface {
 
     abstract fun setCameraMode(mode: CameraMode3d)
 
+    abstract fun pixelToMapUnitFactor(coord: io.openmobilemaps.mapscore.shared.map.coordinates.Coord): Double
+
     private class CppProxy : MapCamera3dInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -30,5 +32,11 @@ abstract class MapCamera3dInterface {
             native_setCameraMode(this.nativeRef, mode)
         }
         private external fun native_setCameraMode(_nativeRef: Long, mode: CameraMode3d)
+
+        override fun pixelToMapUnitFactor(coord: io.openmobilemaps.mapscore.shared.map.coordinates.Coord): Double {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_pixelToMapUnitFactor(this.nativeRef, coord)
+        }
+        private external fun native_pixelToMapUnitFactor(_nativeRef: Long, coord: io.openmobilemaps.mapscore.shared.map.coordinates.Coord): Double
     }
 }

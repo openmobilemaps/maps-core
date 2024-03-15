@@ -577,7 +577,7 @@ void Matrix::multiply(const std::vector<float> &M, const std::vector<float> &x, 
     result[3] = M[3] * x[0] + M[7] * x[1] + M[11] * x[2] + M[15] * x[3];
 }
 
-std::string Matrix::toMatrixString(std::vector<float> &M) {
+std::string Matrix::toMatrixString(const std::vector<float> &M) {
     std::stringstream ss;
     ss << "[ " << M[0] << ", " << M[4] << ", " << M[8] << ", " << M[12] << "; "
             << M[1] << ", " << M[5] << ", " << M[9] << ", " << M[13] << "; "
@@ -586,7 +586,7 @@ std::string Matrix::toMatrixString(std::vector<float> &M) {
     return ss.str();
 }
 
-std::string Matrix::toVectorString(std::vector<float> &v) {
+std::string Matrix::toVectorString(const std::vector<float> &v) {
     std::stringstream ss;
     ss << "[ ";
     for (int i = 0; i < v.size(); i++) {
