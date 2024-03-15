@@ -71,7 +71,8 @@ final class Quad2dInstanced: BaseGraphicsObject {
     override func render(encoder: MTLRenderCommandEncoder,
                          context: RenderingContext,
                          renderPass _: MCRenderPassConfig,
-                         mvpMatrix: Int64,
+                         vpMatrix: Int64,
+                         mMatrix: Int64,
                          isMasked: Bool,
                          screenPixelAsRealMeterFactor _: Double) {
         guard let verticesBuffer,
@@ -119,7 +120,7 @@ final class Quad2dInstanced: BaseGraphicsObject {
         shader.preRender(context)
 
         encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
-        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mvpMatrix)) {
+        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(vpMatrix)) {
             encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
         }
 
@@ -149,7 +150,8 @@ final class Quad2dInstanced: BaseGraphicsObject {
 extension Quad2dInstanced: MCMaskingObjectInterface {
     func render(asMask context: MCRenderingContextInterface?,
                 renderPass: MCRenderPassConfig,
-                mvpMatrix: Int64,
+                vpMatrix: Int64,
+                mMatrix: Int64,
                 screenPixelAsRealMeterFactor: Double) {
         guard isReady(),
               let context = context as? RenderingContext,
@@ -160,7 +162,8 @@ extension Quad2dInstanced: MCMaskingObjectInterface {
         render(encoder: encoder,
                context: context,
                renderPass: renderPass,
-               mvpMatrix: mvpMatrix,
+               vpMatrix: vpMatrix,
+               mMatrix: mMatrix,
                isMasked: false,
                screenPixelAsRealMeterFactor: screenPixelAsRealMeterFactor)
     }

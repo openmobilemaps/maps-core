@@ -36,6 +36,10 @@ class ShaderFactory: MCShaderFactoryInterface {
         AlphaShader()
     }
 
+    func createUnitSphereAlphaShader() -> (any MCAlphaShaderInterface)? {
+        AlphaShader(shader: .unitSphereAlphaShader)
+    }
+
     func createAlphaInstancedShader() -> MCAlphaInstancedShaderInterface? {
         AlphaInstancedShader()
     }

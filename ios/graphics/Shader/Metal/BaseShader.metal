@@ -13,7 +13,7 @@
 using namespace metal;
 
 vertex VertexOut
-baseVertexShader(const VertexIn vertexIn [[stage_in]],
+baseVertexShader(const Vertex3DIn vertexIn [[stage_in]],
                     constant float4x4 &mvpMatrix [[buffer(1)]])
 {
     VertexOut out {
@@ -23,6 +23,26 @@ baseVertexShader(const VertexIn vertexIn [[stage_in]],
     
     return out;
 }
+
+vertex VertexOut
+unitSphereBaseVertexShader(const Vertex3DIn vertexIn [[stage_in]],
+                           constant float4x4 &vpMatrix [[buffer(1)]],
+                           constant float4x4 &mMatrix [[buffer(2)]])
+{
+    const float4 newVertex = mMatrix * float4(vertexIn.position.xyz, 1.0);
+
+    const float x = newVertex.z * sin(newVertex.y) * cos(newVertex.x);
+    const float y = newVertex.z * cos(newVertex.y);
+    const float z = -newVertex.z * sin(newVertex.y) * sin(newVertex.x);
+
+    VertexOut out {
+        .position = vpMatrix * float4(x,y,z, 1.0),
+        .uv = vertexIn.uv
+    };
+
+    return out;
+}
+
 
 fragment float4
 baseFragmentShader(VertexOut in [[stage_in]],

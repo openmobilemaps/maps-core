@@ -49,7 +49,8 @@ final class Text: BaseGraphicsObject {
     override func render(encoder: MTLRenderCommandEncoder,
                          context: RenderingContext,
                          renderPass _: MCRenderPassConfig,
-                         mvpMatrix: Int64,
+                         vpMatrix: Int64,
+                         mMatrix: Int64,
                          isMasked: Bool,
                          screenPixelAsRealMeterFactor _: Double) {
         lock.lock()
@@ -81,7 +82,7 @@ final class Text: BaseGraphicsObject {
         shader.preRender(context)
 
         encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
-        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mvpMatrix)) {
+        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(vpMatrix)) {
             encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
         }
 

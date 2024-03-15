@@ -68,7 +68,8 @@ final class Quad2d: BaseGraphicsObject {
     override func render(encoder: MTLRenderCommandEncoder,
                          context: RenderingContext,
                          renderPass: MCRenderPassConfig,
-                         mvpMatrix: Int64,
+                         vpMatrix: Int64,
+                         mMatrix: Int64,
                          isMasked: Bool,
                          screenPixelAsRealMeterFactor _: Double) {
         guard isReady(),
@@ -115,8 +116,12 @@ final class Quad2d: BaseGraphicsObject {
         shader.preRender(context)
 
         encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
-        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mvpMatrix)) {
-            encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
+        
+        if let vpMatrixPointer = UnsafeRawPointer(bitPattern: Int(vpMatrix)) {
+            encoder.setVertexBytes(vpMatrixPointer, length: 64, index: 1)
+        }
+        if let mMatrixPointer = UnsafeRawPointer(bitPattern: Int(mMatrix)) {
+            encoder.setVertexBytes(mMatrixPointer, length: 64, index: 2)
         }
 
         encoder.setFragmentSamplerState(sampler, index: 0)
@@ -136,7 +141,8 @@ final class Quad2d: BaseGraphicsObject {
 extension Quad2d: MCMaskingObjectInterface {
     func render(asMask context: MCRenderingContextInterface?,
                 renderPass: MCRenderPassConfig,
-                mvpMatrix: Int64,
+                vpMatrix: Int64,
+                mMatrix: Int64,
                 screenPixelAsRealMeterFactor: Double) {
         guard isReady(),
               let context = context as? RenderingContext,
@@ -147,7 +153,8 @@ extension Quad2d: MCMaskingObjectInterface {
         render(encoder: encoder,
                context: context,
                renderPass: renderPass,
-               mvpMatrix: mvpMatrix,
+               vpMatrix: vpMatrix,
+               mMatrix: mMatrix,
                isMasked: false,
                screenPixelAsRealMeterFactor: screenPixelAsRealMeterFactor)
     }
@@ -190,8 +197,8 @@ extension Quad2d: MCQuad2dInterface {
                 Vertex3D(position: frame.bottomRight, textureU: textureCoordinates.xF + textureCoordinates.widthF, textureV: textureCoordinates.yF + textureCoordinates.heightF), // D
             ]
             indices = [
-                0, 1, 2, // ABC
-                0, 2, 3, // ACD
+                0, 2, 1, // ACB
+                0, 3, 2, // ADC
             ]
 
         } else {
