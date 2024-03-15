@@ -21,7 +21,7 @@ graphics_object_interface = interface +c +j +o {
     # Render the graphics object; ensure calling on graphics thread
 
     set_debug_label(label: string);
-    render(context: rendering_context_interface, render_pass: render_pass_config, mvp_matrix: i64, is_masked: bool, screenPixelAsRealMeterFactor: f64);
+    render(context: rendering_context_interface, render_pass: render_pass_config, vp_matrix: i64, m_matrix: i64, is_masked: bool, screenPixelAsRealMeterFactor: f64);
 }
 
 masking_object_interface = interface +c +j +o {
