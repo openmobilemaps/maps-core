@@ -131,8 +131,9 @@ public enum PipelineType: String, CaseIterable, Codable {
     case rasterShader
     case stretchShader
     case stretchInstancedShader
-    case unitSphereRasterShader
     case icosahedronColorShader
+    case unitSphereRasterShader
+    case unitSphereAlphaShader
 
     var label: String {
         switch self {
@@ -153,6 +154,7 @@ public enum PipelineType: String, CaseIterable, Codable {
             case .stretchInstancedShader: return "Stretch Instanced shader"
             case .unitSphereRasterShader: return "Unit Sphere Raster Shader"
             case .icosahedronColorShader: return "Icosahedron Color Shader"
+            case .unitSphereAlphaShader: return "Unit Sphere Alpha shader with texture"
         }
     }
 
@@ -173,7 +175,8 @@ public enum PipelineType: String, CaseIterable, Codable {
             case .rasterShader: return "rasterVertexShader"
             case .stretchShader: return "stretchVertexShader"
             case .stretchInstancedShader: return "stretchInstancedVertexShader"
-            case .unitSphereRasterShader: return "unitSphereRasterVertexShader"
+            case .unitSphereRasterShader: return "unitSphereBaseVertexShader"
+            case .unitSphereAlphaShader: return "unitSphereBaseVertexShader"
             case .icosahedronColorShader: return "icosahedronVertexShader"
         }
     }
@@ -196,6 +199,7 @@ public enum PipelineType: String, CaseIterable, Codable {
             case .stretchShader: return "stretchFragmentShader"
             case .stretchInstancedShader: return "stretchInstancedFragmentShader"
             case .unitSphereRasterShader: return "rasterFragmentShader"
+            case .unitSphereAlphaShader: return "baseFragmentShader"
             case .icosahedronColorShader: return "icosahedronFragmentShader"
         }
     }
@@ -206,7 +210,7 @@ public enum PipelineType: String, CaseIterable, Codable {
                 return LineVertex.descriptor
             case .polygonGroupShader, .polygonPatternGroupShader, .polygonPatternFadeInGroupShader, .polygonStripedGroupShader:
                 return PolygonVertex.descriptor
-            case .rasterShader, .unitSphereRasterShader, .clearStencilShader:
+            case .rasterShader, .unitSphereRasterShader, .clearStencilShader, .alphaShader, .unitSphereAlphaShader:
                 return Vertex3D.descriptor
             case.icosahedronColorShader:
                 return PolygonVertex.descriptor

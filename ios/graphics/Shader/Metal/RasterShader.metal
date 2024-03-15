@@ -22,25 +22,6 @@ struct RasterStyle {
 };
 
 vertex VertexOut
-unitSphereRasterVertexShader(const Vertex3DIn vertexIn [[stage_in]],
-                 constant float4x4 &mvpMatrix [[buffer(1)]])
-{
-
-    const float x = vertexIn.position.z * sin(vertexIn.position.y) * cos(vertexIn.position.x);
-    const float y = vertexIn.position.z * cos(vertexIn.position.y);
-    const float z = -vertexIn.position.z * sin(vertexIn.position.y) * sin(vertexIn.position.x);
-
-    const float4 position = float4(x,y,z, 1.0);
-
-    VertexOut out {
-        .position = mvpMatrix * position,
-        .uv = vertexIn.uv
-    };
-
-    return out;
-}
-
-vertex VertexOut
 rasterVertexShader(const Vertex3DIn vertexIn [[stage_in]],
                  constant float4x4 &mvpMatrix [[buffer(1)]])
 {

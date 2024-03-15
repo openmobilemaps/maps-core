@@ -17,9 +17,6 @@ public struct Vertex3D: Equatable {
     var position: SIMD3<Float>
     /// The texture coordinates mapped to the vertex in U-V coordinate space
     var textureCoordinate: SIMD2<Float>
-    /// Normal
-    var normal: SIMD2<Float>
-
     /// Returns the descriptor to use when passed to a metal shader
     public static let descriptor: MTLVertexDescriptor = {
         let vertexDescriptor = MTLVertexDescriptor()
@@ -38,12 +35,6 @@ public struct Vertex3D: Equatable {
         vertexDescriptor.attributes[1].offset = offset
         offset += MemoryLayout<SIMD2<Float>>.stride
 
-        // Normal
-        vertexDescriptor.attributes[2].bufferIndex = bufferIndex
-        vertexDescriptor.attributes[2].format = .float2
-        vertexDescriptor.attributes[2].offset = offset
-        offset += MemoryLayout<SIMD2<Float>>.stride
-
         vertexDescriptor.layouts[0].stride = MemoryLayout<Vertex3D>.stride
         return vertexDescriptor
     }()
@@ -57,7 +48,6 @@ public struct Vertex3D: Equatable {
     ///   - textureV: The texture V-coordinate mapping
     public init(x: Float, y: Float, z: Float, textureU: Float, textureV: Float) {
         position = SIMD3([x, y, z])
-        normal = SIMD2([0.0, 0.0])
         textureCoordinate = SIMD2([textureU, textureV])
     }
 
@@ -77,13 +67,10 @@ extension Vertex3D {
     var textureU: Float { textureCoordinate.x }
     /// The texture V-coordinate mapping
     var textureV: Float { textureCoordinate.x }
-
-    var normalX: Float { normal.x }
-    var normalY: Float { normal.y }
 }
 
 extension Vertex3D: CustomDebugStringConvertible {
     public var debugDescription: String {
-        "<XYZ: (\(x), \(y), \(z)), UV: (\(textureU), \(textureV)), n: (\(normalX), \(normalY))>"
+        "<XYZ: (\(x), \(y), \(z)), UV: (\(textureU), \(textureV)))>"
     }
 }

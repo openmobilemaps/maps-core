@@ -31,7 +31,8 @@ final class Polygon2d: BaseGraphicsObject {
     override func render(encoder: MTLRenderCommandEncoder,
                          context: RenderingContext,
                          renderPass _: MCRenderPassConfig,
-                         mvpMatrix: Int64,
+                         vpMatrix: Int64,
+                         mMatrix: Int64,
                          isMasked: Bool,
                          screenPixelAsRealMeterFactor _: Double) {
         lock.lock()
@@ -65,7 +66,7 @@ final class Polygon2d: BaseGraphicsObject {
         shader.preRender(context)
 
         encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
-        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mvpMatrix)) {
+        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(vpMatrix)) {
             encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
         }
 
@@ -96,7 +97,8 @@ final class Polygon2d: BaseGraphicsObject {
 extension Polygon2d: MCMaskingObjectInterface {
     func render(asMask context: MCRenderingContextInterface?,
                 renderPass _: MCRenderPassConfig,
-                mvpMatrix: Int64,
+                vpMatrix: Int64,
+                mMatrix: Int64,
                 screenPixelAsRealMeterFactor _: Double) {
         guard isReady(),
               let context = context as? RenderingContext,
@@ -128,7 +130,7 @@ extension Polygon2d: MCMaskingObjectInterface {
         shader.preRender(context)
 
         encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
-        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mvpMatrix)) {
+        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(vpMatrix)) {
             encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
         }
 
