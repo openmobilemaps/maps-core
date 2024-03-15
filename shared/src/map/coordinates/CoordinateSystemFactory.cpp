@@ -46,5 +46,5 @@
     return MapCoordinateSystem(CoordinateSystemIdentifiers::UnitSphere(),
                                RectCoord(Coord(CoordinateSystemIdentifiers::UnitSphere(), -2.0 * M_PI, 0.0,         0.0),
                                          Coord(CoordinateSystemIdentifiers::UnitSphere(),  0.0       , -1.0 * M_PI, 3.0)),
-                               1.0 / (2.0 * M_PI / 360.0));
+                               1.0 / (40075017.0 / (2 * M_PI)));
 }
