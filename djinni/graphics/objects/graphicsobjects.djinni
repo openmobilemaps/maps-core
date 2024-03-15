@@ -26,7 +26,7 @@ graphics_object_interface = interface +c +j +o {
 
 masking_object_interface = interface +c +j +o {
     as_graphics_object(): graphics_object_interface;
-	render_as_mask(context: rendering_context_interface, render_pass: render_pass_config, mvp_matrix: i64, screenPixelAsRealMeterFactor: f64);
+	render_as_mask(context: rendering_context_interface, render_pass: render_pass_config, vp_matrix: i64, m_matrix: i64, screenPixelAsRealMeterFactor: f64);
 }
 
 graphics_object_factory_interface = interface +c +j +o {

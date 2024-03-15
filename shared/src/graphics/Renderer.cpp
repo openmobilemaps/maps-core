@@ -53,13 +53,14 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
             for (const auto &renderObject : renderObjects) {
                 const auto &graphicsObject = renderObject->getGraphicsObject();
                 if (renderObject->isScreenSpaceCoords()) {
-                    graphicsObject->render(renderingContext, pass->getRenderPassConfig(), (int64_t) identityMatrix.data(), hasMask, factor);
+                    graphicsObject->render(renderingContext, pass->getRenderPassConfig(), (int64_t) identityMatrix.data(), (int64_t) identityMatrix.data(), hasMask, factor);
                 } else if (renderObject->hasCustomModelMatrix()) {
-                    Matrix::multiplyMMC(tempMvpMatrix, 0, vpMatrix, 0, renderObject->getCustomModelMatrix(), 0);
-                    graphicsObject->render(renderingContext, pass->getRenderPassConfig(), (int64_t)tempMvpMatrix.data(), hasMask,
+                    const auto mMatrix = renderObject->getCustomModelMatrix();
+                    const auto mMatrixPointer = (int64_t)vpMatrix.data();
+                    graphicsObject->render(renderingContext, pass->getRenderPassConfig(), vpMatrixPointer, mMatrixPointer, hasMask,
                                            factor);
                 } else {
-                    graphicsObject->render(renderingContext, pass->getRenderPassConfig(), vpMatrixPointer, hasMask, factor);
+                    graphicsObject->render(renderingContext, pass->getRenderPassConfig(), vpMatrixPointer, (int64_t) identityMatrix.data(), hasMask, factor);
                 }
             }
 
