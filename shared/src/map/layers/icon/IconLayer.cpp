@@ -151,9 +151,12 @@ void IconLayer::addIcons(const std::vector<std::shared_ptr<IconInfoInterface>> &
     std::vector<std::pair<std::shared_ptr<IconInfoInterface>, std::shared_ptr<Textured2dLayerObject>>> iconObjects;
 
     for (const auto &icon : iconsToAdd) {
-        auto shader = shaderFactory->createAlphaShader();
+        auto shader = is3D ? shaderFactory->createUnitSphereAlphaShader() : shaderFactory->createAlphaShader();
         shader->asShaderProgramInterface()->setBlendMode(icon->getBlendMode());
         auto quadObject = objectFactory->createQuad(shader->asShaderProgramInterface());
+        if (is3D) {
+            quadObject->setSubdivisionFactor(SUBDIVISION_FACTOR_3D_DEFAULT);
+        }
 
         auto iconObject = std::make_shared<Textured2dLayerObject>(quadObject, shader, mapInterface);
 
@@ -361,6 +364,7 @@ void IconLayer::preGenerateRenderPasses() {
 
 void IconLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface, int32_t layerIndex) {
     this->mapInterface = mapInterface;
+    is3D = mapInterface->is3d();
     {
         std::scoped_lock<std::recursive_mutex> lock(addingQueueMutex);
         if (!addingQueue.empty()) {

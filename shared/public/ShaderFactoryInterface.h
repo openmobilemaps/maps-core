@@ -24,6 +24,8 @@ public:
 
     virtual /*not-null*/ std::shared_ptr<AlphaShaderInterface> createAlphaShader() = 0;
 
+    virtual /*not-null*/ std::shared_ptr<AlphaShaderInterface> createUnitSphereAlphaShader() = 0;
+
     virtual /*not-null*/ std::shared_ptr<AlphaInstancedShaderInterface> createAlphaInstancedShader() = 0;
 
     virtual /*not-null*/ std::shared_ptr<LineGroupShaderInterface> createLineGroupShader() = 0;

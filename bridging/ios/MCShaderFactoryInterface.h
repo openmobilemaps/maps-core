@@ -20,6 +20,8 @@
 
 - (nullable id<MCAlphaShaderInterface>)createAlphaShader;
 
+- (nullable id<MCAlphaShaderInterface>)createUnitSphereAlphaShader;
+
 - (nullable id<MCAlphaInstancedShaderInterface>)createAlphaInstancedShader;
 
 - (nullable id<MCLineGroupShaderInterface>)createLineGroupShader;

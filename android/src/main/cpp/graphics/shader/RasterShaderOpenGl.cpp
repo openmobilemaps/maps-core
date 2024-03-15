@@ -63,33 +63,11 @@ void RasterShaderOpenGl::setStyle(const RasterShaderStyle &style) {
 }
 
 std::string RasterShaderOpenGl::getVertexShader() {
-    return projectOntoUnitSphere
-           // Project vertices onto unit sphere
-           ? OMMVersionedGlesShaderCode(320 es,
-                                        uniform mat4 uMVPMatrix;
-                                                in vec4 vPosition;
-                                                in vec2 texCoordinate;
-                                                out vec2 v_texcoord;
-
-                                                void main() {
-                                                    gl_Position = uMVPMatrix * vec4(vPosition.z * sin(vPosition.y) * cos(vPosition.x),
-                                                                                    vPosition.z * cos(vPosition.y),
-                                                                                    -vPosition.z * sin(vPosition.y) * sin(vPosition.x),
-                                                                                    1.0);
-                                                    v_texcoord = texCoordinate;
-                                                })
-           // Default vertex shader
-           : OMMVersionedGlesShaderCode(320 es,
-                                        uniform mat4 uMVPMatrix;
-                                                in vec4 vPosition;
-                                                in vec2 texCoordinate;
-                                                out vec2 v_texcoord;
-
-                                                void main() {
-                                                    gl_Position = uMVPMatrix * vPosition;
-                                                    v_texcoord = texCoordinate;
-                                                }
-           );
+    return projectOntoUnitSphere ?
+           // Vertices projected onto unit sphere
+           BaseShaderProgramOpenGl::getUnitSphereVertexShader()
+           // Default Shader
+           : BaseShaderProgramOpenGl::getVertexShader();
 }
 
 std::string RasterShaderOpenGl::getFragmentShader() {
