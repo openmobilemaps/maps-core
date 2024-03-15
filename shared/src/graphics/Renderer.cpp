@@ -58,7 +58,7 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
                     graphicsObject->render(renderingContext, pass->getRenderPassConfig(), identityMatrixPointer, identityMatrixPointer, hasMask, factor);
                 } else if (renderObject->hasCustomModelMatrix()) {
                     const auto mMatrix = renderObject->getCustomModelMatrix();
-                    const auto mMatrixPointer = (int64_t)vpMatrix.data();
+                    const auto mMatrixPointer = (int64_t)mMatrix.data();
                     graphicsObject->render(renderingContext, pass->getRenderPassConfig(), vpMatrixPointer, mMatrixPointer, hasMask,
                                            factor);
                 } else {
