@@ -418,41 +418,15 @@ std::optional<float> MapCamera3d::getLastVpMatrixZoom() {
 void MapCamera3d::update() { inertiaStep(); }
 
 std::vector<float> MapCamera3d::getInvariantModelMatrix(const ::Coord &coordinate, bool scaleInvariant, bool rotationInvariant) {
-
     Coord renderCoord = conversionHelper->convertToRenderSystem(coordinate);
-    Coord focusRenderCoord = conversionHelper->convertToRenderSystem(focusPointPosition);
     std::vector<float> newMatrix(16, 0);
 
     Matrix::setIdentityM(newMatrix, 0);
     Matrix::translateM(newMatrix, 0, renderCoord.x, renderCoord.y, renderCoord.z);
 
-    if (scaleInvariant && validVpMatrix) {
-        Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
-        float sampleSize = M_PI / 180.0;
-        std::vector<float> posOne = {(float) (focusRenderCoord.z * sin(focusRenderCoord.y) * cos(focusRenderCoord.x)),
-                             (float) (focusRenderCoord.z * cos(focusRenderCoord.y)),
-                             (float) (-focusRenderCoord.z * sin(focusRenderCoord.y) * sin(focusRenderCoord.x)),
-                             1.0};
-        std::vector<float> posTwo = {(float) (focusRenderCoord.z * sin(focusRenderCoord.y + sampleSize) * cos(focusRenderCoord.x + sampleSize)),
-                             (float) (focusRenderCoord.z * cos(focusRenderCoord.y + sampleSize)),
-                             (float) (-focusRenderCoord.z * sin(focusRenderCoord.y + sampleSize) * sin(focusRenderCoord.x + sampleSize)),
-                             1.0};
-        auto projectedOne = Matrix::multiply(vpMatrix, posOne);
-        auto projectedTwo = Matrix::multiply(vpMatrix, posTwo);
-        projectedOne[0] /= projectedOne[3];
-        projectedOne[1] /= projectedOne[3];
-        projectedOne[2] /= projectedOne[3];
-        projectedOne[3] /= projectedOne[3];
-        projectedTwo[0] /= projectedTwo[3];
-        projectedTwo[1] /= projectedTwo[3];
-        projectedTwo[2] /= projectedTwo[3];
-        projectedTwo[3] /= projectedTwo[3];
-        float projectedLength = Matrix::length((projectedTwo[0] - projectedOne[0]) * sizeViewport.x,
-                                               (projectedTwo[1] - projectedOne[1]) * sizeViewport.y,
-                                               0.0);
-        double scaleFactor = 2.0 * sqrt(sampleSize * sampleSize * 2) / projectedLength;
-
-        Matrix::scaleM(newMatrix, 0.0, scaleFactor, scaleFactor, 1.0);
+    if (scaleInvariant) {
+        double zoomFactor = mapUnitsFromPixels(1.0);
+        Matrix::scaleM(newMatrix, 0.0, zoomFactor, zoomFactor, 1.0);
     }
 
     if (rotationInvariant) {
@@ -972,10 +946,36 @@ Coord MapCamera3d::coordFromScreenPosition(const ::Vec2F &posScreen) {
     return Vec2F(posScreenX, posScreenY);
 }
 
-double MapCamera3d::mapUnitsFromPixels(double distancePx) { return distancePx * screenPixelAsRealMeterFactor * zoom; }
+double MapCamera3d::mapUnitsFromPixels(double distancePx) {
+    Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
+    if (validVpMatrix && sizeViewport.x != 0 && sizeViewport.y != 0) {
+        Coord focusRenderCoord = conversionHelper->convertToRenderSystem(focusPointPosition);
 
-double MapCamera3d::pixelToMapUnitFactor(const Coord &coord) {
-    return 0;
+        float sampleSize = M_PI / 180.0;
+        std::vector<float> posOne = {(float) (focusRenderCoord.z * sin(focusRenderCoord.y) * cos(focusRenderCoord.x)),
+            (float) (focusRenderCoord.z * cos(focusRenderCoord.y)),
+            (float) (-focusRenderCoord.z * sin(focusRenderCoord.y) * sin(focusRenderCoord.x)),
+            1.0};
+        std::vector<float> posTwo = {(float) (focusRenderCoord.z * sin(focusRenderCoord.y + sampleSize) * cos(focusRenderCoord.x + sampleSize)),
+            (float) (focusRenderCoord.z * cos(focusRenderCoord.y + sampleSize)),
+            (float) (-focusRenderCoord.z * sin(focusRenderCoord.y + sampleSize) * sin(focusRenderCoord.x + sampleSize)),
+            1.0};
+        auto projectedOne = Matrix::multiply(vpMatrix, posOne);
+        auto projectedTwo = Matrix::multiply(vpMatrix, posTwo);
+        projectedOne[0] /= projectedOne[3];
+        projectedOne[1] /= projectedOne[3];
+        projectedOne[2] /= projectedOne[3];
+        projectedOne[3] /= projectedOne[3];
+        projectedTwo[0] /= projectedTwo[3];
+        projectedTwo[1] /= projectedTwo[3];
+        projectedTwo[2] /= projectedTwo[3];
+        projectedTwo[3] /= projectedTwo[3];
+        float projectedLength = Matrix::length((projectedTwo[0] - projectedOne[0]) * sizeViewport.x,
+                                               (projectedTwo[1] - projectedOne[1]) * sizeViewport.y,
+                                               0.0);
+        return distancePx * 2.0 * sqrt(sampleSize * sampleSize * 2) / projectedLength;
+    }
+    return distancePx * screenPixelAsRealMeterFactor * zoom;
 }
 
 double MapCamera3d::getScalingFactor() { return mapUnitsFromPixels(1.0); }
@@ -1091,7 +1091,7 @@ double MapCamera3d::getCameraPitchFromZoom(double zoom) {
 
 double MapCamera3d::getCameraDistanceFromZoom(double zoom) {
     auto z = (zoom - getMaxZoom()) / (getMinZoom() - getMaxZoom());
-    auto max = 20.0;
+    auto max = 2.5;
     auto min = 1.2;
     return min + (z * (max - min));
 }
