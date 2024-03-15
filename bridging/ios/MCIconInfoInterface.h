@@ -19,8 +19,10 @@
 
 - (nonnull MCCoord *)getCoordinate;
 
+/** iconSize is in meters when scaleType is scale invariant(i.e. FIXED or ROTATION_INVARIANT), screen pixels otherwise */
 - (void)setIconSize:(nonnull MCVec2F *)size;
 
+/** iconSize is in meters when scaleType is scale invariant(i.e. FIXED or ROTATION_INVARIANT), screen pixels otherwise */
 - (nonnull MCVec2F *)getIconSize;
 
 - (void)setType:(MCIconType)scaleType;
