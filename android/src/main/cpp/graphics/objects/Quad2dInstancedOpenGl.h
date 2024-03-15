@@ -36,10 +36,10 @@ class Quad2dInstancedOpenGl : public GraphicsObjectInterface,
     virtual void clear() override;
 
     virtual void renderAsMask(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
-                              int64_t mvpMatrix, double screenPixelAsRealMeterFactor) override;
+                              int64_t vpMatrix, int64_t mMatrix, double screenPixelAsRealMeterFactor) override;
 
     virtual void render(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
-                        int64_t mvpMatrix, bool isMasked, double screenPixelAsRealMeterFactor) override;
+                        int64_t vpMatrix, int64_t mMatrix, bool isMasked, double screenPixelAsRealMeterFactor) override;
 
     virtual void setFrame(const ::Quad2dD &frame) override;
 
@@ -85,7 +85,8 @@ class Quad2dInstancedOpenGl : public GraphicsObjectInterface,
     std::string programName;
     int program;
 
-    int mvpMatrixHandle;
+    int vpMatrixHandle;
+    int mMatrixHandle;
     int positionHandle;
     GLuint vertexBuffer;
     std::vector<GLfloat> vertices;

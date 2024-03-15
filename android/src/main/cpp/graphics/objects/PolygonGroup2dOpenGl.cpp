@@ -69,7 +69,8 @@ void PolygonGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterfa
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort) * polygonIndices.size(), &polygonIndices[0], GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-    mvpMatrixHandle = glGetUniformLocation(program, "uMVPMatrix");
+    vpMatrixHandle = glGetUniformLocation(program, "uvpMatrix");
+    mMatrixHandle = glGetUniformLocation(program, "umMatrix");
     scaleFactorHandle = glGetUniformLocation(program, "scaleFactors");
 
     ready = true;
@@ -95,7 +96,7 @@ void PolygonGroup2dOpenGl::removeGlBuffers() {
 void PolygonGroup2dOpenGl::setIsInverseMasked(bool inversed) { isMaskInversed = inversed; }
 
 void PolygonGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
-                                  int64_t mvpMatrix, bool isMasked, double screenPixelAsRealMeterFactor) {
+                                  int64_t vpMatrix, int64_t mMatrix, bool isMasked, double screenPixelAsRealMeterFactor) {
     if (!ready)
         return;
 
@@ -119,7 +120,8 @@ void PolygonGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterf
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
     glUseProgram(program);
 
-    glUniformMatrix4fv(mvpMatrixHandle, 1, false, (GLfloat *)mvpMatrix);
+    glUniformMatrix4fv(vpMatrixHandle, 1, false, (GLfloat *)vpMatrix);
+    glUniformMatrix4fv(mMatrixHandle, 1, false, (GLfloat *)mMatrix);
     if (scaleFactorHandle >= 0) {
         glUniform2f(scaleFactorHandle, screenPixelAsRealMeterFactor,
                     pow(2.0, ceil(log2(screenPixelAsRealMeterFactor))));

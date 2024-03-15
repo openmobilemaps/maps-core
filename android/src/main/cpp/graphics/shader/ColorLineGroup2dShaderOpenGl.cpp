@@ -78,7 +78,7 @@ void ColorLineGroup2dShaderOpenGl::setDashingScaleFactor(float factor) {
 std::string ColorLineGroup2dShaderOpenGl::getVertexShader() {
     return OMMVersionedGlesShaderCode(320 es,
                                       precision highp float;
-                                      uniform mat4 uMVPMatrix;
+                                      uniform mat4 uvpMatrix;
                                       in vec2 vPosition;
                                       in vec2 vWidthNormal;
                                       in vec2 vPointA;
@@ -159,9 +159,9 @@ std::string ColorLineGroup2dShaderOpenGl::getVertexShader() {
                                                    dashingSize *= dashingScaleFactor;
                                                }
 
-                                               vec4 trfPosition = uMVPMatrix * vec4(vPosition.xy, 0.0, 1.0);
+                                               vec4 trfPosition = uvpMatrix * vec4(vPosition.xy, 0.0, 1.0);
                                                vec4 displ = vec4((lengthNormal + widthNormal).xy, 0.0, 0.0) * vec4(scaledWidth, scaledWidth, 0.0, 0.0) + offset;
-                                               vec4 trfDispl = uMVPMatrix * displ;
+                                               vec4 trfDispl = uvpMatrix * displ;
                                                vec4 extendedPosition = vec4(vPosition.xy, 0.0, 1.0) + displ;
                                                radius = scaledWidth;
                                                scaledBlur = blur;

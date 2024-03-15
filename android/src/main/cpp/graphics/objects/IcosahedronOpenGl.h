@@ -33,7 +33,7 @@ public:
     virtual void clear() override;
 
     virtual void render(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
-                        int64_t mvpMatrix, bool isMasked, double screenPixelAsRealMeterFactor) override;
+                        int64_t vpMatrix, int64_t mMatrix, bool isMasked, double screenPixelAsRealMeterFactor) override;
 
     virtual void setVertices(const ::SharedBytes & vertices, const ::SharedBytes & indices) override;
 
@@ -52,7 +52,8 @@ protected:
     std::string programName;
     int program = 0;
 
-    int mvpMatrixHandle;
+    int vpMatrixHandle;
+    int mMatrixHandle;
     int positionHandle;
     int valueHandle;
     GLuint vertexBuffer;

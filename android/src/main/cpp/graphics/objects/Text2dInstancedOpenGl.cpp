@@ -110,7 +110,8 @@ void Text2dInstancedOpenGl::prepareGlData(int program) {
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    mvpMatrixHandle = glGetUniformLocation(program, "uMVPMatrix");
+    vpMatrixHandle = glGetUniformLocation(program, "uvpMatrix");
+    mMatrixHandle = glGetUniformLocation(program, "umMatrix");
 
     glDataBuffersGenerated = true;
 }
@@ -194,7 +195,7 @@ void Text2dInstancedOpenGl::adjustTextureCoordinates() {
 }
 
 void Text2dInstancedOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
-                                   int64_t mvpMatrix, bool isMasked, double screenPixelAsRealMeterFactor) {
+                                   int64_t vpMatrix, int64_t mMatrix, bool isMasked, double screenPixelAsRealMeterFactor) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
     if (!ready || (usesTextureCoords && !textureCoordsReady) || instanceCount == 0 || buffersNotReady) {
         return;
@@ -259,7 +260,8 @@ void Text2dInstancedOpenGl::render(const std::shared_ptr<::RenderingContextInter
 
 
     // Apply the projection and view transformation
-    glUniformMatrix4fv(mvpMatrixHandle, 1, false, (GLfloat *)mvpMatrix);
+    glUniformMatrix4fv(vpMatrixHandle, 1, false, (GLfloat *)vpMatrix);
+    glUniformMatrix4fv(mMatrixHandle, 1, false, (GLfloat *)mMatrix);
 
     // Draw the triangles
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);

@@ -76,14 +76,14 @@ void TextShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterfa
 
 std::string TextShaderOpenGl::getVertexShader() {
     return OMMVersionedGlesShaderCode(320 es,
-                                      uniform mat4 uMVPMatrix;
+                                      uniform mat4 uvpMatrix;
                                       uniform vec2 textureCoordScaleFactor;
                                       in vec2 vPosition;
                                       in vec2 texCoordinate;
                                       out vec2 vTextCoord;
 
                                       void main() {
-                                          gl_Position = vec4((uMVPMatrix * vec4(vPosition.xy, 0.0, 1.0)).xy, 0.0, 1.0);
+                                          gl_Position = vec4((uvpMatrix * vec4(vPosition.xy, 0.0, 1.0)).xy, 0.0, 1.0);
                                           vTextCoord = textureCoordScaleFactor * texCoordinate;
                                       });
 }

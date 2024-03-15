@@ -58,7 +58,7 @@ void IcosahedronColorShaderOpenGl::setColor(float red, float green, float blue, 
 std::string IcosahedronColorShaderOpenGl::getVertexShader() {
     return OMMVersionedGlesShaderCode(320 es,
                                       precision highp float;
-                                      uniform mat4 uMVPMatrix;
+                                      uniform mat4 uvpMatrix;
                                       in vec3 vLatLon;
                                       in float vValue;
                                       out float gridValue;
@@ -72,7 +72,7 @@ std::string IcosahedronColorShaderOpenGl::getVertexShader() {
                                                              -1.0 * sin(th) * sin(phi),
                                                              1.0);
                                           gridValue = vValue;
-                                          gl_Position = uMVPMatrix * adjPos;
+                                          gl_Position = uvpMatrix * adjPos;
                                       }
     );
 }
