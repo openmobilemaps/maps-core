@@ -92,11 +92,11 @@ std::string BaseShaderProgramOpenGl::getUnitSphereVertexShader() {
                                       out vec2 v_texcoord;
 
                                       void main() {
-                                          gl_Position = umMatrix * vPosition;
+                                          gl_Position = umMatrix * vec4(vPosition.xyz, 1.0);
                                           gl_Position = gl_Position / gl_Position.w;
-                                          gl_Position = uvpMatrix * vec4(vPosition.z * sin(vPosition.y) * cos(vPosition.x),
-                                                                          vPosition.z * cos(vPosition.y),
-                                                                          -vPosition.z * sin(vPosition.y) * sin(vPosition.x),
+                                          gl_Position = uvpMatrix * vec4(gl_Position.z * sin(gl_Position.y) * cos(gl_Position.x),
+                                                                          gl_Position.z * cos(gl_Position.y),
+                                                                          -gl_Position.z * sin(gl_Position.y) * sin(gl_Position.x),
                                                                           1.0);
                                           v_texcoord = texCoordinate;
                                       }

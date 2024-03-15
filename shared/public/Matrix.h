@@ -77,7 +77,7 @@ public:
 
     static std::vector<float> sTemp;
 
-    static std::string toMatrixString(std::vector<float> &M);
+    static std::string toMatrixString(const std::vector<float> &M);
 
-    static std::string toVectorString(std::vector<float> &v);
+    static std::string toVectorString(const std::vector<float> &v);
 };

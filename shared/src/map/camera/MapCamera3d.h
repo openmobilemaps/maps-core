@@ -128,6 +128,8 @@ class MapCamera3d : public MapCameraInterface,
 
     virtual double mapUnitsFromPixels(double distancePx) override;
 
+    double pixelToMapUnitFactor(const Coord &coord) override;
+
     virtual double getScalingFactor() override;
 
     virtual void setRotationEnabled(bool enabled) override;
