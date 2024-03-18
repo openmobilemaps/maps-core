@@ -1,5 +1,8 @@
 # Changelog for Open Mobile Maps
 
+## Version 2.2.0
+- @3x sprites are now opt-in, that is per default we do not try to fetch the @3x sprites anymore. To enable it, explicitly add the 'use3xSprites' property to the metadata property in your style json.
+
 ## Version 2.1.0 (07.03.2024)
 - Adds dotted line style (line-dotted boolean and an optional skewFactor, defaulting to 1.0 and denoting the stretch factor)
 - Fixes style for short dashes

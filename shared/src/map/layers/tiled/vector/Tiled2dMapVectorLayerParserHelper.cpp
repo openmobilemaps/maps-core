@@ -202,11 +202,16 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
     std::optional<std::string> metadata;
     std::shared_ptr<Value> globalIsInteractable;
     bool persistingSymbolPlacement = false;
+    std::optional<bool> use3xSprites;
 
     if(json["metadata"].is_object()) {
         metadata = json["metadata"].dump();
         globalIsInteractable = parser.parseValue(json["metadata"]["interactable"]);
         persistingSymbolPlacement = json["metadata"].value("persistingSymbolPlacement", false);
+        
+        if (json["metadata"].contains("use3xSprites")) {
+            use3xSprites = json["metadata"]["use3xSprites"].get<bool>();
+        }
     }
 
     int64_t globalTransitionDuration = 300;
@@ -437,6 +442,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                                                           layers,
                                                           sprite,
                                                           geojsonSources,
-                                                          persistingSymbolPlacement);
+                                                          persistingSymbolPlacement,
+                                                          use3xSprites);
     return Tiled2dMapVectorLayerParserResult(mapDesc, LoaderStatus::OK, "", metadata);
 };
