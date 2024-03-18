@@ -8,6 +8,7 @@
 
 - (nonnull instancetype)initWithZoomLevelScaleFactor:(float)zoomLevelScaleFactor
                                numDrawPreviousLayers:(int32_t)numDrawPreviousLayers
+                       numDrawPreviousOrLaterTLayers:(int32_t)numDrawPreviousOrLaterTLayers
                                   adaptScaleToScreen:(BOOL)adaptScaleToScreen
                                             maskTile:(BOOL)maskTile
                                            underzoom:(BOOL)underzoom
@@ -16,6 +17,7 @@
     if (self = [super init]) {
         _zoomLevelScaleFactor = zoomLevelScaleFactor;
         _numDrawPreviousLayers = numDrawPreviousLayers;
+        _numDrawPreviousOrLaterTLayers = numDrawPreviousOrLaterTLayers;
         _adaptScaleToScreen = adaptScaleToScreen;
         _maskTile = maskTile;
         _underzoom = underzoom;
@@ -26,6 +28,7 @@
 
 + (nonnull instancetype)tiled2dMapZoomInfoWithZoomLevelScaleFactor:(float)zoomLevelScaleFactor
                                              numDrawPreviousLayers:(int32_t)numDrawPreviousLayers
+                                     numDrawPreviousOrLaterTLayers:(int32_t)numDrawPreviousOrLaterTLayers
                                                 adaptScaleToScreen:(BOOL)adaptScaleToScreen
                                                           maskTile:(BOOL)maskTile
                                                          underzoom:(BOOL)underzoom
@@ -33,6 +36,7 @@
 {
     return [[self alloc] initWithZoomLevelScaleFactor:zoomLevelScaleFactor
                                 numDrawPreviousLayers:numDrawPreviousLayers
+                        numDrawPreviousOrLaterTLayers:numDrawPreviousOrLaterTLayers
                                    adaptScaleToScreen:adaptScaleToScreen
                                              maskTile:maskTile
                                             underzoom:underzoom
@@ -42,7 +46,7 @@
 #ifndef DJINNI_DISABLE_DESCRIPTION_METHODS
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@ %p zoomLevelScaleFactor:%@ numDrawPreviousLayers:%@ adaptScaleToScreen:%@ maskTile:%@ underzoom:%@ overzoom:%@>", self.class, (void *)self, @(self.zoomLevelScaleFactor), @(self.numDrawPreviousLayers), @(self.adaptScaleToScreen), @(self.maskTile), @(self.underzoom), @(self.overzoom)];
+    return [NSString stringWithFormat:@"<%@ %p zoomLevelScaleFactor:%@ numDrawPreviousLayers:%@ numDrawPreviousOrLaterTLayers:%@ adaptScaleToScreen:%@ maskTile:%@ underzoom:%@ overzoom:%@>", self.class, (void *)self, @(self.zoomLevelScaleFactor), @(self.numDrawPreviousLayers), @(self.numDrawPreviousOrLaterTLayers), @(self.adaptScaleToScreen), @(self.maskTile), @(self.underzoom), @(self.overzoom)];
 }
 
 #endif

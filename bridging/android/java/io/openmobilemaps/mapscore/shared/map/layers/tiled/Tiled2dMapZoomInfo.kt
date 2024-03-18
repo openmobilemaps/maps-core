@@ -6,6 +6,7 @@ package io.openmobilemaps.mapscore.shared.map.layers.tiled
 data class Tiled2dMapZoomInfo(
     val zoomLevelScaleFactor: Float,
     val numDrawPreviousLayers: Int,
+    val numDrawPreviousOrLaterTLayers: Int,
     val adaptScaleToScreen: Boolean,
     val maskTile: Boolean,
     val underzoom: Boolean,

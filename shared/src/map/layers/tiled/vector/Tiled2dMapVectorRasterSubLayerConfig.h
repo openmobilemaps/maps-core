@@ -29,12 +29,13 @@ public:
         if (customZoomInfo.has_value()) {
             zoomInfo = Tiled2dMapZoomInfo(customZoomInfo->zoomLevelScaleFactor * description->zoomLevelScaleFactor,
                                           std::max(customZoomInfo->numDrawPreviousLayers, description->numDrawPreviousLayers),
+                                          0,
                                           customZoomInfo->adaptScaleToScreen || description->adaptScaleToScreen,
                                           customZoomInfo->maskTile || description->maskTiles,
                                           customZoomInfo->underzoom && description->underzoom,
                                           customZoomInfo->overzoom && description->overzoom);
         } else {
-            zoomInfo = Tiled2dMapZoomInfo(description->zoomLevelScaleFactor, description->numDrawPreviousLayers,
+            zoomInfo = Tiled2dMapZoomInfo(description->zoomLevelScaleFactor, description->numDrawPreviousLayers, 0,
                                           description->adaptScaleToScreen, description->maskTiles, description->underzoom,
                                           description->overzoom);
         }
