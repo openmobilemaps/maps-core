@@ -21,7 +21,7 @@
 class Tiled2dMapVectorLayerConfig : public Tiled2dMapLayerConfig {
 public:
     Tiled2dMapVectorLayerConfig(const std::shared_ptr<VectorMapSourceDescription> &sourceDescription,
-                                const Tiled2dMapZoomInfo &zoomInfo = Tiled2dMapZoomInfo(1.0, 0, false, true, false, true))
+                                const Tiled2dMapZoomInfo &zoomInfo = Tiled2dMapZoomInfo(1.0, 0, 0,  false, true, false, true))
             : sourceDescription(sourceDescription), zoomInfo(zoomInfo) {}
 
     ~Tiled2dMapVectorLayerConfig() {}

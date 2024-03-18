@@ -13,7 +13,7 @@
 
 class Tiled2dMapVectorGeoJSONLayerConfig : public Tiled2dMapVectorLayerConfig {
 public:
-    Tiled2dMapVectorGeoJSONLayerConfig(const std::string &sourceName, const std::weak_ptr<GeoJSONVTInterface> geoJSON, const Tiled2dMapZoomInfo &zoomInfo = Tiled2dMapZoomInfo(1.0, 0, false, true, false, true))
+    Tiled2dMapVectorGeoJSONLayerConfig(const std::string &sourceName, const std::weak_ptr<GeoJSONVTInterface> geoJSON, const Tiled2dMapZoomInfo &zoomInfo = Tiled2dMapZoomInfo(1.0, 0, 0, false, true, false, true))
             : Tiled2dMapVectorLayerConfig(nullptr, zoomInfo), geoJSON(geoJSON), sourceName(sourceName) {}
 
     ~Tiled2dMapVectorGeoJSONLayerConfig() {}

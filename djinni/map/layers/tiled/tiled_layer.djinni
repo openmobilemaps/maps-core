@@ -46,6 +46,8 @@ tiled_2d_map_zoom_info = record {
     # this factor is applied to the the scale
 	zoom_level_scale_factor: f32;
 	num_draw_previous_layers: i32;
+    num_draw_previous_or_later_t_layers: i32;
+
     # if this flag is set to true the map is scaled according to the wmts scaledenominator (https://gis.stackexchange.com/questions/315881/what-is-wmts-scaledenominator)
     # and the screen ppi
     adapt_scale_to_screen: bool;

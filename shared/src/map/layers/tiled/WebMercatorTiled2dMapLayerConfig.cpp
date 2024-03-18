@@ -72,7 +72,7 @@ std::vector<Tiled2dMapZoomLevelInfo> WebMercatorTiled2dMapLayerConfig::getZoomLe
 }
 
 Tiled2dMapZoomInfo WebMercatorTiled2dMapLayerConfig::getZoomInfo() {
-    return Tiled2dMapZoomInfo(0.65, 0, true, false, true, true);
+    return Tiled2dMapZoomInfo(0.65, 0, 0, true, false, true, true);
 }
 
 std::optional<Tiled2dMapVectorSettings> WebMercatorTiled2dMapLayerConfig::getVectorSettings() {
