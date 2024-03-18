@@ -28,12 +28,11 @@ class PolygonPatternGroupShader: BaseShader {
     // MARK: - Setup
 
     override func setupProgram(_: MCRenderingContextInterface?) {
-        pipelineAccessQueue.sync {
-            if pipeline == nil {
-                let t : PipelineType = fadeInPattern ? .polygonPatternFadeInGroupShader : .polygonPatternGroupShader
+        guard pipeline == nil else { return }
+
+        let t : PipelineType = fadeInPattern ? .polygonPatternFadeInGroupShader : .polygonPatternGroupShader
         let pl = Pipeline(type: t, blendMode: blendMode)
-        pipeline = MetalContext.current.pipelineLibrary.value(pl.json)            }
-        }
+        pipeline = MetalContext.current.pipelineLibrary.value(pl.json)
     }
 
     override func preRender(encoder: MTLRenderCommandEncoder, context: RenderingContext) {

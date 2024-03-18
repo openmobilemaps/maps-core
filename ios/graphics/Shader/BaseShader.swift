@@ -16,7 +16,6 @@ open class BaseShader: MCShaderProgramInterface {
     open var blendMode: MCBlendMode = .NORMAL
 
     open var pipeline: MTLRenderPipelineState?
-    let pipelineAccessQueue = DispatchQueue(label: "pipelineAccessQueue")
 
     public init() {
     }
@@ -41,9 +40,7 @@ open class BaseShader: MCShaderProgramInterface {
     open func setBlendMode(_ blendMode: MCBlendMode) {
         guard blendMode != self.blendMode else { return }
         self.blendMode = blendMode
-        pipelineAccessQueue.sync {
-            pipeline = nil
-        }
+        pipeline = nil
         setupProgram(nil)
     }
 }

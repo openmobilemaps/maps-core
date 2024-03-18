@@ -18,10 +18,8 @@ class ColorCircleShader: BaseShader {
     private var miter: Float = 0.0
 
     override func setupProgram(_: MCRenderingContextInterface?) {
-        pipelineAccessQueue.sync {
-            if pipeline == nil {
-                pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: .roundColorShader, blendMode: blendMode).json)
-            }
+        if pipeline == nil {
+            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: .roundColorShader, blendMode: blendMode).json)
         }
     }
 

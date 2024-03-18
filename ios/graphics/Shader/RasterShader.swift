@@ -45,10 +45,8 @@ class RasterShader: BaseShader {
     }
 
     override func setupProgram(_: MCRenderingContextInterface?) {
-        pipelineAccessQueue.sync {
-            if pipeline == nil {
-                pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: shader, blendMode: blendMode).json)
-            }
+        if pipeline == nil {
+            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: shader, blendMode: blendMode).json)
         }
     }
 

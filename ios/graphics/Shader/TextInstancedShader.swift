@@ -14,10 +14,8 @@ import Metal
 
 class TextInstancedShader: BaseShader {
     override func setupProgram(_: MCRenderingContextInterface?) {
-        pipelineAccessQueue.sync {
-            if pipeline == nil {
-                pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: .textInstancedShader, blendMode: blendMode).json)
-            }
+        if pipeline == nil {
+            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: .textInstancedShader, blendMode: blendMode).json)
         }
     }
 

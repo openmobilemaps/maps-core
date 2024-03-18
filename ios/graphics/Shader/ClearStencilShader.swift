@@ -26,10 +26,8 @@ class ClearStencilShader: BaseShader {
     }()
 
     override func setupProgram(_: MCRenderingContextInterface?) {
-        pipelineAccessQueue.sync {
-            if pipeline == nil {
-                pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: .clearStencilShader, blendMode: blendMode).json)
-            }
+        if pipeline == nil {
+            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: .clearStencilShader, blendMode: blendMode).json)
         }
     }
 

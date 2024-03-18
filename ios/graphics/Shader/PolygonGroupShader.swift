@@ -24,11 +24,9 @@ class PolygonGroupShader: BaseShader {
     }
 
     override func setupProgram(_: MCRenderingContextInterface?) {
-        pipelineAccessQueue.sync {
-            if pipeline == nil {
+        if pipeline == nil {
             let t : PipelineType = isStriped ? .polygonStripedGroupShader : .polygonGroupShader
             pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: t, blendMode: blendMode).json)
-            }
         }
     }
 
