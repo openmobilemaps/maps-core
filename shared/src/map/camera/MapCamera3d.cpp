@@ -646,9 +646,11 @@ bool MapCamera3d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
                 newPhi = oldPhi;
             }
 
+            auto absY = std::min(1.0, std::abs(focusPointPosition.y + 2.0 * cameraPitch) / (90.0 - 2.0 * cameraPitch));
+            auto f = (1 + 0.8 * absY);
 
             // DELTA CALCULATION
-            dPhi = (newPhi - oldPhi) * (180.0 / M_PI) * (mapSystemRtl ? -1 : 1);
+            dPhi = (newPhi - oldPhi) * (180.0 / M_PI) * (mapSystemRtl ? -1 : 1) * f;
             dTheta = (newTheta - oldTheta) * (180.0 / M_PI) * (mapSystemTtb ? 1 : -1);
 
             if(std::abs(dTheta) > 20 || std::abs(dPhi) > 20) {
@@ -717,10 +719,11 @@ void MapCamera3d::inertiaStep() {
         return;
     }
 
-    float factor = std::pow(0.99, delta);
+    float factor = std::pow(0.95, delta);
     if (delta > inertia->t1) {
         factor *= std::pow(0.6, delta - inertia->t1);
     }
+
     float xDiffMap = (inertia->velocity.x) * factor * deltaPrev;
     float yDiffMap = (inertia->velocity.y) * factor * deltaPrev;
     inertia->timestampUpdate = now;
