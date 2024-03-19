@@ -1,5 +1,9 @@
 # Changelog for Open Mobile Maps
 
+## Version 2.0.3 (19.03.2024)
+- Fixes thread safety in iOS shader
+- Fixes coordinate conversion from EPSG:4326 to EPSG:3857
+
 ## Version 2.0.2 (12.03.2024)
 - Fixes a bug in iOS Polygon Pattern Shader
 - Fixes a bug in camera restricted bounds calculations
