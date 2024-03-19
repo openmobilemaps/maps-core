@@ -646,8 +646,14 @@ bool MapCamera3d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
                 newPhi = oldPhi;
             }
 
-            auto absY = std::min(1.0, std::abs(focusPointPosition.y + 2.0 * cameraPitch) / (90.0 - 2.0 * cameraPitch));
-            auto f = (1 + 0.8 * absY);
+            auto factor1 = 0.8 * std::min(1.0, std::abs(focusPointPosition.y + 2.0 * cameraPitch) / (90.0 - 2.0 * cameraPitch));
+
+            auto fp = (std::max(0.0, focusPointPosition.y - 30.0) / 60.0f);
+            auto factor2 = 5.5 * fp * fp;
+
+            auto distance = (1.0 - cameraDistance / 2.5) * 0.5;
+
+            auto f = (1 + factor1 + factor2 + distance);
 
             // DELTA CALCULATION
             dPhi = (newPhi - oldPhi) * (180.0 / M_PI) * (mapSystemRtl ? -1 : 1) * f;
