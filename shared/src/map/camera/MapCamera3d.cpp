@@ -703,9 +703,9 @@ bool MapCamera3d::onMoveComplete() {
 }
 
 void MapCamera3d::setupInertia() {
-    float vel = sqrt(currentDragVelocity.x * currentDragVelocity.x + currentDragVelocity.y * currentDragVelocity.y);
-    double t1 = vel >= 1.0 ? -19.4957 * std::log(1.0 / vel) : 0.0;
-    double t2 = vel >= 0.01 ? -1.95762 * std::log(0.01 / 1.0) : 0.0;
+    float vel = std::sqrt(currentDragVelocity.x * currentDragVelocity.x + currentDragVelocity.y * currentDragVelocity.y);
+    double t1 = vel >= 0.4 ? 30.0 : 0.0;
+    double t2 = vel >= 0.01 ? 200.0 : 0.0;
     inertia = Inertia(DateHelper::currentTimeMicros(), currentDragVelocity, t1, t2);
     currentDragVelocity = {0, 0};
     currentDragTimestamp = 0;
@@ -725,7 +725,7 @@ void MapCamera3d::inertiaStep() {
         return;
     }
 
-    float factor = std::pow(0.95, delta);
+    float factor = std::pow(0.9, delta);
     if (delta > inertia->t1) {
         factor *= std::pow(0.6, delta - inertia->t1);
     }
