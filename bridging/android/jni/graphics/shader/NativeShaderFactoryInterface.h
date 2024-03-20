@@ -37,6 +37,7 @@ private:
         /*not-null*/ std::shared_ptr<::AlphaShaderInterface> createUnitSphereAlphaShader() override;
         /*not-null*/ std::shared_ptr<::AlphaInstancedShaderInterface> createAlphaInstancedShader() override;
         /*not-null*/ std::shared_ptr<::LineGroupShaderInterface> createLineGroupShader() override;
+        /*not-null*/ std::shared_ptr<::ColorShaderInterface> createUnitSphereColorShader() override;
         /*not-null*/ std::shared_ptr<::ColorShaderInterface> createColorShader() override;
         /*not-null*/ std::shared_ptr<::ColorCircleShaderInterface> createColorCircleShader() override;
         /*not-null*/ std::shared_ptr<::PolygonGroupShaderInterface> createPolygonGroupShader(bool isStriped) override;
@@ -58,6 +59,7 @@ private:
     const jmethodID method_createUnitSphereAlphaShader { ::djinni::jniGetMethodID(clazz.get(), "createUnitSphereAlphaShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/AlphaShaderInterface;") };
     const jmethodID method_createAlphaInstancedShader { ::djinni::jniGetMethodID(clazz.get(), "createAlphaInstancedShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/AlphaInstancedShaderInterface;") };
     const jmethodID method_createLineGroupShader { ::djinni::jniGetMethodID(clazz.get(), "createLineGroupShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/LineGroupShaderInterface;") };
+    const jmethodID method_createUnitSphereColorShader { ::djinni::jniGetMethodID(clazz.get(), "createUnitSphereColorShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/ColorShaderInterface;") };
     const jmethodID method_createColorShader { ::djinni::jniGetMethodID(clazz.get(), "createColorShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/ColorShaderInterface;") };
     const jmethodID method_createColorCircleShader { ::djinni::jniGetMethodID(clazz.get(), "createColorCircleShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/ColorCircleShaderInterface;") };
     const jmethodID method_createPolygonGroupShader { ::djinni::jniGetMethodID(clazz.get(), "createPolygonGroupShader", "(Z)Lio/openmobilemaps/mapscore/shared/graphics/shader/PolygonGroupShaderInterface;") };

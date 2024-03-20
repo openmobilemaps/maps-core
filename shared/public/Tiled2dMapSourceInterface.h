@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "Coord.h"
 #include "ErrorManager.h"
 #include "LayerReadyState.h"
 #include "RectCoord.h"
@@ -17,7 +18,7 @@ public:
 
     virtual void onVisibleBoundsChanged(const ::RectCoord & visibleBounds, int32_t curT, double zoom) = 0;
 
-    virtual void onCameraChange(const std::vector<float> & viewMatrix, const std::vector<float> & projectionMatrix, float verticalFov, float horizontalFov, float width, float height, float focusPointAltitude) = 0;
+    virtual void onCameraChange(const std::vector<float> & viewMatrix, const std::vector<float> & projectionMatrix, float verticalFov, float horizontalFov, float width, float height, float focusPointAltitude, const ::Coord & focusPointPosition) = 0;
 
     virtual void setMinZoomLevelIdentifier(std::optional<int32_t> value) = 0;
 

@@ -23,7 +23,10 @@ shader_factory_interface = interface +c +j +o {
     create_unit_sphere_alpha_shader() : alpha_shader_interface;
     create_alpha_instanced_shader(): alpha_instanced_shader_interface;
     create_line_group_shader(): line_group_shader_interface;
+
+    create_unit_sphere_color_shader() : color_shader_interface;
     create_color_shader() : color_shader_interface;
+
     create_color_circle_shader() : color_circle_shader_interface;
     create_polygon_group_shader(is_striped: bool): polygon_group_shader_interface;
     create_polygon_pattern_group_shader(fade_in_pattern: bool): polygon_pattern_group_shader_interface;

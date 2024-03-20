@@ -71,6 +71,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (nullable id<MCColorShaderInterface>)createUnitSphereColorShader {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->createUnitSphereColorShader();
+        return ::djinni_generated::ColorShaderInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (nullable id<MCColorShaderInterface>)createColorShader {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->createColorShader();
@@ -183,6 +190,13 @@ public:
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createLineGroupShader];
             return ::djinni_generated::LineGroupShaderInterface::toCpp(objcpp_result_);
+        }
+    }
+    /*not-null*/ std::shared_ptr<::ColorShaderInterface> createUnitSphereColorShader() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createUnitSphereColorShader];
+            return ::djinni_generated::ColorShaderInterface::toCpp(objcpp_result_);
         }
     }
     /*not-null*/ std::shared_ptr<::ColorShaderInterface> createColorShader() override
