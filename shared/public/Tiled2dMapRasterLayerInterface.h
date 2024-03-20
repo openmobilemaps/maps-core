@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "BlendMode.h"
 #include "LayerInterface.h"
 #include "LoaderInterface.h"
 #include "MaskingObjectInterface.h"
@@ -61,4 +62,6 @@ public:
     virtual /*not-null*/ std::shared_ptr<::Tiled2dMapLayerConfig> getConfig() = 0;
 
     virtual void set3dSubdivisionFactor(int32_t factor) = 0;
+
+    virtual void setBlendMode(::BlendMode blendMode) = 0;
 };

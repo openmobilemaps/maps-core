@@ -108,6 +108,8 @@ public:
 
     void set3dSubdivisionFactor(int32_t factor) override;
 
+    void setBlendMode(::BlendMode blendMode) override;
+
 private:
     virtual void enableAnimations(bool enabled) override;
 
@@ -136,6 +138,8 @@ protected:
     ::RasterShaderStyle style = RasterShaderStyle::DEFAULT_STYLE;
     bool animationsEnabled = true;
     bool registerToTouchHandler = true;
+
+    ::BlendMode blendMode = BlendMode::NORMAL;
 
     std::vector<std::shared_ptr<MaskingObjectInterface>> newMaskObjects;
     std::vector<std::shared_ptr<MaskingObjectInterface>> obsoleteMaskObjects;

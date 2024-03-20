@@ -6,6 +6,7 @@
 #import "DJICppWrapperCache+Private.h"
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
+#import "MCBlendMode+Private.h"
 #import "MCLayerInterface+Private.h"
 #import "MCLoaderInterface+Private.h"
 #import "MCMaskingObjectInterface+Private.h"
@@ -169,6 +170,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 - (void)set3dSubdivisionFactor:(int32_t)factor {
     try {
         _cppRefHandle.get()->set3dSubdivisionFactor(::djinni::I32::toCpp(factor));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)setBlendMode:(MCBlendMode)blendMode {
+    try {
+        _cppRefHandle.get()->setBlendMode(::djinni::Enum<::BlendMode, MCBlendMode>::toCpp(blendMode));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

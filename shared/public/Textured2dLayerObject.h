@@ -65,6 +65,8 @@ class Textured2dLayerObject : public LayerObjectInterface {
     
     std::shared_ptr<RenderObjectInterface> getRenderObject();
 
+    std::shared_ptr<ShaderProgramInterface> getShader();
+
     void beginAlphaAnimation(double startAlpha, double targetAlpha, long long duration);
     
     void beginStyleAnimation(RasterShaderStyle start, RasterShaderStyle target, long long duration);

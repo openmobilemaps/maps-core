@@ -259,6 +259,7 @@ void Tiled2dMapRasterLayer::onTilesUpdated(const std::string &layerName, std::un
                     tileObject = std::make_shared<Textured2dLayerObject>(graphicsFactory->createQuad(shader), mapInterface, is3d);
                 } else {
                     auto rasterShader = is3d ? shaderFactory->createUnitSphereRasterShader() : shaderFactory->createRasterShader();
+                    rasterShader->asShaderProgramInterface()->setBlendMode(blendMode);
                     tileObject = std::make_shared<Textured2dLayerObject>(
                             graphicsFactory->createQuad(rasterShader->asShaderProgramInterface()), rasterShader, mapInterface, is3d);
                 }
@@ -577,4 +578,20 @@ void Tiled2dMapRasterLayer::updateReadyStateListenerIfNeeded() {
 
 void Tiled2dMapRasterLayer::set3dSubdivisionFactor(int32_t factor) {
     this->subdivisionFactor = factor;
+}
+
+void Tiled2dMapRasterLayer::setBlendMode(::BlendMode blendMode) {
+    this->blendMode = blendMode;
+    if (shader) {
+        shader->setBlendMode(blendMode);
+    }
+    {
+        std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
+        for (const auto &tileObject : tileObjectMap) {
+            auto shader = tileObject.second->getShader();
+            if (shader) {
+                shader->setBlendMode(blendMode);
+            }
+        }
+    }
 }
