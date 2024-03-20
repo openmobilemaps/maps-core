@@ -829,52 +829,48 @@ bool MapCamera3d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, cons
             rotationPossible = false;
         }
 
-//        auto midpoint = Vec2FHelper::midpoint(posScreenNew[0], posScreenNew[1]);
-//        auto oldMidpoint = Vec2FHelper::midpoint(posScreenOld[0], posScreenOld[1]);
-//        Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
-//        auto centerScreen = Vec2F(sizeViewport.x * 0.5f, sizeViewport.y * 0.5f);
-//
-//        float dx = -(scaleFactor - 1) * (midpoint.x - centerScreen.x) + (midpoint.x - oldMidpoint.x);
-//        float dy = -(scaleFactor - 1) * (midpoint.y - centerScreen.y) + (midpoint.y - oldMidpoint.y);
-//
-//        float sinAngle = sin(angle * M_PI / 180.0);
-//        float cosAngle = cos(angle * M_PI / 180.0);
-//
-//        float leftDiff = (cosAngle * dx + sinAngle * dy);
-//        float topDiff = (-sinAngle * dx + cosAngle * dy);
-//
-//        double diffCenterX = -leftDiff * newZoom * screenPixelAsRealMeterFactor;
-//        double diffCenterY = topDiff * newZoom * screenPixelAsRealMeterFactor;
+        auto viewport = mapInterface->getRenderingContext()->getViewportSize();
 
-        /*focusPointPosition.y += diffCenterX;
-        focusPointPosition.x += diffCenterY;*/
+        float dPhi = 0.0;
+        float dTheta = 0.0;
+
+        auto midpoint = Vec2FHelper::midpoint(posScreenNew[0], posScreenNew[1]);
+        auto oldMidpoint = Vec2FHelper::midpoint(posScreenOld[0], posScreenOld[1]);
+        
+        float dx = midpoint.x - oldMidpoint.x;
+        float dy = midpoint.y - oldMidpoint.y;
+
+        auto fovWithPitch = 2.0 * (0.5 * FIELD_OF_VIEW + cameraPitch);
+        auto fovWithoutPitch = 2.0 * (0.5 * FIELD_OF_VIEW - cameraPitch);
+
+        // horizontal
+        auto halfWidth = MapCamera3DHelper::halfWidth(cameraDistance * cos(cameraPitch * M_PI / 180.0), FIELD_OF_VIEW, viewport.x, viewport.y);
+        auto viewPortHalfX = viewport.x * 0.5;
+
+        // vertical
+        auto halfHeightTop = MapCamera3DHelper::halfHeight(cameraDistance * cos(cameraPitch * M_PI / 180.0), fovWithPitch);
+        auto halfHeightBottom = MapCamera3DHelper::halfHeight(cameraDistance * cos(cameraPitch * M_PI / 180.0), fovWithoutPitch);
+        auto h = halfHeightTop + halfHeightBottom;
+
+        auto centerY = viewport.y * (halfHeightTop / h);
+
+        auto tdx = (((midpoint.x) - viewPortHalfX) / viewPortHalfX);
+        auto tdy = ((centerY - (midpoint.y)) / centerY);
+
+        dPhi = tdx * (180.0 / M_PI) * (mapSystemRtl ? -1 : 1);
+        dTheta = tdy * (180.0 / M_PI) * (mapSystemTtb ? 1 : -1);
+
+        double t = (newZoom > zoom) ? 1.0 : -1.0;
+        focusPointPosition.x += t * dPhi * 0.001;
+        focusPointPosition.y += t * dTheta * 0.00055;
+
+        float beforeAngle = cameraPitch;
+
         updateZoom(newZoom);
 
-//        if (config.rotationEnabled) {
-//            float olda = atan2(posScreenOld[0].x - posScreenOld[1].x, posScreenOld[0].y - posScreenOld[1].y);
-//            float newa = atan2(posScreenNew[0].x - posScreenNew[1].x, posScreenNew[0].y - posScreenNew[1].y);
-//            if (isRotationThresholdReached) {
-//                angle = fmod((angle + (olda - newa) / M_PI * 180.0) + 360.0, 360.0);
-//
-//                // Update focusPointPosition such that the midpoint is the rotation center
-//                double centerXDiff = (centerScreen.x - midpoint.x) * cos(newa - olda) -
-//                                     (centerScreen.y - midpoint.y) * sin(newa - olda) + midpoint.x - centerScreen.x;
-//                double centerYDiff = (centerScreen.y - midpoint.y) * cos(newa - olda) -
-//                                     (centerScreen.x - midpoint.x) * sin(newa - olda) + midpoint.y - centerScreen.y;
-//                double rotDiffX = (cosAngle * centerXDiff - sinAngle * centerYDiff);
-//                double rotDiffY = (cosAngle * centerYDiff + sinAngle * centerXDiff);
-//                focusPointPosition.x += rotDiffX * zoom * screenPixelAsRealMeterFactor;
-//                focusPointPosition.y += rotDiffY * zoom * screenPixelAsRealMeterFactor;
-//
-//                listenerType |= ListenerType::ROTATION;
-//            } else {
-//                tempAngle = fmod((tempAngle + (olda - newa) / M_PI * 180.0) + 360.0, 360.0);
-//                auto diff = std::min(std::abs(tempAngle - angle), std::abs(360.0 - (tempAngle - angle)));
-//                if (diff >= ROTATION_THRESHOLD && rotationPossible) {
-//                    isRotationThresholdReached = true;
-//                }
-//            }
-//        }
+        float afterAngle = cameraPitch;
+        focusPointPosition.y -= 0.5 * (afterAngle - beforeAngle);
+        focusPointPosition.y = std::clamp(focusPointPosition.y, -90.0, 90.0);
 
         auto mapConfig = mapInterface->getMapConfig();
 
