@@ -17,9 +17,15 @@ class ColorShader: BaseShader {
 
     private var stencilState: MTLDepthStencilState?
 
+    private let shader: PipelineType
+
+    init(shader: PipelineType = .colorShader) {
+        self.shader = shader
+    }
+
     override func setupProgram(_: MCRenderingContextInterface?) {
         if pipeline == nil {
-            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: .colorShader, blendMode: blendMode).json)
+            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: shader, blendMode: blendMode).json)
         }
     }
 

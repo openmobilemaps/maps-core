@@ -26,6 +26,8 @@
 
 - (nullable id<MCLineGroupShaderInterface>)createLineGroupShader;
 
+- (nullable id<MCColorShaderInterface>)createUnitSphereColorShader;
+
 - (nullable id<MCColorShaderInterface>)createColorShader;
 
 - (nullable id<MCColorCircleShaderInterface>)createColorCircleShader;

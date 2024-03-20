@@ -290,7 +290,7 @@ public class MapViewCoordinator: MCMapCameraListenerInterface {
     }
 
     nonisolated
-    public func onCameraChange(_ viewMatrix: [NSNumber], projectionMatrix: [NSNumber], verticalFov: Float, horizontalFov: Float, width: Float, height: Float, focusPointAltitude: Float) {}
+    public func onCameraChange(_ viewMatrix: [NSNumber], projectionMatrix: [NSNumber], verticalFov: Float, horizontalFov: Float, width: Float, height: Float, focusPointAltitude: Float, focusPointPosition: MCCoord) {}
 
 
     nonisolated

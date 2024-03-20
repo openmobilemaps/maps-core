@@ -490,6 +490,7 @@ void MapCamera3d::notifyListeners(const int &listenerType) {
     float horizontalFov = 0.0;
     float verticalFov = 0.0;
     float focusPointAltitude = 0.0;
+    auto focusPointPosition = Coord(0, 0.0, 0.0, 0.0);
 
     if (listenerType & ListenerType::BOUNDS) {
         bool validVpMatrix = false;
@@ -508,6 +509,7 @@ void MapCamera3d::notifyListeners(const int &listenerType) {
             horizontalFov = this->horizontalFov;
             verticalFov = this->verticalFov;
             focusPointAltitude = this->focusPointAltitude;
+            focusPointPosition = this->focusPointPosition;
         }
 
         Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
@@ -518,7 +520,7 @@ void MapCamera3d::notifyListeners(const int &listenerType) {
     std::lock_guard<std::recursive_mutex> lock(listenerMutex);
     for (auto listener : listeners) {
         if (listenerType & ListenerType::BOUNDS) {
-            listener->onCameraChange(viewMatrix, projectionMatrix, verticalFov, horizontalFov, width, height, focusPointAltitude);
+            listener->onCameraChange(viewMatrix, projectionMatrix, verticalFov, horizontalFov, width, height, focusPointAltitude, focusPointPosition);
         }
         if (listenerType & ListenerType::ROTATION) {
             listener->onRotationChanged(angle);
@@ -672,6 +674,8 @@ bool MapCamera3d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
     focusPointPosition.x += dPhi;
     focusPointPosition.y += dTheta;
 
+    focusPointPosition.x = std::fmod((focusPointPosition.x + 180 + 360), 360.0) - 180;
+
     lastOnTouchDownPoint->x = lastOnTouchDownPoint->x + dx;
     lastOnTouchDownPoint->y = lastOnTouchDownPoint->y + dy;
 
@@ -739,6 +743,7 @@ void MapCamera3d::inertiaStep() {
                                focusPointPosition.y + yDiffMap,
                                focusPointPosition.z);
 
+    focusPointPosition.x = std::fmod((focusPointPosition.x + 180 + 360), 360.0) - 180;
     focusPointPosition.y = std::clamp(focusPointPosition.y, -90.0, 90.0);
 
     notifyListeners(ListenerType::BOUNDS);

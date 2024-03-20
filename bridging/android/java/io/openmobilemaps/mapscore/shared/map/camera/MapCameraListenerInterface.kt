@@ -14,7 +14,7 @@ abstract class MapCameraListenerInterface {
 
     abstract fun onMapInteraction()
 
-    abstract fun onCameraChange(viewMatrix: ArrayList<Float>, projectionMatrix: ArrayList<Float>, verticalFov: Float, horizontalFov: Float, width: Float, height: Float, focusPointAltitude: Float)
+    abstract fun onCameraChange(viewMatrix: ArrayList<Float>, projectionMatrix: ArrayList<Float>, verticalFov: Float, horizontalFov: Float, width: Float, height: Float, focusPointAltitude: Float, focusPointPosition: io.openmobilemaps.mapscore.shared.map.coordinates.Coord)
 
     private class CppProxy : MapCameraListenerInterface {
         private val nativeRef: Long
@@ -49,10 +49,10 @@ abstract class MapCameraListenerInterface {
         }
         private external fun native_onMapInteraction(_nativeRef: Long)
 
-        override fun onCameraChange(viewMatrix: ArrayList<Float>, projectionMatrix: ArrayList<Float>, verticalFov: Float, horizontalFov: Float, width: Float, height: Float, focusPointAltitude: Float) {
+        override fun onCameraChange(viewMatrix: ArrayList<Float>, projectionMatrix: ArrayList<Float>, verticalFov: Float, horizontalFov: Float, width: Float, height: Float, focusPointAltitude: Float, focusPointPosition: io.openmobilemaps.mapscore.shared.map.coordinates.Coord) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_onCameraChange(this.nativeRef, viewMatrix, projectionMatrix, verticalFov, horizontalFov, width, height, focusPointAltitude)
+            native_onCameraChange(this.nativeRef, viewMatrix, projectionMatrix, verticalFov, horizontalFov, width, height, focusPointAltitude, focusPointPosition)
         }
-        private external fun native_onCameraChange(_nativeRef: Long, viewMatrix: ArrayList<Float>, projectionMatrix: ArrayList<Float>, verticalFov: Float, horizontalFov: Float, width: Float, height: Float, focusPointAltitude: Float)
+        private external fun native_onCameraChange(_nativeRef: Long, viewMatrix: ArrayList<Float>, projectionMatrix: ArrayList<Float>, verticalFov: Float, horizontalFov: Float, width: Float, height: Float, focusPointAltitude: Float, focusPointPosition: io.openmobilemaps.mapscore.shared.map.coordinates.Coord)
     }
 }

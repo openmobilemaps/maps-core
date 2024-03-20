@@ -6,6 +6,7 @@
 #import "DJICppWrapperCache+Private.h"
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
+#import "MCCoord+Private.h"
 #import "MCErrorManager+Private.h"
 #import "MCLayerReadyState+Private.h"
 #import "MCRectCoord+Private.h"
@@ -49,7 +50,8 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
          horizontalFov:(float)horizontalFov
                  width:(float)width
                 height:(float)height
-    focusPointAltitude:(float)focusPointAltitude {
+    focusPointAltitude:(float)focusPointAltitude
+    focusPointPosition:(nonnull MCCoord *)focusPointPosition {
     try {
         _cppRefHandle.get()->onCameraChange(::djinni::List<::djinni::F32>::toCpp(viewMatrix),
                                             ::djinni::List<::djinni::F32>::toCpp(projectionMatrix),
@@ -57,7 +59,8 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
                                             ::djinni::F32::toCpp(horizontalFov),
                                             ::djinni::F32::toCpp(width),
                                             ::djinni::F32::toCpp(height),
-                                            ::djinni::F32::toCpp(focusPointAltitude));
+                                            ::djinni::F32::toCpp(focusPointAltitude),
+                                            ::djinni_generated::Coord::toCpp(focusPointPosition));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

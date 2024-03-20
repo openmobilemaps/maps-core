@@ -3,6 +3,7 @@
 
 #include "NativeMapCameraListenerInterface.h"  // my header
 #include "Marshal.hpp"
+#include "NativeCoord.h"
 #include "NativeRectCoord.h"
 
 namespace djinni_generated {
@@ -39,7 +40,7 @@ void NativeMapCameraListenerInterface::JavaProxy::onMapInteraction() {
     jniEnv->CallVoidMethod(Handle::get().get(), data.method_onMapInteraction);
     ::djinni::jniExceptionCheck(jniEnv);
 }
-void NativeMapCameraListenerInterface::JavaProxy::onCameraChange(const std::vector<float> & c_viewMatrix, const std::vector<float> & c_projectionMatrix, float c_verticalFov, float c_horizontalFov, float c_width, float c_height, float c_focusPointAltitude) {
+void NativeMapCameraListenerInterface::JavaProxy::onCameraChange(const std::vector<float> & c_viewMatrix, const std::vector<float> & c_projectionMatrix, float c_verticalFov, float c_horizontalFov, float c_width, float c_height, float c_focusPointAltitude, const ::Coord & c_focusPointPosition) {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
     const auto& data = ::djinni::JniClass<::djinni_generated::NativeMapCameraListenerInterface>::get();
@@ -50,7 +51,8 @@ void NativeMapCameraListenerInterface::JavaProxy::onCameraChange(const std::vect
                            ::djinni::get(::djinni::F32::fromCpp(jniEnv, c_horizontalFov)),
                            ::djinni::get(::djinni::F32::fromCpp(jniEnv, c_width)),
                            ::djinni::get(::djinni::F32::fromCpp(jniEnv, c_height)),
-                           ::djinni::get(::djinni::F32::fromCpp(jniEnv, c_focusPointAltitude)));
+                           ::djinni::get(::djinni::F32::fromCpp(jniEnv, c_focusPointAltitude)),
+                           ::djinni::get(::djinni_generated::NativeCoord::fromCpp(jniEnv, c_focusPointPosition)));
     ::djinni::jniExceptionCheck(jniEnv);
 }
 
@@ -86,7 +88,7 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_camera_MapCam
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_camera_MapCameraListenerInterface_00024CppProxy_native_1onCameraChange(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_viewMatrix, jobject j_projectionMatrix, jfloat j_verticalFov, jfloat j_horizontalFov, jfloat j_width, jfloat j_height, jfloat j_focusPointAltitude)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_camera_MapCameraListenerInterface_00024CppProxy_native_1onCameraChange(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_viewMatrix, jobject j_projectionMatrix, jfloat j_verticalFov, jfloat j_horizontalFov, jfloat j_width, jfloat j_height, jfloat j_focusPointAltitude, ::djinni_generated::NativeCoord::JniType j_focusPointPosition)
 {
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::MapCameraListenerInterface>(nativeRef);
@@ -96,7 +98,8 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_camera_MapCam
                             ::djinni::F32::toCpp(jniEnv, j_horizontalFov),
                             ::djinni::F32::toCpp(jniEnv, j_width),
                             ::djinni::F32::toCpp(jniEnv, j_height),
-                            ::djinni::F32::toCpp(jniEnv, j_focusPointAltitude));
+                            ::djinni::F32::toCpp(jniEnv, j_focusPointAltitude),
+                            ::djinni_generated::NativeCoord::toCpp(jniEnv, j_focusPointPosition));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

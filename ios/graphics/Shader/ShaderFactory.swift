@@ -36,7 +36,7 @@ class ShaderFactory: MCShaderFactoryInterface {
         AlphaShader()
     }
 
-    func createUnitSphereAlphaShader() -> (any MCAlphaShaderInterface)? {
+    func createUnitSphereAlphaShader() -> MCAlphaShaderInterface? {
         AlphaShader(shader: .unitSphereAlphaShader)
     }
 
@@ -46,6 +46,10 @@ class ShaderFactory: MCShaderFactoryInterface {
 
     func createLineGroupShader() -> MCLineGroupShaderInterface? {
         LineGroupShader()
+    }
+
+    func createUnitSphereColorShader() -> MCColorShaderInterface? {
+        ColorShader(shader: .unitSphereColorShader)
     }
 
     func createColorShader() -> MCColorShaderInterface? {
