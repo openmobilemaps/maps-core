@@ -128,3 +128,13 @@ void Textured2dLayerObject::beginStyleAnimation(RasterShaderStyle start, RasterS
     animation->start();
     mapInterface->invalidate();
 }
+
+std::shared_ptr<ShaderProgramInterface> Textured2dLayerObject::getShader() {
+    if (rasterShader) {
+        return rasterShader->asShaderProgramInterface();
+    }
+    if (shader) {
+        return shader->asShaderProgramInterface();
+    }
+    return nullptr;
+}

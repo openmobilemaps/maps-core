@@ -3,6 +3,7 @@
 
 #include "NativeTiled2dMapRasterLayerInterface.h"  // my header
 #include "Marshal.hpp"
+#include "NativeBlendMode.h"
 #include "NativeLayerInterface.h"
 #include "NativeLoaderInterface.h"
 #include "NativeMaskingObjectInterface.h"
@@ -187,6 +188,14 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapRasterLayerInterface>(nativeRef);
         ref->set3dSubdivisionFactor(::djinni::I32::toCpp(jniEnv, j_factor));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_raster_Tiled2dMapRasterLayerInterface_00024CppProxy_native_1setBlendMode(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeBlendMode::JniType j_blendMode)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapRasterLayerInterface>(nativeRef);
+        ref->setBlendMode(::djinni_generated::NativeBlendMode::toCpp(jniEnv, j_blendMode));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
