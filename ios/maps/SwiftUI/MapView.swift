@@ -116,9 +116,7 @@ public struct MapView: UIViewRepresentable {
 
     public func makeUIView(context: Context) -> MCMapView {
         // reset camera values to user if the camera gets reused
-        if camera.zoom.value != nil,
-           camera.center.value != nil,
-           camera.zoom.mode == .map,
+        if camera.center.value != nil,
            camera.center.mode == .map {
             camera = MapView.Camera(center: .init(mode: .user, value: camera.center.value),
                                     zoom: .init(mode: .user, value: camera.zoom.value),
@@ -166,21 +164,20 @@ public struct MapView: UIViewRepresentable {
         coordinator.ignoreCallbacks = true
         let animated = coordinator.lastWrittenCamera != nil
 
-        if let restrictedBounds = camera.restrictedBounds {
-           mapView.camera.setBounds(restrictedBounds)
-           mapView.camera.setBoundsRestrictWholeVisibleRect(true)
-           camera.restrictedBounds = nil
-       }
-
-        if let center = camera.center.value, let zoom = camera.zoom.value, camera.center.mode == .user, camera.zoom.mode == .user {
+        if let visibleRect = camera.visibleRect.value, camera.visibleRect.mode == .user {
+           mapView.camera.move(toBoundingBox: visibleRect, paddingPc: 0, animated: animated, minZoom: nil, maxZoom: nil)
+       } else if let center = camera.center.value, let zoom = camera.zoom.value, camera.center.mode == .user, camera.zoom.mode == .user {
             mapView.camera.move(toCenterPositionZoom: center, zoom: zoom, animated: animated)
         } else if let center = camera.center.value, camera.center.mode == .user {
             mapView.camera.move(toCenterPosition: center, animated: animated)
         } else if let zoom = camera.zoom.value, camera.zoom.mode == .user {
             mapView.camera.setZoom(zoom, animated: animated)
-        } else if let visibleRect = camera.visibleRect.value, camera.visibleRect.mode == .user {
-            mapView.camera.move(toBoundingBox: visibleRect, paddingPc: 0, animated: animated, minZoom: nil, maxZoom: nil)
         }
+        
+        if let restrictedBounds = camera.restrictedBounds {
+           mapView.camera.setBounds(restrictedBounds)
+           mapView.camera.setBoundsRestrictWholeVisibleRect(true)
+       }
 
         if is3D {
             mapView.camera.asMapCamera3d()?.setCameraMode(camera.mode)
@@ -281,7 +278,8 @@ public class MapViewCoordinator: MCMapCameraListenerInterface {
                 return
             }
 
-            guard mapView?.bounds.size != .zero else {
+            guard mapView?.bounds.size != .zero, hasSizeChanged
+            else {
                 return
             }
 
@@ -289,10 +287,6 @@ public class MapViewCoordinator: MCMapCameraListenerInterface {
                 if let mapView = mapView {
                     parent.updateCamera(mapView, self)
                 }
-                return
-            }
-
-            guard hasSizeChanged else {
                 return
             }
 
