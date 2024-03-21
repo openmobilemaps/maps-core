@@ -120,6 +120,8 @@ extension RenderingContext: MCRenderingContextInterface {
                     encoder?.setCullMode(.back)
                 case .NONE:
                     encoder?.setCullMode(.none)
+                @unknown default:
+                    assertionFailure()
             }
         }
     }

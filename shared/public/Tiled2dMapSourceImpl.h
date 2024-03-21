@@ -125,11 +125,13 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
     Coord viewBoundsBottomRight(-1, 0, 0, 0);
     bool validViewBounds = false;
 
+    int minNumTiles = layerSystemId == CoordinateSystemIdentifiers::EPSG4326() ? 0 : 1;
+
     int maxLevel = 0;
     int minZoomLevelIndex = 0;
     for (int index = 0; index < zoomLevelInfos.size(); ++index) {
         const auto &level = zoomLevelInfos[index];
-        if (level.numTilesX > 1 && level.numTilesY > 1) {
+        if (level.numTilesX > minNumTiles && level.numTilesY > minNumTiles) {
             for (int x = 0; x < level.numTilesX; x++) {
                 for (int y = 0; y < level.numTilesY; y++) {
                     VisibleTileCandidate c;
@@ -194,10 +196,10 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
                                                    topLeft.y < bottomLeft.y ? std::clamp(focusPointInLayerCoords.y, topLeft.y, bottomLeft.y) : std::clamp(focusPointInLayerCoords.y, bottomLeft.y, topLeft.y),
                                                    focusPointAltitude);
 
-        auto toRight = focusPointClampedToTile.x - tileCenter.x < 0.0;
-        auto toTop = focusPointClampedToTile.y - tileCenter.y < 0.0;
+        auto toRight = focusPointClampedToTile.x < tileCenter.x;
+        auto toTop = focusPointClampedToTile.y < tileCenter.y;
 
-        const double sampleSize = 0.3;
+        const double sampleSize = 0.25;
 
         const auto focusPointSampleX = Coord(layerSystemId, 
                                              focusPointClampedToTile.x + (toRight ? tileWidthAdj : -tileWidthAdj) * sampleSize,
@@ -206,7 +208,7 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
 
         const auto focusPointSampleY = Coord(layerSystemId,
                                              focusPointClampedToTile.x,
-                                             focusPointClampedToTile.y + (toTop ? tileHeightAdj : -tileHeightAdj) * sampleSize,
+                                             focusPointClampedToTile.y + (toTop ? -tileHeightAdj : tileHeightAdj) * sampleSize,
                                              focusPointClampedToTile.z);
 
         const Coord topCenter = Coord(layerSystemId, topLeft.x * 0.5 + topRight.x * 0.5, topLeft.y, topLeft.z);
@@ -376,8 +378,7 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
         double xLengthPx = Vec2DHelper::distance(samplePointOriginViewScreenPx, samplePointXViewScreenPx);
         double yLengthPx = Vec2DHelper::distance(samplePointOriginViewScreenPx, samplePointYViewScreenPx);
 
-        const double maxLength = sampleSize * (std::min(width, height) * 0.5 / zoomInfo.zoomLevelScaleFactor);
-
+        double maxLength = sampleSize * (std::min(width, height) * 0.5 / zoomInfo.zoomLevelScaleFactor);
         bool preciseEnough = xLengthPx <= maxLength && yLengthPx <= maxLength;
 
         bool lastLevel = candidate.levelIndex == maxLevelAvailable;

@@ -44,7 +44,7 @@ namespace std {
     template <> struct hash<Tiled2dMapVersionedTileInfo> {
         inline size_t operator()(const Tiled2dMapVersionedTileInfo &k) const {
             size_t res = std::hash<Tiled2dMapTileInfo>()( k.tileInfo );
-            res = res * 31 + std::hash<int>()( k.tileVersion );
+            res = res * 31 + std::hash<int>()( (int)k.tileVersion );
             return res;
         }
     };
