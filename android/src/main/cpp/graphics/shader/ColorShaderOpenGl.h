@@ -19,6 +19,8 @@ class ColorShaderOpenGl : public BaseShaderProgramOpenGl,
                           public ColorShaderInterface,
                           public std::enable_shared_from_this<ShaderProgramInterface> {
   public:
+    ColorShaderOpenGl(bool projectOntoUnitSphere);
+
     virtual std::shared_ptr<ShaderProgramInterface> asShaderProgramInterface() override;
 
     virtual std::string getProgramName() override;
@@ -35,7 +37,8 @@ class ColorShaderOpenGl : public BaseShaderProgramOpenGl,
     virtual std::string getFragmentShader() override;
 
   private:
-    const static std::string programName;
+    const bool projectOntoUnitSphere;
+    const std::string programName;
 
     std::mutex dataMutex;
     std::vector<float> color = {0, 0, 0, 0};

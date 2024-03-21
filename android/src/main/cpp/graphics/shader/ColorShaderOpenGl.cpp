@@ -12,7 +12,9 @@
 #include "OpenGlContext.h"
 #include "OpenGlHelper.h"
 
-const std::string ColorShaderOpenGl::programName = "UBMAP_ColorShaderOpenGl";
+ColorShaderOpenGl::ColorShaderOpenGl(bool projectOntoUnitSphere)
+        : programName(projectOntoUnitSphere ? "UBMAP_ColorShaderUnitSphereOpenGl" : "UBMAP_ColorShaderOpenGl"),
+          projectOntoUnitSphere(projectOntoUnitSphere) {}
 
 std::string ColorShaderOpenGl::getProgramName() { return programName; }
 
@@ -54,12 +56,36 @@ void ColorShaderOpenGl::setColor(float red, float green, float blue, float alpha
 }
 
 std::string ColorShaderOpenGl::getVertexShader() {
-    return OMMVersionedGlesShaderCode(320 es,
+    return projectOntoUnitSphere ?
+           // Vertices projected onto unit sphere
+           OMMVersionedGlesShaderCode(320 es,
                                       precision highp float;
-                                      uniform mat4 uvpMatrix;
-                                      in vec4 vPosition;
+                                              uniform mat4 uvpMatrix;
+                                              uniform mat4 umMatrix;
+                                              in vec4 vPosition;
 
-                                      void main() { gl_Position = uvpMatrix * vPosition; });
+                                              void main() {
+                                                  gl_Position = umMatrix * vec4(vPosition.xyz, 1.0);
+                                                  gl_Position = gl_Position / gl_Position.w;
+                                                  gl_Position = uvpMatrix *
+                                                                vec4(gl_Position.z * sin(gl_Position.y) * cos(gl_Position.x),
+                                                                     gl_Position.z * cos(gl_Position.y),
+                                                                     -gl_Position.z * sin(gl_Position.y) *
+                                                                     sin(gl_Position.x),
+                                                                     1.0);
+                                              }
+           )
+           // Default Shader
+           : OMMVersionedGlesShaderCode(320 es,
+                                        precision highp float;
+                                                uniform mat4 uvpMatrix;
+                                                uniform mat4 umMatrix;
+                                                in vec4 vPosition;
+
+                                                void main() {
+                                                    gl_Position = uvpMatrix * umMatrix * vPosition;
+                                                }
+           );
 }
 
 std::string ColorShaderOpenGl::getFragmentShader() {
