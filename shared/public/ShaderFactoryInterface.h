@@ -36,6 +36,8 @@ public:
 
     virtual /*not-null*/ std::shared_ptr<ColorCircleShaderInterface> createColorCircleShader() = 0;
 
+    virtual /*not-null*/ std::shared_ptr<ColorCircleShaderInterface> createUnitSphereColorCircleShader() = 0;
+
     virtual /*not-null*/ std::shared_ptr<PolygonGroupShaderInterface> createPolygonGroupShader(bool isStriped) = 0;
 
     virtual /*not-null*/ std::shared_ptr<PolygonPatternGroupShaderInterface> createPolygonPatternGroupShader(bool fadeInPattern) = 0;
