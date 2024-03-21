@@ -367,16 +367,21 @@ void MapScene::drawFrame() {
         camera->update();
     }
 
+    std::vector<std::shared_ptr<LayerInterface>> layerInterfaces;
     {
         std::lock_guard<std::recursive_mutex> lock(layersMutex);
-        for (const auto &layer : layers) {
-            layer.second->update();
+        for (const auto &[index, layer]: layers) {
+            layerInterfaces.push_back(layer);
         }
+    }
 
-        for (const auto &layer : layers) {
-            for (const auto &renderPass : layer.second->buildRenderPasses()) {
-                scene->getRenderer()->addToRenderQueue(renderPass);
-            }
+    for (const auto &layer: layerInterfaces) {
+        layer->update();
+    }
+
+    for (const auto &layer: layerInterfaces) {
+        for (const auto &renderPass: layer->buildRenderPasses()) {
+            scene->getRenderer()->addToRenderQueue(renderPass);
         }
     }
 
@@ -388,9 +393,16 @@ void MapScene::resume() {
         return;
     }
 
-    std::lock_guard<std::recursive_mutex> lock(layersMutex);
-    for (const auto &layer : layers) {
-        layer.second->resume();
+    std::vector<std::shared_ptr<LayerInterface>> layerInterfaces;
+    {
+        std::lock_guard<std::recursive_mutex> lock(layersMutex);
+        for (const auto &[index, layer]: layers) {
+            layerInterfaces.push_back(layer);
+        }
+    }
+
+    for (const auto &layer : layerInterfaces) {
+        layer->resume();
     }
 
     isResumed = true;
@@ -403,9 +415,16 @@ void MapScene::pause() {
     }
     isResumed = false;
 
-    std::lock_guard<std::recursive_mutex> lock(layersMutex);
-    for (const auto &layer : layers) {
-        layer.second->pause();
+    std::vector<std::shared_ptr<LayerInterface>> layerInterfaces;
+    {
+        std::lock_guard<std::recursive_mutex> lock(layersMutex);
+        for (const auto &[index, layer]: layers) {
+            layerInterfaces.push_back(layer);
+        }
+    }
+
+    for (const auto &layer : layerInterfaces) {
+        layer->pause();
     }
 }
 
@@ -473,9 +492,15 @@ LayerReadyState MapScene::getLayersReadyState() {
 }
 
 void MapScene::forceReload() {
-    std::lock_guard<std::recursive_mutex> lock(layersMutex);
+    std::vector<std::shared_ptr<LayerInterface>> layerInterfaces;
+    {
+        std::lock_guard<std::recursive_mutex> lock(layersMutex);
+        for (const auto &[index, layer]: layers) {
+            layerInterfaces.push_back(layer);
+        }
+    }
 
-    for (const auto &[index, layer] : layers) {
+    for (const auto &layer : layerInterfaces) {
         layer->forceReload();
     }
 }
