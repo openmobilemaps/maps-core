@@ -89,6 +89,14 @@ public:
     }
 
     template <typename Fn, class... Args>
+    inline void syncMessage(Fn fn, Args&&... args) const {
+        auto msg = makeMessage(MailboxDuplicationStrategy::none, MailboxExecutionEnvironment::computation, object, fn, std::forward<Args>(args)...);
+        syncAccess([&msg](auto t) {
+            (*msg)();
+        });
+    }
+
+    template <typename Fn, class... Args>
     inline void message(const MailboxDuplicationStrategy &strategy, Fn fn, Args&&... args) const {
         auto strongObject = object.lock();
         auto strongMailbox = receivingMailbox.lock();

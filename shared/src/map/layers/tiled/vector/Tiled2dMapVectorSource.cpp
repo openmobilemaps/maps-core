@@ -28,6 +28,10 @@ Tiled2dMapVectorSource::Tiled2dMapVectorSource(const MapConfig &mapConfig,
 loaders(tileLoaders), layersToDecode(layersToDecode), listener(listener), sourceName(sourceName) {}
 
 ::djinni::Future<std::shared_ptr<DataLoaderResult>> Tiled2dMapVectorSource::loadDataAsync(Tiled2dMapTileInfo tile, size_t loaderIndex) {
+    {
+        std::lock_guard<std::mutex> lock_guard(loadingTilesMutex);
+        loadingTiles.insert(tile);
+    }
     auto const url = layerConfig->getTileUrl(tile.x, tile.y, tile.t, tile.zoomIdentifier);
     auto promise = std::make_shared<::djinni::Promise<std::shared_ptr<DataLoaderResult>>>();
     loaders[loaderIndex]->loadDataAsync(url, std::nullopt).then([promise](::djinni::Future<::DataLoaderResult> result) {
@@ -39,6 +43,10 @@ loaders(tileLoaders), layersToDecode(layersToDecode), listener(listener), source
 void Tiled2dMapVectorSource::cancelLoad(Tiled2dMapTileInfo tile, size_t loaderIndex) {
     auto const url = layerConfig->getTileUrl(tile.x, tile.y, tile.t, tile.zoomIdentifier);
     loaders[loaderIndex]->cancel(url);
+    {
+        std::lock_guard<std::mutex> lock_guard(loadingTilesMutex);
+        loadingTiles.erase(tile);
+    }
 }
 
 bool Tiled2dMapVectorSource::hasExpensivePostLoadingTask() {
@@ -57,6 +65,12 @@ Tiled2dMapVectorTileInfo::FeatureMap Tiled2dMapVectorSource::postLoadingTask(con
                 layerFeatureMap->emplace(sourceLayerName, std::make_shared<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>>());
                 layerFeatureMap->at(sourceLayerName)->reserve(layer.num_features());
                 while (const auto &feature = layer.next_feature()) {
+                    {
+                        std::lock_guard<std::mutex> lock_guard(loadingTilesMutex);
+                        if (loadingTiles.find(tile) == loadingTiles.end()) {
+                            return std::make_shared<std::unordered_map<std::string, std::shared_ptr<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>>>>();
+                        }
+                    }
                     auto const featureContext = std::make_shared<FeatureContext>(feature);
                     try {
                         std::shared_ptr<VectorTileGeometryHandler> geometryHandler = std::make_shared<VectorTileGeometryHandler>(tile.bounds, extent, layerConfig->getVectorSettings(), conversionHelper);
@@ -81,6 +95,11 @@ Tiled2dMapVectorTileInfo::FeatureMap Tiled2dMapVectorSource::postLoadingTask(con
     catch (const protozero::unknown_pbf_wire_type_exception &typeException) {
         LogError <<= "Unknown wire type exception for tile " + std::to_string(tile.zoomIdentifier) + "/" +
         std::to_string(tile.x) + "/" + std::to_string(tile.y);
+    }
+
+    {
+        std::lock_guard<std::mutex> lock_guard(loadingTilesMutex);
+        loadingTiles.erase(tile);
     }
 
     return layerFeatureMap;
