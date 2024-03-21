@@ -90,8 +90,8 @@ public struct MapView: UIViewRepresentable {
 
         public static func == (lhs: Camera, rhs: Camera) -> Bool {
             lhs.zoom == rhs.zoom
-                && lhs.visibleRect == rhs.visibleRect
-                && lhs.center == rhs.center
+            && lhs.visibleRect == rhs.visibleRect
+            && lhs.center == rhs.center
             && lhs.mode == rhs.mode
         }
     }
@@ -217,7 +217,7 @@ public struct MapView: UIViewRepresentable {
 
     public func updateUIView(_ mapView: MapCore.MCMapView, context: Context) {
         updateLayers(context, mapView)
-//        updateCamera(mapView, context.coordinator)
+        updateCamera(mapView, context.coordinator)
     }
 }
 
@@ -260,7 +260,7 @@ public class MapViewCoordinator: MCMapCameraListenerInterface {
     var lastWrittenCamera: MapView.Camera?
 
     nonisolated
-    public func onVisibleBoundsChanged(_ visibleBounds: MCRectCoord, zoom: Double) {
+    private func updateCamera() {
         Task { @MainActor in
             guard !ignoreCallbacks else {
                 return
@@ -290,7 +290,14 @@ public class MapViewCoordinator: MCMapCameraListenerInterface {
     }
 
     nonisolated
-    public func onCameraChange(_ viewMatrix: [NSNumber], projectionMatrix: [NSNumber], verticalFov: Float, horizontalFov: Float, width: Float, height: Float, focusPointAltitude: Float, focusPointPosition: MCCoord) {}
+    public func onVisibleBoundsChanged(_ visibleBounds: MCRectCoord, zoom: Double) {
+        updateCamera()
+    }
+
+    nonisolated
+    public func onCameraChange(_ viewMatrix: [NSNumber], projectionMatrix: [NSNumber], verticalFov: Float, horizontalFov: Float, width: Float, height: Float, focusPointAltitude: Float, focusPointPosition: MCCoord) {
+        updateCamera()
+    }
 
 
     nonisolated
@@ -309,7 +316,7 @@ extension MapViewCoordinator: MCMapSizeDelegate {
         Task { @MainActor in
             hasSizeChanged = true
             if let mapView = mapView {
-//                parent.updateCamera(mapView, self)
+                parent.updateCamera(mapView, self)
             }
         }
     }
