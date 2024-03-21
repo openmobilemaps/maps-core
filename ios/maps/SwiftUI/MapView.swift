@@ -115,6 +115,18 @@ public struct MapView: UIViewRepresentable {
     }
 
     public func makeUIView(context: Context) -> MCMapView {
+        // reset camera values to user if the camera gets reused
+        if camera.zoom.value != nil,
+           camera.center.value != nil,
+           camera.zoom.mode == .map,
+           camera.center.mode == .map {
+            camera = MapView.Camera(center: .init(mode: .user, value: camera.center.value),
+                                    zoom: .init(mode: .user, value: camera.zoom.value),
+                                    visibleRect: camera.visibleRect,
+                                    mode: camera.mode,
+                                    restrictedBounds: camera.restrictedBounds)
+        }
+
         let mapView = MCMapView(mapConfig: mapConfig, is3D: is3D)
         mapView.backgroundColor = .clear
         mapView.camera.addListener(context.coordinator)
@@ -123,7 +135,6 @@ public struct MapView: UIViewRepresentable {
             mapView.camera.asMapCamera3d()?.setCameraMode(camera.mode)
         }
         mapView.sizeDelegate = context.coordinator
-//        MapActivityHandler.shared.mapView = mapView
         context.coordinator.mapView = mapView
         return mapView
     }
@@ -270,6 +281,10 @@ public class MapViewCoordinator: MCMapCameraListenerInterface {
                 return
             }
 
+            guard mapView?.bounds.size != .zero else {
+                return
+            }
+
             guard lastWrittenCamera != nil else {
                 if let mapView = mapView {
                     parent.updateCamera(mapView, self)
@@ -281,9 +296,12 @@ public class MapViewCoordinator: MCMapCameraListenerInterface {
                 return
             }
 
+            let center = mapView?.camera.getCenterPosition()
+            let zoom = mapView?.camera.getZoom()
+
             parent.camera = MapView.Camera(
-                center: .init(mode: .map, value: mapView?.camera.getCenterPosition()),
-                zoom: .init(mode: .map, value: mapView?.camera.getZoom()),
+                center: .init(mode: .map, value: center),
+                zoom: .init(mode: .map, value: zoom),
                 visibleRect: .init(mode: .map, value: mapView?.camera.getPaddingAdjustedVisibleRect()),
                 mode: parent.camera.mode,
                 restrictedBounds: parent.camera.restrictedBounds
