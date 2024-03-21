@@ -104,9 +104,9 @@ public struct MapView: UIViewRepresentable {
 
     @Binding var camera: Camera
 
-    var paddingInset: EdgeInsets
+    var paddingInset: EdgeInsets?
 
-    public init(camera: Binding<Camera>, mapConfig: MCMapConfig = MCMapConfig(mapCoordinateSystem: MCCoordinateSystemFactory.getEpsg3857System()), paddingInset: EdgeInsets = .init(), layers: [(any Layer)?], is3D: Bool = false) {
+    public init(camera: Binding<Camera>, mapConfig: MCMapConfig = MCMapConfig(mapCoordinateSystem: MCCoordinateSystemFactory.getEpsg3857System()), paddingInset: EdgeInsets? = nil, layers: [(any Layer)?], is3D: Bool = false) {
         self.layers = layers
         self.mapConfig = mapConfig
         self._camera = camera
@@ -144,20 +144,24 @@ public struct MapView: UIViewRepresentable {
             return
         }
 
-        // TODO: Allow padding definition
-        //        mapView.camera.setPaddingTop(Float(-paddingInset.top))
-        //        mapView.camera.setPaddingBottom(0.003)
-        //        mapView.camera.setPaddingLeft(Float(-paddingInset.leading))
-        //        mapView.camera.setPaddingRight(Float(-paddingInset.trailing))
+        if let paddingInset {
+            let scale = Float(UIScreen.main.nativeScale)
+            mapView.camera.setPaddingTop(scale * Float(paddingInset.top))
+            mapView.camera.setPaddingBottom(scale * Float(paddingInset.bottom))
+            mapView.camera.setPaddingLeft(scale * Float(paddingInset.leading))
+            mapView.camera.setPaddingRight(scale * Float(paddingInset.trailing))
+        }
 
         coordinator.ignoreCallbacks = true
         let animated = coordinator.lastWrittenCamera != nil
+
         if let restrictedBounds = camera.restrictedBounds {
            mapView.camera.setBounds(restrictedBounds)
            mapView.camera.setBoundsRestrictWholeVisibleRect(true)
-           mapView.camera.move(toBoundingBox: restrictedBounds, paddingPc: 0.0, animated: false, minZoom: nil, maxZoom: nil)
            camera.restrictedBounds = nil
-       } else if let center = camera.center.value, let zoom = camera.zoom.value, camera.center.mode == .user, camera.zoom.mode == .user {
+       }
+
+        if let center = camera.center.value, let zoom = camera.zoom.value, camera.center.mode == .user, camera.zoom.mode == .user {
             mapView.camera.move(toCenterPositionZoom: center, zoom: zoom, animated: animated)
         } else if let center = camera.center.value, camera.center.mode == .user {
             mapView.camera.move(toCenterPosition: center, animated: animated)
