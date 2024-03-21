@@ -81,8 +81,14 @@ void MapCamera3d::moveToCenterPositionZoom(const ::Coord &centerPosition, double
     if (cameraFrozen)
         return;
     Coord currentFocusPointPosition = this->focusPointPosition;
+    Coord currentCenterPosition = getCenterPosition();
     inertia = std::nullopt;
-    Coord focusPosition = getBoundsCorrectedCoords(mapInterface->getCoordinateConverterHelper()->convert(CoordinateSystemIdentifiers::EPSG4326(), centerPosition));
+    Coord focusPosition = mapInterface->getCoordinateConverterHelper()->convert(CoordinateSystemIdentifiers::EPSG4326(), centerPosition);
+
+    focusPosition.x += (currentFocusPointPosition.x - currentCenterPosition.x);
+    focusPosition.y += (currentFocusPointPosition.y - currentCenterPosition.y);
+    focusPosition.z += (currentFocusPointPosition.z - currentCenterPosition.z);
+
     if (animated) {
         std::lock_guard<std::recursive_mutex> lock(animationMutex);
         coordAnimation = std::make_shared<CoordAnimation>(
@@ -113,8 +119,14 @@ void MapCamera3d::moveToCenterPosition(const ::Coord &centerPosition, bool anima
     if (cameraFrozen)
         return;
     Coord currentFocusPointPosition = this->focusPointPosition;
+    Coord currentCenterPosition = getCenterPosition();
     inertia = std::nullopt;
-    Coord focusPosition = getBoundsCorrectedCoords(mapInterface->getCoordinateConverterHelper()->convert(CoordinateSystemIdentifiers::EPSG4326(), centerPosition));
+    Coord focusPosition = mapInterface->getCoordinateConverterHelper()->convert(CoordinateSystemIdentifiers::EPSG4326(), centerPosition);
+
+    focusPosition.x += (currentFocusPointPosition.x - currentCenterPosition.x);
+    focusPosition.y += (currentFocusPointPosition.y - currentCenterPosition.y);
+    focusPosition.z += (currentFocusPointPosition.z - currentCenterPosition.z);
+
     if (animated) {
         std::lock_guard<std::recursive_mutex> lock(animationMutex);
         coordAnimation = std::make_shared<CoordAnimation>(
@@ -181,7 +193,11 @@ void MapCamera3d::moveToBoundingBox(const RectCoord &boundingBox, float paddingP
 }
 
 ::Coord MapCamera3d::getCenterPosition() {
-    return focusPointPosition;
+    auto center = focusPointPosition;
+    if (mode == CameraMode3d::TILTED_ORBITAL) {
+        center.y += 21.0; // TODO: Fix constants or use raycast from screen center to determine position, when available
+    }
+    return center;
 }
 
 void MapCamera3d::setZoom(double zoom, bool animated) {
@@ -959,7 +975,7 @@ Coord MapCamera3d::coordFromScreenPosition(const ::Vec2F &posScreen) {
 double MapCamera3d::mapUnitsFromPixels(double distancePx) {
     Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
     if (validVpMatrix && sizeViewport.x != 0 && sizeViewport.y != 0) {
-        Coord focusRenderCoord = conversionHelper->convertToRenderSystem(focusPointPosition);
+        Coord focusRenderCoord = conversionHelper->convertToRenderSystem(getCenterPosition());
 
         float sampleSize = M_PI / 180.0;
         std::vector<float> posOne = {(float) (focusRenderCoord.z * sin(focusRenderCoord.y) * cos(focusRenderCoord.x)),
