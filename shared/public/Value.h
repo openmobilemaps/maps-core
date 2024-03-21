@@ -2393,8 +2393,10 @@ public:
                 decimalPointPos = result.length();
                 result += '.';
             }
-            int fractionDigits = (int)(result.length() - decimalPointPos - 1);
-            int zerosToAdd = minFractionDigits - fractionDigits;
+
+            size_t fractionDigits = result.length() - decimalPointPos - 1;
+            size_t zerosToAdd = minFractionDigits - fractionDigits;
+
             if (zerosToAdd > 0) {
                 result.append(zerosToAdd, '0');
             }
