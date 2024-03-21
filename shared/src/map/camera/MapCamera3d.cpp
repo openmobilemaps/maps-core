@@ -195,7 +195,8 @@ void MapCamera3d::moveToBoundingBox(const RectCoord &boundingBox, float paddingP
 ::Coord MapCamera3d::getCenterPosition() {
     auto center = focusPointPosition;
     if (mode == CameraMode3d::TILTED_ORBITAL) {
-        center.y += 21.0; // TODO: Fix constants or use raycast from screen center to determine position, when available
+        double d = getCameraDistanceFromZoom(zoom);
+        center.y -= (d * d * -9.2987162 + 34.635713 * d - 50.0); // TODO: Fix constants or use raycast from screen center to determine position, when available
     }
     return center;
 }
