@@ -19,11 +19,7 @@ Circle2dLayerObject::Circle2dLayerObject(const std::shared_ptr<MapInterface> &ma
           shader(mapInterface->is3d() ? mapInterface->getShaderFactory()->createUnitSphereColorCircleShader()
                                       : mapInterface->getShaderFactory()->createColorCircleShader()),
           quad(mapInterface->getGraphicsObjectFactory()->createQuad(shader->asShaderProgramInterface())),
-          graphicsObject(quad->asGraphicsObject()), renderConfig(std::make_shared<RenderConfig>(graphicsObject, 0)) {
-    if (mapInterface->is3d()) {
-        quad->setSubdivisionFactor(SUBDIVISION_FACTOR_3D_DEFAULT);
-    }
-}
+          graphicsObject(quad->asGraphicsObject()), renderConfig(std::make_shared<RenderConfig>(graphicsObject, 0)) {}
 
 std::vector<std::shared_ptr<RenderConfigInterface>> Circle2dLayerObject::getRenderConfig() { return {renderConfig}; }
 
@@ -31,10 +27,10 @@ void Circle2dLayerObject::setColor(Color color) { shader->setColor(color.r, colo
 
 void Circle2dLayerObject::setPosition(Coord position, double radius) {
     Coord renderPos = conversionHelper->convertToRenderSystem(position);
-    quad->setFrame(Quad3dD(Vec3D(renderPos.x - radius, renderPos.y - radius, is3d ? renderPos.z : 0.0),
-                           Vec3D(renderPos.x + radius, renderPos.y - radius, is3d ? renderPos.z : 0.0),
+    quad->setFrame(Quad3dD(Vec3D(renderPos.x - radius, renderPos.y + radius, is3d ? renderPos.z : 0.0),
                            Vec3D(renderPos.x + radius, renderPos.y + radius, is3d ? renderPos.z : 0.0),
-                           Vec3D(renderPos.x - radius, renderPos.y + radius, is3d ? renderPos.z : 0.0)),
+                           Vec3D(renderPos.x + radius, renderPos.y - radius, is3d ? renderPos.z : 0.0),
+                           Vec3D(renderPos.x - radius, renderPos.y - radius, is3d ? renderPos.z : 0.0)),
                    RectD(0, 0, 1, 1));
 }
 
