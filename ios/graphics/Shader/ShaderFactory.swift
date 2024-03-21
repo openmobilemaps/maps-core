@@ -32,6 +32,10 @@ class ShaderFactory: MCShaderFactoryInterface {
         ColorCircleShader()
     }
 
+    func createUnitSphereColorCircleShader() -> (any MCColorCircleShaderInterface)? {
+        ColorCircleShader(shader: .unitSphereRoundColorShader)
+    }
+
     func createAlphaShader() -> MCAlphaShaderInterface? {
         AlphaShader()
     }

@@ -31,6 +31,10 @@ unitSphereBaseVertexShader(const Vertex3DIn vertexIn [[stage_in]],
 {
     const float4 newVertex = mMatrix * float4(vertexIn.position.xyz, 1.0);
 
+    newVertex.x /= newVertex.w;
+    newVertex.y /= newVertex.w;
+    newVertex.z /= newVertex.w;
+
     const float x = newVertex.z * sin(newVertex.y) * cos(newVertex.x);
     const float y = newVertex.z * cos(newVertex.y);
     const float z = -newVertex.z * sin(newVertex.y) * sin(newVertex.x);
