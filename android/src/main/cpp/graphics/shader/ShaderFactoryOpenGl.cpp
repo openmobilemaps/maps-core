@@ -56,7 +56,11 @@ std::shared_ptr<ColorShaderInterface> ShaderFactoryOpenGl::createUnitSphereColor
 }
 
 std::shared_ptr<ColorCircleShaderInterface> ShaderFactoryOpenGl::createColorCircleShader() {
-    return std::make_shared<ColorCircleShaderOpenGl>();
+    return std::make_shared<ColorCircleShaderOpenGl>(false);
+}
+
+std::shared_ptr<ColorCircleShaderInterface> ShaderFactoryOpenGl::createUnitSphereColorCircleShader() {
+    return std::make_shared<ColorCircleShaderOpenGl>(true);
 }
 
 std::shared_ptr<PolygonGroupShaderInterface> ShaderFactoryOpenGl::createPolygonGroupShader(bool isStriped) {

@@ -12,7 +12,9 @@
 #include "OpenGlContext.h"
 #include "OpenGlHelper.h"
 
-const std::string ColorCircleShaderOpenGl::programName = "UBMAP_ColorCircleShaderOpenGl";
+ColorCircleShaderOpenGl::ColorCircleShaderOpenGl(bool projectOntoUnitSphere)
+        : projectOntoUnitSphere(projectOntoUnitSphere),
+          programName(projectOntoUnitSphere ? "UBMAP_ColorCircleShaderUnitSphereOpenGl" : "UBMAP_ColorCircleShaderOpenGl") {}
 
 std::string ColorCircleShaderOpenGl::getProgramName() { return programName; }
 
@@ -53,6 +55,14 @@ void ColorCircleShaderOpenGl::setColor(float red, float green, float blue, float
     color[3] = alpha;
 }
 
+std::string ColorCircleShaderOpenGl::getVertexShader() {
+    return projectOntoUnitSphere ?
+           // Vertices projected onto unit sphere
+           BaseShaderProgramOpenGl::getUnitSphereVertexShader()
+           // Default Shader
+           : BaseShaderProgramOpenGl::getVertexShader();
+}
+
 std::string ColorCircleShaderOpenGl::getFragmentShader() {
     return OMMVersionedGlesShaderCode(320 es,
                                       precision mediump float;
@@ -61,8 +71,7 @@ std::string ColorCircleShaderOpenGl::getFragmentShader() {
                                       out vec4 fragmentColor;
 
                                       void main() {
-                                          highp
-                                          vec2 circleCenter = vec2(0.5, 0.5);
+                                          highp vec2 circleCenter = vec2(0.5, 0.5);
                                           highp float dist = distance(v_texcoord, circleCenter);
 
                                           if (dist > 0.5) {

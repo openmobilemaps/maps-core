@@ -92,6 +92,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (nullable id<MCColorCircleShaderInterface>)createUnitSphereColorCircleShader {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->createUnitSphereColorCircleShader();
+        return ::djinni_generated::ColorCircleShaderInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (nullable id<MCPolygonGroupShaderInterface>)createPolygonGroupShader:(BOOL)isStriped {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->createPolygonGroupShader(::djinni::Bool::toCpp(isStriped));
@@ -210,6 +217,13 @@ public:
     {
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createColorCircleShader];
+            return ::djinni_generated::ColorCircleShaderInterface::toCpp(objcpp_result_);
+        }
+    }
+    /*not-null*/ std::shared_ptr<::ColorCircleShaderInterface> createUnitSphereColorCircleShader() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createUnitSphereColorCircleShader];
             return ::djinni_generated::ColorCircleShaderInterface::toCpp(objcpp_result_);
         }
     }
