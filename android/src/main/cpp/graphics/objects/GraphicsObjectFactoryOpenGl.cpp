@@ -46,11 +46,11 @@ GraphicsObjectFactoryOpenGl::createPolygonPatternGroup(const std::shared_ptr<::S
 }
 
 std::shared_ptr<Quad2dInterface> GraphicsObjectFactoryOpenGl::createQuadMask() {
-    return std::make_shared<Quad2dOpenGl>(std::make_shared<ColorShaderOpenGl>());
+    return std::make_shared<Quad2dOpenGl>(std::make_shared<ColorShaderOpenGl>(false));
 }
 
 std::shared_ptr<Polygon2dInterface> GraphicsObjectFactoryOpenGl::createPolygonMask() {
-    std::shared_ptr<ColorShaderOpenGl> shader = std::make_shared<ColorShaderOpenGl>();
+    std::shared_ptr<ColorShaderOpenGl> shader = std::make_shared<ColorShaderOpenGl>(false);
     shader->setColor(1, 1, 1, 1);
     return std::make_shared<Polygon2dOpenGl>(shader);
 }

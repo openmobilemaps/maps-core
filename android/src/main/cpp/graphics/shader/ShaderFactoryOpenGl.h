@@ -25,6 +25,8 @@ public:
 
     std::shared_ptr<ColorShaderInterface> createColorShader() override;
 
+    std::shared_ptr<ColorShaderInterface> createUnitSphereColorShader() override;
+
     std::shared_ptr<ColorCircleShaderInterface> createColorCircleShader() override;
 
     std::shared_ptr<PolygonGroupShaderInterface> createPolygonGroupShader(bool isStriped) override;

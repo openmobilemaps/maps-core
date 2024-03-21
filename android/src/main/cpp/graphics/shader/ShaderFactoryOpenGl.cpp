@@ -48,7 +48,11 @@ std::shared_ptr<LineGroupShaderInterface> ShaderFactoryOpenGl::createLineGroupSh
 }
 
 std::shared_ptr<ColorShaderInterface> ShaderFactoryOpenGl::createColorShader() {
-    return std::make_shared<ColorShaderOpenGl>();
+    return std::make_shared<ColorShaderOpenGl>(false);
+}
+
+std::shared_ptr<ColorShaderInterface> ShaderFactoryOpenGl::createUnitSphereColorShader() {
+    return std::make_shared<ColorShaderOpenGl>(true);
 }
 
 std::shared_ptr<ColorCircleShaderInterface> ShaderFactoryOpenGl::createColorCircleShader() {
