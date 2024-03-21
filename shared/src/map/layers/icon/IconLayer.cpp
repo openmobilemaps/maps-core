@@ -160,6 +160,10 @@ void IconLayer::addIcons(const std::vector<std::shared_ptr<IconInfoInterface>> &
             quadObject->setSubdivisionFactor(SUBDIVISION_FACTOR_3D_DEFAULT);
         }
 
+#if DEBUG
+        quadObject->asGraphicsObject()->setDebugLabel("IconLayerID:" + icon->getIdentifier());
+#endif
+
         auto iconObject = std::make_shared<Textured2dLayerObject>(quadObject, shader, mapInterface, is3D);
 
         updateIconPosition(conversionHelper, icon, iconObject);
@@ -309,9 +313,9 @@ void IconLayer::updateIconPosition(const std::shared_ptr<CoordinateConversionHel
     float ratioLeftRight = std::clamp(anchor.x, 0.0f, 1.0f);
     float ratioTopBottom = std::clamp(anchor.y, 0.0f, 1.0f);
     float leftW = iconSize.x * ratioLeftRight;
-    float topH = iconSize.y * ratioTopBottom;
+    float topH = iconSize.y * (is3D ? ratioTopBottom : (1.0f - ratioTopBottom));
     float rightW = iconSize.x * (1.0f - ratioLeftRight);
-    float bottomH = iconSize.y * (1.0f - ratioTopBottom);
+    float bottomH = iconSize.y * (is3D ? (1.0f - ratioTopBottom) : ratioTopBottom);
 
     if (is3D) {
         float scaleFactor = 1.0 / abs(cos(origIconPosRender.y + (M_PI / 2.0)));
