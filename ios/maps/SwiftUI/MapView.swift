@@ -106,12 +106,20 @@ public struct MapView: UIViewRepresentable {
 
     var paddingInset: EdgeInsets?
 
-    public init(camera: Binding<Camera>, mapConfig: MCMapConfig = MCMapConfig(mapCoordinateSystem: MCCoordinateSystemFactory.getEpsg3857System()), paddingInset: EdgeInsets? = nil, layers: [(any Layer)?], is3D: Bool = false) {
+    let touchHandler: TouchHandler?
+
+    public init(camera: Binding<Camera>,
+                mapConfig: MCMapConfig = MCMapConfig(mapCoordinateSystem: MCCoordinateSystemFactory.getEpsg3857System()),
+                paddingInset: EdgeInsets? = nil,
+                layers: [(any Layer)?],
+                is3D: Bool = false, 
+                touchHandler: TouchHandler? = nil) {
         self.layers = layers
         self.mapConfig = mapConfig
         self._camera = camera
         self.paddingInset = paddingInset
         self.is3D = is3D
+        self.touchHandler = touchHandler
     }
 
     public func makeUIView(context: Context) -> MCMapView {
@@ -134,6 +142,11 @@ public struct MapView: UIViewRepresentable {
         }
         mapView.sizeDelegate = context.coordinator
         context.coordinator.mapView = mapView
+        if let touchHandler {
+            mapView.mapInterface.getTouchHandler()?.addListener(touchHandler)
+            touchHandler.mapView = mapView
+        }
+
         return mapView
     }
 
@@ -335,5 +348,54 @@ extension MapViewCoordinator: MCMapSizeDelegate {
                 parent.updateCamera(mapView, self)
             }
         }
+    }
+}
+
+open class TouchHandler: MCTouchInterface {
+
+    public weak var mapView: MCMapView?
+
+    public init() {}
+
+    open func onTouchDown(_ posScreen: MCVec2F) -> Bool {
+        false
+    }
+    
+    open func onClickUnconfirmed(_ posScreen: MCVec2F) -> Bool {
+        false
+    }
+    
+    open func onClickConfirmed(_ posScreen: MCVec2F) -> Bool {
+        false
+    }
+    
+    open func onDoubleClick(_ posScreen: MCVec2F) -> Bool {
+        false
+    }
+    
+    open func onMove(_ deltaScreen: MCVec2F, confirmed: Bool, doubleClick: Bool) -> Bool {
+        false
+    }
+    
+    open func onMoveComplete() -> Bool {
+        false
+    }
+    
+    open func onTwoFingerClick(_ posScreen1: MCVec2F, posScreen2: MCVec2F) -> Bool {
+        false
+    }
+    
+    open func onTwoFingerMove(_ posScreenOld: [MCVec2F], posScreenNew: [MCVec2F]) -> Bool {
+        false
+    }
+    
+    open func onTwoFingerMoveComplete() -> Bool {
+        false
+    }
+    
+    open func clearTouch() {}
+    
+    @MainActor open func onLongPress(_ posScreen: MCVec2F) -> Bool {
+        false
     }
 }
