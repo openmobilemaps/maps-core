@@ -306,6 +306,8 @@ void Quad2dInstancedOpenGl::prepareTextureDraw(int program) {
 }
 
 void Quad2dInstancedOpenGl::setInstanceCount(int count) {
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
+    ready = false;
     this->instanceCount = count;
 }
 

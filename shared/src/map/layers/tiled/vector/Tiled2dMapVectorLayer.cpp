@@ -577,7 +577,7 @@ void Tiled2dMapVectorLayer::update() {
                 newIsAnimating |= a;
             }
             isAnimating = newIsAnimating;
-            if (now - lastCollitionCheck > 1000 || tilesChanged) {
+            if (now - lastCollitionCheck > 1000 || tilesChanged || zoomChange > 0.001) {
                 lastCollitionCheck = now;
                 bool enforceUpdate = !prevCollisionStillValid.test_and_set();
                 collisionManager.syncAccess(
