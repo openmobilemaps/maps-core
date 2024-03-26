@@ -18,20 +18,24 @@ public struct MapView: UIViewRepresentable {
     public struct Updatable<T: Equatable>: Equatable {
         public let mode: UpdateMode
         public let value: T?
+        public let animated: Bool
 
         public init() {
             mode = .map
             value = nil
+            animated = true
         }
 
         public init(mode: UpdateMode) {
             self.mode = mode
             value = nil
+            self.animated = true
         }
 
-        public init(mode: UpdateMode, value: T?) {
+        public init(mode: UpdateMode, value: T?, animated: Bool = true) {
             self.mode = mode
             self.value = value
+            self.animated = animated
         }
     }
 
@@ -175,7 +179,10 @@ public struct MapView: UIViewRepresentable {
         }
 
         coordinator.ignoreCallbacks = true
-        let animated = coordinator.lastWrittenCamera != nil
+        var animated = camera.center.animated
+        if coordinator.lastWrittenCamera == nil {
+            animated = false
+        }
 
         if let visibleRect = camera.visibleRect.value, camera.visibleRect.mode == .user {
            mapView.camera.move(toBoundingBox: visibleRect, paddingPc: 0, animated: animated, minZoom: nil, maxZoom: nil)
