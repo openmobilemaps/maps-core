@@ -150,7 +150,7 @@ polygonPatternGroupFadeInFragmentShader(PolygonPatternGroupVertexOut in [[stage_
     const float scalingFactorFactor = (scalingFactor.x / screenPixelAsRealMeterFactor) - 1.0;
     const float2 spacing = pixelSize * scalingFactorFactor;
     const float2 totalSize = pixelSize + spacing;
-    const float2 adjustedPixelPosition = in.pixelPosition + pixelSize * 0.5; // in other project pixelSize
+    const float2 adjustedPixelPosition = in.pixelPosition + pixelSize * 0.5;
     float2 uvTot = fmod(adjustedPixelPosition, totalSize);
 
     const int yIndex = int(adjustedPixelPosition.y / totalSize.y) % 2;
@@ -172,6 +172,7 @@ polygonPatternGroupFadeInFragmentShader(PolygonPatternGroupVertexOut in [[stage_
 
                 const float2 texUv = uvOrig + uvSize * uv;
                 resultColor = texture0.sample(textureSampler, texUv);
+                resultColor = float4(resultColor.rgb * resultColor.a, resultColor.a);
             }
         } else {
             uvTot.x = fmod(adjustedPixelPosition.x + spacing.x * 0.5, totalSize.x);
@@ -180,6 +181,7 @@ polygonPatternGroupFadeInFragmentShader(PolygonPatternGroupVertexOut in [[stage_
                 const float2 uv = fmod((uvTot - pixelSize) / spacing + float2(1.0, 1.0), float2(1.0,1.0));
                 const float2 texUv = uvOrig + uvSize * uv;
                 resultColor = texture0.sample(textureSampler, texUv);
+                resultColor = float4(resultColor.rgb * resultColor.a, resultColor.a);
             } else {
                 // bottom left
                 const float2 spacingTexSize = float2(spacing.y, spacing.y);
@@ -189,6 +191,7 @@ polygonPatternGroupFadeInFragmentShader(PolygonPatternGroupVertexOut in [[stage_
                     const float2 uv = fmod(float2(relativeX, uvTot.y - pixelSize.y) / spacingTexSize + float2(1.0, 1.0), float2(1.0,1.0));
                     const float2 texUv = uvOrig + uvSize * uv;
                     resultColor = texture0.sample(textureSampler, texUv);
+                    resultColor = float4(resultColor.rgb * resultColor.a, resultColor.a);
                 }
             }
         }
@@ -196,6 +199,7 @@ polygonPatternGroupFadeInFragmentShader(PolygonPatternGroupVertexOut in [[stage_
         const float2 uv = fmod(uvTot / pixelSize + float2(1.0,1.0), float2(1.0,1.0));
         const float2 texUv = uvOrig + uvSize * uv;
         resultColor = texture0.sample(textureSampler, texUv);
+        resultColor = float4(resultColor.rgb * resultColor.a, resultColor.a);
     }
 
     return resultColor;

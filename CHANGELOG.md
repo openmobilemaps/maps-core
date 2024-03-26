@@ -5,6 +5,19 @@
 - Fixes style for short dashes
 - Fixes line touch area
 
+## Version 2.0.4 (22.03.2024)
+- Changes in symbol vector map collision detection: Run collision detection when zoom changes. This change ensures that icons never collide but also carries a performance burden.
+
+## Version 2.0.3 (19.03.2024)
+- Fixes thread safety in iOS shader
+- Fixes coordinate conversion from EPSG:4326 to EPSG:3857
+
+## Version 2.0.2 (12.03.2024)
+- Fixes a bug in iOS Polygon Pattern Shader
+- Fixes a bug in camera restricted bounds calculations
+- iOS Quad2dInstanced setup bugfix
+- Adds density enforcement for android map view
+
 ## Version 2.0.1 (07.03.2024)
 - Fixed WGS84 bounding box parsing for WMTS layers
 - Fix deadlock in renderToImage on iOS

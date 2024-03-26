@@ -238,7 +238,6 @@ extension Quad2dInstanced: MCQuad2dInstancedInterface {
         }
         lock.withCritical {
             texture = textureHolder.texture
-            ready = true
         }
     }
 
