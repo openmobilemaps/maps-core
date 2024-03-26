@@ -17,7 +17,9 @@
                                 width:(float)width
                             dashArray:(nonnull NSArray<NSNumber *> *)dashArray
                               lineCap:(MCLineCapType)lineCap
-                               offset:(float)offset NS_DESIGNATED_INITIALIZER;
+                               offset:(float)offset
+                               dotted:(BOOL)dotted
+                           dottedSkew:(float)dottedSkew NS_DESIGNATED_INITIALIZER;
 + (nonnull instancetype)lineStyleWithColor:(nonnull MCColorStateList *)color
                                   gapColor:(nonnull MCColorStateList *)gapColor
                                    opacity:(float)opacity
@@ -26,7 +28,9 @@
                                      width:(float)width
                                  dashArray:(nonnull NSArray<NSNumber *> *)dashArray
                                    lineCap:(MCLineCapType)lineCap
-                                    offset:(float)offset;
+                                    offset:(float)offset
+                                    dotted:(BOOL)dotted
+                                dottedSkew:(float)dottedSkew;
 
 @property (nonatomic, readonly, nonnull) MCColorStateList * color;
 
@@ -45,5 +49,9 @@
 @property (nonatomic, readonly) MCLineCapType lineCap;
 
 @property (nonatomic, readonly) float offset;
+
+@property (nonatomic, readonly) BOOL dotted;
+
+@property (nonatomic, readonly) float dottedSkew;
 
 @end

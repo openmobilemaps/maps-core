@@ -1,5 +1,11 @@
 # Changelog for Open Mobile Maps
 
+## Version 2.1.0 (07.03.2024)
+- Adds dotted line style (line-dotted boolean and an optional skewFactor, defaulting to 1.0 and denoting the stretch factor)
+- Fixes style for short dashes
+- Fixes line touch area
+- Added a Helper to create geojson strings from GeoJsonPoints
+
 ## Version 2.0.4 (22.03.2024)
 - Changes in symbol vector map collision detection: Run collision detection when zoom changes. This change ensures that icons never collide but also carries a performance burden.
 
