@@ -385,7 +385,8 @@ std::vector<float> MapCamera3d::getVpMatrix() {
         Matrix::multiplyMM(newVpMatrix, 0, newProjectionMatrix, 0, newViewMatrix, 0);
     } else if (mode == CameraMode3d::TILTED_ORBITAL) {
         Matrix::rotateM(newViewMatrix, 0, -cameraPitch, 1.0, 0.0, 0.0);
-        Matrix::translateM(newViewMatrix, 0, 0, cameraVerticalDisplacement, -cameraDistance);
+        Matrix::translateM(newViewMatrix, 0, 0.0, cameraVerticalDisplacement, -cameraDistance);
+
         Matrix::rotateM(newViewMatrix, 0.0, latitude, 1.0, 0.0, 0.0);
         Matrix::rotateM(newViewMatrix, 0.0, -longitude - 90.0, 0.0, 1.0, 0.0);
     }
@@ -927,21 +928,63 @@ bool MapCamera3d::onTwoFingerMoveComplete() {
 }
 
 Coord MapCamera3d::coordFromScreenPosition(const ::Vec2F &posScreen) {
-    Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
-    double zoomFactor = screenPixelAsRealMeterFactor * zoom;
+    auto viewport = mapInterface->getRenderingContext()->getViewportSize();
 
-    double xDiffToCenter = zoomFactor * (posScreen.x - ((double)sizeViewport.x / 2.0));
-    double yDiffToCenter = zoomFactor * (posScreen.y - ((double)sizeViewport.y / 2.0));
+    switch(mode) {
+        case CameraMode3d::GLOBE: {
+            break;
+        }
+        case CameraMode3d::TILTED_ORBITAL: {
+            auto fovWithPitch = 2.0 * (0.5 * FIELD_OF_VIEW + cameraPitch);
+            auto fovWithoutPitch = 2.0 * (0.5 * FIELD_OF_VIEW - cameraPitch);
 
-    double angRad = -angle * M_PI / 180.0;
-    double sinAng = std::sin(angRad);
-    double cosAng = std::cos(angRad);
+            // vertical
+            auto halfHeightTop = MapCamera3DHelper::halfHeight(cameraDistance * cos(cameraPitch * M_PI / 180.0), fovWithPitch) - cameraVerticalDisplacement;
+            auto halfHeightBottom = MapCamera3DHelper::halfHeight(cameraDistance * cos(cameraPitch * M_PI / 180.0), fovWithoutPitch) + cameraVerticalDisplacement;
+            auto h = halfHeightTop + halfHeightBottom;
 
-    double adjXDiff = xDiffToCenter * cosAng - yDiffToCenter * sinAng;
-    double adjYDiff = xDiffToCenter * sinAng + yDiffToCenter * cosAng;
+            auto centerY = viewport.y * (halfHeightTop / h);
 
-    return Coord(focusPointPosition.systemIdentifier, focusPointPosition.x + adjXDiff, focusPointPosition.y - adjYDiff,
-                 focusPointPosition.z);
+            // horizontal
+            auto halfWidth = MapCamera3DHelper::halfWidth(cameraDistance * cos(cameraPitch * M_PI / 180.0), FIELD_OF_VIEW, viewport.x, viewport.y);
+            auto viewPortHalfX = viewport.x * 0.5;
+
+            auto tdx = ((posScreen.x - viewPortHalfX) / viewPortHalfX) * halfWidth;
+            auto tdy = ((centerY - posScreen.y) / centerY) * halfHeightTop - cameraVerticalDisplacement;
+
+            bool didHit = false;
+            auto newPoint = MapCamera3DHelper::raySphereIntersection(Vec3D(0.0, cameraVerticalDisplacement, 0.0), Vec3D(tdx, tdy * cos(cameraPitch * M_PI / 180.0), cameraDistance * cos(cameraPitch * M_PI / 180.0)), Vec3D(0.0, 0.0, cameraDistance), 1.0, didHit);
+
+            // old point is focuspoint
+            auto oldPoint = Vec3D(0.0, 0.0, -1.0);
+            newPoint = Vec3DHelper::normalize(newPoint - Vec3D(0.0, 0.0, cameraDistance));
+
+            float oldPhi = std::atan2(oldPoint.z, oldPoint.x);
+            float oldTheta = std::acos(oldPoint.y / 1.0);
+
+            // NEW:
+            float newPhi = std::atan2(newPoint.z, newPoint.x);
+            float newTheta = std::acos(newPoint.y / 1.0);
+
+            if(std::abs(oldPoint.z) < 0.01) {
+                oldPhi = newPhi;
+            } else if(std::abs(newPoint.z) < 0.01) {
+                newPhi = oldPhi;
+            }
+
+            auto dPhi = (newPhi - oldPhi) * (180.0 / M_PI) * (mapSystemRtl ? 1 : -1);
+            auto dTheta = (newTheta - oldTheta) * (180.0 / M_PI) * (mapSystemTtb ? 1 : -1);
+
+            auto f = focusPointPosition;
+            f.x += dPhi;
+            f.y += dTheta;
+            f.y = std::clamp(f.y, -90.0, 90.0);
+
+            return f;
+        }
+    }
+
+    return focusPointPosition;
 }
 
 ::Vec2F MapCamera3d::screenPosFromCoord(const Coord &coord) {
