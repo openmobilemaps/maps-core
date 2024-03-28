@@ -981,8 +981,6 @@ Coord MapCamera3d::coordFromScreenPosition(const ::Vec2F &posScreen) {
             f.x += dPhi;
             f.y += dTheta;
             
-            LogError << "dPhi: " << dPhi << " " << " / dTheta: " <<= dTheta;
-
             return f;
         }
     }
@@ -1154,7 +1152,7 @@ void MapCamera3d::updateZoom(double zoom_) {
 
 double MapCamera3d::getCameraVerticalDisplacementFromZoom(double zoom) {
     auto z = (zoom - getMaxZoom()) / (getMinZoom() - getMaxZoom());
-    return 0.0;// 0.05 - (1.0 - z) * 0.4;
+    return 0.05 - (1.0 - z) * 0.4;
 }
 
 double MapCamera3d::getCameraPitchFromZoom(double zoom) {
