@@ -778,19 +778,7 @@ bool MapCamera3d::onDoubleClick(const ::Vec2F &posScreen) {
     auto targetZoom = zoom / 2;
     targetZoom = std::max(std::min(targetZoom, zoomMin), zoomMax);
 
-    auto position = coordFromScreenPosition(posScreen);
-
-    auto config = mapInterface->getMapConfig();
-    auto bottomRight = bounds.bottomRight;
-    auto topLeft = bounds.topLeft;
-
-    position.x = std::min(position.x, bottomRight.x);
-    position.x = std::max(position.x, topLeft.x);
-
-    position.y = std::max(position.y, bottomRight.y);
-    position.y = std::min(position.y, topLeft.y);
-
-    moveToCenterPositionZoom(position, targetZoom, true);
+    setZoom(targetZoom, true);
 
     notifyListeners(ListenerType::MAP_INTERACTION);
     return true;

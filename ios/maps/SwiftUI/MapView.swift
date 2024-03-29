@@ -212,14 +212,14 @@ public struct MapView: UIViewRepresentable {
 
         // Get description-structs of layers
         let oldLayers = context.coordinator.currentLayers
-        let newLayers = layers.compactMap { $0?.interface }
+        let newLayers = layers.filter { $0?.interface != nil }.compactMap { $0 }
 
-        var needsInsert: [any MCLayerInterface] = []
+        var needsInsert: [any Layer] = []
         var needsRemoval: [any MCLayerInterface] = []
 
         // Find layers that...
         for layer in newLayers {
-            if let _ = oldLayers.first(where: { $0 === layer }) {
+            if let _ = oldLayers.first(where: { $0 === layer.interface! }) {
                 // ... existed before
             } else {
                 // ... are new
@@ -229,17 +229,21 @@ public struct MapView: UIViewRepresentable {
 
         // ... are not needed any more
         for layer in oldLayers {
-            if !newLayers.contains(where: { $0 === layer }) {
+            if !newLayers.contains(where: { $0.interface === layer }) {
                 needsRemoval.append(layer)
             }
         }
 
-        context.coordinator.currentLayers = newLayers
+        context.coordinator.currentLayers = newLayers.compactMap { $0.interface }
 
         // Schedule Task to load or onload layers if needed
         if !needsInsert.isEmpty || !needsRemoval.isEmpty {
             for layer in needsInsert {
-                mapView.add(layer: layer)
+                if let layerIndex = layer.layerIndex {
+                    mapView.insert(layer: layer, at: layerIndex)
+                } else {
+                    mapView.add(layer: layer)
+                }
             }
             for layer in needsRemoval {
                 mapView.remove(layer: layer)
