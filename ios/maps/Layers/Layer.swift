@@ -10,4 +10,9 @@ import MapCoreSharedModule
 
 public protocol Layer {
     var interface: MCLayerInterface? { get }
+    var layerIndex: Int? { get }
+}
+
+public extension Layer {
+    var layerIndex: Int? { nil }
 }
