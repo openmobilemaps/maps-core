@@ -195,8 +195,7 @@ void MapCamera3d::moveToBoundingBox(const RectCoord &boundingBox, float paddingP
 ::Coord MapCamera3d::getCenterPosition() {
     auto center = focusPointPosition;
     if (mode == CameraMode3d::TILTED_ORBITAL) {
-        double d = getCameraDistanceFromZoom(zoom);
-        center.y -= (d * d * -9.2987162 + 34.635713 * d - 50.0); // TODO: Fix constants or use raycast from screen center to determine position, when available
+        center.y += getCenterYOffsetFromZoom(zoom);
     }
     return center;
 }
@@ -834,13 +833,13 @@ bool MapCamera3d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, cons
 
         double scaleFactor =
             Vec2FHelper::distance(posScreenNew[0], posScreenNew[1]) / Vec2FHelper::distance(posScreenOld[0], posScreenOld[1]);
-        double newZoom = zoom / scaleFactor;
+        double newZoom = std::clamp(zoom / scaleFactor, zoomMax, zoomMin);
 
         if (newZoom > startZoom * ROTATION_LOCKING_FACTOR || newZoom < startZoom / ROTATION_LOCKING_FACTOR) {
             rotationPossible = false;
         }
 
-        auto viewport = mapInterface->getRenderingContext()->getViewportSize();
+/*        auto viewport = mapInterface->getRenderingContext()->getViewportSize();
 
         float dPhi = 0.0;
         float dTheta = 0.0;
@@ -875,15 +874,17 @@ bool MapCamera3d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, cons
         focusPointPosition.x += t * dPhi * 0.001;
         focusPointPosition.y += t * dTheta * 0.00055;
 
-        float beforeAngle = cameraPitch;
+        float beforeAngle = cameraPitch;*/
+
+        double yOffsetPrev = getCenterYOffsetFromZoom(zoom);
+        double yOffsetNew = getCenterYOffsetFromZoom(newZoom);
+        focusPointPosition.y += (yOffsetPrev - yOffsetNew);
 
         updateZoom(newZoom);
 
-        float afterAngle = cameraPitch;
+/*        float afterAngle = cameraPitch;
         focusPointPosition.y -= 0.5 * (afterAngle - beforeAngle);
-        focusPointPosition.y = std::clamp(focusPointPosition.y, -90.0, 90.0);
-
-        auto mapConfig = mapInterface->getMapConfig();
+        focusPointPosition.y = std::clamp(focusPointPosition.y, -90.0, 90.0);*/
 
         notifyListeners(listenerType);
         mapInterface->invalidate();
@@ -1152,4 +1153,9 @@ double MapCamera3d::getCameraDistanceFromZoom(double zoom) {
     auto max = 2.5;
     auto min = 1.2;
     return min + (z * (max - min));
+}
+
+double MapCamera3d::getCenterYOffsetFromZoom(double zoom) {
+    double d = getCameraDistanceFromZoom(zoom);
+    return -(d * d * -9.2987162 + 34.635713 * d - 50.0); // TODO: Fix constants, compute from camera parameters or use raycast from screen center to determine position, when available
 }

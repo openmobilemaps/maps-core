@@ -151,6 +151,7 @@ protected:
     double getCameraDistanceFromZoom(double zoom);
     double getCameraVerticalDisplacementFromZoom(double zoom);
     double getCameraPitchFromZoom(double zoom);
+    double getCenterYOffsetFromZoom(double zoom);
 
     std::recursive_mutex listenerMutex;
     std::set<std::shared_ptr<MapCameraListenerInterface>> listeners;
