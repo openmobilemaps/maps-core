@@ -11,14 +11,16 @@ import MapCoreSharedModule
 @available(iOS 13.0, *)
 open class VectorLayer: Layer, ObservableObject {
 
-    public init(_ layerName: String = UUID().uuidString, styleURL: String) {
+    public init(_ layerName: String = UUID().uuidString, styleURL: String, layerIndex: Int? = nil) {
         self.layerInterface = MCTiled2dMapVectorLayerInterface.createExplicitly(layerName, styleJson: styleURL, localStyleJson: nil, loaders: [MCTextureLoader()], fontLoader: MCFontLoader(bundle: .main), localDataProvider: nil, customZoomInfo: nil, symbolDelegate: nil, sourceUrlParams: nil)
+        self.layerIndex = layerIndex
     }
-
 
     public let layerInterface: MCTiled2dMapVectorLayerInterface?
 
     public var interface: MCLayerInterface? { layerInterface?.asLayerInterface() }
+
+    public var layerIndex: Int?
 }
 
 
