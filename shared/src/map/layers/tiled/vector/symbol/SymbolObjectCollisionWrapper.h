@@ -43,7 +43,7 @@ public:
 
     bool operator<(const SymbolObjectCollisionWrapper &o) const {
         if (symbolSortKey == o.symbolSortKey) {
-            return symbolTileIndex > o.symbolTileIndex;
+            return symbolTileIndex < o.symbolTileIndex;
         }
         return symbolSortKey > o.symbolSortKey;
     }
