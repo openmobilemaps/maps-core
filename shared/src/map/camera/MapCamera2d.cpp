@@ -235,6 +235,7 @@ void MapCamera2d::setRotation(float angle, bool animated) {
     if (cameraFrozen)
         return;
     double newAngle = (angle > 360 || angle < 0) ? fmod(angle + 360.0, 360.0) : angle;
+
     if (animated) {
         double currentAngle = fmod(this->angle, 360.0);
         if (abs(currentAngle - newAngle) > abs(currentAngle - (newAngle + 360.0))) {
@@ -242,6 +243,7 @@ void MapCamera2d::setRotation(float angle, bool animated) {
         } else if (abs(currentAngle - newAngle) > abs(currentAngle - (newAngle - 360.0))) {
             newAngle -= 360.0;
         }
+
         std::lock_guard<std::recursive_mutex> lock(animationMutex);
         rotationAnimation = std::make_shared<DoubleAnimation>(
             DEFAULT_ANIM_LENGTH, currentAngle, newAngle, InterpolatorFunction::Linear,
@@ -253,17 +255,24 @@ void MapCamera2d::setRotation(float angle, bool animated) {
         rotationAnimation->start();
         mapInterface->invalidate();
     } else {
-        double angleDiff = newAngle - this->angle;
-        Coord centerScreen = centerPosition;
-        Coord realCenter = getCenterPosition();
-        Vec2D rotatedDiff =
-            Vec2DHelper::rotate(Vec2D(centerScreen.x - realCenter.x, centerScreen.y - realCenter.y), Vec2D(0.0, 0.0), angleDiff);
-        const auto [adjPosition, adjZoom] =
-                getBoundsCorrectedCoords(adjustCoordForPadding(Coord(mapCoordinateSystem.identifier, realCenter.x + rotatedDiff.x, realCenter.y + rotatedDiff.y, centerPosition.z), zoom), zoom);
-        centerPosition = adjPosition;
-        zoom = adjZoom;
+        if(coordAnimation) {
+            // if a coordinate animation is running during rotation,
+            // we go right to the correct end coordinate such that the rotation
+            // is performed correctly
+            centerPosition = coordAnimation->endValue;
+            coordAnimation->cancel();
+            coordAnimation = nullptr;
+        }
 
+        Coord realCenter = getCenterPosition();
+        Vec2D padVec = Vec2D(0.5 * (paddingLeft - paddingRight) * screenPixelAsRealMeterFactor * zoom,
+                             0.5 * (paddingBottom - paddingTop) * screenPixelAsRealMeterFactor * zoom);
+        Vec2D rotPadVec = Vec2DHelper::rotate(padVec, Vec2D(0.0, 0.0), newAngle);
+
+        this->centerPosition.x = realCenter.x - rotPadVec.x;
+        this->centerPosition.y = realCenter.y - rotPadVec.y;
         this->angle = newAngle;
+
         notifyListeners(ListenerType::ROTATION | ListenerType::BOUNDS);
         mapInterface->invalidate();
     }
