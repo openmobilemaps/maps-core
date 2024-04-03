@@ -461,10 +461,16 @@ std::vector<Actor<Tiled2dMapVectorSymbolGroup>> Tiled2dMapVectorSourceSymbolData
                                                                                                          layerIdentifier),
                                                                                                  featureStateManager,
                                                                                                  symbolDelegate,
-                                                                                                 persistingSymbolPlacement);
-        symbolGroupActor.message(&Tiled2dMapVectorSymbolGroup::initialize, features, featuresBase,
-                                 std::min(featuresBase + maxNumFeaturesPerGroup, numFeatures) - featuresBase,
-                                 animationCoordinatorMap, selfActor, alpha);
+                                                                                                 persistingSymbolPlacement,
+                                                                                                 features, 
+                                                                                                 featuresBase,
+                                                                                                 std::min(featuresBase + maxNumFeaturesPerGroup, numFeatures) - featuresBase,
+                                                                                                 animationCoordinatorMap,
+                                                                                                 selfActor,
+                                                                                                 alpha);
+
+        symbolGroupActor.message(&Tiled2dMapVectorSymbolGroup::initialize, spriteData, spriteTexture);
+
         symbolGroups.push_back(symbolGroupActor);
     }
     return symbolGroups;
@@ -592,10 +598,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::setSprites(std::shared_ptr<SpriteD
     this->spriteData = spriteData;
     this->spriteTexture = spriteTexture;
 
-    if (!tileSymbolGroupMap.empty()) {
-        auto selfActor = WeakActor(mailbox, weak_from_this());
-        selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorSourceSymbolDataManager::setupExistingSymbolWithSprite);
-    }
+    setupExistingSymbolWithSprite();
 }
 
 void Tiled2dMapVectorSourceSymbolDataManager::setupExistingSymbolWithSprite() {
@@ -608,12 +611,10 @@ void Tiled2dMapVectorSourceSymbolDataManager::setupExistingSymbolWithSprite() {
     for (const auto &[tile, symbolGroupMap]: tileSymbolGroupMap) {
         for (const auto &[layerIdentifier, symbolGroups]: symbolGroupMap) {
             for (auto &symbolGroup: std::get<1>(symbolGroups)) {
-                symbolGroup.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorSymbolGroup::setupObjects, spriteData, spriteTexture, std::nullopt);
+                symbolGroup.message(&Tiled2dMapVectorSymbolGroup::initialize, spriteData, spriteTexture);
             }
         }
     }
-
-    pregenerateRenderPasses();
 }
 
 void Tiled2dMapVectorSourceSymbolDataManager::collisionDetection(std::vector<std::string> layerIdentifiers, std::shared_ptr<CollisionGrid> collisionGrid) {

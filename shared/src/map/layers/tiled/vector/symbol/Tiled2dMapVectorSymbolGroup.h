@@ -44,14 +44,16 @@ public:
                                 const std::shared_ptr<SymbolVectorLayerDescription> &layerDescription,
                                 const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager,
                                 const std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> &symbolDelegate,
-                                const bool persistingSymbolPlacement);
+                                const bool persistingSymbolPlacement,
+                                std::weak_ptr<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>> weakFeatures,
+                                int32_t featuresBase,
+                                int32_t featuresCount,
+                                std::shared_ptr<SymbolAnimationCoordinatorMap> animationCoordinatorMap,
+                                const WeakActor<Tiled2dMapVectorSourceSymbolDataManager> symbolManagerActor,
+                                float alpha);
 
-    void initialize(std::weak_ptr<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>> weakFeatures,
-                    int32_t featuresBase,
-                    int32_t featuresCount,
-                    std::shared_ptr<SymbolAnimationCoordinatorMap> animationCoordinatorMap,
-                    const WeakActor<Tiled2dMapVectorSourceSymbolDataManager> &symbolManagerActor,
-                    float alpha = 1.0);
+    void initialize(const std::shared_ptr<SpriteData> spriteData,
+                    const std::shared_ptr<TextureHolderInterface> spriteTexture);
 
     void update(const double zoomIdentifier, const double rotation, const double scaleFactor, long long now);
 
@@ -167,6 +169,7 @@ private:
 
     bool anyInteractable = false;
 
+    bool isSetup = false;
     bool isInitialized = false;
 
     const std::shared_ptr<Tiled2dMapVectorStateManager> featureStateManager;
@@ -178,4 +181,10 @@ private:
 #endif
 
     UsedKeysCollection usedKeys;
+
+    std::weak_ptr<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>> weakFeatures;
+    int32_t featuresBase;
+    int32_t featuresCount;
+    std::shared_ptr<SymbolAnimationCoordinatorMap> animationCoordinatorMap;
+    const WeakActor<Tiled2dMapVectorSourceSymbolDataManager> symbolManagerActor;
 };
