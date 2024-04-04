@@ -28,7 +28,7 @@ public class TextureHolder: NSObject {
         super.init()
     }
 
-    convenience init(_ url: URL, textureUsableSize: TextureUsableSize? = nil) throws {
+    public convenience init(_ url: URL, textureUsableSize: TextureUsableSize? = nil) throws {
         let options: [MTKTextureLoader.Option: Any] = [
             MTKTextureLoader.Option.SRGB: NSNumber(booleanLiteral: false),
         ]
