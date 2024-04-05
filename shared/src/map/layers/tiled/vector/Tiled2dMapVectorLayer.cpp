@@ -224,6 +224,7 @@ void Tiled2dMapVectorLayer::setMapDescription(const std::shared_ptr<VectorMapDes
     {
         std::lock_guard<std::recursive_mutex> lock(mapDescriptionMutex);
         this->mapDescription = mapDescription;
+        this->persistingSymbolPlacement = mapDescription->persistingSymbolPlacement;
         this->layerConfigs.clear();
 
         for (auto const &source: mapDescription->vectorSources) {
@@ -594,9 +595,8 @@ void Tiled2dMapVectorLayer::update() {
             if (now - lastCollitionCheck > 1000 || tilesChanged || zoomChange > 0.001) {
                 lastCollitionCheck = now;
                 bool enforceUpdate = !prevCollisionStillValid.test_and_set();
-                std::lock_guard<std::recursive_mutex> lock(mapDescriptionMutex);
                 collisionManager.syncAccess(
-                        [&vpMatrix, &viewportSize, viewportRotation, enforceUpdate, persistingPlacement = mapDescription->persistingSymbolPlacement](
+                        [&vpMatrix, &viewportSize, viewportRotation, enforceUpdate, persistingPlacement = this->persistingSymbolPlacement](
                                 const auto &manager) {
                             manager->collisionDetection(*vpMatrix, viewportSize, viewportRotation, enforceUpdate,
                                                         persistingPlacement);
