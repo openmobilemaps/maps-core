@@ -28,6 +28,14 @@ public class TextureHolder: NSObject {
         super.init()
     }
 
+    deinit {
+        let texture = self.texture
+        DispatchQueue.global(qos: .utility).async {
+            // access texture to make sure it gets deallocated asynchron
+            _ = texture.width
+        }
+    }
+
     public convenience init(_ url: URL, textureUsableSize: TextureUsableSize? = nil) throws {
         let options: [MTKTextureLoader.Option: Any] = [
             MTKTextureLoader.Option.SRGB: NSNumber(booleanLiteral: false),
