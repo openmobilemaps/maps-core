@@ -9,6 +9,7 @@
 
 class SchedulerGraphicsTaskCallbacks;
 class TaskInterface;
+class ThreadPoolCallbacks;
 
 class SchedulerInterface {
 public:
@@ -34,4 +35,6 @@ public:
     virtual bool runGraphicsTasks() = 0;
 
     virtual void setSchedulerGraphicsTaskCallbacks(const /*not-null*/ std::shared_ptr<SchedulerGraphicsTaskCallbacks> & callbacks) = 0;
+
+    virtual /*not-null*/ std::shared_ptr<ThreadPoolCallbacks> getThreadPoolCallbacks() = 0;
 };
