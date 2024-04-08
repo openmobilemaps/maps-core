@@ -99,6 +99,10 @@ open class DataLoader(
                 val bytes: ByteArray? = response.body?.bytes()
                 if (response.isSuccessful && bytes != null) {
                     val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+					if(bitmap==null){
+						result.setValue(TextureLoaderResult(null, null, LoaderStatus.ERROR_OTHER, "DECODING"))
+						return
+					}
                     result.setValue(
                         TextureLoaderResult(
                             BitmapTextureHolder(bitmap),

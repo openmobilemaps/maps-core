@@ -6,6 +6,10 @@
 - Fixes line touch area
 - Added a Helper to create geojson strings from GeoJsonPoints
 
+## Version 2.0.5 (08.04.2024)
+- Expose thread_pool_callbacks in scheduler interface
+- call onRemoved on layerInterface before the mapScene is destroyed
+
 ## Version 2.0.4 (22.03.2024)
 - Changes in symbol vector map collision detection: Run collision detection when zoom changes. This change ensures that icons never collide but also carries a performance burden.
 

@@ -10,12 +10,7 @@
 
 package io.openmobilemaps.mapscore.map.scheduling
 
-import io.openmobilemaps.mapscore.shared.map.scheduling.ExecutionEnvironment
-import io.openmobilemaps.mapscore.shared.map.scheduling.SchedulerGraphicsTaskCallbacks
-import io.openmobilemaps.mapscore.shared.map.scheduling.SchedulerInterface
-import io.openmobilemaps.mapscore.shared.map.scheduling.TaskConfig
-import io.openmobilemaps.mapscore.shared.map.scheduling.TaskInterface
-import io.openmobilemaps.mapscore.shared.map.scheduling.TaskPriority
+import io.openmobilemaps.mapscore.shared.map.scheduling.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
@@ -151,6 +146,10 @@ class AndroidScheduler(
 
 	override fun setSchedulerGraphicsTaskCallbacks(callbacks: SchedulerGraphicsTaskCallbacks) {
 		graphicsTaskCallbacks = callbacks
+	}
+
+	override fun getThreadPoolCallbacks(): ThreadPoolCallbacks {
+		throw IllegalStateException("Android Scheduler doesn't provide any thread callbacks")
 	}
 
 	fun launchCoroutine(
