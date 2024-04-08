@@ -98,6 +98,8 @@ std::string ColorLineGroup2dShaderOpenGl::getVertexShader() {
                                       //            float numDashValues; // 13
                                       //            float dashArray[4]; // 14 15 16 17
                                       //            float offset; // 18
+                                      //            float dotted; // 19
+                                      //            float dottedSkew; // 20
                                       //        };
                                       uniform float lineValues[) + std::to_string(sizeLineValuesArray) + OMMShaderCode(];
                                       uniform int numStyles;
@@ -199,7 +201,7 @@ std::string ColorLineGroup2dShaderOpenGl::getFragmentShader() {
 
                                            float d;
                                            if (t < 0.0 || t > 1.0) {
-                                               if (numDashInfos > 0) {
+                                               if (numDashInfos > 0 && lineValues[int(fStyleIndexBase) + 14] < 1.0 && lineValues[int(fStyleIndexBase) + 14] > 0.0) {
                                                    discard;
                                                }
                                                if (segmentType == 0 || iCapType == 1 || (segmentType == 2 && t < 0.0) || (segmentType == 1 && t > 1.0)) {
@@ -223,24 +225,49 @@ std::string ColorLineGroup2dShaderOpenGl::getFragmentShader() {
 
                                            vec4 fragColor = color;
                                            float opacity = lineValues[int(fStyleIndexBase) + 10];
+                                           float colorA = lineValues[int(fStyleIndexBase) + 4];
+                                           float colorAGap = lineValues[int(fStyleIndexBase) + 8];
 
-                                           if (numDashInfos > 0) {
-                                               int gapColorIndexBase = int(fStyleIndexBase) + 5;
-                                               vec4 gapColor = vec4(lineValues[gapColorIndexBase], lineValues[gapColorIndexBase + 1],
-                                                                    lineValues[gapColorIndexBase + 2], lineValues[gapColorIndexBase + 3]);
+                                           float a = colorA * opacity;
+                                           float aGap = colorAGap * opacity;
 
-                                               int baseDashInfos = dashBase + 1;
-                                               float factorToT = dashingSize / lineLength;
-                                               float dashTotal = lineValues[baseDashInfos + (numDashInfos - 1)] * factorToT;
+                                           int iDottedLine = int(floor(lineValues[int(fStyleIndexBase) + 19] + 0.5));
+
+                                           if (iDottedLine == 1) {
+                                               float skew = lineValues[int(fStyleIndexBase) + 20];
+
+                                               float factorToT = (radius * 2.0) / lineLength * skew;
+                                               float dashOffset = (radius - skew * radius) / lineLength;
+
+                                               float dashTotalDotted = 2.0 * factorToT;
+                                               float offset = segmentStartLPos / lineLength;
+                                               float startOffsetSegmentDotted = mod(offset, dashTotalDotted);
+                                               float pos = t + startOffsetSegmentDotted;
+
+                                               float intraDashPosDotted = mod(pos, dashTotalDotted);
+                                               if ((intraDashPosDotted > 1.0 * factorToT + dashOffset && intraDashPosDotted < dashTotalDotted - dashOffset) ||
+                                               (length(vec2(min(abs(intraDashPosDotted - 0.5 * factorToT), 0.5 * factorToT + dashTotalDotted - intraDashPosDotted) / (0.5 * factorToT + dashOffset), d / radius)) > 1.0)) {
+                                                   discard;
+                                               }
+                                           } else if (numDashInfos > 0) {
+                                               float dashArray[4] = float[](lineValues[int(fStyleIndexBase) + 14], lineValues[int(fStyleIndexBase) + 15], lineValues[int(fStyleIndexBase) + 16], lineValues[int(fStyleIndexBase) + 17]);
+
+                                               float factorToT = (radius * 2.0) / lineLength;
+                                               float dashTotal = dashArray[3] * factorToT;
                                                float startOffsetSegment = mod(segmentStartLPos / lineLength, dashTotal);
                                                float intraDashPos = mod(t + startOffsetSegment, dashTotal);
-                                               // unrolled for efficiency reasons
-                                               if ((intraDashPos > lineValues[baseDashInfos + 0] * factorToT &&
-                                                intraDashPos < lineValues[baseDashInfos + 1] * factorToT) ||
-                                                (intraDashPos > lineValues[baseDashInfos + 2] * factorToT &&
-                                                intraDashPos < lineValues[baseDashInfos + 3] * factorToT)) {
-                                                    fragColor = gapColor;
-                                                }
+
+                                               if ((intraDashPos > dashArray[0] * factorToT && intraDashPos < dashArray[1] * factorToT) ||
+                                                   (intraDashPos > dashArray[2] * factorToT && intraDashPos < dashArray[3] * factorToT)) {
+                                                   if (int(aGap) == 0) {
+                                                       discard;
+                                                   }
+
+                                                   int gapColorIndexBase = int(fStyleIndexBase) + 5;
+                                                   vec4 gapColor = vec4(lineValues[gapColorIndexBase], lineValues[gapColorIndexBase + 1],
+                                                                        lineValues[gapColorIndexBase + 2], lineValues[gapColorIndexBase + 3]);
+                                                   fragColor = gapColor;
+                                               }
                                             }
 
 

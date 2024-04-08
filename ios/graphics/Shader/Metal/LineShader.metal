@@ -58,6 +58,8 @@ struct LineStyling {
   float numDashValues; // 13
   float dashArray[4]; // 14 15 16 17
   float offset; // 18
+  float dotted; // 19
+  float dottedSkew; // 20
 };
 
 /**
@@ -74,7 +76,7 @@ lineGroupVertexShader(const LineVertexIn vertexIn [[stage_in]],
                       constant float &dashingScalingFactor [[buffer(3)]],
                       constant float *styling [[buffer(4)]])
 {
-    int styleIndex = (int(vertexIn.stylingIndex) & 0xFF) * 19;
+    int styleIndex = (int(vertexIn.stylingIndex) & 0xFF) * 21;
 
     // extend position in width direction and in length direction by width / 2.0
     float width = styling[styleIndex] / 2.0;
@@ -144,7 +146,7 @@ lineGroupFragmentShader(LineVertexOut in [[stage_in]],
   float d;
 
   if (t < 0.0 || t > 1.0) {
-    if (numDash > 0) {
+    if (numDash > 0 && styling[in.stylingIndex + 14] < 1.0 && styling[in.stylingIndex + 14] > 0.0) {
       discard_fragment();
     }
     if (segmentType == 0 || capType == 1 || (segmentType == 2 && t < 0.0) || (segmentType == 1 && t > 1.0)) {
@@ -173,19 +175,38 @@ lineGroupFragmentShader(LineVertexOut in [[stage_in]],
 
   float a = colorA * opacity;
   float aGap = colorAGap * opacity;
-
-  if(in.scaledBlur > 0 && t > 0.0 && t < 1.0) {
+    
+  int dottedLine = int(styling[in.stylingIndex + 19]);
+    
+  if (in.scaledBlur > 0 && t > 0.0 && t < 1.0) {
     float nonBlurRange = (in.width - in.scaledBlur);
     if (d > nonBlurRange) {
-      a *= clamp(1 - max(0.0, d - nonBlurRange) / (in.scaledBlur) ,0.0, 1.0);
+      a *= clamp(1 - max(0.0, d - nonBlurRange) / (in.scaledBlur), 0.0, 1.0);
     }
   }
 
-  if(numDash > 0) {
+  if (dottedLine == 1) {
+    float skew = styling[in.stylingIndex + 20];
+
+    half factorToT = (in.width * 2) / lineLength * skew;
+    half dashOffset = (in.width - skew * in.width) / lineLength;
+
+    half dashTotalDotted =  2.0 * factorToT;
+    half offset = half(in.lengthPrefix) / lineLength;
+    half startOffsetSegmentDotted = fmod(offset, dashTotalDotted);
+    half pos = t + startOffsetSegmentDotted;
+
+    half intraDashPosDotted = fmod(pos, dashTotalDotted);
+      if ((intraDashPosDotted > 1.0 * factorToT + dashOffset && intraDashPosDotted < dashTotalDotted - dashOffset) ||
+                              (length(half2(min(abs(intraDashPosDotted - 0.5 * factorToT), 0.5 * factorToT + dashTotalDotted - intraDashPosDotted) / (0.5 * factorToT + dashOffset), d / in.width)) > 1.0)) {
+          discard_fragment();
+      }
+  } else if(numDash > 0) {
     float dashArray[4] = { styling[in.stylingIndex + 14],
                            styling[in.stylingIndex + 15],
                            styling[in.stylingIndex + 16],
                            styling[in.stylingIndex + 17] };
+
 
     float factorToT = (in.width * 2) / lineLength;
     float dashTotal = dashArray[3] * factorToT;
