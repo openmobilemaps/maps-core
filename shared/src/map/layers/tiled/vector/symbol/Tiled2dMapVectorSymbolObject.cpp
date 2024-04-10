@@ -18,6 +18,7 @@
 #include "Tiled2dMapSource.h"
 #include "Tiled2dMapVectorStyleParser.h"
 #include "CollisionUtil.h"
+#include "ExceptionLogger.h"
 
 Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<MapInterface> &mapInterface,
                                                            const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
@@ -124,6 +125,8 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
             }
         }
 
+        fontResult = nullptr;
+
         if (fontResult) {
             auto textOffset = description->style.getTextOffset(evalContext);
             const auto textRadialOffset = description->style.getTextRadialOffset(evalContext);
@@ -150,6 +153,7 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
                 fontString.append(font + ",");
             }
             fontString.pop_back();
+            ExceptionLogger::instance().logMessage("map-core:Tiled2dMapVectorSymbolObject", 0, "font (" + fontString + ") could not be loaded");
             LogError << "font (" << fontString <<=") could not be loaded";
         }
     } else {
