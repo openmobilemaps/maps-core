@@ -125,8 +125,6 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
             }
         }
 
-        fontResult = nullptr;
-
         if (fontResult) {
             auto textOffset = description->style.getTextOffset(evalContext);
             const auto textRadialOffset = description->style.getTextRadialOffset(evalContext);
