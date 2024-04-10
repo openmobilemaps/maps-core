@@ -62,8 +62,12 @@ open class MCTextureLoader: MCLoaderInterface {
     open func loadTextureAsnyc(_ url: String, etag: String?) -> DJFuture<MCTextureLoaderResult> {
         let urlString = url
 
+        let promise = DJPromise<MCTextureLoaderResult>()
+
         guard let url = URL(string: urlString) else {
-            preconditionFailure("invalid url: \(urlString)")
+            assertionFailure("invalid url: \(urlString)")
+            promise.setValue(.init(data: nil, etag: nil, status: .ERROR_NETWORK, errorCode: "IURL"))
+            return promise.getFuture()
         }
 
         var urlRequest = URLRequest(url: url)
@@ -75,8 +79,6 @@ open class MCTextureLoader: MCLoaderInterface {
            session.configuration.urlCache?.cachedResponse(for: urlRequest) != nil {
             wasCached = true
         }
-
-        let promise = DJPromise<MCTextureLoaderResult>()
 
         var task = session.dataTask(with: urlRequest) { [weak self] data, response_, error_ in
             guard let self else { return }
@@ -211,15 +213,17 @@ open class MCTextureLoader: MCLoaderInterface {
     open func loadDataAsync(_ url: String, etag: String?) -> DJFuture<MCDataLoaderResult> {
         let urlString = url
 
+        let promise = DJPromise<MCDataLoaderResult>()
+
         guard let url = URL(string: urlString) else {
-            preconditionFailure("invalid url: \(urlString)")
+            assertionFailure("invalid url: \(urlString)")
+            promise.setValue(.init(data: nil, etag: nil, status: .ERROR_NETWORK, errorCode: "IURL"))
+            return promise.getFuture()
         }
 
         var urlRequest = URLRequest(url: url)
 
         modifyUrlRequest(request: &urlRequest)
-
-        let promise = DJPromise<MCDataLoaderResult>()
 
         var task = session.dataTask(with: urlRequest) { [weak self] data, response_, error_ in
             guard let self else { return }
