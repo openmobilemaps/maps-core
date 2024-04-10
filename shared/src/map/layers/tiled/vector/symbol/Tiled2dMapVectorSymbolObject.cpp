@@ -106,7 +106,7 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
     // only load the font if we actually need it
     if (hasText) {
 
-        std::shared_ptr<FontLoaderResult> fontResult;
+        std::shared_ptr<FontLoaderResult> fontResult = nullptr;
 
         for (const auto &font: fontList) {
             // try to load a font until we succeed
@@ -124,26 +124,34 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
             }
         }
 
+        if (fontResult) {
+            auto textOffset = description->style.getTextOffset(evalContext);
+            const auto textRadialOffset = description->style.getTextRadialOffset(evalContext);
+            const auto letterSpacing = description->style.getTextLetterSpacing(evalContext);
 
-        auto textOffset = description->style.getTextOffset(evalContext);
-        const auto textRadialOffset = description->style.getTextRadialOffset(evalContext);
-        const auto letterSpacing = description->style.getTextLetterSpacing(evalContext);
+            SymbolAlignment labelRotationAlignment = description->style.getTextRotationAlignment(evalContext);
+            boundingBoxRotationAlignment = labelRotationAlignment;
+            labelObject = std::make_shared<Tiled2dMapVectorSymbolLabelObject>(converter, featureContext, description, text, fullText,
+                                                                              coordinate, lineCoordinates, textAnchor, angle,
+                                                                              textJustify, fontResult, textOffset, textRadialOffset,
+                                                                              description->style.getTextLineHeight(evalContext),
+                                                                              letterSpacing,
+                                                                              description->style.getTextMaxWidth(evalContext),
+                                                                              description->style.getTextMaxAngle(evalContext),
+                                                                              labelRotationAlignment, textSymbolPlacement,
+                                                                              animationCoordinator, featureStateManager,
+                                                                              dpFactor);
 
-        SymbolAlignment labelRotationAlignment = description->style.getTextRotationAlignment(evalContext);
-        boundingBoxRotationAlignment = labelRotationAlignment;
-        labelObject = std::make_shared<Tiled2dMapVectorSymbolLabelObject>(converter, featureContext, description, text, fullText,
-                                                                          coordinate, lineCoordinates, textAnchor, angle,
-                                                                          textJustify, fontResult, textOffset, textRadialOffset,
-                                                                          description->style.getTextLineHeight(evalContext),
-                                                                          letterSpacing,
-                                                                          description->style.getTextMaxWidth(evalContext),
-                                                                          description->style.getTextMaxAngle(evalContext),
-                                                                          labelRotationAlignment, textSymbolPlacement,
-                                                                          animationCoordinator, featureStateManager,
-                                                                          dpFactor);
-
-        instanceCounts.textCharacters = labelObject->getCharacterCount();
-
+            instanceCounts.textCharacters = labelObject->getCharacterCount();
+        } else {
+            // font could not be loaded
+            std::string fontString;
+            for (const auto &font: fontList) {
+                fontString.append(font + ",");
+            }
+            fontString.pop_back();
+            LogError << "font (" << fontString <<=") could not be loaded";
+        }
     } else {
         boundingBoxRotationAlignment = iconRotationAlignment;
     }
