@@ -7,6 +7,9 @@
 - Fix map description issues in concurrent settings
 - Added a Helper to create geojson strings from GeoJsonPoints
 
+## Version 2.0.6 (10.04.2024)
+- log exception when a font can not be loaded
+
 ## Version 2.0.5 (08.04.2024)
 - Expose thread_pool_callbacks in scheduler interface
 - call onRemoved on layerInterface before the mapScene is destroyed
