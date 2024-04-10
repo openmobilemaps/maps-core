@@ -28,7 +28,9 @@ auto ShaderLineStyle::toCpp(ObjcType obj) -> CppType
             ::djinni::F32::toCpp(obj.dashValue1),
             ::djinni::F32::toCpp(obj.dashValue2),
             ::djinni::F32::toCpp(obj.dashValue3),
-            ::djinni::F32::toCpp(obj.offset)};
+            ::djinni::F32::toCpp(obj.offset),
+            ::djinni::F32::toCpp(obj.dotted),
+            ::djinni::F32::toCpp(obj.dottedSkew)};
 }
 
 auto ShaderLineStyle::fromCpp(const CppType& cpp) -> ObjcType
@@ -51,7 +53,9 @@ auto ShaderLineStyle::fromCpp(const CppType& cpp) -> ObjcType
                                          dashValue1:(::djinni::F32::fromCpp(cpp.dashValue1))
                                          dashValue2:(::djinni::F32::fromCpp(cpp.dashValue2))
                                          dashValue3:(::djinni::F32::fromCpp(cpp.dashValue3))
-                                             offset:(::djinni::F32::fromCpp(cpp.offset))];
+                                             offset:(::djinni::F32::fromCpp(cpp.offset))
+                                             dotted:(::djinni::F32::fromCpp(cpp.dotted))
+                                         dottedSkew:(::djinni::F32::fromCpp(cpp.dottedSkew))];
 }
 
 } // namespace djinni_generated

@@ -24,7 +24,9 @@ public:
                     std::shared_ptr<Value> lineBlur = nullptr,
                     std::shared_ptr<Value> lineCap = nullptr,
                     std::shared_ptr<Value> lineOffset = nullptr,
-                    std::shared_ptr<Value> blendMode = nullptr)
+                    std::shared_ptr<Value> blendMode = nullptr,
+                    std::shared_ptr<Value> lineDotted = nullptr,
+                    std::shared_ptr<Value> lineDottedSkew = nullptr)
             : lineColor(lineColor),
               lineOpacity(lineOpacity),
               lineWidth(lineWidth),
@@ -32,7 +34,9 @@ public:
               lineBlur(lineBlur),
               lineCap(lineCap),
               lineOffset(lineOffset),
-              blendMode(blendMode) {}
+              blendMode(blendMode),
+              lineDotted(lineDotted),
+              lineDottedSkew(lineDottedSkew) {}
 
     LineVectorStyle(LineVectorStyle &style)
             : lineColor(style.lineColor),
@@ -42,11 +46,13 @@ public:
               lineBlur(style.lineBlur),
               lineCap(style.lineCap),
               lineOffset(style.lineOffset),
-              blendMode(style.blendMode) {}
+              blendMode(style.blendMode),
+              lineDotted(style.lineDotted),
+              lineDottedSkew(style.lineDottedSkew) {}
 
     UsedKeysCollection getUsedKeys() const {
         UsedKeysCollection usedKeys;
-        std::shared_ptr<Value> values[] = { lineColor, lineOpacity, lineWidth, lineBlur, lineDashArray, lineCap, blendMode };
+        std::shared_ptr<Value> values[] = { lineColor, lineOpacity, lineWidth, lineBlur, lineDashArray, lineCap, blendMode, lineDotted, lineDottedSkew };
 
         for (auto const &value: values) {
             if (!value) continue;
@@ -99,6 +105,16 @@ public:
         double offset = lineOffsetEvaluator.getResult(lineOffset, context, defaultValue);
         return std::min(offset * context.dpFactor, getLineWidth(context) * 0.5);
     }
+    
+    bool getLineDotted(const EvaluationContext &context) {
+        static const bool defaultValue = false;
+        return lineDottedEvaluator.getResult(lineDotted, context, defaultValue);
+    }
+    
+    double getLineDottedSkew(const EvaluationContext &context) {
+        static const bool defaultValue = 1.0;
+        return lineDottedSkewEvaluator.getResult(lineDottedSkew, context, defaultValue);
+    }
 
     std::shared_ptr<Value> lineColor;
     std::shared_ptr<Value> lineOpacity;
@@ -108,6 +124,8 @@ public:
     std::shared_ptr<Value> lineCap;
     std::shared_ptr<Value> lineOffset;
     std::shared_ptr<Value> blendMode;
+    std::shared_ptr<Value> lineDotted;
+    std::shared_ptr<Value> lineDottedSkew;
 
 private:
     ValueEvaluator<Color> lineColorEvaluator;
@@ -118,6 +136,8 @@ private:
     ValueEvaluator<LineCapType> lineCapEvaluator;
     ValueEvaluator<double> lineOffsetEvaluator;
     ValueEvaluator<BlendMode> blendModeEvaluator;
+    ValueEvaluator<bool> lineDottedEvaluator;
+    ValueEvaluator<double> lineDottedSkewEvaluator;
 };
 
 class LineVectorLayerDescription: public VectorLayerDescription {

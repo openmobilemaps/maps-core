@@ -238,6 +238,8 @@ private:
     std::recursive_mutex mapDescriptionMutex;
     std::shared_ptr<VectorMapDescription> mapDescription;
 
+    bool persistingSymbolPlacement;
+
     std::shared_ptr<Tiled2dMapVectorBackgroundSubLayer> backgroundLayer;
 
     std::unordered_map<std::string, std::shared_ptr<Tiled2dMapVectorLayerConfig>> layerConfigs;

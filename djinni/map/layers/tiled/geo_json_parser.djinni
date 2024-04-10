@@ -12,3 +12,9 @@ geo_json_point = record {
     point: coord;
     feature_info: vector_layer_feature_info;
 }
+
+geo_json_helper_interface = interface +c {
+	static independent_instance(): geo_json_helper_interface;
+	geo_json_string_from_feature_info(point: geo_json_point): string;
+	geo_json_string_from_feature_infos(points: list<geo_json_point>): string;
+}
