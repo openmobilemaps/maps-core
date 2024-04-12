@@ -350,9 +350,9 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
                 baseLines[numberOfCharacters] = yh;
 
                 boxMin.x = boxMin.x < x ? boxMin.x : x;
-                boxMax.x = boxMax.x > x ? boxMax.x : x;
+                boxMax.x = boxMax.x > xw ? boxMax.x : xw;
                 boxMin.y = boxMin.y < y ? boxMin.y : y;
-                boxMax.y = boxMax.y > y ? boxMax.y : y;
+                boxMax.y = boxMax.y > yh ? boxMax.y : yh;
 
                 if (pen.x == 0.0 && pen.y == 0.0) {
                     // only look at first character for offset
@@ -773,8 +773,9 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
         Vec2D lastCirclePosition = Vec2D(0, 0);
         size_t count = centerPositions.size();
         for (int i = 0; i < count; i++) {
-            double newX = centerPositions.at(i).x;
-            double newY = centerPositions.at(i).y;
+            const auto &cp = centerPositions[i];
+            double newX = cp.x;
+            double newY = cp.y;
             if (i != count - 1 && std::sqrt((newX - lastCirclePosition.x) * (newX - lastCirclePosition.x) +
                                             (newY - lastCirclePosition.y) * (newY - lastCirclePosition.y))
                                   <= (maxSymbolRadius * 2.0) * collisionDistanceBias) {

@@ -41,6 +41,7 @@
 #include "ValueVariant.h"
 #include "Tiled2dMapVectorStateManager.h"
 #include "Logger.h"
+#include "ValueKeys.h"
 #include <mutex>
 #include <iomanip>
 
@@ -156,23 +157,23 @@ public:
     };
 
     void initialize() {
-        propertiesMap.push_back(std::make_pair("identifier", int64_t(identifier)));
+        propertiesMap.push_back(std::make_pair(ValueKeys::IDENTIFIER_KEY, int64_t(identifier)));
 
         switch (geomType) {
             case vtzero::GeomType::LINESTRING: {
-                propertiesMap.push_back(std::make_pair("$type", "LineString"));
+                propertiesMap.push_back(std::make_pair(ValueKeys::TYPE_KEY, "LineString"));
                 break;
             }
             case vtzero::GeomType::POINT: {
-                propertiesMap.push_back(std::make_pair("$type", "Point"));
+                propertiesMap.push_back(std::make_pair(ValueKeys::TYPE_KEY, "Point"));
                 break;
             }
             case vtzero::GeomType::POLYGON: {
-                propertiesMap.push_back(std::make_pair("$type", "Polygon"));
+                propertiesMap.push_back(std::make_pair(ValueKeys::TYPE_KEY, "Polygon"));
                 break;
             }
             case vtzero::GeomType::UNKNOWN: {
-                propertiesMap.push_back(std::make_pair("$type", "Unknown"));
+                propertiesMap.push_back(std::make_pair(ValueKeys::TYPE_KEY, "Unknown"));
                 break;
             }
         }

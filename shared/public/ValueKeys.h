@@ -8,6 +8,12 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-#include "MapsCoreSharedModule.h"
+#pragma once
 
-std::string MapsCoreSharedModule::version() { return "2.1.0"; }
+#include <string>
+
+class ValueKeys {
+public:
+    const static std::string IDENTIFIER_KEY;
+    const static std::string TYPE_KEY;
+};
