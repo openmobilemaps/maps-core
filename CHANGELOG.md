@@ -1,5 +1,8 @@
 # Changelog for Open Mobile Maps
 
+## Version 2.2.0
+- Adds support for `{bbox-epsg-3857}` placeholder in URL template
+
 ## Version 2.1.0 (08.04.2024)
 - Adds dotted line style (line-dotted boolean and an optional skewFactor, defaulting to 1.0 and denoting the stretch factor)
 - Fixes style for short dashes
