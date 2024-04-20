@@ -102,7 +102,7 @@ private:
             temp.reserve(geometry->holes.at(index).size());
             for (auto &points : geometry->holes.at(index)) {
                 std::vector<::Coord> temp1;
-                simplify(temp1, tolerance);
+                simplify(points, tolerance);
                 temp1.reserve(points.size());
                 for (const auto &point : points) {
                     if (point.z > sq_tolerance) {
