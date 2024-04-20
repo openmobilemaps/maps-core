@@ -52,19 +52,7 @@ public:
     GeoJSONVT(const std::shared_ptr<GeoJson> &geoJson,
               const Options& options_ = Options())
     : options(options_), loadingResult(DataLoaderResult(std::nullopt, std::nullopt, LoaderStatus::OK, std::nullopt)) {
-
-        // If the GeoJSON contains only points, there is no need to split it into smaller tiles,
-        // as there are no opportunities for simplification, merging, or meaningful point reduction.
-        if (geoJson->hasOnlyPoints) {
-            options.maxZoom = options.minZoom;
-        }
-
-
-        const uint32_t z2 = 1u << options.maxZoom;
-
-        convert(geoJson->geometries, (options.tolerance / options.extent) / z2);
-
-        splitTile(geoJson->geometries, 0, 0, 0);
+        initialize(geoJson);
     }
 
     GeoJSONVT(const std::string &sourceName,
@@ -117,17 +105,7 @@ public:
                     auto geoJson = GeoJsonParser::getGeoJson(json);
                     if (geoJson) {
 
-                        // If the GeoJSON contains only points, there is no need to split it into smaller tiles,
-                        // as there are no opportunities for simplification, merging, or meaningful point reduction.
-                        if (geoJson->hasOnlyPoints) {
-                            self->options.maxZoom = self->options.minZoom;
-                        }
-
-                        const uint32_t z2 = 1u << self->options.maxZoom;
-
-                        convert(geoJson->geometries, (self->options.tolerance / self->options.extent) / z2);
-
-                        self->splitTile(geoJson->geometries, 0, 0, 0);
+                        self->initialize(geoJson);
 
                         self->delegate.message(&GeoJSONTileDelegate::didLoad, self->options.maxZoom);
                     }
@@ -145,6 +123,20 @@ public:
 
             self->resolveAllWaitingPromises();
         });
+    }
+
+    void initialize(const std::shared_ptr<GeoJson> &geoJson) {
+        // If the GeoJSON contains only points, there is no need to split it into smaller tiles,
+        // as there are no opportunities for simplification, merging, or meaningful point reduction.
+        if (geoJson->hasOnlyPoints) {
+            options.maxZoom = options.minZoom;
+        }
+
+        const uint32_t z2 = 1u << options.maxZoom;
+
+        convert(geoJson->geometries, (options.tolerance / options.extent) / z2);
+
+        splitTile(geoJson->geometries, 0, 0, 0);
     }
 
     void setDelegate(const WeakActor<GeoJSONTileDelegate> delegate) override {
