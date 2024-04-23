@@ -21,6 +21,8 @@
 #include "IndexedLayer.h"
 #include "Logger.h"
 #include <algorithm>
+#include "opengl_wrapper.h"
+#include <numeric>
 
 #include "Tiled2dMapRasterLayer.h"
 
@@ -350,7 +352,17 @@ void MapScene::invalidate() {
     }
 }
 
+std::vector<GLuint64> frametimes;
+int numFramesPerAvg = 30;
+int currentFrametime = 0;
 void MapScene::drawFrame() {
+    GLuint queryObject;
+    glGenQueries(1, &queryObject);
+    glBeginQuery(0x88BF, queryObject);
+    if (frametimes.empty()) {
+        frametimes.resize(numFramesPerAvg);
+    }
+
     isInvalidated.clear();
 
     if (scheduler && scheduler->hasSeparateGraphicsInvocation()) {
@@ -381,6 +393,22 @@ void MapScene::drawFrame() {
     }
 
     scene->drawFrame();
+    glEndQuery(0x88BF);
+    GLuint available = 0;
+    while (!available) {
+        glGetQueryObjectuiv(queryObject, GL_QUERY_RESULT_AVAILABLE, &available);
+    }
+    GLuint elapsedTime;
+    glGetQueryObjectuiv(queryObject, GL_QUERY_RESULT, &elapsedTime);
+    // Convert nanoseconds to milliseconds
+    elapsedTime /= 1000000;
+    frametimes[currentFrametime] = elapsedTime;
+/*    if (currentFrametime == numFramesPerAvg - 1) {
+        LogDebug << "Avg frame time last " << numFramesPerAvg << ": " <<= (std::accumulate(frametimes.begin(), frametimes.end(),
+                                                                                                decltype(frametimes)::value_type(0)) / numFramesPerAvg);
+    }*/
+    glDeleteQueries(1, &queryObject);
+    currentFrametime = (currentFrametime + 1) % numFramesPerAvg;
 }
 
 void MapScene::resume() {
