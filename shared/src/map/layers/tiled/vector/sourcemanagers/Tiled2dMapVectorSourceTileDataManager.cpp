@@ -15,6 +15,7 @@
 #include "Tiled2dMapVectorLineTile.h"
 #include "Tiled2dMapVectorLayer.h"
 #include "RenderPass.h"
+#include "PerformanceLogger.h"
 
 void Tiled2dMapVectorSourceTileDataManager::update() {
     if (!noPendingUpdateMasks.test_and_set()) {
@@ -35,9 +36,11 @@ void Tiled2dMapVectorSourceTileDataManager::update() {
         }
 
         for (const auto &[index, identifier, tile]: subTiles) {
+            PERF_LOG_START(identifier + "_update");
             tile.syncAccess([](auto t) {
                 t->update();
             });
+            PERF_LOG_END(identifier + "_update");
         }
     }
 }
