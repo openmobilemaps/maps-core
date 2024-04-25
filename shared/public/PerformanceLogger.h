@@ -8,18 +8,15 @@
 #include <chrono>
 #include "Logger.h"
 
+#pragma once
+
 // Define ENABLE_PERF_LOGGING to enable performance logging, comment out to disable it
 //#define ENABLE_PERF_LOGGING
 
 #ifdef ENABLE_PERF_LOGGING
+
 #define PERF_LOG_START(key) PerformanceLogger::getInstance().startSection(key)
 #define PERF_LOG_END(key) PerformanceLogger::getInstance().endSection(key)
-#else
-#define PERF_LOG_START(key)
-#define PERF_LOG_END(key)
-#endif
-
-#ifdef ENABLE_PERF_LOGGING
 
 
 class PerformanceLogger {
@@ -106,5 +103,7 @@ public:
     PerformanceLogger& operator=(const PerformanceLogger&) = delete;
 };
 
-thread_local PerformanceLogger::ThreadLocalData PerformanceLogger::local_data;
+#else
+    #define PERF_LOG_START(key)
+    #define PERF_LOG_END(key)
 #endif
