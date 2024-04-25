@@ -142,23 +142,14 @@ extension Polygon2d: MCMaskingObjectInterface {
 
 extension Polygon2d: MCPolygon2dInterface {
     func setVertices(_ vertices: MCSharedBytes, indices: MCSharedBytes) {
-        guard let verticesBuffer = device.makeBuffer(from: vertices),
-              let indicesBuffer = device.makeBuffer(from: indices),
-              indices.elementCount > 0
-        else {
-            lock.withCritical {
-                indicesCount = 0
-                verticesBuffer = nil
-                indicesBuffer = nil
-            }
-
-            return
-        }
-
         lock.withCritical {
-            self.indicesCount = Int(indices.elementCount)
-            self.verticesBuffer = verticesBuffer
-            self.indicesBuffer = indicesBuffer
+            self.verticesBuffer.copyOrCreate(from: vertices, device: device)
+            self.indicesBuffer.copyOrCreate(from: indices, device: device)
+            if self.verticesBuffer != nil && self.indicesBuffer != nil {
+                self.indicesCount = Int(indices.elementCount)
+            } else {
+                self.indicesCount = 0
+            }
         }
     }
 
