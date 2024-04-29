@@ -94,7 +94,7 @@ std::string ColorPolygonGroup2dShaderOpenGl::getVertexShader() {
                   } else if (styleIndex > numStyles) {
                       styleIndex = numStyles;
                   }
-                  styleIndex = styleIndex * 5;
+                  styleIndex = styleIndex * 7;
                   color = vec4(polygonStyles[styleIndex], polygonStyles[styleIndex + 1],
                                polygonStyles[styleIndex + 2], polygonStyles[styleIndex + 3] * polygonStyles[styleIndex + 4]);
                   stripeInfo = vec2(polygonStyles[styleIndex + 5], polygonStyles[styleIndex + 6]);
