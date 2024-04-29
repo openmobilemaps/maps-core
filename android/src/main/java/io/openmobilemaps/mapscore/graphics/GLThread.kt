@@ -77,6 +77,9 @@ class GLThread constructor(
 	val lastDirtyTimestamp = AtomicLong(0)
 	var hasFinishedSinceDirty = false
 
+	var enforcedFinishInterval: Int? = null
+	private var currentFrameIndex = 0
+
 	var renderer: GLSurfaceView.Renderer? = null
 	var surface: SurfaceTexture? = null
 
@@ -168,6 +171,13 @@ class GLThread constructor(
 			if (surface != null) {
 				if (egl?.eglSwapBuffers(eglDisplay, eglSurface) != true) {
 					throw RuntimeException("Cannot swap buffers")
+				}
+			}
+
+			enforcedFinishInterval?.let { interval ->
+				if (currentFrameIndex++ >= interval) {
+					GLES32.glFinish()
+					currentFrameIndex = 0
 				}
 			}
 
