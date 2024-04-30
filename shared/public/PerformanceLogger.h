@@ -18,7 +18,6 @@
 #define PERF_LOG_START(key) PerformanceLogger::getInstance().startSection(key)
 #define PERF_LOG_END(key) PerformanceLogger::getInstance().endSection(key)
 
-
 class PerformanceLogger {
 public:
     static PerformanceLogger& getInstance() {
@@ -38,31 +37,34 @@ public:
         log(key, duration);
     }
 
-    // Enhanced print_stats to show total and average durations
     void print_stats() {
         std::lock_guard<std::mutex> lock(global_map_mutex);
-        LogDebug <<= "----PerformanceLogger-----";
+        LogDebug <<= "--------------------------";
+        LogDebug <<= "Key,Total Time,Unit,Average Time,Unit"; // CSV header
         for (const auto& pair : global_map) {
-            auto total = double(pair.second.first) / 1000.0;
-            auto count = pair.second.second;
-            double average = count > 0 ? total / count : 0.0;
-            LogDebug << pair.first << ": Total = " << total << " ms, Average = " << average <<= " ms";
+            const auto total = double(pair.second.first) / 1000.0; // Convert nanoseconds to milliseconds
+            const auto count = pair.second.second;
+            const std::string time_unit = "ms";
+            const double average = count > 0 ? total / count : 0.0;
+            LogDebug << pair.first << "," << total << "," << time_unit << "," << average << "," <<= time_unit;
         }
         LogDebug <<= "--------------------------";
     }
 
+
+
 private:
     struct ThreadLocalData {
-        std::unordered_map<std::string, long long> local_map;  // Sum of durations for each key
+        std::unordered_map<std::string, long long> local_map;
         std::unordered_map<std::string, std::chrono::high_resolution_clock::time_point> start_times;
-        std::unordered_map<std::string, long long> counts;     // Number of logs for each key
+        std::unordered_map<std::string, long long> counts;
+        int estimated_global_size = 0;  // Estimate of the global map size
     };
 
     static thread_local ThreadLocalData local_data;
-    std::unordered_map<std::string, std::pair<long long, long long>> global_map;  // Pair of total duration and count
+    std::unordered_map<std::string, std::pair<long long, long long>> global_map;
     std::mutex global_map_mutex;
     std::chrono::steady_clock::time_point last_print_time = std::chrono::steady_clock::now();
-
 
     PerformanceLogger() {}
 
@@ -70,8 +72,8 @@ private:
         local_data.local_map[key] += duration;
         local_data.counts[key]++;
 
-        // Periodically flush to reduce lock contention
-        if (++local_data.counts[key] % 1000 == 0) {
+        int flush_threshold = std::max(1, int(local_data.estimated_global_size * 0.1));
+        if (++local_data.counts[key] % flush_threshold == 0) {
             flush_local_data();
             bool print = false;
             {
@@ -94,6 +96,8 @@ private:
             global_map[entry.first].first += entry.second;
             global_map[entry.first].second += local_data.counts[entry.first];
         }
+        // Update local estimated size after flushing
+        local_data.estimated_global_size = global_map.size();
         local_data.local_map.clear();
         local_data.counts.clear();
     }
