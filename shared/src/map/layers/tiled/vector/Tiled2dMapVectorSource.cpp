@@ -47,6 +47,7 @@ bool Tiled2dMapVectorSource::hasExpensivePostLoadingTask() {
 }
 
 Tiled2dMapVectorTileInfo::FeatureMap Tiled2dMapVectorSource::postLoadingTask(std::shared_ptr<DataLoaderResult> loadedData, Tiled2dMapTileInfo tile) {
+    PERF_LOG_START(sourceName + "_postLoadingTask");
     auto layerFeatureMap = std::make_shared<std::unordered_map<std::string, std::shared_ptr<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>>>>();
     
     if (!loadedData->data.has_value()) {
@@ -92,7 +93,7 @@ Tiled2dMapVectorTileInfo::FeatureMap Tiled2dMapVectorSource::postLoadingTask(std
         LogError <<= "Unknown wire type exception for tile " + std::to_string(tile.zoomIdentifier) + "/" +
         std::to_string(tile.x) + "/" + std::to_string(tile.y);
     }
-
+    PERF_LOG_START(sourceName + "_postLoadingTask");
     return layerFeatureMap;
 }
 

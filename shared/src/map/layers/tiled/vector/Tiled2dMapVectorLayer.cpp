@@ -354,7 +354,8 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
         auto sourceMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
 
         Actor<Tiled2dMapVectorSource> vectorSource;
-        if (mapDescription->geoJsonSources.count(source) != 0) {
+        auto geoJsonSourceIt = mapDescription->geoJsonSources.find(source);
+        if (geoJsonSourceIt != mapDescription->geoJsonSources.end()) {
             auto geoJsonSource = Actor<Tiled2dVectorGeoJsonSource>(sourceMailbox,
                                                                    mapInterface->getCamera(),
                                                                    mapInterface->getMapConfig(),
@@ -370,7 +371,7 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
                                                                    layerName);
             vectorSource = geoJsonSource.strongActor<Tiled2dMapVectorSource>();
 
-            mapDescription->geoJsonSources.at(source)->setDelegate(geoJsonSource.weakActor<GeoJSONTileDelegate>());
+            geoJsonSourceIt->second->setDelegate(geoJsonSource.weakActor<GeoJSONTileDelegate>());
 
         } else {
             vectorSource = Actor<Tiled2dMapVectorSource>(sourceMailbox,
