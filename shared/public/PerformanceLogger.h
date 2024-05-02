@@ -42,9 +42,9 @@ public:
         LogDebug <<= "--------------------------";
         LogDebug <<= "Key,Total Time,Unit,Average Time,Unit"; // CSV header
         for (const auto& pair : global_map) {
-            const auto total = double(pair.second.first) / 1000.0; // Convert nanoseconds to milliseconds
-            const auto count = pair.second.second;
-            const std::string time_unit = "ms";
+            double total = double(pair.second.first) / 1000.0; // Convert nanoseconds to milliseconds
+            const double count = pair.second.second;
+            std::string time_unit = "ms";
             const double average = count > 0 ? total / count : 0.0;
             LogDebug << pair.first << "," << total << "," << time_unit << "," << average << "," <<= time_unit;
         }
@@ -57,7 +57,7 @@ private:
     struct ThreadLocalData {
         std::unordered_map<std::string, long long> local_map;
         std::unordered_map<std::string, std::chrono::high_resolution_clock::time_point> start_times;
-        std::unordered_map<std::string, long long> counts;
+        std::unordered_map<std::string, size_t> counts;
         int estimated_global_size = 0;  // Estimate of the global map size
     };
 
