@@ -46,7 +46,8 @@ public:
 
         std::shared_ptr<GeoJson> geoJson = std::make_shared<GeoJson>();
         for (const auto &feature: geojson["features"]) {
-            if (!feature["geometry"].is_object() ||
+            if (!feature.contains("geometry") ||
+                !feature["geometry"].is_object() ||
                 !feature["geometry"]["type"].is_string() ||
                 !feature["geometry"]["coordinates"].is_array()) {
                 LogError <<= "Geojson feature is not valid";
