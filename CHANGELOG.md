@@ -1,5 +1,6 @@
 # Changelog for Open Mobile Maps
 
+
 ## Version 2.2.0
 - Adds support for `{bbox-epsg-3857}` placeholder in URL template
 
@@ -9,6 +10,11 @@
 - Fixes line touch area
 - Fix map description issues in concurrent settings
 - Added a Helper to create geojson strings from GeoJsonPoints
+
+## Version 2.0.7 (29.04.2024)
+- adds performance logger (disabled by default)
+- fixes a bug in the android striped pattern shader
+- fixes a bug in geojson hole simplification
 
 ## Version 2.0.6 (10.04.2024)
 - log exception when a font can not be loaded

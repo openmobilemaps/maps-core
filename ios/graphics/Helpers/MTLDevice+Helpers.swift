@@ -29,6 +29,9 @@ extension MTLBuffer {
             self.contents().copyMemory(from: p, byteCount: Int(sharedBytes.elementCount * sharedBytes.bytesPerElement))
         }
     }
+    func copyMemory(bytes pointer: UnsafeRawPointer, length: Int) {
+        self.contents().copyMemory(from: pointer, byteCount: length)
+    }
 }
 
 extension MTLBuffer? {
@@ -41,6 +44,18 @@ extension MTLBuffer? {
                     wrapped.copyMemory(from: sharedBytes)
                 } else {
                     self = device.makeBuffer(from: sharedBytes)
+                }
+        }
+    }
+    mutating public func copyOrCreate(bytes pointer: UnsafeRawPointer, length: Int, device: MTLDevice) {
+        switch self {
+            case .none:
+                self = device.makeBuffer(bytes: pointer, length: length)
+            case let .some(wrapped):
+                if wrapped.length == length {
+                    wrapped.copyMemory(bytes: pointer, length: length)
+                } else {
+                    self = device.makeBuffer(bytes: pointer, length: length)
                 }
         }
     }
