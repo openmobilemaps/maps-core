@@ -74,13 +74,13 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 			}
 
 			override fun onMapResumed() {
-				mapViewStateMutable.value = MapViewState.RESUMED
+				updateMapViewState(MapViewState.RESUMED)
 			}
 		})
 		mapInterface.setBackgroundColor(Color(1f, 1f, 1f, 1f))
 		touchHandler = mapInterface.getTouchHandler()
 		this.mapInterface = mapInterface
-		mapViewStateMutable.value = MapViewState.INITIALIZED
+		updateMapViewState(MapViewState.INITIALIZED)
 	}
 
 	fun registerLifecycle(lifecycle: Lifecycle) {
@@ -122,7 +122,7 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 	@OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
 	open fun onDestroy() {
 		lifecycle = null
-		mapViewStateMutable.value = MapViewState.DESTROYED
+		updateMapViewState(MapViewState.DESTROYED)
 		finishGlThread()
 	}
 
@@ -134,7 +134,7 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 
 	override fun onGlThreadPause() {
 		if (mapViewStateMutable.value != MapViewState.PAUSED) {
-			mapViewStateMutable.value = MapViewState.PAUSED
+			updateMapViewState(MapViewState.PAUSED)
 			requireMapInterface().pause()
 		}
 	}
@@ -248,6 +248,13 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 		saveFrameSpec = null
 		SaveFrameUtil.saveCurrentFrame(Vec2I(width, height), spec, callback)
 	}
+
+	private fun updateMapViewState(state: MapViewState) {
+		mapViewStateMutable.value = state
+		onMapViewStateUpdated(state)
+	}
+
+	protected open fun onMapViewStateUpdated(state: MapViewState) {}
 
 	override fun requireMapInterface(): MapInterface = mapInterface ?: throw IllegalStateException("Map is not setup or already destroyed!")
 }

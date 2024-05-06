@@ -423,7 +423,7 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
         }
     }
     if (instanceCounts.icons + instanceCounts.stretchedIcons + instanceCounts.textCharacters > 0) {
-        auto shader = strongMapInterface->getShaderFactory()->createPolygonGroupShader();
+        auto shader = strongMapInterface->getShaderFactory()->createPolygonGroupShader(false);
         auto object = strongMapInterface->getGraphicsObjectFactory()->createPolygonGroup(shader->asShaderProgramInterface());
         boundingBoxLayerObject = std::make_shared<PolygonGroup2dLayerObject>(strongMapInterface->getCoordinateConverterHelper(),
                                                                              object, shader);

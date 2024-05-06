@@ -185,18 +185,32 @@ void Tiled2dMapVectorLineTile::update() {
                 style.offset = offset;
                 needsUpdate = true;
             }
+            
+            // dotted
+            bool lineDotted = lineDescription->style.getLineDotted(context);
 
+            auto dotted = lineDotted ? 1 : 0;
+            if(dotted != style.dotted) {
+                style.dotted = dotted;
+                needsUpdate = true;
+            }
+            
+            // dotted skew
+            auto dottedSkew = lineDescription->style.getLineDottedSkew(context);
+            if(dottedSkew != style.dottedSkew) {
+                style.dottedSkew = dottedSkew;
+                needsUpdate = true;
+            }
+            
             i++;
         }
 
         if (needsUpdate) {
             auto &styles = reusableLineStyles[styleGroupId];
-            auto buffer = SharedBytes((int64_t)styles.data(), (int)styles.size(), 19 * sizeof(float));
+            auto buffer = SharedBytes((int64_t)styles.data(), (int)styles.size(), 21 * sizeof(float));
             shaders[styleGroupId]->setStyles(buffer);
         }
     }
-
-
 }
 
 void Tiled2dMapVectorLineTile::clear() {
@@ -253,7 +267,7 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
                     }
 
                     if (styleIndex == -1) {
-                        auto reusableStyle = ShaderLineStyle(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+                        auto reusableStyle = ShaderLineStyle(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
                         if (!featureGroups.empty() && featureGroups.back().size() < maxStylesPerGroup) {
                             styleGroupIndex = (int) featureGroups.size() - 1;
                             styleIndex = (int) featureGroups.back().size();
@@ -423,12 +437,13 @@ bool Tiled2dMapVectorLineTile::performClick(const Coord &coord) {
     double zoomIdentifier = layerConfig->getZoomIdentifier(camera->getZoom());
 
     auto lineDescription = std::static_pointer_cast<LineVectorLayerDescription>(description);
-
+    
     std::vector<VectorLayerFeatureInfo> featureInfos;
     for (auto const &[lineCoordinateVector, featureContext]: hitDetection) {
         for (auto const &coordinates: lineCoordinateVector) {
             auto lineWidth = lineDescription->style.getLineWidth(EvaluationContext(zoomIdentifier, dpFactor, featureContext, featureStateManager));
-            if (LineHelper::pointWithin(coordinates, coord, lineWidth, coordinateConverter)) {
+            auto lineWidthInMapUnits = camera->mapUnitsFromPixels(lineWidth);
+            if (LineHelper::pointWithin(coordinates, coord, lineWidthInMapUnits, coordinateConverter)) {
                 if (multiselect) {
                     featureInfos.push_back(featureContext->getFeatureInfo());
                 } else if (strongSelectionDelegate->didSelectFeature(featureContext->getFeatureInfo(), description->identifier, coord)) {

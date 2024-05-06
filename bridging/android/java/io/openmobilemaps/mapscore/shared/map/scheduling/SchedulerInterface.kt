@@ -29,6 +29,8 @@ abstract class SchedulerInterface {
 
     abstract fun setSchedulerGraphicsTaskCallbacks(callbacks: SchedulerGraphicsTaskCallbacks)
 
+    abstract fun getThreadPoolCallbacks(): ThreadPoolCallbacks
+
     private class CppProxy : SchedulerInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -103,5 +105,11 @@ abstract class SchedulerInterface {
             native_setSchedulerGraphicsTaskCallbacks(this.nativeRef, callbacks)
         }
         private external fun native_setSchedulerGraphicsTaskCallbacks(_nativeRef: Long, callbacks: SchedulerGraphicsTaskCallbacks)
+
+        override fun getThreadPoolCallbacks(): ThreadPoolCallbacks {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getThreadPoolCallbacks(this.nativeRef)
+        }
+        private external fun native_getThreadPoolCallbacks(_nativeRef: Long): ThreadPoolCallbacks
     }
 }

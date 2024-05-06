@@ -36,10 +36,10 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
             const bool hasMask = maskObject != nullptr;
             const bool usesStencil = hasMask || pass->getRenderPassConfig().isPassMasked;
 
-            double factor = camera->getScalingFactor();
+            const double factor = camera->getScalingFactor();
             const auto &renderObjects = pass->getRenderObjects();
+            const auto &scissoringRect = pass->getScissoringRect();
 
-            auto scissoringRect = pass->getScissoringRect();
             if (scissoringRect) {
                 renderingContext->applyScissorRect(scissoringRect);
             }

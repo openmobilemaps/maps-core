@@ -858,8 +858,16 @@ void Tiled2dMapSource<T, L, R>::performLoadingTask(Tiled2dMapTileInfo tile, size
                                 [tile, loaderIndex, weakSelfPtr, weakActor, res] {
                                     auto strongSelf = weakSelfPtr.lock();
                                     if (strongSelf) {
-                                        weakActor.message(&Tiled2dMapSource::didLoad, tile, loaderIndex,
-                                                          strongSelf->postLoadingTask(res, tile));
+                                        auto isStillVisible = weakActor.syncAccess([tile](auto actor){
+                                            auto strongSelf = actor.lock();
+                                            return strongSelf ? strongSelf->isTileVisible(tile) : false;
+                                        });
+                                        if (isStillVisible == false) {
+                                            weakActor.message(&Tiled2dMapSource::didFailToLoad, tile, loaderIndex, LoaderStatus::ERROR_OTHER, std::nullopt);
+                                        } else {
+                                            weakActor.message(&Tiled2dMapSource::didLoad, tile, loaderIndex,
+                                                              strongSelf->postLoadingTask(res, tile));
+                                        }
                                     }
                                 }));
                     }

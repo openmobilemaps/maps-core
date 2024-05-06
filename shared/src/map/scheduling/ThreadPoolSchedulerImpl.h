@@ -44,6 +44,8 @@ public:
 
     bool runGraphicsTasks() override;
 
+    std::shared_ptr<ThreadPoolCallbacks> getThreadPoolCallbacks() override;
+
     void addTaskIgnoringDelay(const std::shared_ptr<TaskInterface> & task);
 
 private:

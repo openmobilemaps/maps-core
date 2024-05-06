@@ -112,28 +112,30 @@ extension PolygonGroup2d: MCPolygonGroup2dInterface {
         else {
             fatalError("Cannot allocate buffers for the UBTileModel")
         }
+
+        var minX = Float.greatestFiniteMagnitude
+        var minY = Float.greatestFiniteMagnitude
+
+        if shader.isStriped {
+            if let p = UnsafeRawPointer(bitPattern: Int(vertices.address)) {
+                for i in 0..<vertices.elementCount {
+                    if i % 3 == 0 {
+                        let x = (p + 4 * Int(i)).load(as: Float.self)
+                        let y = (p + 4 * (Int(i) + 1)).load(as: Float.self)
+                        minX = min(x, minX)
+                        minY = min(y, minY)
+                    }
+                }
+            }
+        }
         lock.withCritical {
             self.indicesCount = Int(indices.elementCount)
             self.verticesBuffer = verticesBuffer
             self.indicesBuffer = indicesBuffer
 
             if shader.isStriped {
-                if let p = UnsafeRawPointer(bitPattern: Int(vertices.address)) {
-                    var minX = Float.greatestFiniteMagnitude
-                    var minY = Float.greatestFiniteMagnitude
-
-                    for i in 0..<vertices.elementCount {
-                        if i % 3 == 0 {
-                            let x = (p + 4 * Int(i)).load(as: Float.self)
-                            let y = (p + 4 * (Int(i) + 1)).load(as: Float.self)
-                            minX = min(x, minX)
-                            minY = min(y, minY)
-                        }
-                    }
-
-                    self.posOffset.x = minX;
-                    self.posOffset.y = minY;
-                }
+                self.posOffset.x = minX;
+                self.posOffset.y = minY;
             }
         }
     }

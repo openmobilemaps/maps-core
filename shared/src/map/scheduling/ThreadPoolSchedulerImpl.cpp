@@ -239,3 +239,7 @@ void ThreadPoolSchedulerImpl::setSchedulerGraphicsTaskCallbacks(const /*not-null
     graphicsCallbacks = callbacks;
     separateGraphicsQueue = callbacks != nullptr;
 }
+
+std::shared_ptr<ThreadPoolCallbacks> ThreadPoolSchedulerImpl::getThreadPoolCallbacks() {
+    return callbacks;
+}

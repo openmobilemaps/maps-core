@@ -13,6 +13,7 @@
 #include "vtzero/vector_tile.hpp"
 #include "Logger.h"
 #include "Tiled2dMapVectorTileInfo.h"
+#include "PerformanceLogger.h"
 
 Tiled2dMapVectorSource::Tiled2dMapVectorSource(const MapConfig &mapConfig,
                                                const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig,
@@ -46,6 +47,7 @@ bool Tiled2dMapVectorSource::hasExpensivePostLoadingTask() {
 }
 
 Tiled2dMapVectorTileInfo::FeatureMap Tiled2dMapVectorSource::postLoadingTask(std::shared_ptr<DataLoaderResult> loadedData, Tiled2dMapTileInfo tile) {
+    PERF_LOG_START(sourceName + "_postLoadingTask");
     auto layerFeatureMap = std::make_shared<std::unordered_map<std::string, std::shared_ptr<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>>>>();
     
     if (!loadedData->data.has_value()) {
@@ -65,6 +67,7 @@ Tiled2dMapVectorTileInfo::FeatureMap Tiled2dMapVectorSource::postLoadingTask(std
                 layerFeatureMap->at(sourceLayerName)->reserve(layer.num_features());
                 while (const auto &feature = layer.next_feature()) {
                     auto const featureContext = std::make_shared<FeatureContext>(feature);
+                    PERF_LOG_START(sourceLayerName + "_decode");
                     try {
                         std::shared_ptr<VectorTileGeometryHandler> geometryHandler = std::make_shared<VectorTileGeometryHandler>(tile.bounds, extent, layerConfig->getVectorSettings(), conversionHelper);
                         vtzero::decode_geometry(feature.geometry(), *geometryHandler);
@@ -74,6 +77,7 @@ Tiled2dMapVectorTileInfo::FeatureMap Tiled2dMapVectorSource::postLoadingTask(std
                         LogError <<= "geometryException for tile " + std::to_string(tile.zoomIdentifier) + "/" + std::to_string(tile.x) + "/" + std::to_string(tile.y);
                         continue;
                     }
+                    PERF_LOG_END(sourceLayerName + "_decode");
                 }
                 if (layerFeatureMap->at(sourceLayerName)->empty()) {
                     layerFeatureMap->erase(sourceLayerName);
@@ -89,7 +93,7 @@ Tiled2dMapVectorTileInfo::FeatureMap Tiled2dMapVectorSource::postLoadingTask(std
         LogError <<= "Unknown wire type exception for tile " + std::to_string(tile.zoomIdentifier) + "/" +
         std::to_string(tile.x) + "/" + std::to_string(tile.y);
     }
-
+    PERF_LOG_START(sourceName + "_postLoadingTask");
     return layerFeatureMap;
 }
 

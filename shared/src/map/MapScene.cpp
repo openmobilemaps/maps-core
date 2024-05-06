@@ -415,6 +415,15 @@ void MapScene::pause() {
 }
 
 void MapScene::destroy() {
+    std::lock_guard<std::recursive_mutex> lock(layersMutex);
+    for (const auto &layer : layers) {
+        if (isResumed) {
+            layer.second->pause();
+        }
+        layer.second->onRemoved();
+    }
+    layers.clear();
+
     scheduler->destroy();
     scheduler = nullptr;
     callbackHandler = nullptr;

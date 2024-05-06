@@ -31,13 +31,15 @@ auto NativeShaderLineStyle::fromCpp(JNIEnv* jniEnv, const CppType& c) -> ::djinn
                                                            ::djinni::get(::djinni::F32::fromCpp(jniEnv, c.dashValue1)),
                                                            ::djinni::get(::djinni::F32::fromCpp(jniEnv, c.dashValue2)),
                                                            ::djinni::get(::djinni::F32::fromCpp(jniEnv, c.dashValue3)),
-                                                           ::djinni::get(::djinni::F32::fromCpp(jniEnv, c.offset)))};
+                                                           ::djinni::get(::djinni::F32::fromCpp(jniEnv, c.offset)),
+                                                           ::djinni::get(::djinni::F32::fromCpp(jniEnv, c.dotted)),
+                                                           ::djinni::get(::djinni::F32::fromCpp(jniEnv, c.dottedSkew)))};
     ::djinni::jniExceptionCheck(jniEnv);
     return r;
 }
 
 auto NativeShaderLineStyle::toCpp(JNIEnv* jniEnv, JniType j) -> CppType {
-    ::djinni::JniLocalScope jscope(jniEnv, 20);
+    ::djinni::JniLocalScope jscope(jniEnv, 22);
     assert(j != nullptr);
     const auto& data = ::djinni::JniClass<NativeShaderLineStyle>::get();
     return {::djinni::F32::toCpp(jniEnv, jniEnv->GetFloatField(j, data.field_width)),
@@ -58,7 +60,9 @@ auto NativeShaderLineStyle::toCpp(JNIEnv* jniEnv, JniType j) -> CppType {
             ::djinni::F32::toCpp(jniEnv, jniEnv->GetFloatField(j, data.field_dashValue1)),
             ::djinni::F32::toCpp(jniEnv, jniEnv->GetFloatField(j, data.field_dashValue2)),
             ::djinni::F32::toCpp(jniEnv, jniEnv->GetFloatField(j, data.field_dashValue3)),
-            ::djinni::F32::toCpp(jniEnv, jniEnv->GetFloatField(j, data.field_offset))};
+            ::djinni::F32::toCpp(jniEnv, jniEnv->GetFloatField(j, data.field_offset)),
+            ::djinni::F32::toCpp(jniEnv, jniEnv->GetFloatField(j, data.field_dotted)),
+            ::djinni::F32::toCpp(jniEnv, jniEnv->GetFloatField(j, data.field_dottedSkew))};
 }
 
 } // namespace djinni_generated

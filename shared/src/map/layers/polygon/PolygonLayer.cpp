@@ -330,6 +330,11 @@ void PolygonLayer::resetSelection() {
 }
 
 bool PolygonLayer::onTouchDown(const ::Vec2F &posScreen) {
+    const auto handler = callbackHandler;
+    if (!handler) {
+        return false;
+    }
+
     auto point = mapInterface->getCamera()->coordFromScreenPosition(posScreen);
 
     std::lock_guard<std::recursive_mutex> lock(polygonsMutex);
@@ -376,12 +381,14 @@ void PolygonLayer::clearTouch() {
 }
 
 bool PolygonLayer::onClickUnconfirmed(const ::Vec2F &posScreen) {
+    const auto handler = callbackHandler;
+    if (!handler) {
+        return false;
+    }
     if (highlightedPolygon) {
         selectedPolygon = highlightedPolygon;
 
-        if (callbackHandler) {
-            callbackHandler->onClickConfirmed(*selectedPolygon);
-        }
+        handler->onClickConfirmed(*selectedPolygon);
 
         highlightedPolygon = std::nullopt;
         mapInterface->invalidate();

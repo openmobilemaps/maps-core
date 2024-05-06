@@ -135,19 +135,16 @@ extension LineGroup2d: MCLineGroup2dInterface {
 
             return
         }
-        guard let verticesBuffer = device.makeBuffer(from: lines),
-              let indicesBuffer = device.makeBuffer(from: indices)
-        else {
-            fatalError("Cannot allocate buffers for LineGroup2d")
-        }
-
-        verticesBuffer.label = "LineGroup2d.verticesBuffer"
-        indicesBuffer.label = "LineGroup2d.indicesBuffer"
-
         lock.withCritical {
-            indicesCount = Int(indices.elementCount)
-            lineVerticesBuffer = verticesBuffer
-            lineIndicesBuffer = indicesBuffer
+            self.lineVerticesBuffer.copyOrCreate(from: lines, device: device)
+            self.lineIndicesBuffer.copyOrCreate(from: indices, device: device)
+            if self.lineVerticesBuffer != nil && self.lineIndicesBuffer != nil {
+                self.lineVerticesBuffer?.label = "LineGroup2d.verticesBuffer"
+                self.lineIndicesBuffer?.label = "LineGroup2d.indicesBuffer"
+                self.indicesCount = Int(indices.elementCount)
+            } else {
+                self.indicesCount = 0
+            }
         }
     }
 

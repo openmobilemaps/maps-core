@@ -221,22 +221,27 @@ Tiled2dMapVectorLayer::getGeoJSONLayerConfig(const std::string &sourceName, cons
 }
 
 void Tiled2dMapVectorLayer::setMapDescription(const std::shared_ptr<VectorMapDescription> &mapDescription) {
-    std::lock_guard<std::recursive_mutex> lock(mapDescriptionMutex);
-    this->mapDescription = mapDescription;
-    this->layerConfigs.clear();
+    {
+        std::lock_guard<std::recursive_mutex> lock(mapDescriptionMutex);
+        this->mapDescription = mapDescription;
+        this->persistingSymbolPlacement = mapDescription->persistingSymbolPlacement;
+        this->layerConfigs.clear();
 
-    for (auto const &source: mapDescription->vectorSources) {
-        layerConfigs[source->identifier] = getLayerConfig(source);
+        for (auto const &source: mapDescription->vectorSources) {
+            layerConfigs[source->identifier] = getLayerConfig(source);
+        }
+        for (auto const &[source, geoJson]: mapDescription->geoJsonSources) {
+            layerConfigs[source] = getGeoJSONLayerConfig(source, geoJson);
+        }
     }
-    for (auto const &[source, geoJson]: mapDescription->geoJsonSources) {
-        layerConfigs[source] = getGeoJSONLayerConfig(source, geoJson);
-    }
-    
+
     initializeVectorLayer();
     applyGlobalOrFeatureStateIfPossible(StateType::BOTH);
 }
 
 void Tiled2dMapVectorLayer::initializeVectorLayer() {
+
+    std::lock_guard<std::recursive_mutex> lock(mapDescriptionMutex);
 
     if (!sourceDataManagers.empty() || !symbolSourceDataManagers.empty() || !rasterTileSources.empty()) {
         // do nothing if the layer is already initialized
@@ -349,7 +354,8 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
         auto sourceMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
 
         Actor<Tiled2dMapVectorSource> vectorSource;
-        if (mapDescription->geoJsonSources.count(source) != 0) {
+        auto geoJsonSourceIt = mapDescription->geoJsonSources.find(source);
+        if (geoJsonSourceIt != mapDescription->geoJsonSources.end()) {
             auto geoJsonSource = Actor<Tiled2dVectorGeoJsonSource>(sourceMailbox,
                                                                    mapInterface->getCamera(),
                                                                    mapInterface->getMapConfig(),
@@ -365,7 +371,7 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
                                                                    layerName);
             vectorSource = geoJsonSource.strongActor<Tiled2dMapVectorSource>();
 
-            mapDescription->geoJsonSources.at(source)->setDelegate(geoJsonSource.weakActor<GeoJSONTileDelegate>());
+            geoJsonSourceIt->second->setDelegate(geoJsonSource.weakActor<GeoJSONTileDelegate>());
 
         } else {
             vectorSource = Actor<Tiled2dMapVectorSource>(sourceMailbox,
@@ -488,8 +494,16 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
 }
 
 void Tiled2dMapVectorLayer::reloadDataSource(const std::string &sourceName) {
-    auto &source = vectorTileSources[sourceName];
-    const auto &geoSource = mapDescription->geoJsonSources[sourceName];
+
+    Actor<Tiled2dMapVectorSource> source;
+    std::shared_ptr<GeoJSONVTInterface> geoSource = nullptr;
+
+    {
+        std::lock_guard<std::recursive_mutex> lock(mapDescriptionMutex);
+        source = vectorTileSources[sourceName];
+        geoSource = mapDescription->geoJsonSources[sourceName];
+    }
+
     if (source && geoSource) {
         source.syncAccess([&,geoSource](const auto &source) {
 
@@ -505,6 +519,8 @@ void Tiled2dMapVectorLayer::reloadDataSource(const std::string &sourceName) {
 }
 
 void Tiled2dMapVectorLayer::reloadLocalDataSource(const std::string &sourceName, const std::string &geoJson) {
+
+    std::lock_guard<std::recursive_mutex> lock(mapDescriptionMutex);
 
     if (!mapInterface) {
         return;
@@ -577,11 +593,11 @@ void Tiled2dMapVectorLayer::update() {
                 newIsAnimating |= a;
             }
             isAnimating = newIsAnimating;
-            if (now - lastCollitionCheck > 1000 || tilesChanged) {
+            if (now - lastCollitionCheck > 1000 || tilesChanged || zoomChange > 0.001) {
                 lastCollitionCheck = now;
                 bool enforceUpdate = !prevCollisionStillValid.test_and_set();
                 collisionManager.syncAccess(
-                        [&vpMatrix, &viewportSize, viewportRotation, enforceUpdate, persistingPlacement = mapDescription->persistingSymbolPlacement](
+                        [&vpMatrix, &viewportSize, viewportRotation, enforceUpdate, persistingPlacement = this->persistingSymbolPlacement](
                                 const auto &manager) {
                             manager->collisionDetection(*vpMatrix, viewportSize, viewportRotation, enforceUpdate,
                                                         persistingPlacement);
@@ -766,6 +782,7 @@ float Tiled2dMapVectorLayer::getAlpha() { return alpha; }
 
 
 void Tiled2dMapVectorLayer::forceReload() {
+    std::lock_guard<std::recursive_mutex> lock(mapDescriptionMutex);
     if (!isLoadingStyleJson && remoteStyleJsonUrl.has_value() && !mapDescription && vectorTileSources.empty()) {
         scheduleStyleJsonLoading();
         return;
@@ -812,10 +829,13 @@ void Tiled2dMapVectorLayer::loadSpriteData(int scale, bool fromLocal) {
 
     std::string scalePrefix = (scale == 3 ? "@3x" : (scale == 2 ? "@2x" : ""));
     std::stringstream ssTexture;
-    ssTexture << *mapDescription->spriteBaseUrl << scalePrefix << ".png";
-    std::string urlTexture = ssTexture.str();
     std::stringstream ssData;
-    ssData << *mapDescription->spriteBaseUrl << scalePrefix << ".json";
+    {
+        std::lock_guard<std::recursive_mutex> lock(mapDescriptionMutex);
+        ssTexture << *mapDescription->spriteBaseUrl << scalePrefix << ".png";
+        ssData << *mapDescription->spriteBaseUrl << scalePrefix << ".json";
+    }
+    std::string urlTexture = ssTexture.str();
     std::string urlData = ssData.str();
 
     struct Context {
@@ -1210,6 +1230,7 @@ void Tiled2dMapVectorLayer::setGlobalState(const std::unordered_map<std::string,
 }
 
 void Tiled2dMapVectorLayer::applyGlobalOrFeatureStateIfPossible(StateType type) {
+    std::lock_guard<std::recursive_mutex> lock(mapDescriptionMutex);
     auto mapInterface = this->mapInterface;
     auto mapDescription = this->mapDescription;
     if(!mapInterface || !mapDescription) { return; }

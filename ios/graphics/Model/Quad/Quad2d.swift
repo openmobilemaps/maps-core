@@ -245,9 +245,13 @@ extension Quad2d: MCQuad2dInterface {
         }
 
         lock.withCritical {
-            indicesCount = indices.count
-            self.verticesBuffer = verticesBuffer
-            self.indicesBuffer = indicesBuffer
+            self.verticesBuffer.copyOrCreate(bytes: vertices, length: MemoryLayout<Vertex3D>.stride * vertices.count, device: device)
+            self.indicesBuffer.copyOrCreate(bytes: indices, length: MemoryLayout<UInt16>.stride * indices.count, device: device)
+            if self.verticesBuffer != nil && self.indicesBuffer != nil {
+                self.indicesCount = indices.count
+            } else {
+                self.indicesCount = 0
+            }
         }
     }
 
