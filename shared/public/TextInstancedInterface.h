@@ -24,6 +24,9 @@ public:
     /** 2 floats (x and y) for each instance */
     virtual void setPositions(const ::SharedBytes & positions) = 0;
 
+    /** 2 floats (x and y) for each instance */
+    virtual void setReferencePositions(const ::SharedBytes & positions) = 0;
+
     /** 4 floats (x, y, width and height) for each instanced */
     virtual void setTextureCoordinates(const ::SharedBytes & textureCoordinates) = 0;
 

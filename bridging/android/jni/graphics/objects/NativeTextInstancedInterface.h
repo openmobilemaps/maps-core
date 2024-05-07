@@ -36,6 +36,7 @@ private:
         void setFrame(const ::Quad2dD & frame) override;
         void setInstanceCount(int32_t count) override;
         void setPositions(const ::SharedBytes & positions) override;
+        void setReferencePositions(const ::SharedBytes & positions) override;
         void setTextureCoordinates(const ::SharedBytes & textureCoordinates) override;
         void setScales(const ::SharedBytes & scales) override;
         void setRotations(const ::SharedBytes & rotations) override;
@@ -53,6 +54,7 @@ private:
     const jmethodID method_setFrame { ::djinni::jniGetMethodID(clazz.get(), "setFrame", "(Lio/openmobilemaps/mapscore/shared/graphics/common/Quad2dD;)V") };
     const jmethodID method_setInstanceCount { ::djinni::jniGetMethodID(clazz.get(), "setInstanceCount", "(I)V") };
     const jmethodID method_setPositions { ::djinni::jniGetMethodID(clazz.get(), "setPositions", "(Lio/openmobilemaps/mapscore/shared/graphics/common/SharedBytes;)V") };
+    const jmethodID method_setReferencePositions { ::djinni::jniGetMethodID(clazz.get(), "setReferencePositions", "(Lio/openmobilemaps/mapscore/shared/graphics/common/SharedBytes;)V") };
     const jmethodID method_setTextureCoordinates { ::djinni::jniGetMethodID(clazz.get(), "setTextureCoordinates", "(Lio/openmobilemaps/mapscore/shared/graphics/common/SharedBytes;)V") };
     const jmethodID method_setScales { ::djinni::jniGetMethodID(clazz.get(), "setScales", "(Lio/openmobilemaps/mapscore/shared/graphics/common/SharedBytes;)V") };
     const jmethodID method_setRotations { ::djinni::jniGetMethodID(clazz.get(), "setRotations", "(Lio/openmobilemaps/mapscore/shared/graphics/common/SharedBytes;)V") };

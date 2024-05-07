@@ -13,63 +13,81 @@
 using namespace metal;
 
 struct InstancedVertexOut {
-  float4 position [[ position ]];
-  float2 uv;
-  float2 uvOrig;
-  float2 uvSize;
-  float alpha;
+    float4 position [[ position ]];
+    float2 uv;
+    float2 uvOrig;
+    float2 uvSize;
+    float alpha;
 };
 
 vertex InstancedVertexOut
 alphaInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
-                           constant float4x4 &mvpMatrix [[buffer(1)]],
-                           constant float2 *positions [[buffer(2)]],
-                           constant float2 *scales [[buffer(3)]],
-                           constant float *rotations [[buffer(4)]],
-                           constant float2 *texureCoordinates [[buffer(5)]],
-                           constant float *alphas [[buffer(6)]],
+                           constant float4x4 &vpMatrix [[buffer(1)]],
+                           constant float4x4 &mMatrix [[buffer(2)]],
+                           constant float2 *positions [[buffer(3)]],
+                           constant float2 *scales [[buffer(4)]],
+                           constant float *rotations [[buffer(5)]],
+                           constant float2 *texureCoordinates [[buffer(6)]],
+                           constant float *alphas [[buffer(7)]],
                            uint instanceId [[instance_id]])
 {
-  const float2 position = positions[instanceId];
-  const float2 scale = scales[instanceId];
-  const float rotation = rotations[instanceId];
+    const float2 position = positions[instanceId];
+    const float2 scale = scales[instanceId];
+    const float rotation = rotations[instanceId];
+    float alpha = alphas[instanceId];
 
-  const float angle = rotation * M_PI_F / 180.0;
+    const float angle = rotation * M_PI_F / 180.0;
 
-  const float4x4 model_matrix = float4x4(
-                                            float4(cos(angle) * scale.x, -sin(angle) * scale.x, 0, 0),
-                                            float4(sin(angle) * scale.y, cos(angle) * scale.y, 0, 0),
-                                            float4(0, 0, 0, 0),
-                                            float4(position.x, position.y, 0.0, 1)
-                                            );
+    float4 newVertex = mMatrix * float4(position, 1.0, 1.0);
+
+    newVertex.x /= newVertex.w;
+    newVertex.y /= newVertex.w;
+    newVertex.z /= newVertex.w;
+
+    const float x = newVertex.z * sin(newVertex.y) * cos(newVertex.x);
+    const float y = newVertex.z * cos(newVertex.y);
+    const float z = -newVertex.z * sin(newVertex.y) * sin(newVertex.x);
+
+    const float4 earthCenter = vpMatrix * float4(0,0,0, 1.0);
+    const float4 screenPosition = vpMatrix * float4(x,y,z, 1.0);
+
+    auto diffCenter = screenPosition - earthCenter;
+
+    alpha = 1;
+
+    if (diffCenter.z > 0) {
+        alpha = 0.0;
+    }
 
 
-  const float4x4 matrix = mvpMatrix * model_matrix;
+    const float4x4 scaleRotateMatrix = float4x4(float4(cos(angle), -sin(angle), 0, 0),
+                                           float4(sin(angle), cos(angle), 0, 0),
+                                           float4(0, 0, 0, 0),
+                                           float4(vertexIn.position.xy * scale, 1.0, 1));
 
-  InstancedVertexOut out {
-    .position = matrix * float4(vertexIn.position.xy, 0.0, 1.0),
-    .uv = vertexIn.uv,
-    .uvOrig = texureCoordinates[instanceId * 2],
-    .uvSize = texureCoordinates[instanceId * 2 + 1],
-    .alpha = alphas[instanceId]
-  };
 
-  return out;
+    InstancedVertexOut out {
+        .position = scaleRotateMatrix * screenPosition,
+        .uv = vertexIn.uv,
+        .uvOrig = texureCoordinates[instanceId * 2],
+        .uvSize = texureCoordinates[instanceId * 2 + 1],
+        .alpha = alpha
+    };
+
+    return out;
 }
+
 
 fragment float4
 alphaInstancedFragmentShader(InstancedVertexOut in [[stage_in]],
                              texture2d<float> texture0 [[ texture(0)]],
                              sampler textureSampler [[sampler(0)]])
 {
-  if (in.alpha == 0) {
-    discard_fragment();
-  }
+    const float2 uv = in.uvOrig + in.uvSize * float2(in.uv.x, 1 - in.uv.y);
+    float4 color = texture0.sample(textureSampler, uv);
 
-  const float2 uv = in.uvOrig + in.uvSize * float2(in.uv.x, 1 - in.uv.y);
-  const float4 color = texture0.sample(textureSampler, uv);
+    color.a = 1.0;
 
-  const float a = color.a * in.alpha;
-
-  return float4(color.r * a, color.g * a, color.b * a, a);
+    const float a = color.a * in.alpha;
+    return float4(color.r * in.alpha, color.g * in.alpha, color.b * in.alpha, a);
 }

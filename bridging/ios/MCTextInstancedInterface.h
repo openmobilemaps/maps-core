@@ -19,6 +19,9 @@
 /** 2 floats (x and y) for each instance */
 - (void)setPositions:(nonnull MCSharedBytes *)positions;
 
+/** 2 floats (x and y) for each instance */
+- (void)setReferencePositions:(nonnull MCSharedBytes *)positions;
+
 /** 4 floats (x, y, width and height) for each instanced */
 - (void)setTextureCoordinates:(nonnull MCSharedBytes *)textureCoordinates;
 
