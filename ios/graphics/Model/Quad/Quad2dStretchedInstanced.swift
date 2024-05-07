@@ -184,8 +184,8 @@ extension Quad2dStretchedInstanced: MCQuad2dStretchedInstancedInterface {
             Vertex(position: frame.bottomRight, textureU: 1, textureV: 1), // D
         ]
         let indices: [UInt16] = [
-            0, 1, 2, // ABC
-            0, 2, 3, // ACD
+            0, 2, 1, // ACB
+            0, 3, 2, // ADC
         ]
 
         guard let verticesBuffer = device.makeBuffer(bytes: vertecies, length: MemoryLayout<Vertex>.stride * vertecies.count, options: []), let indicesBuffer = device.makeBuffer(bytes: indices, length: MemoryLayout<UInt16>.stride * indices.count, options: []) else {

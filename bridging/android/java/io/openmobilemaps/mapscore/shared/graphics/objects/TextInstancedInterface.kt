@@ -16,6 +16,9 @@ abstract class TextInstancedInterface {
     /** 2 floats (x and y) for each instance */
     abstract fun setPositions(positions: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
 
+    /** 2 floats (x and y) for each instance */
+    abstract fun setReferencePositions(positions: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
+
     /** 4 floats (x, y, width and height) for each instanced */
     abstract fun setTextureCoordinates(textureCoordinates: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
 
@@ -75,6 +78,12 @@ abstract class TextInstancedInterface {
             native_setPositions(this.nativeRef, positions)
         }
         private external fun native_setPositions(_nativeRef: Long, positions: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
+
+        override fun setReferencePositions(positions: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setReferencePositions(this.nativeRef, positions)
+        }
+        private external fun native_setReferencePositions(_nativeRef: Long, positions: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
 
         override fun setTextureCoordinates(textureCoordinates: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

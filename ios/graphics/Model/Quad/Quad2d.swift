@@ -240,15 +240,12 @@ extension Quad2d: MCQuad2dInterface {
             }
         }
 
-        guard let verticesBuffer = device.makeBuffer(bytes: vertices, length: MemoryLayout<Vertex3D>.stride * vertices.count, options: []), let indicesBuffer = device.makeBuffer(bytes: indices, length: MemoryLayout<UInt16>.stride * indices.count, options: []) else {
-            fatalError("Cannot allocate buffers")
-        }
-
         lock.withCritical {
             self.verticesBuffer.copyOrCreate(bytes: vertices, length: MemoryLayout<Vertex3D>.stride * vertices.count, device: device)
             self.indicesBuffer.copyOrCreate(bytes: indices, length: MemoryLayout<UInt16>.stride * indices.count, device: device)
             if self.verticesBuffer != nil && self.indicesBuffer != nil {
                 self.indicesCount = indices.count
+                assert(self.indicesCount * 2 == MemoryLayout<UInt16>.stride * indices.count)
             } else {
                 self.indicesCount = 0
             }

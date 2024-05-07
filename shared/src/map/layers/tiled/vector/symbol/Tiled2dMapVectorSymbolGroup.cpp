@@ -105,6 +105,10 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
             fullText += textEntry.text;
         }
 
+        if (fullText != "Neapel") {
+            continue;
+        }
+
         auto anchor = layerDescription->style.getTextAnchor(evalContext);
         const auto &justify = layerDescription->style.getTextJustify(evalContext);
         const auto &placement = layerDescription->style.getTextSymbolPlacement(evalContext);
@@ -405,6 +409,7 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
         textRotations.resize(instanceCounts.textCharacters, 0.0);
         textScales.resize(instanceCounts.textCharacters * 2, 0.0);
         textPositions.resize(instanceCounts.textCharacters * 2, 0.0);
+        textReferencePositions.resize(instanceCounts.textCharacters * 2, 0.0);
         textTextureCoordinates.resize(instanceCounts.textCharacters * 4, 0.0);
     }
 
@@ -570,7 +575,7 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
             object->updateStretchIconProperties(stretchedIconPositions, stretchedIconScales, stretchedIconRotations,
                                                 stretchedIconAlphas, stretchedIconStretchInfos, stretchedIconOffset, zoomIdentifier,
                                                 scaleFactor, rotation, now);
-            object->updateTextProperties(textPositions, textScales, textRotations, textStyles, textOffset, textStyleOffset,
+            object->updateTextProperties(textPositions, textReferencePositions, textScales, textRotations, textStyles, textOffset, textStyleOffset,
                                          zoomIdentifier, scaleFactor, rotation, now);
         }
 
@@ -618,6 +623,8 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
         if (textInstancedObject) {
             textInstancedObject->setPositions(
                     SharedBytes((int64_t) textPositions.data(), (int32_t) textRotations.size(), 2 * (int32_t) sizeof(float)));
+            textInstancedObject->setReferencePositions(
+                    SharedBytes((int64_t) textReferencePositions.data(), (int32_t) textRotations.size(), 2 * (int32_t) sizeof(float)));
             textInstancedObject->setStyles(
                     SharedBytes((int64_t) textStyles.data(), (int32_t) textStyles.size() / 9, 9 * (int32_t) sizeof(float)));
             textInstancedObject->setScales(

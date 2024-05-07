@@ -173,6 +173,9 @@ text_instanced_interface = interface +c +j +o {
     # 2 floats (x and y) for each instance
     set_positions(positions: shared_bytes);
 
+    # 2 floats (x and y) for each instance
+    set_reference_positions(positions: shared_bytes);
+
     # 4 floats (x, y, width and height) for each instanced
     set_texture_coordinates(textureCoordinates: shared_bytes);
 

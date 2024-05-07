@@ -120,17 +120,21 @@ final class Quad2dInstanced: BaseGraphicsObject {
         shader.preRender(context)
 
         encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
-        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(vpMatrix)) {
-            encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
+        
+        if let vpMatrixPointer = UnsafeRawPointer(bitPattern: Int(vpMatrix)) {
+            encoder.setVertexBytes(vpMatrixPointer, length: 64, index: 1)
+        }
+        if let mMatrixPointer = UnsafeRawPointer(bitPattern: Int(mMatrix)) {
+            encoder.setVertexBytes(mMatrixPointer, length: 64, index: 2)
         }
 
-        encoder.setVertexBuffer(positionsBuffer, offset: 0, index: 2)
-        encoder.setVertexBuffer(scalesBuffer, offset: 0, index: 3)
-        encoder.setVertexBuffer(rotationsBuffer, offset: 0, index: 4)
+        encoder.setVertexBuffer(positionsBuffer, offset: 0, index: 3)
+        encoder.setVertexBuffer(scalesBuffer, offset: 0, index: 4)
+        encoder.setVertexBuffer(rotationsBuffer, offset: 0, index: 5)
 
-        encoder.setVertexBuffer(textureCoordinatesBuffer, offset: 0, index: 5)
+        encoder.setVertexBuffer(textureCoordinatesBuffer, offset: 0, index: 6)
 
-        encoder.setVertexBuffer(alphaBuffer, offset: 0, index: 6)
+        encoder.setVertexBuffer(alphaBuffer, offset: 0, index: 7)
 
         encoder.setFragmentSamplerState(sampler, index: 0)
 
@@ -186,8 +190,8 @@ extension Quad2dInstanced: MCQuad2dInstancedInterface {
             Vertex(position: frame.bottomRight, textureU: 1, textureV: 1), // D
         ]
         let indices: [UInt16] = [
-            0, 1, 2, // ABC
-            0, 2, 3, // ACD
+            0, 2, 1, // ACB
+            0, 3, 2, // ADC
         ]
 
         guard let verticesBuffer = device.makeBuffer(bytes: vertecies, length: MemoryLayout<Vertex>.stride * vertecies.count, options: []), let indicesBuffer = device.makeBuffer(bytes: indices, length: MemoryLayout<UInt16>.stride * indices.count, options: []) else {

@@ -149,6 +149,7 @@ private:
 
     std::shared_ptr<FontLoaderResult> fontResult;
     std::vector<float> textPositions;
+    std::vector<float> textReferencePositions;
     std::vector<float> textScales;
     std::vector<float> textRotations;
     std::vector<uint16_t> textStyleIndices;

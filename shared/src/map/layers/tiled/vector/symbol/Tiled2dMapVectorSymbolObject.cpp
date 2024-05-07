@@ -421,13 +421,15 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &posi
         rotations[countOffset] += rotation;
     }
 
-    const auto iconWidth = spriteSize.x * iconSize * scaleFactor;
-    const auto iconHeight = spriteSize.y * iconSize * scaleFactor;
+    const auto iconWidth = spriteSize.x * iconSize;
+    const auto iconHeight = spriteSize.y * iconSize;
 
     const float scaledIconPadding = iconPadding * scaleFactor;
 
-    scales[2 * countOffset] = iconWidth;
-    scales[2 * countOffset + 1] = iconHeight;
+    auto viewPortSize = mapInterface.lock()->getRenderingContext()->getViewportSize();
+
+    scales[2 * countOffset] = iconWidth * 1.0 / viewPortSize.x;
+    scales[2 * countOffset + 1] = iconHeight * 1.0 / viewPortSize.y;
 
     renderCoordinate = getRenderCoordinates(iconAnchor, -rotations[countOffset], iconWidth, iconHeight);
 
@@ -719,7 +721,7 @@ void Tiled2dMapVectorSymbolObject::setupTextProperties(std::vector<float> &textu
     labelObject->setupProperties(textureCoordinates, styleIndices, countOffset, styleOffset, zoomIdentifier);
 }
 
-void Tiled2dMapVectorSymbolObject::updateTextProperties(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, long long now) {
+void Tiled2dMapVectorSymbolObject::updateTextProperties(std::vector<float> &positions, std::vector<float> &referencePositions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, long long now) {
     if (instanceCounts.textCharacters ==  0 || !labelObject) {
         return;
     }
@@ -739,9 +741,8 @@ void Tiled2dMapVectorSymbolObject::updateTextProperties(std::vector<float> &posi
         countOffset += instanceCounts.textCharacters;
         return;
     }
-
-    labelObject->updateProperties(positions, scales, rotations, styles, countOffset, styleOffset, zoomIdentifier, scaleFactor,
-                                      animationCoordinator->isColliding(), rotation, alpha, isCoordinateOwner, now);
+    auto viewPortSize = mapInterface.lock()->getRenderingContext()->getViewportSize();
+    labelObject->updateProperties(positions, referencePositions, scales, rotations, styles, countOffset, styleOffset, zoomIdentifier, scaleFactor, animationCoordinator->isColliding(), rotation, alpha, isCoordinateOwner, now, viewPortSize);
 
     if (!animationCoordinator->isTextAnimating()) {
         lastTextUpdateScaleFactor = scaleFactor;
@@ -857,12 +858,12 @@ void Tiled2dMapVectorSymbolObject::collisionDetection(const double zoomIdentifie
     if (!isCoordinateOwner) {
         return;
     }
-
-    if (!(description->minZoom <= zoomIdentifier && description->maxZoom >= zoomIdentifier) || !getIsOpaque() || !isPlaced()) {
-        // not visible
-        setHideFromCollision(true);
-        return;
-    }
+//
+//    if (!(description->minZoom <= zoomIdentifier && description->maxZoom >= zoomIdentifier) || !getIsOpaque() || !isPlaced()) {
+//        // not visible
+//        setHideFromCollision(true);
+//        return;
+//    }
 
 
     bool willCollide = true;
