@@ -126,6 +126,8 @@ class MapCamera3d : public MapCameraInterface,
 
     Vec2F screenPosFromCoord(const Coord &coord) override;
 
+    bool gluInvertMatrix(const std::vector<double> &m, std::vector<double> &invOut);
+
     virtual double mapUnitsFromPixels(double distancePx) override;
 
     virtual double getScalingFactor() override;
@@ -255,4 +257,5 @@ protected:
     bool validVpMatrix = false;
                         
     std::optional<::Vec2F> lastOnTouchDownPoint;
+    std::optional<Coord> lastOnTouchDownCoord;
 };
