@@ -16,6 +16,7 @@
 #include "MapConfig.h"
 #include "MapInterface.h"
 #include "Matrix.h"
+#include "MatrixD.h"
 #include "Vec2D.h"
 #include "Vec2DHelper.h"
 #include "Vec2FHelper.h"
@@ -80,19 +81,13 @@ void MapCamera3d::freeze(bool freeze) {
 void MapCamera3d::moveToCenterPositionZoom(const ::Coord &centerPosition, double zoom, bool animated) {
     if (cameraFrozen)
         return;
-    Coord currentFocusPointPosition = this->focusPointPosition;
-    Coord currentCenterPosition = getCenterPosition();
     inertia = std::nullopt;
     Coord focusPosition = mapInterface->getCoordinateConverterHelper()->convert(CoordinateSystemIdentifiers::EPSG4326(), centerPosition);
-
-    focusPosition.x += (currentFocusPointPosition.x - currentCenterPosition.x);
-    focusPosition.y += (currentFocusPointPosition.y - currentCenterPosition.y);
-    focusPosition.z += (currentFocusPointPosition.z - currentCenterPosition.z);
 
     if (animated) {
         std::lock_guard<std::recursive_mutex> lock(animationMutex);
         coordAnimation = std::make_shared<CoordAnimation>(
-            DEFAULT_ANIM_LENGTH, currentFocusPointPosition, focusPosition, centerPosition, InterpolatorFunction::EaseInOut,
+            DEFAULT_ANIM_LENGTH, focusPointPosition, focusPosition, centerPosition, InterpolatorFunction::EaseInOut,
             [=](Coord positionMapSystem) {
                 this->focusPointPosition = positionMapSystem;
                 notifyListeners(ListenerType::BOUNDS);
@@ -118,19 +113,13 @@ void MapCamera3d::moveToCenterPositionZoom(const ::Coord &centerPosition, double
 void MapCamera3d::moveToCenterPosition(const ::Coord &centerPosition, bool animated) {
     if (cameraFrozen)
         return;
-    Coord currentFocusPointPosition = this->focusPointPosition;
-    Coord currentCenterPosition = getCenterPosition();
     inertia = std::nullopt;
     Coord focusPosition = mapInterface->getCoordinateConverterHelper()->convert(CoordinateSystemIdentifiers::EPSG4326(), centerPosition);
-
-    focusPosition.x += (currentFocusPointPosition.x - currentCenterPosition.x);
-    focusPosition.y += (currentFocusPointPosition.y - currentCenterPosition.y);
-    focusPosition.z += (currentFocusPointPosition.z - currentCenterPosition.z);
 
     if (animated) {
         std::lock_guard<std::recursive_mutex> lock(animationMutex);
         coordAnimation = std::make_shared<CoordAnimation>(
-            DEFAULT_ANIM_LENGTH, currentFocusPointPosition, focusPosition, centerPosition, InterpolatorFunction::EaseInOut,
+            DEFAULT_ANIM_LENGTH, focusPointPosition, focusPosition, centerPosition, InterpolatorFunction::EaseInOut,
             [=](Coord positionMapSystem) {
                 this->focusPointPosition = positionMapSystem;
                 notifyListeners(ListenerType::BOUNDS);
@@ -193,11 +182,7 @@ void MapCamera3d::moveToBoundingBox(const RectCoord &boundingBox, float paddingP
 }
 
 ::Coord MapCamera3d::getCenterPosition() {
-    auto center = focusPointPosition;
-    if (mode == CameraMode3d::TILTED_ORBITAL) {
-        center.y += getCenterYOffsetFromZoom(zoom);
-    }
-    return center;
+    return focusPointPosition;
 }
 
 void MapCamera3d::setZoom(double zoom, bool animated) {
@@ -360,35 +345,36 @@ std::vector<float> MapCamera3d::getVpMatrix() {
     cameraDistance = getCameraDistanceFromZoom(zoom);
     cameraPitch = getCameraPitchFromZoom(zoom);
     cameraVerticalDisplacement = getCameraVerticalDisplacementFromZoom(zoom);
-    float maxD = 3.0;
-    float minD = 1.0 / (R * 1000.0);
+    float maxD = cameraDistance / R + 1;
+    float minD = std::max(cameraDistance / R - 1, 0.00001);
 
-    float fov = FIELD_OF_VIEW; // 45 // zoom / 70800;
+    float fovy = FIELD_OF_VIEW; // 45 // zoom / 70800;
 
     // aspect ratio
     float vpr = (float) sizeViewport.x / (float) sizeViewport.y;
     if (vpr > 1.0) {
-        fov /= vpr;
+        fovy /= vpr;
     }
+    float fovyRad = fovy * M_PI / 180.0;
 
-    Matrix::setIdentityM(newProjectionMatrix, 0);
-    Matrix::perspectiveM(newProjectionMatrix, 0, fov, vpr, minD, maxD);
+    Matrix::perspectiveM(newProjectionMatrix, 0, fovy, vpr, minD, maxD);
+    float contentHeight = ((double) sizeViewport.y) - paddingBottom - paddingTop;
+    float offsetY = -paddingBottom / 2.0 / (double) sizeViewport.y + cameraVerticalDisplacement * contentHeight * 0.5 / (double) sizeViewport.y;
+    offsetY = cameraDistance / R * tan(fovyRad / 2.0) * offsetY; // view space to world space
+    Matrix::translateM(newProjectionMatrix, 0, 0.0, -offsetY, 0);
 
     Matrix::setIdentityM(newViewMatrix, 0);
 
-    if (mode == CameraMode3d::GLOBE) {
-        Matrix::translateM(newViewMatrix, 0, 0, 0, -cameraDistance);
-        Matrix::rotateM(newViewMatrix, 0.0, latitude, 1.0, 0.0, 0.0);
-        Matrix::rotateM(newViewMatrix, 0.0, -longitude - 90.0, 0.0, 1.0, 0.0);
-        std::vector<float> newVpMatrix(16, 0.0);
-        Matrix::multiplyMM(newVpMatrix, 0, newProjectionMatrix, 0, newViewMatrix, 0);
-    } else if (mode == CameraMode3d::TILTED_ORBITAL) {
-        Matrix::rotateM(newViewMatrix, 0, -cameraPitch, 1.0, 0.0, 0.0);
-        Matrix::translateM(newViewMatrix, 0, 0.0, cameraVerticalDisplacement, -cameraDistance);
 
-        Matrix::rotateM(newViewMatrix, 0.0, latitude, 1.0, 0.0, 0.0);
-        Matrix::rotateM(newViewMatrix, 0.0, -longitude - 90.0, 0.0, 1.0, 0.0);
-    }
+    Matrix::translateM(newViewMatrix, 0, 0.0, 0, -cameraDistance / R);
+    Matrix::rotateM(newViewMatrix, 0, -cameraPitch, 1.0, 0.0, 0.0);
+    Matrix::rotateM(newViewMatrix, 0, -angle, 0.0, 0.0, 1.0);
+
+    Matrix::translateM(newViewMatrix, 0, 0, 0, -1 - focusPointAltitude / R);
+
+    Matrix::rotateM(newViewMatrix, 0.0, latitude, 1.0, 0.0, 0.0);
+    Matrix::rotateM(newViewMatrix, 0.0, -longitude, 0.0, 1.0, 0.0);
+    Matrix::rotateM(newViewMatrix, 0.0, -90, 0.0, 1.0, 0.0); // zero longitude in London
 
     std::vector<float> newVpMatrix(16, 0.0);
     Matrix::multiplyMM(newVpMatrix, 0, newProjectionMatrix, 0, newViewMatrix, 0);
@@ -400,8 +386,8 @@ std::vector<float> MapCamera3d::getVpMatrix() {
     vpMatrix = newVpMatrix;
     viewMatrix = newViewMatrix;
     projectionMatrix = newProjectionMatrix;
-    verticalFov = fov;
-    horizontalFov = fov * vpr;
+    verticalFov = fovy;
+    horizontalFov = fovy * vpr;
     validVpMatrix = true;
 
     return newVpMatrix;
@@ -551,11 +537,12 @@ void MapCamera3d::notifyListeners(const int &listenerType) {
 bool MapCamera3d::onTouchDown(const ::Vec2F &posScreen) {
     inertia = std::nullopt;
     lastOnTouchDownPoint = posScreen;
+    lastOnTouchDownCoord = coordFromScreenPosition(posScreen);
     return true;
 }
 
 bool MapCamera3d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleClick) {
-    if (!config.moveEnabled || cameraFrozen || (lastOnTouchDownPoint == std::nullopt)) {
+    if (!config.moveEnabled || cameraFrozen || (lastOnTouchDownPoint == std::nullopt) || (lastOnTouchDownCoord == std::nullopt)) {
         return false;
     }
 
@@ -570,132 +557,19 @@ bool MapCamera3d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
         return true;
     }
 
-    auto viewport = mapInterface->getRenderingContext()->getViewportSize();
+    Vec2F newScreenPos = lastOnTouchDownPoint.value() + deltaScreen;
+    lastOnTouchDownPoint = newScreenPos;
 
-    float dPhi = 0.0;
-    float dTheta = 0.0;
+    auto newTouchDownCoord = coordFromScreenPosition(newScreenPos);
 
-    float dx = deltaScreen.x;
-    float dy = deltaScreen.y;
 
-    switch(mode) {
-        case CameraMode3d::GLOBE: {
+    double dx = -(newTouchDownCoord.x - lastOnTouchDownCoord->x);
+    double dy = -(newTouchDownCoord.y - lastOnTouchDownCoord->y);
 
-            auto viewportHalf = Vec2D(viewport.x * 0.5, viewport.y * 0.5);
-
-            auto halfWidth = MapCamera3DHelper::halfWidth(cameraDistance, FIELD_OF_VIEW, viewport.x, viewport.y);
-            auto halfHeight = MapCamera3DHelper::halfHeight(cameraDistance, FIELD_OF_VIEW);
-
-            auto tdx = ((lastOnTouchDownPoint->x - viewportHalf.x) / viewportHalf.x) * halfWidth;
-            auto tdy = ((lastOnTouchDownPoint->y - viewportHalf.y) / viewportHalf.y) * halfHeight;
-
-            bool didHit = true;
-            auto oldPoint = MapCamera3DHelper::raySphereIntersection(Vec3D(0.0, 0.0, 0.0), Vec3D(tdx, tdy, cameraDistance), Vec3D(0.0, cameraVerticalDisplacement, cameraDistance), 1.0, didHit);
-
-            tdx = (((lastOnTouchDownPoint->x + dx) - viewportHalf.x) / viewportHalf.x) * halfWidth;
-            tdy = (((lastOnTouchDownPoint->y + dy) - viewportHalf.y) / viewportHalf.y) * halfHeight;
-
-            auto newPoint = MapCamera3DHelper::raySphereIntersection(Vec3D(0.0, 0.0, 0.0), Vec3D(tdx, tdy, cameraDistance), Vec3D(0.0, cameraVerticalDisplacement, cameraDistance), 1.0, didHit);
-
-            if(!didHit) {
-                lastOnTouchDownPoint = std::nullopt;
-                return false;
-            }
-
-            oldPoint = Vec3DHelper::normalize(oldPoint - Vec3D(0.0, 0.0, cameraDistance));
-            newPoint = Vec3DHelper::normalize(newPoint - Vec3D(0.0, 0.0, cameraDistance));
-
-            float oldPhi = std::atan2(oldPoint.z, oldPoint.x);
-            float oldTheta = std::acos(oldPoint.y / 1.0);
-
-            // NEW:
-            float newPhi = std::atan2(newPoint.z, newPoint.x);
-            float newTheta = std::acos(newPoint.y / 1.0);
-
-            // DELTA CALCULATION
-            dPhi = (newPhi - oldPhi) * (180.0 / M_PI) * (mapSystemRtl ? -1 : 1);
-            dTheta = (newTheta - oldTheta) * (180.0 / M_PI) * (mapSystemTtb ? 1 : -1);
-            break;
-        }
-        case CameraMode3d::TILTED_ORBITAL: {
-            auto fovWithPitch = 2.0 * (0.5 * FIELD_OF_VIEW + cameraPitch);
-            auto fovWithoutPitch = 2.0 * (0.5 * FIELD_OF_VIEW - cameraPitch);
-
-            // horizontal
-            auto halfWidth = MapCamera3DHelper::halfWidth(cameraDistance * cos(cameraPitch * M_PI / 180.0), FIELD_OF_VIEW, viewport.x, viewport.y);
-            auto viewPortHalfX = viewport.x * 0.5;
-
-            // vertical
-            auto halfHeightTop = MapCamera3DHelper::halfHeight(cameraDistance * cos(cameraPitch * M_PI / 180.0), fovWithPitch);
-            auto halfHeightBottom = MapCamera3DHelper::halfHeight(cameraDistance * cos(cameraPitch * M_PI / 180.0), fovWithoutPitch);
-            auto h = halfHeightTop + halfHeightBottom;
-
-            auto centerY = viewport.y * (halfHeightTop / h);
-
-            auto tdx = ((lastOnTouchDownPoint->x - viewPortHalfX) / viewPortHalfX) * halfWidth;
-            auto tdy = ((centerY - lastOnTouchDownPoint->y) / centerY) * halfHeightTop;
-
-            bool didHit = false;
-            auto oldPoint = MapCamera3DHelper::raySphereIntersection(Vec3D(0.0, 0.0, 0.0), Vec3D(tdx, tdy * cos(cameraPitch * M_PI / 180.0), cameraDistance), Vec3D(0.0, cameraVerticalDisplacement, cameraDistance), 1.00, didHit);
-
-            tdx = (((lastOnTouchDownPoint->x + dx) - viewPortHalfX) / viewPortHalfX) * halfWidth;
-            tdy = ((centerY - (lastOnTouchDownPoint->y - dy)) / centerY) * halfHeightTop;
-
-            auto newPoint = MapCamera3DHelper::raySphereIntersection(Vec3D(0.0, 0.0, 0.0), Vec3D(tdx, tdy * cos(cameraPitch * M_PI / 180.0), cameraDistance), Vec3D(0.0, cameraVerticalDisplacement, cameraDistance), 1.0, didHit);
-
-            if(!didHit) {
-                lastOnTouchDownPoint = std::nullopt;
-                inertia = std::nullopt;
-                return false;
-            }
-
-            oldPoint = Vec3DHelper::normalize(oldPoint - Vec3D(0.0, 0.0, cameraDistance));
-            newPoint = Vec3DHelper::normalize(newPoint - Vec3D(0.0, 0.0, cameraDistance));
-
-            float oldPhi = std::atan2(oldPoint.z, oldPoint.x);
-            float oldTheta = std::acos(oldPoint.y / 1.0);
-
-            // NEW:
-            float newPhi = std::atan2(newPoint.z, newPoint.x);
-            float newTheta = std::acos(newPoint.y / 1.0);
-
-            if(std::abs(oldPoint.z) < 0.01) {
-                oldPhi = newPhi;
-            } else if(std::abs(newPoint.z) < 0.01) {
-                newPhi = oldPhi;
-            }
-
-            auto factor1 = 0.8 * std::min(1.0, std::abs(focusPointPosition.y + 2.0 * cameraPitch) / (90.0 - 2.0 * cameraPitch));
-
-            auto fp = (std::max(0.0, focusPointPosition.y - 30.0) / 60.0f);
-            auto factor2 = 5.5 * fp * fp;
-
-            auto distance = (1.0 - cameraDistance / 2.5) * 0.5;
-
-            auto f = (1 + factor1 + factor2 + distance);
-
-            // DELTA CALCULATION
-            dPhi = (newPhi - oldPhi) * (180.0 / M_PI) * (mapSystemRtl ? -1 : 1) * f;
-            dTheta = (newTheta - oldTheta) * (180.0 / M_PI) * (mapSystemTtb ? 1 : -1);
-
-            if(std::abs(dTheta) > 20 || std::abs(dPhi) > 20) {
-                lastOnTouchDownPoint = std::nullopt;
-                inertia = std::nullopt;
-                return false;
-            }
-
-            break;
-        }
-    }
-
-    focusPointPosition.x += dPhi;
-    focusPointPosition.y += dTheta;
+    focusPointPosition.x = focusPointPosition.x + dx;
+    focusPointPosition.y = focusPointPosition.y + dy;
 
     focusPointPosition.x = std::fmod((focusPointPosition.x + 180 + 360), 360.0) - 180;
-
-    lastOnTouchDownPoint->x = lastOnTouchDownPoint->x + dx;
-    lastOnTouchDownPoint->y = lastOnTouchDownPoint->y + dy;
-
     focusPointPosition.y = std::clamp(focusPointPosition.y, -90.0, 90.0);
 
     if (currentDragTimestamp == 0) {
@@ -706,14 +580,15 @@ bool MapCamera3d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
         long long newTimestamp = DateHelper::currentTimeMicros();
         long long deltaMcs = std::max(newTimestamp - currentDragTimestamp, 8000ll);
         float averageFactor = currentDragVelocity.x == 0 && currentDragVelocity.y == 0 ? 1.0 : 0.5;
-        currentDragVelocity.x = (1 - averageFactor) * currentDragVelocity.x + averageFactor * dPhi / (deltaMcs / 16000.0);
-        currentDragVelocity.y = (1 - averageFactor) * currentDragVelocity.y + averageFactor * dTheta / (deltaMcs / 16000.0);
+        currentDragVelocity.x = (1 - averageFactor) * currentDragVelocity.x + averageFactor * dx / (deltaMcs / 16000.0);
+        currentDragVelocity.y = (1 - averageFactor) * currentDragVelocity.y + averageFactor * dy / (deltaMcs / 16000.0);
         currentDragTimestamp = newTimestamp;
     }
 
     notifyListeners(ListenerType::BOUNDS | ListenerType::MAP_INTERACTION);
     mapInterface->invalidate();
-    return true;
+
+    return;
 }
 
 bool MapCamera3d::onMoveComplete() {
@@ -793,19 +668,21 @@ bool MapCamera3d::onTwoFingerClick(const ::Vec2F &posScreen1, const ::Vec2F &pos
 
     targetZoom = std::max(std::min(targetZoom, zoomMin), zoomMax);
 
-    auto position = coordFromScreenPosition(Vec2FHelper::midpoint(posScreen1, posScreen2));
+    setZoom(targetZoom, true);
 
-    auto config = mapInterface->getMapConfig();
-    auto bottomRight = bounds.bottomRight;
-    auto topLeft = bounds.topLeft;
-
-    position.x = std::min(position.x, bottomRight.x);
-    position.x = std::max(position.x, topLeft.x);
-
-    position.y = std::max(position.y, bottomRight.y);
-    position.y = std::min(position.y, topLeft.y);
-
-    moveToCenterPositionZoom(position, targetZoom, true);
+//    auto position = coordFromScreenPosition(Vec2FHelper::midpoint(posScreen1, posScreen2));
+//
+//    auto config = mapInterface->getMapConfig();
+//    auto bottomRight = bounds.bottomRight;
+//    auto topLeft = bounds.topLeft;
+//
+//    position.x = std::min(position.x, bottomRight.x);
+//    position.x = std::max(position.x, topLeft.x);
+//
+//    position.y = std::max(position.y, bottomRight.y);
+//    position.y = std::min(position.y, topLeft.y);
+//
+//    moveToCenterPositionZoom(position, targetZoom, true);
 
     notifyListeners(ListenerType::MAP_INTERACTION);
     return true;
@@ -839,52 +716,7 @@ bool MapCamera3d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, cons
             rotationPossible = false;
         }
 
-/*        auto viewport = mapInterface->getRenderingContext()->getViewportSize();
-
-        float dPhi = 0.0;
-        float dTheta = 0.0;
-
-        auto midpoint = Vec2FHelper::midpoint(posScreenNew[0], posScreenNew[1]);
-        auto oldMidpoint = Vec2FHelper::midpoint(posScreenOld[0], posScreenOld[1]);
-        
-        float dx = midpoint.x - oldMidpoint.x;
-        float dy = midpoint.y - oldMidpoint.y;
-
-        auto fovWithPitch = 2.0 * (0.5 * FIELD_OF_VIEW + cameraPitch);
-        auto fovWithoutPitch = 2.0 * (0.5 * FIELD_OF_VIEW - cameraPitch);
-
-        // horizontal
-        auto halfWidth = MapCamera3DHelper::halfWidth(cameraDistance * cos(cameraPitch * M_PI / 180.0), FIELD_OF_VIEW, viewport.x, viewport.y);
-        auto viewPortHalfX = viewport.x * 0.5;
-
-        // vertical
-        auto halfHeightTop = MapCamera3DHelper::halfHeight(cameraDistance * cos(cameraPitch * M_PI / 180.0), fovWithPitch);
-        auto halfHeightBottom = MapCamera3DHelper::halfHeight(cameraDistance * cos(cameraPitch * M_PI / 180.0), fovWithoutPitch);
-        auto h = halfHeightTop + halfHeightBottom;
-
-        auto centerY = viewport.y * (halfHeightTop / h);
-
-        auto tdx = (((midpoint.x) - viewPortHalfX) / viewPortHalfX);
-        auto tdy = ((centerY - (midpoint.y)) / centerY);
-
-        dPhi = tdx * (180.0 / M_PI) * (mapSystemRtl ? -1 : 1);
-        dTheta = tdy * (180.0 / M_PI) * (mapSystemTtb ? 1 : -1);
-
-        double t = (newZoom > zoom) ? 1.0 : -1.0;
-        focusPointPosition.x += t * dPhi * 0.001;
-        focusPointPosition.y += t * dTheta * 0.00055;
-
-        float beforeAngle = cameraPitch;*/
-
-        double yOffsetPrev = getCenterYOffsetFromZoom(zoom);
-        double yOffsetNew = getCenterYOffsetFromZoom(newZoom);
-        focusPointPosition.y += (yOffsetPrev - yOffsetNew);
-
         updateZoom(newZoom);
-
-/*        float afterAngle = cameraPitch;
-        focusPointPosition.y -= 0.5 * (afterAngle - beforeAngle);
-        focusPointPosition.y = std::clamp(focusPointPosition.y, -90.0, 90.0);*/
 
         notifyListeners(listenerType);
         mapInterface->invalidate();
@@ -919,61 +751,190 @@ bool MapCamera3d::onTwoFingerMoveComplete() {
 Coord MapCamera3d::coordFromScreenPosition(const ::Vec2F &posScreen) {
     auto viewport = mapInterface->getRenderingContext()->getViewportSize();
 
-    switch(mode) {
-        case CameraMode3d::GLOBE: {
-            break;
-        }
-        case CameraMode3d::TILTED_ORBITAL: {
-            auto fovWithPitch = 2.0 * (0.5 * FIELD_OF_VIEW + cameraPitch);
-            auto fovWithoutPitch = 2.0 * (0.5 * FIELD_OF_VIEW - cameraPitch);
-
-            // vertical
-            auto halfHeightTop = MapCamera3DHelper::halfHeight(cameraDistance * cos(cameraPitch * M_PI / 180.0), fovWithPitch) - cameraVerticalDisplacement;
-            auto halfHeightBottom = MapCamera3DHelper::halfHeight(cameraDistance * cos(cameraPitch * M_PI / 180.0), fovWithoutPitch) + cameraVerticalDisplacement;
-            auto h = halfHeightTop + halfHeightBottom;
-
-            auto centerY = viewport.y * (halfHeightTop / h);
-
-            // horizontal
-            auto halfWidth = MapCamera3DHelper::halfWidth(cameraDistance * cos(cameraPitch * M_PI / 180.0), FIELD_OF_VIEW, viewport.x, viewport.y);
-            auto viewPortHalfX = viewport.x * 0.5;
-
-            auto tdx = ((posScreen.x - viewPortHalfX) / viewPortHalfX) * halfWidth;
-            auto tdy = ((centerY - posScreen.y) / centerY) * halfHeightTop - cameraVerticalDisplacement;
-
-            bool didHit = false;
-            auto newPoint = MapCamera3DHelper::raySphereIntersection(Vec3D(0.0, cameraVerticalDisplacement, 0.0), Vec3D(tdx, tdy * cos(cameraPitch * M_PI / 180.0), cameraDistance * cos(cameraPitch * M_PI / 180.0)), Vec3D(0.0, 0.0, cameraDistance), 1.0, didHit);
-
-            // old point is focuspoint
-            auto oldPoint = Vec3D(0.0, 0.0, -1.0);
-            newPoint = Vec3DHelper::normalize(newPoint - Vec3D(0.0, 0.0, cameraDistance));
-
-            float oldPhi = std::atan2(oldPoint.z, oldPoint.x);
-            float oldTheta = std::acos(oldPoint.y / 1.0);
-
-            // NEW:
-            float newPhi = std::atan2(newPoint.z, newPoint.x);
-            float newTheta = std::acos(newPoint.y / 1.0);
-
-            if(std::abs(oldPoint.z) < 0.01) {
-                oldPhi = newPhi;
-            } else if(std::abs(newPoint.z) < 0.01) {
-                newPhi = oldPhi;
-            }
-
-            auto dPhi = (newPhi - oldPhi) * (180.0 / M_PI) * (mapSystemRtl ? 1 : -1);
-            auto dTheta = (newTheta - oldTheta) * (180.0 / M_PI) * (mapSystemTtb ? 1 : -1);
-
-            auto f = focusPointPosition;
-            f.x += dPhi;
-            f.y += dTheta;
-            f.y = std::clamp(f.y, -90.0, 90.0);
-
-            return f;
-        }
+    std::vector<double> vpMatrixD = {
+        static_cast<double>(vpMatrix[0]),
+        static_cast<double>(vpMatrix[1]),
+        static_cast<double>(vpMatrix[2]),
+        static_cast<double>(vpMatrix[3]),
+        static_cast<double>(vpMatrix[4]),
+        static_cast<double>(vpMatrix[5]),
+        static_cast<double>(vpMatrix[6]),
+        static_cast<double>(vpMatrix[7]),
+        static_cast<double>(vpMatrix[8]),
+        static_cast<double>(vpMatrix[9]),
+        static_cast<double>(vpMatrix[10]),
+        static_cast<double>(vpMatrix[11]),
+        static_cast<double>(vpMatrix[12]),
+        static_cast<double>(vpMatrix[13]),
+        static_cast<double>(vpMatrix[14]),
+        static_cast<double>(vpMatrix[15])
+    };
+    std::vector<double> inverseMatrix(16, 0.0);
+    if(!gluInvertMatrix(vpMatrixD, inverseMatrix)) {
+        return focusPointPosition;
     }
 
-    return focusPointPosition;
+    std::vector<double> normalizedPosScreenFront = {
+        (posScreen.x / (double)viewport.x * 2.0 - 1),
+        -(posScreen.y / (double)viewport.y * 2.0 - 1),
+        -1,
+        1
+    };
+    std::vector<double> normalizedPosScreenBack = {
+        (posScreen.x / (double)viewport.x * 2.0 - 1),
+        -(posScreen.y / (double)viewport.y * 2.0 - 1),
+        1,
+        1
+    };
+
+
+    auto worldPosFrontVec = MatrixD::multiply(inverseMatrix, normalizedPosScreenFront);
+    Vec3D worldPosFront(worldPosFrontVec[0] / worldPosFrontVec[3], worldPosFrontVec[1] / worldPosFrontVec[3], worldPosFrontVec[2] / worldPosFrontVec[3]);
+    auto worldPosBackVec = MatrixD::multiply(inverseMatrix, normalizedPosScreenBack);
+    Vec3D worldPosBack(worldPosBackVec[0] / worldPosBackVec[3], worldPosBackVec[1] / worldPosBackVec[3], worldPosBackVec[2] / worldPosBackVec[3]);
+
+    bool didHit = false;
+    auto point = MapCamera3DHelper::raySphereIntersection(worldPosFront, worldPosBack, Vec3D(0.0, 0.0, 0.0), 1.0, didHit);
+
+    float longitude = std::atan2(point.x, point.z) * 180 / M_PI - 90;
+    float latitude = std::asin(point.y) * 180 / M_PI;
+    return Coord(CoordinateSystemIdentifiers::EPSG4326(), longitude, latitude, 0);
+
+}
+
+bool MapCamera3d::gluInvertMatrix(const std::vector<double> &m, std::vector<double> &invOut)
+{
+
+    if (m.size() != 16 || invOut.size() != 16) {
+        return false;
+    }
+
+    double inv[16], det;
+    int i;
+
+    inv[0] = m[5]  * m[10] * m[15] -
+    m[5]  * m[11] * m[14] -
+    m[9]  * m[6]  * m[15] +
+    m[9]  * m[7]  * m[14] +
+    m[13] * m[6]  * m[11] -
+    m[13] * m[7]  * m[10];
+
+    inv[4] = -m[4]  * m[10] * m[15] +
+    m[4]  * m[11] * m[14] +
+    m[8]  * m[6]  * m[15] -
+    m[8]  * m[7]  * m[14] -
+    m[12] * m[6]  * m[11] +
+    m[12] * m[7]  * m[10];
+
+    inv[8] = m[4]  * m[9] * m[15] -
+    m[4]  * m[11] * m[13] -
+    m[8]  * m[5] * m[15] +
+    m[8]  * m[7] * m[13] +
+    m[12] * m[5] * m[11] -
+    m[12] * m[7] * m[9];
+
+    inv[12] = -m[4]  * m[9] * m[14] +
+    m[4]  * m[10] * m[13] +
+    m[8]  * m[5] * m[14] -
+    m[8]  * m[6] * m[13] -
+    m[12] * m[5] * m[10] +
+    m[12] * m[6] * m[9];
+
+    inv[1] = -m[1]  * m[10] * m[15] +
+    m[1]  * m[11] * m[14] +
+    m[9]  * m[2] * m[15] -
+    m[9]  * m[3] * m[14] -
+    m[13] * m[2] * m[11] +
+    m[13] * m[3] * m[10];
+
+    inv[5] = m[0]  * m[10] * m[15] -
+    m[0]  * m[11] * m[14] -
+    m[8]  * m[2] * m[15] +
+    m[8]  * m[3] * m[14] +
+    m[12] * m[2] * m[11] -
+    m[12] * m[3] * m[10];
+
+    inv[9] = -m[0]  * m[9] * m[15] +
+    m[0]  * m[11] * m[13] +
+    m[8]  * m[1] * m[15] -
+    m[8]  * m[3] * m[13] -
+    m[12] * m[1] * m[11] +
+    m[12] * m[3] * m[9];
+
+    inv[13] = m[0]  * m[9] * m[14] -
+    m[0]  * m[10] * m[13] -
+    m[8]  * m[1] * m[14] +
+    m[8]  * m[2] * m[13] +
+    m[12] * m[1] * m[10] -
+    m[12] * m[2] * m[9];
+
+    inv[2] = m[1]  * m[6] * m[15] -
+    m[1]  * m[7] * m[14] -
+    m[5]  * m[2] * m[15] +
+    m[5]  * m[3] * m[14] +
+    m[13] * m[2] * m[7] -
+    m[13] * m[3] * m[6];
+
+    inv[6] = -m[0]  * m[6] * m[15] +
+    m[0]  * m[7] * m[14] +
+    m[4]  * m[2] * m[15] -
+    m[4]  * m[3] * m[14] -
+    m[12] * m[2] * m[7] +
+    m[12] * m[3] * m[6];
+
+    inv[10] = m[0]  * m[5] * m[15] -
+    m[0]  * m[7] * m[13] -
+    m[4]  * m[1] * m[15] +
+    m[4]  * m[3] * m[13] +
+    m[12] * m[1] * m[7] -
+    m[12] * m[3] * m[5];
+
+    inv[14] = -m[0]  * m[5] * m[14] +
+    m[0]  * m[6] * m[13] +
+    m[4]  * m[1] * m[14] -
+    m[4]  * m[2] * m[13] -
+    m[12] * m[1] * m[6] +
+    m[12] * m[2] * m[5];
+
+    inv[3] = -m[1] * m[6] * m[11] +
+    m[1] * m[7] * m[10] +
+    m[5] * m[2] * m[11] -
+    m[5] * m[3] * m[10] -
+    m[9] * m[2] * m[7] +
+    m[9] * m[3] * m[6];
+
+    inv[7] = m[0] * m[6] * m[11] -
+    m[0] * m[7] * m[10] -
+    m[4] * m[2] * m[11] +
+    m[4] * m[3] * m[10] +
+    m[8] * m[2] * m[7] -
+    m[8] * m[3] * m[6];
+
+    inv[11] = -m[0] * m[5] * m[11] +
+    m[0] * m[7] * m[9] +
+    m[4] * m[1] * m[11] -
+    m[4] * m[3] * m[9] -
+    m[8] * m[1] * m[7] +
+    m[8] * m[3] * m[5];
+
+    inv[15] = m[0] * m[5] * m[10] -
+    m[0] * m[6] * m[9] -
+    m[4] * m[1] * m[10] +
+    m[4] * m[2] * m[9] +
+    m[8] * m[1] * m[6] -
+    m[8] * m[2] * m[5];
+
+    det = m[0] * inv[0] + m[1] * inv[4] + m[2] * inv[8] + m[3] * inv[12];
+
+    if (det == 0)
+        return false;
+
+    det = 1.0 / det;
+
+    for (i = 0; i < 16; i++)
+        invOut[i] = inv[i] * det;
+
+    return true;
 }
 
 ::Vec2F MapCamera3d::screenPosFromCoord(const Coord &coord) {
@@ -1001,6 +962,9 @@ Coord MapCamera3d::coordFromScreenPosition(const ::Vec2F &posScreen) {
     double zoomFactor = screenPixelAsRealMeterFactor * zoom;
     double posScreenX = (screenXDiffToCenter / zoomFactor) + ((double)sizeViewport.x / 2.0);
     double posScreenY = ((double)sizeViewport.y / 2.0) - (screenYDiffToCenter / zoomFactor);
+
+    // TODO: Ensure screenPosFromCoord is correct
+    printf("Warning: screenPosFromCoord incomplete logic.\n");
 
     return Vec2F(posScreenX, posScreenY);
 }
@@ -1140,19 +1104,24 @@ void MapCamera3d::updateZoom(double zoom_) {
 
 double MapCamera3d::getCameraVerticalDisplacementFromZoom(double zoom) {
     auto z = (zoom - getMaxZoom()) / (getMinZoom() - getMaxZoom());
-    return 0.05 - (1.0 - z) * 0.4;
+    auto out = 0;
+    auto in = 1;
+    return in + (z * (out - in));
 }
 
 double MapCamera3d::getCameraPitchFromZoom(double zoom) {
     auto z = (zoom - getMaxZoom()) / (getMinZoom() - getMaxZoom());
-    return 15.0 - (1.0 - z) * 10.0;
+    auto out = 5;
+    auto in = 25;
+    return in + (z * (out - in));
 }
 
 double MapCamera3d::getCameraDistanceFromZoom(double zoom) {
     auto z = (zoom - getMaxZoom()) / (getMinZoom() - getMaxZoom());
-    auto max = 2.5;
-    auto min = 1.2;
-    return min + (z * (max - min));
+    float R = 6378137.0;
+    auto out = 8.0 * R; // earth-radii in m, above ground
+    auto in = 100; // m above ground
+    return in + (z * (out - in));
 }
 
 double MapCamera3d::getCenterYOffsetFromZoom(double zoom) {
