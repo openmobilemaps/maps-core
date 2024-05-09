@@ -574,7 +574,6 @@ bool MapCamera3d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
         return false;
     }
 
-
     double dx = -(newTouchDownCoord.x - lastOnTouchDownCoord->x);
     double dy = -(newTouchDownCoord.y - lastOnTouchDownCoord->y);
 
@@ -664,7 +663,39 @@ bool MapCamera3d::onDoubleClick(const ::Vec2F &posScreen) {
     auto targetZoom = zoom / 2;
     targetZoom = std::max(std::min(targetZoom, zoomMin), zoomMax);
 
-    setZoom(targetZoom, true);
+    // Get initial coordinate at touch
+    auto centerCoordBefore = coordFromScreenPosition(posScreen);
+
+    // Force update of matrices with new zoom for coordFromScreenPosition-call, ...
+    auto originalZoom = zoom;
+    setZoom(targetZoom, false);
+    getVpMatrix();
+
+    // ..., then find coordinate, that would be at touch
+    auto centerCoordAfter = coordFromScreenPosition(posScreen);
+
+    // Reset zoom before animation
+    setZoom(originalZoom, false);
+    getVpMatrix();
+
+    // Rotate globe to keep initial coordinate at touch
+    if (centerCoordBefore.systemIdentifier != -1 && centerCoordAfter.systemIdentifier != -1) {
+        double dx = (centerCoordBefore.x - centerCoordAfter.x);
+        double dy = (centerCoordBefore.y - centerCoordAfter.y);
+
+        auto position = focusPointPosition;
+        position.x += dx;
+        position.y += dy;
+
+        position.x = std::fmod((position.x + 180 + 360), 360.0) - 180;
+        position.y = std::clamp(position.y, -90.0, 90.0);
+
+        moveToCenterPositionZoom(position, targetZoom, true);
+
+    }
+    else {
+        setZoom(targetZoom, true);
+    }
 
     notifyListeners(ListenerType::MAP_INTERACTION);
     return true;
@@ -677,24 +708,43 @@ bool MapCamera3d::onTwoFingerClick(const ::Vec2F &posScreen1, const ::Vec2F &pos
     inertia = std::nullopt;
 
     auto targetZoom = zoom * 2;
-
     targetZoom = std::max(std::min(targetZoom, zoomMin), zoomMax);
 
-    setZoom(targetZoom, true);
+    // Get initial coordinate below middle-point of fingers
+    auto posScreen = (posScreen1 + posScreen2) / 2.0;
+    auto centerCoordBefore = coordFromScreenPosition(posScreen);
 
-//    auto position = coordFromScreenPosition(Vec2FHelper::midpoint(posScreen1, posScreen2));
-//
-//    auto config = mapInterface->getMapConfig();
-//    auto bottomRight = bounds.bottomRight;
-//    auto topLeft = bounds.topLeft;
-//
-//    position.x = std::min(position.x, bottomRight.x);
-//    position.x = std::max(position.x, topLeft.x);
-//
-//    position.y = std::max(position.y, bottomRight.y);
-//    position.y = std::min(position.y, topLeft.y);
-//
-//    moveToCenterPositionZoom(position, targetZoom, true);
+    // Force update of matrices with new zoom for coordFromScreenPosition-call, ...
+    auto originalZoom = zoom;
+    setZoom(targetZoom, false);
+    getVpMatrix();
+
+    // ..., then find coordinate, that would be below middle-point
+    auto centerCoordAfter = coordFromScreenPosition(posScreen);
+
+    // Reset zoom before animation
+    setZoom(originalZoom, false);
+    getVpMatrix();
+
+    // Rotate globe to keep initial coordinate at middle-point
+    if (centerCoordBefore.systemIdentifier != -1 && centerCoordAfter.systemIdentifier != -1) {
+        double dx = (centerCoordBefore.x - centerCoordAfter.x);
+        double dy = (centerCoordBefore.y - centerCoordAfter.y);
+
+        auto position = focusPointPosition;
+        position.x += dx;
+        position.y += dy;
+
+        position.x = std::fmod((position.x + 180 + 360), 360.0) - 180;
+        position.y = std::clamp(position.y, -90.0, 90.0);
+
+        moveToCenterPositionZoom(position, targetZoom, true);
+
+    }
+    else {
+        setZoom(targetZoom, true);
+    }
+
 
     notifyListeners(ListenerType::MAP_INTERACTION);
     return true;
@@ -705,6 +755,8 @@ void MapCamera3d::clearTouch() {
     rotationPossible = true;
     tempAngle = angle;
     startZoom = 0;
+    lastOnTouchDownPoint = std::nullopt;
+    lastOnTouchDownCoord = std::nullopt;
 }
 
 bool MapCamera3d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, const std::vector<::Vec2F> &posScreenNew) {
@@ -713,23 +765,62 @@ bool MapCamera3d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, cons
 
     inertia = std::nullopt;
 
-    if (startZoom == 0) {
-        startZoom = zoom;
-    }
 
     if (posScreenOld.size() >= 2) {
-        auto listenerType = ListenerType::BOUNDS | ListenerType::MAP_INTERACTION;
 
         double scaleFactor =
             Vec2FHelper::distance(posScreenNew[0], posScreenNew[1]) / Vec2FHelper::distance(posScreenOld[0], posScreenOld[1]);
         double newZoom = std::clamp(zoom / scaleFactor, zoomMax, zoomMin);
 
+        if (startZoom == 0) {
+            startZoom = zoom;
+
+            // Compute initial middle-point
+            // Coordinate at middle-point of fingers should stay at middle-point during zoom gesture
+            auto screenCenterOld = (posScreenOld[0] + posScreenOld[1]) / 2.0;
+            lastOnTouchDownCoord = coordFromScreenPosition(screenCenterOld);
+        }
         if (newZoom > startZoom * ROTATION_LOCKING_FACTOR || newZoom < startZoom / ROTATION_LOCKING_FACTOR) {
             rotationPossible = false;
         }
 
+        // Set new zoom
         updateZoom(newZoom);
 
+        // Force update of matrices for coordFromScreenPosition-call, ...
+        getVpMatrix();
+
+        // ..., then find coordinate, that would be below middle-point
+        auto screenCenterNew = (posScreenNew[0] + posScreenNew[1]) / 2.0;
+        auto newTouchDownCoord = coordFromScreenPosition(screenCenterNew);
+
+        // Rotate globe to keep initial coordinate at middle-point
+        if (lastOnTouchDownCoord && lastOnTouchDownCoord->systemIdentifier != -1 && newTouchDownCoord.systemIdentifier != -1) {
+            double dx = -(newTouchDownCoord.x - lastOnTouchDownCoord->x);
+            double dy = -(newTouchDownCoord.y - lastOnTouchDownCoord->y);
+
+            focusPointPosition.x = focusPointPosition.x + dx;
+            focusPointPosition.y = focusPointPosition.y + dy;
+
+            focusPointPosition.x = std::fmod((focusPointPosition.x + 180 + 360), 360.0) - 180;
+            focusPointPosition.y = std::clamp(focusPointPosition.y, -90.0, 90.0);
+
+            if (currentDragTimestamp == 0) {
+                currentDragTimestamp = DateHelper::currentTimeMicros();
+                currentDragVelocity.x = 0;
+                currentDragVelocity.y = 0;
+            } else {
+                long long newTimestamp = DateHelper::currentTimeMicros();
+                long long deltaMcs = std::max(newTimestamp - currentDragTimestamp, 8000ll);
+                float averageFactor = currentDragVelocity.x == 0 && currentDragVelocity.y == 0 ? 1.0 : 0.5;
+                currentDragVelocity.x = (1 - averageFactor) * currentDragVelocity.x + averageFactor * dx / (deltaMcs / 16000.0);
+                currentDragVelocity.y = (1 - averageFactor) * currentDragVelocity.y + averageFactor * dy / (deltaMcs / 16000.0);
+                currentDragTimestamp = newTimestamp;
+            }
+        }
+
+
+        auto listenerType = ListenerType::BOUNDS | ListenerType::MAP_INTERACTION;
         notifyListeners(listenerType);
         mapInterface->invalidate();
     }
