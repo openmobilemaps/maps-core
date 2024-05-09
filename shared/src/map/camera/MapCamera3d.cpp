@@ -536,9 +536,17 @@ void MapCamera3d::notifyListeners(const int &listenerType) {
 
 bool MapCamera3d::onTouchDown(const ::Vec2F &posScreen) {
     inertia = std::nullopt;
-    lastOnTouchDownPoint = posScreen;
-    lastOnTouchDownCoord = coordFromScreenPosition(posScreen);
-    return true;
+    auto pos = coordFromScreenPosition(posScreen);
+    if (pos.systemIdentifier == -1) {
+        lastOnTouchDownPoint = std::nullopt;
+        lastOnTouchDownCoord = std::nullopt;
+        return false;
+    }
+    else {
+        lastOnTouchDownPoint = posScreen;
+        lastOnTouchDownCoord = pos;
+        return true;
+    }
 }
 
 bool MapCamera3d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleClick) {
@@ -561,6 +569,10 @@ bool MapCamera3d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
     lastOnTouchDownPoint = newScreenPos;
 
     auto newTouchDownCoord = coordFromScreenPosition(newScreenPos);
+
+    if (newTouchDownCoord.systemIdentifier == -1) {
+        return false;
+    }
 
 
     double dx = -(newTouchDownCoord.x - lastOnTouchDownCoord->x);
@@ -588,7 +600,7 @@ bool MapCamera3d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
     notifyListeners(ListenerType::BOUNDS | ListenerType::MAP_INTERACTION);
     mapInterface->invalidate();
 
-    return;
+    return true;
 }
 
 bool MapCamera3d::onMoveComplete() {
@@ -771,7 +783,7 @@ Coord MapCamera3d::coordFromScreenPosition(const ::Vec2F &posScreen) {
     };
     std::vector<double> inverseMatrix(16, 0.0);
     if(!gluInvertMatrix(vpMatrixD, inverseMatrix)) {
-        return focusPointPosition;
+        return Coord(-1, 0, 0, 0);
     }
 
     std::vector<double> normalizedPosScreenFront = {
@@ -796,10 +808,14 @@ Coord MapCamera3d::coordFromScreenPosition(const ::Vec2F &posScreen) {
     bool didHit = false;
     auto point = MapCamera3DHelper::raySphereIntersection(worldPosFront, worldPosBack, Vec3D(0.0, 0.0, 0.0), 1.0, didHit);
 
-    float longitude = std::atan2(point.x, point.z) * 180 / M_PI - 90;
-    float latitude = std::asin(point.y) * 180 / M_PI;
-    return Coord(CoordinateSystemIdentifiers::EPSG4326(), longitude, latitude, 0);
-
+    if (didHit) {
+        float longitude = std::atan2(point.x, point.z) * 180 / M_PI - 90;
+        float latitude = std::asin(point.y) * 180 / M_PI;
+        return Coord(CoordinateSystemIdentifiers::EPSG4326(), longitude, latitude, 0);
+    }
+    else {
+        return Coord(-1, 0, 0, 0);
+    }
 }
 
 bool MapCamera3d::gluInvertMatrix(const std::vector<double> &m, std::vector<double> &invOut)
