@@ -257,5 +257,6 @@ protected:
     bool validVpMatrix = false;
                         
     std::optional<::Vec2F> lastOnTouchDownPoint;
+    std::optional<::Vec2F> initialTouchDownPoint;
     std::optional<Coord> lastOnTouchDownCoord;
 };
