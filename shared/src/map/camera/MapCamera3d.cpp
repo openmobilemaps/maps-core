@@ -544,6 +544,7 @@ bool MapCamera3d::onTouchDown(const ::Vec2F &posScreen) {
     }
     else {
         lastOnTouchDownPoint = posScreen;
+        initialTouchDownPoint = posScreen;
         lastOnTouchDownCoord = pos;
         return true;
     }
@@ -559,6 +560,28 @@ bool MapCamera3d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
     if (doubleClick) {
         double newZoom = zoom * (1.0 - (deltaScreen.y * 0.003));
         updateZoom(newZoom);
+
+        if (initialTouchDownPoint) {
+            // Force update of matrices for coordFromScreenPosition-call, ...
+            getVpMatrix();
+
+            // ..., then find coordinate, that would be below middle-point
+            auto newTouchDownCoord = coordFromScreenPosition(initialTouchDownPoint.value());
+
+            // Rotate globe to keep initial coordinate at middle-point
+            if (lastOnTouchDownCoord && lastOnTouchDownCoord->systemIdentifier != -1 && newTouchDownCoord.systemIdentifier != -1) {
+                double dx = -(newTouchDownCoord.x - lastOnTouchDownCoord->x);
+                double dy = -(newTouchDownCoord.y - lastOnTouchDownCoord->y);
+
+                focusPointPosition.x = focusPointPosition.x + dx;
+                focusPointPosition.y = focusPointPosition.y + dy;
+
+                focusPointPosition.x = std::fmod((focusPointPosition.x + 180 + 360), 360.0) - 180;
+                focusPointPosition.y = std::clamp(focusPointPosition.y, -90.0, 90.0);
+
+            }
+        }
+
 
         notifyListeners(ListenerType::BOUNDS | ListenerType::MAP_INTERACTION);
         mapInterface->invalidate();
