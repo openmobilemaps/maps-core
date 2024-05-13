@@ -21,7 +21,10 @@ shader_program_interface = interface +c +o {
 shader_factory_interface = interface +c +j +o {
     create_alpha_shader() : alpha_shader_interface;
     create_unit_sphere_alpha_shader() : alpha_shader_interface;
+
     create_alpha_instanced_shader(): alpha_instanced_shader_interface;
+    create_unit_sphere_alpha_instanced_shader(): alpha_instanced_shader_interface;
+
     create_line_group_shader(): line_group_shader_interface;
 
     create_unit_sphere_color_shader() : color_shader_interface;
@@ -35,6 +38,7 @@ shader_factory_interface = interface +c +j +o {
 
     create_text_shader() : text_shader_interface;
     create_text_instanced_shader(): text_instanced_shader_interface;
+    create_unit_sphere_text_instanced_shader(): text_instanced_shader_interface;
 
     create_raster_shader() : raster_shader_interface;
     create_unit_sphere_raster_shader() : raster_shader_interface;

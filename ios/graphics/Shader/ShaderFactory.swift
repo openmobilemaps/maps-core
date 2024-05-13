@@ -48,6 +48,10 @@ class ShaderFactory: MCShaderFactoryInterface {
         AlphaInstancedShader()
     }
 
+    func createUnitSphereAlphaInstancedShader() -> (any MCAlphaInstancedShaderInterface)? {
+        AlphaInstancedShader(shader: .unitSphereAlphaInstancedShader, unitSphere: true)
+    }
+
     func createLineGroupShader() -> MCLineGroupShaderInterface? {
         LineGroupShader()
     }
@@ -70,6 +74,10 @@ class ShaderFactory: MCShaderFactoryInterface {
 
     func createTextInstancedShader() -> MCTextInstancedShaderInterface? {
         TextInstancedShader()
+    }
+
+    func createUnitSphereTextInstancedShader() -> (any MCTextInstancedShaderInterface)? {
+        TextInstancedShader(unitSphere: true)
     }
 
     func createStretchInstancedShader() -> MCStretchInstancedShaderInterface? {

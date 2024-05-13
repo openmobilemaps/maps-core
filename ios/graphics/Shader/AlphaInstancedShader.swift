@@ -14,9 +14,11 @@ import Metal
 
 class AlphaInstancedShader: BaseShader {
     private let shader: PipelineType
+    public let isUnitSphere: Bool
 
-    init(shader: PipelineType = .alphaInstancedShader) {
+    init(shader: PipelineType = .alphaInstancedShader, unitSphere: Bool = false) {
         self.shader = shader
+        self.isUnitSphere = unitSphere
     }
 
     override func setupProgram(_: MCRenderingContextInterface?) {

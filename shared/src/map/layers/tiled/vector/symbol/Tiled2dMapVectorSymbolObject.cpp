@@ -43,7 +43,8 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
                                                            const size_t symbolTileIndex,
                                                            const bool hasCustomTexture,
                                                            const double dpFactor,
-                                                           const bool persistingSymbolPlacement) :
+                                                           const bool persistingSymbolPlacement,
+                                                           bool is3d) :
     description(description),
     layerConfig(layerConfig),
     coordinate(coordinate),
@@ -56,6 +57,7 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
     symbolTileIndex(symbolTileIndex),
     hasCustomTexture(hasCustomTexture),
     dpFactor(dpFactor),
+    is3d(is3d),
     persistingSymbolPlacement(persistingSymbolPlacement) {
     auto strongMapInterface = mapInterface.lock();
     auto objectFactory = strongMapInterface ? strongMapInterface->getGraphicsObjectFactory() : nullptr;
@@ -141,7 +143,8 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
                                                                               description->style.getTextMaxAngle(evalContext),
                                                                               labelRotationAlignment, textSymbolPlacement,
                                                                               animationCoordinator, featureStateManager,
-                                                                              dpFactor);
+                                                                              dpFactor,
+                                                                              is3d);
 
             instanceCounts.textCharacters = labelObject->getCharacterCount();
         } else {
@@ -421,15 +424,20 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &posi
         rotations[countOffset] += rotation;
     }
 
-    const auto iconWidth = spriteSize.x * iconSize;
-    const auto iconHeight = spriteSize.y * iconSize;
+    const auto iconWidth = spriteSize.x * iconSize * (is3d ? 1.0 : scaleFactor);
+    const auto iconHeight = spriteSize.y * iconSize * (is3d ? 1.0 : scaleFactor);;
 
     const float scaledIconPadding = iconPadding * scaleFactor;
 
     auto viewPortSize = mapInterface.lock()->getRenderingContext()->getViewportSize();
 
-    scales[2 * countOffset] = iconWidth * 1.0 / viewPortSize.x;
-    scales[2 * countOffset + 1] = iconHeight * 1.0 / viewPortSize.y;
+    scales[2 * countOffset] = iconWidth;
+    scales[2 * countOffset + 1] = iconHeight;
+
+    if (is3d) {
+        scales[2 * countOffset] *= 1.0 / viewPortSize.x;
+        scales[2 * countOffset + 1] *= 1.0 / viewPortSize.y;
+    }
 
     renderCoordinate = getRenderCoordinates(iconAnchor, -rotations[countOffset], iconWidth, iconHeight);
 
@@ -858,12 +866,12 @@ void Tiled2dMapVectorSymbolObject::collisionDetection(const double zoomIdentifie
     if (!isCoordinateOwner) {
         return;
     }
-//
-//    if (!(description->minZoom <= zoomIdentifier && description->maxZoom >= zoomIdentifier) || !getIsOpaque() || !isPlaced()) {
-//        // not visible
-//        setHideFromCollision(true);
-//        return;
-//    }
+
+    if (!(description->minZoom <= zoomIdentifier && description->maxZoom >= zoomIdentifier) || !getIsOpaque() || !isPlaced()) {
+        // not visible
+        setHideFromCollision(true);
+        return;
+    }
 
 
     bool willCollide = true;

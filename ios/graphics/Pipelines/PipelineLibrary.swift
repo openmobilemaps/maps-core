@@ -136,6 +136,8 @@ public enum PipelineType: String, CaseIterable, Codable {
     case unitSphereAlphaShader
     case unitSphereColorShader
     case unitSphereRoundColorShader
+    case unitSphereAlphaInstancedShader
+    case unitSphereTextInstancedShader
 
     var label: String {
         switch self {
@@ -159,6 +161,8 @@ public enum PipelineType: String, CaseIterable, Codable {
             case .icosahedronColorShader: return "Icosahedron Color Shader"
             case .unitSphereAlphaShader: return "Unit Sphere Alpha shader with texture"
             case .unitSphereRoundColorShader: return "Unit Sphere Round color shader"
+            case .unitSphereAlphaInstancedShader: return "Unit Sphere Alpha instanced shader with texture"
+            case .unitSphereTextInstancedShader: return "Unit Sphere Text Instanced shader"
         }
     }
 
@@ -184,6 +188,8 @@ public enum PipelineType: String, CaseIterable, Codable {
             case .unitSphereColorShader: return "unitSphereBaseVertexShader"
             case .icosahedronColorShader: return "icosahedronVertexShader"
             case .unitSphereRoundColorShader: return "unitSphereBaseVertexShader"
+            case .unitSphereAlphaInstancedShader: return "unitSphereAlphaInstancedVertexShader"
+            case .unitSphereTextInstancedShader: return "unitSphereTextInstancedVertexShader"
         }
     }
 
@@ -209,6 +215,8 @@ public enum PipelineType: String, CaseIterable, Codable {
             case .unitSphereAlphaShader: return "baseFragmentShader"
             case .icosahedronColorShader: return "icosahedronFragmentShader"
             case .unitSphereRoundColorShader: return "roundColorFragmentShader"
+            case .unitSphereAlphaInstancedShader: return "unitSphereAlphaInstancedFragmentShader"
+            case .unitSphereTextInstancedShader: return "unitSphereTextInstancedFragmentShader"
         }
     }
 

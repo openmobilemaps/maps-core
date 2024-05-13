@@ -24,6 +24,8 @@
 
 - (nullable id<MCAlphaInstancedShaderInterface>)createAlphaInstancedShader;
 
+- (nullable id<MCAlphaInstancedShaderInterface>)createUnitSphereAlphaInstancedShader;
+
 - (nullable id<MCLineGroupShaderInterface>)createLineGroupShader;
 
 - (nullable id<MCColorShaderInterface>)createUnitSphereColorShader;
@@ -41,6 +43,8 @@
 - (nullable id<MCTextShaderInterface>)createTextShader;
 
 - (nullable id<MCTextInstancedShaderInterface>)createTextInstancedShader;
+
+- (nullable id<MCTextInstancedShaderInterface>)createUnitSphereTextInstancedShader;
 
 - (nullable id<MCRasterShaderInterface>)createRasterShader;
 

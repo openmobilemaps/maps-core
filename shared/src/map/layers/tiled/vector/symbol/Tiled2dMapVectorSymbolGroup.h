@@ -170,6 +170,8 @@ private:
 
     bool isInitialized = false;
 
+    bool is3d;
+
     const std::shared_ptr<Tiled2dMapVectorStateManager> featureStateManager;
     const std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> &symbolDelegate;
 

@@ -28,6 +28,8 @@ public:
 
     virtual /*not-null*/ std::shared_ptr<AlphaInstancedShaderInterface> createAlphaInstancedShader() = 0;
 
+    virtual /*not-null*/ std::shared_ptr<AlphaInstancedShaderInterface> createUnitSphereAlphaInstancedShader() = 0;
+
     virtual /*not-null*/ std::shared_ptr<LineGroupShaderInterface> createLineGroupShader() = 0;
 
     virtual /*not-null*/ std::shared_ptr<ColorShaderInterface> createUnitSphereColorShader() = 0;
@@ -45,6 +47,8 @@ public:
     virtual /*not-null*/ std::shared_ptr<TextShaderInterface> createTextShader() = 0;
 
     virtual /*not-null*/ std::shared_ptr<TextInstancedShaderInterface> createTextInstancedShader() = 0;
+
+    virtual /*not-null*/ std::shared_ptr<TextInstancedShaderInterface> createUnitSphereTextInstancedShader() = 0;
 
     virtual /*not-null*/ std::shared_ptr<RasterShaderInterface> createRasterShader() = 0;
 

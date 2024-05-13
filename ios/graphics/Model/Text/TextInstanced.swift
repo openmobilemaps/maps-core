@@ -75,7 +75,6 @@ final class TextInstanced: BaseGraphicsObject {
               let textureCoordinatesBuffer,
               let styleIndicesBuffer,
               let styleBuffer,
-              let referencePositionsBuffer,
               instanceCount != 0 else { return }
 
         if isMasked {
@@ -112,7 +111,12 @@ final class TextInstanced: BaseGraphicsObject {
         encoder.setVertexBuffer(rotationsBuffer, offset: 0, index: 5)
         encoder.setVertexBuffer(textureCoordinatesBuffer, offset: 0, index: 6)
         encoder.setVertexBuffer(styleIndicesBuffer, offset: 0, index: 7)
-        encoder.setVertexBuffer(referencePositionsBuffer, offset: 0, index: 8)
+        
+        if shader.isUnitSphere,
+           let referencePositionsBuffer {
+            encoder.setVertexBuffer(referencePositionsBuffer, offset: 0, index: 8)
+        }
+
 
         encoder.setFragmentSamplerState(sampler, index: 0)
 
