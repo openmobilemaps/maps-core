@@ -294,7 +294,7 @@ void Tiled2dMapVectorSymbolLabelObject::updateProperties(std::vector<float> &pos
 void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float> &positions, std::vector<float> &referencePositions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, const Vec2I &viewportSize) {
 
     const auto evalContext = EvaluationContext(zoomIdentifier, dpFactor, featureContext, stateManager);
-    const float fontSize = is3d ? textSize : scaleFactor * textSize;;
+    const float fontSize = is3d ? textSize : scaleFactor * textSize;
 
     Vec2D boxMin(std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
     Vec2D boxMax(std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest());
@@ -328,7 +328,12 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
 
     float yOffset = 0;
 
-    pen.y -= fontSize * lineHeight * 0.25;
+    if (is3d) {
+        pen.y += fontSize * lineHeight * 0.25;
+    } else {
+        pen.y -= fontSize * lineHeight * 0.25;
+    }
+
 
     int numberOfCharacters = 0;
     int baseLineStartIndex = 0;
@@ -345,10 +350,10 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
 
             if(i.glyphIndex != spaceIndex) {
                 auto x = pen.x + bearing.x;
-                auto y = pen.y - bearing.y;
+                auto y = is3d ? pen.y + bearing.y : pen.y - bearing.y;
                 auto xw = x + size.x;
-                auto yh = y + size.y;
-                
+                auto yh = is3d ? y - size.y : y + size.y;
+
                 baseLines[numberOfCharacters] = yh;
 
                 boxMin.x = boxMin.x < x ? boxMin.x : x;
@@ -365,17 +370,17 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
                     }
                 }
 
-                scales[2 * (countOffset + numberOfCharacters) + 0] = size.x;
-                scales[2 * (countOffset + numberOfCharacters) + 1] = size.y;
-
                 if (is3d) {
-                    scales[2 * (countOffset + numberOfCharacters) + 0] *= 1.0 / viewportSize.x;
-                    scales[2 * (countOffset + numberOfCharacters) + 1] *= 1.0 / viewportSize.x;
+                    scales[2 * (countOffset + numberOfCharacters) + 0] = size.x / viewportSize.x;
+                    scales[2 * (countOffset + numberOfCharacters) + 1] = size.y / viewportSize.y;
+                } else {
+                    scales[2 * (countOffset + numberOfCharacters) + 0] = size.x;
+                    scales[2 * (countOffset + numberOfCharacters) + 1] = size.y;
                 }
 
                 rotations[countOffset + numberOfCharacters] = -angle;
-                centerPositions[numberOfCharacters].x = x + size.x * 0.5;
-                centerPositions[numberOfCharacters].y = y + size.y * 0.5;
+                centerPositions[numberOfCharacters].x = (x + xw) * 0.5;
+                centerPositions[numberOfCharacters].y = (y + yh) * 0.5;
                 ++numberOfCharacters;
             }
 
@@ -499,7 +504,7 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
             if (radialOffset != 0.0) {
                 anchorOffset.y -= (lineHeight - fontResult->fontData->info.lineHeight + 1.0 - textOffset.y) * fontSize;
             } else {
-                anchorOffset.y = -size.y;
+                anchorOffset.y = -(is3d ? 2 : 1) * size.y;
                 anchorOffset.y -= ((fontResult->fontData->info.lineHeight - fontResult->fontData->info.base) * lineHeight - textOffset.y) * fontSize + yOffset;
             }
             break;
@@ -532,18 +537,15 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
         const float scaleXH = scales[2 * countOffset + 0] / 2.0;
         const float scaleYH = scales[2 * countOffset + 1] / 2.0;
 
-        positions[2 * countOffset + 0] = rX;
-        positions[2 * countOffset + 1] = rY;
-
         if (is3d) {
-            positions[2 * countOffset + 0] *= 1.0 / viewportSize.x;
-            positions[2 * countOffset + 1] *= 1.0 / viewportSize.y;
+            positions[2 * countOffset + 0] = (rX + anchorOffsetRot.x) / viewportSize.x;
+            positions[2 * countOffset + 1] = (rY + anchorOffsetRot.y) / viewportSize.y;
 
             referencePositions[2 * countOffset + 0] = referencePoint.x;
             referencePositions[2 * countOffset + 1] = referencePoint.y;
         } else {
-            positions[2 * countOffset + 0] += dxRot;
-            positions[2 * countOffset + 1] += dyRot;
+            positions[2 * countOffset + 0] = rX + dxRot;
+            positions[2 * countOffset + 1] = rY + dyRot;
         }
 
         auto maxScale = (scaleXH > scaleYH) ? scaleXH : scaleYH;
