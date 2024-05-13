@@ -163,25 +163,30 @@ extension Quad2d: MCMaskingObjectInterface {
 extension Quad2d: MCQuad2dInterface {
 
     func setSubdivisionFactor(_ factor: Int32) {
-        if subdivisionFactor != factor {
-            self.subdivisionFactor = factor
-
-            if let frame,
-               let textureCoordinates {
-                setFrame(frame, textureCoordinates: textureCoordinates)
+        let (optFrame, optTextureCoordinates) = lock.withCritical { () -> (MCQuad3dD?, MCRectD?) in
+            if self.subdivisionFactor != factor {
+                self.subdivisionFactor = factor
+                return (frame, textureCoordinates)
+            } else {
+                return (nil, nil)
             }
+        }
+        if let frame = optFrame,
+           let textureCoordinates = optTextureCoordinates {
+            setFrame(frame, textureCoordinates: textureCoordinates)
         }
     }
 
 
     func setFrame(_ frame: MCQuad3dD, textureCoordinates: MCRectD) {
-        self.frame = frame
-        self.textureCoordinates = textureCoordinates
+
 
         var vertices: [Vertex3D] = []
         var indices: [UInt16] = []
 
-        if subdivisionFactor == 0 {
+        let sFactor = lock.withCritical { subdivisionFactor }
+
+        if sFactor == 0 {
             /*
              The quad is made out of 4 vertices as following
              B----C
@@ -203,7 +208,7 @@ extension Quad2d: MCQuad2dInterface {
 
         } else {
 
-            let numSubd = Int(pow(2.0, Double(subdivisionFactor)))
+            let numSubd = Int(pow(2.0, Double(sFactor)))
 
             let deltaRTop = MCVec3F(x: Float(frame.topRight.x - frame.topLeft.x),
                                     y: Float(frame.topRight.y - frame.topLeft.y),
@@ -241,6 +246,8 @@ extension Quad2d: MCQuad2dInterface {
         }
 
         lock.withCritical {
+            self.frame = frame
+            self.textureCoordinates = textureCoordinates
             self.verticesBuffer.copyOrCreate(bytes: vertices, length: MemoryLayout<Vertex3D>.stride * vertices.count, device: device)
             self.indicesBuffer.copyOrCreate(bytes: indices, length: MemoryLayout<UInt16>.stride * indices.count, device: device)
             if self.verticesBuffer != nil && self.indicesBuffer != nil {

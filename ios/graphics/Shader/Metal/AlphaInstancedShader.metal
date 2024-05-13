@@ -53,12 +53,9 @@ unitSphereAlphaInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
 
     auto diffCenter = screenPosition - earthCenter;
 
-    alpha = 1;
-
     if (diffCenter.z > 0) {
         alpha = 0.0;
     }
-
 
     const float4x4 scaleRotateMatrix = float4x4(float4(cos(angle), -sin(angle), 0, 0),
                                            float4(sin(angle), cos(angle), 0, 0),

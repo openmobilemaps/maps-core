@@ -50,12 +50,12 @@ unitSphereTextInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
 
     auto diffCenter = screenPosition - earthCenter;
 
-    float alpha = 0.0;
-    if (diffCenter.z < 0) {
+    float alpha = 1.0;
+
+    if (diffCenter.z > 0) {
         alpha = 0.0;
-    } else {
-        alpha = 1.0;
     }
+
 
     const float2 size = (vertexIn.position.xy) * scale;
 
@@ -89,9 +89,7 @@ unitSphereTextInstancedFragmentShader(TextInstancedVertexOut in [[stage_in]],
     const float4 haloColor = float4(styles[styleOffset + 4], styles[styleOffset + 5], styles[styleOffset + 6], styles[styleOffset + 7]);
     const float haloWidth = styles[styleOffset + 8];
 
-    color.a = 1.0;
-
-    if (color.a == 0 && haloColor.a == 0.0) {
+    if (in.alpha == 0 || (color.a == 0 && haloColor.a == 0.0)) {
         discard_fragment();
     }
 

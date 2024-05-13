@@ -106,10 +106,6 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
             fullText += textEntry.text;
         }
 
-        if (is3d && fullText != "Neapel") {
-            continue;
-        }
-
         auto anchor = layerDescription->style.getTextAnchor(evalContext);
         const auto &justify = layerDescription->style.getTextJustify(evalContext);
         const auto &placement = layerDescription->style.getTextSymbolPlacement(evalContext);
@@ -410,7 +406,9 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
         textRotations.resize(instanceCounts.textCharacters, 0.0);
         textScales.resize(instanceCounts.textCharacters * 2, 0.0);
         textPositions.resize(instanceCounts.textCharacters * 2, 0.0);
-        textReferencePositions.resize(instanceCounts.textCharacters * 2, 0.0);
+        if (is3d) {
+            textReferencePositions.resize(instanceCounts.textCharacters * 2, 0.0);
+        }
         textTextureCoordinates.resize(instanceCounts.textCharacters * 4, 0.0);
     }
 
