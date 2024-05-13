@@ -50,7 +50,8 @@ public:
                                  const size_t symbolTileIndex,
                                  const bool hasCustomTexture,
                                  const double dpFactor,
-                                 const bool persistingSymbolPlacement);
+                                 const bool persistingSymbolPlacement,
+                                 bool is3d);
 
     ~Tiled2dMapVectorSymbolObject();
 
@@ -188,4 +189,6 @@ private:
     size_t crossTileIdentifier;
 
     const std::shared_ptr<Tiled2dMapVectorStateManager> featureStateManager;
+    
+    bool is3d;
 };

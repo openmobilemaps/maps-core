@@ -52,7 +52,8 @@ public:
                                       const TextSymbolPlacement &textSymbolPlacement,
                                       std::shared_ptr<SymbolAnimationCoordinator> animationCoordinator,
                                       const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager,
-                                      double dpFactor);
+                                      double dpFactor,
+                                      bool is3d);
 
     int getCharacterCount();
 
@@ -196,4 +197,5 @@ private:
     const std::shared_ptr<Tiled2dMapVectorStateManager> stateManager;
 
     double dpFactor = 1.0;
+    bool is3d;
 };

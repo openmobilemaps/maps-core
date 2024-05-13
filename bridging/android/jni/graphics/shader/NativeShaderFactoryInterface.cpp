@@ -50,6 +50,14 @@ NativeShaderFactoryInterface::JavaProxy::~JavaProxy() = default;
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni_generated::NativeAlphaInstancedShaderInterface::toCpp(jniEnv, jret);
 }
+/*not-null*/ std::shared_ptr<::AlphaInstancedShaderInterface> NativeShaderFactoryInterface::JavaProxy::createUnitSphereAlphaInstancedShader() {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeShaderFactoryInterface>::get();
+    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_createUnitSphereAlphaInstancedShader);
+    ::djinni::jniExceptionCheck(jniEnv);
+    return ::djinni_generated::NativeAlphaInstancedShaderInterface::toCpp(jniEnv, jret);
+}
 /*not-null*/ std::shared_ptr<::LineGroupShaderInterface> NativeShaderFactoryInterface::JavaProxy::createLineGroupShader() {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
@@ -124,6 +132,14 @@ NativeShaderFactoryInterface::JavaProxy::~JavaProxy() = default;
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni_generated::NativeTextInstancedShaderInterface::toCpp(jniEnv, jret);
 }
+/*not-null*/ std::shared_ptr<::TextInstancedShaderInterface> NativeShaderFactoryInterface::JavaProxy::createUnitSphereTextInstancedShader() {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeShaderFactoryInterface>::get();
+    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_createUnitSphereTextInstancedShader);
+    ::djinni::jniExceptionCheck(jniEnv);
+    return ::djinni_generated::NativeTextInstancedShaderInterface::toCpp(jniEnv, jret);
+}
 /*not-null*/ std::shared_ptr<::RasterShaderInterface> NativeShaderFactoryInterface::JavaProxy::createRasterShader() {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
@@ -195,6 +211,15 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shade
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::ShaderFactoryInterface>(nativeRef);
         auto r = ref->createAlphaInstancedShader();
+        return ::djinni::release(::djinni_generated::NativeAlphaInstancedShaderInterface::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_ShaderFactoryInterface_00024CppProxy_native_1createUnitSphereAlphaInstancedShader(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::ShaderFactoryInterface>(nativeRef);
+        auto r = ref->createUnitSphereAlphaInstancedShader();
         return ::djinni::release(::djinni_generated::NativeAlphaInstancedShaderInterface::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
@@ -276,6 +301,15 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shade
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::ShaderFactoryInterface>(nativeRef);
         auto r = ref->createTextInstancedShader();
+        return ::djinni::release(::djinni_generated::NativeTextInstancedShaderInterface::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_ShaderFactoryInterface_00024CppProxy_native_1createUnitSphereTextInstancedShader(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::ShaderFactoryInterface>(nativeRef);
+        auto r = ref->createUnitSphereTextInstancedShader();
         return ::djinni::release(::djinni_generated::NativeTextInstancedShaderInterface::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }

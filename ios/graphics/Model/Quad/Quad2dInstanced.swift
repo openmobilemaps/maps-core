@@ -37,8 +37,16 @@ final class Quad2dInstanced: BaseGraphicsObject {
 
     private var renderAsMask = false
 
-    init(shader: MCShaderProgramInterface, metalContext: MetalContext, label: String = "Quad2dInstanced") {
+    public let isUnitSphere: Bool
+
+    init(shader: MCShaderProgramInterface, 
+         metalContext: MetalContext, label: String = "Quad2dInstanced") {
         self.shader = shader
+        if let shader = shader as? AlphaInstancedShader {
+            self.isUnitSphere = shader.isUnitSphere
+        } else {
+            self.isUnitSphere = false
+        }
         super.init(device: metalContext.device,
                    sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue)!,
                    label: label)

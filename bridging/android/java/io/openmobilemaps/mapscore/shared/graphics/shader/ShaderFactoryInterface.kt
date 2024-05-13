@@ -14,6 +14,8 @@ abstract class ShaderFactoryInterface {
 
     abstract fun createAlphaInstancedShader(): AlphaInstancedShaderInterface
 
+    abstract fun createUnitSphereAlphaInstancedShader(): AlphaInstancedShaderInterface
+
     abstract fun createLineGroupShader(): LineGroupShaderInterface
 
     abstract fun createUnitSphereColorShader(): ColorShaderInterface
@@ -31,6 +33,8 @@ abstract class ShaderFactoryInterface {
     abstract fun createTextShader(): TextShaderInterface
 
     abstract fun createTextInstancedShader(): TextInstancedShaderInterface
+
+    abstract fun createUnitSphereTextInstancedShader(): TextInstancedShaderInterface
 
     abstract fun createRasterShader(): RasterShaderInterface
 
@@ -74,6 +78,12 @@ abstract class ShaderFactoryInterface {
             return native_createAlphaInstancedShader(this.nativeRef)
         }
         private external fun native_createAlphaInstancedShader(_nativeRef: Long): AlphaInstancedShaderInterface
+
+        override fun createUnitSphereAlphaInstancedShader(): AlphaInstancedShaderInterface {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_createUnitSphereAlphaInstancedShader(this.nativeRef)
+        }
+        private external fun native_createUnitSphereAlphaInstancedShader(_nativeRef: Long): AlphaInstancedShaderInterface
 
         override fun createLineGroupShader(): LineGroupShaderInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
@@ -128,6 +138,12 @@ abstract class ShaderFactoryInterface {
             return native_createTextInstancedShader(this.nativeRef)
         }
         private external fun native_createTextInstancedShader(_nativeRef: Long): TextInstancedShaderInterface
+
+        override fun createUnitSphereTextInstancedShader(): TextInstancedShaderInterface {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_createUnitSphereTextInstancedShader(this.nativeRef)
+        }
+        private external fun native_createUnitSphereTextInstancedShader(_nativeRef: Long): TextInstancedShaderInterface
 
         override fun createRasterShader(): RasterShaderInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

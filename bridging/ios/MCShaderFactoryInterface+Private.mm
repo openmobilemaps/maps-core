@@ -64,6 +64,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (nullable id<MCAlphaInstancedShaderInterface>)createUnitSphereAlphaInstancedShader {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->createUnitSphereAlphaInstancedShader();
+        return ::djinni_generated::AlphaInstancedShaderInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (nullable id<MCLineGroupShaderInterface>)createLineGroupShader {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->createLineGroupShader();
@@ -123,6 +130,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 - (nullable id<MCTextInstancedShaderInterface>)createTextInstancedShader {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->createTextInstancedShader();
+        return ::djinni_generated::TextInstancedShaderInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nullable id<MCTextInstancedShaderInterface>)createUnitSphereTextInstancedShader {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->createUnitSphereTextInstancedShader();
         return ::djinni_generated::TextInstancedShaderInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
@@ -192,6 +206,13 @@ public:
             return ::djinni_generated::AlphaInstancedShaderInterface::toCpp(objcpp_result_);
         }
     }
+    /*not-null*/ std::shared_ptr<::AlphaInstancedShaderInterface> createUnitSphereAlphaInstancedShader() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createUnitSphereAlphaInstancedShader];
+            return ::djinni_generated::AlphaInstancedShaderInterface::toCpp(objcpp_result_);
+        }
+    }
     /*not-null*/ std::shared_ptr<::LineGroupShaderInterface> createLineGroupShader() override
     {
         @autoreleasepool {
@@ -252,6 +273,13 @@ public:
     {
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createTextInstancedShader];
+            return ::djinni_generated::TextInstancedShaderInterface::toCpp(objcpp_result_);
+        }
+    }
+    /*not-null*/ std::shared_ptr<::TextInstancedShaderInterface> createUnitSphereTextInstancedShader() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createUnitSphereTextInstancedShader];
             return ::djinni_generated::TextInstancedShaderInterface::toCpp(objcpp_result_);
         }
     }
