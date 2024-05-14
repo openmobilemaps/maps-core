@@ -578,6 +578,7 @@ void Tiled2dMapVectorLayer::update() {
         bool tilesChanged = !tilesStillValid.test_and_set();
         double zoomChange = abs(newZoom-lastDataManagerZoom) / std::max(newZoom, 1.0);
         double timeDiff = now - lastDataManagerUpdate;
+        bool is3d = mapInterface->is3d();
         if (zoomChange > 0.001 || timeDiff > 1000 || isAnimating || tilesChanged) {
             lastDataManagerUpdate = now;
             lastDataManagerZoom = newZoom;
@@ -597,10 +598,10 @@ void Tiled2dMapVectorLayer::update() {
                 lastCollitionCheck = now;
                 bool enforceUpdate = !prevCollisionStillValid.test_and_set();
                 collisionManager.syncAccess(
-                        [&vpMatrix, &viewportSize, viewportRotation, enforceUpdate, persistingPlacement = this->persistingSymbolPlacement](
+                        [&vpMatrix, &viewportSize, viewportRotation, enforceUpdate, persistingPlacement = this->persistingSymbolPlacement, is3d](
                                 const auto &manager) {
                             manager->collisionDetection(*vpMatrix, viewportSize, viewportRotation, enforceUpdate,
-                                                        persistingPlacement);
+                                                        persistingPlacement, is3d);
                         });
                 isAnimating = true;
             }

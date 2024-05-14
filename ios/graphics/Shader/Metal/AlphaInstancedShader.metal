@@ -38,15 +38,9 @@ unitSphereAlphaInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
 
     const float angle = rotation * M_PI_F / 180.0;
 
-    float4 newVertex = mMatrix * float4(position, 1.0, 1.0);
-
-    newVertex.x /= newVertex.w;
-    newVertex.y /= newVertex.w;
-    newVertex.z /= newVertex.w;
-
-    const float x = newVertex.z * sin(newVertex.y) * cos(newVertex.x);
-    const float y = newVertex.z * cos(newVertex.y);
-    const float z = -newVertex.z * sin(newVertex.y) * sin(newVertex.x);
+    const float x = 1.0 * sin(position.y) * cos(position.x);
+    const float y = 1.0 * cos(position.y);
+    const float z = -1.0 * sin(position.y) * sin(position.x);
 
     const float4 earthCenter = vpMatrix * float4(0,0,0, 1.0);
     const float4 screenPosition = vpMatrix * float4(x,y,z, 1.0);
