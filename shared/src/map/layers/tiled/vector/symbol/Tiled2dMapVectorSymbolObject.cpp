@@ -444,10 +444,17 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &posi
     positions[2 * countOffset] = renderCoordinate.x + iconOffset.x * scaleFactor * iconSize;
     positions[2 * countOffset + 1] = renderCoordinate.y + iconOffset.y * scaleFactor * iconSize;
 
-    iconBoundingBoxViewportAligned.x = (renderCoordinate.x - iconWidth * 0.5) - scaledIconPadding;
-    iconBoundingBoxViewportAligned.y = (renderCoordinate.y - iconHeight * 0.5) - scaledIconPadding;
-    iconBoundingBoxViewportAligned.width = iconWidth + 2.0 * scaledIconPadding;
-    iconBoundingBoxViewportAligned.height = iconHeight + 2.0 * scaledIconPadding;
+    if (is3d) {
+        iconBoundingBoxViewportAligned.x = renderCoordinate.x;
+        iconBoundingBoxViewportAligned.y = renderCoordinate.y;
+        iconBoundingBoxViewportAligned.width = iconWidth;
+        iconBoundingBoxViewportAligned.height = iconHeight;
+    } else {
+        iconBoundingBoxViewportAligned.x = (renderCoordinate.x - iconWidth * 0.5) - scaledIconPadding;
+        iconBoundingBoxViewportAligned.y = (renderCoordinate.y - iconHeight * 0.5) - scaledIconPadding;
+        iconBoundingBoxViewportAligned.width = iconWidth + 2.0 * scaledIconPadding;
+        iconBoundingBoxViewportAligned.height = iconHeight + 2.0 * scaledIconPadding;
+    }
 
     if (!isCoordinateOwner) {
         alphas[countOffset] = 0.0;

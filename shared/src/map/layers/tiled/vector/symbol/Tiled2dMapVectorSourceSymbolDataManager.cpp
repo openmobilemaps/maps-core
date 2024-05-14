@@ -727,6 +727,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::pregenerateRenderPasses() {
         }
     }
 
+
     vectorLayer.syncAccess([source = this->source, &renderDescriptions](const auto &layer){
         if(auto strong = layer.lock()) {
             strong->onRenderPassUpdate(source, true, renderDescriptions);

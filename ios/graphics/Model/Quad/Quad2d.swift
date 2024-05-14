@@ -263,10 +263,15 @@ extension Quad2d: MCQuad2dInterface {
         guard let textureHolder = textureHolder as? TextureHolder else {
             fatalError("unexpected TextureHolder")
         }
-        texture = textureHolder.texture
+        lock.withCritical {
+            texture = textureHolder.texture
+        }
     }
 
     func removeTexture() {
+        lock.withCritical {
+            texture = nil
+        }
     }
 
     func asGraphicsObject() -> MCGraphicsObjectInterface? {
