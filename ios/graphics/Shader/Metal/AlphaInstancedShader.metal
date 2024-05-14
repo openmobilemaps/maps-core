@@ -83,8 +83,6 @@ unitSphereAlphaInstancedFragmentShader(InstancedVertexOut in [[stage_in]],
     const float2 uv = in.uvOrig + in.uvSize * float2(in.uv.x, 1 - in.uv.y);
     float4 color = texture0.sample(textureSampler, uv);
 
-    color.a = 1.0;
-
     const float a = color.a * in.alpha;
 
     return float4(color.r * in.alpha, color.g * in.alpha, color.b * in.alpha, a);
@@ -126,28 +124,6 @@ alphaInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
   };
 
   return out;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 }
 
