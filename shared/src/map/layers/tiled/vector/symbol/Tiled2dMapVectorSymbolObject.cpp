@@ -425,7 +425,7 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &posi
     }
 
     const auto iconWidth = spriteSize.x * iconSize * (is3d ? 1.0 : scaleFactor);
-    const auto iconHeight = spriteSize.y * iconSize * (is3d ? 1.0 : scaleFactor);;
+    const auto iconHeight = spriteSize.y * iconSize * (is3d ? 1.0 : scaleFactor);
 
     const float scaledIconPadding = iconPadding * scaleFactor;
 
