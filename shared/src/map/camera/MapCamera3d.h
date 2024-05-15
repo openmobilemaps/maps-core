@@ -150,10 +150,10 @@ protected:
     void updateZoom(double zoom);
     virtual void setupInertia();
 
-    double getCameraDistanceFromZoom(double zoom);
-    double getCameraVerticalDisplacementFromZoom(double zoom);
-    double getCameraPitchFromZoom(double zoom);
-    double getCenterYOffsetFromZoom(double zoom);
+    double getCameraDistance();
+    double getCameraVerticalDisplacement();
+    double getCameraPitch();
+    double getCenterYOffset();
 
     std::recursive_mutex listenerMutex;
     std::set<std::shared_ptr<MapCameraListenerInterface>> listeners;
@@ -186,8 +186,8 @@ protected:
     double paddingRight = 0;
     double paddingBottom = 0;
 
-    double zoomMin = 30;
-    double zoomMax = 0.02;
+    double zoomMin = 1;
+    double zoomMax = 0;
 
     RectCoord bounds;
 

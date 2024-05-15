@@ -342,9 +342,9 @@ std::vector<float> MapCamera3d::getVpMatrix() {
     float latitude = focusPointPosition.y; // 2*atan(exp(py / R)) - 3.1415926 / 2;
 
     focusPointAltitude = focusPointPosition.z;
-    cameraDistance = getCameraDistanceFromZoom(zoom);
-    cameraPitch = getCameraPitchFromZoom(zoom);
-    cameraVerticalDisplacement = getCameraVerticalDisplacementFromZoom(zoom);
+    cameraDistance = getCameraDistance();
+    cameraPitch = getCameraPitch();
+    cameraVerticalDisplacement = getCameraVerticalDisplacement();
     float maxD = cameraDistance / R + 1;
     float minD = std::max(cameraDistance / R - 1, 0.00001);
 
@@ -1203,6 +1203,7 @@ void MapCamera3d::setRotationEnabled(bool enabled) { config.rotationEnabled = en
 void MapCamera3d::setSnapToNorthEnabled(bool enabled) { config.snapToNorthEnabled = enabled; }
 
 void MapCamera3d::setBoundsRestrictWholeVisibleRect(bool enabled) {
+    // TODO
     return;
 }
 
@@ -1224,37 +1225,33 @@ void MapCamera3d::updateZoom(double zoom_) {
     auto zoomMin = getMinZoom();
     auto zoomMax = getMaxZoom();
 
-    auto newZoom = std::max(std::min(zoom_, zoomMin), zoomMax);
-    zoom = newZoom;
+    zoom = std::clamp(zoom_, zoomMax, zoomMin);
 
-    cameraDistance = getCameraDistanceFromZoom(zoom);
-    cameraVerticalDisplacement = getCameraVerticalDisplacementFromZoom(zoom);
-    cameraPitch = getCameraPitchFromZoom(zoom);
+    cameraDistance = getCameraDistance();
+    cameraVerticalDisplacement = getCameraVerticalDisplacement();
+    cameraPitch = getCameraPitch();
 }
 
-double MapCamera3d::getCameraVerticalDisplacementFromZoom(double zoom) {
-    auto z = (zoom - getMaxZoom()) / (getMinZoom() - getMaxZoom());
+double MapCamera3d::getCameraVerticalDisplacement() {
     auto out = 0;
     auto in = 1;
-    return in + (z * (out - in));
+    return in + (zoom * (out - in));
 }
 
-double MapCamera3d::getCameraPitchFromZoom(double zoom) {
-    auto z = (zoom - getMaxZoom()) / (getMinZoom() - getMaxZoom());
+double MapCamera3d::getCameraPitch() {
     auto out = 5;
     auto in = 25;
-    return in + (z * (out - in));
+    return in + (zoom * (out - in));
 }
 
-double MapCamera3d::getCameraDistanceFromZoom(double zoom) {
-    auto z = (zoom - getMaxZoom()) / (getMinZoom() - getMaxZoom());
+double MapCamera3d::getCameraDistance() {
     float R = 6378137.0;
     auto out = 8.0 * R; // earth-radii in m, above ground
     auto in = 100; // m above ground
-    return in + (z * (out - in));
+    return in + (zoom * (out - in));
 }
 
-double MapCamera3d::getCenterYOffsetFromZoom(double zoom) {
-    double d = getCameraDistanceFromZoom(zoom);
+double MapCamera3d::getCenterYOffset() {
+    double d = getCameraDistance();
     return -(d * d * -9.2987162 + 34.635713 * d - 50.0); // TODO: Fix constants, compute from camera parameters or use raycast from screen center to determine position, when available
 }
