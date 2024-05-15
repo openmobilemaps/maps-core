@@ -435,8 +435,8 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &posi
     scales[2 * countOffset + 1] = iconHeight;
 
     if (is3d) {
-        scales[2 * countOffset] *= 1.0 / viewPortSize.x;
-        scales[2 * countOffset + 1] *= 1.0 / viewPortSize.y;
+        scales[2 * countOffset] *= 2.0 / viewPortSize.x;
+        scales[2 * countOffset + 1] *= 2.0 / viewPortSize.y;
     }
 
     renderCoordinate = getRenderCoordinates(iconAnchor, -rotations[countOffset], iconWidth, iconHeight);
