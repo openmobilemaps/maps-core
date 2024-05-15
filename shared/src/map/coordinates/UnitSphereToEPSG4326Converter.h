@@ -22,7 +22,7 @@ public:
     UnitSphereToEPSG4326Converter() {}
 
     virtual Coord convert(const Coord &coordinate) override {
-        const double x = coordinate.x * 180.0 / M_PI;
+        const double x = coordinate.x * 180.0 / M_PI + 180;
         const double y = coordinate.y * 180.0 / M_PI + 90.0;
         const double z = coordinate.z * 6378137.0;
 
