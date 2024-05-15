@@ -138,6 +138,7 @@ class MapCamera3d : public MapCameraInterface,
 
     void setBoundsRestrictWholeVisibleRect(bool centerOnly) override;
 
+
     virtual float getScreenDensityPpi() override;
 
     std::shared_ptr<MapCamera3dInterface> asMapCamera3d() override;
@@ -243,9 +244,12 @@ protected:
     std::shared_ptr<DoubleAnimation> zoomAnimation;
     std::shared_ptr<DoubleAnimation> rotationAnimation;
 
-    Coord getBoundsCorrectedCoords(const Coord &position);
+    std::tuple<Coord, double> getBoundsCorrectedCoords(const Coord &position, double zoom);
 
-    void clampCenterToBounds();
+    RectCoord getPaddingCorrectedBounds(double zoom);
+    Coord adjustCoordForPadding(const Coord &coords, double targetZoom);
+
+    void clampCenterToPaddingCorrectedBounds();
 
     RectCoord getRectFromViewport(const Vec2I &sizeViewport, const Coord &center);
 

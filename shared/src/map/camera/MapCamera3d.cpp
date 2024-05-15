@@ -255,11 +255,14 @@ void MapCamera3d::setPaddingLeft(float padding) {
     std::lock_guard<std::recursive_mutex> lock(animationMutex);
     if (coordAnimation && coordAnimation->helperCoord.has_value()) {
         double targetZoom = (zoomAnimation) ? zoomAnimation->endValue : getZoom();
-        const auto adjPosition =
-                getBoundsCorrectedCoords(*coordAnimation->helperCoord);
+        const auto [adjPosition, adjZoom] =
+                getBoundsCorrectedCoords(adjustCoordForPadding(*coordAnimation->helperCoord, targetZoom), targetZoom);
         coordAnimation->endValue = adjPosition;
+        if (zoomAnimation) {
+            zoomAnimation->endValue = adjZoom;
+        }
     } else {
-        clampCenterToBounds();
+        clampCenterToPaddingCorrectedBounds();
     }
 }
 
@@ -268,11 +271,14 @@ void MapCamera3d::setPaddingRight(float padding) {
     std::lock_guard<std::recursive_mutex> lock(animationMutex);
     if (coordAnimation && coordAnimation->helperCoord.has_value()) {
         double targetZoom = (zoomAnimation) ? zoomAnimation->endValue : getZoom();
-        const auto adjPosition =
-                getBoundsCorrectedCoords(*coordAnimation->helperCoord);
+        const auto [adjPosition, adjZoom] =
+                getBoundsCorrectedCoords(adjustCoordForPadding(*coordAnimation->helperCoord, targetZoom), targetZoom);
         coordAnimation->endValue = adjPosition;
+        if (zoomAnimation) {
+            zoomAnimation->endValue = adjZoom;
+        }
     } else {
-        clampCenterToBounds();
+        clampCenterToPaddingCorrectedBounds();
     }
 }
 
@@ -281,11 +287,14 @@ void MapCamera3d::setPaddingTop(float padding) {
     std::lock_guard<std::recursive_mutex> lock(animationMutex);
     if (coordAnimation && coordAnimation->helperCoord.has_value()) {
         double targetZoom = (zoomAnimation) ? zoomAnimation->endValue : getZoom();
-        const auto adjPosition =
-                getBoundsCorrectedCoords(*coordAnimation->helperCoord);
+        const auto [adjPosition, adjZoom] =
+                getBoundsCorrectedCoords(adjustCoordForPadding(*coordAnimation->helperCoord, targetZoom), targetZoom);
         coordAnimation->endValue = adjPosition;
+        if (zoomAnimation) {
+            zoomAnimation->endValue = adjZoom;
+        }
     } else {
-        clampCenterToBounds();
+        clampCenterToPaddingCorrectedBounds();
     }
 }
 
@@ -294,11 +303,14 @@ void MapCamera3d::setPaddingBottom(float padding) {
     std::lock_guard<std::recursive_mutex> lock(animationMutex);
     if (coordAnimation && coordAnimation->helperCoord.has_value()) {
         double targetZoom = (zoomAnimation) ? zoomAnimation->endValue : getZoom();
-        const auto adjPosition =
-                getBoundsCorrectedCoords(*coordAnimation->helperCoord);
+        const auto [adjPosition, adjZoom] =
+                getBoundsCorrectedCoords(adjustCoordForPadding(*coordAnimation->helperCoord, targetZoom), targetZoom);
         coordAnimation->endValue = adjPosition;
+        if (zoomAnimation) {
+            zoomAnimation->endValue = adjZoom;
+        }
     } else {
-        clampCenterToBounds();
+        clampCenterToPaddingCorrectedBounds();
     }
 }
 
@@ -582,6 +594,7 @@ bool MapCamera3d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
             }
         }
 
+        clampCenterToPaddingCorrectedBounds();
 
         notifyListeners(ListenerType::BOUNDS | ListenerType::MAP_INTERACTION);
         mapInterface->invalidate();
@@ -605,6 +618,8 @@ bool MapCamera3d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
 
     focusPointPosition.x = std::fmod((focusPointPosition.x + 180 + 360), 360.0) - 180;
     focusPointPosition.y = std::clamp(focusPointPosition.y, -90.0, 90.0);
+
+    clampCenterToPaddingCorrectedBounds();
 
     if (currentDragTimestamp == 0) {
         currentDragTimestamp = DateHelper::currentTimeMicros();
@@ -664,13 +679,17 @@ void MapCamera3d::inertiaStep() {
     float yDiffMap = (inertia->velocity.y) * factor * deltaPrev;
     inertia->timestampUpdate = now;
 
-    focusPointPosition = Coord(CoordinateSystemIdentifiers::EPSG4326(),
-                               focusPointPosition.x + xDiffMap,
-                               focusPointPosition.y + yDiffMap,
-                               focusPointPosition.z);
+    const auto [adjustedPosition, adjustedZoom] = getBoundsCorrectedCoords(
+            Coord(focusPointPosition.systemIdentifier,
+                  focusPointPosition.x + xDiffMap,
+                  focusPointPosition.y + yDiffMap,
+                  focusPointPosition.z), zoom);
 
-    focusPointPosition.x = std::fmod((focusPointPosition.x + 180 + 360), 360.0) - 180;
-    focusPointPosition.y = std::clamp(focusPointPosition.y, -90.0, 90.0);
+
+    focusPointPosition.x = std::fmod((adjustedPosition.x + 180 + 360), 360.0) - 180;
+    focusPointPosition.y = std::clamp(adjustedPosition.y, -90.0, 90.0);
+
+    zoom = adjustedZoom;
 
     notifyListeners(ListenerType::BOUNDS);
     mapInterface->invalidate();
@@ -842,6 +861,10 @@ bool MapCamera3d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, cons
             }
         }
 
+
+        const auto [adjPosition, adjZoom] = getBoundsCorrectedCoords(focusPointPosition, newZoom);
+        focusPointPosition = adjPosition;
+        zoom = adjZoom;
 
         auto listenerType = ListenerType::BOUNDS | ListenerType::MAP_INTERACTION;
         notifyListeners(listenerType);
@@ -1157,8 +1180,9 @@ void MapCamera3d::setBounds(const RectCoord &bounds) {
     RectCoord boundsMapSpace = mapInterface->getCoordinateConverterHelper()->convertRect(mapCoordinateSystem.identifier, bounds);
     this->bounds = boundsMapSpace;
 
-    const auto adjPosition = getBoundsCorrectedCoords(focusPointPosition);
+    const auto [adjPosition, adjZoom] = getBoundsCorrectedCoords(focusPointPosition, zoom);
     focusPointPosition = adjPosition;
+    zoom = adjZoom;
 
     mapInterface->invalidate();
 }
@@ -1178,24 +1202,58 @@ bool MapCamera3d::isInBounds(const Coord &coords) {
     return mapCoords.x <= maxHor && mapCoords.x >= minHor && mapCoords.y <= maxVert && mapCoords.y >= minVert;
 }
 
-Coord MapCamera3d::getBoundsCorrectedCoords(const Coord &position) {
-    /*auto const bounds = this->bounds;
 
-    Coord newPosition = Coord(position.systemIdentifier,
-                              std::clamp(position.x,
-                                         std::min(bounds.topLeft.x, bounds.bottomRight.x),
-                                         std::max(bounds.topLeft.x, bounds.bottomRight.x)),
-                              std::clamp(position.y,
-                                         std::min(bounds.topLeft.y, bounds.bottomRight.y),
-                                         std::max(bounds.topLeft.y, bounds.bottomRight.y)),
-                              position.z);
-    return newPosition;*/ // TODO: not needed for circular system (4326), otherwise fix
-    return position;
+Coord MapCamera3d::adjustCoordForPadding(const Coord &coords, double targetZoom) {
+    Coord coordinates = mapInterface->getCoordinateConverterHelper()->convert(mapCoordinateSystem.identifier, coords);
+
+    auto adjustedZoom = std::clamp(targetZoom, zoomMax, zoomMin);
+
+    Vec2D padVec = Vec2D(0.5 * (paddingRight - paddingLeft) * screenPixelAsRealMeterFactor * adjustedZoom,
+                         0.5 * (paddingTop - paddingBottom) * screenPixelAsRealMeterFactor * adjustedZoom);
+    Vec2D rotPadVec = Vec2DHelper::rotate(padVec, Vec2D(0.0, 0.0), angle);
+    coordinates.x += rotPadVec.x;
+    coordinates.y += rotPadVec.y;
+
+    return coordinates;
 }
 
-void MapCamera3d::clampCenterToBounds() {
-    /*const auto newPosition = getBoundsCorrectedCoords(focusPointPosition);
-    focusPointPosition = newPosition;*/
+RectCoord MapCamera3d::getPaddingCorrectedBounds(double zoom) {
+    double const factor = screenPixelAsRealMeterFactor * zoom;
+
+    double const addRight = (mapSystemRtl ? -1.0 : 1.0) * paddingRight * factor;
+    double const addLeft = (mapSystemRtl ? 1.0 : -1.0) * paddingLeft * factor;
+    double const addTop = (mapSystemTtb ? -1.0 : 1.0) * paddingTop * factor;
+    double const addBottom = (mapSystemTtb ? 1.0 : -1.0) * paddingBottom * factor;
+
+    // new top left and bottom right
+    const auto &id = bounds.topLeft.systemIdentifier;
+    Coord tl = Coord(id, bounds.topLeft.x + addLeft, bounds.topLeft.y + addTop, bounds.topLeft.z);
+    Coord br = Coord(id, bounds.bottomRight.x + addRight, bounds.bottomRight.y + addBottom, bounds.bottomRight.z);
+
+    return RectCoord(tl, br);
+}
+
+std::tuple<Coord, double> MapCamera3d::getBoundsCorrectedCoords(const Coord &position, double zoom) {
+    // TODO: Take into account 'boundsRestrictWholeVisibleRect', which not only
+    // clamps the cameraCenter, but the entire viewport. First step for example without rotation
+
+    auto const &paddingCorrectedBounds = getPaddingCorrectedBounds(zoom);
+    const auto &id = position.systemIdentifier;
+
+    Coord topLeft = mapInterface->getCoordinateConverterHelper()->convert(id, paddingCorrectedBounds.topLeft);
+    Coord bottomRight = mapInterface->getCoordinateConverterHelper()->convert(id, paddingCorrectedBounds.bottomRight);
+
+    Coord clampedPosition = Coord(id,
+                                  std::clamp(position.x,
+                                             std::min(topLeft.x, bottomRight.x),
+                                             std::max(topLeft.x, bottomRight.x)),
+                                  std::clamp(position.y,
+                                             std::min(topLeft.y, bottomRight.y),
+                                             std::max(topLeft.y, bottomRight.y)),
+                                  position.z);
+
+
+    return {clampedPosition, zoom};
 }
 
 void MapCamera3d::setRotationEnabled(bool enabled) { config.rotationEnabled = enabled; }
@@ -1203,9 +1261,16 @@ void MapCamera3d::setRotationEnabled(bool enabled) { config.rotationEnabled = en
 void MapCamera3d::setSnapToNorthEnabled(bool enabled) { config.snapToNorthEnabled = enabled; }
 
 void MapCamera3d::setBoundsRestrictWholeVisibleRect(bool enabled) {
-    // TODO
-    return;
+    config.boundsRestrictWholeVisibleRect = enabled;
+    clampCenterToPaddingCorrectedBounds();
 }
+
+void MapCamera3d::clampCenterToPaddingCorrectedBounds() {
+    const auto [newPosition, newZoom] = getBoundsCorrectedCoords(focusPointPosition, zoom);
+    focusPointPosition = newPosition;
+    zoom = newZoom;
+}
+
 
 float MapCamera3d::getScreenDensityPpi() { return screenDensityPpi; }
 
