@@ -105,6 +105,7 @@ public struct MapView: UIViewRepresentable {
             && lhs.mode == rhs.mode
             && lhs.minZoom == rhs.minZoom
             && lhs.maxZoom == rhs.maxZoom
+            && lhs.restrictedBounds == rhs.restrictedBounds
         }
     }
 
@@ -215,7 +216,10 @@ public struct MapView: UIViewRepresentable {
         if let restrictedBounds = camera.restrictedBounds {
            mapView.camera.setBounds(restrictedBounds)
            mapView.camera.setBoundsRestrictWholeVisibleRect(true)
-       }
+        } else {
+            mapView.camera.setBoundsRestrictWholeVisibleRect(false)
+            mapView.camera.setBounds(mapView.mapInterface.getMapConfig().mapCoordinateSystem.bounds)
+        }
 
         if is3D {
             mapView.camera.asMapCamera3d()?.setCameraMode(camera.mode)
