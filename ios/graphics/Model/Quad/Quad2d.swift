@@ -72,14 +72,16 @@ final class Quad2d: BaseGraphicsObject {
                          mMatrix: Int64,
                          isMasked: Bool,
                          screenPixelAsRealMeterFactor _: Double) {
-        guard isReady(),
-              let verticesBuffer,
-              let indicesBuffer else { return }
-
         lock.lock()
         defer {
             lock.unlock()
         }
+
+        guard isReady(),
+              let verticesBuffer,
+              let indicesBuffer else { return }
+
+
         if shader is AlphaShader || shader is RasterShader, texture == nil {
             ready = false
             return

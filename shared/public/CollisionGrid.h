@@ -282,9 +282,8 @@ private:
 
     RectF getProjectedRectangle(const CollisionRectF &rectangle) {
         if (is3d) {
-
             temp2[0] = (float) (1.0 * sin(rectangle.anchorY) * cos(rectangle.anchorX));
-            temp2[1] =  (float) (1.0 * cos(rectangle.anchorY));
+            temp2[1] = (float) (1.0 * cos(rectangle.anchorY));
             temp2[2] = (float) (-1.0 * sin(rectangle.anchorY) * sin(rectangle.anchorX));
             temp2[3] = 1.0;
 

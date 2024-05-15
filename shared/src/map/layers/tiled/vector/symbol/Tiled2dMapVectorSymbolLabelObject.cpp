@@ -370,8 +370,8 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
                 }
 
                 if (is3d) {
-                    scales[2 * (countOffset + numberOfCharacters) + 0] = size.x / viewportSize.x;
-                    scales[2 * (countOffset + numberOfCharacters) + 1] = size.y / viewportSize.y;
+                    scales[2 * (countOffset + numberOfCharacters) + 0] = size.x / viewportSize.x * 2.0;
+                    scales[2 * (countOffset + numberOfCharacters) + 1] = size.y / viewportSize.y * 2.0;
                 } else {
                     scales[2 * (countOffset + numberOfCharacters) + 0] = size.x;
                     scales[2 * (countOffset + numberOfCharacters) + 1] = size.y;
@@ -391,7 +391,13 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
                 assert((countOffset + numberOfCharacters-1)*2 < scales.size());
             }
             pen.x = 0.0;
-            pen.y += fontSize * lineHeight;
+            
+            if (is3d) {
+                pen.y -= fontSize * lineHeight;
+            } else {
+                pen.y += fontSize * lineHeight;
+            }
+
 
             baseLineStartIndex = numberOfCharacters;
         }
@@ -533,12 +539,12 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
         const double rX = cp.x * cosAngle - cp.y * sinAngle;
         const double rY = cp.x * sinAngle + cp.y * cosAngle;
 
-        const float scaleXH = scales[2 * countOffset + 0] / 2.0;
-        const float scaleYH = scales[2 * countOffset + 1] / 2.0;
+        const float scaleXH = (scales[2 * countOffset + 0] / 2.0) * (is3d ? 0.5 * viewportSize.x : 1.0);
+        const float scaleYH = (scales[2 * countOffset + 1] / 2.0) * (is3d ? 0.5 * viewportSize.y : 1.0);
 
         if (is3d) {
-            positions[2 * countOffset + 0] = (rX + anchorOffsetRot.x) / viewportSize.x;
-            positions[2 * countOffset + 1] = (rY + anchorOffsetRot.y) / viewportSize.y;
+            positions[2 * countOffset + 0] = (rX + anchorOffsetRot.x) / viewportSize.x * 2;
+            positions[2 * countOffset + 1] = (rY + anchorOffsetRot.y) / viewportSize.y * 2;
 
             referencePositions[2 * countOffset + 0] = referencePoint.x;
             referencePositions[2 * countOffset + 1] = referencePoint.y;
@@ -577,7 +583,7 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
 
     auto rectBoundingBox = (numberOfCharacters > 0) ? RectCoord(boundingBoxMin, boundingBoxMax) :  RectCoord(referencePoint, referencePoint);
 
-    const float scaledTextPadding = textPadding * scaleFactor;
+    const float scaledTextPadding = is3d ? textPadding : scaleFactor * textPadding;
 
     rectBoundingBox.topLeft.x -= scaledTextPadding;
     rectBoundingBox.topLeft.y -= scaledTextPadding;
