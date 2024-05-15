@@ -626,6 +626,18 @@ void Tiled2dMapVectorSourceSymbolDataManager::collisionDetection(std::vector<std
     }
 
     double zoom = camera->getZoom();
+
+    // remove this wen the 3d camera exposes a scale factor
+    if (mapInterface->is3d()) {
+        const double radianToMeterFactor = 40075017.0 / (2 * M_PI);
+        const double mapUnitsPerPixel = camera->mapUnitsFromPixels(1.0) / 10;
+        const double metersPerPixel = mapUnitsPerPixel * radianToMeterFactor;
+        const double ppi = camera->getScreenDensityPpi();
+        const double pixelWidthMeters = 0.0254 / ppi;
+        const double scaleFactor = metersPerPixel / pixelWidthMeters;
+        zoom = scaleFactor;
+    }
+
     double zoomIdentifier = layerConfig->getZoomIdentifier(zoom);
     double rotation = -camera->getRotation();
     auto scaleFactor = camera->mapUnitsFromPixels(1.0);
@@ -667,7 +679,18 @@ bool Tiled2dMapVectorSourceSymbolDataManager::update(long long now) {
         return false;
     }
 
-    const double zoomIdentifier = layerConfig->getZoomIdentifier(camera->getZoom());
+    double zoom = camera->getZoom();
+    // remove this wen the 3d camera exposes a scale factor
+    if (mapInterface->is3d()) {
+        const double radianToMeterFactor = 40075017.0 / (2 * M_PI);
+        const double mapUnitsPerPixel = camera->mapUnitsFromPixels(1.0) / 10;
+        const double metersPerPixel = mapUnitsPerPixel * radianToMeterFactor;
+        const double ppi = camera->getScreenDensityPpi();
+        const double pixelWidthMeters = 0.0254 / ppi;
+        const double scaleFactor = metersPerPixel / pixelWidthMeters;
+        zoom = scaleFactor;
+    }
+    const double zoomIdentifier = layerConfig->getZoomIdentifier(zoom);
     const double rotation = camera->getRotation();
 
     const auto scaleFactor = camera->mapUnitsFromPixels(1.0);
