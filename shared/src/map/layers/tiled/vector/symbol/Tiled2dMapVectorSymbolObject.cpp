@@ -914,17 +914,21 @@ void Tiled2dMapVectorSymbolObject::collisionDetection(const double zoomIdentifie
 
 }
 
-std::optional<std::tuple<Coord, VectorLayerFeatureInfo>> Tiled2dMapVectorSymbolObject::onClickConfirmed(const CircleD &clickHitCircle) {
+std::optional<std::tuple<Coord, VectorLayerFeatureInfo>> Tiled2dMapVectorSymbolObject::onClickConfirmed(const CircleD &clickHitCircle, double zoomIdentifier, CollisionUtil::CollisionEnvironment &collisionEnvironment) {
     if (animationCoordinator->isColliding()) {
         return std::nullopt;
     }
 
     if (boundingBoxRotationAlignment == SymbolAlignment::VIEWPORT) {
-        if ((labelObject && labelObject->boundingBoxViewportAligned.has_value() && CollisionUtil::checkRectCircleCollision(*labelObject->boundingBoxViewportAligned, clickHitCircle))
-        || (iconBoundingBoxViewportAligned.x != 0 && CollisionUtil::checkRectCircleCollision(iconBoundingBoxViewportAligned, clickHitCircle))
-        || (stretchIconBoundingBoxViewportAligned.x != 0 && CollisionUtil::checkRectCircleCollision(stretchIconBoundingBoxViewportAligned, clickHitCircle))) {
-            return std::make_tuple(coordinate, featureContext->getFeatureInfo());
+        
+        std::optional<CollisionRectF> boundingRect = getViewportAlignedBoundingBox(zoomIdentifier, false, true);
+        if (boundingRect) {
+            auto projectedRectangle = CollisionUtil::getProjectedRectangle(*boundingRect, collisionEnvironment);
+            if (CollisionUtil::checkRectCircleCollision(RectD(projectedRectangle.x, projectedRectangle.y, projectedRectangle.width, projectedRectangle.height), clickHitCircle)) {
+                return std::make_tuple(coordinate, featureContext->getFeatureInfo());
+            }
         }
+
     } else {
         if ((labelObject && labelObject->boundingBoxCircles.has_value() && CollisionUtil::checkCirclesCollision(*labelObject->boundingBoxCircles, clickHitCircle))
         || (iconBoundingBoxViewportAligned.width != 0 && CollisionUtil::checkRectCircleCollision(iconBoundingBoxViewportAligned, clickHitCircle))

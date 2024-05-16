@@ -74,7 +74,8 @@ public:
      * return true (1) if collision, or true (2) if outside of bounds
      */
     uint8_t addAndCheckCollisionAlignedRect(const CollisionRectF &rectangle) {
-        const RectF &projectedRectangle = getProjectedRectangle(rectangle);
+        CollisionUtil::CollisionEnvironment env(vpMatrix, is3d, temp1, temp2, halfWidth, halfHeight, sinNegGridAngle, cosNegGridAngle);
+        const RectF &projectedRectangle = CollisionUtil::getProjectedRectangle(rectangle, env);;
         const IndexRange &indexRange = getIndexRangeForRectangle(projectedRectangle);
         if (!indexRange.isValid(numCellsX - 1, numCellsY - 1)) {
             return 2; // Fully outside of bounds - not relevant
@@ -278,62 +279,6 @@ private:
         }
 
         return colliding ? 1 : 0;
-    }
-
-    RectF getProjectedRectangle(const CollisionRectF &rectangle) {
-        if (is3d) {
-            temp2[0] = (float) (1.0 * sin(rectangle.anchorY) * cos(rectangle.anchorX));
-            temp2[1] = (float) (1.0 * cos(rectangle.anchorY));
-            temp2[2] = (float) (-1.0 * sin(rectangle.anchorY) * sin(rectangle.anchorX));
-            temp2[3] = 1.0;
-
-            Matrix::multiply(vpMatrix, temp2, temp1);
-
-            temp1[0] /= temp1[3];
-            temp1[1] /= temp1[3];
-            temp1[2] /= temp1[3];
-            temp1[3] /= temp1[3];
-
-            float originX = ((temp1[0]) * halfWidth + halfWidth);
-            float originY = ((temp1[1]) * halfHeight + halfHeight);
-
-            float w = rectangle.width;
-            float h = rectangle.height;
-
-            return {float(originX - w / 2.0) , float(originY - h / 2.0), std::abs(w), std::abs(h)};
-        } else {
-            temp2[0] = rectangle.x - rectangle.anchorX; // move x to the anchor
-            temp2[1] = rectangle.y - rectangle.anchorY;
-            temp2[2] = temp2[0] * cosNegGridAngle - temp2[1] * sinNegGridAngle; // rotate x
-            temp2[3] = temp2[0] * sinNegGridAngle + temp2[1] * cosNegGridAngle;
-            temp2[0] = temp2[2] + rectangle.anchorX; // move rotated x to correct location relativ to the anchor
-            temp2[1] = temp2[3] + rectangle.anchorY;
-            temp2[2] = 0.0;
-            temp2[3] = 1.0;
-            Matrix::multiply(vpMatrix, temp2, temp1);
-            float originX = ((temp1[0] / temp1[3]) * halfWidth + halfWidth);
-            float originY = ((temp1[1] / temp1[3]) * halfHeight + halfHeight);
-            temp2[0] = rectangle.width * cosNegGridAngle;
-            temp2[1] = rectangle.width * sinNegGridAngle;
-            temp2[2] = 0.0;
-            temp2[3] = 0.0;
-            Matrix::multiply(vpMatrix, temp2, temp1);
-            float w = temp1[0];
-            float h = temp1[1];
-            temp2[0] = -rectangle.height * sinNegGridAngle;
-            temp2[1] = rectangle.height * cosNegGridAngle;
-            temp2[2] = 0.0;
-            temp2[3] = 0.0;
-            Matrix::multiply(vpMatrix, temp2, temp1);
-            w += temp1[0];
-            h += temp1[1];
-            float width = (w * halfWidth); // by assumption aligned with projected space
-            float height = (h * halfHeight); // by assumption aligned with projected space
-            originX = std::min(originX, originX + width);
-            originY = std::min(originY, originY + height);
-            // Rectangle origin is chosen as the min/min corner with width/height always positive
-            return {originX, originY, std::abs(width), std::abs(height)};
-        }
     }
 
     CircleF getProjectedCircle(const CollisionCircleF &circle) {
