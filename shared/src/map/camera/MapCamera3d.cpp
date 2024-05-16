@@ -1310,10 +1310,17 @@ double MapCamera3d::getCameraPitch() {
 }
 
 double MapCamera3d::getCameraDistance() {
-    float R = 6378137.0;
-    auto out = 8.0 * R; // earth-radii in m, above ground
-    auto in = 100; // m above ground
-    return in + (zoom * (out - in));
+    double f = FIELD_OF_VIEW;
+    Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
+    double w = (double)sizeViewport.y;
+    float d = (w / (2/z)) / tan(f / 2);
+    printf("z (%f) -> d (%f)\n", z, d);
+    return -d;
+//    auto z = (zoom - getMaxZoom()) / (getMinZoom() - getMaxZoom());
+//    float R = 6378137.0;
+//    auto out = 8.0 * R; // earth-radii in m, above ground
+//    auto in = 100; // m above ground
+//    return in + (z * (out - in));
 }
 
 double MapCamera3d::getCenterYOffset() {

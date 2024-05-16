@@ -187,8 +187,8 @@ protected:
     double paddingRight = 0;
     double paddingBottom = 0;
 
-    double zoomMin = 1;
-    double zoomMax = 0;
+    double zoomMin = 10000000;
+    double zoomMax = 10000;
 
     RectCoord bounds;
 
