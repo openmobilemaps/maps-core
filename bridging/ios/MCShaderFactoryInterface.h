@@ -28,6 +28,8 @@
 
 - (nullable id<MCLineGroupShaderInterface>)createLineGroupShader;
 
+- (nullable id<MCLineGroupShaderInterface>)createUnitSphereLineGroupShader;
+
 - (nullable id<MCColorShaderInterface>)createUnitSphereColorShader;
 
 - (nullable id<MCColorShaderInterface>)createColorShader;

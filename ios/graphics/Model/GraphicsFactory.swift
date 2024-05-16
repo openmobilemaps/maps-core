@@ -52,7 +52,7 @@ class GraphicsFactory: MCGraphicsObjectFactoryInterface {
     }
 
     func createPolygonMask() -> MCPolygon2dInterface? {
-        Polygon2d(shader: ColorShader(), metalContext: .current)
+        Polygon2d(shader: ColorShader(shader: .unitSphereColorShader), metalContext: .current)
     }
 
     func createText(_ shader: MCShaderProgramInterface?) -> MCTextInterface? {

@@ -81,19 +81,19 @@ void Tiled2dMapVectorLineTile::update() {
     auto scalingFactor = (camera->asCameraInterface()->getScalingFactor() / cameraZoom) * zoom;
     
     auto lineDescription = std::static_pointer_cast<LineVectorLayerDescription>(description);
-    bool inZoomRange = lineDescription->maxZoom >= zoomIdentifier && lineDescription->minZoom <= zoomIdentifier;
+    bool inZoomRange = true;//lineDescription->maxZoom >= zoomIdentifier && lineDescription->minZoom <= zoomIdentifier;
 
     for (auto const &line: lines) {
         line->setScalingFactor(scalingFactor);
     }
 
-    if (lastAlpha == alpha &&
-        lastZoom &&
-        ((isStyleZoomDependant && *lastZoom == zoomIdentifier) || !isStyleZoomDependant) &&
-        (lastInZoomRange && *lastInZoomRange == inZoomRange) &&
-        !isStyleStateDependant) {
-        return;
-    }
+//    if (lastAlpha == alpha &&
+//        lastZoom &&
+//        ((isStyleZoomDependant && *lastZoom == zoomIdentifier) || !isStyleZoomDependant) &&
+//        (lastInZoomRange && *lastInZoomRange == inZoomRange) &&
+//        !isStyleStateDependant) {
+//        return;
+//    }
 
     lastZoom = zoomIdentifier;
     lastAlpha = alpha;
@@ -140,7 +140,7 @@ void Tiled2dMapVectorLineTile::update() {
             }
 
             // width
-            float width = inZoomRange ? lineDescription->style.getLineWidth(context) : 0.0;
+            float width = lineDescription->style.getLineWidth(context);
             if (width != style.width) {
                 style.width = width;
                 needsUpdate = true;
@@ -276,7 +276,7 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
                         } else {
                             styleGroupIndex = (int) featureGroups.size();
                             styleIndex = 0;
-                            auto shader = shaderFactory->createLineGroupShader();
+                            auto shader = mapInterface->is3d() ? shaderFactory->createUnitSphereLineGroupShader() : shaderFactory->createLineGroupShader();
                             auto lineDescription = std::static_pointer_cast<LineVectorLayerDescription>(description);
                             shader->asShaderProgramInterface()->setBlendMode(lineDescription->style.getBlendMode(EvaluationContext(0.0, dpFactor, std::make_shared<FeatureContext>(), featureStateManager)));
                             shaders.push_back(shader);

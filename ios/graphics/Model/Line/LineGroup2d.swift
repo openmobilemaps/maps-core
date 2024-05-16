@@ -109,8 +109,10 @@ final class LineGroup2d: BaseGraphicsObject {
         shader.preRender(context)
 
         encoder.setVertexBuffer(lineVerticesBuffer, offset: 0, index: 0)
-        let matrixPointer = UnsafeRawPointer(bitPattern: Int(vpMatrix))!
-        encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
+
+        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(vpMatrix)) {
+            encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
+        }
 
         encoder.drawIndexedPrimitives(type: .triangle,
                                       indexCount: indicesCount,

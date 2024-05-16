@@ -38,6 +38,7 @@ private:
         /*not-null*/ std::shared_ptr<::AlphaInstancedShaderInterface> createAlphaInstancedShader() override;
         /*not-null*/ std::shared_ptr<::AlphaInstancedShaderInterface> createUnitSphereAlphaInstancedShader() override;
         /*not-null*/ std::shared_ptr<::LineGroupShaderInterface> createLineGroupShader() override;
+        /*not-null*/ std::shared_ptr<::LineGroupShaderInterface> createUnitSphereLineGroupShader() override;
         /*not-null*/ std::shared_ptr<::ColorShaderInterface> createUnitSphereColorShader() override;
         /*not-null*/ std::shared_ptr<::ColorShaderInterface> createColorShader() override;
         /*not-null*/ std::shared_ptr<::ColorCircleShaderInterface> createColorCircleShader() override;
@@ -63,6 +64,7 @@ private:
     const jmethodID method_createAlphaInstancedShader { ::djinni::jniGetMethodID(clazz.get(), "createAlphaInstancedShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/AlphaInstancedShaderInterface;") };
     const jmethodID method_createUnitSphereAlphaInstancedShader { ::djinni::jniGetMethodID(clazz.get(), "createUnitSphereAlphaInstancedShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/AlphaInstancedShaderInterface;") };
     const jmethodID method_createLineGroupShader { ::djinni::jniGetMethodID(clazz.get(), "createLineGroupShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/LineGroupShaderInterface;") };
+    const jmethodID method_createUnitSphereLineGroupShader { ::djinni::jniGetMethodID(clazz.get(), "createUnitSphereLineGroupShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/LineGroupShaderInterface;") };
     const jmethodID method_createUnitSphereColorShader { ::djinni::jniGetMethodID(clazz.get(), "createUnitSphereColorShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/ColorShaderInterface;") };
     const jmethodID method_createColorShader { ::djinni::jniGetMethodID(clazz.get(), "createColorShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/ColorShaderInterface;") };
     const jmethodID method_createColorCircleShader { ::djinni::jniGetMethodID(clazz.get(), "createColorCircleShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/ColorCircleShaderInterface;") };

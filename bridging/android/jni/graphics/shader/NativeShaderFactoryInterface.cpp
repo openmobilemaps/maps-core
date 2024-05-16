@@ -66,6 +66,14 @@ NativeShaderFactoryInterface::JavaProxy::~JavaProxy() = default;
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni_generated::NativeLineGroupShaderInterface::toCpp(jniEnv, jret);
 }
+/*not-null*/ std::shared_ptr<::LineGroupShaderInterface> NativeShaderFactoryInterface::JavaProxy::createUnitSphereLineGroupShader() {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeShaderFactoryInterface>::get();
+    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_createUnitSphereLineGroupShader);
+    ::djinni::jniExceptionCheck(jniEnv);
+    return ::djinni_generated::NativeLineGroupShaderInterface::toCpp(jniEnv, jret);
+}
 /*not-null*/ std::shared_ptr<::ColorShaderInterface> NativeShaderFactoryInterface::JavaProxy::createUnitSphereColorShader() {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
@@ -229,6 +237,15 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shade
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::ShaderFactoryInterface>(nativeRef);
         auto r = ref->createLineGroupShader();
+        return ::djinni::release(::djinni_generated::NativeLineGroupShaderInterface::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_ShaderFactoryInterface_00024CppProxy_native_1createUnitSphereLineGroupShader(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::ShaderFactoryInterface>(nativeRef);
+        auto r = ref->createUnitSphereLineGroupShader();
         return ::djinni::release(::djinni_generated::NativeLineGroupShaderInterface::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
