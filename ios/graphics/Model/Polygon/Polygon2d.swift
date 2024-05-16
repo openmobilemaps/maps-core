@@ -130,8 +130,13 @@ extension Polygon2d: MCMaskingObjectInterface {
         shader.preRender(context)
 
         encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
+
         if let matrixPointer = UnsafeRawPointer(bitPattern: Int(vpMatrix)) {
             encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
+        }
+
+        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mMatrix)) {
+            encoder.setVertexBytes(matrixPointer, length: 64, index: 2)
         }
 
         encoder.drawIndexedPrimitives(type: .triangle,

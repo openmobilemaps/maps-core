@@ -56,6 +56,10 @@ class ShaderFactory: MCShaderFactoryInterface {
         LineGroupShader()
     }
 
+    func createUnitSphereLineGroupShader() -> (any MCLineGroupShaderInterface)? {
+        LineGroupShader(shader: .unitSphereLineGroupShader)
+    }
+
     func createUnitSphereColorShader() -> MCColorShaderInterface? {
         ColorShader(shader: .unitSphereColorShader)
     }

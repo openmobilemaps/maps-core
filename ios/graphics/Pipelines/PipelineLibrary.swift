@@ -138,6 +138,7 @@ public enum PipelineType: String, CaseIterable, Codable {
     case unitSphereRoundColorShader
     case unitSphereAlphaInstancedShader
     case unitSphereTextInstancedShader
+    case unitSphereLineGroupShader
 
     var label: String {
         switch self {
@@ -163,6 +164,7 @@ public enum PipelineType: String, CaseIterable, Codable {
             case .unitSphereRoundColorShader: return "Unit Sphere Round color shader"
             case .unitSphereAlphaInstancedShader: return "Unit Sphere Alpha instanced shader with texture"
             case .unitSphereTextInstancedShader: return "Unit Sphere Text Instanced shader"
+            case .unitSphereLineGroupShader: return "Unit Sphere Line Group shader"
         }
     }
 
@@ -190,6 +192,7 @@ public enum PipelineType: String, CaseIterable, Codable {
             case .unitSphereRoundColorShader: return "unitSphereBaseVertexShader"
             case .unitSphereAlphaInstancedShader: return "unitSphereAlphaInstancedVertexShader"
             case .unitSphereTextInstancedShader: return "unitSphereTextInstancedVertexShader"
+            case .unitSphereLineGroupShader: return "unitSphereLineGroupVertexShader"
         }
     }
 
@@ -217,12 +220,13 @@ public enum PipelineType: String, CaseIterable, Codable {
             case .unitSphereRoundColorShader: return "roundColorFragmentShader"
             case .unitSphereAlphaInstancedShader: return "unitSphereAlphaInstancedFragmentShader"
             case .unitSphereTextInstancedShader: return "unitSphereTextInstancedFragmentShader"
+            case .unitSphereLineGroupShader: return "lineGroupFragmentShader"
         }
     }
 
     var vertexDescriptor: MTLVertexDescriptor {
         switch self {
-            case .lineGroupShader:
+            case .lineGroupShader, .unitSphereLineGroupShader:
                 return LineVertex.descriptor
             case .polygonGroupShader, .polygonPatternGroupShader, .polygonPatternFadeInGroupShader, .polygonStripedGroupShader:
                 return PolygonVertex.descriptor

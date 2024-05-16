@@ -68,6 +68,54 @@ void LineGroup2dLayerObject::setLines(const std::vector<std::tuple<std::vector<C
                     : (i == iSecondToLast ? (float) (2 << 8)
                     : 0.0)));
 
+            // Vertex 4
+            lineAttributes.push_back(pNext.x);
+            lineAttributes.push_back(pNext.y);
+
+            lineAttributes.push_back(widthNormalX);
+            lineAttributes.push_back(widthNormalY);
+
+            lineAttributes.push_back(p.x);
+            lineAttributes.push_back(p.y);
+            lineAttributes.push_back(pNext.x);
+            lineAttributes.push_back(pNext.y);
+
+            lineAttributes.push_back(3);
+            lineAttributes.push_back(prefixTotalLineLength);
+            lineAttributes.push_back(lineStyleInfo);
+
+            // Vertex 3
+            lineAttributes.push_back(pNext.x);
+            lineAttributes.push_back(pNext.y);
+
+            lineAttributes.push_back(widthNormalX);
+            lineAttributes.push_back(widthNormalY);
+
+            lineAttributes.push_back(p.x);
+            lineAttributes.push_back(p.y);
+            lineAttributes.push_back(pNext.x);
+            lineAttributes.push_back(pNext.y);
+
+            lineAttributes.push_back(2);
+            lineAttributes.push_back(prefixTotalLineLength);
+            lineAttributes.push_back(lineStyleInfo);
+
+            // Vertex 2
+            lineAttributes.push_back(p.x);
+            lineAttributes.push_back(p.y);
+
+            lineAttributes.push_back(widthNormalX);
+            lineAttributes.push_back(widthNormalY);
+
+            lineAttributes.push_back(p.x);
+            lineAttributes.push_back(p.y);
+            lineAttributes.push_back(pNext.x);
+            lineAttributes.push_back(pNext.y);
+
+            lineAttributes.push_back(1);
+            lineAttributes.push_back(prefixTotalLineLength);
+            lineAttributes.push_back(lineStyleInfo);
+
             // Vertex 1
             // Position
             lineAttributes.push_back(p.x);
@@ -90,54 +138,6 @@ void LineGroup2dLayerObject::setLines(const std::vector<std::tuple<std::vector<C
             lineAttributes.push_back(prefixTotalLineLength);
 
             // Style Info
-            lineAttributes.push_back(lineStyleInfo);
-
-            // Vertex 2
-            lineAttributes.push_back(p.x);
-            lineAttributes.push_back(p.y);
-
-            lineAttributes.push_back(widthNormalX);
-            lineAttributes.push_back(widthNormalY);
-
-            lineAttributes.push_back(p.x);
-            lineAttributes.push_back(p.y);
-            lineAttributes.push_back(pNext.x);
-            lineAttributes.push_back(pNext.y);
-
-            lineAttributes.push_back(1);
-            lineAttributes.push_back(prefixTotalLineLength);
-            lineAttributes.push_back(lineStyleInfo);
-
-            // Vertex 3
-            lineAttributes.push_back(pNext.x);
-            lineAttributes.push_back(pNext.y);
-
-            lineAttributes.push_back(widthNormalX);
-            lineAttributes.push_back(widthNormalY);
-
-            lineAttributes.push_back(p.x);
-            lineAttributes.push_back(p.y);
-            lineAttributes.push_back(pNext.x);
-            lineAttributes.push_back(pNext.y);
-
-            lineAttributes.push_back(2);
-            lineAttributes.push_back(prefixTotalLineLength);
-            lineAttributes.push_back(lineStyleInfo);
-
-            // Vertex 4
-            lineAttributes.push_back(pNext.x);
-            lineAttributes.push_back(pNext.y);
-
-            lineAttributes.push_back(widthNormalX);
-            lineAttributes.push_back(widthNormalY);
-
-            lineAttributes.push_back(p.x);
-            lineAttributes.push_back(p.y);
-            lineAttributes.push_back(pNext.x);
-            lineAttributes.push_back(pNext.y);
-
-            lineAttributes.push_back(3);
-            lineAttributes.push_back(prefixTotalLineLength);
             lineAttributes.push_back(lineStyleInfo);
 
 
