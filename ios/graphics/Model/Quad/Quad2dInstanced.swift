@@ -24,6 +24,7 @@ final class Quad2dInstanced: BaseGraphicsObject {
     private var scalesBuffer: MTLBuffer?
     private var rotationsBuffer: MTLBuffer?
     private var alphaBuffer: MTLBuffer?
+    private var offsetsBuffer: MTLBuffer?
 
     private var textureCoordinatesBuffer: MTLBuffer?
 
@@ -144,6 +145,10 @@ final class Quad2dInstanced: BaseGraphicsObject {
 
         encoder.setVertexBuffer(alphaBuffer, offset: 0, index: 7)
 
+        if (offsetsBuffer != nil) {
+            encoder.setVertexBuffer(offsetsBuffer, offset: 0, index: 8)
+        }
+
         encoder.setFragmentSamplerState(sampler, index: 0)
 
         if let texture {
@@ -191,7 +196,7 @@ extension Quad2dInstanced: MCQuad2dInstancedInterface {
          A----D
          Where A-C are joined to form two triangles
          */
-        let vertecies: [Vertex] = [
+        let vertices: [Vertex] = [
             Vertex(position: frame.bottomLeft, textureU: 0, textureV: 1), // A
             Vertex(position: frame.topLeft, textureU: 0, textureV: 0), // B
             Vertex(position: frame.topRight, textureU: 1, textureV: 0), // C
@@ -202,7 +207,7 @@ extension Quad2dInstanced: MCQuad2dInstancedInterface {
             0, 3, 2, // ADC
         ]
 
-        guard let verticesBuffer = device.makeBuffer(bytes: vertecies, length: MemoryLayout<Vertex>.stride * vertecies.count, options: []), let indicesBuffer = device.makeBuffer(bytes: indices, length: MemoryLayout<UInt16>.stride * indices.count, options: []) else {
+        guard let verticesBuffer = device.makeBuffer(bytes: vertices, length: MemoryLayout<Vertex>.stride * vertices.count, options: []), let indicesBuffer = device.makeBuffer(bytes: indices, length: MemoryLayout<UInt16>.stride * indices.count, options: []) else {
             fatalError("Cannot allocate buffers")
         }
 
@@ -253,6 +258,12 @@ extension Quad2dInstanced: MCQuad2dInstancedInterface {
         }
         lock.withCritical {
             texture = textureHolder.texture
+        }
+    }
+
+    func setPositionOffset(_ offsets: MCSharedBytes) {
+        lock.withCritical {
+            offsetsBuffer.copyOrCreate(from: offsets, device: device)
         }
     }
 

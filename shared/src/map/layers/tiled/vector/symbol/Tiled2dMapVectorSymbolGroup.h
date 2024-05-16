@@ -122,12 +122,13 @@ private:
         std::vector<float> iconScales;
         std::vector<float> iconRotations;
         std::vector<float> iconAlphas;
+        std::vector<float> iconOffsets;
         std::vector<float> iconTextureCoordinates;
         std::shared_ptr<TextureHolderInterface> texture;
         std::shared_ptr<Quad2dInstancedInterface> renderObject;
         std::unordered_map<std::string, ::RectI> featureIdentifiersUv;
 
-        CustomIconDescriptor(std::shared_ptr<TextureHolderInterface> texture, std::shared_ptr<Quad2dInstancedInterface> renderObject, std::unordered_map<std::string, ::RectI> featureIdentifiersUv): texture(texture), renderObject(renderObject), featureIdentifiersUv(featureIdentifiersUv) {
+        CustomIconDescriptor(std::shared_ptr<TextureHolderInterface> texture, std::shared_ptr<Quad2dInstancedInterface> renderObject, std::unordered_map<std::string, ::RectI> featureIdentifiersUv, bool is3d): texture(texture), renderObject(renderObject), featureIdentifiersUv(featureIdentifiersUv) {
             auto count = featureIdentifiersUv.size();
 
             iconAlphas.resize(count, 0.0);
@@ -135,6 +136,9 @@ private:
             iconScales.resize(count * 2, 0.0);
             iconPositions.resize(count * 2, 0.0);
             iconTextureCoordinates.resize(count * 4, 0.0);
+            if (is3d) {
+                iconOffsets.resize(count * 2, 0.0);
+            }
         }
     };
 
@@ -145,6 +149,7 @@ private:
     std::vector<float> iconScales;
     std::vector<float> iconRotations;
     std::vector<float> iconAlphas;
+    std::vector<float> iconOffsets;
     std::vector<float> iconTextureCoordinates;
 
     std::shared_ptr<FontLoaderResult> fontResult;

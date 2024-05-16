@@ -79,6 +79,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)setPositionOffset:(nonnull MCSharedBytes *)offsets {
+    try {
+        _cppRefHandle.get()->setPositionOffset(::djinni_generated::SharedBytes::toCpp(offsets));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (void)loadTexture:(nullable id<MCRenderingContextInterface>)context
       textureHolder:(nullable id<MCTextureHolderInterface>)textureHolder {
     try {
@@ -156,6 +162,12 @@ public:
     {
         @autoreleasepool {
             [djinni_private_get_proxied_objc_object() setTextureCoordinates:(::djinni_generated::SharedBytes::fromCpp(c_textureCoordinates))];
+        }
+    }
+    void setPositionOffset(const ::SharedBytes & c_offsets) override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() setPositionOffset:(::djinni_generated::SharedBytes::fromCpp(c_offsets))];
         }
     }
     void loadTexture(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & c_context, const /*not-null*/ std::shared_ptr<::TextureHolderInterface> & c_textureHolder) override
