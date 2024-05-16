@@ -808,12 +808,12 @@ std::vector<SymbolObjectCollisionWrapper> Tiled2dMapVectorSymbolGroup::getSymbol
     return wrapperObjects;
 }
 
-std::optional<std::tuple<Coord, VectorLayerFeatureInfo>> Tiled2dMapVectorSymbolGroup::onClickConfirmed(const CircleD &clickHitCircle) {
+std::optional<std::tuple<Coord, VectorLayerFeatureInfo>> Tiled2dMapVectorSymbolGroup::onClickConfirmed(const CircleD &clickHitCircle, double zoomIdentifier, CollisionUtil::CollisionEnvironment &collisionEnvironment) {
     if (!anyInteractable) {
         return std::nullopt;
     }
     for (const auto object: symbolObjects) {
-        const auto result = object->onClickConfirmed(clickHitCircle);
+        const auto result = object->onClickConfirmed(clickHitCircle, zoomIdentifier, collisionEnvironment);
         if (result) {
             return result;
         }

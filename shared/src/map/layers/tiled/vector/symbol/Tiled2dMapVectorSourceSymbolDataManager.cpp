@@ -769,29 +769,42 @@ bool Tiled2dMapVectorSourceSymbolDataManager::onClickConfirmed(const std::unorde
     auto mapInterface = lockSelfPtr ? lockSelfPtr->mapInterface.lock() : nullptr;
     auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
     auto conversionHelper = mapInterface ? mapInterface->getCoordinateConverterHelper() : nullptr;
-    if (!camera || !conversionHelper) {
-        return false;
-    }
-
-    Coord clickCoords = camera->coordFromScreenPosition(posScreen);
-
-    return performClick(layers, clickCoords);
-}
-
-bool Tiled2dMapVectorSourceSymbolDataManager::performClick(const std::unordered_set<std::string> &layers, const Coord &coord) {
-    auto lockSelfPtr = shared_from_this();
-    auto mapInterface = lockSelfPtr ? lockSelfPtr->mapInterface.lock() : nullptr;
-    auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
-    auto conversionHelper = mapInterface ? mapInterface->getCoordinateConverterHelper() : nullptr;
+    auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
     auto strongSelectionDelegate = selectionDelegate.lock();
-    if (!camera || !conversionHelper || !strongSelectionDelegate) {
+    if (!camera || !conversionHelper || !strongSelectionDelegate || !renderingContext) {
         return false;
     }
 
-    Coord clickCoordsRenderCoord = conversionHelper->convertToRenderSystem(coord);
+    double zoom = camera->getZoom();
 
-    double clickPadding = camera->mapUnitsFromPixels(16);
-    CircleD clickHitCircle(clickCoordsRenderCoord.x, clickCoordsRenderCoord.y, clickPadding);
+    // remove this wen the 3d camera exposes a scale factor
+    if (mapInterface->is3d()) {
+        const double radianToMeterFactor = 40075017.0 / (2 * M_PI);
+        const double mapUnitsPerPixel = camera->mapUnitsFromPixels(1.0) / 10;
+        const double metersPerPixel = mapUnitsPerPixel * radianToMeterFactor;
+        const double ppi = camera->getScreenDensityPpi();
+        const double pixelWidthMeters = 0.0254 / ppi;
+        const double scaleFactor = metersPerPixel / pixelWidthMeters;
+        zoom = scaleFactor;
+    }
+
+    double rotation = camera->getRotation();
+    auto viewportSize = renderingContext->getViewportSize();
+    const std::vector<float> vpMatrix = *camera->getLastVpMatrix();
+    const bool is3d = mapInterface->is3d();
+    std::vector<float> temp1 = {0.f, 0.f, 0.f, 0.f};
+    std::vector<float> temp2 = {0.f, 0.f, 0.f, 0.f};
+    const float halfWidth = viewportSize.x / 2.0;
+    const float halfHeight = viewportSize.y / 2.0;
+    const float sinNegGridAngle = std::sin(rotation * M_PI / 180.0);
+    const float cosNegGridAngle = std::cos(rotation * M_PI / 180.0);
+
+    auto collisionEnvironment = CollisionUtil::CollisionEnvironment(vpMatrix, is3d, temp1, temp2, halfWidth, halfHeight, sinNegGridAngle, cosNegGridAngle);
+
+    double zoomIdentifier = layerConfig->getZoomIdentifier(zoom);
+
+    double clickPadding = 16.0;
+    CircleD clickHitCircleScreen(posScreen.x, posScreen.y, clickPadding);
 
     for(const auto &[tile, symbolGroupsMap]: tileSymbolGroupMap) {
         const auto tileState = tileStateMap.find(tile);
@@ -803,8 +816,8 @@ bool Tiled2dMapVectorSourceSymbolDataManager::performClick(const std::unordered_
                 continue;
             }
             for (const auto &symbolGroup : std::get<1>(symbolGroups)) {
-                auto result = symbolGroup.syncAccess([&clickHitCircle](auto group){
-                    return group->onClickConfirmed(clickHitCircle);
+                auto result = symbolGroup.syncAccess([&clickHitCircleScreen, zoomIdentifier, &collisionEnvironment](auto group){
+                    return group->onClickConfirmed(clickHitCircleScreen, zoomIdentifier, collisionEnvironment);
                 });
                 if (result) {
                     if (strongSelectionDelegate->didSelectFeature(std::get<1>(*result), layerIdentifier, conversionHelper->convert(CoordinateSystemIdentifiers::EPSG4326(), std::get<0>(*result)))) {
@@ -814,6 +827,10 @@ bool Tiled2dMapVectorSourceSymbolDataManager::performClick(const std::unordered_
             }
         }
     }
+    return false;
+}
+
+bool Tiled2dMapVectorSourceSymbolDataManager::performClick(const std::unordered_set<std::string> &layers, const Coord &coord) {
     return false;
 }
 

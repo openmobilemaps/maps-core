@@ -59,7 +59,7 @@ public:
 
     std::vector<SymbolObjectCollisionWrapper> getSymbolObjectsForCollision();
 
-    std::optional<std::tuple<Coord, VectorLayerFeatureInfo>> onClickConfirmed(const CircleD &clickHitCircle);
+    std::optional<std::tuple<Coord, VectorLayerFeatureInfo>> onClickConfirmed(const CircleD &clickHitCircle, double zoomIdentifier, CollisionUtil::CollisionEnvironment &collisionEnvironment);
 
     void setAlpha(float alpha);
 
