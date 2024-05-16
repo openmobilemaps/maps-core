@@ -334,7 +334,7 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
         for (const auto &page: customAssetPages) {
             auto object = strongMapInterface->getGraphicsObjectFactory()->createQuadInstanced(alphaInstancedShader);
             object->setInstanceCount((int32_t) page.featureIdentifiersUv.size());
-            customTextures.push_back(CustomIconDescriptor(page.texture, object, page.featureIdentifiersUv));
+            customTextures.push_back(CustomIconDescriptor(page.texture, object, page.featureIdentifiersUv, is3d));
         }
     }
 
@@ -368,6 +368,9 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
         iconScales.resize(instanceCounts.icons * 2, 0.0);
         iconPositions.resize(instanceCounts.icons * 2, 0.0);
         iconTextureCoordinates.resize(instanceCounts.icons * 4, 0.0);
+        if (is3d) {
+            iconOffsets.resize(instanceCounts.icons * 2, 0.0);
+        }
     }
 
 
@@ -565,10 +568,10 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
             if (object->hasCustomTexture) {
                 auto &page = customTextures[object->customTexturePage];
                 int offset = (int)object->customTextureOffset;
-                object->updateIconProperties(page.iconPositions, page.iconScales, page.iconRotations, page.iconAlphas, offset, zoomIdentifier,scaleFactor, rotation, now);
+                object->updateIconProperties(page.iconPositions, page.iconScales, page.iconRotations, page.iconAlphas, page.iconOffsets, offset, zoomIdentifier,scaleFactor, rotation, now);
 
             } else {
-                object->updateIconProperties(iconPositions, iconScales, iconRotations, iconAlphas, iconOffset, zoomIdentifier,
+                object->updateIconProperties(iconPositions, iconScales, iconRotations, iconAlphas, iconOffsets, iconOffset, zoomIdentifier,
                                              scaleFactor, rotation, now);
             }
             object->updateStretchIconProperties(stretchedIconPositions, stretchedIconScales, stretchedIconRotations,
@@ -588,6 +591,11 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
                     SharedBytes((int64_t) customDescriptor.iconScales.data(), (int32_t) count, 2 * (int32_t) sizeof(float)));
             customDescriptor.renderObject->setRotations(
                     SharedBytes((int64_t) customDescriptor.iconRotations.data(), (int32_t) count, 1 * (int32_t) sizeof(float)));
+
+            if (is3d) {
+                customDescriptor.renderObject->setPositionOffset(
+                        SharedBytes((int64_t) customDescriptor.iconOffsets.data(), (int32_t) count, 2 * (int32_t) sizeof(float)));
+            }
         }
 
         if (iconInstancedObject) {
@@ -599,6 +607,10 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
                     SharedBytes((int64_t) iconScales.data(), (int32_t) iconAlphas.size(), 2 * (int32_t) sizeof(float)));
             iconInstancedObject->setRotations(
                     SharedBytes((int64_t) iconRotations.data(), (int32_t) iconAlphas.size(), 1 * (int32_t) sizeof(float)));
+            if (is3d) {
+                iconInstancedObject->setPositionOffset(
+                        SharedBytes((int64_t) iconOffsets.data(), (int32_t) iconOffsets.size(), 2 * (int32_t) sizeof(float)));
+            }
         }
 
         if (stretchedInstancedObject) {
@@ -622,8 +634,10 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
         if (textInstancedObject) {
             textInstancedObject->setPositions(
                     SharedBytes((int64_t) textPositions.data(), (int32_t) textRotations.size(), 2 * (int32_t) sizeof(float)));
-            textInstancedObject->setReferencePositions(
-                    SharedBytes((int64_t) textReferencePositions.data(), (int32_t) textRotations.size(), 2 * (int32_t) sizeof(float)));
+            if (is3d) {
+                textInstancedObject->setReferencePositions(
+                        SharedBytes((int64_t) textReferencePositions.data(), (int32_t) textRotations.size(), 2 * (int32_t) sizeof(float)));
+            }
             textInstancedObject->setStyles(
                     SharedBytes((int64_t) textStyles.data(), (int32_t) textStyles.size() / 9, 9 * (int32_t) sizeof(float)));
             textInstancedObject->setScales(

@@ -31,6 +31,12 @@ public:
 
     virtual void setTextureCoordinates(const ::SharedBytes & textureCoordinates) = 0;
 
+    /**
+     * 2 floats (x and y) for each instance
+     * defines the offset applied to the projected position in viewspace coordinates
+     */
+    virtual void setPositionOffset(const ::SharedBytes & offsets) = 0;
+
     virtual void loadTexture(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & context, const /*not-null*/ std::shared_ptr<TextureHolderInterface> & textureHolder) = 0;
 
     virtual void removeTexture() = 0;

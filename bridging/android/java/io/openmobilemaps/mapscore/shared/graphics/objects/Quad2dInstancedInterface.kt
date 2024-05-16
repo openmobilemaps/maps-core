@@ -22,6 +22,12 @@ abstract class Quad2dInstancedInterface {
 
     abstract fun setTextureCoordinates(textureCoordinates: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
 
+    /**
+     * 2 floats (x and y) for each instance
+     * defines the offset applied to the projected position in viewspace coordinates
+     */
+    abstract fun setPositionOffset(offsets: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
+
     abstract fun loadTexture(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, textureHolder: TextureHolderInterface)
 
     abstract fun removeTexture()
@@ -86,6 +92,12 @@ abstract class Quad2dInstancedInterface {
             native_setTextureCoordinates(this.nativeRef, textureCoordinates)
         }
         private external fun native_setTextureCoordinates(_nativeRef: Long, textureCoordinates: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
+
+        override fun setPositionOffset(offsets: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setPositionOffset(this.nativeRef, offsets)
+        }
+        private external fun native_setPositionOffset(_nativeRef: Long, offsets: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
 
         override fun loadTexture(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, textureHolder: TextureHolderInterface) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
