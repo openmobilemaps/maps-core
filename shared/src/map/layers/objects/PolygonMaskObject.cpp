@@ -63,9 +63,13 @@ void PolygonMaskObject::setPolygons(const std::vector<::PolygonCoord> &polygons)
                 vertices.push_back(i.x);
                 vertices.push_back(i.y);
                 // fill for android z
-                vertices.push_back(0.0);
+                vertices.push_back(1.0);
 #ifdef __APPLE__
                 // are needed to fill metal vertex property (uv.y)
+                vertices.push_back(0.0);
+                vertices.push_back(0.0);
+                vertices.push_back(0.0);
+                vertices.push_back(0.0);
                 vertices.push_back(0.0);
 #endif
             }

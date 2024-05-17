@@ -12,6 +12,7 @@
 #include "DataStructures.metal"
 using namespace metal;
 
+
 vertex VertexOut
 baseVertexShader(const Vertex3DIn vertexIn [[stage_in]],
                 constant float4x4 &mvpMatrix [[buffer(1)]],
@@ -30,7 +31,7 @@ unitSphereBaseVertexShader(const Vertex3DIn vertexIn [[stage_in]],
                            constant float4x4 &vpMatrix [[buffer(1)]],
                            constant float4x4 &mMatrix [[buffer(2)]])
 {
-    float4 newVertex = mMatrix * float4(vertexIn.position.xyz, 1.0);
+    float4 newVertex = float4(vertexIn.position.xyz, 1.0);
 
     newVertex.x /= newVertex.w;
     newVertex.y /= newVertex.w;
@@ -47,6 +48,7 @@ unitSphereBaseVertexShader(const Vertex3DIn vertexIn [[stage_in]],
 
     return out;
 }
+
 
 
 fragment float4

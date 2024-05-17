@@ -38,8 +38,7 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
 
     for (const auto &[index, passes] : renderQueue) {
         for (const auto &pass : passes) {
-            auto maskObject = pass->getMaskingObject();
-            maskObject = nullptr;
+            const auto &maskObject = pass->getMaskingObject();
             const bool hasMask = maskObject != nullptr;
             const bool usesStencil = hasMask || pass->getRenderPassConfig().isPassMasked;
 

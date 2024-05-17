@@ -36,11 +36,4 @@ struct PolygonVertex: Equatable {
         vertexDescriptor.layouts[0].stride = offset
         return vertexDescriptor
     }()
-
-    init(x: Float,
-         y: Float,
-         stylingIndex: Float = 0.0) {
-        position = SIMD2([x, y])
-        self.stylingIndex = stylingIndex
-    }
 }
