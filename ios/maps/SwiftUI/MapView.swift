@@ -208,7 +208,7 @@ public struct MapView: UIViewRepresentable {
         if let maxZoom = camera.maxZoom.value, camera.maxZoom.mode == .user {
             mapView.camera.setMaxZoom(maxZoom)
         }
-        if let minZoom = camera.minZoom.value {
+        if let minZoom = camera.minZoom.value, camera.minZoom.mode == .user {
             mapView.camera.setMinZoom(minZoom)
         }
 

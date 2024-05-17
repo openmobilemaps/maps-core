@@ -154,7 +154,6 @@ protected:
     double getCameraDistance();
     double getCameraVerticalDisplacement();
     double getCameraPitch();
-    double getCenterYOffset();
 
     std::recursive_mutex listenerMutex;
     std::set<std::shared_ptr<MapCameraListenerInterface>> listeners;
@@ -170,8 +169,6 @@ protected:
     CameraMode3d mode = CameraMode3d::GLOBE;
 
     Coord focusPointPosition;
-    double focusPointAltitude = 0;
-    double cameraDistance = 0;
     double cameraVerticalDisplacement = 0.0;
     double cameraPitch = 0; // looking up or down
 
@@ -243,6 +240,7 @@ protected:
     std::shared_ptr<CoordAnimation> coordAnimation;
     std::shared_ptr<DoubleAnimation> zoomAnimation;
     std::shared_ptr<DoubleAnimation> rotationAnimation;
+    std::shared_ptr<DoubleAnimation> pitchAnimation;
 
     std::tuple<Coord, double> getBoundsCorrectedCoords(const Coord &position, double zoom);
 
