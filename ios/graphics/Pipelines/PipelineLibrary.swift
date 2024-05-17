@@ -139,6 +139,7 @@ public enum PipelineType: String, CaseIterable, Codable {
     case unitSphereAlphaInstancedShader
     case unitSphereTextInstancedShader
     case unitSphereLineGroupShader
+    case unitSpherePolygonGroupShader
 
     var label: String {
         switch self {
@@ -165,6 +166,7 @@ public enum PipelineType: String, CaseIterable, Codable {
             case .unitSphereAlphaInstancedShader: return "Unit Sphere Alpha instanced shader with texture"
             case .unitSphereTextInstancedShader: return "Unit Sphere Text Instanced shader"
             case .unitSphereLineGroupShader: return "Unit Sphere Line Group shader"
+            case .unitSpherePolygonGroupShader: return "Unit Sphere Polygon Group shader"
         }
     }
 
@@ -193,6 +195,7 @@ public enum PipelineType: String, CaseIterable, Codable {
             case .unitSphereAlphaInstancedShader: return "unitSphereAlphaInstancedVertexShader"
             case .unitSphereTextInstancedShader: return "unitSphereTextInstancedVertexShader"
             case .unitSphereLineGroupShader: return "unitSphereLineGroupVertexShader"
+            case .unitSpherePolygonGroupShader: return "unitSpherePolygonGroupVertexShader"
         }
     }
 
@@ -221,6 +224,7 @@ public enum PipelineType: String, CaseIterable, Codable {
             case .unitSphereAlphaInstancedShader: return "unitSphereAlphaInstancedFragmentShader"
             case .unitSphereTextInstancedShader: return "unitSphereTextInstancedFragmentShader"
             case .unitSphereLineGroupShader: return "lineGroupFragmentShader"
+            case .unitSpherePolygonGroupShader: return "polygonGroupFragmentShader"
         }
     }
 
@@ -228,7 +232,7 @@ public enum PipelineType: String, CaseIterable, Codable {
         switch self {
             case .lineGroupShader, .unitSphereLineGroupShader:
                 return LineVertex.descriptor
-            case .polygonGroupShader, .polygonPatternGroupShader, .polygonPatternFadeInGroupShader, .polygonStripedGroupShader:
+            case .polygonGroupShader, .polygonPatternGroupShader, .polygonPatternFadeInGroupShader, .polygonStripedGroupShader, .unitSpherePolygonGroupShader:
                 return PolygonVertex.descriptor
             case .rasterShader, .unitSphereRasterShader, .clearStencilShader, .alphaShader, .unitSphereAlphaShader, .unitSphereColorShader, .unitSphereRoundColorShader:
                 return Vertex3D.descriptor

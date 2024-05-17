@@ -21,7 +21,7 @@ class ShaderFactory: MCShaderFactoryInterface {
     }
 
     func createPolygonGroupShader(_ isStriped: Bool) -> MCPolygonGroupShaderInterface? {
-        PolygonGroupShader(isStriped: isStriped)
+        PolygonGroupShader(isStriped: isStriped, isUnitSphere: true)
     }
 
     func createPolygonPatternGroupShader(_ fadeInPattern: Bool) -> MCPolygonPatternGroupShaderInterface? {
