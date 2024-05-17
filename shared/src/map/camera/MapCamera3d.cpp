@@ -486,8 +486,8 @@ RectCoord MapCamera3d::getRectFromViewport(const Vec2I &sizeViewport, const Coor
     double bottomRightX = center.x + deltaX;
     double bottomRightY = center.y - deltaY;
 
-    Coord topLeft = Coord(mapCoordinateSystem.identifier, topLeftX, topLeftY, center.z);
-    Coord bottomRight = Coord(mapCoordinateSystem.identifier, bottomRightX, bottomRightY, center.z);
+    Coord topLeft = Coord(center.systemIdentifier, topLeftX, topLeftY, center.z);
+    Coord bottomRight = Coord(center.systemIdentifier, bottomRightX, bottomRightY, center.z);
     return RectCoord(topLeft, bottomRight);
 }
 
