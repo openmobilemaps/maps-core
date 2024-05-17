@@ -171,6 +171,8 @@ public:
 
             std::vector<uint16_t> indices = mapbox::earcut<uint16_t>(polygon);
 
+            std::reverse(indices.begin(), indices.end());
+
             polygons.push_back({{}, indices});
 
             for (auto const &points: polygon) {

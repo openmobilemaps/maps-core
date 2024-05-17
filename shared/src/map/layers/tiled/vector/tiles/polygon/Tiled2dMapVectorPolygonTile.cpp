@@ -82,7 +82,7 @@ void Tiled2dMapVectorPolygonTile::update() {
 
     auto polygonDescription = std::static_pointer_cast<PolygonVectorLayerDescription>(description);
     bool inZoomRange = true;//polygonDescription->maxZoom >= zoomIdentifier && polygonDescription->minZoom <= zoomIdentifier;
-//    
+//
 //    if (lastZoom &&
 //        ((isStyleZoomDependant && *lastZoom == zoomIdentifier) || !isStyleZoomDependant) &&
 //        lastAlpha == alpha &&
