@@ -31,6 +31,11 @@
 #define ROTATION_LOCKING_ANGLE 10
 #define ROTATION_LOCKING_FACTOR 1.5
 
+#define GLOBE_MIN_ZOOM 2'00'000'000
+#define GLOBE_INITIAL_ZOOM 30'000'000
+#define LOCAL_MIN_ZOOM 10'000'000
+#define LOCAL_MAX_ZOOM 100'000
+
 #define FIELD_OF_VIEW 22.5
 
 MapCamera3d::MapCamera3d(const std::shared_ptr<MapInterface> &mapInterface, float screenDensityPpi)
@@ -40,14 +45,15 @@ MapCamera3d::MapCamera3d(const std::shared_ptr<MapInterface> &mapInterface, floa
     , screenDensityPpi(screenDensityPpi)
     , screenPixelAsRealMeterFactor(0.0254 / screenDensityPpi * mapCoordinateSystem.unitToScreenMeterFactor),
       focusPointPosition(CoordinateSystemIdentifiers::EPSG4326(), 0, 0, 0),
-      focusPointAltitude(0),
-      cameraDistance(10000),
       cameraPitch(0),
+      zoomMin(GLOBE_MIN_ZOOM),
+      zoomMax(LOCAL_MIN_ZOOM),
+      mode(CameraMode3d::GLOBE),
       lastOnTouchDownPoint(std::nullopt)
     , bounds(mapCoordinateSystem.bounds) {
     mapSystemRtl = mapCoordinateSystem.bounds.bottomRight.x > mapCoordinateSystem.bounds.topLeft.x;
     mapSystemTtb = mapCoordinateSystem.bounds.bottomRight.y > mapCoordinateSystem.bounds.topLeft.y;
-    updateZoom(zoomMin);
+    updateZoom(GLOBE_INITIAL_ZOOM);
 }
 
 void MapCamera3d::viewportSizeChanged() {
@@ -74,6 +80,8 @@ void MapCamera3d::freeze(bool freeze) {
             zoomAnimation->cancel();
         if (rotationAnimation)
             rotationAnimation->cancel();
+        if (pitchAnimation)
+            pitchAnimation->cancel();
     }
     inertia = std::nullopt;
 }
@@ -339,6 +347,8 @@ std::vector<float> MapCamera3d::getVpMatrix() {
             std::static_pointer_cast<AnimationInterface>(rotationAnimation)->update();
         if (coordAnimation)
             std::static_pointer_cast<AnimationInterface>(coordAnimation)->update();
+        if (pitchAnimation)
+            std::static_pointer_cast<AnimationInterface>(pitchAnimation)->update();
     }
 
     Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
@@ -353,30 +363,34 @@ std::vector<float> MapCamera3d::getVpMatrix() {
     float longitude = focusPointPosition.x; //  px / R;
     float latitude = focusPointPosition.y; // 2*atan(exp(py / R)) - 3.1415926 / 2;
 
-    focusPointAltitude = focusPointPosition.z;
-    cameraDistance = getCameraDistance();
-    cameraPitch = getCameraPitch();
-    cameraVerticalDisplacement = getCameraVerticalDisplacement();
-    float maxD = cameraDistance / R + 1;
-    float minD = std::max(cameraDistance / R - 1, 0.00001);
+    double focusPointAltitude = focusPointPosition.z;
+    double cameraDistance = getCameraDistance();
+    double maxD = cameraDistance / R + 1;
+    double minD = std::max(cameraDistance / R - 1, 0.00001);
 
-    float fovy = FIELD_OF_VIEW; // 45 // zoom / 70800;
+    double fovy = FIELD_OF_VIEW; // 45 // zoom / 70800;
 
     // aspect ratio
-    float vpr = (float) sizeViewport.x / (float) sizeViewport.y;
+    double vpr = (double) sizeViewport.x / (double) sizeViewport.y;
     if (vpr > 1.0) {
         fovy /= vpr;
     }
-    float fovyRad = fovy * M_PI / 180.0;
+    double fovyRad = fovy * M_PI / 180.0;
 
+    // initial perspective projection
     Matrix::perspectiveM(newProjectionMatrix, 0, fovy, vpr, minD, maxD);
-    float contentHeight = ((double) sizeViewport.y) - paddingBottom - paddingTop;
-    float offsetY = -paddingBottom / 2.0 / (double) sizeViewport.y + cameraVerticalDisplacement * contentHeight * 0.5 / (double) sizeViewport.y;
+
+    // modify projection
+    // translate anchor point based on padding and offset
+    // TODO: horizontal translation
+    double contentHeight = ((double) sizeViewport.y) - paddingBottom - paddingTop;
+    double offsetY = -paddingBottom / 2.0 / (double) sizeViewport.y + cameraVerticalDisplacement * contentHeight * 0.5 / (double) sizeViewport.y;
     offsetY = cameraDistance / R * tan(fovyRad / 2.0) * offsetY; // view space to world space
     Matrix::translateM(newProjectionMatrix, 0, 0.0, -offsetY, 0);
 
+    // view matrix
+    // remember: read from bottom to top
     Matrix::setIdentityM(newViewMatrix, 0);
-
 
     Matrix::translateM(newViewMatrix, 0, 0.0, 0, -cameraDistance / R);
     Matrix::rotateM(newViewMatrix, 0, -cameraPitch, 1.0, 0.0, 0.0);
@@ -387,6 +401,8 @@ std::vector<float> MapCamera3d::getVpMatrix() {
     Matrix::rotateM(newViewMatrix, 0.0, latitude, 1.0, 0.0, 0.0);
     Matrix::rotateM(newViewMatrix, 0.0, -longitude, 0.0, 1.0, 0.0);
     Matrix::rotateM(newViewMatrix, 0.0, -90, 0.0, 1.0, 0.0); // zero longitude in London
+    // ^
+    // |
 
     std::vector<float> newVpMatrix(16, 0.0);
     Matrix::multiplyMM(newVpMatrix, 0, newProjectionMatrix, 0, newViewMatrix, 0);
@@ -523,7 +539,6 @@ void MapCamera3d::notifyListeners(const int &listenerType) {
             projectionMatrix = this->projectionMatrix;
             horizontalFov = this->horizontalFov;
             verticalFov = this->verticalFov;
-            focusPointAltitude = this->focusPointAltitude;
             focusPointPosition = this->focusPointPosition;
         }
 
@@ -1279,7 +1294,60 @@ std::shared_ptr<MapCamera3dInterface> MapCamera3d::asMapCamera3d() {
 }
 
 void MapCamera3d::setCameraMode(CameraMode3d mode) {
+    if (mode == this->mode) {
+        return;
+    }
     this->mode = mode;
+
+    float initialZoom = zoom;
+    float targetZoom;
+    float initialPitch = cameraPitch;
+
+    switch (mode) {
+        case CameraMode3d::GLOBE:
+            this->zoomMin = GLOBE_MIN_ZOOM;
+            this->zoomMax = LOCAL_MIN_ZOOM;
+            targetZoom = GLOBE_INITIAL_ZOOM;
+            break;
+
+        case CameraMode3d::TILTED_ORBITAL:
+            this->zoomMin = LOCAL_MIN_ZOOM;
+            this->zoomMax = LOCAL_MAX_ZOOM;
+            targetZoom = LOCAL_MIN_ZOOM;
+            break;
+    }
+
+    // temporarily set target zoom to get target pitch
+    this->zoom = targetZoom;
+    float targetPitch = getCameraPitch();
+
+
+    std::lock_guard<std::recursive_mutex> lock(animationMutex);
+
+    zoomAnimation = std::make_shared<DoubleAnimation>(
+                                                       DEFAULT_ANIM_LENGTH, initialZoom, targetZoom, InterpolatorFunction::EaseInOut,
+                                                      [=](double zoom) {
+                                                          this->zoom = zoom;
+                                                          mapInterface->invalidate();
+                                                      },
+                                                       [=] {
+                                                           this->zoom = targetZoom;
+                                                           this->zoomAnimation = nullptr;
+                                                       });
+    zoomAnimation->start();
+
+    pitchAnimation = std::make_shared<DoubleAnimation>(
+                                                          DEFAULT_ANIM_LENGTH, initialPitch, targetPitch, InterpolatorFunction::EaseInOut,
+                                                       [=](double pitch) {
+                                                           this->cameraPitch = pitch;
+                                                           mapInterface->invalidate();
+                                                       },
+                                                          [=] {
+                                                              this->cameraPitch = targetPitch;
+                                                              this->pitchAnimation = nullptr;
+                                                          });
+    pitchAnimation->start();
+    mapInterface->invalidate();
 }
 
 void MapCamera3d::notifyListenerBoundsChange() {
@@ -1292,31 +1360,41 @@ void MapCamera3d::updateZoom(double zoom_) {
 
     zoom = std::clamp(zoom_, zoomMax, zoomMin);
 
-    cameraDistance = getCameraDistance();
     cameraVerticalDisplacement = getCameraVerticalDisplacement();
     cameraPitch = getCameraPitch();
 }
 
 double MapCamera3d::getCameraVerticalDisplacement() {
+    return 0;
     auto out = 0;
     auto in = 1;
     return in + (zoom * (out - in));
 }
 
 double MapCamera3d::getCameraPitch() {
-    auto out = 5;
-    auto in = 25;
-    return in + (zoom * (out - in));
+    double z, from, to;
+    switch (mode) {
+        case CameraMode3d::GLOBE:
+            z = 1.0 - (zoom - LOCAL_MIN_ZOOM) / (GLOBE_MIN_ZOOM - LOCAL_MIN_ZOOM);
+            from = 0;
+            to = 40;
+            break;
+
+        case CameraMode3d::TILTED_ORBITAL: // abused as local
+            z = 1.0 - (zoom - LOCAL_MAX_ZOOM) / (LOCAL_MIN_ZOOM - LOCAL_MAX_ZOOM);
+            from = 0;
+            to = 0;
+            break;
+    }    
+    return from + (z * (to - from));
 }
 
 double MapCamera3d::getCameraDistance() {
-    float R = 6378137.0;
-    auto out = 8.0 * R; // earth-radii in m, above ground
-    auto in = 100; // m above ground
-    return in + (zoom * (out - in));
+    double f = FIELD_OF_VIEW;
+    Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
+    double w = (double)sizeViewport.y;
+    double pixelsPerMeter =  this->screenDensityPpi / 0.0254;
+    float d = (zoom * w / pixelsPerMeter / 2.0) / tan(f / 2.0 * M_PI / 180.0);
+    return d;
 }
 
-double MapCamera3d::getCenterYOffset() {
-    double d = getCameraDistance();
-    return -(d * d * -9.2987162 + 34.635713 * d - 50.0); // TODO: Fix constants, compute from camera parameters or use raycast from screen center to determine position, when available
-}

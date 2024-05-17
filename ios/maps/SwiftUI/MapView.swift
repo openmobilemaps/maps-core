@@ -42,8 +42,8 @@ public struct MapView: UIViewRepresentable {
     public struct Camera: Equatable {
         public var center: Updatable<MCCoord>
         public var zoom: Updatable<Double>
-        public var minZoom: Updatable<Double> = .init(mode: .user, value: 1.0)
-        public var maxZoom: Updatable<Double> = .init(mode: .user, value: 0.0)
+        public var minZoom: Updatable<Double> = .init(mode: .map, value: nil)
+        public var maxZoom: Updatable<Double> = .init(mode: .map, value: nil)
         public var visibleRect: Updatable<MCRectCoord>
         public var mode: MCCameraMode3d = .GLOBE
 
@@ -208,7 +208,7 @@ public struct MapView: UIViewRepresentable {
         if let maxZoom = camera.maxZoom.value, camera.maxZoom.mode == .user {
             mapView.camera.setMaxZoom(maxZoom)
         }
-        if let minZoom = camera.minZoom.value {
+        if let minZoom = camera.minZoom.value, camera.minZoom.mode == .user {
             mapView.camera.setMinZoom(minZoom)
         }
 
