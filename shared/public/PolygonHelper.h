@@ -14,6 +14,7 @@
 #include "PolygonInfo.h"
 #include "PolygonCoord.h"
 #include "gpc.h"
+#include "Vec2D.h"
 
 class PolygonHelper {
 private:
@@ -33,6 +34,8 @@ private:
                             const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper);
 
     static PolygonCoord coordsFromRect(const RectCoord &rect);
+
+    static void subdivision(std::vector<Vec2D> &vertices, std::vector<uint16_t> &indices, float threshold, int level = 0);
 
 private:
     static gpc_op gpcOperationFrom(const ClippingOperation operation);

@@ -71,7 +71,8 @@ baseFragmentShader(VertexOut in [[stage_in]],
 
 vertex VertexOut
 colorVertexShader(const VertexIn vertexIn [[stage_in]],
-                    constant float4x4 &mvpMatrix [[buffer(1)]])
+                  constant float4x4 &mvpMatrix [[buffer(1)]],
+                   constant float4x4 &mMatrix [[buffer(2)]])
 {
     VertexOut out {
         .position = mvpMatrix * float4(vertexIn.position.xy, 0.0, 1.0),

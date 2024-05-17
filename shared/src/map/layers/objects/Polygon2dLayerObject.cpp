@@ -10,6 +10,7 @@
 
 #include "Polygon2dLayerObject.h"
 #include "EarcutVec2D.h"
+#include "PolygonHelper.h"
 
 Polygon2dLayerObject::Polygon2dLayerObject(const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                                            const std::shared_ptr<Polygon2dInterface> &polygon,
@@ -33,6 +34,8 @@ void Polygon2dLayerObject::setPolygons(const std::vector<PolygonCoord> &polygons
     std::vector<uint16_t> indices;
     std::vector<float> vertices;
     int32_t indexOffset = 0;
+
+    std::vector<Vec2D> vecVertices;
 
     for (auto const &polygon : polygons) {
         std::vector<std::vector<Vec2D>> renderCoords;
@@ -61,16 +64,24 @@ void Polygon2dLayerObject::setPolygons(const std::vector<PolygonCoord> &polygons
             indexOffset += list.size();
 
             for(auto& i : list) {
-                vertices.push_back(i.x);
-                vertices.push_back(i.y);
-                // fill for android z
-                vertices.push_back(0.0);
-#ifdef __APPLE__
-                // are needed to fill metal vertex property (uv.y)
-                vertices.push_back(0.0);
-#endif
+                vecVertices.push_back(i);
             }
         }
+    }
+
+    PolygonHelper::subdivision(vecVertices, indices, 0.2, 4);
+
+    for (const auto& v : vecVertices) {
+        vertices.push_back(v.x);
+        vertices.push_back(v.y);
+        vertices.push_back(1.0f);
+    #ifdef __APPLE__
+        vertices.push_back(0.0f);
+        vertices.push_back(0.0f);
+        vertices.push_back(0.0f);
+        vertices.push_back(0.0f);
+        vertices.push_back(0.0f);
+    #endif
     }
 
     auto attr = SharedBytes((int64_t)vertices.data(), (int32_t)vertices.size(), (int32_t)sizeof(float));
