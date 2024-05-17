@@ -335,7 +335,12 @@ void Tiled2dMapVectorSymbolObject::setupIconProperties(std::vector<float> &posit
         const auto textureWidth = (double) spriteTexture->getImageWidth();
         const auto textureHeight = (double) spriteTexture->getImageHeight();
 
-        renderCoordinate = getRenderCoordinates(iconAnchor, -rotations[countOffset], textureWidth, textureHeight);
+        if (is3d) {
+            renderCoordinate = getRenderCoordinates(Anchor::CENTER, -rotations[countOffset], textureWidth, textureHeight);
+        } else {
+            renderCoordinate = getRenderCoordinates(iconAnchor, -rotations[countOffset], textureWidth, textureHeight);
+        }
+
 
         int spriteX = 0;
         int spriteY = 0;
@@ -385,7 +390,7 @@ void Tiled2dMapVectorSymbolObject::setupIconProperties(std::vector<float> &posit
     countOffset += instanceCounts.icons;
 }
 
-void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &alphas, int &countOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, long long now) {
+void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &alphas, std::vector<float> &offsets, int &countOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, long long now) {
 
     if (instanceCounts.icons == 0) {
         return;
@@ -427,7 +432,7 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &posi
     const auto iconWidth = spriteSize.x * iconSize * (is3d ? 1.0 : scaleFactor);
     const auto iconHeight = spriteSize.y * iconSize * (is3d ? 1.0 : scaleFactor);
 
-    const float scaledIconPadding = iconPadding * scaleFactor;
+    const float scaledIconPadding = iconPadding * (is3d ? 1.0 : scaleFactor);
 
     auto viewPortSize = mapInterface.lock()->getRenderingContext()->getViewportSize();
 
@@ -439,7 +444,51 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &posi
         scales[2 * countOffset + 1] *= 2.0 / viewPortSize.y;
     }
 
-    renderCoordinate = getRenderCoordinates(iconAnchor, -rotations[countOffset], iconWidth, iconHeight);
+    if (is3d) {
+        switch (iconAnchor) {
+            case Anchor::CENTER:
+                offsets[2 * countOffset] = 0;
+                offsets[2 * countOffset + 1] = 0;
+                break;
+            case Anchor::LEFT:
+                offsets[2 * countOffset] = iconWidth * 1.0 / viewPortSize.x;
+                offsets[2 * countOffset + 1] = 0;
+                break;
+            case Anchor::RIGHT:
+                offsets[2 * countOffset] = -iconWidth * 1.0 / viewPortSize.x;
+                offsets[2 * countOffset + 1] = 0;
+                break;
+            case Anchor::TOP:
+                offsets[2 * countOffset] = 0;
+                offsets[2 * countOffset + 1] = -iconHeight * 1.0 / viewPortSize.y;
+                break;
+            case Anchor::BOTTOM:
+                offsets[2 * countOffset] = 0;
+                offsets[2 * countOffset + 1] = iconHeight * 1.0 / viewPortSize.y;
+                break;
+            case Anchor::TOP_LEFT:
+                offsets[2 * countOffset] = iconWidth * 1.0 / viewPortSize.x;
+                offsets[2 * countOffset + 1] = -iconHeight * 1.0 / viewPortSize.y;
+                break;
+            case Anchor::TOP_RIGHT:
+                offsets[2 * countOffset] = -iconWidth * 1.0 / viewPortSize.x;
+                offsets[2 * countOffset + 1] = -iconHeight * 1.0 / viewPortSize.y;
+                break;
+            case Anchor::BOTTOM_LEFT:
+                offsets[2 * countOffset] = iconWidth * 1.0 / viewPortSize.x;
+                offsets[2 * countOffset + 1] = iconHeight * 1.0 / viewPortSize.y;
+                break;
+            case Anchor::BOTTOM_RIGHT:
+                offsets[2 * countOffset] = -iconWidth * 1.0 / viewPortSize.x;
+                offsets[2 * countOffset + 1] = iconHeight * 1.0 / viewPortSize.y;
+                break;
+            default:
+                break;
+        }
+    } else {
+        renderCoordinate = getRenderCoordinates(iconAnchor, -rotations[countOffset], iconWidth, iconHeight);
+    }
+
 
     positions[2 * countOffset] = renderCoordinate.x + iconOffset.x * scaleFactor * iconSize;
     positions[2 * countOffset + 1] = renderCoordinate.y + iconOffset.y * scaleFactor * iconSize;
@@ -914,17 +963,21 @@ void Tiled2dMapVectorSymbolObject::collisionDetection(const double zoomIdentifie
 
 }
 
-std::optional<std::tuple<Coord, VectorLayerFeatureInfo>> Tiled2dMapVectorSymbolObject::onClickConfirmed(const CircleD &clickHitCircle) {
+std::optional<std::tuple<Coord, VectorLayerFeatureInfo>> Tiled2dMapVectorSymbolObject::onClickConfirmed(const CircleD &clickHitCircle, double zoomIdentifier, CollisionUtil::CollisionEnvironment &collisionEnvironment) {
     if (animationCoordinator->isColliding()) {
         return std::nullopt;
     }
 
     if (boundingBoxRotationAlignment == SymbolAlignment::VIEWPORT) {
-        if ((labelObject && labelObject->boundingBoxViewportAligned.has_value() && CollisionUtil::checkRectCircleCollision(*labelObject->boundingBoxViewportAligned, clickHitCircle))
-        || (iconBoundingBoxViewportAligned.x != 0 && CollisionUtil::checkRectCircleCollision(iconBoundingBoxViewportAligned, clickHitCircle))
-        || (stretchIconBoundingBoxViewportAligned.x != 0 && CollisionUtil::checkRectCircleCollision(stretchIconBoundingBoxViewportAligned, clickHitCircle))) {
-            return std::make_tuple(coordinate, featureContext->getFeatureInfo());
+        
+        std::optional<CollisionRectF> boundingRect = getViewportAlignedBoundingBox(zoomIdentifier, false, true);
+        if (boundingRect) {
+            auto projectedRectangle = CollisionUtil::getProjectedRectangle(*boundingRect, collisionEnvironment);
+            if (CollisionUtil::checkRectCircleCollision(RectD(projectedRectangle.x, projectedRectangle.y, projectedRectangle.width, projectedRectangle.height), clickHitCircle)) {
+                return std::make_tuple(coordinate, featureContext->getFeatureInfo());
+            }
         }
+
     } else {
         if ((labelObject && labelObject->boundingBoxCircles.has_value() && CollisionUtil::checkCirclesCollision(*labelObject->boundingBoxCircles, clickHitCircle))
         || (iconBoundingBoxViewportAligned.width != 0 && CollisionUtil::checkRectCircleCollision(iconBoundingBoxViewportAligned, clickHitCircle))

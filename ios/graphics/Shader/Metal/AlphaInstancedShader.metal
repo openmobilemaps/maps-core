@@ -29,10 +29,12 @@ unitSphereAlphaInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
                            constant float *rotations [[buffer(5)]],
                            constant float2 *texureCoordinates [[buffer(6)]],
                            constant float *alphas [[buffer(7)]],
+                           constant float2 *offsets [[buffer(8)]],
                            uint instanceId [[instance_id]])
 {
     const float2 position = positions[instanceId];
     const float2 scale = scales[instanceId];
+    const float2 offset = offsets[instanceId];
     const float rotation = rotations[instanceId];
     float alpha = alphas[instanceId];
 
@@ -54,7 +56,7 @@ unitSphereAlphaInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
     const float4x4 scaleRotateMatrix = float4x4(float4(cos(angle), -sin(angle), 0, 0),
                                            float4(sin(angle), cos(angle), 0, 0),
                                            float4(0, 0, 0, 0),
-                                           float4(vertexIn.position.xy * scale, 1.0, 1));
+                                           float4(vertexIn.position.xy * scale + offset, 1.0, 1));
 
 
     InstancedVertexOut out {
@@ -74,7 +76,7 @@ unitSphereAlphaInstancedFragmentShader(InstancedVertexOut in [[stage_in]],
                              texture2d<float> texture0 [[ texture(0)]],
                              sampler textureSampler [[sampler(0)]])
 {
-    const float2 uv = in.uvOrig + in.uvSize * float2(in.uv.x, 1 - in.uv.y);
+    const float2 uv = in.uvOrig + in.uvSize * float2(in.uv.x, in.uv.y);
     float4 color = texture0.sample(textureSampler, uv);
 
     const float a = color.a * in.alpha;

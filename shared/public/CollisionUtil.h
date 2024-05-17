@@ -80,4 +80,93 @@ public:
         }
         return false;
     }
+
+#include <vector>
+
+    struct CollisionEnvironment {
+        const std::vector<float> &vpMatrix;
+        const bool is3d;
+        std::vector<float> &temp1;
+        std::vector<float> &temp2;
+        const float halfWidth;
+        const float halfHeight;
+        const float sinNegGridAngle;
+        const float cosNegGridAngle;
+
+        CollisionEnvironment(
+                             const std::vector<float>& vpMatrix,
+                             const bool is3d,
+                             std::vector<float>& temp1,
+                             std::vector<float>& temp2,
+                             const float halfWidth,
+                             const float halfHeight,
+                             const float sinNegGridAngle,
+                             const float cosNegGridAngle)
+        : vpMatrix(vpMatrix),
+        is3d(is3d),
+        temp1(temp1),
+        temp2(temp2),
+        halfWidth(halfWidth),
+        halfHeight(halfHeight),
+        sinNegGridAngle(sinNegGridAngle),
+        cosNegGridAngle(cosNegGridAngle)
+        {}
+    };
+
+    static RectF getProjectedRectangle(const CollisionRectF &rectangle, 
+                                       CollisionEnvironment &env) {
+        if (env.is3d) {
+            env.temp2[0] = (float) (1.0 * sin(rectangle.anchorY) * cos(rectangle.anchorX));
+            env.temp2[1] = (float) (1.0 * cos(rectangle.anchorY));
+            env.temp2[2] = (float) (-1.0 * sin(rectangle.anchorY) * sin(rectangle.anchorX));
+            env.temp2[3] = 1.0;
+
+            Matrix::multiply(env.vpMatrix, env.temp2, env.temp1);
+
+            env.temp1[0] /= env.temp1[3];
+            env.temp1[1] /= env.temp1[3];
+            env.temp1[2] /= env.temp1[3];
+            env.temp1[3] /= env.temp1[3];
+
+            float originX = ((env.temp1[0]) * env.halfWidth + env.halfWidth);
+            float originY = 2 * env.halfHeight - ((env.temp1[1]) * env.halfHeight + env.halfHeight);
+
+            float w = rectangle.width;
+            float h = rectangle.height;
+
+            return {float(originX - w / 2.0) , float(originY - h / 2.0), std::abs(w), std::abs(h)};
+        } else {
+            env.temp2[0] = rectangle.x - rectangle.anchorX; // move x to the anchor
+            env.temp2[1] = rectangle.y - rectangle.anchorY;
+            env.temp2[2] = env.temp2[0] * env.cosNegGridAngle - env.temp2[1] * env.sinNegGridAngle; // rotate x
+            env.temp2[3] = env.temp2[0] * env.sinNegGridAngle + env.temp2[1] * env.cosNegGridAngle;
+            env.temp2[0] = env.temp2[2] + rectangle.anchorX; // move rotated x to correct location relative to the anchor
+            env.temp2[1] = env.temp2[3] + rectangle.anchorY;
+            env.temp2[2] = 0.0;
+            env.temp2[3] = 1.0;
+            Matrix::multiply(env.vpMatrix, env.temp2, env.temp1);
+            float originX = ((env.temp1[0] / env.temp1[3]) * env.halfWidth + env.halfWidth);
+            float originY = ((env.temp1[1] / env.temp1[3]) * env.halfHeight + env.halfHeight);
+            env.temp2[0] = rectangle.width * env.cosNegGridAngle;
+            env.temp2[1] = rectangle.width * env.sinNegGridAngle;
+            env.temp2[2] = 0.0;
+            env.temp2[3] = 0.0;
+            Matrix::multiply(env.vpMatrix, env.temp2, env.temp1);
+            float w = env.temp1[0];
+            float h = env.temp1[1];
+            env.temp2[0] = -rectangle.height * env.sinNegGridAngle;
+            env.temp2[1] = rectangle.height * env.cosNegGridAngle;
+            env.temp2[2] = 0.0;
+            env.temp2[3] = 0.0;
+            Matrix::multiply(env.vpMatrix, env.temp2, env.temp1);
+            w += env.temp1[0];
+            h += env.temp1[1];
+            float width = (w * env.halfWidth); // by assumption aligned with projected space
+            float height = (h * env.halfHeight); // by assumption aligned with projected space
+            originX = std::min(originX, originX + width);
+            originY = std::min(originY, originY + height);
+            // Rectangle origin is chosen as the min/min corner with width/height always positive
+            return {originX, originY, std::abs(width), std::abs(height)};
+        }
+    }
 };

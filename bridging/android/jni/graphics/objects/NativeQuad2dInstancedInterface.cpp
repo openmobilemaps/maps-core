@@ -76,6 +76,14 @@ void NativeQuad2dInstancedInterface::JavaProxy::setTextureCoordinates(const ::Sh
                            ::djinni::get(::djinni_generated::NativeSharedBytes::fromCpp(jniEnv, c_textureCoordinates)));
     ::djinni::jniExceptionCheck(jniEnv);
 }
+void NativeQuad2dInstancedInterface::JavaProxy::setPositionOffset(const ::SharedBytes & c_offsets) {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeQuad2dInstancedInterface>::get();
+    jniEnv->CallVoidMethod(Handle::get().get(), data.method_setPositionOffset,
+                           ::djinni::get(::djinni_generated::NativeSharedBytes::fromCpp(jniEnv, c_offsets)));
+    ::djinni::jniExceptionCheck(jniEnv);
+}
 void NativeQuad2dInstancedInterface::JavaProxy::loadTexture(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & c_context, const /*not-null*/ std::shared_ptr<::TextureHolderInterface> & c_textureHolder) {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
@@ -169,6 +177,14 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::Quad2dInstancedInterface>(nativeRef);
         ref->setTextureCoordinates(::djinni_generated::NativeSharedBytes::toCpp(jniEnv, j_textureCoordinates));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_Quad2dInstancedInterface_00024CppProxy_native_1setPositionOffset(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeSharedBytes::JniType j_offsets)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::Quad2dInstancedInterface>(nativeRef);
+        ref->setPositionOffset(::djinni_generated::NativeSharedBytes::toCpp(jniEnv, j_offsets));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

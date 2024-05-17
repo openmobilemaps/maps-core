@@ -85,7 +85,7 @@ public:
                 continue;
             }
 
-            const auto &properties = parseProperties(feature["properties"]);
+            const auto &properties = feature.contains("properties") ? parseProperties(feature["properties"]) : FeatureContext::mapType();
 
             if(feature.contains("id") && feature["id"].is_string()) {
                 geometry->featureContext = std::make_shared<FeatureContext>(geomType, properties, feature["id"].get<std::string>());
