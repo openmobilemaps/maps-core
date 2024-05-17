@@ -10,7 +10,8 @@
 
 #include "PolygonHelper.h"
 #include "RectCoord.h"
-
+#include "Vec2DHelper.h"
+#include <unordered_map>
 
 bool PolygonHelper::pointInside(const PolygonCoord &polygon, const Coord &point,
                         const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper) {
@@ -107,3 +108,159 @@ PolygonCoord PolygonHelper::coordsFromRect(const RectCoord &rect) {
              rect.topLeft},
             {}));
 }
+
+// Helper function to find or create a midpoint
+uint16_t findOrCreateMidpoint(std::unordered_map<uint32_t, uint16_t> &midpointCache,
+                              std::vector<Vec2D> &vertices,
+                              uint16_t v0, uint16_t v1) {
+    // Ensure the smaller index comes first to avoid duplicate edges in different order
+    uint32_t smallerIndex = std::min(v0, v1);
+    uint32_t largerIndex = std::max(v0, v1);
+    uint32_t key = (smallerIndex << 16) | largerIndex;
+
+    // Check if midpoint is already created
+    auto it = midpointCache.find(key);
+    if (it != midpointCache.end()) {
+        return it->second;
+    }
+
+    // Create new midpoint, normalize it and add to vertex list
+    Vec2D midpoint = Vec2DHelper::midpoint(vertices[v0], vertices[v1]);
+    uint16_t newIndex = vertices.size();
+    vertices.push_back(midpoint);
+
+    // Cache the midpoint
+    midpointCache[key] = newIndex;
+    return newIndex;
+}
+// Function to recursively subdivide triangles
+    void PolygonHelper::subdivision(std::vector<Vec2D> &vertices, std::vector<uint16_t> &indices, float threshold, int level) {
+        std::unordered_map<uint32_t, uint16_t> midpointCache;
+                std::vector<uint16_t> newIndices;
+                bool subdivided = false;
+
+                // Iterate over triangles
+                for (size_t i = 0; i < indices.size(); i += 3) {
+                    uint16_t v0 = indices[i];
+                    uint16_t v1 = indices[i + 1];
+                    uint16_t v2 = indices[i + 2];
+
+                    // Check edge lengths
+
+                    float d0 = Vec2DHelper::distance(vertices[v0], vertices[v1]);
+                    float d1 = Vec2DHelper::distance(vertices[v1], vertices[v2]);
+                    float d2 = Vec2DHelper::distance(vertices[v2], vertices[v0]);
+
+                    // Subdivide edges longer than the threshold
+                    if (d0 > threshold && d1 > threshold && d2 > threshold) {
+                        // All edges are longer than the threshold, subdivide all edges
+                        uint16_t a = findOrCreateMidpoint(midpointCache, vertices, v0, v1);
+                        uint16_t b = findOrCreateMidpoint(midpointCache, vertices, v1, v2);
+                        uint16_t c = findOrCreateMidpoint(midpointCache, vertices, v2, v0);
+
+                        newIndices.push_back(v0); newIndices.push_back(a); newIndices.push_back(c);
+                        newIndices.push_back(v1); newIndices.push_back(b); newIndices.push_back(a);
+                        newIndices.push_back(v2); newIndices.push_back(c); newIndices.push_back(b);
+                        newIndices.push_back(a); newIndices.push_back(b); newIndices.push_back(c);
+
+                        subdivided = true;
+                    } else if (d0 > threshold) {
+                        // Only the edge v0-v1 is longer than the threshold
+                        uint16_t a = findOrCreateMidpoint(midpointCache, vertices, v0, v1);
+
+                        newIndices.push_back(v0); newIndices.push_back(a); newIndices.push_back(v2);
+                        newIndices.push_back(a); newIndices.push_back(v1); newIndices.push_back(v2);
+
+                        subdivided = true;
+                    } else if (d1 > threshold) {
+                        // Only the edge v1-v2 is longer than the threshold
+                        uint16_t b = findOrCreateMidpoint(midpointCache, vertices, v1, v2);
+
+                        newIndices.push_back(v1); newIndices.push_back(b); newIndices.push_back(v0);
+                        newIndices.push_back(b); newIndices.push_back(v2); newIndices.push_back(v0);
+
+                        subdivided = true;
+                    } else if (d2 > threshold) {
+                        // Only the edge v2-v0 is longer than the threshold
+                        uint16_t c = findOrCreateMidpoint(midpointCache, vertices, v2, v0);
+
+                        newIndices.push_back(v2); newIndices.push_back(c); newIndices.push_back(v1);
+                        newIndices.push_back(c); newIndices.push_back(v0); newIndices.push_back(v1);
+
+                        subdivided = true;
+                    } else {
+                        // No edges are longer than the threshold, keep original triangle
+                        newIndices.push_back(v0);
+                        newIndices.push_back(v1);
+                        newIndices.push_back(v2);
+                    }
+                }
+
+                // Replace old indices with new indices
+                indices = std::move(newIndices);
+
+                // Recursively subdivide if any triangles were subdivided
+                if (subdivided) {
+                    subdivision(vertices, indices, threshold);
+                } 
+    }
+
+
+//
+//
+//// Helper function to find or create a midpoint
+//uint16_t findOrCreateMidpoint(std::unordered_map<uint32_t, uint16_t> &midpointCache,
+//                              std::vector<Vec2D> &vertices,
+//                              uint16_t v0, uint16_t v1) {
+//    // Ensure the smaller index comes first to avoid duplicate edges in different order
+//    uint32_t smallerIndex = std::min(v0, v1);
+//    uint32_t largerIndex = std::max(v0, v1);
+//    uint32_t key = (smallerIndex << 16) | largerIndex;
+//
+//    // Check if midpoint is already created
+//    auto it = midpointCache.find(key);
+//    if (it != midpointCache.end()) {
+//        return it->second;
+//    }
+//
+//    // Create new midpoint, normalize it and add to vertex list
+//    Vec2D midpoint = Vec2DHelper::midpoint(vertices[v0], vertices[v1]);
+//    uint16_t newIndex = vertices.size();
+//    vertices.push_back(midpoint);
+//
+//    // Cache the midpoint
+//    midpointCache[key] = newIndex;
+//    return newIndex;
+//}
+//
+//// Function to recursively subdivide triangles
+//void PolygonHelper::subdivision(std::vector<Vec2D> &vertices, std::vector<uint16_t> &indices, int level) {
+//    if (level <= 0) return;
+//
+//    std::unordered_map<uint32_t, uint16_t> midpointCache;
+//    std::vector<uint16_t> newIndices;
+//
+//    // Iterate over triangles
+//    for (size_t i = 0; i < indices.size(); i += 3) {
+//        uint16_t v0 = indices[i];
+//        uint16_t v1 = indices[i + 1];
+//        uint16_t v2 = indices[i + 2];
+//
+//        // Calculate midpoints and cache them
+//        uint16_t a = findOrCreateMidpoint(midpointCache, vertices, v0, v1);
+//        uint16_t b = findOrCreateMidpoint(midpointCache, vertices, v1, v2);
+//        uint16_t c = findOrCreateMidpoint(midpointCache, vertices, v2, v0);
+//
+//        // Form new triangles
+//        newIndices.push_back(v0); newIndices.push_back(a); newIndices.push_back(c);
+//        newIndices.push_back(v1); newIndices.push_back(b); newIndices.push_back(a);
+//        newIndices.push_back(v2); newIndices.push_back(c); newIndices.push_back(b);
+//        newIndices.push_back(a); newIndices.push_back(b); newIndices.push_back(c);
+//    }
+//
+//    // Replace old indices with new indices
+//    indices = std::move(newIndices);
+//
+//    // Recursively subdivide the new set of triangles
+//    subdivision(vertices, indices, level - 1);
+//}

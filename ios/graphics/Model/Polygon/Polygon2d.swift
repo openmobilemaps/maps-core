@@ -80,6 +80,9 @@ final class Polygon2d: BaseGraphicsObject {
         if let matrixPointer = UnsafeRawPointer(bitPattern: Int(vpMatrix)) {
             encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
         }
+        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mMatrix)) {
+            encoder.setVertexBytes(matrixPointer, length: 64, index: 2)
+        }
 
         encoder.drawIndexedPrimitives(type: .triangle,
                                       indexCount: indicesCount,
