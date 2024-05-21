@@ -69,7 +69,7 @@ void Polygon2dLayerObject::setPolygons(const std::vector<PolygonCoord> &polygons
         }
     }
 
-    PolygonHelper::subdivision(vecVertices, indices, 0.2, 4);
+    PolygonHelper::subdivision(vecVertices, indices, 0.1, 4);
 
     for (const auto& v : vecVertices) {
         vertices.push_back(v.x);
