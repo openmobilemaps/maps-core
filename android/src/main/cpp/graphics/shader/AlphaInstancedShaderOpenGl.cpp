@@ -12,7 +12,9 @@
 #include "OpenGlContext.h"
 #include "OpenGlHelper.h"
 
-const std::string AlphaInstancedShaderOpenGl::programName = "UBMAP_AlphaInstancedShaderOpenGl";
+AlphaInstancedShaderOpenGl::AlphaInstancedShaderOpenGl(bool projectOntoUnitSphere)
+: projectOntoUnitSphere(projectOntoUnitSphere),
+programName(projectOntoUnitSphere ? "UBMAP_AlphaInstancedUnitSphereShaderOpenGl" : "UBMAP_AlphaInstancedShaderOpenGl") {}
 
 std::string AlphaInstancedShaderOpenGl::getProgramName() { return programName; }
 
@@ -39,7 +41,51 @@ void AlphaInstancedShaderOpenGl::setupProgram(const std::shared_ptr<::RenderingC
 }
 
 std::string AlphaInstancedShaderOpenGl::getVertexShader() {
-    return OMMVersionedGlesShaderCode(320 es,
+    return projectOntoUnitSphere ?
+           OMMVersionedGlesShaderCode(320 es,
+                                      uniform mat4 uvpMatrix;
+
+                                              in vec3 vPosition;
+                                              in vec2 vTexCoordinate;
+
+                                              in vec2 aPosition;
+                                              in float aRotation;
+                                              in vec4 aTexCoordinate;
+                                              in vec2 aScale;
+                                              in float aAlpha;
+                                              in vec2 aOffset;
+
+                                              out vec2 v_texCoord;
+                                              out vec4 v_texcoordInstance;
+                                              out float v_alpha;
+
+                                              void main() {
+                                                  float angle = aRotation * 3.14159265 / 180.0;
+
+                                                  float x = 1.0 * sin(aPosition.y) * cos(aPosition.x);
+                                                  float y = 1.0 * cos(aPosition.y);
+                                                  float z = -1.0 * sin(aPosition.y) * sin(aPosition.x);
+
+                                                  vec4 earthCenter = uvpMatrix * vec4(0,0,0, 1.0);
+                                                  vec4 screenPosition = uvpMatrix * vec4(x,y,z, 1.0);
+
+                                                  mat4 scaleRotateMatrix = mat4(vec4(cos(angle), -sin(angle), 0.0, 0.0),
+                                                                                vec4(sin(angle), cos(angle), 0.0, 0.0),
+                                                                                vec4(0.0, 0.0, 0.0, 0.0),
+                                                                                vec4(vPosition.xy * aScale + aOffset, 1.0, 1.0));
+
+                                                  auto diffCenter = screenPosition - earthCenter;
+                                                  if (diffCenter.z > 0.0) {
+                                                      v_alpha = 0.0;
+                                                  }
+
+                                                  gl_Position = scaleRotateMatrix * screenPosition;
+                                                  v_texcoordInstance = aTexCoordinate;
+                                                  v_texCoord = vTexCoordinate;
+                                                  v_alpha = aAlpha;
+                                              }
+                                      )
+    : OMMVersionedGlesShaderCode(320 es,
                                       uniform mat4 uvpMatrix;
 
                                       in vec3 vPosition;

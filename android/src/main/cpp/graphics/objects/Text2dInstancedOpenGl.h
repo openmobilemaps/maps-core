@@ -59,6 +59,8 @@ public:
 
     void setTextureCoordinates(const SharedBytes &textureCoordinates) override;
 
+    void setReferencePositions(const SharedBytes &positions) override;
+
     virtual void setStyleIndices(const ::SharedBytes &indices) override;
 
     virtual void setStyles(const ::SharedBytes &values) override;
@@ -103,7 +105,8 @@ protected:
     double factorWidth = 1.0;
 
     bool ready = false;
-    uint8_t buffersNotReady = 0b00111111;
+    uint8_t buffersNotReadyResetValue = 0b01111111;
+    uint8_t buffersNotReady = buffersNotReadyResetValue;
     bool textureCoordsReady = false;
     std::recursive_mutex dataMutex;
 
@@ -117,6 +120,7 @@ protected:
     int instScalesHandle;
     int instStyleIndicesHandle;
     int instTextureCoordinatesHandle;
+    int instReferencePositionsHandle;
 
     int styleBufferHandle;
     GLuint styleBuffer;
@@ -126,7 +130,8 @@ protected:
     static const int instScalesOffsetBytes = sizeof(GLfloat) * 6;
     static const int instRotationsOffsetBytes = sizeof(GLfloat) * 8;
     static const int instStyleIndicesOffsetBytes = sizeof(GLfloat) * 9;
-    static const int instValuesSizeBytes = sizeof(GLfloat) * 10;
+    static const int instReferencePositionsOffsetBytes = sizeof(GLfloat) * 10;
+    static const int instValuesSizeBytes = sizeof(GLfloat) * 12;
 
 private:
     bool writeToDynamicInstanceDataBuffer(const ::SharedBytes &data, GLuint targetOffsetBytes);
