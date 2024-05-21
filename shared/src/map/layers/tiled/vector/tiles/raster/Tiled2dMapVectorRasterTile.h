@@ -57,4 +57,6 @@ private:
     std::optional<RasterShaderStyle> lastStyle;
 
     Tiled2dMapZoomInfo zoomInfo;
+
+    int32_t subdivisionFactor = 3;
 };

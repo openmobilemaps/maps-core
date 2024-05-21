@@ -203,7 +203,7 @@ void Tiled2dMapVectorPolygonPatternTile::setVectorTileData(const Tiled2dMapVecto
                         } else {
                             styleGroupIndex = (int) featureGroups.size();
                             styleIndex = 0;
-                            auto shader = shaderFactory->createPolygonPatternGroupShader(fadeInPattern);
+                            auto shader = shaderFactory->createPolygonPatternGroupShader(fadeInPattern, mapInterface->is3d());
                             auto polygonDescription = std::static_pointer_cast<PolygonVectorLayerDescription>(description);
                             shader->asShaderProgramInterface()->setBlendMode(polygonDescription->style.getBlendMode(EvaluationContext(0.0, dpFactor, std::make_shared<FeatureContext>(), featureStateManager)));
                             shaders.push_back(shader);

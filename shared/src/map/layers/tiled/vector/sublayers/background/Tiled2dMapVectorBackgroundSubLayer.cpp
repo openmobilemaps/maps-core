@@ -19,6 +19,7 @@
 #include "PolygonPatternGroup2dInterface.h"
 #include "MapCameraInterface.h"
 #include "PolygonGroupShaderInterface.h"
+#include "PolygonHelper.h"
 
 void Tiled2dMapVectorBackgroundSubLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface, int32_t layerIndex) {
     Tiled2dMapVectorSubLayer::onAdded(mapInterface, layerIndex);
@@ -29,20 +30,46 @@ void Tiled2dMapVectorBackgroundSubLayer::onAdded(const std::shared_ptr<MapInterf
     auto context = std::make_shared<FeatureContext>(vtzero::GeomType::POINT, FeatureContext::mapType{}, 0);
     auto evalContext = EvaluationContext(0.0, dpFactor, context, featureStateManager);
 
-    std::vector<float> vertices = {
-        -1,  1, 0,//A
-         1,  1, 0,//B
-         1, -1, 0,//C
-        -1, -1, 0 //D
-    };
+    bool is3d = mapInterface->is3d();
+
+    std::vector<float> vertices;
     std::vector<uint16_t> indices = {
-        0, 1, 2, // ABC
-        0, 2, 3, // ACD
+        0, 2, 1, // ACB
+        0, 3, 2, // ADC
     };
+
+    if (is3d) {
+        auto converter = mapInterface->getCoordinateConverterHelper();
+
+        RectCoord globe = RectCoord(Coord(CoordinateSystemIdentifiers::EPSG4326(), -180.0, 90.0, 0),
+                                     Coord(CoordinateSystemIdentifiers::EPSG4326(),  180.0, -90.0, 0));
+
+        std::vector<Vec2D> vecVertices;
+        auto globeConverted = converter->convertRectToRenderSystem(globe);
+        for (auto const &coord: PolygonHelper::coordsFromRect(globeConverted).positions) {
+            vecVertices.push_back(Vec2D(coord.x, coord.y));
+        }
+
+        PolygonHelper::subdivision(vecVertices, indices, 0.2, 3);
+        for (const auto& v : vecVertices) {
+            vertices.push_back(v.x);
+            vertices.push_back(v.y);
+            vertices.push_back(0.0f);
+        }
+    } else {
+        vertices = {
+            -1,  1, 0,//A
+             1,  1, 0,//B
+             1, -1, 0,//C
+            -1, -1, 0 //D
+        };
+    }
+
+
 
     patternName = description->style.getPattern(evalContext);
     if (!patternName.empty()) {
-        auto shader = mapInterface->getShaderFactory()->createPolygonPatternGroupShader(false);
+        auto shader = mapInterface->getShaderFactory()->createPolygonPatternGroupShader(false, is3d);
 
         shader->asShaderProgramInterface()->setBlendMode(description->style.getBlendMode(evalContext));
 
@@ -58,7 +85,7 @@ void Tiled2dMapVectorBackgroundSubLayer::onAdded(const std::shared_ptr<MapInterf
         }
     }
 
-    auto shader = mapInterface->getShaderFactory()->createPolygonGroupShader(false);
+    auto shader = mapInterface->getShaderFactory()->createPolygonGroupShader(false, is3d);
     auto object = mapInterface->getGraphicsObjectFactory()->createPolygonGroup(shader->asShaderProgramInterface());
     object->asGraphicsObject()->setDebugLabel(description->identifier);
     polygonObject = std::make_shared<PolygonGroup2dLayerObject>(mapInterface->getCoordinateConverterHelper(), object, shader);
@@ -67,13 +94,14 @@ void Tiled2dMapVectorBackgroundSubLayer::onAdded(const std::shared_ptr<MapInterf
     polygonObject->setStyles({
         PolygonStyle(color, alpha)
     });
+
     polygonObject->setVertices(vertices, indices);
 
     std::vector<std::shared_ptr<::RenderObjectInterface>> renderObjects {  };
 
-    renderObjects.push_back(std::make_shared<RenderObject>(object->asGraphicsObject(), true));
+    renderObjects.push_back(std::make_shared<RenderObject>(object->asGraphicsObject(), !is3d));
     if (patternObject) {
-        renderObjects.push_back(std::make_shared<RenderObject>(patternObject->getPolygonObject(), true));
+        renderObjects.push_back(std::make_shared<RenderObject>(patternObject->getPolygonObject(), !is3d));
     }
 
     auto renderPass = std::make_shared<RenderPass>(RenderPassConfig(0, false), renderObjects );

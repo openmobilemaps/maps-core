@@ -42,9 +42,9 @@ public:
 
     virtual /*not-null*/ std::shared_ptr<ColorCircleShaderInterface> createUnitSphereColorCircleShader() = 0;
 
-    virtual /*not-null*/ std::shared_ptr<PolygonGroupShaderInterface> createPolygonGroupShader(bool isStriped) = 0;
+    virtual /*not-null*/ std::shared_ptr<PolygonGroupShaderInterface> createPolygonGroupShader(bool isStriped, bool unitSphere) = 0;
 
-    virtual /*not-null*/ std::shared_ptr<PolygonPatternGroupShaderInterface> createPolygonPatternGroupShader(bool fadeInPattern) = 0;
+    virtual /*not-null*/ std::shared_ptr<PolygonPatternGroupShaderInterface> createPolygonPatternGroupShader(bool fadeInPattern, bool unitSphere) = 0;
 
     virtual /*not-null*/ std::shared_ptr<TextShaderInterface> createTextShader() = 0;
 

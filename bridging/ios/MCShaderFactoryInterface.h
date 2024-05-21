@@ -38,9 +38,11 @@
 
 - (nullable id<MCColorCircleShaderInterface>)createUnitSphereColorCircleShader;
 
-- (nullable id<MCPolygonGroupShaderInterface>)createPolygonGroupShader:(BOOL)isStriped;
+- (nullable id<MCPolygonGroupShaderInterface>)createPolygonGroupShader:(BOOL)isStriped
+                                                            unitSphere:(BOOL)unitSphere;
 
-- (nullable id<MCPolygonPatternGroupShaderInterface>)createPolygonPatternGroupShader:(BOOL)fadeInPattern;
+- (nullable id<MCPolygonPatternGroupShaderInterface>)createPolygonPatternGroupShader:(BOOL)fadeInPattern
+                                                                          unitSphere:(BOOL)unitSphere;
 
 - (nullable id<MCTextShaderInterface>)createTextShader;
 
