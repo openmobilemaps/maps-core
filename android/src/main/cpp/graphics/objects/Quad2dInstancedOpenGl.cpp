@@ -27,7 +27,7 @@ void Quad2dInstancedOpenGl::clear() {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
     if (ready) {
         removeGlBuffers();
-        buffersNotReady = 0b00011111;
+        buffersNotReady = buffersNotReadyResetValue;
     }
     if (textureCoordsReady) {
         removeTextureCoordsGlBuffers();
@@ -107,6 +107,11 @@ void Quad2dInstancedOpenGl::prepareGlData(int program) {
     instTextureCoordinatesHandle = glGetAttribLocation(program, "aTexCoordinate");
     instScalesHandle = glGetAttribLocation(program, "aScale");
     instAlphasHandle = glGetAttribLocation(program, "aAlpha");
+    instPositionOffsetsHandle = glGetAttribLocation(program, "aOffset");
+    if (instPositionOffsetsHandle < 0) {
+        buffersNotReadyResetValue &= ~(1 << 5);
+        buffersNotReady &= ~(1 << 5);
+    }
 
     vpMatrixHandle = glGetUniformLocation(program, "uvpMatrix");
     mMatrixHandle = glGetUniformLocation(program, "umMatrix");
@@ -251,6 +256,12 @@ void Quad2dInstancedOpenGl::render(const std::shared_ptr<::RenderingContextInter
     glVertexAttribPointer(instAlphasHandle, 1, GL_FLOAT, GL_FALSE, 0, (float *)(instAlphasOffsetBytes * instanceCount));
     glEnableVertexAttribArray(instAlphasHandle);
     glVertexAttribDivisor(instAlphasHandle, 1);
+    if (instPositionOffsetsHandle >= 0) {
+        glVertexAttribPointer(instPositionOffsetsHandle, 2, GL_FLOAT, GL_FALSE, 0,
+                              (float *) (instPositionOffsetsOffsetBytes * instanceCount));
+        glEnableVertexAttribArray(instPositionOffsetsHandle);
+        glVertexAttribDivisor(instPositionOffsetsHandle, 1);
+    }
 
     shaderProgram->preRender(context);
 
@@ -276,6 +287,9 @@ void Quad2dInstancedOpenGl::render(const std::shared_ptr<::RenderingContextInter
     glVertexAttribDivisor(instTextureCoordinatesHandle, 0);
     glVertexAttribDivisor(instScalesHandle, 0);
     glVertexAttribDivisor(instAlphasHandle, 0);
+    if (instPositionOffsetsHandle >= 0) {
+        glVertexAttribDivisor(instPositionOffsetsHandle, 0);
+    }
 
     // Disable vertex array
     glDisableVertexAttribArray(positionHandle);
@@ -287,6 +301,9 @@ void Quad2dInstancedOpenGl::render(const std::shared_ptr<::RenderingContextInter
     glDisableVertexAttribArray(instTextureCoordinatesHandle);
     glDisableVertexAttribArray(instScalesHandle);
     glDisableVertexAttribArray(instAlphasHandle);
+    if (instPositionOffsetsHandle >= 0) {
+        glDisableVertexAttribArray(instPositionOffsetsHandle);
+    }
 
     glDisable(GL_BLEND);
 }
@@ -347,6 +364,14 @@ void Quad2dInstancedOpenGl::setAlphas(const SharedBytes &values) {
         buffersNotReady &= ~(1 << 4);
     }
 }
+
+void Quad2dInstancedOpenGl::setPositionOffset(const SharedBytes &offsets) {
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
+    if (writeToDynamicInstanceDataBuffer(offsets, instPositionOffsetsOffsetBytes)) {
+        buffersNotReady &= ~(1 << 5);
+    }
+}
+
 
 bool Quad2dInstancedOpenGl::writeToDynamicInstanceDataBuffer(const ::SharedBytes &data, int targetOffsetBytes) {
     if(!ready){

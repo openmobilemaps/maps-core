@@ -25,7 +25,7 @@ void Text2dInstancedOpenGl::clear() {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
     if (ready) {
         removeGlBuffers();
-        buffersNotReady = 0b00111111;
+        buffersNotReady = buffersNotReadyResetValue;
     }
     if (textureCoordsReady) {
         removeTextureCoordsGlBuffers();
@@ -106,6 +106,11 @@ void Text2dInstancedOpenGl::prepareGlData(int program) {
     instScalesHandle = glGetAttribLocation(program, "aScale");
     instRotationsHandle = glGetAttribLocation(program, "aRotation");
     instStyleIndicesHandle = glGetAttribLocation(program, "aStyleIndex");
+    instReferencePositionsHandle = glGetAttribLocation(program, "aReferencePosition");
+    if (instReferencePositionsHandle < 0) {
+        buffersNotReadyResetValue &= ~(1 << 5);
+        buffersNotReady &= ~(1 << 5);
+    }
     styleBufferHandle = glGetProgramResourceIndex(program, GL_SHADER_STORAGE_BLOCK, "textInstancedStyleBuffer");
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -247,6 +252,15 @@ void Text2dInstancedOpenGl::render(const std::shared_ptr<::RenderingContextInter
     glVertexAttribIPointer(instStyleIndicesHandle, 1, GL_UNSIGNED_SHORT, 0, (float*)(instStyleIndicesOffsetBytes * instanceCount));
     glEnableVertexAttribArray(instStyleIndicesHandle);
     glVertexAttribDivisor(instStyleIndicesHandle, 1);
+    glVertexAttribIPointer(instStyleIndicesHandle, 1, GL_UNSIGNED_SHORT, 0, (float*)(instStyleIndicesOffsetBytes * instanceCount));
+    glEnableVertexAttribArray(instStyleIndicesHandle);
+    glVertexAttribDivisor(instStyleIndicesHandle, 1);
+    if (instReferencePositionsHandle >= 0) {
+        glVertexAttribPointer(instReferencePositionsHandle, 2, GL_FLOAT, GL_FALSE, 0,
+                              (float *) (instReferencePositionsOffsetBytes * instanceCount));
+        glEnableVertexAttribArray(instReferencePositionsHandle);
+        glVertexAttribDivisor(instReferencePositionsHandle, 1);
+    }
 
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, styleBuffer);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, styleBufferHandle, styleBuffer);
@@ -276,6 +290,9 @@ void Text2dInstancedOpenGl::render(const std::shared_ptr<::RenderingContextInter
     glVertexAttribDivisor(instScalesHandle, 0);
     glVertexAttribDivisor(instRotationsHandle, 0);
     glVertexAttribDivisor(instStyleIndicesHandle, 0);
+    if (instReferencePositionsHandle >= 0) {
+        glVertexAttribDivisor(instReferencePositionsHandle, 0);
+    }
 
     // Disable vertex array
     glDisableVertexAttribArray(positionHandle);
@@ -287,6 +304,9 @@ void Text2dInstancedOpenGl::render(const std::shared_ptr<::RenderingContextInter
     glDisableVertexAttribArray(instScalesHandle);
     glDisableVertexAttribArray(instRotationsHandle);
     glDisableVertexAttribArray(instStyleIndicesHandle);
+    if (instReferencePositionsHandle >= 0) {
+        glDisableVertexAttribArray(instReferencePositionsHandle);
+    }
 
     glDisable(GL_BLEND);
 }
@@ -346,6 +366,13 @@ void Text2dInstancedOpenGl::setStyleIndices(const ::SharedBytes &indices) {
     }
 }
 
+void Text2dInstancedOpenGl::setReferencePositions(const SharedBytes &positions) {
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
+    if (writeToDynamicInstanceDataBuffer(positions, instReferencePositionsOffsetBytes)) {
+        buffersNotReady &= ~(1 << 5);
+    }
+}
+
 void Text2dInstancedOpenGl::setStyles(const ::SharedBytes &values) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
     if (!ready) {
@@ -355,7 +382,7 @@ void Text2dInstancedOpenGl::setStyles(const ::SharedBytes &values) {
     glBufferData(GL_SHADER_STORAGE_BUFFER, values.elementCount * values.bytesPerElement, (void *) values.address, GL_DYNAMIC_DRAW);
     glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-    buffersNotReady &= ~(1 << 5);
+    buffersNotReady &= ~(1 << 6);
 }
 
 bool Text2dInstancedOpenGl::writeToDynamicInstanceDataBuffer(const ::SharedBytes &data, GLuint targetOffsetBytes) {

@@ -68,7 +68,9 @@ class Quad2dInstancedOpenGl : public GraphicsObjectInterface,
 
     virtual void setAlphas(const ::SharedBytes &values) override;
 
-  protected:
+    void setPositionOffset(const SharedBytes &offsets) override;
+
+protected:
     virtual void adjustTextureCoordinates();
 
     virtual void prepareTextureDraw(int mProgram);
@@ -108,7 +110,8 @@ class Quad2dInstancedOpenGl : public GraphicsObjectInterface,
     double factorWidth = 1.0;
 
     bool ready = false;
-    uint8_t buffersNotReady = 0b00011111;
+    uint8_t buffersNotReadyResetValue = 0b00111111;
+    uint8_t buffersNotReady = 0b00111111;
     bool textureCoordsReady = false;
     std::recursive_mutex dataMutex;
 
@@ -119,16 +122,18 @@ class Quad2dInstancedOpenGl : public GraphicsObjectInterface,
     GLuint dynamicInstanceDataBuffer;
     int instPositionsHandle;
     int instRotationsHandle;
+    int instTextureCoordinatesHandle;
     int instScalesHandle;
     int instAlphasHandle;
-    int instTextureCoordinatesHandle;
+    int instPositionOffsetsHandle;
 
     static const int instPositionsOffsetBytes = sizeof(GLfloat) * 0;
     static const int instRotationsOffsetBytes = sizeof(GLfloat) * 2;
     static const int instTextureCoordinatesOffsetBytes = sizeof(GLfloat) * 3;
     static const int instScalesOffsetBytes = sizeof(GLfloat) * 7;
     static const int instAlphasOffsetBytes = sizeof(GLfloat) * 9;
-    static const int instValuesSizeBytes = sizeof(GLfloat) * 10;
+    static const int instPositionOffsetsOffsetBytes = sizeof(GLfloat) * 10;
+    static const int instValuesSizeBytes = sizeof(GLfloat) * 12;
 
 private:
     bool writeToDynamicInstanceDataBuffer(const ::SharedBytes &data, int targetOffsetBytes);
