@@ -17,11 +17,13 @@ class PolygonPatternGroupShader: BaseShader {
     // MARK: - Variables
 
     let fadeInPattern : Bool
+    let isUnitSphere : Bool
 
     // MARK: - Init
 
-    init(fadeInPattern: Bool) {
+    init(fadeInPattern: Bool,  isUnitSphere: Bool = false) {
         self.fadeInPattern = fadeInPattern
+        self.isUnitSphere = isUnitSphere
         super.init()
     }
 

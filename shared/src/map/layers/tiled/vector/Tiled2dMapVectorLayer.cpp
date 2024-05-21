@@ -492,6 +492,8 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
         setupReady = true;
     }
     setupCV.notify_all();
+
+    pregenerateRenderPasses();
 }
 
 void Tiled2dMapVectorLayer::reloadDataSource(const std::string &sourceName) {

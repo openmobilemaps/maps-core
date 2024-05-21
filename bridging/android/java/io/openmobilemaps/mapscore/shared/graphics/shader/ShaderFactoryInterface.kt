@@ -28,9 +28,9 @@ abstract class ShaderFactoryInterface {
 
     abstract fun createUnitSphereColorCircleShader(): ColorCircleShaderInterface
 
-    abstract fun createPolygonGroupShader(isStriped: Boolean): PolygonGroupShaderInterface
+    abstract fun createPolygonGroupShader(isStriped: Boolean, unitSphere: Boolean): PolygonGroupShaderInterface
 
-    abstract fun createPolygonPatternGroupShader(fadeInPattern: Boolean): PolygonPatternGroupShaderInterface
+    abstract fun createPolygonPatternGroupShader(fadeInPattern: Boolean, unitSphere: Boolean): PolygonPatternGroupShaderInterface
 
     abstract fun createTextShader(): TextShaderInterface
 
@@ -123,17 +123,17 @@ abstract class ShaderFactoryInterface {
         }
         private external fun native_createUnitSphereColorCircleShader(_nativeRef: Long): ColorCircleShaderInterface
 
-        override fun createPolygonGroupShader(isStriped: Boolean): PolygonGroupShaderInterface {
+        override fun createPolygonGroupShader(isStriped: Boolean, unitSphere: Boolean): PolygonGroupShaderInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            return native_createPolygonGroupShader(this.nativeRef, isStriped)
+            return native_createPolygonGroupShader(this.nativeRef, isStriped, unitSphere)
         }
-        private external fun native_createPolygonGroupShader(_nativeRef: Long, isStriped: Boolean): PolygonGroupShaderInterface
+        private external fun native_createPolygonGroupShader(_nativeRef: Long, isStriped: Boolean, unitSphere: Boolean): PolygonGroupShaderInterface
 
-        override fun createPolygonPatternGroupShader(fadeInPattern: Boolean): PolygonPatternGroupShaderInterface {
+        override fun createPolygonPatternGroupShader(fadeInPattern: Boolean, unitSphere: Boolean): PolygonPatternGroupShaderInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            return native_createPolygonPatternGroupShader(this.nativeRef, fadeInPattern)
+            return native_createPolygonPatternGroupShader(this.nativeRef, fadeInPattern, unitSphere)
         }
-        private external fun native_createPolygonPatternGroupShader(_nativeRef: Long, fadeInPattern: Boolean): PolygonPatternGroupShaderInterface
+        private external fun native_createPolygonPatternGroupShader(_nativeRef: Long, fadeInPattern: Boolean, unitSphere: Boolean): PolygonPatternGroupShaderInterface
 
         override fun createTextShader(): TextShaderInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

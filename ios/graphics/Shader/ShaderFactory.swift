@@ -20,12 +20,12 @@ class ShaderFactory: MCShaderFactoryInterface {
         TextShader()
     }
 
-    func createPolygonGroupShader(_ isStriped: Bool) -> MCPolygonGroupShaderInterface? {
-        PolygonGroupShader(isStriped: isStriped, isUnitSphere: true)
+    func createPolygonGroupShader(_ isStriped: Bool, unitSphere: Bool) -> MCPolygonGroupShaderInterface? {
+        PolygonGroupShader(isStriped: isStriped, isUnitSphere: unitSphere)
     }
 
-    func createPolygonPatternGroupShader(_ fadeInPattern: Bool) -> MCPolygonPatternGroupShaderInterface? {
-        PolygonPatternGroupShader(fadeInPattern: fadeInPattern)
+    func createPolygonPatternGroupShader(_ fadeInPattern: Bool, unitSphere: Bool) -> MCPolygonPatternGroupShaderInterface? {
+        PolygonPatternGroupShader(fadeInPattern: fadeInPattern, isUnitSphere: unitSphere)
     }
 
     func createColorCircleShader() -> MCColorCircleShaderInterface? {

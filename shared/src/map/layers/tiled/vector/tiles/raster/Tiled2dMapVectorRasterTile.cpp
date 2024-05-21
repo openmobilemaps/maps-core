@@ -27,14 +27,18 @@ Tiled2dMapVectorRasterTile::Tiled2dMapVectorRasterTile(const std::weak_ptr<MapIn
     isStyleStateDependant = usedKeys.isStateDependant();
     auto pMapInterface = mapInterface.lock();
     if (pMapInterface) {
-        auto shader = pMapInterface->getShaderFactory()->createRasterShader();
+        auto shader = pMapInterface->is3d() ? pMapInterface->getShaderFactory()->createUnitSphereRasterShader() : pMapInterface->getShaderFactory()->createRasterShader();
         shader->asShaderProgramInterface()->setBlendMode(description->style.getBlendMode(EvaluationContext(0.0, dpFactor, std::make_shared<FeatureContext>(), featureStateManager)));
         auto quad = pMapInterface->getGraphicsObjectFactory()->createQuad(shader->asShaderProgramInterface());
 #if DEBUG
         quad->asGraphicsObject()->setDebugLabel(description->identifier + "_" + tileInfo.tileInfo.to_string_short());
 #endif
-        tileObject = std::make_shared<Textured2dLayerObject>(quad, shader, pMapInterface);
+        tileObject = std::make_shared<Textured2dLayerObject>(quad, shader, pMapInterface, pMapInterface->is3d());
         tileObject->setRectCoord(tileInfo.tileInfo.bounds);
+
+        if  (pMapInterface->is3d()) {
+            quad->setSubdivisionFactor(std::clamp(subdivisionFactor + tileInfo.tileInfo.tessellationFactor, 0, 5));
+        }
     }
 }
 

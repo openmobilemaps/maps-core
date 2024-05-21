@@ -113,16 +113,20 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (nullable id<MCPolygonGroupShaderInterface>)createPolygonGroupShader:(BOOL)isStriped {
+- (nullable id<MCPolygonGroupShaderInterface>)createPolygonGroupShader:(BOOL)isStriped
+                                                            unitSphere:(BOOL)unitSphere {
     try {
-        auto objcpp_result_ = _cppRefHandle.get()->createPolygonGroupShader(::djinni::Bool::toCpp(isStriped));
+        auto objcpp_result_ = _cppRefHandle.get()->createPolygonGroupShader(::djinni::Bool::toCpp(isStriped),
+                                                                            ::djinni::Bool::toCpp(unitSphere));
         return ::djinni_generated::PolygonGroupShaderInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (nullable id<MCPolygonPatternGroupShaderInterface>)createPolygonPatternGroupShader:(BOOL)fadeInPattern {
+- (nullable id<MCPolygonPatternGroupShaderInterface>)createPolygonPatternGroupShader:(BOOL)fadeInPattern
+                                                                          unitSphere:(BOOL)unitSphere {
     try {
-        auto objcpp_result_ = _cppRefHandle.get()->createPolygonPatternGroupShader(::djinni::Bool::toCpp(fadeInPattern));
+        auto objcpp_result_ = _cppRefHandle.get()->createPolygonPatternGroupShader(::djinni::Bool::toCpp(fadeInPattern),
+                                                                                   ::djinni::Bool::toCpp(unitSphere));
         return ::djinni_generated::PolygonPatternGroupShaderInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
@@ -262,17 +266,19 @@ public:
             return ::djinni_generated::ColorCircleShaderInterface::toCpp(objcpp_result_);
         }
     }
-    /*not-null*/ std::shared_ptr<::PolygonGroupShaderInterface> createPolygonGroupShader(bool c_isStriped) override
+    /*not-null*/ std::shared_ptr<::PolygonGroupShaderInterface> createPolygonGroupShader(bool c_isStriped, bool c_unitSphere) override
     {
         @autoreleasepool {
-            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createPolygonGroupShader:(::djinni::Bool::fromCpp(c_isStriped))];
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createPolygonGroupShader:(::djinni::Bool::fromCpp(c_isStriped))
+                                                                                          unitSphere:(::djinni::Bool::fromCpp(c_unitSphere))];
             return ::djinni_generated::PolygonGroupShaderInterface::toCpp(objcpp_result_);
         }
     }
-    /*not-null*/ std::shared_ptr<::PolygonPatternGroupShaderInterface> createPolygonPatternGroupShader(bool c_fadeInPattern) override
+    /*not-null*/ std::shared_ptr<::PolygonPatternGroupShaderInterface> createPolygonPatternGroupShader(bool c_fadeInPattern, bool c_unitSphere) override
     {
         @autoreleasepool {
-            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createPolygonPatternGroupShader:(::djinni::Bool::fromCpp(c_fadeInPattern))];
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createPolygonPatternGroupShader:(::djinni::Bool::fromCpp(c_fadeInPattern))
+                                                                                                 unitSphere:(::djinni::Bool::fromCpp(c_unitSphere))];
             return ::djinni_generated::PolygonPatternGroupShaderInterface::toCpp(objcpp_result_);
         }
     }
