@@ -963,7 +963,7 @@ Coord MapCamera3d::coordFromScreenPosition(const ::Vec2F &posScreen) {
 
     if (didHit) {
         float longitude = std::atan2(point.x, point.z) * 180 / M_PI - 90;
-        if (longitude < 180) {
+        if (longitude < -180) {
             longitude += 360;
         }
         float latitude = std::asin(point.y) * 180 / M_PI;
