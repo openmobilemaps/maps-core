@@ -32,7 +32,11 @@ std::shared_ptr<AlphaShaderInterface> ShaderFactoryOpenGl::createUnitSphereAlpha
 }
 
 std::shared_ptr<AlphaInstancedShaderInterface> ShaderFactoryOpenGl::createAlphaInstancedShader() {
-    return std::make_shared<AlphaInstancedShaderOpenGl>();
+    return std::make_shared<AlphaInstancedShaderOpenGl>(false);
+}
+
+std::shared_ptr<AlphaInstancedShaderInterface> ShaderFactoryOpenGl::createUnitSphereAlphaInstancedShader() {
+    return std::make_shared<AlphaInstancedShaderOpenGl>(true);
 }
 
 std::shared_ptr<RasterShaderInterface> ShaderFactoryOpenGl::createRasterShader() {
@@ -76,7 +80,11 @@ std::shared_ptr<TextShaderInterface> ShaderFactoryOpenGl::createTextShader() {
 }
 
 std::shared_ptr<TextInstancedShaderInterface> ShaderFactoryOpenGl::createTextInstancedShader() {
-    return std::make_shared<TextInstancedShaderOpenGl>();
+    return std::make_shared<TextInstancedShaderOpenGl>(false);
+}
+
+std::shared_ptr<TextInstancedShaderInterface> ShaderFactoryOpenGl::createUnitSphereTextInstancedShader() {
+    return std::make_shared<TextInstancedShaderOpenGl>(true);
 }
 
 std::shared_ptr<StretchShaderInterface> ShaderFactoryOpenGl::createStretchShader() {

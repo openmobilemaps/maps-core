@@ -35,6 +35,7 @@
 #define GLOBE_INITIAL_ZOOM 30'000'000
 #define LOCAL_MIN_ZOOM 10'000'000
 #define LOCAL_MAX_ZOOM 100'000
+#define LOCAL_INITIAL_ZOOM 3'000'000
 
 #define FIELD_OF_VIEW 22.5
 
@@ -962,6 +963,9 @@ Coord MapCamera3d::coordFromScreenPosition(const ::Vec2F &posScreen) {
 
     if (didHit) {
         float longitude = std::atan2(point.x, point.z) * 180 / M_PI - 90;
+        if (longitude < 180) {
+            longitude += 360;
+        }
         float latitude = std::asin(point.y) * 180 / M_PI;
         return Coord(CoordinateSystemIdentifiers::EPSG4326(), longitude, latitude, 0);
     }
@@ -1313,7 +1317,7 @@ void MapCamera3d::setCameraMode(CameraMode3d mode) {
         case CameraMode3d::TILTED_ORBITAL:
             this->zoomMin = LOCAL_MIN_ZOOM;
             this->zoomMax = LOCAL_MAX_ZOOM;
-            targetZoom = LOCAL_MIN_ZOOM;
+            targetZoom = LOCAL_INITIAL_ZOOM;
             break;
     }
 

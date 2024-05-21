@@ -29,6 +29,10 @@ public:
 
     std::shared_ptr<ColorCircleShaderInterface> createColorCircleShader() override;
 
+    std::shared_ptr<AlphaInstancedShaderInterface> createUnitSphereAlphaInstancedShader() override;
+
+    std::shared_ptr<TextInstancedShaderInterface> createUnitSphereTextInstancedShader() override;
+
     std::shared_ptr<ColorCircleShaderInterface> createUnitSphereColorCircleShader() override;
 
     std::shared_ptr<PolygonGroupShaderInterface> createPolygonGroupShader(bool isStriped) override;

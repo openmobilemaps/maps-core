@@ -12,7 +12,10 @@
 #include "OpenGlContext.h"
 #include "OpenGlHelper.h"
 
-const std::string TextInstancedShaderOpenGl::programName = "UBMAP_TextInstancedShaderOpenGl";
+
+TextInstancedShaderOpenGl::TextInstancedShaderOpenGl(bool projectOntoUnitSphere)
+        : projectOntoUnitSphere(projectOntoUnitSphere),
+          programName(projectOntoUnitSphere ? "UBMAP_TextInstancedUnitSphereShaderOpenGl" : "UBMAP_TextInstancedShaderOpenGl") {}
 
 std::string TextInstancedShaderOpenGl::getProgramName() { return programName; }
 
@@ -39,7 +42,58 @@ void TextInstancedShaderOpenGl::preRender(const std::shared_ptr<::RenderingConte
 }
 
 std::string TextInstancedShaderOpenGl::getVertexShader() {
-    return OMMVersionedGlesShaderCode(320 es,
+    return projectOntoUnitSphere ?
+    OMMVersionedGlesShaderCode(320 es,
+                               uniform mat4 uvpMatrix;
+                               uniform mat4 umMatrix;
+
+                                       in vec4 vPosition;
+                                       in vec2 texCoordinate;
+
+                                       in vec2 aPosition;
+                                       in vec2 aReferencePosition;
+                                       in vec4 aTexCoordinate;
+                                       in vec2 aScale;
+                                       in float aRotation;
+                                       in uint aStyleIndex;
+
+                                       out vec2 v_texCoord;
+                                       out vec4 v_texCoordInstance;
+                                       out flat uint vStyleIndex;
+                                       out float alpha;
+
+                                       void main() {
+                                           float angle = aRotation * 3.14159265 / 180.0;
+
+                                           vec4 newVertex = umMatrix * vec4(aReferencePosition, 1.0, 1.0);
+
+                                           vec4 earthCenter = uvpMatrix * vec4(0.0, 0.0, 0.0, 1.0);
+                                           vec4 screenPosition = uvpMatrix * vec4(newVertex.z * sin(newVertex.y) * cos(newVertex.x),
+                                                                                  newVertex.z * cos(newVertex.y),
+                                                                                  -newVertex.z * sin(newVertex.y) * sin(newVertex.x),
+                                                                                  1.0);
+
+                                           alpha = 1.0;
+                                           if (screenPosition.z - earthCenter.z > 0.0) {
+                                               alpha = 0.0;
+                                           }
+
+                                           vec2 size = (vPosition.xy) * scale;
+
+                                           mat4 screenMatrix = mat4(
+                                                   vec4(cos(angle), -sin(angle), 0.0, 0.0),
+                                                   vec4(sin(angle), cos(angle), 0.0, 0.0),
+                                                   vec4(0.0, 0.0, 0.0, 0.0),
+                                                   vec4(size.xy + aPosition, 0.0, 1.0)
+                                           );
+
+                                           gl_Position = screenMatrix * screenPosition;
+                                           v_texCoordInstance = aTexCoordinate;
+                                           v_texCoord = texCoordinate;
+                                           vStyleIndex = aStyleIndex;
+                                       }
+                               )
+    : OMMVersionedGlesShaderCode(320 es,
                                       uniform mat4 uvpMatrix;
 
                                       in vec4 vPosition;
@@ -54,6 +108,7 @@ std::string TextInstancedShaderOpenGl::getVertexShader() {
                                       out vec2 v_texCoord;
                                       out vec4 v_texCoordInstance;
                                       out flat uint vStyleIndex;
+                                      out float alpha;
 
                                       void main() {
                                           float angle = aRotation * 3.14159265 / 180.0;
@@ -71,6 +126,7 @@ std::string TextInstancedShaderOpenGl::getVertexShader() {
                                           v_texCoordInstance = aTexCoordinate;
                                           v_texCoord = texCoordinate;
                                           vStyleIndex = aStyleIndex;
+                                          alpha = 1.0;
                                       }
     );
 }
@@ -88,6 +144,7 @@ std::string TextInstancedShaderOpenGl::getFragmentShader() {
                                               in vec2 v_texCoord;
                                               in vec4 v_texCoordInstance;
                                               in flat uint vStyleIndex;
+                                              in float alpha;
 
                                               out vec4 fragmentColor;
 
