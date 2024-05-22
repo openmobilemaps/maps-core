@@ -114,14 +114,15 @@ extension Polygon2d: MCMaskingObjectInterface {
                 vpMatrix: Int64,
                 mMatrix: Int64,
                 screenPixelAsRealMeterFactor _: Double) {
-        guard isReady(),
-              let context = context as? RenderingContext,
-              let encoder = context.encoder else { return }
-
+        
         lock.lock()
         defer {
             lock.unlock()
         }
+
+        guard isReady(),
+              let context = context as? RenderingContext,
+              let encoder = context.encoder else { return }
 
         guard let verticesBuffer,
               let indicesBuffer

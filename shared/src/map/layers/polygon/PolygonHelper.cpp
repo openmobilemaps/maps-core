@@ -10,7 +10,7 @@
 
 #include "PolygonHelper.h"
 #include "RectCoord.h"
-#include "Vec2DHelper.h"
+#include "Vec2FHelper.h"
 #include <unordered_map>
 
 bool PolygonHelper::pointInside(const PolygonCoord &polygon, const Coord &point,
@@ -111,7 +111,7 @@ PolygonCoord PolygonHelper::coordsFromRect(const RectCoord &rect) {
 
 // Helper function to find or create a midpoint
 uint16_t findOrCreateMidpoint(std::unordered_map<uint32_t, uint16_t> &midpointCache,
-                              std::vector<Vec2D> &vertices,
+                              std::vector<Vec2F> &vertices,
                               uint16_t v0, uint16_t v1) {
     // Ensure the smaller index comes first to avoid duplicate edges in different order
     uint32_t smallerIndex = std::min(v0, v1);
@@ -125,7 +125,7 @@ uint16_t findOrCreateMidpoint(std::unordered_map<uint32_t, uint16_t> &midpointCa
     }
     
     // Create new midpoint, normalize it and add to vertex list
-    Vec2D midpoint = Vec2DHelper::midpoint(vertices[v0], vertices[v1]);
+    Vec2F midpoint = Vec2FHelper::midpoint(vertices[v0], vertices[v1]);
     uint16_t newIndex = vertices.size();
     vertices.push_back(midpoint);
     
@@ -134,7 +134,10 @@ uint16_t findOrCreateMidpoint(std::unordered_map<uint32_t, uint16_t> &midpointCa
     return newIndex;
 }
 // Function to recursively subdivide triangles
-void PolygonHelper::subdivision(std::vector<Vec2D> &vertices, std::vector<uint16_t> &indices, float threshold, int level) {
+void PolygonHelper::subdivision(std::vector<Vec2F> &vertices, std::vector<uint16_t> &indices, float threshold, int level) {
+    if (level == 0) {
+        return;
+    }
     std::unordered_map<uint32_t, uint16_t> midpointCache;
     std::vector<uint16_t> newIndices;
     bool subdivided = false;
@@ -147,10 +150,10 @@ void PolygonHelper::subdivision(std::vector<Vec2D> &vertices, std::vector<uint16
         
         // Check edge lengths
         
-        float d0 = Vec2DHelper::distance(vertices[v0], vertices[v1]);
-        float d1 = Vec2DHelper::distance(vertices[v1], vertices[v2]);
-        float d2 = Vec2DHelper::distance(vertices[v2], vertices[v0]);
-        
+        float d0 = Vec2FHelper::distance(vertices[v0], vertices[v1]);
+        float d1 = Vec2FHelper::distance(vertices[v1], vertices[v2]);
+        float d2 = Vec2FHelper::distance(vertices[v2], vertices[v0]);
+
         // Subdivide edges longer than the threshold
         if (d0 > threshold && d1 > threshold && d2 > threshold) {
             // All edges are longer than the threshold, subdivide all edges
@@ -201,6 +204,6 @@ void PolygonHelper::subdivision(std::vector<Vec2D> &vertices, std::vector<uint16
     
     // Recursively subdivide if any triangles were subdivided
     if (subdivided) {
-        subdivision(vertices, indices, threshold);
-    } 
+        subdivision(vertices, indices, threshold, level - 1);
+    }
 }

@@ -84,6 +84,12 @@ final class Quad2dInstanced: BaseGraphicsObject {
                          mMatrix: Int64,
                          isMasked: Bool,
                          screenPixelAsRealMeterFactor _: Double) {
+
+        lock.lock()
+        defer {
+            lock.unlock()
+        }
+        
         guard let verticesBuffer,
               let indicesBuffer,
               instanceCount != 0,
@@ -96,10 +102,6 @@ final class Quad2dInstanced: BaseGraphicsObject {
             return
         }
 
-        lock.lock()
-        defer {
-            lock.unlock()
-        }
         if shader is AlphaInstancedShader, texture == nil {
             ready = false
             return
