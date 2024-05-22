@@ -322,6 +322,16 @@ CJNIEXPORT jdouble JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCameraI
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
+CJNIEXPORT jboolean JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCameraInterface_00024CppProxy_native_1coordIsVisibleOnScreen(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeCoord::JniType j_coord, jfloat j_paddingPc)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::MapCameraInterface>(nativeRef);
+        auto r = ref->coordIsVisibleOnScreen(::djinni_generated::NativeCoord::toCpp(jniEnv, j_coord),
+                                             ::djinni::F32::toCpp(jniEnv, j_paddingPc));
+        return ::djinni::release(::djinni::Bool::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
 CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCameraInterface_00024CppProxy_native_1setRotationEnabled(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jboolean j_enabled)
 {
     try {

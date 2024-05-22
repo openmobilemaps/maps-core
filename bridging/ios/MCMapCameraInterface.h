@@ -98,6 +98,10 @@
 
 - (double)mapUnitsFromPixels:(double)distancePx;
 
+/** padding in percentage, where 1.0 = rect is half of full width and height */
+- (BOOL)coordIsVisibleOnScreen:(nonnull MCCoord *)coord
+                     paddingPc:(float)paddingPc;
+
 - (void)setRotationEnabled:(BOOL)enabled;
 
 - (void)setSnapToNorthEnabled:(BOOL)enabled;

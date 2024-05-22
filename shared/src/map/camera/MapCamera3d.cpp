@@ -355,7 +355,7 @@ std::vector<float> MapCamera3d::getVpMatrix() {
     Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
     double currentRotation = angle;
     double currentZoom = zoom;
-    RectCoord viewBounds = getRectFromViewport(sizeViewport, focusPointPosition);
+    // RectCoord viewBounds = getRectFromViewport(sizeViewport, focusPointPosition);
 
     std::vector<float> newViewMatrix(16, 0.0);
     std::vector<float> newProjectionMatrix(16, 0.0);
@@ -402,14 +402,13 @@ std::vector<float> MapCamera3d::getVpMatrix() {
     Matrix::rotateM(newViewMatrix, 0.0, latitude, 1.0, 0.0, 0.0);
     Matrix::rotateM(newViewMatrix, 0.0, -longitude, 0.0, 1.0, 0.0);
     Matrix::rotateM(newViewMatrix, 0.0, -90, 0.0, 1.0, 0.0); // zero longitude in London
-    // ^
-    // |
+
 
     std::vector<float> newVpMatrix(16, 0.0);
     Matrix::multiplyMM(newVpMatrix, 0, newProjectionMatrix, 0, newViewMatrix, 0);
 
     std::lock_guard<std::recursive_mutex> lock(vpDataMutex);
-    lastVpBounds = viewBounds;
+    // lastVpBounds = viewBounds;
     lastVpRotation = currentRotation;
     lastVpZoom = currentZoom;
     vpMatrix = newVpMatrix;
@@ -423,9 +422,10 @@ std::vector<float> MapCamera3d::getVpMatrix() {
 }
 
 std::optional<std::vector<float>> MapCamera3d::getLastVpMatrix() {
-    if (!lastVpBounds) {
-        return std::nullopt;
-    }
+    // TODO: Add back as soon as visiblerect calculation is done
+//    if (!lastVpBounds) {
+//        return std::nullopt;
+//    }
     std::vector<float> vpCopy;
     std::copy(vpMatrix.begin(), vpMatrix.end(), std::back_inserter(vpCopy));
     return vpCopy;
@@ -476,41 +476,51 @@ RectCoord MapCamera3d::getVisibleRect() {
 }
 
 RectCoord MapCamera3d::getPaddingAdjustedVisibleRect() {
-    Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
+    // TODO: Implement for Camera3D
+    printf("Warning: getPaddingAdjustedVisibleRect incomplete logic.\n");
 
-    // adjust viewport
-    sizeViewport.x -= (paddingLeft + paddingRight);
-    sizeViewport.y -= (paddingTop + paddingBottom);
-
-    // also use the padding adjusted center position
-    return getRectFromViewport(sizeViewport, getCenterPosition());
+    return RectCoord(Coord(3857, 0, 0, 0), Coord(3857, 0, 0, 0));
+//    Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
+//
+//    // adjust viewport
+//    sizeViewport.x -= (paddingLeft + paddingRight);
+//    sizeViewport.y -= (paddingTop + paddingBottom);
+//
+//    // also use the padding adjusted center position
+//    return getRectFromViewport(sizeViewport, getCenterPosition());
 }
 
 RectCoord MapCamera3d::getRectFromViewport(const Vec2I &sizeViewport, const Coord &center) {
-    double zoomFactor = screenPixelAsRealMeterFactor * zoom;
-
-    double halfWidth = sizeViewport.x * 0.5 * zoomFactor;
-    double halfHeight = sizeViewport.y * 0.5 * zoomFactor;
-
-    double sinAngle = sin(angle * M_PI / 180.0);
-    double cosAngle = cos(angle * M_PI / 180.0);
-
-    double deltaX = std::abs(halfWidth * cosAngle) + std::abs(halfHeight * sinAngle);
-    double deltaY = std::abs(halfWidth * sinAngle) + std::abs(halfHeight * cosAngle);
-
-    double topLeftX = center.x - deltaX;
-    double topLeftY = center.y + deltaY;
-    double bottomRightX = center.x + deltaX;
-    double bottomRightY = center.y - deltaY;
-
-    Coord topLeft = Coord(center.systemIdentifier, topLeftX, topLeftY, center.z);
-    Coord bottomRight = Coord(center.systemIdentifier, bottomRightX, bottomRightY, center.z);
-    return RectCoord(topLeft, bottomRight);
+    // TODO: Implement for Camera3D
+    printf("Warning: getRectFromViewport incomplete logic.\n");
+    return RectCoord(Coord(3857, 0, 0, 0), Coord(3857, 0, 0, 0));;
+//    double zoomFactor = screenPixelAsRealMeterFactor * zoom;
+//
+//    double halfWidth = sizeViewport.x * 0.5 * zoomFactor;
+//    double halfHeight = sizeViewport.y * 0.5 * zoomFactor;
+//
+//    double sinAngle = sin(angle * M_PI / 180.0);
+//    double cosAngle = cos(angle * M_PI / 180.0);
+//
+//    double deltaX = std::abs(halfWidth * cosAngle) + std::abs(halfHeight * sinAngle);
+//    double deltaY = std::abs(halfWidth * sinAngle) + std::abs(halfHeight * cosAngle);
+//
+//    double topLeftX = center.x - deltaX;
+//    double topLeftY = center.y + deltaY;
+//    double bottomRightX = center.x + deltaX;
+//    double bottomRightY = center.y - deltaY;
+//
+//    Coord topLeft = Coord(center.systemIdentifier, topLeftX, topLeftY, center.z);
+//    Coord bottomRight = Coord(center.systemIdentifier, bottomRightX, bottomRightY, center.z);
+//    return RectCoord(topLeft, bottomRight);
 }
 
 void MapCamera3d::notifyListeners(const int &listenerType) {
+    // TODO: Add back bounds listener as soon as visibleRect is implemented correctly
     std::optional<RectCoord> visibleRect =
         (listenerType & ListenerType::BOUNDS) ? std::optional<RectCoord>(getVisibleRect()) : std::nullopt;
+
+//    std::optional<RectCoord> visibleRect = std::nullopt;
 
     double angle = this->angle;
     double zoom = this->zoom;
@@ -1110,35 +1120,45 @@ bool MapCamera3d::gluInvertMatrix(const std::vector<double> &m, std::vector<doub
 }
 
 ::Vec2F MapCamera3d::screenPosFromCoord(const Coord &coord) {
-    const auto mapInterface = this->mapInterface;
-    const auto conversionHelper = mapInterface ? mapInterface->getCoordinateConverterHelper() : nullptr;
-    const auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
-    if (!conversionHelper || !renderingContext) {
-        return Vec2F(0.0, 0.0);
+    Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
+    if (validVpMatrix && sizeViewport.x != 0 && sizeViewport.y != 0) {
+        Coord renderCoord = conversionHelper->convertToRenderSystem(coord);
+
+        std::vector<float> position = {(float) (renderCoord.z * sin(renderCoord.y) * cos(renderCoord.x)),
+            (float) (renderCoord.z * cos(renderCoord.y)),
+            (float) (-renderCoord.z * sin(renderCoord.y) * sin(renderCoord.x)),
+            1.0};
+        auto projected = Matrix::multiply(vpMatrix, position);
+        projected[0] /= projected[3]; // percentage in x direction in [-1, 1], 0 being the center of the screen)
+        projected[1] /= projected[3]; // percentage in y direction in [-1, 1], 0 being the center of the screen)
+        projected[2] /= projected[3];
+        projected[3] /= projected[3];
+        // Map from [-1, 1] to screenPixels, with (0,0) being the top left corner
+        double screenXDiffToCenter = projected[0] * sizeViewport.x / 2.0;
+        double screenYDiffToCenter = projected[1] * sizeViewport.y / 2.0;
+
+        double posScreenX = screenXDiffToCenter + ((double)sizeViewport.x / 2.0);
+        double posScreenY = ((double)sizeViewport.y / 2.0) - screenYDiffToCenter;
+
+        return Vec2F(posScreenX, posScreenY);
     }
 
-    const auto mapCoord = conversionHelper->convert(mapCoordinateSystem.identifier, coord);
+    return Vec2F(0.0, 0.0);
+}
+// padding in percentage, where 1.0 = rect is half of full width and height
+bool MapCamera3d::coordIsVisibleOnScreen(const ::Coord & coord, float paddingPc) {
+    auto screenPos = screenPosFromCoord(coord);
+    Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
+    auto minX = sizeViewport.x * paddingPc * 0.25;
+    auto maxX = sizeViewport.x - minX;
+    auto minY = sizeViewport.y * paddingPc * 0.25;
+    auto maxY = sizeViewport.y - minY;
 
-    double angRad = -angle * M_PI / 180.0;
-    double sinAng = std::sin(angRad);
-    double cosAng = std::cos(angRad);
-
-    double coordXDiffToCenter = mapCoord.x - focusPointPosition.x;
-    double coordYDiffToCenter = mapCoord.y - focusPointPosition.y;
-
-    double screenXDiffToCenter = coordXDiffToCenter * cosAng - coordYDiffToCenter * sinAng;
-    double screenYDiffToCenter = coordXDiffToCenter * sinAng + coordYDiffToCenter * cosAng;
-
-    const Vec2I sizeViewport = renderingContext->getViewportSize();
-
-    double zoomFactor = screenPixelAsRealMeterFactor * zoom;
-    double posScreenX = (screenXDiffToCenter / zoomFactor) + ((double)sizeViewport.x / 2.0);
-    double posScreenY = ((double)sizeViewport.y / 2.0) - (screenYDiffToCenter / zoomFactor);
-
-    // TODO: Ensure screenPosFromCoord is correct
-    printf("Warning: screenPosFromCoord incomplete logic.\n");
-
-    return Vec2F(posScreenX, posScreenY);
+    if (sizeViewport.x != 0 && sizeViewport.y != 0) {
+        return screenPos.x >= minX && screenPos.x <= maxX && screenPos.y >= minY && screenPos.y <= maxY;
+    } else {
+        return false;
+    }
 }
 
 double MapCamera3d::mapUnitsFromPixels(double distancePx) {

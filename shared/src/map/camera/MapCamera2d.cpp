@@ -836,6 +836,20 @@ Coord MapCamera2d::coordFromScreenPosition(const ::Vec2F &posScreen) {
 
 ::Vec2F MapCamera2d::screenPosFromCoord(const Coord &coord) {
     return screenPosFromCoordZoom(coord, zoom);
+
+bool MapCamera2d::coordIsVisibleOnScreen(const ::Coord & coord, float paddingPc) {
+    auto screenPos = screenPosFromCoord(coord);
+    Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
+    auto minX = sizeViewport.x * paddingPc * 0.25;
+    auto maxX = sizeViewport.x - minX;
+    auto minY = sizeViewport.y * paddingPc * 0.25;
+    auto maxY = sizeViewport.y - minY;
+
+    if (sizeViewport.x != 0 && sizeViewport.y != 0) {
+        return screenPos.x >= minX && screenPos.x <= maxX && screenPos.y >= minY && screenPos.y <= maxY;
+    } else {
+        return false;
+    }
 }
 
 double MapCamera2d::mapUnitsFromPixels(double distancePx) { return distancePx * screenPixelAsRealMeterFactor * zoom; }

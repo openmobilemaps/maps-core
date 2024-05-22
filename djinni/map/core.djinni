@@ -181,6 +181,8 @@ map_camera_interface = interface +c {
     screen_pos_from_coord_zoom(coord: coord, zoom: f32): vec_2_f;
 
     map_units_from_pixels(distancePx: f64): f64;
+    # padding in percentage, where 1.0 = rect is half of full width and height
+    coord_is_visible_on_screen(coord: coord, padding_pc: f32): bool;
 
     set_rotation_enabled(enabled: bool);
     set_snap_to_north_enabled(enabled: bool);
