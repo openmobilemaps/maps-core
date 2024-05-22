@@ -219,11 +219,19 @@ void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDa
                         indexOffset = 0;
                     }
 
-                    for (auto const &index: polygon.indices) {
+                    auto coordinates = polygon.coordinates;
+                    auto indices = polygon.indices;
+
+                    if (mapInterface->is3d()) {
+                        PolygonHelper::subdivision(coordinates, indices, 0.1, 4);
+                    }
+
+
+                    for (auto const &index: indices) {
                         styleGroupNewPolygonsVector[styleGroupIndex].back().indices.push_back(indexOffset + index);
                     }
 
-                    for (auto const &coordinate: polygon.coordinates) {
+                    for (auto const &coordinate: coordinates) {
                         styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(coordinate.x);
                         styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(coordinate.y);
                         styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(styleIndex);

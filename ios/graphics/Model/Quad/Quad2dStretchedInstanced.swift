@@ -76,6 +76,12 @@ final class Quad2dStretchedInstanced: BaseGraphicsObject {
                          mMatrix: Int64,
                          isMasked: Bool,
                          screenPixelAsRealMeterFactor _: Double) {
+
+        lock.lock()
+        defer {
+            lock.unlock()
+        }
+        
         guard let verticesBuffer,
               let indicesBuffer,
               let positionsBuffer,
@@ -87,11 +93,6 @@ final class Quad2dStretchedInstanced: BaseGraphicsObject {
               let texture,
               instanceCount != 0 else {
             return
-        }
-
-        lock.lock()
-        defer {
-            lock.unlock()
         }
 
         #if DEBUG

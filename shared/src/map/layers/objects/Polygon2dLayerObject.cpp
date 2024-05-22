@@ -35,7 +35,7 @@ void Polygon2dLayerObject::setPolygons(const std::vector<PolygonCoord> &polygons
     std::vector<float> vertices;
     int32_t indexOffset = 0;
 
-    std::vector<Vec2D> vecVertices;
+    std::vector<Vec2F> vecVertices;
 
     for (auto const &polygon : polygons) {
         std::vector<std::vector<Vec2D>> renderCoords;
@@ -64,7 +64,7 @@ void Polygon2dLayerObject::setPolygons(const std::vector<PolygonCoord> &polygons
             indexOffset += list.size();
 
             for(auto& i : list) {
-                vecVertices.push_back(i);
+                vecVertices.push_back(Vec2F(i.x, i.y));
             }
         }
     }

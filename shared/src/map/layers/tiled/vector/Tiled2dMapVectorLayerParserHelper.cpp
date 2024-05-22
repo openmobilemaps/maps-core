@@ -93,6 +93,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
             int minZoom = val.value("minzoom", 0);
             int maxZoom = val.value("maxzoom", 22);
             std::optional<::RectCoord> bounds;
+            std::optional<std::string> coordinateReferenceSystem;
 
             if (val["tiles"].is_array()) {
                 auto str = val.dump();
@@ -112,6 +113,10 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                         const auto bottomRight = Coord(CoordinateSystemIdentifiers::EPSG4326(), tmpBounds[2], tmpBounds[3], 0);
                         bounds = RectCoord(topLeft, bottomRight);
                     }
+                }
+
+                if(val["metadata"].is_object() && val["metadata"].contains("crs") && val["metadata"]["crs"].is_string()) {
+                    coordinateReferenceSystem = val["metadata"]["crs"].get<std::string>();
                 }
 
             } else if (val["url"].is_string()) {
@@ -141,6 +146,10 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                     }
                 }
 
+                if(json["metadata"].is_object() && json["metadata"].contains("crs") && json["metadata"]["crs"].is_string()) {
+                    coordinateReferenceSystem = json["metadata"]["crs"].get<std::string>();
+                }
+
                 minZoom = json.value("minzoom", 0);
                 maxZoom = json.value("maxzoom", 22);
             }
@@ -160,8 +169,8 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                                                                                  nullptr,
                                                                                  underzoom,
                                                                                  overzoom,
-                                                                                 bounds
-                                                                                 );
+                                                                                 bounds,
+                                                                                 coordinateReferenceSystem);
 
         } else if (type == "vector" && val["url"].is_string()) {
             auto result = LoaderHelper::loadData(replaceUrlParams(val["url"].get<std::string>(), sourceUrlParams), std::nullopt, loaders);
@@ -285,7 +294,8 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                                                                            interactable,
                                                                            layer->underzoom,
                                                                            layer->overzoom,
-                                                                           layer->bounds);
+                                                                           layer->bounds,
+                                                                           layer->coordinateReferenceSystem);
             layers.push_back(newLayer);
         } else if (val["type"] == "line") {
 
