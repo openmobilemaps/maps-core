@@ -154,6 +154,7 @@ protected:
     virtual void setupInertia();
 
     double getCameraDistance();
+    double getCameraFieldOfView();
     double getCameraVerticalDisplacement();
     double getCameraPitch();
 
@@ -173,6 +174,7 @@ protected:
     Coord focusPointPosition;
     double cameraVerticalDisplacement = 0.0;
     double cameraPitch = 0; // looking up or down
+    double fieldOfView = 10.0f;
 
     double zoom;
     double angle = 0;
