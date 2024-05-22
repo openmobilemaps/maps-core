@@ -348,7 +348,7 @@ public class MapViewCoordinator: MCMapCameraListenerInterface {
             let center = mapView?.camera.getCenterPosition()
             let zoom = mapView?.camera.getZoom()
             let minZoom = mapView?.camera.getMinZoom()
-            let maxZoom = mapView?.camera.getMinZoom()
+            let maxZoom = mapView?.camera.getMaxZoom()
 
 
             parent.camera = MapView.Camera(
