@@ -125,6 +125,8 @@ class MapCamera2d : public MapCameraInterface,
 
     Vec2F screenPosFromCoord(const Coord &coord) override;
 
+    bool coordIsVisibleOnScreen(const ::Coord & coord, float paddingPc) override;
+
     virtual double mapUnitsFromPixels(double distancePx) override;
 
     virtual double getScalingFactor() override;

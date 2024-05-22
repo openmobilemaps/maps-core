@@ -126,6 +126,8 @@ class MapCamera3d : public MapCameraInterface,
 
     Vec2F screenPosFromCoord(const Coord &coord) override;
 
+    bool coordIsVisibleOnScreen(const ::Coord & coord, float paddingPc) override;
+
     bool gluInvertMatrix(const std::vector<double> &m, std::vector<double> &invOut);
 
     virtual double mapUnitsFromPixels(double distancePx) override;

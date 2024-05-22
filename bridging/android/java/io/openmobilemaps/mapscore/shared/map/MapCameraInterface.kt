@@ -76,6 +76,9 @@ abstract class MapCameraInterface {
 
     abstract fun mapUnitsFromPixels(distancePx: Double): Double
 
+    /** padding in percentage, where 1.0 = rect is half of full width and height */
+    abstract fun coordIsVisibleOnScreen(coord: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, paddingPc: Float): Boolean
+
     abstract fun setRotationEnabled(enabled: Boolean)
 
     abstract fun setSnapToNorthEnabled(enabled: Boolean)
@@ -294,6 +297,12 @@ abstract class MapCameraInterface {
             return native_mapUnitsFromPixels(this.nativeRef, distancePx)
         }
         private external fun native_mapUnitsFromPixels(_nativeRef: Long, distancePx: Double): Double
+
+        override fun coordIsVisibleOnScreen(coord: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, paddingPc: Float): Boolean {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_coordIsVisibleOnScreen(this.nativeRef, coord, paddingPc)
+        }
+        private external fun native_coordIsVisibleOnScreen(_nativeRef: Long, coord: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, paddingPc: Float): Boolean
 
         override fun setRotationEnabled(enabled: Boolean) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
