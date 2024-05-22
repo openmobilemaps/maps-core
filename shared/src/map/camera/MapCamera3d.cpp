@@ -31,13 +31,11 @@
 #define ROTATION_LOCKING_ANGLE 10
 #define ROTATION_LOCKING_FACTOR 1.5
 
-#define GLOBE_MIN_ZOOM 2'00'000'000
-#define GLOBE_INITIAL_ZOOM 30'000'000
-#define LOCAL_MIN_ZOOM 10'000'000
-#define LOCAL_MAX_ZOOM 100'000
-#define LOCAL_INITIAL_ZOOM 3'000'000
-
-#define FIELD_OF_VIEW 22.5
+#define GLOBE_MIN_ZOOM      200'000'000
+#define GLOBE_INITIAL_ZOOM   46'000'000
+#define LOCAL_MIN_ZOOM       10'000'000
+#define LOCAL_INITIAL_ZOOM    3'000'000
+#define LOCAL_MAX_ZOOM          100'000
 
 MapCamera3d::MapCamera3d(const std::shared_ptr<MapInterface> &mapInterface, float screenDensityPpi)
     : mapInterface(mapInterface)
@@ -369,7 +367,7 @@ std::vector<float> MapCamera3d::getVpMatrix() {
     double maxD = cameraDistance / R + 1;
     double minD = std::max(cameraDistance / R - 1, 0.00001);
 
-    double fovy = FIELD_OF_VIEW; // 45 // zoom / 70800;
+    double fovy = getCameraFieldOfView(); // 45 // zoom / 70800;
 
     // aspect ratio
     double vpr = (double) sizeViewport.x / (double) sizeViewport.y;
@@ -1397,24 +1395,43 @@ double MapCamera3d::getCameraVerticalDisplacement() {
 
 double MapCamera3d::getCameraPitch() {
     double z, from, to;
-    switch (mode) {
-        case CameraMode3d::GLOBE:
-            z = 1.0 - (zoom - LOCAL_MIN_ZOOM) / (GLOBE_MIN_ZOOM - LOCAL_MIN_ZOOM);
-            from = 0;
-            to = 40;
-            break;
+    double maxPitch = GLOBE_INITIAL_ZOOM;
+    if (zoom >= maxPitch) {
+        z = 1.0 - (zoom - maxPitch) / (GLOBE_MIN_ZOOM - maxPitch);
+        from = 0;
+        to = 20;
+    }
+    else {
+        z = 1.0 - (zoom - LOCAL_MAX_ZOOM) / (maxPitch - LOCAL_MAX_ZOOM);
+        from = 20;
+        to = 0;
+    }
+//    switch (mode) {
+//        case CameraMode3d::GLOBE:
+//            z = 1.0 - (zoom - LOCAL_MIN_ZOOM) / (GLOBE_MIN_ZOOM - LOCAL_MIN_ZOOM);
+//            from = 0;
+//            to = 40;
+//            break;
+//
+//        case CameraMode3d::TILTED_ORBITAL: // abused as local
+//            z = 1.0 - (zoom - LOCAL_MAX_ZOOM) / (LOCAL_MIN_ZOOM - LOCAL_MAX_ZOOM);
+//            from = 0;
+//            to = 0;
+//            break;
+//    }   
+    double p = from + (z * (to - from));
+    return p;
+}
 
-        case CameraMode3d::TILTED_ORBITAL: // abused as local
-            z = 1.0 - (zoom - LOCAL_MAX_ZOOM) / (LOCAL_MIN_ZOOM - LOCAL_MAX_ZOOM);
-            from = 0;
-            to = 0;
-            break;
-    }    
-    return from + (z * (to - from));
+double MapCamera3d::getCameraFieldOfView() {
+    return 42;
+//    fieldOfView -= 0.01;
+//    mapInterface->invalidate();
+//    return fieldOfView;
 }
 
 double MapCamera3d::getCameraDistance() {
-    double f = FIELD_OF_VIEW;
+    double f = getCameraFieldOfView();
     Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
     double w = (double)sizeViewport.y;
     double pixelsPerMeter =  this->screenDensityPpi / 0.0254;
