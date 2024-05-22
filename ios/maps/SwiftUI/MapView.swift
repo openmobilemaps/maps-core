@@ -51,6 +51,8 @@ public struct MapView: UIViewRepresentable {
 
         public var camera3d: MCMapCameraInterface?
 
+        public var mapConfig: MCMapConfig?
+
         public init(center: Updatable<MCCoord> = .init(),
                     zoom: Updatable<Double> = .init(),
                     minZoom: Updatable<Double> = .init(),
@@ -58,7 +60,8 @@ public struct MapView: UIViewRepresentable {
                     // visibleRect: Updatable<MCRectCoord> = .init(),
                     mode: MCCameraMode3d = .GLOBE,
                     restrictedBounds: MCRectCoord? = nil,
-                    camera3d: MCMapCameraInterface? = nil
+                    camera3d: MCMapCameraInterface? = nil,
+                    mapConfig: MCMapConfig? = nil
         ) {
             self.center = center
             self.zoom = zoom
@@ -68,6 +71,7 @@ public struct MapView: UIViewRepresentable {
             self.mode = mode
             self.restrictedBounds = restrictedBounds
             self.camera3d = camera3d
+            self.mapConfig = mapConfig
         }
 
         public init(location: CLLocationCoordinate2D,
@@ -355,8 +359,8 @@ public class MapViewCoordinator: MCMapCameraListenerInterface {
                 // visibleRect: .init(mode: .map, value: mapView?.camera.getPaddingAdjustedVisibleRect()),
                 mode: parent.camera.mode,
                 restrictedBounds: parent.camera.restrictedBounds,
-                camera3d: mapView?.camera
-
+                camera3d: mapView?.camera,
+                mapConfig: mapView?.mapInterface.getMapConfig()
             )
 
             lastWrittenCamera = parent.camera
