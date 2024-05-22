@@ -44,13 +44,13 @@ void Tiled2dMapVectorBackgroundSubLayer::onAdded(const std::shared_ptr<MapInterf
         RectCoord globe = RectCoord(Coord(CoordinateSystemIdentifiers::EPSG4326(), -180.0, 90.0, 0),
                                      Coord(CoordinateSystemIdentifiers::EPSG4326(),  180.0, -90.0, 0));
 
-        std::vector<Vec2D> vecVertices;
+        std::vector<Vec2F> vecVertices;
         auto globeConverted = converter->convertRectToRenderSystem(globe);
         for (auto const &coord: PolygonHelper::coordsFromRect(globeConverted).positions) {
-            vecVertices.push_back(Vec2D(coord.x, coord.y));
+            vecVertices.push_back(Vec2F(coord.x, coord.y));
         }
 
-        PolygonHelper::subdivision(vecVertices, indices, 0.2, 3);
+        PolygonHelper::subdivision(vecVertices, indices, 0.1, 4);
         for (const auto& v : vecVertices) {
             vertices.push_back(v.x);
             vertices.push_back(v.y);
@@ -64,8 +64,6 @@ void Tiled2dMapVectorBackgroundSubLayer::onAdded(const std::shared_ptr<MapInterf
             -1, -1, 0 //D
         };
     }
-
-
 
     patternName = description->style.getPattern(evalContext);
     if (!patternName.empty()) {

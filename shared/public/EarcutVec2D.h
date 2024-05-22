@@ -10,6 +10,7 @@
 
 #include "earcut.hpp"
 #include "Vec2D.h"
+#include "Vec2F.h"
 
 namespace mapbox {
 namespace util {
@@ -23,6 +24,19 @@ struct nth<0, ::Vec2D> {
 template <>
 struct nth<1, ::Vec2D> {
     inline static auto get(const ::Vec2D &t) {
+        return t.y;
+    };
+};
+
+template <>
+struct nth<0, ::Vec2F> {
+    inline static auto get(const ::Vec2F &t) {
+        return t.x;
+    };
+};
+template <>
+struct nth<1, ::Vec2F> {
+    inline static auto get(const ::Vec2F &t) {
         return t.y;
     };
 };
