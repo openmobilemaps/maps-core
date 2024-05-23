@@ -61,7 +61,7 @@ tiled_2d_map_zoom_info = record {
 
 tiled_2d_map_source_interface = interface +c {
     on_visible_bounds_changed(visible_bounds: rect_coord, cur_t:i32, zoom: f64);
-    on_camera_change(view_matrix: list<f32>, projection_matrix: list<f32>, vertical_fov: f32, horizontal_fov: f32, width: f32, height: f32, focus_point_altitude: f32, focus_point_position: coord);
+    on_camera_change(view_matrix: list<f32>, projection_matrix: list<f32>, vertical_fov: f32, horizontal_fov: f32, width: f32, height: f32, focus_point_altitude: f32, focus_point_position: coord, zoom: f32);
 
     set_min_zoom_level_identifier(value: optional<i32>);
     get_min_zoom_level_identifier(): optional<i32>;

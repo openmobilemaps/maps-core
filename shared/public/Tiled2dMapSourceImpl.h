@@ -108,7 +108,7 @@ template<class T, class L, class R>
 template<class T, class L, class R>
 void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMatrix, const std::vector<float> &projectionMatrix,
                                                float verticalFov, float horizontalFov, float width, float height,
-                                               float focusPointAltitude, const ::Coord & focusPointPosition) {
+                                               float focusPointAltitude, const ::Coord & focusPointPosition, float zoom) {
 
     if (isPaused) {
         return;

@@ -32,7 +32,7 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_Tiled2dMapSourceInterface_00024CppProxy_native_1onCameraChange(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_viewMatrix, jobject j_projectionMatrix, jfloat j_verticalFov, jfloat j_horizontalFov, jfloat j_width, jfloat j_height, jfloat j_focusPointAltitude, ::djinni_generated::NativeCoord::JniType j_focusPointPosition)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_Tiled2dMapSourceInterface_00024CppProxy_native_1onCameraChange(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_viewMatrix, jobject j_projectionMatrix, jfloat j_verticalFov, jfloat j_horizontalFov, jfloat j_width, jfloat j_height, jfloat j_focusPointAltitude, ::djinni_generated::NativeCoord::JniType j_focusPointPosition, jfloat j_zoom)
 {
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapSourceInterface>(nativeRef);
@@ -43,7 +43,8 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_
                             ::djinni::F32::toCpp(jniEnv, j_width),
                             ::djinni::F32::toCpp(jniEnv, j_height),
                             ::djinni::F32::toCpp(jniEnv, j_focusPointAltitude),
-                            ::djinni_generated::NativeCoord::toCpp(jniEnv, j_focusPointPosition));
+                            ::djinni_generated::NativeCoord::toCpp(jniEnv, j_focusPointPosition),
+                            ::djinni::F32::toCpp(jniEnv, j_zoom));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

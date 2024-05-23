@@ -69,7 +69,7 @@ class Tiled2dMapLayer : public SimpleLayerInterface,
     virtual void setT(int32_t t);
 
     void onCameraChange(const std::vector<float> &viewMatrix, const std::vector<float> &projectionMatrix, float verticalFov,
-                        float horizontalFov, float width, float height, float focusPointAltitude, const ::Coord & focusPointPosition) override;
+                        float horizontalFov, float width, float height, float focusPointAltitude, const ::Coord & focusPointPosition, float zoom) override;
 
 protected:
     std::shared_ptr<MapInterface> mapInterface;
