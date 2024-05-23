@@ -703,12 +703,12 @@ void Tiled2dMapVectorLayer::onAdded(const std::shared_ptr<::MapInterface> &mapIn
     this->mapInterface = mapInterface;
     this->layerIndex = layerIndex;
 
-    if (layerConfigs.empty()) {
+    if (mapDescription == nullptr) {
         scheduleStyleJsonLoading();
         return;
     }
 
-    // this is needed if the layer is initialized with a style.json string
+    // this is needed if the layer is initialised with a style.json string
     initializeVectorLayer();
 }
 
