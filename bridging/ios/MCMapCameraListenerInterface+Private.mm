@@ -60,7 +60,8 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
                  width:(float)width
                 height:(float)height
     focusPointAltitude:(float)focusPointAltitude
-    focusPointPosition:(nonnull MCCoord *)focusPointPosition {
+    focusPointPosition:(nonnull MCCoord *)focusPointPosition
+                  zoom:(float)zoom {
     try {
         _cppRefHandle.get()->onCameraChange(::djinni::List<::djinni::F32>::toCpp(viewMatrix),
                                             ::djinni::List<::djinni::F32>::toCpp(projectionMatrix),
@@ -69,7 +70,8 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
                                             ::djinni::F32::toCpp(width),
                                             ::djinni::F32::toCpp(height),
                                             ::djinni::F32::toCpp(focusPointAltitude),
-                                            ::djinni_generated::Coord::toCpp(focusPointPosition));
+                                            ::djinni_generated::Coord::toCpp(focusPointPosition),
+                                            ::djinni::F32::toCpp(zoom));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -101,7 +103,7 @@ public:
             [djinni_private_get_proxied_objc_object() onMapInteraction];
         }
     }
-    void onCameraChange(const std::vector<float> & c_viewMatrix, const std::vector<float> & c_projectionMatrix, float c_verticalFov, float c_horizontalFov, float c_width, float c_height, float c_focusPointAltitude, const ::Coord & c_focusPointPosition) override
+    void onCameraChange(const std::vector<float> & c_viewMatrix, const std::vector<float> & c_projectionMatrix, float c_verticalFov, float c_horizontalFov, float c_width, float c_height, float c_focusPointAltitude, const ::Coord & c_focusPointPosition, float c_zoom) override
     {
         @autoreleasepool {
             [djinni_private_get_proxied_objc_object() onCameraChange:(::djinni::List<::djinni::F32>::fromCpp(c_viewMatrix))
@@ -111,7 +113,8 @@ public:
                                                                width:(::djinni::F32::fromCpp(c_width))
                                                               height:(::djinni::F32::fromCpp(c_height))
                                                   focusPointAltitude:(::djinni::F32::fromCpp(c_focusPointAltitude))
-                                                  focusPointPosition:(::djinni_generated::Coord::fromCpp(c_focusPointPosition))];
+                                                  focusPointPosition:(::djinni_generated::Coord::fromCpp(c_focusPointPosition))
+                                                                zoom:(::djinni::F32::fromCpp(c_zoom))];
         }
     }
 };

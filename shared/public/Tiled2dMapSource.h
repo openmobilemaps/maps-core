@@ -88,8 +88,7 @@ public:
 
     virtual void onVisibleBoundsChanged(const ::RectCoord &visibleBounds, int curT, double zoom) override;
 
-    virtual void onCameraChange(const std::vector<float> &viewMatrix, const std::vector<float> &projectionMatrix, float verticalFov,
-                        float horizontalFov, float width, float height, float focusPointAltitude, const ::Coord & focusPointPosition) override;
+    virtual void onCameraChange(const std::vector<float> &viewMatrix, const std::vector<float> &projectionMatrix, float verticalFov, float horizontalFov, float width, float height, float focusPointAltitude, const ::Coord & focusPointPosition, float zoom) override;
 
     virtual bool isTileVisible(const Tiled2dMapTileInfo &tileInfo);
 

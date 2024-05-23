@@ -114,12 +114,12 @@ void Tiled2dMapLayer::onVisibleBoundsChanged(const ::RectCoord &visibleBounds, d
 }
 
 void Tiled2dMapLayer::onCameraChange(const std::vector<float> &viewMatrix, const std::vector<float> &projectionMatrix, float verticalFov,
-                                float horizontalFov, float width, float height, float focusPointAltitude, const ::Coord & focusPointPosition) {
+                                float horizontalFov, float width, float height, float focusPointAltitude, const ::Coord & focusPointPosition, float zoom) {
     std::lock_guard<std::recursive_mutex> lock(sourcesMutex);
 
     for (const auto &sourceInterface: sourceInterfaces) {
         sourceInterface.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapSourceInterface::onCameraChange,
-                                viewMatrix, projectionMatrix, verticalFov, horizontalFov, width, height, focusPointAltitude, focusPointPosition);
+                                viewMatrix, projectionMatrix, verticalFov, horizontalFov, width, height, focusPointAltitude, focusPointPosition, zoom);
     }
 }
 

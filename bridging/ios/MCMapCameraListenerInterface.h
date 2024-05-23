@@ -22,6 +22,7 @@
                  width:(float)width
                 height:(float)height
     focusPointAltitude:(float)focusPointAltitude
-    focusPointPosition:(nonnull MCCoord *)focusPointPosition;
+    focusPointPosition:(nonnull MCCoord *)focusPointPosition
+                  zoom:(float)zoom;
 
 @end
