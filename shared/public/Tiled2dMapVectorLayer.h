@@ -178,6 +178,8 @@ public:
 
     bool onTwoFingerMoveComplete() override;
 
+    std::vector<VectorLayerFeatureCoordInfo> getVisiblePointFeatureContexts(float paddingPc, const std::optional<std::string> & sourceLayer) override;
+
     void clearTouch() override;
 
     virtual std::optional<std::string> getStyleMetadataJson() override;

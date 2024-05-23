@@ -19,6 +19,7 @@
 class Tiled2dMapVectorLayerLocalDataProviderInterface;
 class Tiled2dMapVectorLayerSelectionCallbackInterface;
 class Tiled2dMapVectorLayerSymbolDelegateInterface;
+struct VectorLayerFeatureCoordInfo;
 struct VectorLayerFeatureInfoValue;
 
 class Tiled2dMapVectorLayerInterface {
@@ -60,6 +61,8 @@ public:
     virtual void setFeatureState(const std::string & identifier, const std::unordered_map<std::string, VectorLayerFeatureInfoValue> & properties) = 0;
 
     virtual void setGlobalState(const std::unordered_map<std::string, VectorLayerFeatureInfoValue> & properties) = 0;
+
+    virtual std::vector<VectorLayerFeatureCoordInfo> getVisiblePointFeatureContexts(float paddingPc, const std::optional<std::string> & sourceLayer) = 0;
 
     virtual void setReadyStateListener(const /*nullable*/ std::shared_ptr<::Tiled2dMapReadyStateListener> & listener) = 0;
 

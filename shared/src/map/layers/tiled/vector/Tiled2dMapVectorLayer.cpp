@@ -47,6 +47,7 @@
 #include "Tiled2dMapVectorStyleParser.h"
 #include "Tiled2dMapVectorGeoJSONLayerConfig.h"
 #include "GeoJsonVTFactory.h"
+#include "VectorLayerFeatureCoordInfo.h"
 
 Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
                                              const std::string &remoteStyleJsonUrl,
@@ -1322,4 +1323,44 @@ void Tiled2dMapVectorLayer::updateReadyStateListenerIfNeeded() {
         listener->stateUpdate(newState);
         lastReadyState = newState;
     }
+}
+
+
+
+/// Returns a list of all the point feature contexts that are currently visible on the screen. This method is blocking and should be run on a background thread
+/// - Parameters:
+///   - paddingPc: padding in percentage, where  0 = consider entire screen and 1.0 = considered rect is half of full width and height
+///   - sourceLayer: If given, only consider this layer (can greatly improve speed)
+std::vector<VectorLayerFeatureCoordInfo> Tiled2dMapVectorLayer::getVisiblePointFeatureContexts(float paddingPc, const std::optional<std::string> & sourceLayer) {
+    auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
+    if (!camera) {
+        return {};
+    }
+
+    std::vector<VectorLayerFeatureCoordInfo> features = {};
+
+    for (const auto &[source, vectorTileSource] : vectorTileSources) {
+        auto const &currentTileInfos = vectorTileSource.converse(&Tiled2dMapVectorSource::getCurrentTiles).get();
+
+        for (auto const &tile: currentTileInfos) {
+            for (auto it = tile.layerFeatureMaps->begin(); it != tile.layerFeatureMaps->end(); it++) {
+                if (sourceLayer.has_value() && it->first != *sourceLayer) {
+                    continue;
+                }
+                for (auto const &[featureContext, geometry]: *it->second) {
+                    for (auto const &points: geometry->getPointCoordinates()) {
+                        for (auto const &point: points) {
+                            bool isVisible = camera->coordIsVisibleOnScreen(point, paddingPc);
+
+                            if (isVisible) {
+                                features.push_back(VectorLayerFeatureCoordInfo(featureContext->getFeatureInfo(), point));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return features;
 }
