@@ -1278,14 +1278,15 @@ bool MapCamera3d::gluInvertMatrix(const std::vector<double> &m, std::vector<doub
 
     return Vec2F(0.0, 0.0);
 }
+
 // padding in percentage, where 1.0 = rect is half of full width and height
 bool MapCamera3d::coordIsVisibleOnScreen(const ::Coord & coord, float paddingPc) {
     auto screenPos = screenPosFromCoord(coord);
     Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
-    auto minX = sizeViewport.x * paddingPc * 0.5;
-    auto maxX = sizeViewport.x - minX;
-    auto minY = sizeViewport.y * paddingPc * 0.5;
-    auto maxY = sizeViewport.y - minY;
+    auto minX = (sizeViewport.x + paddingLeft) * paddingPc * 0.5;
+    auto maxX = (sizeViewport.x - paddingRight) - minX;
+    auto minY = (sizeViewport.y + paddingTop) * paddingPc * 0.5;
+    auto maxY = (sizeViewport.y - paddingBottom) - minY;
 
     if (sizeViewport.x != 0 && sizeViewport.y != 0) {
         return screenPos.x >= minX && screenPos.x <= maxX && screenPos.y >= minY && screenPos.y <= maxY;
