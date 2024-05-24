@@ -301,10 +301,7 @@ CJNIEXPORT ::djinni_generated::NativeCoord::JniType JNICALL Java_io_openmobilema
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT ::djinni_generated::NativeVec2F::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1screenPosFromCoord(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeCoord::JniType j_coord)
-=======
 CJNIEXPORT ::djinni_generated::NativeVec2F::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCameraInterface_00024CppProxy_native_1screenPosFromCoord(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeCoord::JniType j_coord)
->>>>>>> 448e3e65 (Create specific MapCamera3dInterface, rename prev. 2d to generic CameraInterface, try remove fixed tile level for 2d):bridging/android/jni/map/NativeMapCameraInterface.cpp
 {
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::MapCameraInterface>(nativeRef);
