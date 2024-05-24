@@ -1470,7 +1470,11 @@ void MapCamera3d::setCameraMode(CameraMode3d mode) {
         case CameraMode3d::TILTED_ORBITAL:
             this->zoomMin = LOCAL_MIN_ZOOM;
             this->zoomMax = LOCAL_MAX_ZOOM;
-            targetZoom = LOCAL_INITIAL_ZOOM;
+            if (this->zoom == this->zoomMin) {
+                targetZoom = LOCAL_MIN_ZOOM;
+            } else {
+                targetZoom = LOCAL_INITIAL_ZOOM;
+            }
             break;
     }
 
