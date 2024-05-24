@@ -534,7 +534,7 @@ void Matrix::setRotateM(std::vector<float> &rm, int rmOffset, float a, float x, 
 
 #define I(_i, _j) ((_j) + 4 * (_i))
 
-void Matrix::multiplyMM(std::vector<float> &r, int resultOffset, std::vector<float> &lhs, int lhsOffset, std::vector<float> &rhs,
+void Matrix::multiplyMM(std::vector<float> &r, int resultOffset, const std::vector<float> &lhs, int lhsOffset, const std::vector<float> &rhs,
                         int rhsOffset) {
     multiplyMMC(r, resultOffset, lhs, lhsOffset, rhs, rhsOffset);
 }

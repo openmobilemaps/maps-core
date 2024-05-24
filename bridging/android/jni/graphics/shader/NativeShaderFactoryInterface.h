@@ -53,6 +53,7 @@ private:
         /*not-null*/ std::shared_ptr<::StretchShaderInterface> createStretchShader() override;
         /*not-null*/ std::shared_ptr<::StretchInstancedShaderInterface> createStretchInstancedShader() override;
         /*not-null*/ std::shared_ptr<::ColorShaderInterface> createIcosahedronColorShader() override;
+        /*not-null*/ std::shared_ptr<::SphereEffectShaderInterface> createSphereEffectShader() override;
 
     private:
         friend ::djinni::JniInterface<::ShaderFactoryInterface, ::djinni_generated::NativeShaderFactoryInterface>;
@@ -79,6 +80,7 @@ private:
     const jmethodID method_createStretchShader { ::djinni::jniGetMethodID(clazz.get(), "createStretchShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/StretchShaderInterface;") };
     const jmethodID method_createStretchInstancedShader { ::djinni::jniGetMethodID(clazz.get(), "createStretchInstancedShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/StretchInstancedShaderInterface;") };
     const jmethodID method_createIcosahedronColorShader { ::djinni::jniGetMethodID(clazz.get(), "createIcosahedronColorShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/ColorShaderInterface;") };
+    const jmethodID method_createSphereEffectShader { ::djinni::jniGetMethodID(clazz.get(), "createSphereEffectShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/SphereEffectShaderInterface;") };
 };
 
 } // namespace djinni_generated

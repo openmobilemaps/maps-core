@@ -149,6 +149,10 @@ class MapCamera3d : public MapCameraInterface,
 
     void notifyListenerBoundsChange() override;
 
+    void computeEllipseCoefficients(float& A, float& B, float& C, float& D, float& E, float& F);
+
+     bool isPointInsideEllipse(float x, float y);
+
 protected:
     void updateZoom(double zoom);
     virtual void setupInertia();
@@ -256,6 +260,7 @@ protected:
     RectCoord getRectFromViewport(const Vec2I &sizeViewport, const Coord &center);
 
     std::vector<float> vpMatrix = std::vector<float>(16, 0.0);
+    std::vector<float> inverseVPMatrix = std::vector<float>(16, 0.0);
     std::vector<float> viewMatrix = std::vector<float>(16, 0.0);
     std::vector<float> projectionMatrix = std::vector<float>(16, 0.0);
     float verticalFov;

@@ -405,18 +405,153 @@ std::vector<float> MapCamera3d::getVpMatrix() {
     std::vector<float> newVpMatrix(16, 0.0);
     Matrix::multiplyMM(newVpMatrix, 0, newProjectionMatrix, 0, newViewMatrix, 0);
 
+    std::vector<double> vpMatrixD = {
+        static_cast<double>(newVpMatrix[0]),
+        static_cast<double>(newVpMatrix[1]),
+        static_cast<double>(newVpMatrix[2]),
+        static_cast<double>(newVpMatrix[3]),
+        static_cast<double>(newVpMatrix[4]),
+        static_cast<double>(newVpMatrix[5]),
+        static_cast<double>(newVpMatrix[6]),
+        static_cast<double>(newVpMatrix[7]),
+        static_cast<double>(newVpMatrix[8]),
+        static_cast<double>(newVpMatrix[9]),
+        static_cast<double>(newVpMatrix[10]),
+        static_cast<double>(newVpMatrix[11]),
+        static_cast<double>(newVpMatrix[12]),
+        static_cast<double>(newVpMatrix[13]),
+        static_cast<double>(newVpMatrix[14]),
+        static_cast<double>(newVpMatrix[15])
+    };
+    std::vector<double> newInverseMatrixD(16, 0.0);
+    gluInvertMatrix(vpMatrixD, newInverseMatrixD);
+    std::vector<float> newInverseMatrix = {
+        static_cast<float>(newInverseMatrixD[0]),
+        static_cast<float>(newInverseMatrixD[1]),
+        static_cast<float>(newInverseMatrixD[2]),
+        static_cast<float>(newInverseMatrixD[3]),
+        static_cast<float>(newInverseMatrixD[4]),
+        static_cast<float>(newInverseMatrixD[5]),
+        static_cast<float>(newInverseMatrixD[6]),
+        static_cast<float>(newInverseMatrixD[7]),
+        static_cast<float>(newInverseMatrixD[8]),
+        static_cast<float>(newInverseMatrixD[9]),
+        static_cast<float>(newInverseMatrixD[10]),
+        static_cast<float>(newInverseMatrixD[11]),
+        static_cast<float>(newInverseMatrixD[12]),
+        static_cast<float>(newInverseMatrixD[13]),
+        static_cast<float>(newInverseMatrixD[14]),
+        static_cast<float>(newInverseMatrixD[15])
+    };
+
     std::lock_guard<std::recursive_mutex> lock(vpDataMutex);
     // lastVpBounds = viewBounds;
     lastVpRotation = currentRotation;
     lastVpZoom = currentZoom;
     vpMatrix = newVpMatrix;
+    inverseVPMatrix = newInverseMatrix;
     viewMatrix = newViewMatrix;
     projectionMatrix = newProjectionMatrix;
     verticalFov = fovy;
     horizontalFov = fovy * vpr;
     validVpMatrix = true;
 
+
     return newVpMatrix;
+}
+
+
+// Funktion zur Berechnung der Koeffizienten der projizierten Ellipse
+void MapCamera3d::computeEllipseCoefficients(float& A, float& B, float& C, float& D, float& E, float& F) {
+    // Die Kugelmatrix Q
+    std::vector<float> Q = {
+        1, 0, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, -1
+    };
+
+    std::vector<float> QI(16, 0.0f);
+    Matrix::multiplyMM(QI, 0, Q, 0, inverseVPMatrix, 0);
+
+    std::vector<float> IT(16, 0.0f);
+    Matrix::transposeM(IT, 0, inverseVPMatrix, 0);
+
+    std::vector<float> IQI(16, 0.0f);
+    Matrix::multiplyMM(IQI, 0, IT, 0, QI , 0);
+
+    A =     IQI[0 * 4 + 0];
+    B = 2 * IQI[0 * 4 + 1];
+    C =     IQI[1 * 4 + 1];
+    D = 2 * IQI[0 * 4 + 2] + 2 * IQI[0 * 4 + 3];
+    E = 2 * IQI[1 * 4 + 2] + 2 * IQI[1 * 4 + 3];
+    F =     IQI[2 * 4 + 2] + IQI[2 * 4 + 3] + IQI[3 * 4 + 2] + IQI[3 * 4 + 3];
+
+    printf("E: %f, %f, %f, %f, %f, %f\n", A, B, C, D, E, F);
+
+
+//    std::vector<float> P = vpMatrix;
+
+//    // Berechne Q' = P^T * Q * P
+//    std::vector<float> PT(16, 0.0f);
+//    for (int i = 0; i < 4; ++i) {
+//        for (int j = 0; j < 4; ++j) {
+//            P[i * 4 + j] = vpMatrix[j * 4 + i];
+//        }
+//    }
+//
+//    std::vector<float> QP(16, 0.0);
+//    Matrix::multiplyMM(QP, 0, Q, 0, P, 0);
+//
+//    std::vector<float> QP_PT(16, 0.0);
+//    Matrix::multiplyMM(QP_PT, 0, PT, 0, QP, 0);
+
+    // Extrahiere die Koeffizienten der Ellipse
+//    A =     QP_PT[0 * 4 + 0];
+//    B = 2 * QP_PT[0 * 4 + 1];
+//    C =     QP_PT[1 * 4 + 1];
+//    D = 2 * QP_PT[0 * 4 + 3];
+//    E = 2 * QP_PT[1 * 4 + 3];
+//    F =     QP_PT[3 * 4 + 3];
+//    A =     QP_PT[0 * 4 + 0];
+//    B = 2 * QP_PT[1 * 4 + 0];
+//    C =     QP_PT[1 * 4 + 1];
+//    D = 2 * QP_PT[3 * 4 + 0];
+//    E = 2 * QP_PT[3 * 4 + 1];
+//    F =     QP_PT[3 * 4 + 3];
+
+    // Extrahiere die Elemente der Projektionsmatrix P
+//    float p11 = P[0], p12 = P[1], p13 = P[2], p14 = P[3];
+//    float p21 = P[4], p22 = P[5], p23 = P[6], p24 = P[7];
+//    float p31 = P[8], p32 = P[9], p33 = P[10], p34 = P[11];
+//    float p41 = P[12], p42 = P[13], p43 = P[14], p44 = P[15];
+//
+//    // Berechne die Koeffizienten der Ellipse
+//    A = p11 * p11 + p21 * p21 + p31 * p31 - p41 * p41;
+//    B = 2 * (p11 * p12 + p21 * p22 + p31 * p32 - p41 * p42);
+//    C = p12 * p12 + p22 * p22 + p32 * p32 - p42 * p42;
+//    D = 2 * (p11 * p14 + p21 * p24 + p31 * p34 - p41 * p44);
+//    E = 2 * (p12 * p14 + p22 * p24 + p32 * p34 - p42 * p44);
+//    F = p14 * p14 + p24 * p24 + p34 * p34 - p44 * p44;
+//
+    // Normalize the coefficients by F to get a standard form
+    if (F != 0) {
+        A /= std::abs(F);
+        B /= std::abs(F);
+        C /= std::abs(F);
+        D /= std::abs(F);
+        E /= std::abs(F);
+        F /= std::abs(F); // Set F to ±1 after normalization
+    }
+
+}
+
+// Funktion zur Überprüfung, ob ein Punkt innerhalb der Ellipse liegt
+bool MapCamera3d::isPointInsideEllipse(float x, float y) {
+    float A,  B,  C,  D,  E,  F;
+    computeEllipseCoefficients(A, B, C, D, E, F);
+    float value = A*x*x + B*x*y + C*y*y + D*x + E*y + F;
+    return value < 0;
 }
 
 std::optional<std::vector<float>> MapCamera3d::getLastVpMatrix() {
@@ -1388,9 +1523,20 @@ void MapCamera3d::updateZoom(double zoom_) {
 
 double MapCamera3d::getCameraVerticalDisplacement() {
     return 0;
-    auto out = 0;
-    auto in = 1;
-    return in + (zoom * (out - in));
+    double z, from, to;
+    double maxPitch = GLOBE_INITIAL_ZOOM;
+    if (zoom >= maxPitch) {
+        z = 1.0 - (zoom - maxPitch) / (GLOBE_MIN_ZOOM - maxPitch);
+        from = 10;
+        to = -10;
+    }
+    else {
+        z = 1.0 - (zoom - LOCAL_MAX_ZOOM) / (maxPitch - LOCAL_MAX_ZOOM);
+        from = -10;
+        to = 10;
+    }
+    double p = from + (z * (to - from));
+    return p;
 }
 
 double MapCamera3d::getCameraPitch() {

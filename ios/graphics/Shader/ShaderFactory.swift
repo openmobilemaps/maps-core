@@ -91,4 +91,8 @@ class ShaderFactory: MCShaderFactoryInterface {
     func createIcosahedronColorShader() -> MCColorShaderInterface? {
         IcosahedronShader()
     }
+
+    func createSphereEffectShader() -> (any MCSphereEffectShaderInterface)? {
+        SphereEffectShader()
+    }
 }
