@@ -28,16 +28,11 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shade
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_SphereEffectShaderInterface_00024CppProxy_native_1setEllipse(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jfloat j_a, jfloat j_b, jfloat j_c, jfloat j_d, jfloat j_e, jfloat j_f)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_SphereEffectShaderInterface_00024CppProxy_native_1setEllipse(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_coefficients)
 {
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::SphereEffectShaderInterface>(nativeRef);
-        ref->setEllipse(::djinni::F32::toCpp(jniEnv, j_a),
-                        ::djinni::F32::toCpp(jniEnv, j_b),
-                        ::djinni::F32::toCpp(jniEnv, j_c),
-                        ::djinni::F32::toCpp(jniEnv, j_d),
-                        ::djinni::F32::toCpp(jniEnv, j_e),
-                        ::djinni::F32::toCpp(jniEnv, j_f));
+        ref->setEllipse(::djinni::List<::djinni::F64>::toCpp(jniEnv, j_coefficients));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

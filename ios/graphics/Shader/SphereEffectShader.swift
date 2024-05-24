@@ -15,14 +15,7 @@ import UIKit
 
 class SphereEffectShader: BaseShader {
 
-    struct Ellipse {
-        var a: Float
-        var b: Float
-        var c: Float
-        var d: Float
-        var e: Float
-        var f: Float
-    }
+    private var ellipse: [Float] = []
 
     private var ellipseBuffer: (any MTLBuffer)?
 
@@ -47,9 +40,11 @@ extension SphereEffectShader: MCSphereEffectShaderInterface {
     func asShaderProgram() -> (any MCShaderProgramInterface)? {
         return self
     }
-    
-    func setEllipse(_ a: Float, b: Float, c: Float, d: Float, e: Float, f: Float) {
-        var ellipse = Ellipse(a: a, b: b, c: c, d: d, e: e, f: f)
-        ellipseBuffer = MetalContext.current.device.makeBuffer(bytes: &ellipse, length: MemoryLayout<Ellipse>.size, options: [])
+
+    func setEllipse(_ coefficients: [NSNumber]) {
+
+        ellipse = coefficients.map { $0.floatValue }
+
+        ellipseBuffer = MetalContext.current.device.makeBuffer(bytes: &ellipse, length: MemoryLayout<Float>.size * ellipse.count, options: [])
     }
 }

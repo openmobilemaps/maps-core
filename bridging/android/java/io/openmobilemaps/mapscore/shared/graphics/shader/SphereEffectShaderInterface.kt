@@ -10,7 +10,7 @@ abstract class SphereEffectShaderInterface {
 
     abstract fun asShaderProgramInterface(): ShaderProgramInterface
 
-    abstract fun setEllipse(a: Float, b: Float, c: Float, d: Float, e: Float, f: Float)
+    abstract fun setEllipse(coefficients: ArrayList<Double>)
 
     private class CppProxy : SphereEffectShaderInterface {
         private val nativeRef: Long
@@ -33,10 +33,10 @@ abstract class SphereEffectShaderInterface {
         }
         private external fun native_asShaderProgramInterface(_nativeRef: Long): ShaderProgramInterface
 
-        override fun setEllipse(a: Float, b: Float, c: Float, d: Float, e: Float, f: Float) {
+        override fun setEllipse(coefficients: ArrayList<Double>) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_setEllipse(this.nativeRef, a, b, c, d, e, f)
+            native_setEllipse(this.nativeRef, coefficients)
         }
-        private external fun native_setEllipse(_nativeRef: Long, a: Float, b: Float, c: Float, d: Float, e: Float, f: Float)
+        private external fun native_setEllipse(_nativeRef: Long, coefficients: ArrayList<Double>)
     }
 }
