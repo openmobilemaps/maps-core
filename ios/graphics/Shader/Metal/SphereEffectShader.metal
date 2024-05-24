@@ -27,16 +27,38 @@ fragment float4
 sphereEffectFragmentShader(VertexOut in [[stage_in]],
                            constant Ellipse &E [[buffer(0)]])
 {
+    float4 white = float4(1.0,1.0,1.0,1.0);
+    float4 blueOut = float4(44.0/255.0,166.0/255.0,1.0,1.0);
+    float4 blueClear = float4(0.0,148.0/255.0,1.0,1.0);
+
     float x = in.uv.x;
     float y = -in.uv.y;
     float L = E.a*x*x + E.b*x*y + E.c*y*y + E.d*x + E.e*y + E.f;
     if (L > 0) {
-        float a = clamp(1.0 - pow(L, 0.3), 0.0, 1.0);
-        float b = clamp(1.0 - L, 0.0, 1.0);
-//        return float4(a, 0.0, 0.0, 1.0);
-       return a * float4(1.0, 1.0, 1.0, 1) + (1.0 - a) * b * float4(0.1718, 0.62641, 1.0, 1);
+        float t = clamp(L * 2.4, 0.0, 1.0);
+
+        float4 c, c2;
+        float alpha, alpha2;
+
+        if(t < 0.5) {
+            t = t / 0.5;
+            c = white;
+            alpha = 1.0;
+            c2 = blueOut;
+            alpha2 = 0.5;
+        } else {
+            t = (t - 0.5) / 0.5;
+            c = blueOut;
+            c2 = blueClear;
+            alpha = 0.5;
+            alpha2 = 0.0;
+        }
+
+        return ((1.0 - t) * alpha + t * alpha2) * ((1.0 - t) * c + t * c2);
     }
+
     discard_fragment();
-    return float4(0.0, 0.0, 0.0, 0.0);
+    return float4(0.0,0.0,0.0,0.0);
+  //  return discard_fragment();
 }
 
