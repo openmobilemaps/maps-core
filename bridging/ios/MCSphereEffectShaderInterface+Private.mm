@@ -39,19 +39,9 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)setEllipse:(float)a
-                 b:(float)b
-                 c:(float)c
-                 d:(float)d
-                 e:(float)e
-                 f:(float)f {
+- (void)setEllipse:(nonnull NSArray<NSNumber *> *)coefficients {
     try {
-        _cppRefHandle.get()->setEllipse(::djinni::F32::toCpp(a),
-                                        ::djinni::F32::toCpp(b),
-                                        ::djinni::F32::toCpp(c),
-                                        ::djinni::F32::toCpp(d),
-                                        ::djinni::F32::toCpp(e),
-                                        ::djinni::F32::toCpp(f));
+        _cppRefHandle.get()->setEllipse(::djinni::List<::djinni::F64>::toCpp(coefficients));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -71,15 +61,10 @@ public:
             return ::djinni_generated::ShaderProgramInterface::toCpp(objcpp_result_);
         }
     }
-    void setEllipse(float c_a, float c_b, float c_c, float c_d, float c_e, float c_f) override
+    void setEllipse(const std::vector<double> & c_coefficients) override
     {
         @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() setEllipse:(::djinni::F32::fromCpp(c_a))
-                                                               b:(::djinni::F32::fromCpp(c_b))
-                                                               c:(::djinni::F32::fromCpp(c_c))
-                                                               d:(::djinni::F32::fromCpp(c_d))
-                                                               e:(::djinni::F32::fromCpp(c_e))
-                                                               f:(::djinni::F32::fromCpp(c_f))];
+            [djinni_private_get_proxied_objc_object() setEllipse:(::djinni::List<::djinni::F64>::fromCpp(c_coefficients))];
         }
     }
 };

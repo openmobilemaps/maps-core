@@ -32,7 +32,7 @@
 #define ROTATION_LOCKING_FACTOR 1.5
 
 #define GLOBE_MIN_ZOOM      200'000'000
-#define GLOBE_INITIAL_ZOOM   46'000'000
+#define GLOBE_INITIAL_ZOOM   146'000'000
 #define LOCAL_MIN_ZOOM       10'000'000
 #define LOCAL_INITIAL_ZOOM    3'000'000
 #define LOCAL_MAX_ZOOM          100'000
@@ -364,7 +364,7 @@ std::vector<float> MapCamera3d::getVpMatrix() {
 
     double focusPointAltitude = focusPointPosition.z;
     double cameraDistance = getCameraDistance();
-    double maxD = cameraDistance / R + 1;
+    double maxD = cameraDistance / R + 1.0 ;
     double minD = std::max(cameraDistance / R - 1, 0.00001);
 
     double fovy = getCameraFieldOfView(); // 45 // zoom / 70800;
@@ -423,26 +423,8 @@ std::vector<float> MapCamera3d::getVpMatrix() {
         static_cast<double>(newVpMatrix[14]),
         static_cast<double>(newVpMatrix[15])
     };
-    std::vector<double> newInverseMatrixD(16, 0.0);
-    gluInvertMatrix(vpMatrixD, newInverseMatrixD);
-    std::vector<float> newInverseMatrix = {
-        static_cast<float>(newInverseMatrixD[0]),
-        static_cast<float>(newInverseMatrixD[1]),
-        static_cast<float>(newInverseMatrixD[2]),
-        static_cast<float>(newInverseMatrixD[3]),
-        static_cast<float>(newInverseMatrixD[4]),
-        static_cast<float>(newInverseMatrixD[5]),
-        static_cast<float>(newInverseMatrixD[6]),
-        static_cast<float>(newInverseMatrixD[7]),
-        static_cast<float>(newInverseMatrixD[8]),
-        static_cast<float>(newInverseMatrixD[9]),
-        static_cast<float>(newInverseMatrixD[10]),
-        static_cast<float>(newInverseMatrixD[11]),
-        static_cast<float>(newInverseMatrixD[12]),
-        static_cast<float>(newInverseMatrixD[13]),
-        static_cast<float>(newInverseMatrixD[14]),
-        static_cast<float>(newInverseMatrixD[15])
-    };
+    std::vector<double> newInverseMatrix(16, 0.0);
+    gluInvertMatrix(vpMatrixD, newInverseMatrix);
 
     std::lock_guard<std::recursive_mutex> lock(vpDataMutex);
     // lastVpBounds = viewBounds;
@@ -462,32 +444,56 @@ std::vector<float> MapCamera3d::getVpMatrix() {
 
 
 // Funktion zur Berechnung der Koeffizienten der projizierten Ellipse
-void MapCamera3d::computeEllipseCoefficients(float& A, float& B, float& C, float& D, float& E, float& F) {
+std::vector<double> MapCamera3d::computeEllipseCoefficients() {
     // Die Kugelmatrix Q
-    std::vector<float> Q = {
+    std::vector<double> Q = {
         1, 0, 0, 0,
         0, 1, 0, 0,
         0, 0, 1, 0,
         0, 0, 0, -1
     };
 
-    std::vector<float> QI(16, 0.0f);
-    Matrix::multiplyMM(QI, 0, Q, 0, inverseVPMatrix, 0);
+    std::vector<double> QI(16, 0.0f);
+    MatrixD::multiplyMM(QI, 0, Q, 0, inverseVPMatrix, 0);
 
-    std::vector<float> IT(16, 0.0f);
-    Matrix::transposeM(IT, 0, inverseVPMatrix, 0);
+    std::vector<double> IT(16, 0.0f);
+    MatrixD::transposeM(IT, 0, inverseVPMatrix, 0);
 
-    std::vector<float> IQI(16, 0.0f);
-    Matrix::multiplyMM(IQI, 0, IT, 0, QI , 0);
+    std::vector<double> IQI(16, 0.0f);
+    MatrixD::multiplyMM(IQI, 0, IT, 0, QI , 0);
 
-    A =     IQI[0 * 4 + 0];
-    B = 2 * IQI[0 * 4 + 1];
-    C =     IQI[1 * 4 + 1];
-    D = 2 * IQI[0 * 4 + 2] + 2 * IQI[0 * 4 + 3];
-    E = 2 * IQI[1 * 4 + 2] + 2 * IQI[1 * 4 + 3];
-    F =     IQI[2 * 4 + 2] + IQI[2 * 4 + 3] + IQI[3 * 4 + 2] + IQI[3 * 4 + 3];
+//    std::vector<float> coeffs = {
+//        static_cast<float>(IQI[0 * 4 + 2]), // Q13
+//        static_cast<float>(IQI[1 * 4 + 2]), // Q23
+//        static_cast<float>(IQI[2 * 4 + 3]), // Q24
+//        static_cast<float>(IQI[2 * 4 + 2]), // Q33
+//        static_cast<float>(IQI[0 * 4 + 0]), // Q11
+//        static_cast<float>(IQI[0 * 4 + 1]), // Q12
+//        static_cast<float>(IQI[0 * 4 + 2]), // Q13
+//        static_cast<float>(IQI[0 * 4 + 3]), // Q14
+//        static_cast<float>(IQI[1 * 4 + 1]), // Q22
+//        static_cast<float>(IQI[0 * 4 + 3]), // Q24
+//        static_cast<float>(IQI[0 * 4 + 3]) // Q44
+//    };
 
-    printf("E: %f, %f, %f, %f, %f, %f\n", A, B, C, D, E, F);
+    for (int i = 0; i < 4; ++i) {
+        for (int j = 0; j < 4; ++j) {
+            IQI[i * 4 + j] = IQI[i * 4 + j] / IQI[15];
+        }
+    }
+
+    return IQI;
+
+//    double c = sin((double)DateHelper::currentTimeMicros() / 1000000.0) * 0.5 + 0.5;
+//    c = 1;
+//    printf("c = %f\n", c);
+//    mapInterface->invalidate();
+//    A =     IQI[0 * 4 + 0];
+//    B = 2 * IQI[0 * 4 + 1];
+//    C =     IQI[1 * 4 + 1];
+//    D = c * IQI[0 * 4 + 2] + c * IQI[0 * 4 + 3];
+//    E = c * IQI[1 * 4 + 2] + c * IQI[1 * 4 + 3];
+//    F = c * c * IQI[2 * 4 + 2] + c * IQI[2 * 4 + 3] + c * IQI[3 * 4 + 2] + IQI[3 * 4 + 3];
 
 
 //    std::vector<float> P = vpMatrix;
@@ -535,24 +541,18 @@ void MapCamera3d::computeEllipseCoefficients(float& A, float& B, float& C, float
 //    F = p14 * p14 + p24 * p24 + p34 * p34 - p44 * p44;
 //
     // Normalize the coefficients by F to get a standard form
-    if (F != 0) {
-        A /= std::abs(F);
-        B /= std::abs(F);
-        C /= std::abs(F);
-        D /= std::abs(F);
-        E /= std::abs(F);
-        F /= std::abs(F); // Set F to ±1 after normalization
-    }
+//    if (F != 0) {
+//        A /= std::abs(F);
+//        B /= std::abs(F);
+//        C /= std::abs(F);
+//        D /= std::abs(F);
+//        E /= std::abs(F);
+//        F /= std::abs(F); // Set F to ±1 after normalization
+//    }
 
 }
 
-// Funktion zur Überprüfung, ob ein Punkt innerhalb der Ellipse liegt
-bool MapCamera3d::isPointInsideEllipse(float x, float y) {
-    float A,  B,  C,  D,  E,  F;
-    computeEllipseCoefficients(A, B, C, D, E, F);
-    float value = A*x*x + B*x*y + C*y*y + D*x + E*y + F;
-    return value < 0;
-}
+
 
 std::optional<std::vector<float>> MapCamera3d::getLastVpMatrix() {
     // TODO: Add back as soon as visiblerect calculation is done

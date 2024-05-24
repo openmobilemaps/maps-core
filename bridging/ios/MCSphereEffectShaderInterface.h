@@ -9,11 +9,6 @@
 
 - (nullable id<MCShaderProgramInterface>)asShaderProgramInterface;
 
-- (void)setEllipse:(float)a
-                 b:(float)b
-                 c:(float)c
-                 d:(float)d
-                 e:(float)e
-                 f:(float)f;
+- (void)setEllipse:(nonnull NSArray<NSNumber *> *)coefficients;
 
 @end

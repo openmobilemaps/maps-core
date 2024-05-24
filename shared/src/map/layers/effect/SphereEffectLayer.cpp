@@ -75,9 +75,8 @@ void SphereEffectLayer::update() {
         return;
     }
     if (auto casted = std::dynamic_pointer_cast<MapCamera3d>(camera)) {
-        float A, B, C, D, E, F;
-        casted->computeEllipseCoefficients(A, B, C, D, E, F);
-        shader->setEllipse(A, B, C, D, E, F);
+        auto coeffs = casted->computeEllipseCoefficients();
+        shader->setEllipse(coeffs);
     }
 }
 
