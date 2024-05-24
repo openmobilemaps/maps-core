@@ -433,7 +433,6 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
     }
 
     if (!validViewBounds) {
-        printf("ERROR: No valid ViewBounds, this can't happen\n");
         return;
     }
     currentViewBounds = RectCoord(viewBoundsTopLeft, viewBoundsBottomRight);
@@ -838,7 +837,6 @@ void Tiled2dMapSource<T, L, R>::performLoadingTask(Tiled2dMapTileInfo tile, size
         errorTiles[loaderIndex].erase(tile);
         return;
     };
-
     std::weak_ptr<Tiled2dMapSource> weakSelfPtr = std::dynamic_pointer_cast<Tiled2dMapSource>(shared_from_this());
     auto weakActor = WeakActor<Tiled2dMapSource>(mailbox, std::static_pointer_cast<Tiled2dMapSource>(shared_from_this()));
 
@@ -1046,6 +1044,14 @@ template<class T, class L, class R>
 void Tiled2dMapSource<T, L, R>::updateTileMasks() {
 
     if (!zoomInfo.maskTile) {
+        for (auto it = currentTiles.rbegin(); it != currentTiles.rend(); it++){
+            auto &[tileInfo, tileWrapper] = *it;
+            if (readyTiles.count(tileInfo) == 0) {
+                tileWrapper.state = TileState::IN_SETUP;
+            } else {
+                tileWrapper.state = TileState::VISIBLE;
+            }
+        }
         return;
     }
 
