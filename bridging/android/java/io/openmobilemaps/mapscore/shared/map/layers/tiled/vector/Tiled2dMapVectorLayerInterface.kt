@@ -34,6 +34,8 @@ abstract class Tiled2dMapVectorLayerInterface {
 
     abstract fun setGlobalState(properties: HashMap<String, VectorLayerFeatureInfoValue>)
 
+    abstract fun getVisiblePointFeatureContexts(paddingPc: Float, sourceLayer: String?): ArrayList<VectorLayerFeatureCoordInfo>
+
     abstract fun setReadyStateListener(listener: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapReadyStateListener?)
 
     abstract fun reloadDataSource(sourceName: String)
@@ -110,6 +112,12 @@ abstract class Tiled2dMapVectorLayerInterface {
             native_setGlobalState(this.nativeRef, properties)
         }
         private external fun native_setGlobalState(_nativeRef: Long, properties: HashMap<String, VectorLayerFeatureInfoValue>)
+
+        override fun getVisiblePointFeatureContexts(paddingPc: Float, sourceLayer: String?): ArrayList<VectorLayerFeatureCoordInfo> {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getVisiblePointFeatureContexts(this.nativeRef, paddingPc, sourceLayer)
+        }
+        private external fun native_getVisiblePointFeatureContexts(_nativeRef: Long, paddingPc: Float, sourceLayer: String?): ArrayList<VectorLayerFeatureCoordInfo>
 
         override fun setReadyStateListener(listener: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapReadyStateListener?) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

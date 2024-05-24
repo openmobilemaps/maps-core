@@ -12,6 +12,7 @@
 #include "NativeTiled2dMapVectorLayerSelectionCallbackInterface.h"
 #include "NativeTiled2dMapVectorLayerSymbolDelegateInterface.h"
 #include "NativeTiled2dMapZoomInfo.h"
+#include "NativeVectorLayerFeatureCoordInfo.h"
 #include "NativeVectorLayerFeatureInfoValue.h"
 
 namespace djinni_generated {
@@ -130,6 +131,16 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_
         const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapVectorLayerInterface>(nativeRef);
         ref->setGlobalState(::djinni::Map<::djinni::String, ::djinni_generated::NativeVectorLayerFeatureInfoValue>::toCpp(jniEnv, j_properties));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_vector_Tiled2dMapVectorLayerInterface_00024CppProxy_native_1getVisiblePointFeatureContexts(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jfloat j_paddingPc, jstring j_sourceLayer)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapVectorLayerInterface>(nativeRef);
+        auto r = ref->getVisiblePointFeatureContexts(::djinni::F32::toCpp(jniEnv, j_paddingPc),
+                                                     ::djinni::Optional<std::optional, ::djinni::String>::toCpp(jniEnv, j_sourceLayer));
+        return ::djinni::release(::djinni::List<::djinni_generated::NativeVectorLayerFeatureCoordInfo>::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
 CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_vector_Tiled2dMapVectorLayerInterface_00024CppProxy_native_1setReadyStateListener(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeTiled2dMapReadyStateListener::Boxed::JniType j_listener)

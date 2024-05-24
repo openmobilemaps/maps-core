@@ -694,7 +694,7 @@ void MapCamera3d::notifyListeners(const int &listenerType) {
     std::lock_guard<std::recursive_mutex> lock(listenerMutex);
     for (auto listener : listeners) {
         if (listenerType & ListenerType::BOUNDS) {
-            listener->onCameraChange(viewMatrix, projectionMatrix, verticalFov, horizontalFov, width, height, focusPointAltitude, getCenterPosition());
+            listener->onCameraChange(viewMatrix, projectionMatrix, verticalFov, horizontalFov, width, height, focusPointAltitude, getCenterPosition(), getZoom());
         }
         if (listenerType & ListenerType::ROTATION) {
             listener->onRotationChanged(angle);
@@ -1278,14 +1278,15 @@ bool MapCamera3d::gluInvertMatrix(const std::vector<double> &m, std::vector<doub
 
     return Vec2F(0.0, 0.0);
 }
+
 // padding in percentage, where 1.0 = rect is half of full width and height
 bool MapCamera3d::coordIsVisibleOnScreen(const ::Coord & coord, float paddingPc) {
     auto screenPos = screenPosFromCoord(coord);
     Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
-    auto minX = sizeViewport.x * paddingPc * 0.5;
-    auto maxX = sizeViewport.x - minX;
-    auto minY = sizeViewport.y * paddingPc * 0.5;
-    auto maxY = sizeViewport.y - minY;
+    auto minX = (sizeViewport.x + paddingLeft) * paddingPc * 0.5;
+    auto maxX = (sizeViewport.x - paddingRight) - minX;
+    auto minY = (sizeViewport.y + paddingTop) * paddingPc * 0.5;
+    auto maxY = (sizeViewport.y - paddingBottom) - minY;
 
     if (sizeViewport.x != 0 && sizeViewport.y != 0) {
         return screenPos.x >= minX && screenPos.x <= maxX && screenPos.y >= minY && screenPos.y <= maxY;
@@ -1470,7 +1471,11 @@ void MapCamera3d::setCameraMode(CameraMode3d mode) {
         case CameraMode3d::TILTED_ORBITAL:
             this->zoomMin = LOCAL_MIN_ZOOM;
             this->zoomMax = LOCAL_MAX_ZOOM;
-            targetZoom = LOCAL_INITIAL_ZOOM;
+            if (this->zoom == this->zoomMin) {
+                targetZoom = LOCAL_MIN_ZOOM;
+            } else {
+                targetZoom = LOCAL_INITIAL_ZOOM;
+            }
             break;
     }
 

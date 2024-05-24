@@ -120,7 +120,7 @@ void PolygonLayer::addAll(const std::vector<PolygonInfo> &polygons) {
         std::lock_guard<std::recursive_mutex> lock(polygonsMutex);
         for (const auto &polygon : polygons) {
 
-            auto shader = shaderFactory->createColorShader();
+            auto shader = mapInterface->is3d() ? shaderFactory->createUnitSphereColorShader() : shaderFactory->createColorShader();
             auto polygonGraphicsObject = objectFactory->createPolygon(shader->asShaderProgramInterface());
 
             auto polygonObject =

@@ -136,12 +136,12 @@ void Line2dLayerObject::setPositions(const std::vector<Coord> &positions) {
 
         // Vertex indices
         lineIndices.push_back(4 * i);
-        lineIndices.push_back(4 * i + 1);
         lineIndices.push_back(4 * i + 2);
+        lineIndices.push_back(4 * i + 1);
 
         lineIndices.push_back(4 * i);
-        lineIndices.push_back(4 * i + 2);
         lineIndices.push_back(4 * i + 3);
+        lineIndices.push_back(4 * i + 2);
 
         prefixTotalLineLength += lineLength;
     }
