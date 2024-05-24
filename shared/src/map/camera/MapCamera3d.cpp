@@ -32,7 +32,7 @@
 #define ROTATION_LOCKING_FACTOR 1.5
 
 #define GLOBE_MIN_ZOOM      200'000'000
-#define GLOBE_INITIAL_ZOOM   146'000'000
+#define GLOBE_INITIAL_ZOOM   46'000'000
 #define LOCAL_MIN_ZOOM       10'000'000
 #define LOCAL_INITIAL_ZOOM    3'000'000
 #define LOCAL_MAX_ZOOM          100'000
@@ -462,93 +462,16 @@ std::vector<double> MapCamera3d::computeEllipseCoefficients() {
     std::vector<double> IQI(16, 0.0f);
     MatrixD::multiplyMM(IQI, 0, IT, 0, QI , 0);
 
-//    std::vector<float> coeffs = {
-//        static_cast<float>(IQI[0 * 4 + 2]), // Q13
-//        static_cast<float>(IQI[1 * 4 + 2]), // Q23
-//        static_cast<float>(IQI[2 * 4 + 3]), // Q24
-//        static_cast<float>(IQI[2 * 4 + 2]), // Q33
-//        static_cast<float>(IQI[0 * 4 + 0]), // Q11
-//        static_cast<float>(IQI[0 * 4 + 1]), // Q12
-//        static_cast<float>(IQI[0 * 4 + 2]), // Q13
-//        static_cast<float>(IQI[0 * 4 + 3]), // Q14
-//        static_cast<float>(IQI[1 * 4 + 1]), // Q22
-//        static_cast<float>(IQI[0 * 4 + 3]), // Q24
-//        static_cast<float>(IQI[0 * 4 + 3]) // Q44
-//    };
+    double R = 6378137.0;
+    double S = 4.0 / (getCameraDistance() / R);
 
     for (int i = 0; i < 4; ++i) {
         for (int j = 0; j < 4; ++j) {
-            IQI[i * 4 + j] = IQI[i * 4 + j] / IQI[15];
+            IQI[i * 4 + j] = IQI[i * 4 + j] / IQI[15] * S;
         }
     }
 
     return IQI;
-
-//    double c = sin((double)DateHelper::currentTimeMicros() / 1000000.0) * 0.5 + 0.5;
-//    c = 1;
-//    printf("c = %f\n", c);
-//    mapInterface->invalidate();
-//    A =     IQI[0 * 4 + 0];
-//    B = 2 * IQI[0 * 4 + 1];
-//    C =     IQI[1 * 4 + 1];
-//    D = c * IQI[0 * 4 + 2] + c * IQI[0 * 4 + 3];
-//    E = c * IQI[1 * 4 + 2] + c * IQI[1 * 4 + 3];
-//    F = c * c * IQI[2 * 4 + 2] + c * IQI[2 * 4 + 3] + c * IQI[3 * 4 + 2] + IQI[3 * 4 + 3];
-
-
-//    std::vector<float> P = vpMatrix;
-
-//    // Berechne Q' = P^T * Q * P
-//    std::vector<float> PT(16, 0.0f);
-//    for (int i = 0; i < 4; ++i) {
-//        for (int j = 0; j < 4; ++j) {
-//            P[i * 4 + j] = vpMatrix[j * 4 + i];
-//        }
-//    }
-//
-//    std::vector<float> QP(16, 0.0);
-//    Matrix::multiplyMM(QP, 0, Q, 0, P, 0);
-//
-//    std::vector<float> QP_PT(16, 0.0);
-//    Matrix::multiplyMM(QP_PT, 0, PT, 0, QP, 0);
-
-    // Extrahiere die Koeffizienten der Ellipse
-//    A =     QP_PT[0 * 4 + 0];
-//    B = 2 * QP_PT[0 * 4 + 1];
-//    C =     QP_PT[1 * 4 + 1];
-//    D = 2 * QP_PT[0 * 4 + 3];
-//    E = 2 * QP_PT[1 * 4 + 3];
-//    F =     QP_PT[3 * 4 + 3];
-//    A =     QP_PT[0 * 4 + 0];
-//    B = 2 * QP_PT[1 * 4 + 0];
-//    C =     QP_PT[1 * 4 + 1];
-//    D = 2 * QP_PT[3 * 4 + 0];
-//    E = 2 * QP_PT[3 * 4 + 1];
-//    F =     QP_PT[3 * 4 + 3];
-
-    // Extrahiere die Elemente der Projektionsmatrix P
-//    float p11 = P[0], p12 = P[1], p13 = P[2], p14 = P[3];
-//    float p21 = P[4], p22 = P[5], p23 = P[6], p24 = P[7];
-//    float p31 = P[8], p32 = P[9], p33 = P[10], p34 = P[11];
-//    float p41 = P[12], p42 = P[13], p43 = P[14], p44 = P[15];
-//
-//    // Berechne die Koeffizienten der Ellipse
-//    A = p11 * p11 + p21 * p21 + p31 * p31 - p41 * p41;
-//    B = 2 * (p11 * p12 + p21 * p22 + p31 * p32 - p41 * p42);
-//    C = p12 * p12 + p22 * p22 + p32 * p32 - p42 * p42;
-//    D = 2 * (p11 * p14 + p21 * p24 + p31 * p34 - p41 * p44);
-//    E = 2 * (p12 * p14 + p22 * p24 + p32 * p34 - p42 * p44);
-//    F = p14 * p14 + p24 * p24 + p34 * p34 - p44 * p44;
-//
-    // Normalize the coefficients by F to get a standard form
-//    if (F != 0) {
-//        A /= std::abs(F);
-//        B /= std::abs(F);
-//        C /= std::abs(F);
-//        D /= std::abs(F);
-//        E /= std::abs(F);
-//        F /= std::abs(F); // Set F to ±1 after normalization
-//    }
 
 }
 
@@ -1527,18 +1450,17 @@ void MapCamera3d::updateZoom(double zoom_) {
 }
 
 double MapCamera3d::getCameraVerticalDisplacement() {
-    return 0;
     double z, from, to;
     double maxPitch = GLOBE_INITIAL_ZOOM;
     if (zoom >= maxPitch) {
         z = 1.0 - (zoom - maxPitch) / (GLOBE_MIN_ZOOM - maxPitch);
-        from = 10;
-        to = -10;
+        from = 0;
+        to = 1.0;
     }
     else {
         z = 1.0 - (zoom - LOCAL_MAX_ZOOM) / (maxPitch - LOCAL_MAX_ZOOM);
-        from = -10;
-        to = 10;
+        from = 1.0;
+        to = 0;
     }
     double p = from + (z * (to - from));
     return p;
@@ -1550,11 +1472,11 @@ double MapCamera3d::getCameraPitch() {
     if (zoom >= maxPitch) {
         z = 1.0 - (zoom - maxPitch) / (GLOBE_MIN_ZOOM - maxPitch);
         from = 0;
-        to = 20;
+        to = 25;
     }
     else {
         z = 1.0 - (zoom - LOCAL_MAX_ZOOM) / (maxPitch - LOCAL_MAX_ZOOM);
-        from = 20;
+        from = 25;
         to = 0;
     }
 //    switch (mode) {
