@@ -65,7 +65,7 @@ public:
 
     static void setRotateM(std::vector<float> &rm, int rmOffset, float a, float x, float y, float z);
 
-    static void multiplyMM(std::vector<float> &r, int resultOffset, std::vector<float> &lhs, int lhsOffset, std::vector<float> &rhs,
+    static void multiplyMM(std::vector<float> &r, int resultOffset, const std::vector<float> &lhs, int lhsOffset, const std::vector<float> &rhs,
                            int rhsOffset);
 
     static void multiplyMMC(std::vector<float> &r, int resultOffset, const std::vector<float> &lhs, int lhsOffset,

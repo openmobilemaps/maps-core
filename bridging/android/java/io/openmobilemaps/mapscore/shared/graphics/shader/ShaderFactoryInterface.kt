@@ -48,6 +48,8 @@ abstract class ShaderFactoryInterface {
 
     abstract fun createIcosahedronColorShader(): ColorShaderInterface
 
+    abstract fun createSphereEffectShader(): SphereEffectShaderInterface
+
     private class CppProxy : ShaderFactoryInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -182,5 +184,11 @@ abstract class ShaderFactoryInterface {
             return native_createIcosahedronColorShader(this.nativeRef)
         }
         private external fun native_createIcosahedronColorShader(_nativeRef: Long): ColorShaderInterface
+
+        override fun createSphereEffectShader(): SphereEffectShaderInterface {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_createSphereEffectShader(this.nativeRef)
+        }
+        private external fun native_createSphereEffectShader(_nativeRef: Long): SphereEffectShaderInterface
     }
 }
