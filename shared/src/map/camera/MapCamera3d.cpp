@@ -462,16 +462,15 @@ std::vector<double> MapCamera3d::computeEllipseCoefficients() {
     std::vector<double> IQI(16, 0.0f);
     MatrixD::multiplyMM(IQI, 0, IT, 0, QI , 0);
 
-    double R = 6378137.0;
-    double S = 4.0 / (getCameraDistance() / R);
+    IQI = inverseVPMatrix;
 
     for (int i = 0; i < 4; ++i) {
         for (int j = 0; j < 4; ++j) {
-            IQI[i * 4 + j] = IQI[i * 4 + j] / IQI[15] * S;
+            IQI[i * 4 + j] = inverseVPMatrix[j * 4 + i] / inverseVPMatrix[15];
         }
     }
 
-    return IQI;
+    return inverseVPMatrix;
 
 }
 
