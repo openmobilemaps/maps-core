@@ -12,6 +12,16 @@ import Foundation
 import MapCoreSharedModule
 
 class GraphicsFactory: MCGraphicsObjectFactoryInterface {
+    func createQuadMask(_ is3d: Bool) -> (any MCQuad2dInterface)? {
+        let shader = ColorShader(shader: is3d ? .unitSphereColorShader : .colorShader)
+        return Quad2d(shader: shader, metalContext: .current)
+    }
+    
+    func createPolygonMask(_ is3d: Bool) -> (any MCPolygon2dInterface)? {
+        let shader = ColorShader(shader: is3d ? .unitSphereColorShader : .colorShader)
+        return Polygon2d(shader: shader, metalContext: .current)
+    }
+    
     func createPolygonGroup(_ shader: MCShaderProgramInterface?) -> MCPolygonGroup2dInterface? {
         guard let shader else { fatalError("No Shader provided") }
         return PolygonGroup2d(shader: shader, metalContext: .current)
@@ -45,14 +55,6 @@ class GraphicsFactory: MCGraphicsObjectFactoryInterface {
     func createPolygon(_ shader: MCShaderProgramInterface?) -> MCPolygon2dInterface? {
         guard let shader else { fatalError("No Shader provided") }
         return Polygon2d(shader: shader, metalContext: .current)
-    }
-
-    func createQuadMask() -> MCQuad2dInterface? {
-        Quad2d(shader: ColorShader(), metalContext: .current)
-    }
-
-    func createPolygonMask() -> MCPolygon2dInterface? {
-        Polygon2d(shader: ColorShader(shader: .unitSphereColorShader), metalContext: .current)
     }
 
     func createText(_ shader: MCShaderProgramInterface?) -> MCTextInterface? {
