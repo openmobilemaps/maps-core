@@ -53,7 +53,7 @@ sphereEffectFragmentShader(VertexOut in [[stage_in]],
     float Rsq = ((divident / k4) / a43) / divisor;
     float R = sqrt(Rsq);
 
-    float L = clamp((R - 1.0) * 2.0, -1.0, 1.0);
+    float L = clamp((R - 1.0) * 5.0, -1.0, 1.0);
 
 
     float4 white = float4(1.0,1.0,1.0,1.0);
