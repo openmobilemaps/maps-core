@@ -365,7 +365,7 @@ std::vector<float> MapCamera3d::getVpMatrix() {
     double focusPointAltitude = focusPointPosition.z;
     double cameraDistance = getCameraDistance();
     double maxD = cameraDistance / R + 1.0 ;
-    double minD = std::max(cameraDistance / R - 1, 0.00001);
+    double minD = std::max(cameraDistance / R - 1, 0.1);
 
     double fovy = getCameraFieldOfView(); // 45 // zoom / 70800;
 
