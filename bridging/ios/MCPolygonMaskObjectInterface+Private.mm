@@ -35,10 +35,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 }
 
 + (nullable MCPolygonMaskObjectInterface *)create:(nullable id<MCGraphicsObjectFactoryInterface>)graphicsObjectFactory
-                                 conversionHelper:(nullable MCCoordinateConversionHelperInterface *)conversionHelper {
+                                 conversionHelper:(nullable MCCoordinateConversionHelperInterface *)conversionHelper
+                                             is3d:(BOOL)is3d {
     try {
         auto objcpp_result_ = ::PolygonMaskObjectInterface::create(::djinni_generated::GraphicsObjectFactoryInterface::toCpp(graphicsObjectFactory),
-                                                                   ::djinni_generated::CoordinateConversionHelperInterface::toCpp(conversionHelper));
+                                                                   ::djinni_generated::CoordinateConversionHelperInterface::toCpp(conversionHelper),
+                                                                   ::djinni::Bool::toCpp(is3d));
         return ::djinni_generated::PolygonMaskObjectInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }

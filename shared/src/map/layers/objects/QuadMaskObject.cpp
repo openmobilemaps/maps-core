@@ -12,15 +12,17 @@
 #include "Vec2D.h"
 
 QuadMaskObject::QuadMaskObject(const std::shared_ptr<GraphicsObjectFactoryInterface> &graphicsObjectFactory,
-                               const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper)
+                               const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
+                               bool is3D)
     : conversionHelper(conversionHelper)
-    , quad(graphicsObjectFactory->createQuadMask()) {}
+    , quad(graphicsObjectFactory->createQuadMask(is3D)) {}
 
 QuadMaskObject::QuadMaskObject(const std::shared_ptr<GraphicsObjectFactoryInterface> &graphicsObjectFactory,
                                const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
-                               const RectCoord &rectCoord)
+                               const RectCoord &rectCoord,
+                               bool is3D)
     : conversionHelper(conversionHelper)
-    , quad(graphicsObjectFactory->createQuadMask()) {
+    , quad(graphicsObjectFactory->createQuadMask(is3D)) {
     setRectCoord(rectCoord);
 }
 

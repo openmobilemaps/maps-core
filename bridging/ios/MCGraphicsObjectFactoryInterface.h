@@ -33,9 +33,9 @@
 
 - (nullable id<MCPolygonPatternGroup2dInterface>)createPolygonPatternGroup:(nullable id<MCShaderProgramInterface>)shader;
 
-- (nullable id<MCQuad2dInterface>)createQuadMask;
+- (nullable id<MCQuad2dInterface>)createQuadMask:(BOOL)is3d;
 
-- (nullable id<MCPolygon2dInterface>)createPolygonMask;
+- (nullable id<MCPolygon2dInterface>)createPolygonMask:(BOOL)is3d;
 
 - (nullable id<MCTextInterface>)createText:(nullable id<MCShaderProgramInterface>)shader;
 

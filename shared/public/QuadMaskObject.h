@@ -21,11 +21,13 @@
 class QuadMaskObject {
 public:
     QuadMaskObject(const std::shared_ptr<GraphicsObjectFactoryInterface> &graphicsObjectFactory,
-            const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper);
+            const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
+            bool is3D);
 
     QuadMaskObject(const std::shared_ptr<GraphicsObjectFactoryInterface> &graphicsObjectFactory,
             const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
-            const ::RectCoord &rectCoord);
+            const ::RectCoord &rectCoord,
+            bool is3D);
 
     void setRectCoord(const ::RectCoord &rectCoord);
 

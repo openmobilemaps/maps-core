@@ -78,13 +78,13 @@ std::string TextInstancedShaderOpenGl::getVertexShader() {
                                                alpha = 0.0;
                                            }
 
-                                           vec2 size = (vPosition.xy) * scale;
+                                           vec2 size = (vPosition.xy) * aScale;
 
                                            mat4 screenMatrix = mat4(
-                                                   vec4(cos(angle), -sin(angle), 0.0, 0.0),
-                                                   vec4(sin(angle), cos(angle), 0.0, 0.0),
-                                                   vec4(0.0, 0.0, 0.0, 0.0),
-                                                   vec4(size.xy + aPosition, 0.0, 1.0)
+                                                   cos(angle), -sin(angle), 0.0, 0.0,
+                                                   sin(angle), cos(angle), 0.0, 0.0,
+                                                   0.0, 0.0, 0.0, 0.0,
+                                                   size.x + aPosition.x, size.y + aPosition.y, 0.0, 1.0
                                            );
 
                                            gl_Position = screenMatrix * screenPosition;
@@ -158,7 +158,12 @@ std::string TextInstancedShaderOpenGl::getFragmentShader() {
                                                       discard;
                                                   }
 
-                                                  vec2 uv = (v_texCoordInstance.xy + v_texCoordInstance.zw * vec2(v_texCoord.x, (1.0 - v_texCoord.y))) * textureFactor;
+                                                  ) + (projectOntoUnitSphere ? OMMShaderCode(
+                                                          vec2 uv = (v_texCoordInstance.xy + v_texCoordInstance.zw * vec2(v_texCoord.x, v_texCoord.y)) * textureFactor;
+                                                  ) : OMMShaderCode(
+                                                          vec2 uv = (v_texCoordInstance.xy + v_texCoordInstance.zw * vec2(v_texCoord.x, (1.0 - v_texCoord.y))) * textureFactor;
+                                                  )) + OMMShaderCode(
+
                                                   vec4 dist = texture(textureSampler, uv);
 
                                                   float median = max(min(dist.r, dist.g), min(max(dist.r, dist.g), dist.b)) / dist.a;

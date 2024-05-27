@@ -62,24 +62,28 @@ std::string AlphaInstancedShaderOpenGl::getVertexShader() {
                                               void main() {
                                                   float angle = aRotation * 3.14159265 / 180.0;
 
-                                                  float x = 1.0 * sin(aPosition.y) * cos(aPosition.x);
-                                                  float y = 1.0 * cos(aPosition.y);
-                                                  float z = -1.0 * sin(aPosition.y) * sin(aPosition.x);
+                                                  vec4 position = vec4(
+                                                          1.0 * sin(aPosition.y) * cos(aPosition.x),
+                                                          1.0 * cos(aPosition.y),
+                                                          -1.0 * sin(aPosition.y) * sin(aPosition.x),
+                                                          1.0);
 
-                                                  vec4 earthCenter = uvpMatrix * vec4(0,0,0, 1.0);
-                                                  vec4 screenPosition = uvpMatrix * vec4(x,y,z, 1.0);
+                                                  vec4 earthCenter = uvpMatrix * vec4(0.0, 0.0, 0.0, 1.0);
+                                                  position = uvpMatrix * position;
 
-                                                  mat4 scaleRotateMatrix = mat4(vec4(cos(angle), -sin(angle), 0.0, 0.0),
-                                                                                vec4(sin(angle), cos(angle), 0.0, 0.0),
-                                                                                vec4(0.0, 0.0, 0.0, 0.0),
-                                                                                vec4(vPosition.xy * aScale + aOffset, 1.0, 1.0));
+                                                  vec2 scaleOffset = vPosition.xy * aScale + aOffset;
 
-                                                  auto diffCenter = screenPosition - earthCenter;
+                                                  mat4 scaleRotateMatrix = mat4(cos(angle), -sin(angle), 0.0, 0.0,
+                                                                                sin(angle), cos(angle), 0.0, 0.0,
+                                                                                0.0, 0.0, 1.0, 0.0,
+                                                                                scaleOffset.x, scaleOffset.y, 0.0, 1.0);
+
+                                                  vec4 diffCenter = position - earthCenter;
                                                   if (diffCenter.z > 0.0) {
                                                       v_alpha = 0.0;
                                                   }
 
-                                                  gl_Position = scaleRotateMatrix * screenPosition;
+                                                  gl_Position = scaleRotateMatrix * position;
                                                   v_texcoordInstance = aTexCoordinate;
                                                   v_texCoord = vTexCoordinate;
                                                   v_alpha = aAlpha;
@@ -135,7 +139,7 @@ std::string AlphaInstancedShaderOpenGl::getFragmentShader() {
                                       out vec4 fragmentColor;
 
                                       void main() {
-                                          vec2 uv = (v_texcoordInstance.xy + v_texcoordInstance.zw * vec2(v_texCoord.x, (1.0 - v_texCoord.y))) * textureFactor;
+                                          vec2 uv = (v_texcoordInstance.xy + v_texcoordInstance.zw * vec2(v_texCoord.x, (v_texCoord.y))) * textureFactor;
                                           vec4 c = texture(textureSampler, uv);
                                           float alpha = c.a * v_alpha;
                                           fragmentColor = vec4(c.rgb * v_alpha, alpha);

@@ -48,7 +48,11 @@ std::shared_ptr<RasterShaderInterface> ShaderFactoryOpenGl::createUnitSphereRast
 }
 
 std::shared_ptr<LineGroupShaderInterface> ShaderFactoryOpenGl::createLineGroupShader() {
-    return std::make_shared<ColorLineGroup2dShaderOpenGl>();
+    return std::make_shared<ColorLineGroup2dShaderOpenGl>(false);
+}
+
+std::shared_ptr<LineGroupShaderInterface> ShaderFactoryOpenGl::createUnitSphereLineGroupShader() {
+    return std::make_shared<ColorLineGroup2dShaderOpenGl>(true);
 }
 
 std::shared_ptr<ColorShaderInterface> ShaderFactoryOpenGl::createColorShader() {
@@ -67,12 +71,14 @@ std::shared_ptr<ColorCircleShaderInterface> ShaderFactoryOpenGl::createUnitSpher
     return std::make_shared<ColorCircleShaderOpenGl>(true);
 }
 
-std::shared_ptr<PolygonGroupShaderInterface> ShaderFactoryOpenGl::createPolygonGroupShader(bool isStriped) {
-    return std::make_shared<ColorPolygonGroup2dShaderOpenGl>(isStriped);
+std::shared_ptr<PolygonGroupShaderInterface>
+ShaderFactoryOpenGl::createPolygonGroupShader(bool isStriped, bool projectOntoUnitSphere) {
+    return std::make_shared<ColorPolygonGroup2dShaderOpenGl>(isStriped, projectOntoUnitSphere);
 }
 
-std::shared_ptr<PolygonPatternGroupShaderInterface> ShaderFactoryOpenGl::createPolygonPatternGroupShader(bool fadeInPattern) {
-    return std::make_shared<PolygonPatternGroup2dShaderOpenGl>(fadeInPattern);
+std::shared_ptr<PolygonPatternGroupShaderInterface>
+ShaderFactoryOpenGl::createPolygonPatternGroupShader(bool fadeInPattern, bool projectOntoUnitSphere) {
+    return std::make_shared<PolygonPatternGroup2dShaderOpenGl>(fadeInPattern, projectOntoUnitSphere);
 }
 
 std::shared_ptr<TextShaderInterface> ShaderFactoryOpenGl::createTextShader() {
@@ -97,4 +103,8 @@ std::shared_ptr<StretchInstancedShaderInterface> ShaderFactoryOpenGl::createStre
 
 std::shared_ptr<ColorShaderInterface> ShaderFactoryOpenGl::createIcosahedronColorShader() {
     return std::make_shared<IcosahedronColorShaderOpenGl>();
+}
+
+std::shared_ptr<SphereEffectShaderInterface> ShaderFactoryOpenGl::createSphereEffectShader() {
+    return nullptr; // TODO
 }

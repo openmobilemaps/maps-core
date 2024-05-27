@@ -171,7 +171,7 @@ void Tiled2dMapRasterLayer::onTilesUpdated(const std::string &layerName, std::un
         return;
     }
 
-    bool is3d = mapInterface->is3d();
+    bool is3D = mapInterface->is3d();
 
     {
         if (updateFlag.test_and_set()) {
@@ -199,10 +199,10 @@ void Tiled2dMapRasterLayer::onTilesUpdated(const std::string &layerName, std::un
 
                         if (found == this->tilesToSetup.end()) {
                             tilesToAdd.insert(rasterTileInfo);
-                        } else if (is3d) {
+                        } else if (is3D) {
                             found->second->getQuadObject()->setSubdivisionFactor(std::clamp(subdivisionFactor + rasterTileInfo.tessellationFactor, 0, 5));
                         }
-                    } else if (is3d) {
+                    } else if (is3D) {
                         it->second->getQuadObject()->setSubdivisionFactor(std::clamp(subdivisionFactor + rasterTileInfo.tessellationFactor, 0, 5));
                         tilesToSetup.emplace_back(rasterTileInfo, it->second);
                     }
@@ -231,7 +231,8 @@ void Tiled2dMapRasterLayer::onTilesUpdated(const std::string &layerName, std::un
 
                         if (tileMaskMap[tileEntry.first.tileInfo].getPolygonHash() != hash) {
                             const auto &tileMask = std::make_shared<PolygonMaskObject>(graphicsFactory,
-                                                                                       coordinateConverterHelper);
+                                                                                       coordinateConverterHelper,
+                                                                                       is3D);
 
                             tileMask->setPolygons(curTile->masks);
                             newTileMasks[tileEntry.first.tileInfo] = Tiled2dMapLayerMaskWrapper(tileMask, hash);
@@ -256,17 +257,17 @@ void Tiled2dMapRasterLayer::onTilesUpdated(const std::string &layerName, std::un
                 }
                 std::shared_ptr<Textured2dLayerObject> tileObject;
                 if (shader) {
-                    tileObject = std::make_shared<Textured2dLayerObject>(graphicsFactory->createQuad(shader), mapInterface, is3d);
+                    tileObject = std::make_shared<Textured2dLayerObject>(graphicsFactory->createQuad(shader), mapInterface, is3D);
                 } else {
-                    auto rasterShader = is3d ? shaderFactory->createUnitSphereRasterShader() : shaderFactory->createRasterShader();
+                    auto rasterShader = is3D ? shaderFactory->createUnitSphereRasterShader() : shaderFactory->createRasterShader();
                     rasterShader->asShaderProgramInterface()->setBlendMode(blendMode);
                     tileObject = std::make_shared<Textured2dLayerObject>(
-                            graphicsFactory->createQuad(rasterShader->asShaderProgramInterface()), rasterShader, mapInterface, is3d);
+                            graphicsFactory->createQuad(rasterShader->asShaderProgramInterface()), rasterShader, mapInterface, is3D);
                 }
-                if (is3d) {
+                if (is3D) {
                     tileObject->getQuadObject()->setSubdivisionFactor(std::clamp(subdivisionFactor + tile.tessellationFactor, 0, 5));
                 }
-                if (zoomInfo.numDrawPreviousLayers == 0 || !animationsEnabled || zoomInfo.maskTile || is3d) {
+                if (zoomInfo.numDrawPreviousLayers == 0 || !animationsEnabled || zoomInfo.maskTile || is3D) {
                     tileObject->setStyle(style);
                 } else {
                     auto startStyle = style;
@@ -281,7 +282,8 @@ void Tiled2dMapRasterLayer::onTilesUpdated(const std::string &layerName, std::un
 
                 if (newTileMasks.count(tile.tileInfo) == 0 && layerConfig->getZoomInfo().maskTile) {
                     const auto &tileMask = std::make_shared<PolygonMaskObject>(graphicsFactory,
-                                                                               coordinateConverterHelper);
+                                                                               coordinateConverterHelper,
+                                                                               is3D);
                     const size_t hash = std::hash<std::vector<::PolygonCoord>>()(tile.masks);
                     tileMask->setPolygons(tile.masks);
                     newTileMasks[tile.tileInfo] = Tiled2dMapLayerMaskWrapper(tileMask, hash);
@@ -404,7 +406,7 @@ void Tiled2dMapRasterLayer::generateRenderPasses() {
     auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
     if (!renderingContext)
         return;
-    const bool is3d = mapInterface->is3d();
+    const bool is3D = mapInterface->is3d();
 
     std::vector<std::shared_ptr<RenderPassInterface>> newRenderPasses;
     std::vector<std::shared_ptr<::RenderObjectInterface>> renderObjects;
@@ -439,11 +441,11 @@ void Tiled2dMapRasterLayer::generateRenderPasses() {
         }
 
         if (!renderObjects.empty()) {
-            if (is3d) {
+            if (is3D) {
                 std::reverse(renderObjects.begin(), renderObjects.end());
             }
 
-            auto config = RenderPassConfig(0, is3d);
+            auto config = RenderPassConfig(0, is3D);
             std::shared_ptr<RenderPass> renderPass =
                     std::make_shared<RenderPass>(config, renderObjects, mask);
             renderPass->setScissoringRect(scissorRect);

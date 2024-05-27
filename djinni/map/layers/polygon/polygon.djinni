@@ -37,7 +37,7 @@ polygon_layer_interface = interface +c {
 }
 
 polygon_mask_object_interface = interface +c {
-    static create(graphics_object_factory: graphics_object_factory_interface, conversion_helper: coordinate_conversion_helper_interface) : polygon_mask_object_interface;
+    static create(graphics_object_factory: graphics_object_factory_interface, conversion_helper: coordinate_conversion_helper_interface, is_3d: bool) : polygon_mask_object_interface;
     set_polygons(polygons: list<polygon_coord>);
     set_polygon(polygon: polygon_coord);
     get_polygon_object(): polygon_2d_interface;

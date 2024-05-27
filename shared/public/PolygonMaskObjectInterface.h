@@ -14,7 +14,7 @@ class PolygonMaskObjectInterface {
 public:
     virtual ~PolygonMaskObjectInterface() = default;
 
-    static /*not-null*/ std::shared_ptr<PolygonMaskObjectInterface> create(const /*not-null*/ std::shared_ptr<::GraphicsObjectFactoryInterface> & graphicsObjectFactory, const /*not-null*/ std::shared_ptr<::CoordinateConversionHelperInterface> & conversionHelper);
+    static /*not-null*/ std::shared_ptr<PolygonMaskObjectInterface> create(const /*not-null*/ std::shared_ptr<::GraphicsObjectFactoryInterface> & graphicsObjectFactory, const /*not-null*/ std::shared_ptr<::CoordinateConversionHelperInterface> & conversionHelper, bool is3d);
 
     virtual void setPolygons(const std::vector<::PolygonCoord> & polygons) = 0;
 

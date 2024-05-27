@@ -98,16 +98,16 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (nullable id<MCQuad2dInterface>)createQuadMask {
+- (nullable id<MCQuad2dInterface>)createQuadMask:(BOOL)is3d {
     try {
-        auto objcpp_result_ = _cppRefHandle.get()->createQuadMask();
+        auto objcpp_result_ = _cppRefHandle.get()->createQuadMask(::djinni::Bool::toCpp(is3d));
         return ::djinni_generated::Quad2dInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (nullable id<MCPolygon2dInterface>)createPolygonMask {
+- (nullable id<MCPolygon2dInterface>)createPolygonMask:(BOOL)is3d {
     try {
-        auto objcpp_result_ = _cppRefHandle.get()->createPolygonMask();
+        auto objcpp_result_ = _cppRefHandle.get()->createPolygonMask(::djinni::Bool::toCpp(is3d));
         return ::djinni_generated::Polygon2dInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
@@ -191,17 +191,17 @@ public:
             return ::djinni_generated::PolygonPatternGroup2dInterface::toCpp(objcpp_result_);
         }
     }
-    /*not-null*/ std::shared_ptr<::Quad2dInterface> createQuadMask() override
+    /*not-null*/ std::shared_ptr<::Quad2dInterface> createQuadMask(bool c_is3d) override
     {
         @autoreleasepool {
-            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createQuadMask];
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createQuadMask:(::djinni::Bool::fromCpp(c_is3d))];
             return ::djinni_generated::Quad2dInterface::toCpp(objcpp_result_);
         }
     }
-    /*not-null*/ std::shared_ptr<::Polygon2dInterface> createPolygonMask() override
+    /*not-null*/ std::shared_ptr<::Polygon2dInterface> createPolygonMask(bool c_is3d) override
     {
         @autoreleasepool {
-            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createPolygonMask];
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createPolygonMask:(::djinni::Bool::fromCpp(c_is3d))];
             return ::djinni_generated::Polygon2dInterface::toCpp(objcpp_result_);
         }
     }

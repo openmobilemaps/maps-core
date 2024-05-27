@@ -13,9 +13,11 @@
 #include "OpenGlHelper.h"
 #include "ColorPolygonGroup2dShaderOpenGl.h"
 
-ColorPolygonGroup2dShaderOpenGl::ColorPolygonGroup2dShaderOpenGl(bool isStriped)
-        : isStriped(isStriped),
-          programName(std::string("UBMAP_ColorPolygonGroupShaderOpenGl_") + (isStriped ? "striped" : "std")) {
+ColorPolygonGroup2dShaderOpenGl::ColorPolygonGroup2dShaderOpenGl(bool isStriped, bool projectOntoUnitSphere)
+        : projectOntoUnitSphere(projectOntoUnitSphere),
+          isStriped(isStriped),
+          programName(std::string("UBMAP_ColorPolygonGroupShaderOpenGl_") + (projectOntoUnitSphere ? "UnitSphere_" : "")
+          + (isStriped ? "striped" : "std")) {
     this->polygonStyles.resize(sizeStyleValuesArray);
 }
 
@@ -76,6 +78,7 @@ std::string ColorPolygonGroup2dShaderOpenGl::getVertexShader() {
                 // Striped Shader
                 precision highp float;
 
+                uniform mat4 umMatrix;
                 uniform mat4 uvpMatrix;
                 in vec2 vPosition;
                 in float vStyleIndex;
@@ -88,23 +91,33 @@ std::string ColorPolygonGroup2dShaderOpenGl::getVertexShader() {
                 out vec2 uv;
 
                 void main() {
-                  int styleIndex = int(floor(vStyleIndex + 0.5));
-                  if (styleIndex < 0) {
-                      styleIndex = 0;
-                  } else if (styleIndex > numStyles) {
-                      styleIndex = numStyles;
-                  }
-                  styleIndex = styleIndex * 7;
-                  color = vec4(polygonStyles[styleIndex], polygonStyles[styleIndex + 1],
-                               polygonStyles[styleIndex + 2], polygonStyles[styleIndex + 3] * polygonStyles[styleIndex + 4]);
-                  stripeInfo = vec2(polygonStyles[styleIndex + 5], polygonStyles[styleIndex + 6]);
-                  uv = vPosition;
-                  gl_Position = uvpMatrix * vec4(vPosition, 0.0, 1.0);
+    ) + (projectOntoUnitSphere ? OMMShaderCode(
+                    gl_Position = umMatrix * vec4(vPosition.xy, 1.0, 1.0);
+                    gl_Position = gl_Position / gl_Position.w;
+                    gl_Position = uvpMatrix * vec4(gl_Position.z * sin(gl_Position.y) * cos(gl_Position.x),
+                                                   gl_Position.z * cos(gl_Position.y),
+                                                   -gl_Position.z * sin(gl_Position.y) * sin(gl_Position.x),
+                                                   1.0);
+    ) : OMMShaderCode(
+                    gl_Position = uvpMatrix * umMatrix * vec4(vPosition, 0.0, 1.0);
+    )) + OMMShaderCode(
+                    int styleIndex = int(floor(vStyleIndex + 0.5));
+                    if (styleIndex < 0) {
+                        styleIndex = 0;
+                    } else if (styleIndex > numStyles) {
+                        styleIndex = numStyles;
+                    }
+                    styleIndex = styleIndex * 7;
+                    color = vec4(polygonStyles[styleIndex], polygonStyles[styleIndex + 1],
+                                 polygonStyles[styleIndex + 2], polygonStyles[styleIndex + 3] * polygonStyles[styleIndex + 4]);
+                    stripeInfo = vec2(polygonStyles[styleIndex + 5], polygonStyles[styleIndex + 6]);
+                    uv = vPosition;
                 }
             ) : OMMVersionedGlesShaderCode(320 es,
                 // Default Color Shader
                 precision highp float;
 
+                uniform mat4 umMatrix;
                 uniform mat4 uvpMatrix;
                 in vec2 vPosition;
                 in float vStyleIndex;
@@ -115,6 +128,16 @@ std::string ColorPolygonGroup2dShaderOpenGl::getVertexShader() {
                 out vec4 color;
 
                 void main() {
+    ) + (projectOntoUnitSphere ? OMMShaderCode(
+                    gl_Position = umMatrix * vec4(vPosition.xy, 1.0, 1.0);
+                    gl_Position = gl_Position / gl_Position.w;
+                    gl_Position = uvpMatrix * vec4(gl_Position.z * sin(gl_Position.y) * cos(gl_Position.x),
+                                                   gl_Position.z * cos(gl_Position.y),
+                                                   -gl_Position.z * sin(gl_Position.y) * sin(gl_Position.x),
+                                                   1.0);
+    ) : OMMShaderCode(
+                    gl_Position = uvpMatrix * umMatrix * vec4(vPosition, 0.0, 1.0);
+    )) + OMMShaderCode(
                     int styleIndex = int(floor(vStyleIndex + 0.5));
                     if (styleIndex < 0) {
                         styleIndex = 0;
@@ -124,7 +147,6 @@ std::string ColorPolygonGroup2dShaderOpenGl::getVertexShader() {
                     styleIndex = styleIndex * 5;
                     color = vec4(polygonStyles[styleIndex], polygonStyles[styleIndex + 1],
                                  polygonStyles[styleIndex + 2], polygonStyles[styleIndex + 3] * polygonStyles[styleIndex + 4]);
-                    gl_Position = uvpMatrix * vec4(vPosition, 0.0, 1.0);
                 });
 }
 

@@ -16,9 +16,11 @@
 #include <string>
 #include <iostream>
 
-PolygonPatternGroup2dShaderOpenGl::PolygonPatternGroup2dShaderOpenGl(bool fadeInPattern)
-        : fadeInPattern(fadeInPattern),
-          programName(std::string("UBMAP_PolygonPatternGroup2dShaderOpenGl_") + (fadeInPattern ? "std" : "fade")) {}
+PolygonPatternGroup2dShaderOpenGl::PolygonPatternGroup2dShaderOpenGl(bool fadeInPattern, bool projectOntoUnitSphere)
+        : projectOntoUnitSphere(projectOntoUnitSphere),
+          fadeInPattern(fadeInPattern),
+          programName(std::string("UBMAP_PolygonPatternGroup2dShaderOpenGl_") + (projectOntoUnitSphere ? "UnitSphere_" : "") +
+                      (fadeInPattern ? "std" : "fade")) {}
 
 std::string PolygonPatternGroup2dShaderOpenGl::getProgramName() { return programName; }
 
@@ -49,6 +51,7 @@ std::string PolygonPatternGroup2dShaderOpenGl::getVertexShader() {
                                       in vec2 vPosition;
                                       in float vStyleIndex;
 
+                                      uniform mat4 umMatrix;
                                       uniform mat4 uvpMatrix;
                                       uniform vec2 uScalingFactor;
     ) + (fadeInPattern ? OMMShaderCode(uniform float uScreenPixelAsRealMeterFactor;) : "")
@@ -58,15 +61,23 @@ std::string PolygonPatternGroup2dShaderOpenGl::getVertexShader() {
                                       out flat uint styleIndex;
 
                                       void main() {
-                         ) + (fadeInPattern ? OMMShaderCode(
+    ) + (fadeInPattern ? OMMShaderCode(
                                         // fadeInPattern
                                         pixelPosition = vPosition.xy / vec2(uScreenPixelAsRealMeterFactor);
     ) : OMMShaderCode(
                                         // DefaultBehavior
                                         pixelPosition = vPosition.xy / uScalingFactor;
+    )) + (projectOntoUnitSphere ? OMMShaderCode(
+                                        gl_Position = umMatrix * vec4(vPosition.xy, 1.0, 1.0);
+                                        gl_Position = gl_Position / gl_Position.w;
+                                        gl_Position = uvpMatrix * vec4(gl_Position.z * sin(gl_Position.y) * cos(gl_Position.x),
+                                                             gl_Position.z * cos(gl_Position.y),
+                                                             -gl_Position.z * sin(gl_Position.y) * sin(gl_Position.x),
+                                                             1.0);
+    ) : OMMShaderCode(
+                                        gl_Position = uvpMatrix * umMatrix * vec4(vPosition, 0.0, 1.0);
     )) + OMMShaderCode(
                                         styleIndex = uint(floor(vStyleIndex + 0.5));
-                                        gl_Position = uvpMatrix * vec4(vPosition, 0.0, 1.0);
                                       }
     );
 }

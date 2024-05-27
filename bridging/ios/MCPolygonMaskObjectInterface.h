@@ -12,7 +12,8 @@
 @interface MCPolygonMaskObjectInterface : NSObject
 
 + (nullable MCPolygonMaskObjectInterface *)create:(nullable id<MCGraphicsObjectFactoryInterface>)graphicsObjectFactory
-                                 conversionHelper:(nullable MCCoordinateConversionHelperInterface *)conversionHelper;
+                                 conversionHelper:(nullable MCCoordinateConversionHelperInterface *)conversionHelper
+                                             is3d:(BOOL)is3d;
 
 - (void)setPolygons:(nonnull NSArray<MCPolygonCoord *> *)polygons;
 

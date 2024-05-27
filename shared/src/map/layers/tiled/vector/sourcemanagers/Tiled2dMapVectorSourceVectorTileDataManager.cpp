@@ -39,6 +39,8 @@ void Tiled2dMapVectorSourceVectorTileDataManager::onVectorTilesUpdated(const std
             return;
         }
 
+        bool is3D = mapInterface->is3d();
+
         // Just insert pointers here since we will only access the objects inside this method where we know that currentTileInfos is retained
         std::vector<const Tiled2dMapVectorTileInfo*> tilesToAdd;
         std::vector<const Tiled2dMapVectorTileInfo*> tilesToKeep;
@@ -97,7 +99,8 @@ void Tiled2dMapVectorSourceVectorTileDataManager::onVectorTilesUpdated(const std
                 if (hash != existingPolygonHash) {
 
                     const auto &tileMask = std::make_shared<PolygonMaskObject>(graphicsFactory,
-                                                                               coordinateConverterHelper);
+                                                                               coordinateConverterHelper,
+                                                                               is3D);
 
                     tileMask->setPolygons(tileEntry->masks);
 
