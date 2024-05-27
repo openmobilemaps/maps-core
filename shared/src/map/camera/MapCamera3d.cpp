@@ -365,7 +365,7 @@ std::vector<float> MapCamera3d::getVpMatrix() {
     double focusPointAltitude = focusPointPosition.z;
     double cameraDistance = getCameraDistance();
     double maxD = cameraDistance / R + 1.0 ;
-    double minD = std::max(cameraDistance / R - 1, 0.00001);
+    double minD = std::max(cameraDistance / R - 1, 0.1);
 
     double fovy = getCameraFieldOfView(); // 45 // zoom / 70800;
 
@@ -445,33 +445,7 @@ std::vector<float> MapCamera3d::getVpMatrix() {
 
 // Funktion zur Berechnung der Koeffizienten der projizierten Ellipse
 std::vector<double> MapCamera3d::computeEllipseCoefficients() {
-    // Die Kugelmatrix Q
-    std::vector<double> Q = {
-        1, 0, 0, 0,
-        0, 1, 0, 0,
-        0, 0, 1, 0,
-        0, 0, 0, -1
-    };
-
-    std::vector<double> QI(16, 0.0f);
-    MatrixD::multiplyMM(QI, 0, Q, 0, inverseVPMatrix, 0);
-
-    std::vector<double> IT(16, 0.0f);
-    MatrixD::transposeM(IT, 0, inverseVPMatrix, 0);
-
-    std::vector<double> IQI(16, 0.0f);
-    MatrixD::multiplyMM(IQI, 0, IT, 0, QI , 0);
-
-    IQI = inverseVPMatrix;
-
-    for (int i = 0; i < 4; ++i) {
-        for (int j = 0; j < 4; ++j) {
-            IQI[i * 4 + j] = inverseVPMatrix[j * 4 + i] / inverseVPMatrix[15];
-        }
-    }
-
     return inverseVPMatrix;
-
 }
 
 
