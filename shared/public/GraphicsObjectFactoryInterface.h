@@ -37,9 +37,9 @@ public:
 
     virtual /*not-null*/ std::shared_ptr<PolygonPatternGroup2dInterface> createPolygonPatternGroup(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & shader) = 0;
 
-    virtual /*not-null*/ std::shared_ptr<Quad2dInterface> createQuadMask() = 0;
+    virtual /*not-null*/ std::shared_ptr<Quad2dInterface> createQuadMask(bool is3d) = 0;
 
-    virtual /*not-null*/ std::shared_ptr<Polygon2dInterface> createPolygonMask() = 0;
+    virtual /*not-null*/ std::shared_ptr<Polygon2dInterface> createPolygonMask(bool is3d) = 0;
 
     virtual /*not-null*/ std::shared_ptr<TextInterface> createText(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & shader) = 0;
 

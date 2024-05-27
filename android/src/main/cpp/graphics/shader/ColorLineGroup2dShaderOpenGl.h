@@ -18,8 +18,8 @@
 class ColorLineGroup2dShaderOpenGl : public BaseShaderProgramOpenGl,
                                      public LineGroupShaderInterface,
                                      public std::enable_shared_from_this<ShaderProgramInterface> {
-  public:
-    ColorLineGroup2dShaderOpenGl();
+public:
+    ColorLineGroup2dShaderOpenGl(bool projectOntoUnitSphere);
 
     virtual std::shared_ptr<ShaderProgramInterface> asShaderProgramInterface() override;
 
@@ -38,8 +38,9 @@ protected:
 
     virtual std::string getFragmentShader() override;
 
-  private:
-    static const std::string programName;
+private:
+    const bool projectOntoUnitSphere;
+    const std::string programName;
 
     std::recursive_mutex styleMutex;
     std::vector<GLfloat> lineValues;

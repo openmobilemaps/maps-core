@@ -43,7 +43,7 @@ MapScene::MapScene(std::shared_ptr<SceneInterface> scene, const MapConfig &mapCo
     setCamera(MapCameraInterface::create(ptr, pixelDensity, is3D));
 
     if (is3D) {
-        scene->getRenderingContext()->setCulling(RenderingCullMode::BACK);
+        scene->getRenderingContext()->setCulling(RenderingCullMode::NONE);
     }
 }
 

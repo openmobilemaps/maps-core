@@ -24,9 +24,9 @@ abstract class GraphicsObjectFactoryInterface {
 
     abstract fun createPolygonPatternGroup(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): PolygonPatternGroup2dInterface
 
-    abstract fun createQuadMask(): Quad2dInterface
+    abstract fun createQuadMask(is3d: Boolean): Quad2dInterface
 
-    abstract fun createPolygonMask(): Polygon2dInterface
+    abstract fun createPolygonMask(is3d: Boolean): Polygon2dInterface
 
     abstract fun createText(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): TextInterface
 
@@ -95,17 +95,17 @@ abstract class GraphicsObjectFactoryInterface {
         }
         private external fun native_createPolygonPatternGroup(_nativeRef: Long, shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): PolygonPatternGroup2dInterface
 
-        override fun createQuadMask(): Quad2dInterface {
+        override fun createQuadMask(is3d: Boolean): Quad2dInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            return native_createQuadMask(this.nativeRef)
+            return native_createQuadMask(this.nativeRef, is3d)
         }
-        private external fun native_createQuadMask(_nativeRef: Long): Quad2dInterface
+        private external fun native_createQuadMask(_nativeRef: Long, is3d: Boolean): Quad2dInterface
 
-        override fun createPolygonMask(): Polygon2dInterface {
+        override fun createPolygonMask(is3d: Boolean): Polygon2dInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            return native_createPolygonMask(this.nativeRef)
+            return native_createPolygonMask(this.nativeRef, is3d)
         }
-        private external fun native_createPolygonMask(_nativeRef: Long): Polygon2dInterface
+        private external fun native_createPolygonMask(_nativeRef: Long, is3d: Boolean): Polygon2dInterface
 
         override fun createText(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): TextInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

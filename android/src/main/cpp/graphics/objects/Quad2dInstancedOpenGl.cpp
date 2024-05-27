@@ -13,6 +13,7 @@
 #include "OpenGlHelper.h"
 #include "TextureHolderInterface.h"
 #include "BaseShaderProgramOpenGl.h"
+#include "assert.h"
 
 Quad2dInstancedOpenGl::Quad2dInstancedOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader)
     : shaderProgram(shader) {}

@@ -44,8 +44,8 @@ graphics_object_factory_interface = interface +c +j +o {
     create_polygon_group(shader: shader_program_interface): polygon_group_2d_interface;
     create_polygon_pattern_group(shader: shader_program_interface): polygon_pattern_group_2d_interface;
 
-    create_quad_mask() : quad_2d_interface;
-    create_polygon_mask() : polygon_2d_interface;
+    create_quad_mask(is_3d: bool) : quad_2d_interface;
+    create_polygon_mask(is_3d: bool) : polygon_2d_interface;
 
     create_text(shader: shader_program_interface) : text_interface;
 

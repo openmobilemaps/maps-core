@@ -149,7 +149,7 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
                 for (auto pointIt = points.begin(); pointIt != points.end(); pointIt++) {
                     auto point = *pointIt;
 
-                    double interpolationValue;
+                    double interpolationValue = 0.0;
                     if (pointIt != points.begin() && !fullText.empty()) {
                         auto last = std::prev(pointIt);
                         double addDistance = Vec2DHelper::distance(Vec2D(last->x, last->y), Vec2D(point.x, point.y));
@@ -609,7 +609,7 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
                     SharedBytes((int64_t) iconRotations.data(), (int32_t) iconAlphas.size(), 1 * (int32_t) sizeof(float)));
             if (is3d) {
                 iconInstancedObject->setPositionOffset(
-                        SharedBytes((int64_t) iconOffsets.data(), (int32_t) iconOffsets.size(), 2 * (int32_t) sizeof(float)));
+                        SharedBytes((int64_t) iconOffsets.data(), (int32_t) iconAlphas.size(), 2 * (int32_t) sizeof(float)));
             }
         }
 

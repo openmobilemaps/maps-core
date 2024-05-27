@@ -12,11 +12,11 @@
 #include "OpenGlContext.h"
 #include "OpenGlHelper.h"
 
-ColorLineGroup2dShaderOpenGl::ColorLineGroup2dShaderOpenGl() {
+ColorLineGroup2dShaderOpenGl::ColorLineGroup2dShaderOpenGl(bool projectOntoUnitSphere)
+        : projectOntoUnitSphere(projectOntoUnitSphere),
+          programName(projectOntoUnitSphere ? "UBMAP_ColorLineGroupUnitSphereShaderOpenGl" : "UBMAP_ColorLineGroupShaderOpenGl") {
     lineValues.resize(sizeLineValuesArray);
 }
-
-const std::string ColorLineGroup2dShaderOpenGl::programName = "UBMAP_ColorLineGroupShaderOpenGl";
 
 std::shared_ptr<ShaderProgramInterface> ColorLineGroup2dShaderOpenGl::asShaderProgramInterface() { return shared_from_this(); }
 
@@ -78,6 +78,7 @@ void ColorLineGroup2dShaderOpenGl::setDashingScaleFactor(float factor) {
 std::string ColorLineGroup2dShaderOpenGl::getVertexShader() {
     return OMMVersionedGlesShaderCode(320 es,
                                       precision highp float;
+                                      uniform mat4 umMatrix;
                                       uniform mat4 uvpMatrix;
                                       in vec2 vPosition;
                                       in vec2 vWidthNormal;
@@ -151,23 +152,32 @@ std::string ColorLineGroup2dShaderOpenGl::getVertexShader() {
                                            float offsetFloat = lineValues[styleIndexBase + 18] * scaleFactor;
                                            vec4 offset = vec4(vWidthNormal.x * offsetFloat, vWidthNormal.y * offsetFloat, 0.0, 0.0);
 
-                                               float scaledWidth = width * 0.5;
-                                               dashingSize = width;
-                                               if (isScaled > 0.0) {
-                                                   scaledWidth = scaledWidth * scaleFactor;
-                                                   blur = blur * scaleFactor;
-                                                   dashingSize *= dashingScaleFactor;
-                                               }
+                                           float scaledWidth = width * 0.5;
+                                           dashingSize = width;
+                                           if (isScaled > 0.0) {
+                                               scaledWidth = scaledWidth * scaleFactor;
+                                               blur = blur * scaleFactor;
+                                               dashingSize *= dashingScaleFactor;
+                                           }
 
-                                               vec4 trfPosition = uvpMatrix * vec4(vPosition.xy, 0.0, 1.0);
-                                               vec4 displ = vec4((lengthNormal + widthNormal).xy, 0.0, 0.0) * vec4(scaledWidth, scaledWidth, 0.0, 0.0) + offset;
-                                               vec4 trfDispl = uvpMatrix * displ;
-                                               vec4 extendedPosition = vec4(vPosition.xy, 0.0, 1.0) + displ;
-                                               radius = scaledWidth;
-                                               scaledBlur = blur;
-                                               pointDeltaA = (extendedPosition.xy - vPointA);
-                                               pointBDeltaA = vPointB - vPointA;
-                                               gl_Position = trfPosition + trfDispl;
+                                           vec4 displ = vec4((lengthNormal + widthNormal).xy, 0.0, 0.0) * vec4(scaledWidth, scaledWidth, 0.0, 0.0) + offset;
+                                           ) + (projectOntoUnitSphere ? OMMShaderCode(
+                                                vec4 extendedPosition = umMatrix * vec4(vPosition.xy, 1.0, 1.0);
+                                                extendedPosition += displ;
+                                                gl_Position = uvpMatrix * vec4(extendedPosition.z * sin(extendedPosition.y) * cos(extendedPosition.x),
+                                                                               extendedPosition.z * cos(extendedPosition.y),
+                                                                               -extendedPosition.z * sin(extendedPosition.y) * sin(extendedPosition.x),
+                                                                               1.0);
+                                           ) : OMMShaderCode(
+                                                vec4 extendedPosition = umMatrix * vec4(vPosition.xy, 0.0, 1.0);
+                                                extendedPosition += displ;
+                                                gl_Position = uvpMatrix * extendedPosition;
+                                           )) + OMMShaderCode(
+
+                                           radius = scaledWidth;
+                                           scaledBlur = blur;
+                                           pointDeltaA = (extendedPosition.xy - vPointA);
+                                           pointBDeltaA = vPointB - vPointA;
                                        }
                                        );
 }

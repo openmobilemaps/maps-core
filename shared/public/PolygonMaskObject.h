@@ -21,7 +21,8 @@
 class PolygonMaskObject: public PolygonMaskObjectInterface {
 public:
     PolygonMaskObject(const std::shared_ptr<::GraphicsObjectFactoryInterface> &graphicsObjectFactory,
-                      const std::shared_ptr<::CoordinateConversionHelperInterface> &conversionHelper);
+                      const std::shared_ptr<::CoordinateConversionHelperInterface> &conversionHelper,
+                      bool is3D);
 
     virtual void setPolygons(const std::vector<::PolygonCoord> & polygons) override;
 

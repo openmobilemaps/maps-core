@@ -22,11 +22,12 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_polygo
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_polygon_PolygonMaskObjectInterface_create(JNIEnv* jniEnv, jobject /*this*/, ::djinni_generated::NativeGraphicsObjectFactoryInterface::JniType j_graphicsObjectFactory, ::djinni_generated::NativeCoordinateConversionHelperInterface::JniType j_conversionHelper)
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_polygon_PolygonMaskObjectInterface_create(JNIEnv* jniEnv, jobject /*this*/, ::djinni_generated::NativeGraphicsObjectFactoryInterface::JniType j_graphicsObjectFactory, ::djinni_generated::NativeCoordinateConversionHelperInterface::JniType j_conversionHelper, jboolean j_is3d)
 {
     try {
         auto r = ::PolygonMaskObjectInterface::create(::djinni_generated::NativeGraphicsObjectFactoryInterface::toCpp(jniEnv, j_graphicsObjectFactory),
-                                                      ::djinni_generated::NativeCoordinateConversionHelperInterface::toCpp(jniEnv, j_conversionHelper));
+                                                      ::djinni_generated::NativeCoordinateConversionHelperInterface::toCpp(jniEnv, j_conversionHelper),
+                                                      ::djinni::Bool::toCpp(jniEnv, j_is3d));
         return ::djinni::release(::djinni_generated::NativePolygonMaskObjectInterface::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }

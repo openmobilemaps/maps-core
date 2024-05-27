@@ -39,6 +39,8 @@ void Tiled2dMapVectorSourceRasterTileDataManager::onRasterTilesUpdated(const std
             return;
         }
 
+        bool is3D = mapInterface->is3d();
+
         std::unordered_set<Tiled2dMapRasterTileInfo> tilesToAdd;
         std::unordered_set<Tiled2dMapRasterTileInfo> tilesToKeep;
         std::unordered_set<Tiled2dMapVersionedTileInfo> tilesToRemove;
@@ -91,7 +93,8 @@ void Tiled2dMapVectorSourceRasterTileDataManager::onRasterTilesUpdated(const std
                 if (hash != existingPolygonHash) {
 
                     const auto &tileMask = std::make_shared<PolygonMaskObject>(graphicsFactory,
-                                                                               coordinateConverterHelper);
+                                                                               coordinateConverterHelper,
+                                                                               is3D);
 
                     tileMask->setPolygons(tileEntry.masks);
 

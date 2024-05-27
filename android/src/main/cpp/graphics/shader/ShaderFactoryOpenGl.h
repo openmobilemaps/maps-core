@@ -23,6 +23,8 @@ public:
 
     std::shared_ptr<LineGroupShaderInterface> createLineGroupShader() override;
 
+    std::shared_ptr<LineGroupShaderInterface> createUnitSphereLineGroupShader() override;
+
     std::shared_ptr<ColorShaderInterface> createColorShader() override;
 
     std::shared_ptr<ColorShaderInterface> createUnitSphereColorShader() override;
@@ -35,9 +37,9 @@ public:
 
     std::shared_ptr<ColorCircleShaderInterface> createUnitSphereColorCircleShader() override;
 
-    std::shared_ptr<PolygonGroupShaderInterface> createPolygonGroupShader(bool isStriped) override;
+    std::shared_ptr<PolygonGroupShaderInterface> createPolygonGroupShader(bool isStriped, bool unitSphere) override;
 
-    std::shared_ptr<PolygonPatternGroupShaderInterface> createPolygonPatternGroupShader(bool fadeInPattern) override;
+    std::shared_ptr<PolygonPatternGroupShaderInterface> createPolygonPatternGroupShader(bool fadeInPattern, bool unitSphere) override;
 
     std::shared_ptr<TextShaderInterface> createTextShader() override;
 
@@ -52,4 +54,6 @@ public:
     std::shared_ptr<StretchInstancedShaderInterface> createStretchInstancedShader() override;
 
     std::shared_ptr<ColorShaderInterface> createIcosahedronColorShader() override;
+
+    std::shared_ptr<SphereEffectShaderInterface> createSphereEffectShader() override;
 };

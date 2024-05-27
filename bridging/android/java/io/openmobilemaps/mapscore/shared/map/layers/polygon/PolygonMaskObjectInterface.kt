@@ -10,7 +10,7 @@ abstract class PolygonMaskObjectInterface {
 
     companion object {
         @JvmStatic
-        external fun create(graphicsObjectFactory: io.openmobilemaps.mapscore.shared.graphics.objects.GraphicsObjectFactoryInterface, conversionHelper: io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateConversionHelperInterface): PolygonMaskObjectInterface
+        external fun create(graphicsObjectFactory: io.openmobilemaps.mapscore.shared.graphics.objects.GraphicsObjectFactoryInterface, conversionHelper: io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateConversionHelperInterface, is3d: Boolean): PolygonMaskObjectInterface
     }
 
     abstract fun setPolygons(polygons: ArrayList<io.openmobilemaps.mapscore.shared.map.coordinates.PolygonCoord>)

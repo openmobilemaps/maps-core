@@ -15,14 +15,16 @@
 
 std::shared_ptr<PolygonMaskObjectInterface>
 PolygonMaskObjectInterface::create(const std::shared_ptr<::GraphicsObjectFactoryInterface> &graphicsObjectFactory,
-                                   const std::shared_ptr<::CoordinateConversionHelperInterface> &conversionHelper) {
-    return std::make_shared<PolygonMaskObject>(graphicsObjectFactory, conversionHelper);
+                                   const std::shared_ptr<::CoordinateConversionHelperInterface> &conversionHelper,
+                                   bool is3D) {
+    return std::make_shared<PolygonMaskObject>(graphicsObjectFactory, conversionHelper, is3D);
 }
 
 PolygonMaskObject::PolygonMaskObject(const std::shared_ptr<GraphicsObjectFactoryInterface> &graphicsObjectFactory,
-                                     const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper)
+                                     const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
+                                     bool is3D)
     : conversionHelper(conversionHelper)
-    , polygon(graphicsObjectFactory->createPolygonMask()) {}
+    , polygon(graphicsObjectFactory->createPolygonMask(is3D)) {}
 
 void PolygonMaskObject::setPositions(const std::vector<Coord> &positions, const std::vector<std::vector<Coord>> &holes) {
     setPolygon({positions, holes});
