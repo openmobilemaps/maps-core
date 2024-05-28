@@ -121,8 +121,11 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
     std::queue<VisibleTileCandidate> candidates;
     std::unordered_set<VisibleTileCandidate> candidatesSet;
 
-    Coord viewBoundsTopLeft(-1, 0, 0, 0);
-    Coord viewBoundsBottomRight(-1, 0, 0, 0);
+
+    Coord viewBoundsTopLeft(layerSystemId, 0, 0, 0);
+    Coord viewBoundsTopRight(layerSystemId, 0, 0, 0);
+    Coord viewBoundsBottomLeft(layerSystemId, 0, 0, 0);
+    Coord viewBoundsBottomRight(layerSystemId, 0, 0, 0);
     bool validViewBounds = false;
 
     int minNumTiles = layerSystemId == CoordinateSystemIdentifiers::EPSG4326() ? 0 : 1;
@@ -327,45 +330,28 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
             }
         }
 
+
         if (!validViewBounds) {
             viewBoundsTopLeft = topLeft;
             viewBoundsBottomRight = bottomRight;
             validViewBounds = true;
         }
 
-        if (leftToRight) {
-            if (topLeft.x < viewBoundsTopLeft.x) {
-                viewBoundsTopLeft.x = topLeft.x;
-            }
-            if (bottomRight.x > viewBoundsBottomRight.x) {
-                viewBoundsBottomRight.x = bottomRight.x;
-            }
-        }
-        else {
-            if (topLeft.x > viewBoundsTopLeft.x) {
-                viewBoundsTopLeft.x = topLeft.x;
-            }
-            if (bottomRight.x < viewBoundsBottomRight.x) {
-                viewBoundsBottomRight.x = bottomRight.x;
-            }
-        }
-        if (topToBottom) {
-            if (topLeft.y > viewBoundsTopLeft.y) {
-                viewBoundsTopLeft.y = topLeft.y;
-            }
-            if (bottomRight.y < viewBoundsBottomRight.y) {
-                viewBoundsBottomRight.y = bottomRight.y;
-            }
-        }
-        else {
+        auto updateBounds = [](double& bound, double value, bool compareLess) {
+            bound = compareLess ? std::min(bound, value) : std::max(bound, value);
+        };
 
-            if (topLeft.y < viewBoundsTopLeft.y) {
-                viewBoundsTopLeft.y = topLeft.y;
-            }
-            if (bottomRight.y > viewBoundsBottomRight.y) {
-                viewBoundsBottomRight.y = bottomRight.y;
-            }
-        }
+        // Update x coordinates
+        updateBounds(viewBoundsTopRight.x, topRight.x, leftToRight);
+        updateBounds(viewBoundsTopLeft.x, topLeft.x, !leftToRight);
+        updateBounds(viewBoundsBottomRight.x, bottomRight.x, leftToRight);
+        updateBounds(viewBoundsBottomLeft.x, bottomLeft.x, !leftToRight);
+
+        // Update y coordinates
+        updateBounds(viewBoundsTopRight.y, topRight.y, topToBottom);
+        updateBounds(viewBoundsTopLeft.y, topLeft.y, topToBottom);
+        updateBounds(viewBoundsBottomRight.y, bottomRight.y, !topToBottom);
+        updateBounds(viewBoundsBottomLeft.y, bottomLeft.y, !topToBottom);
 
         auto samplePointOriginViewScreen = projectToScreen(focusPointView, projectionMatrix);
         auto samplePointYViewScreen = projectToScreen(focusPointSampleYView, projectionMatrix);
@@ -435,7 +421,12 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
     if (!validViewBounds) {
         return;
     }
-    currentViewBounds = RectCoord(viewBoundsTopLeft, viewBoundsBottomRight);
+
+    currentViewBounds.topLeft = Coord(4326, -180, 90, 0);
+    currentViewBounds.topRight =  Coord(4326, 180, 90, 0);
+    currentViewBounds.bottomRight =  Coord(4326, 180, -90, 0);
+    currentViewBounds.bottomLeft =  Coord(4326, -180, -90, 0);
+    currentViewBounds = conversionHelper->convertQuad(layerSystemId, currentViewBounds);
 
     std::vector<VisibleTilesLayer> layers;
 
@@ -703,7 +694,13 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
         lastVisibleTilesHash = visibleTileHash;
         onVisibleTilesChanged(layers, false, keepZoomLevelOffset);
     }
-    currentViewBounds = visibleBoundsLayer;
+
+    currentViewBounds.topLeft = visibleBoundsLayer.topLeft;
+    currentViewBounds.topRight = Coord(visibleBoundsLayer.topLeft.systemIdentifier, visibleBoundsLayer.bottomRight.x,
+                                       visibleBoundsLayer.topLeft.y, 0);
+    currentViewBounds.bottomRight = visibleBoundsLayer.bottomRight;
+    currentViewBounds.bottomLeft = Coord(visibleBoundsLayer.topLeft.systemIdentifier, visibleBoundsLayer.topLeft.x,
+                                         visibleBoundsLayer.bottomRight.y, 0);
 }
 
 template<class T, class L, class R>
@@ -1059,8 +1056,6 @@ void Tiled2dMapSource<T, L, R>::updateTileMasks() {
         return;
     }
 
-    std::vector<Tiled2dMapTileInfo> tilesToRemove;
-
     int currentZoomLevelIdentifier = this->currentZoomLevelIdentifier;
 
     gpc_polygon currentTileMask;
@@ -1071,11 +1066,9 @@ void Tiled2dMapSource<T, L, R>::updateTileMasks() {
     gpc_polygon currentViewBoundsPolygon;
     gpc_set_polygon({PolygonCoord({
         currentViewBounds.topLeft,
-        Coord(currentViewBounds.topLeft.systemIdentifier, currentViewBounds.bottomRight.x,
-              currentViewBounds.topLeft.y, 0),
+        currentViewBounds.topRight,
         currentViewBounds.bottomRight,
-        Coord(currentViewBounds.topLeft.systemIdentifier, currentViewBounds.topLeft.x,
-              currentViewBounds.bottomRight.y, 0),
+        currentViewBounds.bottomLeft,
         currentViewBounds.topLeft
     }, {})}, &currentViewBoundsPolygon);
 
@@ -1217,7 +1210,7 @@ void Tiled2dMapSource<T, L, R>::setTilesReady(const std::vector<Tiled2dMapVersio
 }
 
 template<class T, class L, class R>
-RectCoord Tiled2dMapSource<T, L, R>::getCurrentViewBounds() {
+QuadCoord Tiled2dMapSource<T, L, R>::getCurrentViewBounds() {
     return currentViewBounds;
 }
 
