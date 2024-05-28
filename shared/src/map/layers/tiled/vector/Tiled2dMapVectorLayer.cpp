@@ -542,8 +542,9 @@ void Tiled2dMapVectorLayer::reloadLocalDataSource(const std::string &sourceName,
 
         geoSource->reload(GeoJsonParser::getGeoJson(json));
     }
-    if (auto &source = vectorTileSources[sourceName]) {
-        source.syncAccess([](const auto &source) {
+    auto sourceIt = vectorTileSources.find(sourceName);
+    if (sourceIt != vectorTileSources.end()) {
+        sourceIt->second.syncAccess([](const auto &source) {
             source->reloadTiles();
         });
     }

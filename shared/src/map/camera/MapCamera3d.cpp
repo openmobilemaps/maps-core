@@ -506,7 +506,7 @@ RectCoord MapCamera3d::getVisibleRect() {
 
 RectCoord MapCamera3d::getPaddingAdjustedVisibleRect() {
     // TODO: Implement for Camera3D
-    printf("Warning: getPaddingAdjustedVisibleRect incomplete logic.\n");
+//    printf("Warning: getPaddingAdjustedVisibleRect incomplete logic.\n");
 
     return RectCoord(Coord(3857, 0, 0, 0), Coord(3857, 0, 0, 0));
 //    Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
@@ -521,7 +521,7 @@ RectCoord MapCamera3d::getPaddingAdjustedVisibleRect() {
 
 RectCoord MapCamera3d::getRectFromViewport(const Vec2I &sizeViewport, const Coord &center) {
     // TODO: Implement for Camera3D
-    printf("Warning: getRectFromViewport incomplete logic.\n");
+//    printf("Warning: getRectFromViewport incomplete logic.\n");
     return RectCoord(Coord(3857, 0, 0, 0), Coord(3857, 0, 0, 0));;
 //    double zoomFactor = screenPixelAsRealMeterFactor * zoom;
 //
