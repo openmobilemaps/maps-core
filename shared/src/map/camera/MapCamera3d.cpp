@@ -1149,17 +1149,9 @@ bool MapCamera3d::gluInvertMatrix(const std::vector<double> &m, std::vector<doub
 ::Vec2F MapCamera3d::screenPosFromCoord(const Coord &coord) {
     Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
     if (validVpMatrix && sizeViewport.x != 0 && sizeViewport.y != 0) {
-        Coord renderCoord = conversionHelper->convertToRenderSystem(coord);
+        auto coordCartesian = convertToCartesianCoordinates(coord);
+        auto projected = projectedPoint(coordCartesian);
 
-        std::vector<float> position = {(float) (renderCoord.z * sin(renderCoord.y) * cos(renderCoord.x)),
-            (float) (renderCoord.z * cos(renderCoord.y)),
-            (float) (-renderCoord.z * sin(renderCoord.y) * sin(renderCoord.x)),
-            1.0};
-        auto projected = Matrix::multiply(vpMatrix, position);
-        projected[0] /= projected[3]; // percentage in x direction in [-1, 1], 0 being the center of the screen)
-        projected[1] /= projected[3]; // percentage in y direction in [-1, 1], 0 being the center of the screen)
-        projected[2] /= projected[3];
-        projected[3] /= projected[3];
         // Map from [-1, 1] to screenPixels, with (0,0) being the top left corner
         double screenXDiffToCenter = projected[0] * sizeViewport.x / 2.0;
         double screenYDiffToCenter = projected[1] * sizeViewport.y / 2.0;
@@ -1175,7 +1167,14 @@ bool MapCamera3d::gluInvertMatrix(const std::vector<double> &m, std::vector<doub
 
 // padding in percentage, where 1.0 = rect is half of full width and height
 bool MapCamera3d::coordIsVisibleOnScreen(const ::Coord & coord, float paddingPc) {
+    // 1. Check that coordinate is not on the back of the globe
+    if (coordIsOnFrontHalfOfGlobe(coord) == false) {
+        return false;
+    }
+
+    // 2. Check that coordinate is in bounds of viewport
     auto screenPos = screenPosFromCoord(coord);
+
     Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
     auto minX = (sizeViewport.x + paddingLeft) * paddingPc * 0.5;
     auto maxX = (sizeViewport.x - paddingRight) - minX;
@@ -1188,6 +1187,42 @@ bool MapCamera3d::coordIsVisibleOnScreen(const ::Coord & coord, float paddingPc)
         return false;
     }
 }
+
+bool MapCamera3d::coordIsOnFrontHalfOfGlobe(Coord coord) {
+    // Coordinate is on front half of the globe if the projected z-value is in front
+    // of the projected z-value of the globe center
+
+    auto coordCartesian = convertToCartesianCoordinates(coord);
+    auto projectedCoord = projectedPoint(coordCartesian);
+
+    auto projectedCenter = projectedPoint({0,0,0,1});
+
+    bool isInFront = projectedCoord[2] <= projectedCenter[2];
+
+    return isInFront;
+}
+
+std::vector<float> MapCamera3d::convertToCartesianCoordinates(Coord coord) {
+    Coord renderCoord = conversionHelper->convertToRenderSystem(coord);
+
+    return {(float) (renderCoord.z * sin(renderCoord.y) * cos(renderCoord.x)),
+        (float) (renderCoord.z * cos(renderCoord.y)),
+        (float) (-renderCoord.z * sin(renderCoord.y) * sin(renderCoord.x)),
+        1.0};
+}
+
+
+// Point given in cartesian coordinates, where (0,0,0) is the center of the globe
+std::vector<float> MapCamera3d::projectedPoint(std::vector<float> point) {
+    auto projected = Matrix::multiply(vpMatrix, point);
+    projected[0] /= projected[3]; // percentage in x direction in [-1, 1], 0 being the center of the screen)
+    projected[1] /= projected[3]; // percentage in y direction in [-1, 1], 0 being the center of the screen)
+    projected[2] /= projected[3]; // percentage in z direction in [-1, 1], 0 being the center of the screen)
+    projected[3] /= projected[3];
+
+    return projected;
+}
+
 
 double MapCamera3d::mapUnitsFromPixels(double distancePx) {
     Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
