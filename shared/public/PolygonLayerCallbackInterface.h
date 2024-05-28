@@ -9,5 +9,7 @@ class PolygonLayerCallbackInterface {
 public:
     virtual ~PolygonLayerCallbackInterface() = default;
 
-    virtual void onClickConfirmed(const PolygonInfo & polygon) = 0;
+    virtual bool onClickConfirmed(const PolygonInfo & polygon) = 0;
+
+    virtual bool onClickUnconfirmed(const PolygonInfo & polygon) = 0;
 };

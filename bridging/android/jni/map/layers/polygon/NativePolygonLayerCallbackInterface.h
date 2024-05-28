@@ -33,14 +33,16 @@ private:
         JavaProxy(JniType j);
         ~JavaProxy();
 
-        void onClickConfirmed(const ::PolygonInfo & polygon) override;
+        bool onClickConfirmed(const ::PolygonInfo & polygon) override;
+        bool onClickUnconfirmed(const ::PolygonInfo & polygon) override;
 
     private:
         friend ::djinni::JniInterface<::PolygonLayerCallbackInterface, ::djinni_generated::NativePolygonLayerCallbackInterface>;
     };
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/map/layers/polygon/PolygonLayerCallbackInterface") };
-    const jmethodID method_onClickConfirmed { ::djinni::jniGetMethodID(clazz.get(), "onClickConfirmed", "(Lio/openmobilemaps/mapscore/shared/map/layers/polygon/PolygonInfo;)V") };
+    const jmethodID method_onClickConfirmed { ::djinni::jniGetMethodID(clazz.get(), "onClickConfirmed", "(Lio/openmobilemaps/mapscore/shared/map/layers/polygon/PolygonInfo;)Z") };
+    const jmethodID method_onClickUnconfirmed { ::djinni::jniGetMethodID(clazz.get(), "onClickUnconfirmed", "(Lio/openmobilemaps/mapscore/shared/map/layers/polygon/PolygonInfo;)Z") };
 };
 
 } // namespace djinni_generated

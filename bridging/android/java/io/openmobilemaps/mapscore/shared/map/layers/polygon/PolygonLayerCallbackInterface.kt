@@ -8,7 +8,9 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class PolygonLayerCallbackInterface {
 
-    abstract fun onClickConfirmed(polygon: PolygonInfo)
+    abstract fun onClickConfirmed(polygon: PolygonInfo): Boolean
+
+    abstract fun onClickUnconfirmed(polygon: PolygonInfo): Boolean
 
     private class CppProxy : PolygonLayerCallbackInterface {
         private val nativeRef: Long
@@ -25,10 +27,16 @@ abstract class PolygonLayerCallbackInterface {
             external fun nativeDestroy(nativeRef: Long)
         }
 
-        override fun onClickConfirmed(polygon: PolygonInfo) {
+        override fun onClickConfirmed(polygon: PolygonInfo): Boolean {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_onClickConfirmed(this.nativeRef, polygon)
+            return native_onClickConfirmed(this.nativeRef, polygon)
         }
-        private external fun native_onClickConfirmed(_nativeRef: Long, polygon: PolygonInfo)
+        private external fun native_onClickConfirmed(_nativeRef: Long, polygon: PolygonInfo): Boolean
+
+        override fun onClickUnconfirmed(polygon: PolygonInfo): Boolean {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_onClickUnconfirmed(this.nativeRef, polygon)
+        }
+        private external fun native_onClickUnconfirmed(_nativeRef: Long, polygon: PolygonInfo): Boolean
     }
 }

@@ -19,7 +19,8 @@ polygon_info = record {
 }
 
 polygon_layer_callback_interface = interface +c +j +o {
-    on_click_confirmed(polygon: polygon_info);
+    on_click_confirmed(polygon: polygon_info): bool;
+    on_click_unconfirmed(polygon: polygon_info): bool;
 }
 
 polygon_layer_interface = interface +c {
