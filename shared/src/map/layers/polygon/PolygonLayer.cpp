@@ -360,7 +360,6 @@ bool PolygonLayer::onTouchDown(const ::Vec2F &posScreen) {
             }
 
             mapInterface->invalidate();
-            return true;
         }
     }
     return false;
@@ -386,13 +385,30 @@ bool PolygonLayer::onClickUnconfirmed(const ::Vec2F &posScreen) {
         return false;
     }
     if (highlightedPolygon) {
-        selectedPolygon = highlightedPolygon;
+        if (handler->onClickConfirmed(*highlightedPolygon)) {
+            selectedPolygon = highlightedPolygon;
 
-        handler->onClickConfirmed(*selectedPolygon);
+            highlightedPolygon = std::nullopt;
+            mapInterface->invalidate();
+            return true;
+        }
+    }
+    return false;
+}
 
-        highlightedPolygon = std::nullopt;
-        mapInterface->invalidate();
-        return true;
+bool PolygonLayer::onClickConfirmed(const ::Vec2F &posScreen) {
+    const auto handler = callbackHandler;
+    if (!handler) {
+        return false;
+    }
+    if (highlightedPolygon) {
+        if (handler->onClickUnconfirmed(*highlightedPolygon)) {
+            selectedPolygon = highlightedPolygon;
+
+            highlightedPolygon = std::nullopt;
+            mapInterface->invalidate();
+            return true;
+        }
     }
     return false;
 }
