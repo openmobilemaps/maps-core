@@ -147,6 +147,8 @@ class MapCamera3d : public MapCameraInterface,
 
     void setCameraMode(CameraMode3d mode) override;
 
+    CameraMode3d getCameraMode() override;
+
     void notifyListenerBoundsChange() override;
 
     std::vector<double> computeEllipseCoefficients();
@@ -238,7 +240,7 @@ protected:
 
     CameraConfiguration config;
 
-    enum ListenerType { BOUNDS = 1, ROTATION = 1 << 1, MAP_INTERACTION = 1 << 2 };
+    enum ListenerType { BOUNDS = 1, ROTATION = 1 << 1, MAP_INTERACTION = 1 << 2, CAMERA_MODE = 1 << 3 };
 
     void notifyListeners(const int &listenerType);
 
@@ -264,6 +266,8 @@ protected:
     std::vector<float> convertToCartesianCoordinates(Coord coord);
 
     std::vector<float> projectedPoint(std::vector<float> point);
+
+    double overzoom = 0.0;
 
     std::vector<float> vpMatrix = std::vector<float>(16, 0.0);
     std::vector<double> inverseVPMatrix = std::vector<double>(16, 0.0);

@@ -349,6 +349,7 @@ public class MapViewCoordinator: MCMapCameraListenerInterface {
             let zoom = mapView?.camera.getZoom()
             let minZoom = mapView?.camera.getMinZoom()
             let maxZoom = mapView?.camera.getMaxZoom()
+            let mode = mapView?.camera.asMapCamera3d()?.getCameraMode()
 
 
             parent.camera = MapView.Camera(
@@ -357,7 +358,7 @@ public class MapViewCoordinator: MCMapCameraListenerInterface {
                 minZoom: .init(mode: .map, value: minZoom),
                 maxZoom: .init(mode: .map, value: maxZoom),
                 // visibleRect: .init(mode: .map, value: mapView?.camera.getPaddingAdjustedVisibleRect()),
-                mode: parent.camera.mode,
+                mode: mode ?? parent.camera.mode,
                 restrictedBounds: parent.camera.restrictedBounds,
                 camera3d: mapView?.camera,
                 mapConfig: mapView?.mapInterface.getMapConfig()
@@ -373,7 +374,7 @@ public class MapViewCoordinator: MCMapCameraListenerInterface {
     }
 
     nonisolated
-    public func onCameraChange(_ viewMatrix: [NSNumber], projectionMatrix: [NSNumber], verticalFov: Float, horizontalFov: Float, width: Float, height: Float, focusPointAltitude: Float, focusPointPosition: MCCoord, zoom: Float) {
+    public func onCameraChange(_ viewMatrix: [NSNumber], projectionMatrix: [NSNumber], verticalFov: Float, horizontalFov: Float, width: Float, height: Float, focusPointAltitude: Float, focusPointPosition: MCCoord, zoom: Float, mode: MCCameraMode3d) {
             updateCamera()
     }
 

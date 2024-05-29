@@ -7,6 +7,7 @@
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
+#import "MCCameraMode3d+Private.h"
 #import "MCCoord+Private.h"
 #import "MCRectCoord+Private.h"
 #include <exception>
@@ -61,7 +62,8 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
                 height:(float)height
     focusPointAltitude:(float)focusPointAltitude
     focusPointPosition:(nonnull MCCoord *)focusPointPosition
-                  zoom:(float)zoom {
+                  zoom:(float)zoom
+                  mode:(MCCameraMode3d)mode {
     try {
         _cppRefHandle.get()->onCameraChange(::djinni::List<::djinni::F32>::toCpp(viewMatrix),
                                             ::djinni::List<::djinni::F32>::toCpp(projectionMatrix),
@@ -71,7 +73,8 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
                                             ::djinni::F32::toCpp(height),
                                             ::djinni::F32::toCpp(focusPointAltitude),
                                             ::djinni_generated::Coord::toCpp(focusPointPosition),
-                                            ::djinni::F32::toCpp(zoom));
+                                            ::djinni::F32::toCpp(zoom),
+                                            ::djinni::Enum<::CameraMode3d, MCCameraMode3d>::toCpp(mode));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -103,7 +106,7 @@ public:
             [djinni_private_get_proxied_objc_object() onMapInteraction];
         }
     }
-    void onCameraChange(const std::vector<float> & c_viewMatrix, const std::vector<float> & c_projectionMatrix, float c_verticalFov, float c_horizontalFov, float c_width, float c_height, float c_focusPointAltitude, const ::Coord & c_focusPointPosition, float c_zoom) override
+    void onCameraChange(const std::vector<float> & c_viewMatrix, const std::vector<float> & c_projectionMatrix, float c_verticalFov, float c_horizontalFov, float c_width, float c_height, float c_focusPointAltitude, const ::Coord & c_focusPointPosition, float c_zoom, ::CameraMode3d c_mode) override
     {
         @autoreleasepool {
             [djinni_private_get_proxied_objc_object() onCameraChange:(::djinni::List<::djinni::F32>::fromCpp(c_viewMatrix))
@@ -114,7 +117,8 @@ public:
                                                               height:(::djinni::F32::fromCpp(c_height))
                                                   focusPointAltitude:(::djinni::F32::fromCpp(c_focusPointAltitude))
                                                   focusPointPosition:(::djinni_generated::Coord::fromCpp(c_focusPointPosition))
-                                                                zoom:(::djinni::F32::fromCpp(c_zoom))];
+                                                                zoom:(::djinni::F32::fromCpp(c_zoom))
+                                                                mode:(::djinni::Enum<::CameraMode3d, MCCameraMode3d>::fromCpp(c_mode))];
         }
     }
 };

@@ -9,4 +9,6 @@
 
 - (void)setCameraMode:(MCCameraMode3d)mode;
 
+- (MCCameraMode3d)getCameraMode;
+
 @end

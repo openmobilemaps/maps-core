@@ -36,6 +36,7 @@
 #define LOCAL_MIN_ZOOM       10'000'000
 #define LOCAL_INITIAL_ZOOM    3'000'000
 #define LOCAL_MAX_ZOOM          100'000
+#define RUBBER_BAND_WINDOW    3'000'000.0
 
 MapCamera3d::MapCamera3d(const std::shared_ptr<MapInterface> &mapInterface, float screenDensityPpi)
     : mapInterface(mapInterface)
@@ -590,7 +591,7 @@ void MapCamera3d::notifyListeners(const int &listenerType) {
     std::lock_guard<std::recursive_mutex> lock(listenerMutex);
     for (auto listener : listeners) {
         if (listenerType & ListenerType::BOUNDS) {
-            listener->onCameraChange(viewMatrix, projectionMatrix, verticalFov, horizontalFov, width, height, focusPointAltitude, getCenterPosition(), getZoom());
+            listener->onCameraChange(viewMatrix, projectionMatrix, verticalFov, horizontalFov, width, height, focusPointAltitude, getCenterPosition(), getZoom(), getCameraMode());
         }
         if (listenerType & ListenerType::ROTATION) {
             listener->onRotationChanged(angle);
@@ -865,9 +866,9 @@ bool MapCamera3d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, cons
 
     if (posScreenOld.size() >= 2) {
 
-        double scaleFactor =
-            Vec2FHelper::distance(posScreenNew[0], posScreenNew[1]) / Vec2FHelper::distance(posScreenOld[0], posScreenOld[1]);
-        double newZoom = std::clamp(zoom / scaleFactor, zoomMax, zoomMin);
+        double scaleFactor = Vec2FHelper::distance(posScreenNew[0], posScreenNew[1]) / Vec2FHelper::distance(posScreenOld[0], posScreenOld[1]);
+
+        double newZoom = zoom / scaleFactor;
 
         if (startZoom == 0) {
             startZoom = zoom;
@@ -917,9 +918,9 @@ bool MapCamera3d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, cons
         }
 
 
-        const auto [adjPosition, adjZoom] = getBoundsCorrectedCoords(focusPointPosition, newZoom);
+        const auto [adjPosition, adjZoom] = getBoundsCorrectedCoords(focusPointPosition, zoom);
         focusPointPosition = adjPosition;
-        zoom = adjZoom;
+        updateZoom(adjZoom);
 
         auto listenerType = ListenerType::BOUNDS | ListenerType::MAP_INTERACTION;
         notifyListeners(listenerType);
@@ -929,6 +930,26 @@ bool MapCamera3d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, cons
 }
 
 bool MapCamera3d::onTwoFingerMoveComplete() {
+    double diff;
+    if (getCameraMode() == CameraMode3d::TILTED_ORBITAL) {
+        // Check if we are overzooming, and if overzooming enough, we change to global mode
+        diff = zoom - zoomMin;
+    } else {
+        // Check if we are overzooming, and if overzooming enough, we change to local mode
+        diff = zoomMax - zoom;
+    }
+
+    if (diff > 0) {
+        auto factor = RUBBER_BAND_WINDOW / diff;
+        if (factor > 0.5) {
+            if (getCameraMode() == CameraMode3d::TILTED_ORBITAL) {
+                setCameraMode(CameraMode3d::GLOBE);
+            } else {
+                setCameraMode(CameraMode3d::TILTED_ORBITAL);
+            }
+        }
+    }
+
     if (config.snapToNorthEnabled && !cameraFrozen && (angle < ROTATION_LOCKING_ANGLE || angle > (360 - ROTATION_LOCKING_ANGLE))) {
         std::lock_guard<std::recursive_mutex> lock(animationMutex);
         rotationAnimation = std::make_shared<DoubleAnimation>(
@@ -1382,6 +1403,10 @@ std::shared_ptr<MapCamera3dInterface> MapCamera3d::asMapCamera3d() {
     return shared_from_this();
 }
 
+CameraMode3d MapCamera3d::getCameraMode() {
+    return this->mode;
+}
+
 void MapCamera3d::setCameraMode(CameraMode3d mode) {
     if (mode == this->mode) {
         return;
@@ -1414,7 +1439,6 @@ void MapCamera3d::setCameraMode(CameraMode3d mode) {
     this->zoom = targetZoom;
     float targetPitch = getCameraPitch();
 
-
     std::lock_guard<std::recursive_mutex> lock(animationMutex);
 
     zoomAnimation = std::make_shared<DoubleAnimation>(
@@ -1441,6 +1465,8 @@ void MapCamera3d::setCameraMode(CameraMode3d mode) {
                                                           });
     pitchAnimation->start();
     mapInterface->invalidate();
+
+    notifyListeners(ListenerType::CAMERA_MODE);
 }
 
 void MapCamera3d::notifyListenerBoundsChange() {
@@ -1451,7 +1477,33 @@ void MapCamera3d::updateZoom(double zoom_) {
     auto zoomMin = getMinZoom();
     auto zoomMax = getMaxZoom();
 
-    zoom = std::clamp(zoom_, zoomMax, zoomMin);
+    double diff;
+    if (getCameraMode() == CameraMode3d::TILTED_ORBITAL) {
+        diff = zoom_ - zoomMin;
+    } else {
+        diff = zoomMax - zoom_;
+    }
+
+    double newZoom = 0;
+
+    if (diff > 0) {
+        // We are overzooming
+        double normalizedDiff = std::min(diff / RUBBER_BAND_WINDOW, RUBBER_BAND_WINDOW); // Normalize to [0, 1]
+        double mapped = 1 - 1 / (1 + normalizedDiff);
+        double newValue =  mapped * RUBBER_BAND_WINDOW;
+        
+        if (getCameraMode() == CameraMode3d::TILTED_ORBITAL) {
+            newZoom = LOCAL_MIN_ZOOM + newValue;
+        } else {
+            newZoom = LOCAL_MIN_ZOOM - newValue;
+        }
+    } else {
+        newZoom = std::clamp(zoom_, zoomMax, zoomMin);
+    }
+
+    this->overzoom = std::max(0.0, newZoom - zoomMax);
+
+    zoom = newZoom;
 
     cameraVerticalDisplacement = getCameraVerticalDisplacement();
     cameraPitch = getCameraPitch();
