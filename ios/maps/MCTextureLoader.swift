@@ -17,7 +17,7 @@ import OSLog
 private let logger = Logger(subsystem: "maps-core", category: "MCTextureLoader")
 
 open class MCTextureLoader: MCLoaderInterface {
-    private let session: URLSession
+    public let session: URLSession
 
     public var isRasterDebugModeEnabled: Bool
 
@@ -59,6 +59,25 @@ open class MCTextureLoader: MCLoaderInterface {
         return MCTextureLoaderResult(data: nil, etag: nil, status: .ERROR_OTHER, errorCode: "NRES")
     }
 
+    open func modifyResult(_ suggested: MCTextureLoaderResult, response: HTTPURLResponse?, data: Data?, error: (any Error)?) -> MCTextureLoaderResult {
+        return suggested
+    }
+
+    open func modifyResult(_ suggested: MCDataLoaderResult, response: HTTPURLResponse?, data: Data?, error: (any Error)?) -> MCDataLoaderResult {
+        return suggested
+    }
+
+    private func promiseSetValue(_ promise: DJPromise<MCTextureLoaderResult>, response: HTTPURLResponse?, data: Data?, error: (any Error)?, suggested: MCTextureLoaderResult) {
+        let modified = modifyResult(suggested, response: response, data: data, error: error)
+        promise.setValue(modified)
+    }
+
+    private func promiseSetValue(_ promise: DJPromise<MCDataLoaderResult>, response: HTTPURLResponse?, data: Data?, error: (any Error)?, suggested: MCDataLoaderResult) {
+        let modified = modifyResult(suggested, response: response, data: data, error: error)
+        promise.setValue(modified)
+    }
+
+
     open func loadTextureAsnyc(_ url: String, etag: String?) -> DJFuture<MCTextureLoaderResult> {
         let urlString = url
 
@@ -95,7 +114,7 @@ open class MCTextureLoader: MCLoaderInterface {
                 if #available(iOS 14.0, *) {
                     logger.debug("Failed to load \(url, privacy: .public): Timeout")
                 }
-                promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_TIMEOUT, errorCode: (error?.code).stringOrNil))
+                promiseSetValue(promise, response: response, data: data, error: error, suggested: .init(data: nil, etag: response?.etag, status: .ERROR_TIMEOUT, errorCode: (error?.code).stringOrNil))
                 return
             }
 
@@ -108,27 +127,27 @@ open class MCTextureLoader: MCLoaderInterface {
                 if #available(iOS 14.0, *) {
                     logger.debug("Failed to load \(url, privacy: .public): 404, \(data.map { String(data: $0, encoding: .utf8)?.prefix(1024) ?? "?" } ?? "?")")
                 }
-                promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_404, errorCode: (response?.statusCode).stringOrNil))
+                promiseSetValue(promise, response: response, data: data, error: error, suggested: .init(data: nil, etag: response?.etag, status: .ERROR_404, errorCode: (response?.statusCode).stringOrNil))
                 return
             } else if response?.statusCode == 400 {
                 if #available(iOS 14.0, *) {
                     logger.debug("Failed to load \(url, privacy: .public): 400, \(data.map { String(data: $0, encoding: .utf8)?.prefix(1024) ?? "?" } ?? "?")")
                 }
-                promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_400, errorCode: (response?.statusCode).stringOrNil))
+                promiseSetValue(promise, response: response, data: data, error: error, suggested: .init(data: nil, etag: response?.etag, status: .ERROR_400, errorCode: (response?.statusCode).stringOrNil))
                 return
             } else if response?.statusCode == 204 {
-                promise.setValue(.init(data: nil, etag: response?.etag, status: .OK, errorCode: nil))
+                promiseSetValue(promise, response: response, data: data, error: error, suggested: .init(data: nil, etag: response?.etag, status: .OK, errorCode: nil))
                 return
             } else if response?.statusCode != 200 {
                 if #available(iOS 14.0, *) {
                     logger.debug("Failed to load \(url, privacy: .public): \(response?.statusCode ?? 0, privacy: .public), \(data.map { String(data: $0, encoding: .utf8)?.prefix(1024) ?? "?" } ?? "?")")
                 }
-                promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_NETWORK, errorCode: (response?.statusCode).stringOrNil))
+                promiseSetValue(promise, response: response, data: data, error: error, suggested: .init(data: nil, etag: response?.etag, status: .ERROR_NETWORK, errorCode: (response?.statusCode).stringOrNil))
                 return
             }
 
             guard let data = result else {
-                promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_OTHER, errorCode: (response?.statusCode).stringOrNil))
+                promiseSetValue(promise, response: response, data: data, error: error, suggested: .init(data: nil, etag: response?.etag, status: .ERROR_OTHER, errorCode: (response?.statusCode).stringOrNil))
                 return
             }
 
@@ -141,22 +160,22 @@ open class MCTextureLoader: MCLoaderInterface {
                     }
                     if let cgImage = img.cgImage,
                        let textureHolder = try? TextureHolder(cgImage) {
-                        promise.setValue(.init(data: textureHolder, etag: response?.etag, status: .OK, errorCode: nil))
+                        promiseSetValue(promise, response: response, data: data, error: error, suggested: .init(data: textureHolder, etag: response?.etag, status: .OK, errorCode: nil))
                         return
                     }
                 }
 
                 let textureHolder = try TextureHolder(data)
-                promise.setValue(.init(data: textureHolder, etag: response?.etag, status: .OK, errorCode: nil))
+                promiseSetValue(promise, response: response, data: data, error: error, suggested: .init(data: textureHolder, etag: response?.etag, status: .OK, errorCode: nil))
                 return
             } catch TextureHolderError.emptyData {
-                promise.setValue(.init(data: nil, etag: response?.etag, status: .OK, errorCode: nil))
+                promiseSetValue(promise, response: response, data: data, error: error, suggested: .init(data: nil, etag: response?.etag, status: .OK, errorCode: nil))
                 return
             } catch {
                 // If metal can not load this image
                 // try workaround to first load it into UIImage context
                 guard let uiImage = UIImage(data: data) else {
-                    promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_OTHER, errorCode: "MNL"))
+                    promiseSetValue(promise, response: response, data: data, error: error, suggested: .init(data: nil, etag: response?.etag, status: .ERROR_OTHER, errorCode: "MNL"))
                     return
                 }
 
@@ -171,11 +190,11 @@ open class MCTextureLoader: MCLoaderInterface {
 
                 guard let cgImage = img.cgImage,
                       let textureHolder = try? TextureHolder(cgImage) else {
-                    promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_OTHER, errorCode: "UINL"))
+                    promiseSetValue(promise, response: response, data: data, error: error, suggested: .init(data: nil, etag: response?.etag, status: .ERROR_OTHER, errorCode: "UINL"))
                     return
                 }
 
-                promise.setValue(.init(data: textureHolder, etag: response?.etag, status: .OK, errorCode: nil))
+                promiseSetValue(promise, response: response, data: data, error: error, suggested: .init(data: textureHolder, etag: response?.etag, status: .OK, errorCode: nil))
                 return
             }
         }
@@ -236,11 +255,12 @@ open class MCTextureLoader: MCLoaderInterface {
             let response: HTTPURLResponse? = response_ as? HTTPURLResponse
             let error: NSError? = error_ as NSError?
 
+
             if error?.domain == NSURLErrorDomain, error?.code == NSURLErrorTimedOut {
                 if #available(iOS 14.0, *) {
                     logger.debug("Failed to load \(url, privacy: .public): Timeout")
                 }
-                promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_TIMEOUT, errorCode: (error?.code).stringOrNil))
+                promiseSetValue(promise, response: response, data: data, error: error, suggested: .init(data: nil, etag: response?.etag, status: .ERROR_TIMEOUT, errorCode: (error?.code).stringOrNil))
                 return
             }
 
@@ -253,31 +273,31 @@ open class MCTextureLoader: MCLoaderInterface {
                 if #available(iOS 14.0, *) {
                     logger.debug("Failed to load \(url, privacy: .public): 404, \(data.map { String(data: $0, encoding: .utf8)?.prefix(1024) ?? "?" } ?? "?")")
                 }
-                promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_404, errorCode: (response?.statusCode).stringOrNil))
+                promiseSetValue(promise, response: response, data: data, error: error, suggested: .init(data: nil, etag: response?.etag, status: .ERROR_404, errorCode: (response?.statusCode).stringOrNil))
                 return
             } else if response?.statusCode == 400 {
                 if #available(iOS 14.0, *) {
                     logger.debug("Failed to load \(url, privacy: .public): 400, \(data.map { String(data: $0, encoding: .utf8)?.prefix(1024) ?? "?" } ?? "?")")
                 }
-                promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_400, errorCode: (response?.statusCode).stringOrNil))
+                promiseSetValue(promise, response: response, data: data, error: error, suggested: .init(data: nil, etag: response?.etag, status: .ERROR_400, errorCode: (response?.statusCode).stringOrNil))
                 return
             } else if response?.statusCode == 204 {
-                promise.setValue(.init(data: nil, etag: response?.etag, status: .OK, errorCode: nil))
+                promiseSetValue(promise, response: response, data: data, error: error, suggested: .init(data: nil, etag: response?.etag, status: .OK, errorCode: nil))
                 return
             } else if response?.statusCode != 200 {
                 if #available(iOS 14.0, *) {
                     logger.debug("Failed to load \(url, privacy: .public): \(response?.statusCode ?? 0, privacy: .public), \(data.map { String(data: $0, encoding: .utf8)?.prefix(1024) ?? "?" } ?? "?")")
                 }
-                promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_NETWORK, errorCode: (response?.statusCode).stringOrNil))
+                promiseSetValue(promise, response: response, data: data, error: error, suggested: .init(data: nil, etag: response?.etag, status: .ERROR_NETWORK, errorCode: (response?.statusCode).stringOrNil))
                 return
             }
 
             guard let data = result else {
-                promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_OTHER, errorCode: (response?.statusCode).stringOrNil))
+                promiseSetValue(promise, response: response, data: data, error: error, suggested: .init(data: nil, etag: response?.etag, status: .ERROR_OTHER, errorCode: (response?.statusCode).stringOrNil))
                 return
             }
 
-            promise.setValue(.init(data: data, etag: response?.etag, status: .OK, errorCode: nil))
+            promiseSetValue(promise, response: response, data: data, error: error, suggested: .init(data: data, etag: response?.etag, status: .OK, errorCode: nil))
         }
 
         taskQueue.sync {
