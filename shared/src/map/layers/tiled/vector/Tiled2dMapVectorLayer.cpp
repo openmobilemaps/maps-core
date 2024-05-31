@@ -519,10 +519,12 @@ void Tiled2dMapVectorLayer::reloadDataSource(const std::string &sourceName) {
 }
 
 void Tiled2dMapVectorLayer::reloadLocalDataSource(const std::string &sourceName, const std::string &geoJson) {
-
     std::lock_guard<std::recursive_mutex> lock(mapDescriptionMutex);
 
-    if (!mapInterface) {
+    auto mapInterface = this->mapInterface;
+    auto mapDescription = this->mapDescription;
+
+    if (!mapInterface || !mapDescription) {
         return;
     }
 
