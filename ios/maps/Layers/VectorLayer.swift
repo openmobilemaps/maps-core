@@ -15,8 +15,9 @@ open class VectorLayer: Layer, ObservableObject {
                 styleURL: String,
                 layerIndex: Int? = nil,
                 localDataProvider: MCTiled2dMapVectorLayerLocalDataProviderInterface? = nil,
-                customZoomInfo: MCTiled2dMapZoomInfo? = nil) {
-        self.layerInterface = MCTiled2dMapVectorLayerInterface.createExplicitly(layerName, styleJson: styleURL, localStyleJson: nil, loaders: [MCTextureLoader()], fontLoader: MCFontLoader(bundle: .main), localDataProvider: localDataProvider, customZoomInfo: customZoomInfo, symbolDelegate: nil, sourceUrlParams: nil)
+                customZoomInfo: MCTiled2dMapZoomInfo? = nil,
+                loaders: [MCLoaderInterface] = [MCTextureLoader()]) {
+        self.layerInterface = MCTiled2dMapVectorLayerInterface.createExplicitly(layerName, styleJson: styleURL, localStyleJson: nil, loaders: loaders, fontLoader: MCFontLoader(bundle: .main), localDataProvider: localDataProvider, customZoomInfo: customZoomInfo, symbolDelegate: nil, sourceUrlParams: nil)
         self.layerInterface?.setSelectionDelegate(selectionHandler)
         self.layerIndex = layerIndex
     }
