@@ -102,6 +102,7 @@ class MapCamera3d : public MapCameraInterface,
 
     virtual bool onTouchDown(const ::Vec2F &posScreen) override;
 
+
     virtual bool onMove(const ::Vec2F &deltaScreen, bool confirmed, bool doubleClick) override;
 
     virtual bool onMoveComplete() override;
@@ -267,7 +268,7 @@ protected:
 
     std::vector<float> projectedPoint(std::vector<float> point);
 
-    double overzoom = 0.0;
+    void checkForRubberBandEffect();
 
     std::vector<float> vpMatrix = std::vector<float>(16, 0.0);
     std::vector<double> inverseVPMatrix = std::vector<double>(16, 0.0);
