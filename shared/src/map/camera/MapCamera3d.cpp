@@ -359,16 +359,24 @@ std::vector<float> MapCamera3d::getVpMatrix() {
     std::vector<float> newViewMatrix(16, 0.0);
     std::vector<float> newProjectionMatrix(16, 0.0);
 
-    float R = 6378137.0;
+    const float R = 6378137.0;
     float longitude = focusPointPosition.x; //  px / R;
     float latitude = focusPointPosition.y; // 2*atan(exp(py / R)) - 3.1415926 / 2;
 
     double focusPointAltitude = focusPointPosition.z;
     double cameraDistance = getCameraDistance();
-    double maxD = cameraDistance / R + 1.0 ;
-    double minD = std::max(cameraDistance / R - 1, 0.001);
-
     double fovy = getCameraFieldOfView(); // 45 // zoom / 70800;
+    const double minCameraDistance = 1.05;
+    if (cameraDistance < minCameraDistance) {
+        double d = minCameraDistance * R;
+        double pixelsPerMeter =  this->screenDensityPpi / 0.0254;
+        double w = (double)sizeViewport.y;
+        fovy = atan((zoom * w / pixelsPerMeter / 2.0) / d) * 2.0 / M_PI * 180.0;
+        cameraDistance = minCameraDistance;
+    }
+
+    double maxD = cameraDistance + 1.0;
+    double minD = cameraDistance - 1.0;
 
     // aspect ratio
     double vpr = (double) sizeViewport.x / (double) sizeViewport.y;
@@ -385,14 +393,14 @@ std::vector<float> MapCamera3d::getVpMatrix() {
     // TODO: horizontal translation
     double contentHeight = ((double) sizeViewport.y) - paddingBottom - paddingTop;
     double offsetY = -paddingBottom / 2.0 / (double) sizeViewport.y + cameraVerticalDisplacement * contentHeight * 0.5 / (double) sizeViewport.y;
-    offsetY = cameraDistance / R * tan(fovyRad / 2.0) * offsetY; // view space to world space
+    offsetY = cameraDistance * tan(fovyRad / 2.0) * offsetY; // view space to world space
     Matrix::translateM(newProjectionMatrix, 0, 0.0, -offsetY, 0);
 
     // view matrix
     // remember: read from bottom to top
     Matrix::setIdentityM(newViewMatrix, 0);
 
-    Matrix::translateM(newViewMatrix, 0, 0.0, 0, -cameraDistance / R);
+    Matrix::translateM(newViewMatrix, 0, 0.0, 0, -cameraDistance);
     Matrix::rotateM(newViewMatrix, 0, -cameraPitch, 1.0, 0.0, 0.0);
     Matrix::rotateM(newViewMatrix, 0, -angle, 0.0, 0.0, 1.0);
 
@@ -1582,6 +1590,7 @@ double MapCamera3d::getCameraDistance() {
     double w = (double)sizeViewport.y;
     double pixelsPerMeter =  this->screenDensityPpi / 0.0254;
     float d = (zoom * w / pixelsPerMeter / 2.0) / tan(f / 2.0 * M_PI / 180.0);
-    return d;
+    float R = 6378137.0;
+    return d / R;
 }
 
