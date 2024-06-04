@@ -79,6 +79,14 @@ bool NativeTouchInterface::JavaProxy::onMoveComplete() {
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni::Bool::toCpp(jniEnv, jret);
 }
+bool NativeTouchInterface::JavaProxy::onOneFingerDoubleClickMoveComplete() {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeTouchInterface>::get();
+    auto jret = jniEnv->CallBooleanMethod(Handle::get().get(), data.method_onOneFingerDoubleClickMoveComplete);
+    ::djinni::jniExceptionCheck(jniEnv);
+    return ::djinni::Bool::toCpp(jniEnv, jret);
+}
 bool NativeTouchInterface::JavaProxy::onTwoFingerClick(const ::Vec2F & c_posScreen1, const ::Vec2F & c_posScreen2) {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
@@ -183,6 +191,15 @@ CJNIEXPORT jboolean JNICALL Java_io_openmobilemaps_mapscore_shared_map_controls_
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::TouchInterface>(nativeRef);
         auto r = ref->onMoveComplete();
+        return ::djinni::release(::djinni::Bool::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT jboolean JNICALL Java_io_openmobilemaps_mapscore_shared_map_controls_TouchInterface_00024CppProxy_native_1onOneFingerDoubleClickMoveComplete(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::TouchInterface>(nativeRef);
+        auto r = ref->onOneFingerDoubleClickMoveComplete();
         return ::djinni::release(::djinni::Bool::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }

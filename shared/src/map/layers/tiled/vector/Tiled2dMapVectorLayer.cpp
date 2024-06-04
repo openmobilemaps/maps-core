@@ -1207,6 +1207,10 @@ bool Tiled2dMapVectorLayer::onMoveComplete() {
     return interactionManager->onMoveComplete();
 }
 
+bool Tiled2dMapVectorLayer::onOneFingerDoubleClickMoveComplete() {
+    return interactionManager->onOneFingerDoubleClickMoveComplete();
+}
+
 bool Tiled2dMapVectorLayer::onTwoFingerClick(const Vec2F &posScreen1, const Vec2F &posScreen2) {
     return interactionManager->onTwoFingerClick(posScreen1, posScreen2);
 }

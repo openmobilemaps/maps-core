@@ -224,6 +224,14 @@ void DefaultTouchHandler::handleTouchUp() {
 #ifdef ENABLE_TOUCH_LOGGING
         LogDebug <<= "TouchHandler: double click move ended";
 #endif
+        {
+            std::lock_guard<std::recursive_mutex> lock(listenerMutex);
+            for (auto &[index, listener]: listeners) {
+                if (listener->onOneFingerDoubleClickMoveComplete()) {
+                    break;
+                }
+            }
+        }
         state = IDLE;
     } else if (state == ONE_FINGER_DOUBLE_CLICK_DOWN) {
 #ifdef ENABLE_TOUCH_LOGGING
