@@ -10,4 +10,6 @@ public:
     virtual ~MapCamera3dInterface() = default;
 
     virtual void setCameraMode(CameraMode3d mode) = 0;
+
+    virtual CameraMode3d getCameraMode() = 0;
 };

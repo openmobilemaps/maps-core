@@ -113,8 +113,7 @@ void Tiled2dMapLayer::onVisibleBoundsChanged(const ::RectCoord &visibleBounds, d
     }
 }
 
-void Tiled2dMapLayer::onCameraChange(const std::vector<float> &viewMatrix, const std::vector<float> &projectionMatrix, float verticalFov,
-                                float horizontalFov, float width, float height, float focusPointAltitude, const ::Coord & focusPointPosition, float zoom) {
+void Tiled2dMapLayer::onCameraChange(const std::vector<float> &viewMatrix, const std::vector<float> &projectionMatrix, float verticalFov, float horizontalFov, float width, float height, float focusPointAltitude, const ::Coord & focusPointPosition, float zoom, ::CameraMode3d mode) {
     std::lock_guard<std::recursive_mutex> lock(sourcesMutex);
 
     for (const auto &sourceInterface: sourceInterfaces) {

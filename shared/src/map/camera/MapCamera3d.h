@@ -102,6 +102,7 @@ class MapCamera3d : public MapCameraInterface,
 
     virtual bool onTouchDown(const ::Vec2F &posScreen) override;
 
+
     virtual bool onMove(const ::Vec2F &deltaScreen, bool confirmed, bool doubleClick) override;
 
     virtual bool onMoveComplete() override;
@@ -146,6 +147,8 @@ class MapCamera3d : public MapCameraInterface,
     std::shared_ptr<MapCamera3dInterface> asMapCamera3d() override;
 
     void setCameraMode(CameraMode3d mode) override;
+
+    CameraMode3d getCameraMode() override;
 
     void notifyListenerBoundsChange() override;
 
@@ -238,7 +241,7 @@ protected:
 
     CameraConfiguration config;
 
-    enum ListenerType { BOUNDS = 1, ROTATION = 1 << 1, MAP_INTERACTION = 1 << 2 };
+    enum ListenerType { BOUNDS = 1, ROTATION = 1 << 1, MAP_INTERACTION = 1 << 2, CAMERA_MODE = 1 << 3 };
 
     void notifyListeners(const int &listenerType);
 
@@ -264,6 +267,8 @@ protected:
     std::vector<float> convertToCartesianCoordinates(Coord coord);
 
     std::vector<float> projectedPoint(std::vector<float> point);
+
+    void checkForRubberBandEffect();
 
     std::vector<float> vpMatrix = std::vector<float>(16, 0.0);
     std::vector<double> inverseVPMatrix = std::vector<double>(16, 0.0);

@@ -10,6 +10,8 @@ abstract class MapCamera3dInterface {
 
     abstract fun setCameraMode(mode: CameraMode3d)
 
+    abstract fun getCameraMode(): CameraMode3d
+
     private class CppProxy : MapCamera3dInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -30,5 +32,11 @@ abstract class MapCamera3dInterface {
             native_setCameraMode(this.nativeRef, mode)
         }
         private external fun native_setCameraMode(_nativeRef: Long, mode: CameraMode3d)
+
+        override fun getCameraMode(): CameraMode3d {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getCameraMode(this.nativeRef)
+        }
+        private external fun native_getCameraMode(_nativeRef: Long): CameraMode3d
     }
 }
