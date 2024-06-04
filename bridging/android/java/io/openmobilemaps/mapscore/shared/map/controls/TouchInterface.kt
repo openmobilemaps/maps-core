@@ -22,6 +22,8 @@ abstract class TouchInterface {
 
     abstract fun onMoveComplete(): Boolean
 
+    abstract fun onOneFingerDoubleClickMoveComplete(): Boolean
+
     abstract fun onTwoFingerClick(posScreen1: io.openmobilemaps.mapscore.shared.graphics.common.Vec2F, posScreen2: io.openmobilemaps.mapscore.shared.graphics.common.Vec2F): Boolean
 
     abstract fun onTwoFingerMove(posScreenOld: ArrayList<io.openmobilemaps.mapscore.shared.graphics.common.Vec2F>, posScreenNew: ArrayList<io.openmobilemaps.mapscore.shared.graphics.common.Vec2F>): Boolean
@@ -86,6 +88,12 @@ abstract class TouchInterface {
             return native_onMoveComplete(this.nativeRef)
         }
         private external fun native_onMoveComplete(_nativeRef: Long): Boolean
+
+        override fun onOneFingerDoubleClickMoveComplete(): Boolean {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_onOneFingerDoubleClickMoveComplete(this.nativeRef)
+        }
+        private external fun native_onOneFingerDoubleClickMoveComplete(_nativeRef: Long): Boolean
 
         override fun onTwoFingerClick(posScreen1: io.openmobilemaps.mapscore.shared.graphics.common.Vec2F, posScreen2: io.openmobilemaps.mapscore.shared.graphics.common.Vec2F): Boolean {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

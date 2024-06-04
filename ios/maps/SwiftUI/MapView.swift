@@ -430,7 +430,11 @@ open class TouchHandler: MCTouchInterface {
     open func onMoveComplete() -> Bool {
         false
     }
-    
+
+    public func onOneFingerDoubleClickMoveComplete() -> Bool {
+        false
+    }
+
     open func onTwoFingerClick(_ posScreen1: MCVec2F, posScreen2: MCVec2F) -> Bool {
         false
     }

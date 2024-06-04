@@ -85,6 +85,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (BOOL)onOneFingerDoubleClickMoveComplete {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->onOneFingerDoubleClickMoveComplete();
+        return ::djinni::Bool::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (BOOL)onTwoFingerClick:(nonnull MCVec2F *)posScreen1
               posScreen2:(nonnull MCVec2F *)posScreen2 {
     try {
@@ -173,6 +180,13 @@ public:
     {
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() onMoveComplete];
+            return ::djinni::Bool::toCpp(objcpp_result_);
+        }
+    }
+    bool onOneFingerDoubleClickMoveComplete() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() onOneFingerDoubleClickMoveComplete];
             return ::djinni::Bool::toCpp(objcpp_result_);
         }
     }

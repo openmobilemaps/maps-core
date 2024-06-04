@@ -107,6 +107,8 @@ class MapCamera3d : public MapCameraInterface,
 
     virtual bool onMoveComplete() override;
 
+    virtual bool onOneFingerDoubleClickMoveComplete() override;
+                        
     virtual bool onTwoFingerClick(const ::Vec2F &posScreen1, const ::Vec2F &posScreen2) override;
 
     virtual bool onDoubleClick(const ::Vec2F &posScreen) override;

@@ -24,6 +24,8 @@ public:
 
     virtual bool onMoveComplete() = 0;
 
+    virtual bool onOneFingerDoubleClickMoveComplete() = 0;
+
     virtual bool onTwoFingerClick(const ::Vec2F & posScreen1, const ::Vec2F & posScreen2) = 0;
 
     virtual bool onTwoFingerMove(const std::vector<::Vec2F> & posScreenOld, const std::vector<::Vec2F> & posScreenNew) = 0;

@@ -68,6 +68,10 @@ bool Tiled2dMapVectorInteractionManager::onMoveComplete() {
     return false;
 }
 
+bool Tiled2dMapVectorInteractionManager::onOneFingerDoubleClickMoveComplete() {
+    return false;
+}
+
 bool Tiled2dMapVectorInteractionManager::onTwoFingerClick(const Vec2F &posScreen1, const Vec2F &posScreen2) {
     const auto lambda =
             [&posScreen1, &posScreen2](std::unordered_set<std::string> &layers, auto &manager) -> bool {

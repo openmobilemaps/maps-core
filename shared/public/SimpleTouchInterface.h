@@ -28,6 +28,8 @@ class SimpleTouchInterface : public TouchInterface {
 
     virtual bool onMoveComplete() override { return false; };
 
+    virtual bool onOneFingerDoubleClickMoveComplete() override { return false; }
+    
     virtual bool onTwoFingerClick(const ::Vec2F &posScreen1, const ::Vec2F &posScreen2) override { return false; };
 
     virtual bool onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, const std::vector<::Vec2F> &posScreenNew) override {

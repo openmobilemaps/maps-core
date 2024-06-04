@@ -703,6 +703,15 @@ bool MapCamera3d::onMoveComplete() {
     return true;
 }
 
+bool MapCamera3d::onOneFingerDoubleClickMoveComplete() {
+    if (cameraFrozen)
+        return false;
+    
+    checkForRubberBandEffect();
+    
+    return true;
+}
+
 void MapCamera3d::setupInertia() {
     float vel = std::sqrt(currentDragVelocity.x * currentDragVelocity.x + currentDragVelocity.y * currentDragVelocity.y);
     double t1 = vel >= 0.4 ? 30.0 : 0.0;
