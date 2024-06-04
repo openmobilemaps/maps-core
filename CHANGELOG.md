@@ -1,16 +1,20 @@
 # Changelog for Open Mobile Maps
 
+## Version 2.0.8 (04.06.2024)
+- Add edge fill options for OpenGL textures
+- iOS instanced rendering alpha multiplication fix
+
 ## Version 2.0.7 (29.04.2024)
-- adds performance logger (disabled by default)
-- fixes a bug in the android striped pattern shader
-- fixes a bug in geojson hole simplification
+- Adds performance logger (disabled by default)
+- Fixes a bug in the android striped pattern shader
+- Fixes a bug in geojson hole simplification
 
 ## Version 2.0.6 (10.04.2024)
-- log exception when a font can not be loaded
+- Log exception when a font can not be loaded
 
 ## Version 2.0.5 (08.04.2024)
 - Expose thread_pool_callbacks in scheduler interface
-- call onRemoved on layerInterface before the mapScene is destroyed
+- Call onRemoved on layerInterface before the mapScene is destroyed
 
 ## Version 2.0.4 (22.03.2024)
 - Changes in symbol vector map collision detection: Run collision detection when zoom changes. This change ensures that icons never collide but also carries a performance burden.
@@ -53,35 +57,35 @@
 - Convenience function for RectCoord to PolygonCoord conversion
 
 ## Version 1.5.0 (23.03.2023)
-- implements vector icon anchor
-- evaluate color from feature context 
-- expose bounding box in djinni
-- fixes touch propagation in VectorLayer
-- iOS: fixes graphics object race conditions  
-- fixes vector tile origin 
-- adds option to enable/disable underzoom and overzoom
-- adds exception logger 
-- adds network activity manager
-- adds two finger zoom out gesture 
-- adds option to specify multiple loaders
-- many improvements and bugfixes
+- Implements vector icon anchor
+- Evaluate color from feature context
+- Expose bounding box in djinni
+- Fixes touch propagation in VectorLayer
+- iOS: fixes graphics object race conditions
+- Fixes vector tile origin
+- Adds option to enable/disable underzoom and overzoom
+- Adds exception logger
+- Adds network activity manager
+- Adds two finger zoom out gesture
+- Adds option to specify multiple loaders
+- Many improvements and bugfixes
 
 ## Version 1.4.1 (16.08.2022)
 - iOS: updates device to ppi mapping
 - iOS: fixes masked line groups
 - iOS: fixes bug that caused the map to be cropped if display zoom is enabled
 - iOS: fixes metal crash when attempting to load empty texture
-- fixes a error in MapCamera2d::getPaddingCorrectedBounds
+- Fixes a error in MapCamera2d::getPaddingCorrectedBounds
 
 ## Version 1.4.0 (09.06.2022)
 - includes earcut.hpp dependency for polygon triangulation
-- adds polygon and line group rendering objects which can be used to efficiently render many objects with a limited number of styles
-- expands line style options
-- adds masking methods to the layerInterface
-- adds scissoring methods to the layerInterface
-- adds option to display tiled raster layer density dependent
-- adds off screen rendering helpers
-- many improvements and bugfixes
+- Adds polygon and line group rendering objects which can be used to efficiently render many objects with a limited number of styles
+- Expands line style options
+- Adds masking methods to the layerInterface
+- Adds scissoring methods to the layerInterface
+- Adds option to display tiled raster layer density dependent
+- Adds off screen rendering helpers
+- Many improvements and bugfixes
 
 ## Version 1.3.3 (16.08.2021)
 - Memory leak fix for Android
@@ -95,21 +99,21 @@
 - Add line layer implementation
 
 ## Version 1.3.0 (19.04.2021)
-- fixes iOS retain cycle
+- Fixes iOS retain cycle
 - Native library and relevant header files are now properly included in the published dependency
 - Added a Circle2dLayerObject
-- bugfixes & improvements
+- Bugfixes & improvements
 
 ## Version 1.2.0 (03.03.2021)
 
 - Add WMTS capability parsing capabilities
 - Add icon layer implementation
-- implemented camera movement inertia
-- improves animation handling
-- bugfixes and improvements
+- Implemented camera movement inertia
+- Improves animation handling
+- Bugfixes and improvements
 
 ## Version 1.1.0 (01.03.2021)
-- various improvements & bugfixes
+- Various improvements & bugfixes
 
 ## Version 1.0.0 (19.02.2021)
-- initial version of open mobile maps
+- Initial version of open mobile maps
