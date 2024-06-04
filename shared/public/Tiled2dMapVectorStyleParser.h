@@ -361,6 +361,10 @@ public:
             std::vector<std::tuple<double, std::shared_ptr<Value>>> steps;
 
             for (auto const stop: json[stopsExpression]) {
+                if (!stop[0].is_number()) {
+                    LogError <<= "Tiled2dMapVectorStyleParser not handled: " + json.dump();
+                    return nullptr;
+                }
                 steps.push_back({stop[0].get<double>(), parseValue(stop[1])});
             }
 
