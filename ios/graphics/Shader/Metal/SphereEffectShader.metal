@@ -83,6 +83,9 @@ sphereEffectFragmentShader(VertexOut in [[stage_in]],
 
         return ((1.0 - t) * alpha + t * alpha2) * ((1.0 - t) * c + t * c2) * opacity;
     }
+    else {
+        return float4(1.0, 1.0, 1.0, 1.0) * (1.0 + L * 10.0);
+    }
 
     return white * opacity;
 }
