@@ -588,7 +588,7 @@ void MapCamera3d::notifyListeners(const int &listenerType) {
 
     std::lock_guard<std::recursive_mutex> lock(listenerMutex);
     for (auto listener : listeners) {
-        if (listenerType & ListenerType::BOUNDS) {
+        if (listenerType & (ListenerType::BOUNDS | ListenerType::CAMERA_MODE)) {
             listener->onCameraChange(viewMatrix, projectionMatrix, verticalFov, horizontalFov, width, height, focusPointAltitude, getCenterPosition(), getZoom(), getCameraMode());
         }
         if (listenerType & ListenerType::ROTATION) {
@@ -706,7 +706,7 @@ bool MapCamera3d::onOneFingerDoubleClickMoveComplete() {
         return false;
     
     checkForRubberBandEffect();
-    
+
     return true;
 }
 
@@ -1403,7 +1403,7 @@ void MapCamera3d::checkForRubberBandEffect() {
 
     if (diff > 0) {
         auto factor = diff / RUBBER_BAND_WINDOW;
-        if (factor > 0.6) {
+        if (factor > 0.5) {
             if (getCameraMode() == CameraMode3d::TILTED_ORBITAL) {
                 // Check if we are overzooming, and if overzooming enough, we change to global mode
                 setCameraMode(CameraMode3d::GLOBE);
