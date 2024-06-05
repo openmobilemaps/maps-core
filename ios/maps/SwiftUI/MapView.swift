@@ -221,6 +221,9 @@ public struct MapView: UIViewRepresentable {
             mapView.camera.setMinZoom(minZoom)
         }
 
+        if let zoom = camera.zoom.value, camera.zoom.mode == .user {
+            mapView.camera.setZoom(zoom, animated: camera.zoom.animated)
+        }
 
         if let restrictedBounds = camera.restrictedBounds {
            mapView.camera.setBounds(restrictedBounds)
