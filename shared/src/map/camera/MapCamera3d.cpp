@@ -36,7 +36,7 @@
 #define LOCAL_MIN_ZOOM       10'000'000
 #define LOCAL_INITIAL_ZOOM    3'000'000
 #define LOCAL_MAX_ZOOM          100'000
-#define RUBBER_BAND_WINDOW    2'000'000.0
+#define RUBBER_BAND_WINDOW    4'000'000.0
 
 MapCamera3d::MapCamera3d(const std::shared_ptr<MapInterface> &mapInterface, float screenDensityPpi)
     : mapInterface(mapInterface)
@@ -1413,7 +1413,7 @@ void MapCamera3d::checkForRubberBandEffect() {
 
     if (diff > 0) {
         auto factor = diff / RUBBER_BAND_WINDOW;
-        if (factor > 0.5) {
+        if (factor > 0.55) {
             if (getCameraMode() == CameraMode3d::TILTED_ORBITAL) {
                 // Check if we are overzooming, and if overzooming enough, we change to global mode
                 setCameraMode(CameraMode3d::GLOBE);
