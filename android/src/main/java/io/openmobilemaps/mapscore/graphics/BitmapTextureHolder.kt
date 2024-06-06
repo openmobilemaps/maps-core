@@ -12,17 +12,20 @@ package io.openmobilemaps.mapscore.graphics
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.opengl.GLES20
 import android.opengl.GLUtils
 import io.openmobilemaps.mapscore.shared.graphics.objects.TextureHolderInterface
 import java.nio.IntBuffer
 import java.util.concurrent.locks.ReentrantLock
+import kotlin.math.min
 
 class BitmapTextureHolder(
 	bitmap: Bitmap,
 	private val minFilter: Int = GLES20.GL_LINEAR,
 	private val magFilter: Int = GLES20.GL_LINEAR,
+	edgeFillMode: CanvasEdgeFillMode = CanvasEdgeFillMode.Mirorred
 ) : TextureHolderInterface() {
 
 	val bitmap: Bitmap
@@ -136,16 +139,46 @@ class BitmapTextureHolder(
 			c.drawBitmap(bitmap, 0f, 0f, null)
 
 			//Draw the picture mirrored again to fake clamp mode
-			c.save()
-			c.scale(1f, -1f, 0f, bitmap.height.toFloat())
-			c.drawBitmap(bitmap, 0f, 0f, null)
-			c.restore()
-			c.save()
-			c.scale(-1f, 1f, bitmap.width.toFloat(), 0f)
-			c.drawBitmap(bitmap, 0f, 0f, null)
-			c.restore()
-			c.scale(-1f, -1f, bitmap.width.toFloat(), bitmap.height.toFloat())
-			c.drawBitmap(bitmap, 0f, 0f, null)
+			when (edgeFillMode) {
+				is CanvasEdgeFillMode.Clamped -> {
+					c.drawBitmap(
+						bitmap,
+						Rect(0, bitmap.height - 1, bitmap.width, bitmap.height),
+						Rect(0, bitmap.height, bitmap.width, min(height, bitmap.height + edgeFillMode.borderWidthPx)),
+						null
+					)
+					c.drawBitmap(
+						bitmap,
+						Rect(bitmap.width - 1, 0, bitmap.width, bitmap.height),
+						Rect(bitmap.width, 0, min(width, bitmap.width + edgeFillMode.borderWidthPx), bitmap.height),
+						null
+					)
+					c.drawBitmap(
+						bitmap,
+						Rect(bitmap.width - 1, bitmap.height - 1, bitmap.width, bitmap.height),
+						Rect(
+							bitmap.width,
+							bitmap.height,
+							min(width, bitmap.width + edgeFillMode.borderWidthPx),
+							min(height, bitmap.height + edgeFillMode.borderWidthPx)
+						),
+						null
+					)
+				}
+				CanvasEdgeFillMode.Mirorred -> {
+					c.save()
+					c.scale(1f, -1f, 0f, bitmap.height.toFloat())
+					c.drawBitmap(bitmap, 0f, 0f, null)
+					c.restore()
+					c.save()
+					c.scale(-1f, 1f, bitmap.width.toFloat(), 0f)
+					c.drawBitmap(bitmap, 0f, 0f, null)
+					c.restore()
+					c.scale(-1f, -1f, bitmap.width.toFloat(), bitmap.height.toFloat())
+					c.drawBitmap(bitmap, 0f, 0f, null)
+				}
+				CanvasEdgeFillMode.None -> {}
+			}
 			bitmap.recycle()
 			bitmap = large
 		}
