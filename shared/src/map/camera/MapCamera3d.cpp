@@ -351,6 +351,14 @@ std::vector<float> MapCamera3d::getVpMatrix() {
             std::static_pointer_cast<AnimationInterface>(pitchAnimation)->update();
     }
 
+    if (mode == CameraMode3d::ONBOARDING_ROTATING) {
+        focusPointPosition.y = 42;
+        focusPointPosition.x = fmod(DateHelper::currentTimeMicros() * 0.000003 + 180.0, 360.0) - 180.0;
+        zoom = GLOBE_MIN_ZOOM;
+        mapInterface->invalidate();
+    }
+
+
     Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
     double currentRotation = angle;
     double currentZoom = zoom;
@@ -1441,6 +1449,14 @@ void MapCamera3d::setCameraMode(CameraMode3d mode) {
     float initialPitch = cameraPitch;
 
     switch (mode) {
+        case CameraMode3d::ONBOARDING_ROTATING:
+            this->zoomMin = GLOBE_MIN_ZOOM;
+            this->zoomMax = GLOBE_MIN_ZOOM;
+            targetZoom = GLOBE_MIN_ZOOM;
+        case CameraMode3d::ONBOARDING_FOCUS_ZURICH:
+            this->zoomMin = LOCAL_MIN_ZOOM;
+            this->zoomMax = LOCAL_MIN_ZOOM;
+            targetZoom = LOCAL_MIN_ZOOM;
         case CameraMode3d::GLOBE:
             this->zoomMin = GLOBE_MIN_ZOOM;
             this->zoomMax = LOCAL_MIN_ZOOM;
@@ -1461,6 +1477,8 @@ void MapCamera3d::setCameraMode(CameraMode3d mode) {
     // temporarily set target zoom to get target pitch
     this->zoom = targetZoom;
     float targetPitch = getCameraPitch();
+
+    cameraVerticalDisplacement = getCameraVerticalDisplacement();
 
     std::lock_guard<std::recursive_mutex> lock(animationMutex);
 
@@ -1530,7 +1548,10 @@ void MapCamera3d::updateZoom(double zoom_) {
 }
 
 double MapCamera3d::getCameraVerticalDisplacement() {
-    return 0;
+    if (mode == CameraMode3d::ONBOARDING_ROTATING) {
+        return 0;
+    }
+
     double z, from, to;
     double maxPitch = GLOBE_INITIAL_ZOOM;
     if (zoom >= maxPitch) {
@@ -1548,6 +1569,9 @@ double MapCamera3d::getCameraVerticalDisplacement() {
 }
 
 double MapCamera3d::getCameraPitch() {
+    if (mode == CameraMode3d::ONBOARDING_ROTATING) {
+        return 0;
+    }
     double z, from, to;
     double maxPitch = GLOBE_INITIAL_ZOOM;
     if (zoom >= maxPitch) {
