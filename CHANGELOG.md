@@ -1,5 +1,16 @@
 # Changelog for Open Mobile Maps
 
+
+## Version 2.2.0
+- Adds support for `{bbox-epsg-3857}` placeholder in URL template
+
+## Version 2.1.0 (08.04.2024)
+- Adds dotted line style (line-dotted boolean and an optional skewFactor, defaulting to 1.0 and denoting the stretch factor)
+- Fixes style for short dashes
+- Fixes line touch area
+- Fix map description issues in concurrent settings
+- Added a Helper to create geojson strings from GeoJsonPoints
+
 ## Version 2.0.8 (04.06.2024)
 - Add edge fill options for OpenGL textures
 - iOS instanced rendering alpha multiplication fix

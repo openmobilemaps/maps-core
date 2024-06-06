@@ -145,6 +145,7 @@ extension MCMapView: MTKViewDelegate {
 
     public func draw(in view: MTKView) {
         guard !backgroundDisable else {
+            isPaused = true
             return // don't execute metal calls in background
         }
 

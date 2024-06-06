@@ -10,6 +10,7 @@
 
 #pragma once
 #include "Value.h"
+#include "ValueKeys.h"
 #include "json.h"
 #include "Logger.h"
 #include <string>
@@ -62,7 +63,7 @@ public:
             } else if (isExpression(json[0], getExpression) && json.size() == 2 && json[1].is_string()) {
                 auto key = json[1].get<std::string>();
                 if (json[1].is_array() && json[1][0] == "geometry-type") {
-                    key = "$type";
+                    key = ValueKeys::TYPE_KEY;
                 }
                 return std::make_shared<GetPropertyValue>(key);
 
@@ -324,7 +325,7 @@ public:
 
             // Example: ["geometry-type"]
             else if (!json[0].is_null() && json[0].is_primitive() && json.size() == 1 && json[0] == "geometry-type") {
-                return std::make_shared<GetPropertyValue>("$type");
+                return std::make_shared<GetPropertyValue>(ValueKeys::TYPE_KEY);
             }
 
             // Example: ["%",["to-number",["get","ele"]],100]
@@ -360,6 +361,10 @@ public:
             std::vector<std::tuple<double, std::shared_ptr<Value>>> steps;
 
             for (auto const stop: json[stopsExpression]) {
+                if (!stop[0].is_number()) {
+                    LogError <<= "Tiled2dMapVectorStyleParser not handled: " + json.dump();
+                    return nullptr;
+                }
                 steps.push_back({stop[0].get<double>(), parseValue(stop[1])});
             }
 
