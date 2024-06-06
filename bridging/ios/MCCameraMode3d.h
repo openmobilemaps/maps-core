@@ -7,4 +7,6 @@ typedef NS_ENUM(NSInteger, MCCameraMode3d)
 {
     MCCameraMode3dGLOBE = 0,
     MCCameraMode3dTILTED_ORBITAL = 1,
+    MCCameraMode3dONBOARDING_ROTATING = 2,
+    MCCameraMode3dONBOARDING_FOCUS_ZURICH = 3,
 };

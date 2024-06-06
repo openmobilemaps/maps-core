@@ -192,4 +192,6 @@ map_camera_3d_interface = interface +c {
 camera_mode_3d = enum {
 	globe;
 	tilted_orbital;
+    onboarding_rotating;
+    onboarding_focus_zurich;
 }
