@@ -33,10 +33,10 @@
 
 #define GLOBE_MIN_ZOOM      200'000'000
 #define GLOBE_INITIAL_ZOOM   46'000'000
-#define LOCAL_MIN_ZOOM       7'000'000
+#define LOCAL_MIN_ZOOM       5'000'000
 #define LOCAL_INITIAL_ZOOM    3'000'000
 #define LOCAL_MAX_ZOOM          100'000
-#define RUBBER_BAND_WINDOW    4'000'000.0
+#define RUBBER_BAND_WINDOW    0 // Disabled for now
 
 MapCamera3d::MapCamera3d(const std::shared_ptr<MapInterface> &mapInterface, float screenDensityPpi)
     : mapInterface(mapInterface)
