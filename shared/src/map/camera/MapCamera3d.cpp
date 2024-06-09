@@ -351,10 +351,9 @@ std::vector<float> MapCamera3d::getVpMatrix() {
             std::static_pointer_cast<AnimationInterface>(pitchAnimation)->update();
     }
 
-    if (mode == CameraMode3d::ONBOARDING_ROTATING) {
+    if (mode == CameraMode3d::ONBOARDING_ROTATING_GLOBE || mode == CameraMode3d::ONBOARDING_ROTATING_SEMI_GLOBE || mode == CameraMode3d::ONBOARDING_CLOSE_ORBITAL) {
         focusPointPosition.y = 42;
         focusPointPosition.x = fmod(DateHelper::currentTimeMicros() * 0.000003 + 180.0, 360.0) - 180.0;
-        zoom = GLOBE_MIN_ZOOM;
         mapInterface->invalidate();
     }
 
@@ -1450,15 +1449,36 @@ void MapCamera3d::setCameraMode(CameraMode3d mode) {
     float targetZoom;
     float initialPitch = cameraPitch;
 
+    float duration = DEFAULT_ANIM_LENGTH;
+
+    std::optional<Coord> targetCoordinate;
+
     switch (mode) {
-        case CameraMode3d::ONBOARDING_ROTATING:
+        case CameraMode3d::ONBOARDING_ROTATING_GLOBE:
             this->zoomMin = GLOBE_MIN_ZOOM;
             this->zoomMax = GLOBE_MIN_ZOOM;
             targetZoom = GLOBE_MIN_ZOOM;
+            duration = 0;
+            break;
+        case CameraMode3d::ONBOARDING_ROTATING_SEMI_GLOBE:
+            this->zoomMin = 100'000'000;
+            this->zoomMax = 100'000'000;
+            targetZoom = 100'000'000;
+            duration = 2000;
+            break;
+        case CameraMode3d::ONBOARDING_CLOSE_ORBITAL:
+            this->zoomMin = 70'000'000;
+            this->zoomMax = 70'000'000;
+            targetZoom = 70'000'000;
+            duration = 2000;
+            break;
         case CameraMode3d::ONBOARDING_FOCUS_ZURICH:
             this->zoomMin = LOCAL_MIN_ZOOM;
             this->zoomMax = LOCAL_MIN_ZOOM;
             targetZoom = LOCAL_MIN_ZOOM;
+            duration = 2000;
+            targetCoordinate = Coord(CoordinateSystemIdentifiers::EPSG4326(), 8.5417, 47.3769, 0.0);
+            break;
         case CameraMode3d::GLOBE:
             this->zoomMin = GLOBE_MIN_ZOOM;
             this->zoomMax = LOCAL_MIN_ZOOM;
@@ -1484,8 +1504,7 @@ void MapCamera3d::setCameraMode(CameraMode3d mode) {
 
     std::lock_guard<std::recursive_mutex> lock(animationMutex);
 
-    zoomAnimation = std::make_shared<DoubleAnimation>(
-                                                       DEFAULT_ANIM_LENGTH, initialZoom, targetZoom, InterpolatorFunction::EaseInOut,
+    zoomAnimation = std::make_shared<DoubleAnimation>(duration, initialZoom, targetZoom, InterpolatorFunction::EaseInOut,
                                                       [=](double zoom) {
                                                           this->zoom = zoom;
                                                           mapInterface->invalidate();
@@ -1507,6 +1526,27 @@ void MapCamera3d::setCameraMode(CameraMode3d mode) {
                                                               this->pitchAnimation = nullptr;
                                                           });
     pitchAnimation->start();
+
+    if (targetCoordinate) {
+        Coord startPosition = mapInterface->getCoordinateConverterHelper()->convert(CoordinateSystemIdentifiers::EPSG4326(), focusPointPosition);
+
+        coordAnimation = std::make_shared<CoordAnimation>(
+                                                          DEFAULT_ANIM_LENGTH, startPosition, *targetCoordinate, std::nullopt, InterpolatorFunction::EaseInOut,
+                                                          [=](Coord positionMapSystem) {
+                                                              this->focusPointPosition = positionMapSystem;
+                                                              notifyListeners(ListenerType::BOUNDS);
+                                                              mapInterface->invalidate();
+                                                          },
+                                                          [=] {
+                                                              this->focusPointPosition = this->coordAnimation->endValue;
+                                                              notifyListeners(ListenerType::BOUNDS);
+                                                              mapInterface->invalidate();
+                                                              this->coordAnimation = nullptr;
+                                                          });
+        coordAnimation->start();
+    }
+
+
     mapInterface->invalidate();
 
     notifyListeners(ListenerType::CAMERA_MODE);
@@ -1550,7 +1590,7 @@ void MapCamera3d::updateZoom(double zoom_) {
 }
 
 double MapCamera3d::getCameraVerticalDisplacement() {
-    if (mode == CameraMode3d::ONBOARDING_ROTATING) {
+    if (mode == CameraMode3d::ONBOARDING_ROTATING_GLOBE || mode == CameraMode3d::ONBOARDING_ROTATING_SEMI_GLOBE) {
         return 0;
     }
     double z, from, to;
@@ -1570,7 +1610,7 @@ double MapCamera3d::getCameraVerticalDisplacement() {
 }
 
 double MapCamera3d::getCameraPitch() {
-    if (mode == CameraMode3d::ONBOARDING_ROTATING) {
+    if (mode == CameraMode3d::ONBOARDING_ROTATING_GLOBE || mode == CameraMode3d::ONBOARDING_ROTATING_SEMI_GLOBE) {
         return 0;
     }
     double z, from, to;
