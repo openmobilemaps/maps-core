@@ -6,6 +6,8 @@ package io.openmobilemaps.mapscore.shared.map
 enum class CameraMode3d {
     GLOBE,
     TILTED_ORBITAL,
-    ONBOARDING_ROTATING,
+    ONBOARDING_ROTATING_GLOBE,
+    ONBOARDING_ROTATING_SEMI_GLOBE,
+    ONBOARDING_CLOSE_ORBITAL,
     ONBOARDING_FOCUS_ZURICH,
 }
