@@ -349,6 +349,8 @@ std::vector<float> MapCamera3d::getVpMatrix() {
             std::static_pointer_cast<AnimationInterface>(coordAnimation)->update();
         if (pitchAnimation)
             std::static_pointer_cast<AnimationInterface>(pitchAnimation)->update();
+        if (verticalDisplacementAnimation)
+            std::static_pointer_cast<AnimationInterface>(verticalDisplacementAnimation)->update();
     }
 
     if (mode == CameraMode3d::ONBOARDING_ROTATING_GLOBE || mode == CameraMode3d::ONBOARDING_ROTATING_SEMI_GLOBE || mode == CameraMode3d::ONBOARDING_CLOSE_ORBITAL) {
@@ -1446,6 +1448,7 @@ void MapCamera3d::setCameraMode(CameraMode3d mode) {
     float initialZoom = zoom;
     float targetZoom;
     float initialPitch = cameraPitch;
+    float initialVerticalDisplacement = cameraVerticalDisplacement;
 
     float duration = DEFAULT_ANIM_LENGTH;
 
@@ -1474,7 +1477,7 @@ void MapCamera3d::setCameraMode(CameraMode3d mode) {
             this->zoomMin = LOCAL_MIN_ZOOM;
             this->zoomMax = LOCAL_MIN_ZOOM;
             targetZoom = LOCAL_MIN_ZOOM;
-            duration = 2000;
+            duration = 4000;
             targetCoordinate = Coord(CoordinateSystemIdentifiers::EPSG4326(), 8.5417, 47.3769, 0.0);
             break;
         case CameraMode3d::GLOBE:
@@ -1497,8 +1500,7 @@ void MapCamera3d::setCameraMode(CameraMode3d mode) {
     // temporarily set target zoom to get target pitch
     this->zoom = targetZoom;
     float targetPitch = getCameraPitch();
-
-    cameraVerticalDisplacement = getCameraVerticalDisplacement();
+    float targetVerticalDisplacement = getCameraVerticalDisplacement();
 
     std::lock_guard<std::recursive_mutex> lock(animationMutex);
 
@@ -1514,7 +1516,7 @@ void MapCamera3d::setCameraMode(CameraMode3d mode) {
     zoomAnimation->start();
 
     pitchAnimation = std::make_shared<DoubleAnimation>(
-                                                          DEFAULT_ANIM_LENGTH, initialPitch, targetPitch, InterpolatorFunction::EaseInOut,
+                                                       duration, initialPitch, targetPitch, InterpolatorFunction::EaseInOut,
                                                        [=](double pitch) {
                                                            this->cameraPitch = pitch;
                                                            mapInterface->invalidate();
@@ -1525,11 +1527,23 @@ void MapCamera3d::setCameraMode(CameraMode3d mode) {
                                                           });
     pitchAnimation->start();
 
+    verticalDisplacementAnimation = std::make_shared<DoubleAnimation>(
+                                                       duration, initialVerticalDisplacement, targetVerticalDisplacement, InterpolatorFunction::EaseInOut,
+                                                       [=](double dis) {
+                                                           this->cameraVerticalDisplacement = dis;
+                                                           mapInterface->invalidate();
+                                                       },
+                                                       [=] {
+                                                           this->cameraVerticalDisplacement = targetVerticalDisplacement;
+                                                           this->verticalDisplacementAnimation = nullptr;
+                                                       });
+    verticalDisplacementAnimation->start();
+
     if (targetCoordinate) {
         Coord startPosition = mapInterface->getCoordinateConverterHelper()->convert(CoordinateSystemIdentifiers::EPSG4326(), focusPointPosition);
 
         coordAnimation = std::make_shared<CoordAnimation>(
-                                                          DEFAULT_ANIM_LENGTH, startPosition, *targetCoordinate, std::nullopt, InterpolatorFunction::EaseInOut,
+                                                          duration, startPosition, *targetCoordinate, std::nullopt, InterpolatorFunction::EaseInOut,
                                                           [=](Coord positionMapSystem) {
                                                               this->focusPointPosition = positionMapSystem;
                                                               notifyListeners(ListenerType::BOUNDS);

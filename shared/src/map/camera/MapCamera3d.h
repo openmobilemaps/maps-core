@@ -254,6 +254,7 @@ protected:
     std::shared_ptr<DoubleAnimation> zoomAnimation;
     std::shared_ptr<DoubleAnimation> rotationAnimation;
     std::shared_ptr<DoubleAnimation> pitchAnimation;
+    std::shared_ptr<DoubleAnimation> verticalDisplacementAnimation;
 
     std::tuple<Coord, double> getBoundsCorrectedCoords(const Coord &position, double zoom);
 
