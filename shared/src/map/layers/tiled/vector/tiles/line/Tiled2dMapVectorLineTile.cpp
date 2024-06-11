@@ -241,6 +241,8 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
         return;
     }
 
+    bool is3d = mapInterface->is3d();
+
     if (!tileData->empty()) {
         std::unordered_map<int, int> subGroupCoordCount;
         std::vector<std::vector<std::vector<std::tuple<std::vector<Coord>, int>>>> styleGroupNewLinesVector;
@@ -276,7 +278,7 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
                         } else {
                             styleGroupIndex = (int) featureGroups.size();
                             styleIndex = 0;
-                            auto shader = mapInterface->is3d() ? shaderFactory->createUnitSphereLineGroupShader() : shaderFactory->createLineGroupShader();
+                            auto shader = is3d ? shaderFactory->createUnitSphereLineGroupShader() : shaderFactory->createLineGroupShader();
                             auto lineDescription = std::static_pointer_cast<LineVectorLayerDescription>(description);
                             shader->asShaderProgramInterface()->setBlendMode(lineDescription->style.getBlendMode(EvaluationContext(0.0, dpFactor, std::make_shared<FeatureContext>(), featureStateManager)));
                             shaders.push_back(shader);
@@ -299,7 +301,11 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
                 for (const auto &lineCoordinates: geometryHandler->getLineCoordinates()) {
                     if (lineCoordinates.empty()) { continue; }
 
-                    int numCoords = (int)lineCoordinates.size();
+                    auto maxSegmentLength = std::abs(tileInfo.tileInfo.bounds.bottomRight.x - tileInfo.tileInfo.bounds.topLeft.x) / 2.0;
+
+                    const auto &coordinates = is3d ? LineHelper::subdividePolyline(lineCoordinates, maxSegmentLength) : lineCoordinates;
+
+                    int numCoords = (int)coordinates.size();
                     int coordCount = subGroupCoordCount[styleGroupIndex];
                     if (coordCount + numCoords > maxNumLinePoints
                         && !styleGroupLineSubGroupVector[styleGroupIndex].empty()) {
@@ -308,9 +314,9 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
                         subGroupCoordCount[styleGroupIndex] = 0;
                     }
 
-                    styleGroupLineSubGroupVector[styleGroupIndex].push_back({lineCoordinates, std::min(maxStylesPerGroup - 1, styleIndex)});
+                    styleGroupLineSubGroupVector[styleGroupIndex].push_back({coordinates, std::min(maxStylesPerGroup - 1, styleIndex)});
                     subGroupCoordCount[styleGroupIndex] = (int)subGroupCoordCount[styleGroupIndex] + numCoords;
-                    lineCoordinatesVector.push_back(lineCoordinates);
+                    lineCoordinatesVector.push_back(coordinates);
                 }
 
                 if (description->isInteractable(evalContext)) {
