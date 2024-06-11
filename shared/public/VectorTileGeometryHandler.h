@@ -225,7 +225,7 @@ public:
         }
     }
 
-    const std::vector<std::vector<::Coord>> &getLineCoordinates() {
+    std::vector<std::vector<::Coord>> &getLineCoordinates() {
         return coordinates;
     }
 
