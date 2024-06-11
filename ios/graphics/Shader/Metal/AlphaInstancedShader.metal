@@ -134,5 +134,6 @@ alphaInstancedFragmentShader(InstancedVertexOut in [[stage_in]],
 
     const float a = color.a * in.alpha;
 
-    return float4(color.r * in.alpha, color.g * in.alpha, color.b * in.alpha, a);
+
+  return float4(color.r * a, color.g * a, color.b * a, a);
 }

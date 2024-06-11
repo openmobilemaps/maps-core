@@ -2,7 +2,7 @@ name: android
 
 on:
   pull_request:
-    branches: [ main, develop ]
+    branches: [ main, develop, release/** ]
 
 jobs:
   build:
@@ -19,7 +19,7 @@ jobs:
           java-version: 17
       - name: Build with Gradle
         env:
-          UBIQUE_ARTIFACTORY_URL: ${{secrets.UBIQUE_ARTIFACTORY_URL}}
-          UBIQUE_ARTIFACTORY_USER: ${{secrets.UBIQUE_ARTIFACTORY_USER}}
-          UBIQUE_ARTIFACTORY_PASS: ${{secrets.UBIQUE_ARTIFACTORY_PASS}}
+          UB_ARTIFACTORY_URL_ANDROID: ${{secrets.UBIQUE_ARTIFACTORY_URL}}
+          UB_ARTIFACTORY_USERNAME: ${{secrets.UBIQUE_ARTIFACTORY_USER}}
+          UB_ARTIFACTORY_PASSWORD: ${{secrets.UBIQUE_ARTIFACTORY_PASS}}
         run: cd android; ./gradlew assembleDebug -P'android.injected.build.abi=arm64-v8a'
