@@ -36,6 +36,7 @@ open class GlTextureView @JvmOverloads constructor(context: Context, attrs: Attr
 
 	private val pendingTaskQueue = ArrayDeque<Pair<Boolean, () -> Unit>>()
 	private var pendingTargetFrameRate = -1
+	private var pendingEnforcedFinishInterval: Int? = null
 	private var shouldResume = false
 
 	override fun onSurfaceTextureAvailable(surfaceTexture: SurfaceTexture, width: Int, height: Int) {
@@ -47,6 +48,7 @@ open class GlTextureView @JvmOverloads constructor(context: Context, attrs: Attr
 			useMSAA = this@GlTextureView.useMSAA
 			renderer = this@GlTextureView.renderer
 			targetFrameRate = pendingTargetFrameRate
+			enforcedFinishInterval = pendingEnforcedFinishInterval
 			if (shouldResume) {
 				doResume()
 			}
@@ -95,6 +97,11 @@ open class GlTextureView @JvmOverloads constructor(context: Context, attrs: Attr
 	fun setTargetFrameRate(frameRate: Int) {
 		pendingTargetFrameRate = frameRate
 		glThread?.targetFrameRate = frameRate
+	}
+
+	fun setEnforcedFinishInterval(enforcedFinishInterval: Int?) {
+		pendingEnforcedFinishInterval = enforcedFinishInterval
+		glThread?.enforcedFinishInterval = enforcedFinishInterval
 	}
 
 	fun pauseGlThread() {

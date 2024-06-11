@@ -354,7 +354,8 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
         auto sourceMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
 
         Actor<Tiled2dMapVectorSource> vectorSource;
-        if (mapDescription->geoJsonSources.count(source) != 0) {
+        auto geoJsonSourceIt = mapDescription->geoJsonSources.find(source);
+        if (geoJsonSourceIt != mapDescription->geoJsonSources.end()) {
             auto geoJsonSource = Actor<Tiled2dVectorGeoJsonSource>(sourceMailbox,
                                                                    mapInterface->getCamera(),
                                                                    mapInterface->getMapConfig(),
@@ -370,7 +371,7 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
                                                                    layerName);
             vectorSource = geoJsonSource.strongActor<Tiled2dMapVectorSource>();
 
-            mapDescription->geoJsonSources.at(source)->setDelegate(geoJsonSource.weakActor<GeoJSONTileDelegate>());
+            geoJsonSourceIt->second->setDelegate(geoJsonSource.weakActor<GeoJSONTileDelegate>());
 
         } else {
             vectorSource = Actor<Tiled2dMapVectorSource>(sourceMailbox,
@@ -518,10 +519,12 @@ void Tiled2dMapVectorLayer::reloadDataSource(const std::string &sourceName) {
 }
 
 void Tiled2dMapVectorLayer::reloadLocalDataSource(const std::string &sourceName, const std::string &geoJson) {
-
     std::lock_guard<std::recursive_mutex> lock(mapDescriptionMutex);
 
-    if (!mapInterface) {
+    auto mapInterface = this->mapInterface;
+    auto mapDescription = this->mapDescription;
+
+    if (!mapInterface || !mapDescription) {
         return;
     }
 
