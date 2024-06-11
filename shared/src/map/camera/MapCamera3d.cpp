@@ -33,6 +33,7 @@
 
 #define GLOBE_MIN_ZOOM      200'000'000
 #define GLOBE_INITIAL_ZOOM   46'000'000
+#define GLOBE_MAX_ZOOM        1'000'000
 #define LOCAL_MIN_ZOOM       20'000'000
 #define LOCAL_INITIAL_ZOOM    3'000'000
 #define LOCAL_MAX_ZOOM          100'000
@@ -47,8 +48,8 @@ MapCamera3d::MapCamera3d(const std::shared_ptr<MapInterface> &mapInterface, floa
       focusPointPosition(CoordinateSystemIdentifiers::EPSG4326(), 0, 0, 0),
       cameraPitch(0),
       zoomMin(GLOBE_MIN_ZOOM),
-      zoomMax(LOCAL_MIN_ZOOM),
-      mode(CameraMode3d::GLOBE),
+      zoomMax(GLOBE_MAX_ZOOM),
+      mode(CameraMode3d::GLOBAL),
       lastOnTouchDownPoint(std::nullopt)
     , bounds(mapCoordinateSystem.bounds) {
     mapSystemRtl = mapCoordinateSystem.bounds.bottomRight.x > mapCoordinateSystem.bounds.topLeft.x;
@@ -1412,7 +1413,7 @@ std::shared_ptr<MapCamera3dInterface> MapCamera3d::asMapCamera3d() {
 
 void MapCamera3d::checkForRubberBandEffect() {
     double diff;
-    if (getCameraMode() == CameraMode3d::TILTED_ORBITAL) {
+    if (getCameraMode() == CameraMode3d::LOCAL) {
         diff = zoom - zoomMin;
     } else {
         diff = zoomMax - zoom;
@@ -1421,12 +1422,12 @@ void MapCamera3d::checkForRubberBandEffect() {
     if (diff > 0) {
         auto factor = diff / RUBBER_BAND_WINDOW;
         if (factor > 0.55) {
-            if (getCameraMode() == CameraMode3d::TILTED_ORBITAL) {
+            if (getCameraMode() == CameraMode3d::LOCAL) {
                 // Check if we are overzooming, and if overzooming enough, we change to global mode
-                setCameraMode(CameraMode3d::GLOBE);
+                setCameraMode(CameraMode3d::GLOBAL);
             } else {
                 // Check if we are overzooming, and if overzooming enough, we change to local mode
-                setCameraMode(CameraMode3d::TILTED_ORBITAL);
+                setCameraMode(CameraMode3d::LOCAL);
             }
         } else {
             // Reset zoom
@@ -1480,13 +1481,13 @@ void MapCamera3d::setCameraMode(CameraMode3d mode) {
             duration = 4000;
             targetCoordinate = Coord(CoordinateSystemIdentifiers::EPSG4326(), 8.5417, 47.3769, 0.0);
             break;
-        case CameraMode3d::GLOBE:
+        case CameraMode3d::GLOBAL:
             this->zoomMin = GLOBE_MIN_ZOOM;
-            this->zoomMax = LOCAL_MIN_ZOOM;
+            this->zoomMax = GLOBE_MAX_ZOOM;
             targetZoom = GLOBE_INITIAL_ZOOM;
             break;
 
-        case CameraMode3d::TILTED_ORBITAL:
+        case CameraMode3d::LOCAL:
             this->zoomMin = LOCAL_MIN_ZOOM;
             this->zoomMax = LOCAL_MAX_ZOOM;
             if (this->zoom == this->zoomMin) {
@@ -1573,10 +1574,10 @@ void MapCamera3d::updateZoom(double zoom_) {
     auto zoomMax = getMaxZoom();
 
     double overZooming;
-    if (getCameraMode() == CameraMode3d::TILTED_ORBITAL) {
+    if (getCameraMode() == CameraMode3d::LOCAL) {
         overZooming = zoom_ - LOCAL_MIN_ZOOM;
     } else {
-        overZooming = LOCAL_MIN_ZOOM - zoom_;
+        overZooming = GLOBE_MAX_ZOOM - zoom_;
     }
 
     double newZoom = 0;
@@ -1585,7 +1586,7 @@ void MapCamera3d::updateZoom(double zoom_) {
         double normalizedDiff = std::min(overZooming / RUBBER_BAND_WINDOW, 1.0); // Normalize to [0, 1]
         double mapped = 1 / (1 + normalizedDiff) * 2 - 1; // Rubberband so that medium to large values are all squashed towards the end
 
-        if (getCameraMode() == CameraMode3d::TILTED_ORBITAL) {
+        if (getCameraMode() == CameraMode3d::LOCAL) {
             newZoom = zoom + (zoom_ - zoom) * mapped;
         } else {
             newZoom = zoom - (zoom - zoom_) * mapped;

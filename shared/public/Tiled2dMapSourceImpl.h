@@ -430,6 +430,8 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
 
     std::vector<VisibleTilesLayer> layers;
 
+    size_t visibleTileHash = 0;
+
     for (int previousLayerOffset = 0; previousLayerOffset <= zoomInfo.numDrawPreviousLayers; previousLayerOffset++) {
 
         VisibleTilesLayer curVisibleTiles(-previousLayerOffset);
@@ -439,6 +441,11 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
         for (auto &tile : visibleTilesVec) {
             tile.second.tileInfo.tessellationFactor = std::min(std::max(0, maxLevel - tile.second.tileInfo.zoomIdentifier), 4);
             curVisibleTiles.visibleTiles.insert(tile.second);
+
+            hash_combine(visibleTileHash, std::hash<int>{}(tile.second.tileInfo.zoomIdentifier));
+            hash_combine(visibleTileHash, std::hash<int>{}(tile.second.tileInfo.x));
+            hash_combine(visibleTileHash, std::hash<int>{}(tile.second.tileInfo.y));
+            hash_combine(visibleTileHash, std::hash<int>{}(tile.second.tileInfo.t));
 
             if (tile.first.levelIndex > 0 && previousLayerOffset < zoomInfo.numDrawPreviousLayers) {
 
@@ -479,10 +486,15 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
         layers.push_back(curVisibleTiles);
     }
 
-    currentZoomLevelIdentifier = maxLevel;
+    if (lastVisibleTilesHash != visibleTileHash) {
 
-    onVisibleTilesChanged(layers, true);
+        currentZoomLevelIdentifier = maxLevel;
 
+        lastVisibleTilesHash = visibleTileHash;
+        onVisibleTilesChanged(layers, true);
+
+        printf("Tiles changed\n");
+    }
 }
 
 template<class T, class L, class R>
@@ -722,6 +734,7 @@ void Tiled2dMapSource<T, L, R>::onVisibleTilesChanged(const std::vector<VisibleT
 
                 if (currentTilesCount == 0 && currentlyLoadingCount == 0 && notFoundCount == 0) {
                     toAdd.push_back(tileInfo);
+                    printf("add %d, %d, %d\n", tileInfo.tileInfo.zoomIdentifier, tileInfo.tileInfo.x, tileInfo.tileInfo.y);
                 }
             }
         }
@@ -758,6 +771,7 @@ void Tiled2dMapSource<T, L, R>::onVisibleTilesChanged(const std::vector<VisibleT
 
         if (!found) {
             toRemove.push_back(tileInfo);
+            printf("remove %d, %d, %d\n", tileInfo.zoomIdentifier, tileInfo.x, tileInfo.y);
         }
     }
 

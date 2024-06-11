@@ -178,7 +178,7 @@ protected:
     float screenDensityPpi;
     double screenPixelAsRealMeterFactor;
 
-    CameraMode3d mode = CameraMode3d::GLOBE;
+    CameraMode3d mode = CameraMode3d::GLOBAL;
 
     Coord focusPointPosition;
     double cameraVerticalDisplacement = 0.0;

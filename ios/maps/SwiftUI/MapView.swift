@@ -45,7 +45,7 @@ public struct MapView: UIViewRepresentable {
         public var minZoom: Updatable<Double> = .init(mode: .map, value: nil)
         public var maxZoom: Updatable<Double> = .init(mode: .map, value: nil)
         // public var visibleRect: Updatable<MCRectCoord>
-        public var mode: MCCameraMode3d = .GLOBE
+        public var mode: MCCameraMode3d = .GLOBAL
 
         public var restrictedBounds: MCRectCoord? = nil
 
@@ -58,7 +58,7 @@ public struct MapView: UIViewRepresentable {
                     minZoom: Updatable<Double> = .init(),
                     maxZoom: Updatable<Double> = .init(),
                     // visibleRect: Updatable<MCRectCoord> = .init(),
-                    mode: MCCameraMode3d = .GLOBE,
+                    mode: MCCameraMode3d = .GLOBAL,
                     restrictedBounds: MCRectCoord? = nil,
                     camera3d: MCMapCameraInterface? = nil,
                     mapConfig: MCMapConfig? = nil
@@ -76,7 +76,7 @@ public struct MapView: UIViewRepresentable {
 
         public init(location: CLLocationCoordinate2D,
                     zoom: Double?,
-                    mode: MCCameraMode3d = .GLOBE) {
+                    mode: MCCameraMode3d = .GLOBAL) {
             self.center = .init(mode: .user, value: MCCoord(systemIdentifier: MCCoordinateSystemIdentifiers.epsg4326(), x: location.longitude, y: location.latitude, z: 0))
             self.zoom = .init(mode: .user, value: zoom)
             // self.visibleRect = .init()
@@ -86,7 +86,7 @@ public struct MapView: UIViewRepresentable {
         public init(latitude: Double,
                     longitude: Double,
                     zoom: Double?,
-                    mode: MCCameraMode3d = .GLOBE) {
+                    mode: MCCameraMode3d = .GLOBAL) {
             self.center = .init(mode: .user, value: MCCoord(systemIdentifier: MCCoordinateSystemIdentifiers.epsg4326(), x: longitude, y: latitude, z: 0))
             self.zoom = .init(mode: .user, value: zoom)
             // self.visibleRect = .init()
@@ -94,7 +94,7 @@ public struct MapView: UIViewRepresentable {
         }
 
         public init(restrictedBounds: MCRectCoord,
-                    mode: MCCameraMode3d = .GLOBE) {
+                    mode: MCCameraMode3d = .GLOBAL) {
             self.center = .init()
             self.zoom = .init()
             // self.visibleRect = .init()
