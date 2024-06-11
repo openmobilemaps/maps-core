@@ -3,6 +3,14 @@
 
 ## Version 2.2.0
 - Adds support for `{bbox-epsg-3857}` placeholder in URL template
+- Improves the handling of non-interactive polygon layers
+- Improves performance logger
+- Improves loading behavior of paused vector layer
+- Pauses iOS MapView when in background
+- Improves the stability of geojson parsing
+- Fixes the interpolation for non-numeric values in vector layer styles
+- Fixes a bug caused by an ill-timed vector layer reload
+- Fixes issues with the zoom during moveToCenter animations
 
 ## Version 2.1.0 (08.04.2024)
 - Adds dotted line style (line-dotted boolean and an optional skewFactor, defaulting to 1.0 and denoting the stretch factor)
