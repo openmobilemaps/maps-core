@@ -528,7 +528,7 @@ void Tiled2dMapVectorLayer::reloadLocalDataSource(const std::string &sourceName,
     auto mapInterface = this->mapInterface;
     auto mapDescription = this->mapDescription;
 
-    if (!mapInterface || !mapDescription) {
+    if (!mapDescription) {
         return;
     }
 
@@ -554,7 +554,10 @@ void Tiled2dMapVectorLayer::reloadLocalDataSource(const std::string &sourceName,
 
     prevCollisionStillValid.clear();
     tilesStillValid.clear();
-    mapInterface->invalidate();
+
+    if (mapInterface) {
+        mapInterface->invalidate();
+    }
 }
 
 std::shared_ptr<::LayerInterface> Tiled2dMapVectorLayer::asLayerInterface() {
