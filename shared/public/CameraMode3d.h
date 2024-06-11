@@ -6,8 +6,8 @@
 #include <functional>
 
 enum class CameraMode3d : int {
-    GLOBE = 0,
-    TILTED_ORBITAL = 1,
+    GLOBAL = 0,
+    LOCAL = 1,
     ONBOARDING_ROTATING_GLOBE = 2,
     ONBOARDING_ROTATING_SEMI_GLOBE = 3,
     ONBOARDING_CLOSE_ORBITAL = 4,
@@ -16,8 +16,8 @@ enum class CameraMode3d : int {
 
 constexpr const char* toString(CameraMode3d e) noexcept {
     constexpr const char* names[] = {
-        "globe",
-        "tilted_orbital",
+        "global",
+        "local",
         "onboarding_rotating_globe",
         "onboarding_rotating_semi_globe",
         "onboarding_close_orbital",

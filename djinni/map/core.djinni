@@ -190,8 +190,8 @@ map_camera_3d_interface = interface +c {
 }
 
 camera_mode_3d = enum {
-	globe;
-	tilted_orbital;
+	global;
+	local;
     onboarding_rotating_globe;
     onboarding_rotating_semi_globe;
     onboarding_close_orbital;
