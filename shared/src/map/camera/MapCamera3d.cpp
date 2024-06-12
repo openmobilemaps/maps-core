@@ -33,7 +33,7 @@
 
 #define GLOBE_MIN_ZOOM      200'000'000
 #define GLOBE_INITIAL_ZOOM   46'000'000
-#define GLOBE_MAX_ZOOM        1'000'000
+#define GLOBE_MAX_ZOOM       5'000'000
 #define LOCAL_MIN_ZOOM       20'000'000
 #define LOCAL_INITIAL_ZOOM    3'000'000
 #define LOCAL_MAX_ZOOM          100'000
