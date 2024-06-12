@@ -24,9 +24,17 @@ public:
                       const std::shared_ptr<::CoordinateConversionHelperInterface> &conversionHelper,
                       bool is3D);
 
-    virtual void setPolygons(const std::vector<::PolygonCoord> & polygons) override;
+    virtual void setPolygons(const std::vector<::PolygonCoord> & polygons, std::optional<float> maxSegmentLength = std::nullopt);
 
-    virtual void setPolygon(const ::PolygonCoord & polygon) override;
+    virtual void setPolygon(const ::PolygonCoord & polygon, std::optional<float> maxSegmentLength = std::nullopt);
+
+    virtual void setPolygons(const std::vector<::PolygonCoord> & polygons) override {
+        setPolygons(polygons, std::nullopt);
+    };
+
+    virtual void setPolygon(const ::PolygonCoord & polygon) override {
+        setPolygon(polygon, std::nullopt);
+    }
 
     void setPositions(const std::vector<Coord> &positions, const std::vector<std::vector<Coord>> &holes);
 

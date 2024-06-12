@@ -27,12 +27,12 @@ PolygonMaskObject::PolygonMaskObject(const std::shared_ptr<GraphicsObjectFactory
     , polygon(graphicsObjectFactory->createPolygonMask(is3D)) {}
 
 void PolygonMaskObject::setPositions(const std::vector<Coord> &positions, const std::vector<std::vector<Coord>> &holes) {
-    setPolygon({positions, holes});
+    setPolygon({positions, holes}, std::nullopt);
 }
 
-void PolygonMaskObject::setPolygon(const ::PolygonCoord &polygon) { setPolygons({polygon}); }
+void PolygonMaskObject::setPolygon(const ::PolygonCoord &polygon, std::optional<float> maxSegmentLength) { setPolygons({polygon}, maxSegmentLength); }
 
-void PolygonMaskObject::setPolygons(const std::vector<::PolygonCoord> &polygons) {
+void PolygonMaskObject::setPolygons(const std::vector<::PolygonCoord> &polygons, std::optional<float> maxSegmentLength) {
     std::vector<uint16_t> indices;
     std::vector<float> vertices;
     int32_t indexOffset = 0;
@@ -71,8 +71,9 @@ void PolygonMaskObject::setPolygons(const std::vector<::PolygonCoord> &polygons)
         }
     }
 
-    PolygonHelper::subdivision(vecVertices, indices, 0.0001, 3);
-
+    if(maxSegmentLength) {
+        PolygonHelper::subdivision(vecVertices, indices, *maxSegmentLength, 4);
+    }
     for (const auto& v : vecVertices) {
         vertices.push_back(v.x);
         vertices.push_back(v.y);

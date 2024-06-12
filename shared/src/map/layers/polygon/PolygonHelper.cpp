@@ -12,6 +12,7 @@
 #include "RectCoord.h"
 #include "Vec2FHelper.h"
 #include <unordered_map>
+#include <cassert>
 
 bool PolygonHelper::pointInside(const PolygonCoord &polygon, const Coord &point,
                                 const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper) {
@@ -127,6 +128,7 @@ uint16_t findOrCreateMidpoint(std::unordered_map<uint32_t, uint16_t> &midpointCa
     // Create new midpoint, normalize it and add to vertex list
     Vec2F midpoint = Vec2FHelper::midpoint(vertices[v0], vertices[v1]);
     uint16_t newIndex = vertices.size();
+    assert(newIndex < std::numeric_limits<uint16_t>::max());
     vertices.push_back(midpoint);
     
     // Cache the midpoint
