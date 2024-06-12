@@ -32,6 +32,10 @@ open class SimpleTouchInterface : TouchInterface() {
 		return false
 	}
 
+	override fun onOneFingerDoubleClickMoveComplete(): Boolean {
+		return false
+	}
+
 	override fun onTwoFingerClick(posScreen1: Vec2F, posScreen2: Vec2F): Boolean {
 		return false
 	}
