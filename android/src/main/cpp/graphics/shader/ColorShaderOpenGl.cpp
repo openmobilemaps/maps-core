@@ -14,9 +14,7 @@
 
 ColorShaderOpenGl::ColorShaderOpenGl(bool projectOntoUnitSphere)
         : programName(projectOntoUnitSphere ? "UBMAP_ColorShaderUnitSphereOpenGl" : "UBMAP_ColorShaderOpenGl"),
-          projectOntoUnitSphere(projectOntoUnitSphere) {
-    LogDebug << "UBCM: color project: " <<= (projectOntoUnitSphere ? "true" : "false");
-}
+          projectOntoUnitSphere(projectOntoUnitSphere) {}
 
 std::string ColorShaderOpenGl::getProgramName() { return programName; }
 
