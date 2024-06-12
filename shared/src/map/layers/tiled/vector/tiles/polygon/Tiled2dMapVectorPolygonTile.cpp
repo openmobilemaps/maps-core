@@ -17,7 +17,7 @@
 #include "PolygonHelper.h"
 #include "CoordinateSystemIdentifiers.h"
 #include "Tiled2dMapVectorStyleParser.h"
-
+#include "Tiled2dMapVectorLayerConstants.h"
 
 Tiled2dMapVectorPolygonTile::Tiled2dMapVectorPolygonTile(const std::weak_ptr<MapInterface> &mapInterface,
                                                          const Tiled2dMapVersionedTileInfo &tileInfo,
@@ -223,7 +223,9 @@ void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDa
                     auto indices = polygon.indices;
 
                     if (mapInterface->is3d()) {
-                        PolygonHelper::subdivision(coordinates, indices, 0.1, 4);
+                        auto convertedTileBounds = mapInterface->getCoordinateConverterHelper()->convertRectToRenderSystem(tileInfo.tileInfo.bounds);
+                        auto maxSegmentLength = std::max(std::abs(convertedTileBounds.bottomRight.x - convertedTileBounds.topLeft.x) / POLYGON_SUBDIVISION_FACTOR, (M_PI * 2.0) / POLYGON_SUBDIVISION_FACTOR);
+                        PolygonHelper::subdivision(coordinates, indices, maxSegmentLength, 4);
                     }
 
 

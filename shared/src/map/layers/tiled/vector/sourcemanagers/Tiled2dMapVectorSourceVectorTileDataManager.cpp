@@ -11,6 +11,7 @@
 #include "Tiled2dMapVectorSourceVectorTileDataManager.h"
 #include "PolygonCompare.h"
 #include "Tiled2dMapVectorLayer.h"
+#include "Tiled2dMapVectorLayerConstants.h"
 
 Tiled2dMapVectorSourceVectorTileDataManager::Tiled2dMapVectorSourceVectorTileDataManager(
                                                                                          const WeakActor<Tiled2dMapVectorLayer> &vectorLayer,
@@ -101,8 +102,7 @@ void Tiled2dMapVectorSourceVectorTileDataManager::onVectorTilesUpdated(const std
                     const auto &tileMask = std::make_shared<PolygonMaskObject>(graphicsFactory,
                                                                                coordinateConverterHelper,
                                                                                is3D);
-
-                    tileMask->setPolygons(tileEntry->masks);
+                    tileMask->setPolygons(tileEntry->masks, 0.001);
 
                     newTileMasks[tileEntry->tileInfo] = Tiled2dMapLayerMaskWrapper(tileMask, hash);
                 }
