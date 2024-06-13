@@ -44,8 +44,11 @@ unitSphereAlphaInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
     const float y = 1.0 * cos(position.y);
     const float z = -1.0 * sin(position.y) * sin(position.x);
 
-    const float4 earthCenter = vpMatrix * float4(0,0,0, 1.0);
-    const float4 screenPosition = vpMatrix * float4(x,y,z, 1.0);
+    float4 earthCenter = vpMatrix * float4(0,0,0, 1.0);
+    float4 screenPosition = vpMatrix * float4(x,y,z, 1.0);
+
+    earthCenter /= earthCenter.w;
+    screenPosition /= screenPosition.w;
 
     auto diffCenter = screenPosition - earthCenter;
 
