@@ -72,7 +72,7 @@ void PolygonMaskObject::setPolygons(const std::vector<::PolygonCoord> &polygons,
     }
 
     if(maxSegmentLength) {
-        PolygonHelper::subdivision(vecVertices, indices, *maxSegmentLength, 4);
+        PolygonHelper::subdivision(vecVertices, indices, *maxSegmentLength);
     }
     for (const auto& v : vecVertices) {
         vertices.push_back(v.x);

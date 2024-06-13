@@ -12,6 +12,7 @@
 #include "RectCoord.h"
 #include "Vec2FHelper.h"
 #include <cassert>
+#include <queue>
 
 bool PolygonHelper::pointInside(const PolygonCoord &polygon, const Coord &point,
                                 const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper) {
@@ -139,75 +140,54 @@ uint16_t PolygonHelper::findOrCreateMidpoint(std::unordered_map<uint32_t, uint16
     return newIndex;
 }
 
-// Function to recursively subdivide triangles
-void PolygonHelper::subdivision(std::vector<Vec2F> &vertices, std::vector<uint16_t> &indices, float threshold, int level, uint16_t maxVertexCount) {
-    if (level == 0) {
-        return;
-    }
+void PolygonHelper::subdivision(std::vector<Vec2F> &vertices, std::vector<uint16_t> &indices, float threshold, uint16_t maxVertexCount) {
     std::unordered_map<uint32_t, uint16_t> midpointCache;
-    std::vector<uint16_t> newIndices;
-    bool subdivided = false;
-    
-    // Iterate over triangles
-    for (size_t i = 0; i < indices.size(); i += 3) {
-        uint16_t v0 = indices[i];
-        uint16_t v1 = indices[i + 1];
-        uint16_t v2 = indices[i + 2];
-        
-        // Check edge lengths
-        
-        float d0 = Vec2FHelper::distance(vertices[v0], vertices[v1]);
-        float d1 = Vec2FHelper::distance(vertices[v1], vertices[v2]);
-        float d2 = Vec2FHelper::distance(vertices[v2], vertices[v0]);
 
-        uint16_t a = d0 > threshold ? findOrCreateMidpoint(midpointCache, vertices, v0, v1, maxVertexCount) : 0;
-        uint16_t b = d1 > threshold ? findOrCreateMidpoint(midpointCache, vertices, v1, v2, maxVertexCount) : 0;
-        uint16_t c = d2 > threshold ? findOrCreateMidpoint(midpointCache, vertices, v2, v0, maxVertexCount) : 0;
+    size_t offset = 0;
+    while (true) {
+        bool subdivided = false;
+        size_t currentSize = indices.size();
+        for (size_t i = offset; i < currentSize; i += 3) {
+            uint16_t v0 = indices[i];
+            uint16_t v1 = indices[i + 1];
+            uint16_t v2 = indices[i + 2];
 
-        // Subdivide edges longer than the threshold
-        if (a > 0 && b > 0 && c > 0) {
-            // All edges are longer than the threshold and can be subdivided, subdivide all edges
+            float d0 = Vec2FHelper::distance(vertices[v0], vertices[v1]);
+            float d1 = Vec2FHelper::distance(vertices[v1], vertices[v2]);
+            float d2 = Vec2FHelper::distance(vertices[v2], vertices[v0]);
 
-            newIndices.push_back(v0); newIndices.push_back(a); newIndices.push_back(c);
-            newIndices.push_back(v1); newIndices.push_back(b); newIndices.push_back(a);
-            newIndices.push_back(v2); newIndices.push_back(c); newIndices.push_back(b);
-            newIndices.push_back(a); newIndices.push_back(b); newIndices.push_back(c);
-            
-            subdivided = true;
-        } else if (a > 0 && d0 >= std::max(d1, d2)) {
-            // Only the edge v0-v1 is longer than the threshold and can be subdivided
+            uint16_t a = d0 > threshold ? findOrCreateMidpoint(midpointCache, vertices, v0, v1, maxVertexCount) : 0;
+            uint16_t b = d1 > threshold ? findOrCreateMidpoint(midpointCache, vertices, v1, v2, maxVertexCount) : 0;
+            uint16_t c = d2 > threshold ? findOrCreateMidpoint(midpointCache, vertices, v2, v0, maxVertexCount) : 0;
 
-            newIndices.push_back(v0); newIndices.push_back(a); newIndices.push_back(v2);
-            newIndices.push_back(a); newIndices.push_back(v1); newIndices.push_back(v2);
-            
-            subdivided = true;
-        } else if (b > 0 && d1 >= std::max(d0, d2)) {
-            // Only the edge v1-v2 is longer than the threshold and can be subdivided
-
-            newIndices.push_back(v1); newIndices.push_back(b); newIndices.push_back(v0);
-            newIndices.push_back(b); newIndices.push_back(v2); newIndices.push_back(v0);
-            
-            subdivided = true;
-        } else if (c > 0 && d2 >= std::max(d0, d1)) {
-            // Only the edge v2-v0 is longer than the threshold and can be subdivided
-
-            newIndices.push_back(v2); newIndices.push_back(c); newIndices.push_back(v1);
-            newIndices.push_back(c); newIndices.push_back(v0); newIndices.push_back(v1);
-            
-            subdivided = true;
-        } else {
-            // No edges are longer than the threshold, keep original triangle
-            newIndices.push_back(v0);
-            newIndices.push_back(v1);
-            newIndices.push_back(v2);
+            if (a > 0 && b > 0 && c > 0) {
+                indices[i + 0] = v0; indices[i + 1] = a; indices[i + 2] = c;
+                indices.push_back(v1); indices.push_back(b); indices.push_back(a);
+                indices.push_back(v2); indices.push_back(c); indices.push_back(b);
+                indices.push_back(a); indices.push_back(b); indices.push_back(c);
+                subdivided = true;
+            } else if (a > 0 && d0 >= std::max(d1, d2)) {
+                indices[i + 0] = v0; indices[i + 1] = a; indices[i + 2] = v2;
+                indices.push_back(a); indices.push_back(v1); indices.push_back(v2);
+                subdivided = true;
+            } else if (b > 0 && d1 >= std::max(d0, d2)) {
+                indices[i + 0] = v1; indices[i + 1] = b; indices[i + 2] = v0;
+                indices.push_back(b); indices.push_back(v2); indices.push_back(v0);
+                subdivided = true;
+            } else if (c > 0 && d2 >= std::max(d0, d1)) {
+                indices[i + 0] = v2; indices[i + 1] = c; indices[i + 2] = v1;
+                indices.push_back(c); indices.push_back(v0); indices.push_back(v1);
+                subdivided = true;
+            } else {
+                // do nothing and increase offset so in next iteration this gets ignored
+                if (offset + 1 == i) {
+                    offset = i;
+                }
+            }
         }
-    }
-    
-    // Replace old indices with new indices
-    indices = std::move(newIndices);
-    
-    // Recursively subdivide if any triangles were subdivided
-    if (subdivided) {
-        subdivision(vertices, indices, threshold, level - 1);
+
+        if (!subdivided) {
+            break;
+        }
     }
 }

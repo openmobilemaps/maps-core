@@ -226,8 +226,8 @@ void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDa
 
                     if (is3d) {
                         auto convertedTileBounds = mapInterface->getCoordinateConverterHelper()->convertRectToRenderSystem(tileInfo.tileInfo.bounds);
-                        auto maxSegmentLength = std::max(std::abs(convertedTileBounds.bottomRight.x - convertedTileBounds.topLeft.x) / POLYGON_SUBDIVISION_FACTOR, (M_PI * 2.0) / POLYGON_SUBDIVISION_FACTOR);
-                        PolygonHelper::subdivision(coordinates, indices, maxSegmentLength, 128);
+                        auto maxSegmentLength = std::min(std::abs(convertedTileBounds.bottomRight.x - convertedTileBounds.topLeft.x) / POLYGON_SUBDIVISION_FACTOR, (M_PI * 2.0) / POLYGON_SUBDIVISION_FACTOR);
+                        PolygonHelper::subdivision(coordinates, indices, maxSegmentLength);
                     }
 
 
