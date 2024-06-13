@@ -69,7 +69,10 @@ std::string AlphaInstancedShaderOpenGl::getVertexShader() {
                                                           1.0);
 
                                                   vec4 earthCenter = uvpMatrix * vec4(0.0, 0.0, 0.0, 1.0);
+                                                  earthCenter = earthCenter / earthCenter.w;
                                                   position = uvpMatrix * position;
+                                                  position = position / position.w;
+
 
                                                   vec2 scaleOffset = vPosition.xy * aScale + aOffset;
 

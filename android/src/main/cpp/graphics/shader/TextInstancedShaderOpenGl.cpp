@@ -68,10 +68,12 @@ std::string TextInstancedShaderOpenGl::getVertexShader() {
                                            vec4 newVertex = umMatrix * vec4(aReferencePosition, 1.0, 1.0);
 
                                            vec4 earthCenter = uvpMatrix * vec4(0.0, 0.0, 0.0, 1.0);
+                                           earthCenter = earthCenter / earthCenter.w;
                                            vec4 screenPosition = uvpMatrix * vec4(newVertex.z * sin(newVertex.y) * cos(newVertex.x),
                                                                                   newVertex.z * cos(newVertex.y),
                                                                                   -newVertex.z * sin(newVertex.y) * sin(newVertex.x),
                                                                                   1.0);
+                                           screenPosition = screenPosition / screenPosition.w;
 
                                            vec2 size = (vPosition.xy) * aScale;
 
