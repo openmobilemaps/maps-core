@@ -116,6 +116,17 @@ public:
     static RectF getProjectedRectangle(const CollisionRectF &rectangle, 
                                        CollisionEnvironment &env) {
         if (env.is3d) {
+
+            //earth center
+            env.temp2[0] = 0.0;
+            env.temp2[1] = 0.0;
+            env.temp2[2] = 0.0;
+            env.temp2[3] = 1.0;
+
+            Matrix::multiply(env.vpMatrix, env.temp2, env.temp1);
+
+            float earthCenterZ = env.temp1[2] / env.temp1[3];
+
             env.temp2[0] = (float) (1.0 * sin(rectangle.anchorY) * cos(rectangle.anchorX));
             env.temp2[1] = (float) (1.0 * cos(rectangle.anchorY));
             env.temp2[2] = (float) (-1.0 * sin(rectangle.anchorY) * sin(rectangle.anchorX));
@@ -127,6 +138,13 @@ public:
             env.temp1[1] /= env.temp1[3];
             env.temp1[2] /= env.temp1[3];
             env.temp1[3] /= env.temp1[3];
+
+            auto diffCenterZ = env.temp1[2] - earthCenterZ;
+
+            if (diffCenterZ > 0) {
+                return {-1000,-1000,0,0};
+            }
+
 
             float originX = ((env.temp1[0]) * env.halfWidth + env.halfWidth);
             float originY = 2 * env.halfHeight - ((env.temp1[1]) * env.halfHeight + env.halfHeight);
