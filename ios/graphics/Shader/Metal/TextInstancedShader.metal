@@ -45,8 +45,11 @@ unitSphereTextInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
     const float y = newVertex.z * cos(newVertex.y);
     const float z = -newVertex.z * sin(newVertex.y) * sin(newVertex.x);
 
-    const float4 earthCenter = vpMatrix * float4(0,0,0, 1.0);
-    const float4 screenPosition = vpMatrix * float4(x,y,z, 1.0);
+    float4 earthCenter = vpMatrix * float4(0,0,0, 1.0);
+    float4 screenPosition = vpMatrix * float4(x,y,z, 1.0);
+
+    earthCenter /= earthCenter.w;
+    screenPosition /= screenPosition.w;
 
     auto diffCenter = screenPosition - earthCenter;
 
