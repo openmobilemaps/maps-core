@@ -78,15 +78,13 @@ std::string AlphaInstancedShaderOpenGl::getVertexShader() {
                                                                                 0.0, 0.0, 1.0, 0.0,
                                                                                 scaleOffset.x, scaleOffset.y, 0.0, 1.0);
 
-                                                  vec4 diffCenter = position - earthCenter;
-                                                  if (diffCenter.z > 0.0) {
-                                                      v_alpha = 0.0;
-                                                  }
-
                                                   gl_Position = scaleRotateMatrix * position;
                                                   v_texcoordInstance = aTexCoordinate;
                                                   v_texCoord = vTexCoordinate;
                                                   v_alpha = aAlpha;
+                                                  if (position.z - earthCenter.z > 0.0) {
+                                                      v_alpha = 0.0;
+                                                  }
                                               }
                                       )
     : OMMVersionedGlesShaderCode(320 es,
@@ -139,6 +137,9 @@ std::string AlphaInstancedShaderOpenGl::getFragmentShader() {
                                       out vec4 fragmentColor;
 
                                       void main() {
+                                          if (v_alpha == 0.0) {
+                                              discard;
+                                          }
                                           vec2 uv = (v_texcoordInstance.xy + v_texcoordInstance.zw * vec2(v_texCoord.x, (v_texCoord.y))) * textureFactor;
                                           vec4 c = texture(textureSampler, uv);
                                           float alpha = c.a * v_alpha;

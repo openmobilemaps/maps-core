@@ -60,7 +60,7 @@ std::string TextInstancedShaderOpenGl::getVertexShader() {
                                        out vec2 v_texCoord;
                                        out vec4 v_texCoordInstance;
                                        out flat uint vStyleIndex;
-                                       out float alpha;
+                                       out float v_alpha;
 
                                        void main() {
                                            float angle = aRotation * 3.14159265 / 180.0;
@@ -72,11 +72,6 @@ std::string TextInstancedShaderOpenGl::getVertexShader() {
                                                                                   newVertex.z * cos(newVertex.y),
                                                                                   -newVertex.z * sin(newVertex.y) * sin(newVertex.x),
                                                                                   1.0);
-
-                                           alpha = 1.0;
-                                           if (screenPosition.z - earthCenter.z > 0.0) {
-                                               alpha = 0.0;
-                                           }
 
                                            vec2 size = (vPosition.xy) * aScale;
 
@@ -91,6 +86,10 @@ std::string TextInstancedShaderOpenGl::getVertexShader() {
                                            v_texCoordInstance = aTexCoordinate;
                                            v_texCoord = texCoordinate;
                                            vStyleIndex = aStyleIndex;
+                                           v_alpha = 1.0;
+                                           if (screenPosition.z - earthCenter.z > 0.0) {
+                                               v_alpha = 0.0;
+                                           }
                                        }
                                )
     : OMMVersionedGlesShaderCode(320 es,
@@ -108,7 +107,7 @@ std::string TextInstancedShaderOpenGl::getVertexShader() {
                                       out vec2 v_texCoord;
                                       out vec4 v_texCoordInstance;
                                       out flat uint vStyleIndex;
-                                      out float alpha;
+                                      out float v_alpha;
 
                                       void main() {
                                           float angle = aRotation * 3.14159265 / 180.0;
@@ -126,7 +125,7 @@ std::string TextInstancedShaderOpenGl::getVertexShader() {
                                           v_texCoordInstance = aTexCoordinate;
                                           v_texCoord = texCoordinate;
                                           vStyleIndex = aStyleIndex;
-                                          alpha = 1.0;
+                                          v_alpha = 1.0;
                                       }
     );
 }
@@ -144,11 +143,15 @@ std::string TextInstancedShaderOpenGl::getFragmentShader() {
                                               in vec2 v_texCoord;
                                               in vec4 v_texCoordInstance;
                                               in flat uint vStyleIndex;
-                                              in float alpha;
+                                              in float v_alpha;
 
                                               out vec4 fragmentColor;
 
                                               void main() {
+                                                  if (v_alpha == 0.0) {
+                                                      discard;
+                                                  }
+
                                                   int styleOffset = int(vStyleIndex) * 9;
                                                   vec4 color = vec4(styles[styleOffset + 0], styles[styleOffset + 1], styles[styleOffset + 2], styles[styleOffset + 3]);
                                                   vec4 haloColor = vec4(styles[styleOffset + 4], styles[styleOffset + 5], styles[styleOffset + 6], styles[styleOffset + 7]);

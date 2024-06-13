@@ -146,9 +146,11 @@ void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDa
         return;
     }
 
+    bool is3d = mapInterface->is3d();
+
     const std::string layerName = description->sourceLayer;
 
-    const auto indicesLimit = std::numeric_limits<uint16_t>::max();
+    const auto indicesLimit = is3d ? std::numeric_limits<uint16_t>::max() / 2 : std::numeric_limits<uint16_t>::max();
 
     if (!tileData->empty()) {
 
@@ -222,7 +224,7 @@ void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDa
                     auto coordinates = polygon.coordinates;
                     auto indices = polygon.indices;
 
-                    if (mapInterface->is3d()) {
+                    if (is3d) {
                         auto convertedTileBounds = mapInterface->getCoordinateConverterHelper()->convertRectToRenderSystem(tileInfo.tileInfo.bounds);
                         auto maxSegmentLength = std::max(std::abs(convertedTileBounds.bottomRight.x - convertedTileBounds.topLeft.x) / POLYGON_SUBDIVISION_FACTOR, (M_PI * 2.0) / POLYGON_SUBDIVISION_FACTOR);
                         PolygonHelper::subdivision(coordinates, indices, maxSegmentLength, 4);
@@ -239,7 +241,7 @@ void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDa
                         styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(styleIndex);
                     }
 
-                    styleIndicesOffsets.at(styleGroupIndex) += verticesCount;
+                    styleIndicesOffsets.at(styleGroupIndex) += coordinates.size();
 
                     bool interactable = description->isInteractable(evalContext);
                     if (interactable) {
