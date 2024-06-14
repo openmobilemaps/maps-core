@@ -33,6 +33,7 @@
 
 #define GLOBE_MIN_ZOOM      200'000'000
 #define GLOBE_INITIAL_ZOOM   46'000'000
+#define GLOBE_RESET_ZOOM     25'000'000
 #define GLOBE_MAX_ZOOM       5'000'000
 #define LOCAL_MIN_ZOOM       20'000'000
 #define LOCAL_INITIAL_ZOOM    3'000'000
@@ -1486,7 +1487,7 @@ void MapCamera3d::setCameraMode(CameraMode3d mode) {
         case CameraMode3d::GLOBAL:
             this->zoomMin = GLOBE_MIN_ZOOM;
             this->zoomMax = GLOBE_MAX_ZOOM;
-            targetZoom = GLOBE_INITIAL_ZOOM;
+            targetZoom = GLOBE_RESET_ZOOM;
             break;
 
         case CameraMode3d::LOCAL:
