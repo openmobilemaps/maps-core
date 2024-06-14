@@ -78,7 +78,9 @@ void Tiled2dMapVectorPolygonPatternTile::update() {
 
     double cameraZoom = camera->getZoom();
     double zoomIdentifier = layerConfig->getZoomIdentifier(cameraZoom);
-    zoomIdentifier = std::max(zoomIdentifier, (double) tileInfo.tileInfo.zoomIdentifier);
+    if (!mapInterface->is3d()) {
+        zoomIdentifier = std::max(zoomIdentifier, (double) tileInfo.tileInfo.zoomIdentifier);
+    }
 
     auto zoom = layerConfig->getZoomFactorAtIdentifier(floor(zoomIdentifier));
     auto scalingFactor = (camera->asCameraInterface()->getScalingFactor() / cameraZoom) * zoom;
@@ -368,7 +370,9 @@ void Tiled2dMapVectorPolygonPatternTile::setupTextureCoordinates() {
 
     double cameraZoom = camera->getZoom();
     double zoomIdentifier = layerConfig->getZoomIdentifier(cameraZoom);
-    zoomIdentifier = std::max(zoomIdentifier, (double) tileInfo.tileInfo.zoomIdentifier);
+    if (!mapInterface->is3d()) {
+        zoomIdentifier = std::max(zoomIdentifier, (double) tileInfo.tileInfo.zoomIdentifier);
+    }
 
     auto polygonDescription = std::static_pointer_cast<PolygonVectorLayerDescription>(description);
     size_t numStyleGroups = featureGroups.size();

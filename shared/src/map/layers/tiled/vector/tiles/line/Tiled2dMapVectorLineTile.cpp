@@ -74,8 +74,12 @@ void Tiled2dMapVectorLineTile::update() {
     }
 
     const double cameraZoom = camera->getZoom();
-     double zoomIdentifier = layerConfig->getZoomIdentifier(cameraZoom);
-    zoomIdentifier = std::max(zoomIdentifier, (double) tileInfo.tileInfo.zoomIdentifier);
+    double zoomIdentifier = layerConfig->getZoomIdentifier(cameraZoom);
+    
+    if (!mapInterface->is3d()) {
+        zoomIdentifier = std::max(zoomIdentifier, (double) tileInfo.tileInfo.zoomIdentifier);
+    }
+
 
     auto zoom = layerConfig->getZoomFactorAtIdentifier(floor(zoomIdentifier));
     auto scalingFactor = (camera->asCameraInterface()->getScalingFactor() / cameraZoom) * zoom;

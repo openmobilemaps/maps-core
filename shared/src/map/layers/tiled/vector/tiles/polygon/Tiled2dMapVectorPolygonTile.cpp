@@ -78,7 +78,9 @@ void Tiled2dMapVectorPolygonTile::update() {
     }
 
     double zoomIdentifier = layerConfig->getZoomIdentifier(camera->getZoom());
-    zoomIdentifier = std::max(zoomIdentifier, (double) tileInfo.tileInfo.zoomIdentifier);
+    if (!mapInterface->is3d()) {
+        zoomIdentifier = std::max(zoomIdentifier, (double) tileInfo.tileInfo.zoomIdentifier);
+    }
 
     auto polygonDescription = std::static_pointer_cast<PolygonVectorLayerDescription>(description);
     bool inZoomRange = polygonDescription->maxZoom >= zoomIdentifier && polygonDescription->minZoom <= zoomIdentifier;
