@@ -156,10 +156,13 @@ class MapCamera3d : public MapCameraInterface,
 
     std::vector<double> computeEllipseCoefficients();
 
-     bool isPointInsideEllipse(float x, float y);
-
 protected:
+    virtual std::tuple<std::vector<float>, std::vector<float>, std::vector<float>, std::vector<double>> getVpMatrix(const Coord &focusCoord);
+
+    virtual ::Coord coordFromScreenPosition(const std::vector<double> &inverseVPMatrix, const ::Vec2F &posScreen);
+
     void updateZoom(double zoom);
+
     virtual void setupInertia();
 
     double getCameraDistance();
@@ -283,5 +286,8 @@ protected:
                         
     std::optional<::Vec2F> lastOnTouchDownPoint;
     std::optional<::Vec2F> initialTouchDownPoint;
+    std::optional<Coord> lastOnTouchDownFocusCoord;
     std::optional<Coord> lastOnTouchDownCoord;
+    std::optional<Coord> lastOnMoveCoord;
+    std::vector<double> lastOnTouchDownInverseVPMatrix;
 };
