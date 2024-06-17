@@ -361,20 +361,41 @@ std::vector<float> MapCamera3d::getVpMatrix() {
         mapInterface->invalidate();
     }
 
-
     Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
     double currentRotation = angle;
     double currentZoom = zoom;
+    double fovy = getCameraFieldOfView();
+    double vpr = (double) sizeViewport.x / (double) sizeViewport.y;
     // RectCoord viewBounds = getRectFromViewport(sizeViewport, focusPointPosition);
+
+    const auto [newVpMatrix, newViewMatrix, newProjectionMatrix, newInverseMatrix] = getVpMatrix(focusPointPosition);
+
+    std::lock_guard<std::recursive_mutex> lock(vpDataMutex);
+    // lastVpBounds = viewBounds;
+    lastVpRotation = currentRotation;
+    lastVpZoom = currentZoom;
+    vpMatrix = newVpMatrix;
+    inverseVPMatrix = newInverseMatrix;
+    viewMatrix = newViewMatrix;
+    projectionMatrix = newProjectionMatrix;
+    verticalFov = fovy;
+    horizontalFov = fovy * vpr;
+    validVpMatrix = true;
+
+    return newVpMatrix;
+}
+
+std::tuple<std::vector<float>, std::vector<float>, std::vector<float>, std::vector<double>> MapCamera3d::getVpMatrix(const Coord &focusCoord) {
+    Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
 
     std::vector<float> newViewMatrix(16, 0.0);
     std::vector<float> newProjectionMatrix(16, 0.0);
 
     const float R = 6378137.0;
-    float longitude = focusPointPosition.x; //  px / R;
-    float latitude = focusPointPosition.y; // 2*atan(exp(py / R)) - 3.1415926 / 2;
+    float longitude = focusCoord.x; //  px / R;
+    float latitude = focusCoord.y; // 2*atan(exp(py / R)) - 3.1415926 / 2;
 
-    double focusPointAltitude = focusPointPosition.z;
+    double focusPointAltitude = focusCoord.z;
     double cameraDistance = getCameraDistance();
     double fovy = getCameraFieldOfView(); // 45 // zoom / 70800;
     const double minCameraDistance = 1.05;
@@ -426,40 +447,27 @@ std::vector<float> MapCamera3d::getVpMatrix() {
     Matrix::multiplyMM(newVpMatrix, 0, newProjectionMatrix, 0, newViewMatrix, 0);
 
     std::vector<double> vpMatrixD = {
-        static_cast<double>(newVpMatrix[0]),
-        static_cast<double>(newVpMatrix[1]),
-        static_cast<double>(newVpMatrix[2]),
-        static_cast<double>(newVpMatrix[3]),
-        static_cast<double>(newVpMatrix[4]),
-        static_cast<double>(newVpMatrix[5]),
-        static_cast<double>(newVpMatrix[6]),
-        static_cast<double>(newVpMatrix[7]),
-        static_cast<double>(newVpMatrix[8]),
-        static_cast<double>(newVpMatrix[9]),
-        static_cast<double>(newVpMatrix[10]),
-        static_cast<double>(newVpMatrix[11]),
-        static_cast<double>(newVpMatrix[12]),
-        static_cast<double>(newVpMatrix[13]),
-        static_cast<double>(newVpMatrix[14]),
-        static_cast<double>(newVpMatrix[15])
+            static_cast<double>(newVpMatrix[0]),
+            static_cast<double>(newVpMatrix[1]),
+            static_cast<double>(newVpMatrix[2]),
+            static_cast<double>(newVpMatrix[3]),
+            static_cast<double>(newVpMatrix[4]),
+            static_cast<double>(newVpMatrix[5]),
+            static_cast<double>(newVpMatrix[6]),
+            static_cast<double>(newVpMatrix[7]),
+            static_cast<double>(newVpMatrix[8]),
+            static_cast<double>(newVpMatrix[9]),
+            static_cast<double>(newVpMatrix[10]),
+            static_cast<double>(newVpMatrix[11]),
+            static_cast<double>(newVpMatrix[12]),
+            static_cast<double>(newVpMatrix[13]),
+            static_cast<double>(newVpMatrix[14]),
+            static_cast<double>(newVpMatrix[15])
     };
     std::vector<double> newInverseMatrix(16, 0.0);
     gluInvertMatrix(vpMatrixD, newInverseMatrix);
 
-    std::lock_guard<std::recursive_mutex> lock(vpDataMutex);
-    // lastVpBounds = viewBounds;
-    lastVpRotation = currentRotation;
-    lastVpZoom = currentZoom;
-    vpMatrix = newVpMatrix;
-    inverseVPMatrix = newInverseMatrix;
-    viewMatrix = newViewMatrix;
-    projectionMatrix = newProjectionMatrix;
-    verticalFov = fovy;
-    horizontalFov = fovy * vpr;
-    validVpMatrix = true;
-
-
-    return newVpMatrix;
+    return std::make_tuple(newVpMatrix, newViewMatrix, newProjectionMatrix, newInverseMatrix);
 }
 
 
@@ -473,6 +481,7 @@ std::optional<std::vector<float>> MapCamera3d::getLastVpMatrix() {
 //    if (!lastVpBounds) {
 //        return std::nullopt;
 //    }
+    std::lock_guard<std::recursive_mutex> lock(vpDataMutex);
     std::vector<float> vpCopy;
     std::copy(vpMatrix.begin(), vpMatrix.end(), std::back_inserter(vpCopy));
     return vpCopy;
@@ -625,18 +634,32 @@ bool MapCamera3d::onTouchDown(const ::Vec2F &posScreen) {
     if (pos.systemIdentifier == -1) {
         lastOnTouchDownPoint = std::nullopt;
         lastOnTouchDownCoord = std::nullopt;
+        lastOnTouchDownFocusCoord = std::nullopt;
+        lastOnTouchDownInverseVPMatrix.clear();
         return false;
     }
     else {
         lastOnTouchDownPoint = posScreen;
         initialTouchDownPoint = posScreen;
-        lastOnTouchDownCoord = pos;
+        lastOnTouchDownFocusCoord = focusPointPosition;
+#ifdef ANDROID
+        {
+            std::lock_guard<std::recursive_mutex> lock(vpDataMutex);
+            const auto [zeroVPMatrix, zeroViewMatrix, zeroProjectionMatrix, zeroInverseVPMatrix] = getVpMatrix(
+                    Coord(CoordinateSystemIdentifiers::EPSG4326(), 0.0, 0.0, lastOnTouchDownFocusCoord->z));
+            lastOnTouchDownInverseVPMatrix = zeroInverseVPMatrix;
+        }
+        lastOnTouchDownCoord = coordFromScreenPosition(lastOnTouchDownInverseVPMatrix, posScreen);
+        lastOnMoveCoord = lastOnTouchDownCoord;
+#else
+        lastOnTouchDownCoord = coordFromScreenPosition(posScreen);
+#endif
         return true;
     }
 }
 
 bool MapCamera3d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleClick) {
-    if (!config.moveEnabled || cameraFrozen || (lastOnTouchDownPoint == std::nullopt) || (lastOnTouchDownCoord == std::nullopt)) {
+    if (!config.moveEnabled || cameraFrozen || (lastOnTouchDownPoint == std::nullopt) || !lastOnTouchDownCoord || !lastOnTouchDownFocusCoord) {
         return false;
     }
 
@@ -676,8 +699,12 @@ bool MapCamera3d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
 
     Vec2F newScreenPos = lastOnTouchDownPoint.value() + deltaScreen;
     lastOnTouchDownPoint = newScreenPos;
-
+#ifdef ANDROID
+    // TOOD: Current wip solution for more stable rotation on Android
+    auto newTouchDownCoord = coordFromScreenPosition(lastOnTouchDownInverseVPMatrix, newScreenPos);
+#else
     auto newTouchDownCoord = coordFromScreenPosition(newScreenPos);
+#endif
 
     if (newTouchDownCoord.systemIdentifier == -1) {
         return false;
@@ -686,8 +713,21 @@ bool MapCamera3d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
     double dx = -(newTouchDownCoord.x - lastOnTouchDownCoord->x);
     double dy = -(newTouchDownCoord.y - lastOnTouchDownCoord->y);
 
+#ifdef ANDROID
+    focusPointPosition.x = lastOnTouchDownFocusCoord->x + dx;
+    focusPointPosition.y = lastOnTouchDownFocusCoord->y + dy;
+
+    auto moveCoordDX = 0.0;
+    auto moveCoordDY = 0.0;
+    if (lastOnMoveCoord) {
+        moveCoordDX = -(newTouchDownCoord.x - lastOnMoveCoord->x);
+        moveCoordDY = -(newTouchDownCoord.y - lastOnMoveCoord->y);
+    }
+    lastOnMoveCoord = newTouchDownCoord;
+#else
     focusPointPosition.x = focusPointPosition.x + dx;
     focusPointPosition.y = focusPointPosition.y + dy;
+#endif
 
     focusPointPosition.x = std::fmod((focusPointPosition.x + 180 + 360), 360.0) - 180;
     focusPointPosition.y = std::clamp(focusPointPosition.y, -90.0, 90.0);
@@ -702,8 +742,13 @@ bool MapCamera3d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
         long long newTimestamp = DateHelper::currentTimeMicros();
         long long deltaMcs = std::max(newTimestamp - currentDragTimestamp, 8000ll);
         float averageFactor = currentDragVelocity.x == 0 && currentDragVelocity.y == 0 ? 1.0 : 0.5;
+#ifdef ANDROID
+        currentDragVelocity.x = (1 - averageFactor) * currentDragVelocity.x + averageFactor * moveCoordDX / (deltaMcs / 16000.0);
+        currentDragVelocity.y = (1 - averageFactor) * currentDragVelocity.y + averageFactor * moveCoordDY / (deltaMcs / 16000.0);
+#else
         currentDragVelocity.x = (1 - averageFactor) * currentDragVelocity.x + averageFactor * dx / (deltaMcs / 16000.0);
         currentDragVelocity.y = (1 - averageFactor) * currentDragVelocity.y + averageFactor * dy / (deltaMcs / 16000.0);
+#endif
         currentDragTimestamp = newTimestamp;
     }
 
@@ -982,49 +1027,32 @@ bool MapCamera3d::onTwoFingerMoveComplete() {
 }
 
 Coord MapCamera3d::coordFromScreenPosition(const ::Vec2F &posScreen) {
+    std::lock_guard<std::recursive_mutex> lock(vpDataMutex);
+    return coordFromScreenPosition(inverseVPMatrix, posScreen);
+}
+
+Coord MapCamera3d::coordFromScreenPosition(const std::vector<double> &inverseVPMatrix, const ::Vec2F &posScreen) {
     auto viewport = mapInterface->getRenderingContext()->getViewportSize();
 
-    std::vector<double> vpMatrixD = {
-        static_cast<double>(vpMatrix[0]),
-        static_cast<double>(vpMatrix[1]),
-        static_cast<double>(vpMatrix[2]),
-        static_cast<double>(vpMatrix[3]),
-        static_cast<double>(vpMatrix[4]),
-        static_cast<double>(vpMatrix[5]),
-        static_cast<double>(vpMatrix[6]),
-        static_cast<double>(vpMatrix[7]),
-        static_cast<double>(vpMatrix[8]),
-        static_cast<double>(vpMatrix[9]),
-        static_cast<double>(vpMatrix[10]),
-        static_cast<double>(vpMatrix[11]),
-        static_cast<double>(vpMatrix[12]),
-        static_cast<double>(vpMatrix[13]),
-        static_cast<double>(vpMatrix[14]),
-        static_cast<double>(vpMatrix[15])
-    };
-    std::vector<double> inverseMatrix(16, 0.0);
-    if(!gluInvertMatrix(vpMatrixD, inverseMatrix)) {
-        return Coord(-1, 0, 0, 0);
-    }
-
-    std::vector<double> normalizedPosScreenFront = {
+    std::vector<double> worldPosFrontVec = {
         (posScreen.x / (double)viewport.x * 2.0 - 1),
         -(posScreen.y / (double)viewport.y * 2.0 - 1),
         -1,
         1
     };
-    std::vector<double> normalizedPosScreenBack = {
+    std::vector<double> worldPosBackVec = {
         (posScreen.x / (double)viewport.x * 2.0 - 1),
         -(posScreen.y / (double)viewport.y * 2.0 - 1),
         1,
         1
     };
 
-
-    auto worldPosFrontVec = MatrixD::multiply(inverseMatrix, normalizedPosScreenFront);
-    Vec3D worldPosFront(worldPosFrontVec[0] / worldPosFrontVec[3], worldPosFrontVec[1] / worldPosFrontVec[3], worldPosFrontVec[2] / worldPosFrontVec[3]);
-    auto worldPosBackVec = MatrixD::multiply(inverseMatrix, normalizedPosScreenBack);
-    Vec3D worldPosBack(worldPosBackVec[0] / worldPosBackVec[3], worldPosBackVec[1] / worldPosBackVec[3], worldPosBackVec[2] / worldPosBackVec[3]);
+    worldPosFrontVec = MatrixD::multiply(inverseVPMatrix, worldPosFrontVec);
+    Vec3D worldPosFront{worldPosFrontVec[0] / worldPosFrontVec[3], worldPosFrontVec[1] / worldPosFrontVec[3],
+                                worldPosFrontVec[2] / worldPosFrontVec[3]};
+    worldPosBackVec = MatrixD::multiply(inverseVPMatrix, worldPosBackVec);
+    Vec3D worldPosBack{worldPosBackVec[0] / worldPosBackVec[3], worldPosBackVec[1] / worldPosBackVec[3],
+                               worldPosBackVec[2] / worldPosBackVec[3]};
 
     bool didHit = false;
     auto point = MapCamera3DHelper::raySphereIntersection(worldPosFront, worldPosBack, Vec3D(0.0, 0.0, 0.0), 1.0, didHit);
