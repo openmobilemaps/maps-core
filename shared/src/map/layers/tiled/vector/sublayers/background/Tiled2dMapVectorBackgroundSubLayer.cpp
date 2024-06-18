@@ -50,8 +50,10 @@ void Tiled2dMapVectorBackgroundSubLayer::onAdded(const std::shared_ptr<MapInterf
             vecVertices.push_back(Vec2F(coord.x, coord.y));
         }
 
-        PolygonHelper::subdivision(vecVertices, indices, 0.1);
-        for (const auto& v : vecVertices) {
+        PolygonHelper::subdivision(vecVertices, indices, std::abs(
+                (globeConverted.bottomRight.x - globeConverted.topLeft.x) / std::powl(2, SUBDIVISION_FACTOR_3D_DEFAULT)));
+
+        for (const auto &v: vecVertices) {
             vertices.push_back(v.x);
             vertices.push_back(v.y);
             vertices.push_back(0.0f);
