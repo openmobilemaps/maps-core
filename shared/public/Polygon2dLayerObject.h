@@ -22,7 +22,8 @@
 class Polygon2dLayerObject : public LayerObjectInterface {
   public:
     Polygon2dLayerObject(const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
-                         const std::shared_ptr<Polygon2dInterface> &polygon, const std::shared_ptr<ColorShaderInterface> &shader);
+                         const std::shared_ptr<Polygon2dInterface> &polygon, const std::shared_ptr<ColorShaderInterface> &shader,
+                         bool is3d);
 
     virtual ~Polygon2dLayerObject() override {}
 
@@ -49,4 +50,8 @@ class Polygon2dLayerObject : public LayerObjectInterface {
     std::shared_ptr<Polygon2dInterface> polygon;
     std::shared_ptr<GraphicsObjectInterface> graphicsObject;
     std::shared_ptr<RenderConfig> renderConfig;
+
+    const static int32_t SUBDIVISION_FACTOR_3D_DEFAULT = 4;
+
+    const bool is3d;
 };

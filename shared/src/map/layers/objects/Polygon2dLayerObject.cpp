@@ -11,16 +11,20 @@
 #include "Polygon2dLayerObject.h"
 #include "EarcutVec2D.h"
 #include "PolygonHelper.h"
+#include "BoundingBox.h"
+#include "CoordinateSystemIdentifiers.h"
+#include "CoordinatesUtil.h"
 
 Polygon2dLayerObject::Polygon2dLayerObject(const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                                            const std::shared_ptr<Polygon2dInterface> &polygon,
-                                           const std::shared_ptr<ColorShaderInterface> &shader)
-    : conversionHelper(conversionHelper)
-    , shader(shader)
-    , polygon(polygon)
-    , graphicsObject(polygon->asGraphicsObject())
-    , renderConfig(std::make_shared<RenderConfig>(graphicsObject, 0))
-{}
+                                           const std::shared_ptr<ColorShaderInterface> &shader,
+                                           bool is3d)
+        : conversionHelper(conversionHelper),
+          shader(shader),
+          polygon(polygon),
+          graphicsObject(polygon->asGraphicsObject()),
+          renderConfig(std::make_shared<RenderConfig>(graphicsObject, 0)),
+          is3d(is3d) {}
 
 std::vector<std::shared_ptr<RenderConfigInterface>> Polygon2dLayerObject::getRenderConfig() { return {renderConfig}; }
 
@@ -37,12 +41,14 @@ void Polygon2dLayerObject::setPolygons(const std::vector<PolygonCoord> &polygons
 
     std::vector<Vec2F> vecVertices;
 
+    BoundingBox bbox = BoundingBox(CoordinateSystemIdentifiers::RENDERSYSTEM());
     for (auto const &polygon : polygons) {
         std::vector<std::vector<Vec2D>> renderCoords;
         std::vector<Vec2D> polygonCoords;
         for (const Coord &mapCoord : polygon.positions) {
             Coord renderCoord = conversionHelper->convertToRenderSystem(mapCoord);
             polygonCoords.push_back(Vec2D(renderCoord.x, renderCoord.y));
+            bbox.addPoint(renderCoord);
         }
         renderCoords.push_back(polygonCoords);
 
@@ -69,7 +75,9 @@ void Polygon2dLayerObject::setPolygons(const std::vector<PolygonCoord> &polygons
         }
     }
 
-    PolygonHelper::subdivision(vecVertices, indices, 0.01);
+    auto bboxSize = bbox.getMax() - bbox.getMin();
+    double threshold = std::max(std::max(bboxSize.x, bboxSize.y), bboxSize.z) / std::powl(2, SUBDIVISION_FACTOR_3D_DEFAULT);
+    PolygonHelper::subdivision(vecVertices, indices, threshold);
 
     for (const auto& v : vecVertices) {
         vertices.push_back(v.x);

@@ -114,6 +114,8 @@ void PolygonLayer::addAll(const std::vector<PolygonInfo> &polygons) {
         return;
     }
 
+    bool is3d = mapInterface->is3d();
+
     std::vector<std::shared_ptr<Polygon2dInterface>> polygonGraphicsObjects;
 
     {
@@ -124,7 +126,7 @@ void PolygonLayer::addAll(const std::vector<PolygonInfo> &polygons) {
             auto polygonGraphicsObject = objectFactory->createPolygon(shader->asShaderProgramInterface());
 
             auto polygonObject =
-                std::make_shared<Polygon2dLayerObject>(mapInterface->getCoordinateConverterHelper(), polygonGraphicsObject, shader);
+                std::make_shared<Polygon2dLayerObject>(mapInterface->getCoordinateConverterHelper(), polygonGraphicsObject, shader, is3d);
 
             polygonObject->setPolygon(polygon.coordinates);
             polygonObject->setColor(polygon.color);
