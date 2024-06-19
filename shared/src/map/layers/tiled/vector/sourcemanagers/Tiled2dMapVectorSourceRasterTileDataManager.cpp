@@ -97,7 +97,11 @@ void Tiled2dMapVectorSourceRasterTileDataManager::onRasterTilesUpdated(const std
                                                                                coordinateConverterHelper,
                                                                                is3D);
                     auto convertedTileBounds = mapInterface->getCoordinateConverterHelper()->convertRectToRenderSystem(tileEntry.tileInfo.tileInfo.bounds);
-                    auto maxSegmentLength = std::min(std::abs(convertedTileBounds.bottomRight.x - convertedTileBounds.topLeft.x) / POLYGON_SUBDIVISION_FACTOR, (M_PI * 2.0) / POLYGON_SUBDIVISION_FACTOR);
+                    std::optional<float> maxSegmentLength = std::nullopt;
+                    if (is3D) {
+                        maxSegmentLength = std::min(std::abs(convertedTileBounds.bottomRight.x - convertedTileBounds.topLeft.x) /
+                                 POLYGON_SUBDIVISION_FACTOR, (M_PI * 2.0) / POLYGON_SUBDIVISION_FACTOR);
+                    }
 
                     tileMask->setPolygons(tileEntry.masks, maxSegmentLength);
 
