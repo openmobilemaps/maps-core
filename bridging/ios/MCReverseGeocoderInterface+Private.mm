@@ -53,6 +53,15 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (nullable MCVectorLayerFeatureCoordInfo *)reverseGeocodeClosest:(nonnull MCCoord *)coord
+                                                  thresholdMeters:(int64_t)thresholdMeters {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->reverseGeocodeClosest(::djinni_generated::Coord::toCpp(coord),
+                                                                         ::djinni::I64::toCpp(thresholdMeters));
+        return ::djinni::Optional<std::optional, ::djinni_generated::VectorLayerFeatureCoordInfo>::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 namespace djinni_generated {
 
 auto ReverseGeocoderInterface::toCpp(ObjcType objc) -> CppType

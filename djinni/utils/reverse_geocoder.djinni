@@ -6,4 +6,6 @@ reverse_geocoder_interface = interface +c {
     static create(loader: loader_interface, tile_url_template: string, zoom_level: i32): reverse_geocoder_interface;
 
     reverse_geocode(coord: coord, threshold_meters: i64): list<vector_layer_feature_coord_info>;
+
+    reverse_geocode_closest(coord: coord, threshold_meters: i64): optional<vector_layer_feature_coord_info>;
 }

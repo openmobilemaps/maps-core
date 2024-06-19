@@ -41,4 +41,14 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_utils_ReverseG
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
+CJNIEXPORT ::djinni_generated::NativeVectorLayerFeatureCoordInfo::Boxed::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_utils_ReverseGeocoderInterface_00024CppProxy_native_1reverseGeocodeClosest(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeCoord::JniType j_coord, jlong j_thresholdMeters)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::ReverseGeocoderInterface>(nativeRef);
+        auto r = ref->reverseGeocodeClosest(::djinni_generated::NativeCoord::toCpp(jniEnv, j_coord),
+                                            ::djinni::I64::toCpp(jniEnv, j_thresholdMeters));
+        return ::djinni::release(::djinni::Optional<std::optional, ::djinni_generated::NativeVectorLayerFeatureCoordInfo>::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
 } // namespace djinni_generated

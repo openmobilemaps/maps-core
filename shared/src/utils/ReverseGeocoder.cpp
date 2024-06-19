@@ -133,3 +133,22 @@ std::vector<::VectorLayerFeatureCoordInfo> ReverseGeocoder::reverseGeocode(const
 
     return resultVector;
 }
+
+std::optional<::VectorLayerFeatureCoordInfo> ReverseGeocoder::reverseGeocodeClosest(const ::Coord & coord, int64_t thresholdMeters) {
+
+    auto results = reverseGeocode(coord, thresholdMeters);
+    auto minDistance = std::numeric_limits<float>::max();
+
+    std::optional<::VectorLayerFeatureCoordInfo> closestFeature = std::nullopt;
+
+    for(const auto& r : results) {
+        const auto d = distance(coord, r.coordinates);
+
+        if(d < minDistance) {
+            closestFeature = r;
+            minDistance = d;
+        }
+    }
+
+    return closestFeature;
+}

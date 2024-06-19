@@ -8,6 +8,7 @@
 #include "VectorLayerFeatureCoordInfo.h"
 #include <cstdint>
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -18,4 +19,6 @@ public:
     static /*not-null*/ std::shared_ptr<ReverseGeocoderInterface> create(const /*not-null*/ std::shared_ptr<::LoaderInterface> & loader, const std::string & tileUrlTemplate, int32_t zoomLevel);
 
     virtual std::vector<::VectorLayerFeatureCoordInfo> reverseGeocode(const ::Coord & coord, int64_t thresholdMeters) = 0;
+
+    virtual std::optional<::VectorLayerFeatureCoordInfo> reverseGeocodeClosest(const ::Coord & coord, int64_t thresholdMeters) = 0;
 };
