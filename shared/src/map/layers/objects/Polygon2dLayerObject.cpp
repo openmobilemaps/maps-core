@@ -18,13 +18,13 @@
 Polygon2dLayerObject::Polygon2dLayerObject(const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                                            const std::shared_ptr<Polygon2dInterface> &polygon,
                                            const std::shared_ptr<ColorShaderInterface> &shader,
-                                           bool is3d)
+                                           bool is3D)
         : conversionHelper(conversionHelper),
           shader(shader),
           polygon(polygon),
           graphicsObject(polygon->asGraphicsObject()),
           renderConfig(std::make_shared<RenderConfig>(graphicsObject, 0)),
-          is3d(is3d) {}
+          is3D(is3D) {}
 
 std::vector<std::shared_ptr<RenderConfigInterface>> Polygon2dLayerObject::getRenderConfig() { return {renderConfig}; }
 
@@ -75,9 +75,11 @@ void Polygon2dLayerObject::setPolygons(const std::vector<PolygonCoord> &polygons
         }
     }
 
-    auto bboxSize = bbox.getMax() - bbox.getMin();
-    double threshold = std::max(std::max(bboxSize.x, bboxSize.y), bboxSize.z) / std::powl(2, SUBDIVISION_FACTOR_3D_DEFAULT);
-    PolygonHelper::subdivision(vecVertices, indices, threshold);
+    if (is3D) {
+        auto bboxSize = bbox.getMax() - bbox.getMin();
+        double threshold = std::max(std::max(bboxSize.x, bboxSize.y), bboxSize.z) / std::powl(2, SUBDIVISION_FACTOR_3D_DEFAULT);
+        PolygonHelper::subdivision(vecVertices, indices, threshold);
+    }
 
     for (const auto& v : vecVertices) {
         vertices.push_back(v.x);

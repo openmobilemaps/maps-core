@@ -53,5 +53,5 @@ class Polygon2dLayerObject : public LayerObjectInterface {
 
     const static int32_t SUBDIVISION_FACTOR_3D_DEFAULT = 4;
 
-    const bool is3d;
+    const bool is3D;
 };
