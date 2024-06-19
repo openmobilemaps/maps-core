@@ -17,4 +17,7 @@
 - (nonnull NSArray<MCVectorLayerFeatureCoordInfo *> *)reverseGeocode:(nonnull MCCoord *)coord
                                                      thresholdMeters:(int64_t)thresholdMeters;
 
+- (nullable MCVectorLayerFeatureCoordInfo *)reverseGeocodeClosest:(nonnull MCCoord *)coord
+                                                  thresholdMeters:(int64_t)thresholdMeters;
+
 @end

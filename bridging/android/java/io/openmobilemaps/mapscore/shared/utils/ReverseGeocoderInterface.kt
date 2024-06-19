@@ -15,6 +15,8 @@ abstract class ReverseGeocoderInterface {
 
     abstract fun reverseGeocode(coord: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, thresholdMeters: Long): ArrayList<io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.VectorLayerFeatureCoordInfo>
 
+    abstract fun reverseGeocodeClosest(coord: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, thresholdMeters: Long): io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.VectorLayerFeatureCoordInfo?
+
     private class CppProxy : ReverseGeocoderInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -35,5 +37,11 @@ abstract class ReverseGeocoderInterface {
             return native_reverseGeocode(this.nativeRef, coord, thresholdMeters)
         }
         private external fun native_reverseGeocode(_nativeRef: Long, coord: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, thresholdMeters: Long): ArrayList<io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.VectorLayerFeatureCoordInfo>
+
+        override fun reverseGeocodeClosest(coord: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, thresholdMeters: Long): io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.VectorLayerFeatureCoordInfo? {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_reverseGeocodeClosest(this.nativeRef, coord, thresholdMeters)
+        }
+        private external fun native_reverseGeocodeClosest(_nativeRef: Long, coord: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, thresholdMeters: Long): io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.VectorLayerFeatureCoordInfo?
     }
 }
