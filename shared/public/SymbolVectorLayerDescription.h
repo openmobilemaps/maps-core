@@ -229,11 +229,9 @@ public:
         return textHaloColorEvaluator.getResult(textHaloColor, context, defaultValue);
     }
 
-    double getTextHaloWidth(const EvaluationContext &context) {
+    double getTextHaloWidth(const EvaluationContext &context, double size) {
         static double defaultValue = 0.0;
         double width = textHaloWidthEvaluator.getResult(textHaloWidth, context, defaultValue) * context.dpFactor;
-
-        double size = getTextSize(context);
 
         // in a font of size 41pt, we can show around 7pt of halo
         // (due to generation of font atlasses)

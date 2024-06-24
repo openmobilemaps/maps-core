@@ -227,7 +227,7 @@ void Tiled2dMapVectorSymbolLabelObject::evaluateStyleProperties(const double zoo
 
     textColor = description->style.getTextColor(evalContext);
     haloColor = description->style.getTextHaloColor(evalContext);
-    haloWidth = description->style.getTextHaloWidth(evalContext);
+    haloWidth = description->style.getTextHaloWidth(evalContext, textSize);
 
     lastZoomEvaluation = roundedZoom;
 }
@@ -308,7 +308,6 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
     }
 
     std::vector<size_t> lineEndIndices;
-    lineEndIndices.clear();
 
     auto pen = zero;
 
