@@ -83,7 +83,7 @@ public:
     }
 
     virtual double getZoomIdentifier(double zoom) {
-        return std::round(log(baseValueZoom * zoomInfo.zoomLevelScaleFactor / zoom) / log(2) * 100) / 100;
+        return std::max(0.0, std::round(log(baseValueZoom * zoomInfo.zoomLevelScaleFactor / zoom) / log(2) * 100) / 100);
     }
 
     virtual double getZoomFactorAtIdentifier(double zoomIdentifier) {
