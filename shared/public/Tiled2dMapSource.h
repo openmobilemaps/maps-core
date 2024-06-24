@@ -174,7 +174,7 @@ public:
             
     void onVisibleTilesChanged(const std::vector<VisibleTilesLayer> &pyramid, bool keepMultipleLevels, int keepZoomLevelOffset = 0);
 
-private:
+protected:
     void performLoadingTask(Tiled2dMapTileInfo tile, size_t loaderIndex);
 
 
