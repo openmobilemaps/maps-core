@@ -329,10 +329,12 @@ public:
                 }
             }
         }
+
         if (context.featureStateManager) {
             if (context.feature) {
+                const auto &state = context.featureStateManager->getFeatureState(context.feature->identifier);
+
                 for (const auto &featureStateKey: featureStateKeys) {
-                    const auto &state = context.featureStateManager->getFeatureState(context.feature->identifier);
                     const auto &value = state.find(featureStateKey);
                     if (value != state.end()) {
                         std::hash_combine(hash, std::hash<ValueVariant>{}(value->second));
@@ -344,6 +346,7 @@ public:
                 std::hash_combine(hash, std::hash<ValueVariant>{}(value));
             }
         }
+        
         return hash;
     };
 };
@@ -638,6 +641,9 @@ public:
         return alternative;
     }
 
+    virtual bool isGettingPropertyValues() {
+        return false;
+    }
 };
 
 template<class ResultType>
@@ -648,11 +654,17 @@ public:
         if (!value) {
             return defaultValue;
         }
+
+        if(value->isGettingPropertyValues()) {
+            return value->evaluateOr(context, defaultValue);
+        }
+
         if (lastValuePtr != value.get()) {
             lastResults.clear();
             staticValue = std::nullopt;
-            const auto &usedKeysCollection = value->getUsedKeys();
+            usedKeysCollection = value->getUsedKeys();
             isStatic = usedKeysCollection.empty();
+
             if (isStatic) {
                 staticValue = value->evaluateOr(context, defaultValue);
             } else {
@@ -670,10 +682,7 @@ public:
             return value->evaluateOr(context, defaultValue);
         }
 
-        auto identifier = context.feature->identifier;
-        if(isStateDependant && !context.featureStateManager->empty()) {
-            identifier = (context.feature->identifier << 32) | (uint64_t)(context.featureStateManager->getCurrentState());
-        }
+        int64_t identifier = usedKeysCollection.getHash(context);
 
         const auto lastResultIt = lastResults.find(identifier);
         if (lastResultIt != lastResults.end()) {
@@ -682,12 +691,14 @@ public:
 
         const auto result = value->evaluateOr(context, defaultValue);
         lastResults.insert({identifier, result});
+
         return result;
     }
 
 private:
     std::unordered_map<uint64_t, ResultType> lastResults;
     std::mutex mutex;
+    UsedKeysCollection usedKeysCollection;
 
     std::optional<ResultType> staticValue;
     bool isZoomDependent = false;
@@ -722,6 +733,11 @@ public:
         }
         return false;
     };
+
+    bool isGettingPropertyValues() {
+        return true;
+    }
+
 private:
     const std::string key;
 };
@@ -2616,5 +2632,15 @@ public:
             return true; // All members are equal
         }
         return false; // Not the same type or nullptr
+    }
+
+    virtual bool isGettingPropertyValues() override {
+        for (const auto &value: values) {
+            if(!value->isGettingPropertyValues()) {
+                return false;
+            }
+        }
+
+        return true;
     }
 };
