@@ -157,7 +157,7 @@ class MapCamera3d : public MapCameraInterface,
     std::vector<double> computeEllipseCoefficients();
 
 protected:
-    virtual std::tuple<std::vector<float>, std::vector<float>, std::vector<float>, std::vector<double>> getVpMatrix(const Coord &focusCoord, bool updateVariables);
+    virtual std::tuple<std::vector<float>, std::vector<double>> getVpMatrix(const Coord &focusCoord, bool updateVariables);
 
     virtual ::Coord coordFromScreenPosition(const std::vector<double> &inverseVPMatrix, const ::Vec2F &posScreen);
 
