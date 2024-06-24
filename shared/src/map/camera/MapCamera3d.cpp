@@ -362,30 +362,17 @@ std::vector<float> MapCamera3d::getVpMatrix() {
     }
 
     Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
-    double currentRotation = angle;
-    double currentZoom = zoom;
+
     double fovy = getCameraFieldOfView();
     double vpr = (double) sizeViewport.x / (double) sizeViewport.y;
     // RectCoord viewBounds = getRectFromViewport(sizeViewport, focusPointPosition);
 
-    const auto [newVpMatrix, newViewMatrix, newProjectionMatrix, newInverseMatrix] = getVpMatrix(focusPointPosition);
-
-    std::lock_guard<std::recursive_mutex> lock(vpDataMutex);
-    // lastVpBounds = viewBounds;
-    lastVpRotation = currentRotation;
-    lastVpZoom = currentZoom;
-    vpMatrix = newVpMatrix;
-    inverseVPMatrix = newInverseMatrix;
-    viewMatrix = newViewMatrix;
-    projectionMatrix = newProjectionMatrix;
-    verticalFov = fovy;
-    horizontalFov = fovy * vpr;
-    validVpMatrix = true;
+    const auto [newVpMatrix, newViewMatrix, newProjectionMatrix, newInverseMatrix] = getVpMatrix(focusPointPosition, true);
 
     return newVpMatrix;
 }
 
-std::tuple<std::vector<float>, std::vector<float>, std::vector<float>, std::vector<double>> MapCamera3d::getVpMatrix(const Coord &focusCoord) {
+std::tuple<std::vector<float>, std::vector<float>, std::vector<float>, std::vector<double>> MapCamera3d::getVpMatrix(const Coord &focusCoord, bool updateVariables) {
     Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
 
     std::vector<float> newViewMatrix(16, 0.0);
@@ -467,6 +454,22 @@ std::tuple<std::vector<float>, std::vector<float>, std::vector<float>, std::vect
     std::vector<double> newInverseMatrix(16, 0.0);
     gluInvertMatrix(vpMatrixD, newInverseMatrix);
 
+    
+
+    if (updateVariables) {
+        std::lock_guard<std::recursive_mutex> lock(vpDataMutex);
+        double currentRotation = angle;
+        double currentZoom = zoom;
+        lastVpRotation = currentRotation;
+        lastVpZoom = currentZoom;
+        vpMatrix = newVpMatrix;
+        inverseVPMatrix = newInverseMatrix;
+        viewMatrix = newViewMatrix;
+        projectionMatrix = newProjectionMatrix;
+        verticalFov = fovy;
+        horizontalFov = fovy * vpr;
+        validVpMatrix = true;
+    }
     return std::make_tuple(newVpMatrix, newViewMatrix, newProjectionMatrix, newInverseMatrix);
 }
 
@@ -646,7 +649,7 @@ bool MapCamera3d::onTouchDown(const ::Vec2F &posScreen) {
         {
             std::lock_guard<std::recursive_mutex> lock(vpDataMutex);
             const auto [zeroVPMatrix, zeroViewMatrix, zeroProjectionMatrix, zeroInverseVPMatrix] = getVpMatrix(
-                    Coord(CoordinateSystemIdentifiers::EPSG4326(), 0.0, 0.0, lastOnTouchDownFocusCoord->z));
+                    Coord(CoordinateSystemIdentifiers::EPSG4326(), 0.0, 0.0, lastOnTouchDownFocusCoord->z), false);
             lastOnTouchDownInverseVPMatrix = zeroInverseVPMatrix;
         }
         lastOnTouchDownCoord = coordFromScreenPosition(lastOnTouchDownInverseVPMatrix, posScreen);
