@@ -361,18 +361,10 @@ std::vector<float> MapCamera3d::getVpMatrix() {
         mapInterface->invalidate();
     }
 
-    Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
-
-    double fovy = getCameraFieldOfView();
-    double vpr = (double) sizeViewport.x / (double) sizeViewport.y;
-    // RectCoord viewBounds = getRectFromViewport(sizeViewport, focusPointPosition);
-
-    const auto [newVpMatrix, newViewMatrix, newProjectionMatrix, newInverseMatrix] = getVpMatrix(focusPointPosition, true);
-
-    return newVpMatrix;
+    return std::get<0>(getVpMatrix(focusPointPosition, true));
 }
 
-std::tuple<std::vector<float>, std::vector<float>, std::vector<float>, std::vector<double>> MapCamera3d::getVpMatrix(const Coord &focusCoord, bool updateVariables) {
+std::tuple<std::vector<float>, std::vector<double>> MapCamera3d::getVpMatrix(const Coord &focusCoord, bool updateVariables) {
     Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
 
     std::vector<float> newViewMatrix(16, 0.0);
@@ -458,10 +450,8 @@ std::tuple<std::vector<float>, std::vector<float>, std::vector<float>, std::vect
 
     if (updateVariables) {
         std::lock_guard<std::recursive_mutex> lock(vpDataMutex);
-        double currentRotation = angle;
-        double currentZoom = zoom;
-        lastVpRotation = currentRotation;
-        lastVpZoom = currentZoom;
+        lastVpRotation = angle;
+        lastVpZoom = zoom;
         vpMatrix = newVpMatrix;
         inverseVPMatrix = newInverseMatrix;
         viewMatrix = newViewMatrix;
@@ -470,7 +460,7 @@ std::tuple<std::vector<float>, std::vector<float>, std::vector<float>, std::vect
         horizontalFov = fovy * vpr;
         validVpMatrix = true;
     }
-    return std::make_tuple(newVpMatrix, newViewMatrix, newProjectionMatrix, newInverseMatrix);
+    return std::make_tuple(newVpMatrix, newInverseMatrix);
 }
 
 
@@ -648,7 +638,7 @@ bool MapCamera3d::onTouchDown(const ::Vec2F &posScreen) {
 #ifdef ANDROID
         {
             std::lock_guard<std::recursive_mutex> lock(vpDataMutex);
-            const auto [zeroVPMatrix, zeroViewMatrix, zeroProjectionMatrix, zeroInverseVPMatrix] = getVpMatrix(
+            const auto [zeroVPMatrix, zeroInverseVPMatrix] = getVpMatrix(
                     Coord(CoordinateSystemIdentifiers::EPSG4326(), 0.0, 0.0, lastOnTouchDownFocusCoord->z), false);
             lastOnTouchDownInverseVPMatrix = zeroInverseVPMatrix;
         }
