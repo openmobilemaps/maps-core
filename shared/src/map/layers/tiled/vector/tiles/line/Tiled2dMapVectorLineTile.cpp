@@ -22,7 +22,7 @@ Tiled2dMapVectorLineTile::Tiled2dMapVectorLineTile(const std::weak_ptr<MapInterf
                                                    const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
                                                    const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager)
         : Tiled2dMapVectorTile(mapInterface, tileInfo, description, layerConfig, tileCallbackInterface, featureStateManager), usedKeys(description->getUsedKeys()) {
-    isStyleZoomDependant = usedKeys.usedKeys.find(Tiled2dMapVectorStyleParser::zoomExpression) != usedKeys.usedKeys.end();
+            isStyleZoomDependant = usedKeys.usedKeys.find(Tiled2dMapVectorStyleParser::zoomExpression);
     isStyleStateDependant = usedKeys.isStateDependant();
 }
 

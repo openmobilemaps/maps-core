@@ -264,28 +264,93 @@ public:
         zoomLevel(zoomLevel), dpFactor(dpFactor), feature(feature), featureStateManager(featureStateManager) {}
 };
 
+template<typename T>
+class VectorSet {
+public:
+    using const_iterator = typename std::vector<T>::const_iterator;
+
+    // Default constructor
+    VectorSet() = default;
+
+    // Constructor with initializer list
+    VectorSet(std::initializer_list<T> initList) {
+        for (const T& value : initList) {
+            insert(value);
+        }
+    }
+
+    // Insert an element into the set
+    void insert(const T& value) {
+        if (!find(value)) {
+            data.push_back(value);
+        }
+    }
+
+    // Find an element in the set
+    bool find(const T& value) const {
+        return std::find(data.begin(), data.end(), value) != data.end();
+    }
+
+    // Check if the set is empty
+    bool empty() const {
+        return data.empty();
+    }
+
+    // Check if all elements of another set are present in this set
+    bool covers(const VectorSet<T>& other) const {
+        for (const T& value : other.data) {
+            if (!find(value)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // Insert elements from another VectorSet into this set
+    void insertSet(const VectorSet<T>& otherSet) {
+        for (const T& value : otherSet.data) {
+            insert(value);
+        }
+    }
+
+    // Iterator functions
+    const_iterator begin() const {
+        return data.cbegin();
+    }
+
+    const_iterator end() const {
+        return data.cend();
+    }
+
+    size_t size() const {
+        return data.size();
+    }
+
+private:
+    std::vector<T> data;
+};
 
 class UsedKeysCollection {
 public:
-    std::unordered_set<std::string> usedKeys;
-    std::unordered_set<std::string> featureStateKeys;
-    std::unordered_set<std::string> globalStateKeys;
+    VectorSet<std::string> usedKeys;
+    VectorSet<std::string> featureStateKeys;
+    VectorSet<std::string> globalStateKeys;
 
     UsedKeysCollection() {};
 
-    UsedKeysCollection(const std::unordered_set<std::string> &usedKeys) : usedKeys(usedKeys) {};
+    UsedKeysCollection(const VectorSet<std::string> &usedKeys) : usedKeys(usedKeys) {};
 
-    UsedKeysCollection(const std::unordered_set<std::string> &usedKeys,
-                       const std::unordered_set<std::string> &featureStateKeys,
-                       const std::unordered_set<std::string> &globalStateKeys)
+    UsedKeysCollection(const VectorSet<std::string> &usedKeys,
+                       const VectorSet<std::string> &featureStateKeys,
+                       const VectorSet<std::string> &globalStateKeys)
             : usedKeys(usedKeys),
               featureStateKeys(featureStateKeys),
               globalStateKeys(globalStateKeys) {};
 
     void includeOther(const UsedKeysCollection &other) {
-        usedKeys.insert(other.usedKeys.begin(), other.usedKeys.end());
-        featureStateKeys.insert(other.featureStateKeys.begin(), other.featureStateKeys.end());
-        globalStateKeys.insert(other.globalStateKeys.begin(), other.globalStateKeys.end());
+        usedKeys.insertSet(other.usedKeys);
+        featureStateKeys.insertSet(other.featureStateKeys);
+        globalStateKeys.insertSet(other.globalStateKeys);
     };
 
     bool isStateDependant() const {
@@ -293,31 +358,21 @@ public:
     };
 
     bool containsUsedKey(const std::string &key) const {
-        return usedKeys.find(key) != usedKeys.end();
+        return usedKeys.find(key);
     }
 
     bool empty() const {
         return usedKeys.empty() && featureStateKeys.empty() && globalStateKeys.empty();
     }
 
-    bool covers(const UsedKeysCollection &other) {
-        for (const auto &keyOther : other.usedKeys) {
-            if (usedKeys.find(keyOther) == usedKeys.end()) {
-                return false;
-            }
-        }
-        for (const auto &keyOther : other.featureStateKeys) {
-            if (featureStateKeys.find(keyOther) == featureStateKeys.end()) {
-                return false;
-            }
-        }
-        for (const auto &keyOther : other.globalStateKeys) {
-            if (globalStateKeys.find(keyOther) == globalStateKeys.end()) {
-                return false;
-            }
-        }
+    size_t size() const {
+        return usedKeys.size() + featureStateKeys.size() + globalStateKeys.size();
+    }
 
-        return true;
+    bool covers(const UsedKeysCollection &other) {
+        return usedKeys.covers(other.usedKeys) &&
+               featureStateKeys.covers(other.featureStateKeys) &&
+               globalStateKeys.covers(other.globalStateKeys);
     }
 
     size_t getHash(const EvaluationContext &context) const {
@@ -663,12 +718,13 @@ public:
             lastResults.clear();
             staticValue = std::nullopt;
             usedKeysCollection = value->getUsedKeys();
+
             isStatic = usedKeysCollection.empty();
 
             if (isStatic) {
                 staticValue = value->evaluateOr(context, defaultValue);
             } else {
-                isZoomDependent = usedKeysCollection.usedKeys.count("zoom") != 0;
+                isZoomDependent = usedKeysCollection.usedKeys.find("zoom");
                 isStateDependant = usedKeysCollection.isStateDependant();
             }
             lastValuePtr = value.get();
@@ -839,7 +895,7 @@ public:
     UsedKeysCollection getUsedKeys() const override {
         if (std::holds_alternative<std::string>(value)) {
             std::string res = std::get<std::string>(value);
-            std::unordered_set<std::string> usedKeys = { res };
+            VectorSet<std::string> usedKeys = { res };
 
             auto begin = res.find("{");
             auto end = res.find("}", begin);

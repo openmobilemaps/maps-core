@@ -151,7 +151,15 @@ public:
               blendMode(style.blendMode),
               symbolZOrder(style.symbolZOrder),
               transitionDuration(style.transitionDuration),
-              transitionDelay(style.transitionDelay) {}
+              transitionDelay(style.transitionDelay) {
+
+                  if(symbolSortKey != nullptr) {
+                      auto usedKeysCollection = symbolSortKey->getUsedKeys();
+                      auto isZoomDependent = usedKeysCollection.usedKeys.find("zoom");
+                      auto isStateDependant = usedKeysCollection.isStateDependant();
+                      symbolSortKeyIsIndependent = !isZoomDependent && !isStateDependant;
+                  }
+              }
 
     UsedKeysCollection getUsedKeys() const {
 
@@ -408,6 +416,10 @@ public:
         return transitionDelay;
     }
 
+    const bool symbolSortKeyNeedsRecomputation() const {
+        return !symbolSortKeyIsIndependent;
+    }
+
     std::shared_ptr<Value> textSize;
     std::shared_ptr<Value> textFont;
     std::shared_ptr<Value> textField;
@@ -492,6 +504,8 @@ private:
     ValueEvaluator<IconTextFit> iconTextFitEvaluator;
     ValueEvaluator<std::vector<float>> iconTextFitPaddingEvaluator;
     ValueEvaluator<SymbolZOrder> symbolZOrderEvaluator;
+
+    bool symbolSortKeyIsIndependent = true;
 };
 
 class SymbolVectorLayerDescription: public VectorLayerDescription {

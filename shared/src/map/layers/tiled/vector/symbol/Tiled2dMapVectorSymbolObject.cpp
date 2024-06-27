@@ -252,7 +252,9 @@ void Tiled2dMapVectorSymbolObject::evaluateStyleProperties(const double zoomIden
     iconTextFit = description->style.getIconTextFit(evalContext);
     iconPadding = description->style.getIconPadding(evalContext);
 
-    symbolSortKey = description->style.getSymbolSortKey(evalContext);
+    if(description->style.symbolSortKeyNeedsRecomputation()) {
+        symbolSortKey = description->style.getSymbolSortKey(evalContext);
+    }
 
     // only evaluate these properties once since they are expensive and should not change
     if (lastZoomEvaluation == -1) {
