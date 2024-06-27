@@ -237,7 +237,9 @@ void Tiled2dMapVectorLayer::setMapDescription(const std::shared_ptr<VectorMapDes
     }
 
     initializeVectorLayer();
-    applyGlobalOrFeatureStateIfPossible(StateType::BOTH);
+    if (!noPendingStateUpdate.test_and_set()) {
+        applyGlobalOrFeatureStateIfPossible(StateType::BOTH);
+    }
 }
 
 void Tiled2dMapVectorLayer::initializeVectorLayer() {
@@ -751,8 +753,6 @@ void Tiled2dMapVectorLayer::pause() {
 }
 
 void Tiled2dMapVectorLayer::resume() {
-    isResumed = true;
-
     if (backgroundLayer) {
         backgroundLayer->resume();
     }
@@ -766,6 +766,12 @@ void Tiled2dMapVectorLayer::resume() {
         sourceDataManager.syncAccess([](const auto &manager){
             manager->resume();
         });
+    }
+
+    isResumed = true;
+
+    if (!noPendingStateUpdate.test_and_set()) {
+        applyGlobalOrFeatureStateIfPossible(StateType::BOTH);
     }
 
     for (const auto &source: sourceInterfaces) {
@@ -1248,7 +1254,10 @@ void Tiled2dMapVectorLayer::applyGlobalOrFeatureStateIfPossible(StateType type) 
     std::lock_guard<std::recursive_mutex> lock(mapDescriptionMutex);
     auto mapInterface = this->mapInterface;
     auto mapDescription = this->mapDescription;
-    if(!mapInterface || !mapDescription) { return; }
+    if(!mapInterface || !mapDescription || !isResumed) {
+        noPendingStateUpdate.clear();
+        return;
+    }
 
     std::unordered_map<std::string, std::vector<std::tuple<std::string, std::string>>> sourceLayerIdentifiersMap;
     std::unordered_map<std::string, std::vector<std::tuple<std::shared_ptr<VectorLayerDescription>, int32_t>>> sourcelayerDescriptionIndexMap;

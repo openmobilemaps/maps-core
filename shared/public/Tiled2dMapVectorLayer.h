@@ -285,6 +285,7 @@ private:
     std::shared_ptr<::TextureHolderInterface> spriteTexture;
 
     std::shared_ptr<Tiled2dMapVectorStateManager> featureStateManager;
+    std::atomic_flag noPendingStateUpdate;
     std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> symbolDelegate;
 
     void updateReadyStateListenerIfNeeded();
