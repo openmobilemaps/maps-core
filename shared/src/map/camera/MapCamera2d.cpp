@@ -371,16 +371,6 @@ void MapCamera2d::removeListener(const std::shared_ptr<MapCameraListenerInterfac
 std::shared_ptr<::CameraInterface> MapCamera2d::asCameraInterface() { return shared_from_this(); }
 
 std::vector<float> MapCamera2d::getVpMatrix() {
-    {
-        std::lock_guard<std::recursive_mutex> lock(animationMutex);
-        if (zoomAnimation)
-            std::static_pointer_cast<AnimationInterface>(zoomAnimation)->update();
-        if (rotationAnimation)
-            std::static_pointer_cast<AnimationInterface>(rotationAnimation)->update();
-        if (coordAnimation)
-            std::static_pointer_cast<AnimationInterface>(coordAnimation)->update();
-    }
-
     Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
     double currentRotation = angle;
     double currentZoom = zoom;
@@ -434,7 +424,19 @@ std::optional<float> MapCamera2d::getLastVpMatrixZoom() {
 }
 
 /** this method is called just before the update methods on all layers */
-void MapCamera2d::update() { inertiaStep(); }
+void MapCamera2d::update() {
+    inertiaStep();
+
+    {
+        std::lock_guard<std::recursive_mutex> lock(animationMutex);
+        if (zoomAnimation)
+            std::static_pointer_cast<AnimationInterface>(zoomAnimation)->update();
+        if (rotationAnimation)
+            std::static_pointer_cast<AnimationInterface>(rotationAnimation)->update();
+        if (coordAnimation)
+            std::static_pointer_cast<AnimationInterface>(coordAnimation)->update();
+    }
+}
 
 std::vector<float> MapCamera2d::getInvariantModelMatrix(const ::Coord &coordinate, bool scaleInvariant, bool rotationInvariant) {
     Coord renderCoord = conversionHelper->convertToRenderSystem(coordinate);
