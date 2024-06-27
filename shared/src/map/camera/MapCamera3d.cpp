@@ -341,7 +341,7 @@ void MapCamera3d::removeListener(const std::shared_ptr<MapCameraListenerInterfac
 std::shared_ptr<::CameraInterface> MapCamera3d::asCameraInterface() { return shared_from_this(); }
 
 std::vector<float> MapCamera3d::getVpMatrix() {
-    if (mode == CameraMode3d::ONBOARDING_ROTATING_GLOBE || mode == CameraMode3d::ONBOARDING_ROTATING_SEMI_GLOBE || mode == CameraMode3d::ONBOARDING_CLOSE_ORBITAL) {
+    if (mode == CameraMode3d::ONBOARDING_ROTATING_GLOBE || mode == CameraMode3d::ONBOARDING_ROTATING_SEMI_GLOBE || mode == CameraMode3d::ONBOARDING_CLOSE_ORBITAL || mode == CameraMode3d::ONBOARDING_EVEN_CLOSER_ORBITAL) {
         focusPointPosition.y = 42;
         focusPointPosition.x = fmod(DateHelper::currentTimeMicros() * 0.000003 + 180.0, 360.0) - 180.0;
         mapInterface->invalidate();
@@ -1496,6 +1496,12 @@ void MapCamera3d::setCameraMode(CameraMode3d mode) {
             this->zoomMax = 70'000'000;
             targetZoom = 70'000'000;
             duration = 2000;
+            break;
+        case CameraMode3d::ONBOARDING_EVEN_CLOSER_ORBITAL:
+            this->zoomMin = 50'000'000;
+            this->zoomMax = 50'000'000;
+            targetZoom = 50'000'000;
+            duration = 1000;
             break;
         case CameraMode3d::ONBOARDING_FOCUS_ZURICH:
             this->zoomMin = LOCAL_MIN_ZOOM;
