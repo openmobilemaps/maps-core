@@ -341,20 +341,6 @@ void MapCamera3d::removeListener(const std::shared_ptr<MapCameraListenerInterfac
 std::shared_ptr<::CameraInterface> MapCamera3d::asCameraInterface() { return shared_from_this(); }
 
 std::vector<float> MapCamera3d::getVpMatrix() {
-    {
-        std::lock_guard<std::recursive_mutex> lock(animationMutex);
-        if (zoomAnimation)
-            std::static_pointer_cast<AnimationInterface>(zoomAnimation)->update();
-        if (rotationAnimation)
-            std::static_pointer_cast<AnimationInterface>(rotationAnimation)->update();
-        if (coordAnimation)
-            std::static_pointer_cast<AnimationInterface>(coordAnimation)->update();
-        if (pitchAnimation)
-            std::static_pointer_cast<AnimationInterface>(pitchAnimation)->update();
-        if (verticalDisplacementAnimation)
-            std::static_pointer_cast<AnimationInterface>(verticalDisplacementAnimation)->update();
-    }
-
     if (mode == CameraMode3d::ONBOARDING_ROTATING_GLOBE || mode == CameraMode3d::ONBOARDING_ROTATING_SEMI_GLOBE || mode == CameraMode3d::ONBOARDING_CLOSE_ORBITAL) {
         focusPointPosition.y = 42;
         focusPointPosition.x = fmod(DateHelper::currentTimeMicros() * 0.000003 + 180.0, 360.0) - 180.0;
@@ -496,7 +482,22 @@ std::optional<float> MapCamera3d::getLastVpMatrixZoom() {
 }
 
 /** this method is called just before the update methods on all layers */
-void MapCamera3d::update() { inertiaStep(); }
+void MapCamera3d::update() {
+    inertiaStep();
+    {
+        std::lock_guard<std::recursive_mutex> lock(animationMutex);
+        if (zoomAnimation)
+            std::static_pointer_cast<AnimationInterface>(zoomAnimation)->update();
+        if (rotationAnimation)
+            std::static_pointer_cast<AnimationInterface>(rotationAnimation)->update();
+        if (coordAnimation)
+            std::static_pointer_cast<AnimationInterface>(coordAnimation)->update();
+        if (pitchAnimation)
+            std::static_pointer_cast<AnimationInterface>(pitchAnimation)->update();
+        if (verticalDisplacementAnimation)
+            std::static_pointer_cast<AnimationInterface>(verticalDisplacementAnimation)->update();
+    }
+}
 
 std::vector<float> MapCamera3d::getInvariantModelMatrix(const ::Coord &coordinate, bool scaleInvariant, bool rotationInvariant) {
     Coord renderCoord = conversionHelper->convertToRenderSystem(coordinate);
