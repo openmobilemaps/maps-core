@@ -336,11 +336,12 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
 
     int numberOfCharacters = 0;
     int baseLineStartIndex = 0;
+    const auto &glyphs = fontResult->fontData->glyphs;
 
     for(const auto &i : splittedTextInfo) {
         if(i.glyphIndex >= 0) {
             assert(i.glyphIndex < fontResult->fontData->glyphs.size());
-            auto &d = fontResult->fontData->glyphs[i.glyphIndex];
+            auto &d = glyphs[i.glyphIndex];
 
             auto scale = fontSize * i.scale;
             auto size = Vec2D(d.boundingBoxSize.x * scale, d.boundingBoxSize.y * scale);
@@ -639,12 +640,13 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
     auto currentIndex = findReferencePointIndices();
 
     double size = 0;
+    const auto &glyphs = fontResult->fontData->glyphs;
 
     for(const auto &i : splittedTextInfo) {
         if(i.glyphIndex < 0) {
             size += spaceAdvance * fontSize * i.scale;
         } else {
-            auto &d = fontResult->fontData->glyphs[i.glyphIndex];
+            auto &d = glyphs[i.glyphIndex];
             auto advance = Vec2D(d.advance.x * fontSize * i.scale, d.advance.y * fontSize * i.scale);
             size += advance.x * (1.0 + letterSpacing);
         }
@@ -674,7 +676,7 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
             currentIndex = indexAtDistance(currentIndex, spaceAdvance * fontSize * i.scale, std::nullopt);
             index = 0;
         } else {
-            auto& d = fontResult->fontData->glyphs[i.glyphIndex];
+            auto& d = glyphs[i.glyphIndex];
             auto charSize = Vec2D(d.boundingBoxSize.x * fontSize * i.scale, d.boundingBoxSize.y * fontSize * i.scale);
             auto bearing = Vec2D(d.bearing.x * fontSize * i.scale, d.bearing.y * fontSize * i.scale);
             auto advance = Vec2D(d.advance.x * fontSize * i.scale, d.advance.y * fontSize * i.scale);
