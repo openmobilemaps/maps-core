@@ -32,6 +32,8 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
     const auto vpMatrix = camera->getVpMatrix();
     const auto vpMatrixPointer = (int64_t)vpMatrix.data();
 
+    const double factor = camera->getScalingFactor();
+
     const auto identityMatrixPointer = (int64_t) identityMatrix.data();
 
     renderingContext->setupDrawFrame();
@@ -42,7 +44,6 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
             const bool hasMask = maskObject != nullptr;
             const bool usesStencil = hasMask || pass->getRenderPassConfig().isPassMasked;
 
-            double factor = camera->getScalingFactor();
             const auto &renderObjects = pass->getRenderObjects();
 
             auto scissoringRect = pass->getScissoringRect();
