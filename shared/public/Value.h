@@ -44,6 +44,8 @@
 #include "ValueKeys.h"
 #include <mutex>
 #include <iomanip>
+#include <shared_mutex>
+#include <atomic>
 
 
 namespace std {
@@ -705,10 +707,15 @@ template<class ResultType>
 class ValueEvaluator {
 public:
     inline ResultType getResult(const std::shared_ptr<Value> &value, const EvaluationContext &context, const ResultType &defaultValue) {
-        std::lock_guard<std::mutex> lock(mutex);
         if (!value) {
             return defaultValue;
         }
+
+        if (isStatic.load() && staticValue) {
+            return *staticValue;
+        }
+
+        std::lock_guard<std::mutex> lock(mutex);
 
         if(value->isGettingPropertyValues()) {
             return value->evaluateOr(context, defaultValue);
@@ -719,19 +726,16 @@ public:
             staticValue = std::nullopt;
             usedKeysCollection = value->getUsedKeys();
 
-            isStatic = usedKeysCollection.empty();
+            bool isStatic_ = usedKeysCollection.empty();
 
-            if (isStatic) {
+            if (staticValue) {
                 staticValue = value->evaluateOr(context, defaultValue);
+                isStatic.store(isStatic_);
             } else {
                 isZoomDependent = usedKeysCollection.usedKeys.find("zoom");
                 isStateDependant = usedKeysCollection.isStateDependant();
             }
             lastValuePtr = value.get();
-        }
-
-        if (isStatic) {
-            return *staticValue;
         }
 
         if (isZoomDependent || (isStateDependant && !context.featureStateManager->empty())) {
@@ -759,7 +763,8 @@ private:
     std::optional<ResultType> staticValue;
     bool isZoomDependent = false;
     bool isStateDependant = false;
-    bool isStatic = false;
+    std::atomic<bool> isStatic = false;
+
     void* lastValuePtr = nullptr;
 };
 
