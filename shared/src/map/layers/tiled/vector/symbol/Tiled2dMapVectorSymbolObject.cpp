@@ -390,7 +390,7 @@ void Tiled2dMapVectorSymbolObject::setupIconProperties(std::vector<float> &posit
     countOffset += instanceCounts.icons;
 }
 
-void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &alphas, std::vector<float> &offsets, int &countOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, long long now) {
+void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &alphas, std::vector<float> &offsets, int &countOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, long long now, const Vec2I viewPortSize) {
 
     if (instanceCounts.icons == 0) {
         return;
@@ -433,8 +433,6 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &posi
     const auto iconHeight = spriteSize.y * iconSize * (is3d ? 1.0 : scaleFactor);
 
     const float scaledIconPadding = iconPadding * (is3d ? 1.0 : scaleFactor);
-
-    auto viewPortSize = mapInterface.lock()->getRenderingContext()->getViewportSize();
 
     scales[2 * countOffset] = iconWidth;
     scales[2 * countOffset + 1] = iconHeight;
@@ -583,7 +581,7 @@ void Tiled2dMapVectorSymbolObject::setupStretchIconProperties(std::vector<float>
     lastStretchIconUpdateScaleFactor = -1;
 }
 
-void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &alphas, std::vector<float> &stretchInfos, int &countOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, long long now) {
+void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &alphas, std::vector<float> &stretchInfos, int &countOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, long long now, const Vec2I viewPortSize) {
 
     if (instanceCounts.stretchedIcons == 0) {
         return;
@@ -785,7 +783,7 @@ void Tiled2dMapVectorSymbolObject::setupTextProperties(std::vector<float> &textu
     labelObject->setupProperties(textureCoordinates, styleIndices, countOffset, styleOffset, zoomIdentifier);
 }
 
-void Tiled2dMapVectorSymbolObject::updateTextProperties(std::vector<float> &positions, std::vector<float> &referencePositions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, long long now) {
+void Tiled2dMapVectorSymbolObject::updateTextProperties(std::vector<float> &positions, std::vector<float> &referencePositions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, long long now, const Vec2I viewPortSize) {
     if (instanceCounts.textCharacters ==  0 || !labelObject) {
         return;
     }
@@ -805,7 +803,7 @@ void Tiled2dMapVectorSymbolObject::updateTextProperties(std::vector<float> &posi
         countOffset += instanceCounts.textCharacters;
         return;
     }
-    auto viewPortSize = mapInterface.lock()->getRenderingContext()->getViewportSize();
+
     labelObject->updateProperties(positions, referencePositions, scales, rotations, styles, countOffset, styleOffset, zoomIdentifier, scaleFactor, animationCoordinator->isColliding(), rotation, alpha, isCoordinateOwner, now, viewPortSize);
 
     if (!animationCoordinator->isTextAnimating()) {

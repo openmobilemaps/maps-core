@@ -552,7 +552,7 @@ void Tiled2dMapVectorSymbolGroup::setupObjects(const std::shared_ptr<SpriteData>
     isInitialized = true;
 }
 
-void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const double rotation, const double scaleFactor, long long now) {
+void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const double rotation, const double scaleFactor, long long now, const Vec2I viewPortSize) {
     if (!isInitialized) {
         return;
     }
@@ -568,17 +568,17 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
             if (object->hasCustomTexture) {
                 auto &page = customTextures[object->customTexturePage];
                 int offset = (int)object->customTextureOffset;
-                object->updateIconProperties(page.iconPositions, page.iconScales, page.iconRotations, page.iconAlphas, page.iconOffsets, offset, zoomIdentifier,scaleFactor, rotation, now);
+                object->updateIconProperties(page.iconPositions, page.iconScales, page.iconRotations, page.iconAlphas, page.iconOffsets, offset, zoomIdentifier,scaleFactor, rotation, now, viewPortSize);
 
             } else {
                 object->updateIconProperties(iconPositions, iconScales, iconRotations, iconAlphas, iconOffsets, iconOffset, zoomIdentifier,
-                                             scaleFactor, rotation, now);
+                                             scaleFactor, rotation, now, viewPortSize);
             }
             object->updateStretchIconProperties(stretchedIconPositions, stretchedIconScales, stretchedIconRotations,
                                                 stretchedIconAlphas, stretchedIconStretchInfos, stretchedIconOffset, zoomIdentifier,
-                                                scaleFactor, rotation, now);
+                                                scaleFactor, rotation, now, viewPortSize);
             object->updateTextProperties(textPositions, textReferencePositions, textScales, textRotations, textStyles, textOffset, textStyleOffset,
-                                         zoomIdentifier, scaleFactor, rotation, now);
+                                         zoomIdentifier, scaleFactor, rotation, now, viewPortSize);
         }
 
         for (const auto &customDescriptor: customTextures) {
