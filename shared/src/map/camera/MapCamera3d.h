@@ -156,6 +156,8 @@ class MapCamera3d : public MapCameraInterface,
 
     std::vector<double> computeEllipseCoefficients();
 
+    bool coordIsFarAwayFromFocusPoint(const ::Coord & coord);
+
 protected:
     virtual std::tuple<std::vector<float>, std::vector<double>> getVpMatrix(const Coord &focusCoord, bool updateVariables);
 
