@@ -925,6 +925,12 @@ void Tiled2dMapVectorSymbolObject::collisionDetection(const double zoomIdentifie
         return;
     }
 
+    if (!(description->minZoom <= zoomIdentifier && description->maxZoom >= zoomIdentifier) || !getIsOpaque() || !isPlaced()) {
+        // not visible
+        setHideFromCollision(true);
+        return;
+    }
+
     auto visibleIn3d = true;
     {
         auto strongMapInterface = mapInterface.lock();
@@ -936,7 +942,7 @@ void Tiled2dMapVectorSymbolObject::collisionDetection(const double zoomIdentifie
         }
     }
 
-    if (!(description->minZoom <= zoomIdentifier && description->maxZoom >= zoomIdentifier) || !getIsOpaque() || !isPlaced() || !visibleIn3d) {
+    if(!visibleIn3d) {
         // not visible
         setHideFromCollision(true);
         return;
