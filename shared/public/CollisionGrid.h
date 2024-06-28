@@ -184,7 +184,7 @@ private:
 
         for (int16_t y = indexRange.yMin; y <= indexRange.yMax; y++) {
             for (int16_t x = indexRange.xMin; x <= indexRange.xMax; x++) {
-                gridRects[y][x].push_back(projectedRectangle);
+                gridRects[y][x].emplace_back(projectedRectangle);
             }
         }
         if (rectangle.contentHash != 0 && rectangle.symbolSpacing > 0) {
@@ -210,7 +210,7 @@ private:
                         }
                     }
                 }
-                gridRects[y][x].push_back(projectedRectangle);
+                gridRects[y][x].emplace_back(projectedRectangle);
             }
         }
 
