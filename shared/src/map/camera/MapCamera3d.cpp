@@ -643,8 +643,8 @@ bool MapCamera3d::onTouchDown(const ::Vec2F &posScreen) {
                     Coord(CoordinateSystemIdentifiers::EPSG4326(), 0.0, 0.0, lastOnTouchDownFocusCoord->z), false);
             lastOnTouchDownInverseVPMatrix = zeroInverseVPMatrix;
         }
-        lastOnTouchDownCoord = coordFromScreenPosition(lastOnTouchDownInverseVPMatrix, posScreen);
-        lastOnMoveCoord = lastOnTouchDownCoord;
+        lastOnTouchDownCoord = coordFromScreenPosition(posScreen);
+        lastOnMoveCoord = coordFromScreenPosition(lastOnTouchDownInverseVPMatrix, posScreen);
 #else
         lastOnTouchDownCoord = coordFromScreenPosition(posScreen);
 #endif
@@ -695,7 +695,11 @@ bool MapCamera3d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
     lastOnTouchDownPoint = newScreenPos;
 #ifdef ANDROID
     // TOOD: Current wip solution for more stable rotation on Android
+    if (!initialTouchDownPoint.has_value()) {
+        return false;
+    }
     auto newTouchDownCoord = coordFromScreenPosition(lastOnTouchDownInverseVPMatrix, newScreenPos);
+    auto lastOnTouchDownZeroCoord = coordFromScreenPosition(lastOnTouchDownInverseVPMatrix, initialTouchDownPoint.value());
 #else
     auto newTouchDownCoord = coordFromScreenPosition(newScreenPos);
 #endif
@@ -704,10 +708,10 @@ bool MapCamera3d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
         return false;
     }
 
-    double dx = -(newTouchDownCoord.x - lastOnTouchDownCoord->x);
-    double dy = -(newTouchDownCoord.y - lastOnTouchDownCoord->y);
-
 #ifdef ANDROID
+    double dx = -(newTouchDownCoord.x - lastOnTouchDownZeroCoord.x);
+    double dy = -(newTouchDownCoord.y - lastOnTouchDownZeroCoord.y);
+
     focusPointPosition.x = lastOnTouchDownFocusCoord->x + dx;
     focusPointPosition.y = lastOnTouchDownFocusCoord->y + dy;
 
@@ -719,6 +723,9 @@ bool MapCamera3d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
     }
     lastOnMoveCoord = newTouchDownCoord;
 #else
+    double dx = -(newTouchDownCoord.x - lastOnTouchDownCoord->x);
+    double dy = -(newTouchDownCoord.y - lastOnTouchDownCoord->y);
+
     focusPointPosition.x = focusPointPosition.x + dx;
     focusPointPosition.y = focusPointPosition.y + dy;
 #endif
