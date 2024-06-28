@@ -1228,7 +1228,7 @@ bool MapCamera3d::gluInvertMatrix(const std::vector<double> &m, std::vector<doub
 // padding in percentage, where 1.0 = rect is half of full width and height
 bool MapCamera3d::coordIsVisibleOnScreen(const ::Coord & coord, float paddingPc) {
     // 1. Check that coordinate is not on the back of the globe
-    if (coordIsOnFrontHalfOfGlobe(coord) == false) {
+    if (coordIsOnFrontHalfOfGlobe(coord) == false || coordIsFarAwayFromFocusPoint(coord)) {
         return false;
     }
 
@@ -1246,6 +1246,21 @@ bool MapCamera3d::coordIsVisibleOnScreen(const ::Coord & coord, float paddingPc)
     } else {
         return false;
     }
+}
+
+bool MapCamera3d::coordIsFarAwayFromFocusPoint(const ::Coord & coord) {
+    const auto coordinateConverter = CoordinateConversionHelperInterface::independentInstance();
+    Coord wgsC1 = coordinateConverter->convert(CoordinateSystemIdentifiers::EPSG4326(), focusPointPosition);
+    Coord wgsC2 = coordinateConverter->convert(CoordinateSystemIdentifiers::EPSG4326(), coord);
+
+    const double R = 6371; // Radius of the earth in meters
+    double latDistance = (wgsC2.y - wgsC1.y) * M_PI / 180.0;
+    double lonDistance = (wgsC2.x - wgsC1.x) * M_PI / 180.0;
+    double a = std::sin(latDistance / 2) * std::sin(latDistance / 2) +
+    std::cos(wgsC1.y * M_PI / 180.0) * std::cos(wgsC2.y * M_PI / 180.0) *
+    std::sin(lonDistance / 2) * std::sin(lonDistance / 2);
+    double c = 2 * std::atan2(std::sqrt(a), std::sqrt(1 - a));
+    return R * c > 4000;
 }
 
 bool MapCamera3d::coordIsOnFrontHalfOfGlobe(Coord coord) {

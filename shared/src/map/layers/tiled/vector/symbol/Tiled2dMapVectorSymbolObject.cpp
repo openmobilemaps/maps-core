@@ -19,6 +19,8 @@
 #include "Tiled2dMapVectorStyleParser.h"
 #include "CollisionUtil.h"
 #include "ExceptionLogger.h"
+#include "MapCamera3dInterface.h"
+#include "MapCamera3d.h"
 
 Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<MapInterface> &mapInterface,
                                                            const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
@@ -923,12 +925,22 @@ void Tiled2dMapVectorSymbolObject::collisionDetection(const double zoomIdentifie
         return;
     }
 
-    if (!(description->minZoom <= zoomIdentifier && description->maxZoom >= zoomIdentifier) || !getIsOpaque() || !isPlaced()) {
+    auto visibleIn3d = true;
+    {
+        auto strongMapInterface = mapInterface.lock();
+        auto camera3d = strongMapInterface ? strongMapInterface->getCamera()->asMapCamera3d() : nullptr;
+        if(camera3d != nullptr) {
+            if (auto cam = std::dynamic_pointer_cast<MapCamera3d>(camera3d)) {
+                visibleIn3d = !cam->coordIsFarAwayFromFocusPoint(coordinate);
+            }
+        }
+    }
+
+    if (!(description->minZoom <= zoomIdentifier && description->maxZoom >= zoomIdentifier) || !getIsOpaque() || !isPlaced() || !visibleIn3d) {
         // not visible
         setHideFromCollision(true);
         return;
     }
-
 
     bool willCollide = true;
     bool outside = true;
@@ -943,7 +955,6 @@ void Tiled2dMapVectorSymbolObject::collisionDetection(const double zoomIdentifie
             willCollide = false;
             outside = false;
         }
-
     } else {
         std::optional<std::vector<CollisionCircleF>> boundingCircles = getMapAlignedBoundingCircles(zoomIdentifier, textSymbolPlacement != TextSymbolPlacement::POINT, true);
         // Collide, if no valid boundingCircles
