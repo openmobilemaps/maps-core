@@ -727,7 +727,7 @@ public:
 
             bool isStatic_ = usedKeysCollection.empty();
 
-            if (staticValue) {
+            if (isStatic_) {
                 staticValue = value->evaluateOr(context, defaultValue);
                 isStatic.store(isStatic_);
             } else {
