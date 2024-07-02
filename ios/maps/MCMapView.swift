@@ -119,6 +119,13 @@ open class MCMapView: MTKView {
         backgroundDisable = true
     }
 
+    open override func willMove(toWindow newWindow: UIWindow?) {
+        super.willMove(toWindow: newWindow)
+        if newWindow == nil {
+            touchHandler.cancelAllTouches()
+        }
+    }
+
     /// The view’s background color.
     override public var backgroundColor: UIColor? {
         get {
