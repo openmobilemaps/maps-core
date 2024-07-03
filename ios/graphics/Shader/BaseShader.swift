@@ -12,7 +12,7 @@ import Foundation
 import MapCoreSharedModule
 import Metal
 
-open class BaseShader: MCShaderProgramInterface {
+open class BaseShader: MCShaderProgramInterface, @unchecked Sendable {
     open var blendMode: MCBlendMode = .NORMAL
 
     open var pipeline: MTLRenderPipelineState?

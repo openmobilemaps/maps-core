@@ -13,7 +13,7 @@ import MapCoreSharedModule
 import Metal
 import UIKit
 
-final class Icosahedron: BaseGraphicsObject {
+final class Icosahedron: BaseGraphicsObject, @unchecked Sendable {
     private var shader: MCShaderProgramInterface
 
     private var verticesBuffer: MTLBuffer?

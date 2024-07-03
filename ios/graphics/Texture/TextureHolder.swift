@@ -10,14 +10,14 @@
 
 import Foundation
 import MapCoreSharedModule
-import MetalKit
+@preconcurrency import MetalKit
 
 enum TextureHolderError: Error {
     case emptyData
 }
 
 @objc
-public class TextureHolder: NSObject {
+public class TextureHolder: NSObject, @unchecked Sendable {
     public let texture: MTLTexture
 
     let textureUsableSize: TextureUsableSize?

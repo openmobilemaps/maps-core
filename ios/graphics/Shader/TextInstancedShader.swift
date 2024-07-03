@@ -12,7 +12,7 @@ import Foundation
 import MapCoreSharedModule
 import Metal
 
-class TextInstancedShader: BaseShader {
+class TextInstancedShader: BaseShader, @unchecked Sendable {
 
     public let isUnitSphere: Bool
 

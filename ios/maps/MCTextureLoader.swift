@@ -16,7 +16,7 @@ import OSLog
 @available(iOS 14.0, *)
 private let logger = Logger(subsystem: "maps-core", category: "MCTextureLoader")
 
-open class MCTextureLoader: MCLoaderInterface {
+open class MCTextureLoader: MCLoaderInterface, @unchecked Sendable {
     public let session: URLSession
 
     public var isRasterDebugModeEnabled: Bool
@@ -80,7 +80,7 @@ open class MCTextureLoader: MCLoaderInterface {
             wasCached = true
         }
 
-        var task = session.dataTask(with: urlRequest) { [weak self] data, response_, error_ in
+        var task = session.dataTask(with: urlRequest) { [weak self, wasCached] data, response_, error_ in
             guard let self else { return }
 
             self.taskQueue.sync {

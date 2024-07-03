@@ -9,7 +9,7 @@ import Foundation
 import MapCoreSharedModule
 
 @available(iOS 13.0, *)
-open class TiledRasterLayer: ObservableObject {
+open class TiledRasterLayer: Layer, ObservableObject {
 
     public init(config: MCTiled2dMapLayerConfig, loaders: [MCLoaderInterface] = [MCTextureLoader()], callbackHandler: MCTiled2dMapRasterLayerCallbackInterface? = nil, layerIndex: Int? = nil) {
         self.tiledLayerInterface = MCTiled2dMapRasterLayerInterface.create(config, loaders: loaders) !! fatalError("create is non-null")
@@ -34,9 +34,5 @@ open class TiledRasterLayer: ObservableObject {
 
     public var layerIndex: Int?
 
-}
-
-@available(iOS 13.0, *)
-extension TiledRasterLayer: Layer {
     public var interface: MCLayerInterface? { tiledLayerInterface.asLayerInterface() !! fatalError("asLayerInterface is non-null") }
 }

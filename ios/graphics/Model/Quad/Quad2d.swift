@@ -13,7 +13,7 @@ import MapCoreSharedModule
 import Metal
 import UIKit
 
-final class Quad2d: BaseGraphicsObject {
+final class Quad2d: BaseGraphicsObject, @unchecked Sendable {
     private var verticesBuffer: MTLBuffer?
 
     private var indicesBuffer: MTLBuffer?

@@ -13,7 +13,7 @@ import MapCoreSharedModule
 import Metal
 import UIKit
 
-class PolygonPatternGroupShader: BaseShader {
+class PolygonPatternGroupShader: BaseShader, @unchecked Sendable {
     // MARK: - Variables
 
     let fadeInPattern : Bool

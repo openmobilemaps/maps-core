@@ -452,7 +452,7 @@ open class TouchHandler: MCTouchInterface {
     
     open func clearTouch() {}
     
-    @MainActor open func onLongPress(_ posScreen: MCVec2F) -> Bool {
+    open func onLongPress(_ posScreen: MCVec2F) -> Bool {
         false
     }
 }

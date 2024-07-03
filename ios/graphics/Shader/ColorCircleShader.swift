@@ -12,7 +12,7 @@ import Foundation
 import MapCoreSharedModule
 import Metal
 
-class ColorCircleShader: BaseShader {
+class ColorCircleShader: BaseShader, @unchecked Sendable {
     private var color = SIMD4<Float>([0.0, 0.0, 0.0, 0.0])
 
     private var miter: Float = 0.0

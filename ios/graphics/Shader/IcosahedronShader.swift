@@ -13,7 +13,7 @@ import MapCoreSharedModule
 import Metal
 import UIKit
 
-class IcosahedronShader: BaseShader {
+class IcosahedronShader: BaseShader, @unchecked Sendable {
     private var color = SIMD4<Float>([0.0, 0.0, 0.0, 0.0])
 
     private var stencilState: MTLDepthStencilState?

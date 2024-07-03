@@ -12,7 +12,7 @@ import Foundation
 import MapCoreSharedModule
 import Metal
 
-final class PolygonGroup2d: BaseGraphicsObject {
+final class PolygonGroup2d: BaseGraphicsObject, @unchecked Sendable {
     private var shader: PolygonGroupShader
 
     private var verticesBuffer: MTLBuffer?
