@@ -10,8 +10,8 @@
 
 import MetalKit
 
-public class MetalContext {
-    public static let current: MetalContext = {
+public class MetalContext: @unchecked Sendable {
+    nonisolated(unsafe) public static let current: MetalContext = {
         guard let device = MTLCreateSystemDefaultDevice() else {
             // Metal is available in iOS 13 and tvOS 13 simulators when running on macOS 10.15.
             fatalError("No GPU device found. Are you testing with iOS 12 Simulator?")

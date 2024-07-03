@@ -16,7 +16,7 @@ struct PolygonVertex: Equatable {
     var stylingIndex: Float = 0.0
 
     /// Returns the descriptor to use when passed to a metal shader
-    static let descriptor: MTLVertexDescriptor = {
+    nonisolated(unsafe) static let descriptor: MTLVertexDescriptor = {
         let vertexDescriptor = MTLVertexDescriptor()
         var offset = 0
         let bufferIndex = 0

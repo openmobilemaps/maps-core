@@ -12,7 +12,7 @@ import Foundation
 import MapCoreSharedModule
 import Metal
 
-class ColorShader: BaseShader {
+class ColorShader: BaseShader, @unchecked Sendable {
     private var color = SIMD4<Float>([0.0, 0.0, 0.0, 0.0])
 
     private var stencilState: MTLDepthStencilState?

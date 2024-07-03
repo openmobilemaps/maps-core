@@ -46,7 +46,7 @@ struct StretchShaderInfoSwift: Equatable {
     }
 }
 
-class StretchShader: BaseShader {
+class StretchShader: BaseShader, @unchecked Sendable {
     private let alphaBuffer: MTLBuffer
     private var alphaContent: UnsafeMutablePointer<Float>
 

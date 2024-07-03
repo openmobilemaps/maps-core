@@ -13,7 +13,7 @@ import MapCoreSharedModule
 import Metal
 import UIKit
 
-class SphereEffectShader: BaseShader {
+class SphereEffectShader: BaseShader, @unchecked Sendable {
 
     private var ellipse: [Float] = []
 

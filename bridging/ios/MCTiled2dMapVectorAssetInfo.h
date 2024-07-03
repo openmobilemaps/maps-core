@@ -5,6 +5,7 @@
 #import "MCTextureHolderInterface.h"
 #import <Foundation/Foundation.h>
 
+NS_SWIFT_SENDABLE
 @interface MCTiled2dMapVectorAssetInfo : NSObject
 - (nonnull instancetype)init NS_UNAVAILABLE;
 + (nonnull instancetype)new NS_UNAVAILABLE;

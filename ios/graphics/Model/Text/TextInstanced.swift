@@ -12,7 +12,7 @@ import Foundation
 import MapCoreSharedModule
 import Metal
 
-final class TextInstanced: BaseGraphicsObject {
+final class TextInstanced: BaseGraphicsObject, @unchecked Sendable {
     private var shader: TextInstancedShader
 
     private var verticesBuffer: MTLBuffer?

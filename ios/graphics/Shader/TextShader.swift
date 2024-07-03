@@ -12,7 +12,7 @@ import Foundation
 import MapCoreSharedModule
 import Metal
 
-class TextShader: BaseShader {
+class TextShader: BaseShader, @unchecked Sendable {
     private var opacity: Float = 1.0
     private var color = SIMD4<Float>([0.0, 0.0, 0.0, 0.0])
     private var haloColor = SIMD4<Float>([0.0, 0.0, 0.0, 0.0])
