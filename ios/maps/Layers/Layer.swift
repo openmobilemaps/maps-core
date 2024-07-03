@@ -8,7 +8,6 @@
 import Foundation
 import MapCoreSharedModule
 
-@MainActor
 public protocol Layer: Sendable {
     var interface: MCLayerInterface? { get }
     var layerIndex: Int? { get }
