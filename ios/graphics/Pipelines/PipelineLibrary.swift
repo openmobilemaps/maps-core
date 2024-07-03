@@ -260,7 +260,7 @@ public class PipelineLibrary: StaticMetalLibrary<String, MTLRenderPipelineState>
     }
 }
 
-extension MCBlendMode: Codable, @retroactive CaseIterable {
+extension MCBlendMode: Codable, CaseIterable {
     public static var allCases: [MCBlendMode] {
         [.NORMAL, .MULTIPLY]
     }
