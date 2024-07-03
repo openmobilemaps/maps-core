@@ -794,7 +794,7 @@ public:
         return false;
     };
 
-    bool isGettingPropertyValues() {
+    bool isGettingPropertyValues() override {
         return true;
     }
 

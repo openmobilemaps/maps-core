@@ -14,7 +14,7 @@ import Metal
 import UIKit
 
 @objc
-public class RenderingContext: NSObject {
+public class RenderingContext: NSObject, @unchecked Sendable {
     public weak var encoder: MTLRenderCommandEncoder?
     public weak var computeEncoder: MTLComputeCommandEncoder?
     public weak var sceneView: MCMapView?
@@ -137,7 +137,9 @@ extension RenderingContext: MCRenderingContextInterface {
     public func getViewportSize() -> MCVec2I { viewportSize }
 
     public func setBackgroundColor(_ color: MCColor) {
-        sceneView?.clearColor = color.metalColor
+        Task { @MainActor in
+            self.sceneView?.clearColor = color.metalColor
+        }
     }
 
     public func applyScissorRect(_ scissorRect: MCRectI?) {
@@ -145,9 +147,20 @@ extension RenderingContext: MCRenderingContextInterface {
             encoder?.setScissorRect(sr.scissorRect)
             isScissoringDirty = true
         } else if isScissoringDirty {
-            var s = self.sceneView?.frame.size ?? CGSize(width: 1.0, height: 1.0)
-            s.width = UIScreen.main.nativeScale * s.width
-            s.height = UIScreen.main.nativeScale * s.height
+            var s = CGSize(width: 1.0, height: 1.0)
+            if Thread.isMainThread {
+                MainActor.assumeIsolated {
+                    s = self.sceneView?.frame.size ?? CGSize(width: 1.0, height: 1.0)
+                    s.width = UIScreen.main.nativeScale * s.width
+                    s.height = UIScreen.main.nativeScale * s.height
+                }
+            } else {
+                DispatchQueue.main.sync {
+                    s = self.sceneView?.frame.size ?? CGSize(width: 1.0, height: 1.0)
+                    s.width = UIScreen.main.nativeScale * s.width
+                    s.height = UIScreen.main.nativeScale * s.height
+                }
+            }
 
             var size = viewportSize.scissorRect
             size.width = min(size.width, Int(s.width))

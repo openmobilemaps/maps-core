@@ -12,7 +12,7 @@ import Foundation
 import MapCoreSharedModule
 import Metal
 
-final class LineGroup2d: BaseGraphicsObject {
+final class LineGroup2d: BaseGraphicsObject, @unchecked Sendable {
     private var shader: LineGroupShader
 
     private var lineVerticesBuffer: MTLBuffer?

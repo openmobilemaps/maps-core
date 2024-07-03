@@ -11,6 +11,7 @@
 import MapCoreSharedModule
 import UIKit
 
+@MainActor
 open class MCMapViewTouchHandler: NSObject {
     private var touchHandler: MCTouchHandlerInterface?
 
@@ -144,6 +145,7 @@ open class MCMapViewTouchHandler: NSObject {
     }
 }
 
+@MainActor
 private extension Set<UITouch> {
     func asMCTouchLocation(in view: UIView, scale: Float) -> [MCVec2F] {
         map {

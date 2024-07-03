@@ -9,11 +9,11 @@
  */
 
 import Foundation
-@_exported import MapCoreSharedModule
+@_exported @preconcurrency import MapCoreSharedModule
 import MetalKit
 import os
 
-open class MCMapView: MTKView {
+open class MCMapView: MTKView, @unchecked Sendable {
     public let mapInterface: MCMapInterface
     private let renderingContext: RenderingContext
 
@@ -212,7 +212,7 @@ extension MCMapView: MTKViewDelegate {
         }
     }
 
-    public func renderToImage(size: CGSize, timeout: Float, bounds: MCRectCoord, callbackQueue: DispatchQueue = .main, callback: @escaping (UIImage?, MCLayerReadyState) -> Void) {
+    public func renderToImage(size: CGSize, timeout: Float, bounds: MCRectCoord, callbackQueue: DispatchQueue = .main, callback: @escaping @Sendable (UIImage?, MCLayerReadyState) -> Void) {
         renderToImageQueue.async {
             DispatchQueue.main.sync {
                 self.frame = CGRect(origin: .zero, size: .init(width: size.width / UIScreen.main.scale, height: size.height / UIScreen.main.scale))
@@ -225,7 +225,9 @@ extension MCMapView: MTKViewDelegate {
             mapReadyCallbacks.callback = callback
             mapReadyCallbacks.callbackQueue = callbackQueue
 
-            self.mapInterface.drawReadyFrame(bounds, timeout: timeout, callbacks: mapReadyCallbacks)
+            MainActor.assumeIsolated {
+                self.mapInterface.drawReadyFrame(bounds, timeout: timeout, callbacks: mapReadyCallbacks)
+            }
         }
     }
 }
@@ -385,7 +387,7 @@ extension MCMapView : UIGestureRecognizerDelegate {
     }
 }
 
-private class MCMapViewMapReadyCallbacks: MCMapReadyCallbackInterface {
+private class MCMapViewMapReadyCallbacks: MCMapReadyCallbackInterface, @unchecked Sendable {
     public weak var delegate: MCMapView?
     public var callback: ((UIImage?, MCLayerReadyState) -> Void)?
     public var callbackQueue: DispatchQueue?
@@ -395,21 +397,25 @@ private class MCMapViewMapReadyCallbacks: MCMapReadyCallbackInterface {
         guard let delegate = self.delegate else { return }
 
         semaphore.wait()
+        MainActor.assumeIsolated {
 
-        delegate.draw(in: delegate)
+            delegate.draw(in: delegate)
 
-        callbackQueue?.async {
-            switch state {
-                case .NOT_READY:
-                    break
-                case .ERROR, .TIMEOUT_ERROR:
-                    self.callback?(nil, state)
-                case .READY:
-                    self.callback?(delegate.currentDrawableImage(), state)
-                @unknown default:
-                    break
+            callbackQueue?.async {
+                switch state {
+                    case .NOT_READY:
+                        break
+                    case .ERROR, .TIMEOUT_ERROR:
+                        self.callback?(nil, state)
+                    case .READY:
+                        MainActor.assumeIsolated {
+                            self.callback?(delegate.currentDrawableImage(), state)
+                        }
+                    @unknown default:
+                        break
+                }
+                self.semaphore.signal()
             }
-            self.semaphore.signal()
         }
     }
 }

@@ -13,7 +13,7 @@ import MetalKit
 
 public struct LineVertex: Equatable {
     /// Returns the descriptor to use when passed to a metal shader
-    public static let descriptor: MTLVertexDescriptor = {
+    nonisolated(unsafe) public static let descriptor: MTLVertexDescriptor = {
         let vertexDescriptor = MTLVertexDescriptor()
         var offset = 0
         let bufferIndex = 0

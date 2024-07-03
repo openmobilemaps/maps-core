@@ -13,7 +13,7 @@ import MapCoreSharedModule
 import Metal
 import UIKit
 
-class PolygonGroupShader: BaseShader {
+class PolygonGroupShader: BaseShader, @unchecked Sendable {
     var polygonStyleBuffer: MTLBuffer?
 
     let isStriped : Bool

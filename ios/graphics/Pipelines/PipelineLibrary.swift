@@ -248,7 +248,7 @@ public enum PipelineType: String, CaseIterable, Codable {
     }
 }
 
-public class PipelineLibrary: StaticMetalLibrary<String, MTLRenderPipelineState> {
+public class PipelineLibrary: StaticMetalLibrary<String, MTLRenderPipelineState>, @unchecked Sendable{
     init(device: MTLDevice) throws {
         try super.init(Pipeline.allCases.map(\.json)) { key -> MTLRenderPipelineState in
             guard let pipeline = Pipeline(json: key) else {
@@ -260,7 +260,7 @@ public class PipelineLibrary: StaticMetalLibrary<String, MTLRenderPipelineState>
     }
 }
 
-extension MCBlendMode: Codable, CaseIterable {
+extension MCBlendMode: Codable, @retroactive CaseIterable {
     public static var allCases: [MCBlendMode] {
         [.NORMAL, .MULTIPLY]
     }

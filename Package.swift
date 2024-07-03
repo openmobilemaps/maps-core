@@ -5,7 +5,7 @@ import PackageDescription
 let package = Package(
     name: "MapCore",
     platforms: [
-        .iOS(.v11),
+        .iOS(.v13),
         .macOS(.v10_13),
     ],
     products: [
@@ -23,7 +23,7 @@ let package = Package(
         ),
     ],
     dependencies: [
-        .package(url: "https://github.com/UbiqueInnovation/djinni.git", .upToNextMajor(from: "1.0.7")),
+        .package(url: "https://github.com/UbiqueInnovation/djinni.git", .branch("release/1.0.8")),
     ],
     targets: [
         .target(
@@ -116,6 +116,9 @@ let package = Package(
             exclude: ["readme.md"],
             resources: [
                 .process("graphics/Shader/Metal/"),
+            ],
+            swiftSettings: [
+                .unsafeFlags(["-Xfrontend", "-strict-concurrency=complete"]),
             ]
         ),
         .target(
@@ -124,7 +127,10 @@ let package = Package(
                 "MapCoreSharedModuleCpp"
             ],
             path: "bridging/ios",
-            publicHeadersPath: ""
+            publicHeadersPath: "",
+            swiftSettings: [
+                .unsafeFlags(["-Xfrontend", "-strict-concurrency=complete"])
+            ]
         ),
         .target(
             name: "MapCoreSharedModuleCpp",

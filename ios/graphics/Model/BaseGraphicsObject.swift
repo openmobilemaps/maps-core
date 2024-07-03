@@ -12,7 +12,7 @@ import Foundation
 import MapCoreSharedModule
 import Metal
 
-open class BaseGraphicsObject {
+open class BaseGraphicsObject: @unchecked Sendable {
     private weak var context: MCRenderingContextInterface!
 
     public let device: MTLDevice

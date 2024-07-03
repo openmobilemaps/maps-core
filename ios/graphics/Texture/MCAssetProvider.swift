@@ -34,9 +34,17 @@ open class MCAssetProvider: MCTiled2dMapVectorLayerSymbolDelegateInterface {
     var images: [String: UIImage] = [:]
 
     for featureInfo in featureInfos {
-      images[featureInfo.identifier] = getImageFor(for: featureInfo, layerIdentifier: layerIdentifier)
+        images[featureInfo.identifier] = getImageFor(for: featureInfo, layerIdentifier: layerIdentifier)
     }
-    let scale = UIScreen.main.nativeScale
+    let scale = if Thread.isMainThread {
+        MainActor.assumeIsolated {
+            UIScreen.main.nativeScale
+        }
+    } else {
+        DispatchQueue.main.sync {
+            UIScreen.main.nativeScale
+        }
+    }
     let packerResult = MCRectanglePacker.pack(images.mapValues { MCVec2I(x: Int32($0.size.width * scale), y: Int32($0.size.height * scale)) }, maxPageSize: MCVec2I(x: 4096, y: 4096))
 
     var results = [MCTiled2dMapVectorAssetInfo]()

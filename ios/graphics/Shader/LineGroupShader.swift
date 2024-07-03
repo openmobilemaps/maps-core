@@ -13,7 +13,7 @@ import MapCoreSharedModule
 import Metal
 import UIKit
 
-class LineGroupShader: BaseShader {
+class LineGroupShader: BaseShader, @unchecked Sendable {
     var lineStyleBuffer: MTLBuffer?
 
     var screenPixelAsRealMeterFactor: Float = 1.0

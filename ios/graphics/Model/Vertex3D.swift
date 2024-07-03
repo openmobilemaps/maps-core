@@ -18,7 +18,7 @@ public struct Vertex3D: Equatable {
     /// The texture coordinates mapped to the vertex in U-V coordinate space
     var textureCoordinate: SIMD2<Float>
     /// Returns the descriptor to use when passed to a metal shader
-    public static let descriptor: MTLVertexDescriptor = {
+    nonisolated(unsafe) public static let descriptor: MTLVertexDescriptor = {
         let vertexDescriptor = MTLVertexDescriptor()
         var offset = 0
         let bufferIndex = 0

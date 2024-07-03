@@ -12,7 +12,7 @@ import Foundation
 import MapCoreSharedModule
 import Metal
 
-class AlphaInstancedShader: BaseShader {
+class AlphaInstancedShader: BaseShader, @unchecked Sendable {
     private let shader: PipelineType
     public let isUnitSphere: Bool
 
