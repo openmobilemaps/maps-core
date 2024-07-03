@@ -9,7 +9,7 @@ import Foundation
 import MapCoreSharedModule
 
 @available(iOS 13.0, *)
-open class VectorLayer: Layer, ObservableObject {
+open class VectorLayer: Layer, ObservableObject, @unchecked Sendable {
 
     public init(_ layerName: String = UUID().uuidString,
                 styleURL: String,
