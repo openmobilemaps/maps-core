@@ -234,7 +234,7 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
          */
 
 
-        auto focusPointView = transformToView(focusPointClampedToTile, viewMatrix);
+        auto focusPointClampedView = transformToView(focusPointClampedToTile, viewMatrix);
         auto focusPointSampleXView = transformToView(focusPointSampleX, viewMatrix);
         auto focusPointSampleYView = transformToView(focusPointSampleY, viewMatrix);
 
@@ -256,8 +256,10 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
             diffCenterViewBottomRight.z < 0.0) {
             continue;
         }
-
-        if (!isKeptLevel) {
+        auto samplePointOriginViewScreen = projectToScreen(focusPointClampedView, projectionMatrix);
+        if (!isKeptLevel && 
+            (samplePointOriginViewScreen.x < -1.0 || samplePointOriginViewScreen.x > 1.0 ||
+            samplePointOriginViewScreen.y < -1.0 || samplePointOriginViewScreen.y > 1.0)) {
             if (mapConfig.mapCoordinateSystem.identifier == CoordinateSystemIdentifiers::UnitSphere()) {
                 // v(0,0,+1) = unit-vector out of screen
                 float topLeftHA = 180.0 / M_PI * atan2(topLeftView.x, -topLeftView.z);
@@ -353,7 +355,6 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
         updateBounds(viewBoundsBottomRight.y, bottomRight.y, !topToBottom);
         updateBounds(viewBoundsBottomLeft.y, bottomLeft.y, !topToBottom);
 
-        auto samplePointOriginViewScreen = projectToScreen(focusPointView, projectionMatrix);
         auto samplePointYViewScreen = projectToScreen(focusPointSampleYView, projectionMatrix);
         auto samplePointXViewScreen = projectToScreen(focusPointSampleXView, projectionMatrix);
 
