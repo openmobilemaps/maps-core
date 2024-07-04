@@ -81,8 +81,6 @@ public:
         return false;
     }
 
-#include <vector>
-
     struct CollisionEnvironment {
         const std::vector<float> &vpMatrix;
         const bool is3d;
