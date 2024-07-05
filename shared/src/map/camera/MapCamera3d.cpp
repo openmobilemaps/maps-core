@@ -350,7 +350,12 @@ std::vector<float> MapCamera3d::getVpMatrix() {
     return std::get<0>(getVpMatrix(focusPointPosition, true));
 }
 
+void MapCamera3d::setHardwareVpMatrix(const std::vector<float> & vpMatrix) {
+    hardwareVpMatrix = vpMatrix;
+}
+
 std::tuple<std::vector<float>, std::vector<double>> MapCamera3d::getVpMatrix(const Coord &focusCoord, bool updateVariables) {
+
     Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
 
     std::vector<float> newViewMatrix(16, 0.0);
@@ -409,7 +414,20 @@ std::tuple<std::vector<float>, std::vector<double>> MapCamera3d::getVpMatrix(con
 
 
     std::vector<float> newVpMatrix(16, 0.0);
-    Matrix::multiplyMM(newVpMatrix, 0, newProjectionMatrix, 0, newViewMatrix, 0);
+    if (hardwareVpMatrix.size() == 16) {
+        Matrix::setIdentityM(newViewMatrix, 0);
+        Matrix::translateM(newViewMatrix, 0, 0.0, cameraPitch, 0.0);
+        cameraPitch += 0.00001;
+        Matrix::rotateM(newViewMatrix, 0, -angle, 1.0, 0.0, 0.0);
+        angle += 0.1 ;
+        Matrix::scaleM(newViewMatrix, 0, 0.2, 0.2, 0.2);
+        Matrix::multiplyMM(newVpMatrix, 0, hardwareVpMatrix, 0, newViewMatrix, 0);
+    }
+    else {
+        Matrix::multiplyMM(newVpMatrix, 0, newProjectionMatrix, 0, newViewMatrix, 0);
+    }
+
+
 
     std::vector<double> vpMatrixD = {
             static_cast<double>(newVpMatrix[0]),

@@ -94,6 +94,8 @@ class MapCamera3d : public MapCameraInterface,
 
     std::optional<float> getLastVpMatrixZoom() override;
 
+    virtual void setHardwareVpMatrix(const std::vector<float> & vpMatrix) override;
+
     /** this method is called just before the update methods on all layers */
     virtual void update() override;
 
@@ -278,6 +280,7 @@ protected:
 
     void checkForRubberBandEffect();
 
+    std::vector<float> hardwareVpMatrix = std::vector<float>(0, 0.0);
     std::vector<float> vpMatrix = std::vector<float>(16, 0.0);
     std::vector<double> inverseVPMatrix = std::vector<double>(16, 0.0);
     std::vector<float> viewMatrix = std::vector<float>(16, 0.0);

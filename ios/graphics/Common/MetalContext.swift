@@ -32,7 +32,7 @@ public class MetalContext: @unchecked Sendable {
     let commandQueue: MTLCommandQueue
     public let library: MTLLibrary
 
-    let colorPixelFormat: MTLPixelFormat = .bgra8Unorm
+    let colorPixelFormat: MTLPixelFormat = .bgra8Unorm_srgb
     let textureLoader: MTKTextureLoader
 
     public lazy var pipelineLibrary: PipelineLibrary = try! PipelineLibrary(device: self.device)

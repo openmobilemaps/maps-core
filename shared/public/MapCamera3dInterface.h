@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <vector>
+
 enum class CameraMode3d;
 
 class MapCamera3dInterface {
@@ -12,4 +14,6 @@ public:
     virtual void setCameraMode(CameraMode3d mode) = 0;
 
     virtual CameraMode3d getCameraMode() = 0;
+
+    virtual void setHardwareVpMatrix(const std::vector<float> & vpMatrix) = 0;
 };

@@ -11,4 +11,6 @@
 
 - (MCCameraMode3d)getCameraMode;
 
+- (void)setHardwareVpMatrix:(nonnull NSArray<NSNumber *> *)vpMatrix;
+
 @end

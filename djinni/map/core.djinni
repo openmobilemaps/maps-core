@@ -187,6 +187,7 @@ map_camera_interface = interface +c {
 map_camera_3d_interface = interface +c {
 	set_camera_mode(mode: camera_mode_3d);
     get_camera_mode(): camera_mode_3d;
+    set_hardware_vp_matrix(vp_matrix: list<f32>);
 }
 
 camera_mode_3d = enum {

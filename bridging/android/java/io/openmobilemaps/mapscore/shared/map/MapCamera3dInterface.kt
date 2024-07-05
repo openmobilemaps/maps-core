@@ -12,6 +12,8 @@ abstract class MapCamera3dInterface {
 
     abstract fun getCameraMode(): CameraMode3d
 
+    abstract fun setHardwareVpMatrix(vpMatrix: ArrayList<Float>)
+
     private class CppProxy : MapCamera3dInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -38,5 +40,11 @@ abstract class MapCamera3dInterface {
             return native_getCameraMode(this.nativeRef)
         }
         private external fun native_getCameraMode(_nativeRef: Long): CameraMode3d
+
+        override fun setHardwareVpMatrix(vpMatrix: ArrayList<Float>) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setHardwareVpMatrix(this.nativeRef, vpMatrix)
+        }
+        private external fun native_setHardwareVpMatrix(_nativeRef: Long, vpMatrix: ArrayList<Float>)
     }
 }

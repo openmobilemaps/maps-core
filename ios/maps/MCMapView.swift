@@ -39,7 +39,7 @@ open class MCMapView: MTKView, @unchecked Sendable {
                                                        renderingContext: renderingContext,
                                                        mapConfig: mapConfig,
                                                        scheduler: MCThreadPoolScheduler.create(),
-                                                       pixelDensity: pixelsPerInch ?? Float(UIScreen.pixelsPerInch), 
+                                                       pixelDensity: pixelsPerInch ?? Float(DevicePpi.pixelsPerInch), 
                                                        is3D: is3D) else {
             fatalError("Can't create MCMapInterface")
         }
@@ -202,7 +202,7 @@ extension MCMapView: MTKViewDelegate {
     public func renderToImage(size: CGSize, timeout: Float, bounds: MCRectCoord, callbackQueue: DispatchQueue = .main, callback: @escaping @Sendable (UIImage?, MCLayerReadyState) -> Void) {
         renderToImageQueue.async {
             DispatchQueue.main.sync {
-                self.frame = CGRect(origin: .zero, size: .init(width: size.width / UIScreen.main.scale, height: size.height / UIScreen.main.scale))
+                self.frame = CGRect(origin: .zero, size: .init(width: size.width / DevicePpi.scale, height: size.height / DevicePpi.scale))
                 self.setNeedsLayout()
                 self.layoutIfNeeded()
             }

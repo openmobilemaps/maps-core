@@ -28,6 +28,8 @@ public class RenderingContext: NSObject, @unchecked Sendable {
         descriptor.depthStencilPassOperation = .replace
         descriptor.writeMask = 0b1100_0000
         let depthStencilDescriptor = MTLDepthStencilDescriptor()
+        depthStencilDescriptor.depthCompareFunction = .greaterEqual
+        depthStencilDescriptor.isDepthWriteEnabled = true
         depthStencilDescriptor.frontFaceStencil = descriptor
         depthStencilDescriptor.backFaceStencil = descriptor
         return MetalContext.current.device.makeDepthStencilState(descriptor: depthStencilDescriptor)
@@ -41,6 +43,8 @@ public class RenderingContext: NSObject, @unchecked Sendable {
         descriptor.depthStencilPassOperation = .replace
         descriptor.writeMask = 0b1100_0000
         let depthStencilDescriptor = MTLDepthStencilDescriptor()
+        depthStencilDescriptor.depthCompareFunction = .greaterEqual
+        depthStencilDescriptor.isDepthWriteEnabled = true
         depthStencilDescriptor.frontFaceStencil = descriptor
         depthStencilDescriptor.backFaceStencil = descriptor
         return MetalContext.current.device.makeDepthStencilState(descriptor: depthStencilDescriptor)
@@ -51,6 +55,8 @@ public class RenderingContext: NSObject, @unchecked Sendable {
         descriptor.stencilCompareFunction = .always
         descriptor.depthStencilPassOperation = .keep
         let depthStencilDescriptor = MTLDepthStencilDescriptor()
+        depthStencilDescriptor.depthCompareFunction = .greaterEqual
+        depthStencilDescriptor.isDepthWriteEnabled = true
         depthStencilDescriptor.frontFaceStencil = descriptor
         depthStencilDescriptor.backFaceStencil = descriptor
         return MetalContext.current.device.makeDepthStencilState(descriptor: depthStencilDescriptor)
@@ -150,14 +156,14 @@ extension RenderingContext: MCRenderingContextInterface {
             if Thread.isMainThread {
                 MainActor.assumeIsolated {
                     s = self.sceneView?.frame.size ?? CGSize(width: 1.0, height: 1.0)
-                    s.width = UIScreen.main.nativeScale * s.width
-                    s.height = UIScreen.main.nativeScale * s.height
+                    s.width = DevicePpi.nativeScale * s.width
+                    s.height = DevicePpi.nativeScale * s.height
                 }
             } else {
                 DispatchQueue.main.sync {
                     s = self.sceneView?.frame.size ?? CGSize(width: 1.0, height: 1.0)
-                    s.width = UIScreen.main.nativeScale * s.width
-                    s.height = UIScreen.main.nativeScale * s.height
+                    s.width = DevicePpi.nativeScale * s.width
+                    s.height = DevicePpi.nativeScale * s.height
                 }
             }
 

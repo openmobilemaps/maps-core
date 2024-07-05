@@ -64,11 +64,11 @@ open class MCFontLoader: NSObject, MCFontLoaderInterface {
 
                     let pixelsPerInch = if Thread.isMainThread {
                         MainActor.assumeIsolated {
-                            UIScreen.pixelsPerInch
+                            DevicePpi.pixelsPerInch
                         }
                     } else {
                         DispatchQueue.main.sync {
-                            UIScreen.pixelsPerInch
+                            DevicePpi.pixelsPerInch
                         }
                     }
 
