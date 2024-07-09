@@ -35,7 +35,7 @@ public:
                            float screenDensityPpi,
                            std::string layerName);
 
-    std::unordered_set<Tiled2dMapVectorTileInfo> getCurrentTiles();
+                                                            VectorSet<Tiled2dMapVectorTileInfo> getCurrentTiles();
 
     virtual void pause() override;
 

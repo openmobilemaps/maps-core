@@ -10,5 +10,5 @@
 
 #pragma once
 
-#define POLYGON_SUBDIVISION_FACTOR 16.0
+#define POLYGON_SUBDIVISION_FACTOR 20.0
 

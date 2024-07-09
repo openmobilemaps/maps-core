@@ -28,6 +28,7 @@
 #include "Tiled2dMapVectorLayerConfig.h"
 #include "Tiled2dMapVectorStateManager.h"
 #include "Tiled2dMapVectorLayerLocalDataProviderInterface.h"
+#include "VectorSet.h"
 #include <unordered_map>
 
 class Tiled2dMapVectorBackgroundSubLayer;
@@ -127,9 +128,9 @@ public:
 
     void forceReload() override;
 
-    void onTilesUpdated(const std::string &layerName, std::unordered_set<Tiled2dMapRasterTileInfo> currentTileInfos) override;
+    void onTilesUpdated(const std::string &layerName, VectorSet<Tiled2dMapRasterTileInfo> currentTileInfos) override;
 
-    void onTilesUpdated(const std::string &sourceName, std::unordered_set<Tiled2dMapVectorTileInfo> currentTileInfos) override;
+    void onTilesUpdated(const std::string &sourceName, VectorSet<Tiled2dMapVectorTileInfo> currentTileInfos) override;
 
     virtual void setScissorRect(const std::optional<::RectI> &scissorRect) override;
 

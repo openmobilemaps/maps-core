@@ -42,6 +42,7 @@
 #include "Tiled2dMapVectorStateManager.h"
 #include "Logger.h"
 #include "ValueKeys.h"
+#include "VectorSet.h"
 #include <mutex>
 #include <iomanip>
 #include <atomic>
@@ -265,71 +266,6 @@ public:
         zoomLevel(zoomLevel), dpFactor(dpFactor), feature(feature), featureStateManager(featureStateManager) {}
 };
 
-template<typename T>
-class VectorSet {
-public:
-    using const_iterator = typename std::vector<T>::const_iterator;
-
-    // Default constructor
-    VectorSet() = default;
-
-    // Constructor with initializer list
-    VectorSet(std::initializer_list<T> initList) {
-        for (const T& value : initList) {
-            insert(value);
-        }
-    }
-
-    // Insert an element into the set
-    void insert(const T& value) {
-        if (!find(value)) {
-            data.push_back(value);
-        }
-    }
-
-    // Find an element in the set
-    bool find(const T& value) const {
-        return std::find(data.begin(), data.end(), value) != data.end();
-    }
-
-    // Check if the set is empty
-    bool empty() const {
-        return data.empty();
-    }
-
-    // Check if all elements of another set are present in this set
-    bool covers(const VectorSet<T>& other) const {
-        for (const T& value : other.data) {
-            if (!find(value)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    // Insert elements from another VectorSet into this set
-    void insertSet(const VectorSet<T>& otherSet) {
-        for (const T& value : otherSet.data) {
-            insert(value);
-        }
-    }
-
-    // Iterator functions
-    const_iterator begin() const {
-        return data.cbegin();
-    }
-
-    const_iterator end() const {
-        return data.cend();
-    }
-
-    size_t size() const {
-        return data.size();
-    }
-
-private:
-    std::vector<T> data;
-};
 
 class UsedKeysCollection {
 public:
@@ -359,7 +295,7 @@ public:
     };
 
     bool containsUsedKey(const std::string &key) const {
-        return usedKeys.find(key);
+        return usedKeys.contains(key);
     }
 
     bool empty() const {
@@ -731,7 +667,7 @@ public:
                 staticValue = value->evaluateOr(context, defaultValue);
                 isStatic.store(isStatic_);
             } else {
-                isZoomDependent = usedKeysCollection.usedKeys.find("zoom");
+                isZoomDependent = usedKeysCollection.usedKeys.contains("zoom");
                 isStateDependant = usedKeysCollection.isStateDependant();
             }
             lastValuePtr = value.get();

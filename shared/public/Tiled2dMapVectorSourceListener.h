@@ -15,5 +15,5 @@
 
 class Tiled2dMapVectorSourceListener {
 public:
-    virtual void onTilesUpdated(const std::string &sourceName, std::unordered_set<Tiled2dMapVectorTileInfo> currentTileInfos) = 0;
+    virtual void onTilesUpdated(const std::string &sourceName, VectorSet<Tiled2dMapVectorTileInfo> currentTileInfos) = 0;
 };

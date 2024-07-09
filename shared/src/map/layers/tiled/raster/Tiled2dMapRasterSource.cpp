@@ -55,14 +55,13 @@ void Tiled2dMapRasterSource::notifyTilesUpdates() {
                              layerConfig->getLayerName(), getCurrentTiles());
 }
 
-std::unordered_set<Tiled2dMapRasterTileInfo> Tiled2dMapRasterSource::getCurrentTiles() {
-    std::unordered_set<Tiled2dMapRasterTileInfo> currentTileInfos;
+VectorSet<Tiled2dMapRasterTileInfo> Tiled2dMapRasterSource::getCurrentTiles() {
+    VectorSet<Tiled2dMapRasterTileInfo> currentTileInfos;
     currentTileInfos.reserve(currentTiles.size());
-    std::transform(currentTiles.rbegin(), currentTiles.rend(), std::inserter(currentTileInfos, currentTileInfos.end()),
-        [](const auto& tilePair) {
-            const auto& [tileInfo, tileWrapper] = tilePair;
-            return Tiled2dMapRasterTileInfo(Tiled2dMapVersionedTileInfo(std::move(tileInfo), (size_t)tileWrapper.result.get()), std::move(tileWrapper.result), std::move(tileWrapper.masks), std::move(tileWrapper.state), tileWrapper.tessellationFactor);
-        }
-    );
+    for (auto it = currentTiles.rbegin(); it != currentTiles.rend(); it++) {
+        const auto& [tileInfo, tileWrapper] = *it;
+        currentTileInfos.insert(Tiled2dMapRasterTileInfo(Tiled2dMapVersionedTileInfo(std::move(tileInfo), (size_t)tileWrapper.result.get()), std::move(tileWrapper.result), std::move(tileWrapper.masks), std::move(tileWrapper.state), tileWrapper.tessellationFactor));
+    }
+
     return currentTileInfos;
 }
