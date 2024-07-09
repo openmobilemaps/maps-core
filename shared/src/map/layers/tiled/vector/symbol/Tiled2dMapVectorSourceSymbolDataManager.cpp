@@ -106,8 +106,6 @@ void Tiled2dMapVectorSourceSymbolDataManager::updateLayerDescriptions(std::vecto
         return;
     }
 
-    auto const &currentTileInfos = vectorSource.converse(&Tiled2dMapVectorSource::getCurrentTiles).get();
-
     for (const auto layerUpdate: layerUpdates) {
         if (layerUpdate.layerDescription->source != source || layerUpdate.layerDescription->getType() != VectorLayerType::symbol) {
             continue;
@@ -132,7 +130,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::updateLayerDescriptions(std::vecto
 
             {
                 std::lock_guard<std::recursive_mutex> updateLock(updateMutex);
-                for (const auto &tileData: currentTileInfos) {
+                for (const auto &tileData: latestTileInfos) {
                     auto tileGroup = tileSymbolGroupMap.find(tileData.tileInfo);
                     if (tileGroup == tileSymbolGroupMap.end()) {
                         continue;
@@ -218,14 +216,12 @@ void Tiled2dMapVectorSourceSymbolDataManager::updateLayerDescription(std::shared
     layerDescriptions.insert({layerDescription->identifier, castedDescription});
 
     if (needsTileReplace || iconWasAdded) {
-        auto const &currentTileInfos = vectorSource.converse(&Tiled2dMapVectorSource::getCurrentTiles).get();
-
         std::unordered_map<Tiled2dMapTileInfo, std::vector<Actor<Tiled2dMapVectorSymbolGroup>>> toSetup;
         std::vector<Actor<Tiled2dMapVectorSymbolGroup>> toClear;
 
         {
             std::lock_guard<std::recursive_mutex> updateLock(updateMutex);
-            for (const auto &tileData: currentTileInfos) {
+            for (const auto &tileData: latestTileInfos) {
                 auto tileGroup = tileSymbolGroupMap.find(tileData.tileInfo);
                 if (tileGroup == tileSymbolGroupMap.end()) {
                     continue;
@@ -289,12 +285,10 @@ void Tiled2dMapVectorSourceSymbolDataManager::reloadLayerContent(const std::vect
         return;
     }
 
-    auto const &currentTileInfos = vectorSource.converse(&Tiled2dMapVectorSource::getCurrentTiles).get();
-
     {
         std::lock_guard<std::recursive_mutex> updateLock(updateMutex);
         for (const auto &[sourceLayer, layerIdentifier]: sourceLayerIdentifierPairs) {
-            for (const auto &tileData: currentTileInfos) {
+            for (const auto &tileData: latestTileInfos) {
                 auto tileGroup = tileSymbolGroupMap.find(tileData.tileInfo);
                 if (tileGroup == tileSymbolGroupMap.end()) {
                     continue;
@@ -334,11 +328,12 @@ void Tiled2dMapVectorSourceSymbolDataManager::reloadLayerContent(const std::vect
 
 }
 
-void Tiled2dMapVectorSourceSymbolDataManager::onVectorTilesUpdated(const std::string &sourceName,
-                                                                   std::unordered_set<Tiled2dMapVectorTileInfo> currentTileInfos) {
+void Tiled2dMapVectorSourceSymbolDataManager::onVectorTilesUpdated(const std::string &sourceName, VectorSet<Tiled2dMapVectorTileInfo> currentTileInfos) {
     if (updateFlag.test_and_set()) {
         return;
     }
+
+    latestTileInfos = std::move(currentTileInfos);
 
     auto mapInterface = this->mapInterface.lock();
     auto graphicsFactory = mapInterface ? mapInterface->getGraphicsObjectFactory() : nullptr;
@@ -359,7 +354,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::onVectorTilesUpdated(const std::st
         std::lock_guard<std::recursive_mutex> updateLock(updateMutex);
         updateFlag.clear();
 
-        for (const auto &vectorTileInfo: currentTileInfos) {
+        for (const auto &vectorTileInfo: latestTileInfos) {
             if (tileSymbolGroupMap.count(vectorTileInfo.tileInfo) == 0) {
                 tilesToAdd.push_back(&vectorTileInfo);
             } else {

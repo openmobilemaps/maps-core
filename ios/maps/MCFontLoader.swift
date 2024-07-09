@@ -12,7 +12,7 @@ import MapCoreSharedModule
 import UIKit
 import os
 
-open class MCFontLoader: NSObject, MCFontLoaderInterface {
+open class MCFontLoader: NSObject, MCFontLoaderInterface, @unchecked Sendable {
     // MARK: - Font Atlas Dictionary
 
     private let loadingQueue = DispatchQueue(label: "MCFontLoader")
@@ -24,9 +24,16 @@ open class MCFontLoader: NSObject, MCFontLoaderInterface {
     private let bundle: Bundle
 
     // the bundle to use for searching for fonts
-    public init(bundle: Bundle) {
+    public init(bundle: Bundle, preload: [String] = []) {
         self.bundle = bundle
         super.init()
+        loadingQueue.async {
+            let fonts = preload.map { MCFont(name: $0)}
+            for font in fonts {
+                let _ = self.getFontImage(font: font)
+                let _ = self.getFontData(font: font)
+            }
+        }
     }
 
     // MARK: - Loader
@@ -68,7 +75,9 @@ open class MCFontLoader: NSObject, MCFontLoaderInterface {
                         }
                     } else {
                         DispatchQueue.main.sync {
-                            UIScreen.pixelsPerInch
+                            MainActor.assumeIsolated {
+                                UIScreen.pixelsPerInch
+                            }
                         }
                     }
 

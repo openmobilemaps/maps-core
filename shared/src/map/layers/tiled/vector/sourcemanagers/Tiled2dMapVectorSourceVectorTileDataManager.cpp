@@ -25,10 +25,12 @@ Tiled2dMapVectorSourceVectorTileDataManager::Tiled2dMapVectorSourceVectorTileDat
 vectorSource(vectorSource) {}
 
 void Tiled2dMapVectorSourceVectorTileDataManager::onVectorTilesUpdated(const std::string &sourceName,
-                                                                       std::unordered_set<Tiled2dMapVectorTileInfo> currentTileInfos) {
+                                                                       VectorSet<Tiled2dMapVectorTileInfo> currentTileInfos) {
     if (updateFlag.test_and_set()) {
         return;
     }
+
+    latestTileInfos = std::move(currentTileInfos);
 
     auto mapInterface = this->mapInterface.lock();
     {
@@ -42,7 +44,7 @@ void Tiled2dMapVectorSourceVectorTileDataManager::onVectorTilesUpdated(const std
 
         bool is3D = mapInterface->is3d();
 
-        // Just insert pointers here since we will only access the objects inside this method where we know that currentTileInfos is retained
+        // Just insert pointers here since we will only access the objects inside this method where we know that latestTileInfos is retained
         std::vector<const Tiled2dMapVectorTileInfo*> tilesToAdd;
         std::vector<const Tiled2dMapVectorTileInfo*> tilesToKeep;
         std::unordered_set<Tiled2dMapVersionedTileInfo> tilesToRemove;
@@ -53,7 +55,7 @@ void Tiled2dMapVectorSourceVectorTileDataManager::onVectorTilesUpdated(const std
             std::lock_guard<std::recursive_mutex> updateLock(updateMutex);
             updateFlag.clear();
 
-            for (const auto &vectorTileInfo: currentTileInfos) {
+            for (const auto &vectorTileInfo: latestTileInfos) {
                 if (tiles.count(vectorTileInfo.tileInfo) == 0) {
                     tilesToAdd.push_back(&vectorTileInfo);
                 } else {
@@ -71,7 +73,7 @@ void Tiled2dMapVectorSourceVectorTileDataManager::onVectorTilesUpdated(const std
 
             for (const auto &[tileInfo, _]: tiles) {
                 bool found = false;
-                for (const auto &currentTile: currentTileInfos) {
+                for (const auto &currentTile: latestTileInfos) {
                     if (tileInfo == currentTile.tileInfo) {
                         found = true;
                         break;
@@ -183,9 +185,7 @@ void Tiled2dMapVectorSourceVectorTileDataManager::updateLayerDescription(std::sh
         return;
     }
 
-    auto const &currentTileInfos = vectorSource.converse(&Tiled2dMapVectorSource::getCurrentTiles).get();
-
-    for (const auto &tileData: currentTileInfos) {
+    for (const auto &tileData: latestTileInfos) {
         auto subTiles = tiles.find(tileData.tileInfo);
         if (subTiles == tiles.end()) {
             continue;
@@ -275,11 +275,9 @@ void Tiled2dMapVectorSourceVectorTileDataManager::reloadLayerContent(const std::
         return;
     }
 
-    auto const &currentTileInfos = vectorSource.converse(&Tiled2dMapVectorSource::getCurrentTiles).get();
-
     for (const auto &[layerDescription, layerIndex]: descriptionLayerIndexPairs) {
 
-        for (const auto &tileData: currentTileInfos) {
+        for (const auto &tileData: latestTileInfos) {
             auto subTiles = tiles.find(tileData.tileInfo);
             if (subTiles == tiles.end()) {
                 continue;

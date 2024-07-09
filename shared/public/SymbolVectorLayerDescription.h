@@ -155,7 +155,7 @@ public:
 
                   if(symbolSortKey != nullptr) {
                       auto usedKeysCollection = symbolSortKey->getUsedKeys();
-                      auto isZoomDependent = usedKeysCollection.usedKeys.find("zoom");
+                      auto isZoomDependent = usedKeysCollection.usedKeys.contains("zoom");
                       auto isStateDependant = usedKeysCollection.isStateDependant();
                       symbolSortKeyIsIndependent = !isZoomDependent && !isStateDependant;
                   }

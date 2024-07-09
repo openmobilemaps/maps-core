@@ -11,9 +11,9 @@
 #pragma once
 
 #include "Tiled2dMapRasterTileInfo.h"
-#include <unordered_set>
+#include "VectorSet.h"
 
 class Tiled2dMapRasterSourceListener {
 public:
-    virtual void onTilesUpdated(const std::string &layerName, std::unordered_set<Tiled2dMapRasterTileInfo> currentTileInfos) = 0;
+    virtual void onTilesUpdated(const std::string &layerName, VectorSet<Tiled2dMapRasterTileInfo> currentTileInfos) = 0;
 };

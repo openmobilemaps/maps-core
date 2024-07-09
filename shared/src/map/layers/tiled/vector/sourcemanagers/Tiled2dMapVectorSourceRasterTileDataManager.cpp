@@ -25,7 +25,7 @@ Tiled2dMapVectorSourceRasterTileDataManager::Tiled2dMapVectorSourceRasterTileDat
 layerDescription(layerDescription), rasterSource(rasterSource), dpFactor(dpFactor) {}
 
 void Tiled2dMapVectorSourceRasterTileDataManager::onRasterTilesUpdated(const std::string &layerName,
-                                                                       std::unordered_set<Tiled2dMapRasterTileInfo> currentTileInfos) {
+                                                                       VectorSet<Tiled2dMapRasterTileInfo> currentTileInfos) {
     if (updateFlag.test_and_set()) {
         return;
     }

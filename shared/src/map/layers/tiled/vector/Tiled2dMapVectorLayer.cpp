@@ -807,7 +807,7 @@ void Tiled2dMapVectorLayer::forceReload() {
     Tiled2dMapLayer::forceReload();
 }
 
-void Tiled2dMapVectorLayer::onTilesUpdated(const std::string &layerName, std::unordered_set<Tiled2dMapRasterTileInfo> currentTileInfos) {
+void Tiled2dMapVectorLayer::onTilesUpdated(const std::string &layerName, VectorSet<Tiled2dMapRasterTileInfo> currentTileInfos) {
 
     std::unique_lock<std::mutex> lock(setupMutex);
     setupCV.wait(lock, [this]{ return setupReady; });
@@ -819,7 +819,7 @@ void Tiled2dMapVectorLayer::onTilesUpdated(const std::string &layerName, std::un
     tilesStillValid.clear();
 }
 
-void Tiled2dMapVectorLayer::onTilesUpdated(const std::string &sourceName, std::unordered_set<Tiled2dMapVectorTileInfo> currentTileInfos) {
+void Tiled2dMapVectorLayer::onTilesUpdated(const std::string &sourceName, VectorSet<Tiled2dMapVectorTileInfo> currentTileInfos) {
 
     std::unique_lock<std::mutex> lock(setupMutex);
     setupCV.wait(lock, [this]{ return setupReady; });
