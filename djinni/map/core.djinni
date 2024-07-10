@@ -197,4 +197,5 @@ camera_mode_3d = enum {
     onboarding_close_orbital;
     onboarding_even_closer_orbital;
     onboarding_focus_zurich;
+    globe_rotating;
 }
