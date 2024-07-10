@@ -12,4 +12,5 @@ typedef NS_ENUM(NSInteger, MCCameraMode3d)
     MCCameraMode3dONBOARDING_CLOSE_ORBITAL = 4,
     MCCameraMode3dONBOARDING_EVEN_CLOSER_ORBITAL = 5,
     MCCameraMode3dONBOARDING_FOCUS_ZURICH = 6,
+    MCCameraMode3dGLOBE_ROTATING = 7,
 };

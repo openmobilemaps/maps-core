@@ -13,6 +13,7 @@ enum class CameraMode3d : int {
     ONBOARDING_CLOSE_ORBITAL = 4,
     ONBOARDING_EVEN_CLOSER_ORBITAL = 5,
     ONBOARDING_FOCUS_ZURICH = 6,
+    GLOBE_ROTATING = 7,
 };
 
 constexpr const char* toString(CameraMode3d e) noexcept {
@@ -24,6 +25,7 @@ constexpr const char* toString(CameraMode3d e) noexcept {
         "onboarding_close_orbital",
         "onboarding_even_closer_orbital",
         "onboarding_focus_zurich",
+        "globe_rotating",
     };
     return names[static_cast<int>(e)];
 }

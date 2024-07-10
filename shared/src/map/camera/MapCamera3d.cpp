@@ -345,6 +345,9 @@ std::vector<float> MapCamera3d::getVpMatrix() {
         focusPointPosition.y = 42;
         focusPointPosition.x = fmod(DateHelper::currentTimeMicros() * 0.000003 + 180.0, 360.0) - 180.0;
         mapInterface->invalidate();
+    } else if (mode == CameraMode3d::GLOBE_ROTATING) {
+        focusPointPosition.x = fmod(DateHelper::currentTimeMicros() * 0.000003 + 180.0, 360.0) - 180.0;
+        mapInterface->invalidate();
     }
 
     return std::get<0>(getVpMatrix(focusPointPosition, true));
@@ -1537,7 +1540,11 @@ void MapCamera3d::setCameraMode(CameraMode3d mode) {
             this->zoomMax = GLOBE_MAX_ZOOM;
             targetZoom = GLOBE_RESET_ZOOM;
             break;
-
+        case CameraMode3d::GLOBE_ROTATING:
+            this->zoomMin = GLOBE_MIN_ZOOM;
+            this->zoomMax = GLOBE_MAX_ZOOM;
+            targetZoom = zoom;
+            break;
         case CameraMode3d::LOCAL:
             this->zoomMin = LOCAL_MIN_ZOOM;
             this->zoomMax = LOCAL_MAX_ZOOM;
