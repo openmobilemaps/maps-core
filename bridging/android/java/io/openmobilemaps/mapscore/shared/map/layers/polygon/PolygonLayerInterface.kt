@@ -33,6 +33,8 @@ abstract class PolygonLayerInterface {
 
     abstract fun setLayerClickable(isLayerClickable: Boolean)
 
+    abstract fun setRenderPassIndex(index: Int)
+
     private class CppProxy : PolygonLayerInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -107,5 +109,11 @@ abstract class PolygonLayerInterface {
             native_setLayerClickable(this.nativeRef, isLayerClickable)
         }
         private external fun native_setLayerClickable(_nativeRef: Long, isLayerClickable: Boolean)
+
+        override fun setRenderPassIndex(index: Int) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setRenderPassIndex(this.nativeRef, index)
+        }
+        private external fun native_setRenderPassIndex(_nativeRef: Long, index: Int)
     }
 }

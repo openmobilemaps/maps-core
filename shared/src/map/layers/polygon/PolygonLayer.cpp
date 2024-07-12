@@ -244,7 +244,7 @@ void PolygonLayer::generateRenderPasses() {
     for (auto const &p : polygons) {
         for (auto const &object : p.second) {
             for (auto config : object.second->getRenderConfig()) {
-                renderPassObjectMap[config->getRenderIndex()].push_back(
+                renderPassObjectMap[renderPassIndex].push_back(
                     std::make_shared<RenderObject>(config->getGraphicsObject()));
             }
         }
@@ -435,4 +435,9 @@ void PolygonLayer::setLayerClickable(bool isLayerClickable) {
             mapInterface->getTouchHandler()->removeListener(shared_from_this());
         }
     }
+}
+
+void PolygonLayer::setRenderPassIndex(int32_t index) {
+    renderPassIndex = index;
+    generateRenderPasses();
 }

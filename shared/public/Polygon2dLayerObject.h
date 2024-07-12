@@ -51,7 +51,7 @@ class Polygon2dLayerObject : public LayerObjectInterface {
     std::shared_ptr<GraphicsObjectInterface> graphicsObject;
     std::shared_ptr<RenderConfig> renderConfig;
 
-    const static int32_t SUBDIVISION_FACTOR_3D_DEFAULT = 4;
+    const static int32_t SUBDIVISION_FACTOR_3D_DEFAULT = 5;
 
     const bool is3D;
 };

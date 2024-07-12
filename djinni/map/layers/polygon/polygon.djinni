@@ -35,6 +35,7 @@ polygon_layer_interface = interface +c {
     asLayerInterface(): layer_interface;
     reset_selection();
     set_layer_clickable(is_layer_clickable: bool);
+    set_render_pass_index(index: i32);
 }
 
 polygon_mask_object_interface = interface +c {

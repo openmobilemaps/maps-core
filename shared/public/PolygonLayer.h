@@ -52,6 +52,8 @@ class PolygonLayer : public PolygonLayerInterface,
 
     virtual void setLayerClickable(bool isLayerClickable) override;
 
+    virtual void setRenderPassIndex(int32_t index) override;
+
     // LayerInterface
     virtual void setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> & maskingObject) override;
 
@@ -106,4 +108,6 @@ class PolygonLayer : public PolygonLayerInterface,
 
     std::atomic<bool> isHidden;
     std::atomic<bool> isLayerClickable = true;
+
+    int32_t renderPassIndex = 0;
 };
