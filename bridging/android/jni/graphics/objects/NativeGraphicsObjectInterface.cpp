@@ -67,6 +67,15 @@ void NativeGraphicsObjectInterface::JavaProxy::render(const /*not-null*/ std::sh
                            ::djinni::get(::djinni::F64::fromCpp(jniEnv, c_screenPixelAsRealMeterFactor)));
     ::djinni::jniExceptionCheck(jniEnv);
 }
+void NativeGraphicsObjectInterface::JavaProxy::compute(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & c_context, const ::RenderPassConfig & c_renderPass) {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeGraphicsObjectInterface>::get();
+    jniEnv->CallVoidMethod(Handle::get().get(), data.method_compute,
+                           ::djinni::get(::djinni_generated::NativeRenderingContextInterface::fromCpp(jniEnv, c_context)),
+                           ::djinni::get(::djinni_generated::NativeRenderPassConfig::fromCpp(jniEnv, c_renderPass)));
+    ::djinni::jniExceptionCheck(jniEnv);
+}
 
 CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_GraphicsObjectInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
@@ -125,6 +134,15 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_
                     ::djinni::I64::toCpp(jniEnv, j_mvpMatrix),
                     ::djinni::Bool::toCpp(jniEnv, j_isMasked),
                     ::djinni::F64::toCpp(jniEnv, j_screenPixelAsRealMeterFactor));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_GraphicsObjectInterface_00024CppProxy_native_1compute(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeRenderingContextInterface::JniType j_context, ::djinni_generated::NativeRenderPassConfig::JniType j_renderPass)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::GraphicsObjectInterface>(nativeRef);
+        ref->compute(::djinni_generated::NativeRenderingContextInterface::toCpp(jniEnv, j_context),
+                     ::djinni_generated::NativeRenderPassConfig::toCpp(jniEnv, j_renderPass));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

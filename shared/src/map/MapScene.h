@@ -69,6 +69,10 @@ class MapScene : public MapInterface, public SceneCallbackInterface, public Sche
 
     virtual void drawFrame() override;
 
+    virtual void prepare() override;
+
+    virtual void compute() override;
+
     virtual void resume() override;
 
     virtual void pause() override;

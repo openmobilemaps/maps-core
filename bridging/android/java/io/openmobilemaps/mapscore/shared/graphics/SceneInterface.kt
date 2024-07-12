@@ -30,7 +30,11 @@ abstract class SceneInterface {
 
     abstract fun getShaderFactory(): io.openmobilemaps.mapscore.shared.graphics.shader.ShaderFactoryInterface
 
+    abstract fun prepare()
+
     abstract fun drawFrame()
+
+    abstract fun compute()
 
     abstract fun clear()
 
@@ -93,11 +97,23 @@ abstract class SceneInterface {
         }
         private external fun native_getShaderFactory(_nativeRef: Long): io.openmobilemaps.mapscore.shared.graphics.shader.ShaderFactoryInterface
 
+        override fun prepare() {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_prepare(this.nativeRef)
+        }
+        private external fun native_prepare(_nativeRef: Long)
+
         override fun drawFrame() {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             native_drawFrame(this.nativeRef)
         }
         private external fun native_drawFrame(_nativeRef: Long)
+
+        override fun compute() {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_compute(this.nativeRef)
+        }
+        private external fun native_compute(_nativeRef: Long)
 
         override fun clear() {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

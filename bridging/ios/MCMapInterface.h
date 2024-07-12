@@ -77,8 +77,12 @@
 
 - (void)invalidate;
 
+- (void)prepare;
+
 /** Must be called on the rendering thread! */
 - (void)drawFrame;
+
+- (void)compute;
 
 /** Must be called on the rendering thread! */
 - (void)resume;
