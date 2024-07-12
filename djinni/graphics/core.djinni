@@ -17,7 +17,9 @@ scene_interface = interface +c {
     get_rendering_context() : rendering_context_interface;
     get_graphics_factory(): graphics_object_factory_interface;
     get_shader_factory(): shader_factory_interface;
+    prepare();
     draw_frame();
+    compute();
     clear();
     invalidate();
 }
@@ -71,8 +73,10 @@ render_pass_config = record {
 
 renderer_interface = interface +c +j +o {
     add_to_render_queue(render_pass: render_pass_interface);
+    add_to_compute_queue(render_pass: render_pass_interface);
     # Ensure calling on graphics thread
     draw_frame(rendering_context: rendering_context_interface, camera: camera_interface);
+    compute(rendering_context: rendering_context_interface);
 }
 
 camera_interface = interface +c +j +o {

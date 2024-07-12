@@ -10,8 +10,12 @@ abstract class RendererInterface {
 
     abstract fun addToRenderQueue(renderPass: RenderPassInterface)
 
+    abstract fun addToComputeQueue(renderPass: RenderPassInterface)
+
     /** Ensure calling on graphics thread */
     abstract fun drawFrame(renderingContext: RenderingContextInterface, camera: CameraInterface)
+
+    abstract fun compute(renderingContext: RenderingContextInterface)
 
     private class CppProxy : RendererInterface {
         private val nativeRef: Long
@@ -34,10 +38,22 @@ abstract class RendererInterface {
         }
         private external fun native_addToRenderQueue(_nativeRef: Long, renderPass: RenderPassInterface)
 
+        override fun addToComputeQueue(renderPass: RenderPassInterface) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_addToComputeQueue(this.nativeRef, renderPass)
+        }
+        private external fun native_addToComputeQueue(_nativeRef: Long, renderPass: RenderPassInterface)
+
         override fun drawFrame(renderingContext: RenderingContextInterface, camera: CameraInterface) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             native_drawFrame(this.nativeRef, renderingContext, camera)
         }
         private external fun native_drawFrame(_nativeRef: Long, renderingContext: RenderingContextInterface, camera: CameraInterface)
+
+        override fun compute(renderingContext: RenderingContextInterface) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_compute(this.nativeRef, renderingContext)
+        }
+        private external fun native_compute(_nativeRef: Long, renderingContext: RenderingContextInterface)
     }
 }

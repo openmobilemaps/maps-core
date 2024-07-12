@@ -56,6 +56,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (nonnull NSArray<id<MCRenderPassInterface>> *)buildComputePasses {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->buildComputePasses();
+        return ::djinni::List<::djinni_generated::RenderPassInterface>::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (void)onAdded:(nullable MCMapInterface *)mapInterface
      layerIndex:(int32_t)layerIndex {
     try {
@@ -163,6 +170,13 @@ public:
     {
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() buildRenderPasses];
+            return ::djinni::List<::djinni_generated::RenderPassInterface>::toCpp(objcpp_result_);
+        }
+    }
+    std::vector</*not-null*/ std::shared_ptr<::RenderPassInterface>> buildComputePasses() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() buildComputePasses];
             return ::djinni::List<::djinni_generated::RenderPassInterface>::toCpp(objcpp_result_);
         }
     }

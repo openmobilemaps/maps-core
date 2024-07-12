@@ -19,6 +19,25 @@ void Renderer::addToRenderQueue(const std::shared_ptr<RenderPassInterface> &rend
     renderQueue[renderPassIndex].push_back(renderPass);
 }
 
+
+void Renderer::addToComputeQueue(const std::shared_ptr<RenderPassInterface> &renderPass) {
+    int32_t renderPassIndex = renderPass->getRenderPassConfig().renderPassIndex;
+    computeQueue[renderPassIndex].push_back(renderPass);
+}
+
+void Renderer::compute(const std::shared_ptr<RenderingContextInterface> &renderingContext) {
+    for (const auto &[index, passes] : computeQueue) {
+        for (const auto &pass : passes) {
+            const auto &renderObjects = pass->getRenderObjects();
+            for (const auto &renderObject : renderObjects) {
+                const auto &graphicsObject = renderObject->getGraphicsObject();
+                graphicsObject->compute(renderingContext, pass->getRenderPassConfig());
+            }
+
+        }
+    }
+}
+
 /** Ensure calling on graphics thread */
 void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &renderingContext,
                          const std::shared_ptr<CameraInterface> &camera) {

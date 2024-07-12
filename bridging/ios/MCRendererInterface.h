@@ -11,8 +11,12 @@
 
 - (void)addToRenderQueue:(nullable id<MCRenderPassInterface>)renderPass;
 
+- (void)addToComputeQueue:(nullable id<MCRenderPassInterface>)renderPass;
+
 /** Ensure calling on graphics thread */
 - (void)drawFrame:(nullable id<MCRenderingContextInterface>)renderingContext
            camera:(nullable id<MCCameraInterface>)camera;
+
+- (void)compute:(nullable id<MCRenderingContextInterface>)renderingContext;
 
 @end

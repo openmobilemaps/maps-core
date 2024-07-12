@@ -33,4 +33,7 @@
       isMasked:(BOOL)isMasked
 screenPixelAsRealMeterFactor:(double)screenPixelAsRealMeterFactor;
 
+- (void)compute:(nullable id<MCRenderingContextInterface>)context
+     renderPass:(nonnull MCRenderPassConfig *)renderPass;
+
 @end
