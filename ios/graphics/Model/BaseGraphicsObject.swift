@@ -86,8 +86,7 @@ extension BaseGraphicsObject: MCGraphicsObjectInterface {
     }
 
     public func compute(_ context: (any MCRenderingContextInterface)?, renderPass: MCRenderPassConfig) {
-        guard isReady(),
-              let context = context as? RenderingContext,
+        guard let context = context as? RenderingContext,
               let encoder = context.computeEncoder
         else { return }
         compute(encoder: encoder, context: context)

@@ -36,6 +36,7 @@ void Renderer::compute(const std::shared_ptr<RenderingContextInterface> &renderi
 
         }
     }
+    computeQueue.clear();
 }
 
 /** Ensure calling on graphics thread */
