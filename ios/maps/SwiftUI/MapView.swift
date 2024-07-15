@@ -203,6 +203,10 @@ public struct MapView: UIViewRepresentable {
             animated = false
         }
 
+        if is3D {
+            mapView.camera.asMapCamera3d()?.setCameraMode(camera.mode)
+        }
+
 //        if let visibleRect = camera.visibleRect.value, camera.visibleRect.mode == .user {
 //           mapView.camera.move(toBoundingBox: visibleRect, paddingPc: 0, animated: animated, minZoom: nil, maxZoom: nil)
 //       } else 
@@ -231,10 +235,6 @@ public struct MapView: UIViewRepresentable {
         } else {
             mapView.camera.setBoundsRestrictWholeVisibleRect(false)
             mapView.camera.setBounds(mapView.mapInterface.getMapConfig().mapCoordinateSystem.bounds)
-        }
-
-        if is3D {
-            mapView.camera.asMapCamera3d()?.setCameraMode(camera.mode)
         }
 
         coordinator.ignoreCallbacks = false
