@@ -167,6 +167,12 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
 
         candidateChecks++;
 
+        if (candidateChecks > 1000) {
+            // something seems wrong here.
+            // lets ignore this run and wait for the next update instead of burning the cpu
+            return;
+        }
+
 
         const Tiled2dMapZoomLevelInfo &zoomLevelInfo = zoomLevelInfos.at(candidate.levelIndex);
 

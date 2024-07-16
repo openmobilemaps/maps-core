@@ -207,9 +207,6 @@ public struct MapView: UIViewRepresentable {
             mapView.camera.asMapCamera3d()?.setCameraMode(camera.mode)
         }
 
-//        if let visibleRect = camera.visibleRect.value, camera.visibleRect.mode == .user {
-//           mapView.camera.move(toBoundingBox: visibleRect, paddingPc: 0, animated: animated, minZoom: nil, maxZoom: nil)
-//       } else 
         if let center = camera.center.value, let zoom = camera.zoom.value, camera.center.mode == .user, camera.zoom.mode == .user {
             mapView.camera.move(toCenterPositionZoom: center, zoom: zoom, animated: animated)
         } else if let center = camera.center.value, camera.center.mode == .user {
@@ -230,8 +227,8 @@ public struct MapView: UIViewRepresentable {
         }
 
         if let restrictedBounds = camera.restrictedBounds {
-           mapView.camera.setBounds(restrictedBounds)
-           mapView.camera.setBoundsRestrictWholeVisibleRect(true)
+            mapView.camera.setBounds(restrictedBounds)
+            mapView.camera.setBoundsRestrictWholeVisibleRect(true)
         } else {
             mapView.camera.setBoundsRestrictWholeVisibleRect(false)
             mapView.camera.setBounds(mapView.mapInterface.getMapConfig().mapCoordinateSystem.bounds)
