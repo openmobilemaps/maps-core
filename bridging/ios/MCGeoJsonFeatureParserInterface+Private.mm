@@ -6,6 +6,7 @@
 #import "DJICppWrapperCache+Private.h"
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
+#import "MCGeoJsonLine+Private.h"
 #import "MCGeoJsonPoint+Private.h"
 #import "MCVectorLayerFeatureInfo+Private.h"
 #include <exception>
@@ -50,6 +51,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     try {
         auto objcpp_result_ = _cppRefHandle.get()->parseWithPointGeometry(::djinni::String::toCpp(geoJson));
         return ::djinni::Optional<std::optional, ::djinni::List<::djinni_generated::GeoJsonPoint>>::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nullable NSArray<MCGeoJsonLine *> *)parseWithLineGeometry:(nonnull NSString *)geoJson {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->parseWithLineGeometry(::djinni::String::toCpp(geoJson));
+        return ::djinni::Optional<std::optional, ::djinni::List<::djinni_generated::GeoJsonLine>>::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
