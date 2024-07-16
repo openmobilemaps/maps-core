@@ -92,18 +92,20 @@ void MapCamera3d::moveToCenterPositionZoom(const ::Coord &centerPosition, double
     if (cameraFrozen)
         return;
     inertia = std::nullopt;
-    Coord focusPosition = mapInterface->getCoordinateConverterHelper()->convert(CoordinateSystemIdentifiers::EPSG4326(), centerPosition);
+    Coord focusPosition = mapInterface->getCoordinateConverterHelper()->convert(focusPointPosition.systemIdentifier, centerPosition);
 
     if (animated) {
         std::lock_guard<std::recursive_mutex> lock(animationMutex);
         coordAnimation = std::make_shared<CoordAnimation>(
             DEFAULT_ANIM_LENGTH, focusPointPosition, focusPosition, centerPosition, InterpolatorFunction::EaseInOut,
             [=](Coord positionMapSystem) {
+                assert(positionMapSystem.systemIdentifier == 4326);
                 this->focusPointPosition = positionMapSystem;
                 notifyListeners(ListenerType::BOUNDS);
                 mapInterface->invalidate();
             },
             [=] {
+                assert(this->coordAnimation->endValue.systemIdentifier == 4326);
                 this->focusPointPosition = this->coordAnimation->endValue;
                 notifyListeners(ListenerType::BOUNDS);
                 mapInterface->invalidate();
@@ -113,6 +115,7 @@ void MapCamera3d::moveToCenterPositionZoom(const ::Coord &centerPosition, double
         setZoom(zoom, true);
         mapInterface->invalidate();
     } else {
+        assert(focusPosition.systemIdentifier == 4326);
         this->focusPointPosition = focusPosition;
         updateZoom(zoom);
         notifyListeners(ListenerType::BOUNDS);
@@ -124,18 +127,20 @@ void MapCamera3d::moveToCenterPosition(const ::Coord &centerPosition, bool anima
     if (cameraFrozen)
         return;
     inertia = std::nullopt;
-    Coord focusPosition = mapInterface->getCoordinateConverterHelper()->convert(CoordinateSystemIdentifiers::EPSG4326(), centerPosition);
+    Coord focusPosition = mapInterface->getCoordinateConverterHelper()->convert(focusPointPosition.systemIdentifier, centerPosition);
 
     if (animated) {
         std::lock_guard<std::recursive_mutex> lock(animationMutex);
         coordAnimation = std::make_shared<CoordAnimation>(
             DEFAULT_ANIM_LENGTH, focusPointPosition, focusPosition, centerPosition, InterpolatorFunction::EaseInOut,
             [=](Coord positionMapSystem) {
+                assert(positionMapSystem.systemIdentifier == 4326);
                 this->focusPointPosition = positionMapSystem;
                 notifyListeners(ListenerType::BOUNDS);
                 mapInterface->invalidate();
             },
             [=] {
+                assert(this->coordAnimation->endValue.systemIdentifier == 4326);
                 this->focusPointPosition = this->coordAnimation->endValue;
                 notifyListeners(ListenerType::BOUNDS);
                 mapInterface->invalidate();
@@ -144,6 +149,7 @@ void MapCamera3d::moveToCenterPosition(const ::Coord &centerPosition, bool anima
         coordAnimation->start();
         mapInterface->invalidate();
     } else {
+        assert(focusPosition.systemIdentifier == 4326);
         this->focusPointPosition = focusPosition;
         notifyListeners(ListenerType::BOUNDS);
         mapInterface->invalidate();
@@ -192,6 +198,7 @@ void MapCamera3d::moveToBoundingBox(const RectCoord &boundingBox, float paddingP
 }
 
 ::Coord MapCamera3d::getCenterPosition() {
+    assert(focusPointPosition.systemIdentifier == 4326);
     return focusPointPosition;
 }
 
@@ -1384,7 +1391,7 @@ bool MapCamera3d::isInBounds(const Coord &coords) {
 
 
 Coord MapCamera3d::adjustCoordForPadding(const Coord &coords, double targetZoom) {
-    Coord coordinates = mapInterface->getCoordinateConverterHelper()->convert(mapCoordinateSystem.identifier, coords);
+    Coord coordinates = mapInterface->getCoordinateConverterHelper()->convert(focusPointPosition.systemIdentifier, coords);
 
     auto adjustedZoom = std::clamp(targetZoom, zoomMax, zoomMin);
 
@@ -1432,7 +1439,7 @@ std::tuple<Coord, double> MapCamera3d::getBoundsCorrectedCoords(const Coord &pos
                                              std::max(topLeft.y, bottomRight.y)),
                                   position.z);
 
-
+    assert(clampedPosition.systemIdentifier == 4326);
     return {clampedPosition, zoom};
 }
 
@@ -1604,11 +1611,13 @@ void MapCamera3d::setCameraMode(CameraMode3d mode) {
         coordAnimation = std::make_shared<CoordAnimation>(
                                                           duration, startPosition, *targetCoordinate, std::nullopt, InterpolatorFunction::EaseInOut,
                                                           [=](Coord positionMapSystem) {
+                                                              assert(positionMapSystem.systemIdentifier == 4326);
                                                               this->focusPointPosition = positionMapSystem;
                                                               notifyListeners(ListenerType::BOUNDS);
                                                               mapInterface->invalidate();
                                                           },
                                                           [=] {
+                                                              assert(this->coordAnimation->endValue.systemIdentifier == 4326);
                                                               this->focusPointPosition = this->coordAnimation->endValue;
                                                               notifyListeners(ListenerType::BOUNDS);
                                                               mapInterface->invalidate();
