@@ -47,8 +47,8 @@ std::vector<::VectorLayerFeatureCoordInfo> ReverseGeocoder::reverseGeocode(const
     double tileSize = (2 * ORIGIN_SHIFT) / (tileCount);
 
     // Calculate the tile coordinates
-    int x = std::clamp(int(floor((converted.x + ORIGIN_SHIFT) / tileSize)), 0, tileCount);
-    int y = std::clamp(int(floor((ORIGIN_SHIFT - converted.y) / tileSize)), 0, tileCount);
+    int x = std::clamp(int(floor((converted.x + ORIGIN_SHIFT) / tileSize)), 0, tileCount - 1);
+    int y = std::clamp(int(floor((ORIGIN_SHIFT - converted.y) / tileSize)), 0, tileCount - 1);
 
     std::string url = tileUrlTemplate;
     size_t zoomIndex = url.find("{z}", 0);
