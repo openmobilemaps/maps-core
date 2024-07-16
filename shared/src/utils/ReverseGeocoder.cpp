@@ -42,13 +42,13 @@ std::vector<::VectorLayerFeatureCoordInfo> ReverseGeocoder::reverseGeocode(const
     auto converted4326 = conversionHelper->convert(CoordinateSystemIdentifiers::EPSG4326(), coord);
 
     const double ORIGIN_SHIFT = 20037508.34;
+    int tileCount = pow(2, zoomLevel);
 
-    double tileSize = (2 * ORIGIN_SHIFT) / (pow(2, zoomLevel));
+    double tileSize = (2 * ORIGIN_SHIFT) / (tileCount);
 
     // Calculate the tile coordinates
-    int x = floor((converted.x + ORIGIN_SHIFT) / tileSize);
-    int y = floor((ORIGIN_SHIFT - converted.y) / tileSize);
-
+    int x = std::clamp(int(floor((converted.x + ORIGIN_SHIFT) / tileSize)), 0, tileCount);
+    int y = std::clamp(int(floor((ORIGIN_SHIFT - converted.y) / tileSize)), 0, tileCount);
 
     std::string url = tileUrlTemplate;
     size_t zoomIndex = url.find("{z}", 0);
