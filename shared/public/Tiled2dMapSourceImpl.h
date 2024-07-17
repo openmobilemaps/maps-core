@@ -108,7 +108,7 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
 
     int distanceWeight = 100;
     int zoomLevelWeight = 1000 * zoomLevelInfos.at(0).numTilesT;
-    int zDistanceWeight = 1000 * zoomLevelInfos.at(0).numTilesT;
+    int zDistanceWeight = 100000 * zoomLevelInfos.at(0).numTilesT;
 
     std::vector<VisibleTilesLayer> layers;
 
