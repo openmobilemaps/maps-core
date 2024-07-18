@@ -1,6 +1,9 @@
 # Changelog for Open Mobile Maps
 
 
+## Version 2.3.0
+- Adds numDrawPreviousOrLaterTLayers field to Tiled2dMapZoomInfo to control the t dimension loading
+
 ## Version 2.2.0
 - Adds support for `{bbox-epsg-3857}` placeholder in URL template
 - Improves the handling of non-interactive polygon layers
