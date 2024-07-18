@@ -108,7 +108,7 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
 
     int distanceWeight = 100;
     int zoomLevelWeight = 1000 * zoomLevelInfos.at(0).numTilesT;
-    int zDistanceWeight = 1000 * zoomLevelInfos.at(0).numTilesT;
+    int zDistanceWeight = 100000 * zoomLevelInfos.at(0).numTilesT;
 
     std::vector<VisibleTilesLayer> layers;
 
@@ -210,13 +210,14 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
         hash_combine(visibleTileHash, std::hash<int>{}(maxTileLeft));
         hash_combine(visibleTileHash, std::hash<int>{}(startTileTop));
         hash_combine(visibleTileHash, std::hash<int>{}(maxTileTop));
-        hash_combine(visibleTileHash, std::hash<int>{}(zoomLevelInfo.numTilesT));
+        hash_combine(visibleTileHash, std::hash<int>{}(curT));
 
         for (int x = startTileLeft; x <= maxTileLeft && x < zoomLevelInfo.numTilesX; x++) {
             for (int y = startTileTop; y <= maxTileTop && y < zoomLevelInfo.numTilesY; y++) {
                 for (int t = 0; t < zoomLevelInfo.numTilesT; t++) {
 
-                    if( t != curT ) {
+                    
+                    if( abs(t - curT) > zoomInfo.numDrawPreviousOrLaterTLayers ) {
                         continue;
                     }
 
