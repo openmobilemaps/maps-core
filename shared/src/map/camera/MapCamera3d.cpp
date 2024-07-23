@@ -34,11 +34,11 @@
 #define GLOBE_MIN_ZOOM      200'000'000
 #define GLOBE_INITIAL_ZOOM   46'000'000
 #define GLOBE_RESET_ZOOM     25'000'000
-#define GLOBE_MAX_ZOOM       5'000'000
-#define LOCAL_MIN_ZOOM       20'000'000
+#define GLOBE_MAX_ZOOM        5'000'000
+#define LOCAL_MIN_ZOOM        8'000'000
 #define LOCAL_INITIAL_ZOOM    3'000'000
 #define LOCAL_MAX_ZOOM          100'000
-#define RUBBER_BAND_WINDOW    0 // Disabled for now
+#define RUBBER_BAND_WINDOW            0 // Disabled for now
 
 MapCamera3d::MapCamera3d(const std::shared_ptr<MapInterface> &mapInterface, float screenDensityPpi)
     : mapInterface(mapInterface)
@@ -1536,9 +1536,9 @@ void MapCamera3d::setCameraMode(CameraMode3d mode) {
             duration = 1000;
             break;
         case CameraMode3d::ONBOARDING_FOCUS_ZURICH:
-            this->zoomMin = LOCAL_MIN_ZOOM;
-            this->zoomMax = LOCAL_MIN_ZOOM;
-            targetZoom = LOCAL_MIN_ZOOM;
+            this->zoomMin = 20'000'000;
+            this->zoomMax = 20'000'000;
+            targetZoom = 20'000'000;
             duration = 4000;
             targetCoordinate = Coord(CoordinateSystemIdentifiers::EPSG4326(), 8.5417, 47.3769, 0.0);
             break;
