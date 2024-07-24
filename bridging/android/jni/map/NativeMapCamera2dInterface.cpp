@@ -280,11 +280,31 @@ CJNIEXPORT ::djinni_generated::NativeCoord::JniType JNICALL Java_io_openmobilema
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
+CJNIEXPORT ::djinni_generated::NativeCoord::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1coordFromScreenPositionZoom(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeVec2F::JniType j_posScreen, jfloat j_zoom)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::MapCamera2dInterface>(nativeRef);
+        auto r = ref->coordFromScreenPositionZoom(::djinni_generated::NativeVec2F::toCpp(jniEnv, j_posScreen),
+                                                  ::djinni::F32::toCpp(jniEnv, j_zoom));
+        return ::djinni::release(::djinni_generated::NativeCoord::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
 CJNIEXPORT ::djinni_generated::NativeVec2F::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1screenPosFromCoord(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeCoord::JniType j_coord)
 {
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::MapCamera2dInterface>(nativeRef);
         auto r = ref->screenPosFromCoord(::djinni_generated::NativeCoord::toCpp(jniEnv, j_coord));
+        return ::djinni::release(::djinni_generated::NativeVec2F::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT ::djinni_generated::NativeVec2F::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera2dInterface_00024CppProxy_native_1screenPosFromCoordZoom(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeCoord::JniType j_coord, jfloat j_zoom)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::MapCamera2dInterface>(nativeRef);
+        auto r = ref->screenPosFromCoordZoom(::djinni_generated::NativeCoord::toCpp(jniEnv, j_coord),
+                                             ::djinni::F32::toCpp(jniEnv, j_zoom));
         return ::djinni::release(::djinni_generated::NativeVec2F::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }

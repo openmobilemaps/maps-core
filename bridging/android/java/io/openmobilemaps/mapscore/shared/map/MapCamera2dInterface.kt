@@ -70,7 +70,11 @@ abstract class MapCamera2dInterface {
 
     abstract fun coordFromScreenPosition(posScreen: io.openmobilemaps.mapscore.shared.graphics.common.Vec2F): io.openmobilemaps.mapscore.shared.map.coordinates.Coord
 
+    abstract fun coordFromScreenPositionZoom(posScreen: io.openmobilemaps.mapscore.shared.graphics.common.Vec2F, zoom: Float): io.openmobilemaps.mapscore.shared.map.coordinates.Coord
+
     abstract fun screenPosFromCoord(coord: io.openmobilemaps.mapscore.shared.map.coordinates.Coord): io.openmobilemaps.mapscore.shared.graphics.common.Vec2F
+
+    abstract fun screenPosFromCoordZoom(coord: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, zoom: Float): io.openmobilemaps.mapscore.shared.graphics.common.Vec2F
 
     abstract fun mapUnitsFromPixels(distancePx: Double): Double
 
@@ -273,11 +277,23 @@ abstract class MapCamera2dInterface {
         }
         private external fun native_coordFromScreenPosition(_nativeRef: Long, posScreen: io.openmobilemaps.mapscore.shared.graphics.common.Vec2F): io.openmobilemaps.mapscore.shared.map.coordinates.Coord
 
+        override fun coordFromScreenPositionZoom(posScreen: io.openmobilemaps.mapscore.shared.graphics.common.Vec2F, zoom: Float): io.openmobilemaps.mapscore.shared.map.coordinates.Coord {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_coordFromScreenPositionZoom(this.nativeRef, posScreen, zoom)
+        }
+        private external fun native_coordFromScreenPositionZoom(_nativeRef: Long, posScreen: io.openmobilemaps.mapscore.shared.graphics.common.Vec2F, zoom: Float): io.openmobilemaps.mapscore.shared.map.coordinates.Coord
+
         override fun screenPosFromCoord(coord: io.openmobilemaps.mapscore.shared.map.coordinates.Coord): io.openmobilemaps.mapscore.shared.graphics.common.Vec2F {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             return native_screenPosFromCoord(this.nativeRef, coord)
         }
         private external fun native_screenPosFromCoord(_nativeRef: Long, coord: io.openmobilemaps.mapscore.shared.map.coordinates.Coord): io.openmobilemaps.mapscore.shared.graphics.common.Vec2F
+
+        override fun screenPosFromCoordZoom(coord: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, zoom: Float): io.openmobilemaps.mapscore.shared.graphics.common.Vec2F {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_screenPosFromCoordZoom(this.nativeRef, coord, zoom)
+        }
+        private external fun native_screenPosFromCoordZoom(_nativeRef: Long, coord: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, zoom: Float): io.openmobilemaps.mapscore.shared.graphics.common.Vec2F
 
         override fun mapUnitsFromPixels(distancePx: Double): Double {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

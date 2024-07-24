@@ -247,9 +247,27 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (nonnull MCCoord *)coordFromScreenPositionZoom:(nonnull MCVec2F *)posScreen
+                                            zoom:(float)zoom {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->coordFromScreenPositionZoom(::djinni_generated::Vec2F::toCpp(posScreen),
+                                                                               ::djinni::F32::toCpp(zoom));
+        return ::djinni_generated::Coord::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (nonnull MCVec2F *)screenPosFromCoord:(nonnull MCCoord *)coord {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->screenPosFromCoord(::djinni_generated::Coord::toCpp(coord));
+        return ::djinni_generated::Vec2F::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nonnull MCVec2F *)screenPosFromCoordZoom:(nonnull MCCoord *)coord
+                                       zoom:(float)zoom {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->screenPosFromCoordZoom(::djinni_generated::Coord::toCpp(coord),
+                                                                          ::djinni::F32::toCpp(zoom));
         return ::djinni_generated::Vec2F::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
