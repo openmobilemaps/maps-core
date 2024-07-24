@@ -77,7 +77,11 @@ public:
 
     virtual ::Coord coordFromScreenPosition(const ::Vec2F & posScreen) = 0;
 
+    virtual ::Coord coordFromScreenPositionZoom(const ::Vec2F & posScreen, float zoom) = 0;
+
     virtual ::Vec2F screenPosFromCoord(const ::Coord & coord) = 0;
+
+    virtual ::Vec2F screenPosFromCoordZoom(const ::Coord & coord, float zoom) = 0;
 
     virtual double mapUnitsFromPixels(double distancePx) = 0;
 

@@ -84,7 +84,13 @@
 
 - (nonnull MCCoord *)coordFromScreenPosition:(nonnull MCVec2F *)posScreen;
 
+- (nonnull MCCoord *)coordFromScreenPositionZoom:(nonnull MCVec2F *)posScreen
+                                            zoom:(float)zoom;
+
 - (nonnull MCVec2F *)screenPosFromCoord:(nonnull MCCoord *)coord;
+
+- (nonnull MCVec2F *)screenPosFromCoordZoom:(nonnull MCCoord *)coord
+                                       zoom:(float)zoom;
 
 - (double)mapUnitsFromPixels:(double)distancePx;
 

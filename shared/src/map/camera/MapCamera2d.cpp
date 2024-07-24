@@ -784,7 +784,7 @@ bool MapCamera2d::onTwoFingerMoveComplete() {
     return false;
 }
 
-Coord MapCamera2d::coordFromScreenPosition(const ::Vec2F &posScreen) {
+::Coord MapCamera2d::coordFromScreenPositionZoom(const ::Vec2F & posScreen, float zoom) {
     Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
     double zoomFactor = screenPixelAsRealMeterFactor * zoom;
 
@@ -801,7 +801,11 @@ Coord MapCamera2d::coordFromScreenPosition(const ::Vec2F &posScreen) {
     return Coord(centerPosition.systemIdentifier, centerPosition.x + adjXDiff, centerPosition.y - adjYDiff, centerPosition.z);
 }
 
-::Vec2F MapCamera2d::screenPosFromCoord(const Coord &coord) {
+Coord MapCamera2d::coordFromScreenPosition(const ::Vec2F &posScreen) {
+    return coordFromScreenPositionZoom(posScreen, zoom);
+}
+
+::Vec2F MapCamera2d::screenPosFromCoordZoom(const ::Coord & coord, float zoom) {
     const auto mapInterface = this->mapInterface;
     const auto conversionHelper = mapInterface ? mapInterface->getCoordinateConverterHelper() : nullptr;
     const auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
@@ -828,6 +832,10 @@ Coord MapCamera2d::coordFromScreenPosition(const ::Vec2F &posScreen) {
     double posScreenY = ((double)sizeViewport.y / 2.0) - (screenYDiffToCenter / zoomFactor);
 
     return Vec2F(posScreenX, posScreenY);
+}
+
+::Vec2F MapCamera2d::screenPosFromCoord(const Coord &coord) {
+    return screenPosFromCoordZoom(coord, zoom);
 }
 
 double MapCamera2d::mapUnitsFromPixels(double distancePx) { return distancePx * screenPixelAsRealMeterFactor * zoom; }
