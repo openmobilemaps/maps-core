@@ -569,27 +569,29 @@ void Tiled2dMapVectorLayer::update() {
     if (isHidden) {
         return;
     }
-    long long now = DateHelper::currentTimeMillis();
-    for (const auto &[source, sourceDataManager]: sourceDataManagers) {
-        sourceDataManager.syncAccess([](const auto &manager) {
-            manager->update();
-        });
+    auto mapInterface = this->mapInterface;
+    auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
+    auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
+    if (!camera) {
+        return;
+    }
+    double newZoom = camera->getZoom();
+    auto now = DateHelper::currentTimeMillis();
+    bool newIsAnimating = false;
+    bool tilesChanged = !tilesStillValid.test_and_set();
+    double zoomChange = abs(newZoom-lastDataManagerZoom) / std::max(newZoom, 1.0);
+    double timeDiff = now - lastDataManagerUpdate;
+    bool is3d = mapInterface->is3d();
+
+    if (zoomChange > 0.001 || isAnimating || tilesChanged) {
+        for (const auto &[source, sourceDataManager]: sourceDataManagers) {
+            sourceDataManager.syncAccess([](const auto &manager) {
+                manager->update();
+            });
+        }
     }
 
     if (collisionManager) {
-        auto mapInterface = this->mapInterface;
-        auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
-        auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
-        if (!camera) {
-            return;
-        }
-        double newZoom = camera->getZoom();
-        auto now = DateHelper::currentTimeMillis();
-        bool newIsAnimating = false;
-        bool tilesChanged = !tilesStillValid.test_and_set();
-        double zoomChange = abs(newZoom-lastDataManagerZoom) / std::max(newZoom, 1.0);
-        double timeDiff = now - lastDataManagerUpdate;
-        bool is3d = mapInterface->is3d();
         if (zoomChange > 0.001 || timeDiff > 1000 || isAnimating || tilesChanged) {
             lastDataManagerUpdate = now;
             lastDataManagerZoom = newZoom;
@@ -617,8 +619,6 @@ void Tiled2dMapVectorLayer::update() {
                 isAnimating = true;
             }
         }
-
-
     }
 }
 
