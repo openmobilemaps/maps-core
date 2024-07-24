@@ -150,6 +150,10 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
         }
     }
 
+
+    size_t visibleTileHash = minZoomLevelIndex;
+
+
     std::vector<std::pair<VisibleTileCandidate, PrioritizedTiled2dMapTileInfo>> visibleTilesVec;
 
     auto maxLevelAvailable = zoomLevelInfos.size() - 1;
@@ -479,6 +483,13 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
                 nextVisibleTilesVec.push_back(std::make_pair(parent, PrioritizedTiled2dMapTileInfo(
                         Tiled2dMapTileInfo(rect, parent.x, parent.y, t, zoomLevelInfo.zoomLevelIdentifier, zoomLevelInfo.zoom),
                         priority)));
+
+
+                hash_combine(visibleTileHash, std::hash<int>{}(zoomLevelInfo.zoomLevelIdentifier));
+                hash_combine(visibleTileHash, std::hash<int>{}(boundsLeft));
+                hash_combine(visibleTileHash, std::hash<int>{}(boundsTop));
+                hash_combine(visibleTileHash, std::hash<int>{}(parent.x));
+                hash_combine(visibleTileHash, std::hash<int>{}(parent.y));
             }
             visibleTilesVec = nextVisibleTilesVec;
         }
@@ -488,8 +499,12 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
 
     currentZoomLevelIdentifier = maxLevel;
 
-    onVisibleTilesChanged(layers, true);
+    hash_combine(visibleTileHash, std::hash<int>{}(maxLevel));
 
+    if (lastVisibleTilesHash != visibleTileHash) {
+        lastVisibleTilesHash = visibleTileHash;
+        onVisibleTilesChanged(layers, true);
+    }
 }
 
 template<class T, class L, class R>
