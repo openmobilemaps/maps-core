@@ -100,7 +100,7 @@ void Tiled2dMapVectorSourceRasterTileDataManager::onRasterTilesUpdated(const std
                     std::optional<float> maxSegmentLength = std::nullopt;
                     if (is3D) {
                         maxSegmentLength = std::min(std::abs(convertedTileBounds.bottomRight.x - convertedTileBounds.topLeft.x) /
-                                 POLYGON_SUBDIVISION_FACTOR, (M_PI * 2.0) / POLYGON_SUBDIVISION_FACTOR);
+                                 POLYGON_MASK_SUBDIVISION_FACTOR, (M_PI * 2.0) / POLYGON_MASK_SUBDIVISION_FACTOR);
                     }
 
                     tileMask->setPolygons(tileEntry.masks, maxSegmentLength);
