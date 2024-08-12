@@ -388,6 +388,8 @@ void MapScene::resume() {
         return;
     }
 
+    scheduler->resume();
+
     std::lock_guard<std::recursive_mutex> lock(layersMutex);
     for (const auto &layer : layers) {
         layer.second->resume();
@@ -407,6 +409,8 @@ void MapScene::pause() {
     for (const auto &layer : layers) {
         layer.second->pause();
     }
+
+    scheduler->pause();
 }
 
 void MapScene::destroy() {
