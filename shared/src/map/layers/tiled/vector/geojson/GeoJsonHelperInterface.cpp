@@ -8,8 +8,6 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-#pragma once
-
 #include "GeoJsonHelperInterface.h"
 #include "GeoJsonHelper.h"
 
