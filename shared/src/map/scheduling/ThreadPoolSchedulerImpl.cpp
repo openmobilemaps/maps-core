@@ -29,11 +29,12 @@ ThreadPoolSchedulerImpl::ThreadPoolSchedulerImpl(const std::shared_ptr<ThreadPoo
 void ThreadPoolSchedulerImpl::addTask(const std::shared_ptr<TaskInterface> & task) {
     assert(task);
     auto const &config = task->getConfig();
-
     if (config.delay != 0) {
         std::lock_guard<std::mutex> lock(delayedTasksMutex);
         delayedTasks.push_back({task,  std::chrono::system_clock::now() + std::chrono::milliseconds(config.delay)});
-        delayedTasksCv.notify_one();
+        if (!paused) {
+            delayedTasksCv.notify_one();
+        }
     } else {
         addTaskIgnoringDelay(task);
     }
@@ -51,7 +52,9 @@ void ThreadPoolSchedulerImpl::addTaskIgnoringDelay(const std::shared_ptr<TaskInt
     } else {
         std::lock_guard<std::mutex> lock(defaultMutex);
         defaultQueue.push_back(task);
-        defaultCv.notify_one();
+        if (!paused) {
+            defaultCv.notify_one();
+        }
     }
 }
 
@@ -94,11 +97,13 @@ void ThreadPoolSchedulerImpl::clear() {
 }
 
 void ThreadPoolSchedulerImpl::pause() {
-    
+    paused = true;
 }
 
 void ThreadPoolSchedulerImpl::resume() {
-    
+    paused = false;
+    defaultCv.notify_all();
+    delayedTasksCv.notify_all();
 }
 
 
@@ -147,9 +152,12 @@ std::thread ThreadPoolSchedulerImpl::makeSchedulerThread(size_t index, TaskPrior
                 callbacks->detachThread();
                 return;
             }
+            if (paused) {
+                continue;
+            }
 
             // execute tasks as long as there are tasks
-            while(!defaultQueue.empty()) {
+            while(!defaultQueue.empty() && !paused) {
                 auto task = std::move(defaultQueue.front());
                 defaultQueue.pop_front();
                 lock.unlock();
@@ -214,14 +222,18 @@ std::thread ThreadPoolSchedulerImpl::makeDelayedTasksThread() {
             delayedTasksCv.wait_until(lock, nextWakeup);
 
             if (terminated) {
+                callbacks->detachThread();
                 return;
             }
 
             auto now = std::chrono::system_clock::now();
-
             nextWakeup = TimeStamp::max();
 
-            for (auto it = delayedTasks.begin(); it != delayedTasks.end();) {
+            if (paused) {
+                continue;
+            }
+
+            for (auto it = delayedTasks.begin(); it != delayedTasks.end() && !paused;) {
                 // lets schedule this task
                 if(it->second <= now) {
                     addTaskIgnoringDelay(it->first);
