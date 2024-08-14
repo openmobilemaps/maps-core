@@ -187,6 +187,7 @@ void Tiled2dMapVectorSymbolLabelObject::setupProperties(std::vector<float> &text
     evaluateStyleProperties(zoomIdentifier);
 
     for(auto &i : splittedTextInfo) {
+        if (i.glyphIndex < 0) continue;
         auto& d = fontResult->fontData->glyphs[i.glyphIndex];
         if(i.glyphIndex >= 0 && d.charCode != " ") {
             textureCoordinates[(4 * countOffset) + 0] = d.uv.topLeft.x;
