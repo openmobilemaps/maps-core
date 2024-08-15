@@ -65,7 +65,7 @@ This library is available on MavenCentral. To add it to your Android project, ad
 
 ```
 dependencies {
-  implementation 'io.openmobilemaps:mapscore:2.3.0'
+  implementation 'io.openmobilemaps:mapscore:2.4.0'
 }
 ```
 
@@ -182,7 +182,8 @@ To use different raster tile services with different tile pyramids, you can crea
 			override fun getZoomInfo(): Tiled2dMapZoomInfo {
 				return Tiled2dMapZoomInfo(
 					zoomLevelScaleFactor = 0.6667f,
-					numDrawPreviousLayers = 10,
+					numDrawPreviousLayers = 2,
+					numDrawPreviousOrLaterTLayers = 0,
 					adaptScaleToScreen = true,
 					maskTile = false,
 					underzoom = true,
@@ -322,7 +323,9 @@ val line = LineFactory.createLine(
 		width = lineWidth,
 		dashArray = arrayListOf(4.0f, 2.0f),
 		lineCap = LineCapType.SQUARE,
-        offset = 0f
+        offset = 0f,
+		dotted = false,
+		dottedSkew = 0.0
 	)
 )
 lineLayer.add(line)
