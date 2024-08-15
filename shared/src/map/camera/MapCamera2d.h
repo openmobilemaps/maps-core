@@ -121,7 +121,11 @@ class MapCamera2d : public MapCamera2dInterface,
 
     virtual ::Coord coordFromScreenPosition(const ::Vec2F &posScreen) override;
 
+    virtual ::Coord coordFromScreenPositionZoom(const ::Vec2F & posScreen, float zoom) override;
+
     Vec2F screenPosFromCoord(const Coord &coord) override;
+
+    virtual ::Vec2F screenPosFromCoordZoom(const ::Coord & coord, float zoom) override;
 
     virtual double mapUnitsFromPixels(double distancePx) override;
 

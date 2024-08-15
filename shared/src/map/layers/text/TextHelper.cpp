@@ -23,6 +23,10 @@
 #include "Vec2DHelper.h"
 
 unsigned char *StrToUprExt(unsigned char *pString);
+#if defined(__clang__) || defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
 
 std::vector<std::string> TextHelper::splitWstring(const std::string &word) {
     std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
@@ -37,6 +41,10 @@ std::vector<std::string> TextHelper::splitWstring(const std::string &word) {
     }
     return characters;
 }
+
+#if defined(__clang__) || defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
 
 TextHelper::TextHelper(const std::shared_ptr<MapInterface> &mapInterface)
     : mapInterface(mapInterface) {}

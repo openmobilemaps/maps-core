@@ -1,5 +1,12 @@
 # Changelog for Open Mobile Maps
 
+## Version 2.4.0
+- Add pass masking for single polygons
+- Fixing pass masking in non-tile-masked contexts for OpenGl
+- Improving pause/resume handling in ThreadPoolScheduler
+- Update AGP and Kotlin versions for Android
+- Improving gesture handling for iOS mac apps
+- Other fixes and stability imrpovements
 
 ## Version 2.3.0
 - Adds numDrawPreviousOrLaterTLayers field to Tiled2dMapZoomInfo to control the t dimension loading

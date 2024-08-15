@@ -97,6 +97,8 @@ open class MCMapView: MTKView {
         mapInterface.resume()
 
         addEventListeners()
+
+        setupMacGestureRecognizersIfNeeded()
     }
 
     private func addEventListeners() {
@@ -317,6 +319,50 @@ public extension MCMapView {
     @available(iOS 13.0, *)
     func remove(layer: any Layer) {
         mapInterface.removeLayer(layer.interface)
+    }
+}
+
+extension MCMapView : UIGestureRecognizerDelegate {
+    // MARK: - Mac setup
+
+    private func setupMacGestureRecognizersIfNeeded() {
+        var isiOSAppOnMac = false
+        if #available(iOS 14.0, *) {
+            isiOSAppOnMac = ProcessInfo.processInfo.isiOSAppOnMac
+        }
+
+        guard isiOSAppOnMac else { return }
+
+        let pinch = UIPinchGestureRecognizer(target: self, action: #selector(pinched))
+        pinch.delegate = self
+        pinch.allowedTouchTypes = []
+        self.addGestureRecognizer(pinch)
+
+        let pan = UIPanGestureRecognizer(target: self, action: #selector(panned))
+        pan.delegate = self
+        if #available(iOS 13.4, *) {
+            pan.allowedScrollTypesMask = .continuous
+        }
+        pan.allowedTouchTypes = []
+        self.addGestureRecognizer(pan)
+
+        pan.require(toFail: pinch)
+    }
+
+    public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        true
+    }
+
+    public override func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        true
+    }
+
+    @objc func pinched(_ gestureRecognizer: UIPinchGestureRecognizer) {
+        self.touchHandler.handlePinch(pinchGestureRecognizer: gestureRecognizer)
+    }
+
+    @objc func panned(_ gestureRecognizer: UIPanGestureRecognizer) {
+        self.touchHandler.handlePan(panGestureRecognizer: gestureRecognizer)
     }
 }
 

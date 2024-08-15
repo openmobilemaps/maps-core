@@ -55,8 +55,8 @@ public:
               cosNegGridAngle(std::cos(-gridAngle * M_PI / 180.0)),
               alwaysInsert(alwaysInsert) {
         cellSize = std::min(size.x, size.y) / (float) numCellsMinDim;
-        numCellsX = std::ceil(size.x / cellSize) + 2 * numCellsPadding;
-        numCellsY = std::ceil(size.y / cellSize) + 2 * numCellsPadding;
+        numCellsX = (cellSize > 0 ? std::ceil(size.x / cellSize) : 0.0) + 2 * numCellsPadding;
+        numCellsY = (cellSize > 0 ? std::ceil(size.y / cellSize) : 0.0) + 2 * numCellsPadding;
         halfWidth = size.x / 2.0f;
         halfHeight = size.y / 2.0f;
         gridRects.reserve(numCellsY);

@@ -2393,7 +2393,7 @@ public:
                 decimalPointPos = result.length();
                 result += '.';
             }
-            int fractionDigits = result.length() - decimalPointPos - 1;
+            int fractionDigits = (int)(result.length() - decimalPointPos - 1);
             int zerosToAdd = minFractionDigits - fractionDigits;
             if (zerosToAdd > 0) {
                 result.append(zerosToAdd, '0');

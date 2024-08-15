@@ -20,6 +20,8 @@ final class Polygon2d: BaseGraphicsObject {
     private var indicesCount: Int = 0
 
     private var stencilState: MTLDepthStencilState?
+    private var renderPassStencilState: MTLDepthStencilState?
+
 
     init(shader: MCShaderProgramInterface, metalContext: MetalContext) {
         self.shader = shader
@@ -30,7 +32,7 @@ final class Polygon2d: BaseGraphicsObject {
 
     override func render(encoder: MTLRenderCommandEncoder,
                          context: RenderingContext,
-                         renderPass _: MCRenderPassConfig,
+                         renderPass pass: MCRenderPassConfig,
                          mvpMatrix: Int64,
                          isMasked: Bool,
                          screenPixelAsRealMeterFactor _: Double) {
@@ -59,6 +61,15 @@ final class Polygon2d: BaseGraphicsObject {
             } else {
                 encoder.setStencilReferenceValue(0b1100_0000)
             }
+        }
+
+        if pass.isPassMasked {
+            if renderPassStencilState == nil {
+                renderPassStencilState = self.renderPassMaskStencilState()
+            }
+
+            encoder.setDepthStencilState(renderPassStencilState)
+            encoder.setStencilReferenceValue(0b0000_0000)
         }
 
         shader.setupProgram(context)
