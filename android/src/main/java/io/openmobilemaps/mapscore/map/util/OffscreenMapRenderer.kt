@@ -80,7 +80,11 @@ open class OffscreenMapRenderer(val sizePx: Vec2I, val density: Float = 72f) : G
 	}
 
 	override fun onDrawFrame(gl: GL10?) {
-		mapInterface?.drawFrame()
+		mapInterface?.apply {
+			prepare()
+			compute()
+			drawFrame()
+		}
 		if (saveFrame.getAndSet(false)) {
 			saveFrame()
 		}
