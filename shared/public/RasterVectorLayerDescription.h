@@ -134,6 +134,7 @@ public:
                                  int minZoom,
                                  int maxZoom,
                                  std::string url,
+                                 std::shared_ptr<Value> filter,
                                  RasterVectorStyle style,
                                  bool adaptScaleToScreen,
                                  int32_t numDrawPreviousLayers,
@@ -144,7 +145,7 @@ public:
                                  bool underzoom,
                                  bool overzoom,
                                  std::optional<::RectCoord> bounds):
-    VectorLayerDescription(identifier, source, "", minZoom, maxZoom, nullptr, renderPassIndex, interactable, false, false),
+    VectorLayerDescription(identifier, source, "", minZoom, maxZoom, filter, renderPassIndex, interactable, false, false),
     style(style), url(url), underzoom(underzoom), overzoom(overzoom), adaptScaleToScreen(adaptScaleToScreen), numDrawPreviousLayers(numDrawPreviousLayers),
     maskTiles(maskTiles), zoomLevelScaleFactor(zoomLevelScaleFactor), bounds(bounds) {};
 
@@ -155,6 +156,7 @@ public:
                                             minZoom,
                                             maxZoom,
                                             url,
+                                            filter,
                                             style,
                                             adaptScaleToScreen,
                                             numDrawPreviousLayers,

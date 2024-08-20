@@ -319,10 +319,11 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
                                                                                              selfActor,
                                                                                              mapDescription,
                                                                                              rasterSubLayerConfig,
-                                                                                             layerDesc->source,
+                                                                                             layerDesc,
                                                                                              sourceActor.weakActor<Tiled2dMapRasterSource>(),
                                                                                              readyManager,
-                                                                                             featureStateManager);
+                                                                                             featureStateManager,
+                                                                                             mapInterface->getCamera()->getScreenDensityPpi() / 160.0);
                 sourceManagerActor.unsafe()->setAlpha(alpha);
                 sourceTileManagers[layerDesc->source] = sourceManagerActor.strongActor<Tiled2dMapVectorSourceTileDataManager>();
                 sourceInterfaces.push_back(sourceActor.weakActor<Tiled2dMapSourceInterface>());
