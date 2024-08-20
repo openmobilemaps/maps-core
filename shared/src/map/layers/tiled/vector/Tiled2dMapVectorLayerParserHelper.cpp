@@ -145,12 +145,14 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                 maxZoom = json.value("maxzoom", 22);
             }
 
+
             RasterVectorStyle style = RasterVectorStyle(nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
             rasterLayerMap[key] = std::make_shared<RasterVectorLayerDescription>(layerName,
                                                                                  key,
                                                                                  minZoom,
                                                                                  maxZoom,
                                                                                  url,
+                                                                                 nullptr,
                                                                                  style,
                                                                                  adaptScaleToScreen,
                                                                                  numDrawPreviousLayers,
@@ -270,12 +272,14 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                                                         parser.parseValue(val["paint"]["raster-saturation"]),
                                                         parser.parseValue(val["metadata"]["raster-gamma"]),
                                                         blendMode);
+            std::shared_ptr<Value> filter = parser.parseValue(val["filter"]);
             
             auto newLayer = std::make_shared<RasterVectorLayerDescription>(val["id"],
                                                                            val["source"],
                                                                            val.value("minzoom", layer->minZoom),
                                                                            val.value("maxzoom", layer->maxZoom),
                                                                            layer->url,
+                                                                           filter,
                                                                            style,
                                                                            layer->adaptScaleToScreen,
                                                                            layer->numDrawPreviousLayers,
