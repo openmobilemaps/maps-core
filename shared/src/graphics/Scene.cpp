@@ -47,7 +47,9 @@ void Scene::drawFrame() {
 }
 
 void Scene::compute() {
-    renderer->compute(renderingContext);
+    if (camera) {
+        renderer->compute(renderingContext, camera);
+    }
 }
 
 void Scene::clear() {}

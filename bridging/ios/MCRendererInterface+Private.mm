@@ -8,6 +8,7 @@
 #import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
 #import "MCCameraInterface+Private.h"
+#import "MCComputePassInterface+Private.h"
 #import "MCRenderPassInterface+Private.h"
 #import "MCRenderingContextInterface+Private.h"
 #include <exception>
@@ -40,9 +41,9 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)addToComputeQueue:(nullable id<MCRenderPassInterface>)renderPass {
+- (void)addToComputeQueue:(nullable id<MCComputePassInterface>)computePass {
     try {
-        _cppRefHandle.get()->addToComputeQueue(::djinni_generated::RenderPassInterface::toCpp(renderPass));
+        _cppRefHandle.get()->addToComputeQueue(::djinni_generated::ComputePassInterface::toCpp(computePass));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -54,9 +55,11 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)compute:(nullable id<MCRenderingContextInterface>)renderingContext {
+- (void)compute:(nullable id<MCRenderingContextInterface>)renderingContext
+         camera:(nullable id<MCCameraInterface>)camera {
     try {
-        _cppRefHandle.get()->compute(::djinni_generated::RenderingContextInterface::toCpp(renderingContext));
+        _cppRefHandle.get()->compute(::djinni_generated::RenderingContextInterface::toCpp(renderingContext),
+                                     ::djinni_generated::CameraInterface::toCpp(camera));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -75,10 +78,10 @@ public:
             [djinni_private_get_proxied_objc_object() addToRenderQueue:(::djinni_generated::RenderPassInterface::fromCpp(c_renderPass))];
         }
     }
-    void addToComputeQueue(const /*not-null*/ std::shared_ptr<::RenderPassInterface> & c_renderPass) override
+    void addToComputeQueue(const /*not-null*/ std::shared_ptr<::ComputePassInterface> & c_computePass) override
     {
         @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() addToComputeQueue:(::djinni_generated::RenderPassInterface::fromCpp(c_renderPass))];
+            [djinni_private_get_proxied_objc_object() addToComputeQueue:(::djinni_generated::ComputePassInterface::fromCpp(c_computePass))];
         }
     }
     void drawFrame(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & c_renderingContext, const /*not-null*/ std::shared_ptr<::CameraInterface> & c_camera) override
@@ -88,10 +91,11 @@ public:
                                                          camera:(::djinni_generated::CameraInterface::fromCpp(c_camera))];
         }
     }
-    void compute(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & c_renderingContext) override
+    void compute(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & c_renderingContext, const /*not-null*/ std::shared_ptr<::CameraInterface> & c_camera) override
     {
         @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() compute:(::djinni_generated::RenderingContextInterface::fromCpp(c_renderingContext))];
+            [djinni_private_get_proxied_objc_object() compute:(::djinni_generated::RenderingContextInterface::fromCpp(c_renderingContext))
+                                                       camera:(::djinni_generated::CameraInterface::fromCpp(c_camera))];
         }
     }
 };

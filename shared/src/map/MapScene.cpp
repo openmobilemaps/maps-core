@@ -378,8 +378,8 @@ void MapScene::prepare() {
                 scene->getRenderer()->addToRenderQueue(renderPass);
             }
 
-            for (const auto &renderPass : layer.second->buildComputePasses()) {
-                scene->getRenderer()->addToComputeQueue(renderPass);
+            for (const auto &computePass : layer.second->buildComputePasses()) {
+                scene->getRenderer()->addToComputeQueue(computePass);
             }
         }
     }

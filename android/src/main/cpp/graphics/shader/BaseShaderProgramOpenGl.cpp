@@ -33,7 +33,7 @@ int BaseShaderProgramOpenGl::loadShader(int type, std::string shaderCode) {
         glGetShaderInfoLog(shader, maxLength, &maxLength, &errorLog[0]);
 
         std::stringstream errorSS;
-        errorSS << "Shader " << shader << " (" << getProgramName() << ") failed:\n";
+        errorSS << "Shader " << shader << "failed:\n";
 
         for (auto a : errorLog) {
             errorSS << a;

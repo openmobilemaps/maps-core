@@ -36,7 +36,7 @@ private:
         void setMaskingObject(const /*nullable*/ std::shared_ptr<::MaskingObjectInterface> & maskingObject) override;
         void update() override;
         std::vector</*not-null*/ std::shared_ptr<::RenderPassInterface>> buildRenderPasses() override;
-        std::vector</*not-null*/ std::shared_ptr<::RenderPassInterface>> buildComputePasses() override;
+        std::vector</*not-null*/ std::shared_ptr<::ComputePassInterface>> buildComputePasses() override;
         void onAdded(const /*not-null*/ std::shared_ptr<::MapInterface> & mapInterface, int32_t layerIndex) override;
         void onRemoved() override;
         void pause() override;

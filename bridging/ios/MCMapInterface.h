@@ -82,6 +82,7 @@
 /** Must be called on the rendering thread! */
 - (void)drawFrame;
 
+/** Must be called on the rendering thread! */
 - (void)compute;
 
 /** Must be called on the rendering thread! */

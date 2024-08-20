@@ -63,6 +63,7 @@ abstract class MapInterface {
     /** Must be called on the rendering thread! */
     abstract fun drawFrame()
 
+    /** Must be called on the rendering thread! */
     abstract fun compute()
 
     /** Must be called on the rendering thread! */

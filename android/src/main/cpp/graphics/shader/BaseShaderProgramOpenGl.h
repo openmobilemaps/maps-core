@@ -20,15 +20,15 @@
 
 class BaseShaderProgramOpenGl: public ShaderProgramInterface {
   protected:
-    int loadShader(int type, std::string shaderCode);
-
-    void checkGlProgramLinking(GLuint program);
-
     virtual std::string getVertexShader();
 
     virtual std::string getFragmentShader();
 
 public:
+    static int loadShader(int type, std::string shaderCode);
+
+    static void checkGlProgramLinking(GLuint program);
+
     void preRender(const std::shared_ptr<::RenderingContextInterface> &context) override;
 
 protected:

@@ -79,6 +79,7 @@ public:
     /** Must be called on the rendering thread! */
     virtual void drawFrame() = 0;
 
+    /** Must be called on the rendering thread! */
     virtual void compute() = 0;
 
     /** Must be called on the rendering thread! */

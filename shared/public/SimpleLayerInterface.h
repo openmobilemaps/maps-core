@@ -23,7 +23,7 @@ class SimpleLayerInterface : public LayerInterface {
         return {};
     };
 
-    virtual std::vector<std::shared_ptr<::RenderPassInterface>> buildComputePasses() {
+    virtual std::vector<std::shared_ptr<::ComputePassInterface>> buildComputePasses() {
         return {};
     };
 

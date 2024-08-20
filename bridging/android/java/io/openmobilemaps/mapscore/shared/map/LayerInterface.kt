@@ -14,7 +14,7 @@ abstract class LayerInterface {
 
     abstract fun buildRenderPasses(): ArrayList<io.openmobilemaps.mapscore.shared.graphics.RenderPassInterface>
 
-    abstract fun buildComputePasses(): ArrayList<io.openmobilemaps.mapscore.shared.graphics.RenderPassInterface>
+    abstract fun buildComputePasses(): ArrayList<io.openmobilemaps.mapscore.shared.graphics.ComputePassInterface>
 
     abstract fun onAdded(mapInterface: MapInterface, layerIndex: Int)
 
@@ -76,11 +76,11 @@ abstract class LayerInterface {
         }
         private external fun native_buildRenderPasses(_nativeRef: Long): ArrayList<io.openmobilemaps.mapscore.shared.graphics.RenderPassInterface>
 
-        override fun buildComputePasses(): ArrayList<io.openmobilemaps.mapscore.shared.graphics.RenderPassInterface> {
+        override fun buildComputePasses(): ArrayList<io.openmobilemaps.mapscore.shared.graphics.ComputePassInterface> {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             return native_buildComputePasses(this.nativeRef)
         }
-        private external fun native_buildComputePasses(_nativeRef: Long): ArrayList<io.openmobilemaps.mapscore.shared.graphics.RenderPassInterface>
+        private external fun native_buildComputePasses(_nativeRef: Long): ArrayList<io.openmobilemaps.mapscore.shared.graphics.ComputePassInterface>
 
         override fun onAdded(mapInterface: MapInterface, layerIndex: Int) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

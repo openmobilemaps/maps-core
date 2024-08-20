@@ -28,8 +28,6 @@ abstract class GraphicsObjectInterface {
 
     abstract fun render(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, renderPass: io.openmobilemaps.mapscore.shared.graphics.RenderPassConfig, mvpMatrix: Long, isMasked: Boolean, screenPixelAsRealMeterFactor: Double)
 
-    abstract fun compute(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, renderPass: io.openmobilemaps.mapscore.shared.graphics.RenderPassConfig)
-
     private class CppProxy : GraphicsObjectInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -80,11 +78,5 @@ abstract class GraphicsObjectInterface {
             native_render(this.nativeRef, context, renderPass, mvpMatrix, isMasked, screenPixelAsRealMeterFactor)
         }
         private external fun native_render(_nativeRef: Long, context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, renderPass: io.openmobilemaps.mapscore.shared.graphics.RenderPassConfig, mvpMatrix: Long, isMasked: Boolean, screenPixelAsRealMeterFactor: Double)
-
-        override fun compute(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, renderPass: io.openmobilemaps.mapscore.shared.graphics.RenderPassConfig) {
-            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_compute(this.nativeRef, context, renderPass)
-        }
-        private external fun native_compute(_nativeRef: Long, context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, renderPass: io.openmobilemaps.mapscore.shared.graphics.RenderPassConfig)
     }
 }

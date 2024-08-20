@@ -3,6 +3,7 @@
 
 #include "NativeLayerInterface.h"  // my header
 #include "Marshal.hpp"
+#include "NativeComputePassInterface.h"
 #include "NativeErrorManager.h"
 #include "NativeLayerReadyState.h"
 #include "NativeMapInterface.h"
@@ -43,13 +44,13 @@ std::vector</*not-null*/ std::shared_ptr<::RenderPassInterface>> NativeLayerInte
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni::List<::djinni_generated::NativeRenderPassInterface>::toCpp(jniEnv, jret);
 }
-std::vector</*not-null*/ std::shared_ptr<::RenderPassInterface>> NativeLayerInterface::JavaProxy::buildComputePasses() {
+std::vector</*not-null*/ std::shared_ptr<::ComputePassInterface>> NativeLayerInterface::JavaProxy::buildComputePasses() {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
     const auto& data = ::djinni::JniClass<::djinni_generated::NativeLayerInterface>::get();
     auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_buildComputePasses);
     ::djinni::jniExceptionCheck(jniEnv);
-    return ::djinni::List<::djinni_generated::NativeRenderPassInterface>::toCpp(jniEnv, jret);
+    return ::djinni::List<::djinni_generated::NativeComputePassInterface>::toCpp(jniEnv, jret);
 }
 void NativeLayerInterface::JavaProxy::onAdded(const /*not-null*/ std::shared_ptr<::MapInterface> & c_mapInterface, int32_t c_layerIndex) {
     auto jniEnv = ::djinni::jniGetThreadEnv();
@@ -188,7 +189,7 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_LayerInter
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::LayerInterface>(nativeRef);
         auto r = ref->buildComputePasses();
-        return ::djinni::release(::djinni::List<::djinni_generated::NativeRenderPassInterface>::fromCpp(jniEnv, r));
+        return ::djinni::release(::djinni::List<::djinni_generated::NativeComputePassInterface>::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
