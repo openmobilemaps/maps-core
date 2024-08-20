@@ -32,4 +32,6 @@ public:
     virtual void setDebugLabel(const std::string & label) = 0;
 
     virtual void render(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & context, const ::RenderPassConfig & renderPass, int64_t mvpMatrix, bool isMasked, double screenPixelAsRealMeterFactor) = 0;
+
+    virtual void compute(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & context, const ::RenderPassConfig & renderPass) = 0;
 };
