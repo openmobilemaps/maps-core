@@ -147,6 +147,7 @@ void PolygonLayer::addAll(const std::vector<PolygonInfo> &polygons) {
                                      }));
 
     generateRenderPasses();
+    mapInterface->invalidate();
 }
 
 void PolygonLayer::setupPolygonObjects(const std::vector<std::shared_ptr<Polygon2dInterface>> &polygons) {
@@ -178,7 +179,7 @@ void PolygonLayer::clear() {
         auto scheduler = mapInterface->getScheduler();
         if (scheduler) {
             auto polygonsToClear = polygons;
-            scheduler->addTask(std::make_shared<LambdaTask>(TaskConfig("LineLayer_clearLines", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS), [polygonsToClear]{
+            scheduler->addTask(std::make_shared<LambdaTask>(TaskConfig("PolygonLayer_clearLines", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS), [polygonsToClear]{
                 for (const auto &polygon : polygonsToClear) {
                     for (const auto &p : polygon.second) {
                         if (p.second->getPolygonObject()->isReady()) {
