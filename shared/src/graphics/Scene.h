@@ -37,6 +37,10 @@ class Scene : public SceneInterface {
 
     virtual void drawFrame() override;
 
+    virtual void prepare() override;
+
+    virtual void compute() override;
+
     virtual void clear() override;
 
     virtual void invalidate() override;

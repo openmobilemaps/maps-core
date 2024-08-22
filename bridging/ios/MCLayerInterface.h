@@ -18,6 +18,8 @@
 
 - (nonnull NSArray<id<MCRenderPassInterface>> *)buildRenderPasses;
 
+- (nonnull NSArray<id<MCRenderPassInterface>> *)buildComputePasses;
+
 - (void)onAdded:(nullable MCMapInterface *)mapInterface
      layerIndex:(int32_t)layerIndex;
 

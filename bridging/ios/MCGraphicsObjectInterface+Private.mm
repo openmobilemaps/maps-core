@@ -80,6 +80,14 @@ screenPixelAsRealMeterFactor:(double)screenPixelAsRealMeterFactor {
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)compute:(nullable id<MCRenderingContextInterface>)context
+     renderPass:(nonnull MCRenderPassConfig *)renderPass {
+    try {
+        _cppRefHandle.get()->compute(::djinni_generated::RenderingContextInterface::toCpp(context),
+                                     ::djinni_generated::RenderPassConfig::toCpp(renderPass));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 namespace djinni_generated {
 
 class GraphicsObjectInterface::ObjcProxy final
@@ -129,6 +137,13 @@ public:
                                                      mMatrix:(::djinni::I64::fromCpp(c_mMatrix))
                                                     isMasked:(::djinni::Bool::fromCpp(c_isMasked))
                                 screenPixelAsRealMeterFactor:(::djinni::F64::fromCpp(c_screenPixelAsRealMeterFactor))];
+        }
+    }
+    void compute(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & c_context, const ::RenderPassConfig & c_renderPass) override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() compute:(::djinni_generated::RenderingContextInterface::fromCpp(c_context))
+                                                   renderPass:(::djinni_generated::RenderPassConfig::fromCpp(c_renderPass))];
         }
     }
 };

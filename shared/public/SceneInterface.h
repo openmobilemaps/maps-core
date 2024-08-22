@@ -34,7 +34,11 @@ public:
 
     virtual /*not-null*/ std::shared_ptr<::ShaderFactoryInterface> getShaderFactory() = 0;
 
+    virtual void prepare() = 0;
+
     virtual void drawFrame() = 0;
+
+    virtual void compute() = 0;
 
     virtual void clear() = 0;
 

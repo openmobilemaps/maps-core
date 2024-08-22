@@ -33,7 +33,11 @@
 
 - (nullable id<MCShaderFactoryInterface>)getShaderFactory;
 
+- (void)prepare;
+
 - (void)drawFrame;
+
+- (void)compute;
 
 - (void)clear;
 
