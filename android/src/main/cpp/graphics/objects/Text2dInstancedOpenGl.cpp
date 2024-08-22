@@ -111,6 +111,8 @@ void Text2dInstancedOpenGl::prepareGlData(int program) {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     mvpMatrixHandle = glGetUniformLocation(program, "uMVPMatrix");
+
+    glDataBuffersGenerated = true;
 }
 
 void Text2dInstancedOpenGl::prepareTextureCoordsGlData(int program) {

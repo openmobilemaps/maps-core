@@ -82,6 +82,8 @@ void PolygonPatternGroup2dOpenGl::prepareGlData(int program) {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     mvpMatrixHandle = glGetUniformLocation(program, "uMVPMatrix");
+
+    glDataBuffersGenerated = true;
 }
 
 void PolygonPatternGroup2dOpenGl::clear() {

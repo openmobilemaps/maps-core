@@ -14,6 +14,7 @@
 int BaseShaderProgramOpenGl::loadShader(int type, std::string shaderCode) {
     // create a vertex shader type (GL_VERTEX_SHADER)
     // or a fragment shader type (GL_FRAGMENT_SHADER)
+    // or a compute shader type (GL_COMPUTE_SHADER)
     int shader = glCreateShader(type);
 
     // add the source code to the shader and compile it
@@ -33,7 +34,7 @@ int BaseShaderProgramOpenGl::loadShader(int type, std::string shaderCode) {
         glGetShaderInfoLog(shader, maxLength, &maxLength, &errorLog[0]);
 
         std::stringstream errorSS;
-        errorSS << "Shader " << shader << "failed:\n";
+        errorSS << "Shader " << shader << " failed:\n";
 
         for (auto a : errorLog) {
             errorSS << a;
