@@ -24,4 +24,6 @@
 
 @property (nonatomic, readonly, nonnull) MCVec2D * bottomLeft;
 
+- (NSComparisonResult)compare:(nonnull MCQuad2dD *)other;
+
 @end

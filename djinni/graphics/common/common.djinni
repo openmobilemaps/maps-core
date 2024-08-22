@@ -57,7 +57,7 @@ quad_2d_d = record {
     top_right: vec_2_d;
     bottom_right: vec_2_d;
     bottom_left: vec_2_d;
-}
+} deriving (eq, ord)
 
 circle_d = record {
     x: f64;
