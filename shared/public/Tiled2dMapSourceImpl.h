@@ -144,7 +144,7 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
             }
         }
 
-        VisibleTilesLayer curVisibleTiles(i - targetZoomLayer);
+        VisibleTilesLayer curVisibleTiles(i - targetZoomLayer, curT);
         std::vector<PrioritizedTiled2dMapTileInfo> curVisibleTilesVec;
 
         const double tileWidth = zoomLevelInfo.tileWidthLayerSystemUnits;
@@ -217,9 +217,9 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
                 for (int t = 0; t < zoomLevelInfo.numTilesT; t++) {
 
                     
-                    if( abs(t - curT) > zoomInfo.numDrawPreviousOrLaterTLayers ) {
-                        continue;
-                    }
+//                    if( abs(t - curT) > zoomInfo.numDrawPreviousOrLaterTLayers ) {
+//                        continue;
+//                    }
 
                     const Coord topLeft = Coord(layerSystemId, x * tileWidthAdj + boundsLeft, y * tileHeightAdj + boundsTop, 0);
                     const Coord bottomRight = Coord(layerSystemId, topLeft.x + tileWidthAdj, topLeft.y + tileHeightAdj, 0);
@@ -245,6 +245,13 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
         }
 
         curVisibleTiles.visibleTiles.insert(curVisibleTilesVec.begin(), curVisibleTilesVec.end());
+
+        if(startTileLeft == maxTileLeft && startTileTop == maxTileTop) {
+            if (!layers.empty()) {
+                layers.back().isLastSingleCover = false;
+            }
+            curVisibleTiles.isLastSingleCover = true;
+        }
 
         std::unordered_set<PrioritizedTiled2dMapTileInfo> visibleTiles(visibleTilesVec.begin(), visibleTilesVec.end());
         layers.push_back(curVisibleTiles);
@@ -272,6 +279,10 @@ void Tiled2dMapSource<T, L, R>::onVisibleTilesChanged(const std::vector<VisibleT
     for (const auto &layer: pyramid) {
         if ((layer.targetZoomLevelOffset <= 0 && layer.targetZoomLevelOffset >= -zoomInfo.numDrawPreviousLayers) || layer.targetZoomLevelOffset == keepZoomLevelOffset){
             for (auto const &tileInfo: layer.visibleTiles) {
+//                if (abs(tileInfo.tileInfo.t - layer.curT) > zoomInfo.numDrawPreviousOrLaterTLayers) {
+//                    continue;
+//                }
+
                 currentVisibleTiles.insert(tileInfo.tileInfo);
 
                 size_t currentTilesCount = currentTiles.count(tileInfo.tileInfo);
@@ -334,7 +345,7 @@ void Tiled2dMapSource<T, L, R>::onVisibleTilesChanged(const std::vector<VisibleT
         if (it->first.zoomIdentifier <= currentZoomLevelIdentifier) {
             for (const auto &layer: pyramid) {
                 for (auto const &tile: layer.visibleTiles) {
-                    if (it->first == tile.tileInfo) {
+                    if (it->first == tile.tileInfo && (abs(tile.tileInfo.t - layer.curT) <= zoomInfo.numDrawPreviousOrLaterTLayers || layer.isLastSingleCover)) {
                         found = true;
                         break;
                     }

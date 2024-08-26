@@ -154,10 +154,18 @@ void Tiled2dMapRasterLayer::setT(int32_t t) {
     for (const auto &sourceInterface : sourceInterfaces) {
         sourceInterface.message(&Tiled2dMapSourceInterface::notifyTilesUpdates);
     }
+    generateRenderPasses();
+    if(mapInterface) {
+        mapInterface->invalidate();
+    }
 }
 
 bool Tiled2dMapRasterLayer::shouldLoadTile(const Tiled2dMapTileInfo& tileInfo){
     return abs(tileInfo.t - curT) <= layerConfig->getZoomInfo().numDrawPreviousOrLaterTLayers;
+}
+
+bool Tiled2dMapRasterLayer::shouldKeepTile(const Tiled2dMapTileInfo& tileInfo){
+    return true;
 }
 
 void Tiled2dMapRasterLayer::onTilesUpdated(const std::string &layerName, std::unordered_set<Tiled2dMapRasterTileInfo> currentTileInfos) {
@@ -175,11 +183,22 @@ void Tiled2dMapRasterLayer::onTilesUpdated(const std::string &layerName, std::un
         if (updateFlag.test_and_set()) {
             return;
         }
-        
+
         std::vector<std::pair<Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>>> tilesToSetup, tilesToClean;
         std::vector<std::shared_ptr<MaskingObjectInterface>> newMaskObjects;
         std::vector<std::shared_ptr<MaskingObjectInterface>> obsoleteMaskObjects;
-        
+
+        std::vector<Tiled2dMapRasterTileInfo> sortedTileInfos(currentTileInfos.begin(), currentTileInfos.end());
+
+        // Sort the vector by the absolute difference from curT
+        auto t = curT;
+        std::sort(sortedTileInfos.begin(),
+ sortedTileInfos.end(),
+                  [t](const Tiled2dMapRasterTileInfo& a,
+                         const Tiled2dMapRasterTileInfo& b) {
+            return std::abs(a.tileInfo.tileInfo.t - t) < std::abs(b.tileInfo.tileInfo.t - t);
+        });
+
         std::vector<Tiled2dMapRasterTileInfo> tileStateUpdates;
 
         {
@@ -187,7 +206,7 @@ void Tiled2dMapRasterLayer::onTilesUpdated(const std::string &layerName, std::un
             updateFlag.clear();
 
             std::unordered_set<Tiled2dMapRasterTileInfo> tilesToAdd;
-            for (const auto &rasterTileInfo : currentTileInfos) {
+            for (const auto &rasterTileInfo : sortedTileInfos) {
                 if (shouldLoadTile(rasterTileInfo.tileInfo.tileInfo)) {
                     auto it = tileObjectMap.find(rasterTileInfo);
                     if (it == tileObjectMap.end()) {
@@ -207,7 +226,7 @@ void Tiled2dMapRasterLayer::onTilesUpdated(const std::string &layerName, std::un
             std::unordered_set<Tiled2dMapRasterTileInfo> tilesToRemove;
             for (const auto &tileEntry : tileObjectMap) {
                 auto currentTileInfosIt = currentTileInfos.find(tileEntry.first);
-                if (currentTileInfosIt == currentTileInfos.end() || !shouldLoadTile(tileEntry.first.tileInfo.tileInfo)){
+                if (currentTileInfosIt == currentTileInfos.end() || !shouldKeepTile(tileEntry.first.tileInfo.tileInfo)){
                     tilesToRemove.insert(tileEntry.first);
                 } else {
                     if (tileEntry.first.state != currentTileInfosIt->state) {
@@ -400,8 +419,22 @@ void Tiled2dMapRasterLayer::generateRenderPasses() {
     {
         std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
 
+        std::map<Tiled2dMapTileInfo, int> bestT;
+
         for (const auto &entry : tileObjectMap) {
-            if (entry.first.tileInfo.tileInfo.t != curT) {
+            auto ti = entry.first.tileInfo.tileInfo;
+            int t = ti.t;
+            ti.t = 0;
+            auto it = bestT.find(ti);
+            if (it == bestT.end() || abs(it->second - curT) > abs(t - curT)) {
+                bestT[ti] = t;
+            }
+        }
+
+        for (const auto &entry : tileObjectMap) {
+            auto ti = entry.first.tileInfo.tileInfo;
+            ti.t = 0;
+            if (entry.first.tileInfo.tileInfo.t != bestT[ti]) {
                 continue;
             }
 
