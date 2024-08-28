@@ -181,7 +181,7 @@ public enum PipelineType: String, CaseIterable, Codable {
             case .polygonStripedGroupShader: return "polygonStripedGroupVertexShader"
             case .polygonPatternGroupShader: return "polygonPatternGroupVertexShader"
             case .polygonPatternFadeInGroupShader: return "polygonPatternGroupVertexShader"
-            case .colorShader: return "colorVertexShader"
+            case .colorShader: return "baseVertexShader"
             case .roundColorShader: return "colorVertexShader"
             case .clearStencilShader: return "stencilClearVertexShader"
             case .textShader: return "textVertexShader"
@@ -238,7 +238,7 @@ public enum PipelineType: String, CaseIterable, Codable {
                 return LineVertex.descriptor
             case .polygonGroupShader, .polygonPatternGroupShader, .polygonPatternFadeInGroupShader, .polygonStripedGroupShader, .unitSpherePolygonGroupShader:
                 return PolygonVertex.descriptor
-            case .rasterShader, .unitSphereRasterShader, .clearStencilShader, .alphaShader, .unitSphereAlphaShader, .unitSphereColorShader, .unitSphereRoundColorShader, .sphereEffectShader:
+            case .rasterShader, .unitSphereRasterShader, .clearStencilShader, .alphaShader, .colorShader, .unitSphereAlphaShader, .unitSphereColorShader, .unitSphereRoundColorShader, .sphereEffectShader:
                 return Vertex3D.descriptor
             case.icosahedronColorShader:
                 return PolygonVertex.descriptor

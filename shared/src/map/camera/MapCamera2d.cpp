@@ -838,6 +838,7 @@ Coord MapCamera2d::coordFromScreenPosition(const ::Vec2F &posScreen) {
 
 ::Vec2F MapCamera2d::screenPosFromCoord(const Coord &coord) {
     return screenPosFromCoordZoom(coord, zoom);
+}
 
 bool MapCamera2d::coordIsVisibleOnScreen(const ::Coord & coord, float paddingPc) {
     auto screenPos = screenPosFromCoord(coord);

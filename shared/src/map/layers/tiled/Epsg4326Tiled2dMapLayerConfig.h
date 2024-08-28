@@ -41,5 +41,5 @@ private:
 
     int32_t minZoomLevel = 0;
     int32_t maxZoomLevel = 20;
-    Tiled2dMapZoomInfo zoomInfo = Tiled2dMapZoomInfo(1.0, 0, true, false, true, true);
+    Tiled2dMapZoomInfo zoomInfo = Tiled2dMapZoomInfo(1.0, 0, 0, true, false, true, true);
 };

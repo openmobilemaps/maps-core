@@ -1042,6 +1042,12 @@ Coord MapCamera3d::coordFromScreenPosition(const ::Vec2F &posScreen) {
     return coordFromScreenPosition(inverseVPMatrix, posScreen);
 }
 
+::Coord MapCamera3d::coordFromScreenPositionZoom(const ::Vec2F & posScreen, float zoom) {
+    // TODO: fix
+    std::lock_guard<std::recursive_mutex> lock(vpDataMutex);
+    return coordFromScreenPosition(inverseVPMatrix, posScreen);
+}
+
 Coord MapCamera3d::coordFromScreenPosition(const std::vector<double> &inverseVPMatrix, const ::Vec2F &posScreen) {
     auto viewport = mapInterface->getRenderingContext()->getViewportSize();
 
@@ -1234,6 +1240,12 @@ bool MapCamera3d::gluInvertMatrix(const std::vector<double> &m, std::vector<doub
 
     return Vec2F(0.0, 0.0);
 }
+
+::Vec2F MapCamera3d::screenPosFromCoordZoom(const ::Coord & coord, float zoom) {
+    // TODO: fix
+    return screenPosFromCoord(coord);
+}
+
 
 // padding in percentage, where 1.0 = rect is half of full width and height
 bool MapCamera3d::coordIsVisibleOnScreen(const ::Coord & coord, float paddingPc) {

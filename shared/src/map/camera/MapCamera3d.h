@@ -127,7 +127,11 @@ class MapCamera3d : public MapCameraInterface,
 
     virtual ::Coord coordFromScreenPosition(const ::Vec2F &posScreen) override;
 
+    virtual ::Coord coordFromScreenPositionZoom(const ::Vec2F & posScreen, float zoom) override;
+
     Vec2F screenPosFromCoord(const Coord &coord) override;
+
+    virtual ::Vec2F screenPosFromCoordZoom(const ::Coord & coord, float zoom) override;
 
     bool coordIsVisibleOnScreen(const ::Coord & coord, float paddingPc) override;
 
@@ -157,6 +161,8 @@ class MapCamera3d : public MapCameraInterface,
     std::vector<double> computeEllipseCoefficients();
 
     bool coordIsFarAwayFromFocusPoint(const ::Coord & coord);
+
+                        
 
 protected:
     virtual std::tuple<std::vector<float>, std::vector<double>> getVpMatrix(const Coord &focusCoord, bool updateVariables);
