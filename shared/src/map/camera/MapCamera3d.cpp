@@ -442,7 +442,7 @@ std::tuple<std::vector<float>, std::vector<double>> MapCamera3d::getVpMatrix(con
     std::vector<double> newInverseMatrix(16, 0.0);
     gluInvertMatrix(vpMatrixD, newInverseMatrix);
 
-    
+
 
     if (updateVariables) {
         std::lock_guard<std::recursive_mutex> lock(vpDataMutex);
@@ -779,7 +779,7 @@ bool MapCamera3d::onMoveComplete() {
 bool MapCamera3d::onOneFingerDoubleClickMoveComplete() {
     if (cameraFrozen)
         return false;
-    
+
     checkForRubberBandEffect();
 
     return true;
@@ -1674,7 +1674,7 @@ void MapCamera3d::updateZoom(double zoom_) {
         newZoom = std::clamp(zoom_, zoomMax, zoomMin);
     }
 
-    
+
     zoom = newZoom;
 
     cameraVerticalDisplacement = getCameraVerticalDisplacement();
@@ -1685,18 +1685,17 @@ double MapCamera3d::getCameraVerticalDisplacement() {
     if (mode == CameraMode3d::ONBOARDING_ROTATING_GLOBE || mode == CameraMode3d::ONBOARDING_ROTATING_SEMI_GLOBE) {
         return 0;
     }
-
     double z, from, to;
     double maxPitch = GLOBE_INITIAL_ZOOM;
     if (zoom >= maxPitch) {
         z = 1.0 - (zoom - maxPitch) / (GLOBE_MIN_ZOOM - maxPitch);
-        from = 10;
-        to = -10;
+        from = 0;
+        to = 1.0;
     }
     else {
         z = 1.0 - (zoom - LOCAL_MAX_ZOOM) / (maxPitch - LOCAL_MAX_ZOOM);
-        from = -10;
-        to = 10;
+        from = 1.0;
+        to = 0;
     }
     double p = from + (z * (to - from));
     return p;
@@ -1711,11 +1710,11 @@ double MapCamera3d::getCameraPitch() {
     if (zoom >= maxPitch) {
         z = 1.0 - (zoom - maxPitch) / (GLOBE_MIN_ZOOM - maxPitch);
         from = 0;
-        to = 20;
+        to = 25;
     }
     else {
         z = 1.0 - (zoom - LOCAL_MAX_ZOOM) / (maxPitch - LOCAL_MAX_ZOOM);
-        from = 20;
+        from = 25;
         to = 0;
     }
 //    switch (mode) {
@@ -1730,7 +1729,7 @@ double MapCamera3d::getCameraPitch() {
 //            from = 0;
 //            to = 0;
 //            break;
-//    }   
+//    }
     double p = from + (z * (to - from));
     return p;
 }
@@ -1751,4 +1750,3 @@ double MapCamera3d::getCameraDistance() {
     float R = 6378137.0;
     return d / R;
 }
-
