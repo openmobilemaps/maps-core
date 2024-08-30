@@ -23,9 +23,12 @@
 #include "Vec2I.h"
 #include "Vec2F.h"
 #include "CameraMode3d.h"
+#include "Camera3dConfig.h"
+#include "CameraInterpolation.h"
 #include <mutex>
 #include <optional>
 #include <set>
+
 
 class MapCamera3d : public MapCameraInterface,
                     public MapCamera3dInterface,
@@ -156,13 +159,15 @@ class MapCamera3d : public MapCameraInterface,
 
     CameraMode3d getCameraMode() override;
 
+    void setCameraConfig(const Camera3dConfig & config, std::optional<float> durationSeconds, std::optional<float> targetZoom, const std::optional<::Coord> & targetCoordinate) override;
+
+    Camera3dConfig getCameraConfig() override;
+
     void notifyListenerBoundsChange() override;
 
     std::vector<double> computeEllipseCoefficients();
 
     bool coordIsFarAwayFromFocusPoint(const ::Coord & coord);
-
-                        
 
 protected:
     virtual std::tuple<std::vector<float>, std::vector<double>> getVpMatrix(const Coord &focusCoord, bool updateVariables);
@@ -188,8 +193,6 @@ protected:
     bool mapSystemTtb;
     float screenDensityPpi;
     double screenPixelAsRealMeterFactor;
-
-    CameraMode3d mode = CameraMode3d::GLOBAL;
 
     Coord focusPointPosition;
     double cameraVerticalDisplacement = 0.0;
@@ -258,6 +261,8 @@ protected:
 
     void notifyListeners(const int &listenerType);
 
+    float valueForZoom(const CameraInterpolation& interpolator);
+
     // MARK: Animations
 
     std::recursive_mutex animationMutex;
@@ -298,4 +303,6 @@ protected:
     std::optional<Coord> lastOnTouchDownCoord;
     std::optional<Coord> lastOnMoveCoord;
     std::vector<double> lastOnTouchDownInverseVPMatrix;
+
+    Camera3dConfig cameraZoomConfig;
 };

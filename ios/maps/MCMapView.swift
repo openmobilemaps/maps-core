@@ -297,6 +297,10 @@ public extension MCMapView {
         mapInterface.getCamera()!
     }
 
+    var camera3d: MCMapCamera3dInterface? {
+        camera.asMapCamera3d()
+    }
+
     func add(layer: MCLayerInterface?) {
         mapInterface.addLayer(layer)
     }
