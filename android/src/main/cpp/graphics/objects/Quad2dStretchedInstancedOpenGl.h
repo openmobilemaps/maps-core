@@ -128,15 +128,15 @@ class Quad2dStretchedInstancedOpenGl : public GraphicsObjectInterface,
     int instStretchYsHandle;
     int instTextureCoordinatesHandle;
 
-    static const int instPositionsOffsetBytes = sizeof(GLfloat) * 0;
-    static const int instTextureCoordinatesOffsetBytes = sizeof(GLfloat) * 2;
-    static const int instScalesOffsetBytes = sizeof(GLfloat) * 6;
-    static const int instRotationsOffsetBytes = sizeof(GLfloat) * 8;
-    static const int instAlphasOffsetBytes = sizeof(GLfloat) * 9;
-    static const int instStretchInfoOffsetBytes = sizeof(GLfloat) * 10;
-    static const int instStretchXsAddOffsetBytes = sizeof(GLfloat) * 2;
-    static const int instStretchYsAddOffsetBytes = sizeof(GLfloat) * 6;
-    static const int instValuesSizeBytes = sizeof(GLfloat) * 20;
+    static const uintptr_t instPositionsOffsetBytes = sizeof(GLfloat) * 0;
+    static const uintptr_t instTextureCoordinatesOffsetBytes = sizeof(GLfloat) * 2;
+    static const uintptr_t instScalesOffsetBytes = sizeof(GLfloat) * 6;
+    static const uintptr_t instRotationsOffsetBytes = sizeof(GLfloat) * 8;
+    static const uintptr_t instAlphasOffsetBytes = sizeof(GLfloat) * 9;
+    static const uintptr_t instStretchInfoOffsetBytes = sizeof(GLfloat) * 10;
+    static const uintptr_t instStretchXsAddOffsetBytes = sizeof(GLfloat) * 2;
+    static const uintptr_t instStretchYsAddOffsetBytes = sizeof(GLfloat) * 6;
+    static const uintptr_t instValuesSizeBytes = sizeof(GLfloat) * 20;
 
 private:
     bool writeToDynamicInstanceDataBuffer(const ::SharedBytes &data, GLuint targetOffsetBytes);

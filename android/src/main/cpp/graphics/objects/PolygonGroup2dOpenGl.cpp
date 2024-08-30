@@ -10,6 +10,8 @@
 
 #include "PolygonGroup2dOpenGl.h"
 #include "RenderVerticesDescription.h"
+#include <cmath>
+#include <cstring>
 
 PolygonGroup2dOpenGl::PolygonGroup2dOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader)
     : shaderProgram(shader) {}

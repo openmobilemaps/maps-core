@@ -138,7 +138,7 @@ public:
 
             // Example: ["all", [ "in", "admin_level", 2, 4 ], [ "!=", "maritime", 1] ]
             else if (isExpression(json[0], allExpression)) {
-                std::vector<const std::shared_ptr<Value>> values;
+                std::vector<std::shared_ptr<Value>> values;
                 for (auto it = json.begin() + 1; it != json.end(); it++) {
                     auto const &v = parseValue(*it);
                     if (v != nullptr) {
@@ -153,7 +153,7 @@ public:
 
             // Example: ["any", [ "in", "admin_level", 2, 4 ], [ "!=", "maritime", 1] ]
             else if (isExpression(json[0], anyExpression)) {
-                std::vector<const std::shared_ptr<Value>> values;
+                std::vector<std::shared_ptr<Value>> values;
                 for (auto it = json.begin() + 1; it != json.end(); it++) {
                     auto const &v = parseValue(*it);
                     if (v != nullptr) {

@@ -598,7 +598,7 @@ void Tiled2dMapVectorLayer::update() {
     auto now = DateHelper::currentTimeMillis();
     bool newIsAnimating = false;
     bool tilesChanged = !tilesStillValid.test_and_set();
-    double zoomChange = abs(newZoom-lastDataManagerZoom) / std::max(newZoom, 1.0);
+    double zoomChange = std::abs(newZoom-lastDataManagerZoom) / std::max(newZoom, 1.0);
     double timeDiff = now - lastDataManagerUpdate;
     bool is3d = mapInterface->is3d();
 

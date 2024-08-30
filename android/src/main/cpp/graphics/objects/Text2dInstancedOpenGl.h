@@ -125,13 +125,13 @@ protected:
     int styleBufferHandle;
     GLuint styleBuffer;
 
-    static const int instPositionsOffsetBytes = sizeof(GLfloat) * 0;
-    static const int instTextureCoordinatesOffsetBytes = sizeof(GLfloat) * 2;
-    static const int instScalesOffsetBytes = sizeof(GLfloat) * 6;
-    static const int instRotationsOffsetBytes = sizeof(GLfloat) * 8;
-    static const int instStyleIndicesOffsetBytes = sizeof(GLfloat) * 9;
-    static const int instReferencePositionsOffsetBytes = sizeof(GLfloat) * 10;
-    static const int instValuesSizeBytes = sizeof(GLfloat) * 12;
+    static const uintptr_t instPositionsOffsetBytes = sizeof(GLfloat) * 0;
+    static const uintptr_t instTextureCoordinatesOffsetBytes = sizeof(GLfloat) * 2;
+    static const uintptr_t instScalesOffsetBytes = sizeof(GLfloat) * 6;
+    static const uintptr_t instRotationsOffsetBytes = sizeof(GLfloat) * 8;
+    static const uintptr_t instStyleIndicesOffsetBytes = sizeof(GLfloat) * 9;
+    static const uintptr_t instReferencePositionsOffsetBytes = sizeof(GLfloat) * 10;
+    static const uintptr_t instValuesSizeBytes = sizeof(GLfloat) * 12;
 
 private:
     bool writeToDynamicInstanceDataBuffer(const ::SharedBytes &data, GLuint targetOffsetBytes);

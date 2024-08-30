@@ -12,9 +12,9 @@
 
 #include "RenderingContextInterface.h"
 #include "RenderingCullMode.h"
+#include <memory>
 #include <string>
 #include <unordered_map>
-#include <vector>
 
 class OpenGlContext : public RenderingContextInterface, std::enable_shared_from_this<OpenGlContext> {
   public:

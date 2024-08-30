@@ -13,6 +13,7 @@
 #include "OpenGlHelper.h"
 #include "TextureHolderInterface.h"
 #include "BaseShaderProgramOpenGl.h"
+#include <cstring>
 
 PolygonPatternGroup2dOpenGl::PolygonPatternGroup2dOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader)
     : shaderProgram(shader) {}

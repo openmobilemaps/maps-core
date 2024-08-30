@@ -76,7 +76,12 @@ void JNISchedulerCallback::attachThread() {
     jint envRes = vm->GetEnv((void **) &env, JNI_VERSION_1_6);
     if (envRes != JNI_OK) {
         if (envRes == JNI_EDETACHED) {
+
+#if defined(ANDROID) || defined(__ANDROID__)
             jint attachRes = vm->AttachCurrentThread(&env, nullptr);
+#else
+            jint attachRes = vm->AttachCurrentThread(reinterpret_cast<void**>(&env), nullptr);
+#endif
             if (attachRes != JNI_OK) {
                 throw std::runtime_error("Failed to attach thread to JVM!");
             }

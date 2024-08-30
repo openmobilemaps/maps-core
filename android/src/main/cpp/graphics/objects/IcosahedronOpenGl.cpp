@@ -9,7 +9,7 @@
  */
 
 #include "IcosahedronOpenGl.h"
-#include "OpenGlHelper.h"
+#include <cstring>
 
 IcosahedronOpenGl::IcosahedronOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader)
     : shaderProgram(shader) {}

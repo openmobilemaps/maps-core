@@ -15,6 +15,7 @@
 #include "CoordinateConverterInterface.h"
 #include "CoordinateSystemIdentifiers.h"
 #include "MapCoordinateSystem.h"
+#include <algorithm>
 
 /// Convert WGS84 to WGS 84 / Pseudo-Mercator
 ///  https://epsg.io/4326 to https://epsg.io/3857
