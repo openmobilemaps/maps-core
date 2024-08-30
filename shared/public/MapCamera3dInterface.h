@@ -4,6 +4,7 @@
 #pragma once
 
 enum class CameraMode3d;
+struct Camera3dConfig;
 
 class MapCamera3dInterface {
 public:
@@ -12,4 +13,8 @@ public:
     virtual void setCameraMode(CameraMode3d mode) = 0;
 
     virtual CameraMode3d getCameraMode() = 0;
+
+    virtual void setCameraConfig(const Camera3dConfig & config) = 0;
+
+    virtual Camera3dConfig getCameraConfig() = 0;
 };

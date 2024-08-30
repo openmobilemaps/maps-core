@@ -228,7 +228,7 @@ camera_interpolation_value = record {
     value: f32;
 }
 
-struct camera_3d_config = record {
+camera_3d_config = record {
     allow_user_interaction: bool;
     rotation_speed: optional<f32>;
 
