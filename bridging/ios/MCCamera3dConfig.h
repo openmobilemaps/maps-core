@@ -8,18 +8,22 @@ NS_SWIFT_SENDABLE
 @interface MCCamera3dConfig : NSObject
 - (nonnull instancetype)init NS_UNAVAILABLE;
 + (nonnull instancetype)new NS_UNAVAILABLE;
-- (nonnull instancetype)initWithAllowUserInteraction:(BOOL)allowUserInteraction
-                                       rotationSpeed:(nullable NSNumber *)rotationSpeed
-                                             minZoom:(float)minZoom
-                                             maxZoom:(float)maxZoom
-                            pitchInterpolationValues:(nonnull MCCameraInterpolation *)pitchInterpolationValues
-             verticalDisplacementInterpolationValues:(nonnull MCCameraInterpolation *)verticalDisplacementInterpolationValues NS_DESIGNATED_INITIALIZER;
-+ (nonnull instancetype)camera3dConfigWithAllowUserInteraction:(BOOL)allowUserInteraction
-                                                 rotationSpeed:(nullable NSNumber *)rotationSpeed
-                                                       minZoom:(float)minZoom
-                                                       maxZoom:(float)maxZoom
-                                      pitchInterpolationValues:(nonnull MCCameraInterpolation *)pitchInterpolationValues
-                       verticalDisplacementInterpolationValues:(nonnull MCCameraInterpolation *)verticalDisplacementInterpolationValues;
+- (nonnull instancetype)initWithKey:(nonnull NSString *)key
+               allowUserInteraction:(BOOL)allowUserInteraction
+                      rotationSpeed:(nullable NSNumber *)rotationSpeed
+                            minZoom:(float)minZoom
+                            maxZoom:(float)maxZoom
+           pitchInterpolationValues:(nonnull MCCameraInterpolation *)pitchInterpolationValues
+verticalDisplacementInterpolationValues:(nonnull MCCameraInterpolation *)verticalDisplacementInterpolationValues NS_DESIGNATED_INITIALIZER;
++ (nonnull instancetype)camera3dConfigWithKey:(nonnull NSString *)key
+                         allowUserInteraction:(BOOL)allowUserInteraction
+                                rotationSpeed:(nullable NSNumber *)rotationSpeed
+                                      minZoom:(float)minZoom
+                                      maxZoom:(float)maxZoom
+                     pitchInterpolationValues:(nonnull MCCameraInterpolation *)pitchInterpolationValues
+      verticalDisplacementInterpolationValues:(nonnull MCCameraInterpolation *)verticalDisplacementInterpolationValues;
+
+@property (nonatomic, readonly, nonnull) NSString * key;
 
 @property (nonatomic, readonly) BOOL allowUserInteraction;
 

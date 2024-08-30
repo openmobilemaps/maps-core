@@ -6,14 +6,16 @@
 
 @implementation MCCamera3dConfig
 
-- (nonnull instancetype)initWithAllowUserInteraction:(BOOL)allowUserInteraction
-                                       rotationSpeed:(nullable NSNumber *)rotationSpeed
-                                             minZoom:(float)minZoom
-                                             maxZoom:(float)maxZoom
-                            pitchInterpolationValues:(nonnull MCCameraInterpolation *)pitchInterpolationValues
-             verticalDisplacementInterpolationValues:(nonnull MCCameraInterpolation *)verticalDisplacementInterpolationValues
+- (nonnull instancetype)initWithKey:(nonnull NSString *)key
+               allowUserInteraction:(BOOL)allowUserInteraction
+                      rotationSpeed:(nullable NSNumber *)rotationSpeed
+                            minZoom:(float)minZoom
+                            maxZoom:(float)maxZoom
+           pitchInterpolationValues:(nonnull MCCameraInterpolation *)pitchInterpolationValues
+verticalDisplacementInterpolationValues:(nonnull MCCameraInterpolation *)verticalDisplacementInterpolationValues
 {
     if (self = [super init]) {
+        _key = [key copy];
         _allowUserInteraction = allowUserInteraction;
         _rotationSpeed = rotationSpeed;
         _minZoom = minZoom;
@@ -24,25 +26,27 @@
     return self;
 }
 
-+ (nonnull instancetype)camera3dConfigWithAllowUserInteraction:(BOOL)allowUserInteraction
-                                                 rotationSpeed:(nullable NSNumber *)rotationSpeed
-                                                       minZoom:(float)minZoom
-                                                       maxZoom:(float)maxZoom
-                                      pitchInterpolationValues:(nonnull MCCameraInterpolation *)pitchInterpolationValues
-                       verticalDisplacementInterpolationValues:(nonnull MCCameraInterpolation *)verticalDisplacementInterpolationValues
++ (nonnull instancetype)camera3dConfigWithKey:(nonnull NSString *)key
+                         allowUserInteraction:(BOOL)allowUserInteraction
+                                rotationSpeed:(nullable NSNumber *)rotationSpeed
+                                      minZoom:(float)minZoom
+                                      maxZoom:(float)maxZoom
+                     pitchInterpolationValues:(nonnull MCCameraInterpolation *)pitchInterpolationValues
+      verticalDisplacementInterpolationValues:(nonnull MCCameraInterpolation *)verticalDisplacementInterpolationValues
 {
-    return [[self alloc] initWithAllowUserInteraction:allowUserInteraction
-                                        rotationSpeed:rotationSpeed
-                                              minZoom:minZoom
-                                              maxZoom:maxZoom
-                             pitchInterpolationValues:pitchInterpolationValues
-              verticalDisplacementInterpolationValues:verticalDisplacementInterpolationValues];
+    return [[self alloc] initWithKey:key
+                allowUserInteraction:allowUserInteraction
+                       rotationSpeed:rotationSpeed
+                             minZoom:minZoom
+                             maxZoom:maxZoom
+            pitchInterpolationValues:pitchInterpolationValues
+    verticalDisplacementInterpolationValues:verticalDisplacementInterpolationValues];
 }
 
 #ifndef DJINNI_DISABLE_DESCRIPTION_METHODS
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@ %p allowUserInteraction:%@ rotationSpeed:%@ minZoom:%@ maxZoom:%@ pitchInterpolationValues:%@ verticalDisplacementInterpolationValues:%@>", self.class, (void *)self, @(self.allowUserInteraction), self.rotationSpeed, @(self.minZoom), @(self.maxZoom), self.pitchInterpolationValues, self.verticalDisplacementInterpolationValues];
+    return [NSString stringWithFormat:@"<%@ %p key:%@ allowUserInteraction:%@ rotationSpeed:%@ minZoom:%@ maxZoom:%@ pitchInterpolationValues:%@ verticalDisplacementInterpolationValues:%@>", self.class, (void *)self, self.key, @(self.allowUserInteraction), self.rotationSpeed, @(self.minZoom), @(self.maxZoom), self.pitchInterpolationValues, self.verticalDisplacementInterpolationValues];
 }
 
 #endif

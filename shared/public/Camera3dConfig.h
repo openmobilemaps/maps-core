@@ -5,9 +5,11 @@
 
 #include "CameraInterpolation.h"
 #include <optional>
+#include <string>
 #include <utility>
 
 struct Camera3dConfig final {
+    std::string key;
     bool allowUserInteraction;
     std::optional<float> rotationSpeed;
     float minZoom;
@@ -15,13 +17,15 @@ struct Camera3dConfig final {
     CameraInterpolation pitchInterpolationValues;
     CameraInterpolation verticalDisplacementInterpolationValues;
 
-    Camera3dConfig(bool allowUserInteraction_,
+    Camera3dConfig(std::string key_,
+                   bool allowUserInteraction_,
                    std::optional<float> rotationSpeed_,
                    float minZoom_,
                    float maxZoom_,
                    CameraInterpolation pitchInterpolationValues_,
                    CameraInterpolation verticalDisplacementInterpolationValues_)
-    : allowUserInteraction(std::move(allowUserInteraction_))
+    : key(std::move(key_))
+    , allowUserInteraction(std::move(allowUserInteraction_))
     , rotationSpeed(std::move(rotationSpeed_))
     , minZoom(std::move(minZoom_))
     , maxZoom(std::move(maxZoom_))

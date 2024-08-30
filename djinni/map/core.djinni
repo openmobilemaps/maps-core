@@ -202,8 +202,9 @@ map_camera_3d_interface = interface +c {
     set_camera_mode(mode: camera_mode_3d);
     get_camera_mode(): camera_mode_3d;
 
-    set_camera_config(config: camera_3d_config);
     get_camera_config(): camera_3d_config;
+
+    set_camera_config(config: camera_3d_config, durationSeconds: optional<f32>, target_zoom: optional<f32>, target_coordinate: optional<coord>);
 }
 
 camera_mode_3d = enum {
@@ -229,6 +230,7 @@ camera_interpolation_value = record {
 }
 
 camera_3d_config = record {
+    key: string;
     allow_user_interaction: bool;
     rotation_speed: optional<f32>;
 

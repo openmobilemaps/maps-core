@@ -4,6 +4,7 @@
 package io.openmobilemaps.mapscore.shared.map
 
 data class Camera3dConfig(
+    val key: String,
     val allowUserInteraction: Boolean,
     val rotationSpeed: Float?,
     val minZoom: Float,

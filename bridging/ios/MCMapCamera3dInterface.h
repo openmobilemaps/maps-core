@@ -3,6 +3,7 @@
 
 #import "MCCamera3dConfig.h"
 #import "MCCameraMode3d.h"
+#import "MCCoord.h"
 #import <Foundation/Foundation.h>
 
 
@@ -12,8 +13,11 @@
 
 - (MCCameraMode3d)getCameraMode;
 
-- (void)setCameraConfig:(nonnull MCCamera3dConfig *)config;
-
 - (nonnull MCCamera3dConfig *)getCameraConfig;
+
+- (void)setCameraConfig:(nonnull MCCamera3dConfig *)config
+        durationSeconds:(nullable NSNumber *)durationSeconds
+             targetZoom:(nullable NSNumber *)targetZoom
+       targetCoordinate:(nullable MCCoord *)targetCoordinate;
 
 @end
