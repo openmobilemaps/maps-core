@@ -40,12 +40,14 @@ public struct MapView: UIViewRepresentable {
     }
 
     public struct Camera: Equatable {
+        public static let basicCamera3dConfig = MCCamera3dConfig(key: "basic_config", allowUserInteraction: true, rotationSpeed: nil, minZoom: 200_000_000, maxZoom: 5_000_000, pitchInterpolationValues: MCCameraInterpolation(stops: []), verticalDisplacementInterpolationValues: MCCameraInterpolation(stops: []))
+
         public var center: Updatable<MCCoord>
         public var zoom: Updatable<Double>
         public var minZoom: Updatable<Double> = .init(mode: .map, value: nil)
         public var maxZoom: Updatable<Double> = .init(mode: .map, value: nil)
-        // public var visibleRect: Updatable<MCRectCoord>
-        public var mode: MCCameraMode3d = .GLOBAL
+
+        public var cameraConfig: MCCamera3dConfig = Self.basicCamera3dConfig
 
         public var restrictedBounds: MCRectCoord? = nil
 
@@ -58,7 +60,7 @@ public struct MapView: UIViewRepresentable {
                     minZoom: Updatable<Double> = .init(),
                     maxZoom: Updatable<Double> = .init(),
                     // visibleRect: Updatable<MCRectCoord> = .init(),
-                    mode: MCCameraMode3d = .GLOBAL,
+                    cameraConfig: MCCamera3dConfig = Self.basicCamera3dConfig,
                     restrictedBounds: MCRectCoord? = nil,
                     camera3d: MCMapCameraInterface? = nil,
                     mapConfig: MCMapConfig? = nil
@@ -68,7 +70,7 @@ public struct MapView: UIViewRepresentable {
             self.minZoom = minZoom
             self.maxZoom = maxZoom
             // self.visibleRect = visibleRect
-            self.mode = mode
+            self.cameraConfig = cameraConfig
             self.restrictedBounds = restrictedBounds
             self.camera3d = camera3d
             self.mapConfig = mapConfig
@@ -76,30 +78,30 @@ public struct MapView: UIViewRepresentable {
 
         public init(location: CLLocationCoordinate2D,
                     zoom: Double?,
-                    mode: MCCameraMode3d = .GLOBAL) {
+                    cameraConfig: MCCamera3dConfig = Self.basicCamera3dConfig) {
             self.center = .init(mode: .user, value: MCCoord(systemIdentifier: MCCoordinateSystemIdentifiers.epsg4326(), x: location.longitude, y: location.latitude, z: 0))
             self.zoom = .init(mode: .user, value: zoom)
             // self.visibleRect = .init()
-            self.mode = mode
+            self.cameraConfig = cameraConfig
         }
 
         public init(latitude: Double,
                     longitude: Double,
                     zoom: Double?,
-                    mode: MCCameraMode3d = .GLOBAL) {
+                    cameraConfig: MCCamera3dConfig = Self.basicCamera3dConfig) {
             self.center = .init(mode: .user, value: MCCoord(systemIdentifier: MCCoordinateSystemIdentifiers.epsg4326(), x: longitude, y: latitude, z: 0))
             self.zoom = .init(mode: .user, value: zoom)
             // self.visibleRect = .init()
-            self.mode = mode
+            self.cameraConfig = cameraConfig
         }
 
         public init(restrictedBounds: MCRectCoord,
-                    mode: MCCameraMode3d = .GLOBAL) {
+                    cameraConfig: MCCamera3dConfig = Self.basicCamera3dConfig) {
             self.center = .init()
             self.zoom = .init()
             // self.visibleRect = .init()
             self.restrictedBounds = restrictedBounds
-            self.mode = mode
+            self.cameraConfig = cameraConfig
         }
 
         public var centerCoordinate: MCCoord? {
@@ -110,7 +112,7 @@ public struct MapView: UIViewRepresentable {
             lhs.zoom == rhs.zoom
             //&& lhs.visibleRect == rhs.visibleRect
             && lhs.center == rhs.center
-            && lhs.mode == rhs.mode
+            && lhs.cameraConfig.key == rhs.cameraConfig.key
             && lhs.minZoom == rhs.minZoom
             && lhs.maxZoom == rhs.maxZoom
             && lhs.restrictedBounds == rhs.restrictedBounds
@@ -152,7 +154,7 @@ public struct MapView: UIViewRepresentable {
                                     minZoom: .init(mode: .user, value: camera.minZoom.value),
                                     maxZoom: .init(mode: .user, value: camera.maxZoom.value),
                                     //visibleRect: camera.visibleRect,
-                                    mode: camera.mode,
+                                    cameraConfig: camera.cameraConfig,
                                     restrictedBounds: camera.restrictedBounds)
         }
 
@@ -161,7 +163,7 @@ public struct MapView: UIViewRepresentable {
         mapView.camera.addListener(context.coordinator)
         mapView.camera.setRotationEnabled(false)
         if is3D {
-            mapView.camera.asMapCamera3d()?.setCameraMode(camera.mode)
+            mapView.camera.asMapCamera3d()?.setCameraConfig(camera.cameraConfig, durationSeconds: nil, targetZoom: nil, targetCoordinate: nil)
         }
         mapView.sizeDelegate = context.coordinator
         context.coordinator.mapView = mapView
@@ -204,7 +206,7 @@ public struct MapView: UIViewRepresentable {
         }
 
         if is3D {
-            mapView.camera.asMapCamera3d()?.setCameraMode(camera.mode)
+            mapView.camera.asMapCamera3d()?.setCameraConfig(camera.cameraConfig, durationSeconds: nil, targetZoom: nil, targetCoordinate: nil)
         }
 
         if let center = camera.center.value, let zoom = camera.zoom.value, camera.center.mode == .user, camera.zoom.mode == .user {
@@ -349,7 +351,7 @@ public class MapViewCoordinator: MCMapCameraListenerInterface {
             let zoom = mapView?.camera.getZoom()
             let minZoom = mapView?.camera.getMinZoom()
             let maxZoom = mapView?.camera.getMaxZoom()
-            let mode = mapView?.camera.asMapCamera3d()?.getCameraMode()
+            let cameraConfig = mapView?.camera.asMapCamera3d()?.getCameraConfig()
 
 
             parent.camera = MapView.Camera(
@@ -358,7 +360,7 @@ public class MapViewCoordinator: MCMapCameraListenerInterface {
                 minZoom: .init(mode: .map, value: minZoom),
                 maxZoom: .init(mode: .map, value: maxZoom),
                 // visibleRect: .init(mode: .map, value: mapView?.camera.getPaddingAdjustedVisibleRect()),
-                mode: mode ?? parent.camera.mode,
+                cameraConfig: cameraConfig ?? parent.camera.cameraConfig,
                 restrictedBounds: parent.camera.restrictedBounds,
                 camera3d: mapView?.camera,
                 mapConfig: mapView?.mapInterface.getMapConfig()

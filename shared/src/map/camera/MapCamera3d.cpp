@@ -52,6 +52,7 @@ MapCamera3d::MapCamera3d(const std::shared_ptr<MapInterface> &mapInterface, floa
 {
     mapSystemRtl = mapCoordinateSystem.bounds.bottomRight.x > mapCoordinateSystem.bounds.topLeft.x;
     mapSystemTtb = mapCoordinateSystem.bounds.bottomRight.y > mapCoordinateSystem.bounds.topLeft.y;
+    updateZoom(GLOBE_MIN_ZOOM);
 }
 
 void MapCamera3d::viewportSizeChanged() {
@@ -345,8 +346,7 @@ std::shared_ptr<::CameraInterface> MapCamera3d::asCameraInterface() { return sha
 
 std::vector<float> MapCamera3d::getVpMatrix() {
     if(cameraZoomConfig.rotationSpeed) {
-        auto speed = *(cameraZoomConfig.rotationSpeed);
-
+        double speed = *(cameraZoomConfig.rotationSpeed);
         focusPointPosition.x = fmod(DateHelper::currentTimeMicros() * speed * 0.000003 + 180.0, 360.0) - 180.0;
         mapInterface->invalidate();
     }
@@ -1495,7 +1495,7 @@ void MapCamera3d::setCameraConfig(const Camera3dConfig & config, std::optional<f
     zoomMin = cameraZoomConfig.minZoom;
     zoomMax = cameraZoomConfig.maxZoom;
 
-    float targetZoom = targetZoom_ ? *targetZoom_ : zoom;
+    float targetZoom = targetZoom_ ? *targetZoom_ : zoomMin;
     std::optional<Coord> targetCoordinate = targetCoordinate_;
 
     // temporarily set target zoom to get target pitch
