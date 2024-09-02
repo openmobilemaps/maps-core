@@ -372,7 +372,8 @@ std::tuple<std::vector<float>, std::vector<double>> MapCamera3d::getVpMatrix(con
         double d = minCameraDistance * R;
         double pixelsPerMeter =  this->screenDensityPpi / 0.0254;
         double w = (double)sizeViewport.y;
-        fovy = atan((zoom * w / pixelsPerMeter / 2.0) / d) * 2.0 / M_PI * 180.0;
+        fovy = atan2(zoom * w / pixelsPerMeter / 2.0, d) * 2.0 / M_PI * 180.0;
+
         cameraDistance = minCameraDistance;
     }
 

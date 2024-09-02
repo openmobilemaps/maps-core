@@ -19,7 +19,7 @@ public:
         // According to https://en.wikipedia.org/wiki/Field_of_view_in_video_games, this holds:
         // tan(fovx/2.0) / tan(fovy/2.0) = w / h
         float fovyRadian = fovy * (M_PI / 180.0);
-        float fovx = 2.0 * atan(width/height * tan(fovyRadian * 0.5));
+        float fovx = 2.0 * atan2(width, height / tan(fovyRadian * 0.5));
         fovx = fovx * (180.0 / M_PI);
 
         return halfHeight(cameraDistance, fovx);
