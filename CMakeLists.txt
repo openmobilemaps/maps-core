@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.24.0)
 project(mapscore)
 
+find_package(JNI) ## HACK
+
 ####
 # mapscore "proper", i.e. the C++ implementation without any bindings
 ####
@@ -84,6 +86,7 @@ file(GLOB_RECURSE mapscore_jni_SRC
   "external/djinni/support-lib/cpp/*.cpp"
   "external/djinni/support-lib/jni/*.cpp"
   "bridging/android/jni/*.cpp"
+  "jvm/src/main/cpp/jni/*.cpp"
 )
 
 add_library(mapscore_jni SHARED ${mapscore_jni_SRC})
@@ -115,10 +118,9 @@ target_include_directories(mapscore_jni PRIVATE
 )
 target_compile_features(mapscore_jni PRIVATE cxx_std_20)
 target_compile_options(mapscore_jni PRIVATE -Wno-deprecated -Wno-reorder -DDATAREF_JNI=1)
-target_link_libraries(mapscore_jni mapscore)
+target_link_libraries(mapscore_jni mapscore -lOSMesa)
 
 add_executable(testmain main.cpp)
-target_include_directories(testmain PRIVATE shared/src/map/scheduling/ shared/src/map) # XXX just a workaround
 target_compile_features(testmain PRIVATE cxx_std_20)
 target_compile_options(testmain PRIVATE -Wall)
 target_link_libraries(testmain mapscore -lOSMesa)

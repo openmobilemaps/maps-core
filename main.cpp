@@ -18,15 +18,6 @@
 
 #include <GL/osmesa.h>
 
-struct TmpThreadPoolCallbacks : ThreadPoolCallbacks {
-    ~TmpThreadPoolCallbacks() = default;
-    std::string getCurrentThreadName() override { return ""; };
-    void setCurrentThreadName(const std::string &name) override {}
-    void setThreadPriority(TaskPriority priority) override {}
-    void attachThread() override {}
-    void detachThread() override {}
-};
-
 struct MapCallbackHandler : MapCallbackInterface {
     void invalidate() override {}
     void onMapResumed() override {}
@@ -105,8 +96,7 @@ int main() {
     const MapConfig mapConfig{CoordinateSystemFactory::getEpsg2056System()};
     auto csid = mapConfig.mapCoordinateSystem.identifier;
     const float pixelDensity = 1.0f; // ??
-    std::shared_ptr<ThreadPoolCallbacks> threadCallbacks = std::make_shared<TmpThreadPoolCallbacks>();
-    auto map = MapInterface::createWithOpenGl(mapConfig, pixelDensity, threadCallbacks);
+    auto map = MapInterface::createWithOpenGl(mapConfig, pixelDensity);
     std::cout << map << std::endl;
 
     std::shared_ptr<MapCallbackInterface> mapCallbacks = std::make_shared<MapCallbackHandler>();

@@ -27,16 +27,6 @@
       <artifactId>kotlin-stdlib</artifactId>
       <version>${kotlin.version}</version>
     </dependency>
-    <dependency>
-      <groupId>org.jogamp.gluegen</groupId>
-      <artifactId>gluegen-rt-main</artifactId>
-      <version>2.5.0</version>
-    </dependency>
-    <dependency>
-      <groupId>org.jogamp.jogl</groupId>
-      <artifactId>jogl-all-main</artifactId>
-      <version>2.5.0</version>
-    </dependency>
     <!-- <dependency> -->
     <!--   <groupid>${parent.groupId}</groupid> -->
     <!--   <artifactid>mapscore</artifactId> -->
@@ -50,6 +40,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
+        <version>3.4.2</version>
         <configuration>
           <archive>
             <manifest>
@@ -94,7 +85,7 @@
       <resource>
         <directory>../build-ninja/</directory>
         <includes>
-          <include>libmapscore.so</include>
+          <include>libmapscore_jni.so</include>
         </includes>
         <targetPath>native/</targetPath>
       </resource>
