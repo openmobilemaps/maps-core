@@ -2,6 +2,7 @@ package io.openmobilemaps.mapscore
 
 import io.openmobilemaps.mapscore.graphics.util.OSMesa
 import io.openmobilemaps.mapscore.map.loader.DataLoader;
+import io.openmobilemaps.mapscore.map.loader.FontLoader;
 import io.openmobilemaps.mapscore.shared.graphics.common.Color
 import io.openmobilemaps.mapscore.shared.graphics.common.Vec2I
 import io.openmobilemaps.mapscore.shared.map.MapCallbackInterface
@@ -34,19 +35,7 @@ object MapsCore {
   }
 }
 
-class MyFontLoader : FontLoaderInterface() {
-  override fun loadFont(font: Font): FontLoaderResult {
-    println("loadFont ${font}");
-    return FontLoaderResult(
-            imageData = null,
-            fontData = null,
-            status = LoaderStatus.ERROR_OTHER,
-    )
-  }
-}
-
 fun main() {
-  System.out.println("hi")
   MapsCore.initialize()
   var dpi = 96.0; // ????
   var ctx = OSMesa(1000, 1000)
@@ -88,7 +77,7 @@ fun main() {
           //"http://localhost:8888/ctr-tma-style.json",
           "https://demotiles.maplibre.org/styles/osm-bright-gl-style/style.json", 
           arrayListOf(DataLoader()),
-          MyFontLoader()
+          FontLoader()
   )
 
   val layeri = layer.asLayerInterface()

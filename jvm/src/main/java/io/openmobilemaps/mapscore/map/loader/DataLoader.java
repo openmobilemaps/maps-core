@@ -3,9 +3,6 @@ package io.openmobilemaps.mapscore.map.loader;
 import com.snapchat.djinni.Promise;
 import com.snapchat.djinni.Future;
 import io.openmobilemaps.mapscore.shared.map.loader.DataLoaderResult;
-import io.openmobilemaps.mapscore.shared.map.loader.Font;
-import io.openmobilemaps.mapscore.shared.map.loader.FontLoaderInterface;
-import io.openmobilemaps.mapscore.shared.map.loader.FontLoaderResult;
 import io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface;
 import io.openmobilemaps.mapscore.shared.map.loader.LoaderStatus;
 import io.openmobilemaps.mapscore.shared.map.loader.TextureLoaderResult;
@@ -20,9 +17,6 @@ import java.net.URI;
 import java.nio.ByteBuffer;
 import javax.imageio.ImageIO;
 import java.util.zip.GZIPInputStream;
-
-import java.security.MessageDigest;
-import java.util.Formatter;
 
 public class DataLoader extends LoaderInterface {
 
@@ -164,23 +158,5 @@ public class DataLoader extends LoaderInterface {
         throw new UncheckedIOException(ioe);
     }
   }
-
-
-  private static String SHAsum(byte[] convertme) {
-    try {
-      var md = MessageDigest.getInstance("SHA-1"); 
-      return byteArray2Hex(md.digest(convertme));
-    } catch(Exception e) {
-      return "";
-    }
-}
-
-private static String byteArray2Hex(final byte[] hash) {
-    var formatter = new Formatter();
-    for (byte b : hash) {
-        formatter.format("%02x", b);
-    }
-    return formatter.toString();
-}
 }
 
