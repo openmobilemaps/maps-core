@@ -84,6 +84,9 @@ void MapCamera3d::freeze(bool freeze) {
             rotationAnimation->cancel();
         if (pitchAnimation)
             pitchAnimation->cancel();
+        if (verticalDisplacementAnimation) {
+            verticalDisplacementAnimation->cancel();
+        }
     }
     inertia = std::nullopt;
 }
@@ -205,6 +208,13 @@ void MapCamera3d::moveToBoundingBox(const RectCoord &boundingBox, float paddingP
 void MapCamera3d::setZoom(double zoom, bool animated) {
     if (cameraFrozen) {
         return;
+    }
+
+    if (pitchAnimation) {
+        pitchAnimation->cancel();
+    }
+    if (verticalDisplacementAnimation) {
+        verticalDisplacementAnimation->cancel();
     }
 
     double targetZoom = std::clamp(zoom, zoomMax, zoomMin);
