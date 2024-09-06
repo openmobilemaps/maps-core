@@ -998,7 +998,7 @@ std::tuple<Coord, double> MapCamera2d::getBoundsCorrectedCoords(const Coord &pos
 Coord MapCamera2d::adjustCoordForPadding(const Coord &coords, double targetZoom) {
     Coord coordinates = mapInterface->getCoordinateConverterHelper()->convert(mapCoordinateSystem.identifier, coords);
 
-    auto adjustedZoom = std::clamp(targetZoom, zoomMax, zoomMin);
+    auto adjustedZoom = zoomMin != -1 ? std::clamp(targetZoom, zoomMax, zoomMin) : targetZoom;
 
     Vec2D padVec = Vec2D(0.5 * (paddingRight - paddingLeft) * screenPixelAsRealMeterFactor * adjustedZoom,
                          0.5 * (paddingTop - paddingBottom) * screenPixelAsRealMeterFactor * adjustedZoom);
