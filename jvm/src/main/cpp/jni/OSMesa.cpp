@@ -1,7 +1,6 @@
 #include <GL/osmesa.h>
 #include <cstdlib>
 #include <cstring>
-#include <dlfcn.h>
 #include <jni.h>
 
 extern "C" {
@@ -9,12 +8,12 @@ extern "C" {
 JNIEXPORT jlong JNICALL Java_io_openmobilemaps_mapscore_graphics_util_OSMesa_createContext(JNIEnv *, jclass) {
 #if OSMESA_MAJOR_VERSION > 11 || (OSMESA_MAJOR_VERSION == 11 && OSMESA_MINOR_VERSION >= 2)
     int osmesa_attribs[] = {
-        OSMESA_FORMAT, OSMESA_ARGB, OSMESA_PROFILE, OSMESA_COMPAT_PROFILE, 0,
+        OSMESA_FORMAT, OSMESA_BGRA, OSMESA_PROFILE, OSMESA_COMPAT_PROFILE, 0,
     };
     OSMesaContext ctx = OSMesaCreateContextAttribs(osmesa_attribs, nullptr);
 #else
     // Just hope
-    OSMesaContext ctx = OSMesaCreateContext(OSMESA_ARGB, nullptr);
+    OSMesaContext ctx = OSMesaCreateContext(OSMESA_BGRA nullptr);
 #endif
     return (jlong)ctx; // "type-punning" aka. a lazy hack
 }
@@ -31,7 +30,7 @@ JNIEXPORT jlong JNICALL Java_io_openmobilemaps_mapscore_graphics_util_OSMesa_mak
     return (jlong)buf;
 }
 
-JNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_graphics_util_OSMesa_read(JNIEnv *env, jclass, jlong bufArg, jintArray out) {
+JNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_graphics_util_OSMesa_readARGB(JNIEnv *env, jclass, jlong bufArg, jintArray out) {
     void *buf = (void *)bufArg;
     if (buf == NULL) {
         return;
@@ -39,9 +38,9 @@ JNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_graphics_util_OSMesa_read
 
     glFinish();
 
+    // NOTE: little-endian! Implicit byte-order conversion from BGRA into ARGB by reinterpreting as int (highest-order int byte is A).
     const jsize outLen = env->GetArrayLength(out);
-    jboolean isCopy;
-    jint *outBuf = env->GetIntArrayElements(out, &isCopy);
+    jint *outBuf = env->GetIntArrayElements(out, NULL);
     memcpy(outBuf, buf, sizeof(jint) * outLen);
     env->ReleaseIntArrayElements(out, outBuf, 0);
 }

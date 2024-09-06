@@ -31,14 +31,30 @@ public class OSMesa {
   }
 
   // NOTE: in the OSMesa C-API, the image is rendered directly to the
-  // user-provided buffer. With JNI, this doesn't work (buffer needs to be
-  // explicitly released for data to be visible in Java)
+  // user-provided buffer. Currently, we make a couple of copies. (Could be
+  // optimized using ByteBuffer).
   public BufferedImage getImage() {
     var out = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
     var tmpARGB = new int[width * height];
-    read(buf, tmpARGB);
-    out.setRGB(0, 0, width, height, tmpARGB, 0, width);
+    readARGB(buf, tmpARGB);
+    setARGBflipV(out, width, height, tmpARGB);
     return out;
+  }
+
+  // Analogous BufferedImage.setRGB with a vertically flip.
+  // Simplified (startX/Y = 0 and scansize == width). 
+  static private void setARGBflipV(BufferedImage image, int w, int h, int[] buf) {
+      Object pixel = null;
+      var colorModel = image.getColorModel();
+      var raster = image.getRaster();
+
+      int off = 0;
+      for(int y = h-1; y >= 0; --y) {
+         for(int x = 0; x < w; ++x) {
+            pixel = colorModel.getDataElements(buf[off++], pixel);
+            raster.setDataElements(x, y, pixel);
+         }
+      }
   }
 
   protected void finalize() {
@@ -49,7 +65,7 @@ public class OSMesa {
 
   private static native long makeCurrent(long ctx, int width, int height);
 
-  private static native void read(long buf, int[] out);
+  private static native void readARGB(long buf, int[] out);
 
   private static native void free(long buf);
 }

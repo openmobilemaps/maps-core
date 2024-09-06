@@ -97,7 +97,7 @@ void Logger::log(int prio, const char *tag, const char *fmt, ...) const {
     }
 #endif
 
-#ifdef BANDIT_TESTING
+#if defined(BANDIT_TESTING) || (defined(__linux__) && !defined(__ANDROID__))
     if (priority <= LOG_LEVEL) {
         switch (priority) {
         case 0: {
