@@ -10,22 +10,35 @@ import javax.imageio.ImageIO;
 
 import io.openmobilemaps.mapscore.graphics.BufferedImageTextureHolder;
 import io.openmobilemaps.mapscore.shared.map.loader.Font;
+import io.openmobilemaps.mapscore.shared.map.loader.FontData;
 import io.openmobilemaps.mapscore.shared.map.loader.FontLoaderInterface;
 import io.openmobilemaps.mapscore.shared.map.loader.FontLoaderResult;
+import io.openmobilemaps.mapscore.shared.map.loader.FontWrapper;
 import io.openmobilemaps.mapscore.shared.map.loader.LoaderStatus;
 
+/**
+ * Load fonts from local resources.
+ * 
+ * Fonts are expected to be defined by a JSON/PNG file pair. The JSON document
+ * is the font manifest and the PNG is the multichannelfsigned-distance-field
+ * font atlas. See e.g. by https://github.com/soimy/msdf-bmfont-xml
+ */
 public class FontLoader extends FontLoaderInterface {
 
   private HashMap<String, FontLoaderResult> fontCache;
+  private double dpFactor; // !< render-DPI / 160.0, factor for "Density Independent Pixel" size.
 
-  public FontLoader() {
+  /**
+   * @param dpi: render resolution, for appropriate scaling.
+   */
+  public FontLoader(double dpi) {
+    this.dpFactor = dpi / 160.0; // see android DisplayMetrics.density.
     fontCache = new HashMap<String, FontLoaderResult>();
   }
 
   @Override
   public FontLoaderResult loadFont(Font font) {
     synchronized (this) { // TODO: lazy, should allow loading _different_ fonts concurrently.
-
       var fontName = font.getName();
       var entry = this.fontCache.get(fontName);
       if (entry != null) {
@@ -33,9 +46,13 @@ public class FontLoader extends FontLoaderInterface {
       }
       System.out.printf("loadFont %s\n", fontName);
       var result = loadFont(fontName);
-      if(result.getStatus() == LoaderStatus.ERROR_404) {
+      if (result.getStatus() == LoaderStatus.ERROR_404) {
         result = loadFontFallback(fontName);
-        System.out.printf("loadFont [Fallback] %s -> %s\n", fontName, result.getStatus());
+        var fallbackName = "";
+        if (result.getFontData() != null) {
+          fallbackName = result.getFontData().getInfo().getName();
+        }
+        System.out.printf("loadFont(%s) -> Fallback %s -> %s\n", fontName, fallbackName, result.getStatus());
       } else {
         System.out.printf("loadFont %s -> %s\n", fontName, result.getStatus());
       }
@@ -68,12 +85,27 @@ public class FontLoader extends FontLoaderInterface {
   }
 
   protected FontLoaderResult loadFontFallback(String fontName) {
-    return loadFont("averta-bold");
+    return loadFont("Roboto-Regular"); // TODO: fallback to _any_ available font? Configurable?
   }
 
   protected FontLoaderResult readFont(InputStream manifestStream, InputStream imageStream) {
     try {
       var manifest = FontJsonManifestReader.read(manifestStream);
+
+      // Adapt size for render resolution.
+      // Note: this feels a bit clunky, couldn't this be done in the shader?
+      manifest = new FontData(
+          new FontWrapper(
+              manifest.getInfo().getName(),
+              manifest.getInfo().getLineHeight(),
+              manifest.getInfo().getBase(),
+              manifest.getInfo().getBitmapSize(),
+              manifest.getInfo().getSize() * dpFactor // <-
+          ),
+          manifest.getGlyphs());
+
+      System.out.printf("Font manifest:\n%s\n", manifest.getInfo());
+
       var image = new BufferedImageTextureHolder(ImageIO.read(imageStream));
       return new FontLoaderResult(image, manifest, LoaderStatus.OK);
     } catch (IOException e) {
@@ -83,7 +115,6 @@ public class FontLoader extends FontLoaderInterface {
       System.out.println(e);
       return new FontLoaderResult(null, null, LoaderStatus.ERROR_OTHER);
     }
-
   }
 
 }

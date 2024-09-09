@@ -110,10 +110,10 @@ int main() {
     map->getRenderingContext()->onSurfaceCreated();
     map->setViewportSize(Vec2I(width, height));
     map->setBackgroundColor(Color{0.3f, 0.3f, 0.3f, 1.0f});
-    auto cam = MapCamera2dInterface::create(map, 1.0f);
-    map->setCamera(cam);
+    //map->setCamera(MapCamera2dInterface::create(map, 1.0f)); // BUG! must be _before_ setViewportSize
     map->resume();
 
+    auto cam = map->getCamera();
     cam->setPaddingTop(1000.f);
     cam->setPaddingBottom(1000.f);
     cam->setPaddingLeft(1000.f);

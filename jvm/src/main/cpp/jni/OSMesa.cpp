@@ -30,7 +30,8 @@ JNIEXPORT jlong JNICALL Java_io_openmobilemaps_mapscore_graphics_util_OSMesa_mak
     return (jlong)buf;
 }
 
-JNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_graphics_util_OSMesa_readARGB(JNIEnv *env, jclass, jlong bufArg, jintArray out) {
+JNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_graphics_util_OSMesa_readARGB(JNIEnv *env, jclass, jlong bufArg,
+                                                                                     jintArray out) {
     void *buf = (void *)bufArg;
     if (buf == NULL) {
         return;
@@ -38,7 +39,7 @@ JNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_graphics_util_OSMesa_read
 
     glFinish();
 
-    // NOTE: little-endian! Implicit byte-order conversion from BGRA into ARGB by reinterpreting as int (highest-order int byte is A).
+    // NOTE: little-endian! Implicit byte-order conversion from BGRA byte buffer into ARGB ints (highest-order byte is A)
     const jsize outLen = env->GetArrayLength(out);
     jint *outBuf = env->GetIntArrayElements(out, NULL);
     memcpy(outBuf, buf, sizeof(jint) * outLen);

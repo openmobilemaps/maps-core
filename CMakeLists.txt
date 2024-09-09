@@ -1,21 +1,17 @@
 cmake_minimum_required(VERSION 3.24.0)
 project(mapscore)
 
-find_package(JNI) ## HACK
-
 ####
 # mapscore "proper", i.e. the C++ implementation without any bindings
 ####
 file(GLOB_RECURSE mapscore_SRC
   "shared/*.cpp"
   "android/src/main/cpp/graphics/*.cpp"
-  # "external/gpc/gpc.cpp"
-  # "external/vtzero/vtzero/include/*.cpp"
-  # "external/earcut/earcut/include/*.cpp"
 )
 
 add_library(mapscore STATIC ${mapscore_SRC})
 
+# TODO: this picks up mesa (libgl-dev). Should we use an independent loader (glad/glew?) instead?
 find_package(OpenGL)
 
 target_include_directories(mapscore PRIVATE
@@ -73,8 +69,7 @@ target_include_directories(mapscore PUBLIC
 
 target_compile_features(mapscore PRIVATE cxx_std_20)
 target_compile_options(mapscore PRIVATE -Wno-deprecated -Wno-reorder -fPIC) # fPIC so we can "embed" into shared mapscore_jni
-target_link_libraries(mapscore ${OPENGL_LIBRARIES}) # XXX this doesnt seem right, needs apt package libgl-dev??
-#set_source_files_properties(bridging/android/jni/map/loader/NativeDataLoaderResult.cpp PROPERTIES COMPILE_FLAGS -fpermissive)
+target_link_libraries(mapscore ${OPENGL_LIBRARIES})
 
 ####
 # mapscore-jni

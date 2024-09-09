@@ -1,10 +1,13 @@
 package io.openmobilemaps.mapscore.graphics;
 
-import io.openmobilemaps.mapscore.shared.graphics.objects.TextureHolderInterface;
-
-import io.openmobilemaps.mapscore.graphics.util.GlTextureHelper;
 import java.awt.image.BufferedImage;
 
+import io.openmobilemaps.mapscore.graphics.util.GlTextureHelper;
+import io.openmobilemaps.mapscore.shared.graphics.objects.TextureHolderInterface;
+
+/**
+ * Implementation of the TextureHolderInterface for BufferedImage and OpenGL.
+ */
 public class BufferedImageTextureHolder extends TextureHolderInterface {
   protected BufferedImage image;
   protected int usageCounter;
@@ -15,43 +18,43 @@ public class BufferedImageTextureHolder extends TextureHolderInterface {
     this.usageCounter = 0;
   }
 
-  @Override 
+  @Override
   public int getImageWidth() {
     return image.getWidth();
   }
 
-  @Override 
+  @Override
   public int getImageHeight() {
     return image.getHeight();
   }
 
-  @Override 
+  @Override
   public int getTextureWidth() {
     return image.getWidth();
   }
 
-  @Override 
+  @Override
   public int getTextureHeight() {
     return image.getHeight();
   }
 
   @Override
-  public int attachToGraphics() { 
-    synchronized(this) {
-      if(usageCounter == 0) {
+  public int attachToGraphics() {
+    synchronized (this) {
+      if (usageCounter == 0) {
         textureId = GlTextureHelper.createTexture(image);
         System.out.printf("attach to graphics %d\n", textureId);
       }
       usageCounter++;
     }
-    return textureId; 
+    return textureId;
   }
 
   @Override
   public void clearFromGraphics() {
-    synchronized(this) {
+    synchronized (this) {
       usageCounter--;
-      if(usageCounter == 0) {
+      if (usageCounter == 0) {
         GlTextureHelper.deleteTexture(textureId);
         textureId = 0;
       }
