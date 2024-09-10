@@ -79,7 +79,7 @@ std::string TextInstancedShaderOpenGl::getFragmentShader() {
     return OMMVersionedGlesShaderCode(320 es,
                                       precision highp float;
                                               layout(std430, binding = 0) buffer textInstancedStyleBuffer {
-                                                  float styles[]; // vec4 color; vec4 haloColor; float haloWidth;
+                                                  float styles[]; // vec4 color; vec4 haloColor; float haloWidth; float haloBlur;
                                               };
 
                                               uniform sampler2D textureSampler;
@@ -92,10 +92,11 @@ std::string TextInstancedShaderOpenGl::getFragmentShader() {
                                               out vec4 fragmentColor;
 
                                               void main() {
-                                                  int styleOffset = int(vStyleIndex) * 9;
+                                                  int styleOffset = int(vStyleIndex) * 10;
                                                   vec4 color = vec4(styles[styleOffset + 0], styles[styleOffset + 1], styles[styleOffset + 2], styles[styleOffset + 3]);
                                                   vec4 haloColor = vec4(styles[styleOffset + 4], styles[styleOffset + 5], styles[styleOffset + 6], styles[styleOffset + 7]);
                                                   float haloWidth = styles[styleOffset + 8];
+                                                  float haloBlur = styles[styleOffset + 9];
 
                                                   if (color.a == 0.0 && haloColor.a == 0.0) {
                                                       discard;
@@ -111,8 +112,8 @@ std::string TextInstancedShaderOpenGl::getFragmentShader() {
                                                   vec4 mixed = mix(haloColor, color, alpha);
 
                                                   if(haloWidth > 0.0) {
-                                                      float start = (0.0 + 0.5 * (1.0 - haloWidth)) - w;
-                                                      float end = start + w;
+                                                      float start = max(0.0, 0.5 - w - (haloWidth + 0.5 * haloBlur));
+                                                      float end = 0.5 - w - max(0.0, haloWidth - 0.5 * haloBlur);
                                                       float a2 = smoothstep(start, end, median) * color.a;
                                                       fragmentColor = mixed;
                                                       fragmentColor.a = 1.0;

@@ -328,6 +328,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                                     parser.parseValue(val["paint"]["text-color"]),
                                     parser.parseValue(val["paint"]["text-halo-color"]),
                                     parser.parseValue(val["paint"]["text-halo-width"]),
+                                    parser.parseValue(val["paint"]["text-halo-blur"]),
                                     parser.parseValue(val["paint"]["text-opacity"]),
                                     parser.parseValue(val["layout"]["text-font"]),
                                     parser.parseValue(val["layout"]["text-field"]),

@@ -400,7 +400,7 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
 
         textInstancedObject->setInstanceCount(instanceCounts.textCharacters);
 
-        textStyles.resize(textStyleCount * 9, 0.0);
+        textStyles.resize(textStyleCount * 10, 0.0);
         textStyleIndices.resize(instanceCounts.textCharacters, 0);
         textRotations.resize(instanceCounts.textCharacters, 0.0);
         textScales.resize(instanceCounts.textCharacters * 2, 0.0);
@@ -619,7 +619,7 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
             textInstancedObject->setPositions(
                     SharedBytes((int64_t) textPositions.data(), (int32_t) textRotations.size(), 2 * (int32_t) sizeof(float)));
             textInstancedObject->setStyles(
-                    SharedBytes((int64_t) textStyles.data(), (int32_t) textStyles.size() / 9, 9 * (int32_t) sizeof(float)));
+                    SharedBytes((int64_t) textStyles.data(), (int32_t) textStyles.size() / 10, 10 * (int32_t) sizeof(float)));
             textInstancedObject->setScales(
                     SharedBytes((int64_t) textScales.data(), (int32_t) textRotations.size(), 2 * (int32_t) sizeof(float)));
             textInstancedObject->setRotations(

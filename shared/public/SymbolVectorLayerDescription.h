@@ -28,6 +28,7 @@ public:
                       std::shared_ptr<Value> textColor,
                       std::shared_ptr<Value> textHaloColor,
                       std::shared_ptr<Value> textHaloWidth,
+                      std::shared_ptr<Value> textHaloBlur,
                       std::shared_ptr<Value> textOpacity,
                       std::shared_ptr<Value> textFont,
                       std::shared_ptr<Value> textField,
@@ -75,6 +76,7 @@ public:
     textColor(textColor),
     textHaloColor(textHaloColor),
     textHaloWidth(textHaloWidth),
+    textHaloBlur(textHaloBlur),
     textPadding(textPadding),
     symbolSortKey(symbolSortKey),
     symbolPlacement(symbolPlacement),
@@ -119,6 +121,7 @@ public:
               textColor(style.textColor),
               textHaloColor(style.textHaloColor),
               textHaloWidth(style.textHaloWidth),
+              textHaloBlur(style.textHaloBlur),
               textPadding(style.textPadding),
               symbolSortKey(style.symbolSortKey),
               symbolPlacement(style.symbolPlacement),
@@ -232,6 +235,20 @@ public:
     double getTextHaloWidth(const EvaluationContext &context) {
         static double defaultValue = 0.0;
         double width = textHaloWidthEvaluator.getResult(textHaloWidth, context, defaultValue) * context.dpFactor;
+
+        double size = getTextSize(context);
+
+        // in a font of size 41pt, we can show around 7pt of halo
+        // (due to generation of font atlasses)
+        double relativeMax = 7.0 / 41.0;
+        double relative = width / size;
+
+        return std::max(0.0, std::min(1.0, relative / relativeMax));
+    }
+
+    double getTextHaloBlur(const EvaluationContext &context) {
+        static double defaultValue = 0.0;
+        double width = textHaloBlurEvaluator.getResult(textHaloBlur, context, defaultValue) * context.dpFactor;
 
         double size = getTextSize(context);
 
@@ -419,6 +436,7 @@ public:
     std::shared_ptr<Value> textColor;
     std::shared_ptr<Value> textHaloColor;
     std::shared_ptr<Value> textHaloWidth;
+    std::shared_ptr<Value> textHaloBlur;
     std::shared_ptr<Value> textPadding;
     std::shared_ptr<Value> textAnchor;
     std::shared_ptr<Value> textJustify;
@@ -464,6 +482,7 @@ private:
     ValueEvaluator<Color> textColorEvaluator;
     ValueEvaluator<Color> textHaloColorEvaluator;
     ValueEvaluator<double> textHaloWidthEvaluator;
+    ValueEvaluator<double> textHaloBlurEvaluator;
     ValueEvaluator<double> textPaddingEvaluator;
     ValueEvaluator<double> iconPaddingEvaluator;
     ValueEvaluator<double> textLetterSpacingEvaluator;
