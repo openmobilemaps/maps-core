@@ -9,7 +9,8 @@ RasterShaderStyle const RasterShaderStyle::DEFAULT_STYLE = RasterShaderStyle(
     1.0f /* brightnessMax */ ,
     0.0f /* contrast */ ,
     0.0f /* saturation */ ,
-    1.0f /* gamma */ );
+    1.0f /* gamma */ ,
+    0.0f /* brightnessShift */ );
 
 bool operator==(const RasterShaderStyle& lhs, const RasterShaderStyle& rhs) {
     return lhs.opacity == rhs.opacity &&
@@ -17,7 +18,8 @@ bool operator==(const RasterShaderStyle& lhs, const RasterShaderStyle& rhs) {
            lhs.brightnessMax == rhs.brightnessMax &&
            lhs.contrast == rhs.contrast &&
            lhs.saturation == rhs.saturation &&
-           lhs.gamma == rhs.gamma;
+           lhs.gamma == rhs.gamma &&
+           lhs.brightnessShift == rhs.brightnessShift;
 }
 
 bool operator!=(const RasterShaderStyle& lhs, const RasterShaderStyle& rhs) {
@@ -59,6 +61,12 @@ bool operator<(const RasterShaderStyle& lhs, const RasterShaderStyle& rhs) {
         return true;
     }
     if (rhs.gamma < lhs.gamma) {
+        return false;
+    }
+    if (lhs.brightnessShift < rhs.brightnessShift) {
+        return true;
+    }
+    if (rhs.brightnessShift < lhs.brightnessShift) {
         return false;
     }
     return false;
