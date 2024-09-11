@@ -55,25 +55,24 @@ textInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
     return out;
 }
 
-//struct TextInstanceStyle {
-//    float4 color;
-//    float4 haloColor;
-//    float haloWidth;
-//};
+struct TextInstanceStyle {
+    packed_float4 color;
+    packed_float4 haloColor;
+    float haloWidth;
+    float haloBlur;
+} __attribute__((__packed__));
 
 fragment float4
 textInstancedFragmentShader(TextInstancedVertexOut in [[stage_in]],
-                       constant float *styles [[buffer(1)]],
+                       constant TextInstanceStyle *styles [[buffer(1)]],
                        texture2d<float> texture0 [[ texture(0)]],
                        sampler textureSampler [[sampler(0)]])
 {
-    const float2 uv = in.texureCoordinates.xy + in.texureCoordinates.zw * float2(in.uv.x, 1 - in.uv.y);
-    const int styleOffset = in.styleIndex * 9;
-    const float4 color = float4(styles[styleOffset + 0], styles[styleOffset + 1], styles[styleOffset + 2], styles[styleOffset + 3]);
-    const float4 haloColor = float4(styles[styleOffset + 4], styles[styleOffset + 5], styles[styleOffset + 6], styles[styleOffset + 7]);
-    const float haloWidth = styles[styleOffset + 8];
+    constant TextInstanceStyle *style = (constant TextInstanceStyle *)(styles + in.styleIndex);
 
-    if (color.a == 0 && haloColor.a == 0.0) {
+    const float2 uv = in.texureCoordinates.xy + in.texureCoordinates.zw * float2(in.uv.x, 1 - in.uv.y);
+
+    if (style->color.a == 0 && style->haloColor.a == 0.0) {
         discard_fragment();
     }
 
@@ -83,15 +82,15 @@ textInstancedFragmentShader(TextInstancedVertexOut in [[stage_in]],
     float w = fwidth(median);
     float alpha = smoothstep(0.5 - w, 0.5 + w, median);
 
-    float4 mixed = mix(haloColor, color, alpha);
+    float4 mixed = mix(style->haloColor, style->color, alpha);
 
-    if(haloWidth > 0) {
-      float start = (0.0 + 0.5 * (1.0 - haloWidth)) - w;
-      float end = start + w;
-      float a2 = smoothstep(start, end, median) * color.a;
+    if(style->haloWidth > 0) {
+      float start = max(0.0, 0.5 - w - (style->haloWidth + 0.5 * style->haloBlur));
+      float end = 0.5 - w - max(0.0, style->haloWidth - 0.5 * style->haloBlur);
+      float a2 = smoothstep(start, end, median) * style->color.a;
       return float4(mixed.r * a2, mixed.g * a2, mixed.b * a2, a2);
     } else {
-      float a2 = alpha * color.a;
+      float a2 = alpha * style->color.a;
       return float4(mixed.r * a2, mixed.g * a2, mixed.b * a2, a2);
     }
 
