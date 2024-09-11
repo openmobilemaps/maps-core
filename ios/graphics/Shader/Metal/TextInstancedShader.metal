@@ -64,35 +64,51 @@ struct TextInstanceStyle {
 
 fragment float4
 textInstancedFragmentShader(TextInstancedVertexOut in [[stage_in]],
-                       constant TextInstanceStyle *styles [[buffer(1)]],
+                            constant TextInstanceStyle *styles [[buffer(1)]],
+                            constant bool &isHalo [[buffer(2)]],
                        texture2d<float> texture0 [[ texture(0)]],
                        sampler textureSampler [[sampler(0)]])
 {
     constant TextInstanceStyle *style = (constant TextInstanceStyle *)(styles + in.styleIndex);
 
-    const float2 uv = in.texureCoordinates.xy + in.texureCoordinates.zw * float2(in.uv.x, 1 - in.uv.y);
 
-    if (style->color.a == 0 && style->haloColor.a == 0.0) {
+    if (style->color.a == 0 || style->haloColor.a == 0.0) {
         discard_fragment();
     }
 
-    float4 dist = texture0.sample(textureSampler, uv);
+    const float2 uv = in.texureCoordinates.xy + in.texureCoordinates.zw * float2(in.uv.x, 1 - in.uv.y);
+    const float4 dist = texture0.sample(textureSampler, uv);
 
-    float median = max(min(dist.r, dist.g), min(max(dist.r, dist.g), dist.b)) / dist.a;
-    float w = fwidth(median);
-    float alpha = smoothstep(0.5 - w, 0.5 + w, median);
+    const float median = max(min(dist.r, dist.g), min(max(dist.r, dist.g), dist.b)) / dist.a;
+    const float w = fwidth(median);
 
-    float4 mixed = mix(style->haloColor, style->color, alpha);
+    const float fillStart = 0.5 - w;
+    const float fillEnd = 0.5 + w;
 
-    if(style->haloWidth > 0) {
-      float start = max(0.0, 0.5 - w - (style->haloWidth + 0.5 * style->haloBlur));
-      float end = 0.5 - w - max(0.0, style->haloWidth - 0.5 * style->haloBlur);
-      float a2 = smoothstep(start, end, median) * style->color.a;
-      return float4(mixed.r * a2, mixed.g * a2, mixed.b * a2, a2);
+    const float innerFallOff = smoothstep(fillStart, fillEnd, median);
+
+    float edgeAlpha = 0.0;
+
+    if (isHalo) {
+        float halfHaloBlur = 0.5 * style->haloBlur;
+
+        if (style->haloWidth == 0.0 && halfHaloBlur == 0.0) {
+            discard_fragment();
+        }
+
+        const float start = max(0.0, fillStart - (style->haloWidth + halfHaloBlur));
+        const float end = fillStart - max(0.0, style->haloWidth - halfHaloBlur);
+
+        const float sideSwitch = step(median, end);
+        const float outerFallOff = smoothstep(start, end, median);
+
+        // Combination of blurred outer falloff and inverse inner fill falloff
+        edgeAlpha = (sideSwitch * outerFallOff + (1.0 - sideSwitch) * (1.0 - innerFallOff)) * style->haloColor.a;
+
+        return style->haloColor * edgeAlpha;
     } else {
-      float a2 = alpha * style->color.a;
-      return float4(mixed.r * a2, mixed.g * a2, mixed.b * a2, a2);
-    }
+        edgeAlpha = innerFallOff * style->haloColor.a;
 
-    return mixed;
+        return style->color * edgeAlpha;
+    }
 }

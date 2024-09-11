@@ -86,10 +86,7 @@ final class TextInstanced: BaseGraphicsObject {
         }
 
         #if DEBUG
-            encoder.pushDebugGroup(label)
-            defer {
-                encoder.popDebugGroup()
-            }
+            encoder.pushDebugGroup(label + "-Halo")
         #endif
 
         shader.setupProgram(context)
@@ -113,6 +110,27 @@ final class TextInstanced: BaseGraphicsObject {
         encoder.setVertexBuffer(styleIndicesBuffer, offset: 0, index: 6)
 
         encoder.setFragmentBuffer(styleBuffer, offset: 0, index: 1)
+
+        var isHalo: Bool = true
+
+        encoder.setFragmentBytes(&isHalo, length: MemoryLayout<Bool>.stride, index: 2)
+
+        encoder.drawIndexedPrimitives(type: .triangle,
+                                      indexCount: indicesCount,
+                                      indexType: .uint16,
+                                      indexBuffer: indicesBuffer,
+                                      indexBufferOffset: 0,
+                                      instanceCount: instanceCount)
+        isHalo = false
+        #if DEBUG
+            encoder.popDebugGroup()
+            encoder.pushDebugGroup(label)
+            defer {
+                encoder.popDebugGroup()
+            }
+        #endif
+
+        encoder.setFragmentBytes(&isHalo, length: MemoryLayout<Bool>.stride, index: 2)
 
         encoder.drawIndexedPrimitives(type: .triangle,
                                       indexCount: indicesCount,
