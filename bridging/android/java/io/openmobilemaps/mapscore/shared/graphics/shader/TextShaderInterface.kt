@@ -12,7 +12,7 @@ abstract class TextShaderInterface {
 
     abstract fun setOpacity(opacity: Float)
 
-    abstract fun setHaloColor(color: io.openmobilemaps.mapscore.shared.graphics.common.Color, width: Double)
+    abstract fun setHaloColor(color: io.openmobilemaps.mapscore.shared.graphics.common.Color, width: Float, blur: Float)
 
     abstract fun asShaderProgramInterface(): ShaderProgramInterface
 
@@ -43,11 +43,11 @@ abstract class TextShaderInterface {
         }
         private external fun native_setOpacity(_nativeRef: Long, opacity: Float)
 
-        override fun setHaloColor(color: io.openmobilemaps.mapscore.shared.graphics.common.Color, width: Double) {
+        override fun setHaloColor(color: io.openmobilemaps.mapscore.shared.graphics.common.Color, width: Float, blur: Float) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_setHaloColor(this.nativeRef, color, width)
+            native_setHaloColor(this.nativeRef, color, width, blur)
         }
-        private external fun native_setHaloColor(_nativeRef: Long, color: io.openmobilemaps.mapscore.shared.graphics.common.Color, width: Double)
+        private external fun native_setHaloColor(_nativeRef: Long, color: io.openmobilemaps.mapscore.shared.graphics.common.Color, width: Float, blur: Float)
 
         override fun asShaderProgramInterface(): ShaderProgramInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
