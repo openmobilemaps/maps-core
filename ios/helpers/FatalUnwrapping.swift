@@ -7,16 +7,16 @@
 
 import Foundation
 
-infix operator !! : NilCoalescingPrecedence
+infix operator !!: NilCoalescingPrecedence
 
-public func !!<T>(wrapped: T?, failureMessage: @autoclosure () -> Never) -> T {
+public func !! <T>(wrapped: T?, failureMessage: @autoclosure () -> Never) -> T {
     guard let unwrapped = wrapped else {
         failureMessage()
     }
     return unwrapped
 }
 
-public func !!<T>(wrapped: T?, failureMessage: @autoclosure () -> Error) throws -> T {
+public func !! <T>(wrapped: T?, failureMessage: @autoclosure () -> Error) throws -> T {
     guard let unwrapped = wrapped else {
         throw failureMessage()
     }

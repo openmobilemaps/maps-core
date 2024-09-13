@@ -9,8 +9,8 @@
  */
 
 import MapCoreSharedModule
-import UIKit
 import os
+import UIKit
 
 open class MCFontLoader: NSObject, MCFontLoaderInterface {
     // MARK: - Font Atlas Dictionary

@@ -93,12 +93,12 @@ final class Quad2dStretchedInstanced: BaseGraphicsObject {
             lock.unlock()
         }
 
-        #if DEBUG
-            encoder.pushDebugGroup(label)
-            defer {
-                encoder.popDebugGroup()
-            }
-        #endif
+#if DEBUG
+        encoder.pushDebugGroup(label)
+        defer {
+            encoder.popDebugGroup()
+        }
+#endif
 
         if isMasked {
             if stencilState == nil {

@@ -1,6 +1,6 @@
 //
-//  File.swift
-//  
+//  RasterLayer.swift
+//
 //
 //  Created by Nicolas Märki on 14.02.2024.
 //
@@ -10,7 +10,6 @@ import MapCoreSharedModule
 
 @available(iOS 13.0, *)
 open class TiledRasterLayer: ObservableObject {
-
     public init(config: MCTiled2dMapLayerConfig, loaders: [MCLoaderInterface] = [MCTextureLoader()]) {
         self.tiledLayerInterface = MCTiled2dMapRasterLayerInterface.create(config, loaders: loaders) !! fatalError("create is non-null")
     }
@@ -29,7 +28,6 @@ open class TiledRasterLayer: ObservableObject {
 
     /// Shared implementation with advanced APIs
     public let tiledLayerInterface: MCTiled2dMapRasterLayerInterface
-
 }
 
 @available(iOS 13.0, *)

@@ -46,7 +46,7 @@ open class BaseGraphicsObject {
     }
 
     open func compute(encoder _: MTLComputeCommandEncoder,
-                     context _: RenderingContext) {
+                      context _: RenderingContext) {
         // subclasses may override
     }
 }

@@ -16,7 +16,7 @@ import UIKit
 class PolygonPatternGroupShader: BaseShader {
     // MARK: - Variables
 
-    let fadeInPattern : Bool
+    let fadeInPattern: Bool
 
     // MARK: - Init
 
@@ -30,7 +30,7 @@ class PolygonPatternGroupShader: BaseShader {
     override func setupProgram(_: MCRenderingContextInterface?) {
         guard pipeline == nil else { return }
 
-        let t : PipelineType = fadeInPattern ? .polygonPatternFadeInGroupShader : .polygonPatternGroupShader
+        let t: PipelineType = fadeInPattern ? .polygonPatternFadeInGroupShader : .polygonPatternGroupShader
         let pl = Pipeline(type: t, blendMode: blendMode)
         pipeline = MetalContext.current.pipelineLibrary.value(pl.json)
     }

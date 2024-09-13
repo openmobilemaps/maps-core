@@ -43,7 +43,7 @@ extension TextShader: MCTextShaderInterface {
         self.haloColor = color.simdValues
         self.haloWidth = Float(width)
     }
-    
+
     func setOpacity(_ opacity: Float) {
         self.opacity = opacity
     }

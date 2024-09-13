@@ -35,6 +35,7 @@ public enum PipelineDescriptorFactory {
                 renderbufferAttachment?.sourceAlphaBlendFactor = .one
                 renderbufferAttachment?.destinationRGBBlendFactor = .oneMinusSourceAlpha
                 renderbufferAttachment?.destinationAlphaBlendFactor = .oneMinusSourceAlpha
+
             case .MULTIPLY:
                 renderbufferAttachment?.rgbBlendOperation = .add
                 renderbufferAttachment?.alphaBlendOperation = .add
@@ -196,9 +197,9 @@ public enum PipelineType: String, CaseIterable, Codable {
         switch self {
             case .lineGroupShader:
                 return LineVertex.descriptor
-        case .polygonGroupShader, .polygonPatternGroupShader, .polygonPatternFadeInGroupShader, .polygonStripedGroupShader:
+            case .polygonGroupShader, .polygonPatternGroupShader, .polygonPatternFadeInGroupShader, .polygonStripedGroupShader:
                 return PolygonVertex.descriptor
-            default: 
+            default:
                 return Vertex.descriptor
         }
     }

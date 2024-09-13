@@ -85,9 +85,9 @@ final class TextInstanced: BaseGraphicsObject {
             encoder.setDepthStencilState(context.defaultMask)
         }
 
-        #if DEBUG
-            encoder.pushDebugGroup(label + "-Halo")
-        #endif
+#if DEBUG
+        encoder.pushDebugGroup(label + "-Halo")
+#endif
 
         shader.setupProgram(context)
         shader.preRender(context)
@@ -122,13 +122,13 @@ final class TextInstanced: BaseGraphicsObject {
                                       indexBufferOffset: 0,
                                       instanceCount: instanceCount)
         isHalo = false
-        #if DEBUG
+#if DEBUG
+        encoder.popDebugGroup()
+        encoder.pushDebugGroup(label)
+        defer {
             encoder.popDebugGroup()
-            encoder.pushDebugGroup(label)
-            defer {
-                encoder.popDebugGroup()
-            }
-        #endif
+        }
+#endif
 
         encoder.setFragmentBytes(&isHalo, length: MemoryLayout<Bool>.stride, index: 2)
 

@@ -95,12 +95,12 @@ final class Quad2dInstanced: BaseGraphicsObject {
             return
         }
 
-        #if DEBUG
-            encoder.pushDebugGroup(label)
-            defer {
-                encoder.popDebugGroup()
-            }
-        #endif
+#if DEBUG
+        encoder.pushDebugGroup(label)
+        defer {
+            encoder.popDebugGroup()
+        }
+#endif
 
         if isMasked {
             if stencilState == nil {

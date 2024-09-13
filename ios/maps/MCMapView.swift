@@ -332,7 +332,7 @@ public extension MCMapView {
     }
 }
 
-extension MCMapView : UIGestureRecognizerDelegate {
+extension MCMapView: UIGestureRecognizerDelegate {
     // MARK: - Mac setup
 
     private func setupMacGestureRecognizersIfNeeded() {
@@ -363,7 +363,7 @@ extension MCMapView : UIGestureRecognizerDelegate {
         true
     }
 
-    public override func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+    override public func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
         true
     }
 

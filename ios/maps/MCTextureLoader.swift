@@ -10,8 +10,8 @@
 
 import DjinniSupport
 import MapCoreSharedModule
-import UIKit
 import OSLog
+import UIKit
 
 @available(iOS 14.0, *)
 private let logger = Logger(subsystem: "maps-core", category: "MCTextureLoader")

@@ -12,7 +12,6 @@ import Foundation
 import MapCoreSharedModule
 
 class ShaderFactory: MCShaderFactoryInterface {
-    
     func createTextShader() -> MCTextShaderInterface? {
         TextShader()
     }
