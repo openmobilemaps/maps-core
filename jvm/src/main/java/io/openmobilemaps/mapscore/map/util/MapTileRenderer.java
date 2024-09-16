@@ -32,7 +32,7 @@ public class MapTileRenderer {
     this.renderer = renderer;
     this.zoomLevelInfos = zoomLevelInfos;
 
-    this.renderer.setImageSize(256, 256);
+    this.renderer.setFramebufferSize(256, 256, 4);
   }
 
   /**

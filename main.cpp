@@ -1,3 +1,5 @@
+#define GL_GLEXT_PROTOTYPES 1
+
 #include "Color.h"
 #include "CoordinateSystemFactory.h"
 #include "MapCallbackInterface.h"
@@ -92,10 +94,52 @@ int main() {
         std::cerr << "Error OSMesaMakeCurrent" << std::endl;
         return 3;
     }
+    static GLuint fboMSAA = -1;
+    static GLuint rbo[2] = {(GLuint)-1, (GLuint)-1};
+
+    glGenFramebuffers(1, &fboMSAA);
+    glGenRenderbuffers(2, rbo);
+    glBindRenderbuffer(GL_RENDERBUFFER, rbo[0]);
+    glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_RGBA, width, height);
+    glCheckError();
+    glBindRenderbuffer(GL_RENDERBUFFER, rbo[1]);
+    glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_DEPTH24_STENCIL8, width, height);
+    glCheckError();
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fboMSAA);
+    glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, rbo[0]);  
+    glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo[1]);  
+/*
+
+    glGenRenderbuffers(1, rbo);
+    glBindRenderbuffer(GL_RENDERBUFFER, rbo[0]);
+    glRenderbufferStorageMultisample(GL_RENDERBUFFER, 0, GL_RGBA, width, height);
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
+    glFramebufferRenderbuffer(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, rbo[0]);  
+    glCheckError();
+
+    glReadPixels(0, 0, width, height,  GL_RGBA,  GL_UNSIGNED_BYTE, buf);
+    */
+    
+    auto fbStatus = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
+    switch(fbStatus) {
+case GL_FRAMEBUFFER_COMPLETE: printf("GL_FRAMEBUFFER_COMPLETE\n"); break;
+case GL_FRAMEBUFFER_UNDEFINED: printf("GL_FRAMEBUFFER_UNDEFINED is returned if the specified framebuffer is the default read or draw framebuffer, but the default framebuffer does not exist.\n"); break;
+case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:  printf("GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT is returned if any of the framebuffer attachment points are framebuffer incomplete."); break;
+case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT: printf("GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT is returned if the framebuffer does not have at least one image attached to it."); break;
+case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER: printf("GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER is returned if the value of GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE is GL_NONE for any color attachment point(s) named by GL_DRAW_BUFFERi."); break;
+case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER: printf("GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER is returned if GL_READ_BUFFER is not GL_NONE and the value of GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE is GL_NONE for the color attachment point named by GL_READ_BUFFER."); break;
+case GL_FRAMEBUFFER_UNSUPPORTED: printf("GL_FRAMEBUFFER_UNSUPPORTED is returned if the combination of internal formats of the attached images violates an implementation-dependent set of restrictions."); break;
+case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE: printf("GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE is returned if the value of GL_RENDERBUFFER_SAMPLES is not the same for all attached renderbuffers; if the value of GL_TEXTURE_SAMPLES is the not same for all attached textures; or, if the attached images are a mix of renderbuffers and textures, the value of GL_RENDERBUFFER_SAMPLES does not match the value of GL_TEXTURE_SAMPLES."); break;
+//case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE: printf("GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE is also returned if the value of GL_TEXTURE_FIXED_SAMPLE_LOCATIONS is not the same for all attached textures; or, if the attached images are a mix of renderbuffers and textures, the value of GL_TEXTURE_FIXED_SAMPLE_LOCATIONS is not GL_TRUE for all attached textures."); break;
+    }
+    glCheckError();
 
     const MapConfig mapConfig{CoordinateSystemFactory::getEpsg2056System()};
     auto csid = mapConfig.mapCoordinateSystem.identifier;
-    const float pixelDensity = 1.0f; // ??
+    const float pixelDensity = 90.0f; // ??
     auto map = MapInterface::createWithOpenGl(mapConfig, pixelDensity);
     std::cout << map << std::endl;
 
@@ -186,6 +230,17 @@ int main() {
 
     glCheckError();
     glFinish();
+    glCheckError();
+
+
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, fboMSAA);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+    glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST); 
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fboMSAA);
+
+    glFinish();
+    glReadPixels(0, 0, width, height,  GL_RGBA,  GL_UNSIGNED_BYTE, buf);
     glCheckError();
     printf("%zx\n", *(size_t *)buf);
 

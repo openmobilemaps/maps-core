@@ -15,10 +15,9 @@ public class MapsCoreTest {
   public static void main(String[] args) {
     MapsCore.initialize();
 
-    OffscreenMapRenderer renderer = new OffscreenMapRenderer(256, 256);
+    OffscreenMapRenderer renderer = new OffscreenMapRenderer(2*900, 2*550, 1);
 
-    var layer = Tiled2dMapVectorLayerBuilder.createFromStyleJson("name", "http://localhost:8888/style.json", renderer.getMap().getCamera().getScreenDensityPpi());
-    renderer.addLayerSync(layer.asLayerInterface());
+    Tiled2dMapVectorLayerBuilder.addFromStyleJson(renderer.getMap(), "name", "http://localhost:8888/style.json");
 
     var bbox = new RectCoord(
         new Coord(CoordinateSystemIdentifiers.EPSG3857(),
@@ -26,7 +25,6 @@ public class MapsCoreTest {
         new Coord(CoordinateSystemIdentifiers.EPSG3857(),
                   1187993.122897987, 5741328.40264769, 0.0));
 
-    /*
     var cam = renderer.getMap().getCamera();
     cam.moveToCenterPositionZoom(new Coord(CoordinateSystemIdentifiers.EPSG4326(), 8.2, 46.8, 0.0), 0.5*2183915.09386,
         false);
@@ -38,14 +36,12 @@ public class MapsCoreTest {
       System.out.printf("Could not render image %s\n", e);
       return;
     }
-    */
-
 
     System.out.println(bbox);
 
     MapTileRenderer tiler = new MapTileRenderer(renderer);
     for (int z = 0; z <= 10; ++z) {
-      MapTileRenderer.TileRange tileRange = tiler.getTileRange(z, bbox);
+      var tileRange = tiler.getTileRange(z, bbox);
 
       for (int xcol = tileRange.minColumn(); xcol <= tileRange.maxColumn(); ++xcol) {
         for (int yrow = tileRange.minRow(); yrow <= tileRange.maxRow(); ++yrow) {

@@ -28,12 +28,12 @@ public class OffscreenMapRenderer {
     }
   }
 
-  public OffscreenMapRenderer(int width, int height) {
+  public OffscreenMapRenderer(int width, int height, int numSamples) {
     // Screen DPI: 1 inch / 0.28mm (as defined in Annex E "Well-known scale sets" in "OpenGIS® Web Map Tile Service Implementation Standard").
-    this(width, height, new MapConfig(CoordinateSystemFactory.getEpsg3857System()), 90.714286f);
+    this(width, height, numSamples, new MapConfig(CoordinateSystemFactory.getEpsg3857System()), 90.714286f);
   }
 
-  public OffscreenMapRenderer(int width, int height, MapConfig mapConfig, float dpi) {
+  public OffscreenMapRenderer(int width, int height, int numSamples, MapConfig mapConfig, float dpi) {
     threadId = Thread.currentThread().threadId();
 
     map = MapInterface.createWithOpenGl(mapConfig, dpi);
@@ -46,7 +46,7 @@ public class OffscreenMapRenderer {
 		});
     map.resume();
 
-    ctx = new OSMesa(width, height);
+    ctx = new OSMesa(width, height, numSamples);
     map.getRenderingContext().onSurfaceCreated();
     map.setViewportSize(new Vec2I(width, height));
     map.setBackgroundColor(new Color(0.0f, 0.0f, 0.0f, 0.0f));
@@ -57,9 +57,9 @@ public class OffscreenMapRenderer {
     ctx.destroy();
   }
 
-  public void setImageSize(int width, int height) {
+  public void setFramebufferSize(int width, int height, int numSamples) {
     assertGlContextThread();
-    ctx.makeCurrent(width, height);
+    ctx.makeCurrent(width, height, numSamples);
     map.setViewportSize(new Vec2I(width, height));
   }
 

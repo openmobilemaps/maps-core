@@ -56,7 +56,7 @@ fun main() {
           }
   )
 
-  var ctx = OSMesa(900, 550)
+  var ctx = OSMesa(900, 550, 0)
   mapInterface.getRenderingContext().onSurfaceCreated()
   mapInterface.setViewportSize(Vec2I(900, 550))
 
@@ -125,7 +125,7 @@ fun main() {
   val bbox = cam.getVisibleRect() // XXX, just for testing, needs to be system input
 
   val tileSize = 256;
-  ctx.makeCurrent(tileSize, tileSize)
+  ctx.makeCurrent(tileSize, tileSize, 0)
   mapInterface.setViewportSize(Vec2I(tileSize, tileSize))
 
 
