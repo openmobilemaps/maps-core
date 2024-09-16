@@ -267,10 +267,8 @@ void Tiled2dMapVectorSymbolLabelObject::updateProperties(std::vector<float> &pos
     if (!isCoordinateOwner) {
         alphaFactor = 0.0;
     } else if (collides || !(description->minZoom <= zoomIdentifier && description->maxZoom >= zoomIdentifier)) {
-        printf("symbol: %s, collides: %i, minZ: %i, maxZ: %i, zoomIdentifier: %f\n", fullText.c_str(), collides, description->minZoom, description->maxZoom, zoomIdentifier);
         alphaFactor = animationCoordinator->getTextAlpha(0.0, now);
     } else {
-        printf("symbol: %s, collides: %i, minZ: %i, maxZ: %i, zoomIdentifier: %f\n", fullText.c_str(), collides, description->minZoom, description->maxZoom, zoomIdentifier);
         float targetAlpha = textOpacity * alpha;
         alphaFactor = animationCoordinator->getTextAlpha(targetAlpha, now);
     }

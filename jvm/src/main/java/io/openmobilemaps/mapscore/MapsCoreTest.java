@@ -8,8 +8,8 @@ import io.openmobilemaps.mapscore.map.util.MapTileRenderer;
 import io.openmobilemaps.mapscore.map.util.OffscreenMapRenderer;
 import io.openmobilemaps.mapscore.map.util.Tiled2dMapVectorLayerBuilder;
 import io.openmobilemaps.mapscore.shared.map.coordinates.Coord;
-import io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord;
 import io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateSystemIdentifiers;
+import io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord;
 
 public class MapsCoreTest {
   public static void main(String[] args) {
@@ -25,8 +25,6 @@ public class MapsCoreTest {
                   637646.5258575683, 6077651.323061279, 0.0),
         new Coord(CoordinateSystemIdentifiers.EPSG3857(),
                   1187993.122897987, 5741328.40264769, 0.0));
-
-
 
     /*
     var cam = renderer.getMap().getCamera();
