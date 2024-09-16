@@ -41,10 +41,8 @@ rasterFragmentShader(VertexOut in [[stage_in]],
                    sampler textureSampler [[sampler(0)]])
 {
     float4 color = texture0.sample(textureSampler, in.uv);
-    
-    color.a *= styling[0].opacity;
-    
-    if (color.a == 0) {
+
+    if (color.a == 0.0 || styling[0].opacity == 0.0) {
         discard_fragment();
     }
     
