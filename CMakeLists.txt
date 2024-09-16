@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.24.0)
 project(mapscore)
 
 ####
-# mapscore "proper", i.e. the C++ implementation without any bindings
+# mapscore "proper", i.e. the C++ implementation without language bindings
 ####
 file(GLOB_RECURSE mapscore_SRC
   "shared/*.cpp"
@@ -11,7 +11,7 @@ file(GLOB_RECURSE mapscore_SRC
 
 add_library(mapscore STATIC ${mapscore_SRC})
 
-# TODO: this picks up mesa (libgl-dev). Should we use an independent loader (glad/glew?) instead?
+# TODO: this picks up mesa (libgl-dev) and makes it a runtime dependency. Should we attempt to use an independent GL loader (glad/glew?) instead?
 find_package(OpenGL)
 
 target_include_directories(mapscore PRIVATE
@@ -66,7 +66,9 @@ target_include_directories(mapscore PUBLIC
   external/djinni/support-lib/
   external/djinni/support-lib/cpp
 )
-
+target_compile_definitions(mapscore PRIVATE 
+  $<$<CONFIG:Debug>:LOG_LEVEL=2>    # LogDebug
+  $<$<CONFIG:Release>:LOG_LEVEL=3>) # LogInfo
 target_compile_features(mapscore PRIVATE cxx_std_20)
 target_compile_options(mapscore PRIVATE -Wno-deprecated -Wno-reorder -fPIC) # fPIC so we can "embed" into shared mapscore_jni
 target_link_libraries(mapscore ${OPENGL_LIBRARIES})
@@ -75,6 +77,12 @@ target_link_libraries(mapscore ${OPENGL_LIBRARIES})
 # mapscore-jni
 ####
 find_package(JNI)
+find_library(OSMESA_LIBRARIES 
+  NAMES OSMesa 
+  REQUIRED)
+find_path(OSMESA_INCLUDE_DIRS 
+  NAMES "GL/osmesa.h" 
+  REQUIRED)
 
 file(GLOB_RECURSE mapscore_jni_SRC
   "android/src/main/cpp/scheduling/*.cpp"
@@ -110,12 +118,16 @@ target_include_directories(mapscore_jni PRIVATE
   bridging/android/jni/map/scheduling
   bridging/android/jni/map/coordinates
   bridging/android/jni/map/camera
+
+  ${OSMESA_INCLUDE_DIRS}
 )
 target_compile_features(mapscore_jni PRIVATE cxx_std_20)
-target_compile_options(mapscore_jni PRIVATE -Wno-deprecated -Wno-reorder -DDATAREF_JNI=1)
-target_link_libraries(mapscore_jni mapscore -lOSMesa)
+target_compile_definitions(mapscore_jni PRIVATE DATAREF_JNI=1) # see external/djinni/support-lib/cpp/DataRef.hpp
+target_compile_options(mapscore_jni PRIVATE -Wno-deprecated -Wno-reorder)
+target_link_libraries(mapscore_jni mapscore ${OSMESA_LIBRARIES})
 
 add_executable(testmain main.cpp)
 target_compile_features(testmain PRIVATE cxx_std_20)
 target_compile_options(testmain PRIVATE -Wall)
-target_link_libraries(testmain mapscore -lOSMesa)
+target_include_directories(testmain PRIVATE ${OSMESA_INCLUDE_DIRS})
+target_link_libraries(testmain mapscore ${OSMESA_LIBRARIES})

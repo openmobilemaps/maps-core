@@ -21,6 +21,8 @@ import io.openmobilemaps.mapscore.shared.map.loader.Font
 import io.openmobilemaps.mapscore.shared.map.loader.FontLoaderInterface
 import io.openmobilemaps.mapscore.shared.map.loader.FontLoaderResult
 import io.openmobilemaps.mapscore.shared.map.loader.LoaderStatus
+import io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapZoomLevelInfo;
+import io.openmobilemaps.mapscore.shared.map.layers.tiled.DefaultTiled2dMapLayerConfigs;
 
 import java.io.File
 import javax.imageio.ImageIO
@@ -42,9 +44,7 @@ class MyErrorManager : io.openmobilemaps.mapscore.shared.map.ErrorManager() {
 
 fun main() {
   MapsCore.initialize()
-  var dpi = 2*96.0;
-  var size = 2000;
-  var ctx = OSMesa(size, size)
+  var dpi = 90.0;
 
   val config = MapConfig(CoordinateSystemFactory.getEpsg3857System())
 
@@ -56,21 +56,21 @@ fun main() {
           }
   )
 
+  var ctx = OSMesa(900, 550)
   mapInterface.getRenderingContext().onSurfaceCreated()
+  mapInterface.setViewportSize(Vec2I(900, 550))
 
-  mapInterface.setViewportSize(Vec2I(size, size))
-  mapInterface.setBackgroundColor(Color(0.2f, 0.1f, 0.1f, 0.1f))
+  //mapInterface.setBackgroundColor(Color(0.9f, 0.9f, 1.0f, 1.0f))
+  mapInterface.setBackgroundColor(Color(0.0f, 0.0f, 0.0f, 0.0f))
   var cam = mapInterface.getCamera()
+  
 
-  // var bbox = RectCoord(
-  //   topLeft=Coord(CoordinateSystemIdentifiers.EPSG4326(), 32.48107654411925, 44.38083293528811, 0.0),
-  //   bottomRight=Coord(CoordinateSystemIdentifiers.EPSG4326(), 36.637536777859964, 46.55925987559425, 0.0),
-  // )
-  // cam.moveToBoundingBox(bbox, 0.1f, false, null, null);
-  //cam.moveToCenterPositionZoom(Coord(CoordinateSystemIdentifiers.EPSG4326() , 34.00905273547181, 46.55925987559425, 0.0), 200.0, false)
-  cam.moveToCenterPositionZoom(Coord(CoordinateSystemIdentifiers.EPSG4326() , 8.2, 47.0, 0.0), 97656.25 * 0.1 * dpi, false)
+  var wmts = DefaultTiled2dMapLayerConfigs.webMercator("nöthing", "gär nünt");
+  val zooms = wmts.getZoomLevelInfos();
+
+  cam.moveToCenterPositionZoom(Coord(CoordinateSystemIdentifiers.EPSG4326() , 8.2, 46.8, 0.0), zooms[8].zoom, false);// 97656.25 * 0.1 * dpi, false)
   //cam.moveToCenterPositionZoom(Coord(CoordinateSystemIdentifiers.EPSG4326() , 11.39, 47.26, 0.0), 97656.25 * 0.009 * dpi, false)
-
+  
 
   val layer = Tiled2dMapVectorLayerInterface.createFromStyleJson(
           "name",
@@ -92,39 +92,98 @@ fun main() {
   // Add layer async and enforce running the corresponding task.
   mapInterface.resume()
   mapInterface.addLayer(layeri)
-  while(mapInterface.getLayers().isEmpty()) {
-     mapInterface.getScheduler().runGraphicsTasks()
-  }
+  while(mapInterface.getScheduler().runGraphicsTasks()) {}
   layeri.enableAnimations(false)
   cam.freeze(true);
 
   println(cam.getVisibleRect())
   //mapInterface.drawReadyFrame(cam.getVisibleRect(), 5f, MyMapReadyCallbackInterface())
-  for(i in 0..500) {
-    mapInterface.getScheduler().runGraphicsTasks()
+  while(true) {
+    while(mapInterface.getScheduler().runGraphicsTasks()) {}
     var readyState = layeri.isReadyToRenderOffscreen()
-    println("readyState: ${readyState}")
     if (readyState != LayerReadyState.NOT_READY) {
       break;
     }
-    java.util.concurrent.TimeUnit.MILLISECONDS.sleep(10);
+    Thread.yield()
   }
-  //XXX: workaround for fade in of text labels. :*(
-  //  Set transition.duration = 0 in style.json, otherwise this needs to be even longer.
-  for(i in 0..1) {
-    mapInterface.drawFrame()
-    java.util.concurrent.TimeUnit.MILLISECONDS.sleep(10);
-  }
+  // Text icon fade in workaround:
+  // - getVpMatrix must be called before first update.
+  // - need two calls to update before first actual draw.
+  //    -> first update runs symbol collision detection
+  //    -> snd update to show non-colliding symbols.
+  //    (and another one that is implicit in drawFrame?)
+  cam.asCameraInterface().getVpMatrix()
+  layeri.update();
+  layeri.update();
+
+
   mapInterface.drawFrame()
-
-
-
-  var img = ctx.getImage()
-  ImageIO.write(img, "png", File("frame.png"))
+  ImageIO.write(ctx.getImage(), "png", File("frame.png"))
   println("done")
 
+  // Ok tile rendering
+  val bbox = cam.getVisibleRect() // XXX, just for testing, needs to be system input
 
-  try {} finally {
-    mapInterface.destroy()
+  val tileSize = 256;
+  ctx.makeCurrent(tileSize, tileSize)
+  mapInterface.setViewportSize(Vec2I(tileSize, tileSize))
+
+
+  cam.freeze(false);
+  println(bbox)
+  for (z in 0..12) {
+    assert(zooms[z].zoomLevelIdentifier == z)
+    val (cols, rows) = tileRanges(bbox, zooms[z])
+
+    println("range: ${z} ${cols} ${rows}")
+    for (x in cols.first..cols.second) {
+      for (y in rows.first..rows.second) {
+        val tile = tileBBox(x, y, zooms[z])
+        println("${x},${y}: ${tile}")
+
+
+        cam.moveToBoundingBox(tile, 0.0f, false, zooms[z].zoom, zooms[z].zoom)
+        awaitReady(mapInterface)
+        mapInterface.drawFrame()
+        ImageIO.write(ctx.getImage(), "png", File("tiles/tile_${z}_${x}_${y}.png"))
+      }
+    }
+  }
+
+  mapInterface.destroy()
+}
+
+fun tileRanges(bbox: RectCoord, m: Tiled2dMapZoomLevelInfo): Pair<Pair<Int, Int>, Pair<Int, Int>> 
+{
+  assert(bbox.topLeft.systemIdentifier == m.bounds.topLeft.systemIdentifier)
+  val epsilon = 1e-6
+  val tileSpan = m.tileWidthLayerSystemUnits; // == scaleDenominator * 0.00028 * 256
+  
+  val minCol = kotlin.math.floor((bbox.topLeft.x - m.bounds.topLeft.x) / tileSpan + epsilon).toInt()
+  val maxCol = kotlin.math.floor((bbox.bottomRight.x - m.bounds.topLeft.x) / tileSpan - epsilon).toInt()
+  val minRow = kotlin.math.floor((m.bounds.topLeft.y - bbox.topLeft.y) / tileSpan + epsilon).toInt()
+  val maxRow = kotlin.math.floor((m.bounds.topLeft.y - bbox.bottomRight.y) / tileSpan - epsilon).toInt()
+  return Pair(Pair(minCol, maxCol), Pair(minRow, maxRow))
+}
+
+fun tileBBox(col: Int, row: Int, m: Tiled2dMapZoomLevelInfo): RectCoord {
+  val tileSpan = m.tileWidthLayerSystemUnits; // == scaleDenominator * 0.00028 * 256
+  val leftX = col * tileSpan + m.bounds.topLeft.x;
+  val rightX = (col+1) * tileSpan + m.bounds.topLeft.x;
+  val upperY = m.bounds.topLeft.y - row * tileSpan;
+  val lowerY = m.bounds.topLeft.y - (row+1) * tileSpan;
+  return RectCoord(Coord(m.bounds.topLeft.systemIdentifier, leftX, upperY, 0.0),
+                   Coord(m.bounds.topLeft.systemIdentifier, rightX, lowerY, 0.0))
+}
+
+fun awaitReady(map: MapInterface) {
+  var layers = map.getLayers()
+  while(true) {
+    while(map.getScheduler().runGraphicsTasks()) {}
+    var readyState = layers[0].isReadyToRenderOffscreen() // TODO for all
+    if (readyState != LayerReadyState.NOT_READY) {
+      break;
+    }
+    Thread.yield()
   }
 }

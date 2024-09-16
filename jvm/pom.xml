@@ -12,7 +12,7 @@
     <maven.compiler.release>${java.version}</maven.compiler.release>
     <kotlin.version>1.9.21</kotlin.version>
     <!-- TODO REMOVE -->
-    <main.class>io.openmobilemaps.mapscore.MapsCoreTestKt</main.class>
+    <main.class>io.openmobilemaps.mapscore.MapsCoreTest</main.class>
   </properties>
   <repositories>
     <repository>
@@ -89,7 +89,7 @@
     </plugins>
     <resources>
       <resource>
-        <directory>../build-ninja/</directory>
+        <directory>../build-debug/</directory>
         <includes>
           <include>libmapscore_jni.so</include>
         </includes>

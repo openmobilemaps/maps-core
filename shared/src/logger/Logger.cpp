@@ -28,6 +28,12 @@ int __android_log_print(int prio, const char *tag, const char *fmt, ...);
 #include <os/log.h>
 #endif
 
+//#define SHOW_COLORS 0
+
+#ifndef LOG_LEVEL
+#define LOG_LEVEL 2 // == LogDebug
+#endif
+
 Logger::Logger(int p){
     priority = p;
 }

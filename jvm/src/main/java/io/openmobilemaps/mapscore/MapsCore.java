@@ -7,12 +7,16 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 
 public class MapsCore {
-  public static void initialize() throws IOException {
-    File tempLib = File.createTempFile("libmapscore_jni_", ".so");
-    tempLib.deleteOnExit();
-    InputStream lib = MapsCore.class.getResourceAsStream("/native/libmapscore_jni.so");
-    Files.copy(lib, tempLib.toPath(), StandardCopyOption.REPLACE_EXISTING);
-    
-    System.load(tempLib.getAbsolutePath());
+  public static void initialize() {
+    try {
+      File tempLib = File.createTempFile("libmapscore_jni_", ".so");
+      tempLib.deleteOnExit();
+      InputStream lib = MapsCore.class.getResourceAsStream("/native/libmapscore_jni.so");
+      Files.copy(lib, tempLib.toPath(), StandardCopyOption.REPLACE_EXISTING);
+
+      System.load(tempLib.getAbsolutePath());
+    } catch (IOException e) {
+      throw new RuntimeException("Could not load native mapscore library", e);
+    }
   }
 }

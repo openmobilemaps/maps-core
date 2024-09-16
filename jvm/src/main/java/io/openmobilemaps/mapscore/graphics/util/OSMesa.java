@@ -14,21 +14,27 @@ public class OSMesa {
   private int width;
   private int height;
 
+  public class OSMesaError extends Error {
+    OSMesaError(String reason) {
+      super(reason);
+    }
+  }
+
   /**
    * Create the OSMesa context. The context needs to be activated with
    * makeCurrent before any GL operations can take place.
    */
-  public OSMesa() throws Exception {
+  public OSMesa() {
     this.ctx = createContext();
     if (ctx == 0) {
-      throw new Exception("Could not create OSMesa context");
+      throw new OSMesaError("Could not create OSMesa context");
     }
   }
 
   /**
    * Create the OSMesa context and activate it immediately.
    */
-  public OSMesa(int width, int height) throws Exception {
+  public OSMesa(int width, int height) throws OSMesaError {
     this();
     makeCurrent(width, height);
   }
@@ -38,13 +44,12 @@ public class OSMesa {
    * renderbuffer.
    * This can be called any number of times to modify the renderbuffer size.
    */
-  public void makeCurrent(int width, int height) throws Exception {
-    free(buf);
+  public void makeCurrent(int width, int height) throws OSMesaError {
     this.width = width;
     this.height = height;
-    buf = OSMesa.makeCurrent(ctx, width, height);
+    buf = OSMesa.makeCurrent(ctx, buf, width, height);
     if (buf == 0) {
-      throw new Exception("Could not make OSMesa context current");
+      throw new OSMesaError("Could not activate OSMesa context");
     }
   }
 
@@ -78,15 +83,15 @@ public class OSMesa {
     }
   }
 
-  protected void finalize() {
-    free(buf);
+  public void destroy() {
+    destroy(ctx, buf);
   }
 
   private static native long createContext();
 
-  private static native long makeCurrent(long ctx, int width, int height);
+  private static native long makeCurrent(long ctx, long buf, int width, int height);
 
   private static native void readARGB(long buf, int[] out);
 
-  private static native void free(long buf);
+  private static native void destroy(long ctx, long buf);
 }
