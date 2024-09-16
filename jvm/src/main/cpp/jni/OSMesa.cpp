@@ -1,5 +1,6 @@
 #define GL_GLEXT_PROTOTYPES 1
 #include <GL/osmesa.h>
+#include <algorithm>
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
@@ -128,7 +129,9 @@ JNIEXPORT jlong JNICALL Java_io_openmobilemaps_mapscore_graphics_util_OSMesa_mak
     }
 
     glDeleteFramebuffers(1, &state->fbo);
+    state->fbo = 0;
     glDeleteRenderbuffers(2, state->rbo);
+    std::fill(state->rbo, state->rbo + 2, 0);
     if (numSamples == 0) {
         return true;
     }
@@ -176,11 +179,12 @@ JNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_graphics_util_OSMesa_read
 JNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_graphics_util_OSMesa_destroy(JNIEnv *, jclass, jlong stateArg) {
     JNIOSMesaState *state = (JNIOSMesaState *)stateArg;
 
+    glDeleteRenderbuffers(2, state->rbo);
+    glDeleteFramebuffers(1, &state->fbo);
     OSMesaDestroyContext(state->ctx);
     free(state->buf);
-    glDeleteFramebuffers(1, &state->fbo);
-    glDeleteRenderbuffers(2, state->rbo);
 
+    *state = JNIOSMesaState{};
     delete (state);
 }
 }
