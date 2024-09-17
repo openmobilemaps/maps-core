@@ -113,6 +113,8 @@ void Quad2dStretchedInstancedOpenGl::prepareGlData(int program) {
     instStretchYsHandle = glGetAttribLocation(program, "aStretchY");
 
     mvpMatrixHandle = glGetUniformLocation(program, "uMVPMatrix");
+
+    glDataBuffersGenerated = true;
 }
 
 void Quad2dStretchedInstancedOpenGl::prepareTextureCoordsGlData(int program) {

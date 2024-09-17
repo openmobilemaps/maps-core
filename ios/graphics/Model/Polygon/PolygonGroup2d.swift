@@ -47,12 +47,12 @@ final class PolygonGroup2d: BaseGraphicsObject {
         guard let verticesBuffer,
               let indicesBuffer, shader.polygonStyleBuffer != nil else { return }
 
-        #if DEBUG
-            encoder.pushDebugGroup(label)
-            defer {
-                encoder.popDebugGroup()
-            }
-        #endif
+#if DEBUG
+        encoder.pushDebugGroup(label)
+        defer {
+            encoder.popDebugGroup()
+        }
+#endif
 
         if isMasked {
             if stencilState == nil {
@@ -82,7 +82,7 @@ final class PolygonGroup2d: BaseGraphicsObject {
         if self.shader.isStriped {
             encoder.setVertexBytes(&posOffset, length: MemoryLayout<SIMD2<Float>>.stride, index: 2)
 
-            let p : Float = Float(screenPixelAsRealMeterFactor)
+            let p: Float = Float(screenPixelAsRealMeterFactor)
             var scaleFactors = SIMD2<Float>([p, pow(2.0, ceil(log2(p)))])
             encoder.setFragmentBytes(&scaleFactors, length: MemoryLayout<SIMD2<Float>>.stride, index: 2)
         }
@@ -117,7 +117,7 @@ extension PolygonGroup2d: MCPolygonGroup2dInterface {
 
         if shader.isStriped {
             if let p = UnsafeRawPointer(bitPattern: Int(vertices.address)) {
-                for i in 0..<vertices.elementCount {
+                for i in 0 ..< vertices.elementCount {
                     if i % 3 == 0 {
                         let x = (p + 4 * Int(i)).load(as: Float.self)
                         let y = (p + 4 * (Int(i) + 1)).load(as: Float.self)
@@ -133,8 +133,8 @@ extension PolygonGroup2d: MCPolygonGroup2dInterface {
             self.indicesBuffer = indicesBuffer
 
             if shader.isStriped {
-                self.posOffset.x = minX;
-                self.posOffset.y = minY;
+                self.posOffset.x = minX
+                self.posOffset.y = minY
             }
         }
     }

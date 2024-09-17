@@ -23,6 +23,10 @@ class SimpleLayerInterface : public LayerInterface {
         return {};
     };
 
+    virtual std::vector<std::shared_ptr<::ComputePassInterface>> buildComputePasses() {
+        return {};
+    };
+
     virtual void onAdded(const std::shared_ptr<MapInterface> & mapInterface, int32_t layerIndex) {};
 
     virtual void onRemoved() {};

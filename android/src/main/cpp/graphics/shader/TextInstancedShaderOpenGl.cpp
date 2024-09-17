@@ -79,11 +79,12 @@ std::string TextInstancedShaderOpenGl::getFragmentShader() {
     return OMMVersionedGlesShaderCode(320 es,
                                       precision highp float;
                                               layout(std430, binding = 0) buffer textInstancedStyleBuffer {
-                                                  float styles[]; // vec4 color; vec4 haloColor; float haloWidth;
+                                                  float styles[]; // vec4 color; vec4 haloColor; float haloWidth; float haloBlur;
                                               };
 
                                               uniform sampler2D textureSampler;
                                               uniform vec2 textureFactor;
+                                              uniform float isHalo; // 0.0 = false, 1.0 = true
 
                                               in vec2 v_texCoord;
                                               in vec4 v_texCoordInstance;
@@ -92,12 +93,13 @@ std::string TextInstancedShaderOpenGl::getFragmentShader() {
                                               out vec4 fragmentColor;
 
                                               void main() {
-                                                  int styleOffset = int(vStyleIndex) * 9;
-                                                  vec4 color = vec4(styles[styleOffset + 0], styles[styleOffset + 1], styles[styleOffset + 2], styles[styleOffset + 3]);
-                                                  vec4 haloColor = vec4(styles[styleOffset + 4], styles[styleOffset + 5], styles[styleOffset + 6], styles[styleOffset + 7]);
-                                                  float haloWidth = styles[styleOffset + 8];
+                                                  int styleOffset = int(vStyleIndex) * 10;
 
-                                                  if (color.a == 0.0 && haloColor.a == 0.0) {
+                                                  int colorOffset = int(isHalo) * 4 + styleOffset; // fill/halo color switch
+                                                  vec4 color = vec4(styles[colorOffset + 0], styles[colorOffset + 1],
+                                                               styles[colorOffset + 2], styles[colorOffset + 3]);
+
+                                                  if (color.a == 0.0) {
                                                       discard;
                                                   }
 
@@ -106,23 +108,37 @@ std::string TextInstancedShaderOpenGl::getFragmentShader() {
 
                                                   float median = max(min(dist.r, dist.g), min(max(dist.r, dist.g), dist.b)) / dist.a;
                                                   float w = fwidth(median);
-                                                  float alpha = smoothstep(0.5 - w, 0.5 + w, median);
 
-                                                  vec4 mixed = mix(haloColor, color, alpha);
+                                                  float fillStart = 0.5 - w;
+                                                  float fillEnd = 0.5 + w;
 
-                                                  if(haloWidth > 0.0) {
-                                                      float start = (0.0 + 0.5 * (1.0 - haloWidth)) - w;
-                                                      float end = start + w;
-                                                      float a2 = smoothstep(start, end, median) * color.a;
-                                                      fragmentColor = mixed;
-                                                      fragmentColor.a = 1.0;
-                                                      fragmentColor *= a2;
+                                                  float innerFallOff = smoothstep(fillStart, fillEnd, median);
+
+                                                  float edgeAlpha = 0.0;
+
+                                                  if(bool(isHalo)) {
+                                                      float haloWidth = styles[styleOffset + 8];
+                                                      float halfHaloBlur = 0.5 * styles[styleOffset + 9];
+
+                                                      if (haloWidth == 0.0 && halfHaloBlur == 0.0) {
+                                                          discard;
+                                                      }
+
+                                                      float start = max(0.0, fillStart - (haloWidth + halfHaloBlur));
+                                                      float end = fillStart - max(0.0, haloWidth - halfHaloBlur);
+
+                                                      float sideSwitch = step(median, end);
+                                                      float outerFallOff = smoothstep(start, end, median);
+
+                                                      // Combination of blurred outer falloff and inverse inner fill falloff
+                                                      edgeAlpha = (sideSwitch * outerFallOff + (1.0 - sideSwitch) * (1.0 - innerFallOff)) * color.a;
                                                   } else {
-                                                      float a2 = alpha * color.a;
-                                                      fragmentColor = mixed;
-                                                      fragmentColor.a = 1.0;
-                                                      fragmentColor *= a2;
+                                                      edgeAlpha = innerFallOff * color.a;
                                                   }
+
+                                                  fragmentColor = color;
+                                                  fragmentColor.a = 1.0;
+                                                  fragmentColor *= edgeAlpha;
                                               }
     );
 }

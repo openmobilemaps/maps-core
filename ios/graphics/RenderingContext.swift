@@ -16,6 +16,7 @@ import UIKit
 @objc
 public class RenderingContext: NSObject {
     public weak var encoder: MTLRenderCommandEncoder?
+    public weak var computeEncoder: MTLComputeCommandEncoder?
     public weak var sceneView: MCMapView?
 
     public lazy var mask: MTLDepthStencilState? = {

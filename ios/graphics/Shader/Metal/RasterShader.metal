@@ -19,6 +19,7 @@ struct RasterStyle {
     float contrast;
     float saturation;
     float gamma;
+    float brightnessShift;
 };
 
 vertex VertexOut
@@ -40,21 +41,20 @@ rasterFragmentShader(VertexOut in [[stage_in]],
                    sampler textureSampler [[sampler(0)]])
 {
     float4 color = texture0.sample(textureSampler, in.uv);
-    
-    color.a *= styling[0].opacity;
-    
-    if (color.a == 0) {
+
+    if (color.a == 0.0 || styling[0].opacity == 0.0) {
         discard_fragment();
     }
     
     float3 rgb = color.rgb;
+
+    rgb = clamp(rgb + styling[0].brightnessShift, float3(0.0), float3(1.0));
     
     float average = (color.r + color.g + color.b) / 3.0;
     
     rgb += (average - rgb) * styling[0].saturation;
     
-    rgb = (rgb - 0.5) * styling[0].contrast + 0.5;
-    
+    rgb = clamp((rgb - 0.5) * styling[0].contrast + 0.5, float3(0.0), float3(1.0));
     
     float3 brightnessMin = float3(styling[0].brightnessMin, styling[0].brightnessMin, styling[0].brightnessMin);
     float3 brightnessMax = float3(styling[0].brightnessMax, styling[0].brightnessMax, styling[0].brightnessMax);

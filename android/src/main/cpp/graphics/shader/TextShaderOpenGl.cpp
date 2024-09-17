@@ -24,13 +24,14 @@ void TextShaderOpenGl::setColor(const ::Color & c) {
     color[3] = c.a;
 }
 
-void TextShaderOpenGl::setHaloColor(const ::Color & color, double width) {
+void TextShaderOpenGl::setHaloColor(const ::Color & color, float width, float blur) {
     std::lock_guard<std::mutex> lock(dataMutex);
     haloColor[0] = color.r;
     haloColor[1] = color.g;
     haloColor[2] = color.b;
     haloColor[3] = color.a;
     haloWidth = width;
+    haloBlur = blur;
 }
 
 void TextShaderOpenGl::setOpacity(float opacity) { this->opacity = opacity; }
@@ -61,12 +62,14 @@ void TextShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterfa
     int colorHandle = glGetUniformLocation(program, "color");
     int haloColorHandle = glGetUniformLocation(program, "haloColor");
     int haloWidthHandle = glGetUniformLocation(program, "haloWidth");
+    int haloBlurHandle = glGetUniformLocation(program, "haloBlur");
     int opacityHandle = glGetUniformLocation(program, "opacity");
     {
         std::lock_guard<std::mutex> lock(dataMutex);
         glUniform4fv(colorHandle, 1, &color[0]);
         glUniform4fv(haloColorHandle, 1, &haloColor[0]);
         glUniform1f(haloWidthHandle, haloWidth);
+        glUniform1f(haloBlurHandle, haloBlur);
         glUniform1f(opacityHandle, opacity);
     }
 
@@ -96,33 +99,50 @@ std::string TextShaderOpenGl::getFragmentShader() {
                                       uniform vec4 haloColor;
                                       uniform float opacity;
                                       uniform float haloWidth;
+                                      uniform float haloBlur;
+                                      uniform float isHalo; // 0.0 = false, 1.0 = true
                                       in vec2 vTextCoord;
                                       out vec4 fragmentColor;
 
                                       void main() {
-                                          vec4 dist = texture(textureSampler, vTextCoord);
+                                          vec4 finalColor = isHalo * haloColor + (1.0 - isHalo) * color; // fill/halo color switch
 
-                                          if(opacity == 0.0) {
+                                          if (opacity == 0.0 || finalColor.a == 0.0) {
                                               discard;
                                           }
 
+                                          vec4 dist = texture(textureSampler, vTextCoord);
+
                                           float median = max(min(dist.r, dist.g), min(max(dist.r, dist.g), dist.b)) / dist.a;
-
                                           float w = fwidth(median);
-                                          float alpha = smoothstep(0.5 - w, 0.5 + w, median);
 
-                                          vec4 mixed = mix(haloColor, color, alpha);
+                                          float fillStart = 0.5 - w;
+                                          float fillEnd = 0.5 + w;
 
-                                          if(haloWidth > 0.0) {
-                                              float start = (0.0 + 0.5 * (1.0 - haloWidth)) - w;
-                                              float end = start + w;
-                                              float a2 = smoothstep(start, end, median) * opacity;
-                                              fragmentColor = mixed;
-                                              fragmentColor.a = 1.0;
-                                              fragmentColor *= a2;
+                                          float innerFallOff = smoothstep(fillStart, fillEnd, median);
+
+                                          float edgeAlpha = 0.0;
+
+                                          if(bool(isHalo)) {
+                                              if (haloWidth == 0.0 && haloBlur == 0.0) {
+                                                  discard;
+                                              }
+
+                                              float start = max(0.0, fillStart - (haloWidth + 0.5 * haloBlur));
+                                              float end = fillStart - max(0.0, haloWidth - 0.5 * haloBlur);
+
+                                              float sideSwitch = step(median, end);
+                                              float outerFallOff = smoothstep(start, end, median);
+
+                                              // Combination of blurred outer falloff and inverse inner fill falloff
+                                              edgeAlpha = (sideSwitch * outerFallOff + (1.0 - sideSwitch) * (1.0 - innerFallOff)) * finalColor.a;
                                           } else {
-                                              fragmentColor = mixed;
+                                              edgeAlpha = innerFallOff * finalColor.a;
                                           }
+
+                                          fragmentColor = finalColor;
+                                          fragmentColor.a = 1.0;
+                                          fragmentColor *= edgeAlpha;
                                       });
 }
 

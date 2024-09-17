@@ -28,45 +28,46 @@ import UIKit
  }
  */
 open class MCAssetProvider: MCTiled2dMapVectorLayerSymbolDelegateInterface {
-  public init () {}
-
-  open func getCustomAssets(for featureInfos: [MCVectorLayerFeatureInfo], layerIdentifier: String) -> [MCTiled2dMapVectorAssetInfo] {
-    var images: [String: UIImage] = [:]
-
-    for featureInfo in featureInfos {
-      images[featureInfo.identifier] = getImageFor(for: featureInfo, layerIdentifier: layerIdentifier)
-    }
-    let scale = UIScreen.main.nativeScale
-    let packerResult = MCRectanglePacker.pack(images.mapValues { MCVec2I(x: Int32($0.size.width * scale), y: Int32($0.size.height * scale)) }, maxPageSize: MCVec2I(x: 4096, y: 4096))
-
-    var results = [MCTiled2dMapVectorAssetInfo]()
-
-    for page in packerResult {
-      let sizes = page.uvs.values.map({ return CGSize(width: CGFloat($0.x + $0.width), height: CGFloat($0.y + $0.height)) })
-      let maxWidth = sizes.map(\.width).max() ?? 0.0
-      let maxHeight = sizes.map(\.height).max() ?? 0.0
-
-      UIGraphicsBeginImageContext(.init(width: maxWidth, height: maxHeight))
-
-      for (key, rect) in page.uvs {
-          if let image = images[key] {
-              image.draw(in: CGRect(x: CGFloat(rect.x), y: CGFloat(rect.y), width: CGFloat(rect.width), height: CGFloat(rect.height)))
-          }
-      }
-
-      if let combinedImage = UIGraphicsGetImageFromCurrentImageContext() {
-        results.append(MCTiled2dMapVectorAssetInfo(featureIdentifiersUv: page.uvs, texture: try? TextureHolder(combinedImage.cgImage!)))
-      } else {
-        assertionFailure("could not create image atlas")
-      }
-
-      UIGraphicsEndImageContext()
+    public init() {
     }
 
-    return results
-  }
+    open func getCustomAssets(for featureInfos: [MCVectorLayerFeatureInfo], layerIdentifier: String) -> [MCTiled2dMapVectorAssetInfo] {
+        var images: [String: UIImage] = [:]
 
-  open func getImageFor(for featureInfo: MCVectorLayerFeatureInfo, layerIdentifier: String) -> UIImage {
-    fatalError("implemented by subclass")
-  }
+        for featureInfo in featureInfos {
+            images[featureInfo.identifier] = getImageFor(for: featureInfo, layerIdentifier: layerIdentifier)
+        }
+        let scale = UIScreen.main.nativeScale
+        let packerResult = MCRectanglePacker.pack(images.mapValues { MCVec2I(x: Int32($0.size.width * scale), y: Int32($0.size.height * scale)) }, maxPageSize: MCVec2I(x: 4096, y: 4096))
+
+        var results = [MCTiled2dMapVectorAssetInfo]()
+
+        for page in packerResult {
+            let sizes = page.uvs.values.map { CGSize(width: CGFloat($0.x + $0.width), height: CGFloat($0.y + $0.height)) }
+            let maxWidth = sizes.map(\.width).max() ?? 0.0
+            let maxHeight = sizes.map(\.height).max() ?? 0.0
+
+            UIGraphicsBeginImageContext(.init(width: maxWidth, height: maxHeight))
+
+            for (key, rect) in page.uvs {
+                if let image = images[key] {
+                    image.draw(in: CGRect(x: CGFloat(rect.x), y: CGFloat(rect.y), width: CGFloat(rect.width), height: CGFloat(rect.height)))
+                }
+            }
+
+            if let combinedImage = UIGraphicsGetImageFromCurrentImageContext() {
+                results.append(MCTiled2dMapVectorAssetInfo(featureIdentifiersUv: page.uvs, texture: try? TextureHolder(combinedImage.cgImage!)))
+            } else {
+                assertionFailure("could not create image atlas")
+            }
+
+            UIGraphicsEndImageContext()
+        }
+
+        return results
+    }
+
+    open func getImageFor(for featureInfo: MCVectorLayerFeatureInfo, layerIdentifier: String) -> UIImage {
+        fatalError("implemented by subclass")
+    }
 }

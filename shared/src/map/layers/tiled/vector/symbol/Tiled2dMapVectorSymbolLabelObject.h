@@ -187,6 +187,7 @@ private:
     Color textColor = Color(0.0 ,0.0, 0.0, 0.0);
     Color haloColor = Color(0.0 ,0.0, 0.0, 0.0);
     double haloWidth;
+    double haloBlur;
 
     std::shared_ptr<SymbolAnimationCoordinator> animationCoordinator;
     static constexpr double collisionDistanceBias = 0.75;

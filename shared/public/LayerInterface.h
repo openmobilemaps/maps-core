@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "ComputePassInterface.h"
 #include "ErrorManager.h"
 #include "MaskingObjectInterface.h"
 #include "RectI.h"
@@ -24,6 +25,8 @@ public:
     virtual void update() = 0;
 
     virtual std::vector</*not-null*/ std::shared_ptr<::RenderPassInterface>> buildRenderPasses() = 0;
+
+    virtual std::vector</*not-null*/ std::shared_ptr<::ComputePassInterface>> buildComputePasses() = 0;
 
     virtual void onAdded(const /*not-null*/ std::shared_ptr<MapInterface> & mapInterface, int32_t layerIndex) = 0;
 

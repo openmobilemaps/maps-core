@@ -39,17 +39,17 @@ class TextShader: BaseShader {
 }
 
 extension TextShader: MCTextShaderInterface {
+    func setHaloColor(_ color: MCColor, width: Float, blur: Float) {
+        self.haloColor = color.simdValues
+        self.haloWidth = Float(width)
+    }
+
     func setOpacity(_ opacity: Float) {
         self.opacity = opacity
     }
 
     func setColor(_ color: MCColor) {
         self.color = color.simdValues
-    }
-
-    func setHaloColor(_ color: MCColor, width: Double) {
-        self.haloColor = color.simdValues
-        self.haloWidth = Float(width)
     }
 
     func asShaderProgram() -> MCShaderProgramInterface? {

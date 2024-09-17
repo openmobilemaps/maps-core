@@ -1,6 +1,6 @@
 //
-//  File.swift
-//  
+//  MCCoord+Convenience.swift
+//
 //
 //  Created by Nicolas Märki on 14.02.2024.
 //

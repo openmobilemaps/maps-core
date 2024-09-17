@@ -15,6 +15,7 @@
 @extern "../yaml/map_camera_2d_listener_interface.yaml"
 @extern "../yaml/color.yaml"
 @extern "../yaml/render_pass_interface.yaml"
+@extern "../yaml/compute_pass_interface.yaml"
 @extern "../yaml/masking_object_interface.yaml"
 @extern "../yaml/error_manager.yaml"
 
@@ -53,12 +54,20 @@ map_interface = interface +c {
 
     invalidate();
 
+    prepare();
+
     # Must be called on the rendering thread!
     draw_frame();
+
+    # Must be called on the rendering thread!
+    compute();
+
     # Must be called on the rendering thread!
     resume();
+
     # Must be called on the rendering thread!
     pause();
+
     destroy();
 
     # changes bounds to bounds, checks all layers for readiness, and updates callbacks, timeout in
@@ -97,6 +106,7 @@ layer_interface = interface +c +j +o {
     set_masking_object(masking_object: optional<masking_object_interface>);
     update();
     build_render_passes(): list<render_pass_interface>;
+    build_compute_passes(): list<compute_pass_interface>;
     onAdded(map_interface: map_interface, layer_index: i32);
     onRemoved();
     pause();

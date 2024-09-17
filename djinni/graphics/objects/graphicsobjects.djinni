@@ -28,6 +28,10 @@ masking_object_interface = interface +c +j +o {
 	render_as_mask(context: rendering_context_interface, render_pass: render_pass_config, mvp_matrix: i64, screenPixelAsRealMeterFactor: f64);
 }
 
+compute_object_interface = interface +c +j +o {
+	compute(context: rendering_context_interface, screenPixelAsRealMeterFactor: f64);
+}
+
 graphics_object_factory_interface = interface +c +j +o {
     create_quad(shader: shader_program_interface) : quad_2d_interface;
     create_polygon(shader: shader_program_interface) : polygon_2d_interface;

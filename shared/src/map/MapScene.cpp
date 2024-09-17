@@ -350,7 +350,7 @@ void MapScene::invalidate() {
     }
 }
 
-void MapScene::drawFrame() {
+void MapScene::prepare() {
     isInvalidated.clear();
 
     if (scheduler && scheduler->hasSeparateGraphicsInvocation()) {
@@ -377,9 +377,19 @@ void MapScene::drawFrame() {
             for (const auto &renderPass : layer.second->buildRenderPasses()) {
                 scene->getRenderer()->addToRenderQueue(renderPass);
             }
+
+            for (const auto &computePass : layer.second->buildComputePasses()) {
+                scene->getRenderer()->addToComputeQueue(computePass);
+            }
         }
     }
+}
 
+void MapScene::compute() {
+    scene->compute();
+}
+
+void MapScene::drawFrame() {
     scene->drawFrame();
 }
 

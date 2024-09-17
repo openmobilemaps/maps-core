@@ -43,6 +43,7 @@ raster_shader_style = record {
     contrast: f32;
     saturation: f32;
     gamma: f32;
+    brightness_shift: f32;
 
     const default_style: raster_shader_style = {
         opacity = 1.0,
@@ -50,7 +51,8 @@ raster_shader_style = record {
         brightness_max = 1.0,
         contrast = 0.0,
         saturation = 0.0,
-        gamma = 1.0
+        gamma = 1.0,
+        brightness_shift = 0.0
     };
 } deriving (eq, ord)
 
@@ -125,7 +127,7 @@ polygon_pattern_group_shader_interface = interface +c +o {
 text_shader_interface = interface +c +o {
     set_color(color: color);
     set_opacity(opacity: f32);
-    set_halo_color(color: color, width: f64);
+    set_halo_color(color: color, width: f32, blur: f32);
     as_shader_program_interface() : shader_program_interface;
 }
 

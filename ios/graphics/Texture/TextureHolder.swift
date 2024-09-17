@@ -84,13 +84,13 @@ public class TextureHolder: NSObject {
         self.init(texture, textureUsableSize: textureUsableSize)
     }
 
-    public convenience init(_ size: CGSize, drawCallback: ((CGContext) -> Void)) throws {
+    public convenience init(_ size: CGSize, drawCallback: (CGContext) -> Void) throws {
         guard size.width > 0, size.height > 0 else {
             throw TextureHolderError.emptyData
         }
 
-        let width : Int = Int(size.width)
-        let height : Int = Int(size.height)
+        let width: Int = Int(size.width)
+        let height: Int = Int(size.height)
 
         let bytesPerPixel = 4
         let bytesPerRow = bytesPerPixel * width
@@ -108,7 +108,7 @@ public class TextureHolder: NSObject {
         }
 
         let data = NSMutableData(bytesNoCopy: imageData, length: length, freeWhenDone: true)
-        
+
         let colorSpace = CGColorSpaceCreateDeviceRGB()
         let bitmapInfo = CGBitmapInfo(rawValue: CGBitmapInfo.byteOrder32Big.rawValue | CGImageAlphaInfo.premultipliedLast.rawValue)
 

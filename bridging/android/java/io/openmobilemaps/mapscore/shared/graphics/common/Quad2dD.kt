@@ -8,4 +8,26 @@ data class Quad2dD(
     val topRight: Vec2D,
     val bottomRight: Vec2D,
     val bottomLeft: Vec2D,
-)
+) : Comparable<Quad2dD> {
+
+    override fun compareTo(other: Quad2dD): Int {
+        var tempResult = 0
+        tempResult = this.topLeft.compareTo(other.topLeft)
+        if (tempResult != 0) {
+            return tempResult
+        }
+        tempResult = this.topRight.compareTo(other.topRight)
+        if (tempResult != 0) {
+            return tempResult
+        }
+        tempResult = this.bottomRight.compareTo(other.bottomRight)
+        if (tempResult != 0) {
+            return tempResult
+        }
+        tempResult = this.bottomLeft.compareTo(other.bottomLeft)
+        if (tempResult != 0) {
+            return tempResult
+        }
+        return 0
+    }
+}

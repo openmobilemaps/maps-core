@@ -1,4 +1,5 @@
 @extern "../yaml/graphics_object_interface.yaml"
+@extern "../yaml/compute_object_interface.yaml"
 @extern "../yaml/masking_object_interface.yaml"
 @extern "../yaml/graphics_object_factory_interface.yaml"
 @extern "../yaml/shader_factory_interface.yaml"
@@ -17,7 +18,9 @@ scene_interface = interface +c {
     get_rendering_context() : rendering_context_interface;
     get_graphics_factory(): graphics_object_factory_interface;
     get_shader_factory(): shader_factory_interface;
+    prepare();
     draw_frame();
+    compute();
     clear();
     invalidate();
 }
@@ -56,6 +59,10 @@ render_pass_interface = interface +c +j +o {
     get_scissoring_rect() : optional<rect_i>;
 }
 
+compute_pass_interface = interface +c +j +o {
+	get_compute_objects() : list<compute_object_interface>;
+}
+
 render_pass_config = record {
     render_pass_index: i32;
     is_pass_masked: bool;
@@ -63,8 +70,11 @@ render_pass_config = record {
 
 renderer_interface = interface +c +j +o {
     add_to_render_queue(render_pass: render_pass_interface);
+    add_to_compute_queue(compute_pass: compute_pass_interface);
     # Ensure calling on graphics thread
     draw_frame(rendering_context: rendering_context_interface, camera: camera_interface);
+    # Ensure calling on graphics thread
+    compute(rendering_context: rendering_context_interface, camera: camera_interface);
 }
 
 camera_interface = interface +c +j +o {

@@ -44,6 +44,11 @@ open class BaseGraphicsObject {
                      screenPixelAsRealMeterFactor _: Double) {
         fatalError("has to be overwritten by subclass")
     }
+
+    open func compute(encoder _: MTLComputeCommandEncoder,
+                      context _: RenderingContext) {
+        // subclasses may override
+    }
 }
 
 extension BaseGraphicsObject: MCGraphicsObjectInterface {
@@ -71,12 +76,20 @@ extension BaseGraphicsObject: MCGraphicsObjectInterface {
               let context = context as? RenderingContext,
               let encoder = context.encoder
         else { return }
+
         render(encoder: encoder,
                context: context,
                renderPass: renderPass,
                mvpMatrix: mvpMatrix,
                isMasked: isMasked,
                screenPixelAsRealMeterFactor: screenPixelAsRealMeterFactor)
+    }
+
+    public func compute(_ context: (any MCRenderingContextInterface)?, renderPass: MCRenderPassConfig) {
+        guard let context = context as? RenderingContext,
+              let encoder = context.computeEncoder
+        else { return }
+        compute(encoder: encoder, context: context)
     }
 
     // MARK: - Stencil

@@ -121,7 +121,7 @@ let package = Package(
         .target(
             name: "MapCoreSharedModule",
             dependencies: [
-                "MapCoreSharedModuleCpp"
+                "MapCoreSharedModuleCpp",
             ],
             path: "bridging/ios",
             publicHeadersPath: ""

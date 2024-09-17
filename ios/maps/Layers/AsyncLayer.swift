@@ -9,10 +9,10 @@ import Foundation
 
 @available(iOS 13.0, *)
 public class AsyncLayer: Layer, ObservableObject {
-    private(set) public var error: Error?
-    private(set) public var isLoading = true
+    public private(set) var error: Error?
+    public private(set) var isLoading = true
 
-    private(set) public var baseLayer: Layer?
+    public private(set) var baseLayer: Layer?
 
     public var interface: MCLayerInterface? { baseLayer?.interface }
 
@@ -20,8 +20,7 @@ public class AsyncLayer: Layer, ObservableObject {
         Task {
             do {
                 self.baseLayer = try await setup()
-            }
-            catch {
+            } catch {
                 self.error = error
             }
             self.isLoading = false
@@ -30,6 +29,4 @@ public class AsyncLayer: Layer, ObservableObject {
             }
         }
     }
-
-    
 }

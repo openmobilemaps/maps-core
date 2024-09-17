@@ -23,24 +23,26 @@ public:
                       std::shared_ptr<Value> rasterContrast,
                       std::shared_ptr<Value> rasterSaturation,
                       std::shared_ptr<Value> rasterGamma,
+                      std::shared_ptr<Value> rasterBrightnessShift,
                       std::shared_ptr<Value> blendMode) :
             rasterOpacity(rasterOpacity), rasterBrightnessMin(rasterBrightnessMin), rasterBrightnessMax(rasterBrightnessMax),
-            rasterContrast(rasterContrast), rasterSaturation(rasterSaturation), rasterGamma(rasterGamma), blendMode(blendMode) {}
+            rasterContrast(rasterContrast), rasterSaturation(rasterSaturation), rasterGamma(rasterGamma), rasterBrightnessShift(rasterBrightnessShift), blendMode(blendMode) {}
 
     RasterVectorStyle(RasterVectorStyle &style) :
             rasterOpacity(style.rasterOpacity), rasterBrightnessMin(style.rasterBrightnessMin), rasterBrightnessMax(style.rasterBrightnessMax),
-            rasterContrast(style.rasterContrast), rasterSaturation(style.rasterSaturation), rasterGamma(style.rasterGamma), blendMode(style.blendMode) {}
+            rasterContrast(style.rasterContrast), rasterSaturation(style.rasterSaturation), rasterGamma(style.rasterGamma), rasterBrightnessShift(style.rasterBrightnessShift), blendMode(style.blendMode) {}
 
     UsedKeysCollection getUsedKeys() const {
         UsedKeysCollection usedKeys;
-        std::shared_ptr<Value> values[] = { 
-            rasterOpacity, 
-            rasterBrightnessMin,
-            rasterBrightnessMax,
-            rasterContrast,
-            rasterSaturation,
-            rasterGamma,
-            blendMode
+        std::shared_ptr<Value> values[] = {
+                rasterOpacity,
+                rasterBrightnessMin,
+                rasterBrightnessMax,
+                rasterContrast,
+                rasterSaturation,
+                rasterGamma,
+                rasterBrightnessShift,
+                blendMode
         };
 
         for (auto const &value: values) {
@@ -64,7 +66,8 @@ public:
             (float) getRasterBrightnessMax(context),
             (float) getRasterContrast(context),
             (float) getRasterSaturation(context),
-            (float) getRasterGamma(context)
+            (float) getRasterGamma(context),
+            (float) getRasterBrightnessShift(context)
         };
     }
 
@@ -98,12 +101,18 @@ public:
         return rasterGammaEvaluator.getResult(rasterGamma, context, defaultValue);
     }
 
+    double getRasterBrightnessShift(const EvaluationContext &context) {
+        double defaultValue = 0.0;
+        return rasterBrightnessEvaluator.getResult(rasterBrightnessShift, context, defaultValue);
+    }
+
     std::shared_ptr<Value> rasterOpacity;
     std::shared_ptr<Value> rasterBrightnessMin;
     std::shared_ptr<Value> rasterBrightnessMax;
     std::shared_ptr<Value> rasterContrast;
     std::shared_ptr<Value> rasterSaturation;
     std::shared_ptr<Value> rasterGamma;
+    std::shared_ptr<Value> rasterBrightnessShift;
     std::shared_ptr<Value> blendMode;
 private:
     ValueEvaluator<double> rasterOpacityEvaluator;
@@ -112,6 +121,7 @@ private:
     ValueEvaluator<double> rasterContrastEvaluator;
     ValueEvaluator<double> rasterSaturationEvaluator;
     ValueEvaluator<double> rasterGammaEvaluator;
+    ValueEvaluator<double> rasterBrightnessEvaluator;
     ValueEvaluator<BlendMode> blendModeEvaluator;
 };
 
@@ -134,6 +144,7 @@ public:
                                  int minZoom,
                                  int maxZoom,
                                  std::string url,
+                                 std::shared_ptr<Value> filter,
                                  RasterVectorStyle style,
                                  bool adaptScaleToScreen,
                                  int32_t numDrawPreviousLayers,
@@ -144,7 +155,7 @@ public:
                                  bool underzoom,
                                  bool overzoom,
                                  std::optional<::RectCoord> bounds):
-    VectorLayerDescription(identifier, source, "", minZoom, maxZoom, nullptr, renderPassIndex, interactable, false, false),
+    VectorLayerDescription(identifier, source, "", minZoom, maxZoom, filter, renderPassIndex, interactable, false, false),
     style(style), url(url), underzoom(underzoom), overzoom(overzoom), adaptScaleToScreen(adaptScaleToScreen), numDrawPreviousLayers(numDrawPreviousLayers),
     maskTiles(maskTiles), zoomLevelScaleFactor(zoomLevelScaleFactor), bounds(bounds) {};
 
@@ -155,6 +166,7 @@ public:
                                             minZoom,
                                             maxZoom,
                                             url,
+                                            filter,
                                             style,
                                             adaptScaleToScreen,
                                             numDrawPreviousLayers,

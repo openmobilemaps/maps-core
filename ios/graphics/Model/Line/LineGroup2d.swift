@@ -81,12 +81,12 @@ final class LineGroup2d: BaseGraphicsObject {
               shader.lineStyleBuffer != nil
         else { return }
 
-        #if DEBUG
-            encoder.pushDebugGroup(label)
-            defer {
-                encoder.popDebugGroup()
-            }
-        #endif
+#if DEBUG
+        encoder.pushDebugGroup(label)
+        defer {
+            encoder.popDebugGroup()
+        }
+#endif
 
         if stencilState == nil {
             setupStencilBufferDescriptor()
@@ -137,7 +137,7 @@ extension LineGroup2d: MCLineGroup2dInterface {
         lock.withCritical {
             self.lineVerticesBuffer.copyOrCreate(from: lines, device: device)
             self.lineIndicesBuffer.copyOrCreate(from: indices, device: device)
-            if self.lineVerticesBuffer != nil && self.lineIndicesBuffer != nil {
+            if self.lineVerticesBuffer != nil, self.lineIndicesBuffer != nil {
                 self.lineVerticesBuffer?.label = "LineGroup2d.verticesBuffer"
                 self.lineIndicesBuffer?.label = "LineGroup2d.indicesBuffer"
                 self.indicesCount = Int(indices.elementCount)

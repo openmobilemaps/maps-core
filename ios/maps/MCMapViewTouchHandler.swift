@@ -82,20 +82,20 @@ open class MCMapViewTouchHandler: NSObject {
         let touches = [panGestureRecognizer.location(in: mapView)]
 
         switch panGestureRecognizer.state {
-        case .began:
-            let te = touches.asMCTouchEvent(scale: contentScale, action: .DOWN)
-            touchHandler.onTouchEvent(te)
-        case .changed:
-            let te = touches.asMCTouchEvent(scale: contentScale, action: .MOVE)
-            touchHandler.onTouchEvent(te)
-        case .ended:
-            let te = touches.asMCTouchEvent(scale: contentScale, action: .UP)
-            touchHandler.onTouchEvent(te)
-        case .failed, .cancelled:
-            let te = touches.asMCTouchEvent(scale: contentScale, action: .CANCEL)
-            touchHandler.onTouchEvent(te)
-        default:
-            break
+            case .began:
+                let te = touches.asMCTouchEvent(scale: contentScale, action: .DOWN)
+                touchHandler.onTouchEvent(te)
+            case .changed:
+                let te = touches.asMCTouchEvent(scale: contentScale, action: .MOVE)
+                touchHandler.onTouchEvent(te)
+            case .ended:
+                let te = touches.asMCTouchEvent(scale: contentScale, action: .UP)
+                touchHandler.onTouchEvent(te)
+            case .failed, .cancelled:
+                let te = touches.asMCTouchEvent(scale: contentScale, action: .CANCEL)
+                touchHandler.onTouchEvent(te)
+            default:
+                break
         }
     }
 
@@ -110,36 +110,36 @@ open class MCMapViewTouchHandler: NSObject {
         let halfWidth = 100.0
 
         switch pinchGestureRecognizer.state {
-        case .began:
-            let t0 = CGPoint(x: touch.x - halfWidth, y: touch.y)
-            let t1 = CGPoint(x: touch.x + halfWidth, y: touch.y)
-            let touches = [t0, t1]
+            case .began:
+                let t0 = CGPoint(x: touch.x - halfWidth, y: touch.y)
+                let t1 = CGPoint(x: touch.x + halfWidth, y: touch.y)
+                let touches = [t0, t1]
 
-            let te = touches.asMCTouchEvent(scale: contentScale, action: .DOWN)
-            touchHandler.onTouchEvent(te)
-        case .changed:
-            let t0 = CGPoint(x: touch.x - halfWidth * s, y: touch.y)
-            let t1 = CGPoint(x: touch.x + halfWidth * s, y: touch.y)
-            let touches = [t0, t1]
+                let te = touches.asMCTouchEvent(scale: contentScale, action: .DOWN)
+                touchHandler.onTouchEvent(te)
+            case .changed:
+                let t0 = CGPoint(x: touch.x - halfWidth * s, y: touch.y)
+                let t1 = CGPoint(x: touch.x + halfWidth * s, y: touch.y)
+                let touches = [t0, t1]
 
-            let te = touches.asMCTouchEvent(scale: contentScale, action: .MOVE)
-            touchHandler.onTouchEvent(te)
-        case .ended:
-            let t0 = CGPoint(x: touch.x - halfWidth * s, y: touch.y)
-            let t1 = CGPoint(x: touch.x + halfWidth * s, y: touch.y)
-            let touches = [t0, t1]
+                let te = touches.asMCTouchEvent(scale: contentScale, action: .MOVE)
+                touchHandler.onTouchEvent(te)
+            case .ended:
+                let t0 = CGPoint(x: touch.x - halfWidth * s, y: touch.y)
+                let t1 = CGPoint(x: touch.x + halfWidth * s, y: touch.y)
+                let touches = [t0, t1]
 
-            let te = touches.asMCTouchEvent(scale: contentScale, action: .UP)
-            touchHandler.onTouchEvent(te)
-        case .failed, .cancelled:
-            let t0 = CGPoint(x: touch.x - halfWidth * s, y: touch.y)
-            let t1 = CGPoint(x: touch.x + halfWidth * s, y: touch.y)
-            let touches = [t0, t1]
+                let te = touches.asMCTouchEvent(scale: contentScale, action: .UP)
+                touchHandler.onTouchEvent(te)
+            case .failed, .cancelled:
+                let t0 = CGPoint(x: touch.x - halfWidth * s, y: touch.y)
+                let t1 = CGPoint(x: touch.x + halfWidth * s, y: touch.y)
+                let touches = [t0, t1]
 
-            let te = touches.asMCTouchEvent(scale: contentScale, action: .CANCEL)
-            touchHandler.onTouchEvent(te)
-        default:
-            break
+                let te = touches.asMCTouchEvent(scale: contentScale, action: .CANCEL)
+                touchHandler.onTouchEvent(te)
+            default:
+                break
         }
     }
 }
@@ -159,7 +159,7 @@ private extension Set<UITouch> {
     }
 }
 
-private extension Array<CGPoint> {
+private extension [CGPoint] {
     func asMCTouchLocation(scale: Float) -> [MCVec2F] {
         map {
             let x = Float($0.x) * scale

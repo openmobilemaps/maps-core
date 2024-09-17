@@ -58,8 +58,13 @@ abstract class MapInterface {
 
     abstract fun invalidate()
 
+    abstract fun prepare()
+
     /** Must be called on the rendering thread! */
     abstract fun drawFrame()
+
+    /** Must be called on the rendering thread! */
+    abstract fun compute()
 
     /** Must be called on the rendering thread! */
     abstract fun resume()
@@ -218,11 +223,23 @@ abstract class MapInterface {
         }
         private external fun native_invalidate(_nativeRef: Long)
 
+        override fun prepare() {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_prepare(this.nativeRef)
+        }
+        private external fun native_prepare(_nativeRef: Long)
+
         override fun drawFrame() {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             native_drawFrame(this.nativeRef)
         }
         private external fun native_drawFrame(_nativeRef: Long)
+
+        override fun compute() {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_compute(this.nativeRef)
+        }
+        private external fun native_compute(_nativeRef: Long)
 
         override fun resume() {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

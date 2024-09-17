@@ -158,10 +158,20 @@ extension MCMapView: MTKViewDelegate {
 
         framesToRender -= 1
 
+        mapInterface.prepare()
+
         guard let renderPassDescriptor = view.currentRenderPassDescriptor,
               let commandBuffer = MetalContext.current.commandQueue.makeCommandBuffer(),
-              let renderEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor)
+              let computeEncoder = commandBuffer.makeComputeCommandEncoder()
         else {
+            return
+        }
+
+        renderingContext.computeEncoder = computeEncoder
+        mapInterface.compute()
+        computeEncoder.endEncoding()
+
+        guard let renderEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor) else {
             return
         }
 
@@ -322,7 +332,7 @@ public extension MCMapView {
     }
 }
 
-extension MCMapView : UIGestureRecognizerDelegate {
+extension MCMapView: UIGestureRecognizerDelegate {
     // MARK: - Mac setup
 
     private func setupMacGestureRecognizersIfNeeded() {
@@ -353,7 +363,7 @@ extension MCMapView : UIGestureRecognizerDelegate {
         true
     }
 
-    public override func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+    override public func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
         true
     }
 

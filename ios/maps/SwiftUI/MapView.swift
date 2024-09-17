@@ -41,8 +41,8 @@ public struct MapView: UIViewRepresentable {
         public var visibleRect: Updatable<MCRectCoord>
 
         public init(center: Updatable<MCCoord> = .init(),
-             zoom: Updatable<Double> = .init(),
-             visibleRect: Updatable<MCRectCoord> = .init()) {
+                    zoom: Updatable<Double> = .init(),
+                    visibleRect: Updatable<MCRectCoord> = .init()) {
             self.center = center
             self.zoom = zoom
             self.visibleRect = visibleRect
@@ -98,7 +98,7 @@ public struct MapView: UIViewRepresentable {
     }
 
     public func makeCoordinator() -> MapViewCoordinator {
-        return MapViewCoordinator(parent: self)
+        MapViewCoordinator(parent: self)
     }
 
     @MainActor
@@ -137,7 +137,6 @@ public struct MapView: UIViewRepresentable {
 
     @MainActor
     fileprivate func updateLayers(_ context: MapView.Context, _ mapView: MCMapView) {
-
         // Get description-structs of layers
         let oldLayers = context.coordinator.currentLayers
         let newLayers = layers.compactMap { $0?.interface }
@@ -220,15 +219,15 @@ public class MapViewCoordinator: MCMapCamera2dListenerInterface {
     var hasSizeChanged = false
     var lastWrittenCamera: MapView.Camera?
 
-    nonisolated
-    public func onVisibleBoundsChanged(_ visibleBounds: MCRectCoord, zoom: Double) {
+    public nonisolated
+    func onVisibleBoundsChanged(_ visibleBounds: MCRectCoord, zoom: Double) {
         Task { @MainActor in
             guard !ignoreCallbacks else {
                 return
             }
 
             guard lastWrittenCamera != nil else {
-                if let mapView = mapView {
+                if let mapView {
                     parent.updateCamera(mapView, self)
                 }
                 return
@@ -248,22 +247,22 @@ public class MapViewCoordinator: MCMapCamera2dListenerInterface {
         }
     }
 
-    nonisolated
-    public func onRotationChanged(_ angle: Float) {
+    public nonisolated
+    func onRotationChanged(_ angle: Float) {
     }
 
-    nonisolated
-    public func onMapInteraction() {
+    public nonisolated
+    func onMapInteraction() {
     }
 }
 
 @available(iOS 17.0, *)
 extension MapViewCoordinator: MCMapSizeDelegate {
-    nonisolated
-    public func sizeChanged() {
+    public nonisolated
+    func sizeChanged() {
         Task { @MainActor in
             hasSizeChanged = true
-            if let mapView = mapView {
+            if let mapView {
                 parent.updateCamera(mapView, self)
             }
         }

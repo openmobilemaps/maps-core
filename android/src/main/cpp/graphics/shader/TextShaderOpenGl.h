@@ -29,7 +29,7 @@ class TextShaderOpenGl : public BaseShaderProgramOpenGl,
 
     virtual void setColor(const ::Color & color) override;
 
-    virtual void setHaloColor(const ::Color & color, double width) override;
+    virtual void setHaloColor(const ::Color & color, float width, float blur) override;
 
     virtual void setOpacity(float opacity) override;
 
@@ -48,4 +48,5 @@ class TextShaderOpenGl : public BaseShaderProgramOpenGl,
     std::vector<float> haloColor = {0.0, 0.0, 0.0, 0.0};
     float opacity = 0.0;
     float haloWidth = 0.0f;
+    float haloBlur = 0.0f;
 };

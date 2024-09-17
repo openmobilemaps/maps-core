@@ -6,6 +6,7 @@
 #include <memory>
 
 class CameraInterface;
+class ComputePassInterface;
 class RenderPassInterface;
 class RenderingContextInterface;
 
@@ -15,6 +16,11 @@ public:
 
     virtual void addToRenderQueue(const /*not-null*/ std::shared_ptr<RenderPassInterface> & renderPass) = 0;
 
+    virtual void addToComputeQueue(const /*not-null*/ std::shared_ptr<ComputePassInterface> & computePass) = 0;
+
     /** Ensure calling on graphics thread */
     virtual void drawFrame(const /*not-null*/ std::shared_ptr<RenderingContextInterface> & renderingContext, const /*not-null*/ std::shared_ptr<CameraInterface> & camera) = 0;
+
+    /** Ensure calling on graphics thread */
+    virtual void compute(const /*not-null*/ std::shared_ptr<RenderingContextInterface> & renderingContext, const /*not-null*/ std::shared_ptr<CameraInterface> & camera) = 0;
 };

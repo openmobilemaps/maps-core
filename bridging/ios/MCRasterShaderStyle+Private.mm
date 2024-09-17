@@ -15,7 +15,8 @@ auto RasterShaderStyle::toCpp(ObjcType obj) -> CppType
             ::djinni::F32::toCpp(obj.brightnessMax),
             ::djinni::F32::toCpp(obj.contrast),
             ::djinni::F32::toCpp(obj.saturation),
-            ::djinni::F32::toCpp(obj.gamma)};
+            ::djinni::F32::toCpp(obj.gamma),
+            ::djinni::F32::toCpp(obj.brightnessShift)};
 }
 
 auto RasterShaderStyle::fromCpp(const CppType& cpp) -> ObjcType
@@ -25,7 +26,8 @@ auto RasterShaderStyle::fromCpp(const CppType& cpp) -> ObjcType
                                           brightnessMax:(::djinni::F32::fromCpp(cpp.brightnessMax))
                                                contrast:(::djinni::F32::fromCpp(cpp.contrast))
                                              saturation:(::djinni::F32::fromCpp(cpp.saturation))
-                                                  gamma:(::djinni::F32::fromCpp(cpp.gamma))];
+                                                  gamma:(::djinni::F32::fromCpp(cpp.gamma))
+                                        brightnessShift:(::djinni::F32::fromCpp(cpp.brightnessShift))];
 }
 
 } // namespace djinni_generated

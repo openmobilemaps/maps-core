@@ -12,11 +12,17 @@
 #include "CameraInterface.h"
 #include "Matrix.h"
 #include "RenderObjectInterface.h"
+#include "ComputeObjectInterface.h"
 #include <Logger.h>
 
 void Renderer::addToRenderQueue(const std::shared_ptr<RenderPassInterface> &renderPass) {
     int32_t renderPassIndex = renderPass->getRenderPassConfig().renderPassIndex;
     renderQueue[renderPassIndex].push_back(renderPass);
+}
+
+
+void Renderer::addToComputeQueue(const std::shared_ptr<ComputePassInterface> &computePass) {
+    computeQueue.push_back(computePass);
 }
 
 /** Ensure calling on graphics thread */
@@ -72,4 +78,16 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
         }
     }
     renderQueue.clear();
+}
+
+/** Ensure calling on graphics thread */
+void Renderer::compute(const std::shared_ptr<RenderingContextInterface> &renderingContext,
+                       const std::shared_ptr<CameraInterface> &camera) {
+    double factor = camera->getScalingFactor();
+
+    for (const auto &pass: computeQueue) {
+        for (const auto &computeObject : pass->getComputeObjects())
+            computeObject->compute(renderingContext, factor);
+    }
+    computeQueue.clear();
 }

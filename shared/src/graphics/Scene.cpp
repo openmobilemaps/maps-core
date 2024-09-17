@@ -37,9 +37,18 @@ std::shared_ptr<RendererInterface> Scene::getRenderer() { return renderer; }
 
 std::shared_ptr<RenderingContextInterface> Scene::getRenderingContext() { return renderingContext; }
 
+void Scene::prepare() {
+}
+
 void Scene::drawFrame() {
     if (camera) {
         renderer->drawFrame(renderingContext, camera);
+    }
+}
+
+void Scene::compute() {
+    if (camera) {
+        renderer->compute(renderingContext, camera);
     }
 }
 

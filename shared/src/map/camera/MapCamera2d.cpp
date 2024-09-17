@@ -95,7 +95,7 @@ void MapCamera2d::moveToCenterPositionZoom(const ::Coord &centerPosition, double
                 this->coordAnimation = nullptr;
             });
         coordAnimation->start();
-        double targetZoom = std::clamp(zoom, zoomMax, zoomMin);
+        double targetZoom = std::clamp(adjustedZoom, zoomMax, zoomMin);
         zoomAnimation = std::make_shared<DoubleAnimation>(
               DEFAULT_ANIM_LENGTH, this->zoom, targetZoom, InterpolatorFunction::EaseIn,
               [=](double zoom) {
@@ -981,7 +981,7 @@ std::tuple<Coord, double> MapCamera2d::getBoundsCorrectedCoords(const Coord &pos
 Coord MapCamera2d::adjustCoordForPadding(const Coord &coords, double targetZoom) {
     Coord coordinates = mapInterface->getCoordinateConverterHelper()->convert(mapCoordinateSystem.identifier, coords);
 
-    auto adjustedZoom = std::clamp(targetZoom, zoomMax, zoomMin);
+    auto adjustedZoom = zoomMin != -1 ? std::clamp(targetZoom, zoomMax, zoomMin) : targetZoom;
 
     Vec2D padVec = Vec2D(0.5 * (paddingRight - paddingLeft) * screenPixelAsRealMeterFactor * adjustedZoom,
                          0.5 * (paddingTop - paddingBottom) * screenPixelAsRealMeterFactor * adjustedZoom);

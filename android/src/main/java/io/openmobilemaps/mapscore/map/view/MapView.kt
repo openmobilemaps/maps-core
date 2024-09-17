@@ -95,7 +95,11 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 	}
 
 	override fun onDrawFrame(gl: GL10?) {
-		mapInterface?.drawFrame()
+		mapInterface?.apply {
+			prepare()
+			compute()
+			drawFrame()
+		}
 		if (saveFrame.getAndSet(false)) {
 			saveFrame()
 		}

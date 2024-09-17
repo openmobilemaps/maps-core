@@ -145,12 +145,14 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                 maxZoom = json.value("maxzoom", 22);
             }
 
-            RasterVectorStyle style = RasterVectorStyle(nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+
+            RasterVectorStyle style = RasterVectorStyle(nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
             rasterLayerMap[key] = std::make_shared<RasterVectorLayerDescription>(layerName,
                                                                                  key,
                                                                                  minZoom,
                                                                                  maxZoom,
                                                                                  url,
+                                                                                 nullptr,
                                                                                  style,
                                                                                  adaptScaleToScreen,
                                                                                  numDrawPreviousLayers,
@@ -269,13 +271,16 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                                                         parser.parseValue(val["paint"]["raster-contrast"]),
                                                         parser.parseValue(val["paint"]["raster-saturation"]),
                                                         parser.parseValue(val["metadata"]["raster-gamma"]),
+                                                        parser.parseValue(val["metadata"]["raster-brightness-shift"]),
                                                         blendMode);
+            std::shared_ptr<Value> filter = parser.parseValue(val["filter"]);
             
             auto newLayer = std::make_shared<RasterVectorLayerDescription>(val["id"],
                                                                            val["source"],
                                                                            val.value("minzoom", layer->minZoom),
                                                                            val.value("maxzoom", layer->maxZoom),
                                                                            layer->url,
+                                                                           filter,
                                                                            style,
                                                                            layer->adaptScaleToScreen,
                                                                            layer->numDrawPreviousLayers,
@@ -323,6 +328,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                                     parser.parseValue(val["paint"]["text-color"]),
                                     parser.parseValue(val["paint"]["text-halo-color"]),
                                     parser.parseValue(val["paint"]["text-halo-width"]),
+                                    parser.parseValue(val["paint"]["text-halo-blur"]),
                                     parser.parseValue(val["paint"]["text-opacity"]),
                                     parser.parseValue(val["layout"]["text-font"]),
                                     parser.parseValue(val["layout"]["text-field"]),

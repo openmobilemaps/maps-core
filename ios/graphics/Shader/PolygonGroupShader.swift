@@ -16,7 +16,7 @@ import UIKit
 class PolygonGroupShader: BaseShader {
     var polygonStyleBuffer: MTLBuffer?
 
-    let isStriped : Bool
+    let isStriped: Bool
 
     init(isStriped: Bool) {
         self.isStriped = isStriped
@@ -25,7 +25,7 @@ class PolygonGroupShader: BaseShader {
 
     override func setupProgram(_: MCRenderingContextInterface?) {
         if pipeline == nil {
-            let t : PipelineType = isStriped ? .polygonStripedGroupShader : .polygonGroupShader
+            let t: PipelineType = isStriped ? .polygonStripedGroupShader : .polygonGroupShader
             pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: t, blendMode: blendMode).json)
         }
     }
