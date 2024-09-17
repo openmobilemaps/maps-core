@@ -1,5 +1,14 @@
 # Changelog for Open Mobile Maps
 
+## Version 2.5.0
+- Initial version of the integration of compute shaders into the render pipeline
+- Fix of an issue for OpenGl that could lead to unnecessary buffer creations
+- Fix logging of OpenGl Shader compilation/linking errors
+- Fix of an invalid usage of clamp in the MapCamera2D
+- Add support for a "raster-brightness-shift" attribute in the metadata clause of raster layers in vector style.jsons
+- Add support for "text-halo-blur" in vector layers
+- Fix of a superfluous alpha multiplication in the Metal RasterShader
+
 ## Version 2.4.0
 - Add pass masking for single polygons
 - Fixing pass masking in non-tile-masked contexts for OpenGl
