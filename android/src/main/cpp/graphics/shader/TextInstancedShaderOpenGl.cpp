@@ -53,7 +53,7 @@ std::string TextInstancedShaderOpenGl::getVertexShader() {
 
                                       out vec2 v_texCoord;
                                       out vec4 v_texCoordInstance;
-                                      out flat uint vStyleIndex;
+                                      out flat highp uint vStyleIndex;
 
                                       void main() {
                                           float angle = aRotation * 3.14159265 / 180.0;
@@ -88,14 +88,14 @@ std::string TextInstancedShaderOpenGl::getFragmentShader() {
 
                                               in vec2 v_texCoord;
                                               in vec4 v_texCoordInstance;
-                                              in flat uint vStyleIndex;
+                                              in flat highp uint vStyleIndex;
 
                                               out vec4 fragmentColor;
 
                                               void main() {
-                                                  int styleOffset = int(vStyleIndex) * 10;
+                                                  highp int styleOffset = int(vStyleIndex) * 10;
 
-                                                  int colorOffset = int(isHalo) * 4 + styleOffset; // fill/halo color switch
+                                                  highp int colorOffset = int(isHalo) * 4 + styleOffset; // fill/halo color switch
                                                   vec4 color = vec4(styles[colorOffset + 0], styles[colorOffset + 1],
                                                                styles[colorOffset + 2], styles[colorOffset + 3]);
 
