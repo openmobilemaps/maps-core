@@ -65,7 +65,7 @@ This library is available on MavenCentral. To add it to your Android project, ad
 
 ```
 dependencies {
-  implementation 'io.openmobilemaps:mapscore:2.5.0'
+  implementation 'io.openmobilemaps:mapscore:2.5.1'
 }
 ```
 
