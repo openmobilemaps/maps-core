@@ -1,5 +1,9 @@
 # Changelog for Open Mobile Maps
 
+## Version 2.5.1
+- Fix of partially transparent line gap color on OpenGl
+- Fix a bug when using a huge number of text styles on OpenGl
+
 ## Version 2.5.0
 - Initial version of the integration of compute shaders into the render pipeline
 - Fix of an issue for OpenGl that could lead to unnecessary buffer creations
