@@ -67,8 +67,8 @@ target_include_directories(mapscore PUBLIC
   external/djinni/support-lib/cpp
 )
 target_compile_definitions(mapscore PRIVATE 
-  $<$<CONFIG:Debug>:LOG_LEVEL=2>    # LogDebug
-  $<$<CONFIG:Release>:LOG_LEVEL=3>) # LogInfo
+  $<$<CONFIG:Debug>:LOG_LEVEL=4>    # LogTrace
+  $<$<CONFIG:Release>:LOG_LEVEL=2>) # LogWarning
 target_compile_features(mapscore PRIVATE cxx_std_20)
 target_compile_options(mapscore PRIVATE -Wno-deprecated -Wno-reorder -fPIC) # fPIC so we can "embed" into shared mapscore_jni
 target_link_libraries(mapscore ${OPENGL_LIBRARIES})
@@ -125,6 +125,14 @@ target_compile_features(mapscore_jni PRIVATE cxx_std_20)
 target_compile_definitions(mapscore_jni PRIVATE DATAREF_JNI=1) # see external/djinni/support-lib/cpp/DataRef.hpp
 target_compile_options(mapscore_jni PRIVATE -Wno-deprecated -Wno-reorder)
 target_link_libraries(mapscore_jni mapscore ${OSMESA_LIBRARIES})
+# Fiddle with cmake system  TARGET_OS/TARGET_ARCH to form string "linux_amd64" for library filename.
+string(TOLOWER ${CMAKE_SYSTEM_NAME} TARGET_OS)
+string(REPLACE "x86_64" "amd64" TARGET_ARCHITECTURE ${CMAKE_SYSTEM_PROCESSOR})
+set_target_properties(mapscore_jni PROPERTIES 
+  LIBRARY_OUTPUT_NAME_RELEASE mapscore_jni_${TARGET_OS}_${TARGET_ARCHITECTURE}
+  LIBRARY_OUTPUT_NAME_DEBUG mapscore_jni_${TARGET_OS}_${TARGET_ARCHITECTURE}_debug
+)
+
 
 add_executable(testmain main.cpp)
 target_compile_features(testmain PRIVATE cxx_std_20)

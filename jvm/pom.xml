@@ -91,7 +91,14 @@
       <resource>
         <directory>../build-debug/</directory>
         <includes>
-          <include>libmapscore_jni.so</include>
+          <include>libmapscore_jni_*.so</include>
+        </includes>
+        <targetPath>native/</targetPath>
+      </resource>
+      <resource>
+        <directory>../build-release/</directory>
+        <includes>
+          <include>libmapscore_jni_*.so</include>
         </includes>
         <targetPath>native/</targetPath>
       </resource>
