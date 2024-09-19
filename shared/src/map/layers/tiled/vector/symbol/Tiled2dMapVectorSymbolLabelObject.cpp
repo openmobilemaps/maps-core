@@ -80,6 +80,8 @@ Tiled2dMapVectorSymbolLabelObject::Tiled2dMapVectorSymbolLabelObject(const std::
         breaks = TextHelper::bestBreakIndices(letters, maxCharacterWidth);
     }
 
+    lineEndIndices.push_back(0); // one is always needed
+
     int currentLetterIndex = 0;
     for (const auto &entry: text) {
         for (const auto &c : TextHelper::splitWstring(entry.text)) {
@@ -111,6 +113,7 @@ Tiled2dMapVectorSymbolLabelObject::Tiled2dMapVectorSymbolLabelObject(const std::
                         splittedTextInfo.emplace_back(index, entry.scale);
                     }
                     // use -1 as line break
+                    lineEndIndices.push_back(0.0);
                     splittedTextInfo.emplace_back(-1, entry.scale);
                 } else {
                     // just add it
@@ -307,7 +310,6 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
         centerPositions.push_back(zero);
     }
 
-    std::vector<size_t> lineEndIndices;
 
     auto pen = zero;
 
@@ -336,6 +338,7 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
 
     int numberOfCharacters = 0;
     int baseLineStartIndex = 0;
+    int lineEndIndicesIndex = 0;
     const auto &glyphs = fontResult->fontData->glyphs;
 
     for(const auto &i : splittedTextInfo) {
@@ -388,7 +391,8 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
 
         } else if(i.glyphIndex == -1) {
             if (numberOfCharacters > 0) {
-                lineEndIndices.push_back(numberOfCharacters - 1);
+                lineEndIndices[lineEndIndicesIndex] = numberOfCharacters - 1;
+                lineEndIndicesIndex++;
                 assert((countOffset + numberOfCharacters-1)*2 < scales.size());
             }
             pen.x = 0.0;
@@ -421,7 +425,8 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
     }
 
     if (numberOfCharacters > 0) {
-        lineEndIndices.push_back(numberOfCharacters - 1);
+        lineEndIndices[lineEndIndicesIndex] = numberOfCharacters - 1;
+        lineEndIndicesIndex++;
         assert((countOffset + numberOfCharacters-1)*2 < scales.size());
     }
 
@@ -437,7 +442,8 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
         case TextJustify::CENTER: {
             size_t lineStart = 0;
             size_t centerPositionsSize = centerPositions.size();
-            for (auto const lineEndIndex: lineEndIndices) {
+            for (size_t i = 0; i < lineEndIndicesIndex; ++i) {
+                auto lineEndIndex = lineEndIndices[i];
                 if (lineStart >= centerPositionsSize || lineEndIndex >= centerPositionsSize) {
                     continue;
                 }

@@ -29,7 +29,7 @@ Tiled2dMapVectorPolygonPatternTile::Tiled2dMapVectorPolygonPatternTile(const std
                                                                        const std::shared_ptr<TextureHolderInterface> &spriteTexture,
                                                                        const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager)
         : Tiled2dMapVectorTile(mapInterface, tileInfo, description, layerConfig, tileCallbackInterface, featureStateManager),
-          spriteData(spriteData), spriteTexture(spriteTexture), usedKeys(description->getUsedKeys()), fadeInPattern(description->style.fadeInPattern) {
+          spriteData(spriteData), spriteTexture(spriteTexture), usedKeys(description->getUsedKeys()), fadeInPattern(description->style.hasFadeInPattern()) {
     isStyleZoomDependant = usedKeys.containsUsedKey(Tiled2dMapVectorStyleParser::zoomExpression);
     isStyleStateDependant = usedKeys.isStateDependant();
 }

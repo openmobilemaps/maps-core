@@ -641,36 +641,39 @@ public:
 template<class ResultType>
 class ValueEvaluator {
 public:
-    inline ResultType getResult(const std::shared_ptr<Value> &value, const EvaluationContext &context, const ResultType &defaultValue) {
+    ValueEvaluator(const std::shared_ptr<Value> &value) : value(value) {
+        if(!value) {
+            return;
+        }
+
+        usedKeysCollection = value->getUsedKeys();
+
+        isStatic = usedKeysCollection.empty();
+        isZoomDependent = usedKeysCollection.usedKeys.contains("zoom");
+        isStateDependant = usedKeysCollection.isStateDependant();
+    }
+
+    ValueEvaluator(const ValueEvaluator& evaluator) : ValueEvaluator(evaluator.getValue()) {};
+
+    std::shared_ptr<Value> getValue() const {
+        return value;
+    }
+
+    inline ResultType getResult(const EvaluationContext &context, const ResultType &defaultValue) {
         if (!value) {
             return defaultValue;
         }
 
-        if (isStatic.load() && staticValue) {
+        if (isStatic) {
+            if(!staticValue) {
+                staticValue = value->evaluateOr(context, defaultValue);
+            }
+
             return *staticValue;
         }
 
-        std::lock_guard<std::mutex> lock(mutex);
-
         if(value->isGettingPropertyValues()) {
             return value->evaluateOr(context, defaultValue);
-        }
-
-        if (lastValuePtr != value.get()) {
-            lastResults.clear();
-            staticValue = std::nullopt;
-            usedKeysCollection = value->getUsedKeys();
-
-            bool isStatic_ = usedKeysCollection.empty();
-
-            if (isStatic_) {
-                staticValue = value->evaluateOr(context, defaultValue);
-                isStatic.store(isStatic_);
-            } else {
-                isZoomDependent = usedKeysCollection.usedKeys.contains("zoom");
-                isStateDependant = usedKeysCollection.isStateDependant();
-            }
-            lastValuePtr = value.get();
         }
 
         if (isZoomDependent || (isStateDependant && !context.featureStateManager->empty())) {
@@ -691,16 +694,15 @@ public:
     }
 
 private:
-    std::unordered_map<uint64_t, ResultType> lastResults;
-    std::mutex mutex;
+    std::shared_ptr<Value> value;
     UsedKeysCollection usedKeysCollection;
-
     std::optional<ResultType> staticValue;
+
+    bool isStatic = false;
     bool isZoomDependent = false;
     bool isStateDependant = false;
-    std::atomic<bool> isStatic = false;
 
-    void* lastValuePtr = nullptr;
+    std::unordered_map<uint64_t, ResultType> lastResults;
 };
 
 class GetPropertyValue : public Value {

@@ -161,6 +161,7 @@ private:
 
 
     std::vector<Vec2D> centerPositions;
+    std::vector<size_t> lineEndIndices;
 
     struct SplitInfo {
         SplitInfo(int g, float s) : glyphIndex(g), scale(s) {};
