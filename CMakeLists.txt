@@ -66,9 +66,12 @@ target_include_directories(mapscore PUBLIC
   external/djinni/support-lib/
   external/djinni/support-lib/cpp
 )
-target_compile_definitions(mapscore PRIVATE 
+set_property(
+  SOURCE shared/src/logger/Logger.cpp
+  APPEND
+  PROPERTY COMPILE_DEFINITIONS
   $<$<CONFIG:Debug>:LOG_LEVEL=4>    # LogTrace
-  $<$<CONFIG:Release>:LOG_LEVEL=2>) # LogWarning
+  $<$<CONFIG:Release>:LOG_LEVEL=1>) # LogWarning
 target_compile_features(mapscore PRIVATE cxx_std_20)
 target_compile_options(mapscore PRIVATE -Wno-deprecated -Wno-reorder -fPIC) # fPIC so we can "embed" into shared mapscore_jni
 target_link_libraries(mapscore ${OPENGL_LIBRARIES})

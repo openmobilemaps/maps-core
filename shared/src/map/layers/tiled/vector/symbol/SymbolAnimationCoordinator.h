@@ -48,9 +48,7 @@ public:
     }
 
     float getTextAlpha(float targetAlpha, long long now) {
-        float alpha = internalGetAlpha(targetAlpha, now, lastTextAlpha, textAnimationStart);
-        printf("getTextAlpha target: %f, now: %lld, lastTextAlpha: %f, textAnimationStart %lld -> %f\n", targetAlpha, now, lastTextAlpha, textAnimationStart, alpha);
-        return alpha;
+        return internalGetAlpha(targetAlpha, now, lastTextAlpha, textAnimationStart);
     }
 
     bool isAnimating() {

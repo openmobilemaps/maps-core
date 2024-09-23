@@ -1,7 +1,6 @@
 package io.openmobilemaps.mapscore.map.util;
 
 import java.awt.image.BufferedImage;
-import java.sql.Time;
 
 import io.openmobilemaps.mapscore.graphics.util.OSMesa;
 import io.openmobilemaps.mapscore.shared.graphics.common.Color;
@@ -30,7 +29,7 @@ public class OffscreenMapRenderer {
 
   public OffscreenMapRenderer(int width, int height, int numSamples) {
     // Screen DPI: 1 inch / 0.28mm (as defined in Annex E "Well-known scale sets" in "OpenGIS® Web Map Tile Service Implementation Standard").
-    this(width, height, numSamples, new MapConfig(CoordinateSystemFactory.getEpsg3857System()), 90.714286f);
+    this(width, height, numSamples, new MapConfig(CoordinateSystemFactory.getEpsg3857System()), 2*90.714286f);
   }
 
   public OffscreenMapRenderer(int width, int height, int numSamples, MapConfig mapConfig, float dpi) {
@@ -58,7 +57,7 @@ public class OffscreenMapRenderer {
   }
 
   public void setFramebufferSize(int width, int height, int numSamples) {
-    assertGlContextThread();
+    threadId = Thread.currentThread().threadId();
     ctx.makeCurrent(width, height, numSamples);
     map.setViewportSize(new Vec2I(width, height));
   }
@@ -79,6 +78,13 @@ public class OffscreenMapRenderer {
   }
 
   public BufferedImage drawFrame() throws MapLayerException {
+
+    // - getVpMatrix must be called before first update.
+    map.getCamera().asCameraInterface().getVpMatrix();
+    for (var layer : map.getLayers()) {
+        layer.enableAnimations(false);
+    }
+
     awaitReady();
 
     // Text icon fade in workaround:
@@ -90,7 +96,6 @@ public class OffscreenMapRenderer {
     // XXX: still have text labels flickering back and forth.
     map.getCamera().asCameraInterface().getVpMatrix();
     for (var layer : map.getLayers()) {
-        layer.enableAnimations(false);
         layer.update();
         layer.update();
     }
@@ -98,7 +103,12 @@ public class OffscreenMapRenderer {
     return ctx.getImage();
   }
 
-  private void awaitReady() throws MapLayerException {
+  public BufferedImage getFramebufferImage() {
+    return ctx.getImage();
+  }
+
+  // XXX: public for a test
+  public void awaitReady() throws MapLayerException {
     // Note: this sort of duplicates map.drawReadyFrame.
     // The key difference is that this implementation assumes that we're already on the render thread and so we don't have to juggle with invalidate and callbacks etc.
 
@@ -106,6 +116,7 @@ public class OffscreenMapRenderer {
 
     boolean allReady = true;
     int i = 0;
+    long triggerUpdate = System.currentTimeMillis() + 10;
     do {
       runGraphicsTasks();
       allReady = true;
@@ -120,8 +131,13 @@ public class OffscreenMapRenderer {
         }
       }
       Thread.yield();
-      if(++i % 1000 == 0 && !allReady) {
-        System.out.printf("waiting\n");
+
+      final long now = System.currentTimeMillis();
+      if (now > triggerUpdate) {
+        // Trigger layer updates. This _might_ trigger some more activity that might make the layer ready, eventually.
+        for (var layer : map.getLayers()) {
+            layer.update();
+        }
       }
     } while(!allReady);
   }
@@ -134,7 +150,7 @@ public class OffscreenMapRenderer {
 
   private void assertGlContextThread() {
     if (Thread.currentThread().threadId() != threadId) { 
-      throw new AssertionError("must be called from the thread that initialized this OffscreenMapRenderer object -- the GL context is made active _only_ on that thread"); 
+      throw new RuntimeException("must be called from the thread that initialized this OffscreenMapRenderer object -- the GL context is made active _only_ on that thread"); 
     }
   }
 }

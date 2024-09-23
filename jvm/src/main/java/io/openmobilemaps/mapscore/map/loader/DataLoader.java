@@ -8,6 +8,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.ByteBuffer;
+import java.time.Duration;
 import java.util.zip.GZIPInputStream;
 
 import javax.imageio.ImageIO;
@@ -35,7 +36,10 @@ public class DataLoader extends LoaderInterface {
 
   public DataLoader() {
     // TODO: sensible defaults
-    httpClient = HttpClient.newHttpClient();
+    httpClient = HttpClient.newBuilder()
+        .followRedirects(HttpClient.Redirect.NORMAL)
+        .connectTimeout(Duration.ofSeconds(3))
+        .build();
   }
 
   public DataLoader(HttpClient httpClient) {
@@ -50,9 +54,12 @@ public class DataLoader extends LoaderInterface {
     try {
       HttpResponse<InputStream> response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
       return completeLoadData(response);
-    } catch (Exception e) {
+    } catch (IOException e) {
       System.out.printf("loadData %s -> %s\n", url, e);
-      return new DataLoaderResult(null, null, LoaderStatus.ERROR_OTHER, null);
+      return new DataLoaderResult(null, null, LoaderStatus.ERROR_OTHER, e.toString());
+    } catch (InterruptedException e) {
+      System.out.printf("loadData %s -> %s\n", url, e);
+      return new DataLoaderResult(null, null, LoaderStatus.ERROR_OTHER, e.toString());
     }
   }
 
@@ -74,9 +81,12 @@ public class DataLoader extends LoaderInterface {
     try {
       HttpResponse<InputStream> response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
       return completeLoadTexture(response);
-    } catch (Exception e) {
+    } catch (IOException e) {
       System.out.printf("loadTexture %s -> %s\n", url, e);
-      return new TextureLoaderResult(null, null, LoaderStatus.ERROR_OTHER, null);
+      return new TextureLoaderResult(null, null, LoaderStatus.ERROR_OTHER, e.toString());
+    } catch (InterruptedException e) {
+      System.out.printf("loadTexture %s -> %s\n", url, e);
+      return new TextureLoaderResult(null, null, LoaderStatus.ERROR_OTHER, e.toString());
     }
   }
 

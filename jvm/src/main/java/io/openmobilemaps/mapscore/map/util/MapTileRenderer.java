@@ -3,8 +3,8 @@ package io.openmobilemaps.mapscore.map.util;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
-import io.openmobilemaps.mapscore.graphics.util.OSMesa;
 import io.openmobilemaps.mapscore.shared.map.coordinates.Coord;
+import io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateConversionHelperInterface;
 import io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord;
 import io.openmobilemaps.mapscore.shared.map.layers.tiled.DefaultTiled2dMapLayerConfigs;
 import io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapZoomLevelInfo;
@@ -15,6 +15,7 @@ import io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapZoomLevelInf
 public class MapTileRenderer {
   private ArrayList<Tiled2dMapZoomLevelInfo> zoomLevelInfos;
   private OffscreenMapRenderer renderer;
+  private CoordinateConversionHelperInterface converter;
 
   public record TileRange(int zoomLevel, int minColumn, int maxColumn, int minRow, int maxRow) {
   }
@@ -31,8 +32,9 @@ public class MapTileRenderer {
   public MapTileRenderer(OffscreenMapRenderer renderer, ArrayList<Tiled2dMapZoomLevelInfo> zoomLevelInfos) {
     this.renderer = renderer;
     this.zoomLevelInfos = zoomLevelInfos;
-
-    this.renderer.setFramebufferSize(256, 256, 4);
+    this.converter = renderer.getMap().getCoordinateConverterHelper();
+      
+    this.renderer.setFramebufferSize(2*256, 2*256, 4);
   }
 
   /**
@@ -41,10 +43,11 @@ public class MapTileRenderer {
   public TileRange getTileRange(int zoomLevel, RectCoord bbox) {
     // See H.1 "From BBOX to tile indices" in "OpenGIS® Web Map Tile Service
     // Implementation Standard" (OGC 07-057r7)
-    // (simplified to fixed tile size 256)
     final var m = zoomLevelInfos.get(zoomLevel); // m for tile _m_atrix.
-    assert (bbox.getTopLeft().getSystemIdentifier() == m.getBounds().getTopLeft().getSystemIdentifier());
-    final double tileSpan = m.getTileWidthLayerSystemUnits(); // == scaleDenominator * 0.00028 * 256
+   
+    bbox = converter.convertRect(m.getBounds().getTopLeft().getSystemIdentifier(), bbox);
+
+    final double tileSpan = m.getTileWidthLayerSystemUnits(); // == world-size / numTiles
     final double tileMatrixMinX = m.getBounds().getTopLeft().getX();
     final double tileMatrixMaxY = m.getBounds().getTopLeft().getY();
 
@@ -53,7 +56,7 @@ public class MapTileRenderer {
     final int maxCol = (int) Math.floor((bbox.getBottomRight().getX() - tileMatrixMinX) / tileSpan - epsilon);
     final int minRow = (int) Math.floor((tileMatrixMaxY - bbox.getTopLeft().getY()) / tileSpan + epsilon);
     final int maxRow = (int) Math.floor((tileMatrixMaxY - bbox.getBottomRight().getY()) / tileSpan - epsilon);
-
+    
     return new TileRange(zoomLevel, minCol, maxCol, minRow, maxRow);
   }
 
@@ -64,7 +67,7 @@ public class MapTileRenderer {
     if (m.getZoomLevelIdentifier() != zoomLevel) {
       throw new AssertionError("zoomLevel inconsistent");
     }
-    final double tileSpan = m.getTileWidthLayerSystemUnits(); // == scaleDenominator * 0.00028 * 256
+    final double tileSpan = m.getTileWidthLayerSystemUnits(); // == world-size / numTiles
     final double tileMatrixMinX = m.getBounds().getTopLeft().getX();
     final double tileMatrixMaxY = m.getBounds().getTopLeft().getY();
 
@@ -84,8 +87,7 @@ public class MapTileRenderer {
     cam.freeze(false);
 
     var tile = getTileBBox(zoomLevel, xcol, yrow);
-    double zoom = zoomLevelInfos.get(zoomLevel).getZoom();
-    cam.moveToBoundingBox(tile, 0.0f, false, zoom, zoom);
+    cam.moveToBoundingBox(tile, 0.0f, false, null, null);
     // TODO: this drawFrame calls update() on camera/layer for each tile separately. Is this safe or will it cause issues at tile borders?
     return renderer.drawFrame();
   }
