@@ -204,6 +204,8 @@ public:
 
     virtual void didLoadSpriteData(std::shared_ptr<SpriteData> spriteData, std::shared_ptr<::TextureHolderInterface> spriteTexture);
 
+    void enableAnimations(bool enabled) override;
+
     std::unordered_map<std::string, Actor<Tiled2dMapVectorSource>> vectorTileSources;
     std::vector<Actor<Tiled2dMapRasterSource>> rasterTileSources;
 
@@ -284,12 +286,14 @@ private:
     std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> symbolDelegate;
 
     void updateReadyStateListenerIfNeeded();
+
     std::optional<LayerReadyState> lastReadyState;
     std::shared_ptr<::Tiled2dMapReadyStateListener> readyStateListener;
 
    std::mutex setupMutex;
    std::condition_variable setupCV;
    bool setupReady = false;
+   bool animationsEnabled = true;
 };
 
 

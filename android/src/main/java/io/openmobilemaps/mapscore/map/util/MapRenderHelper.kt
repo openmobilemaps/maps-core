@@ -6,7 +6,13 @@ import io.openmobilemaps.mapscore.shared.map.LayerReadyState
 import io.openmobilemaps.mapscore.shared.map.MapConfig
 import io.openmobilemaps.mapscore.shared.map.MapReadyCallbackInterface
 import io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord
+import io.openmobilemaps.mapscore.shared.map.scheduling.ExecutionEnvironment
+import io.openmobilemaps.mapscore.shared.map.scheduling.TaskConfig
+import io.openmobilemaps.mapscore.shared.map.scheduling.TaskInterface
+import io.openmobilemaps.mapscore.shared.map.scheduling.TaskPriority
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.util.concurrent.Semaphore
 
 open class MapRenderHelper {
@@ -29,7 +35,15 @@ open class MapRenderHelper {
 			mapRenderer.setupMap(coroutineScope, mapConfig, true)
 			onSetupMap(mapRenderer)
 
-			render(mapRenderer, renderBounds, renderTimeoutSeconds, onStateUpdate)
+			mapRenderer.requireMapInterface().getScheduler().addTask(object : TaskInterface() {
+				override fun getConfig() = TaskConfig("Render Task", 0, TaskPriority.NORMAL, ExecutionEnvironment.GRAPHICS)
+
+				override fun run() {
+					coroutineScope.launch(Dispatchers.Default) {
+						render(mapRenderer, renderBounds, renderTimeoutSeconds, onStateUpdate)
+					}
+				}
+			})
 		}
 
 		@JvmStatic
@@ -54,6 +68,7 @@ open class MapRenderHelper {
 					prevState = state
 					when (state) {
 						LayerReadyState.READY -> {
+							val saveFrameSemaphore = Semaphore(0, true)
 							mapRenderer.saveFrame(
 								SaveFrameSpec(
 									outputFormat = SaveFrameSpec.OutputFormat.BITMAP,
@@ -63,14 +78,17 @@ open class MapRenderHelper {
 									override fun onResultBitmap(bitmap: Bitmap) {
 										onStateUpdate(MapViewRenderState.Finished(bitmap))
 										mapRenderer.destroy()
+										saveFrameSemaphore.release()
 									}
 
 									override fun onError() {
 										onStateUpdate(MapViewRenderState.Error)
 										mapRenderer.destroy()
+										saveFrameSemaphore.release()
 									}
 
 								})
+							saveFrameSemaphore.acquire()
 						}
 						LayerReadyState.NOT_READY -> onStateUpdate(MapViewRenderState.Loading)
 						LayerReadyState.ERROR -> {
