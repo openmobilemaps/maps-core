@@ -1,5 +1,9 @@
 # Changelog for Open Mobile Maps
 
+## Version 2.6.0
+- Increases Deployment target to iOS 14
+- fixes iOS builds with Xcode 16
+
 ## Version 2.5.1
 - Fix of partially transparent line gap color on OpenGl
 - Fix a bug when using a huge number of text styles on OpenGl
