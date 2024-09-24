@@ -97,7 +97,7 @@ textInstancedFragmentShader(TextInstancedVertexOut in [[stage_in]],
         }
 
         const float start = max(0.0, fillStart - (style->haloWidth + halfHaloBlur));
-        const float end = fillStart - max(0.0, style->haloWidth - halfHaloBlur);
+        const float end = max(0.0, fillStart - max(0.0, style->haloWidth - halfHaloBlur));
 
         const float sideSwitch = step(median, end);
         const float outerFallOff = smoothstep(start, end, median);

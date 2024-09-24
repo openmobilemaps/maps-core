@@ -125,7 +125,7 @@ std::string TextInstancedShaderOpenGl::getFragmentShader() {
                                                       }
 
                                                       float start = max(0.0, fillStart - (haloWidth + halfHaloBlur));
-                                                      float end = fillStart - max(0.0, haloWidth - halfHaloBlur);
+                                                      float end = max(0.0, fillStart - max(0.0, haloWidth - halfHaloBlur));
 
                                                       float sideSwitch = step(median, end);
                                                       float outerFallOff = smoothstep(start, end, median);
