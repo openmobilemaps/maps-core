@@ -275,8 +275,8 @@ void Tiled2dMapVectorSymbolLabelObject::updateProperties(std::vector<float> &pos
             if (rotationAlignment == SymbolAlignment::VIEWPORT) {
                 updatePropertiesPoint(positions, referencePositions, scales, rotations, styles, countOffset, styleOffset, zoomIdentifier, scaleFactor, rotation, viewportSize);
             } else {
-                auto rotatedFactor = updatePropertiesLine(positions, scales, rotations, styles, countOffset, styleOffset,
-                                                          zoomIdentifier, scaleFactor, rotation);
+                auto rotatedFactor = updatePropertiesLine(positions, referencePositions, scales, rotations, styles, countOffset, styleOffset, zoomIdentifier, scaleFactor, rotation, viewportSize);
+
                 if(rotatedFactor > 0.5 && lineCoordinates) {
                     std::reverse((*lineCoordinates).begin(), (*lineCoordinates).end());
                     std::reverse(renderLineCoordinates.begin(), renderLineCoordinates.end());
@@ -285,7 +285,7 @@ void Tiled2dMapVectorSymbolLabelObject::updateProperties(std::vector<float> &pos
 
                     countOffset -= characterCount;
 
-                    updatePropertiesLine(positions, scales, rotations, styles, countOffset, styleOffset, zoomIdentifier, scaleFactor, rotation);
+                    updatePropertiesLine(positions, referencePositions, scales, rotations, styles, countOffset, styleOffset, zoomIdentifier, scaleFactor, rotation, viewportSize);
                 }
             }
 
@@ -627,7 +627,7 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
     }
 }
 
-double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const double rotation) {
+double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float> &positions, std::vector<float> &referencePositions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, const Vec2I &viewportSize) {
     if(lineCoordinates == std::nullopt) {
         countOffset += characterCount;
         return 0;
@@ -696,7 +696,8 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
             const auto &before = pointAtIndex(indexAtDistance(currentIndex, -halfSpace, p), false);
             const auto &after = pointAtIndex(indexAtDistance(currentIndex, halfSpace, p), false);
 
-            double angleRad = atan2_approximation((before.y - after.y), -(before.x - after.x));
+            double beforeAfter = is3d ? (after.y - before.y) : (before.y - after.y);
+            double angleRad = atan2_approximation(beforeAfter, -(before.x - after.x));
             double angleDeg = angleRad * (180.0 / M_PI);
 
             if(index > 0) {
@@ -758,8 +759,15 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
 
             if (d.charCode != " ") {
                 const size_t centerPositionSize = centerPositions.size();
-                scales[2 * (countOffset + centerPositionSize) + 0] = charSize.x;
-                scales[2 * (countOffset + centerPositionSize) + 1] = charSize.y;
+
+                if (is3d) {
+                    scales[2 * (countOffset + centerPositionSize) + 0] = (charSize.x / scaleFactor) / viewportSize.x * 2.0;
+                    scales[2 * (countOffset + centerPositionSize) + 1] = (charSize.y / scaleFactor) / viewportSize.y * 2.0;
+                } else {
+                    scales[2 * (countOffset + centerPositionSize) + 0] = charSize.x;
+                    scales[2 * (countOffset + centerPositionSize) + 1] = charSize.y;
+                }
+
                 maxSymbolRadius = std::max(maxSymbolRadius, std::max(charSize.x * 0.5, charSize.y * 0.5));
                 rotations[countOffset + centerPositionSize] = -angleDeg;
 
@@ -783,8 +791,15 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
         assert(centerPositions.size() == characterCount);
 
         for (auto const &centerPosition: centerPositions) {
-            positions[(2 * countOffset) + 0] = centerPosition.x;
-            positions[(2 * countOffset) + 1] = centerPosition.y;
+            if (is3d) {
+                positions[2 * countOffset + 0] = 0;
+                positions[2 * countOffset + 1] = 0;
+                referencePositions[2 * countOffset + 0] = centerPosition.x;
+                referencePositions[2 * countOffset + 1] = centerPosition.y;
+            } else {
+                positions[(2 * countOffset) + 0] = centerPosition.x;
+                positions[(2 * countOffset) + 1] = centerPosition.y;
+            }
 
             countOffset += 1;
         }
@@ -802,7 +817,7 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
     assert(countOffset == countBefore + characterCount);
 
     if (boxMin.x != std::numeric_limits<float>::max()) {
-        const float padding = textPadding * scaleFactor;
+        const float scaledTextPadding = is3d ? textPadding : scaleFactor * textPadding;
 
         std::vector<CircleD> circles;
         Vec2D lastCirclePosition = Vec2D(0, 0);
@@ -816,7 +831,7 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
                                   <= (maxSymbolRadius * 2.0) * collisionDistanceBias) {
                 continue;
             }
-            circles.emplace_back(newX, newY, maxSymbolRadius + padding);
+            circles.emplace_back(newX, newY, maxSymbolRadius + scaledTextPadding);
             lastCirclePosition.x = newX;
             lastCirclePosition.y = newY;
         }
