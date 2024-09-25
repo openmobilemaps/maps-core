@@ -59,15 +59,13 @@ unitSphereTextInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
         alpha = 0.0;
     }
 
+    float sinAngle = sin(angle);
+    float cosAngle = cos(angle);
 
-    const float2 size = (vertexIn.position.xy) * scale;
-
-    const float4x4 modelMatrix = float4x4(float4(cos(angle), -sin(angle), 0, 0),
-                                              float4(sin(angle), cos(angle), 0, 0),
-                                              float4(0, 0, 0, 0),
-                                              float4(size.xy + offset, 0.0, 1) );
-
-    float4 position = modelMatrix * screenPosition;
+    const float2 p = (vertexIn.position.xy);
+    auto pRot = float2(p.x * cosAngle + p.y * sinAngle, -p.x * sinAngle + p.y * cosAngle);
+    pRot = float2(pRot.x * scale.x, pRot.y * scale.y);
+    auto position = float4(screenPosition.xy + offset + pRot, 0, 1.0);
 
     TextInstancedVertexOut out {
       .position = position,
