@@ -913,6 +913,10 @@ public:
 
     };
 
+    bool isGettingPropertyValues() override {
+        return true;
+    }
+
     bool isEqual(const std::shared_ptr<Value> &other) const override {
         if (auto casted = std::dynamic_pointer_cast<StaticValue>(other)) {
             return casted->value == value;
