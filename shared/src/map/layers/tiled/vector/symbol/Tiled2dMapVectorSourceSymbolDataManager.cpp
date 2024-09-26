@@ -813,3 +813,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::clearTouch() {
 void Tiled2dMapVectorSourceSymbolDataManager::setSymbolDelegate(const /*not-null*/ std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> & symbolDelegate) {
     this->symbolDelegate = symbolDelegate;
 }
+
+void Tiled2dMapVectorSourceSymbolDataManager::enableAnimations(bool enabled) {
+    animationCoordinatorMap->enableAnimations(enabled);
+}

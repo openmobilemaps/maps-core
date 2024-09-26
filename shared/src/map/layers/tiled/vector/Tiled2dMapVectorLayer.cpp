@@ -420,6 +420,7 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
                                                                         symbolDelegate,
                                                                         mapDescription->persistingSymbolPlacement);
             actor.unsafe()->setAlpha(alpha);
+            actor.unsafe()->enableAnimations(animationsEnabled);
             symbolSourceDataManagers[source] = actor;
             interactionDataManagers[source].push_back(actor.weakActor<Tiled2dMapVectorSourceDataManager>());
         }
@@ -1279,6 +1280,15 @@ LayerReadyState Tiled2dMapVectorLayer::isReadyToRenderOffscreen() {
         return LayerReadyState::NOT_READY;
     }
     return Tiled2dMapLayer::isReadyToRenderOffscreen();
+}
+
+void Tiled2dMapVectorLayer::enableAnimations(bool enabled) {
+    this->animationsEnabled = enabled;
+    for (const auto &[source, manager] : symbolSourceDataManagers) {
+        manager.syncAccess([enabled](const std::shared_ptr<Tiled2dMapVectorSourceSymbolDataManager> manager) {
+            manager->enableAnimations(enabled);
+        });
+    }
 }
 
 void Tiled2dMapVectorLayer::setMinZoomLevelIdentifier(std::optional<int32_t> value) {

@@ -106,6 +106,8 @@ public:
 
     void setSymbolDelegate(const /*not-null*/ std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> & symbolDelegate);
 
+    void enableAnimations(bool enabled);
+
 private:
     std::vector<Actor<Tiled2dMapVectorSymbolGroup>>
     createSymbolGroups(const Tiled2dMapVersionedTileInfo &tileInfo, const std::string &layerIdentifier,

@@ -190,7 +190,6 @@ void MapCamera2d::moveToBoundingBox(const RectCoord &boundingBox, float paddingP
         targetZoom = std::min(targetZoom, *maxZoom);
     }
 
-    LogDebug << "targetCenterNotBC.x = " << targetCenterNotBC.x << " targetCenterNotBC.y: " << targetCenterNotBC.y << " targetZoom: " <<= targetZoom;
     moveToCenterPositionZoom(targetCenterNotBC, targetZoom, animated);
 }
 

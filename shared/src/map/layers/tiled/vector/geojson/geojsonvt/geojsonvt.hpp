@@ -119,8 +119,6 @@ public:
             self->loadingResult = DataLoaderResult(std::nullopt, std::nullopt, result.status, result.errorCode);
             self->loaders.clear();
 
-            LogDebug << "GeoJson was loaded from " << self->geoJsonUrl;
-
             self->resolveAllWaitingPromises();
         });
     }
