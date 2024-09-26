@@ -236,8 +236,10 @@ public enum PipelineType: String, CaseIterable, Codable {
         switch self {
             case .lineGroupShader, .unitSphereLineGroupShader:
                 return LineVertex.descriptor
-            case .polygonGroupShader, .polygonPatternGroupShader, .polygonPatternFadeInGroupShader, .polygonStripedGroupShader, .unitSpherePolygonGroupShader:
+            case .polygonGroupShader, .polygonPatternGroupShader, .polygonPatternFadeInGroupShader, .polygonStripedGroupShader:
                 return PolygonVertex.descriptor
+            case .unitSpherePolygonGroupShader:
+                return PolygonVertex4.descriptor
             case .rasterShader, .unitSphereRasterShader, .clearStencilShader, .alphaShader, .colorShader, .unitSphereAlphaShader, .unitSphereColorShader, .unitSphereRoundColorShader, .sphereEffectShader:
                 return Vertex3D.descriptor
             case.icosahedronColorShader:

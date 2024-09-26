@@ -37,22 +37,22 @@ void PolygonMaskObject::setPolygons(const std::vector<::PolygonCoord> &polygons,
     std::vector<float> vertices;
     int32_t indexOffset = 0;
 
-    std::vector<Vec2F> vecVertices;
+    std::vector<Vec2D> vecVertices;
 
     for (auto const &polygon : polygons) {
-        std::vector<std::vector<Vec2F>> renderCoords;
-        std::vector<Vec2F> polygonCoords;
+        std::vector<std::vector<Vec2D>> renderCoords;
+        std::vector<Vec2D> polygonCoords;
         for (const Coord &mapCoord : polygon.positions) {
             Coord renderCoord = conversionHelper->convertToRenderSystem(mapCoord);
-            polygonCoords.push_back(Vec2F(renderCoord.x, renderCoord.y));
+            polygonCoords.push_back(Vec2D(renderCoord.x, renderCoord.y));
         }
         renderCoords.push_back(polygonCoords);
 
         for (const auto &hole : polygon.holes) {
-            std::vector<::Vec2F> holeCoords;
+            std::vector<::Vec2D> holeCoords;
             for (const Coord &coord : hole) {
                 Coord renderCoord = conversionHelper->convertToRenderSystem(coord);
-                holeCoords.push_back(Vec2F(renderCoord.x, renderCoord.y));
+                holeCoords.push_back(Vec2D(renderCoord.x, renderCoord.y));
             }
             renderCoords.push_back(holeCoords);
         }

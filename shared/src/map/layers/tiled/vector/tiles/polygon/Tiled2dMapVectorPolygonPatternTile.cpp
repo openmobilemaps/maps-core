@@ -244,8 +244,10 @@ void Tiled2dMapVectorPolygonPatternTile::setVectorTileData(const Tiled2dMapVecto
                     }
 
                     for (auto const &coordinate: polygon.coordinates) {
-                        styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(coordinate.x);
-                        styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(coordinate.y);
+                        styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(sin(coordinate.x));
+                        styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(cos(coordinate.x));
+                        styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(sin(coordinate.y));
+                        styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(cos(coordinate.y));
                         styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(styleIndex);
                     }
 

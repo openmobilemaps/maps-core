@@ -37,3 +37,30 @@ struct PolygonVertex: Equatable {
         return vertexDescriptor
     }()
 }
+
+struct PolygonVertex4: Equatable {
+    var position: SIMD4<Float>
+    var stylingIndex: Float = 0.0
+
+    /// Returns the descriptor to use when passed to a metal shader
+    nonisolated(unsafe) static let descriptor: MTLVertexDescriptor = {
+        let vertexDescriptor = MTLVertexDescriptor()
+        var offset = 0
+        let bufferIndex = 0
+
+        // Position
+        vertexDescriptor.attributes[0].bufferIndex = bufferIndex
+        vertexDescriptor.attributes[0].format = .float4
+        vertexDescriptor.attributes[0].offset = offset
+        offset += MemoryLayout<SIMD4<Float>>.stride
+
+        // Styling Index
+        vertexDescriptor.attributes[1].bufferIndex = bufferIndex
+        vertexDescriptor.attributes[1].format = .float
+        vertexDescriptor.attributes[1].offset = offset
+        offset += MemoryLayout<Float>.stride
+
+        vertexDescriptor.layouts[0].stride = offset
+        return vertexDescriptor
+    }()
+}

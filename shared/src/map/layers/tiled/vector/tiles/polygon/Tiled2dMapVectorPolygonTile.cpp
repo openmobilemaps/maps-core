@@ -238,8 +238,10 @@ void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDa
                     }
 
                     for (auto const &coordinate: coordinates) {
-                        styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(coordinate.x);
-                        styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(coordinate.y);
+                        styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(sin(coordinate.x));
+                        styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(cos(coordinate.x));
+                        styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(sin(coordinate.y));
+                        styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(cos(coordinate.y));
                         styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(styleIndex);
                     }
 

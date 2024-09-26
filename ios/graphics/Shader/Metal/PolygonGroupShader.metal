@@ -11,10 +11,16 @@
 #include <metal_stdlib>
 using namespace metal;
 
+struct Polygon4GroupVertexIn {
+    float4 position [[attribute(0)]];
+    float stylingIndex [[attribute(1)]];
+};
+
 struct PolygonGroupVertexIn {
     float2 position [[attribute(0)]];
     float stylingIndex [[attribute(1)]];
 };
+
 
 struct PolygonGroupVertexOut {
     float4 position [[ position ]];
@@ -48,19 +54,31 @@ polygonGroupVertexShader(const PolygonGroupVertexIn vertexIn [[stage_in]],
 }
 
 vertex PolygonGroupVertexOut
-unitSpherePolygonGroupVertexShader(const PolygonGroupVertexIn vertexIn [[stage_in]],
+unitSpherePolygonGroupVertexShader(const Polygon4GroupVertexIn vertexIn [[stage_in]],
                  constant float4x4 &vpMatrix [[buffer(1)]])
 {
 
-    float4 newVertex = float4(vertexIn.position.xy, 1.0, 1.0);
+//    float4 newVertex = float4(vertexIn.position.xy, 1.0, 1.0);
+//
+//    newVertex.x /= newVertex.w;
+//    newVertex.y /= newVertex.w;
+//    newVertex.z /= newVertex.w;
 
-    newVertex.x /= newVertex.w;
-    newVertex.y /= newVertex.w;
-    newVertex.z /= newVertex.w;
+    //    position.x = sin(x)
+    //    position.y = cos(x)
+    //    position.z = sin(y)
+    //    position.w = cos(y)
 
-    const float x = newVertex.z * sin(newVertex.y) * cos(newVertex.x);
-    const float y = newVertex.z * cos(newVertex.y);
-    const float z = -newVertex.z * sin(newVertex.y) * sin(newVertex.x);
+    float4 position = vertexIn.position;
+
+    const float x = 1.0 * position.z * position.y;
+    const float y = 1.0 * position.w;
+    const float z = -1.0 * position.z * position.x;
+
+
+//    const float x = newVertex.z * sin(newVertex.y) * cos(newVertex.x);
+//    const float y = newVertex.z * cos(newVertex.y);
+//    const float z = -newVertex.z * sin(newVertex.y) * sin(newVertex.x);
 
     PolygonGroupVertexOut out {
         .position = vpMatrix * float4(x,y,z, 1.0),
