@@ -3,6 +3,8 @@
 ## Version 2.6.0
 - Increases Deployment target to iOS 14
 - fixes iOS builds with Xcode 16
+- Allow reuse of Android OffscreenMapRenderer
+- Fix halo blur artifacts for certain combinations
 
 ## Version 2.5.1
 - Fix of partially transparent line gap color on OpenGl
