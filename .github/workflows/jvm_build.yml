@@ -1,0 +1,12 @@
+name: Maven build JVM
+on: push
+
+jobs:
+    build:
+        name: Build JVM Project
+        uses: UbiqueInnovation/workflows-backend/.github/workflows/mvn_install.yml@main
+        with:
+            ref_name: ${{ github.ref_name }}
+            parent_pom: jvm/pom.xml
+            use_mvn_central: true
+            install_apt_packages: "cmake make clang libgl-dev libgles-dev libosmesa6-dev"
