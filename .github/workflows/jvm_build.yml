@@ -4,9 +4,10 @@ on: push
 jobs:
     build:
         name: Build JVM Project
-        uses: UbiqueInnovation/workflows-backend/.github/workflows/mvn_install.yml@main
+        uses: UbiqueInnovation/workflows-backend/.github/workflows/mvn_install.yml@feature/checkout-submodules
         with:
             ref_name: ${{ github.ref_name }}
+            checkout_submodules: recursive
             parent_pom: jvm/pom.xml
             use_mvn_central: true
             install_apt_packages: "cmake make clang libgl-dev libgles-dev libosmesa6-dev"
