@@ -4,7 +4,7 @@ on: push
 jobs:
     build:
         name: Build JVM Project
-        uses: UbiqueInnovation/workflows-backend/.github/workflows/mvn_install.yml@feature/checkout-submodules
+        uses: UbiqueInnovation/workflows-backend/.github/workflows/mvn_install.yml@main
         with:
             ref_name: ${{ github.ref_name }}
             checkout_submodules: recursive

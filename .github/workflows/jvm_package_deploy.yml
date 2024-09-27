@@ -4,7 +4,7 @@ on: push
 jobs:
     build:
         name: Build JVM package and deploy to Maven repo
-        uses: UbiqueInnovation/workflows-backend/.github/workflows/mvn_package_deploy.yml@feature/checkout-submodules
+        uses: UbiqueInnovation/workflows-backend/.github/workflows/mvn_package_deploy.yml@feature/alt-deploy-repository
         with:
             ref_name: ${{ github.ref_name }}
             checkout_submodules: recursive
