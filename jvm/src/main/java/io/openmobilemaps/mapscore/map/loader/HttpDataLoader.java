@@ -32,12 +32,11 @@ import javax.imageio.ImageIO;
  * io.openmobilemaps.mapscore.graphics.BufferedImageTextureHolder} which can load textures for
  * OpenGL.
  */
-public class DataLoader extends LoaderInterface {
-    private static final Logger logger = Logger.getLogger(DataLoader.class.getName());
+public class HttpDataLoader extends LoaderInterface {
+    private static final Logger logger = Logger.getLogger(HttpDataLoader.class.getName());
     protected final HttpClient httpClient;
 
-    public DataLoader() {
-        // TODO: sensible defaults
+    public HttpDataLoader() {
         httpClient =
                 HttpClient.newBuilder()
                         .followRedirects(HttpClient.Redirect.NORMAL)
@@ -45,7 +44,7 @@ public class DataLoader extends LoaderInterface {
                         .build();
     }
 
-    public DataLoader(HttpClient httpClient) {
+    public HttpDataLoader(HttpClient httpClient) {
         this.httpClient = httpClient;
     }
 
@@ -62,12 +61,19 @@ public class DataLoader extends LoaderInterface {
         };
     }
 
+    private static boolean isHTTP(final URI uri) {
+        return "http".equals(uri.getScheme()) || "https".equals(uri.getScheme());
+    }
+
     @NotNull
     @Override
     public DataLoaderResult loadData(@NotNull String url, String etag) {
         // TODO: cache?
-        // TODO: non-http/https URI?
-        var request = HttpRequest.newBuilder(URI.create(url)).build();
+        final URI uri = URI.create(url);
+        if (!isHTTP(uri)) {
+            return new DataLoaderResult(null, null, LoaderStatus.NOOP, null);
+        }
+        var request = HttpRequest.newBuilder(uri).build();
         try {
             HttpResponse<InputStream> response =
                     httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
@@ -81,21 +87,30 @@ public class DataLoader extends LoaderInterface {
     @NotNull
     @Override
     public Future<DataLoaderResult> loadDataAsync(@NotNull String url, String etag) {
-        logger.finer(String.format("loadDataAsync %s", url));
-        var result = new Promise<DataLoaderResult>();
-        var request = HttpRequest.newBuilder(URI.create(url)).build();
-        httpClient
-                .sendAsync(request, HttpResponse.BodyHandlers.ofInputStream())
-                .thenApply(this::completeLoadData)
-                .thenAccept(result::setValue);
 
+        var result = new Promise<DataLoaderResult>();
+        final URI uri = URI.create(url);
+        if (!isHTTP(uri)) {
+            result.setValue(new DataLoaderResult(null, null, LoaderStatus.NOOP, null));
+        } else {
+            logger.finer(String.format("loadDataAsync %s", url));
+            var request = HttpRequest.newBuilder(uri).build();
+            httpClient
+                    .sendAsync(request, HttpResponse.BodyHandlers.ofInputStream())
+                    .thenApply(this::completeLoadData)
+                    .thenAccept(result::setValue);
+        }
         return result.getFuture();
     }
 
     @NotNull
     @Override
     public TextureLoaderResult loadTexture(@NotNull String url, String etag) {
-        var request = HttpRequest.newBuilder(URI.create(url)).build();
+        final URI uri = URI.create(url);
+        if (!isHTTP(uri)) {
+            return new TextureLoaderResult(null, null, LoaderStatus.NOOP, null);
+        }
+        var request = HttpRequest.newBuilder(uri).build();
         try {
             HttpResponse<InputStream> response =
                     httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
@@ -109,14 +124,19 @@ public class DataLoader extends LoaderInterface {
     @NotNull
     @Override
     public Future<TextureLoaderResult> loadTextureAsync(@NotNull String url, String etag) {
-        logger.finer(String.format("loadTextureAsync %s", url));
-        var result = new Promise<TextureLoaderResult>();
-        var request = HttpRequest.newBuilder(URI.create(url)).build();
-        httpClient
-                .sendAsync(request, HttpResponse.BodyHandlers.ofInputStream())
-                .thenApply(this::completeLoadTexture)
-                .thenAccept(result::setValue);
 
+        var result = new Promise<TextureLoaderResult>();
+        final URI uri = URI.create(url);
+        if (!isHTTP(uri)) {
+            result.setValue(new TextureLoaderResult(null, null, LoaderStatus.NOOP, null));
+        } else {
+            logger.finer(String.format("loadTextureAsync %s", url));
+            var request = HttpRequest.newBuilder(uri).build();
+            httpClient
+                    .sendAsync(request, HttpResponse.BodyHandlers.ofInputStream())
+                    .thenApply(this::completeLoadTexture)
+                    .thenAccept(result::setValue);
+        }
         return result.getFuture();
     }
 
@@ -136,7 +156,7 @@ public class DataLoader extends LoaderInterface {
                                 response.headers().firstValue("etag").orElse(null),
                                 LoaderStatus.OK,
                                 null);
-                System.out.printf("loadData %s -> %s\n", response.uri(), LoaderStatus.OK);
+                logger.finer(String.format("loadData %s -> %s", response.uri(), LoaderStatus.OK));
                 return result;
             } catch (IOException | UnsupportedOperationException e) {
                 error = LoaderStatus.ERROR_OTHER;
@@ -148,7 +168,7 @@ public class DataLoader extends LoaderInterface {
         } else {
             error = LoaderStatus.ERROR_OTHER;
         }
-        System.out.printf("loadData %s -> %s\n", response.uri(), error);
+        logger.finer(String.format("loadData %s -> %s", response.uri(), error));
         return new DataLoaderResult(null, null, error, null);
     }
 
@@ -164,7 +184,8 @@ public class DataLoader extends LoaderInterface {
                                 response.headers().firstValue("etag").orElse(null),
                                 LoaderStatus.OK,
                                 null);
-                System.out.printf("loadTexture %s -> %s\n", response.uri(), LoaderStatus.OK);
+                logger.finer(
+                        String.format("loadTexture %s -> %s", response.uri(), LoaderStatus.OK));
                 return result;
             } catch (IOException e) {
                 error = LoaderStatus.ERROR_OTHER;
@@ -176,7 +197,7 @@ public class DataLoader extends LoaderInterface {
         } else {
             error = LoaderStatus.ERROR_OTHER;
         }
-        System.out.printf("loadTexture %s -> %s\n", response.uri(), error);
+        logger.finer(String.format("loadTexture %s -> %s", response.uri(), error));
         return new TextureLoaderResult(null, null, error, null);
     }
 }

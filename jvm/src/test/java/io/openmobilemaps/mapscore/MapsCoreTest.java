@@ -1,16 +1,17 @@
 package io.openmobilemaps.mapscore;
 
-import java.awt.image.BufferedImage;
-import java.io.File;
-
-import javax.imageio.ImageIO;
-
 import io.openmobilemaps.mapscore.map.util.MapTileRenderer;
 import io.openmobilemaps.mapscore.map.util.OffscreenMapRenderer;
 import io.openmobilemaps.mapscore.map.util.Tiled2dMapVectorLayerBuilder;
 import io.openmobilemaps.mapscore.shared.map.coordinates.Coord;
 import io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateSystemIdentifiers;
 import io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord;
+
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.net.URL;
+
+import javax.imageio.ImageIO;
 
 public class MapsCoreTest {
     // TODO turn this into a self contained test.
@@ -19,10 +20,15 @@ public class MapsCoreTest {
 
         OffscreenMapRenderer renderer = new OffscreenMapRenderer(2 * 900, 2 * 550, 1);
 
+        URL styleJsonUrl = MapsCoreTest.class.getResource("/test-style.json");
+        String resourceDir = new File(styleJsonUrl.getPath()).getParent().toString();
+        System.out.println(resourceDir);
+
         Tiled2dMapVectorLayerBuilder.addFromStyleJson(
                 renderer.getMap(),
                 "name",
-                "http://localhost:8888/style.json",
+                styleJsonUrl.toString(),
+                resourceDir,
                 MapsCoreTest.class.getClassLoader(),
                 "fonts");
 
