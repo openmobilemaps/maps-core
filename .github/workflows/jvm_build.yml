@@ -9,5 +9,5 @@ jobs:
             ref_name: ${{ github.ref_name }}
             checkout_submodules: recursive
             parent_pom: jvm/pom.xml
-            use_mvn_central: true
             install_apt_packages: "cmake make clang libgl-dev libgles-dev libosmesa6-dev"
+            use_mvn_central: true

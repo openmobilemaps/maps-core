@@ -1,0 +1,17 @@
+name: Maven build and deploy JVM
+on: push
+
+jobs:
+    build:
+        name: Build JVM package and deploy to Maven repo
+        uses: UbiqueInnovation/workflows-backend/.github/workflows/mvn_package_deploy.yml@feature/checkout-submodules
+        with:
+            ref_name: ${{ github.ref_name }}
+            checkout_submodules: recursive
+            parent_pom: jvm/pom.xml
+            install_apt_packages: "cmake make clang libgl-dev libgles-dev libosmesa6-dev"
+        secrets:
+            artifactory_user: ${{ secrets.UB_ARTIFACTORY_USER}}
+            artifactory_password: ${{ secrets.UB_ARTIFACTORY_PASSWORD }}
+            artifactory_url: ${{ secrets.UB_ARTIFACTORY_URL }}
+            artifactory_repo: ${{ secrets.UB_ARTIFACTORY_REPO_BACKEND }}
