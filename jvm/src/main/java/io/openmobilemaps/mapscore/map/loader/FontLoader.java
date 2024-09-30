@@ -1,14 +1,5 @@
 package io.openmobilemaps.mapscore.map.loader;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.logging.Logger;
-
-import javax.imageio.ImageIO;
-
 import io.openmobilemaps.mapscore.graphics.BufferedImageTextureHolder;
 import io.openmobilemaps.mapscore.shared.map.loader.Font;
 import io.openmobilemaps.mapscore.shared.map.loader.FontData;
@@ -16,26 +7,48 @@ import io.openmobilemaps.mapscore.shared.map.loader.FontLoaderInterface;
 import io.openmobilemaps.mapscore.shared.map.loader.FontLoaderResult;
 import io.openmobilemaps.mapscore.shared.map.loader.FontWrapper;
 import io.openmobilemaps.mapscore.shared.map.loader.LoaderStatus;
+
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.logging.Logger;
+
+import javax.imageio.ImageIO;
+
 /**
- * Load fonts from local resources.
+ * Load fonts from local ClassLoader resources.
  *
  * <p>Fonts are expected to be defined by a JSON/PNG file pair. The JSON document is the font
- * manifest and the PNG is the multichannel signed-distance-field font atlas. See e.g.
- * <a href="https://github.com/soimy/msdf-bmfont-xml">https://github.com/soimy/msdf-bmfont-xml</a>
+ * manifest and the PNG is the multichannel signed-distance-field font atlas. See e.g. <a
+ * href="https://github.com/soimy/msdf-bmfont-xml">https://github.com/soimy/msdf-bmfont-xml</a>
  */
 public class FontLoader extends FontLoaderInterface {
 
     private static final Logger logger = Logger.getLogger(FontLoader.class.getName());
     private final HashMap<String, FontLoaderResult> fontCache;
-    private final double dpFactor; // !< render-DPI / 160.0, factor for "Density Independent Pixel" size.
+    private final double
+            dpFactor; // !< render-DPI / 160.0, factor for "Density Independent Pixel" size.
+    private final ClassLoader classLoader;
+    private final String fontDirectory;
+    private final String fallbackFontName;
 
     /**
-     * @param dpi: render resolution, for appropriate scaling.
+     * @param dpi render resolution, for appropriate scaling.
+     * @param classLoader ClassLoader in which to look for font resources
+     * @param fontDirectory: directory in which to look for font resources
+     * @param fallbackFontName optional, name of font to use as fallback for unknown fonts
      */
-    public FontLoader(double dpi) {
+    public FontLoader(
+            double dpi,
+            @NotNull ClassLoader classLoader,
+            @NotNull String fontDirectory,
+            String fallbackFontName) {
         this.dpFactor = dpi / 160.0; // see android DisplayMetrics.density.
+        this.classLoader = classLoader;
+        this.fontDirectory = fontDirectory;
+        this.fallbackFontName = fallbackFontName;
         fontCache = new HashMap<>();
     }
 
@@ -48,19 +61,20 @@ public class FontLoader extends FontLoaderInterface {
             if (entry != null) {
                 return entry;
             }
-            System.out.printf("loadFont %s\n", fontName);
+            logger.finer("loadFont " + fontName);
             var result = loadFont(fontName);
+            String fallbackName = null;
             if (result.getStatus() == LoaderStatus.ERROR_404) {
-                result = loadFontFallback(fontName);
-                var fallbackName = "";
-                if (result.getFontData() != null) {
-                    fallbackName = result.getFontData().getInfo().getName();
-                }
-                System.out.printf(
-                        "loadFont(%s) -> Fallback %s -> %s\n",
-                        fontName, fallbackName, result.getStatus());
+                fallbackName = getFallbackFont(fontName);
+            }
+            if (fallbackName != null) {
+                result = loadFont(getFallbackFont(fontName));
+                logger.finer(
+                        String.format(
+                                "loadFont(%s) -> Fallback %s -> %s",
+                                fontName, fallbackName, result.getStatus()));
             } else {
-                System.out.printf("loadFont %s -> %s\n", fontName, result.getStatus());
+                logger.finer(String.format("loadFont %s -> %s", fontName, result.getStatus()));
             }
             fontCache.put(fontName, result);
             return result;
@@ -68,34 +82,37 @@ public class FontLoader extends FontLoaderInterface {
     }
 
     protected FontLoaderResult loadFont(String fontName) {
-        // TODO: no clue what is a sensible place to look for these font files
-        String manifestName = fontName + ".json";
-        String imageName = fontName + ".png";
-        // Try resources:
-        InputStream manifest = getClass().getResourceAsStream(manifestName);
-        InputStream image = getClass().getResourceAsStream(imageName);
-        if (manifest != null && image != null) {
-            return readFont(manifest, image);
-        } else if (manifest != null || image != null) {
-            // Error if one is found but not the other.
-            return new FontLoaderResult(null, null, LoaderStatus.ERROR_404);
-        }
-        // Try current working directory:
-        try {
-            manifest = new FileInputStream(manifestName);
-            image = new FileInputStream(imageName);
-            return readFont(manifest, image);
-        } catch (FileNotFoundException e) {
-            return new FontLoaderResult(null, null, LoaderStatus.ERROR_404);
+
+        try (FontDataStreams streams = findFontData(fontName)) {
+            if (streams == null || streams.image() == null || streams.manifest() == null) {
+                return new FontLoaderResult(null, null, LoaderStatus.ERROR_404);
+            }
+            return readFont(streams.image(), streams.manifest());
+        } catch (Exception e) {
+            return new FontLoaderResult(null, null, LoaderStatus.ERROR_OTHER);
         }
     }
 
-    protected FontLoaderResult loadFontFallback(String fontName) {
-        logger.finer("Loading fallback for font " + fontName);
-        return loadFont("Roboto-Regular"); // TODO: fallback to _any_ available font? Configurable?
+    /**
+     * Find the font data, that is the font.png image and font.json manifest. Implementation should
+     * return null if either item could not be found.
+     *
+     * @return InputStreams for font data, i.e. the png image and the manifest, or null if not
+     *     found.
+     */
+    protected FontDataStreams findFontData(String fontName) {
+        return new FontDataStreams(
+                classLoader.getResourceAsStream(
+                        String.format("%s/%s.png", fontDirectory, fontName)),
+                classLoader.getResourceAsStream(
+                        String.format("%s/%s.json", fontDirectory, fontName)));
     }
 
-    protected FontLoaderResult readFont(InputStream manifestStream, InputStream imageStream) {
+    protected String getFallbackFont(String ignoredFontName) {
+        return fallbackFontName;
+    }
+
+    protected FontLoaderResult readFont(InputStream imageStream, InputStream manifestStream) {
         try {
             var manifest = FontJsonManifestReader.read(manifestStream);
 
@@ -119,6 +136,15 @@ public class FontLoader extends FontLoaderInterface {
         } catch (IOException | FontJsonManifestReader.InvalidManifestException e) {
             logger.warning(e.toString());
             return new FontLoaderResult(null, null, LoaderStatus.ERROR_OTHER);
+        }
+    }
+
+    protected static record FontDataStreams(InputStream image, InputStream manifest)
+            implements AutoCloseable {
+        @Override
+        public void close() throws Exception {
+            image.close();
+            manifest.close();
         }
     }
 }

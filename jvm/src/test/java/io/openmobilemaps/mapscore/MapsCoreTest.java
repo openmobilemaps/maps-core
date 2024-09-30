@@ -13,13 +13,18 @@ import io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateSystemIdentif
 import io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord;
 
 public class MapsCoreTest {
+    // TODO turn this into a self contained test.
     public static void main(String[] args) {
         MapsCore.initialize();
 
         OffscreenMapRenderer renderer = new OffscreenMapRenderer(2 * 900, 2 * 550, 1);
 
         Tiled2dMapVectorLayerBuilder.addFromStyleJson(
-                renderer.getMap(), "name", "http://localhost:8888/style.json");
+                renderer.getMap(),
+                "name",
+                "http://localhost:8888/style.json",
+                MapsCoreTest.class.getClassLoader(),
+                "fonts");
 
         var bbox =
                 new RectCoord(
