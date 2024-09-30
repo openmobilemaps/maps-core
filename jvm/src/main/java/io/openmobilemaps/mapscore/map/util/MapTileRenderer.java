@@ -1,5 +1,6 @@
 package io.openmobilemaps.mapscore.map.util;
 
+import io.openmobilemaps.mapscore.shared.map.LayerReadyState;
 import io.openmobilemaps.mapscore.shared.map.coordinates.Coord;
 import io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateConversionHelperInterface;
 import io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord;
@@ -7,6 +8,7 @@ import io.openmobilemaps.mapscore.shared.map.layers.tiled.DefaultTiled2dMapLayer
 import io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapZoomLevelInfo;
 
 import java.awt.image.BufferedImage;
+import java.time.Duration;
 import java.util.ArrayList;
 
 /** Off-screen tile renderer for an openmobilemaps Map. */
@@ -82,6 +84,11 @@ public class MapTileRenderer {
 
     public BufferedImage renderTile(int zoomLevel, int xcol, int yrow)
             throws OffscreenMapRenderer.MapLayerException {
+        return renderTile(zoomLevel, xcol, yrow, null);
+    }
+
+    public BufferedImage renderTile(int zoomLevel, int xcol, int yrow, Duration timeout)
+            throws OffscreenMapRenderer.MapLayerException {
         var cam = renderer.getMap().getCamera();
         cam.freeze(false);
 
@@ -89,7 +96,23 @@ public class MapTileRenderer {
         cam.moveToBoundingBox(tile, 0.0f, false, null, null);
         // TODO: this drawFrame calls update() on camera/layer for each tile separately. Is this
         // safe or will it cause issues at tile borders?
-        return renderer.drawFrame();
+        return renderer.drawFrame(timeout);
+    }
+
+    /**
+     * Attempt to force rendering a tile even if a map layer keeps saying it's not ready. See
+     * OffscreenMapRenderer.forceDrawFrame.
+     */
+    public BufferedImage forceRenderTile(int zoomLevel, int xcol, int yrow) throws OffscreenMapRenderer.MapLayerException {
+        try {
+            return renderTile(zoomLevel, xcol, yrow, Duration.ofMillis(50));
+        } catch (OffscreenMapRenderer.MapLayerException e) {
+            if (e.getState() == LayerReadyState.NOT_READY) {
+                return renderer.forceDrawFrame();
+            } else {
+                throw e;
+            }
+        }
     }
 
     public record TileRange(int zoomLevel, int minColumn, int maxColumn, int minRow, int maxRow) {}

@@ -10,7 +10,10 @@ import io.openmobilemaps.mapscore.shared.map.MapConfig;
 import io.openmobilemaps.mapscore.shared.map.MapInterface;
 import io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateSystemFactory;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.awt.image.BufferedImage;
+import java.time.Duration;
 
 public class OffscreenMapRenderer {
     private final MapInterface map;
@@ -66,42 +69,54 @@ public class OffscreenMapRenderer {
     }
 
     public BufferedImage drawFrame() throws MapLayerException {
+        return drawFrame(null);
+    }
 
-        // - getVpMatrix must be called before first update.
-        map.getCamera().asCameraInterface().getVpMatrix();
-        for (var layer : map.getLayers()) {
-            layer.enableAnimations(false);
-        }
-
-        awaitReady();
-
+    public BufferedImage drawFrame(@Nullable Duration timeout) throws MapLayerException {
         // Text icon fade in workaround:
         // - getVpMatrix must be called before first update.
         // - need two calls to update before first actual draw.
         //    -> first update runs symbol collision detection
         //    -> snd update to show non-colliding symbols.
         //    (and another one that is implicit in drawFrame?)
-        // XXX: still have text labels flickering back and forth.
         map.getCamera().asCameraInterface().getVpMatrix();
+        for (var layer : map.getLayers()) {
+            layer.enableAnimations(false);
+        }
+
+        awaitReady(timeout);
+
         for (var layer : map.getLayers()) {
             layer.update();
             layer.update();
         }
+
         map.drawFrame();
         return ctx.getImage();
     }
 
-    private void awaitReady() throws MapLayerException {
+    /**
+     * Occasionally map layers may get stuck and return an unready state, but might in fact be ready to render.
+     * This method simply draws the map anyway, but all bets are off if the output is correct.
+     */
+    public BufferedImage forceDrawFrame() {
+        map.drawFrame();
+        return ctx.getImage();
+    }
+
+    private void awaitReady(@Nullable Duration timeout) throws MapLayerException {
         // Note: this sort of duplicates `map.drawReadyFrame`.
         // The key difference is that this implementation assumes that we're already on the render
         // thread so we don't have to juggle with invalidate and callbacks etc.
 
-        // TODO: looks like we need a timeout? Randomly gets stuck with layers never getting ready
-        // sometimes...
+        if (timeout == null) {
+            timeout = Duration.ofMinutes(1); // basically an eternity.
+        }
+        final long hopeTime = Math.clamp(0, 10, timeout.toMillis() - 10);
 
-        boolean allReady;
-        long triggerUpdate = System.currentTimeMillis() + 10;
-        do {
+        boolean allReady = false;
+        final long deadline = System.currentTimeMillis() + timeout.toMillis();
+        while (!allReady && System.currentTimeMillis() < (deadline - hopeTime)) {
             runGraphicsTasks();
             allReady = true;
             for (var layer : map.getLayers()) {
@@ -115,16 +130,27 @@ public class OffscreenMapRenderer {
                 }
             }
             Thread.yield();
+        }
 
-            final long now = System.currentTimeMillis();
-            if (now > triggerUpdate) {
-                // Trigger layer updates. This _might_ trigger some more activity that might make
-                // the layer ready, eventually.
+        // timeout
+        if (!allReady) {
+            // The layer might have gotten stuck somehow. Try to kick "update" on the layers and see
+            // if this helps. Shouldn't have to, but who knows.
+            while (System.currentTimeMillis() < deadline) {
                 for (var layer : map.getLayers()) {
                     layer.update();
                 }
+                runGraphicsTasks();
+                Thread.yield();
             }
-        } while (!allReady);
+
+            for (var layer : map.getLayers()) {
+                var readyState = layer.isReadyToRenderOffscreen();
+                if (readyState != LayerReadyState.READY) {
+                    throw new MapLayerException(layer, readyState);
+                }
+            }
+        }
     }
 
     private void runGraphicsTasks() {
@@ -147,6 +173,14 @@ public class OffscreenMapRenderer {
         MapLayerException(LayerInterface layer, LayerReadyState state) {
             this.layer = layer;
             this.state = state;
+        }
+
+        public LayerReadyState getState() {
+            return state;
+        }
+
+        public LayerInterface getLayer() {
+            return layer;
         }
 
         @Override
