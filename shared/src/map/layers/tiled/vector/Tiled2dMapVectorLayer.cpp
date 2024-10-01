@@ -166,7 +166,11 @@ void Tiled2dMapVectorLayer::didLoadStyleJson(const std::optional<TiledLayerError
 }
 
 std::optional<TiledLayerError> Tiled2dMapVectorLayer::loadStyleJson() {
-    auto error = loadStyleJsonRemotely();
+    std::optional<TiledLayerError> error = std::nullopt;
+    if (this->remoteStyleJsonUrl.has_value()) {
+        error = loadStyleJsonRemotely();
+    }
+    
     if (error.has_value() || !this->remoteStyleJsonUrl.has_value()) {
         if (localDataProvider) {
             auto optionalStyleJson = localDataProvider->getStyleJson();
