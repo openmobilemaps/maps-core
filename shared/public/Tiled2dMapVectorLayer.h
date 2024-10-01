@@ -69,8 +69,8 @@ public:
                           const std::shared_ptr<Tiled2dMapVectorLayerLocalDataProviderInterface> &localDataProvider = nullptr);
 
     Tiled2dMapVectorLayer(const std::string &layerName,
-                          const std::string &remoteStyleJsonUrl,
-                          const std::string &fallbackStyleJsonString,
+                          const std::optional<std::string> &remoteStyleJsonUrl,
+                          const std::optional<std::string> &fallbackStyleJsonString,
                           const std::vector <std::shared_ptr<::LoaderInterface>> &loaders,
                           const std::shared_ptr<::FontLoaderInterface> &fontLoader,
                           const std::optional<Tiled2dMapZoomInfo> &customZoomInfo = std::nullopt,

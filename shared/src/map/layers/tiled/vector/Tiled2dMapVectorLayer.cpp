@@ -69,8 +69,8 @@ Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
         {}
 
 Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
-                                             const std::string &remoteStyleJsonUrl,
-                                             const std::string &fallbackStyleJsonString,
+                                             const std::optional<std::string> &remoteStyleJsonUrl,
+                                             const std::optional<std::string> &fallbackStyleJsonString,
                                              const std::vector<std::shared_ptr<::LoaderInterface>> &loaders,
                                              const std::shared_ptr<::FontLoaderInterface> &fontLoader,
                                              const std::optional<Tiled2dMapZoomInfo> &customZoomInfo,
@@ -166,21 +166,21 @@ void Tiled2dMapVectorLayer::didLoadStyleJson(const std::optional<TiledLayerError
 }
 
 std::optional<TiledLayerError> Tiled2dMapVectorLayer::loadStyleJson() {
-    if (localDataProvider) {
-        auto optionalStyleJson = localDataProvider->getStyleJson();
-        if (optionalStyleJson) {
-            auto parseResult = Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromString(layerName, *optionalStyleJson, localDataProvider, loaders, sourceUrlParams);
-            
-            if (parseResult.status == LoaderStatus::OK) {
-                setMapDescription(parseResult.mapDescription);
-                metadata = parseResult.metadata;
-                return std::nullopt;
+    auto error = loadStyleJsonRemotely();
+    if (error.has_value() || !this->remoteStyleJsonUrl.has_value()) {
+        if (localDataProvider) {
+            auto optionalStyleJson = localDataProvider->getStyleJson();
+            if (optionalStyleJson) {
+                auto parseResult = Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromString(layerName, *optionalStyleJson, localDataProvider, loaders, sourceUrlParams);
+                
+                if (parseResult.status == LoaderStatus::OK) {
+                    setMapDescription(parseResult.mapDescription);
+                    metadata = parseResult.metadata;
+                    return std::nullopt;
+                }
             }
         }
-    }
-    
-    auto error = loadStyleJsonRemotely();
-    if (error.has_value()) {
+        
         if (auto json = fallbackStyleJsonString) {
             return loadStyleJsonLocally(*json);
         } else {
