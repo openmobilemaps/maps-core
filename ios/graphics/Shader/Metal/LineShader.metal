@@ -71,10 +71,11 @@ struct LineStyling {
 
 vertex LineVertexOut
 lineGroupVertexShader(const LineVertexIn vertexIn [[stage_in]],
-                      constant float4x4 &vpMatrix [[buffer(1)]],
-                      constant float &scalingFactor [[buffer(2)]],
-                      constant float &dashingScalingFactor [[buffer(3)]],
-                      constant float *styling [[buffer(4)]])
+                      constant float4x4 &viewMatrix [[buffer(1)]],
+                      constant float4x4 &projectionMatrix [[buffer(2)]],
+                      constant float &scalingFactor [[buffer(3)]],
+                      constant float &dashingScalingFactor [[buffer(4)]],
+                      constant float *styling [[buffer(5)]])
 {
     int styleIndex = (int(vertexIn.stylingIndex) & 0xFF) * 21;
 
@@ -115,7 +116,7 @@ lineGroupVertexShader(const LineVertexIn vertexIn [[stage_in]],
   int segmentType = int(vertexIn.stylingIndex) >> 8;// / 256.0;
 
     LineVertexOut out {
-        .position = vpMatrix * extendedPosition,
+        .position = projectionMatrix * (viewMatrix * extendedPosition),
         .uv = extendedPosition.xy,
         .lineA = extendedPosition.xy - (vertexIn.lineA + offset.xy),
         .lineB = (vertexIn.lineB + offset.xy) - (vertexIn.lineA + offset.xy),
@@ -133,10 +134,11 @@ lineGroupVertexShader(const LineVertexIn vertexIn [[stage_in]],
 
 vertex LineVertexOut
 unitSphereLineGroupVertexShader(const LineVertexIn vertexIn [[stage_in]],
-                      constant float4x4 &vpMatrix [[buffer(1)]],
-                      constant float &scalingFactor [[buffer(2)]],
-                      constant float &dashingScalingFactor [[buffer(3)]],
-                      constant float *styling [[buffer(4)]])
+                      constant float4x4 &viewMatrix [[buffer(1)]],
+                      constant float4x4 &projectionMatrix [[buffer(2)]],
+                      constant float &scalingFactor [[buffer(3)]],
+                      constant float &dashingScalingFactor [[buffer(4)]],
+                      constant float *styling [[buffer(5)]])
 {
     int styleIndex = (int(vertexIn.stylingIndex) & 0xFF) * 21;
 
@@ -185,7 +187,7 @@ unitSphereLineGroupVertexShader(const LineVertexIn vertexIn [[stage_in]],
     const float z = -extendedPosition.z * sin(extendedPosition.y) * sin(extendedPosition.x);
 
     LineVertexOut out {
-        .position = vpMatrix * float4(x,y,z, 1.0),
+        .position = projectionMatrix * (viewMatrix * float4(x,y,z, 1.0)),
         .uv = extendedPosition.xy,
         .lineA = extendedPosition.xy - (vertexIn.lineA + offset.xy),
         .lineB = (vertexIn.lineB + offset.xy) - (vertexIn.lineA + offset.xy),

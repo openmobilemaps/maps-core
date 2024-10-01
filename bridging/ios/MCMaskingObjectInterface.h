@@ -13,7 +13,8 @@
 
 - (void)renderAsMask:(nullable id<MCRenderingContextInterface>)context
           renderPass:(nonnull MCRenderPassConfig *)renderPass
-            vpMatrix:(int64_t)vpMatrix
+          viewMatrix:(int64_t)viewMatrix
+    projectionMatrix:(int64_t)projectionMatrix
              mMatrix:(int64_t)mMatrix
 screenPixelAsRealMeterFactor:(double)screenPixelAsRealMeterFactor;
 

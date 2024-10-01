@@ -49,7 +49,8 @@ final class Text: BaseGraphicsObject, @unchecked Sendable {
     override func render(encoder: MTLRenderCommandEncoder,
                          context: RenderingContext,
                          renderPass _: MCRenderPassConfig,
-                         vpMatrix: Int64,
+                         viewMatrix: Int64,
+                         projectionMatrix: Int64,
                          mMatrix: Int64,
                          isMasked: Bool,
                          screenPixelAsRealMeterFactor _: Double) {
@@ -82,8 +83,11 @@ final class Text: BaseGraphicsObject, @unchecked Sendable {
         shader.preRender(context)
 
         encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
-        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(vpMatrix)) {
+        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(viewMatrix)) {
             encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
+        }
+        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(projectionMatrix)) {
+            encoder.setVertexBytes(matrixPointer, length: 64, index: 2)
         }
 
         encoder.setFragmentSamplerState(sampler, index: 0)

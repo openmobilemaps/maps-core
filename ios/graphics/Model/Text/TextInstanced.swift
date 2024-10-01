@@ -58,7 +58,8 @@ final class TextInstanced: BaseGraphicsObject, @unchecked Sendable {
     override func render(encoder: MTLRenderCommandEncoder,
                          context: RenderingContext,
                          renderPass _: MCRenderPassConfig,
-                         vpMatrix: Int64,
+                         viewMatrix: Int64,
+                         projectionMatrix: Int64,
                          mMatrix: Int64,
                          isMasked: Bool,
                          screenPixelAsRealMeterFactor _: Double) {
@@ -99,22 +100,25 @@ final class TextInstanced: BaseGraphicsObject, @unchecked Sendable {
 
         encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
         
-        if let vpMatrixPointer = UnsafeRawPointer(bitPattern: Int(vpMatrix)) {
+        if let vpMatrixPointer = UnsafeRawPointer(bitPattern: Int(viewMatrix)) {
             encoder.setVertexBytes(vpMatrixPointer, length: 64, index: 1)
         }
+        if let vpMatrixPointer = UnsafeRawPointer(bitPattern: Int(projectionMatrix)) {
+            encoder.setVertexBytes(vpMatrixPointer, length: 64, index: 2)
+        }
         if let mMatrixPointer = UnsafeRawPointer(bitPattern: Int(mMatrix)) {
-            encoder.setVertexBytes(mMatrixPointer, length: 64, index: 2)
+            encoder.setVertexBytes(mMatrixPointer, length: 64, index: 3)
         }
 
-        encoder.setVertexBuffer(positionsBuffer, offset: 0, index: 3)
-        encoder.setVertexBuffer(scalesBuffer, offset: 0, index: 4)
-        encoder.setVertexBuffer(rotationsBuffer, offset: 0, index: 5)
-        encoder.setVertexBuffer(textureCoordinatesBuffer, offset: 0, index: 6)
-        encoder.setVertexBuffer(styleIndicesBuffer, offset: 0, index: 7)
+        encoder.setVertexBuffer(positionsBuffer, offset: 0, index: 4)
+        encoder.setVertexBuffer(scalesBuffer, offset: 0, index: 5)
+        encoder.setVertexBuffer(rotationsBuffer, offset: 0, index: 6)
+        encoder.setVertexBuffer(textureCoordinatesBuffer, offset: 0, index: 7)
+        encoder.setVertexBuffer(styleIndicesBuffer, offset: 0, index: 8)
         
         if shader.isUnitSphere,
            let referencePositionsBuffer {
-            encoder.setVertexBuffer(referencePositionsBuffer, offset: 0, index: 8)
+            encoder.setVertexBuffer(referencePositionsBuffer, offset: 0, index: 9)
         }
 
 

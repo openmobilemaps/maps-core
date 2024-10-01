@@ -87,7 +87,8 @@ class MapCamera3d : public MapCameraInterface,
 
     virtual std::shared_ptr<::CameraInterface> asCameraInterface() override;
 
-    virtual std::vector<float> getVpMatrix() override;
+    virtual std::vector<float> getViewMatrix() override;
+    virtual std::vector<float> getProjectionMatrix() override;
 
     std::optional<std::vector<float>> getLastVpMatrix() override;
 
@@ -170,7 +171,7 @@ class MapCamera3d : public MapCameraInterface,
     bool coordIsFarAwayFromFocusPoint(const ::Coord & coord);
 
 protected:
-    virtual std::tuple<std::vector<float>, std::vector<double>> getVpMatrix(const Coord &focusCoord, bool updateVariables);
+    virtual std::tuple<std::tuple<std::vector<float>, std::vector<float>>, std::vector<double>> getVpMatrix(const Coord &focusCoord, bool updateVariables);
 
     virtual ::Coord coordFromScreenPosition(const std::vector<double> &inverseVPMatrix, const ::Vec2F &posScreen);
 
@@ -291,8 +292,8 @@ protected:
 
     std::vector<float> vpMatrix = std::vector<float>(16, 0.0);
     std::vector<double> inverseVPMatrix = std::vector<double>(16, 0.0);
-    std::vector<float> viewMatrix = std::vector<float>(16, 0.0);
-    std::vector<float> projectionMatrix = std::vector<float>(16, 0.0);
+    std::vector<double> viewMatrix = std::vector<double>(16, 0.0);
+    std::vector<double> projectionMatrix = std::vector<double>(16, 0.0);
     float verticalFov;
     float horizontalFov;
     bool validVpMatrix = false;

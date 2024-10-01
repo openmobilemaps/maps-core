@@ -42,10 +42,12 @@ struct PolygonGroupStripeStyling {
 
 vertex PolygonGroupVertexOut
 polygonGroupVertexShader(const PolygonGroupVertexIn vertexIn [[stage_in]],
-                 constant float4x4 &vpMatrix [[buffer(1)]])
+                 constant float4x4 &viewMatrix [[buffer(1)]],
+                 constant float4x4 &projectionMatrix [[buffer(2)]]
+                         )
 {
     PolygonGroupVertexOut out {
-        .position = vpMatrix * float4(vertexIn.position.xy, 0.0, 1.0),
+        .position = projectionMatrix * (viewMatrix * float4(vertexIn.position.xy, 0.0, 1.0)),
         .uv = float2(0.0, 0.0),
         .stylingIndex = vertexIn.stylingIndex,
     };
@@ -55,7 +57,9 @@ polygonGroupVertexShader(const PolygonGroupVertexIn vertexIn [[stage_in]],
 
 vertex PolygonGroupVertexOut
 unitSpherePolygonGroupVertexShader(const Polygon4GroupVertexIn vertexIn [[stage_in]],
-                 constant float4x4 &vpMatrix [[buffer(1)]])
+                 constant float4x4 &viewMatrix [[buffer(1)]],
+                 constant float4x4 &projectionMatrix [[buffer(2)]]
+                                   )
 {
 
 //    float4 newVertex = float4(vertexIn.position.xy, 1.0, 1.0);
@@ -81,7 +85,7 @@ unitSpherePolygonGroupVertexShader(const Polygon4GroupVertexIn vertexIn [[stage_
 //    const float z = -newVertex.z * sin(newVertex.y) * sin(newVertex.x);
 
     PolygonGroupVertexOut out {
-        .position = vpMatrix * float4(x,y,z, 1.0),
+        .position = projectionMatrix * (viewMatrix * float4(x,y,z, 1.0)),
         .uv = float2(0.0, 0.0),
         .stylingIndex = vertexIn.stylingIndex,
     };

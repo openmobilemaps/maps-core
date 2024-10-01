@@ -70,7 +70,8 @@ final class Quad2d: BaseGraphicsObject, @unchecked Sendable {
     override func render(encoder: MTLRenderCommandEncoder,
                          context: RenderingContext,
                          renderPass: MCRenderPassConfig,
-                         vpMatrix: Int64,
+                         viewMatrix: Int64,
+                         projectionMatrix: Int64,
                          mMatrix: Int64,
                          isMasked: Bool,
                          screenPixelAsRealMeterFactor _: Double) {
@@ -121,11 +122,14 @@ final class Quad2d: BaseGraphicsObject, @unchecked Sendable {
 
         encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
         
-        if let vpMatrixPointer = UnsafeRawPointer(bitPattern: Int(vpMatrix)) {
+        if let vpMatrixPointer = UnsafeRawPointer(bitPattern: Int(viewMatrix)) {
             encoder.setVertexBytes(vpMatrixPointer, length: 64, index: 1)
         }
+        if let vpMatrixPointer = UnsafeRawPointer(bitPattern: Int(projectionMatrix)) {
+            encoder.setVertexBytes(vpMatrixPointer, length: 64, index: 2)
+        }
         if let mMatrixPointer = UnsafeRawPointer(bitPattern: Int(mMatrix)) {
-            encoder.setVertexBytes(mMatrixPointer, length: 64, index: 2)
+            encoder.setVertexBytes(mMatrixPointer, length: 64, index: 3)
         }
 
         encoder.setFragmentSamplerState(sampler, index: 0)
@@ -145,7 +149,8 @@ final class Quad2d: BaseGraphicsObject, @unchecked Sendable {
 extension Quad2d: MCMaskingObjectInterface {
     func render(asMask context: MCRenderingContextInterface?,
                 renderPass: MCRenderPassConfig,
-                vpMatrix: Int64,
+                viewMatrix: Int64,
+                projectionMatrix: Int64,
                 mMatrix: Int64,
                 screenPixelAsRealMeterFactor: Double) {
         guard isReady(),
@@ -157,7 +162,8 @@ extension Quad2d: MCMaskingObjectInterface {
         render(encoder: encoder,
                context: context,
                renderPass: renderPass,
-               vpMatrix: vpMatrix,
+               viewMatrix: viewMatrix,
+               projectionMatrix: projectionMatrix,
                mMatrix: mMatrix,
                isMasked: false,
                screenPixelAsRealMeterFactor: screenPixelAsRealMeterFactor)

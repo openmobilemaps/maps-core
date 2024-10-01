@@ -6,7 +6,9 @@
 
 @protocol MCCameraInterface
 
-- (nonnull NSArray<NSNumber *> *)getVpMatrix;
+- (nonnull NSArray<NSNumber *> *)getViewMatrix;
+
+- (nonnull NSArray<NSNumber *> *)getProjectionMatrix;
 
 - (double)getScalingFactor;
 

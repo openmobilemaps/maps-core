@@ -81,7 +81,8 @@ class MapCamera2d : public MapCameraInterface,
 
     virtual std::shared_ptr<::CameraInterface> asCameraInterface() override;
 
-    virtual std::vector<float> getVpMatrix() override;
+    virtual std::vector<float> getViewMatrix() override;
+    virtual std::vector<float> getProjectionMatrix() override;
 
     std::optional<std::vector<float>> getLastVpMatrix() override;
 

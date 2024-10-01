@@ -21,12 +21,12 @@ graphics_object_interface = interface +c +j +o {
     # Render the graphics object; ensure calling on graphics thread
 
     set_debug_label(label: string);
-    render(context: rendering_context_interface, render_pass: render_pass_config, vp_matrix: i64, m_matrix: i64, is_masked: bool, screenPixelAsRealMeterFactor: f64);
+    render(context: rendering_context_interface, render_pass: render_pass_config, view_matrix: i64, projection_matrix: i64, m_matrix: i64, is_masked: bool, screenPixelAsRealMeterFactor: f64);
 }
 
 masking_object_interface = interface +c +j +o {
     as_graphics_object(): graphics_object_interface;
-	render_as_mask(context: rendering_context_interface, render_pass: render_pass_config, vp_matrix: i64, m_matrix: i64, screenPixelAsRealMeterFactor: f64);
+	render_as_mask(context: rendering_context_interface, render_pass: render_pass_config, view_matrix: i64, projection_matrix: i64, m_matrix: i64, screenPixelAsRealMeterFactor: f64);
 }
 
 compute_object_interface = interface +c +j +o {

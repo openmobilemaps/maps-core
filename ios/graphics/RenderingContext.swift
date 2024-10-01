@@ -89,7 +89,8 @@ public class RenderingContext: NSObject, @unchecked Sendable {
         stencilClearQuad.render(encoder: encoder,
                                 context: self,
                                 renderPass: .init(renderPass: 0, isPassMasked: false),
-                                vpMatrix: 0,
+                                viewMatrix: 0,
+                                projectionMatrix: 0,
                                 mMatrix: 0,
                                 isMasked: false,
                                 screenPixelAsRealMeterFactor: 1)

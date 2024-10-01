@@ -33,7 +33,8 @@ final class Polygon2d: BaseGraphicsObject, @unchecked Sendable {
     override func render(encoder: MTLRenderCommandEncoder,
                          context: RenderingContext,
                          renderPass pass: MCRenderPassConfig,
-                         vpMatrix: Int64,
+                         viewMatrix: Int64,
+                         projectionMatrix: Int64,
                          mMatrix: Int64,
                          isMasked: Bool,
                          screenPixelAsRealMeterFactor _: Double) {
@@ -77,11 +78,14 @@ final class Polygon2d: BaseGraphicsObject, @unchecked Sendable {
         shader.preRender(context)
 
         encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
-        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(vpMatrix)) {
+        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(viewMatrix)) {
             encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
         }
-        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mMatrix)) {
+        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(projectionMatrix)) {
             encoder.setVertexBytes(matrixPointer, length: 64, index: 2)
+        }
+        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mMatrix)) {
+            encoder.setVertexBytes(matrixPointer, length: 64, index: 3)
         }
 
         encoder.drawIndexedPrimitives(type: .triangle,
@@ -111,7 +115,8 @@ final class Polygon2d: BaseGraphicsObject, @unchecked Sendable {
 extension Polygon2d: MCMaskingObjectInterface {
     func render(asMask context: MCRenderingContextInterface?,
                 renderPass _: MCRenderPassConfig,
-                vpMatrix: Int64,
+                viewMatrix: Int64,
+                projectionMatrix: Int64,
                 mMatrix: Int64,
                 screenPixelAsRealMeterFactor _: Double) {
         
@@ -146,12 +151,15 @@ extension Polygon2d: MCMaskingObjectInterface {
 
         encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
 
-        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(vpMatrix)) {
+        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(viewMatrix)) {
             encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
+        }
+        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(projectionMatrix)) {
+            encoder.setVertexBytes(matrixPointer, length: 64, index: 2)
         }
 
         if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mMatrix)) {
-            encoder.setVertexBytes(matrixPointer, length: 64, index: 2)
+            encoder.setVertexBytes(matrixPointer, length: 64, index: 3)
         }
 
         encoder.drawIndexedPrimitives(type: .triangle,

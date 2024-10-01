@@ -43,13 +43,15 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 
 - (void)renderAsMask:(nullable id<MCRenderingContextInterface>)context
           renderPass:(nonnull MCRenderPassConfig *)renderPass
-            vpMatrix:(int64_t)vpMatrix
+          viewMatrix:(int64_t)viewMatrix
+    projectionMatrix:(int64_t)projectionMatrix
              mMatrix:(int64_t)mMatrix
 screenPixelAsRealMeterFactor:(double)screenPixelAsRealMeterFactor {
     try {
         _cppRefHandle.get()->renderAsMask(::djinni_generated::RenderingContextInterface::toCpp(context),
                                           ::djinni_generated::RenderPassConfig::toCpp(renderPass),
-                                          ::djinni::I64::toCpp(vpMatrix),
+                                          ::djinni::I64::toCpp(viewMatrix),
+                                          ::djinni::I64::toCpp(projectionMatrix),
                                           ::djinni::I64::toCpp(mMatrix),
                                           ::djinni::F64::toCpp(screenPixelAsRealMeterFactor));
     } DJINNI_TRANSLATE_EXCEPTIONS()
@@ -71,12 +73,13 @@ public:
             return ::djinni_generated::GraphicsObjectInterface::toCpp(objcpp_result_);
         }
     }
-    void renderAsMask(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & c_context, const ::RenderPassConfig & c_renderPass, int64_t c_vpMatrix, int64_t c_mMatrix, double c_screenPixelAsRealMeterFactor) override
+    void renderAsMask(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & c_context, const ::RenderPassConfig & c_renderPass, int64_t c_viewMatrix, int64_t c_projectionMatrix, int64_t c_mMatrix, double c_screenPixelAsRealMeterFactor) override
     {
         @autoreleasepool {
             [djinni_private_get_proxied_objc_object() renderAsMask:(::djinni_generated::RenderingContextInterface::fromCpp(c_context))
                                                         renderPass:(::djinni_generated::RenderPassConfig::fromCpp(c_renderPass))
-                                                          vpMatrix:(::djinni::I64::fromCpp(c_vpMatrix))
+                                                        viewMatrix:(::djinni::I64::fromCpp(c_viewMatrix))
+                                                  projectionMatrix:(::djinni::I64::fromCpp(c_projectionMatrix))
                                                            mMatrix:(::djinni::I64::fromCpp(c_mMatrix))
                                       screenPixelAsRealMeterFactor:(::djinni::F64::fromCpp(c_screenPixelAsRealMeterFactor))];
         }

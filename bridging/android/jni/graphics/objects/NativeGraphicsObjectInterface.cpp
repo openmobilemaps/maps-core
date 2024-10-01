@@ -55,14 +55,15 @@ void NativeGraphicsObjectInterface::JavaProxy::setDebugLabel(const std::string &
                            ::djinni::get(::djinni::String::fromCpp(jniEnv, c_label)));
     ::djinni::jniExceptionCheck(jniEnv);
 }
-void NativeGraphicsObjectInterface::JavaProxy::render(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & c_context, const ::RenderPassConfig & c_renderPass, int64_t c_vpMatrix, int64_t c_mMatrix, bool c_isMasked, double c_screenPixelAsRealMeterFactor) {
+void NativeGraphicsObjectInterface::JavaProxy::render(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & c_context, const ::RenderPassConfig & c_renderPass, int64_t c_viewMatrix, int64_t c_projectionMatrix, int64_t c_mMatrix, bool c_isMasked, double c_screenPixelAsRealMeterFactor) {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
     const auto& data = ::djinni::JniClass<::djinni_generated::NativeGraphicsObjectInterface>::get();
     jniEnv->CallVoidMethod(Handle::get().get(), data.method_render,
                            ::djinni::get(::djinni_generated::NativeRenderingContextInterface::fromCpp(jniEnv, c_context)),
                            ::djinni::get(::djinni_generated::NativeRenderPassConfig::fromCpp(jniEnv, c_renderPass)),
-                           ::djinni::get(::djinni::I64::fromCpp(jniEnv, c_vpMatrix)),
+                           ::djinni::get(::djinni::I64::fromCpp(jniEnv, c_viewMatrix)),
+                           ::djinni::get(::djinni::I64::fromCpp(jniEnv, c_projectionMatrix)),
                            ::djinni::get(::djinni::I64::fromCpp(jniEnv, c_mMatrix)),
                            ::djinni::get(::djinni::Bool::fromCpp(jniEnv, c_isMasked)),
                            ::djinni::get(::djinni::F64::fromCpp(jniEnv, c_screenPixelAsRealMeterFactor)));
@@ -117,13 +118,14 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_GraphicsObjectInterface_00024CppProxy_native_1render(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeRenderingContextInterface::JniType j_context, ::djinni_generated::NativeRenderPassConfig::JniType j_renderPass, jlong j_vpMatrix, jlong j_mMatrix, jboolean j_isMasked, jdouble j_screenPixelAsRealMeterFactor)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_GraphicsObjectInterface_00024CppProxy_native_1render(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeRenderingContextInterface::JniType j_context, ::djinni_generated::NativeRenderPassConfig::JniType j_renderPass, jlong j_viewMatrix, jlong j_projectionMatrix, jlong j_mMatrix, jboolean j_isMasked, jdouble j_screenPixelAsRealMeterFactor)
 {
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::GraphicsObjectInterface>(nativeRef);
         ref->render(::djinni_generated::NativeRenderingContextInterface::toCpp(jniEnv, j_context),
                     ::djinni_generated::NativeRenderPassConfig::toCpp(jniEnv, j_renderPass),
-                    ::djinni::I64::toCpp(jniEnv, j_vpMatrix),
+                    ::djinni::I64::toCpp(jniEnv, j_viewMatrix),
+                    ::djinni::I64::toCpp(jniEnv, j_projectionMatrix),
                     ::djinni::I64::toCpp(jniEnv, j_mMatrix),
                     ::djinni::Bool::toCpp(jniEnv, j_isMasked),
                     ::djinni::F64::toCpp(jniEnv, j_screenPixelAsRealMeterFactor));

@@ -344,21 +344,25 @@ void MapCamera3d::removeListener(const std::shared_ptr<MapCameraListenerInterfac
 
 std::shared_ptr<::CameraInterface> MapCamera3d::asCameraInterface() { return shared_from_this(); }
 
-std::vector<float> MapCamera3d::getVpMatrix() {
+std::vector<float> MapCamera3d::getViewMatrix() {
     if(cameraZoomConfig.rotationSpeed) {
         double speed = *(cameraZoomConfig.rotationSpeed);
         focusPointPosition.x = fmod(DateHelper::currentTimeMicros() * speed * 0.000003 + 180.0, 360.0) - 180.0;
         mapInterface->invalidate();
     }
 
-    return std::get<0>(getVpMatrix(focusPointPosition, true));
+    return std::get<0>(std::get<0>(getVpMatrix(focusPointPosition, true)));
 }
 
-std::tuple<std::vector<float>, std::vector<double>> MapCamera3d::getVpMatrix(const Coord &focusCoord, bool updateVariables) {
+std::vector<float> MapCamera3d::getProjectionMatrix() {
+    return std::get<1>(std::get<0>(getVpMatrix(focusPointPosition, true)));
+}
+
+std::tuple<std::tuple<std::vector<float>, std::vector<float>>, std::vector<double>> MapCamera3d::getVpMatrix(const Coord &focusCoord, bool updateVariables) {
     Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
 
-    std::vector<float> newViewMatrix(16, 0.0);
-    std::vector<float> newProjectionMatrix(16, 0.0);
+    std::vector<double> newViewMatrix(16, 0.0);
+    std::vector<double> newProjectionMatrix(16, 0.0);
 
     const float R = 6378137.0;
     float longitude = focusCoord.x; //  px / R;
@@ -388,7 +392,7 @@ std::tuple<std::vector<float>, std::vector<double>> MapCamera3d::getVpMatrix(con
     double fovyRad = fovy * M_PI / 180.0;
 
     // initial perspective projection
-    Matrix::perspectiveM(newProjectionMatrix, 0, fovy, vpr, minD, maxD);
+    MatrixD::perspectiveM(newProjectionMatrix, 0, fovy, vpr, minD, maxD);
 
     // modify projection
     // translate anchor point based on padding and offset
@@ -396,46 +400,86 @@ std::tuple<std::vector<float>, std::vector<double>> MapCamera3d::getVpMatrix(con
     double contentHeight = ((double) sizeViewport.y) - paddingBottom - paddingTop;
     double offsetY = -paddingBottom / 2.0 / (double) sizeViewport.y + cameraVerticalDisplacement * contentHeight * 0.5 / (double) sizeViewport.y;
     offsetY = cameraDistance * tan(fovyRad / 2.0) * offsetY; // view space to world space
-    Matrix::translateM(newProjectionMatrix, 0, 0.0, -offsetY, 0);
+    MatrixD::translateM(newProjectionMatrix, 0, 0.0, -offsetY, 0);
 
     // view matrix
     // remember: read from bottom to top
-    Matrix::setIdentityM(newViewMatrix, 0);
+    MatrixD::setIdentityM(newViewMatrix, 0);
 
-    Matrix::translateM(newViewMatrix, 0, 0.0, 0, -cameraDistance);
-    Matrix::rotateM(newViewMatrix, 0, -cameraPitch, 1.0, 0.0, 0.0);
-    Matrix::rotateM(newViewMatrix, 0, -angle, 0.0, 0.0, 1.0);
+    MatrixD::translateM(newViewMatrix, 0, 0.0, 0, -cameraDistance);
+    MatrixD::rotateM(newViewMatrix, 0, -cameraPitch, 1.0, 0.0, 0.0);
+    MatrixD::rotateM(newViewMatrix, 0, -angle, 0.0, 0.0, 1.0);
 
-    Matrix::translateM(newViewMatrix, 0, 0, 0, -1 - focusPointAltitude / R);
+    MatrixD::translateM(newViewMatrix, 0, 0, 0, -1 - focusPointAltitude / R);
 
-    Matrix::rotateM(newViewMatrix, 0.0, latitude, 1.0, 0.0, 0.0);
-    Matrix::rotateM(newViewMatrix, 0.0, -longitude, 0.0, 1.0, 0.0);
-    Matrix::rotateM(newViewMatrix, 0.0, -90, 0.0, 1.0, 0.0); // zero longitude in London
+    MatrixD::rotateM(newViewMatrix, 0.0, latitude, 1.0, 0.0, 0.0);
+    MatrixD::rotateM(newViewMatrix, 0.0, -longitude, 0.0, 1.0, 0.0);
+    MatrixD::rotateM(newViewMatrix, 0.0, -90, 0.0, 1.0, 0.0); // zero longitude in London
 
 
-    std::vector<float> newVpMatrix(16, 0.0);
-    Matrix::multiplyMM(newVpMatrix, 0, newProjectionMatrix, 0, newViewMatrix, 0);
+    std::vector<double> newVpMatrix(16, 0.0);
+    MatrixD::multiplyMM(newVpMatrix, 0, newProjectionMatrix, 0, newViewMatrix, 0);
 
-    std::vector<double> vpMatrixD = {
-            static_cast<double>(newVpMatrix[0]),
-            static_cast<double>(newVpMatrix[1]),
-            static_cast<double>(newVpMatrix[2]),
-            static_cast<double>(newVpMatrix[3]),
-            static_cast<double>(newVpMatrix[4]),
-            static_cast<double>(newVpMatrix[5]),
-            static_cast<double>(newVpMatrix[6]),
-            static_cast<double>(newVpMatrix[7]),
-            static_cast<double>(newVpMatrix[8]),
-            static_cast<double>(newVpMatrix[9]),
-            static_cast<double>(newVpMatrix[10]),
-            static_cast<double>(newVpMatrix[11]),
-            static_cast<double>(newVpMatrix[12]),
-            static_cast<double>(newVpMatrix[13]),
-            static_cast<double>(newVpMatrix[14]),
-            static_cast<double>(newVpMatrix[15])
-    };
+
     std::vector<double> newInverseMatrix(16, 0.0);
-    gluInvertMatrix(vpMatrixD, newInverseMatrix);
+    gluInvertMatrix(newVpMatrix, newInverseMatrix);
+
+    std::vector<float> newVpMatrixF = {
+        static_cast<float>(newVpMatrix[0]),
+        static_cast<float>(newVpMatrix[1]),
+        static_cast<float>(newVpMatrix[2]),
+        static_cast<float>(newVpMatrix[3]),
+        static_cast<float>(newVpMatrix[4]),
+        static_cast<float>(newVpMatrix[5]),
+        static_cast<float>(newVpMatrix[6]),
+        static_cast<float>(newVpMatrix[7]),
+        static_cast<float>(newVpMatrix[8]),
+        static_cast<float>(newVpMatrix[9]),
+        static_cast<float>(newVpMatrix[10]),
+        static_cast<float>(newVpMatrix[11]),
+        static_cast<float>(newVpMatrix[12]),
+        static_cast<float>(newVpMatrix[13]),
+        static_cast<float>(newVpMatrix[14]),
+        static_cast<float>(newVpMatrix[15])
+    };
+
+    std::vector<float> newProjectionMatrixF = {
+        static_cast<float>(newProjectionMatrix[0]),
+        static_cast<float>(newProjectionMatrix[1]),
+        static_cast<float>(newProjectionMatrix[2]),
+        static_cast<float>(newProjectionMatrix[3]),
+        static_cast<float>(newProjectionMatrix[4]),
+        static_cast<float>(newProjectionMatrix[5]),
+        static_cast<float>(newProjectionMatrix[6]),
+        static_cast<float>(newProjectionMatrix[7]),
+        static_cast<float>(newProjectionMatrix[8]),
+        static_cast<float>(newProjectionMatrix[9]),
+        static_cast<float>(newProjectionMatrix[10]),
+        static_cast<float>(newProjectionMatrix[11]),
+        static_cast<float>(newProjectionMatrix[12]),
+        static_cast<float>(newProjectionMatrix[13]),
+        static_cast<float>(newProjectionMatrix[14]),
+        static_cast<float>(newProjectionMatrix[15])
+    };
+
+    std::vector<float> newViewMatrixF = {
+        static_cast<float>(newViewMatrix[0]),
+        static_cast<float>(newViewMatrix[1]),
+        static_cast<float>(newViewMatrix[2]),
+        static_cast<float>(newViewMatrix[3]),
+        static_cast<float>(newViewMatrix[4]),
+        static_cast<float>(newViewMatrix[5]),
+        static_cast<float>(newViewMatrix[6]),
+        static_cast<float>(newViewMatrix[7]),
+        static_cast<float>(newViewMatrix[8]),
+        static_cast<float>(newViewMatrix[9]),
+        static_cast<float>(newViewMatrix[10]),
+        static_cast<float>(newViewMatrix[11]),
+        static_cast<float>(newViewMatrix[12]),
+        static_cast<float>(newViewMatrix[13]),
+        static_cast<float>(newViewMatrix[14]),
+        static_cast<float>(newViewMatrix[15])
+    };
 
 
 
@@ -443,7 +487,7 @@ std::tuple<std::vector<float>, std::vector<double>> MapCamera3d::getVpMatrix(con
         std::lock_guard<std::recursive_mutex> lock(vpDataMutex);
         lastVpRotation = angle;
         lastVpZoom = zoom;
-        vpMatrix = newVpMatrix;
+        vpMatrix = newVpMatrixF;
         inverseVPMatrix = newInverseMatrix;
         viewMatrix = newViewMatrix;
         projectionMatrix = newProjectionMatrix;
@@ -451,7 +495,9 @@ std::tuple<std::vector<float>, std::vector<double>> MapCamera3d::getVpMatrix(con
         horizontalFov = fovy * vpr;
         validVpMatrix = true;
     }
-    return std::make_tuple(newVpMatrix, newInverseMatrix);
+    return std::make_tuple(std::make_tuple(newViewMatrixF,
+                           newProjectionMatrixF),
+                           newInverseMatrix);
 }
 
 
@@ -580,8 +626,8 @@ void MapCamera3d::notifyListeners(const int &listenerType) {
     double angle = this->angle;
     double zoom = this->zoom;
 
-    std::vector<float> viewMatrix;
-    std::vector<float> projectionMatrix;
+    std::vector<double> viewMatrix;
+    std::vector<double> projectionMatrix;
     float width = 0.0;
     float height = 0.0;
     float horizontalFov = 0.0;
@@ -596,7 +642,7 @@ void MapCamera3d::notifyListeners(const int &listenerType) {
             validVpMatrix = this->validVpMatrix;
         }
         if (!validVpMatrix) {
-            getVpMatrix(); // update matrices
+            getViewMatrix(); // update matrices
         }
         {
             std::lock_guard<std::recursive_mutex> lock(vpDataMutex);
@@ -616,7 +662,46 @@ void MapCamera3d::notifyListeners(const int &listenerType) {
     std::lock_guard<std::recursive_mutex> lock(listenerMutex);
     for (auto listener : listeners) {
         if (listenerType & (ListenerType::BOUNDS | ListenerType::CAMERA_MODE)) {
-            listener->onCameraChange(viewMatrix, projectionMatrix, verticalFov, horizontalFov, width, height, focusPointAltitude, getCenterPosition(), getZoom(), getCameraMode());
+
+            std::vector<float> viewMatrixF = {
+                static_cast<float>(viewMatrix[0]),
+                static_cast<float>(viewMatrix[1]),
+                static_cast<float>(viewMatrix[2]),
+                static_cast<float>(viewMatrix[3]),
+                static_cast<float>(viewMatrix[4]),
+                static_cast<float>(viewMatrix[5]),
+                static_cast<float>(viewMatrix[6]),
+                static_cast<float>(viewMatrix[7]),
+                static_cast<float>(viewMatrix[8]),
+                static_cast<float>(viewMatrix[9]),
+                static_cast<float>(viewMatrix[10]),
+                static_cast<float>(viewMatrix[11]),
+                static_cast<float>(viewMatrix[12]),
+                static_cast<float>(viewMatrix[13]),
+                static_cast<float>(viewMatrix[14]),
+                static_cast<float>(viewMatrix[15])
+            };
+
+            std::vector<float> projectionMatrixF = {
+                static_cast<float>(projectionMatrix[0]),
+                static_cast<float>(projectionMatrix[1]),
+                static_cast<float>(projectionMatrix[2]),
+                static_cast<float>(projectionMatrix[3]),
+                static_cast<float>(projectionMatrix[4]),
+                static_cast<float>(projectionMatrix[5]),
+                static_cast<float>(projectionMatrix[6]),
+                static_cast<float>(projectionMatrix[7]),
+                static_cast<float>(projectionMatrix[8]),
+                static_cast<float>(projectionMatrix[9]),
+                static_cast<float>(projectionMatrix[10]),
+                static_cast<float>(projectionMatrix[11]),
+                static_cast<float>(projectionMatrix[12]),
+                static_cast<float>(projectionMatrix[13]),
+                static_cast<float>(projectionMatrix[14]),
+                static_cast<float>(projectionMatrix[15])
+            };
+
+            listener->onCameraChange(viewMatrixF, projectionMatrixF, verticalFov, horizontalFov, width, height, focusPointAltitude, getCenterPosition(), getZoom(), getCameraMode());
         }
         if (listenerType & ListenerType::ROTATION) {
             listener->onRotationChanged(angle);
@@ -670,7 +755,7 @@ bool MapCamera3d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
 
         if (initialTouchDownPoint) {
             // Force update of matrices for coordFromScreenPosition-call, ...
-            getVpMatrix();
+            getViewMatrix();
 
             // ..., then find coordinate, that would be below middle-point
             auto newTouchDownCoord = coordFromScreenPosition(initialTouchDownPoint.value());
@@ -844,14 +929,14 @@ bool MapCamera3d::onDoubleClick(const ::Vec2F &posScreen) {
     // Force update of matrices with new zoom for coordFromScreenPosition-call, ...
     auto originalZoom = zoom;
     setZoom(targetZoom, false);
-    getVpMatrix();
+    getViewMatrix();
 
     // ..., then find coordinate, that would be at touch
     auto centerCoordAfter = coordFromScreenPosition(posScreen);
 
     // Reset zoom before animation
     setZoom(originalZoom, false);
-    getVpMatrix();
+    getViewMatrix();
 
     // Rotate globe to keep initial coordinate at touch
     if (centerCoordBefore.systemIdentifier != -1 && centerCoordAfter.systemIdentifier != -1) {
@@ -892,14 +977,14 @@ bool MapCamera3d::onTwoFingerClick(const ::Vec2F &posScreen1, const ::Vec2F &pos
     // Force update of matrices with new zoom for coordFromScreenPosition-call, ...
     auto originalZoom = zoom;
     setZoom(targetZoom, false);
-    getVpMatrix();
+    getViewMatrix();
 
     // ..., then find coordinate, that would be below middle-point
     auto centerCoordAfter = coordFromScreenPosition(posScreen);
 
     // Reset zoom before animation
     setZoom(originalZoom, false);
-    getVpMatrix();
+    getViewMatrix();
 
     // Rotate globe to keep initial coordinate at middle-point
     if (centerCoordBefore.systemIdentifier != -1 && centerCoordAfter.systemIdentifier != -1) {
@@ -963,7 +1048,7 @@ bool MapCamera3d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, cons
         updateZoom(newZoom);
 
         // Force update of matrices for coordFromScreenPosition-call, ...
-        getVpMatrix();
+        getViewMatrix();
 
         // ..., then find coordinate, that would be below middle-point
         auto screenCenterNew = (posScreenNew[0] + posScreenNew[1]) / 2.0;
