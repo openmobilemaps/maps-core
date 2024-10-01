@@ -60,7 +60,7 @@ class Tiled2dMapVectorLayer
           public Tiled2dMapVectorSourceListener {
 public:
     Tiled2dMapVectorLayer(const std::string &layerName,
-                          const std::string &remoteStyleJsonUrl,
+                          const std::optional<std::string> &remoteStyleJsonUrl,
                           const std::vector <std::shared_ptr<::LoaderInterface>> &loaders,
                           const std::shared_ptr<::FontLoaderInterface> &fontLoader,
                           const std::optional<Tiled2dMapZoomInfo> &customZoomInfo = std::nullopt,
