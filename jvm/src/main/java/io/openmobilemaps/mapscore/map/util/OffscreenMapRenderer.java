@@ -91,6 +91,7 @@ public class OffscreenMapRenderer {
             layer.update();
         }
 
+        map.prepare();
         map.drawFrame();
         return ctx.getImage();
     }
@@ -100,6 +101,7 @@ public class OffscreenMapRenderer {
      * This method simply draws the map anyway, but all bets are off if the output is correct.
      */
     public BufferedImage forceDrawFrame() {
+        map.prepare();
         map.drawFrame();
         return ctx.getImage();
     }
