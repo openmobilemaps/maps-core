@@ -66,7 +66,7 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 		setRenderer(this)
 		val mapInterface = MapInterface.createWithOpenGl(
 			mapConfig,
-			density,
+			densityExact,
 			is3D
 		)
 		mapInterface.setCallbackHandler(object : MapCallbackInterface() {
