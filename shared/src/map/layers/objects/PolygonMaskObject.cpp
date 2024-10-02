@@ -75,9 +75,16 @@ void PolygonMaskObject::setPolygons(const std::vector<::PolygonCoord> &polygons,
         PolygonHelper::subdivision(vecVertices, indices, *maxSegmentLength);
     }
     for (const auto& v : vecVertices) {
-        vertices.push_back(v.x);
-        vertices.push_back(v.y);
-        vertices.push_back(1.0f);
+        const double rx = 0.66955330801749313;
+        const double ry = 0.73604201859882956;
+        const double rz = -0.099702129264085129;
+        double x = 1.0 * sin(v.y) * cos(v.x) - rx;
+        double y = 1.0 * cos(v.y) - ry;
+        double z = -1.0 * sin(v.y) * sin(v.x) - rz;
+
+        vertices.push_back(x);
+        vertices.push_back(y);
+        vertices.push_back(z);
     #ifdef __APPLE__
         vertices.push_back(0.0f);
         vertices.push_back(0.0f);

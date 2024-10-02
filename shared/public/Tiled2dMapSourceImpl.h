@@ -90,7 +90,11 @@ template<class T, class L, class R>
 
     Matrix::multiply(viewMatrix, inVec, outVec);
 
-    auto point2d = Vec3D(outVec[0] / outVec[3], outVec[1] / outVec[3], outVec[2] / outVec[3]);
+    const double rx = 0.66955330801749313;
+    const double ry = 0.73604201859882956;
+    const double rz = -0.099702129264085129;
+
+    auto point2d = Vec3D(outVec[0] / outVec[3] - rx, outVec[1] / outVec[3] - ry, outVec[2] / outVec[3] - rz);
     return point2d;
 }
 

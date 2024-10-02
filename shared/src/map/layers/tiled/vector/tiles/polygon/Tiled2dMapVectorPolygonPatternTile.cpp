@@ -244,10 +244,22 @@ void Tiled2dMapVectorPolygonPatternTile::setVectorTileData(const Tiled2dMapVecto
                     }
 
                     for (auto const &coordinate: polygon.coordinates) {
-                        styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(sin(coordinate.x));
-                        styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(cos(coordinate.x));
-                        styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(sin(coordinate.y));
-                        styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(cos(coordinate.y));
+
+                        const double rx = 0.66955330801749313;
+                        const double ry = 0.73604201859882956;
+                        const double rz = -0.099702129264085129;
+                        double x = 1.0 * sin(coordinate.y) * cos(coordinate.x) - rx;
+                        double y = 1.0 * cos(coordinate.y) - ry;
+                        double z = -1.0 * sin(coordinate.y) * sin(coordinate.x) - rz;
+
+                        //    const float x = newVertex.z * sin(newVertex.y) * cos(newVertex.x);
+                        //    const float y = newVertex.z * cos(newVertex.y);
+                        //    const float z = -newVertex.z * sin(newVertex.y) * sin(newVertex.x);
+
+                        styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(x);
+                        styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(y);
+                        styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(z);
+                        styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(1.0);
                         styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(styleIndex);
                     }
 

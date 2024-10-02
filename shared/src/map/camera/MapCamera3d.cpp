@@ -403,8 +403,14 @@ std::tuple<std::tuple<std::vector<float>, std::vector<float>>, std::vector<doubl
     MatrixD::translateM(newProjectionMatrix, 0, 0.0, -offsetY, 0);
 
     // view matrix
-    // remember: read from bottom to top
+    // remember: read from bottom to top as camera movement relative to fixed globe
+    //           read from top to bottom as vertex movement relative to fixed camera
     MatrixD::setIdentityM(newViewMatrix, 0);
+
+    const double rx = 0.66955330801749313;
+    const double ry = 0.73604201859882956;
+    const double rz = -0.099702129264085129;
+    MatrixD::translateM(newViewMatrix, 0, rx, ry, rz);
 
     MatrixD::translateM(newViewMatrix, 0, 0.0, 0, -cameraDistance);
     MatrixD::rotateM(newViewMatrix, 0, -cameraPitch, 1.0, 0.0, 0.0);
@@ -415,6 +421,9 @@ std::tuple<std::tuple<std::vector<float>, std::vector<float>>, std::vector<doubl
     MatrixD::rotateM(newViewMatrix, 0.0, latitude, 1.0, 0.0, 0.0);
     MatrixD::rotateM(newViewMatrix, 0.0, -longitude, 0.0, 1.0, 0.0);
     MatrixD::rotateM(newViewMatrix, 0.0, -90, 0.0, 1.0, 0.0); // zero longitude in London
+
+    // ^
+    // |
 
 
     std::vector<double> newVpMatrix(16, 0.0);
