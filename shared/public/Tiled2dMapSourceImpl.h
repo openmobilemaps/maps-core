@@ -1310,6 +1310,7 @@ void Tiled2dMapSource<T, L, R>::forceReload() {
         }
     }
 
+    onVisibleTilesChanged(currentPyramid, currentKeepZoomLevelOffset);
 }
 
 template<class T, class L, class R>

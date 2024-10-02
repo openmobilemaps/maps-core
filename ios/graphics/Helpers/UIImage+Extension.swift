@@ -1,6 +1,6 @@
 //
 //  UIImage+Extension.swift
-//  
+//
 //
 //  Created by Matthias Felix on 23.08.23.
 //
@@ -41,8 +41,8 @@ extension UIImage {
             return nil
         }
 
-        for y in 0..<Int(self.size.height) {
-            for x in 0..<Int(self.size.width) {
+        for y in 0 ..< Int(self.size.height) {
+            for x in 0 ..< Int(self.size.width) {
                 let offset = ctx.bytesPerRow * y + 4 * x
 
                 let inColor = UBColor(r: data[offset + 2], g: data[offset + 1], b: data[offset], a: data[offset + 3])

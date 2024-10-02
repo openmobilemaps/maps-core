@@ -57,13 +57,14 @@ void BaseShaderProgramOpenGl::checkGlProgramLinking(GLuint program) {
         std::vector<GLchar> infoLog(maxLength);
         glGetProgramInfoLog(program, maxLength, &maxLength, &infoLog[0]);
 
-        LogError << "OpenGL Program Linking failed:";
+        std::stringstream errorSS;
+        errorSS << "OpenGL Program Linking failed:\n";
 
         for (auto a : infoLog) {
-            LogError << a;
+            errorSS << a;
         }
 
-        LogError <<= ".";
+        LogError << errorSS.str() <<= ".";
     }
 }
 

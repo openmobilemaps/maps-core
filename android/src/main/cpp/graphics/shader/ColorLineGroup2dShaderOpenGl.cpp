@@ -269,7 +269,7 @@ std::string ColorLineGroup2dShaderOpenGl::getFragmentShader() {
 
                                                if ((intraDashPos > dashArray[0] * factorToT && intraDashPos < dashArray[1] * factorToT) ||
                                                    (intraDashPos > dashArray[2] * factorToT && intraDashPos < dashArray[3] * factorToT)) {
-                                                   if (int(aGap) == 0) {
+                                                   if (aGap == 0.0) {
                                                        discard;
                                                    }
 

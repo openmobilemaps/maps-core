@@ -35,6 +35,7 @@ public enum PipelineDescriptorFactory {
                 renderbufferAttachment?.sourceAlphaBlendFactor = .one
                 renderbufferAttachment?.destinationRGBBlendFactor = .oneMinusSourceAlpha
                 renderbufferAttachment?.destinationAlphaBlendFactor = .oneMinusSourceAlpha
+
             case .MULTIPLY:
                 renderbufferAttachment?.rgbBlendOperation = .add
                 renderbufferAttachment?.alphaBlendOperation = .add

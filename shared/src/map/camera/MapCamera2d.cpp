@@ -95,7 +95,7 @@ void MapCamera2d::moveToCenterPositionZoom(const ::Coord &centerPosition, double
                 this->coordAnimation = nullptr;
             });
         coordAnimation->start();
-        double targetZoom = std::clamp(zoom, zoomMax, zoomMin);
+        double targetZoom = std::clamp(adjustedZoom, zoomMax, zoomMin);
         zoomAnimation = std::make_shared<DoubleAnimation>(
               DEFAULT_ANIM_LENGTH, this->zoom, targetZoom, InterpolatorFunction::EaseIn,
               [=](double zoom) {
@@ -190,7 +190,6 @@ void MapCamera2d::moveToBoundingBox(const RectCoord &boundingBox, float paddingP
         targetZoom = std::min(targetZoom, *maxZoom);
     }
 
-    LogDebug << "targetCenterNotBC.x = " << targetCenterNotBC.x << " targetCenterNotBC.y: " << targetCenterNotBC.y << " targetZoom: " <<= targetZoom;
     moveToCenterPositionZoom(targetCenterNotBC, targetZoom, animated);
 }
 

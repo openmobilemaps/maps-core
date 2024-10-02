@@ -81,7 +81,7 @@ final class Quad2dStretchedInstanced: BaseGraphicsObject, @unchecked Sendable {
         defer {
             lock.unlock()
         }
-        
+
         guard let verticesBuffer,
               let indicesBuffer,
               let positionsBuffer,
@@ -95,12 +95,17 @@ final class Quad2dStretchedInstanced: BaseGraphicsObject, @unchecked Sendable {
             return
         }
 
-        #if DEBUG
-            encoder.pushDebugGroup(label)
-            defer {
-                encoder.popDebugGroup()
-            }
-        #endif
+        lock.lock()
+        defer {
+            lock.unlock()
+        }
+
+#if DEBUG
+        encoder.pushDebugGroup(label)
+        defer {
+            encoder.popDebugGroup()
+        }
+#endif
 
         if isMasked {
             if stencilState == nil {

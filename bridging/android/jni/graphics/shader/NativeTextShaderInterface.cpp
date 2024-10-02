@@ -36,12 +36,13 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_T
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_TextShaderInterface_00024CppProxy_native_1setHaloColor(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeColor::JniType j_color, jdouble j_width)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_TextShaderInterface_00024CppProxy_native_1setHaloColor(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeColor::JniType j_color, jfloat j_width, jfloat j_blur)
 {
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::TextShaderInterface>(nativeRef);
         ref->setHaloColor(::djinni_generated::NativeColor::toCpp(jniEnv, j_color),
-                          ::djinni::F64::toCpp(jniEnv, j_width));
+                          ::djinni::F32::toCpp(jniEnv, j_width),
+                          ::djinni::F32::toCpp(jniEnv, j_blur));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

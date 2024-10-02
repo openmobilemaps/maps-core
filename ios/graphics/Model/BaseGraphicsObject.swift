@@ -47,7 +47,7 @@ open class BaseGraphicsObject: @unchecked Sendable {
     }
 
     open func compute(encoder _: MTLComputeCommandEncoder,
-                     context _: RenderingContext) {
+                      context _: RenderingContext) {
         // subclasses may override
     }
 }

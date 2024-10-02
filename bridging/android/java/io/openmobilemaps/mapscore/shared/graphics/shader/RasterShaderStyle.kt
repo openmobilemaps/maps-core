@@ -10,6 +10,7 @@ data class RasterShaderStyle(
     val contrast: Float,
     val saturation: Float,
     val gamma: Float,
+    val brightnessShift: Float,
 ) : Comparable<RasterShaderStyle> {
 
     companion object {
@@ -19,7 +20,8 @@ data class RasterShaderStyle(
             1.0f /* brightnessMax */ ,
             0.0f /* contrast */ ,
             0.0f /* saturation */ ,
-            1.0f /* gamma */ )
+            1.0f /* gamma */ ,
+            0.0f /* brightnessShift */ )
     }
 
     override fun compareTo(other: RasterShaderStyle): Int {
@@ -77,6 +79,16 @@ data class RasterShaderStyle(
         if (this.gamma < other.gamma) {
             tempResult = -1;
         } else if (this.gamma > other.gamma) {
+            tempResult = 1;
+        } else {
+            tempResult = 0;
+        }
+        if (tempResult != 0) {
+            return tempResult
+        }
+        if (this.brightnessShift < other.brightnessShift) {
+            tempResult = -1;
+        } else if (this.brightnessShift > other.brightnessShift) {
             tempResult = 1;
         } else {
             tempResult = 0;

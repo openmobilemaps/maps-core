@@ -50,7 +50,7 @@
 #include "VectorLayerFeatureCoordInfo.h"
 
 Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
-                                             const std::string &remoteStyleJsonUrl,
+                                             const std::optional<std::string> &remoteStyleJsonUrl,
                                              const std::vector<std::shared_ptr<::LoaderInterface>> &loaders,
                                              const std::shared_ptr<::FontLoaderInterface> &fontLoader,
                                              const std::optional<Tiled2dMapZoomInfo> &customZoomInfo,
@@ -70,8 +70,8 @@ Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
         {}
 
 Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
-                                             const std::string &remoteStyleJsonUrl,
-                                             const std::string &fallbackStyleJsonString,
+                                             const std::optional<std::string> &remoteStyleJsonUrl,
+                                             const std::optional<std::string> &fallbackStyleJsonString,
                                              const std::vector<std::shared_ptr<::LoaderInterface>> &loaders,
                                              const std::shared_ptr<::FontLoaderInterface> &fontLoader,
                                              const std::optional<Tiled2dMapZoomInfo> &customZoomInfo,
@@ -148,7 +148,7 @@ void Tiled2dMapVectorLayer::scheduleStyleJsonLoading() {
                         if (auto error = layerError) {
                             selfPtr->errorManager->addTiledLayerError(*error);
                         } else {
-                            if (selfPtr->remoteStyleJsonUrl.has_value()) {
+                            if (selfPtr->remoteStyleJsonUrl.has_value() && !selfPtr->remoteStyleJsonUrl->empty()) {
                                 selfPtr->errorManager->removeError(*selfPtr->remoteStyleJsonUrl);
                             } else {
                                 selfPtr->errorManager->removeError(selfPtr->layerName);
@@ -167,8 +167,25 @@ void Tiled2dMapVectorLayer::didLoadStyleJson(const std::optional<TiledLayerError
 }
 
 std::optional<TiledLayerError> Tiled2dMapVectorLayer::loadStyleJson() {
-    auto error = loadStyleJsonRemotely();
-    if (error.has_value()) {
+    std::optional<TiledLayerError> error = std::nullopt;
+    if (this->remoteStyleJsonUrl.has_value()) {
+        error = loadStyleJsonRemotely();
+    }
+    
+    if (error.has_value() || !this->remoteStyleJsonUrl.has_value()) {
+        if (localDataProvider) {
+            auto optionalStyleJson = localDataProvider->getStyleJson();
+            if (optionalStyleJson) {
+                auto parseResult = Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromString(layerName, *optionalStyleJson, localDataProvider, loaders, sourceUrlParams);
+                
+                if (parseResult.status == LoaderStatus::OK) {
+                    setMapDescription(parseResult.mapDescription);
+                    metadata = parseResult.metadata;
+                    return std::nullopt;
+                }
+            }
+        }
+        
         if (auto json = fallbackStyleJsonString) {
             return loadStyleJsonLocally(*json);
         } else {
@@ -423,6 +440,7 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
                                                                         symbolDelegate,
                                                                         mapDescription->persistingSymbolPlacement);
             actor.unsafe()->setAlpha(alpha);
+            actor.unsafe()->enableAnimations(animationsEnabled);
             symbolSourceDataManagers[source] = actor;
             interactionDataManagers[source].push_back(actor.weakActor<Tiled2dMapVectorSourceDataManager>());
         }
@@ -800,7 +818,7 @@ float Tiled2dMapVectorLayer::getAlpha() { return alpha; }
 
 void Tiled2dMapVectorLayer::forceReload() {
     std::lock_guard<std::recursive_mutex> lock(mapDescriptionMutex);
-    if (!isLoadingStyleJson && remoteStyleJsonUrl.has_value() && !mapDescription && vectorTileSources.empty()) {
+    if (!isLoadingStyleJson && (remoteStyleJsonUrl.has_value() || localDataProvider) && !mapDescription && vectorTileSources.empty()) {
         scheduleStyleJsonLoading();
         return;
     }
@@ -1300,6 +1318,15 @@ LayerReadyState Tiled2dMapVectorLayer::isReadyToRenderOffscreen() {
         return LayerReadyState::NOT_READY;
     }
     return Tiled2dMapLayer::isReadyToRenderOffscreen();
+}
+
+void Tiled2dMapVectorLayer::enableAnimations(bool enabled) {
+    this->animationsEnabled = enabled;
+    for (const auto &[source, manager] : symbolSourceDataManagers) {
+        manager.syncAccess([enabled](const std::shared_ptr<Tiled2dMapVectorSourceSymbolDataManager> manager) {
+            manager->enableAnimations(enabled);
+        });
+    }
 }
 
 void Tiled2dMapVectorLayer::setMinZoomLevelIdentifier(std::optional<int32_t> value) {

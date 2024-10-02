@@ -37,8 +37,8 @@ public class MCSchedulerCallbacks: MCThreadPoolCallbacks {
     }
 }
 
-extension MCThreadPoolScheduler {
-    public static func create() -> MCSchedulerInterface {
+public extension MCThreadPoolScheduler {
+    static func create() -> MCSchedulerInterface {
         MCThreadPoolScheduler.create(MCSchedulerCallbacks())!
     }
 }

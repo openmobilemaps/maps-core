@@ -231,6 +231,7 @@ void Tiled2dMapVectorSymbolLabelObject::evaluateStyleProperties(const double zoo
     textColor = description->style.getTextColor(evalContext);
     haloColor = description->style.getTextHaloColor(evalContext);
     haloWidth = description->style.getTextHaloWidth(evalContext, textSize);
+    haloBlur = description->style.getTextHaloBlur(evalContext);
 
     lastZoomEvaluation = roundedZoom;
 }
@@ -251,17 +252,18 @@ void Tiled2dMapVectorSymbolLabelObject::updateProperties(std::vector<float> &pos
         alphaFactor = animationCoordinator->getTextAlpha(targetAlpha, now);
     }
 
-    styles[(9 * styleOffset) + 0] = textColor.r; //R
-    styles[(9 * styleOffset) + 1] = textColor.g; //G
-    styles[(9 * styleOffset) + 2] = textColor.b; //B
-    styles[(9 * styleOffset) + 3] = textColor.a * alphaFactor; //A
-    styles[(9 * styleOffset) + 4] = haloColor.r; //R
-    styles[(9 * styleOffset) + 5] = haloColor.g; //G
-    styles[(9 * styleOffset) + 6] = haloColor.b; //B
-    styles[(9 * styleOffset) + 7] = haloColor.a * alphaFactor; //A
-    styles[(9 * styleOffset) + 8] = haloWidth;
+    styles[(10 * styleOffset) + 0] = textColor.r; //R
+    styles[(10 * styleOffset) + 1] = textColor.g; //G
+    styles[(10 * styleOffset) + 2] = textColor.b; //B
+    styles[(10 * styleOffset) + 3] = textColor.a * alphaFactor; //A
+    styles[(10 * styleOffset) + 4] = haloColor.r; //R
+    styles[(10 * styleOffset) + 5] = haloColor.g; //G
+    styles[(10 * styleOffset) + 6] = haloColor.b; //B
+    styles[(10 * styleOffset) + 7] = haloColor.a * alphaFactor; //A
+    styles[(10 * styleOffset) + 8] = haloWidth;
+    styles[(10 * styleOffset) + 9] = haloBlur;
 
-    isOpaque = styles[(9 * styleOffset) + 3] != 0.0;
+    isOpaque = styles[(10 * styleOffset) + 3] != 0.0;
 
     styleOffset += 1;
 
@@ -396,7 +398,7 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
                 assert((countOffset + numberOfCharacters-1)*2 < scales.size());
             }
             pen.x = 0.0;
-            
+
             if (is3d) {
                 pen.y -= fontSize * lineHeight;
             } else {

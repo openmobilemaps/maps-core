@@ -28,6 +28,7 @@ public:
                       std::shared_ptr<Value> textColor,
                       std::shared_ptr<Value> textHaloColor,
                       std::shared_ptr<Value> textHaloWidth,
+                      std::shared_ptr<Value> textHaloBlur,
                       std::shared_ptr<Value> textOpacity,
                       std::shared_ptr<Value> textFont,
                       std::shared_ptr<Value> textField,
@@ -75,6 +76,7 @@ public:
     textColorEvaluator(textColor),
     textHaloColorEvaluator(textHaloColor),
     textHaloWidthEvaluator(textHaloWidth),
+    textHaloBlurEvaluator(textHaloBlur),
     textPaddingEvaluator(textPadding),
     symbolSortKeyEvaluator(symbolSortKey),
     symbolPlacementEvaluator(symbolPlacement),
@@ -119,6 +121,7 @@ public:
               textColorEvaluator(style.textColorEvaluator),
               textHaloColorEvaluator(style.textHaloColorEvaluator),
               textHaloWidthEvaluator(style.textHaloWidthEvaluator),
+              textHaloBlurEvaluator(style.textHaloBlurEvaluator),
               textPaddingEvaluator(style.textPaddingEvaluator),
               symbolSortKeyEvaluator(style.symbolSortKeyEvaluator),
               symbolPlacementEvaluator(style.symbolPlacementEvaluator),
@@ -166,7 +169,7 @@ public:
         UsedKeysCollection usedKeys;
         std::shared_ptr<Value> values[] = {
             textSizeEvaluator.getValue(), textFontEvaluator.getValue(), textFieldEvaluator.getValue(), textTransformEvaluator.getValue(), textOffsetEvaluator.getValue(), textRadialOffsetEvaluator.getValue(),
-            textColorEvaluator.getValue(), textHaloColorEvaluator.getValue(), textPaddingEvaluator.getValue(), symbolSortKeyEvaluator.getValue(), symbolPlacementEvaluator.getValue(), iconImageEvaluator.getValue(),
+            textColorEvaluator.getValue(), textHaloColorEvaluator.getValue(), textHaloWidthEvaluator.getValue(), textHaloBlurEvaluator.getValue(), textPaddingEvaluator.getValue(), symbolSortKeyEvaluator.getValue(), symbolPlacementEvaluator.getValue(), iconImageEvaluator.getValue(),
             iconAnchorEvaluator.getValue(), iconOffsetEvaluator.getValue(), textAnchorEvaluator.getValue(), textVariableAnchorEvaluator.getValue(), textRotateEvaluator.getValue(), symbolSpacingEvaluator.getValue(),
             iconSizeEvaluator.getValue(), textLineHeightEvaluator.getValue(), textLetterSpacingEvaluator.getValue(), textAllowOverlapEvaluator.getValue(), iconAllowOverlapEvaluator.getValue(),
             iconPaddingEvaluator.getValue(), textOpacityEvaluator.getValue(), iconOpacityEvaluator.getValue(), iconRotationAlignmentEvaluator.getValue(), textRotationAlignmentEvaluator.getValue(),
@@ -193,7 +196,7 @@ public:
         double value = textSizeEvaluator.getResult(context, defaultValue);
         return value * context.dpFactor;
     }
-    
+
     std::vector<std::string> getTextFont(const EvaluationContext &context) {
         static const std::vector<std::string> defaultValue = {"Open Sans Regular"};
         return textFontEvaluator.getResult(context, defaultValue);
@@ -242,6 +245,20 @@ public:
     double getTextHaloWidth(const EvaluationContext &context, double size) {
         static double defaultValue = 0.0;
         double width = textHaloWidthEvaluator.getResult(context, defaultValue) * context.dpFactor;
+
+        // in a font of size 41pt, we can show around 7pt of halo
+        // (due to generation of font atlasses)
+        double relativeMax = 7.0 / 41.0;
+        double relative = width / size;
+
+        return std::max(0.0, std::min(1.0, relative / relativeMax));
+    }
+
+    double getTextHaloBlur(const EvaluationContext &context) {
+        static double defaultValue = 0.0;
+        double width = textHaloBlurEvaluator.getResult(context, defaultValue) * context.dpFactor;
+
+        double size = getTextSize(context);
 
         // in a font of size 41pt, we can show around 7pt of halo
         // (due to generation of font atlasses)
@@ -436,6 +453,7 @@ private:
     ValueEvaluator<Color> textColorEvaluator;
     ValueEvaluator<Color> textHaloColorEvaluator;
     ValueEvaluator<double> textHaloWidthEvaluator;
+    ValueEvaluator<double> textHaloBlurEvaluator;
     ValueEvaluator<double> textPaddingEvaluator;
     ValueEvaluator<double> iconPaddingEvaluator;
     ValueEvaluator<double> textLetterSpacingEvaluator;

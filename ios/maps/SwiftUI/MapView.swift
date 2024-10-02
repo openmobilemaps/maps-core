@@ -176,7 +176,7 @@ public struct MapView: UIViewRepresentable {
     }
 
     public func makeCoordinator() -> MapViewCoordinator {
-        return MapViewCoordinator(parent: self)
+        MapViewCoordinator(parent: self)
     }
 
     @MainActor
@@ -242,7 +242,6 @@ public struct MapView: UIViewRepresentable {
 
     @MainActor
     fileprivate func updateLayers(_ context: MapView.Context, _ mapView: MCMapView) {
-
         // Get description-structs of layers
         let oldLayers = context.coordinator.currentLayers
         let newLayers = layers.filter { $0?.interface != nil }.compactMap { $0 }
@@ -341,7 +340,7 @@ public class MapViewCoordinator: MCMapCameraListenerInterface {
             }
 
             guard lastWrittenCamera != nil else {
-                if let mapView = mapView {
+                if let mapView {
                     parent.updateCamera(mapView, self)
                 }
                 return
@@ -385,18 +384,18 @@ public class MapViewCoordinator: MCMapCameraListenerInterface {
     public func onRotationChanged(_ angle: Float) {
     }
 
-    nonisolated
-    public func onMapInteraction() {
+    public nonisolated
+    func onMapInteraction() {
     }
 }
 
 @available(iOS 17.0, *)
 extension MapViewCoordinator: MCMapSizeDelegate {
-    nonisolated
-    public func sizeChanged() {
+    public nonisolated
+    func sizeChanged() {
         Task { @MainActor in
             hasSizeChanged = true
-            if let mapView = mapView {
+            if let mapView {
                 parent.updateCamera(mapView, self)
             }
         }
@@ -412,23 +411,23 @@ open class TouchHandler: MCTouchInterface {
     open func onTouchDown(_ posScreen: MCVec2F) -> Bool {
         false
     }
-    
+
     open func onClickUnconfirmed(_ posScreen: MCVec2F) -> Bool {
         false
     }
-    
+
     open func onClickConfirmed(_ posScreen: MCVec2F) -> Bool {
         false
     }
-    
+
     open func onDoubleClick(_ posScreen: MCVec2F) -> Bool {
         false
     }
-    
+
     open func onMove(_ deltaScreen: MCVec2F, confirmed: Bool, doubleClick: Bool) -> Bool {
         false
     }
-    
+
     open func onMoveComplete() -> Bool {
         false
     }
@@ -440,17 +439,17 @@ open class TouchHandler: MCTouchInterface {
     open func onTwoFingerClick(_ posScreen1: MCVec2F, posScreen2: MCVec2F) -> Bool {
         false
     }
-    
+
     open func onTwoFingerMove(_ posScreenOld: [MCVec2F], posScreenNew: [MCVec2F]) -> Bool {
         false
     }
-    
+
     open func onTwoFingerMoveComplete() -> Bool {
         false
     }
-    
+
     open func clearTouch() {}
-    
+
     open func onLongPress(_ posScreen: MCVec2F) -> Bool {
         false
     }

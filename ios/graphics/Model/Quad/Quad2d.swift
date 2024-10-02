@@ -89,12 +89,12 @@ final class Quad2d: BaseGraphicsObject, @unchecked Sendable {
             return
         }
 
-        #if DEBUG
-            encoder.pushDebugGroup(label)
-            defer {
-                encoder.popDebugGroup()
-            }
-        #endif
+#if DEBUG
+        encoder.pushDebugGroup(label)
+        defer {
+            encoder.popDebugGroup()
+        }
+#endif
 
         if isMasked {
             if stencilState == nil {
@@ -254,7 +254,7 @@ extension Quad2d: MCQuad2dInterface {
             self.textureCoordinates = textureCoordinates
             self.verticesBuffer.copyOrCreate(bytes: vertices, length: MemoryLayout<Vertex3D>.stride * vertices.count, device: device)
             self.indicesBuffer.copyOrCreate(bytes: indices, length: MemoryLayout<UInt16>.stride * indices.count, device: device)
-            if self.verticesBuffer != nil && self.indicesBuffer != nil {
+            if self.verticesBuffer != nil, self.indicesBuffer != nil {
                 self.indicesCount = indices.count
                 assert(self.indicesCount * 2 == MemoryLayout<UInt16>.stride * indices.count)
             } else {

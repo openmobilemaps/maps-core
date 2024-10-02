@@ -23,13 +23,24 @@ public:
                       std::shared_ptr<Value> rasterContrast,
                       std::shared_ptr<Value> rasterSaturation,
                       std::shared_ptr<Value> rasterGamma,
+                      std::shared_ptr<Value> rasterBrightnessShift,
                       std::shared_ptr<Value> blendMode) :
-            rasterOpacityEvaluator(rasterOpacity), rasterBrightnessMinEvaluator(rasterBrightnessMin), rasterBrightnessMaxEvaluator(rasterBrightnessMax),
-            rasterContrastEvaluator(rasterContrast), rasterSaturationEvaluator(rasterSaturation), rasterGammaEvaluator(rasterGamma), blendModeEvaluator(blendMode) {}
+            rasterOpacityEvaluator(rasterOpacity),
+            rasterBrightnessMinEvaluator(rasterBrightnessMin),
+            rasterBrightnessMaxEvaluator(rasterBrightnessMax),
+            rasterContrastEvaluator(rasterContrast), rasterSaturationEvaluator(rasterSaturation),
+            rasterGammaEvaluator(rasterGamma),
+            rasterBrightnessShiftEvaluator(rasterBrightnessShift), blendModeEvaluator(blendMode) {}
 
     RasterVectorStyle(RasterVectorStyle &style) :
-            rasterOpacityEvaluator(style.rasterOpacityEvaluator), rasterBrightnessMinEvaluator(style.rasterBrightnessMinEvaluator), rasterBrightnessMaxEvaluator(style.rasterBrightnessMaxEvaluator),
-            rasterContrastEvaluator(style.rasterContrastEvaluator), rasterSaturationEvaluator(style.rasterSaturationEvaluator), rasterGammaEvaluator(style.rasterGammaEvaluator), blendModeEvaluator(style.blendModeEvaluator) {}
+            rasterOpacityEvaluator(style.rasterOpacityEvaluator),
+            rasterBrightnessMinEvaluator(style.rasterBrightnessMinEvaluator),
+            rasterBrightnessMaxEvaluator(style.rasterBrightnessMaxEvaluator),
+            rasterContrastEvaluator(style.rasterContrastEvaluator),
+            rasterSaturationEvaluator(style.rasterSaturationEvaluator),
+            rasterGammaEvaluator(style.rasterGammaEvaluator),
+            rasterBrightnessShiftEvaluator(style.rasterBrightnessShiftEvaluator),
+            blendModeEvaluator(style.blendModeEvaluator) {}
 
     UsedKeysCollection getUsedKeys() const {
         UsedKeysCollection usedKeys;
@@ -40,6 +51,7 @@ public:
             rasterContrastEvaluator.getValue(),
             rasterSaturationEvaluator.getValue(),
             rasterGammaEvaluator.getValue(),
+            rasterBrightnessShiftEvaluator.getValue(),
             blendModeEvaluator.getValue()
         };
 
@@ -64,7 +76,8 @@ public:
             (float) getRasterBrightnessMax(context),
             (float) getRasterContrast(context),
             (float) getRasterSaturation(context),
-            (float) getRasterGamma(context)
+            (float) getRasterGamma(context),
+            (float) getRasterBrightnessShift(context)
         };
     }
 
@@ -97,7 +110,13 @@ public:
         double defaultValue = 1.0;
         return rasterGammaEvaluator.getResult(context, defaultValue);
     }
-    
+
+
+    double getRasterBrightnessShift(const EvaluationContext &context) {
+        double defaultValue = 0.0;
+        return rasterBrightnessShiftEvaluator.getResult(context, defaultValue);
+    }
+
 private:
     ValueEvaluator<double> rasterOpacityEvaluator;
     ValueEvaluator<double> rasterBrightnessMinEvaluator;
@@ -105,6 +124,7 @@ private:
     ValueEvaluator<double> rasterContrastEvaluator;
     ValueEvaluator<double> rasterSaturationEvaluator;
     ValueEvaluator<double> rasterGammaEvaluator;
+    ValueEvaluator<double> rasterBrightnessShiftEvaluator;
     ValueEvaluator<BlendMode> blendModeEvaluator;
 };
 
