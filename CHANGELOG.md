@@ -1,5 +1,10 @@
 # Changelog for Open Mobile Maps
 
+## Version 2.6.1
+- Improve handling of different VectorLayer configurations (especially with a LocalDataProvider)
+- Add a default implementation of a LocalDataProvider for Android
+- Update to AGP 8.6.1 and Kotlin 2.0.20
+
 ## Version 2.6.0
 - Increases Deployment target to iOS 14
 - fixes iOS builds with Xcode 16
