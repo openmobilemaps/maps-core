@@ -32,18 +32,9 @@ unitSphereBaseVertexShader(const Vertex3DIn vertexIn [[stage_in]],
                            constant float4x4 &projectionMatrix [[buffer(2)]],
                            constant float4x4 &mMatrix [[buffer(3)]])
 {
-    float4 newVertex = mMatrix * float4(vertexIn.position.xyz, 1.0);
-
-    newVertex.x /= newVertex.w;
-    newVertex.y /= newVertex.w;
-    newVertex.z /= newVertex.w;
-
-    const float x = newVertex.z * sin(newVertex.y) * cos(newVertex.x);
-    const float y = newVertex.z * cos(newVertex.y);
-    const float z = -newVertex.z * sin(newVertex.y) * sin(newVertex.x);
 
     VertexOut out {
-        .position = projectionMatrix * (viewMatrix * float4(x,y,z, 1.0)),
+        .position = projectionMatrix * (viewMatrix * (mMatrix * vertexIn.position)),
         .uv = vertexIn.uv
     };
 

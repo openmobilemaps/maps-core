@@ -17,7 +17,7 @@ struct VertexIn {
 };
 
 struct Vertex3DIn {
-    float3 position [[attribute(0)]];
+    float4 position [[attribute(0)]];
     float2 uv [[attribute(1)]];
 };
 

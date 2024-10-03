@@ -75,12 +75,12 @@ void PolygonMaskObject::setPolygons(const std::vector<::PolygonCoord> &polygons,
         PolygonHelper::subdivision(vecVertices, indices, *maxSegmentLength);
     }
     for (const auto& v : vecVertices) {
-        const double rx = 0.66955330801749313;
-        const double ry = 0.73604201859882956;
-        const double rz = -0.099702129264085129;
-        double x = 1.0 * sin(v.y) * cos(v.x) - rx;
-        double y = 1.0 * cos(v.y) - ry;
-        double z = -1.0 * sin(v.y) * sin(v.x) - rz;
+        const double rx = 0.711650 * 1.0;
+        const double ry = 0.287723 * 1.0;
+        const double rz = -0.639713 * 1.0;
+        double x = (1.0 * sin(v.y) * cos(v.x) - rx) * 1111.0;
+        double y = (1.0 * cos(v.y) - ry) * 1111.0;
+        double z = (-1.0 * sin(v.y) * sin(v.x) - rz) * 1111.0;
 
         vertices.push_back(x);
         vertices.push_back(y);

@@ -81,20 +81,23 @@ static void hash_combine(size_t& seed, const T& value) {
 
 template<class T, class L, class R>
 ::Vec3D Tiled2dMapSource<T, L, R>::transformToView(const ::Coord &position, const std::vector<float> &viewMatrix) {
+
     Coord mapCoord = conversionHelper->convertToRenderSystem(position);
-    std::vector<float> inVec = {(float) (mapCoord.z * sin(mapCoord.y) * cos(mapCoord.x)),
-                                (float) (mapCoord.z * cos(mapCoord.y)),
-                                (float) (-mapCoord.z * sin(mapCoord.y) * sin(mapCoord.x)),
+
+    const double rx = 0.711650 * 1.0;
+    const double ry = 0.287723 * 1.0;
+    const double rz = -0.639713 * 1.0;
+
+    std::vector<float> inVec = {(float) ((mapCoord.z * sin(mapCoord.y) * cos(mapCoord.x) - rx) * 1111.0),
+                                (float) ((mapCoord.z * cos(mapCoord.y) - ry) * 1111.0),
+                                (float) ((-mapCoord.z * sin(mapCoord.y) * sin(mapCoord.x) - rz) * 1111.0),
                                 1.0};
     std::vector<float> outVec = {0, 0, 0, 0};
 
     Matrix::multiply(viewMatrix, inVec, outVec);
 
-    const double rx = 0.66955330801749313;
-    const double ry = 0.73604201859882956;
-    const double rz = -0.099702129264085129;
 
-    auto point2d = Vec3D(outVec[0] / outVec[3] - rx, outVec[1] / outVec[3] - ry, outVec[2] / outVec[3] - rz);
+    auto point2d = Vec3D(outVec[0] / outVec[3], outVec[1] / outVec[3], outVec[2] / outVec[3]);
     return point2d;
 }
 

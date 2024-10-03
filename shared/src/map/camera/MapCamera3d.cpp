@@ -364,9 +364,12 @@ std::tuple<std::tuple<std::vector<float>, std::vector<float>>, std::vector<doubl
     std::vector<double> newViewMatrix(16, 0.0);
     std::vector<double> newProjectionMatrix(16, 0.0);
 
+    double off = fmod(DateHelper::currentTimeMicros() * 0.0000001, 1.0) * 0.000001;
+    mapInterface->invalidate();
+
     const float R = 6378137.0;
-    float longitude = focusCoord.x; //  px / R;
-    float latitude = focusCoord.y; // 2*atan(exp(py / R)) - 3.1415926 / 2;
+    double longitude = focusCoord.x + off * 100.0; //  px / R;
+    double latitude = focusCoord.y; // 2*atan(exp(py / R)) - 3.1415926 / 2;
 
     double focusPointAltitude = focusCoord.z;
     double cameraDistance = getCameraDistance();
@@ -394,6 +397,8 @@ std::tuple<std::tuple<std::vector<float>, std::vector<float>>, std::vector<doubl
     // initial perspective projection
     MatrixD::perspectiveM(newProjectionMatrix, 0, fovy, vpr, minD, maxD);
 
+//    MatrixD::setIdentityM(newProjectionMatrix, 0);
+
     // modify projection
     // translate anchor point based on padding and offset
     // TODO: horizontal translation
@@ -407,10 +412,6 @@ std::tuple<std::tuple<std::vector<float>, std::vector<float>>, std::vector<doubl
     //           read from top to bottom as vertex movement relative to fixed camera
     MatrixD::setIdentityM(newViewMatrix, 0);
 
-    const double rx = 0.66955330801749313;
-    const double ry = 0.73604201859882956;
-    const double rz = -0.099702129264085129;
-    MatrixD::translateM(newViewMatrix, 0, rx, ry, rz);
 
     MatrixD::translateM(newViewMatrix, 0, 0.0, 0, -cameraDistance);
     MatrixD::rotateM(newViewMatrix, 0, -cameraPitch, 1.0, 0.0, 0.0);
@@ -422,8 +423,19 @@ std::tuple<std::tuple<std::vector<float>, std::vector<float>>, std::vector<doubl
     MatrixD::rotateM(newViewMatrix, 0.0, -longitude, 0.0, 1.0, 0.0);
     MatrixD::rotateM(newViewMatrix, 0.0, -90, 0.0, 1.0, 0.0); // zero longitude in London
 
+    const double rx = 0.711650 * 1.0;
+    const double ry = 0.287723 * 1.0;
+    const double rz = -0.639713 * 1.0;
+    MatrixD::translateM(newViewMatrix, 0, rx, ry, rz);
+
+//    MatrixD::translateM(newViewMatrix, 0, off, off, off);
+
+    MatrixD::scaleM(newViewMatrix, 0, 1.0 / 1111.0, 1.0 / 1111.0, 1.0 / 1111.0);
+
     // ^
     // |
+
+//    MatrixD::setIdentityM(newViewMatrix, 0);
 
 
     std::vector<double> newVpMatrix(16, 0.0);
@@ -1153,12 +1165,16 @@ Coord MapCamera3d::coordFromScreenPosition(const std::vector<double> &inverseVPM
         1
     };
 
+    const double rx = 0.711650 * 1.0;
+    const double ry = 0.287723 * 1.0;
+    const double rz = -0.639713 * 1.0;
+
     worldPosFrontVec = MatrixD::multiply(inverseVPMatrix, worldPosFrontVec);
-    Vec3D worldPosFront{worldPosFrontVec[0] / worldPosFrontVec[3], worldPosFrontVec[1] / worldPosFrontVec[3],
-                                worldPosFrontVec[2] / worldPosFrontVec[3]};
+    Vec3D worldPosFront{(worldPosFrontVec[0] / worldPosFrontVec[3]) / 1111.0 + rx, (worldPosFrontVec[1] / worldPosFrontVec[3]) / 1111.0 + ry,
+                                (worldPosFrontVec[2] / worldPosFrontVec[3]) / 1111.0 + rz};
     worldPosBackVec = MatrixD::multiply(inverseVPMatrix, worldPosBackVec);
-    Vec3D worldPosBack{worldPosBackVec[0] / worldPosBackVec[3], worldPosBackVec[1] / worldPosBackVec[3],
-                               worldPosBackVec[2] / worldPosBackVec[3]};
+    Vec3D worldPosBack{(worldPosBackVec[0] / worldPosBackVec[3]) / 1111.0 + rx, (worldPosBackVec[1] / worldPosBackVec[3]) / 1111.0 + ry,
+                               (worldPosBackVec[2] / worldPosBackVec[3]) / 1111.0 + rz};
 
     bool didHit = false;
     auto point = MapCamera3DHelper::raySphereIntersection(worldPosFront, worldPosBack, Vec3D(0.0, 0.0, 0.0), 1.0, didHit);

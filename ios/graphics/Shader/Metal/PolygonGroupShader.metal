@@ -84,7 +84,7 @@ unitSpherePolygonGroupVertexShader(const Polygon4GroupVertexIn vertexIn [[stage_
 //    const float y = newVertex.z * cos(newVertex.y);
 //    const float z = -newVertex.z * sin(newVertex.y) * sin(newVertex.x);
 
-//    float4 off = float4(0.66955330801749313, 0.73604201859882956, -0.099702129264085129, 0.0);
+//    float4 off = float4(0.711650 * 1.0, 0.287723 * 1.0, -0.083849, 0.0);
 
     PolygonGroupVertexOut out {
         .position = projectionMatrix * (viewMatrix * (vertexIn.position)),

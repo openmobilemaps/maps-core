@@ -238,12 +238,12 @@ void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDa
                     }
 
                     for (auto const &coordinate: coordinates) {
-                        const double rx = 0.66955330801749313;
-                        const double ry = 0.73604201859882956;
-                        const double rz = -0.099702129264085129;
-                        double x = 1.0 * sin(coordinate.y) * cos(coordinate.x) - rx;
-                        double y = 1.0 * cos(coordinate.y) - ry;
-                        double z = -1.0 * sin(coordinate.y) * sin(coordinate.x) - rz;
+                        const double rx = 0.711650 * 1.0;
+                        const double ry = 0.287723 * 1.0;
+                        const double rz = -0.639713 * 1.0;
+                        double x = (1.0 * sin(coordinate.y) * cos(coordinate.x) - rx) * 1111.0;
+                        double y = (1.0 * cos(coordinate.y) - ry) * 1111.0;
+                        double z = (-1.0 * sin(coordinate.y) * sin(coordinate.x) - rz) * 1111.0;
                         styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(x);
                         styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(y);
                         styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(z);

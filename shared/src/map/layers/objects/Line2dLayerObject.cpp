@@ -9,6 +9,7 @@
  */
 
 #include "Line2dLayerObject.h"
+#include "Vec3D.h"
 #include <cmath>
 
 Line2dLayerObject::Line2dLayerObject(const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
@@ -31,10 +32,19 @@ void Line2dLayerObject::setPositions(const std::vector<Coord> &positions) {
     std::vector<uint32_t> lineIndices;
     std::vector<float> lineAttributes;
 
-    std::vector<Vec2D> renderCoords;
+    std::vector<Vec3D> renderCoords;
     for (auto const &mapCoord : positions) {
         Coord renderCoord = conversionHelper->convertToRenderSystem(mapCoord);
-        renderCoords.push_back(Vec2D(renderCoord.x, renderCoord.y));
+
+        const double rx = 0.711650 * 1.0;
+        const double ry = 0.287723 * 1.0;
+        const double rz = -0.639713 * 1.0;
+
+        double x = (1.0 * sin(renderCoord.y) * cos(renderCoord.x) - rx) * 1111.0;
+        double y = (1.0 * cos(renderCoord.y) - ry) * 1111.0;
+        double z = (-1.0 * sin(renderCoord.y) * sin(renderCoord.x) - rz) * 1111.0;
+
+        renderCoords.push_back(Vec3D(x, y, z));
     }
 
     int pointCount = (int)renderCoords.size();
@@ -43,8 +53,8 @@ void Line2dLayerObject::setPositions(const std::vector<Coord> &positions) {
 
     int iSecondToLast = pointCount - 2;
     for (int i = 0; i <= iSecondToLast; i++) {
-        const Vec2D &p = renderCoords[i];
-        const Vec2D &pNext = renderCoords[i + 1];
+        const Vec3D &p = renderCoords[i];
+        const Vec3D &pNext = renderCoords[i + 1];
 
         float lengthNormalX = pNext.x - p.x;
         float lengthNormalY = pNext.y - p.y;
@@ -65,6 +75,7 @@ void Line2dLayerObject::setPositions(const std::vector<Coord> &positions) {
         // Position
         lineAttributes.push_back(p.x);
         lineAttributes.push_back(p.y);
+        lineAttributes.push_back(p.z);
 
         // Width normal
         lineAttributes.push_back(widthNormalX);
