@@ -364,11 +364,11 @@ std::tuple<std::tuple<std::vector<float>, std::vector<float>>, std::vector<doubl
     std::vector<double> newViewMatrix(16, 0.0);
     std::vector<double> newProjectionMatrix(16, 0.0);
 
-    double off = fmod(DateHelper::currentTimeMicros() * 0.0000001, 1.0) * 0.000001;
-    mapInterface->invalidate();
+//    double off = fmod(DateHelper::currentTimeMicros() * 0.0000001, 1.0) * 0.000001;
+//    mapInterface->invalidate();
 
     const float R = 6378137.0;
-    double longitude = focusCoord.x + off * 100.0; //  px / R;
+    double longitude = focusCoord.x; //  px / R;
     double latitude = focusCoord.y; // 2*atan(exp(py / R)) - 3.1415926 / 2;
 
     double focusPointAltitude = focusCoord.z;
@@ -1153,14 +1153,14 @@ Coord MapCamera3d::coordFromScreenPosition(const std::vector<double> &inverseVPM
     auto viewport = mapInterface->getRenderingContext()->getViewportSize();
 
     std::vector<double> worldPosFrontVec = {
-        (posScreen.x / (double)viewport.x * 2.0 - 1),
-        -(posScreen.y / (double)viewport.y * 2.0 - 1),
+        ((double)posScreen.x / (double)viewport.x * 2.0 - 1),
+        -((double)posScreen.y / (double)viewport.y * 2.0 - 1),
         -1,
         1
     };
     std::vector<double> worldPosBackVec = {
-        (posScreen.x / (double)viewport.x * 2.0 - 1),
-        -(posScreen.y / (double)viewport.y * 2.0 - 1),
+        ((double)posScreen.x / (double)viewport.x * 2.0 - 1),
+        -((double)posScreen.y / (double)viewport.y * 2.0 - 1),
         1,
         1
     };
@@ -1180,11 +1180,11 @@ Coord MapCamera3d::coordFromScreenPosition(const std::vector<double> &inverseVPM
     auto point = MapCamera3DHelper::raySphereIntersection(worldPosFront, worldPosBack, Vec3D(0.0, 0.0, 0.0), 1.0, didHit);
 
     if (didHit) {
-        float longitude = std::atan2(point.x, point.z) * 180 / M_PI - 90;
+        double longitude = std::atan2(point.x, point.z) * 180 / M_PI - 90;
         if (longitude < -180) {
             longitude += 360;
         }
-        float latitude = std::asin(point.y) * 180 / M_PI;
+        double latitude = std::asin(point.y) * 180 / M_PI;
         return Coord(CoordinateSystemIdentifiers::EPSG4326(), longitude, latitude, 0);
     }
     else {
