@@ -3,6 +3,7 @@
 
 #import "MCLayerInterface.h"
 #import "MCPolygonInfo.h"
+#import "MCVec3F.h"
 #import <Foundation/Foundation.h>
 @class MCPolygonLayerInterface;
 @protocol MCPolygonLayerCallbackInterface;
@@ -12,7 +13,8 @@
 
 + (nullable MCPolygonLayerInterface *)create;
 
-- (void)setPolygons:(nonnull NSArray<MCPolygonInfo *> *)polygons;
+- (void)setPolygons:(nonnull NSArray<MCPolygonInfo *> *)polygons
+             origin:(nonnull MCVec3F *)origin;
 
 - (nonnull NSArray<MCPolygonInfo *> *)getPolygons;
 

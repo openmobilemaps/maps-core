@@ -6,6 +6,7 @@
 #include "RenderingContextInterface.h"
 #include "SharedBytes.h"
 #include "Vec2F.h"
+#include "Vec3F.h"
 #include <memory>
 
 class GraphicsObjectInterface;
@@ -15,7 +16,7 @@ class PolygonPatternGroup2dInterface {
 public:
     virtual ~PolygonPatternGroup2dInterface() = default;
 
-    virtual void setVertices(const ::SharedBytes & vertices, const ::SharedBytes & indices) = 0;
+    virtual void setVertices(const ::SharedBytes & vertices, const ::SharedBytes & indices, const ::Vec3F & origin) = 0;
 
     virtual void setOpacities(const ::SharedBytes & values) = 0;
 

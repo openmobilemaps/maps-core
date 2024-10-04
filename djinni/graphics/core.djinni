@@ -4,6 +4,7 @@
 @extern "../yaml/graphics_object_factory_interface.yaml"
 @extern "../yaml/shader_factory_interface.yaml"
 @extern "../yaml/vec_3_d.yaml"
+@extern "../yaml/vec_3_f.yaml"
 @extern "../yaml/vec_2_i.yaml"
 @extern "../yaml/rect_i.yaml"
 @extern "../yaml/color.yaml"
@@ -89,5 +90,6 @@ camera_interface = interface +c +j +o {
     get_view_matrix() : list<f32>;
     get_projection_matrix() : list<f32>;
     get_scaling_factor(): f64;
+    get_origin(): vec_3_f;
     viewport_size_changed();
 }

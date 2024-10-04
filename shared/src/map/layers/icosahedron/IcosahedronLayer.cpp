@@ -59,12 +59,12 @@ void IcosahedronLayer::onAdded(const std::shared_ptr<MapInterface> & mapInterfac
                             switch (vertex.tag()) {
                                 case 1: {
                                     auto lat = vertex.get_float();
-                                    verticesBuffer.push_back(lat * 180 / M_PI);
+                                    verticesBuffer.push_back(lat * 180 / M_PI); // PRECISION-ISSUE TODO
                                     break;
                                 }
                                 case 2: {
                                     auto lon = vertex.get_float();
-                                    verticesBuffer.push_back(lon * 180 / M_PI);
+                                    verticesBuffer.push_back(lon * 180 / M_PI); // PRECISION-ISSUE TODO
                                     break;
                                 }
                                 case 3: {
@@ -91,7 +91,7 @@ void IcosahedronLayer::onAdded(const std::shared_ptr<MapInterface> & mapInterfac
 
         auto i = SharedBytes((int64_t)indicesBuffer.data(), (int32_t)indicesBuffer.size(), (int32_t)sizeof(uint32_t));
         auto v = SharedBytes((int64_t)verticesBuffer.data(), (int32_t)verticesBuffer.size(), (int32_t)sizeof(float));
-        object->setVertices(v, i);
+        object->setVertices(v, i, Vec3F(0, 0, 0)); // PRECISION-ISSUE TODO
 
 
         auto selfActor = WeakActor<IcosahedronLayer>(selfMailbox, shared_from_this());

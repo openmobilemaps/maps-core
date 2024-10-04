@@ -33,7 +33,7 @@ private:
         JavaProxy(JniType j);
         ~JavaProxy();
 
-        void setVertices(const ::SharedBytes & vertices, const ::SharedBytes & indices) override;
+        void setVertices(const ::SharedBytes & vertices, const ::SharedBytes & indices, const ::Vec3F & origin) override;
         /*not-null*/ std::shared_ptr<::GraphicsObjectInterface> asGraphicsObject() override;
 
     private:
@@ -41,7 +41,7 @@ private:
     };
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/graphics/objects/PolygonGroup2dInterface") };
-    const jmethodID method_setVertices { ::djinni::jniGetMethodID(clazz.get(), "setVertices", "(Lio/openmobilemaps/mapscore/shared/graphics/common/SharedBytes;Lio/openmobilemaps/mapscore/shared/graphics/common/SharedBytes;)V") };
+    const jmethodID method_setVertices { ::djinni::jniGetMethodID(clazz.get(), "setVertices", "(Lio/openmobilemaps/mapscore/shared/graphics/common/SharedBytes;Lio/openmobilemaps/mapscore/shared/graphics/common/SharedBytes;Lio/openmobilemaps/mapscore/shared/graphics/common/Vec3F;)V") };
     const jmethodID method_asGraphicsObject { ::djinni::jniGetMethodID(clazz.get(), "asGraphicsObject", "()Lio/openmobilemaps/mapscore/shared/graphics/objects/GraphicsObjectInterface;") };
 };
 

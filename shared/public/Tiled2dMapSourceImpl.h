@@ -80,17 +80,17 @@ static void hash_combine(size_t& seed, const T& value) {
 }
 
 template<class T, class L, class R>
-::Vec3D Tiled2dMapSource<T, L, R>::transformToView(const ::Coord &position, const std::vector<float> &viewMatrix) {
+::Vec3D Tiled2dMapSource<T, L, R>::transformToView(const ::Coord &position, const std::vector<float> &viewMatrix, const Vec3F & origin) {
 
     Coord mapCoord = conversionHelper->convertToRenderSystem(position);
 
-    const double rx = 0.711650 * 1.0;
-    const double ry = 0.287723 * 1.0;
-    const double rz = -0.639713 * 1.0;
+    const double rx = origin.x;
+    const double ry = origin.y;
+    const double rz = origin.z;
 
-    std::vector<float> inVec = {(float) ((mapCoord.z * sin(mapCoord.y) * cos(mapCoord.x) - rx) * 1111.0),
-                                (float) ((mapCoord.z * cos(mapCoord.y) - ry) * 1111.0),
-                                (float) ((-mapCoord.z * sin(mapCoord.y) * sin(mapCoord.x) - rz) * 1111.0),
+    std::vector<float> inVec = {(float) ((mapCoord.z * sin(mapCoord.y) * cos(mapCoord.x) - rx) ),
+                                (float) ((mapCoord.z * cos(mapCoord.y) - ry) ),
+                                (float) ((-mapCoord.z * sin(mapCoord.y) * sin(mapCoord.x) - rz) ),
                                 1.0};
     std::vector<float> outVec = {0, 0, 0, 0};
 
@@ -113,7 +113,7 @@ template<class T, class L, class R>
 }
 
 template<class T, class L, class R>
-void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMatrix, const std::vector<float> &projectionMatrix,
+void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMatrix, const std::vector<float> &projectionMatrix,const ::Vec3F & origin,
                                                float verticalFov, float horizontalFov, float width, float height,
                                                float focusPointAltitude, const ::Coord & focusPointPosition, float zoom) {
 
@@ -169,7 +169,7 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
 
     auto focusPointInLayerCoords = conversionHelper->convert(layerSystemId, focusPointPosition);
 
-    auto earthCenterView = transformToView(Coord(CoordinateSystemIdentifiers::UnitSphere(), 0.0, 0.0, 0.0), viewMatrix);
+    auto earthCenterView = transformToView(Coord(CoordinateSystemIdentifiers::UnitSphere(), 0.0, 0.0, 0.0), viewMatrix, origin);
 
     while (candidates.size() > 0) {
         VisibleTileCandidate candidate = candidates.front();
@@ -241,24 +241,24 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
         const Coord bottomLeftHigh = Coord(layerSystemId, bottomLeft.x, bottomLeft.y, focusPointAltitude + heightRange / 2.0);
         const Coord bottomRightHigh = Coord(layerSystemId, bottomRight.x, bottomRight.y, focusPointAltitude + heightRange / 2.0);
 
-        auto topLeftView = transformToView(topLeft, viewMatrix);
-        auto topRightView = transformToView(topRight, viewMatrix);
-        auto bottomLeftView = transformToView(bottomLeft, viewMatrix);
-        auto bottomRightView = transformToView(bottomRight, viewMatrix);
+        auto topLeftView = transformToView(topLeft, viewMatrix, origin);
+        auto topRightView = transformToView(topRight, viewMatrix, origin);
+        auto bottomLeftView = transformToView(bottomLeft, viewMatrix, origin);
+        auto bottomRightView = transformToView(bottomRight, viewMatrix, origin);
 
         /*
          use focuspoint in layersystem and clamp to tileBounds
          */
 
 
-        auto focusPointClampedView = transformToView(focusPointClampedToTile, viewMatrix);
-        auto focusPointSampleXView = transformToView(focusPointSampleX, viewMatrix);
-        auto focusPointSampleYView = transformToView(focusPointSampleY, viewMatrix);
+        auto focusPointClampedView = transformToView(focusPointClampedToTile, viewMatrix, origin);
+        auto focusPointSampleXView = transformToView(focusPointSampleX, viewMatrix, origin);
+        auto focusPointSampleYView = transformToView(focusPointSampleY, viewMatrix, origin);
 
-        auto topLeftHighView = transformToView(topLeftHigh, viewMatrix);
-        auto topRightHighView = transformToView(topRightHigh, viewMatrix);
-        auto bottomLeftHighView = transformToView(bottomLeftHigh, viewMatrix);
-        auto bottomRightHighView = transformToView(bottomRightHigh, viewMatrix);
+        auto topLeftHighView = transformToView(topLeftHigh, viewMatrix, origin);
+        auto topRightHighView = transformToView(topRightHigh, viewMatrix, origin);
+        auto bottomLeftHighView = transformToView(bottomLeftHigh, viewMatrix, origin);
+        auto bottomRightHighView = transformToView(bottomRightHigh, viewMatrix, origin);
 
         float centerZ = (topLeftView.z + topRightView.z + bottomLeftView.z + bottomRightView.z) / 4.0;
 

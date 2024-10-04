@@ -5,6 +5,7 @@
 #import "MCGraphicsObjectFactoryInterface.h"
 #import "MCPolygon2dInterface.h"
 #import "MCPolygonCoord.h"
+#import "MCVec3F.h"
 #import <Foundation/Foundation.h>
 @class MCPolygonMaskObjectInterface;
 
@@ -15,9 +16,11 @@
                                  conversionHelper:(nullable MCCoordinateConversionHelperInterface *)conversionHelper
                                              is3d:(BOOL)is3d;
 
-- (void)setPolygons:(nonnull NSArray<MCPolygonCoord *> *)polygons;
+- (void)setPolygons:(nonnull NSArray<MCPolygonCoord *> *)polygons
+             origin:(nonnull MCVec3F *)origin;
 
-- (void)setPolygon:(nonnull MCPolygonCoord *)polygon;
+- (void)setPolygon:(nonnull MCPolygonCoord *)polygon
+            origin:(nonnull MCVec3F *)origin;
 
 - (nullable id<MCPolygon2dInterface>)getPolygonObject;
 

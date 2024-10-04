@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "Vec3F.h"
 #include <vector>
 
 class CameraInterface {
@@ -14,6 +15,8 @@ public:
     virtual std::vector<float> getProjectionMatrix() = 0;
 
     virtual double getScalingFactor() = 0;
+
+    virtual ::Vec3F getOrigin() = 0;
 
     virtual void viewportSizeChanged() = 0;
 };

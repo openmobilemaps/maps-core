@@ -156,6 +156,14 @@ void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDa
 
     if (!tileData->empty()) {
 
+        auto convertedTileBounds = mapInterface->getCoordinateConverterHelper()->convertRectToRenderSystem(tileInfo.tileInfo.bounds);
+        double cx = (convertedTileBounds.bottomRight.x + convertedTileBounds.topLeft.x) / 2.0;
+        double cy = (convertedTileBounds.bottomRight.y + convertedTileBounds.topLeft.y) / 2.0;
+        double rx = 1.0 * sin(cy) * cos(cx);
+        double ry = 1.0 * cos(cy);
+        double rz = -1.0 * sin(cy) * sin(cx);
+        auto origin = Vec3F(rx, ry, rz);
+
         bool anyInteractable = false;
 
         std::vector<std::vector<ObjectDescriptions>> styleGroupNewPolygonsVector;
@@ -227,7 +235,6 @@ void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDa
                     auto indices = polygon.indices;
 
                     if (is3d) {
-                        auto convertedTileBounds = mapInterface->getCoordinateConverterHelper()->convertRectToRenderSystem(tileInfo.tileInfo.bounds);
                         auto maxSegmentLength = std::min(std::abs(convertedTileBounds.bottomRight.x - convertedTileBounds.topLeft.x) / POLYGON_SUBDIVISION_FACTOR, (M_PI * 2.0) / POLYGON_SUBDIVISION_FACTOR);
                         PolygonHelper::subdivision(coordinates, indices, maxSegmentLength);
                     }
@@ -238,12 +245,10 @@ void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDa
                     }
 
                     for (auto const &coordinate: coordinates) {
-                        const double rx = 0.711650 * 1.0;
-                        const double ry = 0.287723 * 1.0;
-                        const double rz = -0.639713 * 1.0;
-                        double x = (1.0 * sin(coordinate.y) * cos(coordinate.x) - rx) * 1111.0;
-                        double y = (1.0 * cos(coordinate.y) - ry) * 1111.0;
-                        double z = (-1.0 * sin(coordinate.y) * sin(coordinate.x) - rz) * 1111.0;
+
+                        double x = 1.0 * sin(coordinate.y) * cos(coordinate.x) - rx;
+                        double y = 1.0 * cos(coordinate.y) - ry;
+                        double z = -1.0 * sin(coordinate.y) * sin(coordinate.x) - rz;
                         styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(x);
                         styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(y);
                         styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(z);
@@ -266,14 +271,15 @@ void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDa
             tileCallbackInterface.message(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsInteractable, description->identifier);
         }
 
-        addPolygons(styleGroupNewPolygonsVector);
+        addPolygons(styleGroupNewPolygonsVector, origin);
     } else {
         auto selfActor = WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this());
         tileCallbackInterface.message(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsReady, tileInfo, description->identifier, selfActor);
     }
 }
 
-void Tiled2dMapVectorPolygonTile::addPolygons(const std::vector<std::vector<ObjectDescriptions>> &styleGroupNewPolygonsVector) {
+void Tiled2dMapVectorPolygonTile::addPolygons(const std::vector<std::vector<ObjectDescriptions>> &styleGroupNewPolygonsVector,
+                                              const Vec3F & origin) {
 
     if (styleGroupNewPolygonsVector.empty()) {
         auto selfActor = WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this());
@@ -301,7 +307,7 @@ void Tiled2dMapVectorPolygonTile::addPolygons(const std::vector<std::vector<Obje
 #endif
 
             auto layerObject = std::make_shared<PolygonGroup2dLayerObject>(converter, polygonObject, shader);
-            layerObject->setVertices(polygonDesc.vertices, polygonDesc.indices);
+            layerObject->setVertices(polygonDesc.vertices, polygonDesc.indices, origin);
 
             polygonGroupObjects.emplace_back(layerObject);
             newGraphicObjects.push_back(polygonObject->asGraphicsObject());

@@ -4,6 +4,7 @@
 #include "NativePolygonGroup2dInterface.h"  // my header
 #include "NativeGraphicsObjectInterface.h"
 #include "NativeSharedBytes.h"
+#include "NativeVec3F.h"
 
 namespace djinni_generated {
 
@@ -15,13 +16,14 @@ NativePolygonGroup2dInterface::JavaProxy::JavaProxy(JniType j) : Handle(::djinni
 
 NativePolygonGroup2dInterface::JavaProxy::~JavaProxy() = default;
 
-void NativePolygonGroup2dInterface::JavaProxy::setVertices(const ::SharedBytes & c_vertices, const ::SharedBytes & c_indices) {
+void NativePolygonGroup2dInterface::JavaProxy::setVertices(const ::SharedBytes & c_vertices, const ::SharedBytes & c_indices, const ::Vec3F & c_origin) {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
     const auto& data = ::djinni::JniClass<::djinni_generated::NativePolygonGroup2dInterface>::get();
     jniEnv->CallVoidMethod(Handle::get().get(), data.method_setVertices,
                            ::djinni::get(::djinni_generated::NativeSharedBytes::fromCpp(jniEnv, c_vertices)),
-                           ::djinni::get(::djinni_generated::NativeSharedBytes::fromCpp(jniEnv, c_indices)));
+                           ::djinni::get(::djinni_generated::NativeSharedBytes::fromCpp(jniEnv, c_indices)),
+                           ::djinni::get(::djinni_generated::NativeVec3F::fromCpp(jniEnv, c_origin)));
     ::djinni::jniExceptionCheck(jniEnv);
 }
 /*not-null*/ std::shared_ptr<::GraphicsObjectInterface> NativePolygonGroup2dInterface::JavaProxy::asGraphicsObject() {
@@ -40,12 +42,13 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_PolygonGroup2dInterface_00024CppProxy_native_1setVertices(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeSharedBytes::JniType j_vertices, ::djinni_generated::NativeSharedBytes::JniType j_indices)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_PolygonGroup2dInterface_00024CppProxy_native_1setVertices(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeSharedBytes::JniType j_vertices, ::djinni_generated::NativeSharedBytes::JniType j_indices, ::djinni_generated::NativeVec3F::JniType j_origin)
 {
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::PolygonGroup2dInterface>(nativeRef);
         ref->setVertices(::djinni_generated::NativeSharedBytes::toCpp(jniEnv, j_vertices),
-                         ::djinni_generated::NativeSharedBytes::toCpp(jniEnv, j_indices));
+                         ::djinni_generated::NativeSharedBytes::toCpp(jniEnv, j_indices),
+                         ::djinni_generated::NativeVec3F::toCpp(jniEnv, j_origin));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

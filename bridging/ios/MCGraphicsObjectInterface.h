@@ -3,6 +3,7 @@
 
 #import "MCRenderPassConfig.h"
 #import "MCRenderingContextInterface.h"
+#import "MCVec3F.h"
 #import <Foundation/Foundation.h>
 
 
@@ -31,6 +32,7 @@
     viewMatrix:(int64_t)viewMatrix
 projectionMatrix:(int64_t)projectionMatrix
        mMatrix:(int64_t)mMatrix
+        origin:(nonnull MCVec3F *)origin
       isMasked:(BOOL)isMasked
 screenPixelAsRealMeterFactor:(double)screenPixelAsRealMeterFactor;
 

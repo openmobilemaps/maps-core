@@ -48,6 +48,7 @@ MapCamera3d::MapCamera3d(const std::shared_ptr<MapInterface> &mapInterface, floa
       zoomMax(GLOBE_MAX_ZOOM),
       lastOnTouchDownPoint(std::nullopt)
     , bounds(mapCoordinateSystem.bounds),
+      origin(0, 0, 0),
       cameraZoomConfig("", false, std::nullopt, 0.0, 0.0, CameraInterpolation({}), CameraInterpolation({}))
 {
     mapSystemRtl = mapCoordinateSystem.bounds.bottomRight.x > mapCoordinateSystem.bounds.topLeft.x;
@@ -423,14 +424,23 @@ std::tuple<std::tuple<std::vector<float>, std::vector<float>>, std::vector<doubl
     MatrixD::rotateM(newViewMatrix, 0.0, -longitude, 0.0, 1.0, 0.0);
     MatrixD::rotateM(newViewMatrix, 0.0, -90, 0.0, 1.0, 0.0); // zero longitude in London
 
-    const double rx = 0.711650 * 1.0;
-    const double ry = 0.287723 * 1.0;
-    const double rz = -0.639713 * 1.0;
-    MatrixD::translateM(newViewMatrix, 0, rx, ry, rz);
+    double lo = (longitude - 90.0) * M_PI / 180.0;
+    double la = latitude * M_PI / 180.0;
+    double x = -(1.0 * sin(lo) * cos(la));
+    double y = (-1.0 * sin(lo) * sin(la)) ;
+    double z = -(1.0 * cos(lo));
+//    double x = (1.0 * sin(latitude) * cos(longitude)) * -0001.0;
+//    double y = (1.0 * cos(latitude)) * -0001.0;
+//    double z = (-1.0 * sin(latitude) * sin(longitude)) * -0001.0;
+
+
+    origin = Vec3F((float)x, (float)y, (float)z);
+
+
+    MatrixD::translateM(newViewMatrix, 0, x, y, z);
 
 //    MatrixD::translateM(newViewMatrix, 0, off, off, off);
 
-    MatrixD::scaleM(newViewMatrix, 0, 1.0 / 1111.0, 1.0 / 1111.0, 1.0 / 1111.0);
 
     // ^
     // |
@@ -519,6 +529,10 @@ std::tuple<std::tuple<std::vector<float>, std::vector<float>>, std::vector<doubl
     return std::make_tuple(std::make_tuple(newViewMatrixF,
                            newProjectionMatrixF),
                            newInverseMatrix);
+}
+
+Vec3F MapCamera3d::getOrigin() {
+    return origin;
 }
 
 
@@ -722,7 +736,7 @@ void MapCamera3d::notifyListeners(const int &listenerType) {
                 static_cast<float>(projectionMatrix[15])
             };
 
-            listener->onCameraChange(viewMatrixF, projectionMatrixF, verticalFov, horizontalFov, width, height, focusPointAltitude, getCenterPosition(), getZoom(), getCameraMode());
+            listener->onCameraChange(viewMatrixF, projectionMatrixF, origin, verticalFov, horizontalFov, width, height, focusPointAltitude, getCenterPosition(), getZoom(), getCameraMode());
         }
         if (listenerType & ListenerType::ROTATION) {
             listener->onRotationChanged(angle);
@@ -1165,16 +1179,16 @@ Coord MapCamera3d::coordFromScreenPosition(const std::vector<double> &inverseVPM
         1
     };
 
-    const double rx = 0.711650 * 1.0;
-    const double ry = 0.287723 * 1.0;
-    const double rz = -0.639713 * 1.0;
+    const double rx = origin.x;
+    const double ry = origin.y;
+    const double rz = origin.z;
 
     worldPosFrontVec = MatrixD::multiply(inverseVPMatrix, worldPosFrontVec);
-    Vec3D worldPosFront{(worldPosFrontVec[0] / worldPosFrontVec[3]) / 1111.0 + rx, (worldPosFrontVec[1] / worldPosFrontVec[3]) / 1111.0 + ry,
-                                (worldPosFrontVec[2] / worldPosFrontVec[3]) / 1111.0 + rz};
+    Vec3D worldPosFront{(worldPosFrontVec[0] / worldPosFrontVec[3]) / 0001.0 + rx, (worldPosFrontVec[1] / worldPosFrontVec[3]) / 0001.0 + ry,
+                                (worldPosFrontVec[2] / worldPosFrontVec[3]) / 0001.0 + rz};
     worldPosBackVec = MatrixD::multiply(inverseVPMatrix, worldPosBackVec);
-    Vec3D worldPosBack{(worldPosBackVec[0] / worldPosBackVec[3]) / 1111.0 + rx, (worldPosBackVec[1] / worldPosBackVec[3]) / 1111.0 + ry,
-                               (worldPosBackVec[2] / worldPosBackVec[3]) / 1111.0 + rz};
+    Vec3D worldPosBack{(worldPosBackVec[0] / worldPosBackVec[3]) / 0001.0 + rx, (worldPosBackVec[1] / worldPosBackVec[3]) / 0001.0 + ry,
+                               (worldPosBackVec[2] / worldPosBackVec[3]) / 0001.0 + rz};
 
     bool didHit = false;
     auto point = MapCamera3DHelper::raySphereIntersection(worldPosFront, worldPosBack, Vec3D(0.0, 0.0, 0.0), 1.0, didHit);

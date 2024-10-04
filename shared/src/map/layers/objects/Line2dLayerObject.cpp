@@ -40,9 +40,9 @@ void Line2dLayerObject::setPositions(const std::vector<Coord> &positions) {
         const double ry = 0.287723 * 1.0;
         const double rz = -0.639713 * 1.0;
 
-        double x = (1.0 * sin(renderCoord.y) * cos(renderCoord.x) - rx) * 1111.0;
-        double y = (1.0 * cos(renderCoord.y) - ry) * 1111.0;
-        double z = (-1.0 * sin(renderCoord.y) * sin(renderCoord.x) - rz) * 1111.0;
+        double x = (1.0 * sin(renderCoord.y) * cos(renderCoord.x) - rx) ;
+        double y = (1.0 * cos(renderCoord.y) - ry) ;
+        double z = (-1.0 * sin(renderCoord.y) * sin(renderCoord.x) - rz) ;
 
         renderCoords.push_back(Vec3D(x, y, z));
     }

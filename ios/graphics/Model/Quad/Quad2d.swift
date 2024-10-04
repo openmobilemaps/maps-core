@@ -12,11 +12,13 @@ import Foundation
 import MapCoreSharedModule
 import Metal
 import UIKit
+import simd
 
 final class Quad2d: BaseGraphicsObject, @unchecked Sendable {
     private var verticesBuffer: MTLBuffer?
 
     private var indicesBuffer: MTLBuffer?
+    private var origin: MCVec3F?
 
     private var indicesCount: Int = 0
 
@@ -73,6 +75,7 @@ final class Quad2d: BaseGraphicsObject, @unchecked Sendable {
                          viewMatrix: Int64,
                          projectionMatrix: Int64,
                          mMatrix: Int64,
+                origin: MCVec3F,
                          isMasked: Bool,
                          screenPixelAsRealMeterFactor _: Double) {
         lock.lock()
@@ -82,7 +85,9 @@ final class Quad2d: BaseGraphicsObject, @unchecked Sendable {
 
         guard isReady(),
               let verticesBuffer,
-              let indicesBuffer else { return }
+              let indicesBuffer,
+              let tileOrigin = self.origin
+        else { return }
 
 
         if shader is AlphaShader || shader is RasterShader, texture == nil {
@@ -132,6 +137,16 @@ final class Quad2d: BaseGraphicsObject, @unchecked Sendable {
             encoder.setVertexBytes(mMatrixPointer, length: 64, index: 3)
         }
 
+        var originOffset: simd_float4 = simd_float4(
+            Float(tileOrigin.x - origin.x),
+            Float(tileOrigin.y - origin.y),
+            Float(tileOrigin.z - origin.z),
+            0
+        )
+        if let originOffsetBuffer = device.makeBuffer(bytes: &originOffset, length: MemoryLayout<simd_float4>.stride, options: []) {
+            encoder.setVertexBuffer(originOffsetBuffer, offset: 0, index: 4)
+        }
+
         encoder.setFragmentSamplerState(sampler, index: 0)
 
         if let texture {
@@ -152,6 +167,7 @@ extension Quad2d: MCMaskingObjectInterface {
                 viewMatrix: Int64,
                 projectionMatrix: Int64,
                 mMatrix: Int64,
+                origin: MCVec3F,
                 screenPixelAsRealMeterFactor: Double) {
         guard isReady(),
               let context = context as? RenderingContext,
@@ -165,6 +181,7 @@ extension Quad2d: MCMaskingObjectInterface {
                viewMatrix: viewMatrix,
                projectionMatrix: projectionMatrix,
                mMatrix: mMatrix,
+               origin: origin,
                isMasked: false,
                screenPixelAsRealMeterFactor: screenPixelAsRealMeterFactor)
     }
@@ -189,6 +206,8 @@ extension Quad2d: MCQuad2dInterface {
 
 
     func setFrame(_ frame: MCQuad3dD, textureCoordinates: MCRectD) {
+
+        origin = MCVec3F(x: 0, y: 0, z: 0) // PRECISION-ISSUE TODO
 
 
         var vertices: [Vertex3D] = []

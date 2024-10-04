@@ -14,7 +14,7 @@ abstract class MapCameraListenerInterface {
 
     abstract fun onMapInteraction()
 
-    abstract fun onCameraChange(viewMatrix: ArrayList<Float>, projectionMatrix: ArrayList<Float>, verticalFov: Float, horizontalFov: Float, width: Float, height: Float, focusPointAltitude: Float, focusPointPosition: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, zoom: Float, mode: io.openmobilemaps.mapscore.shared.map.CameraMode3d)
+    abstract fun onCameraChange(viewMatrix: ArrayList<Float>, projectionMatrix: ArrayList<Float>, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3F, verticalFov: Float, horizontalFov: Float, width: Float, height: Float, focusPointAltitude: Float, focusPointPosition: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, zoom: Float, mode: io.openmobilemaps.mapscore.shared.map.CameraMode3d)
 
     private class CppProxy : MapCameraListenerInterface {
         private val nativeRef: Long
@@ -49,10 +49,10 @@ abstract class MapCameraListenerInterface {
         }
         private external fun native_onMapInteraction(_nativeRef: Long)
 
-        override fun onCameraChange(viewMatrix: ArrayList<Float>, projectionMatrix: ArrayList<Float>, verticalFov: Float, horizontalFov: Float, width: Float, height: Float, focusPointAltitude: Float, focusPointPosition: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, zoom: Float, mode: io.openmobilemaps.mapscore.shared.map.CameraMode3d) {
+        override fun onCameraChange(viewMatrix: ArrayList<Float>, projectionMatrix: ArrayList<Float>, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3F, verticalFov: Float, horizontalFov: Float, width: Float, height: Float, focusPointAltitude: Float, focusPointPosition: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, zoom: Float, mode: io.openmobilemaps.mapscore.shared.map.CameraMode3d) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_onCameraChange(this.nativeRef, viewMatrix, projectionMatrix, verticalFov, horizontalFov, width, height, focusPointAltitude, focusPointPosition, zoom, mode)
+            native_onCameraChange(this.nativeRef, viewMatrix, projectionMatrix, origin, verticalFov, horizontalFov, width, height, focusPointAltitude, focusPointPosition, zoom, mode)
         }
-        private external fun native_onCameraChange(_nativeRef: Long, viewMatrix: ArrayList<Float>, projectionMatrix: ArrayList<Float>, verticalFov: Float, horizontalFov: Float, width: Float, height: Float, focusPointAltitude: Float, focusPointPosition: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, zoom: Float, mode: io.openmobilemaps.mapscore.shared.map.CameraMode3d)
+        private external fun native_onCameraChange(_nativeRef: Long, viewMatrix: ArrayList<Float>, projectionMatrix: ArrayList<Float>, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3F, verticalFov: Float, horizontalFov: Float, width: Float, height: Float, focusPointAltitude: Float, focusPointPosition: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, zoom: Float, mode: io.openmobilemaps.mapscore.shared.map.CameraMode3d)
     }
 }

@@ -4,6 +4,7 @@
 @extern "../../yaml/rect_d.yaml"
 @extern "../../yaml/quad_2d_d.yaml"
 @extern "../../yaml/quad_3d_d.yaml"
+@extern "../../yaml/vec_3_f.yaml"
 @extern "../../yaml/vec_2_d.yaml"
 @extern "../../yaml/vec_2_f.yaml"
 @extern "../../yaml/shared_bytes.yaml"
@@ -21,12 +22,12 @@ graphics_object_interface = interface +c +j +o {
     # Render the graphics object; ensure calling on graphics thread
 
     set_debug_label(label: string);
-    render(context: rendering_context_interface, render_pass: render_pass_config, view_matrix: i64, projection_matrix: i64, m_matrix: i64, is_masked: bool, screenPixelAsRealMeterFactor: f64);
+    render(context: rendering_context_interface, render_pass: render_pass_config, view_matrix: i64, projection_matrix: i64, m_matrix: i64, origin: vec_3_f, is_masked: bool, screenPixelAsRealMeterFactor: f64);
 }
 
 masking_object_interface = interface +c +j +o {
     as_graphics_object(): graphics_object_interface;
-	render_as_mask(context: rendering_context_interface, render_pass: render_pass_config, view_matrix: i64, projection_matrix: i64, m_matrix: i64, screenPixelAsRealMeterFactor: f64);
+	render_as_mask(context: rendering_context_interface, render_pass: render_pass_config, view_matrix: i64, projection_matrix: i64, m_matrix: i64, origin: vec_3_f, screenPixelAsRealMeterFactor: f64);
 }
 
 compute_object_interface = interface +c +j +o {
@@ -128,7 +129,7 @@ line_group_2d_interface = interface +c +j +o {
 }
 
 polygon_2d_interface = interface +c +j +o {
-    set_vertices(vertices: shared_bytes, indices: shared_bytes);
+    set_vertices(vertices: shared_bytes, indices: shared_bytes, origin: vec_3_f);
 
     as_graphics_object(): graphics_object_interface;
     as_masking_object(): masking_object_interface;
@@ -140,12 +141,12 @@ render_vertices_description = record {
 }
 
 polygon_group_2d_interface = interface +c +j +o {
-    set_vertices(vertices: shared_bytes, indices: shared_bytes);
+    set_vertices(vertices: shared_bytes, indices: shared_bytes, origin: vec_3_f);
     as_graphics_object(): graphics_object_interface;
 }
 
 polygon_pattern_group_2d_interface = interface +c +j +o {
-    set_vertices(vertices: shared_bytes, indices: shared_bytes);
+    set_vertices(vertices: shared_bytes, indices: shared_bytes, origin: vec_3_f);
     set_opacities(values: shared_bytes);
     # 4 floats (x, y, width and height) in uv space and 2 uint_16 values for the pixel with and height for each instanced
     set_texture_coordinates(values: shared_bytes);
@@ -219,6 +220,6 @@ glyph_description = record {
 }
 
 icosahedron_interface = interface +c +j +o {
-    set_vertices(vertices: shared_bytes, indices: shared_bytes);
+    set_vertices(vertices: shared_bytes, indices: shared_bytes, origin: vec_3_f);
     as_graphics_object(): graphics_object_interface;
 }

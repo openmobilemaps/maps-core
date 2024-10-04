@@ -33,6 +33,7 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
     const auto viewMatrixPointer = (int64_t)viewMatrix.data();
     const auto projectionMatrix = camera->getProjectionMatrix();
     const auto projectionMatrixPointer = (int64_t)projectionMatrix.data();
+    const auto origin = camera->getOrigin();
 
     const double factor = camera->getScalingFactor();
 
@@ -63,6 +64,7 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
                                          viewMatrixPointer,
                                          projectionMatrixPointer,
                                          identityMatrixPointer,
+                                         origin,
                                          factor);
             }
 
@@ -74,6 +76,7 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
                                            identityMatrixPointer,
                                            identityMatrixPointer,
                                            identityMatrixPointer,
+                                           origin,
                                            hasMask,
                                            factor);
                 } else if (renderObject->hasCustomModelMatrix()) {
@@ -84,6 +87,7 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
                                            viewMatrixPointer,
                                            projectionMatrixPointer,
                                            mMatrixPointer,
+                                           origin,
                                            hasMask,
                                            factor);
                 } else {
@@ -92,6 +96,7 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
                                            viewMatrixPointer,
                                            projectionMatrixPointer,
                                            identityMatrixPointer,
+                                           origin,
                                            hasMask,
                                            factor);
                 }

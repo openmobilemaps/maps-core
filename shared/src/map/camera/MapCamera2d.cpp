@@ -414,6 +414,10 @@ std::optional<std::vector<float>> MapCamera2d::getLastVpMatrix() {
     return vpCopy;
 }
 
+Vec3F MapCamera2d::getOrigin() {
+
+}
+
 std::optional<::RectCoord> MapCamera2d::getLastVpMatrixViewBounds() {
     std::lock_guard<std::recursive_mutex> lock(vpDataMutex);
     return lastVpBounds;

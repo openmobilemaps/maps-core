@@ -32,7 +32,8 @@ class PolygonLayer : public PolygonLayerInterface,
     ~PolygonLayer(){};
 
     // PolygonLayerInterface
-    virtual void setPolygons(const std::vector<PolygonInfo> &polygons) override;
+                         virtual void setPolygons(const std::vector<PolygonInfo> &polygons,
+                                                  const Vec3F & origin) override;
 
     virtual std::vector<PolygonInfo> getPolygons() override;
 

@@ -42,6 +42,7 @@ open class BaseGraphicsObject: @unchecked Sendable {
                      viewMatrix _: Int64,
                      projectionMatrix _: Int64,
                      mMatrix _: Int64,
+                     origin: MCVec3F,
                      isMasked _: Bool,
                      screenPixelAsRealMeterFactor _: Double) {
         fatalError("has to be overwritten by subclass")
@@ -73,7 +74,8 @@ extension BaseGraphicsObject: MCGraphicsObjectInterface {
         maskInverse = inversed
     }
 
-    public func render(_ context: MCRenderingContextInterface?, renderPass: MCRenderPassConfig, viewMatrix: Int64, projectionMatrix: Int64, mMatrix: Int64, isMasked: Bool, screenPixelAsRealMeterFactor: Double) {
+    public func render(_ context: MCRenderingContextInterface?, renderPass: MCRenderPassConfig, viewMatrix: Int64, projectionMatrix: Int64, mMatrix: Int64,
+                origin: MCVec3F, isMasked: Bool, screenPixelAsRealMeterFactor: Double) {
         guard isReady(),
               let context = context as? RenderingContext,
               let encoder = context.encoder
@@ -85,6 +87,7 @@ extension BaseGraphicsObject: MCGraphicsObjectInterface {
                viewMatrix: viewMatrix,
                projectionMatrix: projectionMatrix,
                mMatrix: mMatrix,
+               origin: origin,
                isMasked: isMasked,
                screenPixelAsRealMeterFactor: screenPixelAsRealMeterFactor)
     }

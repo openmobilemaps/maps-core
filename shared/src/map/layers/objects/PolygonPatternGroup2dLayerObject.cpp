@@ -36,7 +36,7 @@ void PolygonPatternGroup2dLayerObject::setVertices(const std::vector<std::tuple<
 
         for (auto const &mapCoord: std::get<0>(v)) {
             auto renderCoord = conversionHelper->convertToRenderSystem(mapCoord);
-            renderVertices.push_back(renderCoord.x);
+            renderVertices.push_back(renderCoord.x); // PRECISION-ISSUE TODO
             renderVertices.push_back(renderCoord.y);
             renderVertices.push_back(s);
         }
@@ -45,13 +45,13 @@ void PolygonPatternGroup2dLayerObject::setVertices(const std::vector<std::tuple<
     auto i = SharedBytes((int64_t)indices.data(), (int32_t)indices.size(), (int32_t)sizeof(uint16_t));
     auto v = SharedBytes((int64_t)renderVertices.data(), (int32_t)renderVertices.size(), (int32_t)sizeof(float));
     
-    polygon->setVertices(v, i);
+    polygon->setVertices(v, i, Vec3F(0, 0, 0)); // PRECISION-ISSUE TODO
 }
 
 void PolygonPatternGroup2dLayerObject::setVertices(const std::vector<float> &verticesBuffer, const std::vector<uint16_t> & indices) {
     auto i = SharedBytes((int64_t)indices.data(), (int32_t)indices.size(), (int32_t)sizeof(uint16_t));
     auto v = SharedBytes((int64_t)verticesBuffer.data(), (int32_t)verticesBuffer.size(), (int32_t)sizeof(float));
-    polygon->setVertices(v, i);
+    polygon->setVertices(v, i, Vec3F(0, 0, 0)); // PRECISION-ISSUE TODO
 }
 
 void PolygonPatternGroup2dLayerObject::setOpacities(const std::vector<float> &opacities) {

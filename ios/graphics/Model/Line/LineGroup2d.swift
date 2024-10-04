@@ -71,6 +71,7 @@ final class LineGroup2d: BaseGraphicsObject, @unchecked Sendable {
                          viewMatrix: Int64,
                          projectionMatrix: Int64,
                          mMatrix: Int64,
+                origin: MCVec3F,
                          isMasked: Bool,
                          screenPixelAsRealMeterFactor: Double) {
         lock.lock()

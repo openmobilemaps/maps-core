@@ -3,6 +3,7 @@
 
 #include "NativeCameraInterface.h"  // my header
 #include "Marshal.hpp"
+#include "NativeVec3F.h"
 
 namespace djinni_generated {
 
@@ -37,6 +38,14 @@ double NativeCameraInterface::JavaProxy::getScalingFactor() {
     auto jret = jniEnv->CallDoubleMethod(Handle::get().get(), data.method_getScalingFactor);
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni::F64::toCpp(jniEnv, jret);
+}
+::Vec3F NativeCameraInterface::JavaProxy::getOrigin() {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeCameraInterface>::get();
+    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_getOrigin);
+    ::djinni::jniExceptionCheck(jniEnv);
+    return ::djinni_generated::NativeVec3F::toCpp(jniEnv, jret);
 }
 void NativeCameraInterface::JavaProxy::viewportSizeChanged() {
     auto jniEnv = ::djinni::jniGetThreadEnv();
@@ -77,6 +86,15 @@ CJNIEXPORT jdouble JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_Camer
         const auto& ref = ::djinni::objectFromHandleAddress<::CameraInterface>(nativeRef);
         auto r = ref->getScalingFactor();
         return ::djinni::release(::djinni::F64::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT ::djinni_generated::NativeVec3F::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_CameraInterface_00024CppProxy_native_1getOrigin(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::CameraInterface>(nativeRef);
+        auto r = ref->getOrigin();
+        return ::djinni::release(::djinni_generated::NativeVec3F::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 

@@ -30,11 +30,13 @@ vertex VertexOut
 unitSphereBaseVertexShader(const Vertex3DIn vertexIn [[stage_in]],
                            constant float4x4 &viewMatrix [[buffer(1)]],
                            constant float4x4 &projectionMatrix [[buffer(2)]],
-                           constant float4x4 &mMatrix [[buffer(3)]])
+                           constant float4x4 &mMatrix [[buffer(3)]],
+                           constant float4 &originOffset [[buffer(4)]]
+                           )
 {
 
     VertexOut out {
-        .position = projectionMatrix * (viewMatrix * (mMatrix * vertexIn.position)),
+        .position = projectionMatrix * (viewMatrix * (mMatrix * (vertexIn.position + originOffset))),
         .uv = vertexIn.uv
     };
 

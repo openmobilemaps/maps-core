@@ -4,6 +4,7 @@
 #pragma once
 
 #include "LayerInterface.h"
+#include "Vec3F.h"
 #include <cstdint>
 #include <memory>
 #include <vector>
@@ -17,7 +18,7 @@ public:
 
     static /*not-null*/ std::shared_ptr<PolygonLayerInterface> create();
 
-    virtual void setPolygons(const std::vector<PolygonInfo> & polygons) = 0;
+    virtual void setPolygons(const std::vector<PolygonInfo> & polygons, const ::Vec3F & origin) = 0;
 
     virtual std::vector<PolygonInfo> getPolygons() = 0;
 

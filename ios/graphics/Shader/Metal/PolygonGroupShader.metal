@@ -41,13 +41,14 @@ struct PolygonGroupStripeStyling {
 };
 
 vertex PolygonGroupVertexOut
-polygonGroupVertexShader(const PolygonGroupVertexIn vertexIn [[stage_in]],
+polygonGroupVertexShader(const Polygon4GroupVertexIn vertexIn [[stage_in]],
                  constant float4x4 &viewMatrix [[buffer(1)]],
-                 constant float4x4 &projectionMatrix [[buffer(2)]]
+                 constant float4x4 &projectionMatrix [[buffer(2)]],
+                 constant float4 &originOffset [[buffer(3)]]
                          )
 {
     PolygonGroupVertexOut out {
-        .position = projectionMatrix * (viewMatrix * float4(vertexIn.position.xy, 0.0, 1.0)),
+        .position = projectionMatrix * (viewMatrix * (vertexIn.position + originOffset)),
         .uv = float2(0.0, 0.0),
         .stylingIndex = vertexIn.stylingIndex,
     };
@@ -58,7 +59,8 @@ polygonGroupVertexShader(const PolygonGroupVertexIn vertexIn [[stage_in]],
 vertex PolygonGroupVertexOut
 unitSpherePolygonGroupVertexShader(const Polygon4GroupVertexIn vertexIn [[stage_in]],
                  constant float4x4 &viewMatrix [[buffer(1)]],
-                 constant float4x4 &projectionMatrix [[buffer(2)]]
+                                   constant float4x4 &projectionMatrix [[buffer(2)]],
+                                   constant float4 &originOffset [[buffer(3)]]
                                    )
 {
 
@@ -87,7 +89,7 @@ unitSpherePolygonGroupVertexShader(const Polygon4GroupVertexIn vertexIn [[stage_
 //    float4 off = float4(0.711650 * 1.0, 0.287723 * 1.0, -0.083849, 0.0);
 
     PolygonGroupVertexOut out {
-        .position = projectionMatrix * (viewMatrix * (vertexIn.position)),
+        .position = projectionMatrix * (viewMatrix * (vertexIn.position + originOffset)),
         .uv = float2(0.0, 0.0),
         .stylingIndex = vertexIn.stylingIndex,
     };
@@ -112,7 +114,9 @@ struct PolygonPatternGroupVertexOut {
 vertex PolygonGroupVertexOut
 polygonStripedGroupVertexShader(const PolygonGroupVertexIn vertexIn [[stage_in]],
                                 constant float4x4 &mvpMatrix [[buffer(1)]],
-                                constant float2 &posOffset [[buffer(2)]])
+                                constant float2 &posOffset [[buffer(2)]],
+                                constant float4 &originOffset [[buffer(3)]]
+                                )
 {
     PolygonGroupVertexOut out {
         .position = mvpMatrix * float4(vertexIn.position.xy, 0.0, 1.0),

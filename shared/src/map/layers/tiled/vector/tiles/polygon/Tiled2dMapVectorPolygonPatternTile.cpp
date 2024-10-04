@@ -174,6 +174,13 @@ void Tiled2dMapVectorPolygonPatternTile::setVectorTileData(const Tiled2dMapVecto
 
         std::int32_t indices_offset = 0;
 
+        auto convertedTileBounds = mapInterface->getCoordinateConverterHelper()->convertRectToRenderSystem(tileInfo.tileInfo.bounds);
+        double cx = (convertedTileBounds.bottomRight.x + convertedTileBounds.topLeft.x) / 2.0;
+        double cy = (convertedTileBounds.bottomRight.y + convertedTileBounds.topLeft.y) / 2.0;
+        double rx = 1.0 * sin(cy) * cos(cx);
+        double ry = 1.0 * cos(cy);
+        double rz = -1.0 * sin(cy) * sin(cx);
+
         for (auto featureIt = tileData->begin(); featureIt != tileData->end(); featureIt++) {
 
             const auto [featureContext, geometryHandler] = *featureIt;
@@ -245,12 +252,9 @@ void Tiled2dMapVectorPolygonPatternTile::setVectorTileData(const Tiled2dMapVecto
 
                     for (auto const &coordinate: polygon.coordinates) {
 
-                        const double rx = 0.711650 * 1.0 * 0.1;
-                        const double ry = 0.287723 * 1.0 * 0;
-                        const double rz = -0.639713 * 1.0;
-                        double x = (1.0 * sin(coordinate.y) * cos(coordinate.x) - rx) * 1111.0;
-                        double y = (1.0 * cos(coordinate.y) - ry) * 1111.0;
-                        double z = (-1.0 * sin(coordinate.y) * sin(coordinate.x) - rz) * 1111.0;
+                        double x = (1.0 * sin(coordinate.y) * cos(coordinate.x) - rx) ;
+                        double y = (1.0 * cos(coordinate.y) - ry) ;
+                        double z = (-1.0 * sin(coordinate.y) * sin(coordinate.x) - rz) ;
 
                         //    const float x = newVertex.z * sin(newVertex.y) * cos(newVertex.x);
                         //    const float y = newVertex.z * cos(newVertex.y);

@@ -11,6 +11,7 @@
 import Foundation
 import MapCoreSharedModule
 import Metal
+import simd
 
 final class Polygon2d: BaseGraphicsObject, @unchecked Sendable {
     private var shader: MCShaderProgramInterface
@@ -18,6 +19,7 @@ final class Polygon2d: BaseGraphicsObject, @unchecked Sendable {
     private var verticesBuffer: MTLBuffer?
     private var indicesBuffer: MTLBuffer?
     private var indicesCount: Int = 0
+    private var origin: MCVec3F?
 
     private var stencilState: MTLDepthStencilState?
     private var renderPassStencilState: MTLDepthStencilState?
@@ -36,6 +38,7 @@ final class Polygon2d: BaseGraphicsObject, @unchecked Sendable {
                          viewMatrix: Int64,
                          projectionMatrix: Int64,
                          mMatrix: Int64,
+                         origin: MCVec3F,
                          isMasked: Bool,
                          screenPixelAsRealMeterFactor _: Double) {
         lock.lock()
@@ -44,7 +47,9 @@ final class Polygon2d: BaseGraphicsObject, @unchecked Sendable {
         }
 
         guard let verticesBuffer,
-              let indicesBuffer else { return }
+              let indicesBuffer,
+              let tileOrigin = self.origin
+        else { return }
 
         #if DEBUG
             encoder.pushDebugGroup(label)
@@ -87,6 +92,15 @@ final class Polygon2d: BaseGraphicsObject, @unchecked Sendable {
         if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mMatrix)) {
             encoder.setVertexBytes(matrixPointer, length: 64, index: 3)
         }
+        var originOffset: simd_float4 = simd_float4(
+            Float(tileOrigin.x - origin.x),
+            Float(tileOrigin.y - origin.y),
+            Float(tileOrigin.z - origin.z),
+            0
+        )
+        if let originOffsetBuffer = device.makeBuffer(bytes: &originOffset, length: MemoryLayout<simd_float4>.stride, options: []) {
+            encoder.setVertexBuffer(originOffsetBuffer, offset: 0, index: 4)
+        }
 
         encoder.drawIndexedPrimitives(type: .triangle,
                                       indexCount: indicesCount,
@@ -118,6 +132,7 @@ extension Polygon2d: MCMaskingObjectInterface {
                 viewMatrix: Int64,
                 projectionMatrix: Int64,
                 mMatrix: Int64,
+                origin: MCVec3F,
                 screenPixelAsRealMeterFactor _: Double) {
         
         lock.lock()
@@ -130,7 +145,8 @@ extension Polygon2d: MCMaskingObjectInterface {
               let encoder = context.encoder else { return }
 
         guard let verticesBuffer,
-              let indicesBuffer
+              let indicesBuffer,
+              let tileOrigin = self.origin
         else { return }
 
         #if DEBUG
@@ -162,6 +178,16 @@ extension Polygon2d: MCMaskingObjectInterface {
             encoder.setVertexBytes(matrixPointer, length: 64, index: 3)
         }
 
+        var originOffset: simd_float4 = simd_float4(
+            Float(tileOrigin.x - origin.x),
+            Float(tileOrigin.y - origin.y),
+            Float(tileOrigin.z - origin.z),
+            0
+        )
+        if let originOffsetBuffer = device.makeBuffer(bytes: &originOffset, length: MemoryLayout<simd_float4>.stride, options: []) {
+            encoder.setVertexBuffer(originOffsetBuffer, offset: 0, index: 4)
+        }
+
         encoder.drawIndexedPrimitives(type: .triangle,
                                       indexCount: indicesCount,
                                       indexType: .uint16,
@@ -171,7 +197,7 @@ extension Polygon2d: MCMaskingObjectInterface {
 }
 
 extension Polygon2d: MCPolygon2dInterface {
-    func setVertices(_ vertices: MCSharedBytes, indices: MCSharedBytes) {
+    func setVertices(_ vertices: MCSharedBytes, indices: MCSharedBytes, origin: MCVec3F) {
         lock.withCritical {
             self.verticesBuffer.copyOrCreate(from: vertices, device: device)
             self.indicesBuffer.copyOrCreate(from: indices, device: device)
@@ -180,6 +206,7 @@ extension Polygon2d: MCPolygon2dInterface {
             } else {
                 self.indicesCount = 0
             }
+            self.origin = origin
         }
     }
 

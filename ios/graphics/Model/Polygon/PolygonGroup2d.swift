@@ -11,6 +11,7 @@
 import Foundation
 import MapCoreSharedModule
 import Metal
+import simd
 
 final class PolygonGroup2d: BaseGraphicsObject, @unchecked Sendable {
     private var shader: PolygonGroupShader
@@ -18,6 +19,7 @@ final class PolygonGroup2d: BaseGraphicsObject, @unchecked Sendable {
     private var verticesBuffer: MTLBuffer?
     private var indicesBuffer: MTLBuffer?
     private var indicesCount: Int = 0
+    private var origin: MCVec3F?
 
     private var stencilState: MTLDepthStencilState?
     private var renderPassStencilState: MTLDepthStencilState?
@@ -39,6 +41,7 @@ final class PolygonGroup2d: BaseGraphicsObject, @unchecked Sendable {
                          viewMatrix: Int64,
                          projectionMatrix: Int64,
                          mMatrix: Int64,
+                         origin: MCVec3F,
                          isMasked: Bool,
                          screenPixelAsRealMeterFactor: Double) {
         lock.lock()
@@ -47,7 +50,10 @@ final class PolygonGroup2d: BaseGraphicsObject, @unchecked Sendable {
         }
 
         guard let verticesBuffer,
-              let indicesBuffer, shader.polygonStyleBuffer != nil else { return }
+              let indicesBuffer, shader.polygonStyleBuffer != nil,
+              let tileOrigin = self.origin
+        else { return }
+
 
         #if DEBUG
             encoder.pushDebugGroup(label)
@@ -83,9 +89,18 @@ final class PolygonGroup2d: BaseGraphicsObject, @unchecked Sendable {
         if let matrixPointer = UnsafeRawPointer(bitPattern: Int(projectionMatrix)) {
             encoder.setVertexBytes(matrixPointer, length: 64, index: 2)
         }
+        var originOffset: simd_float4 = simd_float4(
+            Float(tileOrigin.x - origin.x),
+            Float(tileOrigin.y - origin.y),
+            Float(tileOrigin.z - origin.z),
+            0
+        )
+        if let originOffsetBuffer = device.makeBuffer(bytes: &originOffset, length: MemoryLayout<simd_float4>.stride, options: []) {
+            encoder.setVertexBuffer(originOffsetBuffer, offset: 0, index: 3)
+        }
 
         if self.shader.isStriped {
-            encoder.setVertexBytes(&posOffset, length: MemoryLayout<SIMD2<Float>>.stride, index: 3)
+            encoder.setVertexBytes(&posOffset, length: MemoryLayout<SIMD2<Float>>.stride, index: 4)
 
             let p : Float = Float(screenPixelAsRealMeterFactor)
             var scaleFactors = SIMD2<Float>([p, pow(2.0, ceil(log2(p)))])
@@ -101,12 +116,13 @@ final class PolygonGroup2d: BaseGraphicsObject, @unchecked Sendable {
 }
 
 extension PolygonGroup2d: MCPolygonGroup2dInterface {
-    func setVertices(_ vertices: MCSharedBytes, indices: MCSharedBytes) {
+    func setVertices(_ vertices: MCSharedBytes, indices: MCSharedBytes, origin: MCVec3F) {
         guard vertices.elementCount > 0 else {
             lock.withCritical {
                 self.indicesCount = 0
                 verticesBuffer = nil
                 indicesBuffer = nil
+                self.origin = nil
             }
             return
         }
@@ -136,6 +152,7 @@ extension PolygonGroup2d: MCPolygonGroup2dInterface {
             self.indicesCount = Int(indices.elementCount)
             self.verticesBuffer = verticesBuffer
             self.indicesBuffer = indicesBuffer
+            self.origin = origin
 
             if shader.isStriped {
                 self.posOffset.x = minX;

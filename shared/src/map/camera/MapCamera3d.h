@@ -90,6 +90,8 @@ class MapCamera3d : public MapCameraInterface,
     virtual std::vector<float> getViewMatrix() override;
     virtual std::vector<float> getProjectionMatrix() override;
 
+    virtual ::Vec3F getOrigin() override;
+
     std::optional<std::vector<float>> getLastVpMatrix() override;
 
     std::optional<::RectCoord> getLastVpMatrixViewBounds() override;
@@ -294,6 +296,7 @@ protected:
     std::vector<double> inverseVPMatrix = std::vector<double>(16, 0.0);
     std::vector<double> viewMatrix = std::vector<double>(16, 0.0);
     std::vector<double> projectionMatrix = std::vector<double>(16, 0.0);
+    Vec3F origin;
     float verticalFov;
     float horizontalFov;
     bool validVpMatrix = false;
