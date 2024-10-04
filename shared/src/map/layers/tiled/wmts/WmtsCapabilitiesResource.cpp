@@ -83,10 +83,8 @@ int32_t numZ) override {
             auto topLeft = Coord(coordinateSystem, matrix.topLeftCornerX, matrix.topLeftCornerY, 0);
 
             double magicNumber = 0.00028; // Each pixel is assumed to be 0.28mm – https://gis.stackexchange.com/a/315989
-            double right =
-            topLeft.x + matrix.scaleDenominator * (double)matrix.tileWidth * (double)matrix.matrixWidth * magicNumber;
-            double bottom =
-            topLeft.y - matrix.scaleDenominator * (double)matrix.tileHeight * (double)matrix.tileWidth * magicNumber;
+            double right = topLeft.x + matrix.scaleDenominator * (double)matrix.tileWidth * magicNumber;
+            double bottom = topLeft.y - matrix.scaleDenominator * (double)matrix.tileHeight * magicNumber;
             Coord bottomRight = Coord(topLeft.systemIdentifier, right, bottom, 0);
             RectCoord layerBounds = RectCoord(topLeft, bottomRight);
 
