@@ -43,12 +43,12 @@ void PolygonGroup2dLayerObject::setVertices(const std::vector<std::tuple<std::ve
     auto i = SharedBytes((int64_t)indices.data(), (int32_t)indices.size(), (int32_t)sizeof(uint16_t));
     auto v = SharedBytes((int64_t)renderVertices.data(), (int32_t)renderVertices.size(), (int32_t)sizeof(float));
     
-    polygon->setVertices(v, i, Vec3F(0, 0, 0)); // PRECISION-ISSUE TODO
+    polygon->setVertices(v, i, Vec3D(0, 0, 0)); // PRECISION-ISSUE TODO
 }
 
 void PolygonGroup2dLayerObject::setVertices(const std::vector<float> &verticesBuffer,
                                             const std::vector<uint16_t> & indices,
-                                            const Vec3F & origin) {
+                                            const Vec3D & origin) {
     auto i = SharedBytes((int64_t)indices.data(), (int32_t)indices.size(), (int32_t)sizeof(uint16_t));
     auto v = SharedBytes((int64_t)verticesBuffer.data(), (int32_t)verticesBuffer.size(), (int32_t)sizeof(float));
     polygon->setVertices(v, i, origin);

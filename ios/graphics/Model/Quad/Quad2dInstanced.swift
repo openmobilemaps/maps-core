@@ -83,7 +83,7 @@ final class Quad2dInstanced: BaseGraphicsObject, @unchecked Sendable {
                          viewMatrix: Int64,
                          projectionMatrix: Int64,
                          mMatrix: Int64,
-                origin: MCVec3F,
+                origin: MCVec3D,
                          isMasked: Bool,
                          screenPixelAsRealMeterFactor _: Double) {
 
@@ -177,7 +177,7 @@ extension Quad2dInstanced: MCMaskingObjectInterface {
                 viewMatrix: Int64,
                 projectionMatrix: Int64,
                 mMatrix: Int64,
-                origin: MCVec3F,
+                origin: MCVec3D,
                 screenPixelAsRealMeterFactor: Double) {
         guard isReady(),
               let context = context as? RenderingContext,

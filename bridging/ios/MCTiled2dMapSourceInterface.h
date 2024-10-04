@@ -5,7 +5,7 @@
 #import "MCErrorManager.h"
 #import "MCLayerReadyState.h"
 #import "MCRectCoord.h"
-#import "MCVec3F.h"
+#import "MCVec3D.h"
 #import <Foundation/Foundation.h>
 
 
@@ -17,7 +17,7 @@
 
 - (void)onCameraChange:(nonnull NSArray<NSNumber *> *)viewMatrix
       projectionMatrix:(nonnull NSArray<NSNumber *> *)projectionMatrix
-                origin:(nonnull MCVec3F *)origin
+                origin:(nonnull MCVec3D *)origin
            verticalFov:(float)verticalFov
          horizontalFov:(float)horizontalFov
                  width:(float)width

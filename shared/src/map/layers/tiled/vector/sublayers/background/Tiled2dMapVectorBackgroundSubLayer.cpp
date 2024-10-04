@@ -95,7 +95,7 @@ void Tiled2dMapVectorBackgroundSubLayer::onAdded(const std::shared_ptr<MapInterf
         PolygonStyle(color, alpha)
     });
 
-    polygonObject->setVertices(vertices, indices, Vec3F(0, 0, 0)); // PRECISION-ISSUE TODO
+    polygonObject->setVertices(vertices, indices, Vec3D(0, 0, 0)); // PRECISION-ISSUE TODO
 
     std::vector<std::shared_ptr<::RenderObjectInterface>> renderObjects {  };
 

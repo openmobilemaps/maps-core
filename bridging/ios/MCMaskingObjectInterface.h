@@ -3,7 +3,7 @@
 
 #import "MCRenderPassConfig.h"
 #import "MCRenderingContextInterface.h"
-#import "MCVec3F.h"
+#import "MCVec3D.h"
 #import <Foundation/Foundation.h>
 @protocol MCGraphicsObjectInterface;
 
@@ -17,7 +17,7 @@
           viewMatrix:(int64_t)viewMatrix
     projectionMatrix:(int64_t)projectionMatrix
              mMatrix:(int64_t)mMatrix
-              origin:(nonnull MCVec3F *)origin
+              origin:(nonnull MCVec3D *)origin
 screenPixelAsRealMeterFactor:(double)screenPixelAsRealMeterFactor;
 
 @end

@@ -10,7 +10,7 @@
 #import "MCErrorManager+Private.h"
 #import "MCLayerReadyState+Private.h"
 #import "MCRectCoord+Private.h"
-#import "MCVec3F+Private.h"
+#import "MCVec3D+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -47,7 +47,7 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 
 - (void)onCameraChange:(nonnull NSArray<NSNumber *> *)viewMatrix
       projectionMatrix:(nonnull NSArray<NSNumber *> *)projectionMatrix
-                origin:(nonnull MCVec3F *)origin
+                origin:(nonnull MCVec3D *)origin
            verticalFov:(float)verticalFov
          horizontalFov:(float)horizontalFov
                  width:(float)width
@@ -58,7 +58,7 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     try {
         _cppRefHandle.get()->onCameraChange(::djinni::List<::djinni::F32>::toCpp(viewMatrix),
                                             ::djinni::List<::djinni::F32>::toCpp(projectionMatrix),
-                                            ::djinni_generated::Vec3F::toCpp(origin),
+                                            ::djinni_generated::Vec3D::toCpp(origin),
                                             ::djinni::F32::toCpp(verticalFov),
                                             ::djinni::F32::toCpp(horizontalFov),
                                             ::djinni::F32::toCpp(width),

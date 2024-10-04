@@ -5,7 +5,7 @@
 
 #include "RenderPassConfig.h"
 #include "RenderingContextInterface.h"
-#include "Vec3F.h"
+#include "Vec3D.h"
 #include <cstdint>
 #include <memory>
 
@@ -17,5 +17,5 @@ public:
 
     virtual /*not-null*/ std::shared_ptr<GraphicsObjectInterface> asGraphicsObject() = 0;
 
-    virtual void renderAsMask(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & context, const ::RenderPassConfig & renderPass, int64_t viewMatrix, int64_t projectionMatrix, int64_t mMatrix, const ::Vec3F & origin, double screenPixelAsRealMeterFactor) = 0;
+    virtual void renderAsMask(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & context, const ::RenderPassConfig & renderPass, int64_t viewMatrix, int64_t projectionMatrix, int64_t mMatrix, const ::Vec3D & origin, double screenPixelAsRealMeterFactor) = 0;
 };

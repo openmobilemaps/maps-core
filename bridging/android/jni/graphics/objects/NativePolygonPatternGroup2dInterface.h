@@ -33,7 +33,7 @@ private:
         JavaProxy(JniType j);
         ~JavaProxy();
 
-        void setVertices(const ::SharedBytes & vertices, const ::SharedBytes & indices, const ::Vec3F & origin) override;
+        void setVertices(const ::SharedBytes & vertices, const ::SharedBytes & indices, const ::Vec3D & origin) override;
         void setOpacities(const ::SharedBytes & values) override;
         void setTextureCoordinates(const ::SharedBytes & values) override;
         void setScalingFactor(float factor) override;
@@ -47,7 +47,7 @@ private:
     };
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/graphics/objects/PolygonPatternGroup2dInterface") };
-    const jmethodID method_setVertices { ::djinni::jniGetMethodID(clazz.get(), "setVertices", "(Lio/openmobilemaps/mapscore/shared/graphics/common/SharedBytes;Lio/openmobilemaps/mapscore/shared/graphics/common/SharedBytes;Lio/openmobilemaps/mapscore/shared/graphics/common/Vec3F;)V") };
+    const jmethodID method_setVertices { ::djinni::jniGetMethodID(clazz.get(), "setVertices", "(Lio/openmobilemaps/mapscore/shared/graphics/common/SharedBytes;Lio/openmobilemaps/mapscore/shared/graphics/common/SharedBytes;Lio/openmobilemaps/mapscore/shared/graphics/common/Vec3D;)V") };
     const jmethodID method_setOpacities { ::djinni::jniGetMethodID(clazz.get(), "setOpacities", "(Lio/openmobilemaps/mapscore/shared/graphics/common/SharedBytes;)V") };
     const jmethodID method_setTextureCoordinates { ::djinni::jniGetMethodID(clazz.get(), "setTextureCoordinates", "(Lio/openmobilemaps/mapscore/shared/graphics/common/SharedBytes;)V") };
     const jmethodID method_setScalingFactor { ::djinni::jniGetMethodID(clazz.get(), "setScalingFactor", "(F)V") };

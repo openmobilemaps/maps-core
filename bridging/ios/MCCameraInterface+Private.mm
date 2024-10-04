@@ -7,7 +7,7 @@
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
-#import "MCVec3F+Private.h"
+#import "MCVec3D+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -53,10 +53,10 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (nonnull MCVec3F *)getOrigin {
+- (nonnull MCVec3D *)getOrigin {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->getOrigin();
-        return ::djinni_generated::Vec3F::fromCpp(objcpp_result_);
+        return ::djinni_generated::Vec3D::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -96,11 +96,11 @@ public:
             return ::djinni::F64::toCpp(objcpp_result_);
         }
     }
-    ::Vec3F getOrigin() override
+    ::Vec3D getOrigin() override
     {
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getOrigin];
-            return ::djinni_generated::Vec3F::toCpp(objcpp_result_);
+            return ::djinni_generated::Vec3D::toCpp(objcpp_result_);
         }
     }
     void viewportSizeChanged() override

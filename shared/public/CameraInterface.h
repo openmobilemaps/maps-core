@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Vec3F.h"
+#include "Vec3D.h"
 #include <vector>
 
 class CameraInterface {
@@ -16,7 +16,7 @@ public:
 
     virtual double getScalingFactor() = 0;
 
-    virtual ::Vec3F getOrigin() = 0;
+    virtual ::Vec3D getOrigin() = 0;
 
     virtual void viewportSizeChanged() = 0;
 };

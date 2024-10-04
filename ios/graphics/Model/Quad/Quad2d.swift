@@ -18,7 +18,7 @@ final class Quad2d: BaseGraphicsObject, @unchecked Sendable {
     private var verticesBuffer: MTLBuffer?
 
     private var indicesBuffer: MTLBuffer?
-    private var origin: MCVec3F?
+    private var origin: MCVec3D?
 
     private var indicesCount: Int = 0
 
@@ -75,7 +75,7 @@ final class Quad2d: BaseGraphicsObject, @unchecked Sendable {
                          viewMatrix: Int64,
                          projectionMatrix: Int64,
                          mMatrix: Int64,
-                origin: MCVec3F,
+                origin: MCVec3D,
                          isMasked: Bool,
                          screenPixelAsRealMeterFactor _: Double) {
         lock.lock()
@@ -167,7 +167,7 @@ extension Quad2d: MCMaskingObjectInterface {
                 viewMatrix: Int64,
                 projectionMatrix: Int64,
                 mMatrix: Int64,
-                origin: MCVec3F,
+                origin: MCVec3D,
                 screenPixelAsRealMeterFactor: Double) {
         guard isReady(),
               let context = context as? RenderingContext,
@@ -207,7 +207,7 @@ extension Quad2d: MCQuad2dInterface {
 
     func setFrame(_ frame: MCQuad3dD, textureCoordinates: MCRectD) {
 
-        origin = MCVec3F(x: 0, y: 0, z: 0) // PRECISION-ISSUE TODO
+        origin = MCVec3D(x: 0, y: 0, z: 0) // PRECISION-ISSUE TODO
 
 
         var vertices: [Vertex3D] = []

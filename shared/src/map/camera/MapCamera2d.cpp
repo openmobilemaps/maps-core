@@ -414,8 +414,8 @@ std::optional<std::vector<float>> MapCamera2d::getLastVpMatrix() {
     return vpCopy;
 }
 
-Vec3F MapCamera2d::getOrigin() {
-
+Vec3D MapCamera2d::getOrigin() {
+    return Vec3D(0, 0, 0); // PRECISION-ISSUE TODO
 }
 
 std::optional<::RectCoord> MapCamera2d::getLastVpMatrixViewBounds() {

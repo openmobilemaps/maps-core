@@ -49,7 +49,7 @@ final class PolygonPatternGroup2d: BaseGraphicsObject, @unchecked Sendable {
                          viewMatrix: Int64,
                          projectionMatrix: Int64,
                          mMatrix: Int64,
-                origin: MCVec3F,
+                origin: MCVec3D,
                          isMasked: Bool,
                          screenPixelAsRealMeterFactor: Double) {
         lock.lock()
@@ -134,7 +134,7 @@ final class PolygonPatternGroup2d: BaseGraphicsObject, @unchecked Sendable {
 }
 
 extension PolygonPatternGroup2d: MCPolygonPatternGroup2dInterface {
-    func setVertices(_ vertices: MCSharedBytes, indices: MCSharedBytes, origin: MCVec3F) {
+    func setVertices(_ vertices: MCSharedBytes, indices: MCSharedBytes, origin: MCVec3D) {
         guard vertices.elementCount > 0 else {
             lock.withCritical {
                 self.indicesCount = 0

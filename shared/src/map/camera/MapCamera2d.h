@@ -84,7 +84,7 @@ class MapCamera2d : public MapCameraInterface,
     virtual std::vector<float> getViewMatrix() override;
     virtual std::vector<float> getProjectionMatrix() override;
 
-    virtual ::Vec3F getOrigin() override;
+    virtual ::Vec3D getOrigin() override;
 
     std::optional<std::vector<float>> getLastVpMatrix() override;
 

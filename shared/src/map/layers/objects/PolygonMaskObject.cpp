@@ -27,18 +27,18 @@ PolygonMaskObject::PolygonMaskObject(const std::shared_ptr<GraphicsObjectFactory
     , polygon(graphicsObjectFactory->createPolygonMask(is3D)) {}
 
 void PolygonMaskObject::setPositions(const std::vector<Coord> &positions,
-                                     const Vec3F & origin,
+                                     const Vec3D & origin,
                                      const std::vector<std::vector<Coord>> &holes) {
     setPolygon({positions, holes}, origin, std::nullopt);
 }
 
 void PolygonMaskObject::setPolygon(const ::PolygonCoord &polygon,
-                                   const Vec3F & origin, std::optional<float> maxSegmentLength) {
+                                   const Vec3D & origin, std::optional<float> maxSegmentLength) {
     setPolygons({polygon}, origin, maxSegmentLength);
 }
 
 void PolygonMaskObject::setPolygons(const std::vector<::PolygonCoord> &polygons,
-                                    const Vec3F & origin,
+                                    const Vec3D & origin,
                                     std::optional<float> maxSegmentLength) {
     std::vector<uint16_t> indices;
     std::vector<float> vertices;

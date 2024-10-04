@@ -80,7 +80,7 @@ static void hash_combine(size_t& seed, const T& value) {
 }
 
 template<class T, class L, class R>
-::Vec3D Tiled2dMapSource<T, L, R>::transformToView(const ::Coord &position, const std::vector<float> &viewMatrix, const Vec3F & origin) {
+::Vec3D Tiled2dMapSource<T, L, R>::transformToView(const ::Coord &position, const std::vector<float> &viewMatrix, const Vec3D & origin) {
 
     Coord mapCoord = conversionHelper->convertToRenderSystem(position);
 
@@ -113,7 +113,7 @@ template<class T, class L, class R>
 }
 
 template<class T, class L, class R>
-void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMatrix, const std::vector<float> &projectionMatrix,const ::Vec3F & origin,
+void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMatrix, const std::vector<float> &projectionMatrix,const ::Vec3D & origin,
                                                float verticalFov, float horizontalFov, float width, float height,
                                                float focusPointAltitude, const ::Coord & focusPointPosition, float zoom) {
 
@@ -386,6 +386,8 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
         bool preciseEnough = xLengthPx <= maxLength && yLengthPx <= maxLength;
 
         bool lastLevel = candidate.levelIndex == maxLevelAvailable;
+
+//        preciseEnough = false;
 
         if (preciseEnough || lastLevel || isKeptLevel) {
             const RectCoord rect(topLeft, bottomRight);

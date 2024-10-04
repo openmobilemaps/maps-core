@@ -36,7 +36,7 @@ private:
         std::vector<float> getViewMatrix() override;
         std::vector<float> getProjectionMatrix() override;
         double getScalingFactor() override;
-        ::Vec3F getOrigin() override;
+        ::Vec3D getOrigin() override;
         void viewportSizeChanged() override;
 
     private:
@@ -47,7 +47,7 @@ private:
     const jmethodID method_getViewMatrix { ::djinni::jniGetMethodID(clazz.get(), "getViewMatrix", "()Ljava/util/ArrayList;") };
     const jmethodID method_getProjectionMatrix { ::djinni::jniGetMethodID(clazz.get(), "getProjectionMatrix", "()Ljava/util/ArrayList;") };
     const jmethodID method_getScalingFactor { ::djinni::jniGetMethodID(clazz.get(), "getScalingFactor", "()D") };
-    const jmethodID method_getOrigin { ::djinni::jniGetMethodID(clazz.get(), "getOrigin", "()Lio/openmobilemaps/mapscore/shared/graphics/common/Vec3F;") };
+    const jmethodID method_getOrigin { ::djinni::jniGetMethodID(clazz.get(), "getOrigin", "()Lio/openmobilemaps/mapscore/shared/graphics/common/Vec3D;") };
     const jmethodID method_viewportSizeChanged { ::djinni::jniGetMethodID(clazz.get(), "viewportSizeChanged", "()V") };
 };
 

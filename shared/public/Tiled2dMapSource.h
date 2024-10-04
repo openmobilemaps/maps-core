@@ -89,7 +89,7 @@ public:
 
     virtual void onVisibleBoundsChanged(const ::RectCoord &visibleBounds, int curT, double zoom) override;
 
-    virtual void onCameraChange(const std::vector<float> &viewMatrix, const std::vector<float> &projectionMatrix, const ::Vec3F & origin, float verticalFov, float horizontalFov, float width, float height, float focusPointAltitude, const ::Coord & focusPointPosition, float zoom) override;
+    virtual void onCameraChange(const std::vector<float> &viewMatrix, const std::vector<float> &projectionMatrix, const ::Vec3D & origin, float verticalFov, float horizontalFov, float width, float height, float focusPointAltitude, const ::Coord & focusPointPosition, float zoom) override;
 
     virtual bool isTileVisible(const Tiled2dMapTileInfo &tileInfo);
 
@@ -136,7 +136,7 @@ public:
 
             ::Vec3D transformToView(const ::Coord & position,
                                     const std::vector<float> & vpMatrix,
-                                    const Vec3F & origin);
+                                    const Vec3D & origin);
     ::Vec3D projectToScreen(const ::Vec3D & point, const std::vector<float> & vpMatrix);
 
     MapConfig mapConfig;

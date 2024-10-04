@@ -116,7 +116,7 @@ void Tiled2dMapVectorSourceVectorTileDataManager::onVectorTilesUpdated(const std
                     double ry = 1.0 * cos(cy);
                     double rz = -1.0 * sin(cy) * sin(cx);
 
-                    tileMask->setPolygons(tileEntry->masks, Vec3F(rx, ry, rz), maxSegmentLength);
+                    tileMask->setPolygons(tileEntry->masks, Vec3D(rx, ry, rz), maxSegmentLength);
 
                     newTileMasks[tileEntry->tileInfo] = Tiled2dMapLayerMaskWrapper(tileMask, hash);
                 }

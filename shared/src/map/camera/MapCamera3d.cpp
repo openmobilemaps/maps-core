@@ -434,7 +434,7 @@ std::tuple<std::tuple<std::vector<float>, std::vector<float>>, std::vector<doubl
 //    double z = (-1.0 * sin(latitude) * sin(longitude)) * -0001.0;
 
 
-    origin = Vec3F((float)x, (float)y, (float)z);
+    origin = Vec3D(x, y, z);
 
 
     MatrixD::translateM(newViewMatrix, 0, x, y, z);
@@ -531,7 +531,7 @@ std::tuple<std::tuple<std::vector<float>, std::vector<float>>, std::vector<doubl
                            newInverseMatrix);
 }
 
-Vec3F MapCamera3d::getOrigin() {
+Vec3D MapCamera3d::getOrigin() {
     return origin;
 }
 

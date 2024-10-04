@@ -33,7 +33,7 @@ class PolygonGroup2dLayerObject : public LayerObjectInterface {
 
     void setVertices(const std::vector<std::tuple<std::vector<::Coord>, int>> & vertices, const std::vector<uint16_t> & indices);
 
-    void setVertices(const std::vector<float> &verticesBuffer, const std::vector<uint16_t> & indices, const Vec3F & origin);
+    void setVertices(const std::vector<float> &verticesBuffer, const std::vector<uint16_t> & indices, const Vec3D & origin);
 
     void setStyles(const std::vector<PolygonStyle> &styles);
 

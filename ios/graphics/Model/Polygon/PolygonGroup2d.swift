@@ -19,7 +19,7 @@ final class PolygonGroup2d: BaseGraphicsObject, @unchecked Sendable {
     private var verticesBuffer: MTLBuffer?
     private var indicesBuffer: MTLBuffer?
     private var indicesCount: Int = 0
-    private var origin: MCVec3F?
+    private var origin: MCVec3D?
 
     private var stencilState: MTLDepthStencilState?
     private var renderPassStencilState: MTLDepthStencilState?
@@ -41,7 +41,7 @@ final class PolygonGroup2d: BaseGraphicsObject, @unchecked Sendable {
                          viewMatrix: Int64,
                          projectionMatrix: Int64,
                          mMatrix: Int64,
-                         origin: MCVec3F,
+                         origin: MCVec3D,
                          isMasked: Bool,
                          screenPixelAsRealMeterFactor: Double) {
         lock.lock()
@@ -116,7 +116,7 @@ final class PolygonGroup2d: BaseGraphicsObject, @unchecked Sendable {
 }
 
 extension PolygonGroup2d: MCPolygonGroup2dInterface {
-    func setVertices(_ vertices: MCSharedBytes, indices: MCSharedBytes, origin: MCVec3F) {
+    func setVertices(_ vertices: MCSharedBytes, indices: MCSharedBytes, origin: MCVec3D) {
         guard vertices.elementCount > 0 else {
             lock.withCritical {
                 self.indicesCount = 0

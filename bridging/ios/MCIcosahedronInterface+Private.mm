@@ -9,7 +9,7 @@
 #import "DJIObjcWrapperCache+Private.h"
 #import "MCGraphicsObjectInterface+Private.h"
 #import "MCSharedBytes+Private.h"
-#import "MCVec3F+Private.h"
+#import "MCVec3D+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -36,11 +36,11 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 
 - (void)setVertices:(nonnull MCSharedBytes *)vertices
             indices:(nonnull MCSharedBytes *)indices
-             origin:(nonnull MCVec3F *)origin {
+             origin:(nonnull MCVec3D *)origin {
     try {
         _cppRefHandle.get()->setVertices(::djinni_generated::SharedBytes::toCpp(vertices),
                                          ::djinni_generated::SharedBytes::toCpp(indices),
-                                         ::djinni_generated::Vec3F::toCpp(origin));
+                                         ::djinni_generated::Vec3D::toCpp(origin));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -60,12 +60,12 @@ class IcosahedronInterface::ObjcProxy final
     friend class ::djinni_generated::IcosahedronInterface;
 public:
     using ObjcProxyBase::ObjcProxyBase;
-    void setVertices(const ::SharedBytes & c_vertices, const ::SharedBytes & c_indices, const ::Vec3F & c_origin) override
+    void setVertices(const ::SharedBytes & c_vertices, const ::SharedBytes & c_indices, const ::Vec3D & c_origin) override
     {
         @autoreleasepool {
             [djinni_private_get_proxied_objc_object() setVertices:(::djinni_generated::SharedBytes::fromCpp(c_vertices))
                                                           indices:(::djinni_generated::SharedBytes::fromCpp(c_indices))
-                                                           origin:(::djinni_generated::Vec3F::fromCpp(c_origin))];
+                                                           origin:(::djinni_generated::Vec3D::fromCpp(c_origin))];
         }
     }
     /*not-null*/ std::shared_ptr<::GraphicsObjectInterface> asGraphicsObject() override

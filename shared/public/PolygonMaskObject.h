@@ -25,22 +25,22 @@ public:
                       bool is3D);
 
     virtual void setPolygons(const std::vector<::PolygonCoord> & polygons,
-                             const Vec3F & origin, std::optional<float> maxSegmentLength = std::nullopt);
+                             const Vec3D & origin, std::optional<float> maxSegmentLength = std::nullopt);
 
     virtual void setPolygon(const ::PolygonCoord & polygon,
-                            const Vec3F & origin, std::optional<float> maxSegmentLength = std::nullopt);
+                            const Vec3D & origin, std::optional<float> maxSegmentLength = std::nullopt);
 
     virtual void setPolygons(const std::vector<::PolygonCoord> & polygons,
-                             const Vec3F & origin) override {
+                             const Vec3D & origin) override {
         setPolygons(polygons, origin, std::nullopt);
     };
 
     virtual void setPolygon(const ::PolygonCoord & polygon,
-                            const Vec3F & origin) override {
+                            const Vec3D & origin) override {
         setPolygon(polygon, origin, std::nullopt);
     }
 
-    void setPositions(const std::vector<Coord> &positions, const ::Vec3F & origin, const std::vector<std::vector<Coord>> &holes);
+    void setPositions(const std::vector<Coord> &positions, const ::Vec3D & origin, const std::vector<std::vector<Coord>> &holes);
 
     virtual std::shared_ptr<::Polygon2dInterface> getPolygonObject() override;
 

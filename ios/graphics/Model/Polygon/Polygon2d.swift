@@ -19,7 +19,7 @@ final class Polygon2d: BaseGraphicsObject, @unchecked Sendable {
     private var verticesBuffer: MTLBuffer?
     private var indicesBuffer: MTLBuffer?
     private var indicesCount: Int = 0
-    private var origin: MCVec3F?
+    private var origin: MCVec3D?
 
     private var stencilState: MTLDepthStencilState?
     private var renderPassStencilState: MTLDepthStencilState?
@@ -38,7 +38,7 @@ final class Polygon2d: BaseGraphicsObject, @unchecked Sendable {
                          viewMatrix: Int64,
                          projectionMatrix: Int64,
                          mMatrix: Int64,
-                         origin: MCVec3F,
+                         origin: MCVec3D,
                          isMasked: Bool,
                          screenPixelAsRealMeterFactor _: Double) {
         lock.lock()
@@ -132,7 +132,7 @@ extension Polygon2d: MCMaskingObjectInterface {
                 viewMatrix: Int64,
                 projectionMatrix: Int64,
                 mMatrix: Int64,
-                origin: MCVec3F,
+                origin: MCVec3D,
                 screenPixelAsRealMeterFactor _: Double) {
         
         lock.lock()
@@ -197,7 +197,7 @@ extension Polygon2d: MCMaskingObjectInterface {
 }
 
 extension Polygon2d: MCPolygon2dInterface {
-    func setVertices(_ vertices: MCSharedBytes, indices: MCSharedBytes, origin: MCVec3F) {
+    func setVertices(_ vertices: MCSharedBytes, indices: MCSharedBytes, origin: MCVec3D) {
         lock.withCritical {
             self.verticesBuffer.copyOrCreate(from: vertices, device: device)
             self.indicesBuffer.copyOrCreate(from: indices, device: device)

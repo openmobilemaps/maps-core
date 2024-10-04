@@ -14,7 +14,7 @@ abstract class CameraInterface {
 
     abstract fun getScalingFactor(): Double
 
-    abstract fun getOrigin(): io.openmobilemaps.mapscore.shared.graphics.common.Vec3F
+    abstract fun getOrigin(): io.openmobilemaps.mapscore.shared.graphics.common.Vec3D
 
     abstract fun viewportSizeChanged()
 
@@ -51,11 +51,11 @@ abstract class CameraInterface {
         }
         private external fun native_getScalingFactor(_nativeRef: Long): Double
 
-        override fun getOrigin(): io.openmobilemaps.mapscore.shared.graphics.common.Vec3F {
+        override fun getOrigin(): io.openmobilemaps.mapscore.shared.graphics.common.Vec3D {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             return native_getOrigin(this.nativeRef)
         }
-        private external fun native_getOrigin(_nativeRef: Long): io.openmobilemaps.mapscore.shared.graphics.common.Vec3F
+        private external fun native_getOrigin(_nativeRef: Long): io.openmobilemaps.mapscore.shared.graphics.common.Vec3D
 
         override fun viewportSizeChanged() {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

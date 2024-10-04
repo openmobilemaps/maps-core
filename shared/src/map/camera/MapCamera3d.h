@@ -22,6 +22,7 @@
 #include "SimpleTouchInterface.h"
 #include "Vec2I.h"
 #include "Vec2F.h"
+#include "Vec3D.h"
 #include "CameraMode3d.h"
 #include "Camera3dConfig.h"
 #include "CameraInterpolation.h"
@@ -90,7 +91,7 @@ class MapCamera3d : public MapCameraInterface,
     virtual std::vector<float> getViewMatrix() override;
     virtual std::vector<float> getProjectionMatrix() override;
 
-    virtual ::Vec3F getOrigin() override;
+    virtual ::Vec3D getOrigin() override;
 
     std::optional<std::vector<float>> getLastVpMatrix() override;
 
@@ -296,7 +297,7 @@ protected:
     std::vector<double> inverseVPMatrix = std::vector<double>(16, 0.0);
     std::vector<double> viewMatrix = std::vector<double>(16, 0.0);
     std::vector<double> projectionMatrix = std::vector<double>(16, 0.0);
-    Vec3F origin;
+    Vec3D origin;
     float verticalFov;
     float horizontalFov;
     bool validVpMatrix = false;

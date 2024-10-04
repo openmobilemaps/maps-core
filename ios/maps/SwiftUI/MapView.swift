@@ -379,7 +379,7 @@ public class MapViewCoordinator: MCMapCameraListenerInterface {
     public func onCameraChange(
         _ viewMatrix: [NSNumber],
         projectionMatrix: [NSNumber],
-        origin: MCVec3F,
+        origin: MCVec3D,
         verticalFov: Float,
         horizontalFov: Float,
         width: Float,

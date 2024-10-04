@@ -7,7 +7,7 @@
 #include "GraphicsObjectFactoryInterface.h"
 #include "Polygon2dInterface.h"
 #include "PolygonCoord.h"
-#include "Vec3F.h"
+#include "Vec3D.h"
 #include <memory>
 #include <vector>
 
@@ -17,9 +17,9 @@ public:
 
     static /*not-null*/ std::shared_ptr<PolygonMaskObjectInterface> create(const /*not-null*/ std::shared_ptr<::GraphicsObjectFactoryInterface> & graphicsObjectFactory, const /*not-null*/ std::shared_ptr<::CoordinateConversionHelperInterface> & conversionHelper, bool is3d);
 
-    virtual void setPolygons(const std::vector<::PolygonCoord> & polygons, const ::Vec3F & origin) = 0;
+    virtual void setPolygons(const std::vector<::PolygonCoord> & polygons, const ::Vec3D & origin) = 0;
 
-    virtual void setPolygon(const ::PolygonCoord & polygon, const ::Vec3F & origin) = 0;
+    virtual void setPolygon(const ::PolygonCoord & polygon, const ::Vec3D & origin) = 0;
 
     virtual /*not-null*/ std::shared_ptr<::Polygon2dInterface> getPolygonObject() = 0;
 };

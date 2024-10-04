@@ -13,9 +13,9 @@ abstract class PolygonMaskObjectInterface {
         external fun create(graphicsObjectFactory: io.openmobilemaps.mapscore.shared.graphics.objects.GraphicsObjectFactoryInterface, conversionHelper: io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateConversionHelperInterface, is3d: Boolean): PolygonMaskObjectInterface
     }
 
-    abstract fun setPolygons(polygons: ArrayList<io.openmobilemaps.mapscore.shared.map.coordinates.PolygonCoord>, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3F)
+    abstract fun setPolygons(polygons: ArrayList<io.openmobilemaps.mapscore.shared.map.coordinates.PolygonCoord>, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D)
 
-    abstract fun setPolygon(polygon: io.openmobilemaps.mapscore.shared.map.coordinates.PolygonCoord, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3F)
+    abstract fun setPolygon(polygon: io.openmobilemaps.mapscore.shared.map.coordinates.PolygonCoord, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D)
 
     abstract fun getPolygonObject(): io.openmobilemaps.mapscore.shared.graphics.objects.Polygon2dInterface
 
@@ -34,17 +34,17 @@ abstract class PolygonMaskObjectInterface {
             external fun nativeDestroy(nativeRef: Long)
         }
 
-        override fun setPolygons(polygons: ArrayList<io.openmobilemaps.mapscore.shared.map.coordinates.PolygonCoord>, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3F) {
+        override fun setPolygons(polygons: ArrayList<io.openmobilemaps.mapscore.shared.map.coordinates.PolygonCoord>, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             native_setPolygons(this.nativeRef, polygons, origin)
         }
-        private external fun native_setPolygons(_nativeRef: Long, polygons: ArrayList<io.openmobilemaps.mapscore.shared.map.coordinates.PolygonCoord>, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3F)
+        private external fun native_setPolygons(_nativeRef: Long, polygons: ArrayList<io.openmobilemaps.mapscore.shared.map.coordinates.PolygonCoord>, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D)
 
-        override fun setPolygon(polygon: io.openmobilemaps.mapscore.shared.map.coordinates.PolygonCoord, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3F) {
+        override fun setPolygon(polygon: io.openmobilemaps.mapscore.shared.map.coordinates.PolygonCoord, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             native_setPolygon(this.nativeRef, polygon, origin)
         }
-        private external fun native_setPolygon(_nativeRef: Long, polygon: io.openmobilemaps.mapscore.shared.map.coordinates.PolygonCoord, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3F)
+        private external fun native_setPolygon(_nativeRef: Long, polygon: io.openmobilemaps.mapscore.shared.map.coordinates.PolygonCoord, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D)
 
         override fun getPolygonObject(): io.openmobilemaps.mapscore.shared.graphics.objects.Polygon2dInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

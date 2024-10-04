@@ -4,7 +4,7 @@
 #import "MCRenderingContextInterface.h"
 #import "MCSharedBytes.h"
 #import "MCVec2F.h"
-#import "MCVec3F.h"
+#import "MCVec3D.h"
 #import <Foundation/Foundation.h>
 @protocol MCGraphicsObjectInterface;
 @protocol MCTextureHolderInterface;
@@ -14,7 +14,7 @@
 
 - (void)setVertices:(nonnull MCSharedBytes *)vertices
             indices:(nonnull MCSharedBytes *)indices
-             origin:(nonnull MCVec3F *)origin;
+             origin:(nonnull MCVec3D *)origin;
 
 - (void)setOpacities:(nonnull MCSharedBytes *)values;
 

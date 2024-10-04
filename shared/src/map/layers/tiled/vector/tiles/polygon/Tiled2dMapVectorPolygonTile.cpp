@@ -162,7 +162,7 @@ void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDa
         double rx = 1.0 * sin(cy) * cos(cx);
         double ry = 1.0 * cos(cy);
         double rz = -1.0 * sin(cy) * sin(cx);
-        auto origin = Vec3F(rx, ry, rz);
+        auto origin = Vec3D(rx, ry, rz);
 
         bool anyInteractable = false;
 
@@ -279,7 +279,7 @@ void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDa
 }
 
 void Tiled2dMapVectorPolygonTile::addPolygons(const std::vector<std::vector<ObjectDescriptions>> &styleGroupNewPolygonsVector,
-                                              const Vec3F & origin) {
+                                              const Vec3D & origin) {
 
     if (styleGroupNewPolygonsVector.empty()) {
         auto selfActor = WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this());

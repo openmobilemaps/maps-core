@@ -9,7 +9,7 @@
 #import "MCLayerInterface+Private.h"
 #import "MCPolygonInfo+Private.h"
 #import "MCPolygonLayerCallbackInterface+Private.h"
-#import "MCVec3F+Private.h"
+#import "MCVec3D+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -42,10 +42,10 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 }
 
 - (void)setPolygons:(nonnull NSArray<MCPolygonInfo *> *)polygons
-             origin:(nonnull MCVec3F *)origin {
+             origin:(nonnull MCVec3D *)origin {
     try {
         _cppRefHandle.get()->setPolygons(::djinni::List<::djinni_generated::PolygonInfo>::toCpp(polygons),
-                                         ::djinni_generated::Vec3F::toCpp(origin));
+                                         ::djinni_generated::Vec3D::toCpp(origin));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
