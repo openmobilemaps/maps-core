@@ -169,7 +169,7 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
 
     auto focusPointInLayerCoords = conversionHelper->convert(layerSystemId, focusPointPosition);
 
-    auto earthCenterView = transformToView(Coord(CoordinateSystemIdentifiers::UnitSphere(), 0.0, 0.0, 0.0), viewMatrix, origin);
+    auto earthCenterView = transformToView(Coord(CoordinateSystemIdentifiers::UnitSphere(), 0, 0, 0), viewMatrix, origin);
 
     while (candidates.size() > 0) {
         VisibleTileCandidate candidate = candidates.front();

@@ -365,7 +365,7 @@ std::tuple<std::tuple<std::vector<float>, std::vector<float>>, std::vector<doubl
     std::vector<double> newViewMatrix(16, 0.0);
     std::vector<double> newProjectionMatrix(16, 0.0);
 
-//    double off = fmod(DateHelper::currentTimeMicros() * 0.0000001, 1.0) * 0.000001;
+//    double off = fmod(DateHelper::currentTimeMicros() * 0.0000001, 1.0) * 0.0001;
 //    mapInterface->invalidate();
 
     const float R = 6378137.0;

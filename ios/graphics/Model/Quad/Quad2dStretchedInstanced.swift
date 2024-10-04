@@ -83,7 +83,10 @@ final class Quad2dStretchedInstanced: BaseGraphicsObject, @unchecked Sendable {
         defer {
             lock.unlock()
         }
-        
+
+        // PRECISION-ISSUE TODO
+        return
+
         guard let verticesBuffer,
               let indicesBuffer,
               let positionsBuffer,
