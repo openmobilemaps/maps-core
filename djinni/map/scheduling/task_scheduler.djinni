@@ -56,3 +56,7 @@ thread_pool_callbacks = interface +c +j +o {
 thread_pool_scheduler = interface +c {
     static create(callbacks: thread_pool_callbacks): scheduler_interface;
 }
+
+j_n_i_scheduler_callback_interface = interface +c {
+	static create(): thread_pool_callbacks;
+}

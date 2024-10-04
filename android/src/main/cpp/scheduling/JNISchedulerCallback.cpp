@@ -8,7 +8,8 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-#include "AndroidSchedulerCallback.h"
+#include "JNISchedulerCallback.h"
+#include "JNISchedulerCallbackInterface.h"
 #include "TaskPriority.h"
 #include "Logger.h"
 
@@ -17,7 +18,11 @@
 
 #include "djinni_support.hpp"
 
-AndroidSchedulerCallback::AndroidSchedulerCallback() {
+std::shared_ptr<ThreadPoolCallbacks> JNISchedulerCallbackInterface::create() {
+    return std::make_shared<JNISchedulerCallback>();
+}
+
+JNISchedulerCallback::JNISchedulerCallback() {
     JNIEnv* env = djinni::jniGetThreadEnv();
     if (!env) {
         throw std::runtime_error("Failed to retrieve the environment of the scheduler creation thread!");
@@ -30,7 +35,7 @@ AndroidSchedulerCallback::AndroidSchedulerCallback() {
     vm = newVm;
 }
 
-std::string AndroidSchedulerCallback::getCurrentThreadName() {
+std::string JNISchedulerCallback::getCurrentThreadName() {
     char name[32] = "";
     if (prctl(PR_GET_NAME, name) == -1) {
         LogError <<= "Couldn't get thread name";
@@ -38,13 +43,13 @@ std::string AndroidSchedulerCallback::getCurrentThreadName() {
     return name;
 }
 
-void AndroidSchedulerCallback::setCurrentThreadName(const std::string &name) {
+void JNISchedulerCallback::setCurrentThreadName(const std::string &name) {
     if (prctl(PR_SET_NAME, name.c_str()) == -1) {
         LogError <<= "Couldn't set thread name: " + name;
     }
 }
 
-void AndroidSchedulerCallback::setThreadPriority(TaskPriority priority) {
+void JNISchedulerCallback::setThreadPriority(TaskPriority priority) {
     int p = 0;
     switch (priority) {
         case TaskPriority::HIGH:
@@ -63,7 +68,7 @@ void AndroidSchedulerCallback::setThreadPriority(TaskPriority priority) {
     setpriority(PRIO_PROCESS, 0, p);
 }
 
-void AndroidSchedulerCallback::attachThread() {
+void JNISchedulerCallback::attachThread() {
     if (!vm) {
         throw std::runtime_error("Invalid JVM on attaching thread!");
     }
@@ -81,7 +86,7 @@ void AndroidSchedulerCallback::attachThread() {
     }
 }
 
-void AndroidSchedulerCallback::detachThread() {
+void JNISchedulerCallback::detachThread() {
     if (!vm) {
         throw std::runtime_error("Invalid JVM on detaching thread!");
     }

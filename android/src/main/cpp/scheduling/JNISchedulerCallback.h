@@ -14,11 +14,11 @@
 
 #include "jni.h"
 
-class AndroidSchedulerCallback : public ThreadPoolCallbacks {
+class JNISchedulerCallback : public ThreadPoolCallbacks {
 public:
-    AndroidSchedulerCallback();
+    JNISchedulerCallback();
 
-    ~AndroidSchedulerCallback() = default;
+    ~JNISchedulerCallback() = default;
 
     std::string getCurrentThreadName() override;
 
