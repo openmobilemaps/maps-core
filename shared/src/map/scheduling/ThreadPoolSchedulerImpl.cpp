@@ -10,14 +10,24 @@
 #include <chrono>
 #include <cassert>
 #include <cmath>
-#include <sys/prctl.h>
 
-static void setCurrentThreadName(std::string name) {
+#ifdef __linux__
+#include <sys/prctl.h>
+#else
+#include <pthread.h>
+#endif
+
+static void setCurrentThreadName(const std::string& name) {
+#ifdef __linux__
+    // Linux and Android use prctl to set thread name
     if (prctl(PR_SET_NAME, name.c_str()) == -1) {
         LogError <<= "Couldn't set thread name: " + name;
     }
+#else
+    // iOS and macOS use pthread_setname_np
+    pthread_setname_np(name.c_str());
+#endif
 }
-
 std::shared_ptr<SchedulerInterface> ThreadPoolScheduler::create() {
     return std::make_shared<ThreadPoolSchedulerImpl>();
 }
