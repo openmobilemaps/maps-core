@@ -49,7 +49,7 @@ public struct MapView: UIViewRepresentable {
 
         public var restrictedBounds: MCRectCoord? = nil
 
-        public weak var camera3d: MCMapCameraInterface?
+        public var camera3d: MCMapCameraInterface?
 
         public var mapConfig: MCMapConfig?
 
