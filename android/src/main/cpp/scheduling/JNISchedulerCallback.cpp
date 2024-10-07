@@ -18,10 +18,6 @@
 
 #include "djinni_support.hpp"
 
-std::shared_ptr<ThreadPoolCallbacks> JNISchedulerCallbackInterface::create() {
-    return std::make_shared<JNISchedulerCallback>();
-}
-
 JNISchedulerCallback::JNISchedulerCallback() {
     JNIEnv* env = djinni::jniGetThreadEnv();
     if (!env) {

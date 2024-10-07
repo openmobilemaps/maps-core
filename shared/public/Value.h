@@ -682,6 +682,8 @@ public:
 
         int64_t identifier = usedKeysCollection.getHash(context);
 
+        std::lock_guard<std::mutex> lock(mutex);
+
         const auto lastResultIt = lastResults.find(identifier);
         if (lastResultIt != lastResults.end()) {
             return lastResultIt->second;
@@ -694,6 +696,7 @@ public:
     }
 
 private:
+    std::mutex mutex;
     std::shared_ptr<Value> value;
     UsedKeysCollection usedKeysCollection;
     std::optional<ResultType> staticValue;
