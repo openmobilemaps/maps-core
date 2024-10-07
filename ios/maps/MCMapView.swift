@@ -14,7 +14,7 @@ import MetalKit
 import os
 
 open class MCMapView: MTKView, @unchecked Sendable {
-    public let mapInterface: MCMapInterface
+    public nonisolated(unsafe) let mapInterface: MCMapInterface
     private let renderingContext: RenderingContext
 
     private var sizeChanged = false
@@ -225,9 +225,7 @@ extension MCMapView: MTKViewDelegate {
             mapReadyCallbacks.callback = callback
             mapReadyCallbacks.callbackQueue = callbackQueue
 
-            MainActor.assumeIsolated {
-                self.mapInterface.drawReadyFrame(bounds, timeout: timeout, callbacks: mapReadyCallbacks)
-            }
+            self.mapInterface.drawReadyFrame(bounds, timeout: timeout, callbacks: mapReadyCallbacks)
         }
     }
 }
@@ -391,35 +389,33 @@ extension MCMapView: UIGestureRecognizerDelegate {
     }
 }
 
-private class MCMapViewMapReadyCallbacks: MCMapReadyCallbackInterface, @unchecked Sendable {
-    public weak var delegate: MCMapView?
+private class MCMapViewMapReadyCallbacks: @preconcurrency MCMapReadyCallbackInterface, @unchecked Sendable {
+    public nonisolated(unsafe) weak var delegate: MCMapView?
     public var callback: ((UIImage?, MCLayerReadyState) -> Void)?
     public var callbackQueue: DispatchQueue?
     public let semaphore = DispatchSemaphore(value: 1)
 
-    func stateDidUpdate(_ state: MCLayerReadyState) {
+    @MainActor func stateDidUpdate(_ state: MCLayerReadyState) {
         guard let delegate = self.delegate else { return }
 
         semaphore.wait()
-        MainActor.assumeIsolated {
 
-            delegate.draw(in: delegate)
+        delegate.draw(in: delegate)
 
-            callbackQueue?.async {
-                switch state {
-                    case .NOT_READY:
-                        break
-                    case .ERROR, .TIMEOUT_ERROR:
-                        self.callback?(nil, state)
-                    case .READY:
-                        MainActor.assumeIsolated {
-                            self.callback?(delegate.currentDrawableImage(), state)
-                        }
-                    @unknown default:
-                        break
-                }
-                self.semaphore.signal()
+        callbackQueue?.async {
+            switch state {
+                case .NOT_READY:
+                    break
+                case .ERROR, .TIMEOUT_ERROR:
+                    self.callback?(nil, state)
+                case .READY:
+                    MainActor.assumeIsolated {
+                        self.callback?(delegate.currentDrawableImage(), state)
+                    }
+                @unknown default:
+                    break
             }
+            self.semaphore.signal()
         }
     }
 }
