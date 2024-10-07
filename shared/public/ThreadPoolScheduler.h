@@ -6,11 +6,10 @@
 #include <memory>
 
 class SchedulerInterface;
-class ThreadPoolCallbacks;
 
 class ThreadPoolScheduler {
 public:
     virtual ~ThreadPoolScheduler() = default;
 
-    static /*not-null*/ std::shared_ptr<SchedulerInterface> create(const /*not-null*/ std::shared_ptr<ThreadPoolCallbacks> & callbacks);
+    static /*not-null*/ std::shared_ptr<SchedulerInterface> create();
 };

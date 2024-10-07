@@ -9,7 +9,6 @@
 
 #include "ThreadPoolScheduler.h"
 #include "SchedulerInterface.h"
-#include "ThreadPoolCallbacks.h"
 #include "TaskInterface.h"
 #include "TaskConfig.h"
 #include "SchedulerGraphicsTaskCallbacks.h"
@@ -22,7 +21,7 @@
 
 class ThreadPoolSchedulerImpl: public SchedulerInterface {
 public:
-    ThreadPoolSchedulerImpl(const std::shared_ptr<ThreadPoolCallbacks> &callbacks);
+    ThreadPoolSchedulerImpl();
 
     virtual void addTask(const std::shared_ptr<TaskInterface> & task) override;
 
@@ -44,16 +43,12 @@ public:
 
     bool runGraphicsTasks() override;
 
-    std::shared_ptr<ThreadPoolCallbacks> getThreadPoolCallbacks() override;
-
     void addTaskIgnoringDelay(const std::shared_ptr<TaskInterface> & task);
 
 private:
     std::thread makeSchedulerThread(size_t index, TaskPriority priority);
     std::thread makeDelayedTasksThread();
     
-    std::shared_ptr<ThreadPoolCallbacks> callbacks;
-
     std::mutex defaultMutex;
     std::deque<std::shared_ptr<TaskInterface>> defaultQueue;
     std::condition_variable defaultCv;

@@ -33,7 +33,6 @@ import io.openmobilemaps.mapscore.shared.map.controls.TouchAction
 import io.openmobilemaps.mapscore.shared.map.controls.TouchEvent
 import io.openmobilemaps.mapscore.shared.map.controls.TouchHandlerInterface
 import io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateConversionHelperInterface
-import io.openmobilemaps.mapscore.shared.map.scheduling.JNISchedulerCallbackInterface
 import io.openmobilemaps.mapscore.shared.map.scheduling.TaskInterface
 import io.openmobilemaps.mapscore.shared.map.scheduling.ThreadPoolScheduler
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -66,7 +65,7 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 		val densityExact = resources.displayMetrics.xdpi
 		configureGL(useMSAA)
 		setRenderer(this)
-		val scheduler = ThreadPoolScheduler.create(JNISchedulerCallbackInterface.create())
+		val scheduler = ThreadPoolScheduler.create()
 		val mapInterface = MapInterface.createWithOpenGl(
 			mapConfig,
 			scheduler,
