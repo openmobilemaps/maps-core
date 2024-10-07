@@ -10,13 +10,20 @@
 #include <chrono>
 #include <cassert>
 #include <cmath>
+#include <sys/prctl.h>
 
-std::shared_ptr<SchedulerInterface> ThreadPoolScheduler::create(const std::shared_ptr<ThreadPoolCallbacks> &callbacks) {
-    return std::make_shared<ThreadPoolSchedulerImpl>(callbacks);
+static void setCurrentThreadName(std::string name) {
+    if (prctl(PR_SET_NAME, name.c_str()) == -1) {
+        LogError <<= "Couldn't set thread name: " + name;
+    }
 }
 
-ThreadPoolSchedulerImpl::ThreadPoolSchedulerImpl(const std::shared_ptr<ThreadPoolCallbacks> &callbacks)
-        : callbacks(callbacks), separateGraphicsQueue(false), nextWakeup(std::chrono::system_clock::now() + std::chrono::seconds(1)) {
+std::shared_ptr<SchedulerInterface> ThreadPoolScheduler::create() {
+    return std::make_shared<ThreadPoolSchedulerImpl>();
+}
+
+ThreadPoolSchedulerImpl::ThreadPoolSchedulerImpl()
+        : separateGraphicsQueue(false), nextWakeup(std::chrono::system_clock::now() + std::chrono::seconds(1)) {
     unsigned int maxNumThreads = std::thread::hardware_concurrency();
     if (maxNumThreads < DEFAULT_MIN_NUM_THREADS) maxNumThreads = DEFAULT_MIN_NUM_THREADS;
     threads.reserve(maxNumThreads + 1);
@@ -109,7 +116,6 @@ void ThreadPoolSchedulerImpl::resume() {
 
 void ThreadPoolSchedulerImpl::destroy() {
     terminated = true;
-    callbacks = nullptr;
 
     {
         std::lock_guard<std::mutex> lock(graphicsMutex);
@@ -136,12 +142,7 @@ void ThreadPoolSchedulerImpl::destroy() {
 
 std::thread ThreadPoolSchedulerImpl::makeSchedulerThread(size_t index, TaskPriority priority) {
     return std::thread([this, index, priority] {
-        auto callbacks = this->callbacks;
-        if (!callbacks) {
-            return;
-        }
-        callbacks->setCurrentThreadName(std::string{"MapSDK_"} + std::to_string(index) + "_" + std::string(toString(priority)));
-        callbacks->attachThread();
+        setCurrentThreadName(std::string{"MapSDK_"} + std::to_string(index) + "_" + std::string(toString(priority)));
         
         while (true) {
             std::unique_lock<std::mutex> lock(defaultMutex);
@@ -149,7 +150,6 @@ std::thread ThreadPoolSchedulerImpl::makeSchedulerThread(size_t index, TaskPrior
             defaultCv.wait(lock, [this] { return !defaultQueue.empty() || terminated; });
             
             if (terminated) {
-                callbacks->detachThread();
                 return;
             }
             if (paused) {
@@ -172,7 +172,6 @@ bool ThreadPoolSchedulerImpl::hasSeparateGraphicsInvocation() {
     return separateGraphicsQueue;
 }
 
-std::chrono::time_point<std::chrono::steady_clock> lastEnd;
 bool ThreadPoolSchedulerImpl::runGraphicsTasks() {
     bool noTasksLeft;
     auto start = std::chrono::steady_clock::now();
@@ -212,17 +211,13 @@ bool ThreadPoolSchedulerImpl::runGraphicsTasks() {
 
 std::thread ThreadPoolSchedulerImpl::makeDelayedTasksThread() {
     return std::thread([this] {
-        auto callbacks = this->callbacks;
-        if (callbacks) {
-            callbacks->setCurrentThreadName(std::string{"MapSDK_delayed_tasks"});
-        }
+        setCurrentThreadName(std::string{"MapSDK_delayed_tasks"});
 
         while (true) {
             std::unique_lock<std::mutex> lock(delayedTasksMutex);
             delayedTasksCv.wait_until(lock, nextWakeup);
 
             if (terminated) {
-                callbacks->detachThread();
                 return;
             }
 
@@ -250,8 +245,4 @@ std::thread ThreadPoolSchedulerImpl::makeDelayedTasksThread() {
 void ThreadPoolSchedulerImpl::setSchedulerGraphicsTaskCallbacks(const /*not-null*/ std::shared_ptr<SchedulerGraphicsTaskCallbacks> & callbacks) {
     graphicsCallbacks = callbacks;
     separateGraphicsQueue = callbacks != nullptr;
-}
-
-std::shared_ptr<ThreadPoolCallbacks> ThreadPoolSchedulerImpl::getThreadPoolCallbacks() {
-    return callbacks;
 }

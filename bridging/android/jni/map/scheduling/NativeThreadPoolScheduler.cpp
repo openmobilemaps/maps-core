@@ -3,7 +3,6 @@
 
 #include "NativeThreadPoolScheduler.h"  // my header
 #include "NativeSchedulerInterface.h"
-#include "NativeThreadPoolCallbacks.h"
 
 namespace djinni_generated {
 
@@ -19,10 +18,10 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_scheduling_Th
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_scheduling_ThreadPoolScheduler_create(JNIEnv* jniEnv, jobject /*this*/, jobject j_callbacks)
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_scheduling_ThreadPoolScheduler_create(JNIEnv* jniEnv, jobject /*this*/)
 {
     try {
-        auto r = ::ThreadPoolScheduler::create(::djinni_generated::NativeThreadPoolCallbacks::toCpp(jniEnv, j_callbacks));
+        auto r = ::ThreadPoolScheduler::create();
         return ::djinni::release(::djinni_generated::NativeSchedulerInterface::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }

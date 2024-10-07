@@ -148,10 +148,6 @@ class AndroidScheduler(
 		graphicsTaskCallbacks = callbacks
 	}
 
-	override fun getThreadPoolCallbacks(): ThreadPoolCallbacks {
-		throw IllegalStateException("Android Scheduler doesn't provide any thread callbacks")
-	}
-
 	fun launchCoroutine(
 		context: CoroutineContext = EmptyCoroutineContext,
 		start: CoroutineStart = CoroutineStart.DEFAULT,

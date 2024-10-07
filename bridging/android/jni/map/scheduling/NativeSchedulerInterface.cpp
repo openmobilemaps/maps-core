@@ -5,7 +5,6 @@
 #include "Marshal.hpp"
 #include "NativeSchedulerGraphicsTaskCallbacks.h"
 #include "NativeTaskInterface.h"
-#include "NativeThreadPoolCallbacks.h"
 
 namespace djinni_generated {
 
@@ -92,14 +91,6 @@ void NativeSchedulerInterface::JavaProxy::setSchedulerGraphicsTaskCallbacks(cons
     jniEnv->CallVoidMethod(Handle::get().get(), data.method_setSchedulerGraphicsTaskCallbacks,
                            ::djinni::get(::djinni_generated::NativeSchedulerGraphicsTaskCallbacks::fromCpp(jniEnv, c_callbacks)));
     ::djinni::jniExceptionCheck(jniEnv);
-}
-/*not-null*/ std::shared_ptr<::ThreadPoolCallbacks> NativeSchedulerInterface::JavaProxy::getThreadPoolCallbacks() {
-    auto jniEnv = ::djinni::jniGetThreadEnv();
-    ::djinni::JniLocalScope jscope(jniEnv, 10);
-    const auto& data = ::djinni::JniClass<::djinni_generated::NativeSchedulerInterface>::get();
-    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_getThreadPoolCallbacks);
-    ::djinni::jniExceptionCheck(jniEnv);
-    return ::djinni_generated::NativeThreadPoolCallbacks::toCpp(jniEnv, jret);
 }
 
 CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_scheduling_SchedulerInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
@@ -189,15 +180,6 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_scheduling_Sc
         const auto& ref = ::djinni::objectFromHandleAddress<::SchedulerInterface>(nativeRef);
         ref->setSchedulerGraphicsTaskCallbacks(::djinni_generated::NativeSchedulerGraphicsTaskCallbacks::toCpp(jniEnv, j_callbacks));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
-}
-
-CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_scheduling_SchedulerInterface_00024CppProxy_native_1getThreadPoolCallbacks(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
-{
-    try {
-        const auto& ref = ::djinni::objectFromHandleAddress<::SchedulerInterface>(nativeRef);
-        auto r = ref->getThreadPoolCallbacks();
-        return ::djinni::release(::djinni_generated::NativeThreadPoolCallbacks::fromCpp(jniEnv, r));
-    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
 } // namespace djinni_generated
