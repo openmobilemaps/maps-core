@@ -9,9 +9,8 @@
  */
 
 #include "Quad2dOpenGl.h"
-#include "Logger.h"
-#include "OpenGlHelper.h"
 #include "TextureHolderInterface.h"
+#include <cmath>
 
 Quad2dOpenGl::Quad2dOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader)
     : shaderProgram(shader) {}

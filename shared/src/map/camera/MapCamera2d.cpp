@@ -247,9 +247,9 @@ void MapCamera2d::setRotation(float angle, bool animated) {
 
     if (animated) {
         double currentAngle = fmod(this->angle, 360.0);
-        if (abs(currentAngle - newAngle) > abs(currentAngle - (newAngle + 360.0))) {
+        if (std::abs(currentAngle - newAngle) > std::abs(currentAngle - (newAngle + 360.0))) {
             newAngle += 360.0;
-        } else if (abs(currentAngle - newAngle) > abs(currentAngle - (newAngle - 360.0))) {
+        } else if (std::abs(currentAngle - newAngle) > std::abs(currentAngle - (newAngle - 360.0))) {
             newAngle -= 360.0;
         }
 

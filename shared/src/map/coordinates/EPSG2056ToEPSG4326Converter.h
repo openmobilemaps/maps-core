@@ -15,6 +15,7 @@
 #include "CoordinateConverterInterface.h"
 #include "CoordinateSystemIdentifiers.h"
 #include "MapCoordinateSystem.h"
+#include <cmath>
 
 /// Convert LV03+ to WGS 84 / Pseudo-Mercator
 ///  https://epsg.io/2056 to https://epsg.io/4326

@@ -14,6 +14,7 @@
 #include "PolygonGroupShaderInterface.h"
 #include "ShaderProgramInterface.h"
 #include <vector>
+#include <mutex>
 
 class ColorPolygonGroup2dShaderOpenGl : public BaseShaderProgramOpenGl,
                                         public PolygonGroupShaderInterface,

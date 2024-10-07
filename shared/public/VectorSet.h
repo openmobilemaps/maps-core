@@ -1,4 +1,5 @@
 #include <vector>
+#include <memory>
 
 #pragma once
 

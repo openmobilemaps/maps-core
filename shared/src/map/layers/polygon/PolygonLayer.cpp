@@ -132,7 +132,7 @@ void PolygonLayer::addAll(const std::vector<PolygonInfo> &polygons) {
             polygonObject->setColor(polygon.color);
 
             polygonGraphicsObjects.push_back(polygonGraphicsObject);
-            this->polygons[polygon.identifier].push_back(std::make_tuple(polygon, polygonObject));
+            this->polygons[polygon.identifier].push_back(std::make_pair(polygon, polygonObject));
         }
     }
 

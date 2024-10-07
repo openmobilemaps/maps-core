@@ -198,7 +198,7 @@ void IconLayer::setupIconObjects(
         return;
     }
 
-    for (const auto iconPair : iconObjects) {
+    for (const auto &iconPair : iconObjects) {
         const auto &icon = iconPair.first;
         const auto &iconObject = iconPair.second;
 
@@ -318,7 +318,7 @@ void IconLayer::updateIconPosition(const std::shared_ptr<CoordinateConversionHel
     float bottomH = iconSize.y * (is3D ? (1.0f - ratioTopBottom) : ratioTopBottom);
 
     if (is3D) {
-        float scaleFactor = 1.0 / abs(cos(origIconPosRender.y + (M_PI / 2.0)));
+        float scaleFactor = 1.0 / std::abs(cos(origIconPosRender.y + (M_PI / 2.0)));
         leftW *= scaleFactor;
         rightW *= scaleFactor;
     }

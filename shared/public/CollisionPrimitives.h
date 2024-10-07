@@ -10,6 +10,9 @@
 
 #pragma once
 
+#include <cstddef>
+#include <cstdint>
+
 struct CollisionRectD {
     double anchorX;
     double anchorY;

@@ -11,6 +11,7 @@
 #include "Text2dOpenGl.h"
 #include "OpenGlHelper.h"
 #include "TextureHolderInterface.h"
+#include <cstring>
 
 Text2dOpenGl::Text2dOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader)
     : shaderProgram(shader) {}

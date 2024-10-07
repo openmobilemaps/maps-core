@@ -13,6 +13,7 @@
 #include "CoordinateSystemIdentifiers.h"
 #include "MapCoordinateSystem.h"
 #include "RectCoord.h"
+#include <cmath>
 
 ::MapCoordinateSystem CoordinateSystemFactory::getEpsg2056System() {
     return MapCoordinateSystem(CoordinateSystemIdentifiers::EPSG2056(),

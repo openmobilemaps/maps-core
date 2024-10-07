@@ -12,6 +12,7 @@
 #include "OpenGlContext.h"
 #include "OpenGlHelper.h"
 #include "ColorPolygonGroup2dShaderOpenGl.h"
+#include <cstring>
 
 ColorPolygonGroup2dShaderOpenGl::ColorPolygonGroup2dShaderOpenGl(bool isStriped, bool projectOntoUnitSphere)
         : projectOntoUnitSphere(projectOntoUnitSphere),

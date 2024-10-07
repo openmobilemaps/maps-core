@@ -32,6 +32,7 @@
 
 #include <cmath>
 #include <vector>
+#include <string>
 
 class MatrixD {
 public:
