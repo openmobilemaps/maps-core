@@ -79,7 +79,7 @@ public class RenderingContext: NSObject, @unchecked Sendable {
                             topRight: .init(x: -1, y: -1, z: 0),
                             bottomRight: .init(x: -1, y: 1, z: 0),
                             bottomLeft: .init(x: 1, y: 1, z: 0)),
-                      textureCoordinates: .init(x: 0, y: 0, width: 0, height: 0))
+                      textureCoordinates: .init(x: 0, y: 0, width: 0, height: 0), origin: .init(x: 0, y: 0, z: 0), is3d: false)
         quad.setup(self)
         return quad
     }()

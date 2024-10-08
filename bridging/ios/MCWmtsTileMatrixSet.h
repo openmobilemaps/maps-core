@@ -4,7 +4,6 @@
 #import "MCWmtsTileMatrix.h"
 #import <Foundation/Foundation.h>
 
-NS_SWIFT_SENDABLE
 @interface MCWmtsTileMatrixSet : NSObject
 - (nonnull instancetype)init NS_UNAVAILABLE;
 + (nonnull instancetype)new NS_UNAVAILABLE;

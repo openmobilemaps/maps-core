@@ -18,7 +18,8 @@ final class Quad2d: BaseGraphicsObject, @unchecked Sendable {
     private var verticesBuffer: MTLBuffer?
 
     private var indicesBuffer: MTLBuffer?
-    private var origin: MCVec3D?
+    private var tileOrigin: MCVec3D = .init(x: 0, y: 0, z: 0)
+    private var is3d = false
 
     private var indicesCount: Int = 0
 
@@ -87,8 +88,7 @@ final class Quad2d: BaseGraphicsObject, @unchecked Sendable {
 
         guard isReady(),
               let verticesBuffer,
-              let indicesBuffer,
-              let tileOrigin = self.origin
+              let indicesBuffer
         else { return }
 
 
@@ -197,20 +197,30 @@ extension Quad2d: MCQuad2dInterface {
         }
         if let frame = optFrame,
            let textureCoordinates = optTextureCoordinates {
-            setFrame(frame, textureCoordinates: textureCoordinates)
+            setFrame(frame, textureCoordinates: textureCoordinates, origin: self.tileOrigin, is3d: is3d)
         }
     }
 
 
-    func setFrame(_ frame: MCQuad3dD, textureCoordinates: MCRectD) {
-
-        origin = MCVec3D(x: 0, y: 0, z: 0) // PRECISION-ISSUE TODO
-
-
+    func setFrame(_ frame: MCQuad3dD, textureCoordinates: MCRectD, origin: MCVec3D, is3d: Bool) {
         var vertices: [Vertex3D] = []
         var indices: [UInt16] = []
 
         let sFactor = lock.withCritical { subdivisionFactor }
+
+        func transform(_ coordinate: MCVec3D) -> MCVec3D {
+            if is3d {
+                let x = 1.0 * sin(coordinate.y) * cos(coordinate.x) - origin.x;
+                let y =  1.0 * cos(coordinate.y) - origin.y;
+                let z = -1.0 * sin(coordinate.y) * sin(coordinate.x) - origin.z;
+                return MCVec3D(x: x, y: y, z: z)
+            } else {
+                let x = coordinate.x - origin.x;
+                let y = coordinate.y - origin.y;
+                let z = coordinate.z - origin.z;
+                return MCVec3D(x: x, y: y, z: z)
+            }
+        }
 
         if sFactor == 0 {
             /*
@@ -222,10 +232,10 @@ extension Quad2d: MCQuad2dInterface {
              Where A-C are joined to form two triangles
              */
             vertices = [
-                Vertex3D(position: frame.bottomLeft, textureU: textureCoordinates.xF, textureV: textureCoordinates.yF + textureCoordinates.heightF), // A
-                Vertex3D(position: frame.topLeft, textureU: textureCoordinates.xF, textureV: textureCoordinates.yF), // B
-                Vertex3D(position: frame.topRight, textureU: textureCoordinates.xF + textureCoordinates.widthF, textureV: textureCoordinates.yF), // C
-                Vertex3D(position: frame.bottomRight, textureU: textureCoordinates.xF + textureCoordinates.widthF, textureV: textureCoordinates.yF + textureCoordinates.heightF), // D
+                Vertex3D(position: transform(frame.bottomLeft), textureU: textureCoordinates.xF, textureV: textureCoordinates.yF + textureCoordinates.heightF), // A
+                Vertex3D(position: transform(frame.topLeft), textureU: textureCoordinates.xF, textureV: textureCoordinates.yF), // B
+                Vertex3D(position: transform(frame.topRight), textureU: textureCoordinates.xF + textureCoordinates.widthF, textureV: textureCoordinates.yF), // C
+                Vertex3D(position: transform(frame.bottomRight), textureU: textureCoordinates.xF + textureCoordinates.widthF, textureV: textureCoordinates.yF + textureCoordinates.heightF), // D
             ]
             indices = [
                 0, 2, 1, // ACB
@@ -236,31 +246,31 @@ extension Quad2d: MCQuad2dInterface {
 
             let numSubd = Int(pow(2.0, Double(sFactor)))
 
-            let deltaRTop = MCVec3F(x: Float(frame.topRight.x - frame.topLeft.x),
-                                    y: Float(frame.topRight.y - frame.topLeft.y),
-                                    z: Float(frame.topRight.z - frame.topLeft.z))
-            let deltaDLeft = MCVec3F(x: Float(frame.bottomLeft.x - frame.topLeft.x),
-                                     y: Float(frame.bottomLeft.y - frame.topLeft.y),
-                                     z: Float(frame.bottomLeft.z - frame.topLeft.z))
-            let deltaDRight = MCVec3F(x: Float(frame.bottomRight.x - frame.topRight.x),
-                                      y: Float(frame.bottomRight.y - frame.topRight.y),
-                                      z: Float(frame.bottomRight.z - frame.topRight.z))
+            let deltaRTop = MCVec3D(x: Double(frame.topRight.x - frame.topLeft.x),
+                                    y: Double(frame.topRight.y - frame.topLeft.y),
+                                    z: Double(frame.topRight.z - frame.topLeft.z))
+            let deltaDLeft = MCVec3D(x: Double(frame.bottomLeft.x - frame.topLeft.x),
+                                     y: Double(frame.bottomLeft.y - frame.topLeft.y),
+                                     z: Double(frame.bottomLeft.z - frame.topLeft.z))
+            let deltaDRight = MCVec3D(x: Double(frame.bottomRight.x - frame.topRight.x),
+                                      y: Double(frame.bottomRight.y - frame.topRight.y),
+                                      z: Double(frame.bottomRight.z - frame.topRight.z))
 
             for iR in 0...numSubd {
-                let pcR = Float(iR) / Float(numSubd)
-                let originX = frame.topLeft.xF + pcR * deltaRTop.x
-                let originY = frame.topLeft.yF + pcR * deltaRTop.y
-                let originZ = frame.topLeft.zF + pcR * deltaRTop.z
+                let pcR = Double(iR) / Double(numSubd)
+                let originX = frame.topLeft.x + pcR * deltaRTop.x
+                let originY = frame.topLeft.y + pcR * deltaRTop.y
+                let originZ = frame.topLeft.z + pcR * deltaRTop.z
                 for iD in 0...numSubd {
-                    let pcD = Float(iD) / Float(numSubd)
+                    let pcD = Double(iD) / Double(numSubd)
                     let deltaDX = pcD * ((1.0 - pcR) * deltaDLeft.x + pcR * deltaDRight.x)
                     let deltaDY = pcD * ((1.0 - pcR) * deltaDLeft.y + pcR * deltaDRight.y)
                     let deltaDZ = pcD * ((1.0 - pcR) * deltaDLeft.z + pcR * deltaDRight.z)
 
-                    let u: Float = Float(textureCoordinates.xF + pcR * textureCoordinates.widthF)
-                    let v: Float = Float(textureCoordinates.yF + pcD * textureCoordinates.heightF)
+                    let u: Float = Float(textureCoordinates.x + pcR * textureCoordinates.width)
+                    let v: Float = Float(textureCoordinates.y + pcD * textureCoordinates.height)
 
-                    vertices.append(Vertex3D(x: originX + deltaDX, y: originY + deltaDY, z: originZ + deltaDZ, textureU: u, textureV: v))
+                    vertices.append(Vertex3D(position: transform(.init(x: originX + deltaDX, y: originY + deltaDY, z: originZ + deltaDZ)), textureU: u, textureV: v))
 
                     if iR < numSubd && iD < numSubd {
                         let baseInd = UInt16(iD + (iR * (numSubd + 1)))
@@ -272,6 +282,8 @@ extension Quad2d: MCQuad2dInterface {
         }
 
         lock.withCritical {
+            self.is3d = is3d
+            self.tileOrigin = origin
             self.frame = frame
             self.textureCoordinates = textureCoordinates
             self.verticesBuffer.copyOrCreate(bytes: vertices, length: MemoryLayout<Vertex3D>.stride * vertices.count, device: device)

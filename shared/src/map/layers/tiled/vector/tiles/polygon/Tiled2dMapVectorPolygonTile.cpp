@@ -159,9 +159,9 @@ void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDa
         auto convertedTileBounds = mapInterface->getCoordinateConverterHelper()->convertRectToRenderSystem(tileInfo.tileInfo.bounds);
         double cx = (convertedTileBounds.bottomRight.x + convertedTileBounds.topLeft.x) / 2.0;
         double cy = (convertedTileBounds.bottomRight.y + convertedTileBounds.topLeft.y) / 2.0;
-        double rx = 1.0 * sin(cy) * cos(cx);
-        double ry = 1.0 * cos(cy);
-        double rz = -1.0 * sin(cy) * sin(cx);
+        double rx = is3d ? 1.0 * sin(cy) * cos(cx) : cx;
+        double ry = is3d ? 1.0 * cos(cy) : cy;
+        double rz = is3d ? -1.0 * sin(cy) * sin(cx) : 0.0;
         auto origin = Vec3D(rx, ry, rz);
 
         bool anyInteractable = false;
