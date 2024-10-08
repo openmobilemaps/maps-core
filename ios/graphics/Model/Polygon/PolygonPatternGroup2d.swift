@@ -29,9 +29,8 @@ final class PolygonPatternGroup2d: BaseGraphicsObject, @unchecked Sendable {
 
     private var screenPixelFactor: Float = 0
     var customScreenPixelFactor = SIMD2<Float>([0.0, 0.0])
-    
-    var posOffset = SIMD2<Float>([0.0, 0.0])
 
+    var posOffset = SIMD2<Float>([0.0, 0.0])
 
     init(shader: MCShaderProgramInterface, metalContext: MetalContext) {
         guard let shader = shader as? PolygonPatternGroupShader else {
@@ -64,12 +63,12 @@ final class PolygonPatternGroup2d: BaseGraphicsObject, @unchecked Sendable {
             return
         }
 
-        #if DEBUG
-            encoder.pushDebugGroup(label)
-            defer {
-                encoder.popDebugGroup()
-            }
-        #endif
+#if DEBUG
+        encoder.pushDebugGroup(label)
+        defer {
+            encoder.popDebugGroup()
+        }
+#endif
 
         if isMasked {
             if stencilState == nil {
@@ -98,18 +97,18 @@ final class PolygonPatternGroup2d: BaseGraphicsObject, @unchecked Sendable {
         }
 
         // scale factors for shaders
-        var pixelFactor : Float = Float(screenPixelAsRealMeterFactor)
+        var pixelFactor: Float = Float(screenPixelAsRealMeterFactor)
 
         if self.shader.fadeInPattern {
             var scaleFactors = SIMD2<Float>([pixelFactor, pixelFactor])
             encoder.setVertexBytes(&scaleFactors, length: MemoryLayout<SIMD2<Float>>.stride, index: 2)
             encoder.setVertexBytes(&posOffset, length: MemoryLayout<SIMD2<Float>>.stride, index: 3)
 
-            scaleFactors = customScreenPixelFactor.x != 0 ? customScreenPixelFactor :  SIMD2<Float>([pixelFactor, pixelFactor])
+            scaleFactors = customScreenPixelFactor.x != 0 ? customScreenPixelFactor : SIMD2<Float>([pixelFactor, pixelFactor])
             encoder.setFragmentBytes(&pixelFactor, length: MemoryLayout<Float>.stride, index: 2)
             encoder.setFragmentBytes(&scaleFactors, length: MemoryLayout<SIMD2<Float>>.stride, index: 3)
         } else {
-            var scaleFactors = customScreenPixelFactor.x != 0 ? customScreenPixelFactor :  SIMD2<Float>([pixelFactor, pixelFactor])
+            var scaleFactors = customScreenPixelFactor.x != 0 ? customScreenPixelFactor : SIMD2<Float>([pixelFactor, pixelFactor])
             encoder.setVertexBytes(&scaleFactors, length: MemoryLayout<SIMD2<Float>>.stride, index: 2)
             encoder.setVertexBytes(&posOffset, length: MemoryLayout<SIMD2<Float>>.stride, index: 3)
         }
@@ -150,7 +149,7 @@ extension PolygonPatternGroup2d: MCPolygonPatternGroup2dInterface {
         var minY = Float.greatestFiniteMagnitude
 
         if let p = UnsafeRawPointer(bitPattern: Int(vertices.address)) {
-            for i in 0..<vertices.elementCount {
+            for i in 0 ..< vertices.elementCount {
                 if i % 3 == 0 {
                     let x = (p + 4 * Int(i)).load(as: Float.self)
                     let y = (p + 4 * (Int(i) + 1)).load(as: Float.self)
@@ -163,8 +162,8 @@ extension PolygonPatternGroup2d: MCPolygonPatternGroup2dInterface {
             self.indicesCount = Int(indices.elementCount)
             self.verticesBuffer = verticesBuffer
             self.indicesBuffer = indicesBuffer
-            self.posOffset.x = minX;
-            self.posOffset.y = minY;
+            self.posOffset.x = minX
+            self.posOffset.y = minY
         }
     }
 

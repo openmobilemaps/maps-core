@@ -10,6 +10,7 @@
 
 #include "LineGroup2dOpenGl.h"
 #include <cmath>
+#include <cstring>
 #include <string>
 
 LineGroup2dOpenGl::LineGroup2dOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader)

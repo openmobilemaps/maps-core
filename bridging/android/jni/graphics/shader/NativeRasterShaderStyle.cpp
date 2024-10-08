@@ -18,13 +18,14 @@ auto NativeRasterShaderStyle::fromCpp(JNIEnv* jniEnv, const CppType& c) -> ::dji
                                                            ::djinni::get(::djinni::F32::fromCpp(jniEnv, c.brightnessMax)),
                                                            ::djinni::get(::djinni::F32::fromCpp(jniEnv, c.contrast)),
                                                            ::djinni::get(::djinni::F32::fromCpp(jniEnv, c.saturation)),
-                                                           ::djinni::get(::djinni::F32::fromCpp(jniEnv, c.gamma)))};
+                                                           ::djinni::get(::djinni::F32::fromCpp(jniEnv, c.gamma)),
+                                                           ::djinni::get(::djinni::F32::fromCpp(jniEnv, c.brightnessShift)))};
     ::djinni::jniExceptionCheck(jniEnv);
     return r;
 }
 
 auto NativeRasterShaderStyle::toCpp(JNIEnv* jniEnv, JniType j) -> CppType {
-    ::djinni::JniLocalScope jscope(jniEnv, 7);
+    ::djinni::JniLocalScope jscope(jniEnv, 8);
     assert(j != nullptr);
     const auto& data = ::djinni::JniClass<NativeRasterShaderStyle>::get();
     return {::djinni::F32::toCpp(jniEnv, jniEnv->GetFloatField(j, data.field_opacity)),
@@ -32,7 +33,8 @@ auto NativeRasterShaderStyle::toCpp(JNIEnv* jniEnv, JniType j) -> CppType {
             ::djinni::F32::toCpp(jniEnv, jniEnv->GetFloatField(j, data.field_brightnessMax)),
             ::djinni::F32::toCpp(jniEnv, jniEnv->GetFloatField(j, data.field_contrast)),
             ::djinni::F32::toCpp(jniEnv, jniEnv->GetFloatField(j, data.field_saturation)),
-            ::djinni::F32::toCpp(jniEnv, jniEnv->GetFloatField(j, data.field_gamma))};
+            ::djinni::F32::toCpp(jniEnv, jniEnv->GetFloatField(j, data.field_gamma)),
+            ::djinni::F32::toCpp(jniEnv, jniEnv->GetFloatField(j, data.field_brightnessShift))};
 }
 
 } // namespace djinni_generated

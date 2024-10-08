@@ -12,6 +12,7 @@
 
 #include "CoordinateConversionHelperInterface.h"
 #include "LineInfoInterface.h"
+#include <cmath>
 
 class LineHelper {
   public:

@@ -113,6 +113,10 @@ public:
         return collides;
     }
 
+    void enableAnimations(bool enabled) {
+        animationsEnabled = enabled;
+    }
+
     const Coord coordinate;
     const int zoomIdentifier;
 private:
@@ -137,6 +141,7 @@ private:
 
     const int64_t animationDuration;
     const int64_t animationDelay;
+    bool animationsEnabled = true;
 
     float internalGetAlpha(float targetAlpha, long long now, float &lastAlpha, long long &animationStart) {
         if (animationDuration == 0) {
@@ -146,7 +151,7 @@ private:
             if (animationStart == 0) {
                 animationStart = now + animationDelay;
             }
-            float progress = std::min(double(std::max(now - animationStart, 0ll)) / animationDuration, 1.0);
+            float progress = animationsEnabled ? std::min(double(std::max(now - animationStart, 0ll)) / animationDuration, 1.0) : 1.0;
             if (progress == 1.0) {
                 animationStart = 0;
                 lastAlpha = targetAlpha;

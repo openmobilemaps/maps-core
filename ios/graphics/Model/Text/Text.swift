@@ -72,12 +72,12 @@ final class Text: BaseGraphicsObject, @unchecked Sendable {
             encoder.setDepthStencilState(context.defaultMask)
         }
 
-        #if DEBUG
-            encoder.pushDebugGroup(label)
-            defer {
-                encoder.popDebugGroup()
-            }
-        #endif
+#if DEBUG
+        encoder.pushDebugGroup(label)
+        defer {
+            encoder.popDebugGroup()
+        }
+#endif
 
         shader.setupProgram(context)
         shader.preRender(context)

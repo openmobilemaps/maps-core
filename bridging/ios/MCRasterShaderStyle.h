@@ -13,13 +13,15 @@ NS_SWIFT_SENDABLE
                           brightnessMax:(float)brightnessMax
                                contrast:(float)contrast
                              saturation:(float)saturation
-                                  gamma:(float)gamma NS_DESIGNATED_INITIALIZER;
+                                  gamma:(float)gamma
+                        brightnessShift:(float)brightnessShift NS_DESIGNATED_INITIALIZER;
 + (nonnull instancetype)rasterShaderStyleWithOpacity:(float)opacity
                                        brightnessMin:(float)brightnessMin
                                        brightnessMax:(float)brightnessMax
                                             contrast:(float)contrast
                                           saturation:(float)saturation
-                                               gamma:(float)gamma;
+                                               gamma:(float)gamma
+                                     brightnessShift:(float)brightnessShift;
 
 + (MCRasterShaderStyle * __nonnull)defaultStyle;
 @property (nonatomic, readonly) float opacity;
@@ -33,6 +35,8 @@ NS_SWIFT_SENDABLE
 @property (nonatomic, readonly) float saturation;
 
 @property (nonatomic, readonly) float gamma;
+
+@property (nonatomic, readonly) float brightnessShift;
 
 - (NSComparisonResult)compare:(nonnull MCRasterShaderStyle *)other;
 

@@ -19,6 +19,7 @@ struct RasterShaderStyle: Equatable {
     let contrast: Float
     let saturation: Float
     let gamma: Float
+    let brightnessShift: Float
 
     init(style: MCRasterShaderStyle) {
         self.opacity = style.opacity
@@ -27,6 +28,7 @@ struct RasterShaderStyle: Equatable {
         self.contrast = style.contrast > 0 ? (1 / (1 - style.contrast)) : (1 + style.contrast)
         self.saturation = style.saturation > 0 ? (1.0 - 1.0 / (1.001 - style.saturation)) : (-style.saturation)
         self.gamma = style.gamma
+        self.brightnessShift = style.brightnessShift
     }
 }
 

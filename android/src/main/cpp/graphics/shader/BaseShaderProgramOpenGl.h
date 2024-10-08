@@ -31,7 +31,7 @@ public:
 
     static void checkGlProgramLinking(GLuint program);
 
-    void preRender(const std::shared_ptr<::RenderingContextInterface> &context) override;
+    virtual void preRender(const std::shared_ptr<::RenderingContextInterface> &context) override;
 
 protected:
 

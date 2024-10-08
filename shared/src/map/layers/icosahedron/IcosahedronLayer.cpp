@@ -14,6 +14,7 @@
 #include "RenderObject.h"
 #include "BlendMode.h"
 #include <protozero/pbf_reader.hpp>
+#include <cmath>
 
 IcosahedronLayer::IcosahedronLayer(const /*not-null*/ std::shared_ptr<IcosahedronLayerCallbackInterface> & callbackHandler): callbackHandler(callbackHandler) {
 

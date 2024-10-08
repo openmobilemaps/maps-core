@@ -17,6 +17,7 @@
 #include "SimpleLayerInterface.h"
 #include "SimpleTouchInterface.h"
 #include "Textured2dLayerObject.h"
+#include <atomic>
 #include <map>
 #include <mutex>
 #include <unordered_map>

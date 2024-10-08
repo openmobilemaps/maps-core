@@ -14,7 +14,6 @@ scheduler_interface = interface +c +j +o {
     # Execute added graphics tasks. Returns true, if there are unprocessed tasks in the queue after the execution.
     run_graphics_tasks(): bool;
     set_scheduler_graphics_task_callbacks(callbacks: scheduler_graphics_task_callbacks);
-    get_thread_pool_callbacks(): thread_pool_callbacks;
 }
 
 task_interface = interface +c +j +o {
@@ -41,18 +40,6 @@ execution_environment = enum {
     graphics;
 }
 
-thread_pool_callbacks = interface +c +j +o {
-    get_current_thread_name(): string;
-
-    set_current_thread_name(name: string);
-
-    set_thread_priority(priority: task_priority);
-
-    attach_thread();
-
-    detachThread();
-}
-
 thread_pool_scheduler = interface +c {
-    static create(callbacks: thread_pool_callbacks): scheduler_interface;
+    static create(): scheduler_interface;
 }

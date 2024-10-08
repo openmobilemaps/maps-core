@@ -11,8 +11,8 @@
 #include "Epsg4326Tiled2dMapLayerConfig.h"
 #include "Tiled2dMapVectorSettings.h"
 #include "CoordinateSystemIdentifiers.h"
-
-#include "Logger.h"
+#include <stdexcept>
+#include <cmath>
 
 Epsg4326Tiled2dMapLayerConfig::Epsg4326Tiled2dMapLayerConfig(std::string layerName, std::string urlFormat)
     : layerName(layerName), urlFormat(urlFormat)

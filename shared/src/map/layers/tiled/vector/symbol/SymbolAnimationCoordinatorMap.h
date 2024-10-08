@@ -70,6 +70,7 @@ public:
 
         auto animationCoordinator = std::make_shared<SymbolAnimationCoordinator>(coord, zoomIdentifier, xTolerance, yTolerance,
                                                                                  animationDuration, animationDelay);
+        animationCoordinator->enableAnimations(animationsEnabled);
         std::set<std::shared_ptr<SymbolAnimationCoordinator>, CoordinatorXCompare> newSet;
         newSet.insert(animationCoordinator);
         std::map<int, std::set<std::shared_ptr<SymbolAnimationCoordinator>, CoordinatorXCompare>> newMap;
@@ -115,8 +116,22 @@ public:
         }
     }
 
+    void enableAnimations(bool enabled) {
+        animationsEnabled = enabled;
+        std::lock_guard<std::mutex> lock(mapMutex);
+        for (const auto &[_, coordinatorMap] : animationCoordinators) {
+            for (const auto &[_, coordinatorSet] : coordinatorMap) {
+                for (const auto &coordinator : coordinatorSet) {
+                    coordinator->enableAnimations(enabled);
+                }
+            }
+        }
+    }
+
 private:
     static const size_t MIN_NUM_SEARCH = 9;
+
+    bool animationsEnabled = true;
 
     std::mutex mapMutex;
     std::unordered_map<size_t, std::map<int, std::set<std::shared_ptr<SymbolAnimationCoordinator>, CoordinatorXCompare>>> animationCoordinators;

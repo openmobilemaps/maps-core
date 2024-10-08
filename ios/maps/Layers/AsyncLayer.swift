@@ -12,7 +12,7 @@ public final class AsyncLayer: Layer, ObservableObject, @unchecked Sendable {
     private(set) public var error: Error?
     private(set) public var isLoading = true
 
-    private(set) public var baseLayer: Layer?
+    public private(set) var baseLayer: Layer?
 
     public var interface: MCLayerInterface? { baseLayer?.interface }
 
@@ -20,8 +20,7 @@ public final class AsyncLayer: Layer, ObservableObject, @unchecked Sendable {
         Task {
             do {
                 self.baseLayer = try await setup()
-            }
-            catch {
+            } catch {
                 self.error = error
             }
             self.isLoading = false
@@ -30,6 +29,4 @@ public final class AsyncLayer: Layer, ObservableObject, @unchecked Sendable {
             }
         }
     }
-
-    
 }

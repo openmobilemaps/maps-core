@@ -20,6 +20,7 @@
 #include "MapCameraInterface.h"
 #include "PolygonGroupShaderInterface.h"
 #include "PolygonHelper.h"
+#include <cmath>
 
 void Tiled2dMapVectorBackgroundSubLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface, int32_t layerIndex) {
     Tiled2dMapVectorSubLayer::onAdded(mapInterface, layerIndex);
@@ -51,7 +52,7 @@ void Tiled2dMapVectorBackgroundSubLayer::onAdded(const std::shared_ptr<MapInterf
         }
 
         PolygonHelper::subdivision(vecVertices, indices, std::abs(
-                (globeConverted.bottomRight.x - globeConverted.topLeft.x) / std::powl(2, SUBDIVISION_FACTOR_3D_DEFAULT)));
+                (globeConverted.bottomRight.x - globeConverted.topLeft.x) / std::pow(2, SUBDIVISION_FACTOR_3D_DEFAULT)));
 
         for (const auto &v: vecVertices) {
             vertices.push_back(v.x);

@@ -233,9 +233,9 @@ void MapCamera3d::setRotation(float angle, bool animated) {
     double newAngle = (angle > 360 || angle < 0) ? fmod(angle + 360.0, 360.0) : angle;
     if (animated) {
         double currentAngle = fmod(this->angle, 360.0);
-        if (abs(currentAngle - newAngle) > abs(currentAngle - (newAngle + 360.0))) {
+        if (std::abs(currentAngle - newAngle) > std::abs(currentAngle - (newAngle + 360.0))) {
             newAngle += 360.0;
-        } else if (abs(currentAngle - newAngle) > abs(currentAngle - (newAngle - 360.0))) {
+        } else if (std::abs(currentAngle - newAngle) > std::abs(currentAngle - (newAngle - 360.0))) {
             newAngle -= 360.0;
         }
         std::lock_guard<std::recursive_mutex> lock(animationMutex);
@@ -1797,4 +1797,9 @@ float MapCamera3d::valueForZoom(const CameraInterpolation& interpolator) {
             return a.value + interp * (b.value - a.value);
         }
     }
+#if __cplusplus >= 202302L
+    std::unreachable();
+#else
+    __builtin_unreachable();
+#endif
 }

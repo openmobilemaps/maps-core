@@ -65,10 +65,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 }
 
 + (nullable MCMapInterface *)createWithOpenGl:(nonnull MCMapConfig *)mapConfig
+                                    scheduler:(nullable id<MCSchedulerInterface>)scheduler
                                  pixelDensity:(float)pixelDensity
                                          is3D:(BOOL)is3D {
     try {
         auto objcpp_result_ = ::MapInterface::createWithOpenGl(::djinni_generated::MapConfig::toCpp(mapConfig),
+                                                               ::djinni_generated::SchedulerInterface::toCpp(scheduler),
                                                                ::djinni::F32::toCpp(pixelDensity),
                                                                ::djinni::Bool::toCpp(is3D));
         return ::djinni_generated::MapInterface::fromCpp(objcpp_result_);

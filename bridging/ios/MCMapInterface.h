@@ -31,6 +31,7 @@
                                is3D:(BOOL)is3D;
 
 + (nullable MCMapInterface *)createWithOpenGl:(nonnull MCMapConfig *)mapConfig
+                                    scheduler:(nullable id<MCSchedulerInterface>)scheduler
                                  pixelDensity:(float)pixelDensity
                                          is3D:(BOOL)is3D;
 

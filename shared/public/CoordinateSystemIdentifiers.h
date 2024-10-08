@@ -44,4 +44,7 @@ public:
 
     /** e.g. urn:ogc:def:crs:EPSG:21781 */
     static int32_t fromCrsIdentifier(const std::string & identifier);
+
+    /** Use supported coordinate system identifiers defined in this class */
+    static double unitToMeterFactor(const int32_t coordinateSystemIdentifier);
 };

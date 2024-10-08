@@ -14,6 +14,7 @@ struct RasterShaderStyle final {
     float contrast;
     float saturation;
     float gamma;
+    float brightnessShift;
 
     friend bool operator==(const RasterShaderStyle& lhs, const RasterShaderStyle& rhs);
     friend bool operator!=(const RasterShaderStyle& lhs, const RasterShaderStyle& rhs);
@@ -29,12 +30,14 @@ struct RasterShaderStyle final {
                       float brightnessMax_,
                       float contrast_,
                       float saturation_,
-                      float gamma_)
+                      float gamma_,
+                      float brightnessShift_)
     : opacity(std::move(opacity_))
     , brightnessMin(std::move(brightnessMin_))
     , brightnessMax(std::move(brightnessMax_))
     , contrast(std::move(contrast_))
     , saturation(std::move(saturation_))
     , gamma(std::move(gamma_))
+    , brightnessShift(std::move(brightnessShift_))
     {}
 };

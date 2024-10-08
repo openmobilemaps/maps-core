@@ -12,6 +12,7 @@
                                contrast:(float)contrast
                              saturation:(float)saturation
                                   gamma:(float)gamma
+                        brightnessShift:(float)brightnessShift
 {
     if (self = [super init]) {
         _opacity = opacity;
@@ -20,6 +21,7 @@
         _contrast = contrast;
         _saturation = saturation;
         _gamma = gamma;
+        _brightnessShift = brightnessShift;
     }
     return self;
 }
@@ -30,13 +32,15 @@
                                             contrast:(float)contrast
                                           saturation:(float)saturation
                                                gamma:(float)gamma
+                                     brightnessShift:(float)brightnessShift
 {
     return [[self alloc] initWithOpacity:opacity
                            brightnessMin:brightnessMin
                            brightnessMax:brightnessMax
                                 contrast:contrast
                               saturation:saturation
-                                   gamma:gamma];
+                                   gamma:gamma
+                         brightnessShift:brightnessShift];
 }
 
 + (MCRasterShaderStyle * __nonnull)defaultStyle
@@ -46,7 +50,8 @@
             brightnessMax:1.0f
             contrast:0.0f
             saturation:0.0f
-            gamma:1.0f];
+            gamma:1.0f
+            brightnessShift:0.0f];
     return s_defaultStyle;
 }
 
@@ -61,7 +66,8 @@
             self.brightnessMax == typedOther.brightnessMax &&
             self.contrast == typedOther.contrast &&
             self.saturation == typedOther.saturation &&
-            self.gamma == typedOther.gamma;
+            self.gamma == typedOther.gamma &&
+            self.brightnessShift == typedOther.brightnessShift;
 }
 
 - (NSUInteger)hash
@@ -72,7 +78,8 @@
             (NSUInteger)self.brightnessMax ^
             (NSUInteger)self.contrast ^
             (NSUInteger)self.saturation ^
-            (NSUInteger)self.gamma;
+            (NSUInteger)self.gamma ^
+            (NSUInteger)self.brightnessShift;
 }
 
 - (NSComparisonResult)compare:(MCRasterShaderStyle *)other
@@ -138,13 +145,23 @@
     if (tempResult != NSOrderedSame) {
         return tempResult;
     }
+    if (self.brightnessShift < other.brightnessShift) {
+        tempResult = NSOrderedAscending;
+    } else if (self.brightnessShift > other.brightnessShift) {
+        tempResult = NSOrderedDescending;
+    } else {
+        tempResult = NSOrderedSame;
+    }
+    if (tempResult != NSOrderedSame) {
+        return tempResult;
+    }
     return NSOrderedSame;
 }
 
 #ifndef DJINNI_DISABLE_DESCRIPTION_METHODS
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@ %p opacity:%@ brightnessMin:%@ brightnessMax:%@ contrast:%@ saturation:%@ gamma:%@>", self.class, (void *)self, @(self.opacity), @(self.brightnessMin), @(self.brightnessMax), @(self.contrast), @(self.saturation), @(self.gamma)];
+    return [NSString stringWithFormat:@"<%@ %p opacity:%@ brightnessMin:%@ brightnessMax:%@ contrast:%@ saturation:%@ gamma:%@ brightnessShift:%@>", self.class, (void *)self, @(self.opacity), @(self.brightnessMin), @(self.brightnessMax), @(self.contrast), @(self.saturation), @(self.gamma), @(self.brightnessShift)];
 }
 
 #endif

@@ -95,7 +95,7 @@ void MapCamera2d::moveToCenterPositionZoom(const ::Coord &centerPosition, double
                 this->coordAnimation = nullptr;
             });
         coordAnimation->start();
-        double targetZoom = std::clamp(zoom, zoomMax, zoomMin);
+        double targetZoom = std::clamp(adjustedZoom, zoomMax, zoomMin);
         zoomAnimation = std::make_shared<DoubleAnimation>(
               DEFAULT_ANIM_LENGTH, this->zoom, targetZoom, InterpolatorFunction::EaseIn,
               [=](double zoom) {
@@ -190,7 +190,6 @@ void MapCamera2d::moveToBoundingBox(const RectCoord &boundingBox, float paddingP
         targetZoom = std::min(targetZoom, *maxZoom);
     }
 
-    LogDebug << "targetCenterNotBC.x = " << targetCenterNotBC.x << " targetCenterNotBC.y: " << targetCenterNotBC.y << " targetZoom: " <<= targetZoom;
     moveToCenterPositionZoom(targetCenterNotBC, targetZoom, animated);
 }
 
@@ -248,9 +247,9 @@ void MapCamera2d::setRotation(float angle, bool animated) {
 
     if (animated) {
         double currentAngle = fmod(this->angle, 360.0);
-        if (abs(currentAngle - newAngle) > abs(currentAngle - (newAngle + 360.0))) {
+        if (std::abs(currentAngle - newAngle) > std::abs(currentAngle - (newAngle + 360.0))) {
             newAngle += 360.0;
-        } else if (abs(currentAngle - newAngle) > abs(currentAngle - (newAngle - 360.0))) {
+        } else if (std::abs(currentAngle - newAngle) > std::abs(currentAngle - (newAngle - 360.0))) {
             newAngle -= 360.0;
         }
 
@@ -1002,7 +1001,7 @@ std::tuple<Coord, double> MapCamera2d::getBoundsCorrectedCoords(const Coord &pos
 Coord MapCamera2d::adjustCoordForPadding(const Coord &coords, double targetZoom) {
     Coord coordinates = mapInterface->getCoordinateConverterHelper()->convert(mapCoordinateSystem.identifier, coords);
 
-    auto adjustedZoom = std::clamp(targetZoom, zoomMax, zoomMin);
+    auto adjustedZoom = zoomMin != -1 ? std::clamp(targetZoom, zoomMax, zoomMin) : targetZoom;
 
     Vec2D padVec = Vec2D(0.5 * (paddingRight - paddingLeft) * screenPixelAsRealMeterFactor * adjustedZoom,
                          0.5 * (paddingTop - paddingBottom) * screenPixelAsRealMeterFactor * adjustedZoom);

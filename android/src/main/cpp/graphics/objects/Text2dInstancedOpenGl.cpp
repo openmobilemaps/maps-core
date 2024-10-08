@@ -279,6 +279,14 @@ void Text2dInstancedOpenGl::render(const std::shared_ptr<::RenderingContextInter
 
     // Draw the triangles
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+
+    // Draw halos first
+    auto isHaloHandle = glGetUniformLocation(program, "isHalo");
+    glUniform1f(isHaloHandle, 1.0);
+    glDrawElementsInstanced(GL_TRIANGLES,6, GL_UNSIGNED_BYTE, nullptr, instanceCount);
+
+    // Draw non-halos second
+    glUniform1f(isHaloHandle, 0.0);
     glDrawElementsInstanced(GL_TRIANGLES,6, GL_UNSIGNED_BYTE, nullptr, instanceCount);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);

@@ -17,6 +17,7 @@
 #include "Vec2F.h"
 #include "Vec2D.h"
 #include <unordered_map>
+#include <limits>
 
 class PolygonHelper {
 private:

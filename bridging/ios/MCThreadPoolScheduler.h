@@ -3,11 +3,10 @@
 
 #import <Foundation/Foundation.h>
 @protocol MCSchedulerInterface;
-@protocol MCThreadPoolCallbacks;
 
 
 @interface MCThreadPoolScheduler : NSObject
 
-+ (nullable id<MCSchedulerInterface>)create:(nullable id<MCThreadPoolCallbacks>)callbacks;
++ (nullable id<MCSchedulerInterface>)create;
 
 @end

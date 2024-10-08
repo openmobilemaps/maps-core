@@ -1,11 +1,11 @@
 name: ios
 
 env:
-  XCODE_VERSION: 'Xcode_14.3.1'
+  XCODE_VERSION: 'Xcode_16.0'
 
 on:
   pull_request:
-    branches: [ main, develop ]
+    branches: [ main, develop, release/** ]
 
 jobs:
   build:

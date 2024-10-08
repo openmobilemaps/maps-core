@@ -13,6 +13,7 @@
 #include "BaseShaderProgramOpenGl.h"
 #include "LineGroupShaderInterface.h"
 #include "ShaderProgramInterface.h"
+#include <mutex>
 #include <vector>
 
 class ColorLineGroup2dShaderOpenGl : public BaseShaderProgramOpenGl,

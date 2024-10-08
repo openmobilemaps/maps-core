@@ -14,6 +14,7 @@
 #include "BoundingBox.h"
 #include "CoordinateSystemIdentifiers.h"
 #include "CoordinatesUtil.h"
+#include <cmath>
 
 Polygon2dLayerObject::Polygon2dLayerObject(const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                                            const std::shared_ptr<Polygon2dInterface> &polygon,
@@ -77,7 +78,7 @@ void Polygon2dLayerObject::setPolygons(const std::vector<PolygonCoord> &polygons
 
     if (is3D) {
         auto bboxSize = bbox.getMax() - bbox.getMin();
-        double threshold = std::max(std::max(bboxSize.x, bboxSize.y), bboxSize.z) / std::powl(2, SUBDIVISION_FACTOR_3D_DEFAULT);
+        double threshold = std::max(std::max(bboxSize.x, bboxSize.y), bboxSize.z) / std::pow(2, SUBDIVISION_FACTOR_3D_DEFAULT);
         PolygonHelper::subdivision(vecVertices, indices, threshold);
     }
 

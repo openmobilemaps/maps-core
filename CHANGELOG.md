@@ -1,5 +1,29 @@
 # Changelog for Open Mobile Maps
 
+## Version 2.6.1
+- Improve handling of different VectorLayer configurations (especially with a LocalDataProvider)
+- Add a default implementation of a LocalDataProvider for Android
+- Update to AGP 8.6.1 and Kotlin 2.0.20
+
+## Version 2.6.0
+- Increases Deployment target to iOS 14
+- fixes iOS builds with Xcode 16
+- Allow reuse of Android OffscreenMapRenderer
+- Fix halo blur artifacts for certain combinations
+
+## Version 2.5.1
+- Fix of partially transparent line gap color on OpenGl
+- Fix a bug when using a huge number of text styles on OpenGl
+
+## Version 2.5.0
+- Initial version of the integration of compute shaders into the render pipeline
+- Fix of an issue for OpenGl that could lead to unnecessary buffer creations
+- Fix logging of OpenGl Shader compilation/linking errors
+- Fix of an invalid usage of clamp in the MapCamera2D
+- Add support for a "raster-brightness-shift" attribute in the metadata clause of raster layers in vector style.jsons
+- Add support for "text-halo-blur" in vector layers
+- Fix of a superfluous alpha multiplication in the Metal RasterShader
+
 ## Version 2.4.0
 - Add pass masking for single polygons
 - Fixing pass masking in non-tile-masked contexts for OpenGl

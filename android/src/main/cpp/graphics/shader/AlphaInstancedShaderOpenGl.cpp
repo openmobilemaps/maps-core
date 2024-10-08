@@ -143,7 +143,11 @@ std::string AlphaInstancedShaderOpenGl::getFragmentShader() {
                                           if (v_alpha == 0.0) {
                                               discard;
                                           }
-                                          vec2 uv = (v_texcoordInstance.xy + v_texcoordInstance.zw * vec2(v_texCoord.x, (v_texCoord.y))) * textureFactor;
+                                          ) + (projectOntoUnitSphere ? OMMShaderCode(
+                                              vec2 uv = (v_texcoordInstance.xy + v_texcoordInstance.zw * vec2(v_texCoord.x, v_texCoord.y)) * textureFactor;
+                                          ) : OMMShaderCode(
+                                              vec2 uv = (v_texcoordInstance.xy + v_texcoordInstance.zw * vec2(v_texCoord.x, (1.0 - v_texCoord.y))) * textureFactor;
+                                          )) + OMMShaderCode(
                                           vec4 c = texture(textureSampler, uv);
                                           float alpha = c.a * v_alpha;
                                           fragmentColor = vec4(c.rgb * v_alpha, alpha);

@@ -127,13 +127,13 @@ protected:
     int instAlphasHandle;
     int instPositionOffsetsHandle;
 
-    static const int instPositionsOffsetBytes = sizeof(GLfloat) * 0;
-    static const int instRotationsOffsetBytes = sizeof(GLfloat) * 2;
-    static const int instTextureCoordinatesOffsetBytes = sizeof(GLfloat) * 3;
-    static const int instScalesOffsetBytes = sizeof(GLfloat) * 7;
-    static const int instAlphasOffsetBytes = sizeof(GLfloat) * 9;
-    static const int instPositionOffsetsOffsetBytes = sizeof(GLfloat) * 10;
-    static const int instValuesSizeBytes = sizeof(GLfloat) * 12;
+    static const uintptr_t instPositionsOffsetBytes = sizeof(GLfloat) * 0;
+    static const uintptr_t instRotationsOffsetBytes = sizeof(GLfloat) * 2;
+    static const uintptr_t instTextureCoordinatesOffsetBytes = sizeof(GLfloat) * 3;
+    static const uintptr_t instScalesOffsetBytes = sizeof(GLfloat) * 7;
+    static const uintptr_t instAlphasOffsetBytes = sizeof(GLfloat) * 9;
+    static const uintptr_t instPositionOffsetsOffsetBytes = sizeof(GLfloat) * 10;
+    static const uintptr_t instValuesSizeBytes = sizeof(GLfloat) * 12;
 
 private:
     bool writeToDynamicInstanceDataBuffer(const ::SharedBytes &data, int targetOffsetBytes);

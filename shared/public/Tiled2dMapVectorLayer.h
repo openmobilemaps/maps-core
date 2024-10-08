@@ -61,7 +61,7 @@ class Tiled2dMapVectorLayer
           public Tiled2dMapVectorSourceListener {
 public:
     Tiled2dMapVectorLayer(const std::string &layerName,
-                          const std::string &remoteStyleJsonUrl,
+                          const std::optional<std::string> &remoteStyleJsonUrl,
                           const std::vector <std::shared_ptr<::LoaderInterface>> &loaders,
                           const std::shared_ptr<::FontLoaderInterface> &fontLoader,
                           const std::optional<Tiled2dMapZoomInfo> &customZoomInfo = std::nullopt,
@@ -70,8 +70,8 @@ public:
                           const std::shared_ptr<Tiled2dMapVectorLayerLocalDataProviderInterface> &localDataProvider = nullptr);
 
     Tiled2dMapVectorLayer(const std::string &layerName,
-                          const std::string &remoteStyleJsonUrl,
-                          const std::string &fallbackStyleJsonString,
+                          const std::optional<std::string> &remoteStyleJsonUrl,
+                          const std::optional<std::string> &fallbackStyleJsonString,
                           const std::vector <std::shared_ptr<::LoaderInterface>> &loaders,
                           const std::shared_ptr<::FontLoaderInterface> &fontLoader,
                           const std::optional<Tiled2dMapZoomInfo> &customZoomInfo = std::nullopt,
@@ -209,6 +209,8 @@ public:
 
     virtual void didLoadSpriteData(std::shared_ptr<SpriteData> spriteData, std::shared_ptr<::TextureHolderInterface> spriteTexture);
 
+    void enableAnimations(bool enabled) override;
+
     std::unordered_map<std::string, Actor<Tiled2dMapVectorSource>> vectorTileSources;
     std::vector<Actor<Tiled2dMapRasterSource>> rasterTileSources;
 
@@ -290,12 +292,14 @@ private:
     std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> symbolDelegate;
 
     void updateReadyStateListenerIfNeeded();
+
     std::optional<LayerReadyState> lastReadyState;
     std::shared_ptr<::Tiled2dMapReadyStateListener> readyStateListener;
 
    std::mutex setupMutex;
    std::condition_variable setupCV;
    bool setupReady = false;
+   bool animationsEnabled = true;
 };
 
 

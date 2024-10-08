@@ -10,6 +10,7 @@
 
 #include "Polygon2dOpenGl.h"
 #include "OpenGlHelper.h"
+#include <cstring>
 
 Polygon2dOpenGl::Polygon2dOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader)
     : shaderProgram(shader) {}

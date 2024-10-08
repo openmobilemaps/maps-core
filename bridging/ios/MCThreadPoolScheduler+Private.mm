@@ -7,7 +7,6 @@
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
 #import "MCSchedulerInterface+Private.h"
-#import "MCThreadPoolCallbacks+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -32,9 +31,9 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     return self;
 }
 
-+ (nullable id<MCSchedulerInterface>)create:(nullable id<MCThreadPoolCallbacks>)callbacks {
++ (nullable id<MCSchedulerInterface>)create {
     try {
-        auto objcpp_result_ = ::ThreadPoolScheduler::create(::djinni_generated::ThreadPoolCallbacks::toCpp(callbacks));
+        auto objcpp_result_ = ::ThreadPoolScheduler::create();
         return ::djinni_generated::SchedulerInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }

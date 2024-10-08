@@ -43,7 +43,6 @@ private:
         bool hasSeparateGraphicsInvocation() override;
         bool runGraphicsTasks() override;
         void setSchedulerGraphicsTaskCallbacks(const /*not-null*/ std::shared_ptr<::SchedulerGraphicsTaskCallbacks> & callbacks) override;
-        /*not-null*/ std::shared_ptr<::ThreadPoolCallbacks> getThreadPoolCallbacks() override;
 
     private:
         friend ::djinni::JniInterface<::SchedulerInterface, ::djinni_generated::NativeSchedulerInterface>;
@@ -60,7 +59,6 @@ private:
     const jmethodID method_hasSeparateGraphicsInvocation { ::djinni::jniGetMethodID(clazz.get(), "hasSeparateGraphicsInvocation", "()Z") };
     const jmethodID method_runGraphicsTasks { ::djinni::jniGetMethodID(clazz.get(), "runGraphicsTasks", "()Z") };
     const jmethodID method_setSchedulerGraphicsTaskCallbacks { ::djinni::jniGetMethodID(clazz.get(), "setSchedulerGraphicsTaskCallbacks", "(Lio/openmobilemaps/mapscore/shared/map/scheduling/SchedulerGraphicsTaskCallbacks;)V") };
-    const jmethodID method_getThreadPoolCallbacks { ::djinni::jniGetMethodID(clazz.get(), "getThreadPoolCallbacks", "()Lio/openmobilemaps/mapscore/shared/map/scheduling/ThreadPoolCallbacks;") };
 };
 
 } // namespace djinni_generated

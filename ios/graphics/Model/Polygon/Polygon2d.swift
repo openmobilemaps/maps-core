@@ -24,7 +24,6 @@ final class Polygon2d: BaseGraphicsObject, @unchecked Sendable {
     private var stencilState: MTLDepthStencilState?
     private var renderPassStencilState: MTLDepthStencilState?
 
-
     init(shader: MCShaderProgramInterface, metalContext: MetalContext) {
         self.shader = shader
         super.init(device: metalContext.device,
@@ -50,12 +49,12 @@ final class Polygon2d: BaseGraphicsObject, @unchecked Sendable {
               let tileOrigin = self.origin
         else { return }
 
-        #if DEBUG
-            encoder.pushDebugGroup(label)
-            defer {
-                encoder.popDebugGroup()
-            }
-        #endif
+#if DEBUG
+        encoder.pushDebugGroup(label)
+        defer {
+            encoder.popDebugGroup()
+        }
+#endif
 
         if isMasked {
             if stencilState == nil {
@@ -144,12 +143,12 @@ extension Polygon2d: MCMaskingObjectInterface {
               let tileOrigin = self.origin
         else { return }
 
-        #if DEBUG
-            encoder.pushDebugGroup("Polygon2dMask")
-            defer {
-                encoder.popDebugGroup()
-            }
-        #endif
+#if DEBUG
+        encoder.pushDebugGroup("Polygon2dMask")
+        defer {
+            encoder.popDebugGroup()
+        }
+#endif
 
         if let mask = context.polygonMask {
             encoder.setStencilReferenceValue(0xFF)
@@ -193,7 +192,7 @@ extension Polygon2d: MCPolygon2dInterface {
         lock.withCritical {
             self.verticesBuffer.copyOrCreate(from: vertices, device: device)
             self.indicesBuffer.copyOrCreate(from: indices, device: device)
-            if self.verticesBuffer != nil && self.indicesBuffer != nil {
+            if self.verticesBuffer != nil, self.indicesBuffer != nil {
                 self.indicesCount = Int(indices.elementCount)
             } else {
                 self.indicesCount = 0
