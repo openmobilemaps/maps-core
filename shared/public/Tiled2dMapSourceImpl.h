@@ -142,12 +142,20 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
     for (int index = 0; index < zoomLevelInfos.size(); ++index) {
         const auto &level = zoomLevelInfos[index];
         if (level.numTilesX > minNumTiles && level.numTilesY > minNumTiles) {
+            if (level.numTilesX * level.numTilesY > 100) {
+                printf("Ignore seed candidates for %d x %d tiles for %s\n",
+                       level.numTilesX,
+                       level.numTilesY,
+                       layerName.c_str());
+                break;
+            }
             for (int x = 0; x < level.numTilesX; x++) {
                 for (int y = 0; y < level.numTilesY; y++) {
                     VisibleTileCandidate c;
                     c.levelIndex = index;
                     c.x = x;
                     c.y = y;
+
                     candidates.push(c);
                 }
             }
@@ -386,8 +394,6 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
         bool preciseEnough = xLengthPx <= maxLength && yLengthPx <= maxLength;
 
         bool lastLevel = candidate.levelIndex == maxLevelAvailable;
-
-//        preciseEnough = false;
 
         if (preciseEnough || lastLevel || isKeptLevel) {
             const RectCoord rect(topLeft, bottomRight);
