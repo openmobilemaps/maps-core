@@ -18,6 +18,7 @@ final class Polygon2d: BaseGraphicsObject, @unchecked Sendable {
 
     private var verticesBuffer: MTLBuffer?
     private var indicesBuffer: MTLBuffer?
+    private var originOffsetBuffer: MTLBuffer?
     private var indicesCount: Int = 0
     private var origin: MCVec3D?
 
@@ -26,6 +27,8 @@ final class Polygon2d: BaseGraphicsObject, @unchecked Sendable {
 
     init(shader: MCShaderProgramInterface, metalContext: MetalContext) {
         self.shader = shader
+        var originOffset: simd_float4 = simd_float4(0, 0, 0, 0)
+        originOffsetBuffer = metalContext.device.makeBuffer(bytes: &originOffset, length: MemoryLayout<simd_float4>.stride, options: [])
         super.init(device: metalContext.device,
                    sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue)!,
                    label: "Polygon2d")
@@ -87,15 +90,15 @@ final class Polygon2d: BaseGraphicsObject, @unchecked Sendable {
         if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mMatrix)) {
             encoder.setVertexBytes(matrixPointer, length: 64, index: 2)
         }
-        var originOffset: simd_float4 = simd_float4(
-            Float(tileOrigin.x - origin.x),
-            Float(tileOrigin.y - origin.y),
-            Float(tileOrigin.z - origin.z),
-            0
-        )
-        if let originOffsetBuffer = device.makeBuffer(bytes: &originOffset, length: MemoryLayout<simd_float4>.stride, options: []) {
-            encoder.setVertexBuffer(originOffsetBuffer, offset: 0, index: 4)
+        if let bufferPointer = originOffsetBuffer?.contents().assumingMemoryBound(to: simd_float4.self) {
+            bufferPointer.pointee = simd_float4(
+                Float(tileOrigin.x - origin.x),
+                Float(tileOrigin.y - origin.y),
+                Float(tileOrigin.z - origin.z),
+                0
+            )
         }
+        encoder.setVertexBuffer(originOffsetBuffer, offset: 0, index: 4)
 
         encoder.drawIndexedPrimitives(type: .triangle,
                                       indexCount: indicesCount,
@@ -169,15 +172,15 @@ extension Polygon2d: MCMaskingObjectInterface {
             encoder.setVertexBytes(matrixPointer, length: 64, index: 2)
         }
 
-        var originOffset: simd_float4 = simd_float4(
-            Float(tileOrigin.x - origin.x),
-            Float(tileOrigin.y - origin.y),
-            Float(tileOrigin.z - origin.z),
-            0
-        )
-        if let originOffsetBuffer = device.makeBuffer(bytes: &originOffset, length: MemoryLayout<simd_float4>.stride, options: []) {
-            encoder.setVertexBuffer(originOffsetBuffer, offset: 0, index: 4)
+        if let bufferPointer = originOffsetBuffer?.contents().assumingMemoryBound(to: simd_float4.self) {
+            bufferPointer.pointee = simd_float4(
+                Float(tileOrigin.x - origin.x),
+                Float(tileOrigin.y - origin.y),
+                Float(tileOrigin.z - origin.z),
+                0
+            )
         }
+        encoder.setVertexBuffer(originOffsetBuffer, offset: 0, index: 4)
 
         encoder.drawIndexedPrimitives(type: .triangle,
                                       indexCount: indicesCount,

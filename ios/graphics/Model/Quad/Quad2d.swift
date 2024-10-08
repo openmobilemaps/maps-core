@@ -32,6 +32,7 @@ final class Quad2d: BaseGraphicsObject, @unchecked Sendable {
     private var renderAsMask = false
 
     private var subdivisionFactor: Int32 = 0
+    private var originOffsetBuffer: MTLBuffer?
 
     private var frame: MCQuad3dD?
     private var textureCoordinates: MCRectD?
@@ -41,6 +42,8 @@ final class Quad2d: BaseGraphicsObject, @unchecked Sendable {
         super.init(device: metalContext.device,
                    sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue)!,
                    label: label)
+        var originOffset: simd_float4 = simd_float4(0, 0, 0, 0)
+        originOffsetBuffer = metalContext.device.makeBuffer(bytes: &originOffset, length: MemoryLayout<simd_float4>.stride, options: [])
     }
 
     private func setupStencilStates() {
@@ -133,16 +136,16 @@ final class Quad2d: BaseGraphicsObject, @unchecked Sendable {
             encoder.setVertexBytes(mMatrixPointer, length: 64, index: 2)
         }
 
-        var originOffset: simd_float4 = simd_float4(
-            Float(tileOrigin.x - origin.x),
-            Float(tileOrigin.y - origin.y),
-            Float(tileOrigin.z - origin.z),
-            0
-        )
-        if let originOffsetBuffer = device.makeBuffer(bytes: &originOffset, length: MemoryLayout<simd_float4>.stride, options: []) {
-            encoder.setVertexBuffer(originOffsetBuffer, offset: 0, index: 4)
+        if let bufferPointer = originOffsetBuffer?.contents().assumingMemoryBound(to: simd_float4.self) {
+            bufferPointer.pointee = simd_float4(
+                Float(tileOrigin.x - origin.x),
+                Float(tileOrigin.y - origin.y),
+                Float(tileOrigin.z - origin.z),
+                0
+            )
         }
-
+        encoder.setVertexBuffer(originOffsetBuffer, offset: 0, index: 4)
+        
         encoder.setFragmentSamplerState(sampler, index: 0)
 
         if let texture {
