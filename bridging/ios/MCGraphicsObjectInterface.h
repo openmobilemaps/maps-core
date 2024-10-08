@@ -29,8 +29,7 @@
 
 - (void)render:(nullable id<MCRenderingContextInterface>)context
     renderPass:(nonnull MCRenderPassConfig *)renderPass
-    viewMatrix:(int64_t)viewMatrix
-projectionMatrix:(int64_t)projectionMatrix
+      vpMatrix:(int64_t)vpMatrix
        mMatrix:(int64_t)mMatrix
         origin:(nonnull MCVec3D *)origin
       isMasked:(BOOL)isMasked

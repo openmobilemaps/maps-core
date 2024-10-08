@@ -32,16 +32,9 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     return self;
 }
 
-- (nonnull NSArray<NSNumber *> *)getViewMatrix {
+- (nonnull NSArray<NSNumber *> *)getVpMatrix {
     try {
-        auto objcpp_result_ = _cppRefHandle.get()->getViewMatrix();
-        return ::djinni::List<::djinni::F32>::fromCpp(objcpp_result_);
-    } DJINNI_TRANSLATE_EXCEPTIONS()
-}
-
-- (nonnull NSArray<NSNumber *> *)getProjectionMatrix {
-    try {
-        auto objcpp_result_ = _cppRefHandle.get()->getProjectionMatrix();
+        auto objcpp_result_ = _cppRefHandle.get()->getVpMatrix();
         return ::djinni::List<::djinni::F32>::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
@@ -75,17 +68,10 @@ class CameraInterface::ObjcProxy final
     friend class ::djinni_generated::CameraInterface;
 public:
     using ObjcProxyBase::ObjcProxyBase;
-    std::vector<float> getViewMatrix() override
+    std::vector<float> getVpMatrix() override
     {
         @autoreleasepool {
-            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getViewMatrix];
-            return ::djinni::List<::djinni::F32>::toCpp(objcpp_result_);
-        }
-    }
-    std::vector<float> getProjectionMatrix() override
-    {
-        @autoreleasepool {
-            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getProjectionMatrix];
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getVpMatrix];
             return ::djinni::List<::djinni::F32>::toCpp(objcpp_result_);
         }
     }

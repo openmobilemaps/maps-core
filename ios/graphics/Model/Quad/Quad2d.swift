@@ -72,8 +72,7 @@ final class Quad2d: BaseGraphicsObject, @unchecked Sendable {
     override func render(encoder: MTLRenderCommandEncoder,
                          context: RenderingContext,
                          renderPass: MCRenderPassConfig,
-                         viewMatrix: Int64,
-                         projectionMatrix: Int64,
+                         vpMatrix: Int64,
                          mMatrix: Int64,
                 origin: MCVec3D,
                          isMasked: Bool,
@@ -127,14 +126,11 @@ final class Quad2d: BaseGraphicsObject, @unchecked Sendable {
 
         encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
         
-        if let vpMatrixPointer = UnsafeRawPointer(bitPattern: Int(viewMatrix)) {
+        if let vpMatrixPointer = UnsafeRawPointer(bitPattern: Int(vpMatrix)) {
             encoder.setVertexBytes(vpMatrixPointer, length: 64, index: 1)
         }
-        if let vpMatrixPointer = UnsafeRawPointer(bitPattern: Int(projectionMatrix)) {
-            encoder.setVertexBytes(vpMatrixPointer, length: 64, index: 2)
-        }
         if let mMatrixPointer = UnsafeRawPointer(bitPattern: Int(mMatrix)) {
-            encoder.setVertexBytes(mMatrixPointer, length: 64, index: 3)
+            encoder.setVertexBytes(mMatrixPointer, length: 64, index: 2)
         }
 
         var originOffset: simd_float4 = simd_float4(
@@ -164,8 +160,7 @@ final class Quad2d: BaseGraphicsObject, @unchecked Sendable {
 extension Quad2d: MCMaskingObjectInterface {
     func render(asMask context: MCRenderingContextInterface?,
                 renderPass: MCRenderPassConfig,
-                viewMatrix: Int64,
-                projectionMatrix: Int64,
+                vpMatrix: Int64,
                 mMatrix: Int64,
                 origin: MCVec3D,
                 screenPixelAsRealMeterFactor: Double) {
@@ -178,8 +173,7 @@ extension Quad2d: MCMaskingObjectInterface {
         render(encoder: encoder,
                context: context,
                renderPass: renderPass,
-               viewMatrix: viewMatrix,
-               projectionMatrix: projectionMatrix,
+               vpMatrix: vpMatrix,
                mMatrix: mMatrix,
                origin: origin,
                isMasked: false,

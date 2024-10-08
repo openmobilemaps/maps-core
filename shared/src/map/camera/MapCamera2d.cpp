@@ -370,7 +370,7 @@ void MapCamera2d::removeListener(const std::shared_ptr<MapCameraListenerInterfac
 
 std::shared_ptr<::CameraInterface> MapCamera2d::asCameraInterface() { return shared_from_this(); }
 
-std::vector<float> MapCamera2d::getViewMatrix() {
+std::vector<float> MapCamera2d::getVpMatrix() {
     Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
     double currentRotation = angle;
     double currentZoom = zoom;
@@ -397,12 +397,6 @@ std::vector<float> MapCamera2d::getViewMatrix() {
     lastVpRotation = currentRotation;
     lastVpZoom = currentZoom;
     return newVpMatrix;
-}
-
-std::vector<float> MapCamera2d::getProjectionMatrix() {
-    std::vector<float> matrix = std::vector<float>(16, 0.0);
-    Matrix::setIdentityM(matrix, 0);
-    return matrix;
 }
 
 std::optional<std::vector<float>> MapCamera2d::getLastVpMatrix() {

@@ -68,8 +68,7 @@ final class LineGroup2d: BaseGraphicsObject, @unchecked Sendable {
     override func render(encoder: MTLRenderCommandEncoder,
                          context: RenderingContext,
                          renderPass _: MCRenderPassConfig,
-                         viewMatrix: Int64,
-                         projectionMatrix: Int64,
+                         vpMatrix: Int64,
                          mMatrix: Int64,
                 origin: MCVec3D,
                          isMasked: Bool,
@@ -112,11 +111,8 @@ final class LineGroup2d: BaseGraphicsObject, @unchecked Sendable {
 
         encoder.setVertexBuffer(lineVerticesBuffer, offset: 0, index: 0)
 
-        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(viewMatrix)) {
+        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(vpMatrix)) {
             encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
-        }
-        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(projectionMatrix)) {
-            encoder.setVertexBytes(matrixPointer, length: 64, index: 2)
         }
 
         encoder.drawIndexedPrimitives(type: .triangle,

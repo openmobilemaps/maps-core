@@ -22,15 +22,14 @@ struct InstancedVertexOut {
 
 vertex InstancedVertexOut
 unitSphereAlphaInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
-                           constant float4x4 &viewMatrix [[buffer(1)]],
-                           constant float4x4 &projectionMatrix [[buffer(2)]],
-                           constant float4x4 &mMatrix [[buffer(3)]],
-                           constant float2 *positions [[buffer(4)]],
-                           constant float2 *scales [[buffer(5)]],
-                           constant float *rotations [[buffer(6)]],
-                           constant float2 *texureCoordinates [[buffer(7)]],
-                           constant float *alphas [[buffer(8)]],
-                           constant float2 *offsets [[buffer(9)]],
+                           constant float4x4 &vpMatrix [[buffer(1)]],
+                           constant float4x4 &mMatrix [[buffer(2)]],
+                           constant float2 *positions [[buffer(3)]],
+                           constant float2 *scales [[buffer(4)]],
+                           constant float *rotations [[buffer(5)]],
+                           constant float2 *texureCoordinates [[buffer(6)]],
+                           constant float *alphas [[buffer(7)]],
+                           constant float2 *offsets [[buffer(8)]],
                            uint instanceId [[instance_id]])
 {
     const float2 position = positions[instanceId];
@@ -45,8 +44,8 @@ unitSphereAlphaInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
     const float y = 1.0 * cos(position.y);
     const float z = -1.0 * sin(position.y) * sin(position.x);
 
-    float4 earthCenter = projectionMatrix * (viewMatrix * float4(0,0,0, 1.0));
-    float4 screenPosition = projectionMatrix * (viewMatrix * float4(x,y,z, 1.0));
+    float4 earthCenter = vpMatrix * float4(0,0,0, 1.0);
+    float4 screenPosition = vpMatrix * float4(x,y,z, 1.0);
 
     earthCenter /= earthCenter.w;
     screenPosition /= screenPosition.w;
@@ -89,14 +88,13 @@ unitSphereAlphaInstancedFragmentShader(InstancedVertexOut in [[stage_in]],
 
 vertex InstancedVertexOut
 alphaInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
-                           constant float4x4 &viewMatrix [[buffer(1)]],
-                           constant float4x4 &projectionMatrix [[buffer(2)]],
-                           constant float4x4 &mMatrix [[buffer(3)]],
-                           constant float2 *positions [[buffer(4)]],
-                           constant float2 *scales [[buffer(5)]],
-                           constant float *rotations [[buffer(6)]],
-                           constant float2 *texureCoordinates [[buffer(7)]],
-                           constant float *alphas [[buffer(8)]],
+                           constant float4x4 &vpMatrix [[buffer(1)]],
+                           constant float4x4 &mMatrix [[buffer(2)]],
+                           constant float2 *positions [[buffer(3)]],
+                           constant float2 *scales [[buffer(4)]],
+                           constant float *rotations [[buffer(5)]],
+                           constant float2 *texureCoordinates [[buffer(6)]],
+                           constant float *alphas [[buffer(7)]],
                            uint instanceId [[instance_id]])
 {
   const float2 position = positions[instanceId];
@@ -113,7 +111,7 @@ alphaInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
                                             float4(position.x, position.y, 0.0, 1)
                                             );
 
-  const float4x4 matrix = projectionMatrix * (viewMatrix * model_matrix);
+  const float4x4 matrix = vpMatrix * model_matrix;
 
   InstancedVertexOut out {
     .position = matrix * float4(vertexIn.position.xy, 0.0, 1.0),

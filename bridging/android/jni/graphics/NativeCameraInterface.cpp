@@ -15,19 +15,11 @@ NativeCameraInterface::JavaProxy::JavaProxy(JniType j) : Handle(::djinni::jniGet
 
 NativeCameraInterface::JavaProxy::~JavaProxy() = default;
 
-std::vector<float> NativeCameraInterface::JavaProxy::getViewMatrix() {
+std::vector<float> NativeCameraInterface::JavaProxy::getVpMatrix() {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
     const auto& data = ::djinni::JniClass<::djinni_generated::NativeCameraInterface>::get();
-    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_getViewMatrix);
-    ::djinni::jniExceptionCheck(jniEnv);
-    return ::djinni::List<::djinni::F32>::toCpp(jniEnv, jret);
-}
-std::vector<float> NativeCameraInterface::JavaProxy::getProjectionMatrix() {
-    auto jniEnv = ::djinni::jniGetThreadEnv();
-    ::djinni::JniLocalScope jscope(jniEnv, 10);
-    const auto& data = ::djinni::JniClass<::djinni_generated::NativeCameraInterface>::get();
-    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_getProjectionMatrix);
+    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_getVpMatrix);
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni::List<::djinni::F32>::toCpp(jniEnv, jret);
 }
@@ -62,20 +54,11 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_CameraIn
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_CameraInterface_00024CppProxy_native_1getViewMatrix(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_CameraInterface_00024CppProxy_native_1getVpMatrix(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::CameraInterface>(nativeRef);
-        auto r = ref->getViewMatrix();
-        return ::djinni::release(::djinni::List<::djinni::F32>::fromCpp(jniEnv, r));
-    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
-}
-
-CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_CameraInterface_00024CppProxy_native_1getProjectionMatrix(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
-{
-    try {
-        const auto& ref = ::djinni::objectFromHandleAddress<::CameraInterface>(nativeRef);
-        auto r = ref->getProjectionMatrix();
+        auto r = ref->getVpMatrix();
         return ::djinni::release(::djinni::List<::djinni::F32>::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }

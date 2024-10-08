@@ -34,7 +34,7 @@ private:
         ~JavaProxy();
 
         /*not-null*/ std::shared_ptr<::GraphicsObjectInterface> asGraphicsObject() override;
-        void renderAsMask(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & context, const ::RenderPassConfig & renderPass, int64_t viewMatrix, int64_t projectionMatrix, int64_t mMatrix, const ::Vec3D & origin, double screenPixelAsRealMeterFactor) override;
+        void renderAsMask(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & context, const ::RenderPassConfig & renderPass, int64_t vpMatrix, int64_t mMatrix, const ::Vec3D & origin, double screenPixelAsRealMeterFactor) override;
 
     private:
         friend ::djinni::JniInterface<::MaskingObjectInterface, ::djinni_generated::NativeMaskingObjectInterface>;
@@ -42,7 +42,7 @@ private:
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/graphics/objects/MaskingObjectInterface") };
     const jmethodID method_asGraphicsObject { ::djinni::jniGetMethodID(clazz.get(), "asGraphicsObject", "()Lio/openmobilemaps/mapscore/shared/graphics/objects/GraphicsObjectInterface;") };
-    const jmethodID method_renderAsMask { ::djinni::jniGetMethodID(clazz.get(), "renderAsMask", "(Lio/openmobilemaps/mapscore/shared/graphics/RenderingContextInterface;Lio/openmobilemaps/mapscore/shared/graphics/RenderPassConfig;JJJLio/openmobilemaps/mapscore/shared/graphics/common/Vec3D;D)V") };
+    const jmethodID method_renderAsMask { ::djinni::jniGetMethodID(clazz.get(), "renderAsMask", "(Lio/openmobilemaps/mapscore/shared/graphics/RenderingContextInterface;Lio/openmobilemaps/mapscore/shared/graphics/RenderPassConfig;JJLio/openmobilemaps/mapscore/shared/graphics/common/Vec3D;D)V") };
 };
 
 } // namespace djinni_generated

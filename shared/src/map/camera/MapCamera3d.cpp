@@ -345,21 +345,17 @@ void MapCamera3d::removeListener(const std::shared_ptr<MapCameraListenerInterfac
 
 std::shared_ptr<::CameraInterface> MapCamera3d::asCameraInterface() { return shared_from_this(); }
 
-std::vector<float> MapCamera3d::getViewMatrix() {
+std::vector<float> MapCamera3d::getVpMatrix() {
     if(cameraZoomConfig.rotationSpeed) {
         double speed = *(cameraZoomConfig.rotationSpeed);
         focusPointPosition.x = fmod(DateHelper::currentTimeMicros() * speed * 0.000003 + 180.0, 360.0) - 180.0;
         mapInterface->invalidate();
     }
 
-    return std::get<0>(std::get<0>(getVpMatrix(focusPointPosition, true)));
+    return std::get<0>(getVpMatrix(focusPointPosition, true));
 }
 
-std::vector<float> MapCamera3d::getProjectionMatrix() {
-    return std::get<1>(std::get<0>(getVpMatrix(focusPointPosition, true)));
-}
-
-std::tuple<std::tuple<std::vector<float>, std::vector<float>>, std::vector<double>> MapCamera3d::getVpMatrix(const Coord &focusCoord, bool updateVariables) {
+std::tuple<std::vector<float>, std::vector<double>> MapCamera3d::getVpMatrix(const Coord &focusCoord, bool updateVariables) {
     Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
 
     std::vector<double> newViewMatrix(16, 0.0);
@@ -451,7 +447,24 @@ std::tuple<std::tuple<std::vector<float>, std::vector<float>>, std::vector<doubl
     std::vector<double> newVpMatrix(16, 0.0);
     MatrixD::multiplyMM(newVpMatrix, 0, newProjectionMatrix, 0, newViewMatrix, 0);
 
-
+    std::vector<double> vpMatrixD = {
+            static_cast<double>(newVpMatrix[0]),
+            static_cast<double>(newVpMatrix[1]),
+            static_cast<double>(newVpMatrix[2]),
+            static_cast<double>(newVpMatrix[3]),
+            static_cast<double>(newVpMatrix[4]),
+            static_cast<double>(newVpMatrix[5]),
+            static_cast<double>(newVpMatrix[6]),
+            static_cast<double>(newVpMatrix[7]),
+            static_cast<double>(newVpMatrix[8]),
+            static_cast<double>(newVpMatrix[9]),
+            static_cast<double>(newVpMatrix[10]),
+            static_cast<double>(newVpMatrix[11]),
+            static_cast<double>(newVpMatrix[12]),
+            static_cast<double>(newVpMatrix[13]),
+            static_cast<double>(newVpMatrix[14]),
+            static_cast<double>(newVpMatrix[15])
+    };
     std::vector<double> newInverseMatrix(16, 0.0);
     gluInvertMatrix(newVpMatrix, newInverseMatrix);
 
@@ -520,15 +533,13 @@ std::tuple<std::tuple<std::vector<float>, std::vector<float>>, std::vector<doubl
         lastVpZoom = zoom;
         vpMatrix = newVpMatrixF;
         inverseVPMatrix = newInverseMatrix;
-        viewMatrix = newViewMatrix;
-        projectionMatrix = newProjectionMatrix;
+        viewMatrix = newViewMatrixF;
+        projectionMatrix = newProjectionMatrixF;
         verticalFov = fovy;
         horizontalFov = fovy * vpr;
         validVpMatrix = true;
     }
-    return std::make_tuple(std::make_tuple(newViewMatrixF,
-                           newProjectionMatrixF),
-                           newInverseMatrix);
+    return std::make_tuple(newVpMatrixF, newInverseMatrix);
 }
 
 Vec3D MapCamera3d::getOrigin() {
@@ -661,8 +672,8 @@ void MapCamera3d::notifyListeners(const int &listenerType) {
     double angle = this->angle;
     double zoom = this->zoom;
 
-    std::vector<double> viewMatrix;
-    std::vector<double> projectionMatrix;
+    std::vector<float> viewMatrix;
+    std::vector<float> projectionMatrix;
     float width = 0.0;
     float height = 0.0;
     float horizontalFov = 0.0;
@@ -677,7 +688,7 @@ void MapCamera3d::notifyListeners(const int &listenerType) {
             validVpMatrix = this->validVpMatrix;
         }
         if (!validVpMatrix) {
-            getViewMatrix(); // update matrices
+            getVpMatrix(); // update matrices
         }
         {
             std::lock_guard<std::recursive_mutex> lock(vpDataMutex);
@@ -790,7 +801,7 @@ bool MapCamera3d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
 
         if (initialTouchDownPoint) {
             // Force update of matrices for coordFromScreenPosition-call, ...
-            getViewMatrix();
+            getVpMatrix();
 
             // ..., then find coordinate, that would be below middle-point
             auto newTouchDownCoord = coordFromScreenPosition(initialTouchDownPoint.value());
@@ -964,14 +975,14 @@ bool MapCamera3d::onDoubleClick(const ::Vec2F &posScreen) {
     // Force update of matrices with new zoom for coordFromScreenPosition-call, ...
     auto originalZoom = zoom;
     setZoom(targetZoom, false);
-    getViewMatrix();
+    getVpMatrix();
 
     // ..., then find coordinate, that would be at touch
     auto centerCoordAfter = coordFromScreenPosition(posScreen);
 
     // Reset zoom before animation
     setZoom(originalZoom, false);
-    getViewMatrix();
+    getVpMatrix();
 
     // Rotate globe to keep initial coordinate at touch
     if (centerCoordBefore.systemIdentifier != -1 && centerCoordAfter.systemIdentifier != -1) {
@@ -1012,14 +1023,14 @@ bool MapCamera3d::onTwoFingerClick(const ::Vec2F &posScreen1, const ::Vec2F &pos
     // Force update of matrices with new zoom for coordFromScreenPosition-call, ...
     auto originalZoom = zoom;
     setZoom(targetZoom, false);
-    getViewMatrix();
+    getVpMatrix();
 
     // ..., then find coordinate, that would be below middle-point
     auto centerCoordAfter = coordFromScreenPosition(posScreen);
 
     // Reset zoom before animation
     setZoom(originalZoom, false);
-    getViewMatrix();
+    getVpMatrix();
 
     // Rotate globe to keep initial coordinate at middle-point
     if (centerCoordBefore.systemIdentifier != -1 && centerCoordAfter.systemIdentifier != -1) {
@@ -1083,7 +1094,7 @@ bool MapCamera3d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, cons
         updateZoom(newZoom);
 
         // Force update of matrices for coordFromScreenPosition-call, ...
-        getViewMatrix();
+        getVpMatrix();
 
         // ..., then find coordinate, that would be below middle-point
         auto screenCenterNew = (posScreenNew[0] + posScreenNew[1]) / 2.0;

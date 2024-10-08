@@ -22,15 +22,14 @@ struct TextInstancedVertexOut {
 
 vertex TextInstancedVertexOut
 unitSphereTextInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
-                          constant float4x4 &viewMatrix [[buffer(1)]],
-                          constant float4x4 &projectionMatrix [[buffer(2)]],
-                          constant float4x4 &mMatrix [[buffer(3)]],
-                          constant float2 *positions [[buffer(4)]],
-                          constant float2 *scales [[buffer(5)]],
-                          constant float *rotations [[buffer(6)]],
-                          constant float4 *texureCoordinates [[buffer(7)]],
-                          constant uint16_t *styleIndices [[buffer(8)]],
-                          constant float2 *referencePositions [[buffer(9)]],
+                          constant float4x4 &vpMatrix [[buffer(1)]],
+                          constant float4x4 &mMatrix [[buffer(2)]],
+                          constant float2 *positions [[buffer(3)]],
+                          constant float2 *scales [[buffer(4)]],
+                          constant float *rotations [[buffer(5)]],
+                          constant float4 *texureCoordinates [[buffer(6)]],
+                          constant uint16_t *styleIndices [[buffer(7)]],
+                          constant float2 *referencePositions [[buffer(8)]],
                           uint instanceId [[instance_id]])
 {
     const float2 referencePosition = referencePositions[instanceId];
@@ -46,8 +45,8 @@ unitSphereTextInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
     const float y = newVertex.z * cos(newVertex.y);
     const float z = -newVertex.z * sin(newVertex.y) * sin(newVertex.x);
 
-    float4 earthCenter = projectionMatrix * (viewMatrix * float4(0,0,0, 1.0));
-    float4 screenPosition = projectionMatrix * (viewMatrix * float4(x,y,z, 1.0));
+    float4 earthCenter = vpMatrix * float4(0,0,0, 1.0);
+    float4 screenPosition = vpMatrix * float4(x,y,z, 1.0);
 
     earthCenter /= earthCenter.w;
     screenPosition /= screenPosition.w;
@@ -116,15 +115,14 @@ unitSphereTextInstancedFragmentShader(TextInstancedVertexOut in [[stage_in]],
 
 vertex TextInstancedVertexOut
 textInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
-                          constant float4x4 &viewMatrix [[buffer(1)]],
-                          constant float4x4 &projectionMatrix [[buffer(2)]],
-                          constant float4x4 &mMatrix [[buffer(3)]],
-                          constant float2 *positions [[buffer(4)]],
-                          constant float2 *scales [[buffer(5)]],
-                          constant float *rotations [[buffer(6)]],
-                          constant float4 *texureCoordinates [[buffer(7)]],
-                          constant uint16_t *styleIndices [[buffer(8)]],
-                          constant float2 *referencePositions [[buffer(9)]],
+                          constant float4x4 &vpMatrix [[buffer(1)]],
+                          constant float4x4 &mMatrix [[buffer(2)]],
+                          constant float2 *positions [[buffer(3)]],
+                          constant float2 *scales [[buffer(4)]],
+                          constant float *rotations [[buffer(5)]],
+                          constant float4 *texureCoordinates [[buffer(6)]],
+                          constant uint16_t *styleIndices [[buffer(7)]],
+                          constant float2 *referencePositions [[buffer(8)]],
                           uint instanceId [[instance_id]])
 {
     const float2 position = positions[instanceId];
@@ -141,10 +139,10 @@ textInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
                                               float4(position.x, position.y, 0.0, 1)
                                               );
 
-    const float4 outPos = projectionMatrix * ( viewMatrix * (model_matrix * float4(vertexIn.position.xy, 0.0, 1.0)));
+    const float4x4 matrix = vpMatrix * model_matrix;
 
     TextInstancedVertexOut out {
-      .position = outPos,
+      .position = matrix * float4(vertexIn.position.xy, 0.0, 1.0),
       .uv = vertexIn.uv,
       .texureCoordinates = texureCoordinates[instanceId],
       .styleIndex = styleIndices[instanceId]

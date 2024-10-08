@@ -39,8 +39,7 @@ open class BaseGraphicsObject: @unchecked Sendable {
     open func render(encoder _: MTLRenderCommandEncoder,
                      context _: RenderingContext,
                      renderPass _: MCRenderPassConfig,
-                     viewMatrix _: Int64,
-                     projectionMatrix _: Int64,
+                     vpMatrix _: Int64,
                      mMatrix _: Int64,
                      origin: MCVec3D,
                      isMasked _: Bool,
@@ -74,8 +73,7 @@ extension BaseGraphicsObject: MCGraphicsObjectInterface {
         maskInverse = inversed
     }
 
-    public func render(_ context: MCRenderingContextInterface?, renderPass: MCRenderPassConfig, viewMatrix: Int64, projectionMatrix: Int64, mMatrix: Int64,
-                origin: MCVec3D, isMasked: Bool, screenPixelAsRealMeterFactor: Double) {
+    public func render(_ context: MCRenderingContextInterface?, renderPass: MCRenderPassConfig, vpMatrix: Int64, mMatrix: Int64, origin: MCVec3D, isMasked: Bool, screenPixelAsRealMeterFactor: Double) {
         guard isReady(),
               let context = context as? RenderingContext,
               let encoder = context.encoder
@@ -84,8 +82,7 @@ extension BaseGraphicsObject: MCGraphicsObjectInterface {
         render(encoder: encoder,
                context: context,
                renderPass: renderPass,
-               viewMatrix: viewMatrix,
-               projectionMatrix: projectionMatrix,
+               vpMatrix: vpMatrix,
                mMatrix: mMatrix,
                origin: origin,
                isMasked: isMasked,

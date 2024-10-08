@@ -38,8 +38,7 @@ final class PolygonGroup2d: BaseGraphicsObject, @unchecked Sendable {
     override func render(encoder: MTLRenderCommandEncoder,
                          context: RenderingContext,
                          renderPass pass: MCRenderPassConfig,
-                         viewMatrix: Int64,
-                         projectionMatrix: Int64,
+                         vpMatrix: Int64,
                          mMatrix: Int64,
                          origin: MCVec3D,
                          isMasked: Bool,
@@ -83,12 +82,10 @@ final class PolygonGroup2d: BaseGraphicsObject, @unchecked Sendable {
         shader.preRender(context)
 
         encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
-        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(viewMatrix)) {
+        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(vpMatrix)) {
             encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
         }
-        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(projectionMatrix)) {
-            encoder.setVertexBytes(matrixPointer, length: 64, index: 2)
-        }
+		
         var originOffset: simd_float4 = simd_float4(
             Float(tileOrigin.x - origin.x),
             Float(tileOrigin.y - origin.y),
@@ -99,8 +96,9 @@ final class PolygonGroup2d: BaseGraphicsObject, @unchecked Sendable {
             encoder.setVertexBuffer(originOffsetBuffer, offset: 0, index: 3)
         }
 
+
         if self.shader.isStriped {
-            encoder.setVertexBytes(&posOffset, length: MemoryLayout<SIMD2<Float>>.stride, index: 4)
+            encoder.setVertexBytes(&posOffset, length: MemoryLayout<SIMD2<Float>>.stride, index: 2)
 
             let p : Float = Float(screenPixelAsRealMeterFactor)
             var scaleFactors = SIMD2<Float>([p, pow(2.0, ceil(log2(p)))])

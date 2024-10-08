@@ -29,11 +29,9 @@ void Renderer::addToComputeQueue(const std::shared_ptr<ComputePassInterface> &co
 void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &renderingContext,
                          const std::shared_ptr<CameraInterface> &camera) {
 
-    const auto viewMatrix = camera->getViewMatrix();
-    const auto viewMatrixPointer = (int64_t)viewMatrix.data();
-    const auto projectionMatrix = camera->getProjectionMatrix();
-    const auto projectionMatrixPointer = (int64_t)projectionMatrix.data();
-    const auto origin = camera->getOrigin();
+    const auto vpMatrix = camera->getVpMatrix();
+    const auto vpMatrixPointer = (int64_t)vpMatrix.data();
+	const auto origin = camera->getOrigin();
 
     const double factor = camera->getScalingFactor();
 
@@ -59,46 +57,20 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
             }
 
             if (hasMask) {
-                maskObject->renderAsMask(renderingContext,
-                                         pass->getRenderPassConfig(),
-                                         viewMatrixPointer,
-                                         projectionMatrixPointer,
-                                         identityMatrixPointer,
-                                         origin,
-                                         factor);
+                maskObject->renderAsMask(renderingContext, pass->getRenderPassConfig(), vpMatrixPointer, identityMatrixPointer, origin, factor);
             }
 
             for (const auto &renderObject : renderObjects) {
                 const auto &graphicsObject = renderObject->getGraphicsObject();
                 if (renderObject->isScreenSpaceCoords()) {
-                    graphicsObject->render(renderingContext,
-                                           pass->getRenderPassConfig(),
-                                           identityMatrixPointer,
-                                           identityMatrixPointer,
-                                           identityMatrixPointer,
-                                           origin,
-                                           hasMask,
-                                           factor);
+                    graphicsObject->render(renderingContext, pass->getRenderPassConfig(), identityMatrixPointer, identityMatrixPointer, origin, hasMask, factor);
                 } else if (renderObject->hasCustomModelMatrix()) {
                     const auto mMatrix = renderObject->getCustomModelMatrix();
                     const auto mMatrixPointer = (int64_t)mMatrix.data();
-                    graphicsObject->render(renderingContext,
-                                           pass->getRenderPassConfig(),
-                                           viewMatrixPointer,
-                                           projectionMatrixPointer,
-                                           mMatrixPointer,
-                                           origin,
-                                           hasMask,
+                    graphicsObject->render(renderingContext, pass->getRenderPassConfig(), vpMatrixPointer, mMatrixPointer, origin, hasMask,
                                            factor);
                 } else {
-                    graphicsObject->render(renderingContext,
-                                           pass->getRenderPassConfig(),
-                                           viewMatrixPointer,
-                                           projectionMatrixPointer,
-                                           identityMatrixPointer,
-                                           origin,
-                                           hasMask,
-                                           factor);
+                    graphicsObject->render(renderingContext, pass->getRenderPassConfig(), vpMatrixPointer, identityMatrixPointer, origin, hasMask, factor);
                 }
             }
 

@@ -46,8 +46,7 @@ final class PolygonPatternGroup2d: BaseGraphicsObject, @unchecked Sendable {
     override func render(encoder: MTLRenderCommandEncoder,
                          context: RenderingContext,
                          renderPass pass: MCRenderPassConfig,
-                         viewMatrix: Int64,
-                         projectionMatrix: Int64,
+                         vpMatrix: Int64,
                          mMatrix: Int64,
                 origin: MCVec3D,
                          isMasked: Bool,
@@ -94,11 +93,8 @@ final class PolygonPatternGroup2d: BaseGraphicsObject, @unchecked Sendable {
         shader.preRender(context)
 
         encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
-        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(viewMatrix)) {
+        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(vpMatrix)) {
             encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
-        }
-        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(projectionMatrix)) {
-            encoder.setVertexBytes(matrixPointer, length: 64, index: 2)
         }
 
         // scale factors for shaders
@@ -106,16 +102,16 @@ final class PolygonPatternGroup2d: BaseGraphicsObject, @unchecked Sendable {
 
         if self.shader.fadeInPattern {
             var scaleFactors = SIMD2<Float>([pixelFactor, pixelFactor])
-            encoder.setVertexBytes(&scaleFactors, length: MemoryLayout<SIMD2<Float>>.stride, index: 3)
-            encoder.setVertexBytes(&posOffset, length: MemoryLayout<SIMD2<Float>>.stride, index: 4)
+            encoder.setVertexBytes(&scaleFactors, length: MemoryLayout<SIMD2<Float>>.stride, index: 2)
+            encoder.setVertexBytes(&posOffset, length: MemoryLayout<SIMD2<Float>>.stride, index: 3)
 
             scaleFactors = customScreenPixelFactor.x != 0 ? customScreenPixelFactor :  SIMD2<Float>([pixelFactor, pixelFactor])
             encoder.setFragmentBytes(&pixelFactor, length: MemoryLayout<Float>.stride, index: 2)
             encoder.setFragmentBytes(&scaleFactors, length: MemoryLayout<SIMD2<Float>>.stride, index: 3)
         } else {
             var scaleFactors = customScreenPixelFactor.x != 0 ? customScreenPixelFactor :  SIMD2<Float>([pixelFactor, pixelFactor])
-            encoder.setVertexBytes(&scaleFactors, length: MemoryLayout<SIMD2<Float>>.stride, index: 3)
-            encoder.setVertexBytes(&posOffset, length: MemoryLayout<SIMD2<Float>>.stride, index: 4)
+            encoder.setVertexBytes(&scaleFactors, length: MemoryLayout<SIMD2<Float>>.stride, index: 2)
+            encoder.setVertexBytes(&posOffset, length: MemoryLayout<SIMD2<Float>>.stride, index: 3)
         }
 
         // texture

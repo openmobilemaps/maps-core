@@ -10,9 +10,7 @@ class CameraInterface {
 public:
     virtual ~CameraInterface() = default;
 
-    virtual std::vector<float> getViewMatrix() = 0;
-
-    virtual std::vector<float> getProjectionMatrix() = 0;
+    virtual std::vector<float> getVpMatrix() = 0;
 
     virtual double getScalingFactor() = 0;
 

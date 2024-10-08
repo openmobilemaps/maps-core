@@ -72,8 +72,7 @@ final class Quad2dStretchedInstanced: BaseGraphicsObject, @unchecked Sendable {
     override func render(encoder: MTLRenderCommandEncoder,
                          context: RenderingContext,
                          renderPass _: MCRenderPassConfig,
-                         viewMatrix: Int64,
-                         projectionMatrix: Int64,
+                         vpMatrix: Int64,
                          mMatrix: Int64,
                 origin: MCVec3D,
                          isMasked: Bool,
@@ -124,20 +123,17 @@ final class Quad2dStretchedInstanced: BaseGraphicsObject, @unchecked Sendable {
         shader.preRender(context)
 
         encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
-        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(viewMatrix)) {
+        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(vpMatrix)) {
             encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
         }
-        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(projectionMatrix)) {
-            encoder.setVertexBytes(matrixPointer, length: 64, index: 2)
-        }
 
-        encoder.setVertexBuffer(positionsBuffer, offset: 0, index: 3)
-        encoder.setVertexBuffer(scalesBuffer, offset: 0, index: 4)
-        encoder.setVertexBuffer(rotationsBuffer, offset: 0, index: 5)
+        encoder.setVertexBuffer(positionsBuffer, offset: 0, index: 2)
+        encoder.setVertexBuffer(scalesBuffer, offset: 0, index: 3)
+        encoder.setVertexBuffer(rotationsBuffer, offset: 0, index: 4)
 
-        encoder.setVertexBuffer(textureCoordinatesBuffer, offset: 0, index: 6)
+        encoder.setVertexBuffer(textureCoordinatesBuffer, offset: 0, index: 5)
 
-        encoder.setVertexBuffer(alphaBuffer, offset: 0, index: 7)
+        encoder.setVertexBuffer(alphaBuffer, offset: 0, index: 6)
 
         encoder.setFragmentBuffer(stretchInfoBuffer, offset: 0, index: 1)
 
@@ -157,8 +153,7 @@ final class Quad2dStretchedInstanced: BaseGraphicsObject, @unchecked Sendable {
 extension Quad2dStretchedInstanced: MCMaskingObjectInterface {
     func render(asMask context: MCRenderingContextInterface?,
                 renderPass: MCRenderPassConfig,
-                viewMatrix: Int64,
-                projectionMatrix: Int64,
+                vpMatrix: Int64,
                 mMatrix: Int64,
                 origin: MCVec3D,
                 screenPixelAsRealMeterFactor: Double) {
@@ -171,8 +166,7 @@ extension Quad2dStretchedInstanced: MCMaskingObjectInterface {
         render(encoder: encoder,
                context: context,
                renderPass: renderPass,
-               viewMatrix: viewMatrix,
-               projectionMatrix: projectionMatrix,
+               vpMatrix: vpMatrix,
                mMatrix: mMatrix,
                origin: origin,
                isMasked: false,
