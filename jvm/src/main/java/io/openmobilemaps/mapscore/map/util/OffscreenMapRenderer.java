@@ -9,6 +9,7 @@ import io.openmobilemaps.mapscore.shared.map.MapCallbackInterface;
 import io.openmobilemaps.mapscore.shared.map.MapConfig;
 import io.openmobilemaps.mapscore.shared.map.MapInterface;
 import io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateSystemFactory;
+import io.openmobilemaps.mapscore.shared.map.scheduling.ThreadPoolScheduler;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -35,7 +36,7 @@ public class OffscreenMapRenderer {
             int width, int height, int numSamples, MapConfig mapConfig, float dpi) {
         threadId = Thread.currentThread().threadId();
 
-        map = MapInterface.createWithOpenGl(mapConfig, dpi);
+        map = MapInterface.createWithOpenGl(mapConfig, ThreadPoolScheduler.create(), dpi, false);
         // Set dummy callbacks, we don't use these here.
         map.setCallbackHandler(
                 new MapCallbackInterface() {
