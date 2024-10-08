@@ -246,13 +246,14 @@ void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDa
 
                     for (auto const &coordinate: coordinates) {
 
-                        double x = 1.0 * sin(coordinate.y) * cos(coordinate.x) - rx;
-                        double y = 1.0 * cos(coordinate.y) - ry;
-                        double z = -1.0 * sin(coordinate.y) * sin(coordinate.x) - rz;
+                        double x = is3d ? 1.0 * sin(coordinate.y) * cos(coordinate.x) - rx : coordinate.x - rx;
+                        double y = is3d ?  1.0 * cos(coordinate.y) - ry : coordinate.y - ry;
+                        double z = is3d ? -1.0 * sin(coordinate.y) * sin(coordinate.x) - rz : 0.0;
                         styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(x);
                         styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(y);
-                        styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(z);
-                        styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(1.0);
+                        if (is3d) {
+                            styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(z);
+                        }
                         styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(styleIndex);
                     }
 

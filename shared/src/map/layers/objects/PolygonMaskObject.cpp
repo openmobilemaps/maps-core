@@ -24,7 +24,8 @@ PolygonMaskObject::PolygonMaskObject(const std::shared_ptr<GraphicsObjectFactory
                                      const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                                      bool is3D)
     : conversionHelper(conversionHelper)
-    , polygon(graphicsObjectFactory->createPolygonMask(is3D)) {}
+    , polygon(graphicsObjectFactory->createPolygonMask(is3D))
+    , is3D(is3D) {}
 
 void PolygonMaskObject::setPositions(const std::vector<Coord> &positions,
                                      const Vec3D & origin,
@@ -86,9 +87,9 @@ void PolygonMaskObject::setPolygons(const std::vector<::PolygonCoord> &polygons,
         double ry = origin.y;
         double rz = origin.z;
 
-        double x = (1.0 * sin(v.y) * cos(v.x) - rx) ;
-        double y = (1.0 * cos(v.y) - ry) ;
-        double z = (-1.0 * sin(v.y) * sin(v.x) - rz) ;
+        double x = is3D ? (1.0 * sin(v.y) * cos(v.x) - rx) : v.x - rx ;
+        double y = is3D ? (1.0 * cos(v.y) - ry) : v.y - ry;
+        double z = is3D ? (-1.0 * sin(v.y) * sin(v.x) - rz) : 1.0;
 
         vertices.push_back(x);
         vertices.push_back(y);

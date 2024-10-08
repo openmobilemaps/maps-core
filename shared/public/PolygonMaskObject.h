@@ -47,5 +47,6 @@ public:
 private:
     std::shared_ptr<CoordinateConversionHelperInterface> conversionHelper;
     std::shared_ptr<Polygon2dInterface> polygon;
+    bool is3D;
 };
 

@@ -12,8 +12,7 @@
 using namespace metal;
 
 struct Polygon4GroupVertexIn {
-    float4 position [[attribute(0)]];
-    float stylingIndex [[attribute(1)]];
+    float4 position [[attribute(0)]]; //stylingIndex is stored in position.w
 };
 
 struct PolygonGroupVertexIn {
@@ -46,7 +45,7 @@ polygonGroupVertexShader(const PolygonGroupVertexIn vertexIn [[stage_in]],
                  constant float4 &originOffset [[buffer(3)]])
 {
     PolygonGroupVertexOut out {
-        .position = vpMatrix * float4(vertexIn.position.xy, 0.0, 1.0),
+        .position = vpMatrix * float4(vertexIn.position.xy + originOffset.xy, 0.0, 1.0),
         .uv = float2(0.0, 0.0),
         .stylingIndex = vertexIn.stylingIndex,
     };
@@ -85,9 +84,9 @@ unitSpherePolygonGroupVertexShader(const Polygon4GroupVertexIn vertexIn [[stage_
 //    float4 off = float4(0.711650 * 1.0, 0.287723 * 1.0, -0.083849, 0.0);
 
     PolygonGroupVertexOut out {
-        .position = vpMatrix * (vertexIn.position + originOffset),
+        .position = vpMatrix * (float4(vertexIn.position.xyz, 1.0) + originOffset),
         .uv = float2(0.0, 0.0),
-        .stylingIndex = vertexIn.stylingIndex,
+        .stylingIndex = vertexIn.position.w,
     };
 
     return out;

@@ -112,11 +112,13 @@ void Tiled2dMapVectorSourceVectorTileDataManager::onVectorTilesUpdated(const std
                     }
                     double cx = (convertedTileBounds.bottomRight.x + convertedTileBounds.topLeft.x) / 2.0;
                     double cy = (convertedTileBounds.bottomRight.y + convertedTileBounds.topLeft.y) / 2.0;
-                    double rx = 1.0 * sin(cy) * cos(cx);
-                    double ry = 1.0 * cos(cy);
-                    double rz = -1.0 * sin(cy) * sin(cx);
+                    double rx = is3D ? 1.0 * sin(cy) * cos(cx) : cx;
+                    double ry = is3D ? 1.0 * cos(cy): cy;
+                    double rz = is3D ? -1.0 * sin(cy) * sin(cx) : 0.0;
 
-                    tileMask->setPolygons(tileEntry->masks, Vec3D(rx, ry, rz), maxSegmentLength);
+                    Vec3D origin(rx, ry, rz);
+
+                    tileMask->setPolygons(tileEntry->masks, origin, maxSegmentLength);
 
                     newTileMasks[tileEntry->tileInfo] = Tiled2dMapLayerMaskWrapper(tileMask, hash);
                 }
