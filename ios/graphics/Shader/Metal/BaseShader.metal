@@ -16,10 +16,11 @@ using namespace metal;
 vertex VertexOut
 baseVertexShader(const Vertex3DIn vertexIn [[stage_in]],
                 constant float4x4 &mvpMatrix [[buffer(1)]],
-                 constant float4x4 &mMatrix [[buffer(2)]])
+                 constant float4x4 &mMatrix [[buffer(2)]],
+                 constant float4 &originOffset [[buffer(4)]])
 {
     VertexOut out {
-        .position = mvpMatrix * (mMatrix * float4(vertexIn.position.xy, 0.0, 1.0)),
+        .position = mvpMatrix * (mMatrix * float4(vertexIn.position.xy + originOffset.xy, 0.0, 1.0)),
         .uv = vertexIn.uv
     };
     
