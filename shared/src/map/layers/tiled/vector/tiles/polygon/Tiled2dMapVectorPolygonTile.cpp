@@ -251,9 +251,7 @@ void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDa
                         double z = is3d ? -1.0 * sin(coordinate.y) * sin(coordinate.x) - rz : 0.0;
                         styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(x);
                         styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(y);
-                        if (is3d) {
-                            styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(z);
-                        }
+                        styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(z);
                         styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(styleIndex);
                     }
 

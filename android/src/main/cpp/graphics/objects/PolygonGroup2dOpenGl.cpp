@@ -21,12 +21,14 @@ std::shared_ptr<GraphicsObjectInterface> PolygonGroup2dOpenGl::asGraphicsObject(
 bool PolygonGroup2dOpenGl::isReady() { return ready; }
 
 void
-PolygonGroup2dOpenGl::setVertices(const ::SharedBytes & vertices, const ::SharedBytes & indices) {
+PolygonGroup2dOpenGl::setVertices(const ::SharedBytes & vertices, const ::SharedBytes & indices, const ::Vec3D & origin) {
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
     ready = false;
     dataReady = false;
 
     polygonIndices.resize(indices.elementCount);
     polygonAttributes.resize(vertices.elementCount);
+    polygonOrigin = origin;
     if(indices.elementCount > 0) {
         std::memcpy(polygonIndices.data(), (void *) indices.address,indices.elementCount * indices.bytesPerElement);
     }
@@ -73,6 +75,7 @@ void PolygonGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterfa
 
     vpMatrixHandle = glGetUniformLocation(program, "uvpMatrix");
     mMatrixHandle = glGetUniformLocation(program, "umMatrix");
+    originOffsetHandle = glGetUniformLocation(program, "uOriginOffset");
     scaleFactorHandle = glGetUniformLocation(program, "scaleFactors");
 
     ready = true;
@@ -98,7 +101,8 @@ void PolygonGroup2dOpenGl::removeGlBuffers() {
 void PolygonGroup2dOpenGl::setIsInverseMasked(bool inversed) { isMaskInversed = inversed; }
 
 void PolygonGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
-                                  int64_t vpMatrix, int64_t mMatrix, bool isMasked, double screenPixelAsRealMeterFactor) {
+                                  int64_t vpMatrix, int64_t mMatrix, const ::Vec3D &origin,
+                                  bool isMasked, double screenPixelAsRealMeterFactor) {
     if (!ready)
         return;
 
@@ -124,6 +128,9 @@ void PolygonGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterf
 
     glUniformMatrix4fv(vpMatrixHandle, 1, false, (GLfloat *)vpMatrix);
     glUniformMatrix4fv(mMatrixHandle, 1, false, (GLfloat *)mMatrix);
+
+    glUniform4f(originOffsetHandle, polygonOrigin.x - origin.x, polygonOrigin.y - origin.y, polygonOrigin.z - origin.z, 0.0);
+
     if (scaleFactorHandle >= 0) {
         glUniform2f(scaleFactorHandle, screenPixelAsRealMeterFactor,
                     pow(2.0, ceil(log2(screenPixelAsRealMeterFactor))));
@@ -132,13 +139,13 @@ void PolygonGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterf
     shaderProgram->preRender(context);
 
     size_t floatSize = sizeof(GLfloat);
-    size_t stride = 3 * floatSize;
+    size_t stride = 4 * floatSize;
 
     glBindBuffer(GL_ARRAY_BUFFER, attribBuffer);
     glEnableVertexAttribArray(positionHandle);
-    glVertexAttribPointer(positionHandle, 2, GL_FLOAT, false, stride, nullptr);
+    glVertexAttribPointer(positionHandle, 3, GL_FLOAT, false, stride, nullptr);
     glEnableVertexAttribArray(styleIndexHandle);
-    glVertexAttribPointer(styleIndexHandle, 1, GL_FLOAT, false, stride, (float *)(2 * floatSize));
+    glVertexAttribPointer(styleIndexHandle, 1, GL_FLOAT, false, stride, (float *)(3 * floatSize));
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);

@@ -48,12 +48,13 @@ void PolygonPatternGroup2dShaderOpenGl::preRender(const std::shared_ptr<::Render
 
 std::string PolygonPatternGroup2dShaderOpenGl::getVertexShader() {
     return OMMVersionedGlesShaderCode(320 es,
-                                      in vec2 vPosition;
+                                      in vec3 vPosition;
                                       in float vStyleIndex;
 
                                       uniform mat4 umMatrix;
                                       uniform mat4 uvpMatrix;
                                       uniform vec2 uScalingFactor;
+                                      uniform vec4 uOriginOffset;
     ) + (fadeInPattern ? OMMShaderCode(uniform float uScreenPixelAsRealMeterFactor;) : "")
     + OMMShaderCode(
 
@@ -67,19 +68,10 @@ std::string PolygonPatternGroup2dShaderOpenGl::getVertexShader() {
     ) : OMMShaderCode(
                                         // DefaultBehavior
                                         pixelPosition = vPosition.xy / uScalingFactor;
-    )) + (projectOntoUnitSphere ? OMMShaderCode(
-                                        gl_Position = umMatrix * vec4(vPosition.xy, 1.0, 1.0);
-                                        gl_Position = gl_Position / gl_Position.w;
-                                        gl_Position = uvpMatrix * vec4(gl_Position.z * sin(gl_Position.y) * cos(gl_Position.x),
-                                                             gl_Position.z * cos(gl_Position.y),
-                                                             -gl_Position.z * sin(gl_Position.y) * sin(gl_Position.x),
-                                                             1.0);
-    ) : OMMShaderCode(
-                                        gl_Position = uvpMatrix * umMatrix * vec4(vPosition, 0.0, 1.0);
-    )) + OMMShaderCode(
+                                        gl_Position = uvpMatrix * umMatrix * (vec4(vPosition, 1.0) + uOriginOffset);
                                         styleIndex = uint(floor(vStyleIndex + 0.5));
                                       }
-    );
+    ));
 }
 
 std::string PolygonPatternGroup2dShaderOpenGl::getFragmentShader() {

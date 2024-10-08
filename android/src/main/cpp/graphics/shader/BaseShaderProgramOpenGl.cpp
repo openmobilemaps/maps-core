@@ -73,32 +73,13 @@ std::string BaseShaderProgramOpenGl::getVertexShader() {
     return OMMVersionedGlesShaderCode(320 es,
                                       uniform mat4 uvpMatrix;
                                       uniform mat4 umMatrix;
+                                      uniform vec4 uOriginOffset;
                                       in vec4 vPosition;
                                       in vec2 texCoordinate;
                                       out vec2 v_texcoord;
 
                                       void main() {
-                                          gl_Position = uvpMatrix * umMatrix * vPosition;
-                                          v_texcoord = texCoordinate;
-                                      }
-    );
-}
-
-std::string BaseShaderProgramOpenGl::getUnitSphereVertexShader() {
-    return OMMVersionedGlesShaderCode(320 es,
-                                      uniform mat4 uvpMatrix;
-                                      uniform mat4 umMatrix;
-                                      in vec4 vPosition;
-                                      in vec2 texCoordinate;
-                                      out vec2 v_texcoord;
-
-                                      void main() {
-                                          gl_Position = umMatrix * vec4(vPosition.xyz, 1.0);
-                                          gl_Position = gl_Position / gl_Position.w;
-                                          gl_Position = uvpMatrix * vec4(gl_Position.z * sin(gl_Position.y) * cos(gl_Position.x),
-                                                                          gl_Position.z * cos(gl_Position.y),
-                                                                          -gl_Position.z * sin(gl_Position.y) * sin(gl_Position.x),
-                                                                          1.0);
+                                          gl_Position = uvpMatrix * umMatrix * (vPosition + uOriginOffset);
                                           v_texcoord = texCoordinate;
                                       }
     );

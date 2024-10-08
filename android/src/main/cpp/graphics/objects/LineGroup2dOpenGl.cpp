@@ -102,7 +102,8 @@ void LineGroup2dOpenGl::removeGlBuffers() {
 void LineGroup2dOpenGl::setIsInverseMasked(bool inversed) { isMaskInversed = inversed; }
 
 void LineGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
-                               int64_t vpMatrix, int64_t mMatrix, bool isMasked, double screenPixelAsRealMeterFactor) {
+                               int64_t vpMatrix, int64_t mMatrix, const ::Vec3D &origin, bool isMasked,
+                               double screenPixelAsRealMeterFactor) {
 
     if (!ready) {
         return;

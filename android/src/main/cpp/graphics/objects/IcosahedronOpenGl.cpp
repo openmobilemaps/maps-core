@@ -18,7 +18,7 @@ std::shared_ptr<GraphicsObjectInterface> IcosahedronOpenGl::asGraphicsObject() {
 
 bool IcosahedronOpenGl::isReady() { return ready; }
 
-void IcosahedronOpenGl::setVertices(const ::SharedBytes & vertices_, const ::SharedBytes & indices_) {
+void IcosahedronOpenGl::setVertices(const ::SharedBytes & vertices_, const ::SharedBytes & indices_, const ::Vec3D & origin) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
     ready = false;
     dataReady = false;
@@ -98,7 +98,8 @@ void IcosahedronOpenGl::removeGlBuffers() {
 void IcosahedronOpenGl::setIsInverseMasked(bool inversed) { isMaskInversed = inversed; }
 
 void IcosahedronOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
-                             int64_t vpMatrix, int64_t mMatrix, bool isMasked, double screenPixelAsRealMeterFactor) {
+                               int64_t vpMatrix, int64_t mMatrix, const ::Vec3D &origin, bool isMasked,
+                               double screenPixelAsRealMeterFactor) {
     if (!ready)
         return;
 

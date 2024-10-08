@@ -56,11 +56,7 @@ void ColorCircleShaderOpenGl::setColor(float red, float green, float blue, float
 }
 
 std::string ColorCircleShaderOpenGl::getVertexShader() {
-    return projectOntoUnitSphere ?
-           // Vertices projected onto unit sphere
-           BaseShaderProgramOpenGl::getUnitSphereVertexShader()
-           // Default Shader
-           : BaseShaderProgramOpenGl::getVertexShader();
+    return BaseShaderProgramOpenGl::getVertexShader();
 }
 
 std::string ColorCircleShaderOpenGl::getFragmentShader() {

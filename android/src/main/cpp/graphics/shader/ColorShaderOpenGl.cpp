@@ -56,34 +56,15 @@ void ColorShaderOpenGl::setColor(float red, float green, float blue, float alpha
 }
 
 std::string ColorShaderOpenGl::getVertexShader() {
-    return projectOntoUnitSphere ?
-           // Vertices projected onto unit sphere
-           OMMVersionedGlesShaderCode(320 es,
-                                      precision highp float;
-                                              uniform mat4 uvpMatrix;
-                                              uniform mat4 umMatrix;
-                                              in vec4 vPosition;
-
-                                              void main() {
-                                                  gl_Position = umMatrix * vec4(vPosition.xyz, 1.0);
-                                                  gl_Position = gl_Position / gl_Position.w;
-                                                  gl_Position = uvpMatrix *
-                                                                vec4(gl_Position.z * sin(gl_Position.y) * cos(gl_Position.x),
-                                                                     gl_Position.z * cos(gl_Position.y),
-                                                                     -gl_Position.z * sin(gl_Position.y) *
-                                                                     sin(gl_Position.x),
-                                                                     1.0);
-                                              }
-           )
-           // Default Shader
-           : OMMVersionedGlesShaderCode(320 es,
+    return OMMVersionedGlesShaderCode(320 es,
                                         precision highp float;
                                                 uniform mat4 uvpMatrix;
                                                 uniform mat4 umMatrix;
+                                                uniform vec4 uOriginOffset;
                                                 in vec4 vPosition;
 
                                                 void main() {
-                                                    gl_Position = uvpMatrix * umMatrix * vPosition;
+                                                    gl_Position = uvpMatrix * umMatrix * (vPosition + uOriginOffset);
                                                 }
            );
 }
