@@ -286,13 +286,14 @@ protected:
 
     bool coordIsOnFrontHalfOfGlobe(Coord coord);
 
-    std::vector<float> convertToCartesianCoordinates(Coord coord);
+    std::vector<double> convertToCartesianCoordinates(const Coord &coord) const;
 
-    std::vector<float> projectedPoint(std::vector<float> point);
+    std::vector<double> projectedPoint(const std::vector<double> &point) const;
 
     void checkForRubberBandEffect();
 
     std::vector<float> vpMatrix = std::vector<float>(16, 0.0);
+    std::vector<double> vpMatrixD = std::vector<double>(16, 0.0);
     std::vector<double> inverseVPMatrix = std::vector<double>(16, 0.0);
     std::vector<float> viewMatrix = std::vector<float>(16, 0.0);
     std::vector<float> projectionMatrix = std::vector<float>(16, 0.0);

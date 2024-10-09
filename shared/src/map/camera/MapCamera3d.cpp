@@ -23,6 +23,7 @@
 #include "Vec3DHelper.h"
 #include "Logger.h"
 #include "CoordinateSystemIdentifiers.h"
+#include "CoordHelper.h"
 
 #include "MapCamera3DHelper.h"
 #include "Camera3dConfig.h"
@@ -532,6 +533,7 @@ std::tuple<std::vector<float>, std::vector<double>> MapCamera3d::getVpMatrix(con
         lastVpRotation = angle;
         lastVpZoom = zoom;
         vpMatrix = newVpMatrixF;
+        this->vpMatrixD = newVpMatrix;
         inverseVPMatrix = newInverseMatrix;
         viewMatrix = newViewMatrixF;
         projectionMatrix = newProjectionMatrixF;
@@ -1429,19 +1431,19 @@ bool MapCamera3d::coordIsOnFrontHalfOfGlobe(Coord coord) {
     return isInFront;
 }
 
-std::vector<float> MapCamera3d::convertToCartesianCoordinates(Coord coord) {
+std::vector<double> MapCamera3d::convertToCartesianCoordinates(const Coord &coord) const {
     Coord renderCoord = conversionHelper->convertToRenderSystem(coord);
 
-    return {(float) (renderCoord.z * sin(renderCoord.y) * cos(renderCoord.x)),
-        (float) (renderCoord.z * cos(renderCoord.y)),
-        (float) (-renderCoord.z * sin(renderCoord.y) * sin(renderCoord.x)),
+    return {(renderCoord.z * sin(renderCoord.y) * cos(renderCoord.x)) - origin.x,
+        (renderCoord.z * cos(renderCoord.y)) - origin.y,
+        (-renderCoord.z * sin(renderCoord.y) * sin(renderCoord.x)) - origin.z,
         1.0};
 }
 
 
 // Point given in cartesian coordinates, where (0,0,0) is the center of the globe
-std::vector<float> MapCamera3d::projectedPoint(std::vector<float> point) {
-    auto projected = Matrix::multiply(vpMatrix, point);
+std::vector<double> MapCamera3d::projectedPoint(const std::vector<double> &point) const {
+    auto projected = MatrixD::multiply(vpMatrixD, point);
     projected[0] /= projected[3]; // percentage in x direction in [-1, 1], 0 being the center of the screen)
     projected[1] /= projected[3]; // percentage in y direction in [-1, 1], 0 being the center of the screen)
     projected[2] /= projected[3]; // percentage in z direction in [-1, 1], 0 being the center of the screen)
@@ -1456,42 +1458,11 @@ double MapCamera3d::mapUnitsFromPixels(double distancePx) {
     if (validVpMatrix && sizeViewport.x != 0 && sizeViewport.y != 0) {
         Coord focusRenderCoord = conversionHelper->convertToRenderSystem(getCenterPosition());
 
-        auto projectedFP = projectedPoint(convertToCartesianCoordinates(focusRenderCoord));
+        const double sampleSize = M_PI / 180.0;
+        const auto projectedOne = projectedPoint(convertToCartesianCoordinates(focusRenderCoord));
+        const auto projectedTwo = projectedPoint(convertToCartesianCoordinates(focusRenderCoord + sampleSize));
 
-        double longitude = focusRenderCoord.x;
-        double latitude = focusRenderCoord.y;
-        double lo = (longitude - 90.0) * M_PI / 180.0;
-        double la = latitude * M_PI / 180.0;
-        double x = -(1.0 * sin(lo) * cos(la));
-        double y = (-1.0 * sin(lo) * sin(la)) ;
-        double z = -(1.0 * cos(lo));
-
-        float sampleSize = M_PI / 180.0;
-        std::vector<float> posOne = {(float) (focusRenderCoord.z * sin(focusRenderCoord.y) * cos(focusRenderCoord.x)),
-            (float) (focusRenderCoord.z * cos(focusRenderCoord.y)),
-            (float) (-focusRenderCoord.z * sin(focusRenderCoord.y) * sin(focusRenderCoord.x)),
-            1.0};
-        posOne[0] += x;
-        posOne[1] += y;
-        posOne[2] += z;
-        std::vector<float> posTwo = {(float) (focusRenderCoord.z * sin(focusRenderCoord.y + sampleSize) * cos(focusRenderCoord.x + sampleSize)),
-            (float) (focusRenderCoord.z * cos(focusRenderCoord.y + sampleSize)),
-            (float) (-focusRenderCoord.z * sin(focusRenderCoord.y + sampleSize) * sin(focusRenderCoord.x + sampleSize)),
-            1.0};
-        posTwo[0] += x;
-        posTwo[1] += y;
-        posTwo[2] += z;
-        auto projectedOne = Matrix::multiply(vpMatrix, posOne);
-        auto projectedTwo = Matrix::multiply(vpMatrix, posTwo);
-        projectedOne[0] /= projectedOne[3];
-        projectedOne[1] /= projectedOne[3];
-        projectedOne[2] /= projectedOne[3];
-        projectedOne[3] /= projectedOne[3];
-        projectedTwo[0] /= projectedTwo[3];
-        projectedTwo[1] /= projectedTwo[3];
-        projectedTwo[2] /= projectedTwo[3];
-        projectedTwo[3] /= projectedTwo[3];
-        float projectedLength = Matrix::length((projectedTwo[0] - projectedOne[0]) * sizeViewport.x,
+        const float projectedLength = MatrixD::length((projectedTwo[0] - projectedOne[0]) * sizeViewport.x,
                                                (projectedTwo[1] - projectedOne[1]) * sizeViewport.y,
                                                0.0);
         return distancePx * 2.0 * sqrt(sampleSize * sampleSize * 2) / projectedLength;

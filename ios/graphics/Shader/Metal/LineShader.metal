@@ -114,7 +114,7 @@ lineGroupVertexShader(const LineVertexIn vertexIn [[stage_in]],
     }
 
     float o = styling[styleIndex + 18] * scalingFactor;
-    float4 offset = float4(widthNormalIn.x * o, widthNormalIn.y * o, 0.0, 0.0);
+    float4 offset = float4(widthNormalIn.x * o, widthNormalIn.y * o, widthNormalIn.z * o, 0.0);
 
     float4 extendedPosition = float4(vertexIn.position.xyz + originOffset.xyz, 1.0) +
                               float4((lengthNormal + widthNormal).xyz,0.0)
@@ -125,8 +125,8 @@ lineGroupVertexShader(const LineVertexIn vertexIn [[stage_in]],
     LineVertexOut out {
         .position = vpMatrix * extendedPosition,
         .uv = extendedPosition.xy,
-        .lineA = extendedPosition.xyz - (vertexIn.lineA + offset.xyz),
-        .lineB = (vertexIn.lineB + offset.xyz) - (vertexIn.lineA + offset.xyz),
+        .lineA = extendedPosition.xyz - ((vertexIn.lineA + originOffset.xyz) + offset.xyz),
+        .lineB = ((vertexIn.lineB + originOffset.xyz) + offset.xyz) - ((vertexIn.lineA + originOffset.xyz) + offset.xyz),
         .stylingIndex = styleIndex,
         .width = width,
         .segmentType = segmentType,
@@ -144,7 +144,6 @@ fragment float4
 lineGroupFragmentShader(LineVertexOut in [[stage_in]],
                         constant float *styling [[buffer(1)]])
 {
-    return float4(1,0,0,1);
   float lineLength = length(in.lineB);
   float t = dot(in.lineA, normalize(in.lineB) / lineLength);
 
