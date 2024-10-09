@@ -21,12 +21,14 @@ std::shared_ptr<GraphicsObjectInterface> LineGroup2dOpenGl::asGraphicsObject() {
 bool LineGroup2dOpenGl::isReady() { return ready; }
 
 
-void LineGroup2dOpenGl::setLines(const ::SharedBytes & lines, const ::SharedBytes & indices) {
+void LineGroup2dOpenGl::setLines(const ::SharedBytes & lines, const ::SharedBytes & indices, const Vec3D &origin) {
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
     ready = false;
     dataReady = false;
 
     lineIndices.resize(indices.elementCount);
     lineAttributes.resize(lines.elementCount);
+    lineOrigin = origin;
     if (indices.elementCount > 0) {
         std::memcpy(lineIndices.data(), (void *) indices.address, indices.elementCount * indices.bytesPerElement);
     }
@@ -54,7 +56,7 @@ void LineGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface>
     glUseProgram(program);
 
     positionHandle = glGetAttribLocation(program, "vPosition");
-    widthNormalHandle = glGetAttribLocation(program, "vWidthNormal");
+    lineOriginHandle = glGetAttribLocation(program, "vLineOrigin");
     pointAHandle = glGetAttribLocation(program, "vPointA");
     pointBHandle = glGetAttribLocation(program, "vPointB");
     vertexIndexHandle = glGetAttribLocation(program, "vVertexIndex");
@@ -77,6 +79,7 @@ void LineGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface>
 
     vpMatrixHandle = glGetUniformLocation(program, "uvpMatrix");
     mMatrixHandle = glGetUniformLocation(program, "umMatrix");
+    originOffsetHandle = glGetUniformLocation(program, "uOriginOffset");
     scaleFactorHandle = glGetUniformLocation(program, "scaleFactor");
 
     ready = true;
@@ -129,23 +132,24 @@ void LineGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface
     // Apply the projection and view transformation
     glUniformMatrix4fv(vpMatrixHandle, 1, false, (GLfloat *)vpMatrix);
     glUniformMatrix4fv(mMatrixHandle, 1, false, (GLfloat *)mMatrix);
+    glUniform4f(originOffsetHandle, lineOrigin.x - origin.x, lineOrigin.y - origin.y, lineOrigin.z - origin.z, 0.0);
     glUniform1f(scaleFactorHandle, screenPixelAsRealMeterFactor);
 
     shaderProgram->preRender(openGlContext);
 
     // Prepare the vertex attributes
     size_t floatSize = sizeof(GLfloat);
-    size_t sizeAttribGroup = floatSize * 2;
+    size_t sizeAttribGroup = floatSize * 3;
     size_t stride = sizeAttribGroup * 4 + 3 * floatSize;
     glBindBuffer(GL_ARRAY_BUFFER, vertexAttribBuffer);
     glEnableVertexAttribArray(positionHandle);
-    glVertexAttribPointer(positionHandle, 2, GL_FLOAT, false, stride, nullptr);
-    glEnableVertexAttribArray(widthNormalHandle);
-    glVertexAttribPointer(widthNormalHandle, 2, GL_FLOAT, false, stride, (float *)sizeAttribGroup);
+    glVertexAttribPointer(positionHandle, 3, GL_FLOAT, false, stride, nullptr);
     glEnableVertexAttribArray(pointAHandle);
-    glVertexAttribPointer(pointAHandle, 2, GL_FLOAT, false, stride, (float *)(sizeAttribGroup * 2));
+    glVertexAttribPointer(pointAHandle, 3, GL_FLOAT, false, stride, (float *)(sizeAttribGroup * 1));
     glEnableVertexAttribArray(pointBHandle);
-    glVertexAttribPointer(pointBHandle, 2, GL_FLOAT, false, stride, (float *)(sizeAttribGroup * 3));
+    glVertexAttribPointer(pointBHandle, 3, GL_FLOAT, false, stride, (float *)(sizeAttribGroup * 2));
+    glEnableVertexAttribArray(lineOriginHandle);
+    glVertexAttribPointer(lineOriginHandle, 3, GL_FLOAT, false, stride, (float *)(sizeAttribGroup * 3));
     glEnableVertexAttribArray(vertexIndexHandle);
     glVertexAttribPointer(vertexIndexHandle, 1, GL_FLOAT, false, stride, (float *)(sizeAttribGroup * 4));
     glEnableVertexAttribArray(segmentStartLPosHandle);
@@ -162,7 +166,7 @@ void LineGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface
 
     // Disable vertex array
     glDisableVertexAttribArray(positionHandle);
-    glDisableVertexAttribArray(widthNormalHandle);
+    glDisableVertexAttribArray(lineOriginHandle);
     glDisableVertexAttribArray(pointAHandle);
     glDisableVertexAttribArray(pointBHandle);
     glDisableVertexAttribArray(vertexIndexHandle);

@@ -29,7 +29,7 @@ class LineGroup2dOpenGl : public GraphicsObjectInterface,
 
     // LineGroup2dInterface
 
-    virtual void setLines(const ::SharedBytes & lines, const ::SharedBytes & indices) override;
+    virtual void setLines(const ::SharedBytes & lines, const ::SharedBytes & indices, const Vec3D &origin) override;
 
     virtual std::shared_ptr<GraphicsObjectInterface> asGraphicsObject() override;
 
@@ -57,9 +57,10 @@ protected:
 
     int vpMatrixHandle;
     int mMatrixHandle;
+    int originOffsetHandle;
     int scaleFactorHandle;
     int positionHandle;
-    int widthNormalHandle;
+    int lineOriginHandle;
     int pointAHandle;
     int pointBHandle;
     int vertexIndexHandle;
@@ -70,6 +71,7 @@ protected:
     GLuint indexBuffer = -1;
     std::vector<GLuint> lineIndices;
     bool glDataBuffersGenerated = false;
+    Vec3D lineOrigin = Vec3D(0.0, 0.0, 0.0);
 
     bool ready = false;
     bool dataReady = false;
