@@ -47,7 +47,7 @@ final class PolygonPatternGroup2d: BaseGraphicsObject, @unchecked Sendable {
                          renderPass pass: MCRenderPassConfig,
                          vpMatrix: Int64,
                          mMatrix: Int64,
-                origin: MCVec3D,
+                         origin: MCVec3D,
                          isMasked: Bool,
                          screenPixelAsRealMeterFactor: Double) {
         lock.lock()

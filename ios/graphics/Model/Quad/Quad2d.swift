@@ -144,8 +144,8 @@ final class Quad2d: BaseGraphicsObject, @unchecked Sendable {
                 0
             )
         }
-        encoder.setVertexBuffer(originOffsetBuffer, offset: 0, index: 4)
-        
+        encoder.setVertexBuffer(originOffsetBuffer, offset: 0, index: 3)
+
         encoder.setFragmentSamplerState(sampler, index: 0)
 
         if let texture {
@@ -203,7 +203,7 @@ extension Quad2d: MCQuad2dInterface {
 
 
     func setFrame(_ frame: MCQuad3dD, textureCoordinates: MCRectD, origin: MCVec3D, is3d: Bool) {
-        var vertices: [Vertex3D] = []
+        var vertices: [Vertex3DTexture] = []
         var indices: [UInt16] = []
 
         let sFactor = lock.withCritical { subdivisionFactor }
@@ -232,10 +232,10 @@ extension Quad2d: MCQuad2dInterface {
              Where A-C are joined to form two triangles
              */
             vertices = [
-                Vertex3D(position: transform(frame.bottomLeft), textureU: textureCoordinates.xF, textureV: textureCoordinates.yF + textureCoordinates.heightF), // A
-                Vertex3D(position: transform(frame.topLeft), textureU: textureCoordinates.xF, textureV: textureCoordinates.yF), // B
-                Vertex3D(position: transform(frame.topRight), textureU: textureCoordinates.xF + textureCoordinates.widthF, textureV: textureCoordinates.yF), // C
-                Vertex3D(position: transform(frame.bottomRight), textureU: textureCoordinates.xF + textureCoordinates.widthF, textureV: textureCoordinates.yF + textureCoordinates.heightF), // D
+                Vertex3DTexture(position: transform(frame.bottomLeft), textureU: textureCoordinates.xF, textureV: textureCoordinates.yF + textureCoordinates.heightF), // A
+                Vertex3DTexture(position: transform(frame.topLeft), textureU: textureCoordinates.xF, textureV: textureCoordinates.yF), // B
+                Vertex3DTexture(position: transform(frame.topRight), textureU: textureCoordinates.xF + textureCoordinates.widthF, textureV: textureCoordinates.yF), // C
+                Vertex3DTexture(position: transform(frame.bottomRight), textureU: textureCoordinates.xF + textureCoordinates.widthF, textureV: textureCoordinates.yF + textureCoordinates.heightF), // D
             ]
             indices = [
                 0, 2, 1, // ACB
@@ -270,7 +270,7 @@ extension Quad2d: MCQuad2dInterface {
                     let u: Float = Float(textureCoordinates.x + pcR * textureCoordinates.width)
                     let v: Float = Float(textureCoordinates.y + pcD * textureCoordinates.height)
 
-                    vertices.append(Vertex3D(position: transform(.init(x: originX + deltaDX, y: originY + deltaDY, z: originZ + deltaDZ)), textureU: u, textureV: v))
+                    vertices.append(Vertex3DTexture(position: transform(.init(x: originX + deltaDX, y: originY + deltaDY, z: originZ + deltaDZ)), textureU: u, textureV: v))
 
                     if iR < numSubd && iD < numSubd {
                         let baseInd = UInt16(iD + (iR * (numSubd + 1)))
@@ -286,7 +286,7 @@ extension Quad2d: MCQuad2dInterface {
             self.tileOrigin = origin
             self.frame = frame
             self.textureCoordinates = textureCoordinates
-            self.verticesBuffer.copyOrCreate(bytes: vertices, length: MemoryLayout<Vertex3D>.stride * vertices.count, device: device)
+            self.verticesBuffer.copyOrCreate(bytes: vertices, length: MemoryLayout<Vertex3DTexture>.stride * vertices.count, device: device)
             self.indicesBuffer.copyOrCreate(bytes: indices, length: MemoryLayout<UInt16>.stride * indices.count, device: device)
             if self.verticesBuffer != nil, self.indicesBuffer != nil {
                 self.indicesCount = indices.count

@@ -1456,15 +1456,31 @@ double MapCamera3d::mapUnitsFromPixels(double distancePx) {
     if (validVpMatrix && sizeViewport.x != 0 && sizeViewport.y != 0) {
         Coord focusRenderCoord = conversionHelper->convertToRenderSystem(getCenterPosition());
 
+        auto projectedFP = projectedPoint(convertToCartesianCoordinates(focusRenderCoord));
+
+        double longitude = focusRenderCoord.x;
+        double latitude = focusRenderCoord.y;
+        double lo = (longitude - 90.0) * M_PI / 180.0;
+        double la = latitude * M_PI / 180.0;
+        double x = -(1.0 * sin(lo) * cos(la));
+        double y = (-1.0 * sin(lo) * sin(la)) ;
+        double z = -(1.0 * cos(lo));
+
         float sampleSize = M_PI / 180.0;
         std::vector<float> posOne = {(float) (focusRenderCoord.z * sin(focusRenderCoord.y) * cos(focusRenderCoord.x)),
             (float) (focusRenderCoord.z * cos(focusRenderCoord.y)),
             (float) (-focusRenderCoord.z * sin(focusRenderCoord.y) * sin(focusRenderCoord.x)),
             1.0};
+        posOne[0] += x;
+        posOne[1] += y;
+        posOne[2] += z;
         std::vector<float> posTwo = {(float) (focusRenderCoord.z * sin(focusRenderCoord.y + sampleSize) * cos(focusRenderCoord.x + sampleSize)),
             (float) (focusRenderCoord.z * cos(focusRenderCoord.y + sampleSize)),
             (float) (-focusRenderCoord.z * sin(focusRenderCoord.y + sampleSize) * sin(focusRenderCoord.x + sampleSize)),
             1.0};
+        posTwo[0] += x;
+        posTwo[1] += y;
+        posTwo[2] += z;
         auto projectedOne = Matrix::multiply(vpMatrix, posOne);
         auto projectedTwo = Matrix::multiply(vpMatrix, posTwo);
         projectedOne[0] /= projectedOne[3];

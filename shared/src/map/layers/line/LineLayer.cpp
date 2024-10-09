@@ -93,11 +93,11 @@ void LineLayer::add(const std::shared_ptr<LineInfoInterface> &line) {
     auto shader = mapInterface->is3d() ? shaderFactory->createUnitSphereLineGroupShader() : shaderFactory->createLineGroupShader();
     auto lineGraphicsObject = objectFactory->createLineGroup(shader->asShaderProgramInterface());
 
-    auto lineObject = std::make_shared<Line2dLayerObject>(mapInterface->getCoordinateConverterHelper(), lineGraphicsObject, shader);
+    auto lineObject = std::make_shared<Line2dLayerObject>(mapInterface->getCoordinateConverterHelper(), lineGraphicsObject, shader, mapInterface->is3d());
 
     lineObject->setStyle(line->getStyle());
 
-    lineObject->setPositions(line->getCoordinates());
+    lineObject->setPositions(line->getCoordinates(), Vec3D(0, 0, 0));// PRECISION-ISSUE TODO
 
     std::weak_ptr<LineLayer> weakSelfPtr = std::dynamic_pointer_cast<LineLayer>(shared_from_this());
     scheduler->addTask(std::make_shared<LambdaTask>(

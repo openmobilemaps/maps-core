@@ -27,7 +27,7 @@ class PolygonGroupShader: BaseShader, @unchecked Sendable {
 
     override func setupProgram(_: MCRenderingContextInterface?) {
         if pipeline == nil {
-            let t: PipelineType = isStriped ? .polygonStripedGroupShader : (isUnitSphere ? .unitSpherePolygonGroupShader : .polygonGroupShader)
+            let t: PipelineType = isStriped ? .polygonStripedGroupShader : .polygonGroupShader
             pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: t, blendMode: blendMode).json)
         }
     }

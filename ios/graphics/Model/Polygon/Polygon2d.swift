@@ -98,7 +98,7 @@ final class Polygon2d: BaseGraphicsObject, @unchecked Sendable {
                 0
             )
         }
-        encoder.setVertexBuffer(originOffsetBuffer, offset: 0, index: 4)
+        encoder.setVertexBuffer(originOffsetBuffer, offset: 0, index: 3)
 
         encoder.drawIndexedPrimitives(type: .triangle,
                                       indexCount: indicesCount,
@@ -180,7 +180,7 @@ extension Polygon2d: MCMaskingObjectInterface {
                 0
             )
         }
-        encoder.setVertexBuffer(originOffsetBuffer, offset: 0, index: 4)
+        encoder.setVertexBuffer(originOffsetBuffer, offset: 0, index: 3)
 
         encoder.drawIndexedPrimitives(type: .triangle,
                                       indexCount: indicesCount,

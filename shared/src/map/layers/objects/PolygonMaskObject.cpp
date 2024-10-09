@@ -96,10 +96,6 @@ void PolygonMaskObject::setPolygons(const std::vector<::PolygonCoord> &polygons,
         vertices.push_back(z);
     #ifdef __APPLE__
         vertices.push_back(0.0f);
-        vertices.push_back(0.0f);
-        vertices.push_back(0.0f);
-        vertices.push_back(0.0f);
-        vertices.push_back(0.0f);
     #endif
     }
 

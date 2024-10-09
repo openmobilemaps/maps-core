@@ -23,7 +23,7 @@ struct RasterStyle {
 };
 
 vertex VertexOut
-rasterVertexShader(const Vertex3DIn vertexIn [[stage_in]],
+rasterVertexShader(const Vertex3DTextureIn vertexIn [[stage_in]],
                  constant float4x4 &mvpMatrix [[buffer(1)]])
 {
     VertexOut out {

@@ -11,6 +11,7 @@
 import Foundation
 import MapCoreSharedModule
 import Metal
+import simd
 
 final class LineGroup2d: BaseGraphicsObject, @unchecked Sendable {
     private var shader: LineGroupShader
@@ -23,6 +24,9 @@ final class LineGroup2d: BaseGraphicsObject, @unchecked Sendable {
     private var maskedStencilState: MTLDepthStencilState?
 
     private var customScreenPixelFactor: Float = 0
+    private var tileOrigin: MCVec3D = .init(x: 0, y: 0, z: 0)
+    private var tileOriginBuffer: MTLBuffer?
+    private var originOffsetBuffer: MTLBuffer?
 
     init(shader: MCShaderProgramInterface, metalContext: MetalContext) {
         guard let shader = shader as? LineGroupShader else {
@@ -32,6 +36,9 @@ final class LineGroup2d: BaseGraphicsObject, @unchecked Sendable {
         super.init(device: metalContext.device,
                    sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue)!,
                    label: "LineGroup2d")
+        var originOffset: simd_float4 = simd_float4(0, 0, 0, 0)
+        originOffsetBuffer = metalContext.device.makeBuffer(bytes: &originOffset, length: MemoryLayout<simd_float4>.stride, options: [])
+        tileOriginBuffer = metalContext.device.makeBuffer(bytes: &originOffset, length: MemoryLayout<simd_float4>.stride, options: [])
     }
 
     private func setupStencilBufferDescriptor() {
@@ -115,6 +122,14 @@ final class LineGroup2d: BaseGraphicsObject, @unchecked Sendable {
             encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
         }
 
+        if let bufferPointer = originOffsetBuffer?.contents().assumingMemoryBound(to: simd_float4.self) {
+            bufferPointer.pointee.x = Float(tileOrigin.x - origin.x)
+            bufferPointer.pointee.y = Float(tileOrigin.y - origin.y)
+            bufferPointer.pointee.z = Float(tileOrigin.z - origin.z)
+        }
+        encoder.setVertexBuffer(originOffsetBuffer, offset: 0, index: 5)
+        encoder.setVertexBuffer(tileOriginBuffer, offset: 0, index: 6)
+
         encoder.drawIndexedPrimitives(type: .triangle,
                                       indexCount: indicesCount,
                                       indexType: .uint32,
@@ -128,7 +143,7 @@ final class LineGroup2d: BaseGraphicsObject, @unchecked Sendable {
 }
 
 extension LineGroup2d: MCLineGroup2dInterface {
-    func setLines(_ lines: MCSharedBytes, indices: MCSharedBytes) {
+    func setLines(_ lines: MCSharedBytes, indices: MCSharedBytes, origin: MCVec3D) {
         guard lines.elementCount != 0 else {
             lock.withCritical {
                 lineVerticesBuffer = nil
@@ -139,6 +154,12 @@ extension LineGroup2d: MCLineGroup2dInterface {
             return
         }
         lock.withCritical {
+            self.tileOrigin = origin
+            if let bufferPointer = tileOriginBuffer?.contents().assumingMemoryBound(to: simd_float4.self) {
+                bufferPointer.pointee.x = tileOrigin.xF
+                bufferPointer.pointee.y = tileOrigin.yF
+                bufferPointer.pointee.z = tileOrigin.zF
+            }
             self.lineVerticesBuffer.copyOrCreate(from: lines, device: device)
             self.lineIndicesBuffer.copyOrCreate(from: indices, device: device)
             if self.lineVerticesBuffer != nil, self.lineIndicesBuffer != nil {

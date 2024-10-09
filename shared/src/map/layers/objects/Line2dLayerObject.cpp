@@ -14,12 +14,14 @@
 
 Line2dLayerObject::Line2dLayerObject(const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                                      const std::shared_ptr<LineGroup2dInterface> &line,
-                                     const std::shared_ptr<LineGroupShaderInterface> &shader)
+                                     const std::shared_ptr<LineGroupShaderInterface> &shader,
+                                     bool is3d)
     : conversionHelper(conversionHelper)
     , line(line)
     , shader(shader)
     , style(ColorStateList(Color(0.0f,0.0f,0.0f,0.0f), Color(0.0f,0.0f,0.0f,0.0f)), ColorStateList(Color(0.0f,0.0f,0.0f,0.0f), Color(0.0f,0.0f,0.0f,0.0f)), 0.0, 0.0, SizeType::SCREEN_PIXEL, 0.0, std::vector<float>(), LineCapType::BUTT, 0.0, false, 1.0)
     , highlighted(false)
+    , is3d(is3d)
 {
     renderConfig = {std::make_shared<RenderConfig>(line->asGraphicsObject(), 0)};
 }
@@ -28,7 +30,7 @@ void Line2dLayerObject::update() {}
 
 std::vector<std::shared_ptr<RenderConfigInterface>> Line2dLayerObject::getRenderConfig() { return renderConfig; }
 
-void Line2dLayerObject::setPositions(const std::vector<Coord> &positions) {
+void Line2dLayerObject::setPositions(const std::vector<Coord> &positions, const Vec3D & origin) {
     std::vector<uint32_t> lineIndices;
     std::vector<float> lineAttributes;
 
@@ -36,13 +38,9 @@ void Line2dLayerObject::setPositions(const std::vector<Coord> &positions) {
     for (auto const &mapCoord : positions) {
         Coord renderCoord = conversionHelper->convertToRenderSystem(mapCoord);
 
-        const double rx = 0.711650 * 1.0;
-        const double ry = 0.287723 * 1.0;
-        const double rz = -0.639713 * 1.0;
-
-        double x = (1.0 * sin(renderCoord.y) * cos(renderCoord.x) - rx) ;
-        double y = (1.0 * cos(renderCoord.y) - ry) ;
-        double z = (-1.0 * sin(renderCoord.y) * sin(renderCoord.x) - rz) ;
+        double x = is3d ? 1.0 * sin(renderCoord.y) * cos(renderCoord.x) - origin.x : renderCoord.x - origin.x;
+        double y = is3d ?  1.0 * cos(renderCoord.y) - origin.y : renderCoord.y - origin.y;
+        double z = is3d ? -1.0 * sin(renderCoord.y) * sin(renderCoord.x) - origin.z : 0.0;
 
         renderCoords.push_back(Vec3D(x, y, z));
     }
@@ -160,7 +158,7 @@ void Line2dLayerObject::setPositions(const std::vector<Coord> &positions) {
     auto attributes = SharedBytes((int64_t) lineAttributes.data(), (int32_t) lineAttributes.size(), (int32_t) sizeof(float));
     auto indices = SharedBytes((int64_t) lineIndices.data(), (int32_t) lineIndices.size(), (int32_t) sizeof(uint32_t));
 
-    line->setLines(attributes, indices);
+    line->setLines(attributes, indices, origin);
 }
 
 void Line2dLayerObject::setStyle(const LineStyle &style_) {
