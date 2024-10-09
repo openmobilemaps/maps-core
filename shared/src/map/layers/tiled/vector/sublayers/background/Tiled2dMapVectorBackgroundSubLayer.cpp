@@ -55,16 +55,21 @@ void Tiled2dMapVectorBackgroundSubLayer::onAdded(const std::shared_ptr<MapInterf
                 (globeConverted.bottomRight.x - globeConverted.topLeft.x) / std::pow(2, SUBDIVISION_FACTOR_3D_DEFAULT)));
 
         for (const auto &v: vecVertices) {
-            vertices.push_back(v.x);
-            vertices.push_back(v.y);
-            vertices.push_back(0.0f);
+            double x = 1.0 * sin(v.y) * cos(v.x);
+            double y =  1.0 * cos(v.y);
+            double z = -1.0 * sin(v.y) * sin(v.x);
+
+            vertices.push_back(x);
+            vertices.push_back(y);
+            vertices.push_back(z);
+            vertices.push_back(0.0);
         }
     } else {
         vertices = {
-            -1,  1, 0,//A
-             1,  1, 0,//B
-             1, -1, 0,//C
-            -1, -1, 0 //D
+            -1,  1, 0, 0,//A
+             1,  1, 0, 0,//B
+             1, -1, 0, 0,//C
+            -1, -1, 0, 0 //D
         };
     }
 

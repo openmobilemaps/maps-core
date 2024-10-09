@@ -62,9 +62,9 @@ void Textured2dLayerObject::setPosition(const ::Coord &coord, double width, doub
 void Textured2dLayerObject::setPositions(const ::QuadCoord &coords) {
     QuadCoord renderCoords = conversionHelper->convertQuadToRenderSystem(coords);
 
-    double cx = (renderCoords.bottomRight.x + renderCoords.topLeft.x) / 2.0;
-    double cy = (renderCoords.bottomRight.y + renderCoords.topLeft.y) / 2.0;
-    double cz = 0.0;
+    const double cx = (renderCoords.bottomRight.x + renderCoords.topLeft.x) / 2.0;
+    const double cy = (renderCoords.bottomRight.y + renderCoords.topLeft.y) / 2.0;
+    const double cz = 0.0;
 
     auto origin = Vec3D(cx, cy, cz);
 
@@ -75,9 +75,9 @@ void Textured2dLayerObject::setPositions(const ::QuadCoord &coords) {
     }
 
     auto transform = [&origin](const Coord coordinate) -> Vec3D {
-        double x = coordinate.x;
-        double y = coordinate.y;
-        double z = coordinate.z;
+        const double x = coordinate.x;
+        const double y = coordinate.y;
+        const double z = coordinate.z;
         return Vec3D(x, y, z);
     };
 

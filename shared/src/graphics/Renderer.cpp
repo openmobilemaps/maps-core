@@ -32,6 +32,7 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
     const auto vpMatrix = camera->getVpMatrix();
     const auto vpMatrixPointer = (int64_t)vpMatrix.data();
 	const auto origin = camera->getOrigin();
+    const auto zeroOrigin = Vec3D(0, 0, 0);
 
     const double factor = camera->getScalingFactor();
 
@@ -63,7 +64,7 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
             for (const auto &renderObject : renderObjects) {
                 const auto &graphicsObject = renderObject->getGraphicsObject();
                 if (renderObject->isScreenSpaceCoords()) {
-                    graphicsObject->render(renderingContext, pass->getRenderPassConfig(), identityMatrixPointer, identityMatrixPointer, origin, hasMask, factor);
+                    graphicsObject->render(renderingContext, pass->getRenderPassConfig(), identityMatrixPointer, identityMatrixPointer, zeroOrigin, hasMask, factor);
                 } else if (renderObject->hasCustomModelMatrix()) {
                     const auto mMatrix = renderObject->getCustomModelMatrix();
                     const auto mMatrixPointer = (int64_t)mMatrix.data();
