@@ -24,6 +24,7 @@
 #include "Logger.h"
 #include "CoordinateSystemIdentifiers.h"
 #include "CoordHelper.h"
+#include "VectorHelper.h"
 
 #include "MapCamera3DHelper.h"
 #include "Camera3dConfig.h"
@@ -443,84 +444,12 @@ std::tuple<std::vector<float>, std::vector<double>, Vec3D> MapCamera3d::getVpMat
     std::vector<double> newVpMatrix(16, 0.0);
     MatrixD::multiplyMM(newVpMatrix, 0, newProjectionMatrix, 0, newViewMatrix, 0);
 
-    std::vector<double> vpMatrixD = {
-            static_cast<double>(newVpMatrix[0]),
-            static_cast<double>(newVpMatrix[1]),
-            static_cast<double>(newVpMatrix[2]),
-            static_cast<double>(newVpMatrix[3]),
-            static_cast<double>(newVpMatrix[4]),
-            static_cast<double>(newVpMatrix[5]),
-            static_cast<double>(newVpMatrix[6]),
-            static_cast<double>(newVpMatrix[7]),
-            static_cast<double>(newVpMatrix[8]),
-            static_cast<double>(newVpMatrix[9]),
-            static_cast<double>(newVpMatrix[10]),
-            static_cast<double>(newVpMatrix[11]),
-            static_cast<double>(newVpMatrix[12]),
-            static_cast<double>(newVpMatrix[13]),
-            static_cast<double>(newVpMatrix[14]),
-            static_cast<double>(newVpMatrix[15])
-    };
     std::vector<double> newInverseMatrix(16, 0.0);
     gluInvertMatrix(newVpMatrix, newInverseMatrix);
 
-    std::vector<float> newVpMatrixF = {
-        static_cast<float>(newVpMatrix[0]),
-        static_cast<float>(newVpMatrix[1]),
-        static_cast<float>(newVpMatrix[2]),
-        static_cast<float>(newVpMatrix[3]),
-        static_cast<float>(newVpMatrix[4]),
-        static_cast<float>(newVpMatrix[5]),
-        static_cast<float>(newVpMatrix[6]),
-        static_cast<float>(newVpMatrix[7]),
-        static_cast<float>(newVpMatrix[8]),
-        static_cast<float>(newVpMatrix[9]),
-        static_cast<float>(newVpMatrix[10]),
-        static_cast<float>(newVpMatrix[11]),
-        static_cast<float>(newVpMatrix[12]),
-        static_cast<float>(newVpMatrix[13]),
-        static_cast<float>(newVpMatrix[14]),
-        static_cast<float>(newVpMatrix[15])
-    };
-
-    std::vector<float> newProjectionMatrixF = {
-        static_cast<float>(newProjectionMatrix[0]),
-        static_cast<float>(newProjectionMatrix[1]),
-        static_cast<float>(newProjectionMatrix[2]),
-        static_cast<float>(newProjectionMatrix[3]),
-        static_cast<float>(newProjectionMatrix[4]),
-        static_cast<float>(newProjectionMatrix[5]),
-        static_cast<float>(newProjectionMatrix[6]),
-        static_cast<float>(newProjectionMatrix[7]),
-        static_cast<float>(newProjectionMatrix[8]),
-        static_cast<float>(newProjectionMatrix[9]),
-        static_cast<float>(newProjectionMatrix[10]),
-        static_cast<float>(newProjectionMatrix[11]),
-        static_cast<float>(newProjectionMatrix[12]),
-        static_cast<float>(newProjectionMatrix[13]),
-        static_cast<float>(newProjectionMatrix[14]),
-        static_cast<float>(newProjectionMatrix[15])
-    };
-
-    std::vector<float> newViewMatrixF = {
-        static_cast<float>(newViewMatrix[0]),
-        static_cast<float>(newViewMatrix[1]),
-        static_cast<float>(newViewMatrix[2]),
-        static_cast<float>(newViewMatrix[3]),
-        static_cast<float>(newViewMatrix[4]),
-        static_cast<float>(newViewMatrix[5]),
-        static_cast<float>(newViewMatrix[6]),
-        static_cast<float>(newViewMatrix[7]),
-        static_cast<float>(newViewMatrix[8]),
-        static_cast<float>(newViewMatrix[9]),
-        static_cast<float>(newViewMatrix[10]),
-        static_cast<float>(newViewMatrix[11]),
-        static_cast<float>(newViewMatrix[12]),
-        static_cast<float>(newViewMatrix[13]),
-        static_cast<float>(newViewMatrix[14]),
-        static_cast<float>(newViewMatrix[15])
-    };
-
+    std::vector<float> newVpMatrixF = convertToFloat(newVpMatrix);
+    std::vector<float> newProjectionMatrixF = convertToFloat(newProjectionMatrix);
+    std::vector<float> newViewMatrixF = convertToFloat(newViewMatrix);
 
 
     if (updateVariables) {
@@ -528,7 +457,7 @@ std::tuple<std::vector<float>, std::vector<double>, Vec3D> MapCamera3d::getVpMat
         lastVpRotation = angle;
         lastVpZoom = zoom;
         vpMatrix = newVpMatrixF;
-        this->vpMatrixD = newVpMatrix;
+        vpMatrixD = newVpMatrix;
         inverseVPMatrix = newInverseMatrix;
         viewMatrix = newViewMatrixF;
         projectionMatrix = newProjectionMatrixF;
@@ -707,43 +636,8 @@ void MapCamera3d::notifyListeners(const int &listenerType) {
     for (auto listener : listeners) {
         if (listenerType & (ListenerType::BOUNDS | ListenerType::CAMERA_MODE)) {
 
-            std::vector<float> viewMatrixF = {
-                static_cast<float>(viewMatrix[0]),
-                static_cast<float>(viewMatrix[1]),
-                static_cast<float>(viewMatrix[2]),
-                static_cast<float>(viewMatrix[3]),
-                static_cast<float>(viewMatrix[4]),
-                static_cast<float>(viewMatrix[5]),
-                static_cast<float>(viewMatrix[6]),
-                static_cast<float>(viewMatrix[7]),
-                static_cast<float>(viewMatrix[8]),
-                static_cast<float>(viewMatrix[9]),
-                static_cast<float>(viewMatrix[10]),
-                static_cast<float>(viewMatrix[11]),
-                static_cast<float>(viewMatrix[12]),
-                static_cast<float>(viewMatrix[13]),
-                static_cast<float>(viewMatrix[14]),
-                static_cast<float>(viewMatrix[15])
-            };
-
-            std::vector<float> projectionMatrixF = {
-                static_cast<float>(projectionMatrix[0]),
-                static_cast<float>(projectionMatrix[1]),
-                static_cast<float>(projectionMatrix[2]),
-                static_cast<float>(projectionMatrix[3]),
-                static_cast<float>(projectionMatrix[4]),
-                static_cast<float>(projectionMatrix[5]),
-                static_cast<float>(projectionMatrix[6]),
-                static_cast<float>(projectionMatrix[7]),
-                static_cast<float>(projectionMatrix[8]),
-                static_cast<float>(projectionMatrix[9]),
-                static_cast<float>(projectionMatrix[10]),
-                static_cast<float>(projectionMatrix[11]),
-                static_cast<float>(projectionMatrix[12]),
-                static_cast<float>(projectionMatrix[13]),
-                static_cast<float>(projectionMatrix[14]),
-                static_cast<float>(projectionMatrix[15])
-            };
+            std::vector<float> viewMatrixF = clone(viewMatrix);
+            std::vector<float> projectionMatrixF = clone(projectionMatrix);
 
             listener->onCameraChange(viewMatrixF, projectionMatrixF, origin, verticalFov, horizontalFov, width, height, focusPointAltitude, getCenterPosition(), getZoom(), getCameraMode());
         }
