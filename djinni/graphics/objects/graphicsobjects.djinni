@@ -63,7 +63,7 @@ quad_2d_interface = interface +c +j +o {
 }
 
 quad_2d_instanced_interface = interface +c +j +o {
-    set_frame(frame: quad_2d_d);
+    set_frame(frame: quad_2d_d, origin: vec_3_d);
 
     set_instance_count(count: i32);
     set_positions(positions: shared_bytes);
@@ -86,7 +86,7 @@ quad_2d_instanced_interface = interface +c +j +o {
 }
 
 quad_2d_stretched_instanced_interface = interface +c +j +o {
-    set_frame(frame: quad_2d_d);
+    set_frame(frame: quad_2d_d, origin: vec_3_d);
 
     set_instance_count(count: i32);
     set_positions(positions: shared_bytes);

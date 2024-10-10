@@ -13,6 +13,7 @@
 #include "Matrix.h"
 #include "RectF.h"
 #include "RectD.h"
+#include "Vec3D.h"
 #include "CircleF.h"
 #include "CollisionPrimitives.h"
 #include <vector>
@@ -90,6 +91,7 @@ public:
         const float halfHeight;
         const float sinNegGridAngle;
         const float cosNegGridAngle;
+        const Vec3D &origin;
 
         CollisionEnvironment(
                              const std::vector<float>& vpMatrix,
@@ -99,7 +101,8 @@ public:
                              const float halfWidth,
                              const float halfHeight,
                              const float sinNegGridAngle,
-                             const float cosNegGridAngle)
+                             const float cosNegGridAngle,
+                             const Vec3D &origin)
         : vpMatrix(vpMatrix),
         is3d(is3d),
         temp1(temp1),
@@ -107,7 +110,8 @@ public:
         halfWidth(halfWidth),
         halfHeight(halfHeight),
         sinNegGridAngle(sinNegGridAngle),
-        cosNegGridAngle(cosNegGridAngle)
+        cosNegGridAngle(cosNegGridAngle),
+        origin(origin)
         {}
     };
 
@@ -125,9 +129,11 @@ public:
 
             float earthCenterZ = env.temp1[2] / env.temp1[3];
 
-            env.temp2[0] = (float) (1.0 * sin(rectangle.anchorY) * cos(rectangle.anchorX));
-            env.temp2[1] = (float) (1.0 * cos(rectangle.anchorY));
-            env.temp2[2] = (float) (-1.0 * sin(rectangle.anchorY) * sin(rectangle.anchorX));
+            // PRECISION-ISSUE TODO add origin
+
+            env.temp2[0] = (float) (1.0 * sin(rectangle.anchorY) * cos(rectangle.anchorX)) + env.origin.x;
+            env.temp2[1] = (float) (1.0 * cos(rectangle.anchorY)) + env.origin.y;
+            env.temp2[2] = (float) (-1.0 * sin(rectangle.anchorY) * sin(rectangle.anchorX)) + env.origin.z;
             env.temp2[3] = 1.0;
 
             Matrix::multiply(env.vpMatrix, env.temp2, env.temp1);
@@ -152,8 +158,10 @@ public:
 
             return {float(originX - w / 2.0) , float(originY - h / 2.0), std::abs(w), std::abs(h)};
         } else {
-            env.temp2[0] = rectangle.x - rectangle.anchorX; // move x to the anchor
-            env.temp2[1] = rectangle.y - rectangle.anchorY;
+
+            // PRECISION-ISSUE TODO add origin
+            env.temp2[0] = (rectangle.x + env.origin.x) - rectangle.anchorX; // move x to the anchor
+            env.temp2[1] = (rectangle.y + env.origin.y) - rectangle.anchorY;
             env.temp2[2] = env.temp2[0] * env.cosNegGridAngle - env.temp2[1] * env.sinNegGridAngle; // rotate x
             env.temp2[3] = env.temp2[0] * env.sinNegGridAngle + env.temp2[1] * env.cosNegGridAngle;
             env.temp2[0] = env.temp2[2] + rectangle.anchorX; // move rotated x to correct location relative to the anchor

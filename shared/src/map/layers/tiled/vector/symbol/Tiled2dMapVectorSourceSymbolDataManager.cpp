@@ -765,8 +765,9 @@ bool Tiled2dMapVectorSourceSymbolDataManager::onClickConfirmed(const std::unorde
     const float halfHeight = viewportSize.y / 2.0;
     const float sinNegGridAngle = std::sin(rotation * M_PI / 180.0);
     const float cosNegGridAngle = std::cos(rotation * M_PI / 180.0);
+    auto const origin = camera->asCameraInterface()->getOrigin();
 
-    auto collisionEnvironment = CollisionUtil::CollisionEnvironment(vpMatrix, is3d, temp1, temp2, halfWidth, halfHeight, sinNegGridAngle, cosNegGridAngle);
+    auto collisionEnvironment = CollisionUtil::CollisionEnvironment(vpMatrix, is3d, temp1, temp2, halfWidth, halfHeight, sinNegGridAngle, cosNegGridAngle, origin);
 
     double zoomIdentifier = layerConfig->getZoomIdentifier(zoom);
 

@@ -74,18 +74,20 @@ void LineGroup2dLayerObject::setLines(const std::vector<std::tuple<std::vector<C
             // Vertex 4
             lineAttributes.push_back(pNext.x);
             lineAttributes.push_back(pNext.y);
-            lineAttributes.push_back(pNext.z);
+            if (is3d) {
+                lineAttributes.push_back(pNext.z);
+            }
 
             lineAttributes.push_back(p.x);
             lineAttributes.push_back(p.y);
-            lineAttributes.push_back(p.z);
+            if (is3d) {
+                lineAttributes.push_back(p.z);
+            }
             lineAttributes.push_back(pNext.x);
             lineAttributes.push_back(pNext.y);
-            lineAttributes.push_back(pNext.z);
-
-            lineAttributes.push_back(pNext.x + origin.x);
-            lineAttributes.push_back(pNext.y + origin.y);
-            lineAttributes.push_back(pNext.z + origin.z);
+            if (is3d) {
+                lineAttributes.push_back(pNext.z);
+            }
 
             lineAttributes.push_back(3);
             lineAttributes.push_back(prefixTotalLineLength);
@@ -94,19 +96,20 @@ void LineGroup2dLayerObject::setLines(const std::vector<std::tuple<std::vector<C
             // Vertex 3
             lineAttributes.push_back(pNext.x);
             lineAttributes.push_back(pNext.y);
-            lineAttributes.push_back(pNext.z);
+            if (is3d) {
+                lineAttributes.push_back(pNext.z);
+            }
 
             lineAttributes.push_back(p.x);
             lineAttributes.push_back(p.y);
-            lineAttributes.push_back(p.z);
+            if (is3d) {
+                lineAttributes.push_back(p.z);
+            }
             lineAttributes.push_back(pNext.x);
             lineAttributes.push_back(pNext.y);
-            lineAttributes.push_back(pNext.z);
-
-
-            lineAttributes.push_back(pNext.x + origin.x);
-            lineAttributes.push_back(pNext.y + origin.y);
-            lineAttributes.push_back(pNext.z + origin.z);
+            if (is3d) {
+                lineAttributes.push_back(pNext.z);
+            }
 
             lineAttributes.push_back(2);
             lineAttributes.push_back(prefixTotalLineLength);
@@ -115,18 +118,20 @@ void LineGroup2dLayerObject::setLines(const std::vector<std::tuple<std::vector<C
             // Vertex 2
             lineAttributes.push_back(p.x);
             lineAttributes.push_back(p.y);
-            lineAttributes.push_back(p.z);
+            if (is3d) {
+                lineAttributes.push_back(p.z);
+            }
 
             lineAttributes.push_back(p.x);
             lineAttributes.push_back(p.y);
-            lineAttributes.push_back(p.z);
+            if (is3d) {
+                lineAttributes.push_back(p.z);
+            }
             lineAttributes.push_back(pNext.x);
             lineAttributes.push_back(pNext.y);
-            lineAttributes.push_back(pNext.z);
-
-            lineAttributes.push_back(p.x + origin.x);
-            lineAttributes.push_back(p.y + origin.y);
-            lineAttributes.push_back(p.z + origin.z);
+            if (is3d) {
+                lineAttributes.push_back(pNext.z);
+            }
 
             lineAttributes.push_back(1);
             lineAttributes.push_back(prefixTotalLineLength);
@@ -136,19 +141,21 @@ void LineGroup2dLayerObject::setLines(const std::vector<std::tuple<std::vector<C
             // Position
             lineAttributes.push_back(p.x);
             lineAttributes.push_back(p.y);
-            lineAttributes.push_back(p.z);
+            if (is3d) {
+                lineAttributes.push_back(p.z);
+            }
 
             // Position pointA and pointB
             lineAttributes.push_back(p.x);
             lineAttributes.push_back(p.y);
-            lineAttributes.push_back(p.z);
+            if (is3d) {
+                lineAttributes.push_back(p.z);
+            }
             lineAttributes.push_back(pNext.x);
             lineAttributes.push_back(pNext.y);
-            lineAttributes.push_back(pNext.z);
-
-            lineAttributes.push_back(p.x + origin.x);
-            lineAttributes.push_back(p.y + origin.y);
-            lineAttributes.push_back(p.z + origin.z);
+            if (is3d) {
+                lineAttributes.push_back(pNext.z);
+            }
 
             // Vertex Index
             lineAttributes.push_back(0);

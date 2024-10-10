@@ -4,6 +4,7 @@
 #import "MCQuad2dD.h"
 #import "MCRenderingContextInterface.h"
 #import "MCSharedBytes.h"
+#import "MCVec3D.h"
 #import <Foundation/Foundation.h>
 @protocol MCGraphicsObjectInterface;
 @protocol MCMaskingObjectInterface;
@@ -12,7 +13,8 @@
 
 @protocol MCQuad2dInstancedInterface
 
-- (void)setFrame:(nonnull MCQuad2dD *)frame;
+- (void)setFrame:(nonnull MCQuad2dD *)frame
+          origin:(nonnull MCVec3D *)origin;
 
 - (void)setInstanceCount:(int32_t)count;
 

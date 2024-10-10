@@ -24,9 +24,7 @@ final class LineGroup2d: BaseGraphicsObject, @unchecked Sendable {
     private var maskedStencilState: MTLDepthStencilState?
 
     private var customScreenPixelFactor: Float = 0
-    private var tileOrigin: MCVec3D = .init(x: 0, y: 0, z: 0)
     private var tileOriginBuffer: MTLBuffer?
-    private var originOffsetBuffer: MTLBuffer?
 
     init(shader: MCShaderProgramInterface, metalContext: MetalContext) {
         guard let shader = shader as? LineGroupShader else {
@@ -37,7 +35,6 @@ final class LineGroup2d: BaseGraphicsObject, @unchecked Sendable {
                    sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue)!,
                    label: "LineGroup2d")
         var originOffset: simd_float4 = simd_float4(0, 0, 0, 0)
-        originOffsetBuffer = metalContext.device.makeBuffer(bytes: &originOffset, length: MemoryLayout<simd_float4>.stride, options: [])
         tileOriginBuffer = metalContext.device.makeBuffer(bytes: &originOffset, length: MemoryLayout<simd_float4>.stride, options: [])
     }
 
@@ -123,9 +120,9 @@ final class LineGroup2d: BaseGraphicsObject, @unchecked Sendable {
         }
 
         if let bufferPointer = originOffsetBuffer?.contents().assumingMemoryBound(to: simd_float4.self) {
-            bufferPointer.pointee.x = Float(tileOrigin.x - origin.x)
-            bufferPointer.pointee.y = Float(tileOrigin.y - origin.y)
-            bufferPointer.pointee.z = Float(tileOrigin.z - origin.z)
+            bufferPointer.pointee.x = Float(originOffset.x - origin.x)
+            bufferPointer.pointee.y = Float(originOffset.y - origin.y)
+            bufferPointer.pointee.z = Float(originOffset.z - origin.z)
         }
         encoder.setVertexBuffer(originOffsetBuffer, offset: 0, index: 5)
         encoder.setVertexBuffer(tileOriginBuffer, offset: 0, index: 6)
@@ -154,11 +151,11 @@ extension LineGroup2d: MCLineGroup2dInterface {
             return
         }
         lock.withCritical {
-            self.tileOrigin = origin
+            self.originOffset = origin
             if let bufferPointer = tileOriginBuffer?.contents().assumingMemoryBound(to: simd_float4.self) {
-                bufferPointer.pointee.x = tileOrigin.xF
-                bufferPointer.pointee.y = tileOrigin.yF
-                bufferPointer.pointee.z = tileOrigin.zF
+                bufferPointer.pointee.x = originOffset.xF
+                bufferPointer.pointee.y = originOffset.yF
+                bufferPointer.pointee.z = originOffset.zF
             }
             self.lineVerticesBuffer.copyOrCreate(from: lines, device: device)
             self.lineIndicesBuffer.copyOrCreate(from: indices, device: device)

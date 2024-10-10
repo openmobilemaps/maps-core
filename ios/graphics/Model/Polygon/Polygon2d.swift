@@ -18,17 +18,13 @@ final class Polygon2d: BaseGraphicsObject, @unchecked Sendable {
 
     private var verticesBuffer: MTLBuffer?
     private var indicesBuffer: MTLBuffer?
-    private var originOffsetBuffer: MTLBuffer?
     private var indicesCount: Int = 0
-    private var origin: MCVec3D?
 
     private var stencilState: MTLDepthStencilState?
     private var renderPassStencilState: MTLDepthStencilState?
 
     init(shader: MCShaderProgramInterface, metalContext: MetalContext) {
         self.shader = shader
-        var originOffset: simd_float4 = simd_float4(0, 0, 0, 0)
-        originOffsetBuffer = metalContext.device.makeBuffer(bytes: &originOffset, length: MemoryLayout<simd_float4>.stride, options: [])
         super.init(device: metalContext.device,
                    sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue)!,
                    label: "Polygon2d")
@@ -48,8 +44,7 @@ final class Polygon2d: BaseGraphicsObject, @unchecked Sendable {
         }
 
         guard let verticesBuffer,
-              let indicesBuffer,
-              let tileOrigin = self.origin
+              let indicesBuffer
         else { return }
 
 #if DEBUG
@@ -92,9 +87,9 @@ final class Polygon2d: BaseGraphicsObject, @unchecked Sendable {
         }
         if let bufferPointer = originOffsetBuffer?.contents().assumingMemoryBound(to: simd_float4.self) {
             bufferPointer.pointee = simd_float4(
-                Float(tileOrigin.x - origin.x),
-                Float(tileOrigin.y - origin.y),
-                Float(tileOrigin.z - origin.z),
+                Float(originOffset.x - origin.x),
+                Float(originOffset.y - origin.y),
+                Float(originOffset.z - origin.z),
                 0
             )
         }
@@ -142,8 +137,7 @@ extension Polygon2d: MCMaskingObjectInterface {
               let encoder = context.encoder else { return }
 
         guard let verticesBuffer,
-              let indicesBuffer,
-              let tileOrigin = self.origin
+              let indicesBuffer
         else { return }
 
 #if DEBUG
@@ -174,9 +168,9 @@ extension Polygon2d: MCMaskingObjectInterface {
 
         if let bufferPointer = originOffsetBuffer?.contents().assumingMemoryBound(to: simd_float4.self) {
             bufferPointer.pointee = simd_float4(
-                Float(tileOrigin.x - origin.x),
-                Float(tileOrigin.y - origin.y),
-                Float(tileOrigin.z - origin.z),
+                Float(originOffset.x - origin.x),
+                Float(originOffset.y - origin.y),
+                Float(originOffset.z - origin.z),
                 0
             )
         }
@@ -200,7 +194,7 @@ extension Polygon2d: MCPolygon2dInterface {
             } else {
                 self.indicesCount = 0
             }
-            self.origin = origin
+            self.originOffset = origin
         }
     }
 

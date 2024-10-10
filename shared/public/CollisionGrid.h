@@ -12,6 +12,7 @@
 
 #include "Matrix.h"
 #include "RectF.h"
+#include "Vec3D.h"
 #include "CircleF.h"
 #include "CollisionPrimitives.h"
 #include "CollisionUtil.h"
@@ -49,12 +50,13 @@ public:
 
 class CollisionGrid {
 public:
-    CollisionGrid(const std::vector<float> &vpMatrix, const Vec2I &size, float gridAngle, bool alwaysInsert, bool is3d)
+    CollisionGrid(const std::vector<float> &vpMatrix, const Vec2I &size, float gridAngle, bool alwaysInsert, bool is3d, const Vec3D &origin)
             : vpMatrix(vpMatrix), size(size),
               sinNegGridAngle(std::sin(-gridAngle * M_PI / 180.0)),
               cosNegGridAngle(std::cos(-gridAngle * M_PI / 180.0)),
               alwaysInsert(alwaysInsert),
-              is3d(is3d) {
+              is3d(is3d),
+              origin(origin) {
         cellSize = std::min(size.x, size.y) / (float) numCellsMinDim;
         numCellsX = (cellSize > 0 ? std::ceil(size.x / cellSize) : 0.0) + 2 * numCellsPadding;
         numCellsY = (cellSize > 0 ? std::ceil(size.y / cellSize) : 0.0) + 2 * numCellsPadding;
@@ -74,7 +76,7 @@ public:
      * return true (1) if collision, or true (2) if outside of bounds
      */
     uint8_t addAndCheckCollisionAlignedRect(const CollisionRectF &rectangle) {
-        CollisionUtil::CollisionEnvironment env(vpMatrix, is3d, temp1, temp2, halfWidth, halfHeight, sinNegGridAngle, cosNegGridAngle);
+        CollisionUtil::CollisionEnvironment env(vpMatrix, is3d, temp1, temp2, halfWidth, halfHeight, sinNegGridAngle, cosNegGridAngle, origin);
         const RectF &projectedRectangle = CollisionUtil::getProjectedRectangle(rectangle, env);;
         const IndexRange &indexRange = getIndexRangeForRectangle(projectedRectangle);
         if (!indexRange.isValid(numCellsX - 1, numCellsY - 1)) {
@@ -349,6 +351,8 @@ public:
 
     bool alwaysInsert = false;
     bool is3d;
+
+    const Vec3D origin;
 
     std::vector<float> temp1 = {0, 0, 0, 0}, temp2 = {0, 0, 0, 0};
 };

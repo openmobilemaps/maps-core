@@ -23,6 +23,7 @@
 #include "TextLayerObject.h" // TODO: remove usage of TextLayerObject (and File)
 #include "Tiled2dMapVectorLayerConfig.h"
 #include "CollisionGrid.h"
+#include "Vec3D.h"
 #include "SymbolAnimationCoordinatorMap.h"
 
 class Tiled2dMapVectorSymbolObject {
@@ -110,6 +111,8 @@ public:
     size_t customTexturePage = 0;
     int customTextureOffset = 0;
     std::string stringIdentifier;
+
+    Vec3D origin = Vec3D(0,0,0);
 
 private:
     double lastZoomEvaluation = -1;

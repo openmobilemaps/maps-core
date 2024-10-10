@@ -240,4 +240,6 @@ protected:
     RectCoord getRectFromViewport(const Vec2I &sizeViewport, const Coord &center);
 
     std::vector<float> newVpMatrix = std::vector<float>(16, 0.0);
+
+    Vec3D origin = Vec3D(0, 0, 0);
 };

@@ -89,7 +89,7 @@ void PolygonMaskObject::setPolygons(const std::vector<::PolygonCoord> &polygons,
 
         double x = is3D ? (1.0 * sin(v.y) * cos(v.x) - rx) : v.x - rx ;
         double y = is3D ? (1.0 * cos(v.y) - ry) : v.y - ry;
-        double z = is3D ? (-1.0 * sin(v.y) * sin(v.x) - rz) : 1.0;
+        double z = is3D ? (-1.0 * sin(v.y) * sin(v.x) - rz) : 0.0;
 
         vertices.push_back(x);
         vertices.push_back(y);

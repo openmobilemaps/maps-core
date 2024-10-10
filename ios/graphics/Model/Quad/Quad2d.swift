@@ -18,7 +18,6 @@ final class Quad2d: BaseGraphicsObject, @unchecked Sendable {
     private var verticesBuffer: MTLBuffer?
 
     private var indicesBuffer: MTLBuffer?
-    private var tileOrigin: MCVec3D = .init(x: 0, y: 0, z: 0)
     private var is3d = false
 
     private var indicesCount: Int = 0
@@ -33,7 +32,6 @@ final class Quad2d: BaseGraphicsObject, @unchecked Sendable {
     private var renderAsMask = false
 
     private var subdivisionFactor: Int32 = 0
-    private var originOffsetBuffer: MTLBuffer?
 
     private var frame: MCQuad3dD?
     private var textureCoordinates: MCRectD?
@@ -43,8 +41,6 @@ final class Quad2d: BaseGraphicsObject, @unchecked Sendable {
         super.init(device: metalContext.device,
                    sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue)!,
                    label: label)
-        var originOffset: simd_float4 = simd_float4(0, 0, 0, 0)
-        originOffsetBuffer = metalContext.device.makeBuffer(bytes: &originOffset, length: MemoryLayout<simd_float4>.stride, options: [])
     }
 
     private func setupStencilStates() {
@@ -138,9 +134,9 @@ final class Quad2d: BaseGraphicsObject, @unchecked Sendable {
 
         if let bufferPointer = originOffsetBuffer?.contents().assumingMemoryBound(to: simd_float4.self) {
             bufferPointer.pointee = simd_float4(
-                Float(tileOrigin.x - origin.x),
-                Float(tileOrigin.y - origin.y),
-                Float(tileOrigin.z - origin.z),
+                Float(originOffset.x - origin.x),
+                Float(originOffset.y - origin.y),
+                Float(originOffset.z - origin.z),
                 0
             )
         }
@@ -197,7 +193,7 @@ extension Quad2d: MCQuad2dInterface {
         }
         if let frame = optFrame,
            let textureCoordinates = optTextureCoordinates {
-            setFrame(frame, textureCoordinates: textureCoordinates, origin: self.tileOrigin, is3d: is3d)
+            setFrame(frame, textureCoordinates: textureCoordinates, origin: self.originOffset, is3d: is3d)
         }
     }
 
@@ -283,7 +279,7 @@ extension Quad2d: MCQuad2dInterface {
 
         lock.withCritical {
             self.is3d = is3d
-            self.tileOrigin = origin
+            self.originOffset = origin
             self.frame = frame
             self.textureCoordinates = textureCoordinates
             self.verticesBuffer.copyOrCreate(bytes: vertices, length: MemoryLayout<Vertex3DTexture>.stride * vertices.count, device: device)

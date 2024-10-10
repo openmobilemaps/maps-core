@@ -18,9 +18,7 @@ final class PolygonGroup2d: BaseGraphicsObject, @unchecked Sendable {
 
     private var verticesBuffer: MTLBuffer?
     private var indicesBuffer: MTLBuffer?
-    private var originOffsetBuffer: MTLBuffer?
     private var indicesCount: Int = 0
-    private var origin: MCVec3D?
 
     private var stencilState: MTLDepthStencilState?
     private var renderPassStencilState: MTLDepthStencilState?
@@ -31,8 +29,6 @@ final class PolygonGroup2d: BaseGraphicsObject, @unchecked Sendable {
             fatalError("PolygonGroup2d only supports PolygonGroupShader")
         }
         self.shader = shader
-        var originOffset: simd_float4 = simd_float4(0, 0, 0, 0)
-        originOffsetBuffer = metalContext.device.makeBuffer(bytes: &originOffset, length: MemoryLayout<simd_float4>.stride, options: [])
         super.init(device: metalContext.device,
                    sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue)!,
                    label: "PolygonGroup2d")
@@ -53,8 +49,7 @@ final class PolygonGroup2d: BaseGraphicsObject, @unchecked Sendable {
         }
 
         guard let verticesBuffer,
-              let indicesBuffer, shader.polygonStyleBuffer != nil,
-              let tileOrigin = self.origin
+              let indicesBuffer, shader.polygonStyleBuffer != nil
         else { return }
 
 
@@ -92,9 +87,9 @@ final class PolygonGroup2d: BaseGraphicsObject, @unchecked Sendable {
 
         if let bufferPointer = originOffsetBuffer?.contents().assumingMemoryBound(to: simd_float4.self) {
             bufferPointer.pointee = simd_float4(
-                Float(tileOrigin.x - origin.x),
-                Float(tileOrigin.y - origin.y),
-                Float(tileOrigin.z - origin.z),
+                Float(originOffset.x - origin.x),
+                Float(originOffset.y - origin.y),
+                Float(originOffset.z - origin.z),
                 0
             )
         }
@@ -123,7 +118,6 @@ extension PolygonGroup2d: MCPolygonGroup2dInterface {
                 self.indicesCount = 0
                 verticesBuffer = nil
                 indicesBuffer = nil
-                self.origin = nil
             }
             return
         }
@@ -153,7 +147,7 @@ extension PolygonGroup2d: MCPolygonGroup2dInterface {
             self.indicesCount = Int(indices.elementCount)
             self.verticesBuffer = verticesBuffer
             self.indicesBuffer = indicesBuffer
-            self.origin = origin
+            self.originOffset = origin
 
             if shader.isStriped {
                 self.posOffset.x = minX

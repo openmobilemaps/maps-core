@@ -57,10 +57,6 @@ void Line2dLayerObject::setPositions(const std::vector<Coord> &positions, const 
         float lengthNormalX = pNext.x - p.x;
         float lengthNormalY = pNext.y - p.y;
         float lineLength = std::sqrt(lengthNormalX * lengthNormalX + lengthNormalY * lengthNormalY);
-        lengthNormalX = lengthNormalX / lineLength;
-        lengthNormalY = lengthNormalY / lineLength;
-        float widthNormalX = -lengthNormalY;
-        float widthNormalY = lengthNormalX;
 
         // SegmentType (0 inner, 1 start, 2 end, 3 single segment) | lineStyleIndex
         // (each one Byte, i.e. up to 256 styles if supported by shader!)
@@ -69,21 +65,91 @@ void Line2dLayerObject::setPositions(const std::vector<Coord> &positions, const 
                 : (i == iSecondToLast ? (float) (2 << 8)
                 : 0.0)));
 
+        // Vertex 4
+        lineAttributes.push_back(pNext.x);
+        lineAttributes.push_back(pNext.y);
+        if (is3d) {
+            lineAttributes.push_back(pNext.z);
+        }
+
+        lineAttributes.push_back(p.x);
+        lineAttributes.push_back(p.y);
+        if (is3d) {
+            lineAttributes.push_back(p.z);
+        }
+        lineAttributes.push_back(pNext.x);
+        lineAttributes.push_back(pNext.y);
+        if (is3d) {
+            lineAttributes.push_back(pNext.z);
+        }
+
+        lineAttributes.push_back(3);
+        lineAttributes.push_back(prefixTotalLineLength);
+        lineAttributes.push_back(lineStyleInfo);
+
+        // Vertex 3
+        lineAttributes.push_back(pNext.x);
+        lineAttributes.push_back(pNext.y);
+        if (is3d) {
+            lineAttributes.push_back(pNext.z);
+        }
+
+        lineAttributes.push_back(p.x);
+        lineAttributes.push_back(p.y);
+        if (is3d) {
+            lineAttributes.push_back(p.z);
+        }
+        lineAttributes.push_back(pNext.x);
+        lineAttributes.push_back(pNext.y);
+        if (is3d) {
+            lineAttributes.push_back(pNext.z);
+        }
+
+        lineAttributes.push_back(2);
+        lineAttributes.push_back(prefixTotalLineLength);
+        lineAttributes.push_back(lineStyleInfo);
+
+        // Vertex 2
+        lineAttributes.push_back(p.x);
+        lineAttributes.push_back(p.y);
+        if (is3d) {
+            lineAttributes.push_back(p.z);
+        }
+
+        lineAttributes.push_back(p.x);
+        lineAttributes.push_back(p.y);
+        if (is3d) {
+            lineAttributes.push_back(p.z);
+        }
+        lineAttributes.push_back(pNext.x);
+        lineAttributes.push_back(pNext.y);
+        if (is3d) {
+            lineAttributes.push_back(pNext.z);
+        }
+
+        lineAttributes.push_back(1);
+        lineAttributes.push_back(prefixTotalLineLength);
+        lineAttributes.push_back(lineStyleInfo);
+
         // Vertex 1
         // Position
         lineAttributes.push_back(p.x);
         lineAttributes.push_back(p.y);
-        lineAttributes.push_back(p.z);
-
-        // Width normal
-        lineAttributes.push_back(widthNormalX);
-        lineAttributes.push_back(widthNormalY);
+        if (is3d) {
+            lineAttributes.push_back(p.z);
+        }
 
         // Position pointA and pointB
         lineAttributes.push_back(p.x);
         lineAttributes.push_back(p.y);
+        if (is3d) {
+            lineAttributes.push_back(p.z);
+        }
         lineAttributes.push_back(pNext.x);
         lineAttributes.push_back(pNext.y);
+        if (is3d) {
+            lineAttributes.push_back(pNext.z);
+        }
 
         // Vertex Index
         lineAttributes.push_back(0);
@@ -93,55 +159,6 @@ void Line2dLayerObject::setPositions(const std::vector<Coord> &positions, const 
 
         // Style Info
         lineAttributes.push_back(lineStyleInfo);
-
-        // Vertex 2
-        lineAttributes.push_back(p.x);
-        lineAttributes.push_back(p.y);
-
-        lineAttributes.push_back(widthNormalX);
-        lineAttributes.push_back(widthNormalY);
-
-        lineAttributes.push_back(p.x);
-        lineAttributes.push_back(p.y);
-        lineAttributes.push_back(pNext.x);
-        lineAttributes.push_back(pNext.y);
-
-        lineAttributes.push_back(1);
-        lineAttributes.push_back(prefixTotalLineLength);
-        lineAttributes.push_back(lineStyleInfo);
-
-        // Vertex 3
-        lineAttributes.push_back(pNext.x);
-        lineAttributes.push_back(pNext.y);
-
-        lineAttributes.push_back(widthNormalX);
-        lineAttributes.push_back(widthNormalY);
-
-        lineAttributes.push_back(p.x);
-        lineAttributes.push_back(p.y);
-        lineAttributes.push_back(pNext.x);
-        lineAttributes.push_back(pNext.y);
-
-        lineAttributes.push_back(2);
-        lineAttributes.push_back(prefixTotalLineLength);
-        lineAttributes.push_back(lineStyleInfo);
-
-        // Vertex 4
-        lineAttributes.push_back(pNext.x);
-        lineAttributes.push_back(pNext.y);
-
-        lineAttributes.push_back(widthNormalX);
-        lineAttributes.push_back(widthNormalY);
-
-        lineAttributes.push_back(p.x);
-        lineAttributes.push_back(p.y);
-        lineAttributes.push_back(pNext.x);
-        lineAttributes.push_back(pNext.y);
-
-        lineAttributes.push_back(3);
-        lineAttributes.push_back(prefixTotalLineLength);
-        lineAttributes.push_back(lineStyleInfo);
-
 
         // Vertex indices
         lineIndices.push_back(4 * i);

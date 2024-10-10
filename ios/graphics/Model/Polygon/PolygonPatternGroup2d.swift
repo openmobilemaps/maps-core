@@ -11,6 +11,7 @@
 import Foundation
 import MapCoreSharedModule
 import Metal
+import simd
 
 final class PolygonPatternGroup2d: BaseGraphicsObject, @unchecked Sendable {
     private var shader: PolygonPatternGroupShader
@@ -120,6 +121,16 @@ final class PolygonPatternGroup2d: BaseGraphicsObject, @unchecked Sendable {
         encoder.setFragmentBuffer(opacitiesBuffer, offset: 0, index: 0)
         encoder.setFragmentBuffer(textureCoordinatesBuffer, offset: 0, index: 1)
 
+        if let bufferPointer = originOffsetBuffer?.contents().assumingMemoryBound(to: simd_float4.self) {
+            bufferPointer.pointee = simd_float4(
+                Float(originOffset.x - origin.x),
+                Float(originOffset.y - origin.y),
+                Float(originOffset.z - origin.z),
+                0
+            )
+        }
+        encoder.setVertexBuffer(originOffsetBuffer, offset: 0, index: 4)
+
         encoder.drawIndexedPrimitives(type: .triangle,
                                       indexCount: indicesCount,
                                       indexType: .uint16,
@@ -164,6 +175,7 @@ extension PolygonPatternGroup2d: MCPolygonPatternGroup2dInterface {
             self.indicesBuffer = indicesBuffer
             self.posOffset.x = minX
             self.posOffset.y = minY
+            self.originOffset = origin
         }
     }
 
