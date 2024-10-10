@@ -52,6 +52,9 @@ coordinate_system_identifiers = interface +c {
 
     # e.g. urn:ogc:def:crs:EPSG:21781
     static from_crs_identifier(identifier: string): i32;
+
+    # Use supported coordinate system identifiers defined in this class
+	static unit_to_meter_factor(coordinate_system_identifier: i32) : f64;
 }
 
 map_coordinate_system = record {

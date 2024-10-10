@@ -46,5 +46,5 @@ public:
     static int32_t fromCrsIdentifier(const std::string & identifier);
 
     /** Use supported coordinate system identifiers defined in this class */
-    static double unitToMeterFactor(const int32_t coordinateSystemIdentifier);
+    static double unitToMeterFactor(int32_t coordinateSystemIdentifier);
 };

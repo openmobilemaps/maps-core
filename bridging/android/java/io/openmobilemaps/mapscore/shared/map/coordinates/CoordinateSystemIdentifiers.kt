@@ -29,6 +29,9 @@ abstract class CoordinateSystemIdentifiers {
 
         @JvmStatic
         external fun fromCrsIdentifier(identifier: String): Int
+
+        @JvmStatic
+        external fun unitToMeterFactor(coordinateSystemIdentifier: Int): Double
     }
 
     private class CppProxy : CoordinateSystemIdentifiers {
