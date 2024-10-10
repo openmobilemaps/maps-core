@@ -87,15 +87,16 @@ vertex InstancedVertexOut
 alphaInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
                            constant float4x4 &vpMatrix [[buffer(1)]],
                            constant float4x4 &mMatrix [[buffer(2)]],
-                           constant packed_float3 *positions [[buffer(3)]],
+                           constant float2 * positions [[buffer(3)]],
                            constant float2 *scales [[buffer(4)]],
                            constant float *rotations [[buffer(5)]],
                            constant float2 *texureCoordinates [[buffer(6)]],
                            constant float *alphas [[buffer(7)]],
-                           constant float2 *offset [[buffer(8)]],
+                           constant float2 *offsets [[buffer(8)]],
+                           constant float4 &originOffset [[buffer(9)]],
                            uint instanceId [[instance_id]])
 {
-  const float3 position = positions[instanceId];
+  const float2 position = positions[instanceId] + originOffset.xy;
   const float2 scale = scales[instanceId];
   const float rotation = rotations[instanceId];
 

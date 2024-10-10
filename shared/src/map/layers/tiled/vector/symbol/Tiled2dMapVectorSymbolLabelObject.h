@@ -53,7 +53,8 @@ public:
                                       std::shared_ptr<SymbolAnimationCoordinator> animationCoordinator,
                                       const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager,
                                       double dpFactor,
-                                      bool is3d);
+                                      bool is3d,
+                                      const Vec3D &tileOrigin);
 
     int getCharacterCount();
 
@@ -73,7 +74,11 @@ public:
     bool isOpaque = true;
 
     Vec2D dimensions = Vec2D(0.0, 0.0);
+    Vec3D tileOrigin = Vec3D(0,0,0);
+
 private:
+
+    void writePosition(const double x, const double y, const size_t offset, std::vector<float> &buffer);
 
     void updatePropertiesPoint(std::vector<float> &positions, std::vector<float> &referencePositions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, const Vec2I &viewportSize);
     double updatePropertiesLine(std::vector<float> &positions, std::vector<float> &referencePositions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, const Vec2I &viewportSize);
@@ -200,4 +205,5 @@ private:
 
     double dpFactor = 1.0;
     bool is3d;
+    int positionSize;
 };

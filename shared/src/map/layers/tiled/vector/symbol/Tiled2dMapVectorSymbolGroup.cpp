@@ -30,21 +30,29 @@ Tiled2dMapVectorSymbolGroup::Tiled2dMapVectorSymbolGroup(uint32_t groupId,
                                                          const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager,
                                                          const std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> &symbolDelegate,
                                                          const bool persistingSymbolPlacement)
-        : groupId(groupId),
-          mapInterface(mapInterface),
-          layerConfig(layerConfig),
-          tileInfo(tileInfo),
-          layerIdentifier(layerIdentifier),
-          layerDescription(layerDescription),
-          fontProvider(fontProvider),
-          featureStateManager(featureStateManager),
-          symbolDelegate(symbolDelegate),
-          usedKeys(layerDescription->getUsedKeys()),
-          persistingSymbolPlacement(persistingSymbolPlacement),
-          is3d(mapInterface.lock()->is3d()){
+: groupId(groupId),
+mapInterface(mapInterface),
+layerConfig(layerConfig),
+tileInfo(tileInfo),
+layerIdentifier(layerIdentifier),
+layerDescription(layerDescription),
+fontProvider(fontProvider),
+featureStateManager(featureStateManager),
+symbolDelegate(symbolDelegate),
+usedKeys(layerDescription->getUsedKeys()),
+persistingSymbolPlacement(persistingSymbolPlacement),
+tileOrigin(0, 0, 0),
+is3d(mapInterface.lock()->is3d()){
     if (auto strongMapInterface = mapInterface.lock()) {
         dpFactor = strongMapInterface->getCamera()->getScreenDensityPpi() / 160.0;
     }
+    auto convertedTileBounds = mapInterface.lock()->getCoordinateConverterHelper()->convertRectToRenderSystem(tileInfo.tileInfo.bounds);
+    double cx = (convertedTileBounds.bottomRight.x + convertedTileBounds.topLeft.x) / 2.0;
+    double cy = (convertedTileBounds.bottomRight.y + convertedTileBounds.topLeft.y) / 2.0;
+    double rx = is3d ? 1.0 * sin(cy) * cos(cx) : cx;
+    double ry = is3d ? 1.0 * cos(cy) : cy;
+    double rz = is3d ? -1.0 * sin(cy) * sin(cx) : 0.0;
+    tileOrigin = Vec3D(rx, ry, rz);
 }
 
 void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>> weakFeatures,
@@ -338,6 +346,8 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
         }
     }
 
+    int positionSize = is3d ? 3 : 2;
+
     Tiled2dMapVectorSymbolObject::SymbolObjectInstanceCounts instanceCounts{0, 0, 0};
     int textStyleCount = 0;
     for (auto const object: symbolObjects) {
@@ -366,7 +376,7 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
         iconAlphas.resize(instanceCounts.icons, 0.0);
         iconRotations.resize(instanceCounts.icons, 0.0);
         iconScales.resize(instanceCounts.icons * 2, 0.0);
-        iconPositions.resize(instanceCounts.icons * 3, 0.0);
+        iconPositions.resize(instanceCounts.icons * positionSize, 0.0);
         iconTextureCoordinates.resize(instanceCounts.icons * 4, 0.0);
         if (is3d) {
             iconOffsets.resize(instanceCounts.icons * 2, 0.0);
@@ -388,7 +398,7 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
         stretchedIconAlphas.resize(instanceCounts.stretchedIcons, 0.0);
         stretchedIconRotations.resize(instanceCounts.stretchedIcons, 0.0);
         stretchedIconScales.resize(instanceCounts.stretchedIcons * 2, 0.0);
-        stretchedIconPositions.resize(instanceCounts.stretchedIcons * 3, 0.0);
+        stretchedIconPositions.resize(instanceCounts.stretchedIcons * positionSize, 0.0);
         stretchedIconStretchInfos.resize(instanceCounts.stretchedIcons * 10, 1.0);
         stretchedIconTextureCoordinates.resize(instanceCounts.stretchedIcons * 4, 0.0);
     }
@@ -408,9 +418,9 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
         textStyleIndices.resize(instanceCounts.textCharacters, 0);
         textRotations.resize(instanceCounts.textCharacters, 0.0);
         textScales.resize(instanceCounts.textCharacters * 2, 0.0);
-        textPositions.resize(instanceCounts.textCharacters * 3, 0.0);
+        textPositions.resize(instanceCounts.textCharacters * 2, 0.0);
         if (is3d) {
-            textReferencePositions.resize(instanceCounts.textCharacters * 3, 0.0);
+            textReferencePositions.resize(instanceCounts.textCharacters * positionSize, 0.0);
         }
         textTextureCoordinates.resize(instanceCounts.textCharacters * 4, 0.0);
     }
@@ -462,22 +472,13 @@ void Tiled2dMapVectorSymbolGroup::setupObjects(const std::shared_ptr<SpriteData>
                                                const std::optional<WeakActor<Tiled2dMapVectorSourceSymbolDataManager>> &symbolDataManager) {
     const auto context = mapInterface.lock()->getRenderingContext();
 
-    auto convertedTileBounds = mapInterface.lock()->getCoordinateConverterHelper()->convertRectToRenderSystem(tileInfo.tileInfo.bounds);
-    double cx = (convertedTileBounds.bottomRight.x + convertedTileBounds.topLeft.x) / 2.0;
-    double cy = (convertedTileBounds.bottomRight.y + convertedTileBounds.topLeft.y) / 2.0;
-    double rx = is3d ? 1.0 * sin(cy) * cos(cx) : cx;
-    double ry = is3d ? 1.0 * cos(cy) : cy;
-    double rz = is3d ? -1.0 * sin(cy) * sin(cx) : 0.0;
-    auto origin = Vec3D(rx, ry, rz);
-
     int iconOffset = 0;
     int stretchedIconOffset = 0;
     int textOffset = 0;
     uint16_t textStyleOffset = 0;
 
     for (auto const &object: symbolObjects) {
-        object->origin = origin;
-        
+
         if (!object->hasCustomTexture && spriteTexture && spriteData) {
             object->setupIconProperties(iconPositions, iconRotations, iconTextureCoordinates, iconOffset, tileInfo.tileInfo.zoomIdentifier,
                                         spriteTexture, spriteData, std::nullopt);
@@ -503,7 +504,7 @@ void Tiled2dMapVectorSymbolGroup::setupObjects(const std::shared_ptr<SpriteData>
     }
 
     for (const auto &customDescriptor: customTextures) {
-        customDescriptor.renderObject->setFrame(Quad2dD(Vec2D(-0.5, 0.5), Vec2D(0.5, 0.5), Vec2D(0.5, -0.5), Vec2D(-0.5, -0.5)), origin);
+        customDescriptor.renderObject->setFrame(Quad2dD(Vec2D(-0.5, 0.5), Vec2D(0.5, 0.5), Vec2D(0.5, -0.5), Vec2D(-0.5, -0.5)), tileOrigin);
         customDescriptor.renderObject->loadTexture(context, customDescriptor.texture);
         customDescriptor.renderObject->asGraphicsObject()->setup(context);
 
@@ -514,7 +515,7 @@ void Tiled2dMapVectorSymbolGroup::setupObjects(const std::shared_ptr<SpriteData>
 
     if (spriteTexture && spriteData && iconInstancedObject) {
         if (this->spriteData == nullptr) {
-            iconInstancedObject->setFrame(Quad2dD(Vec2D(-0.5, 0.5), Vec2D(0.5, 0.5), Vec2D(0.5, -0.5), Vec2D(-0.5, -0.5)), origin);
+            iconInstancedObject->setFrame(Quad2dD(Vec2D(-0.5, 0.5), Vec2D(0.5, 0.5), Vec2D(0.5, -0.5), Vec2D(-0.5, -0.5)), tileOrigin);
             iconInstancedObject->loadTexture(context, spriteTexture);
             iconInstancedObject->asGraphicsObject()->setup(context);
         }
@@ -526,7 +527,7 @@ void Tiled2dMapVectorSymbolGroup::setupObjects(const std::shared_ptr<SpriteData>
 
     if (spriteTexture && spriteData && stretchedInstancedObject) {
         if (this->spriteData == nullptr) {
-            stretchedInstancedObject->setFrame(Quad2dD(Vec2D(-0.5, 0.5), Vec2D(0.5, 0.5), Vec2D(0.5, -0.5), Vec2D(-0.5, -0.5)), origin);
+            stretchedInstancedObject->setFrame(Quad2dD(Vec2D(-0.5, 0.5), Vec2D(0.5, 0.5), Vec2D(0.5, -0.5), Vec2D(-0.5, -0.5)), tileOrigin);
             stretchedInstancedObject->loadTexture(context, spriteTexture);
             stretchedInstancedObject->asGraphicsObject()->setup(context);
         }
@@ -540,7 +541,7 @@ void Tiled2dMapVectorSymbolGroup::setupObjects(const std::shared_ptr<SpriteData>
 
     if (textInstancedObject) {
         if (this->spriteData == nullptr) {
-            textInstancedObject->setFrame(Quad2dD(Vec2D(-0.5, 0.5), Vec2D(0.5, 0.5), Vec2D(0.5, -0.5), Vec2D(-0.5, -0.5)));
+            textInstancedObject->setFrame(Quad2dD(Vec2D(-0.5, 0.5), Vec2D(0.5, 0.5), Vec2D(0.5, -0.5), Vec2D(-0.5, -0.5)), tileOrigin);
             textInstancedObject->loadTexture(context, fontResult->imageData);
             textInstancedObject->asGraphicsObject()->setup(context);
         }
@@ -566,6 +567,8 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
     if (!isInitialized) {
         return;
     }
+
+    int positionSize = is3d ? 3 : 2;
     // icons
     if (!symbolObjects.empty()) {
 
@@ -594,7 +597,7 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
         for (const auto &customDescriptor: customTextures) {
             int32_t count = (int32_t)customDescriptor.featureIdentifiersUv.size();
             customDescriptor.renderObject->setPositions(
-                    SharedBytes((int64_t) customDescriptor.iconPositions.data(), (int32_t) count, 3 * (int32_t) sizeof(float)));
+                    SharedBytes((int64_t) customDescriptor.iconPositions.data(), (int32_t) count, positionSize * (int32_t) sizeof(float)));
             customDescriptor.renderObject->setAlphas(
                     SharedBytes((int64_t) customDescriptor.iconAlphas.data(), (int32_t) count, (int32_t) sizeof(float)));
             customDescriptor.renderObject->setScales(
@@ -610,7 +613,7 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
 
         if (iconInstancedObject) {
             iconInstancedObject->setPositions(
-                    SharedBytes((int64_t) iconPositions.data(), (int32_t) iconAlphas.size(), 3 * (int32_t) sizeof(float)));
+                    SharedBytes((int64_t) iconPositions.data(), (int32_t) iconAlphas.size(), positionSize * (int32_t) sizeof(float)));
             iconInstancedObject->setAlphas(
                     SharedBytes((int64_t) iconAlphas.data(), (int32_t) iconAlphas.size(), (int32_t) sizeof(float)));
             iconInstancedObject->setScales(
@@ -626,7 +629,7 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
         if (stretchedInstancedObject) {
             stretchedInstancedObject->setPositions(
                     SharedBytes((int64_t) stretchedIconPositions.data(), (int32_t) stretchedIconAlphas.size(),
-                                3 * (int32_t) sizeof(float)));
+                                positionSize * (int32_t) sizeof(float)));
             stretchedInstancedObject->setAlphas(
                     SharedBytes((int64_t) stretchedIconAlphas.data(), (int32_t) stretchedIconAlphas.size(),
                                 (int32_t) sizeof(float)));
@@ -643,10 +646,10 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
 
         if (textInstancedObject) {
             textInstancedObject->setPositions(
-                    SharedBytes((int64_t) textPositions.data(), (int32_t) textRotations.size(), 3 * (int32_t) sizeof(float)));
+                    SharedBytes((int64_t) textPositions.data(), (int32_t) textRotations.size(), 2 * (int32_t) sizeof(float)));
             if (is3d) {
                 textInstancedObject->setReferencePositions(
-                        SharedBytes((int64_t) textReferencePositions.data(), (int32_t) textRotations.size(), 3 * (int32_t) sizeof(float)));
+                        SharedBytes((int64_t) textReferencePositions.data(), (int32_t) textRotations.size(), positionSize * (int32_t) sizeof(float)));
             }
             textInstancedObject->setStyles(
                     SharedBytes((int64_t) textStyles.data(), (int32_t) textStyles.size() / 10, 10 * (int32_t) sizeof(float)));
@@ -812,7 +815,7 @@ Tiled2dMapVectorSymbolGroup::createSymbolObject(const Tiled2dMapVersionedTileInf
     auto symbolObject = std::make_shared<Tiled2dMapVectorSymbolObject>(mapInterface, layerConfig, fontProvider, tileInfo, layerIdentifier,
                                                           description, featureContext, text, fullText, coordinate, lineCoordinates,
                                                           fontList, textAnchor, angle, textJustify, textSymbolPlacement, hideIcon, animationCoordinatorMap,
-                                                          featureStateManager, usedKeys, symbolTileIndex, hasCustomTexture, dpFactor, persistingSymbolPlacement, is3d);
+                                                          featureStateManager, usedKeys, symbolTileIndex, hasCustomTexture, dpFactor, persistingSymbolPlacement, is3d, tileOrigin);
     symbolObject->setAlpha(alpha);
     const auto counts = symbolObject->getInstanceCounts();
     if (counts.icons + counts.stretchedIcons + counts.textCharacters == 0) {

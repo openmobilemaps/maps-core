@@ -86,12 +86,9 @@ final class PolygonGroup2d: BaseGraphicsObject, @unchecked Sendable {
         }
 
         if let bufferPointer = originOffsetBuffer?.contents().assumingMemoryBound(to: simd_float4.self) {
-            bufferPointer.pointee = simd_float4(
-                Float(originOffset.x - origin.x),
-                Float(originOffset.y - origin.y),
-                Float(originOffset.z - origin.z),
-                0
-            )
+            bufferPointer.pointee.x = Float(originOffset.x - origin.x)
+            bufferPointer.pointee.y = Float(originOffset.y - origin.y)
+            bufferPointer.pointee.z = Float(originOffset.z - origin.z)
         }
         encoder.setVertexBuffer(originOffsetBuffer, offset: 0, index: 2)
 

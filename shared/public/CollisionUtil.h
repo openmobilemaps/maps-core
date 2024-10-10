@@ -131,9 +131,9 @@ public:
 
             // PRECISION-ISSUE TODO add origin
 
-            env.temp2[0] = (float) (1.0 * sin(rectangle.anchorY) * cos(rectangle.anchorX)) + env.origin.x;
-            env.temp2[1] = (float) (1.0 * cos(rectangle.anchorY)) + env.origin.y;
-            env.temp2[2] = (float) (-1.0 * sin(rectangle.anchorY) * sin(rectangle.anchorX)) + env.origin.z;
+            env.temp2[0] = (float) (1.0 * sin(rectangle.anchorY) * cos(rectangle.anchorX))- env.origin.x;
+            env.temp2[1] = (float) (1.0 * cos(rectangle.anchorY)) - env.origin.y;
+            env.temp2[2] = (float) (-1.0 * sin(rectangle.anchorY) * sin(rectangle.anchorX)) - env.origin.z;
             env.temp2[3] = 1.0;
 
             Matrix::multiply(env.vpMatrix, env.temp2, env.temp1);
@@ -160,8 +160,8 @@ public:
         } else {
 
             // PRECISION-ISSUE TODO add origin
-            env.temp2[0] = (rectangle.x + env.origin.x) - rectangle.anchorX; // move x to the anchor
-            env.temp2[1] = (rectangle.y + env.origin.y) - rectangle.anchorY;
+            env.temp2[0] = (rectangle.x - env.origin.x) - rectangle.anchorX; // move x to the anchor
+            env.temp2[1] = (rectangle.y - env.origin.y) - rectangle.anchorY;
             env.temp2[2] = env.temp2[0] * env.cosNegGridAngle - env.temp2[1] * env.sinNegGridAngle; // rotate x
             env.temp2[3] = env.temp2[0] * env.sinNegGridAngle + env.temp2[1] * env.cosNegGridAngle;
             env.temp2[0] = env.temp2[2] + rectangle.anchorX; // move rotated x to correct location relative to the anchor

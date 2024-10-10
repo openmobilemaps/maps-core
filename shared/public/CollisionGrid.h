@@ -284,8 +284,8 @@ private:
     }
 
     CircleF getProjectedCircle(const CollisionCircleF &circle) {
-        temp2[0] = circle.x;
-        temp2[1] = circle.y;
+        temp2[0] = circle.x - origin.x;
+        temp2[1] = circle.y - origin.y;
         temp2[2] = 0.0;
         temp2[3] = 1.0;
         Matrix::multiply(vpMatrix, temp2, temp1);

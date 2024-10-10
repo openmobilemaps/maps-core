@@ -11,6 +11,7 @@
 import Foundation
 import MapCoreSharedModule
 import Metal
+import simd
 
 final class TextInstanced: BaseGraphicsObject, @unchecked Sendable {
     private var shader: TextInstancedShader
@@ -115,6 +116,13 @@ final class TextInstanced: BaseGraphicsObject, @unchecked Sendable {
             encoder.setVertexBuffer(referencePositionsBuffer, offset: 0, index: 8)
         }
 
+        if let bufferPointer = originOffsetBuffer?.contents().assumingMemoryBound(to: simd_float4.self) {
+            bufferPointer.pointee.x = Float(originOffset.x - origin.x)
+            bufferPointer.pointee.y = Float(originOffset.y - origin.y)
+            bufferPointer.pointee.z = Float(originOffset.z - origin.z)
+        }
+        encoder.setVertexBuffer(originOffsetBuffer, offset: 0, index: 9)
+
 
         encoder.setFragmentSamplerState(sampler, index: 0)
 
@@ -155,7 +163,7 @@ final class TextInstanced: BaseGraphicsObject, @unchecked Sendable {
 }
 
 extension TextInstanced: MCTextInstancedInterface {
-    func setFrame(_ frame: MCQuad2dD) {
+    func setFrame(_ frame: MCQuad2dD, origin: MCVec3D) {
         /*
          The quad is made out of 4 vertices as following
          B----C
@@ -180,7 +188,8 @@ extension TextInstanced: MCTextInstancedInterface {
         }
 
         lock.withCritical {
-            indicesCount = indices.count
+            self.originOffset = origin
+            self.indicesCount = indices.count
             self.verticesBuffer = verticesBuffer
             self.indicesBuffer = indicesBuffer
         }

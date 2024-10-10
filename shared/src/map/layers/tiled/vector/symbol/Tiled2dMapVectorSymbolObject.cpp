@@ -46,7 +46,8 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
                                                            const bool hasCustomTexture,
                                                            const double dpFactor,
                                                            const bool persistingSymbolPlacement,
-                                                           bool is3d) :
+                                                           bool is3d,
+                                                           const Vec3D &tileOrigin) :
     description(description),
     layerConfig(layerConfig),
     coordinate(coordinate),
@@ -60,6 +61,8 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
     hasCustomTexture(hasCustomTexture),
     dpFactor(dpFactor),
     is3d(is3d),
+    positionSize(is3d ? 3 : 2),
+    tileOrigin(tileOrigin),
     persistingSymbolPlacement(persistingSymbolPlacement) {
     auto strongMapInterface = mapInterface.lock();
     auto objectFactory = strongMapInterface ? strongMapInterface->getGraphicsObjectFactory() : nullptr;
@@ -146,7 +149,8 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
                                                                               labelRotationAlignment, textSymbolPlacement,
                                                                               animationCoordinator, featureStateManager,
                                                                               dpFactor,
-                                                                              is3d);
+                                                                              is3d,
+                                                                              tileOrigin);
 
             instanceCounts.textCharacters = labelObject->getCharacterCount();
         } else {
@@ -356,9 +360,7 @@ void Tiled2dMapVectorSymbolObject::setupIconProperties(std::vector<float> &posit
             const auto spriteIt = spriteData->sprites.find(iconImage);
             if (spriteIt == spriteData->sprites.end()) {
                 LogError << "Unable to find sprite " << iconImage;
-                positions[3 * countOffset] = 0;
-                positions[3 * countOffset + 1] = 0;
-                positions[3 * countOffset + 2] = 0;
+                writePosition(0, 0, countOffset, positions);
                 countOffset += instanceCounts.icons;
                 return;
             }
@@ -388,10 +390,7 @@ void Tiled2dMapVectorSymbolObject::setupIconProperties(std::vector<float> &posit
         lastIconUpdateRotation = -1;
         lastIconUpdateAlpha = -1;
     }
-
-    positions[3 * countOffset] = renderCoordinate.x;
-    positions[3 * countOffset + 1] = renderCoordinate.y;
-    positions[3 * countOffset + 2] = renderCoordinate.z;
+    writePosition(renderCoordinate.x, renderCoordinate.y, countOffset, positions);
 
     countOffset += instanceCounts.icons;
 }
@@ -494,16 +493,10 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &posi
     }
 
 
-    double x_ = renderCoordinate.x + iconOffset.x * scaleFactor * iconSize;
-    double y_ = renderCoordinate.y + iconOffset.y * scaleFactor * iconSize;
+    const double x = renderCoordinate.x + iconOffset.x * scaleFactor * iconSize;
+    const double y = renderCoordinate.y + iconOffset.y * scaleFactor * iconSize;
 
-    double x = is3d ? 1.0 * sin(y_) * cos(x_) - origin.x : x_ - origin.x;
-    double y = is3d ?  1.0 * cos(y_) - origin.y : y_ - origin.y;
-    double z = is3d ? -1.0 * sin(y_) * sin(x_) - origin.z : 0.0;
-
-    positions[3 * countOffset] = x;
-    positions[3 * countOffset + 1] = y;
-    positions[3 * countOffset + 2] = z;
+    writePosition(x, y, countOffset, positions);
 
     if (is3d) {
         iconBoundingBoxViewportAligned.x = renderCoordinate.x;
@@ -538,6 +531,18 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &posi
     }
 }
 
+void Tiled2dMapVectorSymbolObject::writePosition(const double x_, const double y_, const size_t offset, std::vector<float> &buffer) {
+    double x = is3d ? 1.0 * sin(y_) * cos(x_) - tileOrigin.x : x_ - tileOrigin.x;
+    double y = is3d ?  1.0 * cos(y_) - tileOrigin.y : y_ - tileOrigin.y;
+    double z = is3d ? -1.0 * sin(y_) * sin(x_) - tileOrigin.z : 0.0;
+
+    buffer[positionSize * offset] = x;
+    buffer[positionSize * offset + 1] = y;
+    if (is3d) {
+        buffer[positionSize * offset + 2] = z;
+    }
+}
+
 
 void Tiled2dMapVectorSymbolObject::setupStretchIconProperties(std::vector<float> &positions, std::vector<float> &textureCoordinates, int &countOffset, const double zoomIdentifier, const std::shared_ptr<TextureHolderInterface> spriteTexture, const std::shared_ptr<SpriteData> spriteData) {
     if (instanceCounts.stretchedIcons == 0) {
@@ -567,9 +572,7 @@ void Tiled2dMapVectorSymbolObject::setupStretchIconProperties(std::vector<float>
         const auto spriteIt = spriteData->sprites.find(iconImage);
         if (spriteIt == spriteData->sprites.end()) {
             LogError << "Unable to find sprite " << iconImage;
-            positions[3 * countOffset] = 0;
-            positions[3 * countOffset + 1] = 0;
-            positions[3 * countOffset + 2] = 0;
+            writePosition(0, 0, countOffset, positions);
             countOffset += instanceCounts.stretchedIcons;
             return;
         }
@@ -588,9 +591,7 @@ void Tiled2dMapVectorSymbolObject::setupStretchIconProperties(std::vector<float>
 
     }
 
-    positions[3 * countOffset] = renderCoordinate.x;
-    positions[3 * countOffset + 1] = renderCoordinate.y;
-    positions[3 * countOffset + 2] = renderCoordinate.z;
+    writePosition(renderCoordinate.x, renderCoordinate.y, countOffset, positions);
 
     countOffset += instanceCounts.stretchedIcons;
 
@@ -715,9 +716,7 @@ void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(std::vector<float
     
     offset = Vec2DHelper::rotate(offset, Vec2D(0, 0), -rotation);
 
-    positions[3 * countOffset] = renderCoordinate.x + offset.x;
-    positions[3 * countOffset + 1] = renderCoordinate.y + offset.y;
-    positions[3 * countOffset + 2] = renderCoordinate.z;
+    writePosition(renderCoordinate.x + offset.x, renderCoordinate.y + offset.y, countOffset, positions);
 
     const float scaledIconPadding = iconPadding * scaleFactor;
 

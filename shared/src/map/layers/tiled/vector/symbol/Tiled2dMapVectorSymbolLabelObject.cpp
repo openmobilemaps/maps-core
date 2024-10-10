@@ -37,7 +37,8 @@ Tiled2dMapVectorSymbolLabelObject::Tiled2dMapVectorSymbolLabelObject(const std::
                                                                      std::shared_ptr<SymbolAnimationCoordinator> animationCoordinator,
                                                                      const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager,
                                                                      double dpFactor,
-                                                                     bool is3d)
+                                                                     bool is3d,
+                                                                     const Vec3D &tileOrigin)
         : textSymbolPlacement(textSymbolPlacement),
           rotationAlignment(rotationAlignment),
           featureContext(featureContext),
@@ -57,7 +58,9 @@ Tiled2dMapVectorSymbolLabelObject::Tiled2dMapVectorSymbolLabelObject(const std::
           animationCoordinator(animationCoordinator),
           stateManager(featureStateManager),
           dpFactor(dpFactor),
-          is3d(is3d) {
+          is3d(is3d),
+          tileOrigin(tileOrigin),
+          positionSize(is3d ? 3 : 2) {
 
     for(auto i=0; i<fontResult->fontData->glyphs.size(); ++i) {
         auto& letter = fontResult->fontData->glyphs[i];
@@ -555,11 +558,9 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
             positions[2 * countOffset + 0] = (rX + anchorOffsetRot.x) / viewportSize.x * 2;
             positions[2 * countOffset + 1] = (rY + anchorOffsetRot.y) / viewportSize.y * 2;
 
-            referencePositions[2 * countOffset + 0] = referencePoint.x;
-            referencePositions[2 * countOffset + 1] = referencePoint.y;
+            writePosition(referencePoint.x, referencePoint.y, countOffset, referencePositions);
         } else {
-            positions[2 * countOffset + 0] = rX + dxRot;
-            positions[2 * countOffset + 1] = rY + dyRot;
+            writePosition(rX + dxRot, rY + dyRot, countOffset, positions);
         }
 
         auto maxScale = (scaleXH > scaleYH) ? scaleXH : scaleYH;
@@ -794,13 +795,11 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
 
         for (auto const &centerPosition: centerPositions) {
             if (is3d) {
-                positions[2 * countOffset + 0] = 0;
-                positions[2 * countOffset + 1] = 0;
-                referencePositions[2 * countOffset + 0] = centerPosition.x;
-                referencePositions[2 * countOffset + 1] = centerPosition.y;
+                positions[(2 * countOffset) + 0] = 0;
+                positions[(2 * countOffset) + 1] = 0;
+                writePosition(centerPosition.x, centerPosition.y, countOffset, referencePositions);
             } else {
-                positions[(2 * countOffset) + 0] = centerPosition.x;
-                positions[(2 * countOffset) + 1] = centerPosition.y;
+                writePosition(centerPosition.x, centerPosition.y, countOffset, positions);
             }
 
             countOffset += 1;
@@ -809,6 +808,9 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
         for (int i = 0; i != characterCount; i++) {
             positions[(2 * countOffset) + 0] = 0;
             positions[(2 * countOffset) + 1] = 0;
+            if (is3d) {
+                writePosition(0, 0, countOffset, referencePositions);
+            }
             scales[2 * (countOffset) + 0] = 0;
             scales[2 * (countOffset) + 1] = 0;
             countOffset += 1;
@@ -882,4 +884,17 @@ std::pair<int, double> Tiled2dMapVectorSymbolLabelObject::findReferencePointIndi
     }
 
     return std::make_pair(iMin, tMin);
+}
+
+
+void Tiled2dMapVectorSymbolLabelObject::writePosition(const double x_, const double y_, const size_t offset, std::vector<float> &buffer) {
+    double x = is3d ? 1.0 * sin(y_) * cos(x_) - tileOrigin.x : x_ - tileOrigin.x;
+    double y = is3d ?  1.0 * cos(y_) - tileOrigin.y : y_ - tileOrigin.y;
+    double z = is3d ? -1.0 * sin(y_) * sin(x_) - tileOrigin.z : 0.0;
+
+    buffer[positionSize * offset] = x;
+    buffer[positionSize * offset + 1] = y;
+    if (is3d) {
+        buffer[positionSize * offset + 2] = z;
+    }
 }

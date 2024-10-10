@@ -52,7 +52,8 @@ public:
                                  const bool hasCustomTexture,
                                  const double dpFactor,
                                  const bool persistingSymbolPlacement,
-                                 bool is3d);
+                                 bool is3d,
+                                 const Vec3D &tileOrigin);
 
     ~Tiled2dMapVectorSymbolObject();
 
@@ -112,11 +113,13 @@ public:
     int customTextureOffset = 0;
     std::string stringIdentifier;
 
-    Vec3D origin = Vec3D(0,0,0);
+    Vec3D tileOrigin = Vec3D(0,0,0);
 
 private:
     double lastZoomEvaluation = -1;
     void evaluateStyleProperties(const double zoomIdentifier);
+
+    void writePosition(const double x, const double y, const size_t offset, std::vector<float> &buffer);
 
     ::Coord getRenderCoordinates(Anchor iconAnchor, double rotation, double iconWidth, double iconHeight);
 
@@ -194,4 +197,5 @@ private:
     const std::shared_ptr<Tiled2dMapVectorStateManager> featureStateManager;
     
     bool is3d;
+    int positionSize;
 };
