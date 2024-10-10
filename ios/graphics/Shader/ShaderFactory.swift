@@ -13,7 +13,7 @@ import MapCoreSharedModule
 
 class ShaderFactory: MCShaderFactoryInterface {
     func createUnitSphereRasterShader() -> MCRasterShaderInterface? {
-        RasterShader(shader: .unitSphereRasterShader)
+        RasterShader()
     }
 
     func createTextShader() -> MCTextShaderInterface? {
@@ -61,7 +61,7 @@ class ShaderFactory: MCShaderFactoryInterface {
     }
 
     func createUnitSphereColorShader() -> MCColorShaderInterface? {
-        ColorShader(shader: .unitSphereColorShader)
+        ColorShader()
     }
 
     func createColorShader() -> MCColorShaderInterface? {

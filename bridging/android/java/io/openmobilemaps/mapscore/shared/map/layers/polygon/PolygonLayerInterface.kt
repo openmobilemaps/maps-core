@@ -13,7 +13,7 @@ abstract class PolygonLayerInterface {
         external fun create(): PolygonLayerInterface
     }
 
-    abstract fun setPolygons(polygons: ArrayList<PolygonInfo>)
+    abstract fun setPolygons(polygons: ArrayList<PolygonInfo>, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D)
 
     abstract fun getPolygons(): ArrayList<PolygonInfo>
 
@@ -50,11 +50,11 @@ abstract class PolygonLayerInterface {
             external fun nativeDestroy(nativeRef: Long)
         }
 
-        override fun setPolygons(polygons: ArrayList<PolygonInfo>) {
+        override fun setPolygons(polygons: ArrayList<PolygonInfo>, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_setPolygons(this.nativeRef, polygons)
+            native_setPolygons(this.nativeRef, polygons, origin)
         }
-        private external fun native_setPolygons(_nativeRef: Long, polygons: ArrayList<PolygonInfo>)
+        private external fun native_setPolygons(_nativeRef: Long, polygons: ArrayList<PolygonInfo>, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D)
 
         override fun getPolygons(): ArrayList<PolygonInfo> {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

@@ -35,12 +35,12 @@ class Quad2dOpenGl : public GraphicsObjectInterface,
     virtual void clear() override;
 
     virtual void renderAsMask(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
-                              int64_t vpMatrix, int64_t mMatrix, double screenPixelAsRealMeterFactor) override;
+                              int64_t vpMatrix, int64_t mMatrix, const ::Vec3D & origin, double screenPixelAsRealMeterFactor) override;
 
     virtual void render(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
-                        int64_t vpMatrix, int64_t mMatrix, bool isMasked, double screenPixelAsRealMeterFactor) override;
+                        int64_t vpMatrix, int64_t mMatrix, const ::Vec3D & origin, bool isMasked, double screenPixelAsRealMeterFactor) override;
 
-    virtual void setFrame(const ::Quad3dD &frame, const ::RectD &textureCoordinates) override;
+    virtual void setFrame(const ::Quad3dD &frame, const ::RectD &textureCoordinates, const Vec3D &origin, bool is3D) override;
 
     void setSubdivisionFactor(int32_t factor) override;
 
@@ -77,6 +77,7 @@ protected:
     bool glDataBuffersGenerated = false;
     int vpMatrixHandle;
     int mMatrixHandle;
+    int originOffsetHandle;
     int positionHandle;
     GLuint vertexBuffer;
     std::vector<GLfloat> vertices;
@@ -85,6 +86,8 @@ protected:
     std::vector<GLfloat> textureCoords;
     GLuint indexBuffer;
     std::vector<GLushort> indices;
+    Vec3D quadOrigin = Vec3D(0.0, 0.0, 0.0);
+    bool is3D = false;
 
     std::shared_ptr<TextureHolderInterface> textureHolder;
     int texturePointer;

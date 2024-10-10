@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class Quad2dInterface {
 
-    abstract fun setFrame(frame: io.openmobilemaps.mapscore.shared.graphics.common.Quad3dD, textureCoordinates: io.openmobilemaps.mapscore.shared.graphics.common.RectD)
+    abstract fun setFrame(frame: io.openmobilemaps.mapscore.shared.graphics.common.Quad3dD, textureCoordinates: io.openmobilemaps.mapscore.shared.graphics.common.RectD, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D, is3d: Boolean)
 
     abstract fun setSubdivisionFactor(factor: Int)
 
@@ -35,11 +35,11 @@ abstract class Quad2dInterface {
             external fun nativeDestroy(nativeRef: Long)
         }
 
-        override fun setFrame(frame: io.openmobilemaps.mapscore.shared.graphics.common.Quad3dD, textureCoordinates: io.openmobilemaps.mapscore.shared.graphics.common.RectD) {
+        override fun setFrame(frame: io.openmobilemaps.mapscore.shared.graphics.common.Quad3dD, textureCoordinates: io.openmobilemaps.mapscore.shared.graphics.common.RectD, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D, is3d: Boolean) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_setFrame(this.nativeRef, frame, textureCoordinates)
+            native_setFrame(this.nativeRef, frame, textureCoordinates, origin, is3d)
         }
-        private external fun native_setFrame(_nativeRef: Long, frame: io.openmobilemaps.mapscore.shared.graphics.common.Quad3dD, textureCoordinates: io.openmobilemaps.mapscore.shared.graphics.common.RectD)
+        private external fun native_setFrame(_nativeRef: Long, frame: io.openmobilemaps.mapscore.shared.graphics.common.Quad3dD, textureCoordinates: io.openmobilemaps.mapscore.shared.graphics.common.RectD, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D, is3d: Boolean)
 
         override fun setSubdivisionFactor(factor: Int) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

@@ -31,6 +31,8 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
 
     const auto vpMatrix = camera->getVpMatrix();
     const auto vpMatrixPointer = (int64_t)vpMatrix.data();
+	const auto origin = camera->getOrigin();
+    const auto zeroOrigin = Vec3D(0, 0, 0);
 
     const double factor = camera->getScalingFactor();
 
@@ -56,20 +58,20 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
             }
 
             if (hasMask) {
-                maskObject->renderAsMask(renderingContext, pass->getRenderPassConfig(), vpMatrixPointer, identityMatrixPointer, factor);
+                maskObject->renderAsMask(renderingContext, pass->getRenderPassConfig(), vpMatrixPointer, identityMatrixPointer, origin, factor);
             }
 
             for (const auto &renderObject : renderObjects) {
                 const auto &graphicsObject = renderObject->getGraphicsObject();
                 if (renderObject->isScreenSpaceCoords()) {
-                    graphicsObject->render(renderingContext, pass->getRenderPassConfig(), identityMatrixPointer, identityMatrixPointer, hasMask, factor);
+                    graphicsObject->render(renderingContext, pass->getRenderPassConfig(), identityMatrixPointer, identityMatrixPointer, zeroOrigin, hasMask, factor);
                 } else if (renderObject->hasCustomModelMatrix()) {
                     const auto mMatrix = renderObject->getCustomModelMatrix();
                     const auto mMatrixPointer = (int64_t)mMatrix.data();
-                    graphicsObject->render(renderingContext, pass->getRenderPassConfig(), vpMatrixPointer, mMatrixPointer, hasMask,
+                    graphicsObject->render(renderingContext, pass->getRenderPassConfig(), vpMatrixPointer, mMatrixPointer, origin, hasMask,
                                            factor);
                 } else {
-                    graphicsObject->render(renderingContext, pass->getRenderPassConfig(), vpMatrixPointer, identityMatrixPointer, hasMask, factor);
+                    graphicsObject->render(renderingContext, pass->getRenderPassConfig(), vpMatrixPointer, identityMatrixPointer, origin, hasMask, factor);
                 }
             }
 

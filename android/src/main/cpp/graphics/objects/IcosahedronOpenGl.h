@@ -32,10 +32,10 @@ public:
 
     virtual void clear() override;
 
-    virtual void render(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
-                        int64_t vpMatrix, int64_t mMatrix, bool isMasked, double screenPixelAsRealMeterFactor) override;
+    virtual void render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass, int64_t vpMatrix,
+           int64_t mMatrix, const ::Vec3D &origin, bool isMasked, double screenPixelAsRealMeterFactor) override;
 
-    virtual void setVertices(const ::SharedBytes & vertices, const ::SharedBytes & indices) override;
+    virtual void setVertices(const ::SharedBytes & vertices, const ::SharedBytes & indices, const ::Vec3D & origin) override;
 
     virtual std::shared_ptr<GraphicsObjectInterface> asGraphicsObject() override;
 

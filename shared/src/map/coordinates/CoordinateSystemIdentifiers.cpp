@@ -51,7 +51,7 @@ int32_t CoordinateSystemIdentifiers::fromCrsIdentifier(const std::string &identi
     throw std::invalid_argument("Unsupported CRS identifier: " + identifier);
 }
 
-double CoordinateSystemIdentifiers::unitToMeterFactor(const int32_t coordinateSystemIdentifier) {
+double CoordinateSystemIdentifiers::unitToMeterFactor(int32_t coordinateSystemIdentifier) {
     if (coordinateSystemIdentifier == CoordinateSystemIdentifiers::EPSG3857() ||
         coordinateSystemIdentifier == CoordinateSystemIdentifiers::EPSG2056() ||
         coordinateSystemIdentifier == CoordinateSystemIdentifiers::EPSG21781()) {

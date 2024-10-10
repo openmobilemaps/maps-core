@@ -51,7 +51,7 @@ private:
         std::vector<uint16_t> indices;
     };
 
-    void addPolygons(const std::vector<std::vector<ObjectDescriptions>> &styleGroupNewPolygonsVector);
+    void addPolygons(const std::vector<std::vector<ObjectDescriptions>> &styleGroupNewPolygonsVector, const Vec3D & origin);
 
     void setupPolygons(const std::vector<std::shared_ptr<GraphicsObjectInterface>> &newPolygonObjects);
 

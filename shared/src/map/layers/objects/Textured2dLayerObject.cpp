@@ -61,13 +61,33 @@ void Textured2dLayerObject::setPosition(const ::Coord &coord, double width, doub
 
 void Textured2dLayerObject::setPositions(const ::QuadCoord &coords) {
     QuadCoord renderCoords = conversionHelper->convertQuadToRenderSystem(coords);
-    setFrame(Quad3dD(Vec3D(renderCoords.topLeft.x, renderCoords.topLeft.y, is3d ? renderCoords.topLeft.z : 0.0),
-                     Vec3D(renderCoords.topRight.x, renderCoords.topRight.y, is3d ? renderCoords.topRight.z : 0.0),
-                     Vec3D(renderCoords.bottomRight.x, renderCoords.bottomRight.y, is3d ? renderCoords.bottomRight.z : 0.0),
-                     Vec3D(renderCoords.bottomLeft.x, renderCoords.bottomLeft.y, is3d ? renderCoords.bottomLeft.z : 0.0)));
+
+    const double cx = (renderCoords.bottomRight.x + renderCoords.topLeft.x) / 2.0;
+    const double cy = (renderCoords.bottomRight.y + renderCoords.topLeft.y) / 2.0;
+    const double cz = 0.0;
+
+    auto origin = Vec3D(cx, cy, cz);
+
+    if (is3d) {
+        origin.x = 1.0 * sin(cy) * cos(cx);
+        origin.y = 1.0 * cos(cy);
+        origin.z = -1.0 * sin(cy) * sin(cx);
+    }
+
+    auto transform = [&origin](const Coord coordinate) -> Vec3D {
+        const double x = coordinate.x;
+        const double y = coordinate.y;
+        const double z = coordinate.z;
+        return Vec3D(x, y, z);
+    };
+
+    setFrame(Quad3dD(transform(renderCoords.topLeft),
+                     transform(renderCoords.topRight),
+                     transform(renderCoords.bottomRight),
+                     transform(renderCoords.bottomLeft)), origin);
 }
 
-void Textured2dLayerObject::setFrame(const ::Quad3dD &frame) { quad->setFrame(frame, RectD(0, 0, 1, 1)); }
+void Textured2dLayerObject::setFrame(const ::Quad3dD &frame, const ::Vec3D & origin) { quad->setFrame(frame, RectD(0, 0, 1, 1), origin, is3d); }
 
 void Textured2dLayerObject::update() {
     if (animation) {

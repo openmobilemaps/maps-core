@@ -234,7 +234,7 @@ void Tiled2dMapRasterLayer::onTilesUpdated(const std::string &layerName, VectorS
                                                                                        coordinateConverterHelper,
                                                                                        is3D);
 
-                            tileMask->setPolygons(curTile->masks, std::nullopt);
+                            tileMask->setPolygons(curTile->masks, Vec3D(0, 0, 0), std::nullopt); // PRECISION-ISSUE TODO
                             newTileMasks[tileEntry.first.tileInfo] = Tiled2dMapLayerMaskWrapper(tileMask, hash);
                         }
                     }
@@ -285,7 +285,7 @@ void Tiled2dMapRasterLayer::onTilesUpdated(const std::string &layerName, VectorS
                                                                                coordinateConverterHelper,
                                                                                is3D);
                     const size_t hash = std::hash<std::vector<::PolygonCoord>>()(tile.masks);
-                    tileMask->setPolygons(tile.masks, std::nullopt);
+                    tileMask->setPolygons(tile.masks, Vec3D(0, 0, 0), std::nullopt); // PRECISION-ISSUE TODO
                     newTileMasks[tile.tileInfo] = Tiled2dMapLayerMaskWrapper(tileMask, hash);
                 }
             }

@@ -24,35 +24,43 @@ PolygonMaskObject::PolygonMaskObject(const std::shared_ptr<GraphicsObjectFactory
                                      const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                                      bool is3D)
     : conversionHelper(conversionHelper)
-    , polygon(graphicsObjectFactory->createPolygonMask(is3D)) {}
+    , polygon(graphicsObjectFactory->createPolygonMask(is3D))
+    , is3D(is3D) {}
 
-void PolygonMaskObject::setPositions(const std::vector<Coord> &positions, const std::vector<std::vector<Coord>> &holes) {
-    setPolygon({positions, holes}, std::nullopt);
+void PolygonMaskObject::setPositions(const std::vector<Coord> &positions,
+                                     const Vec3D & origin,
+                                     const std::vector<std::vector<Coord>> &holes) {
+    setPolygon({positions, holes}, origin, std::nullopt);
 }
 
-void PolygonMaskObject::setPolygon(const ::PolygonCoord &polygon, std::optional<float> maxSegmentLength) { setPolygons({polygon}, maxSegmentLength); }
+void PolygonMaskObject::setPolygon(const ::PolygonCoord &polygon,
+                                   const Vec3D & origin, std::optional<float> maxSegmentLength) {
+    setPolygons({polygon}, origin, maxSegmentLength);
+}
 
-void PolygonMaskObject::setPolygons(const std::vector<::PolygonCoord> &polygons, std::optional<float> maxSegmentLength) {
+void PolygonMaskObject::setPolygons(const std::vector<::PolygonCoord> &polygons,
+                                    const Vec3D & origin,
+                                    std::optional<float> maxSegmentLength) {
     std::vector<uint16_t> indices;
     std::vector<float> vertices;
     int32_t indexOffset = 0;
 
-    std::vector<Vec2F> vecVertices;
+    std::vector<Vec2D> vecVertices;
 
     for (auto const &polygon : polygons) {
-        std::vector<std::vector<Vec2F>> renderCoords;
-        std::vector<Vec2F> polygonCoords;
+        std::vector<std::vector<Vec2D>> renderCoords;
+        std::vector<Vec2D> polygonCoords;
         for (const Coord &mapCoord : polygon.positions) {
             Coord renderCoord = conversionHelper->convertToRenderSystem(mapCoord);
-            polygonCoords.push_back(Vec2F(renderCoord.x, renderCoord.y));
+            polygonCoords.push_back(Vec2D(renderCoord.x, renderCoord.y));
         }
         renderCoords.push_back(polygonCoords);
 
         for (const auto &hole : polygon.holes) {
-            std::vector<::Vec2F> holeCoords;
+            std::vector<::Vec2D> holeCoords;
             for (const Coord &coord : hole) {
                 Coord renderCoord = conversionHelper->convertToRenderSystem(coord);
-                holeCoords.push_back(Vec2F(renderCoord.x, renderCoord.y));
+                holeCoords.push_back(Vec2D(renderCoord.x, renderCoord.y));
             }
             renderCoords.push_back(holeCoords);
         }
@@ -75,14 +83,18 @@ void PolygonMaskObject::setPolygons(const std::vector<::PolygonCoord> &polygons,
         PolygonHelper::subdivision(vecVertices, indices, *maxSegmentLength);
     }
     for (const auto& v : vecVertices) {
-        vertices.push_back(v.x);
-        vertices.push_back(v.y);
-        vertices.push_back(1.0f);
+        double rx = origin.x;
+        double ry = origin.y;
+        double rz = origin.z;
+
+        double x = is3D ? (1.0 * sin(v.y) * cos(v.x) - rx) : v.x - rx ;
+        double y = is3D ? (1.0 * cos(v.y) - ry) : v.y - ry;
+        double z = is3D ? (-1.0 * sin(v.y) * sin(v.x) - rz) : 0.0;
+
+        vertices.push_back(x);
+        vertices.push_back(y);
+        vertices.push_back(z);
     #ifdef __APPLE__
-        vertices.push_back(0.0f);
-        vertices.push_back(0.0f);
-        vertices.push_back(0.0f);
-        vertices.push_back(0.0f);
         vertices.push_back(0.0f);
     #endif
     }
@@ -90,7 +102,7 @@ void PolygonMaskObject::setPolygons(const std::vector<::PolygonCoord> &polygons,
     auto attr = SharedBytes((int64_t)vertices.data(), (int32_t)vertices.size(), (int32_t)sizeof(float));
     auto ind = SharedBytes((int64_t)indices.data(), (int32_t)indices.size(), (int32_t)sizeof(uint16_t));
 
-    polygon->setVertices(attr, ind);
+    polygon->setVertices(attr, ind, origin);
 }
 
 std::shared_ptr<Polygon2dInterface> PolygonMaskObject::getPolygonObject() { return polygon; }

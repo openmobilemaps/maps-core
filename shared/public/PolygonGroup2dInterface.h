@@ -4,6 +4,7 @@
 #pragma once
 
 #include "SharedBytes.h"
+#include "Vec3D.h"
 #include <memory>
 
 class GraphicsObjectInterface;
@@ -12,7 +13,7 @@ class PolygonGroup2dInterface {
 public:
     virtual ~PolygonGroup2dInterface() = default;
 
-    virtual void setVertices(const ::SharedBytes & vertices, const ::SharedBytes & indices) = 0;
+    virtual void setVertices(const ::SharedBytes & vertices, const ::SharedBytes & indices, const ::Vec3D & origin) = 0;
 
     virtual /*not-null*/ std::shared_ptr<GraphicsObjectInterface> asGraphicsObject() = 0;
 };

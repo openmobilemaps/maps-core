@@ -40,7 +40,7 @@ void SphereEffectLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterfac
 
     this->quad = mapInterface->getGraphicsObjectFactory()->createQuad(shader->asShaderProgramInterface());
 
-    this->quad->setFrame(Quad3dD(Vec3D(-1, 1, 0), Vec3D(1, 1, 0), Vec3D(1, -1, 0), Vec3D(-1, -1, 0)), RectD(-1, -1, 2, 2));
+    this->quad->setFrame(Quad3dD(Vec3D(-1, 1, 0), Vec3D(1, 1, 0), Vec3D(1, -1, 0), Vec3D(-1, -1, 0)), RectD(-1, -1, 2, 2), Vec3D(0, 0, 0), false);
 
     std::vector<std::shared_ptr<::RenderObjectInterface>> renderObjects {  };
 

@@ -81,27 +81,21 @@ std::string ColorPolygonGroup2dShaderOpenGl::getVertexShader() {
 
                 uniform mat4 umMatrix;
                 uniform mat4 uvpMatrix;
-                in vec2 vPosition;
-                in float vStyleIndex;
+                uniform vec4 uOriginOffset;
                 // polygonStyles: {vec4 color, float opacity, stripe width, gap width} - stride = 7
                 uniform float polygonStyles[7 * 16];
                 uniform int numStyles;
+
+                in vec3 vPosition;
+                in float vStyleIndex;
 
                 out vec4 color;
                 out vec2 stripeInfo;
                 out vec2 uv;
 
                 void main() {
-    ) + (projectOntoUnitSphere ? OMMShaderCode(
-                    gl_Position = umMatrix * vec4(vPosition.xy, 1.0, 1.0);
-                    gl_Position = gl_Position / gl_Position.w;
-                    gl_Position = uvpMatrix * vec4(gl_Position.z * sin(gl_Position.y) * cos(gl_Position.x),
-                                                   gl_Position.z * cos(gl_Position.y),
-                                                   -gl_Position.z * sin(gl_Position.y) * sin(gl_Position.x),
-                                                   1.0);
-    ) : OMMShaderCode(
-                    gl_Position = uvpMatrix * umMatrix * vec4(vPosition, 0.0, 1.0);
-    )) + OMMShaderCode(
+                    gl_Position = uvpMatrix * umMatrix * (vec4(vPosition, 1.0) + uOriginOffset);
+
                     int styleIndex = int(floor(vStyleIndex + 0.5));
                     if (styleIndex < 0) {
                         styleIndex = 0;
@@ -120,25 +114,19 @@ std::string ColorPolygonGroup2dShaderOpenGl::getVertexShader() {
 
                 uniform mat4 umMatrix;
                 uniform mat4 uvpMatrix;
-                in vec2 vPosition;
-                in float vStyleIndex;
+                uniform vec4 uOriginOffset;
                 // polygonStyles: {vec4 color, float opacity} - stride = 5
                 uniform float polygonStyles[5 * 16];
                 uniform int numStyles;
 
+                in vec3 vPosition;
+                in float vStyleIndex;
+
                 out vec4 color;
 
                 void main() {
-    ) + (projectOntoUnitSphere ? OMMShaderCode(
-                    gl_Position = umMatrix * vec4(vPosition.xy, 1.0, 1.0);
-                    gl_Position = gl_Position / gl_Position.w;
-                    gl_Position = uvpMatrix * vec4(gl_Position.z * sin(gl_Position.y) * cos(gl_Position.x),
-                                                   gl_Position.z * cos(gl_Position.y),
-                                                   -gl_Position.z * sin(gl_Position.y) * sin(gl_Position.x),
-                                                   1.0);
-    ) : OMMShaderCode(
-                    gl_Position = uvpMatrix * umMatrix * vec4(vPosition, 0.0, 1.0);
-    )) + OMMShaderCode(
+                    gl_Position = uvpMatrix * umMatrix * (vec4(vPosition, 1.0) + uOriginOffset);
+
                     int styleIndex = int(floor(vStyleIndex + 0.5));
                     if (styleIndex < 0) {
                         styleIndex = 0;

@@ -40,7 +40,7 @@ void Polygon2dLayerObject::setPolygons(const std::vector<PolygonCoord> &polygons
     std::vector<float> vertices;
     int32_t indexOffset = 0;
 
-    std::vector<Vec2F> vecVertices;
+    std::vector<Vec2D> vecVertices;
 
     BoundingBox bbox = BoundingBox(CoordinateSystemIdentifiers::RENDERSYSTEM());
     for (auto const &polygon : polygons) {
@@ -71,7 +71,7 @@ void Polygon2dLayerObject::setPolygons(const std::vector<PolygonCoord> &polygons
             indexOffset += list.size();
 
             for(auto& i : list) {
-                vecVertices.push_back(Vec2F(i.x, i.y));
+                vecVertices.push_back(Vec2D(i.x, i.y));
             }
         }
     }
@@ -83,7 +83,7 @@ void Polygon2dLayerObject::setPolygons(const std::vector<PolygonCoord> &polygons
     }
 
     for (const auto& v : vecVertices) {
-        vertices.push_back(v.x);
+        vertices.push_back(v.x); // PRECISION-ISSUE TODO
         vertices.push_back(v.y);
         vertices.push_back(1.0f);
     #ifdef __APPLE__
@@ -97,7 +97,7 @@ void Polygon2dLayerObject::setPolygons(const std::vector<PolygonCoord> &polygons
 
     auto attr = SharedBytes((int64_t)vertices.data(), (int32_t)vertices.size(), (int32_t)sizeof(float));
     auto ind = SharedBytes((int64_t)indices.data(), (int32_t)indices.size(), (int32_t)sizeof(uint16_t));
-    polygon->setVertices(attr, ind);
+    polygon->setVertices(attr, ind, Vec3D(0, 0, 0)); // PRECISION-ISSUE TODO
 }
 
 void Polygon2dLayerObject::setColor(const Color &color) { shader->setColor(color.r, color.g, color.b, color.a); }

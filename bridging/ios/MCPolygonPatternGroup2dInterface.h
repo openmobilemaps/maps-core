@@ -4,6 +4,7 @@
 #import "MCRenderingContextInterface.h"
 #import "MCSharedBytes.h"
 #import "MCVec2F.h"
+#import "MCVec3D.h"
 #import <Foundation/Foundation.h>
 @protocol MCGraphicsObjectInterface;
 @protocol MCTextureHolderInterface;
@@ -12,7 +13,8 @@
 @protocol MCPolygonPatternGroup2dInterface
 
 - (void)setVertices:(nonnull MCSharedBytes *)vertices
-            indices:(nonnull MCSharedBytes *)indices;
+            indices:(nonnull MCSharedBytes *)indices
+             origin:(nonnull MCVec3D *)origin;
 
 - (void)setOpacities:(nonnull MCSharedBytes *)values;
 

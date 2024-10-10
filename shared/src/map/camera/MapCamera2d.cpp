@@ -378,6 +378,7 @@ std::vector<float> MapCamera2d::getVpMatrix() {
 
     Coord renderCoordCenter = conversionHelper->convertToRenderSystem(centerPosition);
 
+
     Matrix::setIdentityM(newVpMatrix, 0);
 
     Matrix::orthoM(newVpMatrix, 0, renderCoordCenter.x - 0.5 * sizeViewport.x, renderCoordCenter.x + 0.5 * sizeViewport.x,
@@ -389,9 +390,11 @@ std::vector<float> MapCamera2d::getVpMatrix() {
 
     Matrix::rotateM(newVpMatrix, 0.0, currentRotation, 0.0, 0.0, 1.0);
 
-    Matrix::translateM(newVpMatrix, 0, -renderCoordCenter.x, -renderCoordCenter.y, 0);
-
     std::lock_guard<std::recursive_mutex> lock(vpDataMutex);
+
+    origin.x  = renderCoordCenter.x;
+    origin.y  = renderCoordCenter.y;
+
     lastVpBounds = viewBounds;
     lastVpRotation = currentRotation;
     lastVpZoom = currentZoom;
@@ -405,6 +408,10 @@ std::optional<std::vector<float>> MapCamera2d::getLastVpMatrix() {
     std::vector<float> vpCopy;
     std::copy(newVpMatrix.begin(), newVpMatrix.end(), std::back_inserter(vpCopy));
     return vpCopy;
+}
+
+Vec3D MapCamera2d::getOrigin() {
+    return origin;
 }
 
 std::optional<::RectCoord> MapCamera2d::getLastVpMatrixViewBounds() {

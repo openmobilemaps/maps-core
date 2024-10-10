@@ -51,6 +51,7 @@ final class Text: BaseGraphicsObject, @unchecked Sendable {
                          renderPass _: MCRenderPassConfig,
                          vpMatrix: Int64,
                          mMatrix: Int64,
+                origin: MCVec3D,
                          isMasked: Bool,
                          screenPixelAsRealMeterFactor _: Double) {
         lock.lock()

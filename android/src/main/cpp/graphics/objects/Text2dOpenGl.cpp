@@ -201,14 +201,16 @@ void Text2dOpenGl::removeTexture() {
 }
 
 void Text2dOpenGl::renderAsMask(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
-                                int64_t vpMatrix, int64_t mMatrix, double screenPixelAsRealMeterFactor) {
+                                int64_t vpMatrix, int64_t mMatrix, const ::Vec3D &origin,
+                                double screenPixelAsRealMeterFactor) {
     glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-    render(context, renderPass, vpMatrix, mMatrix, false, screenPixelAsRealMeterFactor);
+    render(context, renderPass, vpMatrix, mMatrix, origin, false, screenPixelAsRealMeterFactor);
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 }
 
 void Text2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
-                          int64_t vpMatrix, int64_t mMatrix, bool isMasked, double screenPixelAsRealMeterFactor) {
+                          int64_t vpMatrix, int64_t mMatrix, const ::Vec3D &origin, bool isMasked,
+                          double screenPixelAsRealMeterFactor) {
     if (!ready || !textureHolder) {
         return;
     }

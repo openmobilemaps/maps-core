@@ -9,12 +9,8 @@
  */
 
 #include <metal_stdlib>
+#include "DataStructures.metal"
 using namespace metal;
-
-struct PolygonGroupVertexIn {
-    float2 position [[attribute(0)]];
-    float stylingIndex [[attribute(1)]];
-};
 
 struct PolygonGroupVertexOut {
     float4 position [[ position ]];
@@ -35,37 +31,14 @@ struct PolygonGroupStripeStyling {
 };
 
 vertex PolygonGroupVertexOut
-polygonGroupVertexShader(const PolygonGroupVertexIn vertexIn [[stage_in]],
-                 constant float4x4 &vpMatrix [[buffer(1)]])
+polygonGroupVertexShader(const Vertex3DIn vertexIn [[stage_in]],
+                 constant float4x4 &vpMatrix [[buffer(1)]],
+                 constant float4 &originOffset [[buffer(2)]])
 {
     PolygonGroupVertexOut out {
-        .position = vpMatrix * float4(vertexIn.position.xy, 0.0, 1.0),
+        .position = vpMatrix * (float4(vertexIn.position.xyz, 1.0) + originOffset),
         .uv = float2(0.0, 0.0),
-        .stylingIndex = vertexIn.stylingIndex,
-    };
-
-    return out;
-}
-
-vertex PolygonGroupVertexOut
-unitSpherePolygonGroupVertexShader(const PolygonGroupVertexIn vertexIn [[stage_in]],
-                 constant float4x4 &vpMatrix [[buffer(1)]])
-{
-
-    float4 newVertex = float4(vertexIn.position.xy, 1.0, 1.0);
-
-    newVertex.x /= newVertex.w;
-    newVertex.y /= newVertex.w;
-    newVertex.z /= newVertex.w;
-
-    const float x = newVertex.z * sin(newVertex.y) * cos(newVertex.x);
-    const float y = newVertex.z * cos(newVertex.y);
-    const float z = -newVertex.z * sin(newVertex.y) * sin(newVertex.x);
-
-    PolygonGroupVertexOut out {
-        .position = vpMatrix * float4(x,y,z, 1.0),
-        .uv = float2(0.0, 0.0),
-        .stylingIndex = vertexIn.stylingIndex,
+        .stylingIndex = vertexIn.position.w,
     };
 
     return out;
@@ -86,14 +59,16 @@ struct PolygonPatternGroupVertexOut {
 };
 
 vertex PolygonGroupVertexOut
-polygonStripedGroupVertexShader(const PolygonGroupVertexIn vertexIn [[stage_in]],
-                                constant float4x4 &mvpMatrix [[buffer(1)]],
-                                constant float2 &posOffset [[buffer(2)]])
+polygonStripedGroupVertexShader(const Vertex3DIn vertexIn [[stage_in]],
+                                constant float4x4 &vpMatrix [[buffer(1)]],
+                                constant float4 &originOffset [[buffer(2)]],
+                                constant float2 &posOffset [[buffer(3)]]
+                                )
 {
     PolygonGroupVertexOut out {
-        .position = mvpMatrix * float4(vertexIn.position.xy, 0.0, 1.0),
+        .position = vpMatrix * (float4(vertexIn.position.xyz, 1.0) + originOffset),
         .uv = vertexIn.position.xy - posOffset,
-        .stylingIndex = vertexIn.stylingIndex,
+        .stylingIndex = vertexIn.position.w,
     };
 
     return out;
@@ -118,15 +93,16 @@ polygonGroupStripedFragmentShader(PolygonGroupVertexOut in [[stage_in]],
 }
 
 vertex PolygonPatternGroupVertexOut
-polygonPatternGroupVertexShader(const PolygonGroupVertexIn vertexIn [[stage_in]],
-                                constant float4x4 &mvpMatrix [[buffer(1)]],
+polygonPatternGroupVertexShader(const Vertex3DIn vertexIn [[stage_in]],
+                                constant float4x4 &vpMatrix [[buffer(1)]],
                                 constant float2 &scalingFactor [[buffer(2)]],
-                                constant float2 &posOffset [[buffer(3)]]) {
+                                constant float2 &posOffset [[buffer(3)]],
+                                constant float4 &originOffset [[buffer(4)]]) {
     float2 pixelPosition = (vertexIn.position.xy - posOffset) * float2(1.0 / scalingFactor.x, 1 / scalingFactor.y);
 
     PolygonPatternGroupVertexOut out {
-        .position = mvpMatrix * float4(vertexIn.position.xy, 0.0, 1.0),
-        .stylingIndex = vertexIn.stylingIndex,
+        .position = vpMatrix * (float4(vertexIn.position.xyz, 1.0) + originOffset),
+        .stylingIndex = vertexIn.position.w,
         .pixelPosition = pixelPosition
     };
 

@@ -22,8 +22,6 @@ class BaseShaderProgramOpenGl: public ShaderProgramInterface {
   protected:
     virtual std::string getVertexShader();
 
-    virtual std::string getUnitSphereVertexShader();
-
     virtual std::string getFragmentShader();
 
 public:

@@ -23,6 +23,8 @@
 #include "Vec3DHelper.h"
 #include "Logger.h"
 #include "CoordinateSystemIdentifiers.h"
+#include "CoordHelper.h"
+#include "VectorHelper.h"
 
 #include "MapCamera3DHelper.h"
 #include "Camera3dConfig.h"
@@ -48,6 +50,7 @@ MapCamera3d::MapCamera3d(const std::shared_ptr<MapInterface> &mapInterface, floa
       zoomMax(GLOBE_MAX_ZOOM),
       lastOnTouchDownPoint(std::nullopt)
     , bounds(mapCoordinateSystem.bounds),
+      origin(0, 0, 0),
       cameraZoomConfig("", false, std::nullopt, 0.0, 0.0, CameraInterpolation({}), CameraInterpolation({}))
 {
     mapSystemRtl = mapCoordinateSystem.bounds.bottomRight.x > mapCoordinateSystem.bounds.topLeft.x;
@@ -354,15 +357,18 @@ std::vector<float> MapCamera3d::getVpMatrix() {
     return std::get<0>(getVpMatrix(focusPointPosition, true));
 }
 
-std::tuple<std::vector<float>, std::vector<double>> MapCamera3d::getVpMatrix(const Coord &focusCoord, bool updateVariables) {
+std::tuple<std::vector<float>, std::vector<double>, Vec3D> MapCamera3d::getVpMatrix(const Coord &focusCoord, bool updateVariables) {
     Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
 
-    std::vector<float> newViewMatrix(16, 0.0);
-    std::vector<float> newProjectionMatrix(16, 0.0);
+    std::vector<double> newViewMatrix(16, 0.0);
+    std::vector<double> newProjectionMatrix(16, 0.0);
+
+//    double off = fmod(DateHelper::currentTimeMicros() * 0.0000001, 1.0) * 0.0001;
+//    mapInterface->invalidate();
 
     const float R = 6378137.0;
-    float longitude = focusCoord.x; //  px / R;
-    float latitude = focusCoord.y; // 2*atan(exp(py / R)) - 3.1415926 / 2;
+    double longitude = focusCoord.x; //  px / R;
+    double latitude = focusCoord.y; // 2*atan(exp(py / R)) - 3.1415926 / 2;
 
     double focusPointAltitude = focusCoord.z;
     double cameraDistance = getCameraDistance();
@@ -388,7 +394,9 @@ std::tuple<std::vector<float>, std::vector<double>> MapCamera3d::getVpMatrix(con
     double fovyRad = fovy * M_PI / 180.0;
 
     // initial perspective projection
-    Matrix::perspectiveM(newProjectionMatrix, 0, fovy, vpr, minD, maxD);
+    MatrixD::perspectiveM(newProjectionMatrix, 0, fovy, vpr, minD, maxD);
+
+//    MatrixD::setIdentityM(newProjectionMatrix, 0);
 
     // modify projection
     // translate anchor point based on padding and offset
@@ -396,62 +404,73 @@ std::tuple<std::vector<float>, std::vector<double>> MapCamera3d::getVpMatrix(con
     double contentHeight = ((double) sizeViewport.y) - paddingBottom - paddingTop;
     double offsetY = -paddingBottom / 2.0 / (double) sizeViewport.y + cameraVerticalDisplacement * contentHeight * 0.5 / (double) sizeViewport.y;
     offsetY = cameraDistance * tan(fovyRad / 2.0) * offsetY; // view space to world space
-    Matrix::translateM(newProjectionMatrix, 0, 0.0, -offsetY, 0);
+    MatrixD::translateM(newProjectionMatrix, 0, 0.0, -offsetY, 0);
 
     // view matrix
-    // remember: read from bottom to top
-    Matrix::setIdentityM(newViewMatrix, 0);
-
-    Matrix::translateM(newViewMatrix, 0, 0.0, 0, -cameraDistance);
-    Matrix::rotateM(newViewMatrix, 0, -cameraPitch, 1.0, 0.0, 0.0);
-    Matrix::rotateM(newViewMatrix, 0, -angle, 0.0, 0.0, 1.0);
-
-    Matrix::translateM(newViewMatrix, 0, 0, 0, -1 - focusPointAltitude / R);
-
-    Matrix::rotateM(newViewMatrix, 0.0, latitude, 1.0, 0.0, 0.0);
-    Matrix::rotateM(newViewMatrix, 0.0, -longitude, 0.0, 1.0, 0.0);
-    Matrix::rotateM(newViewMatrix, 0.0, -90, 0.0, 1.0, 0.0); // zero longitude in London
+    // remember: read from bottom to top as camera movement relative to fixed globe
+    //           read from top to bottom as vertex movement relative to fixed camera
+    MatrixD::setIdentityM(newViewMatrix, 0);
 
 
-    std::vector<float> newVpMatrix(16, 0.0);
-    Matrix::multiplyMM(newVpMatrix, 0, newProjectionMatrix, 0, newViewMatrix, 0);
+    MatrixD::translateM(newViewMatrix, 0, 0.0, 0, -cameraDistance);
+    MatrixD::rotateM(newViewMatrix, 0, -cameraPitch, 1.0, 0.0, 0.0);
+    MatrixD::rotateM(newViewMatrix, 0, -angle, 0.0, 0.0, 1.0);
 
-    std::vector<double> vpMatrixD = {
-            static_cast<double>(newVpMatrix[0]),
-            static_cast<double>(newVpMatrix[1]),
-            static_cast<double>(newVpMatrix[2]),
-            static_cast<double>(newVpMatrix[3]),
-            static_cast<double>(newVpMatrix[4]),
-            static_cast<double>(newVpMatrix[5]),
-            static_cast<double>(newVpMatrix[6]),
-            static_cast<double>(newVpMatrix[7]),
-            static_cast<double>(newVpMatrix[8]),
-            static_cast<double>(newVpMatrix[9]),
-            static_cast<double>(newVpMatrix[10]),
-            static_cast<double>(newVpMatrix[11]),
-            static_cast<double>(newVpMatrix[12]),
-            static_cast<double>(newVpMatrix[13]),
-            static_cast<double>(newVpMatrix[14]),
-            static_cast<double>(newVpMatrix[15])
-    };
+    MatrixD::translateM(newViewMatrix, 0, 0, 0, -1 - focusPointAltitude / R);
+
+    MatrixD::rotateM(newViewMatrix, 0.0, latitude, 1.0, 0.0, 0.0);
+    MatrixD::rotateM(newViewMatrix, 0.0, -longitude, 0.0, 1.0, 0.0);
+    MatrixD::rotateM(newViewMatrix, 0.0, -90, 0.0, 1.0, 0.0); // zero longitude in London
+
+    double lo = (longitude - 90.0) * M_PI / 180.0;
+    double la = latitude * M_PI / 180.0;
+    double x = -(1.0 * sin(lo) * cos(la));
+    double y = (-1.0 * sin(lo) * sin(la)) ;
+    double z = -(1.0 * cos(lo));
+
+    Vec3D newOrigin = Vec3D(x, y, z);
+
+    MatrixD::translateM(newViewMatrix, 0, x, y, z);
+
+//    MatrixD::translateM(newViewMatrix, 0, off, off, off);
+
+
+    // ^
+    // |
+
+//    MatrixD::setIdentityM(newViewMatrix, 0);
+
+
+    std::vector<double> newVpMatrix(16, 0.0);
+    MatrixD::multiplyMM(newVpMatrix, 0, newProjectionMatrix, 0, newViewMatrix, 0);
+
     std::vector<double> newInverseMatrix(16, 0.0);
-    gluInvertMatrix(vpMatrixD, newInverseMatrix);
+    gluInvertMatrix(newVpMatrix, newInverseMatrix);
 
+    std::vector<float> newVpMatrixF = convertToFloat(newVpMatrix);
+    std::vector<float> newProjectionMatrixF = convertToFloat(newProjectionMatrix);
+    std::vector<float> newViewMatrixF = convertToFloat(newViewMatrix);
 
 
     if (updateVariables) {
         std::lock_guard<std::recursive_mutex> lock(vpDataMutex);
         lastVpRotation = angle;
         lastVpZoom = zoom;
-        vpMatrix = newVpMatrix;
+        vpMatrix = newVpMatrixF;
+        vpMatrixD = newVpMatrix;
         inverseVPMatrix = newInverseMatrix;
-        viewMatrix = newViewMatrix;
-        projectionMatrix = newProjectionMatrix;
+        viewMatrix = newViewMatrixF;
+        projectionMatrix = newProjectionMatrixF;
         verticalFov = fovy;
         horizontalFov = fovy * vpr;
         validVpMatrix = true;
+        origin = newOrigin;
     }
-    return std::make_tuple(newVpMatrix, newInverseMatrix);
+    return std::make_tuple(newVpMatrixF, newInverseMatrix, newOrigin);
+}
+
+Vec3D MapCamera3d::getOrigin() {
+    return origin;
 }
 
 
@@ -616,7 +635,11 @@ void MapCamera3d::notifyListeners(const int &listenerType) {
     std::lock_guard<std::recursive_mutex> lock(listenerMutex);
     for (auto listener : listeners) {
         if (listenerType & (ListenerType::BOUNDS | ListenerType::CAMERA_MODE)) {
-            listener->onCameraChange(viewMatrix, projectionMatrix, verticalFov, horizontalFov, width, height, focusPointAltitude, getCenterPosition(), getZoom(), getCameraMode());
+
+            std::vector<float> viewMatrixF = clone(viewMatrix);
+            std::vector<float> projectionMatrixF = clone(projectionMatrix);
+
+            listener->onCameraChange(viewMatrixF, projectionMatrixF, origin, verticalFov, horizontalFov, width, height, focusPointAltitude, getCenterPosition(), getZoom(), getCameraMode());
         }
         if (listenerType & ListenerType::ROTATION) {
             listener->onRotationChanged(angle);
@@ -644,12 +667,13 @@ bool MapCamera3d::onTouchDown(const ::Vec2F &posScreen) {
 #ifdef ANDROID
         {
             std::lock_guard<std::recursive_mutex> lock(vpDataMutex);
-            const auto [zeroVPMatrix, zeroInverseVPMatrix] = getVpMatrix(
+            const auto [zeroVPMatrix, zeroInverseVPMatrix, zeroOrigin] = getVpMatrix(
                     Coord(CoordinateSystemIdentifiers::EPSG4326(), 0.0, 0.0, lastOnTouchDownFocusCoord->z), false);
             lastOnTouchDownInverseVPMatrix = zeroInverseVPMatrix;
+            lastOnTouchDownVPOrigin = zeroOrigin;
         }
         lastOnTouchDownCoord = coordFromScreenPosition(posScreen);
-        lastOnMoveCoord = coordFromScreenPosition(lastOnTouchDownInverseVPMatrix, posScreen);
+        lastOnMoveCoord = coordFromScreenPosition(lastOnTouchDownInverseVPMatrix, posScreen, lastOnTouchDownVPOrigin);
 #else
         lastOnTouchDownCoord = coordFromScreenPosition(posScreen);
 #endif
@@ -703,8 +727,8 @@ bool MapCamera3d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
     if (!initialTouchDownPoint.has_value()) {
         return false;
     }
-    auto newTouchDownCoord = coordFromScreenPosition(lastOnTouchDownInverseVPMatrix, newScreenPos);
-    auto lastOnTouchDownZeroCoord = coordFromScreenPosition(lastOnTouchDownInverseVPMatrix, initialTouchDownPoint.value());
+    auto newTouchDownCoord = coordFromScreenPosition(lastOnTouchDownInverseVPMatrix, newScreenPos, lastOnTouchDownVPOrigin);
+    auto lastOnTouchDownZeroCoord = coordFromScreenPosition(lastOnTouchDownInverseVPMatrix, initialTouchDownPoint.value(), lastOnTouchDownVPOrigin);
 #else
     auto newTouchDownCoord = coordFromScreenPosition(newScreenPos);
 #endif
@@ -1044,37 +1068,45 @@ Coord MapCamera3d::coordFromScreenPosition(const ::Vec2F &posScreen) {
 }
 
 Coord MapCamera3d::coordFromScreenPosition(const std::vector<double> &inverseVPMatrix, const ::Vec2F &posScreen) {
+    return coordFromScreenPosition(inverseVPMatrix, posScreen, origin);
+}
+
+Coord MapCamera3d::coordFromScreenPosition(const std::vector<double> &inverseVPMatrix, const ::Vec2F &posScreen, const Vec3D &origin) {
     auto viewport = mapInterface->getRenderingContext()->getViewportSize();
 
     std::vector<double> worldPosFrontVec = {
-        (posScreen.x / (double)viewport.x * 2.0 - 1),
-        -(posScreen.y / (double)viewport.y * 2.0 - 1),
+        ((double)posScreen.x / (double)viewport.x * 2.0 - 1),
+        -((double)posScreen.y / (double)viewport.y * 2.0 - 1),
         -1,
         1
     };
     std::vector<double> worldPosBackVec = {
-        (posScreen.x / (double)viewport.x * 2.0 - 1),
-        -(posScreen.y / (double)viewport.y * 2.0 - 1),
+        ((double)posScreen.x / (double)viewport.x * 2.0 - 1),
+        -((double)posScreen.y / (double)viewport.y * 2.0 - 1),
         1,
         1
     };
 
+    const double rx = origin.x;
+    const double ry = origin.y;
+    const double rz = origin.z;
+
     worldPosFrontVec = MatrixD::multiply(inverseVPMatrix, worldPosFrontVec);
-    Vec3D worldPosFront{worldPosFrontVec[0] / worldPosFrontVec[3], worldPosFrontVec[1] / worldPosFrontVec[3],
-                                worldPosFrontVec[2] / worldPosFrontVec[3]};
+    Vec3D worldPosFront{(worldPosFrontVec[0] / worldPosFrontVec[3]) + rx, (worldPosFrontVec[1] / worldPosFrontVec[3]) + ry,
+                                (worldPosFrontVec[2] / worldPosFrontVec[3]) + rz};
     worldPosBackVec = MatrixD::multiply(inverseVPMatrix, worldPosBackVec);
-    Vec3D worldPosBack{worldPosBackVec[0] / worldPosBackVec[3], worldPosBackVec[1] / worldPosBackVec[3],
-                               worldPosBackVec[2] / worldPosBackVec[3]};
+    Vec3D worldPosBack{(worldPosBackVec[0] / worldPosBackVec[3]) + rx, (worldPosBackVec[1] / worldPosBackVec[3]) + ry,
+                               (worldPosBackVec[2] / worldPosBackVec[3]) + rz};
 
     bool didHit = false;
     auto point = MapCamera3DHelper::raySphereIntersection(worldPosFront, worldPosBack, Vec3D(0.0, 0.0, 0.0), 1.0, didHit);
 
     if (didHit) {
-        float longitude = std::atan2(point.x, point.z) * 180 / M_PI - 90;
+        double longitude = std::atan2(point.x, point.z) * 180 / M_PI - 90;
         if (longitude < -180) {
             longitude += 360;
         }
-        float latitude = std::asin(point.y) * 180 / M_PI;
+        double latitude = std::asin(point.y) * 180 / M_PI;
         return Coord(CoordinateSystemIdentifiers::EPSG4326(), longitude, latitude, 0);
     }
     else {
@@ -1294,19 +1326,19 @@ bool MapCamera3d::coordIsOnFrontHalfOfGlobe(Coord coord) {
     return isInFront;
 }
 
-std::vector<float> MapCamera3d::convertToCartesianCoordinates(Coord coord) {
+std::vector<double> MapCamera3d::convertToCartesianCoordinates(const Coord &coord) const {
     Coord renderCoord = conversionHelper->convertToRenderSystem(coord);
 
-    return {(float) (renderCoord.z * sin(renderCoord.y) * cos(renderCoord.x)),
-        (float) (renderCoord.z * cos(renderCoord.y)),
-        (float) (-renderCoord.z * sin(renderCoord.y) * sin(renderCoord.x)),
+    return {(renderCoord.z * sin(renderCoord.y) * cos(renderCoord.x)) - origin.x,
+        (renderCoord.z * cos(renderCoord.y)) - origin.y,
+        (-renderCoord.z * sin(renderCoord.y) * sin(renderCoord.x)) - origin.z,
         1.0};
 }
 
 
 // Point given in cartesian coordinates, where (0,0,0) is the center of the globe
-std::vector<float> MapCamera3d::projectedPoint(std::vector<float> point) {
-    auto projected = Matrix::multiply(vpMatrix, point);
+std::vector<double> MapCamera3d::projectedPoint(const std::vector<double> &point) const {
+    auto projected = MatrixD::multiply(vpMatrixD, point);
     projected[0] /= projected[3]; // percentage in x direction in [-1, 1], 0 being the center of the screen)
     projected[1] /= projected[3]; // percentage in y direction in [-1, 1], 0 being the center of the screen)
     projected[2] /= projected[3]; // percentage in z direction in [-1, 1], 0 being the center of the screen)
@@ -1321,26 +1353,11 @@ double MapCamera3d::mapUnitsFromPixels(double distancePx) {
     if (validVpMatrix && sizeViewport.x != 0 && sizeViewport.y != 0) {
         Coord focusRenderCoord = conversionHelper->convertToRenderSystem(getCenterPosition());
 
-        float sampleSize = M_PI / 180.0;
-        std::vector<float> posOne = {(float) (focusRenderCoord.z * sin(focusRenderCoord.y) * cos(focusRenderCoord.x)),
-            (float) (focusRenderCoord.z * cos(focusRenderCoord.y)),
-            (float) (-focusRenderCoord.z * sin(focusRenderCoord.y) * sin(focusRenderCoord.x)),
-            1.0};
-        std::vector<float> posTwo = {(float) (focusRenderCoord.z * sin(focusRenderCoord.y + sampleSize) * cos(focusRenderCoord.x + sampleSize)),
-            (float) (focusRenderCoord.z * cos(focusRenderCoord.y + sampleSize)),
-            (float) (-focusRenderCoord.z * sin(focusRenderCoord.y + sampleSize) * sin(focusRenderCoord.x + sampleSize)),
-            1.0};
-        auto projectedOne = Matrix::multiply(vpMatrix, posOne);
-        auto projectedTwo = Matrix::multiply(vpMatrix, posTwo);
-        projectedOne[0] /= projectedOne[3];
-        projectedOne[1] /= projectedOne[3];
-        projectedOne[2] /= projectedOne[3];
-        projectedOne[3] /= projectedOne[3];
-        projectedTwo[0] /= projectedTwo[3];
-        projectedTwo[1] /= projectedTwo[3];
-        projectedTwo[2] /= projectedTwo[3];
-        projectedTwo[3] /= projectedTwo[3];
-        float projectedLength = Matrix::length((projectedTwo[0] - projectedOne[0]) * sizeViewport.x,
+        const double sampleSize = M_PI / 180.0;
+        const auto projectedOne = projectedPoint(convertToCartesianCoordinates(focusRenderCoord));
+        const auto projectedTwo = projectedPoint(convertToCartesianCoordinates(focusRenderCoord + sampleSize));
+
+        const float projectedLength = MatrixD::length((projectedTwo[0] - projectedOne[0]) * sizeViewport.x,
                                                (projectedTwo[1] - projectedOne[1]) * sizeViewport.y,
                                                0.0);
         return distancePx * 2.0 * sqrt(sampleSize * sampleSize * 2) / projectedLength;

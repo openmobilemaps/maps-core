@@ -37,11 +37,13 @@ void Quad2dOpenGl::clear() {
 
 void Quad2dOpenGl::setIsInverseMasked(bool inversed) { isMaskInversed = inversed; }
 
-void Quad2dOpenGl::setFrame(const Quad3dD &frame, const RectD &textureCoordinates) {
+void Quad2dOpenGl::setFrame(const Quad3dD &frame, const RectD &textureCoordinates, const Vec3D &origin, bool is3D) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
     ready = false;
     this->frame = frame;
     this->textureCoordinates = textureCoordinates;
+    this->quadOrigin = origin;
+    this->is3D = is3D;
 }
 
 void Quad2dOpenGl::setSubdivisionFactor(int32_t factor) {
@@ -77,12 +79,32 @@ void Quad2dOpenGl::computeGeometry(bool texCoordsOnly) {
     // Data mutex covered by caller Quad2dOpenGL::setup()
     if (subdivisionFactor == 0) {
         if (!texCoordsOnly) {
-            vertices = {
-                    (float) frame.topLeft.x, (float) frame.topLeft.y, (float) frame.topLeft.z,
-                    (float) frame.bottomLeft.x, (float) frame.bottomLeft.y, (float) frame.bottomLeft.z,
-                    (float) frame.bottomRight.x, (float) frame.bottomRight.y, (float) frame.bottomRight.z,
-                    (float) frame.topRight.x, (float) frame.topRight.y, (float) frame.topRight.z,
-            };
+            if (is3D) {
+                vertices = {
+                        (float) (1.0 * std::sin(frame.topLeft.y) * std::cos(frame.topLeft.x) - quadOrigin.x),
+                        (float) (1.0 * cos(frame.topLeft.y) - quadOrigin.y),
+                        (float) (-1.0 * std::sin(frame.topLeft.x) * std::sin(frame.topLeft.y) - quadOrigin.z),
+
+                        (float) (1.0 * std::sin(frame.bottomLeft.y) * std::cos(frame.bottomLeft.x) - quadOrigin.x),
+                        (float) (1.0 * cos(frame.bottomLeft.y) - quadOrigin.y),
+                        (float) (-1.0 * std::sin(frame.bottomLeft.x) * std::sin(frame.bottomLeft.y) - quadOrigin.z),
+
+                        (float) (1.0 * std::sin(frame.bottomRight.y) * std::cos(frame.bottomRight.x) - quadOrigin.x),
+                        (float) (1.0 * cos(frame.bottomRight.y) - quadOrigin.y),
+                        (float) (-1.0 * std::sin(frame.bottomRight.x) * std::sin(frame.bottomRight.y) - quadOrigin.z),
+
+                        (float) (1.0 * std::sin(frame.topRight.y) * std::cos(frame.topRight.x) - quadOrigin.x),
+                        (float) (1.0 * cos(frame.topRight.y) - quadOrigin.y),
+                        (float) (-1.0 * std::sin(frame.topRight.x) * std::sin(frame.topRight.y) - quadOrigin.z),
+                };
+            } else {
+                vertices = {
+                        (float) (frame.topLeft.x - quadOrigin.x), (float) (frame.topLeft.y - quadOrigin.y), (float) (frame.topLeft.z - quadOrigin.z),
+                        (float) (frame.bottomLeft.x - quadOrigin.x), (float) (frame.bottomLeft.y - quadOrigin.y), (float) (frame.bottomLeft.z - quadOrigin.z),
+                        (float) (frame.bottomRight.x - quadOrigin.x), (float) (frame.bottomRight.y - quadOrigin.y), (float) (frame.bottomRight.z - quadOrigin.z),
+                        (float) (frame.topRight.x - quadOrigin.x), (float) (frame.topRight.y - quadOrigin.y), (float) (frame.topRight.z - quadOrigin.z),
+                };
+            }
             indices = {
                     0, 1, 2, 0, 2, 3,
             };
@@ -128,9 +150,18 @@ void Quad2dOpenGl::computeGeometry(bool texCoordsOnly) {
                 deltaDZ = pcD * ((1.0 - pcR) * deltaDLeft[2] + pcR * deltaDRight[2]);
 
                 if (!texCoordsOnly) {
-                    vertices.push_back(originX + deltaDX);
-                    vertices.push_back(originY + deltaDY);
-                    vertices.push_back(originZ + deltaDZ);
+                    double x = originX + deltaDX;
+                    double y = originY + deltaDY;
+                    double z = originZ + deltaDZ;
+                    if (is3D) {
+                        vertices.push_back((float) (1.0 * std::sin(y) * std::cos(x) - quadOrigin.x));
+                        vertices.push_back((float) (1.0 * cos(y) - quadOrigin.y));
+                        vertices.push_back((float) (-1.0 * std::sin(x) * std::sin(y) - quadOrigin.z));
+                    } else {
+                        vertices.push_back((float) (x - quadOrigin.x));
+                        vertices.push_back((float) (y - quadOrigin.y));
+                        vertices.push_back((float) (z - quadOrigin.z));
+                    }
 
                     if (iR < numSubd && iD < numSubd) {
                         int baseInd = iD + (iR * (numSubd + 1));
@@ -174,6 +205,7 @@ void Quad2dOpenGl::prepareGlData(int program) {
 
     vpMatrixHandle = glGetUniformLocation(program, "uvpMatrix");
     mMatrixHandle = glGetUniformLocation(program, "umMatrix");
+    originOffsetHandle = glGetUniformLocation(program, "uOriginOffset");
     glDataBuffersGenerated = true;
 }
 
@@ -251,14 +283,16 @@ void Quad2dOpenGl::removeTexture() {
 }
 
 void Quad2dOpenGl::renderAsMask(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
-                                int64_t vpMatrix, int64_t mMatrix, double screenPixelAsRealMeterFactor) {
+                                int64_t vpMatrix, int64_t mMatrix, const ::Vec3D &origin,
+                                double screenPixelAsRealMeterFactor) {
     glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-    render(context, renderPass, vpMatrix, mMatrix, false, screenPixelAsRealMeterFactor);
+    render(context, renderPass, vpMatrix, mMatrix, origin, false, screenPixelAsRealMeterFactor);
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 }
 
 void Quad2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
-                          int64_t vpMatrix, int64_t mMatrix, bool isMasked, double screenPixelAsRealMeterFactor) {
+                          int64_t vpMatrix, int64_t mMatrix, const ::Vec3D &origin, bool isMasked,
+                          double screenPixelAsRealMeterFactor) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
     if (!ready || (usesTextureCoords && !textureCoordsReady))
         return;
@@ -302,6 +336,7 @@ void Quad2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &co
     // Apply the projection and view transformation
     glUniformMatrix4fv(vpMatrixHandle, 1, false, (GLfloat *)vpMatrix);
     glUniformMatrix4fv(mMatrixHandle, 1, false, (GLfloat *)mMatrix);
+    glUniform4f(originOffsetHandle, quadOrigin.x - origin.x, quadOrigin.y - origin.y, quadOrigin.z - origin.z, 0.0);
 
     // Draw the triangles
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);

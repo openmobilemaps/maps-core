@@ -4,6 +4,7 @@
 #import "MCQuad3dD.h"
 #import "MCRectD.h"
 #import "MCRenderingContextInterface.h"
+#import "MCVec3D.h"
 #import <Foundation/Foundation.h>
 @protocol MCGraphicsObjectInterface;
 @protocol MCMaskingObjectInterface;
@@ -13,7 +14,9 @@
 @protocol MCQuad2dInterface
 
 - (void)setFrame:(nonnull MCQuad3dD *)frame
-textureCoordinates:(nonnull MCRectD *)textureCoordinates;
+textureCoordinates:(nonnull MCRectD *)textureCoordinates
+          origin:(nonnull MCVec3D *)origin
+            is3d:(BOOL)is3d;
 
 - (void)setSubdivisionFactor:(int32_t)factor;
 

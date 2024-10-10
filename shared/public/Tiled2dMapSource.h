@@ -37,6 +37,7 @@
 #include "LoaderStatus.h"
 #include "TileState.h"
 #include "Vec3D.h"
+#include "Vec3F.h"
 
 template<class R>
 struct TileWrapper {
@@ -88,7 +89,7 @@ public:
 
     virtual void onVisibleBoundsChanged(const ::RectCoord &visibleBounds, int curT, double zoom) override;
 
-    virtual void onCameraChange(const std::vector<float> &viewMatrix, const std::vector<float> &projectionMatrix, float verticalFov, float horizontalFov, float width, float height, float focusPointAltitude, const ::Coord & focusPointPosition, float zoom) override;
+    virtual void onCameraChange(const std::vector<float> &viewMatrix, const std::vector<float> &projectionMatrix, const ::Vec3D & origin, float verticalFov, float horizontalFov, float width, float height, float focusPointAltitude, const ::Coord & focusPointPosition, float zoom) override;
 
     virtual bool isTileVisible(const Tiled2dMapTileInfo &tileInfo);
 
@@ -133,7 +134,9 @@ public:
 
     virtual R postLoadingTask(L loadedData, Tiled2dMapTileInfo tile) = 0;
 
-    ::Vec3D transformToView(const ::Coord & position, const std::vector<float> & vpMatrix);
+            ::Vec3D transformToView(const ::Coord & position,
+                                    const std::vector<float> & vpMatrix,
+                                    const Vec3D & origin);
     ::Vec3D projectToScreen(const ::Vec3D & point, const std::vector<float> & vpMatrix);
 
     MapConfig mapConfig;

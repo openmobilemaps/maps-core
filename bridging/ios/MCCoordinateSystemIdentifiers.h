@@ -41,4 +41,7 @@
 /** e.g. urn:ogc:def:crs:EPSG:21781 */
 + (int32_t)fromCrsIdentifier:(nonnull NSString *)identifier;
 
+/** Use supported coordinate system identifiers defined in this class */
++ (double)unitToMeterFactor:(int32_t)coordinateSystemIdentifier;
+
 @end

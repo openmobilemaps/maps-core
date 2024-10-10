@@ -12,6 +12,7 @@ import Foundation
 import MapCoreSharedModule
 import Metal
 import UIKit
+import simd
 
 final class Quad2dInstanced: BaseGraphicsObject, @unchecked Sendable {
     private var verticesBuffer: MTLBuffer?
@@ -82,6 +83,7 @@ final class Quad2dInstanced: BaseGraphicsObject, @unchecked Sendable {
                          renderPass _: MCRenderPassConfig,
                          vpMatrix: Int64,
                          mMatrix: Int64,
+                origin: MCVec3D,
                          isMasked: Bool,
                          screenPixelAsRealMeterFactor _: Double) {
 
@@ -157,6 +159,13 @@ final class Quad2dInstanced: BaseGraphicsObject, @unchecked Sendable {
             encoder.setFragmentTexture(texture, index: 0)
         }
 
+        if let bufferPointer = originOffsetBuffer?.contents().assumingMemoryBound(to: simd_float4.self) {
+            bufferPointer.pointee.x = Float(originOffset.x - origin.x)
+            bufferPointer.pointee.y = Float(originOffset.y - origin.y)
+            bufferPointer.pointee.z = Float(originOffset.z - origin.z)
+        }
+        encoder.setVertexBuffer(originOffsetBuffer, offset: 0, index: 9)
+
         encoder.drawIndexedPrimitives(type: .triangle,
                                       indexCount: indicesCount,
                                       indexType: .uint16,
@@ -171,6 +180,7 @@ extension Quad2dInstanced: MCMaskingObjectInterface {
                 renderPass: MCRenderPassConfig,
                 vpMatrix: Int64,
                 mMatrix: Int64,
+                origin: MCVec3D,
                 screenPixelAsRealMeterFactor: Double) {
         guard isReady(),
               let context = context as? RenderingContext,
@@ -183,13 +193,14 @@ extension Quad2dInstanced: MCMaskingObjectInterface {
                renderPass: renderPass,
                vpMatrix: vpMatrix,
                mMatrix: mMatrix,
+               origin: origin,
                isMasked: false,
                screenPixelAsRealMeterFactor: screenPixelAsRealMeterFactor)
     }
 }
 
 extension Quad2dInstanced: MCQuad2dInstancedInterface {
-    func setFrame(_ frame: MCQuad2dD) {
+    func setFrame(_ frame: MCQuad2dD, origin: MCVec3D) {
         /*
          The quad is made out of 4 vertices as following
          B----C
@@ -214,7 +225,8 @@ extension Quad2dInstanced: MCQuad2dInstancedInterface {
         }
 
         lock.withCritical {
-            indicesCount = indices.count
+            self.originOffset = origin
+            self.indicesCount = indices.count
             self.verticesBuffer = verticesBuffer
             self.indicesBuffer = indicesBuffer
         }

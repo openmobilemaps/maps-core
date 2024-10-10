@@ -13,12 +13,12 @@ import MapCoreSharedModule
 
 class GraphicsFactory: MCGraphicsObjectFactoryInterface {
     func createQuadMask(_ is3d: Bool) -> (any MCQuad2dInterface)? {
-        let shader = ColorShader(shader: is3d ? .unitSphereColorShader : .colorShader)
+        let shader = ColorShader(shader: .colorShader)
         return Quad2d(shader: shader, metalContext: .current)
     }
     
     func createPolygonMask(_ is3d: Bool) -> (any MCPolygon2dInterface)? {
-        let shader = ColorShader(shader: is3d ? .unitSphereColorShader : .colorShader)
+        let shader = ColorShader(shader: .colorShader)
         return Polygon2d(shader: shader, metalContext: .current)
     }
     
