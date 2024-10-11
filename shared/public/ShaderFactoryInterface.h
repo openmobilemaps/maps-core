@@ -59,7 +59,7 @@ public:
 
     virtual /*not-null*/ std::shared_ptr<StretchShaderInterface> createStretchShader() = 0;
 
-    virtual /*not-null*/ std::shared_ptr<StretchInstancedShaderInterface> createStretchInstancedShader() = 0;
+    virtual /*not-null*/ std::shared_ptr<StretchInstancedShaderInterface> createStretchInstancedShader(bool unitSphere) = 0;
 
     virtual /*not-null*/ std::shared_ptr<ColorShaderInterface> createIcosahedronColorShader() = 0;
 

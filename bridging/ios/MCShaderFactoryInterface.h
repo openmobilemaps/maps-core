@@ -57,7 +57,7 @@
 
 - (nullable id<MCStretchShaderInterface>)createStretchShader;
 
-- (nullable id<MCStretchInstancedShaderInterface>)createStretchInstancedShader;
+- (nullable id<MCStretchInstancedShaderInterface>)createStretchInstancedShader:(BOOL)unitSphere;
 
 - (nullable id<MCColorShaderInterface>)createIcosahedronColorShader;
 

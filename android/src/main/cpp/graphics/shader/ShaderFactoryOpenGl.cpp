@@ -98,8 +98,8 @@ std::shared_ptr<StretchShaderInterface> ShaderFactoryOpenGl::createStretchShader
     return std::make_shared<StretchShaderOpenGl>();
 }
 
-std::shared_ptr<StretchInstancedShaderInterface> ShaderFactoryOpenGl::createStretchInstancedShader() {
-    return std::make_shared<StretchInstancedShaderOpenGl>();
+std::shared_ptr<StretchInstancedShaderInterface> ShaderFactoryOpenGl::createStretchInstancedShader(bool unitSphere) {
+    return std::make_shared<StretchInstancedShaderOpenGl>(unitSphere);
 }
 
 std::shared_ptr<ColorShaderInterface> ShaderFactoryOpenGl::createIcosahedronColorShader() {

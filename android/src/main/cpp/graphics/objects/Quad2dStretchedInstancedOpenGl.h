@@ -141,6 +141,16 @@ class Quad2dStretchedInstancedOpenGl : public GraphicsObjectInterface,
     static const uintptr_t instStretchYsAddOffsetBytes = sizeof(GLfloat) * 6;
     static const uintptr_t instValuesSizeBytes = sizeof(GLfloat) * 20;
 
+    static const uintptr_t instPositionsOffsetBytes3d = sizeof(GLfloat) * 0;
+    static const uintptr_t instTextureCoordinatesOffsetBytes3d = sizeof(GLfloat) * 3;
+    static const uintptr_t instScalesOffsetBytes3d = sizeof(GLfloat) * 7;
+    static const uintptr_t instRotationsOffsetBytes3d = sizeof(GLfloat) * 9;
+    static const uintptr_t instAlphasOffsetBytes3d = sizeof(GLfloat) * 10;
+    static const uintptr_t instStretchInfoOffsetBytes3d = sizeof(GLfloat) * 11;
+    static const uintptr_t instStretchXsAddOffsetBytes3d = sizeof(GLfloat) * 2;
+    static const uintptr_t instStretchYsAddOffsetBytes3d = sizeof(GLfloat) * 6;
+    static const uintptr_t instValuesSizeBytes3d = sizeof(GLfloat) * 21;
+
 private:
     bool writeToDynamicInstanceDataBuffer(const ::SharedBytes &data, GLuint targetOffsetBytes);
 };

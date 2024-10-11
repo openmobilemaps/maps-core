@@ -44,7 +44,7 @@ abstract class ShaderFactoryInterface {
 
     abstract fun createStretchShader(): StretchShaderInterface
 
-    abstract fun createStretchInstancedShader(): StretchInstancedShaderInterface
+    abstract fun createStretchInstancedShader(unitSphere: Boolean): StretchInstancedShaderInterface
 
     abstract fun createIcosahedronColorShader(): ColorShaderInterface
 
@@ -173,11 +173,11 @@ abstract class ShaderFactoryInterface {
         }
         private external fun native_createStretchShader(_nativeRef: Long): StretchShaderInterface
 
-        override fun createStretchInstancedShader(): StretchInstancedShaderInterface {
+        override fun createStretchInstancedShader(unitSphere: Boolean): StretchInstancedShaderInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            return native_createStretchInstancedShader(this.nativeRef)
+            return native_createStretchInstancedShader(this.nativeRef, unitSphere)
         }
-        private external fun native_createStretchInstancedShader(_nativeRef: Long): StretchInstancedShaderInterface
+        private external fun native_createStretchInstancedShader(_nativeRef: Long, unitSphere: Boolean): StretchInstancedShaderInterface
 
         override fun createIcosahedronColorShader(): ColorShaderInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
