@@ -124,7 +124,7 @@ render_line_description = record {
 }
 
 line_group_2d_interface = interface +c +j +o {
-    set_lines(lines: shared_bytes, indices: shared_bytes, origin: vec_3_d);
+    set_lines(lines: shared_bytes, indices: shared_bytes, origin: vec_3_d, is_3d: bool);
     as_graphics_object(): graphics_object_interface;
 }
 

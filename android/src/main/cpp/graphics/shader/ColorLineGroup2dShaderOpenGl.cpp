@@ -82,10 +82,14 @@ std::string ColorLineGroup2dShaderOpenGl::getVertexShader() {
                                       uniform mat4 umMatrix;
                                       uniform mat4 uvpMatrix;
                                       uniform vec4 uOriginOffset;
-                                      in vec3 vPosition;
-                                      in vec3 vLineOrigin;
-                                      in vec3 vPointA;
-                                      in vec3 vPointB;
+                                      ) + (projectOntoUnitSphere ? OMMShaderCode(
+                                          uniform vec4 uLineOrigin;
+                                          in vec3 vPointA;
+                                          in vec3 vPointB;
+                                      ) : OMMShaderCode(
+                                          in vec2 vPointA;
+                                          in vec2 vPointB;
+                                      )) + OMMShaderCode(
                                       in float vVertexIndex;
                                       in float vSegmentStartLPos;
                                       in float vStyleInfo;
@@ -137,23 +141,40 @@ std::string ColorLineGroup2dShaderOpenGl::getVertexShader() {
                                            fStyleIndexBase = float(styleIndexBase);
                                            fSegmentType = vStyleInfo / 256.0;
 
-                                           vec3 lengthNormal = normalize(vPointB - vPointA);
-                                           vec3 radialNormal = normalize(vPosition + vLineOrigin);
-                                           vec3 widthNormal = normalize(cross(radialNormal, lengthNormal));
+                                           ) + (projectOntoUnitSphere ? OMMShaderCode(
+                                               vec3 vertexPosition = vPointB;
+                                               vec3 lengthNormal = normalize(vPointB - vPointA);
+                                           ) : OMMShaderCode(
+                                               vec2 vertexPosition = vPointB;
+                                               vec3 lengthNormal = vec3(normalize(vPointB - vPointA), 0.0);
+                                               vec3 radialNormal = vec3(0.0, 0.0, 1.0);
+                                           )) + OMMShaderCode(
 
+                                           float widthNormalFactor = 1.0;
+                                           float lengthNormalFactor = 1.0;
                                            if(vVertexIndex == 0.0) {
-                                               lengthNormal *= -1.0;
-                                               widthNormal *= -1.0;
+                                               lengthNormalFactor = -1.0;
+                                               widthNormalFactor = -1.0;
+                                               vertexPosition = vPointA;
                                            } else if(vVertexIndex == 1.0) {
-                                               lengthNormal *= -1.0;
+                                               lengthNormalFactor = -1.0;
+                                               vertexPosition = vPointA;
                                            } else if(vVertexIndex == 2.0) {
                                                // all fine
                                            } else if(vVertexIndex == 3.0) {
-                                               widthNormal *= -1.0;
+                                               widthNormalFactor = -1.0;
                                            }
+
+                                           ) + (projectOntoUnitSphere ? OMMShaderCode(
+                                               vec3 radialNormal = normalize(vertexPosition + uLineOrigin.xyz);
+                                           ) : "") + OMMShaderCode(
+                                           vec3 widthNormal = normalize(cross(radialNormal, lengthNormal));
 
                                            float offsetFloat = lineValues[styleIndexBase + 18] * scaleFactor;
                                            vec3 offset = vec3(widthNormal * offsetFloat);
+
+                                           widthNormal *= widthNormalFactor;
+                                           lengthNormal *= lengthNormalFactor;
 
                                            float scaledWidth = width * 0.5;
                                            dashingSize = width;
@@ -164,14 +185,24 @@ std::string ColorLineGroup2dShaderOpenGl::getVertexShader() {
                                            }
 
                                            vec3 displ = uOriginOffset.xyz + vec3(lengthNormal + widthNormal) * vec3(scaledWidth) + offset;
-                                           vec4 extendedPosition = umMatrix * vec4(vPosition, 1.0);
+                                           vec4 extendedPosition = umMatrix *
+                                           ) + (projectOntoUnitSphere ? OMMShaderCode(
+                                                   vec4(vertexPosition, 1.0);
+                                           ) : OMMShaderCode(
+                                                   vec4(vertexPosition, 0.0, 1.0);
+                                           )) + OMMShaderCode(
                                            extendedPosition.xyz += displ;
                                            gl_Position = uvpMatrix * extendedPosition;
 
                                            radius = scaledWidth;
                                            scaledBlur = blur;
-                                           pointDeltaA = extendedPosition.xyz - ((vPointA + uOriginOffset.xyz) + offset.xyz);
-                                           pointBDeltaA = ((vPointB + uOriginOffset.xyz) + offset.xyz) - ((vPointA + uOriginOffset.xyz) + offset.xyz);
+                                           ) + (projectOntoUnitSphere ? OMMShaderCode(
+                                               pointDeltaA = extendedPosition.xyz - ((vPointA + uOriginOffset.xyz) + offset.xyz);
+                                               pointBDeltaA = ((vPointB + uOriginOffset.xyz) + offset.xyz) - ((vPointA + uOriginOffset.xyz) + offset.xyz);
+                                           ) : OMMShaderCode(
+                                               pointDeltaA = extendedPosition.xyz - ((vec3(vPointA, 0.0) + uOriginOffset.xyz) + offset.xyz);
+                                               pointBDeltaA = ((vec3(vPointB, 0.0) + uOriginOffset.xyz) + offset.xyz) - ((vec3(vPointA, 0.0) + uOriginOffset.xyz) + offset.xyz);
+                                           )) + OMMShaderCode(
                                        }
                                        );
 }

@@ -41,10 +41,11 @@ void Quad2dInstancedOpenGl::clear() {
 
 void Quad2dInstancedOpenGl::setIsInverseMasked(bool inversed) { isMaskInversed = inversed; }
 
-void Quad2dInstancedOpenGl::setFrame(const Quad2dD &frame) {
+void Quad2dInstancedOpenGl::setFrame(const Quad2dD &frame, const Vec3D &origin) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
     ready = false;
     this->frame = frame;
+    this->quadsOrigin = origin;
 }
 
 void Quad2dInstancedOpenGl::setup(const std::shared_ptr<::RenderingContextInterface> &context) {
@@ -116,6 +117,7 @@ void Quad2dInstancedOpenGl::prepareGlData(int program) {
 
     vpMatrixHandle = glGetUniformLocation(program, "uvpMatrix");
     mMatrixHandle = glGetUniformLocation(program, "umMatrix");
+    originOffsetHandle = glGetUniformLocation(program, "uOriginOffset");
 
     glDataBuffersGenerated = true;
 }
@@ -279,6 +281,8 @@ void Quad2dInstancedOpenGl::render(const std::shared_ptr<::RenderingContextInter
     // Apply the projection and view transformation
     glUniformMatrix4fv(vpMatrixHandle, 1, false, (GLfloat *)vpMatrix);
     glUniformMatrix4fv(mMatrixHandle, 1, false, (GLfloat *)mMatrix);
+
+    glUniform4f(originOffsetHandle, quadsOrigin.x - origin.x, quadsOrigin.y - origin.y, quadsOrigin.z - origin.z, 0.0);
 
     // Draw the triangles
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);

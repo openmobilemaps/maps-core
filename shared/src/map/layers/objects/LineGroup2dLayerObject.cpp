@@ -71,100 +71,29 @@ void LineGroup2dLayerObject::setLines(const std::vector<std::tuple<std::vector<C
                     : (i == iSecondToLast ? (float) (2 << 8)
                     : 0.0)));
 
-            // Vertex 4
-            lineAttributes.push_back(pNext.x);
-            lineAttributes.push_back(pNext.y);
-            if (is3d) {
-                lineAttributes.push_back(pNext.z);
+            for (uint8_t vertexIndex = 4; vertexIndex > 0; --vertexIndex) {
+                // Vertex
+                // Position pointA and pointB
+                lineAttributes.push_back(p.x);
+                lineAttributes.push_back(p.y);
+                if (is3d) {
+                    lineAttributes.push_back(p.z);
+                }
+                lineAttributes.push_back(pNext.x);
+                lineAttributes.push_back(pNext.y);
+                if (is3d) {
+                    lineAttributes.push_back(pNext.z);
+                }
+
+                // Vertex Index
+                lineAttributes.push_back((float) (vertexIndex - 1));
+
+                // Segment Start Length Position (length prefix sum)
+                lineAttributes.push_back(prefixTotalLineLength);
+
+                // Style Info
+                lineAttributes.push_back(lineStyleInfo);
             }
-
-            lineAttributes.push_back(p.x);
-            lineAttributes.push_back(p.y);
-            if (is3d) {
-                lineAttributes.push_back(p.z);
-            }
-            lineAttributes.push_back(pNext.x);
-            lineAttributes.push_back(pNext.y);
-            if (is3d) {
-                lineAttributes.push_back(pNext.z);
-            }
-
-            lineAttributes.push_back(3);
-            lineAttributes.push_back(prefixTotalLineLength);
-            lineAttributes.push_back(lineStyleInfo);
-
-            // Vertex 3
-            lineAttributes.push_back(pNext.x);
-            lineAttributes.push_back(pNext.y);
-            if (is3d) {
-                lineAttributes.push_back(pNext.z);
-            }
-
-            lineAttributes.push_back(p.x);
-            lineAttributes.push_back(p.y);
-            if (is3d) {
-                lineAttributes.push_back(p.z);
-            }
-            lineAttributes.push_back(pNext.x);
-            lineAttributes.push_back(pNext.y);
-            if (is3d) {
-                lineAttributes.push_back(pNext.z);
-            }
-
-            lineAttributes.push_back(2);
-            lineAttributes.push_back(prefixTotalLineLength);
-            lineAttributes.push_back(lineStyleInfo);
-
-            // Vertex 2
-            lineAttributes.push_back(p.x);
-            lineAttributes.push_back(p.y);
-            if (is3d) {
-                lineAttributes.push_back(p.z);
-            }
-
-            lineAttributes.push_back(p.x);
-            lineAttributes.push_back(p.y);
-            if (is3d) {
-                lineAttributes.push_back(p.z);
-            }
-            lineAttributes.push_back(pNext.x);
-            lineAttributes.push_back(pNext.y);
-            if (is3d) {
-                lineAttributes.push_back(pNext.z);
-            }
-
-            lineAttributes.push_back(1);
-            lineAttributes.push_back(prefixTotalLineLength);
-            lineAttributes.push_back(lineStyleInfo);
-
-            // Vertex 1
-            // Position
-            lineAttributes.push_back(p.x);
-            lineAttributes.push_back(p.y);
-            if (is3d) {
-                lineAttributes.push_back(p.z);
-            }
-
-            // Position pointA and pointB
-            lineAttributes.push_back(p.x);
-            lineAttributes.push_back(p.y);
-            if (is3d) {
-                lineAttributes.push_back(p.z);
-            }
-            lineAttributes.push_back(pNext.x);
-            lineAttributes.push_back(pNext.y);
-            if (is3d) {
-                lineAttributes.push_back(pNext.z);
-            }
-
-            // Vertex Index
-            lineAttributes.push_back(0);
-
-            // Segment Start Length Position (length prefix sum)
-            lineAttributes.push_back(prefixTotalLineLength);
-
-            // Style Info
-            lineAttributes.push_back(lineStyleInfo);
 
             // Vertex indices
             lineIndices.push_back(lineIndexOffset + 4 * i);
@@ -182,7 +111,7 @@ void LineGroup2dLayerObject::setLines(const std::vector<std::tuple<std::vector<C
 
     auto attributes = SharedBytes((int64_t) lineAttributes.data(), (int32_t) lineAttributes.size(), (int32_t) sizeof(float));
     auto indices = SharedBytes((int64_t) lineIndices.data(), (int32_t) lineIndices.size(), (int32_t) sizeof(uint32_t));
-    line->setLines(attributes, indices, origin);
+    line->setLines(attributes, indices, origin, is3d);
 }
 
 void LineGroup2dLayerObject::setStyles(const std::vector<LineStyle> &styles) {

@@ -11,7 +11,8 @@
 
 - (void)setLines:(nonnull MCSharedBytes *)lines
          indices:(nonnull MCSharedBytes *)indices
-          origin:(nonnull MCVec3D *)origin;
+          origin:(nonnull MCVec3D *)origin
+            is3d:(BOOL)is3d;
 
 - (nullable id<MCGraphicsObjectInterface>)asGraphicsObject;
 

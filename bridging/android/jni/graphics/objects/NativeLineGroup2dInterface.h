@@ -33,7 +33,7 @@ private:
         JavaProxy(JniType j);
         ~JavaProxy();
 
-        void setLines(const ::SharedBytes & lines, const ::SharedBytes & indices, const ::Vec3D & origin) override;
+        void setLines(const ::SharedBytes & lines, const ::SharedBytes & indices, const ::Vec3D & origin, bool is3d) override;
         /*not-null*/ std::shared_ptr<::GraphicsObjectInterface> asGraphicsObject() override;
 
     private:
@@ -41,7 +41,7 @@ private:
     };
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/graphics/objects/LineGroup2dInterface") };
-    const jmethodID method_setLines { ::djinni::jniGetMethodID(clazz.get(), "setLines", "(Lio/openmobilemaps/mapscore/shared/graphics/common/SharedBytes;Lio/openmobilemaps/mapscore/shared/graphics/common/SharedBytes;Lio/openmobilemaps/mapscore/shared/graphics/common/Vec3D;)V") };
+    const jmethodID method_setLines { ::djinni::jniGetMethodID(clazz.get(), "setLines", "(Lio/openmobilemaps/mapscore/shared/graphics/common/SharedBytes;Lio/openmobilemaps/mapscore/shared/graphics/common/SharedBytes;Lio/openmobilemaps/mapscore/shared/graphics/common/Vec3D;Z)V") };
     const jmethodID method_asGraphicsObject { ::djinni::jniGetMethodID(clazz.get(), "asGraphicsObject", "()Lio/openmobilemaps/mapscore/shared/graphics/objects/GraphicsObjectInterface;") };
 };
 
