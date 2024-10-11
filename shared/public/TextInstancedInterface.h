@@ -18,7 +18,7 @@ public:
     virtual ~TextInstancedInterface() = default;
 
     /** set the frame of the root object */
-    virtual void setFrame(const ::Quad2dD & frame, const ::Vec3D & origin) = 0;
+    virtual void setFrame(const ::Quad2dD & frame, const ::Vec3D & origin, bool is3d) = 0;
 
     virtual void setInstanceCount(int32_t count) = 0;
 

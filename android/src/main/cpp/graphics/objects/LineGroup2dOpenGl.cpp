@@ -130,8 +130,6 @@ void LineGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface
     // Add program to OpenGL environment
     glUseProgram(program);
 
-    OpenGlHelper::checkGlError("UBCM 1");
-
     // Apply the projection and view transformation
     glUniformMatrix4fv(vpMatrixHandle, 1, false, (GLfloat *)vpMatrix);
     glUniformMatrix4fv(mMatrixHandle, 1, false, (GLfloat *)mMatrix);
@@ -140,8 +138,6 @@ void LineGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface
     glUniform1f(scaleFactorHandle, screenPixelAsRealMeterFactor);
 
     shaderProgram->preRender(openGlContext);
-
-    OpenGlHelper::checkGlError("UBCM 2");
 
     // Prepare the vertex attributes
     size_t floatSize = sizeof(GLfloat);
@@ -161,8 +157,6 @@ void LineGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface
     glVertexAttribPointer(styleInfoHandle, 1, GL_FLOAT, false, stride, (float *)(sizeAttribGroup * 2 + 2 * floatSize));
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    OpenGlHelper::checkGlError("UBCM 3");
-
     // Draw the triangle
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
     glDrawElements(GL_TRIANGLES, lineIndices.size(), GL_UNSIGNED_INT, nullptr);
@@ -175,9 +169,6 @@ void LineGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface
     glDisableVertexAttribArray(vertexIndexHandle);
     glDisableVertexAttribArray(segmentStartLPosHandle);
     glDisableVertexAttribArray(styleInfoHandle);
-
-
-    OpenGlHelper::checkGlError("UBCM 4");
 
     glDisable(GL_BLEND);
     if (!isMasked) {

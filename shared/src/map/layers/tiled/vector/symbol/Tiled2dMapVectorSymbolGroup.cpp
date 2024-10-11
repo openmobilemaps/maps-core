@@ -504,7 +504,7 @@ void Tiled2dMapVectorSymbolGroup::setupObjects(const std::shared_ptr<SpriteData>
     }
 
     for (const auto &customDescriptor: customTextures) {
-        customDescriptor.renderObject->setFrame(Quad2dD(Vec2D(-0.5, 0.5), Vec2D(0.5, 0.5), Vec2D(0.5, -0.5), Vec2D(-0.5, -0.5)), tileOrigin);
+        customDescriptor.renderObject->setFrame(Quad2dD(Vec2D(-0.5, 0.5), Vec2D(0.5, 0.5), Vec2D(0.5, -0.5), Vec2D(-0.5, -0.5)), tileOrigin, is3d);
         customDescriptor.renderObject->loadTexture(context, customDescriptor.texture);
         customDescriptor.renderObject->asGraphicsObject()->setup(context);
 
@@ -515,7 +515,7 @@ void Tiled2dMapVectorSymbolGroup::setupObjects(const std::shared_ptr<SpriteData>
 
     if (spriteTexture && spriteData && iconInstancedObject) {
         if (this->spriteData == nullptr) {
-            iconInstancedObject->setFrame(Quad2dD(Vec2D(-0.5, 0.5), Vec2D(0.5, 0.5), Vec2D(0.5, -0.5), Vec2D(-0.5, -0.5)), tileOrigin);
+            iconInstancedObject->setFrame(Quad2dD(Vec2D(-0.5, 0.5), Vec2D(0.5, 0.5), Vec2D(0.5, -0.5), Vec2D(-0.5, -0.5)), tileOrigin, is3d);
             iconInstancedObject->loadTexture(context, spriteTexture);
             iconInstancedObject->asGraphicsObject()->setup(context);
         }
@@ -527,7 +527,7 @@ void Tiled2dMapVectorSymbolGroup::setupObjects(const std::shared_ptr<SpriteData>
 
     if (spriteTexture && spriteData && stretchedInstancedObject) {
         if (this->spriteData == nullptr) {
-            stretchedInstancedObject->setFrame(Quad2dD(Vec2D(-0.5, 0.5), Vec2D(0.5, 0.5), Vec2D(0.5, -0.5), Vec2D(-0.5, -0.5)), tileOrigin);
+            stretchedInstancedObject->setFrame(Quad2dD(Vec2D(-0.5, 0.5), Vec2D(0.5, 0.5), Vec2D(0.5, -0.5), Vec2D(-0.5, -0.5)), tileOrigin, is3d);
             stretchedInstancedObject->loadTexture(context, spriteTexture);
             stretchedInstancedObject->asGraphicsObject()->setup(context);
         }
@@ -541,7 +541,7 @@ void Tiled2dMapVectorSymbolGroup::setupObjects(const std::shared_ptr<SpriteData>
 
     if (textInstancedObject) {
         if (this->spriteData == nullptr) {
-            textInstancedObject->setFrame(Quad2dD(Vec2D(-0.5, 0.5), Vec2D(0.5, 0.5), Vec2D(0.5, -0.5), Vec2D(-0.5, -0.5)), tileOrigin);
+            textInstancedObject->setFrame(Quad2dD(Vec2D(-0.5, 0.5), Vec2D(0.5, 0.5), Vec2D(0.5, -0.5), Vec2D(-0.5, -0.5)), tileOrigin, is3d);
             textInstancedObject->loadTexture(context, fontResult->imageData);
             textInstancedObject->asGraphicsObject()->setup(context);
         }

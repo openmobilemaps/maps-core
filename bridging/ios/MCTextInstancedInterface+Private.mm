@@ -38,10 +38,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 }
 
 - (void)setFrame:(nonnull MCQuad2dD *)frame
-          origin:(nonnull MCVec3D *)origin {
+          origin:(nonnull MCVec3D *)origin
+            is3d:(BOOL)is3d {
     try {
         _cppRefHandle.get()->setFrame(::djinni_generated::Quad2dD::toCpp(frame),
-                                      ::djinni_generated::Vec3D::toCpp(origin));
+                                      ::djinni_generated::Vec3D::toCpp(origin),
+                                      ::djinni::Bool::toCpp(is3d));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -123,11 +125,12 @@ class TextInstancedInterface::ObjcProxy final
     friend class ::djinni_generated::TextInstancedInterface;
 public:
     using ObjcProxyBase::ObjcProxyBase;
-    void setFrame(const ::Quad2dD & c_frame, const ::Vec3D & c_origin) override
+    void setFrame(const ::Quad2dD & c_frame, const ::Vec3D & c_origin, bool c_is3d) override
     {
         @autoreleasepool {
             [djinni_private_get_proxied_objc_object() setFrame:(::djinni_generated::Quad2dD::fromCpp(c_frame))
-                                                        origin:(::djinni_generated::Vec3D::fromCpp(c_origin))];
+                                                        origin:(::djinni_generated::Vec3D::fromCpp(c_origin))
+                                                          is3d:(::djinni::Bool::fromCpp(c_is3d))];
         }
     }
     void setInstanceCount(int32_t c_count) override

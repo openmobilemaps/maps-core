@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 abstract class TextInstancedInterface {
 
     /** set the frame of the root object */
-    abstract fun setFrame(frame: io.openmobilemaps.mapscore.shared.graphics.common.Quad2dD, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D)
+    abstract fun setFrame(frame: io.openmobilemaps.mapscore.shared.graphics.common.Quad2dD, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D, is3d: Boolean)
 
     abstract fun setInstanceCount(count: Int)
 
@@ -61,11 +61,11 @@ abstract class TextInstancedInterface {
             external fun nativeDestroy(nativeRef: Long)
         }
 
-        override fun setFrame(frame: io.openmobilemaps.mapscore.shared.graphics.common.Quad2dD, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D) {
+        override fun setFrame(frame: io.openmobilemaps.mapscore.shared.graphics.common.Quad2dD, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D, is3d: Boolean) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_setFrame(this.nativeRef, frame, origin)
+            native_setFrame(this.nativeRef, frame, origin, is3d)
         }
-        private external fun native_setFrame(_nativeRef: Long, frame: io.openmobilemaps.mapscore.shared.graphics.common.Quad2dD, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D)
+        private external fun native_setFrame(_nativeRef: Long, frame: io.openmobilemaps.mapscore.shared.graphics.common.Quad2dD, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D, is3d: Boolean)
 
         override fun setInstanceCount(count: Int) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

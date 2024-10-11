@@ -51,7 +51,7 @@ protected:
 
     virtual void removeGlBuffers();
 
-    bool is3d;
+    bool is3d = false;
     std::shared_ptr<ShaderProgramInterface> shaderProgram;
     std::string programName;
     int program = 0;

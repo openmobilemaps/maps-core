@@ -21,13 +21,14 @@ NativeQuad2dStretchedInstancedInterface::JavaProxy::JavaProxy(JniType j) : Handl
 
 NativeQuad2dStretchedInstancedInterface::JavaProxy::~JavaProxy() = default;
 
-void NativeQuad2dStretchedInstancedInterface::JavaProxy::setFrame(const ::Quad2dD & c_frame, const ::Vec3D & c_origin) {
+void NativeQuad2dStretchedInstancedInterface::JavaProxy::setFrame(const ::Quad2dD & c_frame, const ::Vec3D & c_origin, bool c_is3d) {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
     const auto& data = ::djinni::JniClass<::djinni_generated::NativeQuad2dStretchedInstancedInterface>::get();
     jniEnv->CallVoidMethod(Handle::get().get(), data.method_setFrame,
                            ::djinni::get(::djinni_generated::NativeQuad2dD::fromCpp(jniEnv, c_frame)),
-                           ::djinni::get(::djinni_generated::NativeVec3D::fromCpp(jniEnv, c_origin)));
+                           ::djinni::get(::djinni_generated::NativeVec3D::fromCpp(jniEnv, c_origin)),
+                           ::djinni::get(::djinni::Bool::fromCpp(jniEnv, c_is3d)));
     ::djinni::jniExceptionCheck(jniEnv);
 }
 void NativeQuad2dStretchedInstancedInterface::JavaProxy::setInstanceCount(int32_t c_count) {
@@ -126,12 +127,13 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_Quad2dStretchedInstancedInterface_00024CppProxy_native_1setFrame(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeQuad2dD::JniType j_frame, ::djinni_generated::NativeVec3D::JniType j_origin)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_Quad2dStretchedInstancedInterface_00024CppProxy_native_1setFrame(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeQuad2dD::JniType j_frame, ::djinni_generated::NativeVec3D::JniType j_origin, jboolean j_is3d)
 {
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::Quad2dStretchedInstancedInterface>(nativeRef);
         ref->setFrame(::djinni_generated::NativeQuad2dD::toCpp(jniEnv, j_frame),
-                      ::djinni_generated::NativeVec3D::toCpp(jniEnv, j_origin));
+                      ::djinni_generated::NativeVec3D::toCpp(jniEnv, j_origin),
+                      ::djinni::Bool::toCpp(jniEnv, j_is3d));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

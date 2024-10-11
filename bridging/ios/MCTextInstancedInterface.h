@@ -14,7 +14,8 @@
 
 /** set the frame of the root object */
 - (void)setFrame:(nonnull MCQuad2dD *)frame
-          origin:(nonnull MCVec3D *)origin;
+          origin:(nonnull MCVec3D *)origin
+            is3d:(BOOL)is3d;
 
 - (void)setInstanceCount:(int32_t)count;
 

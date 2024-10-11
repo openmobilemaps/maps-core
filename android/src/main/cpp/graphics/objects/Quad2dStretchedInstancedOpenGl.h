@@ -41,7 +41,7 @@ class Quad2dStretchedInstancedOpenGl : public GraphicsObjectInterface,
     virtual void render(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
                         int64_t vpMatrix, int64_t mMatrix, const ::Vec3D & origin, bool isMasked, double screenPixelAsRealMeterFactor) override;
 
-    virtual void setFrame(const ::Quad2dD &frame, const Vec3D &origin) override;
+    virtual void setFrame(const ::Quad2dD &frame, const Vec3D &origin, bool is3d) override;
 
     virtual void loadTexture(const std::shared_ptr<::RenderingContextInterface> &context,
                              const std::shared_ptr<TextureHolderInterface> &textureHolder) override;
@@ -83,6 +83,7 @@ class Quad2dStretchedInstancedOpenGl : public GraphicsObjectInterface,
 
     void removeTextureCoordsGlBuffers();
 
+    bool is3d = false;
     std::shared_ptr<ShaderProgramInterface> shaderProgram;
     std::string programName;
     int program;

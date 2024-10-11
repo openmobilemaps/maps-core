@@ -41,11 +41,12 @@ void Quad2dStretchedInstancedOpenGl::clear() {
 
 void Quad2dStretchedInstancedOpenGl::setIsInverseMasked(bool inversed) { isMaskInversed = inversed; }
 
-void Quad2dStretchedInstancedOpenGl::setFrame(const Quad2dD &frame, const Vec3D &origin) {
+void Quad2dStretchedInstancedOpenGl::setFrame(const Quad2dD &frame, const Vec3D &origin, bool is3d) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
     ready = false;
     this->frame = frame;
     this->quadsOrigin = origin;
+    this->is3d = is3d;
 }
 
 void Quad2dStretchedInstancedOpenGl::setup(const std::shared_ptr<::RenderingContextInterface> &context) {
