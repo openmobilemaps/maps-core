@@ -224,10 +224,10 @@ textInstancedFragmentShader(TextInstancedVertexOut in [[stage_in]],
         // Combination of blurred outer falloff and inverse inner fill falloff
         edgeAlpha = (sideSwitch * outerFallOff + (1.0 - sideSwitch) * (1.0 - innerFallOff)) * style->haloColor.a;
 
-        return style->haloColor * edgeAlpha;
+        return float4(style->haloColor.rgb, 1.0) * edgeAlpha;
     } else {
         edgeAlpha = innerFallOff * style->haloColor.a;
 
-        return style->color * edgeAlpha;
+        return float4(style->color.rgb, 1.0) * edgeAlpha;
     }
 }
