@@ -288,10 +288,14 @@ public extension MCMapView {
         super.touchesMoved(touches, with: event)
         touchHandler.touchesMoved(touches, with: event)
     }
-    
+
     override func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
-         return false
-     }
+        var isiOSAppOnMac = false
+        if #available(iOS 14.0, *) {
+            isiOSAppOnMac = ProcessInfo.processInfo.isiOSAppOnMac
+        }
+        return isiOSAppOnMac
+    }
 }
 
 public extension MCMapView {
