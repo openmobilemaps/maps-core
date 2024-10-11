@@ -288,6 +288,10 @@ public extension MCMapView {
         super.touchesMoved(touches, with: event)
         touchHandler.touchesMoved(touches, with: event)
     }
+    
+    override func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+         return false
+     }
 }
 
 public extension MCMapView {
@@ -373,10 +377,6 @@ extension MCMapView: UIGestureRecognizerDelegate {
     }
 
     public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-        true
-    }
-
-    override public func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
         true
     }
 
