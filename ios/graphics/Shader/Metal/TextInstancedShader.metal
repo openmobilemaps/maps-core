@@ -31,6 +31,7 @@ unitSphereTextInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
                           constant uint16_t *styleIndices [[buffer(7)]],
                           constant packed_float3 *referencePositions [[buffer(8)]],
                           constant float4 &originOffset [[buffer(9)]],
+                          constant float4 &origin [[buffer(10)]],
                           uint instanceId [[instance_id]])
 {
     const float3 referencePosition = referencePositions[instanceId];
@@ -42,7 +43,9 @@ unitSphereTextInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
 
     float4 newVertex = mMatrix * float4(referencePosition + originOffset.xyz, 1.0);
 
-    float4 earthCenter = vpMatrix * float4(0,0,0, 1.0);
+    float4 earthCenter = vpMatrix * float4(0 - origin.x,
+                                           0 - origin.y,
+                                           0 - origin.z, 1.0);
     float4 screenPosition = vpMatrix * newVertex;
 
     earthCenter /= earthCenter.w;
