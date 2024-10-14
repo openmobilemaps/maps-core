@@ -188,7 +188,8 @@ extension Quad2dStretchedInstanced: MCMaskingObjectInterface {
 }
 
 extension Quad2dStretchedInstanced: MCQuad2dStretchedInstancedInterface {
-    func setFrame(_ frame: MCQuad2dD, origin: MCVec3D) {
+
+    func setFrame(_ frame: MCQuad2dD, origin: MCVec3D, is3d: Bool) {
         /*
          The quad is made out of 4 vertices as following
          B----C

@@ -24,21 +24,19 @@ using namespace metal;
   */
 
 struct LineVertexIn {
-    float2 position [[attribute(0)]];
-    float2 lineA [[attribute(1)]];
-    float2 lineB [[attribute(2)]];
-    float vertexIndex [[attribute(3)]];
-    float lengthPrefix [[attribute(4)]];
-    float stylingIndex [[attribute(5)]];
+    float2 lineA [[attribute(0)]];
+    float2 lineB [[attribute(1)]];
+    float vertexIndex [[attribute(2)]];
+    float lengthPrefix [[attribute(3)]];
+    float stylingIndex [[attribute(4)]];
 };
 
 struct LineVertexUnitSphereIn {
-    float3 position [[attribute(0)]];
-    float3 lineA [[attribute(1)]];
-    float3 lineB [[attribute(2)]];
-    float vertexIndex [[attribute(3)]];
-    float lengthPrefix [[attribute(4)]];
-    float stylingIndex [[attribute(5)]];
+    float3 lineA [[attribute(0)]];
+    float3 lineB [[attribute(1)]];
+    float vertexIndex [[attribute(2)]];
+    float lengthPrefix [[attribute(3)]];
+    float stylingIndex [[attribute(4)]];
 };
 
 struct LineVertexOut {
@@ -101,16 +99,24 @@ unitSpherelineGroupVertexShader(const LineVertexUnitSphereIn vertexIn [[stage_in
         dashingSize *= dashingScalingFactor;
     }
 
+    int index = int(vertexIn.vertexIndex);
+
     const float3 lineA = vertexIn.lineA;
     const float3 lineB = vertexIn.lineB;
 
+    float3 position = lineB;
+    if(index == 0) {
+      position = lineA;
+    } else if(index == 1) {
+      position = lineA;
+    }
+
     float3 lengthNormal = normalize(lineB - lineA);
-    const float3 radialVector = normalize(vertexIn.position.xyz + tileOrigin.xyz);
+    const float3 radialVector = normalize(position + tileOrigin.xyz);
     const float3 widthNormalIn = normalize(cross(radialVector, lengthNormal));
 
     float3 widthNormal = widthNormalIn;
 
-    int index = int(vertexIn.vertexIndex);
     if(index == 0) {
       lengthNormal *= -1.0;
       widthNormal *= -1.0;
@@ -124,7 +130,7 @@ unitSpherelineGroupVertexShader(const LineVertexUnitSphereIn vertexIn [[stage_in
 
     const float o = style->offset * scalingFactor;
     const float4 lineOffset = float4(widthNormalIn.x * o, widthNormalIn.y * o, widthNormalIn.z * o, 0.0);
-    const float4 extendedPosition = float4(vertexIn.position.xyz + originOffset.xyz, 1.0) +
+    const float4 extendedPosition = float4(position + originOffset.xyz, 1.0) +
                               float4((lengthNormal + widthNormal).xyz,0.0)
                               * float4(width, width, width, 0.0) + lineOffset;
 
@@ -174,13 +180,20 @@ lineGroupVertexShader(const LineVertexIn vertexIn [[stage_in]],
     const float3 lineA = float3(vertexIn.lineA, 0);
     const float3 lineB = float3(vertexIn.lineB, 0);
 
+    int index = int(vertexIn.vertexIndex);
+    float3 position = lineB;
+    if(index == 0) {
+      position = lineA;
+    } else if(index == 1) {
+      position = lineA;
+    }
+
     float3 lengthNormal = normalize(lineB - lineA);
     const float3 radialVector = float3(0,0,1);
     const float3 widthNormalIn = normalize(cross(radialVector, lengthNormal));
 
     float3 widthNormal = widthNormalIn;
 
-    int index = int(vertexIn.vertexIndex);
     if(index == 0) {
       lengthNormal *= -1.0;
       widthNormal *= -1.0;
@@ -194,7 +207,7 @@ lineGroupVertexShader(const LineVertexIn vertexIn [[stage_in]],
 
     const float o = style->offset * scalingFactor;
     const float4 lineOffset = float4(widthNormalIn.x * o, widthNormalIn.y * o, 0, 0.0);
-    const float4 extendedPosition = float4(vertexIn.position.xy + originOffset.xy, 0.0, 1.0) +
+    const float4 extendedPosition = float4(position.xy + originOffset.xy, 0.0, 1.0) +
                               float4((lengthNormal + widthNormal).xy, 0.0,0.0)
                               * float4(width, width, width, 0.0) + lineOffset;
 

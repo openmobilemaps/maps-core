@@ -140,7 +140,8 @@ final class LineGroup2d: BaseGraphicsObject, @unchecked Sendable {
 }
 
 extension LineGroup2d: MCLineGroup2dInterface {
-    func setLines(_ lines: MCSharedBytes, indices: MCSharedBytes, origin: MCVec3D) {
+    
+    func setLines(_ lines: MCSharedBytes, indices: MCSharedBytes, origin: MCVec3D, is3d: Bool) {
         guard lines.elementCount != 0 else {
             lock.withCritical {
                 lineVerticesBuffer = nil

@@ -12,6 +12,10 @@ import Foundation
 import MapCoreSharedModule
 
 class ShaderFactory: MCShaderFactoryInterface {
+    func createStretchInstancedShader(_ unitSphere: Bool) -> (any MCStretchInstancedShaderInterface)? {
+        StretchInstancedShader()
+    }
+    
     func createUnitSphereRasterShader() -> MCRasterShaderInterface? {
         RasterShader()
     }

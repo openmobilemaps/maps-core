@@ -200,7 +200,7 @@ extension Quad2dInstanced: MCMaskingObjectInterface {
 }
 
 extension Quad2dInstanced: MCQuad2dInstancedInterface {
-    func setFrame(_ frame: MCQuad2dD, origin: MCVec3D) {
+    func setFrame(_ frame: MCQuad2dD, origin: MCVec3D, is3d: Bool) {
         /*
          The quad is made out of 4 vertices as following
          B----C
