@@ -726,13 +726,12 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
             lastAngle = angleDeg;
 
             auto x = p.x + bearing.x + yOffset.x;
-            auto y = p.y - bearing.y + yOffset.y;
+            auto y = (is3d ? p.y + bearing.y : p.y - bearing.y) + yOffset.y;
+            auto xw = x + charSize.x;
+            auto yh = is3d ? y - charSize.y : y + charSize.y;
 
             averageAngleS += sin(angleRad) / numSymbols;
             averageAngleC += cos(angleRad) / numSymbols;
-
-            auto xw = x + charSize.x;
-            auto yh = y + charSize.y;
 
             auto lastIndex = currentIndex;
             currentIndex = indexAtDistance(currentIndex, advance.x * (1.0 + letterSpacing), p);
@@ -764,8 +763,11 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
                 const size_t centerPositionSize = centerPositions.size();
 
                 if (is3d) {
-                    scales[2 * (countOffset + centerPositionSize) + 0] = (charSize.x / scaleFactor) / viewportSize.x * 2.0;
-                    scales[2 * (countOffset + centerPositionSize) + 1] = (charSize.y / scaleFactor) / viewportSize.y * 2.0;
+                    auto charSizeScaled = Vec2D(d.boundingBoxSize.x * textSize * i.scale, d.boundingBoxSize.y * textSize * i.scale);
+                    auto vp = Vec2D(viewportSize.x, viewportSize.y);
+
+                    scales[2 * (countOffset + centerPositionSize) + 0] = charSizeScaled.x / vp.x * 2.0;
+                    scales[2 * (countOffset + centerPositionSize) + 1] = charSizeScaled.y / vp.y * 2.0;
                 } else {
                     scales[2 * (countOffset + centerPositionSize) + 0] = charSize.x;
                     scales[2 * (countOffset + centerPositionSize) + 1] = charSize.y;
@@ -774,8 +776,7 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
                 maxSymbolRadius = std::max(maxSymbolRadius, std::max(charSize.x * 0.5, charSize.y * 0.5));
                 rotations[countOffset + centerPositionSize] = -angleDeg;
 
-                centerPositions.push_back(Vec2DHelper::midpoint(Vec2DHelper::midpoint(quad.bottomLeft, quad.bottomRight),
-                                                                Vec2DHelper::midpoint(quad.topLeft, quad.topRight)));
+                centerPositions.push_back(Vec2DHelper::midpoint(Vec2DHelper::midpoint(quad.bottomLeft, quad.bottomRight), Vec2DHelper::midpoint(quad.topLeft, quad.topRight)));
             }
 
 
