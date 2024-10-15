@@ -17,7 +17,7 @@ struct TextInstancedVertexOut {
   float2 uv;
   float4 texureCoordinates;
   uint16_t styleIndex;
-    float alpha;
+  float alpha;
 };
 
 vertex TextInstancedVertexOut
@@ -96,7 +96,7 @@ unitSphereTextInstancedFragmentShader(TextInstancedVertexOut in [[stage_in]],
 {
     constant TextInstanceStyle *style = (constant TextInstanceStyle *)(styles + in.styleIndex);
 
-    if (style->color.a == 0 || style->haloColor.a == 0.0) {
+  if (style->color.a == 0 || style->haloColor.a == 0.0 || in.alpha == 0.0) {
         discard_fragment();
     }
 
