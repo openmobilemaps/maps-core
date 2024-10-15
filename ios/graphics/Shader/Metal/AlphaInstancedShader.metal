@@ -31,6 +31,7 @@ unitSphereAlphaInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
                            constant float *alphas [[buffer(7)]],
                            constant float2 *offsets [[buffer(8)]],
                            constant float4 &originOffset [[buffer(9)]],
+                           constant float4 &origin [[buffer(10)]],
                            uint instanceId [[instance_id]])
 {
     const float3 position = positions[instanceId];
@@ -41,7 +42,9 @@ unitSphereAlphaInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
 
     const float angle = rotation * M_PI_F / 180.0;
 
-    float4 earthCenter = vpMatrix * float4(0,0,0, 1.0);
+    float4 earthCenter = vpMatrix * float4(0 - origin.x,
+                                           0 - origin.y,
+                                           0 - origin.z, 1.0);
     float4 screenPosition = vpMatrix * (float4(position.xyz, 1.0) + originOffset);
 
     earthCenter /= earthCenter.w;

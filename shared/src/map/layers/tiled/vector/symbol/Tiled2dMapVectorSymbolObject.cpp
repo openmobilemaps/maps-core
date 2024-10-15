@@ -448,6 +448,9 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &posi
     }
 
     if (is3d) {
+        offsets[2 * countOffset] = 0;
+        offsets[2 * countOffset + 1] = 0;
+
         switch (iconAnchor) {
             case Anchor::CENTER:
                 offsets[2 * countOffset] = 0;
@@ -488,13 +491,16 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &posi
             default:
                 break;
         }
+
+        offsets[2 * countOffset] += (iconOffset.x * iconWidth) * 1.0 / viewPortSize.x;
+        offsets[2 * countOffset + 1] += (iconOffset.y * iconHeight) * 1.0 / viewPortSize.y;
     } else {
         renderCoordinate = getRenderCoordinates(iconAnchor, -rotations[countOffset], iconWidth, iconHeight);
     }
 
 
-    const double x = renderCoordinate.x + iconOffset.x * scaleFactor * iconSize;
-    const double y = renderCoordinate.y + iconOffset.y * scaleFactor * iconSize;
+    const double x = renderCoordinate.x + (is3d ? 0.0 : iconOffset.x * scaleFactor * iconSize);
+    const double y = renderCoordinate.y + (is3d ? 0.0 : iconOffset.y * scaleFactor * iconSize);
 
     writePosition(x, y, countOffset, positions);
 

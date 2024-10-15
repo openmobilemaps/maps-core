@@ -26,6 +26,7 @@ final class Quad2dInstanced: BaseGraphicsObject, @unchecked Sendable {
     private var rotationsBuffer: MTLBuffer?
     private var alphaBuffer: MTLBuffer?
     private var offsetsBuffer: MTLBuffer?
+    private var originBuffer: MTLBuffer?
 
     private var textureCoordinatesBuffer: MTLBuffer?
 
@@ -52,6 +53,8 @@ final class Quad2dInstanced: BaseGraphicsObject, @unchecked Sendable {
         super.init(device: metalContext.device,
                    sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue)!,
                    label: label)
+        var originOffset: simd_float4 = simd_float4(0, 0, 0, 0)
+        originBuffer = device.makeBuffer(bytes: &originOffset, length: MemoryLayout<simd_float4>.stride, options: [])
     }
 
     private func setupStencilStates() {
@@ -165,6 +168,14 @@ final class Quad2dInstanced: BaseGraphicsObject, @unchecked Sendable {
             bufferPointer.pointee.z = Float(originOffset.z - origin.z)
         }
         encoder.setVertexBuffer(originOffsetBuffer, offset: 0, index: 9)
+
+
+        if let bufferPointer = originBuffer?.contents().assumingMemoryBound(to: simd_float4.self) {
+            bufferPointer.pointee.x = Float(origin.x)
+            bufferPointer.pointee.y = Float(origin.y)
+            bufferPointer.pointee.z = Float(origin.z)
+        }
+        encoder.setVertexBuffer(originBuffer, offset: 0, index: 10)
 
         encoder.drawIndexedPrimitives(type: .triangle,
                                       indexCount: indicesCount,
