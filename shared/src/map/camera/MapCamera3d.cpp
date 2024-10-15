@@ -1517,7 +1517,7 @@ void MapCamera3d::setCameraConfig(const Camera3dConfig & config, std::optional<f
     zoomMin = cameraZoomConfig.minZoom;
     zoomMax = cameraZoomConfig.maxZoom;
 
-    float targetZoom = targetZoom_ ? *targetZoom_ : zoomMin;
+    float targetZoom = targetZoom_ ? *targetZoom_ : zoom;
     std::optional<Coord> targetCoordinate = targetCoordinate_;
 
     // temporarily set target zoom to get target pitch
