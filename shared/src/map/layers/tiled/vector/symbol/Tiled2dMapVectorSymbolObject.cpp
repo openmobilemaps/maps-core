@@ -950,15 +950,15 @@ void Tiled2dMapVectorSymbolObject::collisionDetection(const double zoomIdentifie
     }
 
     auto visibleIn3d = true;
-    {
-        auto strongMapInterface = mapInterface.lock();
-        auto camera3d = strongMapInterface ? strongMapInterface->getCamera()->asMapCamera3d() : nullptr;
-        if(camera3d != nullptr) {
-            if (auto cam = std::dynamic_pointer_cast<MapCamera3d>(camera3d)) {
-                visibleIn3d = !cam->coordIsFarAwayFromFocusPoint(coordinate);
-            }
-        }
-    }
+//    {
+//        auto strongMapInterface = mapInterface.lock();
+//        auto camera3d = strongMapInterface ? strongMapInterface->getCamera()->asMapCamera3d() : nullptr;
+//        if(camera3d != nullptr) {
+//            if (auto cam = std::dynamic_pointer_cast<MapCamera3d>(camera3d)) {
+//                visibleIn3d = !cam->coordIsFarAwayFromFocusPoint(coordinate);
+//            }
+//        }
+//    }
 
     if(!visibleIn3d) {
         // not visible
