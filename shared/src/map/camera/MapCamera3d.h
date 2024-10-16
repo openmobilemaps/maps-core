@@ -24,8 +24,6 @@
 #include "Vec2F.h"
 #include "Vec3D.h"
 #include "CameraMode3d.h"
-#include "Camera3dConfig.h"
-#include "CameraInterpolation.h"
 #include <mutex>
 #include <optional>
 #include <set>
@@ -162,10 +160,6 @@ class MapCamera3d : public MapCameraInterface,
 
     CameraMode3d getCameraMode() override;
 
-    void setCameraConfig(const Camera3dConfig & config, std::optional<float> durationSeconds, std::optional<float> targetZoom, const std::optional<::Coord> & targetCoordinate) override;
-
-    Camera3dConfig getCameraConfig() override;
-
     void notifyListenerBoundsChange() override;
 
     std::vector<double> computeEllipseCoefficients();
@@ -219,6 +213,8 @@ protected:
     double zoomMin = 10000000;
     double zoomMax = 10000;
 
+    CameraMode3d mode = CameraMode3d::GLOBAL;
+
     RectCoord bounds;
 
     std::recursive_mutex vpDataMutex;
@@ -266,8 +262,6 @@ protected:
 
     void notifyListeners(const int &listenerType);
 
-    float valueForZoom(const CameraInterpolation& interpolator);
-
     // MARK: Animations
 
     std::recursive_mutex animationMutex;
@@ -311,6 +305,4 @@ protected:
     std::optional<Coord> lastOnMoveCoord;
     std::vector<double> lastOnTouchDownInverseVPMatrix;
     Vec3D lastOnTouchDownVPOrigin = Vec3D(0.0, 0.0, 0.0);
-
-    Camera3dConfig cameraZoomConfig;
 };

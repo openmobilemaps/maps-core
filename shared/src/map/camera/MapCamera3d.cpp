@@ -27,7 +27,6 @@
 #include "VectorHelper.h"
 
 #include "MapCamera3DHelper.h"
-#include "Camera3dConfig.h"
 
 #define DEFAULT_ANIM_LENGTH 300
 #define ROTATION_THRESHOLD 20
@@ -35,7 +34,12 @@
 #define ROTATION_LOCKING_FACTOR 1.5
 
 #define GLOBE_MIN_ZOOM      200'000'000
+#define GLOBE_INITIAL_ZOOM   46'000'000
+#define GLOBE_RESET_ZOOM     25'000'000
 #define GLOBE_MAX_ZOOM        5'000'000
+#define LOCAL_MIN_ZOOM        8'000'000
+#define LOCAL_INITIAL_ZOOM    3'000'000
+#define LOCAL_MAX_ZOOM          100'000
 #define RUBBER_BAND_WINDOW            0 // Disabled for now
 
 MapCamera3d::MapCamera3d(const std::shared_ptr<MapInterface> &mapInterface, float screenDensityPpi)
@@ -50,8 +54,7 @@ MapCamera3d::MapCamera3d(const std::shared_ptr<MapInterface> &mapInterface, floa
       zoomMax(GLOBE_MAX_ZOOM),
       lastOnTouchDownPoint(std::nullopt)
     , bounds(mapCoordinateSystem.bounds),
-      origin(0, 0, 0),
-      cameraZoomConfig("", false, std::nullopt, 0.0, 0.0, CameraInterpolation({}), CameraInterpolation({}))
+      origin(0, 0, 0)
 {
     mapSystemRtl = mapCoordinateSystem.bounds.bottomRight.x > mapCoordinateSystem.bounds.topLeft.x;
     mapSystemTtb = mapCoordinateSystem.bounds.bottomRight.y > mapCoordinateSystem.bounds.topLeft.y;
@@ -348,9 +351,12 @@ void MapCamera3d::removeListener(const std::shared_ptr<MapCameraListenerInterfac
 std::shared_ptr<::CameraInterface> MapCamera3d::asCameraInterface() { return shared_from_this(); }
 
 std::vector<float> MapCamera3d::getVpMatrix() {
-    if(cameraZoomConfig.rotationSpeed) {
-        double speed = *(cameraZoomConfig.rotationSpeed);
-        focusPointPosition.x = fmod(DateHelper::currentTimeMicros() * speed * 0.000003 + 180.0, 360.0) - 180.0;
+    if (mode == CameraMode3d::ONBOARDING_ROTATING_GLOBE || mode == CameraMode3d::ONBOARDING_ROTATING_SEMI_GLOBE || mode == CameraMode3d::ONBOARDING_CLOSE_ORBITAL || mode == CameraMode3d::ONBOARDING_EVEN_CLOSER_ORBITAL) {
+        focusPointPosition.y = 42;
+        focusPointPosition.x = fmod(DateHelper::currentTimeMicros() * 0.000003 + 180.0, 360.0) - 180.0;
+        mapInterface->invalidate();
+    } else if (mode == CameraMode3d::GLOBE_ROTATING) {
+        focusPointPosition.x = fmod(DateHelper::currentTimeMicros() * 0.000003 + 180.0, 360.0) - 180.0;
         mapInterface->invalidate();
     }
 
@@ -1497,28 +1503,77 @@ std::shared_ptr<MapCamera3dInterface> MapCamera3d::asMapCamera3d() {
 void MapCamera3d::checkForRubberBandEffect() {
     // not implemented yet.
 }
-
 CameraMode3d MapCamera3d::getCameraMode() {
-    return CameraMode3d::GLOBAL;
+    return this->mode;
 }
 
 void MapCamera3d::setCameraMode(CameraMode3d mode) {
-    // no longer needed.
-}
-
-void MapCamera3d::setCameraConfig(const Camera3dConfig & config, std::optional<float> durationSeconds, std::optional<float> targetZoom_, const std::optional<::Coord> & targetCoordinate_) {
-    cameraZoomConfig = config;
+    if (mode == this->mode) {
+        return;
+    }
+    this->mode = mode;
 
     float initialZoom = zoom;
+    float targetZoom;
     float initialPitch = cameraPitch;
     float initialVerticalDisplacement = cameraVerticalDisplacement;
-    float duration = durationSeconds ? *durationSeconds : 0.0;
 
-    zoomMin = cameraZoomConfig.minZoom;
-    zoomMax = cameraZoomConfig.maxZoom;
+    float duration = DEFAULT_ANIM_LENGTH;
 
-    float targetZoom = targetZoom_ ? *targetZoom_ : zoom;
-    std::optional<Coord> targetCoordinate = targetCoordinate_;
+    std::optional<Coord> targetCoordinate;
+
+    switch (mode) {
+        case CameraMode3d::ONBOARDING_ROTATING_GLOBE:
+            this->zoomMin = GLOBE_MIN_ZOOM;
+            this->zoomMax = GLOBE_MIN_ZOOM;
+            targetZoom = GLOBE_MIN_ZOOM;
+            duration = 0;
+            break;
+        case CameraMode3d::ONBOARDING_ROTATING_SEMI_GLOBE:
+            this->zoomMin = 100'000'000;
+            this->zoomMax = 100'000'000;
+            targetZoom = 100'000'000;
+            duration = 2000;
+            break;
+        case CameraMode3d::ONBOARDING_CLOSE_ORBITAL:
+            this->zoomMin = 70'000'000;
+            this->zoomMax = 70'000'000;
+            targetZoom = 70'000'000;
+            duration = 2000;
+            break;
+        case CameraMode3d::ONBOARDING_EVEN_CLOSER_ORBITAL:
+            this->zoomMin = 50'000'000;
+            this->zoomMax = 50'000'000;
+            targetZoom = 50'000'000;
+            duration = 1000;
+            break;
+        case CameraMode3d::ONBOARDING_FOCUS_ZURICH:
+            this->zoomMin = 20'000'000;
+            this->zoomMax = 20'000'000;
+            targetZoom = 20'000'000;
+            duration = 4000;
+            targetCoordinate = Coord(CoordinateSystemIdentifiers::EPSG4326(), 8.5417, 47.3769, 0.0);
+            break;
+        case CameraMode3d::GLOBAL:
+            this->zoomMin = GLOBE_MIN_ZOOM;
+            this->zoomMax = GLOBE_MAX_ZOOM;
+            targetZoom = GLOBE_RESET_ZOOM;
+            break;
+        case CameraMode3d::GLOBE_ROTATING:
+            this->zoomMin = GLOBE_MIN_ZOOM;
+            this->zoomMax = GLOBE_MAX_ZOOM;
+            targetZoom = zoom;
+            break;
+        case CameraMode3d::LOCAL:
+            this->zoomMin = LOCAL_MIN_ZOOM;
+            this->zoomMax = LOCAL_MAX_ZOOM;
+            if (this->zoom == this->zoomMin) {
+                targetZoom = LOCAL_MIN_ZOOM;
+            } else {
+                targetZoom = LOCAL_INITIAL_ZOOM;
+            }
+            break;
+    }
 
     // temporarily set target zoom to get target pitch
     this->zoom = targetZoom;
@@ -1583,13 +1638,10 @@ void MapCamera3d::setCameraConfig(const Camera3dConfig & config, std::optional<f
         coordAnimation->start();
     }
 
+
     mapInterface->invalidate();
 
     notifyListeners(ListenerType::CAMERA_MODE);
-}
-
-Camera3dConfig MapCamera3d::getCameraConfig() {
-    return cameraZoomConfig;
 }
 
 void MapCamera3d::notifyListenerBoundsChange() {
@@ -1600,41 +1652,73 @@ void MapCamera3d::updateZoom(double zoom_) {
     auto zoomMin = getMinZoom();
     auto zoomMax = getMaxZoom();
 
-    // RUBBERBAND EFFECT
-//    double overZooming;
-//    if (getCameraMode() == CameraMode3d::LOCAL) {
-//        overZooming = zoom_ - LOCAL_MIN_ZOOM;
-//    } else {
-//        overZooming = GLOBE_MAX_ZOOM - zoom_;
-//    }
-//
-//    double newZoom = 0;
-//
-//    if (overZooming > 0) {
-//        double normalizedDiff = std::min(overZooming / RUBBER_BAND_WINDOW, 1.0); // Normalize to [0, 1]
-//        double mapped = 1 / (1 + normalizedDiff) * 2 - 1; // Rubberband so that medium to large values are all squashed towards the end
-//
-//        if (getCameraMode() == CameraMode3d::LOCAL) {
-//            newZoom = zoom + (zoom_ - zoom) * mapped;
-//        } else {
-//            newZoom = zoom - (zoom - zoom_) * mapped;
-//        }
-//    } else {
-//        newZoom = std::clamp(zoom_, zoomMax, zoomMin);
-//    }
+    double overZooming;
+    if (getCameraMode() == CameraMode3d::LOCAL) {
+        overZooming = zoom_ - LOCAL_MIN_ZOOM;
+    } else {
+        overZooming = GLOBE_MAX_ZOOM - zoom_;
+    }
+
+    double newZoom = 0;
+
+    if (overZooming > 0) {
+        double normalizedDiff = std::min(overZooming / RUBBER_BAND_WINDOW, 1.0); // Normalize to [0, 1]
+        double mapped = 1 / (1 + normalizedDiff) * 2 - 1; // Rubberband so that medium to large values are all squashed towards the end
+
+        if (getCameraMode() == CameraMode3d::LOCAL) {
+            newZoom = zoom + (zoom_ - zoom) * mapped;
+        } else {
+            newZoom = zoom - (zoom - zoom_) * mapped;
+        }
+    } else {
+        newZoom = std::clamp(zoom_, zoomMax, zoomMin);
+    }
 
 
-    zoom = std::clamp(zoom_, zoomMax, zoomMin);
+    zoom = newZoom;
+
     cameraVerticalDisplacement = getCameraVerticalDisplacement();
     cameraPitch = getCameraPitch();
 }
 
 double MapCamera3d::getCameraVerticalDisplacement() {
-    return valueForZoom(cameraZoomConfig.verticalDisplacementInterpolationValues);
+    if (mode == CameraMode3d::ONBOARDING_ROTATING_GLOBE || mode == CameraMode3d::ONBOARDING_ROTATING_SEMI_GLOBE) {
+        return 0;
+    }
+    double z, from, to;
+    double maxPitch = GLOBE_INITIAL_ZOOM;
+    if (zoom >= maxPitch) {
+        z = 1.0 - (zoom - maxPitch) / (GLOBE_MIN_ZOOM - maxPitch);
+        from = 0;
+        to = 1.0;
+    }
+    else {
+        z = 1.0 - (zoom - LOCAL_MAX_ZOOM) / (maxPitch - LOCAL_MAX_ZOOM);
+        from = 1.0;
+        to = 0;
+    }
+    double p = from + (z * (to - from));
+    return p;
 }
 
 double MapCamera3d::getCameraPitch() {
-    return valueForZoom(cameraZoomConfig.pitchInterpolationValues);
+    if (mode == CameraMode3d::ONBOARDING_ROTATING_GLOBE || mode == CameraMode3d::ONBOARDING_ROTATING_SEMI_GLOBE) {
+        return 0;
+    }
+    double z, from, to;
+    double maxPitch = GLOBE_INITIAL_ZOOM;
+    if (zoom >= maxPitch) {
+        z = 1.0 - (zoom - maxPitch) / (GLOBE_MIN_ZOOM - maxPitch);
+        from = 0;
+        to = 25;
+    }
+    else {
+        z = 1.0 - (zoom - LOCAL_MAX_ZOOM) / (maxPitch - LOCAL_MAX_ZOOM);
+        from = 25;
+        to = 0;
+    }
+    double p = from + (z * (to - from));
+    return p;
 }
 
 double MapCamera3d::getCameraFieldOfView() {
@@ -1654,38 +1738,3 @@ double MapCamera3d::getCameraDistance() {
     return d / R;
 }
 
-float MapCamera3d::valueForZoom(const CameraInterpolation& interpolator) {
-    if(interpolator.stops.size() == 0) {
-        return 0;
-    }
-
-    // 0 --> minZoom
-    // 1 --> maxZoom
-    auto t = (zoom - zoomMin) / (zoomMax - zoomMin);
-    const auto& values = interpolator.stops;
-
-    if (t <= values.front().stop) {
-        return values.front().value;
-    }
-
-    if (t >= values.back().stop) {
-        return values.back().value;
-    }
-
-    // Find the correct segment where t lies
-    for (size_t i = 1; i < values.size(); ++i) {
-        if (t <= values[i].stop) {
-            const auto& a = values[i - 1];
-            const auto& b = values[i];
-
-            // Linear interpolation
-            float interp = (t - a.stop) / (b.stop - a.stop);
-            return a.value + interp * (b.value - a.value);
-        }
-    }
-#if __cplusplus >= 202302L
-    std::unreachable();
-#else
-    __builtin_unreachable();
-#endif
-}
