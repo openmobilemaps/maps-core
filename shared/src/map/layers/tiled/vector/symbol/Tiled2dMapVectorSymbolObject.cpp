@@ -826,7 +826,11 @@ void Tiled2dMapVectorSymbolObject::updateTextProperties(std::vector<float> &posi
         return;
     }
 
-    labelObject->updateProperties(positions, referencePositions, scales, rotations, styles, countOffset, styleOffset, zoomIdentifier, scaleFactor, animationCoordinator->isColliding(), rotation, alpha, isCoordinateOwner, now, viewPortSize);
+    {
+        auto strongMapInterface = mapInterface.lock();
+
+        labelObject->updateProperties(positions, referencePositions, scales, rotations, styles, countOffset, styleOffset, zoomIdentifier, scaleFactor, animationCoordinator->isColliding(), rotation, alpha, isCoordinateOwner, now, viewPortSize, strongMapInterface->getCamera());
+    }
 
     if (!animationCoordinator->isTextAnimating()) {
         lastTextUpdateScaleFactor = scaleFactor;

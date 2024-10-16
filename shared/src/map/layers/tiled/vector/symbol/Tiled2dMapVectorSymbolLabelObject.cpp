@@ -148,6 +148,7 @@ Tiled2dMapVectorSymbolLabelObject::Tiled2dMapVectorSymbolLabelObject(const std::
                        [converter](const auto& l) {
             return converter->convertToRenderSystem(l);
         });
+        screenLineCoordinates = renderLineCoordinates;
         renderLineCoordinatesCount = renderLineCoordinates.size();
     } else {
         renderLineCoordinatesCount = 0;
@@ -240,7 +241,7 @@ void Tiled2dMapVectorSymbolLabelObject::evaluateStyleProperties(const double zoo
 }
 
 
-void Tiled2dMapVectorSymbolLabelObject::updateProperties(std::vector<float> &positions, std::vector<float> &referencePositions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const bool collides, const double rotation, const float alpha, const bool isCoordinateOwner, long long now, const Vec2I &viewportSize) {
+void Tiled2dMapVectorSymbolLabelObject::updateProperties(std::vector<float> &positions, std::vector<float> &referencePositions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const bool collides, const double rotation, const float alpha, const bool isCoordinateOwner, long long now, const Vec2I &viewportSize, const std::shared_ptr<MapCameraInterface>& camera) {
     const auto evalContext = EvaluationContext(zoomIdentifier, dpFactor, featureContext, stateManager);
 
     evaluateStyleProperties(zoomIdentifier);
@@ -280,17 +281,20 @@ void Tiled2dMapVectorSymbolLabelObject::updateProperties(std::vector<float> &pos
             if (rotationAlignment == SymbolAlignment::VIEWPORT) {
                 updatePropertiesPoint(positions, referencePositions, scales, rotations, styles, countOffset, styleOffset, zoomIdentifier, scaleFactor, rotation, viewportSize);
             } else {
-                auto rotatedFactor = updatePropertiesLine(positions, referencePositions, scales, rotations, styles, countOffset, styleOffset, zoomIdentifier, scaleFactor, rotation, viewportSize);
+                setupCamera(camera);
+                auto rotatedFactor = updatePropertiesLine(positions, referencePositions, scales, rotations, styles, countOffset, styleOffset, zoomIdentifier, scaleFactor, rotation, viewportSize, camera);
 
                 if(rotatedFactor > 0.5 && lineCoordinates) {
                     std::reverse((*lineCoordinates).begin(), (*lineCoordinates).end());
                     std::reverse(renderLineCoordinates.begin(), renderLineCoordinates.end());
+                    std::reverse(screenLineCoordinates.begin(), screenLineCoordinates.end());
 
                     wasReversed = !wasReversed;
 
                     countOffset -= characterCount;
 
-                    updatePropertiesLine(positions, referencePositions, scales, rotations, styles, countOffset, styleOffset, zoomIdentifier, scaleFactor, rotation, viewportSize);
+                    setupCamera(camera);
+                    updatePropertiesLine(positions, referencePositions, scales, rotations, styles, countOffset, styleOffset, zoomIdentifier, scaleFactor, rotation, viewportSize, camera);
                 }
             }
 
@@ -302,7 +306,7 @@ void Tiled2dMapVectorSymbolLabelObject::updateProperties(std::vector<float> &pos
 void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float> &positions, std::vector<float> &referencePositions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, const Vec2I &viewportSize) {
 
     const auto evalContext = EvaluationContext(zoomIdentifier, dpFactor, featureContext, stateManager);
-    const float fontSize = is3d ? textSize : scaleFactor * textSize;
+    const float fontSize = is3d ? textSize : (scaleFactor * textSize);
 
     Vec2D boxMin(std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
     Vec2D boxMax(std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest());
@@ -314,7 +318,6 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
     while(centerPositions.size() < characterCount) {
         centerPositions.push_back(zero);
     }
-
 
     auto pen = zero;
 
@@ -630,7 +633,7 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
     }
 }
 
-double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float> &positions, std::vector<float> &referencePositions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, const Vec2I &viewportSize) {
+double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float> &positions, std::vector<float> &referencePositions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, const Vec2I &viewportSize, const std::shared_ptr<MapCameraInterface>& camera) {
     if(lineCoordinates == std::nullopt) {
         countOffset += characterCount;
         return 0;
@@ -638,7 +641,8 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
 
     auto evalContext = EvaluationContext(zoomIdentifier, dpFactor, featureContext, stateManager);
 
-    const float fontSize = scaleFactor * textSize;
+    const double fontSize = scaleFactor * textSize;
+    const double scaleCorrection = is3d ? (1.0 / scaleFactor) : 1.0;
 
     Vec2D boxMin(std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
     Vec2D boxMax(std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest());
@@ -661,7 +665,7 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
         }
     }
 
-    currentIndex = indexAtDistance(currentIndex, -size * 0.5, std::nullopt);
+    currentIndex = indexAtDistance(currentIndex, -size * 0.5 * scaleCorrection, std::nullopt);
     auto yOffset = Vec2D(0.0, offset.y * fontSize);
 
     if (wasReversed) {
@@ -682,7 +686,7 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
 
     for(auto &i : splittedTextInfo) {
         if(i.glyphIndex < 0) {
-            currentIndex = indexAtDistance(currentIndex, spaceAdvance * fontSize * i.scale, std::nullopt);
+            currentIndex = indexAtDistance(currentIndex, spaceAdvance * fontSize * i.scale * scaleCorrection, std::nullopt);
             index = 0;
         } else {
             auto& d = glyphs[i.glyphIndex];
@@ -696,8 +700,8 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
             const auto &p = pointAtIndex(currentIndex, true);
 
             // get before and after to calculate angle
-            const auto &before = pointAtIndex(indexAtDistance(currentIndex, -halfSpace, p), false);
-            const auto &after = pointAtIndex(indexAtDistance(currentIndex, halfSpace, p), false);
+            const auto &before = pointAtIndex(indexAtDistance(currentIndex, -halfSpace * scaleCorrection, p), is3d);
+            const auto &after = pointAtIndex(indexAtDistance(currentIndex, halfSpace * scaleCorrection, p), is3d);
 
             double beforeAfter = is3d ? (after.y - before.y) : (before.y - after.y);
             double angleRad = atan2_approximation(beforeAfter, -(before.x - after.x));
@@ -734,7 +738,7 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
             averageAngleC += cos(angleRad) / numSymbols;
 
             auto lastIndex = currentIndex;
-            currentIndex = indexAtDistance(currentIndex, advance.x * (1.0 + letterSpacing), p);
+            currentIndex = indexAtDistance(currentIndex, advance.x * (1.0 + letterSpacing) * scaleCorrection, p);
 
             // if we are at the end, and we were at the end (lastIndex), then clear and skip
             if(currentIndex.first == renderLineCoordinatesCount - 1 && lastIndex.first == currentIndex.first && (lastIndex.second == currentIndex.second)) {
@@ -766,8 +770,11 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
                     auto charSizeScaled = Vec2D(d.boundingBoxSize.x * textSize * i.scale, d.boundingBoxSize.y * textSize * i.scale);
                     auto vp = Vec2D(viewportSize.x, viewportSize.y);
 
-                    scales[2 * (countOffset + centerPositionSize) + 0] = charSizeScaled.x / vp.x * 2.0;
-                    scales[2 * (countOffset + centerPositionSize) + 1] = charSizeScaled.y / vp.y * 2.0;
+                    auto sx = charSizeScaled.x / vp.x * 2.0;
+                    auto sy = charSizeScaled.y / vp.y * 2.0;
+
+                    scales[2 * (countOffset + centerPositionSize) + 0] = sx;
+                    scales[2 * (countOffset + centerPositionSize) + 1] = sy;
                 } else {
                     scales[2 * (countOffset + centerPositionSize) + 0] = charSize.x;
                     scales[2 * (countOffset + centerPositionSize) + 1] = charSize.y;
@@ -855,16 +862,29 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
     return diff > 95.0 ? 1.0 : 0.0; // flip with margin to prevent rapid flips
 }
 
+void Tiled2dMapVectorSymbolLabelObject::setupCamera(const std::shared_ptr<MapCameraInterface> &camera) {
+    if(is3d && renderLineCoordinatesCount > 0) {
+        auto &ls = *lineCoordinates;
+        for(size_t i=0; i<ls.size(); ++i) {
+            auto vec2d = camera->screenPosFromCoord(ls[i]);
+            screenLineCoordinates[i] = Coord(0, (double)vec2d.x, (double)vec2d.y, (double)0.0);
+        }
+
+        auto p = camera->screenPosFromCoord(referencePoint);
+        referencePointScreen = Coord(0, (double)p.x, (double)p.y, (double)0.0);
+    }
+}
+
 std::pair<int, double> Tiled2dMapVectorSymbolLabelObject::findReferencePointIndices() {
-    auto point = referencePoint;
+    auto point = is3d ? referencePointScreen : referencePoint;
     auto distance = std::numeric_limits<double>::max();
 
     double tMin = 0.0f;
     int iMin = 0;
 
     for(int i=1; i < renderLineCoordinatesCount; ++i) {
-        auto start = renderLineCoordinates.at(i-1);
-        auto end = renderLineCoordinates.at(i);
+        auto start = screenLineCoordinates[i-1];
+        auto end = screenLineCoordinates[i];
 
         auto length = Vec2DHelper::distance(Vec2D(start.x, start.y), Vec2D(end.x, end.y));
 
