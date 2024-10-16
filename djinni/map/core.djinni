@@ -240,3 +240,7 @@ camera_3d_config = record {
     pitch_interpolation_values: camera_interpolation;
     vertical_displacement_interpolation_values: camera_interpolation;
 }
+
+camera_3d_config_factory = interface +c {
+    static get_restor_config(): camera_3d_config;
+}
