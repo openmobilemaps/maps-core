@@ -455,20 +455,27 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
     currentViewBounds = conversionHelper->convertQuad(layerSystemId, currentViewBounds);
 
     std::vector<VisibleTilesLayer> layers;
+    int topMostZoomLevel = zoomLevelInfos.begin()->zoomLevelIdentifier;
 
-    for (int previousLayerOffset = 0; previousLayerOffset <= zoomInfo.numDrawPreviousLayers; previousLayerOffset++) {
+    for (int previousLayerOffset = 0; (previousLayerOffset <= zoomInfo.numDrawPreviousLayers || zoomInfo.maskTile); previousLayerOffset++) {
 
         VisibleTilesLayer curVisibleTiles(-previousLayerOffset);
 
         std::vector<std::pair<VisibleTileCandidate, PrioritizedTiled2dMapTileInfo>> nextVisibleTilesVec;
 
+        bool allTopMost = true;
+
         for (auto &tile : visibleTilesVec) {
             tile.second.tileInfo.tessellationFactor = std::min(std::max(0, maxLevel - tile.second.tileInfo.zoomIdentifier), 4);
             curVisibleTiles.visibleTiles.insert(tile.second);
 
+            if (allTopMost && tile.second.tileInfo.zoomIdentifier != topMostZoomLevel) {
+                allTopMost = false;
+            }
+
             hash_combine(visibleTileHash, std::hash<Tiled2dMapTileInfo>{}(tile.second.tileInfo));
 
-            if (tile.first.levelIndex > 0 && previousLayerOffset < zoomInfo.numDrawPreviousLayers) {
+            if (tile.first.levelIndex > 0 && (previousLayerOffset < zoomInfo.numDrawPreviousLayers || zoomInfo.maskTile)) {
 
                 const Tiled2dMapZoomLevelInfo &zoomLevelInfo = zoomLevelInfos.at(tile.first.levelIndex - 1);
                 const double boundsRatio = std::abs((zoomLevelInfo.bounds.bottomRight.y  - zoomLevelInfo.bounds.topLeft.y) / (zoomLevelInfo.bounds.bottomRight.x  - zoomLevelInfo.bounds.topLeft.x));
@@ -505,6 +512,10 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
         }
 
         layers.push_back(curVisibleTiles);
+
+        if (allTopMost) {
+            break;
+        }
     }
 
     currentZoomLevelIdentifier = maxLevel;
