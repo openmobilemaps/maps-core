@@ -205,7 +205,7 @@ public struct MapView: UIViewRepresentable {
             animated = false
         }
 
-        if is3D, coordinator.lastWrittenCamera?.cameraConfig != camera.cameraConfig {
+        if is3D, coordinator.lastWrittenCamera?.cameraConfig.key != camera.cameraConfig.key {
             mapView.camera.asMapCamera3d()?.setCameraConfig(camera.cameraConfig, durationSeconds: nil, targetZoom: nil, targetCoordinate: nil)
         }
 

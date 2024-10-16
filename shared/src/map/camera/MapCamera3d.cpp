@@ -36,7 +36,6 @@
 
 #define GLOBE_MIN_ZOOM      200'000'000
 #define GLOBE_MAX_ZOOM        5'000'000
-#define RUBBER_BAND_WINDOW            0 // Disabled for now
 
 MapCamera3d::MapCamera3d(const std::shared_ptr<MapInterface> &mapInterface, float screenDensityPpi)
     : mapInterface(mapInterface)
@@ -1600,30 +1599,6 @@ void MapCamera3d::updateZoom(double zoom_) {
     auto zoomMin = getMinZoom();
     auto zoomMax = getMaxZoom();
 
-    // RUBBERBAND EFFECT
-//    double overZooming;
-//    if (getCameraMode() == CameraMode3d::LOCAL) {
-//        overZooming = zoom_ - LOCAL_MIN_ZOOM;
-//    } else {
-//        overZooming = GLOBE_MAX_ZOOM - zoom_;
-//    }
-//
-//    double newZoom = 0;
-//
-//    if (overZooming > 0) {
-//        double normalizedDiff = std::min(overZooming / RUBBER_BAND_WINDOW, 1.0); // Normalize to [0, 1]
-//        double mapped = 1 / (1 + normalizedDiff) * 2 - 1; // Rubberband so that medium to large values are all squashed towards the end
-//
-//        if (getCameraMode() == CameraMode3d::LOCAL) {
-//            newZoom = zoom + (zoom_ - zoom) * mapped;
-//        } else {
-//            newZoom = zoom - (zoom - zoom_) * mapped;
-//        }
-//    } else {
-//        newZoom = std::clamp(zoom_, zoomMax, zoomMin);
-//    }
-
-
     zoom = std::clamp(zoom_, zoomMax, zoomMin);
     cameraVerticalDisplacement = getCameraVerticalDisplacement();
     cameraPitch = getCameraPitch();
@@ -1634,14 +1609,11 @@ double MapCamera3d::getCameraVerticalDisplacement() {
 }
 
 double MapCamera3d::getCameraPitch() {
-    return valueForZoom(cameraZoomConfig.pitchInterpolationValues);
+    return valueForZoom(cameraZoomConfig.pitchInterpolationValues);;
 }
 
 double MapCamera3d::getCameraFieldOfView() {
     return 42;
-//    fieldOfView -= 0.01;
-//    mapInterface->invalidate();
-//    return fieldOfView;
 }
 
 double MapCamera3d::getCameraDistance() {
