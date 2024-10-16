@@ -770,11 +770,19 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
                     auto charSizeScaled = Vec2D(d.boundingBoxSize.x * textSize * i.scale, d.boundingBoxSize.y * textSize * i.scale);
                     auto vp = Vec2D(viewportSize.x, viewportSize.y);
 
-                    auto sx = charSizeScaled.x / vp.x * 2.0;
-                    auto sy = charSizeScaled.y / vp.y * 2.0;
+                    auto max = std::max(vp.x, vp.y);
+                    auto min = std::min(vp.x, vp.y);
 
-                    scales[2 * (countOffset + centerPositionSize) + 0] = sx;
-                    scales[2 * (countOffset + centerPositionSize) + 1] = sy;
+                    auto sx = charSizeScaled.x / max * 2.0;
+                    auto sy = charSizeScaled.y / max * 2.0;
+
+                    auto c = max / min;
+
+                    float rotationDegrees = fmod(abs(-angleDeg), 90.0);
+                    float f = rotationDegrees / 90.0;
+
+                    scales[2 * (countOffset + centerPositionSize) + 0] = sx * ((1 - f) * c + f);
+                    scales[2 * (countOffset + centerPositionSize) + 1] = sy * ((1 - f) + f * c);
                 } else {
                     scales[2 * (countOffset + centerPositionSize) + 0] = charSize.x;
                     scales[2 * (countOffset + centerPositionSize) + 1] = charSize.y;
