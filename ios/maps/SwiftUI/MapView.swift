@@ -40,7 +40,7 @@ public struct MapView: UIViewRepresentable {
     }
 
     public struct Camera: Equatable {
-        public static let basicCamera3dConfig = MCCamera3dConfig(key: "basic_config", allowUserInteraction: true, rotationSpeed: nil, minZoom: 200_000_000, maxZoom: 5_000_000, pitchInterpolationValues: MCCameraInterpolation(stops: []), verticalDisplacementInterpolationValues: MCCameraInterpolation(stops: []))
+        public static let basicCamera3dConfig = MCCamera3dConfigFactory.getBasicConfig()
 
         public var center: Updatable<MCCoord>
         public var zoom: Updatable<Double>

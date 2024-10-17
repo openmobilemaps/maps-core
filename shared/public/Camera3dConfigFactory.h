@@ -9,5 +9,7 @@ class Camera3dConfigFactory {
 public:
     virtual ~Camera3dConfigFactory() = default;
 
+    static Camera3dConfig getBasicConfig();
+
     static Camera3dConfig getRestorConfig();
 };

@@ -7,6 +7,7 @@ data class Camera3dConfig(
     val key: String,
     val allowUserInteraction: Boolean,
     val rotationSpeed: Float?,
+    val animationDurationMs: Int,
     val minZoom: Float,
     val maxZoom: Float,
     val pitchInterpolationValues: CameraInterpolation,

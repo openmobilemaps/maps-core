@@ -25,11 +25,11 @@
 #include "CoordinateSystemIdentifiers.h"
 #include "CoordHelper.h"
 #include "VectorHelper.h"
+#include "Camera3dConfigFactory.h"
 
 #include "MapCamera3DHelper.h"
 #include "Camera3dConfig.h"
 
-#define DEFAULT_ANIM_LENGTH 300
 #define ROTATION_THRESHOLD 20
 #define ROTATION_LOCKING_ANGLE 10
 #define ROTATION_LOCKING_FACTOR 1.5
@@ -50,7 +50,7 @@ MapCamera3d::MapCamera3d(const std::shared_ptr<MapInterface> &mapInterface, floa
       lastOnTouchDownPoint(std::nullopt)
     , bounds(mapCoordinateSystem.bounds),
       origin(0, 0, 0),
-      cameraZoomConfig("", false, std::nullopt, 0.0, 0.0, CameraInterpolation({}), CameraInterpolation({}))
+cameraZoomConfig(Camera3dConfigFactory::getBasicConfig())
 {
     mapSystemRtl = mapCoordinateSystem.bounds.bottomRight.x > mapCoordinateSystem.bounds.topLeft.x;
     mapSystemTtb = mapCoordinateSystem.bounds.bottomRight.y > mapCoordinateSystem.bounds.topLeft.y;
@@ -96,7 +96,7 @@ void MapCamera3d::moveToCenterPositionZoom(const ::Coord &centerPosition, double
     if (animated) {
         std::lock_guard<std::recursive_mutex> lock(animationMutex);
         coordAnimation = std::make_shared<CoordAnimation>(
-            DEFAULT_ANIM_LENGTH, focusPointPosition, focusPosition, centerPosition, InterpolatorFunction::EaseInOut,
+                                                          cameraZoomConfig.animationDurationMs, focusPointPosition, focusPosition, centerPosition, InterpolatorFunction::EaseInOut,
             [=](Coord positionMapSystem) {
                 assert(positionMapSystem.systemIdentifier == 4326);
                 this->focusPointPosition = positionMapSystem;
@@ -131,7 +131,7 @@ void MapCamera3d::moveToCenterPosition(const ::Coord &centerPosition, bool anima
     if (animated) {
         std::lock_guard<std::recursive_mutex> lock(animationMutex);
         coordAnimation = std::make_shared<CoordAnimation>(
-            DEFAULT_ANIM_LENGTH, focusPointPosition, focusPosition, centerPosition, InterpolatorFunction::EaseInOut,
+                                                          cameraZoomConfig.animationDurationMs, focusPointPosition, focusPosition, centerPosition, InterpolatorFunction::EaseInOut,
             [=](Coord positionMapSystem) {
                 assert(positionMapSystem.systemIdentifier == 4326);
                 this->focusPointPosition = positionMapSystem;
@@ -211,7 +211,7 @@ void MapCamera3d::setZoom(double zoom, bool animated) {
     if (animated) {
         std::lock_guard<std::recursive_mutex> lock(animationMutex);
         zoomAnimation = std::make_shared<DoubleAnimation>(
-            DEFAULT_ANIM_LENGTH, this->zoom, targetZoom, InterpolatorFunction::EaseIn,
+                                                          cameraZoomConfig.animationDurationMs, this->zoom, targetZoom, InterpolatorFunction::EaseIn,
             [=](double zoom) { this->setZoom(zoom, false); },
             [=] {
                 this->setZoom(targetZoom, false);
@@ -241,7 +241,7 @@ void MapCamera3d::setRotation(float angle, bool animated) {
         }
         std::lock_guard<std::recursive_mutex> lock(animationMutex);
         rotationAnimation = std::make_shared<DoubleAnimation>(
-            DEFAULT_ANIM_LENGTH, currentAngle, newAngle, InterpolatorFunction::Linear,
+                                                              cameraZoomConfig.animationDurationMs, currentAngle, newAngle, InterpolatorFunction::Linear,
             [=](double angle) { this->setRotation(angle, false); },
             [=] {
                 this->setRotation(newAngle, false);
@@ -1039,7 +1039,7 @@ bool MapCamera3d::onTwoFingerMoveComplete() {
     if (config.snapToNorthEnabled && !cameraFrozen && (angle < ROTATION_LOCKING_ANGLE || angle > (360 - ROTATION_LOCKING_ANGLE))) {
         std::lock_guard<std::recursive_mutex> lock(animationMutex);
         rotationAnimation = std::make_shared<DoubleAnimation>(
-            DEFAULT_ANIM_LENGTH, this->angle, angle < ROTATION_LOCKING_ANGLE ? 0 : 360, InterpolatorFunction::EaseInOut,
+                                                              cameraZoomConfig.animationDurationMs, this->angle, angle < ROTATION_LOCKING_ANGLE ? 0 : 360, InterpolatorFunction::EaseInOut,
             [=](double angle) {
                 this->angle = angle;
                 mapInterface->invalidate();
@@ -1609,7 +1609,7 @@ double MapCamera3d::getCameraVerticalDisplacement() {
 }
 
 double MapCamera3d::getCameraPitch() {
-    return valueForZoom(cameraZoomConfig.pitchInterpolationValues);;
+    return valueForZoom(cameraZoomConfig.pitchInterpolationValues);
 }
 
 double MapCamera3d::getCameraFieldOfView() {

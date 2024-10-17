@@ -11,6 +11,12 @@
 #include "Camera3dConfigFactory.h"
 #include "Camera3dConfig.h"
 
+Camera3dConfig Camera3dConfigFactory::getBasicConfig() {
+    static constexpr float minZoom = 200000000;
+    static constexpr float maxZoom = 5000000;
+    return Camera3dConfig("basic_config", true, std::nullopt, 300, minZoom, maxZoom, CameraInterpolation({}), CameraInterpolation({}));
+}
+
 Camera3dConfig Camera3dConfigFactory::getRestorConfig() {
     static constexpr float minZoom = 200000000.0f;
     static constexpr float maxZoom = 4000000.0f;
@@ -24,11 +30,11 @@ Camera3dConfig Camera3dConfigFactory::getRestorConfig() {
     });
 
     CameraInterpolation verticalDisplacementInterpolationValues({
-        {0.0f, 0.0f},
+        {0.0f, 0.5f},
         {pitchSwitch, 1.0f},
-        {1.0f, 0.0f}
+        {1.0f, 0.5f}
     });
 
-    return Camera3dConfig("restor_config", true, std::nullopt, minZoom, maxZoom,
+    return Camera3dConfig("restor_config", true, std::nullopt, 1000, minZoom, maxZoom,
                           pitchInterpolationValues, verticalDisplacementInterpolationValues);
 }

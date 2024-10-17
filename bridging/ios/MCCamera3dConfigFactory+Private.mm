@@ -31,6 +31,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     return self;
 }
 
++ (nonnull MCCamera3dConfig *)getBasicConfig {
+    try {
+        auto objcpp_result_ = ::Camera3dConfigFactory::getBasicConfig();
+        return ::djinni_generated::Camera3dConfig::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 + (nonnull MCCamera3dConfig *)getRestorConfig {
     try {
         auto objcpp_result_ = ::Camera3dConfigFactory::getRestorConfig();

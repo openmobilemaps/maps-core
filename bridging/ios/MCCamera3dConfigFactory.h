@@ -7,6 +7,8 @@
 
 @interface MCCamera3dConfigFactory : NSObject
 
++ (nonnull MCCamera3dConfig *)getBasicConfig;
+
 + (nonnull MCCamera3dConfig *)getRestorConfig;
 
 @end

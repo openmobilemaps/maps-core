@@ -233,6 +233,7 @@ camera_3d_config = record {
     key: string;
     allow_user_interaction: bool;
     rotation_speed: optional<f32>;
+    animation_duration_ms: i32;
 
     min_zoom: f32;
     max_zoom: f32;
@@ -242,5 +243,6 @@ camera_3d_config = record {
 }
 
 camera_3d_config_factory = interface +c {
+    static get_basic_config(): camera_3d_config;
     static get_restor_config(): camera_3d_config;
 }

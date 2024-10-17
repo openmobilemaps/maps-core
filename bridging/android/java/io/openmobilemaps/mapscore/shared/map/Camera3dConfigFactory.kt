@@ -10,6 +10,9 @@ abstract class Camera3dConfigFactory {
 
     companion object {
         @JvmStatic
+        external fun getBasicConfig(): Camera3dConfig
+
+        @JvmStatic
         external fun getRestorConfig(): Camera3dConfig
     }
 

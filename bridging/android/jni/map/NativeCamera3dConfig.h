@@ -25,10 +25,11 @@ private:
     friend ::djinni::JniClass<NativeCamera3dConfig>;
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/map/Camera3dConfig") };
-    const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(Ljava/lang/String;ZLjava/lang/Float;FFLio/openmobilemaps/mapscore/shared/map/CameraInterpolation;Lio/openmobilemaps/mapscore/shared/map/CameraInterpolation;)V") };
+    const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(Ljava/lang/String;ZLjava/lang/Float;IFFLio/openmobilemaps/mapscore/shared/map/CameraInterpolation;Lio/openmobilemaps/mapscore/shared/map/CameraInterpolation;)V") };
     const jfieldID field_key { ::djinni::jniGetFieldID(clazz.get(), "key", "Ljava/lang/String;") };
     const jfieldID field_allowUserInteraction { ::djinni::jniGetFieldID(clazz.get(), "allowUserInteraction", "Z") };
     const jfieldID field_rotationSpeed { ::djinni::jniGetFieldID(clazz.get(), "rotationSpeed", "Ljava/lang/Float;") };
+    const jfieldID field_animationDurationMs { ::djinni::jniGetFieldID(clazz.get(), "animationDurationMs", "I") };
     const jfieldID field_minZoom { ::djinni::jniGetFieldID(clazz.get(), "minZoom", "F") };
     const jfieldID field_maxZoom { ::djinni::jniGetFieldID(clazz.get(), "maxZoom", "F") };
     const jfieldID field_pitchInterpolationValues { ::djinni::jniGetFieldID(clazz.get(), "pitchInterpolationValues", "Lio/openmobilemaps/mapscore/shared/map/CameraInterpolation;") };

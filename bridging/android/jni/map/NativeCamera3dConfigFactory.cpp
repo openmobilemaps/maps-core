@@ -18,6 +18,14 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_Camera3dConfi
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_Camera3dConfigFactory_getBasicConfig(JNIEnv* jniEnv, jobject /*this*/)
+{
+    try {
+        auto r = ::Camera3dConfigFactory::getBasicConfig();
+        return ::djinni::release(::djinni_generated::NativeCamera3dConfig::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
 CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_Camera3dConfigFactory_getRestorConfig(JNIEnv* jniEnv, jobject /*this*/)
 {
     try {
