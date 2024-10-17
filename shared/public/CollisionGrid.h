@@ -284,22 +284,60 @@ private:
     }
 
     CircleF getProjectedCircle(const CollisionCircleF &circle) {
-        temp2[0] = circle.x - origin.x;
-        temp2[1] = circle.y - origin.y;
-        temp2[2] = 0.0;
-        temp2[3] = 1.0;
-        Matrix::multiply(vpMatrix, temp2, temp1);
-        float originX = ((temp1[0] / temp1[3]) * halfWidth + halfWidth);
-        float originY = ((temp1[1] / temp1[3]) * halfHeight + halfHeight);
-        temp2[0] = circle.radius;
-        temp2[1] = circle.radius;
-        temp2[2] = 0.0;
-        temp2[3] = 0.0;
-        Matrix::multiply(vpMatrix, temp2, temp1);
-        temp1[0] = temp1[0] * halfWidth;
-        temp1[1] = temp1[1] * halfHeight;
-        float iRadius = std::sqrt(temp1[0] * temp1[0] + temp1[1] * temp1[1]);
-        return {originX, originY, iRadius};
+        if (is3d) {
+            //earth center
+            temp2[0] = 0.0 - origin.x;
+            temp2[1] = 0.0 - origin.y;
+            temp2[2] = 0.0;
+            temp2[3] = 1.0;
+
+            Matrix::multiply(vpMatrix, temp2, temp1);
+
+            float earthCenterZ = temp1[2] / temp1[3];
+
+
+            temp2[0] = (float) (1.0 * sin(circle.y) * cos(circle.x)) - origin.x;
+            temp2[1] = (float) (1.0 * cos(circle.y)) - origin.y;
+            temp2[2] = (float) (-1.0 * sin(circle.y) * sin(circle.x)) - origin.z;
+            temp2[3] = 1.0;
+
+            Matrix::multiply(vpMatrix, temp2, temp1);
+
+            temp1[0] /= temp1[3];
+            temp1[1] /= temp1[3];
+            temp1[2] /= temp1[3];
+            temp1[3] /= temp1[3];
+
+            auto diffCenterZ = temp1[2] - earthCenterZ;
+
+            if (diffCenterZ > 0) {
+                return {-1000.f,-1000.f,0};
+            }
+
+
+            float originX = ((temp1[0]) * halfWidth + halfWidth);
+            float originY = 2 * halfHeight - ((temp1[1]) * halfHeight + halfHeight);
+
+            return {originX, originY,  circle.radius * 4};
+
+        } else {
+            temp2[0] = circle.x - origin.x;
+            temp2[1] = circle.y - origin.y;
+            temp2[2] = 0.0;
+            temp2[3] = 1.0;
+            Matrix::multiply(vpMatrix, temp2, temp1);
+            float originX = ((temp1[0] / temp1[3]) * halfWidth + halfWidth);
+            float originY = ((temp1[1] / temp1[3]) * halfHeight + halfHeight);
+            temp2[0] = circle.radius;
+            temp2[1] = circle.radius;
+            temp2[2] = 0.0;
+            temp2[3] = 0.0;
+            Matrix::multiply(vpMatrix, temp2, temp1);
+            temp1[0] = temp1[0] * halfWidth;
+            temp1[1] = temp1[1] * halfHeight;
+            float iRadius = std::sqrt(temp1[0] * temp1[0] + temp1[1] * temp1[1]);
+            return {originX, originY, iRadius};
+        }
     }
 
     /**
