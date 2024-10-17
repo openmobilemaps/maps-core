@@ -827,9 +827,14 @@ void Tiled2dMapVectorSymbolObject::updateTextProperties(std::vector<float> &posi
     }
 
     {
-        auto strongMapInterface = mapInterface.lock();
+        std::shared_ptr<::MapCameraInterface> camera = nullptr;
 
-        labelObject->updateProperties(positions, referencePositions, scales, rotations, styles, countOffset, styleOffset, zoomIdentifier, scaleFactor, animationCoordinator->isColliding(), rotation, alpha, isCoordinateOwner, now, viewPortSize, strongMapInterface->getCamera());
+        if(is3d) {
+            auto strongMapInterface = mapInterface.lock();
+            camera = strongMapInterface->getCamera();
+        }
+
+        labelObject->updateProperties(positions, referencePositions, scales, rotations, styles, countOffset, styleOffset, zoomIdentifier, scaleFactor, animationCoordinator->isColliding(), rotation, alpha, isCoordinateOwner, now, viewPortSize, camera);
     }
 
     if (!animationCoordinator->isTextAnimating()) {
