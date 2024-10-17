@@ -8,7 +8,6 @@
 import Foundation
 import MapCoreSharedModule
 
-@available(iOS 13.0, *)
 open class TiledRasterLayer: Layer, ObservableObject, @unchecked Sendable {
     public init(config: MCTiled2dMapLayerConfig, loaders: [MCLoaderInterface] = [MCTextureLoader()], callbackHandler: MCTiled2dMapRasterLayerCallbackInterface? = nil, layerIndex: Int? = nil) {
         self.tiledLayerInterface = MCTiled2dMapRasterLayerInterface.create(config, loaders: loaders) !! fatalError("create is non-null")
