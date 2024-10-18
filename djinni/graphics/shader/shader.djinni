@@ -45,7 +45,7 @@ shader_factory_interface = interface +c +j +o {
     create_unit_sphere_raster_shader() : raster_shader_interface;
 
     create_stretch_shader(): stretch_shader_interface;
-    create_stretch_instanced_shader(): stretch_instanced_shader_interface;
+    create_stretch_instanced_shader(unit_sphere: bool): stretch_instanced_shader_interface;
 
     create_icosahedron_color_shader(): color_shader_interface;
 

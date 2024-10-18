@@ -64,11 +64,7 @@ void RasterShaderOpenGl::setStyle(const RasterShaderStyle &style) {
 }
 
 std::string RasterShaderOpenGl::getVertexShader() {
-    return projectOntoUnitSphere ?
-           // Vertices projected onto unit sphere
-           BaseShaderProgramOpenGl::getUnitSphereVertexShader()
-           // Default Shader
-           : BaseShaderProgramOpenGl::getVertexShader();
+    return BaseShaderProgramOpenGl::getVertexShader();
 }
 
 std::string RasterShaderOpenGl::getFragmentShader() {

@@ -11,6 +11,7 @@
 import Foundation
 import MapCoreSharedModule
 import Metal
+import simd
 
 final class TextInstanced: BaseGraphicsObject, @unchecked Sendable {
     private var shader: TextInstancedShader
@@ -27,6 +28,7 @@ final class TextInstanced: BaseGraphicsObject, @unchecked Sendable {
     private var rotationsBuffer: MTLBuffer?
     private var styleIndicesBuffer: MTLBuffer?
     private var styleBuffer: MTLBuffer?
+    private var originBuffer: MTLBuffer?
 
     private var texture: MTLTexture?
 
@@ -37,6 +39,9 @@ final class TextInstanced: BaseGraphicsObject, @unchecked Sendable {
         super.init(device: metalContext.device,
                    sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue)!,
                    label: "TextInstanced")
+
+        var originOffset: simd_float4 = simd_float4(0, 0, 0, 0)
+        originBuffer = device.makeBuffer(bytes: &originOffset, length: MemoryLayout<simd_float4>.stride, options: [])
     }
 
     private func setupStencilStates() {
@@ -60,6 +65,7 @@ final class TextInstanced: BaseGraphicsObject, @unchecked Sendable {
                          renderPass _: MCRenderPassConfig,
                          vpMatrix: Int64,
                          mMatrix: Int64,
+                         origin: MCVec3D,
                          isMasked: Bool,
                          screenPixelAsRealMeterFactor _: Double) {
         lock.lock()
@@ -114,6 +120,21 @@ final class TextInstanced: BaseGraphicsObject, @unchecked Sendable {
             encoder.setVertexBuffer(referencePositionsBuffer, offset: 0, index: 8)
         }
 
+        if let bufferPointer = originOffsetBuffer?.contents().assumingMemoryBound(to: simd_float4.self) {
+            bufferPointer.pointee.x = Float(originOffset.x - origin.x)
+            bufferPointer.pointee.y = Float(originOffset.y - origin.y)
+            bufferPointer.pointee.z = Float(originOffset.z - origin.z)
+        }
+        encoder.setVertexBuffer(originOffsetBuffer, offset: 0, index: 9)
+
+
+        if let bufferPointer = originBuffer?.contents().assumingMemoryBound(to: simd_float4.self) {
+            bufferPointer.pointee.x = Float(origin.x)
+            bufferPointer.pointee.y = Float(origin.y)
+            bufferPointer.pointee.z = Float(origin.z)
+        }
+        encoder.setVertexBuffer(originBuffer, offset: 0, index: 10)
+
 
         encoder.setFragmentSamplerState(sampler, index: 0)
 
@@ -154,7 +175,7 @@ final class TextInstanced: BaseGraphicsObject, @unchecked Sendable {
 }
 
 extension TextInstanced: MCTextInstancedInterface {
-    func setFrame(_ frame: MCQuad2dD) {
+    func setFrame(_ frame: MCQuad2dD, origin: MCVec3D, is3d: Bool) {
         /*
          The quad is made out of 4 vertices as following
          B----C
@@ -179,7 +200,8 @@ extension TextInstanced: MCTextInstancedInterface {
         }
 
         lock.withCritical {
-            indicesCount = indices.count
+            self.originOffset = origin
+            self.indicesCount = indices.count
             self.verticesBuffer = verticesBuffer
             self.indicesBuffer = indicesBuffer
         }

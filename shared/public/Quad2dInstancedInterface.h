@@ -6,6 +6,7 @@
 #include "Quad2dD.h"
 #include "RenderingContextInterface.h"
 #include "SharedBytes.h"
+#include "Vec3D.h"
 #include <cstdint>
 #include <memory>
 
@@ -17,7 +18,7 @@ class Quad2dInstancedInterface {
 public:
     virtual ~Quad2dInstancedInterface() = default;
 
-    virtual void setFrame(const ::Quad2dD & frame) = 0;
+    virtual void setFrame(const ::Quad2dD & frame, const ::Vec3D & origin, bool is3d) = 0;
 
     virtual void setInstanceCount(int32_t count) = 0;
 

@@ -39,8 +39,10 @@ void Polygon2dLayerObject::setPolygons(const std::vector<PolygonCoord> &polygons
     std::vector<uint16_t> indices;
     std::vector<float> vertices;
     int32_t indexOffset = 0;
+    double avgX = 0.0f, avgY = 0.0f;
+    size_t totalPoints = 0;
 
-    std::vector<Vec2F> vecVertices;
+    std::vector<Vec2D> vecVertices;
 
     BoundingBox bbox = BoundingBox(CoordinateSystemIdentifiers::RENDERSYSTEM());
     for (auto const &polygon : polygons) {
@@ -71,10 +73,25 @@ void Polygon2dLayerObject::setPolygons(const std::vector<PolygonCoord> &polygons
             indexOffset += list.size();
 
             for(auto& i : list) {
-                vecVertices.push_back(Vec2F(i.x, i.y));
+                // Accumulate for averaging
+                avgX += i.x;
+                avgY += i.y;
+                totalPoints += 1;
+
+                vecVertices.push_back(Vec2D(i.x, i.y));
             }
         }
     }
+
+    // Calculate the average (origin)
+    if (totalPoints > 0) {
+        avgX /= totalPoints;
+        avgY /= totalPoints;
+    }
+
+    double rx = is3D ? 1.0 * sin(avgY) * cos(avgX) : avgX;
+    double ry = is3D ? 1.0 * cos(avgY) : avgY;
+    double rz = is3D ? -1.0 * sin(avgY) * sin(avgX) : 0.0;
 
     if (is3D) {
         auto bboxSize = bbox.getMax() - bbox.getMin();
@@ -83,21 +100,15 @@ void Polygon2dLayerObject::setPolygons(const std::vector<PolygonCoord> &polygons
     }
 
     for (const auto& v : vecVertices) {
-        vertices.push_back(v.x);
-        vertices.push_back(v.y);
+        vertices.push_back(is3D ? 1.0 * sin(v.y) * cos(v.x) - rx : v.x - rx);
+        vertices.push_back(is3D ? 1.0 * cos(v.y) - ry : v.y - ry);
+        vertices.push_back(is3D ? -1.0 * sin(v.y) * sin(v.x) - rz : 0.0);
         vertices.push_back(1.0f);
-    #ifdef __APPLE__
-        vertices.push_back(0.0f);
-        vertices.push_back(0.0f);
-        vertices.push_back(0.0f);
-        vertices.push_back(0.0f);
-        vertices.push_back(0.0f);
-    #endif
     }
 
     auto attr = SharedBytes((int64_t)vertices.data(), (int32_t)vertices.size(), (int32_t)sizeof(float));
     auto ind = SharedBytes((int64_t)indices.data(), (int32_t)indices.size(), (int32_t)sizeof(uint16_t));
-    polygon->setVertices(attr, ind);
+    polygon->setVertices(attr, ind, Vec3D(rx, ry, rz));
 }
 
 void Polygon2dLayerObject::setColor(const Color &color) { shader->setColor(color.r, color.g, color.b, color.a); }

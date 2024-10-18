@@ -601,6 +601,7 @@ void Tiled2dMapVectorLayer::update() {
     double zoomChange = std::abs(newZoom-lastDataManagerZoom) / std::max(newZoom, 1.0);
     double timeDiff = now - lastDataManagerUpdate;
     bool is3d = mapInterface->is3d();
+    const auto origin = mapInterface->getCamera()->asCameraInterface()->getOrigin();
 
     if (zoomChange > 0.001 || isAnimating || tilesChanged) {
         for (const auto &[source, sourceDataManager]: sourceDataManagers) {
@@ -617,7 +618,7 @@ void Tiled2dMapVectorLayer::update() {
 
             Vec2I viewportSize = renderingContext->getViewportSize();
             float viewportRotation = camera->getRotation();
-            std::optional<std::vector<float>> vpMatrix = camera->getLastVpMatrix();
+            std::optional<std::vector<double>> vpMatrix = camera->getLastVpMatrixD();
             if (!vpMatrix) return;
             for (const auto &[source, sourceDataManager]: symbolSourceDataManagers) {
                 bool a = sourceDataManager.syncAccess([&now](const auto &manager) {
@@ -630,10 +631,10 @@ void Tiled2dMapVectorLayer::update() {
                 lastCollitionCheck = now;
                 bool enforceUpdate = !prevCollisionStillValid.test_and_set();
                 collisionManager.syncAccess(
-                        [&vpMatrix, &viewportSize, viewportRotation, enforceUpdate, persistingPlacement = this->persistingSymbolPlacement, is3d](
+                        [&vpMatrix, &viewportSize, viewportRotation, enforceUpdate, persistingPlacement = this->persistingSymbolPlacement, is3d, origin](
                                 const auto &manager) {
                             manager->collisionDetection(*vpMatrix, viewportSize, viewportRotation, enforceUpdate,
-                                                        persistingPlacement, is3d);
+                                                        persistingPlacement, is3d, origin);
                         });
                 isAnimating = true;
             }

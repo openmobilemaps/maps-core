@@ -11,6 +11,7 @@ NS_SWIFT_SENDABLE
 - (nonnull instancetype)initWithKey:(nonnull NSString *)key
                allowUserInteraction:(BOOL)allowUserInteraction
                       rotationSpeed:(nullable NSNumber *)rotationSpeed
+                animationDurationMs:(int32_t)animationDurationMs
                             minZoom:(float)minZoom
                             maxZoom:(float)maxZoom
            pitchInterpolationValues:(nonnull MCCameraInterpolation *)pitchInterpolationValues
@@ -18,6 +19,7 @@ verticalDisplacementInterpolationValues:(nonnull MCCameraInterpolation *)vertica
 + (nonnull instancetype)camera3dConfigWithKey:(nonnull NSString *)key
                          allowUserInteraction:(BOOL)allowUserInteraction
                                 rotationSpeed:(nullable NSNumber *)rotationSpeed
+                          animationDurationMs:(int32_t)animationDurationMs
                                       minZoom:(float)minZoom
                                       maxZoom:(float)maxZoom
                      pitchInterpolationValues:(nonnull MCCameraInterpolation *)pitchInterpolationValues
@@ -28,6 +30,8 @@ verticalDisplacementInterpolationValues:(nonnull MCCameraInterpolation *)vertica
 @property (nonatomic, readonly) BOOL allowUserInteraction;
 
 @property (nonatomic, readonly, nullable) NSNumber * rotationSpeed;
+
+@property (nonatomic, readonly) int32_t animationDurationMs;
 
 @property (nonatomic, readonly) float minZoom;
 

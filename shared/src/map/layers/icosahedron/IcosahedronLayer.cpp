@@ -92,7 +92,7 @@ void IcosahedronLayer::onAdded(const std::shared_ptr<MapInterface> & mapInterfac
 
         auto i = SharedBytes((int64_t)indicesBuffer.data(), (int32_t)indicesBuffer.size(), (int32_t)sizeof(uint32_t));
         auto v = SharedBytes((int64_t)verticesBuffer.data(), (int32_t)verticesBuffer.size(), (int32_t)sizeof(float));
-        object->setVertices(v, i);
+        object->setVertices(v, i, Vec3D(0, 0, 0));
 
 
         auto selfActor = WeakActor<IcosahedronLayer>(selfMailbox, shared_from_this());

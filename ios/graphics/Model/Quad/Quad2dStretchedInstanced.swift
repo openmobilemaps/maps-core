@@ -12,6 +12,7 @@ import Foundation
 import MapCoreSharedModule
 import Metal
 import UIKit
+import simd
 
 final class Quad2dStretchedInstanced: BaseGraphicsObject, @unchecked Sendable {
     private var verticesBuffer: MTLBuffer?
@@ -74,6 +75,7 @@ final class Quad2dStretchedInstanced: BaseGraphicsObject, @unchecked Sendable {
                          renderPass _: MCRenderPassConfig,
                          vpMatrix: Int64,
                          mMatrix: Int64,
+                origin: MCVec3D,
                          isMasked: Bool,
                          screenPixelAsRealMeterFactor _: Double) {
 
@@ -93,11 +95,6 @@ final class Quad2dStretchedInstanced: BaseGraphicsObject, @unchecked Sendable {
               let texture,
               instanceCount != 0 else {
             return
-        }
-
-        lock.lock()
-        defer {
-            lock.unlock()
         }
 
 #if DEBUG
@@ -136,6 +133,13 @@ final class Quad2dStretchedInstanced: BaseGraphicsObject, @unchecked Sendable {
 
         encoder.setVertexBuffer(alphaBuffer, offset: 0, index: 6)
 
+        if let bufferPointer = originOffsetBuffer?.contents().assumingMemoryBound(to: simd_float4.self) {
+            bufferPointer.pointee.x = Float(originOffset.x - origin.x)
+            bufferPointer.pointee.y = Float(originOffset.y - origin.y)
+            bufferPointer.pointee.z = Float(originOffset.z - origin.z)
+        }
+        encoder.setVertexBuffer(originOffsetBuffer, offset: 0, index: 7)
+
         encoder.setFragmentBuffer(stretchInfoBuffer, offset: 0, index: 1)
 
         encoder.setFragmentSamplerState(sampler, index: 0)
@@ -156,6 +160,7 @@ extension Quad2dStretchedInstanced: MCMaskingObjectInterface {
                 renderPass: MCRenderPassConfig,
                 vpMatrix: Int64,
                 mMatrix: Int64,
+                origin: MCVec3D,
                 screenPixelAsRealMeterFactor: Double) {
         guard isReady(),
               let context = context as? RenderingContext,
@@ -168,13 +173,15 @@ extension Quad2dStretchedInstanced: MCMaskingObjectInterface {
                renderPass: renderPass,
                vpMatrix: vpMatrix,
                mMatrix: mMatrix,
+               origin: origin,
                isMasked: false,
                screenPixelAsRealMeterFactor: screenPixelAsRealMeterFactor)
     }
 }
 
 extension Quad2dStretchedInstanced: MCQuad2dStretchedInstancedInterface {
-    func setFrame(_ frame: MCQuad2dD) {
+
+    func setFrame(_ frame: MCQuad2dD, origin: MCVec3D, is3d: Bool) {
         /*
          The quad is made out of 4 vertices as following
          B----C
@@ -199,7 +206,8 @@ extension Quad2dStretchedInstanced: MCQuad2dStretchedInstancedInterface {
         }
 
         lock.withCritical {
-            indicesCount = indices.count
+            self.originOffset = origin
+            self.indicesCount = indices.count
             self.verticesBuffer = verticesBuffer
             self.indicesBuffer = indicesBuffer
         }

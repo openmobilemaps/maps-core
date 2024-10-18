@@ -366,6 +366,16 @@ void Tiled2dMapVectorLineTile::addLines(const std::vector<std::vector<std::vecto
     std::vector<std::shared_ptr<LineGroup2dLayerObject>> lineGroupObjects;
     std::vector<std::shared_ptr<GraphicsObjectInterface>> newGraphicObjects;
 
+    bool is3d = mapInterface->is3d();
+    auto convertedTileBounds = mapInterface->getCoordinateConverterHelper()->convertRectToRenderSystem(tileInfo.tileInfo.bounds);
+    double cx = (convertedTileBounds.bottomRight.x + convertedTileBounds.topLeft.x) / 2.0;
+    double cy = (convertedTileBounds.bottomRight.y + convertedTileBounds.topLeft.y) / 2.0;
+    double rx = is3d ? 1.0 * sin(cy) * cos(cx) : cx;
+    double ry = is3d ? 1.0 * cos(cy) : cy;
+    double rz = is3d ? -1.0 * sin(cy) * sin(cx) : 0.0;
+    auto origin = Vec3D(rx, ry, rz);
+
+
     for (int styleGroupIndex = 0; styleGroupIndex < styleIdLinesVector.size(); styleGroupIndex++) {
         for (const auto &lineSubGroup: styleIdLinesVector[styleGroupIndex]) {
             const auto &shader = shaders.at(styleGroupIndex);
@@ -376,8 +386,10 @@ void Tiled2dMapVectorLineTile::addLines(const std::vector<std::vector<std::vecto
 #endif
             auto lineGroupObject = std::make_shared<LineGroup2dLayerObject>(coordinateConverterHelper,
                                                                             lineGroupGraphicsObject,
-                                                                            shader);
-            lineGroupObject->setLines(lineSubGroup);
+                                                                            shader,
+                                                                            is3d);
+
+            lineGroupObject->setLines(lineSubGroup, origin);
 
             lineGroupObjects.push_back(lineGroupObject);
             newGraphicObjects.push_back(lineGroupGraphicsObject->asGraphicsObject());

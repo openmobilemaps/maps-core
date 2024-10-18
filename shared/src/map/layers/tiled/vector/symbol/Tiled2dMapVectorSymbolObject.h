@@ -23,6 +23,7 @@
 #include "TextLayerObject.h" // TODO: remove usage of TextLayerObject (and File)
 #include "Tiled2dMapVectorLayerConfig.h"
 #include "CollisionGrid.h"
+#include "Vec3D.h"
 #include "SymbolAnimationCoordinatorMap.h"
 
 class Tiled2dMapVectorSymbolObject {
@@ -51,7 +52,8 @@ public:
                                  const bool hasCustomTexture,
                                  const double dpFactor,
                                  const bool persistingSymbolPlacement,
-                                 bool is3d);
+                                 bool is3d,
+                                 const Vec3D &tileOrigin);
 
     ~Tiled2dMapVectorSymbolObject();
 
@@ -83,9 +85,9 @@ public:
     double symbolSortKey;
     const size_t symbolTileIndex;
 
-    std::optional<CollisionRectF> getViewportAlignedBoundingBox(double zoomIdentifier, bool considerSymbolSpacing, bool considerOverlapFlag);
+    std::optional<CollisionRectD> getViewportAlignedBoundingBox(double zoomIdentifier, bool considerSymbolSpacing, bool considerOverlapFlag);
 
-    std::optional<std::vector<CollisionCircleF>> getMapAlignedBoundingCircles(double zoomIdentifier, bool considerSymbolSpacing, bool considerOverlapFlag);
+    std::optional<std::vector<CollisionCircleD>> getMapAlignedBoundingCircles(double zoomIdentifier, bool considerSymbolSpacing, bool considerOverlapFlag);
 
     bool getIsOpaque();
 
@@ -111,9 +113,13 @@ public:
     int customTextureOffset = 0;
     std::string stringIdentifier;
 
+    Vec3D tileOrigin = Vec3D(0,0,0);
+
 private:
     double lastZoomEvaluation = -1;
     void evaluateStyleProperties(const double zoomIdentifier);
+
+    void writePosition(const double x, const double y, const size_t offset, std::vector<float> &buffer);
 
     ::Coord getRenderCoordinates(Anchor iconAnchor, double rotation, double iconWidth, double iconHeight);
 
@@ -191,4 +197,5 @@ private:
     const std::shared_ptr<Tiled2dMapVectorStateManager> featureStateManager;
     
     bool is3d;
+    int positionSize;
 };

@@ -80,15 +80,22 @@ static void hash_combine(size_t& seed, const T& value) {
 }
 
 template<class T, class L, class R>
-::Vec3D Tiled2dMapSource<T, L, R>::transformToView(const ::Coord &position, const std::vector<float> &viewMatrix) {
+::Vec3D Tiled2dMapSource<T, L, R>::transformToView(const ::Coord &position, const std::vector<float> &viewMatrix, const Vec3D & origin) {
+
     Coord mapCoord = conversionHelper->convertToRenderSystem(position);
-    std::vector<float> inVec = {(float) (mapCoord.z * sin(mapCoord.y) * cos(mapCoord.x)),
-                                (float) (mapCoord.z * cos(mapCoord.y)),
-                                (float) (-mapCoord.z * sin(mapCoord.y) * sin(mapCoord.x)),
+
+    const double rx = origin.x;
+    const double ry = origin.y;
+    const double rz = origin.z;
+
+    std::vector<float> inVec = {(float) ((mapCoord.z * sin(mapCoord.y) * cos(mapCoord.x) - rx) ),
+                                (float) ((mapCoord.z * cos(mapCoord.y) - ry) ),
+                                (float) ((-mapCoord.z * sin(mapCoord.y) * sin(mapCoord.x) - rz) ),
                                 1.0};
     std::vector<float> outVec = {0, 0, 0, 0};
 
     Matrix::multiply(viewMatrix, inVec, outVec);
+
 
     auto point2d = Vec3D(outVec[0] / outVec[3], outVec[1] / outVec[3], outVec[2] / outVec[3]);
     return point2d;
@@ -106,7 +113,7 @@ template<class T, class L, class R>
 }
 
 template<class T, class L, class R>
-void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMatrix, const std::vector<float> &projectionMatrix,
+void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMatrix, const std::vector<float> &projectionMatrix,const ::Vec3D & origin,
                                                float verticalFov, float horizontalFov, float width, float height,
                                                float focusPointAltitude, const ::Coord & focusPointPosition, float zoom) {
 
@@ -135,12 +142,20 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
     for (int index = 0; index < zoomLevelInfos.size(); ++index) {
         const auto &level = zoomLevelInfos[index];
         if (level.numTilesX > minNumTiles && level.numTilesY > minNumTiles) {
+            if (level.numTilesX * level.numTilesY > 100) {
+                printf("Ignore seed candidates for %d x %d tiles for %s\n",
+                       level.numTilesX,
+                       level.numTilesY,
+                       layerName.c_str());
+                break;
+            }
             for (int x = 0; x < level.numTilesX; x++) {
                 for (int y = 0; y < level.numTilesY; y++) {
                     VisibleTileCandidate c;
                     c.levelIndex = index;
                     c.x = x;
                     c.y = y;
+
                     candidates.push(c);
                 }
             }
@@ -162,7 +177,7 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
 
     auto focusPointInLayerCoords = conversionHelper->convert(layerSystemId, focusPointPosition);
 
-    auto earthCenterView = transformToView(Coord(CoordinateSystemIdentifiers::UnitSphere(), 0.0, 0.0, 0.0), viewMatrix);
+    auto earthCenterView = transformToView(Coord(CoordinateSystemIdentifiers::UnitSphere(), 0, 0, 0), viewMatrix, origin);
 
     while (candidates.size() > 0) {
         VisibleTileCandidate candidate = candidates.front();
@@ -234,24 +249,24 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
         const Coord bottomLeftHigh = Coord(layerSystemId, bottomLeft.x, bottomLeft.y, focusPointAltitude + heightRange / 2.0);
         const Coord bottomRightHigh = Coord(layerSystemId, bottomRight.x, bottomRight.y, focusPointAltitude + heightRange / 2.0);
 
-        auto topLeftView = transformToView(topLeft, viewMatrix);
-        auto topRightView = transformToView(topRight, viewMatrix);
-        auto bottomLeftView = transformToView(bottomLeft, viewMatrix);
-        auto bottomRightView = transformToView(bottomRight, viewMatrix);
+        auto topLeftView = transformToView(topLeft, viewMatrix, origin);
+        auto topRightView = transformToView(topRight, viewMatrix, origin);
+        auto bottomLeftView = transformToView(bottomLeft, viewMatrix, origin);
+        auto bottomRightView = transformToView(bottomRight, viewMatrix, origin);
 
         /*
          use focuspoint in layersystem and clamp to tileBounds
          */
 
 
-        auto focusPointClampedView = transformToView(focusPointClampedToTile, viewMatrix);
-        auto focusPointSampleXView = transformToView(focusPointSampleX, viewMatrix);
-        auto focusPointSampleYView = transformToView(focusPointSampleY, viewMatrix);
+        auto focusPointClampedView = transformToView(focusPointClampedToTile, viewMatrix, origin);
+        auto focusPointSampleXView = transformToView(focusPointSampleX, viewMatrix, origin);
+        auto focusPointSampleYView = transformToView(focusPointSampleY, viewMatrix, origin);
 
-        auto topLeftHighView = transformToView(topLeftHigh, viewMatrix);
-        auto topRightHighView = transformToView(topRightHigh, viewMatrix);
-        auto bottomLeftHighView = transformToView(bottomLeftHigh, viewMatrix);
-        auto bottomRightHighView = transformToView(bottomRightHigh, viewMatrix);
+        auto topLeftHighView = transformToView(topLeftHigh, viewMatrix, origin);
+        auto topRightHighView = transformToView(topRightHigh, viewMatrix, origin);
+        auto bottomLeftHighView = transformToView(bottomLeftHigh, viewMatrix, origin);
+        auto bottomRightHighView = transformToView(bottomRightHigh, viewMatrix, origin);
 
         float centerZ = (topLeftView.z + topRightView.z + bottomLeftView.z + bottomRightView.z) / 4.0;
 
@@ -440,20 +455,27 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
     currentViewBounds = conversionHelper->convertQuad(layerSystemId, currentViewBounds);
 
     std::vector<VisibleTilesLayer> layers;
+    int topMostZoomLevel = zoomLevelInfos.begin()->zoomLevelIdentifier;
 
-    for (int previousLayerOffset = 0; previousLayerOffset <= zoomInfo.numDrawPreviousLayers; previousLayerOffset++) {
+    for (int previousLayerOffset = 0; (previousLayerOffset <= zoomInfo.numDrawPreviousLayers || zoomInfo.maskTile); previousLayerOffset++) {
 
         VisibleTilesLayer curVisibleTiles(-previousLayerOffset);
 
         std::vector<std::pair<VisibleTileCandidate, PrioritizedTiled2dMapTileInfo>> nextVisibleTilesVec;
 
+        bool allTopMost = true;
+
         for (auto &tile : visibleTilesVec) {
             tile.second.tileInfo.tessellationFactor = std::min(std::max(0, maxLevel - tile.second.tileInfo.zoomIdentifier), 4);
             curVisibleTiles.visibleTiles.insert(tile.second);
 
+            if (allTopMost && tile.second.tileInfo.zoomIdentifier != topMostZoomLevel) {
+                allTopMost = false;
+            }
+
             hash_combine(visibleTileHash, std::hash<Tiled2dMapTileInfo>{}(tile.second.tileInfo));
 
-            if (tile.first.levelIndex > 0 && previousLayerOffset < zoomInfo.numDrawPreviousLayers) {
+            if (tile.first.levelIndex > 0 && (previousLayerOffset < zoomInfo.numDrawPreviousLayers || zoomInfo.maskTile)) {
 
                 const Tiled2dMapZoomLevelInfo &zoomLevelInfo = zoomLevelInfos.at(tile.first.levelIndex - 1);
                 const double boundsRatio = std::abs((zoomLevelInfo.bounds.bottomRight.y  - zoomLevelInfo.bounds.topLeft.y) / (zoomLevelInfo.bounds.bottomRight.x  - zoomLevelInfo.bounds.topLeft.x));
@@ -490,6 +512,10 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
         }
 
         layers.push_back(curVisibleTiles);
+
+        if (allTopMost) {
+            break;
+        }
     }
 
     currentZoomLevelIdentifier = maxLevel;

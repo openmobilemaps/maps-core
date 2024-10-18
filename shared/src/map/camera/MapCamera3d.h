@@ -22,6 +22,7 @@
 #include "SimpleTouchInterface.h"
 #include "Vec2I.h"
 #include "Vec2F.h"
+#include "Vec3D.h"
 #include "CameraMode3d.h"
 #include "Camera3dConfig.h"
 #include "CameraInterpolation.h"
@@ -88,6 +89,10 @@ class MapCamera3d : public MapCameraInterface,
     virtual std::shared_ptr<::CameraInterface> asCameraInterface() override;
 
     virtual std::vector<float> getVpMatrix() override;
+
+    virtual ::Vec3D getOrigin() override;
+
+    virtual std::optional<std::vector<double>> getLastVpMatrixD() override;
 
     std::optional<std::vector<float>> getLastVpMatrix() override;
 
@@ -170,9 +175,11 @@ class MapCamera3d : public MapCameraInterface,
     bool coordIsFarAwayFromFocusPoint(const ::Coord & coord);
 
 protected:
-    virtual std::tuple<std::vector<float>, std::vector<double>> getVpMatrix(const Coord &focusCoord, bool updateVariables);
+    virtual std::tuple<std::vector<float>, std::vector<double>, Vec3D> getVpMatrix(const Coord &focusCoord, bool updateVariables);
 
     virtual ::Coord coordFromScreenPosition(const std::vector<double> &inverseVPMatrix, const ::Vec2F &posScreen);
+
+    virtual ::Coord coordFromScreenPosition(const std::vector<double> &inverseVPMatrix, const ::Vec2F &posScreen, const Vec3D &origin);
 
     void updateZoom(double zoom);
 
@@ -283,16 +290,18 @@ protected:
 
     bool coordIsOnFrontHalfOfGlobe(Coord coord);
 
-    std::vector<float> convertToCartesianCoordinates(Coord coord);
+    std::vector<double> convertToCartesianCoordinates(const Coord &coord) const;
 
-    std::vector<float> projectedPoint(std::vector<float> point);
+    std::vector<double> projectedPoint(const std::vector<double> &point) const;
 
     void checkForRubberBandEffect();
 
     std::vector<float> vpMatrix = std::vector<float>(16, 0.0);
+    std::vector<double> vpMatrixD = std::vector<double>(16, 0.0);
     std::vector<double> inverseVPMatrix = std::vector<double>(16, 0.0);
     std::vector<float> viewMatrix = std::vector<float>(16, 0.0);
     std::vector<float> projectionMatrix = std::vector<float>(16, 0.0);
+    Vec3D origin;
     float verticalFov;
     float horizontalFov;
     bool validVpMatrix = false;
@@ -303,6 +312,7 @@ protected:
     std::optional<Coord> lastOnTouchDownCoord;
     std::optional<Coord> lastOnMoveCoord;
     std::vector<double> lastOnTouchDownInverseVPMatrix;
+    Vec3D lastOnTouchDownVPOrigin = Vec3D(0.0, 0.0, 0.0);
 
     Camera3dConfig cameraZoomConfig;
 };

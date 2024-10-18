@@ -14,42 +14,18 @@ using namespace metal;
 
 
 vertex VertexOut
-baseVertexShader(const Vertex3DIn vertexIn [[stage_in]],
-                constant float4x4 &mvpMatrix [[buffer(1)]],
-                 constant float4x4 &mMatrix [[buffer(2)]])
+baseVertexShader(const Vertex3DTextureIn vertexIn [[stage_in]],
+                constant float4x4 &vpMatrix [[buffer(1)]],
+                 constant float4x4 &mMatrix [[buffer(2)]],
+                 constant float4 &originOffset [[buffer(3)]])
 {
     VertexOut out {
-        .position = mvpMatrix * (mMatrix * float4(vertexIn.position.xy, 0.0, 1.0)),
-        .uv = vertexIn.uv
-    };
-    
-    return out;
-}
-
-vertex VertexOut
-unitSphereBaseVertexShader(const Vertex3DIn vertexIn [[stage_in]],
-                           constant float4x4 &vpMatrix [[buffer(1)]],
-                           constant float4x4 &mMatrix [[buffer(2)]])
-{
-    float4 newVertex = mMatrix * float4(vertexIn.position.xyz, 1.0);
-
-    newVertex.x /= newVertex.w;
-    newVertex.y /= newVertex.w;
-    newVertex.z /= newVertex.w;
-
-    const float x = newVertex.z * sin(newVertex.y) * cos(newVertex.x);
-    const float y = newVertex.z * cos(newVertex.y);
-    const float z = -newVertex.z * sin(newVertex.y) * sin(newVertex.x);
-
-    VertexOut out {
-        .position = vpMatrix * float4(x,y,z, 1.0),
+        .position = vpMatrix * (mMatrix * (vertexIn.position + originOffset)),
         .uv = vertexIn.uv
     };
 
     return out;
 }
-
-
 
 fragment float4
 baseFragmentShader(VertexOut in [[stage_in]],
@@ -70,13 +46,13 @@ baseFragmentShader(VertexOut in [[stage_in]],
 
 
 vertex VertexOut
-colorVertexShader(const VertexIn vertexIn [[stage_in]],
-                  constant float4x4 &mvpMatrix [[buffer(1)]],
-                   constant float4x4 &mMatrix [[buffer(2)]])
+colorVertexShader(const Vertex3DIn vertexIn [[stage_in]],
+                  constant float4x4 &vpMatrix [[buffer(1)]],
+                   constant float4x4 &mMatrix [[buffer(2)]],
+                  constant float4 &originOffset [[buffer(3)]])
 {
     VertexOut out {
-        .position = mvpMatrix * float4(vertexIn.position.xy, 0.0, 1.0),
-        .uv = vertexIn.uv
+        .position = vpMatrix * (float4(vertexIn.position.xyz, 1.0) + originOffset),
     };
 
     return out;

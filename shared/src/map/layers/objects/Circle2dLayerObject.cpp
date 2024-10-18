@@ -31,7 +31,7 @@ void Circle2dLayerObject::setPosition(Coord position, double radius) {
                            Vec3D(renderPos.x + radius, renderPos.y + radius, is3d ? renderPos.z : 0.0),
                            Vec3D(renderPos.x + radius, renderPos.y - radius, is3d ? renderPos.z : 0.0),
                            Vec3D(renderPos.x - radius, renderPos.y - radius, is3d ? renderPos.z : 0.0)),
-                   RectD(0, 0, 1, 1));
+                   RectD(0, 0, 1, 1), Vec3D(0.0, 0.0, 0.0), false);
 }
 
 std::shared_ptr<Quad2dInterface> Circle2dLayerObject::getQuadObject() { return quad; }

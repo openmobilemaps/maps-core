@@ -24,13 +24,14 @@ std::shared_ptr<GraphicsObjectInterface> PolygonPatternGroup2dOpenGl::asGraphics
 
 void PolygonPatternGroup2dOpenGl::setIsInverseMasked(bool inversed) { isMaskInversed = inversed; }
 
-void PolygonPatternGroup2dOpenGl::setVertices(const SharedBytes &vertices_, const SharedBytes &indices_) {
+void PolygonPatternGroup2dOpenGl::setVertices(const SharedBytes &vertices_, const SharedBytes &indices_, const ::Vec3D & origin) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
     ready = false;
     dataReady = false;
 
     indices.resize(indices_.elementCount);
     vertices.resize(vertices_.elementCount);
+    polygonOrigin = origin;
 
     if(indices_.elementCount > 0) {
         std::memcpy(indices.data(), (void *)indices_.address, indices_.elementCount * indices_.bytesPerElement);
@@ -84,6 +85,7 @@ void PolygonPatternGroup2dOpenGl::prepareGlData(int program) {
 
     vpMatrixHandle = glGetUniformLocation(program, "uvpMatrix");
     mMatrixHandle = glGetUniformLocation(program, "umMatrix");
+    originOffsetHandle = glGetUniformLocation(program, "uOriginOffset");
 
     glDataBuffersGenerated = true;
 }
@@ -130,14 +132,16 @@ void PolygonPatternGroup2dOpenGl::removeTexture() {
 }
 
 void PolygonPatternGroup2dOpenGl::renderAsMask(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
-                                int64_t vpMatrix, int64_t mMatrix, double screenPixelAsRealMeterFactor) {
+                                               int64_t vpMatrix, int64_t mMatrix, const ::Vec3D & origin, double screenPixelAsRealMeterFactor) {
     glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-    render(context, renderPass, vpMatrix, mMatrix, false, screenPixelAsRealMeterFactor);
+    render(context, renderPass, vpMatrix, mMatrix, origin, false, screenPixelAsRealMeterFactor);
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 }
 
-void PolygonPatternGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
-                          int64_t vpMatrix, int64_t mMatrix, bool isMasked, double screenPixelAsRealMeterFactor) {
+void
+PolygonPatternGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
+                                    int64_t vpMatrix, int64_t mMatrix, const ::Vec3D &origin,
+                                    bool isMasked, double screenPixelAsRealMeterFactor) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
     if (!ready || buffersNotReady || !textureHolder) {
         return;
@@ -196,6 +200,7 @@ void PolygonPatternGroup2dOpenGl::render(const std::shared_ptr<::RenderingContex
     // Apply the projection and view transformation
     glUniformMatrix4fv(vpMatrixHandle, 1, false, (GLfloat *)vpMatrix);
     glUniformMatrix4fv(mMatrixHandle, 1, false, (GLfloat *)mMatrix);
+    glUniform4f(originOffsetHandle, polygonOrigin.x - origin.x, polygonOrigin.y - origin.y, polygonOrigin.z - origin.z, 0.0);
 
     // Draw the triangles
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);

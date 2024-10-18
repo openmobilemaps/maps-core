@@ -36,12 +36,12 @@ class Quad2dStretchedInstancedOpenGl : public GraphicsObjectInterface,
     virtual void clear() override;
 
     virtual void renderAsMask(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
-                              int64_t vpMatrix, int64_t mMatrix, double screenPixelAsRealMeterFactor) override;
+                              int64_t vpMatrix, int64_t mMatrix, const ::Vec3D & origin, double screenPixelAsRealMeterFactor) override;
 
     virtual void render(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
-                        int64_t vpMatrix, int64_t mMatrix, bool isMasked, double screenPixelAsRealMeterFactor) override;
+                        int64_t vpMatrix, int64_t mMatrix, const ::Vec3D & origin, bool isMasked, double screenPixelAsRealMeterFactor) override;
 
-    virtual void setFrame(const ::Quad2dD &frame) override;
+    virtual void setFrame(const ::Quad2dD &frame, const Vec3D &origin, bool is3d) override;
 
     virtual void loadTexture(const std::shared_ptr<::RenderingContextInterface> &context,
                              const std::shared_ptr<TextureHolderInterface> &textureHolder) override;
@@ -83,12 +83,14 @@ class Quad2dStretchedInstancedOpenGl : public GraphicsObjectInterface,
 
     void removeTextureCoordsGlBuffers();
 
+    bool is3d = false;
     std::shared_ptr<ShaderProgramInterface> shaderProgram;
     std::string programName;
     int program;
 
     int vpMatrixHandle;
     int mMatrixHandle;
+    int originOffsetHandle;
     int positionHandle;
     GLuint vertexBuffer;
     std::vector<GLfloat> vertices;
@@ -98,6 +100,7 @@ class Quad2dStretchedInstancedOpenGl : public GraphicsObjectInterface,
     GLuint indexBuffer;
     std::vector<GLubyte> indices;
     bool glDataBuffersGenerated = false;
+    Vec3D quadsOrigin = Vec3D(0.0, 0.0, 0.0);
 
     std::shared_ptr<TextureHolderInterface> textureHolder;
     int texturePointer;
@@ -137,6 +140,16 @@ class Quad2dStretchedInstancedOpenGl : public GraphicsObjectInterface,
     static const uintptr_t instStretchXsAddOffsetBytes = sizeof(GLfloat) * 2;
     static const uintptr_t instStretchYsAddOffsetBytes = sizeof(GLfloat) * 6;
     static const uintptr_t instValuesSizeBytes = sizeof(GLfloat) * 20;
+
+    static const uintptr_t instPositionsOffsetBytes3d = sizeof(GLfloat) * 0;
+    static const uintptr_t instTextureCoordinatesOffsetBytes3d = sizeof(GLfloat) * 3;
+    static const uintptr_t instScalesOffsetBytes3d = sizeof(GLfloat) * 7;
+    static const uintptr_t instRotationsOffsetBytes3d = sizeof(GLfloat) * 9;
+    static const uintptr_t instAlphasOffsetBytes3d = sizeof(GLfloat) * 10;
+    static const uintptr_t instStretchInfoOffsetBytes3d = sizeof(GLfloat) * 11;
+    static const uintptr_t instStretchXsAddOffsetBytes3d = sizeof(GLfloat) * 2;
+    static const uintptr_t instStretchYsAddOffsetBytes3d = sizeof(GLfloat) * 6;
+    static const uintptr_t instValuesSizeBytes3d = sizeof(GLfloat) * 21;
 
 private:
     bool writeToDynamicInstanceDataBuffer(const ::SharedBytes &data, GLuint targetOffsetBytes);

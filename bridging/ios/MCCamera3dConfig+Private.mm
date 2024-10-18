@@ -14,6 +14,7 @@ auto Camera3dConfig::toCpp(ObjcType obj) -> CppType
     return {::djinni::String::toCpp(obj.key),
             ::djinni::Bool::toCpp(obj.allowUserInteraction),
             ::djinni::Optional<std::optional, ::djinni::F32>::toCpp(obj.rotationSpeed),
+            ::djinni::I32::toCpp(obj.animationDurationMs),
             ::djinni::F32::toCpp(obj.minZoom),
             ::djinni::F32::toCpp(obj.maxZoom),
             ::djinni_generated::CameraInterpolation::toCpp(obj.pitchInterpolationValues),
@@ -25,6 +26,7 @@ auto Camera3dConfig::fromCpp(const CppType& cpp) -> ObjcType
     return [[MCCamera3dConfig alloc] initWithKey:(::djinni::String::fromCpp(cpp.key))
                             allowUserInteraction:(::djinni::Bool::fromCpp(cpp.allowUserInteraction))
                                    rotationSpeed:(::djinni::Optional<std::optional, ::djinni::F32>::fromCpp(cpp.rotationSpeed))
+                             animationDurationMs:(::djinni::I32::fromCpp(cpp.animationDurationMs))
                                          minZoom:(::djinni::F32::fromCpp(cpp.minZoom))
                                          maxZoom:(::djinni::F32::fromCpp(cpp.maxZoom))
                         pitchInterpolationValues:(::djinni_generated::CameraInterpolation::fromCpp(cpp.pitchInterpolationValues))

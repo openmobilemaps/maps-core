@@ -42,5 +42,5 @@ public:
 private:
     std::shared_ptr<CoordinateConversionHelperInterface> conversionHelper;
     std::shared_ptr<Quad2dInterface> quad;
-
+    bool is3D;
 };

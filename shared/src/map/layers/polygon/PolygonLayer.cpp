@@ -24,7 +24,7 @@
 PolygonLayer::PolygonLayer()
     : isHidden(false) {}
 
-void PolygonLayer::setPolygons(const std::vector<PolygonInfo> &polygons) {
+void PolygonLayer::setPolygons(const std::vector<PolygonInfo> &polygons, const Vec3D & origin) {
     clear();
     for (auto const &polygon : polygons) {
         add(polygon);

@@ -46,89 +46,83 @@ std::string TextInstancedShaderOpenGl::getVertexShader() {
     OMMVersionedGlesShaderCode(320 es,
                                uniform mat4 uvpMatrix;
                                uniform mat4 umMatrix;
+                               uniform vec4 uOriginOffset;
 
-                                       in vec4 vPosition;
-                                       in vec2 texCoordinate;
+                               in vec4 vPosition;
+                               in vec2 texCoordinate;
 
-                                       in vec2 aPosition;
-                                       in vec2 aReferencePosition;
-                                       in vec4 aTexCoordinate;
-                                       in vec2 aScale;
-                                       in float aRotation;
-                                       in uint aStyleIndex;
+                               in vec2 aPosition;
+                               in vec3 aReferencePosition;
+                               in vec4 aTexCoordinate;
+                               in vec2 aScale;
+                               in float aRotation;
+                               in uint aStyleIndex;
 
-                                       out vec2 v_texCoord;
-                                       out vec4 v_texCoordInstance;
-                                       out flat highp uint vStyleIndex;
-                                       out float v_alpha;
+                               out vec2 v_texCoord;
+                               out vec4 v_texCoordInstance;
+                               out flat highp uint vStyleIndex;
+                               out float v_alpha;
 
-                                       void main() {
-                                           float angle = aRotation * 3.14159265 / 180.0;
+                               void main() {
+                                   float angle = aRotation * 3.14159265 / 180.0;
 
-                                           vec4 newVertex = umMatrix * vec4(aReferencePosition, 1.0, 1.0);
+                                   vec4 newVertex = umMatrix * vec4(aReferencePosition + uOriginOffset.xyz, 1.0);
 
-                                           vec4 earthCenter = uvpMatrix * vec4(0.0, 0.0, 0.0, 1.0);
-                                           earthCenter = earthCenter / earthCenter.w;
-                                           vec4 screenPosition = uvpMatrix * vec4(newVertex.z * sin(newVertex.y) * cos(newVertex.x),
-                                                                                  newVertex.z * cos(newVertex.y),
-                                                                                  -newVertex.z * sin(newVertex.y) * sin(newVertex.x),
-                                                                                  1.0);
-                                           screenPosition = screenPosition / screenPosition.w;
+                                   vec4 earthCenter = uvpMatrix * vec4(0.0, 0.0, 0.0, 1.0);
+                                   earthCenter = earthCenter / earthCenter.w;
+                                   vec4 screenPosition = uvpMatrix * newVertex;
+                                   screenPosition = screenPosition / screenPosition.w;
 
-                                           vec2 size = (vPosition.xy) * aScale;
+                                   vec2 p = vPosition.xy;
+                                   vec2 pRot = vec2(p.x * cos(angle) + p.y * sin(angle), -p.x * sin(angle) + p.y * cos(angle));
+                                   pRot = aScale * pRot;
 
-                                           mat4 screenMatrix = mat4(
-                                                   cos(angle), -sin(angle), 0.0, 0.0,
-                                                   sin(angle), cos(angle), 0.0, 0.0,
-                                                   0.0, 0.0, 0.0, 0.0,
-                                                   size.x + aPosition.x, size.y + aPosition.y, 0.0, 1.0
-                                           );
-
-                                           gl_Position = screenMatrix * screenPosition;
-                                           v_texCoordInstance = aTexCoordinate;
-                                           v_texCoord = texCoordinate;
-                                           vStyleIndex = aStyleIndex;
-                                           v_alpha = 1.0;
-                                           if (screenPosition.z - earthCenter.z > 0.0) {
-                                               v_alpha = 0.0;
-                                           }
-                                       }
-                               )
+                                   gl_Position = vec4(screenPosition.xy + aPosition.xy + pRot, 0.0, 1.0);
+                                   v_texCoordInstance = aTexCoordinate;
+                                   v_texCoord = texCoordinate;
+                                   vStyleIndex = aStyleIndex;
+                                   v_alpha = 1.0;
+                                   if (screenPosition.z - earthCenter.z > 0.0) {
+                                       v_alpha = 0.0;
+                                   }
+                               }
+                           )
     : OMMVersionedGlesShaderCode(320 es,
-                                      uniform mat4 uvpMatrix;
+                                  uniform mat4 uvpMatrix;
+                                  uniform vec4 uOriginOffset;
 
-                                      in vec4 vPosition;
-                                      in vec2 texCoordinate;
+                                  in vec4 vPosition;
+                                  in vec2 texCoordinate;
 
-                                      in vec2 aPosition;
-                                      in vec4 aTexCoordinate;
-                                      in vec2 aScale;
-                                      in float aRotation;
-                                      in uint aStyleIndex;
+                                  in vec2 aPosition;
+                                  in vec4 aTexCoordinate;
+                                  in vec2 aScale;
+                                  in float aRotation;
+                                  in uint aStyleIndex;
 
-                                      out vec2 v_texCoord;
-                                      out vec4 v_texCoordInstance;
-                                      out flat highp uint vStyleIndex;
-                                      out float v_alpha;
+                                  out vec2 v_texCoord;
+                                  out vec4 v_texCoordInstance;
+                                  out flat highp uint vStyleIndex;
+                                  out float v_alpha;
 
-                                      void main() {
-                                          float angle = aRotation * 3.14159265 / 180.0;
+                                  void main() {
+                                      float angle = aRotation * 3.14159265 / 180.0;
 
-                                          mat4 model_matrix = mat4(
-                                                  vec4(cos(angle) * aScale.x, -sin(angle) * aScale.x, 0.0, 0.0),
-                                                  vec4(sin(angle) * aScale.y, cos(angle) * aScale.y, 0.0, 0.0),
-                                                  vec4(0.0, 0.0, 1.0, 0.0),
-                                                  vec4(aPosition.x, aPosition.y, 1.0, 1.0)
-                                          );
+                                      mat4 model_matrix = mat4(
+                                              vec4(cos(angle) * aScale.x, -sin(angle) * aScale.x, 0.0, 0.0),
+                                              vec4(sin(angle) * aScale.y, cos(angle) * aScale.y, 0.0, 0.0),
+                                              vec4(0.0, 0.0, 1.0, 0.0),
+                                              vec4(aPosition.xy + uOriginOffset.xy, 1.0, 1.0)
+                                      );
 
-                                          mat4 matrix = uvpMatrix * model_matrix;
+                                      mat4 matrix = uvpMatrix * model_matrix;
 
-                                          gl_Position = matrix * vPosition;
-                                          v_texCoordInstance = aTexCoordinate;
-                                          v_texCoord = texCoordinate;
-                                          vStyleIndex = aStyleIndex;
-                                          v_alpha = 1.0;
-                                      }
+                                      gl_Position = matrix * vPosition;
+                                      v_texCoordInstance = aTexCoordinate;
+                                      v_texCoord = texCoordinate;
+                                      vStyleIndex = aStyleIndex;
+                                      v_alpha = 1.0;
+                                  }
     );
 }
 

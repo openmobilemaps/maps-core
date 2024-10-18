@@ -6,6 +6,7 @@
 #include "NativeLayerInterface.h"
 #include "NativePolygonInfo.h"
 #include "NativePolygonLayerCallbackInterface.h"
+#include "NativeVec3D.h"
 
 namespace djinni_generated {
 
@@ -29,11 +30,12 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_pol
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_polygon_PolygonLayerInterface_00024CppProxy_native_1setPolygons(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_polygons)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_polygon_PolygonLayerInterface_00024CppProxy_native_1setPolygons(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_polygons, ::djinni_generated::NativeVec3D::JniType j_origin)
 {
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::PolygonLayerInterface>(nativeRef);
-        ref->setPolygons(::djinni::List<::djinni_generated::NativePolygonInfo>::toCpp(jniEnv, j_polygons));
+        ref->setPolygons(::djinni::List<::djinni_generated::NativePolygonInfo>::toCpp(jniEnv, j_polygons),
+                         ::djinni_generated::NativeVec3D::toCpp(jniEnv, j_origin));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

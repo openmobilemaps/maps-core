@@ -39,6 +39,7 @@ final class Icosahedron: BaseGraphicsObject, @unchecked Sendable {
                          renderPass _: MCRenderPassConfig,
                          vpMatrix: Int64,
                          mMatrix: Int64,
+                         origin: MCVec3D,
                          isMasked: Bool,
                          screenPixelAsRealMeterFactor _: Double) {
         lock.lock()
@@ -85,6 +86,7 @@ extension Icosahedron: MCMaskingObjectInterface {
                 renderPass _: MCRenderPassConfig,
                 vpMatrix: Int64,
                 mMatrix: Int64,
+                origin: MCVec3D,
                 screenPixelAsRealMeterFactor _: Double) {
 
         lock.lock()
@@ -131,7 +133,7 @@ extension Icosahedron: MCMaskingObjectInterface {
 }
 
 extension Icosahedron: MCIcosahedronInterface {
-    func setVertices(_ vertices: MCSharedBytes, indices: MCSharedBytes) {
+    func setVertices(_ vertices: MCSharedBytes, indices: MCSharedBytes, origin: MCVec3D) {
         guard let verticesBuffer = device.makeBuffer(from: vertices),
               let indicesBuffer = device.makeBuffer(from: indices),
               indices.elementCount > 0

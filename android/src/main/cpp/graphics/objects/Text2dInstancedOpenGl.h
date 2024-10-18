@@ -34,9 +34,9 @@ public:
     virtual void clear() override;
 
     virtual void render(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
-                        int64_t vpMatrix, int64_t mMatrix, bool isMasked, double screenPixelAsRealMeterFactor) override;
+                        int64_t vpMatrix, int64_t mMatrix, const ::Vec3D & origin, bool isMasked, double screenPixelAsRealMeterFactor) override;
 
-    virtual void setFrame(const ::Quad2dD &frame) override;
+    virtual void setFrame(const ::Quad2dD &frame, const Vec3D &origin, bool is3d) override;
 
     virtual void loadTexture(const std::shared_ptr<::RenderingContextInterface> &context,
                              const std::shared_ptr<TextureHolderInterface> &textureHolder) override;
@@ -78,12 +78,14 @@ protected:
 
     void removeTextureCoordsGlBuffers();
 
+    bool is3d = false;
     std::shared_ptr<ShaderProgramInterface> shaderProgram;
     std::string programName;
     int program;
 
     int vpMatrixHandle;
     int mMatrixHandle;
+    int originOffsetHandle;
     int positionHandle;
     GLuint vertexBuffer;
     std::vector<GLfloat> vertices;
@@ -93,6 +95,7 @@ protected:
     GLuint indexBuffer;
     std::vector<GLubyte> indices;
     bool glDataBuffersGenerated = false;
+    Vec3D quadsOrigin = Vec3D(0.0, 0.0, 0.0);
 
     std::shared_ptr<TextureHolderInterface> textureHolder;
     int texturePointer;
@@ -132,6 +135,14 @@ protected:
     static const uintptr_t instStyleIndicesOffsetBytes = sizeof(GLfloat) * 9;
     static const uintptr_t instReferencePositionsOffsetBytes = sizeof(GLfloat) * 10;
     static const uintptr_t instValuesSizeBytes = sizeof(GLfloat) * 12;
+
+    static const uintptr_t instPositionsOffsetBytes3d = sizeof(GLfloat) * 0;
+    static const uintptr_t instTextureCoordinatesOffsetBytes3d = sizeof(GLfloat) * 2;
+    static const uintptr_t instScalesOffsetBytes3d = sizeof(GLfloat) * 6;
+    static const uintptr_t instRotationsOffsetBytes3d = sizeof(GLfloat) * 8;
+    static const uintptr_t instStyleIndicesOffsetBytes3d = sizeof(GLfloat) * 9;
+    static const uintptr_t instReferencePositionsOffsetBytes3d = sizeof(GLfloat) * 10;
+    static const uintptr_t instValuesSizeBytes3d = sizeof(GLfloat) * 13;
 
 private:
     bool writeToDynamicInstanceDataBuffer(const ::SharedBytes &data, GLuint targetOffsetBytes);

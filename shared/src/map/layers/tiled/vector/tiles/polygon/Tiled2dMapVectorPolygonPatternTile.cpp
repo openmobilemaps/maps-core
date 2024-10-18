@@ -161,11 +161,20 @@ void Tiled2dMapVectorPolygonPatternTile::setVectorTileData(const Tiled2dMapVecto
     if (!shaderFactory) {
         return;
     }
+    bool is3d = mapInterface->is3d();
 
     const std::string layerName = description->sourceLayer;
     const auto indicesLimit = std::numeric_limits<uint16_t>::max();
 
     if (!tileData->empty()) {
+
+        auto convertedTileBounds = mapInterface->getCoordinateConverterHelper()->convertRectToRenderSystem(tileInfo.tileInfo.bounds);
+        double cx = (convertedTileBounds.bottomRight.x + convertedTileBounds.topLeft.x) / 2.0;
+        double cy = (convertedTileBounds.bottomRight.y + convertedTileBounds.topLeft.y) / 2.0;
+        double rx = is3d ? 1.0 * sin(cy) * cos(cx) : cx;
+        double ry = is3d ? 1.0 * cos(cy) : cy;
+        double rz = is3d ? -1.0 * sin(cy) * sin(cx) : 0.0;
+        auto origin = Vec3D(rx, ry, rz);
 
         bool anyInteractable = false;
 
@@ -244,8 +253,12 @@ void Tiled2dMapVectorPolygonPatternTile::setVectorTileData(const Tiled2dMapVecto
                     }
 
                     for (auto const &coordinate: polygon.coordinates) {
-                        styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(coordinate.x);
-                        styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(coordinate.y);
+                        double x = is3d ? 1.0 * sin(coordinate.y) * cos(coordinate.x) - rx : coordinate.x - rx;
+                        double y = is3d ?  1.0 * cos(coordinate.y) - ry : coordinate.y - ry;
+                        double z = is3d ? -1.0 * sin(coordinate.y) * sin(coordinate.x) - rz : 0.0;
+                        styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(x);
+                        styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(y);
+                        styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(z);
                         styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(styleIndex);
                     }
 
@@ -264,14 +277,14 @@ void Tiled2dMapVectorPolygonPatternTile::setVectorTileData(const Tiled2dMapVecto
             tileCallbackInterface.message(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsInteractable, description->identifier);
         }
 
-        addPolygons(styleGroupNewPolygonsVector);
+        addPolygons(styleGroupNewPolygonsVector, origin);
     } else {
         auto selfActor = WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this());
         tileCallbackInterface.message(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsReady, tileInfo, description->identifier, selfActor);
     }
 }
 
-void Tiled2dMapVectorPolygonPatternTile::addPolygons(const std::vector<std::vector<ObjectDescriptions>> &styleGroupNewPolygonsVector) {
+void Tiled2dMapVectorPolygonPatternTile::addPolygons(const std::vector<std::vector<ObjectDescriptions>> &styleGroupNewPolygonsVector, const Vec3D & origin) {
 
     if (styleGroupNewPolygonsVector.empty()) {
         auto selfActor = WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this());
@@ -301,7 +314,7 @@ void Tiled2dMapVectorPolygonPatternTile::addPolygons(const std::vector<std::vect
 #endif
 
             auto layerObject = std::make_shared<PolygonPatternGroup2dLayerObject>(converter, polygonObject, shader);
-            layerObject->setVertices(polygonDesc.vertices, polygonDesc.indices);
+            layerObject->setVertices(polygonDesc.vertices, polygonDesc.indices, origin);
 
             polygonGroupObjectsMap[styleGroupIndex].push_back(layerObject);
             polygonsRenderOrder.push_back(layerObject);

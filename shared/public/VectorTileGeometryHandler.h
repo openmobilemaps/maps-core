@@ -218,7 +218,7 @@ public:
                 for (auto const &points: polygon) {
                     for (auto const &point: points) {
                         auto converted = conversionHelper->convertToRenderSystem(point);
-                        polygons.back().coordinates.push_back(Vec2F(converted.x, converted.y));
+                        polygons.back().coordinates.push_back(Vec2D(converted.x, converted.y));
                     }
                 }
             }
@@ -230,7 +230,7 @@ public:
     }
 
     struct TriangulatedPolygon {
-        std::vector<Vec2F> coordinates;
+        std::vector<Vec2D> coordinates;
         std::vector<uint16_t> indices;
     };
 
@@ -242,7 +242,7 @@ public:
         return coordinates;
     }
 
-    static inline double signedTriangleArea(const Vec2F& a, const Vec2F& b, const Vec2F& c) {
+    static inline double signedTriangleArea(const Vec2D& a, const Vec2D& b, const Vec2D& c) {
         return (b.x - a.x) * (c.y - a.y) - (c.x - a.x) * (b.y - a.y);
     }
 
@@ -252,7 +252,7 @@ public:
             return false;
         }
         const auto convertedPoint = conversionHelper->convertToRenderSystem(point);
-        const auto vecPoint = Vec2F(convertedPoint.x, convertedPoint.y);
+        const auto vecPoint = Vec2D(convertedPoint.x, convertedPoint.y);
 
         float d1, d2, d3;
         bool has_neg, has_pos;
@@ -306,9 +306,9 @@ private:
         }
     }
 
-    inline Vec2F vecFromPoint(const vtzero::point &point) {
+    inline Vec2D vecFromPoint(const vtzero::point &point) {
         const auto coord = coordinateFromPoint(point, true);
-        return Vec2F(coord.x, coord.y);
+        return Vec2D(coord.x, coord.y);
     }
 
 

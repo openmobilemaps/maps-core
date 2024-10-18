@@ -174,9 +174,9 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (nullable id<MCStretchInstancedShaderInterface>)createStretchInstancedShader {
+- (nullable id<MCStretchInstancedShaderInterface>)createStretchInstancedShader:(BOOL)unitSphere {
     try {
-        auto objcpp_result_ = _cppRefHandle.get()->createStretchInstancedShader();
+        auto objcpp_result_ = _cppRefHandle.get()->createStretchInstancedShader(::djinni::Bool::toCpp(unitSphere));
         return ::djinni_generated::StretchInstancedShaderInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
@@ -332,10 +332,10 @@ public:
             return ::djinni_generated::StretchShaderInterface::toCpp(objcpp_result_);
         }
     }
-    /*not-null*/ std::shared_ptr<::StretchInstancedShaderInterface> createStretchInstancedShader() override
+    /*not-null*/ std::shared_ptr<::StretchInstancedShaderInterface> createStretchInstancedShader(bool c_unitSphere) override
     {
         @autoreleasepool {
-            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createStretchInstancedShader];
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createStretchInstancedShader:(::djinni::Bool::fromCpp(c_unitSphere))];
             return ::djinni_generated::StretchInstancedShaderInterface::toCpp(objcpp_result_);
         }
     }

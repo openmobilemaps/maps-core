@@ -17,6 +17,7 @@ auto NativeCamera3dConfig::fromCpp(JNIEnv* jniEnv, const CppType& c) -> ::djinni
                                                            ::djinni::get(::djinni::String::fromCpp(jniEnv, c.key)),
                                                            ::djinni::get(::djinni::Bool::fromCpp(jniEnv, c.allowUserInteraction)),
                                                            ::djinni::get(::djinni::Optional<std::optional, ::djinni::F32>::fromCpp(jniEnv, c.rotationSpeed)),
+                                                           ::djinni::get(::djinni::I32::fromCpp(jniEnv, c.animationDurationMs)),
                                                            ::djinni::get(::djinni::F32::fromCpp(jniEnv, c.minZoom)),
                                                            ::djinni::get(::djinni::F32::fromCpp(jniEnv, c.maxZoom)),
                                                            ::djinni::get(::djinni_generated::NativeCameraInterpolation::fromCpp(jniEnv, c.pitchInterpolationValues)),
@@ -26,12 +27,13 @@ auto NativeCamera3dConfig::fromCpp(JNIEnv* jniEnv, const CppType& c) -> ::djinni
 }
 
 auto NativeCamera3dConfig::toCpp(JNIEnv* jniEnv, JniType j) -> CppType {
-    ::djinni::JniLocalScope jscope(jniEnv, 8);
+    ::djinni::JniLocalScope jscope(jniEnv, 9);
     assert(j != nullptr);
     const auto& data = ::djinni::JniClass<NativeCamera3dConfig>::get();
     return {::djinni::String::toCpp(jniEnv, (jstring)jniEnv->GetObjectField(j, data.field_key)),
             ::djinni::Bool::toCpp(jniEnv, jniEnv->GetBooleanField(j, data.field_allowUserInteraction)),
             ::djinni::Optional<std::optional, ::djinni::F32>::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_rotationSpeed)),
+            ::djinni::I32::toCpp(jniEnv, jniEnv->GetIntField(j, data.field_animationDurationMs)),
             ::djinni::F32::toCpp(jniEnv, jniEnv->GetFloatField(j, data.field_minZoom)),
             ::djinni::F32::toCpp(jniEnv, jniEnv->GetFloatField(j, data.field_maxZoom)),
             ::djinni_generated::NativeCameraInterpolation::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_pitchInterpolationValues)),

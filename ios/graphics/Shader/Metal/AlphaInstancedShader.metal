@@ -24,15 +24,17 @@ vertex InstancedVertexOut
 unitSphereAlphaInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
                            constant float4x4 &vpMatrix [[buffer(1)]],
                            constant float4x4 &mMatrix [[buffer(2)]],
-                           constant float2 *positions [[buffer(3)]],
+                           constant packed_float3 *positions [[buffer(3)]],
                            constant float2 *scales [[buffer(4)]],
                            constant float *rotations [[buffer(5)]],
                            constant float2 *texureCoordinates [[buffer(6)]],
                            constant float *alphas [[buffer(7)]],
                            constant float2 *offsets [[buffer(8)]],
+                           constant float4 &originOffset [[buffer(9)]],
+                           constant float4 &origin [[buffer(10)]],
                            uint instanceId [[instance_id]])
 {
-    const float2 position = positions[instanceId];
+    const float3 position = positions[instanceId];
     const float2 scale = scales[instanceId];
     const float2 offset = offsets[instanceId];
     const float rotation = rotations[instanceId];
@@ -40,12 +42,10 @@ unitSphereAlphaInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
 
     const float angle = rotation * M_PI_F / 180.0;
 
-    const float x = 1.0 * sin(position.y) * cos(position.x);
-    const float y = 1.0 * cos(position.y);
-    const float z = -1.0 * sin(position.y) * sin(position.x);
-
-    float4 earthCenter = vpMatrix * float4(0,0,0, 1.0);
-    float4 screenPosition = vpMatrix * float4(x,y,z, 1.0);
+    float4 earthCenter = vpMatrix * float4(0 - origin.x,
+                                           0 - origin.y,
+                                           0 - origin.z, 1.0);
+    float4 screenPosition = vpMatrix * (float4(position.xyz, 1.0) + originOffset);
 
     earthCenter /= earthCenter.w;
     screenPosition /= screenPosition.w;
@@ -90,17 +90,18 @@ vertex InstancedVertexOut
 alphaInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
                            constant float4x4 &vpMatrix [[buffer(1)]],
                            constant float4x4 &mMatrix [[buffer(2)]],
-                           constant float2 *positions [[buffer(3)]],
+                           constant float2 * positions [[buffer(3)]],
                            constant float2 *scales [[buffer(4)]],
                            constant float *rotations [[buffer(5)]],
                            constant float2 *texureCoordinates [[buffer(6)]],
                            constant float *alphas [[buffer(7)]],
+                           constant float2 *offsets [[buffer(8)]],
+                           constant float4 &originOffset [[buffer(9)]],
                            uint instanceId [[instance_id]])
 {
-  const float2 position = positions[instanceId];
+  const float2 position = positions[instanceId] + originOffset.xy;
   const float2 scale = scales[instanceId];
   const float rotation = rotations[instanceId];
-
 
   const float angle = rotation * M_PI_F / 180.0;
 

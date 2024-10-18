@@ -83,6 +83,10 @@ class MapCamera2d : public MapCameraInterface,
 
     virtual std::vector<float> getVpMatrix() override;
 
+    virtual ::Vec3D getOrigin() override;
+
+    virtual std::optional<std::vector<double>> getLastVpMatrixD() override;
+
     std::optional<std::vector<float>> getLastVpMatrix() override;
 
     std::optional<::RectCoord> getLastVpMatrixViewBounds() override;
@@ -238,4 +242,6 @@ protected:
     RectCoord getRectFromViewport(const Vec2I &sizeViewport, const Coord &center);
 
     std::vector<float> newVpMatrix = std::vector<float>(16, 0.0);
+
+    Vec3D origin = Vec3D(0, 0, 0);
 };

@@ -176,6 +176,7 @@ private:
     bool isInitialized = false;
 
     bool is3d;
+    Vec3D tileOrigin;
 
     const std::shared_ptr<Tiled2dMapVectorStateManager> featureStateManager;
     const std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> &symbolDelegate;

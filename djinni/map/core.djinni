@@ -190,6 +190,8 @@ map_camera_interface = interface +c {
 
     as_camera_interface(): camera_interface;
 
+    get_last_vp_matrix_d() : optional<list<f64>>;
+
     get_last_vp_matrix() : optional<list<f32>>;
     get_last_vp_matrix_view_bounds() : optional<rect_coord>;
     get_last_vp_matrix_rotation() : optional<f32>;
@@ -233,10 +235,16 @@ camera_3d_config = record {
     key: string;
     allow_user_interaction: bool;
     rotation_speed: optional<f32>;
+    animation_duration_ms: i32;
 
     min_zoom: f32;
     max_zoom: f32;
 
     pitch_interpolation_values: camera_interpolation;
     vertical_displacement_interpolation_values: camera_interpolation;
+}
+
+camera_3d_config_factory = interface +c {
+    static get_basic_config(): camera_3d_config;
+    static get_restor_config(): camera_3d_config;
 }

@@ -40,7 +40,7 @@ public struct MapView: UIViewRepresentable {
     }
 
     public struct Camera: Equatable {
-        public static let basicCamera3dConfig = MCCamera3dConfig(key: "basic_config", allowUserInteraction: true, rotationSpeed: nil, minZoom: 200_000_000, maxZoom: 5_000_000, pitchInterpolationValues: MCCameraInterpolation(stops: []), verticalDisplacementInterpolationValues: MCCameraInterpolation(stops: []))
+        public static let basicCamera3dConfig = MCCamera3dConfigFactory.getBasicConfig()
 
         public var center: Updatable<MCCoord>
         public var zoom: Updatable<Double>
@@ -205,7 +205,7 @@ public struct MapView: UIViewRepresentable {
             animated = false
         }
 
-        if is3D {
+        if is3D, coordinator.lastWrittenCamera?.cameraConfig.key != camera.cameraConfig.key {
             mapView.camera.asMapCamera3d()?.setCameraConfig(camera.cameraConfig, durationSeconds: nil, targetZoom: nil, targetCoordinate: nil)
         }
 
@@ -375,7 +375,19 @@ public class MapViewCoordinator: MCMapCameraListenerInterface {
     }
 
     nonisolated
-    public func onCameraChange(_ viewMatrix: [NSNumber], projectionMatrix: [NSNumber], verticalFov: Float, horizontalFov: Float, width: Float, height: Float, focusPointAltitude: Float, focusPointPosition: MCCoord, zoom: Float, mode: MCCameraMode3d) {
+    public func onCameraChange(
+        _ viewMatrix: [NSNumber],
+        projectionMatrix: [NSNumber],
+        origin: MCVec3D,
+        verticalFov: Float,
+        horizontalFov: Float,
+        width: Float,
+        height: Float,
+        focusPointAltitude: Float,
+        focusPointPosition: MCCoord,
+        zoom: Float,
+        mode: MCCameraMode3d
+    ) {
             updateCamera()
     }
 

@@ -17,7 +17,7 @@ struct TextInstancedVertexOut {
   float2 uv;
   float4 texureCoordinates;
   uint16_t styleIndex;
-    float alpha;
+  float alpha;
 };
 
 vertex TextInstancedVertexOut
@@ -29,24 +29,24 @@ unitSphereTextInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
                           constant float *rotations [[buffer(5)]],
                           constant float4 *texureCoordinates [[buffer(6)]],
                           constant uint16_t *styleIndices [[buffer(7)]],
-                          constant float2 *referencePositions [[buffer(8)]],
+                          constant packed_float3 *referencePositions [[buffer(8)]],
+                          constant float4 &originOffset [[buffer(9)]],
+                          constant float4 &origin [[buffer(10)]],
                           uint instanceId [[instance_id]])
 {
-    const float2 referencePosition = referencePositions[instanceId];
+    const float3 referencePosition = referencePositions[instanceId];
     const float2 offset = positions[instanceId];
     const float2 scale = scales[instanceId];
     const float rotation = rotations[instanceId];
 
     const float angle = rotation * M_PI_F / 180.0;
 
-    float4 newVertex = mMatrix * float4(referencePosition, 1.0, 1.0);
+    float4 newVertex = mMatrix * float4(referencePosition + originOffset.xyz, 1.0);
 
-    const float x = newVertex.z * sin(newVertex.y) * cos(newVertex.x);
-    const float y = newVertex.z * cos(newVertex.y);
-    const float z = -newVertex.z * sin(newVertex.y) * sin(newVertex.x);
-
-    float4 earthCenter = vpMatrix * float4(0,0,0, 1.0);
-    float4 screenPosition = vpMatrix * float4(x,y,z, 1.0);
+    float4 earthCenter = vpMatrix * float4(0 - origin.x,
+                                           0 - origin.y,
+                                           0 - origin.z, 1.0);
+    float4 screenPosition = vpMatrix * newVertex;
 
     earthCenter /= earthCenter.w;
     screenPosition /= screenPosition.w;
@@ -63,9 +63,14 @@ unitSphereTextInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
     float cosAngle = cos(angle);
 
     const float2 p = (vertexIn.position.xy);
-    auto pRot = float2(p.x * cosAngle + p.y * sinAngle, -p.x * sinAngle + p.y * cosAngle);
-    pRot = float2(pRot.x * scale.x, pRot.y * scale.y);
-    auto position = float4(screenPosition.xy + offset + pRot, 0, 1.0);
+
+    // Apply non-uniform scaling first
+    auto pScaled = float2(p.x * scale.x, p.y * scale.y);
+
+    // Apply rotation after scaling
+    auto pRot = float2(pScaled.x * cosAngle + pScaled.y * sinAngle,
+                       -pScaled.x * sinAngle + pScaled.y * cosAngle);
+    auto position = float4(screenPosition.xy + offset.xy + pRot, 0.0, 1.0);
 
     TextInstancedVertexOut out {
       .position = position,
@@ -95,8 +100,7 @@ unitSphereTextInstancedFragmentShader(TextInstancedVertexOut in [[stage_in]],
 {
     constant TextInstanceStyle *style = (constant TextInstanceStyle *)(styles + in.styleIndex);
 
-
-    if (style->color.a == 0 || style->haloColor.a == 0.0) {
+  if (style->color.a == 0 || style->haloColor.a == 0.0 || in.alpha == 0.0) {
         discard_fragment();
     }
 
@@ -147,9 +151,10 @@ textInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
                           constant float4 *texureCoordinates [[buffer(6)]],
                           constant uint16_t *styleIndices [[buffer(7)]],
                           constant float2 *referencePositions [[buffer(8)]],
+                          constant float4 &originOffset [[buffer(9)]],
                           uint instanceId [[instance_id]])
 {
-    const float2 position = positions[instanceId];
+    const float2 position = positions[instanceId] + originOffset.xy;
 
     const float2 scale = scales[instanceId];
     const float rotation = rotations[instanceId];

@@ -46,11 +46,7 @@ void AlphaShaderOpenGl::setupProgram(const std::shared_ptr<::RenderingContextInt
 }
 
 std::string AlphaShaderOpenGl::getVertexShader() {
-    return projectOntoUnitSphere ?
-           // Vertices projected onto unit sphere
-           BaseShaderProgramOpenGl::getUnitSphereVertexShader()
-           // Default Shader
-           : BaseShaderProgramOpenGl::getVertexShader();
+    return BaseShaderProgramOpenGl::getVertexShader();
 }
 
 std::string AlphaShaderOpenGl::getFragmentShader() {

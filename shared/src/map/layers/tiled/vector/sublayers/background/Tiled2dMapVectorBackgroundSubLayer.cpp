@@ -45,26 +45,31 @@ void Tiled2dMapVectorBackgroundSubLayer::onAdded(const std::shared_ptr<MapInterf
         RectCoord globe = RectCoord(Coord(CoordinateSystemIdentifiers::EPSG4326(), -180.0, 90.0, 0),
                                      Coord(CoordinateSystemIdentifiers::EPSG4326(),  180.0, -90.0, 0));
 
-        std::vector<Vec2F> vecVertices;
+        std::vector<Vec2D> vecVertices;
         auto globeConverted = converter->convertRectToRenderSystem(globe);
         for (auto const &coord: PolygonHelper::coordsFromRect(globeConverted).positions) {
-            vecVertices.push_back(Vec2F(coord.x, coord.y));
+            vecVertices.push_back(Vec2D(coord.x, coord.y));
         }
 
         PolygonHelper::subdivision(vecVertices, indices, std::abs(
                 (globeConverted.bottomRight.x - globeConverted.topLeft.x) / std::pow(2, SUBDIVISION_FACTOR_3D_DEFAULT)));
 
         for (const auto &v: vecVertices) {
-            vertices.push_back(v.x);
-            vertices.push_back(v.y);
-            vertices.push_back(0.0f);
+            double x = 1.0 * sin(v.y) * cos(v.x);
+            double y =  1.0 * cos(v.y);
+            double z = -1.0 * sin(v.y) * sin(v.x);
+
+            vertices.push_back(x);
+            vertices.push_back(y);
+            vertices.push_back(z);
+            vertices.push_back(0.0);
         }
     } else {
         vertices = {
-            -1,  1, 0,//A
-             1,  1, 0,//B
-             1, -1, 0,//C
-            -1, -1, 0 //D
+            -1,  1, 0, 0,//A
+             1,  1, 0, 0,//B
+             1, -1, 0, 0,//C
+            -1, -1, 0, 0 //D
         };
     }
 
@@ -78,7 +83,7 @@ void Tiled2dMapVectorBackgroundSubLayer::onAdded(const std::shared_ptr<MapInterf
         object->asGraphicsObject()->setDebugLabel(description->identifier);
         patternObject = std::make_shared<PolygonPatternGroup2dLayerObject>(mapInterface->getCoordinateConverterHelper(), object, shader);
         
-        patternObject->setVertices(vertices, indices);
+        patternObject->setVertices(vertices, indices, Vec3D(0, 0, 0));
         patternObject->setOpacities({alpha});
 
         if (spriteTexture && spriteData) {
@@ -96,7 +101,7 @@ void Tiled2dMapVectorBackgroundSubLayer::onAdded(const std::shared_ptr<MapInterf
         PolygonStyle(color, alpha)
     });
 
-    polygonObject->setVertices(vertices, indices);
+    polygonObject->setVertices(vertices, indices, Vec3D(0, 0, 0));
 
     std::vector<std::shared_ptr<::RenderObjectInterface>> renderObjects {  };
 

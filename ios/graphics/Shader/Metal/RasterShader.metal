@@ -22,18 +22,6 @@ struct RasterStyle {
     float brightnessShift;
 };
 
-vertex VertexOut
-rasterVertexShader(const Vertex3DIn vertexIn [[stage_in]],
-                 constant float4x4 &mvpMatrix [[buffer(1)]])
-{
-    VertexOut out {
-        .position = mvpMatrix * float4(vertexIn.position.xyz, 1.0),
-        .uv = vertexIn.uv
-    };
-    
-    return out;
-}
-
 fragment float4
 rasterFragmentShader(VertexOut in [[stage_in]],
                    constant RasterStyle *styling [[buffer(1)]],

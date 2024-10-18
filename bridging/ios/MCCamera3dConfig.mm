@@ -9,6 +9,7 @@
 - (nonnull instancetype)initWithKey:(nonnull NSString *)key
                allowUserInteraction:(BOOL)allowUserInteraction
                       rotationSpeed:(nullable NSNumber *)rotationSpeed
+                animationDurationMs:(int32_t)animationDurationMs
                             minZoom:(float)minZoom
                             maxZoom:(float)maxZoom
            pitchInterpolationValues:(nonnull MCCameraInterpolation *)pitchInterpolationValues
@@ -18,6 +19,7 @@ verticalDisplacementInterpolationValues:(nonnull MCCameraInterpolation *)vertica
         _key = [key copy];
         _allowUserInteraction = allowUserInteraction;
         _rotationSpeed = rotationSpeed;
+        _animationDurationMs = animationDurationMs;
         _minZoom = minZoom;
         _maxZoom = maxZoom;
         _pitchInterpolationValues = pitchInterpolationValues;
@@ -29,6 +31,7 @@ verticalDisplacementInterpolationValues:(nonnull MCCameraInterpolation *)vertica
 + (nonnull instancetype)camera3dConfigWithKey:(nonnull NSString *)key
                          allowUserInteraction:(BOOL)allowUserInteraction
                                 rotationSpeed:(nullable NSNumber *)rotationSpeed
+                          animationDurationMs:(int32_t)animationDurationMs
                                       minZoom:(float)minZoom
                                       maxZoom:(float)maxZoom
                      pitchInterpolationValues:(nonnull MCCameraInterpolation *)pitchInterpolationValues
@@ -37,6 +40,7 @@ verticalDisplacementInterpolationValues:(nonnull MCCameraInterpolation *)vertica
     return [[self alloc] initWithKey:key
                 allowUserInteraction:allowUserInteraction
                        rotationSpeed:rotationSpeed
+                 animationDurationMs:animationDurationMs
                              minZoom:minZoom
                              maxZoom:maxZoom
             pitchInterpolationValues:pitchInterpolationValues
@@ -46,7 +50,7 @@ verticalDisplacementInterpolationValues:(nonnull MCCameraInterpolation *)vertica
 #ifndef DJINNI_DISABLE_DESCRIPTION_METHODS
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@ %p key:%@ allowUserInteraction:%@ rotationSpeed:%@ minZoom:%@ maxZoom:%@ pitchInterpolationValues:%@ verticalDisplacementInterpolationValues:%@>", self.class, (void *)self, self.key, @(self.allowUserInteraction), self.rotationSpeed, @(self.minZoom), @(self.maxZoom), self.pitchInterpolationValues, self.verticalDisplacementInterpolationValues];
+    return [NSString stringWithFormat:@"<%@ %p key:%@ allowUserInteraction:%@ rotationSpeed:%@ animationDurationMs:%@ minZoom:%@ maxZoom:%@ pitchInterpolationValues:%@ verticalDisplacementInterpolationValues:%@>", self.class, (void *)self, self.key, @(self.allowUserInteraction), self.rotationSpeed, @(self.animationDurationMs), @(self.minZoom), @(self.maxZoom), self.pitchInterpolationValues, self.verticalDisplacementInterpolationValues];
 }
 
 #endif

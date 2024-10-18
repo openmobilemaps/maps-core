@@ -24,20 +24,26 @@ using namespace metal;
   */
 
 struct LineVertexIn {
-    float2 position [[attribute(0)]];
-    float2 widthNormal [[attribute(1)]];
-    float2 lineA [[attribute(2)]];
-    float2 lineB [[attribute(3)]];
-    float vertexIndex [[attribute(4)]];
-    float lengthPrefix [[attribute(5)]];
-    float stylingIndex [[attribute(6)]];
+    float2 lineA [[attribute(0)]];
+    float2 lineB [[attribute(1)]];
+    float vertexIndex [[attribute(2)]];
+    float lengthPrefix [[attribute(3)]];
+    float stylingIndex [[attribute(4)]];
+};
+
+struct LineVertexUnitSphereIn {
+    float3 lineA [[attribute(0)]];
+    float3 lineB [[attribute(1)]];
+    float vertexIndex [[attribute(2)]];
+    float lengthPrefix [[attribute(3)]];
+    float stylingIndex [[attribute(4)]];
 };
 
 struct LineVertexOut {
     float4 position [[ position ]];
     float2 uv;
-    float2 lineA;
-    float2 lineB;
+    float3 lineA;
+    float3 lineB;
     int stylingIndex;
     float width;
     int segmentType;
@@ -49,18 +55,18 @@ struct LineVertexOut {
 
 struct LineStyling {
   float width; // 0
-  float4 color; // 1 2 3 4
-  float4 gapColor; // 5 6 7 8
+  packed_float4 color; // 1 2 3 4
+  packed_float4 gapColor; // 5 6 7 8
   float widthAsPixels; // 9
   float opacity; // 10
   float blur; // 11
   float capType; // 12
   float numDashValues; // 13
-  float dashArray[4]; // 14 15 16 17
+  packed_float4 dashArray; // 14 15 16 17
   float offset; // 18
   float dotted; // 19
   float dottedSkew; // 20
-};
+} __attribute__((__packed__));
 
 /**
 
@@ -70,30 +76,47 @@ struct LineStyling {
  */
 
 vertex LineVertexOut
-lineGroupVertexShader(const LineVertexIn vertexIn [[stage_in]],
+unitSpherelineGroupVertexShader(const LineVertexUnitSphereIn vertexIn [[stage_in]],
                       constant float4x4 &vpMatrix [[buffer(1)]],
                       constant float &scalingFactor [[buffer(2)]],
                       constant float &dashingScalingFactor [[buffer(3)]],
-                      constant float *styling [[buffer(4)]])
+                      constant float *styling [[buffer(4)]],
+                      constant float4 &originOffset [[buffer(5)]],
+                      constant float4 &tileOrigin [[buffer(6)]])
 {
     int styleIndex = (int(vertexIn.stylingIndex) & 0xFF) * 21;
+    constant LineStyling *style = (constant LineStyling *)(styling + styleIndex);
 
     // extend position in width direction and in length direction by width / 2.0
-    float width = styling[styleIndex] / 2.0;
-    float dashingSize = styling[styleIndex];
+    float width = style->width / 2.0;
+    float dashingSize = style->width;
 
-    float blur = styling[styleIndex + 11];
+    float blur = style->blur;
 
-    if (styling[styleIndex + 9] > 0.0) {
+    if (style->width > 0.0) {
         blur *= scalingFactor;
-        width *= scalingFactor;
+        width *= scalingFactor ;
         dashingSize *= dashingScalingFactor;
     }
 
-    float2 widthNormal = vertexIn.widthNormal;
-    float2 lengthNormal = float2(widthNormal.y, -widthNormal.x);
-
     int index = int(vertexIn.vertexIndex);
+
+    const float3 lineA = vertexIn.lineA;
+    const float3 lineB = vertexIn.lineB;
+
+    float3 position = lineB;
+    if(index == 0) {
+      position = lineA;
+    } else if(index == 1) {
+      position = lineA;
+    }
+
+    float3 lengthNormal = normalize(lineB - lineA);
+    const float3 radialVector = normalize(position + tileOrigin.xyz);
+    const float3 widthNormalIn = normalize(cross(radialVector, lengthNormal));
+
+    float3 widthNormal = widthNormalIn;
+
     if(index == 0) {
       lengthNormal *= -1.0;
       widthNormal *= -1.0;
@@ -105,20 +128,19 @@ lineGroupVertexShader(const LineVertexIn vertexIn [[stage_in]],
       widthNormal *= -1.0;
     }
 
-    float o = styling[styleIndex + 18] * scalingFactor;
-    float4 offset = float4(vertexIn.widthNormal.x * o, vertexIn.widthNormal.y * o, 0.0, 0.0);
+    const float o = style->offset * scalingFactor;
+    const float4 lineOffset = float4(widthNormalIn.x * o, widthNormalIn.y * o, widthNormalIn.z * o, 0.0);
+    const float4 extendedPosition = float4(position + originOffset.xyz, 1.0) +
+                              float4((lengthNormal + widthNormal).xyz,0.0)
+                              * float4(width, width, width, 0.0) + lineOffset;
 
-    float4 extendedPosition = float4(vertexIn.position.xy, 0.0, 1.0) +
-                              float4((lengthNormal + widthNormal).xy, 0.0,0.0)
-                              * float4(width, width, width, 0.0) + offset;
-
-  int segmentType = int(vertexIn.stylingIndex) >> 8;// / 256.0;
+    const int segmentType = int(vertexIn.stylingIndex) >> 8;// / 256.0;
 
     LineVertexOut out {
         .position = vpMatrix * extendedPosition,
         .uv = extendedPosition.xy,
-        .lineA = extendedPosition.xy - (vertexIn.lineA + offset.xy),
-        .lineB = (vertexIn.lineB + offset.xy) - (vertexIn.lineA + offset.xy),
+        .lineA = extendedPosition.xyz - ((vertexIn.lineA + originOffset.xyz) + lineOffset.xyz),
+        .lineB = ((vertexIn.lineB + originOffset.xyz) + lineOffset.xyz) - ((vertexIn.lineA + originOffset.xyz) + lineOffset.xyz),
         .stylingIndex = styleIndex,
         .width = width,
         .segmentType = segmentType,
@@ -132,30 +154,46 @@ lineGroupVertexShader(const LineVertexIn vertexIn [[stage_in]],
 }
 
 vertex LineVertexOut
-unitSphereLineGroupVertexShader(const LineVertexIn vertexIn [[stage_in]],
+lineGroupVertexShader(const LineVertexIn vertexIn [[stage_in]],
                       constant float4x4 &vpMatrix [[buffer(1)]],
                       constant float &scalingFactor [[buffer(2)]],
                       constant float &dashingScalingFactor [[buffer(3)]],
-                      constant float *styling [[buffer(4)]])
+                      constant float *styling [[buffer(4)]],
+                      constant float4 &originOffset [[buffer(5)]],
+                      constant float4 &tileOrigin [[buffer(6)]])
 {
     int styleIndex = (int(vertexIn.stylingIndex) & 0xFF) * 21;
+    constant LineStyling *style = (constant LineStyling *)(styling + styleIndex);
 
     // extend position in width direction and in length direction by width / 2.0
-    float width = styling[styleIndex] / 2.0;
-    float dashingSize = styling[styleIndex];
+    float width = style->width / 2.0;
+    float dashingSize = style->width;
 
-    float blur = styling[styleIndex + 11];
+    float blur = style->blur;
 
-    if (styling[styleIndex + 9] > 0.0) {
+    if (style->width > 0.0) {
         blur *= scalingFactor;
-        width *= scalingFactor;
+        width *= scalingFactor ;
         dashingSize *= dashingScalingFactor;
     }
 
-    float2 widthNormal = vertexIn.widthNormal;
-    float2 lengthNormal = float2(widthNormal.y, -widthNormal.x);
+    const float3 lineA = float3(vertexIn.lineA, 0);
+    const float3 lineB = float3(vertexIn.lineB, 0);
 
     int index = int(vertexIn.vertexIndex);
+    float3 position = lineB;
+    if(index == 0) {
+      position = lineA;
+    } else if(index == 1) {
+      position = lineA;
+    }
+
+    float3 lengthNormal = normalize(lineB - lineA);
+    const float3 radialVector = float3(0,0,1);
+    const float3 widthNormalIn = normalize(cross(radialVector, lengthNormal));
+
+    float3 widthNormal = widthNormalIn;
+
     if(index == 0) {
       lengthNormal *= -1.0;
       widthNormal *= -1.0;
@@ -167,28 +205,19 @@ unitSphereLineGroupVertexShader(const LineVertexIn vertexIn [[stage_in]],
       widthNormal *= -1.0;
     }
 
-    float o = styling[styleIndex + 18] * scalingFactor;
-    float4 offset = float4(vertexIn.widthNormal.x * o, vertexIn.widthNormal.y * o, 0.0, 0.0);
+    const float o = style->offset * scalingFactor;
+    const float4 lineOffset = float4(widthNormalIn.x * o, widthNormalIn.y * o, 0, 0.0);
+    const float4 extendedPosition = float4(position.xy + originOffset.xy, 0.0, 1.0) +
+                              float4((lengthNormal + widthNormal).xy, 0.0,0.0)
+                              * float4(width, width, width, 0.0) + lineOffset;
 
-    float4 extendedPosition = float4(vertexIn.position.xy, 1.0, 1.0) +
-                              float4((lengthNormal + widthNormal).xy, 1.0,0.0)
-                              * float4(width, width, 0.0, 1.0) + offset;
-
-    int segmentType = int(vertexIn.stylingIndex) >> 8;// / 256.0;
-
-    extendedPosition.x /= extendedPosition.w;
-    extendedPosition.y /= extendedPosition.w;
-    extendedPosition.z /= extendedPosition.w;
-
-    const float x = extendedPosition.z * sin(extendedPosition.y) * cos(extendedPosition.x);
-    const float y = extendedPosition.z * cos(extendedPosition.y);
-    const float z = -extendedPosition.z * sin(extendedPosition.y) * sin(extendedPosition.x);
+    const int segmentType = int(vertexIn.stylingIndex) >> 8;// / 256.0;
 
     LineVertexOut out {
-        .position = vpMatrix * float4(x,y,z, 1.0),
+        .position = vpMatrix * extendedPosition,
         .uv = extendedPosition.xy,
-        .lineA = extendedPosition.xy - (vertexIn.lineA + offset.xy),
-        .lineB = (vertexIn.lineB + offset.xy) - (vertexIn.lineA + offset.xy),
+        .lineA = extendedPosition.xyz - ((lineA + originOffset.xyz) + lineOffset.xyz),
+        .lineB = ((lineB + originOffset.xyz) + lineOffset.xyz) - ((lineA + originOffset.xyz) + lineOffset.xyz),
         .stylingIndex = styleIndex,
         .width = width,
         .segmentType = segmentType,
@@ -206,33 +235,34 @@ fragment float4
 lineGroupFragmentShader(LineVertexOut in [[stage_in]],
                         constant float *styling [[buffer(1)]])
 {
-  float lineLength = length(in.lineB);
-  float t = dot(in.lineA, normalize(in.lineB) / lineLength);
+  constant LineStyling *style = (constant LineStyling *)(styling + in.stylingIndex);
+  const float lineLength = length(in.lineB);
+  const float t = dot(in.lineA, normalize(in.lineB) / lineLength);
 
-  int capType = int(styling[in.stylingIndex + 12]);
-  char segmentType = in.segmentType;
+  const int capType = int(style->capType);
+  const char segmentType = in.segmentType;
 
-  float numDash = styling[in.stylingIndex + 13];
+  const float numDash = style->numDashValues;
 
   float d;
 
   if (t < 0.0 || t > 1.0) {
-    if (numDash > 0 && styling[in.stylingIndex + 14] < 1.0 && styling[in.stylingIndex + 14] > 0.0) {
+    if (numDash > 0 && style->dashArray.x < 1.0 && style->dashArray.x > 0.0) {
       discard_fragment();
     }
     if (segmentType == 0 || capType == 1 || (segmentType == 2 && t < 0.0) || (segmentType == 1 && t > 1.0)) {
       d = min(length(in.lineA), length(in.lineA - in.lineB));
     } else if (capType == 2) {
-      float dLen = t < 0.0 ? -t * lineLength : (t - 1.0) * lineLength;
-      float2 intersectPt = t * in.lineB;
-      float dOrth = abs(length(in.lineA - intersectPt));
+      const float dLen = t < 0.0 ? -t * lineLength : (t - 1.0) * lineLength;
+      const float3 intersectPt = t * in.lineB;
+      const float dOrth = abs(length(in.lineA - intersectPt));
       d = max(dLen, dOrth);
     } else {
       d = 0;
       discard_fragment();
     }
   } else {
-    float2 intersectPt = t * in.lineB;
+    const float3 intersectPt = t * in.lineB;
     d = abs(length(in.lineA - intersectPt));
   }
 
@@ -240,61 +270,52 @@ lineGroupFragmentShader(LineVertexOut in [[stage_in]],
     discard_fragment();
   }
 
-  float opacity = styling[in.stylingIndex + 10];
-  float colorA = styling[in.stylingIndex + 4];
-  float colorAGap = styling[in.stylingIndex + 8];
+  const float opacity = style->opacity;
+  const float colorA = style->color.a;
+  const float colorAGap = style->gapColor.a;
 
   float a = colorA * opacity;
-  float aGap = colorAGap * opacity;
-    
-  int dottedLine = int(styling[in.stylingIndex + 19]);
-    
+  const float aGap = colorAGap * opacity;
+
+  const int dottedLine = int(style->dotted);
+
   if (in.scaledBlur > 0 && t > 0.0 && t < 1.0) {
-    float nonBlurRange = (in.width - in.scaledBlur);
+    const float nonBlurRange = (in.width - in.scaledBlur);
     if (d > nonBlurRange) {
       a *= clamp(1 - max(0.0, d - nonBlurRange) / (in.scaledBlur), 0.0, 1.0);
     }
   }
 
   if (dottedLine == 1) {
-    float skew = styling[in.stylingIndex + 20];
+    const float skew = style->dottedSkew;
 
-    half factorToT = (in.width * 2) / lineLength * skew;
-    half dashOffset = (in.width - skew * in.width) / lineLength;
+    const half factorToT = (in.width * 2) / lineLength * skew;
+    const half dashOffset = (in.width - skew * in.width) / lineLength;
 
-    half dashTotalDotted =  2.0 * factorToT;
-    half offset = half(in.lengthPrefix) / lineLength;
-    half startOffsetSegmentDotted = fmod(offset, dashTotalDotted);
-    half pos = t + startOffsetSegmentDotted;
+    const half dashTotalDotted =  2.0 * factorToT;
+    const half offset = half(in.lengthPrefix) / lineLength;
+    const half startOffsetSegmentDotted = fmod(offset, dashTotalDotted);
+    const half pos = t + startOffsetSegmentDotted;
 
-    half intraDashPosDotted = fmod(pos, dashTotalDotted);
+    const half intraDashPosDotted = fmod(pos, dashTotalDotted);
       if ((intraDashPosDotted > 1.0 * factorToT + dashOffset && intraDashPosDotted < dashTotalDotted - dashOffset) ||
                               (length(half2(min(abs(intraDashPosDotted - 0.5 * factorToT), 0.5 * factorToT + dashTotalDotted - intraDashPosDotted) / (0.5 * factorToT + dashOffset), d / in.width)) > 1.0)) {
           discard_fragment();
       }
   } else if(numDash > 0) {
-    float dashArray[4] = { styling[in.stylingIndex + 14],
-                           styling[in.stylingIndex + 15],
-                           styling[in.stylingIndex + 16],
-                           styling[in.stylingIndex + 17] };
+    const float factorToT = (in.width * 2) / lineLength;
+    const float dashTotal = style->dashArray.w * factorToT;
+    const float startOffsetSegment = fmod(in.lengthPrefix / lineLength, dashTotal);
+    const float intraDashPos = fmod(t + startOffsetSegment, dashTotal);
 
-
-    float factorToT = (in.width * 2) / lineLength;
-    float dashTotal = dashArray[3] * factorToT;
-    float startOffsetSegment = fmod(in.lengthPrefix / lineLength, dashTotal);
-    float intraDashPos = fmod(t + startOffsetSegment, dashTotal);
-
-    if ((intraDashPos > dashArray[0] * factorToT && intraDashPos < dashArray[1] * factorToT) ||
-        (intraDashPos > dashArray[2] * factorToT && intraDashPos < dashArray[3] * factorToT)) {
+    if ((intraDashPos > style->dashArray.x * factorToT && intraDashPos < style->dashArray.y * factorToT) ||
+        (intraDashPos > style->dashArray.z * factorToT && intraDashPos < style->dashArray.w * factorToT)) {
 
       if(aGap == 0) {
         discard_fragment();
       }
 
-      return float4(styling[in.stylingIndex + 5],
-                    styling[in.stylingIndex + 6],
-                    styling[in.stylingIndex + 7],
-                    1.0) * aGap;
+      return float4(style->gapColor.rgb, 1.0) * aGap;
     }
   }
 
@@ -302,8 +323,5 @@ lineGroupFragmentShader(LineVertexOut in [[stage_in]],
     discard_fragment();
   }
 
-  return float4(styling[in.stylingIndex + 1],
-                styling[in.stylingIndex + 2],
-                styling[in.stylingIndex + 3],
-                1.0) * a;
+  return float4(style->color.rgb, 1.0) * a;
 }

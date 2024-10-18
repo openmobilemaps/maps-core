@@ -26,6 +26,7 @@
 #include "SpriteData.h"
 #include "SymbolAnimationCoordinator.h"
 #include "Vec2DHelper.h"
+#include "MapCameraInterface.h"
 
 class SymbolAnimationCoordinator;
 
@@ -53,13 +54,14 @@ public:
                                       std::shared_ptr<SymbolAnimationCoordinator> animationCoordinator,
                                       const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager,
                                       double dpFactor,
-                                      bool is3d);
+                                      bool is3d,
+                                      const Vec3D &tileOrigin);
 
     int getCharacterCount();
 
     void setupProperties(std::vector<float> &textureCoordinates, std::vector<uint16_t> &styleIndices, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier);
 
-    void updateProperties(std::vector<float> &positions, std::vector<float> &referencePositions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const bool collides, const double rotation, const float alpha, const bool isCoordinateOwner, long long now, const Vec2I &viewportSize);
+    void updateProperties(std::vector<float> &positions, std::vector<float> &referencePositions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const bool collides, const double rotation, const float alpha, const bool isCoordinateOwner, long long now, const Vec2I &viewportSize, const std::shared_ptr<MapCameraInterface>& camera);
 
     std::shared_ptr<FontLoaderResult> getFont() {
         return fontResult;
@@ -73,11 +75,17 @@ public:
     bool isOpaque = true;
 
     Vec2D dimensions = Vec2D(0.0, 0.0);
+    Vec3D tileOrigin = Vec3D(0,0,0);
+
 private:
 
+    void setupCamera(const std::shared_ptr<MapCameraInterface> &camera);
+
+    void writePosition(const double x, const double y, const size_t offset, std::vector<float> &buffer);
+
     void updatePropertiesPoint(std::vector<float> &positions, std::vector<float> &referencePositions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, const Vec2I &viewportSize);
-    double updatePropertiesLine(std::vector<float> &positions, std::vector<float> &referencePositions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, const Vec2I &viewportSize);
-    
+    double updatePropertiesLine(std::vector<float> &positions, std::vector<float> &referencePositions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, const Vec2I &viewportSize, const std::shared_ptr<MapCameraInterface>& camera);
+
     bool isStyleStateDependant = true;
     double lastZoomEvaluation = -1;
     void evaluateStyleProperties(const double zoomIdentifier);
@@ -90,8 +98,14 @@ private:
         return Vec2D(s.x + (e.x - s.x) * index.second, s.y + (e.y - s.y) * index.second);
     }
 
+    inline Vec2D screenPointAtIndex(const std::pair<int, double> &index) {
+        const auto &s = screenLineCoordinates[index.first];
+        const auto &e = screenLineCoordinates[index.first + 1 < renderLineCoordinatesCount ? (index.first + 1) : index.first];
+        return Vec2D(s.x + (e.x - s.x) * index.second, s.y + (e.y - s.y) * index.second);
+    }
+
     inline std::pair<int, double> indexAtDistance(const std::pair<int, double> &index, double distance, const std::optional<Vec2D> &indexCoord) {
-        auto current = indexCoord ? *indexCoord : pointAtIndex(index, true);
+        auto current = is3d ? screenPointAtIndex(index) : (indexCoord ? *indexCoord : pointAtIndex(index, true));
         auto currentIndex = index;
         auto dist = std::abs(distance);
 
@@ -99,7 +113,7 @@ private:
             auto start = std::min(index.first + 1, (int)renderLineCoordinatesCount - 1);
 
             for(int i = start; i < renderLineCoordinatesCount; i++) {
-                const auto &next = renderLineCoordinates.at(i);
+                const auto &next = screenLineCoordinates[i];
 
                 const double d = Vec2DHelper::distance(current, Vec2D(next.x, next.y));
 
@@ -116,7 +130,7 @@ private:
             auto start = index.first;
 
             for(int i = start; i >= 0; i--) {
-                const auto &next = renderLineCoordinates.at(i);
+                const auto &next = screenLineCoordinates[i];
 
                 const auto d = Vec2DHelper::distance(current, Vec2D(next.x, next.y));
 
@@ -157,6 +171,7 @@ private:
     const std::shared_ptr<FontLoaderResult> fontResult;
 
     Coord referencePoint = Coord(0,0,0,0);
+    Coord referencePointScreen = Coord(0,0,0,0);
     float referenceSize;
 
 
@@ -178,6 +193,7 @@ private:
 
     size_t renderLineCoordinatesCount;
     std::vector<Coord> renderLineCoordinates;
+    std::vector<Coord> screenLineCoordinates;
     std::optional<std::vector<Coord>> lineCoordinates;
 
     double textSize = 0;
@@ -200,4 +216,5 @@ private:
 
     double dpFactor = 1.0;
     bool is3d;
+    int positionSize;
 };

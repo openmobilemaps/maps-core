@@ -9,6 +9,7 @@
  */
 
 import Metal
+import OSLog
 
 public enum PipelineDescriptorFactory {
     public static func pipelineDescriptor(vertexDescriptor: MTLVertexDescriptor,
@@ -120,6 +121,7 @@ public enum PipelineType: String, CaseIterable, Codable {
     case alphaShader
     case alphaInstancedShader
     case lineGroupShader
+    case unitSphereLineGroupShader
     case polygonGroupShader
     case polygonStripedGroupShader
     case polygonPatternGroupShader
@@ -132,15 +134,10 @@ public enum PipelineType: String, CaseIterable, Codable {
     case rasterShader
     case stretchShader
     case stretchInstancedShader
-    case icosahedronColorShader
-    case unitSphereRasterShader
     case unitSphereAlphaShader
-    case unitSphereColorShader
     case unitSphereRoundColorShader
     case unitSphereAlphaInstancedShader
     case unitSphereTextInstancedShader
-    case unitSphereLineGroupShader
-    case unitSpherePolygonGroupShader
     case sphereEffectShader
 
     var label: String {
@@ -148,12 +145,12 @@ public enum PipelineType: String, CaseIterable, Codable {
             case .alphaShader: return "Alpha shader with texture"
             case .alphaInstancedShader: return "Alpha instanced shader with texture"
             case .lineGroupShader: return "Line Group shader"
+            case .unitSphereLineGroupShader: return "Unit sphere line Group shader"
             case .polygonGroupShader: return "Polygon Group shader"
             case .polygonStripedGroupShader: return "Polygon Group (striped) shader"
             case .polygonPatternGroupShader: return "Polygon Group Pattern shader"
             case .polygonPatternFadeInGroupShader: return "Polygon Group Pattern (fade in) shader"
             case .colorShader: return "Color shader"
-            case .unitSphereColorShader: return "Unit Sphere Color shader"
             case .roundColorShader: return "Round color shader"
             case .clearStencilShader: return "Clear stencil shader"
             case .textShader: return "Text shader"
@@ -161,14 +158,10 @@ public enum PipelineType: String, CaseIterable, Codable {
             case .rasterShader: return "Raster shader"
             case .stretchShader: return "Stretch shader"
             case .stretchInstancedShader: return "Stretch Instanced shader"
-            case .unitSphereRasterShader: return "Unit Sphere Raster Shader"
-            case .icosahedronColorShader: return "Icosahedron Color Shader"
             case .unitSphereAlphaShader: return "Unit Sphere Alpha shader with texture"
             case .unitSphereRoundColorShader: return "Unit Sphere Round color shader"
             case .unitSphereAlphaInstancedShader: return "Unit Sphere Alpha instanced shader with texture"
             case .unitSphereTextInstancedShader: return "Unit Sphere Text Instanced shader"
-            case .unitSphereLineGroupShader: return "Unit Sphere Line Group shader"
-            case .unitSpherePolygonGroupShader: return "Unit Sphere Polygon Group shader"
             case .sphereEffectShader: return "Sphere Effect Shader"
         }
     }
@@ -178,27 +171,23 @@ public enum PipelineType: String, CaseIterable, Codable {
             case .alphaShader: return "baseVertexShader"
             case .alphaInstancedShader: return "alphaInstancedVertexShader"
             case .lineGroupShader: return "lineGroupVertexShader"
+            case .unitSphereLineGroupShader: return "unitSpherelineGroupVertexShader"
             case .polygonGroupShader: return "polygonGroupVertexShader"
             case .polygonStripedGroupShader: return "polygonStripedGroupVertexShader"
             case .polygonPatternGroupShader: return "polygonPatternGroupVertexShader"
             case .polygonPatternFadeInGroupShader: return "polygonPatternGroupVertexShader"
-            case .colorShader: return "baseVertexShader"
+            case .colorShader: return "colorVertexShader"
             case .roundColorShader: return "colorVertexShader"
             case .clearStencilShader: return "stencilClearVertexShader"
             case .textShader: return "textVertexShader"
             case .textInstancedShader: return "textInstancedVertexShader"
-            case .rasterShader: return "rasterVertexShader"
+            case .rasterShader: return "baseVertexShader"
             case .stretchShader: return "stretchVertexShader"
             case .stretchInstancedShader: return "stretchInstancedVertexShader"
-            case .unitSphereRasterShader: return "unitSphereBaseVertexShader"
-            case .unitSphereAlphaShader: return "unitSphereBaseVertexShader"
-            case .unitSphereColorShader: return "unitSphereBaseVertexShader"
-            case .icosahedronColorShader: return "icosahedronVertexShader"
-            case .unitSphereRoundColorShader: return "unitSphereBaseVertexShader"
+            case .unitSphereAlphaShader: return "baseVertexShader"
+            case .unitSphereRoundColorShader: return "baseVertexShader"
             case .unitSphereAlphaInstancedShader: return "unitSphereAlphaInstancedVertexShader"
             case .unitSphereTextInstancedShader: return "unitSphereTextInstancedVertexShader"
-            case .unitSphereLineGroupShader: return "unitSphereLineGroupVertexShader"
-            case .unitSpherePolygonGroupShader: return "unitSpherePolygonGroupVertexShader"
             case .sphereEffectShader: return "baseVertexShader"
         }
     }
@@ -208,12 +197,12 @@ public enum PipelineType: String, CaseIterable, Codable {
             case .alphaShader: return "baseFragmentShader"
             case .alphaInstancedShader: return "alphaInstancedFragmentShader"
             case .lineGroupShader: return "lineGroupFragmentShader"
+            case .unitSphereLineGroupShader: return "lineGroupFragmentShader"
             case .polygonGroupShader: return "polygonGroupFragmentShader"
             case .polygonStripedGroupShader: return "polygonGroupStripedFragmentShader"
             case .polygonPatternGroupShader: return "polygonPatternGroupFragmentShader"
             case .polygonPatternFadeInGroupShader: return "polygonPatternGroupFadeInFragmentShader"
             case .colorShader: return "colorFragmentShader"
-            case .unitSphereColorShader: return "colorFragmentShader"
             case .roundColorShader: return "roundColorFragmentShader"
             case .clearStencilShader: return "stencilClearFragmentShader"
             case .textShader: return "textFragmentShader"
@@ -221,47 +210,58 @@ public enum PipelineType: String, CaseIterable, Codable {
             case .rasterShader: return "rasterFragmentShader"
             case .stretchShader: return "stretchFragmentShader"
             case .stretchInstancedShader: return "stretchInstancedFragmentShader"
-            case .unitSphereRasterShader: return "rasterFragmentShader"
             case .unitSphereAlphaShader: return "baseFragmentShader"
-            case .icosahedronColorShader: return "icosahedronFragmentShader"
             case .unitSphereRoundColorShader: return "roundColorFragmentShader"
             case .unitSphereAlphaInstancedShader: return "unitSphereAlphaInstancedFragmentShader"
             case .unitSphereTextInstancedShader: return "unitSphereTextInstancedFragmentShader"
-            case .unitSphereLineGroupShader: return "lineGroupFragmentShader"
-            case .unitSpherePolygonGroupShader: return "polygonGroupFragmentShader"
             case .sphereEffectShader: return "sphereEffectFragmentShader"
         }
     }
 
     var vertexDescriptor: MTLVertexDescriptor {
         switch self {
-            case .lineGroupShader, .unitSphereLineGroupShader:
+            case .lineGroupShader:
                 return LineVertex.descriptor
-            case .polygonGroupShader, .polygonPatternGroupShader, .polygonPatternFadeInGroupShader, .polygonStripedGroupShader, .unitSpherePolygonGroupShader:
-                return PolygonVertex.descriptor
-            case .rasterShader, .unitSphereRasterShader, .clearStencilShader, .alphaShader, .colorShader, .unitSphereAlphaShader, .unitSphereColorShader, .unitSphereRoundColorShader, .sphereEffectShader:
+            case .unitSphereLineGroupShader:
+                return LineVertex.descriptorUnitSphere
+            case .polygonGroupShader,
+                 .polygonPatternGroupShader,
+                 .polygonPatternFadeInGroupShader,
+                 .polygonStripedGroupShader,
+                 .colorShader:
                 return Vertex3D.descriptor
-            case.icosahedronColorShader:
-                return PolygonVertex.descriptor
+            case .rasterShader,
+                 .clearStencilShader,
+                 .alphaShader,
+                 .unitSphereAlphaShader,
+                 .unitSphereRoundColorShader,
+                 .sphereEffectShader:
+                return Vertex3DTexture.descriptor
             default:
                 return Vertex.descriptor
         }
     }
 }
 
-public class PipelineLibrary: StaticMetalLibrary<String, MTLRenderPipelineState>, @unchecked Sendable{
+public class PipelineLibrary: StaticMetalLibrary<String, MTLRenderPipelineState>, @unchecked Sendable {
     init(device: MTLDevice) throws {
         try super.init(Pipeline.allCases.map(\.json)) { key -> MTLRenderPipelineState in
-            guard let pipeline = Pipeline(json: key) else {
-                throw LibraryError.invalidKey
+            do {
+                guard let pipeline = Pipeline(json: key) else {
+                    throw LibraryError.invalidKey
+                }
+                let pipelineDescriptor = PipelineDescriptorFactory.pipelineDescriptor(pipeline: pipeline)
+                return try device.makeRenderPipelineState(descriptor: pipelineDescriptor)
+            } catch {
+                // Log the JSON (key) and the error
+                Logger().error("Error creating pipeline for JSON: \(key, privacy: .public) error: \(error, privacy: .public)")
+                throw error
             }
-            let pipelineDescriptor = PipelineDescriptorFactory.pipelineDescriptor(pipeline: pipeline)
-            return try device.makeRenderPipelineState(descriptor: pipelineDescriptor)
         }
     }
 }
 
-extension MCBlendMode: Codable, CaseIterable {
+extension MCBlendMode: Codable, @retroactive CaseIterable {
     public static var allCases: [MCBlendMode] {
         [.NORMAL, .MULTIPLY]
     }
