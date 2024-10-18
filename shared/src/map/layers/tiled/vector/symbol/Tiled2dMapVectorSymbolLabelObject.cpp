@@ -566,7 +566,7 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
             writePosition(rX + dxRot, rY + dyRot, countOffset, positions);
         }
 
-        auto maxScale = (scaleXH > scaleYH) ? scaleXH : scaleYH;
+        auto maxScale = ((scales[2 * countOffset + 0] / 2.0) > (scales[2 * countOffset + 1] / 2.0)) ? (scales[2 * countOffset + 0] / 2.0) : (scales[2 * countOffset + 1] / 2.0);
         maxSymbolRadius = (maxSymbolRadius > maxScale) ? maxSymbolRadius : maxScale;
 
         const double x1 = dx + cp.x - scaleXH;
@@ -793,12 +793,15 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
 
                     scales[2 * (countOffset + centerPositionSize) + 0] = sx * ((1 - f) * c + f);
                     scales[2 * (countOffset + centerPositionSize) + 1] = sy * ((1 - f) + f * c);
+
+                    maxSymbolRadius = std::max(maxSymbolRadius, std::max(charSizeScaled.x * 0.5, charSizeScaled.y * 0.5));
                 } else {
                     scales[2 * (countOffset + centerPositionSize) + 0] = charSize.x;
                     scales[2 * (countOffset + centerPositionSize) + 1] = charSize.y;
+
+                    maxSymbolRadius = std::max(maxSymbolRadius, std::max(charSize.x * 0.5, charSize.y * 0.5));
                 }
 
-                maxSymbolRadius = std::max(maxSymbolRadius, std::max(charSize.x * 0.5, charSize.y * 0.5));
                 rotations[countOffset + centerPositionSize] = -angleDeg;
 
                 centerPositions.push_back(Vec2DHelper::midpoint(Vec2DHelper::midpoint(quad.bottomLeft, quad.bottomRight), Vec2DHelper::midpoint(quad.topLeft, quad.topRight)));
@@ -856,9 +859,9 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
             const auto &cp = centerPositions[i];
             double newX = cp.x;
             double newY = cp.y;
-            if (i != count - 1 && std::sqrt((newX - lastCirclePosition.x) * (newX - lastCirclePosition.x) +
+            if (i != count - 1 && !is3d && (std::sqrt((newX - lastCirclePosition.x) * (newX - lastCirclePosition.x) +
                                             (newY - lastCirclePosition.y) * (newY - lastCirclePosition.y))
-                                  <= (maxSymbolRadius * 2.0) * collisionDistanceBias) {
+                                  <= (maxSymbolRadius * 2.0) * collisionDistanceBias)) {
                 continue;
             }
             circles.emplace_back(newX, newY, maxSymbolRadius + scaledTextPadding);

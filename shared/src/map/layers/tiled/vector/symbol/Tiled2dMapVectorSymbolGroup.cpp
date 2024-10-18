@@ -440,7 +440,7 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
         }
     }
     if (instanceCounts.icons + instanceCounts.stretchedIcons + instanceCounts.textCharacters > 0) {
-        auto shader = strongMapInterface->getShaderFactory()->createPolygonGroupShader(false);
+        auto shader = strongMapInterface->getShaderFactory()->createPolygonGroupShader(false, is3d);
         auto object = strongMapInterface->getGraphicsObjectFactory()->createPolygonGroup(shader->asShaderProgramInterface());
         boundingBoxLayerObject = std::make_shared<PolygonGroup2dLayerObject>(strongMapInterface->getCoordinateConverterHelper(),
                                                                              object, shader);
@@ -683,19 +683,49 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
                 }
 #endif
 
+                auto camera = mapInterface.lock()->getCamera();
+                auto renderingContext = mapInterface.lock()->getRenderingContext();
+
+                auto viewport = renderingContext->getViewportSize();
+                auto angle = camera->getRotation();
+                auto origin = camera->asCameraInterface()->getOrigin();
+                auto vpMatrix = *camera->getLastVpMatrixD();
+
+
+                double halfWidth = viewport.x / 2.0f;
+                double halfHeight = viewport.y / 2.0f;
+                double sinNegGridAngle(std::sin(-angle * M_PI / 180.0));
+                double cosNegGridAngle(std::cos(-angle * M_PI / 180.0));
+                std::vector<double> temp1 = {0, 0, 0, 0}, temp2 = {0, 0, 0, 0};
+                CollisionUtil::CollisionEnvironment env(vpMatrix, is3d, temp1, temp2, halfWidth, halfHeight, sinNegGridAngle, cosNegGridAngle, origin);
 
                 const auto &circles = object->getMapAlignedBoundingCircles(zoomIdentifier, false, true);
                 if (labelRotationAlignment == SymbolAlignment::MAP && circles && !circles->empty()) {
+
                     for (const auto &circle: *circles) {
+                        auto projectedCircle = CollisionUtil::getProjectedCircle(circle, env);
+                        if (!projectedCircle) {
+                            continue;
+                        }
+
+                        if (projectedCircle->x > viewport.x || projectedCircle->y > viewport.y || projectedCircle->x < 0 || projectedCircle->y < 0) {
+                            continue;
+                        }
+
+                        projectedCircle->x = ((projectedCircle->x / viewport.x) * 2.0) - 1.0;
+                        projectedCircle->y = ((projectedCircle->y / viewport.y) * 2.0) - 1.0;
+                        float aspectRatio = float(viewport.x) / float(viewport.y);
+                        projectedCircle->radius = projectedCircle->radius / halfWidth;
+
                         const size_t numCirclePoints = 8;
                         std::vector<Coord> coords;
                         coords.emplace_back(CoordinateSystemIdentifiers::RENDERSYSTEM(),
-                                            circle.x, circle.y, 0.0);
+                                            projectedCircle->x, projectedCircle->y, 0.0);
                         for (size_t i = 0; i < numCirclePoints; i++) {
                             float angle = i * (2 * M_PI / numCirclePoints);
                             coords.emplace_back(CoordinateSystemIdentifiers::RENDERSYSTEM(),
-                                                circle.x + circle.radius * std::cos(angle),
-                                                circle.y + circle.radius * std::sin(angle),
+                                                projectedCircle->x + projectedCircle->radius * std::cos(angle),
+                                                projectedCircle->y + projectedCircle->radius * aspectRatio * std::sin(angle),
                                                 0.0);
 
                             indices.push_back(currentVertexIndex);
@@ -709,42 +739,38 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
                 } else {
                     const auto &viewportAlignedBox = object->getViewportAlignedBoundingBox(zoomIdentifier, false, true);
                     if (viewportAlignedBox) {
-                        // Align rectangle to viewport
-                        const double sinAngle = sin(-rotation * M_PI / 180.0);
-                        const double cosAngle = cos(-rotation * M_PI / 180.0);
-                        Vec2D rotWidth = Vec2D(viewportAlignedBox->width * cosAngle, viewportAlignedBox->width * sinAngle);
-                        Vec2D rotHeight = Vec2D(-viewportAlignedBox->height * sinAngle, viewportAlignedBox->height * cosAngle);
-                        Vec2D rotOrigin = Vec2DHelper::rotate(Vec2D(viewportAlignedBox->x, viewportAlignedBox->y),
-                                                              Vec2D(viewportAlignedBox->anchorX, viewportAlignedBox->anchorY),
-                                                              -rotation);
-                        vertices.push_back({std::vector<::Coord>{
-                                Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(),
-                                      rotOrigin.x, rotOrigin.y,0.0),
-                                Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(),
-                                      rotOrigin.x + rotWidth.x,rotOrigin.y + rotWidth.y, 0.0),
-                                Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(),
-                                      rotOrigin.x + rotWidth.x + rotHeight.x,rotOrigin.y + rotWidth.y + rotHeight.y, 0.0),
-                                Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(),
-                                      rotOrigin.x + rotHeight.x,rotOrigin.y + rotHeight.y, 0.0),
-                        }, object->animationCoordinator->isColliding() ? 1 : 0});
-                        indices.push_back(currentVertexIndex);
-                        indices.push_back(currentVertexIndex + 1);
-                        indices.push_back(currentVertexIndex + 2);
+                        auto projectedRectangle = CollisionUtil::getProjectedRectangle(*viewportAlignedBox, env);
+                        if (projectedRectangle) {
+                            if (projectedRectangle->x > viewport.x || projectedRectangle->y > viewport.y || projectedRectangle->x < 0 || projectedRectangle->y < 0) {
+                                continue;
+                            }
+                            projectedRectangle->x = ((projectedRectangle->x / viewport.x) * 2.0) - 1.0;
+                            projectedRectangle->y = ((projectedRectangle->y / viewport.y) * 2.0) - 1.0;
+                            projectedRectangle->width = (projectedRectangle->width / halfWidth);
+                            projectedRectangle->height = (projectedRectangle->height / halfHeight);
 
-                        indices.push_back(currentVertexIndex);
-                        indices.push_back(currentVertexIndex + 3);
-                        indices.push_back(currentVertexIndex + 2);
+                            vertices.push_back({std::vector<::Coord>{
+                                    Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(), projectedRectangle->x, projectedRectangle->y,0.0),
+                                    Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(), projectedRectangle->x + projectedRectangle->width, projectedRectangle->y, 0.0),
+                                    Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(), projectedRectangle->x + projectedRectangle->width, projectedRectangle->y + projectedRectangle->height, 0.0),
+                                    Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(), projectedRectangle->x, projectedRectangle->y + projectedRectangle->height, 0.0),
+                            }, object->animationCoordinator->isColliding() ? 1 : 0});
 
-                        currentVertexIndex += 4;
+                            indices.push_back(currentVertexIndex);
+                            indices.push_back(currentVertexIndex + 1);
+                            indices.push_back(currentVertexIndex + 2);
+
+                            indices.push_back(currentVertexIndex);
+                            indices.push_back(currentVertexIndex + 2);
+                            indices.push_back(currentVertexIndex + 3);
+
+                            currentVertexIndex += 4;
+                        }
                     }
                 }
 
-                if (currentVertexIndex == 0) {
-                    return;
-                }
-
                 boundingBoxLayerObject->getPolygonObject()->clear();
-                boundingBoxLayerObject->setVertices(vertices, indices);
+                boundingBoxLayerObject->setVertices(vertices, indices, false);
                 boundingBoxLayerObject->getPolygonObject()->setup(mapInterface.lock()->getRenderingContext());
             }
         }
@@ -902,10 +928,12 @@ std::vector<std::shared_ptr< ::RenderObjectInterface>> Tiled2dMapVectorSymbolGro
         renderObjects.push_back(std::make_shared<RenderObject>(textObject->asGraphicsObject()));
     }
 
+#ifdef DRAW_TEXT_BOUNDING_BOX
     auto boundingBoxLayerObject = this->boundingBoxLayerObject;
     if (boundingBoxLayerObject) {
-        renderObjects.push_back(std::make_shared<RenderObject>(boundingBoxLayerObject->getPolygonObject()));
+        renderObjects.push_back(std::make_shared<RenderObject>(boundingBoxLayerObject->getPolygonObject(), true));
     }
+#endif
 
     return renderObjects;
 }

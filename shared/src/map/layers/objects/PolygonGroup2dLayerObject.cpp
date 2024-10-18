@@ -25,25 +25,56 @@ void PolygonGroup2dLayerObject::update() {}
 std::vector<std::shared_ptr<RenderConfigInterface>> PolygonGroup2dLayerObject::getRenderConfig() { return {renderConfig}; }
 
 
-void PolygonGroup2dLayerObject::setVertices(const std::vector<std::tuple<std::vector<::Coord>, int>> & vertices, const std::vector<uint16_t> & indices) {
-
+void PolygonGroup2dLayerObject::setVertices(const std::vector<std::tuple<std::vector<::Coord>, int>> & vertices, const std::vector<uint16_t> & indices, bool is3d) {
+    float avgX = 0.0f, avgY = 0.0f, avgZ = 0.0f;
+    size_t totalPoints = 0;
     std::vector<float> renderVertices;
 
-    for (auto const &v: vertices) {
+    // First loop: Convert to render system, accumulate averages, and store render coordinates
+    for (auto const &v : vertices) {
         float s = (float)std::get<1>(v);
 
-        for (auto const &mapCoord: std::get<0>(v)) {
-            auto renderCoord = conversionHelper->convertToRenderSystem(mapCoord);
-            renderVertices.push_back(renderCoord.x); // PRECISION-ISSUE TODO
+        for (auto const &mapCoord : std::get<0>(v)) {
+            // Convert to render system once
+            const auto renderCoord = conversionHelper->convertToRenderSystem(mapCoord);
+
+            // Accumulate for averaging
+            avgX += renderCoord.x;
+            avgY += renderCoord.y;
+            avgZ += renderCoord.z;
+            totalPoints += 1;
+
+            // Store the render coordinates temporarily in renderVertices
+            renderVertices.push_back(renderCoord.x);
             renderVertices.push_back(renderCoord.y);
-            renderVertices.push_back(s);
+            renderVertices.push_back(renderCoord.z);
+            renderVertices.push_back(s); // Append style or any extra data
         }
+    }
+
+    // Calculate the average (origin)
+    if (totalPoints > 0) {
+        avgX /= totalPoints;
+        avgY /= totalPoints;
+        avgZ /= totalPoints;
+    }
+
+    // Adjust the stored render coordinates by subtracting the average (origin)
+    for (size_t i = 0; i < renderVertices.size(); i += 4) { // 4 values: x, y, z, s
+        double x = renderVertices[i];
+        double y = renderVertices[i + 1];
+        double z = renderVertices[i + 2];
+
+        // Adjust the coordinates by subtracting the average
+        renderVertices[i]     = is3d ? 1.0 * sin(y) * cos(x) - avgX : x - avgX;
+        renderVertices[i + 1] = is3d ? 1.0 * cos(y) - avgY : y - avgY;
+        renderVertices[i + 2] = is3d ? -1.0 * sin(y) * sin(x) - avgZ : 0.0;
     }
 
     auto i = SharedBytes((int64_t)indices.data(), (int32_t)indices.size(), (int32_t)sizeof(uint16_t));
     auto v = SharedBytes((int64_t)renderVertices.data(), (int32_t)renderVertices.size(), (int32_t)sizeof(float));
     
-    polygon->setVertices(v, i, Vec3D(0, 0, 0)); // PRECISION-ISSUE TODO
+    polygon->setVertices(v, i, Vec3D(avgX, avgY, avgZ));
 }
 
 void PolygonGroup2dLayerObject::setVertices(const std::vector<float> &verticesBuffer,

@@ -757,14 +757,14 @@ bool Tiled2dMapVectorSourceSymbolDataManager::onClickConfirmed(const std::unorde
 
     double rotation = camera->getRotation();
     auto viewportSize = renderingContext->getViewportSize();
-    const std::vector<float> vpMatrix = *camera->getLastVpMatrix();
+    const std::vector<double> vpMatrix = *camera->getLastVpMatrixD();
     const bool is3d = mapInterface->is3d();
-    std::vector<float> temp1 = {0.f, 0.f, 0.f, 0.f};
-    std::vector<float> temp2 = {0.f, 0.f, 0.f, 0.f};
-    const float halfWidth = viewportSize.x / 2.0;
-    const float halfHeight = viewportSize.y / 2.0;
-    const float sinNegGridAngle = std::sin(rotation * M_PI / 180.0);
-    const float cosNegGridAngle = std::cos(rotation * M_PI / 180.0);
+    std::vector<double> temp1 = {0.f, 0.f, 0.f, 0.f};
+    std::vector<double> temp2 = {0.f, 0.f, 0.f, 0.f};
+    const double halfWidth = viewportSize.x / 2.0;
+    const double halfHeight = viewportSize.y / 2.0;
+    const double sinNegGridAngle = std::sin(rotation * M_PI / 180.0);
+    const double cosNegGridAngle = std::cos(rotation * M_PI / 180.0);
     auto const origin = camera->asCameraInterface()->getOrigin();
 
     auto collisionEnvironment = CollisionUtil::CollisionEnvironment(vpMatrix, is3d, temp1, temp2, halfWidth, halfHeight, sinNegGridAngle, cosNegGridAngle, origin);

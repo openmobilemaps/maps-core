@@ -446,9 +446,9 @@ std::tuple<std::vector<float>, std::vector<double>, Vec3D> MapCamera3d::getVpMat
     std::vector<double> newInverseMatrix(16, 0.0);
     gluInvertMatrix(newVpMatrix, newInverseMatrix);
 
-    std::vector<float> newVpMatrixF = convertToFloat(newVpMatrix);
-    std::vector<float> newProjectionMatrixF = convertToFloat(newProjectionMatrix);
-    std::vector<float> newViewMatrixF = convertToFloat(newViewMatrix);
+    std::vector<float> newVpMatrixF = VectorHelper::convertToFloat(newVpMatrix);
+    std::vector<float> newProjectionMatrixF = VectorHelper::convertToFloat(newProjectionMatrix);
+    std::vector<float> newViewMatrixF = VectorHelper::convertToFloat(newViewMatrix);
 
 
     if (updateVariables) {
@@ -475,11 +475,16 @@ Vec3D MapCamera3d::getOrigin() {
 
 // Funktion zur Berechnung der Koeffizienten der projizierten Ellipse
 std::vector<double> MapCamera3d::computeEllipseCoefficients() {
-    std::vector<double> tmp = clone(vpMatrixD);
+    std::vector<double> tmp = VectorHelper::clone(vpMatrixD);
     MatrixD::translateM(tmp, 0, -origin.x, -origin.y, -origin.z);
     std::vector<double> newInverseMatrix(16, 0.0);
     gluInvertMatrix(tmp, newInverseMatrix);
     return newInverseMatrix;
+}
+
+std::optional<std::vector<double>> MapCamera3d::getLastVpMatrixD() {
+    std::lock_guard<std::recursive_mutex> lock(vpDataMutex);
+    return VectorHelper::clone(vpMatrixD);
 }
 
 std::optional<std::vector<float>> MapCamera3d::getLastVpMatrix() {
@@ -639,8 +644,8 @@ void MapCamera3d::notifyListeners(const int &listenerType) {
     for (auto listener : listeners) {
         if (listenerType & (ListenerType::BOUNDS | ListenerType::CAMERA_MODE)) {
 
-            std::vector<float> viewMatrixF = clone(viewMatrix);
-            std::vector<float> projectionMatrixF = clone(projectionMatrix);
+            std::vector<float> viewMatrixF = VectorHelper::clone(viewMatrix);
+            std::vector<float> projectionMatrixF = VectorHelper::clone(projectionMatrix);
 
             listener->onCameraChange(viewMatrixF, projectionMatrixF, origin, verticalFov, horizontalFov, width, height, focusPointAltitude, getCenterPosition(), getZoom(), getCameraMode());
         }

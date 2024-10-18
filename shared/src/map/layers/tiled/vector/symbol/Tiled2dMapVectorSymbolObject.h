@@ -85,9 +85,9 @@ public:
     double symbolSortKey;
     const size_t symbolTileIndex;
 
-    std::optional<CollisionRectF> getViewportAlignedBoundingBox(double zoomIdentifier, bool considerSymbolSpacing, bool considerOverlapFlag);
+    std::optional<CollisionRectD> getViewportAlignedBoundingBox(double zoomIdentifier, bool considerSymbolSpacing, bool considerOverlapFlag);
 
-    std::optional<std::vector<CollisionCircleF>> getMapAlignedBoundingCircles(double zoomIdentifier, bool considerSymbolSpacing, bool considerOverlapFlag);
+    std::optional<std::vector<CollisionCircleD>> getMapAlignedBoundingCircles(double zoomIdentifier, bool considerSymbolSpacing, bool considerOverlapFlag);
 
     bool getIsOpaque();
 

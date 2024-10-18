@@ -190,6 +190,8 @@ map_camera_interface = interface +c {
 
     as_camera_interface(): camera_interface;
 
+    get_last_vp_matrix_d() : optional<list<f64>>;
+
     get_last_vp_matrix() : optional<list<f32>>;
     get_last_vp_matrix_view_bounds() : optional<rect_coord>;
     get_last_vp_matrix_rotation() : optional<f32>;

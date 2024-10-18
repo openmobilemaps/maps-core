@@ -20,6 +20,7 @@
 #include "Vec2DHelper.h"
 #include "Vec2FHelper.h"
 #include "Logger.h"
+#include "VectorHelper.h"
 
 #define DEFAULT_ANIM_LENGTH 300
 #define ROTATION_THRESHOLD 20
@@ -399,6 +400,13 @@ std::vector<float> MapCamera2d::getVpMatrix() {
     lastVpRotation = currentRotation;
     lastVpZoom = currentZoom;
     return newVpMatrix;
+}
+
+std::optional<std::vector<double>> MapCamera2d::getLastVpMatrixD() {
+    if (!lastVpBounds) {
+        return std::nullopt;
+    }
+    return VectorHelper::convertToDouble(newVpMatrix);
 }
 
 std::optional<std::vector<float>> MapCamera2d::getLastVpMatrix() {

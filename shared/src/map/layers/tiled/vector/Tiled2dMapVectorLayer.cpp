@@ -618,7 +618,7 @@ void Tiled2dMapVectorLayer::update() {
 
             Vec2I viewportSize = renderingContext->getViewportSize();
             float viewportRotation = camera->getRotation();
-            std::optional<std::vector<float>> vpMatrix = camera->getLastVpMatrix();
+            std::optional<std::vector<double>> vpMatrix = camera->getLastVpMatrixD();
             if (!vpMatrix) return;
             for (const auto &[source, sourceDataManager]: symbolSourceDataManagers) {
                 bool a = sourceDataManager.syncAccess([&now](const auto &manager) {

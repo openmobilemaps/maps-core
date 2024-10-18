@@ -845,12 +845,12 @@ void Tiled2dMapVectorSymbolObject::updateTextProperties(std::vector<float> &posi
     lastStretchIconUpdateScaleFactor = -1;
 }
 
-std::optional<CollisionRectF> Tiled2dMapVectorSymbolObject::getViewportAlignedBoundingBox(double zoomIdentifier, bool considerSymbolSpacing, bool considerOverlapFlag) {
+std::optional<CollisionRectD> Tiled2dMapVectorSymbolObject::getViewportAlignedBoundingBox(double zoomIdentifier, bool considerSymbolSpacing, bool considerOverlapFlag) {
     double minX = std::numeric_limits<double>::max(), maxX = std::numeric_limits<double>::lowest(), minY = std::numeric_limits<double>::max(), maxY = std::numeric_limits<double>::lowest();
     bool hasBox = false;
 
-    float anchorX = renderCoordinate.x;
-    float anchorY = renderCoordinate.y;
+    double anchorX = renderCoordinate.x;
+    double anchorY = renderCoordinate.y;
 
     if ((!considerOverlapFlag || !textAllowOverlap) && labelObject && labelObject->boundingBoxViewportAligned.has_value()) {
         minX = std::min(minX, std::min(labelObject->boundingBoxViewportAligned->x, labelObject->boundingBoxViewportAligned->x + labelObject->boundingBoxViewportAligned->width));
@@ -888,11 +888,11 @@ std::optional<CollisionRectF> Tiled2dMapVectorSymbolObject::getViewportAlignedBo
         contentHash = this->contentHash;
     }
 
-    return CollisionRectF(anchorX, anchorY, minX, minY, maxX - minX, maxY - minY, contentHash, symbolSpacingPx);
+    return CollisionRectD(anchorX, anchorY, minX, minY, maxX - minX, maxY - minY, contentHash, symbolSpacingPx);
 }
 
-std::optional<std::vector<CollisionCircleF>> Tiled2dMapVectorSymbolObject::getMapAlignedBoundingCircles(double zoomIdentifier, bool considerSymbolSpacing, bool considerOverlapFlag) {
-    std::vector<CollisionCircleF> circles;
+std::optional<std::vector<CollisionCircleD>> Tiled2dMapVectorSymbolObject::getMapAlignedBoundingCircles(double zoomIdentifier, bool considerSymbolSpacing, bool considerOverlapFlag) {
+    std::vector<CollisionCircleD> circles;
 
     double symbolSpacingPx = 0;
     size_t contentHash = 0;
@@ -978,7 +978,7 @@ void Tiled2dMapVectorSymbolObject::collisionDetection(const double zoomIdentifie
     bool willCollide = true;
     bool outside = true;
     if (boundingBoxRotationAlignment == SymbolAlignment::VIEWPORT) {
-        std::optional<CollisionRectF> boundingRect = getViewportAlignedBoundingBox(zoomIdentifier, false, true);
+        std::optional<CollisionRectD> boundingRect = getViewportAlignedBoundingBox(zoomIdentifier, false, true);
         // Collide, if no valid boundingRect
         if (boundingRect.has_value()) {
             auto check = collisionGrid->addAndCheckCollisionAlignedRect(*boundingRect);
@@ -989,7 +989,7 @@ void Tiled2dMapVectorSymbolObject::collisionDetection(const double zoomIdentifie
             outside = false;
         }
     } else {
-        std::optional<std::vector<CollisionCircleF>> boundingCircles = getMapAlignedBoundingCircles(zoomIdentifier, textSymbolPlacement != TextSymbolPlacement::POINT, true);
+        std::optional<std::vector<CollisionCircleD>> boundingCircles = getMapAlignedBoundingCircles(zoomIdentifier, textSymbolPlacement != TextSymbolPlacement::POINT, true);
         // Collide, if no valid boundingCircles
         if (boundingCircles.has_value()) {
             auto check = collisionGrid->addAndCheckCollisionCircles(*boundingCircles);
@@ -1014,10 +1014,10 @@ std::optional<std::tuple<Coord, VectorLayerFeatureInfo>> Tiled2dMapVectorSymbolO
 
     if (boundingBoxRotationAlignment == SymbolAlignment::VIEWPORT) {
         
-        std::optional<CollisionRectF> boundingRect = getViewportAlignedBoundingBox(zoomIdentifier, false, true);
+        std::optional<CollisionRectD> boundingRect = getViewportAlignedBoundingBox(zoomIdentifier, false, true);
         if (boundingRect) {
             auto projectedRectangle = CollisionUtil::getProjectedRectangle(*boundingRect, collisionEnvironment);
-            if (CollisionUtil::checkRectCircleCollision(RectD(projectedRectangle.x, projectedRectangle.y, projectedRectangle.width, projectedRectangle.height), clickHitCircle)) {
+            if (projectedRectangle && CollisionUtil::checkRectCircleCollision(RectD(projectedRectangle->x, projectedRectangle->y, projectedRectangle->width, projectedRectangle->height), clickHitCircle)) {
                 return std::make_tuple(coordinate, featureContext->getFeatureInfo());
             }
         }
