@@ -54,7 +54,7 @@ coordinate_system_identifiers = interface +c {
     static from_crs_identifier(identifier: string): i32;
 
     # Use supported coordinate system identifiers defined in this class
-    static unit_to_meter_factor(coordinateSystemIdentifier: i32): f64;
+	static unit_to_meter_factor(coordinate_system_identifier: i32) : f64;
 }
 
 map_coordinate_system = record {
