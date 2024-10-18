@@ -97,7 +97,21 @@ void LineLayer::add(const std::shared_ptr<LineInfoInterface> &line) {
 
     lineObject->setStyle(line->getStyle());
 
-    lineObject->setPositions(line->getCoordinates(), Vec3D(0, 0, 0));// PRECISION-ISSUE TODO
+
+    bool is3d = mapInterface->is3d();
+
+    auto origin = Vec3D(0.0, 0.0, 0.0);
+    const auto& coords = line->getCoordinates();
+
+    if(coords.size() > 0) {
+        Coord renderCoord = mapInterface->getCoordinateConverterHelper()->convertToRenderSystem(coords[0]);
+        double x = is3d ? 1.0 * sin(renderCoord.y) * cos(renderCoord.x) : renderCoord.x;
+        double y = is3d ?  1.0 * cos(renderCoord.y) : renderCoord.y;
+        double z = is3d ? -1.0 * sin(renderCoord.y) * sin(renderCoord.x) : 0.0;
+        origin = Vec3D(x,y,z);
+    }
+
+    lineObject->setPositions(coords, origin);
 
     std::weak_ptr<LineLayer> weakSelfPtr = std::dynamic_pointer_cast<LineLayer>(shared_from_this());
     scheduler->addTask(std::make_shared<LambdaTask>(
