@@ -79,7 +79,7 @@ public:
 
 private:
 
-    void setupCamera(const std::shared_ptr<MapCameraInterface> &camera);
+    void setupCamera(const std::shared_ptr<MapCameraInterface> &camera, const Vec2I& viewportSize);
 
     void writePosition(const double x, const double y, const size_t offset, std::vector<float> &buffer);
 
@@ -194,6 +194,7 @@ private:
     size_t renderLineCoordinatesCount;
     std::vector<Coord> renderLineCoordinates;
     std::vector<Coord> screenLineCoordinates;
+    std::vector<Vec3D> cartesianRenderLineCoordinates;
     std::optional<std::vector<Coord>> lineCoordinates;
 
     double textSize = 0;

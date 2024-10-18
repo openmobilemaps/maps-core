@@ -14,6 +14,7 @@
 #include "SymbolAnimationCoordinator.h"
 #include "Tiled2dMapVectorStyleParser.h"
 #include "fast_atan2.h"
+#include "MapCamera3d.h"
 
 Tiled2dMapVectorSymbolLabelObject::Tiled2dMapVectorSymbolLabelObject(const std::shared_ptr<CoordinateConversionHelperInterface> &converter,
                                                                      const std::shared_ptr<FeatureContext> featureContext,
@@ -148,6 +149,16 @@ Tiled2dMapVectorSymbolLabelObject::Tiled2dMapVectorSymbolLabelObject(const std::
                        [converter](const auto& l) {
             return converter->convertToRenderSystem(l);
         });
+
+        if(is3d) {
+            for(auto& c : renderLineCoordinates) { 
+                double x = c.z * sin(c.y) * cos(c.x);
+                double y = c.z * cos(c.y);
+                double z = -c.z * sin(c.y) * sin(c.x);
+                cartesianRenderLineCoordinates.emplace_back(x, y, z);
+            }
+        }
+        
         screenLineCoordinates = renderLineCoordinates;
         renderLineCoordinatesCount = renderLineCoordinates.size();
     } else {
@@ -281,19 +292,20 @@ void Tiled2dMapVectorSymbolLabelObject::updateProperties(std::vector<float> &pos
             if (rotationAlignment == SymbolAlignment::VIEWPORT) {
                 updatePropertiesPoint(positions, referencePositions, scales, rotations, styles, countOffset, styleOffset, zoomIdentifier, scaleFactor, rotation, viewportSize);
             } else {
-                setupCamera(camera);
+                setupCamera(camera, viewportSize);
                 auto rotatedFactor = updatePropertiesLine(positions, referencePositions, scales, rotations, styles, countOffset, styleOffset, zoomIdentifier, scaleFactor, rotation, viewportSize, camera);
 
                 if(rotatedFactor > 0.5 && lineCoordinates) {
                     std::reverse((*lineCoordinates).begin(), (*lineCoordinates).end());
                     std::reverse(renderLineCoordinates.begin(), renderLineCoordinates.end());
                     std::reverse(screenLineCoordinates.begin(), screenLineCoordinates.end());
+                    std::reverse(cartesianRenderLineCoordinates.begin(), cartesianRenderLineCoordinates.end());
 
                     wasReversed = !wasReversed;
 
                     countOffset -= characterCount;
 
-                    setupCamera(camera);
+                    setupCamera(camera, viewportSize);
                     updatePropertiesLine(positions, referencePositions, scales, rotations, styles, countOffset, styleOffset, zoomIdentifier, scaleFactor, rotation, viewportSize, camera);
                 }
             }
@@ -883,19 +895,26 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
     return diff > 95.0 ? 1.0 : 0.0; // flip with margin to prevent rapid flips
 }
 
-void Tiled2dMapVectorSymbolLabelObject::setupCamera(const std::shared_ptr<MapCameraInterface> &camera) {
-    if(is3d && renderLineCoordinatesCount > 0 && camera != nullptr) {
-        auto &ls = *lineCoordinates;
-        for(size_t i=0; i<ls.size(); ++i) {
-            auto vec2d = camera->screenPosFromCoord(ls[i]);
-            // don't care about systemIdentifier, only used for indexAtPoint
-            screenLineCoordinates[i] = Coord(0, (double)vec2d.x, (double)vec2d.y, (double)0.0);
-        }
+void Tiled2dMapVectorSymbolLabelObject::setupCamera(const std::shared_ptr<MapCameraInterface> &camera, const Vec2I& viewportSize) {
 
-        auto p = camera->screenPosFromCoord(referencePoint);
-        // don't care about systemIdentifier, only used for findReferencePointIndices
-        referencePointScreen = Coord(0, (double)p.x, (double)p.y, (double)0.0);
+    // only needed for 3d text on line rendering
+    if(!is3d || (renderLineCoordinatesCount == 0)) { return; }
+
+    // check if camera is 3d camera
+    auto casted = std::dynamic_pointer_cast<MapCamera3d>(camera);
+    if(!casted) { return; }
+
+    auto &ls = cartesianRenderLineCoordinates;
+    for(size_t i=0; i<ls.size(); ++i) {
+        const auto &vec2d = casted->screenPosFromCartesianCoord(ls[i], viewportSize);
+        // don't care about systemIdentifier, only used for indexAtPoint
+        screenLineCoordinates[i].x = vec2d.x;
+        screenLineCoordinates[i].y = vec2d.y;
     }
+
+    auto p = camera->screenPosFromCoord(referencePoint);
+    // don't care about systemIdentifier, only used for findReferencePointIndices
+    referencePointScreen = Coord(0, (double)p.x, (double)p.y, (double)0.0);
 }
 
 std::pair<int, double> Tiled2dMapVectorSymbolLabelObject::findReferencePointIndices() {

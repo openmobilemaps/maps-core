@@ -174,12 +174,17 @@ class MapCamera3d : public MapCameraInterface,
 
     bool coordIsFarAwayFromFocusPoint(const ::Coord & coord);
 
+    Vec2F screenPosFromCartesianCoord(const Vec3D &coord, const Vec2I &sizeViewport);
+
 protected:
     virtual std::tuple<std::vector<float>, std::vector<double>, Vec3D> getVpMatrix(const Coord &focusCoord, bool updateVariables);
 
     virtual ::Coord coordFromScreenPosition(const std::vector<double> &inverseVPMatrix, const ::Vec2F &posScreen);
 
     virtual ::Coord coordFromScreenPosition(const std::vector<double> &inverseVPMatrix, const ::Vec2F &posScreen, const Vec3D &origin);
+
+    Vec2F screenPosFromCartesianCoord(const std::vector<double> &coord, const Vec2I &sizeViewport);
+
 
     void updateZoom(double zoom);
 

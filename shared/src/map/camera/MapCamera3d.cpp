@@ -1261,7 +1261,20 @@ bool MapCamera3d::gluInvertMatrix(const std::vector<double> &m, std::vector<doub
     Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
     if (validVpMatrix && sizeViewport.x != 0 && sizeViewport.y != 0) {
         auto coordCartesian = convertToCartesianCoordinates(coord);
-        auto projected = projectedPoint(coordCartesian);
+        return screenPosFromCartesianCoord(coordCartesian, sizeViewport);
+    }
+
+    return Vec2F(0.0, 0.0);
+}
+
+Vec2F MapCamera3d::screenPosFromCartesianCoord(const Vec3D &coord, const Vec2I &sizeViewport) {
+    const auto& cc = { coord.x - origin.x, coord.y - origin.y, coord.z - origin.z, 1.0 };
+    return screenPosFromCartesianCoord(cc, sizeViewport);
+}
+
+Vec2F MapCamera3d::screenPosFromCartesianCoord(const std::vector<double> &coord, const Vec2I &sizeViewport) {
+    if(validVpMatrix) {
+        const auto &projected = projectedPoint(coord);
 
         // Map from [-1, 1] to screenPixels, with (0,0) being the top left corner
         double screenXDiffToCenter = projected[0] * sizeViewport.x / 2.0;
