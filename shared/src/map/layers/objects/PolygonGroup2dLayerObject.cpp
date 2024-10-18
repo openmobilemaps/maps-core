@@ -26,7 +26,7 @@ std::vector<std::shared_ptr<RenderConfigInterface>> PolygonGroup2dLayerObject::g
 
 
 void PolygonGroup2dLayerObject::setVertices(const std::vector<std::tuple<std::vector<::Coord>, int>> & vertices, const std::vector<uint16_t> & indices, bool is3d) {
-    float avgX = 0.0f, avgY = 0.0f, avgZ = 0.0f;
+    double avgX = 0.0f, avgY = 0.0f;
     size_t totalPoints = 0;
     std::vector<float> renderVertices;
 
@@ -41,7 +41,6 @@ void PolygonGroup2dLayerObject::setVertices(const std::vector<std::tuple<std::ve
             // Accumulate for averaging
             avgX += renderCoord.x;
             avgY += renderCoord.y;
-            avgZ += renderCoord.z;
             totalPoints += 1;
 
             // Store the render coordinates temporarily in renderVertices
@@ -56,8 +55,11 @@ void PolygonGroup2dLayerObject::setVertices(const std::vector<std::tuple<std::ve
     if (totalPoints > 0) {
         avgX /= totalPoints;
         avgY /= totalPoints;
-        avgZ /= totalPoints;
     }
+
+    double rx = is3d ? 1.0 * sin(avgY) * cos(avgX) : avgX;
+    double ry = is3d ? 1.0 * cos(avgY) : avgY;
+    double rz = is3d ? -1.0 * sin(avgY) * sin(avgX) : 0.0;
 
     // Adjust the stored render coordinates by subtracting the average (origin)
     for (size_t i = 0; i < renderVertices.size(); i += 4) { // 4 values: x, y, z, s
@@ -66,15 +68,15 @@ void PolygonGroup2dLayerObject::setVertices(const std::vector<std::tuple<std::ve
         double z = renderVertices[i + 2];
 
         // Adjust the coordinates by subtracting the average
-        renderVertices[i]     = is3d ? 1.0 * sin(y) * cos(x) - avgX : x - avgX;
-        renderVertices[i + 1] = is3d ? 1.0 * cos(y) - avgY : y - avgY;
-        renderVertices[i + 2] = is3d ? -1.0 * sin(y) * sin(x) - avgZ : 0.0;
+        renderVertices[i]     = is3d ? 1.0 * sin(y) * cos(x) - rx : x - rx;
+        renderVertices[i + 1] = is3d ? 1.0 * cos(y) - ry : y - ry;
+        renderVertices[i + 2] = is3d ? -1.0 * sin(y) * sin(x) - rz : 0.0;
     }
 
     auto i = SharedBytes((int64_t)indices.data(), (int32_t)indices.size(), (int32_t)sizeof(uint16_t));
     auto v = SharedBytes((int64_t)renderVertices.data(), (int32_t)renderVertices.size(), (int32_t)sizeof(float));
     
-    polygon->setVertices(v, i, Vec3D(avgX, avgY, avgZ));
+    polygon->setVertices(v, i, Vec3D(rx, ry, rz));
 }
 
 void PolygonGroup2dLayerObject::setVertices(const std::vector<float> &verticesBuffer,
