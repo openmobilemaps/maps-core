@@ -84,9 +84,6 @@ final class Quad2dStretchedInstanced: BaseGraphicsObject, @unchecked Sendable {
             lock.unlock()
         }
 
-        // PRECISION-ISSUE TODO
-        return
-
         guard let verticesBuffer,
               let indicesBuffer,
               let positionsBuffer,
@@ -98,11 +95,6 @@ final class Quad2dStretchedInstanced: BaseGraphicsObject, @unchecked Sendable {
               let texture,
               instanceCount != 0 else {
             return
-        }
-
-        lock.lock()
-        defer {
-            lock.unlock()
         }
 
 #if DEBUG

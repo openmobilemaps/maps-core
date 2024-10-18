@@ -28,9 +28,10 @@ stretchInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
                              constant float *rotations [[buffer(4)]],
                              constant float4 *texureCoordinates [[buffer(5)]],
                              constant float *alphas [[buffer(6)]],
+                             constant float4 &originOffset [[buffer(7)]],
                              uint instanceId [[instance_id]])
 {
-  const float2 position = positions[instanceId];
+  const float2 position = positions[instanceId] + originOffset.xy;
   const float2 scale = scales[instanceId];
   const float rotation = rotations[instanceId];
 
@@ -50,7 +51,7 @@ stretchInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
     .position = matrix * float4(vertexIn.position.xy, 0.0, 1.0),
     .uv = vertexIn.uv,
     .texureCoordinates = texureCoordinates[instanceId],
-    .alpha = alphas[instanceId],
+    .alpha = alphas[instanceId], 
     .stretchInfoIndex = instanceId
   };
 
