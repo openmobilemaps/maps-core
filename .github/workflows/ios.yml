@@ -9,7 +9,7 @@ on:
 
 jobs:
   build:
-    runs-on: macos-13
+    runs-on: macos-15
     steps:
     - uses: actions/checkout@v2
       with:
@@ -17,4 +17,4 @@ jobs:
     - name: Switch to Xcode ${{ env.XCODE_VERSION }}
       run: sudo xcode-select --switch /Applications/${{ env.XCODE_VERSION }}.app
     - name: Build
-      run: swift build -Xswiftc "-sdk" -Xswiftc "`xcrun --sdk iphonesimulator --show-sdk-path`" -Xswiftc "-target" -Xswiftc "x86_64-apple-ios13.0-simulator"
+      run: xcodebuild -scheme MapCore -destination 'platform=iOS Simulator,OS=18.0,name=iPhone 16 Pro'
