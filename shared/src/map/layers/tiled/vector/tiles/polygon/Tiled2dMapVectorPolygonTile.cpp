@@ -245,7 +245,6 @@ void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDa
                     }
 
                     for (auto const &coordinate: coordinates) {
-
                         double x = is3d ? 1.0 * sin(coordinate.y) * cos(coordinate.x) - rx : coordinate.x - rx;
                         double y = is3d ?  1.0 * cos(coordinate.y) - ry : coordinate.y - ry;
                         double z = is3d ? -1.0 * sin(coordinate.y) * sin(coordinate.x) - rz : 0.0;
