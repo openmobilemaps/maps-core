@@ -48,6 +48,7 @@ void Tiled2dMapVectorSourceTileDataManager::update() {
 
 void Tiled2dMapVectorSourceTileDataManager::pregenerateRenderPasses() {
     std::vector<std::shared_ptr<Tiled2dMapVectorLayer::TileRenderDescription>> renderDescriptions;
+    bool maskTile = layerConfig->getZoomInfo().maskTile;
     for (const auto &[tile, subTiles] : tileRenderObjectsMap) {
         const auto tileMaskWrapper = tileMaskMap.find(tile);
         const auto tileState = tileStateMap.find(tile);
@@ -61,19 +62,19 @@ void Tiled2dMapVectorSourceTileDataManager::pregenerateRenderPasses() {
             continue;
         }
 
-        if (tileMaskWrapper == tileMaskMap.end()) {
+        if (tileMaskWrapper == tileMaskMap.end() && maskTile) {
             // There is no mask for this tile
             continue;
         }
 
-        const std::shared_ptr<MaskingObjectInterface> &mask = tileMaskWrapper->second.getGraphicsMaskObject();
-        assert(mask->asGraphicsObject()->isReady());
+        const std::shared_ptr<MaskingObjectInterface> &mask = maskTile ? tileMaskWrapper->second.getGraphicsMaskObject() : nullptr;
+        assert(!mask || mask->asGraphicsObject()->isReady());
         for (const auto &[layerIndex, renderObjects]: subTiles) {
             const bool modifiesMask = modifyingMaskLayers.find(layerIndex) != modifyingMaskLayers.end();
             const bool selfMasked = selfMaskedLayers.find(layerIndex) != selfMaskedLayers.end();
             const auto optRenderPassIndex = mapDescription->layers[layerIndex]->renderPassIndex;
             const int32_t renderPassIndex = optRenderPassIndex ? *optRenderPassIndex : 0;
-            renderDescriptions.push_back(std::make_shared<Tiled2dMapVectorLayer::TileRenderDescription>(Tiled2dMapVectorLayer::TileRenderDescription{layerIndex, renderObjects, mask, modifiesMask, selfMasked, renderPassIndex}));
+            renderDescriptions.push_back(std::make_shared<Tiled2dMapVectorLayer::TileRenderDescription>(Tiled2dMapVectorLayer::TileRenderDescription{layerIndex, tile.tileInfo.zoomIdentifier, renderObjects, mask, modifiesMask, selfMasked, renderPassIndex}));
         }
     }
     vectorLayer.syncAccess([source = this->source, &renderDescriptions](const auto &layer){

@@ -676,7 +676,7 @@ void Tiled2dMapVectorLayer::pregenerateRenderPasses() {
     }
 
     std::sort(orderedRenderDescriptions.begin(), orderedRenderDescriptions.end(), [](const auto &lhs, const auto &rhs) {
-        return lhs->layerIndex < rhs->layerIndex;
+        return lhs->renderIndex < rhs->renderIndex;
     });
 
     std::vector<std::shared_ptr<::RenderObjectInterface>> renderObjects;

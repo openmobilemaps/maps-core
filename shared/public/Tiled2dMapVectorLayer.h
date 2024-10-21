@@ -102,15 +102,26 @@ public:
     virtual std::vector<std::shared_ptr<::RenderPassInterface>> buildRenderPasses() override;
 
     struct TileRenderDescription {
-        int32_t layerIndex;
+        int32_t renderIndex;
         std::vector<std::shared_ptr<::RenderObjectInterface>> renderObjects;
         std::shared_ptr<MaskingObjectInterface> maskingObject;
         bool isModifyingMask;
         bool selfMasked;
         int32_t renderPassIndex;
+
+        TileRenderDescription(int32_t layerIndex,
+                              int32_t zoomIdentifier,
+                              const std::vector<std::shared_ptr<::RenderObjectInterface>> &renderObjects,
+                              const std::shared_ptr<MaskingObjectInterface> &maskingObject,
+                              bool isModifyingMask,
+                              bool selfMasked,
+                              int32_t renderPassIndex)
+                : renderIndex((layerIndex << 16) + zoomIdentifier), renderObjects(renderObjects), maskingObject(maskingObject),
+                  isModifyingMask(isModifyingMask), selfMasked(selfMasked), renderPassIndex(renderPassIndex) {}
     };
 
-    virtual void onRenderPassUpdate(const std::string &source, bool isSymbol, const std::vector<std::shared_ptr<TileRenderDescription>> &renderDescription);
+    virtual void onRenderPassUpdate(const std::string &source, bool isSymbol,
+                                    const std::vector<std::shared_ptr<TileRenderDescription>> &renderDescription);
 
     virtual void onAdded(const std::shared_ptr<::MapInterface> &mapInterface, int32_t layerIndex) override;
 
