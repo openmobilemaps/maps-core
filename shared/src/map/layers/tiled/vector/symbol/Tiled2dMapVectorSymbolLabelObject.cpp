@@ -157,6 +157,11 @@ Tiled2dMapVectorSymbolLabelObject::Tiled2dMapVectorSymbolLabelObject(const std::
                 double z = -c.z * sin(c.y) * sin(c.x);
                 cartesianRenderLineCoordinates.emplace_back(x, y, z);
             }
+
+            auto &c = referencePoint;
+            cartesianReferencePoint.x = c.z * sin(c.y) * cos(c.x);
+            cartesianReferencePoint.y = c.z * cos(c.y);
+            cartesianReferencePoint.z = -c.z * sin(c.y) * sin(c.x);
         }
         
         screenLineCoordinates = renderLineCoordinates;
@@ -724,9 +729,15 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
             const auto &before = is3d ? screenPointAtIndex(indexBefore) : pointAtIndex(indexBefore, false);
             const auto &after = is3d ? screenPointAtIndex(indexAfter) : pointAtIndex(indexAfter, false);
 
-            double beforeAfter = (before.y - after.y);
-            double angleRad = atan2_approximation(beforeAfter, -(before.x - after.x));
+            double yAngle = (before.y - after.y);
+            double xAngle = -(before.x - after.x);
+            double sAngle = std::sqrt(xAngle*xAngle + yAngle*yAngle);
+
+            double angleRad = atan2_approximation(yAngle, xAngle);
             double angleDeg = angleRad * (180.0 / M_PI);
+
+            double sinAngle = yAngle / sAngle;
+            double cosAngle = xAngle / sAngle;
 
             if(index > 0) {
                 auto diff = fabs(lastAngle - angleDeg);
@@ -755,8 +766,8 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
             auto xw = x + charSize.x;
             auto yh = is3d ? y - charSize.y : y + charSize.y;
 
-            averageAngleS += sin(angleRad) / numSymbols;
-            averageAngleC += cos(angleRad) / numSymbols;
+            averageAngleS += sinAngle / numSymbols;
+            averageAngleC += cosAngle / numSymbols;
 
             auto lastIndex = currentIndex;
             // update currentIndex
@@ -856,7 +867,9 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
             positions[(2 * countOffset) + 0] = 0;
             positions[(2 * countOffset) + 1] = 0;
             if (is3d) {
-                writePosition(0, 0, countOffset, referencePositions);
+                referencePositions[positionSize * countOffset] = 0;
+                referencePositions[positionSize * countOffset + 1] = 0;
+                referencePositions[positionSize * countOffset + 2] = 0;
             }
             scales[2 * (countOffset) + 0] = 0;
             scales[2 * (countOffset) + 1] = 0;
@@ -910,15 +923,16 @@ void Tiled2dMapVectorSymbolLabelObject::setupCamera(const std::shared_ptr<MapCam
     auto casted = std::dynamic_pointer_cast<MapCamera3d>(camera);
     if(!casted) { return; }
 
-    auto &ls = cartesianRenderLineCoordinates;
-    for(size_t i=0; i<ls.size(); ++i) {
-        const auto &vec2d = casted->screenPosFromCartesianCoord(ls[i], viewportSize);
+    size_t i = 0;
+    for(const auto& ls : cartesianRenderLineCoordinates) {
+        const auto &vec2d = casted->screenPosFromCartesianCoord(ls, viewportSize);
         // don't care about systemIdentifier, only used for indexAtPoint
         screenLineCoordinates[i].x = vec2d.x;
         screenLineCoordinates[i].y = vec2d.y;
+        ++i;
     }
 
-    auto p = camera->screenPosFromCoord(referencePoint);
+    auto p = casted->screenPosFromCartesianCoord(cartesianReferencePoint, viewportSize);
     // don't care about systemIdentifier, only used for findReferencePointIndices
     referencePointScreen = Coord(0, (double)p.x, (double)p.y, (double)0.0);
 }

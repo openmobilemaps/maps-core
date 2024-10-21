@@ -117,8 +117,10 @@ private:
 
     inline void indexAtDistance(const DistanceIndex &index, double distance, const std::optional<Vec2D> &indexCoord, DistanceIndex& result) {
         auto current = is3d ? screenPointAtIndex(index) : (indexCoord ? *indexCoord : pointAtIndex(index, true));
-        auto currentIndex = index;
         auto dist = std::abs(distance);
+
+        int currentI = index.index;
+        double currentPercentage = index.percentage;
 
         if(distance >= 0) {
             auto start = std::min(index.index + 1, (int)renderLineCoordinatesCount - 1);
@@ -132,10 +134,11 @@ private:
                     dist -= d;
                     current.x = next.x;
                     current.y = next.y;
-                    currentIndex = DistanceIndex(i, 0.0);
+                    currentI = i;
+                    currentPercentage = 0;
                 } else {
-                    result.index = currentIndex.index;
-                    result.percentage =  currentIndex.percentage + dist / d * (1.0 - currentIndex.percentage);
+                    result.index = currentI;
+                    result.percentage = currentPercentage + dist / d * (1.0 - currentPercentage);
                     return;
                 }
             }
@@ -151,13 +154,14 @@ private:
                     dist -= d;
                     current.x = next.x;
                     current.y = next.y;
-                    currentIndex = DistanceIndex(i, 0.0);
-                } else {
-                    if(i == currentIndex.index) {
-                        result.index = i;
-                        result.percentage = currentIndex.percentage - currentIndex.percentage * dist / d;
-                        return;
 
+                    currentI = i;
+                    currentPercentage = 0.0;
+                } else {
+                    if(i == currentI) {
+                        result.index = i;
+                        result.percentage = currentPercentage - currentPercentage * dist / d;
+                        return;
                     } else {
                         result.index = i;
                         result.percentage = 1.0 - dist / d;
@@ -167,7 +171,7 @@ private:
             }
         }
 
-        result = currentIndex;
+        result = DistanceIndex(currentI, currentPercentage);
     }
 
     std::shared_ptr<SymbolVectorLayerDescription> description;
@@ -188,6 +192,7 @@ private:
     const std::shared_ptr<FontLoaderResult> fontResult;
 
     Coord referencePoint = Coord(0,0,0,0);
+    Vec3D cartesianReferencePoint = Vec3D(0,0,0);
     Coord referencePointScreen = Coord(0,0,0,0);
     float referenceSize;
 
