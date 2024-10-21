@@ -11,10 +11,23 @@
 import MapCoreSharedModule
 import MetalKit
 
-struct Vertex3D: Equatable {
+struct Vertex3F: Equatable {
     nonisolated(unsafe) static let descriptor: MTLVertexDescriptor = {
         let vertexDescriptor = MTLVertexDescriptor()
         
+        vertexDescriptor.attributes[0].bufferIndex = 0
+        vertexDescriptor.attributes[0].format = .float3
+        vertexDescriptor.attributes[0].offset = 0
+
+        vertexDescriptor.layouts[0].stride = MemoryLayout<SIMD3<Float>>.stride
+        return vertexDescriptor
+    }()
+}
+
+struct Vertex4F: Equatable {
+    nonisolated(unsafe) static let descriptor: MTLVertexDescriptor = {
+        let vertexDescriptor = MTLVertexDescriptor()
+
         vertexDescriptor.attributes[0].bufferIndex = 0
         vertexDescriptor.attributes[0].format = .float4
         vertexDescriptor.attributes[0].offset = 0

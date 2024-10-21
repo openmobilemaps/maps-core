@@ -21,7 +21,11 @@ struct Vertex3DTextureIn {
     float2 uv [[attribute(1)]];
 };
 
-struct Vertex3DIn {
+struct Vertex3FIn {
+    float3 position [[attribute(0)]];
+};
+
+struct Vertex4FIn {
     float4 position [[attribute(0)]];
 };
 

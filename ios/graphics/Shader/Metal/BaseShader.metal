@@ -46,13 +46,13 @@ baseFragmentShader(VertexOut in [[stage_in]],
 
 
 vertex VertexOut
-colorVertexShader(const Vertex3DIn vertexIn [[stage_in]],
+colorVertexShader(const Vertex3FIn vertexIn [[stage_in]],
                   constant float4x4 &vpMatrix [[buffer(1)]],
                    constant float4x4 &mMatrix [[buffer(2)]],
                   constant float4 &originOffset [[buffer(3)]])
 {
     VertexOut out {
-        .position = vpMatrix * (float4(vertexIn.position.xyz, 1.0) + originOffset),
+        .position = vpMatrix * ((mMatrix * float4(vertexIn.position.xyz, 1.0)) + originOffset),
     };
 
     return out;
