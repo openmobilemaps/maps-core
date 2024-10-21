@@ -30,6 +30,16 @@
 
 class SymbolAnimationCoordinator;
 
+struct DistanceIndex {
+    int index;
+    double percentage;
+
+    DistanceIndex(int index_, double percentage_)
+    : index(std::move(index_))
+    , percentage(std::move(percentage_))
+    {}
+};
+
 class Tiled2dMapVectorSymbolLabelObject {
 public:
     Tiled2dMapVectorSymbolLabelObject(const std::shared_ptr<CoordinateConversionHelperInterface> &converter,
@@ -90,27 +100,28 @@ private:
     double lastZoomEvaluation = -1;
     void evaluateStyleProperties(const double zoomIdentifier);
 
-    std::pair<int, double> findReferencePointIndices();
-    
-    inline Vec2D pointAtIndex(const std::pair<int, double> &index, bool useRender) {
-        const auto &s = useRender ? renderLineCoordinates[index.first] : (*lineCoordinates)[index.first];
-        const auto &e = useRender ?  renderLineCoordinates[index.first + 1 < renderLineCoordinatesCount ? (index.first + 1) : index.first] : (*lineCoordinates)[index.first + 1 < renderLineCoordinatesCount ? (index.first + 1) : index.first];
-        return Vec2D(s.x + (e.x - s.x) * index.second, s.y + (e.y - s.y) * index.second);
+    DistanceIndex findReferencePointIndices();
+
+    inline Vec2D pointAtIndex(const DistanceIndex &index, bool useRender) {
+        const auto &s = useRender ? renderLineCoordinates[index.index] : (*lineCoordinates)[index.index];
+        const auto &e = useRender ?  renderLineCoordinates[index.index + 1 < renderLineCoordinatesCount ? (index.index + 1) : index.index] : (*lineCoordinates)[index.index + 1 < renderLineCoordinatesCount ? (index.index + 1) : index.index];
+        return Vec2D(s.x + (e.x - s.x) * index.percentage,
+                     s.y + (e.y - s.y) * index.percentage);
     }
 
-    inline Vec2D screenPointAtIndex(const std::pair<int, double> &index) {
-        const auto &s = screenLineCoordinates[index.first];
-        const auto &e = screenLineCoordinates[index.first + 1 < renderLineCoordinatesCount ? (index.first + 1) : index.first];
-        return Vec2D(s.x + (e.x - s.x) * index.second, s.y + (e.y - s.y) * index.second);
+    inline Vec2D screenPointAtIndex(const DistanceIndex &index) {
+        const auto &s = screenLineCoordinates[index.index];
+        const auto &e = screenLineCoordinates[index.index + 1 < renderLineCoordinatesCount ? (index.index + 1) : index.index];
+        return Vec2D(s.x + (e.x - s.x) * index.percentage, s.y + (e.y - s.y) * index.percentage);
     }
 
-    inline std::pair<int, double> indexAtDistance(const std::pair<int, double> &index, double distance, const std::optional<Vec2D> &indexCoord) {
+    inline void indexAtDistance(const DistanceIndex &index, double distance, const std::optional<Vec2D> &indexCoord, DistanceIndex& result) {
         auto current = is3d ? screenPointAtIndex(index) : (indexCoord ? *indexCoord : pointAtIndex(index, true));
         auto currentIndex = index;
         auto dist = std::abs(distance);
 
         if(distance >= 0) {
-            auto start = std::min(index.first + 1, (int)renderLineCoordinatesCount - 1);
+            auto start = std::min(index.index + 1, (int)renderLineCoordinatesCount - 1);
 
             for(int i = start; i < renderLineCoordinatesCount; i++) {
                 const auto &next = screenLineCoordinates[i];
@@ -121,13 +132,15 @@ private:
                     dist -= d;
                     current.x = next.x;
                     current.y = next.y;
-                    currentIndex = std::make_pair(i, 0.0);
+                    currentIndex = DistanceIndex(i, 0.0);
                 } else {
-                    return std::make_pair(currentIndex.first, currentIndex.second + dist / d * (1.0 - currentIndex.second));
+                    result.index = currentIndex.index;
+                    result.percentage =  currentIndex.percentage + dist / d * (1.0 - currentIndex.percentage);
+                    return;
                 }
             }
         } else {
-            auto start = index.first;
+            auto start = index.index;
 
             for(int i = start; i >= 0; i--) {
                 const auto &next = screenLineCoordinates[i];
@@ -138,19 +151,23 @@ private:
                     dist -= d;
                     current.x = next.x;
                     current.y = next.y;
-                    currentIndex = std::make_pair(i, 0.0);
+                    currentIndex = DistanceIndex(i, 0.0);
                 } else {
-                    if(i == currentIndex.first) {
-                        return std::make_pair(i, currentIndex.second - currentIndex.second * dist / d);
+                    if(i == currentIndex.index) {
+                        result.index = i;
+                        result.percentage = currentIndex.percentage - currentIndex.percentage * dist / d;
+                        return;
+
                     } else {
-                        return std::make_pair(i, 1.0 - dist / d);
+                        result.index = i;
+                        result.percentage = 1.0 - dist / d;
+                        return;
                     }
                 }
             }
-
         }
 
-        return currentIndex;
+        result = currentIndex;
     }
 
     std::shared_ptr<SymbolVectorLayerDescription> description;

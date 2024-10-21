@@ -561,20 +561,18 @@ void MatrixD::multiplyMMC(std::vector<double> &r, int resultOffset, const std::v
     }
 }
 
-std::vector<double> MatrixD::multiply(const std::vector<double> &M, const std::vector<double> &x) {
+Vec4D MatrixD::multiply(const std::vector<double> &M, const Vec4D &x) {
     // calculates Mx and returns result
-    std::vector<double> result = {0.0, 0.0, 0.0, 0.0};
-
+    Vec4D result = Vec4D(0.0, 0.0, 0.0, 0.0);
     MatrixD::multiply(M, x, result);
-
     return result;
 }
 
-void MatrixD::multiply(const std::vector<double> &M, const std::vector<double> &x, std::vector<double> &result) {
-    result[0] = M[0] * x[0] + M[4] * x[1] +  M[8] * x[2] + M[12] * x[3];
-    result[1] = M[1] * x[0] + M[5] * x[1] +  M[9] * x[2] + M[13] * x[3];
-    result[2] = M[2] * x[0] + M[6] * x[1] + M[10] * x[2] + M[14] * x[3];
-    result[3] = M[3] * x[0] + M[7] * x[1] + M[11] * x[2] + M[15] * x[3];
+void MatrixD::multiply(const std::vector<double> &M, const Vec4D &x, Vec4D &result) {
+    result.x = M[0] * x.x + M[4] * x.y + M[8] * x.z + M[12] * x.w;
+    result.y = M[1] * x.x + M[5] * x.y + M[9] * x.z + M[13] * x.w;
+    result.z = M[2] * x.x + M[6] * x.y + M[10] * x.z + M[14] * x.w;
+    result.w = M[3] * x.x + M[7] * x.y + M[11] * x.z + M[15] * x.w;
 }
 
 std::string MatrixD::toMatrixString(const std::vector<double> &M) {

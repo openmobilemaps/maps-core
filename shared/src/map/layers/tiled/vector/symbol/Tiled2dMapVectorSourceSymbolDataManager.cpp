@@ -759,8 +759,8 @@ bool Tiled2dMapVectorSourceSymbolDataManager::onClickConfirmed(const std::unorde
     auto viewportSize = renderingContext->getViewportSize();
     const std::vector<double> vpMatrix = *camera->getLastVpMatrixD();
     const bool is3d = mapInterface->is3d();
-    std::vector<double> temp1 = {0.f, 0.f, 0.f, 0.f};
-    std::vector<double> temp2 = {0.f, 0.f, 0.f, 0.f};
+    Vec4D temp1 = Vec4D(0.0, 0.0, 0.0, 0.0);
+    Vec4D temp2 = Vec4D(0.0, 0.0, 0.0, 0.0);
     const double halfWidth = viewportSize.x / 2.0;
     const double halfHeight = viewportSize.y / 2.0;
     const double sinNegGridAngle = std::sin(rotation * M_PI / 180.0);

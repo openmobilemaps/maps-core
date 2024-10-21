@@ -1082,29 +1082,33 @@ Coord MapCamera3d::coordFromScreenPosition(const std::vector<double> &inverseVPM
 Coord MapCamera3d::coordFromScreenPosition(const std::vector<double> &inverseVPMatrix, const ::Vec2F &posScreen, const Vec3D &origin) {
     auto viewport = mapInterface->getRenderingContext()->getViewportSize();
 
-    std::vector<double> worldPosFrontVec = {
+    auto worldPosFrontVec = Vec4D(
         ((double)posScreen.x / (double)viewport.x * 2.0 - 1),
         -((double)posScreen.y / (double)viewport.y * 2.0 - 1),
         -1,
         1
-    };
-    std::vector<double> worldPosBackVec = {
+    );
+
+    auto worldPosBackVec = Vec4D(
         ((double)posScreen.x / (double)viewport.x * 2.0 - 1),
         -((double)posScreen.y / (double)viewport.y * 2.0 - 1),
         1,
         1
-    };
+    );
 
     const double rx = origin.x;
     const double ry = origin.y;
     const double rz = origin.z;
 
     worldPosFrontVec = MatrixD::multiply(inverseVPMatrix, worldPosFrontVec);
-    Vec3D worldPosFront{(worldPosFrontVec[0] / worldPosFrontVec[3]) + rx, (worldPosFrontVec[1] / worldPosFrontVec[3]) + ry,
-                                (worldPosFrontVec[2] / worldPosFrontVec[3]) + rz};
+    auto worldPosFront = Vec3D((worldPosFrontVec.x / worldPosFrontVec.w) + rx,
+                               (worldPosFrontVec.y / worldPosFrontVec.w) + ry,
+                               (worldPosFrontVec.z / worldPosFrontVec.w) + rz);
+
     worldPosBackVec = MatrixD::multiply(inverseVPMatrix, worldPosBackVec);
-    Vec3D worldPosBack{(worldPosBackVec[0] / worldPosBackVec[3]) + rx, (worldPosBackVec[1] / worldPosBackVec[3]) + ry,
-                               (worldPosBackVec[2] / worldPosBackVec[3]) + rz};
+    auto worldPosBack = Vec3D((worldPosBackVec.x / worldPosBackVec.w) + rx,
+                              (worldPosBackVec.y / worldPosBackVec.w) + ry,
+                              (worldPosBackVec.z / worldPosBackVec.w) + rz);
 
     bool didHit = false;
     auto point = MapCamera3DHelper::raySphereIntersection(worldPosFront, worldPosBack, Vec3D(0.0, 0.0, 0.0), 1.0, didHit);
@@ -1268,17 +1272,17 @@ bool MapCamera3d::gluInvertMatrix(const std::vector<double> &m, std::vector<doub
 }
 
 Vec2F MapCamera3d::screenPosFromCartesianCoord(const Vec3D &coord, const Vec2I &sizeViewport) {
-    const auto& cc = { coord.x - origin.x, coord.y - origin.y, coord.z - origin.z, 1.0 };
+    const auto& cc = Vec4D(coord.x - origin.x, coord.y - origin.y, coord.z - origin.z, 1.0);
     return screenPosFromCartesianCoord(cc, sizeViewport);
 }
 
-Vec2F MapCamera3d::screenPosFromCartesianCoord(const std::vector<double> &coord, const Vec2I &sizeViewport) {
+Vec2F MapCamera3d::screenPosFromCartesianCoord(const Vec4D &coord, const Vec2I &sizeViewport) {
     if(validVpMatrix) {
         const auto &projected = projectedPoint(coord);
 
         // Map from [-1, 1] to screenPixels, with (0,0) being the top left corner
-        double screenXDiffToCenter = projected[0] * sizeViewport.x / 2.0;
-        double screenYDiffToCenter = projected[1] * sizeViewport.y / 2.0;
+        double screenXDiffToCenter = projected.x * sizeViewport.x / 2.0;
+        double screenYDiffToCenter = projected.y * sizeViewport.y / 2.0;
 
         double posScreenX = screenXDiffToCenter + ((double)sizeViewport.x / 2.0);
         double posScreenY = ((double)sizeViewport.y / 2.0) - screenYDiffToCenter;
@@ -1342,28 +1346,31 @@ bool MapCamera3d::coordIsOnFrontHalfOfGlobe(Coord coord) {
 
     auto projectedCenter = projectedPoint({0,0,0,1});
 
-    bool isInFront = projectedCoord[2] <= projectedCenter[2];
+    bool isInFront = projectedCoord.z <= projectedCenter.z;
 
     return isInFront;
 }
 
-std::vector<double> MapCamera3d::convertToCartesianCoordinates(const Coord &coord) const {
+Vec4D MapCamera3d::convertToCartesianCoordinates(const Coord &coord) const {
     Coord renderCoord = conversionHelper->convertToRenderSystem(coord);
 
-    return {(renderCoord.z * sin(renderCoord.y) * cos(renderCoord.x)) - origin.x,
+    return {
+        (renderCoord.z * sin(renderCoord.y) * cos(renderCoord.x)) - origin.x,
         (renderCoord.z * cos(renderCoord.y)) - origin.y,
         (-renderCoord.z * sin(renderCoord.y) * sin(renderCoord.x)) - origin.z,
-        1.0};
+        1.0
+    };
 }
 
-
 // Point given in cartesian coordinates, where (0,0,0) is the center of the globe
-std::vector<double> MapCamera3d::projectedPoint(const std::vector<double> &point) const {
+Vec4D MapCamera3d::projectedPoint(const Vec4D &point) const {
     auto projected = MatrixD::multiply(vpMatrixD, point);
-    projected[0] /= projected[3]; // percentage in x direction in [-1, 1], 0 being the center of the screen)
-    projected[1] /= projected[3]; // percentage in y direction in [-1, 1], 0 being the center of the screen)
-    projected[2] /= projected[3]; // percentage in z direction in [-1, 1], 0 being the center of the screen)
-    projected[3] /= projected[3];
+
+    auto w = projected.w;
+    projected.x /= w; // percentage in x direction in [-1, 1], 0 being the center of the screen)
+    projected.y /= w; // percentage in y direction in [-1, 1], 0 being the center of the screen)
+    projected.z /= w; // percentage in z direction in [-1, 1], 0 being the center of the screen)
+    projected.w = 1.0;
 
     return projected;
 }
@@ -1378,9 +1385,10 @@ double MapCamera3d::mapUnitsFromPixels(double distancePx) {
         const auto projectedOne = projectedPoint(convertToCartesianCoordinates(focusRenderCoord));
         const auto projectedTwo = projectedPoint(convertToCartesianCoordinates(focusRenderCoord + sampleSize));
 
-        const float projectedLength = MatrixD::length((projectedTwo[0] - projectedOne[0]) * sizeViewport.x,
-                                               (projectedTwo[1] - projectedOne[1]) * sizeViewport.y,
-                                               0.0);
+        auto x = (projectedTwo.x - projectedOne.x) * sizeViewport.x;
+        auto y = (projectedTwo.y - projectedOne.y) * sizeViewport.y;
+        const float projectedLength = MatrixD::length(x, y, 0.0);
+        
         return distancePx * 2.0 * sqrt(sampleSize * sampleSize * 2) / projectedLength;
     }
     return distancePx * screenPixelAsRealMeterFactor * zoom;

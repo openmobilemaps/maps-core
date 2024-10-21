@@ -677,7 +677,9 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
         }
     }
 
-    currentIndex = indexAtDistance(currentIndex, -size * 0.5 * scaleCorrection, std::nullopt);
+    // updates currentIndex
+    indexAtDistance(currentIndex, -size * 0.5 * scaleCorrection, std::nullopt, currentIndex);
+    
     auto yOffset = offset.y * fontSize;
 
     if (wasReversed) {
@@ -696,9 +698,13 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
 
     double maxSymbolRadius = 0.0;
 
+    auto indexBefore = DistanceIndex(0, 0.0);
+    auto indexAfter = DistanceIndex(0, 0.0);
+
     for(auto &i : splittedTextInfo) {
         if(i.glyphIndex < 0) {
-            currentIndex = indexAtDistance(currentIndex, spaceAdvance * fontSize * i.scale * scaleCorrection, std::nullopt);
+            // updates current index
+            indexAtDistance(currentIndex, spaceAdvance * fontSize * i.scale * scaleCorrection, std::nullopt, currentIndex);
             index = 0;
         } else {
             auto& d = glyphs[i.glyphIndex];
@@ -712,9 +718,8 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
             const auto &p = pointAtIndex(currentIndex, true);
 
             // get before and after to calculate angle
-
-            auto indexBefore = indexAtDistance(currentIndex, -halfSpace * scaleCorrection, p);
-            auto indexAfter = indexAtDistance(currentIndex, halfSpace * scaleCorrection, p);
+            indexAtDistance(currentIndex, -halfSpace * scaleCorrection, p, indexBefore);
+            indexAtDistance(currentIndex, halfSpace * scaleCorrection, p, indexAfter);
 
             const auto &before = is3d ? screenPointAtIndex(indexBefore) : pointAtIndex(indexBefore, false);
             const auto &after = is3d ? screenPointAtIndex(indexAfter) : pointAtIndex(indexAfter, false);
@@ -754,10 +759,11 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
             averageAngleC += cos(angleRad) / numSymbols;
 
             auto lastIndex = currentIndex;
-            currentIndex = indexAtDistance(currentIndex, advance.x * (1.0 + letterSpacing) * scaleCorrection, p);
+            // update currentIndex
+            indexAtDistance(currentIndex, advance.x * (1.0 + letterSpacing) * scaleCorrection, p, currentIndex);
 
             // if we are at the end, and we were at the end (lastIndex), then clear and skip
-            if(currentIndex.first == renderLineCoordinatesCount - 1 && lastIndex.first == currentIndex.first && (lastIndex.second == currentIndex.second)) {
+            if(currentIndex.index == renderLineCoordinatesCount - 1 && lastIndex.index == currentIndex.index && (lastIndex.percentage == currentIndex.percentage)) {
                 centerPositions.clear();
                 break;
             }
@@ -917,7 +923,7 @@ void Tiled2dMapVectorSymbolLabelObject::setupCamera(const std::shared_ptr<MapCam
     referencePointScreen = Coord(0, (double)p.x, (double)p.y, (double)0.0);
 }
 
-std::pair<int, double> Tiled2dMapVectorSymbolLabelObject::findReferencePointIndices() {
+DistanceIndex Tiled2dMapVectorSymbolLabelObject::findReferencePointIndices() {
     auto point = is3d ? referencePointScreen : referencePoint;
     auto distance = std::numeric_limits<double>::max();
 
@@ -946,7 +952,7 @@ std::pair<int, double> Tiled2dMapVectorSymbolLabelObject::findReferencePointIndi
         }
     }
 
-    return std::make_pair(iMin, tMin);
+    return DistanceIndex(iMin, tMin);
 }
 
 

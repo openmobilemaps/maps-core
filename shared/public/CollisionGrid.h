@@ -342,5 +342,6 @@ public:
 
     const Vec3D origin;
 
-    std::vector<double> temp1 = {0, 0, 0, 0}, temp2 = {0, 0, 0, 0};
+    Vec4D temp1 = Vec4D(0, 0, 0, 0);
+    Vec4D temp2 = Vec4D(0, 0, 0, 0);
 };

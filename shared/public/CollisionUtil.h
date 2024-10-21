@@ -18,6 +18,7 @@
 #include "CircleD.h"
 #include "CollisionPrimitives.h"
 #include <vector>
+#include "Vec4D.h"
 
 class CollisionUtil {
 
@@ -75,8 +76,8 @@ public:
     struct CollisionEnvironment {
         const std::vector<double> &vpMatrix;
         const bool is3d;
-        std::vector<double> &temp1;
-        std::vector<double> &temp2;
+        Vec4D &temp1;
+        Vec4D &temp2;
         const double halfWidth;
         const double halfHeight;
         const double sinNegGridAngle;
@@ -86,8 +87,8 @@ public:
         CollisionEnvironment(
                              const std::vector<double>& vpMatrix,
                              const bool is3d,
-                             std::vector<double>& temp1,
-                             std::vector<double>& temp2,
+                             Vec4D& temp1,
+                             Vec4D& temp2,
                              const double halfWidth,
                              const double halfHeight,
                              const double sinNegGridAngle,
@@ -105,136 +106,146 @@ public:
         {}
     };
 
-    static std::optional<CircleD> getProjectedCircle(const CollisionCircleD &circle,
-                                      CollisionEnvironment &env) {
+    static std::optional<CircleD> getProjectedCircle(const CollisionCircleD &circle, CollisionEnvironment &env) {
         if (env.is3d) {
-            //earth center
-            env.temp2[0] = 0.0 - env.origin.x;
-            env.temp2[1] = 0.0 - env.origin.y;
-            env.temp2[2] = 0.0;
-            env.temp2[3] = 1.0;
+            // Earth center
+            env.temp2.x = 0.0 - env.origin.x;
+            env.temp2.y = 0.0 - env.origin.y;
+            env.temp2.z = 0.0;
+            env.temp2.w = 1.0;
 
             MatrixD::multiply(env.vpMatrix, env.temp2, env.temp1);
 
-            double earthCenterZ = env.temp1[2] / env.temp1[3];
+            double earthCenterZ = env.temp1.z / env.temp1.w;
 
-
-            env.temp2[0] = (double) (1.0 * sin(circle.y) * cos(circle.x)) - env.origin.x;
-            env.temp2[1] = (double) (1.0 * cos(circle.y)) - env.origin.y;
-            env.temp2[2] = (double) (-1.0 * sin(circle.y) * sin(circle.x)) - env.origin.z;
-            env.temp2[3] = 1.0;
+            env.temp2.x = 1.0 * sin(circle.y) * cos(circle.x) - env.origin.x;
+            env.temp2.y = 1.0 * cos(circle.y) - env.origin.y;
+            env.temp2.z = -1.0 * sin(circle.y) * sin(circle.x) - env.origin.z;
+            env.temp2.w = 1.0;
 
             MatrixD::multiply(env.vpMatrix, env.temp2, env.temp1);
 
-            env.temp1[0] /= env.temp1[3];
-            env.temp1[1] /= env.temp1[3];
-            env.temp1[2] /= env.temp1[3];
-            env.temp1[3] /= env.temp1[3];
+            env.temp1.x /= env.temp1.w;
+            env.temp1.y /= env.temp1.w;
+            env.temp1.z /= env.temp1.w;
+            env.temp1.w /= env.temp1.w;
 
-            auto diffCenterZ = env.temp1[2] - earthCenterZ;
+            auto diffCenterZ = env.temp1.z - earthCenterZ;
 
             if (diffCenterZ > 0) {
                 return std::nullopt;
             }
 
-            double originX = (env.temp1[0] * env.halfWidth + env.halfWidth);
-            double originY = (env.temp1[1] * env.halfHeight + env.halfHeight);
+            double originX = env.temp1.x * env.halfWidth + env.halfWidth;
+            double originY = env.temp1.y * env.halfHeight + env.halfHeight;
 
-            return CircleD {originX, originY,  circle.radius};
-
+            return CircleD {originX, originY, circle.radius};
         } else {
-            env.temp2[0] = circle.x - env.origin.x;
-            env.temp2[1] = circle.y - env.origin.y;
-            env.temp2[2] = 0.0;
-            env.temp2[3] = 1.0;
+            env.temp2.x = circle.x - env.origin.x;
+            env.temp2.y = circle.y - env.origin.y;
+            env.temp2.z = 0.0;
+            env.temp2.w = 1.0;
+
             MatrixD::multiply(env.vpMatrix, env.temp2, env.temp1);
-            double originX = ((env.temp1[0] / env.temp1[3]) * env.halfWidth + env.halfWidth);
-            double originY = ((env.temp1[1] / env.temp1[3]) * env.halfHeight + env.halfHeight);
-            env.temp2[0] = circle.radius;
-            env.temp2[1] = circle.radius;
-            env.temp2[2] = 0.0;
-            env.temp2[3] = 0.0;
+
+            double originX = (env.temp1.x / env.temp1.w) * env.halfWidth + env.halfWidth;
+            double originY = (env.temp1.y / env.temp1.w) * env.halfHeight + env.halfHeight;
+
+            env.temp2.x = circle.radius;
+            env.temp2.y = circle.radius;
+            env.temp2.z = 0.0;
+            env.temp2.w = 0.0;
+
             MatrixD::multiply(env.vpMatrix, env.temp2, env.temp1);
-            env.temp1[0] = env.temp1[0] * env.halfWidth;
-            env.temp1[1] = env.temp1[1] * env.halfHeight;
-            double iRadius = std::sqrt(env.temp1[0] * env.temp1[0] + env.temp1[1] * env.temp1[1]);
+            env.temp1.x = env.temp1.x * env.halfWidth;
+            env.temp1.y = env.temp1.y * env.halfHeight;
+
+            double iRadius = std::sqrt(env.temp1.x * env.temp1.x + env.temp1.y * env.temp1.y);
             return CircleD {originX, originY, iRadius};
         }
     }
 
-    static std::optional<RectD> getProjectedRectangle(const CollisionRectD &rectangle,
-                                       CollisionEnvironment &env) {
+    static std::optional<RectD> getProjectedRectangle(const CollisionRectD &rectangle, CollisionEnvironment &env) {
         if (env.is3d) {
-
-            //earth center
-            env.temp2[0] = 0.0 - env.origin.x;
-            env.temp2[1] = 0.0 - env.origin.y;
-            env.temp2[2] = 0.0;
-            env.temp2[3] = 1.0;
-
-            MatrixD::multiply(env.vpMatrix, env.temp2, env.temp1);
-
-            double earthCenterZ = env.temp1[2] / env.temp1[3];
-
-
-            env.temp2[0] = (double) (1.0 * sin(rectangle.anchorY) * cos(rectangle.anchorX)) - env.origin.x;
-            env.temp2[1] = (double) (1.0 * cos(rectangle.anchorY)) - env.origin.y;
-            env.temp2[2] = (double) (-1.0 * sin(rectangle.anchorY) * sin(rectangle.anchorX)) - env.origin.z;
-            env.temp2[3] = 1.0;
+            // Earth center
+            env.temp2.x = 0.0 - env.origin.x;
+            env.temp2.y = 0.0 - env.origin.y;
+            env.temp2.z = 0.0;
+            env.temp2.w = 1.0;
 
             MatrixD::multiply(env.vpMatrix, env.temp2, env.temp1);
 
-            env.temp1[0] /= env.temp1[3];
-            env.temp1[1] /= env.temp1[3];
-            env.temp1[2] /= env.temp1[3];
-            env.temp1[3] /= env.temp1[3];
+            double earthCenterZ = env.temp1.z / env.temp1.w;
 
-            auto diffCenterZ = env.temp1[2] - earthCenterZ;
+            env.temp2.x = 1.0 * sin(rectangle.anchorY) * cos(rectangle.anchorX) - env.origin.x;
+            env.temp2.y = 1.0 * cos(rectangle.anchorY) - env.origin.y;
+            env.temp2.z = -1.0 * sin(rectangle.anchorY) * sin(rectangle.anchorX) - env.origin.z;
+            env.temp2.w = 1.0;
+
+            MatrixD::multiply(env.vpMatrix, env.temp2, env.temp1);
+
+            env.temp1.x /= env.temp1.w;
+            env.temp1.y /= env.temp1.w;
+            env.temp1.z /= env.temp1.w;
+            env.temp1.w /= env.temp1.w;
+
+            auto diffCenterZ = env.temp1.z - earthCenterZ;
 
             if (diffCenterZ > 0) {
                 return std::nullopt;
             }
 
-
-            double originX = ((env.temp1[0]) * env.halfWidth + env.halfWidth);
-            double originY = ((env.temp1[1]) * env.halfHeight + env.halfHeight);
+            double originX = (env.temp1.x * env.halfWidth + env.halfWidth);
+            double originY = (env.temp1.y * env.halfHeight + env.halfHeight);
 
             double w = rectangle.width;
             double h = rectangle.height;
 
-            return RectD {double(originX - w / 2.0) , double(originY - h / 2.0), std::abs(w), std::abs(h)};
+            return RectD {double(originX - w / 2.0), double(originY - h / 2.0), std::abs(w), std::abs(h)};
         } else {
+            env.temp2.x = (rectangle.x - env.origin.x) - rectangle.anchorX;
+            env.temp2.y = (rectangle.y - env.origin.y) - rectangle.anchorY;
+            env.temp2.z = 0.0;
+            env.temp2.w = 1.0;
 
-            env.temp2[0] = (rectangle.x - env.origin.x) - rectangle.anchorX; // move x to the anchor
-            env.temp2[1] = (rectangle.y - env.origin.y) - rectangle.anchorY;
-            env.temp2[2] = env.temp2[0] * env.cosNegGridAngle - env.temp2[1] * env.sinNegGridAngle; // rotate x
-            env.temp2[3] = env.temp2[0] * env.sinNegGridAngle + env.temp2[1] * env.cosNegGridAngle;
-            env.temp2[0] = env.temp2[2] + rectangle.anchorX; // move rotated x to correct location relative to the anchor
-            env.temp2[1] = env.temp2[3] + rectangle.anchorY;
-            env.temp2[2] = 0.0;
-            env.temp2[3] = 1.0;
+            // Rotate and move to the correct position
+            double rotatedX = env.temp2.x * env.cosNegGridAngle - env.temp2.y * env.sinNegGridAngle;
+            double rotatedY = env.temp2.x * env.sinNegGridAngle + env.temp2.y * env.cosNegGridAngle;
+
+            env.temp2.x = rotatedX + rectangle.anchorX;
+            env.temp2.y = rotatedY + rectangle.anchorY;
+
             MatrixD::multiply(env.vpMatrix, env.temp2, env.temp1);
-            double originX = ((env.temp1[0] / env.temp1[3]) * env.halfWidth + env.halfWidth);
-            double originY = ((env.temp1[1] / env.temp1[3]) * env.halfHeight + env.halfHeight);
-            env.temp2[0] = rectangle.width * env.cosNegGridAngle;
-            env.temp2[1] = rectangle.width * env.sinNegGridAngle;
-            env.temp2[2] = 0.0;
-            env.temp2[3] = 0.0;
+
+            double originX = (env.temp1.x / env.temp1.w) * env.halfWidth + env.halfWidth;
+            double originY = (env.temp1.y / env.temp1.w) * env.halfHeight + env.halfHeight;
+
+            // Calculate rotated width
+            env.temp2.x = rectangle.width * env.cosNegGridAngle;
+            env.temp2.y = rectangle.width * env.sinNegGridAngle;
+            env.temp2.z = 0.0;
+            env.temp2.w = 0.0;
+
             MatrixD::multiply(env.vpMatrix, env.temp2, env.temp1);
-            double w = env.temp1[0];
-            double h = env.temp1[1];
-            env.temp2[0] = -rectangle.height * env.sinNegGridAngle;
-            env.temp2[1] = rectangle.height * env.cosNegGridAngle;
-            env.temp2[2] = 0.0;
-            env.temp2[3] = 0.0;
+            double w = env.temp1.x;
+            double h = env.temp1.y;
+
+            // Calculate rotated height
+            env.temp2.x = -rectangle.height * env.sinNegGridAngle;
+            env.temp2.y = rectangle.height * env.cosNegGridAngle;
+            env.temp2.z = 0.0;
+            env.temp2.w = 0.0;
+
             MatrixD::multiply(env.vpMatrix, env.temp2, env.temp1);
-            w += env.temp1[0];
-            h += env.temp1[1];
-            double width = (w * env.halfWidth); // by assumption aligned with projected space
-            double height = (h * env.halfHeight); // by assumption aligned with projected space
+            w += env.temp1.x;
+            h += env.temp1.y;
+
+            double width = w * env.halfWidth;
+            double height = h * env.halfHeight;
+
             originX = std::min(originX, originX + width);
             originY = std::min(originY, originY + height);
-            // Rectangle origin is chosen as the min/min corner with width/height always positive
+
             return RectD {originX, originY, std::abs(width), std::abs(height)};
         }
     }

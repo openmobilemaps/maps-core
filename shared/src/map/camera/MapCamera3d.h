@@ -23,6 +23,7 @@
 #include "Vec2I.h"
 #include "Vec2F.h"
 #include "Vec3D.h"
+#include "Vec4D.h"
 #include "CameraMode3d.h"
 #include "Camera3dConfig.h"
 #include "CameraInterpolation.h"
@@ -183,7 +184,7 @@ protected:
 
     virtual ::Coord coordFromScreenPosition(const std::vector<double> &inverseVPMatrix, const ::Vec2F &posScreen, const Vec3D &origin);
 
-    Vec2F screenPosFromCartesianCoord(const std::vector<double> &coord, const Vec2I &sizeViewport);
+    Vec2F screenPosFromCartesianCoord(const Vec4D &coord, const Vec2I &sizeViewport);
 
 
     void updateZoom(double zoom);
@@ -295,9 +296,8 @@ protected:
 
     bool coordIsOnFrontHalfOfGlobe(Coord coord);
 
-    std::vector<double> convertToCartesianCoordinates(const Coord &coord) const;
-
-    std::vector<double> projectedPoint(const std::vector<double> &point) const;
+    Vec4D convertToCartesianCoordinates(const Coord &coord) const;
+    Vec4D projectedPoint(const Vec4D &point) const;
 
     void checkForRubberBandEffect();
 
