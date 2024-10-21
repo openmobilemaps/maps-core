@@ -156,6 +156,7 @@ std::string TextInstancedShaderOpenGl::getFragmentShader() {
                                                   highp int colorOffset = int(isHalo) * 4 + styleOffset; // fill/halo color switch
                                                   vec4 color = vec4(styles[colorOffset + 0], styles[colorOffset + 1],
                                                                styles[colorOffset + 2], styles[colorOffset + 3]);
+                                                  color.a *= v_alpha;
 
                                                   if (color.a == 0.0) {
                                                       discard;
