@@ -68,7 +68,7 @@ std::string PolygonPatternGroup2dShaderOpenGl::getVertexShader() {
     ) : OMMShaderCode(
                                         // DefaultBehavior
                                         pixelPosition = vPosition.xy / uScalingFactor;
-                                        gl_Position = uvpMatrix * umMatrix * (vec4(vPosition, 1.0) + uOriginOffset);
+                                        gl_Position = uvpMatrix * ((umMatrix * vec4(vPosition, 1.0)) + uOriginOffset);
                                         styleIndex = uint(floor(vStyleIndex + 0.5));
                                       }
     ));

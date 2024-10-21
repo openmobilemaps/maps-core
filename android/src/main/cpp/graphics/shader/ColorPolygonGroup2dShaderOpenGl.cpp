@@ -94,7 +94,7 @@ std::string ColorPolygonGroup2dShaderOpenGl::getVertexShader() {
                 out vec2 uv;
 
                 void main() {
-                    gl_Position = uvpMatrix * umMatrix * (vec4(vPosition, 1.0) + uOriginOffset);
+                    gl_Position = uvpMatrix * ((umMatrix * vec4(vPosition, 1.0)) + uOriginOffset);
 
                     int styleIndex = int(floor(vStyleIndex + 0.5));
                     if (styleIndex < 0) {
@@ -125,7 +125,7 @@ std::string ColorPolygonGroup2dShaderOpenGl::getVertexShader() {
                 out vec4 color;
 
                 void main() {
-                    gl_Position = uvpMatrix * umMatrix * (vec4(vPosition, 1.0) + uOriginOffset);
+                    gl_Position = uvpMatrix * ((umMatrix * vec4(vPosition, 1.0)) + uOriginOffset);
 
                     int styleIndex = int(floor(vStyleIndex + 0.5));
                     if (styleIndex < 0) {

@@ -99,10 +99,10 @@ void Quad2dOpenGl::computeGeometry(bool texCoordsOnly) {
                 };
             } else {
                 vertices = {
-                        (float) (frame.topLeft.x - quadOrigin.x), (float) (frame.topLeft.y - quadOrigin.y), (float) (frame.topLeft.z - quadOrigin.z),
-                        (float) (frame.bottomLeft.x - quadOrigin.x), (float) (frame.bottomLeft.y - quadOrigin.y), (float) (frame.bottomLeft.z - quadOrigin.z),
-                        (float) (frame.bottomRight.x - quadOrigin.x), (float) (frame.bottomRight.y - quadOrigin.y), (float) (frame.bottomRight.z - quadOrigin.z),
-                        (float) (frame.topRight.x - quadOrigin.x), (float) (frame.topRight.y - quadOrigin.y), (float) (frame.topRight.z - quadOrigin.z),
+                        (float) (frame.topLeft.x - quadOrigin.x), (float) (frame.topLeft.y - quadOrigin.y), (float) (-quadOrigin.z),
+                        (float) (frame.bottomLeft.x - quadOrigin.x), (float) (frame.bottomLeft.y - quadOrigin.y), (float) (-quadOrigin.z),
+                        (float) (frame.bottomRight.x - quadOrigin.x), (float) (frame.bottomRight.y - quadOrigin.y), (float) (-quadOrigin.z),
+                        (float) (frame.topRight.x - quadOrigin.x), (float) (frame.topRight.y - quadOrigin.y), (float) (-quadOrigin.z),
                 };
             }
             indices = {
@@ -152,7 +152,7 @@ void Quad2dOpenGl::computeGeometry(bool texCoordsOnly) {
                 if (!texCoordsOnly) {
                     double x = originX + deltaDX;
                     double y = originY + deltaDY;
-                    double z = originZ + deltaDZ;
+                    double z = is3D ? originZ + deltaDZ : 0.0;
                     if (is3D) {
                         vertices.push_back((float) (1.0 * std::sin(y) * std::cos(x) - quadOrigin.x));
                         vertices.push_back((float) (1.0 * cos(y) - quadOrigin.y));
