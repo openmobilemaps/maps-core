@@ -47,6 +47,7 @@ std::string TextInstancedShaderOpenGl::getVertexShader() {
                                uniform mat4 uvpMatrix;
                                uniform mat4 umMatrix;
                                uniform vec4 uOriginOffset;
+                               uniform vec4 uOrigin;
 
                                in vec4 vPosition;
                                in vec2 texCoordinate;
@@ -68,14 +69,19 @@ std::string TextInstancedShaderOpenGl::getVertexShader() {
 
                                    vec4 newVertex = umMatrix * vec4(aReferencePosition + uOriginOffset.xyz, 1.0);
 
-                                   vec4 earthCenter = uvpMatrix * vec4(0.0, 0.0, 0.0, 1.0);
+                                   vec4 earthCenter = uvpMatrix * vec4(0.0 - uOrigin.x, 0.0 - uOrigin.y, 0.0 - uOrigin.z, 1.0);
                                    earthCenter = earthCenter / earthCenter.w;
                                    vec4 screenPosition = uvpMatrix * newVertex;
                                    screenPosition = screenPosition / screenPosition.w;
 
-                                   vec2 p = vPosition.xy;
-                                   vec2 pRot = vec2(p.x * cos(angle) + p.y * sin(angle), -p.x * sin(angle) + p.y * cos(angle));
-                                   pRot = aScale * pRot;
+                                   // Apply non-uniform scaling first
+                                   vec2 pScaled = vec2(vPosition.x * aScale.x, vPosition.y * aScale.y);
+
+                                   // Apply rotation after scaling
+                                   float sinAngle = sin(angle);
+                                   float cosAngle = cos(angle);
+                                   vec2 pRot = vec2(pScaled.x * cosAngle + pScaled.y * sinAngle,
+                                                      -pScaled.x * sinAngle + pScaled.y * cosAngle);
 
                                    gl_Position = vec4(screenPosition.xy + aPosition.xy + pRot, 0.0, 1.0);
                                    v_texCoordInstance = aTexCoordinate;

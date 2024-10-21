@@ -64,7 +64,7 @@ std::string ColorShaderOpenGl::getVertexShader() {
                                                 in vec4 vPosition;
 
                                                 void main() {
-                                                    gl_Position = uvpMatrix * umMatrix * (vPosition + uOriginOffset);
+                                                    gl_Position = uvpMatrix * ((umMatrix * vPosition) + uOriginOffset);
                                                 }
            );
 }

@@ -45,6 +45,7 @@ std::string AlphaInstancedShaderOpenGl::getVertexShader() {
            OMMVersionedGlesShaderCode(320 es,
                                       uniform mat4 uvpMatrix;
                                       uniform vec4 uOriginOffset;
+                                      uniform vec4 uOrigin;
 
                                       in vec3 vPosition;
                                       in vec2 vTexCoordinate;
@@ -63,7 +64,7 @@ std::string AlphaInstancedShaderOpenGl::getVertexShader() {
                                       void main() {
                                           float angle = aRotation * 3.14159265 / 180.0;
 
-                                          vec4 earthCenter = uvpMatrix * vec4(0.0, 0.0, 0.0, 1.0);
+                                          vec4 earthCenter = uvpMatrix * vec4(0.0 - uOrigin.x, 0.0 - uOrigin.y, 0.0 - uOrigin.z, 1.0);
                                           earthCenter = earthCenter / earthCenter.w;
                                           vec4 screenPosition = uvpMatrix * (vec4(aPosition, 1.0) + uOriginOffset);
                                           screenPosition = screenPosition / screenPosition.w;

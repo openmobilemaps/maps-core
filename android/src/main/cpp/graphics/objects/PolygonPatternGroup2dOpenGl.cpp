@@ -188,13 +188,13 @@ PolygonPatternGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInte
 
     // enable vPosition attribs
     size_t floatSize = sizeof(GLfloat);
-    size_t stride = 3 * floatSize;
+    size_t stride = 4 * floatSize;
 
     glEnableVertexAttribArray(positionHandle);
     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-    glVertexAttribPointer(positionHandle, 2, GL_FLOAT, false, stride, nullptr);
+    glVertexAttribPointer(positionHandle, 3, GL_FLOAT, false, stride, nullptr);
     glEnableVertexAttribArray(styleIndexHandle);
-    glVertexAttribPointer(styleIndexHandle, 1, GL_FLOAT, false, stride, (float *)(2 * floatSize));
+    glVertexAttribPointer(styleIndexHandle, 1, GL_FLOAT, false, stride, (float *)(3 * floatSize));
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     // Apply the projection and view transformation

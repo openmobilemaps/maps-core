@@ -79,7 +79,7 @@ std::string BaseShaderProgramOpenGl::getVertexShader() {
                                       out vec2 v_texcoord;
 
                                       void main() {
-                                          gl_Position = uvpMatrix * umMatrix * (vPosition + uOriginOffset);
+                                          gl_Position = uvpMatrix * ((umMatrix * vPosition) + uOriginOffset);
                                           v_texcoord = texCoordinate;
                                       }
     );

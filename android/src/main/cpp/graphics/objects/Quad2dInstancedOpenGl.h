@@ -91,6 +91,7 @@ protected:
     int vpMatrixHandle;
     int mMatrixHandle;
     int originOffsetHandle;
+    int originHandle;
     int positionHandle;
     GLuint vertexBuffer;
     std::vector<GLfloat> vertices;
