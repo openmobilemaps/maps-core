@@ -13,10 +13,6 @@
         <maven.compiler.release>${java.version}</maven.compiler.release>
         <kotlin.version>1.9.21</kotlin.version>
         <CMAKE_CXX_COMPILER>clang++</CMAKE_CXX_COMPILER>
-        <!-- Build type can be "Release" or "Debug".
-             TODO: build and package both
-         -->
-        <CMAKE_BUILD_TYPE>Release</CMAKE_BUILD_TYPE>
     </properties>
     <dependencies>
         <dependency>
@@ -55,28 +51,48 @@
                 <version>19.7.1</version>
                 <executions>
                     <execution>
+                        <id>build-native-release</id>
                         <goals>
                             <goal>clean</goal>
                             <goal>configure</goal>
                             <goal>compile</goal>
                         </goals>
+                        <configuration>
+                            <!--
+                            Disabled, bug in cmake-maven-plugin; creates bad commandline -G"Ninja" (bad quoting). Set generator to ninja (usually faster than make).
+                            <generator>Ninja</generator>
+                             -->
+                            <cmakeSourceDirectory>${project.basedir}/..</cmakeSourceDirectory>
+                            <cmakeBinaryDirectory>${project.build.directory}/build-native-release</cmakeBinaryDirectory>
+                            <cmakeDefines>
+                                <CMAKE_CXX_COMPILER>${CMAKE_CXX_COMPILER}</CMAKE_CXX_COMPILER>
+                                <CMAKE_BUILD_TYPE>RelWithDebInfo</CMAKE_BUILD_TYPE>
+                            </cmakeDefines>
+                            <compileTargets>
+                                <compileTarget>mapscore_jni</compileTarget>
+                            </compileTargets>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>build-native-debug</id>
+                        <goals>
+                            <goal>clean</goal>
+                            <goal>configure</goal>
+                            <goal>compile</goal>
+                        </goals>
+                        <configuration>
+                            <cmakeSourceDirectory>${project.basedir}/..</cmakeSourceDirectory>
+                            <cmakeBinaryDirectory>${project.build.directory}/build-native-debug</cmakeBinaryDirectory>
+                            <cmakeDefines>
+                                <CMAKE_CXX_COMPILER>${CMAKE_CXX_COMPILER}</CMAKE_CXX_COMPILER>
+                                <CMAKE_BUILD_TYPE>Debug</CMAKE_BUILD_TYPE>
+                            </cmakeDefines>
+                            <compileTargets>
+                                <compileTarget>mapscore_jni</compileTarget>
+                            </compileTargets>
+                        </configuration>
                     </execution>
                 </executions>
-                <configuration>
-                    <!--
-                    Disabled, bug in cmake-maven-plugin; creates bad commandline -G"Ninja" (bad quoting). Set generator to ninja (usually faster than make).
-                    <generator>Ninja</generator>
-                     -->
-                    <cmakeSourceDirectory>${project.basedir}/..</cmakeSourceDirectory>
-                    <cmakeBinaryDirectory>${project.build.directory}/build-native</cmakeBinaryDirectory>
-                    <cmakeDefines>
-                        <CMAKE_CXX_COMPILER>${CMAKE_CXX_COMPILER}</CMAKE_CXX_COMPILER>
-                        <CMAKE_BUILD_TYPE>${CMAKE_BUILD_TYPE}</CMAKE_BUILD_TYPE>
-                    </cmakeDefines>
-                    <compileTargets>
-                        <compileTarget>mapscore_jni</compileTarget>
-                    </compileTargets>
-                </configuration>
             </plugin>
 
             <!-- Copy native libraries to jar resources -->
@@ -85,7 +101,7 @@
                 <version>3.3.1</version>
                 <executions>
                     <execution>
-                        <id>copy-resources</id>
+                        <id>copy-native-lib</id>
                         <phase>process-classes</phase> <!-- directly after compile -->
                         <goals>
                             <goal>copy-resources</goal>
@@ -94,7 +110,14 @@
                             <outputDirectory>${project.build.outputDirectory}</outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>${project.build.directory}/build-native</directory>
+                                    <directory>${project.build.directory}/build-native-release</directory>
+                                    <includes>
+                                        <include>libmapscore_jni_*.so</include>
+                                    </includes>
+                                    <targetPath>native/</targetPath>
+                                </resource>
+                                <resource>
+                                    <directory>${project.build.directory}/build-native-debug</directory>
                                     <includes>
                                         <include>libmapscore_jni_*.so</include>
                                     </includes>

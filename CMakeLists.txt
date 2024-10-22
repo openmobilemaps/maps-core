@@ -133,9 +133,9 @@ string(TOLOWER ${CMAKE_SYSTEM_NAME} TARGET_OS)
 string(REPLACE "x86_64" "amd64" TARGET_ARCHITECTURE ${CMAKE_SYSTEM_PROCESSOR})
 set_target_properties(mapscore_jni PROPERTIES 
   LIBRARY_OUTPUT_NAME_RELEASE mapscore_jni_${TARGET_OS}_${TARGET_ARCHITECTURE}
+  LIBRARY_OUTPUT_NAME_RELWITHDEBINFO mapscore_jni_${TARGET_OS}_${TARGET_ARCHITECTURE}
   LIBRARY_OUTPUT_NAME_DEBUG mapscore_jni_${TARGET_OS}_${TARGET_ARCHITECTURE}_debug
 )
-
 
 add_executable(testmain main.cpp)
 target_compile_features(testmain PRIVATE cxx_std_20)
