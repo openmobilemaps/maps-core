@@ -28,7 +28,7 @@
 #include "RenderObjectInterface.h"
 #include "SymbolObjectCollisionWrapper.h"
 
-//#define DRAW_TEXT_BOUNDING_BOX
+#define DRAW_TEXT_BOUNDING_BOX
 //#define DRAW_TEXT_BOUNDING_BOX_WITH_COLLISIONS
 
 class Tiled2dMapVectorSourceSymbolDataManager;

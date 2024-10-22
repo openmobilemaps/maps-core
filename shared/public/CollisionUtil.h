@@ -109,10 +109,11 @@ public:
     static std::optional<CircleD> getProjectedCircle(const CollisionCircleD &circle, CollisionEnvironment &env) {
         if (env.is3d) {
             // Earth center
-            env.temp2.x = 0.0 - env.origin.x;
-            env.temp2.y = 0.0 - env.origin.y;
-            env.temp2.z = 0.0;
+            env.temp2.x = 1.0 * sin(0.0) * cos(0.0) - env.origin.x;
+            env.temp2.y = 1.0 * cos(0.0) - env.origin.y;
+            env.temp2.z = -1.0 * sin(0.0) * sin(0.0) - env.origin.z;
             env.temp2.w = 1.0;
+
 
             MatrixD::multiply(env.vpMatrix, env.temp2, env.temp1);
 
@@ -168,9 +169,9 @@ public:
     static std::optional<RectD> getProjectedRectangle(const CollisionRectD &rectangle, CollisionEnvironment &env) {
         if (env.is3d) {
             // Earth center
-            env.temp2.x = 0.0 - env.origin.x;
-            env.temp2.y = 0.0 - env.origin.y;
-            env.temp2.z = 0.0;
+            env.temp2.x = 1.0 * sin(0.0) * cos(0.0) - env.origin.x;
+            env.temp2.y = 1.0 * cos(0.0) - env.origin.y;
+            env.temp2.z = -1.0 * sin(0.0) * sin(0.0) - env.origin.z;
             env.temp2.w = 1.0;
 
             MatrixD::multiply(env.vpMatrix, env.temp2, env.temp1);

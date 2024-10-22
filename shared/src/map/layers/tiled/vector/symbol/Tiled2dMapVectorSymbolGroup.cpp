@@ -767,7 +767,7 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
                         currentVertexIndex += (numCirclePoints + 1);
                     }
                 } else {
-                    const auto &viewportAlignedBox = object->getViewportAlignedBoundingBox(zoomIdentifier, false, true);
+                    const auto &viewportAlignedBox = object->getViewportAlignedBoundingBox(zoomIdentifier, false, false);
                     if (viewportAlignedBox) {
                         auto projectedRectangle = CollisionUtil::getProjectedRectangle(*viewportAlignedBox, env);
                         if (projectedRectangle) {

@@ -1015,7 +1015,7 @@ std::optional<std::tuple<Coord, VectorLayerFeatureInfo>> Tiled2dMapVectorSymbolO
 
     if (boundingBoxRotationAlignment == SymbolAlignment::VIEWPORT) {
         
-        std::optional<CollisionRectD> boundingRect = getViewportAlignedBoundingBox(zoomIdentifier, false, true);
+        std::optional<CollisionRectD> boundingRect = getViewportAlignedBoundingBox(zoomIdentifier, false, false);
         if (boundingRect) {
             auto projectedRectangle = CollisionUtil::getProjectedRectangle(*boundingRect, collisionEnvironment);
             if (projectedRectangle && CollisionUtil::checkRectCircleCollision(RectD(projectedRectangle->x, projectedRectangle->y, projectedRectangle->width, projectedRectangle->height), clickHitCircle)) {
