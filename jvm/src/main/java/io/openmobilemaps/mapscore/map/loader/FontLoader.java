@@ -61,7 +61,7 @@ public class FontLoader extends FontLoaderInterface {
             if (entry != null) {
                 return entry;
             }
-            logger.finer("loadFont " + fontName);
+            logger.info("loadFont " + fontName);
             var result = loadFont(fontName);
             String fallbackName = null;
             if (result.getStatus() == LoaderStatus.ERROR_404) {
@@ -69,12 +69,12 @@ public class FontLoader extends FontLoaderInterface {
             }
             if (fallbackName != null) {
                 result = loadFont(getFallbackFont(fontName));
-                logger.finer(
+                logger.info(
                         String.format(
                                 "loadFont(%s) -> Fallback %s -> %s",
                                 fontName, fallbackName, result.getStatus()));
             } else {
-                logger.finer(String.format("loadFont %s -> %s", fontName, result.getStatus()));
+                logger.info(String.format("loadFont %s -> %s", fontName, result.getStatus()));
             }
             fontCache.put(fontName, result);
             return result;
@@ -129,7 +129,7 @@ public class FontLoader extends FontLoaderInterface {
                                     ),
                             manifest.getGlyphs());
 
-            logger.finer("Font manifest:\n" + manifest.getInfo());
+            logger.info("Font manifest:\n" + manifest.getInfo());
 
             var image = new BufferedImageTextureHolder(ImageIO.read(imageStream));
             return new FontLoaderResult(image, manifest, LoaderStatus.OK);
@@ -143,8 +143,12 @@ public class FontLoader extends FontLoaderInterface {
             implements AutoCloseable {
         @Override
         public void close() throws Exception {
-            image.close();
-            manifest.close();
+            if (image != null) {
+                image.close();
+            }
+            if (manifest != null) {
+                manifest.close();
+            }
         }
     }
 }

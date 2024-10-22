@@ -75,7 +75,7 @@ public class LocalDataLoader extends LoaderInterface {
         } catch (IOException e) {
             result = new DataLoaderResult(null, null, LoaderStatus.ERROR_OTHER, e.toString());
         }
-        logger.finer(String.format("loadData %s -> %s", uri, result.getStatus()));
+        logger.info(String.format("loadData %s -> %s", uri, result.getStatus()));
         return result;
     }
 
@@ -106,7 +106,7 @@ public class LocalDataLoader extends LoaderInterface {
         } catch (IOException e) {
             result = new TextureLoaderResult(null, null, LoaderStatus.ERROR_OTHER, e.toString());
         }
-        logger.finer(String.format("loadTexture %s -> %s", uri, result.getStatus()));
+        logger.info(String.format("loadTexture %s -> %s", uri, result.getStatus()));
         return result;
     }
 

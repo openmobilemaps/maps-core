@@ -79,7 +79,7 @@ public class HttpDataLoader extends LoaderInterface {
                     httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
             return completeLoadData(response);
         } catch (IOException | InterruptedException e) {
-            logger.finer(String.format("loadData %s -> %s", url, e));
+            logger.info(String.format("loadData %s -> %s", url, e));
             return new DataLoaderResult(null, null, LoaderStatus.ERROR_OTHER, e.toString());
         }
     }
@@ -93,7 +93,7 @@ public class HttpDataLoader extends LoaderInterface {
         if (!isHTTP(uri)) {
             result.setValue(new DataLoaderResult(null, null, LoaderStatus.NOOP, null));
         } else {
-            logger.finer(String.format("loadDataAsync %s", url));
+            logger.info(String.format("loadDataAsync %s", url));
             var request = HttpRequest.newBuilder(uri).build();
             httpClient
                     .sendAsync(request, HttpResponse.BodyHandlers.ofInputStream())
@@ -116,7 +116,7 @@ public class HttpDataLoader extends LoaderInterface {
                     httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
             return completeLoadTexture(response);
         } catch (InterruptedException | IOException e) {
-            logger.finer(String.format("loadTexture %s -> %s", url, e));
+            logger.info(String.format("loadTexture %s -> %s", url, e));
             return new TextureLoaderResult(null, null, LoaderStatus.ERROR_OTHER, e.toString());
         }
     }
@@ -130,7 +130,7 @@ public class HttpDataLoader extends LoaderInterface {
         if (!isHTTP(uri)) {
             result.setValue(new TextureLoaderResult(null, null, LoaderStatus.NOOP, null));
         } else {
-            logger.finer(String.format("loadTextureAsync %s", url));
+            logger.info(String.format("loadTextureAsync %s", url));
             var request = HttpRequest.newBuilder(uri).build();
             httpClient
                     .sendAsync(request, HttpResponse.BodyHandlers.ofInputStream())
@@ -156,7 +156,7 @@ public class HttpDataLoader extends LoaderInterface {
                                 response.headers().firstValue("etag").orElse(null),
                                 LoaderStatus.OK,
                                 null);
-                logger.finer(String.format("loadData %s -> %s", response.uri(), LoaderStatus.OK));
+                logger.info(String.format("loadData %s -> %s", response.uri(), LoaderStatus.OK));
                 return result;
             } catch (IOException | UnsupportedOperationException e) {
                 error = LoaderStatus.ERROR_OTHER;
@@ -168,7 +168,7 @@ public class HttpDataLoader extends LoaderInterface {
         } else {
             error = LoaderStatus.ERROR_OTHER;
         }
-        logger.finer(String.format("loadData %s -> %s", response.uri(), error));
+        logger.info(String.format("loadData %s -> %s", response.uri(), error));
         return new DataLoaderResult(null, null, error, null);
     }
 
@@ -184,7 +184,7 @@ public class HttpDataLoader extends LoaderInterface {
                                 response.headers().firstValue("etag").orElse(null),
                                 LoaderStatus.OK,
                                 null);
-                logger.finer(
+                logger.info(
                         String.format("loadTexture %s -> %s", response.uri(), LoaderStatus.OK));
                 return result;
             } catch (IOException e) {
@@ -197,7 +197,7 @@ public class HttpDataLoader extends LoaderInterface {
         } else {
             error = LoaderStatus.ERROR_OTHER;
         }
-        logger.finer(String.format("loadTexture %s -> %s", response.uri(), error));
+        logger.info(String.format("loadTexture %s -> %s", response.uri(), error));
         return new TextureLoaderResult(null, null, error, null);
     }
 }
