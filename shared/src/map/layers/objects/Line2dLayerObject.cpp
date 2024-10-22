@@ -38,9 +38,9 @@ void Line2dLayerObject::setPositions(const std::vector<Coord> &positions, const 
     for (auto const &mapCoord : positions) {
         Coord renderCoord = conversionHelper->convertToRenderSystem(mapCoord);
 
-        double x = is3d ? 1.0 * sin(renderCoord.y) * cos(renderCoord.x) - origin.x : renderCoord.x - origin.x;
-        double y = is3d ?  1.0 * cos(renderCoord.y) - origin.y : renderCoord.y - origin.y;
-        double z = is3d ? -1.0 * sin(renderCoord.y) * sin(renderCoord.x) - origin.z : 0.0;
+        double x = is3d ? renderCoord.z * sin(renderCoord.y) * cos(renderCoord.x) - origin.x : renderCoord.x - origin.x;
+        double y = is3d ?  renderCoord.z * cos(renderCoord.y) - origin.y : renderCoord.y - origin.y;
+        double z = is3d ? -renderCoord.z * sin(renderCoord.y) * sin(renderCoord.x) - origin.z : 0.0;
 
         renderCoords.push_back(Vec3D(x, y, z));
     }

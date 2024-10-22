@@ -105,9 +105,9 @@ void LineLayer::add(const std::shared_ptr<LineInfoInterface> &line) {
 
     if(coords.size() > 0) {
         Coord renderCoord = mapInterface->getCoordinateConverterHelper()->convertToRenderSystem(coords[0]);
-        double x = is3d ? 1.0 * sin(renderCoord.y) * cos(renderCoord.x) : renderCoord.x;
-        double y = is3d ?  1.0 * cos(renderCoord.y) : renderCoord.y;
-        double z = is3d ? -1.0 * sin(renderCoord.y) * sin(renderCoord.x) : 0.0;
+        double x = is3d ? renderCoord.z * sin(renderCoord.y) * cos(renderCoord.x) : renderCoord.x;
+        double y = is3d ? renderCoord.z * cos(renderCoord.y) : renderCoord.y;
+        double z = is3d ? -renderCoord.z * sin(renderCoord.y) * sin(renderCoord.x) : 0.0;
         origin = Vec3D(x,y,z);
     }
 
