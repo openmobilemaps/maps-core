@@ -696,7 +696,7 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
                 double halfHeight = viewport.y / 2.0f;
                 double sinNegGridAngle(std::sin(-angle * M_PI / 180.0));
                 double cosNegGridAngle(std::cos(-angle * M_PI / 180.0));
-                std::vector<double> temp1 = {0, 0, 0, 0}, temp2 = {0, 0, 0, 0};
+                Vec4D temp1 = {0,0,0,0}, temp2 = {0,0,0,0};
                 CollisionUtil::CollisionEnvironment env(vpMatrix, is3d, temp1, temp2, halfWidth, halfHeight, sinNegGridAngle, cosNegGridAngle, origin);
 
                 const auto &circles = object->getMapAlignedBoundingCircles(zoomIdentifier, false, true);
