@@ -360,7 +360,6 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
         pen.y -= fontSize * lineHeight * 0.25;
     }
 
-
     int numberOfCharacters = 0;
     int baseLineStartIndex = 0;
     int lineEndIndicesIndex = 0;
@@ -400,7 +399,7 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
 
                 if (is3d) {
                     scales[2 * (countOffset + numberOfCharacters) + 0] = size.x / viewportSize.x * 2.0;
-                    scales[2 * (countOffset + numberOfCharacters) + 1] = size.y / viewportSize.y * 2.0;
+                    scales[2 * (countOffset + numberOfCharacters) + 1] = size.y / viewportSize.x * 2.0;
                 } else {
                     scales[2 * (countOffset + numberOfCharacters) + 0] = size.x;
                     scales[2 * (countOffset + numberOfCharacters) + 1] = size.y;
