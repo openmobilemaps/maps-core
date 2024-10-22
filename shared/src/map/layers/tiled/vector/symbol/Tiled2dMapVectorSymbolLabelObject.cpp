@@ -354,11 +354,8 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
 
     float yOffset = 0;
 
-    if (is3d) {
-        pen.y += fontSize * lineHeight * 0.25;
-    } else {
-        pen.y -= fontSize * lineHeight * 0.25;
-    }
+
+    pen.y -= fontSize * lineHeight * 0.25;
 
     int numberOfCharacters = 0;
     int baseLineStartIndex = 0;
@@ -377,9 +374,9 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
 
             if(i.glyphIndex != spaceIndex) {
                 auto x = pen.x + bearing.x;
-                auto y = is3d ? pen.y + bearing.y : pen.y - bearing.y;
+                auto y = pen.y - bearing.y;
                 auto xw = x + size.x;
-                auto yh = is3d ? y - size.y : y + size.y;
+                auto yh = y + size.y;
 
                 baseLines[numberOfCharacters] = yh;
 
@@ -420,13 +417,7 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
                 assert((countOffset + numberOfCharacters-1)*2 < scales.size());
             }
             pen.x = 0.0;
-
-            if (is3d) {
-                pen.y -= fontSize * lineHeight;
-            } else {
-                pen.y += fontSize * lineHeight;
-            }
-
+            pen.y += fontSize * lineHeight;
 
             baseLineStartIndex = numberOfCharacters;
         }
@@ -540,7 +531,7 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
             if (radialOffset != 0.0) {
                 anchorOffset.y -= (lineHeight - fontResult->fontData->info.lineHeight + 1.0 - textOffset.y) * fontSize;
             } else {
-                anchorOffset.y = -(is3d ? 2 : 1) * size.y;
+                anchorOffset.y = -1 * size.y;
                 anchorOffset.y -= ((fontResult->fontData->info.lineHeight - fontResult->fontData->info.base) * lineHeight - textOffset.y) * fontSize + yOffset;
             }
             break;
@@ -575,7 +566,7 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
 
         if (is3d) {
             positions[2 * countOffset + 0] = (rX + anchorOffsetRot.x) / viewportSize.x * 2;
-            positions[2 * countOffset + 1] = (rY + anchorOffsetRot.y) / viewportSize.y * 2;
+            positions[2 * countOffset + 1] = -(rY + anchorOffsetRot.y) / viewportSize.y * 2;
 
             writePosition(referencePoint.x, referencePoint.y, countOffset, referencePositions);
         } else {
@@ -585,11 +576,11 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
         auto maxScale = ((scales[2 * countOffset + 0] / 2.0) > (scales[2 * countOffset + 1] / 2.0)) ? (scales[2 * countOffset + 0] / 2.0) : (scales[2 * countOffset + 1] / 2.0);
         maxSymbolRadius = (maxSymbolRadius > maxScale) ? maxSymbolRadius : maxScale;
 
-        const double x1 = dx + cp.x - scaleXH;
-        const double x2 = dx + cp.x + scaleXH;
+        const double x1 = (is3d ? anchorOffsetRot.x : dxRot) + rX - scaleXH;
+        const double x2 = (is3d ? anchorOffsetRot.x : dxRot) + rX + scaleXH;
 
-        const double y1 = dy + cp.y - scaleYH;
-        const double y2 = dy + cp.y + scaleYH;
+        const double y1 = (is3d ? anchorOffsetRot.y : dyRot) + rY - scaleYH;
+        const double y2 = (is3d ? anchorOffsetRot.y : dyRot) + rY + scaleYH;
 
         if(scaleXH > 0) {
             boundingBoxMin.x = boundingBoxMin.x < x1 ? boundingBoxMin.x : x1;
@@ -624,7 +615,11 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
     dimensions.y = rectBoundingBox.bottomRight.y - rectBoundingBox.topLeft.y;
 
     if (rotationAlignment != SymbolAlignment::MAP) {
-        boundingBoxViewportAligned = CollisionRectD(referencePoint.x, referencePoint.y, boundingBoxMin.x - scaledTextPadding, boundingBoxMin.y - scaledTextPadding, dimensions.x, dimensions.y);
+        if (is3d) {
+            boundingBoxViewportAligned = CollisionRectD(referencePoint.x, referencePoint.y, boundingBoxMin.x - scaledTextPadding, boundingBoxMin.y - scaledTextPadding, dimensions.x, dimensions.y);
+        } else {
+            boundingBoxViewportAligned = CollisionRectD(referencePoint.x, referencePoint.y, boundingBoxMin.x - scaledTextPadding, boundingBoxMin.y - scaledTextPadding, dimensions.x, dimensions.y);
+        }
         boundingBoxCircles = std::nullopt;
     } else {
         std::vector<CircleD> circles;

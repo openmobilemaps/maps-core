@@ -198,10 +198,13 @@ public:
             double originX = (env.temp1.x * env.halfWidth + env.halfWidth);
             double originY = (env.temp1.y * env.halfHeight + env.halfHeight);
 
+            originX += rectangle.x;
+            originY -= rectangle.y;
+
             double w = rectangle.width;
             double h = rectangle.height;
 
-            return RectD {double(originX - w / 2.0), double(originY - h / 2.0), std::abs(w), std::abs(h)};
+            return RectD {originX , originY - h, std::abs(w), std::abs(h)};
         } else {
             env.temp2.x = (rectangle.x - env.origin.x) - rectangle.anchorX;
             env.temp2.y = (rectangle.y - env.origin.y) - rectangle.anchorY;
