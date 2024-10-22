@@ -813,9 +813,14 @@ bool MapCamera3d::onOneFingerDoubleClickMoveComplete() {
 }
 
 void MapCamera3d::setupInertia() {
-    float vel = std::sqrt(currentDragVelocity.x * currentDragVelocity.x + currentDragVelocity.y * currentDragVelocity.y);
-    double t1 = vel >= 0.4 ? 30.0 : 0.0;
-    double t2 = vel >= 0.01 ? 200.0 : 0.0;
+    float velocityFactor = std::sqrt(currentDragVelocity.x * currentDragVelocity.x + currentDragVelocity.y * currentDragVelocity.y) / zoom;
+
+    const double t1Factor = 1e-8;
+    const double t2Factor = t1Factor / 100.0;
+
+    double t1 = velocityFactor >= t1Factor ? 30.0 : 0.0;
+    double t2 = velocityFactor >= t2Factor ? 200.0 : 0.0;
+
     inertia = Inertia(DateHelper::currentTimeMicros(), currentDragVelocity, t1, t2);
     currentDragVelocity = {0, 0};
     currentDragTimestamp = 0;
