@@ -492,6 +492,9 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &posi
                 break;
         }
 
+        iconBoundingBoxViewportAligned.x = (-iconWidth * 0.5) - scaledIconPadding + offsets[2 * countOffset] * viewPortSize.x * 0.5;
+        iconBoundingBoxViewportAligned.y = (-iconHeight * 0.5) - scaledIconPadding - offsets[2 * countOffset + 1] * viewPortSize.y * 0.5;
+
         offsets[2 * countOffset] += (iconOffset.x * iconWidth) * 1.0 / viewPortSize.x;
         offsets[2 * countOffset + 1] += (iconOffset.y * iconHeight) * 1.0 / viewPortSize.y;
     } else {
@@ -505,8 +508,6 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &posi
     writePosition(x, y, countOffset, positions);
 
     if (is3d) {
-        iconBoundingBoxViewportAligned.x = renderCoordinate.x;
-        iconBoundingBoxViewportAligned.y = renderCoordinate.y;
         iconBoundingBoxViewportAligned.width = iconWidth;
         iconBoundingBoxViewportAligned.height = iconHeight;
     } else {

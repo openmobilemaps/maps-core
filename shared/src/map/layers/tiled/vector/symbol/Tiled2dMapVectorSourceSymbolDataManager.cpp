@@ -772,7 +772,7 @@ bool Tiled2dMapVectorSourceSymbolDataManager::onClickConfirmed(const std::unorde
     double zoomIdentifier = layerConfig->getZoomIdentifier(zoom);
 
     double clickPadding = 16.0;
-    CircleD clickHitCircleScreen(posScreen.x, posScreen.y, clickPadding);
+    CircleD clickHitCircleScreen(posScreen.x, viewportSize.y - posScreen.y, clickPadding);
 
     for(const auto &[tile, symbolGroupsMap]: tileSymbolGroupMap) {
         const auto tileState = tileStateMap.find(tile);

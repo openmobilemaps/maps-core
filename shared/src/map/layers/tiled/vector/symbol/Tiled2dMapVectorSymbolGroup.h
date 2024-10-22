@@ -184,6 +184,7 @@ private:
 #ifdef DRAW_TEXT_BOUNDING_BOX
     TextSymbolPlacement textSymbolPlacement;
     SymbolAlignment labelRotationAlignment;
+    std::optional<CircleD> lastClickHitCircle;
 #endif
 
     UsedKeysCollection usedKeys;

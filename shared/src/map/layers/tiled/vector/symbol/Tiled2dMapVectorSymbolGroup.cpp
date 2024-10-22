@@ -446,7 +446,8 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
                                                                              object, shader);
         boundingBoxLayerObject->setStyles({
                                                   PolygonStyle(Color(0, 1, 0, 0.3), 0.3),
-                                                  PolygonStyle(Color(1, 0, 0, 0.3), 1.0)
+                                                  PolygonStyle(Color(1, 0, 0, 0.3), 1.0),
+                                                  PolygonStyle(Color(0, 0, 1, 0.3), 1.0)
                                           });
     }
 #endif
@@ -665,7 +666,51 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
             std::vector<std::tuple<std::vector<::Coord>, int>> vertices;
             std::vector<uint16_t> indices;
 
+
+            auto camera = mapInterface.lock()->getCamera();
+            auto renderingContext = mapInterface.lock()->getRenderingContext();
+
+            auto viewport = renderingContext->getViewportSize();
+            auto angle = camera->getRotation();
+            auto origin = camera->asCameraInterface()->getOrigin();
+            auto vpMatrix = *camera->getLastVpMatrixD();
+
             int32_t currentVertexIndex = 0;
+
+            double halfWidth = viewport.x / 2.0f;
+            double halfHeight = viewport.y / 2.0f;
+            double sinNegGridAngle(std::sin(-angle * M_PI / 180.0));
+            double cosNegGridAngle(std::cos(-angle * M_PI / 180.0));
+            Vec4D temp1 = {0,0,0,0}, temp2 = {0,0,0,0};
+            CollisionUtil::CollisionEnvironment env(vpMatrix, is3d, temp1, temp2, halfWidth, halfHeight, sinNegGridAngle, cosNegGridAngle, origin);
+
+
+            if (lastClickHitCircle) {
+                double x = ((lastClickHitCircle->x / viewport.x) * 2.0) - 1.0;
+                double y = ((lastClickHitCircle->y / viewport.y) * 2.0) - 1.0;
+                float aspectRatio = float(viewport.x) / float(viewport.y);
+                double radius = lastClickHitCircle->radius / halfWidth;
+
+                const size_t numCirclePoints = 8;
+                std::vector<Coord> coords;
+                coords.emplace_back(CoordinateSystemIdentifiers::RENDERSYSTEM(),
+                                    x, y, 0.0);
+                for (size_t i = 0; i < numCirclePoints; i++) {
+                    float angle = i * (2 * M_PI / numCirclePoints);
+                    coords.emplace_back(CoordinateSystemIdentifiers::RENDERSYSTEM(),
+                                        x + radius * std::cos(angle),
+                                        y + radius * aspectRatio * std::sin(angle),
+                                        0.0);
+
+                    indices.push_back(currentVertexIndex);
+                    indices.push_back(currentVertexIndex + i + 1);
+                    indices.push_back(currentVertexIndex + (i + 1) % numCirclePoints + 1);
+                }
+                vertices.push_back({coords, 2});
+
+                currentVertexIndex += (numCirclePoints + 1);
+            }
+
             for (const auto &object: symbolObjects) {
                 if (currentVertexIndex >= std::numeric_limits<uint16_t>::max()) {
                     LogError <<= "Too many debug collision primitives for uint16 vertex indices!";
@@ -683,21 +728,6 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
                 }
 #endif
 
-                auto camera = mapInterface.lock()->getCamera();
-                auto renderingContext = mapInterface.lock()->getRenderingContext();
-
-                auto viewport = renderingContext->getViewportSize();
-                auto angle = camera->getRotation();
-                auto origin = camera->asCameraInterface()->getOrigin();
-                auto vpMatrix = *camera->getLastVpMatrixD();
-
-
-                double halfWidth = viewport.x / 2.0f;
-                double halfHeight = viewport.y / 2.0f;
-                double sinNegGridAngle(std::sin(-angle * M_PI / 180.0));
-                double cosNegGridAngle(std::cos(-angle * M_PI / 180.0));
-                Vec4D temp1 = {0,0,0,0}, temp2 = {0,0,0,0};
-                CollisionUtil::CollisionEnvironment env(vpMatrix, is3d, temp1, temp2, halfWidth, halfHeight, sinNegGridAngle, cosNegGridAngle, origin);
 
                 const auto &circles = object->getMapAlignedBoundingCircles(zoomIdentifier, false, true);
                 if (labelRotationAlignment == SymbolAlignment::MAP && circles && !circles->empty()) {
@@ -865,6 +895,10 @@ std::optional<std::tuple<Coord, VectorLayerFeatureInfo>> Tiled2dMapVectorSymbolG
     if (!anyInteractable) {
         return std::nullopt;
     }
+#ifdef DRAW_TEXT_BOUNDING_BOX
+    lastClickHitCircle = clickHitCircle;
+    mapInterface.lock()->invalidate();
+#endif
     for (const auto object: symbolObjects) {
         const auto result = object->onClickConfirmed(clickHitCircle, zoomIdentifier, collisionEnvironment);
         if (result) {
