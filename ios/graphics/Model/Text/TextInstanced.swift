@@ -29,6 +29,7 @@ final class TextInstanced: BaseGraphicsObject, @unchecked Sendable {
     private var styleIndicesBuffer: MTLBuffer?
     private var styleBuffer: MTLBuffer?
     private var originBuffer: MTLBuffer?
+    private var aspectRatioBuffer: MTLBuffer?
 
     private var texture: MTLTexture?
 
@@ -42,6 +43,9 @@ final class TextInstanced: BaseGraphicsObject, @unchecked Sendable {
 
         var originOffset: simd_float4 = simd_float4(0, 0, 0, 0)
         originBuffer = device.makeBuffer(bytes: &originOffset, length: MemoryLayout<simd_float4>.stride, options: [])
+
+        var aspectRatio: simd_float1 = simd_float1(0)
+        aspectRatioBuffer = device.makeBuffer(bytes: &aspectRatio, length: MemoryLayout<simd_float1>.stride, options: [])
     }
 
     private func setupStencilStates() {
@@ -127,7 +131,6 @@ final class TextInstanced: BaseGraphicsObject, @unchecked Sendable {
         }
         encoder.setVertexBuffer(originOffsetBuffer, offset: 0, index: 9)
 
-
         if let bufferPointer = originBuffer?.contents().assumingMemoryBound(to: simd_float4.self) {
             bufferPointer.pointee.x = Float(origin.x)
             bufferPointer.pointee.y = Float(origin.y)
@@ -135,6 +138,10 @@ final class TextInstanced: BaseGraphicsObject, @unchecked Sendable {
         }
         encoder.setVertexBuffer(originBuffer, offset: 0, index: 10)
 
+        if let bufferPointer = aspectRatioBuffer?.contents().assumingMemoryBound(to: simd_float1.self) {
+            bufferPointer.pointee = Float(context.aspectRatio)
+        }
+        encoder.setVertexBuffer(aspectRatioBuffer, offset: 0, index: 11)
 
         encoder.setFragmentSamplerState(sampler, index: 0)
 

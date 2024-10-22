@@ -57,6 +57,10 @@ public class RenderingContext: NSObject, @unchecked Sendable {
         return MetalContext.current.device.makeDepthStencilState(descriptor: depthStencilDescriptor)
     }()
 
+    public var aspectRatio: Float {
+        Float(viewportSize.x) / Float(viewportSize.y)
+    }
+
     public var viewportSize: MCVec2I = .init(x: 0, y: 0)
 
     var isScissoringDirty = false

@@ -800,30 +800,11 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
                 const size_t centerPositionSize = centerPositions.size();
 
                 if (is3d) {
-                    auto charSizeScaled = Vec2D(d.boundingBoxSize.x * textSize * i.scale, d.boundingBoxSize.y * textSize * i.scale);
-                    auto vp = Vec2D(viewportSize.x, viewportSize.y);
+                    auto charScaled = Vec2D(d.boundingBoxSize.x * textSize * i.scale, d.boundingBoxSize.y * textSize * i.scale);
+                    scales[2 * (countOffset + centerPositionSize) + 0] = (charScaled.x / viewportSize.x) * 2.0;
+                    scales[2 * (countOffset + centerPositionSize) + 1] = (charScaled.y / viewportSize.x) * 2.0;
 
-                    auto max = std::max(vp.x, vp.y);
-                    auto min = std::min(vp.x, vp.y);
-
-                    auto sx = charSizeScaled.x / max * 2.0;
-                    auto sy = charSizeScaled.y / max * 2.0;
-                    auto c = max / min;
-
-                    float rotationDegrees = fmod(abs(angleDeg), 180.0);
-                    if (rotationDegrees > 90.0) {
-                        rotationDegrees = 180.0 - rotationDegrees;
-                    }
-
-                    float f = rotationDegrees / 90.0;
-                    if(vp.x > vp.y) {
-                        f = 1.0 - f;
-                    }
-
-                    scales[2 * (countOffset + centerPositionSize) + 0] = sx * ((1 - f) * c + f);
-                    scales[2 * (countOffset + centerPositionSize) + 1] = sy * ((1 - f) + f * c);
-
-                    maxSymbolRadius = std::max(maxSymbolRadius, std::max(charSizeScaled.x * 0.5, charSizeScaled.y * 0.5));
+                    maxSymbolRadius = std::max(maxSymbolRadius, std::max(charScaled.x * 0.5, charScaled.y * 0.5));
                 } else {
                     scales[2 * (countOffset + centerPositionSize) + 0] = charSize.x;
                     scales[2 * (countOffset + centerPositionSize) + 1] = charSize.y;

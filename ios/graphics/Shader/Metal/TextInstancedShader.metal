@@ -32,6 +32,7 @@ unitSphereTextInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
                           constant packed_float3 *referencePositions [[buffer(8)]],
                           constant float4 &originOffset [[buffer(9)]],
                           constant float4 &origin [[buffer(10)]],
+                          constant float &aspectRatio [[buffer(11)]],
                           uint instanceId [[instance_id]])
 {
     const float3 referencePosition = referencePositions[instanceId];
@@ -64,12 +65,11 @@ unitSphereTextInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
 
     const float2 p = (vertexIn.position.xy);
 
-    // Apply non-uniform scaling first
+    // apply scale, then rotation and aspect ratio correction
     auto pScaled = float2(p.x * scale.x, p.y * scale.y);
+    auto pRot = float2((pScaled.x * cosAngle + pScaled.y * sinAngle),
+                       (-pScaled.x * sinAngle + pScaled.y * cosAngle) * aspectRatio);
 
-    // Apply rotation after scaling
-    auto pRot = float2(pScaled.x * cosAngle + pScaled.y * sinAngle,
-                       -pScaled.x * sinAngle + pScaled.y * cosAngle);
     auto position = float4(screenPosition.xy + offset.xy + pRot, 0.0, 1.0);
 
     TextInstancedVertexOut out {
