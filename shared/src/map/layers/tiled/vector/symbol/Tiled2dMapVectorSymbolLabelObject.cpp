@@ -946,13 +946,18 @@ DistanceIndex Tiled2dMapVectorSymbolLabelObject::findReferencePointIndices() {
 
 
 void Tiled2dMapVectorSymbolLabelObject::writePosition(const double x_, const double y_, const size_t offset, std::vector<float> &buffer) {
-    double x = is3d ? 1.0 * sin(y_) * cos(x_) - tileOrigin.x : x_ - tileOrigin.x;
-    double y = is3d ?  1.0 * cos(y_) - tileOrigin.y : y_ - tileOrigin.y;
-    double z = is3d ? -1.0 * sin(y_) * sin(x_) - tileOrigin.z : 0.0;
-
-    buffer[positionSize * offset] = x;
-    buffer[positionSize * offset + 1] = y;
+    const size_t baseIndex = positionSize * offset;
     if (is3d) {
-        buffer[positionSize * offset + 2] = z;
+        const double sinY = sin(y_);
+        const double cosY = cos(y_);
+        const double sinX = sin(x_);
+        const double cosX = cos(x_);
+
+        buffer[baseIndex]     = sinY * cosX - tileOrigin.x;
+        buffer[baseIndex + 1] = cosY - tileOrigin.y;
+        buffer[baseIndex + 2] = -sinY * sinX - tileOrigin.z;
+    } else {
+        buffer[baseIndex]     = x_ - tileOrigin.x;
+        buffer[baseIndex + 1] = y_ - tileOrigin.y;
     }
 }
