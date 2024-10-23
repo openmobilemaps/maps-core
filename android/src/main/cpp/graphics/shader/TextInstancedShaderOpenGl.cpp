@@ -89,7 +89,7 @@ std::string TextInstancedShaderOpenGl::getVertexShader() {
                                    float sinAngle = sin(angle);
                                    float cosAngle = cos(angle);
                                    vec2 pRot = vec2(pScaled.x * cosAngle + pScaled.y * sinAngle,
-                                                      -pScaled.x * sinAngle + pScaled.y * cosAngle * uAspectRatio);
+                                                    (-pScaled.x * sinAngle + pScaled.y * cosAngle) * uAspectRatio);
 
                                    gl_Position = vec4(screenPosition.xy + aPosition.xy + pRot, 0.0, 1.0);
                                    v_texCoordInstance = aTexCoordinate;
