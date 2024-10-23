@@ -368,11 +368,11 @@ bool Tiled2dMapVectorPolygonTile::performClick(const Coord &coord) {
     }
 
     std::vector<VectorLayerFeatureInfo> featureInfos;
-    for (auto const &[polygon, featureContext]: hitDetectionPolygons) {
-        if (VectorTileGeometryHandler::isPointInTriangulatedPolygon(coord, polygon, converter)) {
+    for (auto iter = hitDetectionPolygons.rbegin(); iter != hitDetectionPolygons.rend(); ++iter) {
+        if (VectorTileGeometryHandler::isPointInTriangulatedPolygon(coord, std::get<0>(*iter), converter)) {
             if (multiselect) {
-                featureInfos.push_back(featureContext->getFeatureInfo());
-            } else if (strongSelectionDelegate->didSelectFeature(featureContext->getFeatureInfo(), description->identifier,
+                featureInfos.push_back(std::get<1>(*iter)->getFeatureInfo());
+            } else if (strongSelectionDelegate->didSelectFeature(std::get<1>(*iter)->getFeatureInfo(), description->identifier,
                                                                  converter->convert(CoordinateSystemIdentifiers::EPSG4326(),coord))) {
                 return true;
             }

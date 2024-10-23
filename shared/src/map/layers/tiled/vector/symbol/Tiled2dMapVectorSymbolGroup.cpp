@@ -899,8 +899,8 @@ std::optional<std::tuple<Coord, VectorLayerFeatureInfo>> Tiled2dMapVectorSymbolG
     lastClickHitCircle = clickHitCircle;
     mapInterface.lock()->invalidate();
 #endif
-    for (const auto object: symbolObjects) {
-        const auto result = object->onClickConfirmed(clickHitCircle, zoomIdentifier, collisionEnvironment);
+    for (auto iter = symbolObjects.rbegin(); iter != symbolObjects.rend(); ++iter) {
+        const auto result = (*iter)->onClickConfirmed(clickHitCircle, zoomIdentifier, collisionEnvironment);
         if (result) {
             return result;
         }
