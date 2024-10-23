@@ -44,6 +44,8 @@ class OpenGlContext : public RenderingContextInterface, std::enable_shared_from_
 
     virtual void applyScissorRect(const std::optional<::RectI> &scissorRect) override;
 
+    virtual float getAspectRatio();
+
   protected:
     RenderingCullMode cullMode = RenderingCullMode::NONE;
     Color backgroundColor = Color(0, 0, 0, 1);

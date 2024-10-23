@@ -91,3 +91,7 @@ void OpenGlContext::setCulling(RenderingCullMode mode) {
             break;
     }
 }
+
+float OpenGlContext::getAspectRatio() {
+    return viewportSize.x / (float) viewportSize.y;
+}

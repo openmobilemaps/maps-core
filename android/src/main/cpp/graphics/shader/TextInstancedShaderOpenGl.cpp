@@ -39,6 +39,13 @@ void TextInstancedShaderOpenGl::setupProgram(const std::shared_ptr<::RenderingCo
 
 void TextInstancedShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context) {
     BaseShaderProgramOpenGl::preRender(context);
+
+    std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
+    int program = openGlContext->getProgram(programName);
+    glUseProgram(program);
+
+    int aspectRatioHandle = glGetUniformLocation(program, "uAspectRatio");
+    glUniform1f(aspectRatioHandle, openGlContext->getAspectRatio());
 }
 
 std::string TextInstancedShaderOpenGl::getVertexShader() {
@@ -48,6 +55,7 @@ std::string TextInstancedShaderOpenGl::getVertexShader() {
                                uniform mat4 umMatrix;
                                uniform vec4 uOriginOffset;
                                uniform vec4 uOrigin;
+                               uniform float uAspectRatio;
 
                                in vec4 vPosition;
                                in vec2 texCoordinate;
@@ -81,7 +89,7 @@ std::string TextInstancedShaderOpenGl::getVertexShader() {
                                    float sinAngle = sin(angle);
                                    float cosAngle = cos(angle);
                                    vec2 pRot = vec2(pScaled.x * cosAngle + pScaled.y * sinAngle,
-                                                      -pScaled.x * sinAngle + pScaled.y * cosAngle);
+                                                      -pScaled.x * sinAngle + pScaled.y * cosAngle * uAspectRatio);
 
                                    gl_Position = vec4(screenPosition.xy + aPosition.xy + pRot, 0.0, 1.0);
                                    v_texCoordInstance = aTexCoordinate;
