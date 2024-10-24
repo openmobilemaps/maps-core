@@ -241,6 +241,7 @@ camera_3d_config = record {
     max_zoom: f32;
 
     pitch_interpolation_values: camera_interpolation;
+    # vertical camera displacement in padding-reduced viewport in [-1.0, 1.0]
     vertical_displacement_interpolation_values: camera_interpolation;
 }
 

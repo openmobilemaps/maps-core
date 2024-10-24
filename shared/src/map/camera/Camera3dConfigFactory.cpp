@@ -30,9 +30,9 @@ Camera3dConfig Camera3dConfigFactory::getRestorConfig() {
     });
 
     CameraInterpolation verticalDisplacementInterpolationValues({
-        {0.0f, 0.5f},
-        {pitchSwitch, 1.0f},
-        {1.0f, 0.5f}
+        {0.0f, 0.0f},
+        {pitchSwitch, 0.61803f},
+        {1.0f, 0.0f}
     });
 
     return Camera3dConfig("restor_config", true, std::nullopt, 1000, minZoom, maxZoom,

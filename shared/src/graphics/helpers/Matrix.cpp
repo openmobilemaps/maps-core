@@ -319,7 +319,8 @@ void Matrix::scaleM(std::vector<float> &m, int mOffset, float x, float y, float 
 }
 
 /**
- * Translates matrix m by x, y, and z, putting the result in tm.
+ * Applies a matrix m to a translation matrix defined by x, y, and z, putting the result in tm.
+ * i.e. tm = m * T
  * <p>
  * m and tm must not overlap.
  *
@@ -343,7 +344,8 @@ void Matrix::translateM(std::vector<float> &tm, int tmOffset, std::vector<float>
 }
 
 /**
- * Translates matrix m by x, y, and z in place.
+ * Applies a matrix m to a translation matrix defined by x, y, and z in place.
+ * i.e. tm = m * T
  *
  * @param m matrix
  * @param mOffset index into m where the matrix starts
@@ -355,6 +357,47 @@ void Matrix::translateM(std::vector<float> &m, int mOffset, float x, float y, fl
     for (int i = 0; i < 4; i++) {
         int mi = mOffset + i;
         m[12 + mi] += m[mi] * x + m[4 + mi] * y + m[8 + mi] * z;
+    }
+}
+
+/**
+ * Translates a matrix by by x, y, and z, putting the result in tm.
+ * i.e. tm = T * m
+ * <p>
+ * m and tm must not overlap.
+ *
+ * @param tm returns the result
+ * @param tmOffset index into sm where the result matrix starts
+ * @param m source matrix
+ * @param mOffset index into m where the source matrix starts
+ * @param x translation factor x
+ * @param y translation factor y
+ * @param z translation factor z
+ */
+void Matrix::mTranslated(std::vector<float> &tm, int tmOffset, std::vector<float> &m, int mOffset, float x, float y, float z) {
+    for (int i = 0; i <= 12; i += 4) {
+        tm[tmOffset + i] = x * m[mOffset + i + 3];
+        tm[tmOffset + i + 1] = y * m[mOffset + i + 3];
+        tm[tmOffset + i + 2] = z * m[mOffset + i + 3];
+        tm[tmOffset + i + 3] = m[mOffset + i + 3];
+    }
+}
+
+/**
+ * Translates a matrix by by x, y, and z in place.
+ * i.e. m' = T * m
+ *
+ * @param m matrix
+ * @param mOffset index into m where the matrix starts
+ * @param x translation factor x
+ * @param y translation factor y
+ * @param z translation factor z
+ */
+void Matrix::mTranslated(std::vector<float> &m, int mOffset, float x, float y, float z) {
+    for (int i = 0; i <= 12; i += 4) {
+        m[mOffset + i] = x * m[mOffset + i + 3];
+        m[mOffset + i + 1] = y * m[mOffset + i + 3];
+        m[mOffset + i + 2] = z * m[mOffset + i + 3];
     }
 }
 

@@ -62,6 +62,10 @@ public:
 
     static void translateM(std::vector<float> &m, int mOffset, float x, float y, float z);
 
+    static void mTranslated(std::vector<float> &tm, int tmOffset, std::vector<float> &m, int mOffset, float x, float y, float z);
+
+    static void mTranslated(std::vector<float> &m, int mOffset, float x, float y, float z);
+
     static void rotateM(std::vector<float> &m, int mOffset, float a, float x, float y, float z);
 
     static void setRotateM(std::vector<float> &rm, int rmOffset, float a, float x, float y, float z);

@@ -398,12 +398,15 @@ std::tuple<std::vector<float>, std::vector<double>, Vec3D> MapCamera3d::getVpMat
 //    MatrixD::setIdentityM(newProjectionMatrix, 0);
 
     // modify projection
-    // translate anchor point based on padding and offset
-    // TODO: horizontal translation
-    double contentHeight = ((double) sizeViewport.y) - paddingBottom - paddingTop;
-    double offsetY = -paddingBottom / 2.0 / (double) sizeViewport.y + cameraVerticalDisplacement * contentHeight * 0.5 / (double) sizeViewport.y;
-    offsetY = cameraDistance * tan(fovyRad / 2.0) * offsetY; // view space to world space
-    MatrixD::translateM(newProjectionMatrix, 0, 0.0, -offsetY, 0);
+    // translate anchor point based on padding and vertical displacement
+    double relPaddingOffsetX = (paddingLeft - paddingRight) / 2.0;
+    double relPaddingOffsetY = (paddingBottom - paddingTop) / 2.0;
+    double relDisplacementOffsetY = -cameraVerticalDisplacement * ((sizeViewport.y - paddingBottom - paddingTop) / 2.0);
+    double relTotalOffsetY = relPaddingOffsetY + relDisplacementOffsetY;
+
+    double viewportXHalf = sizeViewport.x / 2.0; // Clip space is [-1.0, 1.0]
+    double viewportYHalf = sizeViewport.y / 2.0;
+    MatrixD::mTranslated(newProjectionMatrix, 0, relPaddingOffsetX / viewportXHalf, relTotalOffsetY / viewportYHalf, 0);
 
     // view matrix
     // remember: read from bottom to top as camera movement relative to fixed globe

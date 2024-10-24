@@ -17,6 +17,7 @@ struct Camera3dConfig final {
     float minZoom;
     float maxZoom;
     CameraInterpolation pitchInterpolationValues;
+    /** vertical camera displacement in padding-reduced viewport in [-1.0, 1.0] */
     CameraInterpolation verticalDisplacementInterpolationValues;
 
     Camera3dConfig(std::string key_,

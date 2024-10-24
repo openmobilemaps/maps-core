@@ -39,6 +39,7 @@ verticalDisplacementInterpolationValues:(nonnull MCCameraInterpolation *)vertica
 
 @property (nonatomic, readonly, nonnull) MCCameraInterpolation * pitchInterpolationValues;
 
+/** vertical camera displacement in padding-reduced viewport in [-1.0, 1.0] */
 @property (nonatomic, readonly, nonnull) MCCameraInterpolation * verticalDisplacementInterpolationValues;
 
 @end
