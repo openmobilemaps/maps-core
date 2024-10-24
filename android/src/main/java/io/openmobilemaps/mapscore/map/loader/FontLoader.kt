@@ -10,6 +10,7 @@ import io.openmobilemaps.mapscore.graphics.BitmapTextureHolder
 import io.openmobilemaps.mapscore.shared.graphics.common.Quad2dD
 import io.openmobilemaps.mapscore.shared.graphics.common.Vec2D
 import io.openmobilemaps.mapscore.shared.map.loader.*
+import java.io.File
 
 open class FontLoader(context: Context, private val dpFactor: Float = context.resources.displayMetrics.density) : FontLoaderInterface() {
 
@@ -19,11 +20,12 @@ open class FontLoader(context: Context, private val dpFactor: Float = context.re
 	 */
 	constructor(context: Context, fontAssetFolder: String, dpFactor: Float = context.resources.displayMetrics.density)
 			: this(context, dpFactor) {
-		val assetFiles = context.assets.list(fontAssetFolder)?.mapNotNull { it.split('.').firstOrNull() }?.toSet()?.toList() ?: return
+		val fontFolder = fontAssetFolder.trimEnd('/', '\\', File.separatorChar)
+		val assetFiles = context.assets.list(fontFolder)?.mapNotNull { it.split('.').firstOrNull() }?.toSet()?.toList() ?: return
 		assetFiles.forEach { fontPath ->
 			val jsonString =
-				context.resources.assets.open("$fontAssetFolder$fontPath.json").bufferedReader().use { it.readText() }
-			val fontAtlas = BitmapFactory.decodeStream(context.resources.assets.open("$fontAssetFolder$fontPath.png"))
+				context.resources.assets.open("$fontFolder/$fontPath.json").bufferedReader().use { it.readText() }
+			val fontAtlas = BitmapFactory.decodeStream(context.resources.assets.open("$fontFolder/$fontPath.png"))
 			addFont(jsonString, fontAtlas)
 		}
 	}
