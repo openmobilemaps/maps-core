@@ -799,14 +799,17 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
                     scales[2 * (countOffset + centerPositionSize) + 1] = (charScaled.y / viewportSize.x) * 2.0;
 
                     maxSymbolRadius = std::max(maxSymbolRadius, std::max(charScaled.x * 0.5, charScaled.y * 0.5));
+
+                    rotations[countOffset + centerPositionSize] = angleDeg;
                 } else {
                     scales[2 * (countOffset + centerPositionSize) + 0] = charSize.x;
                     scales[2 * (countOffset + centerPositionSize) + 1] = charSize.y;
 
                     maxSymbolRadius = std::max(maxSymbolRadius, std::max(charSize.x * 0.5, charSize.y * 0.5));
+
+                    rotations[countOffset + centerPositionSize] = -angleDeg;
                 }
 
-                rotations[countOffset + centerPositionSize] = -angleDeg;
 
                 centerPositions.push_back(Vec2DHelper::midpoint(Vec2DHelper::midpoint(quad.bottomLeft, quad.bottomRight), Vec2DHelper::midpoint(quad.topLeft, quad.topRight)));
             }

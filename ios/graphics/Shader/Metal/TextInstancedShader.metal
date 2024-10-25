@@ -67,8 +67,8 @@ unitSphereTextInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
 
     // apply scale, then rotation and aspect ratio correction
     auto pScaled = float2(p.x * scale.x, p.y * scale.y);
-    auto pRot = float2((pScaled.x * cosAngle + pScaled.y * sinAngle),
-                       (-pScaled.x * sinAngle + pScaled.y * cosAngle) * aspectRatio);
+    auto pRot = float2((pScaled.x * cosAngle - pScaled.y * sinAngle),
+                       (pScaled.x * sinAngle + pScaled.y * cosAngle) * aspectRatio);
 
     auto position = float4(screenPosition.xy + offset.xy + pRot, 0.0, 1.0);
 
