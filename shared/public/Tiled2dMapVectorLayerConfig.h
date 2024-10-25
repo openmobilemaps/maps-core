@@ -21,8 +21,20 @@
 class Tiled2dMapVectorLayerConfig : public Tiled2dMapLayerConfig {
 public:
     Tiled2dMapVectorLayerConfig(const std::shared_ptr<VectorMapSourceDescription> &sourceDescription,
-                                const Tiled2dMapZoomInfo &zoomInfo = Tiled2dMapZoomInfo(1.0, 0, 0,  false, true, false, true))
+                                const Tiled2dMapZoomInfo &zoomInfo)
             : sourceDescription(sourceDescription), zoomInfo(zoomInfo) {}
+
+    Tiled2dMapVectorLayerConfig(const std::shared_ptr<VectorMapSourceDescription> &sourceDescription,
+                                const bool is3d)
+            : sourceDescription(sourceDescription),
+              zoomInfo(Tiled2dMapZoomInfo(
+                      sourceDescription->zoomLevelScaleFactor ? *sourceDescription->zoomLevelScaleFactor : (is3d ? 0.75 : 1.0),
+                      sourceDescription->numDrawPreviousLayers ? *sourceDescription->numDrawPreviousLayers : 0,
+                      0,
+                      sourceDescription->adaptScaleToScreen ? *sourceDescription->adaptScaleToScreen : false,
+                      true,
+                      sourceDescription->underzoom ? *sourceDescription->underzoom : false,
+                      sourceDescription->overzoom ? *sourceDescription->overzoom : false)) {}
 
     ~Tiled2dMapVectorLayerConfig() {}
 

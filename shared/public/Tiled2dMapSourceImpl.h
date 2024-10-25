@@ -165,10 +165,24 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
         }
     }
 
+    gpc_polygon currentViewBoundsPolygon;
+    gpc_polygon currentTilePolygon;
+    gpc_set_polygon({PolygonCoord(
+            {
+                    conversionHelper->convert(layerSystemId, Coord(4326, -180, 90, 0)), // top left
+                    conversionHelper->convert(layerSystemId, Coord(4326, 180, 90, 0)), // top right
+                    conversionHelper->convert(layerSystemId, Coord(4326, 180, -90, 0)), // bottom right
+                    conversionHelper->convert(layerSystemId, Coord(4326, -180, -90, 0)), // bottom left
+                    conversionHelper->convert(layerSystemId, Coord(4326, -180, 90, 0)) // top left
+            }, {})}, &currentViewBoundsPolygon);
+    auto clipAndFreeLambda = [&currentViewBoundsPolygon, system = layerSystemId](gpc_polygon &polygon) {
+        gpc_polygon_clip(GPC_DIFF, &currentViewBoundsPolygon, &polygon, &currentViewBoundsPolygon);
+        gpc_free_polygon(&polygon);
+        auto tempRes = gpc_get_polygon_coord(&currentViewBoundsPolygon, system);
+        1 + 1;
+    };
 
     size_t visibleTileHash = minZoomLevelIndex;
-
-
     std::vector<std::pair<VisibleTileCandidate, PrioritizedTiled2dMapTileInfo>> visibleTilesVec;
 
     auto maxLevelAvailable = zoomLevelInfos.size() - 1;
@@ -218,6 +232,8 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
         const Coord bottomRight = Coord(layerSystemId, topLeft.x + tileWidthAdj, topLeft.y + tileHeightAdj, focusPointAltitude- heightRange / 2.0);
 
         const Coord tileCenter = Coord(layerSystemId, topLeft.x * 0.5 + bottomRight.x * 0.5, topLeft.y * 0.5 + bottomRight.y * 0.5, topLeft.z * 0.5 + bottomRight.z * 0.5);
+
+        gpc_set_polygon({PolygonCoord({topLeft, topRight, bottomRight, bottomLeft, topLeft}, {})}, &currentTilePolygon);
 
         const auto focusPointClampedToTile = Coord(layerSystemId,
                                                    topLeft.x < topRight.x ? std::clamp(focusPointInLayerCoords.x, topLeft.x, topRight.x) : std::clamp(focusPointInLayerCoords.x, topRight.x, topLeft.x),
@@ -275,10 +291,16 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
         auto diffCenterViewBottomLeft = bottomLeftView - earthCenterView;
         auto diffCenterViewBottomRight = bottomRightView - earthCenterView;
 
+        auto diffCenterViewTopLeftHigh = topLeftHighView - earthCenterView;
+        auto diffCenterViewTopRightHigh = topRightHighView - earthCenterView;
+        auto diffCenterViewBottomLeftHigh = bottomLeftHighView - earthCenterView;
+        auto diffCenterViewBottomRightHigh = bottomRightHighView - earthCenterView;
+
         bool isKeptLevel = candidate.levelIndex == minZoomLevelIndex;
 
         if (!isKeptLevel && diffCenterViewTopLeft.z < 0.0 && diffCenterViewTopRight.z < 0.0 && diffCenterViewBottomLeft.z < 0.0 &&
             diffCenterViewBottomRight.z < 0.0) {
+            clipAndFreeLambda(currentTilePolygon);
             continue;
         }
         auto samplePointOriginViewScreen = projectToScreen(focusPointClampedView, projectionMatrix);
@@ -309,49 +331,73 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
                 // 1.02: increase angle with padding
                 float fovFactor = 0.5 * 1.0;
 
-                if (topLeftVA < -verticalFov * fovFactor && topRightVA < -verticalFov * fovFactor &&
-                    bottomLeftVA < -verticalFov * fovFactor && bottomRightVA < -verticalFov * fovFactor &&
-                    topLeftHighVA < -verticalFov * fovFactor && topRightHighVA < -verticalFov * fovFactor &&
-                    bottomLeftHighVA < -verticalFov * fovFactor && bottomRightHighVA < -verticalFov * fovFactor
+                if ((topLeftVA < -verticalFov * fovFactor || diffCenterViewTopLeft.z < 0.0) &&
+                    (topRightVA < -verticalFov * fovFactor || diffCenterViewTopRight.z < 0.0) &&
+                    (bottomLeftVA < -verticalFov * fovFactor || diffCenterViewBottomLeft.z < 0.0) &&
+                    (bottomRightVA < -verticalFov * fovFactor || diffCenterViewBottomRight.z < 0.0) &&
+                    (topLeftHighVA < -verticalFov * fovFactor || diffCenterViewTopLeftHigh.z < 0.0) &&
+                    (topRightHighVA < -verticalFov * fovFactor || diffCenterViewTopRightHigh.z < 0.0) &&
+                    (bottomLeftHighVA < -verticalFov * fovFactor || diffCenterViewBottomLeftHigh.z < 0.0) &&
+                    (bottomRightHighVA < -verticalFov * fovFactor || diffCenterViewBottomRightHigh.z < 0.0)
                         ) {
-                    continue;
+                    clipAndFreeLambda(currentTilePolygon);
+                    continue; // All camera-facing corners are BELOW the viewport
                 }
-                if (topLeftHA < -horizontalFov * fovFactor && topRightHA < -horizontalFov * fovFactor &&
-                    bottomLeftHA < -horizontalFov * fovFactor && bottomRightHA < -horizontalFov * fovFactor &&
-                    topLeftHighHA < -horizontalFov * fovFactor && topRightHighHA < -horizontalFov * fovFactor &&
-                    bottomLeftHighHA < -horizontalFov * fovFactor && bottomRightHighHA < -horizontalFov * fovFactor
+                if ((topLeftHA < -horizontalFov * fovFactor || diffCenterViewTopLeft.z < 0.0) &&
+                    (topRightHA < -horizontalFov * fovFactor || diffCenterViewTopRight.z < 0.0) &&
+                    (bottomLeftHA < -horizontalFov * fovFactor || diffCenterViewBottomLeft.z < 0.0) &&
+                    (bottomRightHA < -horizontalFov * fovFactor || diffCenterViewBottomRight.z < 0.0) &&
+                    (topLeftHighHA < -horizontalFov * fovFactor || diffCenterViewTopLeftHigh.z < 0.0) &&
+                    (topRightHighHA < -horizontalFov * fovFactor || diffCenterViewTopRightHigh.z < 0.0) &&
+                    (bottomLeftHighHA < -horizontalFov * fovFactor || diffCenterViewBottomLeftHigh.z < 0.0) &&
+                    (bottomRightHighHA < -horizontalFov * fovFactor || diffCenterViewBottomRightHigh.z < 0.0)
                         ) {
-                    continue;
+                    clipAndFreeLambda(currentTilePolygon);
+                    continue; // All camera-facing corners are TO THE LEFT of the viewport
                 }
-                if (topLeftVA > verticalFov * fovFactor && topRightVA > verticalFov * fovFactor &&
-                    bottomLeftVA > verticalFov * fovFactor && bottomRightVA > verticalFov * fovFactor &&
-                    topLeftHighVA > verticalFov * fovFactor && topRightHighVA > verticalFov * fovFactor &&
-                    bottomLeftHighVA > verticalFov * fovFactor && bottomRightHighVA > verticalFov * fovFactor
+                if ((topLeftVA > verticalFov * fovFactor || diffCenterViewTopLeft.z < 0.0) &&
+                    (topRightVA > verticalFov * fovFactor || diffCenterViewTopRight.z < 0.0) &&
+                    (bottomLeftVA > verticalFov * fovFactor || diffCenterViewBottomLeft.z < 0.0) &&
+                    (bottomRightVA > verticalFov * fovFactor || diffCenterViewBottomRight.z < 0.0) &&
+                    (topLeftHighVA > verticalFov * fovFactor || diffCenterViewTopLeftHigh.z < 0.0) &&
+                    (topRightHighVA > verticalFov * fovFactor || diffCenterViewTopRightHigh.z < 0.0) &&
+                    (bottomLeftHighVA > verticalFov * fovFactor || diffCenterViewBottomLeftHigh.z < 0.0) &&
+                    (bottomRightHighVA > verticalFov * fovFactor || diffCenterViewBottomRightHigh.z < 0.0)
                         ) {
-                    continue;
+                    clipAndFreeLambda(currentTilePolygon);
+                    continue; // All camera-facing corners are ABOVE the viewport
                 }
-                if (topLeftHA > horizontalFov * fovFactor && topRightHA > horizontalFov * fovFactor &&
-                    bottomLeftHA > horizontalFov * fovFactor && bottomRightHA > horizontalFov * fovFactor &&
-                    topLeftHighHA > horizontalFov * fovFactor && topRightHighHA > horizontalFov * fovFactor &&
-                    bottomLeftHighHA > horizontalFov * fovFactor && bottomRightHighHA > horizontalFov * fovFactor
+                if ((topLeftHA > horizontalFov * fovFactor || diffCenterViewTopLeft.z < 0.0) &&
+                    (topRightHA > horizontalFov * fovFactor || diffCenterViewTopRight.z < 0.0) &&
+                    (bottomLeftHA > horizontalFov * fovFactor || diffCenterViewBottomLeft.z < 0.0) &&
+                    (bottomRightHA > horizontalFov * fovFactor || diffCenterViewBottomRight.z < 0.0) &&
+                    (topLeftHighHA > horizontalFov * fovFactor || diffCenterViewTopLeftHigh.z < 0.0) &&
+                    (topRightHighHA > horizontalFov * fovFactor || diffCenterViewTopRightHigh.z < 0.0) &&
+                    (bottomLeftHighHA > horizontalFov * fovFactor || diffCenterViewBottomLeftHigh.z < 0.0) &&
+                    (bottomRightHighHA > horizontalFov * fovFactor || diffCenterViewBottomRightHigh.z < 0.0)
                         ) {
-                    continue;
+                    clipAndFreeLambda(currentTilePolygon);
+                    continue; // All camera-facing corners are TO THE RIGHT of the viewport
                 }
             } else {
                 if (topLeftView.x < -width / 2.0 && topRightView.x < -width / 2.0 && bottomLeftView.x < -width / 2.0 &&
                     bottomRightView.x < -width / 2.0) {
+                    clipAndFreeLambda(currentTilePolygon);
                     continue;
                 }
                 if (topLeftView.y < -height / 2.0 && topRightView.y < -height / 2.0 && bottomLeftView.y < -height / 2.0 &&
                     bottomRightView.y < -height / 2.0) {
+                    clipAndFreeLambda(currentTilePolygon);
                     continue;
                 }
                 if (topLeftView.x > width / 2.0 && topRightView.x > width / 2.0 && bottomLeftView.x > width / 2.0 &&
                     bottomRightView.x > width / 2.0) {
+                    clipAndFreeLambda(currentTilePolygon);
                     continue;
                 }
                 if (topLeftView.y > height / 2.0 && topRightView.y > height / 2.0 && bottomLeftView.y > height / 2.0 &&
                     bottomRightView.y > height / 2.0) {
+                    clipAndFreeLambda(currentTilePolygon);
                     continue;
                 }
             }
@@ -444,15 +490,13 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
         }
     }
 
+    currentViewBounds = gpc_get_polygon_coord(&currentViewBoundsPolygon, layerSystemId);
+    gpc_free_polygon(&currentViewBoundsPolygon);
+
     if (!validViewBounds) {
         return;
     }
 
-    currentViewBounds.topLeft = Coord(4326, -180, 90, 0);
-    currentViewBounds.topRight =  Coord(4326, 180, 90, 0);
-    currentViewBounds.bottomRight =  Coord(4326, 180, -90, 0);
-    currentViewBounds.bottomLeft =  Coord(4326, -180, -90, 0);
-    currentViewBounds = conversionHelper->convertQuad(layerSystemId, currentViewBounds);
 
     std::vector<VisibleTilesLayer> layers;
     int topMostZoomLevel = zoomLevelInfos.begin()->zoomLevelIdentifier;
@@ -737,12 +781,17 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
         onVisibleTilesChanged(layers, false, keepZoomLevelOffset);
     }
 
-    currentViewBounds.topLeft = visibleBoundsLayer.topLeft;
-    currentViewBounds.topRight = Coord(visibleBoundsLayer.topLeft.systemIdentifier, visibleBoundsLayer.bottomRight.x,
-                                       visibleBoundsLayer.topLeft.y, 0);
-    currentViewBounds.bottomRight = visibleBoundsLayer.bottomRight;
-    currentViewBounds.bottomLeft = Coord(visibleBoundsLayer.topLeft.systemIdentifier, visibleBoundsLayer.topLeft.x,
-                                         visibleBoundsLayer.bottomRight.y, 0);
+    currentViewBounds = {PolygonCoord({
+                                             visibleBoundsLayer.topLeft,
+                                             Coord(visibleBoundsLayer.topLeft.systemIdentifier,
+                                                   visibleBoundsLayer.bottomRight.x,
+                                                   visibleBoundsLayer.topLeft.y, 0),
+                                             visibleBoundsLayer.bottomRight,
+                                             Coord(visibleBoundsLayer.topLeft.systemIdentifier,
+                                                   visibleBoundsLayer.topLeft.x,
+                                                   visibleBoundsLayer.bottomRight.y, 0)
+                                     }, {})};
+
 }
 
 template<class T, class L, class R>
@@ -1106,13 +1155,7 @@ void Tiled2dMapSource<T, L, R>::updateTileMasks() {
     bool isFirst = true;
 
     gpc_polygon currentViewBoundsPolygon;
-    gpc_set_polygon({PolygonCoord({
-        currentViewBounds.topLeft,
-        currentViewBounds.topRight,
-        currentViewBounds.bottomRight,
-        currentViewBounds.bottomLeft,
-        currentViewBounds.topLeft
-    }, {})}, &currentViewBoundsPolygon);
+    gpc_set_polygons(currentViewBounds, &currentViewBoundsPolygon);
 
     bool completeViewBoundsDrawn = false;
 
@@ -1249,11 +1292,6 @@ void Tiled2dMapSource<T, L, R>::setTilesReady(const std::vector<Tiled2dMapVersio
 
     updateTileMasks();
     notifyTilesUpdates();
-}
-
-template<class T, class L, class R>
-QuadCoord Tiled2dMapSource<T, L, R>::getCurrentViewBounds() {
-    return currentViewBounds;
 }
 
 template<class T, class L, class R>

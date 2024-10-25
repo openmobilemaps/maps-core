@@ -97,8 +97,6 @@ public:
 
     virtual void resume() override;
 
-    virtual QuadCoord getCurrentViewBounds();
-
     void setMinZoomLevelIdentifier(std::optional<int32_t> value) override;
 
     void setMaxZoomLevelIdentifier(std::optional<int32_t> value) override;
@@ -162,11 +160,7 @@ public:
     std::vector<VisibleTilesLayer> currentPyramid;
     int currentKeepZoomLevelOffset;
 
-    QuadCoord currentViewBounds = QuadCoord(Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(), 0.0, 0.0, 0.0),
-                                            Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(), 0.0, 0.0, 0.0),
-                                            Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(), 0.0, 0.0, 0.0),
-                                            Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(), 0.0, 0.0, 0.0));
-
+    std::vector<PolygonCoord> currentViewBounds = {};
 
     std::atomic<bool> isPaused;
 

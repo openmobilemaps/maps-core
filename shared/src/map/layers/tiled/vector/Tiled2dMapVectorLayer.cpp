@@ -109,9 +109,9 @@ Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
         featureStateManager(std::make_shared<Tiled2dMapVectorStateManager>()),
         symbolDelegate(symbolDelegate),
         localDataProvider(localDataProvider),
-		sourceUrlParams(sourceUrlParams) {
-    	setMapDescription(mapDescription);
-}
+		sourceUrlParams(sourceUrlParams),
+        mapDescription(mapDescription)
+        {}
 
 Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
                                              const std::vector<std::shared_ptr<::LoaderInterface>> &loaders,
@@ -228,8 +228,12 @@ std::optional<TiledLayerError> Tiled2dMapVectorLayer::loadStyleJsonLocally(std::
 
 std::shared_ptr<Tiled2dMapVectorLayerConfig>
 Tiled2dMapVectorLayer::getLayerConfig(const std::shared_ptr<VectorMapSourceDescription> &source) {
+    const auto mapInterface = this->mapInterface;
+    if (!mapInterface) {
+        return nullptr;
+    }
     return customZoomInfo.has_value() ? std::make_shared<Tiled2dMapVectorLayerConfig>(source, *customZoomInfo)
-                                      : std::make_shared<Tiled2dMapVectorLayerConfig>(source);
+                                      : std::make_shared<Tiled2dMapVectorLayerConfig>(source, mapInterface->is3d());
 }
 
 std::shared_ptr<Tiled2dMapVectorLayerConfig>
@@ -283,6 +287,7 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
     if (!mapInterface) {
         return;
     }
+    bool is3d = mapInterface->is3d();
     
     std::shared_ptr<Mailbox> selfMailbox = mailbox;
     if (!mailbox) {
@@ -315,9 +320,9 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
             }
             case raster: {
                 auto rasterSubLayerConfig = customZoomInfo.has_value() ? std::make_shared<Tiled2dMapVectorRasterSubLayerConfig>(
-                        std::static_pointer_cast<RasterVectorLayerDescription>(layerDesc), *customZoomInfo)
+                        std::static_pointer_cast<RasterVectorLayerDescription>(layerDesc), is3d,*customZoomInfo)
                                                                        : std::make_shared<Tiled2dMapVectorRasterSubLayerConfig>(
-                                std::static_pointer_cast<RasterVectorLayerDescription>(layerDesc));
+                                std::static_pointer_cast<RasterVectorLayerDescription>(layerDesc), is3d);
 
                 auto sourceMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
                 auto sourceActor = Actor<Tiled2dMapRasterSource>(sourceMailbox,
@@ -732,10 +737,9 @@ void Tiled2dMapVectorLayer::onAdded(const std::shared_ptr<::MapInterface> &mapIn
     if (mapDescription == nullptr) {
         scheduleStyleJsonLoading();
         return;
+    } else {
+        setMapDescription(mapDescription);
     }
-
-    // this is needed if the layer is initialised with a style.json string
-    initializeVectorLayer();
 }
 
 void Tiled2dMapVectorLayer::onRemoved() {

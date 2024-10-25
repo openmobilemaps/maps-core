@@ -85,7 +85,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
             bool adaptScaleToScreen = true;
             int32_t numDrawPreviousLayers = 0;
             bool maskTiles = true;
-            double zoomLevelScaleFactor = 0.65;
+            double zoomLevelScaleFactor = 1.0;
 
             bool overzoom = true;
             bool underzoom = false;
@@ -433,12 +433,22 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                 bounds = RectCoord(topLeft, bottomRight);
             }
         }
+        auto zoomLevelScaleFactor = tileJson.contains("zoomLevelScaleFactor") ? std::optional<float>(tileJson["zoomLevelScaleFactor"].get<float>()) : std::nullopt;
+        auto adaptScaleToScreen = tileJson.contains("adaptScaleToScreen") ? std::optional<bool>(tileJson["adaptScaleToScreen"].get<bool>()) : std::nullopt;
+        auto numDrawPreviousLayers = tileJson.contains("numDrawPreviousLayers") ? std::optional<int>(tileJson["numDrawPreviousLayers"].get<int>()) : std::nullopt;
+        auto underzoom = tileJson.contains("underzoom") ? std::optional<bool>(tileJson["underzoom"].get<bool>()) : std::nullopt;
+        auto overzoom = tileJson.contains("overzoom") ? std::optional<bool>(tileJson["overzoom"].get<bool>()) : std::nullopt;
         sourceDescriptions.push_back(
                 std::make_shared<VectorMapSourceDescription>(identifier,
                                                              tileJson["tiles"].begin()->get<std::string>(),
                                                              tileJson["minzoom"].get<int>(),
                                                              tileJson["maxzoom"].get<int>(),
-                                                             bounds
+                                                             bounds,
+                                                             zoomLevelScaleFactor,
+                                                             adaptScaleToScreen,
+                                                             numDrawPreviousLayers,
+                                                             underzoom,
+                                                             overzoom
                 ));
     }
 

@@ -22,11 +22,17 @@
 class Tiled2dMapVectorRasterSubLayerConfig : public Tiled2dMapVectorLayerConfig {
 public:
     Tiled2dMapVectorRasterSubLayerConfig(const std::shared_ptr<RasterVectorLayerDescription> &layerDescription,
+                                         const bool is3d,
                                          const std::optional<Tiled2dMapZoomInfo> &customZoomInfo = std::nullopt)
-    : Tiled2dMapVectorLayerConfig(
-                                  std::make_shared<VectorMapSourceDescription>(layerDescription->source, layerDescription->url,
-                                                                               layerDescription->minZoom, layerDescription->maxZoom, layerDescription->bounds)),
-    description(layerDescription) {
+            : Tiled2dMapVectorLayerConfig(
+            std::make_shared<VectorMapSourceDescription>(layerDescription->source, layerDescription->url, layerDescription->minZoom,
+                                                         layerDescription->maxZoom, layerDescription->bounds,
+                                                         layerDescription->zoomLevelScaleFactor,
+                                                         layerDescription->adaptScaleToScreen,
+                                                         layerDescription->numDrawPreviousLayers,
+                                                         layerDescription->underzoom,
+                                                         layerDescription->overzoom), is3d),
+              description(layerDescription) {
         if (customZoomInfo.has_value()) {
             zoomInfo = Tiled2dMapZoomInfo(customZoomInfo->zoomLevelScaleFactor * description->zoomLevelScaleFactor,
                                           std::max(customZoomInfo->numDrawPreviousLayers, description->numDrawPreviousLayers),
