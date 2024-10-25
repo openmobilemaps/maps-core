@@ -117,6 +117,7 @@ void MapCamera3d::moveToCenterPositionZoom(const ::Coord &centerPosition, double
         assert(focusPosition.systemIdentifier == 4326);
         this->focusPointPosition = focusPosition;
         updateZoom(zoom);
+        validVpMatrix = false;
         notifyListeners(ListenerType::BOUNDS);
         mapInterface->invalidate();
     }
@@ -150,6 +151,7 @@ void MapCamera3d::moveToCenterPosition(const ::Coord &centerPosition, bool anima
     } else {
         assert(focusPosition.systemIdentifier == 4326);
         this->focusPointPosition = focusPosition;
+        validVpMatrix = false;
         notifyListeners(ListenerType::BOUNDS);
         mapInterface->invalidate();
     }
@@ -221,6 +223,7 @@ void MapCamera3d::setZoom(double zoom, bool animated) {
         mapInterface->invalidate();
     } else {
         updateZoom(zoom);
+        validVpMatrix = false;
         notifyListeners(ListenerType::BOUNDS);
         mapInterface->invalidate();
     }
