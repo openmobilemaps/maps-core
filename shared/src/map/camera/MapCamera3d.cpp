@@ -365,14 +365,11 @@ std::tuple<std::vector<float>, std::vector<double>, Vec3D> MapCamera3d::getVpMat
     std::vector<double> newViewMatrix(16, 0.0);
     std::vector<double> newProjectionMatrix(16, 0.0);
 
-//    double off = fmod(DateHelper::currentTimeMicros() * 0.0000001, 1.0) * 0.0001;
-//    mapInterface->invalidate();
-
     const float R = 6378137.0;
-    double longitude = focusCoord.x; //  px / R;
-    double latitude = focusCoord.y; // 2*atan(exp(py / R)) - 3.1415926 / 2;
+    const double longitude = focusCoord.x; //  px / R;
+    const double latitude = focusCoord.y; // 2*atan(exp(py / R)) - 3.1415926 / 2;
 
-    double focusPointAltitude = focusCoord.z;
+    const double focusPointAltitude = focusCoord.z;
     double cameraDistance = getCameraDistance();
     double fovy = getCameraFieldOfView(); // 45 // zoom / 70800;
     const double minCameraDistance = 1.05;
@@ -385,15 +382,15 @@ std::tuple<std::vector<float>, std::vector<double>, Vec3D> MapCamera3d::getVpMat
         cameraDistance = minCameraDistance;
     }
 
-    double maxD = cameraDistance + 1.0;
-    double minD = cameraDistance - 1.0;
+    const double maxD = cameraDistance + 1.0;
+    const double minD = cameraDistance - 1.0;
 
     // aspect ratio
-    double vpr = (double) sizeViewport.x / (double) sizeViewport.y;
+    const double vpr = (double) sizeViewport.x / (double) sizeViewport.y;
     if (vpr > 1.0) {
         fovy /= vpr;
     }
-    double fovyRad = fovy * M_PI / 180.0;
+    const double fovyRad = fovy * M_PI / 180.0;
 
     // initial perspective projection
     MatrixD::perspectiveM(newProjectionMatrix, 0, fovy, vpr, minD, maxD);
@@ -402,13 +399,13 @@ std::tuple<std::vector<float>, std::vector<double>, Vec3D> MapCamera3d::getVpMat
 
     // modify projection
     // translate anchor point based on padding and vertical displacement
-    double relPaddingOffsetX = (paddingLeft - paddingRight) / 2.0;
-    double relPaddingOffsetY = (paddingBottom - paddingTop) / 2.0;
-    double relDisplacementOffsetY = -cameraVerticalDisplacement * ((sizeViewport.y - paddingBottom - paddingTop) / 2.0);
-    double relTotalOffsetY = relPaddingOffsetY + relDisplacementOffsetY;
+    const double relPaddingOffsetX = (paddingLeft - paddingRight) / 2.0;
+    const double relPaddingOffsetY = (paddingBottom - paddingTop) / 2.0;
+    const double relDisplacementOffsetY = -cameraVerticalDisplacement * ((sizeViewport.y - paddingBottom - paddingTop) / 2.0);
+    const double relTotalOffsetY = relPaddingOffsetY + relDisplacementOffsetY;
 
-    double viewportXHalf = sizeViewport.x / 2.0; // Clip space is [-1.0, 1.0]
-    double viewportYHalf = sizeViewport.y / 2.0;
+    const double viewportXHalf = sizeViewport.x / 2.0; // Clip space is [-1.0, 1.0]
+    const double viewportYHalf = sizeViewport.y / 2.0;
     MatrixD::mTranslated(newProjectionMatrix, 0, relPaddingOffsetX / viewportXHalf, relTotalOffsetY / viewportYHalf, 0);
 
     // view matrix
@@ -427,24 +424,16 @@ std::tuple<std::vector<float>, std::vector<double>, Vec3D> MapCamera3d::getVpMat
     MatrixD::rotateM(newViewMatrix, 0.0, -longitude, 0.0, 1.0, 0.0);
     MatrixD::rotateM(newViewMatrix, 0.0, -90, 0.0, 1.0, 0.0); // zero longitude in London
 
-    double lo = (longitude - 90.0) * M_PI / 180.0;
-    double la = latitude * M_PI / 180.0;
-    double x = -(1.0 * sin(lo) * cos(la));
-    double y = (-1.0 * sin(lo) * sin(la)) ;
-    double z = -(1.0 * cos(lo));
 
-    Vec3D newOrigin = Vec3D(x, y, z);
+    const double lo = (longitude - 180.0) * M_PI / 180.0; // [-2 * pi, 0) X
+    const double la = (latitude - 90.0) * M_PI / 180.0; // [0, -pi] Y
+    const double x = (1.0 * sin(la) * cos(lo));
+    const double y = (1.0 * cos(la)) ;
+    const double z = -(1.0 * sin(la) * sin(lo));
+
+    const Vec3D newOrigin = Vec3D(x, y, z);
 
     MatrixD::translateM(newViewMatrix, 0, x, y, z);
-
-//    MatrixD::translateM(newViewMatrix, 0, off, off, off);
-
-
-    // ^
-    // |
-
-//    MatrixD::setIdentityM(newViewMatrix, 0);
-
 
     std::vector<double> newVpMatrix(16, 0.0);
     MatrixD::multiplyMM(newVpMatrix, 0, newProjectionMatrix, 0, newViewMatrix, 0);
@@ -470,6 +459,7 @@ std::tuple<std::vector<float>, std::vector<double>, Vec3D> MapCamera3d::getVpMat
         horizontalFov = fovy * vpr;
         validVpMatrix = true;
         origin = newOrigin;
+        lastScalingFactor = mapUnitsFromPixels(1.0);
     }
     return std::make_tuple(newVpMatrixF, newInverseMatrix, newOrigin);
 }
@@ -1352,10 +1342,10 @@ bool MapCamera3d::coordIsOnFrontHalfOfGlobe(Coord coord) {
     // Coordinate is on front half of the globe if the projected z-value is in front
     // of the projected z-value of the globe center
 
-    auto coordCartesian = convertToCartesianCoordinates(coord);
-    auto projectedCoord = projectedPoint(coordCartesian);
+    const auto coordCartesian = convertToCartesianCoordinates(coord);
+    const auto projectedCoord = projectedPoint(coordCartesian);
 
-    auto projectedCenter = projectedPoint({0,0,0,1});
+    const auto projectedCenter = projectedPoint({0,0,0,1});
 
     bool isInFront = projectedCoord.z <= projectedCenter.z;
 
@@ -1392,20 +1382,28 @@ double MapCamera3d::mapUnitsFromPixels(double distancePx) {
     if (validVpMatrix && sizeViewport.x != 0 && sizeViewport.y != 0) {
         Coord focusRenderCoord = conversionHelper->convertToRenderSystem(getCenterPosition());
 
-        const double sampleSize = M_PI / 180.0;
-        const auto projectedOne = projectedPoint(convertToCartesianCoordinates(focusRenderCoord));
-        const auto projectedTwo = projectedPoint(convertToCartesianCoordinates(focusRenderCoord + sampleSize));
+        const double sampleSize = (M_PI / 180.0) * 0.5;
+        const auto cartOne = convertToCartesianCoordinates(focusRenderCoord);
+        const auto cartTwo = convertToCartesianCoordinates(Coord(focusRenderCoord.systemIdentifier, focusRenderCoord.x + sampleSize, focusRenderCoord.y + sampleSize * 0.5, focusRenderCoord.z));
+        const auto projectedOne = projectedPoint(cartOne);
+        const auto projectedTwo = projectedPoint(cartTwo);
+        const auto sampleDistance = std::sqrt((cartOne.x - cartTwo.x) * (cartOne.x - cartTwo.x) + (cartOne.y - cartTwo.y) * (cartOne.y - cartTwo.y) + (cartOne.z - cartTwo.z) * (cartOne.z - cartTwo.z));
 
-        auto x = (projectedTwo.x - projectedOne.x) * sizeViewport.x;
-        auto y = (projectedTwo.y - projectedOne.y) * sizeViewport.y;
-        const float projectedLength = MatrixD::length(x, y, 0.0);
-        
-        return distancePx * 2.0 * sqrt(sampleSize * sampleSize * 2) / projectedLength;
+        const auto x = (projectedTwo.x - projectedOne.x) * sizeViewport.x;
+        const auto y = (projectedTwo.y - projectedOne.y) * sizeViewport.y;
+        const double projectedLength = MatrixD::length(x, y, 0.0);
+
+        // 1.4 is an empirically determined scaling factor, observed to align 2D and 3D measurements
+        // based on visual comparisons of screenshots.
+        // TODO: Investigate the origin of this 1.4 factor
+        return 1.4 * distancePx * sqrt(sampleDistance * sampleDistance * 2) / projectedLength;
     }
     return distancePx * screenPixelAsRealMeterFactor * zoom;
 }
 
-double MapCamera3d::getScalingFactor() { return mapUnitsFromPixels(1.0); }
+double MapCamera3d::getScalingFactor() {
+    return lastScalingFactor;
+}
 
 void MapCamera3d::setMinZoom(double zoomMin) {
     this->zoomMin = zoomMin;
