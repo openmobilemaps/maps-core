@@ -93,7 +93,7 @@ void MapCamera3d::moveToCenterPositionZoom(const ::Coord &centerPosition, double
     inertia = std::nullopt;
     auto [focusPosition, focusZoom] = getBoundsCorrectedCoords(mapInterface->getCoordinateConverterHelper()->convert(focusPointPosition.systemIdentifier, centerPosition), zoom);
 
-    if (bounds.topLeft.x == mapCoordinateSystem.bounds.topLeft.x && bounds.bottomRight.x == mapCoordinateSystem.bounds.bottomRight.x) {
+    if (animated && bounds.topLeft.x == mapCoordinateSystem.bounds.topLeft.x && bounds.bottomRight.x == mapCoordinateSystem.bounds.bottomRight.x) {
         // wrappable on longitude
         if (focusPosition.x - focusPointPosition.x > 180.0) {
             focusPosition.x -= 360.0;
@@ -109,12 +109,14 @@ void MapCamera3d::moveToCenterPositionZoom(const ::Coord &centerPosition, double
             [=](Coord positionMapSystem) {
                 assert(positionMapSystem.systemIdentifier == 4326);
                 this->focusPointPosition = positionMapSystem;
+                clampCenterToPaddingCorrectedBounds();
                 notifyListeners(ListenerType::BOUNDS);
                 mapInterface->invalidate();
             },
             [=] {
                 assert(this->coordAnimation->endValue.systemIdentifier == 4326);
                 this->focusPointPosition = this->coordAnimation->endValue;
+                clampCenterToPaddingCorrectedBounds();
                 notifyListeners(ListenerType::BOUNDS);
                 mapInterface->invalidate();
                 this->coordAnimation = nullptr;
@@ -138,7 +140,7 @@ void MapCamera3d::moveToCenterPosition(const ::Coord &centerPosition, bool anima
     inertia = std::nullopt;
     auto [focusPosition, focusZoom] = getBoundsCorrectedCoords(mapInterface->getCoordinateConverterHelper()->convert(focusPointPosition.systemIdentifier, centerPosition), zoom);
 
-    if (bounds.topLeft.x == mapCoordinateSystem.bounds.topLeft.x && bounds.bottomRight.x == mapCoordinateSystem.bounds.bottomRight.x) {
+    if (animated && bounds.topLeft.x == mapCoordinateSystem.bounds.topLeft.x && bounds.bottomRight.x == mapCoordinateSystem.bounds.bottomRight.x) {
         // wrappable on longitude
         if (focusPosition.x - focusPointPosition.x > 180.0) {
             focusPosition.x -= 360.0;
@@ -154,12 +156,14 @@ void MapCamera3d::moveToCenterPosition(const ::Coord &centerPosition, bool anima
             [=](Coord positionMapSystem) {
                 assert(positionMapSystem.systemIdentifier == 4326);
                 this->focusPointPosition = positionMapSystem;
+                clampCenterToPaddingCorrectedBounds();
                 notifyListeners(ListenerType::BOUNDS);
                 mapInterface->invalidate();
             },
             [=] {
                 assert(this->coordAnimation->endValue.systemIdentifier == 4326);
                 this->focusPointPosition = this->coordAnimation->endValue;
+                clampCenterToPaddingCorrectedBounds();
                 notifyListeners(ListenerType::BOUNDS);
                 mapInterface->invalidate();
                 this->coordAnimation = nullptr;
@@ -1532,7 +1536,9 @@ void MapCamera3d::setBoundsRestrictWholeVisibleRect(bool enabled) {
 }
 
 void MapCamera3d::clampCenterToPaddingCorrectedBounds() {
-    const auto [newPosition, newZoom] = getBoundsCorrectedCoords(focusPointPosition, zoom);
+    const auto [newPosition, newZoom] = getBoundsCorrectedCoords(
+            Coord(focusPointPosition.systemIdentifier, std::fmod(focusPointPosition.x + 540.0, 360.0) - 180.0, focusPointPosition.y,
+                  focusPointPosition.z), zoom);
     focusPointPosition = newPosition;
     zoom = newZoom;
 }
