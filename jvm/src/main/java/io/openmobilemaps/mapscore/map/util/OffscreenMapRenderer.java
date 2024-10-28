@@ -99,7 +99,7 @@ public class OffscreenMapRenderer {
 
     /**
      * Occasionally map layers may get stuck and return an unready state, but might in fact be ready to render.
-     * This method simply draws the map anyway, but all bets are off if the output is correct.
+     * This method simply draws the map anyway, but all bets are off.
      */
     public BufferedImage forceDrawFrame() {
         map.prepare();

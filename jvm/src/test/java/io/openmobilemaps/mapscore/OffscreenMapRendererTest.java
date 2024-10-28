@@ -11,6 +11,7 @@ import io.openmobilemaps.mapscore.shared.map.coordinates.Coord;
 import io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateSystemIdentifiers;
 import io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord;
 
+import io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.Tiled2dMapVectorLayerInterface;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -18,31 +19,44 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
+import java.sql.Time;
+import java.time.Duration;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
 
 public class OffscreenMapRendererTest {
     private static final boolean updateGolden = false;
 
-    private static void addTestStyleLayer(MapInterface map) {
-        URL styleJsonUrl = OffscreenMapRendererTest.class.getResource("/test-style.json");
-        if (styleJsonUrl == null) {
-            fail("required resource test-style.json not found.");
+    private static String loadResource(String resourceName) {
+        try {
+            try (InputStream resource =
+                    OffscreenMapRendererTest.class.getResourceAsStream("/" + resourceName)) {
+                if (resource == null) {
+                    fail("Resource not found: " + resourceName);
+                }
+                return new String(resource.readAllBytes());
+            }
+        } catch (IOException e) {
+            return fail("Failed to load resource", e);
         }
-        String resourceDir = new File(styleJsonUrl.getPath()).getParent();
+    }
 
-        Tiled2dMapVectorLayerBuilder.addFromStyleJson(
-                map,
-                "name",
-                styleJsonUrl.toString(),
-                resourceDir,
-                OffscreenMapRendererTest.class.getClassLoader(),
-                "fonts");
+    private static Tiled2dMapVectorLayerInterface addTestStyleLayer(MapInterface map, String styleJsonFile) {
+
+        String styleJsonData = loadResource(styleJsonFile);
+        return new Tiled2dMapVectorLayerBuilder(map)
+                .withLayerName("test-layer")
+                .withFontLoader(
+                        OffscreenMapRendererTest.class.getClassLoader(), "fonts", "Roboto-Regular")
+                .withStyleJsonData(styleJsonData)
+                .build();
     }
 
     private static RectCoord bboxCH() {
-        // rough bbox of geojson data in in test-style.json
+        // rough bbox of geojson data in in style_geojson_ch.json
         return new RectCoord(
                 new Coord(CoordinateSystemIdentifiers.EPSG4326(), 5.9, 47.9, 0.0),
                 new Coord(CoordinateSystemIdentifiers.EPSG4326(), 10.5, 45.8, 0.0));
@@ -89,6 +103,9 @@ public class OffscreenMapRendererTest {
 
     @BeforeAll
     public static void setUp() {
+        System.setProperty("io.openmobilemaps.mapscore.debug", "true");
+        Logger.getLogger("").setLevel(Level.CONFIG);
+
         MapsCore.initialize();
     }
 
@@ -96,15 +113,42 @@ public class OffscreenMapRendererTest {
     public void testStyleJson() {
         OffscreenMapRenderer renderer = new OffscreenMapRenderer(1200, 800, 4);
 
-        addTestStyleLayer(renderer.getMap());
+        var layer = addTestStyleLayer(renderer.getMap(), "style_geojson_ch.json");
 
         var map = renderer.getMap();
         var cam = map.getCamera();
         cam.moveToBoundingBox(bboxCH(), 0.0f, false, null, null);
 
+
         try {
             BufferedImage image = renderer.drawFrame();
+
+            var feat = layer.getVisiblePointFeatureContexts(0.0f, null);
+
             assertImageMatchesGolden(image, "testStyleJson");
+        } catch (Exception e) {
+            fail(e.getMessage());
+        } finally {
+            renderer.destroy();
+        }
+
+
+    }
+
+    @Test
+    public void testStyleJsonLabel() {
+        OffscreenMapRenderer renderer = new OffscreenMapRenderer(1200, 800, 4);
+
+        var map = renderer.getMap();
+        addTestStyleLayer(map, "style_geojson_ch_label.json");
+        map.getCamera().moveToBoundingBox(bboxCH(), 0.0f, false, null, null);
+
+        try {
+            BufferedImage image = renderer.drawFrame(Duration.ofSeconds(1));
+            // XXX: text is broken and only appears on second draw call (again).
+            // Either needs proper fix or workarounds in OffscreenMapRenderer.
+            image = renderer.drawFrame(Duration.ofSeconds(1));
+            assertImageMatchesGolden(image, "testStyleJsonLabel");
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
@@ -116,18 +160,22 @@ public class OffscreenMapRendererTest {
     public void testTiler() throws OffscreenMapRenderer.MapLayerException {
         OffscreenMapRenderer renderer = new OffscreenMapRenderer(256, 256, 4);
 
-        addTestStyleLayer(renderer.getMap());
+        addTestStyleLayer(renderer.getMap(), "style_geojson_ch.json");
 
         MapTileRenderer tiler = new MapTileRenderer(renderer);
 
-        final int z = 7;
-        MapTileRenderer.TileRange tileRange = tiler.getTileRange(z, bboxCH());
-        for (int xcol = tileRange.minColumn(); xcol <= tileRange.maxColumn(); xcol++) {
-            for (int yrow = tileRange.minRow(); yrow <= tileRange.maxRow(); yrow++) {
-                BufferedImage tile = tiler.renderTile(z, xcol, yrow);
-                assertImageMatchesGolden(
-                        tile, String.format("testTiler_tile_%d_%d_%d", z, xcol, yrow));
+        try {
+            final int z = 7;
+            MapTileRenderer.TileRange tileRange = tiler.getTileRange(z, bboxCH());
+            for (int xcol = tileRange.minColumn(); xcol <= tileRange.maxColumn(); xcol++) {
+                for (int yrow = tileRange.minRow(); yrow <= tileRange.maxRow(); yrow++) {
+                    BufferedImage tile = tiler.renderTile(z, xcol, yrow);
+                    assertImageMatchesGolden(
+                            tile, String.format("testTiler_tile_%d_%d_%d", z, xcol, yrow));
+                }
             }
+        } finally {
+            renderer.destroy();
         }
     }
 }
