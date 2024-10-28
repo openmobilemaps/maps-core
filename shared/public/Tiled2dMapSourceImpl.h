@@ -181,7 +181,6 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
         gpc_polygon_clip(GPC_DIFF, &currentViewBoundsPolygon, &polygon, &currentViewBoundsPolygon);
         gpc_free_polygon(&polygon);
         auto tempRes = gpc_get_polygon_coord(&currentViewBoundsPolygon, system);
-        1 + 1;
     };
 
     size_t visibleTileHash = minZoomLevelIndex;

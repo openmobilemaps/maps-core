@@ -9,6 +9,7 @@
  */
 
 #include "CoordinateSystemIdentifiers.h"
+#include <stdexcept>
 
 int32_t CoordinateSystemIdentifiers::RENDERSYSTEM() { return 0; };
 

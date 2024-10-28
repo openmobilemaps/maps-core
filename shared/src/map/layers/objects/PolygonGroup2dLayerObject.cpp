@@ -11,6 +11,7 @@
 #include "PolygonGroup2dLayerObject.h"
 #include "RenderVerticesDescription.h"
 #include "Logger.h"
+#include <cmath>
 
 PolygonGroup2dLayerObject::PolygonGroup2dLayerObject(const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                                                      const std::shared_ptr<PolygonGroup2dInterface> &polygon,
