@@ -260,11 +260,6 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
         const Coord leftCenter = Coord(layerSystemId, topLeft.x, bottomLeft.y * 0.5 + topLeft.y * 0.5, topLeft.z);
         const Coord rightCenter = Coord(layerSystemId, topRight.x, bottomRight.y * 0.5 + topRight.y * 0.5, topRight.z);
 
-        const Coord topLeftHigh = Coord(layerSystemId, topLeft.x, topLeft.y, focusPointAltitude + heightRange / 2.0);
-        const Coord topRightHigh = Coord(layerSystemId, topRight.x , topRight.y, focusPointAltitude + heightRange / 2.0);
-        const Coord bottomLeftHigh = Coord(layerSystemId, bottomLeft.x, bottomLeft.y, focusPointAltitude + heightRange / 2.0);
-        const Coord bottomRightHigh = Coord(layerSystemId, bottomRight.x, bottomRight.y, focusPointAltitude + heightRange / 2.0);
-
         auto topLeftView = transformToView(topLeft, viewMatrix, origin);
         auto topRightView = transformToView(topRight, viewMatrix, origin);
         auto bottomLeftView = transformToView(bottomLeft, viewMatrix, origin);
@@ -279,10 +274,10 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
         auto focusPointSampleXView = transformToView(focusPointSampleX, viewMatrix, origin);
         auto focusPointSampleYView = transformToView(focusPointSampleY, viewMatrix, origin);
 
-        auto topLeftHighView = transformToView(topLeftHigh, viewMatrix, origin);
-        auto topRightHighView = transformToView(topRightHigh, viewMatrix, origin);
-        auto bottomLeftHighView = transformToView(bottomLeftHigh, viewMatrix, origin);
-        auto bottomRightHighView = transformToView(bottomRightHigh, viewMatrix, origin);
+        auto topCenterView = transformToView(topCenter, viewMatrix, origin);
+        auto bottomCenterView = transformToView(bottomCenter, viewMatrix, origin);
+        auto leftCenterView = transformToView(leftCenter, viewMatrix, origin);
+        auto rightCenterView = transformToView(rightCenter, viewMatrix, origin);
 
         float centerZ = (topLeftView.z + topRightView.z + bottomLeftView.z + bottomRightView.z) / 4.0;
 
@@ -291,16 +286,18 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
         auto diffCenterViewBottomLeft = bottomLeftView - earthCenterView;
         auto diffCenterViewBottomRight = bottomRightView - earthCenterView;
 
-        auto diffCenterViewTopLeftHigh = topLeftHighView - earthCenterView;
-        auto diffCenterViewTopRightHigh = topRightHighView - earthCenterView;
-        auto diffCenterViewBottomLeftHigh = bottomLeftHighView - earthCenterView;
-        auto diffCenterViewBottomRightHigh = bottomRightHighView - earthCenterView;
+        auto diffCenterViewTopCenter = topCenterView - earthCenterView;
+        auto diffCenterViewBottomCenter = bottomCenterView - earthCenterView;
+        auto diffCenterViewLeftCenter = leftCenterView - earthCenterView;
+        auto diffCenterViewRightCenter = rightCenterView - earthCenterView;
 
         bool isKeptLevel = candidate.levelIndex == minZoomLevelIndex;
 
         if (!isKeptLevel && diffCenterViewTopLeft.z < 0.0 && diffCenterViewTopRight.z < 0.0 && diffCenterViewBottomLeft.z < 0.0 &&
             diffCenterViewBottomRight.z < 0.0) {
             clipAndFreeLambda(currentTilePolygon);
+            // LogDebug << "UBCM: dropping tile (all facing away) " << candidate.levelIndex << "/" << candidate.x << "/" <<= candidate.y;
+            // Tile is facing away from the camera
             continue;
         }
         auto samplePointOriginViewScreen = projectToScreen(focusPointClampedView, projectionMatrix);
@@ -318,65 +315,70 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
                 float bottomRightHA = 180.0 / M_PI * atan2(bottomRightView.x, -bottomRightView.z);
                 float bottomRightVA = 180.0 / M_PI * atan2(bottomRightView.y, -bottomRightView.z);
 
-                float topLeftHighHA = 180.0 / M_PI * atan2(topLeftHighView.x, -topLeftHighView.z);
-                float topLeftHighVA = 180.0 / M_PI * atan2(topLeftHighView.y, -topLeftHighView.z);
-                float topRightHighHA = 180.0 / M_PI * atan2(topRightHighView.x, -topRightHighView.z);
-                float topRightHighVA = 180.0 / M_PI * atan2(topRightHighView.y, -topRightHighView.z);
-                float bottomLeftHighHA = 180.0 / M_PI * atan2(bottomLeftHighView.x, -bottomLeftHighView.z);
-                float bottomLeftHighVA = 180.0 / M_PI * atan2(bottomLeftHighView.y, -bottomLeftHighView.z);
-                float bottomRightHighHA = 180.0 / M_PI * atan2(bottomRightHighView.x, -bottomRightHighView.z);
-                float bottomRightHighVA = 180.0 / M_PI * atan2(bottomRightHighView.y, -bottomRightHighView.z);
+                float topCenterHA = 180.0 / M_PI * atan2(topCenterView.x, -topCenterView.z);
+                float topCenterVA = 180.0 / M_PI * atan2(topCenterView.y, -topCenterView.z);
+                float bottomCenterHA = 180.0 / M_PI * atan2(bottomCenterView.x, -bottomCenterView.z);
+                float bottomCenterVA = 180.0 / M_PI * atan2(bottomCenterView.y, -bottomCenterView.z);
+                float leftCenterHA = 180.0 / M_PI * atan2(leftCenterView.x, -leftCenterView.z);
+                float leftCenterVA = 180.0 / M_PI * atan2(leftCenterView.y, -leftCenterView.z);
+                float rightCenterHA = 180.0 / M_PI * atan2(rightCenterView.x, -rightCenterView.z);
+                float rightCenterVA = 180.0 / M_PI * atan2(rightCenterView.y, -rightCenterView.z);
 
                 // 0.5: half of view on each side of center
-                // 1.02: increase angle with padding
-                float fovFactor = 0.5 * 1.0;
+                // 1.1: increase angle with padding
+                float fovFactor = 0.5 * 1.1;
 
-                if ((topLeftVA < -verticalFov * fovFactor || diffCenterViewTopLeft.z < 0.0) &&
-                    (topRightVA < -verticalFov * fovFactor || diffCenterViewTopRight.z < 0.0) &&
-                    (bottomLeftVA < -verticalFov * fovFactor || diffCenterViewBottomLeft.z < 0.0) &&
-                    (bottomRightVA < -verticalFov * fovFactor || diffCenterViewBottomRight.z < 0.0) &&
-                    (topLeftHighVA < -verticalFov * fovFactor || diffCenterViewTopLeftHigh.z < 0.0) &&
-                    (topRightHighVA < -verticalFov * fovFactor || diffCenterViewTopRightHigh.z < 0.0) &&
-                    (bottomLeftHighVA < -verticalFov * fovFactor || diffCenterViewBottomLeftHigh.z < 0.0) &&
-                    (bottomRightHighVA < -verticalFov * fovFactor || diffCenterViewBottomRightHigh.z < 0.0)
-                        ) {
+                float left = -horizontalFov * fovFactor;
+                float right = horizontalFov * fovFactor;
+                float top = verticalFov * fovFactor;
+                float bottom = -verticalFov * fovFactor;
+
+                if ((topLeftVA < bottom || diffCenterViewTopLeft.z < 0.0) &&
+                    (topRightVA < bottom || diffCenterViewTopRight.z < 0.0) &&
+                    (bottomLeftVA < bottom || diffCenterViewBottomLeft.z < 0.0) &&
+                    (bottomRightVA < bottom || diffCenterViewBottomRight.z < 0.0) &&
+                    (topCenterVA < bottom || diffCenterViewTopCenter.z < 0.0) &&
+                    (bottomCenterVA < bottom || diffCenterViewBottomCenter.z < 0.0) &&
+                    (leftCenterVA < bottom || diffCenterViewLeftCenter.z < 0.0) &&
+                    (rightCenterVA < bottom || diffCenterViewRightCenter.z < 0.0)) {
                     clipAndFreeLambda(currentTilePolygon);
+                    // LogDebug << "UBCM: dropping tile (below) " << candidate.levelIndex << "/" << candidate.x << "/" <<= candidate.y;
                     continue; // All camera-facing corners are BELOW the viewport
                 }
-                if ((topLeftHA < -horizontalFov * fovFactor || diffCenterViewTopLeft.z < 0.0) &&
-                    (topRightHA < -horizontalFov * fovFactor || diffCenterViewTopRight.z < 0.0) &&
-                    (bottomLeftHA < -horizontalFov * fovFactor || diffCenterViewBottomLeft.z < 0.0) &&
-                    (bottomRightHA < -horizontalFov * fovFactor || diffCenterViewBottomRight.z < 0.0) &&
-                    (topLeftHighHA < -horizontalFov * fovFactor || diffCenterViewTopLeftHigh.z < 0.0) &&
-                    (topRightHighHA < -horizontalFov * fovFactor || diffCenterViewTopRightHigh.z < 0.0) &&
-                    (bottomLeftHighHA < -horizontalFov * fovFactor || diffCenterViewBottomLeftHigh.z < 0.0) &&
-                    (bottomRightHighHA < -horizontalFov * fovFactor || diffCenterViewBottomRightHigh.z < 0.0)
-                        ) {
+                if ((topLeftHA < left || diffCenterViewTopLeft.z < 0.0) &&
+                    (topRightHA < left || diffCenterViewTopRight.z < 0.0) &&
+                    (bottomLeftHA < left || diffCenterViewBottomLeft.z < 0.0) &&
+                    (bottomRightHA < left || diffCenterViewBottomRight.z < 0.0) &&
+                    (topCenterHA < left || diffCenterViewTopCenter.z < 0.0) &&
+                    (bottomCenterHA < left || diffCenterViewBottomCenter.z < 0.0) &&
+                    (leftCenterHA < left || diffCenterViewLeftCenter.z < 0.0) &&
+                    (rightCenterHA < left || diffCenterViewRightCenter.z < 0.0)) {
                     clipAndFreeLambda(currentTilePolygon);
+                    // LogDebug << "UBCM: dropping tile (left) " << candidate.levelIndex << "/" << candidate.x << "/" <<= candidate.y;
                     continue; // All camera-facing corners are TO THE LEFT of the viewport
                 }
-                if ((topLeftVA > verticalFov * fovFactor || diffCenterViewTopLeft.z < 0.0) &&
-                    (topRightVA > verticalFov * fovFactor || diffCenterViewTopRight.z < 0.0) &&
-                    (bottomLeftVA > verticalFov * fovFactor || diffCenterViewBottomLeft.z < 0.0) &&
-                    (bottomRightVA > verticalFov * fovFactor || diffCenterViewBottomRight.z < 0.0) &&
-                    (topLeftHighVA > verticalFov * fovFactor || diffCenterViewTopLeftHigh.z < 0.0) &&
-                    (topRightHighVA > verticalFov * fovFactor || diffCenterViewTopRightHigh.z < 0.0) &&
-                    (bottomLeftHighVA > verticalFov * fovFactor || diffCenterViewBottomLeftHigh.z < 0.0) &&
-                    (bottomRightHighVA > verticalFov * fovFactor || diffCenterViewBottomRightHigh.z < 0.0)
-                        ) {
+                if ((topLeftVA > top || diffCenterViewTopLeft.z < 0.0) &&
+                    (topRightVA > top || diffCenterViewTopRight.z < 0.0) &&
+                    (bottomLeftVA > top || diffCenterViewBottomLeft.z < 0.0) &&
+                    (bottomRightVA > top || diffCenterViewBottomRight.z < 0.0) &&
+                    (topCenterVA > top || diffCenterViewTopCenter.z < 0.0) &&
+                    (bottomCenterVA > top || diffCenterViewBottomCenter.z < 0.0) &&
+                    (leftCenterVA > top || diffCenterViewLeftCenter.z < 0.0) &&
+                    (rightCenterVA > top || diffCenterViewRightCenter.z < 0.0)) {
                     clipAndFreeLambda(currentTilePolygon);
+                    // LogDebug << "UBCM: dropping tile (above) " << candidate.levelIndex << "/" << candidate.x << "/" <<= candidate.y;
                     continue; // All camera-facing corners are ABOVE the viewport
                 }
-                if ((topLeftHA > horizontalFov * fovFactor || diffCenterViewTopLeft.z < 0.0) &&
-                    (topRightHA > horizontalFov * fovFactor || diffCenterViewTopRight.z < 0.0) &&
-                    (bottomLeftHA > horizontalFov * fovFactor || diffCenterViewBottomLeft.z < 0.0) &&
-                    (bottomRightHA > horizontalFov * fovFactor || diffCenterViewBottomRight.z < 0.0) &&
-                    (topLeftHighHA > horizontalFov * fovFactor || diffCenterViewTopLeftHigh.z < 0.0) &&
-                    (topRightHighHA > horizontalFov * fovFactor || diffCenterViewTopRightHigh.z < 0.0) &&
-                    (bottomLeftHighHA > horizontalFov * fovFactor || diffCenterViewBottomLeftHigh.z < 0.0) &&
-                    (bottomRightHighHA > horizontalFov * fovFactor || diffCenterViewBottomRightHigh.z < 0.0)
-                        ) {
+                if ((topLeftHA > right || diffCenterViewTopLeft.z < 0.0) &&
+                    (topRightHA > right || diffCenterViewTopRight.z < 0.0) &&
+                    (bottomLeftHA > right || diffCenterViewBottomLeft.z < 0.0) &&
+                    (bottomRightHA > right || diffCenterViewBottomRight.z < 0.0) &&
+                    (topCenterHA > right || diffCenterViewTopCenter.z < 0.0) &&
+                    (bottomCenterHA > right || diffCenterViewBottomCenter.z < 0.0) &&
+                    (leftCenterHA > right || diffCenterViewLeftCenter.z < 0.0) &&
+                    (rightCenterHA > right || diffCenterViewRightCenter.z < 0.0)) {
                     clipAndFreeLambda(currentTilePolygon);
+                    // LogDebug << "UBCM: dropping tile (right) " << candidate.levelIndex << "/" << candidate.x << "/" <<= candidate.y;
                     continue; // All camera-facing corners are TO THE RIGHT of the viewport
                 }
             } else {
