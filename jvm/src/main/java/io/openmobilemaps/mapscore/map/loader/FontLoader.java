@@ -139,7 +139,7 @@ public class FontLoader extends FontLoaderInterface {
         }
     }
 
-    protected static record FontDataStreams(InputStream image, InputStream manifest)
+    protected record FontDataStreams(InputStream image, InputStream manifest)
             implements AutoCloseable {
         @Override
         public void close() throws Exception {

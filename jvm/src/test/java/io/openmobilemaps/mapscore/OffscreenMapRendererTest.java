@@ -1,7 +1,6 @@
 package io.openmobilemaps.mapscore;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 import io.openmobilemaps.mapscore.map.util.MapTileRenderer;
 import io.openmobilemaps.mapscore.map.util.OffscreenMapRenderer;
@@ -10,18 +9,18 @@ import io.openmobilemaps.mapscore.shared.map.MapInterface;
 import io.openmobilemaps.mapscore.shared.map.coordinates.Coord;
 import io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateSystemIdentifiers;
 import io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord;
-
 import io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.Tiled2dMapVectorLayerInterface;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.Time;
 import java.time.Duration;
-import java.util.concurrent.TimeUnit;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -44,7 +43,8 @@ public class OffscreenMapRendererTest {
         }
     }
 
-    private static Tiled2dMapVectorLayerInterface addTestStyleLayer(MapInterface map, String styleJsonFile) {
+    private static Tiled2dMapVectorLayerInterface addTestStyleLayer(
+            MapInterface map, String styleJsonFile) {
 
         String styleJsonData = loadResource(styleJsonFile);
         return new Tiled2dMapVectorLayerBuilder(map)
@@ -94,11 +94,11 @@ public class OffscreenMapRendererTest {
 
         assertEquals(golden.getHeight(), actual.getHeight());
         assertEquals(golden.getWidth(), actual.getWidth());
-        for (int y = 0; y < golden.getHeight(); y++) {
-            for (int x = 0; x < golden.getWidth(); x++) {
-                assertEquals(golden.getRGB(x, y), actual.getRGB(x, y));
-            }
-        }
+        final int w = golden.getWidth();
+        final int h = golden.getHeight();
+        int[] goldenRGB = golden.getRGB(0, 0, w, h, null, 0, w);
+        int[] actualRGB = actual.getRGB(0, 0, w, h, null, 0, w);
+        assertArrayEquals(goldenRGB, actualRGB, "Images differ");
     }
 
     @BeforeAll
@@ -113,26 +113,18 @@ public class OffscreenMapRendererTest {
     public void testStyleJson() {
         OffscreenMapRenderer renderer = new OffscreenMapRenderer(1200, 800, 4);
 
-        var layer = addTestStyleLayer(renderer.getMap(), "style_geojson_ch.json");
-
         var map = renderer.getMap();
-        var cam = map.getCamera();
-        cam.moveToBoundingBox(bboxCH(), 0.0f, false, null, null);
-
+        addTestStyleLayer(renderer.getMap(), "style_geojson_ch.json");
+        map.getCamera().moveToBoundingBox(bboxCH(), 0.0f, false, null, null);
 
         try {
             BufferedImage image = renderer.drawFrame();
-
-            var feat = layer.getVisiblePointFeatureContexts(0.0f, null);
-
             assertImageMatchesGolden(image, "testStyleJson");
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
             renderer.destroy();
         }
-
-
     }
 
     @Test
@@ -144,10 +136,10 @@ public class OffscreenMapRendererTest {
         map.getCamera().moveToBoundingBox(bboxCH(), 0.0f, false, null, null);
 
         try {
-            BufferedImage image = renderer.drawFrame(Duration.ofSeconds(1));
+            BufferedImage ignoredFirstPass = renderer.drawFrame(Duration.ofSeconds(1));
             // XXX: text is broken and only appears on second draw call (again).
             // Either needs proper fix or workarounds in OffscreenMapRenderer.
-            image = renderer.drawFrame(Duration.ofSeconds(1));
+            BufferedImage image = renderer.drawFrame(Duration.ofSeconds(1));
             assertImageMatchesGolden(image, "testStyleJsonLabel");
         } catch (Exception e) {
             fail(e.getMessage());
@@ -157,7 +149,7 @@ public class OffscreenMapRendererTest {
     }
 
     @Test
-    public void testTiler() throws OffscreenMapRenderer.MapLayerException {
+    public void testTiler() {
         OffscreenMapRenderer renderer = new OffscreenMapRenderer(256, 256, 4);
 
         addTestStyleLayer(renderer.getMap(), "style_geojson_ch.json");
@@ -167,13 +159,23 @@ public class OffscreenMapRendererTest {
         try {
             final int z = 7;
             MapTileRenderer.TileRange tileRange = tiler.getTileRange(z, bboxCH());
+            ArrayList<Executable> subtests = new ArrayList<>();
             for (int xcol = tileRange.minColumn(); xcol <= tileRange.maxColumn(); xcol++) {
                 for (int yrow = tileRange.minRow(); yrow <= tileRange.maxRow(); yrow++) {
-                    BufferedImage tile = tiler.renderTile(z, xcol, yrow);
-                    assertImageMatchesGolden(
-                            tile, String.format("testTiler_tile_%d_%d_%d", z, xcol, yrow));
+                    final int finalXcol = xcol;
+                    final int finalYrow = yrow;
+                    subtests.add(
+                            () -> {
+                                BufferedImage tile = tiler.renderTile(z, finalXcol, finalYrow);
+                                assertImageMatchesGolden(
+                                        tile,
+                                        String.format(
+                                                "testTiler_tile_%d_%d_%d",
+                                                z, finalXcol, finalYrow));
+                            });
                 }
             }
+            assertAll(subtests);
         } finally {
             renderer.destroy();
         }

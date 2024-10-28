@@ -21,11 +21,12 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /** Convenience helper to build a style.json layer with the default loaders. */
+@SuppressWarnings("unused")
 public class Tiled2dMapVectorLayerBuilder {
 
     private final MapInterface map;
     private String layerName;
-    private ArrayList<LoaderInterface> loaders;
+    private final ArrayList<LoaderInterface> loaders;
     private Tiled2dMapVectorLayerLocalDataProviderInterface localDataProvider;
     @Nullable private FontLoaderInterface fontLoader;
     @Nullable private String styleJsonData;
@@ -34,7 +35,7 @@ public class Tiled2dMapVectorLayerBuilder {
     public Tiled2dMapVectorLayerBuilder(MapInterface map) {
         this.map = map;
         this.layerName = "unnamed-layer";
-        this.loaders = new ArrayList();
+        this.loaders = new ArrayList<>();
     }
 
     public Tiled2dMapVectorLayerInterface build() {
@@ -60,7 +61,7 @@ public class Tiled2dMapVectorLayerBuilder {
         return layer;
     }
 
-    public Tiled2dMapVectorLayerBuilder withLayerName(String name) {
+    public Tiled2dMapVectorLayerBuilder withLayerName(String layerName) {
         this.layerName = layerName;
         return this;
     }
