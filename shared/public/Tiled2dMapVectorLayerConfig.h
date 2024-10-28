@@ -34,7 +34,7 @@ public:
                       sourceDescription->adaptScaleToScreen ? *sourceDescription->adaptScaleToScreen : false,
                       true,
                       sourceDescription->underzoom ? *sourceDescription->underzoom : false,
-                      sourceDescription->overzoom ? *sourceDescription->overzoom : false)) {}
+                      sourceDescription->overzoom ? *sourceDescription->overzoom : true)) {}
 
     ~Tiled2dMapVectorLayerConfig() {}
 
