@@ -1,5 +1,8 @@
 # Changelog for Open Mobile Maps
 
+## Version 2.6.2
+-  Fixes iOS fixes text halo alpha multiplication
+
 ## Version 2.6.1
 - Improve handling of different VectorLayer configurations (especially with a LocalDataProvider)
 - Add a default implementation of a LocalDataProvider for Android
