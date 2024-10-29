@@ -191,8 +191,7 @@ textInstancedFragmentShader(TextInstancedVertexOut in [[stage_in]],
 {
     constant TextInstanceStyle *style = (constant TextInstanceStyle *)(styles + in.styleIndex);
 
-
-    if (style->color.a == 0 || style->haloColor.a == 0.0) {
+    if ((isHalo && style->haloColor.a == 0.0) || (!isHalo && style->color.a == 0)) {
         discard_fragment();
     }
 
@@ -206,8 +205,6 @@ textInstancedFragmentShader(TextInstancedVertexOut in [[stage_in]],
     const float fillEnd = 0.5 + w;
 
     const float innerFallOff = smoothstep(fillStart, fillEnd, median);
-
-    float edgeAlpha = 0.0;
 
     if (isHalo) {
         float halfHaloBlur = 0.5 * style->haloBlur;
@@ -223,11 +220,11 @@ textInstancedFragmentShader(TextInstancedVertexOut in [[stage_in]],
         const float outerFallOff = smoothstep(start, end, median);
 
         // Combination of blurred outer falloff and inverse inner fill falloff
-        edgeAlpha = (sideSwitch * outerFallOff + (1.0 - sideSwitch) * (1.0 - innerFallOff)) * style->haloColor.a;
+        const float edgeAlpha = (sideSwitch * outerFallOff + (1.0 - sideSwitch) * (1.0 - innerFallOff)) * style->haloColor.a;
 
         return float4(style->haloColor.rgb, 1.0) * edgeAlpha;
     } else {
-        edgeAlpha = innerFallOff * style->haloColor.a;
+        const float edgeAlpha = innerFallOff * style->color.a;
 
         return float4(style->color.rgb, 1.0) * edgeAlpha;
     }
