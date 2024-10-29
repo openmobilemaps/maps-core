@@ -727,7 +727,7 @@ void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(std::vector<float
 
     const float scaledIconPadding = iconPadding * scaleFactor;
 
-    Vec2D origin(positions[2 * countOffset], positions[2 * countOffset + 1]);
+    Vec2D origin(renderCoordinate.x + offset.x, renderCoordinate.y + offset.y);
     stretchIconBoundingBoxViewportAligned.x = origin.x - spriteWidth * 0.5 - scaledIconPadding;
     stretchIconBoundingBoxViewportAligned.y = origin.y - spriteHeight * 0.5 - scaledIconPadding;
     stretchIconBoundingBoxViewportAligned.width = spriteWidth + 2.0 * scaledIconPadding;

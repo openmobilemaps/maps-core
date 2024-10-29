@@ -434,7 +434,7 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
     int medianIndex = baseLineStartIndex + l/2;
     double medianLastBaseLine;
     if (l % 2 == 0) {
-        medianLastBaseLine = (baseLines[medianIndex - 1] + baseLines[medianIndex + 1]) / 2;
+        medianLastBaseLine = (baseLines[medianIndex - 1] + baseLines[std::min(medianIndex + 1, (int)baseLines.size() - 1)]) / 2;
     } else {
         medianLastBaseLine = baseLines[medianIndex];
     }

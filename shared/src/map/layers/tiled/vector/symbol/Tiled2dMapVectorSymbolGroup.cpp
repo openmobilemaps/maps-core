@@ -738,10 +738,6 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
                             continue;
                         }
 
-                        if (projectedCircle->x > viewport.x || projectedCircle->y > viewport.y || projectedCircle->x < 0 || projectedCircle->y < 0) {
-                            continue;
-                        }
-
                         projectedCircle->x = ((projectedCircle->x / viewport.x) * 2.0) - 1.0;
                         projectedCircle->y = ((projectedCircle->y / viewport.y) * 2.0) - 1.0;
                         float aspectRatio = float(viewport.x) / float(viewport.y);
@@ -771,9 +767,6 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
                     if (viewportAlignedBox) {
                         auto projectedRectangle = CollisionUtil::getProjectedRectangle(*viewportAlignedBox, env);
                         if (projectedRectangle) {
-                            if (projectedRectangle->x > viewport.x || projectedRectangle->y > viewport.y || projectedRectangle->x < 0 || projectedRectangle->y < 0) {
-                                continue;
-                            }
                             projectedRectangle->x = ((projectedRectangle->x / viewport.x) * 2.0) - 1.0;
                             projectedRectangle->y = ((projectedRectangle->y / viewport.y) * 2.0) - 1.0;
                             projectedRectangle->width = (projectedRectangle->width / halfWidth);
