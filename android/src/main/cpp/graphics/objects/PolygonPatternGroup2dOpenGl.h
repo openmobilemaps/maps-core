@@ -37,10 +37,10 @@ class PolygonPatternGroup2dOpenGl : public GraphicsObjectInterface,
     virtual void clear() override;
 
     virtual void renderAsMask(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
-                              int64_t mvpMatrix, double screenPixelAsRealMeterFactor) override;
+                              int64_t vpMatrix, int64_t mMatrix, const ::Vec3D & origin, double screenPixelAsRealMeterFactor) override;
 
     virtual void render(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
-                        int64_t mvpMatrix, bool isMasked, double screenPixelAsRealMeterFactor) override;
+                        int64_t vpMatrix, int64_t mMatrix, const ::Vec3D & origin, bool isMasked, double screenPixelAsRealMeterFactor) override;
 
     virtual void loadTexture(const std::shared_ptr<::RenderingContextInterface> &context,
                              const std::shared_ptr<TextureHolderInterface> &textureHolder) override;
@@ -53,7 +53,7 @@ class PolygonPatternGroup2dOpenGl : public GraphicsObjectInterface,
 
     void setDebugLabel(const std::string &label) override;
 
-    void setVertices(const SharedBytes &vertices, const SharedBytes &indices) override;
+    void setVertices(const SharedBytes &vertices, const SharedBytes &indices, const ::Vec3D & origin) override;
 
     void setTextureCoordinates(const ::SharedBytes &textureCoordinates) override;
 
@@ -74,7 +74,9 @@ protected:
     std::string programName;
     int program;
 
-    int mvpMatrixHandle;
+    int vpMatrixHandle;
+    int mMatrixHandle;
+    int originOffsetHandle;
     int positionHandle;
     int styleIndexHandle;
     GLuint vertexBuffer;
@@ -82,6 +84,7 @@ protected:
     GLuint indexBuffer;
     std::vector<GLushort> indices;
     bool glDataBuffersGenerated = false;
+    Vec3D polygonOrigin = Vec3D(0.0, 0.0, 0.0);
 
     std::shared_ptr<TextureHolderInterface> textureHolder;
     int texturePointer;

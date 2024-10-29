@@ -3,6 +3,7 @@
 
 #import "MCColor.h"
 #import "MCRectI.h"
+#import "MCRenderingCullMode.h"
 #import "MCVec2I.h"
 #import <Foundation/Foundation.h>
 
@@ -18,6 +19,8 @@
 - (nonnull MCVec2I *)getViewportSize;
 
 - (void)setBackgroundColor:(nonnull MCColor *)color;
+
+- (void)setCulling:(MCRenderingCullMode)mode;
 
 - (void)setupDrawFrame;
 

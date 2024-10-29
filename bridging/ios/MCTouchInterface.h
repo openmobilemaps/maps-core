@@ -23,6 +23,8 @@
 
 - (BOOL)onMoveComplete;
 
+- (BOOL)onOneFingerDoubleClickMoveComplete;
+
 - (BOOL)onTwoFingerClick:(nonnull MCVec2F *)posScreen1
               posScreen2:(nonnull MCVec2F *)posScreen2;
 

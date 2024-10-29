@@ -20,6 +20,7 @@ touch_interface = interface +c +j +o {
     on_long_press(pos_screen: vec_2_f) : bool;
     on_move(delta_screen: vec_2_f, confirmed: bool, double_click: bool) : bool;
     on_move_complete() : bool;
+    on_one_finger_double_click_move_complete() : bool;
     on_two_finger_click(pos_screen_1: vec_2_f, pos_screen_2: vec_2_f) : bool;
     on_two_finger_move(pos_screen_old: list<vec_2_f>, pos_screen_new: list<vec_2_f>) : bool;
     on_two_finger_move_complete(): bool;

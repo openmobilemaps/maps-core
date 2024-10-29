@@ -36,7 +36,7 @@ void OpenGlContext::cleanAll() {
 
 void OpenGlContext::onSurfaceCreated() {
     cleanAll();
-    glDisable(GL_CULL_FACE);
+    setCulling(cullMode);
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_BLEND);
 }
@@ -73,4 +73,25 @@ void OpenGlContext::applyScissorRect(const std::optional<::RectI> &scissorRect) 
     } else {
         glDisable(GL_SCISSOR_TEST);
     }
+}
+
+void OpenGlContext::setCulling(RenderingCullMode mode) {
+    cullMode = mode;
+    switch (mode) {
+        case RenderingCullMode::FRONT:
+            glEnable(GL_CULL_FACE);
+            glCullFace(GL_FRONT);
+            break;
+        case RenderingCullMode::BACK:
+            glEnable(GL_CULL_FACE);
+            glCullFace(GL_BACK);
+            break;
+        case RenderingCullMode::NONE:
+            glDisable(GL_CULL_FACE);
+            break;
+    }
+}
+
+float OpenGlContext::getAspectRatio() {
+    return viewportSize.x / (float) viewportSize.y;
 }

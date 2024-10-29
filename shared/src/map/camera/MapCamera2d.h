@@ -15,8 +15,8 @@
 #include "CoordAnimation.h"
 #include "CoordinateConversionHelperInterface.h"
 #include "DoubleAnimation.h"
-#include "MapCamera2dInterface.h"
-#include "MapCamera2dListenerInterface.h"
+#include "MapCameraInterface.h"
+#include "MapCameraListenerInterface.h"
 #include "MapCoordinateSystem.h"
 #include "SimpleTouchInterface.h"
 #include "Vec2I.h"
@@ -25,7 +25,7 @@
 #include <optional>
 #include <set>
 
-class MapCamera2d : public MapCamera2dInterface,
+class MapCamera2d : public MapCameraInterface,
                     public CameraInterface,
                     public SimpleTouchInterface,
                     public std::enable_shared_from_this<CameraInterface> {
@@ -75,13 +75,17 @@ class MapCamera2d : public MapCamera2dInterface,
 
     virtual void setPaddingBottom(float padding) override;
 
-    virtual void addListener(const std::shared_ptr<MapCamera2dListenerInterface> &listener) override;
+    virtual void addListener(const std::shared_ptr<MapCameraListenerInterface> &listener) override;
 
-    virtual void removeListener(const std::shared_ptr<MapCamera2dListenerInterface> &listener) override;
+    virtual void removeListener(const std::shared_ptr<MapCameraListenerInterface> &listener) override;
 
     virtual std::shared_ptr<::CameraInterface> asCameraInterface() override;
 
     virtual std::vector<float> getVpMatrix() override;
+
+    virtual ::Vec3D getOrigin() override;
+
+    virtual std::optional<std::vector<double>> getLastVpMatrixD() override;
 
     std::optional<std::vector<float>> getLastVpMatrix() override;
 
@@ -90,6 +94,8 @@ class MapCamera2d : public MapCamera2dInterface,
     std::optional<float> getLastVpMatrixRotation() override;
 
     std::optional<float> getLastVpMatrixZoom() override;
+
+    void notifyListenerBoundsChange() override;
 
     /** this method is called just before the update methods on all layers */
     virtual void update() override;
@@ -127,6 +133,8 @@ class MapCamera2d : public MapCamera2dInterface,
 
     virtual ::Vec2F screenPosFromCoordZoom(const ::Coord & coord, float zoom) override;
 
+    bool coordIsVisibleOnScreen(const ::Coord & coord, float paddingPc) override;
+
     virtual double mapUnitsFromPixels(double distancePx) override;
 
     virtual double getScalingFactor() override;
@@ -139,11 +147,13 @@ class MapCamera2d : public MapCamera2dInterface,
 
     virtual float getScreenDensityPpi() override;
 
-  protected:
+    std::shared_ptr<MapCamera3dInterface> asMapCamera3d() override;
+
+protected:
     virtual void setupInertia();
 
     std::recursive_mutex listenerMutex;
-    std::set<std::shared_ptr<MapCamera2dListenerInterface>> listeners;
+    std::set<std::shared_ptr<MapCameraListenerInterface>> listeners;
 
     std::shared_ptr<MapInterface> mapInterface;
     std::shared_ptr<CoordinateConversionHelperInterface> conversionHelper;
@@ -232,4 +242,6 @@ class MapCamera2d : public MapCamera2dInterface,
     RectCoord getRectFromViewport(const Vec2I &sizeViewport, const Coord &center);
 
     std::vector<float> newVpMatrix = std::vector<float>(16, 0.0);
+
+    Vec3D origin = Vec3D(0, 0, 0);
 };

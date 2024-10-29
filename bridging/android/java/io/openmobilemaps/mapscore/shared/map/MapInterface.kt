@@ -10,10 +10,10 @@ abstract class MapInterface {
 
     companion object {
         @JvmStatic
-        external fun create(graphicsFactory: io.openmobilemaps.mapscore.shared.graphics.objects.GraphicsObjectFactoryInterface, shaderFactory: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderFactoryInterface, renderingContext: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, mapConfig: MapConfig, scheduler: io.openmobilemaps.mapscore.shared.map.scheduling.SchedulerInterface, pixelDensity: Float): MapInterface
+        external fun create(graphicsFactory: io.openmobilemaps.mapscore.shared.graphics.objects.GraphicsObjectFactoryInterface, shaderFactory: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderFactoryInterface, renderingContext: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, mapConfig: MapConfig, scheduler: io.openmobilemaps.mapscore.shared.map.scheduling.SchedulerInterface, pixelDensity: Float, is3D: Boolean): MapInterface
 
         @JvmStatic
-        external fun createWithOpenGl(mapConfig: MapConfig, pixelDensity: Float): MapInterface
+        external fun createWithOpenGl(mapConfig: MapConfig, scheduler: io.openmobilemaps.mapscore.shared.map.scheduling.SchedulerInterface, pixelDensity: Float, is3D: Boolean): MapInterface
     }
 
     abstract fun setCallbackHandler(callbackInterface: MapCallbackInterface?)
@@ -30,9 +30,9 @@ abstract class MapInterface {
 
     abstract fun getCoordinateConverterHelper(): io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateConversionHelperInterface
 
-    abstract fun setCamera(camera: MapCamera2dInterface)
+    abstract fun setCamera(camera: MapCameraInterface)
 
-    abstract fun getCamera(): MapCamera2dInterface
+    abstract fun getCamera(): MapCameraInterface
 
     abstract fun setTouchHandler(touchHandler: io.openmobilemaps.mapscore.shared.map.controls.TouchHandlerInterface)
 
@@ -55,6 +55,8 @@ abstract class MapInterface {
     abstract fun setViewportSize(size: io.openmobilemaps.mapscore.shared.graphics.common.Vec2I)
 
     abstract fun setBackgroundColor(color: io.openmobilemaps.mapscore.shared.graphics.common.Color)
+
+    abstract fun is3d(): Boolean
 
     abstract fun invalidate()
 
@@ -82,7 +84,7 @@ abstract class MapInterface {
 
     abstract fun forceReload()
 
-    private class CppProxy : MapInterface {
+    public class CppProxy : MapInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 
@@ -139,17 +141,17 @@ abstract class MapInterface {
         }
         private external fun native_getCoordinateConverterHelper(_nativeRef: Long): io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateConversionHelperInterface
 
-        override fun setCamera(camera: MapCamera2dInterface) {
+        override fun setCamera(camera: MapCameraInterface) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             native_setCamera(this.nativeRef, camera)
         }
-        private external fun native_setCamera(_nativeRef: Long, camera: MapCamera2dInterface)
+        private external fun native_setCamera(_nativeRef: Long, camera: MapCameraInterface)
 
-        override fun getCamera(): MapCamera2dInterface {
+        override fun getCamera(): MapCameraInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             return native_getCamera(this.nativeRef)
         }
-        private external fun native_getCamera(_nativeRef: Long): MapCamera2dInterface
+        private external fun native_getCamera(_nativeRef: Long): MapCameraInterface
 
         override fun setTouchHandler(touchHandler: io.openmobilemaps.mapscore.shared.map.controls.TouchHandlerInterface) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
@@ -216,6 +218,12 @@ abstract class MapInterface {
             native_setBackgroundColor(this.nativeRef, color)
         }
         private external fun native_setBackgroundColor(_nativeRef: Long, color: io.openmobilemaps.mapscore.shared.graphics.common.Color)
+
+        override fun is3d(): Boolean {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_is3d(this.nativeRef)
+        }
+        private external fun native_is3d(_nativeRef: Long): Boolean
 
         override fun invalidate() {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

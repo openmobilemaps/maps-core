@@ -12,7 +12,7 @@ abstract class RasterShaderInterface {
 
     abstract fun asShaderProgramInterface(): ShaderProgramInterface
 
-    private class CppProxy : RasterShaderInterface {
+    public class CppProxy : RasterShaderInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

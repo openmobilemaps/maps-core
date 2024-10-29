@@ -7,7 +7,7 @@
 
 import Foundation
 
-@available(iOS 13.0, *)
+@MainActor
 public class CapabilitiesResource {
     public init(xmlString: String) throws {
         resource = try MCWmtsCapabilitiesResource.create(xmlString) !! Errors.capabilitiesLoadFailed

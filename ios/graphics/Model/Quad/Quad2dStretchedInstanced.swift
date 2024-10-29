@@ -12,8 +12,9 @@ import Foundation
 import MapCoreSharedModule
 import Metal
 import UIKit
+import simd
 
-final class Quad2dStretchedInstanced: BaseGraphicsObject {
+final class Quad2dStretchedInstanced: BaseGraphicsObject, @unchecked Sendable {
     private var verticesBuffer: MTLBuffer?
 
     private var indicesBuffer: MTLBuffer?
@@ -72,9 +73,17 @@ final class Quad2dStretchedInstanced: BaseGraphicsObject {
     override func render(encoder: MTLRenderCommandEncoder,
                          context: RenderingContext,
                          renderPass _: MCRenderPassConfig,
-                         mvpMatrix: Int64,
+                         vpMatrix: Int64,
+                         mMatrix: Int64,
+                origin: MCVec3D,
                          isMasked: Bool,
                          screenPixelAsRealMeterFactor _: Double) {
+
+        lock.lock()
+        defer {
+            lock.unlock()
+        }
+
         guard let verticesBuffer,
               let indicesBuffer,
               let positionsBuffer,
@@ -86,11 +95,6 @@ final class Quad2dStretchedInstanced: BaseGraphicsObject {
               let texture,
               instanceCount != 0 else {
             return
-        }
-
-        lock.lock()
-        defer {
-            lock.unlock()
         }
 
 #if DEBUG
@@ -117,7 +121,7 @@ final class Quad2dStretchedInstanced: BaseGraphicsObject {
         shader.preRender(context)
 
         encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
-        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mvpMatrix)) {
+        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(vpMatrix)) {
             encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
         }
 
@@ -128,6 +132,13 @@ final class Quad2dStretchedInstanced: BaseGraphicsObject {
         encoder.setVertexBuffer(textureCoordinatesBuffer, offset: 0, index: 5)
 
         encoder.setVertexBuffer(alphaBuffer, offset: 0, index: 6)
+
+        if let bufferPointer = originOffsetBuffer?.contents().assumingMemoryBound(to: simd_float4.self) {
+            bufferPointer.pointee.x = Float(originOffset.x - origin.x)
+            bufferPointer.pointee.y = Float(originOffset.y - origin.y)
+            bufferPointer.pointee.z = Float(originOffset.z - origin.z)
+        }
+        encoder.setVertexBuffer(originOffsetBuffer, offset: 0, index: 7)
 
         encoder.setFragmentBuffer(stretchInfoBuffer, offset: 0, index: 1)
 
@@ -147,7 +158,9 @@ final class Quad2dStretchedInstanced: BaseGraphicsObject {
 extension Quad2dStretchedInstanced: MCMaskingObjectInterface {
     func render(asMask context: MCRenderingContextInterface?,
                 renderPass: MCRenderPassConfig,
-                mvpMatrix: Int64,
+                vpMatrix: Int64,
+                mMatrix: Int64,
+                origin: MCVec3D,
                 screenPixelAsRealMeterFactor: Double) {
         guard isReady(),
               let context = context as? RenderingContext,
@@ -158,14 +171,17 @@ extension Quad2dStretchedInstanced: MCMaskingObjectInterface {
         render(encoder: encoder,
                context: context,
                renderPass: renderPass,
-               mvpMatrix: mvpMatrix,
+               vpMatrix: vpMatrix,
+               mMatrix: mMatrix,
+               origin: origin,
                isMasked: false,
                screenPixelAsRealMeterFactor: screenPixelAsRealMeterFactor)
     }
 }
 
 extension Quad2dStretchedInstanced: MCQuad2dStretchedInstancedInterface {
-    func setFrame(_ frame: MCQuad2dD) {
+
+    func setFrame(_ frame: MCQuad2dD, origin: MCVec3D, is3d: Bool) {
         /*
          The quad is made out of 4 vertices as following
          B----C
@@ -181,8 +197,8 @@ extension Quad2dStretchedInstanced: MCQuad2dStretchedInstancedInterface {
             Vertex(position: frame.bottomRight, textureU: 1, textureV: 1), // D
         ]
         let indices: [UInt16] = [
-            0, 1, 2, // ABC
-            0, 2, 3, // ACD
+            0, 2, 1, // ACB
+            0, 3, 2, // ADC
         ]
 
         guard let verticesBuffer = device.makeBuffer(bytes: vertecies, length: MemoryLayout<Vertex>.stride * vertecies.count, options: []), let indicesBuffer = device.makeBuffer(bytes: indices, length: MemoryLayout<UInt16>.stride * indices.count, options: []) else {
@@ -190,7 +206,8 @@ extension Quad2dStretchedInstanced: MCQuad2dStretchedInstancedInterface {
         }
 
         lock.withCritical {
-            indicesCount = indices.count
+            self.originOffset = origin
+            self.indicesCount = indices.count
             self.verticesBuffer = verticesBuffer
             self.indicesBuffer = indicesBuffer
         }

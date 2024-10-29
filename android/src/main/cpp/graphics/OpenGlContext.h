@@ -11,9 +11,10 @@
 #pragma once
 
 #include "RenderingContextInterface.h"
+#include "RenderingCullMode.h"
+#include <memory>
 #include <string>
 #include <unordered_map>
-#include <vector>
 
 class OpenGlContext : public RenderingContextInterface, std::enable_shared_from_this<OpenGlContext> {
   public:
@@ -33,6 +34,8 @@ class OpenGlContext : public RenderingContextInterface, std::enable_shared_from_
 
     virtual void setBackgroundColor(const ::Color &color) override;
 
+    void setCulling(RenderingCullMode mode) override;
+
     virtual void setupDrawFrame() override;
 
     virtual void preRenderStencilMask() override;
@@ -41,7 +44,10 @@ class OpenGlContext : public RenderingContextInterface, std::enable_shared_from_
 
     virtual void applyScissorRect(const std::optional<::RectI> &scissorRect) override;
 
+    virtual float getAspectRatio();
+
   protected:
+    RenderingCullMode cullMode = RenderingCullMode::NONE;
     Color backgroundColor = Color(0, 0, 0, 1);
 
     std::unordered_map<std::string, int> programs;

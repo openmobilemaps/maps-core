@@ -13,5 +13,9 @@ public:
 
     static MapCoordinateSystem getEpsg3857System();
 
+    static MapCoordinateSystem getEpsg4326System();
+
     static MapCoordinateSystem getEpsg21781System();
+
+    static MapCoordinateSystem getUnitSphereSystem();
 };

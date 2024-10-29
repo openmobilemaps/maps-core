@@ -11,13 +11,13 @@
 #include "Tiled2dMapVectorPolygonTile.h"
 #include "Tiled2dMapVectorLayerConfig.h"
 #include "RenderObject.h"
-#include "MapCamera2dInterface.h"
+#include "MapCameraInterface.h"
 #include "earcut.hpp"
 #include "Logger.h"
 #include "PolygonHelper.h"
 #include "CoordinateSystemIdentifiers.h"
 #include "Tiled2dMapVectorStyleParser.h"
-
+#include "Tiled2dMapVectorLayerConstants.h"
 
 Tiled2dMapVectorPolygonTile::Tiled2dMapVectorPolygonTile(const std::weak_ptr<MapInterface> &mapInterface,
                                                          const Tiled2dMapVersionedTileInfo &tileInfo,
@@ -78,11 +78,13 @@ void Tiled2dMapVectorPolygonTile::update() {
     }
 
     double zoomIdentifier = layerConfig->getZoomIdentifier(camera->getZoom());
-    zoomIdentifier = std::max(zoomIdentifier, (double) tileInfo.tileInfo.zoomIdentifier);
+    if (!mapInterface->is3d()) {
+        zoomIdentifier = std::max(zoomIdentifier, (double) tileInfo.tileInfo.zoomIdentifier);
+    }
 
     auto polygonDescription = std::static_pointer_cast<PolygonVectorLayerDescription>(description);
     bool inZoomRange = polygonDescription->maxZoom >= zoomIdentifier && polygonDescription->minZoom <= zoomIdentifier;
-    
+
     if (lastZoom &&
         ((isStyleZoomDependant && *lastZoom == zoomIdentifier) || !isStyleZoomDependant) &&
         lastAlpha == alpha &&
@@ -146,11 +148,21 @@ void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDa
         return;
     }
 
+    bool is3d = mapInterface->is3d();
+
     const std::string layerName = description->sourceLayer;
 
-    const auto indicesLimit = std::numeric_limits<uint16_t>::max();
+    const auto indicesLimit = is3d ? std::numeric_limits<uint16_t>::max() / 2 : std::numeric_limits<uint16_t>::max();
 
     if (!tileData->empty()) {
+
+        auto convertedTileBounds = mapInterface->getCoordinateConverterHelper()->convertRectToRenderSystem(tileInfo.tileInfo.bounds);
+        double cx = (convertedTileBounds.bottomRight.x + convertedTileBounds.topLeft.x) / 2.0;
+        double cy = (convertedTileBounds.bottomRight.y + convertedTileBounds.topLeft.y) / 2.0;
+        double rx = is3d ? 1.0 * sin(cy) * cos(cx) : cx;
+        double ry = is3d ? 1.0 * cos(cy) : cy;
+        double rz = is3d ? -1.0 * sin(cy) * sin(cx) : 0.0;
+        auto origin = Vec3D(rx, ry, rz);
 
         bool anyInteractable = false;
 
@@ -186,7 +198,7 @@ void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDa
                         } else {
                             styleGroupIndex = (int) featureGroups.size();
                             styleIndex = 0;
-                            auto shader = shaderFactory->createPolygonGroupShader(isStriped);
+                            auto shader = shaderFactory->createPolygonGroupShader(isStriped, mapInterface->is3d());
                             auto polygonDescription = std::static_pointer_cast<PolygonVectorLayerDescription>(description);
                             shader->asShaderProgramInterface()->setBlendMode(polygonDescription->style.getBlendMode(EvaluationContext(0.0, dpFactor, std::make_shared<FeatureContext>(), featureStateManager)));
                             shaders.push_back(shader);
@@ -219,17 +231,30 @@ void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDa
                         indexOffset = 0;
                     }
 
-                    for (auto const &index: polygon.indices) {
+                    auto coordinates = polygon.coordinates;
+                    auto indices = polygon.indices;
+
+                    if (is3d) {
+                        auto maxSegmentLength = std::min(std::abs(convertedTileBounds.bottomRight.x - convertedTileBounds.topLeft.x) / POLYGON_SUBDIVISION_FACTOR, (M_PI * 2.0) / POLYGON_SUBDIVISION_FACTOR);
+                        PolygonHelper::subdivision(coordinates, indices, maxSegmentLength);
+                    }
+
+
+                    for (auto const &index: indices) {
                         styleGroupNewPolygonsVector[styleGroupIndex].back().indices.push_back(indexOffset + index);
                     }
 
-                    for (auto const &coordinate: polygon.coordinates) {
-                        styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(coordinate.x);
-                        styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(coordinate.y);
+                    for (auto const &coordinate: coordinates) {
+                        double x = is3d ? 1.0 * sin(coordinate.y) * cos(coordinate.x) - rx : coordinate.x - rx;
+                        double y = is3d ?  1.0 * cos(coordinate.y) - ry : coordinate.y - ry;
+                        double z = is3d ? -1.0 * sin(coordinate.y) * sin(coordinate.x) - rz : 0.0;
+                        styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(x);
+                        styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(y);
+                        styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(z);
                         styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(styleIndex);
                     }
 
-                    styleIndicesOffsets.at(styleGroupIndex) += verticesCount;
+                    styleIndicesOffsets.at(styleGroupIndex) += coordinates.size();
 
                     bool interactable = description->isInteractable(evalContext);
                     if (interactable) {
@@ -244,14 +269,15 @@ void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDa
             tileCallbackInterface.message(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsInteractable, description->identifier);
         }
 
-        addPolygons(styleGroupNewPolygonsVector);
+        addPolygons(styleGroupNewPolygonsVector, origin);
     } else {
         auto selfActor = WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this());
         tileCallbackInterface.message(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsReady, tileInfo, description->identifier, selfActor);
     }
 }
 
-void Tiled2dMapVectorPolygonTile::addPolygons(const std::vector<std::vector<ObjectDescriptions>> &styleGroupNewPolygonsVector) {
+void Tiled2dMapVectorPolygonTile::addPolygons(const std::vector<std::vector<ObjectDescriptions>> &styleGroupNewPolygonsVector,
+                                              const Vec3D & origin) {
 
     if (styleGroupNewPolygonsVector.empty()) {
         auto selfActor = WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this());
@@ -279,7 +305,7 @@ void Tiled2dMapVectorPolygonTile::addPolygons(const std::vector<std::vector<Obje
 #endif
 
             auto layerObject = std::make_shared<PolygonGroup2dLayerObject>(converter, polygonObject, shader);
-            layerObject->setVertices(polygonDesc.vertices, polygonDesc.indices);
+            layerObject->setVertices(polygonDesc.vertices, polygonDesc.indices, origin);
 
             polygonGroupObjects.emplace_back(layerObject);
             newGraphicObjects.push_back(polygonObject->asGraphicsObject());
@@ -342,11 +368,11 @@ bool Tiled2dMapVectorPolygonTile::performClick(const Coord &coord) {
     }
 
     std::vector<VectorLayerFeatureInfo> featureInfos;
-    for (auto const &[polygon, featureContext]: hitDetectionPolygons) {
-        if (VectorTileGeometryHandler::isPointInTriangulatedPolygon(coord, polygon, converter)) {
+    for (auto iter = hitDetectionPolygons.rbegin(); iter != hitDetectionPolygons.rend(); ++iter) {
+        if (VectorTileGeometryHandler::isPointInTriangulatedPolygon(coord, std::get<0>(*iter), converter)) {
             if (multiselect) {
-                featureInfos.push_back(featureContext->getFeatureInfo());
-            } else if (strongSelectionDelegate->didSelectFeature(featureContext->getFeatureInfo(), description->identifier,
+                featureInfos.push_back(std::get<1>(*iter)->getFeatureInfo());
+            } else if (strongSelectionDelegate->didSelectFeature(std::get<1>(*iter)->getFeatureInfo(), description->identifier,
                                                                  converter->convert(CoordinateSystemIdentifiers::EPSG4326(),coord))) {
                 return true;
             }

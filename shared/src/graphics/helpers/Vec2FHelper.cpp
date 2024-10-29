@@ -49,6 +49,10 @@ double operator*( const ::Vec2F& left, const ::Vec2F& right ) {
     return left.x * right.x + left.y * right.y;
 }
 
+Vec2F operator*( const ::Vec2F& left, const float& val ) {
+    return Vec2F(left.x * val, left.y * val);
+}
+
 Vec2F operator/( const ::Vec2F& left, const double& val ) {
     return Vec2F(left.x / val, left.y / val);
 }

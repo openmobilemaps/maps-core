@@ -23,7 +23,9 @@
 class Line2dLayerObject : public LayerObjectInterface {
   public:
     Line2dLayerObject(const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
-                      const std::shared_ptr<LineGroup2dInterface> &line, const std::shared_ptr<LineGroupShaderInterface> &shader);
+                      const std::shared_ptr<LineGroup2dInterface> &line,
+                      const std::shared_ptr<LineGroupShaderInterface> &shader,
+                      bool is3d);
 
     ~Line2dLayerObject(){};
 
@@ -31,7 +33,7 @@ class Line2dLayerObject : public LayerObjectInterface {
 
     virtual std::vector<std::shared_ptr<RenderConfigInterface>> getRenderConfig() override;
 
-    void setPositions(const std::vector<Coord> &positions);
+    void setPositions(const std::vector<Coord> &positions, const Vec3D & origin);
 
     void setStyle(const LineStyle &style);
 
@@ -52,4 +54,5 @@ private:
 
     LineStyle style;
     bool highlighted;
+    bool is3d;
 };

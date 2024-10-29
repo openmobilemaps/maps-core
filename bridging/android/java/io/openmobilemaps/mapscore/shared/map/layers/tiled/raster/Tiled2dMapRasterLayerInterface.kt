@@ -49,7 +49,11 @@ abstract class Tiled2dMapRasterLayerInterface {
 
     abstract fun getConfig(): io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig
 
-    private class CppProxy : Tiled2dMapRasterLayerInterface {
+    abstract fun set3dSubdivisionFactor(factor: Int)
+
+    abstract fun setBlendMode(blendMode: io.openmobilemaps.mapscore.shared.graphics.shader.BlendMode)
+
+    public class CppProxy : Tiled2dMapRasterLayerInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 
@@ -153,5 +157,17 @@ abstract class Tiled2dMapRasterLayerInterface {
             return native_getConfig(this.nativeRef)
         }
         private external fun native_getConfig(_nativeRef: Long): io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig
+
+        override fun set3dSubdivisionFactor(factor: Int) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_set3dSubdivisionFactor(this.nativeRef, factor)
+        }
+        private external fun native_set3dSubdivisionFactor(_nativeRef: Long, factor: Int)
+
+        override fun setBlendMode(blendMode: io.openmobilemaps.mapscore.shared.graphics.shader.BlendMode) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setBlendMode(this.nativeRef, blendMode)
+        }
+        private external fun native_setBlendMode(_nativeRef: Long, blendMode: io.openmobilemaps.mapscore.shared.graphics.shader.BlendMode)
     }
 }

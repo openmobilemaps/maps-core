@@ -13,13 +13,15 @@ import MapCoreSharedModule
 import Metal
 import UIKit
 
-class PolygonGroupShader: BaseShader {
+class PolygonGroupShader: BaseShader, @unchecked Sendable {
     var polygonStyleBuffer: MTLBuffer?
 
     let isStriped: Bool
+    let isUnitSphere : Bool
 
-    init(isStriped: Bool) {
+    init(isStriped: Bool, isUnitSphere: Bool = false) {
         self.isStriped = isStriped
+        self.isUnitSphere = isUnitSphere
         super.init()
     }
 

@@ -4,7 +4,6 @@
 #import <Foundation/Foundation.h>
 @class MCSchedulerGraphicsTaskCallbacks;
 @protocol MCTaskInterface;
-@protocol MCThreadPoolCallbacks;
 
 
 @protocol MCSchedulerInterface
@@ -29,7 +28,5 @@
 - (BOOL)runGraphicsTasks;
 
 - (void)setSchedulerGraphicsTaskCallbacks:(nullable MCSchedulerGraphicsTaskCallbacks *)callbacks;
-
-- (nullable id<MCThreadPoolCallbacks>)getThreadPoolCallbacks;
 
 @end

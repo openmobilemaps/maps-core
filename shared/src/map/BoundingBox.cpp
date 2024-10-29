@@ -13,6 +13,9 @@
 #include "CoordinateConversionHelperInterface.h"
 #include "CoordinateSystemIdentifiers.h"
 
+#include <algorithm>
+#include <limits>
+
 std::shared_ptr<BoundingBoxInterface> BoundingBoxInterface::create(int32_t systemIdentifier) {
     return std::make_shared<BoundingBox>(systemIdentifier);
 }

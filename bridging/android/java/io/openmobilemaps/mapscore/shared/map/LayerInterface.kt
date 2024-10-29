@@ -43,7 +43,7 @@ abstract class LayerInterface {
 
     abstract fun forceReload()
 
-    private class CppProxy : LayerInterface {
+    public class CppProxy : LayerInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

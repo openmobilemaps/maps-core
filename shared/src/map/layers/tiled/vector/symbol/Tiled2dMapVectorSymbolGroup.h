@@ -53,13 +53,13 @@ public:
                     const WeakActor<Tiled2dMapVectorSourceSymbolDataManager> &symbolManagerActor,
                     float alpha = 1.0);
 
-    void update(const double zoomIdentifier, const double rotation, const double scaleFactor, long long now);
+    void update(const double zoomIdentifier, const double rotation, const double scaleFactor, long long now, const Vec2I viewPortSize);
 
     void setupObjects(const std::shared_ptr<SpriteData> &spriteData, const std::shared_ptr<TextureHolderInterface> &spriteTexture, const std::optional<WeakActor<Tiled2dMapVectorSourceSymbolDataManager>> &symbolDataManager = std::nullopt);
 
     std::vector<SymbolObjectCollisionWrapper> getSymbolObjectsForCollision();
 
-    std::optional<std::tuple<Coord, VectorLayerFeatureInfo>> onClickConfirmed(const CircleD &clickHitCircle);
+    std::optional<std::tuple<Coord, VectorLayerFeatureInfo>> onClickConfirmed(const CircleD &clickHitCircle, double zoomIdentifier, CollisionUtil::CollisionEnvironment &collisionEnvironment);
 
     void setAlpha(float alpha);
 
@@ -122,12 +122,13 @@ private:
         std::vector<float> iconScales;
         std::vector<float> iconRotations;
         std::vector<float> iconAlphas;
+        std::vector<float> iconOffsets;
         std::vector<float> iconTextureCoordinates;
         std::shared_ptr<TextureHolderInterface> texture;
         std::shared_ptr<Quad2dInstancedInterface> renderObject;
         std::unordered_map<std::string, ::RectI> featureIdentifiersUv;
 
-        CustomIconDescriptor(std::shared_ptr<TextureHolderInterface> texture, std::shared_ptr<Quad2dInstancedInterface> renderObject, std::unordered_map<std::string, ::RectI> featureIdentifiersUv): texture(texture), renderObject(renderObject), featureIdentifiersUv(featureIdentifiersUv) {
+        CustomIconDescriptor(std::shared_ptr<TextureHolderInterface> texture, std::shared_ptr<Quad2dInstancedInterface> renderObject, std::unordered_map<std::string, ::RectI> featureIdentifiersUv, bool is3d): texture(texture), renderObject(renderObject), featureIdentifiersUv(featureIdentifiersUv) {
             auto count = featureIdentifiersUv.size();
 
             iconAlphas.resize(count, 0.0);
@@ -135,6 +136,9 @@ private:
             iconScales.resize(count * 2, 0.0);
             iconPositions.resize(count * 2, 0.0);
             iconTextureCoordinates.resize(count * 4, 0.0);
+            if (is3d) {
+                iconOffsets.resize(count * 2, 0.0);
+            }
         }
     };
 
@@ -145,10 +149,12 @@ private:
     std::vector<float> iconScales;
     std::vector<float> iconRotations;
     std::vector<float> iconAlphas;
+    std::vector<float> iconOffsets;
     std::vector<float> iconTextureCoordinates;
 
     std::shared_ptr<FontLoaderResult> fontResult;
     std::vector<float> textPositions;
+    std::vector<float> textReferencePositions;
     std::vector<float> textScales;
     std::vector<float> textRotations;
     std::vector<uint16_t> textStyleIndices;
@@ -169,12 +175,16 @@ private:
 
     bool isInitialized = false;
 
+    bool is3d;
+    Vec3D tileOrigin;
+
     const std::shared_ptr<Tiled2dMapVectorStateManager> featureStateManager;
     const std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> &symbolDelegate;
 
 #ifdef DRAW_TEXT_BOUNDING_BOX
     TextSymbolPlacement textSymbolPlacement;
     SymbolAlignment labelRotationAlignment;
+    std::optional<CircleD> lastClickHitCircle;
 #endif
 
     UsedKeysCollection usedKeys;

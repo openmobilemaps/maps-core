@@ -11,8 +11,9 @@
 import Foundation
 import MapCoreSharedModule
 import Metal
+import simd
 
-final class PolygonPatternGroup2d: BaseGraphicsObject {
+final class PolygonPatternGroup2d: BaseGraphicsObject, @unchecked Sendable {
     private var shader: PolygonPatternGroupShader
 
     private var verticesBuffer: MTLBuffer?
@@ -45,7 +46,9 @@ final class PolygonPatternGroup2d: BaseGraphicsObject {
     override func render(encoder: MTLRenderCommandEncoder,
                          context: RenderingContext,
                          renderPass pass: MCRenderPassConfig,
-                         mvpMatrix: Int64,
+                         vpMatrix: Int64,
+                         mMatrix: Int64,
+                         origin: MCVec3D,
                          isMasked: Bool,
                          screenPixelAsRealMeterFactor: Double) {
         lock.lock()
@@ -90,7 +93,7 @@ final class PolygonPatternGroup2d: BaseGraphicsObject {
         shader.preRender(context)
 
         encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
-        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mvpMatrix)) {
+        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(vpMatrix)) {
             encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
         }
 
@@ -118,6 +121,13 @@ final class PolygonPatternGroup2d: BaseGraphicsObject {
         encoder.setFragmentBuffer(opacitiesBuffer, offset: 0, index: 0)
         encoder.setFragmentBuffer(textureCoordinatesBuffer, offset: 0, index: 1)
 
+        if let bufferPointer = originOffsetBuffer?.contents().assumingMemoryBound(to: simd_float4.self) {
+            bufferPointer.pointee.x = Float(originOffset.x - origin.x)
+            bufferPointer.pointee.y = Float(originOffset.y - origin.y)
+            bufferPointer.pointee.z = Float(originOffset.z - origin.z)
+        }
+        encoder.setVertexBuffer(originOffsetBuffer, offset: 0, index: 4)
+
         encoder.drawIndexedPrimitives(type: .triangle,
                                       indexCount: indicesCount,
                                       indexType: .uint16,
@@ -127,7 +137,7 @@ final class PolygonPatternGroup2d: BaseGraphicsObject {
 }
 
 extension PolygonPatternGroup2d: MCPolygonPatternGroup2dInterface {
-    func setVertices(_ vertices: MCSharedBytes, indices: MCSharedBytes) {
+    func setVertices(_ vertices: MCSharedBytes, indices: MCSharedBytes, origin: MCVec3D) {
         guard vertices.elementCount > 0 else {
             lock.withCritical {
                 self.indicesCount = 0
@@ -162,6 +172,7 @@ extension PolygonPatternGroup2d: MCPolygonPatternGroup2dInterface {
             self.indicesBuffer = indicesBuffer
             self.posOffset.x = minX
             self.posOffset.y = minY
+            self.originOffset = origin
         }
     }
 

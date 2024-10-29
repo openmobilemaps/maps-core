@@ -6,6 +6,7 @@
 #include "Quad2dD.h"
 #include "RenderingContextInterface.h"
 #include "SharedBytes.h"
+#include "Vec3D.h"
 #include <cstdint>
 #include <memory>
 
@@ -17,7 +18,7 @@ class Quad2dInstancedInterface {
 public:
     virtual ~Quad2dInstancedInterface() = default;
 
-    virtual void setFrame(const ::Quad2dD & frame) = 0;
+    virtual void setFrame(const ::Quad2dD & frame, const ::Vec3D & origin, bool is3d) = 0;
 
     virtual void setInstanceCount(int32_t count) = 0;
 
@@ -30,6 +31,12 @@ public:
     virtual void setAlphas(const ::SharedBytes & values) = 0;
 
     virtual void setTextureCoordinates(const ::SharedBytes & textureCoordinates) = 0;
+
+    /**
+     * 2 floats (x and y) for each instance
+     * defines the offset applied to the projected position in viewspace coordinates
+     */
+    virtual void setPositionOffset(const ::SharedBytes & offsets) = 0;
 
     virtual void loadTexture(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & context, const /*not-null*/ std::shared_ptr<TextureHolderInterface> & textureHolder) = 0;
 

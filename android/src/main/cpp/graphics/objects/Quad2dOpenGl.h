@@ -35,12 +35,14 @@ class Quad2dOpenGl : public GraphicsObjectInterface,
     virtual void clear() override;
 
     virtual void renderAsMask(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
-                              int64_t mvpMatrix, double screenPixelAsRealMeterFactor) override;
+                              int64_t vpMatrix, int64_t mMatrix, const ::Vec3D & origin, double screenPixelAsRealMeterFactor) override;
 
     virtual void render(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
-                        int64_t mvpMatrix, bool isMasked, double screenPixelAsRealMeterFactor) override;
+                        int64_t vpMatrix, int64_t mMatrix, const ::Vec3D & origin, bool isMasked, double screenPixelAsRealMeterFactor) override;
 
-    virtual void setFrame(const ::Quad2dD &frame, const ::RectD &textureCoordinates) override;
+    virtual void setFrame(const ::Quad3dD &frame, const ::RectD &textureCoordinates, const Vec3D &origin, bool is3D) override;
+
+    void setSubdivisionFactor(int32_t factor) override;
 
     virtual void loadTexture(const std::shared_ptr<::RenderingContextInterface> &context,
                              const std::shared_ptr<TextureHolderInterface> &textureHolder) override;
@@ -56,9 +58,7 @@ class Quad2dOpenGl : public GraphicsObjectInterface,
     void setDebugLabel(const std::string &label) override;
 
 protected:
-    virtual void adjustTextureCoordinates();
-
-    virtual void prepareTextureDraw(int mProgram);
+    void computeGeometry(bool texCoordsOnly);
 
     void prepareGlData(int program);
 
@@ -68,12 +68,16 @@ protected:
 
     void removeTextureCoordsGlBuffers();
 
+    virtual void prepareTextureDraw(int mProgram);
+
     std::shared_ptr<ShaderProgramInterface> shaderProgram;
     std::string programName;
     int program;
 
     bool glDataBuffersGenerated = false;
-    int mvpMatrixHandle;
+    int vpMatrixHandle;
+    int mMatrixHandle;
+    int originOffsetHandle;
     int positionHandle;
     GLuint vertexBuffer;
     std::vector<GLfloat> vertices;
@@ -81,14 +85,17 @@ protected:
     GLuint textureCoordsBuffer;
     std::vector<GLfloat> textureCoords;
     GLuint indexBuffer;
-    std::vector<GLubyte> indices;
+    std::vector<GLushort> indices;
+    Vec3D quadOrigin = Vec3D(0.0, 0.0, 0.0);
+    bool is3D = false;
 
     std::shared_ptr<TextureHolderInterface> textureHolder;
     int texturePointer;
 
     bool usesTextureCoords = false;
 
-    Quad2dD frame = Quad2dD(Vec2D(0.0, 0.0), Vec2D(0.0, 0.0), Vec2D(0.0, 0.0), Vec2D(0.0, 0.0));
+    int32_t subdivisionFactor = 0;
+    Quad3dD frame = Quad3dD(Vec3D(0.0, 0.0, 0.0), Vec3D(0.0, 0.0, 0.0), Vec3D(0.0, 0.0, 0.0), Vec3D(0.0, 0.0, 0.0));
     RectD textureCoordinates = RectD(0.0, 0.0, 0.0, 0.0);
     double factorHeight = 1.0;
     double factorWidth = 1.0;

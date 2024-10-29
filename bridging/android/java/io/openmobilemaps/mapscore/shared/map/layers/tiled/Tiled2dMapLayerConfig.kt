@@ -22,7 +22,7 @@ abstract class Tiled2dMapLayerConfig {
 
     abstract fun getBounds(): io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord?
 
-    private class CppProxy : Tiled2dMapLayerConfig {
+    public class CppProxy : Tiled2dMapLayerConfig {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

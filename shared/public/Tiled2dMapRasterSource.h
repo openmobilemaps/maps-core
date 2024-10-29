@@ -29,7 +29,7 @@ class Tiled2dMapRasterSource
                            float screenDensityPpi,
                            std::string layerName);
 
-    std::unordered_set<Tiled2dMapRasterTileInfo> getCurrentTiles();
+    VectorSet<Tiled2dMapRasterTileInfo> getCurrentTiles();
 
     virtual void notifyTilesUpdates() override;
         

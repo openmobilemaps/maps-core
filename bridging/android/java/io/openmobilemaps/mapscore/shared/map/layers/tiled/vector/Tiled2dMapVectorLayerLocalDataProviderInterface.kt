@@ -16,7 +16,7 @@ abstract class Tiled2dMapVectorLayerLocalDataProviderInterface {
 
     abstract fun loadGeojson(sourceName: String, url: String): com.snapchat.djinni.Future<io.openmobilemaps.mapscore.shared.map.loader.DataLoaderResult>
 
-    private class CppProxy : Tiled2dMapVectorLayerLocalDataProviderInterface {
+    public class CppProxy : Tiled2dMapVectorLayerLocalDataProviderInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

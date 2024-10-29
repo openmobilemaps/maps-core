@@ -12,15 +12,18 @@
 #include "DataStructures.metal"
 using namespace metal;
 
+
 vertex VertexOut
-baseVertexShader(const VertexIn vertexIn [[stage_in]],
-                    constant float4x4 &mvpMatrix [[buffer(1)]])
+baseVertexShader(const Vertex3DTextureIn vertexIn [[stage_in]],
+                constant float4x4 &vpMatrix [[buffer(1)]],
+                 constant float4x4 &mMatrix [[buffer(2)]],
+                 constant float4 &originOffset [[buffer(3)]])
 {
     VertexOut out {
-        .position = mvpMatrix * float4(vertexIn.position.xy, 0.0, 1.0),
+        .position = vpMatrix * ((mMatrix * vertexIn.position) + originOffset),
         .uv = vertexIn.uv
     };
-    
+
     return out;
 }
 
@@ -43,12 +46,13 @@ baseFragmentShader(VertexOut in [[stage_in]],
 
 
 vertex VertexOut
-colorVertexShader(const VertexIn vertexIn [[stage_in]],
-                    constant float4x4 &mvpMatrix [[buffer(1)]])
+colorVertexShader(const Vertex3FIn vertexIn [[stage_in]],
+                  constant float4x4 &vpMatrix [[buffer(1)]],
+                   constant float4x4 &mMatrix [[buffer(2)]],
+                  constant float4 &originOffset [[buffer(3)]])
 {
     VertexOut out {
-        .position = mvpMatrix * float4(vertexIn.position.xy, 0.0, 1.0),
-        .uv = vertexIn.uv
+        .position = vpMatrix * ((mMatrix * float4(vertexIn.position.xyz, 1.0)) + originOffset),
     };
 
     return out;

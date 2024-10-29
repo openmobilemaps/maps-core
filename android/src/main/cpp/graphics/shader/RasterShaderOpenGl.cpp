@@ -11,7 +11,10 @@
 #include "RasterShaderOpenGl.h"
 #include "OpenGlContext.h"
 
-const std::string RasterShaderOpenGl::programName = "UBMAP_RasterShaderOpenGl";
+
+RasterShaderOpenGl::RasterShaderOpenGl(bool projectOntoUnitSphere)
+        : programName(projectOntoUnitSphere ? "UBMAP_RasterShaderUnitSphereOpenGl" : "UBMAP_RasterShaderOpenGl"),
+          projectOntoUnitSphere(projectOntoUnitSphere) {}
 
 std::string RasterShaderOpenGl::getProgramName() {
     return programName;
@@ -60,6 +63,10 @@ void RasterShaderOpenGl::setStyle(const RasterShaderStyle &style) {
      styleValues[6] = style.brightnessShift;
 }
 
+std::string RasterShaderOpenGl::getVertexShader() {
+    return BaseShaderProgramOpenGl::getVertexShader();
+}
+
 std::string RasterShaderOpenGl::getFragmentShader() {
     return OMMVersionedGlesShaderCode(320 es,
                                       precision highp float;
@@ -72,7 +79,8 @@ std::string RasterShaderOpenGl::getFragmentShader() {
                                       void main() {
                                           vec4 color = texture(textureSampler, v_texcoord);
                                           if (styleValues[0] == 0.0 || color.a == 0.0) {
-                                              discard;
+                                              fragmentColor = vec4(0.0);
+                                              return;
                                           }
                                           color.rgb = clamp(color.rgb + styleValues[6], 0.0, 1.0); // brighntess shift
                                           float average = (color.r + color.g + color.b) / 3.0;

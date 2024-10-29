@@ -17,6 +17,7 @@
 #include "SimpleLayerInterface.h"
 #include "SimpleTouchInterface.h"
 #include "Textured2dLayerObject.h"
+#include <atomic>
 #include <map>
 #include <mutex>
 #include <unordered_map>
@@ -103,7 +104,10 @@ class IconLayer : public IconLayerInterface,
 
     std::vector<std::shared_ptr<IconInfoInterface>> getIconsAtPosition(const ::Vec2F &posScreen);
 
+    const static int32_t SUBDIVISION_FACTOR_3D_DEFAULT = 2;
+
     std::shared_ptr<MapInterface> mapInterface;
+    bool is3D = false;
 
     std::shared_ptr<IconLayerCallbackInterface> callbackHandler;
 

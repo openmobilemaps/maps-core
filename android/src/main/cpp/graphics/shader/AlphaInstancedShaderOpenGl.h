@@ -20,6 +20,8 @@ class AlphaInstancedShaderOpenGl : public BaseShaderProgramOpenGl,
                           public std::enable_shared_from_this<AlphaInstancedShaderOpenGl> {
 
   public:
+    AlphaInstancedShaderOpenGl(bool projectOntoUnitSphere);
+
     virtual std::string getProgramName() override;
 
     virtual void setupProgram(const std::shared_ptr<::RenderingContextInterface> &context) override;
@@ -29,7 +31,8 @@ class AlphaInstancedShaderOpenGl : public BaseShaderProgramOpenGl,
     virtual std::shared_ptr<ShaderProgramInterface> asShaderProgramInterface() override;
 
   protected:
-    const static std::string programName;
+    const bool projectOntoUnitSphere;
+    const std::string programName;
 
     virtual std::string getFragmentShader() override;
 

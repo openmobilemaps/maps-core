@@ -19,6 +19,8 @@ class WebMercatorTiled2dMapLayerConfig : public Tiled2dMapLayerConfig {
   public:
     WebMercatorTiled2dMapLayerConfig(std::string layerName, std::string urlFormat);
 
+    WebMercatorTiled2dMapLayerConfig(std::string layerName, std::string urlFormat, const Tiled2dMapZoomInfo &zoomInfo, int32_t minZoomLevel, int32_t maxZoomLevel);
+
     virtual int32_t getCoordinateSystemIdentifier() override;
 
     virtual std::string getTileUrl(int32_t x, int32_t y, int32_t t, int32_t zoom) override;
@@ -37,4 +39,7 @@ private:
     std::string layerName;
     std::string urlFormat;
 
+    int32_t minZoomLevel = 0;
+    int32_t maxZoomLevel = 20;
+    Tiled2dMapZoomInfo zoomInfo = Tiled2dMapZoomInfo(1.0, 0, 0, true, false, true, true);
 };

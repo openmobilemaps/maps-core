@@ -10,7 +10,7 @@ abstract class SchedulerGraphicsTaskCallbacks {
 
     abstract fun requestGraphicsTaskExecution()
 
-    private class CppProxy : SchedulerGraphicsTaskCallbacks {
+    public class CppProxy : SchedulerGraphicsTaskCallbacks {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

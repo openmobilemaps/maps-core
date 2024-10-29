@@ -36,6 +36,8 @@
 #include "Future.hpp"
 #include "LoaderStatus.h"
 #include "TileState.h"
+#include "Vec3D.h"
+#include "Vec3F.h"
 
 template<class R>
 struct TileWrapper {
@@ -45,15 +47,18 @@ public:
     const PolygonCoord tileBounds;
     gpc_polygon tilePolygon;
     TileState state = TileState::IN_SETUP;
+    int tessellationFactor;
 
     TileWrapper(const R &result,
                 const std::vector<::PolygonCoord> & masks,
                 const PolygonCoord & tileBounds,
-                const gpc_polygon &tilePolygon) :
+                const gpc_polygon &tilePolygon,
+                int tessellationFactor) :
     result(std::move(result)),
     masks(std::move(masks)),
     tileBounds(std::move(tileBounds)),
-    tilePolygon(std::move(tilePolygon)) {};
+    tilePolygon(std::move(tilePolygon)),
+    tessellationFactor(tessellationFactor) {};
 };
 
 
@@ -84,13 +89,13 @@ public:
 
     virtual void onVisibleBoundsChanged(const ::RectCoord &visibleBounds, int curT, double zoom) override;
 
+    virtual void onCameraChange(const std::vector<float> &viewMatrix, const std::vector<float> &projectionMatrix, const ::Vec3D & origin, float verticalFov, float horizontalFov, float width, float height, float focusPointAltitude, const ::Coord & focusPointPosition, float zoom) override;
+
     virtual bool isTileVisible(const Tiled2dMapTileInfo &tileInfo);
 
     virtual void pause() override;
 
     virtual void resume() override;
-
-    virtual RectCoord getCurrentViewBounds();
 
     void setMinZoomLevelIdentifier(std::optional<int32_t> value) override;
 
@@ -127,6 +132,11 @@ public:
 
     virtual R postLoadingTask(L loadedData, Tiled2dMapTileInfo tile) = 0;
 
+            ::Vec3D transformToView(const ::Coord & position,
+                                    const std::vector<float> & vpMatrix,
+                                    const Vec3D & origin);
+    ::Vec3D projectToScreen(const ::Vec3D & point, const std::vector<float> & vpMatrix);
+
     MapConfig mapConfig;
     std::shared_ptr<Tiled2dMapLayerConfig> layerConfig;
     int32_t layerSystemId;
@@ -150,9 +160,7 @@ public:
     std::vector<VisibleTilesLayer> currentPyramid;
     int currentKeepZoomLevelOffset;
 
-    RectCoord currentViewBounds = RectCoord(Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(), 0.0, 0.0, 0.0),
-                                            Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(), 0.0, 0.0, 0.0));
-
+    std::vector<PolygonCoord> currentViewBounds = {};
 
     std::atomic<bool> isPaused;
 
@@ -161,9 +169,9 @@ public:
 
     size_t lastVisibleTilesHash = -1;
             
-    void onVisibleTilesChanged(const std::vector<VisibleTilesLayer> &pyramid, int keepZoomLevelOffset = 0);
+    void onVisibleTilesChanged(const std::vector<VisibleTilesLayer> &pyramid, bool keepMultipleLevels, int keepZoomLevelOffset = 0);
 
-private:
+protected:
     void performLoadingTask(Tiled2dMapTileInfo tile, size_t loaderIndex);
 
 

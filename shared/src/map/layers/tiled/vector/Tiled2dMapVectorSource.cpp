@@ -101,18 +101,18 @@ void Tiled2dMapVectorSource::notifyTilesUpdates() {
     listener.message(&Tiled2dMapVectorSourceListener::onTilesUpdated, sourceName, getCurrentTiles());
 }
 
-std::unordered_set<Tiled2dMapVectorTileInfo> Tiled2dMapVectorSource::getCurrentTiles() {
-    std::unordered_set<Tiled2dMapVectorTileInfo> currentTileInfos;
-    std::transform(currentTiles.begin(), currentTiles.end(), std::inserter(currentTileInfos, currentTileInfos.end()), [](const auto& tilePair) {
-            const auto& [tileInfo, tileWrapper] = tilePair;
-            return Tiled2dMapVectorTileInfo(Tiled2dMapVersionedTileInfo(std::move(tileInfo), (size_t)tileWrapper.result.get()), std::move(tileWrapper.result), std::move(tileWrapper.masks), std::move(tileWrapper.state));
-        }
-    );
-    std::transform(outdatedTiles.begin(), outdatedTiles.end(), std::inserter(currentTileInfos, currentTileInfos.end()), [](const auto& tilePair) {
-        const auto& [tileInfo, tileWrapper] = tilePair;
-        return Tiled2dMapVectorTileInfo(Tiled2dMapVersionedTileInfo(std::move(tileInfo), (size_t)tileWrapper.result.get()), std::move(tileWrapper.result), std::move(tileWrapper.masks), std::move(tileWrapper.state));
+VectorSet<Tiled2dMapVectorTileInfo> Tiled2dMapVectorSource::getCurrentTiles() {
+    VectorSet<Tiled2dMapVectorTileInfo> currentTileInfos;
+    currentTileInfos.reserve(currentTiles.size() + outdatedTiles.size());
+    
+    for (auto it = currentTiles.begin(); it != currentTiles.end(); it++) {
+        const auto& [tileInfo, tileWrapper] = *it;
+        currentTileInfos.insert(Tiled2dMapVectorTileInfo(Tiled2dMapVersionedTileInfo(std::move(tileInfo), (size_t)tileWrapper.result.get()), std::move(tileWrapper.result), std::move(tileWrapper.masks), std::move(tileWrapper.state)));
     }
-                   );
+    for (auto it = outdatedTiles.begin(); it != outdatedTiles.end(); it++) {
+        const auto& [tileInfo, tileWrapper] = *it;
+        currentTileInfos.insert(Tiled2dMapVectorTileInfo(Tiled2dMapVersionedTileInfo(std::move(tileInfo), (size_t)tileWrapper.result.get()), std::move(tileWrapper.result), std::move(tileWrapper.masks), std::move(tileWrapper.state)));
+    }
     return currentTileInfos;
 }
 

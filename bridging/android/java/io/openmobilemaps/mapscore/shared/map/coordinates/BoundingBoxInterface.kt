@@ -25,7 +25,7 @@ abstract class BoundingBoxInterface {
 
     abstract fun getSystemIdentifier(): Int
 
-    private class CppProxy : BoundingBoxInterface {
+    public class CppProxy : BoundingBoxInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

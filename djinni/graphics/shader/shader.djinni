@@ -20,20 +20,36 @@ shader_program_interface = interface +c +o {
 
 shader_factory_interface = interface +c +j +o {
     create_alpha_shader() : alpha_shader_interface;
+    create_unit_sphere_alpha_shader() : alpha_shader_interface;
+
     create_alpha_instanced_shader(): alpha_instanced_shader_interface;
+    create_unit_sphere_alpha_instanced_shader(): alpha_instanced_shader_interface;
+
     create_line_group_shader(): line_group_shader_interface;
+    create_unit_sphere_line_group_shader(): line_group_shader_interface;
+
+    create_unit_sphere_color_shader() : color_shader_interface;
     create_color_shader() : color_shader_interface;
+
     create_color_circle_shader() : color_circle_shader_interface;
-    create_polygon_group_shader(is_striped: bool): polygon_group_shader_interface;
-    create_polygon_pattern_group_shader(fade_in_pattern: bool): polygon_pattern_group_shader_interface;
+    create_unit_sphere_color_circle_shader() : color_circle_shader_interface;
+
+    create_polygon_group_shader(is_striped: bool, unit_sphere: bool): polygon_group_shader_interface;
+    create_polygon_pattern_group_shader(fade_in_pattern: bool, unit_sphere: bool): polygon_pattern_group_shader_interface;
 
     create_text_shader() : text_shader_interface;
     create_text_instanced_shader(): text_instanced_shader_interface;
+    create_unit_sphere_text_instanced_shader(): text_instanced_shader_interface;
 
     create_raster_shader() : raster_shader_interface;
-    create_stretch_shader(): stretch_shader_interface;
+    create_unit_sphere_raster_shader() : raster_shader_interface;
 
-    create_stretch_instanced_shader(): stretch_instanced_shader_interface;
+    create_stretch_shader(): stretch_shader_interface;
+    create_stretch_instanced_shader(unit_sphere: bool): stretch_instanced_shader_interface;
+
+    create_icosahedron_color_shader(): color_shader_interface;
+
+    create_sphere_effect_shader(): sphere_effect_shader_interface;
 }
 
 raster_shader_style = record {
@@ -68,6 +84,11 @@ alpha_shader_interface = interface +c +o {
 
 alpha_instanced_shader_interface = interface +c +o {
     as_shader_program_interface() : shader_program_interface;
+}
+
+sphere_effect_shader_interface = interface +c +o {
+    as_shader_program_interface() : shader_program_interface;
+    set_ellipse(coefficients: list<f64>);
 }
 
 stretch_shader_info = record {

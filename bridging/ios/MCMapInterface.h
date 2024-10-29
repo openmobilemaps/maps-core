@@ -12,7 +12,7 @@
 #import "MCTouchHandlerInterface.h"
 #import "MCVec2I.h"
 #import <Foundation/Foundation.h>
-@class MCMapCamera2dInterface;
+@class MCMapCameraInterface;
 @class MCMapInterface;
 @protocol MCIndexedLayerInterface;
 @protocol MCLayerInterface;
@@ -27,10 +27,13 @@
                    renderingContext:(nullable id<MCRenderingContextInterface>)renderingContext
                           mapConfig:(nonnull MCMapConfig *)mapConfig
                           scheduler:(nullable id<MCSchedulerInterface>)scheduler
-                       pixelDensity:(float)pixelDensity;
+                       pixelDensity:(float)pixelDensity
+                               is3D:(BOOL)is3D;
 
 + (nullable MCMapInterface *)createWithOpenGl:(nonnull MCMapConfig *)mapConfig
-                                 pixelDensity:(float)pixelDensity;
+                                    scheduler:(nullable id<MCSchedulerInterface>)scheduler
+                                 pixelDensity:(float)pixelDensity
+                                         is3D:(BOOL)is3D;
 
 - (void)setCallbackHandler:(nullable id<MCMapCallbackInterface>)callbackInterface;
 
@@ -46,9 +49,9 @@
 
 - (nullable MCCoordinateConversionHelperInterface *)getCoordinateConverterHelper;
 
-- (void)setCamera:(nullable MCMapCamera2dInterface *)camera;
+- (void)setCamera:(nullable MCMapCameraInterface *)camera;
 
-- (nullable MCMapCamera2dInterface *)getCamera;
+- (nullable MCMapCameraInterface *)getCamera;
 
 - (void)setTouchHandler:(nullable id<MCTouchHandlerInterface>)touchHandler;
 
@@ -74,6 +77,8 @@
 - (void)setViewportSize:(nonnull MCVec2I *)size;
 
 - (void)setBackgroundColor:(nonnull MCColor *)color;
+
+- (BOOL)is3d;
 
 - (void)invalidate;
 

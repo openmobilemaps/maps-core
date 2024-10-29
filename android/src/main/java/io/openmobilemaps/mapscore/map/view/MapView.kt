@@ -32,7 +32,9 @@ import io.openmobilemaps.mapscore.shared.map.*
 import io.openmobilemaps.mapscore.shared.map.controls.TouchAction
 import io.openmobilemaps.mapscore.shared.map.controls.TouchEvent
 import io.openmobilemaps.mapscore.shared.map.controls.TouchHandlerInterface
+import io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateConversionHelperInterface
 import io.openmobilemaps.mapscore.shared.map.scheduling.TaskInterface
+import io.openmobilemaps.mapscore.shared.map.scheduling.ThreadPoolScheduler
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.util.*
@@ -59,12 +61,16 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 	private val mapViewStateMutable = MutableStateFlow(MapViewState.UNINITIALIZED)
 	val mapViewState = mapViewStateMutable.asStateFlow()
 
-	open fun setupMap(mapConfig: MapConfig, density: Float = resources.displayMetrics.xdpi, useMSAA: Boolean = false) {
+	open fun setupMap(mapConfig: MapConfig, useMSAA: Boolean = false, is3D: Boolean = false) {
+		val densityExact = resources.displayMetrics.xdpi
 		configureGL(useMSAA)
 		setRenderer(this)
+		val scheduler = ThreadPoolScheduler.create()
 		val mapInterface = MapInterface.createWithOpenGl(
 			mapConfig,
-			density
+			scheduler,
+			densityExact,
+			is3D
 		)
 		mapInterface.setCallbackHandler(object : MapCallbackInterface() {
 			override fun invalidate() {
@@ -227,8 +233,12 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 		requireMapInterface().removeLayer(layer.layerInterface())
 	}
 
-	override fun getCamera(): MapCamera2dInterface {
+	override fun getCamera(): MapCameraInterface {
 		return requireMapInterface().getCamera()
+	}
+
+	override fun getCoordinateConversionHelper(): CoordinateConversionHelperInterface {
+		return requireMapInterface().getCoordinateConverterHelper()
 	}
 
 	fun saveFrame(saveFrameSpec: SaveFrameSpec, saveFrameCallback: SaveFrameCallback) {

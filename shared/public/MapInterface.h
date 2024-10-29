@@ -20,7 +20,7 @@
 class IndexedLayerInterface;
 class LayerInterface;
 class MapCallbackInterface;
-class MapCamera2dInterface;
+class MapCameraInterface;
 class MapReadyCallbackInterface;
 struct MapConfig;
 
@@ -28,9 +28,9 @@ class MapInterface {
 public:
     virtual ~MapInterface() = default;
 
-    static /*not-null*/ std::shared_ptr<MapInterface> create(const /*not-null*/ std::shared_ptr<::GraphicsObjectFactoryInterface> & graphicsFactory, const /*not-null*/ std::shared_ptr<::ShaderFactoryInterface> & shaderFactory, const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & renderingContext, const MapConfig & mapConfig, const /*not-null*/ std::shared_ptr<::SchedulerInterface> & scheduler, float pixelDensity);
+    static /*not-null*/ std::shared_ptr<MapInterface> create(const /*not-null*/ std::shared_ptr<::GraphicsObjectFactoryInterface> & graphicsFactory, const /*not-null*/ std::shared_ptr<::ShaderFactoryInterface> & shaderFactory, const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & renderingContext, const MapConfig & mapConfig, const /*not-null*/ std::shared_ptr<::SchedulerInterface> & scheduler, float pixelDensity, bool is3D);
 
-    static /*not-null*/ std::shared_ptr<MapInterface> createWithOpenGl(const MapConfig & mapConfig, float pixelDensity);
+    static /*not-null*/ std::shared_ptr<MapInterface> createWithOpenGl(const MapConfig & mapConfig, const /*not-null*/ std::shared_ptr<::SchedulerInterface> & scheduler, float pixelDensity, bool is3D);
 
     virtual void setCallbackHandler(const /*nullable*/ std::shared_ptr<MapCallbackInterface> & callbackInterface) = 0;
 
@@ -46,9 +46,9 @@ public:
 
     virtual /*not-null*/ std::shared_ptr<::CoordinateConversionHelperInterface> getCoordinateConverterHelper() = 0;
 
-    virtual void setCamera(const /*not-null*/ std::shared_ptr<MapCamera2dInterface> & camera) = 0;
+    virtual void setCamera(const /*not-null*/ std::shared_ptr<MapCameraInterface> & camera) = 0;
 
-    virtual /*not-null*/ std::shared_ptr<MapCamera2dInterface> getCamera() = 0;
+    virtual /*not-null*/ std::shared_ptr<MapCameraInterface> getCamera() = 0;
 
     virtual void setTouchHandler(const /*not-null*/ std::shared_ptr<::TouchHandlerInterface> & touchHandler) = 0;
 
@@ -71,6 +71,8 @@ public:
     virtual void setViewportSize(const ::Vec2I & size) = 0;
 
     virtual void setBackgroundColor(const ::Color & color) = 0;
+
+    virtual bool is3d() = 0;
 
     virtual void invalidate() = 0;
 

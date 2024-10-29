@@ -11,6 +11,7 @@
 #include "Tiled2dMapVectorSourceRasterTileDataManager.h"
 #include "PolygonCompare.h"
 #include "Tiled2dMapVectorLayer.h"
+#include "Tiled2dMapVectorLayerConstants.h"
 
 Tiled2dMapVectorSourceRasterTileDataManager::Tiled2dMapVectorSourceRasterTileDataManager(const WeakActor<Tiled2dMapVectorLayer> &vectorLayer,
                                                                                          const std::shared_ptr<VectorMapDescription> &mapDescription,
@@ -24,7 +25,7 @@ Tiled2dMapVectorSourceRasterTileDataManager::Tiled2dMapVectorSourceRasterTileDat
 layerDescription(layerDescription), rasterSource(rasterSource), dpFactor(dpFactor) {}
 
 void Tiled2dMapVectorSourceRasterTileDataManager::onRasterTilesUpdated(const std::string &layerName,
-                                                                       std::unordered_set<Tiled2dMapRasterTileInfo> currentTileInfos) {
+                                                                       VectorSet<Tiled2dMapRasterTileInfo> currentTileInfos) {
     if (updateFlag.test_and_set()) {
         return;
     }
@@ -38,6 +39,8 @@ void Tiled2dMapVectorSourceRasterTileDataManager::onRasterTilesUpdated(const std
             updateFlag.clear();
             return;
         }
+
+        bool is3D = mapInterface->is3d();
 
         std::unordered_set<Tiled2dMapRasterTileInfo> tilesToAdd;
         std::unordered_set<Tiled2dMapRasterTileInfo> tilesToKeep;
@@ -91,9 +94,23 @@ void Tiled2dMapVectorSourceRasterTileDataManager::onRasterTilesUpdated(const std
                 if (hash != existingPolygonHash) {
 
                     const auto &tileMask = std::make_shared<PolygonMaskObject>(graphicsFactory,
-                                                                               coordinateConverterHelper);
+                                                                               coordinateConverterHelper,
+                                                                               is3D);
+                    auto convertedTileBounds = mapInterface->getCoordinateConverterHelper()->convertRectToRenderSystem(tileEntry.tileInfo.tileInfo.bounds);
+                    std::optional<float> maxSegmentLength = std::nullopt;
+                    if (is3D) {
+                        maxSegmentLength = std::min(std::abs(convertedTileBounds.bottomRight.x - convertedTileBounds.topLeft.x) /
+                                 POLYGON_MASK_SUBDIVISION_FACTOR, (M_PI * 2.0) / POLYGON_MASK_SUBDIVISION_FACTOR);
+                    }
+                    double cx = (convertedTileBounds.bottomRight.x + convertedTileBounds.topLeft.x) / 2.0;
+                    double cy = (convertedTileBounds.bottomRight.y + convertedTileBounds.topLeft.y) / 2.0;
+                    double rx = is3D ? 1.0 * sin(cy) * cos(cx) : cx;
+                    double ry = is3D ? 1.0 * cos(cy): cy;
+                    double rz = is3D ? -1.0 * sin(cy) * sin(cx) : 0.0;
 
-                    tileMask->setPolygons(tileEntry.masks);
+                    Vec3D origin(rx, ry, rz);
+
+                    tileMask->setPolygons(tileEntry.masks, origin, maxSegmentLength);
 
                     newTileMasks[tileEntry.tileInfo] = Tiled2dMapLayerMaskWrapper(tileMask, hash);
                 }

@@ -12,7 +12,9 @@
 #include "OpenGlContext.h"
 #include "OpenGlHelper.h"
 
-const std::string AlphaShaderOpenGl::programName = "UBMAP_AlphaShaderOpenGl";
+AlphaShaderOpenGl::AlphaShaderOpenGl(bool projectOntoUnitSphere)
+: projectOntoUnitSphere(projectOntoUnitSphere),
+programName(projectOntoUnitSphere ? "UBMAP_AlphaUnitSphereShaderOpenGl" : "UBMAP_AlphaShaderOpenGl") {}
 
 std::string AlphaShaderOpenGl::getProgramName() { return programName; }
 
@@ -41,6 +43,10 @@ void AlphaShaderOpenGl::setupProgram(const std::shared_ptr<::RenderingContextInt
     checkGlProgramLinking(program);
 
     openGlContext->storeProgram(programName, program);
+}
+
+std::string AlphaShaderOpenGl::getVertexShader() {
+    return BaseShaderProgramOpenGl::getVertexShader();
 }
 
 std::string AlphaShaderOpenGl::getFragmentShader() {

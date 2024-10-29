@@ -10,7 +10,7 @@ abstract class FontLoaderInterface {
 
     abstract fun loadFont(font: Font): FontLoaderResult
 
-    private class CppProxy : FontLoaderInterface {
+    public class CppProxy : FontLoaderInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

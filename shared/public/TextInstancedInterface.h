@@ -6,6 +6,7 @@
 #include "Quad2dD.h"
 #include "RenderingContextInterface.h"
 #include "SharedBytes.h"
+#include "Vec3D.h"
 #include <cstdint>
 #include <memory>
 
@@ -17,12 +18,15 @@ public:
     virtual ~TextInstancedInterface() = default;
 
     /** set the frame of the root object */
-    virtual void setFrame(const ::Quad2dD & frame) = 0;
+    virtual void setFrame(const ::Quad2dD & frame, const ::Vec3D & origin, bool is3d) = 0;
 
     virtual void setInstanceCount(int32_t count) = 0;
 
     /** 2 floats (x and y) for each instance */
     virtual void setPositions(const ::SharedBytes & positions) = 0;
+
+    /** 2 floats (x and y) for each instance */
+    virtual void setReferencePositions(const ::SharedBytes & positions) = 0;
 
     /** 4 floats (x, y, width and height) for each instanced */
     virtual void setTextureCoordinates(const ::SharedBytes & textureCoordinates) = 0;

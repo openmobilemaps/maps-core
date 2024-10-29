@@ -27,7 +27,7 @@ abstract class CoordinateConversionHelperInterface {
 
     abstract fun convertToRenderSystem(coordinate: Coord): Coord
 
-    private class CppProxy : CoordinateConversionHelperInterface {
+    public class CppProxy : CoordinateConversionHelperInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

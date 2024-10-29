@@ -10,10 +10,10 @@ abstract class ThreadPoolScheduler {
 
     companion object {
         @JvmStatic
-        external fun create(callbacks: ThreadPoolCallbacks): SchedulerInterface
+        external fun create(): SchedulerInterface
     }
 
-    private class CppProxy : ThreadPoolScheduler {
+    public class CppProxy : ThreadPoolScheduler {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

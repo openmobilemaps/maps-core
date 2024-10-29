@@ -21,6 +21,8 @@ class TextInstancedShaderOpenGl : public BaseShaderProgramOpenGl,
                          public std::enable_shared_from_this<ShaderProgramInterface> {
 
   public:
+    TextInstancedShaderOpenGl(bool projectOntoUnitSphere);
+
     virtual std::string getProgramName() override;
 
     virtual void setupProgram(const std::shared_ptr<::RenderingContextInterface> &context) override;
@@ -30,7 +32,8 @@ class TextInstancedShaderOpenGl : public BaseShaderProgramOpenGl,
     virtual std::shared_ptr<ShaderProgramInterface> asShaderProgramInterface() override;
 
   protected:
-    const static std::string programName;
+    const bool projectOntoUnitSphere;
+    const std::string programName;
 
     virtual std::string getFragmentShader() override;
 

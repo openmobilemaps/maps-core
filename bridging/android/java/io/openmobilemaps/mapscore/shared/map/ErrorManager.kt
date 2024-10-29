@@ -25,7 +25,7 @@ abstract class ErrorManager {
 
     abstract fun removeErrorListener(listener: ErrorManagerListener)
 
-    private class CppProxy : ErrorManager {
+    public class CppProxy : ErrorManager {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

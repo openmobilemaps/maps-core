@@ -31,3 +31,5 @@ Vec2F operator/( const ::Vec2F& left, const double& val );
 
 // Overloading "*" operator for dot product.
 double operator*( const ::Vec2F& left, const ::Vec2F& right );
+
+Vec2F operator*( const ::Vec2F& left, const float & val );

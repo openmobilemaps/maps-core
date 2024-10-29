@@ -14,7 +14,7 @@ abstract class StretchShaderInterface {
 
     abstract fun asShaderProgramInterface(): ShaderProgramInterface
 
-    private class CppProxy : StretchShaderInterface {
+    public class CppProxy : StretchShaderInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

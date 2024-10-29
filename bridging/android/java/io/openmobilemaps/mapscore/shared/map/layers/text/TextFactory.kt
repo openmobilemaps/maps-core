@@ -13,7 +13,7 @@ abstract class TextFactory {
         external fun createText(text: ArrayList<FormattedStringEntry>, coordinate: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, font: io.openmobilemaps.mapscore.shared.map.loader.Font, textAnchor: Anchor, textJustify: TextJustify): TextInfoInterface
     }
 
-    private class CppProxy : TextFactory {
+    public class CppProxy : TextFactory {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

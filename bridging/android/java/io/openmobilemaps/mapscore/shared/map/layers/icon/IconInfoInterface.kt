@@ -16,8 +16,10 @@ abstract class IconInfoInterface {
 
     abstract fun getCoordinate(): io.openmobilemaps.mapscore.shared.map.coordinates.Coord
 
+    /** iconSize is in meters when scaleType is scale invariant(i.e. FIXED or ROTATION_INVARIANT), screen pixels otherwise */
     abstract fun setIconSize(size: io.openmobilemaps.mapscore.shared.graphics.common.Vec2F)
 
+    /** iconSize is in meters when scaleType is scale invariant(i.e. FIXED or ROTATION_INVARIANT), screen pixels otherwise */
     abstract fun getIconSize(): io.openmobilemaps.mapscore.shared.graphics.common.Vec2F
 
     abstract fun setType(scaleType: IconType)
@@ -28,7 +30,7 @@ abstract class IconInfoInterface {
 
     abstract fun getBlendMode(): io.openmobilemaps.mapscore.shared.graphics.shader.BlendMode
 
-    private class CppProxy : IconInfoInterface {
+    public class CppProxy : IconInfoInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

@@ -16,9 +16,11 @@
 #include <string>
 #include <iostream>
 
-PolygonPatternGroup2dShaderOpenGl::PolygonPatternGroup2dShaderOpenGl(bool fadeInPattern)
-        : fadeInPattern(fadeInPattern),
-          programName(std::string("UBMAP_PolygonPatternGroup2dShaderOpenGl_") + (fadeInPattern ? "std" : "fade")) {}
+PolygonPatternGroup2dShaderOpenGl::PolygonPatternGroup2dShaderOpenGl(bool fadeInPattern, bool projectOntoUnitSphere)
+        : projectOntoUnitSphere(projectOntoUnitSphere),
+          fadeInPattern(fadeInPattern),
+          programName(std::string("UBMAP_PolygonPatternGroup2dShaderOpenGl_") + (projectOntoUnitSphere ? "UnitSphere_" : "") +
+                      (fadeInPattern ? "std" : "fade")) {}
 
 std::string PolygonPatternGroup2dShaderOpenGl::getProgramName() { return programName; }
 
@@ -46,11 +48,13 @@ void PolygonPatternGroup2dShaderOpenGl::preRender(const std::shared_ptr<::Render
 
 std::string PolygonPatternGroup2dShaderOpenGl::getVertexShader() {
     return OMMVersionedGlesShaderCode(320 es,
-                                      in vec2 vPosition;
+                                      in vec3 vPosition;
                                       in float vStyleIndex;
 
-                                      uniform mat4 uMVPMatrix;
+                                      uniform mat4 umMatrix;
+                                      uniform mat4 uvpMatrix;
                                       uniform vec2 uScalingFactor;
+                                      uniform vec4 uOriginOffset;
     ) + (fadeInPattern ? OMMShaderCode(uniform float uScreenPixelAsRealMeterFactor;) : "")
     + OMMShaderCode(
 
@@ -58,17 +62,16 @@ std::string PolygonPatternGroup2dShaderOpenGl::getVertexShader() {
                                       out flat uint styleIndex;
 
                                       void main() {
-                         ) + (fadeInPattern ? OMMShaderCode(
+    ) + (fadeInPattern ? OMMShaderCode(
                                         // fadeInPattern
                                         pixelPosition = vPosition.xy / vec2(uScreenPixelAsRealMeterFactor);
     ) : OMMShaderCode(
                                         // DefaultBehavior
                                         pixelPosition = vPosition.xy / uScalingFactor;
-    )) + OMMShaderCode(
+                                        gl_Position = uvpMatrix * ((umMatrix * vec4(vPosition, 1.0)) + uOriginOffset);
                                         styleIndex = uint(floor(vStyleIndex + 0.5));
-                                        gl_Position = uMVPMatrix * vec4(vPosition, 0.0, 1.0);
                                       }
-    );
+    ));
 }
 
 std::string PolygonPatternGroup2dShaderOpenGl::getFragmentShader() {

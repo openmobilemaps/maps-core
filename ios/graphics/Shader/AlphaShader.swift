@@ -12,7 +12,7 @@ import Foundation
 import MapCoreSharedModule
 import Metal
 
-class AlphaShader: BaseShader {
+class AlphaShader: BaseShader, @unchecked Sendable {
     private var alpha: Float = 1.0
     private var alphaContent: UnsafeMutablePointer<Float>
 

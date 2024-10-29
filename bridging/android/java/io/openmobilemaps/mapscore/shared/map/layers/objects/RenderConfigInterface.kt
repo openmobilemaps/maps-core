@@ -12,7 +12,7 @@ abstract class RenderConfigInterface {
 
     abstract fun getRenderIndex(): Int
 
-    private class CppProxy : RenderConfigInterface {
+    public class CppProxy : RenderConfigInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

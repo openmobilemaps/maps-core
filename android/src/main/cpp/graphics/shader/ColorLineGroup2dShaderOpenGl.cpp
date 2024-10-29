@@ -11,12 +11,13 @@
 #include "ColorLineGroup2dShaderOpenGl.h"
 #include "OpenGlContext.h"
 #include "OpenGlHelper.h"
+#include <cstring>
 
-ColorLineGroup2dShaderOpenGl::ColorLineGroup2dShaderOpenGl() {
+ColorLineGroup2dShaderOpenGl::ColorLineGroup2dShaderOpenGl(bool projectOntoUnitSphere)
+        : projectOntoUnitSphere(projectOntoUnitSphere),
+          programName(projectOntoUnitSphere ? "UBMAP_ColorLineGroupUnitSphereShaderOpenGl" : "UBMAP_ColorLineGroupShaderOpenGl") {
     lineValues.resize(sizeLineValuesArray);
 }
-
-const std::string ColorLineGroup2dShaderOpenGl::programName = "UBMAP_ColorLineGroupShaderOpenGl";
 
 std::shared_ptr<ShaderProgramInterface> ColorLineGroup2dShaderOpenGl::asShaderProgramInterface() { return shared_from_this(); }
 
@@ -78,11 +79,17 @@ void ColorLineGroup2dShaderOpenGl::setDashingScaleFactor(float factor) {
 std::string ColorLineGroup2dShaderOpenGl::getVertexShader() {
     return OMMVersionedGlesShaderCode(320 es,
                                       precision highp float;
-                                      uniform mat4 uMVPMatrix;
-                                      in vec2 vPosition;
-                                      in vec2 vWidthNormal;
-                                      in vec2 vPointA;
-                                      in vec2 vPointB;
+                                      uniform mat4 umMatrix;
+                                      uniform mat4 uvpMatrix;
+                                      uniform vec4 uOriginOffset;
+                                      ) + (projectOntoUnitSphere ? OMMShaderCode(
+                                          uniform vec4 uLineOrigin;
+                                          in vec3 vPointA;
+                                          in vec3 vPointB;
+                                      ) : OMMShaderCode(
+                                          in vec2 vPointA;
+                                          in vec2 vPointB;
+                                      )) + OMMShaderCode(
                                       in float vVertexIndex;
                                       in float vSegmentStartLPos;
                                       in float vStyleInfo;
@@ -109,8 +116,8 @@ std::string ColorLineGroup2dShaderOpenGl::getVertexShader() {
                                       out float radius;
                                       out float segmentStartLPos;
                                       out float fSegmentType;
-                                      out vec2 pointDeltaA;
-                                      out vec2 pointBDeltaA;
+                                      out vec3 pointDeltaA;
+                                      out vec3 pointBDeltaA;
                                       out vec4 color;
                                       out float dashingSize;
                                       out float scaledBlur;
@@ -134,40 +141,68 @@ std::string ColorLineGroup2dShaderOpenGl::getVertexShader() {
                                            fStyleIndexBase = float(styleIndexBase);
                                            fSegmentType = vStyleInfo / 256.0;
 
-                                               vec2 widthNormal = vWidthNormal;
-                                               vec2 lengthNormal = vec2(widthNormal.y, -widthNormal.x);
+                                           ) + (projectOntoUnitSphere ? OMMShaderCode(
+                                               vec3 vertexPosition = vPointB;
+                                               vec3 lengthNormal = normalize(vPointB - vPointA);
+                                           ) : OMMShaderCode(
+                                               vec2 vertexPosition = vPointB;
+                                               vec3 lengthNormal = vec3(normalize(vPointB - vPointA), 0.0);
+                                               vec3 radialNormal = vec3(0.0, 0.0, 1.0);
+                                           )) + OMMShaderCode(
 
-                                               if(vVertexIndex == 0.0) {
-                                                   lengthNormal *= -1.0;
-                                                   widthNormal *= -1.0;
-                                               } else if(vVertexIndex == 1.0) {
-                                                   lengthNormal *= -1.0;
-                                               } else if(vVertexIndex == 2.0) {
-                                                   // all fine
-                                               } else if(vVertexIndex == 3.0) {
-                                                   widthNormal *= -1.0;
-                                               }
+                                           float widthNormalFactor = 1.0;
+                                           float lengthNormalFactor = 1.0;
+                                           if(vVertexIndex == 0.0) {
+                                               lengthNormalFactor = -1.0;
+                                               widthNormalFactor = -1.0;
+                                               vertexPosition = vPointA;
+                                           } else if(vVertexIndex == 1.0) {
+                                               lengthNormalFactor = -1.0;
+                                               vertexPosition = vPointA;
+                                           } else if(vVertexIndex == 2.0) {
+                                               // all fine
+                                           } else if(vVertexIndex == 3.0) {
+                                               widthNormalFactor = -1.0;
+                                           }
+
+                                           ) + (projectOntoUnitSphere ? OMMShaderCode(
+                                               vec3 radialNormal = normalize(vertexPosition + uLineOrigin.xyz);
+                                           ) : "") + OMMShaderCode(
+                                           vec3 widthNormal = normalize(cross(radialNormal, lengthNormal));
 
                                            float offsetFloat = lineValues[styleIndexBase + 18] * scaleFactor;
-                                           vec4 offset = vec4(vWidthNormal.x * offsetFloat, vWidthNormal.y * offsetFloat, 0.0, 0.0);
+                                           vec3 offset = vec3(widthNormal * offsetFloat);
 
-                                               float scaledWidth = width * 0.5;
-                                               dashingSize = width;
-                                               if (isScaled > 0.0) {
-                                                   scaledWidth = scaledWidth * scaleFactor;
-                                                   blur = blur * scaleFactor;
-                                                   dashingSize *= dashingScaleFactor;
-                                               }
+                                           widthNormal *= widthNormalFactor;
+                                           lengthNormal *= lengthNormalFactor;
 
-                                               vec4 trfPosition = uMVPMatrix * vec4(vPosition.xy, 0.0, 1.0);
-                                               vec4 displ = vec4((lengthNormal + widthNormal).xy, 0.0, 0.0) * vec4(scaledWidth, scaledWidth, 0.0, 0.0) + offset;
-                                               vec4 trfDispl = uMVPMatrix * displ;
-                                               vec4 extendedPosition = vec4(vPosition.xy, 0.0, 1.0) + displ;
-                                               radius = scaledWidth;
-                                               scaledBlur = blur;
-                                               pointDeltaA = (extendedPosition.xy - vPointA);
-                                               pointBDeltaA = vPointB - vPointA;
-                                               gl_Position = trfPosition + trfDispl;
+                                           float scaledWidth = width * 0.5;
+                                           dashingSize = width;
+                                           if (isScaled > 0.0) {
+                                               scaledWidth = scaledWidth * scaleFactor;
+                                               blur = blur * scaleFactor;
+                                               dashingSize *= dashingScaleFactor;
+                                           }
+
+                                           vec3 displ = uOriginOffset.xyz + vec3(lengthNormal + widthNormal) * vec3(scaledWidth) + offset;
+                                           vec4 extendedPosition = umMatrix *
+                                           ) + (projectOntoUnitSphere ? OMMShaderCode(
+                                                   vec4(vertexPosition, 1.0);
+                                           ) : OMMShaderCode(
+                                                   vec4(vertexPosition, 0.0, 1.0);
+                                           )) + OMMShaderCode(
+                                           extendedPosition.xyz += displ;
+                                           gl_Position = uvpMatrix * extendedPosition;
+
+                                           radius = scaledWidth;
+                                           scaledBlur = blur;
+                                           ) + (projectOntoUnitSphere ? OMMShaderCode(
+                                               pointDeltaA = extendedPosition.xyz - ((vPointA + uOriginOffset.xyz) + offset.xyz);
+                                               pointBDeltaA = ((vPointB + uOriginOffset.xyz) + offset.xyz) - ((vPointA + uOriginOffset.xyz) + offset.xyz);
+                                           ) : OMMShaderCode(
+                                               pointDeltaA = extendedPosition.xyz - ((vec3(vPointA, 0.0) + uOriginOffset.xyz) + offset.xyz);
+                                               pointBDeltaA = ((vec3(vPointB, 0.0) + uOriginOffset.xyz) + offset.xyz) - ((vec3(vPointA, 0.0) + uOriginOffset.xyz) + offset.xyz);
+                                           )) + OMMShaderCode(
                                        }
                                        );
 }
@@ -182,8 +217,8 @@ std::string ColorLineGroup2dShaderOpenGl::getFragmentShader() {
                                       in float scaledBlur;
                                       in float fSegmentType; // 0: inner segment, 1: line start segment (i.e. A is first point in line), 2: line end segment, 3: start and end in segment
                                       in float dashingSize;
-                                      in vec2 pointDeltaA;
-                                      in vec2 pointBDeltaA;
+                                      in vec3 pointDeltaA;
+                                      in vec3 pointBDeltaA;
                                       in vec4 color;
 
                                       out vec4 fragmentColor;
@@ -208,14 +243,14 @@ std::string ColorLineGroup2dShaderOpenGl::getFragmentShader() {
                                                    d = min(length(pointDeltaA), length(pointDeltaA - pointBDeltaA));
                                                } else if (iCapType == 2) {
                                                    float dLen = t < 0.0 ? -t * lineLength : (t - 1.0) * lineLength;
-                                                   vec2 intersectPt = t * pointBDeltaA;
+                                                   vec3 intersectPt = t * pointBDeltaA;
                                                    float dOrth = abs(length(pointDeltaA - intersectPt));
                                                    d = max(dLen, dOrth);
                                                } else {
                                                    discard;
                                                }
                                            } else {
-                                               vec2 intersectPt = t * pointBDeltaA;
+                                               vec3 intersectPt = t * pointBDeltaA;
                                                d = abs(length(pointDeltaA - intersectPt));
                                            }
 

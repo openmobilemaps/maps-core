@@ -5,6 +5,7 @@
 @extern "../../../../yaml/masking_object_interface.yaml"
 @extern "../../../../yaml/shader_program_interface.yaml"
 @extern "../../../../yaml/raster_shader_style.yaml"
+@extern "../../../../yaml/blend_mode.yaml"
 @extern "../../../../yaml/tiled_2d_map_ready_state_listener.yaml"
 
 tiled_2d_map_raster_layer_interface = interface +c {
@@ -37,6 +38,10 @@ tiled_2d_map_raster_layer_interface = interface +c {
     set_ready_state_listener(listener: optional<tiled_2d_map_ready_state_listener>);
 
     get_config() : tiled_2d_map_layer_config;
+
+    set_3d_subdivision_factor(factor: i32);
+
+    set_blend_mode(blend_mode: blend_mode);
 }
 
 tiled_2d_map_raster_layer_callback_interface = interface +c +j +o {

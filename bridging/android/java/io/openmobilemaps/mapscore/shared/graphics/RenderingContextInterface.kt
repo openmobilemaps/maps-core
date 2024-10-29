@@ -18,6 +18,8 @@ abstract class RenderingContextInterface {
 
     abstract fun setBackgroundColor(color: io.openmobilemaps.mapscore.shared.graphics.common.Color)
 
+    abstract fun setCulling(mode: RenderingCullMode)
+
     abstract fun setupDrawFrame()
 
     abstract fun preRenderStencilMask()
@@ -27,7 +29,7 @@ abstract class RenderingContextInterface {
     /** optional rectangle, remove scissoring when not set */
     abstract fun applyScissorRect(scissorRect: io.openmobilemaps.mapscore.shared.graphics.common.RectI?)
 
-    private class CppProxy : RenderingContextInterface {
+    public class CppProxy : RenderingContextInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 
@@ -65,6 +67,12 @@ abstract class RenderingContextInterface {
             native_setBackgroundColor(this.nativeRef, color)
         }
         private external fun native_setBackgroundColor(_nativeRef: Long, color: io.openmobilemaps.mapscore.shared.graphics.common.Color)
+
+        override fun setCulling(mode: RenderingCullMode) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setCulling(this.nativeRef, mode)
+        }
+        private external fun native_setCulling(_nativeRef: Long, mode: RenderingCullMode)
 
         override fun setupDrawFrame() {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

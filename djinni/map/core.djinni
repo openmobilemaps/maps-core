@@ -12,7 +12,7 @@
 @extern "../yaml/coordinate_conversion_helper_interface.yaml"
 @extern "../yaml/coord.yaml"
 @extern "../yaml/rect_coord.yaml"
-@extern "../yaml/map_camera_2d_listener_interface.yaml"
+@extern "../yaml/map_camera_listener_interface.yaml"
 @extern "../yaml/color.yaml"
 @extern "../yaml/render_pass_interface.yaml"
 @extern "../yaml/compute_pass_interface.yaml"
@@ -20,8 +20,8 @@
 @extern "../yaml/error_manager.yaml"
 
 map_interface = interface +c {
-    static create(graphics_factory: graphics_object_factory_interface, shader_factory: shader_factory_interface, rendering_context: rendering_context_interface, map_config: map_config, scheduler: scheduler_interface, pixel_density: f32) : map_interface;
-    static createWithOpenGl(map_config: map_config, pixel_density: f32) : map_interface;
+    static create(graphics_factory: graphics_object_factory_interface, shader_factory: shader_factory_interface, rendering_context: rendering_context_interface, map_config: map_config, scheduler: scheduler_interface, pixel_density: f32, is_3_d: bool) : map_interface;
+    static createWithOpenGl(map_config: map_config, scheduler: scheduler_interface, pixel_density: f32, is_3_d: bool) : map_interface;
 
     set_callback_handler(callback_interface: optional<map_callback_interface>);
 
@@ -33,8 +33,8 @@ map_interface = interface +c {
     get_map_config() : map_config;
     get_coordinate_converter_helper() : coordinate_conversion_helper_interface;
 
-    set_camera(camera: map_camera_2d_interface);
-    get_camera() : map_camera_2d_interface;
+    set_camera(camera: map_camera_interface);
+    get_camera() : map_camera_interface;
 
     set_touch_handler(touch_handler: touch_handler_interface);
     get_touch_handler() : touch_handler_interface;
@@ -51,6 +51,8 @@ map_interface = interface +c {
 
     set_viewport_size(size: vec_2_i);
     set_background_color(color: color);
+
+	is_3d(): bool;
 
     invalidate();
 
@@ -127,8 +129,8 @@ layer_interface = interface +c +j +o {
     force_reload();
 }
 
-map_camera_2d_interface = interface +c {
-    static create(map_interface: map_interface, screen_density_ppi: f32): map_camera_2d_interface;
+map_camera_interface = interface +c {
+    static create(map_interface: map_interface, screen_density_ppi: f32, is_3_d: bool): map_camera_interface;
 
 	freeze(freeze: bool);
 
@@ -168,8 +170,9 @@ map_camera_2d_interface = interface +c {
 
     get_invariant_model_matrix(coordinate: coord, scale_invariant: bool, rotation_invariant: bool) : list<f32>;
 
-    add_listener(listener: map_camera_2d_listener_interface);
-    remove_listener(listener: map_camera_2d_listener_interface);
+    add_listener(listener: map_camera_listener_interface);
+    remove_listener(listener: map_camera_listener_interface);
+    notify_listener_bounds_change();
 
     coord_from_screen_position(pos_screen: vec_2_f): coord;
     coord_from_screen_position_zoom(pos_screen: vec_2_f, zoom: f32): coord;
@@ -178,6 +181,8 @@ map_camera_2d_interface = interface +c {
     screen_pos_from_coord_zoom(coord: coord, zoom: f32): vec_2_f;
 
     map_units_from_pixels(distancePx: f64): f64;
+    # padding in percentage, where 1.0 = rect is half of full width and height
+    coord_is_visible_on_screen(coord: coord, padding_pc: f32): bool;
 
     set_rotation_enabled(enabled: bool);
     set_snap_to_north_enabled(enabled: bool);
@@ -185,8 +190,48 @@ map_camera_2d_interface = interface +c {
 
     as_camera_interface(): camera_interface;
 
+    get_last_vp_matrix_d() : optional<list<f64>>;
+
     get_last_vp_matrix() : optional<list<f32>>;
     get_last_vp_matrix_view_bounds() : optional<rect_coord>;
     get_last_vp_matrix_rotation() : optional<f32>;
     get_last_vp_matrix_zoom() : optional<f32>;
+
+    as_map_camera_3d(): optional<map_camera_3d_interface>;
+}
+
+map_camera_3d_interface = interface +c {
+    get_camera_config(): camera_3d_config;
+
+    set_camera_config(config: camera_3d_config, durationSeconds: optional<f32>, target_zoom: optional<f32>, target_coordinate: optional<coord>);
+}
+
+camera_interpolation = record {
+    stops: list<camera_interpolation_value>;
+}
+
+camera_interpolation_value = record {
+    # between 0 and 1
+    stop: f32;
+
+    value: f32;
+}
+
+camera_3d_config = record {
+    key: string;
+    allow_user_interaction: bool;
+    rotation_speed: optional<f32>;
+    animation_duration_ms: i32;
+
+    min_zoom: f32;
+    max_zoom: f32;
+
+    pitch_interpolation_values: camera_interpolation;
+    # vertical camera displacement in padding-reduced viewport in [-1.0, 1.0]
+    vertical_displacement_interpolation_values: camera_interpolation;
+}
+
+camera_3d_config_factory = interface +c {
+    static get_basic_config(): camera_3d_config;
+    static get_restor_config(): camera_3d_config;
 }

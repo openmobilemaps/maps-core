@@ -9,7 +9,8 @@
  */
 
 #include "Tiled2dMapLayer.h"
-#include "MapCamera2dInterface.h"
+#include "MapCameraInterface.h"
+#include "CoordinateSystemIdentifiers.h"
 
 Tiled2dMapLayer::Tiled2dMapLayer()
     : curT(0) {}
@@ -39,16 +40,16 @@ void Tiled2dMapLayer::onAdded(const std::shared_ptr<::MapInterface> &mapInterfac
         }
     }
 
-    auto camera = std::dynamic_pointer_cast<MapCamera2dInterface>(mapInterface->getCamera());
+    auto camera = std::dynamic_pointer_cast<MapCameraInterface>(mapInterface->getCamera());
     if (camera) {
         camera->addListener(shared_from_this());
-        onVisibleBoundsChanged(camera->getVisibleRect(), camera->getZoom());
+        camera->notifyListenerBoundsChange();
     }
 }
 
 void Tiled2dMapLayer::onRemoved() {
     if (mapInterface) {
-        auto camera = std::dynamic_pointer_cast<MapCamera2dInterface>(mapInterface->getCamera());
+        auto camera = std::dynamic_pointer_cast<MapCameraInterface>(mapInterface->getCamera());
         if (camera) {
             camera->removeListener(shared_from_this());
         }
@@ -109,6 +110,15 @@ void Tiled2dMapLayer::onVisibleBoundsChanged(const ::RectCoord &visibleBounds, d
     for (const auto &sourceInterface : sourceInterfaces) {
         sourceInterface.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapSourceInterface::onVisibleBoundsChanged,
                                 visibleBounds, curT, zoom);
+    }
+}
+
+void Tiled2dMapLayer::onCameraChange(const std::vector<float> &viewMatrix, const std::vector<float> &projectionMatrix, const ::Vec3D & origin, float verticalFov, float horizontalFov, float width, float height, float focusPointAltitude, const ::Coord & focusPointPosition, float zoom) {
+    std::lock_guard<std::recursive_mutex> lock(sourcesMutex);
+
+    for (const auto &sourceInterface: sourceInterfaces) {
+        sourceInterface.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapSourceInterface::onCameraChange,
+                                viewMatrix, projectionMatrix, origin, verticalFov, horizontalFov, width, height, focusPointAltitude, focusPointPosition, zoom);
     }
 }
 
@@ -195,7 +205,7 @@ void Tiled2dMapLayer::setT(int t) {
 
     auto mapInterface = this->mapInterface;
     if (mapInterface) {
-        auto camera = std::dynamic_pointer_cast<MapCamera2dInterface>(mapInterface->getCamera());
+        auto camera = std::dynamic_pointer_cast<MapCameraInterface>(mapInterface->getCamera());
         if (camera) {
             onVisibleBoundsChanged(camera->getVisibleRect(), camera->getZoom());
         }

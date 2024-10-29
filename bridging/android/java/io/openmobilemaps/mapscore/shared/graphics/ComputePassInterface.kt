@@ -10,7 +10,7 @@ abstract class ComputePassInterface {
 
     abstract fun getComputeObjects(): ArrayList<io.openmobilemaps.mapscore.shared.graphics.objects.ComputeObjectInterface>
 
-    private class CppProxy : ComputePassInterface {
+    public class CppProxy : ComputePassInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

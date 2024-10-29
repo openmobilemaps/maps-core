@@ -17,7 +17,9 @@ class GeoJsonFeatureParser: public GeoJsonFeatureParserInterface {
 public:
     GeoJsonFeatureParser();
     
-    std::optional<std::vector<::VectorLayerFeatureInfo>> parse(const std::string & geoJson) override;
+    virtual std::optional<std::vector<::VectorLayerFeatureInfo>> parse(const std::string & geoJson) override;
 
-    std::optional<std::vector<GeoJsonPoint>> parseWithPointGeometry(const std::string & geoJson) override;
+    virtual std::optional<std::vector<GeoJsonPoint>> parseWithPointGeometry(const std::string & geoJson) override;
+
+    virtual std::optional<std::vector<GeoJsonLine>> parseWithLineGeometry(const std::string & geoJson) override;
 };

@@ -10,6 +10,7 @@
 
 #include "Polygon2dOpenGl.h"
 #include "OpenGlHelper.h"
+#include <cstring>
 
 Polygon2dOpenGl::Polygon2dOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader)
     : shaderProgram(shader) {}
@@ -20,13 +21,14 @@ std::shared_ptr<MaskingObjectInterface> Polygon2dOpenGl::asMaskingObject() { ret
 
 bool Polygon2dOpenGl::isReady() { return ready; }
 
-void Polygon2dOpenGl::setVertices(const ::SharedBytes & vertices_, const ::SharedBytes & indices_) {
+void Polygon2dOpenGl::setVertices(const ::SharedBytes & vertices_, const ::SharedBytes & indices_, const ::Vec3D & origin) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
     ready = false;
     dataReady = false;
 
     indices.resize(indices_.elementCount);
     vertices.resize(vertices_.elementCount);
+    polygonOrigin = origin;
 
     if(indices_.elementCount > 0) {
         std::memcpy(indices.data(), (void *)indices_.address, indices_.elementCount * indices_.bytesPerElement);
@@ -76,7 +78,9 @@ void Polygon2dOpenGl::prepareGlData(int program) {
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort) * indices.size(), &indices[0], GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-    mvpMatrixHandle = glGetUniformLocation(program, "uMVPMatrix");
+    vpMatrixHandle = glGetUniformLocation(program, "uvpMatrix");
+    mMatrixHandle = glGetUniformLocation(program, "umMatrix");
+    originOffsetHandle = glGetUniformLocation(program, "uOriginOffset");
 
     glDataBuffersGenerated = true;
 }
@@ -100,7 +104,8 @@ void Polygon2dOpenGl::removeGlBuffers() {
 void Polygon2dOpenGl::setIsInverseMasked(bool inversed) { isMaskInversed = inversed; }
 
 void Polygon2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
-                             int64_t mvpMatrix, bool isMasked, double screenPixelAsRealMeterFactor) {
+                             int64_t vpMatrix, int64_t mMatrix, const ::Vec3D &origin, bool isMasked,
+                             double screenPixelAsRealMeterFactor) {
     if (!ready)
         return;
 
@@ -125,10 +130,10 @@ void Polygon2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> 
 
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
-    drawPolygon(openGlContext, program, mvpMatrix);
+    drawPolygon(openGlContext, program, vpMatrix, mMatrix, origin);
 }
 
-void Polygon2dOpenGl::drawPolygon(const std::shared_ptr<::RenderingContextInterface> &context, int program, int64_t mvpMatrix) {
+void Polygon2dOpenGl::drawPolygon(const std::shared_ptr<::RenderingContextInterface> &context, int program, int64_t vpMatrix, int64_t mMatrix, const Vec3D &origin) {
     // Add program to OpenGL environment
     glUseProgram(program);
 
@@ -141,7 +146,9 @@ void Polygon2dOpenGl::drawPolygon(const std::shared_ptr<::RenderingContextInterf
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     // Apply the projection and view transformation
-    glUniformMatrix4fv(mvpMatrixHandle, 1, false, (GLfloat *)mvpMatrix);
+    glUniformMatrix4fv(vpMatrixHandle, 1, false, (GLfloat *)vpMatrix);
+    glUniformMatrix4fv(mMatrixHandle, 1, false, (GLfloat *)mMatrix);
+    glUniform4f(originOffsetHandle, polygonOrigin.x - origin.x, polygonOrigin.y - origin.y, polygonOrigin.z - origin.z, 0.0);
 
     // Draw the triangle
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
@@ -156,14 +163,15 @@ void Polygon2dOpenGl::drawPolygon(const std::shared_ptr<::RenderingContextInterf
 }
 
 void Polygon2dOpenGl::renderAsMask(const std::shared_ptr<::RenderingContextInterface> &context,
-                                   const ::RenderPassConfig &renderPass, int64_t mvpMatrix, double screenPixelAsRealMeterFactor) {
+                                   const ::RenderPassConfig &renderPass, int64_t vpMatrix, int64_t mMatrix,
+                                   const ::Vec3D &origin, double screenPixelAsRealMeterFactor) {
     if (!ready)
         return;
 
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
 
     glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-    drawPolygon(openGlContext, program, mvpMatrix);
+    drawPolygon(openGlContext, program, vpMatrix, mMatrix, origin);
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 }
 

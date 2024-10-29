@@ -12,7 +12,9 @@
 
 #include "QuadCoord.h"
 #include "CoordinateConversionHelperInterface.h"
-#include <assert.h>
+#include "RectCoord.h"
+#include <algorithm>
+#include <cassert>
 
 namespace coordsutil {
 
@@ -38,3 +40,5 @@ namespace coordsutil {
     }
 
 }
+
+Coord operator-(const Coord &c1, const Coord &c2);

@@ -28,6 +28,7 @@
 #include "Tiled2dMapVectorLayerConfig.h"
 #include "Tiled2dMapVectorStateManager.h"
 #include "Tiled2dMapVectorLayerLocalDataProviderInterface.h"
+#include "VectorSet.h"
 #include <unordered_map>
 
 class Tiled2dMapVectorBackgroundSubLayer;
@@ -101,15 +102,26 @@ public:
     virtual std::vector<std::shared_ptr<::RenderPassInterface>> buildRenderPasses() override;
 
     struct TileRenderDescription {
-        int32_t layerIndex;
+        int32_t renderIndex;
         std::vector<std::shared_ptr<::RenderObjectInterface>> renderObjects;
         std::shared_ptr<MaskingObjectInterface> maskingObject;
         bool isModifyingMask;
         bool selfMasked;
         int32_t renderPassIndex;
+
+        TileRenderDescription(int32_t layerIndex,
+                              int32_t zoomIdentifier,
+                              const std::vector<std::shared_ptr<::RenderObjectInterface>> &renderObjects,
+                              const std::shared_ptr<MaskingObjectInterface> &maskingObject,
+                              bool isModifyingMask,
+                              bool selfMasked,
+                              int32_t renderPassIndex)
+                : renderIndex((layerIndex << 16) + zoomIdentifier), renderObjects(renderObjects), maskingObject(maskingObject),
+                  isModifyingMask(isModifyingMask), selfMasked(selfMasked), renderPassIndex(renderPassIndex) {}
     };
 
-    virtual void onRenderPassUpdate(const std::string &source, bool isSymbol, const std::vector<std::shared_ptr<TileRenderDescription>> &renderDescription);
+    virtual void onRenderPassUpdate(const std::string &source, bool isSymbol,
+                                    const std::vector<std::shared_ptr<TileRenderDescription>> &renderDescription);
 
     virtual void onAdded(const std::shared_ptr<::MapInterface> &mapInterface, int32_t layerIndex) override;
 
@@ -127,9 +139,9 @@ public:
 
     void forceReload() override;
 
-    void onTilesUpdated(const std::string &layerName, std::unordered_set<Tiled2dMapRasterTileInfo> currentTileInfos) override;
+    void onTilesUpdated(const std::string &layerName, VectorSet<Tiled2dMapRasterTileInfo> currentTileInfos) override;
 
-    void onTilesUpdated(const std::string &sourceName, std::unordered_set<Tiled2dMapVectorTileInfo> currentTileInfos) override;
+    void onTilesUpdated(const std::string &sourceName, VectorSet<Tiled2dMapVectorTileInfo> currentTileInfos) override;
 
     virtual void setScissorRect(const std::optional<::RectI> &scissorRect) override;
 
@@ -172,11 +184,15 @@ public:
 
     bool onMoveComplete() override;
 
+    bool onOneFingerDoubleClickMoveComplete() override;
+
     bool onTwoFingerClick(const Vec2F &posScreen1, const Vec2F &posScreen2) override;
 
     bool onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, const std::vector<::Vec2F> &posScreenNew) override;
 
     bool onTwoFingerMoveComplete() override;
+
+    std::vector<VectorLayerFeatureCoordInfo> getVisiblePointFeatureContexts(float paddingPc, const std::optional<std::string> & sourceLayer) override;
 
     void clearTouch() override;
 
@@ -283,6 +299,7 @@ private:
     std::shared_ptr<::TextureHolderInterface> spriteTexture;
 
     std::shared_ptr<Tiled2dMapVectorStateManager> featureStateManager;
+    std::atomic_flag noPendingStateUpdate;
     std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> symbolDelegate;
 
     void updateReadyStateListenerIfNeeded();

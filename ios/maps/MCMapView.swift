@@ -9,12 +9,12 @@
  */
 
 import Foundation
-@_exported import MapCoreSharedModule
+@_exported @preconcurrency import MapCoreSharedModule
 import MetalKit
 import os
 
-open class MCMapView: MTKView {
-    public let mapInterface: MCMapInterface
+open class MCMapView: MTKView, @unchecked Sendable {
+    public nonisolated(unsafe) let mapInterface: MCMapInterface
     private let renderingContext: RenderingContext
 
     private var sizeChanged = false
@@ -32,14 +32,16 @@ open class MCMapView: MTKView {
 
     public weak var sizeDelegate: MCMapSizeDelegate?
 
-    public init(mapConfig: MCMapConfig = MCMapConfig(mapCoordinateSystem: MCCoordinateSystemFactory.getEpsg3857System()), pixelsPerInch: Float? = nil) {
+    public init(mapConfig: MCMapConfig = MCMapConfig(mapCoordinateSystem: MCCoordinateSystemFactory.getEpsg3857System()), pixelsPerInch: Float? = nil, is3D: Bool = false) {
+
         let renderingContext = RenderingContext()
         guard let mapInterface = MCMapInterface.create(GraphicsFactory(),
                                                        shaderFactory: ShaderFactory(),
                                                        renderingContext: renderingContext,
                                                        mapConfig: mapConfig,
                                                        scheduler: MCThreadPoolScheduler.create(),
-                                                       pixelDensity: pixelsPerInch ?? Float(UIScreen.pixelsPerInch)) else {
+                                                       pixelDensity: pixelsPerInch ?? Float(UIScreen.pixelsPerInch), 
+                                                       is3D: is3D) else {
             fatalError("Can't create MCMapInterface")
         }
         self.mapInterface = mapInterface
@@ -118,6 +120,13 @@ open class MCMapView: MTKView {
 
     @objc func didEnterBackground() {
         backgroundDisable = true
+    }
+
+    open override func willMove(toWindow newWindow: UIWindow?) {
+        super.willMove(toWindow: newWindow)
+        if newWindow == nil {
+            touchHandler.cancelAllTouches()
+        }
     }
 
     /// The view’s background color.
@@ -203,7 +212,7 @@ extension MCMapView: MTKViewDelegate {
         }
     }
 
-    public func renderToImage(size: CGSize, timeout: Float, bounds: MCRectCoord, callbackQueue: DispatchQueue = .main, callback: @escaping (UIImage?, MCLayerReadyState) -> Void) {
+    public func renderToImage(size: CGSize, timeout: Float, bounds: MCRectCoord, callbackQueue: DispatchQueue = .main, callback: @escaping @Sendable (UIImage?, MCLayerReadyState) -> Void) {
         renderToImageQueue.async {
             DispatchQueue.main.sync {
                 self.frame = CGRect(origin: .zero, size: .init(width: size.width / UIScreen.main.scale, height: size.height / UIScreen.main.scale))
@@ -279,11 +288,23 @@ public extension MCMapView {
         super.touchesMoved(touches, with: event)
         touchHandler.touchesMoved(touches, with: event)
     }
+
+    override func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        var isiOSAppOnMac = false
+        if #available(iOS 14.0, *) {
+            isiOSAppOnMac = ProcessInfo.processInfo.isiOSAppOnMac
+        }
+        return isiOSAppOnMac
+    }
 }
 
 public extension MCMapView {
-    var camera: MCMapCamera2dInterface {
+    var camera: MCMapCameraInterface {
         mapInterface.getCamera()!
+    }
+
+    var camera3d: MCMapCamera3dInterface? {
+        camera.asMapCamera3d()
     }
 
     func add(layer: MCLayerInterface?) {
@@ -306,27 +327,22 @@ public extension MCMapView {
         mapInterface.removeLayer(layer)
     }
 
-    @available(iOS 13.0, *)
     func add(layer: any Layer) {
         mapInterface.addLayer(layer.interface)
     }
 
-    @available(iOS 13.0, *)
     func insert(layer: any Layer, at index: Int) {
         mapInterface.insertLayer(at: layer.interface, at: Int32(index))
     }
 
-    @available(iOS 13.0, *)
     func insert(layer: any Layer, above: MCLayerInterface?) {
         mapInterface.insertLayer(above: layer.interface, above: above)
     }
 
-    @available(iOS 13.0, *)
     func insert(layer: any Layer, below: MCLayerInterface?) {
         mapInterface.insertLayer(below: layer.interface, below: below)
     }
 
-    @available(iOS 13.0, *)
     func remove(layer: any Layer) {
         mapInterface.removeLayer(layer.interface)
     }
@@ -363,10 +379,6 @@ extension MCMapView: UIGestureRecognizerDelegate {
         true
     }
 
-    override public func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
-        true
-    }
-
     @objc func pinched(_ gestureRecognizer: UIPinchGestureRecognizer) {
         self.touchHandler.handlePinch(pinchGestureRecognizer: gestureRecognizer)
     }
@@ -376,13 +388,13 @@ extension MCMapView: UIGestureRecognizerDelegate {
     }
 }
 
-private class MCMapViewMapReadyCallbacks: MCMapReadyCallbackInterface {
-    public weak var delegate: MCMapView?
+private class MCMapViewMapReadyCallbacks: @preconcurrency MCMapReadyCallbackInterface, @unchecked Sendable {
+    public nonisolated(unsafe) weak var delegate: MCMapView?
     public var callback: ((UIImage?, MCLayerReadyState) -> Void)?
     public var callbackQueue: DispatchQueue?
     public let semaphore = DispatchSemaphore(value: 1)
 
-    func stateDidUpdate(_ state: MCLayerReadyState) {
+    @MainActor func stateDidUpdate(_ state: MCLayerReadyState) {
         guard let delegate = self.delegate else { return }
 
         semaphore.wait()
@@ -396,7 +408,9 @@ private class MCMapViewMapReadyCallbacks: MCMapReadyCallbackInterface {
                 case .ERROR, .TIMEOUT_ERROR:
                     self.callback?(nil, state)
                 case .READY:
-                    self.callback?(delegate.currentDrawableImage(), state)
+                    MainActor.assumeIsolated {
+                        self.callback?(delegate.currentDrawableImage(), state)
+                    }
                 @unknown default:
                     break
             }

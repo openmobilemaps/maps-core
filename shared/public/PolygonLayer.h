@@ -32,7 +32,8 @@ class PolygonLayer : public PolygonLayerInterface,
     ~PolygonLayer(){};
 
     // PolygonLayerInterface
-    virtual void setPolygons(const std::vector<PolygonInfo> &polygons) override;
+                         virtual void setPolygons(const std::vector<PolygonInfo> &polygons,
+                                                  const Vec3D & origin) override;
 
     virtual std::vector<PolygonInfo> getPolygons() override;
 
@@ -51,6 +52,8 @@ class PolygonLayer : public PolygonLayerInterface,
     virtual void resetSelection() override;
 
     virtual void setLayerClickable(bool isLayerClickable) override;
+
+    virtual void setRenderPassIndex(int32_t index) override;
 
     // LayerInterface
     virtual void setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> & maskingObject) override;
@@ -75,6 +78,8 @@ class PolygonLayer : public PolygonLayerInterface,
     virtual bool onTouchDown(const ::Vec2F &posScreen) override;
 
     virtual bool onClickUnconfirmed(const ::Vec2F &posScreen) override;
+
+    virtual bool onClickConfirmed(const ::Vec2F &posScreen) override;
 
     virtual void clearTouch() override;
 
@@ -104,4 +109,6 @@ class PolygonLayer : public PolygonLayerInterface,
 
     std::atomic<bool> isHidden;
     std::atomic<bool> isLayerClickable = true;
+
+    int32_t renderPassIndex = 0;
 };

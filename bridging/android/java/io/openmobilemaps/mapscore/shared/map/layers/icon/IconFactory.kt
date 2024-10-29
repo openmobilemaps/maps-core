@@ -16,7 +16,7 @@ abstract class IconFactory {
         external fun createIconWithAnchor(identifier: String, coordinate: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, texture: io.openmobilemaps.mapscore.shared.graphics.objects.TextureHolderInterface, iconSize: io.openmobilemaps.mapscore.shared.graphics.common.Vec2F, scaleType: IconType, blendMode: io.openmobilemaps.mapscore.shared.graphics.shader.BlendMode, iconAnchor: io.openmobilemaps.mapscore.shared.graphics.common.Vec2F): IconInfoInterface
     }
 
-    private class CppProxy : IconFactory {
+    public class CppProxy : IconFactory {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

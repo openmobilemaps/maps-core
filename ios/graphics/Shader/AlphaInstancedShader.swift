@@ -12,11 +12,13 @@ import Foundation
 import MapCoreSharedModule
 import Metal
 
-class AlphaInstancedShader: BaseShader {
+class AlphaInstancedShader: BaseShader, @unchecked Sendable {
     private let shader: PipelineType
+    public let isUnitSphere: Bool
 
-    init(shader: PipelineType = .alphaInstancedShader) {
+    init(shader: PipelineType = .alphaInstancedShader, unitSphere: Bool = false) {
         self.shader = shader
+        self.isUnitSphere = unitSphere
     }
 
     override func setupProgram(_: MCRenderingContextInterface?) {

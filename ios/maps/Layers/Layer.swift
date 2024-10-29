@@ -8,6 +8,16 @@
 import Foundation
 import MapCoreSharedModule
 
-public protocol Layer {
+public protocol Layer: Sendable {
     var interface: MCLayerInterface? { get }
+    var layerIndex: Int? { get }
+    func forceReload()
+}
+
+public extension Layer {
+    var layerIndex: Int? { nil }
+
+    func forceReload() {
+        interface?.forceReload()
+    }
 }

@@ -13,7 +13,7 @@ abstract class WmtsTiled2dMapLayerConfigFactory {
         external fun create(wmtsLayerConfiguration: WmtsLayerDescription, zoomLevelInfo: ArrayList<io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapZoomLevelInfo>, zoomInfo: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapZoomInfo, coordinateSystemIdentifier: Int, matrixSetIdentifier: String): io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig
     }
 
-    private class CppProxy : WmtsTiled2dMapLayerConfigFactory {
+    public class CppProxy : WmtsTiled2dMapLayerConfigFactory {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

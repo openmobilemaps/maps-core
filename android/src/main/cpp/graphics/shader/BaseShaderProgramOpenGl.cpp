@@ -68,15 +68,18 @@ void BaseShaderProgramOpenGl::checkGlProgramLinking(GLuint program) {
     }
 }
 
+
 std::string BaseShaderProgramOpenGl::getVertexShader() {
     return OMMVersionedGlesShaderCode(320 es,
-                                      uniform mat4 uMVPMatrix;
+                                      uniform mat4 uvpMatrix;
+                                      uniform mat4 umMatrix;
+                                      uniform vec4 uOriginOffset;
                                       in vec4 vPosition;
                                       in vec2 texCoordinate;
                                       out vec2 v_texcoord;
 
                                       void main() {
-                                          gl_Position = uMVPMatrix * vPosition;
+                                          gl_Position = uvpMatrix * ((umMatrix * vPosition) + uOriginOffset);
                                           v_texcoord = texCoordinate;
                                       }
     );

@@ -12,6 +12,16 @@ import Foundation
 import MapCoreSharedModule
 
 class GraphicsFactory: MCGraphicsObjectFactoryInterface {
+    func createQuadMask(_ is3d: Bool) -> (any MCQuad2dInterface)? {
+        let shader = ColorShader(shader: .colorShader)
+        return Quad2d(shader: shader, metalContext: .current)
+    }
+    
+    func createPolygonMask(_ is3d: Bool) -> (any MCPolygon2dInterface)? {
+        let shader = ColorShader(shader: .colorShader)
+        return Polygon2d(shader: shader, metalContext: .current)
+    }
+    
     func createPolygonGroup(_ shader: MCShaderProgramInterface?) -> MCPolygonGroup2dInterface? {
         guard let shader else { fatalError("No Shader provided") }
         return PolygonGroup2d(shader: shader, metalContext: .current)
@@ -47,14 +57,6 @@ class GraphicsFactory: MCGraphicsObjectFactoryInterface {
         return Polygon2d(shader: shader, metalContext: .current)
     }
 
-    func createQuadMask() -> MCQuad2dInterface? {
-        Quad2d(shader: ColorShader(), metalContext: .current)
-    }
-
-    func createPolygonMask() -> MCPolygon2dInterface? {
-        Polygon2d(shader: ColorShader(), metalContext: .current)
-    }
-
     func createText(_ shader: MCShaderProgramInterface?) -> MCTextInterface? {
         guard let shader else { fatalError("No Shader provided") }
         return Text(shader: shader, metalContext: .current)
@@ -63,5 +65,10 @@ class GraphicsFactory: MCGraphicsObjectFactoryInterface {
     func createTextInstanced(_ shader: MCShaderProgramInterface?) -> MCTextInstancedInterface? {
         guard let shader else { fatalError("No Shader provided") }
         return TextInstanced(shader: shader, metalContext: .current)
+    }
+
+    func createIcosahedronObject(_ shader: MCShaderProgramInterface?) -> MCIcosahedronInterface? {
+        guard let shader else { fatalError("No Shader provided") }
+        return Icosahedron(shader: shader, metalContext: .current)
     }
 }

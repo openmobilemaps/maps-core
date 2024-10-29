@@ -30,20 +30,29 @@ Tiled2dMapVectorSymbolGroup::Tiled2dMapVectorSymbolGroup(uint32_t groupId,
                                                          const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager,
                                                          const std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> &symbolDelegate,
                                                          const bool persistingSymbolPlacement)
-        : groupId(groupId),
-          mapInterface(mapInterface),
-          layerConfig(layerConfig),
-          tileInfo(tileInfo),
-          layerIdentifier(layerIdentifier),
-          layerDescription(layerDescription),
-          fontProvider(fontProvider),
-          featureStateManager(featureStateManager),
-          symbolDelegate(symbolDelegate),
-          usedKeys(layerDescription->getUsedKeys()),
-          persistingSymbolPlacement(persistingSymbolPlacement) {
+: groupId(groupId),
+mapInterface(mapInterface),
+layerConfig(layerConfig),
+tileInfo(tileInfo),
+layerIdentifier(layerIdentifier),
+layerDescription(layerDescription),
+fontProvider(fontProvider),
+featureStateManager(featureStateManager),
+symbolDelegate(symbolDelegate),
+usedKeys(layerDescription->getUsedKeys()),
+persistingSymbolPlacement(persistingSymbolPlacement),
+tileOrigin(0, 0, 0),
+is3d(mapInterface.lock()->is3d()){
     if (auto strongMapInterface = mapInterface.lock()) {
         dpFactor = strongMapInterface->getCamera()->getScreenDensityPpi() / 160.0;
     }
+    auto convertedTileBounds = mapInterface.lock()->getCoordinateConverterHelper()->convertRectToRenderSystem(tileInfo.tileInfo.bounds);
+    double cx = (convertedTileBounds.bottomRight.x + convertedTileBounds.topLeft.x) / 2.0;
+    double cy = (convertedTileBounds.bottomRight.y + convertedTileBounds.topLeft.y) / 2.0;
+    double rx = is3d ? 1.0 * sin(cy) * cos(cx) : cx;
+    double ry = is3d ? 1.0 * cos(cy) : cy;
+    double rz = is3d ? -1.0 * sin(cy) * sin(cx) : 0.0;
+    tileOrigin = Vec3D(rx, ry, rz);
 }
 
 void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>> weakFeatures,
@@ -68,7 +77,7 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
         return;
     }
 
-    auto alphaInstancedShader = strongMapInterface->getShaderFactory()->createAlphaInstancedShader()->asShaderProgramInterface();
+    auto alphaInstancedShader = is3d ? strongMapInterface->getShaderFactory()->createUnitSphereAlphaInstancedShader()->asShaderProgramInterface() : strongMapInterface->getShaderFactory()->createAlphaInstancedShader()->asShaderProgramInterface();
 
     const double tilePixelFactor =
             (0.0254 / camera->getScreenDensityPpi()) * layerConfig->getZoomFactorAtIdentifier(tileInfo.tileInfo.zoomIdentifier - 1);
@@ -148,7 +157,7 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
                 for (auto pointIt = points.begin(); pointIt != points.end(); pointIt++) {
                     auto point = *pointIt;
 
-                    double interpolationValue;
+                    double interpolationValue = 0.0;
                     if (pointIt != points.begin() && !fullText.empty()) {
                         auto last = std::prev(pointIt);
                         double addDistance = Vec2DHelper::distance(Vec2D(last->x, last->y), Vec2D(point.x, point.y));
@@ -333,9 +342,11 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
         for (const auto &page: customAssetPages) {
             auto object = strongMapInterface->getGraphicsObjectFactory()->createQuadInstanced(alphaInstancedShader);
             object->setInstanceCount((int32_t) page.featureIdentifiersUv.size());
-            customTextures.push_back(CustomIconDescriptor(page.texture, object, page.featureIdentifiersUv));
+            customTextures.push_back(CustomIconDescriptor(page.texture, object, page.featureIdentifiersUv, is3d));
         }
     }
+
+    int positionSize = is3d ? 3 : 2;
 
     Tiled2dMapVectorSymbolObject::SymbolObjectInstanceCounts instanceCounts{0, 0, 0};
     int textStyleCount = 0;
@@ -365,13 +376,16 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
         iconAlphas.resize(instanceCounts.icons, 0.0);
         iconRotations.resize(instanceCounts.icons, 0.0);
         iconScales.resize(instanceCounts.icons * 2, 0.0);
-        iconPositions.resize(instanceCounts.icons * 2, 0.0);
+        iconPositions.resize(instanceCounts.icons * positionSize, 0.0);
         iconTextureCoordinates.resize(instanceCounts.icons * 4, 0.0);
+        if (is3d) {
+            iconOffsets.resize(instanceCounts.icons * 2, 0.0);
+        }
     }
 
 
     if (instanceCounts.stretchedIcons != 0) {
-        auto shader = strongMapInterface->getShaderFactory()->createStretchInstancedShader()->asShaderProgramInterface();
+        auto shader = strongMapInterface->getShaderFactory()->createStretchInstancedShader(is3d)->asShaderProgramInterface();
         shader->setBlendMode(
                 layerDescription->style.getBlendMode(EvaluationContext(0.0, dpFactor, std::make_shared<FeatureContext>(), featureStateManager)));
         stretchedInstancedObject = strongMapInterface->getGraphicsObjectFactory()->createQuadStretchedInstanced(shader);
@@ -384,13 +398,13 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
         stretchedIconAlphas.resize(instanceCounts.stretchedIcons, 0.0);
         stretchedIconRotations.resize(instanceCounts.stretchedIcons, 0.0);
         stretchedIconScales.resize(instanceCounts.stretchedIcons * 2, 0.0);
-        stretchedIconPositions.resize(instanceCounts.stretchedIcons * 2, 0.0);
+        stretchedIconPositions.resize(instanceCounts.stretchedIcons * positionSize, 0.0);
         stretchedIconStretchInfos.resize(instanceCounts.stretchedIcons * 10, 1.0);
         stretchedIconTextureCoordinates.resize(instanceCounts.stretchedIcons * 4, 0.0);
     }
 
     if (instanceCounts.textCharacters != 0) {
-        auto shader = strongMapInterface->getShaderFactory()->createTextInstancedShader()->asShaderProgramInterface();
+        auto shader =  is3d ? strongMapInterface->getShaderFactory()->createUnitSphereTextInstancedShader()->asShaderProgramInterface() : strongMapInterface->getShaderFactory()->createTextInstancedShader()->asShaderProgramInterface();
         shader->setBlendMode(
                 layerDescription->style.getBlendMode(EvaluationContext(0.0, dpFactor, std::make_shared<FeatureContext>(), featureStateManager)));
         textInstancedObject = strongMapInterface->getGraphicsObjectFactory()->createTextInstanced(shader);
@@ -405,6 +419,9 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
         textRotations.resize(instanceCounts.textCharacters, 0.0);
         textScales.resize(instanceCounts.textCharacters * 2, 0.0);
         textPositions.resize(instanceCounts.textCharacters * 2, 0.0);
+        if (is3d) {
+            textReferencePositions.resize(instanceCounts.textCharacters * positionSize, 0.0);
+        }
         textTextureCoordinates.resize(instanceCounts.textCharacters * 4, 0.0);
     }
 
@@ -423,13 +440,14 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
         }
     }
     if (instanceCounts.icons + instanceCounts.stretchedIcons + instanceCounts.textCharacters > 0) {
-        auto shader = strongMapInterface->getShaderFactory()->createPolygonGroupShader(false);
+        auto shader = strongMapInterface->getShaderFactory()->createPolygonGroupShader(false, is3d);
         auto object = strongMapInterface->getGraphicsObjectFactory()->createPolygonGroup(shader->asShaderProgramInterface());
         boundingBoxLayerObject = std::make_shared<PolygonGroup2dLayerObject>(strongMapInterface->getCoordinateConverterHelper(),
                                                                              object, shader);
         boundingBoxLayerObject->setStyles({
                                                   PolygonStyle(Color(0, 1, 0, 0.3), 0.3),
-                                                  PolygonStyle(Color(1, 0, 0, 0.3), 1.0)
+                                                  PolygonStyle(Color(1, 0, 0, 0.3), 1.0),
+                                                  PolygonStyle(Color(0, 0, 1, 0.3), 1.0)
                                           });
     }
 #endif
@@ -461,6 +479,7 @@ void Tiled2dMapVectorSymbolGroup::setupObjects(const std::shared_ptr<SpriteData>
     uint16_t textStyleOffset = 0;
 
     for (auto const &object: symbolObjects) {
+
         if (!object->hasCustomTexture && spriteTexture && spriteData) {
             object->setupIconProperties(iconPositions, iconRotations, iconTextureCoordinates, iconOffset, tileInfo.tileInfo.zoomIdentifier,
                                         spriteTexture, spriteData, std::nullopt);
@@ -486,36 +505,36 @@ void Tiled2dMapVectorSymbolGroup::setupObjects(const std::shared_ptr<SpriteData>
     }
 
     for (const auto &customDescriptor: customTextures) {
-        customDescriptor.renderObject->setFrame(Quad2dD(Vec2D(-0.5, 0.5), Vec2D(0.5, 0.5), Vec2D(0.5, -0.5), Vec2D(-0.5, -0.5)));
+        customDescriptor.renderObject->setFrame(Quad2dD(Vec2D(-0.5, 0.5), Vec2D(0.5, 0.5), Vec2D(0.5, -0.5), Vec2D(-0.5, -0.5)), tileOrigin, is3d);
         customDescriptor.renderObject->loadTexture(context, customDescriptor.texture);
         customDescriptor.renderObject->asGraphicsObject()->setup(context);
 
         int32_t count = (int32_t)customDescriptor.featureIdentifiersUv.size();
-        customDescriptor.renderObject->setPositions(SharedBytes((int64_t) customDescriptor.iconPositions.data(), count, 2 * (int32_t) sizeof(float)));
+        customDescriptor.renderObject->setPositions(SharedBytes((int64_t) customDescriptor.iconPositions.data(), count, 3 * (int32_t) sizeof(float)));
         customDescriptor.renderObject->setTextureCoordinates(SharedBytes((int64_t) customDescriptor.iconTextureCoordinates.data(), count, 4 * (int32_t) sizeof(float)));
     }
 
     if (spriteTexture && spriteData && iconInstancedObject) {
         if (this->spriteData == nullptr) {
-            iconInstancedObject->setFrame(Quad2dD(Vec2D(-0.5, 0.5), Vec2D(0.5, 0.5), Vec2D(0.5, -0.5), Vec2D(-0.5, -0.5)));
+            iconInstancedObject->setFrame(Quad2dD(Vec2D(-0.5, 0.5), Vec2D(0.5, 0.5), Vec2D(0.5, -0.5), Vec2D(-0.5, -0.5)), tileOrigin, is3d);
             iconInstancedObject->loadTexture(context, spriteTexture);
             iconInstancedObject->asGraphicsObject()->setup(context);
         }
         iconInstancedObject->setPositions(
-                SharedBytes((int64_t) iconPositions.data(), (int32_t) iconAlphas.size(), 2 * (int32_t) sizeof(float)));
+                SharedBytes((int64_t) iconPositions.data(), (int32_t) iconAlphas.size(), 3 * (int32_t) sizeof(float)));
         iconInstancedObject->setTextureCoordinates(
                 SharedBytes((int64_t) iconTextureCoordinates.data(), (int32_t) iconAlphas.size(), 4 * (int32_t) sizeof(float)));
     }
 
     if (spriteTexture && spriteData && stretchedInstancedObject) {
         if (this->spriteData == nullptr) {
-            stretchedInstancedObject->setFrame(Quad2dD(Vec2D(-0.5, 0.5), Vec2D(0.5, 0.5), Vec2D(0.5, -0.5), Vec2D(-0.5, -0.5)));
+            stretchedInstancedObject->setFrame(Quad2dD(Vec2D(-0.5, 0.5), Vec2D(0.5, 0.5), Vec2D(0.5, -0.5), Vec2D(-0.5, -0.5)), tileOrigin, is3d);
             stretchedInstancedObject->loadTexture(context, spriteTexture);
             stretchedInstancedObject->asGraphicsObject()->setup(context);
         }
         stretchedInstancedObject->setPositions(
                 SharedBytes((int64_t) stretchedIconPositions.data(), (int32_t) stretchedIconAlphas.size(),
-                            2 * (int32_t) sizeof(float)));
+                            3 * (int32_t) sizeof(float)));
         stretchedInstancedObject->setTextureCoordinates(
                 SharedBytes((int64_t) stretchedIconTextureCoordinates.data(), (int32_t) stretchedIconAlphas.size(),
                             4 * (int32_t) sizeof(float)));
@@ -523,7 +542,7 @@ void Tiled2dMapVectorSymbolGroup::setupObjects(const std::shared_ptr<SpriteData>
 
     if (textInstancedObject) {
         if (this->spriteData == nullptr) {
-            textInstancedObject->setFrame(Quad2dD(Vec2D(-0.5, 0.5), Vec2D(0.5, 0.5), Vec2D(0.5, -0.5), Vec2D(-0.5, -0.5)));
+            textInstancedObject->setFrame(Quad2dD(Vec2D(-0.5, 0.5), Vec2D(0.5, 0.5), Vec2D(0.5, -0.5), Vec2D(-0.5, -0.5)), tileOrigin, is3d);
             textInstancedObject->loadTexture(context, fontResult->imageData);
             textInstancedObject->asGraphicsObject()->setup(context);
         }
@@ -545,10 +564,12 @@ void Tiled2dMapVectorSymbolGroup::setupObjects(const std::shared_ptr<SpriteData>
     isInitialized = true;
 }
 
-void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const double rotation, const double scaleFactor, long long now) {
+void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const double rotation, const double scaleFactor, long long now, const Vec2I viewPortSize) {
     if (!isInitialized) {
         return;
     }
+
+    int positionSize = is3d ? 3 : 2;
     // icons
     if (!symbolObjects.empty()) {
 
@@ -561,46 +582,55 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
             if (object->hasCustomTexture) {
                 auto &page = customTextures[object->customTexturePage];
                 int offset = (int)object->customTextureOffset;
-                object->updateIconProperties(page.iconPositions, page.iconScales, page.iconRotations, page.iconAlphas, offset, zoomIdentifier,scaleFactor, rotation, now);
+                object->updateIconProperties(page.iconPositions, page.iconScales, page.iconRotations, page.iconAlphas, page.iconOffsets, offset, zoomIdentifier,scaleFactor, rotation, now, viewPortSize);
 
             } else {
-                object->updateIconProperties(iconPositions, iconScales, iconRotations, iconAlphas, iconOffset, zoomIdentifier,
-                                             scaleFactor, rotation, now);
+                object->updateIconProperties(iconPositions, iconScales, iconRotations, iconAlphas, iconOffsets, iconOffset, zoomIdentifier,
+                                             scaleFactor, rotation, now, viewPortSize);
             }
             object->updateStretchIconProperties(stretchedIconPositions, stretchedIconScales, stretchedIconRotations,
                                                 stretchedIconAlphas, stretchedIconStretchInfos, stretchedIconOffset, zoomIdentifier,
-                                                scaleFactor, rotation, now);
-            object->updateTextProperties(textPositions, textScales, textRotations, textStyles, textOffset, textStyleOffset,
-                                         zoomIdentifier, scaleFactor, rotation, now);
+                                                scaleFactor, rotation, now, viewPortSize);
+            object->updateTextProperties(textPositions, textReferencePositions, textScales, textRotations, textStyles, textOffset, textStyleOffset,
+                                         zoomIdentifier, scaleFactor, rotation, now, viewPortSize);
         }
 
         for (const auto &customDescriptor: customTextures) {
             int32_t count = (int32_t)customDescriptor.featureIdentifiersUv.size();
             customDescriptor.renderObject->setPositions(
-                    SharedBytes((int64_t) customDescriptor.iconPositions.data(), (int32_t) count, 2 * (int32_t) sizeof(float)));
+                    SharedBytes((int64_t) customDescriptor.iconPositions.data(), (int32_t) count, positionSize * (int32_t) sizeof(float)));
             customDescriptor.renderObject->setAlphas(
                     SharedBytes((int64_t) customDescriptor.iconAlphas.data(), (int32_t) count, (int32_t) sizeof(float)));
             customDescriptor.renderObject->setScales(
                     SharedBytes((int64_t) customDescriptor.iconScales.data(), (int32_t) count, 2 * (int32_t) sizeof(float)));
             customDescriptor.renderObject->setRotations(
                     SharedBytes((int64_t) customDescriptor.iconRotations.data(), (int32_t) count, 1 * (int32_t) sizeof(float)));
+
+            if (is3d) {
+                customDescriptor.renderObject->setPositionOffset(
+                        SharedBytes((int64_t) customDescriptor.iconOffsets.data(), (int32_t) count, 2 * (int32_t) sizeof(float)));
+            }
         }
 
         if (iconInstancedObject) {
             iconInstancedObject->setPositions(
-                    SharedBytes((int64_t) iconPositions.data(), (int32_t) iconAlphas.size(), 2 * (int32_t) sizeof(float)));
+                    SharedBytes((int64_t) iconPositions.data(), (int32_t) iconAlphas.size(), positionSize * (int32_t) sizeof(float)));
             iconInstancedObject->setAlphas(
                     SharedBytes((int64_t) iconAlphas.data(), (int32_t) iconAlphas.size(), (int32_t) sizeof(float)));
             iconInstancedObject->setScales(
                     SharedBytes((int64_t) iconScales.data(), (int32_t) iconAlphas.size(), 2 * (int32_t) sizeof(float)));
             iconInstancedObject->setRotations(
                     SharedBytes((int64_t) iconRotations.data(), (int32_t) iconAlphas.size(), 1 * (int32_t) sizeof(float)));
+            if (is3d) {
+                iconInstancedObject->setPositionOffset(
+                        SharedBytes((int64_t) iconOffsets.data(), (int32_t) iconAlphas.size(), 2 * (int32_t) sizeof(float)));
+            }
         }
 
         if (stretchedInstancedObject) {
             stretchedInstancedObject->setPositions(
                     SharedBytes((int64_t) stretchedIconPositions.data(), (int32_t) stretchedIconAlphas.size(),
-                                2 * (int32_t) sizeof(float)));
+                                positionSize * (int32_t) sizeof(float)));
             stretchedInstancedObject->setAlphas(
                     SharedBytes((int64_t) stretchedIconAlphas.data(), (int32_t) stretchedIconAlphas.size(),
                                 (int32_t) sizeof(float)));
@@ -618,6 +648,10 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
         if (textInstancedObject) {
             textInstancedObject->setPositions(
                     SharedBytes((int64_t) textPositions.data(), (int32_t) textRotations.size(), 2 * (int32_t) sizeof(float)));
+            if (is3d) {
+                textInstancedObject->setReferencePositions(
+                        SharedBytes((int64_t) textReferencePositions.data(), (int32_t) textRotations.size(), positionSize * (int32_t) sizeof(float)));
+            }
             textInstancedObject->setStyles(
                     SharedBytes((int64_t) textStyles.data(), (int32_t) textStyles.size() / 10, 10 * (int32_t) sizeof(float)));
             textInstancedObject->setScales(
@@ -632,7 +666,51 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
             std::vector<std::tuple<std::vector<::Coord>, int>> vertices;
             std::vector<uint16_t> indices;
 
+
+            auto camera = mapInterface.lock()->getCamera();
+            auto renderingContext = mapInterface.lock()->getRenderingContext();
+
+            auto viewport = renderingContext->getViewportSize();
+            auto angle = camera->getRotation();
+            auto origin = camera->asCameraInterface()->getOrigin();
+            auto vpMatrix = *camera->getLastVpMatrixD();
+
             int32_t currentVertexIndex = 0;
+
+            double halfWidth = viewport.x / 2.0f;
+            double halfHeight = viewport.y / 2.0f;
+            double sinNegGridAngle(std::sin(-angle * M_PI / 180.0));
+            double cosNegGridAngle(std::cos(-angle * M_PI / 180.0));
+            Vec4D temp1 = {0,0,0,0}, temp2 = {0,0,0,0};
+            CollisionUtil::CollisionEnvironment env(vpMatrix, is3d, temp1, temp2, halfWidth, halfHeight, sinNegGridAngle, cosNegGridAngle, origin);
+
+
+            if (lastClickHitCircle) {
+                double x = ((lastClickHitCircle->x / viewport.x) * 2.0) - 1.0;
+                double y = ((lastClickHitCircle->y / viewport.y) * 2.0) - 1.0;
+                float aspectRatio = float(viewport.x) / float(viewport.y);
+                double radius = lastClickHitCircle->radius / halfWidth;
+
+                const size_t numCirclePoints = 8;
+                std::vector<Coord> coords;
+                coords.emplace_back(CoordinateSystemIdentifiers::RENDERSYSTEM(),
+                                    x, y, 0.0);
+                for (size_t i = 0; i < numCirclePoints; i++) {
+                    float angle = i * (2 * M_PI / numCirclePoints);
+                    coords.emplace_back(CoordinateSystemIdentifiers::RENDERSYSTEM(),
+                                        x + radius * std::cos(angle),
+                                        y + radius * aspectRatio * std::sin(angle),
+                                        0.0);
+
+                    indices.push_back(currentVertexIndex);
+                    indices.push_back(currentVertexIndex + i + 1);
+                    indices.push_back(currentVertexIndex + (i + 1) % numCirclePoints + 1);
+                }
+                vertices.push_back({coords, 2});
+
+                currentVertexIndex += (numCirclePoints + 1);
+            }
+
             for (const auto &object: symbolObjects) {
                 if (currentVertexIndex >= std::numeric_limits<uint16_t>::max()) {
                     LogError <<= "Too many debug collision primitives for uint16 vertex indices!";
@@ -653,16 +731,27 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
 
                 const auto &circles = object->getMapAlignedBoundingCircles(zoomIdentifier, false, true);
                 if (labelRotationAlignment == SymbolAlignment::MAP && circles && !circles->empty()) {
+
                     for (const auto &circle: *circles) {
+                        auto projectedCircle = CollisionUtil::getProjectedCircle(circle, env);
+                        if (!projectedCircle) {
+                            continue;
+                        }
+
+                        projectedCircle->x = ((projectedCircle->x / viewport.x) * 2.0) - 1.0;
+                        projectedCircle->y = ((projectedCircle->y / viewport.y) * 2.0) - 1.0;
+                        float aspectRatio = float(viewport.x) / float(viewport.y);
+                        projectedCircle->radius = projectedCircle->radius / halfWidth;
+
                         const size_t numCirclePoints = 8;
                         std::vector<Coord> coords;
                         coords.emplace_back(CoordinateSystemIdentifiers::RENDERSYSTEM(),
-                                            circle.x, circle.y, 0.0);
+                                            projectedCircle->x, projectedCircle->y, 0.0);
                         for (size_t i = 0; i < numCirclePoints; i++) {
                             float angle = i * (2 * M_PI / numCirclePoints);
                             coords.emplace_back(CoordinateSystemIdentifiers::RENDERSYSTEM(),
-                                                circle.x + circle.radius * std::cos(angle),
-                                                circle.y + circle.radius * std::sin(angle),
+                                                projectedCircle->x + projectedCircle->radius * std::cos(angle),
+                                                projectedCircle->y + projectedCircle->radius * aspectRatio * std::sin(angle),
                                                 0.0);
 
                             indices.push_back(currentVertexIndex);
@@ -674,44 +763,37 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
                         currentVertexIndex += (numCirclePoints + 1);
                     }
                 } else {
-                    const auto &viewportAlignedBox = object->getViewportAlignedBoundingBox(zoomIdentifier, false, true);
+                    const auto &viewportAlignedBox = object->getViewportAlignedBoundingBox(zoomIdentifier, false, false);
                     if (viewportAlignedBox) {
-                        // Align rectangle to viewport
-                        const double sinAngle = sin(-rotation * M_PI / 180.0);
-                        const double cosAngle = cos(-rotation * M_PI / 180.0);
-                        Vec2D rotWidth = Vec2D(viewportAlignedBox->width * cosAngle, viewportAlignedBox->width * sinAngle);
-                        Vec2D rotHeight = Vec2D(-viewportAlignedBox->height * sinAngle, viewportAlignedBox->height * cosAngle);
-                        Vec2D rotOrigin = Vec2DHelper::rotate(Vec2D(viewportAlignedBox->x, viewportAlignedBox->y),
-                                                              Vec2D(viewportAlignedBox->anchorX, viewportAlignedBox->anchorY),
-                                                              -rotation);
-                        vertices.push_back({std::vector<::Coord>{
-                                Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(),
-                                      rotOrigin.x, rotOrigin.y,0.0),
-                                Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(),
-                                      rotOrigin.x + rotWidth.x,rotOrigin.y + rotWidth.y, 0.0),
-                                Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(),
-                                      rotOrigin.x + rotWidth.x + rotHeight.x,rotOrigin.y + rotWidth.y + rotHeight.y, 0.0),
-                                Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(),
-                                      rotOrigin.x + rotHeight.x,rotOrigin.y + rotHeight.y, 0.0),
-                        }, object->animationCoordinator->isColliding() ? 1 : 0});
-                        indices.push_back(currentVertexIndex);
-                        indices.push_back(currentVertexIndex + 1);
-                        indices.push_back(currentVertexIndex + 2);
+                        auto projectedRectangle = CollisionUtil::getProjectedRectangle(*viewportAlignedBox, env);
+                        if (projectedRectangle) {
+                            projectedRectangle->x = ((projectedRectangle->x / viewport.x) * 2.0) - 1.0;
+                            projectedRectangle->y = ((projectedRectangle->y / viewport.y) * 2.0) - 1.0;
+                            projectedRectangle->width = (projectedRectangle->width / halfWidth);
+                            projectedRectangle->height = (projectedRectangle->height / halfHeight);
 
-                        indices.push_back(currentVertexIndex);
-                        indices.push_back(currentVertexIndex + 3);
-                        indices.push_back(currentVertexIndex + 2);
+                            vertices.push_back({std::vector<::Coord>{
+                                    Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(), projectedRectangle->x, projectedRectangle->y,0.0),
+                                    Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(), projectedRectangle->x + projectedRectangle->width, projectedRectangle->y, 0.0),
+                                    Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(), projectedRectangle->x + projectedRectangle->width, projectedRectangle->y + projectedRectangle->height, 0.0),
+                                    Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(), projectedRectangle->x, projectedRectangle->y + projectedRectangle->height, 0.0),
+                            }, object->animationCoordinator->isColliding() ? 1 : 0});
 
-                        currentVertexIndex += 4;
+                            indices.push_back(currentVertexIndex);
+                            indices.push_back(currentVertexIndex + 1);
+                            indices.push_back(currentVertexIndex + 2);
+
+                            indices.push_back(currentVertexIndex);
+                            indices.push_back(currentVertexIndex + 2);
+                            indices.push_back(currentVertexIndex + 3);
+
+                            currentVertexIndex += 4;
+                        }
                     }
                 }
 
-                if (currentVertexIndex == 0) {
-                    return;
-                }
-
                 boundingBoxLayerObject->getPolygonObject()->clear();
-                boundingBoxLayerObject->setVertices(vertices, indices);
+                boundingBoxLayerObject->setVertices(vertices, indices, false);
                 boundingBoxLayerObject->getPolygonObject()->setup(mapInterface.lock()->getRenderingContext());
             }
         }
@@ -782,7 +864,7 @@ Tiled2dMapVectorSymbolGroup::createSymbolObject(const Tiled2dMapVersionedTileInf
     auto symbolObject = std::make_shared<Tiled2dMapVectorSymbolObject>(mapInterface, layerConfig, fontProvider, tileInfo, layerIdentifier,
                                                           description, featureContext, text, fullText, coordinate, lineCoordinates,
                                                           fontList, textAnchor, angle, textJustify, textSymbolPlacement, hideIcon, animationCoordinatorMap,
-                                                          featureStateManager, usedKeys, symbolTileIndex, hasCustomTexture, dpFactor, persistingSymbolPlacement);
+                                                          featureStateManager, usedKeys, symbolTileIndex, hasCustomTexture, dpFactor, persistingSymbolPlacement, is3d, tileOrigin);
     symbolObject->setAlpha(alpha);
     const auto counts = symbolObject->getInstanceCounts();
     if (counts.icons + counts.stretchedIcons + counts.textCharacters == 0) {
@@ -802,12 +884,16 @@ std::vector<SymbolObjectCollisionWrapper> Tiled2dMapVectorSymbolGroup::getSymbol
     return wrapperObjects;
 }
 
-std::optional<std::tuple<Coord, VectorLayerFeatureInfo>> Tiled2dMapVectorSymbolGroup::onClickConfirmed(const CircleD &clickHitCircle) {
+std::optional<std::tuple<Coord, VectorLayerFeatureInfo>> Tiled2dMapVectorSymbolGroup::onClickConfirmed(const CircleD &clickHitCircle, double zoomIdentifier, CollisionUtil::CollisionEnvironment &collisionEnvironment) {
     if (!anyInteractable) {
         return std::nullopt;
     }
-    for (const auto object: symbolObjects) {
-        const auto result = object->onClickConfirmed(clickHitCircle);
+#ifdef DRAW_TEXT_BOUNDING_BOX
+    lastClickHitCircle = clickHitCircle;
+    mapInterface.lock()->invalidate();
+#endif
+    for (auto iter = symbolObjects.rbegin(); iter != symbolObjects.rend(); ++iter) {
+        const auto result = (*iter)->onClickConfirmed(clickHitCircle, zoomIdentifier, collisionEnvironment);
         if (result) {
             return result;
         }
@@ -869,10 +955,12 @@ std::vector<std::shared_ptr< ::RenderObjectInterface>> Tiled2dMapVectorSymbolGro
         renderObjects.push_back(std::make_shared<RenderObject>(textObject->asGraphicsObject()));
     }
 
+#ifdef DRAW_TEXT_BOUNDING_BOX
     auto boundingBoxLayerObject = this->boundingBoxLayerObject;
     if (boundingBoxLayerObject) {
-        renderObjects.push_back(std::make_shared<RenderObject>(boundingBoxLayerObject->getPolygonObject()));
+        renderObjects.push_back(std::make_shared<RenderObject>(boundingBoxLayerObject->getPolygonObject(), true));
     }
+#endif
 
     return renderObjects;
 }

@@ -12,6 +12,7 @@
 
 @interface MCIconFactory : NSObject
 
+/** iconSize is in meters when scaleType is scale invariant(i.e. FIXED or ROTATION_INVARIANT), screen pixels otherwise */
 + (nullable MCIconInfoInterface *)createIcon:(nonnull NSString *)identifier
                                   coordinate:(nonnull MCCoord *)coordinate
                                      texture:(nullable id<MCTextureHolderInterface>)texture
@@ -19,6 +20,7 @@
                                    scaleType:(MCIconType)scaleType
                                    blendMode:(MCBlendMode)blendMode;
 
+/** iconSize is in meters when scaleType is scale invariant(i.e. FIXED or ROTATION_INVARIANT), screen pixels otherwise */
 + (nullable MCIconInfoInterface *)createIconWithAnchor:(nonnull NSString *)identifier
                                             coordinate:(nonnull MCCoord *)coordinate
                                                texture:(nullable id<MCTextureHolderInterface>)texture

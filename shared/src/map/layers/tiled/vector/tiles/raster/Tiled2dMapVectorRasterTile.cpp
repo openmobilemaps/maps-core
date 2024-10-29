@@ -9,7 +9,7 @@
  */
 
 #include "Tiled2dMapVectorRasterTile.h"
-#include "MapCamera2dInterface.h"
+#include "MapCameraInterface.h"
 #include "Tiled2dMapVectorLayerConfig.h"
 #include "RasterShaderInterface.h"
 #include "RenderPass.h"
@@ -27,14 +27,18 @@ Tiled2dMapVectorRasterTile::Tiled2dMapVectorRasterTile(const std::weak_ptr<MapIn
     isStyleStateDependant = usedKeys.isStateDependant();
     auto pMapInterface = mapInterface.lock();
     if (pMapInterface) {
-        auto shader = pMapInterface->getShaderFactory()->createRasterShader();
+        auto shader = pMapInterface->is3d() ? pMapInterface->getShaderFactory()->createUnitSphereRasterShader() : pMapInterface->getShaderFactory()->createRasterShader();
         shader->asShaderProgramInterface()->setBlendMode(description->style.getBlendMode(EvaluationContext(0.0, dpFactor, std::make_shared<FeatureContext>(), featureStateManager)));
         auto quad = pMapInterface->getGraphicsObjectFactory()->createQuad(shader->asShaderProgramInterface());
 #if DEBUG
         quad->asGraphicsObject()->setDebugLabel(description->identifier + "_" + tileInfo.tileInfo.to_string_short());
 #endif
-        tileObject = std::make_shared<Textured2dLayerObject>(quad, shader, pMapInterface);
+        tileObject = std::make_shared<Textured2dLayerObject>(quad, shader, pMapInterface, pMapInterface->is3d());
         tileObject->setRectCoord(tileInfo.tileInfo.bounds);
+
+        if  (pMapInterface->is3d()) {
+            quad->setSubdivisionFactor(std::clamp(subdivisionFactor + tileInfo.tileInfo.tessellationFactor, 0, 5));
+        }
     }
 }
 
@@ -55,7 +59,9 @@ void Tiled2dMapVectorRasterTile::update() {
     }
     
     double zoomIdentifier = layerConfig->getZoomIdentifier(camera->getZoom());
-    zoomIdentifier = std::max(zoomIdentifier, (double) tileInfo.tileInfo.zoomIdentifier);
+    if (!mapInterface->is3d()) {
+        zoomIdentifier = std::max(zoomIdentifier, (double) tileInfo.tileInfo.zoomIdentifier);
+    }
 
     auto rasterDescription = std::static_pointer_cast<RasterVectorLayerDescription>(description);
     bool inZoomRange = (rasterDescription->maxZoom >= zoomIdentifier || zoomInfo.overzoom) && (rasterDescription->minZoom <= zoomIdentifier || zoomInfo.underzoom);

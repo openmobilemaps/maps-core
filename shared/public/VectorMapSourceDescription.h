@@ -22,13 +22,25 @@ public:
     int minZoom;
     int maxZoom;
     std::optional<::RectCoord> bounds;
+    std::optional<bool> adaptScaleToScreen;
+    std::optional<int> numDrawPreviousLayers;
+    std::optional<float> zoomLevelScaleFactor;
+    std::optional<bool> underzoom;
+    std::optional<bool> overzoom;
 
     VectorMapSourceDescription(std::string identifier,
-                         std::string vectorUrl,
-                         int minZoom,
-                         int maxZoom,
-                               std::optional<::RectCoord> bounds):
-    identifier(identifier), vectorUrl(vectorUrl), minZoom(minZoom), maxZoom(maxZoom), bounds(bounds) {}
+                               std::string vectorUrl,
+                               int minZoom,
+                               int maxZoom,
+                               std::optional<::RectCoord> bounds,
+                               std::optional<float> zoomLevelScaleFactor,
+                               std::optional<bool> adaptScaleToScreen,
+                               std::optional<int> numDrawPreviousLayers,
+                               std::optional<bool> underzoom,
+                               std::optional<bool> overzoom) :
+            identifier(identifier), vectorUrl(vectorUrl), minZoom(minZoom), maxZoom(maxZoom), bounds(bounds),
+            adaptScaleToScreen(adaptScaleToScreen), numDrawPreviousLayers(numDrawPreviousLayers),
+            zoomLevelScaleFactor(zoomLevelScaleFactor), underzoom(underzoom), overzoom(overzoom) {}
 };
 
 class VectorMapDescription {

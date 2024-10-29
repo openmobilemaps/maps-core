@@ -13,19 +13,22 @@ import MapCoreSharedModule
 import Metal
 import UIKit
 
-class LineGroupShader: BaseShader {
+class LineGroupShader: BaseShader, @unchecked Sendable {
     var lineStyleBuffer: MTLBuffer?
 
     var screenPixelAsRealMeterFactor: Float = 1.0
 
     var dashingScaleFactor: Float = 1.0
 
-    override init() {
+    private let shaderType: PipelineType
+
+    init(shader: PipelineType = .lineGroupShader) {
+        self.shaderType = shader
     }
 
     override func setupProgram(_: MCRenderingContextInterface?) {
         if pipeline == nil {
-            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: .lineGroupShader, blendMode: blendMode).json)
+            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: shaderType, blendMode: blendMode).json)
         }
     }
 

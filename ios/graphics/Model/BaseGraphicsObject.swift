@@ -11,8 +11,9 @@
 import Foundation
 import MapCoreSharedModule
 import Metal
+import simd
 
-open class BaseGraphicsObject {
+open class BaseGraphicsObject: @unchecked Sendable {
     private weak var context: MCRenderingContextInterface!
 
     public let device: MTLDevice
@@ -30,16 +31,24 @@ open class BaseGraphicsObject {
     // therefore it has to be held for the shortest time possible
     public let lock = OSLock()
 
+    public var originOffset: MCVec3D = .init(x: 0, y: 0, z: 0)
+    public var originOffsetBuffer: MTLBuffer?
+
     public init(device: MTLDevice, sampler: MTLSamplerState, label: String = "") {
         self.device = device
         self.sampler = sampler
         self.label = label
+
+        var originOffset: simd_float4 = simd_float4(0, 0, 0, 0)
+        originOffsetBuffer = device.makeBuffer(bytes: &originOffset, length: MemoryLayout<simd_float4>.stride, options: [])
     }
 
     open func render(encoder _: MTLRenderCommandEncoder,
                      context _: RenderingContext,
                      renderPass _: MCRenderPassConfig,
-                     mvpMatrix _: Int64,
+                     vpMatrix _: Int64,
+                     mMatrix _: Int64,
+                     origin: MCVec3D,
                      isMasked _: Bool,
                      screenPixelAsRealMeterFactor _: Double) {
         fatalError("has to be overwritten by subclass")
@@ -71,7 +80,7 @@ extension BaseGraphicsObject: MCGraphicsObjectInterface {
         maskInverse = inversed
     }
 
-    public func render(_ context: MCRenderingContextInterface?, renderPass: MCRenderPassConfig, mvpMatrix: Int64, isMasked: Bool, screenPixelAsRealMeterFactor: Double) {
+    public func render(_ context: MCRenderingContextInterface?, renderPass: MCRenderPassConfig, vpMatrix: Int64, mMatrix: Int64, origin: MCVec3D, isMasked: Bool, screenPixelAsRealMeterFactor: Double) {
         guard isReady(),
               let context = context as? RenderingContext,
               let encoder = context.encoder
@@ -80,7 +89,9 @@ extension BaseGraphicsObject: MCGraphicsObjectInterface {
         render(encoder: encoder,
                context: context,
                renderPass: renderPass,
-               mvpMatrix: mvpMatrix,
+               vpMatrix: vpMatrix,
+               mMatrix: mMatrix,
+               origin: origin,
                isMasked: isMasked,
                screenPixelAsRealMeterFactor: screenPixelAsRealMeterFactor)
     }

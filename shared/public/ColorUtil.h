@@ -25,13 +25,14 @@
 #pragma once
 
 #include "Color.h"
-#include <string>
+#include <algorithm>
+#include <cmath>
+#include <cstdint>
 #include <map>
-#include <vector>
 #include <optional>
 #include <sstream>
-#include <cmath>
-#include <algorithm>
+#include <string>
+#include <vector>
 
 class ColorUtil {
 public:

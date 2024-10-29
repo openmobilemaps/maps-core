@@ -3,6 +3,7 @@
 
 #include "NativeTiled2dMapRasterLayerInterface.h"  // my header
 #include "Marshal.hpp"
+#include "NativeBlendMode.h"
 #include "NativeLayerInterface.h"
 #include "NativeLoaderInterface.h"
 #include "NativeMaskingObjectInterface.h"
@@ -180,6 +181,22 @@ CJNIEXPORT ::djinni_generated::NativeTiled2dMapLayerConfig::JniType JNICALL Java
         auto r = ref->getConfig();
         return ::djinni::release(::djinni_generated::NativeTiled2dMapLayerConfig::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_raster_Tiled2dMapRasterLayerInterface_00024CppProxy_native_1set3dSubdivisionFactor(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jint j_factor)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapRasterLayerInterface>(nativeRef);
+        ref->set3dSubdivisionFactor(::djinni::I32::toCpp(jniEnv, j_factor));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_raster_Tiled2dMapRasterLayerInterface_00024CppProxy_native_1setBlendMode(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeBlendMode::JniType j_blendMode)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapRasterLayerInterface>(nativeRef);
+        ref->setBlendMode(::djinni_generated::NativeBlendMode::toCpp(jniEnv, j_blendMode));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
 } // namespace djinni_generated

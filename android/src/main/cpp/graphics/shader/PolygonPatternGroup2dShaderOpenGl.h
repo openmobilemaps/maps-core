@@ -21,7 +21,7 @@ class PolygonPatternGroup2dShaderOpenGl : public BaseShaderProgramOpenGl,
                          public std::enable_shared_from_this<ShaderProgramInterface> {
 
   public:
-    PolygonPatternGroup2dShaderOpenGl(bool fadeInPattern);
+    PolygonPatternGroup2dShaderOpenGl(bool fadeInPattern, bool projectOntoUnitSphere);
 
     virtual std::string getProgramName() override;
 
@@ -32,6 +32,7 @@ class PolygonPatternGroup2dShaderOpenGl : public BaseShaderProgramOpenGl,
     virtual std::shared_ptr<ShaderProgramInterface> asShaderProgramInterface() override;
 
   protected:
+    const bool projectOntoUnitSphere;
     const bool fadeInPattern;
     const std::string programName;
 

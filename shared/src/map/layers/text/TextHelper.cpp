@@ -11,7 +11,7 @@
 #include "TextHelper.h"
 
 #include "GlyphDescription.h"
-#include "MapCamera2dInterface.h"
+#include "MapCameraInterface.h"
 #include "Quad2dD.h"
 #include "TextDescription.h"
 #include "BoundingBox.h"
@@ -27,6 +27,12 @@ unsigned char *StrToUprExt(unsigned char *pString);
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
+
+#if defined(__clang__) || defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
+
 
 std::vector<std::string> TextHelper::splitWstring(const std::string &word) {
     std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;

@@ -14,7 +14,7 @@ abstract class Tiled2dMapVectorLayerSelectionCallbackInterface {
 
     abstract fun didClickBackgroundConfirmed(coord: io.openmobilemaps.mapscore.shared.map.coordinates.Coord): Boolean
 
-    private class CppProxy : Tiled2dMapVectorLayerSelectionCallbackInterface {
+    public class CppProxy : Tiled2dMapVectorLayerSelectionCallbackInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

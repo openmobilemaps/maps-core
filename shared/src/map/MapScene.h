@@ -21,7 +21,7 @@
 class MapScene : public MapInterface, public SceneCallbackInterface, public SchedulerGraphicsTaskCallbacks, public std::enable_shared_from_this<MapScene> {
   public:
     MapScene(std::shared_ptr<SceneInterface> scene, const MapConfig &mapConfig,
-             const std::shared_ptr<::SchedulerInterface> &scheduler, float pixelDensity);
+             const std::shared_ptr<::SchedulerInterface> &scheduler, float pixelDensity, bool is3D);
 
     virtual std::shared_ptr<::GraphicsObjectFactoryInterface> getGraphicsObjectFactory() override;
 
@@ -37,9 +37,9 @@ class MapScene : public MapInterface, public SceneCallbackInterface, public Sche
 
     virtual void setCallbackHandler(const std::shared_ptr<MapCallbackInterface> &callbackInterface) override;
 
-    virtual void setCamera(const std::shared_ptr<::MapCamera2dInterface> &camera) override;
+    virtual void setCamera(const std::shared_ptr<::MapCameraInterface> &camera) override;
 
-    virtual std::shared_ptr<::MapCamera2dInterface> getCamera() override;
+    virtual std::shared_ptr<::MapCameraInterface> getCamera() override;
 
     virtual void setTouchHandler(const std::shared_ptr<::TouchHandlerInterface> &touchHandler) override;
 
@@ -60,6 +60,8 @@ class MapScene : public MapInterface, public SceneCallbackInterface, public Sche
                                   const std::shared_ptr<LayerInterface> &below) override;
 
     virtual void removeLayer(const std::shared_ptr<::LayerInterface> &layer) override;
+
+    bool is3d() override;
 
     virtual void setViewportSize(const ::Vec2I &size) override;
 
@@ -98,7 +100,7 @@ class MapScene : public MapInterface, public SceneCallbackInterface, public Sche
 
     std::shared_ptr<SceneInterface> scene;
 
-    std::shared_ptr<MapCamera2dInterface> camera;
+    std::shared_ptr<MapCameraInterface> camera;
 
     std::recursive_mutex layersMutex;
     std::map<int, std::shared_ptr<LayerInterface>> layers;
@@ -109,4 +111,5 @@ class MapScene : public MapInterface, public SceneCallbackInterface, public Sche
 
     bool isResumed = false;
     std::atomic_flag isInvalidated = ATOMIC_FLAG_INIT;
+    bool mapIs3d = false;
 };

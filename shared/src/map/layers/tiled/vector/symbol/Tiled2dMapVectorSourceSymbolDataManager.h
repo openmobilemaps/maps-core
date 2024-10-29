@@ -72,7 +72,7 @@ public:
 
     virtual void setAlpha(float alpha) override;
 
-    void onVectorTilesUpdated(const std::string &sourceName, std::unordered_set<Tiled2dMapVectorTileInfo> currentTileInfos) override;
+    void onVectorTilesUpdated(const std::string &sourceName, VectorSet<Tiled2dMapVectorTileInfo> currentTileInfos) override;
 
     void updateLayerDescriptions(std::vector<Tiled2dMapVectorLayerUpdateInformation> layerUpdates) override;
 
@@ -156,4 +156,5 @@ private:
 #else
     int32_t maxNumFeaturesPerGroup = std::numeric_limits<int32_t>().max();
 #endif
+            VectorSet<Tiled2dMapVectorTileInfo> latestTileInfos;
 };

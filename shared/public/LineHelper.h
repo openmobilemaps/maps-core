@@ -12,6 +12,7 @@
 
 #include "CoordinateConversionHelperInterface.h"
 #include "LineInfoInterface.h"
+#include <cmath>
 
 class LineHelper {
   public:
@@ -44,6 +45,33 @@ class LineHelper {
         }
         return false;
     }
+
+    static std::vector<Coord> subdividePolyline(const std::vector<Coord>& polyline, double maxSegmentLength) {
+        std::vector<Coord> newPolyline;
+        newPolyline.push_back(polyline[0]);
+
+        for (size_t i = 1; i < polyline.size(); ++i) {
+            const Coord start = newPolyline.back();
+            const Coord& end = polyline[i];
+
+            double segmentLength = distanceTo(start, end);
+
+            if (segmentLength > maxSegmentLength) {
+                // Calculate number of divisions needed
+                int numDivisions = static_cast<int>(std::ceil(segmentLength / maxSegmentLength));
+
+                for (int j = 1; j <= numDivisions; ++j) {
+                    double t = static_cast<double>(j) / numDivisions;
+                    newPolyline.push_back(interpolate(start, end, t));
+                }
+            } else {
+                newPolyline.push_back(end);
+            }
+        }
+
+        return newPolyline;
+    }
+
 
 
 private:
@@ -89,5 +117,20 @@ private:
         }
 
         return (dx * dx + dy * dy);
+    }
+
+    // Compute Euclidean distance to another Coord
+    static double distanceTo(const Coord& a, const Coord& b) {
+        return std::sqrt((a.x - b.x) * (a.x - b.x) +
+                         (a.y - b.y) * (a.y - b.y) +
+                         (a.z - b.z) * (a.z - b.z));
+    }
+
+    // Linear interpolation between this Coord and another Coord
+    static Coord interpolate(const Coord& start, const Coord& end, double t) {
+        return Coord(start.systemIdentifier,
+                     start.x + (end.x - start.x) * t,
+                     start.y + (end.y - start.y) * t,
+                     start.z + (end.z - start.z) * t);
     }
 };

@@ -9,6 +9,7 @@
 #import "MCLayerInterface+Private.h"
 #import "MCPolygonInfo+Private.h"
 #import "MCPolygonLayerCallbackInterface+Private.h"
+#import "MCVec3D+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -40,9 +41,11 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)setPolygons:(nonnull NSArray<MCPolygonInfo *> *)polygons {
+- (void)setPolygons:(nonnull NSArray<MCPolygonInfo *> *)polygons
+             origin:(nonnull MCVec3D *)origin {
     try {
-        _cppRefHandle.get()->setPolygons(::djinni::List<::djinni_generated::PolygonInfo>::toCpp(polygons));
+        _cppRefHandle.get()->setPolygons(::djinni::List<::djinni_generated::PolygonInfo>::toCpp(polygons),
+                                         ::djinni_generated::Vec3D::toCpp(origin));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -99,6 +102,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 - (void)setLayerClickable:(BOOL)isLayerClickable {
     try {
         _cppRefHandle.get()->setLayerClickable(::djinni::Bool::toCpp(isLayerClickable));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)setRenderPassIndex:(int32_t)index {
+    try {
+        _cppRefHandle.get()->setRenderPassIndex(::djinni::I32::toCpp(index));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

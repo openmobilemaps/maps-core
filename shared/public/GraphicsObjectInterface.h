@@ -5,6 +5,7 @@
 
 #include "RenderPassConfig.h"
 #include "RenderingContextInterface.h"
+#include "Vec3D.h"
 #include <cstdint>
 #include <memory>
 #include <string>
@@ -31,5 +32,5 @@ public:
     /** Render the graphics object; ensure calling on graphics thread */
     virtual void setDebugLabel(const std::string & label) = 0;
 
-    virtual void render(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & context, const ::RenderPassConfig & renderPass, int64_t mvpMatrix, bool isMasked, double screenPixelAsRealMeterFactor) = 0;
+    virtual void render(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & context, const ::RenderPassConfig & renderPass, int64_t vpMatrix, int64_t mMatrix, const ::Vec3D & origin, bool isMasked, double screenPixelAsRealMeterFactor) = 0;
 };

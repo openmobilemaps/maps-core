@@ -12,7 +12,7 @@
 #import "MCIndexedLayerInterface+Private.h"
 #import "MCLayerInterface+Private.h"
 #import "MCMapCallbackInterface+Private.h"
-#import "MCMapCamera2dInterface+Private.h"
+#import "MCMapCameraInterface+Private.h"
 #import "MCMapConfig+Private.h"
 #import "MCMapReadyCallbackInterface+Private.h"
 #import "MCRectCoord+Private.h"
@@ -50,23 +50,29 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
                    renderingContext:(nullable id<MCRenderingContextInterface>)renderingContext
                           mapConfig:(nonnull MCMapConfig *)mapConfig
                           scheduler:(nullable id<MCSchedulerInterface>)scheduler
-                       pixelDensity:(float)pixelDensity {
+                       pixelDensity:(float)pixelDensity
+                               is3D:(BOOL)is3D {
     try {
         auto objcpp_result_ = ::MapInterface::create(::djinni_generated::GraphicsObjectFactoryInterface::toCpp(graphicsFactory),
                                                      ::djinni_generated::ShaderFactoryInterface::toCpp(shaderFactory),
                                                      ::djinni_generated::RenderingContextInterface::toCpp(renderingContext),
                                                      ::djinni_generated::MapConfig::toCpp(mapConfig),
                                                      ::djinni_generated::SchedulerInterface::toCpp(scheduler),
-                                                     ::djinni::F32::toCpp(pixelDensity));
+                                                     ::djinni::F32::toCpp(pixelDensity),
+                                                     ::djinni::Bool::toCpp(is3D));
         return ::djinni_generated::MapInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
 + (nullable MCMapInterface *)createWithOpenGl:(nonnull MCMapConfig *)mapConfig
-                                 pixelDensity:(float)pixelDensity {
+                                    scheduler:(nullable id<MCSchedulerInterface>)scheduler
+                                 pixelDensity:(float)pixelDensity
+                                         is3D:(BOOL)is3D {
     try {
         auto objcpp_result_ = ::MapInterface::createWithOpenGl(::djinni_generated::MapConfig::toCpp(mapConfig),
-                                                               ::djinni::F32::toCpp(pixelDensity));
+                                                               ::djinni_generated::SchedulerInterface::toCpp(scheduler),
+                                                               ::djinni::F32::toCpp(pixelDensity),
+                                                               ::djinni::Bool::toCpp(is3D));
         return ::djinni_generated::MapInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
@@ -119,16 +125,16 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)setCamera:(nullable MCMapCamera2dInterface *)camera {
+- (void)setCamera:(nullable MCMapCameraInterface *)camera {
     try {
-        _cppRefHandle.get()->setCamera(::djinni_generated::MapCamera2dInterface::toCpp(camera));
+        _cppRefHandle.get()->setCamera(::djinni_generated::MapCameraInterface::toCpp(camera));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (nullable MCMapCamera2dInterface *)getCamera {
+- (nullable MCMapCameraInterface *)getCamera {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->getCamera();
-        return ::djinni_generated::MapCamera2dInterface::fromCpp(objcpp_result_);
+        return ::djinni_generated::MapCameraInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -204,6 +210,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 - (void)setBackgroundColor:(nonnull MCColor *)color {
     try {
         _cppRefHandle.get()->setBackgroundColor(::djinni_generated::Color::toCpp(color));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (BOOL)is3d {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->is3d();
+        return ::djinni::Bool::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

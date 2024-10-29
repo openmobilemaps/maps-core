@@ -12,7 +12,7 @@ import Foundation
 import MapCoreSharedModule
 import Metal
 
-class StretchInstancedShader: BaseShader {
+class StretchInstancedShader: BaseShader, @unchecked Sendable {
     private let shader: PipelineType
 
     init(shader: PipelineType = .stretchInstancedShader) {

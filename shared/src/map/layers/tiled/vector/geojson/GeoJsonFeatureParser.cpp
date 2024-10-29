@@ -40,3 +40,14 @@ std::optional<std::vector<GeoJsonPoint>> GeoJsonFeatureParser::parseWithPointGeo
         return std::nullopt;
     }
 }
+
+
+std::optional<std::vector<GeoJsonLine>> GeoJsonFeatureParser::parseWithLineGeometry(const std::string & geoJson) {
+    try {
+        const auto& json = nlohmann::json::parse(geoJson);
+        return GeoJsonParser::getLinesWithProperties(json);
+    }
+    catch (nlohmann::json::parse_error &ex) {
+        return std::nullopt;
+    }
+}

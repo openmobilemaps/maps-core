@@ -9,6 +9,7 @@
 #include <string>
 #include <vector>
 
+struct GeoJsonLine;
 struct GeoJsonPoint;
 
 class GeoJsonFeatureParserInterface {
@@ -20,4 +21,6 @@ public:
     virtual std::optional<std::vector<::VectorLayerFeatureInfo>> parse(const std::string & geoJson) = 0;
 
     virtual std::optional<std::vector<GeoJsonPoint>> parseWithPointGeometry(const std::string & geoJson) = 0;
+
+    virtual std::optional<std::vector<GeoJsonLine>> parseWithLineGeometry(const std::string & geoJson) = 0;
 };

@@ -1,5 +1,12 @@
 # Changelog for Open Mobile Maps
 
+## Version 3.0.0
+- Introduced 3D globe rendering with support for most established layers and features and a custom camera and configuration options
+- Massively improved the spatial precision of the map
+- Multiple other improvements and bugfixes
+- Introduced reverse geocoding with closest feature detection.
+- Exposed Mapview in SwiftUI
+
 ## Version 2.6.2
 -  Fixes iOS fixes text halo alpha multiplication
 

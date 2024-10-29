@@ -10,29 +10,47 @@ abstract class ShaderFactoryInterface {
 
     abstract fun createAlphaShader(): AlphaShaderInterface
 
+    abstract fun createUnitSphereAlphaShader(): AlphaShaderInterface
+
     abstract fun createAlphaInstancedShader(): AlphaInstancedShaderInterface
 
+    abstract fun createUnitSphereAlphaInstancedShader(): AlphaInstancedShaderInterface
+
     abstract fun createLineGroupShader(): LineGroupShaderInterface
+
+    abstract fun createUnitSphereLineGroupShader(): LineGroupShaderInterface
+
+    abstract fun createUnitSphereColorShader(): ColorShaderInterface
 
     abstract fun createColorShader(): ColorShaderInterface
 
     abstract fun createColorCircleShader(): ColorCircleShaderInterface
 
-    abstract fun createPolygonGroupShader(isStriped: Boolean): PolygonGroupShaderInterface
+    abstract fun createUnitSphereColorCircleShader(): ColorCircleShaderInterface
 
-    abstract fun createPolygonPatternGroupShader(fadeInPattern: Boolean): PolygonPatternGroupShaderInterface
+    abstract fun createPolygonGroupShader(isStriped: Boolean, unitSphere: Boolean): PolygonGroupShaderInterface
+
+    abstract fun createPolygonPatternGroupShader(fadeInPattern: Boolean, unitSphere: Boolean): PolygonPatternGroupShaderInterface
 
     abstract fun createTextShader(): TextShaderInterface
 
     abstract fun createTextInstancedShader(): TextInstancedShaderInterface
 
+    abstract fun createUnitSphereTextInstancedShader(): TextInstancedShaderInterface
+
     abstract fun createRasterShader(): RasterShaderInterface
+
+    abstract fun createUnitSphereRasterShader(): RasterShaderInterface
 
     abstract fun createStretchShader(): StretchShaderInterface
 
-    abstract fun createStretchInstancedShader(): StretchInstancedShaderInterface
+    abstract fun createStretchInstancedShader(unitSphere: Boolean): StretchInstancedShaderInterface
 
-    private class CppProxy : ShaderFactoryInterface {
+    abstract fun createIcosahedronColorShader(): ColorShaderInterface
+
+    abstract fun createSphereEffectShader(): SphereEffectShaderInterface
+
+    public class CppProxy : ShaderFactoryInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 
@@ -53,17 +71,41 @@ abstract class ShaderFactoryInterface {
         }
         private external fun native_createAlphaShader(_nativeRef: Long): AlphaShaderInterface
 
+        override fun createUnitSphereAlphaShader(): AlphaShaderInterface {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_createUnitSphereAlphaShader(this.nativeRef)
+        }
+        private external fun native_createUnitSphereAlphaShader(_nativeRef: Long): AlphaShaderInterface
+
         override fun createAlphaInstancedShader(): AlphaInstancedShaderInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             return native_createAlphaInstancedShader(this.nativeRef)
         }
         private external fun native_createAlphaInstancedShader(_nativeRef: Long): AlphaInstancedShaderInterface
 
+        override fun createUnitSphereAlphaInstancedShader(): AlphaInstancedShaderInterface {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_createUnitSphereAlphaInstancedShader(this.nativeRef)
+        }
+        private external fun native_createUnitSphereAlphaInstancedShader(_nativeRef: Long): AlphaInstancedShaderInterface
+
         override fun createLineGroupShader(): LineGroupShaderInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             return native_createLineGroupShader(this.nativeRef)
         }
         private external fun native_createLineGroupShader(_nativeRef: Long): LineGroupShaderInterface
+
+        override fun createUnitSphereLineGroupShader(): LineGroupShaderInterface {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_createUnitSphereLineGroupShader(this.nativeRef)
+        }
+        private external fun native_createUnitSphereLineGroupShader(_nativeRef: Long): LineGroupShaderInterface
+
+        override fun createUnitSphereColorShader(): ColorShaderInterface {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_createUnitSphereColorShader(this.nativeRef)
+        }
+        private external fun native_createUnitSphereColorShader(_nativeRef: Long): ColorShaderInterface
 
         override fun createColorShader(): ColorShaderInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
@@ -77,17 +119,23 @@ abstract class ShaderFactoryInterface {
         }
         private external fun native_createColorCircleShader(_nativeRef: Long): ColorCircleShaderInterface
 
-        override fun createPolygonGroupShader(isStriped: Boolean): PolygonGroupShaderInterface {
+        override fun createUnitSphereColorCircleShader(): ColorCircleShaderInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            return native_createPolygonGroupShader(this.nativeRef, isStriped)
+            return native_createUnitSphereColorCircleShader(this.nativeRef)
         }
-        private external fun native_createPolygonGroupShader(_nativeRef: Long, isStriped: Boolean): PolygonGroupShaderInterface
+        private external fun native_createUnitSphereColorCircleShader(_nativeRef: Long): ColorCircleShaderInterface
 
-        override fun createPolygonPatternGroupShader(fadeInPattern: Boolean): PolygonPatternGroupShaderInterface {
+        override fun createPolygonGroupShader(isStriped: Boolean, unitSphere: Boolean): PolygonGroupShaderInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            return native_createPolygonPatternGroupShader(this.nativeRef, fadeInPattern)
+            return native_createPolygonGroupShader(this.nativeRef, isStriped, unitSphere)
         }
-        private external fun native_createPolygonPatternGroupShader(_nativeRef: Long, fadeInPattern: Boolean): PolygonPatternGroupShaderInterface
+        private external fun native_createPolygonGroupShader(_nativeRef: Long, isStriped: Boolean, unitSphere: Boolean): PolygonGroupShaderInterface
+
+        override fun createPolygonPatternGroupShader(fadeInPattern: Boolean, unitSphere: Boolean): PolygonPatternGroupShaderInterface {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_createPolygonPatternGroupShader(this.nativeRef, fadeInPattern, unitSphere)
+        }
+        private external fun native_createPolygonPatternGroupShader(_nativeRef: Long, fadeInPattern: Boolean, unitSphere: Boolean): PolygonPatternGroupShaderInterface
 
         override fun createTextShader(): TextShaderInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
@@ -101,11 +149,23 @@ abstract class ShaderFactoryInterface {
         }
         private external fun native_createTextInstancedShader(_nativeRef: Long): TextInstancedShaderInterface
 
+        override fun createUnitSphereTextInstancedShader(): TextInstancedShaderInterface {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_createUnitSphereTextInstancedShader(this.nativeRef)
+        }
+        private external fun native_createUnitSphereTextInstancedShader(_nativeRef: Long): TextInstancedShaderInterface
+
         override fun createRasterShader(): RasterShaderInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             return native_createRasterShader(this.nativeRef)
         }
         private external fun native_createRasterShader(_nativeRef: Long): RasterShaderInterface
+
+        override fun createUnitSphereRasterShader(): RasterShaderInterface {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_createUnitSphereRasterShader(this.nativeRef)
+        }
+        private external fun native_createUnitSphereRasterShader(_nativeRef: Long): RasterShaderInterface
 
         override fun createStretchShader(): StretchShaderInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
@@ -113,10 +173,22 @@ abstract class ShaderFactoryInterface {
         }
         private external fun native_createStretchShader(_nativeRef: Long): StretchShaderInterface
 
-        override fun createStretchInstancedShader(): StretchInstancedShaderInterface {
+        override fun createStretchInstancedShader(unitSphere: Boolean): StretchInstancedShaderInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            return native_createStretchInstancedShader(this.nativeRef)
+            return native_createStretchInstancedShader(this.nativeRef, unitSphere)
         }
-        private external fun native_createStretchInstancedShader(_nativeRef: Long): StretchInstancedShaderInterface
+        private external fun native_createStretchInstancedShader(_nativeRef: Long, unitSphere: Boolean): StretchInstancedShaderInterface
+
+        override fun createIcosahedronColorShader(): ColorShaderInterface {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_createIcosahedronColorShader(this.nativeRef)
+        }
+        private external fun native_createIcosahedronColorShader(_nativeRef: Long): ColorShaderInterface
+
+        override fun createSphereEffectShader(): SphereEffectShaderInterface {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_createSphereEffectShader(this.nativeRef)
+        }
+        private external fun native_createSphereEffectShader(_nativeRef: Long): SphereEffectShaderInterface
     }
 }

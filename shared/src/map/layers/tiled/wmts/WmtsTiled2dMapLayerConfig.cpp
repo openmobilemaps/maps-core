@@ -12,6 +12,7 @@
 
 #include "Tiled2dMapVectorSettings.h"
 #include "Logger.h"
+#include <cstring>
 
 WmtsTiled2dMapLayerConfig::WmtsTiled2dMapLayerConfig(const WmtsLayerDescription &description,
                                                      const std::vector<Tiled2dMapZoomLevelInfo> &zoomLevelInfo,

@@ -13,15 +13,17 @@ import MapCoreSharedModule
 import Metal
 import UIKit
 
-class PolygonPatternGroupShader: BaseShader {
+class PolygonPatternGroupShader: BaseShader, @unchecked Sendable {
     // MARK: - Variables
 
     let fadeInPattern: Bool
+    let isUnitSphere : Bool
 
     // MARK: - Init
 
-    init(fadeInPattern: Bool) {
+    init(fadeInPattern: Bool,  isUnitSphere: Bool = false) {
         self.fadeInPattern = fadeInPattern
+        self.isUnitSphere = isUnitSphere
         super.init()
     }
 

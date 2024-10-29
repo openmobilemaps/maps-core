@@ -40,10 +40,11 @@
 #include "SymbolZOrder.h"
 #include "ValueVariant.h"
 #include "Tiled2dMapVectorStateManager.h"
-#include "Logger.h"
 #include "ValueKeys.h"
-#include <mutex>
+#include "VectorSet.h"
 #include <iomanip>
+#include <memory>
+#include <utility>
 
 
 namespace std {
@@ -267,25 +268,25 @@ public:
 
 class UsedKeysCollection {
 public:
-    std::unordered_set<std::string> usedKeys;
-    std::unordered_set<std::string> featureStateKeys;
-    std::unordered_set<std::string> globalStateKeys;
+    VectorSet<std::string> usedKeys;
+    VectorSet<std::string> featureStateKeys;
+    VectorSet<std::string> globalStateKeys;
 
     UsedKeysCollection() {};
 
-    UsedKeysCollection(const std::unordered_set<std::string> &usedKeys) : usedKeys(usedKeys) {};
+    UsedKeysCollection(const VectorSet<std::string> &usedKeys) : usedKeys(usedKeys) {};
 
-    UsedKeysCollection(const std::unordered_set<std::string> &usedKeys,
-                       const std::unordered_set<std::string> &featureStateKeys,
-                       const std::unordered_set<std::string> &globalStateKeys)
+    UsedKeysCollection(const VectorSet<std::string> &usedKeys,
+                       const VectorSet<std::string> &featureStateKeys,
+                       const VectorSet<std::string> &globalStateKeys)
             : usedKeys(usedKeys),
               featureStateKeys(featureStateKeys),
               globalStateKeys(globalStateKeys) {};
 
     void includeOther(const UsedKeysCollection &other) {
-        usedKeys.insert(other.usedKeys.begin(), other.usedKeys.end());
-        featureStateKeys.insert(other.featureStateKeys.begin(), other.featureStateKeys.end());
-        globalStateKeys.insert(other.globalStateKeys.begin(), other.globalStateKeys.end());
+        usedKeys.insertSet(other.usedKeys);
+        featureStateKeys.insertSet(other.featureStateKeys);
+        globalStateKeys.insertSet(other.globalStateKeys);
     };
 
     bool isStateDependant() const {
@@ -293,31 +294,21 @@ public:
     };
 
     bool containsUsedKey(const std::string &key) const {
-        return usedKeys.find(key) != usedKeys.end();
+        return usedKeys.contains(key);
     }
 
     bool empty() const {
         return usedKeys.empty() && featureStateKeys.empty() && globalStateKeys.empty();
     }
 
-    bool covers(const UsedKeysCollection &other) {
-        for (const auto &keyOther : other.usedKeys) {
-            if (usedKeys.find(keyOther) == usedKeys.end()) {
-                return false;
-            }
-        }
-        for (const auto &keyOther : other.featureStateKeys) {
-            if (featureStateKeys.find(keyOther) == featureStateKeys.end()) {
-                return false;
-            }
-        }
-        for (const auto &keyOther : other.globalStateKeys) {
-            if (globalStateKeys.find(keyOther) == globalStateKeys.end()) {
-                return false;
-            }
-        }
+    size_t size() const {
+        return usedKeys.size() + featureStateKeys.size() + globalStateKeys.size();
+    }
 
-        return true;
+    bool covers(const UsedKeysCollection &other) {
+        return usedKeys.covers(other.usedKeys) &&
+               featureStateKeys.covers(other.featureStateKeys) &&
+               globalStateKeys.covers(other.globalStateKeys);
     }
 
     size_t getHash(const EvaluationContext &context) const {
@@ -329,10 +320,12 @@ public:
                 }
             }
         }
+
         if (context.featureStateManager) {
             if (context.feature) {
+                const auto &state = context.featureStateManager->getFeatureState(context.feature->identifier);
+
                 for (const auto &featureStateKey: featureStateKeys) {
-                    const auto &state = context.featureStateManager->getFeatureState(context.feature->identifier);
                     const auto &value = state.find(featureStateKey);
                     if (value != state.end()) {
                         std::hash_combine(hash, std::hash<ValueVariant>{}(value->second));
@@ -344,6 +337,7 @@ public:
                 std::hash_combine(hash, std::hash<ValueVariant>{}(value));
             }
         }
+        
         return hash;
     };
 };
@@ -403,12 +397,6 @@ public:
         }
 
         return alternative;
-    }
-
-    template<>
-    Vec2F evaluateOr(const EvaluationContext &context, const Vec2F &alternative) const {
-        auto const &value = evaluateOr(context, std::vector<float>{ alternative.x, alternative.y });
-        return Vec2F(value[0], value[1]);
     }
 
     std::optional<::Anchor> anchorFromString(const std::string &value) const {
@@ -509,76 +497,6 @@ public:
         return std::nullopt;
     }
 
-    template<>
-    BlendMode evaluateOr(const EvaluationContext &context, const BlendMode &alternative) const {
-        auto const &value = evaluateOr(context, std::string(""));
-        auto blendMode = blendModeFromString(value);
-        if (blendMode) {
-            return *blendMode;
-        }
-        return alternative;
-    }
-
-    template<>
-    SymbolZOrder evaluateOr(const EvaluationContext &context, const SymbolZOrder &alternative) const {
-        auto const &value = evaluateOr(context, std::string(""));
-        auto symbolZOrder = symbolZOrderFromString(value);
-        if (symbolZOrder) {
-            return *symbolZOrder;
-        }
-        return alternative;
-    }
-
-    template<>
-    Anchor evaluateOr(const EvaluationContext &context, const Anchor &alternative) const {
-        auto const &value = evaluateOr(context, std::string(""));
-        auto anchor = anchorFromString(value);
-        if (anchor) {
-            return *anchor;
-        }
-        return alternative;
-    }
-
-    template<>
-    SymbolAlignment evaluateOr(const EvaluationContext &context, const SymbolAlignment &alternative) const {
-        auto const &value = evaluateOr(context, std::string(""));
-        auto alignment = alignmentFromString(value);
-        if (alignment) {
-            return *alignment;
-        }
-        return alternative;
-    }
-
-    template<>
-    IconTextFit evaluateOr(const EvaluationContext &context, const IconTextFit &alternative) const {
-        auto const &value = evaluateOr(context, std::string(""));
-        auto textFit = iconTextFitFromString(value);
-        if (textFit) {
-            return *textFit;
-        }
-        return alternative;
-    }
-
-    template<>
-    TextJustify evaluateOr(const EvaluationContext &context, const TextJustify &alternative) const {
-        auto const &value = evaluateOr(context, std::string(""));
-        auto anchor = justifyFromString(value);
-        if (anchor) {
-            return *anchor;
-        }
-        return alternative;
-    }
-
-    template<>
-    TextSymbolPlacement evaluateOr(const EvaluationContext &context, const TextSymbolPlacement &alternative) const {
-        auto const &value = evaluateOr(context, std::string(""));
-        auto placement = textSymbolPlacementFromString(value);
-        if (placement) {
-            return *placement;
-        }
-        return alternative;
-    }
-
     std::optional<LineCapType> capTypeFromString(const std::string &value) const {
         if (value == "butt") {
             return LineCapType::BUTT;
@@ -593,16 +511,6 @@ public:
         return std::nullopt;
     }
 
-    template<>
-    LineCapType evaluateOr(const EvaluationContext &context, const LineCapType &alternative) const {
-        auto const &value = evaluateOr(context, std::string(""));
-        auto type = capTypeFromString(value);
-        if (type) {
-            return *type;
-        }
-        return alternative;
-    }
-
     std::optional<TextTransform> textTransformFromString(const std::string &value) const {
         if (value == "none") {
             return TextTransform::NONE;
@@ -611,69 +519,172 @@ public:
         }
         return std::nullopt;
     }
-
-    template<>
-    TextTransform evaluateOr(const EvaluationContext &context, const TextTransform &alternative) const {
-        auto const &value = evaluateOr(context, std::string(""));
-        auto type = textTransformFromString(value);
-        if (type) {
-            return *type;
-        }
-        return alternative;
+    
+    virtual bool isGettingPropertyValues() {
+        return false;
     }
-
-    template<>
-    std::vector<Anchor> evaluateOr(const EvaluationContext &context, const std::vector<Anchor> &alternative) const {
-        auto const &values = evaluateOr(context, std::vector<std::string>());
-        std::vector<Anchor> result;
-        for (auto const &value: values) {
-            auto anchor = anchorFromString(value);
-            if (anchor) {
-                result.push_back(*anchor);
-            }
-        }
-        if (!result.empty()) {
-            return result;
-        }
-        return alternative;
-    }
-
 };
+
+// XXX(matzf): moved out of class scope. Template specialization in class scope _should_ be allowed in C++ since Defect Report CWG 727. But GCC still rejects it (https://gcc.gnu.org/bugzilla/show_bug.cgi?id=85282).
+template<>
+inline Vec2F Value::evaluateOr(const EvaluationContext &context, const Vec2F &alternative) const {
+    auto const &value = evaluateOr(context, std::vector<float>{ alternative.x, alternative.y });
+    return Vec2F(value[0], value[1]);
+}
+
+template<>
+inline BlendMode Value::evaluateOr(const EvaluationContext &context, const BlendMode &alternative) const {
+    auto const &value = evaluateOr(context, std::string(""));
+    auto blendMode = blendModeFromString(value);
+    if (blendMode) {
+        return *blendMode;
+    }
+    return alternative;
+}
+
+template<>
+inline SymbolZOrder Value::evaluateOr(const EvaluationContext &context, const SymbolZOrder &alternative) const {
+    auto const &value = evaluateOr(context, std::string(""));
+    auto symbolZOrder = symbolZOrderFromString(value);
+    if (symbolZOrder) {
+        return *symbolZOrder;
+    }
+    return alternative;
+}
+
+template<>
+inline Anchor Value::evaluateOr(const EvaluationContext &context, const Anchor &alternative) const {
+    auto const &value = evaluateOr(context, std::string(""));
+    auto anchor = anchorFromString(value);
+    if (anchor) {
+        return *anchor;
+    }
+    return alternative;
+}
+
+template<>
+inline SymbolAlignment Value::evaluateOr(const EvaluationContext &context, const SymbolAlignment &alternative) const {
+    auto const &value = evaluateOr(context, std::string(""));
+    auto alignment = alignmentFromString(value);
+    if (alignment) {
+        return *alignment;
+    }
+    return alternative;
+}
+
+template<>
+inline IconTextFit Value::evaluateOr(const EvaluationContext &context, const IconTextFit &alternative) const {
+    auto const &value = evaluateOr(context, std::string(""));
+    auto textFit = iconTextFitFromString(value);
+    if (textFit) {
+        return *textFit;
+    }
+    return alternative;
+}
+
+template<>
+inline TextJustify Value::evaluateOr(const EvaluationContext &context, const TextJustify &alternative) const {
+    auto const &value = evaluateOr(context, std::string(""));
+    auto anchor = justifyFromString(value);
+    if (anchor) {
+        return *anchor;
+    }
+    return alternative;
+}
+
+template<>
+inline TextSymbolPlacement Value::evaluateOr(const EvaluationContext &context, const TextSymbolPlacement &alternative) const {
+    auto const &value = evaluateOr(context, std::string(""));
+    auto placement = textSymbolPlacementFromString(value);
+    if (placement) {
+        return *placement;
+    }
+    return alternative;
+}
+
+
+template<>
+inline LineCapType Value::evaluateOr(const EvaluationContext &context, const LineCapType &alternative) const {
+    auto const &value = evaluateOr(context, std::string(""));
+    auto type = capTypeFromString(value);
+    if (type) {
+        return *type;
+    }
+    return alternative;
+}
+
+template<>
+inline TextTransform Value::evaluateOr(const EvaluationContext &context, const TextTransform &alternative) const {
+    auto const &value = evaluateOr(context, std::string(""));
+    auto type = textTransformFromString(value);
+    if (type) {
+        return *type;
+    }
+    return alternative;
+}
+
+template<>
+inline std::vector<Anchor> Value::evaluateOr(const EvaluationContext &context, const std::vector<Anchor> &alternative) const {
+    auto const &values = evaluateOr(context, std::vector<std::string>());
+    std::vector<Anchor> result;
+    for (auto const &value: values) {
+        auto anchor = anchorFromString(value);
+        if (anchor) {
+            result.push_back(*anchor);
+        }
+    }
+    if (!result.empty()) {
+        return result;
+    }
+    return alternative;
+}
+
 
 template<class ResultType>
 class ValueEvaluator {
 public:
-    inline ResultType getResult(const std::shared_ptr<Value> &value, const EvaluationContext &context, const ResultType &defaultValue) {
-        std::lock_guard<std::mutex> lock(mutex);
+    ValueEvaluator(const std::shared_ptr<Value> &value) : value(value) {
+        if(!value) {
+            return;
+        }
+
+        usedKeysCollection = value->getUsedKeys();
+
+        isStatic = usedKeysCollection.empty();
+        isZoomDependent = usedKeysCollection.usedKeys.contains("zoom");
+        isStateDependant = usedKeysCollection.isStateDependant();
+    }
+
+    ValueEvaluator(const ValueEvaluator& evaluator) : ValueEvaluator(evaluator.getValue()) {};
+
+    std::shared_ptr<Value> getValue() const {
+        return value;
+    }
+
+    inline ResultType getResult(const EvaluationContext &context, const ResultType &defaultValue) {
         if (!value) {
             return defaultValue;
         }
-        if (lastValuePtr != value.get()) {
-            lastResults.clear();
-            staticValue = std::nullopt;
-            const auto &usedKeysCollection = value->getUsedKeys();
-            isStatic = usedKeysCollection.empty();
-            if (isStatic) {
-                staticValue = value->evaluateOr(context, defaultValue);
-            } else {
-                isZoomDependent = usedKeysCollection.usedKeys.count("zoom") != 0;
-                isStateDependant = usedKeysCollection.isStateDependant();
-            }
-            lastValuePtr = value.get();
-        }
 
         if (isStatic) {
+            if(!staticValue) {
+                staticValue = value->evaluateOr(context, defaultValue);
+            }
+
             return *staticValue;
+        }
+
+        if(value->isGettingPropertyValues()) {
+            return value->evaluateOr(context, defaultValue);
         }
 
         if (isZoomDependent || (isStateDependant && !context.featureStateManager->empty())) {
             return value->evaluateOr(context, defaultValue);
         }
 
-        auto identifier = context.feature->identifier;
-        if(isStateDependant && !context.featureStateManager->empty()) {
-            identifier = (context.feature->identifier << 32) | (uint64_t)(context.featureStateManager->getCurrentState());
-        }
+        int64_t identifier = usedKeysCollection.getHash(context);
+
+        std::lock_guard<std::mutex> lock(mutex);
 
         const auto lastResultIt = lastResults.find(identifier);
         if (lastResultIt != lastResults.end()) {
@@ -682,18 +693,21 @@ public:
 
         const auto result = value->evaluateOr(context, defaultValue);
         lastResults.insert({identifier, result});
+
         return result;
     }
 
 private:
-    std::unordered_map<uint64_t, ResultType> lastResults;
     std::mutex mutex;
-
+    std::shared_ptr<Value> value;
+    UsedKeysCollection usedKeysCollection;
     std::optional<ResultType> staticValue;
+
+    bool isStatic = false;
     bool isZoomDependent = false;
     bool isStateDependant = false;
-    bool isStatic = false;
-    void* lastValuePtr = nullptr;
+
+    std::unordered_map<uint64_t, ResultType> lastResults;
 };
 
 class GetPropertyValue : public Value {
@@ -722,6 +736,11 @@ public:
         }
         return false;
     };
+
+    bool isGettingPropertyValues() override {
+        return true;
+    }
+
 private:
     const std::string key;
 };
@@ -823,7 +842,7 @@ public:
     UsedKeysCollection getUsedKeys() const override {
         if (std::holds_alternative<std::string>(value)) {
             std::string res = std::get<std::string>(value);
-            std::unordered_set<std::string> usedKeys = { res };
+            VectorSet<std::string> usedKeys = { res };
 
             auto begin = res.find("{");
             auto end = res.find("}", begin);
@@ -898,6 +917,10 @@ public:
         }
 
     };
+
+    bool isGettingPropertyValues() override {
+        return true;
+    }
 
     bool isEqual(const std::shared_ptr<Value> &other) const override {
         if (auto casted = std::dynamic_pointer_cast<StaticValue>(other)) {
@@ -1554,10 +1577,10 @@ public:
                     return !val.empty();
                 },
                 [](double val){
-                    return val != 0.0 && !isnan(val);
+                    return val != 0.0 && !std::isnan(val);
                 },
                 [](int64_t val){
-                    return val != 0 && !isnan(val);
+                    return val != 0 && !std::isnan(val);
                 },
                 [](bool val){
                     return val;
@@ -1846,6 +1869,12 @@ public:
                 return std::make_unique<LogOpValue>(logOpType, lhs->clone(), rhs->clone());
             case LogOpType::NOT:
                 return std::make_unique<LogOpValue>(logOpType, lhs->clone());
+            default:
+#if __cplusplus >= 202302L
+                std::unreachable();
+#else
+                __builtin_unreachable();
+#endif
         }
     }
 
@@ -1871,6 +1900,12 @@ public:
                 return lhs->evaluateOr(context, false) || (rhs && rhs->evaluateOr(context, false));
             case LogOpType::NOT:
                 return !lhs->evaluateOr(context, false);
+            default:
+#if __cplusplus >= 202302L
+                std::unreachable();
+#else
+                __builtin_unreachable();
+#endif
         }
     };
 
@@ -1903,10 +1938,10 @@ private:
 
 class AllValue: public Value {
 public:
-    AllValue(const std::vector<const std::shared_ptr<Value>> values) : values(values) {}
+    AllValue(const std::vector<std::shared_ptr<Value>> values) : values(values) {}
 
     std::unique_ptr<Value> clone() override {
-        std::vector<const std::shared_ptr<Value>> clonedValues;
+        std::vector<std::shared_ptr<Value>> clonedValues;
         for (const auto &value : values) {
             clonedValues.push_back(value->clone());
         }
@@ -1952,15 +1987,15 @@ public:
 
 
 private:
-    const std::vector<const std::shared_ptr<Value>> values;
+    const std::vector<std::shared_ptr<Value>> values;
 };
 
 class AnyValue: public Value {
 public:
-    AnyValue(const std::vector<const std::shared_ptr<Value>> values) : values(values) {}
+    AnyValue(const std::vector<std::shared_ptr<Value>> values) : values(values) {}
 
     std::unique_ptr<Value> clone() override {
-        std::vector<const std::shared_ptr<Value>> clonedValues;
+        std::vector<std::shared_ptr<Value>> clonedValues;
         for (const auto &value : values) {
             clonedValues.push_back(value->clone());
         }
@@ -2005,7 +2040,7 @@ public:
     }
 
 private:
-    const std::vector<const std::shared_ptr<Value>> values;
+    const std::vector<std::shared_ptr<Value>> values;
 };
 
 class PropertyCompareValue: public Value {
@@ -2393,8 +2428,10 @@ public:
                 decimalPointPos = result.length();
                 result += '.';
             }
-            int fractionDigits = (int)(result.length() - decimalPointPos - 1);
-            int zerosToAdd = minFractionDigits - fractionDigits;
+
+            size_t fractionDigits = result.length() - decimalPointPos - 1;
+            size_t zerosToAdd = minFractionDigits - fractionDigits;
+
             if (zerosToAdd > 0) {
                 result.append(zerosToAdd, '0');
             }
@@ -2472,6 +2509,12 @@ public:
                 return std::fmod(lhsValue, rhsValue);
             case MathOperation::POWER:
                 return std::pow(lhsValue,  rhsValue);
+            default:
+#if __cplusplus >= 202302L
+                std::unreachable();
+#else
+                __builtin_unreachable();
+#endif
         }
     };
 
@@ -2614,5 +2657,15 @@ public:
             return true; // All members are equal
         }
         return false; // Not the same type or nullptr
+    }
+
+    virtual bool isGettingPropertyValues() override {
+        for (const auto &value: values) {
+            if(!value->isGettingPropertyValues()) {
+                return false;
+            }
+        }
+
+        return true;
     }
 };

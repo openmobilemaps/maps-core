@@ -3,18 +3,23 @@
 
 #pragma once
 
+#include "Coord.h"
 #include "ErrorManager.h"
 #include "LayerReadyState.h"
 #include "RectCoord.h"
+#include "Vec3D.h"
 #include <cstdint>
 #include <memory>
 #include <optional>
+#include <vector>
 
 class Tiled2dMapSourceInterface {
 public:
     virtual ~Tiled2dMapSourceInterface() = default;
 
     virtual void onVisibleBoundsChanged(const ::RectCoord & visibleBounds, int32_t curT, double zoom) = 0;
+
+    virtual void onCameraChange(const std::vector<float> & viewMatrix, const std::vector<float> & projectionMatrix, const ::Vec3D & origin, float verticalFov, float horizontalFov, float width, float height, float focusPointAltitude, const ::Coord & focusPointPosition, float zoom) = 0;
 
     virtual void setMinZoomLevelIdentifier(std::optional<int32_t> value) = 0;
 

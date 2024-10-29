@@ -32,9 +32,17 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     return self;
 }
 
-- (void)onClickConfirmed:(nonnull MCPolygonInfo *)polygon {
+- (BOOL)onClickConfirmed:(nonnull MCPolygonInfo *)polygon {
     try {
-        _cppRefHandle.get()->onClickConfirmed(::djinni_generated::PolygonInfo::toCpp(polygon));
+        auto objcpp_result_ = _cppRefHandle.get()->onClickConfirmed(::djinni_generated::PolygonInfo::toCpp(polygon));
+        return ::djinni::Bool::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (BOOL)onClickUnconfirmed:(nonnull MCPolygonInfo *)polygon {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->onClickUnconfirmed(::djinni_generated::PolygonInfo::toCpp(polygon));
+        return ::djinni::Bool::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -47,10 +55,18 @@ class PolygonLayerCallbackInterface::ObjcProxy final
     friend class ::djinni_generated::PolygonLayerCallbackInterface;
 public:
     using ObjcProxyBase::ObjcProxyBase;
-    void onClickConfirmed(const ::PolygonInfo & c_polygon) override
+    bool onClickConfirmed(const ::PolygonInfo & c_polygon) override
     {
         @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() onClickConfirmed:(::djinni_generated::PolygonInfo::fromCpp(c_polygon))];
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() onClickConfirmed:(::djinni_generated::PolygonInfo::fromCpp(c_polygon))];
+            return ::djinni::Bool::toCpp(objcpp_result_);
+        }
+    }
+    bool onClickUnconfirmed(const ::PolygonInfo & c_polygon) override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() onClickUnconfirmed:(::djinni_generated::PolygonInfo::fromCpp(c_polygon))];
+            return ::djinni::Bool::toCpp(objcpp_result_);
         }
     }
 };

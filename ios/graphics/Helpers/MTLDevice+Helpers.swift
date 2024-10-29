@@ -54,7 +54,7 @@ public extension MTLBuffer? {
             case .none:
                 self = device.makeBuffer(bytes: pointer, length: length)
             case let .some(wrapped):
-                if wrapped.length == length {
+                if wrapped.length >= length {
                     wrapped.copyMemory(bytes: pointer, length: length)
                 } else {
                     self = device.makeBuffer(bytes: pointer, length: length)

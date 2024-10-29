@@ -12,7 +12,7 @@ import Foundation
 import MapCoreSharedModule
 import Metal
 
-class ClearStencilShader: BaseShader {
+class ClearStencilShader: BaseShader, @unchecked Sendable {
     lazy var clearMask: MTLDepthStencilState? = {
         let descriptor = MTLStencilDescriptor()
         descriptor.stencilCompareFunction = .always

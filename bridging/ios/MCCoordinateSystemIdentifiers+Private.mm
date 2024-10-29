@@ -65,10 +65,24 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
++ (int32_t)UnitSphere {
+    try {
+        auto objcpp_result_ = ::CoordinateSystemIdentifiers::UnitSphere();
+        return ::djinni::I32::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 + (int32_t)fromCrsIdentifier:(nonnull NSString *)identifier {
     try {
         auto objcpp_result_ = ::CoordinateSystemIdentifiers::fromCrsIdentifier(::djinni::String::toCpp(identifier));
         return ::djinni::I32::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
++ (double)unitToMeterFactor:(int32_t)coordinateSystemIdentifier {
+    try {
+        auto objcpp_result_ = ::CoordinateSystemIdentifiers::unitToMeterFactor(::djinni::I32::toCpp(coordinateSystemIdentifier));
+        return ::djinni::F64::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

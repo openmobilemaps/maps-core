@@ -11,8 +11,9 @@
 import Foundation
 import MapCoreSharedModule
 import Metal
+import simd
 
-final class Polygon2d: BaseGraphicsObject {
+final class Polygon2d: BaseGraphicsObject, @unchecked Sendable {
     private var shader: MCShaderProgramInterface
 
     private var verticesBuffer: MTLBuffer?
@@ -32,7 +33,9 @@ final class Polygon2d: BaseGraphicsObject {
     override func render(encoder: MTLRenderCommandEncoder,
                          context: RenderingContext,
                          renderPass pass: MCRenderPassConfig,
-                         mvpMatrix: Int64,
+                         vpMatrix: Int64,
+                         mMatrix: Int64,
+                         origin: MCVec3D,
                          isMasked: Bool,
                          screenPixelAsRealMeterFactor _: Double) {
         lock.lock()
@@ -41,7 +44,8 @@ final class Polygon2d: BaseGraphicsObject {
         }
 
         guard let verticesBuffer,
-              let indicesBuffer else { return }
+              let indicesBuffer
+        else { return }
 
 #if DEBUG
         encoder.pushDebugGroup(label)
@@ -75,9 +79,18 @@ final class Polygon2d: BaseGraphicsObject {
         shader.preRender(context)
 
         encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
-        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mvpMatrix)) {
+        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(vpMatrix)) {
             encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
         }
+        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mMatrix)) {
+            encoder.setVertexBytes(matrixPointer, length: 64, index: 2)
+        }
+        if let bufferPointer = originOffsetBuffer?.contents().assumingMemoryBound(to: simd_float4.self) {
+            bufferPointer.pointee.x = Float(originOffset.x - origin.x)
+            bufferPointer.pointee.y = Float(originOffset.y - origin.y)
+            bufferPointer.pointee.z = Float(originOffset.z - origin.z)
+        }
+        encoder.setVertexBuffer(originOffsetBuffer, offset: 0, index: 3)
 
         encoder.drawIndexedPrimitives(type: .triangle,
                                       indexCount: indicesCount,
@@ -106,16 +119,19 @@ final class Polygon2d: BaseGraphicsObject {
 extension Polygon2d: MCMaskingObjectInterface {
     func render(asMask context: MCRenderingContextInterface?,
                 renderPass _: MCRenderPassConfig,
-                mvpMatrix: Int64,
+                vpMatrix: Int64,
+                mMatrix: Int64,
+                origin: MCVec3D,
                 screenPixelAsRealMeterFactor _: Double) {
-        guard isReady(),
-              let context = context as? RenderingContext,
-              let encoder = context.encoder else { return }
-
+        
         lock.lock()
         defer {
             lock.unlock()
         }
+
+        guard isReady(),
+              let context = context as? RenderingContext,
+              let encoder = context.encoder else { return }
 
         guard let verticesBuffer,
               let indicesBuffer
@@ -138,9 +154,21 @@ extension Polygon2d: MCMaskingObjectInterface {
         shader.preRender(context)
 
         encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
-        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mvpMatrix)) {
+
+        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(vpMatrix)) {
             encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
         }
+
+        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mMatrix)) {
+            encoder.setVertexBytes(matrixPointer, length: 64, index: 2)
+        }
+
+        if let bufferPointer = originOffsetBuffer?.contents().assumingMemoryBound(to: simd_float4.self) {
+            bufferPointer.pointee.x = Float(originOffset.x - origin.x)
+            bufferPointer.pointee.y = Float(originOffset.y - origin.y)
+            bufferPointer.pointee.z = Float(originOffset.z - origin.z)
+        }
+        encoder.setVertexBuffer(originOffsetBuffer, offset: 0, index: 3)
 
         encoder.drawIndexedPrimitives(type: .triangle,
                                       indexCount: indicesCount,
@@ -151,7 +179,7 @@ extension Polygon2d: MCMaskingObjectInterface {
 }
 
 extension Polygon2d: MCPolygon2dInterface {
-    func setVertices(_ vertices: MCSharedBytes, indices: MCSharedBytes) {
+    func setVertices(_ vertices: MCSharedBytes, indices: MCSharedBytes, origin: MCVec3D) {
         lock.withCritical {
             self.verticesBuffer.copyOrCreate(from: vertices, device: device)
             self.indicesBuffer.copyOrCreate(from: indices, device: device)
@@ -160,6 +188,7 @@ extension Polygon2d: MCPolygon2dInterface {
             } else {
                 self.indicesCount = 0
             }
+            self.originOffset = origin
         }
     }
 

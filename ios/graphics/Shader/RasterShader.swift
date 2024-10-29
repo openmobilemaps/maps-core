@@ -32,7 +32,7 @@ struct RasterShaderStyle: Equatable {
     }
 }
 
-class RasterShader: BaseShader {
+class RasterShader: BaseShader, @unchecked Sendable {
     private var rasterStyleBuffer: MTLBuffer
     private var rasterStyleBufferContents: UnsafeMutablePointer<RasterShaderStyle>
 

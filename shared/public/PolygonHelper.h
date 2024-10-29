@@ -14,6 +14,10 @@
 #include "PolygonInfo.h"
 #include "PolygonCoord.h"
 #include "gpc.h"
+#include "Vec2F.h"
+#include "Vec2D.h"
+#include <unordered_map>
+#include <limits>
 
 class PolygonHelper {
 private:
@@ -34,6 +38,12 @@ private:
 
     static PolygonCoord coordsFromRect(const RectCoord &rect);
 
+    static void subdivision(std::vector<Vec2D> &vertices, std::vector<uint16_t> &indices, float threshold, uint16_t maxVertexCount = std::numeric_limits<uint16_t>::max());
+
 private:
     static gpc_op gpcOperationFrom(const ClippingOperation operation);
+
+    static uint16_t findOrCreateMidpoint(std::unordered_map<uint32_t, uint16_t> &midpointCache,
+                                  std::vector<Vec2D> &vertices,
+                                  uint16_t v0, uint16_t v1, uint16_t maxVertexCount);
 };

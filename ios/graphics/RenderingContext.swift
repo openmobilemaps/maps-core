@@ -14,10 +14,12 @@ import Metal
 import UIKit
 
 @objc
-public class RenderingContext: NSObject {
+public class RenderingContext: NSObject, @unchecked Sendable {
     public weak var encoder: MTLRenderCommandEncoder?
     public weak var computeEncoder: MTLComputeCommandEncoder?
     public weak var sceneView: MCMapView?
+
+    public var cullMode: MCRenderingCullMode?
 
     public lazy var mask: MTLDepthStencilState? = {
         let descriptor = MTLStencilDescriptor()
@@ -55,6 +57,10 @@ public class RenderingContext: NSObject {
         return MetalContext.current.device.makeDepthStencilState(descriptor: depthStencilDescriptor)
     }()
 
+    public var aspectRatio: Float {
+        Float(viewportSize.x) / Float(viewportSize.y)
+    }
+
     public var viewportSize: MCVec2I = .init(x: 0, y: 0)
 
     var isScissoringDirty = false
@@ -73,11 +79,11 @@ public class RenderingContext: NSObject {
     /// this is needed to clear the stencilbuffer
     lazy var stencilClearQuad: Quad2d = {
         let quad = Quad2d(shader: ClearStencilShader(), metalContext: .current, label: "ClearStencil")
-        quad.setFrame(.init(topLeft: .init(x: -1, y: 1),
-                            topRight: .init(x: 1, y: 1),
-                            bottomRight: .init(x: 1, y: -1),
-                            bottomLeft: .init(x: -1, y: -1)),
-                      textureCoordinates: .init(x: 0, y: 0, width: 0, height: 0))
+        quad.setFrame(.init(topLeft: .init(x: 1, y: -1, z: 0),
+                            topRight: .init(x: -1, y: -1, z: 0),
+                            bottomRight: .init(x: -1, y: 1, z: 0),
+                            bottomLeft: .init(x: 1, y: 1, z: 0)),
+                      textureCoordinates: .init(x: 0, y: 0, width: 0, height: 0), origin: .init(x: 0, y: 0, z: 0), is3d: false)
         quad.setup(self)
         return quad
     }()
@@ -87,13 +93,19 @@ public class RenderingContext: NSObject {
         stencilClearQuad.render(encoder: encoder,
                                 context: self,
                                 renderPass: .init(renderPass: 0, isPassMasked: false),
-                                mvpMatrix: 0,
+                                vpMatrix: 0,
+                                mMatrix: 0,
+                                origin: .init(x: 0, y: 0, z: 0),
                                 isMasked: false,
                                 screenPixelAsRealMeterFactor: 1)
     }
 }
 
 extension RenderingContext: MCRenderingContextInterface {
+    public func setCulling(_ mode: MCRenderingCullMode) {
+        self.cullMode = mode
+    }
+    
     public func preRenderStencilMask() {
     }
 
@@ -103,6 +115,21 @@ extension RenderingContext: MCRenderingContextInterface {
 
     public func setupDrawFrame() {
         currentPipeline = nil
+        if let cullMode {
+            /*
+             Set the cullMode inverse in order to be consistent with opengl
+             */
+            switch cullMode {
+                case .BACK:
+                    encoder?.setCullMode(.front)
+                case .FRONT:
+                    encoder?.setCullMode(.back)
+                case .NONE:
+                    encoder?.setCullMode(.none)
+                @unknown default:
+                    assertionFailure()
+            }
+        }
     }
 
     public func onSurfaceCreated() {
@@ -115,7 +142,9 @@ extension RenderingContext: MCRenderingContextInterface {
     public func getViewportSize() -> MCVec2I { viewportSize }
 
     public func setBackgroundColor(_ color: MCColor) {
-        sceneView?.clearColor = color.metalColor
+        Task { @MainActor in
+            self.sceneView?.clearColor = color.metalColor
+        }
     }
 
     public func applyScissorRect(_ scissorRect: MCRectI?) {
@@ -123,9 +152,20 @@ extension RenderingContext: MCRenderingContextInterface {
             encoder?.setScissorRect(sr.scissorRect)
             isScissoringDirty = true
         } else if isScissoringDirty {
-            var s = self.sceneView?.frame.size ?? CGSize(width: 1.0, height: 1.0)
-            s.width = UIScreen.main.nativeScale * s.width
-            s.height = UIScreen.main.nativeScale * s.height
+            var s = CGSize(width: 1.0, height: 1.0)
+            if Thread.isMainThread {
+                MainActor.assumeIsolated {
+                    s = self.sceneView?.frame.size ?? CGSize(width: 1.0, height: 1.0)
+                    s.width = UIScreen.main.nativeScale * s.width
+                    s.height = UIScreen.main.nativeScale * s.height
+                }
+            } else {
+                DispatchQueue.main.sync {
+                    s = self.sceneView?.frame.size ?? CGSize(width: 1.0, height: 1.0)
+                    s.width = UIScreen.main.nativeScale * s.width
+                    s.height = UIScreen.main.nativeScale * s.height
+                }
+            }
 
             var size = viewportSize.scissorRect
             size.width = min(size.width, Int(s.width))

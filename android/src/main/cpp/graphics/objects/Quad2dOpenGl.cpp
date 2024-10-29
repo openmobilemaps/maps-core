@@ -9,9 +9,8 @@
  */
 
 #include "Quad2dOpenGl.h"
-#include "Logger.h"
-#include "OpenGlHelper.h"
 #include "TextureHolderInterface.h"
+#include <cmath>
 
 Quad2dOpenGl::Quad2dOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader)
     : shaderProgram(shader) {}
@@ -38,11 +37,20 @@ void Quad2dOpenGl::clear() {
 
 void Quad2dOpenGl::setIsInverseMasked(bool inversed) { isMaskInversed = inversed; }
 
-void Quad2dOpenGl::setFrame(const Quad2dD &frame, const RectD &textureCoordinates) {
+void Quad2dOpenGl::setFrame(const Quad3dD &frame, const RectD &textureCoordinates, const Vec3D &origin, bool is3D) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
     ready = false;
     this->frame = frame;
     this->textureCoordinates = textureCoordinates;
+    this->quadOrigin = origin;
+    this->is3D = is3D;
+}
+
+void Quad2dOpenGl::setSubdivisionFactor(int32_t factor) {
+    if (factor != subdivisionFactor) {
+        subdivisionFactor = factor;
+        ready = false;
+    }
 }
 
 void Quad2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface> &context) {
@@ -51,17 +59,7 @@ void Quad2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface> &con
         return;
     }
 
-    float frameZ = 0;
-    vertices = {
-        (float)frame.topLeft.x,     (float)frame.topLeft.y,     frameZ,
-        (float)frame.bottomLeft.x,  (float)frame.bottomLeft.y,  frameZ,
-        (float)frame.bottomRight.x, (float)frame.bottomRight.y, frameZ,
-        (float)frame.topRight.x,    (float)frame.topRight.y,    frameZ,
-    };
-    indices = {
-        0, 1, 2, 0, 2, 3,
-    };
-    adjustTextureCoordinates();
+    computeGeometry(false);
 
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
     programName = shaderProgram->getProgramName();
@@ -75,6 +73,115 @@ void Quad2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface> &con
     prepareTextureCoordsGlData(program);
 
     ready = true;
+}
+
+void Quad2dOpenGl::computeGeometry(bool texCoordsOnly) {
+    // Data mutex covered by caller Quad2dOpenGL::setup()
+    if (subdivisionFactor == 0) {
+        if (!texCoordsOnly) {
+            if (is3D) {
+                vertices = {
+                        (float) (1.0 * std::sin(frame.topLeft.y) * std::cos(frame.topLeft.x) - quadOrigin.x),
+                        (float) (1.0 * cos(frame.topLeft.y) - quadOrigin.y),
+                        (float) (-1.0 * std::sin(frame.topLeft.x) * std::sin(frame.topLeft.y) - quadOrigin.z),
+
+                        (float) (1.0 * std::sin(frame.bottomLeft.y) * std::cos(frame.bottomLeft.x) - quadOrigin.x),
+                        (float) (1.0 * cos(frame.bottomLeft.y) - quadOrigin.y),
+                        (float) (-1.0 * std::sin(frame.bottomLeft.x) * std::sin(frame.bottomLeft.y) - quadOrigin.z),
+
+                        (float) (1.0 * std::sin(frame.bottomRight.y) * std::cos(frame.bottomRight.x) - quadOrigin.x),
+                        (float) (1.0 * cos(frame.bottomRight.y) - quadOrigin.y),
+                        (float) (-1.0 * std::sin(frame.bottomRight.x) * std::sin(frame.bottomRight.y) - quadOrigin.z),
+
+                        (float) (1.0 * std::sin(frame.topRight.y) * std::cos(frame.topRight.x) - quadOrigin.x),
+                        (float) (1.0 * cos(frame.topRight.y) - quadOrigin.y),
+                        (float) (-1.0 * std::sin(frame.topRight.x) * std::sin(frame.topRight.y) - quadOrigin.z),
+                };
+            } else {
+                vertices = {
+                        (float) (frame.topLeft.x - quadOrigin.x), (float) (frame.topLeft.y - quadOrigin.y), (float) (-quadOrigin.z),
+                        (float) (frame.bottomLeft.x - quadOrigin.x), (float) (frame.bottomLeft.y - quadOrigin.y), (float) (-quadOrigin.z),
+                        (float) (frame.bottomRight.x - quadOrigin.x), (float) (frame.bottomRight.y - quadOrigin.y), (float) (-quadOrigin.z),
+                        (float) (frame.topRight.x - quadOrigin.x), (float) (frame.topRight.y - quadOrigin.y), (float) (-quadOrigin.z),
+                };
+            }
+            indices = {
+                    0, 1, 2, 0, 2, 3,
+            };
+        }
+
+        float tMinX = factorWidth * textureCoordinates.x;
+        float tMaxX = factorWidth * (textureCoordinates.x + textureCoordinates.width);
+        float tMinY = factorHeight * textureCoordinates.y;
+        float tMaxY = factorHeight * (textureCoordinates.y + textureCoordinates.height);
+
+        textureCoords = {tMinX, tMinY, tMinX, tMaxY, tMaxX, tMaxY, tMaxX, tMinY};
+
+    } else {
+        if (!texCoordsOnly) {
+            vertices = {};
+            indices = {};
+        }
+        textureCoords = {};
+
+
+
+        int32_t numSubd = pow(2.0, subdivisionFactor);
+        std::vector<float> deltaRTop = {(float) (frame.topRight.x - frame.topLeft.x),
+                                        (float) (frame.topRight.y - frame.topLeft.y),
+                                        (float) (frame.topRight.z - frame.topLeft.z)};
+        std::vector<float> deltaDLeft = {(float) (frame.bottomLeft.x - frame.topLeft.x),
+                                        (float) (frame.bottomLeft.y - frame.topLeft.y),
+                                        (float) (frame.bottomLeft.z - frame.topLeft.z)};
+        std::vector<float> deltaDRight = {(float) (frame.bottomRight.x - frame.topRight.x),
+                                        (float) (frame.bottomRight.y - frame.topRight.y),
+                                        (float) (frame.bottomRight.z - frame.topRight.z)};
+
+        float pcR, originX, originY, originZ, pcD, deltaDX, deltaDY, deltaDZ;
+        for (int iR = 0; iR <= numSubd; ++iR) {
+            pcR = iR / (float) numSubd;
+            originX = frame.topLeft.x + pcR * deltaRTop[0];
+            originY = frame.topLeft.y + pcR * deltaRTop[1];
+            originZ = frame.topLeft.z + pcR * deltaRTop[2];
+            for (int iD = 0; iD <= numSubd; ++iD) {
+                pcD = iD / (float) numSubd;
+                deltaDX = pcD * ((1.0 - pcR) * deltaDLeft[0] + pcR * deltaDRight[0]);
+                deltaDY = pcD * ((1.0 - pcR) * deltaDLeft[1] + pcR * deltaDRight[1]);
+                deltaDZ = pcD * ((1.0 - pcR) * deltaDLeft[2] + pcR * deltaDRight[2]);
+
+                if (!texCoordsOnly) {
+                    double x = originX + deltaDX;
+                    double y = originY + deltaDY;
+                    double z = is3D ? originZ + deltaDZ : 0.0;
+                    if (is3D) {
+                        vertices.push_back((float) (1.0 * std::sin(y) * std::cos(x) - quadOrigin.x));
+                        vertices.push_back((float) (1.0 * cos(y) - quadOrigin.y));
+                        vertices.push_back((float) (-1.0 * std::sin(x) * std::sin(y) - quadOrigin.z));
+                    } else {
+                        vertices.push_back((float) (x - quadOrigin.x));
+                        vertices.push_back((float) (y - quadOrigin.y));
+                        vertices.push_back((float) (z - quadOrigin.z));
+                    }
+
+                    if (iR < numSubd && iD < numSubd) {
+                        int baseInd = iD + (iR * (numSubd + 1));
+                        int baseIndNextCol = baseInd + (numSubd + 1);
+                        indices.push_back(baseInd);
+                        indices.push_back(baseInd + 1);
+                        indices.push_back(baseIndNextCol + 1);
+                        indices.push_back(baseInd);
+                        indices.push_back(baseIndNextCol + 1);
+                        indices.push_back(baseIndNextCol);
+                    }
+                }
+                float u = factorWidth * (textureCoordinates.x + pcR * textureCoordinates.width);
+                float v = factorHeight * (textureCoordinates.y + pcD * textureCoordinates.height);
+                textureCoords.push_back(u);
+                textureCoords.push_back(v);
+
+            }
+        }
+    }
 }
 
 void Quad2dOpenGl::prepareGlData(int program) {
@@ -93,10 +200,12 @@ void Quad2dOpenGl::prepareGlData(int program) {
         glGenBuffers(1, &indexBuffer);
     }
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLubyte) * indices.size(), &indices[0], GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort ) * indices.size(), &indices[0], GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-    mvpMatrixHandle = glGetUniformLocation(program, "uMVPMatrix");
+    vpMatrixHandle = glGetUniformLocation(program, "uvpMatrix");
+    mMatrixHandle = glGetUniformLocation(program, "umMatrix");
+    originOffsetHandle = glGetUniformLocation(program, "uOriginOffset");
     glDataBuffersGenerated = true;
 }
 
@@ -139,6 +248,10 @@ void Quad2dOpenGl::removeTextureCoordsGlBuffers() {
 void Quad2dOpenGl::loadTexture(const std::shared_ptr<::RenderingContextInterface> &context,
                                const std::shared_ptr<TextureHolderInterface> &textureHolder) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
+    if (this->textureHolder == textureHolder) {
+        return;
+    }
+
     if (this->textureHolder != nullptr) {
         removeTexture();
     }
@@ -148,7 +261,7 @@ void Quad2dOpenGl::loadTexture(const std::shared_ptr<::RenderingContextInterface
 
         factorHeight = textureHolder->getImageHeight() * 1.0f / textureHolder->getTextureHeight();
         factorWidth = textureHolder->getImageWidth() * 1.0f / textureHolder->getTextureWidth();
-        adjustTextureCoordinates();
+        computeGeometry(true);
 
         if (ready) {
             prepareTextureCoordsGlData(program);
@@ -169,24 +282,17 @@ void Quad2dOpenGl::removeTexture() {
     }
 }
 
-void Quad2dOpenGl::adjustTextureCoordinates() {
-    float tMinX = factorWidth * textureCoordinates.x;
-    float tMaxX = factorWidth * (textureCoordinates.x + textureCoordinates.width);
-    float tMinY = factorHeight * textureCoordinates.y;
-    float tMaxY = factorHeight * (textureCoordinates.y + textureCoordinates.height);
-
-    textureCoords = {tMinX, tMinY, tMinX, tMaxY, tMaxX, tMaxY, tMaxX, tMinY};
-}
-
 void Quad2dOpenGl::renderAsMask(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
-                                int64_t mvpMatrix, double screenPixelAsRealMeterFactor) {
+                                int64_t vpMatrix, int64_t mMatrix, const ::Vec3D &origin,
+                                double screenPixelAsRealMeterFactor) {
     glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-    render(context, renderPass, mvpMatrix, false, screenPixelAsRealMeterFactor);
+    render(context, renderPass, vpMatrix, mMatrix, origin, false, screenPixelAsRealMeterFactor);
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 }
 
 void Quad2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
-                          int64_t mvpMatrix, bool isMasked, double screenPixelAsRealMeterFactor) {
+                          int64_t vpMatrix, int64_t mMatrix, const ::Vec3D &origin, bool isMasked,
+                          double screenPixelAsRealMeterFactor) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
     if (!ready || (usesTextureCoords && !textureCoordsReady))
         return;
@@ -228,11 +334,13 @@ void Quad2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &co
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     // Apply the projection and view transformation
-    glUniformMatrix4fv(mvpMatrixHandle, 1, false, (GLfloat *)mvpMatrix);
+    glUniformMatrix4fv(vpMatrixHandle, 1, false, (GLfloat *)vpMatrix);
+    glUniformMatrix4fv(mMatrixHandle, 1, false, (GLfloat *)mMatrix);
+    glUniform4f(originOffsetHandle, quadOrigin.x - origin.x, quadOrigin.y - origin.y, quadOrigin.z - origin.z, 0.0);
 
     // Draw the triangles
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, nullptr);
+    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_SHORT, nullptr);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 

@@ -25,10 +25,16 @@ abstract class CoordinateSystemIdentifiers {
         external fun EPSG21781(): Int
 
         @JvmStatic
+        external fun UnitSphere(): Int
+
+        @JvmStatic
         external fun fromCrsIdentifier(identifier: String): Int
+
+        @JvmStatic
+        external fun unitToMeterFactor(coordinateSystemIdentifier: Int): Double
     }
 
-    private class CppProxy : CoordinateSystemIdentifiers {
+    public class CppProxy : CoordinateSystemIdentifiers {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

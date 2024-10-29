@@ -35,6 +35,8 @@ public:
 
     bool onMoveComplete() override;
 
+    bool onOneFingerDoubleClickMoveComplete() override;
+
     bool onTwoFingerClick(const Vec2F &posScreen1, const Vec2F &posScreen2) override;
 
     bool onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, const std::vector<::Vec2F> &posScreenNew) override;

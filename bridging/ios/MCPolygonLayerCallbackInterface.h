@@ -7,6 +7,8 @@
 
 @protocol MCPolygonLayerCallbackInterface
 
-- (void)onClickConfirmed:(nonnull MCPolygonInfo *)polygon;
+- (BOOL)onClickConfirmed:(nonnull MCPolygonInfo *)polygon;
+
+- (BOOL)onClickUnconfirmed:(nonnull MCPolygonInfo *)polygon;
 
 @end

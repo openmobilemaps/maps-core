@@ -14,12 +14,13 @@
 #include "PolygonGroupShaderInterface.h"
 #include "ShaderProgramInterface.h"
 #include <vector>
+#include <mutex>
 
 class ColorPolygonGroup2dShaderOpenGl : public BaseShaderProgramOpenGl,
                                         public PolygonGroupShaderInterface,
                                         public std::enable_shared_from_this<ShaderProgramInterface> {
   public:
-    ColorPolygonGroup2dShaderOpenGl(bool isStriped);
+    ColorPolygonGroup2dShaderOpenGl(bool isStriped, bool projectOntoUnitSphere);
 
     virtual std::shared_ptr<ShaderProgramInterface> asShaderProgramInterface() override;
 
@@ -37,6 +38,7 @@ class ColorPolygonGroup2dShaderOpenGl : public BaseShaderProgramOpenGl,
     virtual std::string getFragmentShader() override;
 
   private:
+    bool projectOntoUnitSphere = false;
     bool isStriped = false;
     const std::string programName;
 

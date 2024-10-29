@@ -12,7 +12,7 @@ import MapCoreSharedModule
 import os
 import UIKit
 
-open class MCFontLoader: NSObject, MCFontLoaderInterface {
+open class MCFontLoader: NSObject, MCFontLoaderInterface, @unchecked Sendable {
     // MARK: - Font Atlas Dictionary
 
     private let loadingQueue = DispatchQueue(label: "MCFontLoader")
@@ -24,9 +24,16 @@ open class MCFontLoader: NSObject, MCFontLoaderInterface {
     private let bundle: Bundle
 
     // the bundle to use for searching for fonts
-    public init(bundle: Bundle) {
+    public init(bundle: Bundle, preload: [String] = []) {
         self.bundle = bundle
         super.init()
+        loadingQueue.async {
+            let fonts = preload.map { MCFont(name: $0)}
+            for font in fonts {
+                let _ = self.getFontImage(font: font)
+                let _ = self.getFontData(font: font)
+            }
+        }
     }
 
     // MARK: - Loader
@@ -62,11 +69,23 @@ open class MCFontLoader: NSObject, MCFontLoaderInterface {
                     let size = double(dict: fontInfoJson, value: "size")
                     let imageSize = double(dict: commonJson, value: "scaleW")
 
+                    let pixelsPerInch = if Thread.isMainThread {
+                        MainActor.assumeIsolated {
+                            UIScreen.pixelsPerInch
+                        }
+                    } else {
+                        DispatchQueue.main.sync {
+                            MainActor.assumeIsolated {
+                                UIScreen.pixelsPerInch
+                            }
+                        }
+                    }
+
                     let fontInfo = MCFontWrapper(name: font.name,
                                                  lineHeight: double(dict: commonJson, value: "lineHeight") / size,
                                                  base: double(dict: commonJson, value: "base") / size,
                                                  bitmapSize: MCVec2D(x: imageSize, y: imageSize),
-                                                 size: Double(UIScreen.pixelsPerInch) * size)
+                                                 size: Double(pixelsPerInch) * size)
 
                     var glyphs: [MCFontGlyph] = []
 

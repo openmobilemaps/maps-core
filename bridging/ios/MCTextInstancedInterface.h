@@ -4,6 +4,7 @@
 #import "MCQuad2dD.h"
 #import "MCRenderingContextInterface.h"
 #import "MCSharedBytes.h"
+#import "MCVec3D.h"
 #import <Foundation/Foundation.h>
 @protocol MCGraphicsObjectInterface;
 @protocol MCTextureHolderInterface;
@@ -12,12 +13,17 @@
 @protocol MCTextInstancedInterface
 
 /** set the frame of the root object */
-- (void)setFrame:(nonnull MCQuad2dD *)frame;
+- (void)setFrame:(nonnull MCQuad2dD *)frame
+          origin:(nonnull MCVec3D *)origin
+            is3d:(BOOL)is3d;
 
 - (void)setInstanceCount:(int32_t)count;
 
 /** 2 floats (x and y) for each instance */
 - (void)setPositions:(nonnull MCSharedBytes *)positions;
+
+/** 2 floats (x and y) for each instance */
+- (void)setReferencePositions:(nonnull MCSharedBytes *)positions;
 
 /** 4 floats (x, y, width and height) for each instanced */
 - (void)setTextureCoordinates:(nonnull MCSharedBytes *)textureCoordinates;

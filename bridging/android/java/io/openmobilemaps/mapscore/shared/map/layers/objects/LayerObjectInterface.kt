@@ -12,7 +12,7 @@ abstract class LayerObjectInterface {
 
     abstract fun getRenderConfig(): ArrayList<RenderConfigInterface>
 
-    private class CppProxy : LayerObjectInterface {
+    public class CppProxy : LayerObjectInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

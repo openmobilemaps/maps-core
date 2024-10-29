@@ -11,8 +11,9 @@
 import Foundation
 import MapCoreSharedModule
 import Metal
+import simd
 
-final class LineGroup2d: BaseGraphicsObject {
+final class LineGroup2d: BaseGraphicsObject, @unchecked Sendable {
     private var shader: LineGroupShader
 
     private var lineVerticesBuffer: MTLBuffer?
@@ -23,6 +24,7 @@ final class LineGroup2d: BaseGraphicsObject {
     private var maskedStencilState: MTLDepthStencilState?
 
     private var customScreenPixelFactor: Float = 0
+    private var tileOriginBuffer: MTLBuffer?
 
     init(shader: MCShaderProgramInterface, metalContext: MetalContext) {
         guard let shader = shader as? LineGroupShader else {
@@ -32,6 +34,8 @@ final class LineGroup2d: BaseGraphicsObject {
         super.init(device: metalContext.device,
                    sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue)!,
                    label: "LineGroup2d")
+        var originOffset: simd_float4 = simd_float4(0, 0, 0, 0)
+        tileOriginBuffer = metalContext.device.makeBuffer(bytes: &originOffset, length: MemoryLayout<simd_float4>.stride, options: [])
     }
 
     private func setupStencilBufferDescriptor() {
@@ -68,7 +72,9 @@ final class LineGroup2d: BaseGraphicsObject {
     override func render(encoder: MTLRenderCommandEncoder,
                          context: RenderingContext,
                          renderPass _: MCRenderPassConfig,
-                         mvpMatrix: Int64,
+                         vpMatrix: Int64,
+                         mMatrix: Int64,
+                origin: MCVec3D,
                          isMasked: Bool,
                          screenPixelAsRealMeterFactor: Double) {
         lock.lock()
@@ -108,8 +114,18 @@ final class LineGroup2d: BaseGraphicsObject {
         shader.preRender(context)
 
         encoder.setVertexBuffer(lineVerticesBuffer, offset: 0, index: 0)
-        let matrixPointer = UnsafeRawPointer(bitPattern: Int(mvpMatrix))!
-        encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
+
+        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(vpMatrix)) {
+            encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
+        }
+
+        if let bufferPointer = originOffsetBuffer?.contents().assumingMemoryBound(to: simd_float4.self) {
+            bufferPointer.pointee.x = Float(originOffset.x - origin.x)
+            bufferPointer.pointee.y = Float(originOffset.y - origin.y)
+            bufferPointer.pointee.z = Float(originOffset.z - origin.z)
+        }
+        encoder.setVertexBuffer(originOffsetBuffer, offset: 0, index: 5)
+        encoder.setVertexBuffer(tileOriginBuffer, offset: 0, index: 6)
 
         encoder.drawIndexedPrimitives(type: .triangle,
                                       indexCount: indicesCount,
@@ -124,7 +140,8 @@ final class LineGroup2d: BaseGraphicsObject {
 }
 
 extension LineGroup2d: MCLineGroup2dInterface {
-    func setLines(_ lines: MCSharedBytes, indices: MCSharedBytes) {
+    
+    func setLines(_ lines: MCSharedBytes, indices: MCSharedBytes, origin: MCVec3D, is3d: Bool) {
         guard lines.elementCount != 0 else {
             lock.withCritical {
                 lineVerticesBuffer = nil
@@ -135,6 +152,12 @@ extension LineGroup2d: MCLineGroup2dInterface {
             return
         }
         lock.withCritical {
+            self.originOffset = origin
+            if let bufferPointer = tileOriginBuffer?.contents().assumingMemoryBound(to: simd_float4.self) {
+                bufferPointer.pointee.x = originOffset.xF
+                bufferPointer.pointee.y = originOffset.yF
+                bufferPointer.pointee.z = originOffset.zF
+            }
             self.lineVerticesBuffer.copyOrCreate(from: lines, device: device)
             self.lineIndicesBuffer.copyOrCreate(from: indices, device: device)
             if self.lineVerticesBuffer != nil, self.lineIndicesBuffer != nil {

@@ -60,6 +60,8 @@ public:
     void setSprites(std::shared_ptr<SpriteData> spriteData, std::shared_ptr<TextureHolderInterface> spriteTexture);
 
 private:
+    const static int32_t SUBDIVISION_FACTOR_3D_DEFAULT = 4;
+
     std::shared_ptr<BackgroundVectorLayerDescription> description;
 
     double dpFactor = 1.0;

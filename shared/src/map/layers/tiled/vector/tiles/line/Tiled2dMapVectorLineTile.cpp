@@ -9,7 +9,7 @@
  */
 
 #include "Tiled2dMapVectorLineTile.h"
-#include "MapCamera2dInterface.h"
+#include "MapCameraInterface.h"
 #include "RenderObject.h"
 #include "LineHelper.h"
 #include "Tiled2dMapVectorLayerConfig.h"
@@ -22,7 +22,7 @@ Tiled2dMapVectorLineTile::Tiled2dMapVectorLineTile(const std::weak_ptr<MapInterf
                                                    const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
                                                    const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager)
         : Tiled2dMapVectorTile(mapInterface, tileInfo, description, layerConfig, tileCallbackInterface, featureStateManager), usedKeys(description->getUsedKeys()) {
-    isStyleZoomDependant = usedKeys.usedKeys.find(Tiled2dMapVectorStyleParser::zoomExpression) != usedKeys.usedKeys.end();
+            isStyleZoomDependant = usedKeys.usedKeys.contains(Tiled2dMapVectorStyleParser::zoomExpression);
     isStyleStateDependant = usedKeys.isStateDependant();
 }
 
@@ -74,8 +74,12 @@ void Tiled2dMapVectorLineTile::update() {
     }
 
     const double cameraZoom = camera->getZoom();
-     double zoomIdentifier = layerConfig->getZoomIdentifier(cameraZoom);
-    zoomIdentifier = std::max(zoomIdentifier, (double) tileInfo.tileInfo.zoomIdentifier);
+    double zoomIdentifier = layerConfig->getZoomIdentifier(cameraZoom);
+    
+    if (!mapInterface->is3d()) {
+        zoomIdentifier = std::max(zoomIdentifier, (double) tileInfo.tileInfo.zoomIdentifier);
+    }
+
 
     auto zoom = layerConfig->getZoomFactorAtIdentifier(floor(zoomIdentifier));
     auto scalingFactor = (camera->asCameraInterface()->getScalingFactor() / cameraZoom) * zoom;
@@ -241,6 +245,8 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
         return;
     }
 
+    bool is3d = mapInterface->is3d();
+
     if (!tileData->empty()) {
         std::unordered_map<int, int> subGroupCoordCount;
         std::vector<std::vector<std::vector<std::tuple<std::vector<Coord>, int>>>> styleGroupNewLinesVector;
@@ -276,7 +282,7 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
                         } else {
                             styleGroupIndex = (int) featureGroups.size();
                             styleIndex = 0;
-                            auto shader = shaderFactory->createLineGroupShader();
+                            auto shader = is3d ? shaderFactory->createUnitSphereLineGroupShader() : shaderFactory->createLineGroupShader();
                             auto lineDescription = std::static_pointer_cast<LineVectorLayerDescription>(description);
                             shader->asShaderProgramInterface()->setBlendMode(lineDescription->style.getBlendMode(EvaluationContext(0.0, dpFactor, std::make_shared<FeatureContext>(), featureStateManager)));
                             shaders.push_back(shader);
@@ -299,7 +305,11 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
                 for (const auto &lineCoordinates: geometryHandler->getLineCoordinates()) {
                     if (lineCoordinates.empty()) { continue; }
 
-                    int numCoords = (int)lineCoordinates.size();
+                    auto maxSegmentLength = std::abs(tileInfo.tileInfo.bounds.bottomRight.x - tileInfo.tileInfo.bounds.topLeft.x) / 2.0;
+
+                    const auto &coordinates = is3d ? LineHelper::subdividePolyline(lineCoordinates, maxSegmentLength) : lineCoordinates;
+
+                    int numCoords = (int)coordinates.size();
                     int coordCount = subGroupCoordCount[styleGroupIndex];
                     if (coordCount + numCoords > maxNumLinePoints
                         && !styleGroupLineSubGroupVector[styleGroupIndex].empty()) {
@@ -308,9 +318,9 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
                         subGroupCoordCount[styleGroupIndex] = 0;
                     }
 
-                    styleGroupLineSubGroupVector[styleGroupIndex].push_back({lineCoordinates, std::min(maxStylesPerGroup - 1, styleIndex)});
+                    styleGroupLineSubGroupVector[styleGroupIndex].push_back({coordinates, std::min(maxStylesPerGroup - 1, styleIndex)});
                     subGroupCoordCount[styleGroupIndex] = (int)subGroupCoordCount[styleGroupIndex] + numCoords;
-                    lineCoordinatesVector.push_back(lineCoordinates);
+                    lineCoordinatesVector.push_back(coordinates);
                 }
 
                 if (description->isInteractable(evalContext)) {
@@ -356,6 +366,16 @@ void Tiled2dMapVectorLineTile::addLines(const std::vector<std::vector<std::vecto
     std::vector<std::shared_ptr<LineGroup2dLayerObject>> lineGroupObjects;
     std::vector<std::shared_ptr<GraphicsObjectInterface>> newGraphicObjects;
 
+    bool is3d = mapInterface->is3d();
+    auto convertedTileBounds = mapInterface->getCoordinateConverterHelper()->convertRectToRenderSystem(tileInfo.tileInfo.bounds);
+    double cx = (convertedTileBounds.bottomRight.x + convertedTileBounds.topLeft.x) / 2.0;
+    double cy = (convertedTileBounds.bottomRight.y + convertedTileBounds.topLeft.y) / 2.0;
+    double rx = is3d ? 1.0 * sin(cy) * cos(cx) : cx;
+    double ry = is3d ? 1.0 * cos(cy) : cy;
+    double rz = is3d ? -1.0 * sin(cy) * sin(cx) : 0.0;
+    auto origin = Vec3D(rx, ry, rz);
+
+
     for (int styleGroupIndex = 0; styleGroupIndex < styleIdLinesVector.size(); styleGroupIndex++) {
         for (const auto &lineSubGroup: styleIdLinesVector[styleGroupIndex]) {
             const auto &shader = shaders.at(styleGroupIndex);
@@ -366,8 +386,10 @@ void Tiled2dMapVectorLineTile::addLines(const std::vector<std::vector<std::vecto
 #endif
             auto lineGroupObject = std::make_shared<LineGroup2dLayerObject>(coordinateConverterHelper,
                                                                             lineGroupGraphicsObject,
-                                                                            shader);
-            lineGroupObject->setLines(lineSubGroup);
+                                                                            shader,
+                                                                            is3d);
+
+            lineGroupObject->setLines(lineSubGroup, origin);
 
             lineGroupObjects.push_back(lineGroupObject);
             newGraphicObjects.push_back(lineGroupGraphicsObject->asGraphicsObject());

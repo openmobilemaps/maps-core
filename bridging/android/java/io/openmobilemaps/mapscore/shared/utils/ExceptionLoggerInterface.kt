@@ -13,7 +13,7 @@ abstract class ExceptionLoggerInterface {
         external fun setLoggerDelegate(delegate: ExceptionLoggerDelegateInterface): Unit
     }
 
-    private class CppProxy : ExceptionLoggerInterface {
+    public class CppProxy : ExceptionLoggerInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

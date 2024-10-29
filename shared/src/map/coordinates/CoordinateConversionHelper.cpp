@@ -18,6 +18,10 @@
 #include "EPSG3857ToEPSG2056Converter.h"
 #include "EPSG4326ToEPSG2056Converter.h"
 #include "EPSG4326ToEPSG3857Converter.h"
+#include "EPSG4326ToUnitSphereConverter.h"
+#include "UnitSphereToEPSG4326Converter.h"
+#include "EPSG3857ToUnitSphereConverter.h"
+#include "UnitSphereToEPSG3857Converter.h"
 
 /**
  * This instance is independent of the map and does not know about the rendering system.
@@ -31,9 +35,10 @@ std::shared_ptr<CoordinateConversionHelperInterface> CoordinateConversionHelperI
     return singleton;
 }
 
-CoordinateConversionHelper::CoordinateConversionHelper(MapCoordinateSystem mapCoordinateSystem)
-    : mapCoordinateSystemIdentifier(mapCoordinateSystem.identifier)
-    , renderSystemConverter(std::make_shared<DefaultSystemToRenderConverter>(mapCoordinateSystem)) {
+CoordinateConversionHelper::CoordinateConversionHelper(MapCoordinateSystem mapCoordinateSystem, bool enforceLtrTtb)
+    : mapCoordinateSystemIdentifier(mapCoordinateSystem.identifier),
+    renderSystemConverter(std::make_shared<DefaultSystemToRenderConverter>(mapCoordinateSystem, enforceLtrTtb)),
+    enforceLtrTtb(enforceLtrTtb) {
     registerConverter(renderSystemConverter);
     addDefaultConverters();
 }
@@ -52,6 +57,10 @@ void CoordinateConversionHelper::addDefaultConverters() {
     registerConverter(std::make_shared<EPSG4326ToEPSG2056Converter>());
     registerConverter(std::make_shared<EPSG2056ToEPGS21781Converter>());
     registerConverter(std::make_shared<EPSG21781ToEPGS2056Converter>());
+    registerConverter(std::make_shared<EPSG4326ToUnitSphereConverter>());
+    registerConverter(std::make_shared<UnitSphereToEPSG4326Converter>());
+    registerConverter(std::make_shared<EPSG3857ToUnitSphereConverter>());
+    registerConverter(std::make_shared<UnitSphereToEPSG3857Converter>());
 }
 
 void CoordinateConversionHelper::registerConverter(const std::shared_ptr<CoordinateConverterInterface> &converter) {
@@ -113,6 +122,7 @@ QuadCoord CoordinateConversionHelper::convertQuad(const int32_t to, const QuadCo
     Coord topRight = convert(to, quad.topRight);
     Coord bottomRight = convert(to, quad.bottomRight);
     Coord bottomLeft = convert(to, quad.bottomLeft);
+    if (enforceLtrTtb) {
     bool ltr = topRight.x > topLeft.x;
     bool ttb = bottomLeft.y > topLeft.y;
     if (ltr) {
@@ -127,6 +137,9 @@ QuadCoord CoordinateConversionHelper::convertQuad(const int32_t to, const QuadCo
         } else {
             return QuadCoord(bottomRight, bottomLeft, topLeft, topRight);
         }
+    }
+    } else {
+        return QuadCoord(topLeft, topRight, bottomRight, bottomLeft);
     }
 }
 

@@ -15,6 +15,7 @@
 #include "simplify.hpp"
 #include "CoordinateSystemIdentifiers.h"
 #include "GeoJsonPoint.h"
+#include "GeoJsonLine.h"
 
 class UUIDGenerator {
 private:
@@ -85,7 +86,7 @@ public:
                 continue;
             }
 
-            const auto &properties = parseProperties(feature["properties"]);
+            const auto &properties = feature.contains("properties") ? parseProperties(feature["properties"]) : FeatureContext::mapType();
 
             if(feature.contains("id") && feature["id"].is_string()) {
                 geometry->featureContext = std::make_shared<FeatureContext>(geomType, properties, feature["id"].get<std::string>());
@@ -138,6 +139,53 @@ public:
         }
 
         return points;
+    }
+
+
+    static std::vector<::GeoJsonLine> getLinesWithProperties(const nlohmann::json &geojson) {
+        // preconditions
+        std::vector<::GeoJsonLine> lines;
+
+        if (!geojson["type"].is_string() ||
+            geojson["type"] != "FeatureCollection" ||
+            !geojson["features"].is_array()) {
+            LogError <<= "Geojson is not valid";
+            assert(false);
+            return lines;
+        }
+
+        for (const auto &feature: geojson["features"]) {
+            const auto &geometry = feature["geometry"];
+
+            if (!geometry.is_object()) {
+                LogError <<= "Geojson feature is not valid";
+                continue;
+            }
+
+            const auto &geometryType = geometry["type"];
+            if (!geometryType.is_string() || geometryType != "LineString") {
+                continue;
+            }
+
+            if(!feature.contains("id") || !feature["id"].is_string()) {
+                continue;
+            }
+
+            const auto &coordinates = geometry["coordinates"];
+
+            if(!coordinates.is_array()) {
+                continue;
+            }
+
+            std::vector<Coord> lineCoords;
+            for (const auto &coord : coordinates) {
+                lineCoords.emplace_back(parseCoordinate(coord));
+            }
+
+            lines.emplace_back(lineCoords, GeoJsonParser::getFeatureInfo(feature["properties"], feature["id"].get<std::string>()));
+        }
+
+        return lines;
     }
 
 private:

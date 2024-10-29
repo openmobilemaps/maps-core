@@ -9,6 +9,7 @@
 #import "DJIObjcWrapperCache+Private.h"
 #import "MCRenderPassConfig+Private.h"
 #import "MCRenderingContextInterface+Private.h"
+#import "MCVec3D+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -66,13 +67,17 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 
 - (void)render:(nullable id<MCRenderingContextInterface>)context
     renderPass:(nonnull MCRenderPassConfig *)renderPass
-     mvpMatrix:(int64_t)mvpMatrix
+      vpMatrix:(int64_t)vpMatrix
+       mMatrix:(int64_t)mMatrix
+        origin:(nonnull MCVec3D *)origin
       isMasked:(BOOL)isMasked
 screenPixelAsRealMeterFactor:(double)screenPixelAsRealMeterFactor {
     try {
         _cppRefHandle.get()->render(::djinni_generated::RenderingContextInterface::toCpp(context),
                                     ::djinni_generated::RenderPassConfig::toCpp(renderPass),
-                                    ::djinni::I64::toCpp(mvpMatrix),
+                                    ::djinni::I64::toCpp(vpMatrix),
+                                    ::djinni::I64::toCpp(mMatrix),
+                                    ::djinni_generated::Vec3D::toCpp(origin),
                                     ::djinni::Bool::toCpp(isMasked),
                                     ::djinni::F64::toCpp(screenPixelAsRealMeterFactor));
     } DJINNI_TRANSLATE_EXCEPTIONS()
@@ -118,12 +123,14 @@ public:
             [djinni_private_get_proxied_objc_object() setDebugLabel:(::djinni::String::fromCpp(c_label))];
         }
     }
-    void render(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & c_context, const ::RenderPassConfig & c_renderPass, int64_t c_mvpMatrix, bool c_isMasked, double c_screenPixelAsRealMeterFactor) override
+    void render(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & c_context, const ::RenderPassConfig & c_renderPass, int64_t c_vpMatrix, int64_t c_mMatrix, const ::Vec3D & c_origin, bool c_isMasked, double c_screenPixelAsRealMeterFactor) override
     {
         @autoreleasepool {
             [djinni_private_get_proxied_objc_object() render:(::djinni_generated::RenderingContextInterface::fromCpp(c_context))
                                                   renderPass:(::djinni_generated::RenderPassConfig::fromCpp(c_renderPass))
-                                                   mvpMatrix:(::djinni::I64::fromCpp(c_mvpMatrix))
+                                                    vpMatrix:(::djinni::I64::fromCpp(c_vpMatrix))
+                                                     mMatrix:(::djinni::I64::fromCpp(c_mMatrix))
+                                                      origin:(::djinni_generated::Vec3D::fromCpp(c_origin))
                                                     isMasked:(::djinni::Bool::fromCpp(c_isMasked))
                                 screenPixelAsRealMeterFactor:(::djinni::F64::fromCpp(c_screenPixelAsRealMeterFactor))];
         }

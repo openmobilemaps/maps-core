@@ -12,7 +12,10 @@
 #include "OpenGlContext.h"
 #include "OpenGlHelper.h"
 
-const std::string TextInstancedShaderOpenGl::programName = "UBMAP_TextInstancedShaderOpenGl";
+
+TextInstancedShaderOpenGl::TextInstancedShaderOpenGl(bool projectOntoUnitSphere)
+        : projectOntoUnitSphere(projectOntoUnitSphere),
+          programName(projectOntoUnitSphere ? "UBMAP_TextInstancedUnitSphereShaderOpenGl" : "UBMAP_TextInstancedShaderOpenGl") {}
 
 std::string TextInstancedShaderOpenGl::getProgramName() { return programName; }
 
@@ -36,42 +39,104 @@ void TextInstancedShaderOpenGl::setupProgram(const std::shared_ptr<::RenderingCo
 
 void TextInstancedShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context) {
     BaseShaderProgramOpenGl::preRender(context);
+
+    std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
+    int program = openGlContext->getProgram(programName);
+    glUseProgram(program);
+
+    int aspectRatioHandle = glGetUniformLocation(program, "uAspectRatio");
+    glUniform1f(aspectRatioHandle, openGlContext->getAspectRatio());
 }
 
 std::string TextInstancedShaderOpenGl::getVertexShader() {
-    return OMMVersionedGlesShaderCode(320 es,
-                                      uniform mat4 uMVPMatrix;
+    return projectOntoUnitSphere ?
+    OMMVersionedGlesShaderCode(320 es,
+                               uniform mat4 uvpMatrix;
+                               uniform mat4 umMatrix;
+                               uniform vec4 uOriginOffset;
+                               uniform vec4 uOrigin;
+                               uniform float uAspectRatio;
 
-                                      in vec4 vPosition;
-                                      in vec2 texCoordinate;
+                               in vec4 vPosition;
+                               in vec2 texCoordinate;
 
-                                      in vec2 aPosition;
-                                      in vec4 aTexCoordinate;
-                                      in vec2 aScale;
-                                      in float aRotation;
-                                      in uint aStyleIndex;
+                               in vec2 aPosition;
+                               in vec3 aReferencePosition;
+                               in vec4 aTexCoordinate;
+                               in vec2 aScale;
+                               in float aRotation;
+                               in uint aStyleIndex;
 
-                                      out vec2 v_texCoord;
-                                      out vec4 v_texCoordInstance;
-                                      out flat highp uint vStyleIndex;
+                               out vec2 v_texCoord;
+                               out vec4 v_texCoordInstance;
+                               out flat highp uint vStyleIndex;
+                               out float v_alpha;
 
-                                      void main() {
-                                          float angle = aRotation * 3.14159265 / 180.0;
+                               void main() {
+                                   float angle = aRotation * 3.14159265 / 180.0;
 
-                                          mat4 model_matrix = mat4(
-                                                  vec4(cos(angle) * aScale.x, -sin(angle) * aScale.x, 0.0, 0.0),
-                                                  vec4(sin(angle) * aScale.y, cos(angle) * aScale.y, 0.0, 0.0),
-                                                  vec4(0.0, 0.0, 1.0, 0.0),
-                                                  vec4(aPosition.x, aPosition.y, 1.0, 1.0)
-                                          );
+                                   vec4 newVertex = umMatrix * vec4(aReferencePosition + uOriginOffset.xyz, 1.0);
 
-                                          mat4 matrix = uMVPMatrix * model_matrix;
+                                   vec4 earthCenter = uvpMatrix * vec4(0.0 - uOrigin.x, 0.0 - uOrigin.y, 0.0 - uOrigin.z, 1.0);
+                                   earthCenter = earthCenter / earthCenter.w;
+                                   vec4 screenPosition = uvpMatrix * newVertex;
+                                   screenPosition = screenPosition / screenPosition.w;
 
-                                          gl_Position = matrix * vPosition;
-                                          v_texCoordInstance = aTexCoordinate;
-                                          v_texCoord = texCoordinate;
-                                          vStyleIndex = aStyleIndex;
-                                      }
+                                   // Apply non-uniform scaling first
+                                   vec2 pScaled = vec2(vPosition.x * aScale.x, vPosition.y * aScale.y);
+
+                                   // Apply rotation after scaling
+                                   float sinAngle = sin(angle);
+                                   float cosAngle = cos(angle);
+                                   vec2 pRot = vec2(pScaled.x * cosAngle - pScaled.y * sinAngle,
+                                                    (pScaled.x * sinAngle + pScaled.y * cosAngle) * uAspectRatio);
+
+                                   gl_Position = vec4(screenPosition.xy + aPosition.xy + pRot, 0.0, 1.0);
+                                   v_texCoordInstance = aTexCoordinate;
+                                   v_texCoord = texCoordinate;
+                                   vStyleIndex = aStyleIndex;
+                                   v_alpha = 1.0;
+                                   if (screenPosition.z - earthCenter.z > 0.0) {
+                                       v_alpha = 0.0;
+                                   }
+                               }
+                           )
+    : OMMVersionedGlesShaderCode(320 es,
+                                  uniform mat4 uvpMatrix;
+                                  uniform vec4 uOriginOffset;
+
+                                  in vec4 vPosition;
+                                  in vec2 texCoordinate;
+
+                                  in vec2 aPosition;
+                                  in vec4 aTexCoordinate;
+                                  in vec2 aScale;
+                                  in float aRotation;
+                                  in uint aStyleIndex;
+
+                                  out vec2 v_texCoord;
+                                  out vec4 v_texCoordInstance;
+                                  out flat highp uint vStyleIndex;
+                                  out float v_alpha;
+
+                                  void main() {
+                                      float angle = aRotation * 3.14159265 / 180.0;
+
+                                      mat4 model_matrix = mat4(
+                                              vec4(cos(angle) * aScale.x, -sin(angle) * aScale.x, 0.0, 0.0),
+                                              vec4(sin(angle) * aScale.y, cos(angle) * aScale.y, 0.0, 0.0),
+                                              vec4(0.0, 0.0, 1.0, 0.0),
+                                              vec4(aPosition.xy + uOriginOffset.xy, 1.0, 1.0)
+                                      );
+
+                                      mat4 matrix = uvpMatrix * model_matrix;
+
+                                      gl_Position = matrix * vPosition;
+                                      v_texCoordInstance = aTexCoordinate;
+                                      v_texCoord = texCoordinate;
+                                      vStyleIndex = aStyleIndex;
+                                      v_alpha = 1.0;
+                                  }
     );
 }
 
@@ -89,6 +154,7 @@ std::string TextInstancedShaderOpenGl::getFragmentShader() {
                                               in vec2 v_texCoord;
                                               in vec4 v_texCoordInstance;
                                               in flat highp uint vStyleIndex;
+                                              in float v_alpha;
 
                                               out vec4 fragmentColor;
 
@@ -98,12 +164,18 @@ std::string TextInstancedShaderOpenGl::getFragmentShader() {
                                                   highp int colorOffset = int(isHalo) * 4 + styleOffset; // fill/halo color switch
                                                   vec4 color = vec4(styles[colorOffset + 0], styles[colorOffset + 1],
                                                                styles[colorOffset + 2], styles[colorOffset + 3]);
+                                                  color.a *= v_alpha;
 
                                                   if (color.a == 0.0) {
                                                       discard;
                                                   }
 
-                                                  vec2 uv = (v_texCoordInstance.xy + v_texCoordInstance.zw * vec2(v_texCoord.x, (1.0 - v_texCoord.y))) * textureFactor;
+                                                  ) + (projectOntoUnitSphere ? OMMShaderCode(
+                                                          vec2 uv = (v_texCoordInstance.xy + v_texCoordInstance.zw * vec2(v_texCoord.x, v_texCoord.y)) * textureFactor;
+                                                  ) : OMMShaderCode(
+                                                          vec2 uv = (v_texCoordInstance.xy + v_texCoordInstance.zw * vec2(v_texCoord.x, (1.0 - v_texCoord.y))) * textureFactor;
+                                                  )) + OMMShaderCode(
+
                                                   vec4 dist = texture(textureSampler, uv);
 
                                                   float median = max(min(dist.r, dist.g), min(max(dist.r, dist.g), dist.b)) / dist.a;

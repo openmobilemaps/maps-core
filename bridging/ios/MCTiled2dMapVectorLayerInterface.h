@@ -7,6 +7,7 @@
 #import "MCLoaderInterface.h"
 #import "MCTiled2dMapReadyStateListener.h"
 #import "MCTiled2dMapZoomInfo.h"
+#import "MCVectorLayerFeatureCoordInfo.h"
 #import "MCVectorLayerFeatureInfoValue.h"
 #import <Foundation/Foundation.h>
 @class MCTiled2dMapVectorLayerInterface;
@@ -64,6 +65,9 @@
              properties:(nonnull NSDictionary<NSString *, MCVectorLayerFeatureInfoValue *> *)properties;
 
 - (void)setGlobalState:(nonnull NSDictionary<NSString *, MCVectorLayerFeatureInfoValue *> *)properties;
+
+- (nonnull NSArray<MCVectorLayerFeatureCoordInfo *> *)getVisiblePointFeatureContexts:(float)paddingPc
+                                                                         sourceLayer:(nullable NSString *)sourceLayer;
 
 - (void)setReadyStateListener:(nullable id<MCTiled2dMapReadyStateListener>)listener;
 

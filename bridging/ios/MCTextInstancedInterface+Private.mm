@@ -12,6 +12,7 @@
 #import "MCRenderingContextInterface+Private.h"
 #import "MCSharedBytes+Private.h"
 #import "MCTextureHolderInterface+Private.h"
+#import "MCVec3D+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -36,9 +37,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     return self;
 }
 
-- (void)setFrame:(nonnull MCQuad2dD *)frame {
+- (void)setFrame:(nonnull MCQuad2dD *)frame
+          origin:(nonnull MCVec3D *)origin
+            is3d:(BOOL)is3d {
     try {
-        _cppRefHandle.get()->setFrame(::djinni_generated::Quad2dD::toCpp(frame));
+        _cppRefHandle.get()->setFrame(::djinni_generated::Quad2dD::toCpp(frame),
+                                      ::djinni_generated::Vec3D::toCpp(origin),
+                                      ::djinni::Bool::toCpp(is3d));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -51,6 +56,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 - (void)setPositions:(nonnull MCSharedBytes *)positions {
     try {
         _cppRefHandle.get()->setPositions(::djinni_generated::SharedBytes::toCpp(positions));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)setReferencePositions:(nonnull MCSharedBytes *)positions {
+    try {
+        _cppRefHandle.get()->setReferencePositions(::djinni_generated::SharedBytes::toCpp(positions));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -114,10 +125,12 @@ class TextInstancedInterface::ObjcProxy final
     friend class ::djinni_generated::TextInstancedInterface;
 public:
     using ObjcProxyBase::ObjcProxyBase;
-    void setFrame(const ::Quad2dD & c_frame) override
+    void setFrame(const ::Quad2dD & c_frame, const ::Vec3D & c_origin, bool c_is3d) override
     {
         @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() setFrame:(::djinni_generated::Quad2dD::fromCpp(c_frame))];
+            [djinni_private_get_proxied_objc_object() setFrame:(::djinni_generated::Quad2dD::fromCpp(c_frame))
+                                                        origin:(::djinni_generated::Vec3D::fromCpp(c_origin))
+                                                          is3d:(::djinni::Bool::fromCpp(c_is3d))];
         }
     }
     void setInstanceCount(int32_t c_count) override
@@ -130,6 +143,12 @@ public:
     {
         @autoreleasepool {
             [djinni_private_get_proxied_objc_object() setPositions:(::djinni_generated::SharedBytes::fromCpp(c_positions))];
+        }
+    }
+    void setReferencePositions(const ::SharedBytes & c_positions) override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() setReferencePositions:(::djinni_generated::SharedBytes::fromCpp(c_positions))];
         }
     }
     void setTextureCoordinates(const ::SharedBytes & c_textureCoordinates) override

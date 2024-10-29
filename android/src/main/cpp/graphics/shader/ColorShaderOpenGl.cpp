@@ -12,7 +12,9 @@
 #include "OpenGlContext.h"
 #include "OpenGlHelper.h"
 
-const std::string ColorShaderOpenGl::programName = "UBMAP_ColorShaderOpenGl";
+ColorShaderOpenGl::ColorShaderOpenGl(bool projectOntoUnitSphere)
+        : programName(projectOntoUnitSphere ? "UBMAP_ColorShaderUnitSphereOpenGl" : "UBMAP_ColorShaderOpenGl"),
+          projectOntoUnitSphere(projectOntoUnitSphere) {}
 
 std::string ColorShaderOpenGl::getProgramName() { return programName; }
 
@@ -55,11 +57,16 @@ void ColorShaderOpenGl::setColor(float red, float green, float blue, float alpha
 
 std::string ColorShaderOpenGl::getVertexShader() {
     return OMMVersionedGlesShaderCode(320 es,
-                                      precision highp float;
-                                      uniform mat4 uMVPMatrix;
-                                      in vec4 vPosition;
+                                        precision highp float;
+                                                uniform mat4 uvpMatrix;
+                                                uniform mat4 umMatrix;
+                                                uniform vec4 uOriginOffset;
+                                                in vec4 vPosition;
 
-                                      void main() { gl_Position = uMVPMatrix * vPosition; });
+                                                void main() {
+                                                    gl_Position = uvpMatrix * ((umMatrix * vPosition) + uOriginOffset);
+                                                }
+           );
 }
 
 std::string ColorShaderOpenGl::getFragmentShader() {

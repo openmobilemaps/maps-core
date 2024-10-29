@@ -36,12 +36,12 @@ class Quad2dInstancedOpenGl : public GraphicsObjectInterface,
     virtual void clear() override;
 
     virtual void renderAsMask(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
-                              int64_t mvpMatrix, double screenPixelAsRealMeterFactor) override;
+                              int64_t vpMatrix, int64_t mMatrix, const ::Vec3D & origin, double screenPixelAsRealMeterFactor) override;
 
     virtual void render(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
-                        int64_t mvpMatrix, bool isMasked, double screenPixelAsRealMeterFactor) override;
+                        int64_t vpMatrix, int64_t mMatrix, const ::Vec3D & origin, bool isMasked, double screenPixelAsRealMeterFactor) override;
 
-    virtual void setFrame(const ::Quad2dD &frame) override;
+    virtual void setFrame(const ::Quad2dD &frame, const Vec3D &origin, bool is3d) override;
 
     virtual void loadTexture(const std::shared_ptr<::RenderingContextInterface> &context,
                              const std::shared_ptr<TextureHolderInterface> &textureHolder) override;
@@ -68,7 +68,9 @@ class Quad2dInstancedOpenGl : public GraphicsObjectInterface,
 
     virtual void setAlphas(const ::SharedBytes &values) override;
 
-  protected:
+    void setPositionOffset(const SharedBytes &offsets) override;
+
+protected:
     virtual void adjustTextureCoordinates();
 
     virtual void prepareTextureDraw(int mProgram);
@@ -81,11 +83,15 @@ class Quad2dInstancedOpenGl : public GraphicsObjectInterface,
 
     void removeTextureCoordsGlBuffers();
 
+    bool is3d = false;
     std::shared_ptr<ShaderProgramInterface> shaderProgram;
     std::string programName;
     int program;
 
-    int mvpMatrixHandle;
+    int vpMatrixHandle;
+    int mMatrixHandle;
+    int originOffsetHandle;
+    int originHandle;
     int positionHandle;
     GLuint vertexBuffer;
     std::vector<GLfloat> vertices;
@@ -95,6 +101,7 @@ class Quad2dInstancedOpenGl : public GraphicsObjectInterface,
     GLuint indexBuffer;
     std::vector<GLubyte> indices;
     bool glDataBuffersGenerated = false;
+    Vec3D quadsOrigin = Vec3D(0.0, 0.0, 0.0);
 
     std::shared_ptr<TextureHolderInterface> textureHolder;
     int texturePointer;
@@ -107,7 +114,8 @@ class Quad2dInstancedOpenGl : public GraphicsObjectInterface,
     double factorWidth = 1.0;
 
     bool ready = false;
-    uint8_t buffersNotReady = 0b00011111;
+    uint8_t buffersNotReadyResetValue = 0b00111111;
+    uint8_t buffersNotReady = 0b00111111;
     bool textureCoordsReady = false;
     std::recursive_mutex dataMutex;
 
@@ -118,16 +126,26 @@ class Quad2dInstancedOpenGl : public GraphicsObjectInterface,
     GLuint dynamicInstanceDataBuffer;
     int instPositionsHandle;
     int instRotationsHandle;
+    int instTextureCoordinatesHandle;
     int instScalesHandle;
     int instAlphasHandle;
-    int instTextureCoordinatesHandle;
+    int instPositionOffsetsHandle;
 
-    static const int instPositionsOffsetBytes = sizeof(GLfloat) * 0;
-    static const int instRotationsOffsetBytes = sizeof(GLfloat) * 2;
-    static const int instTextureCoordinatesOffsetBytes = sizeof(GLfloat) * 3;
-    static const int instScalesOffsetBytes = sizeof(GLfloat) * 7;
-    static const int instAlphasOffsetBytes = sizeof(GLfloat) * 9;
-    static const int instValuesSizeBytes = sizeof(GLfloat) * 10;
+    static const uintptr_t instPositionsOffsetBytes = sizeof(GLfloat) * 0;
+    static const uintptr_t instRotationsOffsetBytes = sizeof(GLfloat) * 2;
+    static const uintptr_t instTextureCoordinatesOffsetBytes = sizeof(GLfloat) * 3;
+    static const uintptr_t instScalesOffsetBytes = sizeof(GLfloat) * 7;
+    static const uintptr_t instAlphasOffsetBytes = sizeof(GLfloat) * 9;
+    static const uintptr_t instPositionOffsetsOffsetBytes = sizeof(GLfloat) * 10;
+    static const uintptr_t instValuesSizeBytes = sizeof(GLfloat) * 12;
+
+    static const uintptr_t instPositionsOffsetBytes3d = sizeof(GLfloat) * 0;
+    static const uintptr_t instRotationsOffsetBytes3d = sizeof(GLfloat) * 3;
+    static const uintptr_t instTextureCoordinatesOffsetBytes3d = sizeof(GLfloat) * 4;
+    static const uintptr_t instScalesOffsetBytes3d = sizeof(GLfloat) * 8;
+    static const uintptr_t instAlphasOffsetBytes3d = sizeof(GLfloat) * 10;
+    static const uintptr_t instPositionOffsetsOffsetBytes3d = sizeof(GLfloat) * 11;
+    static const uintptr_t instValuesSizeBytes3d = sizeof(GLfloat) * 13;
 
 private:
     bool writeToDynamicInstanceDataBuffer(const ::SharedBytes &data, int targetOffsetBytes);

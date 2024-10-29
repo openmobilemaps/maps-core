@@ -21,18 +21,32 @@
 class PolygonMaskObject: public PolygonMaskObjectInterface {
 public:
     PolygonMaskObject(const std::shared_ptr<::GraphicsObjectFactoryInterface> &graphicsObjectFactory,
-                      const std::shared_ptr<::CoordinateConversionHelperInterface> &conversionHelper);
+                      const std::shared_ptr<::CoordinateConversionHelperInterface> &conversionHelper,
+                      bool is3D);
 
-    virtual void setPolygons(const std::vector<::PolygonCoord> & polygons) override;
+    virtual void setPolygons(const std::vector<::PolygonCoord> & polygons,
+                             const Vec3D & origin, std::optional<float> maxSegmentLength = std::nullopt);
 
-    virtual void setPolygon(const ::PolygonCoord & polygon) override;
+    virtual void setPolygon(const ::PolygonCoord & polygon,
+                            const Vec3D & origin, std::optional<float> maxSegmentLength = std::nullopt);
 
-    void setPositions(const std::vector<Coord> &positions, const std::vector<std::vector<Coord>> &holes);
+    virtual void setPolygons(const std::vector<::PolygonCoord> & polygons,
+                             const Vec3D & origin) override {
+        setPolygons(polygons, origin, std::nullopt);
+    };
+
+    virtual void setPolygon(const ::PolygonCoord & polygon,
+                            const Vec3D & origin) override {
+        setPolygon(polygon, origin, std::nullopt);
+    }
+
+    void setPositions(const std::vector<Coord> &positions, const ::Vec3D & origin, const std::vector<std::vector<Coord>> &holes);
 
     virtual std::shared_ptr<::Polygon2dInterface> getPolygonObject() override;
 
 private:
     std::shared_ptr<CoordinateConversionHelperInterface> conversionHelper;
     std::shared_ptr<Polygon2dInterface> polygon;
+    bool is3D;
 };
 

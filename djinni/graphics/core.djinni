@@ -4,6 +4,7 @@
 @extern "../yaml/graphics_object_factory_interface.yaml"
 @extern "../yaml/shader_factory_interface.yaml"
 @extern "../yaml/vec_3_d.yaml"
+@extern "../yaml/vec_3_f.yaml"
 @extern "../yaml/vec_2_i.yaml"
 @extern "../yaml/rect_i.yaml"
 @extern "../yaml/color.yaml"
@@ -36,12 +37,20 @@ rendering_context_interface = interface +c +j +o {
     set_viewport_size(size: vec_2_i);
     get_viewport_size() : vec_2_i;
     set_background_color(color: color);
+	set_culling(mode: rendering_cull_mode);
+
     setupDrawFrame();
     pre_render_stencil_mask();
     post_render_stencil_mask();
 
     # optional rectangle, remove scissoring when not set
     apply_scissor_rect(scissor_rect: optional<rect_i>);
+}
+
+rendering_cull_mode = enum {
+	front;
+	back;
+	none;
 }
 
 render_object_interface = interface +c +j +o {
@@ -80,5 +89,6 @@ renderer_interface = interface +c +j +o {
 camera_interface = interface +c +j +o {
     get_vp_matrix() : list<f32>;
     get_scaling_factor(): f64;
+    get_origin(): vec_3_d;
     viewport_size_changed();
 }

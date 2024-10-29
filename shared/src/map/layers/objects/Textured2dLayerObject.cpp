@@ -16,26 +16,36 @@
 #include <cmath>
 #include <cassert>
 
-Textured2dLayerObject::Textured2dLayerObject(std::shared_ptr<Quad2dInterface> quad, const std::shared_ptr<AlphaShaderInterface> &shader,
-                                             const std::shared_ptr<MapInterface> &mapInterface)
-        : quad(quad), shader(shader), rasterShader(nullptr), mapInterface(mapInterface), conversionHelper(mapInterface->getCoordinateConverterHelper()),
-renderConfig(std::make_shared<RenderConfig>(quad->asGraphicsObject(), 0)), graphicsObject(quad->asGraphicsObject()), renderObject(std::make_shared<RenderObject>(graphicsObject))
- {}
+Textured2dLayerObject::Textured2dLayerObject(std::shared_ptr<Quad2dInterface> quad,
+                                             const std::shared_ptr<AlphaShaderInterface> &shader,
+                                             const std::shared_ptr<MapInterface> &mapInterface,
+                                             bool is3d)
+        : quad(quad), shader(shader), rasterShader(nullptr), mapInterface(mapInterface),
+          conversionHelper(mapInterface->getCoordinateConverterHelper()),
+          renderConfig(std::make_shared<RenderConfig>(quad->asGraphicsObject(), 0)), graphicsObject(quad->asGraphicsObject()),
+          renderObject(std::make_shared<RenderObject>(graphicsObject)),
+          is3d(is3d) {}
 
 
-Textured2dLayerObject::Textured2dLayerObject(std::shared_ptr<Quad2dInterface> quad, 
-                      const std::shared_ptr<RasterShaderInterface> &rasterShader,
-                      const std::shared_ptr<MapInterface> &mapInterface)
-: quad(quad), shader(nullptr), rasterShader(rasterShader), mapInterface(mapInterface), conversionHelper(mapInterface->getCoordinateConverterHelper()),
-renderConfig(std::make_shared<RenderConfig>(quad->asGraphicsObject(), 0)), graphicsObject(quad->asGraphicsObject()), renderObject(std::make_shared<RenderObject>(graphicsObject))
- {}
+Textured2dLayerObject::Textured2dLayerObject(std::shared_ptr<Quad2dInterface> quad,
+                                             const std::shared_ptr<RasterShaderInterface> &rasterShader,
+                                             const std::shared_ptr<MapInterface> &mapInterface,
+                                             bool is3d)
+        : quad(quad), shader(nullptr), rasterShader(rasterShader), mapInterface(mapInterface),
+          conversionHelper(mapInterface->getCoordinateConverterHelper()),
+          renderConfig(std::make_shared<RenderConfig>(quad->asGraphicsObject(), 0)), graphicsObject(quad->asGraphicsObject()),
+          renderObject(std::make_shared<RenderObject>(graphicsObject)),
+          is3d(is3d) {}
 
 
-Textured2dLayerObject::Textured2dLayerObject(std::shared_ptr<Quad2dInterface> quad, 
-                                             const std::shared_ptr<MapInterface> &mapInterface) 
-: quad(quad), shader(nullptr), rasterShader(nullptr), mapInterface(mapInterface), conversionHelper(mapInterface->getCoordinateConverterHelper()),
-renderConfig(std::make_shared<RenderConfig>(quad->asGraphicsObject(), 0)), graphicsObject(quad->asGraphicsObject()), renderObject(std::make_shared<RenderObject>(graphicsObject))
- {}
+Textured2dLayerObject::Textured2dLayerObject(std::shared_ptr<Quad2dInterface> quad,
+                                             const std::shared_ptr<MapInterface> &mapInterface,
+                                             bool is3d)
+        : quad(quad), shader(nullptr), rasterShader(nullptr), mapInterface(mapInterface),
+          conversionHelper(mapInterface->getCoordinateConverterHelper()),
+          renderConfig(std::make_shared<RenderConfig>(quad->asGraphicsObject(), 0)), graphicsObject(quad->asGraphicsObject()),
+          renderObject(std::make_shared<RenderObject>(graphicsObject)),
+          is3d(is3d) {}
 
 void Textured2dLayerObject::setRectCoord(const ::RectCoord &rectCoord) {
     auto width = rectCoord.bottomRight.x - rectCoord.topLeft.x;
@@ -51,12 +61,33 @@ void Textured2dLayerObject::setPosition(const ::Coord &coord, double width, doub
 
 void Textured2dLayerObject::setPositions(const ::QuadCoord &coords) {
     QuadCoord renderCoords = conversionHelper->convertQuadToRenderSystem(coords);
-    setFrame(Quad2dD(Vec2D(renderCoords.topLeft.x, renderCoords.topLeft.y), Vec2D(renderCoords.topRight.x, renderCoords.topRight.y),
-                     Vec2D(renderCoords.bottomRight.x, renderCoords.bottomRight.y),
-                     Vec2D(renderCoords.bottomLeft.x, renderCoords.bottomLeft.y)));
+
+    const double cx = (renderCoords.bottomRight.x + renderCoords.topLeft.x) / 2.0;
+    const double cy = (renderCoords.bottomRight.y + renderCoords.topLeft.y) / 2.0;
+    const double cz = 0.0;
+
+    auto origin = Vec3D(cx, cy, cz);
+
+    if (is3d) {
+        origin.x = 1.0 * sin(cy) * cos(cx);
+        origin.y = 1.0 * cos(cy);
+        origin.z = -1.0 * sin(cy) * sin(cx);
+    }
+
+    auto transform = [&origin](const Coord coordinate) -> Vec3D {
+        const double x = coordinate.x;
+        const double y = coordinate.y;
+        const double z = coordinate.z;
+        return Vec3D(x, y, z);
+    };
+
+    setFrame(Quad3dD(transform(renderCoords.topLeft),
+                     transform(renderCoords.topRight),
+                     transform(renderCoords.bottomRight),
+                     transform(renderCoords.bottomLeft)), origin);
 }
 
-void Textured2dLayerObject::setFrame(const ::Quad2dD &frame) { quad->setFrame(frame, RectD(0, 0, 1, 1)); }
+void Textured2dLayerObject::setFrame(const ::Quad3dD &frame, const ::Vec3D & origin) { quad->setFrame(frame, RectD(0, 0, 1, 1), origin, is3d); }
 
 void Textured2dLayerObject::update() {
     if (animation) {
@@ -116,4 +147,14 @@ void Textured2dLayerObject::beginStyleAnimation(RasterShaderStyle start, RasterS
                                                   });
     animation->start();
     mapInterface->invalidate();
+}
+
+std::shared_ptr<ShaderProgramInterface> Textured2dLayerObject::getShader() {
+    if (rasterShader) {
+        return rasterShader->asShaderProgramInterface();
+    }
+    if (shader) {
+        return shader->asShaderProgramInterface();
+    }
+    return nullptr;
 }

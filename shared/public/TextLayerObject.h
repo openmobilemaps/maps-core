@@ -28,7 +28,7 @@
 #include "Vec2F.h"
 #include "RectD.h"
 #include "FontData.h"
-#include "MapCamera2dInterface.h"
+#include "MapCameraInterface.h"
 #include "Quad2dD.h"
 #include "SymbolAlignment.h"
 
@@ -106,7 +106,7 @@ class TextLayerObject : public LayerObjectInterface {
     double maxCharacterAngle;
     float spaceAdvance = 0.0f;
     std::shared_ptr<CoordinateConversionHelperInterface> converter;
-    std::shared_ptr<MapCamera2dInterface> camera;
+    std::shared_ptr<MapCameraInterface> camera;
     std::optional<std::vector<::Coord>> lineCoordinates;
     std::vector<::Coord> renderLineCoordinates;
 

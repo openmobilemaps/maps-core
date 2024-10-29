@@ -9,10 +9,11 @@
 #import "DJIObjcWrapperCache+Private.h"
 #import "MCGraphicsObjectInterface+Private.h"
 #import "MCMaskingObjectInterface+Private.h"
-#import "MCQuad2dD+Private.h"
+#import "MCQuad3dD+Private.h"
 #import "MCRectD+Private.h"
 #import "MCRenderingContextInterface+Private.h"
 #import "MCTextureHolderInterface+Private.h"
+#import "MCVec3D+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -37,11 +38,21 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     return self;
 }
 
-- (void)setFrame:(nonnull MCQuad2dD *)frame
-textureCoordinates:(nonnull MCRectD *)textureCoordinates {
+- (void)setFrame:(nonnull MCQuad3dD *)frame
+textureCoordinates:(nonnull MCRectD *)textureCoordinates
+          origin:(nonnull MCVec3D *)origin
+            is3d:(BOOL)is3d {
     try {
-        _cppRefHandle.get()->setFrame(::djinni_generated::Quad2dD::toCpp(frame),
-                                      ::djinni_generated::RectD::toCpp(textureCoordinates));
+        _cppRefHandle.get()->setFrame(::djinni_generated::Quad3dD::toCpp(frame),
+                                      ::djinni_generated::RectD::toCpp(textureCoordinates),
+                                      ::djinni_generated::Vec3D::toCpp(origin),
+                                      ::djinni::Bool::toCpp(is3d));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)setSubdivisionFactor:(int32_t)factor {
+    try {
+        _cppRefHandle.get()->setSubdivisionFactor(::djinni::I32::toCpp(factor));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -82,11 +93,19 @@ class Quad2dInterface::ObjcProxy final
     friend class ::djinni_generated::Quad2dInterface;
 public:
     using ObjcProxyBase::ObjcProxyBase;
-    void setFrame(const ::Quad2dD & c_frame, const ::RectD & c_textureCoordinates) override
+    void setFrame(const ::Quad3dD & c_frame, const ::RectD & c_textureCoordinates, const ::Vec3D & c_origin, bool c_is3d) override
     {
         @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() setFrame:(::djinni_generated::Quad2dD::fromCpp(c_frame))
-                                            textureCoordinates:(::djinni_generated::RectD::fromCpp(c_textureCoordinates))];
+            [djinni_private_get_proxied_objc_object() setFrame:(::djinni_generated::Quad3dD::fromCpp(c_frame))
+                                            textureCoordinates:(::djinni_generated::RectD::fromCpp(c_textureCoordinates))
+                                                        origin:(::djinni_generated::Vec3D::fromCpp(c_origin))
+                                                          is3d:(::djinni::Bool::fromCpp(c_is3d))];
+        }
+    }
+    void setSubdivisionFactor(int32_t c_factor) override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() setSubdivisionFactor:(::djinni::I32::fromCpp(c_factor))];
         }
     }
     void loadTexture(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & c_context, const /*not-null*/ std::shared_ptr<::TextureHolderInterface> & c_textureHolder) override

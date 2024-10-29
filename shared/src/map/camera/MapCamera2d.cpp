@@ -20,6 +20,7 @@
 #include "Vec2DHelper.h"
 #include "Vec2FHelper.h"
 #include "Logger.h"
+#include "VectorHelper.h"
 
 #define DEFAULT_ANIM_LENGTH 300
 #define ROTATION_THRESHOLD 20
@@ -247,9 +248,9 @@ void MapCamera2d::setRotation(float angle, bool animated) {
 
     if (animated) {
         double currentAngle = fmod(this->angle, 360.0);
-        if (abs(currentAngle - newAngle) > abs(currentAngle - (newAngle + 360.0))) {
+        if (std::abs(currentAngle - newAngle) > std::abs(currentAngle - (newAngle + 360.0))) {
             newAngle += 360.0;
-        } else if (abs(currentAngle - newAngle) > abs(currentAngle - (newAngle - 360.0))) {
+        } else if (std::abs(currentAngle - newAngle) > std::abs(currentAngle - (newAngle - 360.0))) {
             newAngle -= 360.0;
         }
 
@@ -353,14 +354,14 @@ void MapCamera2d::setPaddingBottom(float padding) {
     }
 }
 
-void MapCamera2d::addListener(const std::shared_ptr<MapCamera2dListenerInterface> &listener) {
+void MapCamera2d::addListener(const std::shared_ptr<MapCameraListenerInterface> &listener) {
     std::lock_guard<std::recursive_mutex> lock(listenerMutex);
     if (listeners.count(listener) == 0) {
         listeners.insert(listener);
     }
 }
 
-void MapCamera2d::removeListener(const std::shared_ptr<MapCamera2dListenerInterface> &listener) {
+void MapCamera2d::removeListener(const std::shared_ptr<MapCameraListenerInterface> &listener) {
     std::lock_guard<std::recursive_mutex> lock(listenerMutex);
     if (listeners.count(listener) > 0) {
         listeners.erase(listener);
@@ -370,16 +371,6 @@ void MapCamera2d::removeListener(const std::shared_ptr<MapCamera2dListenerInterf
 std::shared_ptr<::CameraInterface> MapCamera2d::asCameraInterface() { return shared_from_this(); }
 
 std::vector<float> MapCamera2d::getVpMatrix() {
-    {
-        std::lock_guard<std::recursive_mutex> lock(animationMutex);
-        if (zoomAnimation)
-            std::static_pointer_cast<AnimationInterface>(zoomAnimation)->update();
-        if (rotationAnimation)
-            std::static_pointer_cast<AnimationInterface>(rotationAnimation)->update();
-        if (coordAnimation)
-            std::static_pointer_cast<AnimationInterface>(coordAnimation)->update();
-    }
-
     Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
     double currentRotation = angle;
     double currentZoom = zoom;
@@ -387,6 +378,7 @@ std::vector<float> MapCamera2d::getVpMatrix() {
     RectCoord viewBounds = getRectFromViewport(sizeViewport, centerPosition);
 
     Coord renderCoordCenter = conversionHelper->convertToRenderSystem(centerPosition);
+
 
     Matrix::setIdentityM(newVpMatrix, 0);
 
@@ -399,13 +391,22 @@ std::vector<float> MapCamera2d::getVpMatrix() {
 
     Matrix::rotateM(newVpMatrix, 0.0, currentRotation, 0.0, 0.0, 1.0);
 
-    Matrix::translateM(newVpMatrix, 0, -renderCoordCenter.x, -renderCoordCenter.y, 0);
-
     std::lock_guard<std::recursive_mutex> lock(vpDataMutex);
+
+    origin.x  = renderCoordCenter.x;
+    origin.y  = renderCoordCenter.y;
+
     lastVpBounds = viewBounds;
     lastVpRotation = currentRotation;
     lastVpZoom = currentZoom;
     return newVpMatrix;
+}
+
+std::optional<std::vector<double>> MapCamera2d::getLastVpMatrixD() {
+    if (!lastVpBounds) {
+        return std::nullopt;
+    }
+    return VectorHelper::convertToDouble(newVpMatrix);
 }
 
 std::optional<std::vector<float>> MapCamera2d::getLastVpMatrix() {
@@ -415,6 +416,10 @@ std::optional<std::vector<float>> MapCamera2d::getLastVpMatrix() {
     std::vector<float> vpCopy;
     std::copy(newVpMatrix.begin(), newVpMatrix.end(), std::back_inserter(vpCopy));
     return vpCopy;
+}
+
+Vec3D MapCamera2d::getOrigin() {
+    return origin;
 }
 
 std::optional<::RectCoord> MapCamera2d::getLastVpMatrixViewBounds() {
@@ -433,7 +438,19 @@ std::optional<float> MapCamera2d::getLastVpMatrixZoom() {
 }
 
 /** this method is called just before the update methods on all layers */
-void MapCamera2d::update() { inertiaStep(); }
+void MapCamera2d::update() {
+    inertiaStep();
+
+    {
+        std::lock_guard<std::recursive_mutex> lock(animationMutex);
+        if (zoomAnimation)
+            std::static_pointer_cast<AnimationInterface>(zoomAnimation)->update();
+        if (rotationAnimation)
+            std::static_pointer_cast<AnimationInterface>(rotationAnimation)->update();
+        if (coordAnimation)
+            std::static_pointer_cast<AnimationInterface>(coordAnimation)->update();
+    }
+}
 
 std::vector<float> MapCamera2d::getInvariantModelMatrix(const ::Coord &coordinate, bool scaleInvariant, bool rotationInvariant) {
     Coord renderCoord = conversionHelper->convertToRenderSystem(coordinate);
@@ -837,6 +854,21 @@ Coord MapCamera2d::coordFromScreenPosition(const ::Vec2F &posScreen) {
     return screenPosFromCoordZoom(coord, zoom);
 }
 
+bool MapCamera2d::coordIsVisibleOnScreen(const ::Coord & coord, float paddingPc) {
+    auto screenPos = screenPosFromCoord(coord);
+    Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
+    auto minX = sizeViewport.x * paddingPc * 0.5;
+    auto maxX = sizeViewport.x - minX;
+    auto minY = sizeViewport.y * paddingPc * 0.5;
+    auto maxY = sizeViewport.y - minY;
+
+    if (sizeViewport.x != 0 && sizeViewport.y != 0) {
+        return screenPos.x >= minX && screenPos.x <= maxX && screenPos.y >= minY && screenPos.y <= maxY;
+    } else {
+        return false;
+    }
+}
+
 double MapCamera2d::mapUnitsFromPixels(double distancePx) { return distancePx * screenPixelAsRealMeterFactor * zoom; }
 
 double MapCamera2d::getScalingFactor() { return mapUnitsFromPixels(1.0); }
@@ -1024,3 +1056,11 @@ void MapCamera2d::setBoundsRestrictWholeVisibleRect(bool enabled) {
 }
 
 float MapCamera2d::getScreenDensityPpi() { return screenDensityPpi; }
+
+std::shared_ptr<MapCamera3dInterface> MapCamera2d::asMapCamera3d() {
+    return nullptr;
+}
+
+void MapCamera2d::notifyListenerBoundsChange() {
+    notifyListeners(ListenerType::BOUNDS);
+}

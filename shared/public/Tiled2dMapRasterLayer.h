@@ -26,6 +26,7 @@
 #include <map>
 #include <atomic>
 #include "Actor.h"
+#include "VectorSet.h"
 
 
 class Tiled2dMapRasterLayer : public Tiled2dMapLayer,
@@ -102,9 +103,14 @@ public:
 
     virtual std::shared_ptr<::Tiled2dMapLayerConfig> getConfig() override;
                                   
-    void onTilesUpdated(const std::string &layerName, std::unordered_set<Tiled2dMapRasterTileInfo> currentTileInfos) override;
+    void onTilesUpdated(const std::string &layerName, VectorSet<Tiled2dMapRasterTileInfo> currentTileInfos) override;
 
     virtual void setReadyStateListener(const /*not-null*/ std::shared_ptr<::Tiled2dMapReadyStateListener> & listener) override;
+
+    void set3dSubdivisionFactor(int32_t factor) override;
+
+    void setBlendMode(::BlendMode blendMode) override;
+
 private:
     virtual void enableAnimations(bool enabled) override;
 
@@ -134,6 +140,8 @@ protected:
     bool animationsEnabled = true;
     bool registerToTouchHandler = true;
 
+    ::BlendMode blendMode = BlendMode::NORMAL;
+
     std::vector<std::shared_ptr<MaskingObjectInterface>> newMaskObjects;
     std::vector<std::shared_ptr<MaskingObjectInterface>> obsoleteMaskObjects;
     std::vector<std::pair<Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>>> tilesToSetup;
@@ -143,4 +151,9 @@ protected:
     void updateReadyStateListenerIfNeeded();
     std::optional<LayerReadyState> lastReadyState;
     std::shared_ptr<::Tiled2dMapReadyStateListener> readyStateListener;
+
+private:
+    const static int32_t SUBDIVISION_FACTOR_3D_DEFAULT = 3;
+
+    int32_t subdivisionFactor = SUBDIVISION_FACTOR_3D_DEFAULT;
 };

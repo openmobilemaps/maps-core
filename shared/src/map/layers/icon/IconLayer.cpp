@@ -11,13 +11,15 @@
 #include "IconLayer.h"
 #include "CameraInterface.h"
 #include "LambdaTask.h"
-#include "MapCamera2dInterface.h"
+#include "MapCameraInterface.h"
 #include "RenderObject.h"
 #include "RenderPass.h"
 #include "BlendMode.h"
 #include "Logger.h"
 #include "CoordinateSystemIdentifiers.h"
 #include "Matrix.h"
+#include "MapConfig.h"
+#include "Vec2FHelper.h"
 #include <IconType.h>
 
 IconLayer::IconLayer()
@@ -151,11 +153,18 @@ void IconLayer::addIcons(const std::vector<std::shared_ptr<IconInfoInterface>> &
     std::vector<std::pair<std::shared_ptr<IconInfoInterface>, std::shared_ptr<Textured2dLayerObject>>> iconObjects;
 
     for (const auto &icon : iconsToAdd) {
-        auto shader = shaderFactory->createAlphaShader();
+        auto shader = is3D ? shaderFactory->createUnitSphereAlphaShader() : shaderFactory->createAlphaShader();
         shader->asShaderProgramInterface()->setBlendMode(icon->getBlendMode());
         auto quadObject = objectFactory->createQuad(shader->asShaderProgramInterface());
+        if (is3D) {
+            quadObject->setSubdivisionFactor(SUBDIVISION_FACTOR_3D_DEFAULT);
+        }
 
-        auto iconObject = std::make_shared<Textured2dLayerObject>(quadObject, shader, mapInterface);
+#if DEBUG
+        quadObject->asGraphicsObject()->setDebugLabel("IconLayerID:" + icon->getIdentifier());
+#endif
+
+        auto iconObject = std::make_shared<Textured2dLayerObject>(quadObject, shader, mapInterface, is3D);
 
         updateIconPosition(conversionHelper, icon, iconObject);
         iconObjects.push_back(std::make_pair(icon, iconObject));
@@ -189,7 +198,7 @@ void IconLayer::setupIconObjects(
         return;
     }
 
-    for (const auto iconPair : iconObjects) {
+    for (const auto &iconPair : iconObjects) {
         const auto &icon = iconPair.first;
         const auto &iconObject = iconPair.second;
 
@@ -278,21 +287,45 @@ void IconLayer::update() {
 void IconLayer::updateIconPosition(const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                                    const std::shared_ptr<IconInfoInterface> &iconInfo,
                                    const std::shared_ptr<Textured2dLayerObject> &iconObject) {
-    Coord iconPosRender = conversionHelper->convertToRenderSystem(iconInfo->getCoordinate());
-    if (iconInfo->getType() != IconType::FIXED) {
+    auto mapInterface = this->mapInterface;
+    auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
+    if (!camera) {
+        return;
+    }
+
+    Vec2F iconSize = iconInfo->getIconSize();
+    const Coord origIconPosRender = conversionHelper->convertToRenderSystem(iconInfo->getCoordinate());
+    Coord iconPosRender = origIconPosRender;
+
+    const auto &iconType = iconInfo->getType();
+    if (iconType != IconType::FIXED) {
         iconPosRender.x = 0;
         iconPosRender.y = 0;
     }
+
+    if (iconType != IconType::INVARIANT && iconType != IconType::SCALE_INVARIANT){
+        // Size is expected in meters
+        float meterToMapUnit = mapInterface->getMapConfig().mapCoordinateSystem.unitToScreenMeterFactor;
+        iconSize = iconSize * meterToMapUnit;
+    }
+
     const Vec2F &anchor = iconInfo->getIconAnchor();
     float ratioLeftRight = std::clamp(anchor.x, 0.0f, 1.0f);
     float ratioTopBottom = std::clamp(anchor.y, 0.0f, 1.0f);
-    float leftW = iconInfo->getIconSize().x * ratioLeftRight;
-    float topH = iconInfo->getIconSize().y * ratioTopBottom;
-    float rightW = iconInfo->getIconSize().x * (1.0f - ratioLeftRight);
-    float bottomH = iconInfo->getIconSize().y * (1.0f - ratioTopBottom);
+    float leftW = iconSize.x * ratioLeftRight;
+    float topH = iconSize.y * (is3D ? ratioTopBottom : (1.0f - ratioTopBottom));
+    float rightW = iconSize.x * (1.0f - ratioLeftRight);
+    float bottomH = iconSize.y * (is3D ? (1.0f - ratioTopBottom) : ratioTopBottom);
+
+    if (is3D) {
+        float scaleFactor = 1.0 / std::abs(cos(origIconPosRender.y + (M_PI / 2.0)));
+        leftW *= scaleFactor;
+        rightW *= scaleFactor;
+    }
+
     iconObject->setRectCoord(
-            RectCoord(Coord(iconPosRender.systemIdentifier, iconPosRender.x - leftW, iconPosRender.y - topH, iconPosRender.y),
-                      Coord(iconPosRender.systemIdentifier, iconPosRender.x + rightW, iconPosRender.y + bottomH, iconPosRender.y)));
+            RectCoord(Coord(iconPosRender.systemIdentifier, iconPosRender.x - leftW, iconPosRender.y + topH, iconPosRender.z),
+                      Coord(iconPosRender.systemIdentifier, iconPosRender.x + rightW, iconPosRender.y - bottomH, iconPosRender.z)));
 }
 
 std::vector<std::shared_ptr<::RenderPassInterface>> IconLayer::buildRenderPasses() {
@@ -361,6 +394,7 @@ void IconLayer::preGenerateRenderPasses() {
 
 void IconLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface, int32_t layerIndex) {
     this->mapInterface = mapInterface;
+    is3D = mapInterface->is3d();
     {
         std::scoped_lock<std::recursive_mutex> lock(addingQueueMutex);
         if (!addingQueue.empty()) {
