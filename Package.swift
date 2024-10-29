@@ -116,9 +116,6 @@ let package = Package(
             exclude: ["readme.md"],
             resources: [
                 .process("graphics/Shader/Metal/"),
-            ],
-            swiftSettings: [
-                .unsafeFlags(["-Xfrontend", "-strict-concurrency=complete"]),
             ]
         ),
         .target(
@@ -127,10 +124,7 @@ let package = Package(
                 "MapCoreSharedModuleCpp",
             ],
             path: "bridging/ios",
-            publicHeadersPath: "",
-            swiftSettings: [
-                .unsafeFlags(["-Xfrontend", "-strict-concurrency=complete"])
-            ]
+            publicHeadersPath: ""
         ),
         .target(
             name: "MapCoreSharedModuleCpp",
