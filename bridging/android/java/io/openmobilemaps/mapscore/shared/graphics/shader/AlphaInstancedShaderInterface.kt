@@ -10,7 +10,7 @@ abstract class AlphaInstancedShaderInterface {
 
     abstract fun asShaderProgramInterface(): ShaderProgramInterface
 
-    private class CppProxy : AlphaInstancedShaderInterface {
+    public class CppProxy : AlphaInstancedShaderInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

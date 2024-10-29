@@ -35,7 +35,7 @@ abstract class LineLayerInterface {
 
     abstract fun setLayerClickable(isLayerClickable: Boolean)
 
-    private class CppProxy : LineLayerInterface {
+    public class CppProxy : LineLayerInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

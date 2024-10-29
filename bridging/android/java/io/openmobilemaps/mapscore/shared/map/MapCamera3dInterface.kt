@@ -8,15 +8,11 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class MapCamera3dInterface {
 
-    abstract fun setCameraMode(mode: CameraMode3d)
-
-    abstract fun getCameraMode(): CameraMode3d
-
     abstract fun getCameraConfig(): Camera3dConfig
 
     abstract fun setCameraConfig(config: Camera3dConfig, durationSeconds: Float?, targetZoom: Float?, targetCoordinate: io.openmobilemaps.mapscore.shared.map.coordinates.Coord?)
 
-    private class CppProxy : MapCamera3dInterface {
+    public class CppProxy : MapCamera3dInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 
@@ -30,18 +26,6 @@ abstract class MapCamera3dInterface {
             @JvmStatic
             external fun nativeDestroy(nativeRef: Long)
         }
-
-        override fun setCameraMode(mode: CameraMode3d) {
-            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_setCameraMode(this.nativeRef, mode)
-        }
-        private external fun native_setCameraMode(_nativeRef: Long, mode: CameraMode3d)
-
-        override fun getCameraMode(): CameraMode3d {
-            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            return native_getCameraMode(this.nativeRef)
-        }
-        private external fun native_getCameraMode(_nativeRef: Long): CameraMode3d
 
         override fun getCameraConfig(): Camera3dConfig {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

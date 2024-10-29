@@ -3,7 +3,6 @@
 
 #pragma once
 
-#include "CameraMode3d.h"
 #include "Coord.h"
 #include "RectCoord.h"
 #include "Vec3D.h"
@@ -19,5 +18,5 @@ public:
 
     virtual void onMapInteraction() = 0;
 
-    virtual void onCameraChange(const std::vector<float> & viewMatrix, const std::vector<float> & projectionMatrix, const ::Vec3D & origin, float verticalFov, float horizontalFov, float width, float height, float focusPointAltitude, const ::Coord & focusPointPosition, float zoom, ::CameraMode3d mode) = 0;
+    virtual void onCameraChange(const std::vector<float> & viewMatrix, const std::vector<float> & projectionMatrix, const ::Vec3D & origin, float verticalFov, float horizontalFov, float width, float height, float focusPointAltitude, const ::Coord & focusPointPosition, float zoom) = 0;
 };

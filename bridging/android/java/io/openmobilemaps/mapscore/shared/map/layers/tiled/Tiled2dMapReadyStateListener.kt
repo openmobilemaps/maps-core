@@ -10,7 +10,7 @@ abstract class Tiled2dMapReadyStateListener {
 
     abstract fun stateUpdate(state: io.openmobilemaps.mapscore.shared.map.LayerReadyState)
 
-    private class CppProxy : Tiled2dMapReadyStateListener {
+    public class CppProxy : Tiled2dMapReadyStateListener {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

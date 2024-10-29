@@ -12,7 +12,7 @@ abstract class PolygonGroup2dInterface {
 
     abstract fun asGraphicsObject(): GraphicsObjectInterface
 
-    private class CppProxy : PolygonGroup2dInterface {
+    public class CppProxy : PolygonGroup2dInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

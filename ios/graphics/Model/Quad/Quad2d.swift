@@ -74,7 +74,7 @@ final class Quad2d: BaseGraphicsObject, @unchecked Sendable {
                          renderPass: MCRenderPassConfig,
                          vpMatrix: Int64,
                          mMatrix: Int64,
-                origin: MCVec3D,
+                         origin: MCVec3D,
                          isMasked: Bool,
                          screenPixelAsRealMeterFactor _: Double) {
         lock.lock()

@@ -14,7 +14,7 @@ abstract class CoordinateConverterInterface {
 
     abstract fun getTo(): Int
 
-    private class CppProxy : CoordinateConverterInterface {
+    public class CppProxy : CoordinateConverterInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

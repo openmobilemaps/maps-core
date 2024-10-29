@@ -12,7 +12,7 @@ abstract class IndexedLayerInterface {
 
     abstract fun getIndex(): Int
 
-    private class CppProxy : IndexedLayerInterface {
+    public class CppProxy : IndexedLayerInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

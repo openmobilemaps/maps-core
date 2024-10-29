@@ -45,6 +45,8 @@ public:
 
     void addTaskIgnoringDelay(const std::shared_ptr<TaskInterface> & task);
 
+    static void setCurrentThreadName(const std::string& name);
+
 private:
     std::thread makeSchedulerThread(size_t index, TaskPriority priority);
     std::thread makeDelayedTasksThread();

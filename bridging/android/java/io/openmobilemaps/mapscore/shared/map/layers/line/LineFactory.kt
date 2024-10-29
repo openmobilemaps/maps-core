@@ -13,7 +13,7 @@ abstract class LineFactory {
         external fun createLine(identifier: String, coordinates: ArrayList<io.openmobilemaps.mapscore.shared.map.coordinates.Coord>, style: LineStyle): LineInfoInterface
     }
 
-    private class CppProxy : LineFactory {
+    public class CppProxy : LineFactory {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

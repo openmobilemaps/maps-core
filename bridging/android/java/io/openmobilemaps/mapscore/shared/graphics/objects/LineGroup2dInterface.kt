@@ -12,7 +12,7 @@ abstract class LineGroup2dInterface {
 
     abstract fun asGraphicsObject(): GraphicsObjectInterface
 
-    private class CppProxy : LineGroup2dInterface {
+    public class CppProxy : LineGroup2dInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

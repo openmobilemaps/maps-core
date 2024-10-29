@@ -17,7 +17,7 @@
 #include <pthread.h>
 #endif
 
-static void setCurrentThreadName(const std::string& name) {
+void ThreadPoolSchedulerImpl::setCurrentThreadName(const std::string& name) {
 #ifdef __linux__
     // Linux and Android use prctl to set thread name
     if (prctl(PR_SET_NAME, name.c_str()) == -1) {
@@ -28,6 +28,7 @@ static void setCurrentThreadName(const std::string& name) {
     pthread_setname_np(name.c_str());
 #endif
 }
+
 std::shared_ptr<SchedulerInterface> ThreadPoolScheduler::create() {
     return std::make_shared<ThreadPoolSchedulerImpl>();
 }
@@ -152,8 +153,8 @@ void ThreadPoolSchedulerImpl::destroy() {
 
 std::thread ThreadPoolSchedulerImpl::makeSchedulerThread(size_t index, TaskPriority priority) {
     return std::thread([this, index, priority] {
-        setCurrentThreadName(std::string{"MapSDK_"} + std::to_string(index) + "_" + std::string(toString(priority)));
-        
+        ThreadPoolSchedulerImpl::setCurrentThreadName(std::string{"MapSDK_"} + std::to_string(index) + "_" + std::string(toString(priority)));
+
         while (true) {
             std::unique_lock<std::mutex> lock(defaultMutex);
             
@@ -221,7 +222,7 @@ bool ThreadPoolSchedulerImpl::runGraphicsTasks() {
 
 std::thread ThreadPoolSchedulerImpl::makeDelayedTasksThread() {
     return std::thread([this] {
-        setCurrentThreadName(std::string{"MapSDK_delayed_tasks"});
+        ThreadPoolSchedulerImpl::setCurrentThreadName(std::string{"MapSDK_delayed_tasks"});
 
         while (true) {
             std::unique_lock<std::mutex> lock(delayedTasksMutex);

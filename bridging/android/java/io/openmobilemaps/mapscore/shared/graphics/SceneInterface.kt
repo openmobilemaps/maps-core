@@ -40,7 +40,7 @@ abstract class SceneInterface {
 
     abstract fun invalidate()
 
-    private class CppProxy : SceneInterface {
+    public class CppProxy : SceneInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

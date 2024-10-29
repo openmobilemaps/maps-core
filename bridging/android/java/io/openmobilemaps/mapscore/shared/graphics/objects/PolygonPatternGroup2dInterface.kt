@@ -25,7 +25,7 @@ abstract class PolygonPatternGroup2dInterface {
 
     abstract fun asGraphicsObject(): GraphicsObjectInterface
 
-    private class CppProxy : PolygonPatternGroup2dInterface {
+    public class CppProxy : PolygonPatternGroup2dInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

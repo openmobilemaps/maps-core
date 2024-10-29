@@ -10,7 +10,7 @@ abstract class TextInstancedShaderInterface {
 
     abstract fun asShaderProgramInterface(): ShaderProgramInterface
 
-    private class CppProxy : TextInstancedShaderInterface {
+    public class CppProxy : TextInstancedShaderInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

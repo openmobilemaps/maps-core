@@ -16,7 +16,7 @@ abstract class RenderObjectInterface {
 
     abstract fun getCustomModelMatrix(): ArrayList<Float>
 
-    private class CppProxy : RenderObjectInterface {
+    public class CppProxy : RenderObjectInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

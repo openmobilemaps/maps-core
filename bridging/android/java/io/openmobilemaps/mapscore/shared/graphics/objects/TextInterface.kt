@@ -16,7 +16,7 @@ abstract class TextInterface {
 
     abstract fun asGraphicsObject(): GraphicsObjectInterface
 
-    private class CppProxy : TextInterface {
+    public class CppProxy : TextInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

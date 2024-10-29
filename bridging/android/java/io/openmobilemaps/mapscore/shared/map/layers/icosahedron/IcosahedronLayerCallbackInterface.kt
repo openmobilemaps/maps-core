@@ -10,7 +10,7 @@ abstract class IcosahedronLayerCallbackInterface {
 
     abstract fun getData(): com.snapchat.djinni.Future<java.nio.ByteBuffer>
 
-    private class CppProxy : IcosahedronLayerCallbackInterface {
+    public class CppProxy : IcosahedronLayerCallbackInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

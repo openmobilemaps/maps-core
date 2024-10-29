@@ -14,7 +14,7 @@ abstract class Polygon2dInterface {
 
     abstract fun asMaskingObject(): MaskingObjectInterface
 
-    private class CppProxy : Polygon2dInterface {
+    public class CppProxy : Polygon2dInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

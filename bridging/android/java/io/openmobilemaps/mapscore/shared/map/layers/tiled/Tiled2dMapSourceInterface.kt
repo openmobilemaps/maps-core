@@ -32,7 +32,7 @@ abstract class Tiled2dMapSourceInterface {
 
     abstract fun notifyTilesUpdates()
 
-    private class CppProxy : Tiled2dMapSourceInterface {
+    public class CppProxy : Tiled2dMapSourceInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

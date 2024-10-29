@@ -25,7 +25,7 @@ abstract class CoordinateSystemFactory {
         external fun getUnitSphereSystem(): MapCoordinateSystem
     }
 
-    private class CppProxy : CoordinateSystemFactory {
+    public class CppProxy : CoordinateSystemFactory {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

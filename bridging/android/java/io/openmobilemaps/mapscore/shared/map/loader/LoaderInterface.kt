@@ -18,7 +18,7 @@ abstract class LoaderInterface {
 
     abstract fun cancel(url: String)
 
-    private class CppProxy : LoaderInterface {
+    public class CppProxy : LoaderInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

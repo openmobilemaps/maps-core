@@ -16,7 +16,7 @@ abstract class Camera3dConfigFactory {
         external fun getRestorConfig(): Camera3dConfig
     }
 
-    private class CppProxy : Camera3dConfigFactory {
+    public class CppProxy : Camera3dConfigFactory {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

@@ -13,7 +13,7 @@ abstract class ThreadPoolScheduler {
         external fun create(): SchedulerInterface
     }
 
-    private class CppProxy : ThreadPoolScheduler {
+    public class CppProxy : ThreadPoolScheduler {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

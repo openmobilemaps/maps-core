@@ -10,7 +10,7 @@ abstract class ErrorManagerListener {
 
     abstract fun onTiledLayerErrorStateChanged(errors: ArrayList<TiledLayerError>)
 
-    private class CppProxy : ErrorManagerListener {
+    public class CppProxy : ErrorManagerListener {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

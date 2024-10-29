@@ -7,7 +7,6 @@
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
 #import "MCCamera3dConfig+Private.h"
-#import "MCCameraMode3d+Private.h"
 #import "MCCoord+Private.h"
 #include <exception>
 #include <stdexcept>
@@ -31,19 +30,6 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
         _cppRefHandle.assign(cppRef);
     }
     return self;
-}
-
-- (void)setCameraMode:(MCCameraMode3d)mode {
-    try {
-        _cppRefHandle.get()->setCameraMode(::djinni::Enum<::CameraMode3d, MCCameraMode3d>::toCpp(mode));
-    } DJINNI_TRANSLATE_EXCEPTIONS()
-}
-
-- (MCCameraMode3d)getCameraMode {
-    try {
-        auto objcpp_result_ = _cppRefHandle.get()->getCameraMode();
-        return ::djinni::Enum<::CameraMode3d, MCCameraMode3d>::fromCpp(objcpp_result_);
-    } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
 - (nonnull MCCamera3dConfig *)getCameraConfig {

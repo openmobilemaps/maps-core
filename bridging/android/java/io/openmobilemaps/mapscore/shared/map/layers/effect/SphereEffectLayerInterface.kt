@@ -15,7 +15,7 @@ abstract class SphereEffectLayerInterface {
 
     abstract fun asLayerInterface(): io.openmobilemaps.mapscore.shared.map.LayerInterface
 
-    private class CppProxy : SphereEffectLayerInterface {
+    public class CppProxy : SphereEffectLayerInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

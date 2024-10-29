@@ -14,7 +14,7 @@ abstract class LineGroupShaderInterface {
 
     abstract fun asShaderProgramInterface(): ShaderProgramInterface
 
-    private class CppProxy : LineGroupShaderInterface {
+    public class CppProxy : LineGroupShaderInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

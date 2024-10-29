@@ -10,7 +10,7 @@ abstract class ComputeObjectInterface {
 
     abstract fun compute(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, screenPixelAsRealMeterFactor: Double)
 
-    private class CppProxy : ComputeObjectInterface {
+    public class CppProxy : ComputeObjectInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

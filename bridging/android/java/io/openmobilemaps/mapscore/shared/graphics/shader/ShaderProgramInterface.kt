@@ -16,7 +16,7 @@ abstract class ShaderProgramInterface {
 
     abstract fun setBlendMode(blendMode: BlendMode)
 
-    private class CppProxy : ShaderProgramInterface {
+    public class CppProxy : ShaderProgramInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

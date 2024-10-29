@@ -17,7 +17,7 @@ abstract class ReverseGeocoderInterface {
 
     abstract fun reverseGeocodeClosest(coord: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, thresholdMeters: Long): io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.VectorLayerFeatureCoordInfo?
 
-    private class CppProxy : ReverseGeocoderInterface {
+    public class CppProxy : ReverseGeocoderInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

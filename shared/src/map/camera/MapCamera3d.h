@@ -24,7 +24,6 @@
 #include "Vec2F.h"
 #include "Vec3D.h"
 #include "Vec4D.h"
-#include "CameraMode3d.h"
 #include "Camera3dConfig.h"
 #include "CameraInterpolation.h"
 #include <mutex>
@@ -161,10 +160,6 @@ class MapCamera3d : public MapCameraInterface,
 
     std::shared_ptr<MapCamera3dInterface> asMapCamera3d() override;
 
-    void setCameraMode(CameraMode3d mode) override;
-
-    CameraMode3d getCameraMode() override;
-
     void setCameraConfig(const Camera3dConfig & config, std::optional<float> durationSeconds, std::optional<float> targetZoom, const std::optional<::Coord> & targetCoordinate) override;
 
     Camera3dConfig getCameraConfig() override;
@@ -270,7 +265,7 @@ protected:
 
     CameraConfiguration config;
 
-    enum ListenerType { BOUNDS = 1, ROTATION = 1 << 1, MAP_INTERACTION = 1 << 2, CAMERA_MODE = 1 << 3 };
+    enum ListenerType { BOUNDS = 1, ROTATION = 1 << 1, MAP_INTERACTION = 1 << 2 };
 
     void notifyListeners(const int &listenerType);
 
@@ -298,8 +293,6 @@ protected:
 
     Vec4D convertToCartesianCoordinates(const Coord &coord) const;
     Vec4D projectedPoint(const Vec4D &point) const;
-
-    void checkForRubberBandEffect();
 
     std::vector<float> vpMatrix = std::vector<float>(16, 0.0);
     std::vector<double> vpMatrixD = std::vector<double>(16, 0.0);

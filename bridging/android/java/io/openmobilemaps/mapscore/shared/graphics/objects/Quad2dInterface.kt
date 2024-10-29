@@ -20,7 +20,7 @@ abstract class Quad2dInterface {
 
     abstract fun asMaskingObject(): MaskingObjectInterface
 
-    private class CppProxy : Quad2dInterface {
+    public class CppProxy : Quad2dInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

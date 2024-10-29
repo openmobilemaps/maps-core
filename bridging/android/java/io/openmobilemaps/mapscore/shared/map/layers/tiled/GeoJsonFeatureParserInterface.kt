@@ -19,7 +19,7 @@ abstract class GeoJsonFeatureParserInterface {
 
     abstract fun parseWithLineGeometry(geoJson: String): ArrayList<GeoJsonLine>?
 
-    private class CppProxy : GeoJsonFeatureParserInterface {
+    public class CppProxy : GeoJsonFeatureParserInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

@@ -44,7 +44,7 @@ abstract class Tiled2dMapVectorLayerInterface {
 
     abstract fun performClick(coord: io.openmobilemaps.mapscore.shared.map.coordinates.Coord)
 
-    private class CppProxy : Tiled2dMapVectorLayerInterface {
+    public class CppProxy : Tiled2dMapVectorLayerInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

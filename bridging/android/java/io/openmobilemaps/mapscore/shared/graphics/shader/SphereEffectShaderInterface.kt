@@ -12,7 +12,7 @@ abstract class SphereEffectShaderInterface {
 
     abstract fun setEllipse(coefficients: ArrayList<Double>)
 
-    private class CppProxy : SphereEffectShaderInterface {
+    public class CppProxy : SphereEffectShaderInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

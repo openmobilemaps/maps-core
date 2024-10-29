@@ -12,7 +12,7 @@ abstract class Tiled2dMapRasterLayerCallbackInterface {
 
     abstract fun onLongPress(coord: io.openmobilemaps.mapscore.shared.map.coordinates.Coord): Boolean
 
-    private class CppProxy : Tiled2dMapRasterLayerCallbackInterface {
+    public class CppProxy : Tiled2dMapRasterLayerCallbackInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

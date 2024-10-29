@@ -35,7 +35,7 @@ abstract class PolygonLayerInterface {
 
     abstract fun setRenderPassIndex(index: Int)
 
-    private class CppProxy : PolygonLayerInterface {
+    public class CppProxy : PolygonLayerInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

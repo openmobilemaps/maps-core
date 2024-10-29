@@ -12,7 +12,7 @@ abstract class ColorCircleShaderInterface {
 
     abstract fun asShaderProgramInterface(): ShaderProgramInterface
 
-    private class CppProxy : ColorCircleShaderInterface {
+    public class CppProxy : ColorCircleShaderInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

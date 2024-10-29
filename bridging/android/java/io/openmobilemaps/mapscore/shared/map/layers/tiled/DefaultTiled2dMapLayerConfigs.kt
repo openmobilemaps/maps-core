@@ -22,7 +22,7 @@ abstract class DefaultTiled2dMapLayerConfigs {
         external fun epsg4326Custom(layerName: String, urlFormat: String, zoomInfo: Tiled2dMapZoomInfo, minZoomLevel: Int, maxZoomLevel: Int): Tiled2dMapLayerConfig
     }
 
-    private class CppProxy : DefaultTiled2dMapLayerConfigs {
+    public class CppProxy : DefaultTiled2dMapLayerConfigs {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

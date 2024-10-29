@@ -32,7 +32,7 @@ abstract class TouchInterface {
 
     abstract fun clearTouch()
 
-    private class CppProxy : TouchInterface {
+    public class CppProxy : TouchInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

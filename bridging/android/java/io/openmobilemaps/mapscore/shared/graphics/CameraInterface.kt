@@ -16,7 +16,7 @@ abstract class CameraInterface {
 
     abstract fun viewportSizeChanged()
 
-    private class CppProxy : CameraInterface {
+    public class CppProxy : CameraInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

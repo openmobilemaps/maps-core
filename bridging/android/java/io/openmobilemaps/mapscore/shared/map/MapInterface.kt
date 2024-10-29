@@ -84,7 +84,7 @@ abstract class MapInterface {
 
     abstract fun forceReload()
 
-    private class CppProxy : MapInterface {
+    public class CppProxy : MapInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

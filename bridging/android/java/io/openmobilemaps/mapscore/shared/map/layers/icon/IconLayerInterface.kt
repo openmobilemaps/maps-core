@@ -39,7 +39,7 @@ abstract class IconLayerInterface {
 
     abstract fun setLayerClickable(isLayerClickable: Boolean)
 
-    private class CppProxy : IconLayerInterface {
+    public class CppProxy : IconLayerInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

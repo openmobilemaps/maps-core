@@ -53,7 +53,7 @@ abstract class Tiled2dMapRasterLayerInterface {
 
     abstract fun setBlendMode(blendMode: io.openmobilemaps.mapscore.shared.graphics.shader.BlendMode)
 
-    private class CppProxy : Tiled2dMapRasterLayerInterface {
+    public class CppProxy : Tiled2dMapRasterLayerInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

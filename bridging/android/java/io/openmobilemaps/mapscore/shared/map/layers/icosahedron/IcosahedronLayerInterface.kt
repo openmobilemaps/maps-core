@@ -15,7 +15,7 @@ abstract class IcosahedronLayerInterface {
 
     abstract fun asLayerInterface(): io.openmobilemaps.mapscore.shared.map.LayerInterface
 
-    private class CppProxy : IcosahedronLayerInterface {
+    public class CppProxy : IcosahedronLayerInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

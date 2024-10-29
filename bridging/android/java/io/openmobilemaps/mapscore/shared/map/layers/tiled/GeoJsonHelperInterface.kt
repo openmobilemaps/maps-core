@@ -17,7 +17,7 @@ abstract class GeoJsonHelperInterface {
 
     abstract fun geoJsonStringFromFeatureInfos(points: ArrayList<GeoJsonPoint>): String
 
-    private class CppProxy : GeoJsonHelperInterface {
+    public class CppProxy : GeoJsonHelperInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

@@ -10,7 +10,7 @@ abstract class PolygonPatternGroupShaderInterface {
 
     abstract fun asShaderProgramInterface(): ShaderProgramInterface
 
-    private class CppProxy : PolygonPatternGroupShaderInterface {
+    public class CppProxy : PolygonPatternGroupShaderInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

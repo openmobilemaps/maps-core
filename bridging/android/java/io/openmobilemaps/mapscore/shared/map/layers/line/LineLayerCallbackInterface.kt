@@ -10,7 +10,7 @@ abstract class LineLayerCallbackInterface {
 
     abstract fun onLineClickConfirmed(line: LineInfoInterface)
 
-    private class CppProxy : LineLayerCallbackInterface {
+    public class CppProxy : LineLayerCallbackInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

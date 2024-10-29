@@ -10,7 +10,7 @@ abstract class Tiled2dMapVectorLayerSymbolDelegateInterface {
 
     abstract fun getCustomAssetsFor(featureInfos: ArrayList<VectorLayerFeatureInfo>, layerIdentifier: String): ArrayList<Tiled2dMapVectorAssetInfo>
 
-    private class CppProxy : Tiled2dMapVectorLayerSymbolDelegateInterface {
+    public class CppProxy : Tiled2dMapVectorLayerSymbolDelegateInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

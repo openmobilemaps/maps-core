@@ -50,7 +50,7 @@ abstract class ShaderFactoryInterface {
 
     abstract fun createSphereEffectShader(): SphereEffectShaderInterface
 
-    private class CppProxy : ShaderFactoryInterface {
+    public class CppProxy : ShaderFactoryInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

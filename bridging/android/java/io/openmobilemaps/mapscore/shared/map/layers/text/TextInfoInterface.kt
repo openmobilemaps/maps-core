@@ -22,7 +22,7 @@ abstract class TextInfoInterface {
 
     abstract fun getLineCoordinates(): ArrayList<io.openmobilemaps.mapscore.shared.map.coordinates.Coord>?
 
-    private class CppProxy : TextInfoInterface {
+    public class CppProxy : TextInfoInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

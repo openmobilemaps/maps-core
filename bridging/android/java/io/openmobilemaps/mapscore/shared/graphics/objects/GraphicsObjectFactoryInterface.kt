@@ -32,7 +32,7 @@ abstract class GraphicsObjectFactoryInterface {
 
     abstract fun createTextInstanced(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): TextInstancedInterface
 
-    private class CppProxy : GraphicsObjectFactoryInterface {
+    public class CppProxy : GraphicsObjectFactoryInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

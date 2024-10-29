@@ -36,7 +36,7 @@ private:
         void onVisibleBoundsChanged(const ::RectCoord & visibleBounds, double zoom) override;
         void onRotationChanged(float angle) override;
         void onMapInteraction() override;
-        void onCameraChange(const std::vector<float> & viewMatrix, const std::vector<float> & projectionMatrix, const ::Vec3D & origin, float verticalFov, float horizontalFov, float width, float height, float focusPointAltitude, const ::Coord & focusPointPosition, float zoom, ::CameraMode3d mode) override;
+        void onCameraChange(const std::vector<float> & viewMatrix, const std::vector<float> & projectionMatrix, const ::Vec3D & origin, float verticalFov, float horizontalFov, float width, float height, float focusPointAltitude, const ::Coord & focusPointPosition, float zoom) override;
 
     private:
         friend ::djinni::JniInterface<::MapCameraListenerInterface, ::djinni_generated::NativeMapCameraListenerInterface>;
@@ -46,7 +46,7 @@ private:
     const jmethodID method_onVisibleBoundsChanged { ::djinni::jniGetMethodID(clazz.get(), "onVisibleBoundsChanged", "(Lio/openmobilemaps/mapscore/shared/map/coordinates/RectCoord;D)V") };
     const jmethodID method_onRotationChanged { ::djinni::jniGetMethodID(clazz.get(), "onRotationChanged", "(F)V") };
     const jmethodID method_onMapInteraction { ::djinni::jniGetMethodID(clazz.get(), "onMapInteraction", "()V") };
-    const jmethodID method_onCameraChange { ::djinni::jniGetMethodID(clazz.get(), "onCameraChange", "(Ljava/util/ArrayList;Ljava/util/ArrayList;Lio/openmobilemaps/mapscore/shared/graphics/common/Vec3D;FFFFFLio/openmobilemaps/mapscore/shared/map/coordinates/Coord;FLio/openmobilemaps/mapscore/shared/map/CameraMode3d;)V") };
+    const jmethodID method_onCameraChange { ::djinni::jniGetMethodID(clazz.get(), "onCameraChange", "(Ljava/util/ArrayList;Ljava/util/ArrayList;Lio/openmobilemaps/mapscore/shared/graphics/common/Vec3D;FFFFFLio/openmobilemaps/mapscore/shared/map/coordinates/Coord;F)V") };
 };
 
 } // namespace djinni_generated

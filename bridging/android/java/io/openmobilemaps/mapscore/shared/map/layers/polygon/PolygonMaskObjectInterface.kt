@@ -19,7 +19,7 @@ abstract class PolygonMaskObjectInterface {
 
     abstract fun getPolygonObject(): io.openmobilemaps.mapscore.shared.graphics.objects.Polygon2dInterface
 
-    private class CppProxy : PolygonMaskObjectInterface {
+    public class CppProxy : PolygonMaskObjectInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

@@ -660,12 +660,12 @@ void MapCamera3d::notifyListeners(const int &listenerType) {
 
     std::lock_guard<std::recursive_mutex> lock(listenerMutex);
     for (auto listener : listeners) {
-        if (listenerType & (ListenerType::BOUNDS | ListenerType::CAMERA_MODE)) {
+        if (listenerType & (ListenerType::BOUNDS)) {
 
             std::vector<float> viewMatrixF = VectorHelper::clone(viewMatrix);
             std::vector<float> projectionMatrixF = VectorHelper::clone(projectionMatrix);
 
-            listener->onCameraChange(viewMatrixF, projectionMatrixF, origin, verticalFov, horizontalFov, width, height, focusPointAltitude, getCenterPosition(), getZoom(), getCameraMode());
+            listener->onCameraChange(viewMatrixF, projectionMatrixF, origin, verticalFov, horizontalFov, width, height, focusPointAltitude, getCenterPosition(), getZoom());
         }
         if (listenerType & ListenerType::ROTATION) {
             listener->onRotationChanged(angle);
@@ -824,8 +824,6 @@ bool MapCamera3d::onMoveComplete() {
 bool MapCamera3d::onOneFingerDoubleClickMoveComplete() {
     if (cameraFrozen)
         return false;
-
-    checkForRubberBandEffect();
 
     return true;
 }
@@ -1062,7 +1060,6 @@ bool MapCamera3d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, cons
 }
 
 bool MapCamera3d::onTwoFingerMoveComplete() {
-    checkForRubberBandEffect();
 
     if (config.snapToNorthEnabled && !cameraFrozen && (angle < ROTATION_LOCKING_ANGLE || angle > (360 - ROTATION_LOCKING_ANGLE))) {
         std::lock_guard<std::recursive_mutex> lock(animationMutex);
@@ -1550,19 +1547,6 @@ std::shared_ptr<MapCamera3dInterface> MapCamera3d::asMapCamera3d() {
     return shared_from_this();
 }
 
-
-void MapCamera3d::checkForRubberBandEffect() {
-    // not implemented yet.
-}
-
-CameraMode3d MapCamera3d::getCameraMode() {
-    return CameraMode3d::GLOBAL;
-}
-
-void MapCamera3d::setCameraMode(CameraMode3d mode) {
-    // no longer needed.
-}
-
 void MapCamera3d::setCameraConfig(const Camera3dConfig & config, std::optional<float> durationSeconds, std::optional<float> targetZoom, const std::optional<::Coord> & targetCoordinate) {
     cameraZoomConfig = config;
 
@@ -1657,8 +1641,6 @@ void MapCamera3d::setCameraConfig(const Camera3dConfig & config, std::optional<f
     }
 
     mapInterface->invalidate();
-
-    notifyListeners(ListenerType::CAMERA_MODE);
 }
 
 Camera3dConfig MapCamera3d::getCameraConfig() {

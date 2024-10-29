@@ -29,7 +29,7 @@ abstract class RenderingContextInterface {
     /** optional rectangle, remove scissoring when not set */
     abstract fun applyScissorRect(scissorRect: io.openmobilemaps.mapscore.shared.graphics.common.RectI?)
 
-    private class CppProxy : RenderingContextInterface {
+    public class CppProxy : RenderingContextInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

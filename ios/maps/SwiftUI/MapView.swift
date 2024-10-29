@@ -385,8 +385,7 @@ public class MapViewCoordinator: MCMapCameraListenerInterface {
         height: Float,
         focusPointAltitude: Float,
         focusPointPosition: MCCoord,
-        zoom: Float,
-        mode: MCCameraMode3d
+        zoom: Float
     ) {
             updateCamera()
     }

@@ -30,7 +30,7 @@ abstract class IconInfoInterface {
 
     abstract fun getBlendMode(): io.openmobilemaps.mapscore.shared.graphics.shader.BlendMode
 
-    private class CppProxy : IconInfoInterface {
+    public class CppProxy : IconInfoInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

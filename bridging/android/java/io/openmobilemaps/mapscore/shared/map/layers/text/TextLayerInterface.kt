@@ -19,7 +19,7 @@ abstract class TextLayerInterface {
 
     abstract fun invalidate()
 
-    private class CppProxy : TextLayerInterface {
+    public class CppProxy : TextLayerInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

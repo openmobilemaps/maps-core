@@ -18,7 +18,7 @@ abstract class RendererInterface {
     /** Ensure calling on graphics thread */
     abstract fun compute(renderingContext: RenderingContextInterface, camera: CameraInterface)
 
-    private class CppProxy : RendererInterface {
+    public class CppProxy : RendererInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

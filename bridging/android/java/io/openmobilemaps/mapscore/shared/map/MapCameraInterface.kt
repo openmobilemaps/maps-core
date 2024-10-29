@@ -103,7 +103,7 @@ abstract class MapCameraInterface {
 
     abstract fun asMapCamera3d(): MapCamera3dInterface?
 
-    private class CppProxy : MapCameraInterface {
+    public class CppProxy : MapCameraInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

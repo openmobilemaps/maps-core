@@ -47,7 +47,7 @@ abstract class Quad2dStretchedInstancedInterface {
 
     abstract fun asMaskingObject(): MaskingObjectInterface
 
-    private class CppProxy : Quad2dStretchedInstancedInterface {
+    public class CppProxy : Quad2dStretchedInstancedInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

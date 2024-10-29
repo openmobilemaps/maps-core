@@ -12,7 +12,7 @@ abstract class IcosahedronInterface {
 
     abstract fun asGraphicsObject(): GraphicsObjectInterface
 
-    private class CppProxy : IcosahedronInterface {
+    public class CppProxy : IcosahedronInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 
