@@ -209,7 +209,7 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
 
         const Tiled2dMapZoomLevelInfo &zoomLevelInfo = zoomLevelInfos.at(candidate.levelIndex);
 
-        const double boundsRatio = std::abs((zoomLevelInfo.bounds.bottomRight.y  - zoomLevelInfo.bounds.topLeft.y) / (zoomLevelInfo.bounds.bottomRight.x  - zoomLevelInfo.bounds.topLeft.x));
+        const double boundsRatio = std::abs(((zoomLevelInfo.bounds.bottomRight.y  - zoomLevelInfo.bounds.topLeft.y) / zoomLevelInfo.numTilesY) / ((zoomLevelInfo.bounds.bottomRight.x  - zoomLevelInfo.bounds.topLeft.x) / zoomLevelInfo.numTilesX));
         const double tileWidth = zoomLevelInfo.tileWidthLayerSystemUnits;
         const double tileHeight = zoomLevelInfo.tileWidthLayerSystemUnits * boundsRatio;
 
@@ -524,7 +524,7 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
             if (tile.first.levelIndex > 0 && (previousLayerOffset < zoomInfo.numDrawPreviousLayers || zoomInfo.maskTile)) {
 
                 const Tiled2dMapZoomLevelInfo &zoomLevelInfo = zoomLevelInfos.at(tile.first.levelIndex - 1);
-                const double boundsRatio = std::abs((zoomLevelInfo.bounds.bottomRight.y  - zoomLevelInfo.bounds.topLeft.y) / (zoomLevelInfo.bounds.bottomRight.x  - zoomLevelInfo.bounds.topLeft.x));
+                const double boundsRatio = std::abs(((zoomLevelInfo.bounds.bottomRight.y  - zoomLevelInfo.bounds.topLeft.y) / zoomLevelInfo.numTilesY) / ((zoomLevelInfo.bounds.bottomRight.x  - zoomLevelInfo.bounds.topLeft.x) / zoomLevelInfo.numTilesX));
                 const double tileWidth = zoomLevelInfo.tileWidthLayerSystemUnits;
                 const double tileHeight = zoomLevelInfo.tileWidthLayerSystemUnits * boundsRatio;
 
@@ -668,8 +668,9 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
         VisibleTilesLayer curVisibleTiles(i - targetZoomLayer);
         std::vector<PrioritizedTiled2dMapTileInfo> curVisibleTilesVec;
 
-        const double tileWidth = std::abs(zoomLevelInfo.bounds.bottomRight.x - zoomLevelInfo.bounds.topLeft.x) / zoomLevelInfo.numTilesX;
-        const double tileHeight = std::abs(zoomLevelInfo.bounds.bottomRight.y - zoomLevelInfo.bounds.topLeft.y) / zoomLevelInfo.numTilesY;
+        const double boundsRatio = std::abs(((zoomLevelInfo.bounds.bottomRight.y  - zoomLevelInfo.bounds.topLeft.y) / zoomLevelInfo.numTilesY) / ((zoomLevelInfo.bounds.bottomRight.x  - zoomLevelInfo.bounds.topLeft.x) / zoomLevelInfo.numTilesX));
+        const double tileWidth = zoomLevelInfo.tileWidthLayerSystemUnits;
+        const double tileHeight = zoomLevelInfo.tileWidthLayerSystemUnits * boundsRatio;
 
         int zoomDistanceFactor = std::abs(zoomLevelInfo.zoomLevelIdentifier - targetZoomLevelIdentifier);
 
