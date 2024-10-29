@@ -1563,81 +1563,97 @@ void MapCamera3d::setCameraMode(CameraMode3d mode) {
     // no longer needed.
 }
 
-void MapCamera3d::setCameraConfig(const Camera3dConfig & config, std::optional<float> durationSeconds, std::optional<float> targetZoom_, const std::optional<::Coord> & targetCoordinate_) {
+void MapCamera3d::setCameraConfig(const Camera3dConfig & config, std::optional<float> durationSeconds, std::optional<float> targetZoom, const std::optional<::Coord> & targetCoordinate) {
     cameraZoomConfig = config;
 
-    float initialZoom = zoom;
-    float initialPitch = cameraPitch;
-    float initialVerticalDisplacement = cameraVerticalDisplacement;
-    float duration = durationSeconds ? *durationSeconds : 0.0;
+    double initialZoom = zoom;
 
     zoomMin = cameraZoomConfig.minZoom;
     zoomMax = cameraZoomConfig.maxZoom;
 
-    float targetZoom = targetZoom_ ? *targetZoom_ : zoom;
-    std::optional<Coord> targetCoordinate = targetCoordinate_;
+    if (targetZoom) {
+        // temporarily set target zoom to get target pitch
+        this->zoom = *targetZoom;
+    }
+    double targetPitch = getCameraPitch();
+    double targetVerticalDisplacement = getCameraVerticalDisplacement();
+    this->zoom = initialZoom;
 
-    // temporarily set target zoom to get target pitch
-    this->zoom = targetZoom;
-    float targetPitch = getCameraPitch();
-    float targetVerticalDisplacement = getCameraVerticalDisplacement();
+    if (durationSeconds) {
+        long long duration = *durationSeconds * 1000;
+        double initialPitch = cameraPitch;
+        double initialVerticalDisplacement = cameraVerticalDisplacement;
 
-    std::lock_guard<std::recursive_mutex> lock(animationMutex);
+        std::lock_guard<std::recursive_mutex> lock(animationMutex);
 
-    zoomAnimation = std::make_shared<DoubleAnimation>(duration, initialZoom, targetZoom, InterpolatorFunction::EaseInOut,
-                                                      [=](double zoom) {
-                                                          this->zoom = zoom;
-                                                          mapInterface->invalidate();
-                                                      },
-                                                       [=] {
-                                                           this->zoom = targetZoom;
-                                                           this->zoomAnimation = nullptr;
-                                                       });
-    zoomAnimation->start();
+        pitchAnimation = std::make_shared<DoubleAnimation>(
+                duration, initialPitch, targetPitch, InterpolatorFunction::EaseInOut,
+                [=](double pitch) {
+                    this->cameraPitch = pitch;
+                    mapInterface->invalidate();
+                },
+                [=] {
+                    this->cameraPitch = targetPitch;
+                    this->pitchAnimation = nullptr;
+                });
+        pitchAnimation->start();
 
-    pitchAnimation = std::make_shared<DoubleAnimation>(
-                                                       duration, initialPitch, targetPitch, InterpolatorFunction::EaseInOut,
-                                                       [=](double pitch) {
-                                                           this->cameraPitch = pitch;
-                                                           mapInterface->invalidate();
-                                                       },
-                                                          [=] {
-                                                              this->cameraPitch = targetPitch;
-                                                              this->pitchAnimation = nullptr;
-                                                          });
-    pitchAnimation->start();
+        verticalDisplacementAnimation = std::make_shared<DoubleAnimation>(
+                duration, initialVerticalDisplacement, targetVerticalDisplacement, InterpolatorFunction::EaseInOut,
+                [=](double dis) {
+                    this->cameraVerticalDisplacement = dis;
+                    mapInterface->invalidate();
+                },
+                [=] {
+                    this->cameraVerticalDisplacement = targetVerticalDisplacement;
+                    this->verticalDisplacementAnimation = nullptr;
+                });
+        verticalDisplacementAnimation->start();
 
-    verticalDisplacementAnimation = std::make_shared<DoubleAnimation>(
-                                                       duration, initialVerticalDisplacement, targetVerticalDisplacement, InterpolatorFunction::EaseInOut,
-                                                       [=](double dis) {
-                                                           this->cameraVerticalDisplacement = dis;
-                                                           mapInterface->invalidate();
-                                                       },
-                                                       [=] {
-                                                           this->cameraVerticalDisplacement = targetVerticalDisplacement;
-                                                           this->verticalDisplacementAnimation = nullptr;
-                                                       });
-    verticalDisplacementAnimation->start();
+        if (targetZoom) {
+            zoomAnimation = std::make_shared<DoubleAnimation>(
+                    duration, initialZoom, *targetZoom, InterpolatorFunction::EaseInOut,
+                    [=](double zoom) {
+                        this->zoom = zoom;
+                        mapInterface->invalidate();
+                    },
+                    [=] {
+                        this->zoom = *targetZoom;
+                        this->zoomAnimation = nullptr;
+                    });
+            zoomAnimation->start();
+        }
 
-    if (targetCoordinate) {
-        Coord startPosition = mapInterface->getCoordinateConverterHelper()->convert(CoordinateSystemIdentifiers::EPSG4326(), focusPointPosition);
+        if (targetCoordinate) {
+            Coord startPosition = mapInterface->getCoordinateConverterHelper()->convert(CoordinateSystemIdentifiers::EPSG4326(),
+                                                                                        focusPointPosition);
 
-        coordAnimation = std::make_shared<CoordAnimation>(
-                                                          duration, startPosition, *targetCoordinate, std::nullopt, InterpolatorFunction::EaseInOut,
-                                                          [=](Coord positionMapSystem) {
-                                                              assert(positionMapSystem.systemIdentifier == 4326);
-                                                              this->focusPointPosition = positionMapSystem;
-                                                              notifyListeners(ListenerType::BOUNDS);
-                                                              mapInterface->invalidate();
-                                                          },
-                                                          [=] {
-                                                              assert(this->coordAnimation->endValue.systemIdentifier == 4326);
-                                                              this->focusPointPosition = this->coordAnimation->endValue;
-                                                              notifyListeners(ListenerType::BOUNDS);
-                                                              mapInterface->invalidate();
-                                                              this->coordAnimation = nullptr;
-                                                          });
-        coordAnimation->start();
+            coordAnimation = std::make_shared<CoordAnimation>(
+                    duration, startPosition, *targetCoordinate, std::nullopt, InterpolatorFunction::EaseInOut,
+                    [=](Coord positionMapSystem) {
+                        assert(positionMapSystem.systemIdentifier == 4326);
+                        this->focusPointPosition = positionMapSystem;
+                        notifyListeners(ListenerType::BOUNDS);
+                        mapInterface->invalidate();
+                    },
+                    [=] {
+                        assert(this->coordAnimation->endValue.systemIdentifier == 4326);
+                        this->focusPointPosition = this->coordAnimation->endValue;
+                        notifyListeners(ListenerType::BOUNDS);
+                        mapInterface->invalidate();
+                        this->coordAnimation = nullptr;
+                    });
+            coordAnimation->start();
+        }
+    } else {
+        this->cameraPitch = targetPitch;
+        this->cameraVerticalDisplacement = targetVerticalDisplacement;
+        if (targetZoom) {
+            this->zoom = *targetZoom;
+        }
+        if (targetCoordinate) {
+            this->focusPointPosition = *targetCoordinate;
+        }
     }
 
     mapInterface->invalidate();
