@@ -110,14 +110,14 @@
                             <outputDirectory>${project.build.outputDirectory}</outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>${project.build.directory}/build-native-release</directory>
+                                    <directory>${project.build.directory}/build-native-release/jvm</directory>
                                     <includes>
                                         <include>libmapscore_jni_*.so</include>
                                     </includes>
                                     <targetPath>native/</targetPath>
                                 </resource>
                                 <resource>
-                                    <directory>${project.build.directory}/build-native-debug</directory>
+                                    <directory>${project.build.directory}/build-native-debug/jvm</directory>
                                     <includes>
                                         <include>libmapscore_jni_*.so</include>
                                     </includes>

@@ -74,3 +74,7 @@ DerivedData/
 
 ## Gcc Patch
 /*.gcno
+
+## clangd
+.cache/
+compile_commands.json
