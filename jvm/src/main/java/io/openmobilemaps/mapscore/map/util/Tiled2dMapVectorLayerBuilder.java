@@ -15,6 +15,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.awt.image.BufferedImage;
+import java.net.http.HttpClient;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.function.BiFunction;
@@ -68,6 +69,11 @@ public class Tiled2dMapVectorLayerBuilder {
 
     public Tiled2dMapVectorLayerBuilder withHttpLoader() {
         loaders.add(new HttpDataLoader());
+        return this;
+    }
+
+    public Tiled2dMapVectorLayerBuilder withHttpLoader(HttpClient httpClient) {
+        loaders.add(new HttpDataLoader(httpClient));
         return this;
     }
 
