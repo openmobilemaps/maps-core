@@ -1,7 +1,8 @@
 name: Maven build and deploy JVM
-on: 
+on:
     push:
-        tags
+        tags:
+            - '*'
 
 jobs:
     build:
