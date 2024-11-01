@@ -108,7 +108,7 @@ JNIEXPORT jlong JNICALL Java_io_openmobilemaps_mapscore_graphics_util_OSMesa_cre
     state->ctx = OSMesaCreateContextExt(OSMESA_BGRA, 16, 8, 16, nullptr);
 #else
     // Just hope
-    state->ctx = SMesaContext ctx = OSMesaCreateContext(OSMESA_BGRA, nullptr);
+    state->ctx = OSMesaContext ctx = OSMesaCreateContext(OSMESA_BGRA, nullptr);
 #endif
 
     return (jlong)state; // "type-punning" aka. a lazy hack
