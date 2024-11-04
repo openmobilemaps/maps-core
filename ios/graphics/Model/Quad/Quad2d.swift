@@ -133,7 +133,7 @@ final class Quad2d: BaseGraphicsObject, @unchecked Sendable {
 
         let mMatrixBuffer = mMatrixBuffers.getNextBuffer(context)
         if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mMatrix)) {
-            vpMatrixBuffer?.contents().copyMemory(from: matrixPointer, byteCount: 64)
+            mMatrixBuffer?.contents().copyMemory(from: matrixPointer, byteCount: 64)
         }
         encoder.setVertexBuffer(mMatrixBuffer, offset: 0, index: 2)
 

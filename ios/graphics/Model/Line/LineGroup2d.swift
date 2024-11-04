@@ -25,16 +25,12 @@ final class LineGroup2d: BaseGraphicsObject, @unchecked Sendable {
 
     private var customScreenPixelFactor: Float = 0
     private var tileOriginBuffer: MTLBuffer?
-    private var debugTileOriginBuffers: MultiBufferFloat4
-    private var debugRenderOriginBuffers: MultiBufferFloat4
 
     init(shader: MCShaderProgramInterface, metalContext: MetalContext) {
         guard let shader = shader as? LineGroupShader else {
             fatalError("LineGroup2d only supports LineGroupShader")
         }
         self.shader = shader
-        debugTileOriginBuffers = MultiBufferFloat4(device: metalContext.device)
-        debugRenderOriginBuffers = MultiBufferFloat4(device: metalContext.device)
         super.init(device: metalContext.device,
                    sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue)!,
                    label: "LineGroup2d")
@@ -126,33 +122,14 @@ final class LineGroup2d: BaseGraphicsObject, @unchecked Sendable {
         }
         encoder.setVertexBuffer(vpMatrixBuffer, offset: 0, index: 1)
 
-
         let originOffsetBuffer = originOffsetBuffers.getNextBuffer(context)
         if let bufferPointer = originOffsetBuffer?.contents().assumingMemoryBound(to: simd_float4.self) {
             bufferPointer.pointee.x = Float(originOffset.x - origin.x)
             bufferPointer.pointee.y = Float(originOffset.y - origin.y)
             bufferPointer.pointee.z = Float(originOffset.z - origin.z)
         }
-        let debugTileOriginBuffer = debugTileOriginBuffers.getNextBuffer(context)
-        if let bufferPointer = debugTileOriginBuffer?.contents().assumingMemoryBound(
-            to: simd_float4.self
-        ) {
-            bufferPointer.pointee.x = Float(originOffset.x)
-            bufferPointer.pointee.y = Float(originOffset.y)
-            bufferPointer.pointee.z = Float(originOffset.z)
-        }
-        let debugRenderOriginBuffer = debugRenderOriginBuffers.getNextBuffer(context)
-        if let bufferPointer = debugRenderOriginBuffer?.contents().assumingMemoryBound(
-            to: simd_float4.self
-        ) {
-            bufferPointer.pointee.x = Float(origin.x)
-            bufferPointer.pointee.y = Float(origin.y)
-            bufferPointer.pointee.z = Float(origin.z)
-        }
         encoder.setVertexBuffer(originOffsetBuffer, offset: 0, index: 5)
         encoder.setVertexBuffer(tileOriginBuffer, offset: 0, index: 6)
-        encoder.setVertexBuffer(debugTileOriginBuffer, offset: 0, index: 7)
-        encoder.setVertexBuffer(debugRenderOriginBuffer, offset: 0, index: 8)
 
         encoder.drawIndexedPrimitives(type: .triangle,
                                       indexCount: indicesCount,
@@ -163,10 +140,6 @@ final class LineGroup2d: BaseGraphicsObject, @unchecked Sendable {
         if !isMasked {
             context.clearStencilBuffer()
         }
-
-        assert(Polygon2d.renderOrigin?.x == origin.x)
-        assert(Polygon2d.renderOrigin?.y == origin.y)
-        assert(Polygon2d.renderOrigin?.z == origin.z)
     }
 }
 

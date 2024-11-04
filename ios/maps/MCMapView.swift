@@ -26,7 +26,7 @@ open class MCMapView: MTKView, @unchecked Sendable {
     private let framesToRenderAfterInvalidate: Int = 25
     private var lastInvalidate = Date()
     private let renderAfterInvalidate: TimeInterval = 3 // Collision detection might be delayed 3s
-    private var renderSemaphore = DispatchSemaphore(value: 2)
+    private var renderSemaphore = DispatchSemaphore(value: 3) // using tripple buffers
 
     private let touchHandler: MCMapViewTouchHandler
     private let callbackHandler = MCMapViewCallbackHandler()
