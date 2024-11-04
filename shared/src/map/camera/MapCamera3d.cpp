@@ -91,8 +91,8 @@ void MapCamera3d::moveToCenterPositionZoom(const ::Coord &centerPosition, double
     if (cameraFrozen)
         return;
     inertia = std::nullopt;
-    auto [focusPosition, focusZoom] = getBoundsCorrectedCoords(
-        coordinateConversionHelper->convert(focusPointPosition.systemIdentifier, centerPosition), zoom);
+    auto [focusPosition, focusZoom] =
+        getBoundsCorrectedCoords(coordinateConversionHelper->convert(focusPointPosition.systemIdentifier, centerPosition), zoom);
 
     if (animated && bounds.topLeft.x == mapCoordinateSystem.bounds.topLeft.x &&
         bounds.bottomRight.x == mapCoordinateSystem.bounds.bottomRight.x) {
@@ -144,8 +144,8 @@ void MapCamera3d::moveToCenterPosition(const ::Coord &centerPosition, bool anima
     if (cameraFrozen)
         return;
     inertia = std::nullopt;
-    auto [focusPosition, focusZoom] = getBoundsCorrectedCoords(
-        coordinateConversionHelper->convert(focusPointPosition.systemIdentifier, centerPosition), zoom);
+    auto [focusPosition, focusZoom] =
+        getBoundsCorrectedCoords(coordinateConversionHelper->convert(focusPointPosition.systemIdentifier, centerPosition), zoom);
 
     if (animated && bounds.topLeft.x == mapCoordinateSystem.bounds.topLeft.x &&
         bounds.bottomRight.x == mapCoordinateSystem.bounds.bottomRight.x) {
@@ -544,8 +544,6 @@ void MapCamera3d::update() {
         focusPointPosition.x = fmod(DateHelper::currentTimeMicros() * speed * 0.000003 + 180.0, 360.0) - 180.0;
         mapInterface->invalidate();
     }
-    focusPointPosition.x = sin(DateHelper::currentTimeMicros() * 0.00001) * 0.01 + 7.44894;
-    mapInterface->invalidate();
     {
         std::lock_guard<std::recursive_mutex> lock(animationMutex);
         if (zoomAnimation)
@@ -1552,8 +1550,7 @@ void MapCamera3d::setCameraConfig(const Camera3dConfig &config, std::optional<fl
         }
 
         if (targetCoordinate) {
-            Coord startPosition =
-                coordinateConversionHelper->convert(CoordinateSystemIdentifiers::EPSG4326(), focusPointPosition);
+            Coord startPosition = coordinateConversionHelper->convert(CoordinateSystemIdentifiers::EPSG4326(), focusPointPosition);
 
             coordAnimation = std::make_shared<CoordAnimation>(
                 duration, startPosition, *targetCoordinate, std::nullopt, InterpolatorFunction::EaseInOut,
