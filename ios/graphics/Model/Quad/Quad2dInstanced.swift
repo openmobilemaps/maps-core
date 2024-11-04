@@ -26,7 +26,7 @@ final class Quad2dInstanced: BaseGraphicsObject, @unchecked Sendable {
     private var rotationsBuffer: MTLBuffer?
     private var alphaBuffer: MTLBuffer?
     private var offsetsBuffer: MTLBuffer?
-    private var originBuffers: MultiBufferFloat4
+    private var originBuffers: MultiBuffer<simd_float4>
 
     private var textureCoordinatesBuffer: MTLBuffer?
 
@@ -50,7 +50,7 @@ final class Quad2dInstanced: BaseGraphicsObject, @unchecked Sendable {
         } else {
             self.isUnitSphere = false
         }
-        originBuffers = MultiBufferFloat4(device: metalContext.device)
+        originBuffers = MultiBuffer<simd_float4>(device: metalContext.device)
         super.init(device: metalContext.device,
                    sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue)!,
                    label: label)

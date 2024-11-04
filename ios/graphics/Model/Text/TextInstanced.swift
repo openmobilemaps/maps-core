@@ -28,8 +28,8 @@ final class TextInstanced: BaseGraphicsObject, @unchecked Sendable {
     private var rotationsBuffer: MTLBuffer?
     private var styleIndicesBuffer: MTLBuffer?
     private var styleBuffer: MTLBuffer?
-    private var originBuffers: MultiBufferFloat4
-    private var aspectRatioBuffers: MultiBufferFloat1
+    private var originBuffers: MultiBuffer<simd_float4>
+    private var aspectRatioBuffers: MultiBuffer<simd_float1>
 
     private var texture: MTLTexture?
 
@@ -37,8 +37,8 @@ final class TextInstanced: BaseGraphicsObject, @unchecked Sendable {
 
     init(shader: MCShaderProgramInterface, metalContext: MetalContext) {
         self.shader = shader as! TextInstancedShader
-        self.originBuffers = MultiBufferFloat4(device: metalContext.device)
-        self.aspectRatioBuffers = MultiBufferFloat1(device: metalContext.device)
+        self.originBuffers = MultiBuffer<simd_float4>(device: metalContext.device)
+        self.aspectRatioBuffers = MultiBuffer<simd_float1>(device: metalContext.device)
         super.init(device: metalContext.device,
                    sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue)!,
                    label: "TextInstanced")
