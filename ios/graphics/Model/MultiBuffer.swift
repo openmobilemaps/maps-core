@@ -38,11 +38,11 @@ public struct MultiBuffer<DataType> {
 extension MultiBuffer<simd_float1> {
     public init(device: MTLDevice) {
         var initialMutable = simd_float1(1.0)
-        var buffers: [MTLBuffer] = (0..<bufferCount).compactMap { _ in
+        let buffers: [MTLBuffer] = (0..<bufferCount).compactMap { _ in
             device
                 .makeBuffer(
                     bytes: &initialMutable,
-                    length: MemoryLayout<simd_float4x4>.stride
+                    length: MemoryLayout<simd_float1>.stride
                 )
         }
         self.init(buffers: buffers)
@@ -56,7 +56,7 @@ extension MultiBuffer<simd_float4> {
             device
                 .makeBuffer(
                     bytes: &initialMutable,
-                    length: MemoryLayout<simd_float4x4>.stride
+                    length: MemoryLayout<simd_float4>.stride
                 )
         }
         self.init(buffers: buffers)
