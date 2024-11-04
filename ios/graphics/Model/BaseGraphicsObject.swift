@@ -13,8 +13,6 @@ import MapCoreSharedModule
 import Metal
 import simd
 
-
-
 open class BaseGraphicsObject: @unchecked Sendable {
     private weak var context: MCRenderingContextInterface!
 
@@ -38,32 +36,33 @@ open class BaseGraphicsObject: @unchecked Sendable {
     public var originOffsetBuffers: MultiBuffer<simd_float4>
 
     public var vpMatrixBuffers: MultiBuffer<simd_float4x4>
-    public var mMatrixBuffers: MultiBuffer<simd_float4x4>
 
-    public init(device: MTLDevice, sampler: MTLSamplerState, label: String = "") {
+    public init(device: MTLDevice, sampler: MTLSamplerState, label: String = "")
+    {
         self.device = device
         self.sampler = sampler
         self.label = label
         self.originOffsetBuffers = .init(device: device)
         self.vpMatrixBuffers = .init(device: device)
-        self.mMatrixBuffers = .init(device: device)
     }
 
-
-
-    open func render(encoder _: MTLRenderCommandEncoder,
-                     context _: RenderingContext,
-                     renderPass _: MCRenderPassConfig,
-                     vpMatrix _: Int64,
-                     mMatrix _: Int64,
-                     origin: MCVec3D,
-                     isMasked _: Bool,
-                     screenPixelAsRealMeterFactor _: Double) {
+    open func render(
+        encoder _: MTLRenderCommandEncoder,
+        context _: RenderingContext,
+        renderPass _: MCRenderPassConfig,
+        vpMatrix _: Int64,
+        mMatrix _: Int64,
+        origin: MCVec3D,
+        isMasked _: Bool,
+        screenPixelAsRealMeterFactor _: Double
+    ) {
         fatalError("has to be overwritten by subclass")
     }
 
-    open func compute(encoder _: MTLComputeCommandEncoder,
-                      context _: RenderingContext) {
+    open func compute(
+        encoder _: MTLComputeCommandEncoder,
+        context _: RenderingContext
+    ) {
         // subclasses may override
     }
 }
@@ -88,32 +87,42 @@ extension BaseGraphicsObject: MCGraphicsObjectInterface {
         maskInverse = inversed
     }
 
-    public func render(_ context: MCRenderingContextInterface?, renderPass: MCRenderPassConfig, vpMatrix: Int64, mMatrix: Int64, origin: MCVec3D, isMasked: Bool, screenPixelAsRealMeterFactor: Double) {
+    public func render(
+        _ context: MCRenderingContextInterface?, renderPass: MCRenderPassConfig,
+        vpMatrix: Int64, mMatrix: Int64, origin: MCVec3D, isMasked: Bool,
+        screenPixelAsRealMeterFactor: Double
+    ) {
         guard isReady(),
-              let context = context as? RenderingContext,
-              let encoder = context.encoder
+            let context = context as? RenderingContext,
+            let encoder = context.encoder
         else { return }
 
-        render(encoder: encoder,
-               context: context,
-               renderPass: renderPass,
-               vpMatrix: vpMatrix,
-               mMatrix: mMatrix,
-               origin: origin,
-               isMasked: isMasked,
-               screenPixelAsRealMeterFactor: screenPixelAsRealMeterFactor)
+        render(
+            encoder: encoder,
+            context: context,
+            renderPass: renderPass,
+            vpMatrix: vpMatrix,
+            mMatrix: mMatrix,
+            origin: origin,
+            isMasked: isMasked,
+            screenPixelAsRealMeterFactor: screenPixelAsRealMeterFactor)
     }
 
-    public func compute(_ context: (any MCRenderingContextInterface)?, renderPass: MCRenderPassConfig) {
+    public func compute(
+        _ context: (any MCRenderingContextInterface)?,
+        renderPass: MCRenderPassConfig
+    ) {
         guard let context = context as? RenderingContext,
-              let encoder = context.computeEncoder
+            let encoder = context.computeEncoder
         else { return }
         compute(encoder: encoder, context: context)
     }
 
     // MARK: - Stencil
 
-    public func maskStencilState(readMask: UInt32 = 0b1111_1111, writeMask: UInt32 = 0b0000_0000) -> MTLDepthStencilState? {
+    public func maskStencilState(
+        readMask: UInt32 = 0b1111_1111, writeMask: UInt32 = 0b0000_0000
+    ) -> MTLDepthStencilState? {
         let s = MTLStencilDescriptor()
         s.stencilCompareFunction = .equal
         s.stencilFailureOperation = .zero

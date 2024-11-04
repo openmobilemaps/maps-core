@@ -23,38 +23,44 @@ final class Polygon2d: BaseGraphicsObject, @unchecked Sendable {
     private var stencilState: MTLDepthStencilState?
     private var renderPassStencilState: MTLDepthStencilState?
 
-    init(shader: MCShaderProgramInterface, metalContext: MetalContext) {
-        self.shader = shader
-        super.init(device: metalContext.device,
-                   sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue)!,
-                   label: "Polygon2d")
+    private var mMatrixBuffers: MultiBuffer<simd_float4x4>
 
+    init(shader: MCShaderProgramInterface, metalContext: MetalContext) {
+        mMatrixBuffers = .init(device: metalContext.device)
+        self.shader = shader
+        super.init(
+            device: metalContext.device,
+            sampler: metalContext.samplerLibrary.value(
+                Sampler.magLinear.rawValue)!,
+            label: "Polygon2d")
 
     }
 
-    override func render(encoder: MTLRenderCommandEncoder,
-                         context: RenderingContext,
-                         renderPass pass: MCRenderPassConfig,
-                         vpMatrix: Int64,
-                         mMatrix: Int64,
-                         origin: MCVec3D,
-                         isMasked: Bool,
-                         screenPixelAsRealMeterFactor _: Double) {
+    override func render(
+        encoder: MTLRenderCommandEncoder,
+        context: RenderingContext,
+        renderPass pass: MCRenderPassConfig,
+        vpMatrix: Int64,
+        mMatrix: Int64,
+        origin: MCVec3D,
+        isMasked: Bool,
+        screenPixelAsRealMeterFactor _: Double
+    ) {
         lock.lock()
         defer {
             lock.unlock()
         }
 
         guard let verticesBuffer,
-              let indicesBuffer
+            let indicesBuffer
         else { return }
 
-#if DEBUG
-        encoder.pushDebugGroup(label)
-        defer {
-            encoder.popDebugGroup()
-        }
-#endif
+        #if DEBUG
+            encoder.pushDebugGroup(label)
+            defer {
+                encoder.popDebugGroup()
+            }
+        #endif
 
         if isMasked {
             if stencilState == nil {
@@ -84,29 +90,34 @@ final class Polygon2d: BaseGraphicsObject, @unchecked Sendable {
 
         let vpMatrixBuffer = vpMatrixBuffers.getNextBuffer(context)
         if let matrixPointer = UnsafeRawPointer(bitPattern: Int(vpMatrix)) {
-            vpMatrixBuffer?.contents().copyMemory(from: matrixPointer, byteCount: 64)
+            vpMatrixBuffer?.contents().copyMemory(
+                from: matrixPointer, byteCount: 64)
         }
         encoder.setVertexBuffer(vpMatrixBuffer, offset: 0, index: 1)
 
         let mMatrixBuffer = mMatrixBuffers.getNextBuffer(context)
         if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mMatrix)) {
-            mMatrixBuffer?.contents().copyMemory(from: matrixPointer, byteCount: 64)
+            mMatrixBuffer?.contents().copyMemory(
+                from: matrixPointer, byteCount: 64)
         }
         encoder.setVertexBuffer(mMatrixBuffer, offset: 0, index: 2)
 
         let originOffsetBuffer = originOffsetBuffers.getNextBuffer(context)
-        if let bufferPointer = originOffsetBuffer?.contents().assumingMemoryBound(to: simd_float4.self) {
+        if let bufferPointer = originOffsetBuffer?.contents()
+            .assumingMemoryBound(to: simd_float4.self)
+        {
             bufferPointer.pointee.x = Float(originOffset.x - origin.x)
             bufferPointer.pointee.y = Float(originOffset.y - origin.y)
             bufferPointer.pointee.z = Float(originOffset.z - origin.z)
         }
         encoder.setVertexBuffer(originOffsetBuffer, offset: 0, index: 3)
 
-        encoder.drawIndexedPrimitives(type: .triangle,
-                                      indexCount: indicesCount,
-                                      indexType: .uint16,
-                                      indexBuffer: indicesBuffer,
-                                      indexBufferOffset: 0)
+        encoder.drawIndexedPrimitives(
+            type: .triangle,
+            indexCount: indicesCount,
+            indexType: .uint16,
+            indexBuffer: indicesBuffer,
+            indexBufferOffset: 0)
 
     }
 
@@ -128,32 +139,35 @@ final class Polygon2d: BaseGraphicsObject, @unchecked Sendable {
 }
 
 extension Polygon2d: MCMaskingObjectInterface {
-    func render(asMask context: MCRenderingContextInterface?,
-                renderPass _: MCRenderPassConfig,
-                vpMatrix: Int64,
-                mMatrix: Int64,
-                origin: MCVec3D,
-                screenPixelAsRealMeterFactor _: Double) {
-        
+    func render(
+        asMask context: MCRenderingContextInterface?,
+        renderPass _: MCRenderPassConfig,
+        vpMatrix: Int64,
+        mMatrix: Int64,
+        origin: MCVec3D,
+        screenPixelAsRealMeterFactor _: Double
+    ) {
+
         lock.lock()
         defer {
             lock.unlock()
         }
 
         guard isReady(),
-              let context = context as? RenderingContext,
-              let encoder = context.encoder else { return }
-
-        guard let verticesBuffer,
-              let indicesBuffer
+            let context = context as? RenderingContext,
+            let encoder = context.encoder
         else { return }
 
-#if DEBUG
-        encoder.pushDebugGroup("Polygon2dMask")
-        defer {
-            encoder.popDebugGroup()
-        }
-#endif
+        guard let verticesBuffer,
+            let indicesBuffer
+        else { return }
+
+        #if DEBUG
+            encoder.pushDebugGroup("Polygon2dMask")
+            defer {
+                encoder.popDebugGroup()
+            }
+        #endif
 
         if let mask = context.polygonMask {
             encoder.setStencilReferenceValue(0xFF)
@@ -168,34 +182,41 @@ extension Polygon2d: MCMaskingObjectInterface {
 
         let vpMatrixBuffer = vpMatrixBuffers.getNextBuffer(context)
         if let matrixPointer = UnsafeRawPointer(bitPattern: Int(vpMatrix)) {
-            vpMatrixBuffer?.contents().copyMemory(from: matrixPointer, byteCount: 64)
+            vpMatrixBuffer?.contents().copyMemory(
+                from: matrixPointer, byteCount: 64)
         }
         encoder.setVertexBuffer(vpMatrixBuffer, offset: 0, index: 1)
 
         let mMatrixBuffer = mMatrixBuffers.getNextBuffer(context)
         if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mMatrix)) {
-            mMatrixBuffer?.contents().copyMemory(from: matrixPointer, byteCount: 64)
+            mMatrixBuffer?.contents().copyMemory(
+                from: matrixPointer, byteCount: 64)
         }
         encoder.setVertexBuffer(mMatrixBuffer, offset: 0, index: 2)
 
         let originOffsetBuffer = originOffsetBuffers.getNextBuffer(context)
-        if let bufferPointer = originOffsetBuffer?.contents().assumingMemoryBound(to: simd_float4.self) {
+        if let bufferPointer = originOffsetBuffer?.contents()
+            .assumingMemoryBound(to: simd_float4.self)
+        {
             bufferPointer.pointee.x = Float(originOffset.x - origin.x)
             bufferPointer.pointee.y = Float(originOffset.y - origin.y)
             bufferPointer.pointee.z = Float(originOffset.z - origin.z)
         }
         encoder.setVertexBuffer(originOffsetBuffer, offset: 0, index: 3)
 
-        encoder.drawIndexedPrimitives(type: .triangle,
-                                      indexCount: indicesCount,
-                                      indexType: .uint16,
-                                      indexBuffer: indicesBuffer,
-                                      indexBufferOffset: 0)
+        encoder.drawIndexedPrimitives(
+            type: .triangle,
+            indexCount: indicesCount,
+            indexType: .uint16,
+            indexBuffer: indicesBuffer,
+            indexBufferOffset: 0)
     }
 }
 
 extension Polygon2d: MCPolygon2dInterface {
-    func setVertices(_ vertices: MCSharedBytes, indices: MCSharedBytes, origin: MCVec3D) {
+    func setVertices(
+        _ vertices: MCSharedBytes, indices: MCSharedBytes, origin: MCVec3D
+    ) {
         lock.withCritical {
             self.verticesBuffer.copyOrCreate(from: vertices, device: device)
             self.indicesBuffer.copyOrCreate(from: indices, device: device)

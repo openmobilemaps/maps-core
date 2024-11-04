@@ -30,6 +30,7 @@ final class TextInstanced: BaseGraphicsObject, @unchecked Sendable {
     private var styleBuffer: MTLBuffer?
     private var originBuffers: MultiBuffer<simd_float4>
     private var aspectRatioBuffers: MultiBuffer<simd_float1>
+    private var mMatrixBuffers: MultiBuffer<simd_float4x4>
 
     private var texture: MTLTexture?
 
@@ -37,11 +38,14 @@ final class TextInstanced: BaseGraphicsObject, @unchecked Sendable {
 
     init(shader: MCShaderProgramInterface, metalContext: MetalContext) {
         self.shader = shader as! TextInstancedShader
-        self.originBuffers = MultiBuffer<simd_float4>(device: metalContext.device)
-        self.aspectRatioBuffers = MultiBuffer<simd_float1>(device: metalContext.device)
-        super.init(device: metalContext.device,
-                   sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue)!,
-                   label: "TextInstanced")
+        self.originBuffers = .init(device: metalContext.device)
+        self.aspectRatioBuffers = .init(device: metalContext.device)
+        self.mMatrixBuffers = .init(device: metalContext.device)
+        super.init(
+            device: metalContext.device,
+            sampler: metalContext.samplerLibrary.value(
+                Sampler.magLinear.rawValue)!,
+            label: "TextInstanced")
     }
 
     private func setupStencilStates() {
@@ -60,28 +64,31 @@ final class TextInstanced: BaseGraphicsObject, @unchecked Sendable {
         stencilState = device.makeDepthStencilState(descriptor: s2)
     }
 
-    override func render(encoder: MTLRenderCommandEncoder,
-                         context: RenderingContext,
-                         renderPass _: MCRenderPassConfig,
-                         vpMatrix: Int64,
-                         mMatrix: Int64,
-                         origin: MCVec3D,
-                         isMasked: Bool,
-                         screenPixelAsRealMeterFactor _: Double) {
+    override func render(
+        encoder: MTLRenderCommandEncoder,
+        context: RenderingContext,
+        renderPass _: MCRenderPassConfig,
+        vpMatrix: Int64,
+        mMatrix: Int64,
+        origin: MCVec3D,
+        isMasked: Bool,
+        screenPixelAsRealMeterFactor _: Double
+    ) {
         lock.lock()
         defer {
             lock.unlock()
         }
 
         guard let verticesBuffer,
-              let indicesBuffer,
-              let positionsBuffer,
-              let scalesBuffer,
-              let rotationsBuffer,
-              let textureCoordinatesBuffer,
-              let styleIndicesBuffer,
-              let styleBuffer,
-              instanceCount != 0 else { return }
+            let indicesBuffer,
+            let positionsBuffer,
+            let scalesBuffer,
+            let rotationsBuffer,
+            let textureCoordinatesBuffer,
+            let styleIndicesBuffer,
+            let styleBuffer,
+            instanceCount != 0
+        else { return }
 
         if isMasked {
             if stencilState == nil {
@@ -93,24 +100,26 @@ final class TextInstanced: BaseGraphicsObject, @unchecked Sendable {
             encoder.setDepthStencilState(context.defaultMask)
         }
 
-#if DEBUG
-        encoder.pushDebugGroup(label + "-Halo")
-#endif
+        #if DEBUG
+            encoder.pushDebugGroup(label + "-Halo")
+        #endif
 
         shader.setupProgram(context)
         shader.preRender(context)
 
         encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
-        
+
         let vpMatrixBuffer = vpMatrixBuffers.getNextBuffer(context)
         if let matrixPointer = UnsafeRawPointer(bitPattern: Int(vpMatrix)) {
-            vpMatrixBuffer?.contents().copyMemory(from: matrixPointer, byteCount: 64)
+            vpMatrixBuffer?.contents().copyMemory(
+                from: matrixPointer, byteCount: 64)
         }
         encoder.setVertexBuffer(vpMatrixBuffer, offset: 0, index: 1)
 
         let mMatrixBuffer = mMatrixBuffers.getNextBuffer(context)
         if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mMatrix)) {
-            mMatrixBuffer?.contents().copyMemory(from: matrixPointer, byteCount: 64)
+            mMatrixBuffer?.contents().copyMemory(
+                from: matrixPointer, byteCount: 64)
         }
         encoder.setVertexBuffer(mMatrixBuffer, offset: 0, index: 2)
 
@@ -119,39 +128,44 @@ final class TextInstanced: BaseGraphicsObject, @unchecked Sendable {
         encoder.setVertexBuffer(rotationsBuffer, offset: 0, index: 5)
         encoder.setVertexBuffer(textureCoordinatesBuffer, offset: 0, index: 6)
         encoder.setVertexBuffer(styleIndicesBuffer, offset: 0, index: 7)
-        
+
         if shader.isUnitSphere,
-           let referencePositionsBuffer {
-            encoder.setVertexBuffer(referencePositionsBuffer, offset: 0, index: 8)
+            let referencePositionsBuffer
+        {
+            encoder.setVertexBuffer(
+                referencePositionsBuffer, offset: 0, index: 8)
         }
 
         let originOffsetBuffer = originOffsetBuffers.getNextBuffer(context)
-        if let bufferPointer = originOffsetBuffer?.contents().assumingMemoryBound(to: simd_float4.self) {
+        if let bufferPointer = originOffsetBuffer?.contents()
+            .assumingMemoryBound(to: simd_float4.self)
+        {
             bufferPointer.pointee.x = Float(originOffset.x - origin.x)
             bufferPointer.pointee.y = Float(originOffset.y - origin.y)
             bufferPointer.pointee.z = Float(originOffset.z - origin.z)
-        }
-        else {
+        } else {
             fatalError()
         }
         encoder.setVertexBuffer(originOffsetBuffer, offset: 0, index: 9)
 
         let originBuffer = originBuffers.getNextBuffer(context)
-        if let bufferPointer = originBuffer?.contents().assumingMemoryBound(to: simd_float4.self) {
+        if let bufferPointer = originBuffer?.contents().assumingMemoryBound(
+            to: simd_float4.self)
+        {
             bufferPointer.pointee.x = Float(origin.x)
             bufferPointer.pointee.y = Float(origin.y)
             bufferPointer.pointee.z = Float(origin.z)
-        }
-        else {
+        } else {
             fatalError()
         }
         encoder.setVertexBuffer(originBuffer, offset: 0, index: 10)
 
         let aspectRatioBuffer = aspectRatioBuffers.getNextBuffer(context)
-        if let bufferPointer = aspectRatioBuffer?.contents().assumingMemoryBound(to: simd_float1.self) {
+        if let bufferPointer = aspectRatioBuffer?.contents()
+            .assumingMemoryBound(to: simd_float1.self)
+        {
             bufferPointer.pointee = Float(context.aspectRatio)
-        }
-        else {
+        } else {
             fatalError()
         }
         encoder.setVertexBuffer(aspectRatioBuffer, offset: 0, index: 11)
@@ -166,31 +180,35 @@ final class TextInstanced: BaseGraphicsObject, @unchecked Sendable {
 
         var isHalo: Bool = true
 
-        encoder.setFragmentBytes(&isHalo, length: MemoryLayout<Bool>.stride, index: 2)
+        encoder.setFragmentBytes(
+            &isHalo, length: MemoryLayout<Bool>.stride, index: 2)
 
-        encoder.drawIndexedPrimitives(type: .triangle,
-                                      indexCount: indicesCount,
-                                      indexType: .uint16,
-                                      indexBuffer: indicesBuffer,
-                                      indexBufferOffset: 0,
-                                      instanceCount: instanceCount)
+        encoder.drawIndexedPrimitives(
+            type: .triangle,
+            indexCount: indicesCount,
+            indexType: .uint16,
+            indexBuffer: indicesBuffer,
+            indexBufferOffset: 0,
+            instanceCount: instanceCount)
         isHalo = false
-#if DEBUG
-        encoder.popDebugGroup()
-        encoder.pushDebugGroup(label)
-        defer {
+        #if DEBUG
             encoder.popDebugGroup()
-        }
-#endif
+            encoder.pushDebugGroup(label)
+            defer {
+                encoder.popDebugGroup()
+            }
+        #endif
 
-        encoder.setFragmentBytes(&isHalo, length: MemoryLayout<Bool>.stride, index: 2)
+        encoder.setFragmentBytes(
+            &isHalo, length: MemoryLayout<Bool>.stride, index: 2)
 
-        encoder.drawIndexedPrimitives(type: .triangle,
-                                      indexCount: indicesCount,
-                                      indexType: .uint16,
-                                      indexBuffer: indicesBuffer,
-                                      indexBufferOffset: 0,
-                                      instanceCount: instanceCount)
+        encoder.drawIndexedPrimitives(
+            type: .triangle,
+            indexCount: indicesCount,
+            indexType: .uint16,
+            indexBuffer: indicesBuffer,
+            indexBufferOffset: 0,
+            instanceCount: instanceCount)
     }
 }
 
@@ -205,17 +223,26 @@ extension TextInstanced: MCTextInstancedInterface {
          Where A-C are joined to form two triangles
          */
         let vertecies: [Vertex] = [
-            Vertex(position: frame.bottomLeft, textureU: 0, textureV: 1), // A
-            Vertex(position: frame.topLeft, textureU: 0, textureV: 0), // B
-            Vertex(position: frame.topRight, textureU: 1, textureV: 0), // C
-            Vertex(position: frame.bottomRight, textureU: 1, textureV: 1), // D
+            Vertex(position: frame.bottomLeft, textureU: 0, textureV: 1),  // A
+            Vertex(position: frame.topLeft, textureU: 0, textureV: 0),  // B
+            Vertex(position: frame.topRight, textureU: 1, textureV: 0),  // C
+            Vertex(position: frame.bottomRight, textureU: 1, textureV: 1),  // D
         ]
         let indices: [UInt16] = [
-            0, 2, 1, // ACB
-            0, 3, 2, // ADC
+            0, 2, 1,  // ACB
+            0, 3, 2,  // ADC
         ]
 
-        guard let verticesBuffer = device.makeBuffer(bytes: vertecies, length: MemoryLayout<Vertex>.stride * vertecies.count, options: []), let indicesBuffer = device.makeBuffer(bytes: indices, length: MemoryLayout<UInt16>.stride * indices.count, options: []) else {
+        guard
+            let verticesBuffer = device.makeBuffer(
+                bytes: vertecies,
+                length: MemoryLayout<Vertex>.stride * vertecies.count,
+                options: []),
+            let indicesBuffer = device.makeBuffer(
+                bytes: indices,
+                length: MemoryLayout<UInt16>.stride * indices.count, options: []
+            )
+        else {
             fatalError("Cannot allocate buffers")
         }
 
@@ -227,7 +254,10 @@ extension TextInstanced: MCTextInstancedInterface {
         }
     }
 
-    func loadTexture(_ context: MCRenderingContextInterface?, textureHolder: MCTextureHolderInterface?) {
+    func loadTexture(
+        _ context: MCRenderingContextInterface?,
+        textureHolder: MCTextureHolderInterface?
+    ) {
         guard let textureHolder = textureHolder as? TextureHolder else {
             fatalError("unexpected TextureHolder")
         }
@@ -245,7 +275,8 @@ extension TextInstanced: MCTextInstancedInterface {
 
     func setReferencePositions(_ positions: MCSharedBytes) {
         lock.withCritical {
-            referencePositionsBuffer.copyOrCreate(from: positions, device: device)
+            referencePositionsBuffer.copyOrCreate(
+                from: positions, device: device)
         }
     }
 
@@ -257,7 +288,8 @@ extension TextInstanced: MCTextInstancedInterface {
 
     func setTextureCoordinates(_ textureCoordinates: MCSharedBytes) {
         lock.withCritical {
-            textureCoordinatesBuffer.copyOrCreate(from: textureCoordinates, device: device)
+            textureCoordinatesBuffer.copyOrCreate(
+                from: textureCoordinates, device: device)
         }
     }
 

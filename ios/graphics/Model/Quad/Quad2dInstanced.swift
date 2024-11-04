@@ -27,6 +27,7 @@ final class Quad2dInstanced: BaseGraphicsObject, @unchecked Sendable {
     private var alphaBuffer: MTLBuffer?
     private var offsetsBuffer: MTLBuffer?
     private var originBuffers: MultiBuffer<simd_float4>
+    private var mMatrixBuffers: MultiBuffer<simd_float4x4>
 
     private var textureCoordinatesBuffer: MTLBuffer?
 
@@ -42,18 +43,23 @@ final class Quad2dInstanced: BaseGraphicsObject, @unchecked Sendable {
 
     public let isUnitSphere: Bool
 
-    init(shader: MCShaderProgramInterface, 
-         metalContext: MetalContext, label: String = "Quad2dInstanced") {
+    init(
+        shader: MCShaderProgramInterface,
+        metalContext: MetalContext, label: String = "Quad2dInstanced"
+    ) {
         self.shader = shader
         if let shader = shader as? AlphaInstancedShader {
             self.isUnitSphere = shader.isUnitSphere
         } else {
             self.isUnitSphere = false
         }
-        originBuffers = MultiBuffer<simd_float4>(device: metalContext.device)
-        super.init(device: metalContext.device,
-                   sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue)!,
-                   label: label)
+        originBuffers = .init(device: metalContext.device)
+        mMatrixBuffers = .init(device: metalContext.device)
+        super.init(
+            device: metalContext.device,
+            sampler: metalContext.samplerLibrary.value(
+                Sampler.magLinear.rawValue)!,
+            label: label)
     }
 
     private func setupStencilStates() {
@@ -80,28 +86,30 @@ final class Quad2dInstanced: BaseGraphicsObject, @unchecked Sendable {
         return true
     }
 
-    override func render(encoder: MTLRenderCommandEncoder,
-                         context: RenderingContext,
-                         renderPass _: MCRenderPassConfig,
-                         vpMatrix: Int64,
-                         mMatrix: Int64,
-                origin: MCVec3D,
-                         isMasked: Bool,
-                         screenPixelAsRealMeterFactor _: Double) {
+    override func render(
+        encoder: MTLRenderCommandEncoder,
+        context: RenderingContext,
+        renderPass _: MCRenderPassConfig,
+        vpMatrix: Int64,
+        mMatrix: Int64,
+        origin: MCVec3D,
+        isMasked: Bool,
+        screenPixelAsRealMeterFactor _: Double
+    ) {
 
         lock.lock()
         defer {
             lock.unlock()
         }
-        
+
         guard let verticesBuffer,
-              let indicesBuffer,
-              instanceCount != 0,
-              let positionsBuffer,
-              let scalesBuffer,
-              let rotationsBuffer,
-              let textureCoordinatesBuffer,
-              let alphaBuffer
+            let indicesBuffer,
+            instanceCount != 0,
+            let positionsBuffer,
+            let scalesBuffer,
+            let rotationsBuffer,
+            let textureCoordinatesBuffer,
+            let alphaBuffer
         else {
             return
         }
@@ -111,12 +119,12 @@ final class Quad2dInstanced: BaseGraphicsObject, @unchecked Sendable {
             return
         }
 
-#if DEBUG
-        encoder.pushDebugGroup(label)
-        defer {
-            encoder.popDebugGroup()
-        }
-#endif
+        #if DEBUG
+            encoder.pushDebugGroup(label)
+            defer {
+                encoder.popDebugGroup()
+            }
+        #endif
 
         if isMasked {
             if stencilState == nil {
@@ -135,16 +143,18 @@ final class Quad2dInstanced: BaseGraphicsObject, @unchecked Sendable {
         shader.preRender(context)
 
         encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
-        
+
         let vpMatrixBuffer = vpMatrixBuffers.getNextBuffer(context)
         if let matrixPointer = UnsafeRawPointer(bitPattern: Int(vpMatrix)) {
-            vpMatrixBuffer?.contents().copyMemory(from: matrixPointer, byteCount: 64)
+            vpMatrixBuffer?.contents().copyMemory(
+                from: matrixPointer, byteCount: 64)
         }
         encoder.setVertexBuffer(vpMatrixBuffer, offset: 0, index: 1)
 
         let mMatrixBuffer = mMatrixBuffers.getNextBuffer(context)
         if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mMatrix)) {
-            mMatrixBuffer?.contents().copyMemory(from: matrixPointer, byteCount: 64)
+            mMatrixBuffer?.contents().copyMemory(
+                from: matrixPointer, byteCount: 64)
         }
         encoder.setVertexBuffer(mMatrixBuffer, offset: 0, index: 2)
 
@@ -156,7 +166,7 @@ final class Quad2dInstanced: BaseGraphicsObject, @unchecked Sendable {
 
         encoder.setVertexBuffer(alphaBuffer, offset: 0, index: 7)
 
-        if (offsetsBuffer != nil) {
+        if offsetsBuffer != nil {
             encoder.setVertexBuffer(offsetsBuffer, offset: 0, index: 8)
         }
 
@@ -167,58 +177,64 @@ final class Quad2dInstanced: BaseGraphicsObject, @unchecked Sendable {
         }
 
         let originOffsetBuffer = originOffsetBuffers.getNextBuffer(context)
-        if let bufferPointer = originOffsetBuffer?.contents().assumingMemoryBound(to: simd_float4.self) {
+        if let bufferPointer = originOffsetBuffer?.contents()
+            .assumingMemoryBound(to: simd_float4.self)
+        {
             bufferPointer.pointee.x = Float(originOffset.x - origin.x)
             bufferPointer.pointee.y = Float(originOffset.y - origin.y)
             bufferPointer.pointee.z = Float(originOffset.z - origin.z)
-        }
-        else {
+        } else {
             fatalError()
         }
         encoder.setVertexBuffer(originOffsetBuffer, offset: 0, index: 9)
 
-
         let originBuffer = originBuffers.getNextBuffer(context)
-        if let bufferPointer = originBuffer?.contents().assumingMemoryBound(to: simd_float4.self) {
+        if let bufferPointer = originBuffer?.contents().assumingMemoryBound(
+            to: simd_float4.self)
+        {
             bufferPointer.pointee.x = Float(origin.x)
             bufferPointer.pointee.y = Float(origin.y)
             bufferPointer.pointee.z = Float(origin.z)
-        }
-        else {
+        } else {
             fatalError()
         }
         encoder.setVertexBuffer(originBuffer, offset: 0, index: 10)
 
-        encoder.drawIndexedPrimitives(type: .triangle,
-                                      indexCount: indicesCount,
-                                      indexType: .uint16,
-                                      indexBuffer: indicesBuffer,
-                                      indexBufferOffset: 0,
-                                      instanceCount: instanceCount)
+        encoder.drawIndexedPrimitives(
+            type: .triangle,
+            indexCount: indicesCount,
+            indexType: .uint16,
+            indexBuffer: indicesBuffer,
+            indexBufferOffset: 0,
+            instanceCount: instanceCount)
     }
 }
 
 extension Quad2dInstanced: MCMaskingObjectInterface {
-    func render(asMask context: MCRenderingContextInterface?,
-                renderPass: MCRenderPassConfig,
-                vpMatrix: Int64,
-                mMatrix: Int64,
-                origin: MCVec3D,
-                screenPixelAsRealMeterFactor: Double) {
+    func render(
+        asMask context: MCRenderingContextInterface?,
+        renderPass: MCRenderPassConfig,
+        vpMatrix: Int64,
+        mMatrix: Int64,
+        origin: MCVec3D,
+        screenPixelAsRealMeterFactor: Double
+    ) {
         guard isReady(),
-              let context = context as? RenderingContext,
-              let encoder = context.encoder else { return }
+            let context = context as? RenderingContext,
+            let encoder = context.encoder
+        else { return }
 
         renderAsMask = true
 
-        render(encoder: encoder,
-               context: context,
-               renderPass: renderPass,
-               vpMatrix: vpMatrix,
-               mMatrix: mMatrix,
-               origin: origin,
-               isMasked: false,
-               screenPixelAsRealMeterFactor: screenPixelAsRealMeterFactor)
+        render(
+            encoder: encoder,
+            context: context,
+            renderPass: renderPass,
+            vpMatrix: vpMatrix,
+            mMatrix: mMatrix,
+            origin: origin,
+            isMasked: false,
+            screenPixelAsRealMeterFactor: screenPixelAsRealMeterFactor)
     }
 }
 
@@ -233,17 +249,26 @@ extension Quad2dInstanced: MCQuad2dInstancedInterface {
          Where A-C are joined to form two triangles
          */
         let vertices: [Vertex] = [
-            Vertex(position: frame.bottomLeft, textureU: 0, textureV: 1), // A
-            Vertex(position: frame.topLeft, textureU: 0, textureV: 0), // B
-            Vertex(position: frame.topRight, textureU: 1, textureV: 0), // C
-            Vertex(position: frame.bottomRight, textureU: 1, textureV: 1), // D
+            Vertex(position: frame.bottomLeft, textureU: 0, textureV: 1),  // A
+            Vertex(position: frame.topLeft, textureU: 0, textureV: 0),  // B
+            Vertex(position: frame.topRight, textureU: 1, textureV: 0),  // C
+            Vertex(position: frame.bottomRight, textureU: 1, textureV: 1),  // D
         ]
         let indices: [UInt16] = [
-            0, 2, 1, // ACB
-            0, 3, 2, // ADC
+            0, 2, 1,  // ACB
+            0, 3, 2,  // ADC
         ]
 
-        guard let verticesBuffer = device.makeBuffer(bytes: vertices, length: MemoryLayout<Vertex>.stride * vertices.count, options: []), let indicesBuffer = device.makeBuffer(bytes: indices, length: MemoryLayout<UInt16>.stride * indices.count, options: []) else {
+        guard
+            let verticesBuffer = device.makeBuffer(
+                bytes: vertices,
+                length: MemoryLayout<Vertex>.stride * vertices.count,
+                options: []),
+            let indicesBuffer = device.makeBuffer(
+                bytes: indices,
+                length: MemoryLayout<UInt16>.stride * indices.count, options: []
+            )
+        else {
             fatalError("Cannot allocate buffers")
         }
 
@@ -279,7 +304,8 @@ extension Quad2dInstanced: MCQuad2dInstancedInterface {
 
     func setTextureCoordinates(_ textureCoordinates: MCSharedBytes) {
         lock.withCritical {
-            textureCoordinatesBuffer.copyOrCreate(from: textureCoordinates, device: device)
+            textureCoordinatesBuffer.copyOrCreate(
+                from: textureCoordinates, device: device)
         }
     }
 
@@ -289,7 +315,10 @@ extension Quad2dInstanced: MCQuad2dInstancedInterface {
         }
     }
 
-    func loadTexture(_ context: MCRenderingContextInterface?, textureHolder: MCTextureHolderInterface?) {
+    func loadTexture(
+        _ context: MCRenderingContextInterface?,
+        textureHolder: MCTextureHolderInterface?
+    ) {
         guard let textureHolder = textureHolder as? TextureHolder else {
             fatalError("unexpected TextureHolder")
         }
