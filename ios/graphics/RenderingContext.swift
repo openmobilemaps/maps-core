@@ -77,14 +77,17 @@ public class RenderingContext: NSObject, @unchecked Sendable {
     var isScissoringDirty = false
 
     var currentPipeline: MTLRenderPipelineState?
+    var currentPipelineHash = 0
 
     open func setRenderPipelineStateIfNeeded(
         _ pipelineState: MTLRenderPipelineState
     ) {
-        guard currentPipeline?.hash != pipelineState.hash else {
+        let newHash = pipelineState.hash
+        guard currentPipelineHash != newHash else {
             return
         }
         currentPipeline = pipelineState
+        currentPipelineHash = newHash
         encoder?.setRenderPipelineState(pipelineState)
     }
 

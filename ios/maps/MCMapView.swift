@@ -27,7 +27,7 @@ open class MCMapView: MTKView, @unchecked Sendable {
     private let framesToRenderAfterInvalidate: Int = 25
     private var lastInvalidate = Date()
     private let renderAfterInvalidate: TimeInterval = 3  // Collision detection might be delayed 3s
-    private var renderSemaphore = DispatchSemaphore(value: 3)  // using tripple buffers
+    private var renderSemaphore = DispatchSemaphore(value: 3)  // using triple buffers
 
     private let touchHandler: MCMapViewTouchHandler
     private let callbackHandler = MCMapViewCallbackHandler()
@@ -183,7 +183,7 @@ extension MCMapView: MTKViewDelegate {
 
         framesToRender -= 1
 
-        // Ensure that tripple-buffers are not over-used
+        // Ensure that triple-buffers are not over-used
         renderSemaphore.wait()
 
         mapInterface.prepare()
@@ -228,8 +228,8 @@ extension MCMapView: MTKViewDelegate {
             return
         }
 
-        commandBuffer.addCompletedHandler { [weak self] _ in
-            self?.renderSemaphore.signal()
+        commandBuffer.addCompletedHandler {_ in
+            self.renderSemaphore.signal()
         }
 
         // if we want to save the drawable (offscreen rendering), we commit and wait synchronously
