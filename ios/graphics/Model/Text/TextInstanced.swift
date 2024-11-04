@@ -28,8 +28,8 @@ final class TextInstanced: BaseGraphicsObject, @unchecked Sendable {
     private var rotationsBuffer: MTLBuffer?
     private var styleIndicesBuffer: MTLBuffer?
     private var styleBuffer: MTLBuffer?
-    private var originBuffer: MTLBuffer?
-    private var aspectRatioBuffer: MTLBuffer?
+    private var originBuffers: MultiBufferFloat4
+    private var aspectRatioBuffers: MultiBufferFloat1
 
     private var texture: MTLTexture?
 
@@ -37,15 +37,11 @@ final class TextInstanced: BaseGraphicsObject, @unchecked Sendable {
 
     init(shader: MCShaderProgramInterface, metalContext: MetalContext) {
         self.shader = shader as! TextInstancedShader
+        self.originBuffers = MultiBufferFloat4(device: metalContext.device)
+        self.aspectRatioBuffers = MultiBufferFloat1(device: metalContext.device)
         super.init(device: metalContext.device,
                    sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue)!,
                    label: "TextInstanced")
-
-        var originOffset: simd_float4 = simd_float4(0, 0, 0, 0)
-        originBuffer = device.makeBuffer(bytes: &originOffset, length: MemoryLayout<simd_float4>.stride, options: [])
-
-        var aspectRatio: simd_float1 = simd_float1(0)
-        aspectRatioBuffer = device.makeBuffer(bytes: &aspectRatio, length: MemoryLayout<simd_float1>.stride, options: [])
     }
 
     private func setupStencilStates() {
@@ -106,12 +102,17 @@ final class TextInstanced: BaseGraphicsObject, @unchecked Sendable {
 
         encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
         
-        if let vpMatrixPointer = UnsafeRawPointer(bitPattern: Int(vpMatrix)) {
-            encoder.setVertexBytes(vpMatrixPointer, length: 64, index: 1)
+        let vpMatrixBuffer = vpMatrixBuffers.getNextBuffer(context)
+        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(vpMatrix)) {
+            vpMatrixBuffer?.contents().copyMemory(from: matrixPointer, byteCount: 64)
         }
-        if let mMatrixPointer = UnsafeRawPointer(bitPattern: Int(mMatrix)) {
-            encoder.setVertexBytes(mMatrixPointer, length: 64, index: 2)
+        encoder.setVertexBuffer(vpMatrixBuffer, offset: 0, index: 1)
+
+        let mMatrixBuffer = mMatrixBuffers.getNextBuffer(context)
+        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mMatrix)) {
+            vpMatrixBuffer?.contents().copyMemory(from: matrixPointer, byteCount: 64)
         }
+        encoder.setVertexBuffer(mMatrixBuffer, offset: 0, index: 2)
 
         encoder.setVertexBuffer(positionsBuffer, offset: 0, index: 3)
         encoder.setVertexBuffer(scalesBuffer, offset: 0, index: 4)
@@ -124,22 +125,34 @@ final class TextInstanced: BaseGraphicsObject, @unchecked Sendable {
             encoder.setVertexBuffer(referencePositionsBuffer, offset: 0, index: 8)
         }
 
+        let originOffsetBuffer = originOffsetBuffers.getNextBuffer(context)
         if let bufferPointer = originOffsetBuffer?.contents().assumingMemoryBound(to: simd_float4.self) {
             bufferPointer.pointee.x = Float(originOffset.x - origin.x)
             bufferPointer.pointee.y = Float(originOffset.y - origin.y)
             bufferPointer.pointee.z = Float(originOffset.z - origin.z)
         }
+        else {
+            fatalError()
+        }
         encoder.setVertexBuffer(originOffsetBuffer, offset: 0, index: 9)
 
+        let originBuffer = originBuffers.getNextBuffer(context)
         if let bufferPointer = originBuffer?.contents().assumingMemoryBound(to: simd_float4.self) {
             bufferPointer.pointee.x = Float(origin.x)
             bufferPointer.pointee.y = Float(origin.y)
             bufferPointer.pointee.z = Float(origin.z)
         }
+        else {
+            fatalError()
+        }
         encoder.setVertexBuffer(originBuffer, offset: 0, index: 10)
 
+        let aspectRatioBuffer = aspectRatioBuffers.getNextBuffer(context)
         if let bufferPointer = aspectRatioBuffer?.contents().assumingMemoryBound(to: simd_float1.self) {
             bufferPointer.pointee = Float(context.aspectRatio)
+        }
+        else {
+            fatalError()
         }
         encoder.setVertexBuffer(aspectRatioBuffer, offset: 0, index: 11)
 

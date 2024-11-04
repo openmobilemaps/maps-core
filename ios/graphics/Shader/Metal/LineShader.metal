@@ -82,7 +82,9 @@ unitSpherelineGroupVertexShader(const LineVertexUnitSphereIn vertexIn [[stage_in
                       constant float &dashingScalingFactor [[buffer(3)]],
                       constant float *styling [[buffer(4)]],
                       constant float4 &originOffset [[buffer(5)]],
-                      constant float4 &tileOrigin [[buffer(6)]])
+                      constant float4 &tileOrigin [[buffer(6)]],
+                                constant float4 &debugTileOrigin [[buffer(7)]],
+                                constant float4 &debugRenderOrigin [[buffer(8)]])
 {
     int styleIndex = (int(vertexIn.stylingIndex) & 0xFF) * 21;
     constant LineStyling *style = (constant LineStyling *)(styling + styleIndex);

@@ -49,7 +49,9 @@ vertex VertexOut
 colorVertexShader(const Vertex3FIn vertexIn [[stage_in]],
                   constant float4x4 &vpMatrix [[buffer(1)]],
                    constant float4x4 &mMatrix [[buffer(2)]],
-                  constant float4 &originOffset [[buffer(3)]])
+                  constant float4 &originOffset [[buffer(3)]],
+                  constant float4 &debugTileOrigin [[buffer(4)]],
+                  constant float4 &debugRenderOrigin [[buffer(5)]])
 {
     VertexOut out {
         .position = vpMatrix * ((mMatrix * float4(vertexIn.position.xyz, 1.0)) + originOffset),

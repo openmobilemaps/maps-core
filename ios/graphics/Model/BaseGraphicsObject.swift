@@ -13,6 +13,106 @@ import MapCoreSharedModule
 import Metal
 import simd
 
+
+public struct MultiBufferFloat4x4 {
+    // Warning: Seems like suited to be generic
+    // But makeBuffer &reference does not like generic data
+    let bufferCount = 3  // Triple buffering
+    var originOffsetBuffers: [MTLBuffer] = []
+    var currentBufferIndex = 0
+    var currentFrameId = -1
+
+    init(device: MTLDevice) {
+        var initialMutable = simd_float4x4(1.0);
+        for _ in 0 ..< bufferCount {
+            if let buffer = device
+                .makeBuffer(
+                    bytes: &initialMutable,
+                    length: MemoryLayout<simd_float4x4>.stride
+                ) {
+                originOffsetBuffers.append(buffer)
+            }
+        }
+    }
+
+    public mutating func getNextBuffer(_ context: RenderingContext) -> MTLBuffer? {
+        if context.frameId != currentFrameId {
+            currentBufferIndex = (currentBufferIndex + 1) % bufferCount
+            currentFrameId = context.frameId
+        }
+        guard currentBufferIndex < originOffsetBuffers.count else {
+            return nil
+        }
+        return originOffsetBuffers[currentBufferIndex]
+    }
+}
+
+public struct MultiBufferFloat4 {
+    // Warning: Seems like suited to be generic
+    // But makeBuffer &reference does not like generic data
+    let bufferCount = 3  // Triple buffering
+    var originOffsetBuffers: [MTLBuffer] = []
+    var currentBufferIndex = 0
+    var currentFrameId = -1
+
+    init(device: MTLDevice) {
+        var initialMutable = simd_float4(0, 0, 0, 0);
+        for _ in 0 ..< bufferCount {
+            if let buffer = device
+                .makeBuffer(
+                    bytes: &initialMutable,
+                    length: MemoryLayout<simd_float4>.stride
+                ) {
+                originOffsetBuffers.append(buffer)
+            }
+        }
+    }
+
+    public mutating func getNextBuffer(_ context: RenderingContext) -> MTLBuffer? {
+        if context.frameId != currentFrameId {
+            currentBufferIndex = (currentBufferIndex + 1) % bufferCount
+            currentFrameId = context.frameId
+        }
+        guard currentBufferIndex < originOffsetBuffers.count else {
+            return nil
+        }
+        return originOffsetBuffers[currentBufferIndex]
+    }
+}
+
+public struct MultiBufferFloat1 {
+    // Warning: Seems like suited to be generic
+    // But makeBuffer &reference does not like generic data
+    let bufferCount = 3  // Triple buffering
+    var originOffsetBuffers: [MTLBuffer] = []
+    var currentBufferIndex = 0
+    var currentFrameId = -1
+
+    init(device: MTLDevice) {
+        var initialMutable = simd_float1(0);
+        for _ in 0 ..< bufferCount {
+            if let buffer = device
+                .makeBuffer(
+                    bytes: &initialMutable,
+                    length: MemoryLayout<simd_float1>.stride
+                ) {
+                originOffsetBuffers.append(buffer)
+            }
+        }
+    }
+
+    public mutating func getNextBuffer(_ context: RenderingContext) -> MTLBuffer? {
+        if context.frameId != currentFrameId {
+            currentBufferIndex = (currentBufferIndex + 1) % bufferCount
+            currentFrameId = context.frameId
+        }
+        guard currentBufferIndex < originOffsetBuffers.count else {
+            return nil
+        }
+        return originOffsetBuffers[currentBufferIndex]
+    }
+}
+
 open class BaseGraphicsObject: @unchecked Sendable {
     private weak var context: MCRenderingContextInterface!
 
@@ -32,16 +132,22 @@ open class BaseGraphicsObject: @unchecked Sendable {
     public let lock = OSLock()
 
     public var originOffset: MCVec3D = .init(x: 0, y: 0, z: 0)
-    public var originOffsetBuffer: MTLBuffer?
+
+    public var originOffsetBuffers: MultiBufferFloat4
+
+    public var vpMatrixBuffers: MultiBufferFloat4x4
+    public var mMatrixBuffers: MultiBufferFloat4x4
 
     public init(device: MTLDevice, sampler: MTLSamplerState, label: String = "") {
         self.device = device
         self.sampler = sampler
         self.label = label
-
-        var originOffset: simd_float4 = simd_float4(0, 0, 0, 0)
-        originOffsetBuffer = device.makeBuffer(bytes: &originOffset, length: MemoryLayout<simd_float4>.stride, options: [])
+        self.originOffsetBuffers = .init(device: device)
+        self.vpMatrixBuffers = .init(device: device)
+        self.mMatrixBuffers = .init(device: device)
     }
+
+
 
     open func render(encoder _: MTLRenderCommandEncoder,
                      context _: RenderingContext,

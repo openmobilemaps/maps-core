@@ -18,6 +18,11 @@ public class RenderingContext: NSObject, @unchecked Sendable {
     public weak var encoder: MTLRenderCommandEncoder?
     public weak var computeEncoder: MTLComputeCommandEncoder?
     public weak var sceneView: MCMapView?
+    private(set) var frameId: Int = 0
+
+    public func beginFrame() {
+        frameId = (frameId + 1) % 1000
+    }
 
     public var cullMode: MCRenderingCullMode?
 

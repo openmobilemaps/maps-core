@@ -23,11 +23,20 @@ final class Polygon2d: BaseGraphicsObject, @unchecked Sendable {
     private var stencilState: MTLDepthStencilState?
     private var renderPassStencilState: MTLDepthStencilState?
 
+    private var debugTileOriginBuffers: MultiBufferFloat4
+    private var debugRenderOriginBuffers: MultiBufferFloat4
+
+    static var renderOrigin: MCVec3D?
+
     init(shader: MCShaderProgramInterface, metalContext: MetalContext) {
         self.shader = shader
+        debugTileOriginBuffers = MultiBufferFloat4(device: metalContext.device)
+        debugRenderOriginBuffers = MultiBufferFloat4(device: metalContext.device)
         super.init(device: metalContext.device,
                    sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue)!,
                    label: "Polygon2d")
+
+
     }
 
     override func render(encoder: MTLRenderCommandEncoder,
@@ -79,24 +88,54 @@ final class Polygon2d: BaseGraphicsObject, @unchecked Sendable {
         shader.preRender(context)
 
         encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
+
+        let vpMatrixBuffer = vpMatrixBuffers.getNextBuffer(context)
         if let matrixPointer = UnsafeRawPointer(bitPattern: Int(vpMatrix)) {
-            encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
+            vpMatrixBuffer?.contents().copyMemory(from: matrixPointer, byteCount: 64)
         }
+        encoder.setVertexBuffer(vpMatrixBuffer, offset: 0, index: 1)
+
+        let mMatrixBuffer = mMatrixBuffers.getNextBuffer(context)
         if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mMatrix)) {
-            encoder.setVertexBytes(matrixPointer, length: 64, index: 2)
+            vpMatrixBuffer?.contents().copyMemory(from: matrixPointer, byteCount: 64)
         }
+        encoder.setVertexBuffer(mMatrixBuffer, offset: 0, index: 2)
+
+
+        let originOffsetBuffer = originOffsetBuffers.getNextBuffer(context)
         if let bufferPointer = originOffsetBuffer?.contents().assumingMemoryBound(to: simd_float4.self) {
             bufferPointer.pointee.x = Float(originOffset.x - origin.x)
             bufferPointer.pointee.y = Float(originOffset.y - origin.y)
             bufferPointer.pointee.z = Float(originOffset.z - origin.z)
         }
+        let debugTileOriginBuffer = debugTileOriginBuffers.getNextBuffer(context)
+        if let bufferPointer = debugTileOriginBuffer?.contents().assumingMemoryBound(
+            to: simd_float4.self
+        ) {
+            bufferPointer.pointee.x = Float(originOffset.x)
+            bufferPointer.pointee.y = Float(originOffset.y)
+            bufferPointer.pointee.z = Float(originOffset.z)
+        }
+        let debugRenderOriginBuffer = debugRenderOriginBuffers.getNextBuffer(context)
+        if let bufferPointer = debugRenderOriginBuffer?.contents().assumingMemoryBound(
+            to: simd_float4.self
+        ) {
+            bufferPointer.pointee.x = Float(origin.x)
+            bufferPointer.pointee.y = Float(origin.y)
+            bufferPointer.pointee.z = Float(origin.z)
+        }
         encoder.setVertexBuffer(originOffsetBuffer, offset: 0, index: 3)
+        encoder.setVertexBuffer(debugTileOriginBuffer, offset: 0, index: 4)
+        encoder.setVertexBuffer(debugRenderOriginBuffer, offset: 0, index: 5)
 
         encoder.drawIndexedPrimitives(type: .triangle,
                                       indexCount: indicesCount,
                                       indexType: .uint16,
                                       indexBuffer: indicesBuffer,
                                       indexBufferOffset: 0)
+
+
+        debugRenderOriginBuffer?.didModifyRange(0 ..< 1)
     }
 
     private func setupStencilStates() {
@@ -114,6 +153,10 @@ final class Polygon2d: BaseGraphicsObject, @unchecked Sendable {
 
         stencilState = device.makeDepthStencilState(descriptor: s2)
     }
+
+    static var offsetX: Double = 0
+    static var offsetY: Double = 0
+    static var offsetZ: Double = 0
 }
 
 extension Polygon2d: MCMaskingObjectInterface {
@@ -155,26 +198,54 @@ extension Polygon2d: MCMaskingObjectInterface {
 
         encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
 
+        let vpMatrixBuffer = vpMatrixBuffers.getNextBuffer(context)
         if let matrixPointer = UnsafeRawPointer(bitPattern: Int(vpMatrix)) {
-            encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
+            vpMatrixBuffer?.contents().copyMemory(from: matrixPointer, byteCount: 64)
         }
+        encoder.setVertexBuffer(vpMatrixBuffer, offset: 0, index: 1)
 
+        let mMatrixBuffer = mMatrixBuffers.getNextBuffer(context)
         if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mMatrix)) {
-            encoder.setVertexBytes(matrixPointer, length: 64, index: 2)
+            vpMatrixBuffer?.contents().copyMemory(from: matrixPointer, byteCount: 64)
         }
+        encoder.setVertexBuffer(mMatrixBuffer, offset: 0, index: 2)
 
+        let originOffsetBuffer = originOffsetBuffers.getNextBuffer(context)
         if let bufferPointer = originOffsetBuffer?.contents().assumingMemoryBound(to: simd_float4.self) {
             bufferPointer.pointee.x = Float(originOffset.x - origin.x)
             bufferPointer.pointee.y = Float(originOffset.y - origin.y)
             bufferPointer.pointee.z = Float(originOffset.z - origin.z)
         }
+        let debugTileOriginBuffer = debugTileOriginBuffers.getNextBuffer(context)
+        if let bufferPointer = debugTileOriginBuffer?.contents().assumingMemoryBound(
+            to: simd_float4.self
+        ) {
+            bufferPointer.pointee.x = Float(originOffset.x)
+            bufferPointer.pointee.y = Float(originOffset.y)
+            bufferPointer.pointee.z = Float(originOffset.z)
+        }
+        let debugRenderOriginBuffer = debugRenderOriginBuffers.getNextBuffer(context)
+        if let bufferPointer = debugRenderOriginBuffer?.contents().assumingMemoryBound(
+            to: simd_float4.self
+        ) {
+            bufferPointer.pointee.x = Float(origin.x)
+            bufferPointer.pointee.y = Float(origin.y)
+            bufferPointer.pointee.z = Float(origin.z)
+        }
+        Self.offsetX = originOffset.x - origin.x
+        Self.offsetY = originOffset.y - origin.y
+        Self.offsetZ = originOffset.z - origin.z
         encoder.setVertexBuffer(originOffsetBuffer, offset: 0, index: 3)
+        encoder.setVertexBuffer(debugTileOriginBuffer, offset: 0, index: 4)
+        encoder.setVertexBuffer(debugRenderOriginBuffer, offset: 0, index: 5)
 
         encoder.drawIndexedPrimitives(type: .triangle,
                                       indexCount: indicesCount,
                                       indexType: .uint16,
                                       indexBuffer: indicesBuffer,
                                       indexBufferOffset: 0)
+
+        Self.renderOrigin = origin
     }
 }
 
