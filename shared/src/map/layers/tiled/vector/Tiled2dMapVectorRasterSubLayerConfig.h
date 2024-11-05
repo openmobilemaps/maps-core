@@ -80,6 +80,13 @@ public:
         return Tiled2dMapVectorLayerConfig::getZoomLevelInfos();
     }
 
+    std::vector<Tiled2dMapZoomLevelInfo> getVirtualZoomLevelInfos() override {
+        if (customConfig) {
+            return customConfig->getVirtualZoomLevelInfos();
+        }
+        return Tiled2dMapVectorLayerConfig::getVirtualZoomLevelInfos();
+    }
+
     Tiled2dMapZoomInfo getZoomInfo() override {
         if (customConfig) {
             return customConfig->getZoomInfo();
