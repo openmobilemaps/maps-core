@@ -58,6 +58,21 @@ std::vector<Tiled2dMapZoomLevelInfo> Epsg4326Tiled2dMapLayerConfig::getZoomLevel
     return levels;
 }
 
+std::vector<Tiled2dMapZoomLevelInfo> Epsg4326Tiled2dMapLayerConfig::getVirtualZoomLevelInfos() {
+    RectCoord bounds = RectCoord(Coord(CoordinateSystemIdentifiers::EPSG4326(), -180.0, 90.0, 0.0),
+                                 Coord(CoordinateSystemIdentifiers::EPSG4326(), 180.0, -90.0, 0.0));
+    double baseZoom = 500000000.0;
+    std::vector<Tiled2dMapZoomLevelInfo> levels;
+
+    for (int32_t i = 0; i < minZoomLevel; ++i) {
+        int32_t tileCount = pow(2,i);
+        double zoom = baseZoom / tileCount;
+        levels.emplace_back(zoom, 360.0 / tileCount, tileCount, tileCount, 1, i, bounds);
+    }
+
+    return levels;
+};
+
 Tiled2dMapZoomInfo Epsg4326Tiled2dMapLayerConfig::getZoomInfo() {
     return zoomInfo;
 }

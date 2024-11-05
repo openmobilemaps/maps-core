@@ -29,6 +29,8 @@ class WebMercatorTiled2dMapLayerConfig : public Tiled2dMapLayerConfig {
 
     virtual std::vector<Tiled2dMapZoomLevelInfo> getZoomLevelInfos() override;
 
+    virtual std::vector<Tiled2dMapZoomLevelInfo> getVirtualZoomLevelInfos() override;
+
     virtual Tiled2dMapZoomInfo getZoomInfo() override;
 
     virtual std::optional<Tiled2dMapVectorSettings> getVectorSettings() override;

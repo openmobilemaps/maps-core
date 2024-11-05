@@ -82,6 +82,10 @@ public:
         return getDefaultEpsg3857ZoomLevels(sourceDescription->minZoom, sourceDescription->maxZoom);
     }
 
+    std::vector<Tiled2dMapZoomLevelInfo> getVirtualZoomLevelInfos() override {
+        return getDefaultEpsg3857ZoomLevels(0, sourceDescription->minZoom - 1);
+    };
+
     Tiled2dMapZoomInfo getZoomInfo() override {
         return zoomInfo;
     }
