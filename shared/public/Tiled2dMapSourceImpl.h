@@ -449,7 +449,7 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
 
         bool lastLevel = candidate.levelIndex == maxLevelAvailable;
 
-        bool isVirtual = topMostZoomLevel >= zoomLevelInfo.zoomLevelIdentifier;
+        bool isVirtual = topMostZoomLevel > zoomLevelInfo.zoomLevelIdentifier;
 
         if (!isVirtual && (preciseEnough || lastLevel || isKeptLevel)) {
             const RectCoord rect(topLeft, bottomRight);
