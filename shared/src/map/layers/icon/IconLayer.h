@@ -16,7 +16,7 @@
 #include "MapInterface.h"
 #include "SimpleLayerInterface.h"
 #include "SimpleTouchInterface.h"
-#include "Textured2dLayerObject.h"
+#include "Textured3dLayerObject.h"
 #include <atomic>
 #include <map>
 #include <mutex>
@@ -94,12 +94,12 @@ class IconLayer : public IconLayerInterface,
   private:
     void updateIconPosition(const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                             const std::shared_ptr<IconInfoInterface> &iconInfo,
-                            const std::shared_ptr<Textured2dLayerObject> &iconObject);
+                            const std::shared_ptr<Textured3dLayerObject> &iconObject);
 
-    virtual void clearSync(const std::vector<std::pair<std::shared_ptr<IconInfoInterface>, std::shared_ptr<Textured2dLayerObject>>> &iconsToClear);
+    virtual void clearSync(const std::vector<std::pair<std::shared_ptr<IconInfoInterface>, std::shared_ptr<Textured3dLayerObject>>> &iconsToClear);
 
     void
-    setupIconObjects(const std::vector<std::pair<std::shared_ptr<IconInfoInterface>, std::shared_ptr<Textured2dLayerObject>>>
+    setupIconObjects(const std::vector<std::pair<std::shared_ptr<IconInfoInterface>, std::shared_ptr<Textured3dLayerObject>>>
                          &iconObjects);
 
     std::vector<std::shared_ptr<IconInfoInterface>> getIconsAtPosition(const ::Vec2F &posScreen);
@@ -112,7 +112,7 @@ class IconLayer : public IconLayerInterface,
     std::shared_ptr<IconLayerCallbackInterface> callbackHandler;
 
     std::recursive_mutex iconsMutex;
-    std::vector<std::pair<std::shared_ptr<IconInfoInterface>, std::shared_ptr<Textured2dLayerObject>>> icons;
+    std::vector<std::pair<std::shared_ptr<IconInfoInterface>, std::shared_ptr<Textured3dLayerObject>>> icons;
     std::shared_ptr<MaskingObjectInterface> mask = nullptr;
 
     void preGenerateRenderPasses();

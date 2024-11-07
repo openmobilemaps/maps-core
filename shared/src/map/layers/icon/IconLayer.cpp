@@ -150,21 +150,21 @@ void IconLayer::addIcons(const std::vector<std::shared_ptr<IconInfoInterface>> &
         return;
     }
 
-    std::vector<std::pair<std::shared_ptr<IconInfoInterface>, std::shared_ptr<Textured2dLayerObject>>> iconObjects;
+    std::vector<std::pair<std::shared_ptr<IconInfoInterface>, std::shared_ptr<Textured3dLayerObject>>> iconObjects;
 
     for (const auto &icon : iconsToAdd) {
-        auto shader = is3D ? shaderFactory->createUnitSphereAlphaShader() : shaderFactory->createAlphaShader();
+        auto shader = is3D ? shaderFactory->createUnitSphereAlphaInstancedShader() : shaderFactory->createAlphaInstancedShader();
         shader->asShaderProgramInterface()->setBlendMode(icon->getBlendMode());
-        auto quadObject = objectFactory->createQuad(shader->asShaderProgramInterface());
+        auto quadObject = objectFactory->createQuadInstanced(shader->asShaderProgramInterface());
         if (is3D) {
-            quadObject->setSubdivisionFactor(SUBDIVISION_FACTOR_3D_DEFAULT);
+            //quadObject->setSubdivisionFactor(SUBDIVISION_FACTOR_3D_DEFAULT);
         }
 
 #if DEBUG
         quadObject->asGraphicsObject()->setDebugLabel("IconLayerID:" + icon->getIdentifier());
 #endif
 
-        auto iconObject = std::make_shared<Textured2dLayerObject>(quadObject, shader, mapInterface, is3D);
+        auto iconObject = std::make_shared<Textured3dLayerObject>(quadObject, shader, mapInterface, is3D);
 
         updateIconPosition(conversionHelper, icon, iconObject);
         iconObjects.push_back(std::make_pair(icon, iconObject));
@@ -191,7 +191,7 @@ void IconLayer::addIcons(const std::vector<std::shared_ptr<IconInfoInterface>> &
 }
 
 void IconLayer::setupIconObjects(
-    const std::vector<std::pair<std::shared_ptr<IconInfoInterface>, std::shared_ptr<Textured2dLayerObject>>> &iconObjects) {
+    const std::vector<std::pair<std::shared_ptr<IconInfoInterface>, std::shared_ptr<Textured3dLayerObject>>> &iconObjects) {
     auto mapInterface = this->mapInterface;
     auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
     if (!renderingContext) {
@@ -242,7 +242,7 @@ void IconLayer::clear() {
     mapInterface->invalidate();
 }
 
-void IconLayer::clearSync(const std::vector<std::pair<std::shared_ptr<IconInfoInterface>, std::shared_ptr<Textured2dLayerObject>>> &iconsToClear) {
+void IconLayer::clearSync(const std::vector<std::pair<std::shared_ptr<IconInfoInterface>, std::shared_ptr<Textured3dLayerObject>>> &iconsToClear) {
     for (const auto &icon : iconsToClear) {
         if (icon.second->getGraphicsObject()->isReady()) {
             icon.second->getGraphicsObject()->clear();
@@ -273,20 +273,23 @@ void IconLayer::update() {
     {
         std::lock_guard<std::recursive_mutex> lock(iconsMutex);
         for (const auto &[iconInfo, layerObject]: icons) {
-            if (iconInfo.get()->getType() != IconType::FIXED) {
-                continue;
-            }
+//
+//            if (iconInfo.get()->getType() != IconType::FIXED) {
+//                continue;
+//            }
             updateIconPosition(conversionHelper, iconInfo, layerObject);
             if (!layerObject->getGraphicsObject()->isReady()) {
                 layerObject->getGraphicsObject()->setup(renderingContext);
             }
+
+            layerObject->update();
         }
     }
 }
 
 void IconLayer::updateIconPosition(const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                                    const std::shared_ptr<IconInfoInterface> &iconInfo,
-                                   const std::shared_ptr<Textured2dLayerObject> &iconObject) {
+                                   const std::shared_ptr<Textured3dLayerObject> &iconObject) {
     auto mapInterface = this->mapInterface;
     auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
     if (!camera) {
@@ -323,9 +326,11 @@ void IconLayer::updateIconPosition(const std::shared_ptr<CoordinateConversionHel
         rightW *= scaleFactor;
     }
 
-    iconObject->setRectCoord(
-            RectCoord(Coord(iconPosRender.systemIdentifier, iconPosRender.x - leftW, iconPosRender.y + topH, iconPosRender.z),
-                      Coord(iconPosRender.systemIdentifier, iconPosRender.x + rightW, iconPosRender.y - bottomH, iconPosRender.z)));
+//    iconObject->setRectCoord(
+//            RectCoord(Coord(iconPosRender.systemIdentifier, iconPosRender.x - leftW, iconPosRender.y + topH, iconPosRender.z),
+//                      Coord(iconPosRender.systemIdentifier, iconPosRender.x + rightW, iconPosRender.y - bottomH, iconPosRender.z)));
+
+    iconObject->setPosition(iconInfo->getCoordinate(), iconInfo->getIconSize().x, iconInfo->getIconSize().y);
 }
 
 std::vector<std::shared_ptr<::RenderPassInterface>> IconLayer::buildRenderPasses() {
@@ -348,15 +353,15 @@ std::vector<std::shared_ptr<::RenderPassInterface>> IconLayer::buildRenderPasses
             for (auto const &iconTuple : icons) {
                 IconType type = iconTuple.first->getType();
                 if (type != IconType::FIXED) {
-                    bool scaleInvariant = type == IconType::INVARIANT || type == IconType::SCALE_INVARIANT;
-                    bool rotationInvariant = type == IconType::INVARIANT || type == IconType::ROTATION_INVARIANT;
-                    auto renderCoord = conversionHelper->convert(CoordinateSystemIdentifiers::RENDERSYSTEM(), iconTuple.first->getCoordinate());
-                    std::vector<float> modelMatrix =
-                        camera->getInvariantModelMatrix(renderCoord, scaleInvariant, rotationInvariant);
-                    Matrix::translateM(modelMatrix, 0, renderCoord.x, renderCoord.y, 0.0);
+//                    bool scaleInvariant = type == IconType::INVARIANT || type == IconType::SCALE_INVARIANT;
+//                    bool rotationInvariant = type == IconType::INVARIANT || type == IconType::ROTATION_INVARIANT;
+//                    auto renderCoord = conversionHelper->convert(CoordinateSystemIdentifiers::RENDERSYSTEM(), iconTuple.first->getCoordinate());
+//                    std::vector<float> modelMatrix =
+//                        camera->getInvariantModelMatrix(renderCoord, scaleInvariant, rotationInvariant);
+                   // Matrix::translateM(modelMatrix, 0, renderCoord.x, renderCoord.y, 0.0);
                     for (const auto &config : iconTuple.second->getRenderConfig()) {
                         currentRenderPassObjectMap[config->getRenderIndex()].push_back(
-                            std::make_shared<RenderObject>(config->getGraphicsObject(), modelMatrix));
+                            std::make_shared<RenderObject>(config->getGraphicsObject()));
                     }
                 }
                 i++;
