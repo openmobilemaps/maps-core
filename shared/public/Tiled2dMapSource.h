@@ -145,6 +145,10 @@ public:
 
     int currentZoomLevelIdentifier = 0;
 
+    int curT;
+    bool limitToCurrentT;
+    double curZoom;
+
     std::unordered_set<Tiled2dMapTileInfo> currentVisibleTiles;
 
     std::vector<VisibleTilesLayer> currentPyramid;

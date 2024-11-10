@@ -13,18 +13,16 @@
 #include "TiledLayerError.h"
 #include <algorithm>
 
-#include "PolygonCoord.h"
-#include <iostream>
-#include "gpc.h"
 #include "Logger.h"
+#include "PolygonCoord.h"
+#include "gpc.h"
+#include <iostream>
 
-template<class T, class L, class R>
+template <class T, class L, class R>
 Tiled2dMapSource<T, L, R>::Tiled2dMapSource(const MapConfig &mapConfig, const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig,
-                                         const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
-                                         const std::shared_ptr<SchedulerInterface> &scheduler,
-                                         float screenDensityPpi,
-                                         size_t loaderCount,
-                                         std::string layerName)
+                                            const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
+                                            const std::shared_ptr<SchedulerInterface> &scheduler, float screenDensityPpi,
+                                            size_t loaderCount, std::string layerName)
     : mapConfig(mapConfig)
     , layerConfig(layerConfig)
     , conversionHelper(conversionHelper)
@@ -34,7 +32,8 @@ Tiled2dMapSource<T, L, R>::Tiled2dMapSource(const MapConfig &mapConfig, const st
     , layerSystemId(layerConfig->getCoordinateSystemIdentifier())
     , isPaused(false)
     , screenDensityPpi(screenDensityPpi)
-    , layerName(layerName) {
+    , layerName(layerName)
+    , limitToCurrentT(false) {
     std::sort(zoomLevelInfos.begin(), zoomLevelInfos.end(),
               [](const Tiled2dMapZoomLevelInfo &a, const Tiled2dMapZoomLevelInfo &b) -> bool { return a.zoom > b.zoom; });
 }
@@ -42,20 +41,18 @@ Tiled2dMapSource<T, L, R>::Tiled2dMapSource(const MapConfig &mapConfig, const st
 const static double VIEWBOUNDS_PADDING_MIN_DIM_PC = 0.15;
 const static int8_t ALWAYS_KEEP_LEVEL_TARGET_ZOOM_OFFSET = -8;
 
-template<class T, class L, class R>
-bool Tiled2dMapSource<T, L, R>::isTileVisible(const Tiled2dMapTileInfo &tileInfo) {
+template <class T, class L, class R> bool Tiled2dMapSource<T, L, R>::isTileVisible(const Tiled2dMapTileInfo &tileInfo) {
     return currentVisibleTiles.count(tileInfo) > 0;
 }
 
-template <typename T>
-static void hash_combine(size_t& seed, const T& value) {
+template <typename T> static void hash_combine(size_t &seed, const T &value) {
     std::hash<T> hasher;
     auto v = hasher(value);
     seed ^= v + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 }
 
-template<class T, class L, class R>
-void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibleBounds, int curT, double zoom) {
+template <class T, class L, class R>
+void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibleBounds, int curT_, double zoom) {
     if (isPaused) {
         return;
     }
@@ -63,6 +60,18 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
     std::vector<PrioritizedTiled2dMapTileInfo> visibleTilesVec;
 
     RectCoord visibleBoundsLayer = conversionHelper->convertRect(layerSystemId, visibleBounds);
+
+    if ((visibleBoundsLayer != currentViewBounds || curT != curT_)) {
+        for (auto it = currentlyLoading.begin(); it != currentlyLoading.end();) {
+            if (it->first.t != curT_) {
+                cancelLoad(it->first, it->second);
+                it = currentlyLoading.erase(it);
+            } else
+                it++;
+        }
+    }
+    curT = curT_;
+    curZoom = zoom;
 
     const auto bounds = layerConfig->getBounds();
 
@@ -75,9 +84,10 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
     // Each pixel is assumed to be 0.28mm – https://gis.stackexchange.com/a/315989
     const float screenScaleFactor = zoomInfo.adaptScaleToScreen ? screenDensityPpi / (0.0254 / 0.00028) : 1.0;
 
-    if (!zoomInfo.underzoom
-        && (zoomLevelInfos.empty() || zoomLevelInfos[0].zoom * zoomInfo.zoomLevelScaleFactor * screenScaleFactor < zoom)
-        && (zoomLevelInfos.empty() || zoomLevelInfos[0].zoomLevelIdentifier != 0)) { // enable underzoom if the first zoomLevel is zoomLevelIdentifier == 0
+    if (!zoomInfo.underzoom &&
+        (zoomLevelInfos.empty() || zoomLevelInfos[0].zoom * zoomInfo.zoomLevelScaleFactor * screenScaleFactor < zoom) &&
+        (zoomLevelInfos.empty() ||
+         zoomLevelInfos[0].zoomLevelIdentifier != 0)) { // enable underzoom if the first zoomLevel is zoomLevelIdentifier == 0
         if (lastVisibleTilesHash != 0) {
             lastVisibleTilesHash = 0;
             onVisibleTilesChanged({});
@@ -97,11 +107,11 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
             onVisibleTilesChanged({});
             return;
         }
-        targetZoomLayer = (int) numZoomLevels - 1;
+        targetZoomLayer = (int)numZoomLevels - 1;
     }
     int targetZoomLevelIdentifier = zoomLevelInfos.at(targetZoomLayer).zoomLevelIdentifier;
     int startZoomLayer = 0;
-    int endZoomLevel = std::min((int) numZoomLevels - 1, targetZoomLayer + 2);
+    int endZoomLevel = std::min((int)numZoomLevels - 1, targetZoomLayer + 2);
     int keepZoomLevelOffset = std::max(zoomLevelInfos.at(startZoomLayer).zoomLevelIdentifier,
                                        zoomLevelInfos.at(endZoomLevel).zoomLevelIdentifier + ALWAYS_KEEP_LEVEL_TARGET_ZOOM_OFFSET) -
                               targetZoomLevelIdentifier;
@@ -160,14 +170,14 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
 
         const double boundsLeft = layerBounds.topLeft.x;
         int startTileLeft =
-                std::floor(std::max(leftToRight ? (visibleLeft - boundsLeft) : (boundsLeft - visibleLeft), 0.0) / tileWidth);
-        int maxTileLeft = std::floor(
-                std::max(leftToRight ? (visibleRight - boundsLeft) : (boundsLeft - visibleRight), 0.0) / tileWidth);
+            std::floor(std::max(leftToRight ? (visibleLeft - boundsLeft) : (boundsLeft - visibleLeft), 0.0) / tileWidth);
+        int maxTileLeft =
+            std::floor(std::max(leftToRight ? (visibleRight - boundsLeft) : (boundsLeft - visibleRight), 0.0) / tileWidth);
 
         const double boundsTop = layerBounds.topLeft.y;
         int startTileTop = std::floor(std::max(topToBottom ? (visibleTop - boundsTop) : (boundsTop - visibleTop), 0.0) / tileWidth);
-        int maxTileTop = std::floor(
-                std::max(topToBottom ? (visibleBottom - boundsTop) : (boundsTop - visibleBottom), 0.0) / tileWidth);
+        int maxTileTop =
+            std::floor(std::max(topToBottom ? (visibleBottom - boundsTop) : (boundsTop - visibleBottom), 0.0) / tileWidth);
 
         if (bounds.has_value()) {
             const auto availableTiles = conversionHelper->convertRect(layerSystemId, *bounds);
@@ -177,11 +187,14 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
             const double tHeightAdj = topToBottom ? tLength : -tLength;
             const double originX = leftToRight ? zoomLevelInfo.bounds.topLeft.x : -zoomLevelInfo.bounds.bottomRight.x;
             const double originY = topToBottom ? zoomLevelInfo.bounds.bottomRight.y : -zoomLevelInfo.bounds.topLeft.y;
-            const double minAvailableX = leftToRight ? std::min(availableTiles.topLeft.x, availableTiles.bottomRight.x) : -std::max(availableTiles.topLeft.x, availableTiles.bottomRight.x);
-            const double minAvailableY = topToBottom ? std::min(availableTiles.topLeft.y, availableTiles.bottomRight.y) : -std::max(availableTiles.topLeft.y, availableTiles.bottomRight.y);
-            const double maxAvailableX = leftToRight ? std::max(availableTiles.topLeft.x, availableTiles.bottomRight.x) : -std::min(availableTiles.topLeft.x, availableTiles.bottomRight.x);
-            const double maxAvailableY = topToBottom ? std::max(availableTiles.topLeft.y, availableTiles.bottomRight.y) : -std::min(availableTiles.topLeft.y, availableTiles.bottomRight.y);
-
+            const double minAvailableX = leftToRight ? std::min(availableTiles.topLeft.x, availableTiles.bottomRight.x)
+                                                     : -std::max(availableTiles.topLeft.x, availableTiles.bottomRight.x);
+            const double minAvailableY = topToBottom ? std::min(availableTiles.topLeft.y, availableTiles.bottomRight.y)
+                                                     : -std::max(availableTiles.topLeft.y, availableTiles.bottomRight.y);
+            const double maxAvailableX = leftToRight ? std::max(availableTiles.topLeft.x, availableTiles.bottomRight.x)
+                                                     : -std::min(availableTiles.topLeft.x, availableTiles.bottomRight.x);
+            const double maxAvailableY = topToBottom ? std::max(availableTiles.topLeft.y, availableTiles.bottomRight.y)
+                                                     : -std::min(availableTiles.topLeft.y, availableTiles.bottomRight.y);
 
             int min_left_pixel = floor((minAvailableX - originX) / tLength);
             int min_left = std::max(0, min_left_pixel / 256);
@@ -216,17 +229,21 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
             for (int y = startTileTop; y <= maxTileTop && y < zoomLevelInfo.numTilesY; y++) {
                 for (int t = 0; t < zoomLevelInfo.numTilesT; t++) {
 
-                    
-//                    if( abs(t - curT) > zoomInfo.numDrawPreviousOrLaterTLayers ) {
-//                        continue;
-//                    }
+                    //                    if (limitToCurrentT && t != curT) {
+                    //                        continue;
+                    //                    }
+
+                    //                    if( abs(t - curT) > zoomInfo.numDrawPreviousOrLaterTLayers ) {
+                    //                        continue;
+                    //                    }
 
                     const Coord topLeft = Coord(layerSystemId, x * tileWidthAdj + boundsLeft, y * tileHeightAdj + boundsTop, 0);
                     const Coord bottomRight = Coord(layerSystemId, topLeft.x + tileWidthAdj, topLeft.y + tileHeightAdj, 0);
 
                     const double tileCenterX = topLeft.x + 0.5f * tileWidthAdj;
                     const double tileCenterY = topLeft.y + 0.5f * tileHeightAdj;
-                    const double tileCenterDis = std::sqrt(std::pow(tileCenterX - centerVisibleX, 2.0) + std::pow(tileCenterY - centerVisibleY, 2.0));
+                    const double tileCenterDis =
+                        std::sqrt(std::pow(tileCenterX - centerVisibleX, 2.0) + std::pow(tileCenterY - centerVisibleY, 2.0));
 
                     float distanceFactor = (tileCenterDis / maxDisCenter) * distanceWeight;
                     float zoomlevelFactor = zoomDistanceFactor * zoomLevelWeight;
@@ -236,8 +253,7 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
 
                     const RectCoord rect(topLeft, bottomRight);
                     curVisibleTilesVec.push_back(PrioritizedTiled2dMapTileInfo(
-                            Tiled2dMapTileInfo(rect, x, y, t, zoomLevelInfo.zoomLevelIdentifier, zoomLevelInfo.zoom),
-                            priority));
+                        Tiled2dMapTileInfo(rect, x, y, t, zoomLevelInfo.zoomLevelIdentifier, zoomLevelInfo.zoom), priority));
 
                     visibleTilesVec.push_back(curVisibleTilesVec.back());
                 }
@@ -246,7 +262,7 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
 
         curVisibleTiles.visibleTiles.insert(curVisibleTilesVec.begin(), curVisibleTilesVec.end());
 
-        if(startTileLeft == maxTileLeft && startTileTop == maxTileTop) {
+        if (startTileLeft == maxTileLeft && startTileTop == maxTileTop) {
             if (!layers.empty()) {
                 layers.back().isLastSingleCover = false;
             }
@@ -257,9 +273,7 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
         layers.push_back(curVisibleTiles);
     }
 
-    {
-        currentZoomLevelIdentifier = targetZoomLevelIdentifier;
-    }
+    { currentZoomLevelIdentifier = targetZoomLevelIdentifier; }
 
     if (lastVisibleTilesHash != visibleTileHash) {
         lastVisibleTilesHash = visibleTileHash;
@@ -268,7 +282,7 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
     currentViewBounds = visibleBoundsLayer;
 }
 
-template<class T, class L, class R>
+template <class T, class L, class R>
 void Tiled2dMapSource<T, L, R>::onVisibleTilesChanged(const std::vector<VisibleTilesLayer> &pyramid, int keepZoomLevelOffset) {
 
     currentVisibleTiles.clear();
@@ -276,12 +290,13 @@ void Tiled2dMapSource<T, L, R>::onVisibleTilesChanged(const std::vector<VisibleT
     std::vector<PrioritizedTiled2dMapTileInfo> toAdd;
 
     // make sure all tiles on the current zoom level are scheduled to load (as well as those from the level we always want to keep)
-    for (const auto &layer: pyramid) {
-        if ((layer.targetZoomLevelOffset <= 0 && layer.targetZoomLevelOffset >= -zoomInfo.numDrawPreviousLayers) || layer.targetZoomLevelOffset == keepZoomLevelOffset){
-            for (auto const &tileInfo: layer.visibleTiles) {
-//                if (abs(tileInfo.tileInfo.t - layer.curT) > zoomInfo.numDrawPreviousOrLaterTLayers) {
-//                    continue;
-//                }
+    for (const auto &layer : pyramid) {
+        if ((layer.targetZoomLevelOffset <= 0 && layer.targetZoomLevelOffset >= -zoomInfo.numDrawPreviousLayers) ||
+            layer.targetZoomLevelOffset == keepZoomLevelOffset) {
+            for (auto const &tileInfo : layer.visibleTiles) {
+                if (abs(tileInfo.tileInfo.t - layer.curT) > zoomInfo.numDrawPreviousOrLaterTLayers) {
+                    continue;
+                }
 
                 currentVisibleTiles.insert(tileInfo.tileInfo);
 
@@ -308,18 +323,20 @@ void Tiled2dMapSource<T, L, R>::onVisibleTilesChanged(const std::vector<VisibleT
     for (const auto &[tileInfo, tileWrapper] : currentTiles) {
         bool found = false;
 
-        if ((!onlyCurrent && tileInfo.zoomIdentifier <= currentZoomLevelIdentifier)
-            || (onlyCurrent && tileInfo.zoomIdentifier == currentZoomLevelIdentifier)
-            || tileInfo.zoomIdentifier == (currentZoomLevelIdentifier + keepZoomLevelOffset)) {
-            for (const auto &layer: pyramid) {
-                for (auto const &tile: layer.visibleTiles) {
+        if ((!onlyCurrent && tileInfo.zoomIdentifier <= currentZoomLevelIdentifier) ||
+            (onlyCurrent && tileInfo.zoomIdentifier == currentZoomLevelIdentifier) ||
+            tileInfo.zoomIdentifier == (currentZoomLevelIdentifier + keepZoomLevelOffset)) {
+            for (const auto &layer : pyramid) {
+                for (auto const &tile : layer.visibleTiles) {
                     if (tileInfo == tile.tileInfo) {
                         found = true;
                         break;
                     }
                 }
 
-                if(found) { break; }
+                if (found) {
+                    break;
+                }
             }
         }
 
@@ -337,36 +354,38 @@ void Tiled2dMapSource<T, L, R>::onVisibleTilesChanged(const std::vector<VisibleT
 
         if (errorManager)
             errorManager->removeError(
-                    layerConfig->getTileUrl(removedTile.x, removedTile.y, removedTile.t, removedTile.zoomIdentifier));
+                layerConfig->getTileUrl(removedTile.x, removedTile.y, removedTile.t, removedTile.zoomIdentifier));
     }
 
     for (auto it = currentlyLoading.begin(); it != currentlyLoading.end();) {
         bool found = false;
         if (it->first.zoomIdentifier <= currentZoomLevelIdentifier) {
-            for (const auto &layer: pyramid) {
-                for (auto const &tile: layer.visibleTiles) {
-                    if (it->first == tile.tileInfo && (abs(tile.tileInfo.t - layer.curT) <= zoomInfo.numDrawPreviousOrLaterTLayers || layer.isLastSingleCover)) {
+            for (const auto &layer : pyramid) {
+                for (auto const &tile : layer.visibleTiles) {
+                    if (it->first == tile.tileInfo &&
+                        (abs(tile.tileInfo.t - layer.curT) <= zoomInfo.numDrawPreviousOrLaterTLayers || layer.isLastSingleCover)) {
                         found = true;
                         break;
                     }
                 }
 
-                if(found) { break; }
+                if (found) {
+                    break;
+                }
             }
         }
 
-       if(!found) {
-          cancelLoad(it->first, it->second);
-          it = currentlyLoading.erase(it);
-       }
-       else
-          it++;
+        if (!found) {
+            cancelLoad(it->first, it->second);
+            it = currentlyLoading.erase(it);
+        } else
+            it++;
     }
 
-    for (auto &[loaderIndex, errors]: errorTiles) {
+    for (auto &[loaderIndex, errors] : errorTiles) {
         for (auto it = errors.begin(); it != errors.end();) {
             bool found = false;
-            for (const auto &layer: pyramid) {
+            for (const auto &layer : pyramid) {
                 auto visibleTile = layer.visibleTiles.find({it->first, 0});
                 if (visibleTile == layer.visibleTiles.end()) {
                     found = true;
@@ -374,7 +393,9 @@ void Tiled2dMapSource<T, L, R>::onVisibleTilesChanged(const std::vector<VisibleT
                 }
             }
             if (found) {
-                if (errorManager) errorManager->removeError(layerConfig->getTileUrl(it->first.x, it->first.y, it->first.t, it->first.zoomIdentifier));
+                if (errorManager)
+                    errorManager->removeError(
+                        layerConfig->getTileUrl(it->first.x, it->first.y, it->first.t, it->first.zoomIdentifier));
                 it = errors.erase(it);
             } else {
                 ++it;
@@ -387,15 +408,16 @@ void Tiled2dMapSource<T, L, R>::onVisibleTilesChanged(const std::vector<VisibleT
     for (const auto &addedTile : toAdd) {
         performLoadingTask(addedTile.tileInfo, 0);
     }
-    //if we removed tiles, we potentially need to update the tilemasks - also if no new tile is loaded
+    // if we removed tiles, we potentially need to update the tilemasks - also if no new tile is loaded
     updateTileMasks();
-    
+
     notifyTilesUpdates();
 }
 
-template<class T, class L, class R>
+template <class T, class L, class R>
 void Tiled2dMapSource<T, L, R>::performLoadingTask(Tiled2dMapTileInfo tile, size_t loaderIndex) {
-    if (currentlyLoading.count(tile) != 0) return;
+    if (currentlyLoading.count(tile) != 0)
+        return;
 
     if (currentVisibleTiles.count(tile) == 0) {
         errorTiles[loaderIndex].erase(tile);
@@ -418,22 +440,23 @@ void Tiled2dMapSource<T, L, R>::performLoadingTask(Tiled2dMapTileInfo tile, size
                     auto strongScheduler = strongSelf->scheduler.lock();
                     if (strongScheduler) {
                         strongScheduler->addTask(std::make_shared<LambdaTask>(
-                                TaskConfig("postLoadingTask", 0.0, TaskPriority::NORMAL, ExecutionEnvironment::COMPUTATION),
-                                [tile, loaderIndex, weakSelfPtr, weakActor, res] {
-                                    auto strongSelf = weakSelfPtr.lock();
-                                    if (strongSelf) {
-                                        auto isStillVisible = weakActor.syncAccess([tile](auto actor){
-                                            auto strongSelf = actor.lock();
-                                            return strongSelf ? strongSelf->isTileVisible(tile) : false;
-                                        });
-                                        if (isStillVisible == false) {
-                                            weakActor.message(&Tiled2dMapSource::didFailToLoad, tile, loaderIndex, LoaderStatus::ERROR_OTHER, std::nullopt);
-                                        } else {
-                                            weakActor.message(&Tiled2dMapSource::didLoad, tile, loaderIndex,
-                                                              strongSelf->postLoadingTask(res, tile));
-                                        }
+                            TaskConfig("postLoadingTask", 0.0, TaskPriority::NORMAL, ExecutionEnvironment::COMPUTATION),
+                            [tile, loaderIndex, weakSelfPtr, weakActor, res] {
+                                auto strongSelf = weakSelfPtr.lock();
+                                if (strongSelf) {
+                                    auto isStillVisible = weakActor.syncAccess([tile](auto actor) {
+                                        auto strongSelf = actor.lock();
+                                        return strongSelf ? strongSelf->isTileVisible(tile) : false;
+                                    });
+                                    if (isStillVisible == false) {
+                                        weakActor.message(&Tiled2dMapSource::didFailToLoad, tile, loaderIndex,
+                                                          LoaderStatus::ERROR_OTHER, std::nullopt);
+                                    } else {
+                                        weakActor.message(&Tiled2dMapSource::didLoad, tile, loaderIndex,
+                                                          strongSelf->postLoadingTask(res, tile));
                                     }
-                                }));
+                                }
+                            }));
                     }
                 } else {
                     weakActor.message(&Tiled2dMapSource::didLoad, tile, loaderIndex, strongSelf->postLoadingTask(res, tile));
@@ -445,7 +468,7 @@ void Tiled2dMapSource<T, L, R>::performLoadingTask(Tiled2dMapTileInfo tile, size
     });
 }
 
-template<class T, class L, class R>
+template <class T, class L, class R>
 void Tiled2dMapSource<T, L, R>::didLoad(Tiled2dMapTileInfo tile, size_t loaderIndex, const R &result) {
     currentlyLoading.erase(tile);
     std::string layerName = layerConfig->getLayerName();
@@ -462,16 +485,15 @@ void Tiled2dMapSource<T, L, R>::didLoad(Tiled2dMapTileInfo tile, size_t loaderIn
     }
 
     auto bounds = tile.bounds;
-    PolygonCoord mask({ bounds.topLeft,
-        Coord(bounds.topLeft.systemIdentifier, bounds.bottomRight.x, bounds.topLeft.y, 0),
-        bounds.bottomRight,
-        Coord(bounds.topLeft.systemIdentifier, bounds.topLeft.x, bounds.bottomRight.y, 0),
-        bounds.topLeft }, {});
+    PolygonCoord mask({bounds.topLeft, Coord(bounds.topLeft.systemIdentifier, bounds.bottomRight.x, bounds.topLeft.y, 0),
+                       bounds.bottomRight, Coord(bounds.topLeft.systemIdentifier, bounds.topLeft.x, bounds.bottomRight.y, 0),
+                       bounds.topLeft},
+                      {});
 
     gpc_polygon tilePolygon;
     gpc_set_polygon({mask}, &tilePolygon);
 
-    currentTiles.insert({tile, TileWrapper<R>(result, std::vector<::PolygonCoord>{  }, mask, tilePolygon)});
+    currentTiles.insert({tile, TileWrapper<R>(result, std::vector<::PolygonCoord>{}, mask, tilePolygon)});
 
     errorTiles[loaderIndex].erase(tile);
 
@@ -480,8 +502,9 @@ void Tiled2dMapSource<T, L, R>::didLoad(Tiled2dMapTileInfo tile, size_t loaderIn
     notifyTilesUpdates();
 }
 
-template<class T, class L, class R>
-void Tiled2dMapSource<T, L, R>::didFailToLoad(Tiled2dMapTileInfo tile, size_t loaderIndex, const LoaderStatus &status, const std::optional<std::string> &errorCode) {
+template <class T, class L, class R>
+void Tiled2dMapSource<T, L, R>::didFailToLoad(Tiled2dMapTileInfo tile, size_t loaderIndex, const LoaderStatus &status,
+                                              const std::optional<std::string> &errorCode) {
     currentlyLoading.erase(tile);
 
     const bool isVisible = currentVisibleTiles.count(tile);
@@ -493,72 +516,67 @@ void Tiled2dMapSource<T, L, R>::didFailToLoad(Tiled2dMapTileInfo tile, size_t lo
     auto errorManager = this->errorManager;
 
     switch (status) {
-        case LoaderStatus::OK: {
-            assert(false);
-            break;
+    case LoaderStatus::OK: {
+        assert(false);
+        break;
+    }
+    case LoaderStatus::NOOP: {
+        errorTiles[loaderIndex].erase(tile);
+
+        auto newLoaderIndex = loaderIndex + 1;
+        performLoadingTask(tile, newLoaderIndex);
+
+        break;
+    }
+    case LoaderStatus::ERROR_400:
+    case LoaderStatus::ERROR_404: {
+        notFoundTiles.insert(tile);
+
+        errorTiles[loaderIndex].erase(tile);
+
+        if (errorManager) {
+            errorManager->addTiledLayerError(TiledLayerError(status, errorCode, layerName,
+                                                             layerConfig->getTileUrl(tile.x, tile.y, tile.t, tile.zoomIdentifier),
+                                                             false, tile.bounds));
         }
-        case LoaderStatus::NOOP: {
-            errorTiles[loaderIndex].erase(tile);
+        break;
+    }
 
-            auto newLoaderIndex = loaderIndex + 1;
-            performLoadingTask(tile, newLoaderIndex);
-
-            break;
+    case LoaderStatus::ERROR_TIMEOUT:
+    case LoaderStatus::ERROR_OTHER:
+    case LoaderStatus::ERROR_NETWORK: {
+        const auto now = DateHelper::currentTimeMillis();
+        int64_t delay = 0;
+        if (errorTiles[loaderIndex].count(tile) != 0) {
+            errorTiles[loaderIndex].at(tile).lastLoad = now;
+            errorTiles[loaderIndex].at(tile).delay = std::min(2 * errorTiles[loaderIndex].at(tile).delay, MAX_WAIT_TIME);
+        } else {
+            errorTiles[loaderIndex][tile] = {now, MIN_WAIT_TIME};
         }
-        case LoaderStatus::ERROR_400:
-        case LoaderStatus::ERROR_404: {
-            notFoundTiles.insert(tile);
+        delay = errorTiles[loaderIndex].at(tile).delay;
 
-            errorTiles[loaderIndex].erase(tile);
-
-            if (errorManager) {
-                errorManager->addTiledLayerError(TiledLayerError(status,
-                                                                 errorCode,
-                                                                 layerName,
-                                                                 layerConfig->getTileUrl(tile.x, tile.y, tile.t,tile.zoomIdentifier),
-                                                                 false,
-                                                                 tile.bounds));
-            }
-            break;
+        if (errorManager) {
+            errorManager->addTiledLayerError(TiledLayerError(status, errorCode, layerConfig->getLayerName(),
+                                                             layerConfig->getTileUrl(tile.x, tile.y, tile.t, tile.zoomIdentifier),
+                                                             true, tile.bounds));
         }
 
-        case LoaderStatus::ERROR_TIMEOUT:
-        case LoaderStatus::ERROR_OTHER:
-        case LoaderStatus::ERROR_NETWORK: {
-            const auto now = DateHelper::currentTimeMillis();
-            int64_t delay = 0;
-            if (errorTiles[loaderIndex].count(tile) != 0) {
-                errorTiles[loaderIndex].at(tile).lastLoad = now;
-                errorTiles[loaderIndex].at(tile).delay = std::min(2 * errorTiles[loaderIndex].at(tile).delay, MAX_WAIT_TIME);
-            } else {
-                errorTiles[loaderIndex][tile] = {now, MIN_WAIT_TIME};
+        if (!nextDelayTaskExecution || nextDelayTaskExecution > now + delay) {
+            nextDelayTaskExecution = now + delay;
+
+            auto taskIdentifier = "Tiled2dMapSource_loadingErrorTask";
+
+            auto strongScheduler = scheduler.lock();
+            if (strongScheduler) {
+                auto weakActor =
+                    WeakActor<Tiled2dMapSource>(mailbox, std::dynamic_pointer_cast<Tiled2dMapSource>(shared_from_this()));
+                strongScheduler->addTask(
+                    std::make_shared<LambdaTask>(TaskConfig(taskIdentifier, delay, TaskPriority::NORMAL, ExecutionEnvironment::IO),
+                                                 [weakActor] { weakActor.message(&Tiled2dMapSource::performDelayedTasks); }));
             }
-            delay = errorTiles[loaderIndex].at(tile).delay;
-
-            if (errorManager) {
-                errorManager->addTiledLayerError(TiledLayerError(status,
-                                                                 errorCode,
-                                                                 layerConfig->getLayerName(),
-                                                                 layerConfig->getTileUrl(tile.x, tile.y, tile.t, tile.zoomIdentifier),
-                                                                 true,
-                                                                 tile.bounds));
-            }
-
-            if (!nextDelayTaskExecution || nextDelayTaskExecution > now + delay ) {
-                nextDelayTaskExecution = now + delay;
-
-                auto taskIdentifier = "Tiled2dMapSource_loadingErrorTask";
-
-                auto strongScheduler = scheduler.lock();
-                if (strongScheduler) {
-                    auto weakActor = WeakActor<Tiled2dMapSource>(mailbox, std::dynamic_pointer_cast<Tiled2dMapSource>(shared_from_this()));
-                    strongScheduler->addTask(std::make_shared<LambdaTask>(TaskConfig(taskIdentifier, delay, TaskPriority::NORMAL, ExecutionEnvironment::IO), [weakActor] {
-                        weakActor.message(&Tiled2dMapSource::performDelayedTasks);
-                    }));
-                }
-            }
-            break;
         }
+        break;
+    }
     }
 
     updateTileMasks();
@@ -566,9 +584,7 @@ void Tiled2dMapSource<T, L, R>::didFailToLoad(Tiled2dMapTileInfo tile, size_t lo
     notifyTilesUpdates();
 }
 
-
-template<class T, class L, class R>
-void Tiled2dMapSource<T, L, R>::performDelayedTasks() {
+template <class T, class L, class R> void Tiled2dMapSource<T, L, R>::performDelayedTasks() {
     nextDelayTaskExecution = std::nullopt;
 
     const auto now = DateHelper::currentTimeMillis();
@@ -576,8 +592,8 @@ void Tiled2dMapSource<T, L, R>::performDelayedTasks() {
 
     std::vector<std::pair<int, Tiled2dMapTileInfo>> toLoad;
 
-    for (auto &[loaderIndex, errors]: errorTiles) {
-        for(auto &[tile, errorInfo]: errors) {
+    for (auto &[loaderIndex, errors] : errorTiles) {
+        for (auto &[tile, errorInfo] : errors) {
             if (errorInfo.lastLoad + errorInfo.delay >= now) {
                 toLoad.push_back({loaderIndex, tile});
             } else {
@@ -586,7 +602,7 @@ void Tiled2dMapSource<T, L, R>::performDelayedTasks() {
         }
     }
 
-    for (auto &[loaderIndex, tile]: toLoad) {
+    for (auto &[loaderIndex, tile] : toLoad) {
         performLoadingTask(tile, loaderIndex);
     }
 
@@ -598,15 +614,14 @@ void Tiled2dMapSource<T, L, R>::performDelayedTasks() {
         auto strongScheduler = scheduler.lock();
         if (strongScheduler) {
             auto weakActor = WeakActor<Tiled2dMapSource>(mailbox, std::dynamic_pointer_cast<Tiled2dMapSource>(shared_from_this()));
-            strongScheduler->addTask(std::make_shared<LambdaTask>(TaskConfig(taskIdentifier, minDelay, TaskPriority::NORMAL, ExecutionEnvironment::IO), [weakActor] {
-                weakActor.message(&Tiled2dMapSource::performDelayedTasks);
-            }));
+            strongScheduler->addTask(
+                std::make_shared<LambdaTask>(TaskConfig(taskIdentifier, minDelay, TaskPriority::NORMAL, ExecutionEnvironment::IO),
+                                             [weakActor] { weakActor.message(&Tiled2dMapSource::performDelayedTasks); }));
         }
     }
 }
 
-template<class T, class L, class R>
-void Tiled2dMapSource<T, L, R>::updateTileMasks() {
+template <class T, class L, class R> void Tiled2dMapSource<T, L, R>::updateTileMasks() {
 
     if (!zoomInfo.maskTile) {
         return;
@@ -626,19 +641,19 @@ void Tiled2dMapSource<T, L, R>::updateTileMasks() {
     bool isFirst = true;
 
     gpc_polygon currentViewBoundsPolygon;
-    gpc_set_polygon({PolygonCoord({
-        currentViewBounds.topLeft,
-        Coord(currentViewBounds.topLeft.systemIdentifier, currentViewBounds.bottomRight.x,
-              currentViewBounds.topLeft.y, 0),
-        currentViewBounds.bottomRight,
-        Coord(currentViewBounds.topLeft.systemIdentifier, currentViewBounds.topLeft.x,
-              currentViewBounds.bottomRight.y, 0),
-        currentViewBounds.topLeft
-    }, {})}, &currentViewBoundsPolygon);
+    gpc_set_polygon(
+        {PolygonCoord(
+            {currentViewBounds.topLeft,
+             Coord(currentViewBounds.topLeft.systemIdentifier, currentViewBounds.bottomRight.x, currentViewBounds.topLeft.y, 0),
+             currentViewBounds.bottomRight,
+             Coord(currentViewBounds.topLeft.systemIdentifier, currentViewBounds.topLeft.x, currentViewBounds.bottomRight.y, 0),
+             currentViewBounds.topLeft},
+            {})},
+        &currentViewBoundsPolygon);
 
     bool completeViewBoundsDrawn = false;
 
-    for (auto it = currentTiles.rbegin(); it != currentTiles.rend(); it++){
+    for (auto it = currentTiles.rbegin(); it != currentTiles.rend(); it++) {
         auto &[tileInfo, tileWrapper] = *it;
 
         tileWrapper.state = TileState::VISIBLE;
@@ -705,13 +720,13 @@ void Tiled2dMapSource<T, L, R>::updateTileMasks() {
                 gpc_free_polygon(&polygonDiff);
             }
         } else {
-            tileWrapper.masks = { tileWrapper.tileBounds };
+            tileWrapper.masks = {tileWrapper.tileBounds};
         }
 
         // add tileBounds to currentTileMask
         if (tileWrapper.state == TileState::VISIBLE) {
             if (isFirst) {
-                gpc_set_polygon({ tileWrapper.tileBounds }, &currentTileMask);
+                gpc_set_polygon({tileWrapper.tileBounds}, &currentTileMask);
                 isFirst = false;
             } else {
                 gpc_polygon result;
@@ -724,93 +739,82 @@ void Tiled2dMapSource<T, L, R>::updateTileMasks() {
         }
     }
 
-    if(freeCurrent) {
+    if (freeCurrent) {
         gpc_free_polygon(&currentTileMask);
     }
     gpc_free_polygon(&currentViewBoundsPolygon);
 }
 
-template<class T, class L, class R>
-void Tiled2dMapSource<T, L, R>::setTileReady(const Tiled2dMapVersionedTileInfo &tile) {
+template <class T, class L, class R> void Tiled2dMapSource<T, L, R>::setTileReady(const Tiled2dMapVersionedTileInfo &tile) {
     bool needsUpdate = false;
-    
+
     if (readyTiles.count(tile.tileInfo) == 0) {
-        if (currentTiles.count(tile.tileInfo) != 0){
+        if (currentTiles.count(tile.tileInfo) != 0) {
             readyTiles.insert(tile.tileInfo);
             outdatedTiles.erase(tile.tileInfo);
             needsUpdate = true;
         }
     }
-    
-    if (!needsUpdate) { return; }
-    
+
+    if (!needsUpdate) {
+        return;
+    }
+
     updateTileMasks();
-    
+
     notifyTilesUpdates();
 }
 
-template<class T, class L, class R>
+template <class T, class L, class R>
 void Tiled2dMapSource<T, L, R>::setTilesReady(const std::vector<Tiled2dMapVersionedTileInfo> &tiles) {
     bool needsUpdate = false;
-    
-    for (auto const &tile: tiles) {
+
+    for (auto const &tile : tiles) {
         if (readyTiles.count(tile.tileInfo) == 0 || outdatedTiles.count(tile.tileInfo) > 0) {
-            if (currentTiles.count(tile.tileInfo) != 0){
+            if (currentTiles.count(tile.tileInfo) != 0) {
                 readyTiles.insert(tile.tileInfo);
                 outdatedTiles.erase(tile.tileInfo);
                 needsUpdate = true;
             }
         }
     }
-    
-    if (!needsUpdate) { return; }
+
+    if (!needsUpdate) {
+        return;
+    }
 
     updateTileMasks();
     notifyTilesUpdates();
 }
 
-template<class T, class L, class R>
-RectCoord Tiled2dMapSource<T, L, R>::getCurrentViewBounds() {
-    return currentViewBounds;
-}
+template <class T, class L, class R> RectCoord Tiled2dMapSource<T, L, R>::getCurrentViewBounds() { return currentViewBounds; }
 
-template<class T, class L, class R>
-void Tiled2dMapSource<T, L, R>::setMinZoomLevelIdentifier(std::optional<int32_t> value) {
+template <class T, class L, class R> void Tiled2dMapSource<T, L, R>::setMinZoomLevelIdentifier(std::optional<int32_t> value) {
     minZoomLevelIdentifier = value;
 }
 
-template<class T, class L, class R>
-void Tiled2dMapSource<T, L, R>::setMaxZoomLevelIdentifier(std::optional<int32_t> value) {
+template <class T, class L, class R> void Tiled2dMapSource<T, L, R>::setMaxZoomLevelIdentifier(std::optional<int32_t> value) {
     maxZoomLevelIdentifier = value;
 }
 
-template<class T, class L, class R>
-std::optional<int32_t> Tiled2dMapSource<T, L, R>::getMinZoomLevelIdentifier() {
+template <class T, class L, class R> std::optional<int32_t> Tiled2dMapSource<T, L, R>::getMinZoomLevelIdentifier() {
     return minZoomLevelIdentifier;
 }
 
-template<class T, class L, class R>
-std::optional<int32_t> Tiled2dMapSource<T, L, R>::getMaxZoomLevelIdentifier() {
+template <class T, class L, class R> std::optional<int32_t> Tiled2dMapSource<T, L, R>::getMaxZoomLevelIdentifier() {
     return maxZoomLevelIdentifier;
 }
 
-template<class T, class L, class R>
-void Tiled2dMapSource<T, L, R>::pause() {
-    isPaused = true;
-}
+template <class T, class L, class R> void Tiled2dMapSource<T, L, R>::pause() { isPaused = true; }
 
-template<class T, class L, class R>
-void Tiled2dMapSource<T, L, R>::resume() {
-    isPaused = false;
-}
+template <class T, class L, class R> void Tiled2dMapSource<T, L, R>::resume() { isPaused = false; }
 
-template<class T, class L, class R>
-::LayerReadyState Tiled2dMapSource<T, L, R>::isReadyToRenderOffscreen() {
+template <class T, class L, class R>::LayerReadyState Tiled2dMapSource<T, L, R>::isReadyToRenderOffscreen() {
     if (notFoundTiles.size() > 0) {
         return LayerReadyState::ERROR;
     }
 
-    for (auto const &[index, errors]: errorTiles) {
+    for (auto const &[index, errors] : errorTiles) {
         if (errors.size() > 0) {
             return LayerReadyState::ERROR;
         }
@@ -820,7 +824,7 @@ template<class T, class L, class R>
         return LayerReadyState::NOT_READY;
     }
 
-    for (const auto& visible : currentVisibleTiles) {
+    for (const auto &visible : currentVisibleTiles) {
         if (currentTiles.count(visible) == 0) {
             return LayerReadyState::NOT_READY;
         }
@@ -832,33 +836,30 @@ template<class T, class L, class R>
     return LayerReadyState::READY;
 }
 
-template<class T, class L, class R>
+template <class T, class L, class R>
 void Tiled2dMapSource<T, L, R>::setErrorManager(const std::shared_ptr<::ErrorManager> &errorManager) {
     this->errorManager = errorManager;
 }
 
-template<class T, class L, class R>
-void Tiled2dMapSource<T, L, R>::forceReload() {
+template <class T, class L, class R> void Tiled2dMapSource<T, L, R>::forceReload() {
 
-    //set delay to 0 for all error tiles
-    for (auto &[loaderIndex, errors]: errorTiles) {
-        for(auto &[tile, errorInfo]: errors) {
+    // set delay to 0 for all error tiles
+    for (auto &[loaderIndex, errors] : errorTiles) {
+        for (auto &[tile, errorInfo] : errors) {
             errorInfo.delay = 1;
             performLoadingTask(tile, loaderIndex);
         }
     }
-
 }
 
-template<class T, class L, class R>
-void Tiled2dMapSource<T, L, R>::reloadTiles() {
+template <class T, class L, class R> void Tiled2dMapSource<T, L, R>::reloadTiles() {
     outdatedTiles.clear();
     outdatedTiles.insert(currentTiles.begin(), currentTiles.end());
-    
+
     currentTiles.clear();
     readyTiles.clear();
 
-    for (auto it = currentlyLoading.begin(); it != currentlyLoading.end(); ++it ) {
+    for (auto it = currentlyLoading.begin(); it != currentlyLoading.end(); ++it) {
         cancelLoad(it->first, it->second);
     }
     currentlyLoading.clear();
