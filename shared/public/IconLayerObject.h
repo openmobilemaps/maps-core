@@ -25,25 +25,23 @@
 #include <optional>
 #include "AnimationInterface.h"
 #include "Quad3dD.h"
+#include "IconInfoInterface.h"
 
-class Textured3dLayerObject : public LayerObjectInterface, public std::enable_shared_from_this<Textured3dLayerObject> {
+class IconLayerObject : public LayerObjectInterface, public std::enable_shared_from_this<IconLayerObject> {
   public:
-    Textured3dLayerObject(std::shared_ptr<Quad2dInstancedInterface> quad,
+    IconLayerObject(std::shared_ptr<Quad2dInstancedInterface> quad,
+                          const std::shared_ptr<IconInfoInterface> &icon,
                           const std::shared_ptr<AlphaInstancedShaderInterface> &shader,
                           const std::shared_ptr<MapInterface> &mapInterface,
                           bool is3d = false);
 
-    virtual ~Textured3dLayerObject() override {}
+    virtual ~IconLayerObject() override {}
 
     virtual void update() override;
 
     virtual std::vector<std::shared_ptr<RenderConfigInterface>> getRenderConfig() override;
 
-    void setPosition(const ::Coord &coord, double width, double height);
-
-  //  void setPositions(const ::QuadCoord &coords);
-
-//    void setRectCoord(const ::RectCoord &rectCoord);
+    void setup(const std::shared_ptr<RenderingContextInterface> context);
 
     void setAlpha(float alpha);
 
@@ -57,10 +55,9 @@ class Textured3dLayerObject : public LayerObjectInterface, public std::enable_sh
 
     void beginAlphaAnimation(double startAlpha, double targetAlpha, long long duration);
 
-  protected:
-    void setFrame(const ::Quad3dD &frame, const ::Vec3D & origin);
-
   private:
+    std::shared_ptr<IconInfoInterface> icon;
+    
     std::shared_ptr<Quad2dInstancedInterface> quad;
     std::shared_ptr<AlphaInstancedShaderInterface> shader;
     std::shared_ptr<GraphicsObjectInterface> graphicsObject;
