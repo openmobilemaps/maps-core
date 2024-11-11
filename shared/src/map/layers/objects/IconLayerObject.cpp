@@ -142,8 +142,13 @@ void IconLayerObject::update() {
     // ratio = 0.5 -> center -> nothing to do
     // ratio = 1.0 -> right in middle -> -0.5 * width
     // ratio = 0.0 -> left in middle -> 0.5 * width
-    iconOffsets[0] = (0.5 - ratioLeftRight) * iconScales[0];
-    iconOffsets[1] = (0.5 - ratioTopBottom) * iconScales[1];
+    if(!is3d) {
+        iconOffsets[0] = (0.5 - ratioLeftRight) * width * scaleFactor;
+        iconOffsets[1] = (0.5 - ratioTopBottom) * height * scaleFactor;
+    } else {
+        iconOffsets[0] = 2.0 * (0.5 - ratioLeftRight) * width / viewport.x;
+        iconOffsets[1] = 2.0 * (0.5 - (1.0 - ratioTopBottom)) * height / viewport.y;
+    }
 
     quad->setScales(
         SharedBytes((int64_t) iconScales.data(), (int32_t) iconAlphas.size(), 2 * (int32_t) sizeof(float)));
