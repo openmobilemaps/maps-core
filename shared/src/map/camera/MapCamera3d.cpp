@@ -67,6 +67,8 @@ void MapCamera3d::viewportSizeChanged() {
         updateZoom(zoom);
     }
 
+    updateMatrices();
+
     notifyListeners(ListenerType::BOUNDS);
 }
 
