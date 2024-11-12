@@ -80,6 +80,8 @@ abstract class MapCameraInterface {
 
     abstract fun mapUnitsFromPixels(distancePx: Double): Double
 
+    abstract fun getScalingFactor(): Double
+
     /** padding in percentage, where 1.0 = rect is half of full width and height */
     abstract fun coordIsVisibleOnScreen(coord: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, paddingPc: Float): Boolean
 
@@ -315,6 +317,12 @@ abstract class MapCameraInterface {
             return native_mapUnitsFromPixels(this.nativeRef, distancePx)
         }
         private external fun native_mapUnitsFromPixels(_nativeRef: Long, distancePx: Double): Double
+
+        override fun getScalingFactor(): Double {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getScalingFactor(this.nativeRef)
+        }
+        private external fun native_getScalingFactor(_nativeRef: Long): Double
 
         override fun coordIsVisibleOnScreen(coord: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, paddingPc: Float): Boolean {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

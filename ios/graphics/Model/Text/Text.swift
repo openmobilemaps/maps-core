@@ -83,9 +83,12 @@ final class Text: BaseGraphicsObject, @unchecked Sendable {
         shader.preRender(context)
 
         encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
+
+        let vpMatrixBuffer = vpMatrixBuffers.getNextBuffer(context)
         if let matrixPointer = UnsafeRawPointer(bitPattern: Int(vpMatrix)) {
-            encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
+            vpMatrixBuffer?.contents().copyMemory(from: matrixPointer, byteCount: 64)
         }
+        encoder.setVertexBuffer(vpMatrixBuffer, offset: 0, index: 1)
 
         encoder.setFragmentSamplerState(sampler, index: 0)
 

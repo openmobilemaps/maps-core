@@ -36,6 +36,7 @@ final class LineGroup2d: BaseGraphicsObject, @unchecked Sendable {
                    label: "LineGroup2d")
         var originOffset: simd_float4 = simd_float4(0, 0, 0, 0)
         tileOriginBuffer = metalContext.device.makeBuffer(bytes: &originOffset, length: MemoryLayout<simd_float4>.stride, options: [])
+
     }
 
     private func setupStencilBufferDescriptor() {
@@ -115,10 +116,13 @@ final class LineGroup2d: BaseGraphicsObject, @unchecked Sendable {
 
         encoder.setVertexBuffer(lineVerticesBuffer, offset: 0, index: 0)
 
+        let vpMatrixBuffer = vpMatrixBuffers.getNextBuffer(context)
         if let matrixPointer = UnsafeRawPointer(bitPattern: Int(vpMatrix)) {
-            encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
+            vpMatrixBuffer?.contents().copyMemory(from: matrixPointer, byteCount: 64)
         }
+        encoder.setVertexBuffer(vpMatrixBuffer, offset: 0, index: 1)
 
+        let originOffsetBuffer = originOffsetBuffers.getNextBuffer(context)
         if let bufferPointer = originOffsetBuffer?.contents().assumingMemoryBound(to: simd_float4.self) {
             bufferPointer.pointee.x = Float(originOffset.x - origin.x)
             bufferPointer.pointee.y = Float(originOffset.y - origin.y)
@@ -157,6 +161,9 @@ extension LineGroup2d: MCLineGroup2dInterface {
                 bufferPointer.pointee.x = originOffset.xF
                 bufferPointer.pointee.y = originOffset.yF
                 bufferPointer.pointee.z = originOffset.zF
+            }
+            else {
+                fatalError()
             }
             self.lineVerticesBuffer.copyOrCreate(from: lines, device: device)
             self.lineIndicesBuffer.copyOrCreate(from: indices, device: device)

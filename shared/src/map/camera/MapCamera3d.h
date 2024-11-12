@@ -10,26 +10,25 @@
 
 #pragma once
 
+#include "Camera3dConfig.h"
 #include "CameraInterface.h"
-#include "MapCamera3dInterface.h"
+#include "CameraInterpolation.h"
 #include "Coord.h"
 #include "CoordAnimation.h"
 #include "CoordinateConversionHelperInterface.h"
 #include "DoubleAnimation.h"
+#include "MapCamera3dInterface.h"
 #include "MapCameraInterface.h"
 #include "MapCameraListenerInterface.h"
 #include "MapCoordinateSystem.h"
 #include "SimpleTouchInterface.h"
-#include "Vec2I.h"
 #include "Vec2F.h"
+#include "Vec2I.h"
 #include "Vec3D.h"
 #include "Vec4D.h"
-#include "Camera3dConfig.h"
-#include "CameraInterpolation.h"
 #include <mutex>
 #include <optional>
 #include <set>
-
 
 class MapCamera3d : public MapCameraInterface,
                     public MapCamera3dInterface,
@@ -47,8 +46,8 @@ class MapCamera3d : public MapCameraInterface,
 
     virtual void moveToCenterPosition(const ::Coord &centerPosition, bool animated) override;
 
-    virtual void moveToBoundingBox(const ::RectCoord &boundingBox, float paddingPc, bool animated,
-                                   std::optional<double> minZoom, std::optional<double> maxZoom) override;
+    virtual void moveToBoundingBox(const ::RectCoord &boundingBox, float paddingPc, bool animated, std::optional<double> minZoom,
+                                   std::optional<double> maxZoom) override;
 
     virtual ::Coord getCenterPosition() override;
 
@@ -90,6 +89,10 @@ class MapCamera3d : public MapCameraInterface,
 
     virtual std::vector<float> getVpMatrix() override;
 
+    void updateMatrices();
+
+    std::optional<std::tuple<std::vector<double>, std::vector<double>, Vec3D>> computeMatrices(const Coord &focusCoord, bool onlyReturnResult);
+
     virtual ::Vec3D getOrigin() override;
 
     virtual std::optional<std::vector<double>> getLastVpMatrixD() override;
@@ -110,13 +113,12 @@ class MapCamera3d : public MapCameraInterface,
 
     virtual bool onTouchDown(const ::Vec2F &posScreen) override;
 
-
     virtual bool onMove(const ::Vec2F &deltaScreen, bool confirmed, bool doubleClick) override;
 
     virtual bool onMoveComplete() override;
 
     virtual bool onOneFingerDoubleClickMoveComplete() override;
-                        
+
     virtual bool onTwoFingerClick(const ::Vec2F &posScreen1, const ::Vec2F &posScreen2) override;
 
     virtual bool onDoubleClick(const ::Vec2F &posScreen) override;
@@ -135,13 +137,13 @@ class MapCamera3d : public MapCameraInterface,
 
     virtual ::Coord coordFromScreenPosition(const ::Vec2F &posScreen) override;
 
-    virtual ::Coord coordFromScreenPositionZoom(const ::Vec2F & posScreen, float zoom) override;
+    virtual ::Coord coordFromScreenPositionZoom(const ::Vec2F &posScreen, float zoom) override;
 
     Vec2F screenPosFromCoord(const Coord &coord) override;
 
-    virtual ::Vec2F screenPosFromCoordZoom(const ::Coord & coord, float zoom) override;
+    virtual ::Vec2F screenPosFromCoordZoom(const ::Coord &coord, float zoom) override;
 
-    bool coordIsVisibleOnScreen(const ::Coord & coord, float paddingPc) override;
+    bool coordIsVisibleOnScreen(const ::Coord &coord, float paddingPc) override;
 
     bool gluInvertMatrix(const std::vector<double> &m, std::vector<double> &invOut);
 
@@ -155,12 +157,12 @@ class MapCamera3d : public MapCameraInterface,
 
     void setBoundsRestrictWholeVisibleRect(bool centerOnly) override;
 
-
     virtual float getScreenDensityPpi() override;
 
     std::shared_ptr<MapCamera3dInterface> asMapCamera3d() override;
 
-    void setCameraConfig(const Camera3dConfig & config, std::optional<float> durationSeconds, std::optional<float> targetZoom, const std::optional<::Coord> & targetCoordinate) override;
+    void setCameraConfig(const Camera3dConfig &config, std::optional<float> durationSeconds, std::optional<float> targetZoom,
+                         const std::optional<::Coord> &targetCoordinate) override;
 
     Camera3dConfig getCameraConfig() override;
 
@@ -168,25 +170,23 @@ class MapCamera3d : public MapCameraInterface,
 
     std::vector<double> computeEllipseCoefficients();
 
-    bool coordIsFarAwayFromFocusPoint(const ::Coord & coord);
+    bool coordIsFarAwayFromFocusPoint(const ::Coord &coord);
 
     Vec2F screenPosFromCartesianCoord(const Vec3D &coord, const Vec2I &sizeViewport);
 
-protected:
-    virtual std::tuple<std::vector<float>, std::vector<double>, Vec3D> getVpMatrix(const Coord &focusCoord, bool updateVariables);
-
+  protected:
     virtual ::Coord coordFromScreenPosition(const std::vector<double> &inverseVPMatrix, const ::Vec2F &posScreen);
 
-    virtual ::Coord coordFromScreenPosition(const std::vector<double> &inverseVPMatrix, const ::Vec2F &posScreen, const Vec3D &origin);
+    virtual ::Coord coordFromScreenPosition(const std::vector<double> &inverseVPMatrix, const ::Vec2F &posScreen,
+                                            const Vec3D &origin);
 
     Vec2F screenPosFromCartesianCoord(const Vec4D &coord, const Vec2I &sizeViewport);
-
 
     void updateZoom(double zoom);
 
     virtual void setupInertia();
 
-    double getCameraDistance();
+    double getCameraDistance(Vec2I sizeViewport);
     double getCameraFieldOfView();
     double getCameraVerticalDisplacement();
     double getCameraPitch();
@@ -224,7 +224,6 @@ protected:
 
     RectCoord bounds;
 
-    std::recursive_mutex vpDataMutex;
     std::optional<RectCoord> lastVpBounds = std::nullopt;
     std::optional<double> lastVpRotation = std::nullopt;
     std::optional<double> lastVpZoom = std::nullopt;
@@ -269,7 +268,7 @@ protected:
 
     void notifyListeners(const int &listenerType);
 
-    float valueForZoom(const CameraInterpolation& interpolator);
+    float valueForZoom(const CameraInterpolation &interpolator);
 
     // MARK: Animations
 
@@ -294,6 +293,9 @@ protected:
     Vec4D convertToCartesianCoordinates(const Coord &coord) const;
     Vec4D projectedPoint(const Vec4D &point) const;
 
+    std::recursive_mutex paramMutex;
+    std::recursive_mutex matrixMutex;
+
     std::vector<float> vpMatrix = std::vector<float>(16, 0.0);
     std::vector<double> vpMatrixD = std::vector<double>(16, 0.0);
     std::vector<double> inverseVPMatrix = std::vector<double>(16, 0.0);
@@ -314,4 +316,5 @@ protected:
     Vec3D lastOnTouchDownVPOrigin = Vec3D(0.0, 0.0, 0.0);
 
     Camera3dConfig cameraZoomConfig;
+
 };

@@ -93,9 +93,12 @@ final class PolygonPatternGroup2d: BaseGraphicsObject, @unchecked Sendable {
         shader.preRender(context)
 
         encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
+
+        let vpMatrixBuffer = vpMatrixBuffers.getNextBuffer(context)
         if let matrixPointer = UnsafeRawPointer(bitPattern: Int(vpMatrix)) {
-            encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
+            vpMatrixBuffer?.contents().copyMemory(from: matrixPointer, byteCount: 64)
         }
+        encoder.setVertexBuffer(vpMatrixBuffer, offset: 0, index: 1)
 
         // scale factors for shaders
         var pixelFactor: Float = Float(screenPixelAsRealMeterFactor)
@@ -121,10 +124,14 @@ final class PolygonPatternGroup2d: BaseGraphicsObject, @unchecked Sendable {
         encoder.setFragmentBuffer(opacitiesBuffer, offset: 0, index: 0)
         encoder.setFragmentBuffer(textureCoordinatesBuffer, offset: 0, index: 1)
 
+        let originOffsetBuffer = originOffsetBuffers.getNextBuffer(context)
         if let bufferPointer = originOffsetBuffer?.contents().assumingMemoryBound(to: simd_float4.self) {
             bufferPointer.pointee.x = Float(originOffset.x - origin.x)
             bufferPointer.pointee.y = Float(originOffset.y - origin.y)
             bufferPointer.pointee.z = Float(originOffset.z - origin.z)
+        }
+        else {
+            fatalError()
         }
         encoder.setVertexBuffer(originOffsetBuffer, offset: 0, index: 4)
 
