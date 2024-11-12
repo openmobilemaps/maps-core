@@ -301,6 +301,10 @@ public:
         return usedKeys.empty() && featureStateKeys.empty() && globalStateKeys.empty();
     }
 
+    bool onlyGlobalStateDependant() {
+        return featureStateKeys.empty() && !globalStateKeys.empty();
+    }
+
     size_t size() const {
         return usedKeys.size() + featureStateKeys.size() + globalStateKeys.size();
     }
@@ -653,6 +657,7 @@ public:
         isStatic = usedKeysCollection.empty();
         isZoomDependent = usedKeysCollection.usedKeys.contains("zoom");
         isStateDependant = usedKeysCollection.isStateDependant();
+        onlyGlobalStateDependant = usedKeysCollection.onlyGlobalStateDependant();
     }
 
     ValueEvaluator(const ValueEvaluator& evaluator) : ValueEvaluator(evaluator.getValue()) {};
@@ -682,6 +687,17 @@ public:
             return value->evaluateOr(context, defaultValue);
         }
 
+        if(onlyGlobalStateDependant) {
+            auto currentGlobalId = context.featureStateManager->getCurrentState();
+
+            if(currentGlobalId != globalId) {
+                globalValue = value->evaluateOr(context, defaultValue);
+                globalId = currentGlobalId;
+            } else if(globalValue) {
+                return *globalValue;
+            }
+        }
+
         int64_t identifier = usedKeysCollection.getHash(context);
 
         std::lock_guard<std::mutex> lock(mutex);
@@ -702,10 +718,15 @@ private:
     std::shared_ptr<Value> value;
     UsedKeysCollection usedKeysCollection;
     std::optional<ResultType> staticValue;
+    std::optional<ResultType> globalValue;
+
 
     bool isStatic = false;
     bool isZoomDependent = false;
     bool isStateDependant = false;
+    bool onlyGlobalStateDependant = false;
+
+    int64_t globalId = -1;
 
     std::unordered_map<uint64_t, ResultType> lastResults;
 };
