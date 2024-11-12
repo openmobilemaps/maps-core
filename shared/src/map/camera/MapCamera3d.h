@@ -91,6 +91,8 @@ class MapCamera3d : public MapCameraInterface,
 
     void updateMatrices();
 
+    std::optional<std::tuple<std::vector<double>, std::vector<double>, Vec3D>> computeMatrices(const Coord &focusCoord, bool onlyReturnResult);
+
     virtual ::Vec3D getOrigin() override;
 
     virtual std::optional<std::vector<double>> getLastVpMatrixD() override;
@@ -316,4 +318,5 @@ class MapCamera3d : public MapCameraInterface,
     Camera3dConfig cameraZoomConfig;
 
    std::shared_ptr<::CoordinateConversionHelperInterface> coordinateConversionHelper;
+
 };

@@ -389,13 +389,16 @@ std::vector<float> MapCamera3d::getVpMatrix() {
 
 void MapCamera3d::updateMatrices() {
     std::lock_guard<std::recursive_mutex> lock(paramMutex);
+    computeMatrices(focusPointPosition, false);
+}
+
+std::optional<std::tuple<std::vector<double>, std::vector<double>, Vec3D>> MapCamera3d::computeMatrices(const Coord &focusCoord, bool onlyReturnResult) {
+    std::lock_guard<std::recursive_mutex> lock(paramMutex);
 
     Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
 
     std::vector<double> newViewMatrix(16, 0.0);
     std::vector<double> newProjectionMatrix(16, 0.0);
-
-    auto focusCoord = focusPointPosition;
 
     const float R = 6378137.0;
     const double longitude = focusCoord.x; //  px / R;
@@ -475,19 +478,25 @@ void MapCamera3d::updateMatrices() {
     std::vector<float> newProjectionMatrixF = VectorHelper::convertToFloat(newProjectionMatrix);
     std::vector<float> newViewMatrixF = VectorHelper::convertToFloat(newViewMatrix);
 
-    std::lock_guard<std::recursive_mutex> writeLock(matrixMutex);
-    lastVpRotation = angle;
-    lastVpZoom = zoom;
-    vpMatrix = newVpMatrixF;
-    vpMatrixD = newVpMatrix;
-    inverseVPMatrix = newInverseMatrix;
-    viewMatrix = newViewMatrixF;
-    projectionMatrix = newProjectionMatrixF;
-    verticalFov = fovy;
-    horizontalFov = fovy * vpr;
-    validVpMatrix = true;
-    origin = newOrigin;
-    lastScalingFactor = mapUnitsFromPixels(1.0);
+    if (onlyReturnResult) {
+        return std::tuple{newVpMatrix, newInverseMatrix, newOrigin};
+    } else {
+        std::lock_guard<std::recursive_mutex> writeLock(matrixMutex);
+        lastVpRotation = angle;
+        lastVpZoom = zoom;
+        vpMatrix = newVpMatrixF;
+        vpMatrixD = newVpMatrix;
+        inverseVPMatrix = newInverseMatrix;
+        viewMatrix = newViewMatrixF;
+        projectionMatrix = newProjectionMatrixF;
+        verticalFov = fovy;
+        horizontalFov = fovy * vpr;
+        validVpMatrix = true;
+        origin = newOrigin;
+        lastScalingFactor = mapUnitsFromPixels(1.0);
+
+        return std::nullopt;
+    }
 }
 
 Vec3D MapCamera3d::getOrigin() {
@@ -707,9 +716,8 @@ bool MapCamera3d::onTouchDown(const ::Vec2F &posScreen) {
         lastOnTouchDownFocusCoord = focusPointPosition;
 #ifdef ANDROID
         {
-            std::lock_guard<std::recursive_mutex> lock(vpDataMutex);
             const auto [zeroVPMatrix, zeroInverseVPMatrix, zeroOrigin] =
-                getVpMatrix(Coord(CoordinateSystemIdentifiers::EPSG4326(), 0.0, 0.0, lastOnTouchDownFocusCoord->z), false);
+                *computeMatrices(Coord(CoordinateSystemIdentifiers::EPSG4326(), 0.0, 0.0, lastOnTouchDownFocusCoord->z), true);
             lastOnTouchDownInverseVPMatrix = zeroInverseVPMatrix;
             lastOnTouchDownVPOrigin = zeroOrigin;
         }
