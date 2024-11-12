@@ -38,6 +38,12 @@ class Epsg4326Tiled2dMapLayerConfig : public Tiled2dMapLayerConfig {
     std::optional<::RectCoord> getBounds() override;
 
 private:
+    Tiled2dMapZoomLevelInfo getZoomLevelInfo(int32_t zoomLevel);
+
+    const static RectCoord EPSG_4326_BOUNDS;
+    const static double BASE_ZOOM;
+    const static double BASE_WIDTH;
+
     std::string layerName;
     std::string urlFormat;
 
