@@ -187,11 +187,19 @@ std::shared_ptr<RenderObjectInterface> IconLayerObject::getRenderObject() {
 
 void IconLayerObject::beginAlphaAnimation(double startAlpha, double targetAlpha, long long duration) {
     assert(shader != nullptr);
+    std::weak_ptr<IconLayerObject> weakSelf = weak_from_this();
     animation = std::make_shared<DoubleAnimation>(
-            duration, startAlpha, targetAlpha, InterpolatorFunction::EaseIn, [=](double alpha) { this->setAlpha(alpha); },
-            [=] {
-                this->setAlpha(targetAlpha);
-                this->animation = nullptr;
+            duration, startAlpha, targetAlpha, InterpolatorFunction::EaseIn,
+            [weakSelf](double alpha) {
+                if (auto selfPtr = weakSelf.lock()) {
+                    selfPtr->setAlpha(alpha);
+                }
+            },
+            [weakSelf, targetAlpha] {
+                if (auto selfPtr = weakSelf.lock()) {
+                    selfPtr->setAlpha(targetAlpha);
+                    selfPtr->animation = nullptr;
+                }
             });
     animation->start();
     mapInterface->invalidate();

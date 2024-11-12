@@ -27,7 +27,7 @@
 #include "AnimationInterface.h"
 #include "RasterShaderStyle.h"
 
-class Textured2dLayerObject : public LayerObjectInterface {
+class Textured2dLayerObject : public LayerObjectInterface, std::enable_shared_from_this<Textured2dLayerObject> {
   public:
     Textured2dLayerObject(std::shared_ptr<Quad2dInterface> quad,
                           const std::shared_ptr<AlphaShaderInterface> &shader,
