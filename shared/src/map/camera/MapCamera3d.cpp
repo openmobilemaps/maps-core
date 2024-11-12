@@ -38,20 +38,19 @@
 #define GLOBE_MAX_ZOOM 5'000'000
 
 MapCamera3d::MapCamera3d(const std::shared_ptr<MapInterface> &mapInterface, float screenDensityPpi)
-    : mapInterface(mapInterface)
-    , conversionHelper(mapInterface->getCoordinateConverterHelper())
-    , mapCoordinateSystem(mapInterface->getMapConfig().mapCoordinateSystem)
-    , screenDensityPpi(screenDensityPpi)
-    , screenPixelAsRealMeterFactor(0.0254 / screenDensityPpi * mapCoordinateSystem.unitToScreenMeterFactor)
-    , focusPointPosition(CoordinateSystemIdentifiers::EPSG4326(), 0, 0, 0)
-    , cameraPitch(0)
-    , zoomMin(GLOBE_MIN_ZOOM)
-    , zoomMax(GLOBE_MAX_ZOOM)
-    , lastOnTouchDownPoint(std::nullopt)
-    , bounds(mapCoordinateSystem.bounds)
-    , origin(0, 0, 0)
-    , cameraZoomConfig(Camera3dConfigFactory::getBasicConfig())
-    , coordinateConversionHelper(mapInterface->getCoordinateConverterHelper()) {
+        : mapInterface(mapInterface),
+          conversionHelper(mapInterface->getCoordinateConverterHelper()),
+          mapCoordinateSystem(mapInterface->getMapConfig().mapCoordinateSystem),
+          screenDensityPpi(screenDensityPpi),
+          screenPixelAsRealMeterFactor(0.0254 / screenDensityPpi * mapCoordinateSystem.unitToScreenMeterFactor),
+          focusPointPosition(CoordinateSystemIdentifiers::EPSG4326(), 0, 0, 0),
+          cameraPitch(0),
+          zoomMin(GLOBE_MIN_ZOOM),
+          zoomMax(GLOBE_MAX_ZOOM),
+          lastOnTouchDownPoint(std::nullopt),
+          bounds(mapCoordinateSystem.bounds),
+          origin(0, 0, 0),
+          cameraZoomConfig(Camera3dConfigFactory::getBasicConfig()) {
     mapSystemRtl = mapCoordinateSystem.bounds.bottomRight.x > mapCoordinateSystem.bounds.topLeft.x;
     mapSystemTtb = mapCoordinateSystem.bounds.bottomRight.y > mapCoordinateSystem.bounds.topLeft.y;
     updateZoom(GLOBE_MIN_ZOOM);
@@ -92,7 +91,7 @@ void MapCamera3d::moveToCenterPositionZoom(const ::Coord &centerPosition, double
         return;
     inertia = std::nullopt;
     auto [focusPosition, focusZoom] =
-        getBoundsCorrectedCoords(coordinateConversionHelper->convert(focusPointPosition.systemIdentifier, centerPosition), zoom);
+        getBoundsCorrectedCoords(conversionHelper->convert(focusPointPosition.systemIdentifier, centerPosition), zoom);
 
     if (animated && bounds.topLeft.x == mapCoordinateSystem.bounds.topLeft.x &&
         bounds.bottomRight.x == mapCoordinateSystem.bounds.bottomRight.x) {
@@ -145,7 +144,7 @@ void MapCamera3d::moveToCenterPosition(const ::Coord &centerPosition, bool anima
         return;
     inertia = std::nullopt;
     auto [focusPosition, focusZoom] =
-        getBoundsCorrectedCoords(coordinateConversionHelper->convert(focusPointPosition.systemIdentifier, centerPosition), zoom);
+        getBoundsCorrectedCoords(conversionHelper->convert(focusPointPosition.systemIdentifier, centerPosition), zoom);
 
     if (animated && bounds.topLeft.x == mapCoordinateSystem.bounds.topLeft.x &&
         bounds.bottomRight.x == mapCoordinateSystem.bounds.bottomRight.x) {
@@ -1400,7 +1399,7 @@ double MapCamera3d::getMinZoom() { return zoomMin; }
 double MapCamera3d::getMaxZoom() { return zoomMax; }
 
 void MapCamera3d::setBounds(const RectCoord &bounds) {
-    RectCoord boundsMapSpace = coordinateConversionHelper->convertRect(mapCoordinateSystem.identifier, bounds);
+    RectCoord boundsMapSpace = conversionHelper->convertRect(mapCoordinateSystem.identifier, bounds);
     this->bounds = boundsMapSpace;
 
     const auto [adjPosition, adjZoom] = getBoundsCorrectedCoords(focusPointPosition, zoom);
@@ -1413,7 +1412,7 @@ void MapCamera3d::setBounds(const RectCoord &bounds) {
 RectCoord MapCamera3d::getBounds() { return bounds; }
 
 bool MapCamera3d::isInBounds(const Coord &coords) {
-    Coord mapCoords = coordinateConversionHelper->convert(mapCoordinateSystem.identifier, coords);
+    Coord mapCoords = conversionHelper->convert(mapCoordinateSystem.identifier, coords);
 
     auto const bounds = this->bounds;
 
@@ -1426,7 +1425,7 @@ bool MapCamera3d::isInBounds(const Coord &coords) {
 }
 
 Coord MapCamera3d::adjustCoordForPadding(const Coord &coords, double targetZoom) {
-    Coord coordinates = coordinateConversionHelper->convert(focusPointPosition.systemIdentifier, coords);
+    Coord coordinates = conversionHelper->convert(focusPointPosition.systemIdentifier, coords);
 
     auto adjustedZoom = std::clamp(targetZoom, zoomMax, zoomMin);
 
@@ -1461,8 +1460,8 @@ std::tuple<Coord, double> MapCamera3d::getBoundsCorrectedCoords(const Coord &pos
 
     const auto &id = position.systemIdentifier;
 
-    Coord topLeft = coordinateConversionHelper->convert(id, bounds.topLeft);
-    Coord bottomRight = coordinateConversionHelper->convert(id, bounds.bottomRight);
+    Coord topLeft = conversionHelper->convert(id, bounds.topLeft);
+    Coord bottomRight = conversionHelper->convert(id, bounds.bottomRight);
 
     Coord clampedPosition =
         Coord(id, std::clamp(position.x, std::min(topLeft.x, bottomRight.x), std::max(topLeft.x, bottomRight.x)),
@@ -1558,7 +1557,7 @@ void MapCamera3d::setCameraConfig(const Camera3dConfig &config, std::optional<fl
         }
 
         if (targetCoordinate) {
-            Coord startPosition = coordinateConversionHelper->convert(CoordinateSystemIdentifiers::EPSG4326(), focusPointPosition);
+            Coord startPosition = conversionHelper->convert(CoordinateSystemIdentifiers::EPSG4326(), focusPointPosition);
 
             coordAnimation = std::make_shared<CoordAnimation>(
                 duration, startPosition, *targetCoordinate, std::nullopt, InterpolatorFunction::EaseInOut,

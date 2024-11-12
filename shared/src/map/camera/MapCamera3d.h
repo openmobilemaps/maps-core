@@ -317,6 +317,4 @@ class MapCamera3d : public MapCameraInterface,
 
     Camera3dConfig cameraZoomConfig;
 
-   std::shared_ptr<::CoordinateConversionHelperInterface> coordinateConversionHelper;
-
 };
