@@ -8,6 +8,7 @@ tiled_2d_map_layer_config = interface +c +j +o {
     get_coordinate_system_identifier(): i32;
     get_tile_url(x:i32, y:i32, t:i32, zoom:i32): string;
     get_zoom_level_infos() : list<tiled_2d_map_zoom_level_info>;
+    get_virtual_zoom_level_infos() : list<tiled_2d_map_zoom_level_info>;
     get_zoom_info(): tiled_2d_map_zoom_info;
     get_layer_name() : string;
     get_vector_settings(): optional<tiled_2d_map_vector_settings>;

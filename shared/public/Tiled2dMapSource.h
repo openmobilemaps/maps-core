@@ -10,38 +10,37 @@
 
 #pragma once
 
+#include "Actor.h"
 #include "Coord.h"
 #include "CoordinateConversionHelperInterface.h"
+#include "CoordinateSystemIdentifiers.h"
+#include "Future.hpp"
 #include "LambdaTask.h"
+#include "LoaderStatus.h"
 #include "MapConfig.h"
+#include "PolygonCoord.h"
 #include "PrioritizedTiled2dMapTileInfo.h"
-#include "Tiled2dMapVersionedTileInfo.h"
+#include "QuadCoord.h"
 #include "SchedulerInterface.h"
+#include "TileState.h"
 #include "Tiled2dMapLayerConfig.h"
 #include "Tiled2dMapSourceInterface.h"
+#include "Tiled2dMapVersionedTileInfo.h"
 #include "Tiled2dMapZoomInfo.h"
 #include "Tiled2dMapZoomLevelInfo.h"
-#include "QuadCoord.h"
-#include "PolygonCoord.h"
-#include "CoordinateSystemIdentifiers.h"
-#include <atomic>
-#include <cmath>
-#include <mutex>
-#include <set>
-#include <map>
-#include <unordered_map>
-#include <unordered_set>
-#include "gpc.h"
-#include "Actor.h"
-#include "Future.hpp"
-#include "LoaderStatus.h"
-#include "TileState.h"
 #include "Vec3D.h"
 #include "Vec3F.h"
+#include "gpc.h"
+#include <atomic>
+#include <cmath>
+#include <map>
+#include <mutex>
+#include <set>
+#include <unordered_map>
+#include <unordered_set>
 
-template<class R>
-struct TileWrapper {
-public:
+template <class R> struct TileWrapper {
+  public:
     const R result;
     std::vector<::PolygonCoord> masks;
     const PolygonCoord tileBounds;
@@ -49,47 +48,41 @@ public:
     TileState state = TileState::IN_SETUP;
     int tessellationFactor;
 
-    TileWrapper(const R &result,
-                const std::vector<::PolygonCoord> & masks,
-                const PolygonCoord & tileBounds,
-                const gpc_polygon &tilePolygon,
-                int tessellationFactor) :
-    result(std::move(result)),
-    masks(std::move(masks)),
-    tileBounds(std::move(tileBounds)),
-    tilePolygon(std::move(tilePolygon)),
-    tessellationFactor(tessellationFactor) {};
+    TileWrapper(const R &result, const std::vector<::PolygonCoord> &masks, const PolygonCoord &tileBounds,
+                const gpc_polygon &tilePolygon, int tessellationFactor)
+        : result(std::move(result))
+        , masks(std::move(masks))
+        , tileBounds(std::move(tileBounds))
+        , tilePolygon(std::move(tilePolygon))
+        , tessellationFactor(tessellationFactor){};
 };
 
-
 class Tiled2dMapSourceReadyInterface {
-public:
+  public:
     virtual ~Tiled2dMapSourceReadyInterface() = default;
 
     virtual void setTileReady(const Tiled2dMapVersionedTileInfo &tile) = 0;
 };
 
-
 // T is the Object used for loading
 // L is the Loading type
 // R is the Result type
-template<class T, class L, class R>
-class Tiled2dMapSource :
-        public Tiled2dMapSourceInterface,
-        public Tiled2dMapSourceReadyInterface,
-        public std::enable_shared_from_this<Tiled2dMapSourceInterface>,
-        public ActorObject {
-public:
+template <class T, class L, class R>
+class Tiled2dMapSource : public Tiled2dMapSourceInterface,
+                         public Tiled2dMapSourceReadyInterface,
+                         public std::enable_shared_from_this<Tiled2dMapSourceInterface>,
+                         public ActorObject {
+  public:
     Tiled2dMapSource(const MapConfig &mapConfig, const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig,
                      const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
-                     const std::shared_ptr<SchedulerInterface> &scheduler,
-                     float screenDensityPpi,
-                     size_t loaderCount,
+                     const std::shared_ptr<SchedulerInterface> &scheduler, float screenDensityPpi, size_t loaderCount,
                      std::string layerName);
 
     virtual void onVisibleBoundsChanged(const ::RectCoord &visibleBounds, int curT, double zoom) override;
 
-    virtual void onCameraChange(const std::vector<float> &viewMatrix, const std::vector<float> &projectionMatrix, const ::Vec3D & origin, float verticalFov, float horizontalFov, float width, float height, float focusPointAltitude, const ::Coord & focusPointPosition, float zoom) override;
+    virtual void onCameraChange(const std::vector<float> &viewMatrix, const std::vector<float> &projectionMatrix,
+                                const ::Vec3D &origin, float verticalFov, float horizontalFov, float width, float height,
+                                float focusPointAltitude, const ::Coord &focusPointPosition, float zoom) override;
 
     virtual bool isTileVisible(const Tiled2dMapTileInfo &tileInfo);
 
@@ -118,12 +111,13 @@ public:
     void setTilesReady(const std::vector<Tiled2dMapVersionedTileInfo> &tiles);
 
     virtual void cancelLoad(Tiled2dMapTileInfo tile, size_t loaderIndex) = 0;
-            
+
     virtual ::djinni::Future<L> loadDataAsync(Tiled2dMapTileInfo tile, size_t loaderIndex) = 0;
-            
+
     void didLoad(Tiled2dMapTileInfo tile, size_t loaderIndex, const R &result);
 
-    void didFailToLoad(Tiled2dMapTileInfo tile, size_t loaderIndex, const LoaderStatus &status, const std::optional<std::string> &errorCode);
+    void didFailToLoad(Tiled2dMapTileInfo tile, size_t loaderIndex, const LoaderStatus &status,
+                       const std::optional<std::string> &errorCode);
 
     void performDelayedTasks();
 
@@ -132,10 +126,8 @@ public:
 
     virtual R postLoadingTask(L loadedData, Tiled2dMapTileInfo tile) = 0;
 
-            ::Vec3D transformToView(const ::Coord & position,
-                                    const std::vector<float> & vpMatrix,
-                                    const Vec3D & origin);
-    ::Vec3D projectToScreen(const ::Vec3D & point, const std::vector<float> & vpMatrix);
+    ::Vec3D transformToView(const ::Coord &position, const std::vector<float> &vpMatrix, const Vec3D &origin);
+    ::Vec3D projectToScreen(const ::Vec3D &point, const std::vector<float> &vpMatrix);
 
     MapConfig mapConfig;
     std::shared_ptr<Tiled2dMapLayerConfig> layerConfig;
@@ -146,6 +138,7 @@ public:
 
     std::vector<Tiled2dMapZoomLevelInfo> zoomLevelInfos;
     const Tiled2dMapZoomInfo zoomInfo;
+    int topMostZoomLevel;
 
     std::optional<int32_t> minZoomLevelIdentifier;
     std::optional<int32_t> maxZoomLevelIdentifier;
@@ -168,12 +161,11 @@ public:
     std::set<Tiled2dMapTileInfo> readyTiles;
 
     size_t lastVisibleTilesHash = -1;
-            
+
     void onVisibleTilesChanged(const std::vector<VisibleTilesLayer> &pyramid, bool keepMultipleLevels, int keepZoomLevelOffset = 0);
 
-protected:
+  protected:
     void performLoadingTask(Tiled2dMapTileInfo tile, size_t loaderIndex);
-
 
     void updateTileMasks();
 
@@ -193,7 +185,6 @@ protected:
     std::unordered_set<Tiled2dMapTileInfo> notFoundTiles;
 
     std::string layerName;
-
 };
 
 #include "Tiled2dMapSourceImpl.h"

@@ -60,6 +60,13 @@ Tiled2dMapSource<T, L, R>::Tiled2dMapSource(const MapConfig &mapConfig, const st
     , layerName(layerName) {
     std::sort(zoomLevelInfos.begin(), zoomLevelInfos.end(),
               [](const Tiled2dMapZoomLevelInfo &a, const Tiled2dMapZoomLevelInfo &b) -> bool { return a.zoom > b.zoom; });
+    topMostZoomLevel = zoomLevelInfos.begin()->zoomLevelIdentifier;
+
+    // add virtual zoom levels and sort again
+    auto virtualZoomLevelInfos = layerConfig->getVirtualZoomLevelInfos();
+    zoomLevelInfos.insert(zoomLevelInfos.end(), virtualZoomLevelInfos.begin(), virtualZoomLevelInfos.end());
+    std::sort(zoomLevelInfos.begin(), zoomLevelInfos.end(),
+              [](const Tiled2dMapZoomLevelInfo &a, const Tiled2dMapZoomLevelInfo &b) -> bool { return a.zoom > b.zoom; });
 }
 
 const static double VIEWBOUNDS_PADDING_MIN_DIM_PC = 0.15;
@@ -442,7 +449,9 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
 
         bool lastLevel = candidate.levelIndex == maxLevelAvailable;
 
-        if (preciseEnough || lastLevel || isKeptLevel) {
+        bool isVirtual = topMostZoomLevel > zoomLevelInfo.zoomLevelIdentifier;
+
+        if (!isVirtual && (preciseEnough || lastLevel || isKeptLevel)) {
             const RectCoord rect(topLeft, bottomRight);
             int t = 0;
             double priority = -centerZ * 100000;
@@ -500,7 +509,6 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
     }
 
     std::vector<VisibleTilesLayer> layers;
-    int topMostZoomLevel = zoomLevelInfos.begin()->zoomLevelIdentifier;
 
     for (int previousLayerOffset = 0; (previousLayerOffset <= zoomInfo.numDrawPreviousLayers || zoomInfo.maskTile);
          previousLayerOffset++) {
@@ -571,7 +579,6 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
                 if (tile.second.tileInfo.y > max_top) {
                     continue;
                 }
-
             }
 
             tile.second.tileInfo.tessellationFactor = std::min(std::max(0, maxLevel - tile.second.tileInfo.zoomIdentifier), 4);

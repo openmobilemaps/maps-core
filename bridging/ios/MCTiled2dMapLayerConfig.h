@@ -19,6 +19,8 @@
 
 - (nonnull NSArray<MCTiled2dMapZoomLevelInfo *> *)getZoomLevelInfos;
 
+- (nonnull NSArray<MCTiled2dMapZoomLevelInfo *> *)getVirtualZoomLevelInfos;
+
 - (nonnull MCTiled2dMapZoomInfo *)getZoomInfo;
 
 - (nonnull NSString *)getLayerName;

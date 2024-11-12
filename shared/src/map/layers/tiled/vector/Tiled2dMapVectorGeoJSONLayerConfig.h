@@ -31,6 +31,10 @@ public:
         return getDefaultEpsg3857ZoomLevels(0, maxZoom);
     }
 
+    std::vector<Tiled2dMapZoomLevelInfo> getVirtualZoomLevelInfos() override {
+        return {};
+    }
+
     std::string getLayerName() override {
         return sourceName;
     }
