@@ -23,6 +23,7 @@ open class AssetLocalDataProvider(
     private val fileNameStyleJson: String = "style.json",
     private val folderSprite: String = "generated-sprites",
     private val fileNameSprite: String = "sprite",
+    private val loadDataAsync: ((url: String, etag: String?) -> Future<DataLoaderResult>)? = null
 ) : Tiled2dMapVectorLayerLocalDataProviderInterface() {
 
     protected open fun scaleSuffix(scale: Int): String = when (scale) {
@@ -91,9 +92,16 @@ open class AssetLocalDataProvider(
     }
 
     override fun loadGeojson(sourceName: String, url: String): Future<DataLoaderResult> {
-        val resultPromise = Promise<DataLoaderResult>()
-        resultPromise.setValue(DataLoaderResult(null, null, LoaderStatus.ERROR_404, "No geoJson provided in AssetLocalDataProvider!"))
-        return resultPromise.future
+        return loadDataAsync?.invoke(url, null) ?: Promise<DataLoaderResult>().apply {
+            setValue(
+                DataLoaderResult(
+                    null,
+                    null,
+                    LoaderStatus.ERROR_404,
+                    "No geoJson provided in AssetLocalDataProvider!"
+                )
+            )
+        }.future
     }
 
     override fun equals(other: Any?): Boolean {

@@ -23,14 +23,17 @@
 IconLayerObject::IconLayerObject(std::shared_ptr<Quad2dInstancedInterface> quad,
                                              const std::shared_ptr<IconInfoInterface> &icon,
                                              const std::shared_ptr<AlphaInstancedShaderInterface> &shader,
-                                             const std::shared_ptr<MapInterface> &mapInterface,
-                                             bool is3d)
-        : quad(quad), icon(icon), shader(shader), mapInterface(mapInterface),
+                                 const std::shared_ptr<MapInterface> &mapInterface,
+                                 bool is3d)
+        : quad(quad),
+          icon(icon),
+          shader(shader),
+          mapInterface(mapInterface),
           conversionHelper(mapInterface->getCoordinateConverterHelper()),
-          renderConfig(std::make_shared<RenderConfig>(quad->asGraphicsObject(), 0)), graphicsObject(quad->asGraphicsObject()),
+          renderConfig(std::make_shared<RenderConfig>(quad->asGraphicsObject(), 0)),
+          graphicsObject(quad->asGraphicsObject()),
           renderObject(std::make_shared<RenderObject>(graphicsObject)),
-          is3d(is3d)
-{
+          is3d(is3d) {
     int count = 1;
     quad->setInstanceCount(count);
 

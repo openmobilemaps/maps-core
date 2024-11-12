@@ -667,8 +667,7 @@ void MapCamera3d::notifyListeners(const int &listenerType) {
             updateMatrices(); // update matrices
         }
         {
-            std::lock_guard<std::recursive_mutex> lock(matrixMutex);
-            std::lock_guard<std::recursive_mutex> lock2(paramMutex);
+            std::scoped_lock<std::recursive_mutex, std::recursive_mutex> lock(matrixMutex, paramMutex);
 
             viewMatrix = this->viewMatrix;
             projectionMatrix = this->projectionMatrix;
