@@ -17,11 +17,20 @@
 #include "SimpleLayerInterface.h"
 #include "SimpleTouchInterface.h"
 #include "IconLayerObject.h"
+#include "DoubleAnimation.h"
 #include <atomic>
 #include <map>
 #include <mutex>
 #include <unordered_map>
 #include <unordered_set>
+
+struct IconScaleAnimation {
+    IconScaleAnimation() {};
+    
+    Vec2F initialSize = Vec2F(0.0,0.0);
+    int32_t repetitions = 0.0;
+    std::shared_ptr<AnimationInterface> animation = nullptr;
+};
 
 class IconLayer : public IconLayerInterface,
                   public SimpleLayerInterface,
@@ -91,6 +100,9 @@ class IconLayer : public IconLayerInterface,
 
     virtual float getAlpha() override;
 
+    /** scale an icon, use repetitions for pulsating effect (repetions == -1 -> forever) */
+    virtual void animateIconScale(const std::string & identifier, float from, float to, float duration, int32_t repetitions) override;
+
   private:
     virtual void clearSync(const std::vector<std::pair<std::shared_ptr<IconInfoInterface>, std::shared_ptr<IconLayerObject>>> &iconsToClear);
 
@@ -120,4 +132,7 @@ class IconLayer : public IconLayerInterface,
     std::atomic<bool> isHidden;
     std::atomic<bool> isLayerClickable = true;
     float alpha = 1.0;
+
+    std::map<std::string, IconScaleAnimation> scaleAnimations;
+    std::recursive_mutex scaleAnimationMutex;
 };

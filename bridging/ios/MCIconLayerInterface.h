@@ -38,4 +38,11 @@
 
 - (void)setLayerClickable:(BOOL)isLayerClickable;
 
+/** scale an icon, use repetitions for pulsating effect (repetions == -1 -> forever) */
+- (void)animateIconScale:(nonnull NSString *)identifier
+                    from:(float)from
+                      to:(float)to
+                duration:(float)duration
+             repetitions:(int32_t)repetitions;
+
 @end

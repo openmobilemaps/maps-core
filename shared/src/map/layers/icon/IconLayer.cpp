@@ -278,6 +278,19 @@ void IconLayer::update() {
             layerObject->update();
         }
     }
+
+    {
+        std::lock_guard<std::recursive_mutex> lock(scaleAnimationMutex);
+        for (auto it = scaleAnimations.begin(); it != scaleAnimations.end();) {
+            if(it->second.animation == nullptr) {
+                it = scaleAnimations.erase(it);  // erase() returns the next iterator
+
+            } else {
+                it->second.animation->update();
+                ++it;
+            }
+        }
+    }
 }
 
 std::vector<std::shared_ptr<::RenderPassInterface>> IconLayer::buildRenderPasses() {
@@ -310,6 +323,29 @@ void IconLayer::preGenerateRenderPasses() {
             newRenderPassObjectMap[config->getRenderIndex()].push_back(std::make_shared<RenderObject>(config->getGraphicsObject()));
         }
     }
+
+    {
+        std::lock_guard<std::recursive_mutex> animationLock(scaleAnimationMutex);
+
+        for (auto it = scaleAnimations.begin(); it != scaleAnimations.end();) {
+            auto& id = it->first;
+
+            auto hasIcon = false;
+            for(auto& icon : icons) {
+                if(icon.first->getIdentifier() == id) {
+                    hasIcon = true;
+                    break;
+                }
+            }
+
+            if(!hasIcon) {
+                it = scaleAnimations.erase(it);  // erase() returns the next iterator
+            } else {
+                ++it;  // Increment iterator if no erasure
+            }
+        }
+    }
+
     renderPassObjectMap = newRenderPassObjectMap;
 }
 
@@ -490,4 +526,69 @@ void IconLayer::setAlpha(float alpha) {
 
 float IconLayer::getAlpha() {
     return alpha;
+}
+
+/** scale an icon, use repetitions for pulsating effect (repetions == -1 -> forever) */
+void IconLayer::animateIconScale(const std::string & identifier, float from, float to, float duration, int32_t repetitions) {
+    auto lockSelfPtr = shared_from_this();
+    auto mapInterface = lockSelfPtr ? lockSelfPtr->mapInterface : nullptr;
+
+    if(!mapInterface) { return; }
+
+    auto initialSize = Vec2F(0.0, 0.0);
+
+    if(scaleAnimations.find(identifier) != scaleAnimations.end()) {
+        initialSize = scaleAnimations[identifier].initialSize;
+    } else {
+        for(auto& icon : icons) {
+            if(icon.first->getIdentifier() == identifier) {
+                initialSize = icon.first->getIconSize();
+            }
+        }
+    }
+
+    auto scaleAnimation = IconScaleAnimation();
+    scaleAnimation.repetitions = repetitions;
+    scaleAnimation.initialSize = initialSize;
+
+    std::weak_ptr<IconLayer> weakSelf = std::static_pointer_cast<IconLayer>(shared_from_this());
+    std::lock_guard<std::recursive_mutex> lock(scaleAnimationMutex);
+
+    auto animation = std::make_shared<DoubleAnimation>(duration, from, to, InterpolatorFunction::EaseInOut,
+            [weakSelf, initialSize, identifier](double scale) {
+              if (auto selfPtr = weakSelf.lock()) {
+                  for(auto& icon : selfPtr->icons) {
+                      if(icon.first->getIdentifier() == identifier) {
+                          icon.first->setIconSize(Vec2F(initialSize.x * scale, initialSize.y * scale));
+                      }
+                  }
+
+                  auto mapInterface = selfPtr->mapInterface;
+                  if (mapInterface) {
+                      mapInterface->invalidate();
+                  }
+              }
+          },
+          [weakSelf, identifier, from, to, duration] {
+              if (auto selfPtr = weakSelf.lock()) {
+                  auto& sa = selfPtr->scaleAnimations;
+
+                  auto it = sa.find(identifier);
+                  if(it != sa.end()) {
+                      auto rep = (*it).second.repetitions;
+                      if (rep > 0 || rep == -1) {
+                          auto newRep = rep == -1 ? -1 : (rep-1);
+                          selfPtr->animateIconScale(identifier, to, from, duration, rep);
+                      } else {
+                          it->second.animation = nullptr;
+                      }
+                  }
+              }
+          });
+
+    scaleAnimation.animation = animation;
+    scaleAnimations[identifier] = scaleAnimation;
+
+    animation->start();
+    mapInterface->invalidate();
 }

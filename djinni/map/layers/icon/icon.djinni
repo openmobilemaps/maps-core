@@ -53,4 +53,7 @@ icon_layer_interface = interface +c {
     asLayerInterface(): layer_interface;
     invalidate();
     set_layer_clickable(is_layer_clickable: bool);
+
+    # scale an icon, use repetitions for pulsating effect (repetions == -1 -> forever)
+    animate_icon_scale(identifier: string, from: f32, to: f32, duration: f32, repetitions: i32);
 }
