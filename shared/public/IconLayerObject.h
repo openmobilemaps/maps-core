@@ -10,12 +10,12 @@
 
 #pragma once
 
-#include "AlphaShaderInterface.h"
+#include "AlphaInstancedShaderInterface.h"
 #include "Coord.h"
 #include "CoordinateConversionHelperInterface.h"
 #include "LayerObjectInterface.h"
 #include "MapInterface.h"
-#include "Quad2dInterface.h"
+#include "Quad2dInstancedInterface.h"
 #include "QuadCoord.h"
 #include "RectCoord.h"
 #include "RenderConfig.h"
@@ -23,63 +23,53 @@
 #include "RenderObjectInterface.h"
 #include "Vec2D.h"
 #include <optional>
-#include "RasterShaderInterface.h"
 #include "AnimationInterface.h"
-#include "RasterShaderStyle.h"
+#include "Quad3dD.h"
+#include "IconInfoInterface.h"
 
-class Textured2dLayerObject : public LayerObjectInterface, std::enable_shared_from_this<Textured2dLayerObject> {
+class IconLayerObject : public LayerObjectInterface, public std::enable_shared_from_this<IconLayerObject> {
   public:
-    Textured2dLayerObject(std::shared_ptr<Quad2dInterface> quad,
-                          const std::shared_ptr<AlphaShaderInterface> &shader,
-                          const std::shared_ptr<MapInterface> &mapInterface,
-                          bool is3d = false);
-    
-    Textured2dLayerObject(std::shared_ptr<Quad2dInterface> quad, 
-                          const std::shared_ptr<RasterShaderInterface> &rasterShader,
-                          const std::shared_ptr<MapInterface> &mapInterface,
-                          bool is3d = false);
-    
-    Textured2dLayerObject(std::shared_ptr<Quad2dInterface> quad, 
+    IconLayerObject(std::shared_ptr<Quad2dInstancedInterface> quad,
+                          const std::shared_ptr<IconInfoInterface> &icon,
+                          const std::shared_ptr<AlphaInstancedShaderInterface> &shader,
                           const std::shared_ptr<MapInterface> &mapInterface,
                           bool is3d = false);
 
-    virtual ~Textured2dLayerObject() override {}
+    virtual ~IconLayerObject() override {}
 
     virtual void update() override;
 
     virtual std::vector<std::shared_ptr<RenderConfigInterface>> getRenderConfig() override;
 
-    void setPosition(const ::Coord &coord, double width, double height);
-
-    void setPositions(const ::QuadCoord &coords);
-
-    void setRectCoord(const ::RectCoord &rectCoord);
+    void setup(const std::shared_ptr<RenderingContextInterface> context);
 
     void setAlpha(float alpha);
-    
-    void setStyle(const RasterShaderStyle &style);
 
-    std::shared_ptr<Quad2dInterface> getQuadObject();
+    std::shared_ptr<Quad2dInstancedInterface> getQuadObject();
 
     std::shared_ptr<GraphicsObjectInterface> getGraphicsObject();
-    
+
     std::shared_ptr<RenderObjectInterface> getRenderObject();
 
     std::shared_ptr<ShaderProgramInterface> getShader();
 
     void beginAlphaAnimation(double startAlpha, double targetAlpha, long long duration);
-    
-    void beginStyleAnimation(RasterShaderStyle start, RasterShaderStyle target, long long duration);
-
-  protected:
-    void setFrame(const ::Quad3dD &frame, const ::Vec3D & origin);
 
   private:
-    std::shared_ptr<Quad2dInterface> quad;
-    std::shared_ptr<AlphaShaderInterface> shader;
+    std::shared_ptr<IconInfoInterface> icon;
+    
+    std::shared_ptr<Quad2dInstancedInterface> quad;
+    std::shared_ptr<AlphaInstancedShaderInterface> shader;
     std::shared_ptr<GraphicsObjectInterface> graphicsObject;
     std::shared_ptr<RenderObjectInterface> renderObject;
-    std::shared_ptr<RasterShaderInterface> rasterShader;
+
+    std::vector<float> iconPositions;
+    std::vector<float> iconScales;
+    std::vector<float> iconRotations;
+    std::vector<float> iconAlphas;
+    std::vector<float> iconOffsets;
+    std::vector<float> iconTextureCoordinates;
+    std::shared_ptr<TextureHolderInterface> texture;
 
     std::shared_ptr<RenderConfig> renderConfig;
 
@@ -90,4 +80,6 @@ class Textured2dLayerObject : public LayerObjectInterface, std::enable_shared_fr
 
     float alpha = 1.0;
     bool is3d = false;
+
+    Vec3D origin = Vec3D(0.0, 0.0, 0.0);
 };

@@ -67,6 +67,8 @@ void MapCamera3d::viewportSizeChanged() {
         updateZoom(zoom);
     }
 
+    updateMatrices();
+
     notifyListeners(ListenerType::BOUNDS);
 }
 
@@ -104,26 +106,37 @@ void MapCamera3d::moveToCenterPositionZoom(const ::Coord &centerPosition, double
     }
 
     if (animated) {
+        std::weak_ptr<MapCamera3d> weakSelf = std::static_pointer_cast<MapCamera3d>(shared_from_this());
         std::lock_guard<std::recursive_mutex> lock(animationMutex);
         coordAnimation = std::make_shared<CoordAnimation>(
             cameraZoomConfig.animationDurationMs, focusPointPosition, focusPosition, centerPosition,
             InterpolatorFunction::EaseInOut,
-            [=](Coord positionMapSystem) {
-                assert(positionMapSystem.systemIdentifier == 4326);
-                std::lock_guard<std::recursive_mutex> lock(paramMutex);
-                this->focusPointPosition = positionMapSystem;
-                clampCenterToPaddingCorrectedBounds();
-                notifyListeners(ListenerType::BOUNDS);
-                mapInterface->invalidate();
+            [weakSelf](Coord positionMapSystem) {
+                if (auto selfPtr = weakSelf.lock()) {
+                    assert(positionMapSystem.systemIdentifier == 4326);
+                    std::lock_guard<std::recursive_mutex> lock(selfPtr->paramMutex);
+                    selfPtr->focusPointPosition = positionMapSystem;
+                    selfPtr->clampCenterToPaddingCorrectedBounds();
+                    selfPtr->notifyListeners(ListenerType::BOUNDS);
+                    auto mapInterface = selfPtr->mapInterface;
+                    if (mapInterface) {
+                        mapInterface->invalidate();
+                    }
+                }
             },
-            [=] {
-                assert(this->coordAnimation->endValue.systemIdentifier == 4326);
-                std::lock_guard<std::recursive_mutex> lock(paramMutex);
-                this->focusPointPosition = this->coordAnimation->endValue;
-                clampCenterToPaddingCorrectedBounds();
-                notifyListeners(ListenerType::BOUNDS);
-                mapInterface->invalidate();
-                this->coordAnimation = nullptr;
+            [weakSelf] {
+                if (auto selfPtr = weakSelf.lock()) {
+                    assert(selfPtr->coordAnimation->endValue.systemIdentifier == 4326);
+                    std::lock_guard<std::recursive_mutex> lock(selfPtr->paramMutex);
+                    selfPtr->focusPointPosition = selfPtr->coordAnimation->endValue;
+                    selfPtr->clampCenterToPaddingCorrectedBounds();
+                    selfPtr->notifyListeners(ListenerType::BOUNDS);
+                    auto mapInterface = selfPtr->mapInterface;
+                    if (mapInterface) {
+                        mapInterface->invalidate();
+                    }
+                    selfPtr->coordAnimation = nullptr;
+                }
             });
         coordAnimation->start();
         setZoom(focusZoom, true);
@@ -157,24 +170,35 @@ void MapCamera3d::moveToCenterPosition(const ::Coord &centerPosition, bool anima
     }
 
     if (animated) {
+        std::weak_ptr<MapCamera3d> weakSelf = std::static_pointer_cast<MapCamera3d>(shared_from_this());
         std::lock_guard<std::recursive_mutex> lock(animationMutex);
         coordAnimation = std::make_shared<CoordAnimation>(
             cameraZoomConfig.animationDurationMs, focusPointPosition, focusPosition, centerPosition,
             InterpolatorFunction::EaseInOut,
-            [=](Coord positionMapSystem) {
-                assert(positionMapSystem.systemIdentifier == 4326);
-                this->focusPointPosition = positionMapSystem;
-                clampCenterToPaddingCorrectedBounds();
-                notifyListeners(ListenerType::BOUNDS);
-                mapInterface->invalidate();
+            [weakSelf](Coord positionMapSystem) {
+                if (auto selfPtr = weakSelf.lock()) {
+                    assert(positionMapSystem.systemIdentifier == 4326);
+                    selfPtr->focusPointPosition = positionMapSystem;
+                    selfPtr->clampCenterToPaddingCorrectedBounds();
+                    selfPtr->notifyListeners(ListenerType::BOUNDS);
+                    auto mapInterface = selfPtr->mapInterface;
+                    if (mapInterface) {
+                        mapInterface->invalidate();
+                    }
+                }
             },
-            [=] {
-                assert(this->coordAnimation->endValue.systemIdentifier == 4326);
-                this->focusPointPosition = this->coordAnimation->endValue;
-                clampCenterToPaddingCorrectedBounds();
-                notifyListeners(ListenerType::BOUNDS);
-                mapInterface->invalidate();
-                this->coordAnimation = nullptr;
+            [weakSelf] {
+                if (auto selfPtr = weakSelf.lock()) {
+                    assert(selfPtr->coordAnimation->endValue.systemIdentifier == 4326);
+                    selfPtr->focusPointPosition = selfPtr->coordAnimation->endValue;
+                    selfPtr->clampCenterToPaddingCorrectedBounds();
+                    selfPtr->notifyListeners(ListenerType::BOUNDS);
+                    auto mapInterface = selfPtr->mapInterface;
+                    if (mapInterface) {
+                        mapInterface->invalidate();
+                    }
+                    selfPtr->coordAnimation = nullptr;
+                }
             });
         coordAnimation->start();
         mapInterface->invalidate();
@@ -242,13 +266,20 @@ void MapCamera3d::setZoom(double zoom, bool animated) {
     double targetZoom = std::clamp(zoom, zoomMax, zoomMin);
 
     if (animated) {
+        std::weak_ptr<MapCamera3d> weakSelf = std::static_pointer_cast<MapCamera3d>(shared_from_this());
         std::lock_guard<std::recursive_mutex> lock(animationMutex);
         zoomAnimation = std::make_shared<DoubleAnimation>(
             cameraZoomConfig.animationDurationMs, this->zoom, targetZoom, InterpolatorFunction::EaseIn,
-            [=](double zoom) { this->setZoom(zoom, false); },
-            [=] {
-                this->setZoom(targetZoom, false);
-                this->zoomAnimation = nullptr;
+            [weakSelf](double zoom) {
+                if (auto selfPtr = weakSelf.lock()) {
+                    selfPtr->setZoom(zoom, false);
+                }
+            },
+            [weakSelf, targetZoom] {
+                if (auto selfPtr = weakSelf.lock()) {
+                    selfPtr->setZoom(targetZoom, false);
+                    selfPtr->zoomAnimation = nullptr;
+                }
             });
         zoomAnimation->start();
         mapInterface->invalidate();
@@ -273,14 +304,21 @@ void MapCamera3d::setRotation(float angle, bool animated) {
         } else if (std::abs(currentAngle - newAngle) > std::abs(currentAngle - (newAngle - 360.0))) {
             newAngle -= 360.0;
         }
+        std::weak_ptr<MapCamera3d> weakSelf = std::static_pointer_cast<MapCamera3d>(shared_from_this());
         std::lock_guard<std::recursive_mutex> lock(animationMutex);
         rotationAnimation = std::make_shared<DoubleAnimation>(
-            cameraZoomConfig.animationDurationMs, currentAngle, newAngle, InterpolatorFunction::Linear,
-            [=](double angle) { this->setRotation(angle, false); },
-            [=] {
-                this->setRotation(newAngle, false);
-                this->rotationAnimation = nullptr;
-            });
+                cameraZoomConfig.animationDurationMs, currentAngle, newAngle, InterpolatorFunction::Linear,
+                [weakSelf](double angle) {
+                    if (auto selfPtr = weakSelf.lock()) {
+                        selfPtr->setRotation(angle, false);
+                    }
+                },
+                [weakSelf, newAngle] {
+                    if (auto selfPtr = weakSelf.lock()) {
+                        selfPtr->setRotation(newAngle, false);
+                        selfPtr->rotationAnimation = nullptr;
+                    }
+                });
         rotationAnimation->start();
         mapInterface->invalidate();
     } else {
@@ -665,8 +703,7 @@ void MapCamera3d::notifyListeners(const int &listenerType) {
             updateMatrices(); // update matrices
         }
         {
-            std::lock_guard<std::recursive_mutex> lock(matrixMutex);
-            std::lock_guard<std::recursive_mutex> lock2(paramMutex);
+            std::scoped_lock<std::recursive_mutex, std::recursive_mutex> lock(matrixMutex, paramMutex);
 
             viewMatrix = this->viewMatrix;
             projectionMatrix = this->projectionMatrix;
@@ -1090,20 +1127,31 @@ bool MapCamera3d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, cons
 bool MapCamera3d::onTwoFingerMoveComplete() {
 
     if (config.snapToNorthEnabled && !cameraFrozen && (angle < ROTATION_LOCKING_ANGLE || angle > (360 - ROTATION_LOCKING_ANGLE))) {
+        std::weak_ptr<MapCamera3d> weakSelf = std::static_pointer_cast<MapCamera3d>(shared_from_this());
         std::lock_guard<std::recursive_mutex> lock(animationMutex);
         rotationAnimation = std::make_shared<DoubleAnimation>(
             cameraZoomConfig.animationDurationMs, this->angle, angle < ROTATION_LOCKING_ANGLE ? 0 : 360,
             InterpolatorFunction::EaseInOut,
-            [=](double angle) {
-                this->angle = angle;
-                mapInterface->invalidate();
-                notifyListeners(ListenerType::ROTATION | ListenerType::BOUNDS);
+            [weakSelf](double angle) {
+                if (auto selfPtr = weakSelf.lock()) {
+                    selfPtr->angle = angle;
+                    auto mapInterface = selfPtr->mapInterface;
+                    if (mapInterface) {
+                        mapInterface->invalidate();
+                    }
+                    selfPtr->notifyListeners(ListenerType::ROTATION | ListenerType::BOUNDS);
+                }
             },
-            [=] {
-                this->angle = 0;
-                this->rotationAnimation = nullptr;
-                mapInterface->invalidate();
-                notifyListeners(ListenerType::ROTATION | ListenerType::BOUNDS);
+            [weakSelf] {
+                if (auto selfPtr = weakSelf.lock()) {
+                    selfPtr->angle = 0;
+                    selfPtr->rotationAnimation = nullptr;
+                    auto mapInterface = selfPtr->mapInterface;
+                    if (mapInterface) {
+                        mapInterface->invalidate();
+                    }
+                    selfPtr->notifyListeners(ListenerType::ROTATION | ListenerType::BOUNDS);
+                }
             });
         rotationAnimation->start();
         mapInterface->invalidate();
@@ -1516,42 +1564,65 @@ void MapCamera3d::setCameraConfig(const Camera3dConfig &config, std::optional<fl
         double initialPitch = cameraPitch;
         double initialVerticalDisplacement = cameraVerticalDisplacement;
 
+        std::weak_ptr<MapCamera3d> weakSelf = std::static_pointer_cast<MapCamera3d>(shared_from_this());
+
         std::lock_guard<std::recursive_mutex> lock(animationMutex);
 
         pitchAnimation = std::make_shared<DoubleAnimation>(
             duration, initialPitch, targetPitch, InterpolatorFunction::EaseInOut,
-            [=](double pitch) {
-                this->cameraPitch = pitch;
-                mapInterface->invalidate();
+            [weakSelf](double pitch) {
+                if (auto selfPtr = weakSelf.lock()) {
+                    selfPtr->cameraPitch = pitch;
+                    auto mapInterface = selfPtr->mapInterface;
+                    if (mapInterface) {
+                        mapInterface->invalidate();
+                    }
+                }
             },
-            [=] {
-                this->cameraPitch = targetPitch;
-                this->pitchAnimation = nullptr;
+            [weakSelf, targetPitch] {
+                if (auto selfPtr = weakSelf.lock()) {
+                    selfPtr->cameraPitch = targetPitch;
+                    selfPtr->pitchAnimation = nullptr;
+                }
             });
         pitchAnimation->start();
 
         verticalDisplacementAnimation = std::make_shared<DoubleAnimation>(
             duration, initialVerticalDisplacement, targetVerticalDisplacement, InterpolatorFunction::EaseInOut,
-            [=](double dis) {
-                this->cameraVerticalDisplacement = dis;
-                mapInterface->invalidate();
+            [weakSelf](double dis) {
+                if (auto selfPtr = weakSelf.lock()) {
+                    selfPtr->cameraVerticalDisplacement = dis;
+                    auto mapInterface = selfPtr->mapInterface;
+                    if (mapInterface) {
+                        mapInterface->invalidate();
+                    }
+                }
             },
-            [=] {
-                this->cameraVerticalDisplacement = targetVerticalDisplacement;
-                this->verticalDisplacementAnimation = nullptr;
+            [weakSelf, targetVerticalDisplacement] {
+                if (auto selfPtr = weakSelf.lock()) {
+                    selfPtr->cameraVerticalDisplacement = targetVerticalDisplacement;
+                    selfPtr->verticalDisplacementAnimation = nullptr;
+                }
             });
         verticalDisplacementAnimation->start();
 
         if (targetZoom) {
             zoomAnimation = std::make_shared<DoubleAnimation>(
                 duration, initialZoom, *targetZoom, InterpolatorFunction::EaseInOut,
-                [=](double zoom) {
-                    this->zoom = zoom;
-                    mapInterface->invalidate();
+                [weakSelf](double zoom) {
+                    if (auto selfPtr = weakSelf.lock()) {
+                        selfPtr->zoom = zoom;
+                        auto mapInterface = selfPtr->mapInterface;
+                        if (mapInterface) {
+                            mapInterface->invalidate();
+                        }
+                    }
                 },
-                [=] {
-                    this->zoom = *targetZoom;
-                    this->zoomAnimation = nullptr;
+                [weakSelf, targetZoom] {
+                    if (auto selfPtr = weakSelf.lock()) {
+                        selfPtr->zoom = *targetZoom;
+                        selfPtr->zoomAnimation = nullptr;
+                    }
                 });
             zoomAnimation->start();
         }
@@ -1561,20 +1632,30 @@ void MapCamera3d::setCameraConfig(const Camera3dConfig &config, std::optional<fl
 
             coordAnimation = std::make_shared<CoordAnimation>(
                 duration, startPosition, *targetCoordinate, std::nullopt, InterpolatorFunction::EaseInOut,
-                [=](Coord positionMapSystem) {
-                    assert(positionMapSystem.systemIdentifier == 4326);
-                    std::lock_guard<std::recursive_mutex> lock(paramMutex);
-                    this->focusPointPosition = positionMapSystem;
-                    notifyListeners(ListenerType::BOUNDS);
-                    mapInterface->invalidate();
+                [weakSelf](Coord positionMapSystem) {
+                    if (auto selfPtr = weakSelf.lock()) {
+                        assert(positionMapSystem.systemIdentifier == 4326);
+                        std::lock_guard<std::recursive_mutex> lock(selfPtr->paramMutex);
+                        selfPtr->focusPointPosition = positionMapSystem;
+                        selfPtr->notifyListeners(ListenerType::BOUNDS);
+                        auto mapInterface = selfPtr->mapInterface;
+                        if (mapInterface) {
+                            mapInterface->invalidate();
+                        }
+                    }
                 },
-                [=] {
-                    assert(this->coordAnimation->endValue.systemIdentifier == 4326);
-                    std::lock_guard<std::recursive_mutex> lock(paramMutex);
-                    this->focusPointPosition = this->coordAnimation->endValue;
-                    notifyListeners(ListenerType::BOUNDS);
-                    mapInterface->invalidate();
-                    this->coordAnimation = nullptr;
+                [weakSelf] {
+                    if (auto selfPtr = weakSelf.lock()) {
+                        assert(selfPtr->coordAnimation->endValue.systemIdentifier == 4326);
+                        std::lock_guard<std::recursive_mutex> lock(selfPtr->paramMutex);
+                        selfPtr->focusPointPosition = selfPtr->coordAnimation->endValue;
+                        selfPtr->notifyListeners(ListenerType::BOUNDS);
+                        selfPtr->coordAnimation = nullptr;
+                        auto mapInterface = selfPtr->mapInterface;
+                        if (mapInterface) {
+                            mapInterface->invalidate();
+                        }
+                    }
                 });
             coordAnimation->start();
         }

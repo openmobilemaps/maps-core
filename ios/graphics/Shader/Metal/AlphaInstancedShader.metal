@@ -83,7 +83,12 @@ unitSphereAlphaInstancedFragmentShader(InstancedVertexOut in [[stage_in]],
     float4 color = texture0.sample(textureSampler, uv);
 
     const float a = color.a * in.alpha;
-    return float4(color.r * in.alpha, color.g * in.alpha, color.b * in.alpha, a);
+
+    if (a <= 0) {
+       discard_fragment();
+    }
+
+    return float4(color.r * a, color.g * a, color.b * a, a);
 }
 
 vertex InstancedVertexOut
@@ -101,6 +106,7 @@ alphaInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
 {
   const float2 position = positions[instanceId] + originOffset.xy;
   const float2 scale = scales[instanceId];
+  const float2 offset = offsets[instanceId];
   const float rotation = rotations[instanceId];
 
   const float angle = rotation * M_PI_F / 180.0;
@@ -109,7 +115,7 @@ alphaInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
                                             float4(cos(angle) * scale.x, -sin(angle) * scale.x, 0, 0),
                                             float4(sin(angle) * scale.y, cos(angle) * scale.y, 0, 0),
                                             float4(0, 0, 0, 0),
-                                            float4(position.x, position.y, 0.0, 1)
+                                            float4(position + offset, 0.0, 1)
                                             );
 
   const float4x4 matrix = vpMatrix * model_matrix;
@@ -137,5 +143,9 @@ alphaInstancedFragmentShader(InstancedVertexOut in [[stage_in]],
 
     const float a = color.a * in.alpha;
 
-    return float4(color.r * in.alpha, color.g * in.alpha, color.b * in.alpha, a);
+    if (a <= 0) {
+       discard_fragment();
+    }
+
+    return float4(color.r * a, color.g * a, color.b * a, a);
 }

@@ -127,11 +127,19 @@ std::shared_ptr<RenderObjectInterface> Textured2dLayerObject::getRenderObject() 
 
 void Textured2dLayerObject::beginAlphaAnimation(double startAlpha, double targetAlpha, long long duration) {
     assert(shader != nullptr);
+    std::weak_ptr<Textured2dLayerObject> weakSelf = weak_from_this();
     animation = std::make_shared<DoubleAnimation>(
-            duration, startAlpha, targetAlpha, InterpolatorFunction::EaseIn, [=](double alpha) { this->setAlpha(alpha); },
-            [=] {
-                this->setAlpha(targetAlpha);
-                this->animation = nullptr;
+            duration, startAlpha, targetAlpha, InterpolatorFunction::EaseIn,
+            [weakSelf](double alpha) {
+                if (auto selfPtr = weakSelf.lock()) {
+                    selfPtr->setAlpha(alpha);
+                }
+            },
+            [weakSelf, targetAlpha] {
+                if (auto selfPtr = weakSelf.lock()) {
+                    selfPtr->setAlpha(targetAlpha);
+                    selfPtr->animation = nullptr;
+                }
             });
     animation->start();
     mapInterface->invalidate();
@@ -139,12 +147,20 @@ void Textured2dLayerObject::beginAlphaAnimation(double startAlpha, double target
 
 void Textured2dLayerObject::beginStyleAnimation(RasterShaderStyle start, RasterShaderStyle target, long long duration) {
     assert(rasterShader != nullptr);
+    std::weak_ptr<Textured2dLayerObject> weakSelf = weak_from_this();
     animation = std::make_shared<RasterStyleAnimation>(
-                                                  duration, start, target, InterpolatorFunction::EaseIn, [=](RasterShaderStyle style) { this->setStyle(style); },
-                                                  [=] {
-                                                      this->setStyle(target);
-                                                      this->animation = nullptr;
-                                                  });
+            duration, start, target, InterpolatorFunction::EaseIn,
+            [weakSelf](RasterShaderStyle style) {
+                if (auto selfPtr = weakSelf.lock()) {
+                    selfPtr->setStyle(style);
+                }
+            },
+            [weakSelf, target] {
+                if (auto selfPtr = weakSelf.lock()) {
+                    selfPtr->setStyle(target);
+                    selfPtr->animation = nullptr;
+                }
+            });
     animation->start();
     mapInterface->invalidate();
 }

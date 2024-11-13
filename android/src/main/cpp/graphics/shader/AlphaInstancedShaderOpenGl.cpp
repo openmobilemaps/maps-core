@@ -97,6 +97,7 @@ std::string AlphaInstancedShaderOpenGl::getVertexShader() {
                                       in vec4 aTexCoordinate;
                                       in vec2 aScale;
                                       in float aAlpha;
+                                      in vec2 aOffset;
 
                                       out vec2 v_texCoord;
                                       out vec4 v_texcoordInstance;
@@ -108,7 +109,7 @@ std::string AlphaInstancedShaderOpenGl::getVertexShader() {
                                                   vec4(cos(angle) * aScale.x, -sin(angle) * aScale.x, 0.0, 0.0),
                                                   vec4(sin(angle) * aScale.y, cos(angle) * aScale.y, 0.0, 0.0),
                                                   vec4(0.0, 0.0, 1.0, 0.0),
-                                                  vec4(aPosition + uOriginOffset.xy, 0.0, 1.0)
+                                                  vec4(aPosition + uOriginOffset.xy + aOffset, 0.0, 1.0)
                                           );
 
                                           mat4 matrix = uvpMatrix * model_matrix;
