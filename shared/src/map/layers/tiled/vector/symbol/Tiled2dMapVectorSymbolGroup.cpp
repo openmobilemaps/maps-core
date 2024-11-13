@@ -605,11 +605,8 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
                     SharedBytes((int64_t) customDescriptor.iconScales.data(), (int32_t) count, 2 * (int32_t) sizeof(float)));
             customDescriptor.renderObject->setRotations(
                     SharedBytes((int64_t) customDescriptor.iconRotations.data(), (int32_t) count, 1 * (int32_t) sizeof(float)));
-
-            if (is3d) {
-                customDescriptor.renderObject->setPositionOffset(
-                        SharedBytes((int64_t) customDescriptor.iconOffsets.data(), (int32_t) count, 2 * (int32_t) sizeof(float)));
-            }
+            customDescriptor.renderObject->setPositionOffset(
+                    SharedBytes((int64_t) customDescriptor.iconOffsets.data(), (int32_t) count, 2 * (int32_t) sizeof(float)));
         }
 
         if (iconInstancedObject) {
@@ -621,10 +618,8 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
                     SharedBytes((int64_t) iconScales.data(), (int32_t) iconAlphas.size(), 2 * (int32_t) sizeof(float)));
             iconInstancedObject->setRotations(
                     SharedBytes((int64_t) iconRotations.data(), (int32_t) iconAlphas.size(), 1 * (int32_t) sizeof(float)));
-            if (is3d) {
-                iconInstancedObject->setPositionOffset(
-                        SharedBytes((int64_t) iconOffsets.data(), (int32_t) iconAlphas.size(), 2 * (int32_t) sizeof(float)));
-            }
+            iconInstancedObject->setPositionOffset(
+                    SharedBytes((int64_t) iconOffsets.data(), (int32_t) iconAlphas.size(), 2 * (int32_t) sizeof(float)));
         }
 
         if (stretchedInstancedObject) {
