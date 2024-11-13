@@ -41,7 +41,7 @@ IconLayerObject::IconLayerObject(std::shared_ptr<Quad2dInstancedInterface> quad,
     iconRotations.resize(count, 0.0);
     iconScales.resize(count * 2, 0.0);
     iconPositions.resize(count * (is3d ? 3 : 2), 0.0);
-    iconTextureCoordinates.resize(count * 4, 0.0);
+    iconTextureCoordinates = {0.0, 0.0, 1.0, 1.0};
     iconOffsets.resize(count * 2, 0.0);
 
     auto renderCoord = conversionHelper->convertToRenderSystem(icon->getCoordinate());
@@ -57,24 +57,14 @@ IconLayerObject::IconLayerObject(std::shared_ptr<Quad2dInstancedInterface> quad,
     }
 
     quad->setFrame(Quad2dD(Vec2D(-0.5, 0.5), Vec2D(0.5, 0.5), Vec2D(0.5, -0.5), Vec2D(-0.5, -0.5)), origin, true);
-    quad->setPositions(
-            SharedBytes((int64_t) iconPositions.data(), (int32_t) iconAlphas.size(), iconPositions.size() * (int32_t) sizeof(float)));
 }
 
 void IconLayerObject::setup(const std::shared_ptr<RenderingContextInterface> context) {
-    auto texture = icon->getTexture();
-    auto factorHeight = texture->getImageHeight() * 1.0f / texture->getTextureHeight();
-    auto factorWidth = texture->getImageWidth() * 1.0f / texture->getTextureWidth();
-
-    iconTextureCoordinates[0] = 0.0;
-    iconTextureCoordinates[1] = 0.0;
-    iconTextureCoordinates[2] = factorWidth;
-    iconTextureCoordinates[3] = factorHeight;
-
     getGraphicsObject()->setup(context);
     getQuadObject()->loadTexture(context, icon->getTexture());
 
     quad->setTextureCoordinates(SharedBytes((int64_t)iconTextureCoordinates.data(), iconAlphas.size(), 4 * (int32_t)sizeof(float)));
+    quad->setAlphas(SharedBytes((int64_t) iconAlphas.data(), (int32_t) iconAlphas.size(), (int32_t) sizeof(float)));
 }
 
 void IconLayerObject::update() {
@@ -94,6 +84,20 @@ void IconLayerObject::update() {
 
     auto iconSize = icon->getIconSize();
     auto type = icon->getType();
+
+    // POSITION
+
+    auto currentRenderCoord = conversionHelper->convertToRenderSystem(icon->getCoordinate());
+    if (is3d) {
+        const double sinY = sin(currentRenderCoord.y);
+        const double cosY = cos(currentRenderCoord.y);
+        const double sinX = sin(currentRenderCoord.x);
+        const double cosX = cos(currentRenderCoord.x);
+
+        iconPositions = {(float) ((sinY * cosX) - origin.x), (float) (cosY - origin.y), (float) ((-sinY * sinX) - origin.z)};
+    } else {
+        iconPositions = {(float) (currentRenderCoord.x - origin.x), (float) (currentRenderCoord.y - origin.y)};
+    }
 
     // SCALE
 
@@ -153,6 +157,9 @@ void IconLayerObject::update() {
         iconOffsets[1] = 2.0 * (0.5 - (1.0 - ratioTopBottom)) * height / viewport.y;
     }
 
+    quad->setPositions(SharedBytes((int64_t) iconPositions.data(), (int32_t) iconAlphas.size(),
+                                   iconPositions.size() * (int32_t) sizeof(float)));
+
     quad->setScales(
         SharedBytes((int64_t) iconScales.data(), (int32_t) iconAlphas.size(), 2 * (int32_t) sizeof(float)));
 
@@ -171,8 +178,7 @@ std::vector<std::shared_ptr<RenderConfigInterface>> IconLayerObject::getRenderCo
 
 void IconLayerObject::setAlpha(float alpha) {
     iconAlphas[0] = alpha;
-    quad->setAlphas(
-        SharedBytes((int64_t) iconAlphas.data(), (int32_t) iconAlphas.size(), (int32_t) sizeof(float)));
+    quad->setAlphas(SharedBytes((int64_t) iconAlphas.data(), (int32_t) iconAlphas.size(), (int32_t) sizeof(float)));
 
     mapInterface->invalidate();
 }
