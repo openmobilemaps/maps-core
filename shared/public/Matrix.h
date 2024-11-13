@@ -34,6 +34,8 @@
 #include <vector>
 #include <string>
 
+#include "Vec4D.h"
+
 class Matrix {
 public:
     static void transposeM(std::vector<float> &mTrans, int mTransOffset, std::vector<float> &m, int mOffset);
@@ -79,6 +81,9 @@ public:
     static std::vector<float> multiply(const std::vector<float> &M, const std::vector<float> &x);
 
     static void multiply(const std::vector<float> &M, const std::vector<float> &x, std::vector<float> &result);
+
+    static Vec4D multiply(const std::vector<float> &M, const Vec4D &x);
+    static void multiply(const std::vector<float> &M, const Vec4D &x, Vec4D &result);
 
     static std::vector<float> sTemp;
 

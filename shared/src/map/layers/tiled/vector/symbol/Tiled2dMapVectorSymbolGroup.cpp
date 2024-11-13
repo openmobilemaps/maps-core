@@ -564,7 +564,7 @@ void Tiled2dMapVectorSymbolGroup::setupObjects(const std::shared_ptr<SpriteData>
     isInitialized = true;
 }
 
-void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const double rotation, const double scaleFactor, long long now, const Vec2I viewPortSize) {
+void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const double rotation, const double scaleFactor, long long now, const Vec2I viewPortSize, const std::vector<float>& vpMatrix, const Vec3D& origin) {
     if (!isInitialized) {
         return;
     }
@@ -592,7 +592,7 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
                                                 stretchedIconAlphas, stretchedIconStretchInfos, stretchedIconOffset, zoomIdentifier,
                                                 scaleFactor, rotation, now, viewPortSize);
             object->updateTextProperties(textPositions, textReferencePositions, textScales, textRotations, textStyles, textOffset, textStyleOffset,
-                                         zoomIdentifier, scaleFactor, rotation, now, viewPortSize);
+                                         zoomIdentifier, scaleFactor, rotation, now, viewPortSize, vpMatrix, origin);
         }
 
         for (const auto &customDescriptor: customTextures) {

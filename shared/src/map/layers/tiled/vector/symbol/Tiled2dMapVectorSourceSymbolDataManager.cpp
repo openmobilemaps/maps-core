@@ -672,6 +672,8 @@ bool Tiled2dMapVectorSourceSymbolDataManager::update(long long now) {
     const double rotation = camera->getRotation();
 
     const auto scaleFactor = camera->getScalingFactor();
+    const auto vpMatrix = camera->asCameraInterface()->getVpMatrix();
+    const auto origin = camera->asCameraInterface()->getOrigin();
 
     for (const auto &[tile, symbolGroupsMap]: tileSymbolGroupMap) {
         const auto tileState = tileStateMap.find(tile);
@@ -681,8 +683,8 @@ bool Tiled2dMapVectorSourceSymbolDataManager::update(long long now) {
         for (const auto &[layerIdentifier, symbolGroups]: symbolGroupsMap) {
             const auto &description = layerDescriptions.at(layerIdentifier);
             for (auto &symbolGroup: std::get<1>(symbolGroups)) {
-                symbolGroup.syncAccess([&zoomIdentifier, &rotation, &scaleFactor, &now, &viewPortSize](auto group){
-                    group->update(zoomIdentifier, rotation, scaleFactor, now, viewPortSize);
+                symbolGroup.syncAccess([&zoomIdentifier, &rotation, &scaleFactor, &now, &viewPortSize, &vpMatrix, &origin](auto group){
+                    group->update(zoomIdentifier, rotation, scaleFactor, now, viewPortSize, vpMatrix, origin);
                 });
             }
         }
