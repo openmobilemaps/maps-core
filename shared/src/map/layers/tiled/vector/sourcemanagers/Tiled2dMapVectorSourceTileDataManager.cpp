@@ -189,7 +189,7 @@ void Tiled2dMapVectorSourceTileDataManager::updateMaskObjects() {
         for (const auto &tileToRemove: tilesToRemove) {
             auto tilesVectorIt = tiles.find(tileToRemove);
             if (tilesVectorIt != tiles.end()) {
-                for (const auto &[_, _, tile] : tilesVectorIt->second) { // Access the value directly
+                for (const auto &[index, identifier, tile] : tilesVectorIt->second) { // Access the value directly
                     tile.unsafe()->clear();
                 }
                 tiles.erase(tilesVectorIt); // Use the iterator to erase directly
