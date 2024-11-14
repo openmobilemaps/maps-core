@@ -106,7 +106,7 @@ std::string ColorPolygonGroup2dShaderOpenGl::getVertexShader() {
                     color = vec4(polygonStyles[styleIndex], polygonStyles[styleIndex + 1],
                                  polygonStyles[styleIndex + 2], polygonStyles[styleIndex + 3] * polygonStyles[styleIndex + 4]);
                     stripeInfo = vec2(polygonStyles[styleIndex + 5], polygonStyles[styleIndex + 6]);
-                    uv = vPosition;
+                    uv = vPosition.xy;
                 }
             ) : OMMVersionedGlesShaderCode(320 es,
                 // Default Color Shader
