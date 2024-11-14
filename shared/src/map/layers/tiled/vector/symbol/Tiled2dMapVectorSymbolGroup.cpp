@@ -378,9 +378,7 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
         iconScales.resize(instanceCounts.icons * 2, 0.0);
         iconPositions.resize(instanceCounts.icons * positionSize, 0.0);
         iconTextureCoordinates.resize(instanceCounts.icons * 4, 0.0);
-        if (is3d) {
-            iconOffsets.resize(instanceCounts.icons * 2, 0.0);
-        }
+        iconOffsets.resize(instanceCounts.icons * 2, 0.0);
     }
 
 
