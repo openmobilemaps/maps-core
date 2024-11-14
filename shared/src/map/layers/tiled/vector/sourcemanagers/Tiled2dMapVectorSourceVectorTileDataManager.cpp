@@ -180,7 +180,7 @@ void Tiled2dMapVectorSourceVectorTileDataManager::onVectorTilesUpdated(const std
 }
 
 
-void Tiled2dMapVectorSourceVectorTileDataManager::onTileCompletelyReady(const Tiled2dMapVersionedTileInfo tileInfo) {
+void Tiled2dMapVectorSourceVectorTileDataManager::onTileCompletelyReady(const Tiled2dMapVersionedTileInfo &tileInfo) {
     readyManager.message(&Tiled2dMapVectorReadyManager::setReady, readyManagerIndex, tileInfo, 1);
 }
 

@@ -181,7 +181,7 @@ void Tiled2dMapVectorSourceRasterTileDataManager::onRasterTilesUpdated(const std
 
 }
 
-void Tiled2dMapVectorSourceRasterTileDataManager::onTileCompletelyReady(const Tiled2dMapVersionedTileInfo tileInfo) {
+void Tiled2dMapVectorSourceRasterTileDataManager::onTileCompletelyReady(const Tiled2dMapVersionedTileInfo &tileInfo) {
     readyManager.message(&Tiled2dMapVectorReadyManager::setReady, readyManagerIndex, tileInfo, 1);
 }
 
