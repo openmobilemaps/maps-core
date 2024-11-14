@@ -20,4 +20,6 @@ NS_SWIFT_SENDABLE
 
 @property (nonatomic, readonly) double z;
 
+- (NSComparisonResult)compare:(nonnull MCVec3D *)other;
+
 @end

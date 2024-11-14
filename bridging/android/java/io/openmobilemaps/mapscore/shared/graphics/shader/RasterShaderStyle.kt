@@ -25,7 +25,7 @@ data class RasterShaderStyle(
     }
 
     override fun compareTo(other: RasterShaderStyle): Int {
-        var tempResult = 0
+        var tempResult : Int
         if (this.opacity < other.opacity) {
             tempResult = -1;
         } else if (this.opacity > other.opacity) {

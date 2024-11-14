@@ -12,6 +12,15 @@ struct Quad3dD final {
     Vec3D bottomRight;
     Vec3D bottomLeft;
 
+    friend bool operator==(const Quad3dD& lhs, const Quad3dD& rhs);
+    friend bool operator!=(const Quad3dD& lhs, const Quad3dD& rhs);
+
+    friend bool operator<(const Quad3dD& lhs, const Quad3dD& rhs);
+    friend bool operator>(const Quad3dD& lhs, const Quad3dD& rhs);
+
+    friend bool operator<=(const Quad3dD& lhs, const Quad3dD& rhs);
+    friend bool operator>=(const Quad3dD& lhs, const Quad3dD& rhs);
+
     Quad3dD(Vec3D topLeft_,
             Vec3D topRight_,
             Vec3D bottomRight_,
