@@ -12,25 +12,29 @@ import Foundation
 import MapCoreSharedModule
 import Metal
 import UIKit
+import simd
 
 class SphereEffectShader: BaseShader, @unchecked Sendable {
 
     private var ellipse: [Float] = []
 
-    private var ellipseBuffer: (any MTLBuffer)?
+    private var ellipseBuffers: MultiBuffer<simd_float4x4>?
 
     private var stencilState: MTLDepthStencilState?
 
     override func setupProgram(_: MCRenderingContextInterface?) {
         if pipeline == nil {
             pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: .sphereEffectShader, blendMode: blendMode).json)
+            ellipseBuffers = .init(device: MetalContext.current.device)
         }
     }
 
     override func preRender(encoder: MTLRenderCommandEncoder, context: RenderingContext) {
         guard let pipeline else { return }
         context.setRenderPipelineStateIfNeeded(pipeline)
-        if let ellipseBuffer {
+
+        if let ellipseBuffer = ellipseBuffers?.getNextBuffer(context) {
+            ellipseBuffer.copyMemory(bytes: &ellipse, length: MemoryLayout<Float>.size * ellipse.count)
             encoder.setFragmentBuffer(ellipseBuffer, offset: 0, index: 0)
         }
     }
@@ -45,6 +49,5 @@ extension SphereEffectShader: MCSphereEffectShaderInterface {
 
         ellipse = coefficients.map { $0.floatValue }
 
-        ellipseBuffer = MetalContext.current.device.makeBuffer(bytes: &ellipse, length: MemoryLayout<Float>.size * ellipse.count, options: [])
     }
 }
