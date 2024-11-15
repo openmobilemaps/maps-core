@@ -117,8 +117,9 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
                               targetZoomLevelIdentifier;
 
     int distanceWeight = 100;
-    int zoomLevelWeight = 1000 * zoomLevelInfos.at(0).numTilesT;
-    int zDistanceWeight = 100000 * zoomLevelInfos.at(0).numTilesT;
+    bool prioritizeTime = true;
+    int zoomLevelWeight = (prioritizeTime ? 100000 : 1000) * zoomLevelInfos.at(0).numTilesT;
+    int zDistanceWeight = (prioritizeTime ? 1000 : 100000) * zoomLevelInfos.at(0).numTilesT;
 
     std::vector<VisibleTilesLayer> layers;
 
@@ -405,13 +406,21 @@ void Tiled2dMapSource<T, L, R>::onVisibleTilesChanged(const std::vector<VisibleT
 
     std::sort(toAdd.begin(), toAdd.end());
 
-    for (const auto &addedTile : toAdd) {
-        performLoadingTask(addedTile.tileInfo, 0);
-    }
+    tilesRequestedToLoad = toAdd;
+    scheduleFixedNumberOfLoadingTasks();
+
     // if we removed tiles, we potentially need to update the tilemasks - also if no new tile is loaded
     updateTileMasks();
 
     notifyTilesUpdates();
+}
+
+template <class T, class L, class R>
+void Tiled2dMapSource<T, L, R>::scheduleFixedNumberOfLoadingTasks() {
+    while(tilesRequestedToLoad.size()>0 && currentlyLoading.size()<10){
+        performLoadingTask(tilesRequestedToLoad[0].tileInfo, 0);
+        tilesRequestedToLoad.erase(tilesRequestedToLoad.begin());
+    }
 }
 
 template <class T, class L, class R>
@@ -422,7 +431,7 @@ void Tiled2dMapSource<T, L, R>::performLoadingTask(Tiled2dMapTileInfo tile, size
     if (currentVisibleTiles.count(tile) == 0) {
         errorTiles[loaderIndex].erase(tile);
         return;
-    };
+    }
 
     std::weak_ptr<Tiled2dMapSource> weakSelfPtr = std::dynamic_pointer_cast<Tiled2dMapSource>(shared_from_this());
     auto weakActor = WeakActor<Tiled2dMapSource>(mailbox, std::static_pointer_cast<Tiled2dMapSource>(shared_from_this()));
@@ -471,6 +480,8 @@ void Tiled2dMapSource<T, L, R>::performLoadingTask(Tiled2dMapTileInfo tile, size
 template <class T, class L, class R>
 void Tiled2dMapSource<T, L, R>::didLoad(Tiled2dMapTileInfo tile, size_t loaderIndex, const R &result) {
     currentlyLoading.erase(tile);
+    scheduleFixedNumberOfLoadingTasks();
+
     std::string layerName = layerConfig->getLayerName();
     const bool isVisible = currentVisibleTiles.count(tile);
     if (!isVisible) {

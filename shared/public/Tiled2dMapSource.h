@@ -153,6 +153,7 @@ public:
 
     std::vector<VisibleTilesLayer> currentPyramid;
     int currentKeepZoomLevelOffset;
+    std::vector<PrioritizedTiled2dMapTileInfo> tilesRequestedToLoad;
 
     RectCoord currentViewBounds = RectCoord(Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(), 0.0, 0.0, 0.0),
                                             Coord(CoordinateSystemIdentifiers::RENDERSYSTEM(), 0.0, 0.0, 0.0));
@@ -168,6 +169,7 @@ public:
     void onVisibleTilesChanged(const std::vector<VisibleTilesLayer> &pyramid, int keepZoomLevelOffset = 0);
 
 private:
+    void scheduleFixedNumberOfLoadingTasks();
     void performLoadingTask(Tiled2dMapTileInfo tile, size_t loaderIndex);
 
 
