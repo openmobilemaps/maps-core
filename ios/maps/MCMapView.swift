@@ -188,7 +188,7 @@ extension MCMapView: MTKViewDelegate {
 
         mapInterface.prepare()
 
-        guard let renderPassDescriptor = view.currentRenderPassDescriptor,
+        guard
             let commandBuffer = MetalContext.current.commandQueue
                 .makeCommandBuffer()
         else {
@@ -204,7 +204,7 @@ extension MCMapView: MTKViewDelegate {
             computeEncoder.endEncoding()
         }
 
-        guard
+        guard let renderPassDescriptor = view.currentRenderPassDescriptor,
             let renderEncoder = commandBuffer.makeRenderCommandEncoder(
                 descriptor: renderPassDescriptor)
         else {
