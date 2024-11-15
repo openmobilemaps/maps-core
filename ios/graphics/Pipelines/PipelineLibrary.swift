@@ -243,6 +243,14 @@ public enum PipelineType: String, CaseIterable, Codable {
                 return Vertex.descriptor
         }
     }
+
+    var premultiplyAlpha: Bool {
+        switch self {
+            case .colorShader, .polygonGroupShader:
+                return true
+            default: return false
+        }
+    }
 }
 
 public class PipelineLibrary: StaticMetalLibrary<String, MTLRenderPipelineState>, @unchecked Sendable {

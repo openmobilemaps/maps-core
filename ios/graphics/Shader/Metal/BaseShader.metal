@@ -20,7 +20,7 @@ baseVertexShader(const Vertex3DTextureIn vertexIn [[stage_in]],
                  constant float4 &originOffset [[buffer(3)]])
 {
     VertexOut out {
-        .position = vpMatrix * ((mMatrix * vertexIn.position) + originOffset),
+        .position = vpMatrix * ((vertexIn.position) + originOffset),
         .uv = vertexIn.uv
     };
 
@@ -52,7 +52,7 @@ colorVertexShader(const Vertex3FIn vertexIn [[stage_in]],
                   constant float4 &originOffset [[buffer(3)]])
 {
     VertexOut out {
-        .position = vpMatrix * ((mMatrix * float4(vertexIn.position.xyz, 1.0)) + originOffset),
+        .position = vpMatrix * ((float4(vertexIn.position.xyz, 1.0)) + originOffset),
     };
 
     return out;
@@ -62,8 +62,7 @@ fragment float4
 colorFragmentShader(VertexOut in [[stage_in]],
                     constant float4 &color [[buffer(1)]])
 {
-    float a = color.a;
-    return float4(color.r * a, color.g * a, color.b * a, a);
+    return color;
 }
 
 fragment float4

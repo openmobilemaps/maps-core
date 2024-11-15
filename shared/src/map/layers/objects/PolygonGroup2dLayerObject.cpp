@@ -95,10 +95,9 @@ void PolygonGroup2dLayerObject::setStyles(const std::vector<PolygonStyle> &style
         shaderStyles.push_back(s.color.g);
         shaderStyles.push_back(s.color.b);
         shaderStyles.push_back(s.color.a);
-        shaderStyles.push_back(s.opacity);
     }
 
-    auto s = SharedBytes((int64_t)shaderStyles.data(), (int32_t)styles.size(), (int32_t)5 * sizeof(float));
+    auto s = SharedBytes((int64_t)shaderStyles.data(), (int32_t)styles.size(), (int32_t)4 * sizeof(float));
     shader->setStyles(s);
 }
 

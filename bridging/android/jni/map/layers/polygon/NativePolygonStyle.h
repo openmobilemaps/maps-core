@@ -25,9 +25,8 @@ private:
     friend ::djinni::JniClass<NativePolygonStyle>;
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/map/layers/polygon/PolygonStyle") };
-    const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(Lio/openmobilemaps/mapscore/shared/graphics/common/Color;F)V") };
+    const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(Lio/openmobilemaps/mapscore/shared/graphics/common/Color;)V") };
     const jfieldID field_color { ::djinni::jniGetFieldID(clazz.get(), "color", "Lio/openmobilemaps/mapscore/shared/graphics/common/Color;") };
-    const jfieldID field_opacity { ::djinni::jniGetFieldID(clazz.get(), "opacity", "F") };
 };
 
 } // namespace djinni_generated

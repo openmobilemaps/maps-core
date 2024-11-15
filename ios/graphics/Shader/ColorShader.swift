@@ -38,7 +38,12 @@ class ColorShader: BaseShader, @unchecked Sendable {
 
 extension ColorShader: MCColorShaderInterface {
     func setColor(_ red: Float, green: Float, blue: Float, alpha: Float) {
-        color = [red, green, blue, alpha]
+        if shader.premultiplyAlpha {
+            color = [red * alpha, green * alpha, blue * alpha, alpha]
+        }
+        else {
+            color = [red, green, blue, alpha]
+        }
     }
 
     func asShaderProgram() -> MCShaderProgramInterface? {

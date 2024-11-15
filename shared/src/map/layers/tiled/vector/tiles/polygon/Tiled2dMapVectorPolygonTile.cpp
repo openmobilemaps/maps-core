@@ -104,11 +104,10 @@ void Tiled2dMapVectorPolygonTile::update() {
             const auto& ec = EvaluationContext(zoomIdentifier, dpFactor, feature, featureStateManager);
             const auto& color = inZoomRange ? polygonDescription->style.getFillColor(ec) : Color(0.0, 0.0, 0.0, 0.0);
             const auto& opacity = inZoomRange ? polygonDescription->style.getFillOpacity(ec) : 0.0;
-            shaderStyles.push_back(color.r);
-            shaderStyles.push_back(color.g);
-            shaderStyles.push_back(color.b);
-            shaderStyles.push_back(color.a);
-            shaderStyles.push_back(opacity * alpha);
+            shaderStyles.push_back(color.r * color.a * alpha * opacity);
+            shaderStyles.push_back(color.g * color.a * alpha * opacity);
+            shaderStyles.push_back(color.b * color.a * alpha * opacity);
+            shaderStyles.push_back(color.a * alpha * opacity);
             if (isStriped) {
                 const auto stripeWidth = inZoomRange ? polygonDescription->style.getStripeWidth(ec) : std::vector<float>{0.0, 0.0};
                 shaderStyles.push_back(stripeWidth[0]);

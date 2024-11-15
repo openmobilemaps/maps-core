@@ -98,7 +98,7 @@ void Tiled2dMapVectorBackgroundSubLayer::onAdded(const std::shared_ptr<MapInterf
 
     auto color = description->style.getColor(EvaluationContext(0.0, dpFactor, std::make_shared<FeatureContext>(), featureStateManager));
     polygonObject->setStyles({
-        PolygonStyle(color, alpha)
+        PolygonStyle(Color(color.r * color.a * alpha, color.g * color.a * alpha, color.b * color.a * alpha, color.a * alpha))
     });
 
     polygonObject->setVertices(vertices, indices, Vec3D(0, 0, 0));
@@ -199,7 +199,7 @@ void Tiled2dMapVectorBackgroundSubLayer::setAlpha(float alpha) {
     std::lock_guard<std::recursive_mutex> lck(mutex);
     auto color = description->style.getColor(EvaluationContext(0.0, dpFactor, std::make_shared<FeatureContext>(), featureStateManager));
     polygonObject->setStyles({
-        PolygonStyle(color, alpha)
+        PolygonStyle(Color(color.r * color.a * alpha, color.g * color.a * alpha, color.b * color.a * alpha, color.a * alpha))
     });
     if (patternObject) {
         patternObject->setOpacities({

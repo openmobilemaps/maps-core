@@ -190,16 +190,19 @@ extension MCMapView: MTKViewDelegate {
 
         guard let renderPassDescriptor = view.currentRenderPassDescriptor,
             let commandBuffer = MetalContext.current.commandQueue
-                .makeCommandBuffer(),
-            let computeEncoder = commandBuffer.makeComputeCommandEncoder()
+                .makeCommandBuffer()
         else {
             self.renderSemaphore.signal()
             return
         }
 
-        renderingContext.computeEncoder = computeEncoder
-        mapInterface.compute()
-        computeEncoder.endEncoding()
+        if false,
+           let computeEncoder = commandBuffer.makeComputeCommandEncoder() {
+            
+            renderingContext.computeEncoder = computeEncoder
+            mapInterface.compute()
+            computeEncoder.endEncoding()
+        }
 
         guard
             let renderEncoder = commandBuffer.makeRenderCommandEncoder(
