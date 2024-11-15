@@ -44,11 +44,11 @@ struct StretchShaderInfo  {
     float2 uvSize;
 };
 
-fragment float4
+fragment half4
 stretchFragmentShader(VertexOut in [[stage_in]],
                       constant float &alpha [[buffer(1)]],
                       constant StretchShaderInfo *stretchInfo [[buffer(2)]],
-                      texture2d<float> texture0 [[ texture(0)]],
+                      texture2d<half> texture0 [[ texture(0)]],
                       sampler textureSampler [[sampler(0)]])
 {
     const StretchShaderInfo info = stretchInfo[0];
@@ -85,10 +85,10 @@ stretchFragmentShader(VertexOut in [[stage_in]],
     // remap final normalized uv to sprite atlas coordinates
     texCoordNorm = texCoordNorm * info.uvSize + info.uvOrig;
 
-    const float4 color = texture0.sample(textureSampler, texCoordNorm);
+    const half4 color = texture0.sample(textureSampler, texCoordNorm);
     const float a = color.a * alpha;
     if (a == 0) {
         discard_fragment();
     }
-    return float4(color.r * a, color.g * a, color.b * a, a);
+    return half4(color.r * a, color.g * a, color.b * a, a);
 }

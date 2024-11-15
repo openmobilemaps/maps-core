@@ -23,11 +23,11 @@ stencilClearVertexShader(const Vertex3DTextureIn vertexIn [[stage_in]],
     return out;
 }
 
-fragment float4
+fragment half4
 stencilClearFragmentShader(VertexOut in [[stage_in]],
                       constant float &alpha [[buffer(1)]],
                       texture2d<float> texture0 [[ texture(0)]],
                       sampler textureSampler [[sampler(0)]])
 {
-    return float4(0,0,0,0);
+    return half4(0,0,0,0);
 }

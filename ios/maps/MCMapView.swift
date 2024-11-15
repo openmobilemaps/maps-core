@@ -241,7 +241,8 @@ extension MCMapView: MTKViewDelegate {
             commandBuffer.commit()
             commandBuffer.waitUntilCompleted()
         } else {
-            commandBuffer.present(drawable)
+            let duration = 8.0 / 1000.0
+            commandBuffer.present(drawable, afterMinimumDuration: duration)
             commandBuffer.commit()
         }
     }

@@ -231,7 +231,7 @@ lineGroupVertexShader(const LineVertexIn vertexIn [[stage_in]],
 }
 
 
-fragment float4
+fragment half4
 lineGroupFragmentShader(LineVertexOut in [[stage_in]],
                         constant float *styling [[buffer(1)]])
 {
@@ -315,7 +315,7 @@ lineGroupFragmentShader(LineVertexOut in [[stage_in]],
         discard_fragment();
       }
 
-      return float4(style->gapColor.rgb, 1.0) * aGap;
+      return half4(half3(style->gapColor.rgb), 1.0) * aGap;
     }
   }
 
@@ -323,5 +323,5 @@ lineGroupFragmentShader(LineVertexOut in [[stage_in]],
     discard_fragment();
   }
 
-  return float4(style->color.rgb, 1.0) * a;
+  return half4(half3(style->color.rgb), 1.0) * a;
 }
