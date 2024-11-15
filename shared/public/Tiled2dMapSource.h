@@ -146,6 +146,9 @@ class Tiled2dMapSource : public Tiled2dMapSourceInterface,
     std::map<Tiled2dMapTileInfo, TileWrapper<R>> currentTiles;
     std::map<Tiled2dMapTileInfo, TileWrapper<R>> outdatedTiles;
 
+    std::unordered_set<Tiled2dMapTileInfo> loadingTiles;
+    std::mutex loadingTilesMutex;
+
     int currentZoomLevelIdentifier = 0;
 
     std::unordered_set<Tiled2dMapTileInfo> currentVisibleTiles;

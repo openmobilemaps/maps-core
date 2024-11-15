@@ -29,6 +29,10 @@ Tiled2dMapVectorSource::Tiled2dMapVectorSource(const MapConfig &mapConfig,
 loaders(tileLoaders), layersToDecode(layersToDecode), listener(listener), sourceName(sourceName) {}
 
 ::djinni::Future<std::shared_ptr<DataLoaderResult>> Tiled2dMapVectorSource::loadDataAsync(Tiled2dMapTileInfo tile, size_t loaderIndex) {
+    {
+        std::lock_guard<std::mutex> lock_guard(loadingTilesMutex);
+        loadingTiles.insert(tile);
+    }
     auto const url = layerConfig->getTileUrl(tile.x, tile.y, tile.t, tile.zoomIdentifier);
     auto promise = std::make_shared<::djinni::Promise<std::shared_ptr<DataLoaderResult>>>();
     loaders[loaderIndex]->loadDataAsync(url, std::nullopt).then([promise](::djinni::Future<::DataLoaderResult> result) {
@@ -38,6 +42,10 @@ loaders(tileLoaders), layersToDecode(layersToDecode), listener(listener), source
 }
 
 void Tiled2dMapVectorSource::cancelLoad(Tiled2dMapTileInfo tile, size_t loaderIndex) {
+    {
+        std::lock_guard<std::mutex> lock_guard(loadingTilesMutex);
+        loadingTiles.erase(tile);
+    }
     auto const url = layerConfig->getTileUrl(tile.x, tile.y, tile.t, tile.zoomIdentifier);
     loaders[loaderIndex]->cancel(url);
 }
@@ -66,6 +74,14 @@ Tiled2dMapVectorTileInfo::FeatureMap Tiled2dMapVectorSource::postLoadingTask(std
                 layerFeatureMap->emplace(sourceLayerName, std::make_shared<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>>());
                 layerFeatureMap->at(sourceLayerName)->reserve(layer.num_features());
                 while (const auto &feature = layer.next_feature()) {
+
+                    {
+                        std::lock_guard<std::mutex> lock_guard(loadingTilesMutex);
+                        if (loadingTiles.find(tile) == loadingTiles.end()) {
+                            return std::make_shared<std::unordered_map<std::string, std::shared_ptr<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>>>>();
+                        }
+                    }
+
                     auto const featureContext = std::make_shared<FeatureContext>(feature);
                     PERF_LOG_START(sourceLayerName + "_decode");
                     try {
@@ -94,6 +110,12 @@ Tiled2dMapVectorTileInfo::FeatureMap Tiled2dMapVectorSource::postLoadingTask(std
         std::to_string(tile.x) + "/" + std::to_string(tile.y);
     }
     PERF_LOG_START(sourceName + "_postLoadingTask");
+
+    {
+        std::lock_guard<std::mutex> lock_guard(loadingTilesMutex);
+        loadingTiles.erase(tile);
+    }
+
     return layerFeatureMap;
 }
 
