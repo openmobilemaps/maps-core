@@ -193,7 +193,7 @@ void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDa
                         if (!featureGroups.empty() && featureGroups.back().size() < maxStylesPerGroup) {
                             styleGroupIndex = (int) featureGroups.size() - 1;
                             styleIndex = (int) featureGroups.back().size();
-                            featureGroups.at(styleGroupIndex).emplace_back(hash, featureContext);
+                            featureGroups[styleGroupIndex].emplace_back(hash, featureContext);
                         } else {
                             styleGroupIndex = (int) featureGroups.size();
                             styleIndex = 0;
@@ -238,7 +238,6 @@ void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDa
                         PolygonHelper::subdivision(coordinates, indices, maxSegmentLength);
                     }
 
-
                     for (auto const &index: indices) {
                         styleGroupNewPolygonsVector[styleGroupIndex].back().indices.push_back(indexOffset + index);
                     }
@@ -253,7 +252,7 @@ void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDa
                         styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(styleIndex);
                     }
 
-                    styleIndicesOffsets.at(styleGroupIndex) += coordinates.size();
+                    styleIndicesOffsets[styleGroupIndex] += coordinates.size();
 
                     bool interactable = description->isInteractable(evalContext);
                     if (interactable) {
