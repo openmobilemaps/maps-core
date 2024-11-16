@@ -32,8 +32,7 @@ Tiled2dMapSource<T, L, R>::Tiled2dMapSource(const MapConfig &mapConfig, const st
     , layerSystemId(layerConfig->getCoordinateSystemIdentifier())
     , isPaused(false)
     , screenDensityPpi(screenDensityPpi)
-    , layerName(layerName)
-    , limitToCurrentT(false) {
+    , layerName(layerName){
     std::sort(zoomLevelInfos.begin(), zoomLevelInfos.end(),
               [](const Tiled2dMapZoomLevelInfo &a, const Tiled2dMapZoomLevelInfo &b) -> bool { return a.zoom > b.zoom; });
 }
@@ -120,6 +119,7 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
     bool prioritizeTime = true;
     int zoomLevelWeight = (prioritizeTime ? 100000 : 1000) * zoomLevelInfos.at(0).numTilesT;
     int zDistanceWeight = (prioritizeTime ? 1000 : 100000) * zoomLevelInfos.at(0).numTilesT;
+    int onScreenWeight = 10000000 * zoomLevelInfos.at(0).numTilesT;
 
     std::vector<VisibleTilesLayer> layers;
 
@@ -171,14 +171,21 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
 
         const double boundsLeft = layerBounds.topLeft.x;
         int startTileLeft =
-            std::floor(std::max(leftToRight ? (visibleLeft - boundsLeft) : (boundsLeft - visibleLeft), 0.0) / tileWidth);
+                std::floor(std::max(leftToRight ? (visibleLeft - boundsLeft) : (boundsLeft - visibleLeft), 0.0) / tileWidth);
+        int onScreenStartTileLeft =
+                std::floor(std::max(leftToRight ? visibleLeft  :  - visibleLeft, 0.0) / tileWidth);
         int maxTileLeft =
             std::floor(std::max(leftToRight ? (visibleRight - boundsLeft) : (boundsLeft - visibleRight), 0.0) / tileWidth);
+        int onScreenMaxTileLeft =
+                std::floor(std::max(leftToRight ? visibleRight : - visibleRight, 0.0) / tileWidth);
 
         const double boundsTop = layerBounds.topLeft.y;
         int startTileTop = std::floor(std::max(topToBottom ? (visibleTop - boundsTop) : (boundsTop - visibleTop), 0.0) / tileWidth);
+        int onScreenStartTileTop = std::floor(std::max(topToBottom ? visibleTop : - visibleTop, 0.0) / tileWidth);
         int maxTileTop =
             std::floor(std::max(topToBottom ? (visibleBottom - boundsTop) : (boundsTop - visibleBottom), 0.0) / tileWidth);
+        int onScreenMaxTileTop =
+                std::floor(std::max(topToBottom ? visibleBottom  : - visibleBottom, 0.0) / tileWidth);
 
         if (bounds.has_value()) {
             const auto availableTiles = conversionHelper->convertRect(layerSystemId, *bounds);
@@ -230,13 +237,10 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
             for (int y = startTileTop; y <= maxTileTop && y < zoomLevelInfo.numTilesY; y++) {
                 for (int t = 0; t < zoomLevelInfo.numTilesT; t++) {
 
-                    //                    if (limitToCurrentT && t != curT) {
-                    //                        continue;
-                    //                    }
-
-                    //                    if( abs(t - curT) > zoomInfo.numDrawPreviousOrLaterTLayers ) {
-                    //                        continue;
-                    //                    }
+                   if (zoomDistanceFactor>0 && t != curT) {
+                        //only consider tiles of current zoom if t is different
+                        continue;
+                   }
 
                     const Coord topLeft = Coord(layerSystemId, x * tileWidthAdj + boundsLeft, y * tileHeightAdj + boundsTop, 0);
                     const Coord bottomRight = Coord(layerSystemId, topLeft.x + tileWidthAdj, topLeft.y + tileHeightAdj, 0);
@@ -247,10 +251,14 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
                         std::sqrt(std::pow(tileCenterX - centerVisibleX, 2.0) + std::pow(tileCenterY - centerVisibleY, 2.0));
 
                     float distanceFactor = (tileCenterDis / maxDisCenter) * distanceWeight;
+                    float onScreenFactor = 0;
+                    if(x<onScreenStartTileLeft || x>onScreenMaxTileLeft || y <onScreenStartTileTop || y>onScreenMaxTileTop){
+                        onScreenFactor = onScreenWeight;
+                    }
                     float zoomlevelFactor = zoomDistanceFactor * zoomLevelWeight;
                     float zDistanceFactor = std::abs(t - curT) * zDistanceWeight;
 
-                    const int priority = std::ceil(distanceFactor + zoomlevelFactor + zDistanceFactor);
+                    const int priority = std::ceil(distanceFactor + onScreenFactor + zoomlevelFactor + zDistanceFactor);
 
                     const RectCoord rect(topLeft, bottomRight);
                     curVisibleTilesVec.push_back(PrioritizedTiled2dMapTileInfo(
@@ -417,7 +425,7 @@ void Tiled2dMapSource<T, L, R>::onVisibleTilesChanged(const std::vector<VisibleT
 
 template <class T, class L, class R>
 void Tiled2dMapSource<T, L, R>::scheduleFixedNumberOfLoadingTasks() {
-    while(tilesRequestedToLoad.size()>0 && currentlyLoading.size()<10){
+    while(tilesRequestedToLoad.size()>0 && currentlyLoading.size()<16){
         performLoadingTask(tilesRequestedToLoad[0].tileInfo, 0);
         tilesRequestedToLoad.erase(tilesRequestedToLoad.begin());
     }
