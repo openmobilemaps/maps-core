@@ -127,6 +127,8 @@ void Polygon2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> 
 }
 
 void Polygon2dOpenGl::drawPolygon(const std::shared_ptr<::RenderingContextInterface> &context, int program, int64_t mvpMatrix) {
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
+
     // Add program to OpenGL environment
     glUseProgram(program);
 
