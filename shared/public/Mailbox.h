@@ -53,7 +53,19 @@ public:
         size_t hash = typeid(Object).hash_code();
         size_t hashFn = typeid(MemberFn).hash_code();
         hash_combine(hash, hashFn);
-        hash_combine(hash, &memberFn);
+        hash_combine(hash, stableHash(memberFn));
+        return hash;
+    }
+
+    template <typename T>
+    static std::size_t stableHash(const T& memberFunctionPtr) {
+        const char* data = reinterpret_cast<const char*>(&memberFunctionPtr);
+        std::size_t size = sizeof(memberFunctionPtr);
+        std::size_t hash = 0;
+
+        for (std::size_t i = 0; i < size; ++i) {
+            hash = hash * 31 + static_cast<unsigned char>(data[i]);
+        }
         return hash;
     }
 
