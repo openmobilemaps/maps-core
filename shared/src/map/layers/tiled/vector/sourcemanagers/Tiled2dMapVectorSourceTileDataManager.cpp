@@ -74,7 +74,7 @@ void Tiled2dMapVectorSourceTileDataManager::pregenerateRenderPasses() {
             const bool selfMasked = selfMaskedLayers.find(layerIndex) != selfMaskedLayers.end();
             const auto optRenderPassIndex = mapDescription->layers[layerIndex]->renderPassIndex;
             const int32_t renderPassIndex = optRenderPassIndex ? *optRenderPassIndex : 0;
-            renderDescriptions.push_back(std::make_shared<Tiled2dMapVectorLayer::TileRenderDescription>(Tiled2dMapVectorLayer::TileRenderDescription{layerIndex, tile.tileInfo, tile.tileInfo.zoomIdentifier, renderObjects, mask, modifiesMask, selfMasked, renderPassIndex}));
+            renderDescriptions.push_back(std::make_shared<Tiled2dMapVectorLayer::TileRenderDescription>(Tiled2dMapVectorLayer::TileRenderDescription{layerIndex, tile.tileInfo.zoomIdentifier, renderObjects, mask, modifiesMask, selfMasked, renderPassIndex}));
         }
     }
     vectorLayer.syncAccess([source = this->source, &renderDescriptions](const auto &layer){

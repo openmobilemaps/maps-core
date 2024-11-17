@@ -12,27 +12,18 @@ import Foundation
 import MapCoreSharedModule
 import Metal
 import UIKit
-import simd
 
 class LineGroupShader: BaseShader, @unchecked Sendable {
     var lineStyleBuffer: MTLBuffer?
-    private var screenPixelAsRealMeterFactorBuffers: MultiBuffer<simd_float1>
-    private var dashingScaleFactorBuffers: MultiBuffer<simd_float1>
 
     var screenPixelAsRealMeterFactor: Float = 1.0
-    var lastScreenPixelAsRealMeterFactor: Float?
-    var lastScreenPixelAsRealMeterFactorBuffer: MTLBuffer?
 
     var dashingScaleFactor: Float = 1.0
-    var lastDashingScaleFactor: Float?
-    var lastDashingScaleFactorBuffer: MTLBuffer?
 
     private let shaderType: PipelineType
 
     init(shader: PipelineType = .lineGroupShader) {
         self.shaderType = shader
-        self.screenPixelAsRealMeterFactorBuffers = .init(device: MetalContext.current.device)
-        self.dashingScaleFactorBuffers = .init(device: MetalContext.current.device)
     }
 
     override func setupProgram(_: MCRenderingContextInterface?) {
@@ -46,29 +37,9 @@ class LineGroupShader: BaseShader, @unchecked Sendable {
 
         context.setRenderPipelineStateIfNeeded(pipeline)
 
-        if lastScreenPixelAsRealMeterFactor != screenPixelAsRealMeterFactor || lastScreenPixelAsRealMeterFactorBuffer == nil {
-            let screenPixelAsRealMeterFactorBuffer = screenPixelAsRealMeterFactorBuffers.getNextBuffer(context)
-            if let bufferPointer = screenPixelAsRealMeterFactorBuffer?.contents()
-                .assumingMemoryBound(to: simd_float1.self)
-            {
-                bufferPointer.pointee = screenPixelAsRealMeterFactor
-            }
-            lastScreenPixelAsRealMeterFactorBuffer = screenPixelAsRealMeterFactorBuffer
-            lastScreenPixelAsRealMeterFactor = screenPixelAsRealMeterFactor
-        }
-        encoder.setVertexBuffer(lastScreenPixelAsRealMeterFactorBuffer!, offset: 0, index: 2)
+        encoder.setVertexBytes(&screenPixelAsRealMeterFactor, length: MemoryLayout<Float>.stride, index: 2)
 
-        if lastDashingScaleFactor != dashingScaleFactor || lastDashingScaleFactorBuffer == nil {
-            let dashingScaleFactorBuffer = dashingScaleFactorBuffers.getNextBuffer(context)
-            if let bufferPointer = dashingScaleFactorBuffer?.contents()
-                .assumingMemoryBound(to: simd_float1.self)
-            {
-                bufferPointer.pointee = dashingScaleFactor
-            }
-            lastDashingScaleFactorBuffer = dashingScaleFactorBuffer
-            lastDashingScaleFactor = dashingScaleFactor
-        }
-        encoder.setVertexBuffer(lastDashingScaleFactorBuffer, offset: 0, index: 3)
+        encoder.setVertexBytes(&dashingScaleFactor, length: MemoryLayout<Float>.stride, index: 3)
 
         encoder.setVertexBuffer(lineStyleBuffer, offset: 0, index: 4)
 

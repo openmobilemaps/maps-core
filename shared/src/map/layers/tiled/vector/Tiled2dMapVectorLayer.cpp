@@ -680,20 +680,8 @@ void Tiled2dMapVectorLayer::pregenerateRenderPasses() {
         orderedRenderDescriptions.insert(orderedRenderDescriptions.end(), indexPasses.symbolRenderDescriptions.begin(), indexPasses.symbolRenderDescriptions.end());
     }
 
-
-    std::stable_sort(orderedRenderDescriptions.begin(), orderedRenderDescriptions.end(), [](const auto &lhs, const auto &rhs) {
-        if (lhs->maskingObject && !rhs->maskingObject) {
-            return true;
-        }
-        else if (rhs->maskingObject && !lhs->maskingObject) {
-            return false;
-        }
-        else if (lhs->tileInfo == rhs->tileInfo) {
-            return lhs->renderIndex < rhs->renderIndex;
-        }
-        else {
-            return lhs->tileInfo < rhs->tileInfo;
-        }
+    std::sort(orderedRenderDescriptions.begin(), orderedRenderDescriptions.end(), [](const auto &lhs, const auto &rhs) {
+        return lhs->renderIndex < rhs->renderIndex;
     });
 
     std::vector<std::shared_ptr<::RenderObjectInterface>> renderObjects;
@@ -717,7 +705,6 @@ void Tiled2dMapVectorLayer::pregenerateRenderPasses() {
             }
             renderObjects.clear();
             lastMask = nullptr;
-            lastRenderPassIndex = description->renderPassIndex;
             newPasses.emplace_back(std::make_shared<RenderPass>(RenderPassConfig(description->renderPassIndex, description->selfMasked), description->renderObjects, description->maskingObject));
         } else {
             renderObjects.insert(renderObjects.end(), description->renderObjects.begin(), description->renderObjects.end());

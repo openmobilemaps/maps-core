@@ -44,7 +44,7 @@ final class LineGroup2d: BaseGraphicsObject, @unchecked Sendable {
         ss.stencilCompareFunction = .equal
         ss.stencilFailureOperation = .keep
         ss.depthFailureOperation = .keep
-        ss.depthStencilPassOperation = .keep
+        ss.depthStencilPassOperation = .incrementClamp
         ss.writeMask = 0b0111_1111
         ss.readMask = 0b1111_1111
 

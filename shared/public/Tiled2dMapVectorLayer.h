@@ -103,7 +103,6 @@ public:
 
     struct TileRenderDescription {
         int32_t renderIndex;
-        Tiled2dMapTileInfo tileInfo;
         std::vector<std::shared_ptr<::RenderObjectInterface>> renderObjects;
         std::shared_ptr<MaskingObjectInterface> maskingObject;
         bool isModifyingMask;
@@ -111,14 +110,13 @@ public:
         int32_t renderPassIndex;
 
         TileRenderDescription(int32_t layerIndex,
-                              Tiled2dMapTileInfo tileInfo,
                               int32_t zoomIdentifier,
                               const std::vector<std::shared_ptr<::RenderObjectInterface>> &renderObjects,
                               const std::shared_ptr<MaskingObjectInterface> &maskingObject,
                               bool isModifyingMask,
                               bool selfMasked,
                               int32_t renderPassIndex)
-                : renderIndex((layerIndex << 16) + zoomIdentifier), tileInfo(tileInfo), renderObjects(renderObjects), maskingObject(maskingObject),
+                : renderIndex((layerIndex << 16) + zoomIdentifier), renderObjects(renderObjects), maskingObject(maskingObject),
                   isModifyingMask(isModifyingMask), selfMasked(selfMasked), renderPassIndex(renderPassIndex) {}
     };
 
