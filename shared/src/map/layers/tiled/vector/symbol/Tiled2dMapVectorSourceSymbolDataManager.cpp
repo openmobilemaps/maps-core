@@ -726,7 +726,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::pregenerateRenderPasses() {
 
             const auto optRenderPassIndex = mapDescription->layers[index]->renderPassIndex;
             const int32_t renderPassIndex = optRenderPassIndex ? *optRenderPassIndex : 0;
-            renderDescriptions.push_back(std::make_shared<Tiled2dMapVectorLayer::TileRenderDescription>(Tiled2dMapVectorLayer::TileRenderDescription{index, tile.tileInfo.zoomIdentifier, renderObjects, nullptr, false, selfMasked, renderPassIndex}));
+            renderDescriptions.push_back(std::make_shared<Tiled2dMapVectorLayer::TileRenderDescription>(Tiled2dMapVectorLayer::TileRenderDescription{index, tile.tileInfo, tile.tileInfo.zoomIdentifier, renderObjects, nullptr, false, selfMasked, renderPassIndex}));
         }
     }
 
