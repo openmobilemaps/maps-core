@@ -16,7 +16,7 @@ import simd
 
 class SphereEffectShader: BaseShader, @unchecked Sendable {
 
-    private var ellipse: [Float] = []
+    private var ellipse = [Float](repeating: 0.0, count: 16)
 
     private var ellipseBuffers: MultiBuffer<simd_float4x4>?
 
@@ -45,9 +45,12 @@ extension SphereEffectShader: MCSphereEffectShaderInterface {
         return self
     }
 
-    func setEllipse(_ coefficients: [NSNumber]) {
+    func setEllipse(_ coefficients: MCSharedBytes) {
+        guard let rawPointer = UnsafeRawPointer(bitPattern: Int(coefficients.address)) else {
+            return
+        }
 
-        ellipse = coefficients.map { $0.floatValue }
-
+        let count : Int = Int(coefficients.elementCount)
+        ellipse = Array(UnsafeBufferPointer(start: rawPointer.bindMemory(to: Float.self, capacity: count), count: count))
     }
 }

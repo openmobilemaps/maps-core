@@ -702,12 +702,12 @@ public:
 
         std::lock_guard<std::mutex> lock(mutex);
 
-        const auto lastResultIt = lastResults.find(identifier);
+        const auto &lastResultIt = lastResults.find(identifier);
         if (lastResultIt != lastResults.end()) {
             return lastResultIt->second;
         }
 
-        const auto result = value->evaluateOr(context, defaultValue);
+        const auto &result = value->evaluateOr(context, defaultValue);
         lastResults.insert({identifier, result});
 
         return result;
@@ -1104,7 +1104,7 @@ public:
                 return interpolate(ExponentialInterpolation::interpolationFactor(interpolationBase, context.zoomLevel, pS, nS), pV, nV);
             }
         }
-        const auto last = std::get<1>(steps[maxStepInd]);
+        const auto &last = std::get<1>(steps[maxStepInd]);
         return last->evaluate(context);
     }
 
@@ -1131,25 +1131,40 @@ public:
 
     ValueVariant interpolate(const double &interpolationFactor, const ValueVariant &yBase, const ValueVariant &yTop) const {
 
-        if (std::holds_alternative<int64_t>(yBase) && std::holds_alternative<int64_t>(yTop)) {
-            return std::get<int64_t>(yBase) + (std::get<int64_t>(yTop) - std::get<int64_t>(yBase)) * interpolationFactor;
+        auto yBaseIndex = yBase.index();
+        auto yTopIndex = yTop.index();
+
+        if (yBaseIndex == 2 && yTopIndex == yBaseIndex) {
+            int64_t base = std::get<2>(yBase);
+            int64_t top = std::get<2>(yTop);
+
+            return base + (top - base) * interpolationFactor;
         }
 
-        if (std::holds_alternative<int64_t>(yBase) && std::holds_alternative<double>(yTop)) {
-            return std::get<int64_t>(yBase) + (std::get<double>(yTop) - std::get<int64_t>(yBase)) * interpolationFactor;
+        if (yBaseIndex == 1 && yTopIndex == yBaseIndex) {
+            double base = std::get<1>(yBase);
+            double top = std::get<1>(yTop);
+
+            return base + (top - base) * interpolationFactor;
         }
 
-        if (std::holds_alternative<double>(yBase) && std::holds_alternative<int64_t>(yTop)) {
-            return std::get<double>(yBase) + (std::get<int64_t>(yTop) - std::get<double>(yBase)) * interpolationFactor;
+        if (yBaseIndex == 2 && yTopIndex == 1) {
+            double base = (double)std::get<2>(yBase);
+            double top = std::get<1>(yTop);
+
+            return base + (top - base) * interpolationFactor;
         }
 
-        if (std::holds_alternative<double>(yBase) && std::holds_alternative<double>(yTop)) {
-            return std::get<double>(yBase) + (std::get<double>(yTop) - std::get<double>(yBase)) * interpolationFactor;
+        if (yBaseIndex == 1 && yTopIndex == 2) {
+            double base = std::get<1>(yBase);
+            double top = (double)std::get<2>(yTop);
+
+            return base + (top - base) * interpolationFactor;
         }
 
-        if (std::holds_alternative<std::vector<float>>(yBase) && std::holds_alternative<std::vector<float>>(yTop)) {
-            auto const &base = std::get<std::vector<float>>(yBase);
-            auto const &top = std::get<std::vector<float>>(yTop);
+        if (yBaseIndex == 5 && yTopIndex == yBaseIndex) {
+            const std::vector<float> &base = std::get<5>(yBase);
+            const std::vector<float> &top = std::get<5>(yTop);
 
             assert(base.size() == top.size());
             std::vector<float> result(base.size(), 0.0);
@@ -1159,16 +1174,16 @@ public:
             return result;
         }
 
-        if (std::holds_alternative<Color>(yBase) && std::holds_alternative<Color>(yTop)) {
-            Color yBaseC = std::get<Color>(yBase);
-            Color yTopC = std::get<Color>(yTop);
+        if (yBaseIndex == 4 && yBaseIndex == yTopIndex) {
+            const Color &yBaseC = std::get<4>(yBase);
+            const Color &yTopC = std::get<4>(yTop);
             return Color(yBaseC.r + (yTopC.r - yBaseC.r) * interpolationFactor,
                          yBaseC.g + (yTopC.g - yBaseC.g) * interpolationFactor,
                          yBaseC.b + (yTopC.b - yBaseC.b) * interpolationFactor,
                          yBaseC.a + (yTopC.a - yBaseC.a) * interpolationFactor);
         }
 
-        if (interpolationFactor <  0.5 ){
+        if (interpolationFactor < 0.5) {
             return yBase;
         } else {
             return yTop;

@@ -58,8 +58,8 @@ colorVertexShader(const Vertex3FIn vertexIn [[stage_in]],
     return out;
 }
 
-fragment half4
-colorFragmentShader(constant half4 &color [[buffer(1)]])
+fragment float4
+colorFragmentShader(constant float4 &color [[buffer(1)]])
 {
     return color;
 }
@@ -70,9 +70,9 @@ maskFragmentShader()
   return half4(0, 0, 0, 0);
 }
 
-fragment half4
+fragment float4
 roundColorFragmentShader(VertexOut in [[stage_in]],
-                    constant half4 &color [[buffer(1)]])
+                    constant float4 &color [[buffer(1)]])
 {
     if (length(in.uv - float2(0.5)) > 0.5)
     {
@@ -85,5 +85,5 @@ roundColorFragmentShader(VertexOut in [[stage_in]],
        discard_fragment();
     }
 
-    return half4(color.r * a, color.g * a, color.b * a, a);
+    return float4(color.r * a, color.g * a, color.b * a, a);
 }

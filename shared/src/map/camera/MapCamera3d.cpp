@@ -542,12 +542,10 @@ Vec3D MapCamera3d::getOrigin() {
 }
 
 // Funktion zur Berechnung der Koeffizienten der projizierten Ellipse
-std::vector<double> MapCamera3d::computeEllipseCoefficients() {
+void MapCamera3d::computeEllipseCoefficients(std::vector<double> &coefficients) {
     std::vector<double> tmp = VectorHelper::clone(vpMatrixD);
     MatrixD::translateM(tmp, 0, -origin.x, -origin.y, -origin.z);
-    std::vector<double> newInverseMatrix(16, 0.0);
-    gluInvertMatrix(tmp, newInverseMatrix);
-    return newInverseMatrix;
+    gluInvertMatrix(tmp, coefficients);
 }
 
 std::optional<std::vector<double>> MapCamera3d::getLastVpMatrixD() {

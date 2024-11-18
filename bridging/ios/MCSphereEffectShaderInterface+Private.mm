@@ -8,6 +8,7 @@
 #import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
 #import "MCShaderProgramInterface+Private.h"
+#import "MCSharedBytes+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -39,9 +40,9 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)setEllipse:(nonnull NSArray<NSNumber *> *)coefficients {
+- (void)setEllipse:(nonnull MCSharedBytes *)coefficients {
     try {
-        _cppRefHandle.get()->setEllipse(::djinni::List<::djinni::F64>::toCpp(coefficients));
+        _cppRefHandle.get()->setEllipse(::djinni_generated::SharedBytes::toCpp(coefficients));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -61,10 +62,10 @@ public:
             return ::djinni_generated::ShaderProgramInterface::toCpp(objcpp_result_);
         }
     }
-    void setEllipse(const std::vector<double> & c_coefficients) override
+    void setEllipse(const ::SharedBytes & c_coefficients) override
     {
         @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() setEllipse:(::djinni::List<::djinni::F64>::fromCpp(c_coefficients))];
+            [djinni_private_get_proxied_objc_object() setEllipse:(::djinni_generated::SharedBytes::fromCpp(c_coefficients))];
         }
     }
 };

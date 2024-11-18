@@ -18,6 +18,7 @@
 #include "FormattedStringEntry.h"
 #include "Color.h"
 
+// never change order!!!!!
 typedef std::variant<std::string,
                      double,
                      int64_t,

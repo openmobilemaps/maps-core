@@ -168,7 +168,7 @@ class MapCamera3d : public MapCameraInterface,
 
     void notifyListenerBoundsChange() override;
 
-    std::vector<double> computeEllipseCoefficients();
+    void computeEllipseCoefficients(std::vector<double>& coefficients);
 
     bool coordIsFarAwayFromFocusPoint(const ::Coord &coord);
 

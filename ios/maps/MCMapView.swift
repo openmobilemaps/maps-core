@@ -242,7 +242,6 @@ extension MCMapView: MTKViewDelegate {
             commandBuffer.waitUntilCompleted()
         } else {
             commandBuffer.present(drawable)
-            commandBuffer.commit()
         }
     }
 

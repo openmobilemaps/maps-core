@@ -88,7 +88,7 @@ alpha_instanced_shader_interface = interface +c +o {
 
 sphere_effect_shader_interface = interface +c +o {
     as_shader_program_interface() : shader_program_interface;
-    set_ellipse(coefficients: list<f64>);
+    set_ellipse(coefficients: shared_bytes);
 }
 
 stretch_shader_info = record {
