@@ -425,7 +425,7 @@ extension MCMapView: UIGestureRecognizerDelegate {
         if #available(iOS 13.4, *) {
             pan.allowedScrollTypesMask = .continuous
         }
-        pan.delaysTouchesBegan
+        pan.delaysTouchesBegan = false
         pan.allowedTouchTypes = []
         self.addGestureRecognizer(pan)
 
