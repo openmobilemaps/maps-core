@@ -45,7 +45,7 @@
 #include <iomanip>
 #include <memory>
 #include <utility>
-
+#include "Logger.h"
 
 namespace std {
     template <>
@@ -943,6 +943,25 @@ public:
         return true;
     }
 
+    bool isStaticNumber() {
+        return std::holds_alternative<double>(value) ||
+               std::holds_alternative<int64_t>(value);
+    }
+
+    double getStaticDouble() {
+        if(std::holds_alternative<double>(value)) {
+            return std::get<double>(value);
+        }
+
+        if(std::holds_alternative<int64_t>(value)) {
+            return std::get<int64_t>(value);
+        }
+
+        // should be checked by isStaticNumber
+        assert(false);
+        return 0;
+    }
+
     bool isEqual(const std::shared_ptr<Value> &other) const override {
         if (auto casted = std::dynamic_pointer_cast<StaticValue>(other)) {
             return casted->value == value;
@@ -1071,11 +1090,13 @@ public:
 
 class InterpolatedValue : public Value {
 public:
-    InterpolatedValue(double interpolationBase, const std::vector<std::tuple<double, std::shared_ptr<Value>>> &steps)
-    : interpolationBase(interpolationBase), steps(steps) {}
+    InterpolatedValue(double interpolationBase, const std::vector<std::pair<double, std::shared_ptr<Value>>> &steps)
+    : interpolationBase(interpolationBase), steps(steps) {
+        checkSpecialCase();
+    }
 
     std::unique_ptr<Value> clone() override {
-        std::vector<std::tuple<double, std::shared_ptr<Value>>> clonedSteps;
+        std::vector<std::pair<double, std::shared_ptr<Value>>> clonedSteps;
         for (const auto &[step, value] : steps) {
             clonedSteps.emplace_back(step, value->clone());
         }
@@ -1085,27 +1106,45 @@ public:
     UsedKeysCollection getUsedKeys() const override {
         UsedKeysCollection usedKeys = UsedKeysCollection({ "zoom" });
         for (auto const &step: steps) {
-            auto const stepKeys = std::get<1>(step)->getUsedKeys();
+            auto const stepKeys = step.second->getUsedKeys();
             usedKeys.includeOther(stepKeys);
         }
         return usedKeys;
     }
 
     ValueVariant evaluate(const EvaluationContext &context) const override {
+        if(isFast) {
+            int maxStepInd = (int)fastSteps.size() - 1;
+            for (int i = 0; i < maxStepInd; i++) {
+                const auto &nextStep = fastSteps[i + 1];
+                double nS = nextStep.first;
+
+                if (nS >= context.zoomLevel) {
+                    const auto &prevStep = fastSteps[i];
+
+                    auto f = ExponentialInterpolation::interpolationFactor(interpolationBase, context.zoomLevel, prevStep.first, nS);
+                    return prevStep.second + (nextStep.second - prevStep.second) * f;
+                }
+            }
+
+            return fastSteps[maxStepInd].second;
+        }
+
         int maxStepInd = (int)steps.size() - 1;
         for (int i = 0; i < maxStepInd; i++) {
             const auto &nextStep = steps[i + 1];
-            double nS = std::get<0>(nextStep);
+            double nS = nextStep.first;
+
             if (nS >= context.zoomLevel) {
                 const auto &prevStep = steps[i];
-                double pS = std::get<0>(prevStep);
-                const ValueVariant &pV = std::get<1>(prevStep)->evaluate(context);
-                const ValueVariant &nV = std::get<1>(nextStep)->evaluate(context);
+                double pS = prevStep.first;
+                const ValueVariant &pV = prevStep.second->evaluate(context);
+                const ValueVariant &nV = nextStep.second->evaluate(context);
                 return interpolate(ExponentialInterpolation::interpolationFactor(interpolationBase, context.zoomLevel, pS, nS), pV, nV);
             }
         }
-        const auto &last = std::get<1>(steps[maxStepInd]);
-        return last->evaluate(context);
+
+        return steps[maxStepInd].second->evaluate(context);
     }
 
     bool isEqual(const std::shared_ptr<Value> &other) const override {
@@ -1113,19 +1152,24 @@ public:
             if (casted->interpolationBase != interpolationBase) {
                 return false;
             }
+
             if (casted->steps.size() != steps.size()) {
                 return false;
             }
+
             for (int i = 0; i < steps.size(); i++) {
-                if (std::get<0>(casted->steps[i]) != std::get<0>(steps[i])) {
+                if (casted->steps[i].first != steps[i].first) {
                     return false;
                 }
-                if (std::get<1>(casted->steps[i]) && std::get<1>(steps[i]) && !std::get<1>(casted->steps[i])->isEqual(std::get<1>(steps[i]))) {
+                if ((casted->steps[i].second && steps[i].second) &&
+                    !casted->steps[i].second->isEqual(steps[i].second)) {
                     return false;
                 }
             }
+
             return true;
         }
+
         return false;
     }
 
@@ -1190,21 +1234,52 @@ public:
         }
     }
 
+    void checkSpecialCase() {
+        bool allStaticDoubles = true;
+        for(const auto &step : steps) {
+            const auto& staticVal = std::dynamic_pointer_cast<StaticValue>(step.second);
+            if(staticVal) {
+                if(!staticVal->isStaticNumber()) {
+                    allStaticDoubles = false;
+                    break;
+                }
+            } else {
+                allStaticDoubles = false;
+                break;
+            }
+        }
+
+        isFast = allStaticDoubles;
+
+        if(isFast) {
+            for(const auto &step : steps) {
+                const auto& staticVal = std::dynamic_pointer_cast<StaticValue>(step.second);
+                if(staticVal) {
+                    fastSteps.emplace_back(step.first, staticVal->getStaticDouble());
+                }
+            }
+
+            steps.clear();
+        }
+    }
+
 private:
     double interpolationBase;
-    std::vector<std::tuple<double, std::shared_ptr<Value>>> steps;
+    std::vector<std::pair<double, std::shared_ptr<Value>>> steps;
+    std::vector<std::pair<double, double>> fastSteps;
+    bool isFast;
 };
 
 class BezierInterpolatedValue : public Value {
 public:
-    BezierInterpolatedValue(double x1, double y1, double x2, double y2, const std::vector<std::tuple<double, std::shared_ptr<Value>>> &steps)
+    BezierInterpolatedValue(double x1, double y1, double x2, double y2, const std::vector<std::pair<double, std::shared_ptr<Value>>> &steps)
             : bezier(x1, y1, x2, y2), steps(steps) {}
 
-    BezierInterpolatedValue(const UnitBezier &bezier, const std::vector<std::tuple<double, std::shared_ptr<Value>>> &steps)
+    BezierInterpolatedValue(const UnitBezier &bezier, const std::vector<std::pair<double, std::shared_ptr<Value>>> &steps)
             : bezier(bezier), steps(steps) {}
 
     std::unique_ptr<Value> clone() override {
-        std::vector<std::tuple<double, std::shared_ptr<Value>>> clonedSteps;
+        std::vector<std::pair<double, std::shared_ptr<Value>>> clonedSteps;
         for (const auto &[step, value] : steps) {
             clonedSteps.emplace_back(step, value->clone());
         }
@@ -1214,7 +1289,7 @@ public:
     UsedKeysCollection getUsedKeys() const override {
         UsedKeysCollection usedKeys = UsedKeysCollection({"zoom"});
         for (auto const &step: steps) {
-            auto const stepKeys = std::get<1>(step)->getUsedKeys();
+            auto const stepKeys = step.second->getUsedKeys();
             usedKeys.includeOther(stepKeys);
         }
         return usedKeys;
@@ -1224,21 +1299,20 @@ public:
         int maxStepInd = (int)steps.size() - 1;
         for (int i = 0; i < maxStepInd; i++) {
             const auto &nextStep = steps[i + 1];
-            double nS = std::get<0>(nextStep);
+            double nS = nextStep.first;
             if (nS >= context.zoomLevel) {
                 const auto &prevStep = steps[i];
-                double pS = std::get<0>(prevStep);
-                ValueVariant pV = std::get<1>(prevStep)->evaluate(context);
-                ValueVariant nV = std::get<1>(nextStep)->evaluate(context);
+                double pS = prevStep.first;
+                ValueVariant pV = prevStep.second->evaluate(context);
+                ValueVariant nV = nextStep.second->evaluate(context);
 
                 auto factor = bezier.solve(1.0 - (nS - context.zoomLevel) / (nS - pS), 1e-6);
                 return interpolate(factor, pV, nV);
             }
         }
 
-        int index = (steps.size() > 0 && context.zoomLevel <= double(std::get<0>(steps[0]))) ? 0 : maxStepInd;
-        const auto step = std::get<1>(steps[index]);
-        return step->evaluate(context);
+        int index = (steps.size() > 0 && context.zoomLevel <= steps[0].first) ? 0 : maxStepInd;
+        return steps[index].second->evaluate(context);
     }
 
     bool isEqual(const std::shared_ptr<Value> &other) const override {
@@ -1246,19 +1320,23 @@ public:
             if (casted->bezier != bezier) {
                 return false;
             }
+
             if (casted->steps.size() != steps.size()) {
                 return false;
             }
+
             for (int i = 0; i < steps.size(); i++) {
-                if (std::get<0>(casted->steps[i]) != std::get<0>(steps[i])) {
+                if (casted->steps[i].first != steps[i].first) {
                     return false;
                 }
-                if (std::get<1>(casted->steps[i]) && std::get<1>(steps[i]) && !std::get<1>(casted->steps[i])->isEqual(std::get<1>(steps[i]))) {
+                if ((casted->steps[i].second && steps[i].second) && !casted->steps[i].second->isEqual(steps[i].second)) {
                     return false;
                 }
             }
+
             return true;
         }
+
         return false;
     }
 
@@ -1287,7 +1365,7 @@ public:
 
 private:
     const UnitBezier bezier;
-    const std::vector<std::tuple<double, std::shared_ptr<Value>>> steps;
+    const std::vector<std::pair<double, std::shared_ptr<Value>>> steps;
 };
 
 enum class PropertyCompareType {
@@ -1366,11 +1444,11 @@ public:
 class StepValue : public Value {
 public:
     StepValue(const std::shared_ptr<Value> compareValue,
-              const std::vector<std::tuple<std::shared_ptr<Value>, std::shared_ptr<Value>>> stops,
+              const std::vector<std::pair<std::shared_ptr<Value>, std::shared_ptr<Value>>> stops,
               std::shared_ptr<Value> defaultValue) : compareValue(compareValue), stops(stops), defaultValue(defaultValue) {}
 
     std::unique_ptr<Value> clone() override {
-        std::vector<std::tuple<std::shared_ptr<Value>, std::shared_ptr<Value>>> clonedStops;
+        std::vector<std::pair<std::shared_ptr<Value>, std::shared_ptr<Value>>> clonedStops;
         for (const auto &[v1, v2] : stops) {
             clonedStops.emplace_back(v1->clone(), v2->clone());
         }
@@ -1387,7 +1465,7 @@ public:
         usedKeys.includeOther(defaultValueKeys);
 
         for (auto const &stop: stops) {
-            auto const setKeys = std::get<1>(stop)->getUsedKeys();
+            auto const setKeys = stop.second->getUsedKeys();
             usedKeys.includeOther(setKeys);
         }
         return usedKeys;
@@ -1397,15 +1475,15 @@ public:
         const auto &compareValue_ = compareValue->evaluate(context);
 
         for (auto it = stops.begin(); it != stops.end(); it++) {
-            if (ValueVariantCompareHelper::compare(std::get<0>(*it)->evaluate(context), compareValue_, PropertyCompareType::GREATER)) {
+            if (ValueVariantCompareHelper::compare((*it).first->evaluate(context), compareValue_, PropertyCompareType::GREATER)) {
                 if (it != stops.begin()) {
-                    return std::get<1>(*std::prev(it))->evaluate(context);
+                    return (*std::prev(it)).second->evaluate(context);
                 } else {
                     return defaultValue->evaluate(context);
                 }
             }
         }
-        return std::get<1>(*stops.rbegin())->evaluate(context);
+        return (*stops.rbegin()).second->evaluate(context);
     }
     bool isEqual(const std::shared_ptr<Value>& other) const override {
         if (auto casted = std::dynamic_pointer_cast<StepValue>(other)) {
@@ -1423,13 +1501,13 @@ public:
                 const auto &thisStop = stops[i];
                 const auto &otherStop = casted->stops[i];
 
-                // Compare the first value in the tuple
-                if (std::get<0>(thisStop) && std::get<0>(otherStop) && !std::get<0>(thisStop)->isEqual(std::get<0>(otherStop))) {
+                // Compare the first value in the pair
+                if (thisStop.first && otherStop.first && !thisStop.first->isEqual(otherStop.first)) {
                     return false;
                 }
 
-                // Compare the second value in the tuple
-                if (std::get<1>(thisStop) && std::get<1>(otherStop) && !std::get<1>(thisStop)->isEqual(std::get<1>(otherStop))) {
+                // Compare the second value in the pair
+                if (thisStop.second && otherStop.second && !thisStop.second->isEqual(otherStop.second)) {
                     return false;
                 }
             }
@@ -1447,16 +1525,16 @@ public:
 
 private:
     const std::shared_ptr<Value> compareValue;
-    std::vector<std::tuple<std::shared_ptr<Value>, std::shared_ptr<Value>>> stops;
+    std::vector<std::pair<std::shared_ptr<Value>, std::shared_ptr<Value>>> stops;
     std::shared_ptr<Value> defaultValue;
 };
 
 class CaseValue : public Value {
 public:
-    CaseValue(const std::vector<std::tuple<std::shared_ptr<Value>, std::shared_ptr<Value>>> cases, std::shared_ptr<Value> defaultValue) : cases(cases), defaultValue(defaultValue) {}
+    CaseValue(const std::vector<std::pair<std::shared_ptr<Value>, std::shared_ptr<Value>>> cases, std::shared_ptr<Value> defaultValue) : cases(cases), defaultValue(defaultValue) {}
 
     std::unique_ptr<Value> clone() override {
-        std::vector<std::tuple<std::shared_ptr<Value>, std::shared_ptr<Value>>> clonedCases;
+        std::vector<std::pair<std::shared_ptr<Value>, std::shared_ptr<Value>>> clonedCases;
         for (const auto &[v1, v2] : cases) {
             clonedCases.emplace_back(v1->clone(), v2->clone());
         }
@@ -1501,13 +1579,13 @@ public:
                 const auto &thisCase = cases[i];
                 const auto &otherCase = casted->cases[i];
 
-                // Compare the first value in the tuple (condition)
-                if (std::get<0>(thisCase) && std::get<0>(otherCase) && !std::get<0>(thisCase)->isEqual(std::get<0>(otherCase))) {
+                // Compare the first value in the pair (condition)
+                if (thisCase.first && otherCase.first && !thisCase.first->isEqual(otherCase.first)) {
                     return false;
                 }
 
-                // Compare the second value in the tuple (value)
-                if (!std::get<1>(thisCase)->isEqual(std::get<1>(otherCase))) {
+                // Compare the second value in the pair (value)
+                if (!thisCase.second->isEqual(otherCase.second)) {
                     return false;
                 }
             }
@@ -1524,7 +1602,7 @@ public:
     }
 
 private:
-    const std::vector<std::tuple<std::shared_ptr<Value>, std::shared_ptr<Value>>> cases;
+    const std::vector<std::pair<std::shared_ptr<Value>, std::shared_ptr<Value>>> cases;
     const std::shared_ptr<Value> defaultValue;
 };
 

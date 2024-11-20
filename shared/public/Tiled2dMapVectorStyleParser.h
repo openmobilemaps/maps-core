@@ -12,7 +12,6 @@
 #include "Value.h"
 #include "ValueKeys.h"
 #include "json.h"
-#include "Logger.h"
 #include <string>
 #include <type_traits>
 #include "Color.h"
@@ -165,7 +164,7 @@ public:
 
             // Example: ["case", [ "has", "name" ], 1,0 ]
             else if (isExpression(json[0], caseExpression)){
-                std::vector<std::tuple<std::shared_ptr<Value>, std::shared_ptr<Value>>> cases;
+                std::vector<std::pair<std::shared_ptr<Value>, std::shared_ptr<Value>>> cases;
 
                 for (auto it = json.begin() + 1; (it + 1) != json.end(); it += 2) {
                     auto const &condition = parseValue(*it);
@@ -227,7 +226,7 @@ public:
                 if (json[1][0] == "exponential" && json[1][1].is_number()) {
                     interpolationBase = json[1][1].get<float>();
                 }
-                std::vector<std::tuple<double, std::shared_ptr<Value>>> steps;
+                std::vector<std::pair<double, std::shared_ptr<Value>>> steps;
 
                 auto const countElements = json.size() - 3;
                 for (int i = 0; i != countElements; i += 2) {
@@ -239,7 +238,7 @@ public:
 
             // Example: [ "interpolate", ["linear"], [ "zoom" ], 13, 0.3, 15, [ "match", [ "get", "class" ], "river", 0.1, 0.3 ] ]
             else if (isExpression(json[0], interpolateExpression) && json[1][0] == "cubic-bezier" && json[1].size() == 5) {
-                std::vector<std::tuple<double, std::shared_ptr<Value>>> steps;
+                std::vector<std::pair<double, std::shared_ptr<Value>>> steps;
 
                 auto const countElements = json.size() - 3;
                 for (int i = 0; i != countElements; i += 2) {
@@ -311,7 +310,7 @@ public:
             else if (isExpression(json[0], stepExpression)) {
 
                 std::shared_ptr<Value> compareValue = parseValue(json[1]);
-                std::vector<std::tuple<std::shared_ptr<Value>, std::shared_ptr<Value>>> stops;
+                std::vector<std::pair<std::shared_ptr<Value>, std::shared_ptr<Value>>> stops;
                 std::shared_ptr<Value> defaultValue = parseValue(json[2]);
 
                 for (auto it = json.begin() + 3; (it + 1) < json.end(); it += 2) {
@@ -358,7 +357,7 @@ public:
         }
         // Example: { "stops": [ [ 12, "rgba(240, 60, 60, 1)" ], [ 15, "rgba(240, 80, 85, 1)"] ] }
         else if (json.is_object() && json[stopsExpression].is_array()) {
-            std::vector<std::tuple<double, std::shared_ptr<Value>>> steps;
+            std::vector<std::pair<double, std::shared_ptr<Value>>> steps;
 
             for (auto const stop: json[stopsExpression]) {
                 if (!stop[0].is_number()) {
