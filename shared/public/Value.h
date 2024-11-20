@@ -1081,10 +1081,23 @@ private:
 
 class ExponentialInterpolation {
 public:
-    static double interpolationFactor(const double &base, const double &x, const double &a, const double &b) {
-        double range = b - a;
+    static double interpolationFactor(const double &base, const double &rangeFactor, const double &x, const double &a) {
         double progress = std::max(0.0, x - a);
-        return (base == 1.0) ? (progress / range) : (std::pow(base, progress) - 1) / (std::pow(base, range) - 1);
+        if(base == 1.0) {
+            return rangeFactor * progress;
+        } else {
+            return rangeFactor * (std::pow(base, progress) - 1);
+        }
+    }
+
+    static double rangeFactor(const double &base, const double &b, const double &a) {
+        double range = b - a;
+
+        if(base == 1.0) {
+            return 1.0 / range;
+        } else {
+            return 1.0 / (std::pow(base, range) - 1.0);
+        }
     }
 };
 
@@ -1092,6 +1105,7 @@ class InterpolatedValue : public Value {
 public:
     InterpolatedValue(double interpolationBase, const std::vector<std::pair<double, std::shared_ptr<Value>>> &steps)
     : interpolationBase(interpolationBase), steps(steps) {
+        precomputeRanges();
         checkSpecialCase();
     }
 
@@ -1121,8 +1135,7 @@ public:
 
                 if (nS >= context.zoomLevel) {
                     const auto &prevStep = fastSteps[i];
-
-                    auto f = ExponentialInterpolation::interpolationFactor(interpolationBase, context.zoomLevel, prevStep.first, nS);
+                    auto f = ExponentialInterpolation::interpolationFactor(interpolationBase, rangeFactors[i], context.zoomLevel, prevStep.first);
                     return prevStep.second + (nextStep.second - prevStep.second) * f;
                 }
             }
@@ -1140,7 +1153,7 @@ public:
                 double pS = prevStep.first;
                 const ValueVariant &pV = prevStep.second->evaluate(context);
                 const ValueVariant &nV = nextStep.second->evaluate(context);
-                return interpolate(ExponentialInterpolation::interpolationFactor(interpolationBase, context.zoomLevel, pS, nS), pV, nV);
+                return interpolate(ExponentialInterpolation::interpolationFactor(interpolationBase, rangeFactors[i], context.zoomLevel, pS), pV, nV);
             }
         }
 
@@ -1263,10 +1276,18 @@ public:
         }
     }
 
+    void precomputeRanges() {
+        int maxStepInd = (int)steps.size() - 1;
+        for (int i = 0; i < maxStepInd; i++) {
+            rangeFactors.push_back(ExponentialInterpolation::rangeFactor(interpolationBase, steps[i + 1].first, steps[i].first));
+        }
+    }
+
 private:
     double interpolationBase;
     std::vector<std::pair<double, std::shared_ptr<Value>>> steps;
     std::vector<std::pair<double, double>> fastSteps;
+    std::vector<double> rangeFactors;
     bool isFast;
 };
 
