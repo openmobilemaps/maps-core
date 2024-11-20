@@ -42,7 +42,7 @@ unitSphereTextInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
 
     const float angle = rotation * M_PI_F / 180.0;
 
-    float4 newVertex = mMatrix * float4(referencePosition + originOffset.xyz, 1.0);
+    float4 newVertex = float4(referencePosition + originOffset.xyz, 1.0);
 
     float4 earthCenter = vpMatrix * float4(0 - origin.x,
                                            0 - origin.y,

@@ -20,6 +20,20 @@ baseVertexShader(const Vertex3DTextureIn vertexIn [[stage_in]],
                  constant float4 &originOffset [[buffer(3)]])
 {
     VertexOut out {
+        .position = vpMatrix * (vertexIn.position + originOffset),
+        .uv = vertexIn.uv
+    };
+
+    return out;
+}
+
+vertex VertexOut
+baseVertexShaderModel(const Vertex3DTextureIn vertexIn [[stage_in]],
+                constant float4x4 &vpMatrix [[buffer(1)]],
+                 constant float4x4 &mMatrix [[buffer(2)]],
+                 constant float4 &originOffset [[buffer(3)]])
+{
+    VertexOut out {
         .position = vpMatrix * ((mMatrix * vertexIn.position) + originOffset),
         .uv = vertexIn.uv
     };
@@ -52,7 +66,7 @@ colorVertexShader(const Vertex3FIn vertexIn [[stage_in]],
                   constant float4 &originOffset [[buffer(3)]])
 {
     VertexOut out {
-        .position = vpMatrix * ((mMatrix * float4(vertexIn.position.xyz, 1.0)) + originOffset),
+        .position = vpMatrix * (float4(vertexIn.position.xyz, 1.0) + originOffset),
     };
 
     return out;

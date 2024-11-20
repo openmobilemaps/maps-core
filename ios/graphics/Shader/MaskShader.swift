@@ -16,10 +16,8 @@ class MaskShader: BaseShader, @unchecked Sendable {
 
     private var stencilState: MTLDepthStencilState?
 
-    private let shader: PipelineType
-
-    init(shader: PipelineType = .maskShader) {
-        self.shader = shader
+    override init(shader: PipelineType = .maskShader) {
+        super.init(shader: shader)
     }
 
     override func setupProgram(_: MCRenderingContextInterface?) {

@@ -24,7 +24,7 @@ class PolygonPatternGroupShader: BaseShader, @unchecked Sendable {
     init(fadeInPattern: Bool,  isUnitSphere: Bool = false) {
         self.fadeInPattern = fadeInPattern
         self.isUnitSphere = isUnitSphere
-        super.init()
+        super.init(shader: fadeInPattern ? .polygonPatternFadeInGroupShader : .polygonPatternGroupShader)
     }
 
     // MARK: - Setup
@@ -32,8 +32,7 @@ class PolygonPatternGroupShader: BaseShader, @unchecked Sendable {
     override func setupProgram(_: MCRenderingContextInterface?) {
         guard pipeline == nil else { return }
 
-        let t: PipelineType = fadeInPattern ? .polygonPatternFadeInGroupShader : .polygonPatternGroupShader
-        let pl = Pipeline(type: t, blendMode: blendMode)
+        let pl = Pipeline(type: shader, blendMode: blendMode)
         pipeline = MetalContext.current.pipelineLibrary.value(pl.json)
     }
 

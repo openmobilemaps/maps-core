@@ -22,9 +22,13 @@ class SphereEffectShader: BaseShader, @unchecked Sendable {
 
     private var stencilState: MTLDepthStencilState?
 
+    init() {
+        super.init(shader: .sphereEffectShader)
+    }
+
     override func setupProgram(_: MCRenderingContextInterface?) {
         if pipeline == nil {
-            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: .sphereEffectShader, blendMode: blendMode).json)
+            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: shader, blendMode: blendMode).json)
             ellipseBuffers = .init(device: MetalContext.current.device)
         }
     }

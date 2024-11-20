@@ -53,4 +53,13 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_S
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
+CJNIEXPORT jboolean JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_ShaderProgramInterface_00024CppProxy_native_1usesModelMatrix(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::ShaderProgramInterface>(nativeRef);
+        auto r = ref->usesModelMatrix();
+        return ::djinni::release(::djinni::Bool::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
 } // namespace djinni_generated

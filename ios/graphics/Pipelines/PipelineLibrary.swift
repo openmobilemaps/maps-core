@@ -168,6 +168,15 @@ public enum PipelineType: String, CaseIterable, Codable {
         }
     }
 
+    var vertexShaderUsesModelMatrix: Bool {
+        switch self {
+            case .rasterShader, .roundColorShader, .unitSphereRoundColorShader:
+                return true
+            default:
+                return false
+        }
+    }
+
     var vertexShader: String {
         switch self {
             case .alphaShader: return "baseVertexShader"
@@ -180,15 +189,15 @@ public enum PipelineType: String, CaseIterable, Codable {
             case .polygonPatternFadeInGroupShader: return "polygonPatternGroupVertexShader"
             case .maskShader: return "colorVertexShader"
             case .colorShader: return "colorVertexShader"
-            case .roundColorShader: return "baseVertexShader"
+            case .roundColorShader: return "baseVertexShaderModel"
             case .clearStencilShader: return "stencilClearVertexShader"
             case .textShader: return "textVertexShader"
             case .textInstancedShader: return "textInstancedVertexShader"
-            case .rasterShader: return "baseVertexShader"
+            case .rasterShader: return "baseVertexShaderModel"
             case .stretchShader: return "stretchVertexShader"
             case .stretchInstancedShader: return "stretchInstancedVertexShader"
             case .unitSphereAlphaShader: return "baseVertexShader"
-            case .unitSphereRoundColorShader: return "baseVertexShader"
+            case .unitSphereRoundColorShader: return "baseVertexShaderModel"
             case .unitSphereAlphaInstancedShader: return "unitSphereAlphaInstancedVertexShader"
             case .unitSphereTextInstancedShader: return "unitSphereTextInstancedVertexShader"
             case .sphereEffectShader: return "baseVertexShader"

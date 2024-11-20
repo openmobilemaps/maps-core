@@ -20,4 +20,6 @@ public:
     virtual void preRender(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & context) = 0;
 
     virtual void setBlendMode(BlendMode blendMode) = 0;
+
+    virtual bool usesModelMatrix() = 0;
 };

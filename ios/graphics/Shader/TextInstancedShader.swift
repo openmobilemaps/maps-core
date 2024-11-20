@@ -16,17 +16,14 @@ class TextInstancedShader: BaseShader, @unchecked Sendable {
 
     public let isUnitSphere: Bool
 
-    private let type: PipelineType
-
     init(unitSphere: Bool = false) {
         self.isUnitSphere = unitSphere
-        self.type = unitSphere ? .unitSphereTextInstancedShader : .textInstancedShader
-        super.init()
+        super.init(shader: unitSphere ? .unitSphereTextInstancedShader : .textInstancedShader)
     }
 
     override func setupProgram(_: MCRenderingContextInterface?) {
         if pipeline == nil {
-            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: type, blendMode: blendMode).json)
+            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: shader, blendMode: blendMode).json)
         }
     }
 

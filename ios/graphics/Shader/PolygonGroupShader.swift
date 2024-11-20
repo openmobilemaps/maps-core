@@ -22,13 +22,12 @@ class PolygonGroupShader: BaseShader, @unchecked Sendable {
     init(isStriped: Bool, isUnitSphere: Bool = false) {
         self.isStriped = isStriped
         self.isUnitSphere = isUnitSphere
-        super.init()
+        super.init(shader: isStriped ? .polygonStripedGroupShader : .polygonGroupShader)
     }
 
     override func setupProgram(_: MCRenderingContextInterface?) {
         if pipeline == nil {
-            let t: PipelineType = isStriped ? .polygonStripedGroupShader : .polygonGroupShader
-            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: t, blendMode: blendMode).json)
+            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: shader, blendMode: blendMode).json)
         }
     }
 
