@@ -24,11 +24,13 @@ struct PolygonGroupStripedVertexOut {
 };
 
 struct PolygonGroupStyling {
-    float4 color;
+    float color[4];
+    float opacity;
 };
 
 struct PolygonGroupStripeStyling {
-    float4 color;
+    float color[4];
+    float opacity;
     float stripeInfoX;
     float stripeInfoY;
 };
@@ -48,10 +50,10 @@ polygonGroupVertexShader(const Vertex4FIn vertexIn [[stage_in]],
 
 fragment half4
 polygonGroupFragmentShader(PolygonGroupVertexOut in [[stage_in]],
-                           constant PolygonGroupStyling *styling [[buffer(1)]])
+                        constant PolygonGroupStyling *styling [[buffer(1)]])
 {
     PolygonGroupStyling s = styling[int(in.stylingIndex)];
-    return half4(s.color);
+    return half4(s.color[0], s.color[1], s.color[2], 1.0) * s.opacity * s.color[3];
 }
 
 struct PolygonPatternGroupVertexOut {
@@ -91,7 +93,7 @@ polygonGroupStripedFragmentShader(PolygonGroupStripedVertexOut in [[stage_in]],
         return half4(0.0, 0.0, 0.0, 0.0);
     }
 
-    return half4(s.color);
+    return half4(s.color[0], s.color[1], s.color[2], 1.0) * s.opacity * s.color[3];
 }
 
 vertex PolygonPatternGroupVertexOut

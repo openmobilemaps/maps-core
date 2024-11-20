@@ -8,9 +8,13 @@ NS_SWIFT_SENDABLE
 @interface MCPolygonStyle : NSObject
 - (nonnull instancetype)init NS_UNAVAILABLE;
 + (nonnull instancetype)new NS_UNAVAILABLE;
-- (nonnull instancetype)initWithColor:(nonnull MCColor *)color NS_DESIGNATED_INITIALIZER;
-+ (nonnull instancetype)polygonStyleWithColor:(nonnull MCColor *)color;
+- (nonnull instancetype)initWithColor:(nonnull MCColor *)color
+                              opacity:(float)opacity NS_DESIGNATED_INITIALIZER;
++ (nonnull instancetype)polygonStyleWithColor:(nonnull MCColor *)color
+                                      opacity:(float)opacity;
 
 @property (nonatomic, readonly, nonnull) MCColor * color;
+
+@property (nonatomic, readonly) float opacity;
 
 @end

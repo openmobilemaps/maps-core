@@ -8,9 +8,11 @@
 
 struct PolygonStyle final {
     ::Color color;
+    float opacity;
 
-    //NOLINTNEXTLINE(google-explicit-constructor)
-    PolygonStyle(::Color color_)
+    PolygonStyle(::Color color_,
+                 float opacity_)
     : color(std::move(color_))
+    , opacity(std::move(opacity_))
     {}
 };

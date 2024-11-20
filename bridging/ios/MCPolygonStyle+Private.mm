@@ -11,12 +11,14 @@ namespace djinni_generated {
 auto PolygonStyle::toCpp(ObjcType obj) -> CppType
 {
     assert(obj);
-    return {::djinni_generated::Color::toCpp(obj.color)};
+    return {::djinni_generated::Color::toCpp(obj.color),
+            ::djinni::F32::toCpp(obj.opacity)};
 }
 
 auto PolygonStyle::fromCpp(const CppType& cpp) -> ObjcType
 {
-    return [[MCPolygonStyle alloc] initWithColor:(::djinni_generated::Color::fromCpp(cpp.color))];
+    return [[MCPolygonStyle alloc] initWithColor:(::djinni_generated::Color::fromCpp(cpp.color))
+                                         opacity:(::djinni::F32::fromCpp(cpp.opacity))];
 }
 
 } // namespace djinni_generated

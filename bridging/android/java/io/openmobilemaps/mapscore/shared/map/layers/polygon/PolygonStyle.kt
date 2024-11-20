@@ -5,4 +5,5 @@ package io.openmobilemaps.mapscore.shared.map.layers.polygon
 
 data class PolygonStyle(
     val color: io.openmobilemaps.mapscore.shared.graphics.common.Color,
+    val opacity: Float,
 )

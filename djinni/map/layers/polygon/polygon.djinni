@@ -9,6 +9,7 @@
 
 polygon_style = record {
     color: color;
+    opacity: f32;
 }
 
 polygon_info = record {

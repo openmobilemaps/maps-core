@@ -169,10 +169,6 @@ final class Quad2dInstanced: BaseGraphicsObject, @unchecked Sendable {
         if offsetsBuffer != nil {
             encoder.setVertexBuffer(offsetsBuffer, offset: 0, index: 8)
         }
-        else {
-            print("Skip because no offsetsBuffer")
-            return
-        }
 
         encoder.setFragmentSamplerState(sampler, index: 0)
 
