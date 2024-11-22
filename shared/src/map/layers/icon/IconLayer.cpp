@@ -140,7 +140,6 @@ void IconLayer::addIcons(const std::vector<std::shared_ptr<IconInfoInterface>> &
     auto mapInterface = lockSelfPtr ? lockSelfPtr->mapInterface : nullptr;
     auto objectFactory = mapInterface ? mapInterface->getGraphicsObjectFactory() : nullptr;
     auto shaderFactory = mapInterface ? mapInterface->getShaderFactory() : nullptr;
-    auto conversionHelper = mapInterface ? mapInterface->getCoordinateConverterHelper() : nullptr;
     auto scheduler = mapInterface ? mapInterface->getScheduler() : nullptr;
     if (!objectFactory || !shaderFactory || !scheduler) {
         std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
@@ -257,9 +256,8 @@ void IconLayer::invalidate() { setIcons(getIcons()); }
 void IconLayer::update() {
     auto lockSelfPtr = shared_from_this();
     auto mapInterface = lockSelfPtr ? lockSelfPtr->mapInterface : nullptr;
-    auto conversionHelper = mapInterface ? mapInterface->getCoordinateConverterHelper() : nullptr;
     auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
-    if (!conversionHelper || !renderingContext) {
+    if (!renderingContext) {
         return;
     }
 
@@ -297,8 +295,7 @@ std::vector<std::shared_ptr<::RenderPassInterface>> IconLayer::buildRenderPasses
     auto lockSelfPtr = shared_from_this();
     auto mapInterface = lockSelfPtr ? lockSelfPtr->mapInterface : nullptr;
     auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
-    auto conversionHelper = mapInterface ? mapInterface->getCoordinateConverterHelper() : nullptr;
-    if (!camera || !conversionHelper) {
+    if (!camera) {
         return {};
     }
 

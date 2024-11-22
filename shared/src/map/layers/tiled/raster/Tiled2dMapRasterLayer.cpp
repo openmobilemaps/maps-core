@@ -441,7 +441,6 @@ void Tiled2dMapRasterLayer::generateRenderPasses() {
             } else {
                 renderObjects.push_back(renderObject);
             }
-
         }
 
         if (!renderObjects.empty()) {
