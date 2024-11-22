@@ -46,11 +46,12 @@ void SphereEffectShaderOpenGl::preRender(const std::shared_ptr<::RenderingContex
     }
 }
 
-void SphereEffectShaderOpenGl::setEllipse(const std::vector<double> & coefficients) {
+void SphereEffectShaderOpenGl::setEllipse(const SharedBytes &coefficients) {
     std::lock_guard<std::mutex> lock(dataMutex);
 
-    for (size_t i = 0; i < coefficients.size(); ++i) {
-        this->coefficients[i] = (float) coefficients[i];
+    if(coefficients.elementCount > 0) {
+        std::memcpy(coefficients.data(), (void *)coefficients.address,
+                    coefficients.elementCount * coefficients.bytesPerElement);
     }
 }
 
