@@ -33,7 +33,7 @@ class PolygonPatternGroupShader: BaseShader, @unchecked Sendable {
         guard pipeline == nil else { return }
 
         let pl = Pipeline(type: shader, blendMode: blendMode)
-        pipeline = MetalContext.current.pipelineLibrary.value(pl.json)
+        pipeline = MetalContext.current.pipelineLibrary.value(pl)
     }
 
     override func preRender(encoder: MTLRenderCommandEncoder, context: RenderingContext) {

@@ -75,7 +75,7 @@ extension PipelineDescriptorFactory {
     }
 }
 
-public struct Pipeline: Codable, CaseIterable {
+public struct Pipeline: Codable, CaseIterable, Hashable {
     let type: PipelineType
     let blendMode: MCBlendMode
 
@@ -84,12 +84,15 @@ public struct Pipeline: Codable, CaseIterable {
         self.blendMode = blendMode
     }
 
-    public init?(json: String) {
-        guard let data = json.data(using: .utf8),
-              let obj = try? JSONDecoder().decode(Pipeline.self, from: data) else {
-            return nil
-        }
-        self = obj
+    // Conform to `Hashable` by implementing the `hash(into:)` method
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(type)
+        hasher.combine(blendMode)
+    }
+
+    // Conform to `Equatable` (needed for `Hashable`)
+    public static func == (lhs: Pipeline, rhs: Pipeline) -> Bool {
+        return lhs.type == rhs.type && lhs.blendMode == rhs.blendMode
     }
 
     public static var allCases: [Pipeline] {
@@ -98,22 +101,6 @@ public struct Pipeline: Codable, CaseIterable {
                 Pipeline(type: type, blendMode: blendMode)
             }
         }.joined())
-    }
-
-    public var json: String {
-        do {
-            let encoder = JSONEncoder()
-            encoder.outputFormatting = .sortedKeys
-
-            let jsonData = try encoder.encode(self)
-
-            guard let jsonString = String(data: jsonData, encoding: .utf8) else {
-                fatalError("unable to encode Pipeline")
-            }
-            return jsonString
-        } catch {
-            fatalError("An error occurred while encoding Pipeline: \(error)")
-        }
     }
 }
 
@@ -258,18 +245,16 @@ public enum PipelineType: String, CaseIterable, Codable {
     }
 }
 
-public class PipelineLibrary: StaticMetalLibrary<String, MTLRenderPipelineState>, @unchecked Sendable {
+public class PipelineLibrary: StaticMetalLibrary<Pipeline, MTLRenderPipelineState>, @unchecked Sendable {
     init(device: MTLDevice) throws {
-        try super.init(Pipeline.allCases.map(\.json)) { key -> MTLRenderPipelineState in
+        try super.init(
+            Pipeline.allCases.map(\.self)) { pipeline -> MTLRenderPipelineState in
             do {
-                guard let pipeline = Pipeline(json: key) else {
-                    throw LibraryError.invalidKey
-                }
                 let pipelineDescriptor = PipelineDescriptorFactory.pipelineDescriptor(pipeline: pipeline)
                 return try device.makeRenderPipelineState(descriptor: pipelineDescriptor)
             } catch {
                 // Log the JSON (key) and the error
-                Logger().error("Error creating pipeline for JSON: \(key, privacy: .public) error: \(error, privacy: .public)")
+                Logger().error("Error creating pipeline for: \(pipeline.type.rawValue, privacy: .public), \(pipeline.blendMode.rawValue, privacy: .public) error: \(error, privacy: .public)")
                 throw error
             }
         }
