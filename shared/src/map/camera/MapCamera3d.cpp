@@ -1533,6 +1533,26 @@ std::shared_ptr<MapCamera3dInterface> MapCamera3d::asMapCamera3d() { return shar
 
 void MapCamera3d::setCameraConfig(const Camera3dConfig &config, std::optional<float> durationSeconds,
                                   std::optional<float> targetZoom, const std::optional<::Coord> &targetCoordinate) {
+    {
+        std::lock_guard<std::recursive_mutex> lock(animationMutex);
+        if (pitchAnimation) {
+            pitchAnimation->cancel();
+            pitchAnimation = nullptr;
+        }
+        if (verticalDisplacementAnimation) {
+            verticalDisplacementAnimation->cancel();
+            verticalDisplacementAnimation = nullptr;
+        }
+        if (zoomAnimation) {
+            zoomAnimation->cancel();
+            zoomAnimation = nullptr;
+        }
+        if (coordAnimation) {
+            coordAnimation->cancel();
+            coordAnimation = nullptr;
+        }
+    }
+
     cameraZoomConfig = config;
 
     double initialZoom = zoom;
@@ -1544,6 +1564,7 @@ void MapCamera3d::setCameraConfig(const Camera3dConfig &config, std::optional<fl
         // temporarily set target zoom to get target pitch
         this->zoom = *targetZoom;
     }
+
     double targetPitch = getCameraPitch();
     double targetVerticalDisplacement = getCameraVerticalDisplacement();
     this->zoom = initialZoom;
@@ -1726,7 +1747,7 @@ float MapCamera3d::valueForZoom(const CameraInterpolation &interpolator, double 
 
     // 0 --> minZoom
     // 1 --> maxZoom
-    auto t = (zoom - zoomMin) / (zoomMax - zoomMin);
+    auto t = zoomMax != zoomMin ? (zoomMin - zoom) / (zoomMin - zoomMax) : 0.0;
     const auto &values = interpolator.stops;
 
     if (t <= values.front().stop) {

@@ -60,7 +60,7 @@ Tiled2dMapSource<T, L, R>::Tiled2dMapSource(const MapConfig &mapConfig, const st
     , layerName(layerName) {
     std::sort(zoomLevelInfos.begin(), zoomLevelInfos.end(),
               [](const Tiled2dMapZoomLevelInfo &a, const Tiled2dMapZoomLevelInfo &b) -> bool { return a.zoom > b.zoom; });
-    topMostZoomLevel = zoomLevelInfos.begin()->zoomLevelIdentifier;
+    topMostZoomLevel = zoomLevelInfos.empty() ? 0 : zoomLevelInfos.begin()->zoomLevelIdentifier;
 
     // add virtual zoom levels and sort again
     auto virtualZoomLevelInfos = layerConfig->getVirtualZoomLevelInfos();

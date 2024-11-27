@@ -105,7 +105,7 @@ open class MCMapViewTouchHandler: NSObject {
 
         let contentScale = Float(mapView.contentScaleFactor)
 
-        let magicConstant = 1.414 // makes feel like using iOS app natively
+        let magicConstant = 2.414 // makes feel like using iOS app natively
         let s = pow(pinchGestureRecognizer.scale, magicConstant)
         let touch = pinchGestureRecognizer.location(in: mapView)
         let halfWidth = 100.0
