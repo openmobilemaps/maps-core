@@ -50,7 +50,7 @@ void SphereEffectShaderOpenGl::setEllipse(const SharedBytes &coefficients) {
     std::lock_guard<std::mutex> lock(dataMutex);
 
     if(coefficients.elementCount > 0) {
-        std::memcpy(coefficients.data(), (void *)coefficients.address,
+        std::memcpy(this->coefficients.data(), (void *)coefficients.address,
                     coefficients.elementCount * coefficients.bytesPerElement);
     }
 }
