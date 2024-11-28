@@ -110,7 +110,9 @@ void Polygon2dLayerObject::setPolygons(const std::vector<PolygonCoord> &polygons
     polygon->setVertices(attr, ind, Vec3D(rx, ry, rz));
 }
 
-void Polygon2dLayerObject::setColor(const Color &color) { shader->setColor(color.r, color.g, color.b, color.a); }
+void Polygon2dLayerObject::setColor(const Color &color) {
+    shader->setColor(color.r, color.g, color.b, color.a);
+}
 
 std::shared_ptr<GraphicsObjectInterface> Polygon2dLayerObject::getPolygonObject() { return graphicsObject; }
 

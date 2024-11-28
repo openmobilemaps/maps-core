@@ -71,10 +71,9 @@ void IconLayerObject::update() {
     auto lockSelfPtr = shared_from_this();
     auto mapInterface = lockSelfPtr ? lockSelfPtr->mapInterface : nullptr;
     auto context = mapInterface ? mapInterface->getRenderingContext() : nullptr;
-    auto converter = mapInterface ? mapInterface->getCoordinateConverterHelper() : nullptr;
     auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
 
-    if(!converter || !context || !camera) { return; }
+    if(!context || !camera) { return; }
 
     auto zoom = camera->getZoom();
     auto viewport = context->getViewportSize();

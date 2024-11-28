@@ -104,7 +104,7 @@ void Tiled2dMapVectorSourceVectorTileDataManager::onVectorTilesUpdated(const std
                     const auto &tileMask = std::make_shared<PolygonMaskObject>(graphicsFactory,
                                                                                coordinateConverterHelper,
                                                                                is3D);
-                    auto convertedTileBounds = mapInterface->getCoordinateConverterHelper()->convertRectToRenderSystem(tileEntry->tileInfo.tileInfo.bounds);
+                    auto convertedTileBounds = coordinateConverterHelper->convertRectToRenderSystem(tileEntry->tileInfo.tileInfo.bounds);
                     std::optional<float> maxSegmentLength = std::nullopt;
                     if (is3D) {
                         maxSegmentLength = std::min(std::abs(convertedTileBounds.bottomRight.x - convertedTileBounds.topLeft.x) /

@@ -16,4 +16,6 @@
 
 - (void)setBlendMode:(MCBlendMode)blendMode;
 
+- (BOOL)usesModelMatrix;
+
 @end

@@ -14,8 +14,13 @@ using namespace metal;
 
 struct PolygonGroupVertexOut {
     float4 position [[ position ]];
-    float2 uv;
     float stylingIndex;
+};
+
+struct PolygonGroupStripedVertexOut {
+  float4 position [[ position ]];
+  float2 uv;
+  float stylingIndex;
 };
 
 struct PolygonGroupStyling {
@@ -37,19 +42,18 @@ polygonGroupVertexShader(const Vertex4FIn vertexIn [[stage_in]],
 {
     PolygonGroupVertexOut out {
         .position = vpMatrix * (float4(vertexIn.position.xyz, 1.0) + originOffset),
-        .uv = float2(0.0, 0.0),
         .stylingIndex = vertexIn.position.w,
     };
 
     return out;
 }
 
-fragment float4
+fragment half4
 polygonGroupFragmentShader(PolygonGroupVertexOut in [[stage_in]],
                         constant PolygonGroupStyling *styling [[buffer(1)]])
 {
     PolygonGroupStyling s = styling[int(in.stylingIndex)];
-    return float4(s.color[0], s.color[1], s.color[2], 1.0) * s.opacity * s.color[3];
+    return half4(s.color[0], s.color[1], s.color[2], 1.0) * s.opacity * s.color[3];
 }
 
 struct PolygonPatternGroupVertexOut {
@@ -58,14 +62,14 @@ struct PolygonPatternGroupVertexOut {
     float2 pixelPosition;
 };
 
-vertex PolygonGroupVertexOut
+vertex PolygonGroupStripedVertexOut
 polygonStripedGroupVertexShader(const Vertex4FIn vertexIn [[stage_in]],
                                 constant float4x4 &vpMatrix [[buffer(1)]],
                                 constant float4 &originOffset [[buffer(2)]],
                                 constant float2 &posOffset [[buffer(3)]]
                                 )
 {
-    PolygonGroupVertexOut out {
+    PolygonGroupStripedVertexOut out {
         .position = vpMatrix * (float4(vertexIn.position.xyz, 1.0) + originOffset),
         .uv = vertexIn.position.xy - posOffset,
         .stylingIndex = vertexIn.position.w,
@@ -75,8 +79,8 @@ polygonStripedGroupVertexShader(const Vertex4FIn vertexIn [[stage_in]],
 }
 
 
-fragment float4
-polygonGroupStripedFragmentShader(PolygonGroupVertexOut in [[stage_in]],
+fragment half4
+polygonGroupStripedFragmentShader(PolygonGroupStripedVertexOut in [[stage_in]],
                                   constant PolygonGroupStripeStyling *styling [[buffer(1)]],
                                   constant float2 &scaleFactors [[buffer(2)]])
 {
@@ -86,10 +90,10 @@ polygonGroupStripedFragmentShader(PolygonGroupVertexOut in [[stage_in]],
     float totalPx = s.stripeInfoX + s.stripeInfoY;
     float adjLineWPx = s.stripeInfoX / scaleFactors.y * scaleFactors.x;
     if (fmod(disPx, totalPx) > adjLineWPx) {
-        return float4(0.0, 0.0, 0.0, 0.0);
+        return half4(0.0, 0.0, 0.0, 0.0);
     }
 
-    return float4(s.color[0], s.color[1], s.color[2], 1.0) * s.opacity * s.color[3];
+    return half4(s.color[0], s.color[1], s.color[2], 1.0) * s.opacity * s.color[3];
 }
 
 vertex PolygonPatternGroupVertexOut
@@ -109,11 +113,11 @@ polygonPatternGroupVertexShader(const Vertex4FIn vertexIn [[stage_in]],
     return out;
 }
 
-fragment float4
+fragment half4
 polygonPatternGroupFragmentShader(PolygonPatternGroupVertexOut in [[stage_in]],
-                                  texture2d<float> texture0 [[ texture(0)]],
+                                  texture2d<half> texture0 [[ texture(0)]],
                                   sampler textureSampler [[sampler(0)]],
-                                  constant float *opacity [[buffer(0)]],
+                                  constant half *opacity [[buffer(0)]],
                                   constant float *texureCoordinates [[buffer(1)]])
 {
     int offset = int(in.stylingIndex * 5);
@@ -124,18 +128,18 @@ polygonPatternGroupFragmentShader(PolygonPatternGroupVertexOut in [[stage_in]],
 
     const float2 uv = fmod(fmod(in.pixelPosition, pixelSize) / pixelSize + float2(1.0, 1.0), float2(1.0, 1.0));
     const float2 texUv = uvOrig + uvSize * float2(uv.x, uv.y);
-    const float4 color = texture0.sample(textureSampler, texUv);
+    const half4 color = texture0.sample(textureSampler, texUv);
 
-    const float a = color.a * opacity[int(in.stylingIndex)];
+    const half a = color.a * opacity[int(in.stylingIndex)];
 
-    return float4(color.r * a, color.g * a, color.b * a, a);
+    return half4(color.r * a, color.g * a, color.b * a, a);
 }
 
-fragment float4
+fragment half4
 polygonPatternGroupFadeInFragmentShader(PolygonPatternGroupVertexOut in [[stage_in]],
-                                  texture2d<float> texture0 [[ texture(0)]],
+                                  texture2d<half> texture0 [[ texture(0)]],
                                   sampler textureSampler [[sampler(0)]],
-                                  constant float *opacity [[buffer(0)]],
+                                  constant half *opacity [[buffer(0)]],
                                   constant float *texureCoordinates [[buffer(1)]],
                                   constant float &screenPixelAsRealMeterFactor [[buffer(2)]],
                                   constant float2 &scalingFactor [[buffer(3)]])
@@ -159,7 +163,7 @@ polygonPatternGroupFadeInFragmentShader(PolygonPatternGroupVertexOut in [[stage_
         uvTot.x = fmod(adjustedPixelPosition.x + totalSize.x * 0.5, totalSize.x);
     }
 
-    float4 resultColor = float4(0.0,0.0,0.0,0.0);
+    half4 resultColor = half4(0.0,0.0,0.0,0.0);
 
     if(uvTot.x > pixelSize.x || uvTot.y > pixelSize.y) {
         if(uvTot.x > pixelSize.x && uvTot.y < pixelSize.y) {
@@ -172,7 +176,7 @@ polygonPatternGroupFadeInFragmentShader(PolygonPatternGroupVertexOut in [[stage_
 
                 const float2 texUv = uvOrig + uvSize * uv;
                 resultColor = texture0.sample(textureSampler, texUv);
-                resultColor = float4(resultColor.rgb * resultColor.a, resultColor.a);
+                resultColor = half4(resultColor.rgb * resultColor.a, resultColor.a);
             }
         } else {
             uvTot.x = fmod(adjustedPixelPosition.x + spacing.x * 0.5, totalSize.x);
@@ -181,7 +185,7 @@ polygonPatternGroupFadeInFragmentShader(PolygonPatternGroupVertexOut in [[stage_
                 const float2 uv = fmod((uvTot - pixelSize) / spacing + float2(1.0, 1.0), float2(1.0,1.0));
                 const float2 texUv = uvOrig + uvSize * uv;
                 resultColor = texture0.sample(textureSampler, texUv);
-                resultColor = float4(resultColor.rgb * resultColor.a, resultColor.a);
+                resultColor = half4(resultColor.rgb * resultColor.a, resultColor.a);
             } else {
                 // bottom left
                 const float2 spacingTexSize = float2(spacing.y, spacing.y);
@@ -191,7 +195,7 @@ polygonPatternGroupFadeInFragmentShader(PolygonPatternGroupVertexOut in [[stage_
                     const float2 uv = fmod(float2(relativeX, uvTot.y - pixelSize.y) / spacingTexSize + float2(1.0, 1.0), float2(1.0,1.0));
                     const float2 texUv = uvOrig + uvSize * uv;
                     resultColor = texture0.sample(textureSampler, texUv);
-                    resultColor = float4(resultColor.rgb * resultColor.a, resultColor.a);
+                    resultColor = half4(resultColor.rgb * resultColor.a, resultColor.a);
                 }
             }
         }
@@ -199,7 +203,7 @@ polygonPatternGroupFadeInFragmentShader(PolygonPatternGroupVertexOut in [[stage_
         const float2 uv = fmod(uvTot / pixelSize + float2(1.0,1.0), float2(1.0,1.0));
         const float2 texUv = uvOrig + uvSize * uv;
         resultColor = texture0.sample(textureSampler, texUv);
-        resultColor = float4(resultColor.rgb * resultColor.a, resultColor.a);
+        resultColor = half4(resultColor.rgb * resultColor.a, resultColor.a);
     }
 
     return resultColor;

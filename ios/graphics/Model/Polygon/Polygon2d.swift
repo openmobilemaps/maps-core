@@ -95,12 +95,14 @@ final class Polygon2d: BaseGraphicsObject, @unchecked Sendable {
         }
         encoder.setVertexBuffer(vpMatrixBuffer, offset: 0, index: 1)
 
-        let mMatrixBuffer = mMatrixBuffers.getNextBuffer(context)
-        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mMatrix)) {
-            mMatrixBuffer?.contents().copyMemory(
-                from: matrixPointer, byteCount: 64)
+        if shader.usesModelMatrix() {
+            let mMatrixBuffer = mMatrixBuffers.getNextBuffer(context)
+            if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mMatrix)) {
+                mMatrixBuffer?.contents().copyMemory(
+                    from: matrixPointer, byteCount: 64)
+            }
+            encoder.setVertexBuffer(mMatrixBuffer, offset: 0, index: 2)
         }
-        encoder.setVertexBuffer(mMatrixBuffer, offset: 0, index: 2)
 
         let originOffsetBuffer = originOffsetBuffers.getNextBuffer(context)
         if let bufferPointer = originOffsetBuffer?.contents()
@@ -187,12 +189,14 @@ extension Polygon2d: MCMaskingObjectInterface {
         }
         encoder.setVertexBuffer(vpMatrixBuffer, offset: 0, index: 1)
 
-        let mMatrixBuffer = mMatrixBuffers.getNextBuffer(context)
-        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mMatrix)) {
-            mMatrixBuffer?.contents().copyMemory(
-                from: matrixPointer, byteCount: 64)
+        if shader.usesModelMatrix() {
+            let mMatrixBuffer = mMatrixBuffers.getNextBuffer(context)
+            if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mMatrix)) {
+                mMatrixBuffer?.contents().copyMemory(
+                    from: matrixPointer, byteCount: 64)
+            }
+            encoder.setVertexBuffer(mMatrixBuffer, offset: 0, index: 2)
         }
-        encoder.setVertexBuffer(mMatrixBuffer, offset: 0, index: 2)
 
         let originOffsetBuffer = originOffsetBuffers.getNextBuffer(context)
         if let bufferPointer = originOffsetBuffer?.contents()

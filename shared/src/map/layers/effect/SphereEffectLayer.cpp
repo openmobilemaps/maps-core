@@ -21,8 +21,6 @@
 #include "PolygonGroupShaderInterface.h"
 #include "PolygonHelper.h"
 #include "SphereEffectShaderInterface.h"
-#include "MapCamera3d.h"
-
 
 std::shared_ptr<SphereEffectLayerInterface> SphereEffectLayerInterface::create() {
     return std::make_shared<SphereEffectLayer>();
@@ -35,6 +33,7 @@ std::shared_ptr<::LayerInterface> SphereEffectLayer::asLayerInterface() {
 void SphereEffectLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface, int32_t layerIndex) {
 
     this->camera = mapInterface->getCamera()->asMapCamera3d();
+    this->castedCamera = std::dynamic_pointer_cast<MapCamera3d>(this->camera);
     this->shader = mapInterface->getShaderFactory()->createSphereEffectShader();
     this->mapInterface = mapInterface;
 
@@ -71,13 +70,20 @@ void SphereEffectLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterfac
 }
 
 void SphereEffectLayer::update() {
-    if (!shader || !camera) {
+    if (!shader || !castedCamera) {
         return;
     }
-    if (auto casted = std::dynamic_pointer_cast<MapCamera3d>(camera)) {
-        auto coeffs = casted->computeEllipseCoefficients();
-        shader->setEllipse(coeffs);
+
+    static std::vector<double> coefficients(16, 0.0);
+    static std::vector<float> coefficientsFloat(16, 0.0);
+
+    castedCamera->computeEllipseCoefficients(coefficients);
+
+    for(size_t i = 0; i<16; ++i) {
+        coefficientsFloat[i] = coefficients[i];
     }
+
+    shader->setEllipse(SharedBytes((int64_t)coefficientsFloat.data(), 16, sizeof(float)));
 }
 
 std::vector<std::shared_ptr<RenderPassInterface>> SphereEffectLayer::buildRenderPasses() {

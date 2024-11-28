@@ -14,14 +14,20 @@ import Metal
 
 open class BaseShader: MCShaderProgramInterface, @unchecked Sendable {
     open var blendMode: MCBlendMode = .NORMAL
+    internal let shader: PipelineType
 
     open var pipeline: MTLRenderPipelineState?
 
-    public init() {
+    public init(shader: PipelineType) {
+        self.shader = shader
     }
 
     open func getProgramName() -> String {
         ""
+    }
+
+    open func usesModelMatrix() -> Bool {
+        return shader.vertexShaderUsesModelMatrix
     }
 
     open func setupProgram(_: MCRenderingContextInterface?) {

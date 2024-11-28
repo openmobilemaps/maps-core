@@ -22,6 +22,7 @@
 #include "PolygonPatternGroup2dLayerObject.h"
 #include "SphereEffectLayerInterface.h"
 #include "MapCamera3dInterface.h"
+#include "MapCamera3d.h"
 
 class SphereEffectLayer : public SimpleLayerInterface, public SphereEffectLayerInterface, public std::enable_shared_from_this<SphereEffectLayer> {
 public:
@@ -61,6 +62,7 @@ private:
 
     std::shared_ptr<MapInterface> mapInterface;
     std::shared_ptr<MapCamera3dInterface> camera;
+    std::shared_ptr<MapCamera3d> castedCamera;
 
     std::shared_ptr<SphereEffectShaderInterface> shader;
     std::shared_ptr<::Quad2dInterface> quad;

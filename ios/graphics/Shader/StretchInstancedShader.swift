@@ -13,15 +13,14 @@ import MapCoreSharedModule
 import Metal
 
 class StretchInstancedShader: BaseShader, @unchecked Sendable {
-    private let shader: PipelineType
 
-    init(shader: PipelineType = .stretchInstancedShader) {
-        self.shader = shader
+    override init(shader: PipelineType = .stretchInstancedShader) {
+        super.init(shader: shader)
     }
 
     override func setupProgram(_: MCRenderingContextInterface?) {
         if pipeline == nil {
-            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: shader, blendMode: blendMode).json)
+            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: shader, blendMode: blendMode))
         }
     }
 

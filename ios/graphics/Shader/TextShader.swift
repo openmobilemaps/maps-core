@@ -18,9 +18,13 @@ class TextShader: BaseShader, @unchecked Sendable {
     private var haloColor = SIMD4<Float>([0.0, 0.0, 0.0, 0.0])
     private var haloWidth: Float = 0.0
 
+    init() {
+        super.init(shader: .textShader)
+    }
+
     override func setupProgram(_: MCRenderingContextInterface?) {
         if pipeline == nil {
-            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: .textShader, blendMode: blendMode).json)
+            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: shader, blendMode: blendMode))
         }
     }
 

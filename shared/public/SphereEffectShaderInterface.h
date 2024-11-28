@@ -3,8 +3,8 @@
 
 #pragma once
 
+#include "SharedBytes.h"
 #include <memory>
-#include <vector>
 
 class ShaderProgramInterface;
 
@@ -14,5 +14,5 @@ public:
 
     virtual /*not-null*/ std::shared_ptr<ShaderProgramInterface> asShaderProgramInterface() = 0;
 
-    virtual void setEllipse(const std::vector<double> & coefficients) = 0;
+    virtual void setEllipse(const ::SharedBytes & coefficients) = 0;
 };

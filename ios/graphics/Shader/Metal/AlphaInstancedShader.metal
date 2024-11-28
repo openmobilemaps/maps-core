@@ -74,21 +74,21 @@ unitSphereAlphaInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
 }
 
 
-fragment float4
+fragment half4
 unitSphereAlphaInstancedFragmentShader(InstancedVertexOut in [[stage_in]],
-                             texture2d<float> texture0 [[ texture(0)]],
+                             texture2d<half> texture0 [[ texture(0)]],
                              sampler textureSampler [[sampler(0)]])
 {
     const float2 uv = in.uvOrig + in.uvSize * float2(in.uv.x, in.uv.y);
-    float4 color = texture0.sample(textureSampler, uv);
+    half4 color = texture0.sample(textureSampler, uv);
 
-    const float a = color.a * in.alpha;
+    const half a = color.a * in.alpha;
 
     if (a <= 0) {
        discard_fragment();
     }
 
-    return float4(color.r * a, color.g * a, color.b * a, a);
+    return half4(color.r * a, color.g * a, color.b * a, a);
 }
 
 vertex InstancedVertexOut
@@ -133,19 +133,19 @@ alphaInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
 }
 
 
-fragment float4
+fragment half4
 alphaInstancedFragmentShader(InstancedVertexOut in [[stage_in]],
-                             texture2d<float> texture0 [[ texture(0)]],
+                             texture2d<half> texture0 [[ texture(0)]],
                              sampler textureSampler [[sampler(0)]])
 {
     const float2 uv = in.uvOrig + in.uvSize * float2(in.uv.x, 1 - in.uv.y);
-    float4 color = texture0.sample(textureSampler, uv);
+    half4 color = texture0.sample(textureSampler, uv);
 
-    const float a = color.a * in.alpha;
+    const half a = color.a * in.alpha;
 
     if (a <= 0) {
        discard_fragment();
     }
 
-    return float4(color.r * a, color.g * a, color.b * a, a);
+    return half4(color.r * a, color.g * a, color.b * a, a);
 }

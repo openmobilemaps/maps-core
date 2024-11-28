@@ -151,12 +151,14 @@ final class Quad2dInstanced: BaseGraphicsObject, @unchecked Sendable {
         }
         encoder.setVertexBuffer(vpMatrixBuffer, offset: 0, index: 1)
 
-        let mMatrixBuffer = mMatrixBuffers.getNextBuffer(context)
-        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mMatrix)) {
-            mMatrixBuffer?.contents().copyMemory(
-                from: matrixPointer, byteCount: 64)
+        if shader.usesModelMatrix() {
+            let mMatrixBuffer = mMatrixBuffers.getNextBuffer(context)
+            if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mMatrix)) {
+                mMatrixBuffer?.contents().copyMemory(
+                    from: matrixPointer, byteCount: 64)
+            }
+            encoder.setVertexBuffer(mMatrixBuffer, offset: 0, index: 2)
         }
-        encoder.setVertexBuffer(mMatrixBuffer, offset: 0, index: 2)
 
         encoder.setVertexBuffer(positionsBuffer, offset: 0, index: 3)
         encoder.setVertexBuffer(scalesBuffer, offset: 0, index: 4)

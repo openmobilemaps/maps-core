@@ -18,7 +18,7 @@ class GraphicsFactory: MCGraphicsObjectFactoryInterface {
     }
     
     func createPolygonMask(_ is3d: Bool) -> (any MCPolygon2dInterface)? {
-        let shader = ColorShader(shader: .colorShader)
+        let shader = MaskShader()
         return Polygon2d(shader: shader, metalContext: .current)
     }
     

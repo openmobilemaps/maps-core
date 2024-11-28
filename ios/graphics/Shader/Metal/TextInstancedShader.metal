@@ -42,7 +42,7 @@ unitSphereTextInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
 
     const float angle = rotation * M_PI_F / 180.0;
 
-    float4 newVertex = mMatrix * float4(referencePosition + originOffset.xyz, 1.0);
+    float4 newVertex = float4(referencePosition + originOffset.xyz, 1.0);
 
     float4 earthCenter = vpMatrix * float4(0 - origin.x,
                                            0 - origin.y,
@@ -91,11 +91,11 @@ struct TextInstanceStyle {
 } __attribute__((__packed__));
 
 
-fragment float4
+fragment half4
 unitSphereTextInstancedFragmentShader(TextInstancedVertexOut in [[stage_in]],
                                       constant TextInstanceStyle *styles [[buffer(1)]],
                                       constant bool &isHalo [[buffer(2)]],
-                       texture2d<float> texture0 [[ texture(0)]],
+                       texture2d<half> texture0 [[ texture(0)]],
                        sampler textureSampler [[sampler(0)]])
 {
     constant TextInstanceStyle *style = (constant TextInstanceStyle *)(styles + in.styleIndex);
@@ -105,7 +105,7 @@ unitSphereTextInstancedFragmentShader(TextInstancedVertexOut in [[stage_in]],
     }
 
     const float2 uv = in.texureCoordinates.xy + in.texureCoordinates.zw * float2(in.uv.x, in.uv.y);
-    const float4 dist = texture0.sample(textureSampler, uv);
+    const half4 dist = texture0.sample(textureSampler, uv);
 
     const float median = max(min(dist.r, dist.g), min(max(dist.r, dist.g), dist.b)) / dist.a;
     const float w = fwidth(median);
@@ -115,7 +115,7 @@ unitSphereTextInstancedFragmentShader(TextInstancedVertexOut in [[stage_in]],
 
     const float innerFallOff = smoothstep(fillStart, fillEnd, median);
 
-    float edgeAlpha = 0.0;
+    half edgeAlpha = 0.0;
 
     if (isHalo) {
         float halfHaloBlur = 0.5 * style->haloBlur;
@@ -133,12 +133,12 @@ unitSphereTextInstancedFragmentShader(TextInstancedVertexOut in [[stage_in]],
         // Combination of blurred outer falloff and inverse inner fill falloff
         edgeAlpha = (sideSwitch * outerFallOff + (1.0 - sideSwitch) * (1.0 - innerFallOff)) * style->haloColor.a;
 
-        return float4(style->haloColor.rgb, 1.0) * edgeAlpha;
+        return half4(half3(style->haloColor.rgb), 1.0) * edgeAlpha;
 
     } else {
         edgeAlpha = innerFallOff * style->haloColor.a;
 
-        return float4(style->color.rgb, 1.0) * edgeAlpha;
+        return half4(half3(style->color.rgb), 1.0) * edgeAlpha;
     }
 }
 
@@ -182,11 +182,11 @@ textInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
 }
 
 
-fragment float4
+fragment half4
 textInstancedFragmentShader(TextInstancedVertexOut in [[stage_in]],
                             constant TextInstanceStyle *styles [[buffer(1)]],
                             constant bool &isHalo [[buffer(2)]],
-                       texture2d<float> texture0 [[ texture(0)]],
+                       texture2d<half> texture0 [[ texture(0)]],
                        sampler textureSampler [[sampler(0)]])
 {
     constant TextInstanceStyle *style = (constant TextInstanceStyle *)(styles + in.styleIndex);
@@ -196,7 +196,7 @@ textInstancedFragmentShader(TextInstancedVertexOut in [[stage_in]],
     }
 
     const float2 uv = in.texureCoordinates.xy + in.texureCoordinates.zw * float2(in.uv.x, 1 - in.uv.y);
-    const float4 dist = texture0.sample(textureSampler, uv);
+    const half4 dist = texture0.sample(textureSampler, uv);
 
     const float median = max(min(dist.r, dist.g), min(max(dist.r, dist.g), dist.b)) / dist.a;
     const float w = fwidth(median);
@@ -222,10 +222,10 @@ textInstancedFragmentShader(TextInstancedVertexOut in [[stage_in]],
         // Combination of blurred outer falloff and inverse inner fill falloff
         const float edgeAlpha = (sideSwitch * outerFallOff + (1.0 - sideSwitch) * (1.0 - innerFallOff)) * style->haloColor.a;
 
-        return float4(style->haloColor.rgb, 1.0) * edgeAlpha;
+        return half4(half3(style->haloColor.rgb), 1.0) * edgeAlpha;
     } else {
         const float edgeAlpha = innerFallOff * style->color.a;
 
-        return float4(style->color.rgb, 1.0) * edgeAlpha;
+        return half4(half3(style->color.rgb), 1.0) * edgeAlpha;
     }
 }

@@ -107,9 +107,9 @@ void Tiled2dMapVectorLineTile::update() {
     for (int styleGroupId = 0; styleGroupId < numStyleGroups; styleGroupId++) {
         int i = 0;
         bool needsUpdate = false;
-        for (auto const &[key, feature]: featureGroups.at(styleGroupId)) {
+        for (auto const &[key, feature]: featureGroups[styleGroupId]) {
             auto const &context = EvaluationContext(zoomIdentifier, dpFactor, feature, featureStateManager);
-            auto &style = reusableLineStyles.at(styleGroupId).at(i);
+            auto &style = reusableLineStyles[styleGroupId][i];
 
             // color
             auto color = inZoomRange ? lineDescription->style.getLineColor(context) : Color(0.0, 0.0, 0.0, 0.0);
@@ -184,7 +184,7 @@ void Tiled2dMapVectorLineTile::update() {
             }
 
             // offset
-            auto offset = inZoomRange ? lineDescription->style.getLineOffset(context) : 0.0;
+            auto offset = inZoomRange ? lineDescription->style.getLineOffset(context, width) : 0.0;
             if(offset != style.offset) {
                 style.offset = offset;
                 needsUpdate = true;

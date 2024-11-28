@@ -211,46 +211,37 @@ void MapCamera3d::moveToCenterPosition(const ::Coord &centerPosition, bool anima
     }
 }
 
-void MapCamera3d::moveToBoundingBox(const RectCoord &boundingBox, float paddingPc, bool animated, std::optional<double> minZoom,
-                                    std::optional<double> maxZoom) {
-    if (cameraFrozen)
+void MapCamera3d::moveToBoundingBox(const RectCoord &boundingBox, float paddingPc, bool animated, std::optional<double> minZoom, std::optional<double> maxZoom) {
+    if (cameraFrozen) {
         return;
-    RectCoord mapSystemBBox = conversionHelper->convertRect(mapCoordinateSystem.identifier, boundingBox);
-    float newLeft = mapSystemBBox.topLeft.x + paddingPc * (mapSystemBBox.topLeft.x - mapSystemBBox.bottomRight.x);
-    float newRight = mapSystemBBox.bottomRight.x + paddingPc * (mapSystemBBox.bottomRight.x - mapSystemBBox.topLeft.x);
-    float newTop = mapSystemBBox.topLeft.y + paddingPc * (mapSystemBBox.topLeft.y - mapSystemBBox.bottomRight.y);
-    float newBottom = mapSystemBBox.bottomRight.y + paddingPc * (mapSystemBBox.bottomRight.y - mapSystemBBox.topLeft.y);
-    Vec2F centerAABBox = Vec2F(newLeft + 0.5 * (newRight - newLeft), newTop + 0.5 * (newBottom - newTop));
-
-    Coord targetCenterNotBC = Coord(mapCoordinateSystem.identifier, centerAABBox.x, centerAABBox.y, 0.0);
-
-    Vec2F caTopLeft = Vec2FHelper::rotate(Vec2F(newLeft, newTop), centerAABBox, -angle);
-    Vec2F caTopRight = Vec2FHelper::rotate(Vec2F(newRight, newTop), centerAABBox, -angle);
-    Vec2F caBottomLeft = Vec2FHelper::rotate(Vec2F(newLeft, newBottom), centerAABBox, -angle);
-    Vec2F caBottomRight = Vec2FHelper::rotate(Vec2F(newRight, newBottom), centerAABBox, -angle);
-
-    float caMinX = std::min(std::min(std::min(caTopLeft.x, caTopRight.x), caBottomLeft.x), caBottomRight.x);
-    float caMaxX = std::max(std::max(std::max(caTopLeft.x, caTopRight.x), caBottomLeft.x), caBottomRight.x);
-    float caMinY = std::min(std::min(std::min(caTopLeft.y, caTopRight.y), caBottomLeft.y), caBottomRight.y);
-    float caMaxY = std::max(std::max(std::max(caTopLeft.y, caTopRight.y), caBottomLeft.y), caBottomRight.y);
-
-    float caXSpan = caMaxX - caMinX;
-    float caYSpan = caMaxY - caMinY;
-
-    Vec2I viewSize = mapInterface->getRenderingContext()->getViewportSize();
-
-    double caZoomX = caXSpan / ((viewSize.x - paddingLeft - paddingRight) * screenPixelAsRealMeterFactor);
-    double caZoomY = caYSpan / ((viewSize.y - paddingTop - paddingBottom) * screenPixelAsRealMeterFactor);
-    double targetZoom = std::max(caZoomX, caZoomY);
-
-    if (minZoom.has_value()) {
-        targetZoom = std::max(targetZoom, *minZoom);
-    }
-    if (maxZoom.has_value()) {
-        targetZoom = std::min(targetZoom, *maxZoom);
     }
 
-    moveToCenterPositionZoom(targetCenterNotBC, targetZoom, animated);
+    assert(boundingBox.topLeft.systemIdentifier == 4326);
+
+    Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
+
+    auto distance = calculateDistance(boundingBox.topLeft.y, boundingBox.topLeft.x, boundingBox.bottomRight.y, boundingBox.bottomRight.x);
+    auto pFactor = 1.0 + 2.0 * paddingPc;
+    distance = Vec2F(distance.x * pFactor, distance.y * pFactor);
+    auto zoom = zoomForMeterWidth(sizeViewport, distance);
+
+    auto x = 0.5 * boundingBox.topLeft.x + 0.5 * boundingBox.bottomRight.x;
+    auto y = 0.5 * boundingBox.topLeft.y + 0.5 * boundingBox.bottomRight.y;
+    auto z = 0.5 * boundingBox.topLeft.z + 0.5 * boundingBox.bottomRight.z;
+
+    auto center = Coord(boundingBox.topLeft.systemIdentifier, x, y, z);
+    auto p = valueForZoom(cameraZoomConfig.pitchInterpolationValues, zoom);
+
+    auto tanP = tan(p * M_PI / 180.0);
+    auto f = tanP * (getCameraDistance(sizeViewport, zoom) * 6378137.0) * 0.5;
+
+    auto deltaLon = pFactor * abs(boundingBox.topLeft.y - boundingBox.bottomRight.y);
+    auto lengthLon = distance.y;
+
+    auto deltaLonF = (deltaLon/lengthLon) * f;
+    center.y -= 0.5 * deltaLonF;
+
+    moveToCenterPositionZoom(center, zoom, animated);
 }
 
 ::Coord MapCamera3d::getCenterPosition() {
@@ -442,7 +433,7 @@ std::optional<std::tuple<std::vector<double>, std::vector<double>, Vec3D>> MapCa
     const double latitude = focusCoord.y;  // 2*atan(exp(py / R)) - 3.1415926 / 2;
 
     const double focusPointAltitude = focusCoord.z;
-    double cameraDistance = getCameraDistance(sizeViewport);
+    double cameraDistance = getCameraDistance(sizeViewport, zoom);
     double fovy = getCameraFieldOfView(); // 45 // zoom / 70800;
     const double minCameraDistance = 1.05;
     if (cameraDistance < minCameraDistance) {
@@ -542,12 +533,10 @@ Vec3D MapCamera3d::getOrigin() {
 }
 
 // Funktion zur Berechnung der Koeffizienten der projizierten Ellipse
-std::vector<double> MapCamera3d::computeEllipseCoefficients() {
+void MapCamera3d::computeEllipseCoefficients(std::vector<double> &coefficients) {
     std::vector<double> tmp = VectorHelper::clone(vpMatrixD);
     MatrixD::translateM(tmp, 0, -origin.x, -origin.y, -origin.z);
-    std::vector<double> newInverseMatrix(16, 0.0);
-    gluInvertMatrix(tmp, newInverseMatrix);
-    return newInverseMatrix;
+    gluInvertMatrix(tmp, coefficients);
 }
 
 std::optional<std::vector<double>> MapCamera3d::getLastVpMatrixD() {
@@ -1710,16 +1699,16 @@ void MapCamera3d::updateZoom(double zoom_) {
 }
 
 double MapCamera3d::getCameraVerticalDisplacement() {
-    return valueForZoom(cameraZoomConfig.verticalDisplacementInterpolationValues);
+    return valueForZoom(cameraZoomConfig.verticalDisplacementInterpolationValues, zoom);
 }
 
 double MapCamera3d::getCameraPitch() {
-    return valueForZoom(cameraZoomConfig.pitchInterpolationValues);
+    return valueForZoom(cameraZoomConfig.pitchInterpolationValues, zoom);
 }
 
 double MapCamera3d::getCameraFieldOfView() { return 42; }
 
-double MapCamera3d::getCameraDistance(Vec2I sizeViewport) {
+double MapCamera3d::getCameraDistance(Vec2I sizeViewport, double zoom) {
     double f = getCameraFieldOfView();
     double w = (double)sizeViewport.y;
     double pixelsPerMeter = this->screenDensityPpi / 0.0254;
@@ -1728,7 +1717,30 @@ double MapCamera3d::getCameraDistance(Vec2I sizeViewport) {
     return d / R;
 }
 
-float MapCamera3d::valueForZoom(const CameraInterpolation &interpolator) {
+double MapCamera3d::zoomForMeterWidth(Vec2I sizeViewport, Vec2F sizeMeters) {
+    double pixelsPerMeter = this->screenDensityPpi / 0.0254;
+    const double vpr = (double)sizeViewport.x / (double)sizeViewport.y;
+
+    double fy = getCameraFieldOfView();
+    double halfAngleRadianY = fy * 0.5 * M_PI / 180.0;
+
+    double fx = 2 * atan(vpr * tan(halfAngleRadianY));
+    double halfAngleRadianX = fx * 0.5 * M_PI / 180.0;
+
+    double metersX = sizeMeters.x * 0.5;
+    double metersY = sizeMeters.y * 0.5;
+    double wX = sizeViewport.x;
+    double wY = sizeViewport.y;
+
+    double dx = metersX / tan(halfAngleRadianX);
+    double zoomX = 2.0 * dx * pixelsPerMeter * std::tan(halfAngleRadianX) / wX;
+    double dy = metersY / tan(halfAngleRadianY) * vpr;
+    double zoomY = 2.0 * dy * pixelsPerMeter * std::tan(halfAngleRadianY) / wY;
+
+    return std::max(zoomX, zoomY);
+}
+
+float MapCamera3d::valueForZoom(const CameraInterpolation &interpolator, double zoom) {
     if (interpolator.stops.size() == 0) {
         return 0;
     }
@@ -1762,4 +1774,39 @@ float MapCamera3d::valueForZoom(const CameraInterpolation &interpolator) {
 #else
     __builtin_unreachable();
 #endif
+}
+
+// Convert degrees to radians
+double toRadians(double degrees) {
+    return degrees * M_PI / 180.0;
+}
+
+// Haversine formula to calculate distance between two lat/lon points
+double MapCamera3d::haversineDistance(double lat1, double lon1, double lat2, double lon2) {
+    double lat1Rad = lat1 * M_PI / 180.0;
+    double lon1Rad = lon1 * M_PI / 180.0;
+    double lat2Rad = lat2 * M_PI / 180.0;
+    double lon2Rad = lon2 * M_PI / 180.0;
+
+    double deltaLat = lat2Rad - lat1Rad;
+    double deltaLon = lon2Rad - lon1Rad;
+
+    double a = std::sin(deltaLat / 2) * std::sin(deltaLat / 2) +
+               std::cos(lat1Rad) * std::cos(lat2Rad) *
+               std::sin(deltaLon / 2) * std::sin(deltaLon / 2);
+
+    double c = 2 * std::atan2(std::sqrt(a), std::sqrt(1 - a));
+    return 6378137.0 * c;
+}
+
+// Calculate the maximum distance for the bounding box
+Vec2F MapCamera3d::calculateDistance(double latTopLeft, double lonTopLeft, double latBottomRight, double lonBottomRight) {
+    // Width distance (horizontal distance)
+    double width = haversineDistance(latTopLeft, lonTopLeft, latTopLeft, lonBottomRight);
+
+    // Height distance (vertical distance)
+    double height = haversineDistance(latTopLeft, lonTopLeft, latBottomRight, lonTopLeft);
+
+    // Return the maximum of the two distances
+    return Vec2F(width, height);
 }

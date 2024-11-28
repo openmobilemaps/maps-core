@@ -12,13 +12,12 @@ import Foundation
 import MapCoreSharedModule
 import Metal
 
-class TextInstancedShader: BaseShader, @unchecked Sendable {
+class MaskShader: BaseShader, @unchecked Sendable {
 
-    public let isUnitSphere: Bool
+    private var stencilState: MTLDepthStencilState?
 
-    init(unitSphere: Bool = false) {
-        self.isUnitSphere = unitSphere
-        super.init(shader: unitSphere ? .unitSphereTextInstancedShader : .textInstancedShader)
+    override init(shader: PipelineType = .maskShader) {
+        super.init(shader: shader)
     }
 
     override func setupProgram(_: MCRenderingContextInterface?) {
@@ -31,10 +30,6 @@ class TextInstancedShader: BaseShader, @unchecked Sendable {
         guard let pipeline else { return }
         context.setRenderPipelineStateIfNeeded(pipeline)
     }
+
 }
 
-extension TextInstancedShader: MCTextInstancedShaderInterface {
-    func asShaderProgram() -> MCShaderProgramInterface? {
-        self
-    }
-}

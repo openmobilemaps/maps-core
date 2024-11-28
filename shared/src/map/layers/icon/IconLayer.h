@@ -29,8 +29,13 @@ struct IconScaleAnimation {
     
     Vec2F initialSize = Vec2F(0.0,0.0);
     int32_t repetitions = 0.0;
+    double from = 0.0;
+    double to = 0.0;
+    double duration = 0.0;
+    std::string identifier;
     std::shared_ptr<AnimationInterface> animation = nullptr;
 };
+
 
 class IconLayer : public IconLayerInterface,
                   public SimpleLayerInterface,
@@ -110,6 +115,8 @@ class IconLayer : public IconLayerInterface,
     setupIconObjects(const std::vector<std::pair<std::shared_ptr<IconInfoInterface>, std::shared_ptr<IconLayerObject>>>
                          &iconObjects);
 
+    void addScaleAnimation(const IconScaleAnimation& iconScaleAnimation);
+
     std::vector<std::shared_ptr<IconInfoInterface>> getIconsAtPosition(const ::Vec2F &posScreen);
 
     const static int32_t SUBDIVISION_FACTOR_3D_DEFAULT = 2;
@@ -128,6 +135,9 @@ class IconLayer : public IconLayerInterface,
 
     std::recursive_mutex addingQueueMutex;
     std::vector<std::shared_ptr<IconInfoInterface>> addingQueue;
+
+    std::recursive_mutex scaleAddingQueueMutex;
+    std::vector<IconScaleAnimation> scaleAnimationAddingQueue;
 
     std::atomic<bool> isHidden;
     std::atomic<bool> isLayerClickable = true;

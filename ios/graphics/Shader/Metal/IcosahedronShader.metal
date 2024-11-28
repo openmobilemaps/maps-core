@@ -41,14 +41,14 @@ icosahedronVertexShader(const IcosahedronVertexIn vertexIn [[stage_in]],
     return out;
 }
 
-fragment float4
+fragment half4
 icosahedronFragmentShader(IcosahedronVertexOut in [[stage_in]],
-                          constant float4 &color [[buffer(1)]])
+                          constant half &color [[buffer(1)]])
 {
     if (in.value < 0.01) {
         discard_fragment();
-        return float4(0,0,0,0);
+        return half4(0,0,0,0);
     }
-    float alpha = 0.6;
-    return mix(float4(float3(0.149, 0.0, 0.941) * alpha, alpha), float4(float3(0.51, 1.0, 0.36) * alpha, alpha), in.value);
+    half alpha = 0.6;
+    return mix(half4(half3(0.149, 0.0, 0.941) * alpha, alpha), half4(half3(0.51, 1.0, 0.36) * alpha, alpha), in.value);
 }

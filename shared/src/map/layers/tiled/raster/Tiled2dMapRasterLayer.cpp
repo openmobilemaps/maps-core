@@ -291,9 +291,13 @@ void Tiled2dMapRasterLayer::onTilesUpdated(const std::string &layerName, VectorS
             }
 
             for (const auto &newMaskEntry : newTileMasks) {
-                if (tileMaskMap.count(newMaskEntry.first) > 0) {
-                    obsoleteMaskObjects.emplace_back(tileMaskMap.at(newMaskEntry.first).getGraphicsMaskObject());
+                const auto &entryIt = tileMaskMap.find(newMaskEntry.first);
+
+                if (entryIt != tileMaskMap.end()) {
+                    obsoleteMaskObjects.emplace_back(entryIt->second.getGraphicsMaskObject());
+                    entryIt->second = newMaskEntry.second;
                 }
+
                 tileMaskMap[newMaskEntry.first] = newMaskEntry.second;
                 newMaskObjects.emplace_back(newMaskEntry.second.getGraphicsMaskObject());
             }
@@ -437,7 +441,6 @@ void Tiled2dMapRasterLayer::generateRenderPasses() {
             } else {
                 renderObjects.push_back(renderObject);
             }
-
         }
 
         if (!renderObjects.empty()) {

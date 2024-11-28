@@ -75,7 +75,7 @@ extension PipelineDescriptorFactory {
     }
 }
 
-public struct Pipeline: Codable, CaseIterable {
+public struct Pipeline: Codable, CaseIterable, Hashable {
     let type: PipelineType
     let blendMode: MCBlendMode
 
@@ -84,12 +84,15 @@ public struct Pipeline: Codable, CaseIterable {
         self.blendMode = blendMode
     }
 
-    public init?(json: String) {
-        guard let data = json.data(using: .utf8),
-              let obj = try? JSONDecoder().decode(Pipeline.self, from: data) else {
-            return nil
-        }
-        self = obj
+    // Conform to `Hashable` by implementing the `hash(into:)` method
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(type)
+        hasher.combine(blendMode)
+    }
+
+    // Conform to `Equatable` (needed for `Hashable`)
+    public static func == (lhs: Pipeline, rhs: Pipeline) -> Bool {
+        return lhs.type == rhs.type && lhs.blendMode == rhs.blendMode
     }
 
     public static var allCases: [Pipeline] {
@@ -98,22 +101,6 @@ public struct Pipeline: Codable, CaseIterable {
                 Pipeline(type: type, blendMode: blendMode)
             }
         }.joined())
-    }
-
-    public var json: String {
-        do {
-            let encoder = JSONEncoder()
-            encoder.outputFormatting = .sortedKeys
-
-            let jsonData = try encoder.encode(self)
-
-            guard let jsonString = String(data: jsonData, encoding: .utf8) else {
-                fatalError("unable to encode Pipeline")
-            }
-            return jsonString
-        } catch {
-            fatalError("An error occurred while encoding Pipeline: \(error)")
-        }
     }
 }
 
@@ -126,6 +113,7 @@ public enum PipelineType: String, CaseIterable, Codable {
     case polygonStripedGroupShader
     case polygonPatternGroupShader
     case polygonPatternFadeInGroupShader
+    case maskShader
     case colorShader
     case roundColorShader
     case clearStencilShader
@@ -150,6 +138,7 @@ public enum PipelineType: String, CaseIterable, Codable {
             case .polygonStripedGroupShader: return "Polygon Group (striped) shader"
             case .polygonPatternGroupShader: return "Polygon Group Pattern shader"
             case .polygonPatternFadeInGroupShader: return "Polygon Group Pattern (fade in) shader"
+            case .maskShader: return "Mask shader"
             case .colorShader: return "Color shader"
             case .roundColorShader: return "Round color shader"
             case .clearStencilShader: return "Clear stencil shader"
@@ -166,6 +155,15 @@ public enum PipelineType: String, CaseIterable, Codable {
         }
     }
 
+    var vertexShaderUsesModelMatrix: Bool {
+        switch self {
+            case .rasterShader, .roundColorShader, .unitSphereRoundColorShader:
+                return true
+            default:
+                return false
+        }
+    }
+
     var vertexShader: String {
         switch self {
             case .alphaShader: return "baseVertexShader"
@@ -176,16 +174,17 @@ public enum PipelineType: String, CaseIterable, Codable {
             case .polygonStripedGroupShader: return "polygonStripedGroupVertexShader"
             case .polygonPatternGroupShader: return "polygonPatternGroupVertexShader"
             case .polygonPatternFadeInGroupShader: return "polygonPatternGroupVertexShader"
+            case .maskShader: return "colorVertexShader"
             case .colorShader: return "colorVertexShader"
-            case .roundColorShader: return "baseVertexShader"
+            case .roundColorShader: return "baseVertexShaderModel"
             case .clearStencilShader: return "stencilClearVertexShader"
             case .textShader: return "textVertexShader"
             case .textInstancedShader: return "textInstancedVertexShader"
-            case .rasterShader: return "baseVertexShader"
+            case .rasterShader: return "baseVertexShaderModel"
             case .stretchShader: return "stretchVertexShader"
             case .stretchInstancedShader: return "stretchInstancedVertexShader"
             case .unitSphereAlphaShader: return "baseVertexShader"
-            case .unitSphereRoundColorShader: return "baseVertexShader"
+            case .unitSphereRoundColorShader: return "baseVertexShaderModel"
             case .unitSphereAlphaInstancedShader: return "unitSphereAlphaInstancedVertexShader"
             case .unitSphereTextInstancedShader: return "unitSphereTextInstancedVertexShader"
             case .sphereEffectShader: return "baseVertexShader"
@@ -202,6 +201,7 @@ public enum PipelineType: String, CaseIterable, Codable {
             case .polygonStripedGroupShader: return "polygonGroupStripedFragmentShader"
             case .polygonPatternGroupShader: return "polygonPatternGroupFragmentShader"
             case .polygonPatternFadeInGroupShader: return "polygonPatternGroupFadeInFragmentShader"
+            case .maskShader: return "maskFragmentShader"
             case .colorShader: return "colorFragmentShader"
             case .roundColorShader: return "roundColorFragmentShader"
             case .clearStencilShader: return "stencilClearFragmentShader"
@@ -229,7 +229,7 @@ public enum PipelineType: String, CaseIterable, Codable {
                  .polygonPatternFadeInGroupShader,
                  .polygonStripedGroupShader:
                 return Vertex4F.descriptor
-            case .colorShader:
+            case .colorShader, .maskShader:
                 return Vertex3F.descriptor
             case .rasterShader,
                  .clearStencilShader,
@@ -245,18 +245,16 @@ public enum PipelineType: String, CaseIterable, Codable {
     }
 }
 
-public class PipelineLibrary: StaticMetalLibrary<String, MTLRenderPipelineState>, @unchecked Sendable {
+public class PipelineLibrary: StaticMetalLibrary<Pipeline, MTLRenderPipelineState>, @unchecked Sendable {
     init(device: MTLDevice) throws {
-        try super.init(Pipeline.allCases.map(\.json)) { key -> MTLRenderPipelineState in
+        try super.init(
+            Pipeline.allCases.map(\.self)) { pipeline -> MTLRenderPipelineState in
             do {
-                guard let pipeline = Pipeline(json: key) else {
-                    throw LibraryError.invalidKey
-                }
                 let pipelineDescriptor = PipelineDescriptorFactory.pipelineDescriptor(pipeline: pipeline)
                 return try device.makeRenderPipelineState(descriptor: pipelineDescriptor)
             } catch {
                 // Log the JSON (key) and the error
-                Logger().error("Error creating pipeline for JSON: \(key, privacy: .public) error: \(error, privacy: .public)")
+                Logger().error("Error creating pipeline for: \(pipeline.type.rawValue, privacy: .public), \(pipeline.blendMode.rawValue, privacy: .public) error: \(error, privacy: .public)")
                 throw error
             }
         }

@@ -100,10 +100,10 @@ public:
         return lineCapEvaluator.getResult(context, defaultValue);
     }
 
-    double getLineOffset(const EvaluationContext &context) {
+    double getLineOffset(const EvaluationContext &context, double width) {
         static const double defaultValue = 0.0;
         double offset = lineOffsetEvaluator.getResult(context, defaultValue);
-        return std::min(offset * context.dpFactor, getLineWidth(context) * 0.5);
+        return std::min(offset * context.dpFactor, width * 0.5);
     }
     
     bool getLineDotted(const EvaluationContext &context) {

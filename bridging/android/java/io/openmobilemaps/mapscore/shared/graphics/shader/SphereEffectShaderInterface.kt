@@ -10,7 +10,7 @@ abstract class SphereEffectShaderInterface {
 
     abstract fun asShaderProgramInterface(): ShaderProgramInterface
 
-    abstract fun setEllipse(coefficients: ArrayList<Double>)
+    abstract fun setEllipse(coefficients: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
 
     public class CppProxy : SphereEffectShaderInterface {
         private val nativeRef: Long
@@ -33,10 +33,10 @@ abstract class SphereEffectShaderInterface {
         }
         private external fun native_asShaderProgramInterface(_nativeRef: Long): ShaderProgramInterface
 
-        override fun setEllipse(coefficients: ArrayList<Double>) {
+        override fun setEllipse(coefficients: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             native_setEllipse(this.nativeRef, coefficients)
         }
-        private external fun native_setEllipse(_nativeRef: Long, coefficients: ArrayList<Double>)
+        private external fun native_setEllipse(_nativeRef: Long, coefficients: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
     }
 }

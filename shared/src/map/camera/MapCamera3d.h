@@ -168,7 +168,7 @@ class MapCamera3d : public MapCameraInterface,
 
     void notifyListenerBoundsChange() override;
 
-    std::vector<double> computeEllipseCoefficients();
+    void computeEllipseCoefficients(std::vector<double>& coefficients);
 
     bool coordIsFarAwayFromFocusPoint(const ::Coord &coord);
 
@@ -186,10 +186,14 @@ class MapCamera3d : public MapCameraInterface,
 
     virtual void setupInertia();
 
-    double getCameraDistance(Vec2I sizeViewport);
+    double getCameraDistance(Vec2I sizeViewport, double zoom);
     double getCameraFieldOfView();
     double getCameraVerticalDisplacement();
     double getCameraPitch();
+
+    Vec2F calculateDistance(double latTopLeft, double lonTopLeft, double latBottomRight, double lonBottomRight);
+    double haversineDistance(double lat1, double lon1, double lat2, double lon2);
+    double zoomForMeterWidth(Vec2I sizeViewport, Vec2F sizeMeters);
 
     std::recursive_mutex listenerMutex;
     std::set<std::shared_ptr<MapCameraListenerInterface>> listeners;
@@ -268,7 +272,7 @@ class MapCamera3d : public MapCameraInterface,
 
     void notifyListeners(const int &listenerType);
 
-    float valueForZoom(const CameraInterpolation &interpolator);
+    float valueForZoom(const CameraInterpolation &interpolator, double zoom);
 
     // MARK: Animations
 

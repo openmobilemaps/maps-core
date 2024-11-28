@@ -140,7 +140,6 @@ void IconLayer::addIcons(const std::vector<std::shared_ptr<IconInfoInterface>> &
     auto mapInterface = lockSelfPtr ? lockSelfPtr->mapInterface : nullptr;
     auto objectFactory = mapInterface ? mapInterface->getGraphicsObjectFactory() : nullptr;
     auto shaderFactory = mapInterface ? mapInterface->getShaderFactory() : nullptr;
-    auto conversionHelper = mapInterface ? mapInterface->getCoordinateConverterHelper() : nullptr;
     auto scheduler = mapInterface ? mapInterface->getScheduler() : nullptr;
     if (!objectFactory || !shaderFactory || !scheduler) {
         std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
@@ -257,9 +256,8 @@ void IconLayer::invalidate() { setIcons(getIcons()); }
 void IconLayer::update() {
     auto lockSelfPtr = shared_from_this();
     auto mapInterface = lockSelfPtr ? lockSelfPtr->mapInterface : nullptr;
-    auto conversionHelper = mapInterface ? mapInterface->getCoordinateConverterHelper() : nullptr;
     auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
-    if (!conversionHelper || !renderingContext) {
+    if (!renderingContext) {
         return;
     }
 
@@ -297,8 +295,7 @@ std::vector<std::shared_ptr<::RenderPassInterface>> IconLayer::buildRenderPasses
     auto lockSelfPtr = shared_from_this();
     auto mapInterface = lockSelfPtr ? lockSelfPtr->mapInterface : nullptr;
     auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
-    auto conversionHelper = mapInterface ? mapInterface->getCoordinateConverterHelper() : nullptr;
-    if (!camera || !conversionHelper) {
+    if (!camera) {
         return {};
     }
 
@@ -362,7 +359,16 @@ void IconLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface, int32
             addingQueue.clear();
             addIcons(icons);
         }
+
+        std::scoped_lock<std::recursive_mutex> lock2(scaleAddingQueueMutex);
+        if (!scaleAnimationAddingQueue.empty()) {
+            for (auto const &a : scaleAnimationAddingQueue) {
+                addScaleAnimation(a);
+            }
+            scaleAnimationAddingQueue.clear();
+        }
     }
+
     if (isLayerClickable) {
         mapInterface->getTouchHandler()->insertListener(shared_from_this(), layerIndex);
     }
@@ -533,33 +539,58 @@ void IconLayer::animateIconScale(const std::string & identifier, float from, flo
     auto lockSelfPtr = shared_from_this();
     auto mapInterface = lockSelfPtr ? lockSelfPtr->mapInterface : nullptr;
 
-    if(!mapInterface) { return; }
+    auto animation = IconScaleAnimation();
+    animation.identifier = identifier;
+    animation.from = from;
+    animation.to = to;
+    animation.duration = duration;
+    animation.repetitions = repetitions;
 
+    if(!mapInterface) {
+        std::lock_guard<std::recursive_mutex> lock(scaleAddingQueueMutex);
+        scaleAnimationAddingQueue.push_back(animation);
+        return;
+    }
+
+    addScaleAnimation(animation);
+}
+
+void IconLayer::addScaleAnimation(const IconScaleAnimation& iconScaleAnimation) {
+    auto lockSelfPtr = shared_from_this();
+    auto mapInterface = lockSelfPtr ? lockSelfPtr->mapInterface : nullptr;
+
+    if(!mapInterface) {
+        return;
+    }
+
+    auto scaleAnimation = iconScaleAnimation;
     auto initialSize = Vec2F(0.0, 0.0);
 
-    if(scaleAnimations.find(identifier) != scaleAnimations.end()) {
-        initialSize = scaleAnimations[identifier].initialSize;
+    auto it = scaleAnimations.find(scaleAnimation.identifier);
+    if(it != scaleAnimations.end()) {
+        initialSize = it->second.initialSize;
     } else {
         for(auto& icon : icons) {
-            if(icon.first->getIdentifier() == identifier) {
+            if(icon.first->getIdentifier() == scaleAnimation.identifier) {
                 initialSize = icon.first->getIconSize();
+                break;
             }
         }
     }
 
-    auto scaleAnimation = IconScaleAnimation();
-    scaleAnimation.repetitions = repetitions;
     scaleAnimation.initialSize = initialSize;
+
+    auto id = scaleAnimation.identifier;
 
     std::weak_ptr<IconLayer> weakSelf = std::static_pointer_cast<IconLayer>(shared_from_this());
     std::lock_guard<std::recursive_mutex> lock(scaleAnimationMutex);
 
-    auto animation = std::make_shared<DoubleAnimation>(duration, from, to, InterpolatorFunction::EaseInOut,
-            [weakSelf, initialSize, identifier](double scale) {
+    auto animation = std::make_shared<DoubleAnimation>(scaleAnimation.duration, scaleAnimation.from, scaleAnimation.to, InterpolatorFunction::EaseInOut,
+            [weakSelf, id, scaleAnimation](double scale) {
               if (auto selfPtr = weakSelf.lock()) {
                   for(auto& icon : selfPtr->icons) {
-                      if(icon.first->getIdentifier() == identifier) {
-                          icon.first->setIconSize(Vec2F(initialSize.x * scale, initialSize.y * scale));
+                      if(icon.first->getIdentifier() == scaleAnimation.identifier) {
+                          icon.first->setIconSize(Vec2F(scaleAnimation.initialSize.x * scale, scaleAnimation.initialSize.y * scale));
                       }
                   }
 
@@ -569,16 +600,20 @@ void IconLayer::animateIconScale(const std::string & identifier, float from, flo
                   }
               }
           },
-          [weakSelf, identifier, from, to, duration] {
+          [weakSelf, scaleAnimation] {
               if (auto selfPtr = weakSelf.lock()) {
                   auto& sa = selfPtr->scaleAnimations;
 
-                  auto it = sa.find(identifier);
+                  auto it = sa.find(scaleAnimation.identifier);
                   if(it != sa.end()) {
-                      auto rep = (*it).second.repetitions;
+                      auto &sa = (*it).second;
+                      auto rep = sa.repetitions;
                       if (rep > 0 || rep == -1) {
-                          auto newRep = rep == -1 ? -1 : (rep-1);
-                          selfPtr->animateIconScale(identifier, to, from, duration, rep);
+                          sa.repetitions = rep == -1 ? -1 : (rep-1);
+                          auto to = sa.to;
+                          sa.to = sa.from;
+                          sa.from = to;
+                          selfPtr->addScaleAnimation(sa);
                       } else {
                           it->second.animation = nullptr;
                       }
@@ -587,7 +622,7 @@ void IconLayer::animateIconScale(const std::string & identifier, float from, flo
           });
 
     scaleAnimation.animation = animation;
-    scaleAnimations[identifier] = scaleAnimation;
+    scaleAnimations[scaleAnimation.identifier] = scaleAnimation;
 
     animation->start();
     mapInterface->invalidate();
