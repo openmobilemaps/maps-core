@@ -100,7 +100,7 @@ unitSphereTextInstancedFragmentShader(TextInstancedVertexOut in [[stage_in]],
 {
     constant TextInstanceStyle *style = (constant TextInstanceStyle *)(styles + in.styleIndex);
 
-  if (style->color.a == 0 || style->haloColor.a == 0.0 || in.alpha == 0.0) {
+  if ((style->color.a == 0 && !isHalo) || (style->haloColor.a == 0.0 && isHalo) || in.alpha == 0.0) {
         discard_fragment();
     }
 
@@ -136,7 +136,7 @@ unitSphereTextInstancedFragmentShader(TextInstancedVertexOut in [[stage_in]],
         return half4(half3(style->haloColor.rgb), 1.0) * edgeAlpha;
 
     } else {
-        edgeAlpha = innerFallOff * style->haloColor.a;
+        edgeAlpha = innerFallOff * style->color.a;
 
         return half4(half3(style->color.rgb), 1.0) * edgeAlpha;
     }
