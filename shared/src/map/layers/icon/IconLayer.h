@@ -108,6 +108,8 @@ class IconLayer : public IconLayerInterface,
     /** scale an icon, use repetitions for pulsating effect (repetions == -1 -> forever) */
     virtual void animateIconScale(const std::string & identifier, float from, float to, float duration, int32_t repetitions) override;
 
+    virtual void setRenderPassIndex(int32_t index) override;
+
   private:
     virtual void clearSync(const std::vector<std::pair<std::shared_ptr<IconInfoInterface>, std::shared_ptr<IconLayerObject>>> &iconsToClear);
 
@@ -145,4 +147,6 @@ class IconLayer : public IconLayerInterface,
 
     std::map<std::string, IconScaleAnimation> scaleAnimations;
     std::recursive_mutex scaleAnimationMutex;
+
+    int32_t renderPassIndex = 0;
 };

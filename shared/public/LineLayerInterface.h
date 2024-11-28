@@ -4,6 +4,7 @@
 #pragma once
 
 #include "LayerInterface.h"
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <unordered_set>
@@ -39,4 +40,6 @@ public:
     virtual void setSelected(const std::unordered_set<std::string> & selectedIds) = 0;
 
     virtual void setLayerClickable(bool isLayerClickable) = 0;
+
+    virtual void setRenderPassIndex(int32_t index) = 0;
 };

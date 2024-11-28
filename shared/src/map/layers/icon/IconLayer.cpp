@@ -188,6 +188,15 @@ void IconLayer::addIcons(const std::vector<std::shared_ptr<IconInfoInterface>> &
         mapInterface->invalidate();
 }
 
+void IconLayer::setRenderPassIndex(int32_t index) {
+    renderPassIndex = index;
+    preGenerateRenderPasses();
+
+    if (mapInterface) {
+        mapInterface->invalidate();
+    }
+}
+
 void IconLayer::setupIconObjects(
     const std::vector<std::pair<std::shared_ptr<IconInfoInterface>, std::shared_ptr<IconLayerObject>>> &iconObjects) {
     auto mapInterface = this->mapInterface;
@@ -317,7 +326,7 @@ void IconLayer::preGenerateRenderPasses() {
     std::map<int, std::vector<std::shared_ptr<RenderObjectInterface>>> newRenderPassObjectMap;
     for (auto const &iconTuple : icons) {
         for (const auto &config : iconTuple.second->getRenderConfig()) {
-            newRenderPassObjectMap[config->getRenderIndex()].push_back(std::make_shared<RenderObject>(config->getGraphicsObject()));
+            newRenderPassObjectMap[renderPassIndex].push_back(std::make_shared<RenderObject>(config->getGraphicsObject()));
         }
     }
 
