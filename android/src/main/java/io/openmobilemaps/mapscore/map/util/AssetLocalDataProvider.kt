@@ -13,6 +13,7 @@ import io.openmobilemaps.mapscore.shared.map.loader.TextureLoaderResult
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.io.FileNotFoundException
 import java.io.IOException
 import java.nio.ByteBuffer
 
@@ -43,6 +44,9 @@ open class AssetLocalDataProvider(
         } catch (e: IOException) {
             Log.e(AssetLocalDataProvider::class.java.canonicalName, e.localizedMessage, e)
             null
+        } catch (e: FileNotFoundException) {
+            Log.e(AssetLocalDataProvider::class.java.canonicalName, e.localizedMessage, e)
+            null
         }
     }
 
@@ -57,6 +61,9 @@ open class AssetLocalDataProvider(
                 assetStream.close()
                 decodedTexture
             } catch (e: IOException) {
+                Log.e(AssetLocalDataProvider::class.java.canonicalName, e.localizedMessage, e)
+                null
+            } catch (e: FileNotFoundException) {
                 Log.e(AssetLocalDataProvider::class.java.canonicalName, e.localizedMessage, e)
                 null
             }
@@ -80,6 +87,9 @@ open class AssetLocalDataProvider(
                 assetStream.close()
                 json
             } catch (e: IOException) {
+                Log.e(AssetLocalDataProvider::class.java.canonicalName, e.localizedMessage, e)
+                null
+            } catch (e: FileNotFoundException) {
                 Log.e(AssetLocalDataProvider::class.java.canonicalName, e.localizedMessage, e)
                 null
             }
