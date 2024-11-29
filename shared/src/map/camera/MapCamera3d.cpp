@@ -93,7 +93,7 @@ void MapCamera3d::moveToCenterPositionZoom(const ::Coord &centerPosition, double
         return;
     inertia = std::nullopt;
     auto [focusPosition, focusZoom] =
-        getBoundsCorrectedCoords(conversionHelper->convert(focusPointPosition.systemIdentifier, centerPosition), zoom);
+            getBoundsCorrectedCoords(conversionHelper->convert(focusPointPosition.systemIdentifier, centerPosition), zoom);
 
     if (animated && bounds.topLeft.x == mapCoordinateSystem.bounds.topLeft.x &&
         bounds.bottomRight.x == mapCoordinateSystem.bounds.bottomRight.x) {
@@ -109,35 +109,35 @@ void MapCamera3d::moveToCenterPositionZoom(const ::Coord &centerPosition, double
         std::weak_ptr<MapCamera3d> weakSelf = std::static_pointer_cast<MapCamera3d>(shared_from_this());
         std::lock_guard<std::recursive_mutex> lock(animationMutex);
         coordAnimation = std::make_shared<CoordAnimation>(
-            cameraZoomConfig.animationDurationMs, focusPointPosition, focusPosition, centerPosition,
-            InterpolatorFunction::EaseInOut,
-            [weakSelf](Coord positionMapSystem) {
-                if (auto selfPtr = weakSelf.lock()) {
-                    assert(positionMapSystem.systemIdentifier == 4326);
-                    std::lock_guard<std::recursive_mutex> lock(selfPtr->paramMutex);
-                    selfPtr->focusPointPosition = positionMapSystem;
-                    selfPtr->clampCenterToPaddingCorrectedBounds();
-                    selfPtr->notifyListeners(ListenerType::BOUNDS);
-                    auto mapInterface = selfPtr->mapInterface;
-                    if (mapInterface) {
-                        mapInterface->invalidate();
+                cameraZoomConfig.animationDurationMs, focusPointPosition, focusPosition, centerPosition,
+                InterpolatorFunction::EaseInOut,
+                [weakSelf](Coord positionMapSystem) {
+                    if (auto selfPtr = weakSelf.lock()) {
+                        assert(positionMapSystem.systemIdentifier == 4326);
+                        std::lock_guard<std::recursive_mutex> lock(selfPtr->paramMutex);
+                        selfPtr->focusPointPosition = positionMapSystem;
+                        selfPtr->clampCenterToPaddingCorrectedBounds();
+                        selfPtr->notifyListeners(ListenerType::BOUNDS);
+                        auto mapInterface = selfPtr->mapInterface;
+                        if (mapInterface) {
+                            mapInterface->invalidate();
+                        }
                     }
-                }
-            },
-            [weakSelf] {
-                if (auto selfPtr = weakSelf.lock()) {
-                    assert(selfPtr->coordAnimation->endValue.systemIdentifier == 4326);
-                    std::lock_guard<std::recursive_mutex> lock(selfPtr->paramMutex);
-                    selfPtr->focusPointPosition = selfPtr->coordAnimation->endValue;
-                    selfPtr->clampCenterToPaddingCorrectedBounds();
-                    selfPtr->notifyListeners(ListenerType::BOUNDS);
-                    auto mapInterface = selfPtr->mapInterface;
-                    if (mapInterface) {
-                        mapInterface->invalidate();
+                },
+                [weakSelf] {
+                    if (auto selfPtr = weakSelf.lock()) {
+                        assert(selfPtr->coordAnimation->endValue.systemIdentifier == 4326);
+                        std::lock_guard<std::recursive_mutex> lock(selfPtr->paramMutex);
+                        selfPtr->focusPointPosition = selfPtr->coordAnimation->endValue;
+                        selfPtr->clampCenterToPaddingCorrectedBounds();
+                        selfPtr->notifyListeners(ListenerType::BOUNDS);
+                        auto mapInterface = selfPtr->mapInterface;
+                        if (mapInterface) {
+                            mapInterface->invalidate();
+                        }
+                        selfPtr->coordAnimation = nullptr;
                     }
-                    selfPtr->coordAnimation = nullptr;
-                }
-            });
+                });
         coordAnimation->start();
         setZoom(focusZoom, true);
         mapInterface->invalidate();
@@ -157,7 +157,7 @@ void MapCamera3d::moveToCenterPosition(const ::Coord &centerPosition, bool anima
         return;
     inertia = std::nullopt;
     auto [focusPosition, focusZoom] =
-        getBoundsCorrectedCoords(conversionHelper->convert(focusPointPosition.systemIdentifier, centerPosition), zoom);
+            getBoundsCorrectedCoords(conversionHelper->convert(focusPointPosition.systemIdentifier, centerPosition), zoom);
 
     if (animated && bounds.topLeft.x == mapCoordinateSystem.bounds.topLeft.x &&
         bounds.bottomRight.x == mapCoordinateSystem.bounds.bottomRight.x) {
@@ -173,33 +173,33 @@ void MapCamera3d::moveToCenterPosition(const ::Coord &centerPosition, bool anima
         std::weak_ptr<MapCamera3d> weakSelf = std::static_pointer_cast<MapCamera3d>(shared_from_this());
         std::lock_guard<std::recursive_mutex> lock(animationMutex);
         coordAnimation = std::make_shared<CoordAnimation>(
-            cameraZoomConfig.animationDurationMs, focusPointPosition, focusPosition, centerPosition,
-            InterpolatorFunction::EaseInOut,
-            [weakSelf](Coord positionMapSystem) {
-                if (auto selfPtr = weakSelf.lock()) {
-                    assert(positionMapSystem.systemIdentifier == 4326);
-                    selfPtr->focusPointPosition = positionMapSystem;
-                    selfPtr->clampCenterToPaddingCorrectedBounds();
-                    selfPtr->notifyListeners(ListenerType::BOUNDS);
-                    auto mapInterface = selfPtr->mapInterface;
-                    if (mapInterface) {
-                        mapInterface->invalidate();
+                cameraZoomConfig.animationDurationMs, focusPointPosition, focusPosition, centerPosition,
+                InterpolatorFunction::EaseInOut,
+                [weakSelf](Coord positionMapSystem) {
+                    if (auto selfPtr = weakSelf.lock()) {
+                        assert(positionMapSystem.systemIdentifier == 4326);
+                        selfPtr->focusPointPosition = positionMapSystem;
+                        selfPtr->clampCenterToPaddingCorrectedBounds();
+                        selfPtr->notifyListeners(ListenerType::BOUNDS);
+                        auto mapInterface = selfPtr->mapInterface;
+                        if (mapInterface) {
+                            mapInterface->invalidate();
+                        }
                     }
-                }
-            },
-            [weakSelf] {
-                if (auto selfPtr = weakSelf.lock()) {
-                    assert(selfPtr->coordAnimation->endValue.systemIdentifier == 4326);
-                    selfPtr->focusPointPosition = selfPtr->coordAnimation->endValue;
-                    selfPtr->clampCenterToPaddingCorrectedBounds();
-                    selfPtr->notifyListeners(ListenerType::BOUNDS);
-                    auto mapInterface = selfPtr->mapInterface;
-                    if (mapInterface) {
-                        mapInterface->invalidate();
+                },
+                [weakSelf] {
+                    if (auto selfPtr = weakSelf.lock()) {
+                        assert(selfPtr->coordAnimation->endValue.systemIdentifier == 4326);
+                        selfPtr->focusPointPosition = selfPtr->coordAnimation->endValue;
+                        selfPtr->clampCenterToPaddingCorrectedBounds();
+                        selfPtr->notifyListeners(ListenerType::BOUNDS);
+                        auto mapInterface = selfPtr->mapInterface;
+                        if (mapInterface) {
+                            mapInterface->invalidate();
+                        }
+                        selfPtr->coordAnimation = nullptr;
                     }
-                    selfPtr->coordAnimation = nullptr;
-                }
-            });
+                });
         coordAnimation->start();
         mapInterface->invalidate();
     } else {
@@ -238,7 +238,7 @@ void MapCamera3d::moveToBoundingBox(const RectCoord &boundingBox, float paddingP
     auto deltaLon = pFactor * abs(boundingBox.topLeft.y - boundingBox.bottomRight.y);
     auto lengthLon = distance.y;
 
-    auto deltaLonF = (deltaLon/lengthLon) * f;
+    auto deltaLonF = (deltaLon / lengthLon) * f;
     center.y -= 0.5 * deltaLonF;
 
     moveToCenterPositionZoom(center, zoom, animated);
@@ -260,18 +260,18 @@ void MapCamera3d::setZoom(double zoom, bool animated) {
         std::weak_ptr<MapCamera3d> weakSelf = std::static_pointer_cast<MapCamera3d>(shared_from_this());
         std::lock_guard<std::recursive_mutex> lock(animationMutex);
         zoomAnimation = std::make_shared<DoubleAnimation>(
-            cameraZoomConfig.animationDurationMs, this->zoom, targetZoom, InterpolatorFunction::EaseIn,
-            [weakSelf](double zoom) {
-                if (auto selfPtr = weakSelf.lock()) {
-                    selfPtr->setZoom(zoom, false);
-                }
-            },
-            [weakSelf, targetZoom] {
-                if (auto selfPtr = weakSelf.lock()) {
-                    selfPtr->setZoom(targetZoom, false);
-                    selfPtr->zoomAnimation = nullptr;
-                }
-            });
+                cameraZoomConfig.animationDurationMs, this->zoom, targetZoom, InterpolatorFunction::EaseIn,
+                [weakSelf](double zoom) {
+                    if (auto selfPtr = weakSelf.lock()) {
+                        selfPtr->setZoom(zoom, false);
+                    }
+                },
+                [weakSelf, targetZoom] {
+                    if (auto selfPtr = weakSelf.lock()) {
+                        selfPtr->setZoom(targetZoom, false);
+                        selfPtr->zoomAnimation = nullptr;
+                    }
+                });
         zoomAnimation->start();
         mapInterface->invalidate();
     } else {
@@ -336,7 +336,7 @@ void MapCamera3d::setPaddingLeft(float padding) {
     if (coordAnimation && coordAnimation->helperCoord.has_value()) {
         double targetZoom = (zoomAnimation) ? zoomAnimation->endValue : getZoom();
         const auto [adjPosition, adjZoom] =
-            getBoundsCorrectedCoords(adjustCoordForPadding(*coordAnimation->helperCoord, targetZoom), targetZoom);
+                getBoundsCorrectedCoords(adjustCoordForPadding(*coordAnimation->helperCoord, targetZoom), targetZoom);
         coordAnimation->endValue = adjPosition;
         if (zoomAnimation) {
             zoomAnimation->endValue = adjZoom;
@@ -352,7 +352,7 @@ void MapCamera3d::setPaddingRight(float padding) {
     if (coordAnimation && coordAnimation->helperCoord.has_value()) {
         double targetZoom = (zoomAnimation) ? zoomAnimation->endValue : getZoom();
         const auto [adjPosition, adjZoom] =
-            getBoundsCorrectedCoords(adjustCoordForPadding(*coordAnimation->helperCoord, targetZoom), targetZoom);
+                getBoundsCorrectedCoords(adjustCoordForPadding(*coordAnimation->helperCoord, targetZoom), targetZoom);
         coordAnimation->endValue = adjPosition;
         if (zoomAnimation) {
             zoomAnimation->endValue = adjZoom;
@@ -368,7 +368,7 @@ void MapCamera3d::setPaddingTop(float padding) {
     if (coordAnimation && coordAnimation->helperCoord.has_value()) {
         double targetZoom = (zoomAnimation) ? zoomAnimation->endValue : getZoom();
         const auto [adjPosition, adjZoom] =
-            getBoundsCorrectedCoords(adjustCoordForPadding(*coordAnimation->helperCoord, targetZoom), targetZoom);
+                getBoundsCorrectedCoords(adjustCoordForPadding(*coordAnimation->helperCoord, targetZoom), targetZoom);
         coordAnimation->endValue = adjPosition;
         if (zoomAnimation) {
             zoomAnimation->endValue = adjZoom;
@@ -384,7 +384,7 @@ void MapCamera3d::setPaddingBottom(float padding) {
     if (coordAnimation && coordAnimation->helperCoord.has_value()) {
         double targetZoom = (zoomAnimation) ? zoomAnimation->endValue : getZoom();
         const auto [adjPosition, adjZoom] =
-            getBoundsCorrectedCoords(adjustCoordForPadding(*coordAnimation->helperCoord, targetZoom), targetZoom);
+                getBoundsCorrectedCoords(adjustCoordForPadding(*coordAnimation->helperCoord, targetZoom), targetZoom);
         coordAnimation->endValue = adjPosition;
         if (zoomAnimation) {
             zoomAnimation->endValue = adjZoom;
@@ -439,7 +439,7 @@ std::optional<std::tuple<std::vector<double>, std::vector<double>, Vec3D>> MapCa
     if (cameraDistance < minCameraDistance) {
         double d = minCameraDistance * R;
         double pixelsPerMeter = this->screenDensityPpi / 0.0254;
-        double w = (double)sizeViewport.y;
+        double w = (double) sizeViewport.y;
         fovy = atan2(zoom * w / pixelsPerMeter / 2.0, d) * 2.0 / M_PI * 180.0;
 
         cameraDistance = minCameraDistance;
@@ -449,7 +449,7 @@ std::optional<std::tuple<std::vector<double>, std::vector<double>, Vec3D>> MapCa
     const double minD = cameraDistance - 1.0;
 
     // aspect ratio
-    const double vpr = (double)sizeViewport.x / (double)sizeViewport.y;
+    const double vpr = (double) sizeViewport.x / (double) sizeViewport.y;
     if (vpr > 1.0) {
         fovy /= vpr;
     }
@@ -666,7 +666,7 @@ RectCoord MapCamera3d::getRectFromViewport(const Vec2I &sizeViewport, const Coor
 void MapCamera3d::notifyListeners(const int &listenerType) {
     // TODO: Add back bounds listener as soon as visibleRect is implemented correctly
     std::optional<RectCoord> visibleRect =
-        (listenerType & ListenerType::BOUNDS) ? std::optional<RectCoord>(getVisibleRect()) : std::nullopt;
+            (listenerType & ListenerType::BOUNDS) ? std::optional<RectCoord>(getVisibleRect()) : std::nullopt;
 
     //    std::optional<RectCoord> visibleRect = std::nullopt;
 
@@ -707,7 +707,7 @@ void MapCamera3d::notifyListeners(const int &listenerType) {
     }
 
     std::lock_guard<std::recursive_mutex> lock(listenerMutex);
-    for (auto listener : listeners) {
+    for (auto listener: listeners) {
         if (listenerType & (ListenerType::BOUNDS)) {
 
             std::vector<float> viewMatrixF = VectorHelper::clone(viewMatrix);
@@ -742,7 +742,7 @@ bool MapCamera3d::onTouchDown(const ::Vec2F &posScreen) {
 #ifdef ANDROID
         {
             const auto [zeroVPMatrix, zeroInverseVPMatrix, zeroOrigin] =
-                *computeMatrices(Coord(CoordinateSystemIdentifiers::EPSG4326(), 0.0, 0.0, lastOnTouchDownFocusCoord->z), true);
+                    *computeMatrices(Coord(CoordinateSystemIdentifiers::EPSG4326(), 0.0, 0.0, lastOnTouchDownFocusCoord->z), true);
             lastOnTouchDownInverseVPMatrix = zeroInverseVPMatrix;
             lastOnTouchDownVPOrigin = zeroOrigin;
         }
@@ -805,7 +805,7 @@ bool MapCamera3d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
     }
     auto newTouchDownCoord = coordFromScreenPosition(lastOnTouchDownInverseVPMatrix, newScreenPos, lastOnTouchDownVPOrigin);
     auto lastOnTouchDownZeroCoord =
-        coordFromScreenPosition(lastOnTouchDownInverseVPMatrix, initialTouchDownPoint.value(), lastOnTouchDownVPOrigin);
+            coordFromScreenPosition(lastOnTouchDownInverseVPMatrix, initialTouchDownPoint.value(), lastOnTouchDownVPOrigin);
 #else
     auto newTouchDownCoord = coordFromScreenPosition(newScreenPos);
 #endif
@@ -883,7 +883,7 @@ bool MapCamera3d::onOneFingerDoubleClickMoveComplete() {
 
 void MapCamera3d::setupInertia() {
     float velocityFactor =
-        std::sqrt(currentDragVelocity.x * currentDragVelocity.x + currentDragVelocity.y * currentDragVelocity.y) / zoom;
+            std::sqrt(currentDragVelocity.x * currentDragVelocity.x + currentDragVelocity.y * currentDragVelocity.y) / zoom;
 
     const double t1Factor = 1e-8;
     const double t2Factor = t1Factor / 100.0;
@@ -920,9 +920,9 @@ void MapCamera3d::inertiaStep() {
     inertia->timestampUpdate = now;
 
     const auto [adjustedPosition, adjustedZoom] =
-        getBoundsCorrectedCoords(Coord(focusPointPosition.systemIdentifier, focusPointPosition.x + xDiffMap,
-                                       focusPointPosition.y + yDiffMap, focusPointPosition.z),
-                                 zoom);
+            getBoundsCorrectedCoords(Coord(focusPointPosition.systemIdentifier, focusPointPosition.x + xDiffMap,
+                                           focusPointPosition.y + yDiffMap, focusPointPosition.z),
+                                     zoom);
 
     focusPointPosition.x = std::fmod((adjustedPosition.x + 180 + 360), 360.0) - 180;
     focusPointPosition.y = std::clamp(adjustedPosition.y, -90.0, 90.0);
@@ -1051,7 +1051,7 @@ bool MapCamera3d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, cons
     if (posScreenOld.size() >= 2) {
 
         double scaleFactor =
-            Vec2FHelper::distance(posScreenNew[0], posScreenNew[1]) / Vec2FHelper::distance(posScreenOld[0], posScreenOld[1]);
+                Vec2FHelper::distance(posScreenNew[0], posScreenNew[1]) / Vec2FHelper::distance(posScreenOld[0], posScreenOld[1]);
 
         double newZoom = zoom / scaleFactor;
 
@@ -1119,29 +1119,29 @@ bool MapCamera3d::onTwoFingerMoveComplete() {
         std::weak_ptr<MapCamera3d> weakSelf = std::static_pointer_cast<MapCamera3d>(shared_from_this());
         std::lock_guard<std::recursive_mutex> lock(animationMutex);
         rotationAnimation = std::make_shared<DoubleAnimation>(
-            cameraZoomConfig.animationDurationMs, this->angle, angle < ROTATION_LOCKING_ANGLE ? 0 : 360,
-            InterpolatorFunction::EaseInOut,
-            [weakSelf](double angle) {
-                if (auto selfPtr = weakSelf.lock()) {
-                    selfPtr->angle = angle;
-                    auto mapInterface = selfPtr->mapInterface;
-                    if (mapInterface) {
-                        mapInterface->invalidate();
+                cameraZoomConfig.animationDurationMs, this->angle, angle < ROTATION_LOCKING_ANGLE ? 0 : 360,
+                InterpolatorFunction::EaseInOut,
+                [weakSelf](double angle) {
+                    if (auto selfPtr = weakSelf.lock()) {
+                        selfPtr->angle = angle;
+                        auto mapInterface = selfPtr->mapInterface;
+                        if (mapInterface) {
+                            mapInterface->invalidate();
+                        }
+                        selfPtr->notifyListeners(ListenerType::ROTATION | ListenerType::BOUNDS);
                     }
-                    selfPtr->notifyListeners(ListenerType::ROTATION | ListenerType::BOUNDS);
-                }
-            },
-            [weakSelf] {
-                if (auto selfPtr = weakSelf.lock()) {
-                    selfPtr->angle = 0;
-                    selfPtr->rotationAnimation = nullptr;
-                    auto mapInterface = selfPtr->mapInterface;
-                    if (mapInterface) {
-                        mapInterface->invalidate();
+                },
+                [weakSelf] {
+                    if (auto selfPtr = weakSelf.lock()) {
+                        selfPtr->angle = 0;
+                        selfPtr->rotationAnimation = nullptr;
+                        auto mapInterface = selfPtr->mapInterface;
+                        if (mapInterface) {
+                            mapInterface->invalidate();
+                        }
+                        selfPtr->notifyListeners(ListenerType::ROTATION | ListenerType::BOUNDS);
                     }
-                    selfPtr->notifyListeners(ListenerType::ROTATION | ListenerType::BOUNDS);
-                }
-            });
+                });
         rotationAnimation->start();
         mapInterface->invalidate();
         return true;
@@ -1297,8 +1297,8 @@ Vec2F MapCamera3d::screenPosFromCartesianCoord(const Vec4D &coord, const Vec2I &
         double screenXDiffToCenter = projected.x * sizeViewport.x / 2.0;
         double screenYDiffToCenter = projected.y * sizeViewport.y / 2.0;
 
-        double posScreenX = screenXDiffToCenter + ((double)sizeViewport.x / 2.0);
-        double posScreenY = ((double)sizeViewport.y / 2.0) - screenYDiffToCenter;
+        double posScreenX = screenXDiffToCenter + ((double) sizeViewport.x / 2.0);
+        double posScreenY = ((double) sizeViewport.y / 2.0) - screenYDiffToCenter;
 
         return Vec2F(posScreenX, posScreenY);
     }
@@ -1343,8 +1343,8 @@ bool MapCamera3d::coordIsFarAwayFromFocusPoint(const ::Coord &coord) {
     double latDistance = (wgsC2.y - wgsC1.y) * M_PI / 180.0;
     double lonDistance = (wgsC2.x - wgsC1.x) * M_PI / 180.0;
     double a = std::sin(latDistance / 2) * std::sin(latDistance / 2) + std::cos(wgsC1.y * M_PI / 180.0) *
-                                                                           std::cos(wgsC2.y * M_PI / 180.0) *
-                                                                           std::sin(lonDistance / 2) * std::sin(lonDistance / 2);
+                                                                       std::cos(wgsC2.y * M_PI / 180.0) *
+                                                                       std::sin(lonDistance / 2) * std::sin(lonDistance / 2);
     double c = 2 * std::atan2(std::sqrt(a), std::sqrt(1 - a));
     return R * c > 4000;
 }
@@ -1356,9 +1356,7 @@ bool MapCamera3d::coordIsOnFrontHalfOfGlobe(Coord coord) {
     const auto coordCartesian = convertToCartesianCoordinates(coord);
     const auto projectedCoord = projectedPoint(coordCartesian);
 
-    const auto projectedCenter = projectedPoint({0, 0, 0, 1});
-
-    bool isInFront = projectedCoord.z <= projectedCenter.z;
+    bool isInFront = projectedCoord.z > -origin.z;
 
     return isInFront;
 }
@@ -1395,8 +1393,8 @@ double MapCamera3d::mapUnitsFromPixels(double distancePx) {
         const auto projectedOne = projectedPoint(cartOne);
         const auto projectedTwo = projectedPoint(cartTwo);
         const auto sampleDistance =
-            std::sqrt((cartOne.x - cartTwo.x) * (cartOne.x - cartTwo.x) + (cartOne.y - cartTwo.y) * (cartOne.y - cartTwo.y) +
-                      (cartOne.z - cartTwo.z) * (cartOne.z - cartTwo.z));
+                std::sqrt((cartOne.x - cartTwo.x) * (cartOne.x - cartTwo.x) + (cartOne.y - cartTwo.y) * (cartOne.y - cartTwo.y) +
+                          (cartOne.z - cartTwo.z) * (cartOne.z - cartTwo.z));
 
         const auto x = (projectedTwo.x - projectedOne.x) * sizeViewport.x;
         const auto y = (projectedTwo.y - projectedOne.y) * sizeViewport.y;
@@ -1501,8 +1499,8 @@ std::tuple<Coord, double> MapCamera3d::getBoundsCorrectedCoords(const Coord &pos
     Coord bottomRight = conversionHelper->convert(id, bounds.bottomRight);
 
     Coord clampedPosition =
-        Coord(id, std::clamp(position.x, std::min(topLeft.x, bottomRight.x), std::max(topLeft.x, bottomRight.x)),
-              std::clamp(position.y, std::min(topLeft.y, bottomRight.y), std::max(topLeft.y, bottomRight.y)), position.z);
+            Coord(id, std::clamp(position.x, std::min(topLeft.x, bottomRight.x), std::max(topLeft.x, bottomRight.x)),
+                  std::clamp(position.y, std::min(topLeft.y, bottomRight.y), std::max(topLeft.y, bottomRight.y)), position.z);
 
     assert(clampedPosition.systemIdentifier == 4326);
     return {clampedPosition, zoom};
@@ -1520,8 +1518,8 @@ void MapCamera3d::setBoundsRestrictWholeVisibleRect(bool enabled) {
 void MapCamera3d::clampCenterToPaddingCorrectedBounds() {
     const auto [newPosition, newZoom] =
         getBoundsCorrectedCoords(Coord(focusPointPosition.systemIdentifier, std::fmod(focusPointPosition.x + 540.0, 360.0) - 180.0,
-                                       focusPointPosition.y, focusPointPosition.z),
-                                 zoom);
+                          focusPointPosition.y, focusPointPosition.z),
+                    zoom);
     std::lock_guard<std::recursive_mutex> lock(paramMutex);
     focusPointPosition = newPosition;
     zoom = newZoom;
@@ -1579,61 +1577,61 @@ void MapCamera3d::setCameraConfig(const Camera3dConfig &config, std::optional<fl
         std::lock_guard<std::recursive_mutex> lock(animationMutex);
 
         pitchAnimation = std::make_shared<DoubleAnimation>(
-            duration, initialPitch, targetPitch, InterpolatorFunction::EaseInOut,
-            [weakSelf](double pitch) {
-                if (auto selfPtr = weakSelf.lock()) {
-                    selfPtr->cameraPitch = pitch;
-                    auto mapInterface = selfPtr->mapInterface;
-                    if (mapInterface) {
-                        mapInterface->invalidate();
-                    }
-                }
-            },
-            [weakSelf, targetPitch] {
-                if (auto selfPtr = weakSelf.lock()) {
-                    selfPtr->cameraPitch = targetPitch;
-                    selfPtr->pitchAnimation = nullptr;
-                }
-            });
-        pitchAnimation->start();
-
-        verticalDisplacementAnimation = std::make_shared<DoubleAnimation>(
-            duration, initialVerticalDisplacement, targetVerticalDisplacement, InterpolatorFunction::EaseInOut,
-            [weakSelf](double dis) {
-                if (auto selfPtr = weakSelf.lock()) {
-                    selfPtr->cameraVerticalDisplacement = dis;
-                    auto mapInterface = selfPtr->mapInterface;
-                    if (mapInterface) {
-                        mapInterface->invalidate();
-                    }
-                }
-            },
-            [weakSelf, targetVerticalDisplacement] {
-                if (auto selfPtr = weakSelf.lock()) {
-                    selfPtr->cameraVerticalDisplacement = targetVerticalDisplacement;
-                    selfPtr->verticalDisplacementAnimation = nullptr;
-                }
-            });
-        verticalDisplacementAnimation->start();
-
-        if (targetZoom) {
-            zoomAnimation = std::make_shared<DoubleAnimation>(
-                duration, initialZoom, *targetZoom, InterpolatorFunction::EaseInOut,
-                [weakSelf](double zoom) {
+                duration, initialPitch, targetPitch, InterpolatorFunction::EaseInOut,
+                [weakSelf](double pitch) {
                     if (auto selfPtr = weakSelf.lock()) {
-                        selfPtr->zoom = zoom;
+                        selfPtr->cameraPitch = pitch;
                         auto mapInterface = selfPtr->mapInterface;
                         if (mapInterface) {
                             mapInterface->invalidate();
                         }
                     }
                 },
-                [weakSelf, targetZoom] {
+                [weakSelf, targetPitch] {
                     if (auto selfPtr = weakSelf.lock()) {
-                        selfPtr->zoom = *targetZoom;
-                        selfPtr->zoomAnimation = nullptr;
+                        selfPtr->cameraPitch = targetPitch;
+                        selfPtr->pitchAnimation = nullptr;
                     }
                 });
+        pitchAnimation->start();
+
+        verticalDisplacementAnimation = std::make_shared<DoubleAnimation>(
+                duration, initialVerticalDisplacement, targetVerticalDisplacement, InterpolatorFunction::EaseInOut,
+                [weakSelf](double dis) {
+                    if (auto selfPtr = weakSelf.lock()) {
+                        selfPtr->cameraVerticalDisplacement = dis;
+                        auto mapInterface = selfPtr->mapInterface;
+                        if (mapInterface) {
+                            mapInterface->invalidate();
+                        }
+                    }
+                },
+                [weakSelf, targetVerticalDisplacement] {
+                    if (auto selfPtr = weakSelf.lock()) {
+                        selfPtr->cameraVerticalDisplacement = targetVerticalDisplacement;
+                        selfPtr->verticalDisplacementAnimation = nullptr;
+                    }
+                });
+        verticalDisplacementAnimation->start();
+
+        if (targetZoom) {
+            zoomAnimation = std::make_shared<DoubleAnimation>(
+                    duration, initialZoom, *targetZoom, InterpolatorFunction::EaseInOut,
+                    [weakSelf](double zoom) {
+                        if (auto selfPtr = weakSelf.lock()) {
+                            selfPtr->zoom = zoom;
+                            auto mapInterface = selfPtr->mapInterface;
+                            if (mapInterface) {
+                                mapInterface->invalidate();
+                            }
+                        }
+                    },
+                    [weakSelf, targetZoom] {
+                        if (auto selfPtr = weakSelf.lock()) {
+                            selfPtr->zoom = *targetZoom;
+                            selfPtr->zoomAnimation = nullptr;
+                        }
+                    });
             zoomAnimation->start();
         }
 
@@ -1641,32 +1639,32 @@ void MapCamera3d::setCameraConfig(const Camera3dConfig &config, std::optional<fl
             Coord startPosition = conversionHelper->convert(CoordinateSystemIdentifiers::EPSG4326(), focusPointPosition);
 
             coordAnimation = std::make_shared<CoordAnimation>(
-                duration, startPosition, *targetCoordinate, std::nullopt, InterpolatorFunction::EaseInOut,
-                [weakSelf](Coord positionMapSystem) {
-                    if (auto selfPtr = weakSelf.lock()) {
-                        assert(positionMapSystem.systemIdentifier == 4326);
-                        std::lock_guard<std::recursive_mutex> lock(selfPtr->paramMutex);
-                        selfPtr->focusPointPosition = positionMapSystem;
-                        selfPtr->notifyListeners(ListenerType::BOUNDS);
-                        auto mapInterface = selfPtr->mapInterface;
-                        if (mapInterface) {
-                            mapInterface->invalidate();
+                    duration, startPosition, *targetCoordinate, std::nullopt, InterpolatorFunction::EaseInOut,
+                    [weakSelf](Coord positionMapSystem) {
+                        if (auto selfPtr = weakSelf.lock()) {
+                            assert(positionMapSystem.systemIdentifier == 4326);
+                            std::lock_guard<std::recursive_mutex> lock(selfPtr->paramMutex);
+                            selfPtr->focusPointPosition = positionMapSystem;
+                            selfPtr->notifyListeners(ListenerType::BOUNDS);
+                            auto mapInterface = selfPtr->mapInterface;
+                            if (mapInterface) {
+                                mapInterface->invalidate();
+                            }
                         }
-                    }
-                },
-                [weakSelf] {
-                    if (auto selfPtr = weakSelf.lock()) {
-                        assert(selfPtr->coordAnimation->endValue.systemIdentifier == 4326);
-                        std::lock_guard<std::recursive_mutex> lock(selfPtr->paramMutex);
-                        selfPtr->focusPointPosition = selfPtr->coordAnimation->endValue;
-                        selfPtr->notifyListeners(ListenerType::BOUNDS);
-                        selfPtr->coordAnimation = nullptr;
-                        auto mapInterface = selfPtr->mapInterface;
-                        if (mapInterface) {
-                            mapInterface->invalidate();
+                    },
+                    [weakSelf] {
+                        if (auto selfPtr = weakSelf.lock()) {
+                            assert(selfPtr->coordAnimation->endValue.systemIdentifier == 4326);
+                            std::lock_guard<std::recursive_mutex> lock(selfPtr->paramMutex);
+                            selfPtr->focusPointPosition = selfPtr->coordAnimation->endValue;
+                            selfPtr->notifyListeners(ListenerType::BOUNDS);
+                            selfPtr->coordAnimation = nullptr;
+                            auto mapInterface = selfPtr->mapInterface;
+                            if (mapInterface) {
+                                mapInterface->invalidate();
+                            }
                         }
-                    }
-                });
+                    });
             coordAnimation->start();
         }
     } else {
@@ -1710,7 +1708,7 @@ double MapCamera3d::getCameraFieldOfView() { return 42; }
 
 double MapCamera3d::getCameraDistance(Vec2I sizeViewport, double zoom) {
     double f = getCameraFieldOfView();
-    double w = (double)sizeViewport.y;
+    double w = (double) sizeViewport.y;
     double pixelsPerMeter = this->screenDensityPpi / 0.0254;
     float d = (zoom * w / pixelsPerMeter / 2.0) / tan(f / 2.0 * M_PI / 180.0);
     float R = 6378137.0;
@@ -1719,7 +1717,7 @@ double MapCamera3d::getCameraDistance(Vec2I sizeViewport, double zoom) {
 
 double MapCamera3d::zoomForMeterWidth(Vec2I sizeViewport, Vec2F sizeMeters) {
     double pixelsPerMeter = this->screenDensityPpi / 0.0254;
-    const double vpr = (double)sizeViewport.x / (double)sizeViewport.y;
+    const double vpr = (double) sizeViewport.x / (double) sizeViewport.y;
 
     double fy = getCameraFieldOfView();
     double halfAngleRadianY = fy * 0.5 * M_PI / 180.0;
