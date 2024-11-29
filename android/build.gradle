@@ -162,7 +162,7 @@ publishing {
 			name = "UbiqueMaven"
 			url = System.getenv('UB_ARTIFACTORY_URL_ANDROID') ?: readPropertyWithDefault('ubiqueMavenUrl', '')
 			credentials {
-				username = System.getenv('UB_ARTIFACTORY_USERNAME') ?: readPropertyWithDefault('ubiqueMavenUser', '')
+				username = System.getenv('UB_ARTIFACTORY_USER') ?: readPropertyWithDefault('ubiqueMavenUser', '')
 				password = System.getenv('UB_ARTIFACTORY_PASSWORD') ?: readPropertyWithDefault('ubiqueMavenPass', '')
 			}
 		}

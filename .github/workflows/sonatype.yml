@@ -32,7 +32,7 @@ jobs:
           SIGNING_KEY_ID: ${{secrets.MAVEN_SIGNING_KEY_ID}}
           SIGNING_KEY_PASSWORD: ${{secrets.MAVEN_SIGNING_KEY_PASSPHRASE}}
           UB_ARTIFACTORY_URL_ANDROID: ${{secrets.UBIQUE_ARTIFACTORY_URL}}
-          UB_ARTIFACTORY_USERNAME: ${{secrets.UBIQUE_ARTIFACTORY_USER}}
+          UB_ARTIFACTORY_USER: ${{secrets.UBIQUE_ARTIFACTORY_USER}}
           UB_ARTIFACTORY_PASSWORD: ${{secrets.UBIQUE_ARTIFACTORY_PASS}}
         run: |
           echo "Create .gpg key from secret"
@@ -52,7 +52,7 @@ jobs:
           SONATYPE_NEXUS_USERNAME: ${{secrets.SONATYPE_NEXUS_USERNAME}}
           SONATYPE_NEXUS_PASSWORD: ${{secrets.SONATYPE_NEXUS_PASSWORD}}
           UB_ARTIFACTORY_URL_ANDROID: ${{secrets.UBIQUE_ARTIFACTORY_URL}}
-          UB_ARTIFACTORY_USERNAME: ${{secrets.UBIQUE_ARTIFACTORY_USER}}
+          UB_ARTIFACTORY_USER: ${{secrets.UBIQUE_ARTIFACTORY_USER}}
           UB_ARTIFACTORY_PASSWORD: ${{secrets.UBIQUE_ARTIFACTORY_PASS}}
         run: |
           cd android
