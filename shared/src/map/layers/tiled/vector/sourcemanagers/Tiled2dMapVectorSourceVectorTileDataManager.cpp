@@ -64,7 +64,7 @@ void Tiled2dMapVectorSourceVectorTileDataManager::onVectorTilesUpdated(const std
                         // Tile has been cleared in source, but is still available here
                         if (tilesReadyControlSet.find(vectorTileInfo.tileInfo) == tilesReadyControlSet.end()) {
                             // Tile is ready - propagate to source
-                            readyManager.message(&Tiled2dMapVectorReadyManager::didProcessData, readyManagerIndex,
+                            readyManager.message(MFN(&Tiled2dMapVectorReadyManager::didProcessData), readyManagerIndex,
                                                  vectorTileInfo.tileInfo, 0);
                         }
                     }
@@ -149,13 +149,13 @@ void Tiled2dMapVectorSourceVectorTileDataManager::onVectorTilesUpdated(const std
 
                     if (actor) {
                         if (auto strongSelectionDelegate = selectionDelegate.lock()) {
-                            actor.message(&Tiled2dMapVectorTile::setSelectionDelegate, strongSelectionDelegate);
+                            actor.message(MFN(&Tiled2dMapVectorTile::setSelectionDelegate), strongSelectionDelegate);
                         }
 
                         indexControlSet.insert(index);
                         tiles[tile->tileInfo].push_back({index, identifier, actor.strongActor<Tiled2dMapVectorTile>()});
 
-                        actor.message(&Tiled2dMapVectorTile::setVectorTileData, mapIt->second);
+                        actor.message(MFN(&Tiled2dMapVectorTile::setVectorTileData), mapIt->second);
                     }
                 }
 
@@ -163,7 +163,7 @@ void Tiled2dMapVectorSourceVectorTileDataManager::onVectorTilesUpdated(const std
                     tilesReadyControlSet[tile->tileInfo] = indexControlSet;
                 }
 
-                readyManager.message(&Tiled2dMapVectorReadyManager::didProcessData, readyManagerIndex, tile->tileInfo,
+                readyManager.message(MFN(&Tiled2dMapVectorReadyManager::didProcessData), readyManagerIndex, tile->tileInfo,
                                      indexControlSet.empty() ? 0 : 1);
             }
 
@@ -181,7 +181,7 @@ void Tiled2dMapVectorSourceVectorTileDataManager::onVectorTilesUpdated(const std
 
 
 void Tiled2dMapVectorSourceVectorTileDataManager::onTileCompletelyReady(const Tiled2dMapVersionedTileInfo &tileInfo) {
-    readyManager.message(&Tiled2dMapVectorReadyManager::setReady, readyManagerIndex, tileInfo, 1);
+    readyManager.message(MFN(&Tiled2dMapVectorReadyManager::setReady), readyManagerIndex, tileInfo, 1);
 }
 
 void Tiled2dMapVectorSourceVectorTileDataManager::updateLayerDescription(std::shared_ptr<VectorLayerDescription> layerDescription,
@@ -225,7 +225,7 @@ void Tiled2dMapVectorSourceVectorTileDataManager::updateLayerDescription(std::sh
             Actor<Tiled2dMapVectorTile> actor = createTileActor(tileData.tileInfo, layerDescription);
             if (actor) {
                 if (auto strongSelectionDelegate = selectionDelegate.lock()) {
-                    actor.message(&Tiled2dMapVectorTile::setSelectionDelegate, strongSelectionDelegate);
+                    actor.message(MFN(&Tiled2dMapVectorTile::setSelectionDelegate), strongSelectionDelegate);
                 }
 
                 if (subTiles->second.empty()) {
@@ -246,10 +246,10 @@ void Tiled2dMapVectorSourceVectorTileDataManager::updateLayerDescription(std::sh
                 }
                 tilesReady.erase(tileData.tileInfo);
 
-                actor.message(&Tiled2dMapVectorTile::setVectorTileData, mapIt->second);
+                actor.message(MFN(&Tiled2dMapVectorTile::setVectorTileData), mapIt->second);
                 auto castedMe = std::static_pointer_cast<Tiled2dMapVectorSourceVectorTileDataManager>(shared_from_this());
                 auto selfActor = WeakActor<Tiled2dMapVectorSourceVectorTileDataManager>(mailbox, castedMe);
-                selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorSourceVectorTileDataManager::clearTiles, tilesToClear);
+                selfActor.message(MailboxExecutionEnvironment::graphics, MFN(&Tiled2dMapVectorSourceVectorTileDataManager::clearTiles), tilesToClear);
             }
 
         } else {
@@ -268,7 +268,7 @@ void Tiled2dMapVectorSourceVectorTileDataManager::updateLayerDescription(std::sh
                     }
                     tilesReady.erase(tileData.tileInfo);
 
-                    tile.message(&Tiled2dMapVectorTile::updateVectorLayerDescription, layerDescription, mapIt->second);
+                    tile.message(MFN(&Tiled2dMapVectorTile::updateVectorLayerDescription), layerDescription, mapIt->second);
                     break;
                 }
             }
@@ -311,7 +311,7 @@ void Tiled2dMapVectorSourceVectorTileDataManager::reloadLayerContent(const std::
             Actor<Tiled2dMapVectorTile> actor = createTileActor(tileData.tileInfo, layerDescription);
             if (actor) {
                 if (auto strongSelectionDelegate = selectionDelegate.lock()) {
-                    actor.message(&Tiled2dMapVectorTile::setSelectionDelegate, strongSelectionDelegate);
+                    actor.message(MFN(&Tiled2dMapVectorTile::setSelectionDelegate), strongSelectionDelegate);
                 }
 
                 if (subTiles->second.empty()) {
@@ -335,11 +335,11 @@ void Tiled2dMapVectorSourceVectorTileDataManager::reloadLayerContent(const std::
                 }
                 tilesReady.erase(tileData.tileInfo);
 
-                actor.message(&Tiled2dMapVectorTile::setVectorTileData, mapIt->second);
+                actor.message(MFN(&Tiled2dMapVectorTile::setVectorTileData), mapIt->second);
                 auto castedMe = std::static_pointer_cast<Tiled2dMapVectorSourceVectorTileDataManager>(shared_from_this());
                 auto selfActor = WeakActor<Tiled2dMapVectorSourceVectorTileDataManager>(mailbox, castedMe);
                 selfActor.message(MailboxExecutionEnvironment::graphics,
-                                  &Tiled2dMapVectorSourceVectorTileDataManager::clearTiles, tilesToClear);
+                                  MFN(&Tiled2dMapVectorSourceVectorTileDataManager::clearTiles), tilesToClear);
             }
         }
     }

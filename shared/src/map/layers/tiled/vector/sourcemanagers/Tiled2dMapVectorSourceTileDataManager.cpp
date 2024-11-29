@@ -139,7 +139,7 @@ void Tiled2dMapVectorSourceTileDataManager::setAlpha(float alpha) {
     this->alpha = alpha;
     for (const auto &[tileInfo, subTiles] : tiles) {
         for (const auto &[index, identifier, tile]: subTiles) {
-            tile.message(&Tiled2dMapVectorTile::setAlpha, alpha);
+            tile.message(MFN(&Tiled2dMapVectorTile::setAlpha), alpha);
         }
     }
 }
@@ -148,7 +148,7 @@ void Tiled2dMapVectorSourceTileDataManager::setSelectionDelegate(const std::weak
     Tiled2dMapVectorSourceDataManager::setSelectionDelegate(selectionDelegate);
     for (const auto &[tileInfo, subTiles] : tiles) {
         for (const auto &[index, identifier, tile] : subTiles) {
-            tile.message(&Tiled2dMapVectorTile::setSelectionDelegate, selectionDelegate);
+            tile.message(MFN(&Tiled2dMapVectorTile::setSelectionDelegate), selectionDelegate);
         }
     }
 }
@@ -539,7 +539,7 @@ void Tiled2dMapVectorSourceTileDataManager::clearTouch() {
             continue;
         }
         for (auto rIter = subTiles.rbegin(); rIter != subTiles.rend(); rIter++) {
-            std::get<2>(*rIter).message(&Tiled2dMapVectorTile::clearTouch);
+            std::get<2>(*rIter).message(MFN(&Tiled2dMapVectorTile::clearTouch));
         }
 
     }
@@ -551,14 +551,14 @@ void Tiled2dMapVectorSourceTileDataManager::setSprites(std::shared_ptr<SpriteDat
 
     if (!tiles.empty()) {
         auto selfActor = WeakActor(mailbox, weak_from_this());
-        selfActor.message(&Tiled2dMapVectorSourceTileDataManager::setupExistingTilesWithSprite);
+        selfActor.message(MFN(&Tiled2dMapVectorSourceTileDataManager::setupExistingTilesWithSprite));
     }
 }
 
 void Tiled2dMapVectorSourceTileDataManager::setupExistingTilesWithSprite() {
     for (const auto &[tile, subTiles] : tiles) {
         for (const auto &[index, string, actor]: subTiles) {
-            actor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorTile::setSpriteData, spriteData, spriteTexture);
+            actor.message(MailboxExecutionEnvironment::graphics, MFN(&Tiled2dMapVectorTile::setSpriteData), spriteData, spriteTexture);
         }
     }
 

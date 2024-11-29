@@ -105,7 +105,7 @@ void Tiled2dMapVectorRasterTile::setup() {
     tileObject->getQuadObject()->loadTexture(renderingContext, tileData);
 
     auto selfActor = WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this());
-    tileCallbackInterface.message(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsReady, tileInfo, description->identifier, selfActor);
+    tileCallbackInterface.message(MFN(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsReady), tileInfo, description->identifier, selfActor);
 }
 
 void Tiled2dMapVectorRasterTile::setAlpha(float alpha) {
@@ -128,7 +128,7 @@ void Tiled2dMapVectorRasterTile::setRasterTileData(const Tiled2dMapVectorTileDat
     setupTile(tileData);
 #else
     auto selfActor = WeakActor(mailbox, shared_from_this()->weak_from_this());
-    selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorRasterTile::setupTile, tileData);
+    selfActor.message(MailboxExecutionEnvironment::graphics, MFN(&Tiled2dMapVectorRasterTile::setupTile), tileData);
 #endif
 }
 
@@ -150,7 +150,7 @@ void Tiled2dMapVectorRasterTile::setupTile(const Tiled2dMapVectorTileDataRaster 
     tileObject->getQuadObject()->loadTexture(renderingContext, tileData);
 
     auto selfActor = WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this());
-    tileCallbackInterface.message(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsReady, tileInfo, description->identifier, selfActor);
+    tileCallbackInterface.message(MFN(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsReady), tileInfo, description->identifier, selfActor);
 }
 
 std::vector<std::shared_ptr<RenderObjectInterface>> Tiled2dMapVectorRasterTile::generateRenderObjects() {
