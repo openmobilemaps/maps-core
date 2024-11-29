@@ -1,9 +1,12 @@
-//
-//  Actor.h
-//  
-//
-//  Created by Stefan Mitterrutzner on 08.02.23.
-//
+/*
+ * Copyright (c) 2021 Ubique Innovation AG <https://www.ubique.ch>
+ *
+ *  This Source Code Form is subject to the terms of the Mozilla Public
+ *  License, v. 2.0. If a copy of the MPL was not distributed with this
+ *  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ *
+ *  SPDX-License-Identifier: MPL-2.0
+ */
 
 #pragma once
 
@@ -28,13 +31,13 @@ public:
 };
 
 template <class Object, class MemberFn, class... Args>
-inline std::unique_ptr<MailboxMessage> makeMessage(const MailboxDuplicationStrategy &strategy, const MailboxExecutionEnvironment &environment, Object object, MemberFn memberFn, Args&&... args) {
+inline std::unique_ptr<MailboxMessage> makeMessage(const MailboxDuplicationStrategy &strategy, const MailboxExecutionEnvironment &environment, Object object, MemberFunctionWrapper<MemberFn> memberFn, Args&&... args) {
     auto tuple = std::make_tuple(std::forward<Args>(args)...);
     return std::make_unique<MailboxMessageImpl<Object, MemberFn, decltype(tuple)>>(object, memberFn, strategy, environment, std::move(tuple));
 }
 
 template <class ResultType, class Object, class MemberFn, class... Args>
-std::unique_ptr<MailboxMessage> makeAskMessage(const MailboxDuplicationStrategy &strategy, const MailboxExecutionEnvironment &environment, std::promise<ResultType>&& promise, Object object, MemberFn memberFn, Args&&... args) {
+std::unique_ptr<MailboxMessage> makeAskMessage(const MailboxDuplicationStrategy &strategy, const MailboxExecutionEnvironment &environment, std::promise<ResultType>&& promise, Object object, MemberFunctionWrapper<MemberFn> memberFn, Args&&... args) {
     auto tuple = std::make_tuple(std::forward<Args>(args)...);
     return std::make_unique<AskMessageImpl<ResultType, Object, MemberFn, decltype(tuple)>>(std::move(promise), object, memberFn, strategy, environment, std::move(tuple));
 }
@@ -78,7 +81,7 @@ public:
     }
 
     template <typename Fn, class... Args>
-    inline void message(Fn fn, Args&&... args) const {
+    inline void message(MemberFunctionWrapper<Fn> fn, Args&&... args) const {
         auto strongObject = object.lock();
         auto strongMailbox = receivingMailbox.lock();
         if (strongObject && strongMailbox) {
@@ -89,7 +92,7 @@ public:
     }
 
     template <typename Fn, class... Args>
-    inline void message(const MailboxDuplicationStrategy &strategy, Fn fn, Args&&... args) const {
+    inline void message(const MailboxDuplicationStrategy &strategy, MemberFunctionWrapper<Fn> fn, Args&&... args) const {
         auto strongObject = object.lock();
         auto strongMailbox = receivingMailbox.lock();
         if (strongObject && strongMailbox) {
@@ -100,7 +103,7 @@ public:
     }
 
     template <typename Fn, class... Args>
-    inline void message(const MailboxExecutionEnvironment &environment, Fn fn, Args&&... args) const {
+    inline void message(const MailboxExecutionEnvironment &environment, MemberFunctionWrapper<Fn> fn, Args&&... args) const {
         auto strongObject = object.lock();
         auto strongMailbox = receivingMailbox.lock();
         if (strongObject && strongMailbox) {
@@ -111,7 +114,7 @@ public:
     }
 
     template <typename Fn, class... Args>
-    inline void messagePrecisely(const MailboxDuplicationStrategy &strategy, const MailboxExecutionEnvironment &environment, Fn fn, Args&&... args) const {
+    inline void messagePrecisely(const MailboxDuplicationStrategy &strategy, const MailboxExecutionEnvironment &environment, MemberFunctionWrapper<Fn> fn, Args&&... args) const {
         auto strongObject = object.lock();
         auto strongMailbox = receivingMailbox.lock();
         if (strongObject && strongMailbox) {
@@ -123,8 +126,8 @@ public:
 
     
     template <typename Fn, class... Args>
-    auto converse(Fn fn, Args&&... args) const {
-        using ResultType = std::invoke_result_t<decltype(fn), Object, Args...>;
+    auto converse(MemberFunctionWrapper<Fn> fn, Args&&... args) const {
+        using ResultType = std::invoke_result_t<decltype(fn.memberFn), Object, Args...>;
 
         auto strongObject = object.lock();
         auto strongMailbox = receivingMailbox.lock();
@@ -141,8 +144,8 @@ public:
     }
 
     template <typename Fn, class... Args>
-    auto converse(const MailboxExecutionEnvironment &environment, Fn fn, Args&&... args) const {
-        using ResultType = std::invoke_result_t<decltype(fn), Object, Args...>;
+    auto converse(const MailboxExecutionEnvironment &environment, MemberFunctionWrapper<Fn> fn, Args&&... args) const {
+        using ResultType = std::invoke_result_t<decltype(fn.memberFn), Object, Args...>;
 
         auto strongObject = object.lock();
         auto strongMailbox = receivingMailbox.lock();
@@ -233,7 +236,7 @@ public:
 
 
     template <typename Fn, class... Args>
-    inline void message(Fn fn, Args&&... args) const {
+    inline void message(MemberFunctionWrapper<Fn> fn, Args&&... args) const {
         if(!receivingMailbox || !object) {
             return;
         }
@@ -242,7 +245,7 @@ public:
 
     
     template <typename Fn, class... Args>
-    inline void message(const MailboxDuplicationStrategy &strategy, Fn fn, Args&&... args) const {
+    inline void message(const MailboxDuplicationStrategy &strategy, MemberFunctionWrapper<Fn> fn, Args&&... args) const {
         if(!receivingMailbox || !object) {
             return;
         }
@@ -251,7 +254,7 @@ public:
 
 
     template <typename Fn, class... Args>
-    inline void message(const MailboxExecutionEnvironment &environment, Fn fn, Args&&... args) const {
+    inline void message(const MailboxExecutionEnvironment &environment, MemberFunctionWrapper<Fn> fn, Args&&... args) const {
         if(!receivingMailbox || !object) {
             return;
         }
@@ -260,7 +263,7 @@ public:
 
 
     template <typename Fn, class... Args>
-    inline void messagePrecisely(const MailboxDuplicationStrategy &strategy, const MailboxExecutionEnvironment &environment, Fn fn, Args&&... args) const {
+    inline void messagePrecisely(const MailboxDuplicationStrategy &strategy, const MailboxExecutionEnvironment &environment, MemberFunctionWrapper<Fn> fn, Args&&... args) const {
         if(!receivingMailbox || !object) {
             return;
         }
@@ -268,8 +271,8 @@ public:
     }
 
     template <typename Fn, class... Args>
-    auto converse(Fn fn, Args&&... args) const {
-        using ResultType = std::invoke_result_t<decltype(fn), Object, Args...>;
+    auto converse(MemberFunctionWrapper<Fn> fn, Args&&... args) const {
+        using ResultType = std::invoke_result_t<decltype(fn.memberFn), Object, Args...>;
         
         std::promise<ResultType> promise;
         auto future = promise.get_future();
@@ -278,8 +281,8 @@ public:
     }
 
     template <typename Fn, class... Args>
-    auto converse(const MailboxExecutionEnvironment &environment, Fn fn, Args&&... args) const {
-        using ResultType = std::invoke_result_t<decltype(fn), Object, Args...>;
+    auto converse(const MailboxExecutionEnvironment &environment, MemberFunctionWrapper<Fn> fn, Args&&... args) const {
+        using ResultType = std::invoke_result_t<decltype(fn.memberFn), Object, Args...>;
 
         std::promise<ResultType> promise;
         auto future = promise.get_future();
