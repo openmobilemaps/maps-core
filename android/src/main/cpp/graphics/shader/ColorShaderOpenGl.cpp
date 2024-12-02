@@ -29,8 +29,10 @@ void ColorShaderOpenGl::setupProgram(const std::shared_ptr<::RenderingContextInt
     glDeleteShader(vertexShader);
     glAttachShader(program, fragmentShader); // add the fragment shader to program
     glDeleteShader(fragmentShader);
+    glCheckError();
 
     glLinkProgram(program); // create OpenGL program executables
+    glCheckError();
 
     openGlContext->storeProgram(programName, program);
 }

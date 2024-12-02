@@ -51,7 +51,7 @@ private:
 
 
     static const int maxNumLinePoints = std::numeric_limits<uint16_t>::max() / 4 + 1; // 4 vertices per line coord, only 2 at the start/end
-#ifdef __ANDROID__
+#ifdef OPENMOBILEMAPS_GL
     static const int maxStylesPerGroup = 32;
 #else
     static const int maxStylesPerGroup = 256;

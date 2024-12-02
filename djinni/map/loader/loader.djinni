@@ -32,7 +32,8 @@ data_loader_result = record {
 loader_interface = interface +c +j +o {
     load_texture(url: string, etag: optional<string>): texture_loader_result;
     load_data(url: string, etag: optional<string>): data_loader_result;
-    
+
+    # XXX: typo asnyc / async!
     load_texture_asnyc(url: string, etag: optional<string>): future<texture_loader_result>;
     load_data_async(url: string, etag: optional<string>): future<data_loader_result>;
     

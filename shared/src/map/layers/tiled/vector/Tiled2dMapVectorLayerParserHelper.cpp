@@ -203,6 +203,9 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                 geojsonSources[key] = GeoJsonVTFactory::getGeoJsonVt(key, replaceUrlParams(val["data"].get<std::string>(), sourceUrlParams), loaders, localDataProvider, options);
             } else {
                 assert(val["data"].is_object());
+                // XXX: segfault on invalid data
+                // XXX: fails on "type": "Feature" instead of "FeatureCollection"
+                // XXX: fails if there is no "properties"
                 geojsonSources[key] = GeoJsonVTFactory::getGeoJsonVt(GeoJsonParser::getGeoJson(val["data"]), options);
             }
         }
