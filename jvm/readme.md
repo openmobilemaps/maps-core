@@ -34,7 +34,7 @@ The java library has the following runtime dependencies:
 
 On current Debian derivatives, this can be obtained by installing the following packages:
 ```
-apt install --no-install-recommends libosmesa6 libgl1 && \ 
+apt install --no-install-recommends libosmesa6 libgl1
 ```
 
 
