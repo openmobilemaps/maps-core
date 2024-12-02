@@ -6,39 +6,6 @@
 #include <iostream>
 #include <jni.h>
 
-static GLenum glCheckError_(const char *file, int line) {
-    GLenum errorCode;
-    while ((errorCode = glGetError()) != GL_NO_ERROR) {
-        std::string error;
-        switch (errorCode) {
-        case GL_INVALID_ENUM:
-            error = "INVALID_ENUM";
-            break;
-        case GL_INVALID_VALUE:
-            error = "INVALID_VALUE";
-            break;
-        case GL_INVALID_OPERATION:
-            error = "INVALID_OPERATION";
-            break;
-        case GL_STACK_OVERFLOW:
-            error = "STACK_OVERFLOW";
-            break;
-        case GL_STACK_UNDERFLOW:
-            error = "STACK_UNDERFLOW";
-            break;
-        case GL_OUT_OF_MEMORY:
-            error = "OUT_OF_MEMORY";
-            break;
-        case GL_INVALID_FRAMEBUFFER_OPERATION:
-            error = "INVALID_FRAMEBUFFER_OPERATION";
-            break;
-        }
-        std::cout << error << " | " << file << ":" << line << std::endl;
-    }
-    return errorCode;
-}
-#define glCheckError() glCheckError_(__FILE__, __LINE__)
-
 static bool checkFramebufferStatus() {
     std::string status;
     switch (glCheckFramebufferStatus(GL_FRAMEBUFFER)) {
@@ -162,7 +129,6 @@ JNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_graphics_util_OSMesa_read
         glBlitFramebuffer(0, 0, state->width, state->height, 0, 0, state->width, state->height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
         glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, state->fbo);
-        glCheckError();
     }
 
     // NOTE: little-endian! Implicit byte-order conversion from BGRA byte buffer into ARGB ints (highest-order byte is A)
@@ -172,7 +138,6 @@ JNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_graphics_util_OSMesa_read
     // memcpy(outBuf, buf, sizeof(jint) * outLen); // NOTE for whatever reason, the blit above does not seem to directly affect
     // state->buf as I expected with OSMesa. Need to read pixel instead.
     glReadPixels(0, 0, state->width, state->width, GL_BGRA, GL_UNSIGNED_BYTE, outBuf);
-    glCheckError();
     env->ReleaseIntArrayElements(out, outBuf, 0);
 }
 

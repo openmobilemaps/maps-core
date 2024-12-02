@@ -3,6 +3,9 @@ package io.openmobilemaps.mapscore.graphics.util;
 import java.awt.image.BufferedImage;
 
 public class GlTextureHelper {
+    private GlTextureHelper() {
+        // Prevent instantiation of utility class
+    }
 
     public static int createTexture(BufferedImage image) {
         int width = image.getWidth();
