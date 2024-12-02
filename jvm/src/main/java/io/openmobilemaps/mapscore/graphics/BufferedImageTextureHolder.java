@@ -41,7 +41,6 @@ public class BufferedImageTextureHolder extends TextureHolderInterface {
         synchronized (this) {
             if (usageCounter == 0) {
                 textureId = GlTextureHelper.createTexture(image);
-                System.out.printf("attach to graphics %d\n", textureId);
             }
             usageCounter++;
         }
