@@ -49,6 +49,19 @@
                 <groupId>com.borasoftware.balau</groupId>
                 <artifactId>cmake-maven-plugin</artifactId>
                 <version>19.7.1</version>
+                <configuration>
+                    <!--
+                    Disabled, bug in cmake-maven-plugin; creates bad commandline -G"Ninja" (bad quoting). Set generator to ninja (usually faster than make).
+                    <generator>Ninja</generator>
+                     -->
+                    <cmakeSourceDirectory>${project.basedir}/..</cmakeSourceDirectory>
+                    <cmakeDefines>
+                        <CMAKE_CXX_COMPILER>${CMAKE_CXX_COMPILER}</CMAKE_CXX_COMPILER>
+                    </cmakeDefines>
+                    <compileTargets>
+                        <compileTarget>mapscore_jni</compileTarget>
+                    </compileTargets>
+                </configuration>
                 <executions>
                     <execution>
                         <id>build-native-release</id>
@@ -58,19 +71,10 @@
                             <goal>compile</goal>
                         </goals>
                         <configuration>
-                            <!--
-                            Disabled, bug in cmake-maven-plugin; creates bad commandline -G"Ninja" (bad quoting). Set generator to ninja (usually faster than make).
-                            <generator>Ninja</generator>
-                             -->
-                            <cmakeSourceDirectory>${project.basedir}/..</cmakeSourceDirectory>
                             <cmakeBinaryDirectory>${project.build.directory}/build-native-release</cmakeBinaryDirectory>
                             <cmakeDefines>
-                                <CMAKE_CXX_COMPILER>${CMAKE_CXX_COMPILER}</CMAKE_CXX_COMPILER>
                                 <CMAKE_BUILD_TYPE>RelWithDebInfo</CMAKE_BUILD_TYPE>
                             </cmakeDefines>
-                            <compileTargets>
-                                <compileTarget>mapscore_jni</compileTarget>
-                            </compileTargets>
                         </configuration>
                     </execution>
                     <execution>
@@ -81,15 +85,10 @@
                             <goal>compile</goal>
                         </goals>
                         <configuration>
-                            <cmakeSourceDirectory>${project.basedir}/..</cmakeSourceDirectory>
                             <cmakeBinaryDirectory>${project.build.directory}/build-native-debug</cmakeBinaryDirectory>
                             <cmakeDefines>
-                                <CMAKE_CXX_COMPILER>${CMAKE_CXX_COMPILER}</CMAKE_CXX_COMPILER>
                                 <CMAKE_BUILD_TYPE>Debug</CMAKE_BUILD_TYPE>
                             </cmakeDefines>
-                            <compileTargets>
-                                <compileTarget>mapscore_jni</compileTarget>
-                            </compileTargets>
                         </configuration>
                     </execution>
                 </executions>
