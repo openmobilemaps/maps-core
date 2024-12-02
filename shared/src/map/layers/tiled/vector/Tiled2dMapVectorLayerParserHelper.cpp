@@ -34,7 +34,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                                                         const std::vector<std::shared_ptr<::LoaderInterface>> &loaders, const std::unordered_map<std::string, std::string> & sourceUrlParams) {
     DataLoaderResult result = LoaderHelper::loadData(styleJsonUrl, std::nullopt, loaders);
     if (result.status != LoaderStatus::OK) {
-        LogError <<= "Unable to Load style.json from " + styleJsonUrl + " errorCode: " + (result.errorCode ? *result.errorCode : "");
+        LogError <<= "Unable to Load style.json from " + styleJsonUrl + " status: " + toString(result.status) + " errorCode: " + (result.errorCode ? *result.errorCode : "");
         return Tiled2dMapVectorLayerParserResult(nullptr, result.status, result.errorCode, std::nullopt);
     }
     auto string = std::string((char*)result.data->buf(), result.data->len());

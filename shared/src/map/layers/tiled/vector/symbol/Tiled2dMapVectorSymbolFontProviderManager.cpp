@@ -16,11 +16,13 @@ Tiled2dMapVectorSymbolFontProviderManager::Tiled2dMapVectorSymbolFontProviderMan
 std::shared_ptr <FontLoaderResult> Tiled2dMapVectorSymbolFontProviderManager::loadFont(const std::string &fontName) {
     if (fontLoaderResults.count(fontName) > 0) {
         return fontLoaderResults.at(fontName);
-    } else {
+    } else if (fontLoader) {
         auto fontResult = std::make_shared<FontLoaderResult>(fontLoader->loadFont(Font(fontName)));
         if (fontResult->status == LoaderStatus::OK && fontResult->fontData && fontResult->imageData) {
             fontLoaderResults.insert({fontName, fontResult});
         }
         return fontResult;
+    } else {
+      return nullptr;
     }
 }
