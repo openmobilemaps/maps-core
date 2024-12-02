@@ -1,17 +1,14 @@
 //
 //  Actor.h
-//  
+//
 //
 //  Created by Stefan Mitterrutzner on 08.02.23.
 //
 
 #pragma once
 
-#include "SchedulerInterface.h"
-#include "LambdaTask.h"
 #include "Mailbox.h"
 #include <mutex>
-#include <queue>
 #include <future>
 #include "Logger.h"
 
@@ -28,15 +25,15 @@ public:
 };
 
 template <class Object, class MemberFn, class... Args>
-inline std::unique_ptr<MailboxMessage> makeMessage(const MailboxDuplicationStrategy &strategy, const MailboxExecutionEnvironment &environment, Object object, MemberFn memberFn, Args&&... args) {
+inline std::unique_ptr<MailboxMessage> makeMessage(const MailboxDuplicationStrategy &strategy, const MailboxExecutionEnvironment &environment, std::weak_ptr<Object> object, MemberFn memberFn, Args&&... args) {
     auto tuple = std::make_tuple(std::forward<Args>(args)...);
-    return std::make_unique<MailboxMessageImpl<Object, MemberFn, decltype(tuple)>>(object, memberFn, strategy, environment, std::move(tuple));
+    return std::make_unique<MailboxMessageImpl<Object, MemberFn, decltype(tuple)>>(std::move(object), memberFn, strategy, environment, std::move(tuple));
 }
 
 template <class ResultType, class Object, class MemberFn, class... Args>
-std::unique_ptr<MailboxMessage> makeAskMessage(const MailboxDuplicationStrategy &strategy, const MailboxExecutionEnvironment &environment, std::promise<ResultType>&& promise, Object object, MemberFn memberFn, Args&&... args) {
+std::unique_ptr<MailboxMessage> makeAskMessage(const MailboxExecutionEnvironment &environment, std::promise<ResultType>&& promise, std::weak_ptr<Object> object, MemberFn memberFn, Args&&... args) {
     auto tuple = std::make_tuple(std::forward<Args>(args)...);
-    return std::make_unique<AskMessageImpl<ResultType, Object, MemberFn, decltype(tuple)>>(std::move(promise), object, memberFn, strategy, environment, std::move(tuple));
+    return std::make_unique<AskMessageImpl<ResultType, Object, MemberFn, decltype(tuple)>>(std::move(promise), std::move(object), memberFn, environment, std::move(tuple));
 }
 
 template <class Object>
@@ -56,9 +53,9 @@ public:
             assert(casted->mailbox == receivingMailbox.lock());
         }
     }
-    
+
     WeakActor(): object(), receivingMailbox() {}
-    
+
     constexpr explicit operator bool() const noexcept {
         return receivingMailbox.lock() && object.lock();
     }
@@ -121,7 +118,7 @@ public:
         }
     }
 
-    
+
     template <typename Fn, class... Args>
     auto converse(Fn fn, Args&&... args) const {
         using ResultType = std::invoke_result_t<decltype(fn), Object, Args...>;
@@ -133,7 +130,7 @@ public:
         auto future = promise.get_future();
 
         if (strongObject && strongMailbox) {
-            strongMailbox->push(makeAskMessage(MailboxDuplicationStrategy::none, MailboxExecutionEnvironment::computation, std::move(promise), object, fn, std::forward<Args>(args)...));
+            strongMailbox->push(makeAskMessage(MailboxExecutionEnvironment::computation, std::move(promise), object, fn, std::forward<Args>(args)...));
         } else {
             LogError <<= "WeakActor holds nullptr";
         }
@@ -151,13 +148,13 @@ public:
         auto future = promise.get_future();
 
         if (strongObject && strongMailbox) {
-            strongMailbox->push(makeAskMessage(MailboxDuplicationStrategy::none, environment, std::move(promise), object, fn, std::forward<Args>(args)...));
+            strongMailbox->push(makeAskMessage(environment, std::move(promise), object, fn, std::forward<Args>(args)...));
         } else {
             LogError <<= "WeakActor holds nullptr";
         }
         return future;
     }
-    
+
     template <class CastObject>
     WeakActor<CastObject> weakActor() const {
         auto casted = std::static_pointer_cast<CastObject>(object.lock());
@@ -174,11 +171,11 @@ public:
         std::lock_guard<std::recursive_mutex> lock(strongMailbox->receivingMutex);
         return lambda(object);
     }
-    
+
     inline const std::weak_ptr<Object>& unsafe() const {
         return object;
     }
-    
+
 private:
     std::weak_ptr<Object> object;
     std::weak_ptr<Mailbox> receivingMailbox;
@@ -203,21 +200,21 @@ public:
     }
 
     Actor(): object(nullptr), receivingMailbox(nullptr) {}
-    
+
     constexpr explicit operator bool() noexcept {
         return object && receivingMailbox;
     }
-    
+
     template <class... Args>
     void emplaceObject(std::shared_ptr<Mailbox> mailbox, Args&&... args) {
         this->receivingMailbox = mailbox;
         object = std::make_shared<Object>(std::forward<Args>(args)...);
 
         assert(std::dynamic_pointer_cast<ActorObject>(object));
-        
+
         object->mailbox = mailbox;
     }
-    
+
     void emplaceObject(std::shared_ptr<Mailbox> mailbox, std::shared_ptr<Object> object) {
         this->receivingMailbox = mailbox;
         this->object = object;
@@ -240,7 +237,7 @@ public:
         receivingMailbox->push(makeMessage(MailboxDuplicationStrategy::none, MailboxExecutionEnvironment::computation, std::weak_ptr<Object>(object), fn, std::forward<Args>(args)...));
     }
 
-    
+
     template <typename Fn, class... Args>
     inline void message(const MailboxDuplicationStrategy &strategy, Fn fn, Args&&... args) const {
         if(!receivingMailbox || !object) {
@@ -270,10 +267,10 @@ public:
     template <typename Fn, class... Args>
     auto converse(Fn fn, Args&&... args) const {
         using ResultType = std::invoke_result_t<decltype(fn), Object, Args...>;
-        
+
         std::promise<ResultType> promise;
         auto future = promise.get_future();
-        receivingMailbox->push(makeAskMessage(MailboxDuplicationStrategy::none, MailboxExecutionEnvironment::computation, std::move(promise), std::weak_ptr<Object>(object), fn, std::forward<Args>(args)...));
+        receivingMailbox->push(makeAskMessage(MailboxExecutionEnvironment::computation, std::move(promise), std::weak_ptr<Object>(object), fn, std::forward<Args>(args)...));
         return future;
     }
 
@@ -283,10 +280,10 @@ public:
 
         std::promise<ResultType> promise;
         auto future = promise.get_future();
-        receivingMailbox->push(makeAskMessage(MailboxDuplicationStrategy::none, environment, std::move(promise), std::weak_ptr<Object>(object), fn, std::forward<Args>(args)...));
+        receivingMailbox->push(makeAskMessage(environment, std::move(promise), std::weak_ptr<Object>(object), fn, std::forward<Args>(args)...));
         return future;
     }
-    
+
     inline const std::shared_ptr<Object>& unsafe() const {
         return object;
     }
@@ -308,7 +305,7 @@ public:
         auto casted = std::static_pointer_cast<CastObject>(object);
         return Actor<CastObject>(receivingMailbox, casted);
     }
-    
+
 private:
     std::shared_ptr<Object> object;
     std::shared_ptr<Mailbox> receivingMailbox;

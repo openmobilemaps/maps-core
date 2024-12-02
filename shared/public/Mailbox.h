@@ -1,6 +1,6 @@
 //
 //  Mailbox.h
-//  
+//
 //
 //  Created by Stefan Mitterrutzner on 08.02.23.
 //
@@ -12,10 +12,8 @@
 #include <mutex>
 #include <deque>
 #include <future>
-#include <typeinfo>
 #include "assert.h"
 #include "Logger.h"
-#include <functional>
 
 enum class MailboxDuplicationStrategy {
     none = 0,
@@ -29,41 +27,39 @@ enum class MailboxExecutionEnvironment {
 
 class MailboxMessage {
 public:
-    MailboxMessage(const MailboxDuplicationStrategy &strategy, const MailboxExecutionEnvironment &environment, size_t identifier)
-    : strategy(strategy), environment(environment), identifier(identifier) {}
+    MailboxMessage(const MailboxDuplicationStrategy &strategy, const MailboxExecutionEnvironment &environment)
+    : strategy(strategy), environment(environment) {}
     virtual ~MailboxMessage() = default;
     virtual void operator()() = 0;
-    
+
+    // Compare with other MailboxMessage. Return true if this and other can
+    // replace eachother with MailboxDuplicationStrategy::replaceNewest.
+    virtual bool operator==(const MailboxMessage &other) const = 0;
+
     const MailboxDuplicationStrategy strategy;
     const MailboxExecutionEnvironment environment;
-    const size_t identifier;
 };
 
 template <class Object, class MemberFn, class ArgsTuple>
-class MailboxMessageImpl: public MailboxMessage {
+class MailboxMessageImpl final : public MailboxMessage {
 public:
-    MailboxMessageImpl(Object object_, MemberFn memberFn_, const MailboxDuplicationStrategy &strategy, const MailboxExecutionEnvironment &environment, ArgsTuple argsTuple_)
-      : MailboxMessage(strategy, environment, calculateIdentifier(object_, memberFn_)),
-        object(object_),
+    MailboxMessageImpl(std::weak_ptr<Object> object_, MemberFn memberFn_, const MailboxDuplicationStrategy &strategy, const MailboxExecutionEnvironment &environment, ArgsTuple argsTuple_)
+      : MailboxMessage(strategy, environment),
+        object(std::move(object_)),
         memberFn(memberFn_),
         argsTuple(std::move(argsTuple_)) {
     }
 
-    static size_t calculateIdentifier(const Object& object, MemberFn memberFn) {
-        size_t hash = typeid(Object).hash_code();
-        size_t hashFn = typeid(MemberFn).hash_code();
-        hash_combine(hash, hashFn);
-        hash_combine(hash, &memberFn);
-        return hash;
-    }
 
-    template <typename T>
-    static void hash_combine(size_t& seed, const T& value) {
-        std::hash<T> hasher;
-        auto v = hasher(value);
-        seed ^= v + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+    virtual bool operator==(const MailboxMessage &other) const override {
+        auto o = dynamic_cast<decltype(this)>(&other);
+        if(o == nullptr) {
+          return false;
+        }
+        // compare the weak_ptr (owner_equal in C++26)
+        const bool objectEqual = !this->object.owner_before(o->object) && !o->object.owner_before(this->object);
+        return objectEqual && this->memberFn == o->memberFn;
     }
-
 
     void operator()() override {
         invoke(std::make_index_sequence<std::tuple_size_v<ArgsTuple>>());
@@ -78,17 +74,17 @@ public:
         }
     }
 
-    Object object;
+    std::weak_ptr<Object> object;
     MemberFn memberFn;
     ArgsTuple argsTuple;
 };
 
 template <class ResultType, class Object, class MemberFn, class ArgsTuple>
-class AskMessageImpl : public MailboxMessage {
+class AskMessageImpl final : public MailboxMessage {
 public:
-    AskMessageImpl(std::promise<ResultType> promise_, Object object_, MemberFn memberFn_, const MailboxDuplicationStrategy &strategy, const MailboxExecutionEnvironment &environment, ArgsTuple argsTuple_)
-        : MailboxMessage(strategy, environment, typeid(MemberFn).hash_code()),
-          object(object_),
+    AskMessageImpl(std::promise<ResultType> promise_, std::weak_ptr<Object> object_, MemberFn memberFn_, const MailboxExecutionEnvironment &environment, ArgsTuple argsTuple_)
+        : MailboxMessage(MailboxDuplicationStrategy::none, environment),
+          object(std::move(object_)),
           memberFn(memberFn_),
           argsTuple(std::move(argsTuple_)),
           promise(std::move(promise_)) {
@@ -96,6 +92,11 @@ public:
 
     void operator()() override {
         promise.set_value(ask(std::make_index_sequence<std::tuple_size_v<ArgsTuple>>()));
+    }
+
+    virtual bool operator==(const MailboxMessage &other) const override {
+        // Ask message is incompatible with replaceNewest (promise is unique).
+        return false;
     }
 
     template <std::size_t... I>
@@ -109,7 +110,7 @@ public:
         }
     }
 
-    Object object;
+    std::weak_ptr<Object> object;
     MemberFn memberFn;
     ArgsTuple argsTuple;
     std::promise<ResultType> promise;
@@ -118,7 +119,7 @@ public:
 class Mailbox: public std::enable_shared_from_this<Mailbox>  {
 public:
     Mailbox(std::shared_ptr<SchedulerInterface> scheduler): scheduler(scheduler) {};
-    
+
     void push(std::unique_ptr<MailboxMessage> message) {
         std::lock_guard<std::mutex> pushingLock(pushingMutex);
         bool wasEmpty = false;
@@ -129,7 +130,7 @@ public:
             wasEmpty = queue.empty();
             if (message->strategy == MailboxDuplicationStrategy::replaceNewest) {
                 for (auto it = queue.begin(); it != queue.end(); it++) {
-                    if ((*it)->identifier == message->identifier) {
+                    if (*(*it) == *message) {
                         assert((*it)->strategy == MailboxDuplicationStrategy::replaceNewest);
                         auto const newIt = queue.erase (it);
                         queue.insert(newIt, std::move(message));
@@ -157,7 +158,8 @@ public:
             strongScheduler->addTask(makeTask(shared_from_this(), environment));
         }
     };
-    
+
+private:
     void receive(const MailboxExecutionEnvironment &environment) {
         // Make sure to never block the graphics queue
         if (environment == MailboxExecutionEnvironment::graphics) {
@@ -199,7 +201,7 @@ public:
 
         receivingMutex.unlock();
     }
-    
+
     static inline std::shared_ptr<LambdaTask> makeTask(std::weak_ptr<Mailbox> mailbox, MailboxExecutionEnvironment environment){
         ExecutionEnvironment executionEnvironment;
         switch (environment) {
@@ -219,7 +221,12 @@ public:
                                             });
     }
 
+private:
+    // Actor locks mutex for syncAccess
+    template<typename> friend class Actor;
+    template<typename> friend class WeakActor;
     std::recursive_mutex receivingMutex;
+
 private:
     std::weak_ptr<SchedulerInterface> scheduler;
 

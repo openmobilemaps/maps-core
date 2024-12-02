@@ -11,7 +11,6 @@
 #include "DateHelper.h"
 #include "Tiled2dMapSource.h"
 #include "TiledLayerError.h"
-#include <algorithm>
 
 #include "Logger.h"
 #include "Matrix.h"
@@ -19,7 +18,10 @@
 #include "Vec2DHelper.h"
 #include "Vec3DHelper.h"
 #include "gpc.h"
+
+#include <algorithm>
 #include <iostream>
+#include <queue>
 
 struct VisibleTileCandidate {
     int x;
