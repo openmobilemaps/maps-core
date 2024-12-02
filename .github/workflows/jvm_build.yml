@@ -1,5 +1,7 @@
 name: Maven build JVM
-on: push
+on:
+    pull_request:
+        branches: [ main, develop, release/** ]
 
 jobs:
     build:
