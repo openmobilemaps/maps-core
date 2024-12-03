@@ -1314,7 +1314,7 @@ Vec2F MapCamera3d::screenPosFromCartesianCoord(const Vec4D &coord, const Vec2I &
 // padding in percentage, where 1.0 = rect is half of full width and height
 bool MapCamera3d::coordIsVisibleOnScreen(const ::Coord &coord, float paddingPc) {
     // 1. Check that coordinate is not on the back of the globe
-    if (coordIsOnFrontHalfOfGlobe(coord) == false || coordIsFarAwayFromFocusPoint(coord)) {
+    if (!coordIsOnFrontHalfOfGlobe(coord) || coordIsFarAwayFromFocusPoint(coord)) {
         return false;
     }
 
@@ -1356,7 +1356,9 @@ bool MapCamera3d::coordIsOnFrontHalfOfGlobe(Coord coord) {
     const auto coordCartesian = convertToCartesianCoordinates(coord);
     const auto projectedCoord = projectedPoint(coordCartesian);
 
-    bool isInFront = projectedCoord.z > -origin.z;
+    const auto projectedCenter = projectedPoint({-origin.x, -origin.y, -origin.z, 1});
+
+    bool isInFront = projectedCoord.z <= projectedCenter.z;
 
     return isInFront;
 }
