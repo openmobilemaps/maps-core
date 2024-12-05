@@ -157,7 +157,7 @@ public enum PipelineType: String, CaseIterable, Codable {
 
     var vertexShaderUsesModelMatrix: Bool {
         switch self {
-            case .rasterShader, .roundColorShader, .unitSphereRoundColorShader:
+            case .rasterShader, .roundColorShader, .unitSphereRoundColorShader, .alphaShader:
                 return true
             default:
                 return false
@@ -166,7 +166,7 @@ public enum PipelineType: String, CaseIterable, Codable {
 
     var vertexShader: String {
         switch self {
-            case .alphaShader: return "baseVertexShader"
+            case .alphaShader: return "baseVertexShaderModel"
             case .alphaInstancedShader: return "alphaInstancedVertexShader"
             case .lineGroupShader: return "lineGroupVertexShader"
             case .unitSphereLineGroupShader: return "unitSpherelineGroupVertexShader"
