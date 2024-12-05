@@ -64,8 +64,9 @@ Tiled2dMapSource<T, L, R>::Tiled2dMapSource(const MapConfig &mapConfig, const st
 
     // add virtual zoom levels and sort again
     auto virtualZoomLevelInfos = layerConfig->getVirtualZoomLevelInfos();
-    zoomLevelInfos.insert(zoomLevelInfos.end(), virtualZoomLevelInfos.begin(), virtualZoomLevelInfos.end());
-    std::sort(zoomLevelInfos.begin(), zoomLevelInfos.end(),
+    zoomLevelInfosWithVirtual.insert(zoomLevelInfosWithVirtual.end(), zoomLevelInfos.begin(), zoomLevelInfos.end());
+    zoomLevelInfosWithVirtual.insert(zoomLevelInfosWithVirtual.end(), virtualZoomLevelInfos.begin(), virtualZoomLevelInfos.end());
+    std::sort(zoomLevelInfosWithVirtual.begin(), zoomLevelInfosWithVirtual.end(),
               [](const Tiled2dMapZoomLevelInfo &a, const Tiled2dMapZoomLevelInfo &b) -> bool { return a.zoom > b.zoom; });
 }
 
@@ -141,8 +142,8 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
 
     int maxLevel = 0;
     int minZoomLevelIndex = 0;
-    for (int index = 0; index < zoomLevelInfos.size(); ++index) {
-        const auto &level = zoomLevelInfos[index];
+    for (int index = 0; index < zoomLevelInfosWithVirtual.size(); ++index) {
+        const auto &level = zoomLevelInfosWithVirtual[index];
         if (level.numTilesX > minNumTiles && level.numTilesY > minNumTiles) {
             if (level.numTilesX * level.numTilesY > 100) {
                 printf("Ignore seed candidates for %d x %d tiles for %s\n", level.numTilesX, level.numTilesY, layerName.c_str());
@@ -186,7 +187,7 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
     size_t visibleTileHash = minZoomLevelIndex;
     std::vector<std::pair<VisibleTileCandidate, PrioritizedTiled2dMapTileInfo>> visibleTilesVec;
 
-    auto maxLevelAvailable = zoomLevelInfos.size() - 1;
+    auto maxLevelAvailable = zoomLevelInfosWithVirtual.size() - 1;
 
     int candidateChecks = 0;
 
@@ -207,7 +208,7 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
             return;
         }
 
-        const Tiled2dMapZoomLevelInfo &zoomLevelInfo = zoomLevelInfos.at(candidate.levelIndex);
+        const Tiled2dMapZoomLevelInfo &zoomLevelInfo = zoomLevelInfosWithVirtual.at(candidate.levelIndex);
 
         const double boundsRatio =
             std::abs(((zoomLevelInfo.bounds.bottomRight.y - zoomLevelInfo.bounds.topLeft.y) / zoomLevelInfo.numTilesY) /
@@ -464,7 +465,7 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
         }
 
         if (!preciseEnough && !lastLevel) {
-            const Tiled2dMapZoomLevelInfo &zoomLevelInfo = zoomLevelInfos.at(candidate.levelIndex + 1);
+            const Tiled2dMapZoomLevelInfo &zoomLevelInfo = zoomLevelInfosWithVirtual.at(candidate.levelIndex + 1);
 
             const double tileWidth = zoomLevelInfo.tileWidthLayerSystemUnits;
             const double tileHeight = zoomLevelInfo.tileWidthLayerSystemUnits * boundsRatio;
@@ -526,7 +527,7 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
             if (dataBounds.has_value()) {
                 const auto availableTiles = conversionHelper->convertRect(layerSystemId, *dataBounds);
 
-                const Tiled2dMapZoomLevelInfo &zoomLevelInfo = zoomLevelInfos.at(tile.first.levelIndex);
+                const Tiled2dMapZoomLevelInfo &zoomLevelInfo = zoomLevelInfosWithVirtual.at(tile.first.levelIndex);
 
                 RectCoord layerBounds = zoomLevelInfo.bounds;
                 const bool leftToRight = layerBounds.topLeft.x < layerBounds.bottomRight.x;
@@ -592,7 +593,7 @@ void Tiled2dMapSource<T, L, R>::onCameraChange(const std::vector<float> &viewMat
 
             if (tile.first.levelIndex > 0 && (previousLayerOffset < zoomInfo.numDrawPreviousLayers || zoomInfo.maskTile)) {
 
-                const Tiled2dMapZoomLevelInfo &zoomLevelInfo = zoomLevelInfos.at(tile.first.levelIndex - 1);
+                const Tiled2dMapZoomLevelInfo &zoomLevelInfo = zoomLevelInfosWithVirtual.at(tile.first.levelIndex - 1);
                 const double boundsRatio =
                     std::abs(((zoomLevelInfo.bounds.bottomRight.y - zoomLevelInfo.bounds.topLeft.y) / zoomLevelInfo.numTilesY) /
                              ((zoomLevelInfo.bounds.bottomRight.x - zoomLevelInfo.bounds.topLeft.x) / zoomLevelInfo.numTilesX));

@@ -137,6 +137,7 @@ class Tiled2dMapSource : public Tiled2dMapSourceInterface,
     std::shared_ptr<::ErrorManager> errorManager;
 
     std::vector<Tiled2dMapZoomLevelInfo> zoomLevelInfos;
+    std::vector<Tiled2dMapZoomLevelInfo> zoomLevelInfosWithVirtual;
     const Tiled2dMapZoomInfo zoomInfo;
     int topMostZoomLevel;
 
