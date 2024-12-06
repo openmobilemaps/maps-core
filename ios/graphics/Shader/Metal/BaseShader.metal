@@ -60,7 +60,7 @@ baseFragmentShader(VertexOut in [[stage_in]],
 
 
 vertex VertexOut
-colorVertexShader(const Vertex3FIn vertexIn [[stage_in]],
+colorVertexShader(const Vertex4FIn vertexIn [[stage_in]],
                   constant float4x4 &vpMatrix [[buffer(1)]],
                    constant float4x4 &mMatrix [[buffer(2)]],
                   constant float4 &originOffset [[buffer(3)]])

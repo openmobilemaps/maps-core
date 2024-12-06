@@ -139,9 +139,8 @@ final class Quad2d: BaseGraphicsObject, @unchecked Sendable {
         encoder.setVertexBuffer(vpMatrixBuffer, offset: 0, index: 1)
 
         if shader.usesModelMatrix() {
-            if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mMatrix)) {
-                let mMatrixBuffer = device.makeBuffer(bytes: matrixPointer, length: 64)
-                encoder.setVertexBuffer(mMatrixBuffer, offset: 0, index: 2)
+            if let mMatrixPointer = UnsafeRawPointer(bitPattern: Int(mMatrix)) {
+                encoder.setVertexBytes(mMatrixPointer, length: 64, index: 2)
             }
         }
 

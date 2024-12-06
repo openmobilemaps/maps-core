@@ -227,10 +227,9 @@ public enum PipelineType: String, CaseIterable, Codable {
             case .polygonGroupShader,
                  .polygonPatternGroupShader,
                  .polygonPatternFadeInGroupShader,
-                 .polygonStripedGroupShader:
+                 .polygonStripedGroupShader,
+                 .colorShader, .maskShader:
                 return Vertex4F.descriptor
-            case .colorShader, .maskShader:
-                return Vertex3F.descriptor
             case .rasterShader,
                  .clearStencilShader,
                  .alphaShader,
