@@ -51,7 +51,7 @@ std::shared_ptr<::TextureHolderInterface> Tiled2dMapRasterSource::postLoadingTas
 }
 
 void Tiled2dMapRasterSource::notifyTilesUpdates() {
-    rasterLayerActor.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapRasterSourceListener::onTilesUpdated,
+    rasterLayerActor.message(MailboxDuplicationStrategy::replaceNewest, MFN(&Tiled2dMapRasterSourceListener::onTilesUpdated),
                              layerConfig->getLayerName(), getCurrentTiles());
 }
 

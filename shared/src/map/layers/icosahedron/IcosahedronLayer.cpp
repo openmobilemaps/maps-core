@@ -96,7 +96,7 @@ void IcosahedronLayer::onAdded(const std::shared_ptr<MapInterface> & mapInterfac
 
 
         auto selfActor = WeakActor<IcosahedronLayer>(selfMailbox, shared_from_this());
-        selfActor.message(MailboxExecutionEnvironment::graphics, &IcosahedronLayer::setupObject);
+        selfActor.message(MailboxExecutionEnvironment::graphics, MFN(&IcosahedronLayer::setupObject));
     });
 }
 

@@ -120,7 +120,7 @@ Tiled2dMapVectorTileInfo::FeatureMap Tiled2dMapVectorSource::postLoadingTask(std
 }
 
 void Tiled2dMapVectorSource::notifyTilesUpdates() {
-    listener.message(&Tiled2dMapVectorSourceListener::onTilesUpdated, sourceName, getCurrentTiles());
+    listener.message(MFN(&Tiled2dMapVectorSourceListener::onTilesUpdated), sourceName, getCurrentTiles());
 }
 
 VectorSet<Tiled2dMapVectorTileInfo> Tiled2dMapVectorSource::getCurrentTiles() {
