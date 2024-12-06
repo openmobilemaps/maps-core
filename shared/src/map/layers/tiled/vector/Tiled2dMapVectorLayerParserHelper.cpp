@@ -87,8 +87,8 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
             bool maskTiles = true;
             double zoomLevelScaleFactor = 1.0;
 
-            bool overzoom = true;
-            bool underzoom = false;
+            bool overzoom = val.contains("overzoom")  ? tileJsons["overzoom"].get<bool>() : true;
+            bool underzoom = val.contains("underzoom")  ? tileJsons["underzoom"].get<bool>() : false;
 
             int minZoom = val.value("minzoom", 0);
             int maxZoom = val.value("maxzoom", 22);
@@ -283,7 +283,10 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                                                         parser.parseValue(val["metadata"]["raster-brightness-shift"]),
                                                         blendMode);
             std::shared_ptr<Value> filter = parser.parseValue(val["filter"]);
-            
+
+            bool underzoom = layer->underzoom && !val.contains("minzoom");
+            bool overzoom = layer->overzoom && !val.contains("maxzoom");
+
             auto newLayer = std::make_shared<RasterVectorLayerDescription>(val["id"],
                                                                            val["source"],
                                                                            val.value("minzoom", layer->minZoom),
@@ -297,8 +300,8 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                                                                            layer->zoomLevelScaleFactor,
                                                                            layer->renderPassIndex,
                                                                            interactable,
-                                                                           layer->underzoom,
-                                                                           layer->overzoom,
+                                                                           underzoom,
+                                                                           overzoom,
                                                                            layer->bounds,
                                                                            layer->coordinateReferenceSystem);
             layers.push_back(newLayer);
