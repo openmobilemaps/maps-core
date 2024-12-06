@@ -288,37 +288,38 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
             }
         } else {
             for (const auto &p: pointCoordinates) {
-                auto midP = p.begin() + p.size() / 2;
-                std::optional<double> angle = std::nullopt;
+                for (const auto &mp: p) {
+                    std::optional<double> angle = std::nullopt;
 
-                const auto symbolObject = createSymbolObject(tileInfo, layerIdentifier, layerDescription, layerConfig, context,
-                                                             text, fullText, *midP, std::nullopt, fontList, anchor, angle, justify,
-                                                             placement, false, animationCoordinatorMap, featureTileIndex, hasImageFromCustomProvider);
+                    const auto symbolObject = createSymbolObject(tileInfo, layerIdentifier, layerDescription, layerConfig, context,
+                                                                 text, fullText, mp, std::nullopt, fontList, anchor, angle, justify,
+                                                                 placement, false, animationCoordinatorMap, featureTileIndex, hasImageFromCustomProvider);
 
-                if (symbolObject) {
-                    symbolObjects.push_back(symbolObject);
-                    wasPlaced = true;
-                }
-
-                if (hasIcon) {
-                    if (textOptional) {
-                        const auto symbolObject = createSymbolObject(tileInfo, layerIdentifier, layerDescription, layerConfig,
-                                                                     context, {}, "", *midP, std::nullopt, fontList, anchor, angle,
-                                                                     justify, placement, false, animationCoordinatorMap, featureTileIndex, hasImageFromCustomProvider);
-
-                        if (symbolObject) {
-                            symbolObjects.push_back(symbolObject);
-                            wasPlaced = true;
-                        }
+                    if (symbolObject) {
+                        symbolObjects.push_back(symbolObject);
+                        wasPlaced = true;
                     }
-                    if (iconOptional) {
-                        const auto symbolObject = createSymbolObject(tileInfo, layerIdentifier, layerDescription, layerConfig,
-                                                                     context, text, fullText, *midP, std::nullopt, fontList, anchor,
-                                                                     angle, justify, placement, true, animationCoordinatorMap, featureTileIndex, hasImageFromCustomProvider);
 
-                        if (symbolObject) {
-                            symbolObjects.push_back(symbolObject);
-                            wasPlaced = true;
+                    if (hasIcon) {
+                        if (textOptional) {
+                            const auto symbolObject = createSymbolObject(tileInfo, layerIdentifier, layerDescription, layerConfig,
+                                                                         context, {}, "", mp, std::nullopt, fontList, anchor, angle,
+                                                                         justify, placement, false, animationCoordinatorMap, featureTileIndex, hasImageFromCustomProvider);
+
+                            if (symbolObject) {
+                                symbolObjects.push_back(symbolObject);
+                                wasPlaced = true;
+                            }
+                        }
+                        if (iconOptional) {
+                            const auto symbolObject = createSymbolObject(tileInfo, layerIdentifier, layerDescription, layerConfig,
+                                                                         context, text, fullText, mp, std::nullopt, fontList, anchor,
+                                                                         angle, justify, placement, true, animationCoordinatorMap, featureTileIndex, hasImageFromCustomProvider);
+
+                            if (symbolObject) {
+                                symbolObjects.push_back(symbolObject);
+                                wasPlaced = true;
+                            }
                         }
                     }
                 }
