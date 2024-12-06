@@ -23,10 +23,7 @@ final class Polygon2d: BaseGraphicsObject, @unchecked Sendable {
     private var stencilState: MTLDepthStencilState?
     private var renderPassStencilState: MTLDepthStencilState?
 
-    private var mMatrixBuffers: MultiBuffer<simd_float4x4>
-
     init(shader: MCShaderProgramInterface, metalContext: MetalContext) {
-        mMatrixBuffers = .init(device: metalContext.device)
         self.shader = shader
         super.init(
             device: metalContext.device,
@@ -95,12 +92,8 @@ final class Polygon2d: BaseGraphicsObject, @unchecked Sendable {
         }
         encoder.setVertexBuffer(vpMatrixBuffer, offset: 0, index: 1)
 
-        if shader.usesModelMatrix() {
-            let mMatrixBuffer = mMatrixBuffers.getNextBuffer(context)
-            if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mMatrix)) {
-                mMatrixBuffer?.contents().copyMemory(
-                    from: matrixPointer, byteCount: 64)
-            }
+        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mMatrix)) {
+            let mMatrixBuffer = device.makeBuffer(bytes: matrixPointer, length: 64)
             encoder.setVertexBuffer(mMatrixBuffer, offset: 0, index: 2)
         }
 
@@ -189,12 +182,8 @@ extension Polygon2d: MCMaskingObjectInterface {
         }
         encoder.setVertexBuffer(vpMatrixBuffer, offset: 0, index: 1)
 
-        if shader.usesModelMatrix() {
-            let mMatrixBuffer = mMatrixBuffers.getNextBuffer(context)
-            if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mMatrix)) {
-                mMatrixBuffer?.contents().copyMemory(
-                    from: matrixPointer, byteCount: 64)
-            }
+        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mMatrix)) {
+            let mMatrixBuffer = device.makeBuffer(bytes: matrixPointer, length: 64)
             encoder.setVertexBuffer(mMatrixBuffer, offset: 0, index: 2)
         }
 

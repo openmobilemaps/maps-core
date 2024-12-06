@@ -27,7 +27,6 @@ final class Quad2dInstanced: BaseGraphicsObject, @unchecked Sendable {
     private var alphaBuffer: MTLBuffer?
     private var offsetsBuffer: MTLBuffer?
     private var originBuffers: MultiBuffer<simd_float4>
-    private var mMatrixBuffers: MultiBuffer<simd_float4x4>
 
     private var textureCoordinatesBuffer: MTLBuffer?
 
@@ -54,7 +53,6 @@ final class Quad2dInstanced: BaseGraphicsObject, @unchecked Sendable {
             self.isUnitSphere = false
         }
         originBuffers = .init(device: metalContext.device)
-        mMatrixBuffers = .init(device: metalContext.device)
         super.init(
             device: metalContext.device,
             sampler: metalContext.samplerLibrary.value(
@@ -151,12 +149,8 @@ final class Quad2dInstanced: BaseGraphicsObject, @unchecked Sendable {
         }
         encoder.setVertexBuffer(vpMatrixBuffer, offset: 0, index: 1)
 
-        if shader.usesModelMatrix() {
-            let mMatrixBuffer = mMatrixBuffers.getNextBuffer(context)
-            if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mMatrix)) {
-                mMatrixBuffer?.contents().copyMemory(
-                    from: matrixPointer, byteCount: 64)
-            }
+        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mMatrix)) {
+            let mMatrixBuffer = device.makeBuffer(bytes: matrixPointer, length: 64)
             encoder.setVertexBuffer(mMatrixBuffer, offset: 0, index: 2)
         }
 

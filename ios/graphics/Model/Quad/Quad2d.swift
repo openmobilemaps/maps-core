@@ -36,14 +36,11 @@ final class Quad2d: BaseGraphicsObject, @unchecked Sendable {
     private var frame: MCQuad3dD?
     private var textureCoordinates: MCRectD?
 
-    private var mMatrixBuffers: MultiBuffer<simd_float4x4>
-
     init(
         shader: MCShaderProgramInterface, metalContext: MetalContext,
         label: String = "Quad2d"
     ) {
         self.shader = shader
-        self.mMatrixBuffers = .init(device: metalContext.device)
         super.init(
             device: metalContext.device,
             sampler: metalContext.samplerLibrary.value(
@@ -142,12 +139,10 @@ final class Quad2d: BaseGraphicsObject, @unchecked Sendable {
         encoder.setVertexBuffer(vpMatrixBuffer, offset: 0, index: 1)
 
         if shader.usesModelMatrix() {
-            let mMatrixBuffer = mMatrixBuffers.getNextBuffer(context)
             if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mMatrix)) {
-                mMatrixBuffer?.contents().copyMemory(
-                    from: matrixPointer, byteCount: 64)
+                let mMatrixBuffer = device.makeBuffer(bytes: matrixPointer, length: 64)
+                encoder.setVertexBuffer(mMatrixBuffer, offset: 0, index: 2)
             }
-            encoder.setVertexBuffer(mMatrixBuffer, offset: 0, index: 2)
         }
 
         let originOffsetBuffer = originOffsetBuffers.getNextBuffer(context)
