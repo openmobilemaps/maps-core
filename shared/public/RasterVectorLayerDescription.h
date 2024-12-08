@@ -147,6 +147,8 @@ public:
                                  std::string source,
                                  int minZoom,
                                  int maxZoom,
+                                 int sourceMinZoom,
+                                 int sourceMaxZoom,
                                  std::string url,
                                  std::shared_ptr<Value> filter,
                                  RasterVectorStyle style,
@@ -160,7 +162,7 @@ public:
                                  bool overzoom,
                                  std::optional<::RectCoord> bounds,
                                  std::optional<std::string> coordinateReferenceSystem):
-    VectorLayerDescription(identifier, source, "", minZoom, maxZoom, filter, renderPassIndex, interactable, false, false),
+    VectorLayerDescription(identifier, source, "", minZoom, maxZoom, sourceMinZoom, sourceMaxZoom, filter, renderPassIndex, interactable, false, false),
     style(style), url(url), underzoom(underzoom), overzoom(overzoom), adaptScaleToScreen(adaptScaleToScreen), numDrawPreviousLayers(numDrawPreviousLayers),
     maskTiles(maskTiles), zoomLevelScaleFactor(zoomLevelScaleFactor), bounds(bounds), coordinateReferenceSystem(coordinateReferenceSystem) {};
 
@@ -170,6 +172,8 @@ public:
                                             source,
                                             minZoom,
                                             maxZoom,
+                                            sourceMinZoom,
+                                            sourceMaxZoom,
                                             url,
                                             filter,
                                             style,

@@ -24,6 +24,8 @@ public:
     std::string sourceLayer;
     int minZoom;
     int maxZoom;
+    int sourceMinZoom;
+    int sourceMaxZoom;
     std::shared_ptr<Value> filter;
     std::optional<int32_t> renderPassIndex;
     bool multiselect;
@@ -58,6 +60,8 @@ public:
                            std::string sourceId,
                            int minZoom,
                            int maxZoom,
+                           int sourceMinZoom,
+                           int sourceMaxZoom,
                            std::shared_ptr<Value> filter,
                            std::optional<int32_t> renderPassIndex,
                            std::shared_ptr<Value> interactable,
@@ -68,6 +72,8 @@ public:
             sourceLayer(sourceId),
             minZoom(minZoom),
             maxZoom(maxZoom),
+            sourceMinZoom(sourceMinZoom),
+            sourceMaxZoom(sourceMaxZoom),
             filter(filter),
             renderPassIndex(renderPassIndex),
             interactable(interactable),
