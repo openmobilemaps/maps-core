@@ -42,7 +42,7 @@ open class MCTextureLoader: MCLoaderInterface, @unchecked Sendable {
     open func loadTexture(_ url: String, etag: String?) -> MCTextureLoaderResult {
         let semaphore = DispatchSemaphore(value: 0)
         var result: MCTextureLoaderResult? = nil
-        loadTextureAsnyc(url, etag: etag).then { future in
+        loadTextureAsync(url, etag: etag).then { future in
             result = future.get()
             semaphore.signal()
             return nil
@@ -59,7 +59,7 @@ open class MCTextureLoader: MCLoaderInterface, @unchecked Sendable {
         return MCTextureLoaderResult(data: nil, etag: nil, status: .ERROR_OTHER, errorCode: "NRES")
     }
 
-    open func loadTextureAsnyc(_ url: String, etag: String?) -> DJFuture<MCTextureLoaderResult> {
+    open func loadTextureAsync(_ url: String, etag: String?) -> DJFuture<MCTextureLoaderResult> {
         let urlString = url
 
         let promise = DJPromise<MCTextureLoaderResult>()

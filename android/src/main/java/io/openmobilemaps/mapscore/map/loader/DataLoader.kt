@@ -80,7 +80,7 @@ open class DataLoader(
 	}
 
 	override fun loadTexture(url: String, etag: String?): TextureLoaderResult {
-        val resFuture = loadTextureAsnyc(url, etag)
+        val resFuture = loadTextureAsync(url, etag)
         return try {
             resFuture.get(TIMEOUT_DUR, TIMEOUT_UNIT)
         } catch (e: Exception) {
@@ -93,7 +93,7 @@ open class DataLoader(
         }
 	}
 
-    override fun loadTextureAsnyc(url: String, etag: String?): Future<TextureLoaderResult> {
+    override fun loadTextureAsync(url: String, etag: String?): Future<TextureLoaderResult> {
         val request = Request.Builder()
             .url(url)
             .tag(url)
