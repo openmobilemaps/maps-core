@@ -480,10 +480,10 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
     mapInterface->getTouchHandler()->insertListener(std::dynamic_pointer_cast<TouchInterface>(shared_from_this()), layerIndex);
 
     for (const auto &sourceTileManager : sourceTileManagers) {
-        sourceTileManager.second.message(&Tiled2dMapVectorSourceTileDataManager::onAdded, mapInterface);
+        sourceTileManager.second.message(MFN(&Tiled2dMapVectorSourceTileDataManager::onAdded), mapInterface);
     }
     for (const auto &sourceTileManager : symbolSourceDataManagers) {
-        sourceTileManager.second.message(&Tiled2dMapVectorSourceTileDataManager::onAdded, mapInterface);
+        sourceTileManager.second.message(MFN(&Tiled2dMapVectorSourceTileDataManager::onAdded), mapInterface);
     }
 
     auto scale = mapInterface->getCamera()->getScreenDensityPpi() > 326.0 ? 3 : (mapInterface->getCamera()->getScreenDensityPpi() >= 264.0 ? 2 : 1);
@@ -505,11 +505,11 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
 
     if (isResumed) {
         for (const auto &[source, vectorTileSource] : vectorTileSources) {
-            vectorTileSource.message(&Tiled2dMapVectorSource::resume);
+            vectorTileSource.message(MFN(&Tiled2dMapVectorSource::resume));
         }
 
         for (const auto &rasterSource : rasterSources) {
-            rasterSource.message(&Tiled2dMapRasterSource::resume);
+            rasterSource.message(MFN(&Tiled2dMapRasterSource::resume));
         }
     }
 
@@ -799,7 +799,7 @@ void Tiled2dMapVectorLayer::resume() {
     }
 
     for (const auto &source: sourceInterfaces) {
-        source.message(&Tiled2dMapSourceInterface::notifyTilesUpdates);
+        source.message(MFN(&Tiled2dMapSourceInterface::notifyTilesUpdates));
     }
 }
 
@@ -809,10 +809,10 @@ void Tiled2dMapVectorLayer::setAlpha(float alpha) {
     }
     this->alpha = alpha;
     for (const auto &[source, sourceDataManager]: sourceDataManagers) {
-        sourceDataManager.message(&Tiled2dMapVectorSourceTileDataManager::setAlpha, alpha);
+        sourceDataManager.message(MFN(&Tiled2dMapVectorSourceTileDataManager::setAlpha), alpha);
     }
     for (const auto &[source, sourceDataManager]: symbolSourceDataManagers) {
-        sourceDataManager.message(&Tiled2dMapVectorSourceSymbolDataManager::setAlpha, alpha);
+        sourceDataManager.message(MFN(&Tiled2dMapVectorSourceSymbolDataManager::setAlpha), alpha);
     }
 
     if (mapInterface)
@@ -838,7 +838,7 @@ void Tiled2dMapVectorLayer::onTilesUpdated(const std::string &layerName, VectorS
 
     auto sourceManager = sourceDataManagers.find(layerName);
     if (sourceManager != sourceDataManagers.end()) {
-        sourceManager->second.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorSourceTileDataManager::onRasterTilesUpdated, layerName, currentTileInfos);
+        sourceManager->second.message(MailboxDuplicationStrategy::replaceNewest, MFN(&Tiled2dMapVectorSourceTileDataManager::onRasterTilesUpdated), layerName, currentTileInfos);
     }
     tilesStillValid.clear();
 }
@@ -850,11 +850,11 @@ void Tiled2dMapVectorLayer::onTilesUpdated(const std::string &sourceName, Vector
 
     auto sourceManager = sourceDataManagers.find(sourceName);
     if (sourceManager != sourceDataManagers.end()) {
-        sourceManager->second.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorSourceTileDataManager::onVectorTilesUpdated, sourceName, currentTileInfos);
+        sourceManager->second.message(MailboxDuplicationStrategy::replaceNewest, MFN(&Tiled2dMapVectorSourceTileDataManager::onVectorTilesUpdated), sourceName, currentTileInfos);
     }
     auto symbolSourceManager = symbolSourceDataManagers.find(sourceName);
     if (symbolSourceManager != symbolSourceDataManagers.end()) {
-        symbolSourceManager->second.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorSourceTileDataManager::onVectorTilesUpdated, sourceName, currentTileInfos);
+        symbolSourceManager->second.message(MailboxDuplicationStrategy::replaceNewest, MFN(&Tiled2dMapVectorSourceTileDataManager::onVectorTilesUpdated), sourceName, currentTileInfos);
     }
     tilesStillValid.clear();
 }
@@ -976,7 +976,7 @@ void Tiled2dMapVectorLayer::loadSpriteData(int scale, bool fromLocal) {
         }
         
         
-        selfActor.message(&Tiled2dMapVectorLayer::didLoadSpriteData, jsonData, spriteTexture);
+        selfActor.message(MFN(&Tiled2dMapVectorLayer::didLoadSpriteData), jsonData, spriteTexture);
     });
 }
 
@@ -985,11 +985,11 @@ void Tiled2dMapVectorLayer::didLoadSpriteData(std::shared_ptr<SpriteData> sprite
     this->spriteTexture = spriteTexture;
 
     for (const auto &[source, manager] : symbolSourceDataManagers) {
-        manager.message(&Tiled2dMapVectorSourceSymbolDataManager::setSprites, spriteData, spriteTexture);
+        manager.message(MFN(&Tiled2dMapVectorSourceSymbolDataManager::setSprites), spriteData, spriteTexture);
     }
 
     for (const auto &[source, manager] : sourceDataManagers) {
-        manager.message(&Tiled2dMapVectorSourceTileDataManager::setSprites, spriteData, spriteTexture);
+        manager.message(MFN(&Tiled2dMapVectorSourceTileDataManager::setSprites), spriteData, spriteTexture);
     }
 
     if (backgroundLayer) {
@@ -1009,10 +1009,10 @@ void Tiled2dMapVectorLayer::setScissorRect(const std::optional<::RectI> &scissor
 void Tiled2dMapVectorLayer::setSelectionDelegate(const std::weak_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> &selectionDelegate) {
     this->selectionDelegate = selectionDelegate;
     for (const auto &[source, sourceDataManager]: sourceDataManagers) {
-        sourceDataManager.message(&Tiled2dMapVectorSourceTileDataManager::setSelectionDelegate, selectionDelegate);
+        sourceDataManager.message(MFN(&Tiled2dMapVectorSourceTileDataManager::setSelectionDelegate), selectionDelegate);
     }
     for (const auto &[source, sourceDataManager]: symbolSourceDataManagers) {
-        sourceDataManager.message(&Tiled2dMapVectorSourceSymbolDataManager::setSelectionDelegate, selectionDelegate);
+        sourceDataManager.message(MFN(&Tiled2dMapVectorSourceSymbolDataManager::setSelectionDelegate), selectionDelegate);
     }
 }
 
@@ -1136,14 +1136,14 @@ void Tiled2dMapVectorLayer::updateLayerDescription(std::shared_ptr<VectorLayerDe
     if (layerDescription->getType() == VectorLayerType::symbol) {
         for (const auto &[source, sourceDataManager]: symbolSourceDataManagers) {
             if (legacySource == source || newSource == source) {
-                sourceDataManager.message(&Tiled2dMapVectorSourceDataManager::updateLayerDescription, layerDescription, legacyIndex,
+                sourceDataManager.message(MFN(&Tiled2dMapVectorSourceDataManager::updateLayerDescription), layerDescription, legacyIndex,
                                           needsTileReplace);
             }
         }
     } else {
         for (const auto &[source, sourceDataManager]: sourceDataManagers) {
             if (legacySource == source || newSource == source) {
-                sourceDataManager.message(&Tiled2dMapVectorSourceDataManager::updateLayerDescription, layerDescription, legacyIndex,
+                sourceDataManager.message(MFN(&Tiled2dMapVectorSourceDataManager::updateLayerDescription), layerDescription, legacyIndex,
                                           needsTileReplace);
             }
         }
@@ -1155,7 +1155,7 @@ void Tiled2dMapVectorLayer::updateLayerDescription(std::shared_ptr<VectorLayerDe
 
 std::optional<std::shared_ptr<FeatureContext>> Tiled2dMapVectorLayer::getFeatureContext(int64_t identifier) {
     for (const auto &[source, vectorTileSource] : vectorTileSources) {
-        auto const &currentTileInfos = vectorTileSource.converse(&Tiled2dMapVectorSource::getCurrentTiles).get();
+        auto const &currentTileInfos = vectorTileSource.converse(MFN(&Tiled2dMapVectorSource::getCurrentTiles)).get();
 
         for (auto const &tile: currentTileInfos) {
             for (auto it = tile.layerFeatureMaps->begin(); it != tile.layerFeatureMaps->end(); it++) {
@@ -1305,13 +1305,13 @@ void Tiled2dMapVectorLayer::applyGlobalOrFeatureStateIfPossible(StateType type) 
     for (const auto &[source, sourceLayerIdentifiers]: sourceLayerIdentifiersMap) {
         const auto &symbolManager = symbolSourceDataManagers.find(source);
         if (symbolManager != symbolSourceDataManagers.end()) {
-            symbolManager->second.message(&Tiled2dMapVectorSourceSymbolDataManager::reloadLayerContent, sourceLayerIdentifiers);
+            symbolManager->second.message(MFN(&Tiled2dMapVectorSourceSymbolDataManager::reloadLayerContent), sourceLayerIdentifiers);
         }
     }
     for (const auto &[source, descriptionIndexPairs]: sourcelayerDescriptionIndexMap) {
         const auto &dataManager = sourceDataManagers.find(source);
         if (dataManager != sourceDataManagers.end()) {
-            dataManager->second.message(&Tiled2dMapVectorSourceTileDataManager::reloadLayerContent, descriptionIndexPairs);
+            dataManager->second.message(MFN(&Tiled2dMapVectorSourceTileDataManager::reloadLayerContent), descriptionIndexPairs);
         }
     }
 
@@ -1390,7 +1390,7 @@ std::vector<VectorLayerFeatureCoordInfo> Tiled2dMapVectorLayer::getVisiblePointF
     std::vector<VectorLayerFeatureCoordInfo> features = {};
 
     for (const auto &[source, vectorTileSource] : vectorTileSources) {
-        auto const &currentTileInfos = vectorTileSource.converse(&Tiled2dMapVectorSource::getCurrentTiles).get();
+        auto const &currentTileInfos = vectorTileSource.converse(MFN(&Tiled2dMapVectorSource::getCurrentTiles)).get();
 
         for (auto const &tile: currentTileInfos) {
             for (auto it = tile.layerFeatureMaps->begin(); it != tile.layerFeatureMaps->end(); it++) {

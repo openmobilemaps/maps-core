@@ -101,7 +101,19 @@ android {
 	}
 
 	buildTypes {
+		debug {
+			externalNativeBuild {
+				cmake {
+					cppFlags "-DDEBUG"
+				}
+			}
+		}
 		release {
+			externalNativeBuild {
+				cmake {
+					cppFlags "-DNDEBUG"
+				}
+			}
 			ndk {
 				debugSymbolLevel 'SYMBOL_TABLE'
 			}

@@ -27,12 +27,12 @@ void Tiled2dMapVectorReadyManager::didProcessData(size_t managerIndex, const Til
             auto tileIt = tileNotReadyCount.find(tile);
             if (tileIt == tileNotReadyCount.end()) {
                 tileDataProcessCount.erase(tileProcessIt);
-                vectorSource.message(&Tiled2dMapSourceReadyInterface::setTileReady, tile);
+                vectorSource.message(MFN(&Tiled2dMapSourceReadyInterface::setTileReady), tile);
                 return;
             }
         }
     } else if (managerCount == 1 && notReadyCount == 0) {
-        vectorSource.message(&Tiled2dMapSourceReadyInterface::setTileReady, tile);
+        vectorSource.message(MFN(&Tiled2dMapSourceReadyInterface::setTileReady), tile);
         return;
     } else {
         tileDataProcessCount.insert({tile, managerIndex});
@@ -57,7 +57,7 @@ void Tiled2dMapVectorReadyManager::setReady(size_t managerIndex, const Tiled2dMa
             if (tileProcessIt->second == managerCountControlVal) {
                 tileDataProcessCount.erase(tileProcessIt);
                 tileNotReadyCount.erase(tileIt);
-                vectorSource.message(&Tiled2dMapSourceReadyInterface::setTileReady, tile);
+                vectorSource.message(MFN(&Tiled2dMapSourceReadyInterface::setTileReady), tile);
             }
         }
     }

@@ -1034,20 +1034,20 @@ void Tiled2dMapSource<T, L, R>::performLoadingTask(Tiled2dMapTileInfo tile, size
                                         return strongSelf ? strongSelf->isTileVisible(tile) : false;
                                     });
                                     if (isStillVisible == false) {
-                                        weakActor.message(&Tiled2dMapSource::didFailToLoad, tile, loaderIndex,
+                                        weakActor.message(MFN(&Tiled2dMapSource::didFailToLoad), tile, loaderIndex,
                                                           LoaderStatus::ERROR_OTHER, std::nullopt);
                                     } else {
-                                        weakActor.message(&Tiled2dMapSource::didLoad, tile, loaderIndex,
+                                        weakActor.message(MFN(&Tiled2dMapSource::didLoad), tile, loaderIndex,
                                                           strongSelf->postLoadingTask(res, tile));
                                     }
                                 }
                             }));
                     }
                 } else {
-                    weakActor.message(&Tiled2dMapSource::didLoad, tile, loaderIndex, strongSelf->postLoadingTask(res, tile));
+                    weakActor.message(MFN(&Tiled2dMapSource::didLoad), tile, loaderIndex, strongSelf->postLoadingTask(res, tile));
                 }
             } else {
-                weakActor.message(&Tiled2dMapSource::didFailToLoad, tile, loaderIndex, res->status, res->errorCode);
+                weakActor.message(MFN(&Tiled2dMapSource::didFailToLoad), tile, loaderIndex, res->status, res->errorCode);
             }
         }
     });
@@ -1157,7 +1157,7 @@ void Tiled2dMapSource<T, L, R>::didFailToLoad(Tiled2dMapTileInfo tile, size_t lo
                     WeakActor<Tiled2dMapSource>(mailbox, std::dynamic_pointer_cast<Tiled2dMapSource>(shared_from_this()));
                 strongScheduler->addTask(
                     std::make_shared<LambdaTask>(TaskConfig(taskIdentifier, delay, TaskPriority::NORMAL, ExecutionEnvironment::IO),
-                                                 [weakActor] { weakActor.message(&Tiled2dMapSource::performDelayedTasks); }));
+                                                 [weakActor] { weakActor.message(MFN(&Tiled2dMapSource::performDelayedTasks)); }));
             }
         }
         break;
@@ -1201,7 +1201,7 @@ template <class T, class L, class R> void Tiled2dMapSource<T, L, R>::performDela
             auto weakActor = WeakActor<Tiled2dMapSource>(mailbox, std::dynamic_pointer_cast<Tiled2dMapSource>(shared_from_this()));
             strongScheduler->addTask(
                 std::make_shared<LambdaTask>(TaskConfig(taskIdentifier, minDelay, TaskPriority::NORMAL, ExecutionEnvironment::IO),
-                                             [weakActor] { weakActor.message(&Tiled2dMapSource::performDelayedTasks); }));
+                                             [weakActor] { weakActor.message(MFN(&Tiled2dMapSource::performDelayedTasks)); }));
         }
     }
 }
