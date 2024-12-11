@@ -27,11 +27,18 @@ void Circle2dLayerObject::setColor(Color color) { shader->setColor(color.r, colo
 
 void Circle2dLayerObject::setPosition(Coord position, double radius) {
     Coord renderPos = conversionHelper->convertToRenderSystem(position);
-    quad->setFrame(Quad3dD(Vec3D(renderPos.x - radius, renderPos.y + radius, is3d ? renderPos.z : 0.0),
-                           Vec3D(renderPos.x + radius, renderPos.y + radius, is3d ? renderPos.z : 0.0),
-                           Vec3D(renderPos.x + radius, renderPos.y - radius, is3d ? renderPos.z : 0.0),
-                           Vec3D(renderPos.x - radius, renderPos.y - radius, is3d ? renderPos.z : 0.0)),
-                   RectD(0, 0, 1, 1), Vec3D(0.0, 0.0, 0.0), false);
+    auto origin = Vec3D(renderPos.x, renderPos.y, renderPos.z);
+    if (is3d) {
+        origin.x = 1.0 * sin(renderPos.y) * cos(renderPos.x);
+        origin.y = 1.0 * cos(renderPos.y);
+        origin.z = -1.0 * sin(renderPos.y) * sin(renderPos.x);
+    }
+
+    quad->setFrame(Quad3dD(Vec3D(renderPos.x - radius, renderPos.y + radius, 0.0),
+                           Vec3D(renderPos.x + radius, renderPos.y + radius, 0.0),
+                           Vec3D(renderPos.x + radius, renderPos.y - radius, 0.0),
+                           Vec3D(renderPos.x - radius, renderPos.y - radius, 0.0)),
+                   RectD(0, 0, 1, 1), origin, is3d);
 }
 
 std::shared_ptr<Quad2dInterface> Circle2dLayerObject::getQuadObject() { return quad; }

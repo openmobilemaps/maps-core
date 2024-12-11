@@ -60,6 +60,8 @@ public:
 
     static void scaleM(std::vector<double> &m, int mOffset, double x, double y, double z);
 
+    static void mScaled(std::vector<double> &m, int mOffset, double x, double y, double z);
+
     static void translateM(std::vector<double> &tm, int tmOffset, std::vector<double> &m, int mOffset, double x, double y, double z);
 
     static void translateM(std::vector<double> &m, int mOffset, double x, double y, double z);

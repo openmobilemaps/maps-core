@@ -58,6 +58,8 @@ double CoordinateSystemIdentifiers::unitToMeterFactor(int32_t coordinateSystemId
         return 1.0;
     } else if (coordinateSystemIdentifier == CoordinateSystemIdentifiers::EPSG4326()) {
         return 360.0 / 40075017.0;
+    } else if (coordinateSystemIdentifier == CoordinateSystemIdentifiers::UnitSphere()) {
+        return 2 * M_PI / 40075017.0;
     } else {
         throw std::invalid_argument("Unsupported coordinate system identifier: " + std::to_string(coordinateSystemIdentifier));
     }
