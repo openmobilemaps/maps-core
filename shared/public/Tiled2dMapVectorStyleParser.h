@@ -352,7 +352,24 @@ public:
 
             // Example: [0.3, 1.0, 5.0]
             else if (!json[0].is_null()) {
-                return std::make_shared<StaticValue>(getVariant(json));
+                bool allPrimitive = true;
+                for(auto& i : json) {
+                    if(!i.is_primitive()) {
+                        allPrimitive = false;
+                        break;
+                    }
+                }
+
+                if(allPrimitive) {
+                    return std::make_shared<StaticValue>(getVariant(json));
+                } else {
+                    std::vector<std::shared_ptr<Value>> values;
+                    for(auto& i : json) {
+                        values.push_back(parseValue(i));
+                    }
+
+                    return std::make_shared<ArrayValue>(values);
+                }
             }
         }
         // Example: { "stops": [ [ 12, "rgba(240, 60, 60, 1)" ], [ 15, "rgba(240, 80, 85, 1)"] ] }

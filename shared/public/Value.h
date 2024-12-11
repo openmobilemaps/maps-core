@@ -2804,3 +2804,86 @@ public:
         return true;
     }
 };
+
+class ArrayValue : public Value {
+private:
+    const std::vector<std::shared_ptr<Value>> values;
+public:
+    ArrayValue(const std::vector<std::shared_ptr<Value>> &values): values(values){}
+
+    std::unique_ptr<Value> clone() override {
+        std::vector<std::shared_ptr<Value>> clonedValues;
+        for (const auto &value: values) {
+            clonedValues.push_back(value->clone());
+        }
+        return std::make_unique<ArrayValue>(clonedValues);
+    }
+
+    UsedKeysCollection getUsedKeys() const override {
+        UsedKeysCollection usedKeys;
+        for (const auto &value: values) {
+            const auto valueKeys = value->getUsedKeys();
+            usedKeys.includeOther(valueKeys);
+        }
+        return usedKeys;
+    }
+
+    ValueVariant evaluate(const EvaluationContext &context) const override {
+        std::vector<std::string> stringValues;
+        std::vector<float> floatValues;
+
+        for (const auto &value: values) {
+            auto v = value->evaluate(context);
+
+            if(std::holds_alternative<int64_t>(v)) {
+                floatValues.push_back(std::get<int64_t>(v));
+            } else if(std::holds_alternative<double>(v)) {
+                floatValues.push_back(std::get<double>(v));
+            } else if(std::holds_alternative<std::string>(v)) {
+                stringValues.push_back(std::get<std::string>(v));
+            }
+        }
+
+        if(floatValues.size() == values.size()) {
+            return floatValues;
+        }
+
+        if(stringValues.size() == values.size()) {
+            return stringValues;
+        }
+
+        return std::monostate();
+    };
+
+
+    bool isEqual(const std::shared_ptr<Value>& other) const override {
+        if (auto casted = std::dynamic_pointer_cast<ArrayValue>(other)) {
+            // Compare the value members
+            for (const auto &value: values) {
+                bool found = false;
+                for (auto const &castedValue: casted->values) {
+                    if (value && castedValue && value->isEqual(castedValue)) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    return false;
+                }
+            }
+            return true; // All members are equal
+        }
+        return false; // Not the same type or nullptr
+    }
+
+    virtual bool isGettingPropertyValues() override {
+        for (const auto &value: values) {
+            if(!value->isGettingPropertyValues()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+};
+
