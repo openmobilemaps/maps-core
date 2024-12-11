@@ -22,9 +22,15 @@ public class RenderingContext: NSObject, @unchecked Sendable {
     public static let bufferCount = 3  // Triple buffering
     private(set) var currentBufferIndex = 0
 
+    private let start = Date()
+
     public func beginFrame() {
         currentBufferIndex =
             (currentBufferIndex + 1) % RenderingContext.bufferCount
+    }
+
+    public var time: Float {
+        Float(-start.timeIntervalSinceNow)
     }
 
     public var cullMode: MCRenderingCullMode?

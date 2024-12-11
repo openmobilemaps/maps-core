@@ -24,6 +24,8 @@ struct ShaderLineStyle final {
     float dashValue1;
     float dashValue2;
     float dashValue3;
+    float dashFade;
+    float dashAnimationSpeed;
     float offset;
     float dotted;
     float dottedSkew;

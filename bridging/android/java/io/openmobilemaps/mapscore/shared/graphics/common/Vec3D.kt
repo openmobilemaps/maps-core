@@ -10,7 +10,7 @@ data class Vec3D(
 ) : Comparable<Vec3D> {
 
     override fun compareTo(other: Vec3D): Int {
-        var tempResult : Int
+        var tempResult = 0
         if (this.x < other.x) {
             tempResult = -1;
         } else if (this.x > other.x) {

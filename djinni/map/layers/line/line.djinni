@@ -47,6 +47,8 @@ line_style = record {
     width_type: size_type;
     width: f32;
     dash_array: list<f32>;
+    dash_fade: f32;
+    dash_animation_speed: f32;
     line_cap: line_cap_type;
     offset: f32;
     dotted: bool;

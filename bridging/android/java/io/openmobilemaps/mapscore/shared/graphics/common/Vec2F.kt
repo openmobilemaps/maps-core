@@ -9,7 +9,7 @@ data class Vec2F(
 ) : Comparable<Vec2F> {
 
     override fun compareTo(other: Vec2F): Int {
-        var tempResult : Int
+        var tempResult = 0
         if (this.x < other.x) {
             tempResult = -1;
         } else if (this.x > other.x) {
