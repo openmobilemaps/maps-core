@@ -51,7 +51,7 @@ IconLayerObject::IconLayerObject(std::shared_ptr<Quad2dInstancedInterface> quad,
         const double sinX = sin(renderCoord.x);
         const double cosX = cos(renderCoord.x);
 
-        origin = Vec3D(sinY * cosX, cosY, -sinY * sinX);
+        origin = Vec3D(renderCoord.z * sinY * cosX, renderCoord.z * cosY, -renderCoord.z * sinY * sinX);
     } else {
         origin = Vec3D(renderCoord.x, renderCoord.y, 0.0);
     }
@@ -93,7 +93,12 @@ void IconLayerObject::update() {
         const double sinX = sin(currentRenderCoord.x);
         const double cosX = cos(currentRenderCoord.x);
 
-        iconPositions = {(float) ((sinY * cosX) - origin.x), (float) (cosY - origin.y), (float) ((-sinY * sinX) - origin.z)};
+        iconPositions = {
+            (float)(currentRenderCoord.z * (sinY * cosX) - origin.x),
+            (float)(currentRenderCoord.z * cosY - origin.y),
+            (float)(-currentRenderCoord.z * (sinY * sinX) - origin.z)
+        };
+
     } else {
         iconPositions = {(float) (currentRenderCoord.x - origin.x), (float) (currentRenderCoord.y - origin.y)};
     }
