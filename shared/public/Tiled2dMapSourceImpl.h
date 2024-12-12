@@ -1182,7 +1182,8 @@ template <class T, class L, class R> void Tiled2dMapSource<T, L, R>::performDela
             if (errorInfo.lastLoad + errorInfo.delay >= now) {
                 toLoad.push_back({loaderIndex, tile});
             } else {
-                minDelay = std::min(minDelay, errorInfo.delay);
+                auto tileDelay = now - (errorInfo.lastLoad + errorInfo.delay);
+                minDelay = std::min(minDelay, tileDelay);
             }
         }
     }
