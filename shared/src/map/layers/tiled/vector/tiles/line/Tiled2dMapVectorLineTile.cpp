@@ -166,6 +166,8 @@ void Tiled2dMapVectorLineTile::update() {
                 style.dashValue3 = dValue3;
                 needsUpdate = true;
             }
+            style.dashAnimationSpeed = 0; // not yet supported in vector style
+            style.dashFade = 0; // not yet supported in vector style
 
             // line caps
             auto lineCap = lineDescription->style.getLineCap(context);
@@ -211,7 +213,7 @@ void Tiled2dMapVectorLineTile::update() {
 
         if (needsUpdate) {
             auto &styles = reusableLineStyles[styleGroupId];
-            auto buffer = SharedBytes((int64_t)styles.data(), (int)styles.size(), 21 * sizeof(float));
+            auto buffer = SharedBytes((int64_t)styles.data(), (int)styles.size(), 23 * sizeof(float));
             shaders[styleGroupId]->setStyles(buffer);
         }
     }
@@ -273,7 +275,7 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
                     }
 
                     if (styleIndex == -1) {
-                        auto reusableStyle = ShaderLineStyle(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+                        auto reusableStyle = ShaderLineStyle(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
                         if (!featureGroups.empty() && featureGroups.back().size() < maxStylesPerGroup) {
                             styleGroupIndex = (int) featureGroups.size() - 1;
                             styleIndex = (int) featureGroups.back().size();

@@ -34,6 +34,8 @@ shader_line_style = record {
     dash_value_1: f32;
     dash_value_2: f32;
     dash_value_3: f32;
+    dash_fade: f32;
+    dash_animation_speed: f32;
     offset: f32;
     dotted: f32;
     dotted_skew: f32;

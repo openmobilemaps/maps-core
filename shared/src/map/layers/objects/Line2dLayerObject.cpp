@@ -119,7 +119,7 @@ void Line2dLayerObject::setHighlighted(bool highlighted_) {
 }
 
 void Line2dLayerObject::setStyle(const LineStyle &style, bool highlighted) {
-    ShaderLineStyle s(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+    ShaderLineStyle s(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
 
     s.colorR = highlighted ? style.color.highlighted.r : style.color.normal.r;
     s.colorG = highlighted ? style.color.highlighted.g : style.color.normal.g;
