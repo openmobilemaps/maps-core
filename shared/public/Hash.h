@@ -15,20 +15,33 @@
 
 // https://gist.github.com/Lee-R/3839813
 
-namespace detail
-{
-    // FNV-1a 32bit hashing algorithm.
-    inline constexpr uint32_t fnv1a_32(char const *s, size_t count) {
-        return count ? (fnv1a_32(s, count - 1) ^ s[count - 1]) * 16777619u : 2166136261u;
-    }
-}    // namespace detail
+static const std::uint64_t FNV1A_64_INIT = 0xcbf29ce484222325ULL;
+static const std::uint64_t FNV1A_64_PRIME = 0x100000001b3ULL;
 
-constexpr uint32_t const_hash(char const* s, size_t count)
+namespace fnv
 {
-    return detail::fnv1a_32(s, count);
+    // FNV-1a 64bit hashing algorithm.
+    inline constexpr uint64_t fnv1a_64(char const *s, size_t count) {
+        return count ? (fnv1a_64(s, count - 1) ^ s[count - 1]) * FNV1A_64_PRIME : FNV1A_64_INIT;
+    }
+}    // namespace fnv
+
+constexpr uint64_t const_hash(char const* s, size_t count)
+{
+    return fnv::fnv1a_64(s, count);
 }
 
-constexpr uint32_t const_hash(const std::string &s)
+// Expects a zero terminated char array
+constexpr uint64_t const_hash(char const* s)
 {
-    return detail::fnv1a_32(s.c_str(), s.size());
+    size_t size = 0;
+    while (s[size] != '\0') {
+        ++size;
+    }
+    return fnv::fnv1a_64(s, size);
+}
+
+constexpr uint64_t const_hash(const std::string &s)
+{
+    return fnv::fnv1a_64(s.c_str(), s.size());
 }

@@ -31,39 +31,46 @@ enum class MailboxExecutionEnvironment {
     graphics = 1
 };
 
+struct MessageDiagnostics {
+    const char * senderFile;
+    const char * senderFunction;
+    const char * senderLine;
+    const char * targetFunction;
+
+    MessageDiagnostics(const char *senderFile, const char *senderFunction, const char *senderLine, const char *targetFunction) : senderFile(senderFile),
+                                                                                                           senderFunction(senderFunction),
+                                                                                                           senderLine(senderLine),
+                                                                                                           targetFunction(targetFunction) {}
+
+    std::string toString() const {
+        return std::string(senderFile) + "::" + std::string(senderFunction) + ":" + std::string(senderLine) + " -> " + std::string(targetFunction);
+    }
+};
+
 template<class MemberFn>
 struct MemberFunctionWrapper {
     MemberFn memberFn;
-    size_t identifier;
-#if DEBUG
-    std::string debugIdentifier;
+    uint64_t identifier;
+    MessageDiagnostics diagnostics;
 
-    MemberFunctionWrapper(MemberFn memberFn, size_t identifier, const std::string &debugIdentifier) : memberFn(memberFn), identifier(identifier), debugIdentifier(debugIdentifier) {}
-#else
-    MemberFunctionWrapper(MemberFn memberFn, size_t identifier) : memberFn(memberFn), identifier(identifier) {}
-#endif
+    MemberFunctionWrapper(MemberFn memberFn, size_t identifier, MessageDiagnostics diagnostics) : memberFn(memberFn), identifier(identifier), diagnostics(diagnostics) {}
 };
 
-#if DEBUG
-    #define MFN(memberFn) MemberFunctionWrapper(memberFn, const_hash(#memberFn), std::string(__FILE_NAME__) + "::" + std::string(__func__) + ":" + std::to_string(__LINE__) + " -> " + #memberFn)
-#else
-    #define MFN(memberFn) MemberFunctionWrapper(memberFn, const_hash(#memberFn))
-#endif
-
+#define TO_STRING_IMPL(x) #x
+#define TO_STRING(x) TO_STRING_IMPL(x)
+#define MFN(memberFn) MemberFunctionWrapper(memberFn, const_hash(#memberFn), MessageDiagnostics(__FILE_NAME__, __func__, TO_STRING(__LINE__), #memberFn))
 
 class MailboxMessage {
 public:
-    MailboxMessage(const MailboxDuplicationStrategy &strategy, const MailboxExecutionEnvironment &environment, size_t identifier)
-    : strategy(strategy), environment(environment), identifier(identifier) {}
+    MailboxMessage(const MailboxDuplicationStrategy &strategy, const MailboxExecutionEnvironment &environment, uint64_t identifier, const MessageDiagnostics diagnostics)
+    : strategy(strategy), environment(environment), identifier(identifier), diagnostics(diagnostics) {}
     virtual ~MailboxMessage() = default;
     virtual void operator()() = 0;
     
     const MailboxDuplicationStrategy strategy;
     const MailboxExecutionEnvironment environment;
-    const size_t identifier;
-#if DEBUG
-    std::string debugIdentifier;
-#endif
+    const uint64_t identifier;
+    const MessageDiagnostics diagnostics;
 };
 
 template <class Object, class MemberFn, class ArgsTuple>
@@ -72,14 +79,11 @@ public:
     MailboxMessageImpl(Object object_, MemberFunctionWrapper<MemberFn> memberFn_, const MailboxDuplicationStrategy &strategy, const MailboxExecutionEnvironment &environment, ArgsTuple argsTuple_)
       : MailboxMessage(strategy,
                        environment,
-                       memberFn_.identifier),
+                       memberFn_.identifier,
+                       memberFn_.diagnostics),
         object(object_),
         memberFn(memberFn_),
-        argsTuple(std::move(argsTuple_)) {
-#if DEBUG
-        debugIdentifier = memberFn.debugIdentifier;
-#endif
-    }
+        argsTuple(std::move(argsTuple_)) { }
 
     void operator()() override {
         invoke(std::make_index_sequence<std::tuple_size_v<ArgsTuple>>());
@@ -103,15 +107,11 @@ template <class ResultType, class Object, class MemberFn, class ArgsTuple>
 class AskMessageImpl : public MailboxMessage {
 public:
     AskMessageImpl(std::promise<ResultType> promise_, Object object_, MemberFunctionWrapper<MemberFn> memberFn_, const MailboxDuplicationStrategy &strategy, const MailboxExecutionEnvironment &environment, ArgsTuple argsTuple_)
-        : MailboxMessage(strategy, environment, typeid(MemberFn).hash_code()),
+        : MailboxMessage(strategy, environment, memberFn_.identifier, memberFn_.diagnostics),
           object(object_),
           memberFn(memberFn_),
           argsTuple(std::move(argsTuple_)),
-          promise(std::move(promise_)){
-#if DEBUG
-        debugIdentifier = memberFn.debugIdentifier;
-#endif
-    }
+          promise(std::move(promise_)){}
 
     void operator()() override {
         promise.set_value(ask(std::make_index_sequence<std::tuple_size_v<ArgsTuple>>()));

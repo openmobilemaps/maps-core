@@ -39,64 +39,12 @@ void IcosahedronLayer::onAdded(const std::shared_ptr<MapInterface> & mapInterfac
 
     renderPasses = { renderPass };
 
-    callbackHandler->getData().then([=](auto dataFuture) {
-        const auto data = dataFuture.get();
-        protozero::pbf_reader pbfData((char *)data.buf(), data.len());
-
-        std::vector<float> verticesBuffer;
-        std::vector<uint32_t> indicesBuffer;
-
-        int32_t currentIndex = 0;
-
-        while (pbfData.next()) {
-            switch (pbfData.tag()) {
-                case 1: {
-                    protozero::pbf_reader cell = pbfData.get_message();
-                    int count = 0;
-                    while (cell.next()) {
-                        count += 1;
-                        protozero::pbf_reader vertex = cell.get_message();
-                        while (vertex.next()) {
-                            switch (vertex.tag()) {
-                                case 1: {
-                                    auto lat = vertex.get_float();
-                                    verticesBuffer.push_back(lat * 180 / M_PI);
-                                    break;
-                                }
-                                case 2: {
-                                    auto lon = vertex.get_float();
-                                    verticesBuffer.push_back(lon * 180 / M_PI);
-                                    break;
-                                }
-                                case 3: {
-                                    auto value = vertex.get_float();
-                                    verticesBuffer.push_back(value);
-                                    break;
-                                }
-                                default:
-                                    assert(false);
-                            }
-                        }
-                    }
-                    assert(count == 3);
-                    indicesBuffer.push_back(currentIndex);
-                    indicesBuffer.push_back(currentIndex + 1);
-                    indicesBuffer.push_back(currentIndex + 2);
-                    currentIndex += count;
-                }
-            }
+    auto weakSelfPtr = weak_from_this();
+    callbackHandler->getData().then([weakSelfPtr](auto dataFuture) {
+        auto selfPtr = weakSelfPtr.lock();
+        if (selfPtr) {
+            selfPtr->setData(dataFuture.get());
         }
-
-        LogDebug << "verticesBuffer.size: " <<= verticesBuffer.size();
-        LogDebug << "indicesBuffer.size: " <<= indicesBuffer.size();
-
-        auto i = SharedBytes((int64_t)indicesBuffer.data(), (int32_t)indicesBuffer.size(), (int32_t)sizeof(uint32_t));
-        auto v = SharedBytes((int64_t)verticesBuffer.data(), (int32_t)verticesBuffer.size(), (int32_t)sizeof(float));
-        object->setVertices(v, i, Vec3D(0, 0, 0));
-
-
-        auto selfActor = WeakActor<IcosahedronLayer>(selfMailbox, shared_from_this());
-        selfActor.message(MailboxExecutionEnvironment::graphics, MFN(&IcosahedronLayer::setupObject));
     });
 }
 
@@ -112,3 +60,63 @@ std::vector<std::shared_ptr< ::RenderPassInterface>> IcosahedronLayer::buildRend
     return shared_from_this();
 }
 
+void IcosahedronLayer::setData(const djinni::DataRef &data) {
+    protozero::pbf_reader pbfData((char *)data.buf(), data.len());
+
+    std::vector<float> verticesBuffer;
+    std::vector<uint32_t> indicesBuffer;
+
+    int32_t currentIndex = 0;
+
+    while (pbfData.next()) {
+        switch (pbfData.tag()) {
+            case 1: {
+                protozero::pbf_reader cell = pbfData.get_message();
+                int count = 0;
+                while (cell.next()) {
+                    count += 1;
+                    protozero::pbf_reader vertex = cell.get_message();
+                    while (vertex.next()) {
+                        switch (vertex.tag()) {
+                            case 1: {
+                                auto lat = vertex.get_float();
+                                verticesBuffer.push_back(lat * 180 / M_PI);
+                                break;
+                            }
+                            case 2: {
+                                auto lon = vertex.get_float();
+                                verticesBuffer.push_back(lon * 180 / M_PI);
+                                break;
+                            }
+                            case 3: {
+                                auto value = vertex.get_float();
+                                verticesBuffer.push_back(value);
+                                break;
+                            }
+                            default:
+                                assert(false);
+                        }
+                    }
+                }
+                assert(count == 3);
+                indicesBuffer.push_back(currentIndex);
+                indicesBuffer.push_back(currentIndex + 1);
+                indicesBuffer.push_back(currentIndex + 2);
+                currentIndex += count;
+            }
+        }
+    }
+
+    LogDebug << "verticesBuffer.size: " <<= verticesBuffer.size();
+    LogDebug << "indicesBuffer.size: " <<= indicesBuffer.size();
+
+    auto i = SharedBytes((int64_t)indicesBuffer.data(), (int32_t)indicesBuffer.size(), (int32_t)sizeof(uint32_t));
+    auto v = SharedBytes((int64_t)verticesBuffer.data(), (int32_t)verticesBuffer.size(), (int32_t)sizeof(float));
+    object->setVertices(v, i, Vec3D(0, 0, 0));
+
+    auto selfMailbox = mailbox;
+    if (selfMailbox) {
+        auto selfActor = WeakActor<IcosahedronLayer>(selfMailbox, shared_from_this());
+        selfActor.message(MailboxExecutionEnvironment::graphics, MFN(&IcosahedronLayer::setupObject));
+    }
+}
