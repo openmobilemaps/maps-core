@@ -94,7 +94,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::setAlpha(float alpha) {
     for (const auto &[tileInfo, tileSymbolGroups]: tileSymbolGroupMap) {
         for (const auto &[s, symbolGroups]: tileSymbolGroups) {
             for (const auto &symbolGroup: std::get<1>(symbolGroups)) {
-                symbolGroup.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorSymbolGroup::setAlpha, alpha);
+                symbolGroup.message(MailboxDuplicationStrategy::replaceNewest, MFN(&Tiled2dMapVectorSymbolGroup::setAlpha), alpha);
             }
         }
     }
@@ -172,14 +172,14 @@ void Tiled2dMapVectorSourceSymbolDataManager::updateLayerDescriptions(std::vecto
 
             auto selfActor = WeakActor(mailbox, weak_from_this());
             selfActor.messagePrecisely(MailboxDuplicationStrategy::replaceNewest, MailboxExecutionEnvironment::graphics,
-                                       &Tiled2dMapVectorSourceSymbolDataManager::updateSymbolGroups);
+                                       MFN(&Tiled2dMapVectorSourceSymbolDataManager::updateSymbolGroups));
         } else {
             for (const auto &[tileInfo, groupMap]: tileSymbolGroupMap) {
                 auto const groupsIt = groupMap.find(layerUpdate.layerDescription->identifier);
                 if (groupsIt != groupMap.end()) {
                     for (const auto &group: std::get<1>(groupsIt->second)) {
                         group.messagePrecisely(MailboxDuplicationStrategy::replaceNewest, MailboxExecutionEnvironment::graphics,
-                                               &Tiled2dMapVectorSymbolGroup::updateLayerDescription, castedDescription);
+                                               MFN(&Tiled2dMapVectorSymbolGroup::updateLayerDescription), castedDescription);
                     }
                 }
             }
@@ -263,14 +263,14 @@ void Tiled2dMapVectorSourceSymbolDataManager::updateLayerDescription(std::shared
 
         auto selfActor = WeakActor(mailbox, weak_from_this());
         selfActor.messagePrecisely(MailboxDuplicationStrategy::replaceNewest, MailboxExecutionEnvironment::graphics,
-                                   &Tiled2dMapVectorSourceSymbolDataManager::updateSymbolGroups);
+                                   MFN(&Tiled2dMapVectorSourceSymbolDataManager::updateSymbolGroups));
     } else {
         for (const auto &[tileInfo, groupMap]: tileSymbolGroupMap) {
             auto const groupsIt = groupMap.find(layerDescription->identifier);
             if (groupsIt != groupMap.end()) {
                 for (const auto &group: std::get<1>(groupsIt->second)) {
                     group.messagePrecisely(MailboxDuplicationStrategy::replaceNewest, MailboxExecutionEnvironment::graphics,
-                                           &Tiled2dMapVectorSymbolGroup::updateLayerDescription, castedDescription);
+                                           MFN(&Tiled2dMapVectorSymbolGroup::updateLayerDescription), castedDescription);
                 }
             }
         }
@@ -322,7 +322,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::reloadLayerContent(const std::vect
 
     auto selfActor = WeakActor(mailbox, weak_from_this());
     selfActor.messagePrecisely(MailboxDuplicationStrategy::replaceNewest, MailboxExecutionEnvironment::graphics,
-                               &Tiled2dMapVectorSourceSymbolDataManager::updateSymbolGroups);
+                               MFN(&Tiled2dMapVectorSourceSymbolDataManager::updateSymbolGroups));
 
     mapInterface->invalidate();
 
@@ -337,7 +337,6 @@ void Tiled2dMapVectorSourceSymbolDataManager::onVectorTilesUpdated(const std::st
 
     auto mapInterface = this->mapInterface.lock();
     auto graphicsFactory = mapInterface ? mapInterface->getGraphicsObjectFactory() : nullptr;
-    auto coordinateConverterHelper = mapInterface ? mapInterface->getCoordinateConverterHelper() : nullptr;
     auto shaderFactory = mapInterface ? mapInterface->getShaderFactory() : nullptr;
     if (!graphicsFactory || !shaderFactory) {
         updateFlag.clear();
@@ -372,7 +371,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::onVectorTilesUpdated(const std::st
                         }
                         if (fullyReady) {
                             // Tile is ready - propagate to source
-                            readyManager.message(&Tiled2dMapVectorReadyManager::didProcessData, readyManagerIndex, vectorTileInfo.tileInfo, 0);
+                            readyManager.message(MFN(&Tiled2dMapVectorReadyManager::didProcessData), readyManagerIndex, vectorTileInfo.tileInfo, 0);
                         }
                     }
                 }
@@ -423,7 +422,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::onVectorTilesUpdated(const std::st
                 }
             }
 
-            readyManager.message(&Tiled2dMapVectorReadyManager::didProcessData, readyManagerIndex, tile->tileInfo, notReadyCount);
+            readyManager.message(MFN(&Tiled2dMapVectorReadyManager::didProcessData), readyManagerIndex, tile->tileInfo, notReadyCount);
         }
 
         this->tilesToClear = std::vector(toClear);
@@ -433,8 +432,8 @@ void Tiled2dMapVectorSourceSymbolDataManager::onVectorTilesUpdated(const std::st
 
     auto selfActor = WeakActor(mailbox, weak_from_this());
     selfActor.messagePrecisely(MailboxDuplicationStrategy::replaceNewest, MailboxExecutionEnvironment::graphics,
-                               &Tiled2dMapVectorSourceSymbolDataManager::updateSymbolGroups);
-    vectorLayer.message(&Tiled2dMapVectorLayer::invalidateCollisionState);
+                               MFN(&Tiled2dMapVectorSourceSymbolDataManager::updateSymbolGroups));
+    vectorLayer.message(MFN(&Tiled2dMapVectorLayer::invalidateCollisionState));
 }
 
 std::vector<Actor<Tiled2dMapVectorSymbolGroup>> Tiled2dMapVectorSourceSymbolDataManager::createSymbolGroups(const Tiled2dMapVersionedTileInfo &tileInfo,
@@ -457,7 +456,7 @@ std::vector<Actor<Tiled2dMapVectorSymbolGroup>> Tiled2dMapVectorSourceSymbolData
                                                                                                  featureStateManager,
                                                                                                  symbolDelegate,
                                                                                                  persistingSymbolPlacement);
-        symbolGroupActor.message(&Tiled2dMapVectorSymbolGroup::initialize, features, featuresBase,
+        symbolGroupActor.message(MFN(&Tiled2dMapVectorSymbolGroup::initialize), features, featuresBase,
                                  std::min(featuresBase + maxNumFeaturesPerGroup, numFeatures) - featuresBase,
                                  animationCoordinatorMap, selfActor, alpha);
         symbolGroups.push_back(symbolGroupActor);
@@ -489,7 +488,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::onSymbolGroupInitialized(bool succ
 
             if (isLast) {
                 auto selfActor = WeakActor(mailbox, weak_from_this());
-                selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorSourceSymbolDataManager::setupSymbolGroups, tileInfo, layerIdentifier);
+                selfActor.message(MailboxExecutionEnvironment::graphics, MFN(&Tiled2dMapVectorSourceSymbolDataManager::setupSymbolGroups), tileInfo, layerIdentifier);
             }
         }
     }
@@ -510,8 +509,8 @@ void Tiled2dMapVectorSourceSymbolDataManager::setupSymbolGroups(const Tiled2dMap
             group->setupObjects(spriteData, spriteTexture);
         });
     }
-    vectorLayer.message(&Tiled2dMapVectorLayer::invalidateCollisionState);
-    readyManager.message(&Tiled2dMapVectorReadyManager::setReady, readyManagerIndex, tileInfo, std::get<0>(layerIt->second).baseValue);
+    vectorLayer.message(MFN(&Tiled2dMapVectorLayer::invalidateCollisionState));
+    readyManager.message(MFN(&Tiled2dMapVectorReadyManager::setReady), readyManagerIndex, tileInfo, std::get<0>(layerIt->second).baseValue);
 }
 
 void Tiled2dMapVectorSourceSymbolDataManager::updateSymbolGroups() {
@@ -580,7 +579,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::updateSymbolGroups() {
     }
 
     pregenerateRenderPasses();
-    vectorLayer.message(&Tiled2dMapVectorLayer::invalidateCollisionState);
+    vectorLayer.message(MFN(&Tiled2dMapVectorLayer::invalidateCollisionState));
 }
 
 void Tiled2dMapVectorSourceSymbolDataManager::setSprites(std::shared_ptr<SpriteData> spriteData, std::shared_ptr<TextureHolderInterface> spriteTexture) {
@@ -589,7 +588,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::setSprites(std::shared_ptr<SpriteD
 
     if (!tileSymbolGroupMap.empty()) {
         auto selfActor = WeakActor(mailbox, weak_from_this());
-        selfActor.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorSourceSymbolDataManager::setupExistingSymbolWithSprite);
+        selfActor.message(MailboxExecutionEnvironment::graphics, MFN(&Tiled2dMapVectorSourceSymbolDataManager::setupExistingSymbolWithSprite));
     }
 }
 
@@ -603,7 +602,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::setupExistingSymbolWithSprite() {
     for (const auto &[tile, symbolGroupMap]: tileSymbolGroupMap) {
         for (const auto &[layerIdentifier, symbolGroups]: symbolGroupMap) {
             for (auto &symbolGroup: std::get<1>(symbolGroups)) {
-                symbolGroup.message(MailboxExecutionEnvironment::graphics, &Tiled2dMapVectorSymbolGroup::setupObjects, spriteData, spriteTexture, std::nullopt);
+                symbolGroup.message(MailboxExecutionEnvironment::graphics, MFN(&Tiled2dMapVectorSymbolGroup::setupObjects), spriteData, spriteTexture, std::nullopt);
             }
         }
     }
@@ -626,7 +625,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::collisionDetection(std::vector<std
 
     double zoomIdentifier = layerConfig->getZoomIdentifier(zoom);
     double rotation = -camera->getRotation();
-    auto scaleFactor = camera->mapUnitsFromPixels(1.0);
+    auto scaleFactor = camera->getScalingFactor();
 
     for (const auto layerIdentifier: layerIdentifiers) {
         std::vector<SymbolObjectCollisionWrapper> allObjects;
@@ -671,7 +670,9 @@ bool Tiled2dMapVectorSourceSymbolDataManager::update(long long now) {
     const double zoomIdentifier = layerConfig->getZoomIdentifier(zoom);
     const double rotation = camera->getRotation();
 
-    const auto scaleFactor = camera->mapUnitsFromPixels(1.0);
+    const auto scaleFactor = camera->getScalingFactor();
+    const auto vpMatrix = camera->asCameraInterface()->getVpMatrix();
+    const auto origin = camera->asCameraInterface()->getOrigin();
 
     for (const auto &[tile, symbolGroupsMap]: tileSymbolGroupMap) {
         const auto tileState = tileStateMap.find(tile);
@@ -681,8 +682,8 @@ bool Tiled2dMapVectorSourceSymbolDataManager::update(long long now) {
         for (const auto &[layerIdentifier, symbolGroups]: symbolGroupsMap) {
             const auto &description = layerDescriptions.at(layerIdentifier);
             for (auto &symbolGroup: std::get<1>(symbolGroups)) {
-                symbolGroup.syncAccess([&zoomIdentifier, &rotation, &scaleFactor, &now, &viewPortSize](auto group){
-                    group->update(zoomIdentifier, rotation, scaleFactor, now, viewPortSize);
+                symbolGroup.syncAccess([&zoomIdentifier, &rotation, &scaleFactor, &now, &viewPortSize, &vpMatrix, &origin](auto group){
+                    group->update(zoomIdentifier, rotation, scaleFactor, now, viewPortSize, vpMatrix, origin);
                 });
             }
         }

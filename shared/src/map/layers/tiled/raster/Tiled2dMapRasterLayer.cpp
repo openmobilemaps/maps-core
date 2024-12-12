@@ -151,7 +151,7 @@ void Tiled2dMapRasterLayer::resume() {
     }
 
     for (const auto &source : sourceInterfaces) {
-        source.message(&Tiled2dMapSourceInterface::notifyTilesUpdates);
+        source.message(MFN(&Tiled2dMapSourceInterface::notifyTilesUpdates));
     }
 }
 
@@ -159,7 +159,7 @@ void Tiled2dMapRasterLayer::setT(int32_t t) {
     Tiled2dMapLayer::setT(t);
     std::lock_guard<std::recursive_mutex> lock(sourcesMutex);
     for (const auto &sourceInterface : sourceInterfaces) {
-        sourceInterface.message(&Tiled2dMapSourceInterface::notifyTilesUpdates);
+        sourceInterface.message(MFN(&Tiled2dMapSourceInterface::notifyTilesUpdates));
     }
 }
 
@@ -300,9 +300,13 @@ void Tiled2dMapRasterLayer::onTilesUpdated(const std::string &layerName, VectorS
             }
 
             for (const auto &newMaskEntry : newTileMasks) {
-                if (tileMaskMap.count(newMaskEntry.first) > 0) {
-                    obsoleteMaskObjects.emplace_back(tileMaskMap.at(newMaskEntry.first).getGraphicsMaskObject());
+                const auto &entryIt = tileMaskMap.find(newMaskEntry.first);
+
+                if (entryIt != tileMaskMap.end()) {
+                    obsoleteMaskObjects.emplace_back(entryIt->second.getGraphicsMaskObject());
+                    entryIt->second = newMaskEntry.second;
                 }
+
                 tileMaskMap[newMaskEntry.first] = newMaskEntry.second;
                 newMaskObjects.emplace_back(newMaskEntry.second.getGraphicsMaskObject());
             }
@@ -328,7 +332,7 @@ void Tiled2dMapRasterLayer::onTilesUpdated(const std::string &layerName, VectorS
                                              obsoleteMaskObjects.end());
             this->tileStateUpdates.insert(this->tileStateUpdates.end(), tileStateUpdates.begin(), tileStateUpdates.end());
             selfActor.messagePrecisely(MailboxDuplicationStrategy::replaceNewest, MailboxExecutionEnvironment::graphics,
-                                       &Tiled2dMapRasterLayer::setupTiles);
+                                       MFN(&Tiled2dMapRasterLayer::setupTiles));
         }
     }
 }
@@ -405,7 +409,7 @@ void Tiled2dMapRasterLayer::setupTiles() {
         tilesToClean.clear();
     }
 
-    rasterSource.message(&Tiled2dMapRasterSource::setTilesReady, tilesReady);
+    rasterSource.message(MFN(&Tiled2dMapRasterSource::setTilesReady), tilesReady);
 
     updateReadyStateListenerIfNeeded();
 

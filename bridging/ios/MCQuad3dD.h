@@ -25,4 +25,6 @@ NS_SWIFT_SENDABLE
 
 @property (nonatomic, readonly, nonnull) MCVec3D * bottomLeft;
 
+- (NSComparisonResult)compare:(nonnull MCQuad3dD *)other;
+
 @end

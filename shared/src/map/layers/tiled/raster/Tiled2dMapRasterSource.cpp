@@ -35,7 +35,7 @@ void Tiled2dMapRasterSource::cancelLoad(Tiled2dMapTileInfo tile, size_t loaderIn
 ::djinni::Future<std::shared_ptr<TextureLoaderResult>> Tiled2dMapRasterSource::loadDataAsync(Tiled2dMapTileInfo tile, size_t loaderIndex) {
     std::string const url = layerConfig->getTileUrl(tile.x, tile.y, tile.t, tile.zoomIdentifier);
     auto promise = std::make_shared<::djinni::Promise<std::shared_ptr<TextureLoaderResult>>>();
-    loaders[loaderIndex]->loadTextureAsnyc(url, std::nullopt).then([promise](::djinni::Future<::TextureLoaderResult> result) {
+    loaders[loaderIndex]->loadTextureAsync(url, std::nullopt).then([promise](::djinni::Future<::TextureLoaderResult> result) {
         promise->setValue(std::make_shared<TextureLoaderResult>(result.get()));
     });
     return promise->getFuture();
@@ -51,7 +51,7 @@ std::shared_ptr<::TextureHolderInterface> Tiled2dMapRasterSource::postLoadingTas
 }
 
 void Tiled2dMapRasterSource::notifyTilesUpdates() {
-    rasterLayerActor.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapRasterSourceListener::onTilesUpdated,
+    rasterLayerActor.message(MailboxDuplicationStrategy::replaceNewest, MFN(&Tiled2dMapRasterSourceListener::onTilesUpdated),
                              layerConfig->getLayerName(), getCurrentTiles());
 }
 

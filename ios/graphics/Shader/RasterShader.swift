@@ -36,19 +36,17 @@ class RasterShader: BaseShader, @unchecked Sendable {
     private var rasterStyleBuffer: MTLBuffer
     private var rasterStyleBufferContents: UnsafeMutablePointer<RasterShaderStyle>
 
-    private let shader: PipelineType
-
-    init(shader: PipelineType = .rasterShader) {
-        self.shader = shader
+    override init(shader: PipelineType = .rasterShader) {
         guard let buffer = MetalContext.current.device.makeBuffer(length: MemoryLayout<RasterShaderStyle>.stride, options: []) else { fatalError("Could not create buffer") }
         self.rasterStyleBuffer = buffer
         self.rasterStyleBufferContents = self.rasterStyleBuffer.contents().bindMemory(to: RasterShaderStyle.self, capacity: 1)
         self.rasterStyleBufferContents[0] = RasterShaderStyle(style: .default())
+        super.init(shader: shader)
     }
 
     override func setupProgram(_: MCRenderingContextInterface?) {
         if pipeline == nil {
-            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: shader, blendMode: blendMode).json)
+            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: shader, blendMode: blendMode))
         }
     }
 

@@ -14,6 +14,12 @@
 #include <stdexcept>
 #include <cmath>
 
+
+const RectCoord WebMercatorTiled2dMapLayerConfig::WEB_MERCATOR_BOUNDS = RectCoord(Coord(CoordinateSystemIdentifiers::EPSG3857(), -20037508.34, 20037508.34, 0.0),
+                                                                            Coord(CoordinateSystemIdentifiers::EPSG3857(), 20037508.34, -20037508.34, 0.0));
+const double WebMercatorTiled2dMapLayerConfig::BASE_ZOOM = 559082264.029;
+const double WebMercatorTiled2dMapLayerConfig::BASE_WIDTH = 40075016;
+
 WebMercatorTiled2dMapLayerConfig::WebMercatorTiled2dMapLayerConfig(std::string layerName, std::string urlFormat)
     : layerName(layerName), urlFormat(urlFormat)
      {}
@@ -44,23 +50,22 @@ std::string WebMercatorTiled2dMapLayerConfig::getTileUrl(int32_t x, int32_t y, i
 std::string WebMercatorTiled2dMapLayerConfig::getLayerName() { return layerName; }
 
 std::vector<Tiled2dMapZoomLevelInfo> WebMercatorTiled2dMapLayerConfig::getZoomLevelInfos() {
-    int32_t identifer = CoordinateSystemIdentifiers::EPSG3857();
-    Coord topLeft = Coord(identifer, -20037508.34, 20037508.34, 0.0);
-    Coord bottomRight = Coord(identifer, 20037508.34, -20037508.34, 0.0);
-    auto bounds = RectCoord(topLeft, bottomRight);
-
-    double baseZoom = 559082264.029;
-    double baseWidth = 40075016;
     std::vector<Tiled2dMapZoomLevelInfo> levels;
-
+    levels.reserve(maxZoomLevel - minZoomLevel + 1);
     for (int32_t i = minZoomLevel; i <= maxZoomLevel; ++i) {
-        int32_t tileCount = pow(2,i);
-        double zoom = baseZoom / tileCount;
-        levels.emplace_back(zoom, baseWidth / tileCount, tileCount, tileCount, 1, i, bounds);
+        levels.emplace_back(getZoomLevelInfo(i));
     }
-
     return levels;
 }
+
+std::vector<Tiled2dMapZoomLevelInfo> WebMercatorTiled2dMapLayerConfig::getVirtualZoomLevelInfos() {
+    std::vector<Tiled2dMapZoomLevelInfo> levels;
+    levels.reserve(minZoomLevel);
+    for (int32_t i = 0; i < minZoomLevel; ++i) {
+        levels.emplace_back(getZoomLevelInfo(i));
+    }
+    return levels;
+};
 
 Tiled2dMapZoomInfo WebMercatorTiled2dMapLayerConfig::getZoomInfo() {
     return zoomInfo;
@@ -71,6 +76,11 @@ std::optional<Tiled2dMapVectorSettings> WebMercatorTiled2dMapLayerConfig::getVec
 }
 
 std::optional<::RectCoord> WebMercatorTiled2dMapLayerConfig::getBounds() {
-    return RectCoord(Coord(CoordinateSystemIdentifiers::EPSG3857(), -20037508.34, 20037508.34, 0.0),
-                     Coord(CoordinateSystemIdentifiers::EPSG3857(), 20037508.34, -20037508.34, 0.0));
+    return WEB_MERCATOR_BOUNDS;
+}
+
+Tiled2dMapZoomLevelInfo WebMercatorTiled2dMapLayerConfig::getZoomLevelInfo(int32_t zoomLevel) {
+    double tileCount = std::pow(2.0,zoomLevel);
+    double zoom = BASE_ZOOM / tileCount;
+    return {zoom, (float) (BASE_WIDTH / tileCount), (int32_t) tileCount, (int32_t) tileCount, 1, zoomLevel, WEB_MERCATOR_BOUNDS};
 }

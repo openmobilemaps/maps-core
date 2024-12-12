@@ -539,14 +539,16 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &posi
 }
 
 void Tiled2dMapVectorSymbolObject::writePosition(const double x_, const double y_, const size_t offset, std::vector<float> &buffer) {
-    double x = is3d ? 1.0 * sin(y_) * cos(x_) - tileOrigin.x : x_ - tileOrigin.x;
-    double y = is3d ?  1.0 * cos(y_) - tileOrigin.y : y_ - tileOrigin.y;
-    double z = is3d ? -1.0 * sin(y_) * sin(x_) - tileOrigin.z : 0.0;
+    double sinX = sin(x_);
+    double sinY = sin(y_);
+    double cosX = cos(x_);
+    double cosY = cos(y_);
 
-    buffer[positionSize * offset] = x;
-    buffer[positionSize * offset + 1] = y;
+    auto s = positionSize * offset;
+    buffer[s] = is3d ? sinY * cosX - tileOrigin.x : x_ - tileOrigin.x;
+    buffer[s + 1] = is3d ? cosY - tileOrigin.y : y_ - tileOrigin.y;
     if (is3d) {
-        buffer[positionSize * offset + 2] = z;
+        buffer[s + 2] = is3d ? -sinY * sinX - tileOrigin.z : 0.0;
     }
 }
 
@@ -806,7 +808,7 @@ void Tiled2dMapVectorSymbolObject::setupTextProperties(std::vector<float> &textu
     labelObject->setupProperties(textureCoordinates, styleIndices, countOffset, styleOffset, zoomIdentifier);
 }
 
-void Tiled2dMapVectorSymbolObject::updateTextProperties(std::vector<float> &positions, std::vector<float> &referencePositions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, long long now, const Vec2I viewPortSize) {
+void Tiled2dMapVectorSymbolObject::updateTextProperties(std::vector<float> &positions, std::vector<float> &referencePositions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, long long now, const Vec2I viewPortSize, const std::vector<float>& vpMatrix, const Vec3D& origin) {
     if (instanceCounts.textCharacters ==  0 || !labelObject) {
         return;
     }
@@ -827,16 +829,7 @@ void Tiled2dMapVectorSymbolObject::updateTextProperties(std::vector<float> &posi
         return;
     }
 
-    {
-        std::shared_ptr<::MapCameraInterface> camera = nullptr;
-
-        if(is3d) {
-            auto strongMapInterface = mapInterface.lock();
-            camera = strongMapInterface->getCamera();
-        }
-
-        labelObject->updateProperties(positions, referencePositions, scales, rotations, styles, countOffset, styleOffset, zoomIdentifier, scaleFactor, animationCoordinator->isColliding(), rotation, alpha, isCoordinateOwner, now, viewPortSize, camera);
-    }
+    labelObject->updateProperties(positions, referencePositions, scales, rotations, styles, countOffset, styleOffset, zoomIdentifier, scaleFactor, animationCoordinator->isColliding(), rotation, alpha, isCoordinateOwner, now, viewPortSize, vpMatrix, origin);
 
     if (!animationCoordinator->isTextAnimating()) {
         lastTextUpdateScaleFactor = scaleFactor;

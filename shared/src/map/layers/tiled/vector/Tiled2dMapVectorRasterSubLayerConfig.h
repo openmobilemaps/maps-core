@@ -25,8 +25,8 @@ public:
                                          const bool is3d,
                                          const std::optional<Tiled2dMapZoomInfo> &customZoomInfo = std::nullopt)
             : Tiled2dMapVectorLayerConfig(
-            std::make_shared<VectorMapSourceDescription>(layerDescription->source, layerDescription->url, layerDescription->minZoom,
-                                                         layerDescription->maxZoom, layerDescription->bounds,
+                                          std::make_shared<VectorMapSourceDescription>(layerDescription->source, layerDescription->url, layerDescription->sourceMinZoom,
+                                                                                       layerDescription->sourceMaxZoom, layerDescription->bounds,
                                                          layerDescription->zoomLevelScaleFactor,
                                                          layerDescription->adaptScaleToScreen,
                                                          layerDescription->numDrawPreviousLayers,
@@ -48,7 +48,11 @@ public:
         }
 
         if (description->coordinateReferenceSystem == "EPSG:4326") {
-            customConfig = std::make_shared<Epsg4326Tiled2dMapLayerConfig>(layerDescription->source, layerDescription->url, zoomInfo, layerDescription->minZoom, layerDescription->maxZoom);
+            customConfig = std::make_shared<Epsg4326Tiled2dMapLayerConfig>(layerDescription->source,
+                                                                           layerDescription->url,
+                                                                           zoomInfo,
+                                                                           layerDescription->sourceMinZoom,
+                                                                           layerDescription->sourceMaxZoom);
         }
     }
 
@@ -78,6 +82,13 @@ public:
             return customConfig->getZoomLevelInfos();
         }
         return Tiled2dMapVectorLayerConfig::getZoomLevelInfos();
+    }
+
+    std::vector<Tiled2dMapZoomLevelInfo> getVirtualZoomLevelInfos() override {
+        if (customConfig) {
+            return customConfig->getVirtualZoomLevelInfos();
+        }
+        return Tiled2dMapVectorLayerConfig::getVirtualZoomLevelInfos();
     }
 
     Tiled2dMapZoomInfo getZoomInfo() override {

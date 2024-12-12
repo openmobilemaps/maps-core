@@ -11,7 +11,7 @@ data class Color(
 ) : Comparable<Color> {
 
     override fun compareTo(other: Color): Int {
-        var tempResult = 0
+        var tempResult : Int
         if (this.r < other.r) {
             tempResult = -1;
         } else if (this.r > other.r) {

@@ -46,6 +46,14 @@ std::vector<::Tiled2dMapZoomLevelInfo> NativeTiled2dMapLayerConfig::JavaProxy::g
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni::List<::djinni_generated::NativeTiled2dMapZoomLevelInfo>::toCpp(jniEnv, jret);
 }
+std::vector<::Tiled2dMapZoomLevelInfo> NativeTiled2dMapLayerConfig::JavaProxy::getVirtualZoomLevelInfos() {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeTiled2dMapLayerConfig>::get();
+    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_getVirtualZoomLevelInfos);
+    ::djinni::jniExceptionCheck(jniEnv);
+    return ::djinni::List<::djinni_generated::NativeTiled2dMapZoomLevelInfo>::toCpp(jniEnv, jret);
+}
 ::Tiled2dMapZoomInfo NativeTiled2dMapLayerConfig::JavaProxy::getZoomInfo() {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
@@ -112,6 +120,15 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_til
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapLayerConfig>(nativeRef);
         auto r = ref->getZoomLevelInfos();
+        return ::djinni::release(::djinni::List<::djinni_generated::NativeTiled2dMapZoomLevelInfo>::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_Tiled2dMapLayerConfig_00024CppProxy_native_1getVirtualZoomLevelInfos(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapLayerConfig>(nativeRef);
+        auto r = ref->getVirtualZoomLevelInfos();
         return ::djinni::release(::djinni::List<::djinni_generated::NativeTiled2dMapZoomLevelInfo>::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }

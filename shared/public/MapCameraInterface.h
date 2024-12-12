@@ -88,6 +88,8 @@ public:
 
     virtual double mapUnitsFromPixels(double distancePx) = 0;
 
+    virtual double getScalingFactor() = 0;
+
     /** padding in percentage, where 1.0 = rect is half of full width and height */
     virtual bool coordIsVisibleOnScreen(const ::Coord & coord, float paddingPc) = 0;
 

@@ -191,7 +191,7 @@ void LineLayer::generateRenderPasses() {
             if (!lineTuple.first->getCoordinates().empty()) {
                 std::vector<float> modelMatrix =
                     mapInterface->getCamera()->getInvariantModelMatrix(lineTuple.first->getCoordinates()[0], false, false);
-                renderPassObjectMap[config->getRenderIndex()].push_back(
+                renderPassObjectMap[renderPassIndex].push_back(
                     std::make_shared<RenderObject>(config->getGraphicsObject()));
             }
         }
@@ -392,4 +392,13 @@ void LineLayer::setSelected(const std::unordered_set<std::string> &selectedIds) 
     }
     if (mapInterface)
         mapInterface->invalidate();
+}
+
+void LineLayer::setRenderPassIndex(int32_t index) {
+    renderPassIndex = index;
+    generateRenderPasses();
+
+    if (mapInterface) {
+        mapInterface->invalidate();
+    }
 }

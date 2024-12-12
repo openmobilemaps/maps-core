@@ -100,10 +100,10 @@ public:
         return lineCapEvaluator.getResult(context, defaultValue);
     }
 
-    double getLineOffset(const EvaluationContext &context) {
+    double getLineOffset(const EvaluationContext &context, double width) {
         static const double defaultValue = 0.0;
         double offset = lineOffsetEvaluator.getResult(context, defaultValue);
-        return std::min(offset * context.dpFactor, getLineWidth(context) * 0.5);
+        return std::min(offset * context.dpFactor, width * 0.5);
     }
     
     bool getLineDotted(const EvaluationContext &context) {
@@ -139,17 +139,19 @@ public:
                                std::string sourceId,
                                int minZoom,
                                int maxZoom,
+                               int sourceMinZoom,
+                               int sourceMaxZoom,
                                std::shared_ptr<Value> filter,
                                LineVectorStyle style,
                                std::optional<int32_t> renderPassIndex,
                                std::shared_ptr<Value> interactable,
                                bool multiselect,
                                bool selfMasked):
-    VectorLayerDescription(identifier, source, sourceId, minZoom, maxZoom, filter, renderPassIndex, interactable, multiselect, selfMasked),
+    VectorLayerDescription(identifier, source, sourceId, minZoom, maxZoom, sourceMinZoom, sourceMaxZoom, filter, renderPassIndex, interactable, multiselect, selfMasked),
     style(style) {};
 
     std::unique_ptr<VectorLayerDescription> clone() override {
-        return std::make_unique<LineVectorLayerDescription>(identifier, source, sourceLayer, minZoom, maxZoom,
+        return std::make_unique<LineVectorLayerDescription>(identifier, source, sourceLayer, minZoom, maxZoom, sourceMinZoom, sourceMaxZoom,
                                                             filter ? filter->clone() : nullptr, style, renderPassIndex,
                                                             interactable ? interactable->clone() : nullptr, multiselect, selfMasked);
     }

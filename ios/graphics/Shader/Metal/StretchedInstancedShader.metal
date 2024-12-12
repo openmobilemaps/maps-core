@@ -58,10 +58,10 @@ stretchInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
   return out;
 }
 
-fragment float4
+fragment half4
 stretchInstancedFragmentShader(StretchedInstancedVertexOut in [[stage_in]],
                                constant float *stretchInfos [[buffer(1)]],
-                               texture2d<float> texture0 [[ texture(0)]],
+                               texture2d<half> texture0 [[ texture(0)]],
                                sampler textureSampler [[sampler(0)]])
 {
   if (in.alpha == 0) {
@@ -111,10 +111,10 @@ stretchInstancedFragmentShader(StretchedInstancedVertexOut in [[stage_in]],
 
   // remap final normalized uv to sprite atlas coordinates
 
-  const float4 color = texture0.sample(textureSampler, in.texureCoordinates.xy + in.texureCoordinates.zw * float2(texCoordNorm.x, 1 - texCoordNorm.y));
+  const half4 color = texture0.sample(textureSampler, in.texureCoordinates.xy + in.texureCoordinates.zw * float2(texCoordNorm.x, 1 - texCoordNorm.y));
   const float a = color.a * in.alpha;
   if (a == 0) {
     discard_fragment();
   }
-  return float4(color.r * a, color.g * a, color.b * a, a);
+  return half4(color.r * a, color.g * a, color.b * a, a);
 }

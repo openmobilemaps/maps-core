@@ -13,6 +13,7 @@ import io.openmobilemaps.mapscore.shared.map.loader.TextureLoaderResult
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.io.FileNotFoundException
 import java.io.IOException
 import java.nio.ByteBuffer
 
@@ -23,6 +24,7 @@ open class AssetLocalDataProvider(
     private val fileNameStyleJson: String = "style.json",
     private val folderSprite: String = "generated-sprites",
     private val fileNameSprite: String = "sprite",
+    private val loadDataAsync: ((url: String, etag: String?) -> Future<DataLoaderResult>)? = null
 ) : Tiled2dMapVectorLayerLocalDataProviderInterface() {
 
     protected open fun scaleSuffix(scale: Int): String = when (scale) {
@@ -42,6 +44,9 @@ open class AssetLocalDataProvider(
         } catch (e: IOException) {
             Log.e(AssetLocalDataProvider::class.java.canonicalName, e.localizedMessage, e)
             null
+        } catch (e: FileNotFoundException) {
+            Log.e(AssetLocalDataProvider::class.java.canonicalName, e.localizedMessage, e)
+            null
         }
     }
 
@@ -56,6 +61,9 @@ open class AssetLocalDataProvider(
                 assetStream.close()
                 decodedTexture
             } catch (e: IOException) {
+                Log.e(AssetLocalDataProvider::class.java.canonicalName, e.localizedMessage, e)
+                null
+            } catch (e: FileNotFoundException) {
                 Log.e(AssetLocalDataProvider::class.java.canonicalName, e.localizedMessage, e)
                 null
             }
@@ -81,6 +89,9 @@ open class AssetLocalDataProvider(
             } catch (e: IOException) {
                 Log.e(AssetLocalDataProvider::class.java.canonicalName, e.localizedMessage, e)
                 null
+            } catch (e: FileNotFoundException) {
+                Log.e(AssetLocalDataProvider::class.java.canonicalName, e.localizedMessage, e)
+                null
             }
             val result = spriteJson?.let { DataLoaderResult(spriteJson, null, LoaderStatus.OK, null) }
                 ?: DataLoaderResult(null, null, LoaderStatus.ERROR_OTHER, null)
@@ -91,9 +102,16 @@ open class AssetLocalDataProvider(
     }
 
     override fun loadGeojson(sourceName: String, url: String): Future<DataLoaderResult> {
-        val resultPromise = Promise<DataLoaderResult>()
-        resultPromise.setValue(DataLoaderResult(null, null, LoaderStatus.ERROR_404, "No geoJson provided in AssetLocalDataProvider!"))
-        return resultPromise.future
+        return loadDataAsync?.invoke(url, null) ?: Promise<DataLoaderResult>().apply {
+            setValue(
+                DataLoaderResult(
+                    null,
+                    null,
+                    LoaderStatus.ERROR_404,
+                    "No geoJson provided in AssetLocalDataProvider!"
+                )
+            )
+        }.future
     }
 
     override fun equals(other: Any?): Boolean {

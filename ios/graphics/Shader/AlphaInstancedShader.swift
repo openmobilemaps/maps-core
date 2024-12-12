@@ -13,17 +13,16 @@ import MapCoreSharedModule
 import Metal
 
 class AlphaInstancedShader: BaseShader, @unchecked Sendable {
-    private let shader: PipelineType
     public let isUnitSphere: Bool
 
     init(shader: PipelineType = .alphaInstancedShader, unitSphere: Bool = false) {
-        self.shader = shader
         self.isUnitSphere = unitSphere
+        super.init(shader: shader)
     }
 
     override func setupProgram(_: MCRenderingContextInterface?) {
         if pipeline == nil {
-            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: shader, blendMode: blendMode).json)
+            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: shader, blendMode: blendMode))
         }
     }
 

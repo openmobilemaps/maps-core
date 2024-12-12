@@ -103,6 +103,9 @@ void Polygon2dLayerObject::setPolygons(const std::vector<PolygonCoord> &polygons
         vertices.push_back(is3D ? 1.0 * sin(v.y) * cos(v.x) - rx : v.x - rx);
         vertices.push_back(is3D ? 1.0 * cos(v.y) - ry : v.y - ry);
         vertices.push_back(is3D ? -1.0 * sin(v.y) * sin(v.x) - rz : 0.0);
+        #ifdef __APPLE__
+            vertices.push_back(0.0f);
+        #endif
     }
 
     auto attr = SharedBytes((int64_t)vertices.data(), (int32_t)vertices.size(), (int32_t)sizeof(float));
@@ -110,7 +113,9 @@ void Polygon2dLayerObject::setPolygons(const std::vector<PolygonCoord> &polygons
     polygon->setVertices(attr, ind, Vec3D(rx, ry, rz));
 }
 
-void Polygon2dLayerObject::setColor(const Color &color) { shader->setColor(color.r, color.g, color.b, color.a); }
+void Polygon2dLayerObject::setColor(const Color &color) {
+    shader->setColor(color.r, color.g, color.b, color.a);
+}
 
 std::shared_ptr<GraphicsObjectInterface> Polygon2dLayerObject::getPolygonObject() { return graphicsObject; }
 

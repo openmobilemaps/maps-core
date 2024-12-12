@@ -31,6 +31,8 @@ public:
 
     virtual void preRender(const std::shared_ptr<::RenderingContextInterface> &context) override;
 
+    virtual bool usesModelMatrix() override { return true; };
+
 protected:
 
     virtual void setBlendMode(BlendMode blendMode) override;

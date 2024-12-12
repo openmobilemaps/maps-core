@@ -20,6 +20,20 @@ baseVertexShader(const Vertex3DTextureIn vertexIn [[stage_in]],
                  constant float4 &originOffset [[buffer(3)]])
 {
     VertexOut out {
+        .position = vpMatrix * (vertexIn.position + originOffset),
+        .uv = vertexIn.uv
+    };
+
+    return out;
+}
+
+vertex VertexOut
+baseVertexShaderModel(const Vertex3DTextureIn vertexIn [[stage_in]],
+                constant float4x4 &vpMatrix [[buffer(1)]],
+                 constant float4x4 &mMatrix [[buffer(2)]],
+                 constant float4 &originOffset [[buffer(3)]])
+{
+    VertexOut out {
         .position = vpMatrix * ((mMatrix * vertexIn.position) + originOffset),
         .uv = vertexIn.uv
     };
@@ -27,43 +41,48 @@ baseVertexShader(const Vertex3DTextureIn vertexIn [[stage_in]],
     return out;
 }
 
-fragment float4
+fragment half4
 baseFragmentShader(VertexOut in [[stage_in]],
                       constant float &alpha [[buffer(1)]],
-                      texture2d<float> texture0 [[ texture(0)]],
+                      texture2d<half> texture0 [[ texture(0)]],
                       sampler textureSampler [[sampler(0)]])
 {
-    float4 color = texture0.sample(textureSampler, in.uv);
-    
+    half4 color = texture0.sample(textureSampler, in.uv);
+
     float a = color.a * alpha;
 
     if (a == 0) {
        discard_fragment();
     }
 
-    return float4(color.r * a, color.g * a, color.b * a, a);
+    return half4(color.r * a, color.g * a, color.b * a, a);
 }
 
 
 vertex VertexOut
-colorVertexShader(const Vertex3FIn vertexIn [[stage_in]],
+colorVertexShader(const Vertex4FIn vertexIn [[stage_in]],
                   constant float4x4 &vpMatrix [[buffer(1)]],
                    constant float4x4 &mMatrix [[buffer(2)]],
                   constant float4 &originOffset [[buffer(3)]])
 {
     VertexOut out {
-        .position = vpMatrix * ((mMatrix * float4(vertexIn.position.xyz, 1.0)) + originOffset),
+        .position = vpMatrix * (float4(vertexIn.position.xyz, 1.0) + originOffset),
     };
 
     return out;
 }
 
 fragment float4
-colorFragmentShader(VertexOut in [[stage_in]],
-                    constant float4 &color [[buffer(1)]])
+colorFragmentShader(constant float4 &color [[buffer(1)]])
 {
     float a = color.a;
     return float4(color.r * a, color.g * a, color.b * a, a);
+}
+
+fragment half4
+maskFragmentShader()
+{
+  return half4(0, 0, 0, 0);
 }
 
 fragment float4

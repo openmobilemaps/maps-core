@@ -12,6 +12,7 @@ package io.openmobilemaps.mapscore.map.loader
 
 import android.content.Context
 import android.graphics.BitmapFactory
+import android.util.Log
 import com.snapchat.djinni.Future
 import com.snapchat.djinni.Promise
 import io.openmobilemaps.mapscore.graphics.BitmapTextureHolder
@@ -34,7 +35,9 @@ open class DataLoader(
 	private var cacheDirectory: File,
 	private var cacheSize: Long,
 	private var referrer: String = "",
-	private var userAgent: String = RequestUtils.getDefaultUserAgent(context)
+	private var userAgent: String = RequestUtils.getDefaultUserAgent(context),
+	private var interceptors: List<Interceptor>? = null,
+	private var networkInterceptors: List<Interceptor>? = null,
 ) : LoaderInterface() {
 
 	companion object {
@@ -44,13 +47,14 @@ open class DataLoader(
         private val TIMEOUT_UNIT = TimeUnit.SECONDS
 	}
 
-	protected var okHttpClient = initializeClient()
+	protected open var okHttpClient = initializeClient()
 
-	protected open fun createClient(interceptors: List<Interceptor>? = null): OkHttpClient = OkHttpClient.Builder()
+	protected open fun createClient(): OkHttpClient = OkHttpClient.Builder()
 		.addInterceptor(UserAgentInterceptor(userAgent))
 		.addInterceptor(RefererInterceptor(referrer))
 		.apply {
 			interceptors?.forEach { addInterceptor(it) }
+			networkInterceptors?.forEach { addNetworkInterceptor(it) }
 		}
 		.connectionPool(ConnectionPool(8, 5000L, TimeUnit.MILLISECONDS))
 		.cache(Cache(cacheDirectory, cacheSize))
@@ -63,17 +67,20 @@ open class DataLoader(
 		cacheSize: Long? = null,
 		referrer: String? = null,
 		userAgent: String? = null,
-		interceptors: List<Interceptor>? = null
+		interceptors: List<Interceptor>? = null,
+		networkInterceptors: List<Interceptor>? = null
 	) {
 		cacheDirectory?.let { this.cacheDirectory = cacheDirectory }
 		cacheSize?.let { this.cacheSize = cacheSize }
 		referrer?.let { this.referrer = it }
 		userAgent?.let { this.userAgent = it }
-		okHttpClient = createClient(interceptors)
+		interceptors?.let { this.interceptors = it }
+		networkInterceptors?.let { this.networkInterceptors = it }
+		okHttpClient = createClient()
 	}
 
 	override fun loadTexture(url: String, etag: String?): TextureLoaderResult {
-        val resFuture = loadTextureAsnyc(url, etag)
+        val resFuture = loadTextureAsync(url, etag)
         return try {
             resFuture.get(TIMEOUT_DUR, TIMEOUT_UNIT)
         } catch (e: Exception) {
@@ -86,14 +93,13 @@ open class DataLoader(
         }
 	}
 
-    override fun loadTextureAsnyc(url: String, etag: String?): Future<TextureLoaderResult> {
+    override fun loadTextureAsync(url: String, etag: String?): Future<TextureLoaderResult> {
         val request = Request.Builder()
             .url(url)
             .tag(url)
             .build()
 
         val result = Promise<TextureLoaderResult>()
-
         okHttpClient.newCall(request).enqueue(object : Callback {
             override fun onResponse(call: Call, response: Response) {
                 val bytes: ByteArray? = response.body?.bytes()

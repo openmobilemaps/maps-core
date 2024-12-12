@@ -53,13 +53,9 @@ class StretchShader: BaseShader, @unchecked Sendable {
     private var infoContent: UnsafeMutablePointer<StretchShaderInfoSwift>
     private let infoBuffer: MTLBuffer
 
-    private let shader: PipelineType
-
     private var stretchInfo = StretchShaderInfoSwift()
 
-    init(shader: PipelineType = .stretchShader) {
-        self.shader = shader
-
+    override init(shader: PipelineType = .stretchShader) {
         guard let infoBuffer = MetalContext.current.device.makeBuffer(length: MemoryLayout<StretchShaderInfoSwift>.stride, options: []) else { fatalError("Could not create buffer") }
         self.infoBuffer = infoBuffer
         self.infoContent = self.infoBuffer.contents().bindMemory(to: StretchShaderInfoSwift.self, capacity: 1)
@@ -69,11 +65,13 @@ class StretchShader: BaseShader, @unchecked Sendable {
         self.alphaBuffer = alphaBuffer
         self.alphaContent = self.alphaBuffer.contents().bindMemory(to: Float.self, capacity: 1)
         self.alphaContent[0] = 1.0
+
+        super.init(shader: shader)
     }
 
     override func setupProgram(_: MCRenderingContextInterface?) {
         if pipeline == nil {
-            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: shader, blendMode: blendMode).json)
+            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: shader, blendMode: blendMode))
         }
     }
 

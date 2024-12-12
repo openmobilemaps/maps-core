@@ -21,10 +21,8 @@ struct Vertex3DTextureIn {
     float2 uv [[attribute(1)]];
 };
 
-struct Vertex3FIn {
-    float3 position [[attribute(0)]];
-};
-
+// NOTE: float3 also take up 4 * sizeOf(float) bytes
+// therefore we always use float4 for better alignment and to reduce errors when filling the buffer
 struct Vertex4FIn {
     float4 position [[attribute(0)]];
 };

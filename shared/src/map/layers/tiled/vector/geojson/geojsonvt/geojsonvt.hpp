@@ -95,7 +95,7 @@ public:
                     self->load(false);
                 }
                 else {
-                    self->delegate.message(&GeoJSONTileDelegate::failedToLoad);
+                    self->delegate.message(MFN(&GeoJSONTileDelegate::failedToLoad));
                 }
             } else {
                 auto string = std::string((char*)result.data->buf(), result.data->len());
@@ -107,7 +107,7 @@ public:
 
                         self->initialize(geoJson);
 
-                        self->delegate.message(&GeoJSONTileDelegate::didLoad, self->options.maxZoom);
+                        self->delegate.message(MFN(&GeoJSONTileDelegate::didLoad), self->options.maxZoom);
                     }
                 }
                 catch (nlohmann::json::parse_error &ex) {
@@ -140,7 +140,7 @@ public:
     void setDelegate(const WeakActor<GeoJSONTileDelegate> delegate) override {
         this->delegate = delegate;
         if (loadingResult) {
-            delegate.message(&GeoJSONTileDelegate::didLoad, options.maxZoom);
+            delegate.message(MFN(&GeoJSONTileDelegate::didLoad), options.maxZoom);
         }
     }
 

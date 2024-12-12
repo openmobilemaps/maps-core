@@ -4,6 +4,7 @@
 #pragma once
 
 #include "LayerInterface.h"
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <vector>
@@ -42,4 +43,9 @@ public:
     virtual void invalidate() = 0;
 
     virtual void setLayerClickable(bool isLayerClickable) = 0;
+
+    virtual void setRenderPassIndex(int32_t index) = 0;
+
+    /** scale an icon, use repetitions for pulsating effect (repetions == -1 -> forever) */
+    virtual void animateIconScale(const std::string & identifier, float from, float to, float duration, int32_t repetitions) = 0;
 };

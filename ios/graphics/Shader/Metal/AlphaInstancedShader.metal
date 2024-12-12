@@ -74,16 +74,21 @@ unitSphereAlphaInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
 }
 
 
-fragment float4
+fragment half4
 unitSphereAlphaInstancedFragmentShader(InstancedVertexOut in [[stage_in]],
-                             texture2d<float> texture0 [[ texture(0)]],
+                             texture2d<half> texture0 [[ texture(0)]],
                              sampler textureSampler [[sampler(0)]])
 {
     const float2 uv = in.uvOrig + in.uvSize * float2(in.uv.x, in.uv.y);
-    float4 color = texture0.sample(textureSampler, uv);
+    half4 color = texture0.sample(textureSampler, uv);
 
-    const float a = color.a * in.alpha;
-    return float4(color.r * in.alpha, color.g * in.alpha, color.b * in.alpha, a);
+    const half a = color.a * in.alpha;
+
+    if (a <= 0) {
+       discard_fragment();
+    }
+
+    return half4(color.r * a, color.g * a, color.b * a, a);
 }
 
 vertex InstancedVertexOut
@@ -101,6 +106,7 @@ alphaInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
 {
   const float2 position = positions[instanceId] + originOffset.xy;
   const float2 scale = scales[instanceId];
+  const float2 offset = offsets[instanceId];
   const float rotation = rotations[instanceId];
 
   const float angle = rotation * M_PI_F / 180.0;
@@ -109,7 +115,7 @@ alphaInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
                                             float4(cos(angle) * scale.x, -sin(angle) * scale.x, 0, 0),
                                             float4(sin(angle) * scale.y, cos(angle) * scale.y, 0, 0),
                                             float4(0, 0, 0, 0),
-                                            float4(position.x, position.y, 0.0, 1)
+                                            float4(position + offset, 0.0, 1)
                                             );
 
   const float4x4 matrix = vpMatrix * model_matrix;
@@ -127,15 +133,19 @@ alphaInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
 }
 
 
-fragment float4
+fragment half4
 alphaInstancedFragmentShader(InstancedVertexOut in [[stage_in]],
-                             texture2d<float> texture0 [[ texture(0)]],
+                             texture2d<half> texture0 [[ texture(0)]],
                              sampler textureSampler [[sampler(0)]])
 {
     const float2 uv = in.uvOrig + in.uvSize * float2(in.uv.x, 1 - in.uv.y);
-    float4 color = texture0.sample(textureSampler, uv);
+    half4 color = texture0.sample(textureSampler, uv);
 
-    const float a = color.a * in.alpha;
+    const half a = color.a * in.alpha;
 
-    return float4(color.r * in.alpha, color.g * in.alpha, color.b * in.alpha, a);
+    if (a <= 0) {
+       discard_fragment();
+    }
+
+    return half4(color.r * a, color.g * a, color.b * a, a);
 }

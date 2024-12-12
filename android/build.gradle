@@ -17,9 +17,9 @@ buildscript {
 	}
 
 	ext{
-		agp_version = "8.6.1"
-		kotlin_version = "2.0.20"
-		ksp_version = "2.0.20-1.0.25"
+		agp_version = "8.7.2"
+		kotlin_version = "2.0.21"
+		ksp_version = "2.0.21-1.0.28"
 	}
 	repositories {
 		google()
@@ -30,7 +30,7 @@ buildscript {
 		classpath "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:$ksp_version"
 		classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
 
-		classpath 'com.vanniktech:gradle-maven-publish-plugin:0.25.3'
+		classpath 'com.vanniktech:gradle-maven-publish-plugin:0.30.0'
 		classpath 'org.jetbrains.dokka:dokka-gradle-plugin:1.9.10'
 	}
 }
@@ -101,7 +101,19 @@ android {
 	}
 
 	buildTypes {
+		debug {
+			externalNativeBuild {
+				cmake {
+					cppFlags "-DDEBUG"
+				}
+			}
+		}
 		release {
+			externalNativeBuild {
+				cmake {
+					cppFlags "-DNDEBUG"
+				}
+			}
 			ndk {
 				debugSymbolLevel 'SYMBOL_TABLE'
 			}
@@ -162,7 +174,7 @@ publishing {
 			name = "UbiqueMaven"
 			url = System.getenv('UB_ARTIFACTORY_URL_ANDROID') ?: readPropertyWithDefault('ubiqueMavenUrl', '')
 			credentials {
-				username = System.getenv('UB_ARTIFACTORY_USERNAME') ?: readPropertyWithDefault('ubiqueMavenUser', '')
+				username = System.getenv('UB_ARTIFACTORY_USER') ?: readPropertyWithDefault('ubiqueMavenUser', '')
 				password = System.getenv('UB_ARTIFACTORY_PASSWORD') ?: readPropertyWithDefault('ubiqueMavenPass', '')
 			}
 		}
@@ -177,19 +189,19 @@ mavenPublishing {
 dependencies {
 	implementation fileTree(dir: 'libs', include: ['*.jar'])
 	implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-	implementation 'androidx.annotation:annotation:1.7.1'
-	implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.7.0'
-	implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3'
+	implementation 'androidx.annotation:annotation:1.9.1'
+	implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.8.7'
+	implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0'
 
-	implementation 'com.squareup.moshi:moshi:1.15.0'
-	ksp 'com.squareup.moshi:moshi-kotlin-codegen:1.15.0'
+	implementation 'com.squareup.moshi:moshi:1.15.1'
+	ksp 'com.squareup.moshi:moshi-kotlin-codegen:1.15.1'
 	implementation 'com.squareup.okhttp3:okhttp:4.12.0'
 
 	implementation 'ch.ubique.android:djinni-support-lib:1.0.9'
 
 	testImplementation 'junit:junit:4.13.2'
-	androidTestImplementation 'androidx.test.ext:junit:1.1.5'
-	androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+	androidTestImplementation 'androidx.test.ext:junit:1.2.1'
+	androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
 }
 
 clean.doLast {

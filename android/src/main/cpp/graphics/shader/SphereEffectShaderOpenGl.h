@@ -27,7 +27,7 @@ public:
 
     virtual void preRender(const std::shared_ptr<::RenderingContextInterface> &context) override;
 
-    virtual void setEllipse(const std::vector<double> & coefficients) override;
+    virtual void setEllipse(const SharedBytes & coefficients) override;
 
 protected:
     virtual std::string getVertexShader() override;

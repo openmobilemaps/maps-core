@@ -140,7 +140,6 @@ void IconLayer::addIcons(const std::vector<std::shared_ptr<IconInfoInterface>> &
     auto mapInterface = lockSelfPtr ? lockSelfPtr->mapInterface : nullptr;
     auto objectFactory = mapInterface ? mapInterface->getGraphicsObjectFactory() : nullptr;
     auto shaderFactory = mapInterface ? mapInterface->getShaderFactory() : nullptr;
-    auto conversionHelper = mapInterface ? mapInterface->getCoordinateConverterHelper() : nullptr;
     auto scheduler = mapInterface ? mapInterface->getScheduler() : nullptr;
     if (!objectFactory || !shaderFactory || !scheduler) {
         std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
@@ -150,23 +149,22 @@ void IconLayer::addIcons(const std::vector<std::shared_ptr<IconInfoInterface>> &
         return;
     }
 
-    std::vector<std::pair<std::shared_ptr<IconInfoInterface>, std::shared_ptr<Textured2dLayerObject>>> iconObjects;
+    std::vector<std::pair<std::shared_ptr<IconInfoInterface>, std::shared_ptr<IconLayerObject>>> iconObjects;
 
     for (const auto &icon : iconsToAdd) {
-        auto shader = is3D ? shaderFactory->createUnitSphereAlphaShader() : shaderFactory->createAlphaShader();
+        auto shader = is3D ? shaderFactory->createUnitSphereAlphaInstancedShader() : shaderFactory->createAlphaInstancedShader();
         shader->asShaderProgramInterface()->setBlendMode(icon->getBlendMode());
-        auto quadObject = objectFactory->createQuad(shader->asShaderProgramInterface());
+        auto quadObject = objectFactory->createQuadInstanced(shader->asShaderProgramInterface());
         if (is3D) {
-            quadObject->setSubdivisionFactor(SUBDIVISION_FACTOR_3D_DEFAULT);
+            //quadObject->setSubdivisionFactor(SUBDIVISION_FACTOR_3D_DEFAULT);
         }
 
 #if DEBUG
         quadObject->asGraphicsObject()->setDebugLabel("IconLayerID:" + icon->getIdentifier());
 #endif
 
-        auto iconObject = std::make_shared<Textured2dLayerObject>(quadObject, shader, mapInterface, is3D);
+        auto iconObject = std::make_shared<IconLayerObject>(quadObject, icon, shader, mapInterface, is3D);
 
-        updateIconPosition(conversionHelper, icon, iconObject);
         iconObjects.push_back(std::make_pair(icon, iconObject));
 
         {
@@ -190,8 +188,17 @@ void IconLayer::addIcons(const std::vector<std::shared_ptr<IconInfoInterface>> &
         mapInterface->invalidate();
 }
 
+void IconLayer::setRenderPassIndex(int32_t index) {
+    renderPassIndex = index;
+    preGenerateRenderPasses();
+
+    if (mapInterface) {
+        mapInterface->invalidate();
+    }
+}
+
 void IconLayer::setupIconObjects(
-    const std::vector<std::pair<std::shared_ptr<IconInfoInterface>, std::shared_ptr<Textured2dLayerObject>>> &iconObjects) {
+    const std::vector<std::pair<std::shared_ptr<IconInfoInterface>, std::shared_ptr<IconLayerObject>>> &iconObjects) {
     auto mapInterface = this->mapInterface;
     auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
     if (!renderingContext) {
@@ -202,9 +209,8 @@ void IconLayer::setupIconObjects(
         const auto &icon = iconPair.first;
         const auto &iconObject = iconPair.second;
 
-        iconObject->getGraphicsObject()->setup(renderingContext);
-        iconObject->getQuadObject()->loadTexture(renderingContext, icon->getTexture());
-        
+        iconObject->setup(renderingContext);
+
         if (mask && !mask->asGraphicsObject()->isReady()) {
             mask->asGraphicsObject()->setup(renderingContext);
         }
@@ -242,7 +248,7 @@ void IconLayer::clear() {
     mapInterface->invalidate();
 }
 
-void IconLayer::clearSync(const std::vector<std::pair<std::shared_ptr<IconInfoInterface>, std::shared_ptr<Textured2dLayerObject>>> &iconsToClear) {
+void IconLayer::clearSync(const std::vector<std::pair<std::shared_ptr<IconInfoInterface>, std::shared_ptr<IconLayerObject>>> &iconsToClear) {
     for (const auto &icon : iconsToClear) {
         if (icon.second->getGraphicsObject()->isReady()) {
             icon.second->getGraphicsObject()->clear();
@@ -259,9 +265,8 @@ void IconLayer::invalidate() { setIcons(getIcons()); }
 void IconLayer::update() {
     auto lockSelfPtr = shared_from_this();
     auto mapInterface = lockSelfPtr ? lockSelfPtr->mapInterface : nullptr;
-    auto conversionHelper = mapInterface ? mapInterface->getCoordinateConverterHelper() : nullptr;
     auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
-    if (!conversionHelper || !renderingContext) {
+    if (!renderingContext) {
         return;
     }
 
@@ -273,104 +278,41 @@ void IconLayer::update() {
     {
         std::lock_guard<std::recursive_mutex> lock(iconsMutex);
         for (const auto &[iconInfo, layerObject]: icons) {
-            if (iconInfo.get()->getType() != IconType::FIXED) {
-                continue;
-            }
-            updateIconPosition(conversionHelper, iconInfo, layerObject);
             if (!layerObject->getGraphicsObject()->isReady()) {
                 layerObject->getGraphicsObject()->setup(renderingContext);
             }
+
+            layerObject->update();
         }
     }
-}
 
-void IconLayer::updateIconPosition(const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
-                                   const std::shared_ptr<IconInfoInterface> &iconInfo,
-                                   const std::shared_ptr<Textured2dLayerObject> &iconObject) {
-    auto mapInterface = this->mapInterface;
-    auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
-    if (!camera) {
-        return;
+    {
+        std::lock_guard<std::recursive_mutex> lock(scaleAnimationMutex);
+        for (auto it = scaleAnimations.begin(); it != scaleAnimations.end();) {
+            if(it->second.animation == nullptr) {
+                it = scaleAnimations.erase(it);  // erase() returns the next iterator
+
+            } else {
+                it->second.animation->update();
+                ++it;
+            }
+        }
     }
-
-    Vec2F iconSize = iconInfo->getIconSize();
-    const Coord origIconPosRender = conversionHelper->convertToRenderSystem(iconInfo->getCoordinate());
-    Coord iconPosRender = origIconPosRender;
-
-    const auto &iconType = iconInfo->getType();
-    if (iconType != IconType::FIXED) {
-        iconPosRender.x = 0;
-        iconPosRender.y = 0;
-    }
-
-    if (iconType != IconType::INVARIANT && iconType != IconType::SCALE_INVARIANT){
-        // Size is expected in meters
-        float meterToMapUnit = mapInterface->getMapConfig().mapCoordinateSystem.unitToScreenMeterFactor;
-        iconSize = iconSize * meterToMapUnit;
-    }
-
-    const Vec2F &anchor = iconInfo->getIconAnchor();
-    float ratioLeftRight = std::clamp(anchor.x, 0.0f, 1.0f);
-    float ratioTopBottom = std::clamp(anchor.y, 0.0f, 1.0f);
-    float leftW = iconSize.x * ratioLeftRight;
-    float topH = iconSize.y * (is3D ? ratioTopBottom : (1.0f - ratioTopBottom));
-    float rightW = iconSize.x * (1.0f - ratioLeftRight);
-    float bottomH = iconSize.y * (is3D ? (1.0f - ratioTopBottom) : ratioTopBottom);
-
-    if (is3D) {
-        float scaleFactor = 1.0 / std::abs(cos(origIconPosRender.y + (M_PI / 2.0)));
-        leftW *= scaleFactor;
-        rightW *= scaleFactor;
-    }
-
-    iconObject->setRectCoord(
-            RectCoord(Coord(iconPosRender.systemIdentifier, iconPosRender.x - leftW, iconPosRender.y + topH, iconPosRender.z),
-                      Coord(iconPosRender.systemIdentifier, iconPosRender.x + rightW, iconPosRender.y - bottomH, iconPosRender.z)));
 }
 
 std::vector<std::shared_ptr<::RenderPassInterface>> IconLayer::buildRenderPasses() {
     auto lockSelfPtr = shared_from_this();
     auto mapInterface = lockSelfPtr ? lockSelfPtr->mapInterface : nullptr;
     auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
-    auto conversionHelper = mapInterface ? mapInterface->getCoordinateConverterHelper() : nullptr;
-    if (!camera || !conversionHelper) {
+    if (!camera) {
         return {};
     }
 
     if (isHidden) {
         return {};
     } else {
-        int i = 0;
-        std::map<int, std::vector<std::shared_ptr<RenderObjectInterface>>> currentRenderPassObjectMap;
-        std::unordered_map<int, std::vector<float>> transformSet;
-        {
-            std::lock_guard<std::recursive_mutex> lock(iconsMutex);
-            for (auto const &iconTuple : icons) {
-                IconType type = iconTuple.first->getType();
-                if (type != IconType::FIXED) {
-                    bool scaleInvariant = type == IconType::INVARIANT || type == IconType::SCALE_INVARIANT;
-                    bool rotationInvariant = type == IconType::INVARIANT || type == IconType::ROTATION_INVARIANT;
-                    auto renderCoord = conversionHelper->convert(CoordinateSystemIdentifiers::RENDERSYSTEM(), iconTuple.first->getCoordinate());
-                    std::vector<float> modelMatrix =
-                        camera->getInvariantModelMatrix(renderCoord, scaleInvariant, rotationInvariant);
-                    Matrix::translateM(modelMatrix, 0, renderCoord.x, renderCoord.y, 0.0);
-                    for (const auto &config : iconTuple.second->getRenderConfig()) {
-                        currentRenderPassObjectMap[config->getRenderIndex()].push_back(
-                            std::make_shared<RenderObject>(config->getGraphicsObject(), modelMatrix));
-                    }
-                }
-                i++;
-            }
-
-            for (auto const &passObjectEntry : renderPassObjectMap) {
-                for (const auto &object : passObjectEntry.second) {
-                    currentRenderPassObjectMap[passObjectEntry.first].push_back(object);
-                }
-            }
-        }
-
         std::vector<std::shared_ptr<RenderPassInterface>> renderPasses;
-        for (const auto &passEntry : currentRenderPassObjectMap) {
+        for (const auto &passEntry : renderPassObjectMap) {
             std::shared_ptr<RenderPass> renderPass =
                 std::make_shared<RenderPass>(RenderPassConfig(passEntry.first, false), passEntry.second, mask);
             renderPasses.push_back(renderPass);
@@ -383,12 +325,33 @@ void IconLayer::preGenerateRenderPasses() {
     std::lock_guard<std::recursive_mutex> lock(iconsMutex);
     std::map<int, std::vector<std::shared_ptr<RenderObjectInterface>>> newRenderPassObjectMap;
     for (auto const &iconTuple : icons) {
-        if (iconTuple.first->getType() != IconType::FIXED)
-            continue;
         for (const auto &config : iconTuple.second->getRenderConfig()) {
-            newRenderPassObjectMap[config->getRenderIndex()].push_back(std::make_shared<RenderObject>(config->getGraphicsObject()));
+            newRenderPassObjectMap[renderPassIndex].push_back(std::make_shared<RenderObject>(config->getGraphicsObject()));
         }
     }
+
+    {
+        std::lock_guard<std::recursive_mutex> animationLock(scaleAnimationMutex);
+
+        for (auto it = scaleAnimations.begin(); it != scaleAnimations.end();) {
+            auto& id = it->first;
+
+            auto hasIcon = false;
+            for(auto& icon : icons) {
+                if(icon.first->getIdentifier() == id) {
+                    hasIcon = true;
+                    break;
+                }
+            }
+
+            if(!hasIcon) {
+                it = scaleAnimations.erase(it);  // erase() returns the next iterator
+            } else {
+                ++it;  // Increment iterator if no erasure
+            }
+        }
+    }
+
     renderPassObjectMap = newRenderPassObjectMap;
 }
 
@@ -405,7 +368,16 @@ void IconLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface, int32
             addingQueue.clear();
             addIcons(icons);
         }
+
+        std::scoped_lock<std::recursive_mutex> lock2(scaleAddingQueueMutex);
+        if (!scaleAnimationAddingQueue.empty()) {
+            for (auto const &a : scaleAnimationAddingQueue) {
+                addScaleAnimation(a);
+            }
+            scaleAnimationAddingQueue.clear();
+        }
     }
+
     if (isLayerClickable) {
         mapInterface->getTouchHandler()->insertListener(shared_from_this(), layerIndex);
     }
@@ -569,4 +541,98 @@ void IconLayer::setAlpha(float alpha) {
 
 float IconLayer::getAlpha() {
     return alpha;
+}
+
+/** scale an icon, use repetitions for pulsating effect (repetions == -1 -> forever) */
+void IconLayer::animateIconScale(const std::string & identifier, float from, float to, float duration, int32_t repetitions) {
+    auto lockSelfPtr = shared_from_this();
+    auto mapInterface = lockSelfPtr ? lockSelfPtr->mapInterface : nullptr;
+
+    auto animation = IconScaleAnimation();
+    animation.identifier = identifier;
+    animation.from = from;
+    animation.to = to;
+    animation.duration = duration;
+    animation.repetitions = repetitions;
+
+    if(!mapInterface) {
+        std::lock_guard<std::recursive_mutex> lock(scaleAddingQueueMutex);
+        scaleAnimationAddingQueue.push_back(animation);
+        return;
+    }
+
+    addScaleAnimation(animation);
+}
+
+void IconLayer::addScaleAnimation(const IconScaleAnimation& iconScaleAnimation) {
+    auto lockSelfPtr = shared_from_this();
+    auto mapInterface = lockSelfPtr ? lockSelfPtr->mapInterface : nullptr;
+
+    if(!mapInterface) {
+        return;
+    }
+
+    auto scaleAnimation = iconScaleAnimation;
+    auto initialSize = Vec2F(0.0, 0.0);
+
+    auto it = scaleAnimations.find(scaleAnimation.identifier);
+    if(it != scaleAnimations.end()) {
+        initialSize = it->second.initialSize;
+    } else {
+        for(auto& icon : icons) {
+            if(icon.first->getIdentifier() == scaleAnimation.identifier) {
+                initialSize = icon.first->getIconSize();
+                break;
+            }
+        }
+    }
+
+    scaleAnimation.initialSize = initialSize;
+
+    auto id = scaleAnimation.identifier;
+
+    std::weak_ptr<IconLayer> weakSelf = std::static_pointer_cast<IconLayer>(shared_from_this());
+    std::lock_guard<std::recursive_mutex> lock(scaleAnimationMutex);
+
+    auto animation = std::make_shared<DoubleAnimation>(scaleAnimation.duration, scaleAnimation.from, scaleAnimation.to, InterpolatorFunction::EaseInOut,
+            [weakSelf, id, scaleAnimation](double scale) {
+              if (auto selfPtr = weakSelf.lock()) {
+                  for(auto& icon : selfPtr->icons) {
+                      if(icon.first->getIdentifier() == scaleAnimation.identifier) {
+                          icon.first->setIconSize(Vec2F(scaleAnimation.initialSize.x * scale, scaleAnimation.initialSize.y * scale));
+                      }
+                  }
+
+                  auto mapInterface = selfPtr->mapInterface;
+                  if (mapInterface) {
+                      mapInterface->invalidate();
+                  }
+              }
+          },
+          [weakSelf, scaleAnimation] {
+              if (auto selfPtr = weakSelf.lock()) {
+                  auto& sa = selfPtr->scaleAnimations;
+
+                  auto it = sa.find(scaleAnimation.identifier);
+                  if(it != sa.end()) {
+                      auto &sa = (*it).second;
+                      auto rep = sa.repetitions;
+                      if (rep > 0 || rep == -1) {
+                          sa.repetitions = rep == -1 ? -1 : (rep-1);
+                          auto to = sa.to;
+                          sa.to = sa.from;
+                          sa.from = to;
+                          selfPtr->addScaleAnimation(sa);
+                      } else {
+                          it->second.animation = nullptr;
+                      }
+                  }
+              }
+          });
+
+    scaleAnimation.animation = animation;
+    scaleAnimations[scaleAnimation.identifier] = scaleAnimation;
+
+    animation->start();
+    mapInterface->invalidate();
 }

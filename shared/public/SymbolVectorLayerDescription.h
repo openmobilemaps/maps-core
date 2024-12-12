@@ -244,7 +244,7 @@ public:
 
     double getTextHaloWidth(const EvaluationContext &context, double size) {
         static double defaultValue = 0.0;
-        double width = textHaloWidthEvaluator.getResult(context, defaultValue) * context.dpFactor;
+        double width = textHaloWidthEvaluator.getResult(context, defaultValue);
 
         // in a font of size 41pt, we can show around 7pt of halo
         // (due to generation of font atlasses)
@@ -256,7 +256,7 @@ public:
 
     double getTextHaloBlur(const EvaluationContext &context) {
         static double defaultValue = 0.0;
-        double width = textHaloBlurEvaluator.getResult(context, defaultValue) * context.dpFactor;
+        double width = textHaloBlurEvaluator.getResult(context, defaultValue);
 
         double size = getTextSize(context);
 
@@ -498,16 +498,18 @@ public:
                                  std::string sourceId,
                                int minZoom,
                                int maxZoom,
+                                 int sourceMinZoom,
+                                 int sourceMaxZoom,
                                std::shared_ptr<Value> filter,
                                  SymbolVectorStyle style,
                                  std::optional<int32_t> renderPassIndex,
                                  std::shared_ptr<Value> interactable,
                                  bool selfMasked):
-    VectorLayerDescription(identifier, source, sourceId, minZoom, maxZoom, filter, renderPassIndex, interactable, false, selfMasked),
+    VectorLayerDescription(identifier, source, sourceId, minZoom, maxZoom, sourceMinZoom, sourceMaxZoom, filter, renderPassIndex, interactable, false, selfMasked),
     style(style) {};
 
     std::unique_ptr<VectorLayerDescription> clone() override {
-        return std::make_unique<SymbolVectorLayerDescription>(identifier, source, sourceLayer, minZoom, maxZoom,
+        return std::make_unique<SymbolVectorLayerDescription>(identifier, source, sourceLayer, minZoom, maxZoom, sourceMinZoom, sourceMaxZoom,
                                                               filter ? filter->clone() : nullptr, style, renderPassIndex,
                                                               interactable ? interactable : nullptr, selfMasked);
     }

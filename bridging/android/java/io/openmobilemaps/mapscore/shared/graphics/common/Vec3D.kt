@@ -7,4 +7,40 @@ data class Vec3D(
     val x: Double,
     val y: Double,
     val z: Double,
-)
+) : Comparable<Vec3D> {
+
+    override fun compareTo(other: Vec3D): Int {
+        var tempResult : Int
+        if (this.x < other.x) {
+            tempResult = -1;
+        } else if (this.x > other.x) {
+            tempResult = 1;
+        } else {
+            tempResult = 0;
+        }
+        if (tempResult != 0) {
+            return tempResult
+        }
+        if (this.y < other.y) {
+            tempResult = -1;
+        } else if (this.y > other.y) {
+            tempResult = 1;
+        } else {
+            tempResult = 0;
+        }
+        if (tempResult != 0) {
+            return tempResult
+        }
+        if (this.z < other.z) {
+            tempResult = -1;
+        } else if (this.z > other.z) {
+            tempResult = 1;
+        } else {
+            tempResult = 0;
+        }
+        if (tempResult != 0) {
+            return tempResult
+        }
+        return 0
+    }
+}

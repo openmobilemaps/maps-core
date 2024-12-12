@@ -135,4 +135,24 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_icon_I
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_icon_IconLayerInterface_00024CppProxy_native_1setRenderPassIndex(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jint j_index)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::IconLayerInterface>(nativeRef);
+        ref->setRenderPassIndex(::djinni::I32::toCpp(jniEnv, j_index));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_icon_IconLayerInterface_00024CppProxy_native_1animateIconScale(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jstring j_identifier, jfloat j_from, jfloat j_to, jfloat j_duration, jint j_repetitions)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::IconLayerInterface>(nativeRef);
+        ref->animateIconScale(::djinni::String::toCpp(jniEnv, j_identifier),
+                              ::djinni::F32::toCpp(jniEnv, j_from),
+                              ::djinni::F32::toCpp(jniEnv, j_to),
+                              ::djinni::F32::toCpp(jniEnv, j_duration),
+                              ::djinni::I32::toCpp(jniEnv, j_repetitions));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
 } // namespace djinni_generated

@@ -24,16 +24,16 @@ textVertexShader(const VertexIn vertexIn [[stage_in]],
     return out;
 }
 
-fragment float4
+fragment half4
 textFragmentShader(VertexOut in [[stage_in]],
-                       constant float4 &color [[buffer(1)]],
-                       constant float4 &haloColor [[buffer(2)]],
+                       constant half4 &color [[buffer(1)]],
+                       constant half4 &haloColor [[buffer(2)]],
                        constant float &opacity [[buffer(3)]],
                        constant float &haloWidth [[buffer(4)]],
-                       texture2d<float> texture0 [[ texture(0)]],
+                       texture2d<half> texture0 [[ texture(0)]],
                        sampler textureSampler [[sampler(0)]])
 {
-    float4 dist = texture0.sample(textureSampler, in.uv);
+    half4 dist = texture0.sample(textureSampler, in.uv);
 
     if (opacity == 0) {
       discard_fragment();
@@ -43,13 +43,13 @@ textFragmentShader(VertexOut in [[stage_in]],
     float w = fwidth(median);
     float alpha = smoothstep(0.5 - w, 0.5 + w, median);
 
-    float4 mixed = mix(haloColor, color, alpha);
+    half4 mixed = mix(haloColor, color, alpha);
 
     if(haloWidth > 0) {
       float start = (0.0 + 0.5 * (1.0 - haloWidth)) - w;
       float end = start + w;
       float a2 = smoothstep(start, end, median) * opacity;
-      return float4(mixed.r * a2, mixed.g * a2, mixed.b * a2, a2);
+      return half4(mixed.r * a2, mixed.g * a2, mixed.b * a2, a2);
     } else {
       return mixed;
     }

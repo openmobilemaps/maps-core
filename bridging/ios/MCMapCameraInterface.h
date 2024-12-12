@@ -98,6 +98,8 @@
 
 - (double)mapUnitsFromPixels:(double)distancePx;
 
+- (double)getScalingFactor;
+
 /** padding in percentage, where 1.0 = rect is half of full width and height */
 - (BOOL)coordIsVisibleOnScreen:(nonnull MCCoord *)coord
                      paddingPc:(float)paddingPc;

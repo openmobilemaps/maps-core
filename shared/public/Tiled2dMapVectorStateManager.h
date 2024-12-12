@@ -89,6 +89,7 @@ public:
 
         hasNoValues = !properties.empty() && !featureStates.empty();
         currentState++;
+        globalStateId++;
     }
 
     ValueVariant getGlobalState(const std::string &key) {
@@ -109,6 +110,10 @@ public:
         return currentState;
     }
 
+    int32_t getGlobalStateId() {
+        return globalStateId;
+    }
+
 private:
     std::unordered_map<std::string, ValueVariant> globalState;
     std::vector<std::pair<uint64_t, FeatureState>> featureStates;
@@ -116,6 +121,7 @@ private:
     FeatureState emptyState;
 
     int32_t currentState = 0;
+    int32_t globalStateId = 0;
 
     std::atomic_bool hasNoValues = true;
 

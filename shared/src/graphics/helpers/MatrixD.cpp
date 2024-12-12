@@ -319,6 +319,33 @@ void MatrixD::scaleM(std::vector<double> &m, int mOffset, double x, double y, do
 }
 
 /**
+ * Scales matrix m in place by sx, sy, and sz.
+ * i.e. m' = S * m
+ *
+ * @param m matrix to zoom
+ * @param mOffset index into m where the matrix starts
+ * @param x scale factor x
+ * @param y scale factor y
+ * @param z scale factor z
+ */
+void MatrixD::mScaled(std::vector<double> &m, int mOffset, double x, double y, double z) {
+    m[0] *= x;
+    m[4] *= x;
+    m[8] *= x;
+    m[12] *= x;
+
+    m[1] *= y;
+    m[5] *= y;
+    m[9] *= y;
+    m[13] *= y;
+
+    m[2] *= z;
+    m[6] *= z;
+    m[10] *= z;
+    m[14] *= z;
+}
+
+/**
  * Applies a matrix m to a translation matrix defined by x, y, and z, putting the result in tm.
  * i.e. tm = m * T
  * <p>
@@ -375,12 +402,10 @@ void MatrixD::translateM(std::vector<double> &m, int mOffset, double x, double y
  * @param z translation factor z
  */
 void MatrixD::mTranslated(std::vector<double> &tm, int tmOffset, std::vector<double> &m, int mOffset, double x, double y, double z) {
-    for (int i = 0; i <= 12; i += 4) {
-        tm[tmOffset + i] = m[mOffset + i] + x * m[mOffset + i + 3];
-        tm[tmOffset + i + 1] = m[mOffset + i + 1] + y * m[mOffset + i + 3];
-        tm[tmOffset + i + 2] = m[mOffset + i + 2] + z * m[mOffset + i + 3];
-        tm[tmOffset + i + 3] = m[mOffset + i + 3];
-    }
+    tm[12] = m[0]*x + m[4]*y + m[8]*z + m[12];
+    tm[13] = m[1]*x + m[5]*y + m[9]*z + m[13];
+    tm[14] = m[2]*x + m[6]*y + m[10]*z + m[14];
+    tm[15] = m[3]*x + m[7]*y + m[11]*z + m[15];
 }
 
 /**
@@ -394,11 +419,14 @@ void MatrixD::mTranslated(std::vector<double> &tm, int tmOffset, std::vector<dou
  * @param z translation factor z
  */
 void MatrixD::mTranslated(std::vector<double> &m, int mOffset, double x, double y, double z) {
-    for (int i = 0; i <= 12; i += 4) {
-        m[mOffset + i] += x * m[mOffset + i + 3];
-        m[mOffset + i + 1] += y * m[mOffset + i + 3];
-        m[mOffset + i + 2] += z * m[mOffset + i + 3];
-    }
+    double t = m[0]*x + m[4]*y + m[8]*z + m[12];
+    m[12] = t;
+    t = m[1]*x + m[5]*y + m[9]*z + m[13];
+    m[13] = t;
+    t = m[2]*x + m[6]*y + m[10]*z + m[14];
+    m[14] = t;
+    t = m[3]*x + m[7]*y + m[11]*z + m[15];
+    m[15] = t;
 }
 
 /**

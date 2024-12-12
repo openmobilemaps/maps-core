@@ -57,7 +57,7 @@ public:
     }
 
     virtual void notifyTilesUpdates() override {
-        listener.message(&Tiled2dMapVectorSourceListener::onTilesUpdated, sourceName, getCurrentTiles());
+        listener.message(MFN(&Tiled2dMapVectorSourceListener::onTilesUpdated), sourceName, getCurrentTiles());
     };
 
     void didLoad(uint8_t maxZoom) override {

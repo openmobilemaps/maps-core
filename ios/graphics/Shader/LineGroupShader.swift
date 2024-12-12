@@ -20,15 +20,14 @@ class LineGroupShader: BaseShader, @unchecked Sendable {
 
     var dashingScaleFactor: Float = 1.0
 
-    private let shaderType: PipelineType
 
-    init(shader: PipelineType = .lineGroupShader) {
-        self.shaderType = shader
+    override init(shader: PipelineType = .lineGroupShader) {
+        super.init(shader: shader)
     }
 
     override func setupProgram(_: MCRenderingContextInterface?) {
         if pipeline == nil {
-            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: shaderType, blendMode: blendMode).json)
+            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: shader, blendMode: blendMode))
         }
     }
 

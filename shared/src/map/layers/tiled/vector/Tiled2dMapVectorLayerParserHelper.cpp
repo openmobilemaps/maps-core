@@ -87,8 +87,8 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
             bool maskTiles = true;
             double zoomLevelScaleFactor = 1.0;
 
-            bool overzoom = true;
-            bool underzoom = false;
+            bool overzoom = val.contains("overzoom")  ? tileJsons["overzoom"].get<bool>() : true;
+            bool underzoom = val.contains("underzoom")  ? tileJsons["underzoom"].get<bool>() : false;
 
             int minZoom = val.value("minzoom", 0);
             int maxZoom = val.value("maxzoom", 22);
@@ -158,6 +158,8 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
             RasterVectorStyle style = RasterVectorStyle(nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
             rasterLayerMap[key] = std::make_shared<RasterVectorLayerDescription>(layerName,
                                                                                  key,
+                                                                                 minZoom,
+                                                                                 maxZoom,
                                                                                  minZoom,
                                                                                  maxZoom,
                                                                                  url,
@@ -283,11 +285,16 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                                                         parser.parseValue(val["metadata"]["raster-brightness-shift"]),
                                                         blendMode);
             std::shared_ptr<Value> filter = parser.parseValue(val["filter"]);
-            
+
+            bool underzoom = layer->underzoom && !val.contains("minzoom");
+            bool overzoom = layer->overzoom && !val.contains("maxzoom");
+
             auto newLayer = std::make_shared<RasterVectorLayerDescription>(val["id"],
                                                                            val["source"],
                                                                            val.value("minzoom", layer->minZoom),
                                                                            val.value("maxzoom", layer->maxZoom),
+                                                                           layer->minZoom,
+                                                                           layer->maxZoom,
                                                                            layer->url,
                                                                            filter,
                                                                            style,
@@ -297,8 +304,8 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                                                                            layer->zoomLevelScaleFactor,
                                                                            layer->renderPassIndex,
                                                                            interactable,
-                                                                           layer->underzoom,
-                                                                           layer->overzoom,
+                                                                           underzoom,
+                                                                           overzoom,
                                                                            layer->bounds,
                                                                            layer->coordinateReferenceSystem);
             layers.push_back(newLayer);
@@ -317,10 +324,13 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                     parser.parseValue(val["paint"]["line-dotted"]),
                     parser.parseValue(val["paint"]["line-dotted-skew"])
             );
+            
             auto layerDesc = std::make_shared<LineVectorLayerDescription>(
                     val["id"],
                     val["source"],
                     val.value("source-layer", ""),
+                    val.value("minzoom", 0),
+                    val.value("maxzoom", 24),
                     val.value("minzoom", 0),
                     val.value("maxzoom", 24),
                     filter,
@@ -385,6 +395,8 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                                                                             val.value("source-layer", ""),
                                                                             val.value("minzoom", 0),
                                                                             val.value("maxzoom", 24),
+                                                                            val.value("minzoom", 0),
+                                                                            val.value("maxzoom", 24),
                                                                             filter,
                                                                             style,
                                                                             renderPassIndex,
@@ -405,6 +417,8 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
             auto layerDesc = std::make_shared<PolygonVectorLayerDescription>(val["id"],
                                                                              val["source"],
                                                                              val.value("source-layer", ""),
+                                                                             val.value("minzoom", 0),
+                                                                             val.value("maxzoom", 24),
                                                                              val.value("minzoom", 0),
                                                                              val.value("maxzoom", 24),
                                                                              filter,

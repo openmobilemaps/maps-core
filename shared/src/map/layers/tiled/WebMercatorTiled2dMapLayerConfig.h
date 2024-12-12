@@ -29,6 +29,8 @@ class WebMercatorTiled2dMapLayerConfig : public Tiled2dMapLayerConfig {
 
     virtual std::vector<Tiled2dMapZoomLevelInfo> getZoomLevelInfos() override;
 
+    virtual std::vector<Tiled2dMapZoomLevelInfo> getVirtualZoomLevelInfos() override;
+
     virtual Tiled2dMapZoomInfo getZoomInfo() override;
 
     virtual std::optional<Tiled2dMapVectorSettings> getVectorSettings() override;
@@ -36,6 +38,12 @@ class WebMercatorTiled2dMapLayerConfig : public Tiled2dMapLayerConfig {
     std::optional<::RectCoord> getBounds() override;
 
 private:
+    Tiled2dMapZoomLevelInfo getZoomLevelInfo(int32_t zoomLevel);
+
+    const static RectCoord WEB_MERCATOR_BOUNDS;
+    const static double BASE_ZOOM;
+    const static double BASE_WIDTH;
+
     std::string layerName;
     std::string urlFormat;
 

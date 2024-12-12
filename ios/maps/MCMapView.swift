@@ -20,33 +20,48 @@ open class MCMapView: MTKView, @unchecked Sendable {
     private var sizeChanged = false
     private var backgroundDisable = false
     private var saveDrawable = false
-    private lazy var renderToImageQueue = DispatchQueue(label: "io.openmobilemaps.renderToImagQueue", qos: .userInteractive)
+    private lazy var renderToImageQueue = DispatchQueue(
+        label: "io.openmobilemaps.renderToImagQueue", qos: .userInteractive)
 
     private var framesToRender: Int = 1
     private let framesToRenderAfterInvalidate: Int = 25
     private var lastInvalidate = Date()
-    private let renderAfterInvalidate: TimeInterval = 3 // Collision detection might be delayed 3s
+    private let renderAfterInvalidate: TimeInterval = 3  // Collision detection might be delayed 3s
+    private var renderSemaphore = DispatchSemaphore(value: 3)  // using triple buffers
 
     private let touchHandler: MCMapViewTouchHandler
     private let callbackHandler = MCMapViewCallbackHandler()
 
+    private let pinch = UIPinchGestureRecognizer(
+        target: self, action: #selector(pinched))
+    private let pan = UIPanGestureRecognizer(
+        target: self, action: #selector(panned))
+
     public weak var sizeDelegate: MCMapSizeDelegate?
 
-    public init(mapConfig: MCMapConfig = MCMapConfig(mapCoordinateSystem: MCCoordinateSystemFactory.getEpsg3857System()), pixelsPerInch: Float? = nil, is3D: Bool = false) {
+    public init(
+        mapConfig: MCMapConfig = MCMapConfig(
+            mapCoordinateSystem: MCCoordinateSystemFactory.getEpsg3857System()),
+        pixelsPerInch: Float? = nil, is3D: Bool = false
+    ) {
 
         let renderingContext = RenderingContext()
-        guard let mapInterface = MCMapInterface.create(GraphicsFactory(),
-                                                       shaderFactory: ShaderFactory(),
-                                                       renderingContext: renderingContext,
-                                                       mapConfig: mapConfig,
-                                                       scheduler: MCThreadPoolScheduler.create(),
-                                                       pixelDensity: pixelsPerInch ?? Float(UIScreen.pixelsPerInch), 
-                                                       is3D: is3D) else {
+        guard
+            let mapInterface = MCMapInterface.create(
+                GraphicsFactory(),
+                shaderFactory: ShaderFactory(),
+                renderingContext: renderingContext,
+                mapConfig: mapConfig,
+                scheduler: MCThreadPoolScheduler.create(),
+                pixelDensity: pixelsPerInch ?? Float(UIScreen.pixelsPerInch),
+                is3D: is3D)
+        else {
             fatalError("Can't create MCMapInterface")
         }
         self.mapInterface = mapInterface
         self.renderingContext = renderingContext
-        touchHandler = MCMapViewTouchHandler(touchHandler: mapInterface.getTouchHandler())
+        touchHandler = MCMapViewTouchHandler(
+            touchHandler: mapInterface.getTouchHandler())
         super.init(frame: .zero, device: MetalContext.current.device)
         setup()
     }
@@ -87,7 +102,7 @@ open class MCMapView: MTKView, @unchecked Sendable {
 
         preferredFramesPerSecond = 120
 
-        sampleCount = 1 // samples per pixel
+        sampleCount = 1  // samples per pixel
 
         callbackHandler.invalidateCallback = { [weak self] in
             self?.invalidate()
@@ -104,13 +119,15 @@ open class MCMapView: MTKView, @unchecked Sendable {
     }
 
     private func addEventListeners() {
-        NotificationCenter.default.addObserver(self,
-                                               selector: #selector(willEnterForeground),
-                                               name: UIApplication.willEnterForegroundNotification,
-                                               object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(didEnterBackground),
-                                               name: UIApplication.didEnterBackgroundNotification,
-                                               object: nil)
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(willEnterForeground),
+            name: UIApplication.willEnterForegroundNotification,
+            object: nil)
+        NotificationCenter.default.addObserver(
+            self, selector: #selector(didEnterBackground),
+            name: UIApplication.didEnterBackgroundNotification,
+            object: nil)
     }
 
     @objc func willEnterForeground() {
@@ -136,7 +153,8 @@ open class MCMapView: MTKView, @unchecked Sendable {
         }
         set {
             super.backgroundColor = newValue
-            mapInterface.setBackgroundColor(newValue?.mapCoreColor ?? UIColor.clear.mapCoreColor)
+            mapInterface.setBackgroundColor(
+                newValue?.mapCoreColor ?? UIColor.clear.mapCoreColor)
             isOpaque = newValue?.isOpaque ?? false
         }
     }
@@ -157,22 +175,30 @@ extension MCMapView: MTKViewDelegate {
     public func draw(in view: MTKView) {
         guard !backgroundDisable else {
             isPaused = true
-            return // don't execute metal calls in background
+            return  // don't execute metal calls in background
         }
 
-        guard framesToRender > 0 || -lastInvalidate.timeIntervalSinceNow < renderAfterInvalidate else {
+        guard
+            framesToRender > 0
+                || -lastInvalidate.timeIntervalSinceNow < renderAfterInvalidate
+        else {
             isPaused = true
             return
         }
 
         framesToRender -= 1
 
+        // Ensure that triple-buffers are not over-used
+        renderSemaphore.wait()
+
         mapInterface.prepare()
 
-        guard let renderPassDescriptor = view.currentRenderPassDescriptor,
-              let commandBuffer = MetalContext.current.commandQueue.makeCommandBuffer(),
-              let computeEncoder = commandBuffer.makeComputeCommandEncoder()
+        guard
+            let commandBuffer = MetalContext.current.commandQueue
+                .makeCommandBuffer(),
+            let computeEncoder = commandBuffer.makeComputeCommandEncoder()
         else {
+            self.renderSemaphore.signal()
             return
         }
 
@@ -180,11 +206,16 @@ extension MCMapView: MTKViewDelegate {
         mapInterface.compute()
         computeEncoder.endEncoding()
 
-        guard let renderEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor) else {
+        guard let renderPassDescriptor = view.currentRenderPassDescriptor,
+            let renderEncoder = commandBuffer.makeRenderCommandEncoder(
+                descriptor: renderPassDescriptor)
+        else {
+            self.renderSemaphore.signal()
             return
         }
 
         renderingContext.encoder = renderEncoder
+        renderingContext.beginFrame()
 
         // Shared lib stuff
         if sizeChanged {
@@ -198,7 +229,12 @@ extension MCMapView: MTKViewDelegate {
         renderEncoder.endEncoding()
 
         guard let drawable = view.currentDrawable else {
+            self.renderSemaphore.signal()
             return
+        }
+
+        commandBuffer.addCompletedHandler { _ in
+            self.renderSemaphore.signal()
         }
 
         // if we want to save the drawable (offscreen rendering), we commit and wait synchronously
@@ -212,10 +248,18 @@ extension MCMapView: MTKViewDelegate {
         }
     }
 
-    public func renderToImage(size: CGSize, timeout: Float, bounds: MCRectCoord, callbackQueue: DispatchQueue = .main, callback: @escaping @Sendable (UIImage?, MCLayerReadyState) -> Void) {
+    public func renderToImage(
+        size: CGSize, timeout: Float, bounds: MCRectCoord,
+        callbackQueue: DispatchQueue = .main,
+        callback: @escaping @Sendable (UIImage?, MCLayerReadyState) -> Void
+    ) {
         renderToImageQueue.async {
             DispatchQueue.main.sync {
-                self.frame = CGRect(origin: .zero, size: .init(width: size.width / UIScreen.main.scale, height: size.height / UIScreen.main.scale))
+                self.frame = CGRect(
+                    origin: .zero,
+                    size: .init(
+                        width: size.width / UIScreen.main.scale,
+                        height: size.height / UIScreen.main.scale))
                 self.setNeedsLayout()
                 self.layoutIfNeeded()
             }
@@ -225,13 +269,14 @@ extension MCMapView: MTKViewDelegate {
             mapReadyCallbacks.callback = callback
             mapReadyCallbacks.callbackQueue = callbackQueue
 
-            self.mapInterface.drawReadyFrame(bounds, timeout: timeout, callbacks: mapReadyCallbacks)
+            self.mapInterface.drawReadyFrame(
+                bounds, timeout: timeout, callbacks: mapReadyCallbacks)
         }
     }
 }
 
-private extension MCMapView {
-    func currentDrawableImage() -> UIImage? {
+extension MCMapView {
+    fileprivate func currentDrawableImage() -> UIImage? {
         self.saveDrawable = true
         self.invalidate()
         self.draw(in: self)
@@ -240,14 +285,16 @@ private extension MCMapView {
         guard let texture = self.currentDrawable?.texture else { return nil }
 
         let context = CIContext()
-        let kciOptions: [CIImageOption: Any] = [.colorSpace: CGColorSpaceCreateDeviceRGB()]
+        let kciOptions: [CIImageOption: Any] = [
+            .colorSpace: CGColorSpaceCreateDeviceRGB()
+        ]
         let cImg = CIImage(mtlTexture: texture, options: kciOptions)!
         return context.createCGImage(cImg, from: cImg.extent)?.toImage()
     }
 }
 
-private extension CGImage {
-    func toImage() -> UIImage? {
+extension CGImage {
+    fileprivate func toImage() -> UIImage? {
         let w = Double(width)
         let h = Double(height)
         UIGraphicsBeginImageContext(CGSize(width: w, height: h))
@@ -263,87 +310,103 @@ private extension CGImage {
 
 extension CGSize {
     var vec2: MCVec2I {
-        MCVec2I(x: Int32(width),
-                y: Int32(height))
+        MCVec2I(
+            x: Int32(width),
+            y: Int32(height))
     }
 }
 
-public extension MCMapView {
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+extension MCMapView {
+    public override func touchesBegan(
+        _ touches: Set<UITouch>, with event: UIEvent?
+    ) {
         super.touchesBegan(touches, with: event)
         touchHandler.touchesBegan(touches, with: event)
     }
 
-    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+    public override func touchesEnded(
+        _ touches: Set<UITouch>, with event: UIEvent?
+    ) {
         super.touchesEnded(touches, with: event)
         touchHandler.touchesEnded(touches, with: event)
     }
 
-    override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
+    public override func touchesCancelled(
+        _ touches: Set<UITouch>, with event: UIEvent?
+    ) {
         super.touchesCancelled(touches, with: event)
         touchHandler.touchesCancelled(touches, with: event)
     }
 
-    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+    public override func touchesMoved(
+        _ touches: Set<UITouch>, with event: UIEvent?
+    ) {
         super.touchesMoved(touches, with: event)
         touchHandler.touchesMoved(touches, with: event)
     }
 
-    override func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
-        var isiOSAppOnMac = false
-        if #available(iOS 14.0, *) {
-            isiOSAppOnMac = ProcessInfo.processInfo.isiOSAppOnMac
+    public override func gestureRecognizerShouldBegin(
+        _ gestureRecognizer: UIGestureRecognizer
+    ) -> Bool {
+        if gestureRecognizer == pinch || gestureRecognizer == pan {
+            var isiOSAppOnMac = ProcessInfo.processInfo.isMacCatalystApp
+            if #available(iOS 14.0, *) {
+                isiOSAppOnMac =
+                    isiOSAppOnMac || ProcessInfo.processInfo.isiOSAppOnMac
+            }
+            return isiOSAppOnMac
+        } else {
+            return super.gestureRecognizerShouldBegin(gestureRecognizer)
         }
-        return isiOSAppOnMac
     }
 }
 
-public extension MCMapView {
-    var camera: MCMapCameraInterface {
+extension MCMapView {
+    public var camera: MCMapCameraInterface {
         mapInterface.getCamera()!
     }
 
-    var camera3d: MCMapCamera3dInterface? {
+    public var camera3d: MCMapCamera3dInterface? {
         camera.asMapCamera3d()
     }
 
-    func add(layer: MCLayerInterface?) {
+    public func add(layer: MCLayerInterface?) {
         mapInterface.addLayer(layer)
     }
 
-    func insert(layer: MCLayerInterface?, at index: Int) {
+    public func insert(layer: MCLayerInterface?, at index: Int) {
         mapInterface.insertLayer(at: layer, at: Int32(index))
     }
 
-    func insert(layer: MCLayerInterface?, above: MCLayerInterface?) {
+    public func insert(layer: MCLayerInterface?, above: MCLayerInterface?) {
         mapInterface.insertLayer(above: layer, above: above)
     }
 
-    func insert(layer: MCLayerInterface?, below: MCLayerInterface?) {
+    public func insert(layer: MCLayerInterface?, below: MCLayerInterface?) {
         mapInterface.insertLayer(below: layer, below: below)
     }
 
-    func remove(layer: MCLayerInterface?) {
+    public func remove(layer: MCLayerInterface?) {
         mapInterface.removeLayer(layer)
     }
 
-    func add(layer: any Layer) {
+    public func add(layer: any Layer) {
         mapInterface.addLayer(layer.interface)
     }
 
-    func insert(layer: any Layer, at index: Int) {
+    public func insert(layer: any Layer, at index: Int) {
         mapInterface.insertLayer(at: layer.interface, at: Int32(index))
     }
 
-    func insert(layer: any Layer, above: MCLayerInterface?) {
+    public func insert(layer: any Layer, above: MCLayerInterface?) {
         mapInterface.insertLayer(above: layer.interface, above: above)
     }
 
-    func insert(layer: any Layer, below: MCLayerInterface?) {
+    public func insert(layer: any Layer, below: MCLayerInterface?) {
         mapInterface.insertLayer(below: layer.interface, below: below)
     }
 
-    func remove(layer: any Layer) {
+    public func remove(layer: any Layer) {
         mapInterface.removeLayer(layer.interface)
     }
 }
@@ -352,31 +415,42 @@ extension MCMapView: UIGestureRecognizerDelegate {
     // MARK: - Mac setup
 
     private func setupMacGestureRecognizersIfNeeded() {
-        var isiOSAppOnMac = false
+        var isiOSAppOnMac = ProcessInfo.processInfo.isMacCatalystApp
         if #available(iOS 14.0, *) {
-            isiOSAppOnMac = ProcessInfo.processInfo.isiOSAppOnMac
+            isiOSAppOnMac =
+                isiOSAppOnMac || ProcessInfo.processInfo.isiOSAppOnMac
         }
 
         guard isiOSAppOnMac else { return }
 
-        let pinch = UIPinchGestureRecognizer(target: self, action: #selector(pinched))
         pinch.delegate = self
+        pinch.delaysTouchesBegan = false
         pinch.allowedTouchTypes = []
         self.addGestureRecognizer(pinch)
 
-        let pan = UIPanGestureRecognizer(target: self, action: #selector(panned))
         pan.delegate = self
         if #available(iOS 13.4, *) {
             pan.allowedScrollTypesMask = .continuous
         }
+        pan.delaysTouchesBegan = false
         pan.allowedTouchTypes = []
         self.addGestureRecognizer(pan)
 
         pan.require(toFail: pinch)
     }
 
-    public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+    public func gestureRecognizer(
+        _ gestureRecognizer: UIGestureRecognizer,
+        shouldRecognizeSimultaneouslyWith otherGestureRecognizer:
+            UIGestureRecognizer
+    ) -> Bool {
         true
+    }
+
+    public func gestureRecognizer(
+        _ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch
+    ) -> Bool {
+        return true
     }
 
     @objc func pinched(_ gestureRecognizer: UIPinchGestureRecognizer) {
@@ -388,7 +462,9 @@ extension MCMapView: UIGestureRecognizerDelegate {
     }
 }
 
-private class MCMapViewMapReadyCallbacks: @preconcurrency MCMapReadyCallbackInterface, @unchecked Sendable {
+private class MCMapViewMapReadyCallbacks: @preconcurrency
+    MCMapReadyCallbackInterface, @unchecked Sendable
+{
     public nonisolated(unsafe) weak var delegate: MCMapView?
     public var callback: ((UIImage?, MCLayerReadyState) -> Void)?
     public var callbackQueue: DispatchQueue?
@@ -403,16 +479,16 @@ private class MCMapViewMapReadyCallbacks: @preconcurrency MCMapReadyCallbackInte
 
         callbackQueue?.async {
             switch state {
-                case .NOT_READY:
-                    break
-                case .ERROR, .TIMEOUT_ERROR:
-                    self.callback?(nil, state)
-                case .READY:
-                    MainActor.assumeIsolated {
-                        self.callback?(delegate.currentDrawableImage(), state)
-                    }
-                @unknown default:
-                    break
+            case .NOT_READY:
+                break
+            case .ERROR, .TIMEOUT_ERROR:
+                self.callback?(nil, state)
+            case .READY:
+                MainActor.assumeIsolated {
+                    self.callback?(delegate.currentDrawableImage(), state)
+                }
+            @unknown default:
+                break
             }
             self.semaphore.signal()
         }

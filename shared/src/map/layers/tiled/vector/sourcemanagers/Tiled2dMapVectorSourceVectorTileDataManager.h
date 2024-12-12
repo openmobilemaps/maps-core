@@ -33,7 +33,7 @@ public:
     virtual void reloadLayerContent(const std::vector<std::tuple<std::shared_ptr<VectorLayerDescription>, int32_t>> &descriptionLayerIndexPairs) override;
 
 protected:
-    void onTileCompletelyReady(const Tiled2dMapVersionedTileInfo tileInfo) override;
+    void onTileCompletelyReady(const Tiled2dMapVersionedTileInfo &tileInfo) override;
 
 private:
     void clearTiles(const std::vector<Actor<Tiled2dMapVectorTile>> &tilesToClear);

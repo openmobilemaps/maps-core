@@ -18,7 +18,7 @@ public:
 
     virtual DataLoaderResult loadData(const std::string & url, const std::optional<std::string> & etag) = 0;
 
-    virtual ::djinni::Future<TextureLoaderResult> loadTextureAsnyc(const std::string & url, const std::optional<std::string> & etag) = 0;
+    virtual ::djinni::Future<TextureLoaderResult> loadTextureAsync(const std::string & url, const std::optional<std::string> & etag) = 0;
 
     virtual ::djinni::Future<DataLoaderResult> loadDataAsync(const std::string & url, const std::optional<std::string> & etag) = 0;
 

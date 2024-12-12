@@ -14,7 +14,7 @@ using namespace metal;
 
 
 
-fragment float4
+fragment half4
 sphereEffectFragmentShader(VertexOut in [[stage_in]],
                            constant const float4 *a [[buffer(0)]])
 {
@@ -56,15 +56,15 @@ sphereEffectFragmentShader(VertexOut in [[stage_in]],
     float L = clamp((R - 1.0) * 5.0, -1.0, 1.0);
 
 
-    float4 white = float4(1.0,1.0,1.0,1.0);
-    float4 blueOut = float4(44.0/255.0,166.0/255.0,1.0,1.0);
-    float4 blueClear = float4(0.0,148.0/255.0,1.0,1.0);
+    half4 white = half4(1.0,1.0,1.0,1.0);
+    half4 blueOut = half4(44.0/255.0,166.0/255.0,1.0,1.0);
+    half4 blueClear = half4(0.0,148.0/255.0,1.0,1.0);
     float opacity = 0.7;
 
     if (L > 0) {
-        float t = clamp(L * 2.4, 0.0, 1.0);
+      half t = clamp(L * 2.4, 0.0, 1.0);
 
-        float4 c, c2;
+        half4 c, c2;
         float alpha, alpha2;
 
         if(t < 0.5) {
@@ -84,7 +84,7 @@ sphereEffectFragmentShader(VertexOut in [[stage_in]],
         return ((1.0 - t) * alpha + t * alpha2) * ((1.0 - t) * c + t * c2) * opacity;
     }
     else {
-        return float4(1.0, 1.0, 1.0, 1.0) * (1.0 + L * 10.0);
+        return half4(1.0, 1.0, 1.0, 1.0) * (1.0 + L * 10.0);
     }
 
     return white * opacity;

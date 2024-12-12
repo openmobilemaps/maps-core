@@ -3,9 +3,13 @@
 ## Version 3.0.0
 - Introduced 3D globe rendering with support for most established layers and features and a custom camera and configuration options
 - Massively improved the spatial precision of the map
-- Multiple other improvements and bugfixes
 - Introduced reverse geocoding with closest feature detection.
 - Exposed Mapview in SwiftUI
+- Fixed an issue with the internal asynchronous message handling
+- Improved the interceptor handling in the default DataLoader for Android
+- Add the option to animate the scale of elements in the IconLayer
+- Update to AGP 8.7.2 and Kotlin 2.0.21
+- Numerous other improvements and bugfixes
 
 ## Version 2.6.2
 -  Fixes iOS fixes text halo alpha multiplication

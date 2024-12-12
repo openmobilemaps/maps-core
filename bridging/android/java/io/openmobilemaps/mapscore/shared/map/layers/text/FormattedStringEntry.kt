@@ -9,7 +9,7 @@ data class FormattedStringEntry(
 ) : Comparable<FormattedStringEntry> {
 
     override fun compareTo(other: FormattedStringEntry): Int {
-        var tempResult = 0
+        var tempResult : Int
         tempResult = this.text.compareTo(other.text)
         if (tempResult != 0) {
             return tempResult
