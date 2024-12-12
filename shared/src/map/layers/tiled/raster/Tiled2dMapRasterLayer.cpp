@@ -143,7 +143,7 @@ void Tiled2dMapRasterLayer::resume() {
     }
 
     for (const auto &source : sourceInterfaces) {
-        source.message(&Tiled2dMapSourceInterface::notifyTilesUpdates);
+        source.message(MFN(&Tiled2dMapSourceInterface::notifyTilesUpdates));
     }
 
 }
@@ -152,7 +152,7 @@ void Tiled2dMapRasterLayer::setT(int32_t t) {
     Tiled2dMapLayer::setT(t);
     std::lock_guard<std::recursive_mutex> lock(sourcesMutex);
     for (const auto &sourceInterface : sourceInterfaces) {
-        sourceInterface.message(&Tiled2dMapSourceInterface::notifyTilesUpdates);
+        sourceInterface.message(MFN(&Tiled2dMapSourceInterface::notifyTilesUpdates));
     }
 }
 
@@ -321,7 +321,7 @@ void Tiled2dMapRasterLayer::onTilesUpdated(const std::string &layerName, VectorS
             this->newMaskObjects.insert(this->newMaskObjects.end(), newMaskObjects.begin(), newMaskObjects.end());
             this->obsoleteMaskObjects.insert(this->obsoleteMaskObjects.end(), obsoleteMaskObjects.begin(), obsoleteMaskObjects.end());
             this->tileStateUpdates.insert(this->tileStateUpdates.end(), tileStateUpdates.begin(), tileStateUpdates.end());
-            selfActor.messagePrecisely(MailboxDuplicationStrategy::replaceNewest, MailboxExecutionEnvironment::graphics, &Tiled2dMapRasterLayer::setupTiles);
+            selfActor.messagePrecisely(MailboxDuplicationStrategy::replaceNewest, MailboxExecutionEnvironment::graphics, MFN(&Tiled2dMapRasterLayer::setupTiles));
         }
     }
 }
@@ -396,7 +396,7 @@ void Tiled2dMapRasterLayer::setupTiles() {
         tilesToClean.clear();
     }
     
-    rasterSource.message(&Tiled2dMapRasterSource::setTilesReady, tilesReady);
+    rasterSource.message(MFN(&Tiled2dMapRasterSource::setTilesReady), tilesReady);
 
     updateReadyStateListenerIfNeeded();
 

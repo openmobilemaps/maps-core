@@ -35,6 +35,8 @@ public:
 
     void setupObject();
 private:
+    void setData(const ::djinni::DataRef & data);
+
     const /*not-null*/ std::shared_ptr<IcosahedronLayerCallbackInterface> callbackHandler;
     std::shared_ptr<MapInterface> mapInterface;
     std::shared_ptr<ColorShaderInterface> shader;
