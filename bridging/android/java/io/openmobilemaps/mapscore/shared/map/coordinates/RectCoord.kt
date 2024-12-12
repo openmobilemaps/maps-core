@@ -13,7 +13,7 @@ data class RectCoord(
 ) : Comparable<RectCoord>, Parcelable {
 
     override fun compareTo(other: RectCoord): Int {
-        var tempResult : Int
+        var tempResult = 0
         tempResult = this.topLeft.compareTo(other.topLeft)
         if (tempResult != 0) {
             return tempResult

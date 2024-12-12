@@ -19,7 +19,7 @@ Line2dLayerObject::Line2dLayerObject(const std::shared_ptr<CoordinateConversionH
     : conversionHelper(conversionHelper)
     , line(line)
     , shader(shader)
-    , style(ColorStateList(Color(0.0f,0.0f,0.0f,0.0f), Color(0.0f,0.0f,0.0f,0.0f)), ColorStateList(Color(0.0f,0.0f,0.0f,0.0f), Color(0.0f,0.0f,0.0f,0.0f)), 0.0, 0.0, SizeType::SCREEN_PIXEL, 0.0, std::vector<float>(), LineCapType::BUTT, 0.0, false, 1.0)
+    , style(ColorStateList(Color(0.0f,0.0f,0.0f,0.0f), Color(0.0f,0.0f,0.0f,0.0f)), ColorStateList(Color(0.0f,0.0f,0.0f,0.0f), Color(0.0f,0.0f,0.0f,0.0f)), 0.0, 0.0, SizeType::SCREEN_PIXEL, 0.0, std::vector<float>(), 0, 0, LineCapType::BUTT, 0.0, false, 1.0)
     , highlighted(false)
     , is3d(is3d)
 {
@@ -54,9 +54,10 @@ void Line2dLayerObject::setPositions(const std::vector<Coord> &positions, const 
         const Vec3D &p = renderCoords[i];
         const Vec3D &pNext = renderCoords[i + 1];
 
-        float lengthNormalX = pNext.x - p.x;
-        float lengthNormalY = pNext.y - p.y;
-        float lineLength = std::sqrt(lengthNormalX * lengthNormalX + lengthNormalY * lengthNormalY);
+        double lengthNormalX = pNext.x - p.x;
+        double lengthNormalY = pNext.y - p.y;
+        double lengthNormalZ = pNext.z - p.z;
+        float lineLength = std::sqrt(lengthNormalX * lengthNormalX + lengthNormalY * lengthNormalY + lengthNormalZ * lengthNormalZ);
 
         // SegmentType (0 inner, 1 start, 2 end, 3 single segment) | lineStyleIndex
         // (each one Byte, i.e. up to 256 styles if supported by shader!)
@@ -118,7 +119,7 @@ void Line2dLayerObject::setHighlighted(bool highlighted_) {
 }
 
 void Line2dLayerObject::setStyle(const LineStyle &style, bool highlighted) {
-    ShaderLineStyle s(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+    ShaderLineStyle s(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
 
     s.colorR = highlighted ? style.color.highlighted.r : style.color.normal.r;
     s.colorG = highlighted ? style.color.highlighted.g : style.color.normal.g;
@@ -148,6 +149,8 @@ void Line2dLayerObject::setStyle(const LineStyle &style, bool highlighted) {
     s.dashValue1 = (dn > 1 ? dashArray[1] : 0.0) + s.dashValue0;
     s.dashValue2 = (dn > 2 ? dashArray[2] : 0.0) + s.dashValue1;
     s.dashValue3 = (dn > 3 ? dashArray[3] : 0.0) + s.dashValue2;
+    s.dashFade = style.dashFade;
+    s.dashAnimationSpeed = style.dashAnimationSpeed;
 
     // line caps
     auto lineCap = style.lineCap;

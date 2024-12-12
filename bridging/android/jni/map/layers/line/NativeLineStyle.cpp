@@ -23,6 +23,8 @@ auto NativeLineStyle::fromCpp(JNIEnv* jniEnv, const CppType& c) -> ::djinni::Loc
                                                            ::djinni::get(::djinni_generated::NativeSizeType::fromCpp(jniEnv, c.widthType)),
                                                            ::djinni::get(::djinni::F32::fromCpp(jniEnv, c.width)),
                                                            ::djinni::get(::djinni::List<::djinni::F32>::fromCpp(jniEnv, c.dashArray)),
+                                                           ::djinni::get(::djinni::F32::fromCpp(jniEnv, c.dashFade)),
+                                                           ::djinni::get(::djinni::F32::fromCpp(jniEnv, c.dashAnimationSpeed)),
                                                            ::djinni::get(::djinni_generated::NativeLineCapType::fromCpp(jniEnv, c.lineCap)),
                                                            ::djinni::get(::djinni::F32::fromCpp(jniEnv, c.offset)),
                                                            ::djinni::get(::djinni::Bool::fromCpp(jniEnv, c.dotted)),
@@ -32,7 +34,7 @@ auto NativeLineStyle::fromCpp(JNIEnv* jniEnv, const CppType& c) -> ::djinni::Loc
 }
 
 auto NativeLineStyle::toCpp(JNIEnv* jniEnv, JniType j) -> CppType {
-    ::djinni::JniLocalScope jscope(jniEnv, 12);
+    ::djinni::JniLocalScope jscope(jniEnv, 14);
     assert(j != nullptr);
     const auto& data = ::djinni::JniClass<NativeLineStyle>::get();
     return {::djinni_generated::NativeColorStateList::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_color)),
@@ -42,6 +44,8 @@ auto NativeLineStyle::toCpp(JNIEnv* jniEnv, JniType j) -> CppType {
             ::djinni_generated::NativeSizeType::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_widthType)),
             ::djinni::F32::toCpp(jniEnv, jniEnv->GetFloatField(j, data.field_width)),
             ::djinni::List<::djinni::F32>::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_dashArray)),
+            ::djinni::F32::toCpp(jniEnv, jniEnv->GetFloatField(j, data.field_dashFade)),
+            ::djinni::F32::toCpp(jniEnv, jniEnv->GetFloatField(j, data.field_dashAnimationSpeed)),
             ::djinni_generated::NativeLineCapType::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_lineCap)),
             ::djinni::F32::toCpp(jniEnv, jniEnv->GetFloatField(j, data.field_offset)),
             ::djinni::Bool::toCpp(jniEnv, jniEnv->GetBooleanField(j, data.field_dotted)),
