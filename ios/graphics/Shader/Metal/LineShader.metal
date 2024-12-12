@@ -289,7 +289,7 @@ lineGroupFragmentShader(LineVertexOut in [[stage_in]],
     }
   }
 
-  if (dottedLine == 1 && false) {
+  if (dottedLine == 1) {
     const half skew = style->dottedSkew;
 
     const half factorToT = (in.width * 2) / lineLength * skew;
