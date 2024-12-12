@@ -53,11 +53,14 @@ struct MemberFunctionWrapper {
     uint64_t identifier;
     MessageDiagnostics diagnostics;
 
-    MemberFunctionWrapper(MemberFn memberFn, size_t identifier, MessageDiagnostics diagnostics) : memberFn(memberFn), identifier(identifier), diagnostics(diagnostics) {}
+    MemberFunctionWrapper(MemberFn memberFn, uint64_t identifier, MessageDiagnostics diagnostics) : memberFn(memberFn), identifier(identifier), diagnostics(diagnostics) {}
 };
 
 #define TO_STRING_IMPL(x) #x
 #define TO_STRING(x) TO_STRING_IMPL(x)
+
+// CAUTION: Ensure that the provided member function is a direct reference (and e.g. not one stored in a variable).
+// Otherwise the hash will be incorrect and the message replacement will not work as expected!
 #define MFN(memberFn) MemberFunctionWrapper(memberFn, const_hash(#memberFn), MessageDiagnostics(__FILE_NAME__, __func__, TO_STRING(__LINE__), #memberFn))
 
 class MailboxMessage {
