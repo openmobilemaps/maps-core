@@ -2,26 +2,25 @@ package io.openmobilemaps.mapscore.map.loader;
 
 import com.snapchat.djinni.Future;
 import com.snapchat.djinni.Promise;
-
 import io.openmobilemaps.mapscore.graphics.BufferedImageTextureHolder;
 import io.openmobilemaps.mapscore.shared.map.loader.DataLoaderResult;
 import io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface;
 import io.openmobilemaps.mapscore.shared.map.loader.LoaderStatus;
 import io.openmobilemaps.mapscore.shared.map.loader.TextureLoaderResult;
-
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.*;
+import java.net.URI;
+import java.net.URLConnection;
 import java.nio.ByteBuffer;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.logging.Logger;
-
-import javax.imageio.ImageIO;
 
 /**
  * Data loader for jar:file:... or file: URLs.
@@ -43,17 +42,22 @@ public class LocalDataLoader extends LoaderInterface {
 
     /**
      * @param allowedPrefixes Enable loading from file: resources for these paths. This should be
-     *     restricted to paths containing relevant map resources for security reasons.
+     *                        restricted to paths containing relevant map resources for security reasons.
      */
     public LocalDataLoader(Collection<String> allowedPrefixes) {
         this.allowedPrefixes = allowedPrefixes;
     }
 
     private boolean isAllowed(final URI uri) {
-        return "jar".equals(uri.getScheme())
-                || ("file".equals(uri.getScheme())
-                        && allowedPrefixes.stream()
-                                .anyMatch(prefix -> uri.getPath().startsWith(prefix)));
+        if ("jar".equals(uri.getScheme())) {
+            return true;
+        } else if ("file".equals(uri.getScheme())) {
+            String normalizedPath = Paths.get(uri.getPath()).normalize().toString();
+            return allowedPrefixes.stream()
+                    .anyMatch(normalizedPath::startsWith);
+        } else {
+            return false;
+        }
     }
 
     @NotNull
@@ -122,6 +126,7 @@ public class LocalDataLoader extends LoaderInterface {
     }
 
     @Override
-    public void cancel(@NotNull String url) {}
+    public void cancel(@NotNull String url) {
+    }
 
 }
