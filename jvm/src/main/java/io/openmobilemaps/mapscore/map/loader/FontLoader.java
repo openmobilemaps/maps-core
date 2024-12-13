@@ -1,21 +1,14 @@
 package io.openmobilemaps.mapscore.map.loader;
 
 import io.openmobilemaps.mapscore.graphics.BufferedImageTextureHolder;
-import io.openmobilemaps.mapscore.shared.map.loader.Font;
-import io.openmobilemaps.mapscore.shared.map.loader.FontData;
-import io.openmobilemaps.mapscore.shared.map.loader.FontLoaderInterface;
-import io.openmobilemaps.mapscore.shared.map.loader.FontLoaderResult;
-import io.openmobilemaps.mapscore.shared.map.loader.FontWrapper;
-import io.openmobilemaps.mapscore.shared.map.loader.LoaderStatus;
-
+import io.openmobilemaps.mapscore.shared.map.loader.*;
 import org.jetbrains.annotations.NotNull;
 
+import javax.imageio.ImageIO;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
-
-import javax.imageio.ImageIO;
 
 /**
  * Load fonts from local ClassLoader resources.
@@ -27,7 +20,7 @@ import javax.imageio.ImageIO;
 public class FontLoader extends FontLoaderInterface {
 
     private static final Logger logger = Logger.getLogger(FontLoader.class.getName());
-    private final HashMap<String, FontLoaderResult> fontCache;
+    private final ConcurrentHashMap<String, FontLoaderResult> fontCache;
     private final double
             dpFactor; // !< render-DPI / 160.0, factor for "Density Independent Pixel" size.
     private final ClassLoader classLoader;
@@ -35,9 +28,9 @@ public class FontLoader extends FontLoaderInterface {
     private final String fallbackFontName;
 
     /**
-     * @param dpi render resolution, for appropriate scaling.
-     * @param classLoader ClassLoader in which to look for font resources
-     * @param fontDirectory: directory in which to look for font resources
+     * @param dpi              render resolution, for appropriate scaling.
+     * @param classLoader      ClassLoader in which to look for font resources
+     * @param fontDirectory:   directory in which to look for font resources
      * @param fallbackFontName optional, name of font to use as fallback for unknown fonts
      */
     public FontLoader(
@@ -49,18 +42,13 @@ public class FontLoader extends FontLoaderInterface {
         this.classLoader = classLoader;
         this.fontDirectory = fontDirectory;
         this.fallbackFontName = fallbackFontName;
-        fontCache = new HashMap<>();
+        fontCache = new ConcurrentHashMap<>();
     }
 
     @NotNull
     @Override
     public FontLoaderResult loadFont(Font font) {
-        synchronized (this) { // TODO: lazy, should allow loading _different_ fonts concurrently.
-            var fontName = font.getName();
-            var entry = this.fontCache.get(fontName);
-            if (entry != null) {
-                return entry;
-            }
+        return fontCache.computeIfAbsent(font.getName(), fontName -> {
             logger.info("loadFont " + fontName);
             var result = loadFont(fontName);
             String fallbackName = null;
@@ -76,9 +64,8 @@ public class FontLoader extends FontLoaderInterface {
             } else {
                 logger.info(String.format("loadFont %s -> %s", fontName, result.getStatus()));
             }
-            fontCache.put(fontName, result);
             return result;
-        }
+        });
     }
 
     protected FontLoaderResult loadFont(String fontName) {
@@ -98,7 +85,7 @@ public class FontLoader extends FontLoaderInterface {
      * return null if either item could not be found.
      *
      * @return InputStreams for font data, i.e. the png image and the manifest, or null if not
-     *     found.
+     * found.
      */
     protected FontDataStreams findFontData(String fontName) {
         return new FontDataStreams(
@@ -126,7 +113,7 @@ public class FontLoader extends FontLoaderInterface {
                                     manifest.getInfo().getBase(),
                                     manifest.getInfo().getBitmapSize(),
                                     manifest.getInfo().getSize() * dpFactor // <-
-                                    ),
+                            ),
                             manifest.getGlyphs());
 
             logger.info("Font manifest:\n" + manifest.getInfo());
