@@ -29,13 +29,14 @@ public class MapsCore {
         try {
             File tempLib = File.createTempFile("libmapscore_jni_", ".so");
             tempLib.deleteOnExit();
-            InputStream lib = MapsCore.class.getResourceAsStream(libResourcePath);
-            if (lib == null) {
-                throw new RuntimeException(
-                        "Could not load native mapscore library from resource path "
-                                + libResourcePath);
+            try (InputStream lib = MapsCore.class.getResourceAsStream(libResourcePath)) {
+                if (lib == null) {
+                    throw new RuntimeException(
+                            "Could not load native mapscore library from resource path "
+                                    + libResourcePath);
+                }
+                Files.copy(lib, tempLib.toPath(), StandardCopyOption.REPLACE_EXISTING);
             }
-            Files.copy(lib, tempLib.toPath(), StandardCopyOption.REPLACE_EXISTING);
             System.load(tempLib.getAbsolutePath());
         } catch (IOException e) {
             throw new RuntimeException(
