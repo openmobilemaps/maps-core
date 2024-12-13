@@ -11,30 +11,54 @@ import java.awt.image.BufferedImage;
 import java.time.Duration;
 import java.util.ArrayList;
 
-/** Off-screen tile renderer for an openmobilemaps Map. */
+/**
+ * Off-screen tile renderer for an openmobilemaps Map.
+ */
 public class MapTileRenderer {
     private final ArrayList<Tiled2dMapZoomLevelInfo> zoomLevelInfos;
     private final OffscreenMapRenderer renderer;
     private final CoordinateConversionHelperInterface converter;
 
-    /** Create tile renderer for map with default web-mercator (EPSG:3857) tile pyramid. */
+    /**
+     * Create tile renderer for map with default web-mercator (EPSG:3857) tile pyramid
+     * with default tile size 512 x 512 pixels and 4 Multi-Sample-Anti-Aliasing samples per pixel.
+     */
     public MapTileRenderer(OffscreenMapRenderer renderer) {
         this(
                 renderer,
+                512,
+                4
+        );
+    }
+
+    /**
+     * Create tile renderer for map with default web-mercator (EPSG:3857) tile pyramid.
+     */
+    public MapTileRenderer(OffscreenMapRenderer renderer, int tileSize, int numSamples) {
+        this(
+                renderer,
+                tileSize,
+                numSamples,
                 DefaultTiled2dMapLayerConfigs.webMercator("unusedLayerName", "unusedTileUrlPattern")
-                        .getZoomLevelInfos());
+                        .getZoomLevelInfos()
+        );
     }
 
     public MapTileRenderer(
-            OffscreenMapRenderer renderer, ArrayList<Tiled2dMapZoomLevelInfo> zoomLevelInfos) {
+            OffscreenMapRenderer renderer,
+            int tileSize,
+            int numSamples,
+            ArrayList<Tiled2dMapZoomLevelInfo> zoomLevelInfos) {
         this.renderer = renderer;
         this.zoomLevelInfos = zoomLevelInfos;
         this.converter = renderer.getMap().getCoordinateConverterHelper();
 
-        this.renderer.setFramebufferSize(2 * 256, 2 * 256, 4);
+        this.renderer.setFramebufferSize(tileSize, tileSize, numSamples);
     }
 
-    /** Determine the range of tiles necessary to cover the given bounds. */
+    /**
+     * Determine the range of tiles necessary to cover the given bounds.
+     */
     public TileRange getTileRange(int zoomLevel, RectCoord bbox) {
         // See H.1 "From BBOX to tile indices" in "OpenGIS® Web Map Tile Service
         // Implementation Standard" (OGC 07-057r7)
@@ -115,5 +139,6 @@ public class MapTileRenderer {
         }
     }
 
-    public record TileRange(int zoomLevel, int minColumn, int maxColumn, int minRow, int maxRow) {}
+    public record TileRange(int zoomLevel, int minColumn, int maxColumn, int minRow, int maxRow) {
+    }
 }
