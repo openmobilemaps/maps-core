@@ -65,6 +65,9 @@ public class OSMesa {
     public void makeCurrent(int width, int height, int numSamples) throws OSMesaError {
         this.width = width;
         this.height = height;
+        if (numSamples < 0 || numSamples > 4) {
+            throw new IllegalArgumentException("numSamples must be between 0 and 4");
+        }
         boolean ok = OSMesa.makeCurrent(state, width, height, numSamples);
         if (!ok) {
             throw new OSMesaError("Could not activate OSMesa context");
