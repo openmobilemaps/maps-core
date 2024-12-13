@@ -20,7 +20,7 @@ public class OSMesa {
     public OSMesa() {
         this.state = createContext();
         if (state == 0) {
-            throw new OSMesaError("Could not create OSMesa context");
+            throw new OSMesaException("Could not create OSMesa context");
         }
     }
 
@@ -29,7 +29,7 @@ public class OSMesa {
      *
      * @param numSamples enables multisample anti-aliasing (MSAA). 0 disables MSAA. 4 is maximum.
      */
-    public OSMesa(int width, int height, int numSamples) throws OSMesaError {
+    public OSMesa(int width, int height, int numSamples) throws OSMesaException {
         this();
         makeCurrent(width, height, numSamples);
     }
@@ -62,7 +62,7 @@ public class OSMesa {
      * Activate this OSMesa context for GL operations on this thread and initialize the
      * renderbuffer. This can be called any number of times to modify the framebuffer size.
      */
-    public void makeCurrent(int width, int height, int numSamples) throws OSMesaError {
+    public void makeCurrent(int width, int height, int numSamples) throws OSMesaException {
         this.width = width;
         this.height = height;
         if (numSamples < 0 || numSamples > 4) {
@@ -70,7 +70,7 @@ public class OSMesa {
         }
         boolean ok = OSMesa.makeCurrent(state, width, height, numSamples);
         if (!ok) {
-            throw new OSMesaError("Could not activate OSMesa context");
+            throw new OSMesaException("Could not activate OSMesa context");
         }
     }
 
@@ -90,8 +90,8 @@ public class OSMesa {
         destroy(state);
     }
 
-    public static class OSMesaError extends Error {
-        OSMesaError(String reason) {
+    public static class OSMesaException extends RuntimeException {
+        OSMesaException(String reason) {
             super(reason);
         }
     }
