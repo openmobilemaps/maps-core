@@ -71,10 +71,12 @@ public class LocalDataLoader extends LoaderInterface {
         DataLoaderResult result;
         try {
             URLConnection connection = uri.toURL().openConnection();
-            var data = connection.getInputStream().readAllBytes();
-            var buf = ByteBuffer.allocateDirect(data.length);
-            buf.put(data);
-            result = new DataLoaderResult(buf, null, LoaderStatus.OK, null);
+            try (var inputStream = connection.getInputStream()) {
+                var data = inputStream.readAllBytes();
+                var buf = ByteBuffer.allocateDirect(data.length);
+                buf.put(data);
+                result = new DataLoaderResult(buf, null, LoaderStatus.OK, null);
+            }
         } catch (FileNotFoundException e) {
             result = new DataLoaderResult(null, null, LoaderStatus.ERROR_404, e.toString());
         } catch (IOException e) {
