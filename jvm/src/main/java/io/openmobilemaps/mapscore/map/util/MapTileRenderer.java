@@ -90,7 +90,7 @@ public class MapTileRenderer {
         // Implementation Standard" (OGC 07-057r7)
         final var m = zoomLevelInfos.get(zoomLevel); // m for tile _m_atrix.
         if (m.getZoomLevelIdentifier() != zoomLevel) {
-            throw new AssertionError("zoomLevel inconsistent");
+            throw new IllegalStateException("zoomLevel inconsistent");
         }
         final double tileSpan = m.getTileWidthLayerSystemUnits(); // == world-size / numTiles
         final double tileMatrixMinX = m.getBounds().getTopLeft().getX();
