@@ -62,6 +62,9 @@ public class MapTileRenderer {
     public TileRange getTileRange(int zoomLevel, RectCoord bbox) {
         // See H.1 "From BBOX to tile indices" in "OpenGIS® Web Map Tile Service
         // Implementation Standard" (OGC 07-057r7)
+        if (zoomLevel < 0 || zoomLevel >= zoomLevelInfos.size()) {
+            throw new IllegalArgumentException("Invalid zoom level: " + zoomLevel);
+        }
         final var m = zoomLevelInfos.get(zoomLevel); // m for tile _m_atrix.
 
         final var bboxC =
@@ -88,10 +91,22 @@ public class MapTileRenderer {
     public RectCoord getTileBBox(int zoomLevel, int xcol, int yrow) {
         // See H.2 "From tile indices to BBOX" in "OpenGIS® Web Map Tile Service
         // Implementation Standard" (OGC 07-057r7)
+        if (zoomLevel < 0 || zoomLevel >= zoomLevelInfos.size()) {
+            throw new IllegalArgumentException("Invalid zoom level: " + zoomLevel);
+        }
         final var m = zoomLevelInfos.get(zoomLevel); // m for tile _m_atrix.
         if (m.getZoomLevelIdentifier() != zoomLevel) {
             throw new IllegalStateException("zoomLevel inconsistent");
         }
+        if (xcol < 0 || xcol >= m.getNumTilesX() || yrow < 0 || yrow >= m.getNumTilesY()) {
+            throw new IllegalArgumentException(
+                    String.format("Invalid tile indices %d, %d for zoom level %d, (max is %d, %d)",
+                            xcol, yrow,
+                            zoomLevel,
+                            m.getNumTilesX(),
+                            m.getNumTilesY()));
+        }
+
         final double tileSpan = m.getTileWidthLayerSystemUnits(); // == world-size / numTiles
         final double tileMatrixMinX = m.getBounds().getTopLeft().getX();
         final double tileMatrixMaxY = m.getBounds().getTopLeft().getY();
