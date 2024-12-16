@@ -18,4 +18,8 @@ public:
     virtual bool isScreenSpaceCoords() = 0;
 
     virtual std::vector<float> getCustomModelMatrix() = 0;
+
+    virtual void setHidden(bool hidden) = 0;
+
+    virtual bool isHidden() = 0;
 };

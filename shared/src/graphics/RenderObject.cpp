@@ -27,3 +27,11 @@ bool RenderObject::hasCustomModelMatrix() { return setCustomModelMatrix; }
 std::vector<float> RenderObject::getCustomModelMatrix() { return modelMatrix; }
 
 bool RenderObject::isScreenSpaceCoords() { return screenSpaceCoords; }
+
+void RenderObject::setHidden(bool _hidden) {
+    hidden = _hidden;
+}
+
+bool RenderObject::isHidden() {
+    return hidden;
+}
