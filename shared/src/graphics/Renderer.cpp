@@ -48,20 +48,32 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
 
             const auto &renderObjects = pass->getRenderObjects();
 
+            bool prepared = false;
+
             auto scissoringRect = pass->getScissoringRect();
-            if (scissoringRect) {
-                renderingContext->applyScissorRect(scissoringRect);
-            }
-
-            if (usesStencil) {
-                renderingContext->preRenderStencilMask();
-            }
-
-            if (hasMask) {
-                maskObject->renderAsMask(renderingContext, pass->getRenderPassConfig(), vpMatrixPointer, identityMatrixPointer, origin, factor);
-            }
 
             for (const auto &renderObject : renderObjects) {
+
+                if (renderObject->isHidden()) {
+                    continue;
+                }
+
+                if (!prepared) {
+                    if (scissoringRect) {
+                        renderingContext->applyScissorRect(scissoringRect);
+                    }
+
+                    if (usesStencil) {
+                        renderingContext->preRenderStencilMask();
+                    }
+
+                    if (hasMask) {
+                        maskObject->renderAsMask(renderingContext, pass->getRenderPassConfig(), vpMatrixPointer, identityMatrixPointer, origin, factor);
+                    }
+
+                    prepared = true;
+                }
+
                 const auto &graphicsObject = renderObject->getGraphicsObject();
                 if (renderObject->isScreenSpaceCoords()) {
                     graphicsObject->render(renderingContext, pass->getRenderPassConfig(), identityMatrixPointer, identityMatrixPointer, zeroOrigin, hasMask, factor);
@@ -75,12 +87,14 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
                 }
             }
 
-            if (usesStencil) {
-                renderingContext->postRenderStencilMask();
-            }
+            if (prepared) {
+                if (usesStencil) {
+                    renderingContext->postRenderStencilMask();
+                }
 
-            if (scissoringRect) {
-                renderingContext->applyScissorRect(std::nullopt);
+                if (scissoringRect) {
+                    renderingContext->applyScissorRect(std::nullopt);
+                }
             }
         }
     }

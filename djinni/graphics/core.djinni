@@ -58,6 +58,8 @@ render_object_interface = interface +c +j +o {
     has_custom_model_matrix() : bool;
     is_screen_space_coords() : bool;
     get_custom_model_matrix() : list<f32>;
+    set_hidden(hidden: bool);
+    is_hidden(): bool;
 }
 
 render_pass_interface = interface +c +j +o {

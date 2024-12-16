@@ -15,4 +15,8 @@
 
 - (nonnull NSArray<NSNumber *> *)getCustomModelMatrix;
 
+- (void)setHidden:(BOOL)hidden;
+
+- (BOOL)isHidden;
+
 @end
