@@ -1,7 +1,5 @@
 package io.openmobilemaps.mapscore;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import io.openmobilemaps.mapscore.map.util.MapTileRenderer;
 import io.openmobilemaps.mapscore.map.util.OffscreenMapRenderer;
 import io.openmobilemaps.mapscore.map.util.Tiled2dMapVectorLayerBuilder;
@@ -10,21 +8,19 @@ import io.openmobilemaps.mapscore.shared.map.coordinates.Coord;
 import io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateSystemIdentifiers;
 import io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord;
 import io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.Tiled2dMapVectorLayerInterface;
-
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
+import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-import javax.imageio.ImageIO;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class OffscreenMapRendererTest {
     private static final boolean updateGolden = false;
@@ -32,7 +28,7 @@ public class OffscreenMapRendererTest {
     private static String loadResource(String resourceName) {
         try {
             try (InputStream resource =
-                    OffscreenMapRendererTest.class.getResourceAsStream("/" + resourceName)) {
+                         OffscreenMapRendererTest.class.getResourceAsStream("/" + resourceName)) {
                 if (resource == null) {
                     fail("Resource not found: " + resourceName);
                 }
@@ -104,7 +100,6 @@ public class OffscreenMapRendererTest {
     @BeforeAll
     public static void setUp() {
         System.setProperty("io.openmobilemaps.mapscore.debug", "true");
-        Logger.getLogger("").setLevel(Level.CONFIG);
 
         MapsCore.initialize();
     }

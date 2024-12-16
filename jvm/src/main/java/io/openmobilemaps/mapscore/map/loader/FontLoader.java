@@ -3,12 +3,14 @@ package io.openmobilemaps.mapscore.map.loader;
 import io.openmobilemaps.mapscore.graphics.BufferedImageTextureHolder;
 import io.openmobilemaps.mapscore.shared.map.loader.*;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.imageio.ImageIO;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Logger;
+
 
 /**
  * Load fonts from local ClassLoader resources.
@@ -19,7 +21,7 @@ import java.util.logging.Logger;
  */
 public class FontLoader extends FontLoaderInterface {
 
-    private static final Logger logger = Logger.getLogger(FontLoader.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(FontLoader.class);
     private final ConcurrentHashMap<String, FontLoaderResult> fontCache;
     private final double
             dpFactor; // !< render-DPI / 160.0, factor for "Density Independent Pixel" size.
@@ -49,7 +51,7 @@ public class FontLoader extends FontLoaderInterface {
     @Override
     public FontLoaderResult loadFont(Font font) {
         return fontCache.computeIfAbsent(font.getName(), fontName -> {
-            logger.info("loadFont " + fontName);
+            logger.info("loadFont {}", fontName);
             var result = loadFont(fontName);
             String fallbackName = null;
             if (result.getStatus() == LoaderStatus.ERROR_404) {
@@ -57,12 +59,9 @@ public class FontLoader extends FontLoaderInterface {
             }
             if (fallbackName != null) {
                 result = loadFont(getFallbackFont(fontName));
-                logger.info(
-                        String.format(
-                                "loadFont(%s) -> Fallback %s -> %s",
-                                fontName, fallbackName, result.getStatus()));
+                logger.info("loadFont({}) -> Fallback {} -> {}", fontName, fallbackName, result.getStatus());
             } else {
-                logger.info(String.format("loadFont %s -> %s", fontName, result.getStatus()));
+                logger.info("loadFont {} -> {}", fontName, result.getStatus());
             }
             return result;
         });
@@ -116,12 +115,12 @@ public class FontLoader extends FontLoaderInterface {
                             ),
                             manifest.getGlyphs());
 
-            logger.info("Font manifest:\n" + manifest.getInfo());
+            logger.debug("Font manifest: {}", manifest.getInfo());
 
             var image = new BufferedImageTextureHolder(ImageIO.read(imageStream));
             return new FontLoaderResult(image, manifest, LoaderStatus.OK);
         } catch (IOException | FontJsonManifestReader.InvalidManifestException e) {
-            logger.warning(e.toString());
+            logger.warn(e.toString());
             return new FontLoaderResult(null, null, LoaderStatus.ERROR_OTHER);
         }
     }

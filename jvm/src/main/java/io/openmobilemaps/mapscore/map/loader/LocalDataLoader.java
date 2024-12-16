@@ -9,6 +9,8 @@ import io.openmobilemaps.mapscore.shared.map.loader.LoaderStatus;
 import io.openmobilemaps.mapscore.shared.map.loader.TextureLoaderResult;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -20,7 +22,6 @@ import java.nio.ByteBuffer;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.logging.Logger;
 
 /**
  * Data loader for jar:file:... or file: URLs.
@@ -33,7 +34,7 @@ import java.util.logging.Logger;
  */
 @SuppressWarnings("unused")
 public class LocalDataLoader extends LoaderInterface {
-    private static final Logger logger = Logger.getLogger(LocalDataLoader.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(LocalDataLoader.class);
     private final Collection<String> allowedPrefixes;
 
     public LocalDataLoader() {
@@ -82,7 +83,7 @@ public class LocalDataLoader extends LoaderInterface {
         } catch (IOException e) {
             result = new DataLoaderResult(null, null, LoaderStatus.ERROR_OTHER, e.toString());
         }
-        logger.info(String.format("loadData %s -> %s", uri, result.getStatus()));
+        logger.info("loadData {} -> {}", uri, result.getStatus());
         return result;
     }
 
@@ -113,14 +114,13 @@ public class LocalDataLoader extends LoaderInterface {
         } catch (IOException e) {
             result = new TextureLoaderResult(null, null, LoaderStatus.ERROR_OTHER, e.toString());
         }
-        logger.info(String.format("loadTexture %s -> %s", uri, result.getStatus()));
+        logger.info("loadTexture {} -> {}", uri, result.getStatus());
         return result;
     }
 
     @NotNull
     @Override
-    public Future<TextureLoaderResult> loadTextureAsync(
-            @NotNull String url, @Nullable String etag) {
+    public Future<TextureLoaderResult> loadTextureAsync(@NotNull String url, @Nullable String etag) {
         // No async here.
         var result = new Promise<TextureLoaderResult>();
         result.setValue(loadTexture(url, etag));

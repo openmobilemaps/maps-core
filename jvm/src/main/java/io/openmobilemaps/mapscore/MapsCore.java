@@ -1,15 +1,16 @@
 package io.openmobilemaps.mapscore;
 
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.logging.Logger;
 
 public class MapsCore {
     public static void initialize() {
-        final var logger = Logger.getLogger(MapsCore.class.getName());
+        final var logger = LoggerFactory.getLogger(MapsCore.class);
 
         // This won't work for all platforms; it only has to work on the platforms that we build the
         // library for.
@@ -24,7 +25,7 @@ public class MapsCore {
         final String libName = String.format("libmapscore_jni_%s_%s%s.so", os, arch, buildType);
         final String libResourcePath = "/native/" + libName;
 
-        logger.config("Loading native library from resource path " + libResourcePath);
+        logger.info("Loading native library from resource path {}", libResourcePath);
 
         try {
             File tempLib = File.createTempFile("libmapscore_jni_", ".so");

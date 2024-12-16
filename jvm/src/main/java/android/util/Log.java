@@ -1,6 +1,7 @@
 package android.util;
 
-import java.util.logging.Logger;
+
+import org.slf4j.LoggerFactory;
 
 /**
  * Dummy implementation of android.util.Log. This is used in the Djinni Java support lib. To allow
@@ -8,6 +9,6 @@ import java.util.logging.Logger;
  */
 public class Log {
     public static void e(String tag, String msg, Exception e) {
-        Logger.getLogger(tag).severe(msg + ": " + e.toString());
+        LoggerFactory.getLogger(tag).error(msg, e);
     }
 }
