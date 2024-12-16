@@ -225,21 +225,42 @@ void MapCamera3d::moveToBoundingBox(const RectCoord &boundingBox, float paddingP
     distance = Vec2F(distance.x * pFactor, distance.y * pFactor);
     auto zoom = zoomForMeterWidth(sizeViewport, distance);
 
-    auto x = 0.5 * boundingBox.topLeft.x + 0.5 * boundingBox.bottomRight.x;
-    auto y = 0.5 * boundingBox.topLeft.y + 0.5 * boundingBox.bottomRight.y;
-    auto z = 0.5 * boundingBox.topLeft.z + 0.5 * boundingBox.bottomRight.z;
+    zoom = 1000000;
 
-    auto center = Coord(boundingBox.topLeft.systemIdentifier, x, y, z);
-    auto p = valueForZoom(cameraZoomConfig.pitchInterpolationValues, zoom);
+    auto center = boundingBox.bottomRight;
 
-    auto tanP = tan(p * M_PI / 180.0);
-    auto f = tanP * (getCameraDistance(sizeViewport, zoom) * 6378137.0) * 0.5;
+//    auto x = 0.5 * boundingBox.topLeft.x + 0.5 * boundingBox.bottomRight.x;
+//    auto y = 0.5 * boundingBox.topLeft.y + 0.5 * boundingBox.bottomRight.y;
+//    auto z = 0.5 * boundingBox.topLeft.z + 0.5 * boundingBox.bottomRight.z;
 
-    auto deltaLon = pFactor * abs(boundingBox.topLeft.y - boundingBox.bottomRight.y);
-    auto lengthLon = distance.y;
+//    double lat1 = boundingBox.bottomRight.y * M_PI / 180.0;
+//    double lon1 = boundingBox.bottomRight.x * M_PI / 180.0;
+//    double lat2 = boundingBox.topLeft.y * M_PI / 180.0;
+//    double lon2 = boundingBox.topLeft.x * M_PI / 180.0;
+//
+//    // Compute Cartesian coordinates
+//    double x = std::cos(lat1) * std::cos(lon1) + std::cos(lat2) * std::cos(lon2);
+//    double y = std::cos(lat1) * std::sin(lon1) + std::cos(lat2) * std::sin(lon2);
+//    double z = std::sin(lat1) + std::sin(lat2);
+//
+//    // Normalize back to spherical coordinates
+//    double midLat = std::atan2(z, std::sqrt(x * x + y * y));
+//    double midLon = std::atan2(y, x);
 
-    auto deltaLonF = (deltaLon / lengthLon) * f;
-    center.y -= 0.5 * deltaLonF;
+//    auto center = Coord(boundingBox.topLeft.systemIdentifier,
+//                        midLon * 180.0 / M_PI,
+//                        midLat * 180.0 / M_PI,
+//                        0);
+//    auto p = valueForZoom(cameraZoomConfig.pitchInterpolationValues, zoom);
+//
+//    auto tanP = tan(p * M_PI / 180.0);
+//    auto f = tanP * (getCameraDistance(sizeViewport, zoom) * 6378137.0) * 0.5;
+//
+//    auto deltaLon = pFactor * abs(boundingBox.topLeft.y - boundingBox.bottomRight.y);
+//    auto lengthLon = distance.y;
+//
+//    auto deltaLonF = (deltaLon / lengthLon) * f;
+//    center.y -= 0.5 * deltaLonF;
 
     moveToCenterPositionZoom(center, zoom, animated);
 }
