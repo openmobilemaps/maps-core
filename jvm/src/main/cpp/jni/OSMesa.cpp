@@ -137,7 +137,7 @@ JNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_graphics_util_OSMesa_read
 
     // memcpy(outBuf, buf, sizeof(jint) * outLen); // NOTE for whatever reason, the blit above does not seem to directly affect
     // state->buf as I expected with OSMesa. Need to read pixel instead.
-    glReadPixels(0, 0, state->width, state->width, GL_BGRA, GL_UNSIGNED_BYTE, outBuf);
+    glReadPixels(0, 0, state->width, state->height, GL_BGRA, GL_UNSIGNED_BYTE, outBuf);
     env->ReleaseIntArrayElements(out, outBuf, 0);
 }
 

@@ -128,6 +128,24 @@ public class OffscreenMapRendererTest {
     }
 
     @Test
+    public void testStyleJsonPortrait() {
+        OffscreenMapRenderer renderer = new OffscreenMapRenderer(400, 700, 4);
+
+        var map = renderer.getMap();
+        addTestStyleLayer(renderer.getMap(), "style_geojson_ch.json");
+        map.getCamera().moveToBoundingBox(bboxCH(), 0.0f, false, null, null);
+
+        try {
+            BufferedImage image = renderer.drawFrame();
+            assertImageMatchesGolden(image, "testStyleJsonPortrait");
+        } catch (Exception e) {
+            fail(e.getMessage());
+        } finally {
+            renderer.destroy();
+        }
+    }
+
+    @Test
     public void testStyleJsonLabel() {
         OffscreenMapRenderer renderer = new OffscreenMapRenderer(1200, 800, 4);
 
