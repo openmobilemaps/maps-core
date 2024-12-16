@@ -235,7 +235,7 @@ void MapCamera3d::moveToBoundingBox(const RectCoord &boundingBox, float paddingP
     auto tanP = tan(p * M_PI / 180.0);
     auto f = tanP * (getCameraDistance(sizeViewport, zoom) * 6378137.0) * 0.5;
 
-    auto deltaLon = pFactor * abs(boundingBox.topLeft.y - boundingBox.bottomRight.y);
+    auto deltaLon = pFactor * std::abs(boundingBox.topLeft.y - boundingBox.bottomRight.y);
     auto lengthLon = distance.y;
 
     auto deltaLonF = (deltaLon / lengthLon) * f;
