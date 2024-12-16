@@ -29,7 +29,7 @@ apt install --no-install-recommends cmake make clang libgl-dev libgles-dev libos
 ## How to build
 
 ```
-cmake -G build-directory
+cmake -B build-directory
 cmake --build build-directory -- testmain
 
 # run
