@@ -9,7 +9,7 @@
  */
 
 #include "ErrorManagerImpl.h"
-#include "CoordinateConversionHelperInterface.h"
+#include <algorithm>
 
 std::shared_ptr<ErrorManager> ErrorManager::create() { return std::make_shared<ErrorManagerImpl>(); }
 
