@@ -144,6 +144,11 @@ void Tiled2dMapVectorSourceVectorTileDataManager::onVectorTilesUpdated(const std
                         continue;
                     }
 
+                    if ((tile->tileInfo.tileInfo.zoomIdentifier < layer->minZoom ||
+                         tile->tileInfo.tileInfo.zoomIdentifier > layer->maxZoom) && tile->tileInfo.tileInfo.zoomIdentifier != layer->sourceMaxZoom) {
+                        continue;
+                    }
+
                     std::string identifier = layer->identifier;
                     Actor<Tiled2dMapVectorTile> actor = createTileActor(tile->tileInfo, layer);
 
