@@ -2,15 +2,14 @@ package io.openmobilemaps.mapscore.map.loader;
 
 import com.snapchat.djinni.Future;
 import com.snapchat.djinni.Promise;
-
 import io.openmobilemaps.mapscore.graphics.BufferedImageTextureHolder;
 import io.openmobilemaps.mapscore.shared.map.loader.DataLoaderResult;
 import io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface;
 import io.openmobilemaps.mapscore.shared.map.loader.LoaderStatus;
 import io.openmobilemaps.mapscore.shared.map.loader.TextureLoaderResult;
-
 import org.jetbrains.annotations.NotNull;
 
+import javax.imageio.ImageIO;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -21,8 +20,6 @@ import java.nio.ByteBuffer;
 import java.time.Duration;
 import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
-
-import javax.imageio.ImageIO;
 
 /**
  * Implementation of LoaderInterface for HTTP/HTTPS resources using the default {@link
@@ -55,9 +52,8 @@ public class HttpDataLoader extends LoaderInterface {
         return switch (encoding) {
             case "" -> httpResponse.body();
             case "gzip" -> new GZIPInputStream(httpResponse.body());
-            default ->
-                    throw new UnsupportedOperationException(
-                            "Unexpected Content-Encoding: " + encoding);
+            default -> throw new UnsupportedOperationException(
+                    "Unexpected Content-Encoding: " + encoding);
         };
     }
 
@@ -98,7 +94,12 @@ public class HttpDataLoader extends LoaderInterface {
             httpClient
                     .sendAsync(request, HttpResponse.BodyHandlers.ofInputStream())
                     .thenApply(this::completeLoadData)
+                    .exceptionally(e -> {
+                        logger.info(String.format("loadDataAsync %s -> %s", url, e));
+                        return new DataLoaderResult(null, null, LoaderStatus.ERROR_OTHER, e.toString());
+                    })
                     .thenAccept(result::setValue);
+
         }
         return result.getFuture();
     }
@@ -135,13 +136,19 @@ public class HttpDataLoader extends LoaderInterface {
             httpClient
                     .sendAsync(request, HttpResponse.BodyHandlers.ofInputStream())
                     .thenApply(this::completeLoadTexture)
+                    .exceptionally(e -> {
+                        logger.info(String.format("loadTextureAsync %s -> %s", url, e));
+                        return new TextureLoaderResult(null, null, LoaderStatus.ERROR_OTHER, e.toString());
+                    })
                     .thenAccept(result::setValue);
+
         }
         return result.getFuture();
     }
 
     @Override
-    public void cancel(@NotNull String url) {}
+    public void cancel(@NotNull String url) {
+    }
 
     protected DataLoaderResult completeLoadData(HttpResponse<InputStream> response) {
         LoaderStatus error;
@@ -178,15 +185,19 @@ public class HttpDataLoader extends LoaderInterface {
         if (response.statusCode() == 200) {
             try {
                 var image = ImageIO.read(response.body());
-                var result =
-                        new TextureLoaderResult(
-                                new BufferedImageTextureHolder(image),
-                                response.headers().firstValue("etag").orElse(null),
-                                LoaderStatus.OK,
-                                null);
-                logger.info(
-                        String.format("loadTexture %s -> %s", response.uri(), LoaderStatus.OK));
-                return result;
+                if (image != null) {
+                    var result =
+                            new TextureLoaderResult(
+                                    new BufferedImageTextureHolder(image),
+                                    response.headers().firstValue("etag").orElse(null),
+                                    LoaderStatus.OK,
+                                    null);
+                    logger.info(
+                            String.format("loadTexture %s -> %s", response.uri(), LoaderStatus.OK));
+                    return result;
+                } else {
+                    error = LoaderStatus.ERROR_OTHER;
+                }
             } catch (IOException e) {
                 error = LoaderStatus.ERROR_OTHER;
             }
