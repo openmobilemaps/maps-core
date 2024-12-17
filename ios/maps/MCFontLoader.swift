@@ -18,6 +18,7 @@ open class MCFontLoader: NSObject, MCFontLoaderInterface, @unchecked Sendable {
     private let loadingQueue = DispatchQueue(label: "MCFontLoader")
     private var fontAtlasDictionary: [String: TextureHolder] = [:]
     private var fontDataDictionary: [String: MCFontData] = [:]
+    private let pixelsPerInch: Double
 
     // MARK: - Init
 
@@ -26,6 +27,18 @@ open class MCFontLoader: NSObject, MCFontLoaderInterface, @unchecked Sendable {
     // the bundle to use for searching for fonts
     public init(bundle: Bundle, preload: [String] = []) {
         self.bundle = bundle
+        let pixelsPerInch = if Thread.isMainThread {
+            MainActor.assumeIsolated {
+                UIScreen.pixelsPerInch
+            }
+        } else {
+            DispatchQueue.main.sync {
+                MainActor.assumeIsolated {
+                    UIScreen.pixelsPerInch
+                }
+            }
+        }
+        self.pixelsPerInch = pixelsPerInch
         super.init()
         loadingQueue.async {
             let fonts = preload.map { MCFont(name: $0)}
@@ -69,17 +82,6 @@ open class MCFontLoader: NSObject, MCFontLoaderInterface, @unchecked Sendable {
                     let size = double(dict: fontInfoJson, value: "size")
                     let imageSize = double(dict: commonJson, value: "scaleW")
 
-                    let pixelsPerInch = if Thread.isMainThread {
-                        MainActor.assumeIsolated {
-                            UIScreen.pixelsPerInch
-                        }
-                    } else {
-                        DispatchQueue.main.sync {
-                            MainActor.assumeIsolated {
-                                UIScreen.pixelsPerInch
-                            }
-                        }
-                    }
 
                     let fontInfo = MCFontWrapper(name: font.name,
                                                  lineHeight: double(dict: commonJson, value: "lineHeight") / size,
