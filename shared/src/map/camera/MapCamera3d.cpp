@@ -1715,20 +1715,23 @@ double MapCamera3d::zoomForMeterWidth(Vec2I sizeViewport, Vec2F sizeMeters) {
     double pixelsPerMeter = this->screenDensityPpi / 0.0254;
     const double vpr = (double) sizeViewport.x / (double) sizeViewport.y;
 
+    double vprX = 1.0;
+    double vprY = 1.0;
+
     double fy = getCameraFieldOfView();
     double halfAngleRadianY = fy * 0.5 * M_PI / 180.0;
 
     double fx = 2 * atan(vpr * tan(halfAngleRadianY));
     double halfAngleRadianX = fx * 0.5 * M_PI / 180.0;
 
-    double metersX = sizeMeters.x * 0.5;
-    double metersY = sizeMeters.y * 0.5;
+    double metersX = sizeMeters.x * 0.5 * vpr;
+    double metersY = sizeMeters.y * 0.5 * vpr;
     double wX = sizeViewport.x;
     double wY = sizeViewport.y;
 
     double dx = metersX / tan(halfAngleRadianX);
     double zoomX = 2.0 * dx * pixelsPerMeter * std::tan(halfAngleRadianX) / wX;
-    double dy = metersY / tan(halfAngleRadianY) * vpr;
+    double dy = metersY / tan(halfAngleRadianY);
     double zoomY = 2.0 * dy * pixelsPerMeter * std::tan(halfAngleRadianY) / wY;
 
     return std::max(zoomX, zoomY);
