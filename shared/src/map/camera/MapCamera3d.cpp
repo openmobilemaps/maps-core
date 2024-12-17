@@ -1713,7 +1713,11 @@ double MapCamera3d::getCameraDistance(Vec2I sizeViewport, double zoom) {
 
 double MapCamera3d::zoomForMeterWidth(Vec2I sizeViewport, Vec2F sizeMeters) {
     double pixelsPerMeter = this->screenDensityPpi / 0.0254;
-    const double vpr = (double) sizeViewport.x / (double) sizeViewport.y;
+    double vpr = (double) sizeViewport.x / (double) sizeViewport.y;
+    if(vpr < 1) {
+        vpr = 1.0/vpr;
+    }
+
 
     double vprX = 1.0;
     double vprY = 1.0;
