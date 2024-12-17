@@ -117,7 +117,6 @@ public:
         return rasterBrightnessShiftEvaluator.getResult(context, defaultValue);
     }
 
-private:
     ValueEvaluator<double> rasterOpacityEvaluator;
     ValueEvaluator<double> rasterBrightnessMinEvaluator;
     ValueEvaluator<double> rasterBrightnessMaxEvaluator;
