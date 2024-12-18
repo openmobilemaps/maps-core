@@ -780,21 +780,25 @@ bool Tiled2dMapVectorSourceSymbolDataManager::onClickConfirmed(const std::unorde
         if (tileState == tileStateMap.end() || tileState->second != TileState::VISIBLE) {
             continue;
         }
-        for (const auto &[layerIdentifier, symbolGroups] : symbolGroupsMap) {
-            if (interactableLayers.find(layerIdentifier) == interactableLayers.end() || layers.find(layerIdentifier) == layers.end()) {
-                continue;
-            }
-            for (const auto &symbolGroup : std::get<1>(symbolGroups)) {
-                auto result = symbolGroup.syncAccess([&clickHitCircleScreen, zoomIdentifier, &collisionEnvironment](auto group){
-                    return group->onClickConfirmed(clickHitCircleScreen, zoomIdentifier, collisionEnvironment);
-                });
-                if (result) {
-                    if (strongSelectionDelegate->didSelectFeature(std::get<1>(*result), layerIdentifier, conversionHelper->convert(CoordinateSystemIdentifiers::EPSG4326(), std::get<0>(*result)))) {
-                        return true;
+
+        std::vector<std::string> vectorKeys(interactableLayers.begin(), interactableLayers.end());
+        vectorKeys.insert(vectorKeys.end(), layers.begin(), layers.end());
+        for (auto key = vectorKeys.rbegin(); key != vectorKeys.rend(); key++) {
+            auto symbolGroups = symbolGroupsMap.find(*key);
+            if (symbolGroups != symbolGroupsMap.end()) {
+                for (const auto &symbolGroup : std::get<1>(symbolGroups->second)) {
+                    auto result = symbolGroup.syncAccess([&clickHitCircleScreen, zoomIdentifier, &collisionEnvironment](auto group){
+                        return group->onClickConfirmed(clickHitCircleScreen, zoomIdentifier, collisionEnvironment);
+                    });
+                    if (result) {
+                        if (strongSelectionDelegate->didSelectFeature(std::get<1>(*result), *key, conversionHelper->convert(CoordinateSystemIdentifiers::EPSG4326(), std::get<0>(*result)))) {
+                            return true;
+                        }
                     }
                 }
             }
         }
+
     }
     return false;
 }
