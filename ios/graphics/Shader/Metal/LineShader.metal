@@ -63,9 +63,11 @@ struct LineStyling {
   float capType; // 12
   float numDashValues; // 13
   packed_float4 dashArray; // 14 15 16 17
-  float offset; // 18
-  float dotted; // 19
-  float dottedSkew; // 20
+  float dash_fade; // 18
+  float dash_animation_speed; // 19
+  float offset; // 20
+  float dotted; // 21
+  float dottedSkew; // 22
 } __attribute__((__packed__));
 
 /**
@@ -84,7 +86,7 @@ unitSpherelineGroupVertexShader(const LineVertexUnitSphereIn vertexIn [[stage_in
                       constant float4 &originOffset [[buffer(5)]],
                       constant float4 &tileOrigin [[buffer(6)]])
 {
-    int styleIndex = (int(vertexIn.stylingIndex) & 0xFF) * 21;
+    int styleIndex = (int(vertexIn.stylingIndex) & 0xFF) * 23;
     constant LineStyling *style = (constant LineStyling *)(styling + styleIndex);
 
     // extend position in width direction and in length direction by width / 2.0
@@ -162,7 +164,7 @@ lineGroupVertexShader(const LineVertexIn vertexIn [[stage_in]],
                       constant float4 &originOffset [[buffer(5)]],
                       constant float4 &tileOrigin [[buffer(6)]])
 {
-    int styleIndex = (int(vertexIn.stylingIndex) & 0xFF) * 21;
+    int styleIndex = (int(vertexIn.stylingIndex) & 0xFF) * 23;
     constant LineStyling *style = (constant LineStyling *)(styling + styleIndex);
 
     // extend position in width direction and in length direction by width / 2.0
@@ -233,11 +235,12 @@ lineGroupVertexShader(const LineVertexIn vertexIn [[stage_in]],
 
 fragment half4
 lineGroupFragmentShader(LineVertexOut in [[stage_in]],
-                        constant float *styling [[buffer(1)]])
+                        constant float *styling [[buffer(1)]],
+                        constant float &time [[buffer(2)]])
 {
   constant LineStyling *style = (constant LineStyling *)(styling + in.stylingIndex);
-  const half lineLength = length(in.lineB);
-  const half t = dot(in.lineA, normalize(in.lineB) / lineLength);
+  const float lineLength = length(in.lineB);
+  const float t = dot(in.lineA, normalize(in.lineB) / lineLength);
 
   const int capType = int(style->capType);
   const char segmentType = in.segmentType;
@@ -304,19 +307,56 @@ lineGroupFragmentShader(LineVertexOut in [[stage_in]],
       }
   } else if(numDash > 0) {
     const half factorToT = (in.width * 2) / lineLength;
-    const half dashTotal = style->dashArray.w * factorToT;
-    const half startOffsetSegment = fmod(half(in.lengthPrefix) / lineLength, dashTotal);
-    const half intraDashPos = fmod(t + startOffsetSegment, dashTotal);
+    const float dashTotal = style->dashArray.w * factorToT;
+    const float startOffsetSegment = fmod(in.lengthPrefix / lineLength, dashTotal);
 
-    if ((intraDashPos > style->dashArray.x * factorToT && intraDashPos < style->dashArray.y * factorToT) ||
-        (intraDashPos > style->dashArray.z * factorToT && intraDashPos < style->dashArray.w * factorToT)) {
+      const float timeOffset = time * style->dash_animation_speed * factorToT;
 
-      if(aGap == 0) {
-        discard_fragment();
+    const float intraDashPos = fmod(t + startOffsetSegment + timeOffset, dashTotal);
+
+      float dxt = style->dashArray.x * factorToT;
+      float dyt = style->dashArray.y * factorToT;
+      float dzt = style->dashArray.z * factorToT;
+      float dwt = style->dashArray.w * factorToT;
+      if (style->dash_fade == 0 &&
+          ((intraDashPos > dxt && intraDashPos < dyt) || (intraDashPos > dzt && intraDashPos < dwt))) {
+          // Simple case without fade
+          return half4(half3(style->gapColor.rgb), 1.0) * aGap;
       }
+      else {
+          if (intraDashPos > dxt && intraDashPos < dyt) {
 
-      return half4(half3(style->gapColor.rgb), 1.0) * aGap;
-    }
+              half relG = (intraDashPos - dxt) / (dyt - dxt);
+              if (relG < (style->dash_fade * 0.5)) {
+                  half wG = relG / (style->dash_fade * 0.5);
+                  return half4(half3(style->gapColor.rgb), 1.0) * aGap * wG + half4(half3(style->color.rgb), 1.0) * a * (1.0 - wG);
+              }
+              else if (1.0 - relG < (style->dash_fade * 0.5)) {
+                  half wG = (1.0 - relG) / (style->dash_fade * 0.5);
+                  return half4(half3(style->gapColor.rgb), 1.0) * aGap * wG + half4(half3(style->color.rgb), 1.0) * a * (1.0 - wG);
+              }
+              else {
+                  return half4(half3(style->gapColor.rgb), 1.0) * aGap;
+              }
+          }
+
+          if (intraDashPos > dzt && intraDashPos < dwt) {
+
+              half relG = (intraDashPos - dzt) / (dwt - dzt);
+              if (relG < style->dash_fade) {
+                  half wG = relG / style->dash_fade;
+                  return half4(half3(style->gapColor.rgb), 1.0) * aGap * wG + half4(half3(style->color.rgb), 1.0) * a * (1.0 - wG);
+              }
+              else if (1.0 - relG < style->dash_fade) {
+                  half wG = (1.0 - relG) / style->dash_fade;
+                  return half4(half3(style->gapColor.rgb), 1.0) * aGap * wG + half4(half3(style->color.rgb), 1.0) * a * (1.0 - wG);
+              }
+              else {
+                  return half4(half3(style->gapColor.rgb), 1.0) * aGap;
+              }
+
+          }
+      }
   }
 
   if(a == 0) {

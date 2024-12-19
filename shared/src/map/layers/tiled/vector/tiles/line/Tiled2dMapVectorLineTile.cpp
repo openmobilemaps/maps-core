@@ -75,7 +75,7 @@ void Tiled2dMapVectorLineTile::update() {
 
     const double cameraZoom = camera->getZoom();
     double zoomIdentifier = layerConfig->getZoomIdentifier(cameraZoom);
-    
+
     if (!mapInterface->is3d()) {
         zoomIdentifier = std::max(zoomIdentifier, (double) tileInfo.tileInfo.zoomIdentifier);
     }
@@ -87,6 +87,17 @@ void Tiled2dMapVectorLineTile::update() {
     auto lineDescription = std::static_pointer_cast<LineVectorLayerDescription>(description);
     bool inZoomRange = lineDescription->maxZoom >= zoomIdentifier && lineDescription->minZoom <= zoomIdentifier;
 
+    if (inZoomRange != isVisible) {
+        isVisible = inZoomRange;
+        for (auto const &object : renderObjects) {
+            object->setHidden(!inZoomRange);
+        }
+    }
+
+    if (!inZoomRange) {
+        return;
+    }
+
     for (auto const &line: lines) {
         line->setScalingFactor(scalingFactor);
     }
@@ -94,14 +105,12 @@ void Tiled2dMapVectorLineTile::update() {
     if (lastAlpha == alpha &&
         lastZoom &&
         ((isStyleZoomDependant && *lastZoom == zoomIdentifier) || !isStyleZoomDependant) &&
-        (lastInZoomRange && *lastInZoomRange == inZoomRange) &&
         !isStyleStateDependant) {
         return;
     }
 
     lastZoom = zoomIdentifier;
     lastAlpha = alpha;
-    lastInZoomRange = inZoomRange;
 
     size_t numStyleGroups = featureGroups.size();
     for (int styleGroupId = 0; styleGroupId < numStyleGroups; styleGroupId++) {
@@ -112,7 +121,7 @@ void Tiled2dMapVectorLineTile::update() {
             auto &style = reusableLineStyles[styleGroupId][i];
 
             // color
-            auto color = inZoomRange ? lineDescription->style.getLineColor(context) : Color(0.0, 0.0, 0.0, 0.0);
+            auto color = lineDescription->style.getLineColor(context);
             if (color.r != style.colorR || color.g != style.colorG || color.b != style.colorB || color.a != style.colorA) {
                 style.colorR = color.r;
                 style.colorG = color.g;
@@ -122,14 +131,14 @@ void Tiled2dMapVectorLineTile::update() {
             }
 
             // opacity
-            float opacity = inZoomRange ? lineDescription->style.getLineOpacity(context) * alpha : 0.0;
+            float opacity = lineDescription->style.getLineOpacity(context) * alpha;
             if (opacity != style.opacity) {
                 style.opacity = opacity;
                 needsUpdate = true;
             }
 
-            // blue
-            float blur = inZoomRange ? lineDescription->style.getLineBlur(context) : 0.0;
+            // blur
+            float blur = lineDescription->style.getLineBlur(context);
             if (blur != style.blur) {
                 style.blur = blur;
                 needsUpdate = true;
@@ -144,14 +153,14 @@ void Tiled2dMapVectorLineTile::update() {
             }
 
             // width
-            float width = inZoomRange ? lineDescription->style.getLineWidth(context) : 0.0;
+            float width = lineDescription->style.getLineWidth(context);
             if (width != style.width) {
                 style.width = width;
                 needsUpdate = true;
             }
 
             // dashes
-            auto dashArray = inZoomRange ? lineDescription->style.getLineDashArray(context) : std::vector<float>{};
+            auto dashArray = lineDescription->style.getLineDashArray(context);
             auto dn = dashArray.size();
             auto dValue0 = dn > 0 ? dashArray[0] : 0.0;
             auto dValue1 = (dn > 1 ? dashArray[1] : 0.0) + dValue0;
@@ -166,6 +175,8 @@ void Tiled2dMapVectorLineTile::update() {
                 style.dashValue3 = dValue3;
                 needsUpdate = true;
             }
+            style.dashAnimationSpeed = 0; // not yet supported in vector style
+            style.dashFade = 0; // not yet supported in vector style
 
             // line caps
             auto lineCap = lineDescription->style.getLineCap(context);
@@ -184,7 +195,7 @@ void Tiled2dMapVectorLineTile::update() {
             }
 
             // offset
-            auto offset = inZoomRange ? lineDescription->style.getLineOffset(context, width) : 0.0;
+            auto offset = lineDescription->style.getLineOffset(context, width);
             if(offset != style.offset) {
                 style.offset = offset;
                 needsUpdate = true;
@@ -211,7 +222,7 @@ void Tiled2dMapVectorLineTile::update() {
 
         if (needsUpdate) {
             auto &styles = reusableLineStyles[styleGroupId];
-            auto buffer = SharedBytes((int64_t)styles.data(), (int)styles.size(), 21 * sizeof(float));
+            auto buffer = SharedBytes((int64_t)styles.data(), (int)styles.size(), 23 * sizeof(float));
             shaders[styleGroupId]->setStyles(buffer);
         }
     }
@@ -273,7 +284,7 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
                     }
 
                     if (styleIndex == -1) {
-                        auto reusableStyle = ShaderLineStyle(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+                        auto reusableStyle = ShaderLineStyle(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
                         if (!featureGroups.empty() && featureGroups.back().size() < maxStylesPerGroup) {
                             styleGroupIndex = (int) featureGroups.size() - 1;
                             styleIndex = (int) featureGroups.back().size();
@@ -398,6 +409,14 @@ void Tiled2dMapVectorLineTile::addLines(const std::vector<std::vector<std::vecto
 
     lines = lineGroupObjects;
 
+    std::vector<std::shared_ptr<RenderObjectInterface>> newRenderObjects;
+    for (auto const &object : lines) {
+        for (const auto &config : object->getRenderConfig()) {
+            newRenderObjects.push_back(std::make_shared<RenderObject>(config->getGraphicsObject()));
+        }
+    }
+    renderObjects = newRenderObjects;
+
 #ifdef __APPLE__
     setupLines(newGraphicObjects);
 #else
@@ -425,15 +444,7 @@ void Tiled2dMapVectorLineTile::setupLines(const std::vector<std::shared_ptr<Grap
 
 
 std::vector<std::shared_ptr<RenderObjectInterface>> Tiled2dMapVectorLineTile::generateRenderObjects() {
-    std::vector<std::shared_ptr<RenderObjectInterface>> newRenderObjects;
-
-    for (auto const &object : lines) {
-        for (const auto &config : object->getRenderConfig()) {
-            newRenderObjects.push_back(std::make_shared<RenderObject>(config->getGraphicsObject()));
-        }
-    }
-
-    return newRenderObjects;
+    return renderObjects;
 }
 
 bool Tiled2dMapVectorLineTile::onClickConfirmed(const Vec2F &posScreen) {

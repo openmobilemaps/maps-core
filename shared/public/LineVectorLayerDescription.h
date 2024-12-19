@@ -116,7 +116,6 @@ public:
         return lineDottedSkewEvaluator.getResult(context, defaultValue);
     }
 
-private:
     ValueEvaluator<Color> lineColorEvaluator;
     ValueEvaluator<double> lineOpacityEvaluator;
     ValueEvaluator<double> lineBlurEvaluator;

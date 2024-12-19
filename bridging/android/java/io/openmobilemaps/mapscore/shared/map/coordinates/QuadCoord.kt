@@ -15,7 +15,7 @@ data class QuadCoord(
 ) : Comparable<QuadCoord>, Parcelable {
 
     override fun compareTo(other: QuadCoord): Int {
-        var tempResult : Int
+        var tempResult = 0
         tempResult = this.topLeft.compareTo(other.topLeft)
         if (tempResult != 0) {
             return tempResult

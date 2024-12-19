@@ -213,6 +213,41 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
         }
     }
 
+    std::vector<std::shared_ptr<VectorMapSourceDescription>> sourceDescriptions;
+    for (auto const &[identifier, tileJson]: tileJsons) {
+        std::optional<::RectCoord> bounds;
+        if (tileJson.contains("bounds")) {
+            auto tmpBounds = std::vector<double>();
+            for (auto &el: tileJson["bounds"].items()) {
+                double d = el.value().get<double>();
+                tmpBounds.push_back(d);
+            }
+            if (tmpBounds.size() == 4) {
+                const auto topLeft = Coord(CoordinateSystemIdentifiers::EPSG4326(), tmpBounds[0], tmpBounds[1], 0);
+                const auto bottomRight = Coord(CoordinateSystemIdentifiers::EPSG4326(), tmpBounds[2], tmpBounds[3], 0);
+                bounds = RectCoord(topLeft, bottomRight);
+            }
+        }
+        auto zoomLevelScaleFactor = tileJson.contains("zoomLevelScaleFactor") ? std::optional<float>(tileJson["zoomLevelScaleFactor"].get<float>()) : std::nullopt;
+        auto adaptScaleToScreen = tileJson.contains("adaptScaleToScreen") ? std::optional<bool>(tileJson["adaptScaleToScreen"].get<bool>()) : std::nullopt;
+        auto numDrawPreviousLayers = tileJson.contains("numDrawPreviousLayers") ? std::optional<int>(tileJson["numDrawPreviousLayers"].get<int>()) : std::nullopt;
+        auto underzoom = tileJson.contains("underzoom") ? std::optional<bool>(tileJson["underzoom"].get<bool>()) : std::nullopt;
+        auto overzoom = tileJson.contains("overzoom") ? std::optional<bool>(tileJson["overzoom"].get<bool>()) : std::nullopt;
+        sourceDescriptions.push_back(
+                                     std::make_shared<VectorMapSourceDescription>(identifier,
+                                                                                  tileJson["tiles"].begin()->get<std::string>(),
+                                                                                  tileJson["minzoom"].get<int>(),
+                                                                                  tileJson["maxzoom"].get<int>(),
+                                                                                  bounds,
+                                                                                  zoomLevelScaleFactor,
+                                                                                  adaptScaleToScreen,
+                                                                                  numDrawPreviousLayers,
+                                                                                  underzoom,
+                                                                                  overzoom
+                                                                                  ));
+    }
+
+
     Tiled2dMapVectorStyleParser parser;
 
     std::optional<std::string> metadata;
@@ -327,15 +362,24 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                     parser.parseValue(val["paint"]["line-dotted"]),
                     parser.parseValue(val["paint"]["line-dotted-skew"])
             );
-            
+
+            int minZoom = 0;
+            int maxZoom = 24;
+            for (const auto &sourceDesc : sourceDescriptions) {
+                if (sourceDesc->identifier == val["source"]) {
+                    minZoom = sourceDesc->minZoom;
+                    maxZoom = sourceDesc->maxZoom;
+                }
+            }
+
             auto layerDesc = std::make_shared<LineVectorLayerDescription>(
                     val["id"],
                     val["source"],
                     val.value("source-layer", ""),
                     val.value("minzoom", 0),
                     val.value("maxzoom", 24),
-                    val.value("minzoom", 0),
-                    val.value("maxzoom", 24),
+                    minZoom,
+                    maxZoom,
                     filter,
                     style,
                     renderPassIndex,
@@ -393,13 +437,22 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
 
             std::shared_ptr<Value> filter = parser.parseValue(val["filter"]);
 
+            int minZoom = 0;
+            int maxZoom = 24;
+            for (const auto &sourceDesc : sourceDescriptions) {
+                if (sourceDesc->identifier == val["source"]) {
+                    minZoom = sourceDesc->minZoom;
+                    maxZoom = sourceDesc->maxZoom;
+                }
+            }
+
             auto layerDesc = std::make_shared<SymbolVectorLayerDescription>(val["id"],
                                                                             val["source"],
                                                                             val.value("source-layer", ""),
                                                                             val.value("minzoom", 0),
                                                                             val.value("maxzoom", 24),
-                                                                            val.value("minzoom", 0),
-                                                                            val.value("maxzoom", 24),
+                                                                            minZoom,
+                                                                            maxZoom,
                                                                             filter,
                                                                             style,
                                                                             renderPassIndex,
@@ -417,13 +470,22 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                                      (!val["layout"]["fadeInPattern"].is_null()) && val["layout"].value("fadeInPattern", false),
                                      parser.parseValue(val["paint"]["stripe-width"]));
 
+            int minZoom = 0;
+            int maxZoom = 24;
+            for (const auto &sourceDesc : sourceDescriptions) {
+                if (sourceDesc->identifier == val["source"]) {
+                    minZoom = sourceDesc->minZoom;
+                    maxZoom = sourceDesc->maxZoom;
+                }
+            }
+
             auto layerDesc = std::make_shared<PolygonVectorLayerDescription>(val["id"],
                                                                              val["source"],
                                                                              val.value("source-layer", ""),
                                                                              val.value("minzoom", 0),
                                                                              val.value("maxzoom", 24),
-                                                                             val.value("minzoom", 0),
-                                                                             val.value("maxzoom", 24),
+                                                                             minZoom,
+                                                                             maxZoom,
                                                                              filter,
                                                                              style,
                                                                              renderPassIndex,
@@ -433,40 +495,6 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
 
             layers.push_back(layerDesc);
         }
-    }
-
-    std::vector<std::shared_ptr<VectorMapSourceDescription>> sourceDescriptions;
-    for (auto const &[identifier, tileJson]: tileJsons) {
-        std::optional<::RectCoord> bounds;
-        if (tileJson.contains("bounds")) {
-            auto tmpBounds = std::vector<double>();
-            for (auto &el: tileJson["bounds"].items()) {
-                double d = el.value().get<double>();
-                tmpBounds.push_back(d);
-            }
-            if (tmpBounds.size() == 4) {
-                const auto topLeft = Coord(CoordinateSystemIdentifiers::EPSG4326(), tmpBounds[0], tmpBounds[1], 0);
-                const auto bottomRight = Coord(CoordinateSystemIdentifiers::EPSG4326(), tmpBounds[2], tmpBounds[3], 0);
-                bounds = RectCoord(topLeft, bottomRight);
-            }
-        }
-        auto zoomLevelScaleFactor = tileJson.contains("zoomLevelScaleFactor") ? std::optional<float>(tileJson["zoomLevelScaleFactor"].get<float>()) : std::nullopt;
-        auto adaptScaleToScreen = tileJson.contains("adaptScaleToScreen") ? std::optional<bool>(tileJson["adaptScaleToScreen"].get<bool>()) : std::nullopt;
-        auto numDrawPreviousLayers = tileJson.contains("numDrawPreviousLayers") ? std::optional<int>(tileJson["numDrawPreviousLayers"].get<int>()) : std::nullopt;
-        auto underzoom = tileJson.contains("underzoom") ? std::optional<bool>(tileJson["underzoom"].get<bool>()) : std::nullopt;
-        auto overzoom = tileJson.contains("overzoom") ? std::optional<bool>(tileJson["overzoom"].get<bool>()) : std::nullopt;
-        sourceDescriptions.push_back(
-                std::make_shared<VectorMapSourceDescription>(identifier,
-                                                             tileJson["tiles"].begin()->get<std::string>(),
-                                                             tileJson["minzoom"].get<int>(),
-                                                             tileJson["maxzoom"].get<int>(),
-                                                             bounds,
-                                                             zoomLevelScaleFactor,
-                                                             adaptScaleToScreen,
-                                                             numDrawPreviousLayers,
-                                                             underzoom,
-                                                             overzoom
-                ));
     }
 
 

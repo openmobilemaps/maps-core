@@ -11,7 +11,7 @@ data class Quad2dD(
 ) : Comparable<Quad2dD> {
 
     override fun compareTo(other: Quad2dD): Int {
-        var tempResult : Int
+        var tempResult = 0
         tempResult = this.topLeft.compareTo(other.topLeft)
         if (tempResult != 0) {
             return tempResult

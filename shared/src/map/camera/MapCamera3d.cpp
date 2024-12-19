@@ -225,22 +225,16 @@ void MapCamera3d::moveToBoundingBox(const RectCoord &boundingBox, float paddingP
     distance = Vec2F(distance.x * pFactor, distance.y * pFactor);
     auto zoom = zoomForMeterWidth(sizeViewport, distance);
 
+    // the user of moveToBoundingBox wants that the bounding box is centered,
+    // if you have camera verticaldisplacement, this is not the case, this should
+    // be fixed for this function as it only works with 0
+    assert(valueForZoom(cameraZoomConfig.verticalDisplacementInterpolationValues, zoom) == 0);
+
     auto x = 0.5 * boundingBox.topLeft.x + 0.5 * boundingBox.bottomRight.x;
     auto y = 0.5 * boundingBox.topLeft.y + 0.5 * boundingBox.bottomRight.y;
     auto z = 0.5 * boundingBox.topLeft.z + 0.5 * boundingBox.bottomRight.z;
 
     auto center = Coord(boundingBox.topLeft.systemIdentifier, x, y, z);
-    auto p = valueForZoom(cameraZoomConfig.pitchInterpolationValues, zoom);
-
-    auto tanP = tan(p * M_PI / 180.0);
-    auto f = tanP * (getCameraDistance(sizeViewport, zoom) * 6378137.0) * 0.5;
-
-    auto deltaLon = pFactor * std::abs(boundingBox.topLeft.y - boundingBox.bottomRight.y);
-    auto lengthLon = distance.y;
-
-    auto deltaLonF = (deltaLon / lengthLon) * f;
-    center.y -= 0.5 * deltaLonF;
-
     moveToCenterPositionZoom(center, zoom, animated);
 }
 
@@ -1719,7 +1713,14 @@ double MapCamera3d::getCameraDistance(Vec2I sizeViewport, double zoom) {
 
 double MapCamera3d::zoomForMeterWidth(Vec2I sizeViewport, Vec2F sizeMeters) {
     double pixelsPerMeter = this->screenDensityPpi / 0.0254;
-    const double vpr = (double) sizeViewport.x / (double) sizeViewport.y;
+    double vpr = (double) sizeViewport.x / (double) sizeViewport.y;
+    if(vpr < 1) {
+        vpr = 1.0/vpr;
+    }
+
+
+    double vprX = 1.0;
+    double vprY = 1.0;
 
     double fy = getCameraFieldOfView();
     double halfAngleRadianY = fy * 0.5 * M_PI / 180.0;
@@ -1727,14 +1728,14 @@ double MapCamera3d::zoomForMeterWidth(Vec2I sizeViewport, Vec2F sizeMeters) {
     double fx = 2 * atan(vpr * tan(halfAngleRadianY));
     double halfAngleRadianX = fx * 0.5 * M_PI / 180.0;
 
-    double metersX = sizeMeters.x * 0.5;
-    double metersY = sizeMeters.y * 0.5;
+    double metersX = sizeMeters.x * 0.5 * vpr;
+    double metersY = sizeMeters.y * 0.5 * vpr;
     double wX = sizeViewport.x;
     double wY = sizeViewport.y;
 
     double dx = metersX / tan(halfAngleRadianX);
     double zoomX = 2.0 * dx * pixelsPerMeter * std::tan(halfAngleRadianX) / wX;
-    double dy = metersY / tan(halfAngleRadianY) * vpr;
+    double dy = metersY / tan(halfAngleRadianY);
     double zoomY = 2.0 * dy * pixelsPerMeter * std::tan(halfAngleRadianY) / wY;
 
     return std::max(zoomX, zoomY);

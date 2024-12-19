@@ -20,7 +20,7 @@ baseVertexShader(const Vertex3DTextureIn vertexIn [[stage_in]],
                  constant float4 &originOffset [[buffer(3)]])
 {
     VertexOut out {
-        .position = vpMatrix * (vertexIn.position + originOffset),
+        .position = vpMatrix * ((mMatrix * vertexIn.position) + originOffset),
         .uv = vertexIn.uv
     };
 

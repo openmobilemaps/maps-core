@@ -442,7 +442,6 @@ public:
     int64_t transitionDuration;
     int64_t transitionDelay;
 
-private:
     ValueEvaluator<BlendMode> blendModeEvaluator;
     ValueEvaluator<double> textSizeEvaluator;
     ValueEvaluator<std::vector<std::string>> textFontEvaluator;
