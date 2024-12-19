@@ -11,6 +11,7 @@
 #include "ColorLineGroup2dShaderOpenGl.h"
 #include "OpenGlContext.h"
 #include "OpenGlHelper.h"
+#include <cassert>
 #include <cstring>
 
 ColorLineGroup2dShaderOpenGl::ColorLineGroup2dShaderOpenGl(bool projectOntoUnitSphere)
@@ -60,6 +61,8 @@ void ColorLineGroup2dShaderOpenGl::preRender(const std::shared_ptr<::RenderingCo
 }
 
 void ColorLineGroup2dShaderOpenGl::setStyles(const ::SharedBytes & styles) {
+    assert(styles.elementCount <= maxNumStyles);
+    assert(styles.elementCount * styles.bytesPerElement <= lineValues.size() * sizeof(float));
     {
         std::lock_guard<std::recursive_mutex> overlayLock(styleMutex);
         if(styles.elementCount > 0) {

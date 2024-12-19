@@ -10,6 +10,7 @@
 
 #include "QuadMaskObject.h"
 #include "Vec2D.h"
+#include <cmath>
 
 QuadMaskObject::QuadMaskObject(const std::shared_ptr<GraphicsObjectFactoryInterface> &graphicsObjectFactory,
                                const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,

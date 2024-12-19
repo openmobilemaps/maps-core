@@ -114,6 +114,7 @@ include_directories(src/main/cpp/graphics/objects)
 include_directories(src/main/cpp/graphics/shader)
 include_directories(src/main/cpp/scheduling)
 
+target_compile_definitions(mapscore PRIVATE OPENMOBILEMAPS_GL=1)
 
 # Searches for a specified prebuilt library and stores the path as a
 # variable. Because CMake includes system libraries in the search path by

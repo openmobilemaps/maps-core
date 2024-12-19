@@ -17,6 +17,7 @@
 #include "PolygonHelper.h"
 #include "RenderObject.h"
 #include "RenderPass.h"
+#include <algorithm>
 #include <map>
 
 #include "PolygonCompare.h"

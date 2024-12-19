@@ -61,7 +61,7 @@ private:
 
     void setupTextureCoordinates();
 
-#ifdef __ANDROID__
+#ifdef OPENMOBILEMAPS_GL
     static const int maxStylesPerGroup = 16;
 #else
     static const int maxStylesPerGroup = 256;

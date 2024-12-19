@@ -28,6 +28,12 @@ int __android_log_print(int prio, const char *tag, const char *fmt, ...);
 #include <os/log.h>
 #endif
 
+//#define SHOW_COLORS 0
+
+#ifndef LOG_LEVEL
+#define LOG_LEVEL 2 // == LogDebug
+#endif
+
 Logger::Logger(int p){
     priority = p;
 }
@@ -97,7 +103,7 @@ void Logger::log(int prio, const char *tag, const char *fmt, ...) const {
     }
 #endif
 
-#ifdef BANDIT_TESTING
+#if defined(BANDIT_TESTING) || (defined(__linux__) && !defined(__ANDROID__))
     if (priority <= LOG_LEVEL) {
         switch (priority) {
         case 0: {

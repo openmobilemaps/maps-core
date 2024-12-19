@@ -132,7 +132,7 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
             }
         }
 
-        if (fontResult) {
+        if (fontResult && fontResult->status == LoaderStatus::OK) {
             auto textOffset = description->style.getTextOffset(evalContext);
             const auto textRadialOffset = description->style.getTextRadialOffset(evalContext);
             const auto letterSpacing = description->style.getTextLetterSpacing(evalContext);

@@ -13,6 +13,7 @@
 #include "Logger.h"
 #include "BoundingBox.h"
 #include "CoordinateSystemIdentifiers.h"
+#include <cmath>
 
 PolygonPatternGroup2dLayerObject::PolygonPatternGroup2dLayerObject(const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                                                      const std::shared_ptr<PolygonPatternGroup2dInterface> &polygon,
