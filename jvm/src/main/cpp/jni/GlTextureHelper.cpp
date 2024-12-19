@@ -33,6 +33,5 @@ JNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_graphics_util_GlTextureHe
                                                                                                    jint textureId) {
     GLuint textures[] = {(GLuint)textureId};
     glDeleteTextures(1, textures);
-    glGetError();
 }
 }
