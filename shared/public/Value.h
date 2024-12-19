@@ -305,6 +305,10 @@ public:
         return featureStateKeys.empty() && !globalStateKeys.empty();
     }
 
+    bool isGlobalStateDependant() {
+        return !globalStateKeys.empty();
+    }
+
     size_t size() const {
         return usedKeys.size() + featureStateKeys.size() + globalStateKeys.size();
     }
@@ -664,13 +668,13 @@ public:
     void updateValue(std::shared_ptr<Value> newValue) {
         value = newValue;
 
-
         usedKeysCollection = value->getUsedKeys();
 
         isStatic = usedKeysCollection.empty();
         isZoomDependent = usedKeysCollection.usedKeys.contains("zoom");
         isStateDependant = usedKeysCollection.isStateDependant();
         onlyGlobalStateDependant = usedKeysCollection.onlyGlobalStateDependant();
+        isGlobalStateDependant = usedKeysCollection.isGlobalStateDependant();
 
         lastResults.clear();
     }
@@ -703,8 +707,19 @@ public:
             if(currentGlobalId != globalId) {
                 globalValue = value->evaluateOr(context, defaultValue);
                 globalId = currentGlobalId;
-            } else if(globalValue) {
+            }
+
+            if(globalValue) {
                 return *globalValue;
+            }
+        }
+
+
+        if (isGlobalStateDependant) {
+            auto currentGlobalId = context.featureStateManager->getCurrentState();
+            if(currentGlobalId != globalId) {
+                lastResults.clear();
+                globalId = currentGlobalId;
             }
         }
 
@@ -735,6 +750,7 @@ private:
     bool isZoomDependent = false;
     bool isStateDependant = false;
     bool onlyGlobalStateDependant = false;
+    bool isGlobalStateDependant = false;
 
     int64_t globalId = -1;
 
