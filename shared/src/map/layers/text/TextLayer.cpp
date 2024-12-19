@@ -220,6 +220,9 @@ void TextLayer::addTexts(const std::vector<std::shared_ptr<TextInfoInterface>> &
 
     for (const auto &text : texts) {
         auto fontData = fontLoader->loadFont(text->getFont()).fontData;
+        if(!fontData) {
+          continue;
+        }
         auto textObject = textHelper.textLayerObject(text, fontData, Vec2F(0.0, 0.0), 1.2, 0.0, 15, 45.0, SymbolAlignment::AUTO);
 
         if (textObject) {

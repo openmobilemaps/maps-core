@@ -19,6 +19,7 @@
 #include "RenderPass.h"
 #include "SizeType.h"
 #include <map>
+#include <algorithm>
 
 LineLayer::LineLayer()
     : isHidden(false){};

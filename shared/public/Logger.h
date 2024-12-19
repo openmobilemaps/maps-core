@@ -31,9 +31,6 @@
 #define LogTrace utility::Logger(4)
 #endif
 
-//#define SHOW_COLORS 0
-#define LOG_LEVEL 2
-
 #include <iostream>
 #include <sstream>
 

@@ -10,7 +10,6 @@
 
 #include "ColorShaderOpenGl.h"
 #include "OpenGlContext.h"
-#include "OpenGlHelper.h"
 
 ColorShaderOpenGl::ColorShaderOpenGl(bool projectOntoUnitSphere)
         : programName(projectOntoUnitSphere ? "UBMAP_ColorShaderUnitSphereOpenGl" : "UBMAP_ColorShaderOpenGl"),
@@ -29,8 +28,9 @@ void ColorShaderOpenGl::setupProgram(const std::shared_ptr<::RenderingContextInt
     glDeleteShader(vertexShader);
     glAttachShader(program, fragmentShader); // add the fragment shader to program
     glDeleteShader(fragmentShader);
-
     glLinkProgram(program); // create OpenGL program executables
+
+    checkGlProgramLinking(program);
 
     openGlContext->storeProgram(programName, program);
 }

@@ -12,6 +12,7 @@
 #include "ColorCircleShaderInterface.h"
 #include "ColorShaderInterface.h"
 #include "Quad2dInterface.h"
+#include <cmath>
 
 Circle2dLayerObject::Circle2dLayerObject(const std::shared_ptr<MapInterface> &mapInterface)
         : is3d(mapInterface->is3d()),
