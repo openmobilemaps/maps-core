@@ -152,12 +152,17 @@ class Tiled2dMapSource : public Tiled2dMapSourceInterface,
 
     int currentZoomLevelIdentifier = 0;
 
+    int curT;
+    double curZoom;
+
     std::unordered_set<Tiled2dMapTileInfo> currentVisibleTiles;
 
     std::vector<VisibleTilesLayer> currentPyramid;
     int currentKeepZoomLevelOffset;
+    std::vector<PrioritizedTiled2dMapTileInfo> tilesRequestedToLoad;
 
     std::vector<PolygonCoord> currentViewBounds = {};
+    std::optional<RectCoord> currentViewBoundsRect = std::nullopt;
 
     std::atomic<bool> isPaused;
 
@@ -169,6 +174,7 @@ class Tiled2dMapSource : public Tiled2dMapSourceInterface,
     void onVisibleTilesChanged(const std::vector<VisibleTilesLayer> &pyramid, bool keepMultipleLevels, int keepZoomLevelOffset = 0);
 
   protected:
+    void scheduleFixedNumberOfLoadingTasks();
     void performLoadingTask(Tiled2dMapTileInfo tile, size_t loaderIndex);
 
     void updateTileMasks();

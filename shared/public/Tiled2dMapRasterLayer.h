@@ -101,6 +101,8 @@ public:
 
     bool shouldLoadTile(const Tiled2dMapTileInfo &tileInfo);
 
+    bool shouldKeepTile(const Tiled2dMapTileInfo &tileInfo);
+
     virtual std::shared_ptr<::Tiled2dMapLayerConfig> getConfig() override;
                                   
     void onTilesUpdated(const std::string &layerName, VectorSet<Tiled2dMapRasterTileInfo> currentTileInfos) override;
