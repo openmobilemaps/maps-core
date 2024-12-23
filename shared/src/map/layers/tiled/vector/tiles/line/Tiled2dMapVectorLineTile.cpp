@@ -159,6 +159,22 @@ void Tiled2dMapVectorLineTile::update() {
                 needsUpdate = true;
             }
 
+            // line caps
+            auto lineCap = lineDescription->style.getLineCap(context);
+
+            auto cap = 1;
+            switch(lineCap){
+                case LineCapType::BUTT: { cap = 0; break; }
+                case LineCapType::ROUND: { cap = 1; break; }
+                case LineCapType::SQUARE: { cap = 2; break; }
+                default: { cap = 1; }
+            }
+
+            if (cap != style.lineCap) {
+                style.lineCap = cap;
+                needsUpdate = true;
+            }
+
             // dashes
             auto dashArray = lineDescription->style.getLineDashArray(context);
             auto dn = dashArray.size();
@@ -177,22 +193,6 @@ void Tiled2dMapVectorLineTile::update() {
             }
             style.dashAnimationSpeed = 0; // not yet supported in vector style
             style.dashFade = 0; // not yet supported in vector style
-
-            // line caps
-            auto lineCap = lineDescription->style.getLineCap(context);
-
-            auto cap = 1;
-            switch(lineCap){
-                case LineCapType::BUTT: { cap = 0; break; }
-                case LineCapType::ROUND: { cap = 1; break; }
-                case LineCapType::SQUARE: { cap = 2; break; }
-                default: { cap = 1; }
-            }
-
-            if (cap != style.lineCap) {
-                style.lineCap = cap;
-                needsUpdate = true;
-            }
 
             // offset
             auto offset = lineDescription->style.getLineOffset(context, width);

@@ -107,9 +107,11 @@ std::string ColorLineGroup2dShaderOpenGl::getVertexShader() {
                                       //            float capType; // 12
                                       //            float numDashValues; // 13
                                       //            float dashArray[4]; // 14 15 16 17
-                                      //            float offset; // 18
-                                      //            float dotted; // 19
-                                      //            float dottedSkew; // 20
+                                      //            float dashFade // 18 -- not supported currently!
+                                      //            float dashAnimationSpeed // 19 -- not supported currently!
+                                      //            float offset; // 20
+                                      //            float dotted; // 21
+                                      //            float dottedSkew; // 22
                                       //        };
                                       uniform float lineValues[) + std::to_string(sizeLineValuesArray) + OMMShaderCode(];
                                       uniform int numStyles;
@@ -173,7 +175,7 @@ std::string ColorLineGroup2dShaderOpenGl::getVertexShader() {
                                            ) : "") + OMMShaderCode(
                                            vec3 widthNormal = normalize(cross(radialNormal, lengthNormal));
 
-                                           float offsetFloat = lineValues[styleIndexBase + 18] * scaleFactor;
+                                           float offsetFloat = lineValues[styleIndexBase + 20] * scaleFactor;
                                            vec3 offset = vec3(widthNormal * offsetFloat);
 
                                            widthNormal *= widthNormalFactor;
@@ -269,10 +271,10 @@ std::string ColorLineGroup2dShaderOpenGl::getFragmentShader() {
                                            float a = colorA * opacity;
                                            float aGap = colorAGap * opacity;
 
-                                           int iDottedLine = int(floor(lineValues[int(fStyleIndexBase) + 19] + 0.5));
+                                           int iDottedLine = int(floor(lineValues[int(fStyleIndexBase) + 21] + 0.5));
 
                                            if (iDottedLine == 1) {
-                                               float skew = lineValues[int(fStyleIndexBase) + 20];
+                                               float skew = lineValues[int(fStyleIndexBase) + 22];
 
                                                float factorToT = (radius * 2.0) / lineLength * skew;
                                                float dashOffset = (radius - skew * radius) / lineLength;

@@ -141,17 +141,6 @@ void Line2dLayerObject::setStyle(const LineStyle &style, bool highlighted) {
 
     s.width = style.width;
 
-    // dashes
-    auto dashArray = style.dashArray;
-    auto dn = dashArray.size();
-    s.numDashValue = dn;
-    s.dashValue0 = dn > 0 ? dashArray[0] : 0.0;
-    s.dashValue1 = (dn > 1 ? dashArray[1] : 0.0) + s.dashValue0;
-    s.dashValue2 = (dn > 2 ? dashArray[2] : 0.0) + s.dashValue1;
-    s.dashValue3 = (dn > 3 ? dashArray[3] : 0.0) + s.dashValue2;
-    s.dashFade = style.dashFade;
-    s.dashAnimationSpeed = style.dashAnimationSpeed;
-
     // line caps
     auto lineCap = style.lineCap;
 
@@ -164,6 +153,18 @@ void Line2dLayerObject::setStyle(const LineStyle &style, bool highlighted) {
     }
 
     s.lineCap = cap;
+
+    // dashes
+    auto dashArray = style.dashArray;
+    auto dn = dashArray.size();
+    s.numDashValue = dn;
+    s.dashValue0 = dn > 0 ? dashArray[0] : 0.0;
+    s.dashValue1 = (dn > 1 ? dashArray[1] : 0.0) + s.dashValue0;
+    s.dashValue2 = (dn > 2 ? dashArray[2] : 0.0) + s.dashValue1;
+    s.dashValue3 = (dn > 3 ? dashArray[3] : 0.0) + s.dashValue2;
+    s.dashFade = style.dashFade;
+    s.dashAnimationSpeed = style.dashAnimationSpeed;
+
     s.offset = style.offset;
 
     s.dotted = style.dotted;
