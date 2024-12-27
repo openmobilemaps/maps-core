@@ -99,11 +99,15 @@ class MapCamera3d : public MapCameraInterface,
 
     std::optional<std::vector<float>> getLastVpMatrix() override;
 
+    std::optional<std::vector<float>> getLastInverseVpMatrix() override;
+
     std::optional<::RectCoord> getLastVpMatrixViewBounds() override;
 
     std::optional<float> getLastVpMatrixRotation() override;
 
     std::optional<float> getLastVpMatrixZoom() override;
+
+    std::optional<::Vec3D> getLastCameraPosition() override;
 
     /** this method is called just before the update methods on all layers */
     virtual void update() override;
@@ -231,6 +235,7 @@ class MapCamera3d : public MapCameraInterface,
     std::optional<RectCoord> lastVpBounds = std::nullopt;
     std::optional<double> lastVpRotation = std::nullopt;
     std::optional<double> lastVpZoom = std::nullopt;
+    std::optional<Vec3D> lastCameraPosition = std::nullopt;
 
     bool cameraFrozen = false;
 
@@ -305,6 +310,7 @@ class MapCamera3d : public MapCameraInterface,
     std::vector<double> inverseVPMatrix = std::vector<double>(16, 0.0);
     std::vector<float> viewMatrix = std::vector<float>(16, 0.0);
     std::vector<float> projectionMatrix = std::vector<float>(16, 0.0);
+    Vec3D cameraPosition = Vec3D(0.0, 0.0, 0.0);
     Vec3D origin;
     float verticalFov;
     float horizontalFov;

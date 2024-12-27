@@ -1,3 +1,4 @@
+@extern "../yaml/vec_3_d.yaml"
 @extern "../yaml/vec_2_f.yaml"
 @extern "../yaml/vec_2_i.yaml"
 @extern "../yaml/rect_i.yaml"
@@ -195,9 +196,11 @@ map_camera_interface = interface +c {
     get_last_vp_matrix_d() : optional<list<f64>>;
 
     get_last_vp_matrix() : optional<list<f32>>;
+    get_last_inverse_vp_matrix() : optional<list<f32>>;
     get_last_vp_matrix_view_bounds() : optional<rect_coord>;
     get_last_vp_matrix_rotation() : optional<f32>;
     get_last_vp_matrix_zoom() : optional<f32>;
+    get_last_camera_position() : optional<vec_3_d>;
 
     as_map_camera_3d(): optional<map_camera_3d_interface>;
 }

@@ -56,4 +56,6 @@ public:
     std::shared_ptr<ColorShaderInterface> createIcosahedronColorShader() override;
 
     std::shared_ptr<SphereEffectShaderInterface> createSphereEffectShader() override;
+
+    std::shared_ptr<SkySphereShaderInterface> createSkySphereShader() override;
 };
