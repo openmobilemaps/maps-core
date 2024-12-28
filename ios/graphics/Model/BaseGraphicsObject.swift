@@ -132,6 +132,8 @@ extension BaseGraphicsObject: MCGraphicsObjectInterface {
         s.writeMask = writeMask
 
         let desc = MTLDepthStencilDescriptor()
+        desc.depthCompareFunction = .greaterEqual
+        desc.isDepthWriteEnabled = true
         desc.frontFaceStencil = s
         desc.backFaceStencil = s
 
@@ -148,6 +150,8 @@ extension BaseGraphicsObject: MCGraphicsObjectInterface {
         s.writeMask = 0b0000_0001
 
         let desc = MTLDepthStencilDescriptor()
+        desc.depthCompareFunction = .greaterEqual
+        desc.isDepthWriteEnabled = true
         desc.frontFaceStencil = s
         desc.backFaceStencil = s
 

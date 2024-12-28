@@ -20,6 +20,8 @@ class ClearStencilShader: BaseShader, @unchecked Sendable {
         descriptor.depthFailureOperation = .zero
         descriptor.depthStencilPassOperation = .zero
         let depthStencilDescriptor = MTLDepthStencilDescriptor()
+        depthStencilDescriptor.depthCompareFunction = .greaterEqual
+        depthStencilDescriptor.isDepthWriteEnabled = true
         depthStencilDescriptor.frontFaceStencil = descriptor
         depthStencilDescriptor.backFaceStencil = descriptor
         return MetalContext.current.device.makeDepthStencilState(descriptor: depthStencilDescriptor)

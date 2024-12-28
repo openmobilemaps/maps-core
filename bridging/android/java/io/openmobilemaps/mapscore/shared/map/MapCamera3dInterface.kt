@@ -12,6 +12,8 @@ abstract class MapCamera3dInterface {
 
     abstract fun setCameraConfig(config: Camera3dConfig, durationSeconds: Float?, targetZoom: Float?, targetCoordinate: io.openmobilemaps.mapscore.shared.map.coordinates.Coord?)
 
+    abstract fun setHardwareVpMatrix(vpMatrix: ArrayList<Double>)
+
     public class CppProxy : MapCamera3dInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -38,5 +40,11 @@ abstract class MapCamera3dInterface {
             native_setCameraConfig(this.nativeRef, config, durationSeconds, targetZoom, targetCoordinate)
         }
         private external fun native_setCameraConfig(_nativeRef: Long, config: Camera3dConfig, durationSeconds: Float?, targetZoom: Float?, targetCoordinate: io.openmobilemaps.mapscore.shared.map.coordinates.Coord?)
+
+        override fun setHardwareVpMatrix(vpMatrix: ArrayList<Double>) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setHardwareVpMatrix(this.nativeRef, vpMatrix)
+        }
+        private external fun native_setHardwareVpMatrix(_nativeRef: Long, vpMatrix: ArrayList<Double>)
     }
 }

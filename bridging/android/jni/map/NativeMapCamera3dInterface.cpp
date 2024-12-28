@@ -40,4 +40,12 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera3dIn
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera3dInterface_00024CppProxy_native_1setHardwareVpMatrix(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_vpMatrix)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::MapCamera3dInterface>(nativeRef);
+        ref->setHardwareVpMatrix(::djinni::List<::djinni::F64>::toCpp(jniEnv, j_vpMatrix));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
 } // namespace djinni_generated

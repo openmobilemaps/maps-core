@@ -15,4 +15,6 @@
              targetZoom:(nullable NSNumber *)targetZoom
        targetCoordinate:(nullable MCCoord *)targetCoordinate;
 
+- (void)setHardwareVpMatrix:(nonnull NSArray<NSNumber *> *)vpMatrix;
+
 @end

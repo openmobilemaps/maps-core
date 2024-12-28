@@ -491,7 +491,18 @@ std::optional<std::tuple<std::vector<double>, std::vector<double>, Vec3D>> MapCa
     MatrixD::translateM(newViewMatrix, 0, x, y, z);
 
     std::vector<double> newVpMatrix(16, 0.0);
-    MatrixD::multiplyMM(newVpMatrix, 0, newProjectionMatrix, 0, newViewMatrix, 0);
+    if (hardwareVpMatrix.size() == 16) {
+        MatrixD::setIdentityM(newViewMatrix, 0);
+        MatrixD::translateM(newViewMatrix, 0, 0.0, cameraPitch, 0.0);
+        cameraPitch += 0.00001;
+        MatrixD::rotateM(newViewMatrix, 0, -angle, 1.0, 0.0, 0.0);
+        angle += 0.1 ;
+        MatrixD::scaleM(newViewMatrix, 0, 0.2, 0.2, 0.2);
+        MatrixD::multiplyMM(newVpMatrix, 0, hardwareVpMatrix, 0, newViewMatrix, 0);
+    }
+    else {
+        MatrixD::multiplyMM(newVpMatrix, 0, newProjectionMatrix, 0, newViewMatrix, 0);
+    }
 
     std::vector<double> newInverseMatrix(16, 0.0);
     gluInvertMatrix(newVpMatrix, newInverseMatrix);
@@ -562,6 +573,11 @@ std::optional<float> MapCamera3d::getLastVpMatrixRotation() {
 std::optional<float> MapCamera3d::getLastVpMatrixZoom() {
     std::lock_guard<std::recursive_mutex> lock(matrixMutex);
     return lastVpZoom;
+}
+
+void MapCamera3d::setHardwareVpMatrix(const std::vector<double> & vpMatrix) {
+    std::lock_guard<std::recursive_mutex> lock(matrixMutex);
+    hardwareVpMatrix = vpMatrix;
 }
 
 /** this method is called just before the update methods on all layers */

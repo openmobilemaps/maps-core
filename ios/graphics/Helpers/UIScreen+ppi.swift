@@ -10,7 +10,8 @@
 
 import UIKit
 
-extension UIScreen {
+@MainActor
+enum DevicePpi {
     // taken from https://github.com/Clafou/DevicePpi
     private static var mapping: [([String], Double)] = [
         (
@@ -218,6 +219,9 @@ extension UIScreen {
     ]
 
     static let pixelsPerInch: Double = {
+#if os(visionOS)
+        return 500 // ???
+#else
         let modelIdentifier = UIDevice.modelIdentifier
         if let ppi = mapping.first(where: { $0.0.contains(modelIdentifier)}) {
             return ppi.1
@@ -231,10 +235,28 @@ extension UIScreen {
             return screen.nativeScale == 3 ? 460 : 401
         }
         return 326
+#endif
+    }()
+
+    static let scale: Double = {
+#if os(visionOS)
+        return 3.0
+#else
+        return UIScreen.main.scale
+#endif
+    }()
+
+    static let nativeScale: Double = {
+#if os(visionOS)
+        return 3.0
+#else
+        return UIScreen.main.nativeScale
+#endif
     }()
 
     var pointsPerInch: Double {
-        Self.pixelsPerInch / nativeScale
+
+        return Self.pixelsPerInch / Self.nativeScale
     }
 }
 

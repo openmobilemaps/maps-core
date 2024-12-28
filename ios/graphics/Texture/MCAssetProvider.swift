@@ -39,11 +39,11 @@ open class MCAssetProvider: MCTiled2dMapVectorLayerSymbolDelegateInterface {
     }
     let scale = if Thread.isMainThread {
         MainActor.assumeIsolated {
-            UIScreen.main.nativeScale
+            DevicePpi.nativeScale
         }
     } else {
         DispatchQueue.main.sync {
-            UIScreen.main.nativeScale
+            DevicePpi.nativeScale
         }
     }
         let packerResult = MCRectanglePacker.pack(images.mapValues { MCVec2I(x: Int32($0.size.width * scale), y: Int32($0.size.height * scale)) }, maxPageSize: MCVec2I(x: 4096, y: 4096))

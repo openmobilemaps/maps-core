@@ -58,6 +58,8 @@ final class Quad2d: BaseGraphicsObject, @unchecked Sendable {
         ss2.writeMask = 0b0000_0000
 
         let s2 = MTLDepthStencilDescriptor()
+        s2.depthCompareFunction = .greaterEqual
+        s2.isDepthWriteEnabled = true
         s2.frontFaceStencil = ss2
         s2.backFaceStencil = ss2
 
