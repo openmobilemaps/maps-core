@@ -206,7 +206,7 @@ map_camera_3d_interface = interface +c {
     get_camera_config(): camera_3d_config;
 
     set_camera_config(config: camera_3d_config, durationSeconds: optional<f32>, target_zoom: optional<f32>, target_coordinate: optional<coord>);
-	set_hardware_vp_matrix(vp_matrix: list<f64>);
+    set_hardware_matrices(view_matrix: list<f64>, projection_matrix: list<f64>);
 }
 
 camera_interpolation = record {

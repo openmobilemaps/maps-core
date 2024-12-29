@@ -490,19 +490,25 @@ std::optional<std::tuple<std::vector<double>, std::vector<double>, Vec3D>> MapCa
 
     MatrixD::translateM(newViewMatrix, 0, x, y, z);
 
-    std::vector<double> newVpMatrix(16, 0.0);
-    if (hardwareVpMatrix.size() == 16) {
+
+
+    if (hardwareViewMatrix.size() == 16 && hardwareProjectionMatrix.size() == 16) {
+        newProjectionMatrix = hardwareProjectionMatrix;
+
+        // fake camera movement
         MatrixD::setIdentityM(newViewMatrix, 0);
         MatrixD::translateM(newViewMatrix, 0, 0.0, cameraPitch, 0.0);
-        cameraPitch += 0.00001;
+        angle += 0.1;
         MatrixD::rotateM(newViewMatrix, 0, -angle, 1.0, 0.0, 0.0);
-        angle += 0.1 ;
         MatrixD::scaleM(newViewMatrix, 0, 0.2, 0.2, 0.2);
-        MatrixD::multiplyMM(newVpMatrix, 0, hardwareVpMatrix, 0, newViewMatrix, 0);
+
+        std::vector<double> combinedHardwareViewMatrix(16, 0.0);
+        MatrixD::multiplyMM(combinedHardwareViewMatrix, 0, hardwareViewMatrix, 0, newViewMatrix, 0);
+        newViewMatrix = combinedHardwareViewMatrix;
     }
-    else {
-        MatrixD::multiplyMM(newVpMatrix, 0, newProjectionMatrix, 0, newViewMatrix, 0);
-    }
+
+    std::vector<double> newVpMatrix(16, 0.0);
+    MatrixD::multiplyMM(newVpMatrix, 0, newProjectionMatrix, 0, newViewMatrix, 0);
 
     std::vector<double> newInverseMatrix(16, 0.0);
     gluInvertMatrix(newVpMatrix, newInverseMatrix);
@@ -575,9 +581,14 @@ std::optional<float> MapCamera3d::getLastVpMatrixZoom() {
     return lastVpZoom;
 }
 
-void MapCamera3d::setHardwareVpMatrix(const std::vector<double> & vpMatrix) {
-    std::lock_guard<std::recursive_mutex> lock(matrixMutex);
-    hardwareVpMatrix = vpMatrix;
+void MapCamera3d::setHardwareMatrices(const std::vector<double> & viewMatrix, const std::vector<double> & projectionMatrix) {
+    {
+        std::lock_guard<std::recursive_mutex> lock(matrixMutex);
+        hardwareViewMatrix = viewMatrix;
+        hardwareProjectionMatrix = projectionMatrix;
+    }
+    update();
+    notifyListeners(ListenerType::BOUNDS);
 }
 
 /** this method is called just before the update methods on all layers */
@@ -1368,7 +1379,7 @@ bool MapCamera3d::coordIsOnFrontHalfOfGlobe(Coord coord) {
 
     const auto projectedCenter = projectedPoint({-origin.x, -origin.y, -origin.z, 1});
 
-    bool isInFront = projectedCoord.z <= projectedCenter.z;
+    bool isInFront = projectedCoord.z >= projectedCenter.z;
 
     return isInFront;
 }
@@ -1415,7 +1426,7 @@ double MapCamera3d::mapUnitsFromPixels(double distancePx) {
         // 1.4 is an empirically determined scaling factor, observed to align 2D and 3D measurements
         // based on visual comparisons of screenshots.
         // TODO: Investigate the origin of this 1.4 factor
-        return 1.4 * distancePx * sqrt(sampleDistance * sampleDistance * 2) / projectedLength;
+        return 1.4 * distancePx * sqrt(sampleDistance * sampleDistance * 2) / projectedLength * 0.05;
     }
     return distancePx * screenPixelAsRealMeterFactor * zoom;
 }

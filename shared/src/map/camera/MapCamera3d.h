@@ -105,7 +105,7 @@ class MapCamera3d : public MapCameraInterface,
 
     std::optional<float> getLastVpMatrixZoom() override;
 
-    virtual void setHardwareVpMatrix(const std::vector<double> & vpMatrix) override;
+    virtual void setHardwareMatrices(const std::vector<double> & viewMatrix, const std::vector<double> & projectionMatrix) override;
 
     /** this method is called just before the update methods on all layers */
     virtual void update() override;
@@ -302,7 +302,8 @@ class MapCamera3d : public MapCameraInterface,
     std::recursive_mutex paramMutex;
     std::recursive_mutex matrixMutex;
 
-    std::vector<double> hardwareVpMatrix = std::vector<double>(0, 0.0);
+    std::vector<double> hardwareViewMatrix = std::vector<double>(0, 0.0);
+    std::vector<double> hardwareProjectionMatrix = std::vector<double>(0, 0.0);
     std::vector<float> vpMatrix = std::vector<float>(16, 0.0);
     std::vector<double> vpMatrixD = std::vector<double>(16, 0.0);
     std::vector<double> inverseVPMatrix = std::vector<double>(16, 0.0);

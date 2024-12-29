@@ -220,7 +220,7 @@ enum DevicePpi {
 
     static let pixelsPerInch: Double = {
 #if os(visionOS)
-        return 500 // ???
+        return 300 // ???
 #else
         let modelIdentifier = UIDevice.modelIdentifier
         if let ppi = mapping.first(where: { $0.0.contains(modelIdentifier)}) {

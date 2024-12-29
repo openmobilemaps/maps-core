@@ -17,5 +17,5 @@ public:
 
     virtual void setCameraConfig(const Camera3dConfig & config, std::optional<float> durationSeconds, std::optional<float> targetZoom, const std::optional<::Coord> & targetCoordinate) = 0;
 
-    virtual void setHardwareVpMatrix(const std::vector<double> & vpMatrix) = 0;
+    virtual void setHardwareMatrices(const std::vector<double> & viewMatrix, const std::vector<double> & projectionMatrix) = 0;
 };

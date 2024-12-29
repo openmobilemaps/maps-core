@@ -101,12 +101,15 @@ final class Quad2d: BaseGraphicsObject, @unchecked Sendable {
             return
         }
 
+
         #if DEBUG
             encoder.pushDebugGroup(label)
             defer {
                 encoder.popDebugGroup()
             }
         #endif
+
+        encoder.setDepthBias(0.1, slopeScale: 1.0, clamp: 0.2)
 
         if isMasked {
             if stencilState == nil {

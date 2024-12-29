@@ -104,6 +104,8 @@ final class TextInstanced: BaseGraphicsObject, @unchecked Sendable {
             encoder.pushDebugGroup(label + "-Halo")
         #endif
 
+        encoder.setDepthBias(0.2, slopeScale: 1.0, clamp: 0.2)
+
         shader.setupProgram(context)
         shader.preRender(context)
 
