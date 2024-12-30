@@ -160,7 +160,7 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
                 fontString.append(font + ",");
             }
             fontString.pop_back();
-            ExceptionLogger::instance().logMessage("map-core:Tiled2dMapVectorSymbolObject", 0, "font (" + fontString + ") could not be loaded");
+            ExceptionLogger::instance().logMessage("maps-core:Tiled2dMapVectorSymbolObject", 0, "font (" + fontString + ") could not be loaded");
             LogError << "font (" << fontString <<=") could not be loaded";
         }
     } else {

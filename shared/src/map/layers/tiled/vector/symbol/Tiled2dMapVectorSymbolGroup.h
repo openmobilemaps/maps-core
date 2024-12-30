@@ -111,7 +111,7 @@ private:
 
     std::shared_ptr<Quad2dInstancedInterface> iconInstancedObject;
     std::shared_ptr<Quad2dStretchedInstancedInterface> stretchedInstancedObject;
-    std::shared_ptr<TextInstancedInterface> textInstancedObject;
+    std::unordered_map<std::string, std::shared_ptr<TextInstancedInterface>> textInstancedObjects;
     std::shared_ptr<PolygonGroup2dLayerObject> boundingBoxLayerObject;
 
     std::shared_ptr<TextureHolderInterface> spriteTexture;
@@ -152,14 +152,30 @@ private:
     std::vector<float> iconOffsets;
     std::vector<float> iconTextureCoordinates;
 
-    std::shared_ptr<FontLoaderResult> fontResult;
-    std::vector<float> textPositions;
-    std::vector<float> textReferencePositions;
-    std::vector<float> textScales;
-    std::vector<float> textRotations;
-    std::vector<uint16_t> textStyleIndices;
-    std::vector<float> textStyles;
-    std::vector<float> textTextureCoordinates;
+    struct TextDescriptor {
+        std::shared_ptr<FontLoaderResult> fontResult;
+        std::vector<float> textPositions;
+        std::vector<float> textReferencePositions;
+        std::vector<float> textScales;
+        std::vector<float> textRotations;
+        std::vector<uint16_t> textStyleIndices;
+        std::vector<float> textStyles;
+        std::vector<float> textTextureCoordinates;
+
+        TextDescriptor(int32_t textStyleCount, size_t textCharactersCount, std::shared_ptr<FontLoaderResult> fontResult, bool is3d)
+                : fontResult(fontResult) {
+            textStyles.resize(textStyleCount * 10, 0.0);
+            textStyleIndices.resize(textCharactersCount, 0);
+            textRotations.resize(textCharactersCount, 0.0);
+            textScales.resize(textCharactersCount * 2, 0.0);
+            textPositions.resize(textCharactersCount * 2, 0.0);
+            if (is3d) {
+                textReferencePositions.resize(textCharactersCount * 3, 0.0);
+            }
+            textTextureCoordinates.resize(textCharactersCount * 4, 0.0);
+        }
+    };
+    std::unordered_map<std::string, std::shared_ptr<TextDescriptor>> textDescriptors;
 
     std::vector<float> stretchedIconPositions;
     std::vector<float> stretchedIconScales;
