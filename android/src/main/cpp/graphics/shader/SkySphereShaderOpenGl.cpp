@@ -64,12 +64,13 @@ std::string SkySphereShaderOpenGl::getVertexShader() {
                                       in vec4 vPosition;
                                       in vec2 texCoordinate;
                                       out vec2 v_screenPos;
+                                      out vec2 v_textureScaleFactors;
 
                                       void main() {
                                           gl_Position = vPosition; // in screen coordinates
-                                          v_screenPos = texCoordinate;
-                                      }
-                                      );
+                                          v_screenPos = vPosition.xy;
+                                          v_textureScaleFactors = abs(texCoordinate) / abs(vPosition.xy);
+                                      });
 }
 
 std::string SkySphereShaderOpenGl::getFragmentShader() {
@@ -82,16 +83,17 @@ std::string SkySphereShaderOpenGl::getFragmentShader() {
                                       uniform sampler2D textureSampler;
 
                                       in vec2 v_screenPos;
+                                      in vec2 v_textureScaleFactors;
                                       out vec4 fragmentColor;
 
-                                      const float PI = 3.1415926536;
+                                      const float PI = 3.141592653589793;
 
                                       void main() {
-                                          vec4 posCart = uInverseVPMatrix * vec4(v_screenPos.x, -v_screenPos.y, 1.0, 1.0);
+                                          vec4 posCart = uInverseVPMatrix * vec4(v_screenPos.x, v_screenPos.y, 1.0, 1.0);
                                           posCart /= posCart.w;
 
                                           // Assume the sky on a sphere around the camera (and not the earth's center)
-                                          vec4 dirCamera = normalize(posCart - uCameraPosition);
+                                          vec3 dirCamera = normalize(posCart.xyz - uCameraPosition.xyz);
 
                                           float rasc = atan(dirCamera.z, dirCamera.x) + PI;
                                           float decl = asin(dirCamera.y);
@@ -99,14 +101,14 @@ std::string SkySphereShaderOpenGl::getFragmentShader() {
                                           vec2 texCoords = vec2(
                                                   -(rasc / (2.0 * PI)) + 1.0,
                                                   -decl / PI + 0.5
-                                          );
+                                          ) * v_textureScaleFactors;
 
-                                          ivec2 textureSize = textureSize(textureSampler, 0);
+                                          // Mutli-sampling
+                                          /*ivec2 textureSize = textureSize(textureSampler, 0);
                                           vec2 size = vec2(1.0 / float(textureSize.x), 1.0 / float(textureSize.y));
                                           size.y *= cos(decl);
 
-                                          // Mutli-sampling
-                                          /*fragmentColor = 0.2837 * texture(textureSampler, texCoords);
+                                          fragmentColor = 0.2837 * texture(textureSampler, texCoords);
                                           fragmentColor = fragmentColor + 0.179083648 * texture(textureSampler, texCoords + (vec2(0.0, -2.0)) * size);
                                           fragmentColor = fragmentColor + 0.179083648 * texture(textureSampler, texCoords + (vec2(2.0, 0.0)) * size);
                                           fragmentColor = fragmentColor + 0.179083648 * texture(textureSampler, texCoords + (vec2(0.0, 2.0)) * size);
@@ -115,14 +117,14 @@ std::string SkySphereShaderOpenGl::getFragmentShader() {
                                           // Single sample
                                           fragmentColor = texture(textureSampler, texCoords);
 
+                                          // Debug rendering
                                           /*if (abs(mod(texCoords.x, 0.125)) < 0.001) {
                                               fragmentColor = vec4(0.0, 0.0, 1.0, 1.0);
                                           } else if (abs(mod(texCoords.y, 0.125)) < 0.001) {
                                               fragmentColor = vec4(0.0, 1.0, 1.0, 1.0);
-                                          }*/ /*else {
+                                          } else {
                                               fragmentColor = vec4(texCoords, 0.0, 1.0);
                                           }*/
-
                                       }
     );
 }
