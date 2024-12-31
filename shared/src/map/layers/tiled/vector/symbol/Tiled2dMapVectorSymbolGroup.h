@@ -111,7 +111,7 @@ private:
 
     std::shared_ptr<Quad2dInstancedInterface> iconInstancedObject;
     std::shared_ptr<Quad2dStretchedInstancedInterface> stretchedInstancedObject;
-    std::unordered_map<std::string, std::shared_ptr<TextInstancedInterface>> textInstancedObjects;
+    std::vector<std::shared_ptr<TextInstancedInterface>> textInstancedObjects;
     std::shared_ptr<PolygonGroup2dLayerObject> boundingBoxLayerObject;
 
     std::shared_ptr<TextureHolderInterface> spriteTexture;
@@ -175,7 +175,7 @@ private:
             textTextureCoordinates.resize(textCharactersCount * 4, 0.0);
         }
     };
-    std::unordered_map<std::string, std::shared_ptr<TextDescriptor>> textDescriptors;
+    std::vector<std::shared_ptr<TextDescriptor>> textDescriptors;
 
     std::vector<float> stretchedIconPositions;
     std::vector<float> stretchedIconScales;

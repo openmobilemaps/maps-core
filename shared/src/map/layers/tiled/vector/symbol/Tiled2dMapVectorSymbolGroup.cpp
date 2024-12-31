@@ -425,8 +425,8 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
 
             textInstancedObject->setInstanceCount(textCharactersCount);
 
-            textInstancedObjects[fontResult->fontData->info.name] = textInstancedObject;
-            textDescriptors[fontResult->fontData->info.name] = std::make_shared<TextDescriptor>(textStyleCount, textCharactersCount, fontResult, is3d);
+            textInstancedObjects.push_back(textInstancedObject);
+            textDescriptors.emplace_back(std::make_shared<TextDescriptor>(textStyleCount, textCharactersCount, fontResult, is3d));
         }
     }
 
@@ -507,12 +507,17 @@ void Tiled2dMapVectorSymbolGroup::setupObjects(const std::shared_ptr<SpriteData>
                                            tileInfo.tileInfo.zoomIdentifier, spriteTexture, spriteData);
         auto font = object->getFont();
         if (font) {
-            const auto &textDescriptor = textDescriptors.find(font->fontData->info.name);
-            int32_t currentTextOffset = textOffsets[font->fontData->info.name];
-            uint16_t currentStyleOffset = textStyleOffsets[font->fontData->info.name];
+            const auto &textDescriptor = std::find_if(textDescriptors.begin(), textDescriptors.end(),
+                                                      [&font](const auto &textDescriptor) {
+                                                          return font->fontData->info.name ==
+                                                                 textDescriptor->fontResult->fontData->info.name;
+                                                      });
             if (textDescriptor != textDescriptors.end()) {
-                object->setupTextProperties(textDescriptor->second->textTextureCoordinates, textDescriptor->second->textStyleIndices, currentTextOffset,
-                                            currentStyleOffset,
+                int32_t currentTextOffset = textOffsets[font->fontData->info.name];
+                uint16_t currentStyleOffset = textStyleOffsets[font->fontData->info.name];
+                object->setupTextProperties((*textDescriptor)->textTextureCoordinates,
+                                            (*textDescriptor)->textStyleIndices,
+                                            currentTextOffset, currentStyleOffset,
                                             tileInfo.tileInfo.zoomIdentifier);
                 textOffsets[font->fontData->info.name] = currentTextOffset;
                 textStyleOffsets[font->fontData->info.name] = currentStyleOffset;
@@ -556,8 +561,9 @@ void Tiled2dMapVectorSymbolGroup::setupObjects(const std::shared_ptr<SpriteData>
                             4 * (int32_t) sizeof(float)));
     }
 
-    for (const auto &[fontName, textDescriptor] : textDescriptors) {
-        const auto &textInstancedObject = textInstancedObjects[fontName];
+    for (size_t i = 0; i < textDescriptors.size(); i++) {
+        const auto &textDescriptor = textDescriptors[i];
+        const auto &textInstancedObject = textInstancedObjects[i];
         if (this->spriteData == nullptr) {
             textInstancedObject->setFrame(Quad2dD(Vec2D(-0.5, 0.5), Vec2D(0.5, 0.5), Vec2D(0.5, -0.5), Vec2D(-0.5, -0.5)), tileOrigin, is3d);
             textInstancedObject->loadTexture(context, textDescriptor->fontResult->imageData);
@@ -610,11 +616,17 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
                                                 scaleFactor, rotation, now, viewPortSize);
             auto font = object->getFont();
             if (font) {
-                const auto &textDescriptor = textDescriptors.find(font->fontData->info.name);
-                int32_t currentTextOffset = textOffsets[font->fontData->info.name];
-                uint16_t currentStyleOffset = textStyleOffsets[font->fontData->info.name];
+                const auto &textDescriptor = std::find_if(textDescriptors.begin(), textDescriptors.end(),
+                                                          [&font](const auto &textDescriptor) {
+                                                              return font->fontData->info.name ==
+                                                                     textDescriptor->fontResult->fontData->info.name;
+                                                          });
                 if (textDescriptor != textDescriptors.end()) {
-                    object->updateTextProperties(textDescriptor->second->textPositions, textDescriptor->second->textReferencePositions, textDescriptor->second->textScales, textDescriptor->second->textRotations, textDescriptor->second->textStyles,
+                    int32_t currentTextOffset = textOffsets[font->fontData->info.name];
+                    uint16_t currentStyleOffset = textStyleOffsets[font->fontData->info.name];
+                    object->updateTextProperties((*textDescriptor)->textPositions, (*textDescriptor)->textReferencePositions,
+                                                 (*textDescriptor)->textScales, (*textDescriptor)->textRotations,
+                                                 (*textDescriptor)->textStyles,
                                                  currentTextOffset, currentStyleOffset,
                                                  zoomIdentifier, scaleFactor, rotation, now, viewPortSize, vpMatrix, origin);
                     textOffsets[font->fontData->info.name] = currentTextOffset;
@@ -668,8 +680,9 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
                                 10 * (int32_t) sizeof(float)));
         }
 
-        for (const auto &[fontName, textDescriptor] : textDescriptors) {
-            const auto &textInstancedObject = textInstancedObjects[fontName];
+        for (size_t i = 0; i < textDescriptors.size(); i++) {
+            const auto &textDescriptor = textDescriptors[i];
+            const auto &textInstancedObject = textInstancedObjects[i];
             textInstancedObject->setPositions(
                     SharedBytes((int64_t) textDescriptor->textPositions.data(), (int32_t) textDescriptor->textRotations.size(), 2 * (int32_t) sizeof(float)));
             if (is3d) {
@@ -938,7 +951,7 @@ void Tiled2dMapVectorSymbolGroup::clear() {
     if (stretchedInstancedObject) {
         stretchedInstancedObject->asGraphicsObject()->clear();
     }
-    for (const auto &[fontName, textInstancedObject] : textInstancedObjects) {
+    for (const auto &textInstancedObject : textInstancedObjects) {
         textInstancedObject->asGraphicsObject()->clear();
     }
     this->spriteData = nullptr;
@@ -974,7 +987,7 @@ std::vector<std::shared_ptr< ::RenderObjectInterface>> Tiled2dMapVectorSymbolGro
     if (stretchIconObject) {
         renderObjects.push_back(std::make_shared<RenderObject>(stretchIconObject->asGraphicsObject()));
     }
-    for (const auto &[fontName, textInstancedObject] : textInstancedObjects) {
+    for (const auto &textInstancedObject : textInstancedObjects) {
         renderObjects.push_back(std::make_shared<RenderObject>(textInstancedObject->asGraphicsObject()));
     }
 
