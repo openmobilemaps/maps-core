@@ -56,7 +56,7 @@ final class TextInstanced: BaseGraphicsObject, @unchecked Sendable {
         ss2.writeMask = 0b0000_0000
 
         let s2 = MTLDepthStencilDescriptor()
-        s2.depthCompareFunction = .greaterEqual
+        s2.depthCompareFunction = .always
         s2.isDepthWriteEnabled = true
         s2.frontFaceStencil = ss2
         s2.backFaceStencil = ss2
@@ -104,7 +104,7 @@ final class TextInstanced: BaseGraphicsObject, @unchecked Sendable {
             encoder.pushDebugGroup(label + "-Halo")
         #endif
 
-        encoder.setDepthBias(0.2, slopeScale: 1.0, clamp: 0.2)
+        encoder.setDepthBias(0.2, slopeScale: 1.0, clamp: 0.0)
 
         shader.setupProgram(context)
         shader.preRender(context)
@@ -189,7 +189,9 @@ final class TextInstanced: BaseGraphicsObject, @unchecked Sendable {
             indexBuffer: indicesBuffer,
             indexBufferOffset: 0,
             instanceCount: instanceCount)
+
         isHalo = false
+
         #if DEBUG
             encoder.popDebugGroup()
             encoder.pushDebugGroup(label)

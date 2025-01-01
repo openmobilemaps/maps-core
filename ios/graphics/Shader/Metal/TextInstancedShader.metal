@@ -56,7 +56,7 @@ unitSphereTextInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
 
     float alpha = 1.0;
 
-    if (diffCenter.z > 0) {
+    if (diffCenter.z < 0) {
         alpha = 0.0;
     }
 
@@ -70,7 +70,7 @@ unitSphereTextInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
     auto pRot = float2((pScaled.x * cosAngle - pScaled.y * sinAngle),
                        (pScaled.x * sinAngle + pScaled.y * cosAngle) * aspectRatio);
 
-    auto position = float4(screenPosition.xy + offset.xy + pRot, screenPosition.z, 1.0);
+    auto position = float4(screenPosition.xy + offset.xy + pRot, 1.0, 1.0);
 
     TextInstancedVertexOut out {
       .position = position,

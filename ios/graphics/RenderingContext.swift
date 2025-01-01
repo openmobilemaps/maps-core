@@ -19,7 +19,7 @@ public class RenderingContext: NSObject, @unchecked Sendable {
     public weak var computeEncoder: MTLComputeCommandEncoder?
     public weak var sceneView: MCMapView?
 
-    public static let bufferCount = 3  // Triple buffering
+    public static let bufferCount = 6  // Triple buffering
     private(set) var currentBufferIndex = 0
 
     public private(set) var time: Float = 0
@@ -30,6 +30,10 @@ public class RenderingContext: NSObject, @unchecked Sendable {
         currentBufferIndex =
             (currentBufferIndex + 1) % RenderingContext.bufferCount
         time = Float(-start.timeIntervalSinceNow)
+    }
+
+    public func secondEye() {
+        currentBufferIndex += 1
     }
 
 

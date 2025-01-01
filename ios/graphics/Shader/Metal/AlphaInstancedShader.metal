@@ -52,7 +52,7 @@ unitSphereAlphaInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
 
     auto diffCenter = screenPosition - earthCenter;
 
-    if (diffCenter.z > 0) {
+    if (diffCenter.z < 0) {
         alpha = 0.0;
     }
 

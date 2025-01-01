@@ -493,14 +493,28 @@ std::optional<std::tuple<std::vector<double>, std::vector<double>, Vec3D>> MapCa
 
 
     if (hardwareViewMatrix.size() == 16 && hardwareProjectionMatrix.size() == 16) {
+
+        // lat and lon of zurich
+        const double lon = 8.5417;
+        const double lat = 47.3769;
+        focusPointPosition.x = lon;
+        focusPointPosition.y = lat;
+
         newProjectionMatrix = hardwareProjectionMatrix;
 
         // fake camera movement
         MatrixD::setIdentityM(newViewMatrix, 0);
-        MatrixD::translateM(newViewMatrix, 0, 0.0, cameraPitch, 0.0);
-        angle += 0.1;
-        MatrixD::rotateM(newViewMatrix, 0, -angle, 1.0, 0.0, 0.0);
-        MatrixD::scaleM(newViewMatrix, 0, 0.2, 0.2, 0.2);
+        // current time in seconds
+        auto time = DateHelper::currentTimeMicros() / 1'000'000.0;
+//        angle += 0.1;
+//        MatrixD::translateM(newViewMatrix, 0, -x, -y, -z);
+//        MatrixD::rotateM(newViewMatrix, 0, time * 360.0 / 30.0, 0, 1.0, 0.0);
+//        MatrixD::translateM(newViewMatrix, 0, x, y, z);
+
+        MatrixD::translateM(newViewMatrix, 0, sin(time) * 0.0, 1, -2);
+        MatrixD::scaleM(newViewMatrix, 0, 0.5, 0.5, 0.5);
+
+
 
         std::vector<double> combinedHardwareViewMatrix(16, 0.0);
         MatrixD::multiplyMM(combinedHardwareViewMatrix, 0, hardwareViewMatrix, 0, newViewMatrix, 0);
@@ -1379,7 +1393,7 @@ bool MapCamera3d::coordIsOnFrontHalfOfGlobe(Coord coord) {
 
     const auto projectedCenter = projectedPoint({-origin.x, -origin.y, -origin.z, 1});
 
-    bool isInFront = projectedCoord.z >= projectedCenter.z;
+    bool isInFront = projectedCoord.z <= projectedCenter.z;
 
     return isInFront;
 }

@@ -132,7 +132,7 @@ public:
 
             auto diffCenterZ = env.temp1.z - earthCenterZ;
 
-            if (diffCenterZ > 0) {
+            if (diffCenterZ < 0) {
                 return std::nullopt;
             }
 
@@ -191,7 +191,7 @@ public:
 
             auto diffCenterZ = env.temp1.z - earthCenterZ;
 
-            if (diffCenterZ > 0) {
+            if (diffCenterZ < 0) {
                 return std::nullopt;
             }
 

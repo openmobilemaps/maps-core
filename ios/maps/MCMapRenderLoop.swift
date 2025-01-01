@@ -107,12 +107,14 @@ public func MCMapRenderLoop(
             }
 
             nextFrame.startUpdate()
-            mapInterface.prepare()
+            renderingContext.beginFrame()
             nextFrame.endUpdate()
 
             nextFrame.startSubmission()
 
-            let drawable = nextFrame.queryDrawable()!
+            guard let drawable = nextFrame.queryDrawable() else {
+                continue
+            }
 
 
             // Convert the timestamps into units of seconds
@@ -120,32 +122,15 @@ public func MCMapRenderLoop(
 
 
             let time = LayerRenderer.Clock.Instant.epoch.duration(to: drawable.frameTiming.presentationTime).timeInterval
+
             let deviceAnchor = worldTracking.queryDeviceAnchor(atTimestamp: time)
             drawable.deviceAnchor = deviceAnchor
 
 
             let commandBuffer = commandQueue.makeCommandBuffer()!
 
-
-
             for (eye, _) in drawable.colorTextures.enumerated() {
 
-                let renderPassDescriptor = MTLRenderPassDescriptor()
-
-                renderPassDescriptor.colorAttachments[0].texture = drawable.colorTextures[eye]
-                renderPassDescriptor.colorAttachments[0].loadAction = .clear
-                renderPassDescriptor.colorAttachments[0].clearColor = MTLClearColor(red: 0.0, green: 0.0, blue: 0.0, alpha: 0.0)
-                renderPassDescriptor.colorAttachments[0].storeAction = .store
-
-                renderPassDescriptor.depthAttachment.texture = drawable.depthTextures[eye]
-                renderPassDescriptor.depthAttachment.loadAction = .clear
-                renderPassDescriptor.depthAttachment.storeAction = .store
-                renderPassDescriptor.depthAttachment.clearDepth = 0.0
-
-
-                renderPassDescriptor.stencilAttachment.texture = drawable.depthTextures[eye]
-                renderPassDescriptor.stencilAttachment.loadAction = .clear
-                renderPassDescriptor.stencilAttachment.storeAction = .store
 
                 let projection = drawable.computeProjection(viewIndex: eye)
                 let originFromDevice = deviceAnchor?.originFromAnchorTransform
@@ -177,13 +162,36 @@ public func MCMapRenderLoop(
                         )
                 }
 
+
+                mapInterface.prepare()
+
+
+                let renderPassDescriptor = MTLRenderPassDescriptor()
+
+                renderPassDescriptor.colorAttachments[0].texture = drawable.colorTextures[eye]
+                renderPassDescriptor.colorAttachments[0].loadAction = .clear
+                renderPassDescriptor.colorAttachments[0].clearColor = MTLClearColor(red: 0.0, green: 0.0, blue: 0.0, alpha: 0.0)
+                renderPassDescriptor.colorAttachments[0].storeAction = .store
+
+                renderPassDescriptor.depthAttachment.texture = drawable.depthTextures[eye]
+                renderPassDescriptor.depthAttachment.loadAction = .clear
+                renderPassDescriptor.depthAttachment.storeAction = .store
+                renderPassDescriptor.depthAttachment.clearDepth = 0.0
+
+
+                renderPassDescriptor.stencilAttachment.texture = drawable.depthTextures[eye]
+                renderPassDescriptor.stencilAttachment.loadAction = .clear
+                renderPassDescriptor.stencilAttachment.storeAction = .store
+
+
+
                 if layerRenderer.configuration.layout == .layered {
                     renderPassDescriptor.renderTargetArrayLength = drawable.views.count
                 }
                 else {
                     renderPassDescriptor.renderTargetArrayLength = 1
                 }
-                //        renderPassDescriptor.rasterizationRateMap = drawable.rasterizationRateMaps[0]
+//                        renderPassDescriptor.rasterizationRateMap = drawable.rasterizationRateMaps[0]
 
                 let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor)!
 
@@ -193,6 +201,8 @@ public func MCMapRenderLoop(
                 mapInterface.drawFrame()
 
                 encoder.endEncoding()
+
+                renderingContext.secondEye()
             }
 
 
