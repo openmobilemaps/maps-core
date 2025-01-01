@@ -96,7 +96,7 @@ std::string TextInstancedShaderOpenGl::getVertexShader() {
                                    v_texCoord = texCoordinate;
                                    vStyleIndex = aStyleIndex;
                                    v_alpha = 1.0;
-                                   if (screenPosition.z - earthCenter.z > 0.0) {
+                                   if (screenPosition.z - earthCenter.z < 0.0) {
                                        v_alpha = 0.0;
                                    }
                                }

@@ -80,7 +80,7 @@ std::string AlphaInstancedShaderOpenGl::getVertexShader() {
                                           v_texcoordInstance = aTexCoordinate;
                                           v_texCoord = vTexCoordinate;
                                           v_alpha = aAlpha;
-                                          if (screenPosition.z - earthCenter.z > 0.0) {
+                                          if (screenPosition.z - earthCenter.z < 0.0) {
                                               v_alpha = 0.0;
                                           }
                                       }
