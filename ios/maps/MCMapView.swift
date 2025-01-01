@@ -94,7 +94,8 @@ open class MCMapView: MTKView, @unchecked Sendable {
 
         delegate = self
 
-        depthStencilPixelFormat = .stencil8
+        depthStencilPixelFormat = .depth32Float_stencil8
+        clearDepth = 0.0
 
         // if #available(iOS 16.0, *) {
         //   depthStencilStorageMode = .private

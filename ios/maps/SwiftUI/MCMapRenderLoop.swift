@@ -64,12 +64,9 @@ public func MCMapRenderLoop(
                                              pixelDensity: Float(DevicePpi.pixelsPerInch),
                                              is3D: true)!
 
-//    let rasterLayer = TiledRasterLayer(webMercatorUrlFormat: "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png")
-
     for layer in layers {
         mapInterface.addLayer(layer)
     }
-
 
     let device = layerRenderer.device
     let commandQueue = device.makeCommandQueue()!
@@ -176,7 +173,7 @@ public func MCMapRenderLoop(
                 renderPassDescriptor.depthAttachment.texture = drawable.depthTextures[eye]
                 renderPassDescriptor.depthAttachment.loadAction = .clear
                 renderPassDescriptor.depthAttachment.storeAction = .store
-                renderPassDescriptor.depthAttachment.clearDepth = 0.0
+                renderPassDescriptor.depthAttachment.clearDepth = 1.0
 
 
                 renderPassDescriptor.stencilAttachment.texture = drawable.depthTextures[eye]

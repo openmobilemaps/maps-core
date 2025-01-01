@@ -109,8 +109,6 @@ final class Quad2d: BaseGraphicsObject, @unchecked Sendable {
             }
         #endif
 
-        encoder.setDepthBias(0.1, slopeScale: 1.0, clamp: 0.2)
-
         if isMasked {
             if stencilState == nil {
                 setupStencilStates()
