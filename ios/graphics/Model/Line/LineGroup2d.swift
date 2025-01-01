@@ -49,7 +49,7 @@ final class LineGroup2d: BaseGraphicsObject, @unchecked Sendable {
         ss.readMask = 0b1111_1111
 
         let s = MTLDepthStencilDescriptor()
-        s.depthCompareFunction = .greaterEqual
+        s.depthCompareFunction = .always
         s.isDepthWriteEnabled = true
         s.frontFaceStencil = ss
         s.backFaceStencil = ss
@@ -65,7 +65,7 @@ final class LineGroup2d: BaseGraphicsObject, @unchecked Sendable {
         ss.writeMask = 0xFF
 
         let ms = MTLDepthStencilDescriptor()
-        ms.depthCompareFunction = .greaterEqual
+        ms.depthCompareFunction = .always
         ms.isDepthWriteEnabled = true
         ms.frontFaceStencil = mss
         ms.backFaceStencil = mss
