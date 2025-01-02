@@ -49,7 +49,7 @@ public class RenderingContext: NSObject, @unchecked Sendable {
         descriptor.writeMask = 0b1100_0000
         let depthStencilDescriptor = MTLDepthStencilDescriptor()
         depthStencilDescriptor.depthCompareFunction = .always
-        depthStencilDescriptor.isDepthWriteEnabled = true
+        depthStencilDescriptor.isDepthWriteEnabled = false
         depthStencilDescriptor.frontFaceStencil = descriptor
         depthStencilDescriptor.backFaceStencil = descriptor
         return MetalContext.current.device.makeDepthStencilState(
