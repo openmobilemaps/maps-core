@@ -70,7 +70,7 @@
 
     @MainActor
     @available(visionOS 2.0, *)
-    public class ImmersiveSpaceMap {
+    public class ImmersiveMapRenderer {
         let layerRenderer: LayerRenderer
         let layers: [MCLayerInterface]
 
