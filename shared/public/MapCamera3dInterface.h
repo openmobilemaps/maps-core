@@ -4,8 +4,8 @@
 #pragma once
 
 #include "Coord.h"
+#include <cstdint>
 #include <optional>
-#include <vector>
 
 struct Camera3dConfig;
 
@@ -17,5 +17,5 @@ public:
 
     virtual void setCameraConfig(const Camera3dConfig & config, std::optional<float> durationSeconds, std::optional<float> targetZoom, const std::optional<::Coord> & targetCoordinate) = 0;
 
-    virtual void setHardwareMatrices(const std::vector<double> & viewMatrix, const std::vector<double> & projectionMatrix) = 0;
+    virtual void setHardwareMatrices(int64_t viewMatrices, int64_t projectionMatrices, int32_t count) = 0;
 };

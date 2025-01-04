@@ -31,3 +31,7 @@ struct VertexOut {
     float4 position [[ position ]];
     float2 uv;
 };
+
+struct float4x4x2 {
+  float4x4 matrices[2];
+};

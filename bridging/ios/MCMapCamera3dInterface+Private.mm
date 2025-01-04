@@ -51,11 +51,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)setHardwareMatrices:(nonnull NSArray<NSNumber *> *)viewMatrix
-           projectionMatrix:(nonnull NSArray<NSNumber *> *)projectionMatrix {
+- (void)setHardwareMatrices:(int64_t)viewMatrices
+         projectionMatrices:(int64_t)projectionMatrices
+                      count:(int32_t)count {
     try {
-        _cppRefHandle.get()->setHardwareMatrices(::djinni::List<::djinni::F64>::toCpp(viewMatrix),
-                                                 ::djinni::List<::djinni::F64>::toCpp(projectionMatrix));
+        _cppRefHandle.get()->setHardwareMatrices(::djinni::I64::toCpp(viewMatrices),
+                                                 ::djinni::I64::toCpp(projectionMatrices),
+                                                 ::djinni::I32::toCpp(count));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

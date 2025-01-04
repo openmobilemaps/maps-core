@@ -105,7 +105,7 @@ class MapCamera3d : public MapCameraInterface,
 
     std::optional<float> getLastVpMatrixZoom() override;
 
-    virtual void setHardwareMatrices(const std::vector<double> & viewMatrix, const std::vector<double> & projectionMatrix) override;
+    virtual void setHardwareMatrices(int64_t viewMatrices, int64_t projectionMatrices, int32_t count) override;
 
     /** this method is called just before the update methods on all layers */
     virtual void update() override;

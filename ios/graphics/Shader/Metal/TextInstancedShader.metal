@@ -22,8 +22,9 @@ struct TextInstancedVertexOut {
 
 vertex TextInstancedVertexOut
 unitSphereTextInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
-                          constant float4x4 &vpMatrix [[buffer(1)]],
+                          constant float4x4x2 &vpMatrix [[buffer(1)]],
                           constant float4x4 &mMatrix [[buffer(2)]],
+                                    ushort amp_id [[amplification_id]],
                           constant float2 *positions [[buffer(3)]],
                           constant float2 *scales [[buffer(4)]],
                           constant float *rotations [[buffer(5)]],
@@ -44,10 +45,10 @@ unitSphereTextInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
 
     float4 newVertex = float4(referencePosition + originOffset.xyz, 1.0);
 
-    float4 earthCenter = vpMatrix * float4(0 - origin.x,
+    float4 earthCenter = vpMatrix.matrices[amp_id] * float4(0 - origin.x,
                                            0 - origin.y,
                                            0 - origin.z, 1.0);
-    float4 screenPosition = vpMatrix * newVertex;
+    float4 screenPosition = vpMatrix.matrices[amp_id] * newVertex;
 
     earthCenter /= earthCenter.w;
     screenPosition /= screenPosition.w;
@@ -70,7 +71,7 @@ unitSphereTextInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
     auto pRot = float2((pScaled.x * cosAngle - pScaled.y * sinAngle),
                        (pScaled.x * sinAngle + pScaled.y * cosAngle) * aspectRatio);
 
-    auto position = float4(screenPosition.xy + offset.xy + pRot, 1.0, 1.0);
+    auto position = float4(screenPosition.xy + offset.xy + pRot, screenPosition.z, 1.0);
 
     TextInstancedVertexOut out {
       .position = position,
@@ -144,8 +145,9 @@ unitSphereTextInstancedFragmentShader(TextInstancedVertexOut in [[stage_in]],
 
 vertex TextInstancedVertexOut
 textInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
-                          constant float4x4 &vpMatrix [[buffer(1)]],
+                          constant float4x4x2 &vpMatrix [[buffer(1)]],
                           constant float4x4 &mMatrix [[buffer(2)]],
+                          ushort amp_id [[amplification_id]],
                           constant float2 *positions [[buffer(3)]],
                           constant float2 *scales [[buffer(4)]],
                           constant float *rotations [[buffer(5)]],
@@ -169,7 +171,7 @@ textInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
                                               float4(position.x, position.y, 0.0, 1)
                                               );
 
-    const float4x4 matrix = vpMatrix * model_matrix;
+    const float4x4 matrix = vpMatrix.matrices[amp_id] * model_matrix;
 
     TextInstancedVertexOut out {
       .position = matrix * float4(vertexIn.position.xy, 0.0, 1.0),

@@ -105,7 +105,12 @@ open class MCMapView: MTKView, @unchecked Sendable {
 
         preferredFramesPerSecond = 120
 
-        sampleCount = 1  // samples per pixel
+        if MetalContext.current.device.supports32BitMSAA && MetalContext.current.device.supportsTextureSampleCount(4)
+        {
+            sampleCount = 4 // samples per pixel
+        } else {
+            sampleCount = 1 // samples per pixel
+        }
 
         callbackHandler.invalidateCallback = { [weak self] in
             self?.invalidate()

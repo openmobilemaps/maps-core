@@ -15,7 +15,8 @@
              targetZoom:(nullable NSNumber *)targetZoom
        targetCoordinate:(nullable MCCoord *)targetCoordinate;
 
-- (void)setHardwareMatrices:(nonnull NSArray<NSNumber *> *)viewMatrix
-           projectionMatrix:(nonnull NSArray<NSNumber *> *)projectionMatrix;
+- (void)setHardwareMatrices:(int64_t)viewMatrices
+         projectionMatrices:(int64_t)projectionMatrices
+                      count:(int32_t)count;
 
 @end

@@ -15,12 +15,13 @@ using namespace metal;
 
 vertex VertexOut
 baseVertexShader(const Vertex3DTextureIn vertexIn [[stage_in]],
-                constant float4x4 &vpMatrix [[buffer(1)]],
+                constant float4x4x2 &vpMatrix [[buffer(1)]],
                  constant float4x4 &mMatrix [[buffer(2)]],
+                 ushort amp_id [[amplification_id]],
                  constant float4 &originOffset [[buffer(3)]])
 {
     VertexOut out {
-        .position = vpMatrix * ((mMatrix * vertexIn.position) + originOffset),
+        .position = vpMatrix.matrices[amp_id] * ((mMatrix * vertexIn.position) + originOffset),
         .uv = vertexIn.uv
     };
 
@@ -29,12 +30,13 @@ baseVertexShader(const Vertex3DTextureIn vertexIn [[stage_in]],
 
 vertex VertexOut
 baseVertexShaderModel(const Vertex3DTextureIn vertexIn [[stage_in]],
-                constant float4x4 &vpMatrix [[buffer(1)]],
+                constant float4x4x2 &vpMatrix [[buffer(1)]],
                  constant float4x4 &mMatrix [[buffer(2)]],
+                  ushort amp_id [[amplification_id]],
                  constant float4 &originOffset [[buffer(3)]])
 {
     VertexOut out {
-        .position = vpMatrix * ((mMatrix * vertexIn.position) + originOffset),
+        .position = vpMatrix.matrices[amp_id] * ((mMatrix * vertexIn.position) + originOffset),
         .uv = vertexIn.uv
     };
 
@@ -61,12 +63,13 @@ baseFragmentShader(VertexOut in [[stage_in]],
 
 vertex VertexOut
 colorVertexShader(const Vertex4FIn vertexIn [[stage_in]],
-                  constant float4x4 &vpMatrix [[buffer(1)]],
+                  constant float4x4x2 &vpMatrix [[buffer(1)]],
                    constant float4x4 &mMatrix [[buffer(2)]],
+                  ushort amp_id [[amplification_id]],
                   constant float4 &originOffset [[buffer(3)]])
 {
     VertexOut out {
-        .position = vpMatrix * (float4(vertexIn.position.xyz, 1.0) + originOffset),
+        .position = vpMatrix.matrices[amp_id] * (float4(vertexIn.position.xyz, 1.0) + originOffset),
     };
 
     return out;

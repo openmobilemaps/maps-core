@@ -64,6 +64,9 @@ final class Icosahedron: BaseGraphicsObject, @unchecked Sendable {
                 encoder.setStencilReferenceValue(0b1100_0000)
             }
         }
+        else {
+            encoder.setDepthStencilState(context.defaultMask)
+        }
 
         shader.setupProgram(context)
         shader.preRender(context)

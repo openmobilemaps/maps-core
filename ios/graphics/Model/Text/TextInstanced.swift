@@ -112,7 +112,7 @@ final class TextInstanced: BaseGraphicsObject, @unchecked Sendable {
         let vpMatrixBuffer = vpMatrixBuffers.getNextBuffer(context)
         if let matrixPointer = UnsafeRawPointer(bitPattern: Int(vpMatrix)) {
             vpMatrixBuffer?.contents().copyMemory(
-                from: matrixPointer, byteCount: 64)
+                from: matrixPointer, byteCount: 64*context.amplificationCount)
         }
         encoder.setVertexBuffer(vpMatrixBuffer, offset: 0, index: 1)
 

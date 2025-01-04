@@ -22,8 +22,9 @@ struct InstancedVertexOut {
 
 vertex InstancedVertexOut
 unitSphereAlphaInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
-                           constant float4x4 &vpMatrix [[buffer(1)]],
-                           constant float4x4 &mMatrix [[buffer(2)]],
+                           constant float4x4x2 &vpMatrix [[buffer(1)]],
+                           constant float4x4x2 &mMatrix [[buffer(2)]],
+                           ushort amp_id [[amplification_id]],
                            constant packed_float3 *positions [[buffer(3)]],
                            constant float2 *scales [[buffer(4)]],
                            constant float *rotations [[buffer(5)]],
@@ -42,10 +43,10 @@ unitSphereAlphaInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
 
     const float angle = rotation * M_PI_F / 180.0;
 
-    float4 earthCenter = vpMatrix * float4(0 - origin.x,
+    float4 earthCenter = vpMatrix.matrices[amp_id] * float4(0 - origin.x,
                                            0 - origin.y,
                                            0 - origin.z, 1.0);
-    float4 screenPosition = vpMatrix * (float4(position.xyz, 1.0) + originOffset);
+    float4 screenPosition = vpMatrix.matrices[amp_id] * (float4(position.xyz, 1.0) + originOffset);
 
     earthCenter /= earthCenter.w;
     screenPosition /= screenPosition.w;
@@ -93,8 +94,9 @@ unitSphereAlphaInstancedFragmentShader(InstancedVertexOut in [[stage_in]],
 
 vertex InstancedVertexOut
 alphaInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
-                           constant float4x4 &vpMatrix [[buffer(1)]],
+                           constant float4x4x2 &vpMatrix [[buffer(1)]],
                            constant float4x4 &mMatrix [[buffer(2)]],
+                           ushort amp_id [[amplification_id]],
                            constant float2 * positions [[buffer(3)]],
                            constant float2 *scales [[buffer(4)]],
                            constant float *rotations [[buffer(5)]],
@@ -117,8 +119,8 @@ alphaInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
                                             float4(0, 0, 0, 0),
                                             float4(position + offset, 0.0, 1)
                                             );
-
-  const float4x4 matrix = vpMatrix * model_matrix;
+  const float4x4 vpm = vpMatrix.matrices[amp_id];
+  const float4x4 matrix = vpm * model_matrix;
 
   InstancedVertexOut out {
     .position = matrix * float4(vertexIn.position.xy, 0.0, 1.0),

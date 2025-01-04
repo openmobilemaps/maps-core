@@ -43,7 +43,7 @@ open class BaseGraphicsObject: @unchecked Sendable {
         self.sampler = sampler
         self.label = label
         self.originOffsetBuffers = .init(device: device)
-        self.vpMatrixBuffers = .init(device: device)
+        self.vpMatrixBuffers = .init(device: device, length: 2)
     }
 
     open func render(
@@ -119,6 +119,22 @@ extension BaseGraphicsObject: MCGraphicsObjectInterface {
     }
 
     // MARK: - Stencil
+
+    public func depthStencilState() -> MTLDepthStencilState? {
+        let s = MTLStencilDescriptor()
+        s.stencilCompareFunction = .always
+        s.stencilFailureOperation = .zero
+        s.depthFailureOperation = .keep
+        s.depthStencilPassOperation = .keep
+
+        let desc = MTLDepthStencilDescriptor()
+        desc.depthCompareFunction = .always
+        desc.isDepthWriteEnabled = true
+        desc.frontFaceStencil = s
+        desc.backFaceStencil = s
+
+        return device.makeDepthStencilState(descriptor: desc)
+    }
 
     public func maskStencilState(
         readMask: UInt32 = 0b1111_1111, writeMask: UInt32 = 0b0000_0000

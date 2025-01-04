@@ -9,6 +9,7 @@
  */
 
 #include <metal_stdlib>
+#include "DataStructures.metal"
 using namespace metal;
 
 /*
@@ -79,7 +80,8 @@ struct LineStyling {
 
 vertex LineVertexOut
 unitSpherelineGroupVertexShader(const LineVertexUnitSphereIn vertexIn [[stage_in]],
-                      constant float4x4 &vpMatrix [[buffer(1)]],
+                      constant float4x4x2 &vpMatrix [[buffer(1)]],
+                                ushort amp_id [[amplification_id]],
                       constant float &scalingFactor [[buffer(2)]],
                       constant float &dashingScalingFactor [[buffer(3)]],
                       constant float *styling [[buffer(4)]],
@@ -139,7 +141,7 @@ unitSpherelineGroupVertexShader(const LineVertexUnitSphereIn vertexIn [[stage_in
     const int segmentType = int(vertexIn.stylingIndex) >> 8;// / 256.0;
 
     LineVertexOut out {
-        .position = vpMatrix * extendedPosition,
+        .position = vpMatrix.matrices[amp_id] * extendedPosition,
         .uv = extendedPosition.xy,
         .lineA = extendedPosition.xyz - ((vertexIn.lineA + originOffset.xyz) + lineOffset.xyz),
         .lineB = ((vertexIn.lineB + originOffset.xyz) + lineOffset.xyz) - ((vertexIn.lineA + originOffset.xyz) + lineOffset.xyz),
@@ -157,7 +159,8 @@ unitSpherelineGroupVertexShader(const LineVertexUnitSphereIn vertexIn [[stage_in
 
 vertex LineVertexOut
 lineGroupVertexShader(const LineVertexIn vertexIn [[stage_in]],
-                      constant float4x4 &vpMatrix [[buffer(1)]],
+                      constant float4x4x2 &vpMatrix [[buffer(1)]],
+                      ushort amp_id [[amplification_id]],
                       constant float &scalingFactor [[buffer(2)]],
                       constant float &dashingScalingFactor [[buffer(3)]],
                       constant float *styling [[buffer(4)]],
@@ -216,7 +219,7 @@ lineGroupVertexShader(const LineVertexIn vertexIn [[stage_in]],
     const int segmentType = int(vertexIn.stylingIndex) >> 8;// / 256.0;
 
     LineVertexOut out {
-        .position = vpMatrix * extendedPosition,
+        .position = vpMatrix.matrices[amp_id] * extendedPosition,
         .uv = extendedPosition.xy,
         .lineA = extendedPosition.xyz - ((lineA + originOffset.xyz) + lineOffset.xyz),
         .lineB = ((lineB + originOffset.xyz) + lineOffset.xyz) - ((lineA + originOffset.xyz) + lineOffset.xyz),

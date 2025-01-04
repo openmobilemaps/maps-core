@@ -67,6 +67,9 @@ final class PolygonGroup2d: BaseGraphicsObject, @unchecked Sendable {
             encoder.setDepthStencilState(stencilState)
             encoder.setStencilReferenceValue(0b1100_0000)
         }
+        else {
+            encoder.setDepthStencilState(context.defaultMask)
+        }
 
         if pass.isPassMasked {
             if renderPassStencilState == nil {
@@ -84,7 +87,7 @@ final class PolygonGroup2d: BaseGraphicsObject, @unchecked Sendable {
 
         let vpMatrixBuffer = vpMatrixBuffers.getNextBuffer(context)
         if let matrixPointer = UnsafeRawPointer(bitPattern: Int(vpMatrix)) {
-            vpMatrixBuffer?.contents().copyMemory(from: matrixPointer, byteCount: 64)
+            vpMatrixBuffer?.contents().copyMemory(from: matrixPointer, byteCount: 64*context.amplificationCount)
         }
         encoder.setVertexBuffer(vpMatrixBuffer, offset: 0, index: 1)
 

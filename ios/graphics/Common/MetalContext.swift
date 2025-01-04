@@ -35,13 +35,28 @@ public class MetalContext: @unchecked Sendable {
     let colorPixelFormat: MTLPixelFormat = .bgra8Unorm_srgb
     let textureLoader: MTKTextureLoader
 
-    public lazy var pipelineLibrary: PipelineLibrary = try! PipelineLibrary(device: self.device)
+    // default library if not set-up with a different amplification count
+    public lazy var pipelineLibrary: PipelineLibrary! = {
+        try! PipelineLibrary(device: self.device, maxVertexAmplificationCount: 1)
+    }()
     public lazy var samplerLibrary: SamplerLibrary = try! SamplerLibrary(device: self.device)
+
+    public private(set) var maxVertexAmplificationCount: Int = 1
 
     init(device: MTLDevice, commandQueue: MTLCommandQueue, library: MTLLibrary) {
         self.device = device
         self.commandQueue = commandQueue
         self.library = library
         textureLoader = MTKTextureLoader(device: device)
+    }
+
+    // initialize the pipeline library with a different amplification count
+    // used for rendering multiple views for stereoscopic rendering
+    public func setup(maxVertexAmplificationCount c: Int) {
+        maxVertexAmplificationCount = c
+        self.pipelineLibrary = try! PipelineLibrary(
+            device: self.device,
+            maxVertexAmplificationCount: c
+        )
     }
 }
