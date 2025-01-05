@@ -15,8 +15,8 @@
         let layerRenderer: LayerRenderer
         let layers: [MCLayerInterface]
 
-        @MainActor
-        public var followHand = false
+        var followHand = false
+        var handOffset = simd_float4x4(diagonal: .one)
 
         let rasterSampleCount: Int
         var memorylessTargetIndex: Int = 0
@@ -45,9 +45,11 @@
             self.layerRenderer = layerRenderer
             self.layers = layers
 
-            self.renderingContext.amplificationCount = layerRenderer.properties.viewCount
+            self.renderingContext.amplificationCount =
+                layerRenderer.properties.viewCount
             MetalContext.current.setup(
-                maxVertexAmplificationCount: self.renderingContext.amplificationCount)
+                maxVertexAmplificationCount: self.renderingContext
+                    .amplificationCount)
 
             self.commandQueue = MetalContext.current.device.makeCommandQueue()!
 
@@ -82,12 +84,10 @@
 
         }
         public func run() {
-
             Task(executorPreference: RendererTaskExecutor.shared) {
-
                 try await self.setup()
                 self.renderLoop()
-
+                self.teardown()
             }
         }
 
@@ -98,10 +98,7 @@
                     mapInterface.pause()
                     layerRenderer.waitUntilRunning()
                     mapInterface.resume()
-
                 case .invalidated:
-                    mapInterface.pause()
-                    mapInterface.destroy()
                     return
                 case .running:
                     autoreleasepool {
@@ -115,10 +112,7 @@
         }
 
         private func setup() async throws {
-            let device = layerRenderer.device
             mapInterface.resume()
-
-            var handOffset = simd_float4x4(diagonal: .one)
 
             mapInterface
                 .getCamera()?
@@ -133,7 +127,21 @@
                 SpatialEventCollection.Event.ID: SpatialEventCollection
                     .Event
             ]()
-            //                if let touchHandler = mapInterface.getTouchHandler() {
+
+            layerRenderer.onSpatialEvent = { events in
+                for event in events {
+                    if event.kind == .indirectPinch {
+                        switch event.phase {
+                        case .active:
+                            self.followHand = true
+                        case .cancelled, .ended:
+                            self.followHand = false
+                        }
+                    }
+                }
+            }
+
+            //                            if let touchHandler = mapInterface.getTouchHandler() {
             //                    layerRenderer.onSpatialEvent = { events in
             //                        for event in events {
             //                            if event.kind == .indirectPinch {
@@ -174,11 +182,17 @@
                 mapInterface.addLayer(layer)
             }
 
-            //                if HandTrackingProvider.isSupported {
-            //                    try await session.run([worldTracking, handTracking])
-            //                } else {
-            try await self.session.run([self.worldTracking])
-            //
+            if HandTrackingProvider.isSupported {
+                try await session.run([worldTracking, handTracking])
+            } else {
+                try await self.session.run([self.worldTracking])
+            }
+        }
+
+        private func teardown() {
+            mapInterface.pause()
+            mapInterface.destroy()
+            self.session.stop()
         }
 
         private func renderFrame() {
@@ -208,13 +222,7 @@
             // Convert the timestamps into units of seconds
             //        let anchorPredictionTime = LayerRenderer.Clock.Instant.epoch.duration(to: trackableAnchorTime)
 
-            //                    if HandTrackingProvider.isSupported, await self.followHand,
-            //                        let handAnchor = handTracking.latestAnchors.rightHand
-            //                    {
-            //                        handOffset =
-            //                            handOffset * 0.99 + handAnchor
-            //                            .originFromAnchorTransform * 0.01
-            //                    }
+
             self.updateHardwareMatrices(
                 deviceAnchor: deviceAnchor,
                 drawable: drawable, camera: camera)
@@ -317,13 +325,21 @@
             let originFromDevice = deviceAnchor
                 .originFromAnchorTransform
 
+            if HandTrackingProvider.isSupported, self.followHand,
+               let handAnchor = handTracking.latestAnchors.rightHand
+            {
+                handOffset =
+                handOffset * 0.99 + handAnchor
+                    .originFromAnchorTransform * 0.01
+            }
+
             for eye in 0..<drawable.views.count {
                 let projection = drawable.computeProjection(
                     viewIndex: eye)
                 let view = drawable.views[eye]
                 let deviceFromView = view.transform
                 let viewMatrix =
-                    (originFromDevice * deviceFromView).inverse
+                (originFromDevice * deviceFromView).inverse * handOffset
 
                 for column in 0..<4 {
                     for row in 0..<4 {
