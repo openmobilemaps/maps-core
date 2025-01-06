@@ -45,6 +45,10 @@ class MapScene : public MapInterface, public SceneCallbackInterface, public Sche
 
     virtual std::shared_ptr<::TouchHandlerInterface> getTouchHandler() override;
 
+    virtual void setPerformanceLoggers(const /*not-null*/ std::vector<std::shared_ptr<::PerformanceLoggerInterface>> & performanceLoggers) override;
+
+    virtual /*not-null*/ std::vector<std::shared_ptr<::PerformanceLoggerInterface>> getPerformanceLoggers() override;
+
     virtual std::vector<std::shared_ptr<LayerInterface>> getLayers() override;
 
     std::vector<std::shared_ptr<IndexedLayerInterface>> getLayersIndexed() override;
@@ -112,4 +116,7 @@ class MapScene : public MapInterface, public SceneCallbackInterface, public Sche
     bool isResumed = false;
     std::atomic_flag isInvalidated = ATOMIC_FLAG_INIT;
     bool mapIs3d = false;
+
+    std::mutex performanceLoggersMutex;
+    std::vector<std::shared_ptr<PerformanceLoggerInterface>> performanceLoggers;
 };

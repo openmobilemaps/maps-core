@@ -38,6 +38,10 @@ abstract class MapInterface {
 
     abstract fun getTouchHandler(): io.openmobilemaps.mapscore.shared.map.controls.TouchHandlerInterface
 
+    abstract fun setPerformanceLoggers(performanceLoggers: ArrayList<io.openmobilemaps.mapscore.shared.map.PerformanceLoggerInterface>)
+
+    abstract fun getPerformanceLoggers(): ArrayList<io.openmobilemaps.mapscore.shared.map.PerformanceLoggerInterface>
+
     abstract fun getLayers(): ArrayList<LayerInterface>
 
     abstract fun getLayersIndexed(): ArrayList<IndexedLayerInterface>
@@ -164,6 +168,18 @@ abstract class MapInterface {
             return native_getTouchHandler(this.nativeRef)
         }
         private external fun native_getTouchHandler(_nativeRef: Long): io.openmobilemaps.mapscore.shared.map.controls.TouchHandlerInterface
+
+        override fun setPerformanceLoggers(performanceLoggers: ArrayList<io.openmobilemaps.mapscore.shared.map.PerformanceLoggerInterface>) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setPerformanceLoggers(this.nativeRef, performanceLoggers)
+        }
+        private external fun native_setPerformanceLoggers(_nativeRef: Long, performanceLoggers: ArrayList<io.openmobilemaps.mapscore.shared.map.PerformanceLoggerInterface>)
+
+        override fun getPerformanceLoggers(): ArrayList<io.openmobilemaps.mapscore.shared.map.PerformanceLoggerInterface> {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getPerformanceLoggers(this.nativeRef)
+        }
+        private external fun native_getPerformanceLoggers(_nativeRef: Long): ArrayList<io.openmobilemaps.mapscore.shared.map.PerformanceLoggerInterface>
 
         override fun getLayers(): ArrayList<LayerInterface> {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
