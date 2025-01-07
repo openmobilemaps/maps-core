@@ -127,6 +127,7 @@ public enum PipelineType: String, CaseIterable, Codable {
     case unitSphereAlphaInstancedShader
     case unitSphereTextInstancedShader
     case sphereEffectShader
+    case skySphereShader
 
     var label: String {
         switch self {
@@ -152,12 +153,13 @@ public enum PipelineType: String, CaseIterable, Codable {
             case .unitSphereAlphaInstancedShader: return "Unit Sphere Alpha instanced shader with texture"
             case .unitSphereTextInstancedShader: return "Unit Sphere Text Instanced shader"
             case .sphereEffectShader: return "Sphere Effect Shader"
+            case .skySphereShader: return "Sky Effect Shader"
         }
     }
 
     var vertexShaderUsesModelMatrix: Bool {
         switch self {
-            case .rasterShader, .roundColorShader, .unitSphereRoundColorShader, .alphaShader, .unitSphereAlphaShader, .sphereEffectShader:
+            case .rasterShader, .roundColorShader, .unitSphereRoundColorShader, .alphaShader, .unitSphereAlphaShader, .sphereEffectShader, .skySphereShader:
                 return true
             default:
                 return false
@@ -188,6 +190,7 @@ public enum PipelineType: String, CaseIterable, Codable {
             case .unitSphereAlphaInstancedShader: return "unitSphereAlphaInstancedVertexShader"
             case .unitSphereTextInstancedShader: return "unitSphereTextInstancedVertexShader"
             case .sphereEffectShader: return "baseVertexShader"
+            case .skySphereShader: return "baseVertexShader"
         }
     }
 
@@ -215,6 +218,7 @@ public enum PipelineType: String, CaseIterable, Codable {
             case .unitSphereAlphaInstancedShader: return "unitSphereAlphaInstancedFragmentShader"
             case .unitSphereTextInstancedShader: return "unitSphereTextInstancedFragmentShader"
             case .sphereEffectShader: return "sphereEffectFragmentShader"
+            case .skySphereShader: return "skySphereFragmentShader"
         }
     }
 
@@ -236,6 +240,7 @@ public enum PipelineType: String, CaseIterable, Codable {
                  .unitSphereAlphaShader,
                  .unitSphereRoundColorShader,
                  .sphereEffectShader,
+                 .skySphereShader,
                  .roundColorShader:
                 return Vertex3DTexture.descriptor
             default:

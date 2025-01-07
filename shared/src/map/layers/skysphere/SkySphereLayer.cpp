@@ -108,7 +108,7 @@ void SkySphereLayer::setupSkySphere() {
         quad->loadTexture(renderingContext, skySphereTexture);
 
         std::vector<std::shared_ptr<RenderObjectInterface>> renderObjects = {
-                std::make_shared<RenderObject>(quad->asGraphicsObject(), false)
+                std::make_shared<RenderObject>(quad->asGraphicsObject(), true)
         };
         renderPasses = {std::make_shared<RenderPass>(RenderPassConfig(0, false), renderObjects)};
     }
