@@ -9,7 +9,6 @@
  */
 
 #include "CpuPerformanceLogger.h"
-#include "ChronoUtil.h"
 
 CpuPerformanceLogger::CpuPerformanceLogger() : GenericPerformanceLogger() {}
 

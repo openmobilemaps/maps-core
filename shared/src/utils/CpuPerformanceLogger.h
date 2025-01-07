@@ -12,6 +12,7 @@
 
 #include "CpuPerformanceLoggerInterface.h"
 #include "GenericPerformanceLogger.h"
+#include "ChronoUtil.h"
 
 class CpuPerformanceLogger
         : public CpuPerformanceLoggerInterface,
