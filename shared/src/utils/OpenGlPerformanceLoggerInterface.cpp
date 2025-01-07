@@ -9,13 +9,23 @@
  */
 
 #include "OpenGlPerformanceLoggerInterface.h"
+#ifdef OPENMOBILEMAPS_GL
 #include "OpenGlPerformanceLogger.h"
+#endif
 
 std::shared_ptr<OpenGlPerformanceLoggerInterface> OpenGlPerformanceLoggerInterface::create() {
+#ifdef OPENMOBILEMAPS_GL
     return std::make_shared<OpenGlPerformanceLogger>();
+#else
+    return nullptr;
+#endif
 }
 
 std::shared_ptr<OpenGlPerformanceLoggerInterface> OpenGlPerformanceLoggerInterface::createSpecifically(int32_t numBuckets,
                                                                                                        int64_t bucketSizeMs) {
+#ifdef OPENMOBILEMAPS_GL
     return std::make_shared<OpenGlPerformanceLogger>(numBuckets, bucketSizeMs);
+#else
+    return nullptr;
+#endif
 }
