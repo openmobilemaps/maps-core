@@ -5,6 +5,7 @@
 #import "MCCoordinateConversionHelperInterface.h"
 #import "MCGraphicsObjectFactoryInterface.h"
 #import "MCMapConfig.h"
+#import "MCPerformanceLoggerInterface.h"
 #import "MCRectCoord.h"
 #import "MCRenderingContextInterface.h"
 #import "MCSchedulerInterface.h"
@@ -56,6 +57,10 @@
 - (void)setTouchHandler:(nullable id<MCTouchHandlerInterface>)touchHandler;
 
 - (nullable id<MCTouchHandlerInterface>)getTouchHandler;
+
+- (void)setPerformanceLoggers:(nonnull NSArray<id<MCPerformanceLoggerInterface>> *)performanceLoggers;
+
+- (nonnull NSArray<id<MCPerformanceLoggerInterface>> *)getPerformanceLoggers;
 
 - (nonnull NSArray<id<MCLayerInterface>> *)getLayers;
 

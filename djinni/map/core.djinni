@@ -18,6 +18,7 @@
 @extern "../yaml/compute_pass_interface.yaml"
 @extern "../yaml/masking_object_interface.yaml"
 @extern "../yaml/error_manager.yaml"
+@extern "../yaml/performance_logger_interface.yaml"
 
 map_interface = interface +c {
     static create(graphics_factory: graphics_object_factory_interface, shader_factory: shader_factory_interface, rendering_context: rendering_context_interface, map_config: map_config, scheduler: scheduler_interface, pixel_density: f32, is_3_d: bool) : map_interface;
@@ -38,6 +39,9 @@ map_interface = interface +c {
 
     set_touch_handler(touch_handler: touch_handler_interface);
     get_touch_handler() : touch_handler_interface;
+
+    set_performance_loggers(performance_loggers: list<performance_logger_interface>);
+    get_performance_loggers() : list<performance_logger_interface>;
 
     get_layers(): list<layer_interface>;
     get_layers_indexed(): list<indexed_layer_interface>;

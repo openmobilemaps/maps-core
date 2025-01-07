@@ -61,6 +61,7 @@ target_include_directories(mapscore PRIVATE
   android/src/main/cpp/graphics
   android/src/main/cpp/graphics/objects
   android/src/main/cpp/graphics/shader
+  android/src/main/cpp/utils
 )
 target_include_directories(mapscore PUBLIC
   shared/public
