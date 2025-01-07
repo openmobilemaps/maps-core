@@ -10,6 +10,7 @@
 
 #include "GenericPerformanceLogger.h"
 #include "ChronoUtil.h"
+#include <cmath>
 
 const size_t GenericPerformanceLogger::DEFAULT_NUM_BUCKETS = 100;
 const int64_t GenericPerformanceLogger::DEFAULT_BUCKET_SIZE_MS = 5;

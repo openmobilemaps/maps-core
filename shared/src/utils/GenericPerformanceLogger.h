@@ -12,11 +12,13 @@
 
 #include "PerformanceLoggerInterface.h"
 #include "LoggerData.h"
-#include "unordered_map"
+#include <unordered_map>
+#include <memory>
+#include <mutex>
 
 class GenericPerformanceLogger : public PerformanceLoggerInterface {
 public:
-    GenericPerformanceLogger() {};
+    GenericPerformanceLogger() = default;
 
     GenericPerformanceLogger(int32_t numBuckets, int64_t bucketSizeMs);
 
