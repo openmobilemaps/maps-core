@@ -52,10 +52,14 @@ public enum PipelineDescriptorFactory {
         pipelineDescriptor.stencilAttachmentPixelFormat = .stencil8
         pipelineDescriptor.label = label
 
-        guard let vertexFunction = library.makeFunction(name: vertexShader),
-              let fragmentFunction = library.makeFunction(name: fragmentShader)
+        guard let vertexFunction = library.makeFunction(name: vertexShader)
         else {
-            fatalError("Cannot locate the shaders for \(label)")
+            fatalError("Cannot locate vertex shader \(vertexShader) for \(label)")
+        }
+
+        guard let fragmentFunction = library.makeFunction(name: fragmentShader)
+        else {
+            fatalError("Cannot locate fragment shader \(fragmentShader) for \(label)")
         }
 
         pipelineDescriptor.vertexFunction = vertexFunction
