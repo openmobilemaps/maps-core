@@ -612,8 +612,8 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
                                              scaleFactor, rotation, now, viewPortSize, spriteTexture, spriteData);
             }
             object->updateStretchIconProperties(stretchedIconPositions, stretchedIconScales, stretchedIconRotations,
-                                                stretchedIconAlphas, stretchedIconStretchInfos, stretchedIconOffset, zoomIdentifier,
-                                                scaleFactor, rotation, now, viewPortSize);
+                                                stretchedIconAlphas, stretchedIconStretchInfos, stretchedIconTextureCoordinates, stretchedIconOffset, zoomIdentifier,
+                                                scaleFactor, rotation, now, viewPortSize, spriteTexture, spriteData);
             auto font = object->getFont();
             if (font) {
                 const auto &textDescriptor = std::find_if(textDescriptors.begin(), textDescriptors.end(),
@@ -746,6 +746,11 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
                 stretchedIconStretchInfos.resetModificationFlag();
             }
 
+            if (stretchedIconTextureCoordinates.wasModified()) {
+                stretchedInstancedObject->setStretchInfos(SharedBytes((int64_t) stretchedIconTextureCoordinates.data(), iconCount,
+                                                                      4 * (int32_t) sizeof(float)));
+                stretchedIconTextureCoordinates.resetModificationFlag();
+            }
         }
 
         for (size_t i = 0; i < textDescriptors.size(); i++) {

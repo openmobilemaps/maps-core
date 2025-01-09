@@ -629,7 +629,7 @@ void Tiled2dMapVectorSymbolObject::setupStretchIconProperties(VectorModification
 
         const auto spriteIt = spriteData->sprites.find(iconImage);
         if (spriteIt == spriteData->sprites.end()) {
-            LogError << "Unable to find sprite " << iconImage;
+            LogError << "Unable to find sprite " <<= iconImage;
             writePosition(0, 0, countOffset, positions);
             countOffset += instanceCounts.stretchedIcons;
             return;
@@ -647,6 +647,7 @@ void Tiled2dMapVectorSymbolObject::setupStretchIconProperties(VectorModification
         textureCoordinates[4 * countOffset + 2] = ((double) spriteIt->second.width) / textureWidth;
         textureCoordinates[4 * countOffset + 3] = ((double) spriteIt->second.height) / textureHeight;
 
+        lastIconImage = iconImage;
     }
 
     writePosition(renderCoordinate.x, renderCoordinate.y, countOffset, positions);
@@ -656,7 +657,7 @@ void Tiled2dMapVectorSymbolObject::setupStretchIconProperties(VectorModification
     lastStretchIconUpdateScaleFactor = -1;
 }
 
-void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &scales, VectorModificationWrapper<float> &rotations, VectorModificationWrapper<float> &alphas, VectorModificationWrapper<float> &stretchInfos, int &countOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, long long now, const Vec2I viewPortSize) {
+void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &scales, VectorModificationWrapper<float> &rotations, VectorModificationWrapper<float> &alphas, VectorModificationWrapper<float> &stretchInfos, VectorModificationWrapper<float> &textureCoordinates, int &countOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, long long now, const Vec2I viewPortSize, const std::shared_ptr<TextureHolderInterface> spriteTexture, const std::shared_ptr<SpriteData> spriteData) {
 
     if (instanceCounts.stretchedIcons == 0) {
         return;
@@ -685,6 +686,35 @@ void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(VectorModificatio
     }
 
     evaluateStyleProperties(zoomIdentifier);
+
+    if (iconImage != lastIconImage && !(iconImage.empty() || !spriteTexture))  {
+        const auto textureWidth = (double) spriteTexture->getImageWidth();
+        const auto textureHeight = (double) spriteTexture->getImageHeight();
+
+        renderCoordinate = getRenderCoordinates(iconAnchor, 0.0, textureWidth, textureHeight);
+
+        const auto spriteIt = spriteData->sprites.find(iconImage);
+        if (spriteIt == spriteData->sprites.end()) {
+            LogError << "Unable to find sprite " <<= iconImage;
+            writePosition(0, 0, countOffset, positions);
+            countOffset += instanceCounts.stretchedIcons;
+            return;
+        }
+
+        const double densityOffset = (camera->getScreenDensityPpi() / 160.0) / spriteIt->second.pixelRatio;
+
+        stretchSpriteSize.x = spriteIt->second.width * densityOffset;
+        stretchSpriteSize.y = spriteIt->second.height * densityOffset;
+
+        stretchSpriteInfo = spriteIt->second;
+
+        textureCoordinates[4 * countOffset + 0] = ((double) spriteIt->second.x) / textureWidth;
+        textureCoordinates[4 * countOffset + 1] = ((double) spriteIt->second.y) / textureHeight;
+        textureCoordinates[4 * countOffset + 2] = ((double) spriteIt->second.width) / textureWidth;
+        textureCoordinates[4 * countOffset + 3] = ((double) spriteIt->second.height) / textureHeight;
+
+        lastIconImage = iconImage;
+    }
 
     if (!isCoordinateOwner) {
         alphas[countOffset] = 0.0;
