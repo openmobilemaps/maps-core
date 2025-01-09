@@ -11,6 +11,22 @@
 
 #include <vector>
 
+/**
+ * @class VectorWrapper
+ * @brief A wrapper for a `std::vector` that tracks modifications.
+ *
+ * This class provides functionality to wrap a `std::vector` and track
+ * whether the vector has been modified. The `modified` flag is set
+ * under the following conditions:
+ * - Accessing elements via the `operator[]` for writing.
+ * - Adding elements using the `push_back()` or `emplace_back()` methods.
+ * - resizing the vector via the `resize()` method
+
+ * Use the `resetModificationFlag()` method to reset the modification
+ * state after changes are processed.
+ *
+ * @tparam T The type of elements stored in the vector.
+ */
 template <typename T>
 class VectorModificationWrapper {
   private:
@@ -60,5 +76,11 @@ class VectorModificationWrapper {
     void push_back(T &&value) {
         modified = true;
         vec.push_back(std::move(value));
+    }
+
+    template <typename... Args>
+    void emplace_back(Args&&... args) {
+        modified = true;
+        vec.emplace_back(std::forward<Args>(args)...);
     }
 };
