@@ -7,7 +7,8 @@ project(mapscore
 # mapscore OpenGL "proper", i.e. the C++ implementation without language bindings
 ####
 file(GLOB_RECURSE mapscore_SRC
-  "shared/*.cpp"
+  "shared/public/*.cpp"
+  "shared/src/*.cpp"
   "android/src/main/cpp/graphics/*.cpp"
 )
 
@@ -81,3 +82,4 @@ target_link_libraries(mapscore ${OPENGL_LIBRARIES})
 
 add_subdirectory(standalone)
 add_subdirectory(jvm)
+add_subdirectory(shared/test)

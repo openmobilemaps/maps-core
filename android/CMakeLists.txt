@@ -17,23 +17,12 @@ if (CCACHE_FOUND)
 endif (CCACHE_FOUND)
 
 file(GLOB_RECURSE cpp_SRC
-        "../bridging/android/jni/*.h"
-        "../bridging/android/jni/*.hpp"
         "../bridging/android/jni/*.cpp"
-        "../shared/*.h"
-        "../shared/*.cpp"
-        "../shared/*.hpp"
-        "src/main/cpp/*.h"
+        "../shared/public/*.cpp"
+        "../shared/src/*.cpp"
         "src/main/cpp/*.cpp"
-        "../external/djinni/support-lib/cpp/*.h"
-        "../external/djinni/support-lib/cpp/*.hpp"
         "../external/djinni/support-lib/cpp/*.cpp"
-        "../external/djinni/support-lib/jni/*.h"
-        "../external/djinni/support-lib/jni/*.hpp"
         "../external/djinni/support-lib/jni/*.cpp"
-        "../external/protozero/protozero/include/*.hpp"
-        "../external/vtzero/vtzero/include/*.hpp"
-        "../external/earcut/earcut/include/*.hpp"
         )
 
 add_library( # Sets the name of the library.
