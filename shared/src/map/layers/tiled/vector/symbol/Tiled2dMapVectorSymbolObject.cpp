@@ -252,6 +252,7 @@ void Tiled2dMapVectorSymbolObject::evaluateStyleProperties(const double zoomIden
     textAllowOverlap = description->style.getTextAllowOverlap(evalContext);
     iconAllowOverlap = description->style.getIconAllowOverlap(evalContext);
 
+    iconImage = description->style.getIconImage(evalContext);
     iconRotate = -description->style.getIconRotate(evalContext);
     iconSize = description->style.getIconSize(evalContext);
     iconOffset = description->style.getIconOffset(evalContext);
@@ -319,7 +320,7 @@ const Tiled2dMapVectorSymbolObject::SymbolObjectInstanceCounts Tiled2dMapVectorS
     return ::Coord(renderCoordinate.systemIdentifier, rotated.x, rotated.y, renderCoordinate.z);
 }
 
-void Tiled2dMapVectorSymbolObject::setupIconProperties(std::vector<float> &positions, std::vector<float> &rotations, std::vector<float> &textureCoordinates, int &countOffset, const double zoomIdentifier, const std::shared_ptr<TextureHolderInterface> spriteTexture, const std::shared_ptr<SpriteData> spriteData, const std::optional<RectI> customUv) {
+void Tiled2dMapVectorSymbolObject::setupIconProperties(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &rotations, VectorModificationWrapper<float> &textureCoordinates, int &countOffset, const double zoomIdentifier, const std::shared_ptr<TextureHolderInterface> spriteTexture, const std::shared_ptr<SpriteData> spriteData, const std::optional<RectI> customUv) {
 
     if (instanceCounts.icons == 0) {
         return;
@@ -335,7 +336,9 @@ void Tiled2dMapVectorSymbolObject::setupIconProperties(std::vector<float> &posit
 
     const auto evalContext = EvaluationContext(zoomIdentifier, dpFactor, featureContext, featureStateManager);
 
-    auto iconImage = description->style.getIconImage(evalContext);
+    customIconUv = customUv;
+
+    iconImage = description->style.getIconImage(evalContext);
 
     if ((iconImage.empty() && !hasCustomTexture) || !spriteTexture) {
         // TODO: make sure icon is not rendered
@@ -359,7 +362,7 @@ void Tiled2dMapVectorSymbolObject::setupIconProperties(std::vector<float> &posit
         if (!hasCustomTexture) {
             const auto spriteIt = spriteData->sprites.find(iconImage);
             if (spriteIt == spriteData->sprites.end()) {
-                LogError << "Unable to find sprite " << iconImage;
+                LogError << "Unable to find sprite " <<= iconImage;
                 writePosition(0, 0, countOffset, positions);
                 countOffset += instanceCounts.icons;
                 return;
@@ -390,12 +393,15 @@ void Tiled2dMapVectorSymbolObject::setupIconProperties(std::vector<float> &posit
         lastIconUpdateRotation = -1;
         lastIconUpdateAlpha = -1;
     }
+
+    lastIconImage = iconImage;
+
     writePosition(renderCoordinate.x, renderCoordinate.y, countOffset, positions);
 
     countOffset += instanceCounts.icons;
 }
 
-void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &alphas, std::vector<float> &offsets, int &countOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, long long now, const Vec2I viewPortSize) {
+void Tiled2dMapVectorSymbolObject::updateIconProperties(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &scales, VectorModificationWrapper<float> &rotations, VectorModificationWrapper<float> &alphas, VectorModificationWrapper<float> &offsets, VectorModificationWrapper<float> &textureCoordinates, int &countOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, long long now, const Vec2I viewPortSize, const std::shared_ptr<TextureHolderInterface> spriteTexture, const std::shared_ptr<SpriteData> spriteData) {
 
     if (instanceCounts.icons == 0) {
         return;
@@ -426,6 +432,49 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &posi
     auto camera = strongMapInterface ? strongMapInterface->getCamera() : nullptr;
 
     evaluateStyleProperties(zoomIdentifier);
+
+    if (iconImage != lastIconImage && !((iconImage.empty() && !hasCustomTexture) || !spriteTexture)) {
+        const auto textureWidth = (double) spriteTexture->getImageWidth();
+        const auto textureHeight = (double) spriteTexture->getImageHeight();
+
+        int spriteX = 0;
+        int spriteY = 0;
+        int spriteWidth = textureWidth;
+        int spriteHeight = textureHeight;
+        float spritePixelRatio = float(camera->getScreenDensityPpi() / 160.0);
+
+        if (!hasCustomTexture) {
+            const auto spriteIt = spriteData->sprites.find(iconImage);
+            if (spriteIt == spriteData->sprites.end()) {
+                LogError << "Unable to find sprite " <<= iconImage;
+                writePosition(0, 0, countOffset, positions);
+                countOffset += instanceCounts.icons;
+                return;
+            }
+            spriteX = spriteIt->second.x;
+            spriteY = spriteIt->second.y;
+            spriteWidth = spriteIt->second.width;
+            spriteHeight = spriteIt->second.height;
+            spritePixelRatio = spriteIt->second.pixelRatio;
+        } else {
+            spriteX = customIconUv->x;
+            spriteY = customIconUv->y;
+            spriteWidth = customIconUv->width;
+            spriteHeight = customIconUv->height;
+        }
+
+        const double densityOffset = (camera->getScreenDensityPpi() / 160.0) / spritePixelRatio;
+
+        spriteSize.x = spriteWidth * densityOffset;
+        spriteSize.y = spriteHeight * densityOffset;
+
+        textureCoordinates[4 * countOffset + 0] = ((double) spriteX) / textureWidth;
+        textureCoordinates[4 * countOffset + 1] = ((double) spriteY) / textureHeight;
+        textureCoordinates[4 * countOffset + 2] = ((double) spriteWidth) / textureWidth;
+        textureCoordinates[4 * countOffset + 3] = ((double) spriteHeight) / textureHeight;
+
+        lastIconImage = iconImage;
+    }
 
     rotations[countOffset] = iconRotate;
 
@@ -538,7 +587,7 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(std::vector<float> &posi
     }
 }
 
-void Tiled2dMapVectorSymbolObject::writePosition(const double x_, const double y_, const size_t offset, std::vector<float> &buffer) {
+void Tiled2dMapVectorSymbolObject::writePosition(const double x_, const double y_, const size_t offset, VectorModificationWrapper<float> &buffer) {
     double sinX = sin(x_);
     double sinY = sin(y_);
     double cosX = cos(x_);
@@ -553,7 +602,7 @@ void Tiled2dMapVectorSymbolObject::writePosition(const double x_, const double y
 }
 
 
-void Tiled2dMapVectorSymbolObject::setupStretchIconProperties(std::vector<float> &positions, std::vector<float> &textureCoordinates, int &countOffset, const double zoomIdentifier, const std::shared_ptr<TextureHolderInterface> spriteTexture, const std::shared_ptr<SpriteData> spriteData) {
+void Tiled2dMapVectorSymbolObject::setupStretchIconProperties(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &textureCoordinates, int &countOffset, const double zoomIdentifier, const std::shared_ptr<TextureHolderInterface> spriteTexture, const std::shared_ptr<SpriteData> spriteData) {
     if (instanceCounts.stretchedIcons == 0) {
         return;
     }
@@ -580,7 +629,7 @@ void Tiled2dMapVectorSymbolObject::setupStretchIconProperties(std::vector<float>
 
         const auto spriteIt = spriteData->sprites.find(iconImage);
         if (spriteIt == spriteData->sprites.end()) {
-            LogError << "Unable to find sprite " << iconImage;
+            LogError << "Unable to find sprite " <<= iconImage;
             writePosition(0, 0, countOffset, positions);
             countOffset += instanceCounts.stretchedIcons;
             return;
@@ -598,6 +647,7 @@ void Tiled2dMapVectorSymbolObject::setupStretchIconProperties(std::vector<float>
         textureCoordinates[4 * countOffset + 2] = ((double) spriteIt->second.width) / textureWidth;
         textureCoordinates[4 * countOffset + 3] = ((double) spriteIt->second.height) / textureHeight;
 
+        lastIconImage = iconImage;
     }
 
     writePosition(renderCoordinate.x, renderCoordinate.y, countOffset, positions);
@@ -607,7 +657,7 @@ void Tiled2dMapVectorSymbolObject::setupStretchIconProperties(std::vector<float>
     lastStretchIconUpdateScaleFactor = -1;
 }
 
-void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &alphas, std::vector<float> &stretchInfos, int &countOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, long long now, const Vec2I viewPortSize) {
+void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &scales, VectorModificationWrapper<float> &rotations, VectorModificationWrapper<float> &alphas, VectorModificationWrapper<float> &stretchInfos, VectorModificationWrapper<float> &textureCoordinates, int &countOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, long long now, const Vec2I viewPortSize, const std::shared_ptr<TextureHolderInterface> spriteTexture, const std::shared_ptr<SpriteData> spriteData) {
 
     if (instanceCounts.stretchedIcons == 0) {
         return;
@@ -636,6 +686,35 @@ void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(std::vector<float
     }
 
     evaluateStyleProperties(zoomIdentifier);
+
+    if (iconImage != lastIconImage && !(iconImage.empty() || !spriteTexture))  {
+        const auto textureWidth = (double) spriteTexture->getImageWidth();
+        const auto textureHeight = (double) spriteTexture->getImageHeight();
+
+        renderCoordinate = getRenderCoordinates(iconAnchor, 0.0, textureWidth, textureHeight);
+
+        const auto spriteIt = spriteData->sprites.find(iconImage);
+        if (spriteIt == spriteData->sprites.end()) {
+            LogError << "Unable to find sprite " <<= iconImage;
+            writePosition(0, 0, countOffset, positions);
+            countOffset += instanceCounts.stretchedIcons;
+            return;
+        }
+
+        const double densityOffset = (camera->getScreenDensityPpi() / 160.0) / spriteIt->second.pixelRatio;
+
+        stretchSpriteSize.x = spriteIt->second.width * densityOffset;
+        stretchSpriteSize.y = spriteIt->second.height * densityOffset;
+
+        stretchSpriteInfo = spriteIt->second;
+
+        textureCoordinates[4 * countOffset + 0] = ((double) spriteIt->second.x) / textureWidth;
+        textureCoordinates[4 * countOffset + 1] = ((double) spriteIt->second.y) / textureHeight;
+        textureCoordinates[4 * countOffset + 2] = ((double) spriteIt->second.width) / textureWidth;
+        textureCoordinates[4 * countOffset + 3] = ((double) spriteIt->second.height) / textureHeight;
+
+        lastIconImage = iconImage;
+    }
 
     if (!isCoordinateOwner) {
         alphas[countOffset] = 0.0;
@@ -800,7 +879,7 @@ void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(std::vector<float
     countOffset += instanceCounts.stretchedIcons;
 }
 
-void Tiled2dMapVectorSymbolObject::setupTextProperties(std::vector<float> &textureCoordinates, std::vector<uint16_t> &styleIndices, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier) {
+void Tiled2dMapVectorSymbolObject::setupTextProperties(VectorModificationWrapper<float> &textureCoordinates, VectorModificationWrapper<uint16_t> &styleIndices, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier) {
     if (instanceCounts.textCharacters ==  0 || !labelObject) {
         return;
     }
@@ -808,7 +887,7 @@ void Tiled2dMapVectorSymbolObject::setupTextProperties(std::vector<float> &textu
     labelObject->setupProperties(textureCoordinates, styleIndices, countOffset, styleOffset, zoomIdentifier);
 }
 
-void Tiled2dMapVectorSymbolObject::updateTextProperties(std::vector<float> &positions, std::vector<float> &referencePositions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, long long now, const Vec2I viewPortSize, const std::vector<float>& vpMatrix, const Vec3D& origin) {
+void Tiled2dMapVectorSymbolObject::updateTextProperties(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &referencePositions, VectorModificationWrapper<float> &scales, VectorModificationWrapper<float> &rotations, VectorModificationWrapper<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, long long now, const Vec2I viewPortSize, const std::vector<float>& vpMatrix, const Vec3D& origin) {
     if (instanceCounts.textCharacters ==  0 || !labelObject) {
         return;
     }

@@ -207,7 +207,7 @@ int Tiled2dMapVectorSymbolLabelObject::getCharacterCount(){
     return characterCount;
 }
 
-void Tiled2dMapVectorSymbolLabelObject::setupProperties(std::vector<float> &textureCoordinates, std::vector<uint16_t> &styleIndices, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier) {
+void Tiled2dMapVectorSymbolLabelObject::setupProperties(VectorModificationWrapper<float> &textureCoordinates, VectorModificationWrapper<uint16_t> &styleIndices, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier) {
     const auto evalContext = EvaluationContext(zoomIdentifier, dpFactor, featureContext, stateManager);
 
     evaluateStyleProperties(zoomIdentifier);
@@ -258,7 +258,7 @@ void Tiled2dMapVectorSymbolLabelObject::evaluateStyleProperties(const double zoo
 }
 
 
-void Tiled2dMapVectorSymbolLabelObject::updateProperties(std::vector<float> &positions, std::vector<float> &referencePositions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const bool collides, const double rotation, const float alpha, const bool isCoordinateOwner, long long now, const Vec2I &viewportSize, const std::vector<float>& vpMatrix, const Vec3D& origin) {
+void Tiled2dMapVectorSymbolLabelObject::updateProperties(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &referencePositions, VectorModificationWrapper<float> &scales, VectorModificationWrapper<float> &rotations, VectorModificationWrapper<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const bool collides, const double rotation, const float alpha, const bool isCoordinateOwner, long long now, const Vec2I &viewportSize, const std::vector<float>& vpMatrix, const Vec3D& origin) {
     const auto evalContext = EvaluationContext(zoomIdentifier, dpFactor, featureContext, stateManager);
 
     evaluateStyleProperties(zoomIdentifier);
@@ -321,7 +321,7 @@ void Tiled2dMapVectorSymbolLabelObject::updateProperties(std::vector<float> &pos
     }
 }
 
-void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float> &positions, std::vector<float> &referencePositions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, const Vec2I &viewportSize) {
+void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &referencePositions, VectorModificationWrapper<float> &scales, VectorModificationWrapper<float> &rotations, VectorModificationWrapper<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, const Vec2I &viewportSize) {
 
     const auto evalContext = EvaluationContext(zoomIdentifier, dpFactor, featureContext, stateManager);
     const float fontSize = is3d ? textSize : (scaleFactor * textSize);
@@ -645,7 +645,7 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
     }
 }
 
-double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float> &positions, std::vector<float> &referencePositions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, const Vec2I &viewportSize) {
+double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &referencePositions, VectorModificationWrapper<float> &scales, VectorModificationWrapper<float> &rotations, VectorModificationWrapper<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, const Vec2I &viewportSize) {
     if(lineCoordinates == std::nullopt) {
         countOffset += characterCount;
         return 0;
@@ -963,7 +963,7 @@ DistanceIndex Tiled2dMapVectorSymbolLabelObject::findReferencePointIndices() {
 }
 
 
-void Tiled2dMapVectorSymbolLabelObject::writePosition(const double x_, const double y_, const size_t offset, std::vector<float> &buffer) {
+void Tiled2dMapVectorSymbolLabelObject::writePosition(const double x_, const double y_, const size_t offset, VectorModificationWrapper<float> &buffer) {
     const size_t baseIndex = positionSize * offset;
     if (is3d) {
         const double sinY = sin(y_);
