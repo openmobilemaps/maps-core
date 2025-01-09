@@ -567,16 +567,14 @@ void Tiled2dMapVectorLayer::reloadLocalDataSource(const std::string &sourceName,
 
     if (const auto &geoSource = mapDescription->geoJsonSources[sourceName]) {
 
-        nlohmann::json json;
-
         try {
-            json = nlohmann::json::parse(geoJson);
+            auto json = nlohmann::json::parse(geoJson);
+            geoSource->reload(GeoJsonParser::getGeoJson(json));
         }
-        catch (nlohmann::json::parse_error &ex) {
+        catch (nlohmann::json::exception &ex) {
             return;
         }
 
-        geoSource->reload(GeoJsonParser::getGeoJson(json));
     }
     auto sourceIt = vectorTileSources.find(sourceName);
     if (sourceIt != vectorTileSources.end()) {
