@@ -433,6 +433,49 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(VectorModificationWrappe
 
     evaluateStyleProperties(zoomIdentifier);
 
+    if (iconImage != lastIconImage && !((iconImage.empty() && !hasCustomTexture) || !spriteTexture)) {
+        const auto textureWidth = (double) spriteTexture->getImageWidth();
+        const auto textureHeight = (double) spriteTexture->getImageHeight();
+
+        int spriteX = 0;
+        int spriteY = 0;
+        int spriteWidth = textureWidth;
+        int spriteHeight = textureHeight;
+        float spritePixelRatio = float(camera->getScreenDensityPpi() / 160.0);
+
+        if (!hasCustomTexture) {
+            const auto spriteIt = spriteData->sprites.find(iconImage);
+            if (spriteIt == spriteData->sprites.end()) {
+                LogError << "Unable to find sprite " <<= iconImage;
+                writePosition(0, 0, countOffset, positions);
+                countOffset += instanceCounts.icons;
+                return;
+            }
+            spriteX = spriteIt->second.x;
+            spriteY = spriteIt->second.y;
+            spriteWidth = spriteIt->second.width;
+            spriteHeight = spriteIt->second.height;
+            spritePixelRatio = spriteIt->second.pixelRatio;
+        } else {
+            spriteX = customIconUv->x;
+            spriteY = customIconUv->y;
+            spriteWidth = customIconUv->width;
+            spriteHeight = customIconUv->height;
+        }
+
+        const double densityOffset = (camera->getScreenDensityPpi() / 160.0) / spritePixelRatio;
+
+        spriteSize.x = spriteWidth * densityOffset;
+        spriteSize.y = spriteHeight * densityOffset;
+
+        textureCoordinates[4 * countOffset + 0] = ((double) spriteX) / textureWidth;
+        textureCoordinates[4 * countOffset + 1] = ((double) spriteY) / textureHeight;
+        textureCoordinates[4 * countOffset + 2] = ((double) spriteWidth) / textureWidth;
+        textureCoordinates[4 * countOffset + 3] = ((double) spriteHeight) / textureHeight;
+
+        lastIconImage = iconImage;
+    }
+
     rotations[countOffset] = iconRotate;
 
     if (iconRotationAlignment == SymbolAlignment::VIEWPORT ||
