@@ -50,5 +50,5 @@ rasterFragmentShader(VertexOut in [[stage_in]],
     float gamma = styling[0].gamma;
     rgb = pow(rgb, (1.0 / (gamma)));
     rgb = mix(brightnessMin, brightnessMax, min(rgb / color.a, half3(1.0)));
-    return half4(rgb * color.a, color.a);
+    return half4(rgb * color.a, color.a) * styling[0].opacity;
 }

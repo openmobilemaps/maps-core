@@ -61,7 +61,9 @@ public:
 
     void removeFromCache();
 
-    struct SymbolObjectInstanceCounts { int icons, textCharacters, stretchedIcons; };
+    struct SymbolObjectInstanceCounts {
+        int32_t icons, textCharacters, stretchedIcons;
+    };
 
     const SymbolObjectInstanceCounts getInstanceCounts() const;
 

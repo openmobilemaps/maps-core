@@ -253,60 +253,60 @@ lineGroupFragmentShader(LineVertexOut in [[stage_in]],
     if (segmentType == 0 || capType == 1 || (segmentType == 2 && t < 0.0) || (segmentType == 1 && t > 1.0)) {
       d = min(length(in.lineA), length(in.lineA - in.lineB));
     } else if (capType == 2) {
-      const half dLen = t < 0.0 ? -t * lineLength : (t - 1.0) * lineLength;
-      const half3 intersectPt = t * half3(in.lineB);
-      const half dOrth = abs(length(half3(in.lineA) - intersectPt));
+      const float dLen = t < 0.0 ? -t * lineLength : (t - 1.0) * lineLength;
+      const float3 intersectPt = t * float3(in.lineB);
+      const float dOrth = abs(length(float3(in.lineA) - intersectPt));
       d = max(dLen, dOrth);
     } else {
       d = 0;
       discard_fragment();
     }
   } else {
-    const half3 intersectPt = t * half3(in.lineB);
-    d = abs(length(half3(in.lineA) - intersectPt));
+    const float3 intersectPt = t * float3(in.lineB);
+    d = abs(length(float3(in.lineA) - intersectPt));
   }
 
   if (d > in.width) {
     discard_fragment();
   }
 
-  const half opacity = style->opacity;
-  const half colorA = style->color.a;
-  const half colorAGap = style->gapColor.a;
+  const float opacity = style->opacity;
+  const float colorA = style->color.a;
+  const float colorAGap = style->gapColor.a;
 
-  half a = colorA * opacity;
-  const half aGap = colorAGap * opacity;
+  float a = colorA * opacity;
+  const float aGap = colorAGap * opacity;
 
   const int dottedLine = int(style->dotted);
 
   if (in.scaledBlur > 0 && t > 0.0 && t < 1.0) {
-    const half nonBlurRange = (in.width - in.scaledBlur);
+    const float nonBlurRange = (in.width - in.scaledBlur);
     if (d > nonBlurRange) {
       a *= clamp(1 - max(0.0, d - nonBlurRange) / (in.scaledBlur), 0.0, 1.0);
     }
   }
 
   if (dottedLine == 1) {
-    const half skew = style->dottedSkew;
+    const float skew = style->dottedSkew;
 
-    const half factorToT = (in.width * 2) / lineLength * skew;
-    const half dashOffset = (in.width - skew * in.width) / lineLength;
+    const float factorToT = (in.width * 2) / lineLength * skew;
+    const float dashOffset = (in.width - skew * in.width) / lineLength;
 
-    const half dashTotalDotted =  2.0 * factorToT;
-    const half offset = half(in.lengthPrefix) / lineLength;
-    const half startOffsetSegmentDotted = fmod(offset, dashTotalDotted);
-    const half pos = t + startOffsetSegmentDotted;
+    const float dashTotalDotted =  2.0 * factorToT;
+    const float offset = float(in.lengthPrefix) / lineLength;
+    const float startOffsetSegmentDotted = fmod(offset, dashTotalDotted);
+    const float pos = t + startOffsetSegmentDotted;
 
-    const half intraDashPosDotted = fmod(pos, dashTotalDotted);
+    const float intraDashPosDotted = fmod(pos, dashTotalDotted);
       if ((intraDashPosDotted > 1.0 * factorToT + dashOffset && intraDashPosDotted < dashTotalDotted - dashOffset) ||
                               (length(half2(min(abs(intraDashPosDotted - 0.5 * factorToT), 0.5 * factorToT + dashTotalDotted - intraDashPosDotted) / (0.5 * factorToT + dashOffset), d / in.width)) > 1.0)) {
           discard_fragment();
       }
   } else if(numDash > 0) {
-    const half factorToT = (in.width * 2) / lineLength;
-    const half dashTotal = style->dashArray.w * factorToT;
-    const half startOffsetSegment = fmod(half(in.lengthPrefix) / lineLength, dashTotal);
-    const half intraDashPos = fmod(t + startOffsetSegment, dashTotal);
+    const float factorToT = (in.width * 2) / lineLength;
+    const float dashTotal = style->dashArray.w * factorToT;
+    const float startOffsetSegment = fmod(float(in.lengthPrefix) / lineLength, dashTotal);
+    const float intraDashPos = fmod(t + startOffsetSegment, dashTotal);
 
     if ((intraDashPos > style->dashArray.x * factorToT && intraDashPos < style->dashArray.y * factorToT) ||
         (intraDashPos > style->dashArray.z * factorToT && intraDashPos < style->dashArray.w * factorToT)) {
