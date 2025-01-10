@@ -18,7 +18,7 @@ target_include_directories(tests PRIVATE
 target_link_libraries(tests PRIVATE Catch2::Catch2WithMain mapscore)
 target_compile_definitions(tests PRIVATE OPENMOBILEMAPS_GL=1)
 target_compile_features(tests PRIVATE cxx_std_20)
-target_compile_options(tests PRIVATE -Werror)
+target_compile_options(tests PRIVATE -Werror -Wno-deprecated)
 
 # Test via CTest 
 enable_testing()
