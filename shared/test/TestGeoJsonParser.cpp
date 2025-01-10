@@ -306,7 +306,7 @@ TEST_CASE("GeoJSON Parser Points") {
 
         CHECK(points[2].featureInfo.identifier == "point2");
         auto &props2 = points[2].featureInfo.properties;
-        CHECK(props2.at("prop_string").stringVal == "value0");
+        CHECK(props2.at("prop_string").stringVal == "duh");
         CHECK(props2.at("prop_number_integer").intVal == 1);
         CHECK(props2.at("prop_number_float").doubleVal == 1.5);
         CHECK(props2.at("prop_bool").boolVal == false);
@@ -383,10 +383,10 @@ TEST_CASE("GeoJSON Parser Lines") {
         CHECK(lines[2].points.size() == 5);
         auto &props2 = lines[2].featureInfo.properties;
         CHECK(props2.at("prop_string").stringVal == "value0");
-        CHECK(props2.at("prop_number_integer").intVal == 1);
+        CHECK(props2.at("prop_number_integer").intVal == 2);
         CHECK(props2.at("prop_number_float").doubleVal == 1.5);
         CHECK(props2.at("prop_bool").boolVal == false);
-        CHECK(props2.at("prop_string_array").listStringVal == std::vector<std::string>{"this", "that"});
+        CHECK(props2.at("prop_string_array").listStringVal == std::vector<std::string>{"this", "that", "and what about this?"});
         CHECK(props2.at("prop_number_array").listFloatVal == std::vector<float>{1.f, 2.f, 3.f});
         CHECK(props2.size() == 6);
 
