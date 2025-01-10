@@ -27,7 +27,6 @@
     </a>
 </div>
 
-
 <h1>Android</h1>
 
 ## How to build
@@ -131,13 +130,14 @@ For a more custom layer creation, you can directly use the methods provided with
 mapView.addLayer(tiledRasterLayer)
 ```
 
-#### Parsing a WMTS Capability 
+#### Parsing a WMTS Capability
 
 Open Mobile Maps supports the [WMTS standard](https://en.wikipedia.org/wiki/Web_Map_Tile_Service) and can parse their Capability XML file to generate raster layer configurations.
 
 ```kotlin
 val ressource = WmtsCapabilitiesResource.create(xml)
 ```
+
 The created resource object is then capable of creating a layer object with a given identifier.
 
 ```kotlin
@@ -179,17 +179,17 @@ To use different raster tile services with different tile pyramids, you can crea
             // Defines both an additional scale factor for the tiles (and if they are scaled to match the target
             // devices screen density), how many layers above the ideal one should be loaded an displayed as well,
             // as well as if the layer is drawn, when the zoom is smaller/larger than the valid range
-			override fun getZoomInfo(): Tiled2dMapZoomInfo {
-				return Tiled2dMapZoomInfo(
-					zoomLevelScaleFactor = 0.6667f,
-					numDrawPreviousLayers = 2,
-					numDrawPreviousOrLaterTLayers = 0,
-					adaptScaleToScreen = true,
-					maskTile = false,
-					underzoom = true,
-					overzoom = true
-				)
-			}
+            override fun getZoomInfo(): Tiled2dMapZoomInfo {
+                return Tiled2dMapZoomInfo(
+                    zoomLevelScaleFactor = 0.6667f,
+                    numDrawPreviousLayers = 2,
+                    numDrawPreviousOrLaterTLayers = 0,
+                    adaptScaleToScreen = true,
+                    maskTile = false,
+                    underzoom = true,
+                    overzoom = true
+                )
+            }
 
             // List of valid zoom-levels and their target zoom-value, the tile size in
             // the layers coordinate system, the number of tiles on that level and the
@@ -231,7 +231,9 @@ val tiledVectorLayer = TiledVectorLayer(context, "https://www.sample.org/base-ma
 mapView.add(tiledVectorLayer)
 ```
 
-Additional features and differences will be documented soon.
+Please note that font data for vector layers is loaded via the implicitly declared (as above) or explicitly provided `FontLoaderInterface` and not via the the url provided in the style.json. For each font type used in the layer, a bitmap texture with the multi-channel signed distance fields of all the glyphs and a corresponding metadata json need to be provided. Please see the `FontData` class for the structure of the metadata. Such files can conveniently be created with the tool https://github.com/Experience-Monks/msdf-bmfont and imported from the apps asset folder via the provided `FontLoader.kt`.
+
+Additional vector layer features and differences to the standard will be documented soon. 
 
 ### Polygon layer
 
@@ -240,22 +242,22 @@ Open Mobile Maps provides a simple interface to create a polygon layer. The laye
 ```kotlin
 val polygonLayer = PolygonLayerInterface.create()
 polygonLayer.add(
-	PolygonInfo(
-		identifier = "Polygon",
-		coordinates = PolygonCoord(
-			positions = /* coordinates */, holes = /* hole coordinates */
-		),
-		color = Color(1.0f, 0.0f, 0.0f, 0.5f),
-		highlightColor = Color(1.0f, 0.4f, 0.4f, 0.7f),
-	)
+    PolygonInfo(
+        identifier = "Polygon",
+        coordinates = PolygonCoord(
+            positions = /* coordinates */, holes = /* hole coordinates */
+        ),
+        color = Color(1.0f, 0.0f, 0.0f, 0.5f),
+        highlightColor = Color(1.0f, 0.4f, 0.4f, 0.7f),
+    )
 )
 
 // Optional click interaction
 polygonLayer.setLayerClickable(true)
 polygonLayer.setCallbackHandler(object : PolygonLayerCallbackInterface(){
-	override fun onClickConfirmed(polygon: PolygonInfo) {
-		// React
-	}
+    override fun onClickConfirmed(polygon: PolygonInfo) {
+        // React
+    }
 })
 
 mapView.addLayer(polygonLayer.asLayerInterface())
@@ -269,21 +271,21 @@ A simple icon layer is implemented as well. This supports displaying textures at
 val iconLayer = IconLayerInterface.create()
 val texture = BitmapTextureHolder(/* drawable or bitmap */)
 val icon = IconFactory.createIcon(
-	identifier = "Icon",
-	coordinate = coordinate,
-	texture = texture,
-	iconSize = Vec2F(iconSize, iconSize),
-	scaleType = IconType.INVARIANT,
+    identifier = "Icon",
+    coordinate = coordinate,
+    texture = texture,
+    iconSize = Vec2F(iconSize, iconSize),
+    scaleType = IconType.INVARIANT,
     blendMode = BlendMode.NORMAL
 )
 val iconWithCustomAnchor = IconFactory.createIconWithAnchor(
-	"Icon with a custom Anchor",
-	coordinate = coordinate,
-	texture = texture,
-	iconSize = Vec2F(iconSize, iconSize),
-	scaleType = IconType.INVARIANT,
-	blendMode = BlendMode.NORMAL,
-	iconAnchor = Vec2F(0.5f, 1.0f) // e.g. horizontally centered at the bottom
+    "Icon with a custom Anchor",
+    coordinate = coordinate,
+    texture = texture,
+    iconSize = Vec2F(iconSize, iconSize),
+    scaleType = IconType.INVARIANT,
+    blendMode = BlendMode.NORMAL,
+    iconAnchor = Vec2F(0.5f, 1.0f) // e.g. horizontally centered at the bottom
 )
 iconLayer.add(icon)
 iconLayer.add(iconWithCustomAnchor)
@@ -291,15 +293,15 @@ iconLayer.add(iconWithCustomAnchor)
 // Optional interaction
 iconLayer.setLayerClickable(true)
 iconLayer.setCallbackHandler(object : IconLayerCallbackInterface(){
-	override fun onClickConfirmed(icons: ArrayList<IconInfoInterface>): Boolean {
-		// React and return true if handled
-		return true
-	}
+    override fun onClickConfirmed(icons: ArrayList<IconInfoInterface>): Boolean {
+        // React and return true if handled
+        return true
+    }
 
-	override fun onLongPress(icons: ArrayList<IconInfoInterface>): Boolean {
-		// React and return true if handled
-		return true
-	}
+    override fun onLongPress(icons: ArrayList<IconInfoInterface>): Boolean {
+        // React and return true if handled
+        return true
+    }
 })
 
 mapView.addLayer(iconLayer.asLayerInterface())
@@ -312,30 +314,30 @@ A line layer can be added to the mapView as well. Using the MCLineFactory a Line
 ```kotlin
 val lineLayer = LineLayerInterface.create()
 val line = LineFactory.createLine(
-	identifier = "lineIdentifier",
-	coordinates = lineCoordinates,
-	style = LineStyle(
-		color = ColorStateList(normal = Color(1.0f, 0.0f, 0.0f, 1.0f), highlighted = Color(1.0f, 0.5f, 0.0f, 1.0f)),
-		gapColor = ColorStateList(normal = Color(0.0f, 0.0f, 0.0f, 0.0f), highlighted = Color(0.0f, 0.0f, 0.0f, 0.0f)),
-		opacity = 1.0f,
+    identifier = "lineIdentifier",
+    coordinates = lineCoordinates,
+    style = LineStyle(
+        color = ColorStateList(normal = Color(1.0f, 0.0f, 0.0f, 1.0f), highlighted = Color(1.0f, 0.5f, 0.0f, 1.0f)),
+        gapColor = ColorStateList(normal = Color(0.0f, 0.0f, 0.0f, 0.0f), highlighted = Color(0.0f, 0.0f, 0.0f, 0.0f)),
+        opacity = 1.0f,
         blur = 0.0f,
-		widthType = SizeType.SCREEN_PIXEL,
-		width = lineWidth,
-		dashArray = arrayListOf(4.0f, 2.0f),
-		lineCap = LineCapType.SQUARE,
+        widthType = SizeType.SCREEN_PIXEL,
+        width = lineWidth,
+        dashArray = arrayListOf(4.0f, 2.0f),
+        lineCap = LineCapType.SQUARE,
         offset = 0f,
-		dotted = false,
-		dottedSkew = 0.0
-	)
+        dotted = false,
+        dottedSkew = 0.0
+    )
 )
 lineLayer.add(line)
 
 // Optional click interaction
 lineLayer.setLayerClickable(true)
 lineLayer.setCallbackHandler(object : LineLayerCallbackInterface() {
-	override fun onLineClickConfirmed(line: LineInfoInterface) {
-		// React
-	}
+    override fun onLineClickConfirmed(line: LineInfoInterface) {
+        // React
+    }
 })
 
 mapView.addLayer(lineLayer.asLayerInterface())
@@ -352,6 +354,7 @@ mapView.getCamera().moveToCenterPositionZoom(
 ```
 
 In the camera, one can also override the default zoom limits with:
+
 ```kotlin
 mapView.getCamera().setMinZoom(5000000.0)
 mapView.getCamera().setMaxZoom(300.0)
@@ -362,4 +365,3 @@ Please note, that the MapView must be ready and running to be able to properly c
 ## License
 
 This project is licensed under the terms of the MPL 2 license. See the [LICENSE](../LICENSE) file.
-
