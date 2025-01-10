@@ -14,10 +14,11 @@ using namespace metal;
 
 vertex VertexOut
 textVertexShader(const VertexIn vertexIn [[stage_in]],
-                 constant float4x4 &mvpMatrix [[buffer(1)]])
+                 ushort amp_id [[amplification_id]],
+                 constant float4x4x2 &mvpMatrix [[buffer(1)]])
 {
     VertexOut out {
-        .position = float4((mvpMatrix * float4(vertexIn.position.xy, 0.0, 1.0)).xy, 0.0, 1.0),
+        .position = float4((mvpMatrix.matrices[amp_id] * float4(vertexIn.position.xy, 0.0, 1.0)).xy, 0.0, 1.0),
         .uv = vertexIn.uv
     };
 

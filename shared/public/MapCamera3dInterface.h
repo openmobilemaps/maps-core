@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Coord.h"
+#include <cstdint>
 #include <optional>
 
 struct Camera3dConfig;
@@ -15,4 +16,6 @@ public:
     virtual Camera3dConfig getCameraConfig() = 0;
 
     virtual void setCameraConfig(const Camera3dConfig & config, std::optional<float> durationSeconds, std::optional<float> targetZoom, const std::optional<::Coord> & targetCoordinate) = 0;
+
+    virtual void setHardwareMatrices(int64_t viewMatrices, int64_t projectionMatrices, int32_t count) = 0;
 };

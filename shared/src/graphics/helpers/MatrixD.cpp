@@ -228,7 +228,7 @@ void MatrixD::frustumM(std::vector<double> &m, int offset, double left, double r
  */
 void MatrixD::perspectiveM(std::vector<double> &m, int offset, double fovy, double aspect, double zNear, double zFar) {
     double f = 1.0f / (double)std::tan(fovy * (M_PI / 360.0));
-    double rangeReciprocal = 1.0f / (zNear - zFar);
+    double rangeReciprocal = 1.0f / (zFar - zNear);  // Reverse Z uses (zFar - zNear)
 
     m[offset + 0] = f / aspect;
     m[offset + 1] = 0.0f;
@@ -242,12 +242,12 @@ void MatrixD::perspectiveM(std::vector<double> &m, int offset, double fovy, doub
 
     m[offset + 8] = 0.0f;
     m[offset + 9] = 0.0f;
-    m[offset + 10] = (zFar + zNear) * rangeReciprocal;
+    m[offset + 10] = zNear * rangeReciprocal;
     m[offset + 11] = -1.0f;
 
     m[offset + 12] = 0.0f;
     m[offset + 13] = 0.0f;
-    m[offset + 14] = 2.0f * zFar * zNear * rangeReciprocal;
+    m[offset + 14] = zFar * zNear * rangeReciprocal;
     m[offset + 15] = 0.0f;
 }
 

@@ -29,12 +29,12 @@ open class MCFontLoader: NSObject, MCFontLoaderInterface, @unchecked Sendable {
         self.bundle = bundle
         let pixelsPerInch = if Thread.isMainThread {
             MainActor.assumeIsolated {
-                UIScreen.pixelsPerInch
+                DevicePpi.pixelsPerInch
             }
         } else {
             DispatchQueue.main.sync {
                 MainActor.assumeIsolated {
-                    UIScreen.pixelsPerInch
+                    DevicePpi.pixelsPerInch
                 }
             }
         }

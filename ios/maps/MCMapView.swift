@@ -51,7 +51,7 @@ open class MCMapView: MTKView, @unchecked Sendable {
                 renderingContext: renderingContext,
                 mapConfig: mapConfig,
                 scheduler: MCThreadPoolScheduler.create(),
-                pixelDensity: pixelsPerInch ?? Float(UIScreen.pixelsPerInch),
+                pixelDensity: pixelsPerInch ?? Float(DevicePpi.pixelsPerInch),
                 is3D: is3D)
         else {
             fatalError("Can't create MCMapInterface")
@@ -94,7 +94,8 @@ open class MCMapView: MTKView, @unchecked Sendable {
 
         delegate = self
 
-        depthStencilPixelFormat = .stencil8
+        depthStencilPixelFormat = .depth32Float_stencil8
+        clearDepth = 0.0
 
         // if #available(iOS 16.0, *) {
         //   depthStencilStorageMode = .private
@@ -104,7 +105,12 @@ open class MCMapView: MTKView, @unchecked Sendable {
 
         preferredFramesPerSecond = 120
 
-        sampleCount = 1  // samples per pixel
+        if MetalContext.current.device.supports32BitMSAA && MetalContext.current.device.supportsTextureSampleCount(4)
+        {
+            sampleCount = 4 // samples per pixel
+        } else {
+            sampleCount = 1 // samples per pixel
+        }
 
         callbackHandler.invalidateCallback = { [weak self] in
             self?.invalidate()
@@ -260,8 +266,8 @@ extension MCMapView: MTKViewDelegate {
                 self.frame = CGRect(
                     origin: .zero,
                     size: .init(
-                        width: size.width / UIScreen.main.scale,
-                        height: size.height / UIScreen.main.scale))
+                        width: size.width / DevicePpi.scale,
+                        height: size.height / DevicePpi.scale))
                 self.setNeedsLayout()
                 self.layoutIfNeeded()
             }

@@ -37,11 +37,12 @@ struct PolygonGroupStripeStyling {
 
 vertex PolygonGroupVertexOut
 polygonGroupVertexShader(const Vertex4FIn vertexIn [[stage_in]],
-                 constant float4x4 &vpMatrix [[buffer(1)]],
+                 constant float4x4x2 &vpMatrix [[buffer(1)]],
+                         ushort amp_id [[amplification_id]],
                  constant float4 &originOffset [[buffer(2)]])
 {
     PolygonGroupVertexOut out {
-        .position = vpMatrix * (float4(vertexIn.position.xyz, 1.0) + originOffset),
+        .position = vpMatrix.matrices[amp_id] * (float4(vertexIn.position.xyz, 1.0) + originOffset),
         .stylingIndex = vertexIn.position.w,
     };
 
@@ -64,13 +65,14 @@ struct PolygonPatternGroupVertexOut {
 
 vertex PolygonGroupStripedVertexOut
 polygonStripedGroupVertexShader(const Vertex4FIn vertexIn [[stage_in]],
-                                constant float4x4 &vpMatrix [[buffer(1)]],
+                                constant float4x4x2 &vpMatrix [[buffer(1)]],
+                                ushort amp_id [[amplification_id]],
                                 constant float4 &originOffset [[buffer(2)]],
                                 constant float2 &posOffset [[buffer(3)]]
                                 )
 {
     PolygonGroupStripedVertexOut out {
-        .position = vpMatrix * (float4(vertexIn.position.xyz, 1.0) + originOffset),
+        .position = vpMatrix.matrices[amp_id] * (float4(vertexIn.position.xyz, 1.0) + originOffset),
         .uv = vertexIn.position.xy - posOffset,
         .stylingIndex = vertexIn.position.w,
     };
@@ -98,14 +100,15 @@ polygonGroupStripedFragmentShader(PolygonGroupStripedVertexOut in [[stage_in]],
 
 vertex PolygonPatternGroupVertexOut
 polygonPatternGroupVertexShader(const Vertex4FIn vertexIn [[stage_in]],
-                                constant float4x4 &vpMatrix [[buffer(1)]],
+                                constant float4x4x2 &vpMatrix [[buffer(1)]],
+                                ushort amp_id [[amplification_id]],
                                 constant float2 &scalingFactor [[buffer(2)]],
                                 constant float2 &posOffset [[buffer(3)]],
                                 constant float4 &originOffset [[buffer(4)]]) {
     float2 pixelPosition = (vertexIn.position.xy - posOffset) * float2(1.0 / scalingFactor.x, 1 / scalingFactor.y);
 
     PolygonPatternGroupVertexOut out {
-        .position = vpMatrix * (float4(vertexIn.position.xyz, 1.0) + originOffset),
+        .position = vpMatrix.matrices[amp_id] * (float4(vertexIn.position.xyz, 1.0) + originOffset),
         .stylingIndex = vertexIn.position.w,
         .pixelPosition = pixelPosition
     };

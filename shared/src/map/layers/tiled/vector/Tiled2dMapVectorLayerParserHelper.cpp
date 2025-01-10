@@ -91,7 +91,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
             bool underzoom = val.contains("underzoom")  ? tileJsons["underzoom"].get<bool>() : false;
 
             int minZoom = val.value("minzoom", 0);
-            int maxZoom = val.value("maxzoom", 22);
+            int maxZoom = val.value("maxzoom", 24);
             std::optional<::RectCoord> bounds;
             std::optional<std::string> coordinateReferenceSystem;
 
@@ -151,15 +151,15 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                 }
 
                 minZoom = json.value("minzoom", 0);
-                maxZoom = json.value("maxzoom", 22);
+                maxZoom = json.value("maxzoom", 24);
             }
 
 
             RasterVectorStyle style = RasterVectorStyle(nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
             rasterLayerMap[key] = std::make_shared<RasterVectorLayerDescription>(layerName,
                                                                                  key,
-                                                                                 minZoom,
-                                                                                 maxZoom,
+                                                                                 0,
+                                                                                 24,
                                                                                  minZoom,
                                                                                  maxZoom,
                                                                                  url,
@@ -331,8 +331,8 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                                                                            val["source"],
                                                                            val.value("minzoom", layer->minZoom),
                                                                            val.value("maxzoom", layer->maxZoom),
-                                                                           layer->minZoom,
-                                                                           layer->maxZoom,
+                                                                           layer->sourceMinZoom,
+                                                                           layer->sourceMaxZoom,
                                                                            layer->url,
                                                                            filter,
                                                                            style,

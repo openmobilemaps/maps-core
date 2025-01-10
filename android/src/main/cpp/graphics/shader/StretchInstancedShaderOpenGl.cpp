@@ -83,7 +83,7 @@ std::string StretchInstancedShaderOpenGl::getVertexShader() {
                                           v_texCoordInstance = aTexCoordinate;
                                           v_texCoord = texCoordinate;
                                           v_alpha = aAlpha;
-                                          if (screenPosition.z - earthCenter.z > 0.0) {
+                                          if (screenPosition.z - earthCenter.z < 0.0) {
                                               v_alpha = 0.0;
                                           }
                                           v_stretchScales = aStretchScales;

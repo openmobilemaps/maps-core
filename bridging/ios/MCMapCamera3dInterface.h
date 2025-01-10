@@ -15,4 +15,8 @@
              targetZoom:(nullable NSNumber *)targetZoom
        targetCoordinate:(nullable MCCoord *)targetCoordinate;
 
+- (void)setHardwareMatrices:(int64_t)viewMatrices
+         projectionMatrices:(int64_t)projectionMatrices
+                      count:(int32_t)count;
+
 @end

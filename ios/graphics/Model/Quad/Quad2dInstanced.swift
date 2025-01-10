@@ -70,6 +70,8 @@ final class Quad2dInstanced: BaseGraphicsObject, @unchecked Sendable {
         ss2.writeMask = 0b0000_0000
 
         let s2 = MTLDepthStencilDescriptor()
+        s2.depthCompareFunction = .always
+        s2.isDepthWriteEnabled = true
         s2.frontFaceStencil = ss2
         s2.backFaceStencil = ss2
 
@@ -145,7 +147,7 @@ final class Quad2dInstanced: BaseGraphicsObject, @unchecked Sendable {
         let vpMatrixBuffer = vpMatrixBuffers.getNextBuffer(context)
         if let matrixPointer = UnsafeRawPointer(bitPattern: Int(vpMatrix)) {
             vpMatrixBuffer?.contents().copyMemory(
-                from: matrixPointer, byteCount: 64)
+                from: matrixPointer, byteCount: 64*context.amplificationCount)
         }
         encoder.setVertexBuffer(vpMatrixBuffer, offset: 0, index: 1)
 

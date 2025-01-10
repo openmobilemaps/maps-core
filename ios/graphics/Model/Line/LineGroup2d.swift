@@ -49,6 +49,8 @@ final class LineGroup2d: BaseGraphicsObject, @unchecked Sendable {
         ss.readMask = 0b1111_1111
 
         let s = MTLDepthStencilDescriptor()
+        s.depthCompareFunction = .always
+        s.isDepthWriteEnabled = true
         s.frontFaceStencil = ss
         s.backFaceStencil = ss
         s.label = "LineGroup2d.maskedStencilState"
@@ -63,6 +65,8 @@ final class LineGroup2d: BaseGraphicsObject, @unchecked Sendable {
         ss.writeMask = 0xFF
 
         let ms = MTLDepthStencilDescriptor()
+        ms.depthCompareFunction = .always
+        ms.isDepthWriteEnabled = true
         ms.frontFaceStencil = mss
         ms.backFaceStencil = mss
         ms.label = "LineGroup2d.stencilState"
@@ -118,7 +122,12 @@ final class LineGroup2d: BaseGraphicsObject, @unchecked Sendable {
 
         let vpMatrixBuffer = vpMatrixBuffers.getNextBuffer(context)
         if let matrixPointer = UnsafeRawPointer(bitPattern: Int(vpMatrix)) {
-            vpMatrixBuffer?.contents().copyMemory(from: matrixPointer, byteCount: 64)
+            vpMatrixBuffer?
+                .contents()
+                .copyMemory(
+                    from: matrixPointer,
+                    byteCount: 64*context.amplificationCount
+                )
         }
         encoder.setVertexBuffer(vpMatrixBuffer, offset: 0, index: 1)
 

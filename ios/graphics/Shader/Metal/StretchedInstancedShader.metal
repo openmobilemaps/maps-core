@@ -22,7 +22,8 @@ struct StretchedInstancedVertexOut {
 
 vertex StretchedInstancedVertexOut
 stretchInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
-                             constant float4x4 &mvpMatrix [[buffer(1)]],
+                             constant float4x4x2 &mvpMatrix [[buffer(1)]],
+                             ushort amp_id [[amplification_id]],
                              constant float2 *positions [[buffer(2)]],
                              constant float2 *scales [[buffer(3)]],
                              constant float *rotations [[buffer(4)]],
@@ -45,7 +46,7 @@ stretchInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
                                          );
 
 
-  const float4x4 matrix = mvpMatrix * model_matrix;
+  const float4x4 matrix = mvpMatrix.matrices[amp_id] * model_matrix;
 
   StretchedInstancedVertexOut out {
     .position = matrix * float4(vertexIn.position.xy, 0.0, 1.0),

@@ -192,7 +192,7 @@ public struct MapView: UIViewRepresentable {
         }
 
         if let paddingInset {
-            let scale = Float(UIScreen.main.nativeScale)
+            let scale = Float(DevicePpi.nativeScale)
             mapView.camera.setPaddingTop(scale * Float(paddingInset.top))
             mapView.camera.setPaddingBottom(scale * Float(paddingInset.bottom))
             mapView.camera.setPaddingLeft(scale * Float(paddingInset.leading))

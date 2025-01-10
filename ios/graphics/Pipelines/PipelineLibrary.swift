@@ -22,7 +22,12 @@ public enum PipelineDescriptorFactory {
         pipelineDescriptor.colorAttachments[0].pixelFormat = MetalContext.current.colorPixelFormat
         pipelineDescriptor.vertexDescriptor = vertexDescriptor
 
-        pipelineDescriptor.rasterSampleCount = 1 // samples per pixel
+        if MetalContext.current.device.supports32BitMSAA && MetalContext.current.device.supportsTextureSampleCount(4)
+        {
+            pipelineDescriptor.rasterSampleCount = 4 // samples per pixel
+        } else {
+            pipelineDescriptor.rasterSampleCount = 1 // samples per pixel
+        }
 
         let renderbufferAttachment = pipelineDescriptor.colorAttachments[0]
         renderbufferAttachment?.pixelFormat = MetalContext.current.colorPixelFormat
@@ -49,7 +54,8 @@ public enum PipelineDescriptorFactory {
                 fatalError("blendMode not implemented")
         }
 
-        pipelineDescriptor.stencilAttachmentPixelFormat = .stencil8
+        pipelineDescriptor.depthAttachmentPixelFormat = .depth32Float_stencil8
+        pipelineDescriptor.stencilAttachmentPixelFormat = .depth32Float_stencil8
         pipelineDescriptor.label = label
 
         guard let vertexFunction = library.makeFunction(name: vertexShader),
@@ -245,11 +251,12 @@ public enum PipelineType: String, CaseIterable, Codable {
 }
 
 public class PipelineLibrary: StaticMetalLibrary<Pipeline, MTLRenderPipelineState>, @unchecked Sendable {
-    init(device: MTLDevice) throws {
+    init(device: MTLDevice, maxVertexAmplificationCount: Int) throws {
         try super.init(
             Pipeline.allCases.map(\.self)) { pipeline -> MTLRenderPipelineState in
             do {
                 let pipelineDescriptor = PipelineDescriptorFactory.pipelineDescriptor(pipeline: pipeline)
+                pipelineDescriptor.maxVertexAmplificationCount = maxVertexAmplificationCount
                 return try device.makeRenderPipelineState(descriptor: pipelineDescriptor)
             } catch {
                 // Log the JSON (key) and the error

@@ -490,8 +490,56 @@ std::optional<std::tuple<std::vector<double>, std::vector<double>, Vec3D>> MapCa
 
     MatrixD::translateM(newViewMatrix, 0, x, y, z);
 
-    std::vector<double> newVpMatrix(16, 0.0);
-    MatrixD::multiplyMM(newVpMatrix, 0, newProjectionMatrix, 0, newViewMatrix, 0);
+    if (hardwareProjectionMatrix.size() > 0) {
+        newProjectionMatrix = hardwareProjectionMatrix;
+    }
+
+    if (hardwareViewMatrix.size() == 16) {
+
+        // lat and lon of zurich
+//        const double lon = 8.5417;
+//        const double lat = 47.3769;
+//        focusPointPosition.x = lon;
+//        focusPointPosition.y = lat;
+//        printf("%f %f\n", focusPointPosition.x, focusPointPosition.y);
+
+
+
+        // fake camera movement
+//        MatrixD::setIdentityM(newViewMatrix, 0);
+        // current time in seconds
+//        auto time = DateHelper::currentTimeMicros() / 1'000'000.0;
+//        angle += 0.1;
+//        MatrixD::translateM(newViewMatrix, 0, -x, -y, -z);
+//        MatrixD::rotateM(newViewMatrix, 0, time * 360.0 / 30.0, 0, 1.0, 0.0);
+//        MatrixD::translateM(newViewMatrix, 0, x, y, z);
+
+        MatrixD::translateM(newViewMatrix, 0, 0, 1, -2);
+//        MatrixD::scaleM(newViewMatrix, 0, 0.5, 0.5, 0.5);
+
+
+
+        std::vector<double> combinedHardwareViewMatrix(16, 0.0);
+        MatrixD::multiplyMM(combinedHardwareViewMatrix, 0, hardwareViewMatrix, 0, newViewMatrix, 0);
+        newViewMatrix = combinedHardwareViewMatrix;
+    }
+    else if (hardwareViewMatrix.size() == 32) {
+        std::vector<double> combinedHardwareViewMatrix(32, 0.0);
+        MatrixD::multiplyMM(combinedHardwareViewMatrix, 0, hardwareViewMatrix, 0, newViewMatrix, 0);
+        MatrixD::multiplyMM(combinedHardwareViewMatrix, 16, hardwareViewMatrix, 16, newViewMatrix, 0);
+        newViewMatrix = combinedHardwareViewMatrix;
+    }
+
+    std::vector<double> newVpMatrix;
+    if (hardwareViewMatrix.size() == 32 && hardwareProjectionMatrix.size() == 32) {
+        newVpMatrix = std::vector<double>(32, 0.0);
+        MatrixD::multiplyMM(newVpMatrix, 0, newProjectionMatrix, 0, newViewMatrix, 0);
+        MatrixD::multiplyMM(newVpMatrix, 16, newProjectionMatrix, 16, newViewMatrix, 16);
+    }
+    else {
+        newVpMatrix = std::vector<double>(16, 0.0);
+        MatrixD::multiplyMM(newVpMatrix, 0, newProjectionMatrix, 0, newViewMatrix, 0);
+    }
 
     std::vector<double> newInverseMatrix(16, 0.0);
     gluInvertMatrix(newVpMatrix, newInverseMatrix);
@@ -562,6 +610,18 @@ std::optional<float> MapCamera3d::getLastVpMatrixRotation() {
 std::optional<float> MapCamera3d::getLastVpMatrixZoom() {
     std::lock_guard<std::recursive_mutex> lock(matrixMutex);
     return lastVpZoom;
+}
+
+void MapCamera3d::setHardwareMatrices(int64_t viewMatrices, int64_t projectionMatrices, int32_t count) {
+    {
+        std::lock_guard<std::recursive_mutex> lock(matrixMutex);
+        double* viewMatricesPointer = reinterpret_cast<double*>(viewMatrices);
+        hardwareViewMatrix = std::vector<double>(viewMatricesPointer, viewMatricesPointer + count*16);
+        double* projectionMatricesPointer = reinterpret_cast<double*>(projectionMatrices);
+        hardwareProjectionMatrix = std::vector<double>(projectionMatricesPointer, projectionMatricesPointer + count*16);
+    }
+    update();
+    notifyListeners(ListenerType::BOUNDS);
 }
 
 /** this method is called just before the update methods on all layers */
@@ -659,8 +719,8 @@ RectCoord MapCamera3d::getRectFromViewport(const Vec2I &sizeViewport, const Coor
 
 void MapCamera3d::notifyListeners(const int &listenerType) {
     // TODO: Add back bounds listener as soon as visibleRect is implemented correctly
-    std::optional<RectCoord> visibleRect =
-            (listenerType & ListenerType::BOUNDS) ? std::optional<RectCoord>(getVisibleRect()) : std::nullopt;
+    // std::optional<RectCoord> visibleRect =
+       //     (listenerType & ListenerType::BOUNDS) ? std::optional<RectCoord>(getVisibleRect()) : std::nullopt;
 
     //    std::optional<RectCoord> visibleRect = std::nullopt;
 
@@ -1164,10 +1224,10 @@ Coord MapCamera3d::coordFromScreenPosition(const std::vector<double> &inverseVPM
     auto viewport = mapInterface->getRenderingContext()->getViewportSize();
 
     auto worldPosFrontVec =
-        Vec4D(((double)posScreen.x / (double)viewport.x * 2.0 - 1), -((double)posScreen.y / (double)viewport.y * 2.0 - 1), -1, 1);
+        Vec4D(((double)posScreen.x / (double)viewport.x * 2.0 - 1), -((double)posScreen.y / (double)viewport.y * 2.0 - 1), 1, 1);
 
     auto worldPosBackVec =
-        Vec4D(((double)posScreen.x / (double)viewport.x * 2.0 - 1), -((double)posScreen.y / (double)viewport.y * 2.0 - 1), 1, 1);
+        Vec4D(((double)posScreen.x / (double)viewport.x * 2.0 - 1), -((double)posScreen.y / (double)viewport.y * 2.0 - 1), -1, 1);
 
     const double rx = origin.x;
     const double ry = origin.y;
@@ -1198,7 +1258,7 @@ Coord MapCamera3d::coordFromScreenPosition(const std::vector<double> &inverseVPM
 
 bool MapCamera3d::gluInvertMatrix(const std::vector<double> &m, std::vector<double> &invOut) {
 
-    if (m.size() != 16 || invOut.size() != 16) {
+    if (m.size() < 16 || invOut.size() != 16) {
         return false;
     }
 
@@ -1399,7 +1459,7 @@ double MapCamera3d::mapUnitsFromPixels(double distancePx) {
         // 1.4 is an empirically determined scaling factor, observed to align 2D and 3D measurements
         // based on visual comparisons of screenshots.
         // TODO: Investigate the origin of this 1.4 factor
-        return 1.4 * distancePx * sqrt(sampleDistance * sampleDistance * 2) / projectedLength;
+        return 1.4 * distancePx * sqrt(sampleDistance * sampleDistance * 2) / projectedLength * 0.05;
     }
     return distancePx * screenPixelAsRealMeterFactor * zoom;
 }
