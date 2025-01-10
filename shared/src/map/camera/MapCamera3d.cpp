@@ -1512,7 +1512,7 @@ void MapCamera3d::setCameraMode(CameraMode3d mode) {
     this->mode = mode;
 
     float initialZoom = zoom;
-    float targetZoom;
+    float targetZoom = zoom;
     float initialPitch = cameraPitch;
     float initialVerticalDisplacement = cameraVerticalDisplacement;
 
@@ -1555,7 +1555,7 @@ void MapCamera3d::setCameraMode(CameraMode3d mode) {
         case CameraMode3d::GLOBAL:
             this->zoomMin = GLOBE_MIN_ZOOM;
             this->zoomMax = GLOBE_MAX_ZOOM;
-            targetZoom = GLOBE_RESET_ZOOM;
+//            targetZoom = GLOBE_RESET_ZOOM;
             break;
         case CameraMode3d::GLOBE_ROTATING:
             this->zoomMin = GLOBE_MIN_ZOOM;
@@ -1565,11 +1565,11 @@ void MapCamera3d::setCameraMode(CameraMode3d mode) {
         case CameraMode3d::LOCAL:
             this->zoomMin = LOCAL_MIN_ZOOM;
             this->zoomMax = LOCAL_MAX_ZOOM;
-            if (this->zoom == this->zoomMin) {
-                targetZoom = LOCAL_MIN_ZOOM;
-            } else {
-                targetZoom = LOCAL_INITIAL_ZOOM;
-            }
+//            if (this->zoom == this->zoomMin) {
+//                targetZoom = LOCAL_MIN_ZOOM;
+//            } else {
+//                targetZoom = LOCAL_INITIAL_ZOOM;
+//            }
             break;
     }
 
