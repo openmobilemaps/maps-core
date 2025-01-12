@@ -656,18 +656,11 @@ bool MapCamera3d::onTouchDown(const ::Vec2F &posScreen) {
         lastOnTouchDownPoint = posScreen;
         initialTouchDownPoint = posScreen;
         lastOnTouchDownFocusCoord = focusPointPosition;
-#ifdef ANDROID
-        {
-            std::lock_guard<std::recursive_mutex> lock(vpDataMutex);
-            const auto [zeroVPMatrix, zeroInverseVPMatrix] = getVpMatrix(
-                    Coord(CoordinateSystemIdentifiers::EPSG4326(), 0.0, 0.0, lastOnTouchDownFocusCoord->z), false);
-            lastOnTouchDownInverseVPMatrix = zeroInverseVPMatrix;
-        }
+        auto northPole = screenPosFromCoord(Coord(CoordinateSystemIdentifiers::EPSG4326(), 0, 90, 0));
+        auto southPole = screenPosFromCoord(Coord(CoordinateSystemIdentifiers::EPSG4326(), 0, -90, 0));
         lastOnTouchDownCoord = coordFromScreenPosition(posScreen);
-        lastOnMoveCoord = coordFromScreenPosition(lastOnTouchDownInverseVPMatrix, posScreen);
-#else
-        lastOnTouchDownCoord = coordFromScreenPosition(posScreen);
-#endif
+        reverseLongitudeRotation = abs(focusPointPosition.x - lastOnTouchDownCoord->x) > 90;
+        printf("move: start (reversed %d)\n", reverseLongitudeRotation);
         return true;
     }
 }
@@ -713,45 +706,33 @@ bool MapCamera3d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
 
     Vec2F newScreenPos = lastOnTouchDownPoint.value() + deltaScreen;
     lastOnTouchDownPoint = newScreenPos;
-#ifdef ANDROID
-    // TOOD: Current wip solution for more stable rotation on Android
-    if (!initialTouchDownPoint.has_value()) {
-        return false;
-    }
-    auto newTouchDownCoord = coordFromScreenPosition(lastOnTouchDownInverseVPMatrix, newScreenPos);
-    auto lastOnTouchDownZeroCoord = coordFromScreenPosition(lastOnTouchDownInverseVPMatrix, initialTouchDownPoint.value());
-#else
     auto newTouchDownCoord = coordFromScreenPosition(newScreenPos);
-#endif
 
     if (newTouchDownCoord.systemIdentifier == -1) {
         return false;
     }
 
-#ifdef ANDROID
-    double dx = -(newTouchDownCoord.x - lastOnTouchDownZeroCoord.x);
-    double dy = -(newTouchDownCoord.y - lastOnTouchDownZeroCoord.y);
 
-    focusPointPosition.x = lastOnTouchDownFocusCoord->x + dx;
-    focusPointPosition.y = lastOnTouchDownFocusCoord->y + dy;
 
-    auto moveCoordDX = 0.0;
-    auto moveCoordDY = 0.0;
-    if (lastOnMoveCoord) {
-        moveCoordDX = -(newTouchDownCoord.x - lastOnMoveCoord->x);
-        moveCoordDY = -(newTouchDownCoord.y - lastOnMoveCoord->y);
-    }
-    lastOnMoveCoord = newTouchDownCoord;
-#else
-    double dx = -(newTouchDownCoord.x - lastOnTouchDownCoord->x);
     double dy = -(newTouchDownCoord.y - lastOnTouchDownCoord->y);
+    bool newReverseLongitudeRotation = abs(focusPointPosition.x - lastOnTouchDownCoord->x) > 90;
+    if (newReverseLongitudeRotation != reverseLongitudeRotation) {
+        lastOnTouchDownCoord = newTouchDownCoord;
+        reverseLongitudeRotation = newReverseLongitudeRotation;
+    }
+    if (newReverseLongitudeRotation) {
+        dy *= -1;
+    }
 
-    focusPointPosition.x = focusPointPosition.x + dx;
     focusPointPosition.y = focusPointPosition.y + dy;
-#endif
+    focusPointPosition.y = std::clamp(focusPointPosition.y, -90.0, 90.0);
+
+    getVpMatrix(focusPointPosition, true);
+    newTouchDownCoord = coordFromScreenPosition(newScreenPos);
+    double dx = -(newTouchDownCoord.x - lastOnTouchDownCoord->x);
+    focusPointPosition.x = focusPointPosition.x + dx;
 
     focusPointPosition.x = std::fmod((focusPointPosition.x + 180 + 360), 360.0) - 180;
-    focusPointPosition.y = std::clamp(focusPointPosition.y, -90.0, 90.0);
 
     clampCenterToPaddingCorrectedBounds();
 
@@ -763,13 +744,8 @@ bool MapCamera3d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
         long long newTimestamp = DateHelper::currentTimeMicros();
         long long deltaMcs = std::max(newTimestamp - currentDragTimestamp, 8000ll);
         float averageFactor = currentDragVelocity.x == 0 && currentDragVelocity.y == 0 ? 1.0 : 0.5;
-#ifdef ANDROID
-        currentDragVelocity.x = (1 - averageFactor) * currentDragVelocity.x + averageFactor * moveCoordDX / (deltaMcs / 16000.0);
-        currentDragVelocity.y = (1 - averageFactor) * currentDragVelocity.y + averageFactor * moveCoordDY / (deltaMcs / 16000.0);
-#else
         currentDragVelocity.x = (1 - averageFactor) * currentDragVelocity.x + averageFactor * dx / (deltaMcs / 16000.0);
         currentDragVelocity.y = (1 - averageFactor) * currentDragVelocity.y + averageFactor * dy / (deltaMcs / 16000.0);
-#endif
         currentDragTimestamp = newTimestamp;
     }
 
@@ -1077,6 +1053,8 @@ Coord MapCamera3d::coordFromScreenPosition(const std::vector<double> &inverseVPM
 
     bool didHit = false;
     auto point = MapCamera3DHelper::raySphereIntersection(worldPosFront, worldPosBack, Vec3D(0.0, 0.0, 0.0), 1.0, didHit);
+    point.x = std::max(-1.0, std::min(1.0, point.x));
+    point.y = std::max(-1.0, std::min(1.0, point.y));
 
     if (didHit) {
         float longitude = std::atan2(point.x, point.z) * 180 / M_PI - 90;
@@ -1084,6 +1062,7 @@ Coord MapCamera3d::coordFromScreenPosition(const std::vector<double> &inverseVPM
             longitude += 360;
         }
         float latitude = std::asin(point.y) * 180 / M_PI;
+        assert (!std::isnan(latitude) && !std::isnan(longitude));
         return Coord(CoordinateSystemIdentifiers::EPSG4326(), longitude, latitude, 0);
     }
     else {

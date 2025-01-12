@@ -285,7 +285,8 @@ protected:
     float verticalFov;
     float horizontalFov;
     bool validVpMatrix = false;
-                        
+
+    bool reverseLongitudeRotation = false;
     std::optional<::Vec2F> lastOnTouchDownPoint;
     std::optional<::Vec2F> initialTouchDownPoint;
     std::optional<Coord> lastOnTouchDownFocusCoord;
