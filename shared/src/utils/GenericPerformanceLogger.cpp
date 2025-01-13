@@ -63,8 +63,11 @@ void GenericPerformanceLogger::addTimeLog(const std::string &id, double deltaMs)
 
     // Update logger data
     auto loggerDataEntry = logData.find(id);
+    if (loggerDataEntry == logData.end()) {
+        return;
+    }
     auto loggerData = loggerDataEntry->second;
-    if (loggerDataEntry == logData.end() || !loggerData) {
+    if (!loggerData) {
         return;
     }
 
