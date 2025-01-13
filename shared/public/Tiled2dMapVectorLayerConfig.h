@@ -46,7 +46,7 @@ public:
         std::string url = sourceDescription->vectorUrl;
         size_t epsg3857Index = url.find("{bbox-epsg-3857}", 0);
         if (epsg3857Index != std::string::npos) {
-            const auto zoomLevelInfos = getDefaultEpsg3857ZoomLevels(zoom, zoom);
+            const auto zoomLevelInfos = getDefaultEpsg3857ZoomLevels(zoom, zoom, std::nullopt);
             const Tiled2dMapZoomLevelInfo &zoomLevelInfo = zoomLevelInfos.at(0);
             RectCoord layerBounds = zoomLevelInfo.bounds;
             const double tileWidth = zoomLevelInfo.tileWidthLayerSystemUnits;
@@ -79,11 +79,11 @@ public:
     }
 
     std::vector<Tiled2dMapZoomLevelInfo> getZoomLevelInfos() override {
-        return getDefaultEpsg3857ZoomLevels(sourceDescription->minZoom, sourceDescription->maxZoom);
+        return getDefaultEpsg3857ZoomLevels(sourceDescription->minZoom, sourceDescription->maxZoom, sourceDescription->levels);
     }
 
     std::vector<Tiled2dMapZoomLevelInfo> getVirtualZoomLevelInfos() override {
-        return getDefaultEpsg3857ZoomLevels(0, sourceDescription->minZoom - 1);
+        return getDefaultEpsg3857ZoomLevels(0, sourceDescription->minZoom - 1, sourceDescription->levels);
     };
 
     Tiled2dMapZoomInfo getZoomInfo() override {
@@ -117,13 +117,22 @@ public:
         }
     }
 
-    static std::vector<Tiled2dMapZoomLevelInfo> getDefaultEpsg3857ZoomLevels(int minZoom, int maxZoom) {
+    static std::vector<Tiled2dMapZoomLevelInfo> getDefaultEpsg3857ZoomLevels(int minZoom, int maxZoom, const std::optional<std::vector<int>> &levels) {
         std::vector<Tiled2dMapZoomLevelInfo> infos;
-        for (int i = minZoom; i <= maxZoom; i++) {
-            double factor = pow(2, i);
-            double zoom = baseValueZoom / factor;
-            double width = baseValueWidth / factor;
-            infos.push_back(Tiled2dMapZoomLevelInfo(zoom, width, factor, factor, 1, i, epsg3857Bounds));
+        if (levels.has_value()) {
+            for (const auto &level : levels.value()) {
+                double factor = pow(2, level);
+                double zoom = baseValueZoom / factor;
+                double width = baseValueWidth / factor;
+                infos.push_back(Tiled2dMapZoomLevelInfo(zoom, width, factor, factor, 1, level, epsg3857Bounds));
+            }
+        } else {
+            for (int i = minZoom; i <= maxZoom; i++) {
+                double factor = pow(2, i);
+                double zoom = baseValueZoom / factor;
+                double width = baseValueWidth / factor;
+                infos.push_back(Tiled2dMapZoomLevelInfo(zoom, width, factor, factor, 1, i, epsg3857Bounds));
+            }
         }
         return infos;
     }

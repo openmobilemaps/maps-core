@@ -141,6 +141,7 @@ public:
     bool underzoom;
     std::optional<::RectCoord> bounds;
     std::optional<std::string> coordinateReferenceSystem;
+    std::optional<std::vector<int>> levels;
 
     RasterVectorLayerDescription(std::string identifier,
                                  std::string source,
@@ -160,10 +161,11 @@ public:
                                  bool underzoom,
                                  bool overzoom,
                                  std::optional<::RectCoord> bounds,
-                                 std::optional<std::string> coordinateReferenceSystem):
+                                 std::optional<std::string> coordinateReferenceSystem,
+                                 std::optional<std::vector<int>> levels) :
     VectorLayerDescription(identifier, source, "", minZoom, maxZoom, sourceMinZoom, sourceMaxZoom, filter, renderPassIndex, interactable, false, false),
     style(style), url(url), underzoom(underzoom), overzoom(overzoom), adaptScaleToScreen(adaptScaleToScreen), numDrawPreviousLayers(numDrawPreviousLayers),
-    maskTiles(maskTiles), zoomLevelScaleFactor(zoomLevelScaleFactor), bounds(bounds), coordinateReferenceSystem(coordinateReferenceSystem) {};
+    maskTiles(maskTiles), zoomLevelScaleFactor(zoomLevelScaleFactor), bounds(bounds), coordinateReferenceSystem(coordinateReferenceSystem), levels(levels) {};
 
 
     std::unique_ptr<VectorLayerDescription> clone() override {
@@ -185,7 +187,8 @@ public:
                                             underzoom,
                                             overzoom,
                                             bounds,
-                                            coordinateReferenceSystem);
+                                            coordinateReferenceSystem,
+                                            levels);
     }
 
     virtual UsedKeysCollection getUsedKeys() const override {
