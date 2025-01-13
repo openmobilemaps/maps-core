@@ -963,7 +963,7 @@ Tiled2dMapVectorSymbolGroup::getPositioning(std::vector<::Coord>::const_iterator
         }
     }
 
-    double angle = -atan2(next->y - prev->y, next->x - prev->x) * (180.0 / M_PI);
+    double angle = -atan2(prev->y - next->y, -(prev->x - next->x)) * (180.0 / M_PI);
     auto midpoint = Vec2D(onePrev->x * (1.0 - interpolationValue) + iterator->x * interpolationValue,
                           onePrev->y * (1.0 - interpolationValue) + iterator->y * interpolationValue);
     return Tiled2dMapVectorSymbolSubLayerPositioningWrapper(angle, Coord(next->systemIdentifier, midpoint.x, midpoint.y, next->z));
