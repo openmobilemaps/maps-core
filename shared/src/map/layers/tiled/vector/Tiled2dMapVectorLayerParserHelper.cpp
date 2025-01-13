@@ -407,6 +407,11 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                 }
             }
 
+            float selectionSizeFactor = 1.0;
+            if (!val["metadata"].is_null()) {
+                selectionSizeFactor = val["metadata"].value("selection-size-factor", 1.0);
+            }
+
             auto layerDesc = std::make_shared<LineVectorLayerDescription>(
                     val["id"],
                     val["source"],
@@ -420,7 +425,8 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                     renderPassIndex,
                     interactable,
                     layerMultiselect,
-                    layerSelfMasked);
+                    layerSelfMasked,
+                    selectionSizeFactor);
 
             layers.push_back(layerDesc);
 

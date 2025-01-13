@@ -71,6 +71,7 @@ private:
     bool isStyleStateDependant = true;
     std::optional<double> lastZoom = std::nullopt;
     bool isVisible = true;
+    float selectionSizeFactor = 1.0f;
 
     std::vector<std::vector<ShaderLineStyle>> reusableLineStyles;
     std::unordered_map<size_t, std::pair<int, int>> styleHashToGroupMap;
