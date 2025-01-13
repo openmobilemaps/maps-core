@@ -816,6 +816,10 @@ bool MapCamera3d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
 
     focusPointPosition.x = std::fmod((focusPointPosition.x + 180 + 360), 360.0) - 180;
 
+    if (focusPointPosition.y == -90 || focusPointPosition.y == 90) {
+        lastOnTouchDownCoord = newTouchDownCoord;
+    }
+
     clampCenterToPaddingCorrectedBounds();
 
     if (currentDragTimestamp == 0) {
