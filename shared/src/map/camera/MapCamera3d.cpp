@@ -809,7 +809,8 @@ bool MapCamera3d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
     focusPointPosition.y = focusPointPosition.y + dy;
     focusPointPosition.y = std::clamp(focusPointPosition.y, -90.0, 90.0);
 
-    getVpMatrix(focusPointPosition, true);
+    computeMatrices(focusPointPosition, false);
+
     newTouchDownCoord = coordFromScreenPosition(newScreenPos);
     double dx = -(newTouchDownCoord.x - lastOnTouchDownCoord->x);
     focusPointPosition.x = focusPointPosition.x + dx;
