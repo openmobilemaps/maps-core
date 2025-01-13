@@ -63,7 +63,8 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
     is3d(is3d),
     positionSize(is3d ? 3 : 2),
     tileOrigin(tileOrigin),
-    persistingSymbolPlacement(persistingSymbolPlacement) {
+    persistingSymbolPlacement(persistingSymbolPlacement),
+    angle(angle) {
     auto strongMapInterface = mapInterface.lock();
     auto objectFactory = strongMapInterface ? strongMapInterface->getGraphicsObjectFactory() : nullptr;
     auto camera = strongMapInterface ? strongMapInterface->getCamera() : nullptr;
@@ -140,7 +141,7 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
             SymbolAlignment labelRotationAlignment = description->style.getTextRotationAlignment(evalContext);
             boundingBoxRotationAlignment = labelRotationAlignment;
             labelObject = std::make_shared<Tiled2dMapVectorSymbolLabelObject>(converter, featureContext, description, text, fullText,
-                                                                              coordinate, lineCoordinates, textAnchor, angle,
+                                                                              coordinate, lineCoordinates, textAnchor,
                                                                               textJustify, fontResult, textOffset, textRadialOffset,
                                                                               description->style.getTextLineHeight(evalContext),
                                                                               letterSpacing,
@@ -478,7 +479,13 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(VectorModificationWrappe
 
     rotations[countOffset] = iconRotate;
 
-    if (iconRotationAlignment == SymbolAlignment::VIEWPORT ||
+    if ((textSymbolPlacement ==  TextSymbolPlacement::LINE || textSymbolPlacement ==  TextSymbolPlacement::LINE_CENTER) && angle) {
+        if (labelObject && labelObject->wasReversed) {
+            rotations[countOffset] += std::fmod(*angle + 180.0, 360.0);
+        } else {
+            rotations[countOffset] += *angle;
+        }
+    } else if (iconRotationAlignment == SymbolAlignment::VIEWPORT ||
         (iconRotationAlignment == SymbolAlignment::AUTO && textSymbolPlacement == TextSymbolPlacement::POINT)) {
         rotations[countOffset] += rotation;
     }
@@ -566,7 +573,7 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(VectorModificationWrappe
         iconBoundingBoxViewportAligned.height = iconHeight + 2.0 * scaledIconPadding;
     }
 
-    if (!isCoordinateOwner) {
+    if (!isCoordinateOwner || (labelObject && !labelObject->isPlaced)) {
         alphas[countOffset] = 0.0;
     } else if (!(description->minZoom <= zoomIdentifier && description->maxZoom >= zoomIdentifier)) {
         alphas[countOffset] = animationCoordinator->getIconAlpha(0.0, now);

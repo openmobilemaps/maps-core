@@ -51,7 +51,6 @@ public:
                                       const ::Coord &coordinate,
                                       const std::optional<std::vector<Coord>> &lineCoordinates,
                                       const Anchor &textAnchor,
-                                      const std::optional<double> &angle,
                                       const TextJustify &textJustify,
                                       const std::shared_ptr<FontLoaderResult> fontResult,
                                       const Vec2F &offset,
@@ -84,6 +83,9 @@ public:
     std::optional<std::vector<CircleD>> boundingBoxCircles = std::nullopt;
 
     bool isOpaque = true;
+    bool wasReversed = false;
+
+    bool isPlaced = true;
 
     Vec2D dimensions = Vec2D(0.0, 0.0);
     Vec3D tileOrigin = Vec3D(0,0,0);
@@ -233,8 +235,6 @@ private:
 
     std::shared_ptr<SymbolAnimationCoordinator> animationCoordinator;
     static constexpr double collisionDistanceBias = 0.75;
-
-    bool wasReversed = false;
 
     const std::shared_ptr<Tiled2dMapVectorStateManager> stateManager;
 

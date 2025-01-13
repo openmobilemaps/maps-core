@@ -25,7 +25,6 @@ Tiled2dMapVectorSymbolLabelObject::Tiled2dMapVectorSymbolLabelObject(const std::
                                                                      const ::Coord &coordinate,
                                                                      const std::optional<std::vector<Coord>> &lineCoordinates,
                                                                      const Anchor &textAnchor,
-                                                                     const std::optional<double> &angle,
                                                                      const TextJustify &textJustify,
                                                                      const std::shared_ptr<FontLoaderResult> fontResult,
                                                                      const Vec2F &offset,
@@ -678,7 +677,24 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(VectorModificatio
     }
 
     // updates currentIndex
-    indexAtDistance(currentIndex, -size * 0.5 * scaleCorrection, std::nullopt, currentIndex);
+
+    switch (textAnchor) {
+        case Anchor::TOP_LEFT:
+        case Anchor::LEFT:
+        case Anchor::BOTTOM_LEFT:
+            indexAtDistance(currentIndex, fontSize * scaleCorrection, std::nullopt, currentIndex);
+            break;
+        case Anchor::TOP_RIGHT:
+        case Anchor::RIGHT:
+        case Anchor::BOTTOM_RIGHT:
+            indexAtDistance(currentIndex, -size * 1.0 * scaleCorrection, std::nullopt, currentIndex);
+            break;
+        case Anchor::CENTER:
+        case Anchor::TOP:
+        case Anchor::BOTTOM:
+            indexAtDistance(currentIndex, -size * 0.5 * scaleCorrection, std::nullopt, currentIndex);
+            break;
+    }
     
     auto yOffset = offset.y * fontSize;
 
@@ -841,6 +857,8 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(VectorModificatio
 
             countOffset += 1;
         }
+
+        isPlaced = true;
     } else {
         for (int i = 0; i != characterCount; i++) {
             positions[(2 * countOffset) + 0] = 0;
@@ -855,6 +873,8 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(VectorModificatio
             countOffset += 1;
         }
         boxMin.x = std::numeric_limits<float>::max();
+
+        isPlaced = false;
     }
 
     assert(countOffset == countBefore + characterCount);
