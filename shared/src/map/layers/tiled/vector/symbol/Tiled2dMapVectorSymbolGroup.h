@@ -27,6 +27,7 @@
 #include "CollisionGrid.h"
 #include "RenderObjectInterface.h"
 #include "SymbolObjectCollisionWrapper.h"
+#include "VectorModificationWrapper.h"
 
 //#define DRAW_TEXT_BOUNDING_BOX
 //#define DRAW_TEXT_BOUNDING_BOX_WITH_COLLISIONS
@@ -111,19 +112,19 @@ private:
 
     std::shared_ptr<Quad2dInstancedInterface> iconInstancedObject;
     std::shared_ptr<Quad2dStretchedInstancedInterface> stretchedInstancedObject;
-    std::shared_ptr<TextInstancedInterface> textInstancedObject;
+    std::vector<std::shared_ptr<TextInstancedInterface>> textInstancedObjects;
     std::shared_ptr<PolygonGroup2dLayerObject> boundingBoxLayerObject;
 
     std::shared_ptr<TextureHolderInterface> spriteTexture;
     std::shared_ptr<SpriteData> spriteData;
 
     struct CustomIconDescriptor {
-        std::vector<float> iconPositions;
-        std::vector<float> iconScales;
-        std::vector<float> iconRotations;
-        std::vector<float> iconAlphas;
-        std::vector<float> iconOffsets;
-        std::vector<float> iconTextureCoordinates;
+        VectorModificationWrapper<float> iconPositions;
+        VectorModificationWrapper<float> iconScales;
+        VectorModificationWrapper<float> iconRotations;
+        VectorModificationWrapper<float> iconAlphas;
+        VectorModificationWrapper<float> iconOffsets;
+        VectorModificationWrapper<float> iconTextureCoordinates;
         std::shared_ptr<TextureHolderInterface> texture;
         std::shared_ptr<Quad2dInstancedInterface> renderObject;
         std::unordered_map<std::string, ::RectI> featureIdentifiersUv;
@@ -145,28 +146,44 @@ private:
     std::vector<CustomIconDescriptor> customTextures;
 
 
-    std::vector<float> iconPositions;
-    std::vector<float> iconScales;
-    std::vector<float> iconRotations;
-    std::vector<float> iconAlphas;
-    std::vector<float> iconOffsets;
-    std::vector<float> iconTextureCoordinates;
+    VectorModificationWrapper<float> iconPositions;
+    VectorModificationWrapper<float> iconScales;
+    VectorModificationWrapper<float> iconRotations;
+    VectorModificationWrapper<float> iconAlphas;
+    VectorModificationWrapper<float> iconOffsets;
+    VectorModificationWrapper<float> iconTextureCoordinates;
 
-    std::shared_ptr<FontLoaderResult> fontResult;
-    std::vector<float> textPositions;
-    std::vector<float> textReferencePositions;
-    std::vector<float> textScales;
-    std::vector<float> textRotations;
-    std::vector<uint16_t> textStyleIndices;
-    std::vector<float> textStyles;
-    std::vector<float> textTextureCoordinates;
+    struct TextDescriptor {
+        std::shared_ptr<FontLoaderResult> fontResult;
+        VectorModificationWrapper<float> textPositions;
+        VectorModificationWrapper<float> textReferencePositions;
+        VectorModificationWrapper<float> textScales;
+        VectorModificationWrapper<float> textRotations;
+        VectorModificationWrapper<uint16_t> textStyleIndices;
+        VectorModificationWrapper<float> textStyles;
+        VectorModificationWrapper<float> textTextureCoordinates;
 
-    std::vector<float> stretchedIconPositions;
-    std::vector<float> stretchedIconScales;
-    std::vector<float> stretchedIconRotations;
-    std::vector<float> stretchedIconAlphas;
-    std::vector<float> stretchedIconStretchInfos;
-    std::vector<float> stretchedIconTextureCoordinates;
+        TextDescriptor(int32_t textStyleCount, size_t textCharactersCount, std::shared_ptr<FontLoaderResult> fontResult, bool is3d)
+                : fontResult(fontResult) {
+            textStyles.resize(textStyleCount * 10, 0.0);
+            textStyleIndices.resize(textCharactersCount, 0);
+            textRotations.resize(textCharactersCount, 0.0);
+            textScales.resize(textCharactersCount * 2, 0.0);
+            textPositions.resize(textCharactersCount * 2, 0.0);
+            if (is3d) {
+                textReferencePositions.resize(textCharactersCount * 3, 0.0);
+            }
+            textTextureCoordinates.resize(textCharactersCount * 4, 0.0);
+        }
+    };
+    std::vector<std::shared_ptr<TextDescriptor>> textDescriptors;
+
+    VectorModificationWrapper<float> stretchedIconPositions;
+    VectorModificationWrapper<float> stretchedIconScales;
+    VectorModificationWrapper<float> stretchedIconRotations;
+    VectorModificationWrapper<float> stretchedIconAlphas;
+    VectorModificationWrapper<float> stretchedIconStretchInfos;
+    VectorModificationWrapper<float> stretchedIconTextureCoordinates;
 
     float alpha = 1.0;
     double dpFactor = 1.0;

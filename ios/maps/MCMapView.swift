@@ -32,10 +32,8 @@ open class MCMapView: MTKView, @unchecked Sendable {
     private let touchHandler: MCMapViewTouchHandler
     private let callbackHandler = MCMapViewCallbackHandler()
 
-    private let pinch = UIPinchGestureRecognizer(
-        target: self, action: #selector(pinched))
-    private let pan = UIPanGestureRecognizer(
-        target: self, action: #selector(panned))
+    private var pinch: UIPinchGestureRecognizer!
+    private var pan: UIPanGestureRecognizer!
 
     public weak var sizeDelegate: MCMapSizeDelegate?
 
@@ -63,6 +61,10 @@ open class MCMapView: MTKView, @unchecked Sendable {
         touchHandler = MCMapViewTouchHandler(
             touchHandler: mapInterface.getTouchHandler())
         super.init(frame: .zero, device: MetalContext.current.device)
+        self.pinch = UIPinchGestureRecognizer(
+            target: self, action: #selector(pinched))
+        self.pan = UIPanGestureRecognizer(
+            target: self, action: #selector(panned))
         setup()
     }
 

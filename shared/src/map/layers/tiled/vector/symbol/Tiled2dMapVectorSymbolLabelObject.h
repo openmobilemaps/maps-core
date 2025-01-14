@@ -27,6 +27,7 @@
 #include "SymbolAnimationCoordinator.h"
 #include "Vec2DHelper.h"
 #include "MapCameraInterface.h"
+#include "VectorModificationWrapper.h"
 
 class SymbolAnimationCoordinator;
 
@@ -50,7 +51,6 @@ public:
                                       const ::Coord &coordinate,
                                       const std::optional<std::vector<Coord>> &lineCoordinates,
                                       const Anchor &textAnchor,
-                                      const std::optional<double> &angle,
                                       const TextJustify &textJustify,
                                       const std::shared_ptr<FontLoaderResult> fontResult,
                                       const Vec2F &offset,
@@ -69,9 +69,9 @@ public:
 
     int getCharacterCount();
 
-    void setupProperties(std::vector<float> &textureCoordinates, std::vector<uint16_t> &styleIndices, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier);
+    void setupProperties(VectorModificationWrapper<float> &textureCoordinates, VectorModificationWrapper<uint16_t> &styleIndices, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier);
 
-    void updateProperties(std::vector<float> &positions, std::vector<float> &referencePositions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const bool collides, const double rotation, const float alpha, const bool isCoordinateOwner, long long now, const Vec2I &viewportSize, const std::vector<float>& vpMatrix, const Vec3D& origin);
+    void updateProperties(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &referencePositions, VectorModificationWrapper<float> &scales, VectorModificationWrapper<float> &rotations, VectorModificationWrapper<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const bool collides, const double rotation, const float alpha, const bool isCoordinateOwner, long long now, const Vec2I &viewportSize, const std::vector<float>& vpMatrix, const Vec3D& origin);
 
     std::shared_ptr<FontLoaderResult> getFont() {
         return fontResult;
@@ -83,6 +83,9 @@ public:
     std::optional<std::vector<CircleD>> boundingBoxCircles = std::nullopt;
 
     bool isOpaque = true;
+    bool wasReversed = false;
+
+    bool isPlaced = true;
 
     Vec2D dimensions = Vec2D(0.0, 0.0);
     Vec3D tileOrigin = Vec3D(0,0,0);
@@ -91,10 +94,10 @@ private:
 
     void setupCamera(const std::vector<float>& vpMatrix, const Vec3D& origin, const Vec2I& viewportSize);
 
-    void writePosition(const double x, const double y, const size_t offset, std::vector<float> &buffer);
+    void writePosition(const double x, const double y, const size_t offset, VectorModificationWrapper<float> &buffer);
 
-    void updatePropertiesPoint(std::vector<float> &positions, std::vector<float> &referencePositions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, const Vec2I &viewportSize);
-    double updatePropertiesLine(std::vector<float> &positions, std::vector<float> &referencePositions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, const Vec2I &viewportSize);
+    void updatePropertiesPoint(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &referencePositions, VectorModificationWrapper<float> &scales, VectorModificationWrapper<float> &rotations, VectorModificationWrapper<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, const Vec2I &viewportSize);
+    double updatePropertiesLine(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &referencePositions, VectorModificationWrapper<float> &scales, VectorModificationWrapper<float> &rotations, VectorModificationWrapper<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, const Vec2I &viewportSize);
 
     bool isStyleStateDependant = true;
     double lastZoomEvaluation = -1;
@@ -232,8 +235,6 @@ private:
 
     std::shared_ptr<SymbolAnimationCoordinator> animationCoordinator;
     static constexpr double collisionDistanceBias = 0.75;
-
-    bool wasReversed = false;
 
     const std::shared_ptr<Tiled2dMapVectorStateManager> stateManager;
 

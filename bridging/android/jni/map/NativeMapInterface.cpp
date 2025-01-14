@@ -12,6 +12,7 @@
 #include "NativeMapCameraInterface.h"
 #include "NativeMapConfig.h"
 #include "NativeMapReadyCallbackInterface.h"
+#include "NativePerformanceLoggerInterface.h"
 #include "NativeRectCoord.h"
 #include "NativeRenderingContextInterface.h"
 #include "NativeSchedulerInterface.h"
@@ -151,6 +152,23 @@ CJNIEXPORT ::djinni_generated::NativeTouchHandlerInterface::JniType JNICALL Java
         const auto& ref = ::djinni::objectFromHandleAddress<::MapInterface>(nativeRef);
         auto r = ref->getTouchHandler();
         return ::djinni::release(::djinni_generated::NativeTouchHandlerInterface::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapInterface_00024CppProxy_native_1setPerformanceLoggers(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_performanceLoggers)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::MapInterface>(nativeRef);
+        ref->setPerformanceLoggers(::djinni::List<::djinni_generated::NativePerformanceLoggerInterface>::toCpp(jniEnv, j_performanceLoggers));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapInterface_00024CppProxy_native_1getPerformanceLoggers(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::MapInterface>(nativeRef);
+        auto r = ref->getPerformanceLoggers();
+        return ::djinni::release(::djinni::List<::djinni_generated::NativePerformanceLoggerInterface>::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 

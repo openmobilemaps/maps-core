@@ -69,6 +69,7 @@ include_directories(../bridging/android/jni/map/loader)
 include_directories(../bridging/android/jni/map/scheduling)
 include_directories(../bridging/android/jni/map/coordinates)
 include_directories(../bridging/android/jni/map/camera)
+include_directories(../bridging/android/jni/utils)
 include_directories(../shared/public)
 include_directories(../shared/src)
 include_directories(../shared/src/external/pugixml)
@@ -112,8 +113,10 @@ include_directories(src/main/cpp)
 include_directories(src/main/cpp/graphics)
 include_directories(src/main/cpp/graphics/objects)
 include_directories(src/main/cpp/graphics/shader)
+include_directories(src/main/cpp/utils)
 include_directories(src/main/cpp/scheduling)
 
+target_compile_definitions(mapscore PRIVATE OPENMOBILEMAPS_GL=1)
 
 # Searches for a specified prebuilt library and stores the path as a
 # variable. Because CMake includes system libraries in the search path by

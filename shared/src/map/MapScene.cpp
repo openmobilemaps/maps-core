@@ -92,6 +92,16 @@ void MapScene::setTouchHandler(const std::shared_ptr<::TouchHandlerInterface> &t
 
 std::shared_ptr<::TouchHandlerInterface> MapScene::getTouchHandler() { return touchHandler; }
 
+void MapScene::setPerformanceLoggers(const std::vector<std::shared_ptr<::PerformanceLoggerInterface>> &performanceLoggers) {
+    std::lock_guard<std::mutex> loggerLock(performanceLoggersMutex);
+    this->performanceLoggers = performanceLoggers;
+}
+
+std::vector<std::shared_ptr<::PerformanceLoggerInterface>> MapScene::getPerformanceLoggers() {
+    std::lock_guard<std::mutex> loggerLock(performanceLoggersMutex);
+    return performanceLoggers;
+}
+
 std::vector<std::shared_ptr<LayerInterface>> MapScene::getLayers() {
     std::vector<std::shared_ptr<LayerInterface>> layersList;
     for (const auto &l : layers) {
@@ -441,6 +451,13 @@ void MapScene::destroy() {
     scheduler->destroy();
     scheduler = nullptr;
     callbackHandler = nullptr;
+    if (!performanceLoggers.empty()) {
+        std::lock_guard<std::mutex> loggerLock(performanceLoggersMutex);
+        for (const auto &logger: performanceLoggers) {
+            logger->resetData();
+        }
+        performanceLoggers.clear();
+    }
 }
 
 void MapScene::drawReadyFrame(const ::RectCoord &bounds, float timeout,

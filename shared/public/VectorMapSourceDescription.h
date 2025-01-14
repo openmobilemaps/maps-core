@@ -27,6 +27,7 @@ public:
     std::optional<float> zoomLevelScaleFactor;
     std::optional<bool> underzoom;
     std::optional<bool> overzoom;
+    std::optional<std::vector<int>> levels;
 
     VectorMapSourceDescription(std::string identifier,
                                std::string vectorUrl,
@@ -37,10 +38,11 @@ public:
                                std::optional<bool> adaptScaleToScreen,
                                std::optional<int> numDrawPreviousLayers,
                                std::optional<bool> underzoom,
-                               std::optional<bool> overzoom) :
+                               std::optional<bool> overzoom,
+                               std::optional<std::vector<int>> levels) :
             identifier(identifier), vectorUrl(vectorUrl), minZoom(minZoom), maxZoom(maxZoom), bounds(bounds),
             adaptScaleToScreen(adaptScaleToScreen), numDrawPreviousLayers(numDrawPreviousLayers),
-            zoomLevelScaleFactor(zoomLevelScaleFactor), underzoom(underzoom), overzoom(overzoom) {}
+            zoomLevelScaleFactor(zoomLevelScaleFactor), underzoom(underzoom), overzoom(overzoom), levels(levels) {}
 };
 
 class VectorMapDescription {

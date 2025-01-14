@@ -161,7 +161,7 @@ public enum PipelineType: String, CaseIterable, Codable {
 
     var vertexShaderUsesModelMatrix: Bool {
         switch self {
-            case .rasterShader, .roundColorShader, .unitSphereRoundColorShader, .alphaShader:
+            case .rasterShader, .roundColorShader, .unitSphereRoundColorShader, .alphaShader, .unitSphereAlphaShader, .sphereEffectShader:
                 return true
             default:
                 return false

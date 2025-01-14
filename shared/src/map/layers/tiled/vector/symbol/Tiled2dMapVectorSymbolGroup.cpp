@@ -349,22 +349,31 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
 
     int positionSize = is3d ? 3 : 2;
 
-    Tiled2dMapVectorSymbolObject::SymbolObjectInstanceCounts instanceCounts{0, 0, 0};
-    int textStyleCount = 0;
+    //Tiled2dMapVectorSymbolObject::SymbolObjectInstanceCounts instanceCounts{0, 0, 0};
+    int32_t iconCount = 0;
+    int32_t stretchedIconCount = 0;
+    std::unordered_map<std::shared_ptr<FontLoaderResult>, std::tuple<int32_t, int32_t>> fontStylesAndCharactersCountMap;
+
     for (auto const object: symbolObjects) {
         const auto &counts = object->getInstanceCounts();
         if (!object->hasCustomTexture) {
-            instanceCounts.icons += counts.icons;
+            iconCount += counts.icons;
         }
-        instanceCounts.textCharacters += counts.textCharacters;
-        textStyleCount += instanceCounts.textCharacters == 0 ? 0 : 1;
-        if (counts.textCharacters != 0 && !fontResult) {
-            fontResult = object->getFont();
+        if (counts.textCharacters > 0) {
+            auto font = object->getFont();
+            int32_t stylesCount = 0;
+            int32_t charactersCount = 0;
+            auto currentEntry = fontStylesAndCharactersCountMap.find(font);
+            if (currentEntry != fontStylesAndCharactersCountMap.end()) {
+                stylesCount = std::get<0>(currentEntry->second);
+                charactersCount = std::get<1>(currentEntry->second);
+            }
+            fontStylesAndCharactersCountMap[font] = {stylesCount + 1, charactersCount + counts.textCharacters};
         }
-        instanceCounts.stretchedIcons += counts.stretchedIcons;
+        stretchedIconCount += counts.stretchedIcons;
     }
 
-    if (instanceCounts.icons != 0) {
+    if (iconCount != 0) {
         alphaInstancedShader->setBlendMode(
                 layerDescription->style.getBlendMode(EvaluationContext(0.0, dpFactor, std::make_shared<FeatureContext>(), featureStateManager)));
         iconInstancedObject = strongMapInterface->getGraphicsObjectFactory()->createQuadInstanced(alphaInstancedShader);
@@ -372,18 +381,18 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
         iconInstancedObject->asGraphicsObject()->setDebugLabel(layerDescription->identifier + "_" + tileInfo.tileInfo.to_string_short());
 #endif
 
-        iconInstancedObject->setInstanceCount(instanceCounts.icons);
+        iconInstancedObject->setInstanceCount(iconCount);
 
-        iconAlphas.resize(instanceCounts.icons, 0.0);
-        iconRotations.resize(instanceCounts.icons, 0.0);
-        iconScales.resize(instanceCounts.icons * 2, 0.0);
-        iconPositions.resize(instanceCounts.icons * positionSize, 0.0);
-        iconTextureCoordinates.resize(instanceCounts.icons * 4, 0.0);
-        iconOffsets.resize(instanceCounts.icons * 2, 0.0);
+        iconAlphas.resize(iconCount, 0.0);
+        iconRotations.resize(iconCount, 0.0);
+        iconScales.resize(iconCount * 2, 0.0);
+        iconPositions.resize(iconCount * positionSize, 0.0);
+        iconTextureCoordinates.resize(iconCount * 4, 0.0);
+        iconOffsets.resize(iconCount * 2, 0.0);
     }
 
 
-    if (instanceCounts.stretchedIcons != 0) {
+    if (stretchedIconCount != 0) {
         auto shader = strongMapInterface->getShaderFactory()->createStretchInstancedShader(is3d)->asShaderProgramInterface();
         shader->setBlendMode(
                 layerDescription->style.getBlendMode(EvaluationContext(0.0, dpFactor, std::make_shared<FeatureContext>(), featureStateManager)));
@@ -392,36 +401,33 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
         stretchedInstancedObject->asGraphicsObject()->setDebugLabel(layerDescription->identifier + "_" + tileInfo.tileInfo.to_string_short());
 #endif
 
-        stretchedInstancedObject->setInstanceCount(instanceCounts.stretchedIcons);
+        stretchedInstancedObject->setInstanceCount(stretchedIconCount);
 
-        stretchedIconAlphas.resize(instanceCounts.stretchedIcons, 0.0);
-        stretchedIconRotations.resize(instanceCounts.stretchedIcons, 0.0);
-        stretchedIconScales.resize(instanceCounts.stretchedIcons * 2, 0.0);
-        stretchedIconPositions.resize(instanceCounts.stretchedIcons * positionSize, 0.0);
-        stretchedIconStretchInfos.resize(instanceCounts.stretchedIcons * 10, 1.0);
-        stretchedIconTextureCoordinates.resize(instanceCounts.stretchedIcons * 4, 0.0);
+        stretchedIconAlphas.resize(stretchedIconCount, 0.0);
+        stretchedIconRotations.resize(stretchedIconCount, 0.0);
+        stretchedIconScales.resize(stretchedIconCount * 2, 0.0);
+        stretchedIconPositions.resize(stretchedIconCount * positionSize, 0.0);
+        stretchedIconStretchInfos.resize(stretchedIconCount * 10, 1.0);
+        stretchedIconTextureCoordinates.resize(stretchedIconCount * 4, 0.0);
     }
 
-    if (instanceCounts.textCharacters != 0) {
-        auto shader =  is3d ? strongMapInterface->getShaderFactory()->createUnitSphereTextInstancedShader()->asShaderProgramInterface() : strongMapInterface->getShaderFactory()->createTextInstancedShader()->asShaderProgramInterface();
-        shader->setBlendMode(
-                layerDescription->style.getBlendMode(EvaluationContext(0.0, dpFactor, std::make_shared<FeatureContext>(), featureStateManager)));
-        textInstancedObject = strongMapInterface->getGraphicsObjectFactory()->createTextInstanced(shader);
+    if (!fontStylesAndCharactersCountMap.empty()) {
+        for (auto const &[fontResult, styleTextCharactersCounts]: fontStylesAndCharactersCountMap) {
+            auto shader =  is3d ? strongMapInterface->getShaderFactory()->createUnitSphereTextInstancedShader()->asShaderProgramInterface() : strongMapInterface->getShaderFactory()->createTextInstancedShader()->asShaderProgramInterface();
+            shader->setBlendMode(
+                    layerDescription->style.getBlendMode(EvaluationContext(0.0, dpFactor, std::make_shared<FeatureContext>(), featureStateManager)));
+            auto textInstancedObject = strongMapInterface->getGraphicsObjectFactory()->createTextInstanced(shader);
 #if DEBUG
-        textInstancedObject->asGraphicsObject()->setDebugLabel(layerDescription->identifier + "_" + tileInfo.tileInfo.to_string_short());
+            textInstancedObject->asGraphicsObject()->setDebugLabel(layerDescription->identifier + "_" + tileInfo.tileInfo.to_string_short());
 #endif
+            auto textStyleCount = std::get<0>(styleTextCharactersCounts);
+            auto textCharactersCount = std::get<1>(styleTextCharactersCounts);
 
-        textInstancedObject->setInstanceCount(instanceCounts.textCharacters);
+            textInstancedObject->setInstanceCount(textCharactersCount);
 
-        textStyles.resize(textStyleCount * 10, 0.0);
-        textStyleIndices.resize(instanceCounts.textCharacters, 0);
-        textRotations.resize(instanceCounts.textCharacters, 0.0);
-        textScales.resize(instanceCounts.textCharacters * 2, 0.0);
-        textPositions.resize(instanceCounts.textCharacters * 2, 0.0);
-        if (is3d) {
-            textReferencePositions.resize(instanceCounts.textCharacters * positionSize, 0.0);
+            textInstancedObjects.push_back(textInstancedObject);
+            textDescriptors.emplace_back(std::make_shared<TextDescriptor>(textStyleCount, textCharactersCount, fontResult, is3d));
         }
-        textTextureCoordinates.resize(instanceCounts.textCharacters * 4, 0.0);
     }
 
 #ifdef DRAW_TEXT_BOUNDING_BOX
@@ -438,7 +444,7 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
                 break;
         }
     }
-    if (instanceCounts.icons + instanceCounts.stretchedIcons + instanceCounts.textCharacters > 0) {
+    if (iconCount + stretchedIconCount > 0 || !fontStylesAndCharactersCountMap.empty()) {
         auto shader = strongMapInterface->getShaderFactory()->createPolygonGroupShader(false, is3d);
         auto object = strongMapInterface->getGraphicsObjectFactory()->createPolygonGroup(shader->asShaderProgramInterface());
         boundingBoxLayerObject = std::make_shared<PolygonGroup2dLayerObject>(strongMapInterface->getCoordinateConverterHelper(),
@@ -474,8 +480,8 @@ void Tiled2dMapVectorSymbolGroup::setupObjects(const std::shared_ptr<SpriteData>
 
     int iconOffset = 0;
     int stretchedIconOffset = 0;
-    int textOffset = 0;
-    uint16_t textStyleOffset = 0;
+    std::unordered_map<std::string, int32_t> textOffsets;
+    std::unordered_map<std::string, uint16_t> textStyleOffsets;
 
     for (auto const &object: symbolObjects) {
 
@@ -499,8 +505,24 @@ void Tiled2dMapVectorSymbolGroup::setupObjects(const std::shared_ptr<SpriteData>
         }
         object->setupStretchIconProperties(stretchedIconPositions, stretchedIconTextureCoordinates, stretchedIconOffset,
                                            tileInfo.tileInfo.zoomIdentifier, spriteTexture, spriteData);
-
-        object->setupTextProperties(textTextureCoordinates, textStyleIndices, textOffset, textStyleOffset, tileInfo.tileInfo.zoomIdentifier);
+        auto font = object->getFont();
+        if (font) {
+            const auto &textDescriptor = std::find_if(textDescriptors.begin(), textDescriptors.end(),
+                                                      [&font](const auto &textDescriptor) {
+                                                          return font->fontData->info.name ==
+                                                                 textDescriptor->fontResult->fontData->info.name;
+                                                      });
+            if (textDescriptor != textDescriptors.end()) {
+                int32_t currentTextOffset = textOffsets[font->fontData->info.name];
+                uint16_t currentStyleOffset = textStyleOffsets[font->fontData->info.name];
+                object->setupTextProperties((*textDescriptor)->textTextureCoordinates,
+                                            (*textDescriptor)->textStyleIndices,
+                                            currentTextOffset, currentStyleOffset,
+                                            tileInfo.tileInfo.zoomIdentifier);
+                textOffsets[font->fontData->info.name] = currentTextOffset;
+                textStyleOffsets[font->fontData->info.name] = currentStyleOffset;
+            }
+        }
     }
 
     for (const auto &customDescriptor: customTextures) {
@@ -539,16 +561,18 @@ void Tiled2dMapVectorSymbolGroup::setupObjects(const std::shared_ptr<SpriteData>
                             4 * (int32_t) sizeof(float)));
     }
 
-    if (textInstancedObject) {
+    for (size_t i = 0; i < textDescriptors.size(); i++) {
+        const auto &textDescriptor = textDescriptors[i];
+        const auto &textInstancedObject = textInstancedObjects[i];
         if (this->spriteData == nullptr) {
             textInstancedObject->setFrame(Quad2dD(Vec2D(-0.5, 0.5), Vec2D(0.5, 0.5), Vec2D(0.5, -0.5), Vec2D(-0.5, -0.5)), tileOrigin, is3d);
-            textInstancedObject->loadTexture(context, fontResult->imageData);
+            textInstancedObject->loadTexture(context, textDescriptor->fontResult->imageData);
             textInstancedObject->asGraphicsObject()->setup(context);
         }
         textInstancedObject->setTextureCoordinates(
-                SharedBytes((int64_t) textTextureCoordinates.data(), (int32_t) textRotations.size(), 4 * (int32_t) sizeof(float)));
+                SharedBytes((int64_t) textDescriptor->textTextureCoordinates.data(), (int32_t) textDescriptor->textRotations.size(), 4 * (int32_t) sizeof(float)));
         textInstancedObject->setStyleIndices(
-                SharedBytes((int64_t) textStyleIndices.data(), (int32_t) textStyleIndices.size(), 1 * (int32_t) sizeof(uint16_t)));
+                SharedBytes((int64_t) textDescriptor->textStyleIndices.data(), (int32_t) textDescriptor->textStyleIndices.size(), 1 * (int32_t) sizeof(uint16_t)));
     }
 
     this->spriteData = spriteData;
@@ -574,84 +598,193 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
 
         int iconOffset = 0;
         int stretchedIconOffset = 0;
-        int textOffset = 0;
-        uint16_t textStyleOffset = 0;
+        std::unordered_map<std::string, int32_t> textOffsets;
+        std::unordered_map<std::string, uint16_t> textStyleOffsets;
 
         for (auto const &object: symbolObjects) {
             if (object->hasCustomTexture) {
                 auto &page = customTextures[object->customTexturePage];
                 int offset = (int)object->customTextureOffset;
-                object->updateIconProperties(page.iconPositions, page.iconScales, page.iconRotations, page.iconAlphas, page.iconOffsets, offset, zoomIdentifier,scaleFactor, rotation, now, viewPortSize);
+                object->updateIconProperties(page.iconPositions, page.iconScales, page.iconRotations, page.iconAlphas, page.iconOffsets, page.iconTextureCoordinates, offset, zoomIdentifier,scaleFactor, rotation, now, viewPortSize, spriteTexture, spriteData);
 
             } else {
-                object->updateIconProperties(iconPositions, iconScales, iconRotations, iconAlphas, iconOffsets, iconOffset, zoomIdentifier,
-                                             scaleFactor, rotation, now, viewPortSize);
+                object->updateIconProperties(iconPositions, iconScales, iconRotations, iconAlphas, iconOffsets, iconTextureCoordinates, iconOffset, zoomIdentifier,
+                                             scaleFactor, rotation, now, viewPortSize, spriteTexture, spriteData);
             }
             object->updateStretchIconProperties(stretchedIconPositions, stretchedIconScales, stretchedIconRotations,
-                                                stretchedIconAlphas, stretchedIconStretchInfos, stretchedIconOffset, zoomIdentifier,
-                                                scaleFactor, rotation, now, viewPortSize);
-            object->updateTextProperties(textPositions, textReferencePositions, textScales, textRotations, textStyles, textOffset, textStyleOffset,
-                                         zoomIdentifier, scaleFactor, rotation, now, viewPortSize, vpMatrix, origin);
+                                                stretchedIconAlphas, stretchedIconStretchInfos, stretchedIconTextureCoordinates, stretchedIconOffset, zoomIdentifier,
+                                                scaleFactor, rotation, now, viewPortSize, spriteTexture, spriteData);
+            auto font = object->getFont();
+            if (font) {
+                const auto &textDescriptor = std::find_if(textDescriptors.begin(), textDescriptors.end(),
+                                                          [&font](const auto &textDescriptor) {
+                                                              return font->fontData->info.name ==
+                                                                     textDescriptor->fontResult->fontData->info.name;
+                                                          });
+                if (textDescriptor != textDescriptors.end()) {
+                    int32_t currentTextOffset = textOffsets[font->fontData->info.name];
+                    uint16_t currentStyleOffset = textStyleOffsets[font->fontData->info.name];
+                    object->updateTextProperties((*textDescriptor)->textPositions, (*textDescriptor)->textReferencePositions,
+                                                 (*textDescriptor)->textScales, (*textDescriptor)->textRotations,
+                                                 (*textDescriptor)->textStyles,
+                                                 currentTextOffset, currentStyleOffset,
+                                                 zoomIdentifier, scaleFactor, rotation, now, viewPortSize, vpMatrix, origin);
+                    textOffsets[font->fontData->info.name] = currentTextOffset;
+                    textStyleOffsets[font->fontData->info.name] = currentStyleOffset;
+                }
+            }
         }
 
-        for (const auto &customDescriptor: customTextures) {
+        for (auto &customDescriptor: customTextures) {
             int32_t count = (int32_t)customDescriptor.featureIdentifiersUv.size();
-            customDescriptor.renderObject->setPositions(
-                    SharedBytes((int64_t) customDescriptor.iconPositions.data(), (int32_t) count, positionSize * (int32_t) sizeof(float)));
-            customDescriptor.renderObject->setAlphas(
-                    SharedBytes((int64_t) customDescriptor.iconAlphas.data(), (int32_t) count, (int32_t) sizeof(float)));
-            customDescriptor.renderObject->setScales(
-                    SharedBytes((int64_t) customDescriptor.iconScales.data(), (int32_t) count, 2 * (int32_t) sizeof(float)));
-            customDescriptor.renderObject->setRotations(
-                    SharedBytes((int64_t) customDescriptor.iconRotations.data(), (int32_t) count, 1 * (int32_t) sizeof(float)));
-            customDescriptor.renderObject->setPositionOffset(
-                    SharedBytes((int64_t) customDescriptor.iconOffsets.data(), (int32_t) count, 2 * (int32_t) sizeof(float)));
+
+            if (customDescriptor.iconPositions.wasModified()) {
+                customDescriptor.renderObject->setPositions(
+                        SharedBytes((int64_t) customDescriptor.iconPositions.data(), (int32_t) count, positionSize * (int32_t) sizeof(float)));
+                customDescriptor.iconPositions.resetModificationFlag();
+            }
+
+            if (customDescriptor.iconAlphas.wasModified()) {
+                customDescriptor.renderObject->setAlphas(
+                                                         SharedBytes((int64_t) customDescriptor.iconAlphas.data(), (int32_t) count, (int32_t) sizeof(float)));
+                customDescriptor.iconAlphas.resetModificationFlag();
+            }
+
+            if (customDescriptor.iconScales.wasModified()) {
+                customDescriptor.renderObject->setScales(
+                                                         SharedBytes((int64_t) customDescriptor.iconScales.data(), (int32_t) count, 2 * (int32_t) sizeof(float)));
+                customDescriptor.iconScales.resetModificationFlag();
+            }
+
+            if (customDescriptor.iconRotations.wasModified()) {
+                customDescriptor.renderObject->setRotations(
+                                                            SharedBytes((int64_t) customDescriptor.iconRotations.data(), (int32_t) count, 1 * (int32_t) sizeof(float)));
+                customDescriptor.iconRotations.resetModificationFlag();
+            }
+
+            if (customDescriptor.iconOffsets.wasModified()) {
+                customDescriptor.renderObject->setPositionOffset(
+                                                                 SharedBytes((int64_t) customDescriptor.iconOffsets.data(), (int32_t) count, 2 * (int32_t) sizeof(float)));
+                customDescriptor.iconOffsets.resetModificationFlag();
+            }
+
+            if (customDescriptor.iconTextureCoordinates.wasModified()) {
+                customDescriptor.renderObject->setTextureCoordinates(
+                                                                 SharedBytes((int64_t) customDescriptor.iconTextureCoordinates.data(), (int32_t) count, 4 * (int32_t) sizeof(float)));
+                customDescriptor.iconTextureCoordinates.resetModificationFlag();
+            }
         }
 
         if (iconInstancedObject) {
-            iconInstancedObject->setPositions(
-                    SharedBytes((int64_t) iconPositions.data(), (int32_t) iconAlphas.size(), positionSize * (int32_t) sizeof(float)));
-            iconInstancedObject->setAlphas(
-                    SharedBytes((int64_t) iconAlphas.data(), (int32_t) iconAlphas.size(), (int32_t) sizeof(float)));
-            iconInstancedObject->setScales(
-                    SharedBytes((int64_t) iconScales.data(), (int32_t) iconAlphas.size(), 2 * (int32_t) sizeof(float)));
-            iconInstancedObject->setRotations(
-                    SharedBytes((int64_t) iconRotations.data(), (int32_t) iconAlphas.size(), 1 * (int32_t) sizeof(float)));
-            iconInstancedObject->setPositionOffset(
-                    SharedBytes((int64_t) iconOffsets.data(), (int32_t) iconAlphas.size(), 2 * (int32_t) sizeof(float)));
+            int32_t iconCount = (int32_t) iconAlphas.size();
+            if (iconPositions.wasModified()) {
+                iconInstancedObject->setPositions(
+                                                  SharedBytes((int64_t) iconPositions.data(), iconCount, positionSize * (int32_t) sizeof(float)));
+                iconPositions.resetModificationFlag();
+            }
+
+            if (iconAlphas.wasModified()) {
+                iconInstancedObject->setAlphas(
+                                               SharedBytes((int64_t) iconAlphas.data(), iconCount, (int32_t) sizeof(float)));
+                iconAlphas.resetModificationFlag();
+            }
+
+            if (iconScales.wasModified()) {
+                iconInstancedObject->setScales(
+                                               SharedBytes((int64_t) iconScales.data(), iconCount, 2 * (int32_t) sizeof(float)));
+                iconScales.resetModificationFlag();
+            }
+
+            if (iconRotations.wasModified()) {
+                iconInstancedObject->setRotations(
+                                                  SharedBytes((int64_t) iconRotations.data(), iconCount, 1 * (int32_t) sizeof(float)));
+                iconRotations.resetModificationFlag();
+            }
+
+            if (iconOffsets.wasModified()) {
+                iconInstancedObject->setPositionOffset(
+                                                       SharedBytes((int64_t) iconOffsets.data(), iconCount, 2 * (int32_t) sizeof(float)));
+                iconOffsets.resetModificationFlag();
+            }
+
+            if (iconTextureCoordinates.wasModified()) {
+                iconInstancedObject->setTextureCoordinates(
+                                                       SharedBytes((int64_t) iconTextureCoordinates.data(), iconCount, 4 * (int32_t) sizeof(float)));
+                iconTextureCoordinates.resetModificationFlag();
+            }
         }
 
         if (stretchedInstancedObject) {
-            stretchedInstancedObject->setPositions(
-                    SharedBytes((int64_t) stretchedIconPositions.data(), (int32_t) stretchedIconAlphas.size(),
-                                positionSize * (int32_t) sizeof(float)));
-            stretchedInstancedObject->setAlphas(
-                    SharedBytes((int64_t) stretchedIconAlphas.data(), (int32_t) stretchedIconAlphas.size(),
-                                (int32_t) sizeof(float)));
-            stretchedInstancedObject->setScales(
-                    SharedBytes((int64_t) stretchedIconScales.data(), (int32_t) stretchedIconAlphas.size(),
-                                2 * (int32_t) sizeof(float)));
-            stretchedInstancedObject->setRotations(
-                    SharedBytes((int64_t) stretchedIconRotations.data(), (int32_t) stretchedIconAlphas.size(),
-                                1 * (int32_t) sizeof(float)));
-            stretchedInstancedObject->setStretchInfos(
-                    SharedBytes((int64_t) stretchedIconStretchInfos.data(), (int32_t) stretchedIconAlphas.size(),
-                                10 * (int32_t) sizeof(float)));
+            int32_t iconCount = (int32_t) stretchedIconAlphas.size();
+            if (stretchedIconPositions.wasModified()) {
+                stretchedInstancedObject->setPositions(SharedBytes((int64_t) stretchedIconPositions.data(), iconCount,
+                                                                   positionSize * (int32_t) sizeof(float)));
+                stretchedIconPositions.resetModificationFlag();
+            }
+
+            if (stretchedIconAlphas.wasModified()) {
+                stretchedInstancedObject->setAlphas(SharedBytes((int64_t) stretchedIconAlphas.data(), iconCount,
+                                                                (int32_t) sizeof(float)));
+                stretchedIconAlphas.resetModificationFlag();
+            }
+
+            if (stretchedIconScales.wasModified()) {
+                stretchedInstancedObject->setScales(SharedBytes((int64_t) stretchedIconScales.data(), iconCount,
+                                                                2 * (int32_t) sizeof(float)));
+                stretchedIconScales.resetModificationFlag();
+            }
+
+            if (stretchedIconRotations.wasModified()) {
+                stretchedInstancedObject->setRotations(SharedBytes((int64_t) stretchedIconRotations.data(), iconCount,
+                                                                   1 * (int32_t) sizeof(float)));
+                stretchedIconRotations.resetModificationFlag();
+            }
+
+            if (stretchedIconStretchInfos.wasModified()) {
+                stretchedInstancedObject->setStretchInfos(SharedBytes((int64_t) stretchedIconStretchInfos.data(), iconCount,
+                                                                      10 * (int32_t) sizeof(float)));
+                stretchedIconStretchInfos.resetModificationFlag();
+            }
+
+            if (stretchedIconTextureCoordinates.wasModified()) {
+                stretchedInstancedObject->setStretchInfos(SharedBytes((int64_t) stretchedIconTextureCoordinates.data(), iconCount,
+                                                                      4 * (int32_t) sizeof(float)));
+                stretchedIconTextureCoordinates.resetModificationFlag();
+            }
         }
 
-        if (textInstancedObject) {
-            textInstancedObject->setPositions(
-                    SharedBytes((int64_t) textPositions.data(), (int32_t) textRotations.size(), 2 * (int32_t) sizeof(float)));
-            if (is3d) {
-                textInstancedObject->setReferencePositions(
-                        SharedBytes((int64_t) textReferencePositions.data(), (int32_t) textRotations.size(), positionSize * (int32_t) sizeof(float)));
+        for (size_t i = 0; i < textDescriptors.size(); i++) {
+            const auto &textDescriptor = textDescriptors[i];
+            const auto &textInstancedObject = textInstancedObjects[i];
+            if (textDescriptor->textPositions.wasModified()) {
+                textInstancedObject->setPositions(
+                                                  SharedBytes((int64_t) textDescriptor->textPositions.data(), (int32_t) textDescriptor->textRotations.size(), 2 * (int32_t) sizeof(float)));
+                textDescriptor->textPositions.resetModificationFlag();
             }
-            textInstancedObject->setStyles(
-                    SharedBytes((int64_t) textStyles.data(), (int32_t) textStyles.size() / 10, 10 * (int32_t) sizeof(float)));
-            textInstancedObject->setScales(
-                    SharedBytes((int64_t) textScales.data(), (int32_t) textRotations.size(), 2 * (int32_t) sizeof(float)));
-            textInstancedObject->setRotations(
-                    SharedBytes((int64_t) textRotations.data(), (int32_t) textRotations.size(), 1 * (int32_t) sizeof(float)));
+            if (is3d && textDescriptor->textReferencePositions.wasModified()) {
+                textInstancedObject->setReferencePositions(
+                        SharedBytes((int64_t) textDescriptor->textReferencePositions.data(), (int32_t) textDescriptor->textRotations.size(), positionSize * (int32_t) sizeof(float)));
+                textDescriptor->textReferencePositions.resetModificationFlag();
+            }
+
+            if (textDescriptor->textStyles.wasModified()) {
+                textInstancedObject->setStyles(
+                                               SharedBytes((int64_t) textDescriptor->textStyles.data(), (int32_t) textDescriptor->textStyles.size() / 10, 10 * (int32_t) sizeof(float)));
+                textDescriptor->textStyles.resetModificationFlag();
+            }
+
+            if (textDescriptor->textScales.wasModified()) {
+                textInstancedObject->setScales(
+                                               SharedBytes((int64_t) textDescriptor->textScales.data(), (int32_t) textDescriptor->textRotations.size(), 2 * (int32_t) sizeof(float)));
+                textDescriptor->textScales.resetModificationFlag();
+            }
+
+            if (textDescriptor->textRotations.wasModified()) {
+                textInstancedObject->setRotations(
+                                                  SharedBytes((int64_t) textDescriptor->textRotations.data(), (int32_t) textDescriptor->textRotations.size(), 1 * (int32_t) sizeof(float)));
+                textDescriptor->textRotations.resetModificationFlag();
+            }
+
         }
 
 #ifdef DRAW_TEXT_BOUNDING_BOX
@@ -830,7 +963,7 @@ Tiled2dMapVectorSymbolGroup::getPositioning(std::vector<::Coord>::const_iterator
         }
     }
 
-    double angle = -atan2(next->y - prev->y, next->x - prev->x) * (180.0 / M_PI);
+    double angle = -atan2(prev->y - next->y, -(prev->x - next->x)) * (180.0 / M_PI);
     auto midpoint = Vec2D(onePrev->x * (1.0 - interpolationValue) + iterator->x * interpolationValue,
                           onePrev->y * (1.0 - interpolationValue) + iterator->y * interpolationValue);
     return Tiled2dMapVectorSymbolSubLayerPositioningWrapper(angle, Coord(next->systemIdentifier, midpoint.x, midpoint.y, next->z));
@@ -908,7 +1041,7 @@ void Tiled2dMapVectorSymbolGroup::clear() {
     if (stretchedInstancedObject) {
         stretchedInstancedObject->asGraphicsObject()->clear();
     }
-    if (textInstancedObject) {
+    for (const auto &textInstancedObject : textInstancedObjects) {
         textInstancedObject->asGraphicsObject()->clear();
     }
     this->spriteData = nullptr;
@@ -944,9 +1077,8 @@ std::vector<std::shared_ptr< ::RenderObjectInterface>> Tiled2dMapVectorSymbolGro
     if (stretchIconObject) {
         renderObjects.push_back(std::make_shared<RenderObject>(stretchIconObject->asGraphicsObject()));
     }
-    auto textObject = textInstancedObject;
-    if (textObject) {
-        renderObjects.push_back(std::make_shared<RenderObject>(textObject->asGraphicsObject()));
+    for (const auto &textInstancedObject : textInstancedObjects) {
+        renderObjects.push_back(std::make_shared<RenderObject>(textInstancedObject->asGraphicsObject()));
     }
 
 #ifdef DRAW_TEXT_BOUNDING_BOX

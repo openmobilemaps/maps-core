@@ -15,6 +15,7 @@ import UIKit
 
 class LineGroupShader: BaseShader, @unchecked Sendable {
     var lineStyleBuffer: MTLBuffer?
+    var time: MultiBuffer<Float>
 
     var screenPixelAsRealMeterFactor: Float = 1.0
 
@@ -22,6 +23,7 @@ class LineGroupShader: BaseShader, @unchecked Sendable {
 
 
     override init(shader: PipelineType = .lineGroupShader) {
+        time = .init(device: MetalContext.current.device)
         super.init(shader: shader)
     }
 
@@ -43,6 +45,14 @@ class LineGroupShader: BaseShader, @unchecked Sendable {
         encoder.setVertexBuffer(lineStyleBuffer, offset: 0, index: 4)
 
         encoder.setFragmentBuffer(lineStyleBuffer, offset: 0, index: 1)
+
+        if let timeBuffer = time.getNextBuffer(context) {
+            var now = context.time
+            timeBuffer
+                .copyMemory(bytes: &now, length: MemoryLayout<Float>.stride)
+            encoder.setFragmentBuffer(timeBuffer, offset: 0, index: 2)
+        }
+
     }
 }
 

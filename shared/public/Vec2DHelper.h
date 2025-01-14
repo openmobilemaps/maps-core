@@ -12,6 +12,7 @@
 
 #include "Vec2D.h"
 #include "Quad2dD.h"
+#include <algorithm>
 #include <vector>
 #include <cmath>
 

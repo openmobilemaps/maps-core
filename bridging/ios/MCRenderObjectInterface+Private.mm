@@ -60,6 +60,19 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)setHidden:(BOOL)hidden {
+    try {
+        _cppRefHandle.get()->setHidden(::djinni::Bool::toCpp(hidden));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (BOOL)isHidden {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->isHidden();
+        return ::djinni::Bool::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 namespace djinni_generated {
 
 class RenderObjectInterface::ObjcProxy final
@@ -95,6 +108,19 @@ public:
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getCustomModelMatrix];
             return ::djinni::List<::djinni::F32>::toCpp(objcpp_result_);
+        }
+    }
+    void setHidden(bool c_hidden) override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() setHidden:(::djinni::Bool::fromCpp(c_hidden))];
+        }
+    }
+    bool isHidden() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() isHidden];
+            return ::djinni::Bool::toCpp(objcpp_result_);
         }
     }
 };

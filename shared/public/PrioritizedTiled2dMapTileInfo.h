@@ -49,7 +49,11 @@ struct VisibleTilesLayer {
     // positive means this is "below" the target
     int targetZoomLevelOffset;
 
-    VisibleTilesLayer(const std::unordered_set<PrioritizedTiled2dMapTileInfo> &visibleTiles, int targetZoomLevelOffset): visibleTiles(visibleTiles), targetZoomLevelOffset(targetZoomLevelOffset) {}
+    bool isLastSingleCover = false;
 
-    VisibleTilesLayer(int targetZoomLevelOffset): visibleTiles(), targetZoomLevelOffset(targetZoomLevelOffset) {}
+    int curT;
+
+    VisibleTilesLayer(const std::unordered_set<PrioritizedTiled2dMapTileInfo> &visibleTiles, int targetZoomLevelOffset, int curT): visibleTiles(visibleTiles), targetZoomLevelOffset(targetZoomLevelOffset), curT(curT) {}
+
+    VisibleTilesLayer(int targetZoomLevelOffset, int curT): visibleTiles(), targetZoomLevelOffset(targetZoomLevelOffset), curT(curT) {}
 };

@@ -1,0 +1,69 @@
+@extern "../yaml/rect_coord.yaml"
+@extern "../yaml/loader_status.yaml"
+
+error_manager = interface +c
+{
+    static create() : error_manager;
+
+    add_tiled_layer_error(error: tiled_layer_error);
+    remove_error(url: string);
+    remove_all_errors_for_layer(layer_name: string);
+
+    clear_all_errors();
+
+    add_error_listener(listener: error_manager_listener);
+    remove_error_listener(listener: error_manager_listener);
+}
+
+error_manager_listener = interface +c +j +o
+{
+    on_tiled_layer_error_state_changed(errors: list<tiled_layer_error>);
+}
+
+tiled_layer_error = record
+{
+    status: loader_status;
+    error_code: optional<string>;
+    layer_name: string;
+    url: string;
+    is_recoverable: bool;
+    bounds: optional<rect_coord>;
+}
+
+performance_logger_interface = interface +c +j +o
+{
+	get_logger_name() : string;
+	start_log(id: string);
+	end_log(id: string);
+	get_statistics(id: string) : optional<logger_data>;
+	get_all_statistics() : list<logger_data>;
+	reset_data();
+	set_logging_enabled(enabled: bool);
+}
+
+open_gl_performance_logger_interface = interface +c
+{
+	static create() : open_gl_performance_logger_interface;
+	static create_specifically(num_buckets: i32, bucket_size_ms: i64) : open_gl_performance_logger_interface;
+	as_performance_logger_interface() : performance_logger_interface;
+}
+
+cpu_performance_logger_interface = interface +c
+{
+	static create() : cpu_performance_logger_interface;
+	static create_specifically(num_buckets: i32, bucket_size_ms: i64) : cpu_performance_logger_interface;
+	as_performance_logger_interface() : performance_logger_interface;
+}
+
+logger_data = record
+{
+	id: string;
+	buckets: list<i64>;
+	bucket_size_ms: i32;
+	start: i64;
+	end: i64;
+	num_samples: i64;
+	average: f64;
+	variance: f64;
+	std_deviation: f64;
+}

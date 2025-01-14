@@ -85,16 +85,25 @@ void Tiled2dMapVectorPolygonTile::update() {
     auto polygonDescription = std::static_pointer_cast<PolygonVectorLayerDescription>(description);
     bool inZoomRange = polygonDescription->maxZoom >= zoomIdentifier && polygonDescription->minZoom <= zoomIdentifier;
 
+    if (inZoomRange != isVisible) {
+        isVisible = inZoomRange;
+        for (auto const &object : renderObjects) {
+            object->setHidden(!inZoomRange);
+        }
+    }
+
+    if (!inZoomRange) {
+        return;
+    }
+
     if (lastZoom &&
         ((isStyleZoomDependant && *lastZoom == zoomIdentifier) || !isStyleZoomDependant) &&
         lastAlpha == alpha &&
-        (lastInZoomRange && *lastInZoomRange == inZoomRange) &&
         !isStyleStateDependant) {
         return;
     }
     lastZoom = zoomIdentifier;
     lastAlpha = alpha;
-    lastInZoomRange = inZoomRange;
 
     size_t numStyleGroups = featureGroups.size();
     for (int styleGroupId = 0; styleGroupId < numStyleGroups; styleGroupId++) {
@@ -102,15 +111,15 @@ void Tiled2dMapVectorPolygonTile::update() {
         shaderStyles.reserve(featureGroups.at(styleGroupId).size() * 5);
         for (auto const &[hash, feature]: featureGroups.at(styleGroupId)) {
             const auto& ec = EvaluationContext(zoomIdentifier, dpFactor, feature, featureStateManager);
-            const auto& color = inZoomRange ? polygonDescription->style.getFillColor(ec) : Color(0.0, 0.0, 0.0, 0.0);
-            const auto& opacity = inZoomRange ? polygonDescription->style.getFillOpacity(ec) : 0.0;
+            const auto& color = polygonDescription->style.getFillColor(ec);
+            const auto& opacity = polygonDescription->style.getFillOpacity(ec);
             shaderStyles.push_back(color.r);
             shaderStyles.push_back(color.g);
             shaderStyles.push_back(color.b);
             shaderStyles.push_back(color.a);
             shaderStyles.push_back(opacity * alpha);
             if (isStriped) {
-                const auto stripeWidth = inZoomRange ? polygonDescription->style.getStripeWidth(ec) : std::vector<float>{0.0, 0.0};
+                const auto stripeWidth = polygonDescription->style.getStripeWidth(ec);
                 shaderStyles.push_back(stripeWidth[0]);
                 shaderStyles.push_back(stripeWidth[1]);
             }
@@ -313,6 +322,14 @@ void Tiled2dMapVectorPolygonTile::addPolygons(const std::vector<std::vector<Obje
 
     polygons = polygonGroupObjects;
 
+    std::vector<std::shared_ptr<RenderObjectInterface>> newRenderObjects;
+    for (auto const &object : polygons) {
+        for (const auto &config : object->getRenderConfig()) {
+            newRenderObjects.push_back(std::make_shared<RenderObject>(config->getGraphicsObject()));
+        }
+    }
+    renderObjects = newRenderObjects;
+
 #ifdef __APPLE__
     setupPolygons(newGraphicObjects);
 #else
@@ -338,14 +355,7 @@ void Tiled2dMapVectorPolygonTile::setupPolygons(const std::vector<std::shared_pt
 }
 
 std::vector<std::shared_ptr<RenderObjectInterface>> Tiled2dMapVectorPolygonTile::generateRenderObjects() {
-    std::vector<std::shared_ptr<RenderObjectInterface>> newRenderObjects;
-    for (auto const &object : polygons) {
-        for (const auto &config : object->getRenderConfig()) {
-            newRenderObjects.push_back(std::make_shared<RenderObject>(config->getGraphicsObject()));
-        }
-    }
-
-    return newRenderObjects;
+    return renderObjects;
 }
 
 bool Tiled2dMapVectorPolygonTile::onClickConfirmed(const Vec2F &posScreen) {

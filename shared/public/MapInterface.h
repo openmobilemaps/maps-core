@@ -6,6 +6,7 @@
 #include "Color.h"
 #include "CoordinateConversionHelperInterface.h"
 #include "GraphicsObjectFactoryInterface.h"
+#include "PerformanceLoggerInterface.h"
 #include "RectCoord.h"
 #include "RenderingContextInterface.h"
 #include "SchedulerInterface.h"
@@ -53,6 +54,10 @@ public:
     virtual void setTouchHandler(const /*not-null*/ std::shared_ptr<::TouchHandlerInterface> & touchHandler) = 0;
 
     virtual /*not-null*/ std::shared_ptr<::TouchHandlerInterface> getTouchHandler() = 0;
+
+    virtual void setPerformanceLoggers(const std::vector</*not-null*/ std::shared_ptr<::PerformanceLoggerInterface>> & performanceLoggers) = 0;
+
+    virtual std::vector</*not-null*/ std::shared_ptr<::PerformanceLoggerInterface>> getPerformanceLoggers() = 0;
 
     virtual std::vector</*not-null*/ std::shared_ptr<LayerInterface>> getLayers() = 0;
 
