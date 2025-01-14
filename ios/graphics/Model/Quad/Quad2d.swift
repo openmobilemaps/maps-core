@@ -238,8 +238,7 @@ extension Quad2d: MCQuad2dInterface {
             } else {
                 let x = coordinate.x - origin.x
                 let y = coordinate.y - origin.y
-                let z = coordinate.z - origin.z
-                return MCVec3D(x: x, y: y, z: z)
+                return MCVec3D(x: x, y: y, z: 0)
             }
         }
 
