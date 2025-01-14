@@ -738,7 +738,6 @@ bool MapCamera3d::onTouchDown(const ::Vec2F &posScreen) {
         auto southPole = screenPosFromCoord(Coord(CoordinateSystemIdentifiers::EPSG4326(), 0, -90, 0));
         lastOnTouchDownCoord = coordFromScreenPosition(posScreen);
         reverseLongitudeRotation = abs(focusPointPosition.x - lastOnTouchDownCoord->x) > 90;
-        printf("move: start (reversed %d)\n", reverseLongitudeRotation);
         return true;
     }
 }
@@ -797,12 +796,13 @@ bool MapCamera3d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
 
 
     double dy = -(newTouchDownCoord.y - lastOnTouchDownCoord->y);
-    bool newReverseLongitudeRotation = abs(focusPointPosition.x - lastOnTouchDownCoord->x) > 90;
-    if (newReverseLongitudeRotation != reverseLongitudeRotation) {
+    bool newReverseLongitudeRotation = abs(focusPointPosition.x - newTouchDownCoord.x) > 90;
+    if (!newReverseLongitudeRotation && reverseLongitudeRotation) {
         lastOnTouchDownCoord = newTouchDownCoord;
-        reverseLongitudeRotation = newReverseLongitudeRotation;
+        reverseLongitudeRotation = false;
+        printf("Reverse\n");
     }
-    if (newReverseLongitudeRotation) {
+    if (reverseLongitudeRotation) {
         dy *= -1;
     }
 
@@ -813,13 +813,27 @@ bool MapCamera3d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
 
     newTouchDownCoord = coordFromScreenPosition(newScreenPos);
     double dx = -(newTouchDownCoord.x - lastOnTouchDownCoord->x);
+
+    double tx = lastOnTouchDownPoint->x - initialTouchDownPoint->x;
+    double ty = lastOnTouchDownPoint->y - initialTouchDownPoint->y;
+    printf("p=%f, tx=%f, ty=%f, ", focusPointPosition.y, tx, ty);
+    if (abs(focusPointPosition.y - 90) < 1.0 && -ty > abs(tx)) {
+        dx = 0;
+        lastOnTouchDownCoord = newTouchDownCoord;
+        printf("freeze ");
+    }
+    else if (abs(focusPointPosition.y - 90) < 1.0  && ty > abs(tx)) {
+        dx = 0;
+        lastOnTouchDownCoord = newTouchDownCoord;
+        printf("freeze ");
+    }
+
+
+    printf("dx: %f\n", dx);
+
     focusPointPosition.x = focusPointPosition.x + dx;
 
     focusPointPosition.x = std::fmod((focusPointPosition.x + 180 + 360), 360.0) - 180;
-
-    if (focusPointPosition.y == -90 || focusPointPosition.y == 90) {
-        lastOnTouchDownCoord = newTouchDownCoord;
-    }
 
     clampCenterToPaddingCorrectedBounds();
 
