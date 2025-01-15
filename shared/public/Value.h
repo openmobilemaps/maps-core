@@ -664,8 +664,7 @@ public:
     void updateValue(std::shared_ptr<Value> newValue) {
         value = newValue;
 
-
-        usedKeysCollection = value->getUsedKeys();
+        usedKeysCollection = newValue ? newValue->getUsedKeys() : UsedKeysCollection();
 
         isStatic = usedKeysCollection.empty();
         isZoomDependent = usedKeysCollection.usedKeys.contains("zoom");
