@@ -104,7 +104,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
             }
             if (!levels.has_value()) {
                 minZoom = val.value("minzoom", 0);
-                maxZoom = val.value("maxzoom", 24);
+                maxZoom = val.value("maxzoom", 22);
             }
             
             std::optional<::RectCoord> bounds;
@@ -166,7 +166,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                 }
 
                 minZoom = json.value("minzoom", 0);
-                maxZoom = json.value("maxzoom", 24);
+                maxZoom = json.value("maxzoom", 22);
             }
 
 
@@ -264,7 +264,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
         }
         if (!levels.has_value()) {
             minZoom = tileJson.value("minzoom", 0);
-            maxZoom = tileJson.value("maxzoom", 24);
+            maxZoom = tileJson.value("maxzoom", 22);
         }
 
         sourceDescriptions.push_back(
@@ -399,7 +399,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
             );
 
             int minZoom = 0;
-            int maxZoom = 24;
+            int maxZoom = 22;
             for (const auto &sourceDesc : sourceDescriptions) {
                 if (sourceDesc->identifier == val["source"]) {
                     minZoom = sourceDesc->minZoom;
@@ -479,7 +479,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
             std::shared_ptr<Value> filter = parser.parseValue(val["filter"]);
 
             int minZoom = 0;
-            int maxZoom = 24;
+            int maxZoom = 22;
             for (const auto &sourceDesc : sourceDescriptions) {
                 if (sourceDesc->identifier == val["source"]) {
                     minZoom = sourceDesc->minZoom;
@@ -512,7 +512,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                                      parser.parseValue(val["paint"]["stripe-width"]));
 
             int minZoom = 0;
-            int maxZoom = 24;
+            int maxZoom = 22;
             for (const auto &sourceDesc : sourceDescriptions) {
                 if (sourceDesc->identifier == val["source"]) {
                     minZoom = sourceDesc->minZoom;
