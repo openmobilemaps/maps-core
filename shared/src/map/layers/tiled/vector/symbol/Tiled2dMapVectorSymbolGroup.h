@@ -130,11 +130,12 @@ private:
 
         CustomIconDescriptor(std::shared_ptr<TextureHolderInterface> texture, std::shared_ptr<Quad2dInstancedInterface> renderObject, std::unordered_map<std::string, ::RectI> featureIdentifiersUv, bool is3d): texture(texture), renderObject(renderObject), featureIdentifiersUv(featureIdentifiersUv) {
             auto count = featureIdentifiersUv.size();
+            int positionSize = is3d ? 3 : 2;
 
             iconAlphas.resize(count, 0.0);
             iconRotations.resize(count, 0.0);
             iconScales.resize(count * 2, 0.0);
-            iconPositions.resize(count * 2, 0.0);
+            iconPositions.resize(count * positionSize, 0.0);
             iconTextureCoordinates.resize(count * 4, 0.0);
             if (is3d) {
                 iconOffsets.resize(count * 2, 0.0);

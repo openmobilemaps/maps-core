@@ -483,6 +483,8 @@ void Tiled2dMapVectorSymbolGroup::setupObjects(const std::shared_ptr<SpriteData>
     std::unordered_map<std::string, int32_t> textOffsets;
     std::unordered_map<std::string, uint16_t> textStyleOffsets;
 
+    int positionSize = is3d ? 3 : 2;
+
     for (auto const &object: symbolObjects) {
 
         if (!object->hasCustomTexture && spriteTexture && spriteData) {
@@ -531,7 +533,7 @@ void Tiled2dMapVectorSymbolGroup::setupObjects(const std::shared_ptr<SpriteData>
         customDescriptor.renderObject->asGraphicsObject()->setup(context);
 
         int32_t count = (int32_t)customDescriptor.featureIdentifiersUv.size();
-        customDescriptor.renderObject->setPositions(SharedBytes((int64_t) customDescriptor.iconPositions.data(), count, 3 * (int32_t) sizeof(float)));
+        customDescriptor.renderObject->setPositions(SharedBytes((int64_t) customDescriptor.iconPositions.data(), count, positionSize * (int32_t) sizeof(float)));
         customDescriptor.renderObject->setTextureCoordinates(SharedBytes((int64_t) customDescriptor.iconTextureCoordinates.data(), count, 4 * (int32_t) sizeof(float)));
     }
 
@@ -542,7 +544,7 @@ void Tiled2dMapVectorSymbolGroup::setupObjects(const std::shared_ptr<SpriteData>
             iconInstancedObject->asGraphicsObject()->setup(context);
         }
         iconInstancedObject->setPositions(
-                SharedBytes((int64_t) iconPositions.data(), (int32_t) iconAlphas.size(), 3 * (int32_t) sizeof(float)));
+                SharedBytes((int64_t) iconPositions.data(), (int32_t) iconAlphas.size(), positionSize * (int32_t) sizeof(float)));
         iconInstancedObject->setTextureCoordinates(
                 SharedBytes((int64_t) iconTextureCoordinates.data(), (int32_t) iconAlphas.size(), 4 * (int32_t) sizeof(float)));
     }
@@ -555,7 +557,7 @@ void Tiled2dMapVectorSymbolGroup::setupObjects(const std::shared_ptr<SpriteData>
         }
         stretchedInstancedObject->setPositions(
                 SharedBytes((int64_t) stretchedIconPositions.data(), (int32_t) stretchedIconAlphas.size(),
-                            3 * (int32_t) sizeof(float)));
+                            positionSize * (int32_t) sizeof(float)));
         stretchedInstancedObject->setTextureCoordinates(
                 SharedBytes((int64_t) stretchedIconTextureCoordinates.data(), (int32_t) stretchedIconAlphas.size(),
                             4 * (int32_t) sizeof(float)));
