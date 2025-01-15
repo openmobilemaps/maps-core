@@ -68,6 +68,8 @@ class VectorModificationWrapper {
 
     void resetModificationFlag() { modified = false; }
 
+    void setModified() { modified = true; }
+
     void push_back(const T &value) {
         modified = true;
         vec.push_back(value);
