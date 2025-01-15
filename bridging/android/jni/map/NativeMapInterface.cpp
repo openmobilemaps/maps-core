@@ -14,6 +14,7 @@
 #include "NativeMapReadyCallbackInterface.h"
 #include "NativePerformanceLoggerInterface.h"
 #include "NativeRectCoord.h"
+#include "NativeRenderTargetInterface.h"
 #include "NativeRenderingContextInterface.h"
 #include "NativeSchedulerInterface.h"
 #include "NativeShaderFactoryInterface.h"
@@ -271,6 +272,23 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapInterface_
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::MapInterface>(nativeRef);
         ref->prepare();
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT jboolean JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapInterface_00024CppProxy_native_1getNeedsCompute(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::MapInterface>(nativeRef);
+        auto r = ref->getNeedsCompute();
+        return ::djinni::release(::djinni::Bool::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapInterface_00024CppProxy_native_1drawOffscreenFrame(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeRenderTargetInterface::JniType j_target)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::MapInterface>(nativeRef);
+        ref->drawOffscreenFrame(::djinni_generated::NativeRenderTargetInterface::toCpp(jniEnv, j_target));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

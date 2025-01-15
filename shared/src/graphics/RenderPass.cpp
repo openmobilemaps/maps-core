@@ -10,15 +10,15 @@
 
 #include "RenderPass.h"
 
-RenderPass::RenderPass(RenderPassConfig config, const std::vector<std::shared_ptr<::RenderObjectInterface>> &renderObjects)
+RenderPass::RenderPass(RenderPassConfig config, const std::vector<std::shared_ptr<::RenderObjectInterface>> &renderObjects, std::shared_ptr<RenderTargetInterface> renderTargetInterface)
     : config(config)
-    , renderObjects(renderObjects) {}
+    , renderObjects(renderObjects), renderTargetInterface(renderTargetInterface) {}
 
 RenderPass::RenderPass(RenderPassConfig config, const std::vector<std::shared_ptr<::RenderObjectInterface>> &renderObjects,
-                       const std::shared_ptr<MaskingObjectInterface> &maskingObject)
+                       const std::shared_ptr<MaskingObjectInterface> &maskingObject, std::shared_ptr<RenderTargetInterface> renderTargetInterface)
     : config(config)
     , renderObjects(renderObjects)
-    , maskingObject(maskingObject) {}
+    , maskingObject(maskingObject), renderTargetInterface(renderTargetInterface) {}
 
 std::vector<std::shared_ptr<::RenderObjectInterface>> RenderPass::getRenderObjects() { return renderObjects; }
 
@@ -27,6 +27,10 @@ void RenderPass::addRenderObject(const std::shared_ptr<RenderObjectInterface> &r
 }
 
 RenderPassConfig RenderPass::getRenderPassConfig() { return config; }
+
+std::shared_ptr<RenderTargetInterface> RenderPass::getRenderTargetInterface() {
+    return renderTargetInterface;
+}
 
 std::shared_ptr<::MaskingObjectInterface> RenderPass::getMaskingObject() { return maskingObject; }
 

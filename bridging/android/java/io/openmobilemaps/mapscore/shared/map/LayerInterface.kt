@@ -43,6 +43,8 @@ abstract class LayerInterface {
 
     abstract fun forceReload()
 
+    abstract fun setPrimaryRenderTarget(target: io.openmobilemaps.mapscore.shared.graphics.RenderTargetInterface?)
+
     public class CppProxy : LayerInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -159,5 +161,11 @@ abstract class LayerInterface {
             native_forceReload(this.nativeRef)
         }
         private external fun native_forceReload(_nativeRef: Long)
+
+        override fun setPrimaryRenderTarget(target: io.openmobilemaps.mapscore.shared.graphics.RenderTargetInterface?) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setPrimaryRenderTarget(this.nativeRef, target)
+        }
+        private external fun native_setPrimaryRenderTarget(_nativeRef: Long, target: io.openmobilemaps.mapscore.shared.graphics.RenderTargetInterface?)
     }
 }

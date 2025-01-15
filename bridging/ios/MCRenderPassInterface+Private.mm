@@ -11,6 +11,7 @@
 #import "MCRectI+Private.h"
 #import "MCRenderObjectInterface+Private.h"
 #import "MCRenderPassConfig+Private.h"
+#import "MCRenderTargetInterface+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -55,6 +56,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (nullable id<MCRenderTargetInterface>)getRenderTargetInterface {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getRenderTargetInterface();
+        return ::djinni::Optional<std::optional, ::djinni_generated::RenderTargetInterface>::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (nullable id<MCMaskingObjectInterface>)getMaskingObject {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->getMaskingObject();
@@ -96,6 +104,13 @@ public:
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getRenderPassConfig];
             return ::djinni_generated::RenderPassConfig::toCpp(objcpp_result_);
+        }
+    }
+    /*nullable*/ std::shared_ptr<::RenderTargetInterface> getRenderTargetInterface() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getRenderTargetInterface];
+            return ::djinni::Optional<std::optional, ::djinni_generated::RenderTargetInterface>::toCpp(objcpp_result_);
         }
     }
     /*nullable*/ std::shared_ptr<::MaskingObjectInterface> getMaskingObject() override

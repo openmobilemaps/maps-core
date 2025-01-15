@@ -16,6 +16,7 @@
 @extern "../yaml/map_camera_listener_interface.yaml"
 @extern "../yaml/color.yaml"
 @extern "../yaml/render_pass_interface.yaml"
+@extern "../yaml/render_target_interface.yaml"
 @extern "../yaml/compute_pass_interface.yaml"
 @extern "../yaml/masking_object_interface.yaml"
 @extern "../yaml/error_manager.yaml"
@@ -62,6 +63,10 @@ map_interface = interface +c {
     invalidate();
 
     prepare();
+
+    get_needs_compute(): bool;
+
+    draw_offscreen_frame(target: render_target_interface);
 
     # Must be called on the rendering thread!
     draw_frame();
@@ -132,6 +137,8 @@ layer_interface = interface +c +j +o {
 
     set_error_manager(error_manager: error_manager);
     force_reload();
+
+    set_primary_render_target(target: optional<render_target_interface>);
 }
 
 map_camera_interface = interface +c {
