@@ -106,7 +106,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                 minZoom = val.value("minzoom", 0);
                 maxZoom = val.value("maxzoom", 22);
             }
-
+            
             std::optional<::RectCoord> bounds;
             std::optional<std::string> coordinateReferenceSystem;
 
@@ -173,8 +173,8 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
             RasterVectorStyle style = RasterVectorStyle(nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
             rasterLayerMap[key] = std::make_shared<RasterVectorLayerDescription>(layerName,
                                                                                  key,
-                                                                                 minZoom,
-                                                                                 maxZoom,
+                                                                                 0,
+                                                                                 24,
                                                                                  minZoom,
                                                                                  maxZoom,
                                                                                  url,
@@ -365,8 +365,8 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                                                                            val["source"],
                                                                            val.value("minzoom", layer->minZoom),
                                                                            val.value("maxzoom", layer->maxZoom),
-                                                                           layer->minZoom,
-                                                                           layer->maxZoom,
+                                                                           layer->sourceMinZoom,
+                                                                           layer->sourceMaxZoom,
                                                                            layer->url,
                                                                            filter,
                                                                            style,
@@ -399,7 +399,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
             );
 
             int minZoom = 0;
-            int maxZoom = 24;
+            int maxZoom = 22;
             for (const auto &sourceDesc : sourceDescriptions) {
                 if (sourceDesc->identifier == val["source"]) {
                     minZoom = sourceDesc->minZoom;
@@ -479,7 +479,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
             std::shared_ptr<Value> filter = parser.parseValue(val["filter"]);
 
             int minZoom = 0;
-            int maxZoom = 24;
+            int maxZoom = 22;
             for (const auto &sourceDesc : sourceDescriptions) {
                 if (sourceDesc->identifier == val["source"]) {
                     minZoom = sourceDesc->minZoom;
@@ -512,7 +512,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                                      parser.parseValue(val["paint"]["stripe-width"]));
 
             int minZoom = 0;
-            int maxZoom = 24;
+            int maxZoom = 22;
             for (const auto &sourceDesc : sourceDescriptions) {
                 if (sourceDesc->identifier == val["source"]) {
                     minZoom = sourceDesc->minZoom;
