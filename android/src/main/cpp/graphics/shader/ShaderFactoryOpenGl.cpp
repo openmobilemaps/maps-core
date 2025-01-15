@@ -23,6 +23,7 @@
 #include "StretchInstancedShaderOpenGl.h"
 #include "IcosahedronColorShaderOpenGl.h"
 #include "SphereEffectShaderOpenGl.h"
+#include "SkySphereShaderOpenGl.h"
 
 std::shared_ptr<AlphaShaderInterface> ShaderFactoryOpenGl::createAlphaShader() {
     return std::make_shared<AlphaShaderOpenGl>(false);
@@ -108,4 +109,8 @@ std::shared_ptr<ColorShaderInterface> ShaderFactoryOpenGl::createIcosahedronColo
 
 std::shared_ptr<SphereEffectShaderInterface> ShaderFactoryOpenGl::createSphereEffectShader() {
     return std::make_shared<SphereEffectShaderOpenGl>();
+}
+
+std::shared_ptr<SkySphereShaderInterface> ShaderFactoryOpenGl::createSkySphereShader() {
+    return std::make_shared<SkySphereShaderOpenGl>();
 }

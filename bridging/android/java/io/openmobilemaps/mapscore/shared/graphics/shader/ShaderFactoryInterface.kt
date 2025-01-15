@@ -50,6 +50,8 @@ abstract class ShaderFactoryInterface {
 
     abstract fun createSphereEffectShader(): SphereEffectShaderInterface
 
+    abstract fun createSkySphereShader(): SkySphereShaderInterface
+
     public class CppProxy : ShaderFactoryInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -190,5 +192,11 @@ abstract class ShaderFactoryInterface {
             return native_createSphereEffectShader(this.nativeRef)
         }
         private external fun native_createSphereEffectShader(_nativeRef: Long): SphereEffectShaderInterface
+
+        override fun createSkySphereShader(): SkySphereShaderInterface {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_createSkySphereShader(this.nativeRef)
+        }
+        private external fun native_createSkySphereShader(_nativeRef: Long): SkySphereShaderInterface
     }
 }

@@ -10,6 +10,7 @@
 #include "NativeMapInterface.h"
 #include "NativeRectCoord.h"
 #include "NativeVec2F.h"
+#include "NativeVec3D.h"
 
 namespace djinni_generated {
 
@@ -398,6 +399,15 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCameraI
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCameraInterface_00024CppProxy_native_1getLastInverseVpMatrix(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::MapCameraInterface>(nativeRef);
+        auto r = ref->getLastInverseVpMatrix();
+        return ::djinni::release(::djinni::Optional<std::optional, ::djinni::List<::djinni::F32>>::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
 CJNIEXPORT ::djinni_generated::NativeRectCoord::Boxed::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCameraInterface_00024CppProxy_native_1getLastVpMatrixViewBounds(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
@@ -422,6 +432,15 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCameraI
         const auto& ref = ::djinni::objectFromHandleAddress<::MapCameraInterface>(nativeRef);
         auto r = ref->getLastVpMatrixZoom();
         return ::djinni::release(::djinni::Optional<std::optional, ::djinni::F32>::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT ::djinni_generated::NativeVec3D::Boxed::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCameraInterface_00024CppProxy_native_1getLastCameraPosition(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::MapCameraInterface>(nativeRef);
+        auto r = ref->getLastCameraPosition();
+        return ::djinni::release(::djinni::Optional<std::optional, ::djinni_generated::NativeVec3D>::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 

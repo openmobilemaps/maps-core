@@ -500,6 +500,13 @@ std::optional<std::tuple<std::vector<double>, std::vector<double>, Vec3D>> MapCa
     std::vector<float> newProjectionMatrixF = VectorHelper::convertToFloat(newProjectionMatrix);
     std::vector<float> newViewMatrixF = VectorHelper::convertToFloat(newViewMatrix);
 
+    std::vector<double> newInverseViewMatrix(16, 0.0);
+    gluInvertMatrix(newViewMatrix, newInverseViewMatrix);
+    Vec4D cameraOriginVector = MatrixD::multiply(newInverseViewMatrix, Vec4D(0.0, 0.0, 0.0, 1.0));
+    Vec3D newCameraPosition = Vec3D(cameraOriginVector.x / cameraOriginVector.w,
+                           cameraOriginVector.y / cameraOriginVector.w,
+                           cameraOriginVector.z / cameraOriginVector.w);
+
     if (onlyReturnResult) {
         return std::tuple{newVpMatrix, newInverseMatrix, newOrigin};
     } else {
@@ -516,6 +523,7 @@ std::optional<std::tuple<std::vector<double>, std::vector<double>, Vec3D>> MapCa
         validVpMatrix = true;
         origin = newOrigin;
         lastScalingFactor = mapUnitsFromPixels(1.0);
+        lastCameraPosition = newCameraPosition;
 
         return std::nullopt;
     }
@@ -549,6 +557,17 @@ std::optional<std::vector<float>> MapCamera3d::getLastVpMatrix() {
     return vpCopy;
 }
 
+std::optional<std::vector<float>> MapCamera3d::getLastInverseVpMatrix() {
+    // TODO: Add back as soon as visiblerect calculation is done
+    //    if (!lastInverseVpBounds) {
+    //        return std::nullopt;
+    //    }
+    std::lock_guard<std::recursive_mutex> lock(matrixMutex);
+    std::vector<float> inverseVpCopy;
+    std::copy(inverseVPMatrix.begin(), inverseVPMatrix.end(), std::back_inserter(inverseVpCopy));
+    return inverseVpCopy;
+}
+
 std::optional<::RectCoord> MapCamera3d::getLastVpMatrixViewBounds() {
     std::lock_guard<std::recursive_mutex> lock(matrixMutex);
     return lastVpBounds;
@@ -562,6 +581,11 @@ std::optional<float> MapCamera3d::getLastVpMatrixRotation() {
 std::optional<float> MapCamera3d::getLastVpMatrixZoom() {
     std::lock_guard<std::recursive_mutex> lock(matrixMutex);
     return lastVpZoom;
+}
+
+std::optional<::Vec3D> MapCamera3d::getLastCameraPosition() {
+    std::lock_guard<std::recursive_mutex> lock(matrixMutex);
+    return lastCameraPosition;
 }
 
 /** this method is called just before the update methods on all layers */

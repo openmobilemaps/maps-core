@@ -89,11 +89,15 @@ class MapCamera2d : public MapCameraInterface,
 
     std::optional<std::vector<float>> getLastVpMatrix() override;
 
+    std::optional<std::vector<float>> getLastInverseVpMatrix() override;
+
     std::optional<::RectCoord> getLastVpMatrixViewBounds() override;
 
     std::optional<float> getLastVpMatrixRotation() override;
 
     std::optional<float> getLastVpMatrixZoom() override;
+
+    std::optional<::Vec3D> getLastCameraPosition() override;
 
     void notifyListenerBoundsChange() override;
 
@@ -242,6 +246,7 @@ protected:
     RectCoord getRectFromViewport(const Vec2I &sizeViewport, const Coord &center);
 
     std::vector<float> newVpMatrix = std::vector<float>(16, 0.0);
+    std::vector<float> newInverseVpMatrix = std::vector<float>(16, 0.0);
 
     Vec3D origin = Vec3D(0, 0, 0);
 };
