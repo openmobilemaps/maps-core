@@ -85,7 +85,7 @@ private:
     std::shared_ptr<SpriteData> spriteData;
     std::shared_ptr<TextureHolderInterface> spriteTexture;
 
-    std::vector<std::vector<float>> opacities;
+    std::vector<std::vector<HalfFloat>> opacities;
     std::vector<std::vector<float>> textureCoordinates;
 
     std::vector<std::tuple<VectorTileGeometryHandler::TriangulatedPolygon, std::shared_ptr<FeatureContext>>> hitDetectionPolygons;

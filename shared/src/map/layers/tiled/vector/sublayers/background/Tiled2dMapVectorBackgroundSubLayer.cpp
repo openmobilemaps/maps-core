@@ -84,7 +84,7 @@ void Tiled2dMapVectorBackgroundSubLayer::onAdded(const std::shared_ptr<MapInterf
         patternObject = std::make_shared<PolygonPatternGroup2dLayerObject>(mapInterface->getCoordinateConverterHelper(), object, shader);
         
         patternObject->setVertices(vertices, indices, Vec3D(0, 0, 0));
-        patternObject->setOpacities({alpha});
+        patternObject->setOpacities({toHalfFloat(alpha)});
 
         if (spriteTexture && spriteData) {
             setSprites(spriteData, spriteTexture);
@@ -203,7 +203,7 @@ void Tiled2dMapVectorBackgroundSubLayer::setAlpha(float alpha) {
     });
     if (patternObject) {
         patternObject->setOpacities({
-            alpha
+            toHalfFloat(alpha)
         });
     }
 }
