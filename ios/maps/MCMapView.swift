@@ -237,7 +237,11 @@ extension MCMapView: MTKViewDelegate {
         }
 
         for offscreenTarget in renderTargetTextures {
-            let renderEncoder = offscreenTarget.prepareOffscreenEncoder(commandBuffer, size: view.drawableSize.vec2)!
+            let renderEncoder = offscreenTarget.prepareOffscreenEncoder(
+                commandBuffer,
+                size: view.drawableSize.vec2,
+                context: renderingContext
+            )!
             renderingContext.encoder = renderEncoder
             mapInterface.drawOffscreenFrame(offscreenTarget)
             renderEncoder.endEncoding()
