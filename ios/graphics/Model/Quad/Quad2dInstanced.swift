@@ -107,7 +107,8 @@ final class Quad2dInstanced: BaseGraphicsObject, @unchecked Sendable {
             let scalesBuffer,
             let rotationsBuffer,
             let textureCoordinatesBuffer,
-            let alphaBuffer
+            let alphaBuffer,
+            let offsetsBuffer
         else {
             return
         }
@@ -161,9 +162,7 @@ final class Quad2dInstanced: BaseGraphicsObject, @unchecked Sendable {
 
         encoder.setVertexBuffer(alphaBuffer, offset: 0, index: 7)
 
-        if offsetsBuffer != nil {
-            encoder.setVertexBuffer(offsetsBuffer, offset: 0, index: 8)
-        }
+        encoder.setVertexBuffer(offsetsBuffer, offset: 0, index: 8)
 
         encoder.setFragmentSamplerState(sampler, index: 0)
 
