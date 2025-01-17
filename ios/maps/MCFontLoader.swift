@@ -21,13 +21,13 @@ open class MCFontLoader: NSObject, MCFontLoaderInterface, @unchecked Sendable {
     private let pixelsPerInch: Double
 
     // MARK: - Init
-
+    private let pixelsPerInch: Double
     private let bundle: Bundle
 
     // the bundle to use for searching for fonts
     public init(bundle: Bundle, preload: [String] = []) {
         self.bundle = bundle
-        let pixelsPerInch = if Thread.isMainThread {
+        pixelsPerInch = if Thread.isMainThread {
             MainActor.assumeIsolated {
                 UIScreen.pixelsPerInch
             }
@@ -38,7 +38,6 @@ open class MCFontLoader: NSObject, MCFontLoaderInterface, @unchecked Sendable {
                 }
             }
         }
-        self.pixelsPerInch = pixelsPerInch
         super.init()
         loadingQueue.async {
             let fonts = preload.map { MCFont(name: $0)}
@@ -87,7 +86,7 @@ open class MCFontLoader: NSObject, MCFontLoaderInterface, @unchecked Sendable {
                                                  lineHeight: double(dict: commonJson, value: "lineHeight") / size,
                                                  base: double(dict: commonJson, value: "base") / size,
                                                  bitmapSize: MCVec2D(x: imageSize, y: imageSize),
-                                                 size: Double(pixelsPerInch) * size)
+                                                 size: pixelsPerInch * size)
 
                     var glyphs: [MCFontGlyph] = []
 
