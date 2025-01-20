@@ -21,7 +21,6 @@ open class MCFontLoader: NSObject, MCFontLoaderInterface, @unchecked Sendable {
     private let pixelsPerInch: Double
 
     // MARK: - Init
-    private let pixelsPerInch: Double
     private let bundle: Bundle
 
     // the bundle to use for searching for fonts
