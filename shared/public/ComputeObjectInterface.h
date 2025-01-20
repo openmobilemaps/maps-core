@@ -4,11 +4,13 @@
 #pragma once
 
 #include "RenderingContextInterface.h"
+#include "Vec3D.h"
+#include <cstdint>
 #include <memory>
 
 class ComputeObjectInterface {
 public:
     virtual ~ComputeObjectInterface() = default;
 
-    virtual void compute(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & context, double screenPixelAsRealMeterFactor) = 0;
+    virtual void compute(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & context, int64_t vpMatrix, const ::Vec3D & origin, double screenPixelAsRealMeterFactor) = 0;
 };

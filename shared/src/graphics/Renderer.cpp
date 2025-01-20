@@ -105,10 +105,13 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
 void Renderer::compute(const std::shared_ptr<RenderingContextInterface> &renderingContext,
                        const std::shared_ptr<CameraInterface> &camera) {
     double factor = camera->getScalingFactor();
+    const auto vpMatrix = camera->getVpMatrix();
+    const auto vpMatrixPointer = (int64_t)vpMatrix.data();
+    const auto origin = camera->getOrigin();
 
     for (const auto &pass: computeQueue) {
         for (const auto &computeObject : pass->getComputeObjects())
-            computeObject->compute(renderingContext, factor);
+            computeObject->compute(renderingContext, vpMatrixPointer, origin, factor);
     }
     computeQueue.clear();
 }

@@ -31,7 +31,7 @@ masking_object_interface = interface +c +j +o {
 }
 
 compute_object_interface = interface +c +j +o {
-	compute(context: rendering_context_interface, screenPixelAsRealMeterFactor: f64);
+	compute(context: rendering_context_interface, vp_matrix: i64, origin: vec_3_d, screenPixelAsRealMeterFactor: f64);
 }
 
 graphics_object_factory_interface = interface +c +j +o {

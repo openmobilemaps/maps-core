@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class ComputeObjectInterface {
 
-    abstract fun compute(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, screenPixelAsRealMeterFactor: Double)
+    abstract fun compute(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, vpMatrix: Long, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D, screenPixelAsRealMeterFactor: Double)
 
     public class CppProxy : ComputeObjectInterface {
         private val nativeRef: Long
@@ -25,10 +25,10 @@ abstract class ComputeObjectInterface {
             external fun nativeDestroy(nativeRef: Long)
         }
 
-        override fun compute(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, screenPixelAsRealMeterFactor: Double) {
+        override fun compute(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, vpMatrix: Long, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D, screenPixelAsRealMeterFactor: Double) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_compute(this.nativeRef, context, screenPixelAsRealMeterFactor)
+            native_compute(this.nativeRef, context, vpMatrix, origin, screenPixelAsRealMeterFactor)
         }
-        private external fun native_compute(_nativeRef: Long, context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, screenPixelAsRealMeterFactor: Double)
+        private external fun native_compute(_nativeRef: Long, context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, vpMatrix: Long, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D, screenPixelAsRealMeterFactor: Double)
     }
 }
