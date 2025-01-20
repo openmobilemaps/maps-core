@@ -420,18 +420,14 @@ std::optional<std::tuple<std::vector<double>, std::vector<double>, Vec3D>> MapCa
                                                                                                         bool onlyReturnResult) {
     std::lock_guard<std::recursive_mutex> lock(paramMutex);
 
-    Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
-
-    if (sizeViewport.x == 0 || sizeViewport.y == 0) {
-        return;
-    }
-
     std::vector<double> newViewMatrix(16, 0.0);
     std::vector<double> newProjectionMatrix(16, 0.0);
 
     const float R = 6378137.0;
     const double longitude = focusCoord.x; //  px / R;
     const double latitude = focusCoord.y;  // 2*atan(exp(py / R)) - 3.1415926 / 2;
+
+    Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
 
     const double focusPointAltitude = focusCoord.z;
     double cameraDistance = getCameraDistance(sizeViewport, zoom);
