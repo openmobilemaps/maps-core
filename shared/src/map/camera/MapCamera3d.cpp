@@ -826,7 +826,6 @@ bool MapCamera3d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
     if (!newReverseLongitudeRotation && reverseLongitudeRotation) {
         lastOnTouchDownCoord = newTouchDownCoord;
         reverseLongitudeRotation = false;
-        printf("Reverse\n");
     }
     if (reverseLongitudeRotation) {
         dy *= -1;
@@ -842,20 +841,14 @@ bool MapCamera3d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
 
     double tx = lastOnTouchDownPoint->x - initialTouchDownPoint->x;
     double ty = lastOnTouchDownPoint->y - initialTouchDownPoint->y;
-    printf("p=%f, tx=%f, ty=%f, ", focusPointPosition.y, tx, ty);
     if (abs(focusPointPosition.y - 90) < 1.0 && -ty > abs(tx)) {
         dx = 0;
         lastOnTouchDownCoord = newTouchDownCoord;
-        printf("freeze ");
     }
     else if (abs(focusPointPosition.y - 90) < 1.0  && ty > abs(tx)) {
         dx = 0;
         lastOnTouchDownCoord = newTouchDownCoord;
-        printf("freeze ");
     }
-
-
-    printf("dx: %f\n", dx);
 
     focusPointPosition.x = focusPointPosition.x + dx;
 
