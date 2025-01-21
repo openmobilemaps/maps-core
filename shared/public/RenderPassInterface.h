@@ -10,6 +10,7 @@
 #include <vector>
 
 class RenderObjectInterface;
+class RenderTargetInterface;
 struct RenderPassConfig;
 
 class RenderPassInterface {
@@ -21,6 +22,8 @@ public:
     virtual void addRenderObject(const /*not-null*/ std::shared_ptr<RenderObjectInterface> & renderObject) = 0;
 
     virtual RenderPassConfig getRenderPassConfig() = 0;
+
+    virtual /*nullable*/ std::shared_ptr<RenderTargetInterface> getRenderTargetInterface() = 0;
 
     virtual /*nullable*/ std::shared_ptr<::MaskingObjectInterface> getMaskingObject() = 0;
 

@@ -15,12 +15,13 @@ open class VectorLayer: Layer, ObservableObject, @unchecked Sendable {
                 localDataProvider: MCTiled2dMapVectorLayerLocalDataProviderInterface? = nil,
                 customZoomInfo: MCTiled2dMapZoomInfo? = nil,
                 loaders: [MCLoaderInterface] = [MCTextureLoader()],
-                fontLoader: MCFontLoader = MCFontLoader(bundle: .main)) {
+                fontLoader: MCFontLoader = MCFontLoader(bundle: .main),
+                beforeAdding: ((MCLayerInterface, MCMapView) -> Void)? = nil) {
         self.layerInterface = MCTiled2dMapVectorLayerInterface.createExplicitly(layerName, styleJson: styleURL, localStyleJson: nil, loaders: loaders, fontLoader: fontLoader, localDataProvider: localDataProvider, customZoomInfo: customZoomInfo, symbolDelegate: nil, sourceUrlParams: nil)
         self.layerInterface?.setSelectionDelegate(selectionHandler)
         self.layerIndex = layerIndex
+        self.beforeAdding = beforeAdding
     }
-
 
     public let layerInterface: MCTiled2dMapVectorLayerInterface?
 
@@ -29,6 +30,8 @@ open class VectorLayer: Layer, ObservableObject, @unchecked Sendable {
     public var layerIndex: Int?
 
     public let selectionHandler = MCTiled2dMapVectorLayerSelectionCallbackHandler()
+
+    public var beforeAdding: ((MCLayerInterface, MCMapView) -> Void)?
 }
 
 open class MCTiled2dMapVectorLayerSelectionCallbackHandler: MCTiled2dMapVectorLayerSelectionCallbackInterface {

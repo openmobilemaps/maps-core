@@ -37,6 +37,8 @@ open class MCMapView: MTKView, @unchecked Sendable {
 
     public weak var sizeDelegate: MCMapSizeDelegate?
 
+    public var renderTargetTextures: [RenderTargetTexture] = []
+
     public init(
         mapConfig: MCMapConfig = MCMapConfig(
             mapCoordinateSystem: MCCoordinateSystemFactory.getEpsg3857System()),
@@ -166,6 +168,17 @@ open class MCMapView: MTKView, @unchecked Sendable {
         framesToRender = framesToRenderAfterInvalidate
         lastInvalidate = Date()
     }
+
+    public func renderTarget(named name: String) -> RenderTargetTexture {
+        for target in renderTargetTextures {
+            if target.name == name {
+                return target
+            }
+        }
+        let newTarget = RenderTargetTexture(name: name)
+        renderTargetTextures.append(newTarget)
+        return newTarget
+    }
 }
 
 extension MCMapView: MTKViewDelegate {
@@ -193,20 +206,47 @@ extension MCMapView: MTKViewDelegate {
         // Ensure that triple-buffers are not over-used
         renderSemaphore.wait()
 
+        renderingContext.beginFrame()
         mapInterface.prepare()
+
+        // Shared lib stuff
+        if sizeChanged {
+            mapInterface.setViewportSize(view.drawableSize.vec2)
+            sizeDelegate?.sizeChanged()
+            sizeChanged = false
+        }
 
         guard
             let commandBuffer = MetalContext.current.commandQueue
-                .makeCommandBuffer(),
-            let computeEncoder = commandBuffer.makeComputeCommandEncoder()
-        else {
+                .makeCommandBuffer() else {
             self.renderSemaphore.signal()
             return
         }
 
-        renderingContext.computeEncoder = computeEncoder
-        mapInterface.compute()
-        computeEncoder.endEncoding()
+        if mapInterface.getNeedsCompute() {
+            guard
+                let computeEncoder = commandBuffer.makeComputeCommandEncoder()
+            else {
+                self.renderSemaphore.signal()
+                return
+            }
+
+            renderingContext.computeEncoder = computeEncoder
+            mapInterface.compute()
+            computeEncoder.endEncoding()
+        }
+
+        for offscreenTarget in renderTargetTextures {
+            let renderEncoder = offscreenTarget.prepareOffscreenEncoder(
+                commandBuffer,
+                size: view.drawableSize.vec2,
+                context: renderingContext
+            )!
+            renderingContext.encoder = renderEncoder
+            mapInterface.drawOffscreenFrame(offscreenTarget)
+            renderEncoder.endEncoding()
+        }
+
 
         guard let renderPassDescriptor = view.currentRenderPassDescriptor,
             let renderEncoder = commandBuffer.makeRenderCommandEncoder(
@@ -217,14 +257,6 @@ extension MCMapView: MTKViewDelegate {
         }
 
         renderingContext.encoder = renderEncoder
-        renderingContext.beginFrame()
-
-        // Shared lib stuff
-        if sizeChanged {
-            mapInterface.setViewportSize(view.drawableSize.vec2)
-            sizeDelegate?.sizeChanged()
-            sizeChanged = false
-        }
 
         mapInterface.drawFrame()
 

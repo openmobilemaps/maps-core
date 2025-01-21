@@ -7,6 +7,7 @@
 #import "MCMapConfig.h"
 #import "MCPerformanceLoggerInterface.h"
 #import "MCRectCoord.h"
+#import "MCRenderTargetInterface.h"
 #import "MCRenderingContextInterface.h"
 #import "MCSchedulerInterface.h"
 #import "MCShaderFactoryInterface.h"
@@ -88,6 +89,10 @@
 - (void)invalidate;
 
 - (void)prepare;
+
+- (BOOL)getNeedsCompute;
+
+- (void)drawOffscreenFrame:(nullable id<MCRenderTargetInterface>)target;
 
 /** Must be called on the rendering thread! */
 - (void)drawFrame;

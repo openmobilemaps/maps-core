@@ -77,6 +77,10 @@ class MapScene : public MapInterface, public SceneCallbackInterface, public Sche
 
     virtual void prepare() override;
 
+    virtual bool getNeedsCompute() override;
+
+    virtual void drawOffscreenFrame(const /*not-null*/ std::shared_ptr<::RenderTargetInterface> & target) override;
+
     virtual void compute() override;
 
     virtual void resume() override;
@@ -107,6 +111,7 @@ class MapScene : public MapInterface, public SceneCallbackInterface, public Sche
     std::shared_ptr<MapCameraInterface> camera;
 
     std::recursive_mutex layersMutex;
+    bool needsCompute = false;
     std::map<int, std::shared_ptr<LayerInterface>> layers;
 
     std::shared_ptr<TouchHandlerInterface> touchHandler;

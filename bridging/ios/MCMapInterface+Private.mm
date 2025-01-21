@@ -17,6 +17,7 @@
 #import "MCMapReadyCallbackInterface+Private.h"
 #import "MCPerformanceLoggerInterface+Private.h"
 #import "MCRectCoord+Private.h"
+#import "MCRenderTargetInterface+Private.h"
 #import "MCRenderingContextInterface+Private.h"
 #import "MCSchedulerInterface+Private.h"
 #import "MCShaderFactoryInterface+Private.h"
@@ -243,6 +244,19 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 - (void)prepare {
     try {
         _cppRefHandle.get()->prepare();
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (BOOL)getNeedsCompute {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getNeedsCompute();
+        return ::djinni::Bool::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)drawOffscreenFrame:(nullable id<MCRenderTargetInterface>)target {
+    try {
+        _cppRefHandle.get()->drawOffscreenFrame(::djinni_generated::RenderTargetInterface::toCpp(target));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

@@ -388,6 +388,8 @@ void MapScene::prepare() {
             layer.second->update();
         }
 
+        needsCompute = false;
+
         for (const auto &layer : layers) {
             for (const auto &renderPass : layer.second->buildRenderPasses()) {
                 scene->getRenderer()->addToRenderQueue(renderPass);
@@ -395,9 +397,14 @@ void MapScene::prepare() {
 
             for (const auto &computePass : layer.second->buildComputePasses()) {
                 scene->getRenderer()->addToComputeQueue(computePass);
+                needsCompute = true;
             }
         }
     }
+}
+
+bool MapScene::getNeedsCompute() {
+    return needsCompute;
 }
 
 void MapScene::compute() {
@@ -405,7 +412,11 @@ void MapScene::compute() {
 }
 
 void MapScene::drawFrame() {
-    scene->drawFrame();
+    scene->drawFrame(nullptr);
+}
+
+void MapScene::drawOffscreenFrame(const /*not-null*/ std::shared_ptr<::RenderTargetInterface> & target) {
+    scene->drawFrame(target);
 }
 
 void MapScene::resume() {

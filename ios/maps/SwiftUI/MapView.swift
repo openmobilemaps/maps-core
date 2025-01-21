@@ -271,6 +271,9 @@ public struct MapView: UIViewRepresentable {
         // Schedule Task to load or onload layers if needed
         if !needsInsert.isEmpty || !needsRemoval.isEmpty {
             for layer in needsInsert {
+                if let interface = layer.interface {
+                    layer.beforeAdding?(interface, mapView)
+                }
                 if let layerIndex = layer.layerIndex {
                     mapView.insert(layer: layer, at: layerIndex)
                 } else {

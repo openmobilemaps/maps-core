@@ -27,7 +27,7 @@ void Renderer::addToComputeQueue(const std::shared_ptr<ComputePassInterface> &co
 
 /** Ensure calling on graphics thread */
 void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &renderingContext,
-                         const std::shared_ptr<CameraInterface> &camera) {
+                         const std::shared_ptr<CameraInterface> &camera, const /*nullable*/ std::shared_ptr<RenderTargetInterface> & target) {
 
     const auto vpMatrix = camera->getVpMatrix();
     const auto vpMatrixPointer = (int64_t)vpMatrix.data();
@@ -42,6 +42,9 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
 
     for (const auto &[index, passes] : renderQueue) {
         for (const auto &pass : passes) {
+            if (pass->getRenderTargetInterface() != target) {
+                continue;
+            }
             const auto &maskObject = pass->getMaskingObject();
             const bool hasMask = maskObject != nullptr;
             const bool usesStencil = hasMask || pass->getRenderPassConfig().isPassMasked;
@@ -98,7 +101,9 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
             }
         }
     }
-    renderQueue.clear();
+    if (!target) {
+        renderQueue.clear();
+    }
 }
 
 /** Ensure calling on graphics thread */
