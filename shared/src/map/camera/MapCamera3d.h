@@ -317,6 +317,8 @@ class MapCamera3d : public MapCameraInterface,
     bool validVpMatrix = false;
     double lastScalingFactor = 0.0;
 
+
+    bool reverseLongitudeRotation = false;
     std::optional<::Vec2F> lastOnTouchDownPoint;
     std::optional<::Vec2F> initialTouchDownPoint;
     std::optional<Coord> lastOnTouchDownFocusCoord;
