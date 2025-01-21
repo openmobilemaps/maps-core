@@ -779,7 +779,7 @@ bool MapCamera3d::onTouchDown(const ::Vec2F &posScreen) {
         auto northPole = screenPosFromCoord(Coord(CoordinateSystemIdentifiers::EPSG4326(), 0, 90, 0));
         auto southPole = screenPosFromCoord(Coord(CoordinateSystemIdentifiers::EPSG4326(), 0, -90, 0));
         lastOnTouchDownCoord = coordFromScreenPosition(posScreen);
-        reverseLongitudeRotation = abs(focusPointPosition.x - lastOnTouchDownCoord->x) > 90;
+        reverseLongitudeRotation = std::abs(focusPointPosition.x - lastOnTouchDownCoord->x) > 90;
         return true;
     }
 }
@@ -838,7 +838,7 @@ bool MapCamera3d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
 
 
     double dy = -(newTouchDownCoord.y - lastOnTouchDownCoord->y);
-    bool newReverseLongitudeRotation = abs(focusPointPosition.x - newTouchDownCoord.x) > 90;
+    bool newReverseLongitudeRotation = std::abs(focusPointPosition.x - newTouchDownCoord.x) > 90;
     if (!newReverseLongitudeRotation && reverseLongitudeRotation) {
         lastOnTouchDownCoord = newTouchDownCoord;
         reverseLongitudeRotation = false;
@@ -857,11 +857,11 @@ bool MapCamera3d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
 
     double tx = lastOnTouchDownPoint->x - initialTouchDownPoint->x;
     double ty = lastOnTouchDownPoint->y - initialTouchDownPoint->y;
-    if (abs(focusPointPosition.y - 90) < 1.0 && -ty > abs(tx)) {
+    if (std::abs(focusPointPosition.y - 90) < 1.0 && -ty > std::abs(tx)) {
         dx = 0;
         lastOnTouchDownCoord = newTouchDownCoord;
     }
-    else if (abs(focusPointPosition.y - 90) < 1.0  && ty > abs(tx)) {
+    else if (std::abs(focusPointPosition.y - 90) < 1.0  && ty > std::abs(tx)) {
         dx = 0;
         lastOnTouchDownCoord = newTouchDownCoord;
     }
