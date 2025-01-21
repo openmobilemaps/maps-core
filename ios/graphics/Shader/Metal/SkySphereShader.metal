@@ -40,17 +40,3 @@ skySphereFragmentShader(VertexOut in [[stage_in]],
     // Sample the texture
     return texture0.sample(textureSampler, texCoords);
 }
-
-//vec4 posCart = uInverseVPMatrix * vec4(v_screenPos.x, v_screenPos.y, 1.0, 1.0);
-//posCart /= posCart.w;
-//
-//// Assume the sky on a sphere around the camera (and not the earth's center)
-//vec3 dirCamera = normalize(posCart.xyz - uCameraPosition.xyz);
-//
-//float rasc = atan(dirCamera.z, dirCamera.x) + PI;
-//float decl = asin(dirCamera.y);
-//
-//vec2 texCoords = vec2(
-//        -(rasc / (2.0 * PI)) + 1.0,
-//        -decl / PI + 0.5
-//) * v_textureScaleFactors;

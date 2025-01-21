@@ -563,8 +563,10 @@ std::optional<std::vector<float>> MapCamera3d::getLastInverseVpMatrix() {
     //        return std::nullopt;
     //    }
     std::lock_guard<std::recursive_mutex> lock(matrixMutex);
-    std::vector<float> inverseVpCopy;
-    std::copy(inverseVPMatrix.begin(), inverseVPMatrix.end(), std::back_inserter(inverseVpCopy));
+    std::vector<float> inverseVpCopy(inverseVPMatrix.size());
+    for (size_t i = 0; i < inverseVPMatrix.size(); ++i) {
+        inverseVpCopy[i] = static_cast<float>(inverseVPMatrix[i]);
+    }
     return inverseVpCopy;
 }
 
