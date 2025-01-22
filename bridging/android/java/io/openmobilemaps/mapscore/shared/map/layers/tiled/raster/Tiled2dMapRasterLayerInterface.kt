@@ -35,6 +35,8 @@ abstract class Tiled2dMapRasterLayerInterface {
 
     abstract fun getStyle(): io.openmobilemaps.mapscore.shared.graphics.shader.RasterShaderStyle
 
+    abstract fun setMagnification(nearest: Boolean)
+
     abstract fun setMinZoomLevelIdentifier(value: Int?)
 
     abstract fun getMinZoomLevelIdentifier(): Int?
@@ -115,6 +117,12 @@ abstract class Tiled2dMapRasterLayerInterface {
             return native_getStyle(this.nativeRef)
         }
         private external fun native_getStyle(_nativeRef: Long): io.openmobilemaps.mapscore.shared.graphics.shader.RasterShaderStyle
+
+        override fun setMagnification(nearest: Boolean) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setMagnification(this.nativeRef, nearest)
+        }
+        private external fun native_setMagnification(_nativeRef: Long, nearest: Boolean)
 
         override fun setMinZoomLevelIdentifier(value: Int?) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

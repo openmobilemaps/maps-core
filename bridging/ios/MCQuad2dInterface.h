@@ -20,6 +20,8 @@ textureCoordinates:(nonnull MCRectD *)textureCoordinates
 
 - (void)setSubdivisionFactor:(int32_t)factor;
 
+- (void)setMagnification:(BOOL)nearest;
+
 - (void)loadTexture:(nullable id<MCRenderingContextInterface>)context
       textureHolder:(nullable id<MCTextureHolderInterface>)textureHolder;
 

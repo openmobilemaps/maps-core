@@ -284,12 +284,20 @@ std::vector<Tiled2dMapRasterTileInfo> sortedTileInfos(currentTileInfos.begin(), 
                 }
                 std::shared_ptr<Textured2dLayerObject> tileObject;
                 if (shader) {
-                    tileObject = std::make_shared<Textured2dLayerObject>(graphicsFactory->createQuad(shader), mapInterface, is3D);
+                    auto quad = graphicsFactory->createQuad(shader);
+                    if (magnificationNearest) {
+                        quad->setMagnification(true);
+                    }
+                    tileObject = std::make_shared<Textured2dLayerObject>(quad, mapInterface, is3D);
                 } else {
                     auto rasterShader = is3D ? shaderFactory->createUnitSphereRasterShader() : shaderFactory->createRasterShader();
                     rasterShader->asShaderProgramInterface()->setBlendMode(blendMode);
+                    auto quad = graphicsFactory->createQuad(rasterShader->asShaderProgramInterface());
+                    if (magnificationNearest) {
+                        quad->setMagnification(true);
+                    }
                     tileObject = std::make_shared<Textured2dLayerObject>(
-                        graphicsFactory->createQuad(rasterShader->asShaderProgramInterface()), rasterShader, mapInterface, is3D);
+                        quad, rasterShader, mapInterface, is3D);
                 }
                 if (is3D) {
                     tileObject->getQuadObject()->setSubdivisionFactor(
@@ -633,4 +641,9 @@ void Tiled2dMapRasterLayer::setBlendMode(::BlendMode blendMode) {
             }
         }
     }
+}
+
+
+void Tiled2dMapRasterLayer::setMagnification(bool nearest) {
+    magnificationNearest = nearest;
 }

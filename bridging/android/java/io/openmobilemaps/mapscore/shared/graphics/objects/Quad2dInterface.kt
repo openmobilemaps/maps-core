@@ -12,6 +12,8 @@ abstract class Quad2dInterface {
 
     abstract fun setSubdivisionFactor(factor: Int)
 
+    abstract fun setMagnification(nearest: Boolean)
+
     abstract fun loadTexture(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, textureHolder: TextureHolderInterface)
 
     abstract fun removeTexture()
@@ -46,6 +48,12 @@ abstract class Quad2dInterface {
             native_setSubdivisionFactor(this.nativeRef, factor)
         }
         private external fun native_setSubdivisionFactor(_nativeRef: Long, factor: Int)
+
+        override fun setMagnification(nearest: Boolean) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setMagnification(this.nativeRef, nearest)
+        }
+        private external fun native_setMagnification(_nativeRef: Long, nearest: Boolean)
 
         override fun loadTexture(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, textureHolder: TextureHolderInterface) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

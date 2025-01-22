@@ -47,6 +47,8 @@ public:
 
     virtual ::RasterShaderStyle getStyle() = 0;
 
+    virtual void setMagnification(bool nearest) = 0;
+
     virtual void setMinZoomLevelIdentifier(std::optional<int32_t> value) = 0;
 
     virtual std::optional<int32_t> getMinZoomLevelIdentifier() = 0;

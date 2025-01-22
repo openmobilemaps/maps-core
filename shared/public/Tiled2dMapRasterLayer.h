@@ -113,6 +113,8 @@ public:
 
     void setBlendMode(::BlendMode blendMode) override;
 
+    void setMagnification(bool nearest) override;
+
 private:
     virtual void enableAnimations(bool enabled) override;
 
@@ -158,4 +160,6 @@ private:
     const static int32_t SUBDIVISION_FACTOR_3D_DEFAULT = 3;
 
     int32_t subdivisionFactor = SUBDIVISION_FACTOR_3D_DEFAULT;
+
+    bool magnificationNearest = false;
 };

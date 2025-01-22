@@ -40,6 +40,14 @@ void NativeQuad2dInterface::JavaProxy::setSubdivisionFactor(int32_t c_factor) {
                            ::djinni::get(::djinni::I32::fromCpp(jniEnv, c_factor)));
     ::djinni::jniExceptionCheck(jniEnv);
 }
+void NativeQuad2dInterface::JavaProxy::setMagnification(bool c_nearest) {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeQuad2dInterface>::get();
+    jniEnv->CallVoidMethod(Handle::get().get(), data.method_setMagnification,
+                           ::djinni::get(::djinni::Bool::fromCpp(jniEnv, c_nearest)));
+    ::djinni::jniExceptionCheck(jniEnv);
+}
 void NativeQuad2dInterface::JavaProxy::loadTexture(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & c_context, const /*not-null*/ std::shared_ptr<::TextureHolderInterface> & c_textureHolder) {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
@@ -96,6 +104,14 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::Quad2dInterface>(nativeRef);
         ref->setSubdivisionFactor(::djinni::I32::toCpp(jniEnv, j_factor));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_Quad2dInterface_00024CppProxy_native_1setMagnification(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jboolean j_nearest)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::Quad2dInterface>(nativeRef);
+        ref->setMagnification(::djinni::Bool::toCpp(jniEnv, j_nearest));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

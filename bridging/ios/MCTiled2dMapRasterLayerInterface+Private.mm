@@ -122,6 +122,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)setMagnification:(BOOL)nearest {
+    try {
+        _cppRefHandle.get()->setMagnification(::djinni::Bool::toCpp(nearest));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (void)setMinZoomLevelIdentifier:(nullable NSNumber *)value {
     try {
         _cppRefHandle.get()->setMinZoomLevelIdentifier(::djinni::Optional<std::optional, ::djinni::I32>::toCpp(value));

@@ -56,6 +56,12 @@ textureCoordinates:(nonnull MCRectD *)textureCoordinates
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)setMagnification:(BOOL)nearest {
+    try {
+        _cppRefHandle.get()->setMagnification(::djinni::Bool::toCpp(nearest));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (void)loadTexture:(nullable id<MCRenderingContextInterface>)context
       textureHolder:(nullable id<MCTextureHolderInterface>)textureHolder {
     try {
@@ -106,6 +112,12 @@ public:
     {
         @autoreleasepool {
             [djinni_private_get_proxied_objc_object() setSubdivisionFactor:(::djinni::I32::fromCpp(c_factor))];
+        }
+    }
+    void setMagnification(bool c_nearest) override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() setMagnification:(::djinni::Bool::fromCpp(c_nearest))];
         }
     }
     void loadTexture(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & c_context, const /*not-null*/ std::shared_ptr<::TextureHolderInterface> & c_textureHolder) override

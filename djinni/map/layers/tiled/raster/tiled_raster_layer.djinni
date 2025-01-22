@@ -26,6 +26,7 @@ tiled_2d_map_raster_layer_interface = interface +c {
     set_style(style: raster_shader_style);
     get_style(): raster_shader_style;
 
+    set_magnification(nearest: bool);
 
     set_min_zoom_level_identifier(value: optional<i32>);
     get_min_zoom_level_identifier(): optional<i32>;

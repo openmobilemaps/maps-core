@@ -46,6 +46,8 @@
 
 - (nonnull MCRasterShaderStyle *)getStyle;
 
+- (void)setMagnification:(BOOL)nearest;
+
 - (void)setMinZoomLevelIdentifier:(nullable NSNumber *)value;
 
 - (nullable NSNumber *)getMinZoomLevelIdentifier;

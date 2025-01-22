@@ -16,11 +16,18 @@ open class VectorLayer: Layer, ObservableObject, @unchecked Sendable {
                 customZoomInfo: MCTiled2dMapZoomInfo? = nil,
                 loaders: [MCLoaderInterface] = [MCTextureLoader()],
                 fontLoader: MCFontLoader = MCFontLoader(bundle: .main),
-                beforeAdding: ((MCLayerInterface, MCMapView) -> Void)? = nil) {
+                beforeAdding: ((MCTiled2dMapVectorLayerInterface, MCMapView) -> Void)? = nil) {
         self.layerInterface = MCTiled2dMapVectorLayerInterface.createExplicitly(layerName, styleJson: styleURL, localStyleJson: nil, loaders: loaders, fontLoader: fontLoader, localDataProvider: localDataProvider, customZoomInfo: customZoomInfo, symbolDelegate: nil, sourceUrlParams: nil)
         self.layerInterface?.setSelectionDelegate(selectionHandler)
         self.layerIndex = layerIndex
-        self.beforeAdding = beforeAdding
+        if let beforeAdding {
+            self.beforeAdding = {
+                [weak self] in guard let self, let layerInterface = self.layerInterface else {
+                    return
+                }
+                beforeAdding(layerInterface, $1)
+            }
+        }
     }
 
     public let layerInterface: MCTiled2dMapVectorLayerInterface?

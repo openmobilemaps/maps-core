@@ -13,7 +13,7 @@ abstract class DefaultTiled2dMapLayerConfigs {
         external fun webMercator(layerName: String, urlFormat: String): Tiled2dMapLayerConfig
 
         @JvmStatic
-        external fun webMercatorCustom(layerName: String, urlFormat: String, zoomInfo: Tiled2dMapZoomInfo, minZoomLevel: Int, maxZoomLevel: Int): Tiled2dMapLayerConfig
+        external fun webMercatorCustom(layerName: String, urlFormat: String, zoomInfo: Tiled2dMapZoomInfo?, minZoomLevel: Int, maxZoomLevel: Int): Tiled2dMapLayerConfig
 
         @JvmStatic
         external fun epsg4326(layerName: String, urlFormat: String): Tiled2dMapLayerConfig
