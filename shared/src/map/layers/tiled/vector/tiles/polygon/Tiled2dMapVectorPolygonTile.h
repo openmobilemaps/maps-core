@@ -63,6 +63,7 @@ private:
 
     std::vector<std::shared_ptr<PolygonGroupShaderInterface>> shaders;
     std::vector<std::shared_ptr<PolygonGroup2dLayerObject>> polygons;
+    std::vector<std::shared_ptr<RenderObjectInterface>> renderObjects;
     std::vector<std::vector<std::tuple<size_t, std::shared_ptr<FeatureContext>>>> featureGroups;
     std::unordered_map<size_t, std::pair<int, int>> styleHashToGroupMap;
     UsedKeysCollection usedKeys;
@@ -71,7 +72,7 @@ private:
     bool isStriped = false;
 
     std::optional<double> lastZoom = std::nullopt;
-    std::optional<bool> lastInZoomRange = std::nullopt;
+    bool isVisible = true;
 
     std::vector<std::tuple<VectorTileGeometryHandler::TriangulatedPolygon, std::shared_ptr<FeatureContext>>> hitDetectionPolygons;
 

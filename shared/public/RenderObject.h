@@ -29,10 +29,15 @@ public:
     virtual std::vector<float> getCustomModelMatrix() override;
 
     virtual bool isScreenSpaceCoords() override;
-    
+
+    virtual void setHidden(bool hidden) override;
+
+    virtual bool isHidden() override;
+
 private:
     std::shared_ptr<GraphicsObjectInterface> graphicsObject;
     bool setCustomModelMatrix = false;
     bool screenSpaceCoords = false;
     std::vector<float> modelMatrix;
+    bool hidden = false;
 };

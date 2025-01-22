@@ -60,6 +60,7 @@ private:
     std::vector<std::shared_ptr<LineGroupShaderInterface>> shaders;
 
     std::vector<std::shared_ptr<LineGroup2dLayerObject>> lines;
+    std::vector<std::shared_ptr<RenderObjectInterface>> renderObjects;
 
     std::vector<std::vector<std::tuple<size_t, std::shared_ptr<FeatureContext>>>> featureGroups;
 
@@ -69,7 +70,7 @@ private:
     bool isStyleZoomDependant = true;
     bool isStyleStateDependant = true;
     std::optional<double> lastZoom = std::nullopt;
-    std::optional<bool> lastInZoomRange = std::nullopt;
+    bool isVisible = true;
 
     std::vector<std::vector<ShaderLineStyle>> reusableLineStyles;
     std::unordered_map<size_t, std::pair<int, int>> styleHashToGroupMap;
