@@ -223,6 +223,18 @@ extension MCMapView: MTKViewDelegate {
             return
         }
 
+        for offscreenTarget in renderTargetTextures {
+            let renderEncoder = offscreenTarget.prepareOffscreenEncoder(
+                commandBuffer,
+                size: view.drawableSize.vec2,
+                context: renderingContext
+            )!
+            renderingContext.encoder = renderEncoder
+            renderingContext.renderTarget = offscreenTarget
+            mapInterface.drawOffscreenFrame(offscreenTarget)
+            renderEncoder.endEncoding()
+        }
+
         if mapInterface.getNeedsCompute() {
             guard
                 let computeEncoder = commandBuffer.makeComputeCommandEncoder()
@@ -236,17 +248,6 @@ extension MCMapView: MTKViewDelegate {
             computeEncoder.endEncoding()
         }
 
-        for offscreenTarget in renderTargetTextures {
-            let renderEncoder = offscreenTarget.prepareOffscreenEncoder(
-                commandBuffer,
-                size: view.drawableSize.vec2,
-                context: renderingContext
-            )!
-            renderingContext.encoder = renderEncoder
-            mapInterface.drawOffscreenFrame(offscreenTarget)
-            renderEncoder.endEncoding()
-        }
-
 
         guard let renderPassDescriptor = view.currentRenderPassDescriptor,
             let renderEncoder = commandBuffer.makeRenderCommandEncoder(
@@ -257,6 +258,7 @@ extension MCMapView: MTKViewDelegate {
         }
 
         renderingContext.encoder = renderEncoder
+        renderingContext.renderTarget = nil
 
         mapInterface.drawFrame()
 
