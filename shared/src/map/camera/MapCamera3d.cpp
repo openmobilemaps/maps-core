@@ -540,9 +540,6 @@ std::optional<std::tuple<std::vector<double>, std::vector<double>, Vec3D>> MapCa
         origin = newOrigin;
         lastScalingFactor = mapUnitsFromPixels(1.0);
         lastCameraPosition = newCameraPosition;
-
-        LogDebug << "scaling factor: " <<= lastScalingFactor;
-
         return std::nullopt;
     }
 }
