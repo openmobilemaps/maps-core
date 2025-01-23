@@ -657,7 +657,7 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
 
     RectCoord visibleBoundsLayer = conversionHelper->convertRect(layerSystemId, visibleBounds);
 
-    if ((currentViewBoundsRect && visibleBoundsLayer != *currentViewBoundsRect || curT != curT_)) {
+    if (((currentViewBoundsRect && visibleBoundsLayer != *currentViewBoundsRect) || curT != curT_)) {
         for (auto it = currentlyLoading.begin(); it != currentlyLoading.end();) {
             if (it->first.t != curT_) {
                 cancelLoad(it->first, it->second);
