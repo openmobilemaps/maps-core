@@ -9,6 +9,7 @@
 #include "MaskingObjectInterface.h"
 #include "RasterShaderStyle.h"
 #include "ShaderProgramInterface.h"
+#include "TextureFilterType.h"
 #include "Tiled2dMapLayerConfig.h"
 #include "Tiled2dMapReadyStateListener.h"
 #include <cstdint>
@@ -47,7 +48,7 @@ public:
 
     virtual ::RasterShaderStyle getStyle() = 0;
 
-    virtual void setMagnification(bool nearest) = 0;
+    virtual void setMinMagFilter(::TextureFilterType filterType) = 0;
 
     virtual void setMinZoomLevelIdentifier(std::optional<int32_t> value) = 0;
 

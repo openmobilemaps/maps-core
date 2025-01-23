@@ -44,6 +44,8 @@ class Quad2dOpenGl : public GraphicsObjectInterface,
 
     void setSubdivisionFactor(int32_t factor) override;
 
+    void setMinMagFilter(TextureFilterType filterType) override;
+
     virtual void loadTexture(const std::shared_ptr<::RenderingContextInterface> &context,
                              const std::shared_ptr<TextureHolderInterface> &textureHolder) override;
 
@@ -92,6 +94,7 @@ protected:
 
     std::shared_ptr<TextureHolderInterface> textureHolder;
     int texturePointer;
+    std::optional<TextureFilterType> textureFilterType = std::nullopt;
 
     bool usesTextureCoords = false;
 

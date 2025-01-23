@@ -15,7 +15,7 @@ data class Coord(
 ) : Comparable<Coord>, Parcelable {
 
     override fun compareTo(other: Coord): Int {
-        var tempResult = 0
+        var tempResult : Int
         if (this.systemIdentifier < other.systemIdentifier) {
             tempResult = -1;
         } else if (this.systemIdentifier > other.systemIdentifier) {

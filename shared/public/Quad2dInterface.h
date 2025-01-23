@@ -13,6 +13,7 @@
 class GraphicsObjectInterface;
 class MaskingObjectInterface;
 class TextureHolderInterface;
+enum class TextureFilterType;
 
 class Quad2dInterface {
 public:
@@ -22,7 +23,7 @@ public:
 
     virtual void setSubdivisionFactor(int32_t factor) = 0;
 
-    virtual void setMagnification(bool nearest) = 0;
+    virtual void setMinMagFilter(TextureFilterType filterType) = 0;
 
     virtual void loadTexture(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & context, const /*not-null*/ std::shared_ptr<TextureHolderInterface> & textureHolder) = 0;
 

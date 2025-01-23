@@ -8,6 +8,7 @@
 #include "NativeQuad3dD.h"
 #include "NativeRectD.h"
 #include "NativeRenderingContextInterface.h"
+#include "NativeTextureFilterType.h"
 #include "NativeTextureHolderInterface.h"
 #include "NativeVec3D.h"
 
@@ -40,12 +41,12 @@ void NativeQuad2dInterface::JavaProxy::setSubdivisionFactor(int32_t c_factor) {
                            ::djinni::get(::djinni::I32::fromCpp(jniEnv, c_factor)));
     ::djinni::jniExceptionCheck(jniEnv);
 }
-void NativeQuad2dInterface::JavaProxy::setMagnification(bool c_nearest) {
+void NativeQuad2dInterface::JavaProxy::setMinMagFilter(::TextureFilterType c_filterType) {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
     const auto& data = ::djinni::JniClass<::djinni_generated::NativeQuad2dInterface>::get();
-    jniEnv->CallVoidMethod(Handle::get().get(), data.method_setMagnification,
-                           ::djinni::get(::djinni::Bool::fromCpp(jniEnv, c_nearest)));
+    jniEnv->CallVoidMethod(Handle::get().get(), data.method_setMinMagFilter,
+                           ::djinni::get(::djinni_generated::NativeTextureFilterType::fromCpp(jniEnv, c_filterType)));
     ::djinni::jniExceptionCheck(jniEnv);
 }
 void NativeQuad2dInterface::JavaProxy::loadTexture(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & c_context, const /*not-null*/ std::shared_ptr<::TextureHolderInterface> & c_textureHolder) {
@@ -107,11 +108,11 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_Quad2dInterface_00024CppProxy_native_1setMagnification(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jboolean j_nearest)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_Quad2dInterface_00024CppProxy_native_1setMinMagFilter(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_filterType)
 {
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::Quad2dInterface>(nativeRef);
-        ref->setMagnification(::djinni::Bool::toCpp(jniEnv, j_nearest));
+        ref->setMinMagFilter(::djinni_generated::NativeTextureFilterType::toCpp(jniEnv, j_filterType));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

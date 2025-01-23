@@ -9,6 +9,7 @@
 #include "NativeMaskingObjectInterface.h"
 #include "NativeRasterShaderStyle.h"
 #include "NativeShaderProgramInterface.h"
+#include "NativeTextureFilterType.h"
 #include "NativeTiled2dMapLayerConfig.h"
 #include "NativeTiled2dMapRasterLayerCallbackInterface.h"
 #include "NativeTiled2dMapReadyStateListener.h"
@@ -124,11 +125,11 @@ CJNIEXPORT ::djinni_generated::NativeRasterShaderStyle::JniType JNICALL Java_io_
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_raster_Tiled2dMapRasterLayerInterface_00024CppProxy_native_1setMagnification(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jboolean j_nearest)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_raster_Tiled2dMapRasterLayerInterface_00024CppProxy_native_1setMinMagFilter(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeTextureFilterType::JniType j_filterType)
 {
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapRasterLayerInterface>(nativeRef);
-        ref->setMagnification(::djinni::Bool::toCpp(jniEnv, j_nearest));
+        ref->setMinMagFilter(::djinni_generated::NativeTextureFilterType::toCpp(jniEnv, j_filterType));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

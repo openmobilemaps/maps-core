@@ -10,6 +10,7 @@
 
 #include "Quad2dOpenGl.h"
 #include "TextureHolderInterface.h"
+#include "TextureFilterType.h"
 #include <cmath>
 
 Quad2dOpenGl::Quad2dOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader)
@@ -51,6 +52,11 @@ void Quad2dOpenGl::setSubdivisionFactor(int32_t factor) {
         subdivisionFactor = factor;
         ready = false;
     }
+}
+
+void Quad2dOpenGl::setMinMagFilter(TextureFilterType filterType) {
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
+    textureFilterType = filterType;
 }
 
 void Quad2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface> &context) {
@@ -369,6 +375,11 @@ void Quad2dOpenGl::prepareTextureDraw(int program) {
 
     // Bind the texture to this unit.
     glBindTexture(GL_TEXTURE_2D, (unsigned int)texturePointer);
+    if (textureFilterType.has_value()) {
+        GLint filterParam = GL_NEAREST;//*textureFilterType == TextureFilterType::LINEAR ? GL_LINEAR : GL_NEAREST;
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filterParam);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filterParam);
+    }
 
     // Tell the texture uniform sampler to use this texture in the shader by binding to texture unit 0.
     int textureUniformHandle = glGetUniformLocation(program, "textureSampler");

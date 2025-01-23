@@ -113,7 +113,7 @@ public:
 
     void setBlendMode(::BlendMode blendMode) override;
 
-    void setMagnification(bool nearest) override;
+    void setMinMagFilter(TextureFilterType filterType) override;
 
 private:
     virtual void enableAnimations(bool enabled) override;
@@ -161,5 +161,5 @@ private:
 
     int32_t subdivisionFactor = SUBDIVISION_FACTOR_3D_DEFAULT;
 
-    bool magnificationNearest = false;
+    TextureFilterType textureFilterType = TextureFilterType::LINEAR;
 };
