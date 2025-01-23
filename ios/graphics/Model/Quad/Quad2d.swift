@@ -37,7 +37,8 @@ final class Quad2d: BaseGraphicsObject, @unchecked Sendable {
     private var textureCoordinates: MCRectD?
 
     private var nearestSampler: MTLSamplerState
-    private var useNearestSampler = false
+
+    private var samplerToUse = Sampler.magLinear
 
     init(
         shader: MCShaderProgramInterface, metalContext: MetalContext,
@@ -161,7 +162,7 @@ final class Quad2d: BaseGraphicsObject, @unchecked Sendable {
         }
         encoder.setVertexBuffer(originOffsetBuffer, offset: 0, index: 3)
 
-        if useNearestSampler {
+        if samplerToUse == .magNearest {
             encoder.setFragmentSamplerState(nearestSampler, index: 0)
         }
         else {
@@ -210,9 +211,15 @@ extension Quad2d: MCMaskingObjectInterface {
 }
 
 extension Quad2d: MCQuad2dInterface {
-
-    func setMagnification(_ nearest: Bool) {
-        useNearestSampler = nearest;
+    func setMinMagFilter(_ filterType: MCTextureFilterType) {
+        switch filterType {
+            case .NEAREST:
+                samplerToUse = .magNearest
+            case .LINEAR:
+                samplerToUse = .magLinear
+            default:
+                break
+        }
     }
 
     func setSubdivisionFactor(_ factor: Int32) {
