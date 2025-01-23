@@ -541,6 +541,8 @@ std::optional<std::tuple<std::vector<double>, std::vector<double>, Vec3D>> MapCa
         lastScalingFactor = mapUnitsFromPixels(1.0);
         lastCameraPosition = newCameraPosition;
 
+        LogDebug << "scaling factor: " <<= lastScalingFactor;
+
         return std::nullopt;
     }
 }
@@ -1412,28 +1414,31 @@ Vec4D MapCamera3d::projectedPoint(const Vec4D &point) const {
 
 double MapCamera3d::mapUnitsFromPixels(double distancePx) {
     Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
-    if (validVpMatrix && sizeViewport.x != 0 && sizeViewport.y != 0) {
-        Coord focusRenderCoord = conversionHelper->convertToRenderSystem(getCenterPosition());
-
-        const double sampleSize = (M_PI / 180.0) * 0.5;
-        const auto cartOne = convertToCartesianCoordinates(focusRenderCoord);
-        const auto cartTwo = convertToCartesianCoordinates(Coord(focusRenderCoord.systemIdentifier, focusRenderCoord.x + sampleSize,
-                                                                 focusRenderCoord.y + sampleSize * 0.5, focusRenderCoord.z));
-        const auto projectedOne = projectedPoint(cartOne);
-        const auto projectedTwo = projectedPoint(cartTwo);
-        const auto sampleDistance =
-            std::sqrt((cartOne.x - cartTwo.x) * (cartOne.x - cartTwo.x) + (cartOne.y - cartTwo.y) * (cartOne.y - cartTwo.y) +
-                      (cartOne.z - cartTwo.z) * (cartOne.z - cartTwo.z));
-
-        const auto x = (projectedTwo.x - projectedOne.x) * sizeViewport.x;
-        const auto y = (projectedTwo.y - projectedOne.y) * sizeViewport.y;
-        const double projectedLength = MatrixD::length(x, y, 0.0);
-
-        // 1.4 is an empirically determined scaling factor, observed to align 2D and 3D measurements
-        // based on visual comparisons of screenshots.
-        // TODO: Investigate the origin of this 1.4 factor
-        return 1.4 * distancePx * sqrt(sampleDistance * sampleDistance * 2) / projectedLength;
-    }
+// Mitterrutzner, 23.01.2025
+// Is this really needed? we couldn't find a difference when rendering maps without this complex projection logic
+// Remove this comment if no issues are found
+//    if (validVpMatrix && sizeViewport.x != 0 && sizeViewport.y != 0) {
+//        Coord focusRenderCoord = conversionHelper->convertToRenderSystem(getCenterPosition());
+//
+//        const double sampleSize = (M_PI / 180.0) * 0.5;
+//        const auto cartOne = convertToCartesianCoordinates(focusRenderCoord);
+//        const auto cartTwo = convertToCartesianCoordinates(Coord(focusRenderCoord.systemIdentifier, focusRenderCoord.x + sampleSize,
+//                                                                 focusRenderCoord.y + sampleSize * 0.5, focusRenderCoord.z));
+//        const auto projectedOne = projectedPoint(cartOne);
+//        const auto projectedTwo = projectedPoint(cartTwo);
+//        const auto sampleDistance =
+//            std::sqrt((cartOne.x - cartTwo.x) * (cartOne.x - cartTwo.x) + (cartOne.y - cartTwo.y) * (cartOne.y - cartTwo.y) +
+//                      (cartOne.z - cartTwo.z) * (cartOne.z - cartTwo.z));
+//
+//        const auto x = (projectedTwo.x - projectedOne.x) * sizeViewport.x;
+//        const auto y = (projectedTwo.y - projectedOne.y) * sizeViewport.y;
+//        const double projectedLength = MatrixD::length(x, y, 0.0);
+//
+//        // 1.4 is an empirically determined scaling factor, observed to align 2D and 3D measurements
+//        // based on visual comparisons of screenshots.
+//        // TODO: Investigate the origin of this 1.4 factor
+//        return 1.4 * distancePx * sqrt(sampleDistance * sampleDistance * 2) / projectedLength;
+//    }
     return distancePx * screenPixelAsRealMeterFactor * zoom;
 }
 
