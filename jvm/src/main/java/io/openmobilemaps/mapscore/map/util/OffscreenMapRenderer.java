@@ -79,7 +79,12 @@ public class OffscreenMapRenderer {
         // - need two calls to update before first actual draw.
         //    -> first update runs symbol collision detection
         //    -> snd update to show non-colliding symbols.
-        //    (and another one that is implicit in drawFrame?)
+        //    (and another one that is implicit in prepare() - why?)
+        //
+        // This _used_ to work to some extent, now we need even more update calls.
+        // Just do everything 3 times (update layers, including the draw) -- :sadpanda:
+        // Not analyzed in detail if this is minimal, but at least it seems to work fow now.
+
         map.getCamera().asCameraInterface().getVpMatrix();
         for (var layer : map.getLayers()) {
             layer.enableAnimations(false);
@@ -87,19 +92,21 @@ public class OffscreenMapRenderer {
 
         awaitReady(timeout);
 
-        for (var layer : map.getLayers()) {
-            layer.update();
-            layer.update();
-        }
+        for (int i = 0; i < 3; i++) {
+            for (var layer : map.getLayers()) {
+                layer.update();
+                layer.update();
+            }
 
-        map.prepare();
-        map.drawFrame();
+            map.prepare();
+            map.drawFrame();
+        }
         return ctx.getImage();
     }
 
     /**
-     * Occasionally map layers may get stuck and return an unready state, but might in fact be ready to render.
-     * This method simply draws the map anyway, but all bets are off.
+     * Occasionally map layers may get stuck and return an unready state, but might in fact be ready
+     * to render. This method simply draws the map anyway, but all bets are off.
      */
     public BufferedImage forceDrawFrame() {
         map.prepare();
