@@ -87,19 +87,21 @@ public class OffscreenMapRenderer {
 
         awaitReady(timeout);
 
-        for (var layer : map.getLayers()) {
-            layer.update();
-            layer.update();
-        }
+        for (int i = 0; i < 2; i++) {
+            for (var layer : map.getLayers()) {
+                layer.update();
+                layer.update();
+            }
 
-        map.prepare();
-        map.drawFrame();
+            map.prepare();
+            map.drawFrame();
+        }
         return ctx.getImage();
     }
 
     /**
-     * Occasionally map layers may get stuck and return an unready state, but might in fact be ready to render.
-     * This method simply draws the map anyway, but all bets are off.
+     * Occasionally map layers may get stuck and return an unready state, but might in fact be ready
+     * to render. This method simply draws the map anyway, but all bets are off.
      */
     public BufferedImage forceDrawFrame() {
         map.prepare();
