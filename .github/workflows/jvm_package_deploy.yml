@@ -3,18 +3,63 @@ on:
     push:
         tags:
             - '*'
+    workflow_dispatch:
+        inputs:
+            package_version:
+                description: 'Custom version to use for maven package. Defaults to `git describe`.'
+                required: false
 
 jobs:
     build:
         name: Build JVM package and deploy to Maven repo
-        uses: UbiqueInnovation/workflows-backend/.github/workflows/mvn_package_deploy.yml@feature/alt-deployment-repository
-        with:
-            ref_name: ${{ github.ref_name }}
-            checkout_submodules: recursive
-            parent_pom: jvm/pom.xml
-            install_apt_packages: "cmake make clang libgl-dev libgles-dev libosmesa6-dev"
-        secrets:
-            artifactory_user: ${{ secrets.UB_ARTIFACTORY_USER}}
-            artifactory_password: ${{ secrets.UB_ARTIFACTORY_PASSWORD }}
-            artifactory_url: ${{ secrets.UB_ARTIFACTORY_URL }}
-            artifactory_repo: ${{ secrets.UB_ARTIFACTORY_REPO_BACKEND }}
+        # Based on: UbiqueInnovation/workflows-backend/.github/workflows/mvn_package_deploy.yml@feature/alt-deployment-repository
+        runs-on: ubuntu-22.04
+        steps:
+            -   uses: actions/checkout@v4
+                with:
+                    fetch-depth: 0
+                    submodules: recursive
+
+            -   name: Set up JDK
+                uses: actions/setup-java@v4
+                with:
+                    java-version: '21'
+                    distribution: 'temurin'
+
+            -   name: Cache Maven packages
+                uses: actions/cache@v4
+                with:
+                    path: ~/.m2/repository
+                    key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+                    restore-keys: ${{ runner.os }}-m2-
+
+            -   name: Install build dependency apt packages
+                run: |
+                    sudo apt install cmake make clang libgl-dev libgles-dev libosmesa6-dev
+
+            -   name: Create custom artifactory settings.xml
+                uses: whelk-io/maven-settings-xml-action@9dc09b23833fa9aa7f27b63db287951856f3433d
+                with:
+                    servers: '[{"id": "ubique-artifactory", "username": "${{ secrets.UB_ARTIFACTORY_USER}}", "password": "${{ secrets.UB_ARTIFACTORY_PASSWORD }}"}]'
+                    repositories: '[{"id" : "ubique-artifactory", "url" : "${{ secrets.UB_ARTIFACTORY_URL }}${{ secrets.UB_ARTIFACTORY_REPO_BACKEND }}"}]'
+
+
+            -   name: Set custom VERSION from workflow dispatch input
+                if: ${{ inputs.package_version }}
+                run: echo "VERSION=${{ inputs.package_version }}" >> $GITHUB_ENV
+
+            -   name: Set VERSION with git describe
+                if: ${{ ! inputs.package_version }}
+                run: echo "VERSION=$(git describe --tags --always)" >> $GITHUB_ENV
+
+            -   name: Set version
+                run: |
+                  set -x
+                  # Strip leading `v` from VERSION
+                  # Replace all characters in `\/:"<>|?*` by `-` in VERSION
+                  VERSION=$(echo "$VERSION" | sed 's/[\/:"<>|?*]/-/g;s/^v//;')
+                  mvn -f jvm/pom.xml versions:set -DnewVersion=$VERSION
+                  mvn -f jvm/pom.xml versions:commit
+
+            -   name: Build and deploy package
+                run: mvn -f jvm/pom.xml deploy -DskipTests -DaltDeploymentRepository="ubique-artifactory::${{ secrets.UB_ARTIFACTORY_URL }}${{ secrets.UB_ARTIFACTORY_REPO_BACKEND }}"
