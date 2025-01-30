@@ -1,8 +1,9 @@
 name: Maven build and deploy JVM
 on:
     push:
-        tags:
-            - '*'
+        # XXX temporarily run on every push
+        # tags:
+        #     - '*'
     workflow_dispatch:
         inputs:
             package_version:
