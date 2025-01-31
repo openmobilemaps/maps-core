@@ -1358,6 +1358,15 @@ std::optional<int32_t> Tiled2dMapVectorLayer::getMaxZoomLevelIdentifier() {
 void Tiled2dMapVectorLayer::invalidateCollisionState() {
     prevCollisionStillValid.clear();
     tilesStillValid.clear();
+    auto mapInterface = this->mapInterface;
+    if (mapInterface) {
+        mapInterface->invalidate();
+    }
+}
+
+void Tiled2dMapVectorLayer::invalidateTilesState() {
+    tilesStillValid.clear();
+    auto mapInterface = this->mapInterface;
     if (mapInterface) {
         mapInterface->invalidate();
     }

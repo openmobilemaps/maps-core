@@ -105,8 +105,7 @@ void Tiled2dMapVectorLineTile::update() {
 
     if (lastAlpha == alpha &&
         lastZoom &&
-        ((isStyleZoomDependant && *lastZoom == zoomIdentifier) || !isStyleZoomDependant) &&
-        !isStyleStateDependant) {
+        ((isStyleZoomDependant && *lastZoom == zoomIdentifier) || !isStyleZoomDependant) && !isStyleStateDependant) {
         return;
     }
 
