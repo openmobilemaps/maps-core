@@ -356,4 +356,9 @@ void Tiled2dMapVectorSourceVectorTileDataManager::clearTiles(const std::vector<A
             tileActor->clear();
         });
     }
+    auto mapInterface = this->mapInterface.lock();
+    if (mapInterface) {
+        mapInterface->invalidate();
+        vectorLayer.message(MFN(&Tiled2dMapVectorLayer::invalidateTilesState));
+    }
 }
