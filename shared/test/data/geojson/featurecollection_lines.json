@@ -1,0 +1,67 @@
+{
+  "type": "FeatureCollection",
+  "features": [{
+      "type": "Feature",
+      "geometry": {
+          "type": "LineString",
+          "coordinates": [
+              [30.0, 10.0],
+              [10.0, 30.0],
+              [40.0, 40.0]
+          ]
+      },
+      "id": "line0"
+  }, {
+      "type": "Feature",
+      "geometry": {
+          "type": "LineString",
+          "coordinates": [
+              [30.0, 10.0],
+              [10.0, 30.0],
+              [40.0, 40.0],
+              [50.0, 50.0]
+          ]
+      },
+      "id": "line1",
+      "properties": {}
+  }, {
+      "type": "Feature",
+      "geometry": {
+          "type": "LineString",
+          "coordinates": [
+              [30.0, 10.0],
+              [10.0, 30.0],
+              [40.0, 40.0],
+              [50.0, 50.0],
+              [60.0, 60.0]
+          ]
+      },
+      "id": "line2",
+      "properties": {
+           "prop_string": "value0",
+           "prop_number_integer": 1,
+           "prop_number_float": 1.5,
+           "prop_bool": false,
+           "prop_string_array": ["this", "that"],
+           "prop_number_array": [1.0, 2, 3],
+           "prop_skipped_empty_array": [],
+           "prop_skipped_object": {
+               "this": "value_this",
+               "that": 1.0
+           }
+      }
+  }, {
+      "type": "Feature",
+      "geometry": {
+          "type": "LineString",
+          "coordinates": [
+              [30.0, 10.0],
+              [10.0, 30.0]
+          ]
+      },
+      "id": "line3",
+      "properties": {
+           "prop_mixed": ["this", 1.5]
+      }
+  }]
+}

@@ -7,7 +7,8 @@ project(mapscore
 # mapscore OpenGL "proper", i.e. the C++ implementation without language bindings
 ####
 file(GLOB_RECURSE mapscore_SRC
-  "shared/*.cpp"
+  "shared/public/*.cpp"
+  "shared/src/*.cpp"
   "android/src/main/cpp/graphics/*.cpp"
 )
 
@@ -79,5 +80,13 @@ target_compile_features(mapscore PRIVATE cxx_std_20)
 target_compile_options(mapscore PRIVATE -Werror -Wno-deprecated -Wno-reorder -fPIC) # fPIC so we can "embed" into shared mapscore_jni
 target_link_libraries(mapscore ${OPENGL_LIBRARIES})
 
-add_subdirectory(standalone)
-add_subdirectory(jvm)
+add_subdirectory(shared/test)
+
+option(BUILD_STANDALONE "Build standalone test application with GL offscreen rendering via OSMesa" ON)
+if(BUILD_STANDALONE)
+  add_subdirectory(standalone)
+endif()
+option(BUILD_JVM "Build JNI based Java bindings with GL offscreen rendering via OSMesa" ON)
+if(BUILD_JVM) 
+  add_subdirectory(jvm)
+endif()
