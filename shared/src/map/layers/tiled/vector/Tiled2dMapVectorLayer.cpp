@@ -265,7 +265,11 @@ void Tiled2dMapVectorLayer::setMapDescription(const std::shared_ptr<VectorMapDes
 
 void Tiled2dMapVectorLayer::initializeVectorLayer() {
 
-    std::lock_guard<std::recursive_mutex> lock(mapDescriptionMutex);
+    std::shared_ptr<VectorMapDescription> mapDescription;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mapDescriptionMutex);
+        mapDescription = this->mapDescription;
+    }
 
     if (!sourceDataManagers.empty() || !symbolSourceDataManagers.empty() || !rasterTileSources.empty()) {
         // do nothing if the layer is already initialized
