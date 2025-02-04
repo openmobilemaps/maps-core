@@ -595,11 +595,11 @@ void IconLayer::addScaleAnimation(const IconScaleAnimation& iconScaleAnimation) 
     std::lock_guard<std::recursive_mutex> lock(scaleAnimationMutex);
 
     auto animation = std::make_shared<DoubleAnimation>(scaleAnimation.duration, scaleAnimation.from, scaleAnimation.to, InterpolatorFunction::EaseInOut,
-            [weakSelf, id, scaleAnimation](double scale) {
+            [weakSelf, id, initialSize](double scale) {
               if (auto selfPtr = weakSelf.lock()) {
                   for(auto& icon : selfPtr->icons) {
-                      if(icon.first->getIdentifier() == scaleAnimation.identifier) {
-                          icon.first->setIconSize(Vec2F(scaleAnimation.initialSize.x * scale, scaleAnimation.initialSize.y * scale));
+                      if(icon.first->getIdentifier() == id) {
+                          icon.first->setIconSize(Vec2F(initialSize.x * scale, initialSize.y * scale));
                       }
                   }
 
@@ -609,11 +609,11 @@ void IconLayer::addScaleAnimation(const IconScaleAnimation& iconScaleAnimation) 
                   }
               }
           },
-          [weakSelf, scaleAnimation] {
+          [weakSelf, id] {
               if (auto selfPtr = weakSelf.lock()) {
                   auto& sa = selfPtr->scaleAnimations;
 
-                  auto it = sa.find(scaleAnimation.identifier);
+                  auto it = sa.find(id);
                   if(it != sa.end()) {
                       auto &sa = (*it).second;
                       auto rep = sa.repetitions;
