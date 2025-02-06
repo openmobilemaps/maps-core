@@ -452,30 +452,44 @@ std::vector<std::shared_ptr<IconInfoInterface>> IconLayer::getIconsAtPosition(co
             std::shared_ptr<IconInfoInterface> icon = iconTuple.first;
 
             const Vec2F &anchor = icon->getIconAnchor();
+            const Vec2F& iconSize = icon->getIconSize();
+
             float ratioLeftRight = std::clamp(anchor.x, 0.0f, 1.0f);
             float ratioTopBottom = std::clamp(anchor.y, 0.0f, 1.0f);
-            float leftW = icon->getIconSize().x * ratioLeftRight;
-            float topH = icon->getIconSize().y * ratioTopBottom;
-            float rightW = icon->getIconSize().x * (1.0f - ratioLeftRight);
-            float bottomH = icon->getIconSize().y * (1.0f - ratioTopBottom);
+            float leftW = iconSize.x * ratioLeftRight;
+            float topH = iconSize.y * ratioTopBottom;
+            float rightW = iconSize.x * (1.0f - ratioLeftRight);
+            float bottomH = iconSize.y * (1.0f - ratioTopBottom);
 
-            Coord iconPos = conversionHelper->convert(clickCoords.systemIdentifier, icon->getCoordinate());
-            IconType type = icon->getType();
-            if (type == IconType::INVARIANT || type == IconType::SCALE_INVARIANT) {
-                leftW = camera->mapUnitsFromPixels(leftW);
-                topH = camera->mapUnitsFromPixels(topH);
-                rightW = camera->mapUnitsFromPixels(rightW);
-                bottomH = camera->mapUnitsFromPixels(bottomH);
+            Vec2F clickPos = Vec2F(0.0, 0.0);
+            Vec2F iconPos = Vec2F(0.0, 0.0);
+
+            bool isHit = false;
+            
+            if (is3D) {
+                // We compute hit detection in screen space
+                iconPos = camera->screenPosFromCoord(icon->getCoordinate());
+                clickPos = Vec2F(posScreen.x - iconPos.x, posScreen.y - iconPos.y);
+            } else {
+                Coord converted = conversionHelper->convert(clickCoords.systemIdentifier, icon->getCoordinate());
+                iconPos = Vec2F(converted.x, converted.y);
+                clickPos = Vec2F(clickCoords.x - iconPos.x, clickCoords.y - iconPos.y);
+
+                if (icon->getType() == IconType::INVARIANT || icon->getType() == IconType::SCALE_INVARIANT) {
+                    leftW = camera->mapUnitsFromPixels(leftW);
+                    topH = camera->mapUnitsFromPixels(topH);
+                    rightW = camera->mapUnitsFromPixels(rightW);
+                    bottomH = camera->mapUnitsFromPixels(bottomH);
+                }
             }
 
-            Vec2D clickPos = Vec2D(clickCoords.x - iconPos.x, clickCoords.y - iconPos.y);
-            if (type == IconType::INVARIANT || type == IconType::ROTATION_INVARIANT) {
-                float newX = cosAng * clickPos.x - sinAng * clickPos.y;
-                float newY = sinAng * clickPos.x + cosAng * clickPos.y;
-                clickPos.x = newX;
-                clickPos.y = newY;
+            if (icon->getType() == IconType::INVARIANT || icon->getType() == IconType::ROTATION_INVARIANT) {
+                clickPos = rotatePoint(clickPos, cosAng, sinAng);
             }
-            if (clickPos.x > -leftW && clickPos.x < rightW && clickPos.y < topH && clickPos.y > -bottomH) {
+
+            isHit = isPointInRect(clickPos, leftW, rightW, topH, bottomH);
+
+            if (isHit) {
                 iconsHit.push_back(icon);
             }
         }
@@ -635,4 +649,17 @@ void IconLayer::addScaleAnimation(const IconScaleAnimation& iconScaleAnimation) 
 
     animation->start();
     mapInterface->invalidate();
+}
+
+// Helper functions
+Vec2F IconLayer::rotatePoint(const Vec2F& point, float cosAng, float sinAng) {
+    return Vec2F(
+        cosAng * point.x - sinAng * point.y,
+        sinAng * point.x + cosAng * point.y
+    );
+}
+
+bool IconLayer::isPointInRect(const Vec2F& point, float leftW, float rightW, float topH, float bottomH) {
+    return point.x >  -leftW && point.x < rightW &&
+           point.y > -topH && point.y < bottomH;
 }
