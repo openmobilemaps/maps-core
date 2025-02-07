@@ -23,6 +23,7 @@ open class MCMapView: MTKView, @unchecked Sendable {
     private lazy var renderToImageQueue = DispatchQueue(
         label: "io.openmobilemaps.renderToImagQueue", qos: .userInteractive)
 
+    public var pausesAutomatically = true
     private var framesToRender: Int = 1
     private let framesToRenderAfterInvalidate: Int = 25
     private var lastInvalidate = Date()
@@ -195,13 +196,15 @@ extension MCMapView: MTKViewDelegate {
 
         guard
             framesToRender > 0
-                || -lastInvalidate.timeIntervalSinceNow < renderAfterInvalidate
+                || -lastInvalidate.timeIntervalSinceNow < renderAfterInvalidate || !pausesAutomatically
         else {
             isPaused = true
             return
         }
 
-        framesToRender -= 1
+        if pausesAutomatically {
+            framesToRender -= 1
+        }
 
         // Ensure that triple-buffers are not over-used
         renderSemaphore.wait()

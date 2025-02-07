@@ -244,7 +244,10 @@ void IconLayer::clear() {
         if (mask->asGraphicsObject()->isReady())
             mask->asGraphicsObject()->clear();
     }
-    renderPassObjectMap.clear();
+    {
+        std::lock_guard<std::recursive_mutex> lock(iconsMutex);
+        renderPassObjectMap.clear();
+    }
     mapInterface->invalidate();
 }
 
@@ -311,6 +314,7 @@ std::vector<std::shared_ptr<::RenderPassInterface>> IconLayer::buildRenderPasses
     if (isHidden) {
         return {};
     } else {
+        std::lock_guard<std::recursive_mutex> lock(iconsMutex);
         std::vector<std::shared_ptr<RenderPassInterface>> renderPasses;
         for (const auto &passEntry : renderPassObjectMap) {
             std::shared_ptr<RenderPass> renderPass =
