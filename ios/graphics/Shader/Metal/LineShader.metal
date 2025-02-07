@@ -331,10 +331,10 @@ lineGroupFragmentShader(LineVertexOut in [[stage_in]],
                   float wG = relG / (style->dash_fade * 0.5);
                   return half4(half3(style->gapColor.rgb), 1.0) * aGap * wG + half4(half3(style->color.rgb), 1.0) * a * (1.0 - wG);
               }
-              else if (1.0 - relG < (style->dash_fade * 0.5)) {
-                  half wG = (1.0 - relG) / (style->dash_fade * 0.5);
-                  return half4(half3(style->gapColor.rgb), 1.0) * aGap * wG + half4(half3(style->color.rgb), 1.0) * a * (1.0 - wG);
-              }
+//              else if (1.0 - relG < (style->dash_fade * 0.5)) {
+//                  half wG = (1.0 - relG) / (style->dash_fade * 0.5);
+//                  return half4(half3(style->gapColor.rgb), 1.0) * aGap * wG + half4(half3(style->color.rgb), 1.0) * a * (1.0 - wG);
+//              }
               else {
                   return half4(half3(style->gapColor.rgb), 1.0) * aGap;
               }
