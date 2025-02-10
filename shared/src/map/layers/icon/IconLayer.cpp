@@ -446,10 +446,6 @@ std::vector<std::shared_ptr<IconInfoInterface>> IconLayer::getIconsAtPosition(co
 
     Coord clickCoords = camera->coordFromScreenPosition(posScreen);
 
-    double angle = -(camera->getRotation() * M_PI / 180.0);
-    double sinAng = std::sin(angle);
-    double cosAng = std::cos(angle);
-
     {
         std::lock_guard<std::recursive_mutex> lock(iconsMutex);
         for (const auto &iconTuple : icons) {
@@ -488,7 +484,7 @@ std::vector<std::shared_ptr<IconInfoInterface>> IconLayer::getIconsAtPosition(co
             }
 
             if (icon->getType() == IconType::INVARIANT || icon->getType() == IconType::ROTATION_INVARIANT) {
-                clickPos = rotatePoint(clickPos, cosAng, sinAng);
+                clickPos = Vec2FHelper::rotate(clickPos, Vec2F(0, 0), -camera->getRotation());
             }
 
             isHit = isPointInRect(clickPos, leftW, rightW, topH, bottomH);
@@ -653,14 +649,6 @@ void IconLayer::addScaleAnimation(const IconScaleAnimation& iconScaleAnimation) 
 
     animation->start();
     mapInterface->invalidate();
-}
-
-// Helper functions
-Vec2F IconLayer::rotatePoint(const Vec2F& point, float cosAng, float sinAng) {
-    return Vec2F(
-        cosAng * point.x - sinAng * point.y,
-        sinAng * point.x + cosAng * point.y
-    );
 }
 
 bool IconLayer::isPointInRect(const Vec2F& point, float leftW, float rightW, float topH, float bottomH) {
