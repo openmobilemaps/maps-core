@@ -447,7 +447,7 @@ std::optional<std::tuple<std::vector<double>, std::vector<double>, Vec3D>> MapCa
 
     // aspect ratio
     const double vpr = (double)sizeViewport.x / (double)sizeViewport.y;
-    double fovy = fovy /= vpr;
+    double fovy = fovx / vpr;
     const double fovyRad = fovy * M_PI / 180.0;
 
     // initial perspective projection
