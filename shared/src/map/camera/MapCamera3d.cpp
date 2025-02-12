@@ -431,13 +431,13 @@ std::optional<std::tuple<std::vector<double>, std::vector<double>, Vec3D>> MapCa
 
     const double focusPointAltitude = focusCoord.z;
     double cameraDistance = getCameraDistance(sizeViewport, zoom);
-    double fovy = getCameraFieldOfView(); // 45 // zoom / 70800;
+    double fovx = getCameraFieldOfView(); // 45 // zoom / 70800;
     const double minCameraDistance = 1.05;
     if (cameraDistance < minCameraDistance) {
         double d = minCameraDistance * R;
         double pixelsPerMeter = this->screenDensityPpi / 0.0254;
-        double w = (double)sizeViewport.y;
-        fovy = atan2(zoom * w / pixelsPerMeter / 2.0, d) * 2.0 / M_PI * 180.0;
+        double w = (double)sizeViewport.x;
+        fovx = atan2(zoom * w / pixelsPerMeter / 2.0, d) * 2.0 / M_PI * 180.0;
 
         cameraDistance = minCameraDistance;
     }
@@ -447,9 +447,7 @@ std::optional<std::tuple<std::vector<double>, std::vector<double>, Vec3D>> MapCa
 
     // aspect ratio
     const double vpr = (double)sizeViewport.x / (double)sizeViewport.y;
-    if (vpr > 1.0) {
-        fovy /= vpr;
-    }
+    double fovy = fovy /= vpr;
     const double fovyRad = fovy * M_PI / 180.0;
 
     // initial perspective projection
@@ -1737,7 +1735,7 @@ double MapCamera3d::getCameraFieldOfView() { return 42; }
 
 double MapCamera3d::getCameraDistance(Vec2I sizeViewport, double zoom) {
     double f = getCameraFieldOfView();
-    double w = (double)sizeViewport.y;
+    double w = (double)sizeViewport.x;
     double pixelsPerMeter = this->screenDensityPpi / 0.0254;
     float d = (zoom * w / pixelsPerMeter / 2.0) / tan(f / 2.0 * M_PI / 180.0);
     float R = 6378137.0;
@@ -1755,11 +1753,10 @@ double MapCamera3d::zoomForMeterWidth(Vec2I sizeViewport, Vec2F sizeMeters) {
     double vprX = 1.0;
     double vprY = 1.0;
 
-    double fy = getCameraFieldOfView();
-    double halfAngleRadianY = fy * 0.5 * M_PI / 180.0;
-
-    double fx = 2 * atan(vpr * tan(halfAngleRadianY));
+    double fx = getCameraFieldOfView();
     double halfAngleRadianX = fx * 0.5 * M_PI / 180.0;
+    double fy = 2 * atan(vpr * tan(halfAngleRadianX));
+    double halfAngleRadianY = fy * 0.5 * M_PI / 180.0;
 
     double metersX = sizeMeters.x * 0.5 * vpr;
     double metersY = sizeMeters.y * 0.5 * vpr;
