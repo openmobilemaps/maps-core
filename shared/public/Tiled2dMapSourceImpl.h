@@ -13,13 +13,11 @@
 #include "TiledLayerError.h"
 #include <algorithm>
 
-#include "Logger.h"
 #include "Matrix.h"
 #include "PolygonCoord.h"
 #include "Vec2DHelper.h"
 #include "Vec3DHelper.h"
 #include "gpc.h"
-#include <iostream>
 
 struct VisibleTileCandidate {
     int x;
@@ -57,7 +55,10 @@ Tiled2dMapSource<T, L, R>::Tiled2dMapSource(const MapConfig &mapConfig, const st
     , layerSystemId(layerConfig->getCoordinateSystemIdentifier())
     , isPaused(false)
     , screenDensityPpi(screenDensityPpi)
-    , layerName(layerName) {
+    , layerName(layerName)
+    , curT(std::numeric_limits<decltype(curT)>::lowest())
+    , curZoom(std::numeric_limits<decltype(curZoom)>::lowest())
+{
     std::sort(zoomLevelInfos.begin(), zoomLevelInfos.end(),
               [](const Tiled2dMapZoomLevelInfo &a, const Tiled2dMapZoomLevelInfo &b) -> bool { return a.zoom > b.zoom; });
     topMostZoomLevel = zoomLevelInfos.empty() ? 0 : zoomLevelInfos.begin()->zoomLevelIdentifier;
@@ -969,7 +970,6 @@ void Tiled2dMapSource<T, L, R>::onVisibleTilesChanged(const std::vector<VisibleT
     }
 
     for (const auto &removedTile : toRemove) {
-        gpc_free_polygon(&currentTiles.at(removedTile).tilePolygon);
         currentTiles.erase(removedTile);
         currentlyLoading.erase(removedTile);
 
@@ -1123,10 +1123,10 @@ void Tiled2dMapSource<T, L, R>::didLoad(Tiled2dMapTileInfo tile, size_t loaderIn
                        bounds.topLeft},
                       {});
 
-    gpc_polygon tilePolygon;
-    gpc_set_polygon({mask}, &tilePolygon);
+    GPCPolygonHolder tilePolygon;
+    gpc_set_polygon({mask}, tilePolygon.set());
 
-    currentTiles.insert({tile, TileWrapper<R>(result, std::vector<::PolygonCoord>{}, mask, tilePolygon, tile.tessellationFactor)});
+    currentTiles.emplace(tile, TileWrapper<R>(result, std::vector<::PolygonCoord>{}, mask, std::move(tilePolygon), tile.tessellationFactor));
 
     errorTiles[loaderIndex].erase(tile);
 
@@ -1277,13 +1277,11 @@ template <class T, class L, class R> void Tiled2dMapSource<T, L, R>::updateTileM
 
     int currentZoomLevelIdentifier = this->currentZoomLevelIdentifier;
 
-    gpc_polygon currentTileMask;
-    bool freeCurrent = false;
-    currentTileMask.num_contours = 0;
+    GPCPolygonHolder currentTileMask;
     bool isFirst = true;
 
-    gpc_polygon currentViewBoundsPolygon;
-    gpc_set_polygons(currentViewBounds, &currentViewBoundsPolygon);
+    GPCPolygonHolder currentViewBoundsPolygon;
+    gpc_set_polygons(currentViewBounds, currentViewBoundsPolygon.set());
 
     bool completeViewBoundsDrawn = false;
 
@@ -1299,16 +1297,14 @@ template <class T, class L, class R> void Tiled2dMapSource<T, L, R>::updateTileM
 
         if (tileInfo.zoomIdentifier != currentZoomLevelIdentifier) {
 
-            if (currentTileMask.num_contours != 0) {
+            if (currentTileMask) {
                 if (!completeViewBoundsDrawn) {
-                    gpc_polygon diff;
-                    gpc_polygon_clip(GPC_DIFF, &currentViewBoundsPolygon, &currentTileMask, &diff);
+                    GPCPolygonHolder diff;
+                    gpc_polygon_clip(GPC_DIFF, currentViewBoundsPolygon.get(), currentTileMask.get(), diff.set());
 
-                    if (diff.num_contours == 0) {
+                    if (diff) {
                         completeViewBoundsDrawn = true;
                     }
-
-                    gpc_free_polygon(&diff);
                 }
             }
 
@@ -1317,41 +1313,28 @@ template <class T, class L, class R> void Tiled2dMapSource<T, L, R>::updateTileM
                 continue;
             }
 
-            gpc_polygon polygonDiff;
-            bool freePolygonDiff = false;
-            if (currentTileMask.num_contours != 0) {
-                freePolygonDiff = true;
-                gpc_polygon_clip(GPC_DIFF, &tileWrapper.tilePolygon, &currentTileMask, &polygonDiff);
+            GPCPolygonHolder polygonDiffOwned;
+            gpc_polygon *polygonDiff;
+            if (currentTileMask) {
+                gpc_polygon_clip(GPC_DIFF, tileWrapper.tilePolygon.get(), currentTileMask.get(), polygonDiffOwned.set());
+                polygonDiff = polygonDiffOwned.get();
             } else {
-                polygonDiff = tileWrapper.tilePolygon;
+                polygonDiff = tileWrapper.tilePolygon.get();
             }
 
-            if (polygonDiff.contour == NULL) {
+            if (polygonDiff->contour == NULL) {
                 tileWrapper.state = TileState::CACHED;
-                if (freePolygonDiff) {
-                    gpc_free_polygon(&polygonDiff);
-                }
                 continue;
             } else {
-                gpc_polygon resultingMask;
+                GPCPolygonHolder resultingMask;
+                gpc_polygon_clip(GPC_INT, polygonDiff, currentViewBoundsPolygon.get(), resultingMask.set());
 
-                gpc_polygon_clip(GPC_INT, &polygonDiff, &currentViewBoundsPolygon, &resultingMask);
-
-                if (resultingMask.contour == NULL) {
+                if (resultingMask) {
                     tileWrapper.state = TileState::CACHED;
-                    if (freePolygonDiff) {
-                        gpc_free_polygon(&polygonDiff);
-                    }
                     continue;
                 } else {
-                    tileWrapper.masks = gpc_get_polygon_coord(&polygonDiff, tileInfo.bounds.topLeft.systemIdentifier);
+                    tileWrapper.masks = gpc_get_polygon_coord(polygonDiff, tileInfo.bounds.topLeft.systemIdentifier);
                 }
-
-                gpc_free_polygon(&resultingMask);
-            }
-
-            if (freePolygonDiff) {
-                gpc_free_polygon(&polygonDiff);
             }
         } else {
             tileWrapper.masks = {tileWrapper.tileBounds};
@@ -1360,23 +1343,15 @@ template <class T, class L, class R> void Tiled2dMapSource<T, L, R>::updateTileM
         // add tileBounds to currentTileMask
         if (tileWrapper.state == TileState::VISIBLE) {
             if (isFirst) {
-                gpc_set_polygon({tileWrapper.tileBounds}, &currentTileMask);
+                gpc_set_polygon({tileWrapper.tileBounds}, currentTileMask.set());
                 isFirst = false;
             } else {
-                gpc_polygon result;
-                gpc_polygon_clip(GPC_UNION, &currentTileMask, &tileWrapper.tilePolygon, &result);
-                gpc_free_polygon(&currentTileMask);
-                currentTileMask = result;
+                GPCPolygonHolder result;
+                gpc_polygon_clip(GPC_UNION, currentTileMask.get(), tileWrapper.tilePolygon.get(), result.set());
+                currentTileMask = std::move(result);
             }
-
-            freeCurrent = true;
         }
     }
-
-    if (freeCurrent) {
-        gpc_free_polygon(&currentTileMask);
-    }
-    gpc_free_polygon(&currentViewBoundsPolygon);
 }
 
 template <class T, class L, class R> void Tiled2dMapSource<T, L, R>::setTileReady(const Tiled2dMapVersionedTileInfo &tile) {
@@ -1492,9 +1467,7 @@ template <class T, class L, class R> void Tiled2dMapSource<T, L, R>::forceReload
 
 template <class T, class L, class R> void Tiled2dMapSource<T, L, R>::reloadTiles() {
     outdatedTiles.clear();
-    outdatedTiles.insert(currentTiles.begin(), currentTiles.end());
-
-    currentTiles.clear();
+    outdatedTiles.swap(currentTiles);
     readyTiles.clear();
 
     for (auto it = currentlyLoading.begin(); it != currentlyLoading.end(); ++it) {
