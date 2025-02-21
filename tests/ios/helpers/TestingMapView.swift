@@ -1,0 +1,114 @@
+//
+//  MeasureMapView.swift
+//  MapCore
+//
+//  Created by Nicolas Märki on 21.02.2025.
+//
+
+import MapCore
+import UIKit
+
+class TestingMapView: MCMapView, @unchecked Sendable, MCMapReadyCallbackInterface {
+    private var cont: CheckedContinuation<Void, any Error>?
+    private var prepared = false
+
+    init(
+        size: CGSize = .init(width: 1206 / 3, height: 2622 / 3), // iPhone 16 Pro
+        mapConfig: MCMapConfig = MCMapConfig(
+            mapCoordinateSystem: MCCoordinateSystemFactory.getEpsg3857System()),
+        pixelsPerInch: Float? = nil, is3D: Bool = false,
+        baseStyleURL: String? = nil
+    ) {
+        super.init(mapConfig: mapConfig, pixelsPerInch: pixelsPerInch, is3D: is3D)
+        self.frame = .init(origin: .zero, size: size)
+        if let baseStyleURL {
+            self.add(layer: VectorLayer(testingStyleURL: baseStyleURL))
+        }
+    }
+
+    func prepare(_ region: TestRegion) async throws {
+        self.setNeedsLayout()
+        self.layoutIfNeeded()
+        mapInterface.setViewportSize(
+            MCVec2I(
+                x: Int32(self.drawableSize.width),
+                y: Int32(self.drawableSize.height)))
+
+        try await awaitReady(bounds: region.mcBounds)
+        try await awaitReady(bounds: region.mcBounds)
+
+        for layer in mapInterface.getLayers() {
+            layer.enableAnimations(false)
+        }
+        prepared = true
+    }
+
+    private func awaitReady(bounds: MCRectCoord) async throws {
+        try await withCheckedThrowingContinuation { cont in
+            self.cont = cont
+            self.mapInterface.drawReadyFrame(
+                bounds,
+                timeout: 60,
+                callbacks: self
+            )
+        }
+        self.draw(in: self)
+    }
+
+    func drawMeasured() {
+        if !prepared {
+            assertionFailure()
+            print("Warning: Prepare before calling drawMeasured")
+        }
+        for _ in 0..<120 {
+            self.invalidate()
+            self.draw(in: self)
+        }
+    }
+
+    func drawCaptured() {
+        if !prepared {
+            assertionFailure()
+            print("Warning: Prepare before calling drawMeasured")
+        }
+        startCapture()
+        self.invalidate()
+        self.draw(in: self)
+        stopCapture()
+    }
+
+    override func currentDrawableImage() -> UIImage? {
+        if !prepared {
+            assertionFailure()
+            print("Warning: Prepare before calling currentDrawableImage")
+        }
+        return super.currentDrawableImage()
+    }
+
+    func stateDidUpdate(_ state: MCLayerReadyState) {
+        switch state {
+        case .NOT_READY:
+            break
+        case .ERROR:
+            self.cont?.resume(throwing: MeasureError.error)
+            self.cont = nil
+        case .TIMEOUT_ERROR:
+            self.cont?.resume(throwing: MeasureError.timeout)
+            self.cont = nil
+        case .READY:
+            self.cont?.resume()
+            self.cont = nil
+        @unknown default:
+            self.cont?.resume(throwing: MeasureError.unknown)
+            self.cont = nil
+        }
+    }
+
+    enum MeasureError: Error {
+        case error
+        case timeout
+        case unknown
+    }
+
+    
+}

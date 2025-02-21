@@ -489,7 +489,7 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
     auto scale = mapInterface->getCamera()->getScreenDensityPpi() > 326.0 ? 3 : (mapInterface->getCamera()->getScreenDensityPpi() >= 264.0 ? 2 : 1);
 
     if (mapDescription->spriteBaseUrl) {
-        loadSpriteData(scale);
+        loadSpriteData(scale, mapDescription->highResolutionSprites);
     }
 
     auto backgroundLayerDesc = std::find_if(mapDescription->layers.begin(), mapDescription->layers.end(), [](auto const &layer){
@@ -667,8 +667,7 @@ void Tiled2dMapVectorLayer::onRenderPassUpdate(const std::string &source, bool i
 }
 
 void Tiled2dMapVectorLayer::pregenerateRenderPasses() {
-    static std::vector<std::shared_ptr<RenderPassInterface>> newPasses;
-    newPasses.clear();
+    std::vector<std::shared_ptr<RenderPassInterface>> newPasses;
 
     if (backgroundLayer) {
         auto backgroundLayerPasses = backgroundLayer->buildRenderPasses();
@@ -859,7 +858,7 @@ void Tiled2dMapVectorLayer::onTilesUpdated(const std::string &sourceName, Vector
     tilesStillValid.clear();
 }
 
-void Tiled2dMapVectorLayer::loadSpriteData(int scale, bool fromLocal) {
+void Tiled2dMapVectorLayer::loadSpriteData(int scale, bool allowHighRes, bool fromLocal) {
     auto lockSelfPtr = shared_from_this();
     auto mapInterface = this->mapInterface;
     auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
@@ -869,6 +868,11 @@ void Tiled2dMapVectorLayer::loadSpriteData(int scale, bool fromLocal) {
     }
 
     std::string scalePrefix = (scale == 3 ? "@3x" : (scale == 2 ? "@2x" : ""));
+#if !defined(DEBUG)
+    if (scale > 2 && !allowHighRes) {
+        scalePrefix = "@2x";
+    }
+#endif
     std::stringstream ssTexture;
     std::stringstream ssData;
     {
@@ -924,12 +928,11 @@ void Tiled2dMapVectorLayer::loadSpriteData(int scale, bool fromLocal) {
     });
 
     auto selfActor = WeakActor<Tiled2dMapVectorLayer>(mailbox, castedMe);
-    context->promise.getFuture().then([context, selfActor, fromLocal, weakSelf, scale] (auto result) {
+    context->promise.getFuture().then([context, selfActor, fromLocal, weakSelf, scale, allowHighRes] (auto result) {
         auto jsonResultStatus = context->jsonResult->status;
         auto textureResultStatus = context->textureResult->status;
 
         if (scale == 3 && (jsonResultStatus != LoaderStatus::OK || textureResultStatus != LoaderStatus::OK)) {
-            LogInfo <<= "This device would benefit from @3x assets, but none could be found. Please add @3x assets for crispy icons!";
             // 3@x assets are not available, so we try @2x
             auto self = weakSelf.lock();
             if (self) {
@@ -937,7 +940,12 @@ void Tiled2dMapVectorLayer::loadSpriteData(int scale, bool fromLocal) {
                 return;
             }
         }
-        
+#if !defined(DEBUG)
+        else if (scale == 3 && !allowHighRes) {
+            LogError <<= "High resolution sprites are available, but not enabled in metadata. Please enable 'highResolutionSprites'";
+        }
+#endif
+
         std::shared_ptr<SpriteData> jsonData;
         std::shared_ptr<::TextureHolderInterface> spriteTexture;
         

@@ -467,6 +467,12 @@ void MapScene::drawReadyFrame(const ::RectCoord &bounds, float timeout,
     long long timeoutTimestamp = DateHelper::currentTimeMillis() + (long long)(timeout * 1000);
 
     while (state == LayerReadyState::NOT_READY) {
+
+        while(scheduler->runGraphicsTasks()) {
+            continue;
+            // ensure all graphics tasks are done by polling runGraphicsTasks()
+        }
+        
         state = getLayersReadyState();
 
         auto now = DateHelper::currentTimeMillis();

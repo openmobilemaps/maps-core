@@ -24,6 +24,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/UbiqueInnovation/djinni.git", .upToNextMinor(from: "1.0.9")),
+        .package(url: "https://github.com/pointfreeco/swift-snapshot-testing", .upToNextMajor(from: "1.12.0"))
     ],
     targets: [
         .target(
@@ -118,6 +119,12 @@ let package = Package(
                 .process("graphics/Shader/Metal/"),
             ]
         ),
+        .testTarget(name: "iOSTests",
+                    dependencies: ["MapCore", .product(name: "SnapshotTesting", package: "swift-snapshot-testing")],
+                    path: "tests/ios",
+                    resources: [
+                        .process("fonts"),
+                    ]),
         .target(
             name: "MapCoreSharedModule",
             dependencies: [

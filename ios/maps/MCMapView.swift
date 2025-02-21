@@ -74,9 +74,9 @@ open class MCMapView: MTKView, @unchecked Sendable {
     deinit {
         if Thread.isMainThread {
             // make sure the mapInterface is destroyed from a background thread
-            DispatchQueue.global().async { [mapInterface] in
+//            DispatchQueue.global().async { [mapInterface] in
                 mapInterface.destroy()
-            }
+//            }
         } else {
             mapInterface.destroy()
         }
@@ -163,6 +163,22 @@ open class MCMapView: MTKView, @unchecked Sendable {
         isPaused = false
         framesToRender = framesToRenderAfterInvalidate
         lastInvalidate = Date()
+    }
+
+    open func currentDrawableImage() -> UIImage? {
+        self.saveDrawable = true
+        self.invalidate()
+        self.draw(in: self)
+        self.saveDrawable = false
+
+        guard let texture = self.currentDrawable?.texture else { return nil }
+
+        let context = CIContext()
+        let kciOptions: [CIImageOption: Any] = [
+            .colorSpace: CGColorSpaceCreateDeviceRGB()
+        ]
+        let cImg = CIImage(mtlTexture: texture, options: kciOptions)!
+        return context.createCGImage(cImg, from: cImg.extent)?.toImage()
     }
 }
 
@@ -273,23 +289,28 @@ extension MCMapView: MTKViewDelegate {
                 bounds, timeout: timeout, callbacks: mapReadyCallbacks)
         }
     }
-}
 
-extension MCMapView {
-    fileprivate func currentDrawableImage() -> UIImage? {
-        self.saveDrawable = true
-        self.invalidate()
-        self.draw(in: self)
-        self.saveDrawable = false
+    public func startCapture() {
+        if ProcessInfo.processInfo.environment["MTL_CAPTURE_ENABLED"] != nil {
+            let captureDescriptor = MTLCaptureDescriptor()
+            captureDescriptor.captureObject = MetalContext.current.commandQueue
+            captureDescriptor.destination = .gpuTraceDocument
+            let url = FileManager.default.temporaryDirectory
+                .appendingPathComponent("MapView.gputrace")
+            try? FileManager.default.removeItem(at: url)
+            captureDescriptor.outputURL = url
+            print("Capturing to \(url)")
+            try! MTLCaptureManager.shared().startCapture(with: captureDescriptor)
+        }
+        else {
+            print("MTL_CAPTURE_ENABLED not set as environment variable, capture not started")
+        }
+    }
 
-        guard let texture = self.currentDrawable?.texture else { return nil }
-
-        let context = CIContext()
-        let kciOptions: [CIImageOption: Any] = [
-            .colorSpace: CGColorSpaceCreateDeviceRGB()
-        ]
-        let cImg = CIImage(mtlTexture: texture, options: kciOptions)!
-        return context.createCGImage(cImg, from: cImg.extent)?.toImage()
+    public func stopCapture() {
+        if ProcessInfo.processInfo.environment["MTL_CAPTURE_ENABLED"] != nil {
+            MTLCaptureManager.shared().stopCapture()
+        }
     }
 }
 

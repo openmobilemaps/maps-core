@@ -19,7 +19,7 @@ public:
     ~Tiled2dMapVectorGeoJSONLayerConfig() {}
 
     std::string getTileUrl(int32_t x, int32_t y, int32_t t, int32_t zoom) override {
-        static std::string empty = "";
+        const static std::string empty = "";
         return empty;
     }
 
