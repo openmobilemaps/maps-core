@@ -13,18 +13,17 @@ class TestingMapView: MCMapView, @unchecked Sendable, MCMapReadyCallbackInterfac
     private var prepared = false
 
     init(
-        size: CGSize = .init(width: 1206 / 3, height: 2622 / 3), // iPhone 16 Pro
+        size: CGSize = .init(width: 1206 / 3, height: 2622 / 3),  // iPhone 16 Pro
         mapConfig: MCMapConfig = MCMapConfig(
             mapCoordinateSystem: MCCoordinateSystemFactory.getEpsg3857System()),
         pixelsPerInch: Float? = nil, is3D: Bool = false,
-        baseStyleURL: String? = nil
+        _ dataProvider: DataProvider
     ) {
         super.init(mapConfig: mapConfig, pixelsPerInch: pixelsPerInch, is3D: is3D)
         self.frame = .init(origin: .zero, size: size)
-        if let baseStyleURL {
-            self.add(layer: VectorLayer(testingStyleURL: baseStyleURL))
-        }
+        self.add(layer: VectorLayer(testingStyleURL: DataProvider.styleJsonPlaceholder, loader: dataProvider))
     }
+
 
     func prepare(_ region: TestRegion) async throws {
         self.setNeedsLayout()
@@ -55,15 +54,30 @@ class TestingMapView: MCMapView, @unchecked Sendable, MCMapReadyCallbackInterfac
         self.draw(in: self)
     }
 
-    func drawMeasured() {
+    func drawMeasured(frames: Int = 120) {
         if !prepared {
             assertionFailure()
             print("Warning: Prepare before calling drawMeasured")
         }
-        for _ in 0..<120 {
+        for _ in 0..<frames {
             self.invalidate()
             self.draw(in: self)
         }
+    }
+
+    func measureFPS(duration: TimeInterval = 15.0) -> Double {
+        if !prepared {
+            assertionFailure()
+            print("Warning: Prepare before calling drawMeasured")
+        }
+        let start = Date()
+        var frames = 0.0
+        repeat {
+            self.invalidate()
+            self.draw(in: self)
+            frames += 1
+        } while -start.timeIntervalSinceNow < duration
+        return frames / duration
     }
 
     func drawCaptured() {
@@ -110,5 +124,4 @@ class TestingMapView: MCMapView, @unchecked Sendable, MCMapReadyCallbackInterfac
         case unknown
     }
 
-    
 }

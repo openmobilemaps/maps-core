@@ -24,7 +24,7 @@ struct BasemapRenderingTests {
 
     @Test
     func basicRendering() async throws {
-        let view = TestingMapView(baseStyleURL: "https://vectortiles.geo.admin.ch/styles/ch.swisstopo.basemap.vt/style.json")
+        let view = TestingMapView(DataProvider( "https://vectortiles.geo.admin.ch/styles/ch.swisstopo.basemap.vt/style.json"))
 
         try await view.prepare(.zurich)
 
@@ -33,7 +33,7 @@ struct BasemapRenderingTests {
 
     @Test(arguments: TestRegion.all)
     func basemap(of region: TestRegion) async throws {
-        let view = TestingMapView(baseStyleURL: "https://vectortiles.geo.admin.ch/styles/ch.swisstopo.basemap.vt/style.json")
+        let view = TestingMapView(DataProvider( "https://vectortiles.geo.admin.ch/styles/ch.swisstopo.basemap.vt/style.json"))
 
         try await view.prepare(region)
 
@@ -46,7 +46,7 @@ struct BasemapRenderingTests {
 
     @Test(arguments: TestRegion.all)
     func stableRendering(of region: TestRegion) async throws {
-        let view = TestingMapView(baseStyleURL: "https://vectortiles.geo.admin.ch/styles/ch.swisstopo.basemap.vt/style.json")
+        let view = TestingMapView(DataProvider( "https://vectortiles.geo.admin.ch/styles/ch.swisstopo.basemap.vt/style.json"))
 
         try await view.prepare(region)
 
@@ -56,7 +56,7 @@ struct BasemapRenderingTests {
     @Test(.disabled("Too slow to be run regularly"), arguments: TestRegion.all)
     func veryStableRendering(of region: TestRegion) async throws {
         for _ in 0..<10 {
-            let view = TestingMapView(baseStyleURL: "https://vectortiles.geo.admin.ch/styles/ch.swisstopo.basemap.vt/style.json")
+            let view = TestingMapView(DataProvider( "https://vectortiles.geo.admin.ch/styles/ch.swisstopo.basemap.vt/style.json"))
 
             try await view.prepare(region)
 

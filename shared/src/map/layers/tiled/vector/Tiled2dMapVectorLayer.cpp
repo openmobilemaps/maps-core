@@ -858,7 +858,7 @@ void Tiled2dMapVectorLayer::onTilesUpdated(const std::string &sourceName, Vector
     tilesStillValid.clear();
 }
 
-void Tiled2dMapVectorLayer::loadSpriteData(int scale, bool allowHighRes, bool fromLocal) {
+void Tiled2dMapVectorLayer::loadSpriteData(int scale_, bool allowHighRes, bool fromLocal) {
     auto lockSelfPtr = shared_from_this();
     auto mapInterface = this->mapInterface;
     auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
@@ -867,12 +867,15 @@ void Tiled2dMapVectorLayer::loadSpriteData(int scale, bool allowHighRes, bool fr
         return;
     }
 
-    std::string scalePrefix = (scale == 3 ? "@3x" : (scale == 2 ? "@2x" : ""));
+    int scale = scale_;
 #if !defined(DEBUG)
     if (scale > 2 && !allowHighRes) {
-        scalePrefix = "@2x";
+        scale = 2;;
     }
 #endif
+
+    std::string scalePrefix = (scale == 3 ? "@3x" : (scale == 2 ? "@2x" : ""));
+
     std::stringstream ssTexture;
     std::stringstream ssData;
     {
@@ -936,7 +939,7 @@ void Tiled2dMapVectorLayer::loadSpriteData(int scale, bool allowHighRes, bool fr
             // 3@x assets are not available, so we try @2x
             auto self = weakSelf.lock();
             if (self) {
-                self->loadSpriteData(2, fromLocal);
+                self->loadSpriteData(2, allowHighRes, fromLocal);
                 return;
             }
         }
@@ -978,7 +981,7 @@ void Tiled2dMapVectorLayer::loadSpriteData(int scale, bool allowHighRes, bool fr
         if (!jsonData && !spriteTexture && fromLocal) {
             auto self = weakSelf.lock();
             if (self) {
-                self->loadSpriteData(scale, false);
+                self->loadSpriteData(scale, allowHighRes, false);
                 return;
             }
         }

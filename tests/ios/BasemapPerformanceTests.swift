@@ -8,13 +8,12 @@
 import XCTest
 import MapCore
 
+@MainActor
 final class BasemapPerformanceTests: XCTestCase {
 
-
-    @MainActor
     func testDrawPerformance() async throws {
 
-        let view = TestingMapView(baseStyleURL: "https://vectortiles.geo.admin.ch/styles/ch.swisstopo.basemap.vt/style.json")
+        let view = TestingMapView(DataProvider("https://vectortiles.geo.admin.ch/styles/ch.swisstopo.basemap.vt/style.json"))
 
         try await view.prepare(.zurich)
 

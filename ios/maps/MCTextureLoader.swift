@@ -52,6 +52,13 @@ open class MCTextureLoader: MCLoaderInterface, @unchecked Sendable {
         let etag: String?
         let wasCached: Bool?
 
+        public init(data: Data?, statusCode: Int, etag: String?, wasCached: Bool?) {
+            self.data = data
+            self.statusCode = statusCode
+            self.etag = etag
+            self.wasCached = wasCached
+        }
+
         public enum LoaderError: Error {
             case invalidResponse
             case invalidURL
