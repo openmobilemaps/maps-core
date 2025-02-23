@@ -72,9 +72,8 @@ class DataProvider: MCTextureLoader, @unchecked Sendable {
 
     func loadData(urlString: String) async throws -> Data {
         let fileUrl = URL(fileURLWithPath: filePath, isDirectory: false)
-        let fileName = fileUrl.deletingPathExtension().lastPathComponent
         let snapshotsBaseUrl = fileUrl.deletingLastPathComponent()
-        let snapshotDirectoryUrl = snapshotsBaseUrl.appendingPathComponent("__Requests__").appendingPathComponent(fileName)
+        let snapshotDirectoryUrl = snapshotsBaseUrl.appendingPathComponent("__Requests__")
 
         guard let hex = "\(urlString.hashValue)".data(using: .utf8)?.base64EncodedString() else {
             throw NSError(domain: "Invalid URL string", code: 0, userInfo: nil)
