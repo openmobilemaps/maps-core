@@ -34,9 +34,11 @@ struct BasemapLayerPerformanceTests {
         let provider = DataProvider(style)
         let view = TestingMapView(provider)
         for region in TestRegion.all {
-            try await view.prepare(region)
-            let fps = view.measureFPS()
-            print("\(region.identifier): \(fps)")
+            try await Task {
+                try await view.prepare(region)
+                let fps = view.measureFPS()
+                print("\(region.identifier): \(fps)")
+            }.value
         }
     }
 
