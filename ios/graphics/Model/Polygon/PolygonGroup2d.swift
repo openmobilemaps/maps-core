@@ -136,14 +136,13 @@ extension PolygonGroup2d: MCPolygonGroup2dInterface {
         var minY = Float.greatestFiniteMagnitude
 
         if shader.isStriped {
-            if let p = UnsafeRawPointer(bitPattern: Int(vertices.address)) {
-                for i in 0 ..< vertices.elementCount {
-                    if i % 3 == 0 {
-                        let x = (p + 4 * Int(i)).load(as: Float.self)
-                        let y = (p + 4 * (Int(i) + 1)).load(as: Float.self)
-                        minX = min(x, minX)
-                        minY = min(y, minY)
-                    }
+            let count = Int(vertices.elementCount / 4)
+            if let rawPointer = UnsafeRawPointer(bitPattern: Int(vertices.address)) {
+                let float4Pointer = rawPointer.assumingMemoryBound(to: SIMD4<Float>.self)
+                for i in 0 ..< count {
+                    let value = float4Pointer[i]
+                    minX = min(value.x, minX)
+                    minY = min(value.y, minY)
                 }
             }
         }
