@@ -149,9 +149,6 @@ public class OffscreenMapRendererTest {
         map.getCamera().moveToBoundingBox(bboxCH(), 0.0f, false, null, null);
 
         try {
-            BufferedImage ignoredFirstPass = renderer.drawFrame(Duration.ofSeconds(1));
-            // XXX: text is broken and only appears on second draw call (again).
-            // Either needs proper fix or workarounds in OffscreenMapRenderer.
             BufferedImage image = renderer.drawFrame(Duration.ofSeconds(1));
             assertImageMatchesGolden(image, "testStyleJsonLabel");
         } catch (Exception e) {

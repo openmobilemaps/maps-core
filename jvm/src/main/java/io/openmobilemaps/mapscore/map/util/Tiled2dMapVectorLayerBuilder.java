@@ -67,11 +67,19 @@ public class Tiled2dMapVectorLayerBuilder {
         return this;
     }
 
+    ///! Append a loader to list of loaders.
+    public Tiled2dMapVectorLayerBuilder withLoader(LoaderInterface loader) {
+        this.loaders.add(loader);
+        return this;
+    }
+
+    ///! Append a default-constructed {@link HttpDataLoader} to list of loaders.
     public Tiled2dMapVectorLayerBuilder withHttpLoader() {
         loaders.add(new HttpDataLoader());
         return this;
     }
 
+    ///! Append a {@link HttpDataLoader} constructed with the given client to list of loaders.
     public Tiled2dMapVectorLayerBuilder withHttpLoader(HttpClient httpClient) {
         loaders.add(new HttpDataLoader(httpClient));
         return this;
