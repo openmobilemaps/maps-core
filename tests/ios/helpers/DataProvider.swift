@@ -6,6 +6,7 @@
 //
 
 import MapCore
+import CryptoKit
 
 class DataProvider: MCTextureLoader, @unchecked Sendable {
 
@@ -75,9 +76,11 @@ class DataProvider: MCTextureLoader, @unchecked Sendable {
         let snapshotsBaseUrl = fileUrl.deletingLastPathComponent()
         let snapshotDirectoryUrl = snapshotsBaseUrl.appendingPathComponent("__Requests__")
 
-        guard let hex = "\(urlString.hashValue)".data(using: .utf8)?.base64EncodedString() else {
+        guard let urlStringData = urlString.data(using: .utf8) else {
             throw NSError(domain: "Invalid URL string", code: 0, userInfo: nil)
         }
+        let hash = SHA256.hash(data: urlStringData)
+        let hex = hash.map { String(format: "%02x", $0) }.joined()
 
         guard let url = URL(string: urlString) else {
             throw NSError(domain: "Invalid URL string", code: 0, userInfo: nil)

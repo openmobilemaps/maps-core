@@ -11,6 +11,7 @@ import Testing
 @Suite(.serialized)
 struct BasemapStabilityTests {
 
+
     @Test(arguments: TestRegion.all)
     func testStableRendering(of region: TestRegion) async throws {
         let view = TestingMapView(DataProvider("https://vectortiles.geo.admin.ch/styles/ch.swisstopo.basemap.vt/style.json"))

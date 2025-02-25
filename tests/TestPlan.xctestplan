@@ -9,12 +9,8 @@
     }
   ],
   "defaultOptions" : {
-    "environmentVariableEntries" : [
-      {
-        "key" : "MTL_CAPTURE_ENABLED",
-        "value" : "1"
-      }
-    ]
+    "codeCoverage" : false,
+    "mainThreadCheckerEnabled" : false
   },
   "testTargets" : [
     {

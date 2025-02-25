@@ -180,6 +180,71 @@ open class MCMapView: MTKView, @unchecked Sendable {
         let cImg = CIImage(mtlTexture: texture, options: kciOptions)!
         return context.createCGImage(cImg, from: cImg.extent)?.toImage()
     }
+
+    open func awaitFrame() {
+        // Ensure that triple-buffers are not over-used
+        renderSemaphore.wait()
+    }
+
+    open func prepareDrawFrame() {
+        mapInterface.prepare()
+    }
+
+    open func drawFrame(in view: MTKView, completion: @escaping (Bool) -> Void) {
+        guard
+            let commandBuffer = MetalContext.current.commandQueue
+                .makeCommandBuffer(),
+            let computeEncoder = commandBuffer.makeComputeCommandEncoder()
+        else {
+            self.renderSemaphore.signal()
+            return
+        }
+
+        renderingContext.computeEncoder = computeEncoder
+        mapInterface.compute()
+        computeEncoder.endEncoding()
+
+        guard let renderPassDescriptor = view.currentRenderPassDescriptor,
+            let renderEncoder = commandBuffer.makeRenderCommandEncoder(
+                descriptor: renderPassDescriptor)
+        else {
+            completion(false)
+            return
+        }
+
+        renderingContext.encoder = renderEncoder
+        renderingContext.beginFrame()
+
+        // Shared lib stuff
+        if sizeChanged {
+            mapInterface.setViewportSize(view.drawableSize.vec2)
+            sizeDelegate?.sizeChanged()
+            sizeChanged = false
+        }
+
+        mapInterface.drawFrame()
+
+        renderEncoder.endEncoding()
+
+        guard let drawable = view.currentDrawable else {
+            completion(false)
+            return
+        }
+
+        commandBuffer.addCompletedHandler { _ in
+            completion(true)
+        }
+
+        // if we want to save the drawable (offscreen rendering), we commit and wait synchronously
+        // until the command buffer completes, also we don't present it
+        if self.saveDrawable {
+            commandBuffer.commit()
+            commandBuffer.waitUntilCompleted()
+        } else {
+            commandBuffer.present(drawable)
+            commandBuffer.commit()
+        }
+    }
 }
 
 extension MCMapView: MTKViewDelegate {
@@ -204,64 +269,14 @@ extension MCMapView: MTKViewDelegate {
 
         framesToRender -= 1
 
-        // Ensure that triple-buffers are not over-used
-        renderSemaphore.wait()
+        awaitFrame()
 
-        mapInterface.prepare()
+        prepareDrawFrame()
 
-        guard
-            let commandBuffer = MetalContext.current.commandQueue
-                .makeCommandBuffer(),
-            let computeEncoder = commandBuffer.makeComputeCommandEncoder()
-        else {
-            self.renderSemaphore.signal()
-            return
-        }
-
-        renderingContext.computeEncoder = computeEncoder
-        mapInterface.compute()
-        computeEncoder.endEncoding()
-
-        guard let renderPassDescriptor = view.currentRenderPassDescriptor,
-            let renderEncoder = commandBuffer.makeRenderCommandEncoder(
-                descriptor: renderPassDescriptor)
-        else {
-            self.renderSemaphore.signal()
-            return
-        }
-
-        renderingContext.encoder = renderEncoder
-        renderingContext.beginFrame()
-
-        // Shared lib stuff
-        if sizeChanged {
-            mapInterface.setViewportSize(view.drawableSize.vec2)
-            sizeDelegate?.sizeChanged()
-            sizeChanged = false
-        }
-
-        mapInterface.drawFrame()
-
-        renderEncoder.endEncoding()
-
-        guard let drawable = view.currentDrawable else {
-            self.renderSemaphore.signal()
-            return
-        }
-
-        commandBuffer.addCompletedHandler { _ in
+        drawFrame(in: view) { _ in
             self.renderSemaphore.signal()
         }
 
-        // if we want to save the drawable (offscreen rendering), we commit and wait synchronously
-        // until the command buffer completes, also we don't present it
-        if self.saveDrawable {
-            commandBuffer.commit()
-            commandBuffer.waitUntilCompleted()
-        } else {
-            commandBuffer.present(drawable)
-            commandBuffer.commit()
-        }
     }
 
     public func renderToImage(

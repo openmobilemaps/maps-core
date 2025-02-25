@@ -6,11 +6,22 @@
 //
 
 import MapCore
+import MetalKit
 import UIKit
+import os
 
+@available(iOS 15.0, *)
 class TestingMapView: MCMapView, @unchecked Sendable, MCMapReadyCallbackInterface {
     private var cont: CheckedContinuation<Void, any Error>?
     private var prepared = false
+
+    // Create a signposter that uses the default subsystem.
+    static let signposterSubsystem = "MapCore"
+    static let signposterCategory = "Rendering"
+    static let signposterIntervalAwait: StaticString = "awaitDrawFrame"
+    static let signposterIntervalPrepare: StaticString = "prepareDrawFrame"
+    static let signposterIntervalDraw: StaticString = "drawFrame"
+    let signposter = OSSignposter(subsystem: TestingMapView.signposterSubsystem, category: TestingMapView.signposterCategory)
 
     init(
         size: CGSize = .init(width: 1206 / 3, height: 2622 / 3),  // iPhone 16 Pro
@@ -99,6 +110,40 @@ class TestingMapView: MCMapView, @unchecked Sendable, MCMapReadyCallbackInterfac
         self.invalidate()
         self.draw(in: self)
         stopCapture()
+    }
+
+    override func awaitFrame() {
+        let signpostID = signposter.makeSignpostID()
+
+        let state = signposter.beginInterval(Self.signposterIntervalAwait, id: signpostID)
+
+        super.awaitFrame()
+
+        signposter.endInterval(Self.signposterIntervalAwait, state)
+
+    }
+
+    override func prepareDrawFrame() {
+
+        let signpostID = signposter.makeSignpostID()
+
+        let state = signposter.beginInterval(Self.signposterIntervalPrepare, id: signpostID)
+
+        super.prepareDrawFrame()
+
+        signposter.endInterval(Self.signposterIntervalPrepare, state)
+    }
+
+    override func drawFrame(in view: MTKView, completion: @escaping (Bool) -> Void) {
+        let signpostID = signposter.makeSignpostID()
+
+        let state = signposter.beginInterval(Self.signposterIntervalDraw, id: signpostID)
+
+        super.drawFrame(in: view) { [signposter] in
+            signposter.endInterval(Self.signposterIntervalDraw, state)
+            completion($0)
+        }
+
     }
 
     override func currentDrawableImage() -> UIImage? {
