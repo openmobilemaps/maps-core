@@ -17,11 +17,8 @@ final class BasemapPerformanceTests: XCTestCase {
 
         try await view.prepare(.aletsch)
 
-        let prepareMetric = XCTOSSignpostMetric(subsystem: TestingMapView.signposterSubsystem, category: TestingMapView.signposterCategory, name: "\(TestingMapView.signposterIntervalPrepare)")
-        let drawMetric = XCTOSSignpostMetric(subsystem: TestingMapView.signposterSubsystem, category: TestingMapView.signposterCategory, name: "\(TestingMapView.signposterIntervalDraw)")
-        let awaitMetric = XCTOSSignpostMetric(subsystem: TestingMapView.signposterSubsystem, category: TestingMapView.signposterCategory, name: "\(TestingMapView.signposterIntervalAwait)")
-        self.measure(metrics: [prepareMetric, drawMetric, awaitMetric]) {
-            view.drawMeasured(frames: 70)
+        self.measure(metrics: [FPSMetric(mapView: view)]) {
+            view.drawMeasured()
         }
     }
 

@@ -9,6 +9,7 @@ import MapCore
 import MetalKit
 import UIKit
 import os
+import XCTest
 
 @available(iOS 15.0, *)
 class TestingMapView: MCMapView, @unchecked Sendable, MCMapReadyCallbackInterface {
@@ -134,14 +135,19 @@ class TestingMapView: MCMapView, @unchecked Sendable, MCMapReadyCallbackInterfac
         signposter.endInterval(Self.signposterIntervalPrepare, state)
     }
 
-    override func drawFrame(in view: MTKView, completion: @escaping (Bool) -> Void) {
+    private(set) var frames: [(start: XCTPerformanceMeasurementTimestamp, end: XCTPerformanceMeasurementTimestamp)] = []
+
+    override func drawFrame(in view: MTKView, completion: @escaping (CFTimeInterval?) -> Void) {
         let signpostID = signposter.makeSignpostID()
 
         let state = signposter.beginInterval(Self.signposterIntervalDraw, id: signpostID)
+        let start = XCTPerformanceMeasurementTimestamp()
 
         super.drawFrame(in: view) { [signposter] in
             signposter.endInterval(Self.signposterIntervalDraw, state)
             completion($0)
+            let end = XCTPerformanceMeasurementTimestamp()
+            self.frames.append((start, end))
         }
 
     }

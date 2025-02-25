@@ -190,7 +190,7 @@ open class MCMapView: MTKView, @unchecked Sendable {
         mapInterface.prepare()
     }
 
-    open func drawFrame(in view: MTKView, completion: @escaping (Bool) -> Void) {
+    open func drawFrame(in view: MTKView, completion: @escaping (CFTimeInterval?) -> Void) {
         guard
             let commandBuffer = MetalContext.current.commandQueue
                 .makeCommandBuffer(),
@@ -208,7 +208,7 @@ open class MCMapView: MTKView, @unchecked Sendable {
             let renderEncoder = commandBuffer.makeRenderCommandEncoder(
                 descriptor: renderPassDescriptor)
         else {
-            completion(false)
+            completion(nil)
             return
         }
 
@@ -227,12 +227,17 @@ open class MCMapView: MTKView, @unchecked Sendable {
         renderEncoder.endEncoding()
 
         guard let drawable = view.currentDrawable else {
-            completion(false)
+            completion(nil)
             return
         }
 
-        commandBuffer.addCompletedHandler { _ in
-            completion(true)
+        commandBuffer.addCompletedHandler { commandBuffer in
+            let start = commandBuffer.gpuStartTime
+            let end = commandBuffer.gpuEndTime
+
+
+            let gpuRuntimeDuration = end - start
+            completion(gpuRuntimeDuration)
         }
 
         // if we want to save the drawable (offscreen rendering), we commit and wait synchronously

@@ -14,6 +14,7 @@
   },
   "testTargets" : [
     {
+      "parallelizable" : false,
       "target" : {
         "containerPath" : "container:",
         "identifier" : "iOSTests",

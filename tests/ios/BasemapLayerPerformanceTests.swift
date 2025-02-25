@@ -17,12 +17,10 @@ struct BasemapLayerPerformanceTests {
 
         try await view.prepare(.zurich)
 
-        for _ in 0..<10 {
-            print("measuring fps")
-            let fps = view.measureFPS(duration: 30)
-            print("fps: \(fps)")
-        }
-
+        let fps = (0 ..< 100).map { _ in  view.measureFPS(duration: 5) }
+        let maxFps = fps.max()!
+        print(maxFps)
+        #expect(maxFps > 80.0)
     }
 
     @Test func testStyleParsing() async throws {
