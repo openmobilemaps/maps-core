@@ -17,13 +17,21 @@ class TestingMapView: MCMapView, @unchecked Sendable, MCMapReadyCallbackInterfac
         mapConfig: MCMapConfig = MCMapConfig(
             mapCoordinateSystem: MCCoordinateSystemFactory.getEpsg3857System()),
         pixelsPerInch: Float? = nil, is3D: Bool = false,
-        _ dataProvider: DataProvider
+        _ dataProvider: DataProvider? = nil
     ) {
         super.init(mapConfig: mapConfig, pixelsPerInch: pixelsPerInch, is3D: is3D)
         self.frame = .init(origin: .zero, size: size)
-        self.add(layer: VectorLayer(testingStyleURL: DataProvider.styleJsonPlaceholder, loader: dataProvider))
+        if let dataProvider = dataProvider {
+            self.add(layer: VectorLayer(testingStyleURL: DataProvider.styleJsonPlaceholder, loader: dataProvider))
+        }
     }
 
+    @discardableResult
+    func add(vectorLayer dataProvider: DataProvider) -> VectorLayer {
+        let layer = VectorLayer(testingStyleURL: DataProvider.styleJsonPlaceholder, loader: dataProvider)
+        self.add(layer: layer)
+        return layer
+    }
 
     func prepare(_ region: TestRegion) async throws {
         self.setNeedsLayout()
@@ -45,11 +53,13 @@ class TestingMapView: MCMapView, @unchecked Sendable, MCMapReadyCallbackInterfac
     private func awaitReady(bounds: MCRectCoord) async throws {
         try await withCheckedThrowingContinuation { cont in
             self.cont = cont
-            self.mapInterface.drawReadyFrame(
-                bounds,
-                timeout: 60,
-                callbacks: self
-            )
+            Task.detached {
+                self.mapInterface.drawReadyFrame(
+                    bounds,
+                    timeout: 60,
+                    callbacks: self
+                )
+            }
         }
         self.draw(in: self)
     }

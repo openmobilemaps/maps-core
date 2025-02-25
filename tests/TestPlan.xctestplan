@@ -1,0 +1,29 @@
+{
+  "configurations" : [
+    {
+      "id" : "A7FBA571-274A-400E-B01F-A1355D4ECAB6",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "environmentVariableEntries" : [
+      {
+        "key" : "MTL_CAPTURE_ENABLED",
+        "value" : "1"
+      }
+    ]
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "iOSTests",
+        "name" : "iOSTests"
+      }
+    }
+  ],
+  "version" : 1
+}

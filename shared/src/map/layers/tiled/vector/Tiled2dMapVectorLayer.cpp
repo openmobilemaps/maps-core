@@ -667,7 +667,8 @@ void Tiled2dMapVectorLayer::onRenderPassUpdate(const std::string &source, bool i
 }
 
 void Tiled2dMapVectorLayer::pregenerateRenderPasses() {
-    std::vector<std::shared_ptr<RenderPassInterface>> newPasses;
+    thread_local std::vector<std::shared_ptr<RenderPassInterface>> newPasses;
+    newPasses.clear();
 
     if (backgroundLayer) {
         auto backgroundLayerPasses = backgroundLayer->buildRenderPasses();

@@ -18,7 +18,7 @@ class DataProvider: MCTextureLoader, @unchecked Sendable {
     let inputData: InputData
     let filePath: String
 
-    static let styleJsonPlaceholder = "style.json"
+    static let styleJsonPlaceholder = "{STYLE_JSON}"
 
     init(file filePath: StaticString = #file) {
         self.inputData = .none
@@ -60,7 +60,7 @@ class DataProvider: MCTextureLoader, @unchecked Sendable {
 
         Task {
             do {
-                let data = try await loadData(urlString: urlString)
+                let data = try await self.loadData(urlString: urlString)
                 completion(.success(.init(data: data, statusCode: 200, etag: nil, wasCached: true)))
             } catch {
                 completion(.failure(.other(error)))

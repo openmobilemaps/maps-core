@@ -74,9 +74,9 @@ open class MCMapView: MTKView, @unchecked Sendable {
     deinit {
         if Thread.isMainThread {
             // make sure the mapInterface is destroyed from a background thread
-//            DispatchQueue.global().async { [mapInterface] in
+            DispatchQueue.global().async { [mapInterface] in
                 mapInterface.destroy()
-//            }
+            }
         } else {
             mapInterface.destroy()
         }
@@ -301,8 +301,7 @@ extension MCMapView: MTKViewDelegate {
             captureDescriptor.outputURL = url
             print("Capturing to \(url)")
             try! MTLCaptureManager.shared().startCapture(with: captureDescriptor)
-        }
-        else {
+        } else {
             print("MTL_CAPTURE_ENABLED not set as environment variable, capture not started")
         }
     }

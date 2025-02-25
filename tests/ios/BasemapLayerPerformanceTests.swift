@@ -9,6 +9,7 @@ import Foundation
 import Testing
 
 @MainActor
+@Suite(.serialized)
 struct BasemapLayerPerformanceTests {
 
     @Test func testFPSStability() async throws {
@@ -16,9 +17,12 @@ struct BasemapLayerPerformanceTests {
 
         try await view.prepare(.zurich)
 
-        let fps = (0..<5).map { _ in view.measureFPS() }
+        for _ in 0..<10 {
+            print("measuring fps")
+            let fps = view.measureFPS(duration: 30)
+            print("fps: \(fps)")
+        }
 
-        print(fps)
     }
 
     @Test func testStyleParsing() async throws {
@@ -46,10 +50,10 @@ struct BasemapLayerPerformanceTests {
         let style = try await VectorStyle(url: "https://vectortiles.geo.admin.ch/styles/ch.swisstopo.basemap.vt/style.json")
         for layer in style.layers {
             try await Task {
-                let provider = DataProvider(style.filtered(keepLayers: [layer.id]))
+                let provider = DataProvider(style.filtered(removeLayers: [layer.id]))
                 let view = TestingMapView(provider)
                 try await view.prepare(.zurich)
-                let fps = view.measureFPS()
+                let fps = (0..<3).map { _ in view.measureFPS() }
                 print("\(layer.id): \(fps)")
             }.value
         }
