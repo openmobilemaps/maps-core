@@ -36,6 +36,18 @@ struct Layer: Codable {
     let layout: [String: JSONValue]?
     let paint: [String: JSONValue]?
     let filter: [JSONValue]?
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case type
+        case source
+        case sourceLayer = "source-layer"
+        case minzoom
+        case maxzoom
+        case layout
+        case paint
+        case filter
+    }
 }
 
 // Transition settings

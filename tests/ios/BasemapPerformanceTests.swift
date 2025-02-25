@@ -17,7 +17,9 @@ final class BasemapPerformanceTests: XCTestCase {
 
         try await view.prepare(.aletsch)
 
-        self.measure(metrics: [FPSMetric(mapView: view)]) {
+        let options = XCTMeasureOptions.default
+        options.iterationCount = 10
+        self.measure(metrics: [FPSMetric(mapView: view)], options: options) {
             view.drawMeasured()
         }
     }

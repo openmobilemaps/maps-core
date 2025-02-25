@@ -196,7 +196,7 @@ open class MCMapView: MTKView, @unchecked Sendable {
                 .makeCommandBuffer(),
             let computeEncoder = commandBuffer.makeComputeCommandEncoder()
         else {
-            self.renderSemaphore.signal()
+            completion(nil)
             return
         }
 

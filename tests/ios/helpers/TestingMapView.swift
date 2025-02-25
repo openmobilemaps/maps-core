@@ -73,6 +73,7 @@ class TestingMapView: MCMapView, @unchecked Sendable, MCMapReadyCallbackInterfac
                 )
             }
         }
+        self.invalidate()
         self.draw(in: self)
     }
 

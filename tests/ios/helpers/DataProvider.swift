@@ -52,6 +52,7 @@ class DataProvider: MCTextureLoader, @unchecked Sendable {
             switch inputData {
             case .styleJson(let styleJson):
                 completion(.success(.init(data: styleJson.data(using: .utf8), statusCode: 200, etag: nil, wasCached: true)))
+                return nil
             case .baseStyleURL(let baseStyleURL):
                 urlString = baseStyleURL
             case .none:
@@ -59,7 +60,7 @@ class DataProvider: MCTextureLoader, @unchecked Sendable {
             }
         }
 
-        Task {
+        let task = Task {
             do {
                 let data = try await self.loadData(urlString: urlString)
                 completion(.success(.init(data: data, statusCode: 200, etag: nil, wasCached: true)))
@@ -68,7 +69,7 @@ class DataProvider: MCTextureLoader, @unchecked Sendable {
             }
         }
 
-        return nil
+        return task
     }
 
     func loadData(urlString: String) async throws -> Data {
@@ -111,4 +112,7 @@ class DataProvider: MCTextureLoader, @unchecked Sendable {
         return data
     }
 
+}
+
+extension Task: @retroactive CancellableTask {
 }
