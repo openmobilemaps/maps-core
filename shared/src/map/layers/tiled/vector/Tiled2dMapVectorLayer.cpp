@@ -1159,7 +1159,13 @@ void Tiled2dMapVectorLayer::updateLayerDescription(std::shared_ptr<VectorLayerDe
 
 std::optional<std::shared_ptr<FeatureContext>> Tiled2dMapVectorLayer::getFeatureContext(int64_t identifier) {
     for (const auto &[source, vectorTileSource] : vectorTileSources) {
-        auto const &currentTileInfos = vectorTileSource.converse(MFN(&Tiled2dMapVectorSource::getCurrentTiles)).get();
+        VectorSet<Tiled2dMapVectorTileInfo> currentTileInfos;
+        try {
+            currentTileInfos = vectorTileSource.converse(MFN(&Tiled2dMapVectorSource::getCurrentTiles)).get();
+        } catch (const std::exception &e) {
+            LogError << "Exception while getting future result: " <<= e.what();
+            continue;
+        }
 
         for (auto const &tile: currentTileInfos) {
             for (auto it = tile.layerFeatureMaps->begin(); it != tile.layerFeatureMaps->end(); it++) {
@@ -1394,7 +1400,13 @@ std::vector<VectorLayerFeatureCoordInfo> Tiled2dMapVectorLayer::getVisiblePointF
     std::vector<VectorLayerFeatureCoordInfo> features = {};
 
     for (const auto &[source, vectorTileSource] : vectorTileSources) {
-        auto const &currentTileInfos = vectorTileSource.converse(MFN(&Tiled2dMapVectorSource::getCurrentTiles)).get();
+        VectorSet<Tiled2dMapVectorTileInfo> currentTileInfos;
+        try {
+            currentTileInfos = vectorTileSource.converse(MFN(&Tiled2dMapVectorSource::getCurrentTiles)).get();
+        } catch (const std::exception &e) {
+            LogError << "Exception while getting future result: " <<= e.what();
+            continue;
+        }
 
         for (auto const &tile: currentTileInfos) {
             for (auto it = tile.layerFeatureMaps->begin(); it != tile.layerFeatureMaps->end(); it++) {
