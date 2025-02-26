@@ -192,7 +192,13 @@ void Tiled2dMapVectorSourceRasterTileDataManager::updateLayerDescription(std::sh
         return;
     }
 
-    auto const &currentTileInfos = rasterSource.converse(MFN(&Tiled2dMapRasterSource::getCurrentTiles)).get();
+    VectorSet<Tiled2dMapRasterTileInfo> currentTileInfos;
+    try {
+        currentTileInfos = rasterSource.converse(MFN(&Tiled2dMapRasterSource::getCurrentTiles)).get();
+    } catch (const std::exception &e) {
+        LogError << "Exception while getting future result: " <<= e.what();
+        return;
+    }
 
     std::unordered_set<Tiled2dMapTileInfo> currentTilesStrippedInfos;
     for (const auto &tile : currentTileInfos) {
@@ -297,7 +303,13 @@ void Tiled2dMapVectorSourceRasterTileDataManager::reloadLayerContent(
         return;
     }
 
-    auto const &currentTileInfos = rasterSource.converse(MFN(&Tiled2dMapRasterSource::getCurrentTiles)).get();
+    VectorSet<Tiled2dMapRasterTileInfo> currentTileInfos;
+    try {
+        currentTileInfos = rasterSource.converse(MFN(&Tiled2dMapRasterSource::getCurrentTiles)).get();
+    } catch (const std::exception &e) {
+        LogError << "Exception while getting future result: " <<= e.what();
+        return;
+    }
 
     std::unordered_set<Tiled2dMapTileInfo> currentTilesStrippedInfos;
     for (const auto &tile : currentTileInfos) {
