@@ -15,6 +15,7 @@
 #include "LineVectorLayerDescription.h"
 #include "LineGroup2dLayerObject.h"
 #include "ShaderLineStyle.h"
+#include "ShaderSimpleLineStyle.h"
 
 class Tiled2dMapVectorLineTile
         : public Tiled2dMapVectorTile,
@@ -74,7 +75,11 @@ private:
     float selectionSizeFactor = 1.0f;
 
     std::vector<std::vector<ShaderLineStyle>> reusableLineStyles;
+    std::vector<std::vector<ShaderSimpleLineStyle>> reusableSimpleLineStyles;
     std::unordered_map<size_t, std::pair<int, int>> styleHashToGroupMap;
 
     std::vector<std::shared_ptr<LineGroup2dLayerObject>> toClear;
+
+
+    bool isSimpleLine;
 };

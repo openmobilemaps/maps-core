@@ -20,7 +20,7 @@ class ColorLineGroup2dShaderOpenGl : public BaseShaderProgramOpenGl,
                                      public LineGroupShaderInterface,
                                      public std::enable_shared_from_this<ShaderProgramInterface> {
 public:
-    ColorLineGroup2dShaderOpenGl(bool projectOntoUnitSphere);
+    ColorLineGroup2dShaderOpenGl(bool projectOntoUnitSphere, bool simple);
 
     virtual std::shared_ptr<ShaderProgramInterface> asShaderProgramInterface() override;
 
@@ -41,6 +41,7 @@ protected:
 
 private:
     const bool projectOntoUnitSphere;
+    const bool simpleLine;
     const std::string programName;
 
     std::recursive_mutex styleMutex;
@@ -56,5 +57,6 @@ private:
     //const int maxNumDashValues = 4;
    // const int sizeDashValues = maxNumDashValues + 3;
     const int sizeLineValues = 23;//sizeStyleValues + sizeColorValues + sizeGapColorValues + sizeDashValues + 1;
-    const int sizeLineValuesArray = sizeLineValues * maxNumStyles;
+    const int sizeSimpleLineValues = 8;
+    const int sizeLineValuesArray;
 };

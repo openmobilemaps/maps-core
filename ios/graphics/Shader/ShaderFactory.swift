@@ -68,6 +68,14 @@ class ShaderFactory: MCShaderFactoryInterface {
         LineGroupShader(shader: .unitSphereLineGroupShader)
     }
 
+    func createSimpleLineGroupShader() -> MCLineGroupShaderInterface? {
+        LineGroupShader(shader: .simpleLineGroupShader)
+    }
+
+    func createUnitSphereSimpleLineGroupShader() -> (any MCLineGroupShaderInterface)? {
+        LineGroupShader(shader: .unitSphereSimpleLineGroupShader)
+    }
+
     func createUnitSphereColorShader() -> MCColorShaderInterface? {
         ColorShader()
     }

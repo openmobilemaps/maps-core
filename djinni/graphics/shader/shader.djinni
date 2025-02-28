@@ -30,6 +30,9 @@ shader_factory_interface = interface +c +j +o {
     create_line_group_shader(): line_group_shader_interface;
     create_unit_sphere_line_group_shader(): line_group_shader_interface;
 
+    create_simple_line_group_shader(): line_group_shader_interface;
+    create_unit_sphere_simple_line_group_shader(): line_group_shader_interface;
+
     create_unit_sphere_color_shader() : color_shader_interface;
     create_color_shader() : color_shader_interface;
 
