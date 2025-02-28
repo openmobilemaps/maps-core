@@ -57,6 +57,28 @@ line_style = record {
     dotted_skew: f32;
 }
 
+shader_simple_line_style = record {
+    width: f32;
+    color_r: f32;
+    color_g: f32;
+    color_b: f32;
+    color_a: f32;
+    width_as_pixel: f32;
+    opacity: f32;
+    lineCap: f32;
+}
+
+simple_line_style = record {
+    color: color_state_list;
+    width_type: size_type;
+    width: f32;
+    dash_array: list<f32>;
+    line_cap: line_cap_type;
+    offset: f32;
+    dotted: bool;
+    dotted_skew: f32;
+}
+
 line_info_interface = interface +c {
     get_identifier(): string;
     get_coordinates(): list<coord>;

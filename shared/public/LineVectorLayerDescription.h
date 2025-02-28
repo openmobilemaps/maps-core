@@ -116,6 +116,14 @@ public:
         return lineDottedSkewEvaluator.getResult(context, defaultValue);
     }
 
+    bool isSimpleLine() {
+        return lineBlurEvaluator.getValue() == nil &&
+               lineDashArrayEvaluator.getValue() == nil &&
+               lineOffsetEvaluator.getValue() == nil &&
+               lineDottedEvaluator.getValue() == nil &&
+               lineDottedSkewEvaluator.getValue() == nil;
+    }
+
     ValueEvaluator<Color> lineColorEvaluator;
     ValueEvaluator<double> lineOpacityEvaluator;
     ValueEvaluator<double> lineBlurEvaluator;
