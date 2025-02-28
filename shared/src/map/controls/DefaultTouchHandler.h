@@ -44,8 +44,7 @@ private:
         ONE_FINGER_DOUBLE_CLICK_DOWN,
         ONE_FINGER_DOUBLE_CLICK_MOVE,
         TWO_FINGER_DOWN,
-        TWO_FINGER_MOVING,
-        ONE_FINGER_AFTER_TWO
+        TWO_FINGER_MOVING
     };
 
     void handleTouchDown(Vec2F position);
