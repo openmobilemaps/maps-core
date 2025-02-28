@@ -1,4 +1,4 @@
-name: XCUI Tests
+name: iOS Tests
 
 env:
   XCODE_VERSION: 'Xcode_16.0'
@@ -9,7 +9,7 @@ on:
   pull_request:
 
 jobs:
-  xcuitests:
+  uitests:
     runs-on: macos-15
     timeout-minutes: 60 
     steps:
@@ -34,18 +34,21 @@ jobs:
 
       - name: Upload XCResult
         uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: XCResult
           path: TestResults.xcresult
 
       - name: Upload JUnit Test Results
         uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: TestResults
           path: TestResults.xml
 
       - name: Publish Test Results
-        uses: EnricoMi/publish-unit-test-result-action@v2
+        uses: EnricoMi/publish-unit-test-result-action/macos@v2
+        if: always()
         with:
           files: TestResults.xml
           check_name: "XCUI Tests Report"
