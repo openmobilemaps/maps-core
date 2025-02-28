@@ -16,7 +16,10 @@ class FPSMetric: NSObject, XCTMetric {
     }
 
     func reportMeasurements(from startTime: XCTPerformanceMeasurementTimestamp, to endTime: XCTPerformanceMeasurementTimestamp) throws -> [XCTPerformanceMeasurement] {
-        let frames = self.mapView.frames.count { $0.start.absoluteTimeNanoSeconds > startTime.absoluteTimeNanoSeconds && $0.end.absoluteTimeNanoSeconds < endTime.absoluteTimeNanoSeconds }
+        var frames = 0
+        self.mapView.framesQueue.sync {
+            frames = self.mapView.frames.count { $0.start.absoluteTimeNanoSeconds > startTime.absoluteTimeNanoSeconds && $0.end.absoluteTimeNanoSeconds < endTime.absoluteTimeNanoSeconds }
+        }
         let duration = Double(endTime.absoluteTimeNanoSeconds - startTime.absoluteTimeNanoSeconds) / Double(1_000_000_000)
         let fps = Double(frames) / duration
         return [.init(identifier: "FPS", displayName: "Frames per Second", value: .init(value: fps, unit: .init(symbol: "fps")), polarity: .prefersLarger)]
@@ -26,6 +29,5 @@ class FPSMetric: NSObject, XCTMetric {
         let copy = FPSMetric(mapView: mapView)
         return copy
     }
-
 
 }

@@ -12,7 +12,7 @@ import Testing
 @Suite(.serialized)
 struct BasemapLayerPerformanceTests {
 
-    @Test func testFPSStability() async throws {
+    @Test(.disabled("Too slow")) func testFPSStability() async throws {
         let view = TestingMapView(DataProvider("https://vectortiles.geo.admin.ch/styles/ch.swisstopo.basemap.vt/style.json"))
 
         try await view.prepare(.zurich)

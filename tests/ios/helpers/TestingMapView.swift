@@ -137,6 +137,7 @@ class TestingMapView: MCMapView, @unchecked Sendable, MCMapReadyCallbackInterfac
     }
 
     private(set) var frames: [(start: XCTPerformanceMeasurementTimestamp, end: XCTPerformanceMeasurementTimestamp)] = []
+    let framesQueue = DispatchQueue(label: "FramesQueue")
 
     override func drawFrame(in view: MTKView, completion: @escaping (CFTimeInterval?) -> Void) {
         let signpostID = signposter.makeSignpostID()
@@ -144,11 +145,13 @@ class TestingMapView: MCMapView, @unchecked Sendable, MCMapReadyCallbackInterfac
         let state = signposter.beginInterval(Self.signposterIntervalDraw, id: signpostID)
         let start = XCTPerformanceMeasurementTimestamp()
 
-        super.drawFrame(in: view) { [signposter] in
+        super.drawFrame(in: view) { [signposter, weak self] in
             signposter.endInterval(Self.signposterIntervalDraw, state)
             completion($0)
             let end = XCTPerformanceMeasurementTimestamp()
-            self.frames.append((start, end))
+            self?.framesQueue.sync {
+                self?.frames.append((start, end))
+            }
         }
 
     }
