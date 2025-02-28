@@ -241,8 +241,10 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 		return requireMapInterface().getCoordinateConverterHelper()
 	}
 
-	override fun setPerformanceLoggers(performanceLoggers: List<PerformanceLoggerInterface>) {
-		super.setPerformanceLoggers(performanceLoggers)
+	fun setPerformanceLoggers(performanceLoggers: List<PerformanceLoggerInterface>, captureGlDrawFrame: Boolean = false) {
+		if (captureGlDrawFrame) {
+			super.setPerformanceLoggers(performanceLoggers)
+		}
 		requireMapInterface().setPerformanceLoggers(performanceLoggers.toCollection(ArrayList()))
 	}
 
