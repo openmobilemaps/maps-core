@@ -41,6 +41,7 @@ import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
+import kotlin.collections.ArrayList
 
 open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) :
 	GlTextureView(context, attrs, defStyleAttr), GLSurfaceView.Renderer, AndroidSchedulerCallback, LifecycleObserver,
@@ -238,6 +239,11 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 
 	override fun getCoordinateConversionHelper(): CoordinateConversionHelperInterface {
 		return requireMapInterface().getCoordinateConverterHelper()
+	}
+
+	override fun setPerformanceLoggers(performanceLoggers: List<PerformanceLoggerInterface>) {
+		super.setPerformanceLoggers(performanceLoggers)
+		requireMapInterface().setPerformanceLoggers(performanceLoggers.toCollection(ArrayList()))
 	}
 
 	fun saveFrame(saveFrameSpec: SaveFrameSpec, saveFrameCallback: SaveFrameCallback) {

@@ -20,6 +20,8 @@ auto LineStyle::toCpp(ObjcType obj) -> CppType
             ::djinni::Enum<::SizeType, MCSizeType>::toCpp(obj.widthType),
             ::djinni::F32::toCpp(obj.width),
             ::djinni::List<::djinni::F32>::toCpp(obj.dashArray),
+            ::djinni::F32::toCpp(obj.dashFade),
+            ::djinni::F32::toCpp(obj.dashAnimationSpeed),
             ::djinni::Enum<::LineCapType, MCLineCapType>::toCpp(obj.lineCap),
             ::djinni::F32::toCpp(obj.offset),
             ::djinni::Bool::toCpp(obj.dotted),
@@ -35,6 +37,8 @@ auto LineStyle::fromCpp(const CppType& cpp) -> ObjcType
                                     widthType:(::djinni::Enum<::SizeType, MCSizeType>::fromCpp(cpp.widthType))
                                         width:(::djinni::F32::fromCpp(cpp.width))
                                     dashArray:(::djinni::List<::djinni::F32>::fromCpp(cpp.dashArray))
+                                     dashFade:(::djinni::F32::fromCpp(cpp.dashFade))
+                           dashAnimationSpeed:(::djinni::F32::fromCpp(cpp.dashAnimationSpeed))
                                       lineCap:(::djinni::Enum<::LineCapType, MCLineCapType>::fromCpp(cpp.lineCap))
                                        offset:(::djinni::F32::fromCpp(cpp.offset))
                                        dotted:(::djinni::Bool::fromCpp(cpp.dotted))

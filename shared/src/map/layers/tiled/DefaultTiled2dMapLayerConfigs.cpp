@@ -18,8 +18,11 @@ std::shared_ptr<Tiled2dMapLayerConfig> DefaultTiled2dMapLayerConfigs::webMercato
 
 std::shared_ptr<Tiled2dMapLayerConfig>
 DefaultTiled2dMapLayerConfigs::webMercatorCustom(const std::string &layerName, const std::string &urlFormat,
-                                                 const Tiled2dMapZoomInfo &zoomInfo, int32_t minZoomLevel, int32_t maxZoomLevel) {
-    return std::make_shared<WebMercatorTiled2dMapLayerConfig>(layerName, urlFormat, zoomInfo, minZoomLevel, maxZoomLevel);
+                                                 const std::optional<Tiled2dMapZoomInfo> & zoomInfo, int32_t minZoomLevel, int32_t maxZoomLevel) {
+    if (zoomInfo.has_value()) {
+        return std::make_shared<WebMercatorTiled2dMapLayerConfig>(layerName, urlFormat, zoomInfo.value(), minZoomLevel, maxZoomLevel);
+    }
+    return std::make_shared<WebMercatorTiled2dMapLayerConfig>(layerName, urlFormat, minZoomLevel, maxZoomLevel);
 }
 
 std::shared_ptr<Tiled2dMapLayerConfig>

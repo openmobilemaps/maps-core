@@ -30,7 +30,7 @@ class Renderer : public RendererInterface {
 
     /** Ensure calling on graphics thread */
     void drawFrame(const std::shared_ptr<RenderingContextInterface> &renderingContext,
-                   const std::shared_ptr<CameraInterface> &camera) override;
+                   const std::shared_ptr<CameraInterface> &camera, const /*nullable*/ std::shared_ptr<RenderTargetInterface> & target) override;
 
     /** Ensure calling on graphics thread */
     void compute(const /*not-null*/ std::shared_ptr<RenderingContextInterface> &renderingContext,

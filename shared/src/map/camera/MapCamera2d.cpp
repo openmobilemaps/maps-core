@@ -419,6 +419,7 @@ std::vector<float> MapCamera2d::getVpMatrix() {
 
     Coord renderCoordCenter = conversionHelper->convertToRenderSystem(centerPosition);
 
+    std::lock_guard<std::recursive_mutex> lock(vpDataMutex);
 
     Matrix::setIdentityM(newVpMatrix, 0);
 
@@ -431,10 +432,10 @@ std::vector<float> MapCamera2d::getVpMatrix() {
 
     Matrix::rotateM(newVpMatrix, 0.0, currentRotation, 0.0, 0.0, 1.0);
 
-    std::lock_guard<std::recursive_mutex> lock(vpDataMutex);
-
     origin.x  = renderCoordCenter.x;
     origin.y  = renderCoordCenter.y;
+
+    Matrix::invertM(newInverseVpMatrix, 0, newVpMatrix, 0);
 
     lastVpBounds = viewBounds;
     lastVpRotation = currentRotation;
@@ -458,6 +459,15 @@ std::optional<std::vector<float>> MapCamera2d::getLastVpMatrix() {
     return vpCopy;
 }
 
+std::optional<std::vector<float>> MapCamera2d::getLastInverseVpMatrix() {
+    if (!lastVpBounds) {
+        return std::nullopt;
+    }
+    std::vector<float> inverseVpCopy;
+    std::copy(newInverseVpMatrix.begin(), newInverseVpMatrix.end(), std::back_inserter(inverseVpCopy));
+    return inverseVpCopy;
+}
+
 Vec3D MapCamera2d::getOrigin() {
     return origin;
 }
@@ -475,6 +485,10 @@ std::optional<float> MapCamera2d::getLastVpMatrixRotation() {
 std::optional<float> MapCamera2d::getLastVpMatrixZoom() {
     std::lock_guard<std::recursive_mutex> lock(vpDataMutex);
     return lastVpZoom;
+}
+
+std::optional<::Vec3D> MapCamera2d::getLastCameraPosition() {
+    return Vec3D(0.0, 0.0, 0.0);
 }
 
 /** this method is called just before the update methods on all layers */

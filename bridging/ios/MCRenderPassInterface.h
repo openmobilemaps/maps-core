@@ -6,6 +6,7 @@
 #import "MCRenderPassConfig.h"
 #import <Foundation/Foundation.h>
 @protocol MCRenderObjectInterface;
+@protocol MCRenderTargetInterface;
 
 
 @protocol MCRenderPassInterface
@@ -15,6 +16,8 @@
 - (void)addRenderObject:(nullable id<MCRenderObjectInterface>)renderObject;
 
 - (nonnull MCRenderPassConfig *)getRenderPassConfig;
+
+- (nullable id<MCRenderTargetInterface>)getRenderTargetInterface;
 
 - (nullable id<MCMaskingObjectInterface>)getMaskingObject;
 

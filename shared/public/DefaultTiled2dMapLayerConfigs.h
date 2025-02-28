@@ -5,6 +5,7 @@
 
 #include <cstdint>
 #include <memory>
+#include <optional>
 #include <string>
 
 class Tiled2dMapLayerConfig;
@@ -16,7 +17,7 @@ public:
 
     static /*not-null*/ std::shared_ptr<Tiled2dMapLayerConfig> webMercator(const std::string & layerName, const std::string & urlFormat);
 
-    static /*not-null*/ std::shared_ptr<Tiled2dMapLayerConfig> webMercatorCustom(const std::string & layerName, const std::string & urlFormat, const Tiled2dMapZoomInfo & zoomInfo, int32_t minZoomLevel, int32_t maxZoomLevel);
+    static /*not-null*/ std::shared_ptr<Tiled2dMapLayerConfig> webMercatorCustom(const std::string & layerName, const std::string & urlFormat, const std::optional<Tiled2dMapZoomInfo> & zoomInfo, int32_t minZoomLevel, int32_t maxZoomLevel);
 
     static /*not-null*/ std::shared_ptr<Tiled2dMapLayerConfig> epsg4326(const std::string & layerName, const std::string & urlFormat);
 

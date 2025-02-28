@@ -5,7 +5,9 @@
 #import "MCCoordinateConversionHelperInterface.h"
 #import "MCGraphicsObjectFactoryInterface.h"
 #import "MCMapConfig.h"
+#import "MCPerformanceLoggerInterface.h"
 #import "MCRectCoord.h"
+#import "MCRenderTargetInterface.h"
 #import "MCRenderingContextInterface.h"
 #import "MCSchedulerInterface.h"
 #import "MCShaderFactoryInterface.h"
@@ -57,6 +59,10 @@
 
 - (nullable id<MCTouchHandlerInterface>)getTouchHandler;
 
+- (void)setPerformanceLoggers:(nonnull NSArray<id<MCPerformanceLoggerInterface>> *)performanceLoggers;
+
+- (nonnull NSArray<id<MCPerformanceLoggerInterface>> *)getPerformanceLoggers;
+
 - (nonnull NSArray<id<MCLayerInterface>> *)getLayers;
 
 - (nonnull NSArray<id<MCIndexedLayerInterface>> *)getLayersIndexed;
@@ -83,6 +89,10 @@
 - (void)invalidate;
 
 - (void)prepare;
+
+- (BOOL)getNeedsCompute;
+
+- (void)drawOffscreenFrame:(nullable id<MCRenderTargetInterface>)target;
 
 /** Must be called on the rendering thread! */
 - (void)drawFrame;

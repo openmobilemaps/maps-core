@@ -23,6 +23,7 @@ open class MCMapView: MTKView, @unchecked Sendable {
     private lazy var renderToImageQueue = DispatchQueue(
         label: "io.openmobilemaps.renderToImagQueue", qos: .userInteractive)
 
+    public var pausesAutomatically = true
     private var framesToRender: Int = 1
     private let framesToRenderAfterInvalidate: Int = 25
     private var lastInvalidate = Date()
@@ -32,12 +33,12 @@ open class MCMapView: MTKView, @unchecked Sendable {
     private let touchHandler: MCMapViewTouchHandler
     private let callbackHandler = MCMapViewCallbackHandler()
 
-    private let pinch = UIPinchGestureRecognizer(
-        target: self, action: #selector(pinched))
-    private let pan = UIPanGestureRecognizer(
-        target: self, action: #selector(panned))
+    private var pinch: UIPinchGestureRecognizer!
+    private var pan: UIPanGestureRecognizer!
 
     public weak var sizeDelegate: MCMapSizeDelegate?
+
+    public var renderTargetTextures: [RenderTargetTexture] = []
 
     public init(
         mapConfig: MCMapConfig = MCMapConfig(
@@ -63,6 +64,10 @@ open class MCMapView: MTKView, @unchecked Sendable {
         touchHandler = MCMapViewTouchHandler(
             touchHandler: mapInterface.getTouchHandler())
         super.init(frame: .zero, device: MetalContext.current.device)
+        self.pinch = UIPinchGestureRecognizer(
+            target: self, action: #selector(pinched))
+        self.pan = UIPanGestureRecognizer(
+            target: self, action: #selector(panned))
         setup()
     }
 
@@ -164,6 +169,17 @@ open class MCMapView: MTKView, @unchecked Sendable {
         framesToRender = framesToRenderAfterInvalidate
         lastInvalidate = Date()
     }
+
+    public func renderTarget(named name: String) -> RenderTargetTexture {
+        for target in renderTargetTextures {
+            if target.name == name {
+                return target
+            }
+        }
+        let newTarget = RenderTargetTexture(name: name)
+        renderTargetTextures.append(newTarget)
+        return newTarget
+    }
 }
 
 extension MCMapView: MTKViewDelegate {
@@ -180,31 +196,61 @@ extension MCMapView: MTKViewDelegate {
 
         guard
             framesToRender > 0
-                || -lastInvalidate.timeIntervalSinceNow < renderAfterInvalidate
+                || -lastInvalidate.timeIntervalSinceNow < renderAfterInvalidate || !pausesAutomatically
         else {
             isPaused = true
             return
         }
 
-        framesToRender -= 1
+        if pausesAutomatically {
+            framesToRender -= 1
+        }
 
         // Ensure that triple-buffers are not over-used
         renderSemaphore.wait()
 
+        renderingContext.beginFrame()
         mapInterface.prepare()
+
+        // Shared lib stuff
+        if sizeChanged {
+            mapInterface.setViewportSize(view.drawableSize.vec2)
+            sizeDelegate?.sizeChanged()
+            sizeChanged = false
+        }
 
         guard
             let commandBuffer = MetalContext.current.commandQueue
-                .makeCommandBuffer(),
-            let computeEncoder = commandBuffer.makeComputeCommandEncoder()
-        else {
+                .makeCommandBuffer() else {
             self.renderSemaphore.signal()
             return
         }
 
-        renderingContext.computeEncoder = computeEncoder
-        mapInterface.compute()
-        computeEncoder.endEncoding()
+        for offscreenTarget in renderTargetTextures {
+            let renderEncoder = offscreenTarget.prepareOffscreenEncoder(
+                commandBuffer,
+                size: view.drawableSize.vec2,
+                context: renderingContext
+            )!
+            renderingContext.encoder = renderEncoder
+            renderingContext.renderTarget = offscreenTarget
+            mapInterface.drawOffscreenFrame(offscreenTarget)
+            renderEncoder.endEncoding()
+        }
+
+        if mapInterface.getNeedsCompute() {
+            guard
+                let computeEncoder = commandBuffer.makeComputeCommandEncoder()
+            else {
+                self.renderSemaphore.signal()
+                return
+            }
+
+            renderingContext.computeEncoder = computeEncoder
+            mapInterface.compute()
+            computeEncoder.endEncoding()
+        }
+
 
         guard let renderPassDescriptor = view.currentRenderPassDescriptor,
             let renderEncoder = commandBuffer.makeRenderCommandEncoder(
@@ -215,14 +261,7 @@ extension MCMapView: MTKViewDelegate {
         }
 
         renderingContext.encoder = renderEncoder
-        renderingContext.beginFrame()
-
-        // Shared lib stuff
-        if sizeChanged {
-            mapInterface.setViewportSize(view.drawableSize.vec2)
-            sizeDelegate?.sizeChanged()
-            sizeChanged = false
-        }
+        renderingContext.renderTarget = nil
 
         mapInterface.drawFrame()
 

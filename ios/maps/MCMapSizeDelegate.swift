@@ -10,6 +10,7 @@
 
 import Foundation
 
+@MainActor
 public protocol MCMapSizeDelegate: AnyObject {
     func sizeChanged()
 }

@@ -6,7 +6,9 @@
 #include "Color.h"
 #include "CoordinateConversionHelperInterface.h"
 #include "GraphicsObjectFactoryInterface.h"
+#include "PerformanceLoggerInterface.h"
 #include "RectCoord.h"
+#include "RenderTargetInterface.h"
 #include "RenderingContextInterface.h"
 #include "SchedulerInterface.h"
 #include "ShaderFactoryInterface.h"
@@ -54,6 +56,10 @@ public:
 
     virtual /*not-null*/ std::shared_ptr<::TouchHandlerInterface> getTouchHandler() = 0;
 
+    virtual void setPerformanceLoggers(const std::vector</*not-null*/ std::shared_ptr<::PerformanceLoggerInterface>> & performanceLoggers) = 0;
+
+    virtual std::vector</*not-null*/ std::shared_ptr<::PerformanceLoggerInterface>> getPerformanceLoggers() = 0;
+
     virtual std::vector</*not-null*/ std::shared_ptr<LayerInterface>> getLayers() = 0;
 
     virtual std::vector</*not-null*/ std::shared_ptr<IndexedLayerInterface>> getLayersIndexed() = 0;
@@ -77,6 +83,10 @@ public:
     virtual void invalidate() = 0;
 
     virtual void prepare() = 0;
+
+    virtual bool getNeedsCompute() = 0;
+
+    virtual void drawOffscreenFrame(const /*not-null*/ std::shared_ptr<::RenderTargetInterface> & target) = 0;
 
     /** Must be called on the rendering thread! */
     virtual void drawFrame() = 0;

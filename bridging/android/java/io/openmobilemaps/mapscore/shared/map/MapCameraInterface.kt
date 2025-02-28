@@ -97,11 +97,15 @@ abstract class MapCameraInterface {
 
     abstract fun getLastVpMatrix(): ArrayList<Float>?
 
+    abstract fun getLastInverseVpMatrix(): ArrayList<Float>?
+
     abstract fun getLastVpMatrixViewBounds(): io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord?
 
     abstract fun getLastVpMatrixRotation(): Float?
 
     abstract fun getLastVpMatrixZoom(): Float?
+
+    abstract fun getLastCameraPosition(): io.openmobilemaps.mapscore.shared.graphics.common.Vec3D?
 
     abstract fun asMapCamera3d(): MapCamera3dInterface?
 
@@ -366,6 +370,12 @@ abstract class MapCameraInterface {
         }
         private external fun native_getLastVpMatrix(_nativeRef: Long): ArrayList<Float>?
 
+        override fun getLastInverseVpMatrix(): ArrayList<Float>? {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getLastInverseVpMatrix(this.nativeRef)
+        }
+        private external fun native_getLastInverseVpMatrix(_nativeRef: Long): ArrayList<Float>?
+
         override fun getLastVpMatrixViewBounds(): io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord? {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             return native_getLastVpMatrixViewBounds(this.nativeRef)
@@ -383,6 +393,12 @@ abstract class MapCameraInterface {
             return native_getLastVpMatrixZoom(this.nativeRef)
         }
         private external fun native_getLastVpMatrixZoom(_nativeRef: Long): Float?
+
+        override fun getLastCameraPosition(): io.openmobilemaps.mapscore.shared.graphics.common.Vec3D? {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getLastCameraPosition(this.nativeRef)
+        }
+        private external fun native_getLastCameraPosition(_nativeRef: Long): io.openmobilemaps.mapscore.shared.graphics.common.Vec3D?
 
         override fun asMapCamera3d(): MapCamera3dInterface? {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

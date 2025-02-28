@@ -87,11 +87,21 @@ void Tiled2dMapVectorPolygonPatternTile::update() {
 
     auto polygonDescription = std::static_pointer_cast<PolygonVectorLayerDescription>(description);
     bool inZoomRange = polygonDescription->maxZoom >= zoomIdentifier && polygonDescription->minZoom <= zoomIdentifier;
-    
+
+    if (inZoomRange != isVisible) {
+        isVisible = inZoomRange;
+        for (auto const &object : renderObjects) {
+            object->setHidden(!inZoomRange);
+        }
+    }
+
+    if (!inZoomRange) {
+        return;
+    }
+
     if (lastZoom &&
         ((isStyleZoomDependant && *lastZoom == zoomIdentifier) || !isStyleZoomDependant)
-        && (lastInZoomRange && *lastInZoomRange == inZoomRange) &&
-        !isStyleStateDependant) {
+        && !isStyleStateDependant) {
         for (const auto &[styleGroupId, polygons] : styleGroupPolygonsMap) {
             for (const auto &polygon: polygons) {
                 polygon->setScalingFactor(scalingFactor);
@@ -101,21 +111,16 @@ void Tiled2dMapVectorPolygonPatternTile::update() {
     }
 
     lastZoom = zoomIdentifier;
-    lastInZoomRange = inZoomRange;
 
     opacities.clear();
     size_t numStyleGroups = featureGroups.size();
     for (int styleGroupId = 0; styleGroupId < numStyleGroups; styleGroupId++) {
-        opacities.push_back(std::vector<float>(featureGroups.at(styleGroupId).size()));
+        opacities.push_back(std::vector<HalfFloat>(featureGroups.at(styleGroupId).size()));
         int index = 0;
         for (const auto &[hash, feature]: featureGroups.at(styleGroupId)) {
-            if (inZoomRange) {
-                const auto &ec = EvaluationContext(zoomIdentifier, dpFactor, feature, featureStateManager);
-                const auto &opacity = polygonDescription->style.getFillOpacity(ec);
-                opacities[styleGroupId][index] = alpha * opacity;
-            } else {
-                opacities[styleGroupId][index] = 0.0;
-            }
+            const auto &ec = EvaluationContext(zoomIdentifier, dpFactor, feature, featureStateManager);
+            const auto &opacity = polygonDescription->style.getFillOpacity(ec);
+            opacities[styleGroupId][index] = toHalfFloat(alpha * opacity);
             index++;
         }
         for (const auto &polygon: styleGroupPolygonsMap.at(styleGroupId)) {
@@ -325,6 +330,14 @@ void Tiled2dMapVectorPolygonPatternTile::addPolygons(const std::vector<std::vect
     styleGroupPolygonsMap = polygonGroupObjectsMap;
     polygonRenderOrder = polygonsRenderOrder;
 
+    std::vector<std::shared_ptr<RenderObjectInterface>> newRenderObjects;
+    for (const auto &polygon: polygonRenderOrder) {
+        for (const auto &config: polygon->getRenderConfig()) {
+            newRenderObjects.push_back(std::make_shared<RenderObject>(config->getGraphicsObject()));
+        }
+    }
+    renderObjects = newRenderObjects;
+
 #ifdef __APPLE__
     setupPolygons(newGraphicObjects);
 #else
@@ -351,14 +364,7 @@ void Tiled2dMapVectorPolygonPatternTile::setupPolygons(const std::vector<std::sh
 }
 
 std::vector<std::shared_ptr<RenderObjectInterface>> Tiled2dMapVectorPolygonPatternTile::generateRenderObjects() {
-    std::vector<std::shared_ptr<RenderObjectInterface>> newRenderObjects;
-    for (const auto &polygon: polygonRenderOrder) {
-        for (const auto &config: polygon->getRenderConfig()) {
-            newRenderObjects.push_back(std::make_shared<RenderObject>(config->getGraphicsObject()));
-        }
-    }
-
-    return newRenderObjects;
+    return renderObjects;
 }
 
 void Tiled2dMapVectorPolygonPatternTile::setSpriteData(const std::shared_ptr<SpriteData> &spriteData,

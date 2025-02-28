@@ -1,0 +1,10 @@
+@extern "../../../yaml/layer_interface.yaml"
+@extern "../../../yaml/texture_holder_interface.yaml"
+
+sky_sphere_layer_interface = interface +c {
+    static create(): sky_sphere_layer_interface;
+    as_layer_interface(): layer_interface;
+
+    # Expects a texture with x: right ascension (longitude), y: declination (latitude)
+    set_texture(texture: texture_holder_interface);
+}

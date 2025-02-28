@@ -43,13 +43,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 
 + (nullable id<MCTiled2dMapLayerConfig>)webMercatorCustom:(nonnull NSString *)layerName
                                                 urlFormat:(nonnull NSString *)urlFormat
-                                                 zoomInfo:(nonnull MCTiled2dMapZoomInfo *)zoomInfo
+                                                 zoomInfo:(nullable MCTiled2dMapZoomInfo *)zoomInfo
                                              minZoomLevel:(int32_t)minZoomLevel
                                              maxZoomLevel:(int32_t)maxZoomLevel {
     try {
         auto objcpp_result_ = ::DefaultTiled2dMapLayerConfigs::webMercatorCustom(::djinni::String::toCpp(layerName),
                                                                                  ::djinni::String::toCpp(urlFormat),
-                                                                                 ::djinni_generated::Tiled2dMapZoomInfo::toCpp(zoomInfo),
+                                                                                 ::djinni::Optional<std::optional, ::djinni_generated::Tiled2dMapZoomInfo>::toCpp(zoomInfo),
                                                                                  ::djinni::I32::toCpp(minZoomLevel),
                                                                                  ::djinni::I32::toCpp(maxZoomLevel));
         return ::djinni_generated::Tiled2dMapLayerConfig::fromCpp(objcpp_result_);

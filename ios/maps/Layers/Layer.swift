@@ -11,6 +11,7 @@ import MapCoreSharedModule
 public protocol Layer: Sendable {
     var interface: MCLayerInterface? { get }
     var layerIndex: Int? { get }
+    var beforeAdding: ((MCLayerInterface, MCMapView) -> Void)? { get }
     func forceReload()
 }
 
@@ -19,5 +20,9 @@ public extension Layer {
 
     func forceReload() {
         interface?.forceReload()
+    }
+
+    var beforeAdding: ((MCLayerInterface, MCMapView) -> Void)? {
+        nil
     }
 }

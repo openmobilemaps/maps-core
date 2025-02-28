@@ -10,6 +10,7 @@
 
 #include "Quad2dOpenGl.h"
 #include "TextureHolderInterface.h"
+#include "TextureFilterType.h"
 #include <cmath>
 
 Quad2dOpenGl::Quad2dOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader)
@@ -37,13 +38,13 @@ void Quad2dOpenGl::clear() {
 
 void Quad2dOpenGl::setIsInverseMasked(bool inversed) { isMaskInversed = inversed; }
 
-void Quad2dOpenGl::setFrame(const Quad3dD &frame, const RectD &textureCoordinates, const Vec3D &origin, bool is3D) {
+void Quad2dOpenGl::setFrame(const Quad3dD &frame, const RectD &textureCoordinates, const Vec3D &origin, bool is3d) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
     ready = false;
     this->frame = frame;
     this->textureCoordinates = textureCoordinates;
     this->quadOrigin = origin;
-    this->is3D = is3D;
+    this->is3d = is3d;
 }
 
 void Quad2dOpenGl::setSubdivisionFactor(int32_t factor) {
@@ -51,6 +52,11 @@ void Quad2dOpenGl::setSubdivisionFactor(int32_t factor) {
         subdivisionFactor = factor;
         ready = false;
     }
+}
+
+void Quad2dOpenGl::setMinMagFilter(TextureFilterType filterType) {
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
+    textureFilterType = filterType;
 }
 
 void Quad2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface> &context) {
@@ -79,7 +85,7 @@ void Quad2dOpenGl::computeGeometry(bool texCoordsOnly) {
     // Data mutex covered by caller Quad2dOpenGL::setup()
     if (subdivisionFactor == 0) {
         if (!texCoordsOnly) {
-            if (is3D) {
+            if (is3d) {
                 vertices = {
                         (float) (1.0 * std::sin(frame.topLeft.y) * std::cos(frame.topLeft.x) - quadOrigin.x),
                         (float) (1.0 * cos(frame.topLeft.y) - quadOrigin.y),
@@ -152,8 +158,8 @@ void Quad2dOpenGl::computeGeometry(bool texCoordsOnly) {
                 if (!texCoordsOnly) {
                     double x = originX + deltaDX;
                     double y = originY + deltaDY;
-                    double z = is3D ? originZ + deltaDZ : 0.0;
-                    if (is3D) {
+                    double z = is3d ? originZ + deltaDZ : 0.0;
+                    if (is3d) {
                         vertices.push_back((float) (1.0 * std::sin(y) * std::cos(x) - quadOrigin.x));
                         vertices.push_back((float) (1.0 * cos(y) - quadOrigin.y));
                         vertices.push_back((float) (-1.0 * std::sin(x) * std::sin(y) - quadOrigin.z));
@@ -206,6 +212,8 @@ void Quad2dOpenGl::prepareGlData(int program) {
     vpMatrixHandle = glGetUniformLocation(program, "uvpMatrix");
     mMatrixHandle = glGetUniformLocation(program, "umMatrix");
     originOffsetHandle = glGetUniformLocation(program, "uOriginOffset");
+    originHandle = glGetUniformLocation(program, "uOrigin");
+
     glDataBuffersGenerated = true;
 }
 
@@ -289,7 +297,7 @@ void Quad2dOpenGl::renderAsMask(const std::shared_ptr<::RenderingContextInterfac
     render(context, renderPass, vpMatrix, mMatrix, origin, false, screenPixelAsRealMeterFactor);
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 }
-
+#include "Logger.h"
 void Quad2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
                           int64_t vpMatrix, int64_t mMatrix, const ::Vec3D &origin, bool isMasked,
                           double screenPixelAsRealMeterFactor) {
@@ -337,6 +345,9 @@ void Quad2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &co
     glUniformMatrix4fv(vpMatrixHandle, 1, false, (GLfloat *)vpMatrix);
     glUniformMatrix4fv(mMatrixHandle, 1, false, (GLfloat *)mMatrix);
     glUniform4f(originOffsetHandle, quadOrigin.x - origin.x, quadOrigin.y - origin.y, quadOrigin.z - origin.z, 0.0);
+    if (originHandle >= 0) {
+        glUniform4f(originHandle, origin.x, origin.y, origin.z, 1.0);
+    }
 
     // Draw the triangles
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
@@ -364,6 +375,11 @@ void Quad2dOpenGl::prepareTextureDraw(int program) {
 
     // Bind the texture to this unit.
     glBindTexture(GL_TEXTURE_2D, (unsigned int)texturePointer);
+    if (textureFilterType.has_value()) {
+        GLint filterParam = GL_NEAREST;//*textureFilterType == TextureFilterType::LINEAR ? GL_LINEAR : GL_NEAREST;
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filterParam);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filterParam);
+    }
 
     // Tell the texture uniform sampler to use this texture in the shader by binding to texture unit 0.
     int textureUniformHandle = glGetUniformLocation(program, "textureSampler");

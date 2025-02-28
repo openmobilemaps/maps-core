@@ -652,12 +652,7 @@ public:
             return;
         }
 
-        usedKeysCollection = value->getUsedKeys();
-
-        isStatic = usedKeysCollection.empty();
-        isZoomDependent = usedKeysCollection.usedKeys.contains("zoom");
-        isStateDependant = usedKeysCollection.isStateDependant();
-        onlyGlobalStateDependant = usedKeysCollection.onlyGlobalStateDependant();
+        updateValue(value);
     }
 
     ValueEvaluator(const ValueEvaluator& evaluator) : ValueEvaluator(evaluator.getValue()) {};
@@ -665,6 +660,20 @@ public:
     std::shared_ptr<Value> getValue() const {
         return value;
     }
+
+    void updateValue(std::shared_ptr<Value> newValue) {
+        value = newValue;
+
+        usedKeysCollection = newValue ? newValue->getUsedKeys() : UsedKeysCollection();
+
+        isStatic = usedKeysCollection.empty();
+        isZoomDependent = usedKeysCollection.usedKeys.contains("zoom");
+        isStateDependant = usedKeysCollection.isStateDependant();
+        onlyGlobalStateDependant = usedKeysCollection.onlyGlobalStateDependant();
+
+        lastResults.clear();
+    }
+
 
     inline ResultType getResult(const EvaluationContext &context, const ResultType &defaultValue) {
         if (!value) {

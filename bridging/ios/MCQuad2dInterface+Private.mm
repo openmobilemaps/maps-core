@@ -12,6 +12,7 @@
 #import "MCQuad3dD+Private.h"
 #import "MCRectD+Private.h"
 #import "MCRenderingContextInterface+Private.h"
+#import "MCTextureFilterType+Private.h"
 #import "MCTextureHolderInterface+Private.h"
 #import "MCVec3D+Private.h"
 #include <exception>
@@ -53,6 +54,12 @@ textureCoordinates:(nonnull MCRectD *)textureCoordinates
 - (void)setSubdivisionFactor:(int32_t)factor {
     try {
         _cppRefHandle.get()->setSubdivisionFactor(::djinni::I32::toCpp(factor));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)setMinMagFilter:(MCTextureFilterType)filterType {
+    try {
+        _cppRefHandle.get()->setMinMagFilter(::djinni::Enum<::TextureFilterType, MCTextureFilterType>::toCpp(filterType));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -106,6 +113,12 @@ public:
     {
         @autoreleasepool {
             [djinni_private_get_proxied_objc_object() setSubdivisionFactor:(::djinni::I32::fromCpp(c_factor))];
+        }
+    }
+    void setMinMagFilter(::TextureFilterType c_filterType) override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() setMinMagFilter:(::djinni::Enum<::TextureFilterType, MCTextureFilterType>::fromCpp(c_filterType))];
         }
     }
     void loadTexture(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & c_context, const /*not-null*/ std::shared_ptr<::TextureHolderInterface> & c_textureHolder) override

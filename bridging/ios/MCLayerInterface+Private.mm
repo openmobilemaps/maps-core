@@ -14,6 +14,7 @@
 #import "MCMaskingObjectInterface+Private.h"
 #import "MCRectI+Private.h"
 #import "MCRenderPassInterface+Private.h"
+#import "MCRenderTargetInterface+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -146,6 +147,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)setPrimaryRenderTarget:(nullable id<MCRenderTargetInterface>)target {
+    try {
+        _cppRefHandle.get()->setPrimaryRenderTarget(::djinni::Optional<std::optional, ::djinni_generated::RenderTargetInterface>::toCpp(target));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 namespace djinni_generated {
 
 class LayerInterface::ObjcProxy final
@@ -260,6 +267,12 @@ public:
     {
         @autoreleasepool {
             [djinni_private_get_proxied_objc_object() forceReload];
+        }
+    }
+    void setPrimaryRenderTarget(const /*nullable*/ std::shared_ptr<::RenderTargetInterface> & c_target) override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() setPrimaryRenderTarget:(::djinni::Optional<std::optional, ::djinni_generated::RenderTargetInterface>::fromCpp(c_target))];
         }
     }
 };

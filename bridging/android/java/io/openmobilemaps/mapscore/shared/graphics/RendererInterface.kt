@@ -13,7 +13,7 @@ abstract class RendererInterface {
     abstract fun addToComputeQueue(computePass: ComputePassInterface)
 
     /** Ensure calling on graphics thread */
-    abstract fun drawFrame(renderingContext: RenderingContextInterface, camera: CameraInterface)
+    abstract fun drawFrame(renderingContext: RenderingContextInterface, camera: CameraInterface, target: RenderTargetInterface?)
 
     /** Ensure calling on graphics thread */
     abstract fun compute(renderingContext: RenderingContextInterface, camera: CameraInterface)
@@ -45,11 +45,11 @@ abstract class RendererInterface {
         }
         private external fun native_addToComputeQueue(_nativeRef: Long, computePass: ComputePassInterface)
 
-        override fun drawFrame(renderingContext: RenderingContextInterface, camera: CameraInterface) {
+        override fun drawFrame(renderingContext: RenderingContextInterface, camera: CameraInterface, target: RenderTargetInterface?) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_drawFrame(this.nativeRef, renderingContext, camera)
+            native_drawFrame(this.nativeRef, renderingContext, camera, target)
         }
-        private external fun native_drawFrame(_nativeRef: Long, renderingContext: RenderingContextInterface, camera: CameraInterface)
+        private external fun native_drawFrame(_nativeRef: Long, renderingContext: RenderingContextInterface, camera: CameraInterface, target: RenderTargetInterface?)
 
         override fun compute(renderingContext: RenderingContextInterface, camera: CameraInterface) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

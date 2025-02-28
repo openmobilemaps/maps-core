@@ -40,9 +40,9 @@ std::shared_ptr<RenderingContextInterface> Scene::getRenderingContext() { return
 void Scene::prepare() {
 }
 
-void Scene::drawFrame() {
+void Scene::drawFrame(const /*nullable*/ std::shared_ptr<RenderTargetInterface> & target) {
     if (camera) {
-        renderer->drawFrame(renderingContext, camera);
+        renderer->drawFrame(renderingContext, camera, target);
     }
 }
 

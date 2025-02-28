@@ -50,6 +50,7 @@ private:
         void enableAnimations(bool enabled) override;
         void setErrorManager(const /*not-null*/ std::shared_ptr<::ErrorManager> & errorManager) override;
         void forceReload() override;
+        void setPrimaryRenderTarget(const /*nullable*/ std::shared_ptr<::RenderTargetInterface> & target) override;
 
     private:
         friend ::djinni::JniInterface<::LayerInterface, ::djinni_generated::NativeLayerInterface>;
@@ -73,6 +74,7 @@ private:
     const jmethodID method_enableAnimations { ::djinni::jniGetMethodID(clazz.get(), "enableAnimations", "(Z)V") };
     const jmethodID method_setErrorManager { ::djinni::jniGetMethodID(clazz.get(), "setErrorManager", "(Lio/openmobilemaps/mapscore/shared/map/ErrorManager;)V") };
     const jmethodID method_forceReload { ::djinni::jniGetMethodID(clazz.get(), "forceReload", "()V") };
+    const jmethodID method_setPrimaryRenderTarget { ::djinni::jniGetMethodID(clazz.get(), "setPrimaryRenderTarget", "(Lio/openmobilemaps/mapscore/shared/graphics/RenderTargetInterface;)V") };
 };
 
 } // namespace djinni_generated

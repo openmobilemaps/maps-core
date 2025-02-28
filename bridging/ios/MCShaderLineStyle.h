@@ -25,6 +25,8 @@ NS_SWIFT_SENDABLE
                            dashValue1:(float)dashValue1
                            dashValue2:(float)dashValue2
                            dashValue3:(float)dashValue3
+                             dashFade:(float)dashFade
+                   dashAnimationSpeed:(float)dashAnimationSpeed
                                offset:(float)offset
                                dotted:(float)dotted
                            dottedSkew:(float)dottedSkew NS_DESIGNATED_INITIALIZER;
@@ -46,6 +48,8 @@ NS_SWIFT_SENDABLE
                                       dashValue1:(float)dashValue1
                                       dashValue2:(float)dashValue2
                                       dashValue3:(float)dashValue3
+                                        dashFade:(float)dashFade
+                              dashAnimationSpeed:(float)dashAnimationSpeed
                                           offset:(float)offset
                                           dotted:(float)dotted
                                       dottedSkew:(float)dottedSkew;
@@ -85,6 +89,10 @@ NS_SWIFT_SENDABLE
 @property (nonatomic, readonly) float dashValue2;
 
 @property (nonatomic, readonly) float dashValue3;
+
+@property (nonatomic, readonly) float dashFade;
+
+@property (nonatomic, readonly) float dashAnimationSpeed;
 
 @property (nonatomic, readonly) float offset;
 

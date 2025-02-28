@@ -141,49 +141,49 @@ public:
         }
     }
 
-    void triangulatePolygons() {
-        if (polygonPoints.empty()) {
-            return;
-        }
+    size_t beginTriangulatePolygons() {
+        return polygonPoints.size();
+    }
 
-        for (int i = 0; i < polygonPoints.size(); i++) {
-            std::vector<std::vector<vtzero::point>> polygon;
-            polygon.reserve(polygonHoles[i].size() + 1);
-            coordinates.reserve(coordinates.size() + polygon.capacity());
-
-            coordinates.emplace_back();
-            coordinates.back().reserve(polygonPoints[i].size());
-            for (auto const &point: polygonPoints[i]){
-                coordinates.back().push_back(coordinateFromPoint(point, false));
-            }
-            polygon.emplace_back(std::move(polygonPoints[i]));
-
-            for(auto const &hole: polygonHoles[i]) {
-                coordinates.emplace_back();
-                coordinates.back().reserve(hole.size());
-                for (auto const &point: hole){
-                    coordinates.back().push_back(coordinateFromPoint(point, false));
-                }
-
-                polygon.emplace_back(std::move(hole));
-            }
-            limitHoles(polygon, 500);
-
-            std::vector<uint16_t> indices = mapbox::earcut<uint16_t>(polygon);
-
-            std::reverse(indices.begin(), indices.end());
-
-            polygons.push_back({{}, indices});
-
-            for (auto const &points: polygon) {
-                for (auto const &point: points) {
-                    polygons.back().coordinates.push_back(vecFromPoint(point));
-                }
-            }
-        }
-
+    void endTringulatePolygons() {
         polygonHoles.clear();
         polygonPoints.clear();
+    }
+
+    void triangulatePolygons(size_t i) {
+        std::vector<std::vector<vtzero::point>> polygon;
+        polygon.reserve(polygonHoles[i].size() + 1);
+        coordinates.reserve(coordinates.size() + polygon.capacity());
+
+        coordinates.emplace_back();
+        coordinates.back().reserve(polygonPoints[i].size());
+        for (auto const &point: polygonPoints[i]){
+            coordinates.back().push_back(coordinateFromPoint(point, false));
+        }
+        polygon.emplace_back(std::move(polygonPoints[i]));
+
+        for(auto const &hole: polygonHoles[i]) {
+            coordinates.emplace_back();
+            coordinates.back().reserve(hole.size());
+            for (auto const &point: hole){
+                coordinates.back().push_back(coordinateFromPoint(point, false));
+            }
+
+            polygon.emplace_back(std::move(hole));
+        }
+        limitHoles(polygon, 500);
+
+        std::vector<uint16_t> indices = mapbox::earcut<uint16_t>(polygon);
+
+        std::reverse(indices.begin(), indices.end());
+
+        polygons.push_back({{}, indices});
+
+        for (auto const &points: polygon) {
+            for (auto const &point: points) {
+                polygons.back().coordinates.push_back(vecFromPoint(point));
+            }
+        }
     }
 
     void triangulateGeoJsonPolygons(const std::shared_ptr<GeoJsonGeometry> &geometry) {

@@ -66,24 +66,28 @@ void Tiled2dMapVectorRasterTile::update() {
     auto rasterDescription = std::static_pointer_cast<RasterVectorLayerDescription>(description);
     bool inZoomRange = (rasterDescription->maxZoom >= zoomIdentifier || zoomInfo.overzoom) && (rasterDescription->minZoom <= zoomIdentifier || zoomInfo.underzoom);
 
+    if (inZoomRange != isVisible) {
+        isVisible = inZoomRange;
+        assert(tileObject);
+        tileObject->getRenderObject()->setHidden(!inZoomRange);
+    }
+
+    if (!inZoomRange) {
+        return;
+    }
+
     if (lastZoom &&
         ((isStyleZoomDependant && *lastZoom == zoomIdentifier) || !isStyleZoomDependant)
         && lastAlpha == alpha &&
-        (lastInZoomRange && *lastInZoomRange == inZoomRange) &&
         !isStyleStateDependant) {
         return;
     }
     lastZoom = zoomIdentifier;
     lastAlpha = alpha;
-    lastInZoomRange = inZoomRange;
 
     const EvaluationContext evalContext(zoomIdentifier, dpFactor, std::make_shared<FeatureContext>(), featureStateManager);
     auto rasterStyle = rasterDescription->style.getRasterStyle(evalContext);
-    
-    if (!inZoomRange) {
-        rasterStyle.opacity = 0.0;
-    }
-    
+
     if(rasterStyle == lastStyle) {
         return;
     }

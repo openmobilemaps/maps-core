@@ -8,7 +8,7 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-#ifdef __linux__
+#ifdef OPENMOBILEMAPS_GL
 
 #include "GraphicsObjectFactoryOpenGl.h"
 #include "OpenGlContext.h"
@@ -25,7 +25,7 @@ std::shared_ptr<SceneInterface> SceneInterface::create(const std::shared_ptr<::G
 }
 
 std::shared_ptr<SceneInterface> SceneInterface::createWithOpenGl() {
-#ifdef __linux__
+#ifdef OPENMOBILEMAPS_GL
     auto scene = std::static_pointer_cast<SceneInterface>(std::make_shared<Scene>(std::make_shared<GraphicsObjectFactoryOpenGl>(),
                                                                                   std::make_shared<ShaderFactoryOpenGl>(),
                                                                                   std::make_shared<OpenGlContext>()));

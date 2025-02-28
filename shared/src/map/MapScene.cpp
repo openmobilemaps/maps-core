@@ -92,6 +92,16 @@ void MapScene::setTouchHandler(const std::shared_ptr<::TouchHandlerInterface> &t
 
 std::shared_ptr<::TouchHandlerInterface> MapScene::getTouchHandler() { return touchHandler; }
 
+void MapScene::setPerformanceLoggers(const std::vector<std::shared_ptr<::PerformanceLoggerInterface>> &performanceLoggers) {
+    std::lock_guard<std::mutex> loggerLock(performanceLoggersMutex);
+    this->performanceLoggers = performanceLoggers;
+}
+
+std::vector<std::shared_ptr<::PerformanceLoggerInterface>> MapScene::getPerformanceLoggers() {
+    std::lock_guard<std::mutex> loggerLock(performanceLoggersMutex);
+    return performanceLoggers;
+}
+
 std::vector<std::shared_ptr<LayerInterface>> MapScene::getLayers() {
     std::vector<std::shared_ptr<LayerInterface>> layersList;
     for (const auto &l : layers) {
@@ -378,6 +388,8 @@ void MapScene::prepare() {
             layer.second->update();
         }
 
+        needsCompute = false;
+
         for (const auto &layer : layers) {
             for (const auto &renderPass : layer.second->buildRenderPasses()) {
                 scene->getRenderer()->addToRenderQueue(renderPass);
@@ -385,9 +397,14 @@ void MapScene::prepare() {
 
             for (const auto &computePass : layer.second->buildComputePasses()) {
                 scene->getRenderer()->addToComputeQueue(computePass);
+                needsCompute = true;
             }
         }
     }
+}
+
+bool MapScene::getNeedsCompute() {
+    return needsCompute;
 }
 
 void MapScene::compute() {
@@ -395,7 +412,11 @@ void MapScene::compute() {
 }
 
 void MapScene::drawFrame() {
-    scene->drawFrame();
+    scene->drawFrame(nullptr);
+}
+
+void MapScene::drawOffscreenFrame(const /*not-null*/ std::shared_ptr<::RenderTargetInterface> & target) {
+    scene->drawFrame(target);
 }
 
 void MapScene::resume() {
@@ -441,6 +462,13 @@ void MapScene::destroy() {
     scheduler->destroy();
     scheduler = nullptr;
     callbackHandler = nullptr;
+    if (!performanceLoggers.empty()) {
+        std::lock_guard<std::mutex> loggerLock(performanceLoggersMutex);
+        for (const auto &logger: performanceLoggers) {
+            logger->resetData();
+        }
+        performanceLoggers.clear();
+    }
 }
 
 void MapScene::drawReadyFrame(const ::RectCoord &bounds, float timeout,

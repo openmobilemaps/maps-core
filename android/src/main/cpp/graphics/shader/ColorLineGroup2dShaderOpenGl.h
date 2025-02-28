@@ -54,7 +54,7 @@ private:
     //const int sizeColorValues = 4;
     //const int sizeGapColorValues = 4;
     //const int maxNumDashValues = 4;
-   // const int sizeDashValues = maxNumDashValues + 1;
-    const int sizeLineValues = 21;//sizeStyleValues + sizeColorValues + sizeGapColorValues + sizeDashValues + 1;
+   // const int sizeDashValues = maxNumDashValues + 3;
+    const int sizeLineValues = 23;//sizeStyleValues + sizeColorValues + sizeGapColorValues + sizeDashValues + 1;
     const int sizeLineValuesArray = sizeLineValues * maxNumStyles;
 };

@@ -11,6 +11,8 @@ data class LineStyle(
     val widthType: io.openmobilemaps.mapscore.shared.map.layers.SizeType,
     val width: Float,
     val dashArray: ArrayList<Float>,
+    val dashFade: Float,
+    val dashAnimationSpeed: Float,
     val lineCap: LineCapType,
     val offset: Float,
     val dotted: Boolean,

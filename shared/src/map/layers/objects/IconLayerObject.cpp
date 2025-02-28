@@ -63,7 +63,7 @@ void IconLayerObject::setup(const std::shared_ptr<RenderingContextInterface> con
     getGraphicsObject()->setup(context);
     getQuadObject()->loadTexture(context, icon->getTexture());
 
-    quad->setTextureCoordinates(SharedBytes((int64_t)iconTextureCoordinates.data(), iconAlphas.size(), 4 * (int32_t)sizeof(float)));
+    quad->setTextureCoordinates(SharedBytes((int64_t)iconTextureCoordinates.data(), (int32_t) iconAlphas.size(), 4 * (int32_t)sizeof(float)));
     quad->setAlphas(SharedBytes((int64_t) iconAlphas.data(), (int32_t) iconAlphas.size(), (int32_t) sizeof(float)));
 }
 
@@ -162,7 +162,7 @@ void IconLayerObject::update() {
     }
 
     quad->setPositions(SharedBytes((int64_t) iconPositions.data(), (int32_t) iconAlphas.size(),
-                                   iconPositions.size() * (int32_t) sizeof(float)));
+                                   (int32_t) iconPositions.size() * (int32_t) sizeof(float)));
 
     quad->setScales(
         SharedBytes((int64_t) iconScales.data(), (int32_t) iconAlphas.size(), 2 * (int32_t) sizeof(float)));

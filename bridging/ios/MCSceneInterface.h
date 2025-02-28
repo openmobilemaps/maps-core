@@ -6,6 +6,7 @@
 #import <Foundation/Foundation.h>
 @class MCSceneInterface;
 @protocol MCCameraInterface;
+@protocol MCRenderTargetInterface;
 @protocol MCRendererInterface;
 @protocol MCRenderingContextInterface;
 @protocol MCSceneCallbackInterface;
@@ -35,7 +36,7 @@
 
 - (void)prepare;
 
-- (void)drawFrame;
+- (void)drawFrame:(nullable id<MCRenderTargetInterface>)target;
 
 - (void)compute;
 

@@ -1,3 +1,4 @@
+@extern "../yaml/vec_3_d.yaml"
 @extern "../yaml/vec_2_f.yaml"
 @extern "../yaml/vec_2_i.yaml"
 @extern "../yaml/rect_i.yaml"
@@ -15,9 +16,11 @@
 @extern "../yaml/map_camera_listener_interface.yaml"
 @extern "../yaml/color.yaml"
 @extern "../yaml/render_pass_interface.yaml"
+@extern "../yaml/render_target_interface.yaml"
 @extern "../yaml/compute_pass_interface.yaml"
 @extern "../yaml/masking_object_interface.yaml"
 @extern "../yaml/error_manager.yaml"
+@extern "../yaml/performance_logger_interface.yaml"
 
 map_interface = interface +c {
     static create(graphics_factory: graphics_object_factory_interface, shader_factory: shader_factory_interface, rendering_context: rendering_context_interface, map_config: map_config, scheduler: scheduler_interface, pixel_density: f32, is_3_d: bool) : map_interface;
@@ -39,6 +42,9 @@ map_interface = interface +c {
     set_touch_handler(touch_handler: touch_handler_interface);
     get_touch_handler() : touch_handler_interface;
 
+    set_performance_loggers(performance_loggers: list<performance_logger_interface>);
+    get_performance_loggers() : list<performance_logger_interface>;
+
     get_layers(): list<layer_interface>;
     get_layers_indexed(): list<indexed_layer_interface>;
 
@@ -57,6 +63,10 @@ map_interface = interface +c {
     invalidate();
 
     prepare();
+
+    get_needs_compute(): bool;
+
+    draw_offscreen_frame(target: render_target_interface);
 
     # Must be called on the rendering thread!
     draw_frame();
@@ -127,6 +137,8 @@ layer_interface = interface +c +j +o {
 
     set_error_manager(error_manager: error_manager);
     force_reload();
+
+    set_primary_render_target(target: optional<render_target_interface>);
 }
 
 map_camera_interface = interface +c {
@@ -195,9 +207,11 @@ map_camera_interface = interface +c {
     get_last_vp_matrix_d() : optional<list<f64>>;
 
     get_last_vp_matrix() : optional<list<f32>>;
+    get_last_inverse_vp_matrix() : optional<list<f32>>;
     get_last_vp_matrix_view_bounds() : optional<rect_coord>;
     get_last_vp_matrix_rotation() : optional<f32>;
     get_last_vp_matrix_zoom() : optional<f32>;
+    get_last_camera_position() : optional<vec_3_d>;
 
     as_map_camera_3d(): optional<map_camera_3d_interface>;
 }

@@ -7,6 +7,7 @@
 #include "NativeRectI.h"
 #include "NativeRenderObjectInterface.h"
 #include "NativeRenderPassConfig.h"
+#include "NativeRenderTargetInterface.h"
 
 namespace djinni_generated {
 
@@ -41,6 +42,14 @@ void NativeRenderPassInterface::JavaProxy::addRenderObject(const /*not-null*/ st
     auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_getRenderPassConfig);
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni_generated::NativeRenderPassConfig::toCpp(jniEnv, jret);
+}
+/*nullable*/ std::shared_ptr<::RenderTargetInterface> NativeRenderPassInterface::JavaProxy::getRenderTargetInterface() {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeRenderPassInterface>::get();
+    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_getRenderTargetInterface);
+    ::djinni::jniExceptionCheck(jniEnv);
+    return ::djinni::Optional<std::optional, ::djinni_generated::NativeRenderTargetInterface>::toCpp(jniEnv, jret);
 }
 /*nullable*/ std::shared_ptr<::MaskingObjectInterface> NativeRenderPassInterface::JavaProxy::getMaskingObject() {
     auto jniEnv = ::djinni::jniGetThreadEnv();
@@ -89,6 +98,15 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_Rende
         const auto& ref = ::djinni::objectFromHandleAddress<::RenderPassInterface>(nativeRef);
         auto r = ref->getRenderPassConfig();
         return ::djinni::release(::djinni_generated::NativeRenderPassConfig::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_RenderPassInterface_00024CppProxy_native_1getRenderTargetInterface(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::RenderPassInterface>(nativeRef);
+        auto r = ref->getRenderTargetInterface();
+        return ::djinni::release(::djinni::Optional<std::optional, ::djinni_generated::NativeRenderTargetInterface>::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 

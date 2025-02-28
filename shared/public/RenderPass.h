@@ -16,13 +16,15 @@
 
 class RenderPass : public RenderPassInterface {
 public:
-    RenderPass(RenderPassConfig config, const std::vector<std::shared_ptr<::RenderObjectInterface>> &renderObjects);
+    RenderPass(RenderPassConfig config, const std::vector<std::shared_ptr<::RenderObjectInterface>> &renderObjects, std::shared_ptr<RenderTargetInterface> = nullptr);
 
-    RenderPass(RenderPassConfig config, const std::vector<std::shared_ptr<::RenderObjectInterface>> &renderObjects, const std::shared_ptr<MaskingObjectInterface> &maskingObject);
+    RenderPass(RenderPassConfig config, const std::vector<std::shared_ptr<::RenderObjectInterface>> &renderObjects, const std::shared_ptr<MaskingObjectInterface> &maskingObject, std::shared_ptr<RenderTargetInterface> = nullptr);
 
     virtual std::vector<std::shared_ptr<::RenderObjectInterface>> getRenderObjects() override;
 
     virtual void addRenderObject(const std::shared_ptr<RenderObjectInterface> & renderObject) override;
+
+    virtual /*nullable*/ std::shared_ptr<RenderTargetInterface> getRenderTargetInterface() override;
 
     virtual RenderPassConfig getRenderPassConfig() override;
 
@@ -36,6 +38,7 @@ private:
     RenderPassConfig config;
     std::vector<std::shared_ptr<::RenderObjectInterface>> renderObjects;
     std::shared_ptr<MaskingObjectInterface> maskingObject;
+    std::shared_ptr<RenderTargetInterface> renderTargetInterface;
 
     std::optional< ::RectI> scissoringRect = std::nullopt;
 };

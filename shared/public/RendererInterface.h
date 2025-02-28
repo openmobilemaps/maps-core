@@ -4,10 +4,12 @@
 #pragma once
 
 #include <memory>
+#include <optional>
 
 class CameraInterface;
 class ComputePassInterface;
 class RenderPassInterface;
+class RenderTargetInterface;
 class RenderingContextInterface;
 
 class RendererInterface {
@@ -19,7 +21,7 @@ public:
     virtual void addToComputeQueue(const /*not-null*/ std::shared_ptr<ComputePassInterface> & computePass) = 0;
 
     /** Ensure calling on graphics thread */
-    virtual void drawFrame(const /*not-null*/ std::shared_ptr<RenderingContextInterface> & renderingContext, const /*not-null*/ std::shared_ptr<CameraInterface> & camera) = 0;
+    virtual void drawFrame(const /*not-null*/ std::shared_ptr<RenderingContextInterface> & renderingContext, const /*not-null*/ std::shared_ptr<CameraInterface> & camera, const /*nullable*/ std::shared_ptr<RenderTargetInterface> & target) = 0;
 
     /** Ensure calling on graphics thread */
     virtual void compute(const /*not-null*/ std::shared_ptr<RenderingContextInterface> & renderingContext, const /*not-null*/ std::shared_ptr<CameraInterface> & camera) = 0;

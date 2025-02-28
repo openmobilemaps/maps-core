@@ -19,6 +19,7 @@
 #include "RenderConfig.h"
 #include "Vec2D.h"
 #include "Vec2F.h"
+#include "HalfFloat.h"
 
 class PolygonPatternGroup2dLayerObject : public LayerObjectInterface {
   public:
@@ -35,7 +36,7 @@ class PolygonPatternGroup2dLayerObject : public LayerObjectInterface {
 
     void setVertices(const std::vector<float> &verticesBuffer, const std::vector<uint16_t> & indices, const Vec3D & origin);
 
-    void setOpacities(const std::vector<float> &opacities);
+    void setOpacities(const std::vector<HalfFloat> &opacities);
 
     void setTextureCoordinates(const std::vector<float> &coordinates);
 

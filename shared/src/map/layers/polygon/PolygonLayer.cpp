@@ -17,6 +17,7 @@
 #include "PolygonHelper.h"
 #include "RenderObject.h"
 #include "RenderPass.h"
+#include <algorithm>
 #include <map>
 
 #include "PolygonCompare.h"
@@ -253,7 +254,7 @@ void PolygonLayer::generateRenderPasses() {
     std::vector<std::shared_ptr<RenderPassInterface>> newRenderPasses;
     for (const auto &passEntry : renderPassObjectMap) {
         std::shared_ptr<RenderPass> renderPass =
-            std::make_shared<RenderPass>(RenderPassConfig(passEntry.first, false), passEntry.second, mask);
+            std::make_shared<RenderPass>(RenderPassConfig(passEntry.first, false), passEntry.second, mask, renderTarget);
         newRenderPasses.push_back(renderPass);
     }
     {

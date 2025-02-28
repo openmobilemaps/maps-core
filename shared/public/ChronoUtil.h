@@ -19,6 +19,10 @@ namespace chronoutil {
         return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
     }
 
+    static std::chrono::nanoseconds getCurrentTimestampNs() {
+        return std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch());
+    }
+
     static std::string getTimestampDeltaString(std::chrono::milliseconds start, std::chrono::milliseconds end) {
         return std::to_string((end - start).count()) + "ms";
     }

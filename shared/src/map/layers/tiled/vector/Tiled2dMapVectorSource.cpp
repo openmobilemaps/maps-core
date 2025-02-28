@@ -87,7 +87,18 @@ Tiled2dMapVectorTileInfo::FeatureMap Tiled2dMapVectorSource::postLoadingTask(std
                     try {
                         std::shared_ptr<VectorTileGeometryHandler> geometryHandler = std::make_shared<VectorTileGeometryHandler>(tile.bounds, extent, layerConfig->getVectorSettings(), conversionHelper);
                         vtzero::decode_geometry(feature.geometry(), *geometryHandler);
-                        geometryHandler->triangulatePolygons();
+                        size_t polygonCount = geometryHandler->beginTriangulatePolygons();
+                        for (size_t i = 0; i < polygonCount; i++) {
+                            {
+                                std::lock_guard<std::mutex> lock_guard(loadingTilesMutex);
+                                if (loadingTiles.find(tile) == loadingTiles.end()) {
+                                    return std::make_shared<std::unordered_map<std::string, std::shared_ptr<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>>>>();
+                                }
+                            }
+                            geometryHandler->triangulatePolygons(i);
+                        }
+
+                        geometryHandler->endTringulatePolygons();
                         layerFeatureMap->at(sourceLayerName)->push_back({featureContext, geometryHandler});
                     } catch (const vtzero::geometry_exception &geometryException) {
                         LogError <<= "geometryException for tile " + std::to_string(tile.zoomIdentifier) + "/" + std::to_string(tile.x) + "/" + std::to_string(tile.y);

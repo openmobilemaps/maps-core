@@ -14,6 +14,7 @@ import android.graphics.SurfaceTexture
 import android.opengl.*
 import android.util.Log
 import io.openmobilemaps.mapscore.BuildConfig
+import io.openmobilemaps.mapscore.shared.map.PerformanceLoggerInterface
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicLong
@@ -37,6 +38,9 @@ class GLThread constructor(
 
 	companion object {
 		private const val TAG = "GLThread"
+
+		private const val LOG_TAG_DRAW_FRAME = "$TAG->onDrawFrame"
+
 		private const val EGL_OPENGL_ES3_BIT = 0x00000040
 
 		private const val PAUSE_RENDER_INTERVAL = 30000L
@@ -85,6 +89,8 @@ class GLThread constructor(
 
 	var useMSAA: Boolean = false
 	var targetFrameRate = -1
+
+	var performanceLoggers: List<PerformanceLoggerInterface>? = null
 
 	@Volatile
 	private var finished = false
@@ -160,6 +166,8 @@ class GLThread constructor(
 				glRunList.poll()?.invoke()
 				i++
 			}
+
+			performanceLoggers?.forEach { it.startLog(LOG_TAG_DRAW_FRAME) }
 			renderer.onDrawFrame(gl10)
 			if (BuildConfig.DEBUG) {
 				GLES32.glGetError().let {
@@ -168,6 +176,7 @@ class GLThread constructor(
 					}
 				}
 			}
+			performanceLoggers?.forEach { it.endLog(LOG_TAG_DRAW_FRAME) }
 
 			if (surface != null) {
 				if (egl?.eglSwapBuffers(eglDisplay, eglSurface) != true) {

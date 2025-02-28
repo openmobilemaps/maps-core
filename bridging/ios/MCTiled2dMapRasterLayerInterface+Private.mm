@@ -12,6 +12,7 @@
 #import "MCMaskingObjectInterface+Private.h"
 #import "MCRasterShaderStyle+Private.h"
 #import "MCShaderProgramInterface+Private.h"
+#import "MCTextureFilterType+Private.h"
 #import "MCTiled2dMapLayerConfig+Private.h"
 #import "MCTiled2dMapRasterLayerCallbackInterface+Private.h"
 #import "MCTiled2dMapReadyStateListener+Private.h"
@@ -119,6 +120,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     try {
         auto objcpp_result_ = _cppRefHandle.get()->getStyle();
         return ::djinni_generated::RasterShaderStyle::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)setMinMagFilter:(MCTextureFilterType)filterType {
+    try {
+        _cppRefHandle.get()->setMinMagFilter(::djinni::Enum<::TextureFilterType, MCTextureFilterType>::toCpp(filterType));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

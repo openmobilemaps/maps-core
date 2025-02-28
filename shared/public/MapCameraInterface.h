@@ -8,6 +8,7 @@
 #include "MapCameraListenerInterface.h"
 #include "RectCoord.h"
 #include "Vec2F.h"
+#include "Vec3D.h"
 #include <memory>
 #include <optional>
 #include <vector>
@@ -105,11 +106,15 @@ public:
 
     virtual std::optional<std::vector<float>> getLastVpMatrix() = 0;
 
+    virtual std::optional<std::vector<float>> getLastInverseVpMatrix() = 0;
+
     virtual std::optional<::RectCoord> getLastVpMatrixViewBounds() = 0;
 
     virtual std::optional<float> getLastVpMatrixRotation() = 0;
 
     virtual std::optional<float> getLastVpMatrixZoom() = 0;
+
+    virtual std::optional<::Vec3D> getLastCameraPosition() = 0;
 
     virtual /*nullable*/ std::shared_ptr<MapCamera3dInterface> asMapCamera3d() = 0;
 };

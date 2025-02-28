@@ -116,7 +116,6 @@ public:
         return lineDottedSkewEvaluator.getResult(context, defaultValue);
     }
 
-private:
     ValueEvaluator<Color> lineColorEvaluator;
     ValueEvaluator<double> lineOpacityEvaluator;
     ValueEvaluator<double> lineBlurEvaluator;
@@ -133,6 +132,7 @@ class LineVectorLayerDescription: public VectorLayerDescription {
 public:
     VectorLayerType getType() override { return VectorLayerType::line; };
     LineVectorStyle style;
+    float selectionSizeFactor;
 
     LineVectorLayerDescription(std::string identifier,
                                std::string source,
@@ -146,14 +146,16 @@ public:
                                std::optional<int32_t> renderPassIndex,
                                std::shared_ptr<Value> interactable,
                                bool multiselect,
-                               bool selfMasked):
+                               bool selfMasked,
+                               float selectionSizeFactor):
     VectorLayerDescription(identifier, source, sourceId, minZoom, maxZoom, sourceMinZoom, sourceMaxZoom, filter, renderPassIndex, interactable, multiselect, selfMasked),
-    style(style) {};
+    style(style), selectionSizeFactor(selectionSizeFactor) {};
 
     std::unique_ptr<VectorLayerDescription> clone() override {
         return std::make_unique<LineVectorLayerDescription>(identifier, source, sourceLayer, minZoom, maxZoom, sourceMinZoom, sourceMaxZoom,
                                                             filter ? filter->clone() : nullptr, style, renderPassIndex,
-                                                            interactable ? interactable->clone() : nullptr, multiselect, selfMasked);
+                                                            interactable ? interactable->clone() : nullptr, multiselect, selfMasked,
+                                                            selectionSizeFactor);
     }
 
     virtual UsedKeysCollection getUsedKeys() const override {
