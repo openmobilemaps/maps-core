@@ -1,6 +1,7 @@
 package io.openmobilemaps.mapscore.graphics.util;
 
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferInt;
 
 /**
  * Simple bindings for OSMesa, the Mesa Off-Screen rendering interface.
@@ -34,22 +35,6 @@ public class OSMesa {
         makeCurrent(width, height, numSamples);
     }
 
-    // Analogous BufferedImage.setRGB with a vertical flip.
-    // Simplified (startX/Y = 0 and scansize == width).
-    private static void setARGBflipV(BufferedImage image, int w, int h, int[] buf) {
-        Object pixel = null;
-        var colorModel = image.getColorModel();
-        var raster = image.getRaster();
-
-        int off = 0;
-        for (int y = h - 1; y >= 0; --y) {
-            for (int x = 0; x < w; ++x) {
-                pixel = colorModel.getDataElements(buf[off++], pixel);
-                raster.setDataElements(x, y, pixel);
-            }
-        }
-    }
-
     private static native long createContext();
 
     private static native boolean makeCurrent(long state, int width, int height, int numSamples);
@@ -80,10 +65,23 @@ public class OSMesa {
     // optimized using ByteBuffer).
     public BufferedImage getImage() {
         var out = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-        var tmpARGB = new int[width * height];
-        readARGB(state, tmpARGB);
-        setARGBflipV(out, width, height, tmpARGB);
+        // Direct access to DataBuffer is much faster than initializing it via setDataElement or setRGB.
+        var dataBuf = (DataBufferInt)out.getRaster().getDataBuffer();
+        readARGB(state, dataBuf.getData());
+        flipV(dataBuf.getData(), width, height);
         return out;
+    }
+
+    private static void flipV(int[] image, int width, int height) {
+        for(int yTop = 0; yTop < height / 2; ++yTop) {
+            int yBot = height - yTop - 1;
+            for (int x = 0; x < width; ++x) {
+                int tmpTop = image[yTop * width + x];
+                int tmpBot = image[yBot * width + x];
+                image[yTop * width + x] = tmpBot;
+                image[yBot * width + x] = tmpTop;
+            }
+        }
     }
 
     public void destroy() {
