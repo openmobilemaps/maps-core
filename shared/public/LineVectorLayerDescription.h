@@ -117,11 +117,11 @@ public:
     }
 
     bool isSimpleLine() {
-        return lineBlurEvaluator.getValue() == nil &&
-               lineDashArrayEvaluator.getValue() == nil &&
-               lineOffsetEvaluator.getValue() == nil &&
-               lineDottedEvaluator.getValue() == nil &&
-               lineDottedSkewEvaluator.getValue() == nil;
+        return lineBlurEvaluator.getValue() == nullptr &&
+               lineDashArrayEvaluator.getValue() == nullptr &&
+               lineOffsetEvaluator.getValue() == nullptr &&
+               lineDottedEvaluator.getValue() == nullptr &&
+               lineDottedSkewEvaluator.getValue() == nullptr;
     }
 
     ValueEvaluator<Color> lineColorEvaluator;

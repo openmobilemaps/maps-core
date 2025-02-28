@@ -126,17 +126,17 @@ void Tiled2dMapVectorLineTile::update() {
                 // color
                 auto color = inZoomRange ? lineDescription->style.getLineColor(context) : Color(0.0, 0.0, 0.0, 0.0);
                 if (color.r != style.colorR || color.g != style.colorG || color.b != style.colorB || color.a != style.colorA) {
-                    style.colorR = color.r;
-                    style.colorG = color.g;
-                    style.colorB = color.b;
-                    style.colorA = color.a;
+                    style.colorR = toHalfFloat(color.r);
+                    style.colorG = toHalfFloat(color.g);
+                    style.colorB = toHalfFloat(color.b);
+                    style.colorA = toHalfFloat(color.a);
                     needsUpdate = true;
                 }
 
                 // opacity
                 float opacity = inZoomRange ? lineDescription->style.getLineOpacity(context) * alpha : 0.0;
                 if (opacity != style.opacity) {
-                    style.opacity = opacity;
+                    style.opacity = toHalfFloat(opacity);
                     needsUpdate = true;
                 }
 
@@ -144,14 +144,14 @@ void Tiled2dMapVectorLineTile::update() {
                 auto widthType = SizeType::SCREEN_PIXEL;
                 auto widthAsPixel = (widthType == SizeType::SCREEN_PIXEL ? 1 : 0);
                 if (widthAsPixel != style.widthAsPixel) {
-                    style.widthAsPixel = widthAsPixel;
+                    style.widthAsPixel = toHalfFloat(widthAsPixel);
                     needsUpdate = true;
                 }
 
                 // width
                 float width = inZoomRange ? lineDescription->style.getLineWidth(context) : 0.0;
                 if (width != style.width) {
-                    style.width = width;
+                    style.width = toHalfFloat(width);
                     needsUpdate = true;
                 }
 
@@ -167,7 +167,7 @@ void Tiled2dMapVectorLineTile::update() {
                 }
 
                 if (cap != style.lineCap) {
-                    style.lineCap = cap;
+                    style.lineCap = toHalfFloat(cap);
                     needsUpdate = true;
                 }
             } else {
@@ -176,24 +176,24 @@ void Tiled2dMapVectorLineTile::update() {
                 // color
                 auto color = inZoomRange ? lineDescription->style.getLineColor(context) : Color(0.0, 0.0, 0.0, 0.0);
                 if (color.r != style.colorR || color.g != style.colorG || color.b != style.colorB || color.a != style.colorA) {
-                    style.colorR = color.r;
-                    style.colorG = color.g;
-                    style.colorB = color.b;
-                    style.colorA = color.a;
+                    style.colorR = toHalfFloat(color.r);
+                    style.colorG = toHalfFloat(color.g);
+                    style.colorB = toHalfFloat(color.b);
+                    style.colorA = toHalfFloat(color.a);
                     needsUpdate = true;
                 }
 
                 // opacity
                 float opacity = inZoomRange ? lineDescription->style.getLineOpacity(context) * alpha : 0.0;
                 if (opacity != style.opacity) {
-                    style.opacity = opacity;
+                    style.opacity = toHalfFloat(opacity);
                     needsUpdate = true;
                 }
 
                 // blue
                 float blur = inZoomRange ? lineDescription->style.getLineBlur(context) : 0.0;
                 if (blur != style.blur) {
-                    style.blur = blur;
+                    style.blur = toHalfFloat(blur);
                     needsUpdate = true;
                 }
 
@@ -201,14 +201,14 @@ void Tiled2dMapVectorLineTile::update() {
                 auto widthType = SizeType::SCREEN_PIXEL;
                 auto widthAsPixel = (widthType == SizeType::SCREEN_PIXEL ? 1 : 0);
                 if (widthAsPixel != style.widthAsPixel) {
-                    style.widthAsPixel = widthAsPixel;
+                    style.widthAsPixel = toHalfFloat(widthAsPixel);
                     needsUpdate = true;
                 }
 
                 // width
                 float width = inZoomRange ? lineDescription->style.getLineWidth(context) : 0.0;
                 if (width != style.width) {
-                    style.width = width;
+                    style.width = toHalfFloat(width);
                     needsUpdate = true;
                 }
 
@@ -222,10 +222,11 @@ void Tiled2dMapVectorLineTile::update() {
 
                 if (style.numDashValue != dn || dValue0 != style.dashValue0 || dValue1 != style.dashValue1 || dValue2 != style.dashValue2 || dValue3 != style.dashValue3) {
                     style.numDashValue = dn;
-                    style.dashValue0 = dValue0;
-                    style.dashValue1 = dValue1;
-                    style.dashValue2 = dValue2;
-                    style.dashValue3 = dValue3;
+                    style.dashValue0 = toHalfFloat(dValue0);
+                    style.dashValue1 = toHalfFloat(dValue1);
+                    style.dashValue2 = toHalfFloat(dValue2);
+                    style.dashValue3 = toHalfFloat(dValue3);
+
                     needsUpdate = true;
                 }
 
@@ -241,14 +242,14 @@ void Tiled2dMapVectorLineTile::update() {
                 }
 
                 if (cap != style.lineCap) {
-                    style.lineCap = cap;
+                    style.lineCap = toHalfFloat(cap);
                     needsUpdate = true;
                 }
 
                 // offset
                 auto offset = inZoomRange ? lineDescription->style.getLineOffset(context, width) : 0.0;
                 if(offset != style.offset) {
-                    style.offset = offset;
+                    style.offset = toHalfFloat(offset);
                     needsUpdate = true;
                 }
 
@@ -257,14 +258,14 @@ void Tiled2dMapVectorLineTile::update() {
 
                 auto dotted = lineDotted ? 1 : 0;
                 if(dotted != style.dotted) {
-                    style.dotted = dotted;
+                    style.dotted = toHalfFloat(dotted);
                     needsUpdate = true;
                 }
 
                 // dotted skew
                 auto dottedSkew = lineDescription->style.getLineDottedSkew(context);
                 if(dottedSkew != style.dottedSkew) {
-                    style.dottedSkew = dottedSkew;
+                    style.dottedSkew = toHalfFloat(dottedSkew);
                     needsUpdate = true;
                 }
             }
@@ -275,11 +276,11 @@ void Tiled2dMapVectorLineTile::update() {
         if (needsUpdate) {
             if (isSimpleLine) {
                 auto &styles = reusableSimpleLineStyles[styleGroupId];
-                auto buffer = SharedBytes((int64_t)styles.data(), (int)styles.size(), 8 * sizeof(float));
+                auto buffer = SharedBytes((int64_t)styles.data(), (int)styles.size(), sizeof(ShaderSimpleLineStyle));
                 shaders[styleGroupId]->setStyles(buffer);
             } else {
                 auto &styles = reusableLineStyles[styleGroupId];
-                auto buffer = SharedBytes((int64_t)styles.data(), (int)styles.size(), 23 * sizeof(float));
+                auto buffer = SharedBytes((int64_t)styles.data(), (int)styles.size(), sizeof(ShaderLineStyle));
                 shaders[styleGroupId]->setStyles(buffer);
             }
         }
@@ -342,16 +343,14 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
                     }
 
                     if (styleIndex == -1) {
-                        auto reusableStyle = ShaderLineStyle(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-                        auto simpleReusableStyle = ShaderSimpleLineStyle(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
                         if (!featureGroups.empty() && featureGroups.back().size() < maxStylesPerGroup) {
                             styleGroupIndex = (int) featureGroups.size() - 1;
                             styleIndex = (int) featureGroups.back().size();
                             featureGroups.at(styleGroupIndex).push_back({ hash, featureContext });
                             if (isSimpleLine) {
-                                reusableSimpleLineStyles.at(styleGroupIndex).push_back(simpleReusableStyle);
+                                reusableSimpleLineStyles.at(styleGroupIndex).push_back( ShaderSimpleLineStyle {0});
                             } else {
-                                reusableLineStyles.at(styleGroupIndex).push_back(reusableStyle);
+                                reusableLineStyles.at(styleGroupIndex).push_back(ShaderLineStyle {0});
                             }
                         } else {
                             styleGroupIndex = (int) featureGroups.size();
@@ -361,9 +360,9 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
                             shader->asShaderProgramInterface()->setBlendMode(lineDescription->style.getBlendMode(EvaluationContext(0.0, dpFactor, std::make_shared<FeatureContext>(), featureStateManager)));
                             shaders.push_back(shader);
                             if (isSimpleLine) {
-                                reusableSimpleLineStyles.push_back({ simpleReusableStyle });
+                                reusableSimpleLineStyles.push_back({  ShaderSimpleLineStyle {0} });
                             } else {
-                                reusableLineStyles.push_back({ reusableStyle });
+                                reusableLineStyles.push_back({ ShaderLineStyle {0} });
                             }
                             styleGroupLineSubGroupVector.push_back(std::vector<std::tuple<std::vector<Coord>, int>>());
                             styleGroupNewLinesVector.push_back({});

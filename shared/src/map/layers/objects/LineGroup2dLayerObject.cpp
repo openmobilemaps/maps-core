@@ -134,32 +134,33 @@ void LineGroup2dLayerObject::setStyles(const std::vector<LineStyle> &styles) {
         float dotted = s.dotted ? 0 : 1;
 
         shaderLineStyles
-            .emplace_back(s.width,
-                          s.color.normal.r,
-                          s.color.normal.g,
-                          s.color.normal.b,
-                          s.color.normal.a,
-                          s.gapColor.normal.r,
-                          s.gapColor.normal.g,
-                          s.gapColor.normal.b,
-                          s.gapColor.normal.a,
-                          s.widthType == SizeType::SCREEN_PIXEL ? 1.0 : 0.0,
-                          s.opacity,
-                          s.blur,
-                          cap,
-                          dn,
-                          dValue0,
-                          dValue1,
-                          dValue2,
-                          dValue3,
-                          s.dashFade,
-                          s.dashAnimationSpeed,
-                          s.offset,
-                          s.dotted,
-                          s.dottedSkew);
+            .emplace_back(ShaderLineStyle {
+                toHalfFloat(s.width),
+                toHalfFloat(s.color.normal.r),
+                toHalfFloat(s.color.normal.g),
+                toHalfFloat(s.color.normal.b),
+                toHalfFloat(s.color.normal.a),
+                toHalfFloat(s.gapColor.normal.r),
+                toHalfFloat(s.gapColor.normal.g),
+                toHalfFloat(s.gapColor.normal.b),
+                toHalfFloat(s.gapColor.normal.a),
+                toHalfFloat(s.widthType == SizeType::SCREEN_PIXEL ? 1.0 : 0.0),
+                toHalfFloat(s.opacity),
+                toHalfFloat(s.blur),
+                toHalfFloat(cap),
+                toHalfFloat(dn),
+                toHalfFloat(dValue0),
+                toHalfFloat(dValue1),
+                toHalfFloat(dValue2),
+                toHalfFloat(dValue3),
+                toHalfFloat(s.dashFade),
+                toHalfFloat(s.dashAnimationSpeed),
+                toHalfFloat(s.offset),
+                toHalfFloat(s.dotted),
+                toHalfFloat(s.dottedSkew) });
     }
 
-    auto bytes = SharedBytes((int64_t)shaderLineStyles.data(), (int)shaderLineStyles.size(), 21 * sizeof(float));
+    auto bytes = SharedBytes((int64_t)shaderLineStyles.data(), (int)shaderLineStyles.size(), sizeof(ShaderLineStyle));
     shader->setStyles(bytes);
 }
 

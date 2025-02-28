@@ -119,27 +119,27 @@ void Line2dLayerObject::setHighlighted(bool highlighted_) {
 }
 
 void Line2dLayerObject::setStyle(const LineStyle &style, bool highlighted) {
-    ShaderLineStyle s(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+    ShaderLineStyle s = {0};
 
-    s.colorR = highlighted ? style.color.highlighted.r : style.color.normal.r;
-    s.colorG = highlighted ? style.color.highlighted.g : style.color.normal.g;
-    s.colorB =  highlighted ? style.color.highlighted.b : style.color.normal.b;
-    s.colorA = highlighted ? style.color.highlighted.a : style.color.normal.a;
+    s.colorR = toHalfFloat(highlighted ? style.color.highlighted.r : style.color.normal.r);
+    s.colorG = toHalfFloat(highlighted ? style.color.highlighted.g : style.color.normal.g);
+    s.colorB =  toHalfFloat(highlighted ? style.color.highlighted.b : style.color.normal.b);
+    s.colorA = toHalfFloat(highlighted ? style.color.highlighted.a : style.color.normal.a);
 
-    s.gapColorR = highlighted ? style.gapColor.highlighted.r : style.gapColor.normal.r;
-    s.gapColorG = highlighted ? style.gapColor.highlighted.g : style.gapColor.normal.g;
-    s.gapColorB =  highlighted ? style.gapColor.highlighted.b : style.gapColor.normal.b;
-    s.gapColorA = highlighted ? style.gapColor.highlighted.a : style.gapColor.normal.a;
+    s.gapColorR = toHalfFloat(highlighted ? style.gapColor.highlighted.r : style.gapColor.normal.r);
+    s.gapColorG = toHalfFloat(highlighted ? style.gapColor.highlighted.g : style.gapColor.normal.g);
+    s.gapColorB =  toHalfFloat(highlighted ? style.gapColor.highlighted.b : style.gapColor.normal.b);
+    s.gapColorA = toHalfFloat(highlighted ? style.gapColor.highlighted.a : style.gapColor.normal.a);
 
-    s.opacity = style.opacity;
-    s.blur = style.blur;
+    s.opacity = toHalfFloat(style.opacity);
+    s.blur = toHalfFloat(style.blur);
 
     // width type
     auto widthType = SizeType::SCREEN_PIXEL;
     auto widthAsPixel = (style.widthType == SizeType::SCREEN_PIXEL ? 1 : 0);
-    s.widthAsPixel = widthAsPixel;
+    s.widthAsPixel = toHalfFloat(widthAsPixel);
 
-    s.width = style.width;
+    s.width = toHalfFloat(style.width);
 
     // line caps
     auto lineCap = style.lineCap;
@@ -152,26 +152,26 @@ void Line2dLayerObject::setStyle(const LineStyle &style, bool highlighted) {
         default: { cap = 1; }
     }
 
-    s.lineCap = cap;
+    s.lineCap = toHalfFloat(cap);
 
     // dashes
     auto dashArray = style.dashArray;
     auto dn = dashArray.size();
-    s.numDashValue = dn;
-    s.dashValue0 = dn > 0 ? dashArray[0] : 0.0;
-    s.dashValue1 = (dn > 1 ? dashArray[1] : 0.0) + s.dashValue0;
-    s.dashValue2 = (dn > 2 ? dashArray[2] : 0.0) + s.dashValue1;
-    s.dashValue3 = (dn > 3 ? dashArray[3] : 0.0) + s.dashValue2;
-    s.dashFade = style.dashFade;
-    s.dashAnimationSpeed = style.dashAnimationSpeed;
+    s.numDashValue = toHalfFloat(dn);
+    s.dashValue0 = toHalfFloat(dn > 0 ? dashArray[0] : 0.0);
+    s.dashValue1 = toHalfFloat((dn > 1 ? dashArray[1] : 0.0) + s.dashValue0);
+    s.dashValue2 = toHalfFloat((dn > 2 ? dashArray[2] : 0.0) + s.dashValue1);
+    s.dashValue3 = toHalfFloat((dn > 3 ? dashArray[3] : 0.0) + s.dashValue2);
+    s.dashFade = toHalfFloat(style.dashFade);
+    s.dashAnimationSpeed = toHalfFloat(style.dashAnimationSpeed);
 
-    s.offset = style.offset;
+    s.offset = toHalfFloat(style.offset);
 
-    s.dotted = style.dotted;
-    
-    s.dottedSkew = style.dottedSkew;
+    s.dotted = toHalfFloat(style.dotted);
 
-    auto buffer = SharedBytes((int64_t)&s, 1, 21 * sizeof(float));
+    s.dottedSkew = toHalfFloat(style.dottedSkew);
+
+    auto buffer = SharedBytes((int64_t)&s, 1, sizeof(ShaderLineStyle));
     shader->setStyles(buffer);
 }
 

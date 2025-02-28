@@ -54,20 +54,20 @@ struct LineVertexOut {
 };
 
 struct LineStyling {
-  float width; // 0
-  packed_float4 color; // 1 2 3 4
-  packed_float4 gapColor; // 5 6 7 8
-  float widthAsPixels; // 9
-  float opacity; // 10
-  float blur; // 11
-  float capType; // 12
-  float numDashValues; // 13
-  packed_float4 dashArray; // 14 15 16 17
-  float dash_fade; // 18
-  float dash_animation_speed; // 19
-  float offset; // 20
-  float dotted; // 21
-  float dottedSkew; // 22
+  half width; // 0
+  packed_half4 color; // 1 2 3 4
+  packed_half4 gapColor; // 5 6 7 8
+  half widthAsPixels; // 9
+  half opacity; // 10
+  half blur; // 11
+  half capType; // 12
+  half numDashValues; // 13
+  packed_half4 dashArray; // 14 15 16 17
+  half dash_fade; // 18
+  half dash_animation_speed; // 19
+  half offset; // 20
+  half dotted; // 21
+  half dottedSkew; // 22
 } __attribute__((__packed__));
 
 
@@ -83,11 +83,11 @@ struct SimpleLineVertexOut {
 };
 
 struct SimpleLineStyling {
-    float width; // 0
-    packed_float4 color; // 1 2 3 4
-    float widthAsPixels; // 5
-    float opacity; // 6
-    float capType; // 7
+    half width; // 0
+    packed_half4 color; // 1 2 3 4
+    half widthAsPixels; // 5
+    half opacity; // 6
+    half capType; // 7
 } __attribute__((__packed__));
 
 
@@ -103,11 +103,11 @@ unitSphereSimpleLineGroupVertexShader(const LineVertexUnitSphereIn vertexIn [[st
                       constant float4x4 &vpMatrix [[buffer(1)]],
                       constant float &scalingFactor [[buffer(2)]],
                       constant float &dashingScalingFactor [[buffer(3)]],
-                      constant float *styling [[buffer(4)]],
+                      constant half *styling [[buffer(4)]],
                       constant float4 &originOffset [[buffer(5)]],
                       constant float4 &tileOrigin [[buffer(6)]])
 {
-    int styleIndex = (int(vertexIn.stylingIndex) & 0xFF) * 21;
+    int styleIndex = (int(vertexIn.stylingIndex) & 0xFF) * 8;
     constant SimpleLineStyling *style = (constant SimpleLineStyling *)(styling + styleIndex);
 
     // extend position in width direction and in length direction by width / 2.0
@@ -171,13 +171,13 @@ simpleLineGroupVertexShader(const LineVertexIn vertexIn [[stage_in]],
                       constant float4x4 &vpMatrix [[buffer(1)]],
                       constant float &scalingFactor [[buffer(2)]],
                       constant float &dashingScalingFactor [[buffer(3)]],
-                      constant float *styling [[buffer(4)]],
+                      constant half *styling [[buffer(4)]],
                       constant float4 &originOffset [[buffer(5)]],
                       constant float4 &tileOrigin [[buffer(6)]])
 {
-    int styleIndex = (int(vertexIn.stylingIndex) & 0xFF) * 21;
-    constant LineStyling *style = (constant LineStyling *)(styling + styleIndex);
-
+    int styleIndex = (int(vertexIn.stylingIndex) & 0xFF) * 8;
+    constant SimpleLineStyling *style = (constant SimpleLineStyling *)(styling + styleIndex);
+  
     // extend position in width direction and in length direction by width / 2.0
     float width = style->width / 2.0;
 
@@ -236,7 +236,7 @@ simpleLineGroupVertexShader(const LineVertexIn vertexIn [[stage_in]],
 
 fragment half4
 simpleLineGroupFragmentShader(SimpleLineVertexOut in [[stage_in]],
-                        constant float *styling [[buffer(1)]])
+                        constant half *styling [[buffer(1)]])
 {
   constant SimpleLineStyling *style = (constant SimpleLineStyling *)(styling + in.stylingIndex);
   const half lineLength = length(in.lineB);
@@ -288,7 +288,7 @@ unitSphereLineGroupVertexShader(const LineVertexUnitSphereIn vertexIn [[stage_in
                       constant float4x4 &vpMatrix [[buffer(1)]],
                       constant float &scalingFactor [[buffer(2)]],
                       constant float &dashingScalingFactor [[buffer(3)]],
-                      constant float *styling [[buffer(4)]],
+                      constant half *styling [[buffer(4)]],
                       constant float4 &originOffset [[buffer(5)]],
                       constant float4 &tileOrigin [[buffer(6)]])
 {
@@ -366,7 +366,7 @@ lineGroupVertexShader(const LineVertexIn vertexIn [[stage_in]],
                       constant float4x4 &vpMatrix [[buffer(1)]],
                       constant float &scalingFactor [[buffer(2)]],
                       constant float &dashingScalingFactor [[buffer(3)]],
-                      constant float *styling [[buffer(4)]],
+                      constant half *styling [[buffer(4)]],
                       constant float4 &originOffset [[buffer(5)]],
                       constant float4 &tileOrigin [[buffer(6)]])
 {
@@ -441,7 +441,7 @@ lineGroupVertexShader(const LineVertexIn vertexIn [[stage_in]],
 
 fragment half4
 lineGroupFragmentShader(LineVertexOut in [[stage_in]],
-                        constant float *styling [[buffer(1)]],
+                        constant half *styling [[buffer(1)]],
                         constant float &time [[buffer(2)]])
 {
   constant LineStyling *style = (constant LineStyling *)(styling + in.stylingIndex);
