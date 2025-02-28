@@ -9,6 +9,7 @@
 - Improved the interceptor handling in the default DataLoader for Android
 - Add the option to animate the scale of elements in the IconLayer
 - Update to AGP 8.7.2 and Kotlin 2.0.21
+- Add support for feature dependent text-font in style.jsons
 - Numerous other improvements and bugfixes
 
 ## Version 2.6.2

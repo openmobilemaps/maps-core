@@ -20,12 +20,23 @@ open class MCFontLoader: NSObject, MCFontLoaderInterface, @unchecked Sendable {
     private var fontDataDictionary: [String: MCFontData] = [:]
 
     // MARK: - Init
-
+    private let pixelsPerInch: Double
     private let bundle: Bundle
 
     // the bundle to use for searching for fonts
     public init(bundle: Bundle, preload: [String] = []) {
         self.bundle = bundle
+        pixelsPerInch = if Thread.isMainThread {
+            MainActor.assumeIsolated {
+                UIScreen.pixelsPerInch
+            }
+        } else {
+            DispatchQueue.main.sync {
+                MainActor.assumeIsolated {
+                    UIScreen.pixelsPerInch
+                }
+            }
+        }
         super.init()
         loadingQueue.async {
             let fonts = preload.map { MCFont(name: $0)}
@@ -69,23 +80,12 @@ open class MCFontLoader: NSObject, MCFontLoaderInterface, @unchecked Sendable {
                     let size = double(dict: fontInfoJson, value: "size")
                     let imageSize = double(dict: commonJson, value: "scaleW")
 
-                    let pixelsPerInch = if Thread.isMainThread {
-                        MainActor.assumeIsolated {
-                            UIScreen.pixelsPerInch
-                        }
-                    } else {
-                        DispatchQueue.main.sync {
-                            MainActor.assumeIsolated {
-                                UIScreen.pixelsPerInch
-                            }
-                        }
-                    }
 
                     let fontInfo = MCFontWrapper(name: font.name,
                                                  lineHeight: double(dict: commonJson, value: "lineHeight") / size,
                                                  base: double(dict: commonJson, value: "base") / size,
                                                  bitmapSize: MCVec2D(x: imageSize, y: imageSize),
-                                                 size: Double(pixelsPerInch) * size)
+                                                 size: pixelsPerInch * size)
 
                     var glyphs: [MCFontGlyph] = []
 
