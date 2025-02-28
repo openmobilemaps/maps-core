@@ -25,6 +25,10 @@ public:
 
     std::shared_ptr<LineGroupShaderInterface> createUnitSphereLineGroupShader() override;
 
+    std::shared_ptr<LineGroupShaderInterface> createSimpleLineGroupShader() override;
+
+    std::shared_ptr<LineGroupShaderInterface> createUnitSphereSimpleLineGroupShader() override;
+
     std::shared_ptr<ColorShaderInterface> createColorShader() override;
 
     std::shared_ptr<ColorShaderInterface> createUnitSphereColorShader() override;
