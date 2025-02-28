@@ -19,10 +19,10 @@ struct TileOptions {
     double tolerance = 1.0;
 
     // tile extent
-    uint16_t extent = 4096;
+    uint32_t extent = 4096;
 
     // tile buffer on each side
-    uint16_t buffer = 64;
+    uint32_t buffer = 64;
 };
 
 struct Options : TileOptions {
@@ -87,6 +87,7 @@ public:
             if (!self) return;
             auto result = resultFuture.get();
 
+            self->loadingResult = DataLoaderResult(std::nullopt, std::nullopt, result.status, result.errorCode);
             if (result.status != LoaderStatus::OK) {
                 LogError <<= "Unable to load geoJson";
 
@@ -116,7 +117,6 @@ public:
                     return;
                 }
             }
-            self->loadingResult = DataLoaderResult(std::nullopt, std::nullopt, result.status, result.errorCode);
             self->loaders.clear();
 
             self->resolveAllWaitingPromises();

@@ -19,7 +19,7 @@ public:
 
 class InternalTile {
 public:
-    const uint16_t extent;
+    const uint32_t extent;
     const uint8_t z;
     const uint32_t x;
     const uint32_t y;
@@ -38,7 +38,7 @@ public:
                  const uint8_t z_,
                  const uint32_t x_,
                  const uint32_t y_,
-                 const uint16_t extent_,
+                 const uint32_t extent_,
                  const double tolerance_)
     : extent(extent_),
     z(z_),

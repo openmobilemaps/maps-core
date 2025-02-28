@@ -66,6 +66,7 @@ public:
             auto bounds = camera->getVisibleRect();
             auto zoom = camera->getZoom();
             // there is no concept of curT for geoJSON, therefore we just set it to 0
+            lastVisibleTilesHash = 0;
             onVisibleBoundsChanged(bounds, 0, zoom);
         }
     }

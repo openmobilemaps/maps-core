@@ -103,6 +103,7 @@ open class AssetLocalDataProvider(
 
     override fun loadGeojson(sourceName: String, url: String): Future<DataLoaderResult> {
         return loadDataAsync?.invoke(url, null) ?: Promise<DataLoaderResult>().apply {
+            Log.e(AssetLocalDataProvider::class.java.canonicalName, "Failed to load geojson for url: $url")
             setValue(
                 DataLoaderResult(
                     null,

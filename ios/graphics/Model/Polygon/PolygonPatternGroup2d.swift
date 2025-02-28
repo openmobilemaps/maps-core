@@ -163,14 +163,13 @@ extension PolygonPatternGroup2d: MCPolygonPatternGroup2dInterface {
         var minX = Float.greatestFiniteMagnitude
         var minY = Float.greatestFiniteMagnitude
 
-        if let p = UnsafeRawPointer(bitPattern: Int(vertices.address)) {
-            for i in 0 ..< vertices.elementCount {
-                if i % 3 == 0 {
-                    let x = (p + 4 * Int(i)).load(as: Float.self)
-                    let y = (p + 4 * (Int(i) + 1)).load(as: Float.self)
-                    minX = min(x, minX)
-                    minY = min(y, minY)
-                }
+        if let rawPointer = UnsafeRawPointer(bitPattern: Int(vertices.address)) {
+            let count = Int(vertices.elementCount / 4)
+            let float4Pointer = rawPointer.assumingMemoryBound(to: SIMD4<Float>.self)
+            for i in 0 ..< count {
+                let value = float4Pointer[i]
+                minX = min(value.x, minX)
+                minY = min(value.y, minY)
             }
         }
         lock.withCritical {

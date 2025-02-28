@@ -25,10 +25,12 @@ public:
 
     std::vector<Tiled2dMapZoomLevelInfo> getZoomLevelInfos() override {
         int maxZoom = 0;
+        int minZoom = 0;
         if (auto geoJSON = this->geoJSON.lock()){
+            minZoom = geoJSON->getMinZoom();
             maxZoom = geoJSON->getMaxZoom();
         }
-        return getDefaultEpsg3857ZoomLevels(0, maxZoom);
+        return getDefaultEpsg3857ZoomLevels(minZoom, maxZoom);
     }
 
     std::vector<Tiled2dMapZoomLevelInfo> getVirtualZoomLevelInfos() override {

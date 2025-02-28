@@ -348,10 +348,8 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
 
     Vec2D anchorOffset(0.0, 0.0);
 
-    static std::vector<double> baseLines;
-    while(baseLines.size() < characterCount) {
-        baseLines.push_back(0.0);
-    }
+    thread_local std::vector<double> baseLines;
+    baseLines.resize(characterCount, 0.0);
 
     float yOffset = 0;
 

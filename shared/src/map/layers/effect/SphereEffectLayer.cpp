@@ -74,8 +74,8 @@ void SphereEffectLayer::update() {
         return;
     }
 
-    static std::vector<double> coefficients(16, 0.0);
-    static std::vector<float> coefficientsFloat(16, 0.0);
+    thread_local std::vector<double> coefficients(16, 0.0);
+    thread_local std::vector<float> coefficientsFloat(16, 0.0);
 
     castedCamera->computeEllipseCoefficients(coefficients);
 

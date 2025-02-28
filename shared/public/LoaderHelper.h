@@ -72,7 +72,7 @@ private:
         if (loaderIndex >= loaders.size()) {
             promise->setValue(DataLoaderResult(std::nullopt, std::nullopt, LoaderStatus::NOOP, std::nullopt));
         } else {
-            loaders[loaderIndex]->loadDataAsync(url, etag).then([url, etag, &loaders, loaderIndex, promise](::djinni::Future<::DataLoaderResult> result) {
+            loaders[loaderIndex]->loadDataAsync(url, etag).then([url, etag, loaders, loaderIndex, promise](::djinni::Future<::DataLoaderResult> result) {
                 const auto dataResult = result.get();
                 if (dataResult.status != LoaderStatus::NOOP || loaderIndex == loaders.size() - 1) {
                     promise->setValue(std::move(dataResult));
