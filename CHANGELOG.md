@@ -1,5 +1,11 @@
 # Changelog for Open Mobile Maps
 
+## Version 3.0.1
+- Add minZoom/extent (for virtual tiles) option for geojson sources in style jsons
+- Changed some static vectors to thread-local vectors to avoid potential data races
+- Fixes a bug in iOS polygon position offset calculation
+- Catch c++ future exception if the promise is deallocated while the its not fulfilled
+
 ## Version 3.0.0
 - Introduced 3D globe rendering with support for most established layers and features and a custom camera and configuration options
 - Massively improved the spatial precision of the map
