@@ -10,6 +10,7 @@
 
 #include "Line2dLayerObject.h"
 #include "Vec3D.h"
+#include "LineHelper.h"
 #include <cmath>
 
 Line2dLayerObject::Line2dLayerObject(const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
@@ -63,12 +64,6 @@ void Line2dLayerObject::setPositions(const std::vector<Coord> &positions, const 
         uint8_t segmentType = (i == 0 && i == iSecondToLast) ? 3 :
                               (i == 0) ? 1 :
                               (i == iSecondToLast) ? 2 : 0;
-        const int lineStyleIndex = 0;
-        float lineStyleInfo = static_cast<float>(
-            (segmentType << 10) | // 2 bits for segmentType (shifted left)
-            (lineStyleIndex << 2) | // 8 bits for lineStyleIndex
-            0 // Reserve 2 bits for vertexIndex
-        );
 
         for (uint8_t vertexIndex = 4; vertexIndex > 0; --vertexIndex) {
             // Vertex
@@ -84,12 +79,7 @@ void Line2dLayerObject::setPositions(const std::vector<Coord> &positions, const 
                 lineAttributes.push_back(pNext.z);
             }
 
-            // Segment Start Length Position (length prefix sum)
-            lineAttributes.push_back(prefixTotalLineLength);
-
-            // Vertex Index (store in last 2 bits)
-            float packedStyleInfo = lineStyleInfo + (vertexIndex - 1);
-            lineAttributes.push_back(packedStyleInfo);
+            lineAttributes.push_back(LineHelper::packLineStyleMetadata(vertexIndex, 0, segmentType, prefixTotalLineLength));
         }
 
         // Vertex indices
