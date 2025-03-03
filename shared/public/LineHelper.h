@@ -72,7 +72,17 @@ class LineHelper {
         return newPolyline;
     }
 
+    inline static float packLineStyleMetadata(uint8_t vertexIndex, uint8_t lineStyleIndex, uint8_t segmentType, float prefixTotalLineLength) {
+        uint32_t packed =
+              (vertexIndex & 0x3)
+            | ((lineStyleIndex & 0xFF) << 2)
+            | ((segmentType & 0x3) << 10)
+            | ((int(prefixTotalLineLength * 1000.0) & 0x1FFFFF) << 11);
 
+        float result;
+        std::memcpy(&result, &packed, sizeof(float));  // Preserve all 32 bits
+        return result;
+    }
 
 private:
     static float distanceSquared(const Coord& pt, const Coord &p1, const Coord &p2)

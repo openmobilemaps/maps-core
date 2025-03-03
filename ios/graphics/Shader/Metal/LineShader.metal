@@ -27,24 +27,24 @@ struct LineVertexIn {
     float2 lineA [[attribute(0)]];
     float2 lineB [[attribute(1)]];
   /*
-      lineStyleInfo is packed as a single float but contains multiple pieces of information:
+      lineMetadata is packed as a single float but contains multiple pieces of information:
       - Bits  0-1  : Vertex Index (0-3) (used for rendering different parts of the quad)
       - Bits  2-9  : Line Style Index (0-255) (defines the appearance of the line)
       - Bits 10-11 : Segment Type (0 = inner, 1 = start, 2 = end, 3 = single-segment)
     */
-   float lineStyleInfo [[attribute(2)]];
+   float lineMetadata [[attribute(2)]];
 };
 
 struct LineVertexUnitSphereIn {
     float3 lineA [[attribute(0)]];
     float3 lineB [[attribute(1)]];
   /*
-      lineStyleInfo is packed as a single float but contains multiple pieces of information:
+      lineMetadata is packed as a single float but contains multiple pieces of information:
       - Bits  0-1  : Vertex Index (0-3) (used for rendering different parts of the quad)
       - Bits  2-9  : Line Style Index (0-255) (defines the appearance of the line)
       - Bits 10-11 : Segment Type (0 = inner, 1 = start, 2 = end, 3 = single-segment)
     */
-   float lineStyleInfo [[attribute(2)]];
+   float lineMetadata [[attribute(2)]];
 };
 
 struct LineVertexOut {
@@ -115,7 +115,7 @@ unitSphereSimpleLineGroupVertexShader(const LineVertexUnitSphereIn vertexIn [[st
                       constant float4 &originOffset [[buffer(5)]],
                       constant float4 &tileOrigin [[buffer(6)]])
 {
-    const uint packed = as_type<uint>(vertexIn.lineStyleInfo); // Reinterpret float as uint
+    const uint packed = as_type<uint>(vertexIn.lineMetadata); // Reinterpret float as uint
     const uint vertexIndex = packed & 0x3;                  // Bits 0-1
     const uint styleIndex = (packed >> 2) & 0xFF;       // Bits 2-9
     const uint segmentType = (packed >> 10) & 0x3;          // Bits 10-11
@@ -184,7 +184,7 @@ simpleLineGroupVertexShader(const LineVertexIn vertexIn [[stage_in]],
                       constant float4 &originOffset [[buffer(5)]],
                       constant float4 &tileOrigin [[buffer(6)]])
 {
-    const uint packed = as_type<uint>(vertexIn.lineStyleInfo); // Reinterpret float as uint
+    const uint packed = as_type<uint>(vertexIn.lineMetadata); // Reinterpret float as uint
     const uint vertexIndex = packed & 0x3;                  // Bits 0-1
     const uint styleIndex = (packed >> 2) & 0xFF;       // Bits 2-9
     const uint segmentType = (packed >> 10) & 0x3;          // Bits 10-11
@@ -304,7 +304,7 @@ unitSphereLineGroupVertexShader(const LineVertexUnitSphereIn vertexIn [[stage_in
                       constant float4 &tileOrigin [[buffer(6)]])
 {
 
-    const uint packed = as_type<uint>(vertexIn.lineStyleInfo); // Reinterpret float as uint
+    const uint packed = as_type<uint>(vertexIn.lineMetadata); // Reinterpret float as uint
     const uint vertexIndex = packed & 0x3;                  // Bits 0-1
     const uint styleIndex = (packed >> 2) & 0xFF;       // Bits 2-9
     const uint segmentType = (packed >> 10) & 0x3;          // Bits 10-11
@@ -384,7 +384,7 @@ lineGroupVertexShader(const LineVertexIn vertexIn [[stage_in]],
                       constant float4 &originOffset [[buffer(5)]],
                       constant float4 &tileOrigin [[buffer(6)]])
 {
-    const uint packed = as_type<uint>(vertexIn.lineStyleInfo); // Reinterpret float as uint
+    const uint packed = as_type<uint>(vertexIn.lineMetadata); // Reinterpret float as uint
     const uint vertexIndex = packed & 0x3;                  // Bits 0-1
     const uint styleIndex = (packed >> 2) & 0xFF;       // Bits 2-9
     const uint segmentType = (packed >> 10) & 0x3;          // Bits 10-11

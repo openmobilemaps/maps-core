@@ -12,7 +12,7 @@
 #include "RenderLineDescription.h"
 #include "Logger.h"
 #include "ShaderLineStyle.h"
-
+#include "LineHelper.h"
 #include <cmath>
 
 LineGroup2dLayerObject::LineGroup2dLayerObject(const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
@@ -28,18 +28,6 @@ LineGroup2dLayerObject::LineGroup2dLayerObject(const std::shared_ptr<CoordinateC
 void LineGroup2dLayerObject::update() {}
 
 std::vector<std::shared_ptr<RenderConfigInterface>> LineGroup2dLayerObject::getRenderConfig() { return {renderConfig}; }
-
-float packLineStyleMetadata(uint8_t vertexIndex, uint8_t lineStyleIndex, uint8_t segmentType, float prefixTotalLineLength) {
-    uint32_t packed =
-          (vertexIndex & 0x3)
-        | ((lineStyleIndex & 0xFF) << 2)
-        | ((segmentType & 0x3) << 10)
-        | ((int(prefixTotalLineLength * 1000.0) & 0x1FFFFF) << 11);
-
-    float result;
-    std::memcpy(&result, &packed, sizeof(float));  // Preserve all 32 bits
-    return result;
-}
 
 void LineGroup2dLayerObject::setLines(const std::vector<std::tuple<std::vector<Coord>, int>> &lines, const Vec3D & origin) {
 
@@ -95,8 +83,7 @@ void LineGroup2dLayerObject::setLines(const std::vector<std::tuple<std::vector<C
                     lineAttributes.push_back(pNext.z);
                 }
 
-                float lineStyleMetadata = packLineStyleMetadata(vertexIndex, lineStyleIndex, segmentType, prefixTotalLineLength);
-                lineAttributes.push_back(lineStyleMetadata);
+                lineAttributes.push_back(LineHelper::packLineStyleMetadata(vertexIndex, lineStyleIndex, segmentType, prefixTotalLineLength));
             }
 
             // Vertex indices
