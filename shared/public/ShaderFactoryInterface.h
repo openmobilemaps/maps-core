@@ -36,6 +36,10 @@ public:
 
     virtual /*not-null*/ std::shared_ptr<LineGroupShaderInterface> createUnitSphereLineGroupShader() = 0;
 
+    virtual /*not-null*/ std::shared_ptr<LineGroupShaderInterface> createSimpleLineGroupShader() = 0;
+
+    virtual /*not-null*/ std::shared_ptr<LineGroupShaderInterface> createUnitSphereSimpleLineGroupShader() = 0;
+
     virtual /*not-null*/ std::shared_ptr<ColorShaderInterface> createUnitSphereColorShader() = 0;
 
     virtual /*not-null*/ std::shared_ptr<ColorShaderInterface> createColorShader() = 0;

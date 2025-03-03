@@ -87,6 +87,20 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (nullable id<MCLineGroupShaderInterface>)createSimpleLineGroupShader {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->createSimpleLineGroupShader();
+        return ::djinni_generated::LineGroupShaderInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nullable id<MCLineGroupShaderInterface>)createUnitSphereSimpleLineGroupShader {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->createUnitSphereSimpleLineGroupShader();
+        return ::djinni_generated::LineGroupShaderInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (nullable id<MCColorShaderInterface>)createUnitSphereColorShader {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->createUnitSphereColorShader();
@@ -251,6 +265,20 @@ public:
     {
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createUnitSphereLineGroupShader];
+            return ::djinni_generated::LineGroupShaderInterface::toCpp(objcpp_result_);
+        }
+    }
+    /*not-null*/ std::shared_ptr<::LineGroupShaderInterface> createSimpleLineGroupShader() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createSimpleLineGroupShader];
+            return ::djinni_generated::LineGroupShaderInterface::toCpp(objcpp_result_);
+        }
+    }
+    /*not-null*/ std::shared_ptr<::LineGroupShaderInterface> createUnitSphereSimpleLineGroupShader() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createUnitSphereSimpleLineGroupShader];
             return ::djinni_generated::LineGroupShaderInterface::toCpp(objcpp_result_);
         }
     }

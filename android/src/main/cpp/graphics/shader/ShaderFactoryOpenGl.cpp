@@ -50,11 +50,19 @@ std::shared_ptr<RasterShaderInterface> ShaderFactoryOpenGl::createUnitSphereRast
 }
 
 std::shared_ptr<LineGroupShaderInterface> ShaderFactoryOpenGl::createLineGroupShader() {
-    return std::make_shared<ColorLineGroup2dShaderOpenGl>(false);
+    return std::make_shared<ColorLineGroup2dShaderOpenGl>(false, false);
 }
 
 std::shared_ptr<LineGroupShaderInterface> ShaderFactoryOpenGl::createUnitSphereLineGroupShader() {
-    return std::make_shared<ColorLineGroup2dShaderOpenGl>(true);
+    return std::make_shared<ColorLineGroup2dShaderOpenGl>(true, false);
+}
+
+std::shared_ptr<LineGroupShaderInterface> ShaderFactoryOpenGl::createSimpleLineGroupShader() {
+    return std::make_shared<ColorLineGroup2dShaderOpenGl>(false, true);
+}
+
+std::shared_ptr<LineGroupShaderInterface> ShaderFactoryOpenGl::createUnitSphereSimpleLineGroupShader() {
+    return std::make_shared<ColorLineGroup2dShaderOpenGl>(true, true);
 }
 
 std::shared_ptr<ColorShaderInterface> ShaderFactoryOpenGl::createColorShader() {

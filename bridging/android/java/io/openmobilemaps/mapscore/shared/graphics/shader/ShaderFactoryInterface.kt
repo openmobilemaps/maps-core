@@ -20,6 +20,10 @@ abstract class ShaderFactoryInterface {
 
     abstract fun createUnitSphereLineGroupShader(): LineGroupShaderInterface
 
+    abstract fun createSimpleLineGroupShader(): LineGroupShaderInterface
+
+    abstract fun createUnitSphereSimpleLineGroupShader(): LineGroupShaderInterface
+
     abstract fun createUnitSphereColorShader(): ColorShaderInterface
 
     abstract fun createColorShader(): ColorShaderInterface
@@ -102,6 +106,18 @@ abstract class ShaderFactoryInterface {
             return native_createUnitSphereLineGroupShader(this.nativeRef)
         }
         private external fun native_createUnitSphereLineGroupShader(_nativeRef: Long): LineGroupShaderInterface
+
+        override fun createSimpleLineGroupShader(): LineGroupShaderInterface {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_createSimpleLineGroupShader(this.nativeRef)
+        }
+        private external fun native_createSimpleLineGroupShader(_nativeRef: Long): LineGroupShaderInterface
+
+        override fun createUnitSphereSimpleLineGroupShader(): LineGroupShaderInterface {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_createUnitSphereSimpleLineGroupShader(this.nativeRef)
+        }
+        private external fun native_createUnitSphereSimpleLineGroupShader(_nativeRef: Long): LineGroupShaderInterface
 
         override fun createUnitSphereColorShader(): ColorShaderInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
