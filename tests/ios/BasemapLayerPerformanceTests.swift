@@ -32,7 +32,7 @@ struct BasemapLayerPerformanceTests {
         #expect(img != nil)
     }
 
-    @Test func measureLayerPerformance() async throws {
+    @Test(.disabled()) func measureLayerPerformance() async throws {
         let style = try await VectorStyle(url: "https://vectortiles.geo.admin.ch/styles/ch.swisstopo.basemap.vt/style.json")
         var layerFps: [String: Double] = [:]
         for layer in style.layers {

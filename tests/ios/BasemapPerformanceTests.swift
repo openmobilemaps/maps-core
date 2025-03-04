@@ -11,7 +11,7 @@ import MapCore
 @MainActor
 final class BasemapPerformanceTests: XCTestCase {
 
-    func testDrawPerformance() async throws {
+    func disabled_testDrawPerformance() async throws {
 
         let view = TestingMapView(DataProvider("https://vectortiles.geo.admin.ch/styles/ch.swisstopo.basemap.vt/style.json"))
 

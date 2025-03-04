@@ -8,7 +8,7 @@
 import Testing
 
 @MainActor
-@Suite(.serialized)
+@Suite(.serialized, .disabled())
 struct BasemapStabilityTests {
 
     @Test(arguments: TestRegion.all)

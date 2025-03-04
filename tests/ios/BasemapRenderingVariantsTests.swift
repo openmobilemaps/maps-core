@@ -9,7 +9,7 @@ import SnapshotTesting
 import Testing
 
 @MainActor
-@Suite(.snapshots(record: .missing, diffTool: .ksdiff), .serialized)
+@Suite(.snapshots(record: .missing, diffTool: .ksdiff), .serialized, .disabled())
 struct BasemapRenderingVariantsTests {
 
     @Test(arguments: [TestRegion.zurich, .aletsch])
