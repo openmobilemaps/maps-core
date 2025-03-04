@@ -1302,7 +1302,7 @@ template <class T, class L, class R> void Tiled2dMapSource<T, L, R>::updateTileM
                     GPCPolygonHolder diff;
                     gpc_polygon_clip(GPC_DIFF, currentViewBoundsPolygon.get(), currentTileMask.get(), diff.set());
 
-                    if (diff) {
+                    if (!diff) {
                         completeViewBoundsDrawn = true;
                     }
                 }
@@ -1329,7 +1329,7 @@ template <class T, class L, class R> void Tiled2dMapSource<T, L, R>::updateTileM
                 GPCPolygonHolder resultingMask;
                 gpc_polygon_clip(GPC_INT, polygonDiff, currentViewBoundsPolygon.get(), resultingMask.set());
 
-                if (resultingMask) {
+                if (!resultingMask) {
                     tileWrapper.state = TileState::CACHED;
                     continue;
                 } else {
