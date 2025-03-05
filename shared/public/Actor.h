@@ -87,7 +87,7 @@ public:
         if (strongObject && strongMailbox) {
             strongMailbox->push(makeMessage(MailboxDuplicationStrategy::none, MailboxExecutionEnvironment::computation, object, fn, std::forward<Args>(args)...));
         } else {
-            LogError <<= "WeakActor holds nullptr";
+            LogError << "WeakActor holds nullptr: " <<= fn.diagnostics.toString();
         }
     }
 
@@ -98,7 +98,7 @@ public:
         if (strongObject && strongMailbox) {
             strongMailbox->push(makeMessage(strategy, MailboxExecutionEnvironment::computation, object, fn, std::forward<Args>(args)...));
         } else {
-            LogError <<= "WeakActor holds nullptr";
+            LogError << "WeakActor holds nullptr: " <<= fn.diagnostics.toString();
         }
     }
 
@@ -109,7 +109,7 @@ public:
         if (strongObject && strongMailbox) {
             strongMailbox->push(makeMessage(MailboxDuplicationStrategy::none, environment, object, fn, std::forward<Args>(args)...));
         } else {
-            LogError <<= "WeakActor holds nullptr";
+            LogError << "WeakActor holds nullptr: " <<= fn.diagnostics.toString();
         }
     }
 
@@ -120,7 +120,7 @@ public:
         if (strongObject && strongMailbox) {
             strongMailbox->push(makeMessage(strategy, environment, object, fn, std::forward<Args>(args)...));
         } else {
-            LogError <<= "WeakActor holds nullptr";
+            LogError << "WeakActor holds nullptr: " <<= fn.diagnostics.toString();
         }
     }
 
@@ -138,7 +138,7 @@ public:
         if (strongObject && strongMailbox) {
             strongMailbox->push(makeAskMessage(MailboxDuplicationStrategy::none, MailboxExecutionEnvironment::computation, std::move(promise), object, fn, std::forward<Args>(args)...));
         } else {
-            LogError <<= "WeakActor holds nullptr";
+            LogError << "WeakActor holds nullptr: " <<= fn.diagnostics.toString();
         }
         return future;
     }
@@ -156,7 +156,7 @@ public:
         if (strongObject && strongMailbox) {
             strongMailbox->push(makeAskMessage(MailboxDuplicationStrategy::none, environment, std::move(promise), object, fn, std::forward<Args>(args)...));
         } else {
-            LogError <<= "WeakActor holds nullptr";
+            LogError << "WeakActor holds nullptr: " <<= fn.diagnostics.toString();
         }
         return future;
     }

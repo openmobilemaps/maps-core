@@ -108,7 +108,7 @@ void Tiled2dMapVectorPolygonTile::update() {
     size_t numStyleGroups = featureGroups.size();
     for (int styleGroupId = 0; styleGroupId < numStyleGroups; styleGroupId++) {
         std::vector<float> shaderStyles;
-        shaderStyles.reserve(featureGroups.at(styleGroupId).size() * 5);
+        shaderStyles.reserve(featureGroups.at(styleGroupId).size() * (isStriped ? 7 : 5));
         for (auto const &[hash, feature]: featureGroups.at(styleGroupId)) {
             const auto& ec = EvaluationContext(zoomIdentifier, dpFactor, feature, featureStateManager);
             const auto& color = polygonDescription->style.getFillColor(ec);

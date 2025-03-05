@@ -40,7 +40,11 @@ Tiled2dMapVectorSourceDataManager::Tiled2dMapVectorSourceDataManager(const WeakA
         }
     }
 
-    readyManagerIndex = readyManager.unsafe()->registerManager();
+     try {
+         readyManagerIndex = readyManager.converse(MFN(&Tiled2dMapVectorReadyManager::registerManager)).get();
+     } catch (const std::exception &e) {
+         LogError << "Exception while getting future result: " <<= e.what();
+     }
 }
 
 void Tiled2dMapVectorSourceDataManager::onAdded(const std::weak_ptr<::MapInterface> &mapInterface) {
