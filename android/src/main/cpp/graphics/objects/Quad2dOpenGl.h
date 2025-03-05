@@ -44,6 +44,8 @@ class Quad2dOpenGl : public GraphicsObjectInterface,
 
     void setSubdivisionFactor(int32_t factor) override;
 
+    void setMinMagFilter(TextureFilterType filterType) override;
+
     virtual void loadTexture(const std::shared_ptr<::RenderingContextInterface> &context,
                              const std::shared_ptr<TextureHolderInterface> &textureHolder) override;
 
@@ -78,6 +80,7 @@ protected:
     int vpMatrixHandle;
     int mMatrixHandle;
     int originOffsetHandle;
+    int originHandle;
     int positionHandle;
     GLuint vertexBuffer;
     std::vector<GLfloat> vertices;
@@ -87,10 +90,11 @@ protected:
     GLuint indexBuffer;
     std::vector<GLushort> indices;
     Vec3D quadOrigin = Vec3D(0.0, 0.0, 0.0);
-    bool is3D = false;
+    bool is3d = false;
 
     std::shared_ptr<TextureHolderInterface> textureHolder;
     int texturePointer;
+    std::optional<TextureFilterType> textureFilterType = std::nullopt;
 
     bool usesTextureCoords = false;
 

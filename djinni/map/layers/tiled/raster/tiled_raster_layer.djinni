@@ -7,6 +7,7 @@
 @extern "../../../../yaml/raster_shader_style.yaml"
 @extern "../../../../yaml/blend_mode.yaml"
 @extern "../../../../yaml/tiled_2d_map_ready_state_listener.yaml"
+@extern "../../../../yaml/texture_filter_type.yaml"
 
 tiled_2d_map_raster_layer_interface = interface +c {
     # the loaders are tried in their respective order, if the first loader returns the error code NOOP the second will be tried and so on
@@ -26,6 +27,7 @@ tiled_2d_map_raster_layer_interface = interface +c {
     set_style(style: raster_shader_style);
     get_style(): raster_shader_style;
 
+    set_min_mag_filter(filter_type: texture_filter_type);
 
     set_min_zoom_level_identifier(value: optional<i32>);
     get_min_zoom_level_identifier(): optional<i32>;

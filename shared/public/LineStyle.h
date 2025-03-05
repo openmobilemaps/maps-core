@@ -17,6 +17,8 @@ struct LineStyle final {
     ::SizeType widthType;
     float width;
     std::vector<float> dashArray;
+    float dashFade;
+    float dashAnimationSpeed;
     LineCapType lineCap;
     float offset;
     bool dotted;
@@ -29,6 +31,8 @@ struct LineStyle final {
               ::SizeType widthType_,
               float width_,
               std::vector<float> dashArray_,
+              float dashFade_,
+              float dashAnimationSpeed_,
               LineCapType lineCap_,
               float offset_,
               bool dotted_,
@@ -40,6 +44,8 @@ struct LineStyle final {
     , widthType(std::move(widthType_))
     , width(std::move(width_))
     , dashArray(std::move(dashArray_))
+    , dashFade(std::move(dashFade_))
+    , dashAnimationSpeed(std::move(dashAnimationSpeed_))
     , lineCap(std::move(lineCap_))
     , offset(std::move(offset_))
     , dotted(std::move(dotted_))

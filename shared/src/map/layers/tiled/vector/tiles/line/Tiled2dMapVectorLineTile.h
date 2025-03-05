@@ -15,6 +15,7 @@
 #include "LineVectorLayerDescription.h"
 #include "LineGroup2dLayerObject.h"
 #include "ShaderLineStyle.h"
+#include "ShaderSimpleLineStyle.h"
 
 class Tiled2dMapVectorLineTile
         : public Tiled2dMapVectorTile,
@@ -51,7 +52,7 @@ private:
 
 
     static const int maxNumLinePoints = std::numeric_limits<uint16_t>::max() / 4 + 1; // 4 vertices per line coord, only 2 at the start/end
-#ifdef __ANDROID__
+#ifdef OPENMOBILEMAPS_GL
     static const int maxStylesPerGroup = 32;
 #else
     static const int maxStylesPerGroup = 256;
@@ -60,6 +61,7 @@ private:
     std::vector<std::shared_ptr<LineGroupShaderInterface>> shaders;
 
     std::vector<std::shared_ptr<LineGroup2dLayerObject>> lines;
+    std::vector<std::shared_ptr<RenderObjectInterface>> renderObjects;
 
     std::vector<std::vector<std::tuple<size_t, std::shared_ptr<FeatureContext>>>> featureGroups;
 
@@ -69,10 +71,15 @@ private:
     bool isStyleZoomDependant = true;
     bool isStyleStateDependant = true;
     std::optional<double> lastZoom = std::nullopt;
-    std::optional<bool> lastInZoomRange = std::nullopt;
+    bool isVisible = true;
+    float selectionSizeFactor = 1.0f;
 
     std::vector<std::vector<ShaderLineStyle>> reusableLineStyles;
+    std::vector<std::vector<ShaderSimpleLineStyle>> reusableSimpleLineStyles;
     std::unordered_map<size_t, std::pair<int, int>> styleHashToGroupMap;
 
     std::vector<std::shared_ptr<LineGroup2dLayerObject>> toClear;
+
+
+    bool isSimpleLine;
 };

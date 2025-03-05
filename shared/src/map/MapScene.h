@@ -45,6 +45,10 @@ class MapScene : public MapInterface, public SceneCallbackInterface, public Sche
 
     virtual std::shared_ptr<::TouchHandlerInterface> getTouchHandler() override;
 
+    virtual void setPerformanceLoggers(const /*not-null*/ std::vector<std::shared_ptr<::PerformanceLoggerInterface>> & performanceLoggers) override;
+
+    virtual /*not-null*/ std::vector<std::shared_ptr<::PerformanceLoggerInterface>> getPerformanceLoggers() override;
+
     virtual std::vector<std::shared_ptr<LayerInterface>> getLayers() override;
 
     std::vector<std::shared_ptr<IndexedLayerInterface>> getLayersIndexed() override;
@@ -72,6 +76,10 @@ class MapScene : public MapInterface, public SceneCallbackInterface, public Sche
     virtual void drawFrame() override;
 
     virtual void prepare() override;
+
+    virtual bool getNeedsCompute() override;
+
+    virtual void drawOffscreenFrame(const /*not-null*/ std::shared_ptr<::RenderTargetInterface> & target) override;
 
     virtual void compute() override;
 
@@ -103,6 +111,7 @@ class MapScene : public MapInterface, public SceneCallbackInterface, public Sche
     std::shared_ptr<MapCameraInterface> camera;
 
     std::recursive_mutex layersMutex;
+    bool needsCompute = false;
     std::map<int, std::shared_ptr<LayerInterface>> layers;
 
     std::shared_ptr<TouchHandlerInterface> touchHandler;
@@ -112,4 +121,7 @@ class MapScene : public MapInterface, public SceneCallbackInterface, public Sche
     bool isResumed = false;
     std::atomic_flag isInvalidated = ATOMIC_FLAG_INIT;
     bool mapIs3d = false;
+
+    std::mutex performanceLoggersMutex;
+    std::vector<std::shared_ptr<PerformanceLoggerInterface>> performanceLoggers;
 };

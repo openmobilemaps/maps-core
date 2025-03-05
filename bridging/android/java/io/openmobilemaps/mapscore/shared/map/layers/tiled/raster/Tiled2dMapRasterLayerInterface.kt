@@ -35,6 +35,8 @@ abstract class Tiled2dMapRasterLayerInterface {
 
     abstract fun getStyle(): io.openmobilemaps.mapscore.shared.graphics.shader.RasterShaderStyle
 
+    abstract fun setMinMagFilter(filterType: io.openmobilemaps.mapscore.shared.graphics.objects.TextureFilterType)
+
     abstract fun setMinZoomLevelIdentifier(value: Int?)
 
     abstract fun getMinZoomLevelIdentifier(): Int?
@@ -115,6 +117,12 @@ abstract class Tiled2dMapRasterLayerInterface {
             return native_getStyle(this.nativeRef)
         }
         private external fun native_getStyle(_nativeRef: Long): io.openmobilemaps.mapscore.shared.graphics.shader.RasterShaderStyle
+
+        override fun setMinMagFilter(filterType: io.openmobilemaps.mapscore.shared.graphics.objects.TextureFilterType) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setMinMagFilter(this.nativeRef, filterType)
+        }
+        private external fun native_setMinMagFilter(_nativeRef: Long, filterType: io.openmobilemaps.mapscore.shared.graphics.objects.TextureFilterType)
 
         override fun setMinZoomLevelIdentifier(value: Int?) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

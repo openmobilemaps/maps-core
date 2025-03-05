@@ -13,6 +13,7 @@
 #import "MCMapInterface+Private.h"
 #import "MCRectCoord+Private.h"
 #import "MCVec2F+Private.h"
+#import "MCVec3D+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -343,6 +344,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (nullable NSArray<NSNumber *> *)getLastInverseVpMatrix {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getLastInverseVpMatrix();
+        return ::djinni::Optional<std::optional, ::djinni::List<::djinni::F32>>::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (nullable MCRectCoord *)getLastVpMatrixViewBounds {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->getLastVpMatrixViewBounds();
@@ -361,6 +369,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     try {
         auto objcpp_result_ = _cppRefHandle.get()->getLastVpMatrixZoom();
         return ::djinni::Optional<std::optional, ::djinni::F32>::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nullable MCVec3D *)getLastCameraPosition {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getLastCameraPosition();
+        return ::djinni::Optional<std::optional, ::djinni_generated::Vec3D>::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

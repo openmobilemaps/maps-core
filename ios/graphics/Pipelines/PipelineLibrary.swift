@@ -108,6 +108,8 @@ public enum PipelineType: String, CaseIterable, Codable {
     case alphaShader
     case alphaInstancedShader
     case lineGroupShader
+    case simpleLineGroupShader
+    case unitSphereSimpleLineGroupShader
     case unitSphereLineGroupShader
     case polygonGroupShader
     case polygonStripedGroupShader
@@ -127,6 +129,7 @@ public enum PipelineType: String, CaseIterable, Codable {
     case unitSphereAlphaInstancedShader
     case unitSphereTextInstancedShader
     case sphereEffectShader
+    case skySphereShader
 
     var label: String {
         switch self {
@@ -134,6 +137,8 @@ public enum PipelineType: String, CaseIterable, Codable {
             case .alphaInstancedShader: return "Alpha instanced shader with texture"
             case .lineGroupShader: return "Line Group shader"
             case .unitSphereLineGroupShader: return "Unit sphere line Group shader"
+            case .simpleLineGroupShader: return "Simple Line Group shader"
+            case .unitSphereSimpleLineGroupShader: return "Unit sphere simple line Group shader"
             case .polygonGroupShader: return "Polygon Group shader"
             case .polygonStripedGroupShader: return "Polygon Group (striped) shader"
             case .polygonPatternGroupShader: return "Polygon Group Pattern shader"
@@ -152,12 +157,13 @@ public enum PipelineType: String, CaseIterable, Codable {
             case .unitSphereAlphaInstancedShader: return "Unit Sphere Alpha instanced shader with texture"
             case .unitSphereTextInstancedShader: return "Unit Sphere Text Instanced shader"
             case .sphereEffectShader: return "Sphere Effect Shader"
+            case .skySphereShader: return "Sky Effect Shader"
         }
     }
 
     var vertexShaderUsesModelMatrix: Bool {
         switch self {
-            case .rasterShader, .roundColorShader, .unitSphereRoundColorShader, .alphaShader:
+            case .rasterShader, .roundColorShader, .unitSphereRoundColorShader, .alphaShader, .unitSphereAlphaShader, .sphereEffectShader, .skySphereShader:
                 return true
             default:
                 return false
@@ -169,7 +175,9 @@ public enum PipelineType: String, CaseIterable, Codable {
             case .alphaShader: return "baseVertexShaderModel"
             case .alphaInstancedShader: return "alphaInstancedVertexShader"
             case .lineGroupShader: return "lineGroupVertexShader"
-            case .unitSphereLineGroupShader: return "unitSpherelineGroupVertexShader"
+            case .unitSphereLineGroupShader: return "unitSphereLineGroupVertexShader"
+            case .simpleLineGroupShader: return "simpleLineGroupVertexShader"
+            case .unitSphereSimpleLineGroupShader: return "unitSphereSimpleLineGroupVertexShader"
             case .polygonGroupShader: return "polygonGroupVertexShader"
             case .polygonStripedGroupShader: return "polygonStripedGroupVertexShader"
             case .polygonPatternGroupShader: return "polygonPatternGroupVertexShader"
@@ -188,6 +196,7 @@ public enum PipelineType: String, CaseIterable, Codable {
             case .unitSphereAlphaInstancedShader: return "unitSphereAlphaInstancedVertexShader"
             case .unitSphereTextInstancedShader: return "unitSphereTextInstancedVertexShader"
             case .sphereEffectShader: return "baseVertexShader"
+            case .skySphereShader: return "baseVertexShader"
         }
     }
 
@@ -197,6 +206,8 @@ public enum PipelineType: String, CaseIterable, Codable {
             case .alphaInstancedShader: return "alphaInstancedFragmentShader"
             case .lineGroupShader: return "lineGroupFragmentShader"
             case .unitSphereLineGroupShader: return "lineGroupFragmentShader"
+            case .simpleLineGroupShader: return "simpleLineGroupFragmentShader"
+            case .unitSphereSimpleLineGroupShader: return "simpleLineGroupFragmentShader"
             case .polygonGroupShader: return "polygonGroupFragmentShader"
             case .polygonStripedGroupShader: return "polygonGroupStripedFragmentShader"
             case .polygonPatternGroupShader: return "polygonPatternGroupFragmentShader"
@@ -215,14 +226,15 @@ public enum PipelineType: String, CaseIterable, Codable {
             case .unitSphereAlphaInstancedShader: return "unitSphereAlphaInstancedFragmentShader"
             case .unitSphereTextInstancedShader: return "unitSphereTextInstancedFragmentShader"
             case .sphereEffectShader: return "sphereEffectFragmentShader"
+            case .skySphereShader: return "skySphereFragmentShader"
         }
     }
 
     var vertexDescriptor: MTLVertexDescriptor {
         switch self {
-            case .lineGroupShader:
+            case .lineGroupShader, .simpleLineGroupShader:
                 return LineVertex.descriptor
-            case .unitSphereLineGroupShader:
+            case .unitSphereLineGroupShader, .unitSphereSimpleLineGroupShader:
                 return LineVertex.descriptorUnitSphere
             case .polygonGroupShader,
                  .polygonPatternGroupShader,
@@ -236,6 +248,7 @@ public enum PipelineType: String, CaseIterable, Codable {
                  .unitSphereAlphaShader,
                  .unitSphereRoundColorShader,
                  .sphereEffectShader,
+                 .skySphereShader,
                  .roundColorShader:
                 return Vertex3DTexture.descriptor
             default:

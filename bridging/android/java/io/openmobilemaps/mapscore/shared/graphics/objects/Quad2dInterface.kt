@@ -12,6 +12,8 @@ abstract class Quad2dInterface {
 
     abstract fun setSubdivisionFactor(factor: Int)
 
+    abstract fun setMinMagFilter(filterType: TextureFilterType)
+
     abstract fun loadTexture(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, textureHolder: TextureHolderInterface)
 
     abstract fun removeTexture()
@@ -46,6 +48,12 @@ abstract class Quad2dInterface {
             native_setSubdivisionFactor(this.nativeRef, factor)
         }
         private external fun native_setSubdivisionFactor(_nativeRef: Long, factor: Int)
+
+        override fun setMinMagFilter(filterType: TextureFilterType) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setMinMagFilter(this.nativeRef, filterType)
+        }
+        private external fun native_setMinMagFilter(_nativeRef: Long, filterType: TextureFilterType)
 
         override fun loadTexture(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, textureHolder: TextureHolderInterface) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

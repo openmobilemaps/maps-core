@@ -30,6 +30,9 @@ shader_factory_interface = interface +c +j +o {
     create_line_group_shader(): line_group_shader_interface;
     create_unit_sphere_line_group_shader(): line_group_shader_interface;
 
+    create_simple_line_group_shader(): line_group_shader_interface;
+    create_unit_sphere_simple_line_group_shader(): line_group_shader_interface;
+
     create_unit_sphere_color_shader() : color_shader_interface;
     create_color_shader() : color_shader_interface;
 
@@ -52,6 +55,8 @@ shader_factory_interface = interface +c +j +o {
     create_icosahedron_color_shader(): color_shader_interface;
 
     create_sphere_effect_shader(): sphere_effect_shader_interface;
+
+    create_sky_sphere_shader(): sky_sphere_shader_interface;
 }
 
 raster_shader_style = record {
@@ -91,6 +96,11 @@ alpha_instanced_shader_interface = interface +c +o {
 sphere_effect_shader_interface = interface +c +o {
     as_shader_program_interface() : shader_program_interface;
     set_ellipse(coefficients: shared_bytes);
+}
+
+sky_sphere_shader_interface = interface +c +o {
+    as_shader_program_interface() : shader_program_interface;
+    set_camera_properties(inverse_v_p: list<f32>, camera_position: vec_3_d);
 }
 
 stretch_shader_info = record {

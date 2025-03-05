@@ -39,6 +39,8 @@ private:
         /*not-null*/ std::shared_ptr<::AlphaInstancedShaderInterface> createUnitSphereAlphaInstancedShader() override;
         /*not-null*/ std::shared_ptr<::LineGroupShaderInterface> createLineGroupShader() override;
         /*not-null*/ std::shared_ptr<::LineGroupShaderInterface> createUnitSphereLineGroupShader() override;
+        /*not-null*/ std::shared_ptr<::LineGroupShaderInterface> createSimpleLineGroupShader() override;
+        /*not-null*/ std::shared_ptr<::LineGroupShaderInterface> createUnitSphereSimpleLineGroupShader() override;
         /*not-null*/ std::shared_ptr<::ColorShaderInterface> createUnitSphereColorShader() override;
         /*not-null*/ std::shared_ptr<::ColorShaderInterface> createColorShader() override;
         /*not-null*/ std::shared_ptr<::ColorCircleShaderInterface> createColorCircleShader() override;
@@ -54,6 +56,7 @@ private:
         /*not-null*/ std::shared_ptr<::StretchInstancedShaderInterface> createStretchInstancedShader(bool unitSphere) override;
         /*not-null*/ std::shared_ptr<::ColorShaderInterface> createIcosahedronColorShader() override;
         /*not-null*/ std::shared_ptr<::SphereEffectShaderInterface> createSphereEffectShader() override;
+        /*not-null*/ std::shared_ptr<::SkySphereShaderInterface> createSkySphereShader() override;
 
     private:
         friend ::djinni::JniInterface<::ShaderFactoryInterface, ::djinni_generated::NativeShaderFactoryInterface>;
@@ -66,6 +69,8 @@ private:
     const jmethodID method_createUnitSphereAlphaInstancedShader { ::djinni::jniGetMethodID(clazz.get(), "createUnitSphereAlphaInstancedShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/AlphaInstancedShaderInterface;") };
     const jmethodID method_createLineGroupShader { ::djinni::jniGetMethodID(clazz.get(), "createLineGroupShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/LineGroupShaderInterface;") };
     const jmethodID method_createUnitSphereLineGroupShader { ::djinni::jniGetMethodID(clazz.get(), "createUnitSphereLineGroupShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/LineGroupShaderInterface;") };
+    const jmethodID method_createSimpleLineGroupShader { ::djinni::jniGetMethodID(clazz.get(), "createSimpleLineGroupShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/LineGroupShaderInterface;") };
+    const jmethodID method_createUnitSphereSimpleLineGroupShader { ::djinni::jniGetMethodID(clazz.get(), "createUnitSphereSimpleLineGroupShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/LineGroupShaderInterface;") };
     const jmethodID method_createUnitSphereColorShader { ::djinni::jniGetMethodID(clazz.get(), "createUnitSphereColorShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/ColorShaderInterface;") };
     const jmethodID method_createColorShader { ::djinni::jniGetMethodID(clazz.get(), "createColorShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/ColorShaderInterface;") };
     const jmethodID method_createColorCircleShader { ::djinni::jniGetMethodID(clazz.get(), "createColorCircleShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/ColorCircleShaderInterface;") };
@@ -81,6 +86,7 @@ private:
     const jmethodID method_createStretchInstancedShader { ::djinni::jniGetMethodID(clazz.get(), "createStretchInstancedShader", "(Z)Lio/openmobilemaps/mapscore/shared/graphics/shader/StretchInstancedShaderInterface;") };
     const jmethodID method_createIcosahedronColorShader { ::djinni::jniGetMethodID(clazz.get(), "createIcosahedronColorShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/ColorShaderInterface;") };
     const jmethodID method_createSphereEffectShader { ::djinni::jniGetMethodID(clazz.get(), "createSphereEffectShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/SphereEffectShaderInterface;") };
+    const jmethodID method_createSkySphereShader { ::djinni::jniGetMethodID(clazz.get(), "createSkySphereShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/SkySphereShaderInterface;") };
 };
 
 } // namespace djinni_generated

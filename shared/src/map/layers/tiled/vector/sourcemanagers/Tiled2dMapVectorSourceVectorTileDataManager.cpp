@@ -144,6 +144,11 @@ void Tiled2dMapVectorSourceVectorTileDataManager::onVectorTilesUpdated(const std
                         continue;
                     }
 
+                    if ((tile->tileInfo.tileInfo.zoomIdentifier < layer->minZoom ||
+                         tile->tileInfo.tileInfo.zoomIdentifier > layer->maxZoom) && tile->tileInfo.tileInfo.zoomIdentifier != layer->sourceMaxZoom) {
+                        continue;
+                    }
+
                     std::string identifier = layer->identifier;
                     Actor<Tiled2dMapVectorTile> actor = createTileActor(tile->tileInfo, layer);
 
@@ -350,5 +355,10 @@ void Tiled2dMapVectorSourceVectorTileDataManager::clearTiles(const std::vector<A
         tile.syncAccess([&](auto tileActor){
             tileActor->clear();
         });
+    }
+    auto mapInterface = this->mapInterface.lock();
+    if (mapInterface) {
+        mapInterface->invalidate();
+        vectorLayer.message(MFN(&Tiled2dMapVectorLayer::invalidateTilesState));
     }
 }

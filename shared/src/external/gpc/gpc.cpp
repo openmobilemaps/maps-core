@@ -2516,7 +2516,7 @@ void gpc_set_polygons (const std::vector<PolygonCoord>& ps, gpc_polygon *polygon
         baseIndices[i] = numContours;
         numContours += (ps[i].positions.empty() ? 0 : 1) + (int)ps[i].holes.size();
     }
-    polygon->num_contours = numContours;
+    polygon->num_contours = (int)numContours;
     MALLOC(polygon->hole, numContours * sizeof(int), "hole flag array creation", int);
     MALLOC(polygon->contour, numContours * sizeof(gpc_vertex_list), "contour creation", gpc_vertex_list);
 

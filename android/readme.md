@@ -93,7 +93,7 @@ implementation 'com.squareup.okhttp3:okhttp:4.12.0' // used for the default Data
 
 ### Initializing the library
 
-To use the library, it needs to be initialized as early as possible, e.g. in the oOnCreate(), of the hosting Application by calling:
+To use the library, it needs to be initialized as early as possible, e.g. in the OnCreate(), of the hosting Application by calling:
 
 ```kotlin
 MapsCore.initialize()

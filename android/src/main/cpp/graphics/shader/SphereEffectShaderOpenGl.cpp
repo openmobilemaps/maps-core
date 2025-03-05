@@ -11,7 +11,7 @@
 #include "SphereEffectShaderOpenGl.h"
 #include "OpenGlContext.h"
 #include "OpenGlHelper.h"
-
+#include <cstring>
 
 const std::string SphereEffectShaderOpenGl::programName = "UBMAP_SphereEffectShaderOpenGl";
 

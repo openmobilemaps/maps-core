@@ -6,6 +6,7 @@
 #import "MCMapCameraListenerInterface.h"
 #import "MCRectCoord.h"
 #import "MCVec2F.h"
+#import "MCVec3D.h"
 #import <Foundation/Foundation.h>
 @class MCMapCamera3dInterface;
 @class MCMapCameraInterface;
@@ -116,11 +117,15 @@
 
 - (nullable NSArray<NSNumber *> *)getLastVpMatrix;
 
+- (nullable NSArray<NSNumber *> *)getLastInverseVpMatrix;
+
 - (nullable MCRectCoord *)getLastVpMatrixViewBounds;
 
 - (nullable NSNumber *)getLastVpMatrixRotation;
 
 - (nullable NSNumber *)getLastVpMatrixZoom;
+
+- (nullable MCVec3D *)getLastCameraPosition;
 
 - (nullable MCMapCamera3dInterface *)asMapCamera3d;
 

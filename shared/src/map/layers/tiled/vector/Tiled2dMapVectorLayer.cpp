@@ -265,7 +265,11 @@ void Tiled2dMapVectorLayer::setMapDescription(const std::shared_ptr<VectorMapDes
 
 void Tiled2dMapVectorLayer::initializeVectorLayer() {
 
-    std::lock_guard<std::recursive_mutex> lock(mapDescriptionMutex);
+    std::shared_ptr<VectorMapDescription> mapDescription;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mapDescriptionMutex);
+        mapDescription = this->mapDescription;
+    }
 
     if (!sourceDataManagers.empty() || !symbolSourceDataManagers.empty() || !rasterTileSources.empty()) {
         // do nothing if the layer is already initialized
@@ -293,6 +297,10 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
     if (!mailbox) {
         selfMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
     }
+
+    //lock the mailbox so we are a safe actor
+    std::lock_guard<std::recursive_mutex> mailboxLock(selfMailbox->receivingMutex);
+
     auto castedMe = std::static_pointer_cast<Tiled2dMapVectorLayer>(shared_from_this());
     auto selfActor = WeakActor<Tiled2dMapVectorLayer>(selfMailbox, castedMe);
     auto selfRasterActor = WeakActor<Tiled2dMapRasterSourceListener>(selfMailbox, castedMe);
@@ -694,7 +702,7 @@ void Tiled2dMapVectorLayer::pregenerateRenderPasses() {
             continue;
         }
         if ((description->renderPassIndex != lastRenderPassIndex || description->maskingObject != lastMask) && !renderObjects.empty()) {
-            newPasses.emplace_back(std::make_shared<RenderPass>(RenderPassConfig(lastRenderPassIndex, false), renderObjects, lastMask));
+            newPasses.emplace_back(std::make_shared<RenderPass>(RenderPassConfig(lastRenderPassIndex, false), renderObjects, lastMask, renderTarget));
             renderObjects.clear();
             lastMask = nullptr;
             lastRenderPassIndex = 0;
@@ -702,11 +710,11 @@ void Tiled2dMapVectorLayer::pregenerateRenderPasses() {
 
         if (description->isModifyingMask || description->selfMasked) {
             if (!renderObjects.empty()) {
-                newPasses.emplace_back(std::make_shared<RenderPass>(RenderPassConfig(description->renderPassIndex, false), renderObjects, lastMask));
+                newPasses.emplace_back(std::make_shared<RenderPass>(RenderPassConfig(description->renderPassIndex, false), renderObjects, lastMask, renderTarget));
             }
             renderObjects.clear();
             lastMask = nullptr;
-            newPasses.emplace_back(std::make_shared<RenderPass>(RenderPassConfig(description->renderPassIndex, description->selfMasked), description->renderObjects, description->maskingObject));
+            newPasses.emplace_back(std::make_shared<RenderPass>(RenderPassConfig(description->renderPassIndex, description->selfMasked), description->renderObjects, description->maskingObject, renderTarget));
         } else {
             renderObjects.insert(renderObjects.end(), description->renderObjects.begin(), description->renderObjects.end());
             lastMask = description->maskingObject;
@@ -714,7 +722,7 @@ void Tiled2dMapVectorLayer::pregenerateRenderPasses() {
         }
     }
     if (!renderObjects.empty()) {
-        newPasses.emplace_back(std::make_shared<RenderPass>(RenderPassConfig(lastRenderPassIndex, false), renderObjects, lastMask));
+        newPasses.emplace_back(std::make_shared<RenderPass>(RenderPassConfig(lastRenderPassIndex, false), renderObjects, lastMask, renderTarget));
         renderObjects.clear();
         lastMask = nullptr;
     }
@@ -1360,6 +1368,15 @@ std::optional<int32_t> Tiled2dMapVectorLayer::getMaxZoomLevelIdentifier() {
 void Tiled2dMapVectorLayer::invalidateCollisionState() {
     prevCollisionStillValid.clear();
     tilesStillValid.clear();
+    auto mapInterface = this->mapInterface;
+    if (mapInterface) {
+        mapInterface->invalidate();
+    }
+}
+
+void Tiled2dMapVectorLayer::invalidateTilesState() {
+    tilesStillValid.clear();
+    auto mapInterface = this->mapInterface;
     if (mapInterface) {
         mapInterface->invalidate();
     }

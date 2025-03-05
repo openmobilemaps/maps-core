@@ -4,6 +4,7 @@
 #import "MCQuad3dD.h"
 #import "MCRectD.h"
 #import "MCRenderingContextInterface.h"
+#import "MCTextureFilterType.h"
 #import "MCVec3D.h"
 #import <Foundation/Foundation.h>
 @protocol MCGraphicsObjectInterface;
@@ -19,6 +20,8 @@ textureCoordinates:(nonnull MCRectD *)textureCoordinates
             is3d:(BOOL)is3d;
 
 - (void)setSubdivisionFactor:(int32_t)factor;
+
+- (void)setMinMagFilter:(MCTextureFilterType)filterType;
 
 - (void)loadTexture:(nullable id<MCRenderingContextInterface>)context
       textureHolder:(nullable id<MCTextureHolderInterface>)textureHolder;

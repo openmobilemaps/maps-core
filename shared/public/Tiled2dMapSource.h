@@ -39,17 +39,66 @@
 #include <unordered_map>
 #include <unordered_set>
 
+// Move-only owning holder for a gpc_polygon.
+// Calls gpc_free_polygon on destruction.
+class GPCPolygonHolder {
+  private:
+    gpc_polygon poly;
+
+  public:
+    GPCPolygonHolder() noexcept
+        : poly{} {}
+    ~GPCPolygonHolder() { reset(); }
+    GPCPolygonHolder(GPCPolygonHolder &&other) noexcept
+        : poly{} {
+        other.swap(*this);
+    }
+    GPCPolygonHolder &operator=(GPCPolygonHolder &&other) noexcept {
+        other.swap(*this);
+        return *this;
+    }
+
+    // No copy
+    GPCPolygonHolder(GPCPolygonHolder const &) = delete;
+    GPCPolygonHolder &operator=(GPCPolygonHolder const &) = delete;
+
+    void swap(GPCPolygonHolder &other) noexcept { std::swap(poly, other.poly); }
+
+    // Get gpc_polygon pointer for an _output_ parameter of a gpc_... call.
+    // Frees currently owned polygon first.
+    gpc_polygon *set() {
+        reset();
+        return &poly;
+    }
+
+    // Get gpc_polygon pointer for input parameter of a gpc_... call.
+    gpc_polygon *get() { return &poly; }
+    const gpc_polygon *get() const { return &poly; }
+
+    operator bool() const {
+        assert((poly.num_contours == 0) == (poly.contour == NULL));
+        return poly.num_contours != 0;
+    }
+
+    void reset() {
+        if (poly.num_contours) {
+            gpc_free_polygon(&poly);
+        }
+        poly = {};
+    }
+};
+
 template <class R> struct TileWrapper {
   public:
     const R result;
     std::vector<::PolygonCoord> masks;
     const PolygonCoord tileBounds;
-    gpc_polygon tilePolygon;
+    GPCPolygonHolder tilePolygon;
     TileState state = TileState::IN_SETUP;
     int tessellationFactor;
 
     TileWrapper(const R &result, const std::vector<::PolygonCoord> &masks, const PolygonCoord &tileBounds,
-                const gpc_polygon &tilePolygon, int tessellationFactor)
+                GPCPolygonHolder &&tilePolygon, int tessellationFactor)
         : result(std::move(result))
         , masks(std::move(masks))
         , tileBounds(std::move(tileBounds))
@@ -152,12 +201,17 @@ class Tiled2dMapSource : public Tiled2dMapSourceInterface,
 
     int currentZoomLevelIdentifier = 0;
 
+    int curT;
+    double curZoom;
+
     std::unordered_set<Tiled2dMapTileInfo> currentVisibleTiles;
 
     std::vector<VisibleTilesLayer> currentPyramid;
     int currentKeepZoomLevelOffset;
+    std::vector<PrioritizedTiled2dMapTileInfo> tilesRequestedToLoad;
 
     std::vector<PolygonCoord> currentViewBounds = {};
+    std::optional<RectCoord> currentViewBoundsRect = std::nullopt;
 
     std::atomic<bool> isPaused;
 
@@ -169,6 +223,7 @@ class Tiled2dMapSource : public Tiled2dMapSourceInterface,
     void onVisibleTilesChanged(const std::vector<VisibleTilesLayer> &pyramid, bool keepMultipleLevels, int keepZoomLevelOffset = 0);
 
   protected:
+    void scheduleFixedNumberOfLoadingTasks();
     void performLoadingTask(Tiled2dMapTileInfo tile, size_t loaderIndex);
 
     void updateTileMasks();

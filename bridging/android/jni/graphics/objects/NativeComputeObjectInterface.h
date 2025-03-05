@@ -33,14 +33,14 @@ private:
         JavaProxy(JniType j);
         ~JavaProxy();
 
-        void compute(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & context, double screenPixelAsRealMeterFactor) override;
+        void compute(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & context, int64_t vpMatrix, const ::Vec3D & origin, double screenPixelAsRealMeterFactor) override;
 
     private:
         friend ::djinni::JniInterface<::ComputeObjectInterface, ::djinni_generated::NativeComputeObjectInterface>;
     };
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/graphics/objects/ComputeObjectInterface") };
-    const jmethodID method_compute { ::djinni::jniGetMethodID(clazz.get(), "compute", "(Lio/openmobilemaps/mapscore/shared/graphics/RenderingContextInterface;D)V") };
+    const jmethodID method_compute { ::djinni::jniGetMethodID(clazz.get(), "compute", "(Lio/openmobilemaps/mapscore/shared/graphics/RenderingContextInterface;JLio/openmobilemaps/mapscore/shared/graphics/common/Vec3D;D)V") };
 };
 
 } // namespace djinni_generated

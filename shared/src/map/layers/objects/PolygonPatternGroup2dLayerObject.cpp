@@ -13,6 +13,7 @@
 #include "Logger.h"
 #include "BoundingBox.h"
 #include "CoordinateSystemIdentifiers.h"
+#include <cmath>
 
 PolygonPatternGroup2dLayerObject::PolygonPatternGroup2dLayerObject(const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                                                      const std::shared_ptr<PolygonPatternGroup2dInterface> &polygon,
@@ -87,8 +88,8 @@ void PolygonPatternGroup2dLayerObject::setVertices(const std::vector<float> &ver
     polygon->setVertices(v, i, origin);
 }
 
-void PolygonPatternGroup2dLayerObject::setOpacities(const std::vector<float> &opacities) {
-    polygon->setOpacities(SharedBytes((int64_t)opacities.data(), (int32_t)opacities.size(), (int32_t)sizeof(float)));
+void PolygonPatternGroup2dLayerObject::setOpacities(const std::vector<HalfFloat> &opacities) {
+    polygon->setOpacities(SharedBytes((int64_t)opacities.data(), (int32_t)opacities.size(), (int32_t)sizeof(HalfFloat)));
 }
 
 void PolygonPatternGroup2dLayerObject::setTextureCoordinates(const std::vector<float> &coordinates) {

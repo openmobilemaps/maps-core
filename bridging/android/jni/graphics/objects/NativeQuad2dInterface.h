@@ -35,6 +35,7 @@ private:
 
         void setFrame(const ::Quad3dD & frame, const ::RectD & textureCoordinates, const ::Vec3D & origin, bool is3d) override;
         void setSubdivisionFactor(int32_t factor) override;
+        void setMinMagFilter(::TextureFilterType filterType) override;
         void loadTexture(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & context, const /*not-null*/ std::shared_ptr<::TextureHolderInterface> & textureHolder) override;
         void removeTexture() override;
         /*not-null*/ std::shared_ptr<::GraphicsObjectInterface> asGraphicsObject() override;
@@ -47,6 +48,7 @@ private:
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/graphics/objects/Quad2dInterface") };
     const jmethodID method_setFrame { ::djinni::jniGetMethodID(clazz.get(), "setFrame", "(Lio/openmobilemaps/mapscore/shared/graphics/common/Quad3dD;Lio/openmobilemaps/mapscore/shared/graphics/common/RectD;Lio/openmobilemaps/mapscore/shared/graphics/common/Vec3D;Z)V") };
     const jmethodID method_setSubdivisionFactor { ::djinni::jniGetMethodID(clazz.get(), "setSubdivisionFactor", "(I)V") };
+    const jmethodID method_setMinMagFilter { ::djinni::jniGetMethodID(clazz.get(), "setMinMagFilter", "(Lio/openmobilemaps/mapscore/shared/graphics/objects/TextureFilterType;)V") };
     const jmethodID method_loadTexture { ::djinni::jniGetMethodID(clazz.get(), "loadTexture", "(Lio/openmobilemaps/mapscore/shared/graphics/RenderingContextInterface;Lio/openmobilemaps/mapscore/shared/graphics/objects/TextureHolderInterface;)V") };
     const jmethodID method_removeTexture { ::djinni::jniGetMethodID(clazz.get(), "removeTexture", "()V") };
     const jmethodID method_asGraphicsObject { ::djinni::jniGetMethodID(clazz.get(), "asGraphicsObject", "()Lio/openmobilemaps/mapscore/shared/graphics/objects/GraphicsObjectInterface;") };

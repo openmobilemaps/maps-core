@@ -10,6 +10,7 @@
 @protocol MCPolygonGroupShaderInterface;
 @protocol MCPolygonPatternGroupShaderInterface;
 @protocol MCRasterShaderInterface;
+@protocol MCSkySphereShaderInterface;
 @protocol MCSphereEffectShaderInterface;
 @protocol MCStretchInstancedShaderInterface;
 @protocol MCStretchShaderInterface;
@@ -30,6 +31,10 @@
 - (nullable id<MCLineGroupShaderInterface>)createLineGroupShader;
 
 - (nullable id<MCLineGroupShaderInterface>)createUnitSphereLineGroupShader;
+
+- (nullable id<MCLineGroupShaderInterface>)createSimpleLineGroupShader;
+
+- (nullable id<MCLineGroupShaderInterface>)createUnitSphereSimpleLineGroupShader;
 
 - (nullable id<MCColorShaderInterface>)createUnitSphereColorShader;
 
@@ -62,5 +67,7 @@
 - (nullable id<MCColorShaderInterface>)createIcosahedronColorShader;
 
 - (nullable id<MCSphereEffectShaderInterface>)createSphereEffectShader;
+
+- (nullable id<MCSkySphereShaderInterface>)createSkySphereShader;
 
 @end
