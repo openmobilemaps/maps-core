@@ -66,9 +66,10 @@ public:
             case vtzero::GeomType::POINT:
             case vtzero::GeomType::LINESTRING: {
                 for (auto const &points: geometry->coordinates) {
-                    std::vector<Coord> temp;
+                    std::vector<Vec2D> temp;
                     for (auto const &point: points) {
-                        temp.push_back(point);
+                        //TODO: change geojson to vec2d as well
+                        temp.push_back(Vec2D(point.x, point.y));
                     }
                     coordinates.push_back(temp);
                 }
@@ -85,7 +86,7 @@ public:
     VectorTileGeometryHandler(const VectorTileGeometryHandler& other) = delete;
 
     void points_begin(const uint32_t count) {
-        currentFeature = std::vector<::Coord>();
+        currentFeature = std::vector<::Vec2D>();
         currentFeature.reserve(count);
     }
 
@@ -99,7 +100,7 @@ public:
     }
 
     void linestring_begin(const uint32_t count) {
-        currentFeature = std::vector<::Coord>();
+        currentFeature = std::vector<::Vec2D>();
         currentFeature.reserve(count);
     }
 
@@ -195,7 +196,7 @@ public:
             coordinates.emplace_back();
             coordinates.back().reserve(geometry->coordinates[i].size());
             for (auto const &point: geometry->coordinates[i]){
-                coordinates.back().push_back(point);
+                coordinates.back().push_back(Vec2D(point.x, point.y));
             }
             polygon.emplace_back(geometry->coordinates[i]);
 
@@ -203,7 +204,7 @@ public:
                 coordinates.emplace_back();
                 coordinates.back().reserve(hole.size());
                 for (auto const &point: hole){
-                    coordinates.back().push_back(point);
+                    coordinates.back().push_back(Vec2D(point.x, point.y));
                 }
 
                 polygon.emplace_back(hole);
@@ -225,7 +226,7 @@ public:
         }
     }
 
-    std::vector<std::vector<::Coord>> &getLineCoordinates() {
+    std::vector<std::vector<::Vec2D>> &getLineCoordinates() {
         return coordinates;
     }
 
@@ -238,7 +239,7 @@ public:
         return polygons;
     }
 
-    const std::vector<std::vector<::Coord>> &getPointCoordinates() const {
+    const std::vector<std::vector<::Vec2D>> &getPointCoordinates() const {
         return coordinates;
     }
 
@@ -277,7 +278,7 @@ public:
     }
 
 private:
-    inline Coord coordinateFromPoint(const vtzero::point &point, bool renderSystem) {
+    inline Vec2D coordinateFromPoint(const vtzero::point &point, bool renderSystem) {
         auto tx = point.x / extent;
         auto ty = point.y / extent;
 
@@ -300,15 +301,15 @@ private:
         const auto y = tileCoords.topLeft.y * (1.0 - ty) + tileCoords.bottomRight.y * ty;
 
         if (renderSystem) {
-            return conversionHelper->convertToRenderSystem(Coord(tileCoords.topLeft.systemIdentifier, x, y, 0.0));
+            const auto coord = conversionHelper->convertToRenderSystem(Coord(tileCoords.topLeft.systemIdentifier, x, y, 0.0));
+            return Vec2D(coord.x, coord.y);
         } else {
-            return Coord(tileCoords.topLeft.systemIdentifier, x, y, 0.0);
+            return Vec2D(x, y);
         }
     }
 
     inline Vec2D vecFromPoint(const vtzero::point &point) {
-        const auto coord = coordinateFromPoint(point, true);
-        return Vec2D(coord.x, coord.y);
+        return coordinateFromPoint(point, true);
     }
 
 
@@ -352,8 +353,8 @@ private:
          }
     }
 
-    std::vector<::Coord> currentFeature;
-    std::vector<std::vector<::Coord>> coordinates;
+    std::vector<::Vec2D> currentFeature;
+    std::vector<std::vector<::Vec2D>> coordinates;
 
     std::vector<vtzero::point> polygonCurrentRing;
     std::vector<std::vector<vtzero::point>> polygonPoints;

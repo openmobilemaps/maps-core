@@ -57,4 +57,12 @@ class Vec3DHelper {
     static inline ::Vec3D normalize(const ::Vec3D &vector) {
         return vector / std::sqrt(Vec3DHelper::squaredLength(vector));
     }
+
+    static inline ::Vec3D toVec(const ::Coord &coordinate) {
+        return Vec3D(coordinate.x, coordinate.y, coordinate.z);
+    }
+
+    static inline ::Coord toCoord(const ::Vec3D &vec, const int32_t systemIdentifier) {
+        return Coord(systemIdentifier, vec.x, vec.y, vec.z);
+    }
 };

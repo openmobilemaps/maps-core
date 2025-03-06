@@ -76,7 +76,7 @@ public:
 private:
 
     inline std::optional<Tiled2dMapVectorSymbolSubLayerPositioningWrapper>
-    getPositioning(std::vector<::Coord>::const_iterator &iterator, const std::vector<::Coord> &collection, const double interpolationValue);
+    getPositioning(std::vector<::Vec2D>::const_iterator &iterator, const std::vector<::Vec2D> &collection, const double interpolationValue);
 
     inline std::shared_ptr<Tiled2dMapVectorSymbolObject> createSymbolObject(const Tiled2dMapVersionedTileInfo &tileInfo,
                                                                             const std::string &layerIdentifier,
@@ -85,8 +85,8 @@ private:
                                                                             const std::shared_ptr<FeatureContext> &featureContext,
                                                                             const std::vector<FormattedStringEntry> &text,
                                                                             const std::string &fullText,
-                                                                            const ::Coord &coordinate,
-                                                                            const std::optional<std::vector<Coord>> &lineCoordinates,
+                                                                            const ::Vec2D &coordinate,
+                                                                            const std::optional<std::vector<Vec2D>> &lineCoordinates,
                                                                             const std::vector<std::string> &fontList,
                                                                             const Anchor &textAnchor,
                                                                             const std::optional<double> &angle,
