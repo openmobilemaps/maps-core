@@ -29,7 +29,8 @@ Tiled2dMapVectorSymbolGroup::Tiled2dMapVectorSymbolGroup(uint32_t groupId,
                                                          const std::shared_ptr<SymbolVectorLayerDescription> &layerDescription,
                                                          const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager,
                                                          const std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> &symbolDelegate,
-                                                         const bool persistingSymbolPlacement)
+                                                         const bool persistingSymbolPlacement,
+                                                         const bool useCustomCrossTileIdentifier)
 : groupId(groupId),
 mapInterface(mapInterface),
 layerConfig(layerConfig),
@@ -41,6 +42,7 @@ featureStateManager(featureStateManager),
 symbolDelegate(symbolDelegate),
 usedKeys(layerDescription->getUsedKeys()),
 persistingSymbolPlacement(persistingSymbolPlacement),
+useCustomCrossTileIdentifier(useCustomCrossTileIdentifier),
 tileOrigin(0, 0, 0),
 is3d(mapInterface.lock()->is3d()){
     if (auto strongMapInterface = mapInterface.lock()) {
@@ -1010,7 +1012,7 @@ Tiled2dMapVectorSymbolGroup::createSymbolObject(const Tiled2dMapVersionedTileInf
     auto symbolObject = std::make_shared<Tiled2dMapVectorSymbolObject>(mapInterface, layerConfig, fontProvider, tileInfo, layerIdentifier,
                                                           description, featureContext, text, fullText, coordinate, lineCoordinates,
                                                           fontList, textAnchor, angle, textJustify, textSymbolPlacement, hideIcon, animationCoordinatorMap,
-                                                          featureStateManager, usedKeys, symbolTileIndex, hasCustomTexture, dpFactor, persistingSymbolPlacement, is3d, tileOrigin);
+                                                          featureStateManager, usedKeys, symbolTileIndex, hasCustomTexture, dpFactor, persistingSymbolPlacement, useCustomCrossTileIdentifier, is3d, tileOrigin);
     symbolObject->setAlpha(alpha);
     const auto counts = symbolObject->getInstanceCounts();
     if (counts.icons + counts.stretchedIcons + counts.textCharacters == 0) {
