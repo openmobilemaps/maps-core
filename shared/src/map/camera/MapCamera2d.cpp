@@ -794,6 +794,19 @@ bool MapCamera2d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, cons
                              centerPosition.y + diffCenterY,
                              centerPosition.z);
 
+        if (currentDragTimestamp == 0) {
+            currentDragTimestamp = DateHelper::currentTimeMicros();
+            currentDragVelocity.x = 0;
+            currentDragVelocity.y = 0;
+        } else {
+            long long newTimestamp = DateHelper::currentTimeMicros();
+            long long deltaMcs = std::max(newTimestamp - currentDragTimestamp, 8000ll);
+            float averageFactor = currentDragVelocity.x == 0 && currentDragVelocity.y == 0 ? 1.0 : 0.5;
+            currentDragVelocity.x = (1 - averageFactor) * currentDragVelocity.x + averageFactor * diffCenterX / (deltaMcs / 16000.0);
+            currentDragVelocity.y = (1 - averageFactor) * currentDragVelocity.y + averageFactor * diffCenterY / (deltaMcs / 16000.0);
+            currentDragTimestamp = newTimestamp;
+        }
+
         if (config.rotationEnabled) {
             float olda = atan2(posScreenOld[0].x - posScreenOld[1].x, posScreenOld[0].y - posScreenOld[1].y);
             float newa = atan2(posScreenNew[0].x - posScreenNew[1].x, posScreenNew[0].y - posScreenNew[1].y);
@@ -858,8 +871,13 @@ bool MapCamera2d::onTwoFingerMoveComplete() {
                     }
                 });
         rotationAnimation->start();
+        setupInertia();
         mapInterface->invalidate();
         return true;
+    }
+
+    if (!cameraFrozen) {
+        setupInertia();
     }
 
     return false;
