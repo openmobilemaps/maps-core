@@ -38,8 +38,8 @@ public:
                                  const std::shared_ptr<FeatureContext> featureContext,
                                  const std::vector<FormattedStringEntry> &text,
                                  const std::string &fullText,
-                                 const ::Coord &coordinate,
-                                 const std::optional<std::vector<Coord>> &lineCoordinates,
+                                 const ::Vec2D &coordinate,
+                                 const std::optional<std::vector<Vec2D>> &lineCoordinates,
                                  const std::vector<std::string> &fontList,
                                  const Anchor &textAnchor,
                                  const std::optional<double> &angle,
@@ -124,7 +124,7 @@ private:
 
     void writePosition(const double x, const double y, const size_t offset, VectorModificationWrapper<float> &buffer);
 
-    ::Coord getRenderCoordinates(Anchor iconAnchor, double rotation, double iconWidth, double iconHeight);
+    ::Vec2D getRenderCoordinates(Anchor iconAnchor, double rotation, double iconWidth, double iconHeight);
 
     std::shared_ptr<Tiled2dMapVectorLayerConfig> layerConfig;
 
@@ -138,8 +138,8 @@ private:
 
     std::shared_ptr<SymbolVectorLayerDescription> description;
 
-    const ::Coord coordinate;
-    ::Coord renderCoordinate = Coord(0, 0, 0, 0);
+    const ::Vec2D coordinate;
+    ::Vec2D renderCoordinate = Vec2D(0, 0);
     Vec2D initialRenderCoordinateVec = Vec2D(0, 0);
 
     SymbolObjectInstanceCounts instanceCounts = {0,0,0};

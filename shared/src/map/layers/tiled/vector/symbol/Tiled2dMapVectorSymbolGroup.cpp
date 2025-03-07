@@ -82,7 +82,7 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
     const double tilePixelFactor =
             (0.0254 / camera->getScreenDensityPpi()) * layerConfig->getZoomFactorAtIdentifier(tileInfo.tileInfo.zoomIdentifier - 1);
 
-    std::unordered_map<std::string, std::vector<Coord>> textPositionMap;
+    std::unordered_map<std::string, std::vector<Vec2D>> textPositionMap;
 
     std::vector<VectorLayerFeatureInfo> featureInfosWithCustomAssets;
 
@@ -147,7 +147,7 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
 
             bool isLineCenter = placement == TextSymbolPlacement::LINE_CENTER;
 
-            std::vector<Coord> line = {};
+            std::vector<Vec2D> line = {};
             for (const auto &points: pointCoordinates) {
                 line.insert(line.end(), points.begin(), points.end());
             }
@@ -948,7 +948,7 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
 }
 
 std::optional<Tiled2dMapVectorSymbolSubLayerPositioningWrapper>
-Tiled2dMapVectorSymbolGroup::getPositioning(std::vector<::Coord>::const_iterator &iterator, const std::vector<::Coord> &collection,
+Tiled2dMapVectorSymbolGroup::getPositioning(std::vector<::Vec2D>::const_iterator &iterator, const std::vector<::Vec2D> &collection,
                                             const double interpolationValue) {
 
     double distance = 10;
@@ -985,7 +985,7 @@ Tiled2dMapVectorSymbolGroup::getPositioning(std::vector<::Coord>::const_iterator
     double angle = -atan2(prev->y - next->y, -(prev->x - next->x)) * (180.0 / M_PI);
     auto midpoint = Vec2D(onePrev->x * (1.0 - interpolationValue) + iterator->x * interpolationValue,
                           onePrev->y * (1.0 - interpolationValue) + iterator->y * interpolationValue);
-    return Tiled2dMapVectorSymbolSubLayerPositioningWrapper(angle, Coord(next->systemIdentifier, midpoint.x, midpoint.y, next->z));
+    return Tiled2dMapVectorSymbolSubLayerPositioningWrapper(angle, midpoint);
 }
 
 std::shared_ptr<Tiled2dMapVectorSymbolObject>
@@ -996,8 +996,8 @@ Tiled2dMapVectorSymbolGroup::createSymbolObject(const Tiled2dMapVersionedTileInf
                                                 const std::shared_ptr<FeatureContext> &featureContext,
                                                 const std::vector<FormattedStringEntry> &text,
                                                 const std::string &fullText,
-                                                const ::Coord &coordinate,
-                                                const std::optional<std::vector<Coord>> &lineCoordinates,
+                                                const ::Vec2D &coordinate,
+                                                const std::optional<std::vector<Vec2D>> &lineCoordinates,
                                                 const std::vector<std::string> &fontList,
                                                 const Anchor &textAnchor,
                                                 const std::optional<double> &angle,

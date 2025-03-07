@@ -31,8 +31,8 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
                                                            const std::shared_ptr<FeatureContext> featureContext,
                                                            const std::vector<FormattedStringEntry> &text,
                                                            const std::string &fullText,
-                                                           const ::Coord &coordinate,
-                                                           const std::optional<std::vector<Coord>> &lineCoordinates,
+                                                           const ::Vec2D &coordinate,
+                                                           const std::optional<std::vector<Vec2D>> &lineCoordinates,
                                                            const std::vector<std::string> &fontList,
                                                            const Anchor &textAnchor,
                                                            const std::optional<double> &angle,
@@ -79,10 +79,10 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
     contentHash = std::hash<std::tuple<std::string, std::string, std::string>>()(std::tuple<std::string, std::string, std::string>(layerIdentifier, iconName, fullText));
     
     const bool hasIcon = description->style.hasIconImagePotentially();
-    
-    renderCoordinate = converter->convertToRenderSystem(coordinate);
-    initialRenderCoordinateVec = Vec2D(renderCoordinate.x, renderCoordinate.y);
-    
+
+    renderCoordinate = Vec2DHelper::toVec(converter->convertToRenderSystem(Coord(CoordinateSystemIdentifiers::EPSG3857(), coordinate.x, coordinate.y, 0.0)));
+    initialRenderCoordinateVec = renderCoordinate;
+
     evaluateStyleProperties(tileInfo.tileInfo.zoomIdentifier);
 
     iconRotationAlignment = description->style.getIconRotationAlignment(evalContext);
@@ -277,7 +277,7 @@ const Tiled2dMapVectorSymbolObject::SymbolObjectInstanceCounts Tiled2dMapVectorS
     return instanceCounts;
 }
 
-::Coord Tiled2dMapVectorSymbolObject::getRenderCoordinates(Anchor iconAnchor, double rotation, double iconWidth, double iconHeight) {
+::Vec2D Tiled2dMapVectorSymbolObject::getRenderCoordinates(Anchor iconAnchor, double rotation, double iconWidth, double iconHeight) {
     Vec2D anchorOffset(0, 0);
 
     switch (iconAnchor) {
@@ -318,7 +318,7 @@ const Tiled2dMapVectorSymbolObject::SymbolObjectInstanceCounts Tiled2dMapVectorS
     auto c = initialRenderCoordinateVec - anchorOffset;
     auto rotated = Vec2DHelper::rotate(c, initialRenderCoordinateVec, rotation);
 
-    return ::Coord(renderCoordinate.systemIdentifier, rotated.x, rotated.y, renderCoordinate.z);
+    return ::Vec2D(rotated.x, rotated.y);
 }
 
 void Tiled2dMapVectorSymbolObject::setupIconProperties(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &rotations, VectorModificationWrapper<float> &textureCoordinates, int &countOffset, const double zoomIdentifier, const std::shared_ptr<TextureHolderInterface> spriteTexture, const std::shared_ptr<SpriteData> spriteData, const std::optional<RectI> customUv) {
@@ -1098,7 +1098,7 @@ std::optional<std::tuple<Coord, VectorLayerFeatureInfo>> Tiled2dMapVectorSymbolO
         if (boundingRect) {
             auto projectedRectangle = CollisionUtil::getProjectedRectangle(*boundingRect, collisionEnvironment);
             if (projectedRectangle && CollisionUtil::checkRectCircleCollision(RectD(projectedRectangle->x, projectedRectangle->y, projectedRectangle->width, projectedRectangle->height), clickHitCircle)) {
-                return std::make_tuple(coordinate, featureContext->getFeatureInfo());
+                return std::make_tuple(Coord(CoordinateSystemIdentifiers::EPSG3857(), coordinate.x, coordinate.y, 0.0), featureContext->getFeatureInfo());
             }
         }
 
@@ -1106,7 +1106,7 @@ std::optional<std::tuple<Coord, VectorLayerFeatureInfo>> Tiled2dMapVectorSymbolO
         if ((labelObject && labelObject->boundingBoxCircles.has_value() && CollisionUtil::checkCirclesCollision(*labelObject->boundingBoxCircles, clickHitCircle))
         || (iconBoundingBoxViewportAligned.width != 0 && CollisionUtil::checkRectCircleCollision(iconBoundingBoxViewportAligned, clickHitCircle))
         || (stretchIconBoundingBoxViewportAligned.width != 0 && CollisionUtil::checkRectCircleCollision(stretchIconBoundingBoxViewportAligned, clickHitCircle))) {
-            return std::make_tuple(coordinate, featureContext->getFeatureInfo());
+            return std::make_tuple(Coord(CoordinateSystemIdentifiers::EPSG3857(), coordinate.x, coordinate.y, 0.0), featureContext->getFeatureInfo());
         }
     }
 
