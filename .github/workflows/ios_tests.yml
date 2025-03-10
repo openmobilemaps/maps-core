@@ -1,0 +1,54 @@
+name: iOS Tests
+
+env:
+  XCODE_VERSION: 'Xcode_16.0'
+
+on:
+  push:
+    branches: [ main, develop, feature/**, bugfix/** ]
+  pull_request:
+
+jobs:
+  uitests:
+    runs-on: macos-15
+    timeout-minutes: 60 
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+
+      - name: Switch to Xcode ${{ env.XCODE_VERSION }}
+        run: sudo xcode-select --switch /Applications/${{ env.XCODE_VERSION }}.app
+
+      - name: Resolve Dependencies
+        run: swift package resolve
+
+      - name: Run UI Tests
+        run: |
+          xcodebuild test \
+            -scheme MapCore-Package \
+            -destination 'platform=iOS Simulator,OS=18.0,name=iPhone 16 Pro' \
+            -resultBundlePath TestResults.xcresult \
+            | xcpretty --report junit --output TestResults.xml
+
+      - name: Upload XCResult
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: XCResult
+          path: TestResults.xcresult
+
+      - name: Upload JUnit Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: TestResults
+          path: TestResults.xml
+
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action/macos@v2
+        if: always()
+        with:
+          files: TestResults.xml
+          check_name: "XCUI Tests Report"

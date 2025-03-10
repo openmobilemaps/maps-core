@@ -36,12 +36,41 @@ public class TextureHolder: NSObject, @unchecked Sendable {
         }
     }
 
+    public convenience init(_ url: URL, textureUsableSize: TextureUsableSize? = nil) async throws {
+        let options: [MTKTextureLoader.Option: Any] = [
+            MTKTextureLoader.Option.SRGB: NSNumber(booleanLiteral: false),
+        ]
+        let texture = try await MetalContext.current.textureLoader.newTexture(URL: url, options: options)
+        self.init(texture, textureUsableSize: textureUsableSize)
+    }
+
     public convenience init(_ url: URL, textureUsableSize: TextureUsableSize? = nil) throws {
         let options: [MTKTextureLoader.Option: Any] = [
             MTKTextureLoader.Option.SRGB: NSNumber(booleanLiteral: false),
         ]
         let texture = try MetalContext.current.textureLoader.newTexture(URL: url, options: options)
         self.init(texture, textureUsableSize: textureUsableSize)
+    }
+
+    public convenience init(_ cgImage: CGImage) async throws {
+        let options: [MTKTextureLoader.Option: Any] = [
+            MTKTextureLoader.Option.SRGB: NSNumber(booleanLiteral: false),
+            MTKTextureLoader.Option.textureStorageMode: MTLStorageMode.shared.rawValue,
+        ]
+
+        do {
+            let texture = try await MetalContext.current.textureLoader.newTexture(cgImage: cgImage, options: options)
+
+            self.init(texture)
+        } catch {
+            guard let fixedImage = UIImage(cgImage: cgImage).ub_metalFixMe().cgImage else {
+                throw error
+            }
+
+            let texture = try await MetalContext.current.textureLoader.newTexture(cgImage: fixedImage, options: options)
+
+            self.init(texture)
+        }
     }
 
     public convenience init(_ cgImage: CGImage) throws {
@@ -65,12 +94,31 @@ public class TextureHolder: NSObject, @unchecked Sendable {
         }
     }
 
+    public convenience init(name: String, scaleFactor: Double, bundle: Bundle?) async throws {
+        let options: [MTKTextureLoader.Option: Any] = [
+            MTKTextureLoader.Option.SRGB: NSNumber(booleanLiteral: false),
+        ]
+        let texture = try await MetalContext.current.textureLoader.newTexture(name: name, scaleFactor: scaleFactor, bundle: bundle, options: options)
+        self.init(texture)
+    }
+
     public convenience init(name: String, scaleFactor: Double, bundle: Bundle?) throws {
         let options: [MTKTextureLoader.Option: Any] = [
             MTKTextureLoader.Option.SRGB: NSNumber(booleanLiteral: false),
         ]
         let texture = try MetalContext.current.textureLoader.newTexture(name: name, scaleFactor: scaleFactor, bundle: bundle, options: options)
         self.init(texture)
+    }
+
+    public convenience init(_ data: Data, textureUsableSize: TextureUsableSize? = nil) async throws {
+        guard !data.isEmpty else {
+            throw TextureHolderError.emptyData
+        }
+        let options: [MTKTextureLoader.Option: Any] = [
+            MTKTextureLoader.Option.SRGB: NSNumber(booleanLiteral: false),
+        ]
+        let texture = try await MetalContext.current.textureLoader.newTexture(data: data, options: options)
+        self.init(texture, textureUsableSize: textureUsableSize)
     }
 
     public convenience init(_ data: Data, textureUsableSize: TextureUsableSize? = nil) throws {

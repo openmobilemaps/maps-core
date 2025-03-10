@@ -23,7 +23,6 @@ open class MCMapView: MTKView, @unchecked Sendable {
     private lazy var renderToImageQueue = DispatchQueue(
         label: "io.openmobilemaps.renderToImagQueue", qos: .userInteractive)
 
-    public var pausesAutomatically = true
     private var framesToRender: Int = 1
     private let framesToRenderAfterInvalidate: Int = 25
     private var lastInvalidate = Date()
@@ -33,12 +32,12 @@ open class MCMapView: MTKView, @unchecked Sendable {
     private let touchHandler: MCMapViewTouchHandler
     private let callbackHandler = MCMapViewCallbackHandler()
 
-    private var pinch: UIPinchGestureRecognizer!
-    private var pan: UIPanGestureRecognizer!
+    private let pinch = UIPinchGestureRecognizer(
+        target: self, action: #selector(pinched))
+    private let pan = UIPanGestureRecognizer(
+        target: self, action: #selector(panned))
 
     public weak var sizeDelegate: MCMapSizeDelegate?
-
-    public var renderTargetTextures: [RenderTargetTexture] = []
 
     public init(
         mapConfig: MCMapConfig = MCMapConfig(
@@ -64,10 +63,6 @@ open class MCMapView: MTKView, @unchecked Sendable {
         touchHandler = MCMapViewTouchHandler(
             touchHandler: mapInterface.getTouchHandler())
         super.init(frame: .zero, device: MetalContext.current.device)
-        self.pinch = UIPinchGestureRecognizer(
-            target: self, action: #selector(pinched))
-        self.pan = UIPanGestureRecognizer(
-            target: self, action: #selector(panned))
         setup()
     }
 
@@ -170,15 +165,90 @@ open class MCMapView: MTKView, @unchecked Sendable {
         lastInvalidate = Date()
     }
 
-    public func renderTarget(named name: String) -> RenderTargetTexture {
-        for target in renderTargetTextures {
-            if target.name == name {
-                return target
-            }
+    open func currentDrawableImage() -> UIImage? {
+        self.saveDrawable = true
+        self.invalidate()
+        self.draw(in: self)
+        self.saveDrawable = false
+
+        guard let texture = self.currentDrawable?.texture else { return nil }
+
+        let context = CIContext()
+        let kciOptions: [CIImageOption: Any] = [
+            .colorSpace: CGColorSpaceCreateDeviceRGB()
+        ]
+        let cImg = CIImage(mtlTexture: texture, options: kciOptions)!
+        return context.createCGImage(cImg, from: cImg.extent)?.toImage()
+    }
+
+    open func awaitFrame() {
+        // Ensure that triple-buffers are not over-used
+        renderSemaphore.wait()
+    }
+
+    open func prepareDrawFrame() {
+        mapInterface.prepare()
+    }
+
+    open func drawFrame(in view: MTKView, completion: @escaping (CFTimeInterval?) -> Void) {
+        guard
+            let commandBuffer = MetalContext.current.commandQueue
+                .makeCommandBuffer(),
+            let computeEncoder = commandBuffer.makeComputeCommandEncoder()
+        else {
+            completion(nil)
+            return
         }
-        let newTarget = RenderTargetTexture(name: name)
-        renderTargetTextures.append(newTarget)
-        return newTarget
+
+        renderingContext.computeEncoder = computeEncoder
+        mapInterface.compute()
+        computeEncoder.endEncoding()
+
+        guard let renderPassDescriptor = view.currentRenderPassDescriptor,
+              let renderEncoder = commandBuffer.makeRenderCommandEncoder(
+                descriptor: renderPassDescriptor)
+        else {
+            completion(nil)
+            return
+        }
+
+        renderingContext.encoder = renderEncoder
+        renderingContext.beginFrame()
+
+        // Shared lib stuff
+        if sizeChanged {
+            mapInterface.setViewportSize(view.drawableSize.vec2)
+            sizeDelegate?.sizeChanged()
+            sizeChanged = false
+        }
+
+        mapInterface.drawFrame()
+
+        renderEncoder.endEncoding()
+
+        guard let drawable = view.currentDrawable else {
+            completion(nil)
+            return
+        }
+
+        commandBuffer.addCompletedHandler { commandBuffer in
+            let start = commandBuffer.gpuStartTime
+            let end = commandBuffer.gpuEndTime
+
+
+            let gpuRuntimeDuration = end - start
+            completion(gpuRuntimeDuration)
+        }
+
+        // if we want to save the drawable (offscreen rendering), we commit and wait synchronously
+        // until the command buffer completes, also we don't present it
+        if self.saveDrawable {
+            commandBuffer.commit()
+            commandBuffer.waitUntilCompleted()
+        } else {
+            commandBuffer.present(drawable)
+            commandBuffer.commit()
+        }
     }
 }
 
@@ -196,95 +266,22 @@ extension MCMapView: MTKViewDelegate {
 
         guard
             framesToRender > 0
-                || -lastInvalidate.timeIntervalSinceNow < renderAfterInvalidate || !pausesAutomatically
+                || -lastInvalidate.timeIntervalSinceNow < renderAfterInvalidate
         else {
             isPaused = true
             return
         }
 
-        if pausesAutomatically {
-            framesToRender -= 1
-        }
+        framesToRender -= 1
 
-        // Ensure that triple-buffers are not over-used
-        renderSemaphore.wait()
+        awaitFrame()
 
-        renderingContext.beginFrame()
-        mapInterface.prepare()
+        prepareDrawFrame()
 
-        // Shared lib stuff
-        if sizeChanged {
-            mapInterface.setViewportSize(view.drawableSize.vec2)
-            sizeDelegate?.sizeChanged()
-            sizeChanged = false
-        }
-
-        guard
-            let commandBuffer = MetalContext.current.commandQueue
-                .makeCommandBuffer() else {
-            self.renderSemaphore.signal()
-            return
-        }
-
-        for offscreenTarget in renderTargetTextures {
-            let renderEncoder = offscreenTarget.prepareOffscreenEncoder(
-                commandBuffer,
-                size: view.drawableSize.vec2,
-                context: renderingContext
-            )!
-            renderingContext.encoder = renderEncoder
-            renderingContext.renderTarget = offscreenTarget
-            mapInterface.drawOffscreenFrame(offscreenTarget)
-            renderEncoder.endEncoding()
-        }
-
-        if mapInterface.getNeedsCompute() {
-            guard
-                let computeEncoder = commandBuffer.makeComputeCommandEncoder()
-            else {
-                self.renderSemaphore.signal()
-                return
-            }
-
-            renderingContext.computeEncoder = computeEncoder
-            mapInterface.compute()
-            computeEncoder.endEncoding()
-        }
-
-
-        guard let renderPassDescriptor = view.currentRenderPassDescriptor,
-            let renderEncoder = commandBuffer.makeRenderCommandEncoder(
-                descriptor: renderPassDescriptor)
-        else {
-            self.renderSemaphore.signal()
-            return
-        }
-
-        renderingContext.encoder = renderEncoder
-        renderingContext.renderTarget = nil
-
-        mapInterface.drawFrame()
-
-        renderEncoder.endEncoding()
-
-        guard let drawable = view.currentDrawable else {
-            self.renderSemaphore.signal()
-            return
-        }
-
-        commandBuffer.addCompletedHandler { _ in
+        drawFrame(in: view) { _ in
             self.renderSemaphore.signal()
         }
 
-        // if we want to save the drawable (offscreen rendering), we commit and wait synchronously
-        // until the command buffer completes, also we don't present it
-        if self.saveDrawable {
-            commandBuffer.commit()
-            commandBuffer.waitUntilCompleted()
-        } else {
-            commandBuffer.present(drawable)
-            commandBuffer.commit()
-        }
     }
 
     public func renderToImage(
@@ -312,23 +309,27 @@ extension MCMapView: MTKViewDelegate {
                 bounds, timeout: timeout, callbacks: mapReadyCallbacks)
         }
     }
-}
 
-extension MCMapView {
-    fileprivate func currentDrawableImage() -> UIImage? {
-        self.saveDrawable = true
-        self.invalidate()
-        self.draw(in: self)
-        self.saveDrawable = false
+    public func startCapture() {
+        if ProcessInfo.processInfo.environment["MTL_CAPTURE_ENABLED"] != nil {
+            let captureDescriptor = MTLCaptureDescriptor()
+            captureDescriptor.captureObject = MetalContext.current.commandQueue
+            captureDescriptor.destination = .gpuTraceDocument
+            let url = FileManager.default.temporaryDirectory
+                .appendingPathComponent("MapView.gputrace")
+            try? FileManager.default.removeItem(at: url)
+            captureDescriptor.outputURL = url
+            print("Capturing to \(url)")
+            try! MTLCaptureManager.shared().startCapture(with: captureDescriptor)
+        } else {
+            print("MTL_CAPTURE_ENABLED not set as environment variable, capture not started")
+        }
+    }
 
-        guard let texture = self.currentDrawable?.texture else { return nil }
-
-        let context = CIContext()
-        let kciOptions: [CIImageOption: Any] = [
-            .colorSpace: CGColorSpaceCreateDeviceRGB()
-        ]
-        let cImg = CIImage(mtlTexture: texture, options: kciOptions)!
-        return context.createCGImage(cImg, from: cImg.extent)?.toImage()
+    public func stopCapture() {
+        if ProcessInfo.processInfo.environment["MTL_CAPTURE_ENABLED"] != nil {
+            MTLCaptureManager.shared().stopCapture()
+        }
     }
 }
 
@@ -391,7 +392,7 @@ extension MCMapView {
             var isiOSAppOnMac = ProcessInfo.processInfo.isMacCatalystApp
             if #available(iOS 14.0, *) {
                 isiOSAppOnMac =
-                    isiOSAppOnMac || ProcessInfo.processInfo.isiOSAppOnMac
+                isiOSAppOnMac || ProcessInfo.processInfo.isiOSAppOnMac
             }
             return isiOSAppOnMac
         } else {
@@ -457,7 +458,7 @@ extension MCMapView: UIGestureRecognizerDelegate {
         var isiOSAppOnMac = ProcessInfo.processInfo.isMacCatalystApp
         if #available(iOS 14.0, *) {
             isiOSAppOnMac =
-                isiOSAppOnMac || ProcessInfo.processInfo.isiOSAppOnMac
+            isiOSAppOnMac || ProcessInfo.processInfo.isiOSAppOnMac
         }
 
         guard isiOSAppOnMac else { return }
@@ -481,7 +482,7 @@ extension MCMapView: UIGestureRecognizerDelegate {
     public func gestureRecognizer(
         _ gestureRecognizer: UIGestureRecognizer,
         shouldRecognizeSimultaneouslyWith otherGestureRecognizer:
-            UIGestureRecognizer
+        UIGestureRecognizer
     ) -> Bool {
         true
     }
@@ -502,7 +503,7 @@ extension MCMapView: UIGestureRecognizerDelegate {
 }
 
 private class MCMapViewMapReadyCallbacks: @preconcurrency
-    MCMapReadyCallbackInterface, @unchecked Sendable
+MCMapReadyCallbackInterface, @unchecked Sendable
 {
     public nonisolated(unsafe) weak var delegate: MCMapView?
     public var callback: ((UIImage?, MCLayerReadyState) -> Void)?
@@ -518,16 +519,16 @@ private class MCMapViewMapReadyCallbacks: @preconcurrency
 
         callbackQueue?.async {
             switch state {
-            case .NOT_READY:
-                break
-            case .ERROR, .TIMEOUT_ERROR:
-                self.callback?(nil, state)
-            case .READY:
-                MainActor.assumeIsolated {
-                    self.callback?(delegate.currentDrawableImage(), state)
-                }
-            @unknown default:
-                break
+                case .NOT_READY:
+                    break
+                case .ERROR, .TIMEOUT_ERROR:
+                    self.callback?(nil, state)
+                case .READY:
+                    MainActor.assumeIsolated {
+                        self.callback?(delegate.currentDrawableImage(), state)
+                    }
+                @unknown default:
+                    break
             }
             self.semaphore.signal()
         }

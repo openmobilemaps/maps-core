@@ -16,13 +16,19 @@ import UIKit
 @available(iOS 14.0, *)
 private let logger = Logger(subsystem: "maps-core", category: "MCTextureLoader")
 
+public protocol CancellableTask {
+    func cancel()
+}
+
+extension URLSessionTask: CancellableTask {}
+
 open class MCTextureLoader: MCLoaderInterface, @unchecked Sendable {
     public let session: URLSession
 
     public var isRasterDebugModeEnabled: Bool
 
     public var taskQueue = DispatchQueue(label: "MCTextureLoader.tasks")
-    public var tasks: [String: URLSessionTask] = [:]
+    public var tasks: [String: CancellableTask] = [:]
 
     public let urlCache = URLCache(memoryCapacity: 100 * 1024 * 1024, diskCapacity: 500 * 1024 * 1024, diskPath: "ch.openmobilemaps.urlcache")
 
@@ -39,9 +45,83 @@ open class MCTextureLoader: MCLoaderInterface, @unchecked Sendable {
         isRasterDebugModeEnabled = UserDefaults.standard.bool(forKey: "io.openmobilemaps.debug.rastertiles.enabled")
     }
 
+    public struct LoaderResult {
+        let data: Data?
+
+        let statusCode: Int
+        let etag: String?
+        let wasCached: Bool?
+
+        public init(data: Data?, statusCode: Int, etag: String?, wasCached: Bool?) {
+            self.data = data
+            self.statusCode = statusCode
+            self.etag = etag
+            self.wasCached = wasCached
+        }
+
+        public enum LoaderError: Error {
+            case invalidResponse
+            case invalidURL
+            case timeout
+            case cancelled
+            case other(Error)
+        }
+    }
+
+    open func load(url urlString: String, setWasCachedFlag: Bool = false, completion: @escaping (Result<LoaderResult, LoaderResult.LoaderError>) -> Void) -> CancellableTask? {
+
+        guard let url = URL(string: urlString) else {
+            completion(.failure(LoaderResult.LoaderError.invalidURL))
+            return nil
+        }
+
+        var urlRequest = URLRequest(url: url)
+
+        modifyUrlRequest(request: &urlRequest)
+
+        var wasCached: Bool? = nil
+        if setWasCachedFlag {
+            if session.configuration.urlCache?.cachedResponse(for: urlRequest) != nil {
+                wasCached = true
+            } else {
+                wasCached = false
+            }
+        }
+
+        var task = session.dataTask(with: urlRequest) { data, response, error in
+            if let error {
+                if (error as NSError).domain == NSURLErrorDomain, (error as NSError).code == NSURLErrorTimedOut {
+                    completion(.failure(LoaderResult.LoaderError.timeout))
+                } else if (error as NSError).domain == NSURLErrorDomain, (error as NSError).code == NSURLErrorCancelled {
+                    completion(.failure(LoaderResult.LoaderError.cancelled))
+                } else {
+
+                }
+                completion(.failure(.other(error)))
+                return
+            }
+
+            guard let response = response as? HTTPURLResponse else {
+                completion(.failure(LoaderResult.LoaderError.invalidResponse))
+                return
+            }
+
+            let result = LoaderResult(data: data, statusCode: response.statusCode, etag: response.etag, wasCached: wasCached)
+            completion(.success(result))
+        }
+
+        modifyDataTask(task: &task)
+
+        task.resume()
+
+        return task
+
+    }
+
     open func loadTexture(_ url: String, etag: String?) -> MCTextureLoaderResult {
         let semaphore = DispatchSemaphore(value: 0)
         var result: MCTextureLoaderResult? = nil
+        let uuid = UUID()
         loadTextureAsync(url, etag: etag).then { future in
             result = future.get()
             semaphore.signal()
@@ -64,119 +144,99 @@ open class MCTextureLoader: MCLoaderInterface, @unchecked Sendable {
 
         let promise = DJPromise<MCTextureLoaderResult>()
 
-        guard let url = URL(string: urlString) else {
-            assertionFailure("invalid url: \(urlString)")
-            promise.setValue(.init(data: nil, etag: nil, status: .ERROR_NETWORK, errorCode: "IURL"))
-            return promise.getFuture()
-        }
+        let task = load(url: url, setWasCachedFlag: self.isRasterDebugModeEnabled) { [weak self] result in
 
-        var urlRequest = URLRequest(url: url)
-
-        modifyUrlRequest(request: &urlRequest)
-
-        var wasCached = false
-        if isRasterDebugModeEnabled,
-           session.configuration.urlCache?.cachedResponse(for: urlRequest) != nil {
-            wasCached = true
-        }
-
-        var task = session.dataTask(with: urlRequest) { [weak self, wasCached] data, response_, error_ in
             guard let self else { return }
 
             self.taskQueue.sync {
                 _ = self.tasks.removeValue(forKey: urlString) == nil
             }
 
-            let result: Data? = data
-            let response: HTTPURLResponse? = response_ as? HTTPURLResponse
-            let error: NSError? = error_ as NSError?
-
-            if error?.domain == NSURLErrorDomain, error?.code == NSURLErrorTimedOut {
-                if #available(iOS 14.0, *) {
-                    logger.debug("Failed to load \(url, privacy: .public): Timeout")
-                }
-                promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_TIMEOUT, errorCode: (error?.code).stringOrNil))
-                return
-            }
-
-            if error?.domain == NSURLErrorDomain, error?.code == NSURLErrorCancelled {
-                // Do nothing, since the result is dropped anyway (setting a LoaderStatus will cause the SharedLib to do further computing)
-                return
-            }
-
-            if response?.statusCode == 404 {
-                if #available(iOS 14.0, *) {
-                    logger.debug("Failed to load \(url, privacy: .public): 404, \(data.map { String(data: $0, encoding: .utf8)?.prefix(1024) ?? "?" } ?? "?")")
-                }
-                promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_404, errorCode: (response?.statusCode).stringOrNil))
-                return
-            } else if response?.statusCode == 400 {
-                if #available(iOS 14.0, *) {
-                    logger.debug("Failed to load \(url, privacy: .public): 400, \(data.map { String(data: $0, encoding: .utf8)?.prefix(1024) ?? "?" } ?? "?")")
-                }
-                promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_400, errorCode: (response?.statusCode).stringOrNil))
-                return
-            } else if response?.statusCode == 204 {
-                promise.setValue(.init(data: nil, etag: response?.etag, status: .OK, errorCode: nil))
-                return
-            } else if response?.statusCode != 200 {
-                if #available(iOS 14.0, *) {
-                    logger.debug("Failed to load \(url, privacy: .public): \(response?.statusCode ?? 0, privacy: .public), \(data.map { String(data: $0, encoding: .utf8)?.prefix(1024) ?? "?" } ?? "?")")
-                }
-                promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_NETWORK, errorCode: (response?.statusCode).stringOrNil))
-                return
-            }
-
-            guard let data = result else {
-                promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_OTHER, errorCode: (response?.statusCode).stringOrNil))
-                return
-            }
-
-            do {
-                if self.isRasterDebugModeEnabled,
-                   let uiImage = UIImage(data: data) {
-                    let renderer = UIGraphicsImageRenderer(size: uiImage.size)
-                    let img = renderer.image { ctx in
-                        self.applyDebugWatermark(url: urlString, byteCount: data.count, image: uiImage, wasCached: wasCached, ctx: ctx)
+            switch result {
+                case .failure(.timeout):
+                    if #available(iOS 14.0, *) {
+                        logger.debug("Failed to load \(url, privacy: .public): Timeout")
                     }
-                    if let cgImage = img.cgImage,
-                       let textureHolder = try? TextureHolder(cgImage) {
-                        promise.setValue(.init(data: textureHolder, etag: response?.etag, status: .OK, errorCode: nil))
-                        return
+                    promise.setValue(.init(data: nil, etag: nil, status: .ERROR_TIMEOUT, errorCode: nil))
+                case .failure(.cancelled):
+                    // Do nothing, since the result is dropped anyway (setting a LoaderStatus will cause the SharedLib to do further computing)
+                    break
+                case .failure(_):
+                    promise.setValue(.init(data: nil, etag: nil, status: .ERROR_OTHER, errorCode: "UNK"))
+
+                case .success(let result):
+                    Task {
+                        if result.statusCode == 404 {
+                            if #available(iOS 14.0, *) {
+                                logger.debug("Failed to load \(url, privacy: .public): 404, \(result.data.map { String(data: $0, encoding: .utf8)?.prefix(1024) ?? "?" } ?? "?")")
+                            }
+                            promise.setValue(.init(data: nil, etag: result.etag, status: .ERROR_404, errorCode: "\(result.statusCode)"))
+                        } else if result.statusCode == 400 {
+                            if #available(iOS 14.0, *) {
+                                logger.debug("Failed to load \(url, privacy: .public): 400, \(result.data.map { String(data: $0, encoding: .utf8)?.prefix(1024) ?? "?" } ?? "?")")
+                            }
+                            promise.setValue(.init(data: nil, etag: result.etag, status: .ERROR_400, errorCode: "\(result.statusCode)"))
+                        } else if result.statusCode == 204 {
+                            promise.setValue(.init(data: nil, etag: result.etag, status: .OK, errorCode: nil))
+                        } else if result.statusCode != 200 {
+                            if #available(iOS 14.0, *) {
+                                logger.debug(
+                                    "Failed to load \(url, privacy: .public): \(result.statusCode, privacy: .public), \(result.data.map { String(data: $0, encoding: .utf8)?.prefix(1024) ?? "?" } ?? "?")")
+                            }
+                            promise.setValue(.init(data: nil, etag: result.etag, status: .ERROR_NETWORK, errorCode: "\(result.statusCode)"))
+                        } else if let data = result.data {
+                            do {
+                                if self.isRasterDebugModeEnabled,
+                                   let uiImage = UIImage(data: data)
+                                {
+                                    let renderer = UIGraphicsImageRenderer(size: uiImage.size)
+                                    let img = renderer.image { ctx in
+                                        self.applyDebugWatermark(url: urlString, byteCount: data.count, image: uiImage, wasCached: result.wasCached == true, ctx: ctx)
+                                    }
+                                    if let cgImage = img.cgImage,
+                                       let textureHolder = try? await TextureHolder(cgImage)
+                                    {
+                                        promise.setValue(.init(data: textureHolder, etag: result.etag, status: .OK, errorCode: nil))
+                                        return
+                                    }
+                                }
+
+                                let textureHolder = try await TextureHolder(data)
+                                promise.setValue(.init(data: textureHolder, etag: result.etag, status: .OK, errorCode: nil))
+                            } catch TextureHolderError.emptyData {
+                                promise.setValue(.init(data: nil, etag: result.etag, status: .OK, errorCode: nil))
+                            } catch {
+                                // If metal can not load this image
+                                // try workaround to first load it into UIImage context
+                                guard let uiImage = UIImage(data: data) else {
+                                    promise.setValue(.init(data: nil, etag: result.etag, status: .ERROR_OTHER, errorCode: "MNL"))
+                                    return
+                                }
+
+                                let renderer = UIGraphicsImageRenderer(size: uiImage.size)
+                                let img = renderer.image { ctx in
+                                    if self.isRasterDebugModeEnabled {
+                                        self.applyDebugWatermark(url: urlString, byteCount: data.count, image: uiImage, wasCached: result.wasCached == true, ctx: ctx)
+                                    } else {
+                                        uiImage.draw(in: .init(origin: .init(), size: uiImage.size))
+                                    }
+                                }
+
+                                guard let cgImage = img.cgImage,
+                                      let textureHolder = try? await TextureHolder(cgImage)
+                                else {
+                                    promise.setValue(.init(data: nil, etag: result.etag, status: .ERROR_OTHER, errorCode: "UINL"))
+                                    return
+                                }
+
+                                promise.setValue(.init(data: textureHolder, etag: result.etag, status: .OK, errorCode: nil))
+
+                            }
+                        } else {
+                            promise.setValue(.init(data: nil, etag: result.etag, status: .ERROR_OTHER, errorCode: "\(result.statusCode)"))
+                        }
                     }
-                }
 
-                let textureHolder = try TextureHolder(data)
-                promise.setValue(.init(data: textureHolder, etag: response?.etag, status: .OK, errorCode: nil))
-                return
-            } catch TextureHolderError.emptyData {
-                promise.setValue(.init(data: nil, etag: response?.etag, status: .OK, errorCode: nil))
-                return
-            } catch {
-                // If metal can not load this image
-                // try workaround to first load it into UIImage context
-                guard let uiImage = UIImage(data: data) else {
-                    promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_OTHER, errorCode: "MNL"))
-                    return
-                }
-
-                let renderer = UIGraphicsImageRenderer(size: uiImage.size)
-                let img = renderer.image { ctx in
-                    if self.isRasterDebugModeEnabled {
-                        self.applyDebugWatermark(url: urlString, byteCount: data.count, image: uiImage, wasCached: wasCached, ctx: ctx)
-                    } else {
-                        uiImage.draw(in: .init(origin: .init(), size: uiImage.size))
-                    }
-                }
-
-                guard let cgImage = img.cgImage,
-                      let textureHolder = try? TextureHolder(cgImage) else {
-                    promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_OTHER, errorCode: "UINL"))
-                    return
-                }
-
-                promise.setValue(.init(data: textureHolder, etag: response?.etag, status: .OK, errorCode: nil))
-                return
             }
         }
 
@@ -184,15 +244,13 @@ open class MCTextureLoader: MCLoaderInterface, @unchecked Sendable {
             tasks[urlString] = task
         }
 
-        modifyDataTask(task: &task)
-
-        task.resume()
         return promise.getFuture()
     }
 
     open func loadData(_ url: String, etag: String?) -> MCDataLoaderResult {
         let semaphore = DispatchSemaphore(value: 0)
         var result: MCDataLoaderResult? = nil
+        let uuid = UUID()
         loadDataAsync(url, etag: etag).then { future in
             result = future.get()
             semaphore.signal()
@@ -215,78 +273,58 @@ open class MCTextureLoader: MCLoaderInterface, @unchecked Sendable {
 
         let promise = DJPromise<MCDataLoaderResult>()
 
-        guard let url = URL(string: urlString) else {
-            assertionFailure("invalid url: \(urlString)")
-            promise.setValue(.init(data: nil, etag: nil, status: .ERROR_NETWORK, errorCode: "IURL"))
-            return promise.getFuture()
-        }
+        let task = load(url: url) { [weak self] result in
 
-        var urlRequest = URLRequest(url: url)
-
-        modifyUrlRequest(request: &urlRequest)
-
-        var task = session.dataTask(with: urlRequest) { [weak self] data, response_, error_ in
             guard let self else { return }
 
             self.taskQueue.sync {
                 _ = self.tasks.removeValue(forKey: urlString) == nil
             }
 
-            let result: Data? = data
-            let response: HTTPURLResponse? = response_ as? HTTPURLResponse
-            let error: NSError? = error_ as NSError?
+            switch result {
+                case .failure(.timeout):
+                    if #available(iOS 14.0, *) {
+                        logger.debug("Failed to load \(url, privacy: .public): Timeout")
+                    }
+                    promise.setValue(.init(data: nil, etag: nil, status: .ERROR_TIMEOUT, errorCode: nil))
+                case .failure(.cancelled):
+                    // Do nothing, since the result is dropped anyway (setting a LoaderStatus will cause the SharedLib to do further computing)
+                    break
+                case .failure(_):
+                    promise.setValue(.init(data: nil, etag: nil, status: .ERROR_OTHER, errorCode: "UNKN"))
+                case .success(let result):
+                    if result.statusCode == 404 {
+                        if #available(iOS 14.0, *) {
+                            logger.debug("Failed to load \(url, privacy: .public): 404, \(result.data.map { String(data: $0, encoding: .utf8)?.prefix(1024) ?? "?" } ?? "?")")
+                        }
+                        promise.setValue(.init(data: nil, etag: result.etag, status: .ERROR_404, errorCode: "\(result.statusCode)"))
 
-            if error?.domain == NSURLErrorDomain, error?.code == NSURLErrorTimedOut {
-                if #available(iOS 14.0, *) {
-                    logger.debug("Failed to load \(url, privacy: .public): Timeout")
-                }
-                promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_TIMEOUT, errorCode: (error?.code).stringOrNil))
-                return
+                    } else if result.statusCode == 400 {
+                        if #available(iOS 14.0, *) {
+                            logger.debug("Failed to load \(url, privacy: .public): 400, \(result.data.map { String(data: $0, encoding: .utf8)?.prefix(1024) ?? "?" } ?? "?")")
+                        }
+                        promise.setValue(.init(data: nil, etag: result.etag, status: .ERROR_400, errorCode: "\(result.statusCode)"))
+                    } else if result.statusCode == 204 {
+                        promise.setValue(.init(data: nil, etag: result.etag, status: .OK, errorCode: nil))
+                    } else if result.statusCode != 200 {
+                        if #available(iOS 14.0, *) {
+                            logger.debug(
+                                "Failed to load \(url, privacy: .public): \(result.statusCode, privacy: .public), \(result.data.map { String(data: $0, encoding: .utf8)?.prefix(1024) ?? "?" } ?? "?")")
+                        }
+                        promise.setValue(.init(data: nil, etag: result.etag, status: .ERROR_NETWORK, errorCode: "\(result.statusCode)"))
+                    } else if let data = result.data {
+                        promise.setValue(.init(data: data, etag: result.etag, status: .OK, errorCode: nil))
+                    } else {
+                        promise.setValue(.init(data: nil, etag: result.etag, status: .ERROR_OTHER, errorCode: "\(result.statusCode)"))
+                    }
             }
 
-            if error?.domain == NSURLErrorDomain, error?.code == NSURLErrorCancelled {
-                // Do nothing, since the result is dropped anyway (setting a LoaderStatus will cause the SharedLib to do further computing)
-                return
-            }
-
-            if response?.statusCode == 404 {
-                if #available(iOS 14.0, *) {
-                    logger.debug("Failed to load \(url, privacy: .public): 404, \(data.map { String(data: $0, encoding: .utf8)?.prefix(1024) ?? "?" } ?? "?")")
-                }
-                promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_404, errorCode: (response?.statusCode).stringOrNil))
-                return
-            } else if response?.statusCode == 400 {
-                if #available(iOS 14.0, *) {
-                    logger.debug("Failed to load \(url, privacy: .public): 400, \(data.map { String(data: $0, encoding: .utf8)?.prefix(1024) ?? "?" } ?? "?")")
-                }
-                promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_400, errorCode: (response?.statusCode).stringOrNil))
-                return
-            } else if response?.statusCode == 204 {
-                promise.setValue(.init(data: nil, etag: response?.etag, status: .OK, errorCode: nil))
-                return
-            } else if response?.statusCode != 200 {
-                if #available(iOS 14.0, *) {
-                    logger.debug("Failed to load \(url, privacy: .public): \(response?.statusCode ?? 0, privacy: .public), \(data.map { String(data: $0, encoding: .utf8)?.prefix(1024) ?? "?" } ?? "?")")
-                }
-                promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_NETWORK, errorCode: (response?.statusCode).stringOrNil))
-                return
-            }
-
-            guard let data = result else {
-                promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_OTHER, errorCode: (response?.statusCode).stringOrNil))
-                return
-            }
-
-            promise.setValue(.init(data: data, etag: response?.etag, status: .OK, errorCode: nil))
         }
 
         taskQueue.sync {
             tasks[urlString] = task
         }
 
-        modifyDataTask(task: &task)
-
-        task.resume()
         return promise.getFuture()
     }
 
@@ -321,8 +359,10 @@ open class MCTextureLoader: MCLoaderInterface, @unchecked Sendable {
         let paragraphStyle = NSMutableParagraphStyle()
         paragraphStyle.alignment = .center
 
-        let attrs: [NSAttributedString.Key: Any] = [NSAttributedString.Key.paragraphStyle: paragraphStyle,
-                                                    NSAttributedString.Key.backgroundColor: wasCached ? UIColor.lightGray.cgColor : UIColor.white.cgColor]
+        let attrs: [NSAttributedString.Key: Any] = [
+            NSAttributedString.Key.paragraphStyle: paragraphStyle,
+            NSAttributedString.Key.backgroundColor: wasCached ? UIColor.lightGray.cgColor : UIColor.white.cgColor,
+        ]
 
         let byteCountString = ByteCountFormatter().string(fromByteCount: Int64(byteCount))
         let loadedString = wasCached ? "Loaded from Cache" : "Loaded from www"
@@ -344,8 +384,8 @@ extension HTTPURLResponse {
     }
 }
 
-public extension Int? {
-    var stringOrNil: String {
+extension Int? {
+    public var stringOrNil: String {
         switch self {
             case .none:
                 return ""

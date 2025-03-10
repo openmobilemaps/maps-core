@@ -390,7 +390,7 @@ public:
             return std::make_shared<StaticValue>(getVariant(json));
         }
 
-        if (!json.is_null()) {
+        if (!json.is_null() && (!json.is_array() || !json[0].is_null())) {
             LogError <<= "Tiled2dMapVectorStyleParser not handled: " + json.dump();
         }
         return nullptr;

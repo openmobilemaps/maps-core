@@ -494,6 +494,7 @@ std::optional<::Vec3D> MapCamera2d::getLastCameraPosition() {
 /** this method is called just before the update methods on all layers */
 void MapCamera2d::update() {
     inertiaStep();
+    getVpMatrix(); // enforce update
 
     {
         std::lock_guard<std::recursive_mutex> lock(animationMutex);

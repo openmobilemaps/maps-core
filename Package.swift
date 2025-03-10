@@ -116,6 +116,7 @@ let package = Package(
             exclude: ["readme.md"],
             resources: [
                 .process("graphics/Shader/Metal/"),
+                .process("maps/Layers/Fonts/")
             ]
         ),
         .target(

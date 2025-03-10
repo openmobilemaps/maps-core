@@ -69,7 +69,12 @@ open class MCFontLoader: NSObject, MCFontLoaderInterface, @unchecked Sendable {
         if let fontData = fontDataDictionary[font.name] {
             return fontData
         }
-        if let path = bundle.path(forResource: font.name, ofType: "json") {
+        var path = bundle.path(forResource: font.name, ofType: "json")
+        if path == nil {
+            os_log("MCFontLoader: unable to load font data for %@.json, use fallback %@.json", log: OSLog.default, type: .error, font.name, font.fallback.name)
+            path = Bundle.module.path(forResource: font.fallback.name, ofType: "json")
+        }
+        if let path = path {
             do {
                 let data = try Data(contentsOf: URL(fileURLWithPath: path), options: .mappedIfSafe)
                 let jsonResult = try JSONSerialization.jsonObject(with: data, options: .mutableLeaves)
@@ -141,7 +146,11 @@ open class MCFontLoader: NSObject, MCFontLoaderInterface, @unchecked Sendable {
             return fontData
         }
 
-        let image = UIImage(named: font.name, in: bundle, compatibleWith: nil)
+        var image = UIImage(named: font.name, in: bundle, compatibleWith: nil)
+        if image == nil {
+            os_log("MCFontLoader: unable to load font data for %@.png, use fallback %@.png", log: OSLog.default, type: .error, font.name, font.fallback.name)
+            image = UIImage(named: font.fallback.name, in: Bundle.module, compatibleWith: nil)
+        }
 
         guard let cgImage = image?.cgImage,
               let textureHolder = try? TextureHolder(cgImage) else {
@@ -151,5 +160,11 @@ open class MCFontLoader: NSObject, MCFontLoaderInterface, @unchecked Sendable {
         fontAtlasDictionary[font.name] = textureHolder
 
         return textureHolder
+    }
+}
+
+fileprivate extension MCFont {
+    var fallback: MCFont {
+        MCFont(name: "Figtree-Regular")
     }
 }
