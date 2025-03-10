@@ -46,6 +46,7 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
                                                            const bool hasCustomTexture,
                                                            const double dpFactor,
                                                            const bool persistingSymbolPlacement,
+                                                           const bool useCustomCrossTileIdentifier,
                                                            bool is3d,
                                                            const Vec3D &tileOrigin) :
     description(description),
@@ -102,7 +103,12 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
     const bool hasText = !fullText.empty();
     const size_t contentHash = usedKeys.getHash(evalContext);
 
-    crossTileIdentifier = std::hash<std::tuple<std::string, std::string, bool, size_t>>()(std::tuple<std::string, std::string, bool, size_t>(fullText, layerIdentifier, hasIcon, contentHash));
+    if (useCustomCrossTileIdentifier || featureContext->identifier == 0) {
+        crossTileIdentifier = std::hash<std::tuple<std::string, std::string, bool, size_t>>()(std::tuple<std::string, std::string, bool, size_t>(fullText, layerIdentifier, hasIcon, contentHash));
+    }
+    else {
+        crossTileIdentifier = featureContext->identifier;
+    }
     double xTolerance = std::ceil(std::abs(tileInfo.tileInfo.bounds.bottomRight.x - tileInfo.tileInfo.bounds.topLeft.x) / 4096.0);
     double yTolerance = std::ceil(std::abs(tileInfo.tileInfo.bounds.bottomRight.y - tileInfo.tileInfo.bounds.topLeft.y) / 4096.0);
 

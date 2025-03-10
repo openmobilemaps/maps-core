@@ -26,12 +26,14 @@ Tiled2dMapVectorSourceSymbolDataManager::Tiled2dMapVectorSourceSymbolDataManager
                                                                                  const Actor<Tiled2dMapVectorReadyManager> &readyManager,
                                                                                  const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager,
                                                                                  const std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> &symbolDelegate,
-                                                                                 bool persistingSymbolPlacement)
+                                                                                 bool persistingSymbolPlacement,
+                                                                                 bool useCustomCrossTileIdentifier)
         : Tiled2dMapVectorSourceDataManager(vectorLayer, mapDescription, layerConfig, source, readyManager, featureStateManager),
         fontLoader(fontLoader), vectorSource(vectorSource),
         animationCoordinatorMap(std::make_shared<SymbolAnimationCoordinatorMap>()),
         symbolDelegate(symbolDelegate),
-        persistingSymbolPlacement(persistingSymbolPlacement) {
+        persistingSymbolPlacement(persistingSymbolPlacement),
+        useCustomCrossTileIdentifier(useCustomCrossTileIdentifier) {
 
     for (const auto &layer: mapDescription->layers) {
         if (layer->getType() == VectorLayerType::symbol && layer->source == source) {
@@ -455,7 +457,8 @@ std::vector<Actor<Tiled2dMapVectorSymbolGroup>> Tiled2dMapVectorSourceSymbolData
                                                                                                          layerIdentifier),
                                                                                                  featureStateManager,
                                                                                                  symbolDelegate,
-                                                                                                 persistingSymbolPlacement);
+                                                                                                 persistingSymbolPlacement,
+                                                                                                 useCustomCrossTileIdentifier);
         symbolGroupActor.message(MFN(&Tiled2dMapVectorSymbolGroup::initialize), features, featuresBase,
                                  std::min(featuresBase + maxNumFeaturesPerGroup, numFeatures) - featuresBase,
                                  animationCoordinatorMap, selfActor, alpha);
