@@ -1427,10 +1427,11 @@ std::vector<VectorLayerFeatureCoordInfo> Tiled2dMapVectorLayer::getVisiblePointF
                 for (auto const &[featureContext, geometry]: *it->second) {
                     for (auto const &points: geometry->getPointCoordinates()) {
                         for (auto const &point: points) {
-                            bool isVisible = camera->coordIsVisibleOnScreen(point, paddingPc);
+                            const auto coord = Vec2DHelper::toCoord(point, CoordinateSystemIdentifiers::EPSG3857());
+                            bool isVisible = camera->coordIsVisibleOnScreen(coord, paddingPc);
 
                             if (isVisible) {
-                                features.push_back(VectorLayerFeatureCoordInfo(featureContext->getFeatureInfo(), point));
+                                features.push_back(VectorLayerFeatureCoordInfo(featureContext->getFeatureInfo(), coord));
                             }
                         }
                     }

@@ -22,7 +22,7 @@ class SymbolAnimationCoordinatorMap {
 public:
 
     std::shared_ptr<SymbolAnimationCoordinator> getOrAddAnimationController(size_t crossTileIdentifier,
-                                                                            const Coord &coord,
+                                                                            const Vec2D &coord,
                                                                             int zoomIdentifier,
                                                                             double xTolerance,
                                                                             double yTolerance,

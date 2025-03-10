@@ -319,8 +319,8 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
 
     if (!tileData->empty()) {
         std::unordered_map<int, int> subGroupCoordCount;
-        std::vector<std::vector<std::vector<std::tuple<std::vector<Coord>, int>>>> styleGroupNewLinesVector;
-        std::vector<std::vector<std::tuple<std::vector<Coord>, int>>> styleGroupLineSubGroupVector;
+        std::vector<std::vector<std::vector<std::tuple<std::vector<Vec2D>, int>>>> styleGroupNewLinesVector;
+        std::vector<std::vector<std::tuple<std::vector<Vec2D>, int>>> styleGroupLineSubGroupVector;
 
         bool anyInteractable = false;
 
@@ -364,7 +364,7 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
                             } else {
                                 reusableLineStyles.push_back({ ShaderLineStyle {0} });
                             }
-                            styleGroupLineSubGroupVector.push_back(std::vector<std::tuple<std::vector<Coord>, int>>());
+                            styleGroupLineSubGroupVector.push_back(std::vector<std::tuple<std::vector<Vec2D>, int>>());
                             styleGroupNewLinesVector.push_back({});
                             featureGroups.push_back(std::vector<std::tuple<size_t, std::shared_ptr<FeatureContext>>>{{hash, featureContext}});
                         }
@@ -377,7 +377,8 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
                 }
 
                 const std::shared_ptr<VectorTileGeometryHandler> geometryHandler = std::get<1>(*featureIt);
-                std::vector<std::vector<::Coord>> lineCoordinatesVector;
+                bool isInteractable = description->isInteractable(evalContext);
+                std::vector<std::vector<::Vec2D>> lineCoordinatesVector;
 
                 for (const auto &lineCoordinates: geometryHandler->getLineCoordinates()) {
                     if (lineCoordinates.empty()) { continue; }
@@ -391,16 +392,18 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
                     if (coordCount + numCoords > maxNumLinePoints
                         && !styleGroupLineSubGroupVector[styleGroupIndex].empty()) {
                         styleGroupNewLinesVector[styleGroupIndex].push_back(styleGroupLineSubGroupVector[styleGroupIndex]);
-                        styleGroupLineSubGroupVector.push_back(std::vector<std::tuple<std::vector<Coord>, int>>());
+                        styleGroupLineSubGroupVector.push_back(std::vector<std::tuple<std::vector<Vec2D>, int>>());
                         subGroupCoordCount[styleGroupIndex] = 0;
                     }
 
                     styleGroupLineSubGroupVector[styleGroupIndex].push_back({coordinates, std::min(maxStylesPerGroup - 1, styleIndex)});
                     subGroupCoordCount[styleGroupIndex] = (int)subGroupCoordCount[styleGroupIndex] + numCoords;
-                    lineCoordinatesVector.push_back(coordinates);
+                    if (isInteractable) {
+                        lineCoordinatesVector.push_back(coordinates);
+                    }
                 }
 
-                if (description->isInteractable(evalContext)) {
+                if (isInteractable) {
                     anyInteractable = true;
                     hitDetection.push_back({lineCoordinatesVector, featureContext});
                 }
@@ -426,7 +429,7 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
 }
 
 
-void Tiled2dMapVectorLineTile::addLines(const std::vector<std::vector<std::vector<std::tuple<std::vector<Coord>, int>>>> &styleIdLinesVector) {
+void Tiled2dMapVectorLineTile::addLines(const std::vector<std::vector<std::vector<std::tuple<std::vector<Vec2D>, int>>>> &styleIdLinesVector) {
     if (styleIdLinesVector.empty()) {
         auto selfActor = WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this());
         tileCallbackInterface.message(MFN(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsReady), tileInfo, description->identifier, selfActor);
@@ -466,7 +469,7 @@ void Tiled2dMapVectorLineTile::addLines(const std::vector<std::vector<std::vecto
                                                                             shader,
                                                                             is3d);
 
-            lineGroupObject->setLines(lineSubGroup, origin);
+            lineGroupObject->setLines(lineSubGroup, CoordinateSystemIdentifiers::EPSG3857(), origin);
 
             lineGroupObjects.push_back(lineGroupObject);
             newGraphicObjects.push_back(lineGroupGraphicsObject->asGraphicsObject());
@@ -543,7 +546,7 @@ bool Tiled2dMapVectorLineTile::performClick(const Coord &coord) {
             auto lineWidth = lineDescription->style.getLineWidth(EvaluationContext(zoomIdentifier, dpFactor, featureContext, featureStateManager));
             lineWidth *= selectionSizeFactor;
             auto lineWidthInMapUnits = camera->mapUnitsFromPixels(lineWidth);
-            if (LineHelper::pointWithin(coordinates, coord, lineWidthInMapUnits, coordinateConverter)) {
+            if (LineHelper::pointWithin(coordinates, Coord(CoordinateSystemIdentifiers::EPSG3857(), coord.x, coord.y, 0.0), CoordinateSystemIdentifiers::EPSG3857(), lineWidthInMapUnits, coordinateConverter)) {
                 if (multiselect) {
                     featureInfos.push_back(featureContext->getFeatureInfo());
                 } else if (strongSelectionDelegate->didSelectFeature(featureContext->getFeatureInfo(), description->identifier, coord)) {

@@ -18,6 +18,7 @@
 #include "vtzero/vector_tile.hpp"
 #include "CoordinateSystemIdentifiers.h"
 #include "VectorLayerFeatureCoordInfo.h"
+#include "CoordinateSystemIdentifiers.h"
 #include "Logger.h"
 
 ReverseGeocoder::ReverseGeocoder(const /*not-null*/ std::shared_ptr<::LoaderInterface> & loader, const std::string & tileUrlTemplate, int32_t zoomLevel): loader(loader), tileUrlTemplate(tileUrlTemplate), zoomLevel(zoomLevel) {}
@@ -115,9 +116,10 @@ std::vector<::VectorLayerFeatureCoordInfo> ReverseGeocoder::reverseGeocode(const
 
                     for (auto points: geometryHandler->getPointCoordinates()) {
                         for (auto point: points) {
-                            auto d = distance(converted4326, point);
+                            auto coord = Coord(CoordinateSystemIdentifiers::EPSG3857(), point.x, point.y, 0.0);
+                            auto d = distance(converted4326, coord);
                             if (d < thresholdMeters) {
-                                resultVector.push_back(VectorLayerFeatureCoordInfo(featureContext->getFeatureInfo(), point));
+                                resultVector.push_back(VectorLayerFeatureCoordInfo(featureContext->getFeatureInfo(), coord));
                             }
                         }
                     }

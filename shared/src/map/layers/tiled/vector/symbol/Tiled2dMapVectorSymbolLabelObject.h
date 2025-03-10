@@ -48,8 +48,8 @@ public:
                                       const std::shared_ptr<SymbolVectorLayerDescription> &description,
                                       const std::vector<FormattedStringEntry> &text,
                                       const std::string &fullText,
-                                      const ::Coord &coordinate,
-                                      const std::optional<std::vector<Coord>> &lineCoordinates,
+                                      const ::Vec2D &coordinate,
+                                      const std::optional<std::vector<Vec2D>> &lineCoordinates,
                                       const Anchor &textAnchor,
                                       const TextJustify &textJustify,
                                       const std::shared_ptr<FontLoaderResult> fontResult,
@@ -106,8 +106,8 @@ private:
     DistanceIndex findReferencePointIndices();
 
     inline Vec2D pointAtIndex(const DistanceIndex &index, bool useRender) {
-        const auto &s = useRender ? renderLineCoordinates[index.index] : (*lineCoordinates)[index.index];
-        const auto &e = useRender ?  renderLineCoordinates[index.index + 1 < renderLineCoordinatesCount ? (index.index + 1) : index.index] : (*lineCoordinates)[index.index + 1 < renderLineCoordinatesCount ? (index.index + 1) : index.index];
+        const auto &s = useRender ? renderLineCoordinates[index.index] : Vec2DHelper::toVec3D((*lineCoordinates)[index.index]);
+        const auto &e = useRender ?  renderLineCoordinates[index.index + 1 < renderLineCoordinatesCount ? (index.index + 1) : index.index] : Vec2DHelper::toVec3D((*lineCoordinates)[index.index + 1 < renderLineCoordinatesCount ? (index.index + 1) : index.index]);
         return Vec2D(s.x + (e.x - s.x) * index.percentage,
                      s.y + (e.y - s.y) * index.percentage);
     }
@@ -194,9 +194,9 @@ private:
 
     const std::shared_ptr<FontLoaderResult> fontResult;
 
-    Coord referencePoint = Coord(0,0,0,0);
-    Vec3D cartesianReferencePoint = Vec3D(0,0,0);
-    Coord referencePointScreen = Coord(0,0,0,0);
+    Vec3D referencePoint = Vec3D(0.0, 0.0, 0.0);
+    Vec3D cartesianReferencePoint = Vec3D(0.0, 0.0, 0.0);
+    Vec3D referencePointScreen = Vec3D(0.0, 0.0, 0);
     float referenceSize;
 
 
@@ -217,10 +217,10 @@ private:
     const std::string fullText;
 
     size_t renderLineCoordinatesCount;
-    std::vector<Coord> renderLineCoordinates;
-    std::vector<Coord> screenLineCoordinates;
+    std::vector<Vec3D> renderLineCoordinates;
+    std::vector<Vec3D> screenLineCoordinates;
     std::vector<Vec3D> cartesianRenderLineCoordinates;
-    std::optional<std::vector<Coord>> lineCoordinates;
+    std::optional<std::vector<Vec2D>> lineCoordinates;
 
     double textSize = 0;
     double textRotate = 0;

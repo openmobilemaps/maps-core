@@ -11,6 +11,7 @@
 #pragma once
 
 #include "Vec2D.h"
+#include "Vec3D.h"
 #include "Quad2dD.h"
 #include <algorithm>
 #include <vector>
@@ -61,6 +62,11 @@ class Vec2DHelper {
 
     static inline double crossProduct(const Vec2D& A, const Vec2D& B) {
         return (A.x * B.y) - (A.y * B.x);
+    }
+
+    static inline Vec2D interpolate(const Vec2D& start, const Vec2D& end, double t) {
+        return Vec2D(start.x + (end.x - start.x) * t,
+                     start.y + (end.y - start.y) * t);
     }
 
     static inline ::Vec2D rotate(const ::Vec2D &p, const ::Vec2D &origin, double angleDegree) {
@@ -159,5 +165,17 @@ class Vec2DHelper {
 
     static inline ::Vec2D normalize(const ::Vec2D &vector) {
         return vector / std::sqrt(Vec2DHelper::squaredLength(vector));
+    }
+
+    static inline ::Vec2D toVec(const ::Coord &coordinate) {
+        return Vec2D(coordinate.x, coordinate.y);
+    }
+
+    static inline ::Vec3D toVec3D(const ::Vec2D &vec) {
+        return Vec3D(vec.x, vec.y, 0.0);
+    }
+
+    static inline ::Coord toCoord(const ::Vec2D &vec, const int32_t systemIdentifier) {
+        return Coord(systemIdentifier, vec.x, vec.y, 0.0);
     }
 };
