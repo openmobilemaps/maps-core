@@ -63,7 +63,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
         json = nlohmann::json::parse(styleJsonString);
     }
     catch (nlohmann::json::parse_error &ex) {
-        return Tiled2dMapVectorLayerParserResult(nullptr, LoaderStatus::ERROR_OTHER, "", std::nullopt);
+        return Tiled2dMapVectorLayerParserResult(nullptr, LoaderStatus::ERROR_OTHER, ex.what(), std::nullopt);
     }
 
     std::vector<std::shared_ptr<VectorLayerDescription>> layers;
@@ -223,11 +223,12 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
             if (val["data"].is_string()) {
                 geojsonSources[key] = GeoJsonVTFactory::getGeoJsonVt(key, replaceUrlParams(val["data"].get<std::string>(), sourceUrlParams), loaders, localDataProvider, options);
             } else {
-                assert(val["data"].is_object());
-                // XXX: segfault on invalid data
-                // XXX: fails on "type": "Feature" instead of "FeatureCollection"
-                // XXX: fails if there is no "properties"
-                geojsonSources[key] = GeoJsonVTFactory::getGeoJsonVt(GeoJsonParser::getGeoJson(val["data"]), options);
+                try {
+                    geojsonSources[key] = GeoJsonVTFactory::getGeoJsonVt(GeoJsonParser::getGeoJson(val["data"]), options);
+                }
+                catch (nlohmann::json::exception &ex) {
+                    return Tiled2dMapVectorLayerParserResult(nullptr, LoaderStatus::ERROR_OTHER, ex.what(), std::nullopt);
+                }
             }
         }
     }

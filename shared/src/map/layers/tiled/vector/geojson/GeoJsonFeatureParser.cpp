@@ -16,9 +16,8 @@
 GeoJsonFeatureParser::GeoJsonFeatureParser() {}
 
 std::optional<std::vector<::VectorLayerFeatureInfo>> GeoJsonFeatureParser::parse(const std::string & geoJson) {
-    nlohmann::json json;
     try {
-        json = nlohmann::json::parse(geoJson);
+        const auto json = nlohmann::json::parse(geoJson);
         auto geoJsonObject = GeoJsonParser::getGeoJson(json);
         std::vector<::VectorLayerFeatureInfo> features = {};
         for (auto &geometry: geoJsonObject->geometries) {
@@ -26,7 +25,8 @@ std::optional<std::vector<::VectorLayerFeatureInfo>> GeoJsonFeatureParser::parse
         }
         return features;
     }
-    catch (nlohmann::json::parse_error &ex) {
+    catch (nlohmann::json::exception &ex) {
+        LogError << "Geojson is not valid:" <<= ex.what();
         return std::nullopt;
     }
 }
@@ -36,7 +36,8 @@ std::optional<std::vector<GeoJsonPoint>> GeoJsonFeatureParser::parseWithPointGeo
         const auto& json = nlohmann::json::parse(geoJson);
         return GeoJsonParser::getPointsWithProperties(json);
     }
-    catch (nlohmann::json::parse_error &ex) {
+    catch (nlohmann::json::exception &ex) {
+        LogError << "Geojson is not valid:" <<= ex.what();
         return std::nullopt;
     }
 }
@@ -47,7 +48,8 @@ std::optional<std::vector<GeoJsonLine>> GeoJsonFeatureParser::parseWithLineGeome
         const auto& json = nlohmann::json::parse(geoJson);
         return GeoJsonParser::getLinesWithProperties(json);
     }
-    catch (nlohmann::json::parse_error &ex) {
+    catch (nlohmann::json::exception &ex) {
+        LogError << "Geojson is not valid:" <<= ex.what();
         return std::nullopt;
     }
 }

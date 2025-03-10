@@ -1,0 +1,20 @@
+{
+   "type": "Feature",
+   "geometry": {
+       "type": "Point",
+       "coordinates": [102.0, 0.5]
+   },
+   "properties": {
+       "prop_string": "value0",
+       "prop_number_integer": 1,
+       "prop_number_float": 1.5,
+       "prop_bool": false,
+       "prop_string_array": ["this", "that"],
+       "prop_number_array": [1.0, 2, 3],
+       "prop_skipped_empty_array": [],
+       "prop_skipped_object": {
+           "this": "value_this",
+           "that": 1.0
+       }
+   }
+}
