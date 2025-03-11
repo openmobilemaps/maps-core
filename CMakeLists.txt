@@ -6,11 +6,19 @@ project(mapscore
 ####
 # mapscore OpenGL "proper", i.e. the C++ implementation without language bindings
 ####
-file(GLOB_RECURSE mapscore_SRC
-  "shared/public/*.cpp"
-  "shared/src/*.cpp"
-  "android/src/main/cpp/graphics/*.cpp"
-)
+if(APPLE)
+  file(GLOB_RECURSE mapscore_SRC
+          "shared/public/*.cpp"
+          "shared/src/*.cpp"
+  )
+else()
+  # Include Android-specific files only if not on Apple devices
+  file(GLOB_RECURSE mapscore_SRC
+          "shared/public/*.cpp"
+          "shared/src/*.cpp"
+          "android/src/main/cpp/graphics/*.cpp"
+  )
+endif()
 
 add_library(mapscore STATIC ${mapscore_SRC})
 
@@ -58,12 +66,18 @@ target_include_directories(mapscore PRIVATE
   shared/src/map/layers/text
   shared/src/map/scheduling
   shared/src/utils
-  android/src/main/cpp
-  android/src/main/cpp/graphics
-  android/src/main/cpp/graphics/objects
-  android/src/main/cpp/graphics/shader
-  android/src/main/cpp/utils
 )
+
+if(NOT APPLE)
+  target_include_directories(mapscore PRIVATE
+     android/src/main/cpp
+     android/src/main/cpp/graphics
+     android/src/main/cpp/graphics/objects
+     android/src/main/cpp/graphics/shader
+     android/src/main/cpp/utils
+  )
+endif()
+
 target_include_directories(mapscore PUBLIC
   shared/public
   external/djinni/support-lib/
@@ -75,7 +89,14 @@ set_property(
   PROPERTY COMPILE_DEFINITIONS
   $<$<CONFIG:Debug>:LOG_LEVEL=4>    # LogTrace
   $<$<CONFIG:Release>:LOG_LEVEL=1>) # LogWarning
-target_compile_definitions(mapscore PRIVATE OPENMOBILEMAPS_GL=1)
+
+
+if(APPLE)
+  target_compile_definitions(mapscore PRIVATE CATCH_TESTING=1)
+else()
+  target_compile_definitions(mapscore PRIVATE OPENMOBILEMAPS_GL=1)
+endif()
+
 target_compile_features(mapscore PRIVATE cxx_std_20)
 target_compile_options(mapscore PRIVATE -Werror -Wno-deprecated -Wno-reorder -fPIC) # fPIC so we can "embed" into shared mapscore_jni
 target_link_libraries(mapscore ${OPENGL_LIBRARIES})
