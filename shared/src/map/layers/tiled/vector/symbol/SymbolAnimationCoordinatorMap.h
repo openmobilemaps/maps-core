@@ -18,6 +18,7 @@
 #include <memory>
 #include <vector>
 #include <functional>
+#include <algorithm>
 
 struct CoordinatorXCompare {
     bool operator() (const std::shared_ptr<SymbolAnimationCoordinator> &a, const std::shared_ptr<SymbolAnimationCoordinator> &b) const {
