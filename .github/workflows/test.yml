@@ -8,6 +8,7 @@ on:
 
 jobs:
   test:
+    name: "Catch2 Tests"
     runs-on: ubuntu-latest
 
     steps:
@@ -30,7 +31,6 @@ jobs:
           mkdir test-results
           cd shared/test      # for access to data/ directory
           ../../build-debug/shared/test/tests \
-            --skip-benchmarks \
             -r JUnit::out=../../test-results/catch2-junit.xml \
             -r console::colour-mode=ansi
 
