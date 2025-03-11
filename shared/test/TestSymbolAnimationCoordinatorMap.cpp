@@ -4,6 +4,7 @@
 #include <atomic>
 #include <catch2/benchmark/catch_benchmark.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/catch_get_random_seed.hpp>
 #include <fstream>
 #include <iostream>
 #include <random>
@@ -156,8 +157,7 @@ TEST_CASE("SymbolAnimationCoordinatorMap with multiple threads") {
         SymbolAnimationCoordinatorMap coordinatorMap;
 
         auto threadFunc = [&coordinatorMap, &counter, &runCount, &logEntries](size_t threadIndex, size_t numThreads) {
-            std::random_device rd;
-            std::mt19937 g(rd());
+            std::mt19937 g(Catch::getSeed());
             std::uniform_int_distribution<size_t> dist(0, logEntries.size() - 1);
 
             for (int run = 0; run < runCount; ++run) {
