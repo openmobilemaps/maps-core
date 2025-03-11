@@ -79,3 +79,5 @@ DerivedData/
 ## clangd
 .cache/
 compile_commands.json
+
+cmake-build-test
