@@ -26,17 +26,25 @@ using namespace metal;
 struct LineVertexIn {
     float2 lineA [[attribute(0)]];
     float2 lineB [[attribute(1)]];
-    float vertexIndex [[attribute(2)]];
-    float lengthPrefix [[attribute(3)]];
-    float stylingIndex [[attribute(4)]];
+  /*
+      lineMetadata is packed as a single float but contains multiple pieces of information:
+      - Bits  0-1  : Vertex Index (0-3) (used for rendering different parts of the quad)
+      - Bits  2-9  : Line Style Index (0-255) (defines the appearance of the line)
+      - Bits 10-11 : Segment Type (0 = inner, 1 = start, 2 = end, 3 = single-segment)
+    */
+   float lineMetadata [[attribute(2)]];
 };
 
 struct LineVertexUnitSphereIn {
     float3 lineA [[attribute(0)]];
     float3 lineB [[attribute(1)]];
-    float vertexIndex [[attribute(2)]];
-    float lengthPrefix [[attribute(3)]];
-    float stylingIndex [[attribute(4)]];
+  /*
+      lineMetadata is packed as a single float but contains multiple pieces of information:
+      - Bits  0-1  : Vertex Index (0-3) (used for rendering different parts of the quad)
+      - Bits  2-9  : Line Style Index (0-255) (defines the appearance of the line)
+      - Bits 10-11 : Segment Type (0 = inner, 1 = start, 2 = end, 3 = single-segment)
+    */
+   float lineMetadata [[attribute(2)]];
 };
 
 struct LineVertexOut {
@@ -44,9 +52,9 @@ struct LineVertexOut {
     float2 uv;
     float3 lineA;
     float3 lineB;
-    int stylingIndex;
+    int styleOffset;
     float width;
-    int segmentType;
+    uint segmentType;
     float lengthPrefix;
     float scalingFactor;
     float dashingSize;
@@ -76,9 +84,9 @@ struct SimpleLineVertexOut {
     float2 uv;
     float3 lineA;
     float3 lineB;
-    int stylingIndex;
+    int styleOffset;
     float width;
-    int segmentType;
+    uint segmentType;
     float scalingFactor;
 };
 
@@ -107,8 +115,13 @@ unitSphereSimpleLineGroupVertexShader(const LineVertexUnitSphereIn vertexIn [[st
                       constant float4 &originOffset [[buffer(5)]],
                       constant float4 &tileOrigin [[buffer(6)]])
 {
-    int styleIndex = (int(vertexIn.stylingIndex) & 0xFF) * 8;
-    constant SimpleLineStyling *style = (constant SimpleLineStyling *)(styling + styleIndex);
+    const uint packed = as_type<uint>(vertexIn.lineMetadata); // Reinterpret float as uint
+    const uint vertexIndex = packed & 0x3;                  // Bits 0-1
+    const uint styleIndex = (packed >> 2) & 0xFF;       // Bits 2-9
+    const uint segmentType = (packed >> 10) & 0x3;          // Bits 10-11
+    const int styleOffset = styleIndex * 8;
+
+    constant SimpleLineStyling *style = (constant SimpleLineStyling *)(styling + styleOffset);
 
     // extend position in width direction and in length direction by width / 2.0
     float width = style->width / 2.0;
@@ -117,15 +130,13 @@ unitSphereSimpleLineGroupVertexShader(const LineVertexUnitSphereIn vertexIn [[st
         width *= scalingFactor ;
     }
 
-    int index = int(vertexIn.vertexIndex);
-
     const float3 lineA = vertexIn.lineA;
     const float3 lineB = vertexIn.lineB;
 
     float3 position = lineB;
-    if(index == 0) {
+    if(vertexIndex == 0) {
       position = lineA;
-    } else if(index == 1) {
+    } else if(vertexIndex == 1) {
       position = lineA;
     }
 
@@ -135,14 +146,14 @@ unitSphereSimpleLineGroupVertexShader(const LineVertexUnitSphereIn vertexIn [[st
 
     float3 widthNormal = widthNormalIn;
 
-    if(index == 0) {
+    if(vertexIndex == 0) {
       lengthNormal *= -1.0;
       widthNormal *= -1.0;
-    } else if(index == 1) {
+    } else if(vertexIndex == 1) {
       lengthNormal *= -1.0;
-    } else if(index == 2) {
+    } else if(vertexIndex == 2) {
       // all fine
-    } else if(index == 3) {
+    } else if(vertexIndex == 3) {
       widthNormal *= -1.0;
     }
 
@@ -150,14 +161,12 @@ unitSphereSimpleLineGroupVertexShader(const LineVertexUnitSphereIn vertexIn [[st
                               float4((lengthNormal + widthNormal).xyz,0.0)
                               * float4(width, width, width, 0.0);
 
-    const int segmentType = int(vertexIn.stylingIndex) >> 8;// / 256.0;
-
     SimpleLineVertexOut out {
         .position = vpMatrix * extendedPosition,
         .uv = extendedPosition.xy,
         .lineA = extendedPosition.xyz - ((vertexIn.lineA + originOffset.xyz)),
         .lineB = ((vertexIn.lineB + originOffset.xyz)) - ((vertexIn.lineA + originOffset.xyz)),
-        .stylingIndex = styleIndex,
+        .styleOffset = styleOffset,
         .width = width,
         .segmentType = segmentType,
         .scalingFactor = scalingFactor,
@@ -175,9 +184,14 @@ simpleLineGroupVertexShader(const LineVertexIn vertexIn [[stage_in]],
                       constant float4 &originOffset [[buffer(5)]],
                       constant float4 &tileOrigin [[buffer(6)]])
 {
-    int styleIndex = (int(vertexIn.stylingIndex) & 0xFF) * 8;
-    constant SimpleLineStyling *style = (constant SimpleLineStyling *)(styling + styleIndex);
-  
+    const uint packed = as_type<uint>(vertexIn.lineMetadata); // Reinterpret float as uint
+    const uint vertexIndex = packed & 0x3;                  // Bits 0-1
+    const uint styleIndex = (packed >> 2) & 0xFF;       // Bits 2-9
+    const uint segmentType = (packed >> 10) & 0x3;          // Bits 10-11
+    const int styleOffset = styleIndex * 8;
+
+    constant SimpleLineStyling *style = (constant SimpleLineStyling *)(styling + styleOffset);
+
     // extend position in width direction and in length direction by width / 2.0
     float width = style->width / 2.0;
 
@@ -188,11 +202,10 @@ simpleLineGroupVertexShader(const LineVertexIn vertexIn [[stage_in]],
     const float3 lineA = float3(vertexIn.lineA, 0);
     const float3 lineB = float3(vertexIn.lineB, 0);
 
-    int index = int(vertexIn.vertexIndex);
     float3 position = lineB;
-    if(index == 0) {
+    if(vertexIndex == 0) {
       position = lineA;
-    } else if(index == 1) {
+    } else if(vertexIndex == 1) {
       position = lineA;
     }
 
@@ -202,14 +215,14 @@ simpleLineGroupVertexShader(const LineVertexIn vertexIn [[stage_in]],
 
     float3 widthNormal = widthNormalIn;
 
-    if(index == 0) {
+    if(vertexIndex == 0) {
       lengthNormal *= -1.0;
       widthNormal *= -1.0;
-    } else if(index == 1) {
+    } else if(vertexIndex == 1) {
       lengthNormal *= -1.0;
-    } else if(index == 2) {
+    } else if(vertexIndex == 2) {
       // all fine
-    } else if(index == 3) {
+    } else if(vertexIndex == 3) {
       widthNormal *= -1.0;
     }
 
@@ -217,14 +230,12 @@ simpleLineGroupVertexShader(const LineVertexIn vertexIn [[stage_in]],
                               float4((lengthNormal + widthNormal).xy, 0.0,0.0)
                               * float4(width, width, width, 0.0);
 
-    const int segmentType = int(vertexIn.stylingIndex) >> 8;// / 256.0;
-
     SimpleLineVertexOut out {
         .position = vpMatrix * extendedPosition,
         .uv = extendedPosition.xy,
         .lineA = extendedPosition.xyz - ((lineA + originOffset.xyz)),
         .lineB = ((lineB + originOffset.xyz)) - ((lineA + originOffset.xyz)),
-        .stylingIndex = styleIndex,
+        .styleOffset = styleOffset,
         .width = width,
         .segmentType = segmentType,
         .scalingFactor = scalingFactor,
@@ -238,7 +249,7 @@ fragment half4
 simpleLineGroupFragmentShader(SimpleLineVertexOut in [[stage_in]],
                         constant half *styling [[buffer(1)]])
 {
-  constant SimpleLineStyling *style = (constant SimpleLineStyling *)(styling + in.stylingIndex);
+  constant SimpleLineStyling *style = (constant SimpleLineStyling *)(styling + in.styleOffset);
   const half lineLength = length(in.lineB);
   const half t = dot(in.lineA, normalize(in.lineB) / lineLength);
 
@@ -292,8 +303,15 @@ unitSphereLineGroupVertexShader(const LineVertexUnitSphereIn vertexIn [[stage_in
                       constant float4 &originOffset [[buffer(5)]],
                       constant float4 &tileOrigin [[buffer(6)]])
 {
-    int styleIndex = (int(vertexIn.stylingIndex) & 0xFF) * 23;
-    constant LineStyling *style = (constant LineStyling *)(styling + styleIndex);
+
+    const uint packed = as_type<uint>(vertexIn.lineMetadata); // Reinterpret float as uint
+    const uint vertexIndex = packed & 0x3;                  // Bits 0-1
+    const uint styleIndex = (packed >> 2) & 0xFF;       // Bits 2-9
+    const uint segmentType = (packed >> 10) & 0x3;          // Bits 10-11
+    const float lengthPrefix = float((packed >> 11) & 0x1FFFFF) / 1000.0; // Bits 11-31
+    const int styleOffset = styleIndex * 23;
+
+    constant LineStyling *style = (constant LineStyling *)(styling + styleOffset);
 
     // extend position in width direction and in length direction by width / 2.0
     float width = style->width / 2.0;
@@ -307,15 +325,13 @@ unitSphereLineGroupVertexShader(const LineVertexUnitSphereIn vertexIn [[stage_in
         dashingSize *= dashingScalingFactor;
     }
 
-    int index = int(vertexIn.vertexIndex);
-
     const float3 lineA = vertexIn.lineA;
     const float3 lineB = vertexIn.lineB;
 
     float3 position = lineB;
-    if(index == 0) {
+    if(vertexIndex == 0) {
       position = lineA;
-    } else if(index == 1) {
+    } else if(vertexIndex == 1) {
       position = lineA;
     }
 
@@ -325,14 +341,14 @@ unitSphereLineGroupVertexShader(const LineVertexUnitSphereIn vertexIn [[stage_in
 
     float3 widthNormal = widthNormalIn;
 
-    if(index == 0) {
+    if(vertexIndex == 0) {
       lengthNormal *= -1.0;
       widthNormal *= -1.0;
-    } else if(index == 1) {
+    } else if(vertexIndex == 1) {
       lengthNormal *= -1.0;
-    } else if(index == 2) {
+    } else if(vertexIndex == 2) {
       // all fine
-    } else if(index == 3) {
+    } else if(vertexIndex == 3) {
       widthNormal *= -1.0;
     }
 
@@ -342,17 +358,15 @@ unitSphereLineGroupVertexShader(const LineVertexUnitSphereIn vertexIn [[stage_in
                               float4((lengthNormal + widthNormal).xyz,0.0)
                               * float4(width, width, width, 0.0) + lineOffset;
 
-    const int segmentType = int(vertexIn.stylingIndex) >> 8;// / 256.0;
-
     LineVertexOut out {
         .position = vpMatrix * extendedPosition,
         .uv = extendedPosition.xy,
         .lineA = extendedPosition.xyz - ((vertexIn.lineA + originOffset.xyz) + lineOffset.xyz),
         .lineB = ((vertexIn.lineB + originOffset.xyz) + lineOffset.xyz) - ((vertexIn.lineA + originOffset.xyz) + lineOffset.xyz),
-        .stylingIndex = styleIndex,
+        .styleOffset = styleOffset,
         .width = width,
         .segmentType = segmentType,
-        .lengthPrefix = vertexIn.lengthPrefix,
+        .lengthPrefix = lengthPrefix,
         .scalingFactor = scalingFactor,
         .dashingSize = dashingSize,
         .scaledBlur = blur
@@ -370,8 +384,14 @@ lineGroupVertexShader(const LineVertexIn vertexIn [[stage_in]],
                       constant float4 &originOffset [[buffer(5)]],
                       constant float4 &tileOrigin [[buffer(6)]])
 {
-    int styleIndex = (int(vertexIn.stylingIndex) & 0xFF) * 23;
-    constant LineStyling *style = (constant LineStyling *)(styling + styleIndex);
+    const uint packed = as_type<uint>(vertexIn.lineMetadata); // Reinterpret float as uint
+    const uint vertexIndex = packed & 0x3;                  // Bits 0-1
+    const uint styleIndex = (packed >> 2) & 0xFF;       // Bits 2-9
+    const uint segmentType = (packed >> 10) & 0x3;          // Bits 10-11
+    const float lengthPrefix = float((packed >> 11) & 0x1FFFFF) / 1000.0; // Bits 11-31
+    const int styleOffset = styleIndex * 23;
+
+    constant LineStyling *style = (constant LineStyling *)(styling + styleOffset);
 
     // extend position in width direction and in length direction by width / 2.0
     float width = style->width / 2.0;
@@ -388,11 +408,10 @@ lineGroupVertexShader(const LineVertexIn vertexIn [[stage_in]],
     const float3 lineA = float3(vertexIn.lineA, 0);
     const float3 lineB = float3(vertexIn.lineB, 0);
 
-    int index = int(vertexIn.vertexIndex);
     float3 position = lineB;
-    if(index == 0) {
+    if(vertexIndex == 0) {
       position = lineA;
-    } else if(index == 1) {
+    } else if(vertexIndex == 1) {
       position = lineA;
     }
 
@@ -402,14 +421,14 @@ lineGroupVertexShader(const LineVertexIn vertexIn [[stage_in]],
 
     float3 widthNormal = widthNormalIn;
 
-    if(index == 0) {
+    if(vertexIndex == 0) {
       lengthNormal *= -1.0;
       widthNormal *= -1.0;
-    } else if(index == 1) {
+    } else if(vertexIndex == 1) {
       lengthNormal *= -1.0;
-    } else if(index == 2) {
+    } else if(vertexIndex == 2) {
       // all fine
-    } else if(index == 3) {
+    } else if(vertexIndex == 3) {
       widthNormal *= -1.0;
     }
 
@@ -419,17 +438,15 @@ lineGroupVertexShader(const LineVertexIn vertexIn [[stage_in]],
                               float4((lengthNormal + widthNormal).xy, 0.0,0.0)
                               * float4(width, width, width, 0.0) + lineOffset;
 
-    const int segmentType = int(vertexIn.stylingIndex) >> 8;// / 256.0;
-
     LineVertexOut out {
         .position = vpMatrix * extendedPosition,
         .uv = extendedPosition.xy,
         .lineA = extendedPosition.xyz - ((lineA + originOffset.xyz) + lineOffset.xyz),
         .lineB = ((lineB + originOffset.xyz) + lineOffset.xyz) - ((lineA + originOffset.xyz) + lineOffset.xyz),
-        .stylingIndex = styleIndex,
+        .styleOffset = styleOffset,
         .width = width,
         .segmentType = segmentType,
-        .lengthPrefix = vertexIn.lengthPrefix,
+        .lengthPrefix = lengthPrefix,
         .scalingFactor = scalingFactor,
         .dashingSize = dashingSize,
         .scaledBlur = blur
@@ -444,7 +461,7 @@ lineGroupFragmentShader(LineVertexOut in [[stage_in]],
                         constant half *styling [[buffer(1)]],
                         constant float &time [[buffer(2)]])
 {
-  constant LineStyling *style = (constant LineStyling *)(styling + in.stylingIndex);
+  constant LineStyling *style = (constant LineStyling *)(styling + in.styleOffset);
   const float lineLength = length(in.lineB);
   const float t = dot(in.lineA, normalize(in.lineB) / lineLength);
 
