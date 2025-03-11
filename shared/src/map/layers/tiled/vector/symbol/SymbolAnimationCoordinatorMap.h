@@ -28,7 +28,7 @@ struct CoordinatorXCompare {
 
 class SymbolAnimationCoordinatorMap {
 public:
-    SymbolAnimationCoordinatorMap(size_t numShards = 32) : numShards(numShards), shards(numShards) {}
+    SymbolAnimationCoordinatorMap() {}
 
     std::shared_ptr<SymbolAnimationCoordinator> getOrAddAnimationController(size_t crossTileIdentifier,
                                                                             const Coord &coord,
@@ -149,7 +149,7 @@ private:
     };
 
     bool animationsEnabled = true;
-    size_t numShards;
-    std::vector<Shard> shards;
+    static constexpr size_t numShards = 32;
+    std::array<Shard, numShards> shards;
     std::hash<size_t> hash;
 };
