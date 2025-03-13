@@ -12,6 +12,7 @@
 
 #include "CoordinateConversionHelperInterface.h"
 #include "LineInfoInterface.h"
+#include "Vec2DHelper.h"
 #include <cmath>
 
 class LineHelper {
@@ -46,15 +47,39 @@ class LineHelper {
         return false;
     }
 
-    static std::vector<Coord> subdividePolyline(const std::vector<Coord>& polyline, double maxSegmentLength) {
-        std::vector<Coord> newPolyline;
+    static bool pointWithin(const std::vector<::Vec2D> &coordinates,
+                            const Coord &point,
+                            const int32_t systemIdentifier,
+                            double pointSystemDistance,
+                            const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper) {
+
+        auto pointInRenderSystem = conversionHelper->convertToRenderSystem(point);
+
+        std::optional<Coord> lastPoint = std::nullopt;
+        for (auto const &coord: coordinates) {
+            auto linePointInRenderSystem = conversionHelper->convertToRenderSystem(Coord(systemIdentifier, coord.x, coord.y, 0.0));
+
+            if (lastPoint.has_value()) {
+                auto distance = sqrt(LineHelper::distanceSquared(pointInRenderSystem, *lastPoint, linePointInRenderSystem));
+                if (distance < pointSystemDistance) {
+                    return true;
+                }
+            }
+
+            lastPoint = linePointInRenderSystem;
+        }
+        return false;
+    }
+
+    static std::vector<Vec2D> subdividePolyline(const std::vector<Vec2D>& polyline, double maxSegmentLength) {
+        std::vector<Vec2D> newPolyline;
         newPolyline.push_back(polyline[0]);
 
         for (size_t i = 1; i < polyline.size(); ++i) {
-            const Coord start = newPolyline.back();
-            const Coord& end = polyline[i];
+            const Vec2D start = newPolyline.back();
+            const Vec2D& end = polyline[i];
 
-            double segmentLength = distanceTo(start, end);
+            double segmentLength = Vec2DHelper::distance(start, end);
 
             if (segmentLength > maxSegmentLength) {
                 // Calculate number of divisions needed
@@ -62,7 +87,7 @@ class LineHelper {
 
                 for (int j = 1; j <= numDivisions; ++j) {
                     double t = static_cast<double>(j) / numDivisions;
-                    newPolyline.push_back(interpolate(start, end, t));
+                    newPolyline.push_back(Vec2DHelper::interpolate(start, end, t));
                 }
             } else {
                 newPolyline.push_back(end);
@@ -117,20 +142,5 @@ private:
         }
 
         return (dx * dx + dy * dy);
-    }
-
-    // Compute Euclidean distance to another Coord
-    static double distanceTo(const Coord& a, const Coord& b) {
-        return std::sqrt((a.x - b.x) * (a.x - b.x) +
-                         (a.y - b.y) * (a.y - b.y) +
-                         (a.z - b.z) * (a.z - b.z));
-    }
-
-    // Linear interpolation between this Coord and another Coord
-    static Coord interpolate(const Coord& start, const Coord& end, double t) {
-        return Coord(start.systemIdentifier,
-                     start.x + (end.x - start.x) * t,
-                     start.y + (end.y - start.y) * t,
-                     start.z + (end.z - start.z) * t);
     }
 };

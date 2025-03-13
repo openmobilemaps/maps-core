@@ -17,7 +17,7 @@
 
 class SymbolAnimationCoordinator {
 public:
-    SymbolAnimationCoordinator(const Coord &coordinate,
+    SymbolAnimationCoordinator(const Vec2D &coordinate,
                                const int zoomIdentifier,
                                const double xTolerance,
                                const double yTolerance,
@@ -31,7 +31,7 @@ public:
     animationDuration(animationDuration),
     animationDelay(animationDelay){}
 
-    bool isMatching(const Coord &coordinate, const int zoomIdentifier) const {
+    bool isMatching(const Vec2D &coordinate, const int zoomIdentifier) const {
         const double toleranceFactor = 1 << std::max(0, this->zoomIdentifier - zoomIdentifier); // more efficient than: std::max(1.0, std::pow(2, this->zoomIdentifier - zoomIdentifier))
         const double xDistance = std::abs(this->coordinate.x - coordinate.x);
         const double yDistance = std::abs(this->coordinate.y - coordinate.y);
@@ -117,7 +117,7 @@ public:
         animationsEnabled = enabled;
     }
 
-    const Coord coordinate;
+    const Vec2D coordinate;
     const int zoomIdentifier;
 private:
     const double xTolerance;

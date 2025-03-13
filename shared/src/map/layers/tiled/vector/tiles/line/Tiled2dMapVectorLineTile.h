@@ -46,7 +46,7 @@ public:
     bool performClick(const Coord &coord) override;
 
 private:
-    void addLines(const std::vector<std::vector<std::vector<std::tuple<std::vector<Coord>, int>>>> &styleIdLinesVector);
+    void addLines(const std::vector<std::vector<std::vector<std::tuple<std::vector<Vec2D>, int>>>> &styleIdLinesVector);
 
     void setupLines(const std::vector<std::shared_ptr<GraphicsObjectInterface>> &newLineGraphicsObjects);
 
@@ -65,7 +65,7 @@ private:
 
     std::vector<std::vector<std::tuple<size_t, std::shared_ptr<FeatureContext>>>> featureGroups;
 
-    std::vector<std::tuple<std::vector<std::vector<::Coord>>, std::shared_ptr<FeatureContext>>> hitDetection;
+    std::vector<std::tuple<std::vector<std::vector<::Vec2D>>, std::shared_ptr<FeatureContext>>> hitDetection;
 
     UsedKeysCollection usedKeys;
     bool isStyleZoomDependant = true;
