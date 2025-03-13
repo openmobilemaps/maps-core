@@ -12,14 +12,14 @@
 #include <vector>
 
 // Function to read the log file and parse the arguments
-std::vector<std::tuple<size_t, Coord, int, double, double, int64_t, int64_t>> readLogFile(const std::string &filename) {
-    std::vector<std::tuple<size_t, Coord, int, double, double, int64_t, int64_t>> logEntries;
+std::vector<std::tuple<size_t, Vec2D, int, double, double, int64_t, int64_t>> readLogFile(const std::string &filename) {
+    std::vector<std::tuple<size_t, Vec2D, int, double, double, int64_t, int64_t>> logEntries;
     std::ifstream file(filename);
     std::string line;
 
     std::string threadIdLabel, crossTileIdentifierLabel, coordLabel, zoomIdentifierLabel, xToleranceLabel, yToleranceLabel, animationDurationLabel, animationDelayLabel;
     size_t crossTileIdentifier;
-    int32_t coordX;
+    double coordX;
     double coordY;
     int zoomIdentifier;
     double xTolerance, yTolerance;
@@ -38,7 +38,7 @@ std::vector<std::tuple<size_t, Coord, int, double, double, int64_t, int64_t>> re
         if (tokens.size() == 8) {
             // Remove labels and parse values
             crossTileIdentifier = std::stoull(tokens[1].substr(tokens[1].find(":") + 1));
-            coordX = std::stoi(tokens[2].substr(tokens[2].find("(") + 1, tokens[2].find(";") - tokens[2].find("(") - 1));
+            coordX = std::stod(tokens[2].substr(tokens[2].find("(") + 1, tokens[2].find(";") - tokens[2].find("(") - 1));
             coordY = std::stod(tokens[2].substr(tokens[2].find(";") + 1, tokens[2].find(")") - tokens[2].find(";") - 1));
             zoomIdentifier = std::stoi(tokens[3].substr(tokens[3].find(":") + 1));
             xTolerance = std::stod(tokens[4].substr(tokens[4].find(":") + 1));
@@ -46,7 +46,7 @@ std::vector<std::tuple<size_t, Coord, int, double, double, int64_t, int64_t>> re
             animationDuration = std::stoll(tokens[6].substr(tokens[6].find(":") + 1));
             animationDelay = std::stoll(tokens[7].substr(tokens[7].find(":") + 1));
 
-            logEntries.emplace_back(crossTileIdentifier, Coord{coordX, coordY, 0, 0}, zoomIdentifier, xTolerance, yTolerance, animationDuration, animationDelay);
+            logEntries.emplace_back(crossTileIdentifier, Vec2D{coordX, coordY}, zoomIdentifier, xTolerance, yTolerance, animationDuration, animationDelay);
         }
     }
 
@@ -59,14 +59,14 @@ TEST_CASE("functionality") {
     SECTION("return same coordinator") {
         std::shared_ptr<SymbolAnimationCoordinator> first, second;
         {
-            first = coordinatorMap.getOrAddAnimationController(0, Coord(0, 0, 0, 0), 0, 0.0, 0.0, 10, 0);
+            first = coordinatorMap.getOrAddAnimationController(0, Vec2D(0, 0), 0, 0.0, 0.0, 10, 0);
             first->getIconAlpha(0.5, 10);
             first->getIconAlpha(0.5, 20);
             REQUIRE(first->getIconAlpha(1.0, 20) == 0.5);
         }
 
         {
-            second = coordinatorMap.getOrAddAnimationController(0, Coord(0, 0, 0, 0), 1, 0.0, 0.0, 10, 0);
+            second = coordinatorMap.getOrAddAnimationController(0, Vec2D(0, 0), 1, 0.0, 0.0, 10, 0);
             REQUIRE(second->getIconAlpha(1.0, 20) == 0.5);
         }
 
@@ -74,35 +74,35 @@ TEST_CASE("functionality") {
     }
 
     SECTION("return different coordinators for different crossTileIdentifiers") {
-        auto first = coordinatorMap.getOrAddAnimationController(1, Coord(0, 0, 0, 0), 0, 0.0, 0.0, 10, 0);
-        auto second = coordinatorMap.getOrAddAnimationController(2, Coord(0, 0, 0, 0), 1, 0.0, 0.0, 10, 0);
+        auto first = coordinatorMap.getOrAddAnimationController(1, Vec2D(0, 0), 0, 0.0, 0.0, 10, 0);
+        auto second = coordinatorMap.getOrAddAnimationController(2, Vec2D(0, 0), 1, 0.0, 0.0, 10, 0);
         REQUIRE(first != second);
     }
 
     SECTION("return different coordinator for same crossTileIdentifier and zoomIdentifier") {
-        auto first = coordinatorMap.getOrAddAnimationController(1, Coord(0, 0, 0, 0), 0, 0.0, 0.0, 10, 0);
-        auto second = coordinatorMap.getOrAddAnimationController(1, Coord(0, 0, 0, 0), 0, 0.0, 0.0, 10, 0);
+        auto first = coordinatorMap.getOrAddAnimationController(1, Vec2D(0, 0), 0, 0.0, 0.0, 10, 0);
+        auto second = coordinatorMap.getOrAddAnimationController(1, Vec2D(0, 0), 0, 0.0, 0.0, 10, 0);
         REQUIRE(first != second);
     }
 
     SECTION("return same coordinators for same crossTileIdentifier but different zoomIdentifiers") {
-        auto first = coordinatorMap.getOrAddAnimationController(1, Coord(0, 0, 0, 0), 0, 0.0, 0.0, 10, 0);
-        auto second = coordinatorMap.getOrAddAnimationController(1, Coord(0, 0, 0, 0), 1, 0.0, 0.0, 10, 0);
+        auto first = coordinatorMap.getOrAddAnimationController(1, Vec2D(0, 0), 0, 0.0, 0.0, 10, 0);
+        auto second = coordinatorMap.getOrAddAnimationController(1, Vec2D(0, 0), 1, 0.0, 0.0, 10, 0);
         REQUIRE(first == second);
     }
 
     SECTION("clearAnimationCoordinators removes unused coordinators") {
-        auto first = coordinatorMap.getOrAddAnimationController(1, Coord(0, 0, 0, 0), 0, 0.0, 0.0, 10, 0);
+        auto first = coordinatorMap.getOrAddAnimationController(1, Vec2D(0, 0), 0, 0.0, 0.0, 10, 0);
         coordinatorMap.clearAnimationCoordinators();
-        auto second = coordinatorMap.getOrAddAnimationController(1, Coord(0, 0, 0, 0), 1, 0.0, 0.0, 10, 0);
+        auto second = coordinatorMap.getOrAddAnimationController(1, Vec2D(0, 0), 1, 0.0, 0.0, 10, 0);
         REQUIRE(first != second);
     }
 
     SECTION("clearAnimationCoordinators removes only unused coordinators") {
-        auto first = coordinatorMap.getOrAddAnimationController(1, Coord(0, 0, 0, 0), 0, 0.0, 0.0, 10, 0);
+        auto first = coordinatorMap.getOrAddAnimationController(1, Vec2D(0, 0), 0, 0.0, 0.0, 10, 0);
         first->increaseUsage();
         coordinatorMap.clearAnimationCoordinators();
-        auto second = coordinatorMap.getOrAddAnimationController(1, Coord(0, 0, 0, 0), 1, 0.0, 0.0, 10, 0);
+        auto second = coordinatorMap.getOrAddAnimationController(1, Vec2D(0, 0), 1, 0.0, 0.0, 10, 0);
         REQUIRE(first == second);
     }
 };
@@ -119,7 +119,7 @@ TEST_CASE("SymbolAnimationCoordinatorMap with multiple threads") {
         auto threadFunc = [&coordinatorMap, &counter, &callsNum](size_t threadIndex) {
             for (size_t i = 0; i < callsNum; ++i) {
                 size_t crossTileIdentifier = threadIndex * 1000 + i;
-                Coord coord{static_cast<int32_t>(static_cast<double>(threadIndex)), static_cast<double>(i), 0, 0};
+                Vec2D coord{static_cast<double>(threadIndex), static_cast<double>(i)};
                 int zoomIdentifier = static_cast<int>(threadIndex % 10);
                 double xTolerance = 0.1;
                 double yTolerance = 0.1;

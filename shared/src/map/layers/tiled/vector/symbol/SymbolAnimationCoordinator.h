@@ -12,7 +12,7 @@
 
 #include "AnimationInterpolator.h"
 #include "Tiled2dMapTileInfo.h"
-#include "Coord.h"
+#include "Vec2D.h"
 #include <atomic>
 
 class SymbolAnimationCoordinator {
