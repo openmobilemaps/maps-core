@@ -13,9 +13,11 @@ import Foundation
 import MetalKit
 import os
 
-open class MCMapView: MTKView, @unchecked Sendable {
+open class MCMapView: UIView, @unchecked Sendable {
     public nonisolated(unsafe) let mapInterface: MCMapInterface
     private let renderingContext: RenderingContext
+
+    public var clearColor: MTLClearColor = .init(red: 0, green: 0, blue: 0, alpha: 1)
 
     private var sizeChanged = false
     private var backgroundDisable = false
@@ -40,6 +42,8 @@ open class MCMapView: MTKView, @unchecked Sendable {
 
     public var renderTargetTextures: [RenderTargetTexture] = []
 
+    private var metalLayer: CAMetalLayer!
+
     public init(
         mapConfig: MCMapConfig = MCMapConfig(
             mapCoordinateSystem: MCCoordinateSystemFactory.getEpsg3857System()),
@@ -63,12 +67,18 @@ open class MCMapView: MTKView, @unchecked Sendable {
         self.renderingContext = renderingContext
         touchHandler = MCMapViewTouchHandler(
             touchHandler: mapInterface.getTouchHandler())
-        super.init(frame: .zero, device: MetalContext.current.device)
+        super.init(frame: .zero)
+        self.metalLayer = self.layer as? CAMetalLayer
         self.pinch = UIPinchGestureRecognizer(
             target: self, action: #selector(pinched))
         self.pan = UIPanGestureRecognizer(
             target: self, action: #selector(panned))
         setup()
+        startRenderLoop()
+    }
+
+    open override class var layerClass: AnyClass {
+        CAMetalLayer.classForCoder()
     }
 
     @available(*, unavailable)
@@ -89,26 +99,13 @@ open class MCMapView: MTKView, @unchecked Sendable {
     }
 
     private func setup() {
+        metalLayer.device = MetalContext.current.device
+        metalLayer.pixelFormat = MetalContext.current.colorPixelFormat
+        metalLayer.isOpaque = true
+
         renderingContext.sceneView = self
 
-        device = MetalContext.current.device
-
-        colorPixelFormat = MetalContext.current.colorPixelFormat
-        framebufferOnly = false
-
-        delegate = self
-
-        depthStencilPixelFormat = .stencil8
-
-        // if #available(iOS 16.0, *) {
-        //   depthStencilStorageMode = .private
-        // }
-
         isMultipleTouchEnabled = true
-
-        preferredFramesPerSecond = 120
-
-        sampleCount = 1  // samples per pixel
 
         callbackHandler.invalidateCallback = { [weak self] in
             self?.invalidate()
@@ -123,6 +120,10 @@ open class MCMapView: MTKView, @unchecked Sendable {
 
         setupMacGestureRecognizersIfNeeded()
     }
+
+    //    private func setup() {
+
+    //    }
 
     private func addEventListeners() {
         NotificationCenter.default.addObserver(
@@ -166,7 +167,7 @@ open class MCMapView: MTKView, @unchecked Sendable {
     }
 
     public func invalidate() {
-        isPaused = false
+        //        isPaused = false
         framesToRender = framesToRenderAfterInvalidate
         lastInvalidate = Date()
     }
@@ -181,30 +182,64 @@ open class MCMapView: MTKView, @unchecked Sendable {
         renderTargetTextures.append(newTarget)
         return newTarget
     }
-}
 
-extension MCMapView: MTKViewDelegate {
-    open func mtkView(_: MTKView, drawableSizeWillChange _: CGSize) {
-        sizeChanged = true
-        invalidate()
+    private func startRenderLoop() {
+        Thread.detachNewThread {
+            Thread.current.name = "MapSDK_rendering"
+            Thread.current.threadPriority = 45 // recommended priority for rendering
+            while true {
+                autoreleasepool {
+                    self.renderFrame()
+                }
+            }
+        }
     }
 
-    public func draw(in view: MTKView) {
-        guard !backgroundDisable else {
-            isPaused = true
-            return  // don't execute metal calls in background
-        }
+    var lastSize: CGSize = .zero
 
-        guard
-            framesToRender > 0
-                || -lastInvalidate.timeIntervalSinceNow < renderAfterInvalidate || !pausesAutomatically
-        else {
-            isPaused = true
+    open override func layoutSubviews() {
+        super.layoutSubviews()
+        metalLayer.bounds = bounds
+        metalLayer.frame = bounds
+
+        let scale = window?.screen.scale ?? UIScreen.main.scale
+        contentScaleFactor = scale
+        metalLayer.drawableSize = CGSize(
+            width: bounds.width * scale,
+            height: bounds.height * scale)
+
+    }
+
+    private var stencilTextures: [MTLTexture] = []
+    private var currentStencilIndex = 0
+
+    private func setupStencilTextures() {
+        stencilTextures.removeAll()
+        let descriptor = MTLTextureDescriptor.texture2DDescriptor(
+            pixelFormat: .stencil8,
+            width: Int(metalLayer.drawableSize.width),
+            height: Int(metalLayer.drawableSize.height),
+            mipmapped: false
+        )
+        descriptor.usage = [.renderTarget]
+        descriptor.storageMode = .private
+
+        for _ in 0..<3 {
+            if let texture = MetalContext.current.device.makeTexture(descriptor: descriptor) {
+                stencilTextures.append(texture)
+            }
+        }
+    }
+
+    private func renderFrame() {
+
+        guard UIApplication.shared.applicationState == .active else {
             return
         }
 
-        if pausesAutomatically {
-            framesToRender -= 1
+        let size = metalLayer.drawableSize
+        guard size != .zero else {
+            return
         }
 
         // Ensure that triple-buffers are not over-used
@@ -214,10 +249,13 @@ extension MCMapView: MTKViewDelegate {
         mapInterface.prepare()
 
         // Shared lib stuff
-        if sizeChanged {
-            mapInterface.setViewportSize(view.drawableSize.vec2)
+
+        if size != lastSize {
+            mapInterface.setViewportSize(size.vec2)
             sizeDelegate?.sizeChanged()
-            sizeChanged = false
+            lastSize = size
+
+            setupStencilTextures()
         }
 
         guard
@@ -231,7 +269,7 @@ extension MCMapView: MTKViewDelegate {
         for offscreenTarget in renderTargetTextures {
             let renderEncoder = offscreenTarget.prepareOffscreenEncoder(
                 commandBuffer,
-                size: view.drawableSize.vec2,
+                size: size.vec2,
                 context: renderingContext
             )!
             renderingContext.encoder = renderEncoder
@@ -253,7 +291,25 @@ extension MCMapView: MTKViewDelegate {
             computeEncoder.endEncoding()
         }
 
-        guard let renderPassDescriptor = view.currentRenderPassDescriptor,
+        guard let drawable = metalLayer.nextDrawable() else {
+            self.renderSemaphore.signal()
+            return
+        }
+
+        let renderPassDescriptor = MTLRenderPassDescriptor()
+        renderPassDescriptor.colorAttachments[0].texture = drawable.texture
+        renderPassDescriptor.colorAttachments[0].loadAction = .clear
+        renderPassDescriptor.colorAttachments[0].storeAction = .store
+        renderPassDescriptor.colorAttachments[0].clearColor = clearColor
+        if !stencilTextures.isEmpty {
+            currentStencilIndex = (currentStencilIndex + 1) % stencilTextures.count
+            renderPassDescriptor.stencilAttachment.texture = stencilTextures[currentStencilIndex]
+            renderPassDescriptor.stencilAttachment.loadAction = .clear
+            renderPassDescriptor.stencilAttachment.storeAction = .dontCare
+            currentStencilIndex += 1
+        }
+
+        guard
             let renderEncoder = commandBuffer.makeRenderCommandEncoder(
                 descriptor: renderPassDescriptor)
         else {
@@ -268,11 +324,6 @@ extension MCMapView: MTKViewDelegate {
 
         renderEncoder.endEncoding()
 
-        guard let drawable = view.currentDrawable else {
-            self.renderSemaphore.signal()
-            return
-        }
-
         commandBuffer.addCompletedHandler { _ in
             self.renderSemaphore.signal()
         }
@@ -286,6 +337,33 @@ extension MCMapView: MTKViewDelegate {
             commandBuffer.present(drawable)
             commandBuffer.commit()
         }
+    }
+}
+
+extension MCMapView: MTKViewDelegate {
+    open func mtkView(_: MTKView, drawableSizeWillChange _: CGSize) {
+        sizeChanged = true
+        invalidate()
+    }
+
+    public func draw(in view: MTKView) {
+        guard !backgroundDisable else {
+            //            isPaused = true
+            return  // don't execute metal calls in background
+        }
+
+        guard
+            framesToRender > 0
+                || -lastInvalidate.timeIntervalSinceNow < renderAfterInvalidate || !pausesAutomatically
+        else {
+            //            isPaused = true
+            return
+        }
+
+        if pausesAutomatically {
+            framesToRender -= 1
+        }
+
     }
 
     public func renderToImage(
@@ -319,17 +397,18 @@ extension MCMapView {
     fileprivate func currentDrawableImage() -> UIImage? {
         self.saveDrawable = true
         self.invalidate()
-        self.draw(in: self)
+        //        self.draw(in: self)
         self.saveDrawable = false
 
-        guard let texture = self.currentDrawable?.texture else { return nil }
+        //        guard let texture = self.currentDrawable?.texture else { return nil }
 
-        let context = CIContext()
-        let kciOptions: [CIImageOption: Any] = [
-            .colorSpace: CGColorSpaceCreateDeviceRGB()
-        ]
-        let cImg = CIImage(mtlTexture: texture, options: kciOptions)!
-        return context.createCGImage(cImg, from: cImg.extent)?.toImage()
+        //        let context = CIContext()
+        //        let kciOptions: [CIImageOption: Any] = [
+        //            .colorSpace: CGColorSpaceCreateDeviceRGB()
+        //        ]
+        //        let cImg = CIImage(mtlTexture: texture, options: kciOptions)!
+        //        return context.createCGImage(cImg, from: cImg.extent)?.toImage()
+        return UIImage()
     }
 }
 
@@ -515,7 +594,7 @@ private class MCMapViewMapReadyCallbacks: @preconcurrency
 
         semaphore.wait()
 
-        delegate.draw(in: delegate)
+        //        delegate.draw(in: delegate)
 
         callbackQueue?
             .async {
