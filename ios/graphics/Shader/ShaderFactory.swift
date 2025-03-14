@@ -15,11 +15,11 @@ class ShaderFactory: MCShaderFactoryInterface {
     func createSkySphereShader() -> (any MCSkySphereShaderInterface)? {
         SkySphereShader()
     }
-    
+
     func createStretchInstancedShader(_ unitSphere: Bool) -> (any MCStretchInstancedShaderInterface)? {
         StretchInstancedShader()
     }
-    
+
     func createUnitSphereRasterShader() -> MCRasterShaderInterface? {
         RasterShader()
     }

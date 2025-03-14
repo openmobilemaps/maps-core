@@ -25,9 +25,11 @@ final class Text: BaseGraphicsObject, @unchecked Sendable {
 
     init(shader: MCShaderProgramInterface, metalContext: MetalContext) {
         self.shader = shader as! TextShader
-        super.init(device: metalContext.device,
-                   sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue)!,
-                   label: "Text")
+        super
+            .init(
+                device: metalContext.device,
+                sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue)!,
+                label: "Text")
     }
 
     private func setupStencilStates() {
@@ -46,21 +48,24 @@ final class Text: BaseGraphicsObject, @unchecked Sendable {
         stencilState = device.makeDepthStencilState(descriptor: s2)
     }
 
-    override func render(encoder: MTLRenderCommandEncoder,
-                         context: RenderingContext,
-                         renderPass _: MCRenderPassConfig,
-                         vpMatrix: Int64,
-                         mMatrix: Int64,
-                origin: MCVec3D,
-                         isMasked: Bool,
-                         screenPixelAsRealMeterFactor _: Double) {
+    override func render(
+        encoder: MTLRenderCommandEncoder,
+        context: RenderingContext,
+        renderPass _: MCRenderPassConfig,
+        vpMatrix: Int64,
+        mMatrix: Int64,
+        origin: MCVec3D,
+        isMasked: Bool,
+        screenPixelAsRealMeterFactor _: Double
+    ) {
         lock.lock()
         defer {
             lock.unlock()
         }
 
         guard let verticesBuffer,
-              let indicesBuffer else { return }
+            let indicesBuffer
+        else { return }
 
         if isMasked {
             if stencilState == nil {
@@ -72,12 +77,12 @@ final class Text: BaseGraphicsObject, @unchecked Sendable {
             encoder.setDepthStencilState(context.defaultMask)
         }
 
-#if DEBUG
-        encoder.pushDebugGroup(label)
-        defer {
-            encoder.popDebugGroup()
-        }
-#endif
+        #if DEBUG
+            encoder.pushDebugGroup(label)
+            defer {
+                encoder.popDebugGroup()
+            }
+        #endif
 
         shader.setupProgram(context)
         shader.preRender(context)
@@ -96,19 +101,20 @@ final class Text: BaseGraphicsObject, @unchecked Sendable {
             encoder.setFragmentTexture(texture, index: 0)
         }
 
-        encoder.drawIndexedPrimitives(type: .triangle,
-                                      indexCount: indicesCount,
-                                      indexType: .uint16,
-                                      indexBuffer: indicesBuffer,
-                                      indexBufferOffset: 0)
+        encoder.drawIndexedPrimitives(
+            type: .triangle,
+            indexCount: indicesCount,
+            indexType: .uint16,
+            indexBuffer: indicesBuffer,
+            indexBufferOffset: 0)
     }
 }
 
 extension Text: MCTextInterface {
     func setTextsShared(_ vertices: MCSharedBytes, indices: MCSharedBytes) {
         guard let verticesBuffer = device.makeBuffer(from: vertices),
-              let indicesBuffer = device.makeBuffer(from: indices),
-              indices.elementCount > 0
+            let indicesBuffer = device.makeBuffer(from: indices),
+            indices.elementCount > 0
         else {
             lock.withCritical {
                 indicesCount = 0

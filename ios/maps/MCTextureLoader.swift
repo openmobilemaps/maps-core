@@ -42,11 +42,12 @@ open class MCTextureLoader: MCLoaderInterface, @unchecked Sendable {
     open func loadTexture(_ url: String, etag: String?) -> MCTextureLoaderResult {
         let semaphore = DispatchSemaphore(value: 0)
         var result: MCTextureLoaderResult? = nil
-        loadTextureAsync(url, etag: etag).then { future in
-            result = future.get()
-            semaphore.signal()
-            return nil
-        }
+        loadTextureAsync(url, etag: etag)
+            .then { future in
+                result = future.get()
+                semaphore.signal()
+                return nil
+            }
 
         if semaphore.wait(timeout: .now() + 30.0) == .timedOut {
             return MCTextureLoaderResult(data: nil, etag: nil, status: .ERROR_TIMEOUT, errorCode: "SEMTIM")
@@ -76,7 +77,8 @@ open class MCTextureLoader: MCLoaderInterface, @unchecked Sendable {
 
         var wasCached = false
         if isRasterDebugModeEnabled,
-           session.configuration.urlCache?.cachedResponse(for: urlRequest) != nil {
+            session.configuration.urlCache?.cachedResponse(for: urlRequest) != nil
+        {
             wasCached = true
         }
 
@@ -134,13 +136,15 @@ open class MCTextureLoader: MCLoaderInterface, @unchecked Sendable {
 
             do {
                 if self.isRasterDebugModeEnabled,
-                   let uiImage = UIImage(data: data) {
+                    let uiImage = UIImage(data: data)
+                {
                     let renderer = UIGraphicsImageRenderer(size: uiImage.size)
                     let img = renderer.image { ctx in
                         self.applyDebugWatermark(url: urlString, byteCount: data.count, image: uiImage, wasCached: wasCached, ctx: ctx)
                     }
                     if let cgImage = img.cgImage,
-                       let textureHolder = try? TextureHolder(cgImage) {
+                        let textureHolder = try? TextureHolder(cgImage)
+                    {
                         promise.setValue(.init(data: textureHolder, etag: response?.etag, status: .OK, errorCode: nil))
                         return
                     }
@@ -170,7 +174,8 @@ open class MCTextureLoader: MCLoaderInterface, @unchecked Sendable {
                 }
 
                 guard let cgImage = img.cgImage,
-                      let textureHolder = try? TextureHolder(cgImage) else {
+                    let textureHolder = try? TextureHolder(cgImage)
+                else {
                     promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_OTHER, errorCode: "UINL"))
                     return
                 }
@@ -193,11 +198,12 @@ open class MCTextureLoader: MCLoaderInterface, @unchecked Sendable {
     open func loadData(_ url: String, etag: String?) -> MCDataLoaderResult {
         let semaphore = DispatchSemaphore(value: 0)
         var result: MCDataLoaderResult? = nil
-        loadDataAsync(url, etag: etag).then { future in
-            result = future.get()
-            semaphore.signal()
-            return nil
-        }
+        loadDataAsync(url, etag: etag)
+            .then { future in
+                result = future.get()
+                semaphore.signal()
+                return nil
+            }
 
         if semaphore.wait(timeout: .now() + 30.0) == .timedOut {
             return MCDataLoaderResult(data: nil, etag: nil, status: .ERROR_TIMEOUT, errorCode: "SEMTIM")
@@ -321,8 +327,10 @@ open class MCTextureLoader: MCLoaderInterface, @unchecked Sendable {
         let paragraphStyle = NSMutableParagraphStyle()
         paragraphStyle.alignment = .center
 
-        let attrs: [NSAttributedString.Key: Any] = [NSAttributedString.Key.paragraphStyle: paragraphStyle,
-                                                    NSAttributedString.Key.backgroundColor: wasCached ? UIColor.lightGray.cgColor : UIColor.white.cgColor]
+        let attrs: [NSAttributedString.Key: Any] = [
+            NSAttributedString.Key.paragraphStyle: paragraphStyle,
+            NSAttributedString.Key.backgroundColor: wasCached ? UIColor.lightGray.cgColor : UIColor.white.cgColor,
+        ]
 
         let byteCountString = ByteCountFormatter().string(fromByteCount: Int64(byteCount))
         let loadedString = wasCached ? "Loaded from Cache" : "Loaded from www"

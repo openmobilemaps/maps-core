@@ -41,9 +41,11 @@ final class Quad2dStretchedInstanced: BaseGraphicsObject, @unchecked Sendable {
 
     init(shader: MCShaderProgramInterface, metalContext: MetalContext, label: String = "Quad2dStretchedInstanced") {
         self.shader = shader
-        super.init(device: metalContext.device,
-                   sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue)!,
-                   label: label)
+        super
+            .init(
+                device: metalContext.device,
+                sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue)!,
+                label: label)
     }
 
     private func setupStencilStates() {
@@ -70,14 +72,16 @@ final class Quad2dStretchedInstanced: BaseGraphicsObject, @unchecked Sendable {
         return true
     }
 
-    override func render(encoder: MTLRenderCommandEncoder,
-                         context: RenderingContext,
-                         renderPass _: MCRenderPassConfig,
-                         vpMatrix: Int64,
-                         mMatrix: Int64,
-                origin: MCVec3D,
-                         isMasked: Bool,
-                         screenPixelAsRealMeterFactor _: Double) {
+    override func render(
+        encoder: MTLRenderCommandEncoder,
+        context: RenderingContext,
+        renderPass _: MCRenderPassConfig,
+        vpMatrix: Int64,
+        mMatrix: Int64,
+        origin: MCVec3D,
+        isMasked: Bool,
+        screenPixelAsRealMeterFactor _: Double
+    ) {
 
         lock.lock()
         defer {
@@ -85,24 +89,25 @@ final class Quad2dStretchedInstanced: BaseGraphicsObject, @unchecked Sendable {
         }
 
         guard let verticesBuffer,
-              let indicesBuffer,
-              let positionsBuffer,
-              let scalesBuffer,
-              let rotationsBuffer,
-              let textureCoordinatesBuffer,
-              let alphaBuffer,
-              let stretchInfoBuffer,
-              let texture,
-              instanceCount != 0 else {
+            let indicesBuffer,
+            let positionsBuffer,
+            let scalesBuffer,
+            let rotationsBuffer,
+            let textureCoordinatesBuffer,
+            let alphaBuffer,
+            let stretchInfoBuffer,
+            let texture,
+            instanceCount != 0
+        else {
             return
         }
 
-#if DEBUG
-        encoder.pushDebugGroup(label)
-        defer {
-            encoder.popDebugGroup()
-        }
-#endif
+        #if DEBUG
+            encoder.pushDebugGroup(label)
+            defer {
+                encoder.popDebugGroup()
+            }
+        #endif
 
         if isMasked {
             if stencilState == nil {
@@ -141,8 +146,7 @@ final class Quad2dStretchedInstanced: BaseGraphicsObject, @unchecked Sendable {
             bufferPointer.pointee.x = Float(originOffset.x - origin.x)
             bufferPointer.pointee.y = Float(originOffset.y - origin.y)
             bufferPointer.pointee.z = Float(originOffset.z - origin.z)
-        }
-        else {
+        } else {
             fatalError()
         }
         encoder.setVertexBuffer(originOffsetBuffer, offset: 0, index: 7)
@@ -153,36 +157,41 @@ final class Quad2dStretchedInstanced: BaseGraphicsObject, @unchecked Sendable {
 
         encoder.setFragmentTexture(texture, index: 0)
 
-        encoder.drawIndexedPrimitives(type: .triangle,
-                                      indexCount: indicesCount,
-                                      indexType: .uint16,
-                                      indexBuffer: indicesBuffer,
-                                      indexBufferOffset: 0,
-                                      instanceCount: instanceCount)
+        encoder.drawIndexedPrimitives(
+            type: .triangle,
+            indexCount: indicesCount,
+            indexType: .uint16,
+            indexBuffer: indicesBuffer,
+            indexBufferOffset: 0,
+            instanceCount: instanceCount)
     }
 }
 
 extension Quad2dStretchedInstanced: MCMaskingObjectInterface {
-    func render(asMask context: MCRenderingContextInterface?,
-                renderPass: MCRenderPassConfig,
-                vpMatrix: Int64,
-                mMatrix: Int64,
-                origin: MCVec3D,
-                screenPixelAsRealMeterFactor: Double) {
+    func render(
+        asMask context: MCRenderingContextInterface?,
+        renderPass: MCRenderPassConfig,
+        vpMatrix: Int64,
+        mMatrix: Int64,
+        origin: MCVec3D,
+        screenPixelAsRealMeterFactor: Double
+    ) {
         guard isReady(),
-              let context = context as? RenderingContext,
-              let encoder = context.encoder else { return }
+            let context = context as? RenderingContext,
+            let encoder = context.encoder
+        else { return }
 
         renderAsMask = true
 
-        render(encoder: encoder,
-               context: context,
-               renderPass: renderPass,
-               vpMatrix: vpMatrix,
-               mMatrix: mMatrix,
-               origin: origin,
-               isMasked: false,
-               screenPixelAsRealMeterFactor: screenPixelAsRealMeterFactor)
+        render(
+            encoder: encoder,
+            context: context,
+            renderPass: renderPass,
+            vpMatrix: vpMatrix,
+            mMatrix: mMatrix,
+            origin: origin,
+            isMasked: false,
+            screenPixelAsRealMeterFactor: screenPixelAsRealMeterFactor)
     }
 }
 
@@ -198,17 +207,18 @@ extension Quad2dStretchedInstanced: MCQuad2dStretchedInstancedInterface {
          Where A-C are joined to form two triangles
          */
         let vertecies: [Vertex] = [
-            Vertex(position: frame.bottomLeft, textureU: 0, textureV: 1), // A
-            Vertex(position: frame.topLeft, textureU: 0, textureV: 0), // B
-            Vertex(position: frame.topRight, textureU: 1, textureV: 0), // C
-            Vertex(position: frame.bottomRight, textureU: 1, textureV: 1), // D
+            Vertex(position: frame.bottomLeft, textureU: 0, textureV: 1),  // A
+            Vertex(position: frame.topLeft, textureU: 0, textureV: 0),  // B
+            Vertex(position: frame.topRight, textureU: 1, textureV: 0),  // C
+            Vertex(position: frame.bottomRight, textureU: 1, textureV: 1),  // D
         ]
         let indices: [UInt16] = [
-            0, 2, 1, // ACB
-            0, 3, 2, // ADC
+            0, 2, 1,  // ACB
+            0, 3, 2,  // ADC
         ]
 
-        guard let verticesBuffer = device.makeBuffer(bytes: vertecies, length: MemoryLayout<Vertex>.stride * vertecies.count, options: []), let indicesBuffer = device.makeBuffer(bytes: indices, length: MemoryLayout<UInt16>.stride * indices.count, options: []) else {
+        guard let verticesBuffer = device.makeBuffer(bytes: vertecies, length: MemoryLayout<Vertex>.stride * vertecies.count, options: []), let indicesBuffer = device.makeBuffer(bytes: indices, length: MemoryLayout<UInt16>.stride * indices.count, options: [])
+        else {
             fatalError("Cannot allocate buffers")
         }
 

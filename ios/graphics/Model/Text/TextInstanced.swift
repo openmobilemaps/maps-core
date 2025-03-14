@@ -39,11 +39,12 @@ final class TextInstanced: BaseGraphicsObject, @unchecked Sendable {
         self.shader = shader as! TextInstancedShader
         self.originBuffers = .init(device: metalContext.device)
         self.aspectRatioBuffers = .init(device: metalContext.device)
-        super.init(
-            device: metalContext.device,
-            sampler: metalContext.samplerLibrary.value(
-                Sampler.magLinear.rawValue)!,
-            label: "TextInstanced")
+        super
+            .init(
+                device: metalContext.device,
+                sampler: metalContext.samplerLibrary.value(
+                    Sampler.magLinear.rawValue)!,
+                label: "TextInstanced")
     }
 
     private func setupStencilStates() {
@@ -109,8 +110,9 @@ final class TextInstanced: BaseGraphicsObject, @unchecked Sendable {
 
         let vpMatrixBuffer = vpMatrixBuffers.getNextBuffer(context)
         if let matrixPointer = UnsafeRawPointer(bitPattern: Int(vpMatrix)) {
-            vpMatrixBuffer?.contents().copyMemory(
-                from: matrixPointer, byteCount: 64)
+            vpMatrixBuffer?.contents()
+                .copyMemory(
+                    from: matrixPointer, byteCount: 64)
         }
         encoder.setVertexBuffer(vpMatrixBuffer, offset: 0, index: 1)
 
@@ -144,8 +146,9 @@ final class TextInstanced: BaseGraphicsObject, @unchecked Sendable {
         encoder.setVertexBuffer(originOffsetBuffer, offset: 0, index: 9)
 
         let originBuffer = originBuffers.getNextBuffer(context)
-        if let bufferPointer = originBuffer?.contents().assumingMemoryBound(
-            to: simd_float4.self)
+        if let bufferPointer = originBuffer?.contents()
+            .assumingMemoryBound(
+                to: simd_float4.self)
         {
             bufferPointer.pointee.x = Float(origin.x)
             bufferPointer.pointee.y = Float(origin.y)

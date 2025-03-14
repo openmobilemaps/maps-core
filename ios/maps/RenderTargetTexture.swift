@@ -5,7 +5,6 @@
 //  Created by Nicolas Märki on 15.01.2025.
 //
 
-
 //
 //  RenderTargetTexture.swift
 //
@@ -13,17 +12,16 @@
 //  Created by Nicolas Märki on 28.09.22.
 //
 
-import Foundation
-import Metal
-import MapCoreSharedModule
 import CoreImage
+import Foundation
+import MapCoreSharedModule
+import Metal
 import UIKit
 
 open class RenderTargetTexture: Identifiable, Equatable, MCRenderTargetInterface {
     public let name: String
 
     private var textures: [(color: MTLTexture, stencilDepth: MTLTexture)] = []
-
 
     public init(name: String = UUID().uuidString) {
         self.name = name
@@ -66,7 +64,7 @@ open class RenderTargetTexture: Identifiable, Equatable, MCRenderTargetInterface
         texDescriptor.width = Int(newSize.x)
         texDescriptor.height = Int(newSize.y)
 
-        for _ in 0 ..< RenderingContext.bufferCount {
+        for _ in 0..<RenderingContext.bufferCount {
             texDescriptor.pixelFormat = MetalContext.current.colorPixelFormat
             let texture = MetalContext.current.device.makeTexture(descriptor: texDescriptor)!
 

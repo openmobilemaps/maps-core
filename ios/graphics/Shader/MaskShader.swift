@@ -32,4 +32,3 @@ class MaskShader: BaseShader, @unchecked Sendable {
     }
 
 }
-

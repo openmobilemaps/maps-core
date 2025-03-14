@@ -33,7 +33,9 @@ extension UIColor {
         guard let components = color.components, let alpha = components.last else {
             return MTLClearColorMake(0, 0, 0, 1.0)
         }
-        let r, g, b: Double
+        let r: Double
+        let g: Double
+        let b: Double
         switch color.numberOfComponents {
             case 2:
                 r = components[0]
@@ -52,10 +54,11 @@ extension UIColor {
 
 extension MCColor {
     var metalColor: MTLClearColor {
-        MTLClearColor(red: Double(r),
-                      green: Double(g),
-                      blue: Double(b),
-                      alpha: Double(a))
+        MTLClearColor(
+            red: Double(r),
+            green: Double(g),
+            blue: Double(b),
+            alpha: Double(a))
     }
 
     public var simdValues: SIMD4<Float> {
@@ -69,7 +72,9 @@ public extension UIColor {
         guard let components = color.components, let alpha = components.last else {
             return MCColor(r: 0, g: 0, b: 0, a: 1.0)
         }
-        let r, g, b: Double
+        let r: Double
+        let g: Double
+        let b: Double
         switch color.numberOfComponents {
             case 2:
                 r = components[0]

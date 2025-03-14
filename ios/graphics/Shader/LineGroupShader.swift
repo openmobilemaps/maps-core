@@ -21,7 +21,6 @@ class LineGroupShader: BaseShader, @unchecked Sendable {
 
     var dashingScaleFactor: Float = 1.0
 
-
     override init(shader: PipelineType = .lineGroupShader) {
         time = .init(device: MetalContext.current.device)
         super.init(shader: shader)

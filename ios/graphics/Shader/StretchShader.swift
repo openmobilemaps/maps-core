@@ -29,7 +29,10 @@ struct StretchShaderInfoSwift: Equatable {
     var uvOrig: SIMD2<Float>
     var uvSize: SIMD2<Float>
 
-    init(info: MCStretchShaderInfo = MCStretchShaderInfo(scaleX: 1, stretchX0Begin: -1, stretchX0End: -1, stretchX1Begin: -1, stretchX1End: -1, scaleY: 1, stretchY0Begin: -1, stretchY0End: -1, stretchY1Begin: -1, stretchY1End: -1, uv: MCRectD(x: 0, y: 0, width: 0, height: 0))) {
+    init(
+        info: MCStretchShaderInfo = MCStretchShaderInfo(
+            scaleX: 1, stretchX0Begin: -1, stretchX0End: -1, stretchX1Begin: -1, stretchX1End: -1, scaleY: 1, stretchY0Begin: -1, stretchY0End: -1, stretchY1Begin: -1, stretchY1End: -1, uv: MCRectD(x: 0, y: 0, width: 0, height: 0))
+    ) {
         scaleX = info.scaleX
         stretchX0Begin = info.stretchX0Begin
         stretchX0End = info.stretchX0End

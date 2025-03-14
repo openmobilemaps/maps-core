@@ -23,7 +23,7 @@ let package = Package(
         ),
     ],
     dependencies: [
-        .package(url: "https://github.com/UbiqueInnovation/djinni.git", .upToNextMinor(from: "1.0.9")),
+        .package(url: "https://github.com/UbiqueInnovation/djinni.git", .upToNextMinor(from: "1.0.9"))
     ],
     targets: [
         .target(
@@ -75,7 +75,7 @@ let package = Package(
             ],
             publicHeadersPath: "protozero/include/",
             cxxSettings: [
-                .headerSearchPath("protozero/include/"),
+                .headerSearchPath("protozero/include/")
             ]
         ),
         .target(
@@ -106,7 +106,7 @@ let package = Package(
             ],
             publicHeadersPath: "vtzero/include/",
             cxxSettings: [
-                .headerSearchPath("vtzero/include/"),
+                .headerSearchPath("vtzero/include/")
             ]
         ),
         .target(
@@ -115,13 +115,13 @@ let package = Package(
             path: "ios",
             exclude: ["readme.md"],
             resources: [
-                .process("graphics/Shader/Metal/"),
+                .process("graphics/Shader/Metal/")
             ]
         ),
         .target(
             name: "MapCoreSharedModule",
             dependencies: [
-                "MapCoreSharedModuleCpp",
+                "MapCoreSharedModuleCpp"
             ],
             path: "bridging/ios",
             publicHeadersPath: ""

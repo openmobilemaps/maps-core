@@ -29,36 +29,39 @@ final class PolygonGroup2d: BaseGraphicsObject, @unchecked Sendable {
             fatalError("PolygonGroup2d only supports PolygonGroupShader")
         }
         self.shader = shader
-        super.init(device: metalContext.device,
-                   sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue)!,
-                   label: "PolygonGroup2d")
+        super
+            .init(
+                device: metalContext.device,
+                sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue)!,
+                label: "PolygonGroup2d")
 
     }
 
-    override func render(encoder: MTLRenderCommandEncoder,
-                         context: RenderingContext,
-                         renderPass pass: MCRenderPassConfig,
-                         vpMatrix: Int64,
-                         mMatrix: Int64,
-                         origin: MCVec3D,
-                         isMasked: Bool,
-                         screenPixelAsRealMeterFactor: Double) {
+    override func render(
+        encoder: MTLRenderCommandEncoder,
+        context: RenderingContext,
+        renderPass pass: MCRenderPassConfig,
+        vpMatrix: Int64,
+        mMatrix: Int64,
+        origin: MCVec3D,
+        isMasked: Bool,
+        screenPixelAsRealMeterFactor: Double
+    ) {
         lock.lock()
         defer {
             lock.unlock()
         }
 
         guard let verticesBuffer,
-              let indicesBuffer, shader.polygonStyleBuffer != nil
+            let indicesBuffer, shader.polygonStyleBuffer != nil
         else { return }
 
-
-#if DEBUG
-        encoder.pushDebugGroup(label)
-        defer {
-            encoder.popDebugGroup()
-        }
-#endif
+        #if DEBUG
+            encoder.pushDebugGroup(label)
+            defer {
+                encoder.popDebugGroup()
+            }
+        #endif
 
         if isMasked {
             if stencilState == nil {
@@ -93,8 +96,7 @@ final class PolygonGroup2d: BaseGraphicsObject, @unchecked Sendable {
             bufferPointer.pointee.x = Float(originOffset.x - origin.x)
             bufferPointer.pointee.y = Float(originOffset.y - origin.y)
             bufferPointer.pointee.z = Float(originOffset.z - origin.z)
-        }
-        else {
+        } else {
             fatalError()
         }
         encoder.setVertexBuffer(originOffsetBuffer, offset: 0, index: 2)
@@ -107,11 +109,12 @@ final class PolygonGroup2d: BaseGraphicsObject, @unchecked Sendable {
             encoder.setFragmentBytes(&scaleFactors, length: MemoryLayout<SIMD2<Float>>.stride, index: 2)
         }
 
-        encoder.drawIndexedPrimitives(type: .triangle,
-                                      indexCount: indicesCount,
-                                      indexType: .uint16,
-                                      indexBuffer: indicesBuffer,
-                                      indexBufferOffset: 0)
+        encoder.drawIndexedPrimitives(
+            type: .triangle,
+            indexCount: indicesCount,
+            indexType: .uint16,
+            indexBuffer: indicesBuffer,
+            indexBufferOffset: 0)
     }
 }
 
@@ -127,7 +130,7 @@ extension PolygonGroup2d: MCPolygonGroup2dInterface {
         }
 
         guard let verticesBuffer = device.makeBuffer(from: vertices),
-              let indicesBuffer = device.makeBuffer(from: indices)
+            let indicesBuffer = device.makeBuffer(from: indices)
         else {
             fatalError("Cannot allocate buffers for the UBTileModel")
         }
@@ -139,7 +142,7 @@ extension PolygonGroup2d: MCPolygonGroup2dInterface {
             let count = Int(vertices.elementCount / 4)
             if let rawPointer = UnsafeRawPointer(bitPattern: Int(vertices.address)) {
                 let float4Pointer = rawPointer.assumingMemoryBound(to: SIMD4<Float>.self)
-                for i in 0 ..< count {
+                for i in 0..<count {
                     let value = float4Pointer[i]
                     minX = min(value.x, minX)
                     minY = min(value.y, minY)

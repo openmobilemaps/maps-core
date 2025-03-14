@@ -34,8 +34,6 @@ public class RenderingContext: NSObject, @unchecked Sendable {
         time = Float(-start.timeIntervalSinceNow)
     }
 
-
-
     public var cullMode: MCRenderingCullMode?
 
     public lazy var mask: MTLDepthStencilState? = {
@@ -148,14 +146,14 @@ extension RenderingContext: MCRenderingContextInterface {
              Set the cullMode inverse in order to be consistent with opengl
              */
             switch cullMode {
-            case .BACK:
-                encoder?.setCullMode(.front)
-            case .FRONT:
-                encoder?.setCullMode(.back)
-            case .NONE:
-                encoder?.setCullMode(.none)
-            @unknown default:
-                assertionFailure()
+                case .BACK:
+                    encoder?.setCullMode(.front)
+                case .FRONT:
+                    encoder?.setCullMode(.back)
+                case .NONE:
+                    encoder?.setCullMode(.none)
+                @unknown default:
+                    assertionFailure()
             }
         }
     }

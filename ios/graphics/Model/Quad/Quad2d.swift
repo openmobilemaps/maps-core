@@ -47,11 +47,12 @@ final class Quad2d: BaseGraphicsObject, @unchecked Sendable {
         self.shader = shader
         nearestSampler = metalContext.samplerLibrary.value(
             Sampler.magNearest.rawValue)!
-        super.init(
-            device: metalContext.device,
-            sampler: metalContext.samplerLibrary.value(
-                Sampler.magLinear.rawValue)!,
-            label: label)
+        super
+            .init(
+                device: metalContext.device,
+                sampler: metalContext.samplerLibrary.value(
+                    Sampler.magLinear.rawValue)!,
+                label: label)
     }
 
     private func setupStencilStates() {
@@ -139,8 +140,9 @@ final class Quad2d: BaseGraphicsObject, @unchecked Sendable {
 
         let vpMatrixBuffer = vpMatrixBuffers.getNextBuffer(context)
         if let matrixPointer = UnsafeRawPointer(bitPattern: Int(vpMatrix)) {
-            vpMatrixBuffer?.contents().copyMemory(
-                from: matrixPointer, byteCount: 64)
+            vpMatrixBuffer?.contents()
+                .copyMemory(
+                    from: matrixPointer, byteCount: 64)
         }
         encoder.setVertexBuffer(vpMatrixBuffer, offset: 0, index: 1)
 
@@ -164,8 +166,7 @@ final class Quad2d: BaseGraphicsObject, @unchecked Sendable {
 
         if samplerToUse == .magNearest {
             encoder.setFragmentSamplerState(nearestSampler, index: 0)
-        }
-        else {
+        } else {
             encoder.setFragmentSamplerState(sampler, index: 0)
         }
 

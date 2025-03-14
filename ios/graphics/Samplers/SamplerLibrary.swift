@@ -49,16 +49,17 @@ public enum Sampler: String, CaseIterable {
 
 public class SamplerLibrary: StaticMetalLibrary<String, MTLSamplerState> {
     init(device: MTLDevice) throws {
-        try super.init(Sampler.allCases.map(\.rawValue)) { key -> MTLSamplerState in
-            guard let sampler = Sampler(rawValue: key) else {
-                throw LibraryError.invalidKey
-            }
-            let samplerDescriptor = SamplerFactory.descriptor(sampler: sampler)
+        try super
+            .init(Sampler.allCases.map(\.rawValue)) { key -> MTLSamplerState in
+                guard let sampler = Sampler(rawValue: key) else {
+                    throw LibraryError.invalidKey
+                }
+                let samplerDescriptor = SamplerFactory.descriptor(sampler: sampler)
 
-            guard let samplerState = device.makeSamplerState(descriptor: samplerDescriptor) else {
-                fatalError("Cannot create Sampler \(key)")
+                guard let samplerState = device.makeSamplerState(descriptor: samplerDescriptor) else {
+                    fatalError("Cannot create Sampler \(key)")
+                }
+                return samplerState
             }
-            return samplerState
-        }
     }
 }

@@ -30,15 +30,16 @@ public class TextureHolder: NSObject, @unchecked Sendable {
 
     deinit {
         let texture = self.texture
-        DispatchQueue.global(qos: .utility).async {
-            // access texture to make sure it gets deallocated asynchron
-            _ = texture.width
-        }
+        DispatchQueue.global(qos: .utility)
+            .async {
+                // access texture to make sure it gets deallocated asynchron
+                _ = texture.width
+            }
     }
 
     public convenience init(_ url: URL, textureUsableSize: TextureUsableSize? = nil) throws {
         let options: [MTKTextureLoader.Option: Any] = [
-            MTKTextureLoader.Option.SRGB: NSNumber(booleanLiteral: false),
+            MTKTextureLoader.Option.SRGB: NSNumber(booleanLiteral: false)
         ]
         let texture = try MetalContext.current.textureLoader.newTexture(URL: url, options: options)
         self.init(texture, textureUsableSize: textureUsableSize)
@@ -67,7 +68,7 @@ public class TextureHolder: NSObject, @unchecked Sendable {
 
     public convenience init(name: String, scaleFactor: Double, bundle: Bundle?) throws {
         let options: [MTKTextureLoader.Option: Any] = [
-            MTKTextureLoader.Option.SRGB: NSNumber(booleanLiteral: false),
+            MTKTextureLoader.Option.SRGB: NSNumber(booleanLiteral: false)
         ]
         let texture = try MetalContext.current.textureLoader.newTexture(name: name, scaleFactor: scaleFactor, bundle: bundle, options: options)
         self.init(texture)
@@ -78,7 +79,7 @@ public class TextureHolder: NSObject, @unchecked Sendable {
             throw TextureHolderError.emptyData
         }
         let options: [MTKTextureLoader.Option: Any] = [
-            MTKTextureLoader.Option.SRGB: NSNumber(booleanLiteral: false),
+            MTKTextureLoader.Option.SRGB: NSNumber(booleanLiteral: false)
         ]
         let texture = try MetalContext.current.textureLoader.newTexture(data: data, options: options)
         self.init(texture, textureUsableSize: textureUsableSize)
