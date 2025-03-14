@@ -17,7 +17,7 @@ class PolygonGroupShader: BaseShader, @unchecked Sendable {
     var polygonStyleBuffer: MTLBuffer?
 
     let isStriped: Bool
-    let isUnitSphere : Bool
+    let isUnitSphere: Bool
 
     init(isStriped: Bool, isUnitSphere: Bool = false) {
         self.isStriped = isStriped
@@ -33,7 +33,8 @@ class PolygonGroupShader: BaseShader, @unchecked Sendable {
 
     override func preRender(encoder: MTLRenderCommandEncoder, context: RenderingContext) {
         guard let encoder = context.encoder,
-              let pipeline else { return }
+            let pipeline
+        else { return }
 
         context.setRenderPipelineStateIfNeeded(pipeline)
         encoder.setFragmentBuffer(polygonStyleBuffer, offset: 0, index: 1)

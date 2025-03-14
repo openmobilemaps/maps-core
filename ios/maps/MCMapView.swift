@@ -79,9 +79,10 @@ open class MCMapView: MTKView, @unchecked Sendable {
     deinit {
         if Thread.isMainThread {
             // make sure the mapInterface is destroyed from a background thread
-            DispatchQueue.global().async { [mapInterface] in
-                mapInterface.destroy()
-            }
+            DispatchQueue.global()
+                .async { [mapInterface] in
+                    mapInterface.destroy()
+                }
         } else {
             mapInterface.destroy()
         }
@@ -221,7 +222,8 @@ extension MCMapView: MTKViewDelegate {
 
         guard
             let commandBuffer = MetalContext.current.commandQueue
-                .makeCommandBuffer() else {
+                .makeCommandBuffer()
+        else {
             self.renderSemaphore.signal()
             return
         }
@@ -250,7 +252,6 @@ extension MCMapView: MTKViewDelegate {
             mapInterface.compute()
             computeEncoder.endEncoding()
         }
-
 
         guard let renderPassDescriptor = view.currentRenderPassDescriptor,
             let renderEncoder = commandBuffer.makeRenderCommandEncoder(
@@ -516,20 +517,21 @@ private class MCMapViewMapReadyCallbacks: @preconcurrency
 
         delegate.draw(in: delegate)
 
-        callbackQueue?.async {
-            switch state {
-            case .NOT_READY:
-                break
-            case .ERROR, .TIMEOUT_ERROR:
-                self.callback?(nil, state)
-            case .READY:
-                MainActor.assumeIsolated {
-                    self.callback?(delegate.currentDrawableImage(), state)
+        callbackQueue?
+            .async {
+                switch state {
+                    case .NOT_READY:
+                        break
+                    case .ERROR, .TIMEOUT_ERROR:
+                        self.callback?(nil, state)
+                    case .READY:
+                        MainActor.assumeIsolated {
+                            self.callback?(delegate.currentDrawableImage(), state)
+                        }
+                    @unknown default:
+                        break
                 }
-            @unknown default:
-                break
+                self.semaphore.signal()
             }
-            self.semaphore.signal()
-        }
     }
 }

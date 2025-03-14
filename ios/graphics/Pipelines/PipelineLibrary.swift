@@ -12,17 +12,19 @@ import Metal
 import OSLog
 
 public enum PipelineDescriptorFactory {
-    public static func pipelineDescriptor(vertexDescriptor: MTLVertexDescriptor,
-                                          label: String,
-                                          vertexShader: String,
-                                          fragmentShader: String,
-                                          blendMode: MCBlendMode,
-                                          library: MTLLibrary = MetalContext.current.library) -> MTLRenderPipelineDescriptor {
+    public static func pipelineDescriptor(
+        vertexDescriptor: MTLVertexDescriptor,
+        label: String,
+        vertexShader: String,
+        fragmentShader: String,
+        blendMode: MCBlendMode,
+        library: MTLLibrary = MetalContext.current.library
+    ) -> MTLRenderPipelineDescriptor {
         let pipelineDescriptor = MTLRenderPipelineDescriptor()
         pipelineDescriptor.colorAttachments[0].pixelFormat = MetalContext.current.colorPixelFormat
         pipelineDescriptor.vertexDescriptor = vertexDescriptor
 
-        pipelineDescriptor.rasterSampleCount = 1 // samples per pixel
+        pipelineDescriptor.rasterSampleCount = 1  // samples per pixel
 
         let renderbufferAttachment = pipelineDescriptor.colorAttachments[0]
         renderbufferAttachment?.pixelFormat = MetalContext.current.colorPixelFormat
@@ -53,7 +55,7 @@ public enum PipelineDescriptorFactory {
         pipelineDescriptor.label = label
 
         guard let vertexFunction = library.makeFunction(name: vertexShader),
-              let fragmentFunction = library.makeFunction(name: fragmentShader)
+            let fragmentFunction = library.makeFunction(name: fragmentShader)
         else {
             fatalError("Cannot locate the shaders for \(label)")
         }
@@ -67,11 +69,12 @@ public enum PipelineDescriptorFactory {
 
 extension PipelineDescriptorFactory {
     static func pipelineDescriptor(pipeline: Pipeline) -> MTLRenderPipelineDescriptor {
-        pipelineDescriptor(vertexDescriptor: pipeline.type.vertexDescriptor,
-                           label: pipeline.type.label,
-                           vertexShader: pipeline.type.vertexShader,
-                           fragmentShader: pipeline.type.fragmentShader,
-                           blendMode: pipeline.blendMode)
+        pipelineDescriptor(
+            vertexDescriptor: pipeline.type.vertexDescriptor,
+            label: pipeline.type.label,
+            vertexShader: pipeline.type.vertexShader,
+            fragmentShader: pipeline.type.fragmentShader,
+            blendMode: pipeline.blendMode)
     }
 }
 
@@ -96,11 +99,14 @@ public struct Pipeline: Codable, CaseIterable, Hashable {
     }
 
     public static var allCases: [Pipeline] {
-        Array(PipelineType.allCases.map { type in
-            MCBlendMode.allCases.map { blendMode in
-                Pipeline(type: type, blendMode: blendMode)
-            }
-        }.joined())
+        Array(
+            PipelineType.allCases
+                .map { type in
+                    MCBlendMode.allCases.map { blendMode in
+                        Pipeline(type: type, blendMode: blendMode)
+                    }
+                }
+                .joined())
     }
 }
 
@@ -237,19 +243,19 @@ public enum PipelineType: String, CaseIterable, Codable {
             case .unitSphereLineGroupShader, .unitSphereSimpleLineGroupShader:
                 return LineVertex.descriptorUnitSphere
             case .polygonGroupShader,
-                 .polygonPatternGroupShader,
-                 .polygonPatternFadeInGroupShader,
-                 .polygonStripedGroupShader,
-                 .colorShader, .maskShader:
+                .polygonPatternGroupShader,
+                .polygonPatternFadeInGroupShader,
+                .polygonStripedGroupShader,
+                .colorShader, .maskShader:
                 return Vertex4F.descriptor
             case .rasterShader,
-                 .clearStencilShader,
-                 .alphaShader,
-                 .unitSphereAlphaShader,
-                 .unitSphereRoundColorShader,
-                 .sphereEffectShader,
-                 .skySphereShader,
-                 .roundColorShader:
+                .clearStencilShader,
+                .alphaShader,
+                .unitSphereAlphaShader,
+                .unitSphereRoundColorShader,
+                .sphereEffectShader,
+                .skySphereShader,
+                .roundColorShader:
                 return Vertex3DTexture.descriptor
             default:
                 return Vertex.descriptor
@@ -259,17 +265,19 @@ public enum PipelineType: String, CaseIterable, Codable {
 
 public class PipelineLibrary: StaticMetalLibrary<Pipeline, MTLRenderPipelineState>, @unchecked Sendable {
     init(device: MTLDevice) throws {
-        try super.init(
-            Pipeline.allCases.map(\.self)) { pipeline -> MTLRenderPipelineState in
-            do {
-                let pipelineDescriptor = PipelineDescriptorFactory.pipelineDescriptor(pipeline: pipeline)
-                return try device.makeRenderPipelineState(descriptor: pipelineDescriptor)
-            } catch {
-                // Log the JSON (key) and the error
-                Logger().error("Error creating pipeline for: \(pipeline.type.rawValue, privacy: .public), \(pipeline.blendMode.rawValue, privacy: .public) error: \(error, privacy: .public)")
-                throw error
+        try super
+            .init(
+                Pipeline.allCases.map(\.self)
+            ) { pipeline -> MTLRenderPipelineState in
+                do {
+                    let pipelineDescriptor = PipelineDescriptorFactory.pipelineDescriptor(pipeline: pipeline)
+                    return try device.makeRenderPipelineState(descriptor: pipelineDescriptor)
+                } catch {
+                    // Log the JSON (key) and the error
+                    Logger().error("Error creating pipeline for: \(pipeline.type.rawValue, privacy: .public), \(pipeline.blendMode.rawValue, privacy: .public) error: \(error, privacy: .public)")
+                    throw error
+                }
             }
-        }
     }
 }
 

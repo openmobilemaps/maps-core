@@ -55,7 +55,7 @@ public struct Vertex: Equatable {
         position = SIMD2([x, y])
         textureCoordinate = SIMD2([textureU, textureV])
     }
-    
+
     public init(position: MCVec2D, textureU: Float, textureV: Float) {
         self.init(x: position.xF, y: position.yF, textureU: textureU, textureV: textureV)
     }

@@ -54,7 +54,7 @@ extension SphereEffectShader: MCSphereEffectShaderInterface {
             return
         }
 
-        let count : Int = Int(coefficients.elementCount)
+        let count: Int = Int(coefficients.elementCount)
         ellipse = Array(UnsafeBufferPointer(start: rawPointer.bindMemory(to: Float.self, capacity: count), count: count))
     }
 }

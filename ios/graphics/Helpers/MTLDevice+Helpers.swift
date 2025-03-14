@@ -15,7 +15,7 @@ import UIKit
 extension MTLDevice {
     func makeBuffer(from sharedBytes: MCSharedBytes) -> MTLBuffer? {
         guard let pointer = UnsafeRawPointer(bitPattern: Int(sharedBytes.address)),
-              sharedBytes.elementCount > 0
+            sharedBytes.elementCount > 0
         else { return nil }
 
         return self.makeBuffer(bytes: pointer, length: Int(sharedBytes.elementCount * sharedBytes.bytesPerElement), options: [])
@@ -25,7 +25,8 @@ extension MTLDevice {
 extension MTLBuffer {
     func copyMemory(from sharedBytes: MCSharedBytes) {
         if let p = UnsafeRawPointer(bitPattern: Int(sharedBytes.address)),
-           sharedBytes.elementCount > 0 {
+            sharedBytes.elementCount > 0
+        {
             self.contents().copyMemory(from: p, byteCount: Int(sharedBytes.elementCount * sharedBytes.bytesPerElement))
         }
     }

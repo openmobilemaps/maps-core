@@ -31,9 +31,11 @@ final class LineGroup2d: BaseGraphicsObject, @unchecked Sendable {
             fatalError("LineGroup2d only supports LineGroupShader")
         }
         self.shader = shader
-        super.init(device: metalContext.device,
-                   sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue)!,
-                   label: "LineGroup2d")
+        super
+            .init(
+                device: metalContext.device,
+                sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue)!,
+                label: "LineGroup2d")
         var originOffset: simd_float4 = simd_float4(0, 0, 0, 0)
         tileOriginBuffer = metalContext.device.makeBuffer(bytes: &originOffset, length: MemoryLayout<simd_float4>.stride, options: [])
 
@@ -70,30 +72,32 @@ final class LineGroup2d: BaseGraphicsObject, @unchecked Sendable {
         stencilState = MetalContext.current.device.makeDepthStencilState(descriptor: ms)
     }
 
-    override func render(encoder: MTLRenderCommandEncoder,
-                         context: RenderingContext,
-                         renderPass _: MCRenderPassConfig,
-                         vpMatrix: Int64,
-                         mMatrix: Int64,
-                origin: MCVec3D,
-                         isMasked: Bool,
-                         screenPixelAsRealMeterFactor: Double) {
+    override func render(
+        encoder: MTLRenderCommandEncoder,
+        context: RenderingContext,
+        renderPass _: MCRenderPassConfig,
+        vpMatrix: Int64,
+        mMatrix: Int64,
+        origin: MCVec3D,
+        isMasked: Bool,
+        screenPixelAsRealMeterFactor: Double
+    ) {
         lock.lock()
         defer {
             lock.unlock()
         }
 
         guard let lineVerticesBuffer,
-              let lineIndicesBuffer,
-              shader.lineStyleBuffer != nil
+            let lineIndicesBuffer,
+            shader.lineStyleBuffer != nil
         else { return }
 
-#if DEBUG
-        encoder.pushDebugGroup(label)
-        defer {
-            encoder.popDebugGroup()
-        }
-#endif
+        #if DEBUG
+            encoder.pushDebugGroup(label)
+            defer {
+                encoder.popDebugGroup()
+            }
+        #endif
 
         if stencilState == nil {
             setupStencilBufferDescriptor()
@@ -131,11 +135,12 @@ final class LineGroup2d: BaseGraphicsObject, @unchecked Sendable {
         encoder.setVertexBuffer(originOffsetBuffer, offset: 0, index: 5)
         encoder.setVertexBuffer(tileOriginBuffer, offset: 0, index: 6)
 
-        encoder.drawIndexedPrimitives(type: .triangle,
-                                      indexCount: indicesCount,
-                                      indexType: .uint32,
-                                      indexBuffer: lineIndicesBuffer,
-                                      indexBufferOffset: 0)
+        encoder.drawIndexedPrimitives(
+            type: .triangle,
+            indexCount: indicesCount,
+            indexType: .uint32,
+            indexBuffer: lineIndicesBuffer,
+            indexBufferOffset: 0)
 
         if !isMasked {
             context.clearStencilBuffer()
@@ -144,7 +149,7 @@ final class LineGroup2d: BaseGraphicsObject, @unchecked Sendable {
 }
 
 extension LineGroup2d: MCLineGroup2dInterface {
-    
+
     func setLines(_ lines: MCSharedBytes, indices: MCSharedBytes, origin: MCVec3D, is3d: Bool) {
         guard lines.elementCount != 0 else {
             lock.withCritical {
@@ -161,8 +166,7 @@ extension LineGroup2d: MCLineGroup2dInterface {
                 bufferPointer.pointee.x = originOffset.xF
                 bufferPointer.pointee.y = originOffset.yF
                 bufferPointer.pointee.z = originOffset.zF
-            }
-            else {
+            } else {
                 fatalError()
             }
             self.lineVerticesBuffer.copyOrCreate(from: lines, device: device)

@@ -30,6 +30,6 @@ public final class AsyncLayer: Layer, ObservableObject, @unchecked Sendable {
     }
 
     public var beforeAdding: ((MCLayerInterface, MCMapView) -> Void)? {
-        get { baseLayer?.beforeAdding }
+        baseLayer?.beforeAdding
     }
 }

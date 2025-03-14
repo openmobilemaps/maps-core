@@ -1,9 +1,0 @@
---disable wrapMultilineStatementBraces
---disable initCoderUnavailable
---enable blankLinesBetweenImports
---disable redundantSelf
---disable unusedArguments
---emptybraces lineBreak
---indentcase true
---exclude external
---swiftversion 5.8

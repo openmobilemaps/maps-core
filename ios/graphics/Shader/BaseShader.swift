@@ -35,12 +35,15 @@ open class BaseShader: MCShaderProgramInterface, @unchecked Sendable {
 
     open func preRender(_ context: MCRenderingContextInterface?) {
         guard let context = context as? RenderingContext,
-              let encoder = context.encoder else { return }
+            let encoder = context.encoder
+        else { return }
         preRender(encoder: encoder, context: context)
     }
 
-    open func preRender(encoder _: MTLRenderCommandEncoder,
-                        context _: RenderingContext) {
+    open func preRender(
+        encoder _: MTLRenderCommandEncoder,
+        context _: RenderingContext
+    ) {
     }
 
     open func setBlendMode(_ blendMode: MCBlendMode) {

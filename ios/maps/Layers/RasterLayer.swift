@@ -9,13 +9,16 @@ import Foundation
 import MapCoreSharedModule
 
 open class TiledRasterLayer: Layer, ObservableObject, @unchecked Sendable {
-    public init(config: MCTiled2dMapLayerConfig, loaders: [MCLoaderInterface] = [MCTextureLoader()], callbackHandler: MCTiled2dMapRasterLayerCallbackInterface? = nil, layerIndex: Int? = nil, beforeAdding: ((MCTiled2dMapRasterLayerInterface, MCMapView) -> Void)? = nil) {
+    public init(
+        config: MCTiled2dMapLayerConfig, loaders: [MCLoaderInterface] = [MCTextureLoader()], callbackHandler: MCTiled2dMapRasterLayerCallbackInterface? = nil, layerIndex: Int? = nil, beforeAdding: ((MCTiled2dMapRasterLayerInterface, MCMapView) -> Void)? = nil
+    ) {
         self.tiledLayerInterface = MCTiled2dMapRasterLayerInterface.create(config, loaders: loaders) !! fatalError("create is non-null")
         self.tiledLayerInterface.setCallbackHandler(callbackHandler)
         self.layerIndex = layerIndex
         if let beforeAdding {
             self.beforeAdding = {
-                [weak self] in guard let self else { return }
+                [weak self] in
+                guard let self else { return }
                 beforeAdding(self.tiledLayerInterface, $1)
             }
         }
@@ -27,8 +30,10 @@ open class TiledRasterLayer: Layer, ObservableObject, @unchecked Sendable {
     ///   - urlFormat: URL for tile with placeholders, e.g. https://www.sample.org/{z}/{x}/{y}.png
     public convenience init(_ layerName: String = UUID().uuidString, webMercatorUrlFormat: String, minZoomLevel: Int = 0, maxZoomLevel: Int = 20, layerIndex: Int? = nil, beforeAdding: ((MCTiled2dMapRasterLayerInterface, MCMapView) -> Void)? = nil) {
         self.init(
-            config: MCDefaultTiled2dMapLayerConfigs
-                .webMercatorCustom(layerName, urlFormat: webMercatorUrlFormat, zoomInfo: nil, minZoomLevel: Int32(minZoomLevel), maxZoomLevel: Int32(maxZoomLevel)) !! fatalError(
+            config:
+                MCDefaultTiled2dMapLayerConfigs
+                .webMercatorCustom(layerName, urlFormat: webMercatorUrlFormat, zoomInfo: nil, minZoomLevel: Int32(minZoomLevel), maxZoomLevel: Int32(maxZoomLevel))
+                !! fatalError(
                     "default configs are non-null"
                 ),
             layerIndex: layerIndex,

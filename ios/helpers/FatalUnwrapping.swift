@@ -7,7 +7,7 @@
 
 import Foundation
 
-infix operator !!: NilCoalescingPrecedence
+infix operator !! : NilCoalescingPrecedence
 
 public func !! <T>(wrapped: T?, failureMessage: @autoclosure () -> Never) -> T {
     guard let unwrapped = wrapped else {
