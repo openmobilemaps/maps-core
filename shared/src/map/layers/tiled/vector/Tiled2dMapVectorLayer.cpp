@@ -620,6 +620,7 @@ void Tiled2dMapVectorLayer::update() {
                 manager->update();
             });
         }
+        mapInterface->invalidate();
     }
 
     if (collisionManager) {

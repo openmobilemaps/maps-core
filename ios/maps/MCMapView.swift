@@ -19,17 +19,14 @@ open class MCMapView: UIView, @unchecked Sendable {
 
     public var clearColor: MTLClearColor = .init(red: 0, green: 0, blue: 0, alpha: 1)
 
-    private var sizeChanged = false
     private var backgroundDisable = false
-    private var saveDrawable = false
-    private lazy var renderToImageQueue = DispatchQueue(
-        label: "io.openmobilemaps.renderToImagQueue", qos: .userInteractive)
 
     public var pausesAutomatically = true
     private var framesToRender: Int = 1
-    private let framesToRenderAfterInvalidate: Int = 25
+    private let framesToRenderAfterInvalidate: Int = 1
     private var lastInvalidate = Date()
-    private let renderAfterInvalidate: TimeInterval = 3  // Collision detection might be delayed 3s
+    private let renderAfterInvalidate: TimeInterval = 0  // Collision detection might be delayed 3s
+
     private var renderSemaphore = DispatchSemaphore(value: 3)  // using triple buffers
 
     private let touchHandler: MCMapViewTouchHandler
@@ -167,9 +164,9 @@ open class MCMapView: UIView, @unchecked Sendable {
     }
 
     public func invalidate() {
-        //        isPaused = false
         framesToRender = framesToRenderAfterInvalidate
         lastInvalidate = Date()
+        nextFrameSemaphore.signal()
     }
 
     public func renderTarget(named name: String) -> RenderTargetTexture {
@@ -189,6 +186,7 @@ open class MCMapView: UIView, @unchecked Sendable {
             Thread.current.threadPriority = 45 // recommended priority for rendering
             while true {
                 autoreleasepool {
+                    self.blockUntilNextFrame()
                     self.renderFrame()
                 }
             }
@@ -196,6 +194,22 @@ open class MCMapView: UIView, @unchecked Sendable {
     }
 
     var lastSize: CGSize = .zero
+    var nextFrameSemaphore = DispatchSemaphore(value: 0)
+
+    private func blockUntilNextFrame() {
+        guard
+            (framesToRender > 0
+             || -lastInvalidate.timeIntervalSinceNow < renderAfterInvalidate || !pausesAutomatically) && !backgroundDisable
+        else {
+            nextFrameSemaphore.wait()
+            return
+        }
+
+        if pausesAutomatically {
+            framesToRender -= 1
+        }
+    }
+
 
     open override func layoutSubviews() {
         super.layoutSubviews()
@@ -207,6 +221,8 @@ open class MCMapView: UIView, @unchecked Sendable {
         metalLayer.drawableSize = CGSize(
             width: bounds.width * scale,
             height: bounds.height * scale)
+
+        invalidate()
 
     }
 
@@ -222,7 +238,7 @@ open class MCMapView: UIView, @unchecked Sendable {
             mipmapped: false
         )
         descriptor.usage = [.renderTarget]
-        descriptor.storageMode = .private
+        descriptor.storageMode = .memoryless
 
         for _ in 0..<3 {
             if let texture = MetalContext.current.device.makeTexture(descriptor: descriptor) {
@@ -232,10 +248,6 @@ open class MCMapView: UIView, @unchecked Sendable {
     }
 
     private func renderFrame() {
-
-        guard UIApplication.shared.applicationState == .active else {
-            return
-        }
 
         let size = metalLayer.drawableSize
         guard size != .zero else {
@@ -328,102 +340,8 @@ open class MCMapView: UIView, @unchecked Sendable {
             self.renderSemaphore.signal()
         }
 
-        // if we want to save the drawable (offscreen rendering), we commit and wait synchronously
-        // until the command buffer completes, also we don't present it
-        if self.saveDrawable {
-            commandBuffer.commit()
-            commandBuffer.waitUntilCompleted()
-        } else {
-            commandBuffer.present(drawable)
-            commandBuffer.commit()
-        }
-    }
-}
-
-extension MCMapView: MTKViewDelegate {
-    open func mtkView(_: MTKView, drawableSizeWillChange _: CGSize) {
-        sizeChanged = true
-        invalidate()
-    }
-
-    public func draw(in view: MTKView) {
-        guard !backgroundDisable else {
-            //            isPaused = true
-            return  // don't execute metal calls in background
-        }
-
-        guard
-            framesToRender > 0
-                || -lastInvalidate.timeIntervalSinceNow < renderAfterInvalidate || !pausesAutomatically
-        else {
-            //            isPaused = true
-            return
-        }
-
-        if pausesAutomatically {
-            framesToRender -= 1
-        }
-
-    }
-
-    public func renderToImage(
-        size: CGSize, timeout: Float, bounds: MCRectCoord,
-        callbackQueue: DispatchQueue = .main,
-        callback: @escaping @Sendable (UIImage?, MCLayerReadyState) -> Void
-    ) {
-        renderToImageQueue.async {
-            DispatchQueue.main.sync {
-                self.frame = CGRect(
-                    origin: .zero,
-                    size: .init(
-                        width: size.width / UIScreen.main.scale,
-                        height: size.height / UIScreen.main.scale))
-                self.setNeedsLayout()
-                self.layoutIfNeeded()
-            }
-
-            let mapReadyCallbacks = MCMapViewMapReadyCallbacks()
-            mapReadyCallbacks.delegate = self
-            mapReadyCallbacks.callback = callback
-            mapReadyCallbacks.callbackQueue = callbackQueue
-
-            self.mapInterface.drawReadyFrame(
-                bounds, timeout: timeout, callbacks: mapReadyCallbacks)
-        }
-    }
-}
-
-extension MCMapView {
-    fileprivate func currentDrawableImage() -> UIImage? {
-        self.saveDrawable = true
-        self.invalidate()
-        //        self.draw(in: self)
-        self.saveDrawable = false
-
-        //        guard let texture = self.currentDrawable?.texture else { return nil }
-
-        //        let context = CIContext()
-        //        let kciOptions: [CIImageOption: Any] = [
-        //            .colorSpace: CGColorSpaceCreateDeviceRGB()
-        //        ]
-        //        let cImg = CIImage(mtlTexture: texture, options: kciOptions)!
-        //        return context.createCGImage(cImg, from: cImg.extent)?.toImage()
-        return UIImage()
-    }
-}
-
-extension CGImage {
-    fileprivate func toImage() -> UIImage? {
-        let w = Double(width)
-        let h = Double(height)
-        UIGraphicsBeginImageContext(CGSize(width: w, height: h))
-        let context = UIGraphicsGetCurrentContext()
-        context?.draw(self, in: CGRect(x: 0, y: 0, width: w, height: h))
-
-        let newImage = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
-
-        return newImage
+        commandBuffer.present(drawable)
+        commandBuffer.commit()
     }
 }
 
@@ -581,36 +499,3 @@ extension MCMapView: UIGestureRecognizerDelegate {
     }
 }
 
-private class MCMapViewMapReadyCallbacks: @preconcurrency
-    MCMapReadyCallbackInterface, @unchecked Sendable
-{
-    public nonisolated(unsafe) weak var delegate: MCMapView?
-    public var callback: ((UIImage?, MCLayerReadyState) -> Void)?
-    public var callbackQueue: DispatchQueue?
-    public let semaphore = DispatchSemaphore(value: 1)
-
-    @MainActor func stateDidUpdate(_ state: MCLayerReadyState) {
-        guard let delegate = self.delegate else { return }
-
-        semaphore.wait()
-
-        //        delegate.draw(in: delegate)
-
-        callbackQueue?
-            .async {
-                switch state {
-                    case .NOT_READY:
-                        break
-                    case .ERROR, .TIMEOUT_ERROR:
-                        self.callback?(nil, state)
-                    case .READY:
-                        MainActor.assumeIsolated {
-                            self.callback?(delegate.currentDrawableImage(), state)
-                        }
-                    @unknown default:
-                        break
-                }
-                self.semaphore.signal()
-            }
-    }
-}
