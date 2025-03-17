@@ -160,6 +160,7 @@ open class MCMapView: UIView, @unchecked Sendable {
             mapInterface.setBackgroundColor(
                 newValue?.mapCoreColor ?? UIColor.clear.mapCoreColor)
             isOpaque = newValue?.isOpaque ?? false
+            layer.isOpaque = isOpaque
         }
     }
 
@@ -193,7 +194,7 @@ open class MCMapView: UIView, @unchecked Sendable {
         }
     }
 
-    var lastSize: CGSize = .zero
+    var lastSize: CGSize?
     var nextFrameSemaphore = DispatchSemaphore(value: 0)
 
     private func blockUntilNextFrame() {
@@ -217,10 +218,10 @@ open class MCMapView: UIView, @unchecked Sendable {
         metalLayer.frame = bounds
 
         let scale = window?.screen.scale ?? UIScreen.main.scale
-        contentScaleFactor = scale
-        metalLayer.drawableSize = CGSize(
+        lastSize = CGSize(
             width: bounds.width * scale,
             height: bounds.height * scale)
+        contentScaleFactor = scale
 
         invalidate()
 
@@ -249,11 +250,6 @@ open class MCMapView: UIView, @unchecked Sendable {
 
     private func renderFrame() {
 
-        let size = metalLayer.drawableSize
-        guard size != .zero else {
-            return
-        }
-
         // Ensure that triple-buffers are not over-used
         renderSemaphore.wait()
 
@@ -262,10 +258,11 @@ open class MCMapView: UIView, @unchecked Sendable {
 
         // Shared lib stuff
 
-        if size != lastSize {
+        if let size = lastSize {
+            metalLayer.drawableSize = size
             mapInterface.setViewportSize(size.vec2)
             sizeDelegate?.sizeChanged()
-            lastSize = size
+            lastSize = nil
 
             setupStencilTextures()
         }
@@ -281,7 +278,7 @@ open class MCMapView: UIView, @unchecked Sendable {
         for offscreenTarget in renderTargetTextures {
             let renderEncoder = offscreenTarget.prepareOffscreenEncoder(
                 commandBuffer,
-                size: size.vec2,
+                size: metalLayer.drawableSize.vec2,
                 context: renderingContext
             )!
             renderingContext.encoder = renderEncoder
