@@ -1,5 +1,8 @@
 # Changelog for Open Mobile Maps
 
+## Version 3.0.2
+- Fixed a race condition within geojson sources and add source post-loading exception handling
+
 ## Version 3.0.1
 - Add minZoom/extent (for virtual tiles) option for geojson sources in style jsons
 - Changed some static vectors to thread-local vectors to avoid potential data races

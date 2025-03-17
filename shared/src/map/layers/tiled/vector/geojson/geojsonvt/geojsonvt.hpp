@@ -87,7 +87,6 @@ public:
             if (!self) return;
             auto result = resultFuture.get();
 
-            self->loadingResult = DataLoaderResult(std::nullopt, std::nullopt, result.status, result.errorCode);
             if (result.status != LoaderStatus::OK) {
                 LogError <<= "Unable to load geoJson";
 
@@ -96,6 +95,7 @@ public:
                     self->load(false);
                 }
                 else {
+                    self->loadingResult = DataLoaderResult(std::nullopt, std::nullopt, result.status, result.errorCode);
                     self->delegate.message(MFN(&GeoJSONTileDelegate::failedToLoad));
                 }
             } else {
@@ -105,8 +105,8 @@ public:
                     json = nlohmann::json::parse(string);
                     auto geoJson = GeoJsonParser::getGeoJson(json);
                     if (geoJson) {
-
                         self->initialize(geoJson);
+                        self->loadingResult = DataLoaderResult(std::nullopt, std::nullopt, result.status, result.errorCode);
 
                         self->delegate.message(MFN(&GeoJSONTileDelegate::didLoad), self->options.maxZoom);
                     }

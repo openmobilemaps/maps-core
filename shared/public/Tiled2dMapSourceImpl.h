@@ -907,7 +907,6 @@ void Tiled2dMapSource<T, L, R>::onVisibleBoundsChanged(const ::RectCoord &visibl
 template <class T, class L, class R>
 void Tiled2dMapSource<T, L, R>::onVisibleTilesChanged(const std::vector<VisibleTilesLayer> &pyramid, bool enforceMultipleLevels,
                                                       int keepZoomLevelOffset) {
-
     currentVisibleTiles.clear();
 
     std::vector<PrioritizedTiled2dMapTileInfo> toAdd;
@@ -1027,10 +1026,8 @@ void Tiled2dMapSource<T, L, R>::onVisibleTilesChanged(const std::vector<VisibleT
     }
 
     std::sort(toAdd.begin(), toAdd.end());
-
     tilesRequestedToLoad = toAdd;
     scheduleFixedNumberOfLoadingTasks();
-
     // if we removed tiles, we potentially need to update the tilemasks - also if no new tile is loaded
     updateTileMasks();
 
@@ -1061,7 +1058,6 @@ void Tiled2dMapSource<T, L, R>::performLoadingTask(Tiled2dMapTileInfo tile, size
     currentlyLoading.insert({tile, loaderIndex});
     std::string layerName = layerConfig->getLayerName();
     readyTiles.erase(tile);
-
     loadDataAsync(tile, loaderIndex).then([weakActor, loaderIndex, tile, weakSelfPtr, layerName](::djinni::Future<L> result) {
         auto strongSelf = weakSelfPtr.lock();
         if (strongSelf) {
@@ -1083,14 +1079,24 @@ void Tiled2dMapSource<T, L, R>::performLoadingTask(Tiled2dMapTileInfo tile, size
                                             weakActor.message(MFN(&Tiled2dMapSource::didFailToLoad), tile, loaderIndex,
                                                               LoaderStatus::ERROR_OTHER, std::nullopt);
                                         } else {
-                                            weakActor.message(MFN(&Tiled2dMapSource::didLoad), tile, loaderIndex,
-                                                              strongSelf->postLoadingTask(res, tile));
+                                            try {
+                                            weakActor.message(MFN(&Tiled2dMapSource::didLoad), tile, loaderIndex, strongSelf->postLoadingTask(res, tile));
+                                            } catch (const std::exception &e) {
+                                                LogError << "Failed post-loading for tile " << tile.to_string_short() << " with error " <<= e.what();
+                                                weakActor.message(MFN(&Tiled2dMapSource::didFailToLoad), tile, loaderIndex,
+                                                                  LoaderStatus::ERROR_OTHER, std::nullopt);
+                                            }
                                         }
                                     }
                                 }));
                     }
                 } else {
-                    weakActor.message(MFN(&Tiled2dMapSource::didLoad), tile, loaderIndex, strongSelf->postLoadingTask(res, tile));
+                    try {
+                        weakActor.message(MFN(&Tiled2dMapSource::didLoad), tile, loaderIndex, strongSelf->postLoadingTask(res, tile));
+                    } catch (const std::exception &e) {
+                        LogError << "Failed post-loading for tile " << tile.to_string_short() << " with error " <<= e.what();
+                        weakActor.message(MFN(&Tiled2dMapSource::didFailToLoad), tile, loaderIndex,LoaderStatus::ERROR_OTHER, std::nullopt);
+                    }
                 }
             } else {
                 weakActor.message(MFN(&Tiled2dMapSource::didFailToLoad), tile, loaderIndex, res->status, res->errorCode);

@@ -853,7 +853,6 @@ void Tiled2dMapVectorLayer::onTilesUpdated(const std::string &sourceName, Vector
 
     std::unique_lock<std::mutex> lock(setupMutex);
     setupCV.wait(lock, [this]{ return setupReady; });
-
     auto sourceManager = sourceDataManagers.find(sourceName);
     if (sourceManager != sourceDataManagers.end()) {
         sourceManager->second.message(MailboxDuplicationStrategy::replaceNewest, MFN(&Tiled2dMapVectorSourceTileDataManager::onVectorTilesUpdated), sourceName, currentTileInfos);
