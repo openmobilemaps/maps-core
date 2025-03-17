@@ -95,7 +95,6 @@ public:
         return fadeInPattern;
     }
 
-private:
     bool fadeInPattern;
 
     ValueEvaluator<Color> fillColorEvaluator;

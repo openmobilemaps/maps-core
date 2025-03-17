@@ -34,7 +34,7 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_til
     try {
         auto r = ::DefaultTiled2dMapLayerConfigs::webMercatorCustom(::djinni::String::toCpp(jniEnv, j_layerName),
                                                                     ::djinni::String::toCpp(jniEnv, j_urlFormat),
-                                                                    ::djinni_generated::NativeTiled2dMapZoomInfo::toCpp(jniEnv, j_zoomInfo),
+                                                                    ::djinni::Optional<std::optional, ::djinni_generated::NativeTiled2dMapZoomInfo>::toCpp(jniEnv, j_zoomInfo),
                                                                     ::djinni::I32::toCpp(jniEnv, j_minZoomLevel),
                                                                     ::djinni::I32::toCpp(jniEnv, j_maxZoomLevel));
         return ::djinni::release(::djinni_generated::NativeTiled2dMapLayerConfig::fromCpp(jniEnv, r));

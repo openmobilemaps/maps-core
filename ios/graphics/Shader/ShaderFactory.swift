@@ -12,10 +12,14 @@ import Foundation
 import MapCoreSharedModule
 
 class ShaderFactory: MCShaderFactoryInterface {
+    func createSkySphereShader() -> (any MCSkySphereShaderInterface)? {
+        SkySphereShader()
+    }
+
     func createStretchInstancedShader(_ unitSphere: Bool) -> (any MCStretchInstancedShaderInterface)? {
         StretchInstancedShader()
     }
-    
+
     func createUnitSphereRasterShader() -> MCRasterShaderInterface? {
         RasterShader()
     }
@@ -62,6 +66,14 @@ class ShaderFactory: MCShaderFactoryInterface {
 
     func createUnitSphereLineGroupShader() -> (any MCLineGroupShaderInterface)? {
         LineGroupShader(shader: .unitSphereLineGroupShader)
+    }
+
+    func createSimpleLineGroupShader() -> MCLineGroupShaderInterface? {
+        LineGroupShader(shader: .simpleLineGroupShader)
+    }
+
+    func createUnitSphereSimpleLineGroupShader() -> (any MCLineGroupShaderInterface)? {
+        LineGroupShader(shader: .unitSphereSimpleLineGroupShader)
     }
 
     func createUnitSphereColorShader() -> MCColorShaderInterface? {

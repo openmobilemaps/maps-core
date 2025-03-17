@@ -244,7 +244,10 @@ void IconLayer::clear() {
         if (mask->asGraphicsObject()->isReady())
             mask->asGraphicsObject()->clear();
     }
-    renderPassObjectMap.clear();
+    {
+        std::lock_guard<std::recursive_mutex> lock(iconsMutex);
+        renderPassObjectMap.clear();
+    }
     mapInterface->invalidate();
 }
 
@@ -311,10 +314,11 @@ std::vector<std::shared_ptr<::RenderPassInterface>> IconLayer::buildRenderPasses
     if (isHidden) {
         return {};
     } else {
+        std::lock_guard<std::recursive_mutex> lock(iconsMutex);
         std::vector<std::shared_ptr<RenderPassInterface>> renderPasses;
         for (const auto &passEntry : renderPassObjectMap) {
             std::shared_ptr<RenderPass> renderPass =
-                std::make_shared<RenderPass>(RenderPassConfig(passEntry.first, false), passEntry.second, mask);
+                std::make_shared<RenderPass>(RenderPassConfig(passEntry.first, false), passEntry.second, mask, renderTarget);
             renderPasses.push_back(renderPass);
         }
         return renderPasses;
@@ -442,40 +446,50 @@ std::vector<std::shared_ptr<IconInfoInterface>> IconLayer::getIconsAtPosition(co
 
     Coord clickCoords = camera->coordFromScreenPosition(posScreen);
 
-    double angle = -(camera->getRotation() * M_PI / 180.0);
-    double sinAng = std::sin(angle);
-    double cosAng = std::cos(angle);
-
     {
         std::lock_guard<std::recursive_mutex> lock(iconsMutex);
         for (const auto &iconTuple : icons) {
             std::shared_ptr<IconInfoInterface> icon = iconTuple.first;
 
             const Vec2F &anchor = icon->getIconAnchor();
+            const Vec2F& iconSize = icon->getIconSize();
+
             float ratioLeftRight = std::clamp(anchor.x, 0.0f, 1.0f);
             float ratioTopBottom = std::clamp(anchor.y, 0.0f, 1.0f);
-            float leftW = icon->getIconSize().x * ratioLeftRight;
-            float topH = icon->getIconSize().y * ratioTopBottom;
-            float rightW = icon->getIconSize().x * (1.0f - ratioLeftRight);
-            float bottomH = icon->getIconSize().y * (1.0f - ratioTopBottom);
+            float leftW = iconSize.x * ratioLeftRight;
+            float topH = iconSize.y * ratioTopBottom;
+            float rightW = iconSize.x * (1.0f - ratioLeftRight);
+            float bottomH = iconSize.y * (1.0f - ratioTopBottom);
 
-            Coord iconPos = conversionHelper->convert(clickCoords.systemIdentifier, icon->getCoordinate());
-            IconType type = icon->getType();
-            if (type == IconType::INVARIANT || type == IconType::SCALE_INVARIANT) {
-                leftW = camera->mapUnitsFromPixels(leftW);
-                topH = camera->mapUnitsFromPixels(topH);
-                rightW = camera->mapUnitsFromPixels(rightW);
-                bottomH = camera->mapUnitsFromPixels(bottomH);
+            Vec2F clickPos = Vec2F(0.0, 0.0);
+            Vec2F iconPos = Vec2F(0.0, 0.0);
+
+            bool isHit = false;
+            
+            if (is3D) {
+                // We compute hit detection in screen space
+                iconPos = camera->screenPosFromCoord(icon->getCoordinate());
+                clickPos = Vec2F(posScreen.x - iconPos.x, posScreen.y - iconPos.y);
+            } else {
+                Coord converted = conversionHelper->convert(clickCoords.systemIdentifier, icon->getCoordinate());
+                iconPos = Vec2F(converted.x, converted.y);
+                clickPos = Vec2F(clickCoords.x - iconPos.x, clickCoords.y - iconPos.y);
+
+                if (icon->getType() == IconType::INVARIANT || icon->getType() == IconType::SCALE_INVARIANT) {
+                    leftW = camera->mapUnitsFromPixels(leftW);
+                    topH = camera->mapUnitsFromPixels(topH);
+                    rightW = camera->mapUnitsFromPixels(rightW);
+                    bottomH = camera->mapUnitsFromPixels(bottomH);
+                }
             }
 
-            Vec2D clickPos = Vec2D(clickCoords.x - iconPos.x, clickCoords.y - iconPos.y);
-            if (type == IconType::INVARIANT || type == IconType::ROTATION_INVARIANT) {
-                float newX = cosAng * clickPos.x - sinAng * clickPos.y;
-                float newY = sinAng * clickPos.x + cosAng * clickPos.y;
-                clickPos.x = newX;
-                clickPos.y = newY;
+            if (icon->getType() == IconType::INVARIANT || icon->getType() == IconType::ROTATION_INVARIANT) {
+                clickPos = Vec2FHelper::rotate(clickPos, Vec2F(0, 0), -camera->getRotation());
             }
-            if (clickPos.x > -leftW && clickPos.x < rightW && clickPos.y < topH && clickPos.y > -bottomH) {
+
+            isHit = isPointInRect(clickPos, leftW, rightW, topH, bottomH);
+
+            if (isHit) {
                 iconsHit.push_back(icon);
             }
         }
@@ -595,11 +609,11 @@ void IconLayer::addScaleAnimation(const IconScaleAnimation& iconScaleAnimation) 
     std::lock_guard<std::recursive_mutex> lock(scaleAnimationMutex);
 
     auto animation = std::make_shared<DoubleAnimation>(scaleAnimation.duration, scaleAnimation.from, scaleAnimation.to, InterpolatorFunction::EaseInOut,
-            [weakSelf, id, scaleAnimation](double scale) {
+            [weakSelf, id, initialSize](double scale) {
               if (auto selfPtr = weakSelf.lock()) {
                   for(auto& icon : selfPtr->icons) {
-                      if(icon.first->getIdentifier() == scaleAnimation.identifier) {
-                          icon.first->setIconSize(Vec2F(scaleAnimation.initialSize.x * scale, scaleAnimation.initialSize.y * scale));
+                      if(icon.first->getIdentifier() == id) {
+                          icon.first->setIconSize(Vec2F(initialSize.x * scale, initialSize.y * scale));
                       }
                   }
 
@@ -609,11 +623,11 @@ void IconLayer::addScaleAnimation(const IconScaleAnimation& iconScaleAnimation) 
                   }
               }
           },
-          [weakSelf, scaleAnimation] {
+          [weakSelf, id] {
               if (auto selfPtr = weakSelf.lock()) {
                   auto& sa = selfPtr->scaleAnimations;
 
-                  auto it = sa.find(scaleAnimation.identifier);
+                  auto it = sa.find(id);
                   if(it != sa.end()) {
                       auto &sa = (*it).second;
                       auto rep = sa.repetitions;
@@ -635,4 +649,9 @@ void IconLayer::addScaleAnimation(const IconScaleAnimation& iconScaleAnimation) 
 
     animation->start();
     mapInterface->invalidate();
+}
+
+bool IconLayer::isPointInRect(const Vec2F& point, float leftW, float rightW, float topH, float bottomH) {
+    return point.x >  -leftW && point.x < rightW &&
+           point.y > -topH && point.y < bottomH;
 }

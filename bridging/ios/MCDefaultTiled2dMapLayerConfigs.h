@@ -13,7 +13,7 @@
 
 + (nullable id<MCTiled2dMapLayerConfig>)webMercatorCustom:(nonnull NSString *)layerName
                                                 urlFormat:(nonnull NSString *)urlFormat
-                                                 zoomInfo:(nonnull MCTiled2dMapZoomInfo *)zoomInfo
+                                                 zoomInfo:(nullable MCTiled2dMapZoomInfo *)zoomInfo
                                              minZoomLevel:(int32_t)minZoomLevel
                                              maxZoomLevel:(int32_t)maxZoomLevel;
 

@@ -37,8 +37,7 @@ open class BaseGraphicsObject: @unchecked Sendable {
 
     public var vpMatrixBuffers: MultiBuffer<simd_float4x4>
 
-    public init(device: MTLDevice, sampler: MTLSamplerState, label: String = "")
-    {
+    public init(device: MTLDevice, sampler: MTLSamplerState, label: String = "") {
         self.device = device
         self.sampler = sampler
         self.label = label

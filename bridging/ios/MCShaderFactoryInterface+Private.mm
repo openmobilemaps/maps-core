@@ -15,6 +15,7 @@
 #import "MCPolygonGroupShaderInterface+Private.h"
 #import "MCPolygonPatternGroupShaderInterface+Private.h"
 #import "MCRasterShaderInterface+Private.h"
+#import "MCSkySphereShaderInterface+Private.h"
 #import "MCSphereEffectShaderInterface+Private.h"
 #import "MCStretchInstancedShaderInterface+Private.h"
 #import "MCStretchShaderInterface+Private.h"
@@ -82,6 +83,20 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 - (nullable id<MCLineGroupShaderInterface>)createUnitSphereLineGroupShader {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->createUnitSphereLineGroupShader();
+        return ::djinni_generated::LineGroupShaderInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nullable id<MCLineGroupShaderInterface>)createSimpleLineGroupShader {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->createSimpleLineGroupShader();
+        return ::djinni_generated::LineGroupShaderInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nullable id<MCLineGroupShaderInterface>)createUnitSphereSimpleLineGroupShader {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->createUnitSphereSimpleLineGroupShader();
         return ::djinni_generated::LineGroupShaderInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
@@ -195,6 +210,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (nullable id<MCSkySphereShaderInterface>)createSkySphereShader {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->createSkySphereShader();
+        return ::djinni_generated::SkySphereShaderInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 namespace djinni_generated {
 
 class ShaderFactoryInterface::ObjcProxy final
@@ -243,6 +265,20 @@ public:
     {
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createUnitSphereLineGroupShader];
+            return ::djinni_generated::LineGroupShaderInterface::toCpp(objcpp_result_);
+        }
+    }
+    /*not-null*/ std::shared_ptr<::LineGroupShaderInterface> createSimpleLineGroupShader() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createSimpleLineGroupShader];
+            return ::djinni_generated::LineGroupShaderInterface::toCpp(objcpp_result_);
+        }
+    }
+    /*not-null*/ std::shared_ptr<::LineGroupShaderInterface> createUnitSphereSimpleLineGroupShader() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createUnitSphereSimpleLineGroupShader];
             return ::djinni_generated::LineGroupShaderInterface::toCpp(objcpp_result_);
         }
     }
@@ -351,6 +387,13 @@ public:
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createSphereEffectShader];
             return ::djinni_generated::SphereEffectShaderInterface::toCpp(objcpp_result_);
+        }
+    }
+    /*not-null*/ std::shared_ptr<::SkySphereShaderInterface> createSkySphereShader() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createSkySphereShader];
+            return ::djinni_generated::SkySphereShaderInterface::toCpp(objcpp_result_);
         }
     }
 };

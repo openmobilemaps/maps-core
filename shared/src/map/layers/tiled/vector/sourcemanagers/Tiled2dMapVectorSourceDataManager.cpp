@@ -41,7 +41,9 @@ Tiled2dMapVectorSourceDataManager::Tiled2dMapVectorSourceDataManager(const WeakA
     }
 
      try {
-         readyManagerIndex = readyManager.converse(MFN(&Tiled2dMapVectorReadyManager::registerManager)).get();
+         readyManager.syncAccess([&](auto actor) {
+             readyManagerIndex = actor->registerManager();
+         });
      } catch (const std::exception &e) {
          LogError << "Exception while getting future result: " <<= e.what();
      }

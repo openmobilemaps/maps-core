@@ -19,12 +19,19 @@ public class RenderingContext: NSObject, @unchecked Sendable {
     public weak var computeEncoder: MTLComputeCommandEncoder?
     public weak var sceneView: MCMapView?
 
+    public weak var renderTarget: RenderTargetTexture?
+
     public static let bufferCount = 3  // Triple buffering
     private(set) var currentBufferIndex = 0
+
+    public private(set) var time: Float = 0
+
+    private let start = Date()
 
     public func beginFrame() {
         currentBufferIndex =
             (currentBufferIndex + 1) % RenderingContext.bufferCount
+        time = Float(-start.timeIntervalSinceNow)
     }
 
     public var cullMode: MCRenderingCullMode?
@@ -139,14 +146,14 @@ extension RenderingContext: MCRenderingContextInterface {
              Set the cullMode inverse in order to be consistent with opengl
              */
             switch cullMode {
-            case .BACK:
-                encoder?.setCullMode(.front)
-            case .FRONT:
-                encoder?.setCullMode(.back)
-            case .NONE:
-                encoder?.setCullMode(.none)
-            @unknown default:
-                assertionFailure()
+                case .BACK:
+                    encoder?.setCullMode(.front)
+                case .FRONT:
+                    encoder?.setCullMode(.back)
+                case .NONE:
+                    encoder?.setCullMode(.none)
+                @unknown default:
+                    assertionFailure()
             }
         }
     }

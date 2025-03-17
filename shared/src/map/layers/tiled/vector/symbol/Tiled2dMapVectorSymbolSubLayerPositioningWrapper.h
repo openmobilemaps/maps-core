@@ -14,7 +14,7 @@
 
 struct Tiled2dMapVectorSymbolSubLayerPositioningWrapper {
     double angle;
-    ::Coord centerPosition;
+    ::Vec2D centerPosition;
 
-    Tiled2dMapVectorSymbolSubLayerPositioningWrapper(double angle, ::Coord centerPosition): angle(angle), centerPosition(centerPosition) {}
+    Tiled2dMapVectorSymbolSubLayerPositioningWrapper(double angle, ::Vec2D centerPosition): angle(angle), centerPosition(centerPosition) {}
 };

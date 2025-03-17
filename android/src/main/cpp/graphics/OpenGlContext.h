@@ -16,7 +16,7 @@
 #include <string>
 #include <unordered_map>
 
-class OpenGlContext : public RenderingContextInterface, std::enable_shared_from_this<OpenGlContext> {
+class OpenGlContext : public RenderingContextInterface, public std::enable_shared_from_this<OpenGlContext> {
   public:
     OpenGlContext();
 

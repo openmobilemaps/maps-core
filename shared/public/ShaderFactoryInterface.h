@@ -13,6 +13,7 @@ class LineGroupShaderInterface;
 class PolygonGroupShaderInterface;
 class PolygonPatternGroupShaderInterface;
 class RasterShaderInterface;
+class SkySphereShaderInterface;
 class SphereEffectShaderInterface;
 class StretchInstancedShaderInterface;
 class StretchShaderInterface;
@@ -34,6 +35,10 @@ public:
     virtual /*not-null*/ std::shared_ptr<LineGroupShaderInterface> createLineGroupShader() = 0;
 
     virtual /*not-null*/ std::shared_ptr<LineGroupShaderInterface> createUnitSphereLineGroupShader() = 0;
+
+    virtual /*not-null*/ std::shared_ptr<LineGroupShaderInterface> createSimpleLineGroupShader() = 0;
+
+    virtual /*not-null*/ std::shared_ptr<LineGroupShaderInterface> createUnitSphereSimpleLineGroupShader() = 0;
 
     virtual /*not-null*/ std::shared_ptr<ColorShaderInterface> createUnitSphereColorShader() = 0;
 
@@ -64,4 +69,6 @@ public:
     virtual /*not-null*/ std::shared_ptr<ColorShaderInterface> createIcosahedronColorShader() = 0;
 
     virtual /*not-null*/ std::shared_ptr<SphereEffectShaderInterface> createSphereEffectShader() = 0;
+
+    virtual /*not-null*/ std::shared_ptr<SkySphereShaderInterface> createSkySphereShader() = 0;
 };

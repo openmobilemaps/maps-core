@@ -10,6 +10,7 @@
 #import "MCCameraInterface+Private.h"
 #import "MCComputePassInterface+Private.h"
 #import "MCRenderPassInterface+Private.h"
+#import "MCRenderTargetInterface+Private.h"
 #import "MCRenderingContextInterface+Private.h"
 #include <exception>
 #include <stdexcept>
@@ -48,10 +49,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 }
 
 - (void)drawFrame:(nullable id<MCRenderingContextInterface>)renderingContext
-           camera:(nullable id<MCCameraInterface>)camera {
+           camera:(nullable id<MCCameraInterface>)camera
+           target:(nullable id<MCRenderTargetInterface>)target {
     try {
         _cppRefHandle.get()->drawFrame(::djinni_generated::RenderingContextInterface::toCpp(renderingContext),
-                                       ::djinni_generated::CameraInterface::toCpp(camera));
+                                       ::djinni_generated::CameraInterface::toCpp(camera),
+                                       ::djinni::Optional<std::optional, ::djinni_generated::RenderTargetInterface>::toCpp(target));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -84,11 +87,12 @@ public:
             [djinni_private_get_proxied_objc_object() addToComputeQueue:(::djinni_generated::ComputePassInterface::fromCpp(c_computePass))];
         }
     }
-    void drawFrame(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & c_renderingContext, const /*not-null*/ std::shared_ptr<::CameraInterface> & c_camera) override
+    void drawFrame(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & c_renderingContext, const /*not-null*/ std::shared_ptr<::CameraInterface> & c_camera, const /*nullable*/ std::shared_ptr<::RenderTargetInterface> & c_target) override
     {
         @autoreleasepool {
             [djinni_private_get_proxied_objc_object() drawFrame:(::djinni_generated::RenderingContextInterface::fromCpp(c_renderingContext))
-                                                         camera:(::djinni_generated::CameraInterface::fromCpp(c_camera))];
+                                                         camera:(::djinni_generated::CameraInterface::fromCpp(c_camera))
+                                                         target:(::djinni::Optional<std::optional, ::djinni_generated::RenderTargetInterface>::fromCpp(c_target))];
         }
     }
     void compute(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & c_renderingContext, const /*not-null*/ std::shared_ptr<::CameraInterface> & c_camera) override

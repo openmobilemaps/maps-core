@@ -18,7 +18,7 @@ extension UIScreen {
                 // iPhone 13 mini
                 "iPhone14,4",
                 // iPhone 12 mini
-                "iPhone13,1"
+                "iPhone13,1",
             ],
             476
         ),
@@ -45,7 +45,7 @@ extension UIScreen {
                 // iPhone 12
                 "iPhone13,2",
                 // iPhone 12 Pro
-                "iPhone13,3"
+                "iPhone13,3",
             ],
             460
         ),
@@ -66,7 +66,7 @@ extension UIScreen {
                 // iPhone XS Max
                 "iPhone11,4", "iPhone11,6",
                 // iPhone X
-                "iPhone10,3", "iPhone10,6"
+                "iPhone10,3", "iPhone10,6",
             ],
             458
         ),
@@ -79,7 +79,7 @@ extension UIScreen {
                 // iPhone 6S Plus
                 "iPhone8,2",
                 // iPhone 6 Plus
-                "iPhone7,1"
+                "iPhone7,1",
             ],
             401
         ),
@@ -130,7 +130,7 @@ extension UIScreen {
                 // iPad mini 3
                 "iPad4,7", "iPad4,8", "iPad4,9",
                 // iPad mini 2
-                "iPad4,4", "iPad4,5", "iPad4,6"
+                "iPad4,4", "iPad4,5", "iPad4,6",
             ],
             326
         ),
@@ -197,29 +197,29 @@ extension UIScreen {
                 // iPad (4th generation)
                 "iPad3,4", "iPad3,5", "iPad3,6",
                 // iPad (3rd generation)
-                "iPad3,1", "iPad3,2", "iPad3,3"
+                "iPad3,1", "iPad3,2", "iPad3,3",
             ],
             264
         ),
         (
             [
                 // iPad mini
-                "iPad2,5", "iPad2,6", "iPad2,7"
+                "iPad2,5", "iPad2,6", "iPad2,7",
             ],
             163
         ),
         (
             [
                 // iPad 2
-                "iPad2,1", "iPad2,2", "iPad2,3", "iPad2,4"
+                "iPad2,1", "iPad2,2", "iPad2,3", "iPad2,4",
             ],
             132
-        )
+        ),
     ]
 
     static let pixelsPerInch: Double = {
         let modelIdentifier = UIDevice.modelIdentifier
-        if let ppi = mapping.first(where: { $0.0.contains(modelIdentifier)}) {
+        if let ppi = mapping.first(where: { $0.0.contains(modelIdentifier) }) {
             return ppi.1
         }
         let screen = UIScreen.main
@@ -243,7 +243,7 @@ private extension UIDevice {
     static let modelIdentifier: String = {
         if let simulatorModelIdentifier = ProcessInfo().environment["SIMULATOR_MODEL_IDENTIFIER"] { return simulatorModelIdentifier }
         var sysinfo = utsname()
-        uname(&sysinfo) // ignore return value
+        uname(&sysinfo)  // ignore return value
         return String(bytes: Data(bytes: &sysinfo.machine, count: Int(_SYS_NAMELEN)), encoding: .ascii)!.trimmingCharacters(in: .controlCharacters)
     }()
 }

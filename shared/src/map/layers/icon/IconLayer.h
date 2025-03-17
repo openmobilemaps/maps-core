@@ -119,6 +119,8 @@ class IconLayer : public IconLayerInterface,
 
     void addScaleAnimation(const IconScaleAnimation& iconScaleAnimation);
 
+    bool isPointInRect(const Vec2F& point, float leftW, float rightW, float topH, float bottomH);
+
     std::vector<std::shared_ptr<IconInfoInterface>> getIconsAtPosition(const ::Vec2F &posScreen);
 
     const static int32_t SUBDIVISION_FACTOR_3D_DEFAULT = 2;

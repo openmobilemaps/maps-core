@@ -1,9 +1,13 @@
-//
-//  ReverseGeocoder.cpp
-//  
-//
-//  Created by Stefan Mitterrutzner on 18.06.2024.
-//
+/*
+ * Copyright (c) 2021 Ubique Innovation AG <https://www.ubique.ch>
+ *
+ *  This Source Code Form is subject to the terms of the Mozilla Public
+ *  License, v. 2.0. If a copy of the MPL was not distributed with this
+ *  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ *
+ *  SPDX-License-Identifier: MPL-2.0
+ */
+
 
 #include "ReverseGeocoder.h"
 #include "CoordinateConversionHelperInterface.h"
@@ -14,6 +18,7 @@
 #include "vtzero/vector_tile.hpp"
 #include "CoordinateSystemIdentifiers.h"
 #include "VectorLayerFeatureCoordInfo.h"
+#include "CoordinateSystemIdentifiers.h"
 #include "Logger.h"
 
 ReverseGeocoder::ReverseGeocoder(const /*not-null*/ std::shared_ptr<::LoaderInterface> & loader, const std::string & tileUrlTemplate, int32_t zoomLevel): loader(loader), tileUrlTemplate(tileUrlTemplate), zoomLevel(zoomLevel) {}
@@ -111,9 +116,10 @@ std::vector<::VectorLayerFeatureCoordInfo> ReverseGeocoder::reverseGeocode(const
 
                     for (auto points: geometryHandler->getPointCoordinates()) {
                         for (auto point: points) {
-                            auto d = distance(converted4326, point);
+                            auto coord = Coord(CoordinateSystemIdentifiers::EPSG3857(), point.x, point.y, 0.0);
+                            auto d = distance(converted4326, coord);
                             if (d < thresholdMeters) {
-                                resultVector.push_back(VectorLayerFeatureCoordInfo(featureContext->getFeatureInfo(), point));
+                                resultVector.push_back(VectorLayerFeatureCoordInfo(featureContext->getFeatureInfo(), coord));
                             }
                         }
                     }

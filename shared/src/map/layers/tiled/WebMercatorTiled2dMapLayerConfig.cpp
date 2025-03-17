@@ -20,8 +20,9 @@ const RectCoord WebMercatorTiled2dMapLayerConfig::WEB_MERCATOR_BOUNDS = RectCoor
 const double WebMercatorTiled2dMapLayerConfig::BASE_ZOOM = 559082264.029;
 const double WebMercatorTiled2dMapLayerConfig::BASE_WIDTH = 40075016;
 
-WebMercatorTiled2dMapLayerConfig::WebMercatorTiled2dMapLayerConfig(std::string layerName, std::string urlFormat)
-    : layerName(layerName), urlFormat(urlFormat)
+WebMercatorTiled2dMapLayerConfig::WebMercatorTiled2dMapLayerConfig(std::string layerName, std::string urlFormat, int32_t minZoomLevel,
+                                                                   int32_t maxZoomLevel)
+    : layerName(layerName), urlFormat(urlFormat), minZoomLevel(minZoomLevel), maxZoomLevel(maxZoomLevel)
      {}
 
 WebMercatorTiled2dMapLayerConfig::WebMercatorTiled2dMapLayerConfig(std::string layerName, std::string urlFormat,

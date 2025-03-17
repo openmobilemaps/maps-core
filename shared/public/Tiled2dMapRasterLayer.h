@@ -101,6 +101,8 @@ public:
 
     bool shouldLoadTile(const Tiled2dMapTileInfo &tileInfo);
 
+    bool shouldKeepTile(const Tiled2dMapTileInfo &tileInfo);
+
     virtual std::shared_ptr<::Tiled2dMapLayerConfig> getConfig() override;
                                   
     void onTilesUpdated(const std::string &layerName, VectorSet<Tiled2dMapRasterTileInfo> currentTileInfos) override;
@@ -110,6 +112,8 @@ public:
     void set3dSubdivisionFactor(int32_t factor) override;
 
     void setBlendMode(::BlendMode blendMode) override;
+
+    void setMinMagFilter(TextureFilterType filterType) override;
 
 private:
     virtual void enableAnimations(bool enabled) override;
@@ -156,4 +160,6 @@ private:
     const static int32_t SUBDIVISION_FACTOR_3D_DEFAULT = 3;
 
     int32_t subdivisionFactor = SUBDIVISION_FACTOR_3D_DEFAULT;
+
+    TextureFilterType textureFilterType = TextureFilterType::LINEAR;
 };

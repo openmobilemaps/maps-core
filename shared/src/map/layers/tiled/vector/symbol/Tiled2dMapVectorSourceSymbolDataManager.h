@@ -150,7 +150,7 @@ private:
 
     bool persistingSymbolPlacement = false;
 
-#ifdef __ANDROID__
+#ifdef OPENMOBILEMAPS_GL
     // Higher counts may cause issues for instanced text rendering
     int32_t maxNumFeaturesPerGroup = 3500;
 #else

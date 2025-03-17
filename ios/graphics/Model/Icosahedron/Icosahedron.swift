@@ -24,9 +24,11 @@ final class Icosahedron: BaseGraphicsObject, @unchecked Sendable {
 
     init(shader: MCShaderProgramInterface, metalContext: MetalContext, label: String = "Icosahedron") {
         self.shader = shader
-        super.init(device: metalContext.device,
-                   sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue)!,
-                   label: label)
+        super
+            .init(
+                device: metalContext.device,
+                sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue)!,
+                label: label)
     }
 
     override func isReady() -> Bool {
@@ -34,21 +36,24 @@ final class Icosahedron: BaseGraphicsObject, @unchecked Sendable {
         return true
     }
 
-    override func render(encoder: MTLRenderCommandEncoder,
-                         context: RenderingContext,
-                         renderPass _: MCRenderPassConfig,
-                         vpMatrix: Int64,
-                         mMatrix: Int64,
-                         origin: MCVec3D,
-                         isMasked: Bool,
-                         screenPixelAsRealMeterFactor _: Double) {
+    override func render(
+        encoder: MTLRenderCommandEncoder,
+        context: RenderingContext,
+        renderPass _: MCRenderPassConfig,
+        vpMatrix: Int64,
+        mMatrix: Int64,
+        origin: MCVec3D,
+        isMasked: Bool,
+        screenPixelAsRealMeterFactor _: Double
+    ) {
         lock.lock()
         defer {
             lock.unlock()
         }
 
         guard let verticesBuffer,
-              let indicesBuffer else { return }
+            let indicesBuffer
+        else { return }
 
         #if DEBUG
             encoder.pushDebugGroup(label)
@@ -76,34 +81,37 @@ final class Icosahedron: BaseGraphicsObject, @unchecked Sendable {
         }
         encoder.setVertexBuffer(vpMatrixBuffer, offset: 0, index: 1)
 
-        encoder.drawIndexedPrimitives(type: .triangle,
-                                      indexCount: indicesCount,
-                                      indexType: .uint32,
-                                      indexBuffer: indicesBuffer,
-                                      indexBufferOffset: 0)
+        encoder.drawIndexedPrimitives(
+            type: .triangle,
+            indexCount: indicesCount,
+            indexType: .uint32,
+            indexBuffer: indicesBuffer,
+            indexBufferOffset: 0)
     }
 }
 
 extension Icosahedron: MCMaskingObjectInterface {
-    func render(asMask context: MCRenderingContextInterface?,
-                renderPass _: MCRenderPassConfig,
-                vpMatrix: Int64,
-                mMatrix: Int64,
-                origin: MCVec3D,
-                screenPixelAsRealMeterFactor _: Double) {
+    func render(
+        asMask context: MCRenderingContextInterface?,
+        renderPass _: MCRenderPassConfig,
+        vpMatrix: Int64,
+        mMatrix: Int64,
+        origin: MCVec3D,
+        screenPixelAsRealMeterFactor _: Double
+    ) {
 
         lock.lock()
         defer {
             lock.unlock()
         }
-        
-        guard isReady(),
-              let context = context as? RenderingContext,
-              let encoder = context.encoder else { return }
 
+        guard isReady(),
+            let context = context as? RenderingContext,
+            let encoder = context.encoder
+        else { return }
 
         guard let verticesBuffer,
-              let indicesBuffer
+            let indicesBuffer
         else { return }
 
         #if DEBUG
@@ -130,19 +138,20 @@ extension Icosahedron: MCMaskingObjectInterface {
         }
         encoder.setVertexBuffer(vpMatrixBuffer, offset: 0, index: 1)
 
-        encoder.drawIndexedPrimitives(type: .triangle,
-                                      indexCount: indicesCount,
-                                      indexType: .uint32,
-                                      indexBuffer: indicesBuffer,
-                                      indexBufferOffset: 0)
+        encoder.drawIndexedPrimitives(
+            type: .triangle,
+            indexCount: indicesCount,
+            indexType: .uint32,
+            indexBuffer: indicesBuffer,
+            indexBufferOffset: 0)
     }
 }
 
 extension Icosahedron: MCIcosahedronInterface {
     func setVertices(_ vertices: MCSharedBytes, indices: MCSharedBytes, origin: MCVec3D) {
         guard let verticesBuffer = device.makeBuffer(from: vertices),
-              let indicesBuffer = device.makeBuffer(from: indices),
-              indices.elementCount > 0
+            let indicesBuffer = device.makeBuffer(from: indices),
+            indices.elementCount > 0
         else {
             lock.withCritical {
                 indicesCount = 0

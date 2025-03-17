@@ -17,11 +17,11 @@ class PolygonPatternGroupShader: BaseShader, @unchecked Sendable {
     // MARK: - Variables
 
     let fadeInPattern: Bool
-    let isUnitSphere : Bool
+    let isUnitSphere: Bool
 
     // MARK: - Init
 
-    init(fadeInPattern: Bool,  isUnitSphere: Bool = false) {
+    init(fadeInPattern: Bool, isUnitSphere: Bool = false) {
         self.fadeInPattern = fadeInPattern
         self.isUnitSphere = isUnitSphere
         super.init(shader: fadeInPattern ? .polygonPatternFadeInGroupShader : .polygonPatternGroupShader)

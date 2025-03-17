@@ -7,6 +7,7 @@
 #import "MCMaskingObjectInterface.h"
 #import "MCRectI.h"
 #import "MCRenderPassInterface.h"
+#import "MCRenderTargetInterface.h"
 #import <Foundation/Foundation.h>
 @class MCMapInterface;
 
@@ -48,5 +49,7 @@
 - (void)setErrorManager:(nullable MCErrorManager *)errorManager;
 
 - (void)forceReload;
+
+- (void)setPrimaryRenderTarget:(nullable id<MCRenderTargetInterface>)target;
 
 @end

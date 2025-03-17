@@ -53,11 +53,12 @@ final class Quad2dInstanced: BaseGraphicsObject, @unchecked Sendable {
             self.isUnitSphere = false
         }
         originBuffers = .init(device: metalContext.device)
-        super.init(
-            device: metalContext.device,
-            sampler: metalContext.samplerLibrary.value(
-                Sampler.magLinear.rawValue)!,
-            label: label)
+        super
+            .init(
+                device: metalContext.device,
+                sampler: metalContext.samplerLibrary.value(
+                    Sampler.magLinear.rawValue)!,
+                label: label)
     }
 
     private func setupStencilStates() {
@@ -145,8 +146,9 @@ final class Quad2dInstanced: BaseGraphicsObject, @unchecked Sendable {
 
         let vpMatrixBuffer = vpMatrixBuffers.getNextBuffer(context)
         if let matrixPointer = UnsafeRawPointer(bitPattern: Int(vpMatrix)) {
-            vpMatrixBuffer?.contents().copyMemory(
-                from: matrixPointer, byteCount: 64)
+            vpMatrixBuffer?.contents()
+                .copyMemory(
+                    from: matrixPointer, byteCount: 64)
         }
         encoder.setVertexBuffer(vpMatrixBuffer, offset: 0, index: 1)
 
@@ -183,8 +185,9 @@ final class Quad2dInstanced: BaseGraphicsObject, @unchecked Sendable {
         encoder.setVertexBuffer(originOffsetBuffer, offset: 0, index: 9)
 
         let originBuffer = originBuffers.getNextBuffer(context)
-        if let bufferPointer = originBuffer?.contents().assumingMemoryBound(
-            to: simd_float4.self)
+        if let bufferPointer = originBuffer?.contents()
+            .assumingMemoryBound(
+                to: simd_float4.self)
         {
             bufferPointer.pointee.x = Float(origin.x)
             bufferPointer.pointee.y = Float(origin.y)

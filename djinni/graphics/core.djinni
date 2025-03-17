@@ -20,7 +20,7 @@ scene_interface = interface +c {
     get_graphics_factory(): graphics_object_factory_interface;
     get_shader_factory(): shader_factory_interface;
     prepare();
-    draw_frame();
+    draw_frame(target: optional<render_target_interface>);
     compute();
     clear();
     invalidate();
@@ -58,12 +58,19 @@ render_object_interface = interface +c +j +o {
     has_custom_model_matrix() : bool;
     is_screen_space_coords() : bool;
     get_custom_model_matrix() : list<f32>;
+    set_hidden(hidden: bool);
+    is_hidden(): bool;
+}
+
+render_target_interface = interface +c +j +o {
+
 }
 
 render_pass_interface = interface +c +j +o {
     get_render_objects() : list<render_object_interface>;
     add_render_object(render_object: render_object_interface);
     get_render_pass_config() : render_pass_config;
+    get_render_target_interface() : optional<render_target_interface>;
     get_masking_object(): optional<masking_object_interface>;
     get_scissoring_rect() : optional<rect_i>;
 }
@@ -81,7 +88,7 @@ renderer_interface = interface +c +j +o {
     add_to_render_queue(render_pass: render_pass_interface);
     add_to_compute_queue(compute_pass: compute_pass_interface);
     # Ensure calling on graphics thread
-    draw_frame(rendering_context: rendering_context_interface, camera: camera_interface);
+    draw_frame(rendering_context: rendering_context_interface, camera: camera_interface, target: optional<render_target_interface>);
     # Ensure calling on graphics thread
     compute(rendering_context: rendering_context_interface, camera: camera_interface);
 }

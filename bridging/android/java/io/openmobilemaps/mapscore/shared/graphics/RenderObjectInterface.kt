@@ -16,6 +16,10 @@ abstract class RenderObjectInterface {
 
     abstract fun getCustomModelMatrix(): ArrayList<Float>
 
+    abstract fun setHidden(hidden: Boolean)
+
+    abstract fun isHidden(): Boolean
+
     public class CppProxy : RenderObjectInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -54,5 +58,17 @@ abstract class RenderObjectInterface {
             return native_getCustomModelMatrix(this.nativeRef)
         }
         private external fun native_getCustomModelMatrix(_nativeRef: Long): ArrayList<Float>
+
+        override fun setHidden(hidden: Boolean) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setHidden(this.nativeRef, hidden)
+        }
+        private external fun native_setHidden(_nativeRef: Long, hidden: Boolean)
+
+        override fun isHidden(): Boolean {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_isHidden(this.nativeRef)
+        }
+        private external fun native_isHidden(_nativeRef: Long): Boolean
     }
 }

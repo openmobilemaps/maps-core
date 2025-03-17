@@ -25,6 +25,7 @@
 #include "CollisionGrid.h"
 #include "Vec3D.h"
 #include "SymbolAnimationCoordinatorMap.h"
+#include "VectorModificationWrapper.h"
 
 class Tiled2dMapVectorSymbolObject {
 public:
@@ -37,8 +38,8 @@ public:
                                  const std::shared_ptr<FeatureContext> featureContext,
                                  const std::vector<FormattedStringEntry> &text,
                                  const std::string &fullText,
-                                 const ::Coord &coordinate,
-                                 const std::optional<std::vector<Coord>> &lineCoordinates,
+                                 const ::Vec2D &coordinate,
+                                 const std::optional<std::vector<Vec2D>> &lineCoordinates,
                                  const std::vector<std::string> &fontList,
                                  const Anchor &textAnchor,
                                  const std::optional<double> &angle,
@@ -67,15 +68,15 @@ public:
 
     const SymbolObjectInstanceCounts getInstanceCounts() const;
 
-    void setupIconProperties(std::vector<float> &positions, std::vector<float> &rotations, std::vector<float> &textureCoordinates, int &countOffset, const double zoomIdentifier, const std::shared_ptr<TextureHolderInterface> spriteTexture, const std::shared_ptr<SpriteData> spriteData, const std::optional<RectI> customUv);
+    void setupIconProperties(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &rotations, VectorModificationWrapper<float> &textureCoordinates, int &countOffset, const double zoomIdentifier, const std::shared_ptr<TextureHolderInterface> spriteTexture, const std::shared_ptr<SpriteData> spriteData, const std::optional<RectI> customUv);
 
-    void updateIconProperties(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &alphas, std::vector<float> &offsets, int &countOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, long long now, const Vec2I viewPortSize);
+    void updateIconProperties(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &scales, VectorModificationWrapper<float> &rotations, VectorModificationWrapper<float> &alphas, VectorModificationWrapper<float> &offsets, VectorModificationWrapper<float> &textureCoordinates, int &countOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, long long now, const Vec2I viewPortSize, const std::shared_ptr<TextureHolderInterface> spriteTexture, const std::shared_ptr<SpriteData> spriteData);
 
-    void setupTextProperties(std::vector<float> &textureCoordinates, std::vector<uint16_t> &styleIndices, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier);
-    void updateTextProperties(std::vector<float> &positions, std::vector<float> &referencePositions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, long long now, const Vec2I viewPortSize, const std::vector<float>& vpMatrix, const Vec3D& origin);
+    void setupTextProperties(VectorModificationWrapper<float> &textureCoordinates, VectorModificationWrapper<uint16_t> &styleIndices, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier);
+    void updateTextProperties(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &referencePositions, VectorModificationWrapper<float> &scales, VectorModificationWrapper<float> &rotations, VectorModificationWrapper<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, long long now, const Vec2I viewPortSize, const std::vector<float>& vpMatrix, const Vec3D& origin);
 
-    void setupStretchIconProperties(std::vector<float> &positions, std::vector<float> &textureCoordinates, int &countOffset, const double zoomIdentifier, const std::shared_ptr<TextureHolderInterface> spriteTexture, const std::shared_ptr<SpriteData> spriteData);
-    void updateStretchIconProperties(std::vector<float> &positions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &alphas, std::vector<float> &stretchInfos, int &countOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, long long now, const Vec2I viewPortSize);
+    void setupStretchIconProperties(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &textureCoordinates, int &countOffset, const double zoomIdentifier, const std::shared_ptr<TextureHolderInterface> spriteTexture, const std::shared_ptr<SpriteData> spriteData);
+    void updateStretchIconProperties(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &scales, VectorModificationWrapper<float> &rotations, VectorModificationWrapper<float> &alphas, VectorModificationWrapper<float> &stretchInfos, VectorModificationWrapper<float> &textureCoordinates, int &countOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, long long now, const Vec2I viewPortSize, const std::shared_ptr<TextureHolderInterface> spriteTexture, const std::shared_ptr<SpriteData> spriteData);
 
     std::shared_ptr<FontLoaderResult> getFont() {
         if (labelObject) {
@@ -121,9 +122,9 @@ private:
     double lastZoomEvaluation = -1;
     void evaluateStyleProperties(const double zoomIdentifier);
 
-    void writePosition(const double x, const double y, const size_t offset, std::vector<float> &buffer);
+    void writePosition(const double x, const double y, const size_t offset, VectorModificationWrapper<float> &buffer);
 
-    ::Coord getRenderCoordinates(Anchor iconAnchor, double rotation, double iconWidth, double iconHeight);
+    ::Vec2D getRenderCoordinates(Anchor iconAnchor, double rotation, double iconWidth, double iconHeight);
 
     std::shared_ptr<Tiled2dMapVectorLayerConfig> layerConfig;
 
@@ -137,8 +138,8 @@ private:
 
     std::shared_ptr<SymbolVectorLayerDescription> description;
 
-    const ::Coord coordinate;
-    ::Coord renderCoordinate = Coord(0, 0, 0, 0);
+    const ::Vec2D coordinate;
+    ::Vec2D renderCoordinate = Vec2D(0, 0);
     Vec2D initialRenderCoordinateVec = Vec2D(0, 0);
 
     SymbolObjectInstanceCounts instanceCounts = {0,0,0};
@@ -180,6 +181,8 @@ private:
     float iconOpacity = 0;
     float iconRotate = 0;
     float iconSize = 0;
+    std::string iconImage;
+    std::string lastIconImage;
     std::vector<float> iconTextFitPadding;
     TextSymbolPlacement textSymbolPlacement;
     SymbolAlignment boundingBoxRotationAlignment = SymbolAlignment::AUTO;
@@ -187,6 +190,8 @@ private:
     Anchor iconAnchor = Anchor::CENTER;
     Vec2F iconOffset = Vec2F(0.0, 0.0);
     IconTextFit iconTextFit = IconTextFit::NONE;
+
+    std::optional<RectI> customIconUv;
 
     size_t contentHash = 0;
 
@@ -200,4 +205,6 @@ private:
     
     bool is3d;
     int positionSize;
+
+    const std::optional<double> angle;
 };

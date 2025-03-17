@@ -31,7 +31,8 @@ public:
                                                          layerDescription->adaptScaleToScreen,
                                                          layerDescription->numDrawPreviousLayers,
                                                          layerDescription->underzoom,
-                                                         layerDescription->overzoom), is3d),
+                                                         layerDescription->overzoom,
+                                                         layerDescription->levels), is3d),
               description(layerDescription) {
         if (customZoomInfo.has_value()) {
             zoomInfo = Tiled2dMapZoomInfo(customZoomInfo->zoomLevelScaleFactor * description->zoomLevelScaleFactor,

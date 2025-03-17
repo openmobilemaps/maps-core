@@ -53,7 +53,7 @@ public:
             featureStates.emplace_back(intIdentifier, std::move(convertedProperties));
             hasNoValues = false;
         } else {
-            hasNoValues = !featureStates.empty() && !globalState.empty();
+            hasNoValues = featureStates.empty() && globalState.empty();
         }
 
         currentState++;
@@ -87,7 +87,7 @@ public:
             globalState.emplace(property.first, convertToValueVariant(property.second));
         }
 
-        hasNoValues = !properties.empty() && !featureStates.empty();
+        hasNoValues = properties.empty() && featureStates.empty();
         currentState++;
         globalStateId++;
     }

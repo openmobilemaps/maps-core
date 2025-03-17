@@ -32,7 +32,7 @@ abstract class SceneInterface {
 
     abstract fun prepare()
 
-    abstract fun drawFrame()
+    abstract fun drawFrame(target: RenderTargetInterface?)
 
     abstract fun compute()
 
@@ -103,11 +103,11 @@ abstract class SceneInterface {
         }
         private external fun native_prepare(_nativeRef: Long)
 
-        override fun drawFrame() {
+        override fun drawFrame(target: RenderTargetInterface?) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_drawFrame(this.nativeRef)
+            native_drawFrame(this.nativeRef, target)
         }
-        private external fun native_drawFrame(_nativeRef: Long)
+        private external fun native_drawFrame(_nativeRef: Long, target: RenderTargetInterface?)
 
         override fun compute() {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

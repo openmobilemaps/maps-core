@@ -20,10 +20,11 @@ public extension CLLocation {
 
 public extension CLLocationCoordinate2D {
     var mcCoord: MCCoord {
-        MCCoord(systemIdentifier: MCCoordinateSystemIdentifiers.epsg4326(),
-                x: longitude,
-                y: latitude,
-                z: 0)
+        MCCoord(
+            systemIdentifier: MCCoordinateSystemIdentifiers.epsg4326(),
+            x: longitude,
+            y: latitude,
+            z: 0)
     }
 }
 

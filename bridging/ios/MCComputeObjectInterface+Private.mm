@@ -8,6 +8,7 @@
 #import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
 #import "MCRenderingContextInterface+Private.h"
+#import "MCVec3D+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -33,9 +34,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 }
 
 - (void)compute:(nullable id<MCRenderingContextInterface>)context
+       vpMatrix:(int64_t)vpMatrix
+         origin:(nonnull MCVec3D *)origin
 screenPixelAsRealMeterFactor:(double)screenPixelAsRealMeterFactor {
     try {
         _cppRefHandle.get()->compute(::djinni_generated::RenderingContextInterface::toCpp(context),
+                                     ::djinni::I64::toCpp(vpMatrix),
+                                     ::djinni_generated::Vec3D::toCpp(origin),
                                      ::djinni::F64::toCpp(screenPixelAsRealMeterFactor));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
@@ -49,10 +54,12 @@ class ComputeObjectInterface::ObjcProxy final
     friend class ::djinni_generated::ComputeObjectInterface;
 public:
     using ObjcProxyBase::ObjcProxyBase;
-    void compute(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & c_context, double c_screenPixelAsRealMeterFactor) override
+    void compute(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & c_context, int64_t c_vpMatrix, const ::Vec3D & c_origin, double c_screenPixelAsRealMeterFactor) override
     {
         @autoreleasepool {
             [djinni_private_get_proxied_objc_object() compute:(::djinni_generated::RenderingContextInterface::fromCpp(c_context))
+                                                     vpMatrix:(::djinni::I64::fromCpp(c_vpMatrix))
+                                                       origin:(::djinni_generated::Vec3D::fromCpp(c_origin))
                                  screenPixelAsRealMeterFactor:(::djinni::F64::fromCpp(c_screenPixelAsRealMeterFactor))];
         }
     }

@@ -11,21 +11,22 @@
 #include "Tiled2dMapVectorSymbolLabelObject.h"
 #include "TextHelper.h"
 #include "DateHelper.h"
+#include "Vec3DHelper.h"
 #include "SymbolAnimationCoordinator.h"
 #include "Tiled2dMapVectorStyleParser.h"
 #include "fast_atan2.h"
 #include "Matrix.h"
 #include "MapCamera3d.h"
+#include "CoordinateSystemIdentifiers.h"
 
 Tiled2dMapVectorSymbolLabelObject::Tiled2dMapVectorSymbolLabelObject(const std::shared_ptr<CoordinateConversionHelperInterface> &converter,
                                                                      const std::shared_ptr<FeatureContext> featureContext,
                                                                      const std::shared_ptr<SymbolVectorLayerDescription> &description,
                                                                      const std::vector<FormattedStringEntry> &text,
                                                                      const std::string &fullText,
-                                                                     const ::Coord &coordinate,
-                                                                     const std::optional<std::vector<Coord>> &lineCoordinates,
+                                                                     const ::Vec2D &coordinate,
+                                                                     const std::optional<std::vector<Vec2D>> &lineCoordinates,
                                                                      const Anchor &textAnchor,
-                                                                     const std::optional<double> &angle,
                                                                      const TextJustify &textJustify,
                                                                      const std::shared_ptr<FontLoaderResult> fontResult,
                                                                      const Vec2F &offset,
@@ -55,7 +56,7 @@ Tiled2dMapVectorSymbolLabelObject::Tiled2dMapVectorSymbolLabelObject(const std::
           fontResult(fontResult),
           fullText(fullText),
           lineCoordinates(lineCoordinates),
-          referencePoint(converter->convertToRenderSystem(coordinate)),
+          referencePoint(Vec3DHelper::toVec(converter->convertToRenderSystem(Vec2DHelper::toCoord(coordinate, CoordinateSystemIdentifiers::EPSG3857())))),
           referenceSize(fontResult->fontData->info.size),
           animationCoordinator(animationCoordinator),
           stateManager(featureStateManager),
@@ -148,7 +149,7 @@ Tiled2dMapVectorSymbolLabelObject::Tiled2dMapVectorSymbolLabelObject(const std::
     if(lineCoordinates) {
         std::transform(lineCoordinates->begin(), lineCoordinates->end(), std::back_inserter(renderLineCoordinates),
                        [converter](const auto& l) {
-            return converter->convertToRenderSystem(l);
+            return Vec3DHelper::toVec(converter->convertToRenderSystem(Vec2DHelper::toCoord(l, CoordinateSystemIdentifiers::EPSG3857())));
         });
 
         if(is3d) {
@@ -207,7 +208,7 @@ int Tiled2dMapVectorSymbolLabelObject::getCharacterCount(){
     return characterCount;
 }
 
-void Tiled2dMapVectorSymbolLabelObject::setupProperties(std::vector<float> &textureCoordinates, std::vector<uint16_t> &styleIndices, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier) {
+void Tiled2dMapVectorSymbolLabelObject::setupProperties(VectorModificationWrapper<float> &textureCoordinates, VectorModificationWrapper<uint16_t> &styleIndices, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier) {
     const auto evalContext = EvaluationContext(zoomIdentifier, dpFactor, featureContext, stateManager);
 
     evaluateStyleProperties(zoomIdentifier);
@@ -258,7 +259,7 @@ void Tiled2dMapVectorSymbolLabelObject::evaluateStyleProperties(const double zoo
 }
 
 
-void Tiled2dMapVectorSymbolLabelObject::updateProperties(std::vector<float> &positions, std::vector<float> &referencePositions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const bool collides, const double rotation, const float alpha, const bool isCoordinateOwner, long long now, const Vec2I &viewportSize, const std::vector<float>& vpMatrix, const Vec3D& origin) {
+void Tiled2dMapVectorSymbolLabelObject::updateProperties(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &referencePositions, VectorModificationWrapper<float> &scales, VectorModificationWrapper<float> &rotations, VectorModificationWrapper<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const bool collides, const double rotation, const float alpha, const bool isCoordinateOwner, long long now, const Vec2I &viewportSize, const std::vector<float>& vpMatrix, const Vec3D& origin) {
     const auto evalContext = EvaluationContext(zoomIdentifier, dpFactor, featureContext, stateManager);
 
     evaluateStyleProperties(zoomIdentifier);
@@ -321,7 +322,7 @@ void Tiled2dMapVectorSymbolLabelObject::updateProperties(std::vector<float> &pos
     }
 }
 
-void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float> &positions, std::vector<float> &referencePositions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, const Vec2I &viewportSize) {
+void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &referencePositions, VectorModificationWrapper<float> &scales, VectorModificationWrapper<float> &rotations, VectorModificationWrapper<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, const Vec2I &viewportSize) {
 
     const auto evalContext = EvaluationContext(zoomIdentifier, dpFactor, featureContext, stateManager);
     const float fontSize = is3d ? textSize : (scaleFactor * textSize);
@@ -538,8 +539,8 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
             break;
     }
 
-    Coord boundingBoxMin(referencePoint.systemIdentifier, std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), referencePoint.z);
-    Coord boundingBoxMax(referencePoint.systemIdentifier, std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest(), referencePoint.z);
+    Vec3D boundingBoxMin(std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), referencePoint.z);
+    Vec3D boundingBoxMax(std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest(), referencePoint.z);
 
     Vec2D anchorOffsetRot = Vec2DHelper::rotate(anchorOffset, Vec2D(0, 0), angle);
 
@@ -600,18 +601,19 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
         countOffset += 1;
     }
 
-    auto rectBoundingBox = (numberOfCharacters > 0) ? RectCoord(boundingBoxMin, boundingBoxMax) :  RectCoord(referencePoint, referencePoint);
+    auto rectBoundingBoxTopLeft = (numberOfCharacters > 0) ? boundingBoxMin :  referencePoint;
+    auto rectBoundingBoxBottomRight = (numberOfCharacters > 0) ? boundingBoxMax :  referencePoint;
 
     const float scaledTextPadding = is3d ? textPadding : scaleFactor * textPadding;
 
-    rectBoundingBox.topLeft.x -= scaledTextPadding;
-    rectBoundingBox.topLeft.y -= scaledTextPadding;
+    rectBoundingBoxTopLeft.x -= scaledTextPadding;
+    rectBoundingBoxTopLeft.y -= scaledTextPadding;
 
-    rectBoundingBox.bottomRight.x += scaledTextPadding;
-    rectBoundingBox.bottomRight.y += scaledTextPadding;
+    rectBoundingBoxBottomRight.x += scaledTextPadding;
+    rectBoundingBoxBottomRight.y += scaledTextPadding;
 
-    dimensions.x = rectBoundingBox.bottomRight.x - rectBoundingBox.topLeft.x;
-    dimensions.y = rectBoundingBox.bottomRight.y - rectBoundingBox.topLeft.y;
+    dimensions.x = rectBoundingBoxBottomRight.x - rectBoundingBoxTopLeft.x;
+    dimensions.y = rectBoundingBoxBottomRight.y - rectBoundingBoxTopLeft.y;
 
     if (rotationAlignment != SymbolAlignment::MAP) {
         if (is3d) {
@@ -643,7 +645,7 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(std::vector<float>
     }
 }
 
-double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float> &positions, std::vector<float> &referencePositions, std::vector<float> &scales, std::vector<float> &rotations, std::vector<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, const Vec2I &viewportSize) {
+double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &referencePositions, VectorModificationWrapper<float> &scales, VectorModificationWrapper<float> &rotations, VectorModificationWrapper<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, const Vec2I &viewportSize) {
     if(lineCoordinates == std::nullopt) {
         countOffset += characterCount;
         return 0;
@@ -676,7 +678,24 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
     }
 
     // updates currentIndex
-    indexAtDistance(currentIndex, -size * 0.5 * scaleCorrection, std::nullopt, currentIndex);
+
+    switch (textAnchor) {
+        case Anchor::TOP_LEFT:
+        case Anchor::LEFT:
+        case Anchor::BOTTOM_LEFT:
+            indexAtDistance(currentIndex, fontSize * scaleCorrection, std::nullopt, currentIndex);
+            break;
+        case Anchor::TOP_RIGHT:
+        case Anchor::RIGHT:
+        case Anchor::BOTTOM_RIGHT:
+            indexAtDistance(currentIndex, -size * 1.0 * scaleCorrection, std::nullopt, currentIndex);
+            break;
+        case Anchor::CENTER:
+        case Anchor::TOP:
+        case Anchor::BOTTOM:
+            indexAtDistance(currentIndex, -size * 0.5 * scaleCorrection, std::nullopt, currentIndex);
+            break;
+    }
     
     auto yOffset = offset.y * fontSize;
 
@@ -839,6 +858,8 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
 
             countOffset += 1;
         }
+
+        isPlaced = true;
     } else {
         for (int i = 0; i != characterCount; i++) {
             positions[(2 * countOffset) + 0] = 0;
@@ -853,6 +874,8 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(std::vector<float
             countOffset += 1;
         }
         boxMin.x = std::numeric_limits<float>::max();
+
+        isPlaced = false;
     }
 
     assert(countOffset == countBefore + characterCount);
@@ -925,7 +948,7 @@ void Tiled2dMapVectorSymbolLabelObject::setupCamera(const std::vector<float>& vp
     double posScreenY = ((double)viewportSize.y / 2.0) - screenYDiffToCenter;
 
     // don't care about systemIdentifier, only used for findReferencePointIndices
-    referencePointScreen = Coord(0, (double)posScreenX, (double)posScreenY, (double)0.0);
+    referencePointScreen = Vec3D((double)posScreenX, (double)posScreenY, 0.0);
 }
 
 DistanceIndex Tiled2dMapVectorSymbolLabelObject::findReferencePointIndices() {
@@ -961,7 +984,7 @@ DistanceIndex Tiled2dMapVectorSymbolLabelObject::findReferencePointIndices() {
 }
 
 
-void Tiled2dMapVectorSymbolLabelObject::writePosition(const double x_, const double y_, const size_t offset, std::vector<float> &buffer) {
+void Tiled2dMapVectorSymbolLabelObject::writePosition(const double x_, const double y_, const size_t offset, VectorModificationWrapper<float> &buffer) {
     const size_t baseIndex = positionSize * offset;
     if (is3d) {
         const double sinY = sin(y_);

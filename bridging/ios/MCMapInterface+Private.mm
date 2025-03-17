@@ -15,7 +15,9 @@
 #import "MCMapCameraInterface+Private.h"
 #import "MCMapConfig+Private.h"
 #import "MCMapReadyCallbackInterface+Private.h"
+#import "MCPerformanceLoggerInterface+Private.h"
 #import "MCRectCoord+Private.h"
+#import "MCRenderTargetInterface+Private.h"
 #import "MCRenderingContextInterface+Private.h"
 #import "MCSchedulerInterface+Private.h"
 #import "MCShaderFactoryInterface+Private.h"
@@ -151,6 +153,19 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)setPerformanceLoggers:(nonnull NSArray<id<MCPerformanceLoggerInterface>> *)performanceLoggers {
+    try {
+        _cppRefHandle.get()->setPerformanceLoggers(::djinni::List<::djinni_generated::PerformanceLoggerInterface>::toCpp(performanceLoggers));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nonnull NSArray<id<MCPerformanceLoggerInterface>> *)getPerformanceLoggers {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getPerformanceLoggers();
+        return ::djinni::List<::djinni_generated::PerformanceLoggerInterface>::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (nonnull NSArray<id<MCLayerInterface>> *)getLayers {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->getLayers();
@@ -229,6 +244,19 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 - (void)prepare {
     try {
         _cppRefHandle.get()->prepare();
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (BOOL)getNeedsCompute {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getNeedsCompute();
+        return ::djinni::Bool::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)drawOffscreenFrame:(nullable id<MCRenderTargetInterface>)target {
+    try {
+        _cppRefHandle.get()->drawOffscreenFrame(::djinni_generated::RenderTargetInterface::toCpp(target));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

@@ -27,6 +27,7 @@
 #include "CollisionGrid.h"
 #include "RenderObjectInterface.h"
 #include "SymbolObjectCollisionWrapper.h"
+#include "VectorModificationWrapper.h"
 
 //#define DRAW_TEXT_BOUNDING_BOX
 //#define DRAW_TEXT_BOUNDING_BOX_WITH_COLLISIONS
@@ -75,7 +76,7 @@ public:
 private:
 
     inline std::optional<Tiled2dMapVectorSymbolSubLayerPositioningWrapper>
-    getPositioning(std::vector<::Coord>::const_iterator &iterator, const std::vector<::Coord> &collection, const double interpolationValue);
+    getPositioning(std::vector<::Vec2D>::const_iterator &iterator, const std::vector<::Vec2D> &collection, const double interpolationValue);
 
     inline std::shared_ptr<Tiled2dMapVectorSymbolObject> createSymbolObject(const Tiled2dMapVersionedTileInfo &tileInfo,
                                                                             const std::string &layerIdentifier,
@@ -84,8 +85,8 @@ private:
                                                                             const std::shared_ptr<FeatureContext> &featureContext,
                                                                             const std::vector<FormattedStringEntry> &text,
                                                                             const std::string &fullText,
-                                                                            const ::Coord &coordinate,
-                                                                            const std::optional<std::vector<Coord>> &lineCoordinates,
+                                                                            const ::Vec2D &coordinate,
+                                                                            const std::optional<std::vector<Vec2D>> &lineCoordinates,
                                                                             const std::vector<std::string> &fontList,
                                                                             const Anchor &textAnchor,
                                                                             const std::optional<double> &angle,
@@ -118,12 +119,12 @@ private:
     std::shared_ptr<SpriteData> spriteData;
 
     struct CustomIconDescriptor {
-        std::vector<float> iconPositions;
-        std::vector<float> iconScales;
-        std::vector<float> iconRotations;
-        std::vector<float> iconAlphas;
-        std::vector<float> iconOffsets;
-        std::vector<float> iconTextureCoordinates;
+        VectorModificationWrapper<float> iconPositions;
+        VectorModificationWrapper<float> iconScales;
+        VectorModificationWrapper<float> iconRotations;
+        VectorModificationWrapper<float> iconAlphas;
+        VectorModificationWrapper<float> iconOffsets;
+        VectorModificationWrapper<float> iconTextureCoordinates;
         std::shared_ptr<TextureHolderInterface> texture;
         std::shared_ptr<Quad2dInstancedInterface> renderObject;
         std::unordered_map<std::string, ::RectI> featureIdentifiersUv;
@@ -146,22 +147,22 @@ private:
     std::vector<CustomIconDescriptor> customTextures;
 
 
-    std::vector<float> iconPositions;
-    std::vector<float> iconScales;
-    std::vector<float> iconRotations;
-    std::vector<float> iconAlphas;
-    std::vector<float> iconOffsets;
-    std::vector<float> iconTextureCoordinates;
+    VectorModificationWrapper<float> iconPositions;
+    VectorModificationWrapper<float> iconScales;
+    VectorModificationWrapper<float> iconRotations;
+    VectorModificationWrapper<float> iconAlphas;
+    VectorModificationWrapper<float> iconOffsets;
+    VectorModificationWrapper<float> iconTextureCoordinates;
 
     struct TextDescriptor {
         std::shared_ptr<FontLoaderResult> fontResult;
-        std::vector<float> textPositions;
-        std::vector<float> textReferencePositions;
-        std::vector<float> textScales;
-        std::vector<float> textRotations;
-        std::vector<uint16_t> textStyleIndices;
-        std::vector<float> textStyles;
-        std::vector<float> textTextureCoordinates;
+        VectorModificationWrapper<float> textPositions;
+        VectorModificationWrapper<float> textReferencePositions;
+        VectorModificationWrapper<float> textScales;
+        VectorModificationWrapper<float> textRotations;
+        VectorModificationWrapper<uint16_t> textStyleIndices;
+        VectorModificationWrapper<float> textStyles;
+        VectorModificationWrapper<float> textTextureCoordinates;
 
         TextDescriptor(int32_t textStyleCount, size_t textCharactersCount, std::shared_ptr<FontLoaderResult> fontResult, bool is3d)
                 : fontResult(fontResult) {
@@ -178,12 +179,12 @@ private:
     };
     std::vector<std::shared_ptr<TextDescriptor>> textDescriptors;
 
-    std::vector<float> stretchedIconPositions;
-    std::vector<float> stretchedIconScales;
-    std::vector<float> stretchedIconRotations;
-    std::vector<float> stretchedIconAlphas;
-    std::vector<float> stretchedIconStretchInfos;
-    std::vector<float> stretchedIconTextureCoordinates;
+    VectorModificationWrapper<float> stretchedIconPositions;
+    VectorModificationWrapper<float> stretchedIconScales;
+    VectorModificationWrapper<float> stretchedIconRotations;
+    VectorModificationWrapper<float> stretchedIconAlphas;
+    VectorModificationWrapper<float> stretchedIconStretchInfos;
+    VectorModificationWrapper<float> stretchedIconTextureCoordinates;
 
     float alpha = 1.0;
     double dpFactor = 1.0;

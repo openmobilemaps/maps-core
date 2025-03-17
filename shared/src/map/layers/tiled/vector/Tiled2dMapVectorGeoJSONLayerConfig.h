@@ -30,7 +30,7 @@ public:
             minZoom = geoJSON->getMinZoom();
             maxZoom = geoJSON->getMaxZoom();
         }
-        return getDefaultEpsg3857ZoomLevels(minZoom, maxZoom);
+        return getDefaultEpsg3857ZoomLevels(minZoom, maxZoom, std::nullopt);
     }
 
     std::vector<Tiled2dMapZoomLevelInfo> getVirtualZoomLevelInfos() override {

@@ -23,6 +23,7 @@
 #include "StretchInstancedShaderOpenGl.h"
 #include "IcosahedronColorShaderOpenGl.h"
 #include "SphereEffectShaderOpenGl.h"
+#include "SkySphereShaderOpenGl.h"
 
 std::shared_ptr<AlphaShaderInterface> ShaderFactoryOpenGl::createAlphaShader() {
     return std::make_shared<AlphaShaderOpenGl>(false);
@@ -49,11 +50,19 @@ std::shared_ptr<RasterShaderInterface> ShaderFactoryOpenGl::createUnitSphereRast
 }
 
 std::shared_ptr<LineGroupShaderInterface> ShaderFactoryOpenGl::createLineGroupShader() {
-    return std::make_shared<ColorLineGroup2dShaderOpenGl>(false);
+    return std::make_shared<ColorLineGroup2dShaderOpenGl>(false, false);
 }
 
 std::shared_ptr<LineGroupShaderInterface> ShaderFactoryOpenGl::createUnitSphereLineGroupShader() {
-    return std::make_shared<ColorLineGroup2dShaderOpenGl>(true);
+    return std::make_shared<ColorLineGroup2dShaderOpenGl>(true, false);
+}
+
+std::shared_ptr<LineGroupShaderInterface> ShaderFactoryOpenGl::createSimpleLineGroupShader() {
+    return std::make_shared<ColorLineGroup2dShaderOpenGl>(false, true);
+}
+
+std::shared_ptr<LineGroupShaderInterface> ShaderFactoryOpenGl::createUnitSphereSimpleLineGroupShader() {
+    return std::make_shared<ColorLineGroup2dShaderOpenGl>(true, true);
 }
 
 std::shared_ptr<ColorShaderInterface> ShaderFactoryOpenGl::createColorShader() {
@@ -108,4 +117,8 @@ std::shared_ptr<ColorShaderInterface> ShaderFactoryOpenGl::createIcosahedronColo
 
 std::shared_ptr<SphereEffectShaderInterface> ShaderFactoryOpenGl::createSphereEffectShader() {
     return std::make_shared<SphereEffectShaderOpenGl>();
+}
+
+std::shared_ptr<SkySphereShaderInterface> ShaderFactoryOpenGl::createSkySphereShader() {
+    return std::make_shared<SkySphereShaderOpenGl>();
 }

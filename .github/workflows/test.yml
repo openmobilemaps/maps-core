@@ -1,0 +1,54 @@
+name: test
+
+on:
+  pull_request:
+    branches: [ main, develop, release/** ]
+  push:
+    branches: [ main, develop, release/** ]
+
+jobs:
+  test:
+    name: "Catch2 Tests"
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+           submodules: 'recursive'
+      - name: Install build tools and dependencies
+        run: sudo apt-get update && sudo apt-get install cmake ninja-build clang libgl-dev libgles-dev catch2
+      - name: ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: test-ccache-${{ runner.os }}-${{ runner.arch }}
+
+      - name: Build
+        run: |
+          cmake -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Debug -DBUILD_JVM=OFF -DBUILD_STANDALONE=OFF -B build-debug
+          cmake --build build-debug -- tests
+      - name: Test
+        run: |
+          mkdir test-results
+          cd shared/test      # for access to data/ directory
+          ../../build-debug/shared/test/tests \
+            -r JUnit::out=../../test-results/catch2-junit.xml \
+            -r console::colour-mode=ansi
+
+      - name: Postprocess Junit XML
+        if: always()
+        run: |
+          # cursed XML fixup to add proper file and line number attributes
+          sed -i -e '
+          /<testcase.*[^/]>/,/<\/testcase>/{
+            /<testcase/      {h;d;}
+            /<\/\?testcase/! {H;d;}
+            /<\/testcase>/   {H;x;s/<testcase \(.*\)at \([^:]*\):\([0-9]\+\)/<testcase file="\2" line="\3" \1at \2:\3/;}
+          }' test-results/catch2-junit.xml
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          files: |
+            test-results/catch2-junit.xml
+          test_file_prefix: -/home/runner/work/maps-core/maps-core/
+          comment_mode: off

@@ -10,35 +10,34 @@
 
 import UIKit
 
-/**
- `MCAssetProvider` is a class designed for packing custom icons into a vector layer for use in a mapping application. It implements the `MCTiled2dMapVectorLayerSymbolDelegateInterface` to provide custom assets for vector layer symbols.
-
- This class allows you to efficiently pack multiple custom icons into a single texture atlas, optimizing performance for rendering vector layers with custom icons.
-
- ## Usage:
- 1. Subclass `MCAssetProvider` and implement the `getImageFor` method to provide custom icons for specific feature information.
- 2. Implement the `getCustomAssets` method to pack the custom icons into texture atlases for use in the vector layer.
-
- Example:
- ```swift
- class CustomAssetProvider: MCAssetProvider {
-     override func getImageFor(for featureInfo: MCVectorLayerFeatureInfo, layerIdentifier: String) -> UIImage {
-         // Provide a custom icon for the given featureInfo and layerIdentifier.
-     }
- }
- */
+/// `MCAssetProvider` is a class designed for packing custom icons into a vector layer for use in a mapping application. It implements the `MCTiled2dMapVectorLayerSymbolDelegateInterface` to provide custom assets for vector layer symbols.
+///
+/// This class allows you to efficiently pack multiple custom icons into a single texture atlas, optimizing performance for rendering vector layers with custom icons.
+///
+/// ## Usage:
+/// 1. Subclass `MCAssetProvider` and implement the `getImageFor` method to provide custom icons for specific feature information.
+/// 2. Implement the `getCustomAssets` method to pack the custom icons into texture atlases for use in the vector layer.
+///
+/// Example:
+/// ```swift
+/// class CustomAssetProvider: MCAssetProvider {
+///     override func getImageFor(for featureInfo: MCVectorLayerFeatureInfo, layerIdentifier: String) -> UIImage {
+///         // Provide a custom icon for the given featureInfo and layerIdentifier.
+///     }
+/// }
 open class MCAssetProvider: MCTiled2dMapVectorLayerSymbolDelegateInterface {
     let scale: CGFloat
     public init() {
-        self.scale = if Thread.isMainThread {
-            MainActor.assumeIsolated {
-                UIScreen.main.nativeScale
+        self.scale =
+            if Thread.isMainThread {
+                MainActor.assumeIsolated {
+                    UIScreen.main.nativeScale
+                }
+            } else {
+                DispatchQueue.main.sync {
+                    UIScreen.main.nativeScale
+                }
             }
-        } else {
-            DispatchQueue.main.sync {
-                UIScreen.main.nativeScale
-            }
-        }
     }
 
     open func getCustomAssets(for featureInfos: [MCVectorLayerFeatureInfo], layerIdentifier: String) -> [MCTiled2dMapVectorAssetInfo] {

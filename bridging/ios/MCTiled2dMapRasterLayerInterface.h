@@ -7,6 +7,7 @@
 #import "MCMaskingObjectInterface.h"
 #import "MCRasterShaderStyle.h"
 #import "MCShaderProgramInterface.h"
+#import "MCTextureFilterType.h"
 #import "MCTiled2dMapLayerConfig.h"
 #import "MCTiled2dMapReadyStateListener.h"
 #import <Foundation/Foundation.h>
@@ -45,6 +46,8 @@
 - (void)setStyle:(nonnull MCRasterShaderStyle *)style;
 
 - (nonnull MCRasterShaderStyle *)getStyle;
+
+- (void)setMinMagFilter:(MCTextureFilterType)filterType;
 
 - (void)setMinZoomLevelIdentifier:(nullable NSNumber *)value;
 
