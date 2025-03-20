@@ -47,9 +47,8 @@ public abstract class BaseDataLoader extends LoaderInterface {
             @Nullable String etag,
             @NotNull LoaderStatus status,
             @Nullable String errorCode) {
-        public LoadResult { }
+        public LoadResult {}
     }
-    ;
 
     /**
      * Fetch data for loadData/loadDataAsync and, by default, for loadTexture/loadTextureAsync.
@@ -95,29 +94,39 @@ public abstract class BaseDataLoader extends LoaderInterface {
                                     return result;
                                 });
                     } else {
-                        return fetchData(paramUrl, etag)
-                                .thenApplyAsync(this::completeLoadData)
-                                .exceptionally(
-                                        e -> {
-                                            logger.info(
-                                                    "loadData {} -> {}",
-                                                    paramUrl,
-                                                    LoaderStatus.ERROR_OTHER,
-                                                    e);
-                                            return new DataLoaderResult(
-                                                    null,
-                                                    null,
-                                                    LoaderStatus.ERROR_OTHER,
-                                                    e.toString());
-                                        })
-                                .whenComplete(
-                                        (ignoredResult, ignoredException) ->
-                                                dataLoads.remove(paramUrl))
-                                .thenApply(
-                                        result -> {
-                                            promise.setValue(result);
-                                            return result;
-                                        });
+                        var future =
+                                fetchData(paramUrl, etag)
+                                        .thenApplyAsync(this::completeLoadData)
+                                        .exceptionally(
+                                                e -> {
+                                                    logger.info(
+                                                            "loadData {} -> {}",
+                                                            paramUrl,
+                                                            LoaderStatus.ERROR_OTHER,
+                                                            e);
+                                                    return new DataLoaderResult(
+                                                            null,
+                                                            null,
+                                                            LoaderStatus.ERROR_OTHER,
+                                                            e.toString());
+                                                })
+                                        .thenApply(
+                                                result -> {
+                                                    promise.setValue(result);
+                                                    return result;
+                                                });
+                        if (!future.isDone()) {
+                            // Complete Async, otherwise this could be called here directly.
+                            // Accessing dataLoads is illegal from this stack (Recursive access to
+                            // ConcurrentHashMap)
+                            return future.whenCompleteAsync(
+                                    (ignoredResult, ignoredException) ->
+                                            dataLoads.remove(paramUrl));
+                        } else {
+                            // If the load is already done, we don't need to add it to the dataLoads
+                            // map.
+                            return null;
+                        }
                     }
                 });
         return promise.getFuture();
@@ -138,29 +147,34 @@ public abstract class BaseDataLoader extends LoaderInterface {
                                     return result;
                                 });
                     } else {
-                        return fetchTexture(paramUrl, etag)
-                                .thenApplyAsync(this::completeLoadTexture)
-                                .exceptionally(
-                                        e -> {
-                                            logger.info(
-                                                    "loadTexture {} -> {}",
-                                                    paramUrl,
-                                                    LoaderStatus.ERROR_OTHER,
-                                                    e);
-                                            return new TextureLoaderResult(
-                                                    null,
-                                                    null,
-                                                    LoaderStatus.ERROR_OTHER,
-                                                    e.toString());
-                                        })
-                                .whenComplete(
-                                        (ignoredResult, ignoredException) ->
-                                                textureLoads.remove(paramUrl))
-                                .thenApply(
-                                        result -> {
-                                            promise.setValue(result);
-                                            return result;
-                                        });
+                        var future =
+                                fetchTexture(paramUrl, etag)
+                                        .thenApplyAsync(this::completeLoadTexture)
+                                        .exceptionally(
+                                                e -> {
+                                                    logger.info(
+                                                            "loadTexture {} -> {}",
+                                                            paramUrl,
+                                                            LoaderStatus.ERROR_OTHER,
+                                                            e);
+                                                    return new TextureLoaderResult(
+                                                            null,
+                                                            null,
+                                                            LoaderStatus.ERROR_OTHER,
+                                                            e.toString());
+                                                })
+                                        .thenApply(
+                                                result -> {
+                                                    promise.setValue(result);
+                                                    return result;
+                                                });
+                        if (!future.isDone()) {
+                            return future.whenCompleteAsync(
+                                    (ignoredResult, ignoredException) ->
+                                            textureLoads.remove(paramUrl));
+                        } else {
+                            return null;
+                        }
                     }
                 });
         return promise.getFuture();
