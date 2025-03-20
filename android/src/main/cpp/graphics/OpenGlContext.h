@@ -46,6 +46,8 @@ class OpenGlContext : public RenderingContextInterface, public std::enable_share
 
     virtual float getAspectRatio();
 
+    virtual long getDeltaTimeMs();
+
   protected:
     RenderingCullMode cullMode = RenderingCullMode::NONE;
     Color backgroundColor = Color(0, 0, 0, 1);
@@ -53,4 +55,7 @@ class OpenGlContext : public RenderingContextInterface, public std::enable_share
     std::unordered_map<std::string, int> programs;
 
     Vec2I viewportSize = Vec2I(0, 0);
+
+    std::chrono::milliseconds timeCreation;
+    long timeFrameDelta = 0;
 };

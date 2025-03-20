@@ -10,10 +10,10 @@
 
 #include "OpenGlContext.h"
 #include "opengl_wrapper.h"
+#include "ChronoUtil.h"
 
 OpenGlContext::OpenGlContext()
-    : programs()
-    {}
+        : programs(), timeCreation(chronoutil::getCurrentTimestamp()) {}
 
 int OpenGlContext::getProgram(const std::string &name) {
     auto p = programs.find(name);
@@ -54,6 +54,7 @@ void OpenGlContext::setupDrawFrame() {
     glClearColor(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
     glClearStencil(0);
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    timeFrameDelta = (chronoutil::getCurrentTimestamp() - timeCreation).count();
 }
 
 void OpenGlContext::preRenderStencilMask() {
@@ -94,4 +95,8 @@ void OpenGlContext::setCulling(RenderingCullMode mode) {
 
 float OpenGlContext::getAspectRatio() {
     return viewportSize.x / (float) viewportSize.y;
+}
+
+long OpenGlContext::getDeltaTimeMs() {
+    return timeFrameDelta;
 }
