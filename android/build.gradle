@@ -17,9 +17,9 @@ buildscript {
 	}
 
 	ext{
-		agp_version = "8.7.2"
-		kotlin_version = "2.0.21"
-		ksp_version = "2.0.21-1.0.28"
+		agp_version = "8.8.1"
+		kotlin_version = "2.1.10"
+		ksp_version = "2.1.10-1.0.31"
 	}
 	repositories {
 		google()
