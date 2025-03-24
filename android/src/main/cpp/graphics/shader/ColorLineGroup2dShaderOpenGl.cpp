@@ -483,55 +483,61 @@ std::string ColorLineGroup2dShaderOpenGl::getFragmentShader() {
                                                           float timeOffset = timeFrameDeltaSeconds * lineValues[styleIndexBase + 19] * factorToT;
                                                           float intraDashPos = mod(t + startOffsetSegment + timeOffset, dashTotal);
 
-                                                          /*if ((intraDashPos > dashArray[0] * factorToT && intraDashPos < dashArray[1] * factorToT) ||
-                                                          (intraDashPos > dashArray[2] * factorToT && intraDashPos < dashArray[3] * factorToT)) {
-                                                              if (aGap == 0.0) {
-                                                                  discard;
-                                                              }
-
-                                                              int gapColorIndexBase = styleIndexBase + 5;
-                                                              vec4 gapColor = vec4(lineValues[gapColorIndexBase], lineValues[gapColorIndexBase + 1],
-                                                                                   lineValues[gapColorIndexBase + 2], lineValues[gapColorIndexBase + 3]);
-                                                              fragColor = gapColor;
-                                                          }*/
-
                                                           float dashFade = lineValues[styleIndexBase + 18];
+
+                                                          float dxt = lineValues[styleIndexBase + 14] * factorToT; // end dash 1
+                                                          float dyt = lineValues[styleIndexBase + 15] * factorToT; // end gap 1
+                                                          float dzt = lineValues[styleIndexBase + 16] * factorToT; // end dash 2
+                                                          float dwt = lineValues[styleIndexBase + 17] * factorToT; // end gap 2
+
+                                                          /*
                                                           vec4 gapColor = vec4(lineValues[styleIndexBase + 5], lineValues[styleIndexBase + 6],
                                                                                lineValues[styleIndexBase + 7], lineValues[styleIndexBase + 8]);
 
-                                                          float dxt = lineValues[styleIndexBase + 14] * factorToT;
-                                                          float dyt = lineValues[styleIndexBase + 15] * factorToT;
-                                                          float dzt = lineValues[styleIndexBase + 16] * factorToT;
-                                                          float dwt = lineValues[styleIndexBase + 17] * factorToT;
                                                           if (dashFade == 0.0 && ((intraDashPos > dxt && intraDashPos < dyt) || (intraDashPos > dzt && intraDashPos < dwt))) {
                                                               // Simple case without fade
                                                               fragColor = gapColor;
                                                           } else {
+                                                              float dashHalfFade = dashFade * 0.5;
+
                                                               if (intraDashPos > dxt && intraDashPos < dyt) {
+                                                                  // Within gap 1
                                                                   float relG = (intraDashPos - dxt) / (dyt - dxt);
-                                                                  if (relG < (dashFade * 0.5)) {
-                                                                      float wG = relG / (dashFade * 0.5);
-                                                                      fragColor = mix(gapColor, color, wG);
-                                                                  } /*else if (1.0 - relG < (dashFade * 0.5)) {
-                                                                      float wG = (1.0 - relG) / (dashFade * 0.5);
-                                                                      fragColor = mix(gapColor, color, wG);
-                                                                  }*/ else {
+                                                                  if (relG < dashHalfFade) {
+                                                                      float wG = relG / dashHalfFade;
+                                                                      fragColor = mix(color, gapColor, wG);
+                                                                  } else if (1.0 - relG < dashHalfFade) {
+                                                                      float wG = (1.0 - relG) / dashHalfFade;
+                                                                      fragColor = mix(color, gapColor, wG);
+                                                                  } else {
                                                                       fragColor = gapColor;
                                                                   }
                                                               }
 
                                                               if (intraDashPos > dzt && intraDashPos < dwt) {
+                                                                  // Within gap 2
                                                                   float relG = (intraDashPos - dzt) / (dwt - dzt);
-                                                                  if (relG < dashFade) {
-                                                                      float wG = relG / dashFade;
-                                                                      fragColor = mix(gapColor, color, wG);
-                                                                  } else if (1.0 - relG < dashFade) {
-                                                                      float wG = (1.0 - relG) / dashFade;
-                                                                      fragColor = mix(gapColor, color, wG);
+                                                                  if (relG < dashHalfFade) {
+                                                                      float wG = relG / dashHalfFade;
+                                                                      fragColor = mix(color, gapColor, wG);
+                                                                  } else if (1.0 - relG < dashHalfFade) {
+                                                                      float wG = (1.0 - relG) / dashHalfFade;
+                                                                      fragColor = mix(color, gapColor, wG);
                                                                   } else {
                                                                       fragColor = gapColor;
                                                                   }
                                                               }
+                                                          }*/
+
+                                                          // Only fade-out (dashFade is ratio of gap that is blurred)
+                                                          if ((intraDashPos > dxt && intraDashPos < dyt) || (intraDashPos > dzt && intraDashPos < dwt)) {
+                                                              float relG = intraDashPos < dyt
+                                                                      ? (intraDashPos - dxt) / (dyt - dxt)
+                                                                      : (intraDashPos - dzt) / (dwt - dzt);
+                                                              relG /= dashFade;
+                                                              vec4 gapColor = vec4(lineValues[styleIndexBase + 5], lineValues[styleIndexBase + 6],
+                                                                                   lineValues[styleIndexBase + 7], lineValues[styleIndexBase + 8]);
+                                                              fragColor = mix(color, gapColor, min(relG, 1.0));
                                                           }
                                                       }
 

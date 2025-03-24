@@ -71,6 +71,8 @@ void LineLayer::remove(const std::shared_ptr<LineInfoInterface> &line) {
                             }));
                 }
                 lines.erase(it);
+                animatedLineStyleIds.erase(line->getIdentifier());
+                hasAnimatedLineStyles = !animatedLineStyleIds.empty();
                 break;
             }
         }
@@ -96,8 +98,9 @@ void LineLayer::add(const std::shared_ptr<LineInfoInterface> &line) {
 
     auto lineObject = std::make_shared<Line2dLayerObject>(mapInterface->getCoordinateConverterHelper(), lineGraphicsObject, shader, mapInterface->is3d());
 
-    lineObject->setStyle(line->getStyle());
-
+    const auto &lineStyle = line->getStyle();
+    lineObject->setStyle(lineStyle);
+    bool isAnimatedLineStyle = lineStyle.dashAnimationSpeed > 0.0;
 
     bool is3d = mapInterface->is3d();
 
@@ -126,6 +129,10 @@ void LineLayer::add(const std::shared_ptr<LineInfoInterface> &line) {
     {
         std::lock_guard<std::recursive_mutex> lock(linesMutex);
         lines.push_back(std::make_pair(line, lineObject));
+        if (isAnimatedLineStyle) {
+            animatedLineStyleIds.insert(line->getIdentifier());
+            hasAnimatedLineStyles = true;
+        }
     }
     generateRenderPasses();
 }
@@ -167,6 +174,8 @@ void LineLayer::clear() {
             }));
         }
         lines.clear();
+        animatedLineStyleIds.clear();
+        hasAnimatedLineStyles = false;
     }
     generateRenderPasses();
     mapInterface->invalidate();
@@ -210,10 +219,13 @@ void LineLayer::generateRenderPasses() {
 }
 
 void LineLayer::update() {
-    auto mapInterface = this->mapInterface;
-    if (mapInterface && maskGraphicsObject) {
-        if (!maskGraphicsObject->isReady()) {
+    const auto &mapInterface = this->mapInterface;
+    if (mapInterface) {
+        if (maskGraphicsObject && !maskGraphicsObject->isReady()) {
             maskGraphicsObject->setup(mapInterface->getRenderingContext());
+        }
+        if (hasAnimatedLineStyles) {
+            mapInterface->invalidate();
         }
     }
 }
