@@ -19,6 +19,7 @@
 #include "CoordinateConversionHelperInterface.h"
 #include "CoordinateSystemIdentifiers.h"
 #include "GeoJsonTypes.h"
+#include "EarcutVectorView.h"
 
 namespace mapbox {
     namespace util {
@@ -152,16 +153,13 @@ public:
     }
 
     void triangulatePolygons(size_t i) {
-        std::vector<std::vector<vtzero::point>> polygon;
-        polygon.reserve(polygonHoles[i].size() + 1);
-        coordinates.reserve(coordinates.size() + polygon.capacity());
+        coordinates.reserve(coordinates.size() + polygonHoles[i].size() + 1);
 
         coordinates.emplace_back();
         coordinates.back().reserve(polygonPoints[i].size());
         for (auto const &point: polygonPoints[i]){
             coordinates.back().push_back(coordinateFromPoint(point, false));
         }
-        polygon.emplace_back(std::move(polygonPoints[i]));
 
         for(auto const &hole: polygonHoles[i]) {
             coordinates.emplace_back();
@@ -169,19 +167,17 @@ public:
             for (auto const &point: hole){
                 coordinates.back().push_back(coordinateFromPoint(point, false));
             }
-
-            polygon.emplace_back(std::move(hole));
         }
-        limitHoles(polygon, 500);
 
-        std::vector<uint16_t> indices = mapbox::earcut<uint16_t>(polygon);
+        auto polygonView = EarcutVectorView(polygonPoints[i], polygonHoles[i], 500);
+        std::vector<uint16_t> indices = mapbox::earcut<uint16_t>(polygonView);
 
         std::reverse(indices.begin(), indices.end());
 
         polygons.push_back({{}, indices});
 
-        for (auto const &points: polygon) {
-            for (auto const &point: points) {
+        for(size_t i=0; i<polygonView.size(); ++i) {
+            for(auto const &point : polygonView[i]) {
                 polygons.back().coordinates.push_back(vecFromPoint(point));
             }
         }
@@ -189,16 +185,14 @@ public:
 
     void triangulateGeoJsonPolygons(const std::shared_ptr<GeoJsonGeometry> &geometry) {
         for (int i = 0; i < geometry->coordinates.size(); i++) {
-            std::vector<std::vector<Coord>> polygon;
-            polygon.reserve(geometry->coordinates[i].size() + 1);
-            coordinates.reserve(coordinates.size() + polygon.capacity());
+
+            coordinates.reserve(coordinates.size() + geometry->coordinates[i].size() + 1);
 
             coordinates.emplace_back();
             coordinates.back().reserve(geometry->coordinates[i].size());
             for (auto const &point: geometry->coordinates[i]){
                 coordinates.back().push_back(Vec2D(point.x, point.y));
             }
-            polygon.emplace_back(geometry->coordinates[i]);
 
             for(auto const &hole: geometry->holes[i]) {
                 coordinates.emplace_back();
@@ -206,19 +200,17 @@ public:
                 for (auto const &point: hole){
                     coordinates.back().push_back(Vec2D(point.x, point.y));
                 }
-
-                polygon.emplace_back(hole);
             }
-            limitHoles(polygon, 500);
 
-            std::vector<uint16_t> indices = mapbox::earcut<uint16_t>(polygon);
+            auto polygonView = EarcutVectorView(geometry->coordinates[i], geometry->holes[i], 500);
+            std::vector<uint16_t> indices = mapbox::earcut<uint16_t>(polygonView);
 
             if (!indices.empty()) {
                 polygons.push_back({{}, indices});
 
-                for (auto const &points: polygon) {
-                    for (auto const &point: points) {
-                        auto converted = conversionHelper->convertToRenderSystem(point);
+                for(size_t i=0; i<polygonView.size(); ++i) {
+                    for(auto const &point : polygonView[i]) {
+                        const auto &converted = conversionHelper->convertToRenderSystem(point);
                         polygons.back().coordinates.push_back(Vec2D(converted.x, converted.y));
                     }
                 }
@@ -310,47 +302,6 @@ private:
 
     inline Vec2D vecFromPoint(const vtzero::point &point) {
         return coordinateFromPoint(point, true);
-    }
-
-
-    static double signedArea(const std::vector<vtzero::point>& hole) {
-        double sum = 0;
-        for (std::size_t i = 0, len = hole.size(), j = len - 1; i < len; j = i++) {
-            const auto& p1 = hole[i];
-            const auto& p2 = hole[j];
-            sum += (p2.x - p1.x) * (p1.y + p2.y);
-        }
-        return sum;
-    }
-
-    void limitHoles(std::vector<std::vector<vtzero::point>> &polygon, uint32_t maxHoles) {
-        if (polygon.size() > 1 + maxHoles) {
-             std::nth_element(
-                 polygon.begin() + 1, polygon.begin() + 1 + maxHoles, polygon.end(), [](const auto& a, const auto& b) {
-                     return std::fabs(signedArea(a)) > std::fabs(signedArea(b));
-                 });
-             polygon.resize(1 + maxHoles);
-         }
-    }
-
-    static double signedArea(const std::vector<Coord>& hole) {
-        double sum = 0;
-        for (std::size_t i = 0, len = hole.size(), j = len - 1; i < len; j = i++) {
-            const auto& p1 = hole[i];
-            const auto& p2 = hole[j];
-            sum += (p2.x - p1.x) * (p1.y + p2.y);
-        }
-        return sum;
-    }
-
-    void limitHoles(std::vector<std::vector<Coord>> &polygon, uint32_t maxHoles) {
-        if (polygon.size() > 1 + maxHoles) {
-             std::nth_element(
-                 polygon.begin() + 1, polygon.begin() + 1 + maxHoles, polygon.end(), [](const auto& a, const auto& b) {
-                     return std::fabs(signedArea(a)) > std::fabs(signedArea(b));
-                 });
-             polygon.resize(1 + maxHoles);
-         }
     }
 
     std::vector<::Vec2D> currentFeature;
