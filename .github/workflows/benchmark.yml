@@ -1,0 +1,115 @@
+name: Benchmark
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Base branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.base_ref }}
+          submodules: 'recursive'
+          fetch-depth: 0
+        
+      - name: Install build tools and dependencies
+        run: sudo apt-get update && sudo apt-get install cmake ninja-build clang libgl-dev libgles-dev catch2
+      - name: ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: test-ccache-${{ runner.os }}-${{ runner.arch }}
+
+      - name: Build (Base branch)
+        run: |
+            cmake -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Debug -DBUILD_JVM=OFF -DBUILD_STANDALONE=OFF -B build-debug
+            cmake --build build-debug -- tests
+
+      - name: Run benchmarks (Base branch)
+        run: |
+            cd shared/test      # for access to data/ directory
+            ../../build-debug/shared/test/tests \
+              --reporter xml > ../../base_results.xml
+            cd ../..
+            rm -rf build-debug
+
+      - name: Checkout PR branch
+        run: |
+          git fetch origin pull/${{ github.event.pull_request.number }}/head:pr-branch
+          git checkout pr-branch
+          git submodule update --init --recursive
+
+      - name: Build (PR branch)
+        run: |
+            cmake -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Debug -DBUILD_JVM=OFF -DBUILD_STANDALONE=OFF -B build-debug
+            cmake --build build-debug -- tests
+
+      - name: Run benchmarks (PR branch)
+        run: |
+            cd shared/test      # for access to data/ directory
+            ../../build-debug/shared/test/tests \
+              --reporter xml > ../../pr_results.xml
+            cd ../..
+            rm -rf build-debug
+
+      - name: Compare Benchmark Results
+        run: python scripts/compare_benchmarks.py ./base_results.xml ./pr_results.xml
+
+      - name: Upload Benchmark Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: benchmark-results
+          path: |
+            pr_results.xml
+            base_results.xml
+
+      - name: Post PR Comment on Regression
+        if: env.REGRESSED == 'true'
+        uses: actions/github-script@v7
+        with:
+            github-token: ${{ secrets.GITHUB_TOKEN }}
+            script: |
+              const prNumber = ${{ github.event.pull_request.number }};
+              const owner = context.repo.owner;
+              const repo = context.repo.repo;
+        
+              // Fetch all comments for the PR
+              const comments = await github.rest.issues.listComments({
+                owner,
+                repo,
+                issue_number: prNumber,
+              });
+        
+              // Check if a comment with the benchmark summary already exists
+              const existingComment = comments.data.find(comment => comment.body.includes("**Performance Regression Detected!**"));
+        
+              const summaryUrl = `${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}`;
+              const commentBody = `
+                🚨 **Performance Regression Detected!** 🚨
+        
+                Some benchmarks have worsened in this PR.
+        
+                📊 **[Click here to view the full benchmark results]( ${summaryUrl} )** 📊
+              `;
+        
+              if (existingComment) {
+                // Update the existing comment
+                await github.rest.issues.updateComment({
+                  owner,
+                  repo,
+                  comment_id: existingComment.id,
+                  body: commentBody,
+                });
+              } else {
+                // Create a new comment
+                await github.rest.issues.createComment({
+                  owner,
+                  repo,
+                  issue_number: prNumber,
+                  body: commentBody,
+                });
+              }
