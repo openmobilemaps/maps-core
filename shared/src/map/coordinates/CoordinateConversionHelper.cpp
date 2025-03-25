@@ -74,14 +74,28 @@ Coord CoordinateConversionHelper::convert(const int32_t to, const Coord &coordin
         return coordinate;
     }
 
+    // Thread-local cache of last used converter
+    thread_local int32_t lastFrom = -1;
+    thread_local int32_t lastTo = -1;
+    thread_local std::shared_ptr<CoordinateConverterInterface> lastConverter = nullptr;
+
+    // see if last converter was the one that we need now
+    if (lastConverter && coordinate.systemIdentifier == lastFrom && to == lastTo) {
+        return lastConverter->convert(coordinate);
+    }
+
     const auto tuple = std::tuple<int32_t, int32_t>(coordinate.systemIdentifier, to);
 
-    // first try if we can directly convert
+    // see if we can convert in one step
     auto c = fromToConverterMap.find(tuple);
     if (c != fromToConverterMap.end()) {
+        lastFrom = coordinate.systemIdentifier;
+        lastTo = to;
+        lastConverter = c->second;
         return c->second->convert(coordinate);
     }
 
+    // see if there is a converter chain
     auto ch = converterHelper.find(tuple);
     if (ch != converterHelper.end()) {
         auto const &converterChain = ch->second;
