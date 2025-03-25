@@ -34,18 +34,26 @@ public:
 
     void setDashingScaleFactor(float factor) override;
 
+    void setupGlObjects() override;
+
+    void clearGlObjects() override;
+
 protected:
     virtual std::string getVertexShader() override;
 
     virtual std::string getFragmentShader() override;
 
 private:
+    virtual std::string getLineStyleStruct();
+
     const bool projectOntoUnitSphere;
     const bool simpleLine;
     const std::string programName;
 
     std::recursive_mutex styleMutex;
+    GLuint lineStyleBuffer = 0;
     std::vector<GLfloat> lineValues;
+    bool stylesUpdated = false;
     GLint numStyles = 0;
 
     float dashingScaleFactor = 1.0;
@@ -56,7 +64,7 @@ private:
     //const int sizeGapColorValues = 4;
     //const int maxNumDashValues = 4;
    // const int sizeDashValues = maxNumDashValues + 3;
-    const int sizeLineValues = 23;//sizeStyleValues + sizeColorValues + sizeGapColorValues + sizeDashValues + 1;
-    const int sizeSimpleLineValues = 8;
+    const int sizeLineValues = 24; //sizeStyleValues + sizeColorValues + sizeGapColorValues + sizeDashValues + 1 => 23, with padding (to have styles aligned to 4 floats - std140);
+    const int sizeSimpleLineValues = 8; // ensure size multiple of 4 floats - std140
     const int sizeLineValuesArray;
 };

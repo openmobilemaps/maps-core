@@ -9,6 +9,7 @@
  */
 
 #include "LineGroup2dOpenGl.h"
+#include "BaseShaderProgramOpenGl.h"
 #include <cmath>
 #include <cstring>
 #include <string>
@@ -83,6 +84,10 @@ void LineGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface>
     lineOriginHandle = glGetUniformLocation(program, "uLineOrigin");
     scaleFactorHandle = glGetUniformLocation(program, "scaleFactor");
 
+    if (const auto &glShader = std::static_pointer_cast<BaseShaderProgramOpenGl>(shaderProgram)) {
+        glShader->setupGlObjects();
+    }
+
     ready = true;
     glDataBuffersGenerated = true;
 }
@@ -91,6 +96,9 @@ void LineGroup2dOpenGl::clear() {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
     if (ready) {
         removeGlBuffers();
+        if (const auto &glShader = std::static_pointer_cast<BaseShaderProgramOpenGl>(shaderProgram)) {
+            glShader->clearGlObjects();
+        }
         ready = false;
     }
 }

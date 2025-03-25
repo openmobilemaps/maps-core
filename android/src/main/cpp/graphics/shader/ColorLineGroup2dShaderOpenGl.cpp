@@ -48,10 +48,27 @@ void ColorLineGroup2dShaderOpenGl::setupProgram(const std::shared_ptr<::Renderin
     openGlContext->storeProgram(programName, program);
 }
 
+void ColorLineGroup2dShaderOpenGl::setupGlObjects() {
+    if (lineStyleBuffer == 0) {
+        glGenBuffers(1, &lineStyleBuffer);
+        glBindBuffer(GL_UNIFORM_BUFFER, lineStyleBuffer);
+        glBufferData(GL_UNIFORM_BUFFER, sizeLineValuesArray * sizeof(GLfloat), nullptr, GL_DYNAMIC_DRAW);
+        glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    }
+}
+
+void ColorLineGroup2dShaderOpenGl::clearGlObjects() {
+    if (lineStyleBuffer > 0) {
+        glDeleteBuffers(1, &lineStyleBuffer);
+    }
+}
+
 void ColorLineGroup2dShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context) {
     BaseShaderProgramOpenGl::preRender(context);
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
     int program = openGlContext->getProgram(programName);
+
+    glBindBufferBase(GL_UNIFORM_BUFFER, 0, lineStyleBuffer); // LineStyle is at binding index 0
 
     {
         std::lock_guard<std::recursive_mutex> lock(styleMutex);
@@ -68,6 +85,12 @@ void ColorLineGroup2dShaderOpenGl::preRender(const std::shared_ptr<::RenderingCo
         if (timeFrameDeltaHandle >= 0) {
             glUniform1f(timeFrameDeltaHandle, openGlContext->getDeltaTimeMs() / 1000.0f);
         }
+        if (stylesUpdated) {
+            stylesUpdated = false;
+            glBindBuffer(GL_UNIFORM_BUFFER, lineStyleBuffer);
+            glBufferSubData(GL_UNIFORM_BUFFER, 0, lineValues.size() * sizeof(GLfloat), &lineValues[0]);
+            glBindBuffer(GL_UNIFORM_BUFFER, 0);
+        }
     }
 }
 
@@ -81,6 +104,7 @@ void ColorLineGroup2dShaderOpenGl::setStyles(const ::SharedBytes & styles) {
         }
 
         numStyles = styles.elementCount;
+        stylesUpdated = true;
     }
 }
 
@@ -88,7 +112,53 @@ void ColorLineGroup2dShaderOpenGl::setDashingScaleFactor(float factor) {
     {
         std::lock_guard<std::recursive_mutex> overlayLock(styleMutex);
         this->dashingScaleFactor = factor;
-    }}
+    }
+}
+
+std::string ColorLineGroup2dShaderOpenGl::getLineStyleStruct() {
+    if (simpleLine) {
+        return OMMShaderCode(
+                struct SimpleLineStyle {
+                    float width; // 0
+                    float colorR; // 1
+                    float colorG; // 2
+                    float colorB; // 3
+                    float colorA; // 4
+                    float widthAsPixels; // 5
+                    float opacity; // 6
+                    float capType; // 7
+                };
+        );
+    } else {
+        return OMMShaderCode(
+                struct LineStyle {
+                    float width; // 0
+                    float colorR; // 1
+                    float colorG; // 2
+                    float colorB; // 3
+                    float colorA; // 4
+                    float gapColorR; // 5
+                    float gapColorG; // 6
+                    float gapColorB; // 7
+                    float gapColorA; // 8
+                    float widthAsPixels; // 9
+                    float opacity; // 10
+                    float blur; // 11
+                    float capType; // 12
+                    float numDashValues; // 13
+                    float dashArray0; // 14
+                    float dashArray1; // 15
+                    float dashArray2; // 16
+                    float dashArray3; // 17
+                    float dashFade; // 18
+                    float dashAnimationSpeed; // 19
+                    float offset; // 20
+                    float dotted; // 21
+                    float dottedSkew; // 22
+                };
+        );
+    }
+}
 
 std::string ColorLineGroup2dShaderOpenGl::getVertexShader() {
     if (simpleLine) {
@@ -108,19 +178,16 @@ std::string ColorLineGroup2dShaderOpenGl::getVertexShader() {
                )) + OMMShaderCode(
                        in float vVertexIndex;
                        in float vStyleInfo;
-                       // lineValues:
-                        //        struct SimpleLineStyling {
-                        //            float width; // 0
-                        //            float4 color; // 1 2 3 4
-                        //            float widthAsPixels; // 5
-                        //            float opacity; // 6
-                        //            float capType; // 7
-                        //        };
-                       uniform float lineValues[) + std::to_string(sizeLineValuesArray) + OMMShaderCode(];
+
+                       ) + getLineStyleStruct() + OMMShaderCode(
+
+                       layout (std140, binding = 0) uniform LineStyleCollection {
+                           SimpleLineStyle lineValues[) + std::to_string(maxNumStyles) + OMMShaderCode(];
+                       };
                        uniform int numStyles;
                        uniform float scaleFactor;
                        uniform float dashingScaleFactor;
-                       out float fStyleIndexBase;
+                       out float fLineIndex;
                        out float radius;
                        out float fSegmentType;
                        out vec3 pointDeltaA;
@@ -135,13 +202,11 @@ std::string ColorLineGroup2dShaderOpenGl::getVertexShader() {
                            } else if (lineIndex > numStyles) {
                                lineIndex = numStyles;
                            }
-                           int styleIndexBase = ) + std::to_string(sizeSimpleLineValues) + OMMShaderCode(* lineIndex;
-                           int colorIndexBase = styleIndexBase + 1;
-                           float width = lineValues[styleIndexBase];
-                           float isScaled = lineValues[styleIndexBase + 5];
-                           color = vec4(lineValues[colorIndexBase], lineValues[colorIndexBase + 1], lineValues[colorIndexBase + 2],
-                                        lineValues[colorIndexBase + 3]);
-                           fStyleIndexBase = float(styleIndexBase);
+                           float width = lineValues[lineIndex].width;
+                           float isScaled = lineValues[lineIndex].widthAsPixels;
+                           color = vec4(lineValues[lineIndex].colorR, lineValues[lineIndex].colorG, lineValues[lineIndex].colorB,
+                                        lineValues[lineIndex].colorA);
+                           fLineIndex = float(lineIndex);
                            fSegmentType = vStyleInfo / 256.0;
 
                ) + (projectOntoUnitSphere ? OMMShaderCode(
@@ -221,55 +286,42 @@ std::string ColorLineGroup2dShaderOpenGl::getVertexShader() {
                        in float vVertexIndex;
                        in float vSegmentStartLPos;
                        in float vStyleInfo;
-                       // lineValues:
-                       //        struct LineStyling {
-                       //            float width; // 0
-                       //            float4 color; // 1 2 3 4
-                       //            float4 gapColor; // 5 6 7 8
-                       //            float widthAsPixels; // 9
-                       //            float opacity; // 10
-                       //            float blur; // 11
-                       //            float capType; // 12
-                       //            float numDashValues; // 13
-                       //            float dashArray[4]; // 14 15 16 17
-                       //            float dashFade // 18 -- not supported currently!
-                       //            float dashAnimationSpeed // 19 -- not supported currently!
-                       //            float offset; // 20
-                       //            float dotted; // 21
-                       //            float dottedSkew; // 22
-                       //        };
-                       uniform float lineValues[) + std::to_string(sizeLineValuesArray) + OMMShaderCode(];
-                                uniform int numStyles;
-                                uniform float scaleFactor;
-                                uniform float dashingScaleFactor;
-                                out float fStyleIndexBase;
-                                out float radius;
-                                out float segmentStartLPos;
-                                out float fSegmentType;
-                                out vec3 pointDeltaA;
-                                out vec3 pointBDeltaA;
-                                out vec4 color;
-                                out float dashingSize;
-                                out float scaledBlur;
 
-                                void main() {
-                                    float fStyleIndex = mod(vStyleInfo, 256.0);
-                                    int lineIndex = int(floor(fStyleIndex + 0.5));
-                                    if (lineIndex < 0) {
-                                        lineIndex = 0;
-                                    } else if (lineIndex > numStyles) {
-                                        lineIndex = numStyles;
-                                    }
-                                    int styleIndexBase = ) + std::to_string(sizeLineValues) + OMMShaderCode(* lineIndex;
-                                    int colorIndexBase = styleIndexBase + 1;
-                                    float width = lineValues[styleIndexBase];
-                                    float isScaled = lineValues[styleIndexBase + 9];
-                                    float blur = lineValues[styleIndexBase + 11];
-                                    color = vec4(lineValues[colorIndexBase], lineValues[colorIndexBase + 1], lineValues[colorIndexBase + 2],
-                                                    lineValues[colorIndexBase + 3]);
-                                    segmentStartLPos = vSegmentStartLPos;
-                                    fStyleIndexBase = float(styleIndexBase);
-                                    fSegmentType = vStyleInfo / 256.0;
+                       ) + getLineStyleStruct() + OMMShaderCode(
+
+                       layout (std140, binding = 0) uniform LineStyleCollection {
+                           LineStyle lineValues[) + std::to_string(maxNumStyles) + OMMShaderCode(];
+                       };
+
+                        uniform int numStyles;
+                        uniform float scaleFactor;
+                        uniform float dashingScaleFactor;
+                        out float fLineIndex;
+                        out float radius;
+                        out float segmentStartLPos;
+                        out float fSegmentType;
+                        out vec3 pointDeltaA;
+                        out vec3 pointBDeltaA;
+                        out vec4 color;
+                        out float dashingSize;
+                        out float scaledBlur;
+
+                        void main() {
+                            float fStyleIndex = mod(vStyleInfo, 256.0);
+                            int lineIndex = int(floor(fStyleIndex + 0.5));
+                            if (lineIndex < 0) {
+                                lineIndex = 0;
+                            } else if (lineIndex > numStyles) {
+                                lineIndex = numStyles;
+                            }
+                            float width = lineValues[lineIndex].width;
+                            float isScaled = lineValues[lineIndex].widthAsPixels;
+                            float blur = lineValues[lineIndex].blur;
+                            color = vec4(lineValues[lineIndex].colorR, lineValues[lineIndex].colorG, lineValues[lineIndex].colorB,
+                                            lineValues[lineIndex].colorA);
+                            segmentStartLPos = vSegmentStartLPos;
+                            fLineIndex = float(lineIndex);
+                            fSegmentType = vStyleInfo / 256.0;
 
                ) + (projectOntoUnitSphere ? OMMShaderCode(
                 vec3 vertexPosition = vPointB;
@@ -300,7 +352,7 @@ std::string ColorLineGroup2dShaderOpenGl::getVertexShader() {
         ) : "") + OMMShaderCode(
                        vec3 widthNormal = normalize(cross(radialNormal, lengthNormal));
 
-                       float offsetFloat = lineValues[styleIndexBase + 20] * scaleFactor;
+                       float offsetFloat = lineValues[lineIndex].offset * scaleFactor;
                        vec3 offset = vec3(widthNormal * offsetFloat);
 
                        widthNormal *= widthNormalFactor;
@@ -342,8 +394,14 @@ std::string ColorLineGroup2dShaderOpenGl::getFragmentShader() {
     if (simpleLine) {
         return OMMVersionedGlesShaderCode(320 es,
                                           precision highp float;
-                                                  uniform float lineValues[) + std::to_string(sizeLineValuesArray) + OMMShaderCode(];
-                                        in float fStyleIndexBase;
+
+                                          ) + getLineStyleStruct() + OMMShaderCode(
+
+                                          layout (std140, binding = 0) uniform LineStyleCollection {
+                                              SimpleLineStyle lineValues[) + std::to_string(maxNumStyles) + OMMShaderCode(];
+                                          };
+
+                                        in float fLineIndex;
                                         in float radius;
                                         in float fSegmentType; // 0: inner segment, 1: line start segment (i.e. A is first point in line), 2: line end segment, 3: start and end in segment
                                         in vec3 pointDeltaA;
@@ -353,9 +411,10 @@ std::string ColorLineGroup2dShaderOpenGl::getFragmentShader() {
                                         out vec4 fragmentColor;
 
                                void main() {
+                                        int lineIndex = int(fLineIndex);
                                         int segmentType = int(floor(fSegmentType + 0.5));
                                         // 0: butt, 1: round, 2: square
-                                        int iCapType = int(floor(lineValues[int(fStyleIndexBase) + 7] + 0.5));
+                                        int iCapType = int(floor(lineValues[lineIndex].capType + 0.5));
                                         float lineLength = length(pointBDeltaA);
                                         float t = dot(pointDeltaA, normalize(pointBDeltaA)) / lineLength;
 
@@ -381,10 +440,8 @@ std::string ColorLineGroup2dShaderOpenGl::getFragmentShader() {
                                         }
 
                                         vec4 fragColor = color;
-                                        float opacity = lineValues[int(fStyleIndexBase) + 6];
-                                        float colorA = lineValues[int(fStyleIndexBase) + 4];
-
-                                        float a = colorA * opacity;
+                                        float opacity = lineValues[lineIndex].opacity;
+                                        float colorA = lineValues[lineIndex].colorA;
 
                                         fragmentColor = fragColor;
                                         fragmentColor.a = 1.0;
@@ -393,157 +450,161 @@ std::string ColorLineGroup2dShaderOpenGl::getFragmentShader() {
     } else {
         return OMMVersionedGlesShaderCode(320 es,
                                           precision highp float;
-                                                  uniform float lineValues[) + std::to_string(sizeLineValuesArray) + OMMShaderCode(];
-                                                  uniform float timeFrameDeltaSeconds;
-                                                  in float fStyleIndexBase;
-                                                  in float radius;
-                                                  in float segmentStartLPos;
-                                                  in float scaledBlur;
-                                                  in float fSegmentType; // 0: inner segment, 1: line start segment (i.e. A is first point in line), 2: line end segment, 3: start and end in segment
-                                                  in float dashingSize;
-                                                  in vec3 pointDeltaA;
-                                                  in vec3 pointBDeltaA;
-                                                  in vec4 color;
 
-                                                  out vec4 fragmentColor;
+                                          ) + getLineStyleStruct() + OMMShaderCode(
 
-                                                  void main() {
-                                                      int styleIndexBase = int(fStyleIndexBase);
-                                                      int segmentType = int(floor(fSegmentType + 0.5));
-                                                      // 0: butt, 1: round, 2: square
-                                                      int iCapType = int(floor(lineValues[styleIndexBase + 12] + 0.5));
-                                                      float lineLength = length(pointBDeltaA);
-                                                      float t = dot(pointDeltaA, normalize(pointBDeltaA)) / lineLength;
+                                          layout (std140, binding = 0) uniform LineStyleCollection {
+                                              LineStyle lineValues[) + std::to_string(maxNumStyles) + OMMShaderCode(];
+                                          };
+                                          uniform float timeFrameDeltaSeconds;
+                                          in float fLineIndex;
+                                          in float radius;
+                                          in float segmentStartLPos;
+                                          in float scaledBlur;
+                                          in float fSegmentType; // 0: inner segment, 1: line start segment (i.e. A is first point in line), 2: line end segment, 3: start and end in segment
+                                          in float dashingSize;
+                                          in vec3 pointDeltaA;
+                                          in vec3 pointBDeltaA;
+                                          in vec4 color;
 
-                                                      int dashBase = styleIndexBase + 13;
-                                                      // dash values: {int numDashInfo, vec4 dashArray} -> stride = 5
-                                                      int numDashInfos = int(floor(lineValues[dashBase] + 0.5));
+                                          out vec4 fragmentColor;
 
-                                                      float d;
-                                                      if (t < 0.0 || t > 1.0) {
-                                                          if (numDashInfos > 0 && lineValues[styleIndexBase + 14] < 1.0 && lineValues[styleIndexBase + 14] > 0.0) {
-                                                              discard;
-                                                          }
-                                                          if (segmentType == 0 || iCapType == 1 || (segmentType == 2 && t < 0.0) || (segmentType == 1 && t > 1.0)) {
-                                                              d = min(length(pointDeltaA), length(pointDeltaA - pointBDeltaA));
-                                                          } else if (iCapType == 2) {
-                                                              float dLen = t < 0.0 ? -t * lineLength : (t - 1.0) * lineLength;
-                                                              vec3 intersectPt = t * pointBDeltaA;
-                                                              float dOrth = abs(length(pointDeltaA - intersectPt));
-                                                              d = max(dLen, dOrth);
+                                          void main() {
+                                              int lineIndex = int(fLineIndex);
+                                              int segmentType = int(floor(fSegmentType + 0.5));
+                                              // 0: butt, 1: round, 2: square
+                                              int iCapType = int(floor(lineValues[lineIndex].capType + 0.5));
+                                              float lineLength = length(pointBDeltaA);
+                                              float t = dot(pointDeltaA, normalize(pointBDeltaA)) / lineLength;
+
+                                              // dash values: {int numDashInfo, vec4 dashArray} -> stride = 5
+                                              int numDashInfos = int(floor(lineValues[lineIndex].numDashValues + 0.5));
+
+                                              float d;
+                                              if (t < 0.0 || t > 1.0) {
+                                                  if (numDashInfos > 0 && lineValues[lineIndex].dashArray0 < 1.0 && lineValues[lineIndex].dashArray0 > 0.0) {
+                                                      discard;
+                                                  }
+                                                  if (segmentType == 0 || iCapType == 1 || (segmentType == 2 && t < 0.0) || (segmentType == 1 && t > 1.0)) {
+                                                      d = min(length(pointDeltaA), length(pointDeltaA - pointBDeltaA));
+                                                  } else if (iCapType == 2) {
+                                                      float dLen = t < 0.0 ? -t * lineLength : (t - 1.0) * lineLength;
+                                                      vec3 intersectPt = t * pointBDeltaA;
+                                                      float dOrth = abs(length(pointDeltaA - intersectPt));
+                                                      d = max(dLen, dOrth);
+                                                  } else {
+                                                      discard;
+                                                  }
+                                              } else {
+                                                  vec3 intersectPt = t * pointBDeltaA;
+                                                  d = abs(length(pointDeltaA - intersectPt));
+                                              }
+
+                                              if (d > radius) {
+                                                  discard;
+                                              }
+
+                                              vec4 fragColor = color;
+                                              float opacity = lineValues[lineIndex].opacity;
+                                              float colorA = lineValues[lineIndex].colorA;
+                                              float colorAGap = lineValues[lineIndex].gapColorA;
+
+                                              float a = colorA * opacity;
+                                              float aGap = colorAGap * opacity;
+
+                                              if (scaledBlur > 0.0 && t > 0.0 && t < 1.0) {
+                                                  float nonBlurRange = radius - scaledBlur;
+                                                  if (d > nonBlurRange) {
+                                                      opacity *= clamp(1.0 - max(0.0, d - nonBlurRange) / scaledBlur, 0.0, 1.0);
+                                                  }
+                                              }
+
+                                              int iDottedLine = int(floor(lineValues[lineIndex].dotted + 0.5));
+
+                                              if (iDottedLine == 1) {
+                                                  float skew = lineValues[lineIndex].dottedSkew;
+
+                                                  float factorToT = (radius * 2.0) / lineLength * skew;
+                                                  float dashOffset = (radius - skew * radius) / lineLength;
+
+                                                  float dashTotalDotted = 2.0 * factorToT;
+                                                  float offset = segmentStartLPos / lineLength;
+                                                  float startOffsetSegmentDotted = mod(offset, dashTotalDotted);
+                                                  float pos = t + startOffsetSegmentDotted;
+
+                                                  float intraDashPosDotted = mod(pos, dashTotalDotted);
+                                                  if ((intraDashPosDotted > 1.0 * factorToT + dashOffset && intraDashPosDotted < dashTotalDotted - dashOffset) ||
+                                                  (length(vec2(min(abs(intraDashPosDotted - 0.5 * factorToT), 0.5 * factorToT + dashTotalDotted - intraDashPosDotted) / (0.5 * factorToT + dashOffset), d / radius)) > 1.0)) {
+                                                      discard;
+                                                  }
+                                              } else if (numDashInfos > 0) {
+                                                  float factorToT = (radius * 2.0) / lineLength;
+                                                  float dashTotal = lineValues[lineIndex].dashArray3 * factorToT;
+                                                  float startOffsetSegment = mod(segmentStartLPos / lineLength, dashTotal);
+                                                  float timeOffset = timeFrameDeltaSeconds * lineValues[lineIndex].dashAnimationSpeed * factorToT;
+                                                  float intraDashPos = mod(t + startOffsetSegment + timeOffset, dashTotal);
+
+                                                  float dashFade = lineValues[lineIndex].dashFade;
+
+                                                  float dxt = lineValues[lineIndex].dashArray0 * factorToT; // end dash 1
+                                                  float dyt = lineValues[lineIndex].dashArray1 * factorToT; // end gap 1
+                                                  float dzt = lineValues[lineIndex].dashArray2 * factorToT; // end dash 2
+                                                  float dwt = lineValues[lineIndex].dashArray3 * factorToT; // end gap 2
+
+                                                  /*
+                                                  vec4 gapColor = vec4(lineValues[lineIndex].gapColorR, lineValues[lineIndex].gapColorG,
+                                                                       lineValues[lineIndex].gapColorB, lineValues[lineIndex].gapColorA);
+
+                                                  if (dashFade == 0.0 && ((intraDashPos > dxt && intraDashPos < dyt) || (intraDashPos > dzt && intraDashPos < dwt))) {
+                                                      // Simple case without fade
+                                                      fragColor = gapColor;
+                                                  } else {
+                                                      float dashHalfFade = dashFade * 0.5;
+
+                                                      if (intraDashPos > dxt && intraDashPos < dyt) {
+                                                          // Within gap 1
+                                                          float relG = (intraDashPos - dxt) / (dyt - dxt);
+                                                          if (relG < dashHalfFade) {
+                                                              float wG = relG / dashHalfFade;
+                                                              fragColor = mix(color, gapColor, wG);
+                                                          } else if (1.0 - relG < dashHalfFade) {
+                                                              float wG = (1.0 - relG) / dashHalfFade;
+                                                              fragColor = mix(color, gapColor, wG);
                                                           } else {
-                                                              discard;
-                                                          }
-                                                      } else {
-                                                          vec3 intersectPt = t * pointBDeltaA;
-                                                          d = abs(length(pointDeltaA - intersectPt));
-                                                      }
-
-                                                      if (d > radius) {
-                                                          discard;
-                                                      }
-
-                                                      vec4 fragColor = color;
-                                                      float opacity = lineValues[styleIndexBase + 10];
-                                                      float colorA = lineValues[styleIndexBase + 4];
-                                                      float colorAGap = lineValues[styleIndexBase + 8];
-
-                                                      float a = colorA * opacity;
-                                                      float aGap = colorAGap * opacity;
-
-                                                      if (scaledBlur > 0.0 && t > 0.0 && t < 1.0) {
-                                                          float nonBlurRange = radius - scaledBlur;
-                                                          if (d > nonBlurRange) {
-                                                              opacity *= clamp(1.0 - max(0.0, d - nonBlurRange) / scaledBlur, 0.0, 1.0);
-                                                          }
-                                                      }
-
-                                                      int iDottedLine = int(floor(lineValues[styleIndexBase + 21] + 0.5));
-
-                                                      if (iDottedLine == 1) {
-                                                          float skew = lineValues[styleIndexBase + 22];
-
-                                                          float factorToT = (radius * 2.0) / lineLength * skew;
-                                                          float dashOffset = (radius - skew * radius) / lineLength;
-
-                                                          float dashTotalDotted = 2.0 * factorToT;
-                                                          float offset = segmentStartLPos / lineLength;
-                                                          float startOffsetSegmentDotted = mod(offset, dashTotalDotted);
-                                                          float pos = t + startOffsetSegmentDotted;
-
-                                                          float intraDashPosDotted = mod(pos, dashTotalDotted);
-                                                          if ((intraDashPosDotted > 1.0 * factorToT + dashOffset && intraDashPosDotted < dashTotalDotted - dashOffset) ||
-                                                          (length(vec2(min(abs(intraDashPosDotted - 0.5 * factorToT), 0.5 * factorToT + dashTotalDotted - intraDashPosDotted) / (0.5 * factorToT + dashOffset), d / radius)) > 1.0)) {
-                                                              discard;
-                                                          }
-                                                      } else if (numDashInfos > 0) {
-                                                          float factorToT = (radius * 2.0) / lineLength;
-                                                          float dashTotal = lineValues[styleIndexBase + 17] * factorToT;
-                                                          float startOffsetSegment = mod(segmentStartLPos / lineLength, dashTotal);
-                                                          float timeOffset = timeFrameDeltaSeconds * lineValues[styleIndexBase + 19] * factorToT;
-                                                          float intraDashPos = mod(t + startOffsetSegment + timeOffset, dashTotal);
-
-                                                          float dashFade = lineValues[styleIndexBase + 18];
-
-                                                          float dxt = lineValues[styleIndexBase + 14] * factorToT; // end dash 1
-                                                          float dyt = lineValues[styleIndexBase + 15] * factorToT; // end gap 1
-                                                          float dzt = lineValues[styleIndexBase + 16] * factorToT; // end dash 2
-                                                          float dwt = lineValues[styleIndexBase + 17] * factorToT; // end gap 2
-
-                                                          /*
-                                                          vec4 gapColor = vec4(lineValues[styleIndexBase + 5], lineValues[styleIndexBase + 6],
-                                                                               lineValues[styleIndexBase + 7], lineValues[styleIndexBase + 8]);
-
-                                                          if (dashFade == 0.0 && ((intraDashPos > dxt && intraDashPos < dyt) || (intraDashPos > dzt && intraDashPos < dwt))) {
-                                                              // Simple case without fade
                                                               fragColor = gapColor;
-                                                          } else {
-                                                              float dashHalfFade = dashFade * 0.5;
-
-                                                              if (intraDashPos > dxt && intraDashPos < dyt) {
-                                                                  // Within gap 1
-                                                                  float relG = (intraDashPos - dxt) / (dyt - dxt);
-                                                                  if (relG < dashHalfFade) {
-                                                                      float wG = relG / dashHalfFade;
-                                                                      fragColor = mix(color, gapColor, wG);
-                                                                  } else if (1.0 - relG < dashHalfFade) {
-                                                                      float wG = (1.0 - relG) / dashHalfFade;
-                                                                      fragColor = mix(color, gapColor, wG);
-                                                                  } else {
-                                                                      fragColor = gapColor;
-                                                                  }
-                                                              }
-
-                                                              if (intraDashPos > dzt && intraDashPos < dwt) {
-                                                                  // Within gap 2
-                                                                  float relG = (intraDashPos - dzt) / (dwt - dzt);
-                                                                  if (relG < dashHalfFade) {
-                                                                      float wG = relG / dashHalfFade;
-                                                                      fragColor = mix(color, gapColor, wG);
-                                                                  } else if (1.0 - relG < dashHalfFade) {
-                                                                      float wG = (1.0 - relG) / dashHalfFade;
-                                                                      fragColor = mix(color, gapColor, wG);
-                                                                  } else {
-                                                                      fragColor = gapColor;
-                                                                  }
-                                                              }
-                                                          }*/
-
-                                                          // Only fade-out (dashFade is ratio of gap that is blurred)
-                                                          if ((intraDashPos > dxt && intraDashPos < dyt) || (intraDashPos > dzt && intraDashPos < dwt)) {
-                                                              float relG = intraDashPos < dyt
-                                                                      ? (intraDashPos - dxt) / (dyt - dxt)
-                                                                      : (intraDashPos - dzt) / (dwt - dzt);
-                                                              relG /= dashFade;
-                                                              vec4 gapColor = vec4(lineValues[styleIndexBase + 5], lineValues[styleIndexBase + 6],
-                                                                                   lineValues[styleIndexBase + 7], lineValues[styleIndexBase + 8]);
-                                                              fragColor = mix(color, gapColor, min(relG, 1.0));
                                                           }
                                                       }
 
-                                                      fragmentColor = fragColor;
-                                                      fragmentColor.a = 1.0;
-                                                      fragmentColor *= fragColor.a * opacity;
-                                                  });
+                                                      if (intraDashPos > dzt && intraDashPos < dwt) {
+                                                          // Within gap 2
+                                                          float relG = (intraDashPos - dzt) / (dwt - dzt);
+                                                          if (relG < dashHalfFade) {
+                                                              float wG = relG / dashHalfFade;
+                                                              fragColor = mix(color, gapColor, wG);
+                                                          } else if (1.0 - relG < dashHalfFade) {
+                                                              float wG = (1.0 - relG) / dashHalfFade;
+                                                              fragColor = mix(color, gapColor, wG);
+                                                          } else {
+                                                              fragColor = gapColor;
+                                                          }
+                                                      }
+                                                  }*/
+
+                                                  // Only fade-out (dashFade is ratio of gap that is blurred)
+                                                  if ((intraDashPos > dxt && intraDashPos < dyt) || (intraDashPos > dzt && intraDashPos < dwt)) {
+                                                      float relG = intraDashPos < dyt
+                                                              ? (intraDashPos - dxt) / (dyt - dxt)
+                                                              : (intraDashPos - dzt) / (dwt - dzt);
+                                                      relG /= dashFade;
+                                                      vec4 gapColor = vec4(lineValues[lineIndex].gapColorR, lineValues[lineIndex].gapColorG,
+                                                                           lineValues[lineIndex].gapColorB, lineValues[lineIndex].gapColorA);
+                                                      fragColor = mix(color, gapColor, min(relG, 1.0));
+                                                  }
+                                              }
+
+                                              fragmentColor = fragColor;
+                                              fragmentColor.a = 1.0;
+                                              fragmentColor *= fragColor.a * opacity;
+                                          });
     }
 }

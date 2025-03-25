@@ -33,6 +33,10 @@ public:
 
     virtual bool usesModelMatrix() override { return true; };
 
+    virtual void setupGlObjects() {};
+
+    virtual void clearGlObjects() {};
+
 protected:
 
     virtual void setBlendMode(BlendMode blendMode) override;
