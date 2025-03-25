@@ -87,89 +87,89 @@ public:
     VectorTileGeometryHandler(const VectorTileGeometryHandler& other) = delete;
 
     void points_begin(const uint32_t count) {
-        currentFeature = std::vector<::Vec2D>();
-        currentFeature.reserve(count);
+        coordinates.emplace_back();
+        coordinates.back().reserve(count);
     }
 
     void points_point(const vtzero::point point) {
-        currentFeature.emplace_back(coordinateFromPoint(point, false));
+        coordinates.back().emplace_back(coordinateFromPoint(point, false));
     }
 
     void points_end() {
-        coordinates.push_back(currentFeature);
-        currentFeature.clear();
+        // all done.
     }
 
     void linestring_begin(const uint32_t count) {
-        currentFeature = std::vector<::Vec2D>();
-        currentFeature.reserve(count);
+        coordinates.emplace_back();
+        coordinates.back().reserve(count);
     }
 
     void linestring_point(const vtzero::point point) {
-        currentFeature.emplace_back(coordinateFromPoint(point, false));
+        coordinates.back().emplace_back(coordinateFromPoint(point, false));
     }
 
     void linestring_end() {
-        coordinates.push_back(currentFeature);
-        currentFeature.clear();
     }
 
     void ring_begin(uint32_t count) {
-        polygonCurrentRing = std::vector<vtzero::point>();
-        polygonCurrentRing.reserve(count);
+        polygonRings.emplace_back();
+        polygonRings.back().points.reserve(count);
     }
 
     void ring_point(vtzero::point point) noexcept {
-        polygonCurrentRing.emplace_back(point);
+        polygonRings.back().points.emplace_back(point);
     }
 
     void ring_end(vtzero::ring_type ringType) noexcept {
-        if (!polygonCurrentRing.empty()) {
-            polygonCurrentRing.push_back(polygonCurrentRing[0]);
+        if (polygonRings.empty()) { return; }
 
-            switch (ringType) {
-                case vtzero::ring_type::outer:
-                    polygonPoints.push_back(polygonCurrentRing);
-                    polygonHoles.push_back(std::vector<std::vector<vtzero::point>>());
-                    break;
-                case vtzero::ring_type::inner:
-                    polygonHoles.back().push_back(polygonCurrentRing);
-                    break;
-                case vtzero::ring_type::invalid:
-                    polygonCurrentRing.clear();
-                    break;
-            }
-            polygonCurrentRing.clear();
+        auto& ring = polygonRings.back();
+        if (ring.points.empty()) {
+            polygonRings.pop_back(); // Remove empty ring
+            return;
+        }
+
+        ring.points.push_back(ring.points[0]);
+
+        switch (ringType) {
+            case vtzero::ring_type::outer:
+                ring.isHole = false;
+                break;
+            case vtzero::ring_type::inner:
+                ring.isHole = true;
+                break;
+            case vtzero::ring_type::invalid:
+                polygonRings.pop_back(); // Discard invalid ring
+                break;
         }
     }
 
     size_t beginTriangulatePolygons() {
-        return polygonPoints.size();
+        computePolygonRanges();
+        
+        return polygonRanges.size();
     }
 
     void endTringulatePolygons() {
-        polygonHoles.clear();
-        polygonPoints.clear();
+        polygonRings.clear();
+        polygonRanges.clear();
     }
 
     void triangulatePolygons(size_t i) {
-        coordinates.reserve(coordinates.size() + polygonHoles[i].size() + 1);
+        const auto& range = polygonRanges[i];
 
-        coordinates.emplace_back();
-        coordinates.back().reserve(polygonPoints[i].size());
-        for (auto const &point: polygonPoints[i]){
-            coordinates.back().push_back(coordinateFromPoint(point, false));
-        }
+        coordinates.reserve(coordinates.size() + range.size);
 
-        for(auto const &hole: polygonHoles[i]) {
+        for(size_t i = range.startIndex; i < range.size + range.startIndex; ++i) {
             coordinates.emplace_back();
-            coordinates.back().reserve(hole.size());
-            for (auto const &point: hole){
+            coordinates.back().reserve(polygonRings[i].points.size());
+
+            for (auto const &point: polygonRings[i].points){
                 coordinates.back().push_back(coordinateFromPoint(point, false));
             }
         }
 
-        auto polygonView = EarcutVectorView(polygonPoints[i], polygonHoles[i], 500);
+        auto polygonView = EarcutPolygonVectorView(polygonRings, polygonRanges[i], 500);
         std::vector<uint16_t> indices = mapbox::earcut<uint16_t>(polygonView);
 
         std::reverse(indices.begin(), indices.end());
@@ -185,7 +185,6 @@ public:
 
     void triangulateGeoJsonPolygons(const std::shared_ptr<GeoJsonGeometry> &geometry) {
         for (int i = 0; i < geometry->coordinates.size(); i++) {
-
             coordinates.reserve(coordinates.size() + geometry->coordinates[i].size() + 1);
 
             coordinates.emplace_back();
@@ -202,7 +201,7 @@ public:
                 }
             }
 
-            auto polygonView = EarcutVectorView(geometry->coordinates[i], geometry->holes[i], 500);
+            auto polygonView = EarcutCoordVectorView(geometry->coordinates[i], geometry->holes[i], 500);
             std::vector<uint16_t> indices = mapbox::earcut<uint16_t>(polygonView);
 
             if (!indices.empty()) {
@@ -304,12 +303,35 @@ private:
         return coordinateFromPoint(point, true);
     }
 
-    std::vector<::Vec2D> currentFeature;
+    void computePolygonRanges() {
+        size_t start = 0;
+        size_t count = 0;
+
+        for (size_t i = 0; i < polygonRings.size(); ++i) {
+            const PolygonRing& ring = polygonRings[i];
+
+            if (!ring.isHole) {
+                // Start of a new polygon
+                if (count > 0) {
+                    polygonRanges.push_back({start, count});
+                }
+                start = i;
+                count = 1;
+            } else {
+                ++count;
+            }
+        }
+
+        // Final polygon
+        if (count > 0) {
+            polygonRanges.push_back({start, count});
+        }
+    }
+
     std::vector<std::vector<::Vec2D>> coordinates;
 
-    std::vector<vtzero::point> polygonCurrentRing;
-    std::vector<std::vector<vtzero::point>> polygonPoints;
-    std::vector<std::vector<std::vector<vtzero::point>>> polygonHoles;
+    std::vector<PolygonRing> polygonRings;
+    std::vector<PolygonRange> polygonRanges;
 
     std::vector<TriangulatedPolygon> polygons;
 
