@@ -85,7 +85,7 @@ void LineGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface>
     scaleFactorHandle = glGetUniformLocation(program, "scaleFactor");
 
     if (const auto &glShader = std::static_pointer_cast<BaseShaderProgramOpenGl>(shaderProgram)) {
-        glShader->setupGlObjects();
+        glShader->setupGlObjects(openGlContext);
     }
 
     ready = true;

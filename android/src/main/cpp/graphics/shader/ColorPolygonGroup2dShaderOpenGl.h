@@ -32,6 +32,10 @@ class ColorPolygonGroup2dShaderOpenGl : public BaseShaderProgramOpenGl,
 
     virtual void setStyles(const ::SharedBytes & styles) override;
 
+    void setupGlObjects(const std::shared_ptr<::OpenGlContext> &context) override;
+
+    void clearGlObjects() override;
+
   protected:
     virtual std::string getVertexShader() override;
 
@@ -41,6 +45,9 @@ class ColorPolygonGroup2dShaderOpenGl : public BaseShaderProgramOpenGl,
     bool projectOntoUnitSphere = false;
     bool isStriped = false;
     const std::string programName;
+
+    GLint polygonStylesHandle = -1;
+    GLint numStylesHandle = -1;
 
     std::recursive_mutex styleMutex;
     std::vector<GLfloat> polygonStyles;

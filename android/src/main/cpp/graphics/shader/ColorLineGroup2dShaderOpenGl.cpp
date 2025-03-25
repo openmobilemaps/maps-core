@@ -17,8 +17,8 @@
 ColorLineGroup2dShaderOpenGl::ColorLineGroup2dShaderOpenGl(bool projectOntoUnitSphere, bool simple)
         : projectOntoUnitSphere(projectOntoUnitSphere),
           simpleLine(simple),
-          sizeLineValuesArray(
-                  simple ? sizeSimpleLineValues * maxNumStyles : sizeLineValues * maxNumStyles),
+          sizeLineValues(simple ? sizeSimpleLineValues : sizeFullLineValues),
+          sizeLineValuesArray((simple ? sizeSimpleLineValues : sizeFullLineValues) * maxNumStyles),
           programName(simple ? (projectOntoUnitSphere
                                 ? "UBMAP_ColorSimpleLineGroupUnitSphereShaderOpenGl"
                                 : "UBMAP_ColorSimpleLineGroupShaderOpenGl") : projectOntoUnitSphere
@@ -48,25 +48,34 @@ void ColorLineGroup2dShaderOpenGl::setupProgram(const std::shared_ptr<::Renderin
     openGlContext->storeProgram(programName, program);
 }
 
-void ColorLineGroup2dShaderOpenGl::setupGlObjects() {
+void ColorLineGroup2dShaderOpenGl::setupGlObjects(const std::shared_ptr<::OpenGlContext> &context) {
     if (lineStyleBuffer == 0) {
         glGenBuffers(1, &lineStyleBuffer);
         glBindBuffer(GL_UNIFORM_BUFFER, lineStyleBuffer);
         glBufferData(GL_UNIFORM_BUFFER, sizeLineValuesArray * sizeof(GLfloat), nullptr, GL_DYNAMIC_DRAW);
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
     }
+
+    int program = context->getProgram(programName);
+    numStylesHandle = glGetUniformLocation(program, "numStyles");
+    dashingScaleFactorHandle = glGetUniformLocation(program, "dashingScaleFactor");
+    timeFrameDeltaHandle = glGetUniformLocation(program, "timeFrameDeltaSeconds");
 }
 
 void ColorLineGroup2dShaderOpenGl::clearGlObjects() {
     if (lineStyleBuffer > 0) {
+        std::lock_guard<std::recursive_mutex> lock(styleMutex);
+        lineStyleBuffer = 0;
+        stylesUpdated = true;
         glDeleteBuffers(1, &lineStyleBuffer);
     }
+    numStylesHandle = -1;
+    dashingScaleFactorHandle = -1;
+    timeFrameDeltaHandle = -1;
 }
 
 void ColorLineGroup2dShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context) {
     BaseShaderProgramOpenGl::preRender(context);
-    std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
-    int program = openGlContext->getProgram(programName);
 
     glBindBufferBase(GL_UNIFORM_BUFFER, 0, lineStyleBuffer); // LineStyle is at binding index 0
 
@@ -75,20 +84,20 @@ void ColorLineGroup2dShaderOpenGl::preRender(const std::shared_ptr<::RenderingCo
         if (numStyles == 0) {
             return;
         }
-        int lineStylesHandle = glGetUniformLocation(program, "lineValues");
-        glUniform1fv(lineStylesHandle, numStyles * sizeLineValues, &lineValues[0]);
-        int numStylesHandle = glGetUniformLocation(program, "numStyles");
+
         glUniform1i(numStylesHandle, numStyles);
-        int dashingScaleFactorHandle = glGetUniformLocation(program, "dashingScaleFactor");
-        glUniform1f(dashingScaleFactorHandle, dashingScaleFactor);
-        int timeFrameDeltaHandle = glGetUniformLocation(program, "timeFrameDeltaSeconds");
-        if (timeFrameDeltaHandle >= 0) {
-            glUniform1f(timeFrameDeltaHandle, openGlContext->getDeltaTimeMs() / 1000.0f);
+        if (dashingScaleFactorHandle >= 0) {
+            glUniform1f(dashingScaleFactorHandle, dashingScaleFactor);
         }
+        if (timeFrameDeltaHandle >= 0) {
+            std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
+            glUniform1f(timeFrameDeltaHandle, (float) openGlContext->getDeltaTimeMs() / 1000.0f);
+        }
+
         if (stylesUpdated) {
             stylesUpdated = false;
             glBindBuffer(GL_UNIFORM_BUFFER, lineStyleBuffer);
-            glBufferSubData(GL_UNIFORM_BUFFER, 0, lineValues.size() * sizeof(GLfloat), &lineValues[0]);
+            glBufferSubData(GL_UNIFORM_BUFFER, 0, numStyles * sizeLineValues * sizeof(GLfloat), &lineValues[0]);
             glBindBuffer(GL_UNIFORM_BUFFER, 0);
         }
     }

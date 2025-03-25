@@ -34,7 +34,7 @@ public:
 
     void setDashingScaleFactor(float factor) override;
 
-    void setupGlObjects() override;
+    void setupGlObjects(const std::shared_ptr<::OpenGlContext> &context) override;
 
     void clearGlObjects() override;
 
@@ -50,6 +50,10 @@ private:
     const bool simpleLine;
     const std::string programName;
 
+    GLint numStylesHandle = -1;
+    GLint dashingScaleFactorHandle = -1;
+    GLint timeFrameDeltaHandle = -1;
+
     std::recursive_mutex styleMutex;
     GLuint lineStyleBuffer = 0;
     std::vector<GLfloat> lineValues;
@@ -64,7 +68,9 @@ private:
     //const int sizeGapColorValues = 4;
     //const int maxNumDashValues = 4;
    // const int sizeDashValues = maxNumDashValues + 3;
-    const int sizeLineValues = 24; //sizeStyleValues + sizeColorValues + sizeGapColorValues + sizeDashValues + 1 => 23, with padding (to have styles aligned to 4 floats - std140);
+    const int sizeFullLineValues = 24; //sizeStyleValues + sizeColorValues + sizeGapColorValues + sizeDashValues + 1 => 23, with padding (to have styles aligned to 4 floats - std140);
     const int sizeSimpleLineValues = 8; // ensure size multiple of 4 floats - std140
+
     const int sizeLineValuesArray;
+    const int sizeLineValues;
 };

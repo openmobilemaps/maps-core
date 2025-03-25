@@ -45,19 +45,26 @@ void ColorPolygonGroup2dShaderOpenGl::setupProgram(const std::shared_ptr<::Rende
     openGlContext->storeProgram(programName, program);
 }
 
+void ColorPolygonGroup2dShaderOpenGl::setupGlObjects(const std::shared_ptr<::OpenGlContext> &context) {
+    int program = context->getProgram(programName);
+    polygonStylesHandle = glGetUniformLocation(program, "polygonStyles");
+    numStylesHandle = glGetUniformLocation(program, "numStyles");
+}
+
+void ColorPolygonGroup2dShaderOpenGl::clearGlObjects() {
+    polygonStylesHandle = -1;
+    numStylesHandle = -1;
+}
+
 void ColorPolygonGroup2dShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context) {
     BaseShaderProgramOpenGl::preRender(context);
-    std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
-    int program = openGlContext->getProgram(programName);
 
     {
         std::lock_guard<std::recursive_mutex> overlayLock(styleMutex);
         if (numStyles == 0) {
             return;
         }
-        int lineStylesHandle = glGetUniformLocation(program, "polygonStyles");
-        glUniform1fv(lineStylesHandle, numStyles * sizeStyleValues, &polygonStyles[0]);
-        int numStylesHandle = glGetUniformLocation(program, "numStyles");
+        glUniform1fv(polygonStylesHandle, numStyles * sizeStyleValues, &polygonStyles[0]);
         glUniform1i(numStylesHandle, numStyles);
     }
 }

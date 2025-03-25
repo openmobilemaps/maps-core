@@ -50,6 +50,7 @@ class OpenGlContext : public RenderingContextInterface, public std::enable_share
 
   protected:
     RenderingCullMode cullMode = RenderingCullMode::NONE;
+    std::atomic_flag backgroundColorValid = ATOMIC_FLAG_INIT;
     Color backgroundColor = Color(0, 0, 0, 1);
 
     std::unordered_map<std::string, int> programs;
