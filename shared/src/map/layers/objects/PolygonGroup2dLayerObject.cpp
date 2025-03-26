@@ -97,9 +97,19 @@ void PolygonGroup2dLayerObject::setStyles(const std::vector<PolygonStyle> &style
         shaderStyles.push_back(s.color.b);
         shaderStyles.push_back(s.color.a);
         shaderStyles.push_back(s.opacity);
+#ifndef __APPLE__
+        // Padding to have the style size as a multiple of 16 bytes (OpenGL uniform buffer padding due to std140)
+        shaderStyles.push_back(0.0);
+        shaderStyles.push_back(0.0);
+        shaderStyles.push_back(0.0);
+#endif
     }
 
+#ifndef __APPLE__
+    auto s = SharedBytes((int64_t)shaderStyles.data(), (int32_t)styles.size(), (int32_t)8 * sizeof(float));
+#else
     auto s = SharedBytes((int64_t)shaderStyles.data(), (int32_t)styles.size(), (int32_t)5 * sizeof(float));
+#endif
     shader->setStyles(s);
 }
 

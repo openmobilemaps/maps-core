@@ -16,9 +16,9 @@
 
 ColorLineGroup2dShaderOpenGl::ColorLineGroup2dShaderOpenGl(bool projectOntoUnitSphere, bool simple)
         : projectOntoUnitSphere(projectOntoUnitSphere),
-          simpleLine(simple),
+          isSimpleLine(simple),
           sizeLineValues(simple ? sizeSimpleLineValues : sizeFullLineValues),
-          sizeLineValuesArray((simple ? sizeSimpleLineValues : sizeFullLineValues) * maxNumStyles),
+          sizeLineValuesArray((simple ? sizeSimpleLineValues : sizeFullLineValues) * MAX_NUM_STYLES),
           programName(simple ? (projectOntoUnitSphere
                                 ? "UBMAP_ColorSimpleLineGroupUnitSphereShaderOpenGl"
                                 : "UBMAP_ColorSimpleLineGroupShaderOpenGl") : projectOntoUnitSphere
@@ -52,12 +52,12 @@ void ColorLineGroup2dShaderOpenGl::setupGlObjects(const std::shared_ptr<::OpenGl
     if (lineStyleBuffer == 0) {
         glGenBuffers(1, &lineStyleBuffer);
         glBindBuffer(GL_UNIFORM_BUFFER, lineStyleBuffer);
-        glBufferData(GL_UNIFORM_BUFFER, sizeLineValuesArray * sizeof(GLfloat), nullptr, GL_DYNAMIC_DRAW);
+        // maximum number of polygonStyles and numStyles
+        glBufferData(GL_UNIFORM_BUFFER, sizeLineValuesArray * sizeof(GLfloat) + sizeof(GLint), nullptr, GL_DYNAMIC_DRAW);
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
     }
 
     int program = context->getProgram(programName);
-    numStylesHandle = glGetUniformLocation(program, "numStyles");
     dashingScaleFactorHandle = glGetUniformLocation(program, "dashingScaleFactor");
     timeFrameDeltaHandle = glGetUniformLocation(program, "timeFrameDeltaSeconds");
 }
@@ -69,7 +69,6 @@ void ColorLineGroup2dShaderOpenGl::clearGlObjects() {
         stylesUpdated = true;
         glDeleteBuffers(1, &lineStyleBuffer);
     }
-    numStylesHandle = -1;
     dashingScaleFactorHandle = -1;
     timeFrameDeltaHandle = -1;
 }
@@ -77,7 +76,7 @@ void ColorLineGroup2dShaderOpenGl::clearGlObjects() {
 void ColorLineGroup2dShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context) {
     BaseShaderProgramOpenGl::preRender(context);
 
-    glBindBufferBase(GL_UNIFORM_BUFFER, 0, lineStyleBuffer); // LineStyle is at binding index 0
+    glBindBufferBase(GL_UNIFORM_BUFFER, 0, lineStyleBuffer); // LineStyleCollection is at binding index 0
 
     {
         std::lock_guard<std::recursive_mutex> lock(styleMutex);
@@ -85,7 +84,6 @@ void ColorLineGroup2dShaderOpenGl::preRender(const std::shared_ptr<::RenderingCo
             return;
         }
 
-        glUniform1i(numStylesHandle, numStyles);
         if (dashingScaleFactorHandle >= 0) {
             glUniform1f(dashingScaleFactorHandle, dashingScaleFactor);
         }
@@ -98,13 +96,14 @@ void ColorLineGroup2dShaderOpenGl::preRender(const std::shared_ptr<::RenderingCo
             stylesUpdated = false;
             glBindBuffer(GL_UNIFORM_BUFFER, lineStyleBuffer);
             glBufferSubData(GL_UNIFORM_BUFFER, 0, numStyles * sizeLineValues * sizeof(GLfloat), &lineValues[0]);
+            glBufferSubData(GL_UNIFORM_BUFFER, MAX_NUM_STYLES * sizeLineValues * sizeof(GLfloat), sizeof(GLint), &numStyles);
             glBindBuffer(GL_UNIFORM_BUFFER, 0);
         }
     }
 }
 
 void ColorLineGroup2dShaderOpenGl::setStyles(const ::SharedBytes & styles) {
-    assert(styles.elementCount <= maxNumStyles);
+    assert(styles.elementCount <= MAX_NUM_STYLES);
     assert(styles.elementCount * styles.bytesPerElement <= lineValues.size() * sizeof(float));
     {
         std::lock_guard<std::recursive_mutex> overlayLock(styleMutex);
@@ -124,8 +123,8 @@ void ColorLineGroup2dShaderOpenGl::setDashingScaleFactor(float factor) {
     }
 }
 
-std::string ColorLineGroup2dShaderOpenGl::getLineStyleStruct() {
-    if (simpleLine) {
+std::string ColorLineGroup2dShaderOpenGl::getLineStylesUBODefinition(bool isSimpleLine) {
+    if (isSimpleLine) {
         return OMMShaderCode(
                 struct SimpleLineStyle {
                     float width; // 0
@@ -136,6 +135,11 @@ std::string ColorLineGroup2dShaderOpenGl::getLineStyleStruct() {
                     float widthAsPixels; // 5
                     float opacity; // 6
                     float capType; // 7
+                };
+
+                layout (std140, binding = 0) uniform LineStyleCollection {
+                    SimpleLineStyle lineValues[) + std::to_string(MAX_NUM_STYLES) + OMMShaderCode(];
+                    int numStyles;
                 };
         );
     } else {
@@ -165,12 +169,17 @@ std::string ColorLineGroup2dShaderOpenGl::getLineStyleStruct() {
                     float dotted; // 21
                     float dottedSkew; // 22
                 };
+
+                layout (std140, binding = 0) uniform LineStyleCollection {
+                    LineStyle lineValues[) + std::to_string(MAX_NUM_STYLES) + OMMShaderCode(];
+                    int numStyles;
+                };
         );
     }
 }
 
 std::string ColorLineGroup2dShaderOpenGl::getVertexShader() {
-    if (simpleLine) {
+    if (isSimpleLine) {
         return OMMVersionedGlesShaderCode(320 es,
                                           precision highp float;
                                                   uniform mat4 umMatrix;
@@ -188,15 +197,11 @@ std::string ColorLineGroup2dShaderOpenGl::getVertexShader() {
                        in float vVertexIndex;
                        in float vStyleInfo;
 
-                       ) + getLineStyleStruct() + OMMShaderCode(
+                       ) + getLineStylesUBODefinition(isSimpleLine) + OMMShaderCode(
 
-                       layout (std140, binding = 0) uniform LineStyleCollection {
-                           SimpleLineStyle lineValues[) + std::to_string(maxNumStyles) + OMMShaderCode(];
-                       };
-                       uniform int numStyles;
                        uniform float scaleFactor;
                        uniform float dashingScaleFactor;
-                       out float fLineIndex;
+                       flat out int lineIndex;
                        out float radius;
                        out float fSegmentType;
                        out vec3 pointDeltaA;
@@ -205,17 +210,11 @@ std::string ColorLineGroup2dShaderOpenGl::getVertexShader() {
 
                        void main() {
                            float fStyleIndex = mod(vStyleInfo, 256.0);
-                           int lineIndex = int(floor(fStyleIndex + 0.5));
-                           if (lineIndex < 0) {
-                               lineIndex = 0;
-                           } else if (lineIndex > numStyles) {
-                               lineIndex = numStyles;
-                           }
+                           lineIndex = clamp(int(floor(fStyleIndex + 0.5)), 0, numStyles);
                            float width = lineValues[lineIndex].width;
                            float isScaled = lineValues[lineIndex].widthAsPixels;
                            color = vec4(lineValues[lineIndex].colorR, lineValues[lineIndex].colorG, lineValues[lineIndex].colorB,
                                         lineValues[lineIndex].colorA);
-                           fLineIndex = float(lineIndex);
                            fSegmentType = vStyleInfo / 256.0;
 
                ) + (projectOntoUnitSphere ? OMMShaderCode(
@@ -296,16 +295,11 @@ std::string ColorLineGroup2dShaderOpenGl::getVertexShader() {
                        in float vSegmentStartLPos;
                        in float vStyleInfo;
 
-                       ) + getLineStyleStruct() + OMMShaderCode(
+                       ) + getLineStylesUBODefinition(isSimpleLine) + OMMShaderCode(
 
-                       layout (std140, binding = 0) uniform LineStyleCollection {
-                           LineStyle lineValues[) + std::to_string(maxNumStyles) + OMMShaderCode(];
-                       };
-
-                        uniform int numStyles;
                         uniform float scaleFactor;
                         uniform float dashingScaleFactor;
-                        out float fLineIndex;
+                        flat out int lineIndex;
                         out float radius;
                         out float segmentStartLPos;
                         out float fSegmentType;
@@ -317,19 +311,13 @@ std::string ColorLineGroup2dShaderOpenGl::getVertexShader() {
 
                         void main() {
                             float fStyleIndex = mod(vStyleInfo, 256.0);
-                            int lineIndex = int(floor(fStyleIndex + 0.5));
-                            if (lineIndex < 0) {
-                                lineIndex = 0;
-                            } else if (lineIndex > numStyles) {
-                                lineIndex = numStyles;
-                            }
+                            lineIndex = clamp(int(floor(fStyleIndex + 0.5)), 0, numStyles);
                             float width = lineValues[lineIndex].width;
                             float isScaled = lineValues[lineIndex].widthAsPixels;
                             float blur = lineValues[lineIndex].blur;
                             color = vec4(lineValues[lineIndex].colorR, lineValues[lineIndex].colorG, lineValues[lineIndex].colorB,
                                             lineValues[lineIndex].colorA);
                             segmentStartLPos = vSegmentStartLPos;
-                            fLineIndex = float(lineIndex);
                             fSegmentType = vStyleInfo / 256.0;
 
                ) + (projectOntoUnitSphere ? OMMShaderCode(
@@ -400,17 +388,13 @@ std::string ColorLineGroup2dShaderOpenGl::getVertexShader() {
 }
 
 std::string ColorLineGroup2dShaderOpenGl::getFragmentShader() {
-    if (simpleLine) {
+    if (isSimpleLine) {
         return OMMVersionedGlesShaderCode(320 es,
                                           precision highp float;
 
-                                          ) + getLineStyleStruct() + OMMShaderCode(
+                                          ) + getLineStylesUBODefinition(isSimpleLine) + OMMShaderCode(
 
-                                          layout (std140, binding = 0) uniform LineStyleCollection {
-                                              SimpleLineStyle lineValues[) + std::to_string(maxNumStyles) + OMMShaderCode(];
-                                          };
-
-                                        in float fLineIndex;
+                                        flat in int lineIndex;
                                         in float radius;
                                         in float fSegmentType; // 0: inner segment, 1: line start segment (i.e. A is first point in line), 2: line end segment, 3: start and end in segment
                                         in vec3 pointDeltaA;
@@ -420,7 +404,6 @@ std::string ColorLineGroup2dShaderOpenGl::getFragmentShader() {
                                         out vec4 fragmentColor;
 
                                void main() {
-                                        int lineIndex = int(fLineIndex);
                                         int segmentType = int(floor(fSegmentType + 0.5));
                                         // 0: butt, 1: round, 2: square
                                         int iCapType = int(floor(lineValues[lineIndex].capType + 0.5));
@@ -460,13 +443,10 @@ std::string ColorLineGroup2dShaderOpenGl::getFragmentShader() {
         return OMMVersionedGlesShaderCode(320 es,
                                           precision highp float;
 
-                                          ) + getLineStyleStruct() + OMMShaderCode(
+                                          ) + getLineStylesUBODefinition(isSimpleLine) + OMMShaderCode(
 
-                                          layout (std140, binding = 0) uniform LineStyleCollection {
-                                              LineStyle lineValues[) + std::to_string(maxNumStyles) + OMMShaderCode(];
-                                          };
                                           uniform float timeFrameDeltaSeconds;
-                                          in float fLineIndex;
+                                          flat in int lineIndex;
                                           in float radius;
                                           in float segmentStartLPos;
                                           in float scaledBlur;
@@ -479,7 +459,6 @@ std::string ColorLineGroup2dShaderOpenGl::getFragmentShader() {
                                           out vec4 fragmentColor;
 
                                           void main() {
-                                              int lineIndex = int(fLineIndex);
                                               int segmentType = int(floor(fSegmentType + 0.5));
                                               // 0: butt, 1: round, 2: square
                                               int iCapType = int(floor(lineValues[lineIndex].capType + 0.5));

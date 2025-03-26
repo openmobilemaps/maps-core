@@ -44,13 +44,12 @@ protected:
     virtual std::string getFragmentShader() override;
 
 private:
-    virtual std::string getLineStyleStruct();
+    static std::string getLineStylesUBODefinition(bool isSimpleLine);
 
     const bool projectOntoUnitSphere;
-    const bool simpleLine;
+    const bool isSimpleLine;
     const std::string programName;
 
-    GLint numStylesHandle = -1;
     GLint dashingScaleFactorHandle = -1;
     GLint timeFrameDeltaHandle = -1;
 
@@ -62,7 +61,7 @@ private:
 
     float dashingScaleFactor = 1.0;
 
-    const int maxNumStyles = 32;
+    static const int MAX_NUM_STYLES = 32;
     //const int sizeStyleValues = 3;
     //const int sizeColorValues = 4;
     //const int sizeGapColorValues = 4;

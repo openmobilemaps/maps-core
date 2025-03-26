@@ -42,17 +42,19 @@ class ColorPolygonGroup2dShaderOpenGl : public BaseShaderProgramOpenGl,
     virtual std::string getFragmentShader() override;
 
   private:
+    static std::string getPolygonStylesUBODefinition(bool isStriped);
+
     bool projectOntoUnitSphere = false;
     bool isStriped = false;
     const std::string programName;
 
-    GLint polygonStylesHandle = -1;
-    GLint numStylesHandle = -1;
-
     std::recursive_mutex styleMutex;
+    GLuint polygonStyleBuffer = 0;
     std::vector<GLfloat> polygonStyles;
+    bool stylesUpdated = false;
     GLint numStyles = 0;
 
-    const int sizeStyleValues = isStriped ? 7 : 5;
-    const int sizeStyleValuesArray = sizeStyleValues * 16;
+    const static int MAX_NUM_STYLES = 16;
+    const int sizeStyleValues = 8;// isStriped ? 7 : 5 -> rounded to the nearest multiple of 16 bytes
+    const int sizeStyleValuesArray = sizeStyleValues * MAX_NUM_STYLES;
 };
