@@ -1,17 +1,12 @@
 #include "CoordinateSystemFactory.h"
 #include "DefaultSystemToRenderConverter.h"
-#include "SymbolAnimationCoordinatorMap.h"
 #include "VectorTileGeometryHandler.h"
 
-#include <algorithm>
-#include <atomic>
 #include <catch2/benchmark/catch_benchmark.hpp>
 #include <catch2/catch_get_random_seed.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <fstream>
 #include <iostream>
-#include <random>
-#include <thread>
 #include <vector>
 
 std::pair<char*, std::size_t> readFile(const std::string& filePath) {
@@ -50,6 +45,7 @@ void parseAndTriangulate(const std::string& filePath, ParsingResult expectedResu
     ParsingResult result = {0, 0, 0};
 
     vtzero::vector_tile tileData(dataPtr, dataSize);
+    mapbox::detail::Earcut<uint16_t> earcutter;
     while (auto layer = tileData.next_layer()) {
         std::string sourceLayerName = std::string(layer.name());
 
@@ -60,7 +56,7 @@ void parseAndTriangulate(const std::string& filePath, ParsingResult expectedResu
             decode_geometry(feature.geometry(), geometryHandler);
             size_t polygonCount = geometryHandler.beginTriangulatePolygons();
             for (size_t i = 0; i < polygonCount; i++) {
-                geometryHandler.triangulatePolygons(i);
+                geometryHandler.triangulatePolygons(i, earcutter);
             }
             geometryHandler.endTringulatePolygons();
             result.polygonCount += geometryHandler.getPolygons().size();
