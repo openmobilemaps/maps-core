@@ -32,7 +32,8 @@ jobs:
           cd shared/test      # for access to data/ directory
           ../../build-debug/shared/test/tests \
             -r JUnit::out=../../test-results/catch2-junit.xml \
-            -r console::colour-mode=ansi
+            -r console::colour-mode=ansi \
+            --skip-benchmarks
 
       - name: Postprocess Junit XML
         if: always()
