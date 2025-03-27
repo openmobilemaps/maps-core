@@ -12,8 +12,7 @@
 #include "opengl_wrapper.h"
 
 OpenGlContext::OpenGlContext()
-    : programs()
-    {}
+        : programs(), timeCreation(chronoutil::getCurrentTimestamp()) {}
 
 int OpenGlContext::getProgram(const std::string &name) {
     auto p = programs.find(name);
@@ -39,6 +38,8 @@ void OpenGlContext::onSurfaceCreated() {
     setCulling(cullMode);
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_BLEND);
+    glClearColor(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
+    glClearStencil(0);
 }
 
 void OpenGlContext::setViewportSize(const ::Vec2I &size) {
@@ -48,12 +49,17 @@ void OpenGlContext::setViewportSize(const ::Vec2I &size) {
 
 ::Vec2I OpenGlContext::getViewportSize() { return viewportSize; }
 
-void OpenGlContext::setBackgroundColor(const Color &color) { backgroundColor = color; }
+void OpenGlContext::setBackgroundColor(const Color &color) {
+    backgroundColor = color;
+    backgroundColorValid.clear();
+}
 
 void OpenGlContext::setupDrawFrame() {
-    glClearColor(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
-    glClearStencil(0);
+    if (!backgroundColorValid.test_and_set()) {
+        glClearColor(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
+    }
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    timeFrameDelta = (chronoutil::getCurrentTimestamp() - timeCreation).count();
 }
 
 void OpenGlContext::preRenderStencilMask() {
@@ -94,4 +100,8 @@ void OpenGlContext::setCulling(RenderingCullMode mode) {
 
 float OpenGlContext::getAspectRatio() {
     return viewportSize.x / (float) viewportSize.y;
+}
+
+long OpenGlContext::getDeltaTimeMs() {
+    return timeFrameDelta;
 }

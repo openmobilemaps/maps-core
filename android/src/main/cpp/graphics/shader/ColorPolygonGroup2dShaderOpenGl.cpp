@@ -45,20 +45,41 @@ void ColorPolygonGroup2dShaderOpenGl::setupProgram(const std::shared_ptr<::Rende
     openGlContext->storeProgram(programName, program);
 }
 
+void ColorPolygonGroup2dShaderOpenGl::setupGlObjects(const std::shared_ptr<::OpenGlContext> &context) {
+    if (polygonStyleBuffer == 0) {
+        glGenBuffers(1, &polygonStyleBuffer);
+        glBindBuffer(GL_UNIFORM_BUFFER, polygonStyleBuffer);
+        // maximum number of polygonStyles and numStyles
+        glBufferData(GL_UNIFORM_BUFFER, sizeStyleValuesArray * sizeof(GLfloat) + sizeof(GLint), nullptr, GL_DYNAMIC_DRAW);
+        glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    }
+
+    int program = context->getProgram(programName);
+}
+
+void ColorPolygonGroup2dShaderOpenGl::clearGlObjects() {
+    if (polygonStyleBuffer > 0) {
+        std::lock_guard<std::recursive_mutex> lock(styleMutex);
+        polygonStyleBuffer = 0;
+        stylesUpdated = true;
+        glDeleteBuffers(1, &polygonStyleBuffer);
+    }
+}
+
 void ColorPolygonGroup2dShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context) {
     BaseShaderProgramOpenGl::preRender(context);
-    std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
-    int program = openGlContext->getProgram(programName);
+
+    glBindBufferBase(GL_UNIFORM_BUFFER, 0, polygonStyleBuffer); // PolygonStyleCollection is at binding index 0
 
     {
         std::lock_guard<std::recursive_mutex> overlayLock(styleMutex);
-        if (numStyles == 0) {
-            return;
+        if (stylesUpdated) {
+            stylesUpdated = false;
+            glBindBuffer(GL_UNIFORM_BUFFER, polygonStyleBuffer);
+            glBufferSubData(GL_UNIFORM_BUFFER, 0, numStyles * sizeStyleValues * sizeof(GLfloat), &polygonStyles[0]);
+            glBufferSubData(GL_UNIFORM_BUFFER, MAX_NUM_STYLES * sizeStyleValues * sizeof(GLfloat), sizeof(GLint), &numStyles);
+            glBindBuffer(GL_UNIFORM_BUFFER, 0);
         }
-        int lineStylesHandle = glGetUniformLocation(program, "polygonStyles");
-        glUniform1fv(lineStylesHandle, numStyles * sizeStyleValues, &polygonStyles[0]);
-        int numStylesHandle = glGetUniformLocation(program, "numStyles");
-        glUniform1i(numStylesHandle, numStyles);
     }
 }
 
@@ -71,6 +92,43 @@ void ColorPolygonGroup2dShaderOpenGl::setStyles(const ::SharedBytes & styles) {
         }
 
         this->numStyles = styles.elementCount;
+        stylesUpdated = true;
+    }
+}
+
+std::string ColorPolygonGroup2dShaderOpenGl::getPolygonStylesUBODefinition(bool isStriped) {
+    if (isStriped) {
+        return OMMShaderCode(
+                struct StripedPolygonStyle {
+                    float colorR; // 0
+                    float colorG; // 1
+                    float colorB; // 2
+                    float colorA; // 3
+                    float opacity; // 4
+                    float stripeWidth; // 5
+                    float gapWidth; // 6
+                }; // padded to 8 floats
+
+                layout (std140, binding = 0) uniform PolygonStyleCollection {
+                    StripedPolygonStyle polygonStyles[) + std::to_string(MAX_NUM_STYLES) + OMMShaderCode(];
+                    int numStyles;
+                };
+        );
+    } else {
+        return OMMShaderCode(
+                struct PolygonStyle {
+                    float colorR; // 0
+                    float colorG; // 1
+                    float colorB; // 2
+                    float colorA; // 3
+                    float opacity; // 4
+                }; // padded to 8 floats
+
+                layout (std140, binding = 0) uniform PolygonStyleCollection {
+                    PolygonStyle polygonStyles[) + std::to_string(MAX_NUM_STYLES) + OMMShaderCode(];
+                    int numStyles;
+                };
+        );
     }
 }
 
@@ -79,63 +137,43 @@ std::string ColorPolygonGroup2dShaderOpenGl::getVertexShader() {
                 // Striped Shader
                 precision highp float;
 
+                ) + getPolygonStylesUBODefinition(isStriped) + OMMShaderCode(
+
                 uniform mat4 umMatrix;
                 uniform mat4 uvpMatrix;
                 uniform vec4 uOriginOffset;
-                // polygonStyles: {vec4 color, float opacity, stripe width, gap width} - stride = 7
-                uniform float polygonStyles[7 * 16];
-                uniform int numStyles;
 
                 in vec3 vPosition;
                 in float vStyleIndex;
 
-                out vec4 color;
-                out vec2 stripeInfo;
+                flat out int styleIndex;
                 out vec2 uv;
 
                 void main() {
                     gl_Position = uvpMatrix * ((umMatrix * vec4(vPosition, 1.0)) + uOriginOffset);
 
-                    int styleIndex = int(floor(vStyleIndex + 0.5));
-                    if (styleIndex < 0) {
-                        styleIndex = 0;
-                    } else if (styleIndex > numStyles) {
-                        styleIndex = numStyles;
-                    }
-                    styleIndex = styleIndex * 7;
-                    color = vec4(polygonStyles[styleIndex], polygonStyles[styleIndex + 1],
-                                 polygonStyles[styleIndex + 2], polygonStyles[styleIndex + 3] * polygonStyles[styleIndex + 4]);
-                    stripeInfo = vec2(polygonStyles[styleIndex + 5], polygonStyles[styleIndex + 6]);
+                    styleIndex = clamp(int(floor(vStyleIndex + 0.5)), 0, numStyles);
                     uv = vPosition.xy;
                 }
             ) : OMMVersionedGlesShaderCode(320 es,
                 // Default Color Shader
                 precision highp float;
 
+                ) + getPolygonStylesUBODefinition(isStriped) + OMMShaderCode(
+
                 uniform mat4 umMatrix;
                 uniform mat4 uvpMatrix;
                 uniform vec4 uOriginOffset;
-                // polygonStyles: {vec4 color, float opacity} - stride = 5
-                uniform float polygonStyles[5 * 16];
-                uniform int numStyles;
 
                 in vec3 vPosition;
                 in float vStyleIndex;
 
-                out vec4 color;
+                flat out int styleIndex;
 
                 void main() {
                     gl_Position = uvpMatrix * ((umMatrix * vec4(vPosition, 1.0)) + uOriginOffset);
 
-                    int styleIndex = int(floor(vStyleIndex + 0.5));
-                    if (styleIndex < 0) {
-                        styleIndex = 0;
-                    } else if (styleIndex > numStyles) {
-                        styleIndex = numStyles;
-                    }
-                    styleIndex = styleIndex * 5;
-                    color = vec4(polygonStyles[styleIndex], polygonStyles[styleIndex + 1],
-                                 polygonStyles[styleIndex + 2], polygonStyles[styleIndex + 3] * polygonStyles[styleIndex + 4]);
+                    styleIndex = clamp(int(floor(vStyleIndex + 0.5)), 0, numStyles);
                 });
 }
 
@@ -144,23 +182,26 @@ std::string ColorPolygonGroup2dShaderOpenGl::getFragmentShader() {
                         // Striped Shader
                         precision highp float;
 
+                        ) + getPolygonStylesUBODefinition(isStriped) + OMMShaderCode(
+
                         uniform vec2 scaleFactors;
 
-                        in vec4 color;
-                        in vec2 stripeInfo;
+                        flat in int styleIndex;
                         in vec2 uv;
 
                         out vec4 fragmentColor;
 
                         void main() {
                             float disPx = (uv.x + uv.y) / scaleFactors.y;
-                            float totalPx = stripeInfo.x + stripeInfo.y;
-                            float adjLineWPx = stripeInfo.x / scaleFactors.y * scaleFactors.x;
+                            float totalPx = polygonStyles[styleIndex].stripeWidth + polygonStyles[styleIndex].gapWidth;
+                            float adjLineWPx = polygonStyles[styleIndex].stripeWidth / scaleFactors.y * scaleFactors.x;
                             if (mod(disPx, totalPx) > adjLineWPx) {
                                 fragmentColor = vec4(0.0);
                                 return;
                             }
 
+                            vec4 color = vec4(polygonStyles[styleIndex].colorR, polygonStyles[styleIndex].colorG,
+                                         polygonStyles[styleIndex].colorB, polygonStyles[styleIndex].colorA * polygonStyles[styleIndex].opacity);
                             fragmentColor = color;
                             fragmentColor.a = 1.0;
                             fragmentColor *= color.a;
@@ -169,12 +210,16 @@ std::string ColorPolygonGroup2dShaderOpenGl::getFragmentShader() {
                         // Default Color Shader
                         precision highp float;
 
-                        in vec4 color;
+                        ) + getPolygonStylesUBODefinition(isStriped) + OMMShaderCode(
+
+                        flat in int styleIndex;
                         out vec4 fragmentColor;
 
                         void main() {
-                          fragmentColor = color;
-                          fragmentColor.a = 1.0;
-                          fragmentColor *= color.a;
+                            vec4 color = vec4(polygonStyles[styleIndex].colorR, polygonStyles[styleIndex].colorG,
+                                         polygonStyles[styleIndex].colorB, polygonStyles[styleIndex].colorA * polygonStyles[styleIndex].opacity);
+                            fragmentColor = color;
+                            fragmentColor.a = 1.0;
+                            fragmentColor *= color.a;
                         });
 }

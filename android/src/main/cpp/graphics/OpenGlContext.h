@@ -15,6 +15,7 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include "ChronoUtil.h"
 
 class OpenGlContext : public RenderingContextInterface, public std::enable_shared_from_this<OpenGlContext> {
   public:
@@ -46,11 +47,17 @@ class OpenGlContext : public RenderingContextInterface, public std::enable_share
 
     virtual float getAspectRatio();
 
+    virtual long getDeltaTimeMs();
+
   protected:
     RenderingCullMode cullMode = RenderingCullMode::NONE;
+    std::atomic_flag backgroundColorValid = ATOMIC_FLAG_INIT;
     Color backgroundColor = Color(0, 0, 0, 1);
 
     std::unordered_map<std::string, int> programs;
 
     Vec2I viewportSize = Vec2I(0, 0);
+
+    std::chrono::milliseconds timeCreation;
+    long timeFrameDelta = 0;
 };

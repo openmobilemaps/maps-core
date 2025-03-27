@@ -12,6 +12,9 @@ struct __attribute__((packed)) ShaderSimpleLineStyle final {
     HalfFloat widthAsPixel;
     HalfFloat opacity;
     HalfFloat lineCap;
+#ifndef __APPLE__
+    // Ensure structure size is multiple of 16 bytes due to OpenGL uniform buffer padding rules (std140)
+#endif
 };
 
 #ifdef __APPLE__

@@ -17,6 +17,7 @@
 #include "ShaderProgramInterface.h"
 #include "opengl_wrapper.h"
 #include "BlendMode.h"
+#include "OpenGlContext.h"
 
 class BaseShaderProgramOpenGl: public ShaderProgramInterface {
   protected:
@@ -32,6 +33,10 @@ public:
     virtual void preRender(const std::shared_ptr<::RenderingContextInterface> &context) override;
 
     virtual bool usesModelMatrix() override { return true; };
+
+    virtual void setupGlObjects(const std::shared_ptr<::OpenGlContext> &context) {};
+
+    virtual void clearGlObjects() {};
 
 protected:
 

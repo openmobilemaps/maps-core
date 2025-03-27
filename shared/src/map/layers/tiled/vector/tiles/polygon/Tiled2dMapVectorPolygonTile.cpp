@@ -122,9 +122,26 @@ void Tiled2dMapVectorPolygonTile::update() {
                 const auto stripeWidth = polygonDescription->style.getStripeWidth(ec);
                 shaderStyles.push_back(stripeWidth[0]);
                 shaderStyles.push_back(stripeWidth[1]);
+#ifndef __APPLE__
+                // Padding to have the style size as a multiple of 16 bytes (OpenGL uniform buffer padding due to std140)
+                shaderStyles.push_back(0.0);
+#endif
+            } else {
+#ifndef __APPLE__
+                // Padding to have the style size as a multiple of 16 bytes (OpenGL uniform buffer padding due to std140)
+                shaderStyles.push_back(0.0);
+                shaderStyles.push_back(0.0);
+                shaderStyles.push_back(0.0);
+#endif
             }
         }
-        auto s = SharedBytes((int64_t)shaderStyles.data(), (int32_t)featureGroups.at(styleGroupId).size(), (isStriped ? 7 : 5) * (int32_t)sizeof(float));
+
+#ifndef __APPLE__
+        int32_t numAttributesPerStyle = 8;
+#else
+        int32_t numAttributesPerStyle = isStriped ? 7 : 5;
+#endif
+        auto s = SharedBytes((int64_t)shaderStyles.data(), (int32_t)featureGroups.at(styleGroupId).size(), numAttributesPerStyle * (int32_t)sizeof(float));
         shaders[styleGroupId]->setStyles(s);
     }
 }

@@ -10,6 +10,7 @@
 
 #include "PolygonGroup2dOpenGl.h"
 #include "RenderVerticesDescription.h"
+#include "BaseShaderProgramOpenGl.h"
 #include <cmath>
 #include <cstring>
 
@@ -78,6 +79,10 @@ void PolygonGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterfa
     originOffsetHandle = glGetUniformLocation(program, "uOriginOffset");
     scaleFactorHandle = glGetUniformLocation(program, "scaleFactors");
 
+    if (const auto &glShader = std::static_pointer_cast<BaseShaderProgramOpenGl>(shaderProgram)) {
+        glShader->setupGlObjects(openGlContext);
+    }
+
     ready = true;
     glDataBuffersGenerated = true;
 }
@@ -86,6 +91,9 @@ void PolygonGroup2dOpenGl::clear() {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
     if (ready) {
         removeGlBuffers();
+        if (const auto &glShader = std::static_pointer_cast<BaseShaderProgramOpenGl>(shaderProgram)) {
+            glShader->clearGlObjects();
+        }
         ready = false;
     }
 }
