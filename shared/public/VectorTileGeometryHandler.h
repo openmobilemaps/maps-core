@@ -228,6 +228,10 @@ public:
     }
 
     struct TriangulatedPolygon {
+        TriangulatedPolygon(std::vector<Vec2D> &&coordinates_, std::vector<uint16_t> &&indices_)
+            : coordinates(coordinates_)
+            , indices(indices_) {}
+
         std::vector<Vec2D> coordinates;
         std::vector<uint16_t> indices;
     };
