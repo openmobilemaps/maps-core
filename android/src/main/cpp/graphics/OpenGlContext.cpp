@@ -10,7 +10,6 @@
 
 #include "OpenGlContext.h"
 #include "opengl_wrapper.h"
-#include "ChronoUtil.h"
 
 OpenGlContext::OpenGlContext()
         : programs(), timeCreation(chronoutil::getCurrentTimestamp()) {}

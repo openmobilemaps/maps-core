@@ -15,6 +15,7 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include "ChronoUtil.h"
 
 class OpenGlContext : public RenderingContextInterface, public std::enable_shared_from_this<OpenGlContext> {
   public:
