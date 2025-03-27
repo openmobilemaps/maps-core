@@ -155,7 +155,7 @@ public:
         polygonRanges.clear();
     }
 
-    void triangulatePolygons(size_t i) {
+    void triangulatePolygons(size_t i, mapbox::detail::Earcut<uint16_t> &earcutter) {
         const auto& range = polygonRanges[i];
 
         coordinates.reserve(coordinates.size() + range.size);
@@ -170,20 +170,27 @@ public:
         }
 
         auto polygonView = EarcutPolygonVectorView(polygonRings, polygonRanges[i], 500);
-        std::vector<uint16_t> indices = mapbox::earcut<uint16_t>(polygonView);
+        earcutter(polygonView);
+        std::vector<uint16_t> indices = std::move(earcutter.indices);
 
         std::reverse(indices.begin(), indices.end());
 
+        size_t numCoordinates = 0;
+        for(size_t i=0; i<polygonView.size(); ++i) {
+            numCoordinates += polygonView[i].size();
+        }
         polygons.push_back({{}, indices});
-
+        auto &coordinates = polygons.back().coordinates;
+        coordinates.reserve(numCoordinates);
         for(size_t i=0; i<polygonView.size(); ++i) {
             for(auto const &point : polygonView[i]) {
-                polygons.back().coordinates.push_back(vecFromPoint(point));
+                coordinates.push_back(vecFromPoint(point));
             }
         }
     }
 
     void triangulateGeoJsonPolygons(const std::shared_ptr<GeoJsonGeometry> &geometry) {
+        mapbox::detail::Earcut<uint16_t> earcutter;
         for (int i = 0; i < geometry->coordinates.size(); i++) {
             coordinates.reserve(coordinates.size() + geometry->coordinates[i].size() + 1);
 
@@ -202,15 +209,23 @@ public:
             }
 
             auto polygonView = EarcutCoordVectorView(geometry->coordinates[i], geometry->holes[i], 500);
-            std::vector<uint16_t> indices = mapbox::earcut<uint16_t>(polygonView);
+            earcutter(polygonView);
+            std::vector<uint16_t> indices = std::move(earcutter.indices);
 
             if (!indices.empty()) {
+
+                size_t numCoordinates = 0;
+                for(size_t i=0; i<polygonView.size(); ++i) {
+                    numCoordinates += polygonView[i].size();
+                }
                 polygons.push_back({{}, indices});
 
+                auto &coordinates = polygons.back().coordinates;
+                coordinates.reserve(numCoordinates);
                 for(size_t i=0; i<polygonView.size(); ++i) {
                     for(auto const &point : polygonView[i]) {
                         const auto &converted = conversionHelper->convertToRenderSystem(point);
-                        polygons.back().coordinates.push_back(Vec2D(converted.x, converted.y));
+                        coordinates.push_back(Vec2D(converted.x, converted.y));
                     }
                 }
             }
