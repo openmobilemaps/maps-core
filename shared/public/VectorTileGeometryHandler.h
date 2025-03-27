@@ -175,18 +175,14 @@ public:
 
         std::reverse(indices.begin(), indices.end());
 
-        size_t numCoordinates = 0;
-        for(size_t i=0; i<polygonView.size(); ++i) {
-            numCoordinates += polygonView[i].size();
-        }
-        polygons.push_back({{}, indices});
-        auto &coordinates = polygons.back().coordinates;
-        coordinates.reserve(numCoordinates);
+        std::vector<Vec2D> coordinates;
+        coordinates.reserve(polygonView.numPoints());
         for(size_t i=0; i<polygonView.size(); ++i) {
             for(auto const &point : polygonView[i]) {
                 coordinates.push_back(vecFromPoint(point));
             }
         }
+        polygons.emplace_back(std::move(coordinates), std::move(indices));
     }
 
     void triangulateGeoJsonPolygons(const std::shared_ptr<GeoJsonGeometry> &geometry) {
@@ -214,20 +210,15 @@ public:
 
             if (!indices.empty()) {
 
-                size_t numCoordinates = 0;
-                for(size_t i=0; i<polygonView.size(); ++i) {
-                    numCoordinates += polygonView[i].size();
-                }
-                polygons.push_back({{}, indices});
-
-                auto &coordinates = polygons.back().coordinates;
-                coordinates.reserve(numCoordinates);
+                std::vector<Vec2D> coordinates;
+                coordinates.reserve(polygonView.numPoints());
                 for(size_t i=0; i<polygonView.size(); ++i) {
                     for(auto const &point : polygonView[i]) {
                         const auto &converted = conversionHelper->convertToRenderSystem(point);
                         coordinates.push_back(Vec2D(converted.x, converted.y));
                     }
                 }
+                polygons.emplace_back(std::move(coordinates), std::move(indices));
             }
         }
     }
