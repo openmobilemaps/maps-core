@@ -12,6 +12,7 @@
 
 #include "Coord.h"
 #include "vtzero/geometry.hpp"
+#include <vector>
 
 struct PolygonRing {
     std::vector<vtzero::point> points;
@@ -66,6 +67,20 @@ public:
         return 1 + (useCopy ? copiedHoles.size() : originalHoles.size());
     }
 
+    std::size_t numPoints() const {
+        std::size_t n = polygonPoints.size();
+        if (useCopy) {
+            for(auto &hole : copiedHoles) {
+                n += hole.size();
+            }
+        } else {
+            for(auto &hole : originalHoles) {
+                n += hole.size();
+            }
+        }
+        return n;
+    }
+
     const std::vector<Coord>& operator[](std::size_t index) const {
         if (index == 0) {
             return polygonPoints;
@@ -109,6 +124,20 @@ public:
 
     std::size_t size() const {
         return useCopy ? (copiedHoles.size() + 1) : range.size;
+    }
+
+    std::size_t numPoints() const {
+        std::size_t n = polygonRings[range.startIndex].points.size();
+        if (useCopy) {
+            for(auto &hole : copiedHoles) {
+                n += hole.points.size();
+            }
+        } else {
+            for(size_t index = 1; index < range.size; ++index) {
+                n += polygonRings[range.startIndex + index].points.size();
+            }
+        }
+        return n;
     }
 
     const std::vector<vtzero::point>& operator[](std::size_t index) const {
