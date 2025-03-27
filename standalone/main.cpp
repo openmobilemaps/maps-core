@@ -139,7 +139,7 @@ int main() {
         printRect("visibl", cam->getVisibleRect());
         printRect("vispad", cam->getPaddingAdjustedVisibleRect());
 
-        std::ifstream ifsJson("flesk-style.json");
+        std::ifstream ifsJson("data/basemap-style-notext.json");
         std::string jsonData((std::istreambuf_iterator<char>(ifsJson)), (std::istreambuf_iterator<char>()));
 
         addStyleJsonLayer(map, jsonData);
@@ -389,7 +389,7 @@ class DummyLoader : public LoaderInterface
         }
     }
 
-    virtual ::djinni::Future<TextureLoaderResult> loadTextureAsnyc(const std::string &url,
+    virtual ::djinni::Future<TextureLoaderResult> loadTextureAsync(const std::string &url,
                                                                    const std::optional<std::string> &etag) override {
         djinni::Promise<TextureLoaderResult> promise;
         promise.setValue(loadTexture(url, etag));

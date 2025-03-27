@@ -17,6 +17,7 @@ else()
           "shared/public/*.cpp"
           "shared/src/*.cpp"
           "android/src/main/cpp/graphics/*.cpp"
+          "external/djinni/support-lib/cpp/*.cpp"
   )
 endif()
 
