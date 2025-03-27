@@ -67,6 +67,7 @@ Tiled2dMapVectorTileInfo::FeatureMap Tiled2dMapVectorSource::postLoadingTask(std
     try {
         vtzero::vector_tile tileData((char*)loadedData->data->buf(), loadedData->data->len());
 
+        mapbox::detail::Earcut<uint16_t> earcutter;
         while (auto layer = tileData.next_layer()) {
             std::string sourceLayerName = std::string(layer.name());
             if ((layersToDecode.empty() || layersToDecode.count(sourceLayerName) > 0) && !layer.empty()) {
@@ -95,7 +96,7 @@ Tiled2dMapVectorTileInfo::FeatureMap Tiled2dMapVectorSource::postLoadingTask(std
                                     return std::make_shared<std::unordered_map<std::string, std::shared_ptr<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>>>>();
                                 }
                             }
-                            geometryHandler->triangulatePolygons(i);
+                            geometryHandler->triangulatePolygons(i, earcutter);
                         }
 
                         geometryHandler->endTringulatePolygons();
