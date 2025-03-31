@@ -700,11 +700,11 @@ public:
             return value->evaluateOr(context, defaultValue);
         }
 
-        if (isZoomDependent || (isStateDependant && !context.featureStateManager->empty())) {
+        if (isZoomDependent || (isStateDependant && context.featureStateManager && !context.featureStateManager->empty())) {
             return value->evaluateOr(context, defaultValue);
         }
 
-        if(onlyGlobalStateDependant) {
+        if(onlyGlobalStateDependant && context.featureStateManager) {
             auto currentGlobalId = context.featureStateManager->getCurrentState();
 
             if(currentGlobalId != globalId) {
@@ -796,6 +796,9 @@ public:
     }
 
     ValueVariant evaluate(const EvaluationContext &context) const override {
+        if (!context.featureStateManager) {
+            return std::monostate();
+        }
         const auto& stateMap = context.featureStateManager->getFeatureState(context.feature->identifier);
         const auto& result = stateMap.find(key);
         if (result != stateMap.end()) {
@@ -829,7 +832,10 @@ public:
     }
 
     ValueVariant evaluate(const EvaluationContext &context) const override {
-        return context.featureStateManager->getGlobalState(key);
+        if (context.featureStateManager) {
+            return context.featureStateManager->getGlobalState(key);
+        }
+        return std::monostate();
     };
 
     bool isEqual(const std::shared_ptr<Value> &other) const override {
