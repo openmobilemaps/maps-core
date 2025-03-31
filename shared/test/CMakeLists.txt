@@ -11,6 +11,7 @@ add_executable(tests
   "TestActor.cpp"
   "TestGeoJsonParser.cpp"
   "TestSymbolAnimationCoordinatorMap.cpp"
+  "TestTileSource.cpp"
   "TestGeometryHandler.cpp"
   "TestValueEvaluate.cpp"
   "helper/TestData.cpp"
