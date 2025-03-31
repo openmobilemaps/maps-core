@@ -25,16 +25,14 @@ jobs:
 
       - name: Build (Base branch)
         run: |
-            cmake -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Debug -DBUILD_JVM=OFF -DBUILD_STANDALONE=OFF -B build-debug
-            cmake --build build-debug -- tests
+            cmake -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_JVM=OFF -DBUILD_STANDALONE=OFF -B build-release
+            cmake --build build-release -- tests
 
       - name: Run benchmarks (Base branch)
         run: |
-            cd shared/test      # for access to data/ directory
-            ../../build-debug/shared/test/tests \
-              --reporter xml > ../../base_results.xml
-            cd ../..
-            rm -rf build-debug
+            build-release/shared/test/tests \
+                --reporter xml::out=./base_results.xml \
+                --reporter console::colour-mode=ansi
 
       - name: Checkout PR branch
         run: |
@@ -44,16 +42,15 @@ jobs:
 
       - name: Build (PR branch)
         run: |
-            cmake -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Debug -DBUILD_JVM=OFF -DBUILD_STANDALONE=OFF -B build-debug
-            cmake --build build-debug -- tests
+            rm -rf build-release
+            cmake -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_JVM=OFF -DBUILD_STANDALONE=OFF -B build-release
+            cmake --build build-release -- tests
 
       - name: Run benchmarks (PR branch)
         run: |
-            cd shared/test      # for access to data/ directory
-            ../../build-debug/shared/test/tests \
-              --reporter xml > ../../pr_results.xml
-            cd ../..
-            rm -rf build-debug
+            build-release/shared/test/tests \
+                --reporter xml::out=./pr_results.xml \
+                --reporter console::colour-mode=ansi
 
       - name: Compare Benchmark Results
         run: python scripts/compare_benchmarks.py ./base_results.xml ./pr_results.xml
