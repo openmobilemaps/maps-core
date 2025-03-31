@@ -1,35 +1,13 @@
 #include "CoordinateSystemFactory.h"
-#include "DefaultSystemToRenderConverter.h"
-#include "SymbolAnimationCoordinatorMap.h"
 #include "VectorTileGeometryHandler.h"
+#include "CoordinateConversionHelper.h"
+#include "helper/TestData.h"
 
-#include <algorithm>
-#include <atomic>
 #include <catch2/benchmark/catch_benchmark.hpp>
 #include <catch2/catch_get_random_seed.hpp>
 #include <catch2/catch_test_macros.hpp>
-#include <fstream>
-#include <iostream>
-#include <random>
-#include <thread>
+
 #include <vector>
-
-std::vector<char> readFile(const std::string& filePath) {
-    std::ifstream file(filePath, std::ios::binary | std::ios::ate);
-    if (!file) {
-        throw std::runtime_error("Unable to open file");
-    }
-
-    std::size_t fileSize = file.tellg();
-    file.seekg(0, std::ios::beg);
-
-    std::vector<char> buffer(fileSize);
-    if (!file.read(buffer.data(), fileSize)) {
-        throw std::runtime_error("Error reading file");
-    }
-
-    return buffer;
-}
 
 struct ParsingResult {
     size_t polygonCount;
@@ -37,14 +15,12 @@ struct ParsingResult {
     size_t lineCount;
 };
 
-void parseAndTriangulate(const std::string& filePath, ParsingResult expectedResult, Catch::Benchmark::Chronometer meter) {
+void parseAndTriangulate(const char *filePath, ParsingResult expectedResult, Catch::Benchmark::Chronometer meter) {
     ::RectCoord tileCoords = {Coord(3857,1224991.657211,6287508.342789,0), Coord(3857,1849991.657211,5662508.342789,0)};
     const std::optional<Tiled2dMapVectorSettings> vectorSettings = std::nullopt;
-    const std::shared_ptr<CoordinateConversionHelperInterface> conversionHelper = CoordinateConversionHelperInterface::independentInstance();
+    const auto conversionHelper = std::make_shared<CoordinateConversionHelper>(CoordinateSystemFactory::getEpsg3857System(), false);;
 
-    conversionHelper->registerConverter(std::make_shared<DefaultSystemToRenderConverter>(CoordinateSystemFactory::getEpsg3857System(), false));
-
-    auto data= readFile(filePath);
+    auto data = TestData::readFileToBuffer(filePath);
 
     ParsingResult result = {0, 0, 0};
 
@@ -77,9 +53,9 @@ void parseAndTriangulate(const std::string& filePath, ParsingResult expectedResu
 
 TEST_CASE("VectorTileGeometryHandler") {
     BENCHMARK_ADVANCED("Benchmark regular")(Catch::Benchmark::Chronometer meter) {
-        return parseAndTriangulate("data/tiles/reg.pbf", ParsingResult{318,3336,3336}, meter);
+        return parseAndTriangulate("tiles/reg.pbf", ParsingResult{318,3336,3336}, meter);
     };
     BENCHMARK_ADVANCED("Benchmark relief")(Catch::Benchmark::Chronometer meter) {
-        parseAndTriangulate("data/tiles/relief.pbf", ParsingResult{24345,34413,34413}, meter);
+        return parseAndTriangulate("tiles/relief.pbf", ParsingResult{24345,34413,34413}, meter);
     };
 }

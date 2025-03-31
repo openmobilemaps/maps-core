@@ -29,9 +29,8 @@ jobs:
       - name: Test
         run: |
           mkdir test-results
-          cd shared/test      # for access to data/ directory
-          ../../build-debug/shared/test/tests \
-            -r JUnit::out=../../test-results/catch2-junit.xml \
+          build-debug/shared/test/tests \
+            -r JUnit::out=test-results/catch2-junit.xml \
             -r console::colour-mode=ansi
 
       - name: Postprocess Junit XML

@@ -1,20 +1,11 @@
 #include "GeoJsonParser.h"
+#include "helper/TestData.h"
 
 #include <catch2/benchmark/catch_benchmark.hpp>
 #include <catch2/catch_get_random_seed.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
-#include <fstream>
 #include <random>
-
-static std::string readFileToString(const char *path) {
-    std::ifstream ifs{path};
-    std::string content{std::istreambuf_iterator<char>(ifs), std::istreambuf_iterator<char>()};
-    if (ifs.fail()) {
-        throw std::runtime_error(std::string("Error reading file ") + path + ": " + strerror(errno));
-    }
-    return content;
-}
 
 /** Helper to capture std::ostream (std::cout or std::cerr) into a string.
  * Captures writes to stream until destroyed.
@@ -53,7 +44,7 @@ TEST_CASE("GeoJSON Parser valid") {
 
     auto testCase = GENERATE(
         TestCase{
-            .file = "data/geojson/featurecollection.json",
+            .file = "geojson/featurecollection.json",
             .expectedGeometries =
                 {
                     {
@@ -76,7 +67,7 @@ TEST_CASE("GeoJSON Parser valid") {
             .expectedHasOnlyPoints = false,
         },
         TestCase{
-            .file = "data/geojson/featurecollection_noprops.json",
+            .file = "geojson/featurecollection_noprops.json",
             .expectedGeometries =
                 {
                     {
@@ -99,7 +90,7 @@ TEST_CASE("GeoJSON Parser valid") {
             .expectedHasOnlyPoints = false,
         },
         TestCase{
-            .file = "data/geojson/featurecollection_partially-invalid.json",
+            .file = "geojson/featurecollection_partially-invalid.json",
             .expectedGeometries =
                 {
                     // 0: invalid Feature/Point is skipped
@@ -126,7 +117,7 @@ TEST_CASE("GeoJSON Parser valid") {
             .expectedNumErrorMessages = 2,
         },
         TestCase{
-            .file = "data/geojson/featurecollection_all-types.json",
+            .file = "geojson/featurecollection_all-types.json",
             .expectedGeometries =
                 {
                     {
@@ -185,7 +176,7 @@ TEST_CASE("GeoJSON Parser valid") {
             .expectedNumErrorMessages = 1,
         },
         TestCase{
-            .file = "data/geojson/feature.json",
+            .file = "geojson/feature.json",
             .expectedGeometries = {{
                 .type = vtzero::GeomType::POINT,
                 .numCoordinates = {1},
@@ -194,7 +185,7 @@ TEST_CASE("GeoJSON Parser valid") {
             .expectedHasOnlyPoints = true,
         },
         TestCase{
-            .file = "data/geojson/point.json",
+            .file = "geojson/point.json",
             .expectedGeometries = {{
                 .type = vtzero::GeomType::POINT,
                 .numCoordinates = {1},
@@ -203,7 +194,7 @@ TEST_CASE("GeoJSON Parser valid") {
             .expectedHasOnlyPoints = true,
         },
         TestCase{
-            .file = "data/geojson/multipolygon.json",
+            .file = "geojson/multipolygon.json",
             .expectedGeometries = {{
                 .type = vtzero::GeomType::POLYGON,
                 .numCoordinates = {4, 6},
@@ -214,7 +205,7 @@ TEST_CASE("GeoJSON Parser valid") {
         });
 
     SECTION(testCase.file) {
-        const std::string jsonString = readFileToString(testCase.file);
+        const std::string jsonString = TestData::readFileToString(testCase.file);
         const auto json = nlohmann::json::parse(jsonString);
 
         std::string log;
@@ -263,13 +254,14 @@ TEST_CASE("GeoJSON Parser valid") {
 }
 
 TEST_CASE("GeoJSON Parser invalid") {
-    auto file = GENERATE("data/geojson/invalid/featurecollection_features-not-array.json",
-                         "data/geojson/invalid/feature_unsupported-mixed-type-array.json",
-                         "data/geojson/invalid/geometrycollection_unsupported.json", "data/geojson/invalid/point_coords-short.json",
-                         "data/geojson/invalid/point_coords-string.json");
+    auto file = GENERATE("geojson/invalid/featurecollection_features-not-array.json",
+                         "geojson/invalid/feature_unsupported-mixed-type-array.json",
+                         "geojson/invalid/geometrycollection_unsupported.json", 
+                         "geojson/invalid/point_coords-short.json",
+                         "geojson/invalid/point_coords-string.json");
 
     SECTION(file) {
-        const std::string jsonString = readFileToString(file);
+        const std::string jsonString = TestData::readFileToString(file);
         // files are valid json, no exception expected here.
         auto json = nlohmann::json::parse(jsonString);
         REQUIRE_THROWS_AS(GeoJsonParser::getGeoJson(json), nlohmann::json::exception);
@@ -278,8 +270,8 @@ TEST_CASE("GeoJSON Parser invalid") {
 
 TEST_CASE("GeoJSON Parser Points") {
     SECTION("skip everything but Point") {
-        auto file = "data/geojson/featurecollection_all-types.json";
-        const std::string jsonString = readFileToString(file);
+        auto file = "geojson/featurecollection_all-types.json";
+        const std::string jsonString = TestData::readFileToString(file);
         auto json = nlohmann::json::parse(jsonString);
         auto points = GeoJsonParser::getPointsWithProperties(json);
         REQUIRE(points.size() == 1);
@@ -287,8 +279,8 @@ TEST_CASE("GeoJSON Parser Points") {
     }
 
     SECTION("properties") {
-        auto file = "data/geojson/featurecollection_points.json";
-        const std::string jsonString = readFileToString(file);
+        auto file = "geojson/featurecollection_points.json";
+        const std::string jsonString = TestData::readFileToString(file);
         auto json = nlohmann::json::parse(jsonString);
         std::string log;
         std::vector<GeoJsonPoint> points;
@@ -350,8 +342,8 @@ TEST_CASE("GeoJSON Parser Points") {
 
 TEST_CASE("GeoJSON Parser Lines") {
     SECTION("skip everything but LineString") {
-        auto file = "data/geojson/featurecollection_all-types.json";
-        const std::string jsonString = readFileToString(file);
+        auto file = "geojson/featurecollection_all-types.json";
+        const std::string jsonString = TestData::readFileToString(file);
         auto json = nlohmann::json::parse(jsonString);
         auto lines = GeoJsonParser::getLinesWithProperties(json);
         REQUIRE(lines.size() == 1);
@@ -360,8 +352,8 @@ TEST_CASE("GeoJSON Parser Lines") {
     }
 
     SECTION("properties") {
-        auto file = "data/geojson/featurecollection_lines.json";
-        const std::string jsonString = readFileToString(file);
+        auto file = "geojson/featurecollection_lines.json";
+        const std::string jsonString = TestData::readFileToString(file);
         auto json = nlohmann::json::parse(jsonString);
         std::string log;
         std::vector<GeoJsonLine> lines;
