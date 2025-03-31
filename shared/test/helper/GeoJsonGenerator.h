@@ -2,7 +2,6 @@
 #include "RectCoord.h"
 #include "json.h"
 #include <iostream>
-#include <json.h>
 
 #pragma once
 

@@ -46,4 +46,3 @@ class TestScheduler : public SchedulerInterface {
     std::mutex tasksMutex;
     std::deque<std::shared_ptr<TaskInterface>> tasks;
 };
-//

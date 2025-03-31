@@ -1,21 +1,12 @@
 #include "CoordinateSystemFactory.h"
-#include "DefaultSystemToRenderConverter.h"
-#include "SymbolAnimationCoordinatorMap.h"
 #include "Tiled2dMapSource.h"
-#include "VectorTileGeometryHandler.h"
 #include "WebMercatorTiled2dMapLayerConfig.h"
-#include "helper/GeoJsonGenerator.h"
-
 #include "helper/TestScheduler.h"
-#include <algorithm>
-#include <atomic>
 #include <catch2/benchmark/catch_benchmark.hpp>
 #include <catch2/catch_get_random_seed.hpp>
 #include <catch2/catch_test_macros.hpp>
-#include <fstream>
-#include <iostream>
-#include <random>
-#include <thread>
+#include <catch2/matchers/catch_matchers_range_equals.hpp>
+#include <algorithm>
 #include <vector>
 
 struct TestLoaderResult final {
@@ -30,7 +21,7 @@ class TestTiled2dMapVectorSource : public Tiled2dMapSource<int, std::shared_ptr<
         : Tiled2dMapSource(MapConfig(CoordinateSystemFactory::getEpsg3857System()),
                            std::make_shared<WebMercatorTiled2dMapLayerConfig>(
                                "mock", "{z}/{x}/{y}", Tiled2dMapZoomInfo(1.0, 0, 0, false, true, false, true), 0, 20),
-                           CoordinateConversionHelperInterface::independentInstance(), scheduler, 62, 1, "layer") {};
+                           CoordinateConversionHelperInterface::independentInstance(), scheduler, 62, 0, "layer") {};
 
     std::unordered_set<Tiled2dMapTileInfo> getCurrentTiles() {
         std::unordered_set<Tiled2dMapTileInfo> tiles;
@@ -46,9 +37,9 @@ class TestTiled2dMapVectorSource : public Tiled2dMapSource<int, std::shared_ptr<
     void cancelLoad(Tiled2dMapTileInfo tile, size_t loaderIndex) override {}
 
     ::djinni::Future<std::shared_ptr<TestLoaderResult>> loadDataAsync(Tiled2dMapTileInfo tile, size_t loaderIndex) override {
-        auto promise = std::make_shared<::djinni::Promise<std::shared_ptr<TestLoaderResult>>>();
-        promise->setValue(std::make_shared<TestLoaderResult>());
-        return promise->getFuture();
+        auto promise = ::djinni::Promise<std::shared_ptr<TestLoaderResult>>();
+        promise.setValue(std::make_shared<TestLoaderResult>());
+        return promise.getFuture();
     }
 
     bool hasExpensivePostLoadingTask() override { return false; }
@@ -76,13 +67,7 @@ TEST_CASE("VectorTileSource") {
                                                          {empty, 32, 23, 0, 6, 8735660}, {empty, 33, 22, 0, 6, 8735660},
                                                          {empty, 34, 21, 0, 6, 8735660}, {empty, 34, 22, 0, 6, 8735660}};
 
-        REQUIRE(tiles.size() == 10);
-        for (const auto &expectedTile : expectedTiles) {
-            REQUIRE(std::find_if(tiles.begin(), tiles.end(), [&expectedTile](const auto &tile) {
-                        return tile.x == expectedTile.x && tile.y == expectedTile.y &&
-                               tile.zoomIdentifier == expectedTile.zoomIdentifier && tile.zoomLevel == expectedTile.zoomLevel;
-                    }) != tiles.end());
-        }
+        REQUIRE_THAT(tiles, Catch::Matchers::UnorderedRangeEquals(expectedTiles));
 
         // for debugging
         // GeoJsonGenerator generator;
