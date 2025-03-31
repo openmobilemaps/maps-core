@@ -1,20 +1,20 @@
 #include "SymbolAnimationCoordinatorMap.h"
+#include "helper/TestData.h"
 
-#include <algorithm>
-#include <atomic>
 #include <catch2/benchmark/catch_benchmark.hpp>
-#include <catch2/catch_test_macros.hpp>
 #include <catch2/catch_get_random_seed.hpp>
+#include <catch2/catch_test_macros.hpp>
+
+#include <atomic>
 #include <fstream>
-#include <iostream>
 #include <random>
 #include <thread>
 #include <vector>
 
 // Function to read the log file and parse the arguments
-std::vector<std::tuple<size_t, Vec2D, int, double, double, int64_t, int64_t>> readLogFile(const std::string &filename) {
+std::vector<std::tuple<size_t, Vec2D, int, double, double, int64_t, int64_t>> readLogFile(const char *filename) {
     std::vector<std::tuple<size_t, Vec2D, int, double, double, int64_t, int64_t>> logEntries;
-    std::ifstream file(filename);
+    std::ifstream file(TestData::resolve(filename));
     std::string line;
 
     std::string threadIdLabel, crossTileIdentifierLabel, coordLabel, zoomIdentifierLabel, xToleranceLabel, yToleranceLabel, animationDurationLabel, animationDelayLabel;
@@ -146,7 +146,7 @@ TEST_CASE("SymbolAnimationCoordinatorMap with multiple threads") {
     };
 
 
-    auto logEntries = readLogFile("data/symbolAnimationCoordinator/recording.txt");
+    auto logEntries = readLogFile("symbolAnimationCoordinator/recording.txt");
 
     BENCHMARK("Simulate from log file") {
         std::atomic<size_t> counter{0};
