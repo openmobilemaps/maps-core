@@ -131,15 +131,31 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
         const double symbolSpacingPx = layerDescription->style.getSymbolSpacing(evalContext);
         const double symbolSpacingMeters = symbolSpacingPx * tilePixelFactor;
 
-        const auto iconOptional = layerDescription->style.getIconOptional(evalContext);
-        const auto textOptional = layerDescription->style.getTextOptional(evalContext);
-        const auto hasIcon = layerDescription->style.hasIconImagePotentially();
+        const bool hasImageFromCustomProvider = layerDescription->style.getIconImageCustomProvider(evalContext);
+        bool hasIconPotentially;
+        if (hasImageFromCustomProvider) {
+            hasIconPotentially = true;
+        } else if (layerDescription->style.iconImageEvaluator.getValue()) {
+            // Attempt to evaluate without zoom and state
+            const auto zoomAndStateIndependentEvalCtx = EvaluationContext(dpFactor, context.get(), nullptr);
+            const auto value = layerDescription->style.iconImageEvaluator.getValue();
+            const auto res = value->evaluate(zoomAndStateIndependentEvalCtx);
+            const std::string *iconImage = std::get_if<std::string>(&res);
+            // if this succeeded returns empty, there is no icon image for any zoom level.
+            hasIconPotentially = (iconImage != nullptr && !iconImage->empty());
+        } else {
+            hasIconPotentially = false;
+        }
+        if(!hasIconPotentially && fullText.empty()) {
+            continue;
+        }
+
+        const bool iconOptional = layerDescription->style.getIconOptional(evalContext);
+        const bool textOptional = layerDescription->style.getTextOptional(evalContext);
 
         const auto &pointCoordinates = geometry->getPointCoordinates();
 
         bool wasPlaced = false;
-
-        const bool hasImageFromCustomProvider = layerDescription->style.getIconImageCustomProvider(evalContext);
 
         if (context->geomType != vtzero::GeomType::POINT) {
             double distance = 0;
@@ -181,7 +197,7 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
                             wasPlaced = true;
                         }
 
-                        if (hasIcon) {
+                        if (hasIconPotentially) {
                             if (textOptional) {
                                 const auto symbolObject = createSymbolObject(tileInfo, layerIdentifier, layerDescription,
                                                                              layerConfig, context, {}, "", position, line, fontList,
@@ -256,7 +272,7 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
                                 wasPlaced = true;
                             }
 
-                            if (hasIcon) {
+                            if (hasIconPotentially) {
                                 if (textOptional) {
                                     const auto symbolObject = createSymbolObject(tileInfo, layerIdentifier, layerDescription,
                                                                                  layerConfig, context, {}, "", position, line,
@@ -300,7 +316,7 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
                         wasPlaced = true;
                     }
 
-                    if (hasIcon) {
+                    if (hasIconPotentially) {
                         if (textOptional) {
                             const auto symbolObject = createSymbolObject(tileInfo, layerIdentifier, layerDescription, layerConfig,
                                                                          context, {}, "", mp, std::nullopt, fontList, anchor, angle,

@@ -253,16 +253,24 @@ public:
 // as long as the evaluation context is used.
 class EvaluationContext {
 public:
-    const double zoomLevel;
+    const std::optional<double> zoomLevel;
     const double dpFactor;
-    const std::shared_ptr<FeatureContext> &feature;
-    const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager;
+    const FeatureContext* const feature;
+    const Tiled2dMapVectorStateManager* const featureStateManager;
 
     EvaluationContext(const double zoomLevel,
                       const double dpFactor,
+                      // XXX: reference to shared ptr is effectively equivalent to raw pointer
                       const std::shared_ptr<FeatureContext> &feature,
                       const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager) :
-        zoomLevel(zoomLevel), dpFactor(dpFactor), feature(feature), featureStateManager(featureStateManager) {}
+        zoomLevel(zoomLevel), dpFactor(dpFactor), feature(feature.get()), featureStateManager(featureStateManager.get()) {}
+    
+    // Evaluation context without zoomLevel
+    // Zoom-dependent expressions will evaluate to invalid ValueVariant (i.e. std::monostate{})
+    EvaluationContext(const double dpFactor,
+                      const FeatureContext* feature,
+                      Tiled2dMapVectorStateManager *featureStateManager) :
+        zoomLevel(std::nullopt), dpFactor(dpFactor), feature(feature), featureStateManager(featureStateManager) {}
 };
 
 
@@ -754,7 +762,7 @@ public:
 
     ValueVariant evaluate(const EvaluationContext &context) const override {
         if (key == "zoom") {
-            return context.zoomLevel ? context.zoomLevel : 0.0;
+            return context.zoomLevel ? *context.zoomLevel : ValueVariant{};
         }
 
         return context.feature->getValue(key);
@@ -937,7 +945,7 @@ public:
         } else if (std::holds_alternative<std::vector<std::string>>(value)) {
             const auto& res = std::get<std::vector<std::string>>(value);
             if (!res.empty() && *res.begin() == "zoom") {
-                return context.zoomLevel ? context.zoomLevel : 0.0;
+                return context.zoomLevel ? *context.zoomLevel : ValueVariant{};
             }
 
             return value;
@@ -1136,15 +1144,18 @@ public:
     }
 
     ValueVariant evaluate(const EvaluationContext &context) const override {
+        if(!context.zoomLevel) {
+            return ValueVariant{};
+        }
         if(isFast) {
             int maxStepInd = (int)fastSteps.size() - 1;
             for (int i = 0; i < maxStepInd; i++) {
                 const auto &nextStep = fastSteps[i + 1];
                 double nS = nextStep.first;
 
-                if (nS >= context.zoomLevel) {
+                if (nS >= *context.zoomLevel) {
                     const auto &prevStep = fastSteps[i];
-                    auto f = ExponentialInterpolation::interpolationFactor(interpolationBase, rangeFactors[i], context.zoomLevel, prevStep.first);
+                    auto f = ExponentialInterpolation::interpolationFactor(interpolationBase, rangeFactors[i], *context.zoomLevel, prevStep.first);
                     return prevStep.second + (nextStep.second - prevStep.second) * f;
                 }
             }
@@ -1157,12 +1168,12 @@ public:
             const auto &nextStep = steps[i + 1];
             double nS = nextStep.first;
 
-            if (nS >= context.zoomLevel) {
+            if (nS >= *context.zoomLevel) {
                 const auto &prevStep = steps[i];
                 double pS = prevStep.first;
                 const ValueVariant &pV = prevStep.second->evaluate(context);
                 const ValueVariant &nV = nextStep.second->evaluate(context);
-                return interpolate(ExponentialInterpolation::interpolationFactor(interpolationBase, rangeFactors[i], context.zoomLevel, pS), pV, nV);
+                return interpolate(ExponentialInterpolation::interpolationFactor(interpolationBase, rangeFactors[i], *context.zoomLevel, pS), pV, nV);
             }
         }
 
@@ -1326,22 +1337,25 @@ public:
     }
 
     ValueVariant evaluate(const EvaluationContext &context) const override {
+        if(!context.zoomLevel) {
+            return ValueVariant{};
+        }
         int maxStepInd = (int)steps.size() - 1;
         for (int i = 0; i < maxStepInd; i++) {
             const auto &nextStep = steps[i + 1];
             double nS = nextStep.first;
-            if (nS >= context.zoomLevel) {
+            if (nS >= *context.zoomLevel) {
                 const auto &prevStep = steps[i];
                 double pS = prevStep.first;
                 ValueVariant pV = prevStep.second->evaluate(context);
                 ValueVariant nV = nextStep.second->evaluate(context);
 
-                auto factor = bezier.solve(1.0 - (nS - context.zoomLevel) / (nS - pS), 1e-6);
+                auto factor = bezier.solve(1.0 - (nS - *context.zoomLevel) / (nS - pS), 1e-6);
                 return interpolate(factor, pV, nV);
             }
         }
 
-        int index = (steps.size() > 0 && context.zoomLevel <= steps[0].first) ? 0 : maxStepInd;
+        int index = (steps.size() > 0 && *context.zoomLevel <= steps[0].first) ? 0 : maxStepInd;
         return steps[index].second->evaluate(context);
     }
 

@@ -59,7 +59,8 @@ public:
         currentState++;
     }
 
-    FeatureState& getFeatureState(const uint64_t &identifier) {
+    const FeatureState& getFeatureState(uint64_t identifier) const {
+       // XXX: dangerous optimisation -- hasNoValues can be modified
         if (hasNoValues) {
             return emptyState;
         }
@@ -76,7 +77,7 @@ public:
         return emptyState;
     }
 
-    bool empty() {
+    bool empty() const {
         return hasNoValues;
     }
 
@@ -92,7 +93,8 @@ public:
         globalStateId++;
     }
 
-    ValueVariant getGlobalState(const std::string &key) {
+    ValueVariant getGlobalState(const std::string &key) const {
+        // XXX: dangerous optimisation -- hasNoValues can be modified
         if (hasNoValues) {
             return std::monostate();
         }
@@ -106,18 +108,18 @@ public:
         return std::monostate();
     }
 
-    int32_t getCurrentState() {
+    int32_t getCurrentState() const {
         return currentState;
     }
 
-    int32_t getGlobalStateId() {
+    int32_t getGlobalStateId() const {
         return globalStateId;
     }
 
 private:
     std::unordered_map<std::string, ValueVariant> globalState;
     std::vector<std::pair<uint64_t, FeatureState>> featureStates;
-    std::mutex mutex;
+    mutable std::mutex mutex;
     FeatureState emptyState;
 
     int32_t currentState = 0;
