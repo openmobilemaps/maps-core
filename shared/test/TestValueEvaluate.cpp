@@ -13,16 +13,15 @@ TEST_CASE("GetPropertyValue tests", "[GetPropertyValue]") {
     EvaluationContext context = EvaluationContext(0, 0, featureContext, featureStateManager);
 
     SECTION("Evaluate when key does not exist") {
-        auto evaluator1 = ValueEvaluator<std::string>(std::make_shared<GetPropertyValue>("key"));
-        auto result1 = evaluator1.getResult(EvaluationContext(0, 0, featureContext, featureStateManager), "fallback");
-        REQUIRE(result1 == "fallback");
+        GetPropertyValue value = GetPropertyValue("key");
+        auto result = value.evaluateOr<std::string>(context, "fallback");
+        REQUIRE(result == "fallback");
     }
 
     SECTION("Evaluate when key exist") {
         featureContext->propertiesMap = FeatureContext::mapType{{"key", "value"}};
-        auto staticValue = std::make_shared<GetPropertyValue>("key");
-        auto evaluator = ValueEvaluator<std::string>(staticValue);
-        auto result = evaluator.getResult(EvaluationContext(0, 0, featureContext, featureStateManager), "fallback");
+        GetPropertyValue value = GetPropertyValue("key");
+        auto result = std::get<std::string>(value.evaluate(context));
         REQUIRE(result == "value");
     }
 }
@@ -110,17 +109,6 @@ TEST_CASE("HasNotPropertyValue tests", "[HasNotPropertyValue]") {
         HasNotPropertyValue value("key");
         REQUIRE(std::get<bool>(value.evaluate(context)) == true);
     }
-}
-
-TEST_CASE("ScaleValue Test", "[ScaleValue]") {
-    auto featureContext = std::make_shared<FeatureContext>(vtzero::GeomType::POINT, FeatureContext::mapType{}, 0);
-    auto featureStateManager = std::make_shared<Tiled2dMapVectorStateManager>();
-    EvaluationContext context = EvaluationContext(0, 0, featureContext, featureStateManager);
-
-    auto value = std::make_shared<StaticValue>(ValueVariant(2.0));
-    ScaleValue scaleValue(value, 2.0);
-
-    REQUIRE(std::get<double>(scaleValue.evaluate(context)) == 4.0);
 }
 
 TEST_CASE("InterpolatedValue Test", "[InterpolatedValue]") {
