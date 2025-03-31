@@ -1,15 +1,10 @@
 #include "Value.h"
 
-#include <algorithm>
-#include <atomic>
 #include <catch2/benchmark/catch_benchmark.hpp>
 #include <catch2/catch_get_random_seed.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
-#include <fstream>
-#include <iostream>
-#include <random>
-#include <thread>
+
 #include <vector>
 
 TEST_CASE("GetPropertyValue tests", "[GetPropertyValue]") {
