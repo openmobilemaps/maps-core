@@ -89,7 +89,7 @@ class MapScene : public MapInterface, public SceneCallbackInterface, public Sche
 
     virtual void destroy() override;
 
-    virtual void drawReadyFrame(const ::RectCoord &bounds, float timeout,
+    virtual void drawReadyFrame(const ::RectCoord &bounds, float paddingPc, float timeout,
                                 const std::shared_ptr<MapReadyCallbackInterface> &callbacks) override;
 
     virtual void forceReload() override;

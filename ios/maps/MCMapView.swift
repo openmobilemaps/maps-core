@@ -289,7 +289,7 @@ extension MCMapView: MTKViewDelegate {
     }
 
     public func renderToImage(
-        size: CGSize, timeout: Float, bounds: MCRectCoord,
+        size: CGSize, timeout: Float, bounds: MCRectCoord, boundsPaddingPc: Float = 0.0,
         callbackQueue: DispatchQueue = .main,
         callback: @escaping @Sendable (UIImage?, MCLayerReadyState) -> Void
     ) {
@@ -310,7 +310,7 @@ extension MCMapView: MTKViewDelegate {
             mapReadyCallbacks.callbackQueue = callbackQueue
 
             self.mapInterface.drawReadyFrame(
-                bounds, timeout: timeout, callbacks: mapReadyCallbacks)
+                bounds, paddingPc: boundsPaddingPc, timeout: timeout, callbacks: mapReadyCallbacks)
         }
     }
 }

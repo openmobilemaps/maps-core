@@ -471,7 +471,7 @@ void MapScene::destroy() {
     }
 }
 
-void MapScene::drawReadyFrame(const ::RectCoord &bounds, float timeout,
+void MapScene::drawReadyFrame(const ::RectCoord &bounds, float paddingPc, float timeout,
                               const std::shared_ptr<MapReadyCallbackInterface> &callbacks) {
 
     // for now we only support drawing a ready frame, therefore
@@ -486,7 +486,7 @@ void MapScene::drawReadyFrame(const ::RectCoord &bounds, float timeout,
     callbacks->stateDidUpdate(state);
 
     auto camera = getCamera();
-    camera->moveToBoundingBox(bounds, 0.0, false, std::nullopt, std::nullopt);
+    camera->moveToBoundingBox(bounds, paddingPc, false, std::nullopt, std::nullopt);
     camera->freeze(true);
 
     invalidate();

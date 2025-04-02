@@ -84,7 +84,7 @@ map_interface = interface +c {
 
     # changes bounds to bounds, checks all layers for readiness, and updates callbacks, timeout in
     # seconds, always draw the frame when state is updated in the ready callbacks
-    draw_ready_frame(bounds: rect_coord, timeout: f32, callbacks: map_ready_callback_interface);
+    draw_ready_frame(bounds: rect_coord, padding_pc: f32, timeout: f32, callbacks: map_ready_callback_interface);
 
     force_reload();
 }
