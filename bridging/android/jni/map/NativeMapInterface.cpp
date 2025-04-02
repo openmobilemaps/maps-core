@@ -332,11 +332,12 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapInterface_
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapInterface_00024CppProxy_native_1drawReadyFrame(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeRectCoord::JniType j_bounds, jfloat j_timeout, jobject j_callbacks)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapInterface_00024CppProxy_native_1drawReadyFrame(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeRectCoord::JniType j_bounds, jfloat j_paddingPc, jfloat j_timeout, jobject j_callbacks)
 {
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::MapInterface>(nativeRef);
         ref->drawReadyFrame(::djinni_generated::NativeRectCoord::toCpp(jniEnv, j_bounds),
+                            ::djinni::F32::toCpp(jniEnv, j_paddingPc),
                             ::djinni::F32::toCpp(jniEnv, j_timeout),
                             ::djinni_generated::NativeMapReadyCallbackInterface::toCpp(jniEnv, j_callbacks));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )

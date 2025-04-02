@@ -74,10 +74,11 @@ open class MapRenderHelper {
 			renderBounds: RectCoord,
 			timeoutSeconds: Float,
 			onStateUpdate: (MapViewRenderState) -> Unit,
-			destroyAfterRenderAction: Boolean
+			destroyAfterRenderAction: Boolean,
+			boundsPaddingPc: Float = 0f
 		) {
 			val drawSemaphore = Semaphore(1, true)
-			mapRenderer.requireMapInterface().drawReadyFrame(renderBounds, timeoutSeconds, object : MapReadyCallbackInterface() {
+			mapRenderer.requireMapInterface().drawReadyFrame(renderBounds, boundsPaddingPc, timeoutSeconds, object : MapReadyCallbackInterface() {
 				var prevState: LayerReadyState? = null
 				override fun stateDidUpdate(state: LayerReadyState) {
 					drawSemaphore.acquire()

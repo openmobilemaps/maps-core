@@ -113,6 +113,7 @@
  * seconds, always draw the frame when state is updated in the ready callbacks
  */
 - (void)drawReadyFrame:(nonnull MCRectCoord *)bounds
+             paddingPc:(float)paddingPc
                timeout:(float)timeout
              callbacks:(nullable id<MCMapReadyCallbackInterface>)callbacks;
 
