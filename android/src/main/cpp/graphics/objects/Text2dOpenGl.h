@@ -71,9 +71,10 @@ protected:
     int mMatrixHandle = -1;
     int positionHandle = -1;
     int textureCoordinateHandle = -1;
-    GLuint vertexAttribBuffer = -1;
+    GLuint vao;
+    GLuint vertexAttribBuffer;
     std::vector<GLfloat> textVertexAttributes;
-    GLuint indexBuffer = -1;
+    GLuint indexBuffer;
     std::vector<GLushort> textIndices;
     bool glDataBuffersGenerated = false;
 

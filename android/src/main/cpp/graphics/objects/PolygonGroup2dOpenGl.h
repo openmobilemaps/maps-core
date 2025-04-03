@@ -62,9 +62,10 @@ protected:
     int scaleFactorHandle;
     int positionHandle;
     int styleIndexHandle;
-    GLuint attribBuffer = -1;
+    GLuint vao;
+    GLuint attribBuffer;
     std::vector<GLfloat> polygonAttributes;
-    GLuint indexBuffer = -1;
+    GLuint indexBuffer;
     std::vector<GLushort> polygonIndices;
     bool glDataBuffersGenerated = false;
     Vec3D polygonOrigin = Vec3D(0.0, 0.0, 0.0);

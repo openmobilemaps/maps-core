@@ -79,6 +79,7 @@ protected:
     int originOffsetHandle;
     int positionHandle;
     int styleIndexHandle;
+    GLuint vao;
     GLuint vertexBuffer;
     std::vector<GLfloat> vertices;
     GLuint indexBuffer;

@@ -66,6 +66,7 @@ protected:
     int vertexIndexHandle;
     int segmentStartLPosHandle;
     int styleInfoHandle;
+    GLuint vao;
     GLuint vertexAttribBuffer = -1;
     std::vector<GLfloat> lineAttributes;
     GLuint indexBuffer = -1;

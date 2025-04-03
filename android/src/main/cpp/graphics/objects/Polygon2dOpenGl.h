@@ -64,6 +64,7 @@ protected:
     int mMatrixHandle;
     int originOffsetHandle;
     int positionHandle;
+    GLuint vao;
     GLuint vertexBuffer;
     std::vector<GLfloat> vertices;
     GLuint indexBuffer;

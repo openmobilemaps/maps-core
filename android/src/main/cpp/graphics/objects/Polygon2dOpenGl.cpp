@@ -62,12 +62,20 @@ void Polygon2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface> &
 void Polygon2dOpenGl::prepareGlData(int program) {
     glUseProgram(program);
 
+    if (!glDataBuffersGenerated) {
+        glGenVertexArrays(1, &vao);
+    }
+    glBindVertexArray(vao);
+
     positionHandle = glGetAttribLocation(program, "vPosition");
     if (!glDataBuffersGenerated) {
         glGenBuffers(1, &vertexBuffer);
     }
     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(positionHandle);
+    glVertexAttribPointer(positionHandle, 3, GL_FLOAT, false, 0, nullptr);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -76,6 +84,9 @@ void Polygon2dOpenGl::prepareGlData(int program) {
     }
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort) * indices.size(), &indices[0], GL_STATIC_DRAW);
+
+    glBindVertexArray(0);
+
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     vpMatrixHandle = glGetUniformLocation(program, "uvpMatrix");
@@ -97,6 +108,7 @@ void Polygon2dOpenGl::removeGlBuffers() {
     if (glDataBuffersGenerated) {
         glDeleteBuffers(1, &vertexBuffer);
         glDeleteBuffers(1, &indexBuffer);
+        glDeleteVertexArrays(1, &vao);
         glDataBuffersGenerated = false;
     }
 }
@@ -137,14 +149,9 @@ void Polygon2dOpenGl::drawPolygon(const std::shared_ptr<::RenderingContextInterf
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
     // Add program to OpenGL environment
     glUseProgram(program);
+    glBindVertexArray(vao);
 
     shaderProgram->preRender(context);
-
-    glEnableVertexAttribArray(positionHandle);
-    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-    glVertexAttribPointer(positionHandle, 3, GL_FLOAT, false, 0, nullptr);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     // Apply the projection and view transformation
     glUniformMatrix4fv(vpMatrixHandle, 1, false, (GLfloat *)vpMatrix);
@@ -152,13 +159,9 @@ void Polygon2dOpenGl::drawPolygon(const std::shared_ptr<::RenderingContextInterf
     glUniform4f(originOffsetHandle, polygonOrigin.x - origin.x, polygonOrigin.y - origin.y, polygonOrigin.z - origin.z, 0.0);
 
     // Draw the triangle
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
     glDrawElements(GL_TRIANGLES, (unsigned short)indices.size(), GL_UNSIGNED_SHORT, nullptr);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-    // Disable vertex array
-    glDisableVertexAttribArray(positionHandle);
+    glBindVertexArray(0);
 
     glDisable(GL_BLEND);
 }
