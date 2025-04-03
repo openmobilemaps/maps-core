@@ -26,6 +26,7 @@ void parseAndTriangulate(const char *filePath, ParsingResult expectedResult, Cat
 
     meter.measure([&](int run) {
         vtzero::vector_tile tileData(data.data(), data.size());
+        mapbox::detail::Earcut<uint16_t> earcutter;
         while (auto layer = tileData.next_layer()) {
             std::string sourceLayerName = std::string(layer.name());
 
@@ -36,7 +37,7 @@ void parseAndTriangulate(const char *filePath, ParsingResult expectedResult, Cat
                 decode_geometry(feature.geometry(), geometryHandler);
                 size_t polygonCount = geometryHandler.beginTriangulatePolygons();
                 for (size_t i = 0; i < polygonCount; i++) {
-                    geometryHandler.triangulatePolygons(i);
+                    geometryHandler.triangulatePolygons(i, earcutter);
                 }
                 geometryHandler.endTringulatePolygons();
                 result.polygonCount += geometryHandler.getPolygons().size();
