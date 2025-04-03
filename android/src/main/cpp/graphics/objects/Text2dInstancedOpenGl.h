@@ -88,6 +88,7 @@ protected:
     int originOffsetHandle;
     int originHandle;
     int positionHandle;
+    GLuint vao;
     GLuint vertexBuffer;
     std::vector<GLfloat> vertices;
     int textureCoordinateHandle;
@@ -96,6 +97,7 @@ protected:
     GLuint indexBuffer;
     std::vector<GLubyte> indices;
     bool glDataBuffersGenerated = false;
+    bool texCoordBufferGenerated = false;
     Vec3D quadsOrigin = Vec3D(0.0, 0.0, 0.0);
 
     std::shared_ptr<TextureHolderInterface> textureHolder;

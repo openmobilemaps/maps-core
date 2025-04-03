@@ -13,7 +13,6 @@
 #include "OpenGlHelper.h"
 #include "TextureHolderInterface.h"
 #include "BaseShaderProgramOpenGl.h"
-#include "assert.h"
 
 Quad2dInstancedOpenGl::Quad2dInstancedOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader)
     : shaderProgram(shader) {}
@@ -83,27 +82,27 @@ void Quad2dInstancedOpenGl::setup(const std::shared_ptr<::RenderingContextInterf
 void Quad2dInstancedOpenGl::prepareGlData(int program) {
     glUseProgram(program);
 
-    positionHandle = glGetAttribLocation(program, "vPosition");
+    if (!glDataBuffersGenerated) {
+        glGenVertexArrays(1, &vao);
+    }
+    glBindVertexArray(vao);
+
     if (!glDataBuffersGenerated) {
         glGenBuffers(1, &vertexBuffer);
     }
     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
 
+    positionHandle = glGetAttribLocation(program, "vPosition");
+
+    glEnableVertexAttribArray(positionHandle);
+    glVertexAttribPointer(positionHandle, 3, GL_FLOAT, false, 0, nullptr);
+
     if (!glDataBuffersGenerated) {
         glGenBuffers(1, &dynamicInstanceDataBuffer);
     }
     glBindBuffer(GL_ARRAY_BUFFER, dynamicInstanceDataBuffer);
     glBufferData(GL_ARRAY_BUFFER, instanceCount * (is3d ? instValuesSizeBytes3d : instValuesSizeBytes), nullptr, GL_DYNAMIC_DRAW);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    if (!glDataBuffersGenerated) {
-        glGenBuffers(1, &indexBuffer);
-    }
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLubyte) * indices.size(), &indices[0], GL_STATIC_DRAW);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     instPositionsHandle = glGetAttribLocation(program, "aPosition");
     instRotationsHandle = glGetAttribLocation(program, "aRotation");
@@ -115,6 +114,40 @@ void Quad2dInstancedOpenGl::prepareGlData(int program) {
         buffersNotReadyResetValue &= ~(1 << 5);
         buffersNotReady &= ~(1 << 5);
     }
+
+    glVertexAttribPointer(instPositionsHandle, is3d ? 3 : 2, GL_FLOAT, GL_FALSE, 0, (float *) ((is3d ? instPositionsOffsetBytes3d : instPositionsOffsetBytes) * instanceCount));
+    glEnableVertexAttribArray(instPositionsHandle);
+    glVertexAttribDivisor(instPositionsHandle, 1);
+    glVertexAttribPointer(instRotationsHandle, 1, GL_FLOAT, GL_FALSE, 0, (float *) ((is3d ? instRotationsOffsetBytes3d : instRotationsOffsetBytes) * instanceCount));
+    glEnableVertexAttribArray(instRotationsHandle);
+    glVertexAttribDivisor(instRotationsHandle, 1);
+    glVertexAttribPointer(instTextureCoordinatesHandle, 4, GL_FLOAT, GL_FALSE, 0, (float *) ((is3d ? instTextureCoordinatesOffsetBytes3d : instTextureCoordinatesOffsetBytes) * instanceCount));
+    glEnableVertexAttribArray(instTextureCoordinatesHandle);
+    glVertexAttribDivisor(instTextureCoordinatesHandle, 1);
+    glVertexAttribPointer(instScalesHandle, 2, GL_FLOAT, GL_FALSE, 0, (float *) ((is3d ? instScalesOffsetBytes3d : instScalesOffsetBytes) * instanceCount));
+    glEnableVertexAttribArray(instScalesHandle);
+    glVertexAttribDivisor(instScalesHandle, 1);
+    glVertexAttribPointer(instAlphasHandle, 1, GL_FLOAT, GL_FALSE, 0, (float *) ((is3d ? instAlphasOffsetBytes3d : instAlphasOffsetBytes) * instanceCount));
+    glEnableVertexAttribArray(instAlphasHandle);
+    glVertexAttribDivisor(instAlphasHandle, 1);
+    if (instPositionOffsetsHandle >= 0) {
+        glVertexAttribPointer(instPositionOffsetsHandle, 2, GL_FLOAT, GL_FALSE, 0,
+                              (float *) ((is3d ? instPositionOffsetsOffsetBytes3d : instPositionOffsetsOffsetBytes) * instanceCount));
+        glEnableVertexAttribArray(instPositionOffsetsHandle);
+        glVertexAttribDivisor(instPositionOffsetsHandle, 1);
+    }
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    if (!glDataBuffersGenerated) {
+        glGenBuffers(1, &indexBuffer);
+    }
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLubyte) * indices.size(), &indices[0], GL_STATIC_DRAW);
+
+    glBindVertexArray(0);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     vpMatrixHandle = glGetUniformLocation(program, "uvpMatrix");
     mMatrixHandle = glGetUniformLocation(program, "umMatrix");
@@ -128,23 +161,30 @@ void Quad2dInstancedOpenGl::prepareGlData(int program) {
 
 void Quad2dInstancedOpenGl::prepareTextureCoordsGlData(int program) {
     glUseProgram(program);
-
-    if (textureCoordsReady) {
-        removeTextureCoordsGlBuffers();
-    }
+    glBindVertexArray(vao);
 
     textureCoordinateHandle = glGetAttribLocation(program, "vTexCoordinate");
     if (textureCoordinateHandle < 0) {
         usesTextureCoords = false;
         return;
     }
-    glGenBuffers(1, &textureCoordsBuffer);
+
+    if (!texCoordBufferGenerated) {
+        glGenBuffers(1, &textureCoordsBuffer);
+        texCoordBufferGenerated = true;
+    }
+
     glBindBuffer(GL_ARRAY_BUFFER, textureCoordsBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * textureCoords.size(), &textureCoords[0], GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(textureCoordinateHandle);
+    glVertexAttribPointer(textureCoordinateHandle, 2, GL_FLOAT, false, 0, nullptr);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     usesTextureCoords = true;
     textureCoordsReady = true;
+
+    glBindVertexArray(0);
 }
 
 void Quad2dInstancedOpenGl::removeGlBuffers() {
@@ -152,13 +192,17 @@ void Quad2dInstancedOpenGl::removeGlBuffers() {
         glDeleteBuffers(1, &vertexBuffer);
         glDeleteBuffers(1, &indexBuffer);
         glDeleteBuffers(1, &dynamicInstanceDataBuffer);
+        glDeleteVertexArrays(1, &vao);
         glDataBuffersGenerated = false;
     }
 }
 
 void Quad2dInstancedOpenGl::removeTextureCoordsGlBuffers() {
     if (textureCoordsReady) {
-        glDeleteBuffers(1, &textureCoordsBuffer);
+        if (texCoordBufferGenerated) {
+            glDeleteBuffers(1, &textureCoordsBuffer);
+            texCoordBufferGenerated = false;
+        }
         textureCoordsReady = false;
     }
 }
@@ -220,8 +264,6 @@ void Quad2dInstancedOpenGl::render(const std::shared_ptr<::RenderingContextInter
         return;
     }
 
-    glUseProgram(program);
-
     GLuint stencilMask = 0;
     GLuint validTarget = 0;
     GLenum zpass = GL_KEEP;
@@ -239,48 +281,16 @@ void Quad2dInstancedOpenGl::render(const std::shared_ptr<::RenderingContextInter
         glStencilOp(GL_KEEP, GL_KEEP, zpass);
     }
 
+    glUseProgram(program);
+    glBindVertexArray(vao);
+
     if (usesTextureCoords) {
         prepareTextureDraw(program);
-
-        glEnableVertexAttribArray(textureCoordinateHandle);
-        glBindBuffer(GL_ARRAY_BUFFER, textureCoordsBuffer);
-        glVertexAttribPointer(textureCoordinateHandle, 2, GL_FLOAT, false, 0, nullptr);
-
         auto textureFactorHandle = glGetUniformLocation(program, "textureFactor");
         glUniform2f(textureFactorHandle, factorWidth, factorHeight);
     }
 
-    glBindBuffer(GL_ARRAY_BUFFER, dynamicInstanceDataBuffer);
-    glVertexAttribPointer(instPositionsHandle, is3d ? 3 : 2, GL_FLOAT, GL_FALSE, 0, (float *) ((is3d ? instPositionsOffsetBytes3d : instPositionsOffsetBytes) * instanceCount));
-    glEnableVertexAttribArray(instPositionsHandle);
-    glVertexAttribDivisor(instPositionsHandle, 1);
-    glVertexAttribPointer(instRotationsHandle, 1, GL_FLOAT, GL_FALSE, 0, (float *) ((is3d ? instRotationsOffsetBytes3d : instRotationsOffsetBytes) * instanceCount));
-    glEnableVertexAttribArray(instRotationsHandle);
-    glVertexAttribDivisor(instRotationsHandle, 1);
-    glVertexAttribPointer(instTextureCoordinatesHandle, 4, GL_FLOAT, GL_FALSE, 0, (float *) ((is3d ? instTextureCoordinatesOffsetBytes3d : instTextureCoordinatesOffsetBytes) * instanceCount));
-    glEnableVertexAttribArray(instTextureCoordinatesHandle);
-    glVertexAttribDivisor(instTextureCoordinatesHandle, 1);
-    glVertexAttribPointer(instScalesHandle, 2, GL_FLOAT, GL_FALSE, 0, (float *) ((is3d ? instScalesOffsetBytes3d : instScalesOffsetBytes) * instanceCount));
-    glEnableVertexAttribArray(instScalesHandle);
-    glVertexAttribDivisor(instScalesHandle, 1);
-    glVertexAttribPointer(instAlphasHandle, 1, GL_FLOAT, GL_FALSE, 0, (float *) ((is3d ? instAlphasOffsetBytes3d : instAlphasOffsetBytes) * instanceCount));
-    glEnableVertexAttribArray(instAlphasHandle);
-    glVertexAttribDivisor(instAlphasHandle, 1);
-    if (instPositionOffsetsHandle >= 0) {
-        glVertexAttribPointer(instPositionOffsetsHandle, 2, GL_FLOAT, GL_FALSE, 0,
-                              (float *) ((is3d ? instPositionOffsetsOffsetBytes3d : instPositionOffsetsOffsetBytes) * instanceCount));
-        glEnableVertexAttribArray(instPositionOffsetsHandle);
-        glVertexAttribDivisor(instPositionOffsetsHandle, 1);
-    }
-
     shaderProgram->preRender(context);
-
-    // enable vPosition attribs
-    glEnableVertexAttribArray(positionHandle);
-    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-    glVertexAttribPointer(positionHandle, 3, GL_FLOAT, false, 0, nullptr);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     // Apply the projection and view transformation
     glUniformMatrix4fv(vpMatrixHandle, 1, false, (GLfloat *)vpMatrix);
@@ -292,33 +302,9 @@ void Quad2dInstancedOpenGl::render(const std::shared_ptr<::RenderingContextInter
     }
 
     // Draw the triangles
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-
     glDrawElementsInstanced(GL_TRIANGLES,6, GL_UNSIGNED_BYTE, nullptr, instanceCount);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-    glVertexAttribDivisor(instPositionsHandle, 0);
-    glVertexAttribDivisor(instRotationsHandle, 0);
-    glVertexAttribDivisor(instTextureCoordinatesHandle, 0);
-    glVertexAttribDivisor(instScalesHandle, 0);
-    glVertexAttribDivisor(instAlphasHandle, 0);
-    if (instPositionOffsetsHandle >= 0) {
-        glVertexAttribDivisor(instPositionOffsetsHandle, 0);
-    }
-
-    // Disable vertex array
-    glDisableVertexAttribArray(positionHandle);
-    if (textureHolder) {
-        glDisableVertexAttribArray(textureCoordinateHandle);
-    }
-    glDisableVertexAttribArray(instPositionsHandle);
-    glDisableVertexAttribArray(instRotationsHandle);
-    glDisableVertexAttribArray(instTextureCoordinatesHandle);
-    glDisableVertexAttribArray(instScalesHandle);
-    glDisableVertexAttribArray(instAlphasHandle);
-    if (instPositionOffsetsHandle >= 0) {
-        glDisableVertexAttribArray(instPositionOffsetsHandle);
-    }
+    glBindVertexArray(0);
 
     glDisable(GL_BLEND);
 }
@@ -341,8 +327,8 @@ void Quad2dInstancedOpenGl::prepareTextureDraw(int program) {
 
 void Quad2dInstancedOpenGl::setInstanceCount(int count) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
-    ready = false;
     this->instanceCount = count;
+    ready = false;
 }
 
 void Quad2dInstancedOpenGl::setPositions(const SharedBytes &positions) {

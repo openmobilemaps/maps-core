@@ -193,12 +193,21 @@ void Quad2dOpenGl::computeGeometry(bool texCoordsOnly) {
 void Quad2dOpenGl::prepareGlData(int program) {
     glUseProgram(program);
 
+    if (!glDataBuffersGenerated) {
+        glGenVertexArrays(1, &vao);
+    }
+    glBindVertexArray(vao);
+
     positionHandle = glGetAttribLocation(program, "vPosition");
     if (!glDataBuffersGenerated) {
         glGenBuffers(1, &vertexBuffer);
     }
     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
+
+    // enable vPosition attribs
+    glEnableVertexAttribArray(positionHandle);
+    glVertexAttribPointer(positionHandle, 3, GL_FLOAT, false, 0, nullptr);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -207,6 +216,9 @@ void Quad2dOpenGl::prepareGlData(int program) {
     }
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort ) * indices.size(), &indices[0], GL_STATIC_DRAW);
+
+    glBindVertexArray(0);
+
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     vpMatrixHandle = glGetUniformLocation(program, "uvpMatrix");
@@ -219,36 +231,49 @@ void Quad2dOpenGl::prepareGlData(int program) {
 
 void Quad2dOpenGl::prepareTextureCoordsGlData(int program) {
     glUseProgram(program);
-
-    if (textureCoordsReady) {
-        removeTextureCoordsGlBuffers();
-    }
+    glBindVertexArray(vao);
 
     textureCoordinateHandle = glGetAttribLocation(program, "texCoordinate");
     if (textureCoordinateHandle < 0) {
         usesTextureCoords = false;
         return;
     }
-    glGenBuffers(1, &textureCoordsBuffer);
+
+    textureUniformHandle = glGetUniformLocation(program, "textureSampler");
+
+    if (!texCoordBufferGenerated) {
+        glGenBuffers(1, &textureCoordsBuffer);
+        texCoordBufferGenerated = true;
+    }
+
     glBindBuffer(GL_ARRAY_BUFFER, textureCoordsBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * textureCoords.size(), &textureCoords[0], GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(textureCoordinateHandle);
+    glVertexAttribPointer(textureCoordinateHandle, 2, GL_FLOAT, false, 0, nullptr);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     usesTextureCoords = true;
     textureCoordsReady = true;
+
+    glBindVertexArray(0);
 }
 
 void Quad2dOpenGl::removeGlBuffers() {
     if (glDataBuffersGenerated) {
         glDeleteBuffers(1, &vertexBuffer);
         glDeleteBuffers(1, &indexBuffer);
+        glDeleteVertexArrays(1, &vao);
         glDataBuffersGenerated = false;
     }
 }
 
 void Quad2dOpenGl::removeTextureCoordsGlBuffers() {
     if (textureCoordsReady) {
-        glDeleteBuffers(1, &textureCoordsBuffer);
+        if (texCoordBufferGenerated) {
+            glDeleteBuffers(1, &textureCoordsBuffer);
+            texCoordBufferGenerated = false;
+        }
         textureCoordsReady = false;
     }
 }
@@ -305,8 +330,6 @@ void Quad2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &co
     if (!ready || (usesTextureCoords && !textureCoordsReady))
         return;
 
-    glUseProgram(program);
-
     GLuint stencilMask = 0;
     GLuint validTarget = 0;
     GLenum zpass = GL_KEEP;
@@ -324,22 +347,14 @@ void Quad2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &co
         glStencilOp(GL_KEEP, GL_KEEP, zpass);
     }
 
+    glUseProgram(program);
+    glBindVertexArray(vao);
+
     if (usesTextureCoords) {
         prepareTextureDraw(program);
-
-        glEnableVertexAttribArray(textureCoordinateHandle);
-        glBindBuffer(GL_ARRAY_BUFFER, textureCoordsBuffer);
-        glVertexAttribPointer(textureCoordinateHandle, 2, GL_FLOAT, false, 0, nullptr);
     }
 
     shaderProgram->preRender(context);
-
-    // enable vPosition attribs
-    glEnableVertexAttribArray(positionHandle);
-    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-    glVertexAttribPointer(positionHandle, 3, GL_FLOAT, false, 0, nullptr);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     // Apply the projection and view transformation
     glUniformMatrix4fv(vpMatrixHandle, 1, false, (GLfloat *)vpMatrix);
@@ -350,17 +365,9 @@ void Quad2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &co
     }
 
     // Draw the triangles
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_SHORT, nullptr);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-    // Disable vertex array
-    glDisableVertexAttribArray(positionHandle);
-
-    if (textureHolder) {
-        glDisableVertexAttribArray(textureCoordinateHandle);
-    }
+    glBindVertexArray(0);
 
     glDisable(GL_BLEND);
 }
@@ -382,7 +389,6 @@ void Quad2dOpenGl::prepareTextureDraw(int program) {
     }
 
     // Tell the texture uniform sampler to use this texture in the shader by binding to texture unit 0.
-    int textureUniformHandle = glGetUniformLocation(program, "textureSampler");
     glUniform1i(textureUniformHandle, 0);
 }
 

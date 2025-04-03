@@ -77,13 +77,16 @@ protected:
     int program;
 
     bool glDataBuffersGenerated = false;
+    bool texCoordBufferGenerated = false;
     int vpMatrixHandle;
     int mMatrixHandle;
     int originOffsetHandle;
     int originHandle;
     int positionHandle;
+    GLuint vao;
     GLuint vertexBuffer;
     std::vector<GLfloat> vertices;
+    int textureUniformHandle;
     int textureCoordinateHandle;
     GLuint textureCoordsBuffer;
     std::vector<GLfloat> textureCoords;

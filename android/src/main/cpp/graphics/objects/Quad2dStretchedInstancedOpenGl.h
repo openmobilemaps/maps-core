@@ -92,6 +92,7 @@ class Quad2dStretchedInstancedOpenGl : public GraphicsObjectInterface,
     int mMatrixHandle;
     int originOffsetHandle;
     int positionHandle;
+    GLuint vao;
     GLuint vertexBuffer;
     std::vector<GLfloat> vertices;
     int textureCoordinateHandle;
@@ -100,6 +101,7 @@ class Quad2dStretchedInstancedOpenGl : public GraphicsObjectInterface,
     GLuint indexBuffer;
     std::vector<GLubyte> indices;
     bool glDataBuffersGenerated = false;
+    bool texCoordBufferGenerated = false;
     Vec3D quadsOrigin = Vec3D(0.0, 0.0, 0.0);
 
     std::shared_ptr<TextureHolderInterface> textureHolder;

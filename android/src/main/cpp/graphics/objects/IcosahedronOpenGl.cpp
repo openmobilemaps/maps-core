@@ -58,6 +58,11 @@ void IcosahedronOpenGl::setup(const std::shared_ptr<::RenderingContextInterface>
 void IcosahedronOpenGl::prepareGlData(int program) {
     glUseProgram(program);
 
+    if (!glDataBuffersGenerated) {
+        glGenVertexArrays(1, &vao);
+    }
+    glBindVertexArray(vao);
+
     positionHandle = glGetAttribLocation(program, "vLatLon");
     valueHandle = glGetAttribLocation(program, "vValue");
     if (!glDataBuffersGenerated) {
@@ -66,6 +71,11 @@ void IcosahedronOpenGl::prepareGlData(int program) {
     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
 
+    glEnableVertexAttribArray(positionHandle);
+    glEnableVertexAttribArray(valueHandle);
+    glVertexAttribPointer(positionHandle, 2, GL_FLOAT, false, sizeof(GLfloat) * 3, nullptr);
+    glVertexAttribPointer(valueHandle, 1, GL_FLOAT, false, sizeof(GLfloat) * 3, (float *) (sizeof(GLfloat) * 2));
+
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     if (!glDataBuffersGenerated) {
@@ -73,6 +83,9 @@ void IcosahedronOpenGl::prepareGlData(int program) {
     }
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * indices.size(), &indices[0], GL_STATIC_DRAW);
+
+    glBindVertexArray(0);
+
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     vpMatrixHandle = glGetUniformLocation(program, "uvpMatrix");
@@ -91,6 +104,7 @@ void IcosahedronOpenGl::removeGlBuffers() {
     if (glDataBuffersGenerated) {
         glDeleteBuffers(1, &vertexBuffer);
         glDeleteBuffers(1, &indexBuffer);
+        glDeleteVertexArrays(1, &vao);
         glDataBuffersGenerated = false;
     }
 }
@@ -124,30 +138,18 @@ void IcosahedronOpenGl::render(const std::shared_ptr<::RenderingContextInterface
 
     // Add program to OpenGL environment
     glUseProgram(program);
+    glBindVertexArray(vao);
 
     shaderProgram->preRender(context);
-
-    glEnableVertexAttribArray(positionHandle);
-    glEnableVertexAttribArray(valueHandle);
-    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-    glVertexAttribPointer(positionHandle, 2, GL_FLOAT, false, sizeof(GLfloat) * 3, nullptr);
-    glVertexAttribPointer(valueHandle, 1, GL_FLOAT, false, sizeof(GLfloat) * 3, (float *) (sizeof(GLfloat) * 2));
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     // Apply the projection and view transformation
     glUniformMatrix4fv(vpMatrixHandle, 1, false, (GLfloat *)vpMatrix);
     glUniformMatrix4fv(mMatrixHandle, 1, false, (GLfloat *)mMatrix);
 
     // Draw the triangle
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-    // Disable vertex array
-    glDisableVertexAttribArray(positionHandle);
-    glDisableVertexAttribArray(valueHandle);
+    glBindVertexArray(0);
 
     glDisable(GL_BLEND);
 }
