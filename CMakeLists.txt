@@ -99,6 +99,8 @@ else()
   target_compile_definitions(mapscore PRIVATE OPENMOBILEMAPS_GL=1)
 endif()
 
+target_compile_definitions(mapscore PUBLIC DATAREF_CPP=1)
+
 target_compile_features(mapscore PRIVATE cxx_std_20)
 target_compile_options(mapscore PRIVATE -Werror -Wno-deprecated -Wno-reorder -fPIC) # fPIC so we can "embed" into shared mapscore_jni
 target_link_libraries(mapscore ${OPENGL_LIBRARIES})
