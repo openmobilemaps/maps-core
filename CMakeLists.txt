@@ -10,6 +10,7 @@ if(APPLE)
   file(GLOB_RECURSE mapscore_SRC
           "shared/public/*.cpp"
           "shared/src/*.cpp"
+          "external/djinni/support-lib/cpp/*.cpp"
   )
 else()
   # Include Android-specific files only if not on Apple devices
@@ -17,6 +18,7 @@ else()
           "shared/public/*.cpp"
           "shared/src/*.cpp"
           "android/src/main/cpp/graphics/*.cpp"
+          "external/djinni/support-lib/cpp/*.cpp"
   )
 endif()
 
@@ -96,6 +98,8 @@ if(APPLE)
 else()
   target_compile_definitions(mapscore PRIVATE OPENMOBILEMAPS_GL=1)
 endif()
+
+target_compile_definitions(mapscore PUBLIC DATAREF_CPP=1)
 
 target_compile_features(mapscore PRIVATE cxx_std_20)
 target_compile_options(mapscore PRIVATE -Werror -Wno-deprecated -Wno-reorder -fPIC) # fPIC so we can "embed" into shared mapscore_jni
