@@ -46,6 +46,7 @@ void PolygonMaskObject::setPolygons(const std::vector<::PolygonCoord> &polygons,
     int32_t indexOffset = 0;
 
     std::vector<Vec2D> vecVertices;
+    mapbox::detail::Earcut<int32_t> earcutter;
 
     for (auto const &polygon : polygons) {
         std::vector<std::vector<Vec2D>> renderCoords;
@@ -64,7 +65,8 @@ void PolygonMaskObject::setPolygons(const std::vector<::PolygonCoord> &polygons,
             }
             renderCoords.push_back(holeCoords);
         }
-        std::vector<int32_t> curIndices = mapbox::earcut<int32_t>(renderCoords);
+        earcutter(renderCoords);
+        std::vector<int32_t> curIndices = std::move(earcutter.indices);
 
         for (auto const &index : curIndices) {
             indices.push_back(indexOffset + index);

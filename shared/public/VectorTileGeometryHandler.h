@@ -155,7 +155,7 @@ public:
         polygonRanges.clear();
     }
 
-    void triangulatePolygons(size_t i) {
+    void triangulatePolygons(size_t i, mapbox::detail::Earcut<uint16_t> &earcutter) {
         const auto& range = polygonRanges[i];
 
         coordinates.reserve(coordinates.size() + range.size);
@@ -170,20 +170,23 @@ public:
         }
 
         auto polygonView = EarcutPolygonVectorView(polygonRings, polygonRanges[i], 500);
-        std::vector<uint16_t> indices = mapbox::earcut<uint16_t>(polygonView);
+        earcutter(polygonView);
+        std::vector<uint16_t> indices = std::move(earcutter.indices);
 
         std::reverse(indices.begin(), indices.end());
 
-        polygons.push_back({{}, indices});
-
+        std::vector<Vec2D> coordinates;
+        coordinates.reserve(polygonView.numPoints());
         for(size_t i=0; i<polygonView.size(); ++i) {
             for(auto const &point : polygonView[i]) {
-                polygons.back().coordinates.push_back(vecFromPoint(point));
+                coordinates.push_back(vecFromPoint(point));
             }
         }
+        polygons.emplace_back(std::move(coordinates), std::move(indices));
     }
 
     void triangulateGeoJsonPolygons(const std::shared_ptr<GeoJsonGeometry> &geometry) {
+        mapbox::detail::Earcut<uint16_t> earcutter;
         for (int i = 0; i < geometry->coordinates.size(); i++) {
             coordinates.reserve(coordinates.size() + geometry->coordinates[i].size() + 1);
 
@@ -202,17 +205,20 @@ public:
             }
 
             auto polygonView = EarcutCoordVectorView(geometry->coordinates[i], geometry->holes[i], 500);
-            std::vector<uint16_t> indices = mapbox::earcut<uint16_t>(polygonView);
+            earcutter(polygonView);
+            std::vector<uint16_t> indices = std::move(earcutter.indices);
 
             if (!indices.empty()) {
-                polygons.push_back({{}, indices});
 
+                std::vector<Vec2D> coordinates;
+                coordinates.reserve(polygonView.numPoints());
                 for(size_t i=0; i<polygonView.size(); ++i) {
                     for(auto const &point : polygonView[i]) {
                         const auto &converted = conversionHelper->convertToRenderSystem(point);
-                        polygons.back().coordinates.push_back(Vec2D(converted.x, converted.y));
+                        coordinates.push_back(Vec2D(converted.x, converted.y));
                     }
                 }
+                polygons.emplace_back(std::move(coordinates), std::move(indices));
             }
         }
     }
@@ -222,6 +228,10 @@ public:
     }
 
     struct TriangulatedPolygon {
+        TriangulatedPolygon(std::vector<Vec2D> &&coordinates_, std::vector<uint16_t> &&indices_)
+            : coordinates(coordinates_)
+            , indices(indices_) {}
+
         std::vector<Vec2D> coordinates;
         std::vector<uint16_t> indices;
     };

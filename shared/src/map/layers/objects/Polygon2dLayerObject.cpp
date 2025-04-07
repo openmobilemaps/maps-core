@@ -43,6 +43,7 @@ void Polygon2dLayerObject::setPolygons(const std::vector<PolygonCoord> &polygons
     size_t totalPoints = 0;
 
     std::vector<Vec2D> vecVertices;
+    mapbox::detail::Earcut<int32_t> earcutter;
 
     BoundingBox bbox = BoundingBox(CoordinateSystemIdentifiers::RENDERSYSTEM());
     for (auto const &polygon : polygons) {
@@ -63,7 +64,8 @@ void Polygon2dLayerObject::setPolygons(const std::vector<PolygonCoord> &polygons
             }
             renderCoords.push_back(holeCoords);
         }
-        std::vector<int32_t> curIndices = mapbox::earcut<int32_t>(renderCoords);
+        earcutter(renderCoords);
+        std::vector<int32_t> curIndices = std::move(earcutter.indices);
 
         for (auto const &index : curIndices) {
             indices.push_back(indexOffset + index);
