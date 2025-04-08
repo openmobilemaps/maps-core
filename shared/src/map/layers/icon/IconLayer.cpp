@@ -370,7 +370,7 @@ void IconLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface, int32
                 icons.push_back(icon);
             }
             addingQueue.clear();
-            addIcons(icons);
+            addList(icons);
         }
 
         std::scoped_lock<std::recursive_mutex> lock2(scaleAddingQueueMutex);
