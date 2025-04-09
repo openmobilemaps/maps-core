@@ -25,10 +25,11 @@ open class MapRenderHelper {
 			onSetupMap: (MapViewInterface) -> Unit,
 			onStateUpdate: (MapViewRenderState) -> Unit,
 			renderBounds: RectCoord,
+			renderBoundsPaddingPc: Float = 0f,
 			renderSizePx: Vec2I,
 			renderDensity: Float = 72f,
 			renderTimeoutSeconds: Float = 20f,
-			destroyAfterRenderAction: Boolean = true
+			destroyAfterRenderAction: Boolean = true,
 		) : OffscreenMapRenderer {
 			onStateUpdate.invoke(MapViewRenderState.Loading)
 
@@ -41,7 +42,7 @@ open class MapRenderHelper {
 
 				override fun run() {
 					coroutineScope.launch(Dispatchers.Default) {
-						render(mapRenderer, renderBounds, renderTimeoutSeconds, onStateUpdate, destroyAfterRenderAction)
+						render(mapRenderer, renderBounds, renderTimeoutSeconds, onStateUpdate, destroyAfterRenderAction, renderBoundsPaddingPc)
 					}
 				}
 			})
@@ -54,15 +55,17 @@ open class MapRenderHelper {
 			coroutineScope: CoroutineScope,
 			mapRenderer: OffscreenMapRenderer,
 			renderBounds: RectCoord,
+			renderBoundsPaddingPc: Float = 0f,
 			onStateUpdate: (MapViewRenderState) -> Unit,
 			renderTimeoutSeconds: Float = 20f,
-			destroyAfterRenderAction: Boolean = true){
+			destroyAfterRenderAction: Boolean = true,
+		){
 			mapRenderer.requireMapInterface().getScheduler().addTask(object : TaskInterface() {
 				override fun getConfig() = TaskConfig("render_task_start", 0, TaskPriority.NORMAL, ExecutionEnvironment.GRAPHICS)
 
 				override fun run() {
 					coroutineScope.launch(Dispatchers.Default) {
-						render(mapRenderer, renderBounds, renderTimeoutSeconds, onStateUpdate, destroyAfterRenderAction)
+						render(mapRenderer, renderBounds, renderTimeoutSeconds, onStateUpdate, destroyAfterRenderAction, renderBoundsPaddingPc)
 					}
 				}
 			})
@@ -75,7 +78,7 @@ open class MapRenderHelper {
 			timeoutSeconds: Float,
 			onStateUpdate: (MapViewRenderState) -> Unit,
 			destroyAfterRenderAction: Boolean,
-			boundsPaddingPc: Float = 0f
+			boundsPaddingPc: Float
 		) {
 			val drawSemaphore = Semaphore(1, true)
 			mapRenderer.requireMapInterface().drawReadyFrame(renderBounds, boundsPaddingPc, timeoutSeconds, object : MapReadyCallbackInterface() {
