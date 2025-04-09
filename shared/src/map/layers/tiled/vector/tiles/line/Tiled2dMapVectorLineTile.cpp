@@ -546,7 +546,7 @@ bool Tiled2dMapVectorLineTile::performClick(const Coord &coord) {
             auto lineWidth = lineDescription->style.getLineWidth(EvaluationContext(zoomIdentifier, dpFactor, featureContext, featureStateManager));
             lineWidth *= selectionSizeFactor;
             auto lineWidthInMapUnits = camera->mapUnitsFromPixels(lineWidth);
-            if (LineHelper::pointWithin(coordinates, Coord(CoordinateSystemIdentifiers::EPSG3857(), coord.x, coord.y, 0.0), CoordinateSystemIdentifiers::EPSG3857(), lineWidthInMapUnits, coordinateConverter)) {
+            if (LineHelper::pointWithin(coordinates, coord, CoordinateSystemIdentifiers::EPSG3857(), lineWidthInMapUnits, coordinateConverter)) {
                 if (multiselect) {
                     featureInfos.push_back(featureContext->getFeatureInfo());
                 } else if (strongSelectionDelegate->didSelectFeature(featureContext->getFeatureInfo(), description->identifier, coord)) {
