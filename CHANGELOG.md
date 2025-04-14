@@ -1,5 +1,15 @@
 # Changelog for Open Mobile Maps
 
+## Version 3.1.0
+- Added support for animated dashes in the LineLayer
+- Improved integration of the desktop Java/OpenGL target platform
+- Added support for feature- dependent text fonts in vector layers
+- Enabled dynamic icon images in vector layers
+- Improved the 3D globe mode
+- Fixed alpha issues in the IconLayer
+- Fixed a coordinate system issue in line selection
+- Numerous bug fixes and performance improvements in the vector layer
+
 ## Version 3.0.2
 - Fixed a race condition within geojson sources and add source post-loading exception handling
 
