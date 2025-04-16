@@ -503,8 +503,10 @@ void MapScene::drawReadyFrame(const ::RectCoord &bounds, float paddingPc, float 
 
         state = getLayersReadyState();
 
-        // sleep for 0.1s
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        // sleep for 0.05s to avoid starving main thread
+        if (state == LayerReadyState::NOT_READY) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        }
 
         auto now = DateHelper::currentTimeMillis();
         if (now > timeoutTimestamp) {
