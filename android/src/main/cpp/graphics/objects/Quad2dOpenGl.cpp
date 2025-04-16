@@ -383,7 +383,7 @@ void Quad2dOpenGl::prepareTextureDraw(int program) {
     // Bind the texture to this unit.
     glBindTexture(GL_TEXTURE_2D, (unsigned int)texturePointer);
     if (textureFilterType.has_value()) {
-        GLint filterParam = GL_NEAREST;//*textureFilterType == TextureFilterType::LINEAR ? GL_LINEAR : GL_NEAREST;
+        GLint filterParam = *textureFilterType == TextureFilterType::LINEAR ? GL_LINEAR : GL_NEAREST;
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filterParam);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filterParam);
     }
