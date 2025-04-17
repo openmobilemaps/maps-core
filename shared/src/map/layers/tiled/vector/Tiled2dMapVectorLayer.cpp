@@ -706,7 +706,6 @@ void Tiled2dMapVectorLayer::pregenerateRenderPasses() {
 
     // optimize rendering order
     for(auto it = orderedRenderDescriptions.begin(); it != orderedRenderDescriptions.end(); it++) {
-        continue;
         // find patches with same source
         auto endIt = it;
         while (endIt != orderedRenderDescriptions.end() && (*it)->sourceHash == (*endIt)->sourceHash && ((*it)->maskingObject == nullptr) == ((*endIt)->maskingObject == nullptr)) {

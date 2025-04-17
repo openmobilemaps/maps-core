@@ -69,6 +69,7 @@ void LineGroup2dLayerObject::setLines(const std::vector<std::tuple<std::vector<V
 
             float lengthNormalX = pNext.x - p.x;
             float lengthNormalY = pNext.y - p.y;
+            float lengthNormalZ = pNext.z - p.z;
             float lineLength = std::sqrt(lengthNormalX * lengthNormalX + lengthNormalY * lengthNormalY);
 
             // SegmentType (0 inner, 1 start, 2 end, 3 single segment) | lineStyleIndex
@@ -78,18 +79,41 @@ void LineGroup2dLayerObject::setLines(const std::vector<std::tuple<std::vector<V
                     : (i == iSecondToLast ? (float) (2 << 8)
                     : 0.0)));
 
+            const double fx = 0, fy = 0, fz = 1;
+            double normalX = fy * lengthNormalZ - fz * lengthNormalY;
+            double normalY = fz * lengthNormalX - fx * lengthNormalZ;
+            double normalZ = fx * lengthNormalY - fy * lengthNormalX;
+
             for (uint8_t vertexIndex = 4; vertexIndex > 0; --vertexIndex) {
                 // Vertex
                 // Position pointA and pointB
-                lineAttributes.push_back(p.x);
-                lineAttributes.push_back(p.y);
-                if (is3d) {
-                    lineAttributes.push_back(p.z);
+                if (vertexIndex > 2) {
+                    lineAttributes.push_back(p.x);
+                    lineAttributes.push_back(p.y);
+                    if (is3d) {
+                        lineAttributes.push_back(p.z);
+                    }
                 }
-                lineAttributes.push_back(pNext.x);
-                lineAttributes.push_back(pNext.y);
-                if (is3d) {
-                    lineAttributes.push_back(pNext.z);
+                else {
+                    lineAttributes.push_back(pNext.x);
+                    lineAttributes.push_back(pNext.y);
+                    if (is3d) {
+                        lineAttributes.push_back(pNext.z);
+                    }
+                }
+                if (vertexIndex % 2 == 0) {
+                    lineAttributes.push_back(normalX);
+                    lineAttributes.push_back(normalY);
+                    if (is3d) {
+                        lineAttributes.push_back(normalZ);
+                    }
+                }
+                else {
+                    lineAttributes.push_back(-normalX);
+                    lineAttributes.push_back(-normalY);
+                    if (is3d) {
+                        lineAttributes.push_back(-normalZ);
+                    }
                 }
 
                 // Vertex Index
@@ -107,7 +131,7 @@ void LineGroup2dLayerObject::setLines(const std::vector<std::tuple<std::vector<V
             lineIndices.push_back(lineIndexOffset + 4 * i + 1);
             lineIndices.push_back(lineIndexOffset + 4 * i + 2);
 
-            lineIndices.push_back(lineIndexOffset + 4 * i);
+            lineIndices.push_back(lineIndexOffset + 4 * i + 1);
             lineIndices.push_back(lineIndexOffset + 4 * i + 2);
             lineIndices.push_back(lineIndexOffset + 4 * i + 3);
 
@@ -162,6 +186,7 @@ void LineGroup2dLayerObject::setLines(const std::vector<std::tuple<std::vector<C
 
             float lengthNormalX = pNext.x - p.x;
             float lengthNormalY = pNext.y - p.y;
+            float lengthNormalZ = pNext.z - p.z;
             float lineLength = std::sqrt(lengthNormalX * lengthNormalX + lengthNormalY * lengthNormalY);
 
             // SegmentType (0 inner, 1 start, 2 end, 3 single segment) | lineStyleIndex
@@ -171,18 +196,41 @@ void LineGroup2dLayerObject::setLines(const std::vector<std::tuple<std::vector<C
                     : (i == iSecondToLast ? (float) (2 << 8)
                     : 0.0)));
 
+            const double fx = 0, fy = 0, fz = 1;
+            double normalX = fy * lengthNormalZ - fz * lengthNormalY;
+            double normalY = fz * lengthNormalX - fx * lengthNormalZ;
+            double normalZ = fx * lengthNormalY - fy * lengthNormalX;
+
             for (uint8_t vertexIndex = 4; vertexIndex > 0; --vertexIndex) {
                 // Vertex
                 // Position pointA and pointB
-                lineAttributes.push_back(p.x);
-                lineAttributes.push_back(p.y);
-                if (is3d) {
-                    lineAttributes.push_back(p.z);
+                if (vertexIndex < 2) {
+                    lineAttributes.push_back(p.x);
+                    lineAttributes.push_back(p.y);
+                    if (is3d) {
+                        lineAttributes.push_back(p.z);
+                    }
                 }
-                lineAttributes.push_back(pNext.x);
-                lineAttributes.push_back(pNext.y);
-                if (is3d) {
-                    lineAttributes.push_back(pNext.z);
+                else {
+                    lineAttributes.push_back(pNext.x);
+                    lineAttributes.push_back(pNext.y);
+                    if (is3d) {
+                        lineAttributes.push_back(pNext.z);
+                    }
+                }
+                if (vertexIndex % 2 == 0) {
+                    lineAttributes.push_back(normalX);
+                    lineAttributes.push_back(normalY);
+                    if (is3d) {
+                        lineAttributes.push_back(normalZ);
+                    }
+                }
+                else {
+                    lineAttributes.push_back(-normalX);
+                    lineAttributes.push_back(-normalY);
+                    if (is3d) {
+                        lineAttributes.push_back(-normalZ);
+                    }
                 }
 
                 // Vertex Index
@@ -200,7 +248,7 @@ void LineGroup2dLayerObject::setLines(const std::vector<std::tuple<std::vector<C
             lineIndices.push_back(lineIndexOffset + 4 * i + 1);
             lineIndices.push_back(lineIndexOffset + 4 * i + 2);
 
-            lineIndices.push_back(lineIndexOffset + 4 * i);
+            lineIndices.push_back(lineIndexOffset + 4 * i + 1);
             lineIndices.push_back(lineIndexOffset + 4 * i + 2);
             lineIndices.push_back(lineIndexOffset + 4 * i + 3);
 
