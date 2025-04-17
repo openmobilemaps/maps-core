@@ -110,6 +110,8 @@ open class MCMapView: MTKView, @unchecked Sendable {
 
         sampleCount = 1  // samples per pixel
 
+        presentsWithTransaction = true
+
         callbackHandler.invalidateCallback = { [weak self] in
             self?.invalidate()
         }
@@ -283,8 +285,9 @@ extension MCMapView: MTKViewDelegate {
             commandBuffer.commit()
             commandBuffer.waitUntilCompleted()
         } else {
-            commandBuffer.present(drawable)
             commandBuffer.commit()
+            commandBuffer.waitUntilScheduled()
+            drawable.present()
         }
     }
 
