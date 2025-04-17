@@ -496,10 +496,12 @@ void MapScene::drawReadyFrame(const ::RectCoord &bounds, float paddingPc, float 
 
     while (state == LayerReadyState::NOT_READY) {
 
+#ifdef __APPLE__
         while(scheduler->runGraphicsTasks()) {
             continue;
             // ensure all graphics tasks are done by polling runGraphicsTasks()
         }
+#endif
 
         state = getLayersReadyState();
 
