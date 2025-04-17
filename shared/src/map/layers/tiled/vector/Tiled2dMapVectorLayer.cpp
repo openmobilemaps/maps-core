@@ -704,6 +704,23 @@ void Tiled2dMapVectorLayer::pregenerateRenderPasses() {
         return lhs->renderIndex < rhs->renderIndex;
     });
 
+    // optimize rendering order
+    for(auto it = orderedRenderDescriptions.begin(); it != orderedRenderDescriptions.end(); it++) {
+        continue;
+        // find patches with same source
+        auto endIt = it;
+        while (endIt != orderedRenderDescriptions.end() && (*it)->sourceHash == (*endIt)->sourceHash && ((*it)->maskingObject == nullptr) == ((*endIt)->maskingObject == nullptr)) {
+            endIt++;
+        }
+        // objects can be safely grouped by masking object as masks must be mutually exclusive from same source
+        std::stable_sort(it, endIt, [](const auto &lhs, const auto &rhs) {
+            if (lhs->maskingObject == rhs->maskingObject) {
+                return lhs->renderIndex < rhs->renderIndex;
+            }
+            return lhs->maskingObject < rhs->maskingObject;
+        });
+    }
+
     std::vector<std::shared_ptr<::RenderObjectInterface>> renderObjects;
     std::shared_ptr<MaskingObjectInterface> lastMask = nullptr;
     int32_t lastRenderPassIndex = 0;

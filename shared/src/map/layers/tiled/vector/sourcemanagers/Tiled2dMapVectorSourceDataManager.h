@@ -84,6 +84,7 @@ protected:
     const std::shared_ptr<VectorMapDescription> mapDescription;
     std::shared_ptr<Tiled2dMapVectorLayerConfig> layerConfig;
     const std::string source;
+    const size_t sourceHash;
     std::weak_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> selectionDelegate;
 
     std::unordered_map<std::string, int32_t> layerNameIndexMap;

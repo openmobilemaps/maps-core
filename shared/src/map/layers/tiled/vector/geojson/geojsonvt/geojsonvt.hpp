@@ -333,7 +333,12 @@ private:
     void resolveAllWaitingPromises() {
         std::lock_guard<std::recursive_mutex> lock(mutex);
         for (const auto promise: waitingPromises) {
-            promise->setValue(std::make_shared<DataLoaderResult>(std::nullopt, std::nullopt, loadingResult->status, loadingResult->errorCode));
+            if (loadingResult) {
+                promise->setValue(std::make_shared<DataLoaderResult>(std::nullopt, std::nullopt, loadingResult->status, loadingResult->errorCode));
+            }
+            else {
+                promise->setValue(std::make_shared<DataLoaderResult>(std::nullopt, std::nullopt, LoaderStatus::ERROR_OTHER, std::nullopt));
+            }
         }
         waitingPromises.clear();
     }

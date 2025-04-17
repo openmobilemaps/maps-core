@@ -25,8 +25,10 @@ Tiled2dMapVectorSourceDataManager::Tiled2dMapVectorSourceDataManager(const WeakA
           mapDescription(mapDescription),
           layerConfig(layerConfig),
           source(source),
+          sourceHash(std::hash<std::string>{}(source)),
           readyManager(readyManager),
           featureStateManager(featureStateManager) {
+
     for (int32_t index = 0; index < mapDescription->layers.size(); index++) {
         const auto &layerDescription = mapDescription->layers.at(index);
         if (layerDescription->source == source) {
