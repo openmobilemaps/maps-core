@@ -112,7 +112,7 @@ std::string ColorPolygonGroup2dShaderOpenGl::getPolygonStylesUBODefinition(bool 
                 layout (std140, binding = 0) uniform PolygonStyleCollection {
                     StripedPolygonStyle polygonStyles[) + std::to_string(MAX_NUM_STYLES) + OMMShaderCode(];
                     int numStyles;
-                };
+                } uPolygonStyles;
         );
     } else {
         return OMMShaderCode(
@@ -127,7 +127,7 @@ std::string ColorPolygonGroup2dShaderOpenGl::getPolygonStylesUBODefinition(bool 
                 layout (std140, binding = 0) uniform PolygonStyleCollection {
                     PolygonStyle polygonStyles[) + std::to_string(MAX_NUM_STYLES) + OMMShaderCode(];
                     int numStyles;
-                };
+                } uPolygonStyles;
         );
     }
 }
@@ -152,7 +152,7 @@ std::string ColorPolygonGroup2dShaderOpenGl::getVertexShader() {
                 void main() {
                     gl_Position = uvpMatrix * ((umMatrix * vec4(vPosition, 1.0)) + uOriginOffset);
 
-                    styleIndex = clamp(int(floor(vStyleIndex + 0.5)), 0, numStyles);
+                    styleIndex = clamp(int(floor(vStyleIndex + 0.5)), 0, uPolygonStyles.numStyles);
                     uv = vPosition.xy;
                 }
             ) : OMMVersionedGlesShaderCode(320 es,
@@ -173,7 +173,7 @@ std::string ColorPolygonGroup2dShaderOpenGl::getVertexShader() {
                 void main() {
                     gl_Position = uvpMatrix * ((umMatrix * vec4(vPosition, 1.0)) + uOriginOffset);
 
-                    styleIndex = clamp(int(floor(vStyleIndex + 0.5)), 0, numStyles);
+                    styleIndex = clamp(int(floor(vStyleIndex + 0.5)), 0, uPolygonStyles.numStyles);
                 });
 }
 
@@ -193,15 +193,15 @@ std::string ColorPolygonGroup2dShaderOpenGl::getFragmentShader() {
 
                         void main() {
                             float disPx = (uv.x + uv.y) / scaleFactors.y;
-                            float totalPx = polygonStyles[styleIndex].stripeWidth + polygonStyles[styleIndex].gapWidth;
-                            float adjLineWPx = polygonStyles[styleIndex].stripeWidth / scaleFactors.y * scaleFactors.x;
+                            float totalPx = uPolygonStyles.polygonStyles[styleIndex].stripeWidth + uPolygonStyles.polygonStyles[styleIndex].gapWidth;
+                            float adjLineWPx = uPolygonStyles.polygonStyles[styleIndex].stripeWidth / scaleFactors.y * scaleFactors.x;
                             if (mod(disPx, totalPx) > adjLineWPx) {
                                 fragmentColor = vec4(0.0);
                                 return;
                             }
 
-                            vec4 color = vec4(polygonStyles[styleIndex].colorR, polygonStyles[styleIndex].colorG,
-                                         polygonStyles[styleIndex].colorB, polygonStyles[styleIndex].colorA * polygonStyles[styleIndex].opacity);
+                            vec4 color = vec4(uPolygonStyles.polygonStyles[styleIndex].colorR, uPolygonStyles.polygonStyles[styleIndex].colorG,
+                                         uPolygonStyles.polygonStyles[styleIndex].colorB, uPolygonStyles.polygonStyles[styleIndex].colorA * uPolygonStyles.polygonStyles[styleIndex].opacity);
                             fragmentColor = color;
                             fragmentColor.a = 1.0;
                             fragmentColor *= color.a;
@@ -216,8 +216,8 @@ std::string ColorPolygonGroup2dShaderOpenGl::getFragmentShader() {
                         out vec4 fragmentColor;
 
                         void main() {
-                            vec4 color = vec4(polygonStyles[styleIndex].colorR, polygonStyles[styleIndex].colorG,
-                                         polygonStyles[styleIndex].colorB, polygonStyles[styleIndex].colorA * polygonStyles[styleIndex].opacity);
+                            vec4 color = vec4(uPolygonStyles.polygonStyles[styleIndex].colorR, uPolygonStyles.polygonStyles[styleIndex].colorG,
+                                         uPolygonStyles.polygonStyles[styleIndex].colorB, uPolygonStyles.polygonStyles[styleIndex].colorA * uPolygonStyles.polygonStyles[styleIndex].opacity);
                             fragmentColor = color;
                             fragmentColor.a = 1.0;
                             fragmentColor *= color.a;
