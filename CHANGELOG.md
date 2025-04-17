@@ -1,5 +1,11 @@
 # Changelog for Open Mobile Maps
 
+## Version 3.1.1
+- Fixed an issue with texture filtering in Quad2dOpenGl
+- Fixed the icon-offset for vector layers in 2D to match the behavior of the style specification
+- Improved the reliability of offscreen rendering
+- Fixed an issue with UBOs with certain Android devices 
+
 ## Version 3.1.0
 - Added support for animated dashes in the LineLayer
 - Improved integration of the desktop Java/OpenGL target platform
