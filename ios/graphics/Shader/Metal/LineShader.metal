@@ -321,6 +321,10 @@ lineGroupFragmentShader(LineVertexOut in [[stage_in]],
 
   const int dottedLine = int(style->dotted);
 
+    float t = 0;
+    float d = 0;
+    float numDash = 0;
+
   if (in.scaledBlur > 0 && t > 0.0 && t < 1.0) {
     const float nonBlurRange = (in.width - in.scaledBlur);
     if (d > nonBlurRange) {
