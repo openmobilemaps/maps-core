@@ -15,7 +15,7 @@ struct TestLoaderResult final {
     std::optional<std::string> errorCode = std::nullopt;
 };
 
-class TestTiled2dMapVectorSource : public Tiled2dMapSource<int, std::shared_ptr<TestLoaderResult>, int> {
+class TestTiled2dMapVectorSource : public Tiled2dMapSource<std::shared_ptr<TestLoaderResult>, int> {
   public:
     TestTiled2dMapVectorSource(const std::shared_ptr<TestScheduler> scheduler)
         : Tiled2dMapSource(MapConfig(CoordinateSystemFactory::getEpsg3857System()),

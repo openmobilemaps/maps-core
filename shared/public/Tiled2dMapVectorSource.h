@@ -20,9 +20,8 @@
 #include <vector>
 #include "DataRef.hpp"
 
-class Tiled2dMapVectorSource : public Tiled2dMapSource<std::shared_ptr<djinni::DataRef>,
-                                                        std::shared_ptr<DataLoaderResult>,
-                                                        Tiled2dMapVectorTileInfo::FeatureMap>  {
+class Tiled2dMapVectorSource : public Tiled2dMapSource<std::shared_ptr<DataLoaderResult>,
+                                                       Tiled2dMapVectorTileInfo::FeatureMap> {
 public:
     Tiled2dMapVectorSource(const MapConfig &mapConfig,
                            const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig,
