@@ -255,9 +255,7 @@ extension MCMapView: MTKViewDelegate {
             computeEncoder.endEncoding()
         }
 
-        guard let device = self.device,
-              // use image render pass if renderToImage, else standard renderpass
-              let renderPassDescriptor = renderToImage ? getToImageRenderpass(device: device, size: self.drawableSize) : view.currentRenderPassDescriptor,
+        guard let renderPassDescriptor = renderToImage ? getToImageRenderpass() : view.currentRenderPassDescriptor,
               let renderEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor)
         else {
             self.renderSemaphore.signal()
@@ -291,12 +289,13 @@ extension MCMapView: MTKViewDelegate {
         }
     }
 
-    private func getToImageRenderpass(device: MTLDevice, size: CGSize) -> MTLRenderPassDescriptor? {
+    private func getToImageRenderpass() -> MTLRenderPassDescriptor? {
         if self.renderToImageRenderPass == nil {
+            guard let device else { return nil }
             self.renderToImageRenderPass = RenderToImageRenderPass(device: device)
         }
 
-        return self.renderToImageRenderPass?.getRenderpass(size: size)
+        return self.renderToImageRenderPass?.getRenderpass(size: self.drawableSize)
     }
 
     public func renderToImage(

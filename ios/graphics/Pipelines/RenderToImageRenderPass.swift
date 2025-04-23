@@ -23,7 +23,7 @@ class RenderToImageRenderPass {
 
     public func getRenderpass(size: CGSize)  -> MTLRenderPassDescriptor? {
         if let orp = offlineRenderPass, size == lastSize {
-            return offlineRenderPass
+            return orp
         }
 
         offlineRenderPass = getOfflineRenderPass(size: size)
