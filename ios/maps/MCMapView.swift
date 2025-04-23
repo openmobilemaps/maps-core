@@ -17,9 +17,11 @@ open class MCMapView: MTKView, @unchecked Sendable {
     public nonisolated(unsafe) let mapInterface: MCMapInterface
     private let renderingContext: RenderingContext
 
+    var renderToImageRenderPass : RenderToImageRenderPass? = nil
+
     private var sizeChanged = false
     private var backgroundDisable = false
-    private var saveDrawable = false
+    private var renderToImage = false
     private lazy var renderToImageQueue = DispatchQueue(
         label: "io.openmobilemaps.renderToImagQueue", qos: .userInteractive)
 
@@ -253,9 +255,8 @@ extension MCMapView: MTKViewDelegate {
             computeEncoder.endEncoding()
         }
 
-        guard let renderPassDescriptor = view.currentRenderPassDescriptor,
-            let renderEncoder = commandBuffer.makeRenderCommandEncoder(
-                descriptor: renderPassDescriptor)
+        guard let renderPassDescriptor = renderToImage ? getToImageRenderpass() : view.currentRenderPassDescriptor,
+              let renderEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor)
         else {
             self.renderSemaphore.signal()
             return
@@ -268,24 +269,33 @@ extension MCMapView: MTKViewDelegate {
 
         renderEncoder.endEncoding()
 
-        guard let drawable = view.currentDrawable else {
-            self.renderSemaphore.signal()
-            return
-        }
-
         commandBuffer.addCompletedHandler { _ in
             self.renderSemaphore.signal()
         }
 
-        // if we want to save the drawable (offscreen rendering), we commit and wait synchronously
+        // if we want to save the drawable (image rendering), we commit and wait synchronously
         // until the command buffer completes, also we don't present it
-        if self.saveDrawable {
+        if self.renderToImage {
             commandBuffer.commit()
             commandBuffer.waitUntilCompleted()
         } else {
+            guard let drawable = view.currentDrawable else {
+                self.renderSemaphore.signal()
+                return
+            }
+
             commandBuffer.present(drawable)
             commandBuffer.commit()
         }
+    }
+
+    private func getToImageRenderpass() -> MTLRenderPassDescriptor? {
+        if self.renderToImageRenderPass == nil {
+            guard let device else { return nil }
+            self.renderToImageRenderPass = RenderToImageRenderPass(device: device)
+        }
+
+        return self.renderToImageRenderPass?.getRenderpass(size: self.drawableSize)
     }
 
     public func renderToImage(
@@ -294,15 +304,8 @@ extension MCMapView: MTKViewDelegate {
         callback: @escaping @Sendable (UIImage?, MCLayerReadyState) -> Void
     ) {
         renderToImageQueue.async {
-            DispatchQueue.main.sync {
-                self.frame = CGRect(
-                    origin: .zero,
-                    size: .init(
-                        width: size.width / UIScreen.main.scale,
-                        height: size.height / UIScreen.main.scale))
-                self.setNeedsLayout()
-                self.layoutIfNeeded()
-            }
+            // set the drawable size to get correctly sized texture
+            self.drawableSize = size
 
             let mapReadyCallbacks = MCMapViewMapReadyCallbacks()
             mapReadyCallbacks.delegate = self
@@ -316,35 +319,13 @@ extension MCMapView: MTKViewDelegate {
 }
 
 extension MCMapView {
-    fileprivate func currentDrawableImage() -> UIImage? {
-        self.saveDrawable = true
+    fileprivate func renderToImageResult() -> UIImage? {
+        self.renderToImage = true
         self.invalidate()
         self.draw(in: self)
-        self.saveDrawable = false
+        self.renderToImage = false
 
-        guard let texture = self.currentDrawable?.texture else { return nil }
-
-        let context = CIContext()
-        let kciOptions: [CIImageOption: Any] = [
-            .colorSpace: CGColorSpaceCreateDeviceRGB()
-        ]
-        let cImg = CIImage(mtlTexture: texture, options: kciOptions)!
-        return context.createCGImage(cImg, from: cImg.extent)?.toImage()
-    }
-}
-
-extension CGImage {
-    fileprivate func toImage() -> UIImage? {
-        let w = Double(width)
-        let h = Double(height)
-        UIGraphicsBeginImageContext(CGSize(width: w, height: h))
-        let context = UIGraphicsGetCurrentContext()
-        context?.draw(self, in: CGRect(x: 0, y: 0, width: w, height: h))
-
-        let newImage = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
-
-        return newImage
+        return self.renderToImageRenderPass?.getImage()
     }
 }
 
@@ -526,7 +507,7 @@ private class MCMapViewMapReadyCallbacks: @preconcurrency
                         self.callback?(nil, state)
                     case .READY:
                         MainActor.assumeIsolated {
-                            self.callback?(delegate.currentDrawableImage(), state)
+                            self.callback?(delegate.renderToImageResult(), state)
                         }
                     @unknown default:
                         break
