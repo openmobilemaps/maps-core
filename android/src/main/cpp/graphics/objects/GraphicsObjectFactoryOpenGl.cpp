@@ -20,7 +20,6 @@
 #include "Text2dInstancedOpenGl.h"
 #include "Quad2dStretchedInstancedOpenGl.h"
 #include "IcosahedronOpenGl.h"
-#include <cassert>
 
 std::shared_ptr<Quad2dInterface> GraphicsObjectFactoryOpenGl::createQuad(const std::shared_ptr<::ShaderProgramInterface> &shader) {
     return std::make_shared<Quad2dOpenGl>(enforceGlShader(shader));
@@ -79,7 +78,7 @@ GraphicsObjectFactoryOpenGl::createIcosahedronObject(const std::shared_ptr<::Sha
 }
 
 std::shared_ptr<BaseShaderProgramOpenGl> GraphicsObjectFactoryOpenGl::enforceGlShader(const std::shared_ptr<::ShaderProgramInterface> &shader) {
-    std::shared_ptr<BaseShaderProgramOpenGl> glShader = std::static_pointer_cast<BaseShaderProgramOpenGl>(shader);
+    std::shared_ptr<BaseShaderProgramOpenGl> glShader = std::dynamic_pointer_cast<BaseShaderProgramOpenGl>(shader);
     if (!glShader) {
         throw std::runtime_error("GraphicsObjectFactoryOpenGl: ShaderProgramInterface doesn't extend BaseShaderProgramOpenGl!");
     }
