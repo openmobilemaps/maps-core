@@ -207,7 +207,7 @@ class Tiled2dMapSource : public Tiled2dMapSourceInterface,
 
     std::vector<VisibleTilesLayer> currentPyramid;
     int currentKeepZoomLevelOffset;
-    std::vector<PrioritizedTiled2dMapTileInfo> tilesRequestedToLoad;
+    std::vector<std::vector<Tiled2dMapTileInfo>> loadingQueues;
 
     std::vector<PolygonCoord> currentViewBounds = {};
     std::optional<RectCoord> currentViewBoundsRect = std::nullopt;

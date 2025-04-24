@@ -58,6 +58,7 @@ Tiled2dMapSource<L, R>::Tiled2dMapSource(const MapConfig &mapConfig, const std::
     , layerName(layerName)
     , curT(std::numeric_limits<decltype(curT)>::lowest())
     , curZoom(std::numeric_limits<decltype(curZoom)>::lowest())
+    , loadingQueues(loaderCount)
 {
     std::sort(zoomLevelInfos.begin(), zoomLevelInfos.end(),
               [](const Tiled2dMapZoomLevelInfo &a, const Tiled2dMapZoomLevelInfo &b) -> bool { return a.zoom > b.zoom; });
@@ -1026,7 +1027,19 @@ void Tiled2dMapSource<L, R>::onVisibleTilesChanged(const std::vector<VisibleTile
     }
 
     std::sort(toAdd.begin(), toAdd.end());
-    tilesRequestedToLoad = toAdd;
+    for(auto &queue : loadingQueues) {
+        queue.clear();
+    }
+    if(loadingQueues.empty()) {
+        // no loader (typically this means that the map layer setup is broken)
+        for(auto &t : toAdd) {
+            notFoundTiles.insert(t.tileInfo);
+        }
+    } else {
+        for(auto &t : toAdd) {
+            loadingQueues[0].push_back(t.tileInfo);
+        }
+    }
     scheduleFixedNumberOfLoadingTasks();
     // if we removed tiles, we potentially need to update the tilemasks - also if no new tile is loaded
     updateTileMasks();
@@ -1036,9 +1049,14 @@ void Tiled2dMapSource<L, R>::onVisibleTilesChanged(const std::vector<VisibleTile
 
 template <class L, class R>
 void Tiled2dMapSource<L, R>::scheduleFixedNumberOfLoadingTasks() {
-    while(tilesRequestedToLoad.size()>0 && currentlyLoading.size()<16){
-        performLoadingTask(tilesRequestedToLoad[0].tileInfo, 0);
-        tilesRequestedToLoad.erase(tilesRequestedToLoad.begin());
+    // strictly prioritize by loader index; the fallback loaders must not block the primary loader.
+    // alternatively we could e.g. have a max number of ongoing loads per loader.
+    for(size_t loaderIndex = 0; loaderIndex < loadingQueues.size(); ++loaderIndex) {
+        auto &queue = loadingQueues[loaderIndex];
+        while(queue.size()>0 && currentlyLoading.size() < 16){
+            performLoadingTask(queue.front(), loaderIndex);
+            queue.erase(queue.begin());
+        }
     }
 }
 
@@ -1163,9 +1181,13 @@ void Tiled2dMapSource<L, R>::didFailToLoad(Tiled2dMapTileInfo tile, size_t loade
         errorTiles[loaderIndex].erase(tile);
 
         auto newLoaderIndex = loaderIndex + 1;
-        performLoadingTask(tile, newLoaderIndex);
-
-        break;
+        if(newLoaderIndex < loadingQueues.size()) {
+            loadingQueues[newLoaderIndex].push_back(tile);
+            scheduleFixedNumberOfLoadingTasks();
+            break;
+        } else {
+            [[fallthrough]]; // no more loaders, treat this same as not found.
+        }
     }
     case LoaderStatus::ERROR_400:
     case LoaderStatus::ERROR_404: {
@@ -1219,6 +1241,7 @@ void Tiled2dMapSource<L, R>::didFailToLoad(Tiled2dMapTileInfo tile, size_t loade
     }
     }
 
+    // XXX: why???
     updateTileMasks();
 
     notifyTilesUpdates();

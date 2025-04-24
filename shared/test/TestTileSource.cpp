@@ -1,29 +1,35 @@
 #include "CoordinateSystemFactory.h"
+#include "DataLoaderResult.h"
+#include "LoaderInterface.h"
+#include "TextureLoaderResult.h"
 #include "Tiled2dMapSource.h"
 #include "WebMercatorTiled2dMapLayerConfig.h"
 #include "helper/TestScheduler.h"
+
 #include <catch2/benchmark/catch_benchmark.hpp>
 #include <catch2/catch_get_random_seed.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators_all.hpp>
 #include <catch2/matchers/catch_matchers_range_equals.hpp>
-#include <algorithm>
+
+#include <cassert>
+#include <cstdlib>
+#include <list>
+#include <memory>
+#include <random>
+#include <string>
 #include <vector>
 
-struct TestLoaderResult final {
-    std::optional<std::string> etag = std::nullopt;
-    LoaderStatus status = LoaderStatus::OK;
-    std::optional<std::string> errorCode = std::nullopt;
-};
-
-class TestTiled2dMapVectorSource : public Tiled2dMapSource<std::shared_ptr<TestLoaderResult>, int> {
+class TestTiled2dMapVectorSource : public Tiled2dMapSource<std::shared_ptr<DataLoaderResult>, std::string> {
   public:
-    TestTiled2dMapVectorSource(const std::shared_ptr<TestScheduler> scheduler)
-        : Tiled2dMapSource(MapConfig(CoordinateSystemFactory::getEpsg3857System()),
-                           std::make_shared<WebMercatorTiled2dMapLayerConfig>(
-                               "mock", "{z}/{x}/{y}", Tiled2dMapZoomInfo(1.0, 0, 0, false, true, false, true), 0, 20),
-                           CoordinateConversionHelperInterface::independentInstance(), scheduler, 62, 0, "layer") {};
+    TestTiled2dMapVectorSource(std::shared_ptr<Tiled2dMapLayerConfig> layerConfig, std::shared_ptr<TestScheduler> scheduler,
+                               std::vector<std::shared_ptr<LoaderInterface>> loaders)
+        : Tiled2dMapSource(MapConfig(CoordinateSystemFactory::getEpsg3857System()), layerConfig,
+                           CoordinateConversionHelperInterface::independentInstance(), scheduler, 62, loaders.size(), "layer")
+        , layerConfig(layerConfig)
+        , loaders(loaders) {}
 
-    std::unordered_set<Tiled2dMapTileInfo> getCurrentTiles() {
+    std::unordered_set<Tiled2dMapTileInfo> getCurrentTiles() const {
         std::unordered_set<Tiled2dMapTileInfo> tiles;
         for (const auto &tile : currentTiles) {
             tiles.insert(tile.first);
@@ -31,25 +37,182 @@ class TestTiled2dMapVectorSource : public Tiled2dMapSource<std::shared_ptr<TestL
         return tiles;
     }
 
+    std::unordered_map<std::string, std::string> getCurrentTileUrlsAndData() const {
+        std::unordered_map<std::string, std::string> tiles;
+        for (const auto &tile : currentTiles) {
+            tiles.emplace(layerConfig->getTileUrl(tile.first.x, tile.first.y, tile.first.t, tile.first.zoomIdentifier),
+                          tile.second.result);
+        }
+        return tiles;
+    }
+
+    size_t numLoadingOrQueued() const {
+        size_t n = currentlyLoading.size();
+        for (const auto &queue : loadingQueues) {
+            n += queue.size();
+        }
+        return n;
+    }
+
     void notifyTilesUpdates() override {}
 
   protected:
-    void cancelLoad(Tiled2dMapTileInfo tile, size_t loaderIndex) override {}
+    void cancelLoad(Tiled2dMapTileInfo tile, size_t loaderIndex) override {
+        loaders[loaderIndex]->cancel(layerConfig->getTileUrl(tile.x, tile.y, tile.t, tile.zoomIdentifier));
+    }
 
-    ::djinni::Future<std::shared_ptr<TestLoaderResult>> loadDataAsync(Tiled2dMapTileInfo tile, size_t loaderIndex) override {
-        auto promise = ::djinni::Promise<std::shared_ptr<TestLoaderResult>>();
-        promise.setValue(std::make_shared<TestLoaderResult>());
-        return promise.getFuture();
+    ::djinni::Future<std::shared_ptr<DataLoaderResult>> loadDataAsync(Tiled2dMapTileInfo tile, size_t loaderIndex) override {
+        auto url = layerConfig->getTileUrl(tile.x, tile.y, tile.t, tile.zoomIdentifier);
+        return loaders[loaderIndex]
+            ->loadDataAsync(std::move(url), std::nullopt)
+            .then([](djinni::Future<DataLoaderResult> r) -> std::shared_ptr<DataLoaderResult> {
+                return std::make_shared<DataLoaderResult>(r.get());
+            });
     }
 
     bool hasExpensivePostLoadingTask() override { return false; }
 
-    int postLoadingTask(std::shared_ptr<TestLoaderResult> loadedData, Tiled2dMapTileInfo tile) override { return 12; }
+    std::string postLoadingTask(std::shared_ptr<DataLoaderResult> loadedData, Tiled2dMapTileInfo tile) override {
+        if (!loadedData->data.has_value()) {
+            return std::string{};
+        }
+        return std::string((const char *)loadedData->data->buf(), loadedData->data->len());
+    }
+
+  private:
+    std::vector<std::shared_ptr<LoaderInterface>> loaders;
+    std::shared_ptr<Tiled2dMapLayerConfig> layerConfig;
+};
+
+// For tests where we dont look at the loaded data, returns no data, successfully, immediately.
+class NothingTestLoader : public LoaderInterface {
+  public:
+    virtual TextureLoaderResult loadTexture(const std::string &url, const std::optional<std::string> &etag) override {
+        assert(false);
+        std::abort();
+    }
+
+    virtual ::djinni::Future<TextureLoaderResult> loadTextureAsync(const std::string &url,
+                                                                   const std::optional<std::string> &etag) override {
+        assert(false);
+        std::abort();
+    }
+
+    virtual DataLoaderResult loadData(const std::string &url, const std::optional<std::string> &etag) override {
+        return loadDataAsync(url, etag).get();
+    }
+
+    virtual ::djinni::Future<DataLoaderResult> loadDataAsync(const std::string &url,
+                                                             const std::optional<std::string> &etag) override {
+        auto promise = ::djinni::Promise<DataLoaderResult>();
+        promise.setValue(DataLoaderResult{std::nullopt, std::nullopt, LoaderStatus::OK, std::nullopt});
+        return promise.getFuture();
+    }
+
+    virtual void cancel(const std::string &url) override {
+        assert(false);
+        std::abort();
+    }
+};
+
+class BlockingTestLoader : public LoaderInterface {
+  public:
+    // data: URL -> data string
+    BlockingTestLoader(std::unordered_map<std::string, std::string> data)
+        : data(data)
+        , errorRate(0.f) {}
+
+    BlockingTestLoader(std::unordered_map<std::string, std::string> data, float errorRate)
+        : data(data)
+        , errorRnd(Catch::getSeed())
+        , errorRate(errorRate) {}
+
+    virtual TextureLoaderResult loadTexture(const std::string &url, const std::optional<std::string> &etag) override {
+        assert(false);
+        std::abort();
+    }
+
+    virtual ::djinni::Future<TextureLoaderResult> loadTextureAsync(const std::string &url,
+                                                                   const std::optional<std::string> &etag) override {
+        assert(false);
+        std::abort();
+    }
+
+    virtual DataLoaderResult loadData(const std::string &url, const std::optional<std::string> &etag) override {
+        return loadDataAsync(url, etag).get();
+    }
+
+    virtual ::djinni::Future<DataLoaderResult> loadDataAsync(const std::string &url,
+                                                             const std::optional<std::string> &etag) override {
+        std::unique_lock lock(mutex);
+        auto &load = blockedLoads.emplace_back(url, djinni::Promise<DataLoaderResult>());
+        return load.promise.getFuture();
+    }
+
+    virtual void cancel(const std::string &url) override {
+        assert(false);
+        std::abort();
+    }
+
+    bool unblockFirst() {
+        std::unique_lock lock(mutex);
+        if (blockedLoads.empty()) {
+            return false;
+        }
+        auto load = std::move(blockedLoads.front());
+        blockedLoads.pop_front();
+        lock.unlock();
+
+        unblock(std::move(load));
+        return true;
+    }
+
+    bool unblockAll() {
+        if (!unblockFirst()) {
+            return false;
+        }
+        while (unblockFirst()) {
+            // keep at it
+        }
+        return true;
+    }
+
+  private:
+    struct BlockedLoad {
+        std::string url;
+        djinni::Promise<DataLoaderResult> promise;
+    };
+
+  private:
+    void unblock(BlockedLoad load) {
+        auto it = data.find(load.url);
+        if (it != data.end()) {
+            if (errorRate == 0.f || std::uniform_real_distribution<float>(0.f, 1.f)(errorRnd) > errorRate) {
+                load.promise.setValue(DataLoaderResult{djinni::DataRef(it->second), std::nullopt, LoaderStatus::OK, std::nullopt});
+            } else {
+                load.promise.setValue(
+                    DataLoaderResult{djinni::DataRef(it->second), std::nullopt, LoaderStatus::ERROR_OTHER, "random error"});
+            }
+        } else {
+            load.promise.setValue(DataLoaderResult{std::nullopt, std::nullopt, LoaderStatus::NOOP, std::nullopt});
+        }
+    }
+
+  private:
+    const std::unordered_map<std::string, std::string> data;
+    const float errorRate;
+    std::default_random_engine errorRnd;
+
+    std::mutex mutex;
+    std::list<BlockedLoad> blockedLoads;
 };
 
 TEST_CASE("VectorTileSource") {
+    auto layerConfig = std::make_shared<WebMercatorTiled2dMapLayerConfig>(
+        "mock", "{z}/{x}/{y}", Tiled2dMapZoomInfo(1.0, 0, 0, false, true, false, true), 0, 20);
     auto scheduler = std::make_shared<TestScheduler>();
-    std::shared_ptr<TestTiled2dMapVectorSource> source = std::make_shared<TestTiled2dMapVectorSource>(scheduler);
+    std::shared_ptr<TestTiled2dMapVectorSource> source = std::make_shared<TestTiled2dMapVectorSource>(
+        layerConfig, scheduler, std::vector<std::shared_ptr<LoaderInterface>>{std::make_shared<NothingTestLoader>()});
     source->mailbox = std::make_shared<Mailbox>(scheduler);
 
     SECTION("basic rect") {
@@ -77,4 +240,95 @@ TEST_CASE("VectorTileSource") {
         // }
         // generator.printGeoJson();
     };
+}
+
+static std::unordered_map<std::string, std::string> generateDummyData(const std::vector<Tiled2dMapTileInfo> &tiles,
+                                                                      Tiled2dMapLayerConfig &layerConfig, std::string dataPrefix) {
+    std::unordered_map<std::string, std::string> data;
+    for (auto &tile : tiles) {
+        std::string url = layerConfig.getTileUrl(tile.x, tile.y, tile.t, tile.zoomIdentifier);
+        data.emplace(url, dataPrefix + url);
+    }
+    return data;
+}
+
+/**
+ * Test that loading tiles from a fallback "remote" loader does not block a primary "local" loader.
+ * "local" loads here are simmulated to return immediately, while "remote"
+ * loads are slower than -- the first remote load returns after the last local
+ * load.
+ * This test is repeated for different number of total tiles (zoom level) and fraction of local tiles, via Catch GENERATE.
+ */
+TEST_CASE("Tiled2dMapSource slow fallback does not block local loads") {
+
+    auto layerConfig = std::make_shared<WebMercatorTiled2dMapLayerConfig>(
+        "mock", "test-data://tile/{z}/{x}/{y}", Tiled2dMapZoomInfo(1.0, 0, 0, false, true, false, true), 0, 20);
+
+    // Load the entire world.
+    auto rect = *layerConfig->getBounds();
+    auto zoomLevelInfos = layerConfig->getZoomLevelInfos();
+    // Try with different zoom levels; that's 1, 16, 256 or 1024 tiles
+    const int z = GENERATE(0, 2, 4, 5);
+
+    // level 0 is always loaded too
+    std::vector<Tiled2dMapTileInfo> expectedTiles = {{rect, 0, 0, 0, 0, int(zoomLevelInfos[0].zoom)}};
+    if (z > 0) {
+        assert(zoomLevelInfos[z].zoomLevelIdentifier == z);
+        for (int x = 0; x < zoomLevelInfos[z].numTilesX; x++) {
+            for (int y = 0; y < zoomLevelInfos[z].numTilesY; y++) {
+                expectedTiles.push_back({rect, x, y, 0, z, int(zoomLevelInfos[z].zoom)});
+            }
+        }
+    }
+
+    // This test runs multiple times, with different number of local tiles.
+    size_t numExpectedTiles = expectedTiles.size();
+    size_t numLocalTiles = GENERATE_COPY(size_t(0), numExpectedTiles, take(4, random(size_t(1), numExpectedTiles)));
+    std::vector<Tiled2dMapTileInfo> localTiles;
+    std::vector<Tiled2dMapTileInfo> remoteTiles;
+    {
+        std::vector<Tiled2dMapTileInfo> shuffledTiles = expectedTiles;
+        std::mt19937 g{Catch::getSeed()};
+        std::shuffle(shuffledTiles.begin(), shuffledTiles.end(), g);
+        localTiles.insert(localTiles.end(), shuffledTiles.begin(), shuffledTiles.begin() + numLocalTiles);
+        remoteTiles.insert(remoteTiles.end(), shuffledTiles.begin() + numLocalTiles, shuffledTiles.end());
+    }
+
+    std::unordered_map<std::string, std::string> localData = generateDummyData(localTiles, *layerConfig, "local data ");
+    std::unordered_map<std::string, std::string> remoteData = generateDummyData(remoteTiles, *layerConfig, "remote data ");
+    auto localLoader = std::make_shared<BlockingTestLoader>(localData);
+    auto remoteLoader = std::make_shared<BlockingTestLoader>(remoteData, 0.25f); // 25% error rate
+
+    auto scheduler = std::make_shared<TestScheduler>();
+    std::shared_ptr<TestTiled2dMapVectorSource> source = std::make_shared<TestTiled2dMapVectorSource>(
+        layerConfig, scheduler, std::vector<std::shared_ptr<LoaderInterface>>{localLoader, remoteLoader});
+    source->mailbox = std::make_shared<Mailbox>(scheduler);
+
+    source->onVisibleBoundsChanged(rect, 0, zoomLevelInfos[z].zoom);
+
+    // Complete all "local" loads
+    scheduler->drain();
+    REQUIRE(source->numLoadingOrQueued() == expectedTiles.size());
+    while (localLoader->unblockAll()) {
+        scheduler->drain();
+    }
+
+    // These checks will fail if any local loads are blocked by concurrent remote loads.
+    auto loadedTileData = source->getCurrentTileUrlsAndData();
+    REQUIRE(loadedTileData.size() == localTiles.size());
+    REQUIRE_THAT(loadedTileData, Catch::Matchers::UnorderedRangeEquals(localData));
+    REQUIRE(source->numLoadingOrQueued() == expectedTiles.size() - localTiles.size());
+
+    // Minutes later ;) Load all the rest...
+    scheduler->drain();
+    while (localLoader->unblockAll() || remoteLoader->unblockAll()) {
+        scheduler->drain();
+    }
+
+    std::unordered_map<std::string, std::string> allData{remoteData};
+    allData.insert(localData.begin(), localData.end());
+
+    loadedTileData = source->getCurrentTileUrlsAndData();
+    REQUIRE(loadedTileData.size() == expectedTiles.size());
+    REQUIRE_THAT(loadedTileData, Catch::Matchers::UnorderedRangeEquals(allData));
 }
