@@ -15,6 +15,7 @@
 #include "OpenGlContext.h"
 #include "Quad2dInterface.h"
 #include "ShaderProgramInterface.h"
+#include "BaseShaderProgramOpenGl.h"
 #include "opengl_wrapper.h"
 #include <mutex>
 #include <vector>
@@ -24,7 +25,7 @@ class Quad2dOpenGl : public GraphicsObjectInterface,
                      public Quad2dInterface,
                      public std::enable_shared_from_this<Quad2dOpenGl> {
   public:
-    Quad2dOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader);
+    Quad2dOpenGl(const std::shared_ptr<::BaseShaderProgramOpenGl> &shader);
 
     ~Quad2dOpenGl(){};
 
@@ -72,7 +73,7 @@ protected:
 
     virtual void prepareTextureDraw(int mProgram);
 
-    std::shared_ptr<ShaderProgramInterface> shaderProgram;
+    std::shared_ptr<BaseShaderProgramOpenGl> shaderProgram;
     std::string programName;
     int program;
 

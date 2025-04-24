@@ -16,13 +16,14 @@
 #include "IcosahedronInterface.h"
 #include "ShaderProgramInterface.h"
 #include "opengl_wrapper.h"
+#include "BaseShaderProgramOpenGl.h"
 #include <mutex>
 
 class IcosahedronOpenGl : public GraphicsObjectInterface,
                           public IcosahedronInterface,
                           public std::enable_shared_from_this<IcosahedronOpenGl> {
 public:
-    IcosahedronOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader);
+    IcosahedronOpenGl(const std::shared_ptr<::BaseShaderProgramOpenGl> &shader);
 
     ~IcosahedronOpenGl(){};
 
@@ -48,7 +49,7 @@ protected:
 
     void removeGlBuffers();
 
-    std::shared_ptr<ShaderProgramInterface> shaderProgram;
+    std::shared_ptr<BaseShaderProgramOpenGl> shaderProgram;
     std::string programName;
     int program = 0;
 

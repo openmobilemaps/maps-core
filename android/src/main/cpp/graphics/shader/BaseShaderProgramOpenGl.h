@@ -38,6 +38,8 @@ public:
 
     virtual void clearGlObjects() {};
 
+    virtual bool isRenderable() { return true; }
+
 protected:
 
     virtual void setBlendMode(BlendMode blendMode) override;

@@ -12,10 +12,9 @@
 #include "Logger.h"
 #include "OpenGlHelper.h"
 #include "TextureHolderInterface.h"
-#include "BaseShaderProgramOpenGl.h"
 #include "SharedBytes.h"
 
-Quad2dStretchedInstancedOpenGl::Quad2dStretchedInstancedOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader)
+Quad2dStretchedInstancedOpenGl::Quad2dStretchedInstancedOpenGl(const std::shared_ptr<::BaseShaderProgramOpenGl> &shader)
     : shaderProgram(shader) {}
 
 bool Quad2dStretchedInstancedOpenGl::isReady() { return ready && (!usesTextureCoords || textureHolder) && !buffersNotReady; }
@@ -256,7 +255,8 @@ void Quad2dStretchedInstancedOpenGl::render(const std::shared_ptr<::RenderingCon
                                             const RenderPassConfig &renderPass,
                                             int64_t vpMatrix, int64_t mMatrix, const ::Vec3D &origin,
                                             bool isMasked, double screenPixelAsRealMeterFactor) {
-    if (!ready || (usesTextureCoords && !textureCoordsReady) || instanceCount == 0 || buffersNotReady) {
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
+    if (!ready || (usesTextureCoords && !textureCoordsReady) || instanceCount == 0 || buffersNotReady || !shaderProgram->isRenderable()) {
         return;
     }
 

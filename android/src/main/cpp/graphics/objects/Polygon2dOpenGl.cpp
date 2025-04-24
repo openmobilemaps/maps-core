@@ -12,7 +12,7 @@
 #include "OpenGlHelper.h"
 #include <cstring>
 
-Polygon2dOpenGl::Polygon2dOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader)
+Polygon2dOpenGl::Polygon2dOpenGl(const std::shared_ptr<::BaseShaderProgramOpenGl> &shader)
     : shaderProgram(shader) {}
 
 std::shared_ptr<GraphicsObjectInterface> Polygon2dOpenGl::asGraphicsObject() { return shared_from_this(); }
@@ -118,7 +118,8 @@ void Polygon2dOpenGl::setIsInverseMasked(bool inversed) { isMaskInversed = inver
 void Polygon2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
                              int64_t vpMatrix, int64_t mMatrix, const ::Vec3D &origin, bool isMasked,
                              double screenPixelAsRealMeterFactor) {
-    if (!ready)
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
+    if (!ready || !shaderProgram->isRenderable())
         return;
 
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);

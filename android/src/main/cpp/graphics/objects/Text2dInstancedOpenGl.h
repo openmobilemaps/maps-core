@@ -14,6 +14,7 @@
 #include "OpenGlContext.h"
 #include "TextInstancedInterface.h"
 #include "ShaderProgramInterface.h"
+#include "BaseShaderProgramOpenGl.h"
 #include "opengl_wrapper.h"
 #include <mutex>
 #include <vector>
@@ -23,7 +24,7 @@ class Text2dInstancedOpenGl : public GraphicsObjectInterface,
                               public TextInstancedInterface,
                               public std::enable_shared_from_this<Text2dInstancedOpenGl> {
 public:
-    Text2dInstancedOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader);
+    Text2dInstancedOpenGl(const std::shared_ptr<::BaseShaderProgramOpenGl> &shader);
 
     ~Text2dInstancedOpenGl(){};
 
@@ -79,7 +80,7 @@ protected:
     void removeTextureCoordsGlBuffers();
 
     bool is3d = false;
-    std::shared_ptr<ShaderProgramInterface> shaderProgram;
+    std::shared_ptr<BaseShaderProgramOpenGl> shaderProgram;
     std::string programName;
     int program;
 

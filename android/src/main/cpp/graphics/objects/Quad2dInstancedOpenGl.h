@@ -15,6 +15,7 @@
 #include "OpenGlContext.h"
 #include "Quad2dInstancedInterface.h"
 #include "ShaderProgramInterface.h"
+#include "BaseShaderProgramOpenGl.h"
 #include "opengl_wrapper.h"
 #include <mutex>
 #include <vector>
@@ -25,7 +26,7 @@ class Quad2dInstancedOpenGl : public GraphicsObjectInterface,
                      public Quad2dInstancedInterface,
                      public std::enable_shared_from_this<Quad2dInstancedOpenGl> {
   public:
-    Quad2dInstancedOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader);
+    Quad2dInstancedOpenGl(const std::shared_ptr<::BaseShaderProgramOpenGl> &shader);
 
     ~Quad2dInstancedOpenGl(){};
 
@@ -84,7 +85,7 @@ protected:
     void removeTextureCoordsGlBuffers();
 
     bool is3d = false;
-    std::shared_ptr<ShaderProgramInterface> shaderProgram;
+    std::shared_ptr<BaseShaderProgramOpenGl> shaderProgram;
     std::string programName;
     int program;
 

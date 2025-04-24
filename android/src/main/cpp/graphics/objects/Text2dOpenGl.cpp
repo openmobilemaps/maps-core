@@ -13,7 +13,7 @@
 #include "TextureHolderInterface.h"
 #include <cstring>
 
-Text2dOpenGl::Text2dOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader)
+Text2dOpenGl::Text2dOpenGl(const std::shared_ptr<::BaseShaderProgramOpenGl> &shader)
     : shaderProgram(shader) {}
 
 bool Text2dOpenGl::isReady() { return ready && textureHolder; }
@@ -223,7 +223,8 @@ void Text2dOpenGl::renderAsMask(const std::shared_ptr<::RenderingContextInterfac
 void Text2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
                           int64_t vpMatrix, int64_t mMatrix, const ::Vec3D &origin, bool isMasked,
                           double screenPixelAsRealMeterFactor) {
-    if (!ready || !textureHolder) {
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
+    if (!ready || !textureHolder || !shaderProgram->isRenderable()) {
         return;
     }
 
