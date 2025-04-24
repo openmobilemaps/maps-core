@@ -32,11 +32,13 @@ public:
 
     virtual void setStyles(const ::SharedBytes & styles) override;
 
-    void setDashingScaleFactor(float factor) override;
+    virtual void setDashingScaleFactor(float factor) override;
 
-    void setupGlObjects(const std::shared_ptr<::OpenGlContext> &context) override;
+    virtual void setupGlObjects(const std::shared_ptr<::OpenGlContext> &context) override;
 
-    void clearGlObjects() override;
+    virtual void clearGlObjects() override;
+
+    virtual bool isRenderable() override;
 
 protected:
     virtual std::string getVertexShader() override;

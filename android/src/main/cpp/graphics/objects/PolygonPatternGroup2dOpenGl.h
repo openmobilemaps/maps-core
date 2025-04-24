@@ -15,6 +15,7 @@
 #include "OpenGlContext.h"
 #include "PolygonPatternGroup2dInterface.h"
 #include "ShaderProgramInterface.h"
+#include "BaseShaderProgramOpenGl.h"
 #include "opengl_wrapper.h"
 #include <mutex>
 #include <vector>
@@ -26,7 +27,7 @@ class PolygonPatternGroup2dOpenGl : public GraphicsObjectInterface,
                      public PolygonPatternGroup2dInterface,
                      public std::enable_shared_from_this<PolygonPatternGroup2dOpenGl> {
   public:
-    PolygonPatternGroup2dOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader);
+    PolygonPatternGroup2dOpenGl(const std::shared_ptr<::BaseShaderProgramOpenGl> &shader);
 
     ~PolygonPatternGroup2dOpenGl(){};
 
@@ -70,7 +71,7 @@ protected:
 
     void removeGlBuffers();
 
-    std::shared_ptr<ShaderProgramInterface> shaderProgram;
+    std::shared_ptr<BaseShaderProgramOpenGl> shaderProgram;
     std::string programName;
     int program;
 

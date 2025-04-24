@@ -12,10 +12,9 @@
 #include "Logger.h"
 #include "OpenGlHelper.h"
 #include "TextureHolderInterface.h"
-#include "BaseShaderProgramOpenGl.h"
 #include <cstring>
 
-PolygonPatternGroup2dOpenGl::PolygonPatternGroup2dOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader)
+PolygonPatternGroup2dOpenGl::PolygonPatternGroup2dOpenGl(const std::shared_ptr<::BaseShaderProgramOpenGl> &shader)
     : shaderProgram(shader) {}
 
 bool PolygonPatternGroup2dOpenGl::isReady() { return ready && textureHolder && !buffersNotReady; }
@@ -160,7 +159,7 @@ PolygonPatternGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInte
                                     int64_t vpMatrix, int64_t mMatrix, const ::Vec3D &origin,
                                     bool isMasked, double screenPixelAsRealMeterFactor) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
-    if (!ready || buffersNotReady || !textureHolder) {
+    if (!ready || buffersNotReady || !textureHolder || !shaderProgram->isRenderable()) {
         return;
     }
 

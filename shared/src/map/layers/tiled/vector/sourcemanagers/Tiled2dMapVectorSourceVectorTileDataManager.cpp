@@ -316,7 +316,7 @@ void Tiled2dMapVectorSourceVectorTileDataManager::reloadLayerContent(const std::
             Actor<Tiled2dMapVectorTile> actor = createTileActor(tileData.tileInfo, layerDescription);
             if (actor) {
                 if (auto strongSelectionDelegate = selectionDelegate.lock()) {
-                    actor.message(MFN(&Tiled2dMapVectorTile::setSelectionDelegate), strongSelectionDelegate);
+                    actor.unsafe()->setSelectionDelegate(strongSelectionDelegate);
                 }
 
                 if (subTiles->second.empty()) {

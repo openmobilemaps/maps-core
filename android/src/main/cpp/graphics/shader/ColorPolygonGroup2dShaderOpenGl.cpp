@@ -83,6 +83,11 @@ void ColorPolygonGroup2dShaderOpenGl::preRender(const std::shared_ptr<::Renderin
     }
 }
 
+bool ColorPolygonGroup2dShaderOpenGl::isRenderable() {
+    std::lock_guard<std::recursive_mutex> overlayLock(styleMutex);
+    return numStyles > 0;
+}
+
 void ColorPolygonGroup2dShaderOpenGl::setStyles(const ::SharedBytes & styles) {
     {
         std::lock_guard<std::recursive_mutex> overlayLock(styleMutex);

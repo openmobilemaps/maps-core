@@ -102,6 +102,11 @@ void ColorLineGroup2dShaderOpenGl::preRender(const std::shared_ptr<::RenderingCo
     }
 }
 
+bool ColorLineGroup2dShaderOpenGl::isRenderable() {
+    std::lock_guard<std::recursive_mutex> overlayLock(styleMutex);
+    return numStyles > 0;
+}
+
 void ColorLineGroup2dShaderOpenGl::setStyles(const ::SharedBytes & styles) {
     assert(styles.elementCount <= MAX_NUM_STYLES);
     assert(styles.elementCount * styles.bytesPerElement <= lineValues.size() * sizeof(float));

@@ -20,29 +20,30 @@
 #include "Text2dInstancedOpenGl.h"
 #include "Quad2dStretchedInstancedOpenGl.h"
 #include "IcosahedronOpenGl.h"
+#include <cassert>
 
 std::shared_ptr<Quad2dInterface> GraphicsObjectFactoryOpenGl::createQuad(const std::shared_ptr<::ShaderProgramInterface> &shader) {
-    return std::make_shared<Quad2dOpenGl>(shader);
+    return std::make_shared<Quad2dOpenGl>(enforceGlShader(shader));
 }
 
 std::shared_ptr<Polygon2dInterface>
 GraphicsObjectFactoryOpenGl::createPolygon(const std::shared_ptr<::ShaderProgramInterface> &shader) {
-    return std::make_shared<Polygon2dOpenGl>(shader);
+    return std::make_shared<Polygon2dOpenGl>(enforceGlShader(shader));
 }
 
 std::shared_ptr<LineGroup2dInterface>
 GraphicsObjectFactoryOpenGl::createLineGroup(const std::shared_ptr<::ShaderProgramInterface> &shader) {
-    return std::make_shared<LineGroup2dOpenGl>(shader);
+    return std::make_shared<LineGroup2dOpenGl>(enforceGlShader(shader));
 }
 
 std::shared_ptr<PolygonGroup2dInterface>
 GraphicsObjectFactoryOpenGl::createPolygonGroup(const std::shared_ptr<::ShaderProgramInterface> &shader) {
-    return std::make_shared<PolygonGroup2dOpenGl>(shader);
+    return std::make_shared<PolygonGroup2dOpenGl>(enforceGlShader(shader));
 }
 
 std::shared_ptr<PolygonPatternGroup2dInterface>
 GraphicsObjectFactoryOpenGl::createPolygonPatternGroup(const std::shared_ptr<::ShaderProgramInterface> &shader) {
-    return std::make_shared<PolygonPatternGroup2dOpenGl>(shader);
+    return std::make_shared<PolygonPatternGroup2dOpenGl>(enforceGlShader(shader));
 }
 
 std::shared_ptr<Quad2dInterface> GraphicsObjectFactoryOpenGl::createQuadMask(bool is3D) {
@@ -52,27 +53,35 @@ std::shared_ptr<Quad2dInterface> GraphicsObjectFactoryOpenGl::createQuadMask(boo
 std::shared_ptr<Polygon2dInterface> GraphicsObjectFactoryOpenGl::createPolygonMask(bool is3D) {
     std::shared_ptr<ColorShaderOpenGl> shader = std::make_shared<ColorShaderOpenGl>(is3D);
     shader->setColor(1, 1, 1, 1);
-    return std::make_shared<Polygon2dOpenGl>(shader);
+    return std::make_shared<Polygon2dOpenGl>(enforceGlShader(shader));
 }
 
 std::shared_ptr<TextInterface> GraphicsObjectFactoryOpenGl::createText(const std::shared_ptr<::ShaderProgramInterface> &shader) {
-    return std::make_shared<Text2dOpenGl>(shader);
+    return std::make_shared<Text2dOpenGl>(enforceGlShader(shader));
 }
 
 std::shared_ptr<TextInstancedInterface> GraphicsObjectFactoryOpenGl::createTextInstanced(const std::shared_ptr<::ShaderProgramInterface> & shader) {
-    return std::make_shared<Text2dInstancedOpenGl>(shader);
+    return std::make_shared<Text2dInstancedOpenGl>(enforceGlShader(shader));
 }
 
 std::shared_ptr<Quad2dInstancedInterface> GraphicsObjectFactoryOpenGl::createQuadInstanced(const std::shared_ptr<::ShaderProgramInterface> &shader) {
-    return std::make_shared<Quad2dInstancedOpenGl>(shader);
+    return std::make_shared<Quad2dInstancedOpenGl>(enforceGlShader(shader));
 }
 
 std::shared_ptr<Quad2dStretchedInstancedInterface>
 GraphicsObjectFactoryOpenGl::createQuadStretchedInstanced(const std::shared_ptr<::ShaderProgramInterface> &shader) {
-    return std::make_shared<Quad2dStretchedInstancedOpenGl>(shader);
+    return std::make_shared<Quad2dStretchedInstancedOpenGl>(enforceGlShader(shader));
 }
 
 std::shared_ptr<IcosahedronInterface>
 GraphicsObjectFactoryOpenGl::createIcosahedronObject(const std::shared_ptr<::ShaderProgramInterface> &shader) {
-    return std::make_shared<IcosahedronOpenGl>(shader);
+    return std::make_shared<IcosahedronOpenGl>(enforceGlShader(shader));
+}
+
+std::shared_ptr<BaseShaderProgramOpenGl> GraphicsObjectFactoryOpenGl::enforceGlShader(const std::shared_ptr<::ShaderProgramInterface> &shader) {
+    std::shared_ptr<BaseShaderProgramOpenGl> glShader = std::static_pointer_cast<BaseShaderProgramOpenGl>(shader);
+    if (!glShader) {
+        throw std::runtime_error("GraphicsObjectFactoryOpenGl: ShaderProgramInterface doesn't extend BaseShaderProgramOpenGl!");
+    }
+    return glShader;
 }

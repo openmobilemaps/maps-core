@@ -36,6 +36,8 @@ class ColorPolygonGroup2dShaderOpenGl : public BaseShaderProgramOpenGl,
 
     void clearGlObjects() override;
 
+    virtual bool isRenderable() override;
+
   protected:
     virtual std::string getVertexShader() override;
 
