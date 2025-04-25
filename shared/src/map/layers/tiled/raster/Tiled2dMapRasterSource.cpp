@@ -9,8 +9,6 @@
  */
 
 #include "Tiled2dMapRasterSource.h"
-#include "LambdaTask.h"
-#include <algorithm>
 #include <cmath>
 #include <string>
 
@@ -65,3 +63,7 @@ VectorSet<Tiled2dMapRasterTileInfo> Tiled2dMapRasterSource::getCurrentTiles() {
 
     return currentTileInfos;
 }
+
+#include "Tiled2dMapSourceImpl.h"
+template class Tiled2dMapSource<std::shared_ptr<TextureLoaderResult>, std::shared_ptr<::TextureHolderInterface>>;
+

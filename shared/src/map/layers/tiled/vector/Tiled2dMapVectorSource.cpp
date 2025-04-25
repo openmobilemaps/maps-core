@@ -162,3 +162,6 @@ std::string Tiled2dMapVectorSource::getSourceName() {
     return sourceName;
 }
 
+#include "Tiled2dMapSourceImpl.h"
+template class Tiled2dMapSource<std::shared_ptr<DataLoaderResult>, Tiled2dMapVectorTileInfo::FeatureMap>;
+

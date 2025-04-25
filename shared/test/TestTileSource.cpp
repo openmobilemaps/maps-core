@@ -6,6 +6,8 @@
 #include "WebMercatorTiled2dMapLayerConfig.h"
 #include "helper/TestScheduler.h"
 
+#include "Tiled2dMapSourceImpl.h"
+
 #include <catch2/benchmark/catch_benchmark.hpp>
 #include <catch2/catch_get_random_seed.hpp>
 #include <catch2/catch_test_macros.hpp>
