@@ -53,6 +53,7 @@ public:
                                  const bool hasCustomTexture,
                                  const double dpFactor,
                                  const bool persistingSymbolPlacement,
+                                 const bool useCustomCrossTileIdentifier,
                                  bool is3d,
                                  const Vec3D &tileOrigin);
 
