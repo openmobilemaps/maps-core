@@ -925,8 +925,13 @@ void Tiled2dMapSource<L, R>::onVisibleTilesChanged(const std::vector<VisibleTile
                 size_t currentTilesCount = currentTiles.count(tileInfo.tileInfo);
                 size_t currentlyLoadingCount = currentlyLoading.count(tileInfo.tileInfo);
                 size_t notFoundCount = notFoundTiles.count(tileInfo.tileInfo);
+                // error tiles also don't need to be re-added, they will be retried after the appropriate delay.
+                size_t errorTileCount = 0;
+                for (auto const &[index, errors] : errorTiles) {
+                    errorTileCount += errors.count(tileInfo.tileInfo);
+                }
 
-                if (currentTilesCount == 0 && currentlyLoadingCount == 0 && notFoundCount == 0) {
+                if (currentTilesCount == 0 && currentlyLoadingCount == 0 && notFoundCount == 0 && errorTileCount == 0) {
                     toAdd.push_back(tileInfo);
                 }
             }
@@ -1007,15 +1012,15 @@ void Tiled2dMapSource<L, R>::onVisibleTilesChanged(const std::vector<VisibleTile
 
     for (auto &[loaderIndex, errors] : errorTiles) {
         for (auto it = errors.begin(); it != errors.end();) {
-            bool found = false;
+            bool visible = false;
             for (const auto &layer : pyramid) {
                 auto visibleTile = layer.visibleTiles.find({it->first, 0});
-                if (visibleTile == layer.visibleTiles.end()) {
-                    found = true;
+                if (visibleTile != layer.visibleTiles.end()) {
+                    visible = true;
                     break;
                 }
             }
-            if (found) {
+            if (!visible) {
                 if (errorManager)
                     errorManager->removeError(
                         layerConfig->getTileUrl(it->first.x, it->first.y, it->first.t, it->first.zoomIdentifier));
@@ -1167,6 +1172,7 @@ void Tiled2dMapSource<L, R>::didFailToLoad(Tiled2dMapTileInfo tile, size_t loade
     const bool isVisible = currentVisibleTiles.count(tile);
     if (!isVisible) {
         errorTiles[loaderIndex].erase(tile);
+        scheduleFixedNumberOfLoadingTasks();
         return;
     }
 
@@ -1183,7 +1189,6 @@ void Tiled2dMapSource<L, R>::didFailToLoad(Tiled2dMapTileInfo tile, size_t loade
         auto newLoaderIndex = loaderIndex + 1;
         if(newLoaderIndex < loadingQueues.size()) {
             loadingQueues[newLoaderIndex].push_back(tile);
-            scheduleFixedNumberOfLoadingTasks();
             break;
         } else {
             [[fallthrough]]; // no more loaders, treat this same as not found.
@@ -1240,6 +1245,7 @@ void Tiled2dMapSource<L, R>::didFailToLoad(Tiled2dMapTileInfo tile, size_t loade
         break;
     }
     }
+    scheduleFixedNumberOfLoadingTasks();
 
     // XXX: why???
     updateTileMasks();

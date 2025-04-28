@@ -56,6 +56,14 @@ class TestTiled2dMapVectorSource : public Tiled2dMapSource<std::shared_ptr<DataL
         return n;
     }
 
+    int64_t waitTimeAfterRetry(int retry) const {
+        return std::min((1 << retry) * MIN_WAIT_TIME, MAX_WAIT_TIME);
+    }
+
+    std::unordered_map<size_t, std::map<Tiled2dMapTileInfo, ErrorInfo>> getErrorTiles() const {
+        return errorTiles;
+    }
+
     void notifyTilesUpdates() override {}
 
   protected:
@@ -120,14 +128,11 @@ class NothingTestLoader : public LoaderInterface {
 class BlockingTestLoader : public LoaderInterface {
   public:
     // data: URL -> data string
-    BlockingTestLoader(std::unordered_map<std::string, std::string> data)
-        : data(data)
-        , errorRate(0.f) {}
-
-    BlockingTestLoader(std::unordered_map<std::string, std::string> data, float errorRate)
-        : data(data)
+    BlockingTestLoader(std::unordered_map<std::string, std::string> data, float errorRate = 0.f)
+        : data(std::move(data))
         , errorRnd(Catch::getSeed())
-        , errorRate(errorRate) {}
+        , errorRate(errorRate)
+    {}
 
     virtual TextureLoaderResult loadTexture(const std::string &url, const std::optional<std::string> &etag) override {
         assert(false);
@@ -156,6 +161,7 @@ class BlockingTestLoader : public LoaderInterface {
         std::abort();
     }
 
+  public:
     bool unblockFirst() {
         std::unique_lock lock(mutex);
         if (blockedLoads.empty()) {
@@ -177,6 +183,10 @@ class BlockingTestLoader : public LoaderInterface {
             // keep at it
         }
         return true;
+    }
+
+    void setErrorRate(float errorRate_) {
+        errorRate = errorRate_;
     }
 
   private:
@@ -202,7 +212,7 @@ class BlockingTestLoader : public LoaderInterface {
 
   private:
     const std::unordered_map<std::string, std::string> data;
-    const float errorRate;
+    float errorRate;
     std::default_random_engine errorRnd;
 
     std::mutex mutex;
@@ -333,4 +343,86 @@ TEST_CASE("Tiled2dMapSource slow fallback does not block local loads") {
     loadedTileData = source->getCurrentTileUrlsAndData();
     REQUIRE(loadedTileData.size() == expectedTiles.size());
     REQUIRE_THAT(loadedTileData, Catch::Matchers::UnorderedRangeEquals(allData));
+}
+
+TEST_CASE("Tiled2dMapSource error load retry") {
+    
+    auto layerConfig = std::make_shared<WebMercatorTiled2dMapLayerConfig>(
+        "mock", "test-data://tile/{z}/{x}/{y}", Tiled2dMapZoomInfo(1.0, 0, 0, false, true, false, true), 0, 20);
+
+    // Load the entire world at zoom level 3
+    auto rect = *layerConfig->getBounds();
+    auto zoomLevelInfos = layerConfig->getZoomLevelInfos();
+    const int z = 3;
+    std::vector<Tiled2dMapTileInfo> expectedTiles = {{rect, 0, 0, 0, 0, int(zoomLevelInfos[0].zoom)}};
+    for (int x = 0; x < zoomLevelInfos[z].numTilesX; x++) {
+        for (int y = 0; y < zoomLevelInfos[z].numTilesY; y++) {
+            expectedTiles.push_back({rect, x, y, 0, z, int(zoomLevelInfos[z].zoom)});
+        }
+    }
+    REQUIRE(expectedTiles.size() == 64 + 1); // sanity check
+   
+    auto loader = std::make_shared<BlockingTestLoader>(generateDummyData(expectedTiles, *layerConfig, "dummy data "));
+
+    auto scheduler = std::make_shared<TestScheduler>();
+    std::shared_ptr<TestTiled2dMapVectorSource> source =
+        std::make_shared<TestTiled2dMapVectorSource>(layerConfig, scheduler, std::vector<std::shared_ptr<LoaderInterface>>{loader});
+    source->mailbox = std::make_shared<Mailbox>(scheduler);
+
+    source->onVisibleBoundsChanged(rect, 0, zoomLevelInfos[z].zoom);
+
+    // Let all requests fail
+    loader->setErrorRate(1.f);
+    while (scheduler->drainUntil(0), loader->unblockAll()) {
+    }
+    REQUIRE(source->getCurrentTiles().size() == 0);
+    REQUIRE(source->numLoadingOrQueued() == 0);
+
+    int64_t time = 0;
+    int retry = 0;
+    for(; retry <= 10; retry++) {
+      int64_t expectedDelay = source->waitTimeAfterRetry(retry);
+      
+      auto errorTiles = source->getErrorTiles().at(0);
+      CHECK(errorTiles.size() == expectedTiles.size());
+      for(auto &[tile, errorInfo] : errorTiles) {
+          CHECK(errorInfo.delay == expectedDelay);
+      }
+      time += expectedDelay;
+      while (scheduler->drainUntil(time), loader->unblockAll()) {
+      }
+      REQUIRE(source->numLoadingOrQueued() == 0);
+    }
+    auto prevTileErrorInfo = source->getErrorTiles().at(0);
+
+    // Now change the camera viewport so we should get a different tile pyramid.
+    RectCoord west = rect;
+    west.bottomRight.x = 0.f; // only keep left half of world.
+    std::vector<Tiled2dMapTileInfo> expectedTilesWest;
+    for(auto tile : expectedTiles) {
+        if(tile.x <= zoomLevelInfos[z].numTilesX/2) {
+            expectedTilesWest.push_back(tile);
+        }
+    }
+    source->onVisibleBoundsChanged(west, 0, zoomLevelInfos[z].zoom);
+
+    // Check that the tiles have _kept_ their error state accross the tile pyramid change:
+    REQUIRE(source->numLoadingOrQueued() == 0); // Tiles are not yet loading (instead delayed retry)
+    {
+      auto errorTiles = source->getErrorTiles().at(0);
+      CHECK(errorTiles.size() == expectedTilesWest.size());
+      for(auto &[tile, errorInfo] : errorTiles) {
+          auto prevErrorInfo = prevTileErrorInfo[tile]; 
+          CHECK(errorInfo.delay == prevErrorInfo.delay);
+          CHECK(errorInfo.lastLoad == prevErrorInfo.lastLoad);
+      }
+    }
+
+    // Once loader recovers, loads succeed
+    loader->setErrorRate(0.f);
+    while (scheduler->drain(), loader->unblockAll()) {
+    }
+
+    REQUIRE_THAT(source->getCurrentTiles(), Catch::Matchers::UnorderedRangeEquals(expectedTilesWest));
+    REQUIRE(source->numLoadingOrQueued() == 0);
 }
