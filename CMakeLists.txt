@@ -10,6 +10,7 @@ if(APPLE)
   file(GLOB_RECURSE mapscore_SRC
           "shared/public/*.cpp"
           "shared/src/*.cpp"
+          "external/djinni/support-lib/cpp/*.cpp"
   )
 else()
   # Include Android-specific files only if not on Apple devices
@@ -17,6 +18,7 @@ else()
           "shared/public/*.cpp"
           "shared/src/*.cpp"
           "android/src/main/cpp/graphics/*.cpp"
+          "external/djinni/support-lib/cpp/*.cpp"
   )
 endif()
 
