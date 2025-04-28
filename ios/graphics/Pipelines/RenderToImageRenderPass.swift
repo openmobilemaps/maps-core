@@ -82,6 +82,8 @@ class RenderToImageRenderPass {
             height: Int(size.height),
             mipmapped: false
         )
+
+        descriptor.storageMode = .private
         descriptor.usage = [.renderTarget]
         return device.makeTexture(descriptor: descriptor)
     }
