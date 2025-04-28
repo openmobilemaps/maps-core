@@ -1,5 +1,9 @@
 # Changelog for Open Mobile Maps
 
+## Version 3.1.2
+- Improved offscreen rendering on iOS
+- Fixed an issue with OpenGL line and polygon styles
+
 ## Version 3.1.1
 - Fixed an issue with texture filtering in Quad2dOpenGl
 - Fixed the icon-offset for vector layers in 2D to match the behavior of the style specification
