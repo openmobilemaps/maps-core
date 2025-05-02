@@ -46,14 +46,22 @@ void ColorLineGroup2dShaderOpenGl::setupProgram(const std::shared_ptr<::Renderin
     glLinkProgram(program); // create OpenGL program executables
 
     openGlContext->storeProgram(programName, program);
+
+    // Bind LineStyleCollection at binding index 0
+    GLuint lineStyleUniformBlockIdx = glGetUniformBlockIndex(program, "LineStyleCollection");
+    if (lineStyleUniformBlockIdx == GL_INVALID_INDEX) {
+        LogError <<= "Uniform block LineStyleCollection not found";
+    }
+    glUniformBlockBinding(program, lineStyleUniformBlockIdx, 0);
 }
 
 void ColorLineGroup2dShaderOpenGl::setupGlObjects(const std::shared_ptr<::OpenGlContext> &context) {
     if (lineStyleBuffer == 0) {
         glGenBuffers(1, &lineStyleBuffer);
         glBindBuffer(GL_UNIFORM_BUFFER, lineStyleBuffer);
-        // maximum number of polygonStyles and numStyles
-        glBufferData(GL_UNIFORM_BUFFER, sizeLineValuesArray * sizeof(GLfloat) + sizeof(GLint), nullptr, GL_DYNAMIC_DRAW);
+        // maximum number of polygonStyles and numStyles, padded to 16 byte alignment
+        glBufferData(GL_UNIFORM_BUFFER, sizeLineValuesArray * sizeof(GLfloat) + sizeof(GLint) + 3 * sizeof(GLint), nullptr,
+                     GL_DYNAMIC_DRAW);
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
     }
 
@@ -142,9 +150,9 @@ std::string ColorLineGroup2dShaderOpenGl::getLineStylesUBODefinition(bool isSimp
                     float capType; // 7
                 };
 
-                layout (std140, binding = 0) uniform LineStyleCollection {
+                layout (std140) uniform LineStyleCollection {
                     SimpleLineStyle lineValues[) + std::to_string(MAX_NUM_STYLES) + OMMShaderCode(];
-                    int numStyles;
+                    lowp int numStyles;
                 } uLineStyles;
         );
     } else {
@@ -175,9 +183,9 @@ std::string ColorLineGroup2dShaderOpenGl::getLineStylesUBODefinition(bool isSimp
                     float dottedSkew; // 22
                 };
 
-                layout (std140, binding = 0) uniform LineStyleCollection {
+                layout (std140) uniform LineStyleCollection {
                     LineStyle lineValues[) + std::to_string(MAX_NUM_STYLES) + OMMShaderCode(];
-                    int numStyles;
+                    lowp int numStyles;
                 } uLineStyles;
         );
     }
