@@ -476,8 +476,11 @@ void MapScene::drawReadyFrame(const ::RectCoord &bounds, float paddingPc, float 
 
     // for now we only support drawing a ready frame, therefore
     // we disable animations in the layers
-    for (const auto &layer : layers) {
-        layer.second->enableAnimations(false);
+    {
+        std::lock_guard<std::recursive_mutex> lock(layersMutex);
+        for (const auto &layer: layers) {
+            layer.second->enableAnimations(false);
+        }
     }
 
     auto state = LayerReadyState::NOT_READY;
@@ -521,8 +524,11 @@ void MapScene::drawReadyFrame(const ::RectCoord &bounds, float paddingPc, float 
     // re-enable animations if the map scene is used not only for
     // drawReadyFrame
     camera->freeze(false);
-    for (const auto &layer : layers) {
-        layer.second->enableAnimations(true);
+    {
+        std::lock_guard<std::recursive_mutex> lock(layersMutex);
+        for (const auto &layer: layers) {
+            layer.second->enableAnimations(true);
+        }
     }
 }
 
