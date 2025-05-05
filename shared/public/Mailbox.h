@@ -10,16 +10,15 @@
 
 #pragma once
 
-#include "SchedulerInterface.h"
+#include "Hash.h"
 #include "LambdaTask.h"
-#include <mutex>
+#include "Logger.h"
+#include "SchedulerInterface.h"
+#include <cassert>
 #include <deque>
 #include <future>
-#include <typeinfo>
-#include "Logger.h"
-#include "Hash.h"
-#include <functional>
-#include <cassert>
+#include <mutex>
+#include <memory>
 
 enum class MailboxDuplicationStrategy {
     none = 0,
@@ -79,12 +78,12 @@ public:
 template <class Object, class MemberFn, class ArgsTuple>
 class MailboxMessageImpl: public MailboxMessage {
 public:
-    MailboxMessageImpl(Object object_, MemberFunctionWrapper<MemberFn> memberFn_, const MailboxDuplicationStrategy &strategy, const MailboxExecutionEnvironment &environment, ArgsTuple argsTuple_)
+    MailboxMessageImpl(std::weak_ptr<Object> object_, MemberFunctionWrapper<MemberFn> memberFn_, const MailboxDuplicationStrategy &strategy, const MailboxExecutionEnvironment &environment, ArgsTuple argsTuple_)
       : MailboxMessage(strategy,
                        environment,
                        memberFn_.identifier,
                        memberFn_.diagnostics),
-        object(object_),
+        object(std::move(object_)),
         memberFn(memberFn_),
         argsTuple(std::move(argsTuple_)) { }
 
@@ -101,7 +100,7 @@ public:
         }
     }
 
-    Object object;
+    std::weak_ptr<Object> object;
     MemberFunctionWrapper<MemberFn> memberFn;
     ArgsTuple argsTuple;
 };
@@ -109,9 +108,9 @@ public:
 template <class ResultType, class Object, class MemberFn, class ArgsTuple>
 class AskMessageImpl : public MailboxMessage {
 public:
-    AskMessageImpl(std::promise<ResultType> promise_, Object object_, MemberFunctionWrapper<MemberFn> memberFn_, const MailboxDuplicationStrategy &strategy, const MailboxExecutionEnvironment &environment, ArgsTuple argsTuple_)
-        : MailboxMessage(strategy, environment, memberFn_.identifier, memberFn_.diagnostics),
-          object(object_),
+    AskMessageImpl(std::promise<ResultType> promise_, std::weak_ptr<Object> object_, MemberFunctionWrapper<MemberFn> memberFn_, const MailboxExecutionEnvironment &environment, ArgsTuple argsTuple_)
+        : MailboxMessage(MailboxDuplicationStrategy::none, environment, memberFn_.identifier, memberFn_.diagnostics),
+          object(std::move(object_)),
           memberFn(memberFn_),
           argsTuple(std::move(argsTuple_)),
           promise(std::move(promise_)){}
@@ -131,7 +130,7 @@ public:
         }
     }
 
-    Object object;
+    std::weak_ptr<Object> object;
     MemberFunctionWrapper<MemberFn> memberFn;
     ArgsTuple argsTuple;
     std::promise<ResultType> promise;
@@ -179,7 +178,7 @@ public:
             strongScheduler->addTask(makeTask(shared_from_this(), environment));
         }
     };
-    
+
     void receive(const MailboxExecutionEnvironment &environment) {
         // Make sure to never block the graphics queue
         if (environment == MailboxExecutionEnvironment::graphics) {
