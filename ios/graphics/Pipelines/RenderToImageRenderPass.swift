@@ -8,10 +8,10 @@
 import MapKit
 
 class RenderToImageRenderPass {
-    private var offlineRenderPass : MTLRenderPassDescriptor? = nil
+    private var offlineRenderPass: MTLRenderPassDescriptor? = nil
 
-    private let device : MTLDevice
-    private var lastSize : CGSize = .zero
+    private let device: MTLDevice
+    private var lastSize: CGSize = .zero
 
     // MARK: - Init
 
@@ -21,7 +21,7 @@ class RenderToImageRenderPass {
 
     // MARK: - Public
 
-    public func getRenderpass(size: CGSize)  -> MTLRenderPassDescriptor? {
+    public func getRenderpass(size: CGSize) -> MTLRenderPassDescriptor? {
         if let orp = offlineRenderPass, size == lastSize {
             return orp
         }
@@ -37,7 +37,7 @@ class RenderToImageRenderPass {
         let kciOptions: [CIImageOption: Any] = [
             .colorSpace: CGColorSpaceCreateDeviceRGB()
         ]
-        
+
         guard let cImg = CIImage(mtlTexture: texture, options: kciOptions) else {
             return nil
         }
@@ -49,7 +49,7 @@ class RenderToImageRenderPass {
 
     private func getOfflineRenderPass(size: CGSize) -> MTLRenderPassDescriptor? {
         guard let texture = makeTexture(size: size),
-              let stencil = makeStencilTexture(size: size)
+            let stencil = makeStencilTexture(size: size)
         else { return nil }
 
         let passDescriptor = MTLRenderPassDescriptor()
