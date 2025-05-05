@@ -43,14 +43,22 @@ void ColorPolygonGroup2dShaderOpenGl::setupProgram(const std::shared_ptr<::Rende
     glLinkProgram(program); // create OpenGL program executables
 
     openGlContext->storeProgram(programName, program);
+
+    // Bind PolygonStyleCollection at binding index 0
+    GLuint blockIdx = glGetUniformBlockIndex(program, "PolygonStyleCollection");
+    if (blockIdx == GL_INVALID_INDEX) {
+        LogError <<= "Uniform block PolygonStyleCollection not found";
+    }
+    glUniformBlockBinding(program, blockIdx, 0);
 }
 
 void ColorPolygonGroup2dShaderOpenGl::setupGlObjects(const std::shared_ptr<::OpenGlContext> &context) {
     if (polygonStyleBuffer == 0) {
         glGenBuffers(1, &polygonStyleBuffer);
         glBindBuffer(GL_UNIFORM_BUFFER, polygonStyleBuffer);
-        // maximum number of polygonStyles and numStyles
-        glBufferData(GL_UNIFORM_BUFFER, sizeStyleValuesArray * sizeof(GLfloat) + sizeof(GLint), nullptr, GL_DYNAMIC_DRAW);
+        // maximum number of polygonStyles and numStyles, padded to 16 byte alignment
+        glBufferData(GL_UNIFORM_BUFFER, sizeStyleValuesArray * sizeof(GLfloat) + sizeof(GLint) + 3 * sizeof(GLint), nullptr,
+                     GL_DYNAMIC_DRAW);
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
     }
 
@@ -114,9 +122,10 @@ std::string ColorPolygonGroup2dShaderOpenGl::getPolygonStylesUBODefinition(bool 
                     float gapWidth; // 6
                 }; // padded to 8 floats
 
-                layout (std140, binding = 0) uniform PolygonStyleCollection {
+                layout (std140) uniform PolygonStyleCollection {
                     StripedPolygonStyle polygonStyles[) + std::to_string(MAX_NUM_STYLES) + OMMShaderCode(];
-                    int numStyles;
+                    lowp int numStyles;
+                    // padding
                 } uPolygonStyles;
         );
     } else {
@@ -129,9 +138,10 @@ std::string ColorPolygonGroup2dShaderOpenGl::getPolygonStylesUBODefinition(bool 
                     float opacity; // 4
                 }; // padded to 8 floats
 
-                layout (std140, binding = 0) uniform PolygonStyleCollection {
+                layout (std140) uniform PolygonStyleCollection {
                     PolygonStyle polygonStyles[) + std::to_string(MAX_NUM_STYLES) + OMMShaderCode(];
-                    int numStyles;
+                    lowp int numStyles;
+                    // padding
                 } uPolygonStyles;
         );
     }
