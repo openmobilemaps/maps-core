@@ -213,7 +213,7 @@ lineGroupFragmentShader(LineVertexOut in [[stage_in]],
     const float width = style->width / 2.0 * scalingFactor;
 
   float a = colorA * opacity;
-  const float aGap = colorAGap * opacity;
+  float aGap = colorAGap * opacity;
 
   const int dottedLine = int(style->dotted);
 
@@ -221,11 +221,13 @@ lineGroupFragmentShader(LineVertexOut in [[stage_in]],
     float d = 0;
     const half numDash = style->numDashValues;
 
-    float b = 10;
-
-    float blur = b * scalingFactor - in.lineSide * width; // distance to edge
-
-    a *= clamp(blur, 0.0, 1.0);
+    if (style->blur > 0) {
+        const float blur = (style->blur) * scalingFactor; // screen units
+        const float lineEdgeDistance = (1.0 - abs(in.lineSide)) * width; // screen units
+        const float blurAlpha = clamp(lineEdgeDistance / blur, 0.0, 1.0);
+        a *= blurAlpha;
+        aGap *= blurAlpha;
+    }
 
     float lineLength = 0;
 
