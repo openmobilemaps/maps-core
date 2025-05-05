@@ -11,11 +11,9 @@ find_path(OSMESA_INCLUDE_DIRS
   REQUIRED)
 
 file(GLOB_RECURSE mapscore_jni_SRC
-  "../android/src/main/cpp/scheduling/*.cpp"
-  "../external/djinni/support-lib/cpp/*.cpp"
   "../external/djinni/support-lib/jni/*.cpp"
   "../bridging/android/jni/*.cpp"
-  "../jvm/src/main/cpp/jni/*.cpp"
+  "src/main/cpp/jni/*.cpp"
 )
 
 add_library(mapscore_jni SHARED ${mapscore_jni_SRC})
@@ -47,7 +45,6 @@ target_include_directories(mapscore_jni PRIVATE
   ${OSMESA_INCLUDE_DIRS}
 )
 target_compile_features(mapscore_jni PRIVATE cxx_std_20)
-target_compile_definitions(mapscore_jni PRIVATE DATAREF_JNI=1) # see external/djinni/support-lib/cpp/DataRef.hpp
 target_compile_options(mapscore_jni PRIVATE -Werror -Wno-deprecated -Wno-reorder)
 target_link_libraries(mapscore_jni mapscore ${OSMESA_LIBRARIES})
 # Fiddle with cmake system  TARGET_OS/TARGET_ARCH to form string "linux_amd64" for library filename.
