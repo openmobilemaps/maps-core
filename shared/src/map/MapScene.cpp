@@ -104,16 +104,22 @@ std::vector<std::shared_ptr<::PerformanceLoggerInterface>> MapScene::getPerforma
 
 std::vector<std::shared_ptr<LayerInterface>> MapScene::getLayers() {
     std::vector<std::shared_ptr<LayerInterface>> layersList;
-    for (const auto &l : layers) {
-        layersList.emplace_back(l.second);
+    {
+        std::lock_guard<std::recursive_mutex> lock(layersMutex);
+        for (const auto &l: layers) {
+            layersList.emplace_back(l.second);
+        }
     }
     return layersList;
 };
 
 std::vector<std::shared_ptr<IndexedLayerInterface>> MapScene::getLayersIndexed() {
     std::vector<std::shared_ptr<IndexedLayerInterface>> layersList;
-    for (const auto &l : layers) {
-        layersList.emplace_back(std::make_shared<IndexedLayer>(l.first, l.second));
+    {
+        std::lock_guard<std::recursive_mutex> lock(layersMutex);
+        for (const auto &l: layers) {
+            layersList.emplace_back(std::make_shared<IndexedLayer>(l.first, l.second));
+        }
     }
     return layersList;
 }
