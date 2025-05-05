@@ -10,9 +10,7 @@ import io.openmobilemaps.mapscore.shared.map.scheduling.ExecutionEnvironment
 import io.openmobilemaps.mapscore.shared.map.scheduling.TaskConfig
 import io.openmobilemaps.mapscore.shared.map.scheduling.TaskInterface
 import io.openmobilemaps.mapscore.shared.map.scheduling.TaskPriority
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import java.util.concurrent.Semaphore
 
 open class MapRenderHelper {
@@ -72,7 +70,7 @@ open class MapRenderHelper {
 		}
 
 		@JvmStatic
-		protected fun render(
+		protected suspend fun render(
 			mapRenderer: OffscreenMapRenderer,
 			renderBounds: RectCoord,
 			timeoutSeconds: Float,
@@ -80,10 +78,17 @@ open class MapRenderHelper {
 			destroyAfterRenderAction: Boolean,
 			boundsPaddingPc: Float
 		) {
+			val coroutineContext = currentCoroutineContext()
 			val drawSemaphore = Semaphore(1, true)
 			mapRenderer.requireMapInterface().drawReadyFrame(renderBounds, boundsPaddingPc, timeoutSeconds, object : MapReadyCallbackInterface() {
 				var prevState: LayerReadyState? = null
 				override fun stateDidUpdate(state: LayerReadyState) {
+					if (coroutineContext[Job]?.isActive == false) {
+						mapRenderer.destroy()
+						onStateUpdate(MapViewRenderState.Error)
+						return
+					}
+
 					drawSemaphore.acquire()
 					mapRenderer.setOnDrawCallback {
 						drawSemaphore.release()
