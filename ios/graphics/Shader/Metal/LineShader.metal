@@ -248,18 +248,22 @@ lineGroupFragmentShader(LineVertexOut in [[stage_in]],
       }
   } else if(numDash > 0) {
 
-    const float intraDashPos = fmod(in.lengthPrefix * scalingFactor, (float)style->dashArray.w * width);
+    const float intraDashPos = fmod(in.lengthPrefix, (float)style->dashArray.w * style->width * scalingFactor);
 
-      float dxt = style->dashArray.x * width;
-      float dyt = style->dashArray.y * width;
-      float dzt = style->dashArray.z * width;
-      float dwt = style->dashArray.w * width;
+      float dxt = style->dashArray.x * style->width * scalingFactor;
+      float dyt = style->dashArray.y * style->width * scalingFactor;
+      float dzt = style->dashArray.z * style->width * scalingFactor;
+      float dwt = style->dashArray.w * style->width * scalingFactor;
       if (style->dash_fade == 0 &&
           ((intraDashPos > dxt && intraDashPos < dyt) || (intraDashPos > dzt && intraDashPos < dwt))) {
           // Simple case without fade
           return half4(half3(style->gapColor.rgb), 1.0) * aGap;
       }
+      else if (style->dash_fade == 0) {
+          return half4(half3(style->color.rgb), 1.0) * a;
+      }
       else {
+          return half4(1.0, 0.0, 0.0, 1.0);
           if (intraDashPos > dxt && intraDashPos < dyt) {
 
               half relG = (intraDashPos - dxt) / (dyt - dxt);
