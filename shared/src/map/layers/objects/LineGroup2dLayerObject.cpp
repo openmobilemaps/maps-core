@@ -105,7 +105,7 @@ void LineGroup2dLayerObject::buildLines(const std::vector<std::tuple<std::vector
 
     int numLines = (int)lines.size();
 
-    for (int lineIndex = 0; lineIndex < numLines; lineIndex++) {
+    for (int lineIndex = numLines-1; lineIndex >= 0; lineIndex--) {
         int lineStyleIndex = std::get<1>(lines[lineIndex]);
 
         std::vector<Vec3D> renderCoords = std::get<0>(lines[lineIndex]);
