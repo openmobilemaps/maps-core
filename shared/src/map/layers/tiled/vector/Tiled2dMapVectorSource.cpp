@@ -25,7 +25,7 @@ Tiled2dMapVectorSource::Tiled2dMapVectorSource(const MapConfig &mapConfig,
                                                const std::string &sourceName,
                                                float screenDensityPpi,
                                                std::string layerName)
-        : Tiled2dMapSource<std::shared_ptr<djinni::DataRef>, std::shared_ptr<DataLoaderResult>, Tiled2dMapVectorTileInfo::FeatureMap>(mapConfig, layerConfig, conversionHelper, scheduler, screenDensityPpi, tileLoaders.size(), layerName),
+        : Tiled2dMapSource<std::shared_ptr<DataLoaderResult>, Tiled2dMapVectorTileInfo::FeatureMap>(mapConfig, layerConfig, conversionHelper, scheduler, screenDensityPpi, tileLoaders.size(), layerName),
 loaders(tileLoaders), layersToDecode(layersToDecode), listener(listener), sourceName(sourceName) {}
 
 ::djinni::Future<std::shared_ptr<DataLoaderResult>> Tiled2dMapVectorSource::loadDataAsync(Tiled2dMapTileInfo tile, size_t loaderIndex) {
@@ -161,4 +161,7 @@ void Tiled2dMapVectorSource::resume() {
 std::string Tiled2dMapVectorSource::getSourceName() {
     return sourceName;
 }
+
+#include "Tiled2dMapSourceImpl.h"
+template class Tiled2dMapSource<std::shared_ptr<DataLoaderResult>, Tiled2dMapVectorTileInfo::FeatureMap>;
 

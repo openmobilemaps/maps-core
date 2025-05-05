@@ -396,7 +396,6 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
                                                                    layerConfig,
                                                                    mapInterface->getCoordinateConverterHelper(),
                                                                    mapInterface->getScheduler(),
-                                                                   loaders,
                                                                    selfVectorActor,
                                                                    layers,
                                                                    source,
