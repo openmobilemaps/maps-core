@@ -1,5 +1,9 @@
 # Changelog for Open Mobile Maps
 
+## Version 3.1.3
+- Fixed an unsafe layer accessing during drawReadyFrame
+- Added coarse cooperative cancelling in the Android MapRenderHelper
+
 ## Version 3.1.2
 - Improved offscreen rendering on iOS
 - Fixed an issue with OpenGL line and polygon styles
