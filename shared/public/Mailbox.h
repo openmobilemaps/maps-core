@@ -221,7 +221,13 @@ public:
 
         receivingMutex.unlock();
     }
-    
+
+    bool isEmpty() {
+        std::lock_guard<std::mutex> computationLock(computationQueueMutex);
+        std::lock_guard<std::mutex> graphicsLock(graphicsQueueMutex);
+        return computationQueue.empty() && graphicsQueue.empty();
+    }
+
     static inline std::shared_ptr<LambdaTask> makeTask(std::weak_ptr<Mailbox> mailbox, MailboxExecutionEnvironment environment){
         ExecutionEnvironment executionEnvironment;
         switch (environment) {

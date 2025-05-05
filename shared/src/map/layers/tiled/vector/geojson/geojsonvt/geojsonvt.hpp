@@ -108,7 +108,11 @@ public:
                         self->initialize(geoJson);
                         self->loadingResult = DataLoaderResult(std::nullopt, std::nullopt, result.status, result.errorCode);
 
-                        self->delegate.message(MFN(&GeoJSONTileDelegate::didLoad), self->options.maxZoom);
+                        if (self->delegate) {
+                            // avoid call to null-delegate
+                            // setting the delegate will call didLoad, result won't be lost
+                            self->delegate.message(MFN(&GeoJSONTileDelegate::didLoad), self->options.maxZoom);
+                        }
                     }
                 }
                 catch (nlohmann::json::parse_error &ex) {

@@ -358,7 +358,7 @@ void Tiled2dMapVectorSymbolObject::setupIconProperties(VectorModificationWrapper
         int spriteY = 0;
         int spriteWidth = textureWidth;
         int spriteHeight = textureHeight;
-        float spritePixelRatio = float(camera->getScreenDensityPpi() / 160.0);
+        float spritePixelRatio = dpFactor;
 
         if (!hasCustomTexture) {
             const auto spriteIt = spriteData->sprites.find(iconImage);
@@ -380,7 +380,7 @@ void Tiled2dMapVectorSymbolObject::setupIconProperties(VectorModificationWrapper
             spriteHeight = customUv->height;
         }
 
-        const double densityOffset = (camera->getScreenDensityPpi() / 160.0) / spritePixelRatio;
+        const double densityOffset = dpFactor / spritePixelRatio;
 
         spriteSize.x = spriteWidth * densityOffset;
         spriteSize.y = spriteHeight * densityOffset;
@@ -442,7 +442,7 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(VectorModificationWrappe
         int spriteY = 0;
         int spriteWidth = textureWidth;
         int spriteHeight = textureHeight;
-        float spritePixelRatio = float(camera->getScreenDensityPpi() / 160.0);
+        float spritePixelRatio = dpFactor;
 
         if (!hasCustomTexture) {
             const auto spriteIt = spriteData->sprites.find(iconImage);
@@ -464,7 +464,7 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(VectorModificationWrappe
             spriteHeight = customIconUv->height;
         }
 
-        const double densityOffset = (camera->getScreenDensityPpi() / 160.0) / spritePixelRatio;
+        const double densityOffset = dpFactor / spritePixelRatio;
 
         spriteSize.x = spriteWidth * densityOffset;
         spriteSize.y = spriteHeight * densityOffset;
@@ -557,9 +557,8 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(VectorModificationWrappe
         renderCoordinate = getRenderCoordinates(iconAnchor, -rotations[countOffset], iconWidth, iconHeight);
     }
 
-
-    const double x = renderCoordinate.x + (is3d ? 0.0 : iconOffset.x * scaleFactor * iconSize);
-    const double y = renderCoordinate.y + (is3d ? 0.0 : iconOffset.y * scaleFactor * iconSize);
+    const double x = renderCoordinate.x + (is3d ? 0.0 : iconOffset.x * iconWidth / dpFactor);
+    const double y = renderCoordinate.y + (is3d ? 0.0 : iconOffset.y * iconHeight / dpFactor);
 
     writePosition(x, y, countOffset, positions);
 
@@ -642,7 +641,7 @@ void Tiled2dMapVectorSymbolObject::setupStretchIconProperties(VectorModification
             return;
         }
 
-        const double densityOffset = (camera->getScreenDensityPpi() / 160.0) / spriteIt->second.pixelRatio;
+        const double densityOffset = dpFactor / spriteIt->second.pixelRatio;
 
         stretchSpriteSize.x = spriteIt->second.width * densityOffset;
         stretchSpriteSize.y = spriteIt->second.height * densityOffset;
@@ -708,7 +707,7 @@ void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(VectorModificatio
             return;
         }
 
-        const double densityOffset = (camera->getScreenDensityPpi() / 160.0) / spriteIt->second.pixelRatio;
+        const double densityOffset = dpFactor / spriteIt->second.pixelRatio;
 
         stretchSpriteSize.x = spriteIt->second.width * densityOffset;
         stretchSpriteSize.y = spriteIt->second.height * densityOffset;
@@ -744,7 +743,7 @@ void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(VectorModificatio
         rotations[countOffset] += rotation;
     }
 
-    const double densityOffset = (camera->getScreenDensityPpi() / 160.0) / stretchSpriteInfo->pixelRatio;
+    const double densityOffset = dpFactor / stretchSpriteInfo->pixelRatio;
 
     auto spriteWidth = stretchSpriteInfo->width * densityOffset * scaleFactor;
     auto spriteHeight = stretchSpriteInfo->height * densityOffset * scaleFactor;

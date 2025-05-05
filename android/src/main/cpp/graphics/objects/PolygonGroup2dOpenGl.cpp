@@ -10,11 +10,10 @@
 
 #include "PolygonGroup2dOpenGl.h"
 #include "RenderVerticesDescription.h"
-#include "BaseShaderProgramOpenGl.h"
 #include <cmath>
 #include <cstring>
 
-PolygonGroup2dOpenGl::PolygonGroup2dOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader)
+PolygonGroup2dOpenGl::PolygonGroup2dOpenGl(const std::shared_ptr<::BaseShaderProgramOpenGl> &shader)
     : shaderProgram(shader) {}
 
 std::shared_ptr<GraphicsObjectInterface> PolygonGroup2dOpenGl::asGraphicsObject() { return shared_from_this(); }
@@ -57,6 +56,11 @@ void PolygonGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterfa
 
     glUseProgram(program);
 
+    if (!glDataBuffersGenerated) {
+        glGenVertexArrays(1, &vao);
+    }
+    glBindVertexArray(vao);
+
     positionHandle = glGetAttribLocation(program, "vPosition");
     styleIndexHandle = glGetAttribLocation(program, "vStyleIndex");
 
@@ -65,6 +69,14 @@ void PolygonGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterfa
     }
     glBindBuffer(GL_ARRAY_BUFFER, attribBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * polygonAttributes.size(), &polygonAttributes[0], GL_STATIC_DRAW);
+
+    size_t floatSize = sizeof(GLfloat);
+    size_t stride = 4 * floatSize;
+    glEnableVertexAttribArray(positionHandle);
+    glVertexAttribPointer(positionHandle, 3, GL_FLOAT, false, stride, nullptr);
+    glEnableVertexAttribArray(styleIndexHandle);
+    glVertexAttribPointer(styleIndexHandle, 1, GL_FLOAT, false, stride, (float *)(3 * floatSize));
+
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     if (!glDataBuffersGenerated) {
@@ -72,6 +84,9 @@ void PolygonGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterfa
     }
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort) * polygonIndices.size(), &polygonIndices[0], GL_STATIC_DRAW);
+
+    glBindVertexArray(0);
+
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     vpMatrixHandle = glGetUniformLocation(program, "uvpMatrix");
@@ -102,6 +117,7 @@ void PolygonGroup2dOpenGl::removeGlBuffers() {
     if (glDataBuffersGenerated) {
         glDeleteBuffers(1, &attribBuffer);
         glDeleteBuffers(1, &indexBuffer);
+        glDeleteVertexArrays(1, &vao);
         glDataBuffersGenerated = false;
     }
 }
@@ -111,7 +127,8 @@ void PolygonGroup2dOpenGl::setIsInverseMasked(bool inversed) { isMaskInversed = 
 void PolygonGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
                                   int64_t vpMatrix, int64_t mMatrix, const ::Vec3D &origin,
                                   bool isMasked, double screenPixelAsRealMeterFactor) {
-    if (!ready)
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
+    if (!ready || !shaderProgram->isRenderable())
         return;
 
     GLuint stencilMask = 0;
@@ -133,6 +150,7 @@ void PolygonGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterf
 
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
     glUseProgram(program);
+    glBindVertexArray(vao);
 
     glUniformMatrix4fv(vpMatrixHandle, 1, false, (GLfloat *)vpMatrix);
     glUniformMatrix4fv(mMatrixHandle, 1, false, (GLfloat *)mMatrix);
@@ -146,24 +164,9 @@ void PolygonGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterf
 
     shaderProgram->preRender(context);
 
-    size_t floatSize = sizeof(GLfloat);
-    size_t stride = 4 * floatSize;
-
-    glBindBuffer(GL_ARRAY_BUFFER, attribBuffer);
-    glEnableVertexAttribArray(positionHandle);
-    glVertexAttribPointer(positionHandle, 3, GL_FLOAT, false, stride, nullptr);
-    glEnableVertexAttribArray(styleIndexHandle);
-    glVertexAttribPointer(styleIndexHandle, 1, GL_FLOAT, false, stride, (float *)(3 * floatSize));
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
     glDrawElements(GL_TRIANGLES, polygonIndices.size(), GL_UNSIGNED_SHORT, nullptr);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-    // Disable vertex array
-    glDisableVertexAttribArray(positionHandle);
-    glDisableVertexAttribArray(styleIndexHandle);
+    glBindVertexArray(0);
 
     glDisable(GL_BLEND);
 }

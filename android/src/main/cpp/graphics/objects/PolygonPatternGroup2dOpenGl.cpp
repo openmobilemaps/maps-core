@@ -12,10 +12,9 @@
 #include "Logger.h"
 #include "OpenGlHelper.h"
 #include "TextureHolderInterface.h"
-#include "BaseShaderProgramOpenGl.h"
 #include <cstring>
 
-PolygonPatternGroup2dOpenGl::PolygonPatternGroup2dOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader)
+PolygonPatternGroup2dOpenGl::PolygonPatternGroup2dOpenGl(const std::shared_ptr<::BaseShaderProgramOpenGl> &shader)
     : shaderProgram(shader) {}
 
 bool PolygonPatternGroup2dOpenGl::isReady() { return ready && textureHolder && !buffersNotReady; }
@@ -66,6 +65,11 @@ void PolygonPatternGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContext
 void PolygonPatternGroup2dOpenGl::prepareGlData(int program) {
     glUseProgram(program);
 
+    if (!glDataBuffersGenerated) {
+        glGenVertexArrays(1, &vao);
+    }
+    glBindVertexArray(vao);
+
     positionHandle = glGetAttribLocation(program, "vPosition");
     styleIndexHandle = glGetAttribLocation(program, "vStyleIndex");
     if (!glDataBuffersGenerated) {
@@ -74,6 +78,14 @@ void PolygonPatternGroup2dOpenGl::prepareGlData(int program) {
     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
 
+    // enable vPosition attribs
+    size_t floatSize = sizeof(GLfloat);
+    size_t stride = 4 * floatSize;
+    glEnableVertexAttribArray(positionHandle);
+    glEnableVertexAttribArray(styleIndexHandle);
+    glVertexAttribPointer(positionHandle, 3, GL_FLOAT, false, stride, nullptr);
+    glVertexAttribPointer(styleIndexHandle, 1, GL_FLOAT, false, stride, (float *)(3 * floatSize));
+
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     if (!glDataBuffersGenerated) {
@@ -81,6 +93,9 @@ void PolygonPatternGroup2dOpenGl::prepareGlData(int program) {
     }
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort) * indices.size(), &indices[0], GL_STATIC_DRAW);
+
+    glBindVertexArray(0);
+
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     vpMatrixHandle = glGetUniformLocation(program, "uvpMatrix");
@@ -105,6 +120,7 @@ void PolygonPatternGroup2dOpenGl::removeGlBuffers() {
     if (glDataBuffersGenerated) {
         glDeleteBuffers(1, &vertexBuffer);
         glDeleteBuffers(1, &indexBuffer);
+        glDeleteVertexArrays(1, &vao);
         glDataBuffersGenerated = false;
     }
 }
@@ -143,11 +159,10 @@ PolygonPatternGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInte
                                     int64_t vpMatrix, int64_t mMatrix, const ::Vec3D &origin,
                                     bool isMasked, double screenPixelAsRealMeterFactor) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
-    if (!ready || buffersNotReady || !textureHolder) {
+    if (!ready || buffersNotReady || !textureHolder || !shaderProgram->isRenderable()) {
         return;
     }
 
-    glUseProgram(program);
 
     GLuint stencilMask = 0;
     GLuint validTarget = 0;
@@ -165,6 +180,9 @@ PolygonPatternGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInte
         glStencilFunc(GL_EQUAL, validTarget, stencilMask);
         glStencilOp(GL_KEEP, GL_KEEP, zpass);
     }
+
+    glUseProgram(program);
+    glBindVertexArray(vao);
 
     prepareTextureDraw(program);
 
@@ -186,30 +204,14 @@ PolygonPatternGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInte
 
     shaderProgram->preRender(context);
 
-    // enable vPosition attribs
-    size_t floatSize = sizeof(GLfloat);
-    size_t stride = 4 * floatSize;
-
-    glEnableVertexAttribArray(positionHandle);
-    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-    glVertexAttribPointer(positionHandle, 3, GL_FLOAT, false, stride, nullptr);
-    glEnableVertexAttribArray(styleIndexHandle);
-    glVertexAttribPointer(styleIndexHandle, 1, GL_FLOAT, false, stride, (float *)(3 * floatSize));
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
     // Apply the projection and view transformation
     glUniformMatrix4fv(vpMatrixHandle, 1, false, (GLfloat *)vpMatrix);
     glUniformMatrix4fv(mMatrixHandle, 1, false, (GLfloat *)mMatrix);
     glUniform4f(originOffsetHandle, polygonOrigin.x - origin.x, polygonOrigin.y - origin.y, polygonOrigin.z - origin.z, 0.0);
 
-    // Draw the triangles
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_SHORT, nullptr);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-    // Disable vertex array
-    glDisableVertexAttribArray(positionHandle);
-    glDisableVertexAttribArray(styleIndexHandle);
+    glBindVertexArray(0);
 
     glDisable(GL_BLEND);
 }

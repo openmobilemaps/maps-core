@@ -1450,6 +1450,10 @@ template <class T, class L, class R>::LayerReadyState Tiled2dMapSource<T, L, R>:
         }
     }
 
+    if (!mailbox->isEmpty()) {
+        return LayerReadyState::NOT_READY;
+    }
+
     return LayerReadyState::READY;
 }
 
