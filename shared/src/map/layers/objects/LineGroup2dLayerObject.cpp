@@ -28,8 +28,7 @@ void LineGroup2dLayerObject::update() {}
 
 std::vector<std::shared_ptr<RenderConfigInterface>> LineGroup2dLayerObject::getRenderConfig() { return {renderConfig}; }
 
-void LineGroup2dLayerObject::setLines(const std::vector<std::tuple<std::vector<Vec2D>, int>> &lines, const int32_t systemIdentifier,
-                                      const Vec3D &origin) {
+void LineGroup2dLayerObject::setLines(const std::vector<std::tuple<std::vector<Vec2D>, int>> &lines, const int32_t systemIdentifier, const Vec3D &origin, LineCapType capType) {
     std::vector<uint32_t> lineIndices;
     std::vector<float> lineAttributes;
 
@@ -60,10 +59,10 @@ void LineGroup2dLayerObject::setLines(const std::vector<std::tuple<std::vector<V
         
     }
 
-    buildLines(convertedLines, origin);
+    buildLines(convertedLines, origin, capType);
 }
 
-void LineGroup2dLayerObject::setLines(const std::vector<std::tuple<std::vector<Coord>, int>> &lines, const Vec3D &origin) {
+void LineGroup2dLayerObject::setLines(const std::vector<std::tuple<std::vector<Coord>, int>> &lines, const Vec3D &origin, LineCapType capType) {
 
     std::vector<uint32_t> lineIndices;
     std::vector<float> lineAttributes;
@@ -94,11 +93,11 @@ void LineGroup2dLayerObject::setLines(const std::vector<std::tuple<std::vector<C
 
     }
 
-    buildLines(convertedLines, origin);
+    buildLines(convertedLines, origin, capType);
 
 }
 
-void LineGroup2dLayerObject::buildLines(const std::vector<std::tuple<std::vector<Vec3D>, int>> &lines, const Vec3D & origin) {
+void LineGroup2dLayerObject::buildLines(const std::vector<std::tuple<std::vector<Vec3D>, int>> &lines, const Vec3D & origin, LineCapType capType) {
     std::vector<uint32_t> lineIndices;
     std::vector<float> lineAttributes;
     uint32_t vertexCount = 0;
@@ -119,7 +118,7 @@ void LineGroup2dLayerObject::buildLines(const std::vector<std::tuple<std::vector
         float prefixTotalLineLength = 0.0;
         float lineLength = 0;
 
-        std::optional<Vec3D> pLast, lastNormal = std::nullopt;
+        std::optional<Vec3D> pLast, lastNormal = std::nullopt, lastLineVec = std::nullopt;
 
         int32_t preIndex = -1, prePreIndex = -1;
 
@@ -128,13 +127,16 @@ void LineGroup2dLayerObject::buildLines(const std::vector<std::tuple<std::vector
 
             prefixTotalLineLength += lineLength;
 
-            Vec3D extrude(0, 0, 0);
+            Vec3D extrude(0, 0, 0), extrudeLineVec(0, 0, 0);
 
             if (i < pointCount - 1) {
                 const Vec3D &pNext = renderCoords[i + 1];
 
-                const Vec3D lineVec(pNext.x - p.x, pNext.y - p.y, pNext.z - p.z);
+                Vec3D lineVec(pNext.x - p.x, pNext.y - p.y, pNext.z - p.z);
                 lineLength = std::sqrt(lineVec.x * lineVec.x + lineVec.y * lineVec.y + lineVec.z * lineVec.z);
+                lineVec.x /= lineLength;
+                lineVec.y /= lineLength;
+                lineVec.z /= lineLength;
 
                 Vec3D normal(-lineVec.y, lineVec.x, 0.0);
                 double normalLength = sqrt(normal.x * normal.x + normal.y * normal.y);
@@ -147,11 +149,16 @@ void LineGroup2dLayerObject::buildLines(const std::vector<std::tuple<std::vector
                 }
                 else {
                     extrude = normal;
+                    extrudeLineVec = lineVec;
                 }
                 lastNormal = normal;
-            } else if (lastNormal) {
+                lastLineVec = lineVec;
+            } else if (lastNormal && lastLineVec) {
                 lineLength = 0;
                 extrude = *lastNormal;
+                extrudeLineVec.x = -lastLineVec->x;
+                extrudeLineVec.y = -lastLineVec->y;
+                extrudeLineVec.z = -lastLineVec->z;
             } else {
                 lineLength = 0;
                 continue;
@@ -163,11 +170,28 @@ void LineGroup2dLayerObject::buildLines(const std::vector<std::tuple<std::vector
                 if (is3d) {
                     lineAttributes.push_back(p.z);
                 }
-                lineAttributes.push_back(extrude.x * (float)side);
-                lineAttributes.push_back(extrude.y * (float)side);
-                if (is3d) {
-                    lineAttributes.push_back(extrude.z * (float)side);
+                if (i == 0 && capType == LineCapType::SQUARE) {
+                    lineAttributes.push_back(extrude.x * (float)side - extrudeLineVec.x);
+                    lineAttributes.push_back(extrude.y * (float)side - extrudeLineVec.y);
+                    if (is3d) {
+                        lineAttributes.push_back(extrude.z * (float)side - extrudeLineVec.z);
+                    }
                 }
+                else if (i == pointCount-1 && capType == LineCapType::SQUARE) {
+                    lineAttributes.push_back(extrude.x * (float)side + extrudeLineVec.x);
+                    lineAttributes.push_back(extrude.y * (float)side + extrudeLineVec.y);
+                    if (is3d) {
+                        lineAttributes.push_back(extrude.z * (float)side + extrudeLineVec.z);
+                    }
+                }
+                else {
+                    lineAttributes.push_back(extrude.x * (float)side);
+                    lineAttributes.push_back(extrude.y * (float)side);
+                    if (is3d) {
+                        lineAttributes.push_back(extrude.z * (float)side);
+                    }
+                }
+
 
                 // Line Side
                 lineAttributes.push_back((float)side);
