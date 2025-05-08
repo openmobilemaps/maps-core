@@ -324,6 +324,8 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
 
         bool anyInteractable = false;
 
+        auto lineDescription = std::dynamic_pointer_cast<LineVectorLayerDescription>(description);
+
         for (auto featureIt = tileData->rbegin(); featureIt != tileData->rend(); ++featureIt) {
             std::shared_ptr<FeatureContext> featureContext = std::get<0>(*featureIt);
             
@@ -343,6 +345,14 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
                     }
 
                     if (styleIndex == -1) {
+
+                        auto lineCapValue = lineDescription->style.lineCapEvaluator.getValue();
+                        static const LineCapType defaultValue = LineCapType::BUTT;
+                        LineCapType capType = LineCapType::BUTT;
+                        if (lineCapValue) {
+                            capType = lineCapValue->evaluateOr(evalContext, defaultValue);
+                        }
+
                         if (!featureGroups.empty() && featureGroups.back().size() < maxStylesPerGroup) {
                             styleGroupIndex = (int) featureGroups.size() - 1;
                             styleIndex = (int) featureGroups.back().size();
@@ -359,6 +369,7 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
                             auto lineDescription = std::static_pointer_cast<LineVectorLayerDescription>(description);
                             shader->asShaderProgramInterface()->setBlendMode(lineDescription->style.getBlendMode(EvaluationContext(0.0, dpFactor, std::make_shared<FeatureContext>(), featureStateManager)));
                             shaders.push_back(shader);
+                            capTypes.push_back(capType);
                             if (isSimpleLine) {
                                 reusableSimpleLineStyles.push_back({  ShaderSimpleLineStyle {0} });
                             } else {
@@ -459,6 +470,7 @@ void Tiled2dMapVectorLineTile::addLines(const std::vector<std::vector<std::vecto
     for (int styleGroupIndex = 0; styleGroupIndex < styleIdLinesVector.size(); styleGroupIndex++) {
         for (const auto &lineSubGroup: styleIdLinesVector[styleGroupIndex]) {
             const auto &shader = shaders.at(styleGroupIndex);
+            const auto capType = capTypes.at(styleGroupIndex);
             auto lineGroupGraphicsObject = objectFactory->createLineGroup(shader->asShaderProgramInterface());
 
 #if DEBUG
@@ -469,7 +481,7 @@ void Tiled2dMapVectorLineTile::addLines(const std::vector<std::vector<std::vecto
                                                                             shader,
                                                                             is3d);
 
-            lineGroupObject->setLines(lineSubGroup, CoordinateSystemIdentifiers::EPSG3857(), origin);
+            lineGroupObject->setLines(lineSubGroup, CoordinateSystemIdentifiers::EPSG3857(), origin, capType);
 
             lineGroupObjects.push_back(lineGroupObject);
             newGraphicObjects.push_back(lineGroupGraphicsObject->asGraphicsObject());
