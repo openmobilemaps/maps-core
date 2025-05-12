@@ -126,6 +126,8 @@ void LineGroup2dLayerObject::buildLines(const std::vector<std::tuple<std::vector
 
             prefixTotalLineLength += lineLength;
 
+            float extrudeScale = 1.0;
+
             Vec3D extrude(0, 0, 0), extrudeLineVec(0, 0, 0);
 
             if (i < pointCount - 1) {
@@ -133,6 +135,9 @@ void LineGroup2dLayerObject::buildLines(const std::vector<std::tuple<std::vector
 
                 Vec3D lineVec(pNext.x - p.x, pNext.y - p.y, pNext.z - p.z);
                 lineLength = std::sqrt(lineVec.x * lineVec.x + lineVec.y * lineVec.y + lineVec.z * lineVec.z);
+                if (lineLength == 0) {
+                    continue;
+                }
                 lineVec.x /= lineLength;
                 lineVec.y /= lineLength;
                 lineVec.z /= lineLength;
@@ -145,6 +150,18 @@ void LineGroup2dLayerObject::buildLines(const std::vector<std::tuple<std::vector
                 if (lastNormal) {
                     extrude.x = (normal.x + lastNormal->x) / 2.0;
                     extrude.y = (normal.y + lastNormal->y) / 2.0;
+                    double extrudeLength = sqrt(extrude.x * extrude.x + extrude.y * extrude.y);
+                    if (extrudeLength > 0) {
+                        extrude.x /= extrudeLength;
+                        extrude.y /= extrudeLength;
+                    }
+
+                    const double cosHalfAngle = extrude.x * normal.x + extrude.y * normal.y;
+//                    extrudeScale = cosHalfAngle != 0 ? 1.0 / cosHalfAngle : 1.0;
+                    extrudeScale = 1.0;
+//                    if (extrudeScale > 1.0) {
+//                        extrudeScale = 1.0;
+//                    }
                 } else {
                     extrude = normal;
                     extrudeLineVec = lineVec;
@@ -203,7 +220,7 @@ void LineGroup2dLayerObject::buildLines(const std::vector<std::tuple<std::vector
                     pointExtrude.y = extrudeLineVec.y * endSide;
                     pointExtrude.z = extrudeLineVec.z * endSide;
                 }
-                pushLineVertex(p, pointExtrude, 1.0, side, prefixTotalLineLength, lineStyleIndex, true, side == -1, vertexCount,
+                pushLineVertex(p, pointExtrude, extrudeScale, side, prefixTotalLineLength, lineStyleIndex, true, side == -1, vertexCount,
                                prePreIndex, preIndex, lineAttributes, lineIndices);
 
                 //                if (i == 0 && side == -1 && capType == LineCapType::ROUND) {
