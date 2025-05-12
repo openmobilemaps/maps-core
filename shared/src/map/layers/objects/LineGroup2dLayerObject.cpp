@@ -28,12 +28,12 @@ void LineGroup2dLayerObject::update() {}
 
 std::vector<std::shared_ptr<RenderConfigInterface>> LineGroup2dLayerObject::getRenderConfig() { return {renderConfig}; }
 
-void LineGroup2dLayerObject::setLines(const std::vector<std::tuple<std::vector<Vec2D>, int>> &lines, const int32_t systemIdentifier, const Vec3D &origin, LineCapType capType) {
+void LineGroup2dLayerObject::setLines(const std::vector<std::tuple<std::vector<Vec2D>, int>> &lines, const int32_t systemIdentifier,
+                                      const Vec3D &origin, LineCapType capType) {
     std::vector<uint32_t> lineIndices;
     std::vector<float> lineAttributes;
 
     int numLines = (int)lines.size();
-
 
     std::vector<std::tuple<std::vector<Vec3D>, int>> convertedLines;
 
@@ -56,13 +56,13 @@ void LineGroup2dLayerObject::setLines(const std::vector<std::tuple<std::vector<V
         }
 
         convertedLines.push_back(std::make_tuple(renderCoords, lineStyleIndex));
-        
     }
 
     buildLines(convertedLines, origin, capType);
 }
 
-void LineGroup2dLayerObject::setLines(const std::vector<std::tuple<std::vector<Coord>, int>> &lines, const Vec3D &origin, LineCapType capType) {
+void LineGroup2dLayerObject::setLines(const std::vector<std::tuple<std::vector<Coord>, int>> &lines, const Vec3D &origin,
+                                      LineCapType capType) {
 
     std::vector<uint32_t> lineIndices;
     std::vector<float> lineAttributes;
@@ -90,21 +90,20 @@ void LineGroup2dLayerObject::setLines(const std::vector<std::tuple<std::vector<C
         }
 
         convertedLines.push_back(std::make_tuple(renderCoords, lineStyleIndex));
-
     }
 
     buildLines(convertedLines, origin, capType);
-
 }
 
-void LineGroup2dLayerObject::buildLines(const std::vector<std::tuple<std::vector<Vec3D>, int>> &lines, const Vec3D & origin, LineCapType capType) {
+void LineGroup2dLayerObject::buildLines(const std::vector<std::tuple<std::vector<Vec3D>, int>> &lines, const Vec3D &origin,
+                                        LineCapType capType) {
     std::vector<uint32_t> lineIndices;
     std::vector<float> lineAttributes;
     uint32_t vertexCount = 0;
 
     int numLines = (int)lines.size();
 
-    for (int lineIndex = numLines-1; lineIndex >= 0; lineIndex--) {
+    for (int lineIndex = numLines - 1; lineIndex >= 0; lineIndex--) {
         int lineStyleIndex = std::get<1>(lines[lineIndex]);
 
         std::vector<Vec3D> renderCoords = std::get<0>(lines[lineIndex]);
@@ -146,8 +145,7 @@ void LineGroup2dLayerObject::buildLines(const std::vector<std::tuple<std::vector
                 if (lastNormal) {
                     extrude.x = (normal.x + lastNormal->x) / 2.0;
                     extrude.y = (normal.y + lastNormal->y) / 2.0;
-                }
-                else {
+                } else {
                     extrude = normal;
                     extrudeLineVec = lineVec;
                 }
@@ -164,59 +162,60 @@ void LineGroup2dLayerObject::buildLines(const std::vector<std::tuple<std::vector
                 continue;
             }
 
+            float endSide = 0;
+            if (i == 0) {
+                endSide = -1;
+            } else if (i == pointCount - 1) {
+                endSide = 1;
+            }
+
+            if (endSide != 0 && capType == LineCapType::ROUND) {
+                auto originalPrePreIndex = prePreIndex;
+                auto originalPreIndex = preIndex;
+                pushLineVertex(p, Vec3D(0, 0, 0), 1.0, 0, prefixTotalLineLength, lineStyleIndex, true, false, vertexCount,
+                               prePreIndex, preIndex, lineAttributes, lineIndices);
+                int32_t centerIndex = preIndex, firstIndex = -1, lastIndex = -1;
+                for (float r = -1; r <= 1; r += 0.2) {
+                    Vec3D roundExtrude(extrude.x * r - extrudeLineVec.x * (1.0 - abs(r)),
+                                       extrude.y * r - extrudeLineVec.y * (1.0 - abs(r)),
+                                       extrude.z * r - extrudeLineVec.z * (1.0 - abs(r)));
+                    float roundLength =
+                        sqrt(roundExtrude.x * roundExtrude.x + roundExtrude.y * roundExtrude.y + roundExtrude.z * roundExtrude.z);
+                    roundExtrude.x /= roundLength;
+                    roundExtrude.y /= roundLength;
+                    roundExtrude.z /= roundLength;
+                    pushLineVertex(p, roundExtrude, 1.0, r, prefixTotalLineLength, lineStyleIndex, true, false, vertexCount,
+                                   prePreIndex, preIndex, lineAttributes, lineIndices);
+                    if (r == 0) {
+                        firstIndex = preIndex;
+                    } else {
+                        lastIndex = preIndex;
+                    }
+                    prePreIndex = centerIndex;
+                }
+                prePreIndex = originalPrePreIndex;
+                preIndex = originalPreIndex;
+            }
             for (int8_t side = -1; side <= 1; side += 2) {
-                lineAttributes.push_back(p.x);
-                lineAttributes.push_back(p.y);
-                if (is3d) {
-                    lineAttributes.push_back(p.z);
+                Vec3D pointExtrude(extrude.x * (float)side, extrude.y * (float)side, extrude.z * (float)side);
+                if (capType == LineCapType::SQUARE) {
+                    pointExtrude.x = extrudeLineVec.x * endSide;
+                    pointExtrude.y = extrudeLineVec.y * endSide;
+                    pointExtrude.z = extrudeLineVec.z * endSide;
                 }
-                if (i == 0 && capType == LineCapType::SQUARE) {
-                    lineAttributes.push_back(extrude.x * (float)side - extrudeLineVec.x);
-                    lineAttributes.push_back(extrude.y * (float)side - extrudeLineVec.y);
-                    if (is3d) {
-                        lineAttributes.push_back(extrude.z * (float)side - extrudeLineVec.z);
-                    }
-                }
-                else if (i == pointCount-1 && capType == LineCapType::SQUARE) {
-                    lineAttributes.push_back(extrude.x * (float)side + extrudeLineVec.x);
-                    lineAttributes.push_back(extrude.y * (float)side + extrudeLineVec.y);
-                    if (is3d) {
-                        lineAttributes.push_back(extrude.z * (float)side + extrudeLineVec.z);
-                    }
-                }
-                else {
-                    lineAttributes.push_back(extrude.x * (float)side);
-                    lineAttributes.push_back(extrude.y * (float)side);
-                    if (is3d) {
-                        lineAttributes.push_back(extrude.z * (float)side);
-                    }
-                }
+                pushLineVertex(p, pointExtrude, 1.0, side, prefixTotalLineLength, lineStyleIndex, true, side == -1, vertexCount,
+                               prePreIndex, preIndex, lineAttributes, lineIndices);
 
-
-                // Line Side
-                lineAttributes.push_back((float)side);
-
-                // Segment Start Length Position (length prefix sum)
-                lineAttributes.push_back(prefixTotalLineLength);
-
-                // Style Info
-                lineAttributes.push_back(lineStyleIndex);
-
-                uint32_t newIndex = vertexCount++;
-                if (prePreIndex != -1 && preIndex != -1) {
-                    if (side == -1) {
-                        lineIndices.push_back(prePreIndex);
-                        lineIndices.push_back(preIndex);
-                        lineIndices.push_back(newIndex);
-                    }
-                    else {
-                        lineIndices.push_back(newIndex);
-                        lineIndices.push_back(preIndex);
-                        lineIndices.push_back(prePreIndex);
-                    }
-                }
-                prePreIndex = preIndex;
-                preIndex = newIndex;
+                //                if (i == 0 && side == -1 && capType == LineCapType::ROUND) {
+                //                    endExtrude = Vec3D(-extrudeLineVec.x, -extrudeLineVec.y, -extrudeLineVec.z);
+                //                    auto originalPrePre = prePreIndex;
+                //                    auto originalPre = preIndex;
+                //                    pushLineVertex(p, Vec3D(0, 0, 0), Vec3D(0, 0, 0), 1.0, 0.0, prefixTotalLineLength,
+                //                    lineStyleIndex, false, vertexCount, prePreIndex, preIndex, lineAttributes, lineIndices);
+                //                    pushLineVertex(p, Vec3D(0, 0, 0), endExtrude, 1.0, 0.0, prefixTotalLineLength, lineStyleIndex,
+                //                    true, vertexCount, prePreIndex, preIndex, lineAttributes, lineIndices); prePreIndex =
+                //                    originalPrePre; preIndex = originalPre;
+                //                }
             }
         }
     }
@@ -224,6 +223,49 @@ void LineGroup2dLayerObject::buildLines(const std::vector<std::tuple<std::vector
     auto attributes = SharedBytes((int64_t)lineAttributes.data(), (int32_t)lineAttributes.size(), (int32_t)sizeof(float));
     auto indices = SharedBytes((int64_t)lineIndices.data(), (int32_t)lineIndices.size(), (int32_t)sizeof(uint32_t));
     line->setLines(attributes, indices, origin, is3d);
+}
+
+void LineGroup2dLayerObject::pushLineVertex(const Vec3D &p, const Vec3D &extrude, const float extrudeScale, const float side,
+                                            const float prefixTotalLineLength, const int lineStyleIndex, const bool addTriangle,
+                                            const bool reverse, uint32_t &vertexCount, int32_t &prePreIndex, int32_t &preIndex,
+                                            std::vector<float> &lineAttributes, std::vector<uint32_t> &lineIndices) {
+    lineAttributes.push_back(p.x * extrudeScale);
+    lineAttributes.push_back(p.y * extrudeScale);
+    if (is3d) {
+        lineAttributes.push_back(p.z * extrudeScale);
+    }
+    lineAttributes.push_back(extrude.x * extrudeScale);
+    lineAttributes.push_back(extrude.y * extrudeScale);
+    if (is3d) {
+        lineAttributes.push_back(extrude.z * extrudeScale);
+    }
+
+    // Line Side
+    lineAttributes.push_back((float)side);
+
+    // Segment Start Length Position (length prefix sum)
+    lineAttributes.push_back(prefixTotalLineLength);
+
+    // Style Info
+    lineAttributes.push_back(lineStyleIndex);
+
+    uint32_t newIndex = vertexCount++;
+
+    if (addTriangle) {
+        if (prePreIndex != -1 && preIndex != -1) {
+            if (reverse) {
+                lineIndices.push_back(newIndex);
+                lineIndices.push_back(preIndex);
+                lineIndices.push_back(prePreIndex);
+            } else {
+                lineIndices.push_back(prePreIndex);
+                lineIndices.push_back(preIndex);
+                lineIndices.push_back(newIndex);
+            }
+        }
+    }
+    prePreIndex = preIndex;
+    preIndex = newIndex;
 }
 
 void LineGroup2dLayerObject::setStyles(const std::vector<LineStyle> &styles) {

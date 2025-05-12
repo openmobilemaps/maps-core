@@ -45,6 +45,7 @@ class LineGroup2dLayerObject : public LayerObjectInterface {
 
   private:
     void buildLines(const std::vector<std::tuple<std::vector<Vec3D>, int>> &renderCoords, const Vec3D & origin, LineCapType capType);
+    void pushLineVertex(const Vec3D &p, const Vec3D &extrude, const float extrudeScale, const float side, const float prefixTotalLineLength, const int lineStyleIndex, const bool addTriangle, const bool reverse, uint32_t &vertexCount, int32_t &prePreIndex, int32_t &preIndex, std::vector<float> &lineAttributes, std::vector<uint32_t> &lineIndices);
     std::shared_ptr<CoordinateConversionHelperInterface> conversionHelper;
     std::shared_ptr<LineGroup2dInterface> line;
     std::shared_ptr<LineGroupShaderInterface> shader;
