@@ -157,11 +157,10 @@ void LineGroup2dLayerObject::buildLines(const std::vector<std::tuple<std::vector
                     }
 
                     const double cosHalfAngle = extrude.x * normal.x + extrude.y * normal.y;
-//                    extrudeScale = cosHalfAngle != 0 ? 1.0 / cosHalfAngle : 1.0;
-                    extrudeScale = 1.0;
-//                    if (extrudeScale > 1.0) {
-//                        extrudeScale = 1.0;
-//                    }
+                    extrudeScale = cosHalfAngle != 0 ? 1.0 / cosHalfAngle : 1.0;
+                    if (extrudeScale > 2.0) {
+                        extrudeScale = 2.0;
+                    }
                 } else {
                     extrude = normal;
                     extrudeLineVec = lineVec;
@@ -246,10 +245,10 @@ void LineGroup2dLayerObject::pushLineVertex(const Vec3D &p, const Vec3D &extrude
                                             const float prefixTotalLineLength, const int lineStyleIndex, const bool addTriangle,
                                             const bool reverse, uint32_t &vertexCount, int32_t &prePreIndex, int32_t &preIndex,
                                             std::vector<float> &lineAttributes, std::vector<uint32_t> &lineIndices) {
-    lineAttributes.push_back(p.x * extrudeScale);
-    lineAttributes.push_back(p.y * extrudeScale);
+    lineAttributes.push_back(p.x);
+    lineAttributes.push_back(p.y);
     if (is3d) {
-        lineAttributes.push_back(p.z * extrudeScale);
+        lineAttributes.push_back(p.z);
     }
     lineAttributes.push_back(extrude.x * extrudeScale);
     lineAttributes.push_back(extrude.y * extrudeScale);
