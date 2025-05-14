@@ -104,6 +104,10 @@ open class MCMapView: MTKView {
 
         depthStencilPixelFormat = .stencil8
 
+         if #available(iOS 16.0, *) {
+             depthStencilStorageMode = .memoryless
+         }
+
         isMultipleTouchEnabled = true
 
         preferredFramesPerSecond = 120

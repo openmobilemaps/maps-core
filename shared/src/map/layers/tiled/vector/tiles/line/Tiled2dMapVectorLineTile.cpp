@@ -346,10 +346,15 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
                     if (styleIndex == -1) {
 
                         auto lineCapValue = lineDescription->style.lineCapEvaluator.getValue();
-                        static const LineCapType defaultValue = LineCapType::BUTT;
                         LineCapType capType = LineCapType::BUTT;
                         if (lineCapValue) {
-                            capType = lineCapValue->evaluateOr(evalContext, defaultValue);
+                            capType = lineCapValue->evaluateOr(evalContext, capType);
+                        }
+
+                        auto lineJoinValue = lineDescription->style.lineJoinEvaluator.getValue();
+                        LineJoinType joinType = LineJoinType::MITER;
+                        if (lineJoinValue) {
+                            joinType = lineJoinValue->evaluateOr(evalContext, joinType);
                         }
 
                         if (!featureGroups.empty() && featureGroups.back().size() < maxStylesPerGroup) {
@@ -369,6 +374,7 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
                             shader->asShaderProgramInterface()->setBlendMode(lineDescription->style.getBlendMode(EvaluationContext(0.0, dpFactor, std::make_shared<FeatureContext>(), featureStateManager)));
                             shaders.push_back(shader);
                             capTypes.push_back(capType);
+                            joinTypes.push_back(joinType);
                             if (isSimpleLine) {
                                 reusableSimpleLineStyles.push_back({  ShaderSimpleLineStyle {0} });
                             } else {
@@ -470,6 +476,7 @@ void Tiled2dMapVectorLineTile::addLines(const std::vector<std::vector<std::vecto
         for (const auto &lineSubGroup: styleIdLinesVector[styleGroupIndex]) {
             const auto &shader = shaders.at(styleGroupIndex);
             const auto capType = capTypes.at(styleGroupIndex);
+            const auto joinType = joinTypes.at(styleGroupIndex);
             auto lineGroupGraphicsObject = objectFactory->createLineGroup(shader->asShaderProgramInterface());
 
 #if DEBUG
@@ -480,7 +487,7 @@ void Tiled2dMapVectorLineTile::addLines(const std::vector<std::vector<std::vecto
                                                                             shader,
                                                                             is3d);
 
-            lineGroupObject->setLines(lineSubGroup, tileInfo.tileInfo.bounds.topLeft.systemIdentifier, origin, capType);
+            lineGroupObject->setLines(lineSubGroup, tileInfo.tileInfo.bounds.topLeft.systemIdentifier, origin, capType, joinType);
 
             lineGroupObjects.push_back(lineGroupObject);
             newGraphicObjects.push_back(lineGroupGraphicsObject->asGraphicsObject());

@@ -12,8 +12,11 @@
 #include "Logger.h"
 #include "RenderLineDescription.h"
 #include "ShaderLineStyle.h"
+#include "Vec3DHelper.h"
 
 #include "TrigonometryLUT.h"
+#include <cmath>
+#include <utility>
 
 LineGroup2dLayerObject::LineGroup2dLayerObject(const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                                                const std::shared_ptr<LineGroup2dInterface> &line,
@@ -116,8 +119,9 @@ void LineGroup2dLayerObject::buildLines(const std::vector<std::tuple<std::vector
 
         float prefixTotalLineLength = 0.0;
         float lineLength = 0;
+        float crossProduct = 0;
 
-        std::optional<Vec3D> pLast, lastNormal = std::nullopt, lastLineVec = std::nullopt;
+        Vec3D pLast(0,0,0), normal(0,0,0), lastNormal(0,0,0), lineVec(0,0,0), lastLineVec(0,0,0);
 
         int32_t preIndex = -1, prePreIndex = -1;
 
@@ -130,30 +134,28 @@ void LineGroup2dLayerObject::buildLines(const std::vector<std::tuple<std::vector
 
             Vec3D extrude(0, 0, 0), extrudeLineVec(0, 0, 0);
 
+            if (i > 0) {
+                lastNormal = normal;
+                lastLineVec = lineVec;
+            }
+
             if (i < pointCount - 1) {
                 const Vec3D &pNext = renderCoords[i + 1];
 
-                Vec3D lineVec(pNext.x - p.x, pNext.y - p.y, pNext.z - p.z);
-                lineLength = std::sqrt(lineVec.x * lineVec.x + lineVec.y * lineVec.y + lineVec.z * lineVec.z);
+                lineVec = Vec3D(pNext.x - p.x, pNext.y - p.y, pNext.z - p.z);
+                lineLength = Vec3DHelper::length(lineVec);
                 if (lineLength == 0) {
                     continue;
                 }
-                lineVec.x /= lineLength;
-                lineVec.y /= lineLength;
-                lineVec.z /= lineLength;
+                lineVec /= lineLength;
 
-                Vec3D normal(-lineVec.y, lineVec.x, 0.0);
-                double normalLength = sqrt(normal.x * normal.x + normal.y * normal.y);
-                normal.x /= normalLength;
-                normal.y /= normalLength;
+                normal = Vec3DHelper::normalize(Vec3D(-lineVec.y, lineVec.x, 0.0));
 
-                if (lastNormal) {
-                    extrude.x = (normal.x + lastNormal->x) / 2.0;
-                    extrude.y = (normal.y + lastNormal->y) / 2.0;
-                    double extrudeLength = sqrt(extrude.x * extrude.x + extrude.y * extrude.y);
+                if (i > 0) {
+                    extrude = (normal + lastNormal) / 2.0;
+                    double extrudeLength = Vec3DHelper::length(extrude);
                     if (extrudeLength > 0) {
-                        extrude.x /= extrudeLength;
-                        extrude.y /= extrudeLength;
+                        extrude /= extrudeLength;
                     }
 
                     const double cosHalfAngle = extrude.x * normal.x + extrude.y * normal.y;
@@ -161,18 +163,16 @@ void LineGroup2dLayerObject::buildLines(const std::vector<std::tuple<std::vector
                     if (extrudeScale > 2.0) {
                         extrudeScale = 2.0;
                     }
+
+                    crossProduct = lastLineVec.x * lineVec.y - lastLineVec.y * lineVec.x;
                 } else {
                     extrude = normal;
                     extrudeLineVec = lineVec;
                 }
-                lastNormal = normal;
-                lastLineVec = lineVec;
-            } else if (lastNormal && lastLineVec) {
+            } else if (i > 0) {
                 lineLength = 0;
-                extrude = *lastNormal;
-                extrudeLineVec.x = -lastLineVec->x;
-                extrudeLineVec.y = -lastLineVec->y;
-                extrudeLineVec.z = -lastLineVec->z;
+                extrude = lastNormal;
+                extrudeLineVec = -lastLineVec;
             } else {
                 lineLength = 0;
                 continue;
@@ -192,14 +192,7 @@ void LineGroup2dLayerObject::buildLines(const std::vector<std::tuple<std::vector
                                prePreIndex, preIndex, lineAttributes, lineIndices);
                 int32_t centerIndex = preIndex, firstIndex = -1, lastIndex = -1;
                 for (float r = -1; r <= 1; r += 0.2) {
-                    Vec3D roundExtrude(extrude.x * r - extrudeLineVec.x * (1.0 - abs(r)),
-                                       extrude.y * r - extrudeLineVec.y * (1.0 - abs(r)),
-                                       extrude.z * r - extrudeLineVec.z * (1.0 - abs(r)));
-                    float roundLength =
-                        sqrt(roundExtrude.x * roundExtrude.x + roundExtrude.y * roundExtrude.y + roundExtrude.z * roundExtrude.z);
-                    roundExtrude.x /= roundLength;
-                    roundExtrude.y /= roundLength;
-                    roundExtrude.z /= roundLength;
+                    Vec3D roundExtrude = Vec3DHelper::normalize(extrude * r - extrudeLineVec * (1.0 - abs(r)));
                     pushLineVertex(p, roundExtrude, 1.0, r, prefixTotalLineLength, lineStyleIndex, true, false, vertexCount,
                                    prePreIndex, preIndex, lineAttributes, lineIndices);
                     if (r == 0) {
@@ -213,25 +206,26 @@ void LineGroup2dLayerObject::buildLines(const std::vector<std::tuple<std::vector
                 preIndex = originalPreIndex;
             }
             for (int8_t side = -1; side <= 1; side += 2) {
-                Vec3D pointExtrude(extrude.x * (float)side, extrude.y * (float)side, extrude.z * (float)side);
-                if (capType == LineCapType::SQUARE) {
-                    pointExtrude.x = extrudeLineVec.x * endSide;
-                    pointExtrude.y = extrudeLineVec.y * endSide;
-                    pointExtrude.z = extrudeLineVec.z * endSide;
+                Vec3D pointExtrude = extrude * (double)side;
+                if (capType == LineCapType::SQUARE && endSide != 0) {
+                    pointExtrude = pointExtrude + extrudeLineVec * endSide;
                 }
-                pushLineVertex(p, pointExtrude, extrudeScale, side, prefixTotalLineLength, lineStyleIndex, true, side == -1, vertexCount,
-                               prePreIndex, preIndex, lineAttributes, lineIndices);
+                if (side * crossProduct < 0 && endSide == 0 && abs(crossProduct) > 0.3 && joinType != LineJoinType::MITER) {
+                    float stepSize = joinType == LineJoinType::ROUND ? 0.1 : 1.0;
+                    for (float r = 0; r <= 1; r += stepSize) {
+                        pointExtrude = Vec3DHelper::normalize(lastNormal * (1.0 - r) + normal * r) * (double)side;
+                        pushLineVertex(p, pointExtrude, 1.0, side, prefixTotalLineLength, lineStyleIndex, true, false, vertexCount,
+                                       prePreIndex, preIndex, lineAttributes, lineIndices);
+                        std::swap(prePreIndex, preIndex);
+                    }
+                    std::swap(prePreIndex, preIndex);
+                }
+                else {
+                    pushLineVertex(p, pointExtrude, extrudeScale, side, prefixTotalLineLength, lineStyleIndex, true, side == -1, vertexCount,
+                                   prePreIndex, preIndex, lineAttributes, lineIndices);
+                }
 
-                //                if (i == 0 && side == -1 && capType == LineCapType::ROUND) {
-                //                    endExtrude = Vec3D(-extrudeLineVec.x, -extrudeLineVec.y, -extrudeLineVec.z);
-                //                    auto originalPrePre = prePreIndex;
-                //                    auto originalPre = preIndex;
-                //                    pushLineVertex(p, Vec3D(0, 0, 0), Vec3D(0, 0, 0), 1.0, 0.0, prefixTotalLineLength,
-                //                    lineStyleIndex, false, vertexCount, prePreIndex, preIndex, lineAttributes, lineIndices);
-                //                    pushLineVertex(p, Vec3D(0, 0, 0), endExtrude, 1.0, 0.0, prefixTotalLineLength, lineStyleIndex,
-                //                    true, vertexCount, prePreIndex, preIndex, lineAttributes, lineIndices); prePreIndex =
-                //                    originalPrePre; preIndex = originalPre;
-                //                }
+
             }
         }
     }
