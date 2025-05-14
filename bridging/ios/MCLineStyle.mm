@@ -16,6 +16,7 @@
                              dashFade:(float)dashFade
                    dashAnimationSpeed:(float)dashAnimationSpeed
                               lineCap:(MCLineCapType)lineCap
+                             lineJoin:(MCLineJoinType)lineJoin
                                offset:(float)offset
                                dotted:(BOOL)dotted
                            dottedSkew:(float)dottedSkew
@@ -31,6 +32,7 @@
         _dashFade = dashFade;
         _dashAnimationSpeed = dashAnimationSpeed;
         _lineCap = lineCap;
+        _lineJoin = lineJoin;
         _offset = offset;
         _dotted = dotted;
         _dottedSkew = dottedSkew;
@@ -48,6 +50,7 @@
                                   dashFade:(float)dashFade
                         dashAnimationSpeed:(float)dashAnimationSpeed
                                    lineCap:(MCLineCapType)lineCap
+                                  lineJoin:(MCLineJoinType)lineJoin
                                     offset:(float)offset
                                     dotted:(BOOL)dotted
                                 dottedSkew:(float)dottedSkew
@@ -62,6 +65,7 @@
                               dashFade:dashFade
                     dashAnimationSpeed:dashAnimationSpeed
                                lineCap:lineCap
+                              lineJoin:lineJoin
                                 offset:offset
                                 dotted:dotted
                             dottedSkew:dottedSkew];
@@ -70,7 +74,7 @@
 #ifndef DJINNI_DISABLE_DESCRIPTION_METHODS
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@ %p color:%@ gapColor:%@ opacity:%@ blur:%@ widthType:%@ width:%@ dashArray:%@ dashFade:%@ dashAnimationSpeed:%@ lineCap:%@ offset:%@ dotted:%@ dottedSkew:%@>", self.class, (void *)self, self.color, self.gapColor, @(self.opacity), @(self.blur), @(self.widthType), @(self.width), self.dashArray, @(self.dashFade), @(self.dashAnimationSpeed), @(self.lineCap), @(self.offset), @(self.dotted), @(self.dottedSkew)];
+    return [NSString stringWithFormat:@"<%@ %p color:%@ gapColor:%@ opacity:%@ blur:%@ widthType:%@ width:%@ dashArray:%@ dashFade:%@ dashAnimationSpeed:%@ lineCap:%@ lineJoin:%@ offset:%@ dotted:%@ dottedSkew:%@>", self.class, (void *)self, self.color, self.gapColor, @(self.opacity), @(self.blur), @(self.widthType), @(self.width), self.dashArray, @(self.dashFade), @(self.dashAnimationSpeed), @(self.lineCap), @(self.lineJoin), @(self.offset), @(self.dotted), @(self.dottedSkew)];
 }
 
 #endif

@@ -21,7 +21,20 @@ Line2dLayerObject::Line2dLayerObject(const std::shared_ptr<CoordinateConversionH
     : conversionHelper(conversionHelper)
     , line(line)
     , shader(shader)
-    , style(ColorStateList(Color(0.0f,0.0f,0.0f,0.0f), Color(0.0f,0.0f,0.0f,0.0f)), ColorStateList(Color(0.0f,0.0f,0.0f,0.0f), Color(0.0f,0.0f,0.0f,0.0f)), 0.0, 0.0, SizeType::SCREEN_PIXEL, 0.0, std::vector<float>(), 0, 0, LineCapType::BUTT, 0.0, false, 1.0)
+, style(ColorStateList(Color(0.0f,0.0f,0.0f,0.0f), Color(0.0f,0.0f,0.0f,0.0f)),
+        ColorStateList(Color(0.0f,0.0f,0.0f,0.0f), Color(0.0f,0.0f,0.0f,0.0f)),
+        0.0,
+        0.0,
+        SizeType::SCREEN_PIXEL,
+        0.0,
+        std::vector<float>(),
+        0,
+        0,
+        LineCapType::BUTT,
+        LineJoinType::MITER,
+        0.0,
+        false,
+        1.0)
     , highlighted(false)
     , is3d(is3d)
 {

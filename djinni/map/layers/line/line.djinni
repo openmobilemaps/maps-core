@@ -15,6 +15,12 @@ line_cap_type = enum {
 	SQUARE;
 }
 
+line_join_type = enum {
+	BEVEL;
+	ROUND;
+	MITER;
+}
+
 line_style = record {
     color: color_state_list;
     gap_color: color_state_list;
@@ -26,6 +32,7 @@ line_style = record {
     dash_fade: f32;
     dash_animation_speed: f32;
     line_cap: line_cap_type;
+    line_join: line_join_type;
     offset: f32;
     dotted: bool;
     dotted_skew: f32;

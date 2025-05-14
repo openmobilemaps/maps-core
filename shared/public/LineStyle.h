@@ -5,6 +5,7 @@
 
 #include "ColorStateList.h"
 #include "LineCapType.h"
+#include "LineJoinType.h"
 #include "SizeType.h"
 #include <utility>
 #include <vector>
@@ -20,6 +21,7 @@ struct LineStyle final {
     float dashFade;
     float dashAnimationSpeed;
     LineCapType lineCap;
+    LineJoinType lineJoin;
     float offset;
     bool dotted;
     float dottedSkew;
@@ -34,6 +36,7 @@ struct LineStyle final {
               float dashFade_,
               float dashAnimationSpeed_,
               LineCapType lineCap_,
+              LineJoinType lineJoin_,
               float offset_,
               bool dotted_,
               float dottedSkew_)
@@ -47,6 +50,7 @@ struct LineStyle final {
     , dashFade(std::move(dashFade_))
     , dashAnimationSpeed(std::move(dashAnimationSpeed_))
     , lineCap(std::move(lineCap_))
+    , lineJoin(std::move(lineJoin_))
     , offset(std::move(offset_))
     , dotted(std::move(dotted_))
     , dottedSkew(std::move(dottedSkew_))

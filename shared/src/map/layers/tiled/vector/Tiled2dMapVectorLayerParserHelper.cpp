@@ -401,6 +401,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                     parser.parseValue(val["paint"]["line-dasharray"]),
                     parser.parseValue(val["paint"]["line-blur"]),
                     parser.parseValue(val["layout"]["line-cap"]),
+                    parser.parseValue(val["layout"]["line-join"]),
                     parser.parseValue(val["paint"]["line-offset"]),
                     blendMode,
                     parser.parseValue(val["paint"]["line-dotted"]),

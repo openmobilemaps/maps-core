@@ -5,6 +5,7 @@
 #import "DJIMarshal+Private.h"
 #import "MCColorStateList+Private.h"
 #import "MCLineCapType+Private.h"
+#import "MCLineJoinType+Private.h"
 #import "MCSizeType+Private.h"
 #include <cassert>
 
@@ -23,6 +24,7 @@ auto LineStyle::toCpp(ObjcType obj) -> CppType
             ::djinni::F32::toCpp(obj.dashFade),
             ::djinni::F32::toCpp(obj.dashAnimationSpeed),
             ::djinni::Enum<::LineCapType, MCLineCapType>::toCpp(obj.lineCap),
+            ::djinni::Enum<::LineJoinType, MCLineJoinType>::toCpp(obj.lineJoin),
             ::djinni::F32::toCpp(obj.offset),
             ::djinni::Bool::toCpp(obj.dotted),
             ::djinni::F32::toCpp(obj.dottedSkew)};
@@ -40,6 +42,7 @@ auto LineStyle::fromCpp(const CppType& cpp) -> ObjcType
                                      dashFade:(::djinni::F32::fromCpp(cpp.dashFade))
                            dashAnimationSpeed:(::djinni::F32::fromCpp(cpp.dashAnimationSpeed))
                                       lineCap:(::djinni::Enum<::LineCapType, MCLineCapType>::fromCpp(cpp.lineCap))
+                                     lineJoin:(::djinni::Enum<::LineJoinType, MCLineJoinType>::fromCpp(cpp.lineJoin))
                                        offset:(::djinni::F32::fromCpp(cpp.offset))
                                        dotted:(::djinni::Bool::fromCpp(cpp.dotted))
                                    dottedSkew:(::djinni::F32::fromCpp(cpp.dottedSkew))];

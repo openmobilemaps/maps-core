@@ -14,6 +14,7 @@ data class LineStyle(
     val dashFade: Float,
     val dashAnimationSpeed: Float,
     val lineCap: LineCapType,
+    val lineJoin: LineJoinType,
     val offset: Float,
     val dotted: Boolean,
     val dottedSkew: Float,
