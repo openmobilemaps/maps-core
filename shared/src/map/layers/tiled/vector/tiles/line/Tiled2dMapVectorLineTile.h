@@ -60,6 +60,7 @@ private:
 
     std::vector<std::shared_ptr<LineGroupShaderInterface>> shaders;
     std::vector<LineCapType> capTypes;
+    std::vector<LineJoinType> joinTypes;
 
     std::vector<std::shared_ptr<LineGroup2dLayerObject>> lines;
     std::vector<std::shared_ptr<RenderObjectInterface>> renderObjects;

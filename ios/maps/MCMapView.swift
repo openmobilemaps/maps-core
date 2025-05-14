@@ -100,9 +100,9 @@ open class MCMapView: MTKView, @unchecked Sendable {
 
         depthStencilPixelFormat = .stencil8
 
-        // if #available(iOS 16.0, *) {
-        //   depthStencilStorageMode = .private
-        // }
+         if #available(iOS 16.0, *) {
+             depthStencilStorageMode = .memoryless
+         }
 
         isMultipleTouchEnabled = true
 
