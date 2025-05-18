@@ -119,7 +119,7 @@ void LineGroup2dLayerObject::buildLines(const std::vector<std::tuple<std::vector
 
         float prefixTotalLineLength = 0.0;
         float lineLength = 0;
-        float crossProduct = 0;
+        float cosAngle = 0, cosHalfAngle = 0;
 
         Vec3D pLast(0,0,0), normal(0,0,0), lastNormal(0,0,0), lineVec(0,0,0), lastLineVec(0,0,0);
 
@@ -158,13 +158,10 @@ void LineGroup2dLayerObject::buildLines(const std::vector<std::tuple<std::vector
                         extrude /= extrudeLength;
                     }
 
-                    const double cosHalfAngle = extrude.x * normal.x + extrude.y * normal.y;
+                    cosAngle = normal.x * lastNormal.x - normal.y * lastNormal.x;
+                    cosHalfAngle = extrude.x * normal.x + extrude.y * normal.y;
                     extrudeScale = cosHalfAngle != 0 ? 1.0 / cosHalfAngle : 1.0;
-                    if (extrudeScale > 2.0) {
-                        extrudeScale = 2.0;
-                    }
 
-                    crossProduct = lastLineVec.x * lineVec.y - lastLineVec.y * lineVec.x;
                 } else {
                     extrude = normal;
                     extrudeLineVec = lineVec;
@@ -210,8 +207,10 @@ void LineGroup2dLayerObject::buildLines(const std::vector<std::tuple<std::vector
                 if (capType == LineCapType::SQUARE && endSide != 0) {
                     pointExtrude = pointExtrude + extrudeLineVec * endSide;
                 }
-                if (side * crossProduct < 0 && endSide == 0 && abs(crossProduct) > 0.3 && joinType != LineJoinType::MITER) {
-                    float stepSize = joinType == LineJoinType::ROUND ? 0.1 : 1.0;
+                if (side * cosAngle < 0 && endSide == 0 && extrudeScale > 0.1 && joinType != LineJoinType::MITER) {
+                    const double approxAngle = 2 * std::sqrt(2 - 2 * cosHalfAngle);
+                    // 2.86 ~= 180/pi / 20 -> approximately one slice per 20 degrees
+                    double stepSize = (joinType == LineJoinType::ROUND) ? 1.0 / round(approxAngle * 2.86) : 1.0;
                     for (float r = 0; r <= 1; r += stepSize) {
                         pointExtrude = Vec3DHelper::normalize(lastNormal * (1.0 - r) + normal * r) * (double)side;
                         pushLineVertex(p, pointExtrude, 1.0, side, prefixTotalLineLength, lineStyleIndex, true, false, vertexCount,
