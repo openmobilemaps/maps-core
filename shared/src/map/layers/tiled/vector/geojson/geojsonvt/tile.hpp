@@ -69,7 +69,6 @@ private:
 
         size_t len = geometry->coordinates.size();
 
-        featureContext = geometry->featureContext;
         coordinates.reserve(len);
 
         std::vector<size_t> coordIndices;
