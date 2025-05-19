@@ -797,7 +797,7 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(VectorModificatio
             auto br = Vec2D(xw, y);
 
             Quad2dD quad = Quad2dD(tl, tr, br, bl);
-            quad = TextHelper::rotateQuad2d(quad, p, angleDeg);
+            quad = TextHelper::rotateQuad2d(quad, p, sinAngle, cosAngle);
 
             auto dy = Vec2DHelper::normalize(Vec2D(quad.bottomLeft.x - quad.topLeft.x, quad.bottomLeft.y - quad.topLeft.y));
             dy.x *= lineCenteringParameter * fontSize;
@@ -955,25 +955,38 @@ DistanceIndex Tiled2dMapVectorSymbolLabelObject::findReferencePointIndices() {
     auto point = is3d ? referencePointScreen : referencePoint;
     auto distance = std::numeric_limits<double>::max();
 
+    auto point2D = Vec2D(point.x, point.y);
+
     double tMin = 0.0f;
     int iMin = 0;
 
     for(int i=1; i < renderLineCoordinatesCount; ++i) {
-        auto start = screenLineCoordinates[i-1];
-        auto end = screenLineCoordinates[i];
+        const auto &start = screenLineCoordinates[i-1];
+        const auto &end = screenLineCoordinates[i];
 
-        auto length = Vec2DHelper::distance(Vec2D(start.x, start.y), Vec2D(end.x, end.y));
+        auto lengthSquared = Vec2DHelper::distanceSquaredWith3D(start, end);
 
         double t = 0.0;
-        if(length > 0) {
-            auto dot = Vec2D(point.x - start.x, point.y - start.y) * Vec2D(end.x - start.x, end.y - start.y);
-            t = dot / (length * length);
+        double dist = 0.0;
+
+        if(lengthSquared > 0) {
+            auto endMinusStart = Vec2D(end.x - start.x, end.y - start.y);
+            auto dot = Vec2D(point.x - start.x, point.y - start.y) * endMinusStart;
+            t = dot / lengthSquared;
+
+            if(t > 1.0) {
+                // outside, so skip computation
+                continue;
+            }
+
+            auto proj = Vec2D(start.x + t * endMinusStart.x, start.y + t * endMinusStart.y);
+            dist = Vec2DHelper::distanceSquared(proj, point2D);
+        } else {
+            // here t == 0.0
+            dist = Vec2DHelper::distanceSquared(Vec2D(start.x, start.y), point2D);
         }
 
-        auto proj = Vec2D(start.x + t * (end.x - start.x), start.y + t * (end.y - start.y));
-        auto dist = Vec2DHelper::distance(proj, Vec2D(point.x, point.y));
-
-        if(dist < distance && t >= 0.0 && t <= 1.0) {
+        if(dist < distance) {
             tMin = t;
             iMin = i-1;
             distance = dist;

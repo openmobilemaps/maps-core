@@ -53,6 +53,14 @@ class Vec2DHelper {
         return (from.x - to.x) * (from.x - to.x) + (from.y - to.y) * (from.y - to.y);
     }
 
+    static inline double distanceWith3D(const ::Vec3D &from, const ::Vec3D &to) {
+        return std::sqrt((from.x - to.x) * (from.x - to.x) + (from.y - to.y) * (from.y - to.y));
+    }
+
+    static inline double distanceSquaredWith3D(const ::Vec3D &from, const ::Vec3D &to) {
+        return (from.x - to.x) * (from.x - to.x) + (from.y - to.y) * (from.y - to.y);
+    }
+
     static inline ::Vec2D midpoint(const ::Vec2D &from, const ::Vec2D &to) {
         return Vec2D((from.x + to.x) / 2.0, (from.y + to.y) / 2.0);
     }
@@ -73,6 +81,14 @@ class Vec2DHelper {
     static inline ::Vec2D rotate(const ::Vec2D &p, const ::Vec2D &origin, double angleDegree) {
         const double sinAngle = sin(angleDegree * M_PI / 180.0);
         const double cosAngle = cos(angleDegree * M_PI / 180.0);
+        const double x = p.x - origin.x;
+        const double y = p.y - origin.y;
+        const double rX = x * cosAngle - y * sinAngle;
+        const double rY = x * sinAngle + y * cosAngle;
+        return Vec2D(rX + origin.x, rY + origin.y);
+    }
+
+    static inline ::Vec2D rotate(const ::Vec2D &p, const ::Vec2D &origin, double sinAngle, double cosAngle) {
         const double x = p.x - origin.x;
         const double y = p.y - origin.y;
         const double rX = x * cosAngle - y * sinAngle;
