@@ -131,6 +131,7 @@ void LineGroup2dLayerObject::buildLines(const std::vector<std::tuple<std::vector
             prefixTotalLineLength += lineLength;
 
             float extrudeScale = 1.0;
+            LineJoinType vertexJoinType = joinType;
 
             Vec3D extrude(0, 0, 0), extrudeLineVec(0, 0, 0);
 
@@ -160,8 +161,11 @@ void LineGroup2dLayerObject::buildLines(const std::vector<std::tuple<std::vector
 
                     cosAngle = normal.x * lastNormal.x - normal.y * lastNormal.x;
                     cosHalfAngle = extrude.x * normal.x + extrude.y * normal.y;
-                    extrudeScale = cosHalfAngle != 0 ? 1.0 / cosHalfAngle : 1.0;
-
+                    extrudeScale = cosHalfAngle != 0 ? abs(1.0 / cosHalfAngle) : 1.0;
+                    if (extrudeScale > 2.0) {
+                        vertexJoinType = LineJoinType::BEVEL;
+                        extrudeScale = 2.0;
+                    }
                 } else {
                     extrude = normal;
                     extrudeLineVec = lineVec;
@@ -247,6 +251,9 @@ void LineGroup2dLayerObject::pushLineVertex(const Vec3D &p, const Vec3D &extrude
     lineAttributes.push_back(extrude.y * extrudeScale);
     if (is3d) {
         lineAttributes.push_back(extrude.z * extrudeScale);
+    }
+    if (abs(extrude.x * extrudeScale) > 100) {
+        printf("");
     }
 
     // Line Side
