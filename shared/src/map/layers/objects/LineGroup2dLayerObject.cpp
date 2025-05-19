@@ -41,11 +41,11 @@ void LineGroup2dLayerObject::setLines(const std::vector<std::tuple<std::vector<V
     std::vector<std::tuple<std::vector<Vec3D>, int>> convertedLines;
 
     for (int lineIndex = 0; lineIndex < numLines; lineIndex++) {
-        int lineStyleIndex = std::get<1>(lines[lineIndex]);
+        auto const &[mapCoords, lineStyleIndex] = lines[lineIndex];
 
         std::vector<Vec3D> renderCoords;
-        for (auto const &mapCoord : std::get<0>(lines[lineIndex])) {
-            Coord renderCoord = conversionHelper->convertToRenderSystem(Coord(systemIdentifier, mapCoord.x, mapCoord.y, 0.0));
+        for (auto const &mapCoord : mapCoords) {
+            const auto& renderCoord = conversionHelper->convertToRenderSystem(Coord(systemIdentifier, mapCoord.x, mapCoord.y, 0.0));
 
             double sinX, cosX, sinY, cosY;
             lut::sincos(renderCoord.y, sinY, cosY);
@@ -58,7 +58,7 @@ void LineGroup2dLayerObject::setLines(const std::vector<std::tuple<std::vector<V
             renderCoords.push_back(Vec3D(x, y, z));
         }
 
-        convertedLines.push_back(std::make_tuple(renderCoords, lineStyleIndex));
+        convertedLines.emplace_back(std::move(renderCoords), lineStyleIndex);
     }
 
     buildLines(convertedLines, origin, capType, joinType);
@@ -75,10 +75,10 @@ void LineGroup2dLayerObject::setLines(const std::vector<std::tuple<std::vector<C
     std::vector<std::tuple<std::vector<Vec3D>, int>> convertedLines;
 
     for (int lineIndex = 0; lineIndex < numLines; lineIndex++) {
-        int lineStyleIndex = std::get<1>(lines[lineIndex]);
+        auto const &[mapCoords, lineStyleIndex] = lines[lineIndex];
 
         std::vector<Vec3D> renderCoords;
-        for (auto const &mapCoord : std::get<0>(lines[lineIndex])) {
+        for (auto const &mapCoord : mapCoords) {
             const auto& renderCoord = conversionHelper->convertToRenderSystem(mapCoord);
 
             double sinX, cosX, sinY, cosY;
@@ -92,7 +92,7 @@ void LineGroup2dLayerObject::setLines(const std::vector<std::tuple<std::vector<C
             renderCoords.push_back(Vec3D(x, y, z));
         }
 
-        convertedLines.push_back(std::make_tuple(renderCoords, lineStyleIndex));
+        convertedLines.emplace_back(std::move(renderCoords), lineStyleIndex);
     }
 
     buildLines(convertedLines, origin, capType, joinType);
@@ -107,9 +107,7 @@ void LineGroup2dLayerObject::buildLines(const std::vector<std::tuple<std::vector
     int numLines = (int)lines.size();
 
     for (int lineIndex = numLines - 1; lineIndex >= 0; lineIndex--) {
-        int lineStyleIndex = std::get<1>(lines[lineIndex]);
-
-        std::vector<Vec3D> renderCoords = std::get<0>(lines[lineIndex]);
+        auto const &[renderCoords, lineStyleIndex] = lines[lineIndex];
 
         int pointCount = (int)renderCoords.size();
 
@@ -143,7 +141,7 @@ void LineGroup2dLayerObject::buildLines(const std::vector<std::tuple<std::vector
             if (i < pointCount - 1) {
                 const Vec3D &pNext = renderCoords[i + 1];
 
-                lineVec = Vec3D(pNext.x - p.x, pNext.y - p.y, pNext.z - p.z);
+                lineVec = pNext - p;
                 lineLength = Vec3DHelper::length(lineVec);
                 if (lineLength == 0) {
                     continue;
@@ -206,6 +204,8 @@ void LineGroup2dLayerObject::buildLines(const std::vector<std::tuple<std::vector
                 prePreIndex = originalPrePreIndex;
                 preIndex = originalPreIndex;
             }
+
+
             for (int8_t side = -1; side <= 1; side += 2) {
                 Vec3D pointExtrude = extrude * (double)side;
                 if (capType == LineCapType::SQUARE && endSide != 0) {
@@ -227,8 +227,6 @@ void LineGroup2dLayerObject::buildLines(const std::vector<std::tuple<std::vector
                     pushLineVertex(p, pointExtrude, extrudeScale, side, prefixTotalLineLength, lineStyleIndex, true, side == -1, vertexCount,
                                    prePreIndex, preIndex, lineAttributes, lineIndices);
                 }
-
-
             }
         }
     }
@@ -251,9 +249,6 @@ void LineGroup2dLayerObject::pushLineVertex(const Vec3D &p, const Vec3D &extrude
     lineAttributes.push_back(extrude.y * extrudeScale);
     if (is3d) {
         lineAttributes.push_back(extrude.z * extrudeScale);
-    }
-    if (abs(extrude.x * extrudeScale) > 100) {
-        printf("");
     }
 
     // Line Side
