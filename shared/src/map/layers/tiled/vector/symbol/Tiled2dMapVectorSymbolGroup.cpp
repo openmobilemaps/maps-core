@@ -635,6 +635,8 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
         int stretchedIconOffset = 0;
         std::unordered_map<std::string, int32_t> textOffsets;
         std::unordered_map<std::string, uint16_t> textStyleOffsets;
+        int32_t singleTextOffset = 0;
+        uint16_t singleTextStyleOffset = 0;
 
         for (auto const &object: symbolObjects) {
             if (object->hasCustomTexture) {
@@ -651,21 +653,36 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
                                                 scaleFactor, rotation, now, viewPortSize, spriteTexture, spriteData);
             auto font = object->getFont();
             if (font) {
-                const auto &textDescriptor = std::find_if(textDescriptors.begin(), textDescriptors.end(),
-                                                          [&font](const auto &textDescriptor) {
-                                                              return font->fontData->info.name ==
-                                                                     textDescriptor->fontResult->fontData->info.name;
-                                                          });
-                if (textDescriptor != textDescriptors.end()) {
-                    int32_t currentTextOffset = textOffsets[font->fontData->info.name];
-                    uint16_t currentStyleOffset = textStyleOffsets[font->fontData->info.name];
-                    object->updateTextProperties((*textDescriptor)->textPositions, (*textDescriptor)->textReferencePositions,
-                                                 (*textDescriptor)->textScales, (*textDescriptor)->textRotations,
-                                                 (*textDescriptor)->textStyles,
-                                                 currentTextOffset, currentStyleOffset,
+                auto n = textDescriptors.size();
+
+                if(n > 1) {
+                    auto &name = font->fontData->info.name;
+
+                    const auto &textDescriptor = std::find_if(textDescriptors.begin(), textDescriptors.end(),
+                                                              [&font, &name](const auto &textDescriptor) {
+                        return name == textDescriptor->fontResult->fontData->info.name;
+                    });
+
+                    if (textDescriptor != textDescriptors.end()) {
+                        int32_t currentTextOffset = textOffsets[name];
+                        uint16_t currentStyleOffset = textStyleOffsets[name];
+                        object->updateTextProperties((*textDescriptor)->textPositions, (*textDescriptor)->textReferencePositions,
+                                                     (*textDescriptor)->textScales, (*textDescriptor)->textRotations,
+                                                     (*textDescriptor)->textStyles,
+                                                     currentTextOffset, currentStyleOffset,
+                                                     zoomIdentifier, scaleFactor, rotation, now, viewPortSize, vpMatrix, origin);
+                        textOffsets[name] = currentTextOffset;
+                        textStyleOffsets[name] = currentStyleOffset;
+                    }
+                } else if(n == 1) {
+                    // use first, as it has to be this one, otherwise multiple fonts
+                    // would have been registered
+                    const auto &td = *(textDescriptors.begin());
+                    object->updateTextProperties(td->textPositions, td->textReferencePositions,
+                                                 td->textScales, td->textRotations,
+                                                 td->textStyles,
+                                                 singleTextOffset, singleTextStyleOffset,
                                                  zoomIdentifier, scaleFactor, rotation, now, viewPortSize, vpMatrix, origin);
-                    textOffsets[font->fontData->info.name] = currentTextOffset;
-                    textStyleOffsets[font->fontData->info.name] = currentStyleOffset;
                 }
             }
         }
