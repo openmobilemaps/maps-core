@@ -170,6 +170,52 @@ Tiled2dMapVectorSymbolLabelObject::Tiled2dMapVectorSymbolLabelObject(const std::
         renderLineCoordinatesCount = renderLineCoordinates.size();
     } else {
         renderLineCoordinatesCount = 0;
+
+        // calculate medians if not on line
+        std::vector<std::pair<int, double>> heights;
+
+        const auto &glyphs = fontResult->fontData->glyphs;
+        int baseLineStartIndex = 0;
+
+        int c = 0;
+        for(const auto &i : splittedTextInfo) {
+            if(i.glyphIndex >= 0) {
+                assert(i.glyphIndex < glyphs.size());
+                const auto &d = glyphs[i.glyphIndex];
+
+                if(i.glyphIndex != spaceIndex) {
+                    auto s = i.scale;
+                    auto yh = s * (-d.bearing.y + d.boundingBoxSize.y);
+                    heights.emplace_back(c, yh);
+                    c++;
+                }
+            } else if(i.glyphIndex == -1) {
+                baseLineStartIndex = c;
+            } else {
+                assert(false);
+            }
+        }
+
+        std::sort(
+            heights.begin() + baseLineStartIndex,
+            heights.begin() + c,
+            [](const std::pair<int, double>& a, const std::pair<int, double>& b) {
+                return a.second < b.second;
+            }
+        );
+
+        // Compute the median indices
+        int lineLength = c - baseLineStartIndex;
+        int medianOffset = lineLength / 2;
+        int median = baseLineStartIndex + medianOffset;
+
+        if (lineLength % 2 == 0) {
+            medianBaseLineIndexLow = (heights.begin() + median - 1)->first;
+            medianBaseLineIndexHigh = (heights.begin() + median)->first;
+        } else {
+            medianBaseLineIndexLow = (heights.begin() + median)->first;
+            medianBaseLineIndexHigh = medianBaseLineIndexLow;
+        }
     }
 
     if (textJustify == TextJustify::AUTO) {
@@ -348,12 +394,7 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(VectorModification
     }
 
     Vec2D anchorOffset(0.0, 0.0);
-
-    thread_local std::vector<double> baseLines;
-    baseLines.resize(characterCount, 0.0);
-
     float yOffset = 0;
-
 
     pen.y -= fontSize * lineHeight * 0.25;
 
@@ -361,6 +402,9 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(VectorModification
     int baseLineStartIndex = 0;
     int lineEndIndicesIndex = 0;
     const auto &glyphs = fontResult->fontData->glyphs;
+
+    double medianLow = 0.0;
+    double medianHigh = 0.0;
 
     for(const auto &i : splittedTextInfo) {
         if(i.glyphIndex >= 0) {
@@ -377,8 +421,6 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(VectorModification
                 auto y = pen.y - bearing.y;
                 auto xw = x + size.x;
                 auto yh = y + size.y;
-
-                baseLines[numberOfCharacters] = yh;
 
                 boxMin.x = boxMin.x < x ? boxMin.x : x;
                 boxMax.x = boxMax.x > xw ? boxMax.x : xw;
@@ -405,6 +447,15 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(VectorModification
                 rotations[countOffset + numberOfCharacters] = -angle;
                 centerPositions[numberOfCharacters].x = (x + xw) * 0.5;
                 centerPositions[numberOfCharacters].y = (y + yh) * 0.5;
+
+                if(numberOfCharacters == medianBaseLineIndexLow) {
+                    medianLow = yh;
+                }
+
+                if(numberOfCharacters == medianBaseLineIndexHigh) {
+                    medianHigh = yh;
+                }
+
                 ++numberOfCharacters;
             }
 
@@ -426,24 +477,7 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(VectorModification
         }
     }
 
-    // Use the median base line of the last line for size calculations
-    // This way labels look better placed.
-    std::sort(baseLines.begin() + baseLineStartIndex, baseLines.begin() + numberOfCharacters);
-
-    int l = numberOfCharacters - baseLineStartIndex;
-    int medianIndex = baseLineStartIndex + l/2;
-    double medianLastBaseLine;
-    if (l % 2 == 0) {
-        medianLastBaseLine = (baseLines[medianIndex - 1] + baseLines[std::min(medianIndex + 1, (int)baseLines.size() - 1)]) / 2;
-    } else {
-        medianLastBaseLine = baseLines[medianIndex];
-    }
-
-    if (numberOfCharacters > 0) {
-        lineEndIndices[lineEndIndicesIndex] = numberOfCharacters - 1;
-        lineEndIndicesIndex++;
-        assert((countOffset + numberOfCharacters-1)*2 < scales.size());
-    }
+    auto medianLastBaseLine = 0.5 * (medianLow + medianHigh);
 
     const Vec2D size((boxMax.x - boxMin.x), (medianLastBaseLine - boxMin.y));
 
