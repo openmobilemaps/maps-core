@@ -628,7 +628,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::collisionDetection(std::vector<std
     auto scaleFactor = camera->getScalingFactor();
 
     for (const auto layerIdentifier: layerIdentifiers) {
-        std::vector<SymbolObjectCollisionWrapper> allObjects;
+        std::vector<std::shared_ptr<Tiled2dMapVectorSymbolObject>> allObjects;
 
         for (const auto &[tile, symbolGroupsMap]: tileSymbolGroupMap) {
             const auto tileState = tileStateMap.find(tile);
@@ -647,10 +647,17 @@ void Tiled2dMapVectorSourceSymbolDataManager::collisionDetection(std::vector<std
             }
         }
         
-        std::stable_sort(allObjects.rbegin(), allObjects.rend());
+        std::stable_sort(allObjects.rbegin(), allObjects.rend(),
+                        [](const std::shared_ptr<Tiled2dMapVectorSymbolObject>& a,
+                           const std::shared_ptr<Tiled2dMapVectorSymbolObject>& b) {
+                            if (a->symbolSortKey == b->symbolSortKey) {
+                                return a->symbolTileIndex < b->symbolTileIndex;
+                            }
+                            return a->symbolSortKey > b->symbolSortKey;
+                        });
 
-        for (const auto &objectWrapper: allObjects) {
-            objectWrapper.symbolObject->collisionDetection(zoomIdentifier, rotation, scaleFactor, collisionGrid);
+        for (const auto &object: allObjects) {
+            object->collisionDetection(zoomIdentifier, rotation, scaleFactor, collisionGrid);
         }
     }
 }
