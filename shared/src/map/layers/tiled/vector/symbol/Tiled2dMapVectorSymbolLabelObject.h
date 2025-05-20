@@ -118,9 +118,13 @@ private:
         return Vec2D(s.x + (e.x - s.x) * index.percentage, s.y + (e.y - s.y) * index.percentage);
     }
 
-    inline void indexAtDistance(const DistanceIndex &index, double distance, const std::optional<Vec2D> &indexCoord, DistanceIndex& result) {
-        auto current = is3d ? screenPointAtIndex(index) : (indexCoord ? *indexCoord : pointAtIndex(index, true));
+    inline Vec2D pointForIndex(const DistanceIndex &index, const std::optional<Vec2D> &indexCoord) {
+        return is3d ? screenPointAtIndex(index) : (indexCoord ? *indexCoord : pointAtIndex(index, true));
+    }
+
+    inline void indexAtDistance(const DistanceIndex &index, const Vec2D& currentPoint, double distance, DistanceIndex& result) {
         auto dist = std::abs(distance);
+        auto current = currentPoint;
 
         int currentI = index.index;
         double currentPercentage = index.percentage;

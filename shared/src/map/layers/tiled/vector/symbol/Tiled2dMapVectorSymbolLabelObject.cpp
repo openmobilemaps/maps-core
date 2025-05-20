@@ -678,22 +678,23 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(VectorModificatio
     }
 
     // updates currentIndex
+    auto currentIndexPoint = pointForIndex(currentIndex, std::nullopt);
 
     switch (textAnchor) {
         case Anchor::TOP_LEFT:
         case Anchor::LEFT:
         case Anchor::BOTTOM_LEFT:
-            indexAtDistance(currentIndex, fontSize * scaleCorrection, std::nullopt, currentIndex);
+            indexAtDistance(currentIndex, currentIndexPoint, fontSize * scaleCorrection, currentIndex);
             break;
         case Anchor::TOP_RIGHT:
         case Anchor::RIGHT:
         case Anchor::BOTTOM_RIGHT:
-            indexAtDistance(currentIndex, -size * 1.0 * scaleCorrection, std::nullopt, currentIndex);
+            indexAtDistance(currentIndex, currentIndexPoint, -size * 1.0 * scaleCorrection, currentIndex);
             break;
         case Anchor::CENTER:
         case Anchor::TOP:
         case Anchor::BOTTOM:
-            indexAtDistance(currentIndex, -size * 0.5 * scaleCorrection, std::nullopt, currentIndex);
+            indexAtDistance(currentIndex, currentIndexPoint, -size * 0.5 * scaleCorrection, currentIndex);
             break;
     }
     
@@ -719,9 +720,11 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(VectorModificatio
     auto indexAfter = DistanceIndex(0, 0.0);
 
     for(auto &i : splittedTextInfo) {
+
         if(i.glyphIndex < 0) {
             // updates current index
-            indexAtDistance(currentIndex, spaceAdvance * fontSize * i.scale * scaleCorrection, std::nullopt, currentIndex);
+            auto currentIndexPoint = pointForIndex(currentIndex, std::nullopt);
+            indexAtDistance(currentIndex, currentIndexPoint, spaceAdvance * fontSize * i.scale * scaleCorrection, currentIndex);
             index = 0;
         } else {
             auto& d = glyphs[i.glyphIndex];
@@ -733,10 +736,11 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(VectorModificatio
 
             // Punkt auf Linie
             const auto &p = pointAtIndex(currentIndex, true);
+            auto currentIndexPoint = pointForIndex(currentIndex, p);
 
             // get before and after to calculate angle
-            indexAtDistance(currentIndex, -halfSpace * scaleCorrection, p, indexBefore);
-            indexAtDistance(currentIndex, halfSpace * scaleCorrection, p, indexAfter);
+            indexAtDistance(currentIndex, currentIndexPoint, -halfSpace * scaleCorrection, indexBefore);
+            indexAtDistance(currentIndex, currentIndexPoint, halfSpace * scaleCorrection, indexAfter);
 
             const auto &before = is3d ? screenPointAtIndex(indexBefore) : pointAtIndex(indexBefore, false);
             const auto &after = is3d ? screenPointAtIndex(indexAfter) : pointAtIndex(indexAfter, false);
@@ -783,7 +787,8 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(VectorModificatio
 
             auto lastIndex = currentIndex;
             // update currentIndex
-            indexAtDistance(currentIndex, advance.x * (1.0 + letterSpacing) * scaleCorrection, p, currentIndex);
+
+            indexAtDistance(currentIndex, currentIndexPoint, advance.x * (1.0 + letterSpacing) * scaleCorrection, currentIndex);
 
             // if we are at the end, and we were at the end (lastIndex), then clear and skip
             if(currentIndex.index == renderLineCoordinatesCount - 1 && lastIndex.index == currentIndex.index && (lastIndex.percentage == currentIndex.percentage)) {
