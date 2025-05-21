@@ -17,7 +17,7 @@ open class MCMapView: MTKView, @unchecked Sendable {
     public nonisolated(unsafe) let mapInterface: MCMapInterface
     private let renderingContext: RenderingContext
 
-    var renderToImageRenderPass : RenderToImageRenderPass? = nil
+    var renderToImageRenderPass: RenderToImageRenderPass? = nil
 
     private var sizeChanged = false
     private var backgroundDisable = false
@@ -256,7 +256,7 @@ extension MCMapView: MTKViewDelegate {
         }
 
         guard let renderPassDescriptor = renderToImage ? getToImageRenderpass() : view.currentRenderPassDescriptor,
-              let renderEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor)
+            let renderEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor)
         else {
             self.renderSemaphore.signal()
             return
@@ -305,7 +305,7 @@ extension MCMapView: MTKViewDelegate {
     ) {
         renderToImageQueue.async {
             DispatchQueue.main.sync {
-                MainActor.assumeIsolated{
+                MainActor.assumeIsolated {
                     // set the drawable size to get correctly sized texture
                     self.drawableSize = size
                 }
