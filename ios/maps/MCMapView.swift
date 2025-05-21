@@ -304,8 +304,12 @@ extension MCMapView: MTKViewDelegate {
         callback: @escaping @Sendable (UIImage?, MCLayerReadyState) -> Void
     ) {
         renderToImageQueue.async {
-            // set the drawable size to get correctly sized texture
-            self.drawableSize = size
+            DispatchQueue.main.sync {
+                MainActor.assumeIsolated{
+                    // set the drawable size to get correctly sized texture
+                    self.drawableSize = size
+                }
+            }
 
             let mapReadyCallbacks = MCMapViewMapReadyCallbacks()
             mapReadyCallbacks.delegate = self
