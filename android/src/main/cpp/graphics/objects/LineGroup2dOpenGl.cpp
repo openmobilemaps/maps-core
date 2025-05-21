@@ -9,12 +9,11 @@
  */
 
 #include "LineGroup2dOpenGl.h"
-#include "BaseShaderProgramOpenGl.h"
 #include <cmath>
 #include <cstring>
 #include <string>
 
-LineGroup2dOpenGl::LineGroup2dOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader)
+LineGroup2dOpenGl::LineGroup2dOpenGl(const std::shared_ptr<BaseShaderProgramOpenGl> &shader)
     : shaderProgram(shader) {}
 
 std::shared_ptr<GraphicsObjectInterface> LineGroup2dOpenGl::asGraphicsObject() { return shared_from_this(); }
@@ -110,9 +109,7 @@ void LineGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface>
     lineOriginHandle = glGetUniformLocation(program, "uLineOrigin");
     scaleFactorHandle = glGetUniformLocation(program, "scaleFactor");
 
-    if (const auto &glShader = std::static_pointer_cast<BaseShaderProgramOpenGl>(shaderProgram)) {
-        glShader->setupGlObjects(openGlContext);
-    }
+    shaderProgram->setupGlObjects(openGlContext);
 
     ready = true;
     glDataBuffersGenerated = true;
@@ -122,9 +119,7 @@ void LineGroup2dOpenGl::clear() {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
     if (ready) {
         removeGlBuffers();
-        if (const auto &glShader = std::static_pointer_cast<BaseShaderProgramOpenGl>(shaderProgram)) {
-            glShader->clearGlObjects();
-        }
+        shaderProgram->clearGlObjects();
         ready = false;
     }
 }
@@ -143,8 +138,8 @@ void LineGroup2dOpenGl::setIsInverseMasked(bool inversed) { isMaskInversed = inv
 void LineGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
                                int64_t vpMatrix, int64_t mMatrix, const ::Vec3D &origin, bool isMasked,
                                double screenPixelAsRealMeterFactor) {
-
-    if (!ready) {
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
+    if (!ready || !shaderProgram->isRenderable()) {
         return;
     }
 

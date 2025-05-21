@@ -10,11 +10,10 @@
 
 #include "PolygonGroup2dOpenGl.h"
 #include "RenderVerticesDescription.h"
-#include "BaseShaderProgramOpenGl.h"
 #include <cmath>
 #include <cstring>
 
-PolygonGroup2dOpenGl::PolygonGroup2dOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader)
+PolygonGroup2dOpenGl::PolygonGroup2dOpenGl(const std::shared_ptr<::BaseShaderProgramOpenGl> &shader)
     : shaderProgram(shader) {}
 
 std::shared_ptr<GraphicsObjectInterface> PolygonGroup2dOpenGl::asGraphicsObject() { return shared_from_this(); }
@@ -128,7 +127,8 @@ void PolygonGroup2dOpenGl::setIsInverseMasked(bool inversed) { isMaskInversed = 
 void PolygonGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
                                   int64_t vpMatrix, int64_t mMatrix, const ::Vec3D &origin,
                                   bool isMasked, double screenPixelAsRealMeterFactor) {
-    if (!ready)
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
+    if (!ready || !shaderProgram->isRenderable())
         return;
 
     GLuint stencilMask = 0;

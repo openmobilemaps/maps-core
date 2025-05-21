@@ -15,6 +15,7 @@
 #include "OpenGlContext.h"
 #include "Polygon2dInterface.h"
 #include "ShaderProgramInterface.h"
+#include "BaseShaderProgramOpenGl.h"
 #include "opengl_wrapper.h"
 #include <mutex>
 
@@ -23,7 +24,7 @@ class Polygon2dOpenGl : public GraphicsObjectInterface,
                         public Polygon2dInterface,
                         public std::enable_shared_from_this<Polygon2dOpenGl> {
   public:
-    Polygon2dOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader);
+    Polygon2dOpenGl(const std::shared_ptr<::BaseShaderProgramOpenGl> &shader);
 
     ~Polygon2dOpenGl(){};
 
@@ -56,7 +57,7 @@ protected:
 
     inline void drawPolygon(const std::shared_ptr<::RenderingContextInterface> &context, int program, int64_t vpMatrix, int64_t mMatrix, const Vec3D &origin);
 
-    std::shared_ptr<ShaderProgramInterface> shaderProgram;
+    std::shared_ptr<BaseShaderProgramOpenGl> shaderProgram;
     std::string programName;
     int program = 0;
 

@@ -11,7 +11,7 @@
 #include "IcosahedronOpenGl.h"
 #include <cstring>
 
-IcosahedronOpenGl::IcosahedronOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader)
+IcosahedronOpenGl::IcosahedronOpenGl(const std::shared_ptr<::BaseShaderProgramOpenGl> &shader)
     : shaderProgram(shader) {}
 
 std::shared_ptr<GraphicsObjectInterface> IcosahedronOpenGl::asGraphicsObject() { return shared_from_this(); }

@@ -9,8 +9,6 @@
  */
 
 #include "Tiled2dMapRasterSource.h"
-#include "LambdaTask.h"
-#include <algorithm>
 #include <cmath>
 #include <string>
 
@@ -22,7 +20,7 @@ Tiled2dMapRasterSource::Tiled2dMapRasterSource(const MapConfig &mapConfig,
                                                const WeakActor<Tiled2dMapRasterSourceListener> &listener,
                                                float screenDensityPpi,
                                                std::string layerName)
-    : Tiled2dMapSource<TextureHolderInterface, std::shared_ptr<TextureLoaderResult>, std::shared_ptr<::TextureHolderInterface>>(
+    : Tiled2dMapSource<std::shared_ptr<TextureLoaderResult>, std::shared_ptr<::TextureHolderInterface>>(
           mapConfig, layerConfig, conversionHelper, scheduler, screenDensityPpi, loaders.size(), layerName)
 , loaders(loaders)
 , rasterLayerActor(listener){}
@@ -65,3 +63,7 @@ VectorSet<Tiled2dMapRasterTileInfo> Tiled2dMapRasterSource::getCurrentTiles() {
 
     return currentTileInfos;
 }
+
+#include "Tiled2dMapSourceImpl.h"
+template class Tiled2dMapSource<std::shared_ptr<TextureLoaderResult>, std::shared_ptr<::TextureHolderInterface>>;
+

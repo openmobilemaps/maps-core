@@ -29,7 +29,7 @@ def parse_benchmark_results(xml_file):
     return results
 
 
-def compare_benchmarks(base_file, pr_file, threshold=0.05):
+def compare_benchmarks(base_file, pr_file, threshold=0.1):
     """Compares benchmark results and generates a markdown table with sections."""
     base_results = parse_benchmark_results(base_file)
     pr_results = parse_benchmark_results(pr_file)

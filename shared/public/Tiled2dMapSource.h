@@ -113,10 +113,17 @@ class Tiled2dMapSourceReadyInterface {
     virtual void setTileReady(const Tiled2dMapVersionedTileInfo &tile) = 0;
 };
 
-// T is the Object used for loading
-// L is the Loading type
+// L is the Loading type; std::shared_ptr to either DataLoaderResult or TextureLoaderResult (or compatible class).
 // R is the Result type
-template <class T, class L, class R>
+//
+// NOTE: only include the implementation header Tile2dMapSourceImpl.h
+// selectively to avoid including this in too many compilation units.
+// Instantiate the template with the chosen type parameters for the derived class,
+// e.g. at the bottom of the .cpp of the derived class:
+//
+//  #include <Tiled2dMapSourceImpl.h>
+//  template class Tiled2dMapSource<std::shared_ptr<FooLoaderResult>, FooResultType>;
+template <class L, class R>
 class Tiled2dMapSource : public Tiled2dMapSourceInterface,
                          public Tiled2dMapSourceReadyInterface,
                          public std::enable_shared_from_this<Tiled2dMapSourceInterface>,
@@ -208,7 +215,7 @@ class Tiled2dMapSource : public Tiled2dMapSourceInterface,
 
     std::vector<VisibleTilesLayer> currentPyramid;
     int currentKeepZoomLevelOffset;
-    std::vector<PrioritizedTiled2dMapTileInfo> tilesRequestedToLoad;
+    std::vector<std::vector<Tiled2dMapTileInfo>> loadingQueues;
 
     std::vector<PolygonCoord> currentViewBounds = {};
     std::optional<RectCoord> currentViewBoundsRect = std::nullopt;
@@ -245,5 +252,3 @@ class Tiled2dMapSource : public Tiled2dMapSourceInterface,
 
     std::string layerName;
 };
-
-#include "Tiled2dMapSourceImpl.h"

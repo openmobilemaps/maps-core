@@ -13,7 +13,7 @@
 #include "TextureFilterType.h"
 #include <cmath>
 
-Quad2dOpenGl::Quad2dOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader)
+Quad2dOpenGl::Quad2dOpenGl(const std::shared_ptr<::BaseShaderProgramOpenGl> &shader)
     : shaderProgram(shader) {}
 
 bool Quad2dOpenGl::isReady() { return ready && (!usesTextureCoords || textureHolder); }
@@ -327,7 +327,7 @@ void Quad2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &co
                           int64_t vpMatrix, int64_t mMatrix, const ::Vec3D &origin, bool isMasked,
                           double screenPixelAsRealMeterFactor) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
-    if (!ready || (usesTextureCoords && !textureCoordsReady))
+    if (!ready || (usesTextureCoords && !textureCoordsReady) || !shaderProgram->isRenderable())
         return;
 
     GLuint stencilMask = 0;
@@ -383,7 +383,7 @@ void Quad2dOpenGl::prepareTextureDraw(int program) {
     // Bind the texture to this unit.
     glBindTexture(GL_TEXTURE_2D, (unsigned int)texturePointer);
     if (textureFilterType.has_value()) {
-        GLint filterParam = GL_NEAREST;//*textureFilterType == TextureFilterType::LINEAR ? GL_LINEAR : GL_NEAREST;
+        GLint filterParam = *textureFilterType == TextureFilterType::LINEAR ? GL_LINEAR : GL_NEAREST;
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filterParam);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filterParam);
     }

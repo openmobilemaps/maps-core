@@ -1,5 +1,29 @@
 # Changelog for Open Mobile Maps
 
+## Version 3.1.3
+- Fixed several unsafe layer accesses in MapScene
+- Added coarse cooperative cancelling in the Android MapRenderHelper
+
+## Version 3.1.2
+- Improved offscreen rendering on iOS
+- Fixed an issue with OpenGL line and polygon styles
+
+## Version 3.1.1
+- Fixed an issue with texture filtering in Quad2dOpenGl
+- Fixed the icon-offset for vector layers in 2D to match the behavior of the style specification
+- Improved the reliability of offscreen rendering
+- Fixed an issue with UBOs with certain Android devices 
+
+## Version 3.1.0
+- Added support for animated dashes in the LineLayer
+- Improved integration of the desktop Java/OpenGL target platform
+- Added support for feature- dependent text fonts in vector layers
+- Enabled dynamic icon images in vector layers
+- Improved the 3D globe mode
+- Fixed alpha issues in the IconLayer
+- Fixed a coordinate system issue in line selection
+- Numerous bug fixes and performance improvements in the vector layer
+
 ## Version 3.0.2
 - Fixed a race condition within geojson sources and add source post-loading exception handling
 

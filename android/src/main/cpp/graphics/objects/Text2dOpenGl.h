@@ -15,6 +15,7 @@
 #include "MaskingObjectInterface.h"
 #include "OpenGlContext.h"
 #include "ShaderProgramInterface.h"
+#include "BaseShaderProgramOpenGl.h"
 #include "TextDescription.h"
 #include "TextInterface.h"
 #include "opengl_wrapper.h"
@@ -26,7 +27,7 @@ class Text2dOpenGl : public GraphicsObjectInterface,
                      public TextInterface,
                      public std::enable_shared_from_this<Text2dOpenGl> {
   public:
-    Text2dOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader);
+    Text2dOpenGl(const std::shared_ptr<::BaseShaderProgramOpenGl> &shader);
 
     ~Text2dOpenGl(){};
 
@@ -63,7 +64,7 @@ protected:
 
     void removeGlBuffers();
 
-    std::shared_ptr<ShaderProgramInterface> shaderProgram;
+    std::shared_ptr<BaseShaderProgramOpenGl> shaderProgram;
     std::string programName;
     int program;
 

@@ -11,18 +11,17 @@
 
 #pragma once
 
-#include "Tiled2dMapSource.h"
 #include "DataLoaderResult.h"
 #include "LoaderInterface.h"
-#include "Tiled2dMapVectorTileInfo.h"
+#include "MapCameraInterface.h"
+#include "Tiled2dMapVectorSource.h"
 #include "Tiled2dMapVectorSourceListener.h"
+#include "Tiled2dMapVectorTileInfo.h"
+
+#include <memory>
 #include <unordered_map>
 #include <vector>
-#include "DataRef.hpp"
-#include "geojsonvt.hpp"
-#include "Tiled2dMapVectorSource.h"
-#include "VectorMapSourceDescription.h"
-#include "Tiled2dMapVectorGeoJSONLayerConfig.h"
+#include <string>
 
 class Tiled2dVectorGeoJsonSource : public Tiled2dMapVectorSource, public GeoJSONTileDelegate  {
 public:
@@ -31,15 +30,19 @@ public:
                                const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig,
                                const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                                const std::shared_ptr<SchedulerInterface> &scheduler,
-                               const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders,
                                const WeakActor<Tiled2dMapVectorSourceListener> &listener,
                                const std::unordered_set<std::string> &layersToDecode,
                                const std::string &sourceName,
                                float screenDensityPpi,
                                std::shared_ptr<GeoJSONVTInterface> geoJson,
-                               std::string layerName) :
-    Tiled2dMapVectorSource(mapConfig, layerConfig, conversionHelper, scheduler, tileLoaders, listener, layersToDecode, sourceName, screenDensityPpi, layerName),
-    geoJson(geoJson), camera(camera) {}
+                               std::string layerName)
+      : Tiled2dMapVectorSource(mapConfig, layerConfig, conversionHelper, scheduler,
+                               // fake loader entry so that Tiled2dMapSource sees one loader; loadDataAsync in this class does not use loader.
+                               std::vector<std::shared_ptr<LoaderInterface>>{nullptr},
+                               listener, layersToDecode, sourceName,
+                               screenDensityPpi, layerName)
+      , geoJson(geoJson)
+      , camera(camera) {}
 
     VectorSet<Tiled2dMapVectorTileInfo> getCurrentTiles() {
         VectorSet<Tiled2dMapVectorTileInfo> currentTileInfos;

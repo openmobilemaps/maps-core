@@ -16,6 +16,7 @@
 #include "OpenGlHelper.h"
 #include "RenderLineDescription.h"
 #include "ShaderProgramInterface.h"
+#include "BaseShaderProgramOpenGl.h"
 #include "opengl_wrapper.h"
 #include <mutex>
 
@@ -23,7 +24,7 @@ class LineGroup2dOpenGl : public GraphicsObjectInterface,
                           public LineGroup2dInterface,
                           public std::enable_shared_from_this<GraphicsObjectInterface> {
   public:
-    LineGroup2dOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader);
+    LineGroup2dOpenGl(const std::shared_ptr<BaseShaderProgramOpenGl> &shader);
 
     virtual ~LineGroup2dOpenGl() {}
 
@@ -52,7 +53,7 @@ protected:
     virtual void removeGlBuffers();
 
     bool is3d = false;
-    std::shared_ptr<ShaderProgramInterface> shaderProgram;
+    std::shared_ptr<BaseShaderProgramOpenGl> shaderProgram;
     std::string programName;
     int program = 0;
 
