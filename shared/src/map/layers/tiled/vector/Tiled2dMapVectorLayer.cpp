@@ -450,7 +450,8 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
                                                                         readyManager,
                                                                         featureStateManager,
                                                                         symbolDelegate,
-                                                                        mapDescription->persistingSymbolPlacement);
+                                                                        mapDescription->persistingSymbolPlacement,
+                                                                        mapDescription->useCustomCrossTileIdentifier);
             actor.unsafe()->setAlpha(alpha);
             actor.unsafe()->enableAnimations(animationsEnabled);
             symbolSourceDataManagers[source] = actor;

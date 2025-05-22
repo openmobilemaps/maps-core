@@ -60,7 +60,8 @@ public:
                                             const Actor<Tiled2dMapVectorReadyManager> &readyManager,
                                             const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager,
                                             const std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> &symbolDelegate,
-                                            bool persistingSymbolPlacement);
+                                            bool persistingSymbolPlacement,
+                                            bool useCustomCrossTileIdentifier);
 
     void onAdded(const std::weak_ptr<::MapInterface> &mapInterface) override;
 
@@ -149,6 +150,7 @@ private:
     std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> symbolDelegate;
 
     bool persistingSymbolPlacement = false;
+    bool useCustomCrossTileIdentifier = false;
 
 #ifdef OPENMOBILEMAPS_GL
     // Higher counts may cause issues for instanced text rendering
