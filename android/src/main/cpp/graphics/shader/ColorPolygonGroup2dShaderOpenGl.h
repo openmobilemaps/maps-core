@@ -36,7 +36,9 @@ class ColorPolygonGroup2dShaderOpenGl : public BaseShaderProgramOpenGl,
 
     void clearGlObjects() override;
 
-  protected:
+    virtual bool usesModelMatrix() override { return false; };
+
+protected:
     virtual std::string getVertexShader() override;
 
     virtual std::string getFragmentShader() override;

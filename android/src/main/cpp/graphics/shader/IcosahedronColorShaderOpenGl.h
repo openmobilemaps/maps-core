@@ -29,6 +29,8 @@ class IcosahedronColorShaderOpenGl : public BaseShaderProgramOpenGl,
 
     virtual void setColor(float red, float green, float blue, float alpha) override;
 
+    bool usesModelMatrix() override { return false; }
+
   protected:
     virtual std::string getVertexShader() override;
 
