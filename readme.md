@@ -1,7 +1,7 @@
 <h1 align="center">Open Mobile Maps</h1>
 <br />
 <div align="center">
-  <img width="200" height="45" src="logo.svg" />
+  <img width="200" height="45" src="logo.svg"/>
   <br />
   <br />
   The lightweight and modern Map SDK for Android (8.0+, OpenGl ES 3.2) and iOS (14+)
