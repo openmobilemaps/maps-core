@@ -38,10 +38,15 @@ public:
 
     void clearGlObjects() override;
 
+    virtual bool usesModelMatrix() override { return false; };
+
 protected:
     virtual std::string getVertexShader() override;
 
     virtual std::string getFragmentShader() override;
+
+    std::string getSimpleLineFragmentShader();
+    std::string getLineFragmentShader();
 
 private:
     static std::string getLineStylesUBODefinition(bool isSimpleLine);
