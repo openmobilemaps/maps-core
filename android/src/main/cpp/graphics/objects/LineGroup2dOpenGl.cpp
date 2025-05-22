@@ -62,11 +62,11 @@ void LineGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface>
     }
     glBindVertexArray(vao);
 
-    pointAHandle = glGetAttribLocation(program, "vPointA");
-    pointBHandle = glGetAttribLocation(program, "vPointB");
-    vertexIndexHandle = glGetAttribLocation(program, "vVertexIndex");
-    segmentStartLPosHandle = glGetAttribLocation(program, "vSegmentStartLPos");
-    styleInfoHandle = glGetAttribLocation(program, "vStyleInfo");
+    positionHandle = glGetAttribLocation(program, "position");
+    extrudeHandle = glGetAttribLocation(program, "extrude");
+    lineSideHandle = glGetAttribLocation(program, "lineSide");
+    lengthPrefixHandle = glGetAttribLocation(program, "lengthPrefix");
+    stylingIndexHandle = glGetAttribLocation(program, "stylingIndex");
 
     if (!glDataBuffersGenerated) {
         glGenBuffers(1, &vertexAttribBuffer);
@@ -78,18 +78,21 @@ void LineGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface>
     size_t dimensionality = is3d ? 3 : 2;
     size_t sizeAttribGroup = floatSize * dimensionality;
     size_t stride = sizeAttribGroup * 2 + 3 * floatSize;
-    glEnableVertexAttribArray(pointAHandle);
-    glVertexAttribPointer(pointAHandle, dimensionality, GL_FLOAT, false, stride, nullptr);
-    glEnableVertexAttribArray(pointBHandle);
-    glVertexAttribPointer(pointBHandle, dimensionality, GL_FLOAT, false, stride, (float *)(sizeAttribGroup * 1));
-    glEnableVertexAttribArray(vertexIndexHandle);
-    glVertexAttribPointer(vertexIndexHandle, 1, GL_FLOAT, false, stride, (float *)(sizeAttribGroup * 2));
-    if (segmentStartLPosHandle >= 0) {
-        glEnableVertexAttribArray(segmentStartLPosHandle);
-        glVertexAttribPointer(segmentStartLPosHandle, 1, GL_FLOAT, false, stride, (float *) (sizeAttribGroup * 2 + floatSize));
-    }
-    glEnableVertexAttribArray(styleInfoHandle);
-    glVertexAttribPointer(styleInfoHandle, 1, GL_FLOAT, false, stride, (float *)(sizeAttribGroup * 2 + 2 * floatSize));
+
+    glEnableVertexAttribArray(positionHandle);
+    glVertexAttribPointer(positionHandle, dimensionality, GL_FLOAT, false, stride, nullptr);
+
+    glEnableVertexAttribArray(extrudeHandle);
+    glVertexAttribPointer(extrudeHandle, dimensionality, GL_FLOAT, false, stride, (float *)(sizeAttribGroup * 1));
+
+    glEnableVertexAttribArray(lineSideHandle);
+    glVertexAttribPointer(lineSideHandle, 1, GL_FLOAT, false, stride, (float *)(sizeAttribGroup * 2));
+
+    glEnableVertexAttribArray(lengthPrefixHandle);
+    glVertexAttribPointer(lengthPrefixHandle, 1, GL_FLOAT, false, stride, (float *)(sizeAttribGroup * 2 + 1 * floatSize));
+
+    glEnableVertexAttribArray(stylingIndexHandle);
+    glVertexAttribPointer(stylingIndexHandle, 1, GL_FLOAT, false, stride, (float *)(sizeAttribGroup * 2 + 2 * floatSize));
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -105,9 +108,9 @@ void LineGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface>
 
     vpMatrixHandle = glGetUniformLocation(program, "uvpMatrix");
     mMatrixHandle = glGetUniformLocation(program, "umMatrix");
-    originOffsetHandle = glGetUniformLocation(program, "uOriginOffset");
+    originOffsetHandle = glGetUniformLocation(program, "originOffset");
     lineOriginHandle = glGetUniformLocation(program, "uLineOrigin");
-    scaleFactorHandle = glGetUniformLocation(program, "scaleFactor");
+    scaleFactorHandle = glGetUniformLocation(program, "scalingFactor");
 
     shaderProgram->setupGlObjects(openGlContext);
 
@@ -146,15 +149,8 @@ void LineGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
     if (isMasked) {
         glStencilFunc(GL_EQUAL, isMaskInversed ? 0 : 128, 255);
-    } else {
-        glEnable(GL_STENCIL_TEST);
-        glStencilMask(0xFF);
-        glClearStencil(0x0);
-        glClear(GL_STENCIL_BUFFER_BIT);
-        glStencilFunc(GL_NOTEQUAL, 0x1, 0xFF);
+        glStencilOp(GL_ZERO, GL_KEEP, GL_KEEP);
     }
-    glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
-    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
     // Add program to OpenGL environment
     glUseProgram(program);
@@ -163,7 +159,11 @@ void LineGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface
 
     // Apply the projection and view transformation
     glUniformMatrix4fv(vpMatrixHandle, 1, false, (GLfloat *)vpMatrix);
-    glUniformMatrix4fv(mMatrixHandle, 1, false, (GLfloat *)mMatrix);
+
+    if(shaderProgram->usesModelMatrix()) {
+        glUniformMatrix4fv(mMatrixHandle, 1, false, (GLfloat *)mMatrix);
+    }
+
     glUniform4f(originOffsetHandle, lineOrigin.x - origin.x, lineOrigin.y - origin.y, lineOrigin.z - origin.z, 0.0);
     if (lineOriginHandle >= 0) {
         glUniform4f(lineOriginHandle, lineOrigin.x, lineOrigin.y, lineOrigin.z, 0.0);
