@@ -82,7 +82,7 @@ public class RenderingContext: NSObject, @unchecked Sendable {
     }
 
     private var viewportSize: MCVec2I = .init(x: 0, y: 0)
-    private let viewportQueue = DispatchQueue(label: "com.yourapp.viewportQueue", attributes: .concurrent)
+    private let viewportQueue = DispatchQueue(label: "RenderingContextViewportQueue", attributes: .concurrent)
 
 
     var isScissoringDirty = false
