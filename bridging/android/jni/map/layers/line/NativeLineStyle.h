@@ -25,7 +25,7 @@ private:
     friend ::djinni::JniClass<NativeLineStyle>;
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/map/layers/line/LineStyle") };
-    const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(Lio/openmobilemaps/mapscore/shared/map/layers/ColorStateList;Lio/openmobilemaps/mapscore/shared/map/layers/ColorStateList;FFLio/openmobilemaps/mapscore/shared/map/layers/SizeType;FLjava/util/ArrayList;FFLio/openmobilemaps/mapscore/shared/map/layers/line/LineCapType;FZF)V") };
+    const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(Lio/openmobilemaps/mapscore/shared/map/layers/ColorStateList;Lio/openmobilemaps/mapscore/shared/map/layers/ColorStateList;FFLio/openmobilemaps/mapscore/shared/map/layers/SizeType;FLjava/util/ArrayList;FFLio/openmobilemaps/mapscore/shared/map/layers/line/LineCapType;Lio/openmobilemaps/mapscore/shared/map/layers/line/LineJoinType;FZF)V") };
     const jfieldID field_color { ::djinni::jniGetFieldID(clazz.get(), "color", "Lio/openmobilemaps/mapscore/shared/map/layers/ColorStateList;") };
     const jfieldID field_gapColor { ::djinni::jniGetFieldID(clazz.get(), "gapColor", "Lio/openmobilemaps/mapscore/shared/map/layers/ColorStateList;") };
     const jfieldID field_opacity { ::djinni::jniGetFieldID(clazz.get(), "opacity", "F") };
@@ -36,6 +36,7 @@ private:
     const jfieldID field_dashFade { ::djinni::jniGetFieldID(clazz.get(), "dashFade", "F") };
     const jfieldID field_dashAnimationSpeed { ::djinni::jniGetFieldID(clazz.get(), "dashAnimationSpeed", "F") };
     const jfieldID field_lineCap { ::djinni::jniGetFieldID(clazz.get(), "lineCap", "Lio/openmobilemaps/mapscore/shared/map/layers/line/LineCapType;") };
+    const jfieldID field_lineJoin { ::djinni::jniGetFieldID(clazz.get(), "lineJoin", "Lio/openmobilemaps/mapscore/shared/map/layers/line/LineJoinType;") };
     const jfieldID field_offset { ::djinni::jniGetFieldID(clazz.get(), "offset", "F") };
     const jfieldID field_dotted { ::djinni::jniGetFieldID(clazz.get(), "dotted", "Z") };
     const jfieldID field_dottedSkew { ::djinni::jniGetFieldID(clazz.get(), "dottedSkew", "F") };

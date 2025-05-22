@@ -37,6 +37,24 @@ inline Vec3D operator/( const ::Vec3D& left, const double& val ) {
     return Vec3D(left.x / val, left.y / val, left.z / val);
 }
 
+inline Vec3D& operator*=(Vec3D& left, const double& val) {
+    left.x *= val;
+    left.y *= val;
+    left.z *= val;
+    return left;
+}
+
+inline Vec3D& operator/=(Vec3D& left, const double& val) {
+    left.x /= val;
+    left.y /= val;
+    left.z /= val;
+    return left;
+}
+
+inline Vec3D operator-(const Vec3D& vec) {
+    return Vec3D(-vec.x, -vec.y, -vec.z);
+}
+
 class Vec3DHelper {
   public:
     static inline double distance(const ::Vec3D &from, const ::Vec3D &to) {
@@ -55,8 +73,12 @@ class Vec3DHelper {
         return vector * vector;
     }
 
+    static inline double length(const ::Vec3D &vector) {
+        return std::sqrt(vector * vector);
+    }
+
     static inline ::Vec3D normalize(const ::Vec3D &vector) {
-        return vector / std::sqrt(Vec3DHelper::squaredLength(vector));
+        return vector / Vec3DHelper::length(vector);
     }
 
     static inline ::Vec3D toVec(const ::Coord &coordinate) {
