@@ -271,8 +271,8 @@ extension MCMapView: MTKViewDelegate {
 
         renderEncoder.endEncoding()
 
-        commandBuffer.addCompletedHandler { _ in
-            self.renderSemaphore.signal()
+        commandBuffer.addCompletedHandler { @Sendable [weak renderSemaphore] _ in
+            renderSemaphore?.signal()
         }
 
         // if we want to save the drawable (image rendering), we commit and wait synchronously
