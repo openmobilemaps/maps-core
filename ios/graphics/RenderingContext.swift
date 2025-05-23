@@ -76,10 +76,14 @@ public class RenderingContext: NSObject, @unchecked Sendable {
     }()
 
     public var aspectRatio: Float {
-        Float(viewportSize.x) / Float(viewportSize.y)
+        viewportQueue.sync {
+            Float(viewportSize.x) / Float(viewportSize.y)
+        }
     }
 
-    public var viewportSize: MCVec2I = .init(x: 0, y: 0)
+    private var viewportSize: MCVec2I = .init(x: 0, y: 0)
+    private let viewportQueue = DispatchQueue(label: "RenderingContextViewportQueue", attributes: .concurrent)
+
 
     var isScissoringDirty = false
 
@@ -162,10 +166,16 @@ extension RenderingContext: MCRenderingContextInterface {
     }
 
     public func setViewportSize(_ newSize: MCVec2I) {
-        viewportSize = newSize
+        viewportQueue.async(flags: .barrier) {
+            self.viewportSize = newSize
+        }
     }
 
-    public func getViewportSize() -> MCVec2I { viewportSize }
+    public func getViewportSize() -> MCVec2I { 
+        viewportQueue.sync {
+            viewportSize 
+        }
+    }
 
     public func setBackgroundColor(_ color: MCColor) {
         Task { @MainActor in
