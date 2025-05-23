@@ -10,7 +10,7 @@
 
 import Foundation
 import MapCoreSharedModule
-import Metal
+@preconcurrency import Metal
 import simd
 
 open class BaseGraphicsObject: @unchecked Sendable {

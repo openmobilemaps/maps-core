@@ -10,7 +10,7 @@
 
 import Foundation
 import MapCoreSharedModule
-import Metal
+@preconcurrency import Metal
 import UIKit
 
 class PolygonPatternGroupShader: BaseShader, @unchecked Sendable {

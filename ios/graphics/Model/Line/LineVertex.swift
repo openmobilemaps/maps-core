@@ -9,7 +9,7 @@
  */
 
 import MapCoreSharedModule
-import MetalKit
+@preconcurrency import MetalKit
 
 public struct LineVertex: Equatable {
     /// Returns the descriptor to use when passed to a metal shader

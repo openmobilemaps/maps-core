@@ -9,7 +9,7 @@
  */
 
 import MapCoreSharedModule
-import MetalKit
+@preconcurrency import MetalKit
 
 /// A 3D point in the X-Y coordinate system carrying a texture coordinate
 public struct Vertex3DTexture: Equatable {

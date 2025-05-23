@@ -9,12 +9,12 @@
  */
 
 import Foundation
-@_exported @preconcurrency import MapCoreSharedModule
-import MetalKit
+@_exported import MapCoreSharedModule
+@preconcurrency import MetalKit
 import os
 
-open class MCMapView: MTKView, @unchecked Sendable {
-    public nonisolated(unsafe) let mapInterface: MCMapInterface
+open class MCMapView: MTKView {
+    public let mapInterface: MCMapInterface
     private let renderingContext: RenderingContext
 
     var renderToImageRenderPass: RenderToImageRenderPass? = nil
@@ -95,7 +95,7 @@ open class MCMapView: MTKView, @unchecked Sendable {
 
         device = MetalContext.current.device
 
-        colorPixelFormat = MetalContext.current.colorPixelFormat
+        colorPixelFormat = MetalContext.colorPixelFormat
         framebufferOnly = false
 
         delegate = self
@@ -307,7 +307,7 @@ extension MCMapView: MTKViewDelegate {
         callbackQueue: DispatchQueue = .main,
         callback: @escaping @Sendable (UIImage?, MCLayerReadyState) -> Void
     ) {
-        renderToImageQueue.async {
+        renderToImageQueue.async { @Sendable [weak mapInterface] in
             DispatchQueue.main.sync {
                 MainActor.assumeIsolated {
                     // set the drawable size to get correctly sized texture
@@ -315,12 +315,9 @@ extension MCMapView: MTKViewDelegate {
                 }
             }
 
-            let mapReadyCallbacks = MCMapViewMapReadyCallbacks()
-            mapReadyCallbacks.delegate = self
-            mapReadyCallbacks.callback = callback
-            mapReadyCallbacks.callbackQueue = callbackQueue
+            let mapReadyCallbacks = MCMapViewMapReadyCallbacks(delegate: self, callback: callback, callbackQueue: callbackQueue)
 
-            self.mapInterface.drawReadyFrame(
+            mapInterface?.drawReadyFrame(
                 bounds, paddingPc: boundsPaddingPc, timeout: timeout, callbacks: mapReadyCallbacks)
         }
     }
@@ -491,36 +488,45 @@ extension MCMapView: UIGestureRecognizerDelegate {
     }
 }
 
-private class MCMapViewMapReadyCallbacks: @preconcurrency
-    MCMapReadyCallbackInterface, @unchecked Sendable
+private final class MCMapViewMapReadyCallbacks:
+    MCMapReadyCallbackInterface, Sendable
 {
     public nonisolated(unsafe) weak var delegate: MCMapView?
-    public var callback: ((UIImage?, MCLayerReadyState) -> Void)?
-    public var callbackQueue: DispatchQueue?
+    public let callback: (@Sendable (UIImage?, MCLayerReadyState) -> Void)?
+    public let callbackQueue: DispatchQueue?
     public let semaphore = DispatchSemaphore(value: 1)
 
-    @MainActor func stateDidUpdate(_ state: MCLayerReadyState) {
-        guard let delegate = self.delegate else { return }
+    init(delegate: MCMapView?, callback: (@Sendable (UIImage?, MCLayerReadyState) -> Void)?, callbackQueue: DispatchQueue?) {
+        self.delegate = delegate
+        self.callback = callback
+        self.callbackQueue = callbackQueue
+    }
+
+    func stateDidUpdate(_ state: MCLayerReadyState) {
 
         semaphore.wait()
 
-        delegate.draw(in: delegate)
+        Task { @MainActor in
+            guard let delegate = self.delegate else { return }
 
-        callbackQueue?
-            .async {
-                switch state {
-                    case .NOT_READY:
-                        break
-                    case .ERROR, .TIMEOUT_ERROR:
-                        self.callback?(nil, state)
-                    case .READY:
-                        MainActor.assumeIsolated {
-                            self.callback?(delegate.renderToImageResult(), state)
-                        }
-                    @unknown default:
-                        break
+            delegate.draw(in: delegate)
+
+            callbackQueue?
+                .async {
+                    switch state {
+                        case .NOT_READY:
+                            break
+                        case .ERROR, .TIMEOUT_ERROR:
+                            self.callback?(nil, state)
+                        case .READY:
+                            MainActor.assumeIsolated {
+                                self.callback?(delegate.renderToImageResult(), state)
+                            }
+                        @unknown default:
+                            break
+                    }
+                    self.semaphore.signal()
                 }
-                self.semaphore.signal()
-            }
+        }
     }
 }

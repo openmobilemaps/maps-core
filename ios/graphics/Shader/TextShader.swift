@@ -10,7 +10,7 @@
 
 import Foundation
 import MapCoreSharedModule
-import Metal
+@preconcurrency import Metal
 
 class TextShader: BaseShader, @unchecked Sendable {
     private var opacity: Float = 1.0
