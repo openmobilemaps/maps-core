@@ -7,4 +7,4 @@
 
 import MapCoreSharedModule
 
-extension MCMapInterface: @unchecked @retroactive Sendable { }
+extension MCMapInterface: @unchecked @retroactive Sendable {}

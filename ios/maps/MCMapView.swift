@@ -317,8 +317,9 @@ extension MCMapView: MTKViewDelegate {
 
             let mapReadyCallbacks = MCMapViewMapReadyCallbacks(delegate: self, callback: callback, callbackQueue: callbackQueue)
 
-            mapInterface?.drawReadyFrame(
-                bounds, paddingPc: boundsPaddingPc, timeout: timeout, callbacks: mapReadyCallbacks)
+            mapInterface?
+                .drawReadyFrame(
+                    bounds, paddingPc: boundsPaddingPc, timeout: timeout, callbacks: mapReadyCallbacks)
         }
     }
 }
