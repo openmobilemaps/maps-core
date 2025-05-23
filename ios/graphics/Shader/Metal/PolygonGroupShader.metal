@@ -124,7 +124,7 @@ polygonPatternGroupFragmentShader(PolygonPatternGroupVertexOut in [[stage_in]],
     const float2 uvOrig = float2(texureCoordinates[offset + 0], texureCoordinates[offset + 1]);
     const float2 uvSize = float2(texureCoordinates[offset + 2], texureCoordinates[offset + 3]);
     const int combined = int(texureCoordinates[offset + 4]);
-    const float2 pixelSize = float2(combined & 0xFF, combined >> 16);
+    const float2 pixelSize = float2(combined & 0xFFFF, combined >> 16);
 
     const float2 uv = fmod(fmod(in.pixelPosition, pixelSize) / pixelSize + float2(1.0, 1.0), float2(1.0, 1.0));
     const float2 texUv = uvOrig + uvSize * float2(uv.x, uv.y);
@@ -149,7 +149,7 @@ polygonPatternGroupFadeInFragmentShader(PolygonPatternGroupVertexOut in [[stage_
     const float2 uvOrig = float2(texureCoordinates[offset], texureCoordinates[offset + 1]);
     const float2 uvSize = float2(texureCoordinates[offset + 2], texureCoordinates[offset + 3]);
     const int combined = int(texureCoordinates[offset + 4]);
-    const float2 pixelSize = float2(combined & 0xFF, combined >> 16);
+    const float2 pixelSize = float2(combined & 0xFFFF, combined >> 16);
 
     const float scalingFactorFactor = (scalingFactor.x / screenPixelAsRealMeterFactor) - 1.0;
     const float2 spacing = pixelSize * scalingFactorFactor;
