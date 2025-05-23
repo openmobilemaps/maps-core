@@ -88,4 +88,16 @@ class Vec3DHelper {
     static inline ::Coord toCoord(const ::Vec3D &vec, const int32_t systemIdentifier) {
         return Coord(systemIdentifier, vec.x, vec.y, vec.z);
     }
+
+    static inline double dotProduct(const Vec3D& A, const Vec3D& B) {
+        return A.x * B.x + A.y * B.y + A.z * B.z;
+    }
+
+    static inline Vec3D crossProduct(const Vec3D& A, const Vec3D& B) {
+        return {
+            A.y * B.z - A.z * B.y,
+            A.z * B.x - A.x * B.z,
+            A.x * B.y - A.y * B.x
+        };
+    }
 };
