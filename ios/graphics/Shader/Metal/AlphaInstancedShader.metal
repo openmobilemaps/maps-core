@@ -109,16 +109,27 @@ alphaInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
   const float2 offset = offsets[instanceId];
   const float rotation = rotations[instanceId];
 
-  const float angle = rotation * M_PI_F / 180.0;
+    const float angle = rotation * M_PI_F / 180.0;
+    const float cosA = cos(angle);
+    const float sinA = sin(angle);
 
-  const float4x4 model_matrix = float4x4(
-                                            float4(cos(angle) * scale.x, -sin(angle) * scale.x, 0, 0),
-                                            float4(sin(angle) * scale.y, cos(angle) * scale.y, 0, 0),
-                                            float4(0, 0, 0, 0),
-                                            float4(position + offset, 0.0, 1)
-                                            );
+    // Rotate the offset
+    const float2 rotatedOffset = float2(
+                                        offset.x * cosA - offset.y * sinA,
+                                        -offset.x * sinA - offset.y * cosA
+                                        );
 
-  const float4x4 matrix = vpMatrix * model_matrix;
+    // Apply the rotated offset to the position
+    const float2 finalPosition = position + rotatedOffset;
+
+    const float4x4 model_matrix = float4x4(
+                                           float4(cosA * scale.x, -sinA * scale.x, 0, 0),
+                                           float4(sinA * scale.y,  cosA * scale.y, 0, 0),
+                                           float4(0, 0, 0, 0),
+                                           float4(finalPosition, 0.0, 1.0)
+                                           );
+
+    const float4x4 matrix = vpMatrix * model_matrix;
 
   InstancedVertexOut out {
     .position = matrix * float4(vertexIn.position.xy, 0.0, 1.0),

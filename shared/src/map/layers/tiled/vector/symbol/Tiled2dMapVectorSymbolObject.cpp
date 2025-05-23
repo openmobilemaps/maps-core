@@ -504,8 +504,6 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(VectorModificationWrappe
     }
 
     if (is3d) {
-        offsets[2 * countOffset] = 0;
-        offsets[2 * countOffset + 1] = 0;
 
         switch (iconAnchor) {
             case Anchor::CENTER:
@@ -545,6 +543,8 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(VectorModificationWrappe
                 offsets[2 * countOffset + 1] = iconHeight * 1.0 / viewPortSize.y;
                 break;
             default:
+                offsets[2 * countOffset] = 0;
+                offsets[2 * countOffset + 1] = 0;
                 break;
         }
 
@@ -555,10 +555,12 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(VectorModificationWrappe
         offsets[2 * countOffset + 1] += (iconOffset.y * iconHeight) * 1.0 / viewPortSize.y;
     } else {
         renderCoordinate = getRenderCoordinates(iconAnchor, -rotations[countOffset], iconWidth, iconHeight);
+        offsets[2 * countOffset] = iconOffset.x / dpFactor;
+        offsets[2 * countOffset + 1] = iconOffset.y / dpFactor;
     }
 
-    const double x = renderCoordinate.x + (is3d ? 0.0 : iconOffset.x * iconWidth / dpFactor);
-    const double y = renderCoordinate.y + (is3d ? 0.0 : iconOffset.y * iconHeight / dpFactor);
+    const double x = renderCoordinate.x;
+    const double y = renderCoordinate.y;
 
     writePosition(x, y, countOffset, positions);
 
