@@ -5,7 +5,7 @@
 //  Created by Nicolas Märki on 04.11.2024.
 //
 
-import Metal
+@preconcurrency import Metal
 import simd
 
 public struct MultiBuffer<DataType> {

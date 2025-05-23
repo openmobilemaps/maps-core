@@ -8,9 +8,9 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-import MetalKit
+@preconcurrency import MetalKit
 
-public class MetalContext: @unchecked Sendable {
+public final class MetalContext: Sendable {
     public static let current: MetalContext = {
         guard let device = MTLCreateSystemDefaultDevice() else {
             // Metal is available in iOS 13 and tvOS 13 simulators when running on macOS 10.15.
@@ -32,16 +32,18 @@ public class MetalContext: @unchecked Sendable {
     let commandQueue: MTLCommandQueue
     public let library: MTLLibrary
 
-    let colorPixelFormat: MTLPixelFormat = .bgra8Unorm
+    static let colorPixelFormat: MTLPixelFormat = .bgra8Unorm
     let textureLoader: MTKTextureLoader
 
-    public lazy var pipelineLibrary: PipelineLibrary = try! PipelineLibrary(device: self.device)
-    public lazy var samplerLibrary: SamplerLibrary = try! SamplerLibrary(device: self.device)
+    public let pipelineLibrary: PipelineLibrary
+    public let samplerLibrary: SamplerLibrary
 
     init(device: MTLDevice, commandQueue: MTLCommandQueue, library: MTLLibrary) {
         self.device = device
         self.commandQueue = commandQueue
         self.library = library
+        self.pipelineLibrary = try! PipelineLibrary(device: device, library: library)
+        self.samplerLibrary = try! SamplerLibrary(device: device, library: library)
         textureLoader = MTKTextureLoader(device: device)
     }
 }

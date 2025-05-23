@@ -9,7 +9,7 @@
  */
 
 import Foundation
-import MetalKit
+@preconcurrency import MetalKit
 
 public enum SamplerFactory {
     public static func descriptor(label: String, magFilter: MTLSamplerMinMagFilter) -> MTLSamplerDescriptor {
@@ -47,9 +47,11 @@ public enum Sampler: String, CaseIterable {
     }
 }
 
-public class SamplerLibrary: StaticMetalLibrary<String, MTLSamplerState> {
-    init(device: MTLDevice) throws {
-        try super
+public typealias SamplerLibrary = StaticMetalLibrary<String, MTLSamplerState>
+
+public extension SamplerLibrary {
+    init(device: MTLDevice, library: MTLLibrary) throws {
+        try self
             .init(Sampler.allCases.map(\.rawValue)) { key -> MTLSamplerState in
                 guard let sampler = Sampler(rawValue: key) else {
                     throw LibraryError.invalidKey

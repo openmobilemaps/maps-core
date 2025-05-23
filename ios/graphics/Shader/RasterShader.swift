@@ -10,7 +10,7 @@
 
 import Foundation
 import MapCoreSharedModule
-import Metal
+@preconcurrency import Metal
 
 struct RasterShaderStyle: Equatable {
     let opacity: Float

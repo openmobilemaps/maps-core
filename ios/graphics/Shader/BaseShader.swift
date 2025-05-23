@@ -10,7 +10,7 @@
 
 import Foundation
 import MapCoreSharedModule
-import Metal
+@preconcurrency import Metal
 
 open class BaseShader: MCShaderProgramInterface, @unchecked Sendable {
     open var blendMode: MCBlendMode = .NORMAL

@@ -10,7 +10,7 @@
 
 import Foundation
 import MapCoreSharedModule
-import Metal
+@preconcurrency import Metal
 import simd
 
 final class TextInstanced: BaseGraphicsObject, @unchecked Sendable {

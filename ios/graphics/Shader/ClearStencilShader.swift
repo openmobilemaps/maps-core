@@ -10,7 +10,7 @@
 
 import Foundation
 import MapCoreSharedModule
-import Metal
+@preconcurrency import Metal
 
 class ClearStencilShader: BaseShader, @unchecked Sendable {
     lazy var clearMask: MTLDepthStencilState? = {

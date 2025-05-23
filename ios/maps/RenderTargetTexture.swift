@@ -15,7 +15,7 @@
 import CoreImage
 import Foundation
 import MapCoreSharedModule
-import Metal
+@preconcurrency import Metal
 import UIKit
 
 open class RenderTargetTexture: Identifiable, Equatable, MCRenderTargetInterface {
@@ -65,7 +65,7 @@ open class RenderTargetTexture: Identifiable, Equatable, MCRenderTargetInterface
         texDescriptor.height = Int(newSize.y)
 
         for _ in 0..<RenderingContext.bufferCount {
-            texDescriptor.pixelFormat = MetalContext.current.colorPixelFormat
+            texDescriptor.pixelFormat = MetalContext.colorPixelFormat
             let texture = MetalContext.current.device.makeTexture(descriptor: texDescriptor)!
 
             texDescriptor.pixelFormat = .stencil8

@@ -9,7 +9,7 @@
  */
 
 import MapCoreSharedModule
-import MetalKit
+@preconcurrency import MetalKit
 
 struct Vertex4F: Equatable {
     nonisolated(unsafe) static let descriptor: MTLVertexDescriptor = {

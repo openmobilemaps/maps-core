@@ -10,7 +10,7 @@
 
 import Foundation
 import MapCoreSharedModule
-import Metal
+@preconcurrency import Metal
 import simd
 
 final class LineGroup2d: BaseGraphicsObject, @unchecked Sendable {

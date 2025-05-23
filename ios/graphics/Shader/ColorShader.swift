@@ -10,7 +10,7 @@
 
 import Foundation
 import MapCoreSharedModule
-import Metal
+@preconcurrency import Metal
 
 class ColorShader: BaseShader, @unchecked Sendable {
     private var color = SIMD4<Float>([0.0, 0.0, 0.0, 0.0])

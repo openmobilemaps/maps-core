@@ -8,7 +8,7 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-import Metal
+@preconcurrency import Metal
 import OSLog
 
 public enum PipelineDescriptorFactory {
@@ -18,16 +18,16 @@ public enum PipelineDescriptorFactory {
         vertexShader: String,
         fragmentShader: String,
         blendMode: MCBlendMode,
-        library: MTLLibrary = MetalContext.current.library
+        library: MTLLibrary
     ) -> MTLRenderPipelineDescriptor {
         let pipelineDescriptor = MTLRenderPipelineDescriptor()
-        pipelineDescriptor.colorAttachments[0].pixelFormat = MetalContext.current.colorPixelFormat
+        pipelineDescriptor.colorAttachments[0].pixelFormat = MetalContext.colorPixelFormat
         pipelineDescriptor.vertexDescriptor = vertexDescriptor
 
         pipelineDescriptor.rasterSampleCount = 1  // samples per pixel
 
         let renderbufferAttachment = pipelineDescriptor.colorAttachments[0]
-        renderbufferAttachment?.pixelFormat = MetalContext.current.colorPixelFormat
+        renderbufferAttachment?.pixelFormat = MetalContext.colorPixelFormat
         renderbufferAttachment?.isBlendingEnabled = true
 
         switch blendMode {
@@ -68,17 +68,18 @@ public enum PipelineDescriptorFactory {
 }
 
 extension PipelineDescriptorFactory {
-    static func pipelineDescriptor(pipeline: Pipeline) -> MTLRenderPipelineDescriptor {
+    static func pipelineDescriptor(pipeline: Pipeline, library: MTLLibrary) -> MTLRenderPipelineDescriptor {
         pipelineDescriptor(
             vertexDescriptor: pipeline.type.vertexDescriptor,
             label: pipeline.type.label,
             vertexShader: pipeline.type.vertexShader,
             fragmentShader: pipeline.type.fragmentShader,
-            blendMode: pipeline.blendMode)
+            blendMode: pipeline.blendMode,
+            library: library)
     }
 }
 
-public struct Pipeline: Codable, CaseIterable, Hashable {
+public struct Pipeline: Codable, CaseIterable, Hashable, Sendable {
     let type: PipelineType
     let blendMode: MCBlendMode
 
@@ -110,7 +111,7 @@ public struct Pipeline: Codable, CaseIterable, Hashable {
     }
 }
 
-public enum PipelineType: String, CaseIterable, Codable {
+public enum PipelineType: String, CaseIterable, Codable, Sendable {
     case alphaShader
     case alphaInstancedShader
     case lineGroupShader
@@ -263,14 +264,16 @@ public enum PipelineType: String, CaseIterable, Codable {
     }
 }
 
-public class PipelineLibrary: StaticMetalLibrary<Pipeline, MTLRenderPipelineState>, @unchecked Sendable {
-    init(device: MTLDevice) throws {
-        try super
+public typealias PipelineLibrary = StaticMetalLibrary<Pipeline, MTLRenderPipelineState>
+
+extension PipelineLibrary {
+    init(device: MTLDevice, library: MTLLibrary) throws {
+        try self
             .init(
                 Pipeline.allCases.map(\.self)
             ) { pipeline -> MTLRenderPipelineState in
                 do {
-                    let pipelineDescriptor = PipelineDescriptorFactory.pipelineDescriptor(pipeline: pipeline)
+                    let pipelineDescriptor = PipelineDescriptorFactory.pipelineDescriptor(pipeline: pipeline, library: library)
                     return try device.makeRenderPipelineState(descriptor: pipelineDescriptor)
                 } catch {
                     // Log the JSON (key) and the error

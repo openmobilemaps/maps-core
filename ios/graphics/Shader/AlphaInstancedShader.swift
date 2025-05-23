@@ -10,7 +10,7 @@
 
 import Foundation
 import MapCoreSharedModule
-import Metal
+@preconcurrency import Metal
 
 class AlphaInstancedShader: BaseShader, @unchecked Sendable {
     public let isUnitSphere: Bool

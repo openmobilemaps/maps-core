@@ -10,7 +10,7 @@
 
 import Foundation
 import MapCoreSharedModule
-import Metal
+@preconcurrency import Metal
 
 class AlphaShader: BaseShader, @unchecked Sendable {
     private var alpha: Float = 1.0

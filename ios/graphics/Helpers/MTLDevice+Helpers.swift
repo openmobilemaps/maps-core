@@ -9,7 +9,7 @@
  */
 
 import MapCoreSharedModule
-import Metal
+@preconcurrency import Metal
 import UIKit
 
 extension MTLDevice {
