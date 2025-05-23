@@ -828,7 +828,6 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(VectorModificatio
                     rotations[countOffset + centerPositionSize] = -angleDeg;
                 }
 
-
                 centerPositions.push_back(Vec2DHelper::midpoint(Vec2DHelper::midpoint(quad.bottomLeft, quad.bottomRight), Vec2DHelper::midpoint(quad.topLeft, quad.topRight)));
             }
 
