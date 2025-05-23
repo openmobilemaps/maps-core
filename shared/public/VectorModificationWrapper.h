@@ -33,6 +33,28 @@ class VectorModificationWrapper {
     std::vector<T> vec;
     bool modified;
 
+  private:
+    class RefType {
+        VectorModificationWrapper<T> &vec;
+        size_t index;
+
+      public:
+        RefType(VectorModificationWrapper<T> &v, size_t i)
+            : vec(v)
+            , index(i) {}
+        operator T() const { return vec.vec[index]; }
+        RefType &operator=(RefType &r) { return *this = T(r); }
+        RefType &operator=(T val) {
+            if (val != vec.vec[index]) {
+                vec.vec[index] = val;
+                vec.modified = true;
+            }
+            return *this;
+        }
+        RefType &operator+=(T val) { return *this = T(*this) + val; }
+        RefType &operator*=(T val) { return *this = T(*this) * val; }
+    };
+
   public:
     VectorModificationWrapper()
         : modified(false) {}
@@ -41,16 +63,13 @@ class VectorModificationWrapper {
         : vec(std::move(initialVec))
         , modified(false) {}
 
-    T &operator[](size_t index) {
-        modified = true;
-        return vec[index];
+    RefType operator[](size_t index) {
+        return RefType{ *this, index };
     }
 
     const T &operator[](size_t index) const { return vec[index]; }
 
     size_t size() const { return vec.size(); }
-
-    T *data() { return vec.data(); }
 
     const T *data() const { return vec.data(); }
 
