@@ -119,7 +119,8 @@ void LineGroup2dLayerObject::buildLines(const std::vector<std::tuple<std::vector
         float lineLength = 0;
         float cosAngle = 0, cosHalfAngle = 0;
 
-        Vec3D pLast(0,0,0), normal(0,0,0), lastNormal(0,0,0), lineVec(0,0,0), lastLineVec(0,0,0);
+        Vec3D pLast(0,0,0), normal(0,0,0), lastNormal(0,0,0), lineVec(0,0,0), lastLineVec(0,0,0), pOriginLine(0,0,0);
+
 
         int32_t preIndex = -1, prePreIndex = -1;
 
@@ -148,18 +149,29 @@ void LineGroup2dLayerObject::buildLines(const std::vector<std::tuple<std::vector
                 }
                 lineVec /= lineLength;
 
-                normal = Vec3DHelper::normalize(Vec3D(-lineVec.y, lineVec.x, 0.0));
+                if(is3d) {
+                    pOriginLine = Vec3DHelper::normalize(Vec3D(p.x + origin.x, p.y + origin.y, p.z + origin.z));
+                    normal = Vec3DHelper::normalize(Vec3DHelper::crossProduct(pOriginLine, lineVec));
+                } else {
+                    normal = Vec3DHelper::normalize(Vec3D(-lineVec.y, lineVec.x, 0.0));
+                }
 
                 if (i > 0) {
-                    extrude = (normal + lastNormal) / 2.0;
+                    extrude = (normal + lastNormal);
                     double extrudeLength = Vec3DHelper::length(extrude);
                     if (extrudeLength > 0) {
                         extrude /= extrudeLength;
                     }
 
-                    cosAngle = normal.x * lastNormal.x - normal.y * lastNormal.x;
-                    cosHalfAngle = extrude.x * normal.x + extrude.y * normal.y;
-                    extrudeScale = cosHalfAngle != 0 ? abs(1.0 / cosHalfAngle) : 1.0;
+                    if(is3d) {
+                        cosAngle = Vec3DHelper::dotProduct(normal, lastNormal);
+                        cosHalfAngle = Vec3DHelper::dotProduct(extrude, normal);
+                    } else {
+                        cosAngle = normal.x * lastNormal.x + normal.y * lastNormal.y;
+                        cosHalfAngle = extrude.x * normal.x + extrude.y * normal.y;
+                    }
+
+                    extrudeScale = cosHalfAngle != 0 ? std::abs(1.0 / cosHalfAngle) : 1.0;
                     if (extrudeScale > 2.0) {
                         vertexJoinType = LineJoinType::BEVEL;
                         extrudeScale = 2.0;
@@ -211,13 +223,13 @@ void LineGroup2dLayerObject::buildLines(const std::vector<std::tuple<std::vector
                 if (capType == LineCapType::SQUARE && endSide != 0) {
                     pointExtrude = pointExtrude + extrudeLineVec * endSide;
                 }
-                if (side * cosAngle < 0 && endSide == 0 && extrudeScale > 0.1 && joinType != LineJoinType::MITER) {
+                if (side * cosAngle < 0 && endSide == 0 && extrudeScale > 1.1 && joinType != LineJoinType::MITER) {
                     const double approxAngle = 2 * std::sqrt(2 - 2 * cosHalfAngle);
                     // 2.86 ~= 180/pi / 20 -> approximately one slice per 20 degrees
                     double stepSize = (joinType == LineJoinType::ROUND) ? 1.0 / round(approxAngle * 2.86) : 1.0;
                     for (float r = 0; r <= 1; r += stepSize) {
                         pointExtrude = Vec3DHelper::normalize(lastNormal * (1.0 - r) + normal * r) * (double)side;
-                        pushLineVertex(p, pointExtrude, 1.0, side, prefixTotalLineLength, lineStyleIndex, true, false, vertexCount,
+                        pushLineVertex(p, pointExtrude, 1.0, side, prefixTotalLineLength, lineStyleIndex, true, side == -1, vertexCount,
                                        prePreIndex, preIndex, lineAttributes, lineIndices);
                         std::swap(prePreIndex, preIndex);
                     }
