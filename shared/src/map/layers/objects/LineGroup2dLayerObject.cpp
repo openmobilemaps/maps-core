@@ -204,7 +204,7 @@ void LineGroup2dLayerObject::buildLines(const std::vector<std::tuple<std::vector
                 int32_t centerIndex = preIndex, firstIndex = -1, lastIndex = -1;
                 for (float r = -1; r <= 1; r += 0.2) {
                     Vec3D roundExtrude = Vec3DHelper::normalize(extrude * r - extrudeLineVec * (1.0 - abs(r)));
-                    pushLineVertex(p, roundExtrude, 1.0, r, prefixTotalLineLength, lineStyleIndex, true, false, vertexCount,
+                    pushLineVertex(p, roundExtrude, 1.0, r, prefixTotalLineLength, lineStyleIndex, true, endSide == -1, vertexCount,
                                    prePreIndex, preIndex, lineAttributes, lineIndices);
                     if (r == 0) {
                         firstIndex = preIndex;
