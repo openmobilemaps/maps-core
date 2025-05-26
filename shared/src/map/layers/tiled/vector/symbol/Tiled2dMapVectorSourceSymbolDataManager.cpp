@@ -627,8 +627,10 @@ void Tiled2dMapVectorSourceSymbolDataManager::collisionDetection(std::vector<std
     double rotation = -camera->getRotation();
     auto scaleFactor = camera->getScalingFactor();
 
+    std::vector<std::shared_ptr<Tiled2dMapVectorSymbolObject>> allObjects;
+
     for (const auto layerIdentifier: layerIdentifiers) {
-        std::vector<std::shared_ptr<Tiled2dMapVectorSymbolObject>> allObjects;
+        allObjects.clear();
 
         for (const auto &[tile, symbolGroupsMap]: tileSymbolGroupMap) {
             const auto tileState = tileStateMap.find(tile);
@@ -639,9 +641,9 @@ void Tiled2dMapVectorSourceSymbolDataManager::collisionDetection(std::vector<std
             if (objectsIt != symbolGroupsMap.end()) {
                 for (auto &symbolGroup: std::get<1>(objectsIt->second)) {
                     symbolGroup.syncAccess([&allObjects](auto group){
-                        for(auto& o : group->getSymbolObjectsForCollision()) {
-                            allObjects.push_back(o);
-                        }
+                        const auto& symbols = group->getSymbolObjectsForCollision();
+                        allObjects.reserve(symbols.size());
+                        allObjects.insert(allObjects.end(), allObjects.begin(), allObjects.end());
                     });
                 }
             }
