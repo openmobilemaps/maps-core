@@ -265,7 +265,7 @@ lineGroupFragmentShader(LineVertexOut in [[stage_in]],
           return half4(half3(style->color.rgb), 1.0) * a;
       }
       else {
-          return half4(1.0, 0.0, 0.0, 1.0);
+
           if (intraDashPos > dxt && intraDashPos < dyt) {
 
               half relG = (intraDashPos - dxt) / (dyt - dxt);
