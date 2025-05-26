@@ -91,7 +91,7 @@ public:
     Vec3D tileOrigin = Vec3D(0,0,0);
 
 private:
-    void precomputeMedians();
+    void precomputeMedianIfNeeded();
 
     void setupCamera(const std::vector<float>& vpMatrix, const Vec3D& origin, const Vec2I& viewportSize);
 

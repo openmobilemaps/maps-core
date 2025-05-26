@@ -172,7 +172,7 @@ Tiled2dMapVectorSymbolLabelObject::Tiled2dMapVectorSymbolLabelObject(const std::
         renderLineCoordinatesCount = 0;
     }
 
-    precomputeMediansIfNeeded();
+    precomputeMedianIfNeeded();
 
     if (textJustify == TextJustify::AUTO) {
         switch (textAnchor) {
@@ -198,7 +198,7 @@ Tiled2dMapVectorSymbolLabelObject::Tiled2dMapVectorSymbolLabelObject(const std::
     isStyleStateDependant = usedKeys.isStateDependant();
 }
 
-void Tiled2dMapVectorSymbolLabelObject::precomputeMediansIfNeeded() {
+void Tiled2dMapVectorSymbolLabelObject::precomputeMedianIfNeeded() {
     if(lineCoordinates && (rotationAlignment != SymbolAlignment::VIEWPORT)) {
         return;
     }
