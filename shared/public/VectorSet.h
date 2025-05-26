@@ -1,5 +1,4 @@
 #include <algorithm>
-#include <memory>
 #include <vector>
 
 #pragma once
@@ -10,40 +9,48 @@ public:
     using const_iterator = typename std::vector<T>::const_iterator;
     using iterator = typename std::vector<T>::iterator;
 
-    // Default constructor
-    VectorSet(): data(std::make_shared<std::vector<T>>()) {}
-
-    VectorSet(const VectorSet<T>& source)
-         : data(std::move(source.data))
-    {  }
+    VectorSet() = default;
+    // Move construction / assignment
+    VectorSet(VectorSet<T> &&x) = default;
+    VectorSet<T>& operator=(VectorSet<T> &&x) = default;
+    // No copy constructor/assignment (BUT see copy())
+    VectorSet(const VectorSet<T> &x) = delete;
+    VectorSet<T>& operator=(const VectorSet<T> &x) = delete;
 
     // Constructor with initializer list
-    VectorSet(std::initializer_list<T> initList)
-    : data(std::make_shared<std::vector<T>>()) {
+    VectorSet(std::initializer_list<T> initList) {
         for (const T& value : initList) {
             insert(value);
         }
     }
 
+    // Explicit copy.
+    // This type _is_ copyable, but only with an explicit copy() call to avoid unnecessary, accidental copies.
+    VectorSet<T> copy() const {
+        VectorSet<T> other;
+        other.data = std::vector<T>(data);
+        return other;
+    }
+
     // Insert an element into the set
     void insert(const T& value) {
         if (!contains(value)) {
-            data->push_back(value);
+            data.push_back(value);
         }
     }
 
     // Find an element in the set
     bool contains(const T& value) const {
-        return find(value) != data->end();
+        return find(value) != data.end();
     }
 
     const_iterator find(const T& value) const {
-        return std::find(data->begin(), data->end(), value);
+        return std::find(data.begin(), data.end(), value);
     }
 
     // Check if the set is empty
     bool empty() const {
-        return data->empty();
+        return data.empty();
     }
 
     // Check if all elements of another set are present in this set
@@ -58,28 +65,42 @@ public:
 
     // Insert elements from another VectorSet into this set
     void insertSet(const VectorSet<T>& otherSet) {
+        size_t oldSize = data.size();
         for (auto it = otherSet.begin(); it != otherSet.end(); it++) {
-            insert(*it);
+            // only check if initial set contains a value; 
+            // no need to check inserted values also if otherSet is assumed to be duplicate free
+            auto searchEnd = data.end() + oldSize;
+            if(std::find(data.begin(), searchEnd, *it) != searchEnd) {
+                data.push_back(*it);
+            }
         }
     }
 
     // Iterator functions
-    iterator begin() const {
-        return data->begin();
+    const_iterator begin() const {
+        return data.begin();
     }
 
-    iterator end() const {
-        return data->end();
+    const_iterator end() const {
+        return data.end();
+    }
+
+    iterator begin() {
+        return data.begin();
+    }
+
+    iterator end() {
+        return data.end();
     }
 
     size_t size() const {
-        return data->size();
+        return data.size();
     }
 
     void reserve(const size_t size) {
-        data->reserve(size);
+        data.reserve(size);
     }
 
 private:
-    std::shared_ptr<std::vector<T>> data;
+    std::vector<T> data;
 };

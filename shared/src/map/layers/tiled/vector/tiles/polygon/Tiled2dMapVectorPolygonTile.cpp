@@ -34,11 +34,11 @@ Tiled2dMapVectorPolygonTile::Tiled2dMapVectorPolygonTile(const std::weak_ptr<Map
 void Tiled2dMapVectorPolygonTile::updateVectorLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
                                                          const Tiled2dMapVectorTileDataVector &tileData) {
     Tiled2dMapVectorTile::updateVectorLayerDescription(description, tileData);
-    const auto newUsedKeys = description->getUsedKeys();
+    auto newUsedKeys = description->getUsedKeys();
     bool usedKeysContainsNewUsedKeys = usedKeys.covers(newUsedKeys);
     isStyleZoomDependant = newUsedKeys.containsUsedKey(Tiled2dMapVectorStyleParser::zoomExpression);
     isStyleStateDependant = newUsedKeys.isStateDependant();
-    usedKeys = newUsedKeys;
+    usedKeys = std::move(newUsedKeys);
     lastZoom = std::nullopt;
     lastAlpha = std::nullopt;
 
@@ -48,7 +48,6 @@ void Tiled2dMapVectorPolygonTile::updateVectorLayerDescription(const std::shared
 
         tileCallbackInterface.message(MFN(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsReady), tileInfo, description->identifier, WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this()));
     } else {
-        usedKeys = std::move(newUsedKeys);
         featureGroups.clear();
         styleHashToGroupMap.clear();
         hitDetectionPolygons.clear();
