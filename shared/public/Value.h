@@ -282,14 +282,14 @@ public:
 
     UsedKeysCollection() {};
 
-    UsedKeysCollection(const VectorSet<std::string> &usedKeys) : usedKeys(usedKeys) {};
+    UsedKeysCollection(VectorSet<std::string> &&usedKeys) : usedKeys(std::move(usedKeys)) {};
 
-    UsedKeysCollection(const VectorSet<std::string> &usedKeys,
-                       const VectorSet<std::string> &featureStateKeys,
-                       const VectorSet<std::string> &globalStateKeys)
-            : usedKeys(usedKeys),
-              featureStateKeys(featureStateKeys),
-              globalStateKeys(globalStateKeys) {};
+    UsedKeysCollection(VectorSet<std::string> &&usedKeys,
+                       VectorSet<std::string> &&featureStateKeys,
+                       VectorSet<std::string> &&globalStateKeys)
+            : usedKeys(std::move(usedKeys)),
+              featureStateKeys(std::move(featureStateKeys)),
+              globalStateKeys(std::move(globalStateKeys)) {};
 
     void includeOther(const UsedKeysCollection &other) {
         usedKeys.insertSet(other.usedKeys);
@@ -672,7 +672,7 @@ public:
     void updateValue(std::shared_ptr<Value> newValue) {
         value = newValue;
 
-        usedKeysCollection = newValue ? newValue->getUsedKeys() : UsedKeysCollection();
+        usedKeysCollection = newValue ? std::move(newValue->getUsedKeys()) : std::move(UsedKeysCollection());
 
         isStatic = usedKeysCollection.empty();
         isZoomDependent = usedKeysCollection.usedKeys.contains("zoom");
@@ -903,7 +903,7 @@ public:
                 end = res.find("}", begin);
             }
 
-            return UsedKeysCollection(usedKeys);
+            return std::move(usedKeys);
 
         } else if (std::holds_alternative<std::vector<std::string>>(value)) {
             const auto& res = std::get<std::vector<std::string>>(value);

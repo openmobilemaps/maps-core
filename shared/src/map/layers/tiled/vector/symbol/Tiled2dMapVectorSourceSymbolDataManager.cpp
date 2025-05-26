@@ -380,7 +380,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::onVectorTilesUpdated(const std::st
 
         for (const auto &[tileInfo, groupMap]: tileSymbolGroupMap) {
             bool found = false;
-            for (const auto &currentTile: currentTileInfos) {
+            for (const auto &currentTile: latestTileInfos) {
                 if (tileInfo == currentTile.tileInfo) {
                     found = true;
                     break;
