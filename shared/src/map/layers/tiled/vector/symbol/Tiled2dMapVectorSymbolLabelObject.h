@@ -91,6 +91,7 @@ public:
     Vec3D tileOrigin = Vec3D(0,0,0);
 
 private:
+    void precomputeMedians();
 
     void setupCamera(const std::vector<float>& vpMatrix, const Vec3D& origin, const Vec2I& viewportSize);
 
@@ -118,7 +119,7 @@ private:
         return Vec2D(s.x + (e.x - s.x) * index.percentage, s.y + (e.y - s.y) * index.percentage);
     }
 
-    inline Vec2D pointForIndex(const DistanceIndex &index, const std::optional<Vec2D> &indexCoord) {
+    Vec2D pointForIndex(const DistanceIndex &index, const std::optional<Vec2D> &indexCoord) {
         return is3d ? screenPointAtIndex(index) : (indexCoord ? *indexCoord : pointAtIndex(index, true));
     }
 

@@ -172,50 +172,7 @@ Tiled2dMapVectorSymbolLabelObject::Tiled2dMapVectorSymbolLabelObject(const std::
         renderLineCoordinatesCount = 0;
 
         // calculate medians if not on line
-        std::vector<std::pair<int, double>> heights;
-
-        const auto &glyphs = fontResult->fontData->glyphs;
-        int baseLineStartIndex = 0;
-
-        int c = 0;
-        for(const auto &i : splittedTextInfo) {
-            if(i.glyphIndex >= 0) {
-                assert(i.glyphIndex < glyphs.size());
-                const auto &d = glyphs[i.glyphIndex];
-
-                if(i.glyphIndex != spaceIndex) {
-                    auto s = i.scale;
-                    auto yh = s * (-d.bearing.y + d.boundingBoxSize.y);
-                    heights.emplace_back(c, yh);
-                    c++;
-                }
-            } else if(i.glyphIndex == -1) {
-                baseLineStartIndex = c;
-            } else {
-                assert(false);
-            }
-        }
-
-        std::sort(
-            heights.begin() + baseLineStartIndex,
-            heights.begin() + c,
-            [](const std::pair<int, double>& a, const std::pair<int, double>& b) {
-                return a.second < b.second;
-            }
-        );
-
-        // Compute the median indices
-        int lineLength = c - baseLineStartIndex;
-        int medianOffset = lineLength / 2;
-        int median = baseLineStartIndex + medianOffset;
-
-        if (lineLength % 2 == 0) {
-            medianBaseLineIndexLow = (heights.begin() + median - 1)->first;
-            medianBaseLineIndexHigh = (heights.begin() + median)->first;
-        } else {
-            medianBaseLineIndexLow = (heights.begin() + median)->first;
-            medianBaseLineIndexHigh = medianBaseLineIndexLow;
-        }
+        precomputeMedians();
     }
 
     if (textJustify == TextJustify::AUTO) {
@@ -240,6 +197,54 @@ Tiled2dMapVectorSymbolLabelObject::Tiled2dMapVectorSymbolLabelObject(const std::
 
     const auto &usedKeys = description->getUsedKeys();
     isStyleStateDependant = usedKeys.isStateDependant();
+}
+
+void Tiled2dMapVectorSymbolLabelObject::precomputeMedians() {
+    // calculate medians if not on line
+    std::vector<std::pair<int, double>> heights;
+
+    const auto &glyphs = fontResult->fontData->glyphs;
+    int baseLineStartIndex = 0;
+
+    int c = 0;
+    for(const auto &i : splittedTextInfo) {
+        if(i.glyphIndex >= 0) {
+            assert(i.glyphIndex < glyphs.size());
+            const auto &d = glyphs[i.glyphIndex];
+
+            if(i.glyphIndex != spaceIndex) {
+                auto s = i.scale;
+                auto yh = s * (-d.bearing.y + d.boundingBoxSize.y);
+                heights.emplace_back(c, yh);
+                c++;
+            }
+        } else if(i.glyphIndex == -1) {
+            baseLineStartIndex = c;
+        } else {
+            assert(false);
+        }
+    }
+
+    std::sort(
+        heights.begin() + baseLineStartIndex,
+        heights.begin() + c,
+        [](const std::pair<int, double>& a, const std::pair<int, double>& b) {
+            return a.second < b.second;
+        }
+    );
+
+    // Compute the median indices
+    int lineLength = c - baseLineStartIndex;
+    int medianOffset = lineLength / 2;
+    int median = baseLineStartIndex + medianOffset;
+
+    if (lineLength % 2 == 0) {
+        medianBaseLineIndexLow = (heights.begin() + median - 1)->first;
+        medianBaseLineIndexHigh = (heights.begin() + median)->first;
+    } else {
+        medianBaseLineIndexLow = (heights.begin() + median)->first;
+        medianBaseLineIndexHigh = medianBaseLineIndexLow;
+    }
 }
 
 void Tiled2dMapVectorSymbolLabelObject::updateLayerDescription(const std::shared_ptr<SymbolVectorLayerDescription> layerDescription) {
@@ -1003,7 +1008,7 @@ DistanceIndex Tiled2dMapVectorSymbolLabelObject::findReferencePointIndices() {
         const auto &start = screenLineCoordinates[i-1];
         const auto &end = screenLineCoordinates[i];
 
-        auto lengthSquared = Vec2DHelper::distanceSquaredWith3D(start, end);
+        auto lengthSquared = Vec2DHelper::distanceSquared(Vec2D(start.x, start.y), Vec2D(end.x, end.y));
 
         double t = 0.0;
         double dist = 0.0;
