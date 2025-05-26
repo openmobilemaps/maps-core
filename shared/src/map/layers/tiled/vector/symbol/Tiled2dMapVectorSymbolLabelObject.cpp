@@ -153,7 +153,7 @@ Tiled2dMapVectorSymbolLabelObject::Tiled2dMapVectorSymbolLabelObject(const std::
         });
 
         if(is3d) {
-            for(auto& c : renderLineCoordinates) { 
+            for(auto& c : renderLineCoordinates) {
                 double x = c.z * sin(c.y) * cos(c.x);
                 double y = c.z * cos(c.y);
                 double z = -c.z * sin(c.y) * sin(c.x);
@@ -165,15 +165,14 @@ Tiled2dMapVectorSymbolLabelObject::Tiled2dMapVectorSymbolLabelObject(const std::
             cartesianReferencePoint.y = c.z * cos(c.y);
             cartesianReferencePoint.z = -c.z * sin(c.y) * sin(c.x);
         }
-        
+
         screenLineCoordinates = renderLineCoordinates;
         renderLineCoordinatesCount = renderLineCoordinates.size();
     } else {
         renderLineCoordinatesCount = 0;
-
-        // calculate medians if not on line
-        precomputeMedians();
     }
+
+    precomputeMediansIfNeeded();
 
     if (textJustify == TextJustify::AUTO) {
         switch (textAnchor) {
@@ -199,12 +198,18 @@ Tiled2dMapVectorSymbolLabelObject::Tiled2dMapVectorSymbolLabelObject(const std::
     isStyleStateDependant = usedKeys.isStateDependant();
 }
 
-void Tiled2dMapVectorSymbolLabelObject::precomputeMedians() {
+void Tiled2dMapVectorSymbolLabelObject::precomputeMediansIfNeeded() {
+    if(lineCoordinates && (rotationAlignment != SymbolAlignment::VIEWPORT)) {
+        return;
+    }
+
     // calculate medians if not on line
-    std::vector<std::pair<int, double>> heights;
+    std::vector<double> heights;
 
     const auto &glyphs = fontResult->fontData->glyphs;
     int baseLineStartIndex = 0;
+
+    auto penY = -lineHeight * 0.25;
 
     int c = 0;
     for(const auto &i : splittedTextInfo) {
@@ -212,14 +217,20 @@ void Tiled2dMapVectorSymbolLabelObject::precomputeMedians() {
             assert(i.glyphIndex < glyphs.size());
             const auto &d = glyphs[i.glyphIndex];
 
+            auto scale = i.scale;
+            auto size = Vec2D(d.boundingBoxSize.x * scale, d.boundingBoxSize.y * scale);
+            auto bearing = Vec2D(d.bearing.x * scale, d.bearing.y * scale);
+            auto advance = Vec2D(d.advance.x * scale, d.advance.y * scale);
+
             if(i.glyphIndex != spaceIndex) {
-                auto s = i.scale;
-                auto yh = s * (-d.bearing.y + d.boundingBoxSize.y);
-                heights.emplace_back(c, yh);
+                auto y = penY - bearing.y;
+                auto yh = y + size.y;
+                heights.emplace_back(yh);
                 c++;
             }
         } else if(i.glyphIndex == -1) {
             baseLineStartIndex = c;
+            penY += lineHeight;
         } else {
             assert(false);
         }
@@ -227,10 +238,7 @@ void Tiled2dMapVectorSymbolLabelObject::precomputeMedians() {
 
     std::sort(
         heights.begin() + baseLineStartIndex,
-        heights.begin() + c,
-        [](const std::pair<int, double>& a, const std::pair<int, double>& b) {
-            return a.second < b.second;
-        }
+        heights.begin() + c
     );
 
     // Compute the median indices
@@ -239,11 +247,11 @@ void Tiled2dMapVectorSymbolLabelObject::precomputeMedians() {
     int median = baseLineStartIndex + medianOffset;
 
     if (lineLength % 2 == 0) {
-        medianBaseLineIndexLow = (heights.begin() + median - 1)->first;
-        medianBaseLineIndexHigh = (heights.begin() + median)->first;
+        double medianBaseLineLow = heights[median - 1];
+        double medianBaseLineHigh = heights[median];
+        medianLastBaseLine = 0.5 * (medianBaseLineHigh + medianBaseLineLow);
     } else {
-        medianBaseLineIndexLow = (heights.begin() + median)->first;
-        medianBaseLineIndexHigh = medianBaseLineIndexLow;
+        medianLastBaseLine = heights[median];
     }
 }
 
@@ -408,9 +416,6 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(VectorModification
     int lineEndIndicesIndex = 0;
     const auto &glyphs = fontResult->fontData->glyphs;
 
-    double medianLow = 0.0;
-    double medianHigh = 0.0;
-
     for(const auto &i : splittedTextInfo) {
         if(i.glyphIndex >= 0) {
             assert(i.glyphIndex < fontResult->fontData->glyphs.size());
@@ -453,14 +458,6 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(VectorModification
                 centerPositions[numberOfCharacters].x = (x + xw) * 0.5;
                 centerPositions[numberOfCharacters].y = (y + yh) * 0.5;
 
-                if(numberOfCharacters == medianBaseLineIndexLow) {
-                    medianLow = yh;
-                }
-
-                if(numberOfCharacters == medianBaseLineIndexHigh) {
-                    medianHigh = yh;
-                }
-
                 ++numberOfCharacters;
             }
 
@@ -482,9 +479,9 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(VectorModification
         }
     }
 
-    auto medianLastBaseLine = 0.5 * (medianLow + medianHigh);
+    auto median = fontSize * medianLastBaseLine;
 
-    const Vec2D size((boxMax.x - boxMin.x), (medianLastBaseLine - boxMin.y));
+    const Vec2D size((boxMax.x - boxMin.x), (median - boxMin.y));
 
     switch (textJustify) {
         case TextJustify::AUTO:

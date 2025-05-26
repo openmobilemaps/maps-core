@@ -247,7 +247,5 @@ private:
     bool is3d;
     int positionSize;
 
-    int medianBaseLineIndexLow = 0;
-    int medianBaseLineIndexHigh = 0;
-
+    double medianLastBaseLine = 0.0;
 };
