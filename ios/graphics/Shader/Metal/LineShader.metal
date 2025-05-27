@@ -188,11 +188,15 @@ lineGroupVertexShader(const LineVertexIn vertexIn [[stage_in]],
 
     const float4 extendedPosition = float4(vertexIn.position + vertexIn.extrude * width, 0.0, 1.0) + originOffset;
 
+    float2 lineDir = float2(-vertexIn.extrude.y, vertexIn.extrude.x);
+    float2 offset = vertexIn.extrude * vertexIn.lineSide;
+    float correction = dot(offset, lineDir);
+
     LineVertexOut out {
         .position = vpMatrix * extendedPosition,
         .stylingIndex = styleIndex,
         .lineSide = vertexIn.lineSide,
-        .lengthPrefix = vertexIn.lengthPrefix,
+        .lengthPrefix = vertexIn.lengthPrefix + correction,
     };
 
     return out;
@@ -239,26 +243,17 @@ lineGroupFragmentShader(LineVertexOut in [[stage_in]],
   half4 mainColor = half4(half3(style->color.rgb), 1.0) * a;
   half4 gapColor  = half4(half3(style->gapColor.rgb), 1.0) * aGap;
 
-  float t = 0;
-  float d = 0;
-  float lineLength = 0;
-
   if (dottedLine == 1) {
     const float skew = style->dottedSkew;
 
-    const float factorToT = scaledWidth / lineLength * skew;
-    const float dashOffset = (halfScaledWidth - skew * halfScaledWidth) / lineLength;
+    const float cycleLength = style->width * scalingFactor * skew;
+    const float positionInCycle = fmod(in.lengthPrefix * skew, 2.0 * cycleLength) / cycleLength;
 
-    const float dashTotalDotted =  2.0 * factorToT;
-    const float offset = float(in.lengthPrefix) / lineLength;
-    const float startOffsetSegmentDotted = fmod(offset, dashTotalDotted);
-    const float pos = t + startOffsetSegmentDotted;
+    float2 pos = float2(positionInCycle * 2.0 - 1.0, in.lineSide);
 
-    const float intraDashPosDotted = fmod(pos, dashTotalDotted);
-      if ((intraDashPosDotted > 1.0 * factorToT + dashOffset && intraDashPosDotted < dashTotalDotted - dashOffset) ||
-                              (length(half2(min(abs(intraDashPosDotted - 0.5 * factorToT), 0.5 * factorToT + dashTotalDotted - intraDashPosDotted) / (0.5 * factorToT + dashOffset), d / halfScaledWidth)) > 1.0)) {
-          discard_fragment();
-      }
+    if(dot(pos, pos) >= 1.0) {
+      discard_fragment();
+    }
   } else if(numDash > 0) {
 
     const float intraDashPos = fmod(in.lengthPrefix, (float)style->dashArray.w * scaledWidth);
