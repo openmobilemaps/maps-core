@@ -304,32 +304,45 @@ std::string ColorLineGroup2dShaderOpenGl::getLineFragmentShader() {
                        LineStyle style = lineValues[outStylingIndex];
 
                        float opacity = style.opacity;
-                       float colorA = outColor.a;
-                       float colorAGap = style.gapColorA;
-                       float width = style.width / 2.0 * scalingFactor;
 
-                       float a = colorA * opacity;
-                       float aGap = colorAGap * opacity;
+                       if(opacity == 0.0) {
+                           discard;
+                       }
+
+                       const float scaledWidth = style.width * scalingFactor;
+                       const float halfScaledWidth = scaledWidth / 2.0;
+
+                       float a = outColor.a * opacity;
+                       float aGap = style.gapColorA * opacity;
 
                        int dottedLine = int(style.dotted);
 
-                       float t = 0.0;
-                       float d = 0.0;
                        int numDash = int(style.numDashValues);
 
                        if(style.blur > 0.0) {
                            float blur = style.blur * scalingFactor;
                            float lineEdgeDistance = (1.0 - abs(outLineSide));
                            float blurAlpha = clamp(lineEdgeDistance / blur, 0.0, 1.0);
+
+                           if(blurAlpha == 0.0) {
+                               discard;
+                           }
+
                            a *= blurAlpha;
                            aGap *= blurAlpha;
                        }
 
+                       vec4 mainColor = vec4(outColor.r, outColor.g, outColor.b, 1.0) * a;
+                       vec4 gapColor = vec4(style.gapColorR, style.gapColorG, style.gapColorB, 1.0) * aGap;
+
                        float lineLength = 0.0;
+                       float t = 0;
+                       float d = 0;
+
                        if(dottedLine == 1) {
                            float skew = style.dottedSkew;
-                           float factorToT = (width * 2.0) / lineLength;
-                           float dashOffset = (width - skew * width) / lineLength;
+                           float factorToT = scaledWidth / lineLength * skew;
+                           float dashOffset = (halfScaledWidth - skew * halfScaledWidth) / lineLength;
                            float dashTotalDotted = 2.0 * factorToT;
                            float offset = outLengthPrefix / lineLength;
                            float startOffsetSegmentDotted = mod(offset, dashTotalDotted);
@@ -341,33 +354,59 @@ std::string ColorLineGroup2dShaderOpenGl::getLineFragmentShader() {
                                (length(vec2(
                                        min(abs(intraDashPosDotted - 0.5 * factorToT),
                                            0.5 * factorToT + dashTotalDotted - intraDashPosDotted) / (0.5 * factorToT + dashOffset),
-                                       d / width
+                                       d / halfScaledWidth
                                )) > 1.0)) {
                                discard;
                            }
                        } else if(numDash > 0) {
-                           float intraDashPos = mod(outLengthPrefix, style.dashArray3 * style.width * scalingFactor);
+                           float intraDashPos = mod(outLengthPrefix, style.dashArray3 * scaledWidth);
 
-                           float dxt = style.dashArray0 * style.width * scalingFactor;
-                           float dyt = style.dashArray1 * style.width * scalingFactor;
-                           float dzt = style.dashArray2 * style.width * scalingFactor;
-                           float dwt = style.dashArray3 * style.width * scalingFactor;
+                           float dxt = style.dashArray0 * scaledWidth;
+                           float dyt = style.dashArray1 * scaledWidth;
+                           float dzt = style.dashArray2 * scaledWidth;
+                           float dwt = style.dashArray3 * scaledWidth;
 
-                           if (style.dashFade == 0.0 &&
-                               ((intraDashPos > dxt && intraDashPos < dyt) ||
-                                (intraDashPos > dzt && intraDashPos < dwt))) {
-                               // Simple case without fade
-                               fragmentColor = vec4(style.gapColorR, style.gapColorG, style.gapColorB, 1.0) * aGap;
-                               return;
-                           } else if(style.dashFade == 0.0) {
-                               fragmentColor = outColor;
-                               fragmentColor.a = 1.0;
-                               fragmentColor *= a;
-                               return;
+                           if (style.dashFade == 0.0) {
+                               if((intraDashPos > dxt && intraDashPos < dyt) ||
+                                (intraDashPos > dzt && intraDashPos < dwt))
+                                {
+                                     // Simple case without fade
+                                     fragmentColor = gapColor;
+                                     return;
+                                 } else {
+                                    fragmentColor = mainColor;
+                                    return;
+                                }
                            } else {
-                               // TODO: implement this case
-                               fragmentColor = vec4(1.0, 0.0, 0.0, 1.0);
-                               return;
+                               if(intraDashPos > dxt && intraDashPos < dyt) {
+                                   float relG = (intraDashPos - dxt) / (dyt - dxt);
+
+                                   if(relG < (style.dashFade * 0.5)) {
+                                       float wg = relG / (style.dashFade * 0.5);
+                                       fragmentColor = gapColor * wg + mainColor * (1.0 - wg);
+                                       return;
+                                   } else {
+                                       fragmentColor = gapColor;
+                                       return;
+                                   }
+                               }
+
+                               if(intraDashPos > dzt && intraDashPos < dwt) {
+                                   float relG = (intraDashPos - dzt) / (dwt - dzt);
+                                   if (relG < style.dashFade) {
+                                       float wg = relG / style.dashFade;
+                                        fragmentColor = gapColor * wg + mainColor * (1.0 - wg);
+                                       return;
+                                   } else if (1.0 - relG < style.dashFade) {
+                                       float wg = (1.0 - relG) / style.dashFade;
+                                        fragmentColor = gapColor * wg + mainColor * (1.0 - wg);
+                                        return;
+                                   }
+                                   else {
+                                       fragmentColor = gapColor;
+                                       return;
+                                   }
+                               }
                            }
                        }
 
@@ -375,9 +414,7 @@ std::string ColorLineGroup2dShaderOpenGl::getLineFragmentShader() {
                            discard;
                        }
 
-                       fragmentColor = outColor;
-                       fragmentColor.a = 1.0;
-                       fragmentColor *= a;
+                       fragmentColor = mainColor;
                    });
 }
 

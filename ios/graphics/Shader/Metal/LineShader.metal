@@ -208,35 +208,46 @@ lineGroupFragmentShader(LineVertexOut in [[stage_in]],
   constant LineStyling *style = (constant LineStyling *)(styling + in.stylingIndex);
 
   const float opacity = style->opacity;
-  const float colorA = style->color.a;
-  const float colorAGap = style->gapColor.a;
-    const float width = style->width / 2.0 * scalingFactor;
 
-  float a = colorA * opacity;
-  float aGap = colorAGap * opacity;
+  if (opacity == 0.0) {
+      discard_fragment();
+  }
+
+  const float scaledWidth = style->width * scalingFactor;
+  const float halfScaledWidth = scaledWidth / 2.0;
+
+  float a = style->color.a * opacity;
+  float aGap = style->gapColor.a * opacity;
 
   const int dottedLine = int(style->dotted);
 
-    float t = 0;
-    float d = 0;
-    const half numDash = style->numDashValues;
+  const half numDash = style->numDashValues;
 
-    if (style->blur > 0) {
-        const float blur = (style->blur) * scalingFactor; // screen units
-        const float lineEdgeDistance = (1.0 - abs(in.lineSide)) * width; // screen units
-        const float blurAlpha = clamp(lineEdgeDistance / blur, 0.0, 1.0);
-        a *= blurAlpha;
-        aGap *= blurAlpha;
-    }
+  if (style->blur > 0) {
+      const float blur = (style->blur) * scalingFactor; // screen units
+      const float lineEdgeDistance = (1.0 - abs(in.lineSide)) * halfScaledWidth; // screen units
+      const float blurAlpha = clamp(lineEdgeDistance / blur, 0.0, 1.0);
 
-    float lineLength = 0;
+      if(blurAlpha == 0.0) {
+        discard_fragment();
+      }
 
+      a *= blurAlpha;
+      aGap *= blurAlpha;
+  }
+
+  half4 mainColor = half4(half3(style->color.rgb), 1.0) * a;
+  half4 gapColor  = half4(half3(style->gapColor.rgb), 1.0) * aGap;
+
+  float t = 0;
+  float d = 0;
+  float lineLength = 0;
 
   if (dottedLine == 1) {
     const float skew = style->dottedSkew;
 
-    const float factorToT = (width * 2) / lineLength * skew;
-    const float dashOffset = (width - skew * width) / lineLength;
+    const float factorToT = scaledWidth / lineLength * skew;
+    const float dashOffset = (halfScaledWidth - skew * halfScaledWidth) / lineLength;
 
     const float dashTotalDotted =  2.0 * factorToT;
     const float offset = float(in.lengthPrefix) / lineLength;
@@ -245,24 +256,26 @@ lineGroupFragmentShader(LineVertexOut in [[stage_in]],
 
     const float intraDashPosDotted = fmod(pos, dashTotalDotted);
       if ((intraDashPosDotted > 1.0 * factorToT + dashOffset && intraDashPosDotted < dashTotalDotted - dashOffset) ||
-                              (length(half2(min(abs(intraDashPosDotted - 0.5 * factorToT), 0.5 * factorToT + dashTotalDotted - intraDashPosDotted) / (0.5 * factorToT + dashOffset), d / width)) > 1.0)) {
+                              (length(half2(min(abs(intraDashPosDotted - 0.5 * factorToT), 0.5 * factorToT + dashTotalDotted - intraDashPosDotted) / (0.5 * factorToT + dashOffset), d / halfScaledWidth)) > 1.0)) {
           discard_fragment();
       }
   } else if(numDash > 0) {
 
-    const float intraDashPos = fmod(in.lengthPrefix, (float)style->dashArray.w * style->width * scalingFactor);
+    const float intraDashPos = fmod(in.lengthPrefix, (float)style->dashArray.w * scaledWidth);
 
-      float dxt = style->dashArray.x * style->width * scalingFactor;
-      float dyt = style->dashArray.y * style->width * scalingFactor;
-      float dzt = style->dashArray.z * style->width * scalingFactor;
-      float dwt = style->dashArray.w * style->width * scalingFactor;
-      if (style->dash_fade == 0 &&
-          ((intraDashPos > dxt && intraDashPos < dyt) || (intraDashPos > dzt && intraDashPos < dwt))) {
+    half4 dashArray = style->dashArray * scaledWidth;
+    float dxt = dashArray.x;
+    float dyt = dashArray.y;
+    float dzt = dashArray.z;
+    float dwt = dashArray.w;
+
+    if (style->dash_fade == 0) {
+        if ((intraDashPos > dxt && intraDashPos < dyt) || (intraDashPos > dzt && intraDashPos < dwt)) {
           // Simple case without fade
-          return half4(half3(style->gapColor.rgb), 1.0) * aGap;
-      }
-      else if (style->dash_fade == 0) {
-          return half4(half3(style->color.rgb), 1.0) * a;
+          return gapColor;
+        } else {
+          return mainColor;
+        }
       }
       else {
 
@@ -271,14 +284,9 @@ lineGroupFragmentShader(LineVertexOut in [[stage_in]],
               half relG = (intraDashPos - dxt) / (dyt - dxt);
               if (relG < (style->dash_fade * 0.5)) {
                   float wG = relG / (style->dash_fade * 0.5);
-                  return half4(half3(style->gapColor.rgb), 1.0) * aGap * wG + half4(half3(style->color.rgb), 1.0) * a * (1.0 - wG);
-              }
-//              else if (1.0 - relG < (style->dash_fade * 0.5)) {
-//                  half wG = (1.0 - relG) / (style->dash_fade * 0.5);
-//                  return half4(half3(style->gapColor.rgb), 1.0) * aGap * wG + half4(half3(style->color.rgb), 1.0) * a * (1.0 - wG);
-//              }
-              else {
-                  return half4(half3(style->gapColor.rgb), 1.0) * aGap;
+                  return gapColor * wG + mainColor * (1.0 - wG);
+              } else {
+                return gapColor;
               }
           }
 
@@ -287,14 +295,14 @@ lineGroupFragmentShader(LineVertexOut in [[stage_in]],
               half relG = (intraDashPos - dzt) / (dwt - dzt);
               if (relG < style->dash_fade) {
                   half wG = relG / style->dash_fade;
-                  return half4(half3(style->gapColor.rgb), 1.0) * aGap * wG + half4(half3(style->color.rgb), 1.0) * a * (1.0 - wG);
+                  return gapColor * wG + mainColor * (1.0 - wG);
               }
               else if (1.0 - relG < style->dash_fade) {
                   float wG = (1.0 - relG) / style->dash_fade;
-                  return half4(half3(style->gapColor.rgb), 1.0) * aGap * wG + half4(half3(style->color.rgb), 1.0) * a * (1.0 - wG);
+                  return gapColor * wG + mainColor * (1.0 - wG);
               }
               else {
-                  return half4(half3(style->gapColor.rgb), 1.0) * aGap;
+                return gapColor;
               }
 
           }
@@ -305,5 +313,5 @@ lineGroupFragmentShader(LineVertexOut in [[stage_in]],
     discard_fragment();
   }
 
-  return half4(half3(style->color.rgb), 1.0) * a;
+  return mainColor;
 }
