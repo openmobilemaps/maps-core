@@ -551,14 +551,18 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(VectorModificationWrappe
         iconBoundingBoxViewportAligned.x = (-iconWidth * 0.5) - scaledIconPadding + offsets[2 * countOffset] * viewPortSize.x * 0.5;
         iconBoundingBoxViewportAligned.y = (-iconHeight * 0.5) - scaledIconPadding - offsets[2 * countOffset + 1] * viewPortSize.y * 0.5;
 
-        offsets[2 * countOffset] += (iconOffset.x * iconWidth) * 1.0 / viewPortSize.x;
-        offsets[2 * countOffset + 1] += (iconOffset.y * iconHeight) * 1.0 / viewPortSize.y;
+        offsets[2 * countOffset] += (iconOffset.x * iconSize) * 1.0 / viewPortSize.x;
+        offsets[2 * countOffset + 1] += (iconOffset.y * iconSize) * 1.0 / viewPortSize.y;
     } else {
         renderCoordinate = getRenderCoordinates(iconAnchor, -rotations[countOffset], iconWidth, iconHeight);
     }
 
-    const double x = renderCoordinate.x + (is3d ? 0.0 : iconOffset.x * iconWidth / dpFactor);
-    const double y = renderCoordinate.y + (is3d ? 0.0 : iconOffset.y * iconHeight / dpFactor);
+    const double iconOffsetX = iconOffset.x * iconSize / dpFactor;
+    const double iconOffsetY = iconOffset.y * iconSize / dpFactor;
+    const double rotatedOffsetX = iconOffsetX * cos(-rotations[countOffset] * M_PI / 180.0) - iconOffsetY * sin(-rotations[countOffset] * M_PI / 180.0);
+    const double rotatedOffsetY = iconOffsetX * sin(-rotations[countOffset] * M_PI / 180.0) + iconOffsetY * cos(-rotations[countOffset] * M_PI / 180.0);
+    const double x = renderCoordinate.x + (is3d ? 0.0 : rotatedOffsetX);
+    const double y = renderCoordinate.y + (is3d ? 0.0 : rotatedOffsetY);
 
     writePosition(x, y, countOffset, positions);
 
