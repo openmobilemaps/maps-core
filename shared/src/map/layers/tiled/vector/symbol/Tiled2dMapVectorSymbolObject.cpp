@@ -557,8 +557,8 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(VectorModificationWrappe
         renderCoordinate = getRenderCoordinates(iconAnchor, -rotations[countOffset], iconWidth, iconHeight);
     }
 
-    const double iconOffsetX = iconOffset.x * iconSize / dpFactor;
-    const double iconOffsetY = iconOffset.y * iconSize / dpFactor;
+    const double iconOffsetX = iconOffset.x * iconSize * scaleFactor;
+    const double iconOffsetY = iconOffset.y * iconSize * scaleFactor;
     const double rotatedOffsetX = iconOffsetX * cos(-rotations[countOffset] * M_PI / 180.0) - iconOffsetY * sin(-rotations[countOffset] * M_PI / 180.0);
     const double rotatedOffsetY = iconOffsetX * sin(-rotations[countOffset] * M_PI / 180.0) + iconOffsetY * cos(-rotations[countOffset] * M_PI / 180.0);
     const double x = renderCoordinate.x + (is3d ? 0.0 : rotatedOffsetX);
