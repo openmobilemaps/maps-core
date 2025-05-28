@@ -57,7 +57,7 @@ public struct LineVertex: Equatable {
         var offset = 0
         let bufferIndex = 0
 
-        // Postion
+        // Position
         vertexDescriptor.attributes[0].bufferIndex = bufferIndex
         vertexDescriptor.attributes[0].format = .float2
         vertexDescriptor.attributes[0].offset = offset
