@@ -357,6 +357,12 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
                             joinType = lineJoinValue->evaluateOr(evalContext, joinType);
                         }
 
+                        auto dottedValue = lineDescription->style.lineDottedEvaluator.getValue();
+                        bool isDotted = false;
+                        if (dottedValue) {
+                            isDotted = dottedValue->evaluateOr(evalContext, isDotted);
+                        }
+
                         if (!featureGroups.empty() && featureGroups.back().size() < maxStylesPerGroup) {
                             styleGroupIndex = (int) featureGroups.size() - 1;
                             styleIndex = (int) featureGroups.back().size();
@@ -375,6 +381,7 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
                             shaders.push_back(shader);
                             capTypes.push_back(capType);
                             joinTypes.push_back(joinType);
+                            dotted.push_back(isDotted);
                             if (isSimpleLine) {
                                 reusableSimpleLineStyles.push_back({  ShaderSimpleLineStyle {0} });
                             } else {
@@ -477,6 +484,7 @@ void Tiled2dMapVectorLineTile::addLines(const std::vector<std::vector<std::vecto
             const auto &shader = shaders.at(styleGroupIndex);
             const auto capType = capTypes.at(styleGroupIndex);
             const auto joinType = joinTypes.at(styleGroupIndex);
+            const auto optimizeForDots = dotted.at(styleGroupIndex);
             auto lineGroupGraphicsObject = objectFactory->createLineGroup(shader->asShaderProgramInterface());
 
 #if DEBUG
@@ -487,7 +495,7 @@ void Tiled2dMapVectorLineTile::addLines(const std::vector<std::vector<std::vecto
                                                                             shader,
                                                                             is3d);
 
-            lineGroupObject->setLines(lineSubGroup, tileInfo.tileInfo.bounds.topLeft.systemIdentifier, origin, capType, joinType);
+            lineGroupObject->setLines(lineSubGroup, tileInfo.tileInfo.bounds.topLeft.systemIdentifier, origin, capType, joinType, optimizeForDots);
 
             lineGroupObjects.push_back(lineGroupObject);
             newGraphicObjects.push_back(lineGroupGraphicsObject->asGraphicsObject());

@@ -33,7 +33,7 @@ void LineGroup2dLayerObject::update() {}
 std::vector<std::shared_ptr<RenderConfigInterface>> LineGroup2dLayerObject::getRenderConfig() { return {renderConfig}; }
 
 void LineGroup2dLayerObject::setLines(const std::vector<std::tuple<std::vector<Vec2D>, int>> &lines, const int32_t systemIdentifier,
-                                      const Vec3D &origin, LineCapType capType, LineJoinType joinType) {
+                                      const Vec3D &origin, LineCapType capType, LineJoinType joinType, bool optimizeForDots) {
     std::vector<uint32_t> lineIndices;
     std::vector<float> lineAttributes;
 
@@ -62,11 +62,11 @@ void LineGroup2dLayerObject::setLines(const std::vector<std::tuple<std::vector<V
         convertedLines.emplace_back(std::move(renderCoords), lineStyleIndex);
     }
 
-    LineGeometryBuilder::buildLines(line, convertedLines, origin, capType, joinType, is3d);
+    LineGeometryBuilder::buildLines(line, convertedLines, origin, capType, joinType, is3d, optimizeForDots);
 }
 
 void LineGroup2dLayerObject::setLines(const std::vector<std::tuple<std::vector<Coord>, int>> &lines, const Vec3D &origin,
-                                      LineCapType capType, LineJoinType joinType) {
+                                      LineCapType capType, LineJoinType joinType, bool optimizeForDots) {
 
     std::vector<uint32_t> lineIndices;
     std::vector<float> lineAttributes;
@@ -96,7 +96,7 @@ void LineGroup2dLayerObject::setLines(const std::vector<std::tuple<std::vector<C
         convertedLines.emplace_back(std::move(renderCoords), lineStyleIndex);
     }
 
-    LineGeometryBuilder::buildLines(line, convertedLines, origin, capType, joinType, is3d);
+    LineGeometryBuilder::buildLines(line, convertedLines, origin, capType, joinType, is3d, optimizeForDots);
 }
 
 

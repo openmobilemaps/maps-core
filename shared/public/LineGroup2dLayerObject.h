@@ -31,9 +31,9 @@ class LineGroup2dLayerObject : public LayerObjectInterface {
 
     virtual std::vector<std::shared_ptr<RenderConfigInterface>> getRenderConfig() override;
 
-    void setLines(const std::vector<std::tuple<std::vector<Vec2D>, int>> &lines, const int32_t systemIdentifier, const Vec3D & origin, LineCapType capType = LineCapType::BUTT, LineJoinType joinType = LineJoinType::MITER);
+    void setLines(const std::vector<std::tuple<std::vector<Vec2D>, int>> &lines, const int32_t systemIdentifier, const Vec3D & origin, LineCapType capType = LineCapType::BUTT, LineJoinType joinType = LineJoinType::MITER, bool optimizeForDots = false);
 
-    void setLines(const std::vector<std::tuple<std::vector<Coord>, int>> &lines, const Vec3D & origin, LineCapType capType = LineCapType::BUTT, LineJoinType joinType = LineJoinType::MITER);
+    void setLines(const std::vector<std::tuple<std::vector<Coord>, int>> &lines, const Vec3D & origin, LineCapType capType = LineCapType::BUTT, LineJoinType joinType = LineJoinType::MITER, bool optimizeForDots = false);
 
     void setStyles(const std::vector<LineStyle> &styles);
 

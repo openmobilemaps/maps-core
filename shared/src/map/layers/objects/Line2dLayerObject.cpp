@@ -65,7 +65,7 @@ void Line2dLayerObject::setPositions(const std::vector<Coord> &positions, const 
         renderCoords.push_back(Vec3D(x, y, z));
     }
 
-    LineGeometryBuilder::buildLines(line, {std::make_tuple(renderCoords, 0)}, origin, style.lineCap, style.lineJoin, is3d);
+    LineGeometryBuilder::buildLines(line, {std::make_tuple(renderCoords, 0)}, origin, style.lineCap, style.lineJoin, is3d, style.dotted);
 }
 
 void Line2dLayerObject::setStyle(const LineStyle &style_) {

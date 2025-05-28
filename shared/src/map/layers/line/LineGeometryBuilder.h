@@ -11,7 +11,7 @@ class LineGeometryBuilder {
   public:
     static void buildLines(const std::shared_ptr<LineGroup2dInterface> &line,
                            const std::vector<std::tuple<std::vector<Vec3D>, int>> &lines, const Vec3D &origin, LineCapType capType,
-                           LineJoinType defaultJoinType, bool is3d) {
+                           LineJoinType defaultJoinType, bool is3d, bool optimizeForDots) {
         std::vector<uint32_t> lineIndices;
         std::vector<float> lineAttributes;
         uint32_t vertexCount = 0;
@@ -148,16 +148,18 @@ class LineGeometryBuilder {
                         pointExtrude = pointExtrude + extrudeLineVec * endSide;
                     }
                     if (side * turnDirection < 0 && endSide == 0 && extrudeScale > 1.1 && vertexJoinType != LineJoinType::MITER) {
-                        if (side == -1) {
-                            pushLineVertex(p, extrude - lastNormal * 2, 1.0, -1, prefixTotalLineLength, lineStyleIndex, true, true,
-                                           vertexCount, prePreIndex, preIndex, lineAttributes, lineIndices, is3d);
-                            pushLineVertex(p, extrude, extrudeScale, 1, prefixTotalLineLength, lineStyleIndex, true, false, vertexCount,
-                                           prePreIndex, preIndex, lineAttributes, lineIndices, is3d);
-                        }
-                        else {
-                            pushLineVertex(p, -extrude + lastNormal * 2, 1.0, 1, prefixTotalLineLength, lineStyleIndex, true, false,
-                                           vertexCount, prePreIndex, preIndex, lineAttributes, lineIndices, is3d);
-                            std::swap(prePreIndex, preIndex);
+                        if (optimizeForDots) {
+                            if (side == -1) {
+                                pushLineVertex(p, extrude - lastNormal * 2, 1.0, -1, prefixTotalLineLength, lineStyleIndex, true, true,
+                                               vertexCount, prePreIndex, preIndex, lineAttributes, lineIndices, is3d);
+                                pushLineVertex(p, extrude, extrudeScale, 1, prefixTotalLineLength, lineStyleIndex, true, false, vertexCount,
+                                               prePreIndex, preIndex, lineAttributes, lineIndices, is3d);
+                            }
+                            else {
+                                pushLineVertex(p, -extrude + lastNormal * 2, 1.0, 1, prefixTotalLineLength, lineStyleIndex, true, false,
+                                               vertexCount, prePreIndex, preIndex, lineAttributes, lineIndices, is3d);
+                                std::swap(prePreIndex, preIndex);
+                            }
                         }
                         const double approxAngle = 2 * std::sqrt(2 - 2 * cosHalfAngle);
                         // 2.86 ~= 180/pi / 20 -> approximately one slice per 20 degrees
