@@ -9,8 +9,9 @@
 
 class LineGeometryBuilder {
   public:
-    static void buildLines(const std::shared_ptr<LineGroup2dInterface> &line, const std::vector<std::tuple<std::vector<Vec3D>, int>> &lines, const Vec3D &origin, LineCapType capType,
-                    LineJoinType joinType, bool is3d) {
+    static void buildLines(const std::shared_ptr<LineGroup2dInterface> &line,
+                           const std::vector<std::tuple<std::vector<Vec3D>, int>> &lines, const Vec3D &origin, LineCapType capType,
+                           LineJoinType defaultJoinType, bool is3d) {
         std::vector<uint32_t> lineIndices;
         std::vector<float> lineAttributes;
         uint32_t vertexCount = 0;
@@ -22,6 +23,10 @@ class LineGeometryBuilder {
 
             int pointCount = (int)renderCoords.size();
 
+            if (pointCount < 2) {
+                continue; // Skip lines with less than 2 points
+            }
+
             float prefixTotalLineLength = 0.0;
             float lineLength = 0;
             float cosAngle = 0, cosHalfAngle = 0;
@@ -31,30 +36,38 @@ class LineGeometryBuilder {
 
             int32_t preIndex = -1, prePreIndex = -1;
 
-            for (int i = 0; i < pointCount; i++) {
-                const Vec3D &p = renderCoords[i];
+            for (int currentIndex = 0, nextIndex = 0; currentIndex < pointCount; currentIndex = nextIndex) {
+                const Vec3D &p = renderCoords[currentIndex];
 
                 prefixTotalLineLength += lineLength;
 
                 float extrudeScale = 1.0;
-                LineJoinType vertexJoinType = joinType;
+                float turnDirection = 0;
+                LineJoinType vertexJoinType = defaultJoinType;
 
                 Vec3D extrude(0, 0, 0), extrudeLineVec(0, 0, 0);
 
-                if (i > 0) {
+                if (currentIndex > 0) {
                     lastNormal = normal;
                     lastLineVec = lineVec;
                 }
 
-                if (i < pointCount - 1) {
-                    const Vec3D &pNext = renderCoords[i + 1];
-
-                    lineVec = pNext - p;
-                    lineLength = Vec3DHelper::length(lineVec);
-                    if (lineLength == 0) {
-                        continue;
+                // search for next point with non-zero length vector from current point
+                lineLength = 0;
+                while (lineLength == 0) {
+                    nextIndex++;
+                    if (nextIndex >= pointCount) {
+                        break;
                     }
+                    lineVec = renderCoords[nextIndex] - p;
+                    lineLength = Vec3DHelper::length(lineVec);
+                }
+
+                if (lineLength > 0 && nextIndex < pointCount) {
+
                     lineVec /= lineLength;
+
+                    const Vec3D &pNext = renderCoords[nextIndex];
 
                     if (is3d) {
                         pOriginLine = Vec3DHelper::normalize(Vec3D(p.x + origin.x, p.y + origin.y, p.z + origin.z));
@@ -63,7 +76,7 @@ class LineGeometryBuilder {
                         normal = Vec3DHelper::normalize(Vec3D(-lineVec.y, lineVec.x, 0.0));
                     }
 
-                    if (i > 0) {
+                    if (currentIndex > 0) {
                         extrude = (normal + lastNormal);
                         double extrudeLength = Vec3DHelper::length(extrude);
                         if (extrudeLength > 0) {
@@ -73,13 +86,18 @@ class LineGeometryBuilder {
                         if (is3d) {
                             cosAngle = Vec3DHelper::dotProduct(normal, lastNormal);
                             cosHalfAngle = Vec3DHelper::dotProduct(extrude, normal);
+
+                            Vec3D cross = Vec3DHelper::crossProduct(lastLineVec, lineVec); // 3D cross product
+                            turnDirection = Vec3DHelper::dotProduct(cross, pOriginLine);   // Project onto reference normal
+
                         } else {
                             cosAngle = normal.x * lastNormal.x + normal.y * lastNormal.y;
                             cosHalfAngle = extrude.x * normal.x + extrude.y * normal.y;
+                            turnDirection = (lastNormal.x * normal.y - lastNormal.y * normal.x); // 2D cross product
                         }
 
                         extrudeScale = cosHalfAngle != 0 ? std::abs(1.0 / cosHalfAngle) : 1.0;
-                        if (extrudeScale > 2.0) {
+                        if (extrudeScale > 2.0 && vertexJoinType == LineJoinType::MITER) {
                             vertexJoinType = LineJoinType::BEVEL;
                             extrudeScale = 2.0;
                         }
@@ -87,8 +105,8 @@ class LineGeometryBuilder {
                         extrude = normal;
                         extrudeLineVec = lineVec;
                     }
-                } else if (i > 0) {
-                    lineLength = 0;
+                } else if (currentIndex > 0) {
+                    // last point
                     extrude = lastNormal;
                     extrudeLineVec = -lastLineVec;
                 } else {
@@ -97,9 +115,9 @@ class LineGeometryBuilder {
                 }
 
                 float endSide = 0;
-                if (i == 0) {
+                if (currentIndex == 0) {
                     endSide = -1;
-                } else if (i == pointCount - 1) {
+                } else if (currentIndex == pointCount - 1) {
                     endSide = 1;
                 }
 
@@ -107,14 +125,12 @@ class LineGeometryBuilder {
                     auto originalPrePreIndex = prePreIndex;
                     auto originalPreIndex = preIndex;
                     pushLineVertex(p, Vec3D(0, 0, 0), 1.0, 0, prefixTotalLineLength, lineStyleIndex, true, false, vertexCount,
-                                   prePreIndex, preIndex, lineAttributes, lineIndices,
-                                   is3d);
+                                   prePreIndex, preIndex, lineAttributes, lineIndices, is3d);
                     int32_t centerIndex = preIndex, firstIndex = -1, lastIndex = -1;
                     for (float r = -1; r <= 1; r += 0.2) {
                         Vec3D roundExtrude = Vec3DHelper::normalize(extrude * r - extrudeLineVec * (1.0 - abs(r)));
                         pushLineVertex(p, roundExtrude, 1.0, r, prefixTotalLineLength, lineStyleIndex, true, endSide == -1,
-                                       vertexCount, prePreIndex, preIndex, lineAttributes, lineIndices,
-                                       is3d);
+                                       vertexCount, prePreIndex, preIndex, lineAttributes, lineIndices, is3d);
                         if (r == 0) {
                             firstIndex = preIndex;
                         } else {
@@ -131,22 +147,32 @@ class LineGeometryBuilder {
                     if (capType == LineCapType::SQUARE && endSide != 0) {
                         pointExtrude = pointExtrude + extrudeLineVec * endSide;
                     }
-                    if (side * cosAngle < 0 && endSide == 0 && extrudeScale > 1.1 && joinType != LineJoinType::MITER) {
+                    if (side * turnDirection < 0 && endSide == 0 && extrudeScale > 1.1 && vertexJoinType != LineJoinType::MITER) {
+                        if (side == -1) {
+                            pushLineVertex(p, extrude - lastNormal * 2, 1.0, -1, prefixTotalLineLength, lineStyleIndex, true, true,
+                                           vertexCount, prePreIndex, preIndex, lineAttributes, lineIndices, is3d);
+                            pushLineVertex(p, extrude, extrudeScale, 1, prefixTotalLineLength, lineStyleIndex, true, false, vertexCount,
+                                           prePreIndex, preIndex, lineAttributes, lineIndices, is3d);
+                        }
+                        else {
+                            pushLineVertex(p, -extrude + lastNormal * 2, 1.0, 1, prefixTotalLineLength, lineStyleIndex, true, false,
+                                           vertexCount, prePreIndex, preIndex, lineAttributes, lineIndices, is3d);
+                            std::swap(prePreIndex, preIndex);
+                        }
                         const double approxAngle = 2 * std::sqrt(2 - 2 * cosHalfAngle);
                         // 2.86 ~= 180/pi / 20 -> approximately one slice per 20 degrees
-                        double stepSize = (joinType == LineJoinType::ROUND) ? 1.0 / round(approxAngle * 2.86) : 1.0;
-                        for (float r = 0; r <= 1; r += stepSize) {
+                        const int stepCount = (vertexJoinType == LineJoinType::ROUND) ? round(approxAngle * 2.86) : 1;
+                        for (int step = 0; step <= stepCount; step++) {
+                            double r = (double)step / (double)stepCount;
                             pointExtrude = Vec3DHelper::normalize(lastNormal * (1.0 - r) + normal * r) * (double)side;
                             pushLineVertex(p, pointExtrude, 1.0, side, prefixTotalLineLength, lineStyleIndex, true, side == -1,
-                                           vertexCount, prePreIndex, preIndex, lineAttributes, lineIndices,
-                                           is3d);
+                                           vertexCount, prePreIndex, preIndex, lineAttributes, lineIndices, is3d);
                             std::swap(prePreIndex, preIndex);
                         }
                         std::swap(prePreIndex, preIndex);
                     } else {
                         pushLineVertex(p, pointExtrude, extrudeScale, side, prefixTotalLineLength, lineStyleIndex, true, side == -1,
-                                       vertexCount, prePreIndex, preIndex, lineAttributes, lineIndices,
-                                           is3d);
+                                       vertexCount, prePreIndex, preIndex, lineAttributes, lineIndices, is3d);
                     }
                 }
             }
@@ -158,9 +184,9 @@ class LineGeometryBuilder {
     }
 
     static void pushLineVertex(const Vec3D &p, const Vec3D &extrude, const float extrudeScale, const float side,
-                        const float prefixTotalLineLength, const int lineStyleIndex, const bool addTriangle, const bool reverse,
-                        uint32_t &vertexCount, int32_t &prePreIndex, int32_t &preIndex, std::vector<float> &lineAttributes,
-                        std::vector<uint32_t> &lineIndices, bool is3d) {
+                               const float prefixTotalLineLength, const int lineStyleIndex, const bool addTriangle,
+                               const bool reverse, uint32_t &vertexCount, int32_t &prePreIndex, int32_t &preIndex,
+                               std::vector<float> &lineAttributes, std::vector<uint32_t> &lineIndices, bool is3d) {
         lineAttributes.push_back(p.x);
         lineAttributes.push_back(p.y);
         if (is3d) {
