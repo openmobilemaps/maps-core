@@ -155,12 +155,13 @@ polygonPatternGroupFadeInFragmentShader(PolygonPatternGroupVertexOut in [[stage_
     const float2 spacing = pixelSize * scalingFactorFactor;
     const float2 totalSize = pixelSize + spacing;
     const float2 adjustedPixelPosition = in.pixelPosition + pixelSize * 0.5;
-    float2 uvTot = fmod(adjustedPixelPosition, totalSize);
+
+    float2 uvTot = fmod(fmod(adjustedPixelPosition, totalSize) + totalSize, totalSize);
 
     const int yIndex = int(adjustedPixelPosition.y / totalSize.y) % 2;
 
     if(yIndex != 0 && uvTot.y <= pixelSize.y) {
-        uvTot.x = fmod(adjustedPixelPosition.x + totalSize.x * 0.5, totalSize.x);
+        uvTot.x = fmod(fmod(adjustedPixelPosition.x + totalSize.x * 0.5, totalSize.x) + totalSize.x, totalSize.x);
     }
 
     half4 resultColor = half4(0.0,0.0,0.0,0.0);
