@@ -79,6 +79,10 @@ open class MCMapView: MTKView {
     }
 
     deinit {
+        // nasty workaround for the dispatch_semaphore crash
+        for _ in 0..<3 {
+            renderSemaphore.signal()
+        }
         if Thread.isMainThread {
             // make sure the mapInterface is destroyed from a background thread
             DispatchQueue.global()
