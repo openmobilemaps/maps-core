@@ -5,15 +5,15 @@
 //  Created by Stefan Mitterrutzner on 30.05.2025.
 //
 
-#if canImport(UIKit)
-import UIKit
-public typealias PlatformImage = UIImage
-#elseif canImport(AppKit)
-import AppKit
-public typealias PlatformImage = NSImage
-#endif
-
 import MapCoreSharedModule
+
+#if canImport(UIKit)
+    import UIKit
+    public typealias PlatformImage = UIImage
+#elseif canImport(AppKit)
+    import AppKit
+    public typealias PlatformImage = NSImage
+#endif
 
 public enum MCTextureAtlasProvider {
 
@@ -57,43 +57,44 @@ public enum MCTextureAtlasProvider {
         canvasSize: CGSize
     ) -> PlatformImage? {
         #if canImport(UIKit)
-        UIGraphicsBeginImageContextWithOptions(canvasSize, false, 1.0)
-        defer { UIGraphicsEndImageContext() }
+            UIGraphicsBeginImageContextWithOptions(canvasSize, false, 1.0)
+            defer { UIGraphicsEndImageContext() }
 
-        for (key, rect) in uvs {
-            if let image = images[key] {
-                image.draw(in: CGRect(
-                    x: CGFloat(rect.x),
-                    y: CGFloat(rect.y),
-                    width: CGFloat(rect.width),
-                    height: CGFloat(rect.height)
-                ))
+            for (key, rect) in uvs {
+                if let image = images[key] {
+                    image.draw(
+                        in: CGRect(
+                            x: CGFloat(rect.x),
+                            y: CGFloat(rect.y),
+                            width: CGFloat(rect.width),
+                            height: CGFloat(rect.height)
+                        ))
+                }
             }
-        }
 
-        return UIGraphicsGetImageFromCurrentImageContext()
+            return UIGraphicsGetImageFromCurrentImageContext()
 
         #elseif canImport(AppKit)
-        let image = NSImage(size: canvasSize)
-        image.lockFocus()
+            let image = NSImage(size: canvasSize)
+            image.lockFocus()
 
-        for (key, rect) in uvs {
-            if let img = images[key] {
-                let destRect = CGRect(
-                    x: CGFloat(rect.x),
-                    y: CGFloat(rect.y),
-                    width: CGFloat(rect.width),
-                    height: CGFloat(rect.height)
-                )
-                img.draw(in: destRect, from: .zero, operation: .sourceOver, fraction: 1.0)
+            for (key, rect) in uvs {
+                if let img = images[key] {
+                    let destRect = CGRect(
+                        x: CGFloat(rect.x),
+                        y: CGFloat(rect.y),
+                        width: CGFloat(rect.width),
+                        height: CGFloat(rect.height)
+                    )
+                    img.draw(in: destRect, from: .zero, operation: .sourceOver, fraction: 1.0)
+                }
             }
-        }
 
-        image.unlockFocus()
-        return image
+            image.unlockFocus()
+            return image
 
         #else
-        return nil
+            return nil
         #endif
     }
 }
