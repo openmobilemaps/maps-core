@@ -53,10 +53,6 @@ class Vec2DHelper {
         return (from.x - to.x) * (from.x - to.x) + (from.y - to.y) * (from.y - to.y);
     }
 
-    static inline double distanceWith3D(const ::Vec3D &from, const ::Vec3D &to) {
-        return std::sqrt((from.x - to.x) * (from.x - to.x) + (from.y - to.y) * (from.y - to.y));
-    }
-
     static inline ::Vec2D midpoint(const ::Vec2D &from, const ::Vec2D &to) {
         return Vec2D((from.x + to.x) / 2.0, (from.y + to.y) / 2.0);
     }

@@ -399,12 +399,7 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(VectorModification
 
     auto pen = zero;
 
-    float angle;
-    if (textAlignment == SymbolAlignment::MAP) {
-        angle = textRotate;
-    } else {
-        angle = textRotate - rotation;
-    }
+    const float angle = (textAlignment == SymbolAlignment::MAP) ? textRotate : textRotate - rotation;
 
     Vec2D anchorOffset(0.0, 0.0);
     float yOffset = 0;
@@ -578,15 +573,14 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(VectorModification
     Vec3D boundingBoxMin(std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), referencePoint.z);
     Vec3D boundingBoxMax(std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest(), referencePoint.z);
 
-    Vec2D anchorOffsetRot = Vec2DHelper::rotate(anchorOffset, Vec2D(0, 0), angle);
+    const double sinAngle = sin(angle * M_PI / 180.0);
+    const double cosAngle = cos(angle * M_PI / 180.0);
+    Vec2D anchorOffsetRot = Vec2DHelper::rotate(anchorOffset, Vec2D(0, 0), sinAngle, cosAngle);
 
     const auto dx = referencePoint.x + anchorOffset.x;
     const auto dy = referencePoint.y + anchorOffset.y;
     const auto dxRot = referencePoint.x + anchorOffsetRot.x;
     const auto dyRot = referencePoint.y + anchorOffsetRot.y;
-
-    const double sinAngle = sin(angle * M_PI / 180.0);
-    const double cosAngle = cos(angle * M_PI / 180.0);
 
     assert(numberOfCharacters == characterCount);
 
@@ -662,15 +656,15 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(VectorModification
         std::vector<CircleD> circles;
         Vec2D origin = Vec2D(dx, dy);
         Vec2D lastCirclePosition = Vec2D(0, 0);
+        const double distanceThreshold = (2.0 * maxSymbolRadius) * collisionDistanceBias;
+        const double distanceThresholdSq = distanceThreshold * distanceThreshold;
         size_t count = numberOfCharacters;
         for (int i = 0; i < count; i++) {
             Vec2D newPos = centerPositions[i];
-            newPos = Vec2DHelper::rotate(newPos, Vec2D(0, 0), angle);
+            newPos = Vec2DHelper::rotate(newPos, Vec2D(0, 0), sinAngle, cosAngle);
             newPos.x += dxRot;
             newPos.y += dyRot;
-            if (i != count - 1 && std::sqrt((newPos.x - lastCirclePosition.x) * (newPos.x - lastCirclePosition.x) +
-                                            (newPos.y - lastCirclePosition.y) * (newPos.y - lastCirclePosition.y)) <=
-                                          (2.0 * maxSymbolRadius) * collisionDistanceBias) {
+            if (i != count - 1 && Vec2DHelper::distanceSquared(newPos, lastCirclePosition) <= distanceThresholdSq) {
                 continue;
             }
             circles.emplace_back(newPos.x, newPos.y, maxSymbolRadius + scaledTextPadding);
