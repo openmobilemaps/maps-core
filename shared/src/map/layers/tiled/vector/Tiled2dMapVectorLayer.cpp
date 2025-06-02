@@ -843,7 +843,7 @@ void Tiled2dMapVectorLayer::onTilesUpdated(const std::string &layerName, VectorS
 
     auto sourceManager = sourceDataManagers.find(layerName);
     if (sourceManager != sourceDataManagers.end()) {
-        sourceManager->second.message(MailboxDuplicationStrategy::replaceNewest, MFN(&Tiled2dMapVectorSourceTileDataManager::onRasterTilesUpdated), layerName, currentTileInfos);
+        sourceManager->second.message(MailboxDuplicationStrategy::replaceNewest, MFN(&Tiled2dMapVectorSourceTileDataManager::onRasterTilesUpdated), layerName, std::move(currentTileInfos));
     }
     tilesStillValid.clear();
 }
@@ -852,13 +852,15 @@ void Tiled2dMapVectorLayer::onTilesUpdated(const std::string &sourceName, Vector
 
     std::unique_lock<std::mutex> lock(setupMutex);
     setupCV.wait(lock, [this]{ return setupReady; });
+    
     auto sourceManager = sourceDataManagers.find(sourceName);
     if (sourceManager != sourceDataManagers.end()) {
-        sourceManager->second.message(MailboxDuplicationStrategy::replaceNewest, MFN(&Tiled2dMapVectorSourceTileDataManager::onVectorTilesUpdated), sourceName, currentTileInfos);
+        auto currentTileInfosCopy = currentTileInfos.copy(); // can only be moved into one of the two messages, so make a copy first.
+        sourceManager->second.message(MailboxDuplicationStrategy::replaceNewest, MFN(&Tiled2dMapVectorSourceTileDataManager::onVectorTilesUpdated), sourceName, std::move(currentTileInfosCopy));
     }
     auto symbolSourceManager = symbolSourceDataManagers.find(sourceName);
     if (symbolSourceManager != symbolSourceDataManagers.end()) {
-        symbolSourceManager->second.message(MailboxDuplicationStrategy::replaceNewest, MFN(&Tiled2dMapVectorSourceTileDataManager::onVectorTilesUpdated), sourceName, currentTileInfos);
+        symbolSourceManager->second.message(MailboxDuplicationStrategy::replaceNewest, MFN(&Tiled2dMapVectorSourceTileDataManager::onVectorTilesUpdated), sourceName, std::move(currentTileInfos));
     }
     tilesStillValid.clear();
 }

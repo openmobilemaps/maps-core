@@ -26,7 +26,6 @@
 #include "Tiled2dMapVectorLayerSymbolDelegateInterface.h"
 #include "CollisionGrid.h"
 #include "RenderObjectInterface.h"
-#include "SymbolObjectCollisionWrapper.h"
 #include "VectorModificationWrapper.h"
 
 //#define DRAW_TEXT_BOUNDING_BOX
@@ -58,7 +57,7 @@ public:
 
     void setupObjects(const std::shared_ptr<SpriteData> &spriteData, const std::shared_ptr<TextureHolderInterface> &spriteTexture, const std::optional<WeakActor<Tiled2dMapVectorSourceSymbolDataManager>> &symbolDataManager = std::nullopt);
 
-    std::vector<SymbolObjectCollisionWrapper> getSymbolObjectsForCollision();
+    const std::vector<std::shared_ptr<Tiled2dMapVectorSymbolObject>>& getSymbolObjectsForCollision() const;
 
     std::optional<std::tuple<Coord, VectorLayerFeatureInfo>> onClickConfirmed(const CircleD &clickHitCircle, double zoomIdentifier, CollisionUtil::CollisionEnvironment &collisionEnvironment);
 

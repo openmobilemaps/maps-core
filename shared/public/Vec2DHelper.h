@@ -80,6 +80,14 @@ class Vec2DHelper {
         return Vec2D(rX + origin.x, rY + origin.y);
     }
 
+    static inline ::Vec2D rotate(const ::Vec2D &p, const ::Vec2D &origin, double sinAngle, double cosAngle) {
+        const double x = p.x - origin.x;
+        const double y = p.y - origin.y;
+        const double rX = x * cosAngle - y * sinAngle;
+        const double rY = x * sinAngle + y * cosAngle;
+        return Vec2D(rX + origin.x, rY + origin.y);
+    }
+
     // returns the indices that form the convex hull
     static inline std::vector<size_t> convexHull(std::vector<Vec2D>& points) {
         std::sort(points.begin(), points.end());

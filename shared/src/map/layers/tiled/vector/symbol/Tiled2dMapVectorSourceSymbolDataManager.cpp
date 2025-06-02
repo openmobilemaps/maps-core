@@ -380,7 +380,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::onVectorTilesUpdated(const std::st
 
         for (const auto &[tileInfo, groupMap]: tileSymbolGroupMap) {
             bool found = false;
-            for (const auto &currentTile: currentTileInfos) {
+            for (const auto &currentTile: latestTileInfos) {
                 if (tileInfo == currentTile.tileInfo) {
                     found = true;
                     break;
@@ -627,8 +627,10 @@ void Tiled2dMapVectorSourceSymbolDataManager::collisionDetection(std::vector<std
     double rotation = -camera->getRotation();
     auto scaleFactor = camera->getScalingFactor();
 
+    std::vector<std::shared_ptr<Tiled2dMapVectorSymbolObject>> allObjects;
+
     for (const auto layerIdentifier: layerIdentifiers) {
-        std::vector<SymbolObjectCollisionWrapper> allObjects;
+        allObjects.clear();
 
         for (const auto &[tile, symbolGroupsMap]: tileSymbolGroupMap) {
             const auto tileState = tileStateMap.find(tile);
@@ -639,18 +641,25 @@ void Tiled2dMapVectorSourceSymbolDataManager::collisionDetection(std::vector<std
             if (objectsIt != symbolGroupsMap.end()) {
                 for (auto &symbolGroup: std::get<1>(objectsIt->second)) {
                     symbolGroup.syncAccess([&allObjects](auto group){
-                        for(auto& o : group->getSymbolObjectsForCollision()) {
-                            allObjects.push_back(o);
-                        }
+                        const auto& symbols = group->getSymbolObjectsForCollision();
+                        allObjects.reserve(symbols.size());
+                        allObjects.insert(allObjects.end(), symbols.begin(), symbols.end());
                     });
                 }
             }
         }
         
-        std::stable_sort(allObjects.rbegin(), allObjects.rend());
+        std::stable_sort(allObjects.rbegin(), allObjects.rend(),
+                        [](const std::shared_ptr<Tiled2dMapVectorSymbolObject>& a,
+                           const std::shared_ptr<Tiled2dMapVectorSymbolObject>& b) {
+                            if (a->symbolSortKey == b->symbolSortKey) {
+                                return a->symbolTileIndex < b->symbolTileIndex;
+                            }
+                            return a->symbolSortKey > b->symbolSortKey;
+                        });
 
-        for (const auto &objectWrapper: allObjects) {
-            objectWrapper.symbolObject->collisionDetection(zoomIdentifier, rotation, scaleFactor, collisionGrid);
+        for (const auto &object: allObjects) {
+            object->collisionDetection(zoomIdentifier, rotation, scaleFactor, collisionGrid);
         }
     }
 }

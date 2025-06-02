@@ -598,16 +598,19 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(VectorModificationWrappe
 }
 
 void Tiled2dMapVectorSymbolObject::writePosition(const double x_, const double y_, const size_t offset, VectorModificationWrapper<float> &buffer) {
-    double sinX = sin(x_);
-    double sinY = sin(y_);
-    double cosX = cos(x_);
-    double cosY = cos(y_);
-
-    auto s = positionSize * offset;
-    buffer[s] = is3d ? sinY * cosX - tileOrigin.x : x_ - tileOrigin.x;
-    buffer[s + 1] = is3d ? cosY - tileOrigin.y : y_ - tileOrigin.y;
+    const size_t baseIndex = positionSize * offset;
     if (is3d) {
-        buffer[s + 2] = is3d ? -sinY * sinX - tileOrigin.z : 0.0;
+        const double sinY = sin(y_);
+        const double cosY = cos(y_);
+        const double sinX = sin(x_);
+        const double cosX = cos(x_);
+
+        buffer[baseIndex]     = sinY * cosX - tileOrigin.x;
+        buffer[baseIndex + 1] = cosY - tileOrigin.y;
+        buffer[baseIndex + 2] = -sinY * sinX - tileOrigin.z;
+    } else {
+        buffer[baseIndex]     = x_ - tileOrigin.x;
+        buffer[baseIndex + 1] = y_ - tileOrigin.y;
     }
 }
 
