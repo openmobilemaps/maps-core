@@ -474,6 +474,12 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(VectorModification
         }
     }
 
+    if (numberOfCharacters > 0) {
+        lineEndIndices[lineEndIndicesIndex] = numberOfCharacters - 1;
+        lineEndIndicesIndex++;
+        assert((countOffset + numberOfCharacters-1)*2 < scales.size());
+    }
+
     auto median = fontSize * medianLastBaseLine;
 
     const Vec2D size((boxMax.x - boxMin.x), (median - boxMin.y));
