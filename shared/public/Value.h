@@ -276,25 +276,25 @@ public:
 
 class UsedKeysCollection {
 public:
-    StringVectorSet usedKeys;
-    StringVectorSet featureStateKeys;
-    StringVectorSet globalStateKeys;
+    VectorSet<std::string> usedKeys;
+    VectorSet<std::string> featureStateKeys;
+    VectorSet<std::string> globalStateKeys;
 
     UsedKeysCollection() {};
 
-    UsedKeysCollection(const StringVectorSet &usedKeys) : usedKeys(usedKeys) {};
+    UsedKeysCollection(const VectorSet<std::string> &usedKeys) : usedKeys(usedKeys) {};
 
-    UsedKeysCollection(const StringVectorSet &usedKeys,
-                       const StringVectorSet &featureStateKeys,
-                       const StringVectorSet &globalStateKeys)
+    UsedKeysCollection(const VectorSet<std::string> &usedKeys,
+                       const VectorSet<std::string> &featureStateKeys,
+                       const VectorSet<std::string> &globalStateKeys)
             : usedKeys(usedKeys),
               featureStateKeys(featureStateKeys),
               globalStateKeys(globalStateKeys) {};
 
     void includeOther(const UsedKeysCollection &other) {
-        usedKeys.insertCollection(other.usedKeys);
-        featureStateKeys.insertCollection(other.featureStateKeys);
-        globalStateKeys.insertCollection(other.globalStateKeys);
+        usedKeys.insertSet(other.usedKeys);
+        featureStateKeys.insertSet(other.featureStateKeys);
+        globalStateKeys.insertSet(other.globalStateKeys);
     };
 
     bool isStateDependant() const {
@@ -886,7 +886,7 @@ public:
     UsedKeysCollection getUsedKeys() const override {
         if (std::holds_alternative<std::string>(value)) {
             std::string res = std::get<std::string>(value);
-            StringVectorSet usedKeys = { res };
+            VectorSet<std::string> usedKeys = { res };
 
             auto begin = res.find("{");
             auto end = res.find("}", begin);
