@@ -14,6 +14,7 @@ add_executable(tests
   "TestTileSource.cpp"
   "TestGeometryHandler.cpp"
   "TestValueEvaluate.cpp"
+  "TestVectorSet.cpp"
   "helper/TestData.cpp"
 )
 # Use mapscore _private_ include to allow testing functionality declared in internal headers.
