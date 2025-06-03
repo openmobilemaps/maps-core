@@ -69,8 +69,8 @@ public:
         for (auto it = otherSet.begin(); it != otherSet.end(); it++) {
             // only check if initial set contains a value; 
             // no need to check inserted values also if otherSet is assumed to be duplicate free
-            auto searchEnd = data.end() + oldSize;
-            if(std::find(data.begin(), searchEnd, *it) != searchEnd) {
+            auto searchEnd = data.begin() + oldSize;
+            if(std::find(data.begin(), searchEnd, *it) == searchEnd) {
                 data.push_back(*it);
             }
         }
