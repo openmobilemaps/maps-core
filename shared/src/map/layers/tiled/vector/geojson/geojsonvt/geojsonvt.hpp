@@ -95,6 +95,7 @@ public:
                     self->load(false);
                 }
                 else {
+                    std::lock_guard<std::recursive_mutex> lock(self->mutex);
                     self->loadingResult = DataLoaderResult(std::nullopt, std::nullopt, result.status, result.errorCode);
                     self->delegate.message(MFN(&GeoJSONTileDelegate::failedToLoad));
                 }
@@ -106,6 +107,7 @@ public:
                     auto geoJson = GeoJsonParser::getGeoJson(json);
                     if (geoJson) {
                         self->initialize(geoJson);
+                        std::lock_guard<std::recursive_mutex> lock(self->mutex);
                         self->loadingResult = DataLoaderResult(std::nullopt, std::nullopt, result.status, result.errorCode);
 
                         if (self->delegate) {
@@ -116,6 +118,7 @@ public:
                     }
                 }
                 catch (nlohmann::json::parse_error &ex) {
+                    std::lock_guard<std::recursive_mutex> lock(self->mutex);
                     self->loadingResult = DataLoaderResult(std::nullopt, std::nullopt, LoaderStatus::ERROR_OTHER, "parse error");
                     LogError <<= "Unable to parse geoJson";
                     return;
@@ -143,6 +146,7 @@ public:
 
     void setDelegate(const WeakActor<GeoJSONTileDelegate> delegate) override {
         this->delegate = delegate;
+        std::lock_guard<std::recursive_mutex> lock(mutex);
         if (loadingResult) {
             delegate.message(MFN(&GeoJSONTileDelegate::didLoad), options.maxZoom);
         }
