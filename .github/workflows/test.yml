@@ -29,7 +29,13 @@ jobs:
       - name: Test
         run: |
           mkdir test-results
+          # Run tests. 
+          # We dont care about benchmark results, but still run the benchmark
+          # tests as quickly as possible to catch when something breaks.
           build-debug/shared/test/tests \
+            --benchmark-warmup-time 0 \
+            --benchmark-samples 1 \
+            --benchmark-no-analysis \
             -r JUnit::out=test-results/catch2-junit.xml \
             -r console::colour-mode=ansi
 
@@ -38,7 +44,7 @@ jobs:
         run: |
           # cursed XML fixup to add proper file and line number attributes
           sed -i -e '
-          /<testcase.*[^/]>/,/<\/testcase>/{
+          /^\s*<testcase.*[^/]>\s*$/,/^\s*<\/testcase>\s*$/{
             /<testcase/      {h;d;}
             /<\/\?testcase/! {H;d;}
             /<\/testcase>/   {H;x;s/<testcase \(.*\)at \([^:]*\):\([0-9]\+\)/<testcase file="\2" line="\3" \1at \2:\3/;}
