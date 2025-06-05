@@ -41,7 +41,8 @@ Tiled2dMapVectorSymbolLabelObject::Tiled2dMapVectorSymbolLabelObject(const std::
                                                                      const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager,
                                                                      double dpFactor,
                                                                      bool is3d,
-                                                                     const Vec3D &tileOrigin)
+                                                                     const Vec3D &tileOrigin,
+                                                                     const int32_t systemIdentifier)
         : textSymbolPlacement(textSymbolPlacement),
           rotationAlignment(rotationAlignment),
           featureContext(featureContext),
@@ -56,7 +57,7 @@ Tiled2dMapVectorSymbolLabelObject::Tiled2dMapVectorSymbolLabelObject(const std::
           fontResult(fontResult),
           fullText(fullText),
           lineCoordinates(lineCoordinates),
-          referencePoint(Vec3DHelper::toVec(converter->convertToRenderSystem(Vec2DHelper::toCoord(coordinate, CoordinateSystemIdentifiers::EPSG3857())))),
+          referencePoint(Vec3DHelper::toVec(converter->convertToRenderSystem(Vec2DHelper::toCoord(coordinate, systemIdentifier)))),
           referenceSize(fontResult->fontData->info.size),
           animationCoordinator(animationCoordinator),
           stateManager(featureStateManager),
@@ -148,8 +149,8 @@ Tiled2dMapVectorSymbolLabelObject::Tiled2dMapVectorSymbolLabelObject(const std::
 
     if(lineCoordinates) {
         std::transform(lineCoordinates->begin(), lineCoordinates->end(), std::back_inserter(renderLineCoordinates),
-                       [converter](const auto& l) {
-            return Vec3DHelper::toVec(converter->convertToRenderSystem(Vec2DHelper::toCoord(l, CoordinateSystemIdentifiers::EPSG3857())));
+                       [converter, systemIdentifier](const auto& l) {
+            return Vec3DHelper::toVec(converter->convertToRenderSystem(Vec2DHelper::toCoord(l, systemIdentifier)));
         });
 
         if(is3d) {

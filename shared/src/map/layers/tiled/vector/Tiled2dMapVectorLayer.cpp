@@ -1427,7 +1427,7 @@ std::vector<VectorLayerFeatureCoordInfo> Tiled2dMapVectorLayer::getVisiblePointF
                 for (auto const &[featureContext, geometry]: *it->second) {
                     for (auto const &points: geometry->getPointCoordinates()) {
                         for (auto const &point: points) {
-                            const auto coord = Vec2DHelper::toCoord(point, CoordinateSystemIdentifiers::EPSG3857());
+                            const auto coord = Vec2DHelper::toCoord(point, tile.tileInfo.tileInfo.bounds.topLeft.systemIdentifier);
                             bool isVisible = camera->coordIsVisibleOnScreen(coord, paddingPc);
 
                             if (isVisible) {

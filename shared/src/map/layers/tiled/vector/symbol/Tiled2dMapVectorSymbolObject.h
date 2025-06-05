@@ -206,5 +206,7 @@ private:
     bool is3d;
     int positionSize;
 
+    int32_t systemIdentifier;
+
     const std::optional<double> angle;
 };

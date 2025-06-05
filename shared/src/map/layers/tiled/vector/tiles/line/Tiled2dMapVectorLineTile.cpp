@@ -468,7 +468,7 @@ void Tiled2dMapVectorLineTile::addLines(const std::vector<std::vector<std::vecto
                                                                             shader,
                                                                             is3d);
 
-            lineGroupObject->setLines(lineSubGroup, CoordinateSystemIdentifiers::EPSG3857(), origin);
+            lineGroupObject->setLines(lineSubGroup, tileInfo.tileInfo.bounds.topLeft.systemIdentifier, origin);
 
             lineGroupObjects.push_back(lineGroupObject);
             newGraphicObjects.push_back(lineGroupGraphicsObject->asGraphicsObject());
@@ -545,7 +545,7 @@ bool Tiled2dMapVectorLineTile::performClick(const Coord &coord) {
             auto lineWidth = lineDescription->style.getLineWidth(EvaluationContext(zoomIdentifier, dpFactor, featureContext, featureStateManager));
             lineWidth *= selectionSizeFactor;
             auto lineWidthInMapUnits = camera->mapUnitsFromPixels(lineWidth);
-            if (LineHelper::pointWithin(coordinates, coord, CoordinateSystemIdentifiers::EPSG3857(), lineWidthInMapUnits, coordinateConverter)) {
+            if (LineHelper::pointWithin(coordinates, coord, tileInfo.tileInfo.bounds.topLeft.systemIdentifier, lineWidthInMapUnits, coordinateConverter)) {
                 if (multiselect) {
                     featureInfos.push_back(featureContext->getFeatureInfo());
                 } else if (strongSelectionDelegate->didSelectFeature(featureContext->getFeatureInfo(), description->identifier, coord)) {
