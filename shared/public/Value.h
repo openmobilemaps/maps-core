@@ -310,7 +310,7 @@ public:
     }
 
     bool onlyGlobalStateDependant() {
-        return featureStateKeys.empty() && !globalStateKeys.empty();
+        return usedKeys.empty() && featureStateKeys.empty() && !globalStateKeys.empty();
     }
 
     size_t size() const {
