@@ -280,7 +280,6 @@ extension TextInstanced: MCTextInstancedInterface {
         }
     }
 
-
     func setReferencePositions(_ positions: MCSharedBytes) {
         lock.withCritical {
             referencePositionsBuffer.copyOrCreate(
