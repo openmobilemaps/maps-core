@@ -167,7 +167,6 @@ void Text2dInstancedOpenGl::prepareGlData(int program) {
         LogError <<= "Uniform block TextStyleCollection not found";
     }
     glUniformBlockBinding(program, textStyleUniformBlockIdx, 0);
-    OpenGlHelper::checkGlError("UBCM: Text2dInstancedOpenGl::prepareGlData: after textStyleUniformBlockIdx");
 
     vpMatrixHandle = glGetUniformLocation(program, "uvpMatrix");
     mMatrixHandle = glGetUniformLocation(program, "umMatrix");
@@ -277,7 +276,6 @@ void Text2dInstancedOpenGl::render(const std::shared_ptr<::RenderingContextInter
     if (!ready || (usesTextureCoords && !textureCoordsReady) || instanceCount == 0 || buffersNotReady || !shaderProgram->isRenderable()) {
         return;
     }
-    OpenGlHelper::checkGlError("UBCM: Text2dInstancedOpenGl::render start");
 
     GLuint stencilMask = 0;
     GLuint validTarget = 0;
@@ -306,7 +304,6 @@ void Text2dInstancedOpenGl::render(const std::shared_ptr<::RenderingContextInter
     }
 
     glBindBufferBase(GL_UNIFORM_BUFFER, 0, textStyleBuffer); // TextStyleCollection is at binding index 0
-    OpenGlHelper::checkGlError("UBCM: Text2dInstancedOpenGl::render bindBufferBase");
 
     shaderProgram->preRender(context);
 
@@ -325,12 +322,10 @@ void Text2dInstancedOpenGl::render(const std::shared_ptr<::RenderingContextInter
     auto isHaloHandle = glGetUniformLocation(program, "isHalo");
     glUniform1f(isHaloHandle, 1.0);
     glDrawElementsInstanced(GL_TRIANGLES,6, GL_UNSIGNED_BYTE, nullptr, instanceCount);
-    OpenGlHelper::checkGlError("UBCM: Text2dInstancedOpenGl::render drawElementsInstanced halo");
 
     // Draw non-halos second
     glUniform1f(isHaloHandle, 0.0);
     glDrawElementsInstanced(GL_TRIANGLES,6, GL_UNSIGNED_BYTE, nullptr, instanceCount);
-    OpenGlHelper::checkGlError("UBCM: Text2dInstancedOpenGl::render drawElementsInstanced infill");
 
     glBindVertexArray(0);
 
@@ -398,14 +393,6 @@ void Text2dInstancedOpenGl::setStyleIndices(const ::SharedBytes &indices) {
     if (writeToDynamicInstanceDataBuffer(indices, (is3d ? instStyleIndicesOffsetBytes3d : instStyleIndicesOffsetBytes))) {
         buffersNotReady &= ~(1 << 5);
     }
-    uint16_t maxIndex = 0.0;
-    for (int i = 0; i < indices.elementCount; i++) {
-        uint16_t newInd = *((uint16_t *) (indices.address + (i * indices.bytesPerElement)));
-        if (newInd > maxIndex) {
-            maxIndex = newInd;
-        }
-    }
-    LogDebug << "UBCM: Text2dInstancedOpenGl::setStyleIndices maxIndex: " << maxIndex << " (for " << instanceCount <<= " instances)";
 }
 
 void Text2dInstancedOpenGl::setReferencePositions(const SharedBytes &positions) {
@@ -421,12 +408,11 @@ void Text2dInstancedOpenGl::setStyles(const ::SharedBytes &values) {
         return;
     }
 
-    //assert(values.elementCount * values.bytesPerElement <= TextInstancedShaderOpenGl::MAX_NUM_TEXT_STYLES * TextInstancedShaderOpenGl::BYTE_SIZE_TEXT_STYLES);
+    assert(values.elementCount * values.bytesPerElement <= TextInstancedShaderOpenGl::MAX_NUM_TEXT_STYLES * TextInstancedShaderOpenGl::BYTE_SIZE_TEXT_STYLES);
 
     glBindBuffer(GL_UNIFORM_BUFFER, textStyleBuffer);
     glBufferSubData(GL_UNIFORM_BUFFER, 0, values.elementCount * values.bytesPerElement, (void *) values.address);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
-    OpenGlHelper::checkGlError("UBCM: Text2dInstancedOpenGl::setStyles");
 
     buffersNotReady &= ~(1 << 7);
 }

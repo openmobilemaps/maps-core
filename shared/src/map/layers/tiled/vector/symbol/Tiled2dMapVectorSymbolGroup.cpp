@@ -370,8 +370,6 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
     int32_t stretchedIconCount = 0;
     std::unordered_map<std::shared_ptr<FontLoaderResult>, std::tuple<int32_t, int32_t>> fontStylesAndCharactersCountMap;
 
-    LogDebug << "UBCM: Tiled2dMapVectorSymbolGroup::initialize symbolObjects: " << symbolObjects.size() << " from " << featuresCount <<= " features";
-
     for (auto const object: symbolObjects) {
         const auto &counts = object->getInstanceCounts();
         if (!object->hasCustomTexture) {
