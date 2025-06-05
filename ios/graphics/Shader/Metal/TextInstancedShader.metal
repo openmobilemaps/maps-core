@@ -33,6 +33,7 @@ unitSphereTextInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
                           constant float4 &originOffset [[buffer(9)]],
                           constant float4 &origin [[buffer(10)]],
                           constant float &aspectRatio [[buffer(11)]],
+                          constant float *alphas [[buffer(12)]],
                           uint instanceId [[instance_id]])
 {
     const float3 referencePosition = referencePositions[instanceId];
@@ -54,7 +55,7 @@ unitSphereTextInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
 
     auto diffCenter = screenPosition - earthCenter;
 
-    float alpha = 1.0;
+    float alpha = alphas[instanceId];
 
     if (diffCenter.z > 0) {
         alpha = 0.0;
@@ -84,12 +85,22 @@ unitSphereTextInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
 }
 
 struct TextInstanceStyle {
-    packed_float4 color;
-    packed_float4 haloColor;
+  float packedColor;
+  float packedHaloColor;
     float haloWidth;
     float haloBlur;
 } __attribute__((__packed__));
 
+
+inline float4 unpackColor(float packedColor) {
+    uint bits = as_type<uint>(packedColor);
+    return float4(
+        ((bits >> 24) & 0xFF) * (1.0 / 255.0),
+        ((bits >> 16) & 0xFF) * (1.0 / 255.0),
+        ((bits >>  8) & 0xFF) * (1.0 / 255.0),
+        ((bits      ) & 0xFF) * (1.0 / 255.0)
+    );
+}
 
 fragment half4
 unitSphereTextInstancedFragmentShader(TextInstancedVertexOut in [[stage_in]],
@@ -100,7 +111,10 @@ unitSphereTextInstancedFragmentShader(TextInstancedVertexOut in [[stage_in]],
 {
     constant TextInstanceStyle *style = (constant TextInstanceStyle *)(styles + in.styleIndex);
 
-  if ((style->color.a == 0 && !isHalo) || (style->haloColor.a == 0.0 && isHalo) || in.alpha == 0.0) {
+    float4 color = unpackColor(style->packedColor);
+    float4 haloColor = unpackColor(style->packedHaloColor);
+
+    if ((color.a == 0 && !isHalo) || (haloColor.a == 0.0 && isHalo) || in.alpha == 0.0) {
         discard_fragment();
     }
 
@@ -131,14 +145,14 @@ unitSphereTextInstancedFragmentShader(TextInstancedVertexOut in [[stage_in]],
         const float outerFallOff = smoothstep(start, end, median);
 
         // Combination of blurred outer falloff and inverse inner fill falloff
-        edgeAlpha = (sideSwitch * outerFallOff + (1.0 - sideSwitch) * (1.0 - innerFallOff)) * style->haloColor.a;
+        edgeAlpha = (sideSwitch * outerFallOff + (1.0 - sideSwitch) * (1.0 - innerFallOff)) * haloColor.a;
 
-        return half4(half3(style->haloColor.rgb), 1.0) * edgeAlpha;
+        return half4(half3(haloColor.rgb), 1.0) * edgeAlpha;
 
     } else {
-        edgeAlpha = innerFallOff * style->color.a;
+        edgeAlpha = innerFallOff * color.a;
 
-        return half4(half3(style->color.rgb), 1.0) * edgeAlpha;
+        return half4(half3(color.rgb), 1.0) * edgeAlpha;
     }
 }
 
@@ -153,6 +167,7 @@ textInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
                           constant uint16_t *styleIndices [[buffer(7)]],
                           constant float2 *referencePositions [[buffer(8)]],
                           constant float4 &originOffset [[buffer(9)]],
+                          constant float *alphas [[buffer(12)]],
                           uint instanceId [[instance_id]])
 {
     const float2 position = positions[instanceId] + originOffset.xy;
@@ -175,7 +190,8 @@ textInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
       .position = matrix * float4(vertexIn.position.xy, 0.0, 1.0),
       .uv = vertexIn.uv,
       .texureCoordinates = texureCoordinates[instanceId],
-      .styleIndex = styleIndices[instanceId]
+      .styleIndex = styleIndices[instanceId],
+      .alpha = alphas[instanceId]
     };
 
     return out;
@@ -191,7 +207,10 @@ textInstancedFragmentShader(TextInstancedVertexOut in [[stage_in]],
 {
     constant TextInstanceStyle *style = (constant TextInstanceStyle *)(styles + in.styleIndex);
 
-    if ((isHalo && style->haloColor.a == 0.0) || (!isHalo && style->color.a == 0)) {
+    float4 color = unpackColor(style->packedColor);
+    float4 haloColor = unpackColor(style->packedHaloColor);
+
+    if ((isHalo && haloColor.a == 0.0) || (!isHalo && color.a == 0) || in.alpha == 0.0) {
         discard_fragment();
     }
 
@@ -220,12 +239,12 @@ textInstancedFragmentShader(TextInstancedVertexOut in [[stage_in]],
         const float outerFallOff = smoothstep(start, end, median);
 
         // Combination of blurred outer falloff and inverse inner fill falloff
-        const float edgeAlpha = (sideSwitch * outerFallOff + (1.0 - sideSwitch) * (1.0 - innerFallOff)) * style->haloColor.a;
+        const float edgeAlpha = (sideSwitch * outerFallOff + (1.0 - sideSwitch) * (1.0 - innerFallOff)) * haloColor.a;
 
-        return half4(half3(style->haloColor.rgb), 1.0) * edgeAlpha;
+        return half4(half3(haloColor.rgb), 1.0) * edgeAlpha;
     } else {
-        const float edgeAlpha = innerFallOff * style->color.a;
+        const float edgeAlpha = innerFallOff * color.a;
 
-        return half4(half3(style->color.rgb), 1.0) * edgeAlpha;
+        return half4(half3(color.rgb), 1.0) * edgeAlpha;
     }
 }

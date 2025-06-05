@@ -58,6 +58,8 @@ public:
 
     virtual void setScales(const ::SharedBytes &scales) override;
 
+    virtual void setAlphas(const ::SharedBytes &alphas) override;
+
     void setTextureCoordinates(const SharedBytes &textureCoordinates) override;
 
     void setReferencePositions(const SharedBytes &positions) override;
@@ -112,7 +114,7 @@ protected:
     double factorWidth = 1.0;
 
     bool ready = false;
-    uint8_t buffersNotReadyResetValue = 0b01111111;
+    uint8_t buffersNotReadyResetValue = 0b11111111;
     uint8_t buffersNotReady = buffersNotReadyResetValue;
     bool textureCoordsReady = false;
     std::recursive_mutex dataMutex;
@@ -124,29 +126,31 @@ protected:
     GLuint dynamicInstanceDataBuffer;
     int instPositionsHandle;
     int instRotationsHandle;
+    int instAlphasHandle;
     int instScalesHandle;
     int instStyleIndicesHandle;
     int instTextureCoordinatesHandle;
     int instReferencePositionsHandle;
 
-    int styleBufferHandle;
-    GLuint styleBuffer;
+    GLuint textStyleBuffer;
 
     static const uintptr_t instPositionsOffsetBytes = sizeof(GLfloat) * 0;
     static const uintptr_t instTextureCoordinatesOffsetBytes = sizeof(GLfloat) * 2;
     static const uintptr_t instScalesOffsetBytes = sizeof(GLfloat) * 6;
-    static const uintptr_t instRotationsOffsetBytes = sizeof(GLfloat) * 8;
-    static const uintptr_t instStyleIndicesOffsetBytes = sizeof(GLfloat) * 9;
-    static const uintptr_t instReferencePositionsOffsetBytes = sizeof(GLfloat) * 10;
-    static const uintptr_t instValuesSizeBytes = sizeof(GLfloat) * 12;
+    static const uintptr_t instAlphasOffsetBytes = sizeof(GLfloat) * 8;
+    static const uintptr_t instRotationsOffsetBytes = sizeof(GLfloat) * 9;
+    static const uintptr_t instStyleIndicesOffsetBytes = sizeof(GLfloat) * 10;
+    static const uintptr_t instReferencePositionsOffsetBytes = sizeof(GLfloat) * 11;
+    static const uintptr_t instValuesSizeBytes = sizeof(GLfloat) * 13;
 
     static const uintptr_t instPositionsOffsetBytes3d = sizeof(GLfloat) * 0;
     static const uintptr_t instTextureCoordinatesOffsetBytes3d = sizeof(GLfloat) * 2;
     static const uintptr_t instScalesOffsetBytes3d = sizeof(GLfloat) * 6;
-    static const uintptr_t instRotationsOffsetBytes3d = sizeof(GLfloat) * 8;
-    static const uintptr_t instStyleIndicesOffsetBytes3d = sizeof(GLfloat) * 9;
-    static const uintptr_t instReferencePositionsOffsetBytes3d = sizeof(GLfloat) * 10;
-    static const uintptr_t instValuesSizeBytes3d = sizeof(GLfloat) * 13;
+    static const uintptr_t instAlphasOffsetBytes3d = sizeof(GLfloat) * 8;
+    static const uintptr_t instRotationsOffsetBytes3d = sizeof(GLfloat) * 9;
+    static const uintptr_t instStyleIndicesOffsetBytes3d = sizeof(GLfloat) * 10;
+    static const uintptr_t instReferencePositionsOffsetBytes3d = sizeof(GLfloat) * 11;
+    static const uintptr_t instValuesSizeBytes3d = sizeof(GLfloat) * 14;
 
 private:
     bool writeToDynamicInstanceDataBuffer(const ::SharedBytes &data, GLuint targetOffsetBytes);

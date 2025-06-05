@@ -17,6 +17,9 @@ TextInstancedShaderOpenGl::TextInstancedShaderOpenGl(bool projectOntoUnitSphere)
         : projectOntoUnitSphere(projectOntoUnitSphere),
           programName(projectOntoUnitSphere ? "UBMAP_TextInstancedUnitSphereShaderOpenGl" : "UBMAP_TextInstancedShaderOpenGl") {}
 
+const int TextInstancedShaderOpenGl::BYTE_SIZE_TEXT_STYLES = 4 * sizeof(GLfloat); // Ensure consistency with style buffer creation and shader code below. CAUTION! Padded to 16 bytes due to std140!
+const int TextInstancedShaderOpenGl::MAX_NUM_TEXT_STYLES = 16384 / BYTE_SIZE_TEXT_STYLES; // guaranteed by GL ES 3.2 min 16384 bytes
+
 std::string TextInstancedShaderOpenGl::getProgramName() { return programName; }
 
 void TextInstancedShaderOpenGl::setupProgram(const std::shared_ptr<::RenderingContextInterface> &context) {
@@ -64,6 +67,7 @@ std::string TextInstancedShaderOpenGl::getVertexShader() {
                                in vec3 aReferencePosition;
                                in vec4 aTexCoordinate;
                                in vec2 aScale;
+                               in float aAlpha;
                                in float aRotation;
                                in uint aStyleIndex;
 
@@ -95,7 +99,7 @@ std::string TextInstancedShaderOpenGl::getVertexShader() {
                                    v_texCoordInstance = aTexCoordinate;
                                    v_texCoord = texCoordinate;
                                    vStyleIndex = aStyleIndex;
-                                   v_alpha = 1.0;
+                                   v_alpha = aAlpha;
                                    if (screenPosition.z - earthCenter.z > 0.0) {
                                        v_alpha = 0.0;
                                    }
@@ -111,6 +115,7 @@ std::string TextInstancedShaderOpenGl::getVertexShader() {
                                   in vec2 aPosition;
                                   in vec4 aTexCoordinate;
                                   in vec2 aScale;
+                                  in float aAlpha;
                                   in float aRotation;
                                   in uint aStyleIndex;
 
@@ -135,7 +140,7 @@ std::string TextInstancedShaderOpenGl::getVertexShader() {
                                       v_texCoordInstance = aTexCoordinate;
                                       v_texCoord = texCoordinate;
                                       vStyleIndex = aStyleIndex;
-                                      v_alpha = 1.0;
+                                      v_alpha = aAlpha;
                                   }
     );
 }
@@ -143,9 +148,15 @@ std::string TextInstancedShaderOpenGl::getVertexShader() {
 std::string TextInstancedShaderOpenGl::getFragmentShader() {
     return OMMVersionedGlesShaderCode(320 es,
                                       precision highp float;
-                                              layout(std430, binding = 0) buffer textInstancedStyleBuffer {
-                                                  float styles[]; // vec4 color; vec4 haloColor; float haloWidth; float haloBlur;
+                                              struct TextStyle {
+                                                  float colorRGBA;
+                                                  float haloColorRGBA;
+                                                  float haloWidth;
+                                                  float haloBlur;
                                               };
+                                              layout(std140, binding = 0) uniform TextStyleCollection {
+                                                  TextStyle styles[) + std::to_string(MAX_NUM_TEXT_STYLES) + OMMShaderCode(];
+                                              } uTextStyles;
 
                                               uniform sampler2D textureSampler;
                                               uniform vec2 textureFactor;
@@ -159,11 +170,20 @@ std::string TextInstancedShaderOpenGl::getFragmentShader() {
                                               out vec4 fragmentColor;
 
                                               void main() {
-                                                  highp int styleOffset = int(vStyleIndex) * 10;
+                                                  highp int styleIndex = int(vStyleIndex);
 
-                                                  highp int colorOffset = int(isHalo) * 4 + styleOffset; // fill/halo color switch
-                                                  vec4 color = vec4(styles[colorOffset + 0], styles[colorOffset + 1],
-                                                               styles[colorOffset + 2], styles[colorOffset + 3]);
+                                                  highp uint colorBits = 0u;
+                                                  if (bool(isHalo)) {
+                                                      colorBits = floatBitsToUint(uTextStyles.styles[styleIndex].haloColorRGBA);
+                                                  } else {
+                                                      colorBits = floatBitsToUint(uTextStyles.styles[styleIndex].colorRGBA);
+                                                  }
+                                                  vec4 color = vec4(
+                                                          float(colorBits >> 24), // r
+                                                          float((colorBits >> 16) & 0xFFu), // g
+                                                          float((colorBits >> 8) & 0xFFu), // b
+                                                          float(colorBits & 0xFFu) // a
+                                                  ) / 255.0;
                                                   color.a *= v_alpha;
 
                                                   if (color.a == 0.0) {
@@ -189,8 +209,8 @@ std::string TextInstancedShaderOpenGl::getFragmentShader() {
                                                   float edgeAlpha = 0.0;
 
                                                   if(bool(isHalo)) {
-                                                      float haloWidth = styles[styleOffset + 8];
-                                                      float halfHaloBlur = 0.5 * styles[styleOffset + 9];
+                                                      float haloWidth = uTextStyles.styles[styleIndex].haloWidth;
+                                                      float halfHaloBlur = 0.5 * uTextStyles.styles[styleIndex].haloBlur;
 
                                                       if (haloWidth == 0.0 && halfHaloBlur == 0.0) {
                                                           discard;

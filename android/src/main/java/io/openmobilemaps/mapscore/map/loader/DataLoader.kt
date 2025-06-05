@@ -12,7 +12,6 @@ package io.openmobilemaps.mapscore.map.loader
 
 import android.content.Context
 import android.graphics.BitmapFactory
-import android.util.Log
 import com.snapchat.djinni.Future
 import com.snapchat.djinni.Promise
 import io.openmobilemaps.mapscore.graphics.BitmapTextureHolder

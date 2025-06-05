@@ -59,7 +59,7 @@ void ColorLineGroup2dShaderOpenGl::setupGlObjects(const std::shared_ptr<::OpenGl
     if (lineStyleBuffer == 0) {
         glGenBuffers(1, &lineStyleBuffer);
         glBindBuffer(GL_UNIFORM_BUFFER, lineStyleBuffer);
-        // maximum number of polygonStyles and numStyles, padded to 16 byte alignment
+        // maximum number of lineStyles and numStyles, padded to 16 byte alignment
         glBufferData(GL_UNIFORM_BUFFER, sizeLineValuesArray * sizeof(GLfloat) + sizeof(GLint) + 3 * sizeof(GLint), nullptr,
                      GL_DYNAMIC_DRAW);
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
