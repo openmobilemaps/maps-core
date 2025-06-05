@@ -22,6 +22,7 @@ final class TextInstanced: BaseGraphicsObject, @unchecked Sendable {
 
     private var instanceCount: Int = 0
     private var positionsBuffer: MTLBuffer?
+    private var alphasBuffer: MTLBuffer?
     private var referencePositionsBuffer: MTLBuffer?
     private var textureCoordinatesBuffer: MTLBuffer?
     private var scalesBuffer: MTLBuffer?
@@ -125,6 +126,7 @@ final class TextInstanced: BaseGraphicsObject, @unchecked Sendable {
         encoder.setVertexBuffer(rotationsBuffer, offset: 0, index: 5)
         encoder.setVertexBuffer(textureCoordinatesBuffer, offset: 0, index: 6)
         encoder.setVertexBuffer(styleIndicesBuffer, offset: 0, index: 7)
+        encoder.setVertexBuffer(alphasBuffer, offset: 0, index: 12)
 
         if shader.isUnitSphere,
             let referencePositionsBuffer
@@ -270,6 +272,14 @@ extension TextInstanced: MCTextInstancedInterface {
             self.instanceCount = Int(count)
         }
     }
+
+    func setAlphas(_ alphas: MCSharedBytes) {
+        lock.withCritical {
+            alphasBuffer.copyOrCreate(
+                from: alphas, device: device)
+        }
+    }
+
 
     func setReferencePositions(_ positions: MCSharedBytes) {
         lock.withCritical {

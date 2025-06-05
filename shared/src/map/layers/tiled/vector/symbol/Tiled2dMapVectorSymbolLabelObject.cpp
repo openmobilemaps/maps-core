@@ -342,15 +342,15 @@ void Tiled2dMapVectorSymbolLabelObject::updateProperties(VectorModificationWrapp
     float colorAlpha = textColor.a * alphaFactor;
 
     union { uint32_t i; float f; } packedColorConverter{};
-    packedColorConverter.i = ((uint8_t) (textColor.r * 255) << 24)
-                           | ((uint8_t) (textColor.g * 255) << 16)
-                           | ((uint8_t) (textColor.b * 255) << 8)
-                           | ((uint8_t) (colorAlpha * 255)); // color RGBA
+    packedColorConverter.i = ((uint8_t) round(textColor.r * 255) << 24)
+                           | ((uint8_t) round(textColor.g * 255) << 16)
+                           | ((uint8_t) round(textColor.b * 255) << 8)
+                           | ((uint8_t) round(colorAlpha * 255)); // color RGBA
     styles[4 * styleIndex + 0] = packedColorConverter.f;
-    packedColorConverter.i = ((uint8_t) (haloColor.r * 255) << 24)
-                  | ((uint8_t) (haloColor.g * 255) << 16)
-                  | ((uint8_t) (haloColor.b * 255) << 8)
-                  | ((uint8_t) (haloColor.a * alphaFactor * 255)); // halo color RGBA
+    packedColorConverter.i = ((uint8_t) round(haloColor.r * 255) << 24)
+                  | ((uint8_t) round(haloColor.g * 255) << 16)
+                  | ((uint8_t) round(haloColor.b * 255) << 8)
+                  | ((uint8_t) round(haloColor.a * alphaFactor * 255)); // halo color RGBA
     styles[4 * styleIndex + 1] = packedColorConverter.f;
     styles[4 * styleIndex + 2] = haloWidth; // halo width
     styles[4 * styleIndex + 3] = haloBlur; // halo blur
