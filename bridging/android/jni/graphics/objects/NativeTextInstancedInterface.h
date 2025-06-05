@@ -40,6 +40,7 @@ private:
         void setTextureCoordinates(const ::SharedBytes & textureCoordinates) override;
         void setScales(const ::SharedBytes & scales) override;
         void setRotations(const ::SharedBytes & rotations) override;
+        void setAlphas(const ::SharedBytes & alphas) override;
         void setStyleIndices(const ::SharedBytes & indices) override;
         void setStyles(const ::SharedBytes & values) override;
         void loadTexture(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & context, const /*not-null*/ std::shared_ptr<::TextureHolderInterface> & textureHolder) override;
@@ -58,6 +59,7 @@ private:
     const jmethodID method_setTextureCoordinates { ::djinni::jniGetMethodID(clazz.get(), "setTextureCoordinates", "(Lio/openmobilemaps/mapscore/shared/graphics/common/SharedBytes;)V") };
     const jmethodID method_setScales { ::djinni::jniGetMethodID(clazz.get(), "setScales", "(Lio/openmobilemaps/mapscore/shared/graphics/common/SharedBytes;)V") };
     const jmethodID method_setRotations { ::djinni::jniGetMethodID(clazz.get(), "setRotations", "(Lio/openmobilemaps/mapscore/shared/graphics/common/SharedBytes;)V") };
+    const jmethodID method_setAlphas { ::djinni::jniGetMethodID(clazz.get(), "setAlphas", "(Lio/openmobilemaps/mapscore/shared/graphics/common/SharedBytes;)V") };
     const jmethodID method_setStyleIndices { ::djinni::jniGetMethodID(clazz.get(), "setStyleIndices", "(Lio/openmobilemaps/mapscore/shared/graphics/common/SharedBytes;)V") };
     const jmethodID method_setStyles { ::djinni::jniGetMethodID(clazz.get(), "setStyles", "(Lio/openmobilemaps/mapscore/shared/graphics/common/SharedBytes;)V") };
     const jmethodID method_loadTexture { ::djinni::jniGetMethodID(clazz.get(), "loadTexture", "(Lio/openmobilemaps/mapscore/shared/graphics/RenderingContextInterface;Lio/openmobilemaps/mapscore/shared/graphics/objects/TextureHolderInterface;)V") };

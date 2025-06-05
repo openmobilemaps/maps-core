@@ -31,7 +31,10 @@ class TextInstancedShaderOpenGl : public BaseShaderProgramOpenGl,
 
     virtual std::shared_ptr<ShaderProgramInterface> asShaderProgramInterface() override;
 
-  protected:
+    static const int BYTE_SIZE_TEXT_STYLES;
+    static const int MAX_NUM_TEXT_STYLES;
+
+protected:
     const bool projectOntoUnitSphere;
     const std::string programName;
 

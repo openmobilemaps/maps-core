@@ -190,7 +190,7 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
 
                         const auto symbolObject = createSymbolObject(tileInfo, layerIdentifier, layerDescription, layerConfig,
                                                                      context, text, fullText, position, line, fontList, anchor,
-                                                                     pos->angle, justify, placement, false, animationCoordinatorMap, featureTileIndex, hasImageFromCustomProvider);
+                                                                     pos->angle, justify, placement, false, animationCoordinatorMap, featureTileIndex, hasImageFromCustomProvider, featureTileIndex);
                         if (symbolObject) {
                             symbolObjects.push_back(symbolObject);
                             textPositionMap[fullText].push_back(position);
@@ -201,7 +201,7 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
                             if (textOptional) {
                                 const auto symbolObject = createSymbolObject(tileInfo, layerIdentifier, layerDescription,
                                                                              layerConfig, context, {}, "", position, line, fontList,
-                                                                             anchor, pos->angle, justify, placement, false, animationCoordinatorMap, featureTileIndex, hasImageFromCustomProvider);
+                                                                             anchor, pos->angle, justify, placement, false, animationCoordinatorMap, featureTileIndex, hasImageFromCustomProvider, featureTileIndex);
 
                                 if (symbolObject) {
                                     symbolObjects.push_back(symbolObject);
@@ -213,7 +213,7 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
                                 const auto symbolObject = createSymbolObject(tileInfo, layerIdentifier, layerDescription,
                                                                              layerConfig, context, text, fullText, position, line,
                                                                              fontList, anchor, pos->angle, justify, placement,
-                                                                             true, animationCoordinatorMap, featureTileIndex, hasImageFromCustomProvider);
+                                                                             true, animationCoordinatorMap, featureTileIndex, hasImageFromCustomProvider, featureTileIndex);
 
                                 if (symbolObject) {
                                     symbolObjects.push_back(symbolObject);
@@ -265,7 +265,7 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
 
                             const auto symbolObject = createSymbolObject(tileInfo, layerIdentifier, layerDescription, layerConfig,
                                                                          context, text, fullText, position, line, fontList, anchor,
-                                                                         pos->angle, justify, placement, false, animationCoordinatorMap, featureTileIndex, hasImageFromCustomProvider);
+                                                                         pos->angle, justify, placement, false, animationCoordinatorMap, featureTileIndex, hasImageFromCustomProvider, featureTileIndex);
                             if (symbolObject) {
                                 symbolObjects.push_back(symbolObject);
                                 textPositionMap[fullText].push_back(position);
@@ -277,7 +277,7 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
                                     const auto symbolObject = createSymbolObject(tileInfo, layerIdentifier, layerDescription,
                                                                                  layerConfig, context, {}, "", position, line,
                                                                                  fontList, anchor, pos->angle, justify, placement,
-                                                                                 false, animationCoordinatorMap, featureTileIndex, hasImageFromCustomProvider);
+                                                                                 false, animationCoordinatorMap, featureTileIndex, hasImageFromCustomProvider, featureTileIndex);
                                     if (symbolObject) {
                                         symbolObjects.push_back(symbolObject);
                                         textPositionMap[fullText].push_back(position);
@@ -288,7 +288,7 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
                                     const auto symbolObject = createSymbolObject(tileInfo, layerIdentifier, layerDescription,
                                                                                  layerConfig, context, text, fullText, position,
                                                                                  line, fontList, anchor, pos->angle, justify,
-                                                                                 placement, true, animationCoordinatorMap, featureTileIndex, hasImageFromCustomProvider);
+                                                                                 placement, true, animationCoordinatorMap, featureTileIndex, hasImageFromCustomProvider, featureTileIndex);
                                     if (symbolObject) {
                                         symbolObjects.push_back(symbolObject);
                                         textPositionMap[fullText].push_back(position);
@@ -309,7 +309,7 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
 
                     const auto symbolObject = createSymbolObject(tileInfo, layerIdentifier, layerDescription, layerConfig, context,
                                                                  text, fullText, mp, std::nullopt, fontList, anchor, angle, justify,
-                                                                 placement, false, animationCoordinatorMap, featureTileIndex, hasImageFromCustomProvider);
+                                                                 placement, false, animationCoordinatorMap, featureTileIndex, hasImageFromCustomProvider, featureTileIndex);
 
                     if (symbolObject) {
                         symbolObjects.push_back(symbolObject);
@@ -320,7 +320,7 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
                         if (textOptional) {
                             const auto symbolObject = createSymbolObject(tileInfo, layerIdentifier, layerDescription, layerConfig,
                                                                          context, {}, "", mp, std::nullopt, fontList, anchor, angle,
-                                                                         justify, placement, false, animationCoordinatorMap, featureTileIndex, hasImageFromCustomProvider);
+                                                                         justify, placement, false, animationCoordinatorMap, featureTileIndex, hasImageFromCustomProvider, featureTileIndex);
 
                             if (symbolObject) {
                                 symbolObjects.push_back(symbolObject);
@@ -330,7 +330,7 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
                         if (iconOptional) {
                             const auto symbolObject = createSymbolObject(tileInfo, layerIdentifier, layerDescription, layerConfig,
                                                                          context, text, fullText, mp, std::nullopt, fontList, anchor,
-                                                                         angle, justify, placement, true, animationCoordinatorMap, featureTileIndex, hasImageFromCustomProvider);
+                                                                         angle, justify, placement, true, animationCoordinatorMap, featureTileIndex, hasImageFromCustomProvider, featureTileIndex);
 
                             if (symbolObject) {
                                 symbolObjects.push_back(symbolObject);
@@ -370,6 +370,8 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
     int32_t stretchedIconCount = 0;
     std::unordered_map<std::shared_ptr<FontLoaderResult>, std::tuple<int32_t, int32_t>> fontStylesAndCharactersCountMap;
 
+    LogDebug << "UBCM: Tiled2dMapVectorSymbolGroup::initialize symbolObjects: " << symbolObjects.size() << " from " << featuresCount <<= " features";
+
     for (auto const object: symbolObjects) {
         const auto &counts = object->getInstanceCounts();
         if (!object->hasCustomTexture) {
@@ -377,14 +379,12 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
         }
         if (counts.textCharacters > 0) {
             auto font = object->getFont();
-            int32_t stylesCount = 0;
             int32_t charactersCount = 0;
             auto currentEntry = fontStylesAndCharactersCountMap.find(font);
             if (currentEntry != fontStylesAndCharactersCountMap.end()) {
-                stylesCount = std::get<0>(currentEntry->second);
                 charactersCount = std::get<1>(currentEntry->second);
             }
-            fontStylesAndCharactersCountMap[font] = {stylesCount + 1, charactersCount + counts.textCharacters};
+            fontStylesAndCharactersCountMap[font] = {featuresCount, charactersCount + counts.textCharacters};
         }
         stretchedIconCount += counts.stretchedIcons;
     }
@@ -497,7 +497,6 @@ void Tiled2dMapVectorSymbolGroup::setupObjects(const std::shared_ptr<SpriteData>
     int iconOffset = 0;
     int stretchedIconOffset = 0;
     std::unordered_map<std::string, int32_t> textOffsets;
-    std::unordered_map<std::string, uint16_t> textStyleOffsets;
 
     int positionSize = is3d ? 3 : 2;
 
@@ -532,13 +531,11 @@ void Tiled2dMapVectorSymbolGroup::setupObjects(const std::shared_ptr<SpriteData>
                                                       });
             if (textDescriptor != textDescriptors.end()) {
                 int32_t currentTextOffset = textOffsets[font->fontData->info.name];
-                uint16_t currentStyleOffset = textStyleOffsets[font->fontData->info.name];
                 object->setupTextProperties((*textDescriptor)->textTextureCoordinates,
                                             (*textDescriptor)->textStyleIndices,
-                                            currentTextOffset, currentStyleOffset,
+                                            currentTextOffset,
                                             tileInfo.tileInfo.zoomIdentifier);
                 textOffsets[font->fontData->info.name] = currentTextOffset;
-                textStyleOffsets[font->fontData->info.name] = currentStyleOffset;
             }
         }
     }
@@ -634,9 +631,7 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
         int iconOffset = 0;
         int stretchedIconOffset = 0;
         std::unordered_map<std::string, int32_t> textOffsets;
-        std::unordered_map<std::string, uint16_t> textStyleOffsets;
         int32_t singleTextOffset = 0;
-        uint16_t singleTextStyleOffset = 0;
 
         for (auto const &object: symbolObjects) {
             if (object->hasCustomTexture) {
@@ -665,14 +660,12 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
 
                     if (textDescriptor != textDescriptors.end()) {
                         int32_t currentTextOffset = textOffsets[name];
-                        uint16_t currentStyleOffset = textStyleOffsets[name];
                         object->updateTextProperties((*textDescriptor)->textPositions, (*textDescriptor)->textReferencePositions,
                                                      (*textDescriptor)->textScales, (*textDescriptor)->textRotations,
-                                                     (*textDescriptor)->textStyles,
-                                                     currentTextOffset, currentStyleOffset,
+                                                     (*textDescriptor)->textAlphas, (*textDescriptor)->textStyles,
+                                                     currentTextOffset,
                                                      zoomIdentifier, scaleFactor, rotation, now, viewPortSize, vpMatrix, origin);
                         textOffsets[name] = currentTextOffset;
-                        textStyleOffsets[name] = currentStyleOffset;
                     }
                 } else if(n == 1) {
                     // use first, as it has to be this one, otherwise multiple fonts
@@ -680,8 +673,8 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
                     const auto &td = *(textDescriptors.begin());
                     object->updateTextProperties(td->textPositions, td->textReferencePositions,
                                                  td->textScales, td->textRotations,
-                                                 td->textStyles,
-                                                 singleTextOffset, singleTextStyleOffset,
+                                                 td->textAlphas, td->textStyles,
+                                                 singleTextOffset,
                                                  zoomIdentifier, scaleFactor, rotation, now, viewPortSize, vpMatrix, origin);
                 }
             }
@@ -820,15 +813,18 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
             }
 
             if (textDescriptor->textStyles.wasModified()) {
-                textInstancedObject->setStyles(
-                                               SharedBytes((int64_t) textDescriptor->textStyles.data(), (int32_t) textDescriptor->textStyles.size() / 10, 10 * (int32_t) sizeof(float)));
+                textInstancedObject->setStyles(SharedBytes((int64_t) textDescriptor->textStyles.data(), (int32_t) textDescriptor->textStyles.size() / 4, 4 * (int32_t) sizeof(float)));
                 textDescriptor->textStyles.resetModificationFlag();
             }
 
             if (textDescriptor->textScales.wasModified()) {
-                textInstancedObject->setScales(
-                                               SharedBytes((int64_t) textDescriptor->textScales.data(), (int32_t) textDescriptor->textRotations.size(), 2 * (int32_t) sizeof(float)));
+                textInstancedObject->setScales(SharedBytes((int64_t) textDescriptor->textScales.data(), (int32_t) textDescriptor->textRotations.size(), 2 * (int32_t) sizeof(float)));
                 textDescriptor->textScales.resetModificationFlag();
+            }
+
+            if (textDescriptor->textAlphas.wasModified()) {
+                textInstancedObject->setAlphas(SharedBytes((int64_t) textDescriptor->textAlphas.data(), (int32_t) textDescriptor->textAlphas.size(), 1 * (int32_t) sizeof(float)));
+                textDescriptor->textAlphas.resetModificationFlag();
             }
 
             if (textDescriptor->textRotations.wasModified()) {
@@ -1039,11 +1035,13 @@ Tiled2dMapVectorSymbolGroup::createSymbolObject(const Tiled2dMapVersionedTileInf
                                                 const bool hideIcon,
                                                 std::shared_ptr<SymbolAnimationCoordinatorMap> animationCoordinatorMap,
                                                 const size_t symbolTileIndex,
-                                                const bool hasCustomTexture) {
+                                                const bool hasCustomTexture,
+                                                const uint16_t styleIndex) {
     auto symbolObject = std::make_shared<Tiled2dMapVectorSymbolObject>(mapInterface, layerConfig, fontProvider, tileInfo, layerIdentifier,
                                                           description, featureContext, text, fullText, coordinate, lineCoordinates,
                                                           fontList, textAnchor, angle, textJustify, textSymbolPlacement, hideIcon, animationCoordinatorMap,
-                                                          featureStateManager, usedKeys, symbolTileIndex, hasCustomTexture, dpFactor, persistingSymbolPlacement, is3d, tileOrigin);
+                                                          featureStateManager, usedKeys, symbolTileIndex, hasCustomTexture, dpFactor,
+                                                          persistingSymbolPlacement, is3d, tileOrigin, styleIndex);
     symbolObject->setAlpha(alpha);
     const auto counts = symbolObject->getInstanceCounts();
     if (counts.icons + counts.stretchedIcons + counts.textCharacters == 0) {

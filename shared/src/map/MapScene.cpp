@@ -479,6 +479,11 @@ void MapScene::destroy() {
 
 void MapScene::drawReadyFrame(const ::RectCoord &bounds, float paddingPc, float timeout,
                               const std::shared_ptr<MapReadyCallbackInterface> &callbacks) {
+    auto camera = getCamera();
+
+    if (!callbacks || !camera) {
+        return;
+    }
 
     // for now we only support drawing a ready frame, therefore
     // we disable animations in the layers
@@ -494,7 +499,6 @@ void MapScene::drawReadyFrame(const ::RectCoord &bounds, float paddingPc, float 
     invalidate();
     callbacks->stateDidUpdate(state);
 
-    auto camera = getCamera();
     camera->moveToBoundingBox(bounds, paddingPc, false, std::nullopt, std::nullopt);
     camera->freeze(true);
 

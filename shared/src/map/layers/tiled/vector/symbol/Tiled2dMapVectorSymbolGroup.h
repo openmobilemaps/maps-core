@@ -94,7 +94,8 @@ private:
                                                                             const bool hideIcon,
                                                                             std::shared_ptr<SymbolAnimationCoordinatorMap> animationCoordinatorMap,
                                                                             const size_t symbolTileIndex,
-                                                                            const bool hasCustomTexture);
+                                                                            const bool hasCustomTexture,
+                                                                            const uint16_t styleIndex);
 
 public:
     uint32_t groupId;
@@ -162,10 +163,11 @@ private:
         VectorModificationWrapper<uint16_t> textStyleIndices;
         VectorModificationWrapper<float> textStyles;
         VectorModificationWrapper<float> textTextureCoordinates;
+        VectorModificationWrapper<float> textAlphas;
 
         TextDescriptor(int32_t textStyleCount, size_t textCharactersCount, std::shared_ptr<FontLoaderResult> fontResult, bool is3d)
                 : fontResult(fontResult) {
-            textStyles.resize(textStyleCount * 10, 0.0);
+            textStyles.resize(textStyleCount * 4, 0.0); // color RGBA, halo RGBA, halo width, halo blur
             textStyleIndices.resize(textCharactersCount, 0);
             textRotations.resize(textCharactersCount, 0.0);
             textScales.resize(textCharactersCount * 2, 0.0);
@@ -174,6 +176,7 @@ private:
                 textReferencePositions.resize(textCharactersCount * 3, 0.0);
             }
             textTextureCoordinates.resize(textCharactersCount * 4, 0.0);
+            textAlphas.resize(textCharactersCount, 0.0);
         }
     };
     std::vector<std::shared_ptr<TextDescriptor>> textDescriptors;

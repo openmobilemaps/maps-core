@@ -26,6 +26,10 @@
 #include "Tiled2dMapVectorSymbolFontProviderManager.h"
 #include "Tiled2dMapVectorLayerSymbolDelegateInterface.h"
 
+#ifdef OPENMOBILEMAPS_GL
+#include "TextInstancedShaderOpenGl.h"
+#endif
+
 struct InstanceCounter {
     InstanceCounter() : baseValue(0), decreasingCounter(0) {}
 
@@ -151,10 +155,11 @@ private:
     bool persistingSymbolPlacement = false;
 
 #ifdef OPENMOBILEMAPS_GL
-    // Higher counts may cause issues for instanced text rendering
-    int32_t maxNumFeaturesPerGroup = 3500;
+    // Higher counts can't be handled due to the limited UBO size
+#include "TextInstancedShaderOpenGl.h"
+    int32_t maxNumFeaturesPerGroup = TextInstancedShaderOpenGl::MAX_NUM_TEXT_STYLES;
 #else
     int32_t maxNumFeaturesPerGroup = std::numeric_limits<int32_t>().max();
 #endif
-            VectorSet<Tiled2dMapVectorTileInfo> latestTileInfos;
+    VectorSet<Tiled2dMapVectorTileInfo> latestTileInfos;
 };

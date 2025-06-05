@@ -37,6 +37,9 @@ public:
     /** one float for each instance in degree */
     virtual void setRotations(const ::SharedBytes & rotations) = 0;
 
+    /** one float for each instance */
+    virtual void setAlphas(const ::SharedBytes & alphas) = 0;
+
     /** one uint16 for each instance */
     virtual void setStyleIndices(const ::SharedBytes & indices) = 0;
 

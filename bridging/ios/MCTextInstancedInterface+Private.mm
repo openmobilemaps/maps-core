@@ -83,6 +83,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)setAlphas:(nonnull MCSharedBytes *)alphas {
+    try {
+        _cppRefHandle.get()->setAlphas(::djinni_generated::SharedBytes::toCpp(alphas));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (void)setStyleIndices:(nonnull MCSharedBytes *)indices {
     try {
         _cppRefHandle.get()->setStyleIndices(::djinni_generated::SharedBytes::toCpp(indices));
@@ -167,6 +173,12 @@ public:
     {
         @autoreleasepool {
             [djinni_private_get_proxied_objc_object() setRotations:(::djinni_generated::SharedBytes::fromCpp(c_rotations))];
+        }
+    }
+    void setAlphas(const ::SharedBytes & c_alphas) override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() setAlphas:(::djinni_generated::SharedBytes::fromCpp(c_alphas))];
         }
     }
     void setStyleIndices(const ::SharedBytes & c_indices) override

@@ -34,6 +34,9 @@
 /** one float for each instance in degree */
 - (void)setRotations:(nonnull MCSharedBytes *)rotations;
 
+/** one float for each instance */
+- (void)setAlphas:(nonnull MCSharedBytes *)alphas;
+
 /** one uint16 for each instance */
 - (void)setStyleIndices:(nonnull MCSharedBytes *)indices;
 

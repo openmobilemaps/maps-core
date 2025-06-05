@@ -201,6 +201,9 @@ text_instanced_interface = interface +c +j +o {
     # one float for each instance in degree
     set_rotations(rotations: shared_bytes);
 
+    # one float for each instance
+    set_alphas(alphas: shared_bytes);
+
     # one uint16 for each instance
     set_style_indices(indices: shared_bytes);
 

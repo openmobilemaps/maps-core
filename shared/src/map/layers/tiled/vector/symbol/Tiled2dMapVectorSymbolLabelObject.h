@@ -66,13 +66,14 @@ public:
                                       double dpFactor,
                                       bool is3d,
                                       const Vec3D &tileOrigin,
+                                      const uint16_t styleIndex,
                                       const int32_t systemIdentifier);
 
     int getCharacterCount();
 
-    void setupProperties(VectorModificationWrapper<float> &textureCoordinates, VectorModificationWrapper<uint16_t> &styleIndices, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier);
+    void setupProperties(VectorModificationWrapper<float> &textureCoordinates, VectorModificationWrapper<uint16_t> &styleIndices, int &countOffset, const double zoomIdentifier);
 
-    void updateProperties(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &referencePositions, VectorModificationWrapper<float> &scales, VectorModificationWrapper<float> &rotations, VectorModificationWrapper<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const bool collides, const double rotation, const float alpha, const bool isCoordinateOwner, long long now, const Vec2I &viewportSize, const std::vector<float>& vpMatrix, const Vec3D& origin);
+    void updateProperties(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &referencePositions, VectorModificationWrapper<float> &scales, VectorModificationWrapper<float> &rotations, VectorModificationWrapper<float> &alphas, VectorModificationWrapper<float> &styles, int &countOffset, const double zoomIdentifier, const double scaleFactor, const bool collides, const double rotation, const float alpha, const bool isCoordinateOwner, long long now, const Vec2I &viewportSize, const std::vector<float>& vpMatrix, const Vec3D& origin);
 
     std::shared_ptr<FontLoaderResult> getFont() {
         return fontResult;
@@ -98,8 +99,8 @@ private:
 
     void writePosition(const double x, const double y, const size_t offset, VectorModificationWrapper<float> &buffer);
 
-    void updatePropertiesPoint(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &referencePositions, VectorModificationWrapper<float> &scales, VectorModificationWrapper<float> &rotations, VectorModificationWrapper<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, const Vec2I &viewportSize);
-    double updatePropertiesLine(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &referencePositions, VectorModificationWrapper<float> &scales, VectorModificationWrapper<float> &rotations, VectorModificationWrapper<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, const Vec2I &viewportSize);
+    void updatePropertiesPoint(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &referencePositions, VectorModificationWrapper<float> &scales, VectorModificationWrapper<float> &rotations, VectorModificationWrapper<float> &alphas, int &countOffset, float alphaFactor, const double zoomIdentifier, const double scaleFactor, const double rotation, const Vec2I &viewportSize);
+    double updatePropertiesLine(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &referencePositions, VectorModificationWrapper<float> &scales, VectorModificationWrapper<float> &rotations, VectorModificationWrapper<float> &alphas, int &countOffset, float alphaFactor, const double zoomIdentifier, const double scaleFactor, const double rotation, const Vec2I &viewportSize);
 
     bool isStyleStateDependant = true;
     double lastZoomEvaluation = -1;
@@ -249,4 +250,6 @@ private:
     int positionSize;
 
     double medianLastBaseLine = 0.0;
+
+    uint16_t styleIndex = 0;
 };

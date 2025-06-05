@@ -42,6 +42,7 @@ Tiled2dMapVectorSymbolLabelObject::Tiled2dMapVectorSymbolLabelObject(const std::
                                                                      double dpFactor,
                                                                      bool is3d,
                                                                      const Vec3D &tileOrigin,
+                                                                     const uint16_t styleIndex,
                                                                      const int32_t systemIdentifier)
         : textSymbolPlacement(textSymbolPlacement),
           rotationAlignment(rotationAlignment),
@@ -64,7 +65,8 @@ Tiled2dMapVectorSymbolLabelObject::Tiled2dMapVectorSymbolLabelObject(const std::
           dpFactor(dpFactor),
           is3d(is3d),
           tileOrigin(tileOrigin),
-          positionSize(is3d ? 3 : 2) {
+          positionSize(is3d ? 3 : 2),
+          styleIndex(styleIndex) {
 
     for(auto i=0; i<fontResult->fontData->glyphs.size(); ++i) {
         auto& letter = fontResult->fontData->glyphs[i];
@@ -268,7 +270,7 @@ int Tiled2dMapVectorSymbolLabelObject::getCharacterCount(){
     return characterCount;
 }
 
-void Tiled2dMapVectorSymbolLabelObject::setupProperties(VectorModificationWrapper<float> &textureCoordinates, VectorModificationWrapper<uint16_t> &styleIndices, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier) {
+void Tiled2dMapVectorSymbolLabelObject::setupProperties(VectorModificationWrapper<float> &textureCoordinates, VectorModificationWrapper<uint16_t> &styleIndices, int &countOffset, const double zoomIdentifier) {
     const auto evalContext = EvaluationContext(zoomIdentifier, dpFactor, featureContext, stateManager);
 
     evaluateStyleProperties(zoomIdentifier);
@@ -282,11 +284,10 @@ void Tiled2dMapVectorSymbolLabelObject::setupProperties(VectorModificationWrappe
             textureCoordinates[(4 * countOffset) + 2] = d.uv.bottomRight.x - d.uv.topLeft.x;
             textureCoordinates[(4 * countOffset) + 3] = d.uv.topLeft.y - d.uv.bottomLeft.y;
 
-            styleIndices[countOffset] = (uint16_t)styleOffset;
+            styleIndices[countOffset] = styleIndex;
             countOffset += 1;
         }
     }
-    styleOffset += 1;
 }
 
 
@@ -319,7 +320,7 @@ void Tiled2dMapVectorSymbolLabelObject::evaluateStyleProperties(const double zoo
 }
 
 
-void Tiled2dMapVectorSymbolLabelObject::updateProperties(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &referencePositions, VectorModificationWrapper<float> &scales, VectorModificationWrapper<float> &rotations, VectorModificationWrapper<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const bool collides, const double rotation, const float alpha, const bool isCoordinateOwner, long long now, const Vec2I &viewportSize, const std::vector<float>& vpMatrix, const Vec3D& origin) {
+void Tiled2dMapVectorSymbolLabelObject::updateProperties(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &referencePositions, VectorModificationWrapper<float> &scales, VectorModificationWrapper<float> &rotations, VectorModificationWrapper<float> &alphas, VectorModificationWrapper<float> &styles, int &countOffset, const double zoomIdentifier, const double scaleFactor, const bool collides, const double rotation, const float alpha, const bool isCoordinateOwner, long long now, const Vec2I &viewportSize, const std::vector<float>& vpMatrix, const Vec3D& origin) {
     const auto evalContext = EvaluationContext(zoomIdentifier, dpFactor, featureContext, stateManager);
 
     evaluateStyleProperties(zoomIdentifier);
@@ -334,33 +335,36 @@ void Tiled2dMapVectorSymbolLabelObject::updateProperties(VectorModificationWrapp
         alphaFactor = animationCoordinator->getTextAlpha(targetAlpha, now);
     }
 
-    styles[(10 * styleOffset) + 0] = textColor.r; //R
-    styles[(10 * styleOffset) + 1] = textColor.g; //G
-    styles[(10 * styleOffset) + 2] = textColor.b; //B
-    styles[(10 * styleOffset) + 3] = textColor.a * alphaFactor; //A
-    styles[(10 * styleOffset) + 4] = haloColor.r; //R
-    styles[(10 * styleOffset) + 5] = haloColor.g; //G
-    styles[(10 * styleOffset) + 6] = haloColor.b; //B
-    styles[(10 * styleOffset) + 7] = haloColor.a * alphaFactor; //A
-    styles[(10 * styleOffset) + 8] = haloWidth;
-    styles[(10 * styleOffset) + 9] = haloBlur;
+    float colorAlpha = textColor.a * alphaFactor;
 
-    isOpaque = styles[(10 * styleOffset) + 3] != 0.0;
+    union { uint32_t i; float f; } packedColorConverter{};
+    packedColorConverter.i = ((uint8_t) (textColor.r * 255) << 24)
+                           | ((uint8_t) (textColor.g * 255) << 16)
+                           | ((uint8_t) (textColor.b * 255) << 8)
+                           | ((uint8_t) (colorAlpha * 255)); // color RGBA
+    styles[4 * styleIndex + 0] = packedColorConverter.f;
+    packedColorConverter.i = ((uint8_t) (haloColor.r * 255) << 24)
+                  | ((uint8_t) (haloColor.g * 255) << 16)
+                  | ((uint8_t) (haloColor.b * 255) << 8)
+                  | ((uint8_t) (haloColor.a * alphaFactor * 255)); // halo color RGBA
+    styles[4 * styleIndex + 1] = packedColorConverter.f;
+    styles[4 * styleIndex + 2] = haloWidth; // halo width
+    styles[4 * styleIndex + 3] = haloBlur; // halo blur
 
-    styleOffset += 1;
+    isOpaque = colorAlpha > 0.0;
 
     switch(textSymbolPlacement) {
         case TextSymbolPlacement::POINT: {
-            updatePropertiesPoint(positions, referencePositions, scales, rotations, styles, countOffset, styleOffset, zoomIdentifier, scaleFactor, rotation, viewportSize);
+            updatePropertiesPoint(positions, referencePositions, scales, rotations, alphas, countOffset, alphaFactor, zoomIdentifier, scaleFactor, rotation, viewportSize);
             break;
         }
         case TextSymbolPlacement::LINE_CENTER:
         case TextSymbolPlacement::LINE: {
             if (rotationAlignment == SymbolAlignment::VIEWPORT) {
-                updatePropertiesPoint(positions, referencePositions, scales, rotations, styles, countOffset, styleOffset, zoomIdentifier, scaleFactor, rotation, viewportSize);
+                updatePropertiesPoint(positions, referencePositions, scales, rotations, alphas, countOffset, alphaFactor, zoomIdentifier, scaleFactor, rotation, viewportSize);
             } else {
                 setupCamera(vpMatrix, origin, viewportSize);
-                auto rotatedFactor = updatePropertiesLine(positions, referencePositions, scales, rotations, styles, countOffset, styleOffset, zoomIdentifier, scaleFactor, rotation, viewportSize);
+                auto rotatedFactor = updatePropertiesLine(positions, referencePositions, scales, rotations, alphas, countOffset, alphaFactor, zoomIdentifier, scaleFactor, rotation, viewportSize);
 
                 if(rotatedFactor > 0.5 && lineCoordinates) {
                     std::reverse((*lineCoordinates).begin(), (*lineCoordinates).end());
@@ -373,7 +377,7 @@ void Tiled2dMapVectorSymbolLabelObject::updateProperties(VectorModificationWrapp
                     countOffset -= characterCount;
 
                     setupCamera(vpMatrix, origin, viewportSize);
-                    updatePropertiesLine(positions, referencePositions, scales, rotations, styles, countOffset, styleOffset, zoomIdentifier, scaleFactor, rotation, viewportSize);
+                    updatePropertiesLine(positions, referencePositions, scales, rotations, alphas, countOffset, alphaFactor, zoomIdentifier, scaleFactor, rotation, viewportSize);
                 }
             }
 
@@ -382,7 +386,7 @@ void Tiled2dMapVectorSymbolLabelObject::updateProperties(VectorModificationWrapp
     }
 }
 
-void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &referencePositions, VectorModificationWrapper<float> &scales, VectorModificationWrapper<float> &rotations, VectorModificationWrapper<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, const Vec2I &viewportSize) {
+void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &referencePositions, VectorModificationWrapper<float> &scales, VectorModificationWrapper<float> &rotations, VectorModificationWrapper<float> &alphas, int &countOffset, float alphaFactor, const double zoomIdentifier, const double scaleFactor, const double rotation, const Vec2I &viewportSize) {
 
     const auto evalContext = EvaluationContext(zoomIdentifier, dpFactor, featureContext, stateManager);
     const float fontSize = is3d ? textSize : (scaleFactor * textSize);
@@ -635,6 +639,8 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(VectorModification
             boundingBoxMax.y = boundingBoxMax.y > y1 ? boundingBoxMax.y : y1;
         }
 
+        alphas[countOffset] = alphaFactor;
+
         countOffset += 1;
     }
 
@@ -682,7 +688,7 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(VectorModification
     }
 }
 
-double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &referencePositions, VectorModificationWrapper<float> &scales, VectorModificationWrapper<float> &rotations, VectorModificationWrapper<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, const Vec2I &viewportSize) {
+double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &referencePositions, VectorModificationWrapper<float> &scales, VectorModificationWrapper<float> &rotations, VectorModificationWrapper<float> &alphas, int &countOffset, float alphaFactor, const double zoomIdentifier, const double scaleFactor, const double rotation, const Vec2I &viewportSize) {
     if(lineCoordinates == std::nullopt) {
         countOffset += characterCount;
         return 0;
@@ -861,6 +867,8 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(VectorModificatio
                     maxSymbolRadius = std::max(maxSymbolRadius, std::max(charScaled.x * 0.5, charScaled.y * 0.5));
 
                     rotations[countOffset + centerPositionSize] = angleDeg;
+
+                    alphas[countOffset + centerPositionSize] = alphaFactor;
                 } else {
                     scales[2 * (countOffset + centerPositionSize) + 0] = charSize.x;
                     scales[2 * (countOffset + centerPositionSize) + 1] = charSize.y;
@@ -868,8 +876,9 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(VectorModificatio
                     maxSymbolRadius = std::max(maxSymbolRadius, std::max(charSize.x * 0.5, charSize.y * 0.5));
 
                     rotations[countOffset + centerPositionSize] = -angleDeg;
-                }
 
+                    alphas[countOffset + centerPositionSize] = alphaFactor;
+                }
 
                 centerPositions.push_back(Vec2DHelper::midpoint(Vec2DHelper::midpoint(quad.bottomLeft, quad.bottomRight), Vec2DHelper::midpoint(quad.topLeft, quad.topRight)));
             }
@@ -913,6 +922,7 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(VectorModificatio
             }
             scales[2 * (countOffset) + 0] = 0;
             scales[2 * (countOffset) + 1] = 0;
+            alphas[countOffset] = alphaFactor;
             countOffset += 1;
         }
         boxMin.x = std::numeric_limits<float>::max();

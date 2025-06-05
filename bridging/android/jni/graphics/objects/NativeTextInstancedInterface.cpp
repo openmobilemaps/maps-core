@@ -78,6 +78,14 @@ void NativeTextInstancedInterface::JavaProxy::setRotations(const ::SharedBytes &
                            ::djinni::get(::djinni_generated::NativeSharedBytes::fromCpp(jniEnv, c_rotations)));
     ::djinni::jniExceptionCheck(jniEnv);
 }
+void NativeTextInstancedInterface::JavaProxy::setAlphas(const ::SharedBytes & c_alphas) {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeTextInstancedInterface>::get();
+    jniEnv->CallVoidMethod(Handle::get().get(), data.method_setAlphas,
+                           ::djinni::get(::djinni_generated::NativeSharedBytes::fromCpp(jniEnv, c_alphas)));
+    ::djinni::jniExceptionCheck(jniEnv);
+}
 void NativeTextInstancedInterface::JavaProxy::setStyleIndices(const ::SharedBytes & c_indices) {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
@@ -181,6 +189,14 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::TextInstancedInterface>(nativeRef);
         ref->setRotations(::djinni_generated::NativeSharedBytes::toCpp(jniEnv, j_rotations));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_TextInstancedInterface_00024CppProxy_native_1setAlphas(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeSharedBytes::JniType j_alphas)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::TextInstancedInterface>(nativeRef);
+        ref->setAlphas(::djinni_generated::NativeSharedBytes::toCpp(jniEnv, j_alphas));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

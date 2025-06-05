@@ -28,6 +28,9 @@ abstract class TextInstancedInterface {
     /** one float for each instance in degree */
     abstract fun setRotations(rotations: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
 
+    /** one float for each instance */
+    abstract fun setAlphas(alphas: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
+
     /** one uint16 for each instance */
     abstract fun setStyleIndices(indices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
 
@@ -102,6 +105,12 @@ abstract class TextInstancedInterface {
             native_setRotations(this.nativeRef, rotations)
         }
         private external fun native_setRotations(_nativeRef: Long, rotations: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
+
+        override fun setAlphas(alphas: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setAlphas(this.nativeRef, alphas)
+        }
+        private external fun native_setAlphas(_nativeRef: Long, alphas: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
 
         override fun setStyleIndices(indices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

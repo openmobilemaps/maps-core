@@ -47,7 +47,8 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
                                                            const double dpFactor,
                                                            const bool persistingSymbolPlacement,
                                                            bool is3d,
-                                                           const Vec3D &tileOrigin) :
+                                                           const Vec3D &tileOrigin,
+                                                           const uint16_t styleIndex) :
     description(description),
     layerConfig(layerConfig),
     coordinate(coordinate),
@@ -153,6 +154,7 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
                                                                               dpFactor,
                                                                               is3d,
                                                                               tileOrigin,
+                                                                              styleIndex,
                                                                               systemIdentifier);
 
             instanceCounts.textCharacters = labelObject->getCharacterCount();
@@ -894,15 +896,15 @@ void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(VectorModificatio
     countOffset += instanceCounts.stretchedIcons;
 }
 
-void Tiled2dMapVectorSymbolObject::setupTextProperties(VectorModificationWrapper<float> &textureCoordinates, VectorModificationWrapper<uint16_t> &styleIndices, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier) {
+void Tiled2dMapVectorSymbolObject::setupTextProperties(VectorModificationWrapper<float> &textureCoordinates, VectorModificationWrapper<uint16_t> &styleIndices, int &countOffset, const double zoomIdentifier) {
     if (instanceCounts.textCharacters ==  0 || !labelObject) {
         return;
     }
 
-    labelObject->setupProperties(textureCoordinates, styleIndices, countOffset, styleOffset, zoomIdentifier);
+    labelObject->setupProperties(textureCoordinates, styleIndices, countOffset, zoomIdentifier);
 }
 
-void Tiled2dMapVectorSymbolObject::updateTextProperties(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &referencePositions, VectorModificationWrapper<float> &scales, VectorModificationWrapper<float> &rotations, VectorModificationWrapper<float> &styles, int &countOffset, uint16_t &styleOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, long long now, const Vec2I viewPortSize, const std::vector<float>& vpMatrix, const Vec3D& origin) {
+void Tiled2dMapVectorSymbolObject::updateTextProperties(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &referencePositions, VectorModificationWrapper<float> &scales, VectorModificationWrapper<float> &rotations, VectorModificationWrapper<float> &alphas, VectorModificationWrapper<float> &styles, int &countOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, long long now, const Vec2I viewPortSize, const std::vector<float>& vpMatrix, const Vec3D& origin) {
     if (instanceCounts.textCharacters ==  0 || !labelObject) {
         return;
     }
@@ -918,12 +920,11 @@ void Tiled2dMapVectorSymbolObject::updateTextProperties(VectorModificationWrappe
     }
 
     if (lastTextUpdateScaleFactor == scaleFactor && lastTextUpdateRotation == rotation && !isStyleZoomDependant) {
-        styleOffset += instanceCounts.textCharacters == 0 ? 0 : 1;
         countOffset += instanceCounts.textCharacters;
         return;
     }
 
-    labelObject->updateProperties(positions, referencePositions, scales, rotations, styles, countOffset, styleOffset, zoomIdentifier, scaleFactor, animationCoordinator->isColliding(), rotation, alpha, isCoordinateOwner, now, viewPortSize, vpMatrix, origin);
+    labelObject->updateProperties(positions, referencePositions, scales, rotations, alphas, styles, countOffset, zoomIdentifier, scaleFactor, animationCoordinator->isColliding(), rotation, alpha, isCoordinateOwner, now, viewPortSize, vpMatrix, origin);
 
     if (!animationCoordinator->isTextAnimating()) {
         lastTextUpdateScaleFactor = scaleFactor;
