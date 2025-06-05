@@ -65,7 +65,8 @@ public:
                                       const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager,
                                       double dpFactor,
                                       bool is3d,
-                                      const Vec3D &tileOrigin);
+                                      const Vec3D &tileOrigin,
+                                      const int32_t systemIdentifier);
 
     int getCharacterCount();
 

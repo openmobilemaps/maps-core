@@ -64,7 +64,8 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
     positionSize(is3d ? 3 : 2),
     tileOrigin(tileOrigin),
     persistingSymbolPlacement(persistingSymbolPlacement),
-    angle(angle) {
+    angle(angle),
+    systemIdentifier(tileInfo.tileInfo.bounds.topLeft.systemIdentifier) {
     auto strongMapInterface = mapInterface.lock();
     auto objectFactory = strongMapInterface ? strongMapInterface->getGraphicsObjectFactory() : nullptr;
     auto camera = strongMapInterface ? strongMapInterface->getCamera() : nullptr;
@@ -80,7 +81,7 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
     
     const bool hasIcon = description->style.hasIconImagePotentially();
 
-    renderCoordinate = Vec2DHelper::toVec(converter->convertToRenderSystem(Coord(CoordinateSystemIdentifiers::EPSG3857(), coordinate.x, coordinate.y, 0.0)));
+    renderCoordinate = Vec2DHelper::toVec(converter->convertToRenderSystem(Coord(systemIdentifier, coordinate.x, coordinate.y, 0.0)));
     initialRenderCoordinateVec = renderCoordinate;
 
     evaluateStyleProperties(tileInfo.tileInfo.zoomIdentifier);
@@ -151,7 +152,8 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
                                                                               animationCoordinator, featureStateManager,
                                                                               dpFactor,
                                                                               is3d,
-                                                                              tileOrigin);
+                                                                              tileOrigin,
+                                                                              systemIdentifier);
 
             instanceCounts.textCharacters = labelObject->getCharacterCount();
         } else {
@@ -1104,7 +1106,7 @@ std::optional<std::tuple<Coord, VectorLayerFeatureInfo>> Tiled2dMapVectorSymbolO
         if (boundingRect) {
             auto projectedRectangle = CollisionUtil::getProjectedRectangle(*boundingRect, collisionEnvironment);
             if (projectedRectangle && CollisionUtil::checkRectCircleCollision(RectD(projectedRectangle->x, projectedRectangle->y, projectedRectangle->width, projectedRectangle->height), clickHitCircle)) {
-                return std::make_tuple(Coord(CoordinateSystemIdentifiers::EPSG3857(), coordinate.x, coordinate.y, 0.0), featureContext->getFeatureInfo());
+                return std::make_tuple(Coord(systemIdentifier, coordinate.x, coordinate.y, 0.0), featureContext->getFeatureInfo());
             }
         }
 
@@ -1112,7 +1114,7 @@ std::optional<std::tuple<Coord, VectorLayerFeatureInfo>> Tiled2dMapVectorSymbolO
         if ((labelObject && labelObject->boundingBoxCircles.has_value() && CollisionUtil::checkCirclesCollision(*labelObject->boundingBoxCircles, clickHitCircle))
         || (iconBoundingBoxViewportAligned.width != 0 && CollisionUtil::checkRectCircleCollision(iconBoundingBoxViewportAligned, clickHitCircle))
         || (stretchIconBoundingBoxViewportAligned.width != 0 && CollisionUtil::checkRectCircleCollision(stretchIconBoundingBoxViewportAligned, clickHitCircle))) {
-            return std::make_tuple(Coord(CoordinateSystemIdentifiers::EPSG3857(), coordinate.x, coordinate.y, 0.0), featureContext->getFeatureInfo());
+            return std::make_tuple(Coord(systemIdentifier, coordinate.x, coordinate.y, 0.0), featureContext->getFeatureInfo());
         }
     }
 
