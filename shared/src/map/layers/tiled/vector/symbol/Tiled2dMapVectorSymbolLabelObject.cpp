@@ -239,6 +239,10 @@ void Tiled2dMapVectorSymbolLabelObject::precomputeMedianIfNeeded() {
         }
     }
 
+    if (heights.empty()) {
+        return;
+    }
+
     std::sort(
         heights.begin() + baseLineStartIndex,
         heights.begin() + c
