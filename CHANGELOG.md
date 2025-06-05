@@ -1,5 +1,15 @@
 # Changelog for Open Mobile Maps
 
+## Version 3.2.0
+- Updated to [djinni 1.1.1](https://github.com/UbiqueInnovation/djinni/releases/tag/1.1.1)
+- Improved WebGL compatibility of OpenGL objects
+- Improved loading behavior in tiled layer sources
+- Fixed vector layer pattern rendering on iOS
+- Fixed vector layer icon offsets
+- Added a tool for computing a texture atlas from individual textures
+- Numerous performance and stability improvements
+- Refactored the OpenGL rendering architecture of vector layer text labels to better accommodate restricted target platforms and fix an issue with certain Samsung devices on Android 15
+
 ## Version 3.1.3
 - Fixed several unsafe layer accesses in MapScene
 - Added coarse cooperative cancelling in the Android MapRenderHelper
