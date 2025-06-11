@@ -9,29 +9,13 @@
  */
 
 #include "OpenGlContext.h"
+#include "OpenGlRenderTarget.h"
 #include "opengl_wrapper.h"
 
 OpenGlContext::OpenGlContext()
         : programs(), timeCreation(chronoutil::getCurrentTimestamp()) {}
 
-int OpenGlContext::getProgram(const std::string &name) {
-    auto p = programs.find(name);
-    if (p == programs.end()) {
-        return 0;
-    } else {
-        return p->second;
-    }
-}
-
-void OpenGlContext::storeProgram(const std::string &name, int program) { programs[name] = program; }
-
-void OpenGlContext::cleanAll() {
-    for (std::unordered_map<std::string, int>::iterator it = programs.begin(); it != programs.end(); ++it) {
-        glDeleteProgram(it->second);
-    }
-
-    programs.clear();
-}
+// RenderingContextInterface
 
 void OpenGlContext::onSurfaceCreated() {
     cleanAll();
@@ -45,6 +29,10 @@ void OpenGlContext::onSurfaceCreated() {
 void OpenGlContext::setViewportSize(const ::Vec2I &size) {
     viewportSize = size;
     glViewport(0, 0, size.x, size.y);
+
+    for (const auto &target : renderTargets) {
+        target.second->setup(size);
+    }
 }
 
 ::Vec2I OpenGlContext::getViewportSize() { return viewportSize; }
@@ -96,6 +84,79 @@ void OpenGlContext::setCulling(RenderingCullMode mode) {
             glDisable(GL_CULL_FACE);
             break;
     }
+}
+
+std::shared_ptr<OpenGlRenderingContextInterface> OpenGlContext::asOpenGlRenderingContext() {
+    return shared_from_this();
+}
+
+// OpenGlRenderingContextInterface
+
+/*not-null*/ std::shared_ptr<OpenGlRenderTargetInterface> OpenGlContext::getCreateRenderTarget(const std::string & name, ::TextureFilterType textureFilter) {
+    const auto &targetEntry = renderTargets.find(name);
+    std::shared_ptr<OpenGlRenderTargetInterface> renderTarget = targetEntry != renderTargets.end() ? targetEntry->second : nullptr;
+    if (renderTarget == nullptr) {
+        renderTarget = std::make_shared<OpenGlRenderTarget>(textureFilter);
+        renderTargets[name] = renderTarget;
+
+        if (viewportSize.x > 0 && viewportSize.y > 0) {
+            renderTarget->setup(viewportSize);
+        }
+    }
+    return renderTarget;
+}
+
+void OpenGlContext::deleteRenderTarget(const std::string & name) {
+    const auto &target = renderTargets.find(name);
+    if (target != renderTargets.end()) {
+        target->second->clear();
+        renderTargets.erase(target);
+    }
+}
+
+std::vector</*not-null*/ std::shared_ptr<OpenGlRenderTargetInterface>> OpenGlContext::getRenderTargets() {
+    std::vector<std::shared_ptr<OpenGlRenderTargetInterface>> targets;
+    for (const auto &entry : renderTargets) {
+        targets.push_back(entry.second);
+    }
+    return targets;
+}
+
+
+void OpenGlContext::resume() {
+    for (const auto &target : renderTargets) {
+        target.second->setup(viewportSize);
+    }
+}
+
+void OpenGlContext::pause() {
+    cleanAll();
+}
+
+// OpenGlContext
+
+int OpenGlContext::getProgram(const std::string &name) {
+    auto p = programs.find(name);
+    if (p == programs.end()) {
+        return 0;
+    } else {
+        return p->second;
+    }
+}
+
+void OpenGlContext::storeProgram(const std::string &name, int program) { programs[name] = program; }
+
+void OpenGlContext::cleanAll() {
+    for (const auto &target : renderTargets) {
+        target.second->clear();
+    }
+
+    for (const auto &program : programs) {
+        GLuint programId = program.second;
+        glDeleteProgram(programId);
+    }
+
+    programs.clear();
 }
 
 float OpenGlContext::getAspectRatio() {

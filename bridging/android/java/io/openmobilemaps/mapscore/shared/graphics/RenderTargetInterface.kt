@@ -8,6 +8,8 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class RenderTargetInterface {
 
+    abstract fun asGlRenderTargetInterface(): OpenGlRenderTargetInterface?
+
     public class CppProxy : RenderTargetInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -22,5 +24,11 @@ abstract class RenderTargetInterface {
             @JvmStatic
             external fun nativeDestroy(nativeRef: Long)
         }
+
+        override fun asGlRenderTargetInterface(): OpenGlRenderTargetInterface? {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_asGlRenderTargetInterface(this.nativeRef)
+        }
+        private external fun native_asGlRenderTargetInterface(_nativeRef: Long): OpenGlRenderTargetInterface?
     }
 }

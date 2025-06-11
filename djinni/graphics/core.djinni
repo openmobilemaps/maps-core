@@ -8,6 +8,7 @@
 @extern "../yaml/vec_2_i.yaml"
 @extern "../yaml/rect_i.yaml"
 @extern "../yaml/color.yaml"
+@extern "../yaml/texture_filter_type.yaml"
 
 scene_interface = interface +c {
     static create(graphics_factory: graphics_object_factory_interface, shader_factory: shader_factory_interface, rendering_context: rendering_context_interface) : scene_interface;
@@ -45,6 +46,20 @@ rendering_context_interface = interface +c +j +o {
 
     # optional rectangle, remove scissoring when not set
     apply_scissor_rect(scissor_rect: optional<rect_i>);
+
+    as_open_gl_rendering_context(): optional<open_gl_rendering_context_interface>;
+}
+
+open_gl_rendering_context_interface = interface +c +j +o {
+	resume();
+	pause();
+	get_create_render_target(name: string, texture_filter: texture_filter_type) : open_gl_render_target_interface;
+	delete_render_target(name: string);
+	get_render_targets() : list<open_gl_render_target_interface>;
+	get_program(name: string) : i32;
+	store_program(name: string, program: i32);
+	get_aspect_ratio() : f32;
+	get_delta_time_ms() : i64;
 }
 
 rendering_cull_mode = enum {
@@ -63,7 +78,16 @@ render_object_interface = interface +c +j +o {
 }
 
 render_target_interface = interface +c +j +o {
+	as_gl_render_target_interface(): optional<open_gl_render_target_interface>;
+}
 
+open_gl_render_target_interface = interface +c +j +o {
+	as_render_target_interface(): render_target_interface;
+	setup(size: vec_2_i);
+	clear();
+	bind_framebuffer();
+	unbind_framebuffer();
+	get_texture_id() : i32;
 }
 
 render_pass_interface = interface +c +j +o {
