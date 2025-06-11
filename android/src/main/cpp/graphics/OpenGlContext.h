@@ -67,7 +67,7 @@ public:
 
     virtual float getAspectRatio() override;
 
-    virtual long getDeltaTimeMs() override;
+    virtual int64_t getDeltaTimeMs() override;
 
     // OpenGlContext
 

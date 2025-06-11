@@ -163,6 +163,6 @@ float OpenGlContext::getAspectRatio() {
     return viewportSize.x / (float) viewportSize.y;
 }
 
-long OpenGlContext::getDeltaTimeMs() {
+int64_t OpenGlContext::getDeltaTimeMs() {
     return timeFrameDelta;
 }
