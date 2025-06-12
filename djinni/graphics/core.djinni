@@ -94,7 +94,6 @@ render_pass_interface = interface +c +j +o {
     get_render_objects() : list<render_object_interface>;
     add_render_object(render_object: render_object_interface);
     get_render_pass_config() : render_pass_config;
-    get_render_target_interface() : optional<render_target_interface>;
     get_masking_object(): optional<masking_object_interface>;
     get_scissoring_rect() : optional<rect_i>;
 }
@@ -106,6 +105,7 @@ compute_pass_interface = interface +c +j +o {
 render_pass_config = record {
     render_pass_index: i32;
     is_pass_masked: bool;
+    render_target: optional<render_target_interface>;
 }
 
 renderer_interface = interface +c +j +o {

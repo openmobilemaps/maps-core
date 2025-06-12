@@ -14,8 +14,6 @@ abstract class RenderPassInterface {
 
     abstract fun getRenderPassConfig(): RenderPassConfig
 
-    abstract fun getRenderTargetInterface(): RenderTargetInterface?
-
     abstract fun getMaskingObject(): io.openmobilemaps.mapscore.shared.graphics.objects.MaskingObjectInterface?
 
     abstract fun getScissoringRect(): io.openmobilemaps.mapscore.shared.graphics.common.RectI?
@@ -52,12 +50,6 @@ abstract class RenderPassInterface {
             return native_getRenderPassConfig(this.nativeRef)
         }
         private external fun native_getRenderPassConfig(_nativeRef: Long): RenderPassConfig
-
-        override fun getRenderTargetInterface(): RenderTargetInterface? {
-            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            return native_getRenderTargetInterface(this.nativeRef)
-        }
-        private external fun native_getRenderTargetInterface(_nativeRef: Long): RenderTargetInterface?
 
         override fun getMaskingObject(): io.openmobilemaps.mapscore.shared.graphics.objects.MaskingObjectInterface? {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
