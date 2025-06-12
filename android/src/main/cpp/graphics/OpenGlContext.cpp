@@ -130,7 +130,9 @@ void OpenGlContext::resume() {
 }
 
 void OpenGlContext::pause() {
-    cleanAll();
+    for (const auto &target : renderTargets) {
+        target.second->clear();
+    }
 }
 
 // OpenGlContext
