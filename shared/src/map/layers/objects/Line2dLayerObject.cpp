@@ -10,6 +10,7 @@
 
 #include "Line2dLayerObject.h"
 #include "Vec3D.h"
+#include "LineHelper.h"
 #include <cmath>
 
 Line2dLayerObject::Line2dLayerObject(const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
@@ -59,12 +60,10 @@ void Line2dLayerObject::setPositions(const std::vector<Coord> &positions, const 
         double lengthNormalZ = pNext.z - p.z;
         float lineLength = std::sqrt(lengthNormalX * lengthNormalX + lengthNormalY * lengthNormalY + lengthNormalZ * lengthNormalZ);
 
-        // SegmentType (0 inner, 1 start, 2 end, 3 single segment) | lineStyleIndex
-        // (each one Byte, i.e. up to 256 styles if supported by shader!)
-        float lineStyleInfo = 0 + (i == 0 && i == iSecondToLast ? (3 << 8)
-                : (i == 0 ? (float) (1 << 8)
-                : (i == iSecondToLast ? (float) (2 << 8)
-                : 0.0)));
+        // Pack the values into a float-compatible representation
+        uint8_t segmentType = (i == 0 && i == iSecondToLast) ? 3 :
+                              (i == 0) ? 1 :
+                              (i == iSecondToLast) ? 2 : 0;
 
         for (uint8_t vertexIndex = 4; vertexIndex > 0; --vertexIndex) {
             // Vertex
@@ -80,14 +79,7 @@ void Line2dLayerObject::setPositions(const std::vector<Coord> &positions, const 
                 lineAttributes.push_back(pNext.z);
             }
 
-            // Vertex Index
-            lineAttributes.push_back((float) (vertexIndex - 1));
-
-            // Segment Start Length Position (length prefix sum)
-            lineAttributes.push_back(prefixTotalLineLength);
-
-            // Style Info
-            lineAttributes.push_back(lineStyleInfo);
+            lineAttributes.push_back(LineHelper::packLineStyleMetadata(vertexIndex, 0, segmentType, prefixTotalLineLength));
         }
 
         // Vertex indices
