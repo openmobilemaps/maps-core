@@ -121,7 +121,7 @@ public class RenderingContext: NSObject, @unchecked Sendable {
         stencilClearQuad.render(
             encoder: encoder,
             context: self,
-            renderPass: .init(renderPass: 0, isPassMasked: false),
+            renderPass: .init(renderPass: 0, isPassMasked: false, renderTarget: renderTarget),
             vpMatrix: 0,
             mMatrix: 0,
             origin: .init(x: 0, y: 0, z: 0),
@@ -131,6 +131,10 @@ public class RenderingContext: NSObject, @unchecked Sendable {
 }
 
 extension RenderingContext: MCRenderingContextInterface {
+    public func asOpenGlRenderingContext() -> (any MCOpenGlRenderingContextInterface)? {
+        nil
+    }
+
     public func setCulling(_ mode: MCRenderingCullMode) {
         self.cullMode = mode
     }

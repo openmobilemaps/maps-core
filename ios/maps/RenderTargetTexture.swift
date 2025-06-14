@@ -82,4 +82,8 @@ open class RenderTargetTexture: Identifiable, Equatable, MCRenderTargetInterface
     public static func == (lhs: RenderTargetTexture, rhs: RenderTargetTexture) -> Bool {
         return lhs.id == rhs.id
     }
+
+    public func asGlRenderTargetInterface() -> (any MCOpenGlRenderTargetInterface)? {
+        nil
+    }
 }
