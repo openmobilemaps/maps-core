@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "Color.h"
 #include "TextureFilterType.h"
 #include <cstdint>
 #include <memory>
@@ -19,7 +20,7 @@ public:
 
     virtual void pause() = 0;
 
-    virtual /*not-null*/ std::shared_ptr<OpenGlRenderTargetInterface> getCreateRenderTarget(const std::string & name, ::TextureFilterType textureFilter) = 0;
+    virtual /*not-null*/ std::shared_ptr<OpenGlRenderTargetInterface> getCreateRenderTarget(const std::string & name, ::TextureFilterType textureFilter, const ::Color & clearColor) = 0;
 
     virtual void deleteRenderTarget(const std::string & name) = 0;
 

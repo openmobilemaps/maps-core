@@ -3,6 +3,7 @@
 
 #include "NativeOpenGlRenderingContextInterface.h"  // my header
 #include "Marshal.hpp"
+#include "NativeColor.h"
 #include "NativeOpenGlRenderTargetInterface.h"
 #include "NativeTextureFilterType.h"
 
@@ -30,13 +31,14 @@ void NativeOpenGlRenderingContextInterface::JavaProxy::pause() {
     jniEnv->CallVoidMethod(Handle::get().get(), data.method_pause);
     ::djinni::jniExceptionCheck(jniEnv);
 }
-/*not-null*/ std::shared_ptr<::OpenGlRenderTargetInterface> NativeOpenGlRenderingContextInterface::JavaProxy::getCreateRenderTarget(const std::string & c_name, ::TextureFilterType c_textureFilter) {
+/*not-null*/ std::shared_ptr<::OpenGlRenderTargetInterface> NativeOpenGlRenderingContextInterface::JavaProxy::getCreateRenderTarget(const std::string & c_name, ::TextureFilterType c_textureFilter, const ::Color & c_clearColor) {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
     const auto& data = ::djinni::JniClass<::djinni_generated::NativeOpenGlRenderingContextInterface>::get();
     auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_getCreateRenderTarget,
                                          ::djinni::get(::djinni::String::fromCpp(jniEnv, c_name)),
-                                         ::djinni::get(::djinni_generated::NativeTextureFilterType::fromCpp(jniEnv, c_textureFilter)));
+                                         ::djinni::get(::djinni_generated::NativeTextureFilterType::fromCpp(jniEnv, c_textureFilter)),
+                                         ::djinni::get(::djinni_generated::NativeColor::fromCpp(jniEnv, c_clearColor)));
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni_generated::NativeOpenGlRenderTargetInterface::toCpp(jniEnv, jret);
 }
@@ -114,12 +116,13 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_OpenGlRe
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_OpenGlRenderingContextInterface_00024CppProxy_native_1getCreateRenderTarget(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jstring j_name, ::djinni_generated::NativeTextureFilterType::JniType j_textureFilter)
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_OpenGlRenderingContextInterface_00024CppProxy_native_1getCreateRenderTarget(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jstring j_name, ::djinni_generated::NativeTextureFilterType::JniType j_textureFilter, ::djinni_generated::NativeColor::JniType j_clearColor)
 {
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::OpenGlRenderingContextInterface>(nativeRef);
         auto r = ref->getCreateRenderTarget(::djinni::String::toCpp(jniEnv, j_name),
-                                            ::djinni_generated::NativeTextureFilterType::toCpp(jniEnv, j_textureFilter));
+                                            ::djinni_generated::NativeTextureFilterType::toCpp(jniEnv, j_textureFilter),
+                                            ::djinni_generated::NativeColor::toCpp(jniEnv, j_clearColor));
         return ::djinni::release(::djinni_generated::NativeOpenGlRenderTargetInterface::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }

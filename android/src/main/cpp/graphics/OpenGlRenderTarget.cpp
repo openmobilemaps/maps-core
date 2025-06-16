@@ -11,7 +11,7 @@
 #include "OpenGlRenderTarget.h"
 #include "Logger.h"
 
-OpenGlRenderTarget::OpenGlRenderTarget(::TextureFilterType textureFilter) : textureFilter(textureFilter) {}
+OpenGlRenderTarget::OpenGlRenderTarget(::TextureFilterType textureFilter, const ::Color &clearColor) : textureFilter(textureFilter), clearColor(clearColor) {}
 
 // RenderTargetInterface
 
@@ -66,11 +66,23 @@ void OpenGlRenderTarget::clear() {
 }
 
 void OpenGlRenderTarget::bindFramebuffer() {
+    std::lock_guard<std::mutex> lock(mutex);
+
+    // Get current clear color
+    glGetFloatv(GL_COLOR_CLEAR_VALUE, tempColorBuffer);
+
     glBindFramebuffer(GL_FRAMEBUFFER, framebufferId);
+    glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
+    glClear(GL_COLOR_BUFFER_BIT);
 }
 
 void OpenGlRenderTarget::unbindFramebuffer() {
+    std::lock_guard<std::mutex> lock(mutex);
+
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    // Restore previous clear color
+    glClearColor(tempColorBuffer[0], tempColorBuffer[1],
+                 tempColorBuffer[2], tempColorBuffer[3]);
 }
 
 int32_t OpenGlRenderTarget::getTextureId() {

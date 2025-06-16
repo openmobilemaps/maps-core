@@ -13,13 +13,14 @@
 #include "OpenGlRenderTargetInterface.h"
 #include "RenderTargetInterface.h"
 #include "TextureFilterType.h"
+#include "Color.h"
 #include <opengl_wrapper.h>
 #include <mutex>
 
 class OpenGlRenderTarget : public RenderTargetInterface, public OpenGlRenderTargetInterface, public std::enable_shared_from_this<OpenGlRenderTarget> {
 public:
 
-    OpenGlRenderTarget(::TextureFilterType textureFilter);
+    OpenGlRenderTarget(::TextureFilterType textureFilter, const ::Color &clearColor);
 
     // RenderTargetInterface
 
@@ -40,6 +41,9 @@ public:
     virtual int32_t getTextureId() override;
 
 private:
+    const TextureFilterType textureFilter;
+    const Color clearColor;
+
     std::mutex mutex;
 
     bool isSetup = false;
@@ -48,5 +52,5 @@ private:
     GLuint textureId;
     Vec2I size = Vec2I(0, 0);
 
-    TextureFilterType textureFilter = TextureFilterType::LINEAR;
+    GLfloat tempColorBuffer[4];
 };

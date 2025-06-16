@@ -35,7 +35,7 @@ private:
 
         void resume() override;
         void pause() override;
-        /*not-null*/ std::shared_ptr<::OpenGlRenderTargetInterface> getCreateRenderTarget(const std::string & name, ::TextureFilterType textureFilter) override;
+        /*not-null*/ std::shared_ptr<::OpenGlRenderTargetInterface> getCreateRenderTarget(const std::string & name, ::TextureFilterType textureFilter, const ::Color & clearColor) override;
         void deleteRenderTarget(const std::string & name) override;
         std::vector</*not-null*/ std::shared_ptr<::OpenGlRenderTargetInterface>> getRenderTargets() override;
         int32_t getProgram(const std::string & name) override;
@@ -50,7 +50,7 @@ private:
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/graphics/OpenGlRenderingContextInterface") };
     const jmethodID method_resume { ::djinni::jniGetMethodID(clazz.get(), "resume", "()V") };
     const jmethodID method_pause { ::djinni::jniGetMethodID(clazz.get(), "pause", "()V") };
-    const jmethodID method_getCreateRenderTarget { ::djinni::jniGetMethodID(clazz.get(), "getCreateRenderTarget", "(Ljava/lang/String;Lio/openmobilemaps/mapscore/shared/graphics/objects/TextureFilterType;)Lio/openmobilemaps/mapscore/shared/graphics/OpenGlRenderTargetInterface;") };
+    const jmethodID method_getCreateRenderTarget { ::djinni::jniGetMethodID(clazz.get(), "getCreateRenderTarget", "(Ljava/lang/String;Lio/openmobilemaps/mapscore/shared/graphics/objects/TextureFilterType;Lio/openmobilemaps/mapscore/shared/graphics/common/Color;)Lio/openmobilemaps/mapscore/shared/graphics/OpenGlRenderTargetInterface;") };
     const jmethodID method_deleteRenderTarget { ::djinni::jniGetMethodID(clazz.get(), "deleteRenderTarget", "(Ljava/lang/String;)V") };
     const jmethodID method_getRenderTargets { ::djinni::jniGetMethodID(clazz.get(), "getRenderTargets", "()Ljava/util/ArrayList;") };
     const jmethodID method_getProgram { ::djinni::jniGetMethodID(clazz.get(), "getProgram", "(Ljava/lang/String;)I") };
