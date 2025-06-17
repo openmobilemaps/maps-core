@@ -8,6 +8,7 @@
 #include <memory>
 
 class RenderTargetInterface;
+class RenderingContextInterface;
 
 class OpenGlRenderTargetInterface {
 public:
@@ -19,7 +20,7 @@ public:
 
     virtual void clear() = 0;
 
-    virtual void bindFramebuffer() = 0;
+    virtual void bindFramebuffer(const /*not-null*/ std::shared_ptr<RenderingContextInterface> & renderingContext) = 0;
 
     virtual void unbindFramebuffer() = 0;
 

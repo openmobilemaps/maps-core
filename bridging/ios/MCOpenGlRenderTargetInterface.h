@@ -4,6 +4,7 @@
 #import "MCVec2I.h"
 #import <Foundation/Foundation.h>
 @protocol MCRenderTargetInterface;
+@protocol MCRenderingContextInterface;
 
 
 @protocol MCOpenGlRenderTargetInterface
@@ -14,7 +15,7 @@
 
 - (void)clear;
 
-- (void)bindFramebuffer;
+- (void)bindFramebuffer:(nullable id<MCRenderingContextInterface>)renderingContext;
 
 - (void)unbindFramebuffer;
 

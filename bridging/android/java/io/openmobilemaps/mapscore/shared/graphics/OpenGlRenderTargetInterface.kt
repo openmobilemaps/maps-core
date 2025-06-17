@@ -14,7 +14,7 @@ abstract class OpenGlRenderTargetInterface {
 
     abstract fun clear()
 
-    abstract fun bindFramebuffer()
+    abstract fun bindFramebuffer(renderingContext: RenderingContextInterface)
 
     abstract fun unbindFramebuffer()
 
@@ -53,11 +53,11 @@ abstract class OpenGlRenderTargetInterface {
         }
         private external fun native_clear(_nativeRef: Long)
 
-        override fun bindFramebuffer() {
+        override fun bindFramebuffer(renderingContext: RenderingContextInterface) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_bindFramebuffer(this.nativeRef)
+            native_bindFramebuffer(this.nativeRef, renderingContext)
         }
-        private external fun native_bindFramebuffer(_nativeRef: Long)
+        private external fun native_bindFramebuffer(_nativeRef: Long, renderingContext: RenderingContextInterface)
 
         override fun unbindFramebuffer() {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

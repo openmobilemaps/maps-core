@@ -85,7 +85,7 @@ open_gl_render_target_interface = interface +c +j +o {
 	as_render_target_interface(): render_target_interface;
 	setup(size: vec_2_i);
 	clear();
-	bind_framebuffer();
+	bind_framebuffer(rendering_context: rendering_context_interface);
 	unbind_framebuffer();
 	get_texture_id() : i32;
 }

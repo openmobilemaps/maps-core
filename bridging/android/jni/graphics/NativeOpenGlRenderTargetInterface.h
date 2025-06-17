@@ -36,7 +36,7 @@ private:
         /*not-null*/ std::shared_ptr<::RenderTargetInterface> asRenderTargetInterface() override;
         void setup(const ::Vec2I & size) override;
         void clear() override;
-        void bindFramebuffer() override;
+        void bindFramebuffer(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & renderingContext) override;
         void unbindFramebuffer() override;
         int32_t getTextureId() override;
 
@@ -48,7 +48,7 @@ private:
     const jmethodID method_asRenderTargetInterface { ::djinni::jniGetMethodID(clazz.get(), "asRenderTargetInterface", "()Lio/openmobilemaps/mapscore/shared/graphics/RenderTargetInterface;") };
     const jmethodID method_setup { ::djinni::jniGetMethodID(clazz.get(), "setup", "(Lio/openmobilemaps/mapscore/shared/graphics/common/Vec2I;)V") };
     const jmethodID method_clear { ::djinni::jniGetMethodID(clazz.get(), "clear", "()V") };
-    const jmethodID method_bindFramebuffer { ::djinni::jniGetMethodID(clazz.get(), "bindFramebuffer", "()V") };
+    const jmethodID method_bindFramebuffer { ::djinni::jniGetMethodID(clazz.get(), "bindFramebuffer", "(Lio/openmobilemaps/mapscore/shared/graphics/RenderingContextInterface;)V") };
     const jmethodID method_unbindFramebuffer { ::djinni::jniGetMethodID(clazz.get(), "unbindFramebuffer", "()V") };
     const jmethodID method_getTextureId { ::djinni::jniGetMethodID(clazz.get(), "getTextureId", "()I") };
 };
