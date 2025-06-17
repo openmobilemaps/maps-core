@@ -110,6 +110,6 @@ void SkySphereLayer::setupSkySphere() {
         std::vector<std::shared_ptr<RenderObjectInterface>> renderObjects = {
                 std::make_shared<RenderObject>(quad->asGraphicsObject(), true)
         };
-        renderPasses = {std::make_shared<RenderPass>(RenderPassConfig(0, false), renderObjects)};
+        renderPasses = {std::make_shared<RenderPass>(RenderPassConfig(0, false, nullptr), renderObjects)};
     }
 }

@@ -7,6 +7,7 @@
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
+#import "MCOpenGlRenderTargetInterface+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -31,6 +32,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     return self;
 }
 
+- (nullable id<MCOpenGlRenderTargetInterface>)asGlRenderTargetInterface {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->asGlRenderTargetInterface();
+        return ::djinni::Optional<std::optional, ::djinni_generated::OpenGlRenderTargetInterface>::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 namespace djinni_generated {
 
 class RenderTargetInterface::ObjcProxy final
@@ -40,6 +48,13 @@ class RenderTargetInterface::ObjcProxy final
     friend class ::djinni_generated::RenderTargetInterface;
 public:
     using ObjcProxyBase::ObjcProxyBase;
+    /*nullable*/ std::shared_ptr<::OpenGlRenderTargetInterface> asGlRenderTargetInterface() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() asGlRenderTargetInterface];
+            return ::djinni::Optional<std::optional, ::djinni_generated::OpenGlRenderTargetInterface>::toCpp(objcpp_result_);
+        }
+    }
 };
 
 } // namespace djinni_generated

@@ -42,6 +42,7 @@ private:
         void preRenderStencilMask() override;
         void postRenderStencilMask() override;
         void applyScissorRect(const std::optional<::RectI> & scissorRect) override;
+        /*nullable*/ std::shared_ptr<::OpenGlRenderingContextInterface> asOpenGlRenderingContext() override;
 
     private:
         friend ::djinni::JniInterface<::RenderingContextInterface, ::djinni_generated::NativeRenderingContextInterface>;
@@ -57,6 +58,7 @@ private:
     const jmethodID method_preRenderStencilMask { ::djinni::jniGetMethodID(clazz.get(), "preRenderStencilMask", "()V") };
     const jmethodID method_postRenderStencilMask { ::djinni::jniGetMethodID(clazz.get(), "postRenderStencilMask", "()V") };
     const jmethodID method_applyScissorRect { ::djinni::jniGetMethodID(clazz.get(), "applyScissorRect", "(Lio/openmobilemaps/mapscore/shared/graphics/common/RectI;)V") };
+    const jmethodID method_asOpenGlRenderingContext { ::djinni::jniGetMethodID(clazz.get(), "asOpenGlRenderingContext", "()Lio/openmobilemaps/mapscore/shared/graphics/OpenGlRenderingContextInterface;") };
 };
 
 } // namespace djinni_generated

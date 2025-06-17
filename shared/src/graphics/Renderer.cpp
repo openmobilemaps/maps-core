@@ -42,7 +42,7 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
 
     for (const auto &[index, passes] : renderQueue) {
         for (const auto &pass : passes) {
-            if (pass->getRenderTargetInterface() != target) {
+            if (pass->getRenderPassConfig().renderTarget != target) {
                 continue;
             }
             const auto &maskObject = pass->getMaskingObject();

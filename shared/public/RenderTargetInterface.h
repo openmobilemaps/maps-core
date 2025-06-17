@@ -3,7 +3,14 @@
 
 #pragma once
 
+#include <memory>
+#include <optional>
+
+class OpenGlRenderTargetInterface;
+
 class RenderTargetInterface {
 public:
     virtual ~RenderTargetInterface() = default;
+
+    virtual /*nullable*/ std::shared_ptr<OpenGlRenderTargetInterface> asGlRenderTargetInterface() = 0;
 };

@@ -25,9 +25,10 @@ private:
     friend ::djinni::JniClass<NativeRenderPassConfig>;
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/graphics/RenderPassConfig") };
-    const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(IZ)V") };
+    const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(IZLio/openmobilemaps/mapscore/shared/graphics/RenderTargetInterface;)V") };
     const jfieldID field_renderPassIndex { ::djinni::jniGetFieldID(clazz.get(), "renderPassIndex", "I") };
     const jfieldID field_isPassMasked { ::djinni::jniGetFieldID(clazz.get(), "isPassMasked", "Z") };
+    const jfieldID field_renderTarget { ::djinni::jniGetFieldID(clazz.get(), "renderTarget", "Lio/openmobilemaps/mapscore/shared/graphics/RenderTargetInterface;") };
 };
 
 } // namespace djinni_generated

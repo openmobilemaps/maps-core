@@ -29,6 +29,8 @@ abstract class RenderingContextInterface {
     /** optional rectangle, remove scissoring when not set */
     abstract fun applyScissorRect(scissorRect: io.openmobilemaps.mapscore.shared.graphics.common.RectI?)
 
+    abstract fun asOpenGlRenderingContext(): OpenGlRenderingContextInterface?
+
     public class CppProxy : RenderingContextInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -97,5 +99,11 @@ abstract class RenderingContextInterface {
             native_applyScissorRect(this.nativeRef, scissorRect)
         }
         private external fun native_applyScissorRect(_nativeRef: Long, scissorRect: io.openmobilemaps.mapscore.shared.graphics.common.RectI?)
+
+        override fun asOpenGlRenderingContext(): OpenGlRenderingContextInterface? {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_asOpenGlRenderingContext(this.nativeRef)
+        }
+        private external fun native_asOpenGlRenderingContext(_nativeRef: Long): OpenGlRenderingContextInterface?
     }
 }

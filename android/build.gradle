@@ -120,6 +120,8 @@ android {
 		}
 	}
 
+	// Latest LTS version (as of June 2025)
+	ndkVersion "27.2.12479018"
 }
 
 project.tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {

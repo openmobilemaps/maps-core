@@ -24,9 +24,9 @@
  */
 - (void)setIsInverseMasked:(BOOL)inversed;
 
-/** Render the graphics object; ensure calling on graphics thread */
 - (void)setDebugLabel:(nonnull NSString *)label;
 
+/** Render the graphics object; ensure calling on graphics thread */
 - (void)render:(nullable id<MCRenderingContextInterface>)context
     renderPass:(nonnull MCRenderPassConfig *)renderPass
       vpMatrix:(int64_t)vpMatrix

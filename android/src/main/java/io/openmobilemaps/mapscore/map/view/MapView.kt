@@ -103,6 +103,13 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 	override fun onDrawFrame(gl: GL10?) {
 		mapInterface?.apply {
 			prepare()
+
+			getRenderingContext().asOpenGlRenderingContext()?.getRenderTargets()?.forEach { renderTarget ->
+				renderTarget.bindFramebuffer()
+				drawOffscreenFrame(renderTarget.asRenderTargetInterface())
+				renderTarget.unbindFramebuffer()
+			}
+
 			compute()
 			drawFrame()
 		}
@@ -136,6 +143,7 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 
 	override fun onGlThreadResume() {
 		if (lifecycleResumed) {
+			requireMapInterface().getRenderingContext().asOpenGlRenderingContext()?.resume()
 			requireMapInterface().resume()
 		}
 	}
@@ -143,6 +151,7 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 	override fun onGlThreadPause() {
 		if (mapViewStateMutable.value != MapViewState.PAUSED) {
 			updateMapViewState(MapViewState.PAUSED)
+			requireMapInterface().getRenderingContext().asOpenGlRenderingContext()?.pause()
 			requireMapInterface().pause()
 		}
 	}
