@@ -239,8 +239,8 @@ simpleLineGroupFragmentShader(SimpleLineVertexOut in [[stage_in]],
                         constant half *styling [[buffer(1)]])
 {
   constant SimpleLineStyling *style = (constant SimpleLineStyling *)(styling + in.stylingIndex);
-  const half lineLength = length(in.lineB);
-  const half t = dot(in.lineA, normalize(in.lineB) / lineLength);
+  const float lineLength = length(in.lineB);
+  const float t = dot(in.lineA, normalize(in.lineB) / lineLength);
 
   const int capType = int(style->capType);
   const char segmentType = in.segmentType;
