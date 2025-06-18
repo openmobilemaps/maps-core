@@ -8,6 +8,7 @@
 #import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
 #import "MCRenderTargetInterface+Private.h"
+#import "MCRenderingContextInterface+Private.h"
 #import "MCVec2I+Private.h"
 #include <exception>
 #include <stdexcept>
@@ -52,9 +53,9 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)bindFramebuffer {
+- (void)bindFramebuffer:(nullable id<MCRenderingContextInterface>)renderingContext {
     try {
-        _cppRefHandle.get()->bindFramebuffer();
+        _cppRefHandle.get()->bindFramebuffer(::djinni_generated::RenderingContextInterface::toCpp(renderingContext));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -99,10 +100,10 @@ public:
             [djinni_private_get_proxied_objc_object() clear];
         }
     }
-    void bindFramebuffer() override
+    void bindFramebuffer(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & c_renderingContext) override
     {
         @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() bindFramebuffer];
+            [djinni_private_get_proxied_objc_object() bindFramebuffer:(::djinni_generated::RenderingContextInterface::fromCpp(c_renderingContext))];
         }
     }
     void unbindFramebuffer() override

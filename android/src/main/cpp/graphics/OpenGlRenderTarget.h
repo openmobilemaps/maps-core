@@ -34,7 +34,7 @@ public:
 
     virtual void clear() override;
 
-    virtual void bindFramebuffer() override;
+    virtual void bindFramebuffer(const std::shared_ptr<RenderingContextInterface> &renderingContext) override;
 
     virtual void unbindFramebuffer() override;
 

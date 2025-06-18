@@ -37,7 +37,6 @@ import io.openmobilemaps.mapscore.shared.map.scheduling.TaskInterface
 import io.openmobilemaps.mapscore.shared.map.scheduling.ThreadPoolScheduler
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
@@ -104,10 +103,12 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 		mapInterface?.apply {
 			prepare()
 
-			getRenderingContext().asOpenGlRenderingContext()?.getRenderTargets()?.forEach { renderTarget ->
-				renderTarget.bindFramebuffer()
-				drawOffscreenFrame(renderTarget.asRenderTargetInterface())
-				renderTarget.unbindFramebuffer()
+			getRenderingContext().let { context ->
+				context.asOpenGlRenderingContext()?.getRenderTargets()?.forEach { renderTarget ->
+					renderTarget.bindFramebuffer(context)
+					drawOffscreenFrame(renderTarget.asRenderTargetInterface())
+					renderTarget.unbindFramebuffer()
+				}
 			}
 
 			compute()

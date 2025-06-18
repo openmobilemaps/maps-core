@@ -4,6 +4,7 @@
 #include "NativeOpenGlRenderTargetInterface.h"  // my header
 #include "Marshal.hpp"
 #include "NativeRenderTargetInterface.h"
+#include "NativeRenderingContextInterface.h"
 #include "NativeVec2I.h"
 
 namespace djinni_generated {
@@ -39,11 +40,12 @@ void NativeOpenGlRenderTargetInterface::JavaProxy::clear() {
     jniEnv->CallVoidMethod(Handle::get().get(), data.method_clear);
     ::djinni::jniExceptionCheck(jniEnv);
 }
-void NativeOpenGlRenderTargetInterface::JavaProxy::bindFramebuffer() {
+void NativeOpenGlRenderTargetInterface::JavaProxy::bindFramebuffer(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & c_renderingContext) {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
     const auto& data = ::djinni::JniClass<::djinni_generated::NativeOpenGlRenderTargetInterface>::get();
-    jniEnv->CallVoidMethod(Handle::get().get(), data.method_bindFramebuffer);
+    jniEnv->CallVoidMethod(Handle::get().get(), data.method_bindFramebuffer,
+                           ::djinni::get(::djinni_generated::NativeRenderingContextInterface::fromCpp(jniEnv, c_renderingContext)));
     ::djinni::jniExceptionCheck(jniEnv);
 }
 void NativeOpenGlRenderTargetInterface::JavaProxy::unbindFramebuffer() {
@@ -94,11 +96,11 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_OpenGlRe
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_OpenGlRenderTargetInterface_00024CppProxy_native_1bindFramebuffer(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_OpenGlRenderTargetInterface_00024CppProxy_native_1bindFramebuffer(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_renderingContext)
 {
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::OpenGlRenderTargetInterface>(nativeRef);
-        ref->bindFramebuffer();
+        ref->bindFramebuffer(::djinni_generated::NativeRenderingContextInterface::toCpp(jniEnv, j_renderingContext));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

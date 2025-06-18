@@ -98,10 +98,6 @@ std::shared_ptr<OpenGlRenderingContextInterface> OpenGlContext::asOpenGlRenderin
     if (renderTarget == nullptr) {
         renderTarget = std::make_shared<OpenGlRenderTarget>(textureFilter, clearColor);
         renderTargets[name] = renderTarget;
-
-        if (viewportSize.x > 0 && viewportSize.y > 0) {
-            renderTarget->setup(viewportSize);
-        }
     }
     return renderTarget;
 }

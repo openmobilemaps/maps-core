@@ -9,6 +9,7 @@
  */
 
 #include "OpenGlRenderTarget.h"
+#include "RenderConfigInterface.h"
 #include "Logger.h"
 
 OpenGlRenderTarget::OpenGlRenderTarget(::TextureFilterType textureFilter, const ::Color &clearColor) : textureFilter(textureFilter), clearColor(clearColor) {}
@@ -65,7 +66,10 @@ void OpenGlRenderTarget::clear() {
     }
 }
 
-void OpenGlRenderTarget::bindFramebuffer() {
+void OpenGlRenderTarget::bindFramebuffer(const std::shared_ptr<RenderingContextInterface> &renderingContext) {
+    // Lazy setup
+    setup(renderingContext->getViewportSize());
+
     std::lock_guard<std::mutex> lock(mutex);
 
     // Get current clear color
@@ -86,5 +90,6 @@ void OpenGlRenderTarget::unbindFramebuffer() {
 }
 
 int32_t OpenGlRenderTarget::getTextureId() {
+    std::lock_guard<std::mutex> lock(mutex);
     return (int32_t) textureId;
 }
