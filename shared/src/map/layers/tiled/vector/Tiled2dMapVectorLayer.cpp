@@ -493,8 +493,18 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
         sourceTileManager.second.message(MFN(&Tiled2dMapVectorSourceTileDataManager::onAdded), mapInterface);
     }
 
-    auto scale = mapInterface->getCamera()->getScreenDensityPpi() > 326.0 ? 3 : (mapInterface->getCamera()->getScreenDensityPpi() >= 264.0 ? 2 : 1);
-
+    
+#if DEBUG
+    bool use3xSprites = true;
+    if (mapDescription->use3xSprites.has_value()) {
+        use3xSprites = mapDescription->use3xSprites.value();
+    }
+#else
+    bool use3xSprites = mapDescription->use3xSprites.value_or(false);
+#endif
+    
+    auto scale = (use3xSprites && mapInterface->getCamera()->getScreenDensityPpi() > 326.0) ? 3 : (mapInterface->getCamera()->getScreenDensityPpi() >= 264.0 ? 2 : 1);
+    
     if (mapDescription->spriteBaseUrl) {
         loadSpriteData(scale);
     }
@@ -933,21 +943,33 @@ void Tiled2dMapVectorLayer::loadSpriteData(int scale, bool fromLocal) {
     context->promise.getFuture().then([context, selfActor, fromLocal, weakSelf, scale] (auto result) {
         auto jsonResultStatus = context->jsonResult->status;
         auto textureResultStatus = context->textureResult->status;
-
-        if (scale == 3 && (jsonResultStatus != LoaderStatus::OK || textureResultStatus != LoaderStatus::OK)) {
-            LogInfo <<= "This device would benefit from @3x assets, but none could be found. Please add @3x assets for crispy icons!";
-            // 3@x assets are not available, so we try @2x
-            auto self = weakSelf.lock();
-            if (self) {
+        
+#if DEBUG
+        auto self = weakSelf.lock();
+        if (self) {
+            if (scale == 3 && self->mapDescription->use3xSprites.has_value() == false && (jsonResultStatus != LoaderStatus::OK || textureResultStatus != LoaderStatus::OK)) {
+                // We tried to load @3x sprite even though the user has not specified any use3xSprite flag
+                // We do this to notify him ion case he or she forgot to set the flag
+                // Since we could not find the @3x sprite we now load the @2x sprites
                 self->loadSpriteData(2, fromLocal);
                 return;
             }
         }
+#endif
         
         std::shared_ptr<SpriteData> jsonData;
         std::shared_ptr<::TextureHolderInterface> spriteTexture;
         
         if (jsonResultStatus == LoaderStatus::OK) {
+#if DEBUG
+            auto self = weakSelf.lock();
+            if (self) {
+                if (scale == 3 && self->mapDescription->use3xSprites.has_value() == false) {
+                    LogError <<= "You have not specified whether to use @3x sprites or not, yet we could fetch and find @3x sprites. Please either add 'use3xSprites': true to your style json or explicitly set it to false.";
+                    abort();
+                }
+            }
+#endif
             auto string = std::string((char*)context->jsonResult->data->buf(), context->jsonResult->data->len());
             nlohmann::json json;
             try

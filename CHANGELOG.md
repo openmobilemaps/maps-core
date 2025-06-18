@@ -1,5 +1,8 @@
 # Changelog for Open Mobile Maps
 
+## Version 3.3.0
+- @3x sprites are now opt-in, that is per default we do not try to fetch the @3x sprites anymore. To enable it, explicitly add the 'use3xSprites' property to the metadata property in your style json.
+
 ## Version 3.2.0
 - Updated to [djinni 1.1.1](https://github.com/UbiqueInnovation/djinni/releases/tag/1.1.1)
 - Improved WebGL compatibility of OpenGL objects
