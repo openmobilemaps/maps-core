@@ -12,7 +12,7 @@ abstract class TaskInterface {
 
     abstract fun run()
 
-    private class CppProxy : TaskInterface {
+    public class CppProxy : TaskInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

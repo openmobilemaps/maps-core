@@ -36,6 +36,15 @@ public:
      */
     static int32_t EPSG21781();
 
+    /**
+     * Unit Sphere Polar
+     * phi, theta, radius with reference to earth as unit sphere
+     */
+    static int32_t UnitSphere();
+
     /** e.g. urn:ogc:def:crs:EPSG:21781 */
     static int32_t fromCrsIdentifier(const std::string & identifier);
+
+    /** Use supported coordinate system identifiers defined in this class */
+    static double unitToMeterFactor(int32_t coordinateSystemIdentifier);
 };

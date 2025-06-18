@@ -19,7 +19,7 @@ enum LibraryError: Error {
     case invalidKey
 }
 
-public class StaticMetalLibrary<Key: Hashable, Value>: Library {
+public struct StaticMetalLibrary<Key: Hashable & Sendable, Value: Sendable>: Library, Sendable {
     private var storage: [Key: Value]
 
     init(_ allKeys: [Key], _ newInstance: (Key) throws -> Value) rethrows {
@@ -30,15 +30,15 @@ public class StaticMetalLibrary<Key: Hashable, Value>: Library {
         storage = collector
     }
 
-    public final func register(_ value: Value, for key: Key) {
+    public mutating func register(_ value: Value, for key: Key) {
         storage[key] = value
     }
 
-    public final func value(_ key: Key) -> Value? {
+    public func value(_ key: Key) -> Value? {
         storage[key]
     }
 
-    public final subscript(_ key: Key) -> Value? {
+    public subscript(_ key: Key) -> Value? {
         value(key)
     }
 }

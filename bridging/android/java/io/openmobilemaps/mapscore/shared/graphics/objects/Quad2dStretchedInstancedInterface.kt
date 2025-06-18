@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class Quad2dStretchedInstancedInterface {
 
-    abstract fun setFrame(frame: io.openmobilemaps.mapscore.shared.graphics.common.Quad2dD)
+    abstract fun setFrame(frame: io.openmobilemaps.mapscore.shared.graphics.common.Quad2dD, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D, is3d: Boolean)
 
     abstract fun setInstanceCount(count: Int)
 
@@ -47,7 +47,7 @@ abstract class Quad2dStretchedInstancedInterface {
 
     abstract fun asMaskingObject(): MaskingObjectInterface
 
-    private class CppProxy : Quad2dStretchedInstancedInterface {
+    public class CppProxy : Quad2dStretchedInstancedInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 
@@ -62,11 +62,11 @@ abstract class Quad2dStretchedInstancedInterface {
             external fun nativeDestroy(nativeRef: Long)
         }
 
-        override fun setFrame(frame: io.openmobilemaps.mapscore.shared.graphics.common.Quad2dD) {
+        override fun setFrame(frame: io.openmobilemaps.mapscore.shared.graphics.common.Quad2dD, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D, is3d: Boolean) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_setFrame(this.nativeRef, frame)
+            native_setFrame(this.nativeRef, frame, origin, is3d)
         }
-        private external fun native_setFrame(_nativeRef: Long, frame: io.openmobilemaps.mapscore.shared.graphics.common.Quad2dD)
+        private external fun native_setFrame(_nativeRef: Long, frame: io.openmobilemaps.mapscore.shared.graphics.common.Quad2dD, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D, is3d: Boolean)
 
         override fun setInstanceCount(count: Int) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

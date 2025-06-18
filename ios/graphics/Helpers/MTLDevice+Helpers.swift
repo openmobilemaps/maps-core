@@ -9,13 +9,13 @@
  */
 
 import MapCoreSharedModule
-import Metal
+@preconcurrency import Metal
 import UIKit
 
 extension MTLDevice {
     func makeBuffer(from sharedBytes: MCSharedBytes) -> MTLBuffer? {
         guard let pointer = UnsafeRawPointer(bitPattern: Int(sharedBytes.address)),
-              sharedBytes.elementCount >= 0
+            sharedBytes.elementCount > 0
         else { return nil }
 
         return self.makeBuffer(bytes: pointer, length: Int(sharedBytes.elementCount * sharedBytes.bytesPerElement), options: [])
@@ -25,14 +25,19 @@ extension MTLDevice {
 extension MTLBuffer {
     func copyMemory(from sharedBytes: MCSharedBytes) {
         if let p = UnsafeRawPointer(bitPattern: Int(sharedBytes.address)),
-           sharedBytes.elementCount > 0 {
+            sharedBytes.elementCount > 0
+        {
             self.contents().copyMemory(from: p, byteCount: Int(sharedBytes.elementCount * sharedBytes.bytesPerElement))
         }
     }
+
+    func copyMemory(bytes pointer: UnsafeRawPointer, length: Int) {
+        self.contents().copyMemory(from: pointer, byteCount: length)
+    }
 }
 
-extension MTLBuffer? {
-    mutating public func copyOrCreate(from sharedBytes: MCSharedBytes, device: MTLDevice) {
+public extension MTLBuffer? {
+    mutating func copyOrCreate(from sharedBytes: MCSharedBytes, device: MTLDevice) {
         switch self {
             case .none:
                 self = device.makeBuffer(from: sharedBytes)
@@ -41,6 +46,19 @@ extension MTLBuffer? {
                     wrapped.copyMemory(from: sharedBytes)
                 } else {
                     self = device.makeBuffer(from: sharedBytes)
+                }
+        }
+    }
+
+    mutating func copyOrCreate(bytes pointer: UnsafeRawPointer, length: Int, device: MTLDevice) {
+        switch self {
+            case .none:
+                self = device.makeBuffer(bytes: pointer, length: length)
+            case let .some(wrapped):
+                if wrapped.length >= length {
+                    wrapped.copyMemory(bytes: pointer, length: length)
+                } else {
+                    self = device.makeBuffer(bytes: pointer, length: length)
                 }
         }
     }

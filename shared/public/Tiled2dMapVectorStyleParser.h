@@ -10,8 +10,8 @@
 
 #pragma once
 #include "Value.h"
+#include "ValueKeys.h"
 #include "json.h"
-#include "Logger.h"
 #include <string>
 #include <type_traits>
 #include "Color.h"
@@ -62,7 +62,7 @@ public:
             } else if (isExpression(json[0], getExpression) && json.size() == 2 && json[1].is_string()) {
                 auto key = json[1].get<std::string>();
                 if (json[1].is_array() && json[1][0] == "geometry-type") {
-                    key = "$type";
+                    key = ValueKeys::TYPE_KEY;
                 }
                 return std::make_shared<GetPropertyValue>(key);
 
@@ -137,7 +137,7 @@ public:
 
             // Example: ["all", [ "in", "admin_level", 2, 4 ], [ "!=", "maritime", 1] ]
             else if (isExpression(json[0], allExpression)) {
-                std::vector<const std::shared_ptr<Value>> values;
+                std::vector<std::shared_ptr<Value>> values;
                 for (auto it = json.begin() + 1; it != json.end(); it++) {
                     auto const &v = parseValue(*it);
                     if (v != nullptr) {
@@ -152,7 +152,7 @@ public:
 
             // Example: ["any", [ "in", "admin_level", 2, 4 ], [ "!=", "maritime", 1] ]
             else if (isExpression(json[0], anyExpression)) {
-                std::vector<const std::shared_ptr<Value>> values;
+                std::vector<std::shared_ptr<Value>> values;
                 for (auto it = json.begin() + 1; it != json.end(); it++) {
                     auto const &v = parseValue(*it);
                     if (v != nullptr) {
@@ -164,7 +164,7 @@ public:
 
             // Example: ["case", [ "has", "name" ], 1,0 ]
             else if (isExpression(json[0], caseExpression)){
-                std::vector<std::tuple<std::shared_ptr<Value>, std::shared_ptr<Value>>> cases;
+                std::vector<std::pair<std::shared_ptr<Value>, std::shared_ptr<Value>>> cases;
 
                 for (auto it = json.begin() + 1; (it + 1) != json.end(); it += 2) {
                     auto const &condition = parseValue(*it);
@@ -226,7 +226,7 @@ public:
                 if (json[1][0] == "exponential" && json[1][1].is_number()) {
                     interpolationBase = json[1][1].get<float>();
                 }
-                std::vector<std::tuple<double, std::shared_ptr<Value>>> steps;
+                std::vector<std::pair<double, std::shared_ptr<Value>>> steps;
 
                 auto const countElements = json.size() - 3;
                 for (int i = 0; i != countElements; i += 2) {
@@ -238,7 +238,7 @@ public:
 
             // Example: [ "interpolate", ["linear"], [ "zoom" ], 13, 0.3, 15, [ "match", [ "get", "class" ], "river", 0.1, 0.3 ] ]
             else if (isExpression(json[0], interpolateExpression) && json[1][0] == "cubic-bezier" && json[1].size() == 5) {
-                std::vector<std::tuple<double, std::shared_ptr<Value>>> steps;
+                std::vector<std::pair<double, std::shared_ptr<Value>>> steps;
 
                 auto const countElements = json.size() - 3;
                 for (int i = 0; i != countElements; i += 2) {
@@ -310,7 +310,7 @@ public:
             else if (isExpression(json[0], stepExpression)) {
 
                 std::shared_ptr<Value> compareValue = parseValue(json[1]);
-                std::vector<std::tuple<std::shared_ptr<Value>, std::shared_ptr<Value>>> stops;
+                std::vector<std::pair<std::shared_ptr<Value>, std::shared_ptr<Value>>> stops;
                 std::shared_ptr<Value> defaultValue = parseValue(json[2]);
 
                 for (auto it = json.begin() + 3; (it + 1) < json.end(); it += 2) {
@@ -324,7 +324,7 @@ public:
 
             // Example: ["geometry-type"]
             else if (!json[0].is_null() && json[0].is_primitive() && json.size() == 1 && json[0] == "geometry-type") {
-                return std::make_shared<GetPropertyValue>("$type");
+                return std::make_shared<GetPropertyValue>(ValueKeys::TYPE_KEY);
             }
 
             // Example: ["%",["to-number",["get","ele"]],100]
@@ -352,14 +352,35 @@ public:
 
             // Example: [0.3, 1.0, 5.0]
             else if (!json[0].is_null()) {
-                return std::make_shared<StaticValue>(getVariant(json));
+                bool allPrimitive = true;
+                for(auto& i : json) {
+                    if(!i.is_primitive()) {
+                        allPrimitive = false;
+                        break;
+                    }
+                }
+
+                if(allPrimitive) {
+                    return std::make_shared<StaticValue>(getVariant(json));
+                } else {
+                    std::vector<std::shared_ptr<Value>> values;
+                    for(auto& i : json) {
+                        values.push_back(parseValue(i));
+                    }
+
+                    return std::make_shared<ArrayValue>(values);
+                }
             }
         }
         // Example: { "stops": [ [ 12, "rgba(240, 60, 60, 1)" ], [ 15, "rgba(240, 80, 85, 1)"] ] }
         else if (json.is_object() && json[stopsExpression].is_array()) {
-            std::vector<std::tuple<double, std::shared_ptr<Value>>> steps;
+            std::vector<std::pair<double, std::shared_ptr<Value>>> steps;
 
             for (auto const stop: json[stopsExpression]) {
+                if (!stop[0].is_number()) {
+                    LogError <<= "Tiled2dMapVectorStyleParser not handled: " + json.dump();
+                    return nullptr;
+                }
                 steps.push_back({stop[0].get<double>(), parseValue(stop[1])});
             }
 

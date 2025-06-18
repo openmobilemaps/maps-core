@@ -14,6 +14,8 @@ abstract class Tiled2dMapLayerConfig {
 
     abstract fun getZoomLevelInfos(): ArrayList<Tiled2dMapZoomLevelInfo>
 
+    abstract fun getVirtualZoomLevelInfos(): ArrayList<Tiled2dMapZoomLevelInfo>
+
     abstract fun getZoomInfo(): Tiled2dMapZoomInfo
 
     abstract fun getLayerName(): String
@@ -22,7 +24,7 @@ abstract class Tiled2dMapLayerConfig {
 
     abstract fun getBounds(): io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord?
 
-    private class CppProxy : Tiled2dMapLayerConfig {
+    public class CppProxy : Tiled2dMapLayerConfig {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 
@@ -54,6 +56,12 @@ abstract class Tiled2dMapLayerConfig {
             return native_getZoomLevelInfos(this.nativeRef)
         }
         private external fun native_getZoomLevelInfos(_nativeRef: Long): ArrayList<Tiled2dMapZoomLevelInfo>
+
+        override fun getVirtualZoomLevelInfos(): ArrayList<Tiled2dMapZoomLevelInfo> {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getVirtualZoomLevelInfos(this.nativeRef)
+        }
+        private external fun native_getVirtualZoomLevelInfos(_nativeRef: Long): ArrayList<Tiled2dMapZoomLevelInfo>
 
         override fun getZoomInfo(): Tiled2dMapZoomInfo {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

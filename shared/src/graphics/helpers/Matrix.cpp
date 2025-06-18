@@ -9,6 +9,7 @@
  */
 
 #include "Matrix.h"
+#include <sstream>
 
 /**
  * Transposes a 4 x 4 matrix.
@@ -318,7 +319,35 @@ void Matrix::scaleM(std::vector<float> &m, int mOffset, float x, float y, float 
 }
 
 /**
- * Translates matrix m by x, y, and z, putting the result in tm.
+ * Scales matrix m in place by sx, sy, and sz.
+ * i.e. m' = S * m
+ *
+ * @param m matrix to zoom
+ * @param mOffset index into m where the matrix starts
+ * @param x scale factor x
+ * @param y scale factor y
+ * @param z scale factor z
+ */
+void Matrix::mScaled(std::vector<float> &m, int mOffset, float x, float y, float z) {
+    m[0] *= x;
+    m[4] *= x;
+    m[8] *= x;
+    m[12] *= x;
+
+    m[1] *= y;
+    m[5] *= y;
+    m[9] *= y;
+    m[13] *= y;
+
+    m[2] *= z;
+    m[6] *= z;
+    m[10] *= z;
+    m[14] *= z;
+}
+
+/**
+ * Applies a matrix m to a translation matrix defined by x, y, and z, putting the result in tm.
+ * i.e. tm = m * T
  * <p>
  * m and tm must not overlap.
  *
@@ -342,7 +371,8 @@ void Matrix::translateM(std::vector<float> &tm, int tmOffset, std::vector<float>
 }
 
 /**
- * Translates matrix m by x, y, and z in place.
+ * Applies a matrix m to a translation matrix defined by x, y, and z in place.
+ * i.e. tm = m * T
  *
  * @param m matrix
  * @param mOffset index into m where the matrix starts
@@ -355,6 +385,48 @@ void Matrix::translateM(std::vector<float> &m, int mOffset, float x, float y, fl
         int mi = mOffset + i;
         m[12 + mi] += m[mi] * x + m[4 + mi] * y + m[8 + mi] * z;
     }
+}
+
+/**
+ * Translates a matrix by by x, y, and z, putting the result in tm.
+ * i.e. tm = T * m
+ * <p>
+ * m and tm must not overlap.
+ *
+ * @param tm returns the result
+ * @param tmOffset index into sm where the result matrix starts
+ * @param m source matrix
+ * @param mOffset index into m where the source matrix starts
+ * @param x translation factor x
+ * @param y translation factor y
+ * @param z translation factor z
+ */
+void Matrix::mTranslated(std::vector<float> &tm, int tmOffset, std::vector<float> &m, int mOffset, float x, float y, float z) {
+    tm[12] = m[0]*x + m[4]*y + m[8]*z + m[12];
+    tm[13] = m[1]*x + m[5]*y + m[9]*z + m[13];
+    tm[14] = m[2]*x + m[6]*y + m[10]*z + m[14];
+    tm[15] = m[3]*x + m[7]*y + m[11]*z + m[15];
+}
+
+/**
+ * Translates a matrix by by x, y, and z in place.
+ * i.e. m' = T * m
+ *
+ * @param m matrix
+ * @param mOffset index into m where the matrix starts
+ * @param x translation factor x
+ * @param y translation factor y
+ * @param z translation factor z
+ */
+void Matrix::mTranslated(std::vector<float> &m, int mOffset, float x, float y, float z) {
+    float t = m[0]*x + m[4]*y + m[8]*z + m[12];
+    m[12] = t;
+    t = m[1]*x + m[5]*y + m[9]*z + m[13];
+    m[13] = t;
+    t = m[2]*x + m[6]*y + m[10]*z + m[14];
+    m[14] = t;
+    t = m[3]*x + m[7]*y + m[11]*z + m[15];
+    m[15] = t;
 }
 
 /**
@@ -533,7 +605,7 @@ void Matrix::setRotateM(std::vector<float> &rm, int rmOffset, float a, float x, 
 
 #define I(_i, _j) ((_j) + 4 * (_i))
 
-void Matrix::multiplyMM(std::vector<float> &r, int resultOffset, std::vector<float> &lhs, int lhsOffset, std::vector<float> &rhs,
+void Matrix::multiplyMM(std::vector<float> &r, int resultOffset, const std::vector<float> &lhs, int lhsOffset, const std::vector<float> &rhs,
                         int rhsOffset) {
     multiplyMMC(r, resultOffset, lhs, lhsOffset, rhs, rhsOffset);
 }
@@ -574,4 +646,40 @@ void Matrix::multiply(const std::vector<float> &M, const std::vector<float> &x, 
     result[1] = M[1] * x[0] + M[5] * x[1] +  M[9] * x[2] + M[13] * x[3];
     result[2] = M[2] * x[0] + M[6] * x[1] + M[10] * x[2] + M[14] * x[3];
     result[3] = M[3] * x[0] + M[7] * x[1] + M[11] * x[2] + M[15] * x[3];
+}
+
+Vec4D Matrix::multiply(const std::vector<float> &M, const Vec4D &x) {
+    // calculates Mx and returns result
+    Vec4D result = Vec4D(0.0, 0.0, 0.0, 0.0);
+    Matrix::multiply(M, x, result);
+    return result;
+}
+
+void Matrix::multiply(const std::vector<float> &M, const Vec4D &x, Vec4D &result) {
+    result.x = M[0] * x.x + M[4] * x.y + M[8] * x.z + M[12] * x.w;
+    result.y = M[1] * x.x + M[5] * x.y + M[9] * x.z + M[13] * x.w;
+    result.z = M[2] * x.x + M[6] * x.y + M[10] * x.z + M[14] * x.w;
+    result.w = M[3] * x.x + M[7] * x.y + M[11] * x.z + M[15] * x.w;
+}
+
+std::string Matrix::toMatrixString(const std::vector<float> &M) {
+    std::stringstream ss;
+    ss << "[ " << M[0] << ", " << M[4] << ", " << M[8] << ", " << M[12] << "; "
+            << M[1] << ", " << M[5] << ", " << M[9] << ", " << M[13] << "; "
+            << M[2] << ", " << M[6] << ", " << M[10] << ", " << M[14] << "; "
+            << M[3] << ", " << M[7] << ", " << M[11] << ", " << M[15] << " ]";
+    return ss.str();
+}
+
+std::string Matrix::toVectorString(const std::vector<float> &v) {
+    std::stringstream ss;
+    ss << "[ ";
+    for (int i = 0; i < v.size(); i++) {
+        ss << v[i];
+        if (i < v.size() - 1) {
+            ss << "; ";
+        }
+    }
+    ss << " ]";
+    return ss.str();
 }

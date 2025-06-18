@@ -13,6 +13,7 @@
 #include "dp_rect_pack.h"
 #include "HashedTuple.h"
 #include "RectanglePackerPage.h"
+#include <algorithm>
 
 
 std::vector<RectanglePackerPage> RectanglePacker::pack(const std::unordered_map<std::string, ::Vec2I> & rectangles, const ::Vec2I & maxPageSize) {

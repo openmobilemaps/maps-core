@@ -10,9 +10,9 @@
 
 import Foundation
 import MapCoreSharedModule
-import Metal
+@preconcurrency import Metal
 
-class ClearStencilShader: BaseShader {
+class ClearStencilShader: BaseShader, @unchecked Sendable {
     lazy var clearMask: MTLDepthStencilState? = {
         let descriptor = MTLStencilDescriptor()
         descriptor.stencilCompareFunction = .always
@@ -25,15 +25,20 @@ class ClearStencilShader: BaseShader {
         return MetalContext.current.device.makeDepthStencilState(descriptor: depthStencilDescriptor)
     }()
 
+    init() {
+        super.init(shader: .clearStencilShader)
+    }
+
     override func setupProgram(_: MCRenderingContextInterface?) {
         if pipeline == nil {
-            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: .clearStencilShader, blendMode: blendMode).json)
+            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: shader, blendMode: blendMode))
         }
     }
 
     override func preRender(_ context: MCRenderingContextInterface?) {
         guard let encoder = (context as? RenderingContext)?.encoder,
-              let pipeline else { return }
+            let pipeline
+        else { return }
 
         (context as? RenderingContext)?.setRenderPipelineStateIfNeeded(pipeline)
         encoder.setDepthStencilState(clearMask)

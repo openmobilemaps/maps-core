@@ -4,7 +4,9 @@
 #include "NativeRenderingContextInterface.h"  // my header
 #include "Marshal.hpp"
 #include "NativeColor.h"
+#include "NativeOpenGlRenderingContextInterface.h"
 #include "NativeRectI.h"
+#include "NativeRenderingCullMode.h"
 #include "NativeVec2I.h"
 
 namespace djinni_generated {
@@ -48,6 +50,14 @@ void NativeRenderingContextInterface::JavaProxy::setBackgroundColor(const ::Colo
                            ::djinni::get(::djinni_generated::NativeColor::fromCpp(jniEnv, c_color)));
     ::djinni::jniExceptionCheck(jniEnv);
 }
+void NativeRenderingContextInterface::JavaProxy::setCulling(::RenderingCullMode c_mode) {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeRenderingContextInterface>::get();
+    jniEnv->CallVoidMethod(Handle::get().get(), data.method_setCulling,
+                           ::djinni::get(::djinni_generated::NativeRenderingCullMode::fromCpp(jniEnv, c_mode)));
+    ::djinni::jniExceptionCheck(jniEnv);
+}
 void NativeRenderingContextInterface::JavaProxy::setupDrawFrame() {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
@@ -76,6 +86,14 @@ void NativeRenderingContextInterface::JavaProxy::applyScissorRect(const std::opt
     jniEnv->CallVoidMethod(Handle::get().get(), data.method_applyScissorRect,
                            ::djinni::get(::djinni::Optional<std::optional, ::djinni_generated::NativeRectI>::fromCpp(jniEnv, c_scissorRect)));
     ::djinni::jniExceptionCheck(jniEnv);
+}
+/*nullable*/ std::shared_ptr<::OpenGlRenderingContextInterface> NativeRenderingContextInterface::JavaProxy::asOpenGlRenderingContext() {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeRenderingContextInterface>::get();
+    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_asOpenGlRenderingContext);
+    ::djinni::jniExceptionCheck(jniEnv);
+    return ::djinni::Optional<std::optional, ::djinni_generated::NativeOpenGlRenderingContextInterface>::toCpp(jniEnv, jret);
 }
 
 CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_RenderingContextInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
@@ -118,6 +136,14 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_Renderin
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_RenderingContextInterface_00024CppProxy_native_1setCulling(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_mode)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::RenderingContextInterface>(nativeRef);
+        ref->setCulling(::djinni_generated::NativeRenderingCullMode::toCpp(jniEnv, j_mode));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
 CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_RenderingContextInterface_00024CppProxy_native_1setupDrawFrame(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
@@ -148,6 +174,15 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_Renderin
         const auto& ref = ::djinni::objectFromHandleAddress<::RenderingContextInterface>(nativeRef);
         ref->applyScissorRect(::djinni::Optional<std::optional, ::djinni_generated::NativeRectI>::toCpp(jniEnv, j_scissorRect));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_RenderingContextInterface_00024CppProxy_native_1asOpenGlRenderingContext(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::RenderingContextInterface>(nativeRef);
+        auto r = ref->asOpenGlRenderingContext();
+        return ::djinni::release(::djinni::Optional<std::optional, ::djinni_generated::NativeOpenGlRenderingContextInterface>::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
 } // namespace djinni_generated

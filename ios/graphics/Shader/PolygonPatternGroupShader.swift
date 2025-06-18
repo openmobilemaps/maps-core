@@ -10,19 +10,21 @@
 
 import Foundation
 import MapCoreSharedModule
-import Metal
+@preconcurrency import Metal
 import UIKit
 
-class PolygonPatternGroupShader: BaseShader {
+class PolygonPatternGroupShader: BaseShader, @unchecked Sendable {
     // MARK: - Variables
 
-    let fadeInPattern : Bool
+    let fadeInPattern: Bool
+    let isUnitSphere: Bool
 
     // MARK: - Init
 
-    init(fadeInPattern: Bool) {
+    init(fadeInPattern: Bool, isUnitSphere: Bool = false) {
         self.fadeInPattern = fadeInPattern
-        super.init()
+        self.isUnitSphere = isUnitSphere
+        super.init(shader: fadeInPattern ? .polygonPatternFadeInGroupShader : .polygonPatternGroupShader)
     }
 
     // MARK: - Setup
@@ -30,9 +32,8 @@ class PolygonPatternGroupShader: BaseShader {
     override func setupProgram(_: MCRenderingContextInterface?) {
         guard pipeline == nil else { return }
 
-        let t : PipelineType = fadeInPattern ? .polygonPatternFadeInGroupShader : .polygonPatternGroupShader
-        let pl = Pipeline(type: t, blendMode: blendMode)
-        pipeline = MetalContext.current.pipelineLibrary.value(pl.json)
+        let pl = Pipeline(type: shader, blendMode: blendMode)
+        pipeline = MetalContext.current.pipelineLibrary.value(pl)
     }
 
     override func preRender(encoder: MTLRenderCommandEncoder, context: RenderingContext) {

@@ -5,14 +5,16 @@
 #import "MCCoordinateConversionHelperInterface.h"
 #import "MCGraphicsObjectFactoryInterface.h"
 #import "MCMapConfig.h"
+#import "MCPerformanceLoggerInterface.h"
 #import "MCRectCoord.h"
+#import "MCRenderTargetInterface.h"
 #import "MCRenderingContextInterface.h"
 #import "MCSchedulerInterface.h"
 #import "MCShaderFactoryInterface.h"
 #import "MCTouchHandlerInterface.h"
 #import "MCVec2I.h"
 #import <Foundation/Foundation.h>
-@class MCMapCamera2dInterface;
+@class MCMapCameraInterface;
 @class MCMapInterface;
 @protocol MCIndexedLayerInterface;
 @protocol MCLayerInterface;
@@ -27,10 +29,13 @@
                    renderingContext:(nullable id<MCRenderingContextInterface>)renderingContext
                           mapConfig:(nonnull MCMapConfig *)mapConfig
                           scheduler:(nullable id<MCSchedulerInterface>)scheduler
-                       pixelDensity:(float)pixelDensity;
+                       pixelDensity:(float)pixelDensity
+                               is3D:(BOOL)is3D;
 
 + (nullable MCMapInterface *)createWithOpenGl:(nonnull MCMapConfig *)mapConfig
-                                 pixelDensity:(float)pixelDensity;
+                                    scheduler:(nullable id<MCSchedulerInterface>)scheduler
+                                 pixelDensity:(float)pixelDensity
+                                         is3D:(BOOL)is3D;
 
 - (void)setCallbackHandler:(nullable id<MCMapCallbackInterface>)callbackInterface;
 
@@ -46,13 +51,17 @@
 
 - (nullable MCCoordinateConversionHelperInterface *)getCoordinateConverterHelper;
 
-- (void)setCamera:(nullable MCMapCamera2dInterface *)camera;
+- (void)setCamera:(nullable MCMapCameraInterface *)camera;
 
-- (nullable MCMapCamera2dInterface *)getCamera;
+- (nullable MCMapCameraInterface *)getCamera;
 
 - (void)setTouchHandler:(nullable id<MCTouchHandlerInterface>)touchHandler;
 
 - (nullable id<MCTouchHandlerInterface>)getTouchHandler;
+
+- (void)setPerformanceLoggers:(nonnull NSArray<id<MCPerformanceLoggerInterface>> *)performanceLoggers;
+
+- (nonnull NSArray<id<MCPerformanceLoggerInterface>> *)getPerformanceLoggers;
 
 - (nonnull NSArray<id<MCLayerInterface>> *)getLayers;
 
@@ -75,10 +84,21 @@
 
 - (void)setBackgroundColor:(nonnull MCColor *)color;
 
+- (BOOL)is3d;
+
 - (void)invalidate;
+
+- (void)prepare;
+
+- (BOOL)getNeedsCompute;
+
+- (void)drawOffscreenFrame:(nullable id<MCRenderTargetInterface>)target;
 
 /** Must be called on the rendering thread! */
 - (void)drawFrame;
+
+/** Must be called on the rendering thread! */
+- (void)compute;
 
 /** Must be called on the rendering thread! */
 - (void)resume;
@@ -93,6 +113,7 @@
  * seconds, always draw the frame when state is updated in the ready callbacks
  */
 - (void)drawReadyFrame:(nonnull MCRectCoord *)bounds
+             paddingPc:(float)paddingPc
                timeout:(float)timeout
              callbacks:(nullable id<MCMapReadyCallbackInterface>)callbacks;
 

@@ -4,7 +4,7 @@
   <img width="200" height="45" src="logo.svg" />
   <br />
   <br />
-  The lightweight and modern Map SDK for Android (8.0+, OpenGl ES 3.2) and iOS (11+)
+  The lightweight and modern Map SDK for Android (8.0+, OpenGl ES 3.2) and iOS (14+)
   <br />
   <br />
   <a href="https://openmobilemaps.io/">openmobilemaps.io</a>

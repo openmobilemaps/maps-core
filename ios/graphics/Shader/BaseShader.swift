@@ -10,18 +10,24 @@
 
 import Foundation
 import MapCoreSharedModule
-import Metal
+@preconcurrency import Metal
 
-open class BaseShader: MCShaderProgramInterface {
+open class BaseShader: MCShaderProgramInterface, @unchecked Sendable {
     open var blendMode: MCBlendMode = .NORMAL
+    internal let shader: PipelineType
 
     open var pipeline: MTLRenderPipelineState?
 
-    public init() {
+    public init(shader: PipelineType) {
+        self.shader = shader
     }
 
     open func getProgramName() -> String {
         ""
+    }
+
+    open func usesModelMatrix() -> Bool {
+        return shader.vertexShaderUsesModelMatrix
     }
 
     open func setupProgram(_: MCRenderingContextInterface?) {
@@ -29,18 +35,23 @@ open class BaseShader: MCShaderProgramInterface {
 
     open func preRender(_ context: MCRenderingContextInterface?) {
         guard let context = context as? RenderingContext,
-              let encoder = context.encoder else { return }
+            let encoder = context.encoder
+        else { return }
         preRender(encoder: encoder, context: context)
     }
 
-    open func preRender(encoder _: MTLRenderCommandEncoder,
-                        context _: RenderingContext) {
+    open func preRender(
+        encoder _: MTLRenderCommandEncoder,
+        context _: RenderingContext
+    ) {
     }
 
     open func setBlendMode(_ blendMode: MCBlendMode) {
-        guard blendMode != self.blendMode else { return }
-        self.blendMode = blendMode
-        pipeline = nil
-        setupProgram(nil)
+        DispatchQueue.main.async {
+            guard blendMode != self.blendMode else { return }
+            self.blendMode = blendMode
+            self.pipeline = nil
+            self.setupProgram(nil)
+        }
     }
 }

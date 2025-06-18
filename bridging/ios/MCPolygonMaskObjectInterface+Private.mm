@@ -10,6 +10,7 @@
 #import "MCGraphicsObjectFactoryInterface+Private.h"
 #import "MCPolygon2dInterface+Private.h"
 #import "MCPolygonCoord+Private.h"
+#import "MCVec3D+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -35,23 +36,29 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 }
 
 + (nullable MCPolygonMaskObjectInterface *)create:(nullable id<MCGraphicsObjectFactoryInterface>)graphicsObjectFactory
-                                 conversionHelper:(nullable MCCoordinateConversionHelperInterface *)conversionHelper {
+                                 conversionHelper:(nullable MCCoordinateConversionHelperInterface *)conversionHelper
+                                             is3d:(BOOL)is3d {
     try {
         auto objcpp_result_ = ::PolygonMaskObjectInterface::create(::djinni_generated::GraphicsObjectFactoryInterface::toCpp(graphicsObjectFactory),
-                                                                   ::djinni_generated::CoordinateConversionHelperInterface::toCpp(conversionHelper));
+                                                                   ::djinni_generated::CoordinateConversionHelperInterface::toCpp(conversionHelper),
+                                                                   ::djinni::Bool::toCpp(is3d));
         return ::djinni_generated::PolygonMaskObjectInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)setPolygons:(nonnull NSArray<MCPolygonCoord *> *)polygons {
+- (void)setPolygons:(nonnull NSArray<MCPolygonCoord *> *)polygons
+             origin:(nonnull MCVec3D *)origin {
     try {
-        _cppRefHandle.get()->setPolygons(::djinni::List<::djinni_generated::PolygonCoord>::toCpp(polygons));
+        _cppRefHandle.get()->setPolygons(::djinni::List<::djinni_generated::PolygonCoord>::toCpp(polygons),
+                                         ::djinni_generated::Vec3D::toCpp(origin));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)setPolygon:(nonnull MCPolygonCoord *)polygon {
+- (void)setPolygon:(nonnull MCPolygonCoord *)polygon
+            origin:(nonnull MCVec3D *)origin {
     try {
-        _cppRefHandle.get()->setPolygon(::djinni_generated::PolygonCoord::toCpp(polygon));
+        _cppRefHandle.get()->setPolygon(::djinni_generated::PolygonCoord::toCpp(polygon),
+                                        ::djinni_generated::Vec3D::toCpp(origin));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

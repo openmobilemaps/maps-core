@@ -16,7 +16,7 @@ abstract class TouchHandlerInterface {
 
     abstract fun removeListener(listener: TouchInterface)
 
-    private class CppProxy : TouchHandlerInterface {
+    public class CppProxy : TouchHandlerInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

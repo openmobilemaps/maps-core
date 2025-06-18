@@ -19,6 +19,8 @@ class ColorCircleShaderOpenGl : public BaseShaderProgramOpenGl,
                                 public ColorCircleShaderInterface,
                                 public std::enable_shared_from_this<ShaderProgramInterface> {
   public:
+    ColorCircleShaderOpenGl(bool projectOntoUnitSphere);
+
     virtual std::shared_ptr<ShaderProgramInterface> asShaderProgramInterface() override;
 
     virtual std::string getProgramName() override;
@@ -30,10 +32,13 @@ class ColorCircleShaderOpenGl : public BaseShaderProgramOpenGl,
     virtual void setColor(float red, float green, float blue, float alpha) override;
 
   protected:
+    std::string getVertexShader() override;
+
     virtual std::string getFragmentShader() override;
 
   private:
-    const static std::string programName;
+    const bool projectOntoUnitSphere;
+    const std::string programName;
 
     std::mutex dataMutex;
     std::vector<float> color = {0.0, 0.0, 0.0, 0.0};

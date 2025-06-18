@@ -10,9 +10,10 @@
 
 import Foundation
 import MapCoreSharedModule
-import Metal
+@preconcurrency import Metal
+import simd
 
-final class LineGroup2d: BaseGraphicsObject {
+final class LineGroup2d: BaseGraphicsObject, @unchecked Sendable {
     private var shader: LineGroupShader
 
     private var lineVerticesBuffer: MTLBuffer?
@@ -23,15 +24,21 @@ final class LineGroup2d: BaseGraphicsObject {
     private var maskedStencilState: MTLDepthStencilState?
 
     private var customScreenPixelFactor: Float = 0
+    private var tileOriginBuffer: MTLBuffer?
 
     init(shader: MCShaderProgramInterface, metalContext: MetalContext) {
         guard let shader = shader as? LineGroupShader else {
             fatalError("LineGroup2d only supports LineGroupShader")
         }
         self.shader = shader
-        super.init(device: metalContext.device,
-                   sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue)!,
-                   label: "LineGroup2d")
+        super
+            .init(
+                device: metalContext.device,
+                sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue)!,
+                label: "LineGroup2d")
+        var originOffset: simd_float4 = simd_float4(0, 0, 0, 0)
+        tileOriginBuffer = metalContext.device.makeBuffer(bytes: &originOffset, length: MemoryLayout<simd_float4>.stride, options: [])
+
     }
 
     private func setupStencilBufferDescriptor() {
@@ -65,20 +72,24 @@ final class LineGroup2d: BaseGraphicsObject {
         stencilState = MetalContext.current.device.makeDepthStencilState(descriptor: ms)
     }
 
-    override func render(encoder: MTLRenderCommandEncoder,
-                         context: RenderingContext,
-                         renderPass _: MCRenderPassConfig,
-                         mvpMatrix: Int64,
-                         isMasked: Bool,
-                         screenPixelAsRealMeterFactor: Double) {
+    override func render(
+        encoder: MTLRenderCommandEncoder,
+        context: RenderingContext,
+        renderPass _: MCRenderPassConfig,
+        vpMatrix: Int64,
+        mMatrix: Int64,
+        origin: MCVec3D,
+        isMasked: Bool,
+        screenPixelAsRealMeterFactor: Double
+    ) {
         lock.lock()
         defer {
             lock.unlock()
         }
 
         guard let lineVerticesBuffer,
-              let lineIndicesBuffer,
-              shader.lineStyleBuffer != nil
+            let lineIndicesBuffer,
+            shader.lineStyleBuffer != nil
         else { return }
 
         #if DEBUG
@@ -108,14 +119,28 @@ final class LineGroup2d: BaseGraphicsObject {
         shader.preRender(context)
 
         encoder.setVertexBuffer(lineVerticesBuffer, offset: 0, index: 0)
-        let matrixPointer = UnsafeRawPointer(bitPattern: Int(mvpMatrix))!
-        encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
 
-        encoder.drawIndexedPrimitives(type: .triangle,
-                                      indexCount: indicesCount,
-                                      indexType: .uint32,
-                                      indexBuffer: lineIndicesBuffer,
-                                      indexBufferOffset: 0)
+        let vpMatrixBuffer = vpMatrixBuffers.getNextBuffer(context)
+        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(vpMatrix)) {
+            vpMatrixBuffer?.contents().copyMemory(from: matrixPointer, byteCount: 64)
+        }
+        encoder.setVertexBuffer(vpMatrixBuffer, offset: 0, index: 1)
+
+        let originOffsetBuffer = originOffsetBuffers.getNextBuffer(context)
+        if let bufferPointer = originOffsetBuffer?.contents().assumingMemoryBound(to: simd_float4.self) {
+            bufferPointer.pointee.x = Float(originOffset.x - origin.x)
+            bufferPointer.pointee.y = Float(originOffset.y - origin.y)
+            bufferPointer.pointee.z = Float(originOffset.z - origin.z)
+        }
+        encoder.setVertexBuffer(originOffsetBuffer, offset: 0, index: 5)
+        encoder.setVertexBuffer(tileOriginBuffer, offset: 0, index: 6)
+
+        encoder.drawIndexedPrimitives(
+            type: .triangle,
+            indexCount: indicesCount,
+            indexType: .uint32,
+            indexBuffer: lineIndicesBuffer,
+            indexBufferOffset: 0)
 
         if !isMasked {
             context.clearStencilBuffer()
@@ -124,7 +149,8 @@ final class LineGroup2d: BaseGraphicsObject {
 }
 
 extension LineGroup2d: MCLineGroup2dInterface {
-    func setLines(_ lines: MCSharedBytes, indices: MCSharedBytes) {
+
+    func setLines(_ lines: MCSharedBytes, indices: MCSharedBytes, origin: MCVec3D, is3d: Bool) {
         guard lines.elementCount != 0 else {
             lock.withCritical {
                 lineVerticesBuffer = nil
@@ -134,19 +160,24 @@ extension LineGroup2d: MCLineGroup2dInterface {
 
             return
         }
-        guard let verticesBuffer = device.makeBuffer(from: lines),
-              let indicesBuffer = device.makeBuffer(from: indices)
-        else {
-            fatalError("Cannot allocate buffers for LineGroup2d")
-        }
-
-        verticesBuffer.label = "LineGroup2d.verticesBuffer"
-        indicesBuffer.label = "LineGroup2d.indicesBuffer"
-
         lock.withCritical {
-            indicesCount = Int(indices.elementCount)
-            lineVerticesBuffer = verticesBuffer
-            lineIndicesBuffer = indicesBuffer
+            self.originOffset = origin
+            if let bufferPointer = tileOriginBuffer?.contents().assumingMemoryBound(to: simd_float4.self) {
+                bufferPointer.pointee.x = originOffset.xF
+                bufferPointer.pointee.y = originOffset.yF
+                bufferPointer.pointee.z = originOffset.zF
+            } else {
+                fatalError()
+            }
+            self.lineVerticesBuffer.copyOrCreate(from: lines, device: device)
+            self.lineIndicesBuffer.copyOrCreate(from: indices, device: device)
+            if self.lineVerticesBuffer != nil, self.lineIndicesBuffer != nil {
+                self.lineVerticesBuffer?.label = "LineGroup2d.verticesBuffer"
+                self.lineIndicesBuffer?.label = "LineGroup2d.indicesBuffer"
+                self.indicesCount = Int(indices.elementCount)
+            } else {
+                self.indicesCount = 0
+            }
         }
     }
 

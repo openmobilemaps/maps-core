@@ -9,7 +9,8 @@
  */
 
 #include "Tiled2dMapLayer.h"
-#include "MapCamera2dInterface.h"
+#include "MapCameraInterface.h"
+#include "CoordinateSystemIdentifiers.h"
 
 Tiled2dMapLayer::Tiled2dMapLayer()
     : curT(0) {}
@@ -19,11 +20,11 @@ void Tiled2dMapLayer::setSourceInterfaces(const std::vector<WeakActor<Tiled2dMap
     this->sourceInterfaces = sourceInterfaces;
     for (const auto &sourceInterface : sourceInterfaces) {
         if (isHidden) {
-            sourceInterface.message(&Tiled2dMapSourceInterface::pause);
+            sourceInterface.message(MFN(&Tiled2dMapSourceInterface::pause));
         }
         auto errorManager = this->errorManager;
         if (errorManager) {
-            sourceInterface.message(&Tiled2dMapSourceInterface::setErrorManager, errorManager);
+            sourceInterface.message(MFN(&Tiled2dMapSourceInterface::setErrorManager), errorManager);
         }
     }
 }
@@ -34,21 +35,21 @@ void Tiled2dMapLayer::onAdded(const std::shared_ptr<::MapInterface> &mapInterfac
     {
         std::lock_guard<std::recursive_mutex> lock(sourcesMutex);
         for (const auto &sourceInterface: sourceInterfaces) {
-            sourceInterface.message(&Tiled2dMapSourceInterface::setMinZoomLevelIdentifier, minZoomLevelIdentifier);
-            sourceInterface.message(&Tiled2dMapSourceInterface::setMaxZoomLevelIdentifier, maxZoomLevelIdentifier);
+            sourceInterface.message(MFN(&Tiled2dMapSourceInterface::setMinZoomLevelIdentifier), minZoomLevelIdentifier);
+            sourceInterface.message(MFN(&Tiled2dMapSourceInterface::setMaxZoomLevelIdentifier), maxZoomLevelIdentifier);
         }
     }
 
-    auto camera = std::dynamic_pointer_cast<MapCamera2dInterface>(mapInterface->getCamera());
+    auto camera = std::dynamic_pointer_cast<MapCameraInterface>(mapInterface->getCamera());
     if (camera) {
         camera->addListener(shared_from_this());
-        onVisibleBoundsChanged(camera->getVisibleRect(), camera->getZoom());
+        camera->notifyListenerBoundsChange();
     }
 }
 
 void Tiled2dMapLayer::onRemoved() {
     if (mapInterface) {
-        auto camera = std::dynamic_pointer_cast<MapCamera2dInterface>(mapInterface->getCamera());
+        auto camera = std::dynamic_pointer_cast<MapCameraInterface>(mapInterface->getCamera());
         if (camera) {
             camera->removeListener(shared_from_this());
         }
@@ -59,7 +60,7 @@ void Tiled2dMapLayer::onRemoved() {
 void Tiled2dMapLayer::pause() {
     std::lock_guard<std::recursive_mutex> lock(sourcesMutex);
     for (const auto &sourceInterface : sourceInterfaces) {
-        sourceInterface.message(&Tiled2dMapSourceInterface::pause);
+        sourceInterface.message(MFN(&Tiled2dMapSourceInterface::pause));
     }
 }
 
@@ -67,7 +68,7 @@ void Tiled2dMapLayer::resume() {
     if (!isHidden) {
         std::lock_guard<std::recursive_mutex> lock(sourcesMutex);
         for (const auto &sourceInterface : sourceInterfaces) {
-            sourceInterface.message(&Tiled2dMapSourceInterface::resume);
+            sourceInterface.message(MFN(&Tiled2dMapSourceInterface::resume));
         }
     }
 }
@@ -80,7 +81,7 @@ void Tiled2dMapLayer::hide() {
     {
         std::lock_guard<std::recursive_mutex> lock(sourcesMutex);
         for (const auto &sourceInterface: sourceInterfaces) {
-            sourceInterface.message(&Tiled2dMapSourceInterface::pause);
+            sourceInterface.message(MFN(&Tiled2dMapSourceInterface::pause));
         }
     }
     if (mapInterface) {
@@ -96,7 +97,7 @@ void Tiled2dMapLayer::show() {
     {
         std::lock_guard<std::recursive_mutex> lock(sourcesMutex);
         for (const auto &sourceInterface : sourceInterfaces) {
-            sourceInterface.message(&Tiled2dMapSourceInterface::resume);
+            sourceInterface.message(MFN(&Tiled2dMapSourceInterface::resume));
         }
     }
     if (mapInterface) {
@@ -107,8 +108,17 @@ void Tiled2dMapLayer::show() {
 void Tiled2dMapLayer::onVisibleBoundsChanged(const ::RectCoord &visibleBounds, double zoom) {
     std::lock_guard<std::recursive_mutex> lock(sourcesMutex);
     for (const auto &sourceInterface : sourceInterfaces) {
-        sourceInterface.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapSourceInterface::onVisibleBoundsChanged,
+        sourceInterface.message(MailboxDuplicationStrategy::replaceNewest, MFN(&Tiled2dMapSourceInterface::onVisibleBoundsChanged),
                                 visibleBounds, curT, zoom);
+    }
+}
+
+void Tiled2dMapLayer::onCameraChange(const std::vector<float> &viewMatrix, const std::vector<float> &projectionMatrix, const ::Vec3D & origin, float verticalFov, float horizontalFov, float width, float height, float focusPointAltitude, const ::Coord & focusPointPosition, float zoom) {
+    std::lock_guard<std::recursive_mutex> lock(sourcesMutex);
+
+    for (const auto &sourceInterface: sourceInterfaces) {
+        sourceInterface.message(MailboxDuplicationStrategy::replaceNewest, MFN(&Tiled2dMapSourceInterface::onCameraChange),
+                                viewMatrix, projectionMatrix, origin, verticalFov, horizontalFov, width, height, focusPointAltitude, focusPointPosition, zoom);
     }
 }
 
@@ -126,7 +136,7 @@ void Tiled2dMapLayer::setMinZoomLevelIdentifier(std::optional<int32_t> value) {
     minZoomLevelIdentifier = value;
     std::lock_guard<std::recursive_mutex> lock(sourcesMutex);
     for (const auto &sourceInterface : sourceInterfaces) {
-        sourceInterface.message(&Tiled2dMapSourceInterface::setMinZoomLevelIdentifier, value);
+        sourceInterface.message(MFN(&Tiled2dMapSourceInterface::setMinZoomLevelIdentifier), value);
     }
 }
 
@@ -141,7 +151,7 @@ void Tiled2dMapLayer::setMaxZoomLevelIdentifier(std::optional<int32_t> value) {
     maxZoomLevelIdentifier = value;
     std::lock_guard<std::recursive_mutex> lock(sourcesMutex);
     for (const auto &sourceInterface : sourceInterfaces) {
-        sourceInterface.message(&Tiled2dMapSourceInterface::setMaxZoomLevelIdentifier, value);
+        sourceInterface.message(MFN(&Tiled2dMapSourceInterface::setMaxZoomLevelIdentifier), value);
     }
 }
 
@@ -179,14 +189,14 @@ void Tiled2dMapLayer::setErrorManager(const std::shared_ptr<::ErrorManager> &err
     this->errorManager = errorManager;
     std::lock_guard<std::recursive_mutex> lock(sourcesMutex);
     for (const auto &sourceInterface : sourceInterfaces) {
-        sourceInterface.message(&Tiled2dMapSourceInterface::setErrorManager, errorManager);
+        sourceInterface.message(MFN(&Tiled2dMapSourceInterface::setErrorManager), errorManager);
     }
 }
 
 void Tiled2dMapLayer::forceReload() {
     std::lock_guard<std::recursive_mutex> lock(sourcesMutex);
     for (const auto &sourceInterface : sourceInterfaces) {
-        sourceInterface.message(&Tiled2dMapSourceInterface::forceReload);
+        sourceInterface.message(MFN(&Tiled2dMapSourceInterface::forceReload));
     }
 }
 
@@ -195,7 +205,7 @@ void Tiled2dMapLayer::setT(int t) {
 
     auto mapInterface = this->mapInterface;
     if (mapInterface) {
-        auto camera = std::dynamic_pointer_cast<MapCamera2dInterface>(mapInterface->getCamera());
+        auto camera = std::dynamic_pointer_cast<MapCameraInterface>(mapInterface->getCamera());
         if (camera) {
             onVisibleBoundsChanged(camera->getVisibleRect(), camera->getZoom());
         }

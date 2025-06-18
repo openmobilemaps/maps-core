@@ -3,8 +3,10 @@
 
 #import "MCColor.h"
 #import "MCRectI.h"
+#import "MCRenderingCullMode.h"
 #import "MCVec2I.h"
 #import <Foundation/Foundation.h>
+@protocol MCOpenGlRenderingContextInterface;
 
 
 @protocol MCRenderingContextInterface
@@ -19,6 +21,8 @@
 
 - (void)setBackgroundColor:(nonnull MCColor *)color;
 
+- (void)setCulling:(MCRenderingCullMode)mode;
+
 - (void)setupDrawFrame;
 
 - (void)preRenderStencilMask;
@@ -27,5 +31,7 @@
 
 /** optional rectangle, remove scissoring when not set */
 - (void)applyScissorRect:(nullable MCRectI *)scissorRect;
+
+- (nullable id<MCOpenGlRenderingContextInterface>)asOpenGlRenderingContext;
 
 @end

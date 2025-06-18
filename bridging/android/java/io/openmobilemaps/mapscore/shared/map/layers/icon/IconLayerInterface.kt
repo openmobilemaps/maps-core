@@ -39,7 +39,12 @@ abstract class IconLayerInterface {
 
     abstract fun setLayerClickable(isLayerClickable: Boolean)
 
-    private class CppProxy : IconLayerInterface {
+    abstract fun setRenderPassIndex(index: Int)
+
+    /** scale an icon, use repetitions for pulsating effect (repetions == -1 -> forever) */
+    abstract fun animateIconScale(identifier: String, from: Float, to: Float, duration: Float, repetitions: Int)
+
+    public class CppProxy : IconLayerInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 
@@ -131,5 +136,17 @@ abstract class IconLayerInterface {
             native_setLayerClickable(this.nativeRef, isLayerClickable)
         }
         private external fun native_setLayerClickable(_nativeRef: Long, isLayerClickable: Boolean)
+
+        override fun setRenderPassIndex(index: Int) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setRenderPassIndex(this.nativeRef, index)
+        }
+        private external fun native_setRenderPassIndex(_nativeRef: Long, index: Int)
+
+        override fun animateIconScale(identifier: String, from: Float, to: Float, duration: Float, repetitions: Int) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_animateIconScale(this.nativeRef, identifier, from, to, duration, repetitions)
+        }
+        private external fun native_animateIconScale(_nativeRef: Long, identifier: String, from: Float, to: Float, duration: Float, repetitions: Int)
     }
 }

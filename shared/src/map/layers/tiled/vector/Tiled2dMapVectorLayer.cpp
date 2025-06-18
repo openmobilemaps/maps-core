@@ -21,7 +21,7 @@
 #include "Tiled2dMapVectorBackgroundSubLayer.h"
 #include "Tiled2dMapVectorRasterSubLayerConfig.h"
 #include "Polygon2dInterface.h"
-#include "MapCamera2dInterface.h"
+#include "MapCameraInterface.h"
 #include "QuadMaskObject.h"
 #include "PolygonMaskObject.h"
 #include "CoordinatesUtil.h"
@@ -47,9 +47,10 @@
 #include "Tiled2dMapVectorStyleParser.h"
 #include "Tiled2dMapVectorGeoJSONLayerConfig.h"
 #include "GeoJsonVTFactory.h"
+#include "VectorLayerFeatureCoordInfo.h"
 
 Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
-                                             const std::string &remoteStyleJsonUrl,
+                                             const std::optional<std::string> &remoteStyleJsonUrl,
                                              const std::vector<std::shared_ptr<::LoaderInterface>> &loaders,
                                              const std::shared_ptr<::FontLoaderInterface> &fontLoader,
                                              const std::optional<Tiled2dMapZoomInfo> &customZoomInfo,
@@ -69,8 +70,8 @@ Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
         {}
 
 Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
-                                             const std::string &remoteStyleJsonUrl,
-                                             const std::string &fallbackStyleJsonString,
+                                             const std::optional<std::string> &remoteStyleJsonUrl,
+                                             const std::optional<std::string> &fallbackStyleJsonString,
                                              const std::vector<std::shared_ptr<::LoaderInterface>> &loaders,
                                              const std::shared_ptr<::FontLoaderInterface> &fontLoader,
                                              const std::optional<Tiled2dMapZoomInfo> &customZoomInfo,
@@ -108,9 +109,9 @@ Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
         featureStateManager(std::make_shared<Tiled2dMapVectorStateManager>()),
         symbolDelegate(symbolDelegate),
         localDataProvider(localDataProvider),
-		sourceUrlParams(sourceUrlParams) {
-    	setMapDescription(mapDescription);
-}
+		sourceUrlParams(sourceUrlParams),
+        mapDescription(mapDescription)
+        {}
 
 Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
                                              const std::vector<std::shared_ptr<::LoaderInterface>> &loaders,
@@ -147,7 +148,7 @@ void Tiled2dMapVectorLayer::scheduleStyleJsonLoading() {
                         if (auto error = layerError) {
                             selfPtr->errorManager->addTiledLayerError(*error);
                         } else {
-                            if (selfPtr->remoteStyleJsonUrl.has_value()) {
+                            if (selfPtr->remoteStyleJsonUrl.has_value() && !selfPtr->remoteStyleJsonUrl->empty()) {
                                 selfPtr->errorManager->removeError(*selfPtr->remoteStyleJsonUrl);
                             } else {
                                 selfPtr->errorManager->removeError(selfPtr->layerName);
@@ -166,8 +167,25 @@ void Tiled2dMapVectorLayer::didLoadStyleJson(const std::optional<TiledLayerError
 }
 
 std::optional<TiledLayerError> Tiled2dMapVectorLayer::loadStyleJson() {
-    auto error = loadStyleJsonRemotely();
-    if (error.has_value()) {
+    std::optional<TiledLayerError> error = std::nullopt;
+    if (this->remoteStyleJsonUrl.has_value()) {
+        error = loadStyleJsonRemotely();
+    }
+    
+    if (error.has_value() || !this->remoteStyleJsonUrl.has_value()) {
+        if (localDataProvider) {
+            auto optionalStyleJson = localDataProvider->getStyleJson();
+            if (optionalStyleJson) {
+                auto parseResult = Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromString(layerName, *optionalStyleJson, localDataProvider, loaders, sourceUrlParams);
+                
+                if (parseResult.status == LoaderStatus::OK) {
+                    setMapDescription(parseResult.mapDescription);
+                    metadata = parseResult.metadata;
+                    return std::nullopt;
+                }
+            }
+        }
+        
         if (auto json = fallbackStyleJsonString) {
             return loadStyleJsonLocally(*json);
         } else {
@@ -210,8 +228,12 @@ std::optional<TiledLayerError> Tiled2dMapVectorLayer::loadStyleJsonLocally(std::
 
 std::shared_ptr<Tiled2dMapVectorLayerConfig>
 Tiled2dMapVectorLayer::getLayerConfig(const std::shared_ptr<VectorMapSourceDescription> &source) {
+    const auto mapInterface = this->mapInterface;
+    if (!mapInterface) {
+        return nullptr;
+    }
     return customZoomInfo.has_value() ? std::make_shared<Tiled2dMapVectorLayerConfig>(source, *customZoomInfo)
-                                      : std::make_shared<Tiled2dMapVectorLayerConfig>(source);
+                                      : std::make_shared<Tiled2dMapVectorLayerConfig>(source, mapInterface->is3d());
 }
 
 std::shared_ptr<Tiled2dMapVectorLayerConfig>
@@ -221,22 +243,33 @@ Tiled2dMapVectorLayer::getGeoJSONLayerConfig(const std::string &sourceName, cons
 }
 
 void Tiled2dMapVectorLayer::setMapDescription(const std::shared_ptr<VectorMapDescription> &mapDescription) {
-    std::lock_guard<std::recursive_mutex> lock(mapDescriptionMutex);
-    this->mapDescription = mapDescription;
-    this->layerConfigs.clear();
+    {
+        std::lock_guard<std::recursive_mutex> lock(mapDescriptionMutex);
+        this->mapDescription = mapDescription;
+        this->persistingSymbolPlacement = mapDescription->persistingSymbolPlacement;
+        this->layerConfigs.clear();
 
-    for (auto const &source: mapDescription->vectorSources) {
-        layerConfigs[source->identifier] = getLayerConfig(source);
+        for (auto const &source: mapDescription->vectorSources) {
+            layerConfigs[source->identifier] = getLayerConfig(source);
+        }
+        for (auto const &[source, geoJson]: mapDescription->geoJsonSources) {
+            layerConfigs[source] = getGeoJSONLayerConfig(source, geoJson);
+        }
     }
-    for (auto const &[source, geoJson]: mapDescription->geoJsonSources) {
-        layerConfigs[source] = getGeoJSONLayerConfig(source, geoJson);
-    }
-    
+
     initializeVectorLayer();
-    applyGlobalOrFeatureStateIfPossible(StateType::BOTH);
+    if (!noPendingStateUpdate.test_and_set()) {
+        applyGlobalOrFeatureStateIfPossible(StateType::BOTH);
+    }
 }
 
 void Tiled2dMapVectorLayer::initializeVectorLayer() {
+
+    std::shared_ptr<VectorMapDescription> mapDescription;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mapDescriptionMutex);
+        mapDescription = this->mapDescription;
+    }
 
     if (!sourceDataManagers.empty() || !symbolSourceDataManagers.empty() || !rasterTileSources.empty()) {
         // do nothing if the layer is already initialized
@@ -258,11 +291,16 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
     if (!mapInterface) {
         return;
     }
+    bool is3d = mapInterface->is3d();
     
     std::shared_ptr<Mailbox> selfMailbox = mailbox;
     if (!mailbox) {
         selfMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
     }
+
+    //lock the mailbox so we are a safe actor
+    std::lock_guard<std::recursive_mutex> mailboxLock(selfMailbox->receivingMutex);
+
     auto castedMe = std::static_pointer_cast<Tiled2dMapVectorLayer>(shared_from_this());
     auto selfActor = WeakActor<Tiled2dMapVectorLayer>(selfMailbox, castedMe);
     auto selfRasterActor = WeakActor<Tiled2dMapRasterSourceListener>(selfMailbox, castedMe);
@@ -290,9 +328,9 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
             }
             case raster: {
                 auto rasterSubLayerConfig = customZoomInfo.has_value() ? std::make_shared<Tiled2dMapVectorRasterSubLayerConfig>(
-                        std::static_pointer_cast<RasterVectorLayerDescription>(layerDesc), *customZoomInfo)
+                        std::static_pointer_cast<RasterVectorLayerDescription>(layerDesc), is3d,*customZoomInfo)
                                                                        : std::make_shared<Tiled2dMapVectorRasterSubLayerConfig>(
-                                std::static_pointer_cast<RasterVectorLayerDescription>(layerDesc));
+                                std::static_pointer_cast<RasterVectorLayerDescription>(layerDesc), is3d);
 
                 auto sourceMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
                 auto sourceActor = Actor<Tiled2dMapRasterSource>(sourceMailbox,
@@ -314,10 +352,11 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
                                                                                              selfActor,
                                                                                              mapDescription,
                                                                                              rasterSubLayerConfig,
-                                                                                             layerDesc->source,
+                                                                                             layerDesc,
                                                                                              sourceActor.weakActor<Tiled2dMapRasterSource>(),
                                                                                              readyManager,
-                                                                                             featureStateManager);
+                                                                                             featureStateManager,
+                                                                                             mapInterface->getCamera()->getScreenDensityPpi() / 160.0);
                 sourceManagerActor.unsafe()->setAlpha(alpha);
                 sourceTileManagers[layerDesc->source] = sourceManagerActor.strongActor<Tiled2dMapVectorSourceTileDataManager>();
                 sourceInterfaces.push_back(sourceActor.weakActor<Tiled2dMapSourceInterface>());
@@ -349,14 +388,14 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
         auto sourceMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
 
         Actor<Tiled2dMapVectorSource> vectorSource;
-        if (mapDescription->geoJsonSources.count(source) != 0) {
+        auto geoJsonSourceIt = mapDescription->geoJsonSources.find(source);
+        if (geoJsonSourceIt != mapDescription->geoJsonSources.end()) {
             auto geoJsonSource = Actor<Tiled2dVectorGeoJsonSource>(sourceMailbox,
                                                                    mapInterface->getCamera(),
                                                                    mapInterface->getMapConfig(),
                                                                    layerConfig,
                                                                    mapInterface->getCoordinateConverterHelper(),
                                                                    mapInterface->getScheduler(),
-                                                                   loaders,
                                                                    selfVectorActor,
                                                                    layers,
                                                                    source,
@@ -365,7 +404,7 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
                                                                    layerName);
             vectorSource = geoJsonSource.strongActor<Tiled2dMapVectorSource>();
 
-            mapDescription->geoJsonSources.at(source)->setDelegate(geoJsonSource.weakActor<GeoJSONTileDelegate>());
+            geoJsonSourceIt->second->setDelegate(geoJsonSource.weakActor<GeoJSONTileDelegate>());
 
         } else {
             vectorSource = Actor<Tiled2dMapVectorSource>(sourceMailbox,
@@ -413,6 +452,7 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
                                                                         symbolDelegate,
                                                                         mapDescription->persistingSymbolPlacement);
             actor.unsafe()->setAlpha(alpha);
+            actor.unsafe()->enableAnimations(animationsEnabled);
             symbolSourceDataManagers[source] = actor;
             interactionDataManagers[source].push_back(actor.weakActor<Tiled2dMapVectorSourceDataManager>());
         }
@@ -447,10 +487,10 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
     mapInterface->getTouchHandler()->insertListener(std::dynamic_pointer_cast<TouchInterface>(shared_from_this()), layerIndex);
 
     for (const auto &sourceTileManager : sourceTileManagers) {
-        sourceTileManager.second.message(&Tiled2dMapVectorSourceTileDataManager::onAdded, mapInterface);
+        sourceTileManager.second.message(MFN(&Tiled2dMapVectorSourceTileDataManager::onAdded), mapInterface);
     }
     for (const auto &sourceTileManager : symbolSourceDataManagers) {
-        sourceTileManager.second.message(&Tiled2dMapVectorSourceTileDataManager::onAdded, mapInterface);
+        sourceTileManager.second.message(MFN(&Tiled2dMapVectorSourceTileDataManager::onAdded), mapInterface);
     }
 
     
@@ -482,11 +522,11 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
 
     if (isResumed) {
         for (const auto &[source, vectorTileSource] : vectorTileSources) {
-            vectorTileSource.message(&Tiled2dMapVectorSource::resume);
+            vectorTileSource.message(MFN(&Tiled2dMapVectorSource::resume));
         }
 
         for (const auto &rasterSource : rasterSources) {
-            rasterSource.message(&Tiled2dMapRasterSource::resume);
+            rasterSource.message(MFN(&Tiled2dMapRasterSource::resume));
         }
     }
 
@@ -495,11 +535,21 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
         setupReady = true;
     }
     setupCV.notify_all();
+
+    pregenerateRenderPasses();
 }
 
 void Tiled2dMapVectorLayer::reloadDataSource(const std::string &sourceName) {
-    auto &source = vectorTileSources[sourceName];
-    const auto &geoSource = mapDescription->geoJsonSources[sourceName];
+
+    Actor<Tiled2dMapVectorSource> source;
+    std::shared_ptr<GeoJSONVTInterface> geoSource = nullptr;
+
+    {
+        std::lock_guard<std::recursive_mutex> lock(mapDescriptionMutex);
+        source = vectorTileSources[sourceName];
+        geoSource = mapDescription->geoJsonSources[sourceName];
+    }
+
     if (source && geoSource) {
         source.syncAccess([&,geoSource](const auto &source) {
 
@@ -515,33 +565,39 @@ void Tiled2dMapVectorLayer::reloadDataSource(const std::string &sourceName) {
 }
 
 void Tiled2dMapVectorLayer::reloadLocalDataSource(const std::string &sourceName, const std::string &geoJson) {
+    std::lock_guard<std::recursive_mutex> lock(mapDescriptionMutex);
 
-    if (!mapInterface) {
+    auto mapInterface = this->mapInterface;
+    auto mapDescription = this->mapDescription;
+
+    if (!mapDescription) {
         return;
     }
 
     if (const auto &geoSource = mapDescription->geoJsonSources[sourceName]) {
 
-        nlohmann::json json;
-
         try {
-            json = nlohmann::json::parse(geoJson);
+            auto json = nlohmann::json::parse(geoJson);
+            geoSource->reload(GeoJsonParser::getGeoJson(json));
         }
-        catch (nlohmann::json::parse_error &ex) {
+        catch (nlohmann::json::exception &ex) {
             return;
         }
 
-        geoSource->reload(GeoJsonParser::getGeoJson(json));
     }
-    if (auto &source = vectorTileSources[sourceName]) {
-        source.syncAccess([](const auto &source) {
+    auto sourceIt = vectorTileSources.find(sourceName);
+    if (sourceIt != vectorTileSources.end()) {
+        sourceIt->second.syncAccess([](const auto &source) {
             source->reloadTiles();
         });
     }
 
     prevCollisionStillValid.clear();
     tilesStillValid.clear();
-    mapInterface->invalidate();
+
+    if (mapInterface) {
+        mapInterface->invalidate();
+    }
 }
 
 std::shared_ptr<::LayerInterface> Tiled2dMapVectorLayer::asLayerInterface() {
@@ -552,33 +608,37 @@ void Tiled2dMapVectorLayer::update() {
     if (isHidden) {
         return;
     }
-    long long now = DateHelper::currentTimeMillis();
-    for (const auto &[source, sourceDataManager]: sourceDataManagers) {
-        sourceDataManager.syncAccess([](const auto &manager) {
-            manager->update();
-        });
+    auto mapInterface = this->mapInterface;
+    auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
+    auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
+    if (!camera) {
+        return;
+    }
+    double newZoom = camera->getZoom();
+    auto now = DateHelper::currentTimeMillis();
+    bool newIsAnimating = false;
+    bool tilesChanged = !tilesStillValid.test_and_set();
+    double zoomChange = std::abs(newZoom-lastDataManagerZoom) / std::max(newZoom, 1.0);
+    double timeDiff = now - lastDataManagerUpdate;
+    bool is3d = mapInterface->is3d();
+    const auto origin = mapInterface->getCamera()->asCameraInterface()->getOrigin();
+
+    if (zoomChange > 0.001 || isAnimating || tilesChanged) {
+        for (const auto &[source, sourceDataManager]: sourceDataManagers) {
+            sourceDataManager.syncAccess([](const auto &manager) {
+                manager->update();
+            });
+        }
     }
 
     if (collisionManager) {
-        auto mapInterface = this->mapInterface;
-        auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
-        auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
-        if (!camera) {
-            return;
-        }
-        double newZoom = camera->getZoom();
-        auto now = DateHelper::currentTimeMillis();
-        bool newIsAnimating = false;
-        bool tilesChanged = !tilesStillValid.test_and_set();
-        double zoomChange = abs(newZoom-lastDataManagerZoom) / std::max(newZoom, 1.0);
-        double timeDiff = now - lastDataManagerUpdate;
         if (zoomChange > 0.001 || timeDiff > 1000 || isAnimating || tilesChanged) {
             lastDataManagerUpdate = now;
             lastDataManagerZoom = newZoom;
 
             Vec2I viewportSize = renderingContext->getViewportSize();
             float viewportRotation = camera->getRotation();
-            std::optional<std::vector<float>> vpMatrix = camera->getLastVpMatrix();
+            std::optional<std::vector<double>> vpMatrix = camera->getLastVpMatrixD();
             if (!vpMatrix) return;
             for (const auto &[source, sourceDataManager]: symbolSourceDataManagers) {
                 bool a = sourceDataManager.syncAccess([&now](const auto &manager) {
@@ -587,20 +647,18 @@ void Tiled2dMapVectorLayer::update() {
                 newIsAnimating |= a;
             }
             isAnimating = newIsAnimating;
-            if (now - lastCollitionCheck > 1000 || tilesChanged) {
+            if (now - lastCollitionCheck > 1000 || tilesChanged || zoomChange > 0.001) {
                 lastCollitionCheck = now;
                 bool enforceUpdate = !prevCollisionStillValid.test_and_set();
                 collisionManager.syncAccess(
-                        [&vpMatrix, &viewportSize, viewportRotation, enforceUpdate, persistingPlacement = mapDescription->persistingSymbolPlacement](
+                        [&vpMatrix, &viewportSize, viewportRotation, enforceUpdate, persistingPlacement = this->persistingSymbolPlacement, is3d, origin](
                                 const auto &manager) {
                             manager->collisionDetection(*vpMatrix, viewportSize, viewportRotation, enforceUpdate,
-                                                        persistingPlacement);
+                                                        persistingPlacement, is3d, origin);
                         });
                 isAnimating = true;
             }
         }
-
-
     }
 }
 
@@ -624,7 +682,8 @@ void Tiled2dMapVectorLayer::onRenderPassUpdate(const std::string &source, bool i
 }
 
 void Tiled2dMapVectorLayer::pregenerateRenderPasses() {
-    std::vector<std::shared_ptr<RenderPassInterface>> newPasses;
+    thread_local std::vector<std::shared_ptr<RenderPassInterface>> newPasses;
+    newPasses.clear();
 
     if (backgroundLayer) {
         auto backgroundLayerPasses = backgroundLayer->buildRenderPasses();
@@ -638,7 +697,7 @@ void Tiled2dMapVectorLayer::pregenerateRenderPasses() {
     }
 
     std::sort(orderedRenderDescriptions.begin(), orderedRenderDescriptions.end(), [](const auto &lhs, const auto &rhs) {
-        return lhs->layerIndex < rhs->layerIndex;
+        return lhs->renderIndex < rhs->renderIndex;
     });
 
     std::vector<std::shared_ptr<::RenderObjectInterface>> renderObjects;
@@ -650,7 +709,7 @@ void Tiled2dMapVectorLayer::pregenerateRenderPasses() {
             continue;
         }
         if ((description->renderPassIndex != lastRenderPassIndex || description->maskingObject != lastMask) && !renderObjects.empty()) {
-            newPasses.emplace_back(std::make_shared<RenderPass>(RenderPassConfig(lastRenderPassIndex, false), renderObjects, lastMask));
+            newPasses.emplace_back(std::make_shared<RenderPass>(RenderPassConfig(lastRenderPassIndex, false, renderTarget), renderObjects, lastMask));
             renderObjects.clear();
             lastMask = nullptr;
             lastRenderPassIndex = 0;
@@ -658,11 +717,11 @@ void Tiled2dMapVectorLayer::pregenerateRenderPasses() {
 
         if (description->isModifyingMask || description->selfMasked) {
             if (!renderObjects.empty()) {
-                newPasses.emplace_back(std::make_shared<RenderPass>(RenderPassConfig(description->renderPassIndex, false), renderObjects, lastMask));
+                newPasses.emplace_back(std::make_shared<RenderPass>(RenderPassConfig(description->renderPassIndex, false, renderTarget), renderObjects, lastMask));
             }
             renderObjects.clear();
             lastMask = nullptr;
-            newPasses.emplace_back(std::make_shared<RenderPass>(RenderPassConfig(description->renderPassIndex, description->selfMasked), description->renderObjects, description->maskingObject));
+            newPasses.emplace_back(std::make_shared<RenderPass>(RenderPassConfig(description->renderPassIndex, description->selfMasked, renderTarget), description->renderObjects, description->maskingObject));
         } else {
             renderObjects.insert(renderObjects.end(), description->renderObjects.begin(), description->renderObjects.end());
             lastMask = description->maskingObject;
@@ -670,7 +729,7 @@ void Tiled2dMapVectorLayer::pregenerateRenderPasses() {
         }
     }
     if (!renderObjects.empty()) {
-        newPasses.emplace_back(std::make_shared<RenderPass>(RenderPassConfig(lastRenderPassIndex, false), renderObjects, lastMask));
+        newPasses.emplace_back(std::make_shared<RenderPass>(RenderPassConfig(lastRenderPassIndex, false, renderTarget), renderObjects, lastMask));
         renderObjects.clear();
         lastMask = nullptr;
     }
@@ -691,13 +750,12 @@ void Tiled2dMapVectorLayer::onAdded(const std::shared_ptr<::MapInterface> &mapIn
     this->mapInterface = mapInterface;
     this->layerIndex = layerIndex;
 
-    if (layerConfigs.empty()) {
+    if (mapDescription == nullptr) {
         scheduleStyleJsonLoading();
         return;
+    } else {
+        setMapDescription(mapDescription);
     }
-
-    // this is needed if the layer is initialized with a style.json string
-    initializeVectorLayer();
 }
 
 void Tiled2dMapVectorLayer::onRemoved() {
@@ -734,8 +792,6 @@ void Tiled2dMapVectorLayer::pause() {
 }
 
 void Tiled2dMapVectorLayer::resume() {
-    isResumed = true;
-
     if (backgroundLayer) {
         backgroundLayer->resume();
     }
@@ -751,8 +807,14 @@ void Tiled2dMapVectorLayer::resume() {
         });
     }
 
+    isResumed = true;
+
+    if (!noPendingStateUpdate.test_and_set()) {
+        applyGlobalOrFeatureStateIfPossible(StateType::BOTH);
+    }
+
     for (const auto &source: sourceInterfaces) {
-        source.message(&Tiled2dMapSourceInterface::notifyTilesUpdates);
+        source.message(MFN(&Tiled2dMapSourceInterface::notifyTilesUpdates));
     }
 }
 
@@ -762,10 +824,10 @@ void Tiled2dMapVectorLayer::setAlpha(float alpha) {
     }
     this->alpha = alpha;
     for (const auto &[source, sourceDataManager]: sourceDataManagers) {
-        sourceDataManager.message(&Tiled2dMapVectorSourceTileDataManager::setAlpha, alpha);
+        sourceDataManager.message(MFN(&Tiled2dMapVectorSourceTileDataManager::setAlpha), alpha);
     }
     for (const auto &[source, sourceDataManager]: symbolSourceDataManagers) {
-        sourceDataManager.message(&Tiled2dMapVectorSourceSymbolDataManager::setAlpha, alpha);
+        sourceDataManager.message(MFN(&Tiled2dMapVectorSourceSymbolDataManager::setAlpha), alpha);
     }
 
     if (mapInterface)
@@ -776,37 +838,39 @@ float Tiled2dMapVectorLayer::getAlpha() { return alpha; }
 
 
 void Tiled2dMapVectorLayer::forceReload() {
-    if (!isLoadingStyleJson && remoteStyleJsonUrl.has_value() && !mapDescription && vectorTileSources.empty()) {
+    std::lock_guard<std::recursive_mutex> lock(mapDescriptionMutex);
+    if (!isLoadingStyleJson && (remoteStyleJsonUrl.has_value() || localDataProvider) && !mapDescription && vectorTileSources.empty()) {
         scheduleStyleJsonLoading();
         return;
     }
     Tiled2dMapLayer::forceReload();
 }
 
-void Tiled2dMapVectorLayer::onTilesUpdated(const std::string &layerName, std::unordered_set<Tiled2dMapRasterTileInfo> currentTileInfos) {
+void Tiled2dMapVectorLayer::onTilesUpdated(const std::string &layerName, VectorSet<Tiled2dMapRasterTileInfo> currentTileInfos) {
 
     std::unique_lock<std::mutex> lock(setupMutex);
     setupCV.wait(lock, [this]{ return setupReady; });
 
     auto sourceManager = sourceDataManagers.find(layerName);
     if (sourceManager != sourceDataManagers.end()) {
-        sourceManager->second.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorSourceTileDataManager::onRasterTilesUpdated, layerName, currentTileInfos);
+        sourceManager->second.message(MailboxDuplicationStrategy::replaceNewest, MFN(&Tiled2dMapVectorSourceTileDataManager::onRasterTilesUpdated), layerName, std::move(currentTileInfos));
     }
     tilesStillValid.clear();
 }
 
-void Tiled2dMapVectorLayer::onTilesUpdated(const std::string &sourceName, std::unordered_set<Tiled2dMapVectorTileInfo> currentTileInfos) {
+void Tiled2dMapVectorLayer::onTilesUpdated(const std::string &sourceName, VectorSet<Tiled2dMapVectorTileInfo> currentTileInfos) {
 
     std::unique_lock<std::mutex> lock(setupMutex);
     setupCV.wait(lock, [this]{ return setupReady; });
-
+    
     auto sourceManager = sourceDataManagers.find(sourceName);
     if (sourceManager != sourceDataManagers.end()) {
-        sourceManager->second.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorSourceTileDataManager::onVectorTilesUpdated, sourceName, currentTileInfos);
+        auto currentTileInfosCopy = currentTileInfos.copy(); // can only be moved into one of the two messages, so make a copy first.
+        sourceManager->second.message(MailboxDuplicationStrategy::replaceNewest, MFN(&Tiled2dMapVectorSourceTileDataManager::onVectorTilesUpdated), sourceName, std::move(currentTileInfosCopy));
     }
     auto symbolSourceManager = symbolSourceDataManagers.find(sourceName);
     if (symbolSourceManager != symbolSourceDataManagers.end()) {
-        symbolSourceManager->second.message(MailboxDuplicationStrategy::replaceNewest, &Tiled2dMapVectorSourceTileDataManager::onVectorTilesUpdated, sourceName, currentTileInfos);
+        symbolSourceManager->second.message(MailboxDuplicationStrategy::replaceNewest, MFN(&Tiled2dMapVectorSourceTileDataManager::onVectorTilesUpdated), sourceName, std::move(currentTileInfos));
     }
     tilesStillValid.clear();
 }
@@ -822,10 +886,13 @@ void Tiled2dMapVectorLayer::loadSpriteData(int scale, bool fromLocal) {
 
     std::string scalePrefix = (scale == 3 ? "@3x" : (scale == 2 ? "@2x" : ""));
     std::stringstream ssTexture;
-    ssTexture << *mapDescription->spriteBaseUrl << scalePrefix << ".png";
-    std::string urlTexture = ssTexture.str();
     std::stringstream ssData;
-    ssData << *mapDescription->spriteBaseUrl << scalePrefix << ".json";
+    {
+        std::lock_guard<std::recursive_mutex> lock(mapDescriptionMutex);
+        ssTexture << *mapDescription->spriteBaseUrl << scalePrefix << ".png";
+        ssData << *mapDescription->spriteBaseUrl << scalePrefix << ".json";
+    }
+    std::string urlTexture = ssTexture.str();
     std::string urlData = ssData.str();
 
     struct Context {
@@ -937,7 +1004,7 @@ void Tiled2dMapVectorLayer::loadSpriteData(int scale, bool fromLocal) {
         }
         
         
-        selfActor.message(&Tiled2dMapVectorLayer::didLoadSpriteData, jsonData, spriteTexture);
+        selfActor.message(MFN(&Tiled2dMapVectorLayer::didLoadSpriteData), jsonData, spriteTexture);
     });
 }
 
@@ -946,11 +1013,11 @@ void Tiled2dMapVectorLayer::didLoadSpriteData(std::shared_ptr<SpriteData> sprite
     this->spriteTexture = spriteTexture;
 
     for (const auto &[source, manager] : symbolSourceDataManagers) {
-        manager.message(&Tiled2dMapVectorSourceSymbolDataManager::setSprites, spriteData, spriteTexture);
+        manager.message(MFN(&Tiled2dMapVectorSourceSymbolDataManager::setSprites), spriteData, spriteTexture);
     }
 
     for (const auto &[source, manager] : sourceDataManagers) {
-        manager.message(&Tiled2dMapVectorSourceTileDataManager::setSprites, spriteData, spriteTexture);
+        manager.message(MFN(&Tiled2dMapVectorSourceTileDataManager::setSprites), spriteData, spriteTexture);
     }
 
     if (backgroundLayer) {
@@ -970,10 +1037,10 @@ void Tiled2dMapVectorLayer::setScissorRect(const std::optional<::RectI> &scissor
 void Tiled2dMapVectorLayer::setSelectionDelegate(const std::weak_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> &selectionDelegate) {
     this->selectionDelegate = selectionDelegate;
     for (const auto &[source, sourceDataManager]: sourceDataManagers) {
-        sourceDataManager.message(&Tiled2dMapVectorSourceTileDataManager::setSelectionDelegate, selectionDelegate);
+        sourceDataManager.message(MFN(&Tiled2dMapVectorSourceTileDataManager::setSelectionDelegate), selectionDelegate);
     }
     for (const auto &[source, sourceDataManager]: symbolSourceDataManagers) {
-        sourceDataManager.message(&Tiled2dMapVectorSourceSymbolDataManager::setSelectionDelegate, selectionDelegate);
+        sourceDataManager.message(MFN(&Tiled2dMapVectorSourceSymbolDataManager::setSelectionDelegate), selectionDelegate);
     }
 }
 
@@ -1097,14 +1164,14 @@ void Tiled2dMapVectorLayer::updateLayerDescription(std::shared_ptr<VectorLayerDe
     if (layerDescription->getType() == VectorLayerType::symbol) {
         for (const auto &[source, sourceDataManager]: symbolSourceDataManagers) {
             if (legacySource == source || newSource == source) {
-                sourceDataManager.message(&Tiled2dMapVectorSourceDataManager::updateLayerDescription, layerDescription, legacyIndex,
+                sourceDataManager.message(MFN(&Tiled2dMapVectorSourceDataManager::updateLayerDescription), layerDescription, legacyIndex,
                                           needsTileReplace);
             }
         }
     } else {
         for (const auto &[source, sourceDataManager]: sourceDataManagers) {
             if (legacySource == source || newSource == source) {
-                sourceDataManager.message(&Tiled2dMapVectorSourceDataManager::updateLayerDescription, layerDescription, legacyIndex,
+                sourceDataManager.message(MFN(&Tiled2dMapVectorSourceDataManager::updateLayerDescription), layerDescription, legacyIndex,
                                           needsTileReplace);
             }
         }
@@ -1116,7 +1183,13 @@ void Tiled2dMapVectorLayer::updateLayerDescription(std::shared_ptr<VectorLayerDe
 
 std::optional<std::shared_ptr<FeatureContext>> Tiled2dMapVectorLayer::getFeatureContext(int64_t identifier) {
     for (const auto &[source, vectorTileSource] : vectorTileSources) {
-        auto const &currentTileInfos = vectorTileSource.converse(&Tiled2dMapVectorSource::getCurrentTiles).get();
+        VectorSet<Tiled2dMapVectorTileInfo> currentTileInfos;
+        try {
+            currentTileInfos = vectorTileSource.converse(MFN(&Tiled2dMapVectorSource::getCurrentTiles)).get();
+        } catch (const std::exception &e) {
+            LogError << "Exception while getting future result: " <<= e.what();
+            continue;
+        }
 
         for (auto const &tile: currentTileInfos) {
             for (auto it = tile.layerFeatureMaps->begin(); it != tile.layerFeatureMaps->end(); it++) {
@@ -1201,6 +1274,10 @@ bool Tiled2dMapVectorLayer::onMoveComplete() {
     return interactionManager->onMoveComplete();
 }
 
+bool Tiled2dMapVectorLayer::onOneFingerDoubleClickMoveComplete() {
+    return interactionManager->onOneFingerDoubleClickMoveComplete();
+}
+
 bool Tiled2dMapVectorLayer::onTwoFingerClick(const Vec2F &posScreen1, const Vec2F &posScreen2) {
     return interactionManager->onTwoFingerClick(posScreen1, posScreen2);
 }
@@ -1232,9 +1309,13 @@ void Tiled2dMapVectorLayer::setGlobalState(const std::unordered_map<std::string,
 }
 
 void Tiled2dMapVectorLayer::applyGlobalOrFeatureStateIfPossible(StateType type) {
+    std::lock_guard<std::recursive_mutex> lock(mapDescriptionMutex);
     auto mapInterface = this->mapInterface;
     auto mapDescription = this->mapDescription;
-    if(!mapInterface || !mapDescription) { return; }
+    if(!mapInterface || !mapDescription || !isResumed) {
+        noPendingStateUpdate.clear();
+        return;
+    }
 
     std::unordered_map<std::string, std::vector<std::tuple<std::string, std::string>>> sourceLayerIdentifiersMap;
     std::unordered_map<std::string, std::vector<std::tuple<std::shared_ptr<VectorLayerDescription>, int32_t>>> sourcelayerDescriptionIndexMap;
@@ -1258,13 +1339,13 @@ void Tiled2dMapVectorLayer::applyGlobalOrFeatureStateIfPossible(StateType type) 
     for (const auto &[source, sourceLayerIdentifiers]: sourceLayerIdentifiersMap) {
         const auto &symbolManager = symbolSourceDataManagers.find(source);
         if (symbolManager != symbolSourceDataManagers.end()) {
-            symbolManager->second.message(&Tiled2dMapVectorSourceSymbolDataManager::reloadLayerContent, sourceLayerIdentifiers);
+            symbolManager->second.message(MFN(&Tiled2dMapVectorSourceSymbolDataManager::reloadLayerContent), sourceLayerIdentifiers);
         }
     }
     for (const auto &[source, descriptionIndexPairs]: sourcelayerDescriptionIndexMap) {
         const auto &dataManager = sourceDataManagers.find(source);
         if (dataManager != sourceDataManagers.end()) {
-            dataManager->second.message(&Tiled2dMapVectorSourceTileDataManager::reloadLayerContent, descriptionIndexPairs);
+            dataManager->second.message(MFN(&Tiled2dMapVectorSourceTileDataManager::reloadLayerContent), descriptionIndexPairs);
         }
     }
 
@@ -1277,6 +1358,15 @@ LayerReadyState Tiled2dMapVectorLayer::isReadyToRenderOffscreen() {
         return LayerReadyState::NOT_READY;
     }
     return Tiled2dMapLayer::isReadyToRenderOffscreen();
+}
+
+void Tiled2dMapVectorLayer::enableAnimations(bool enabled) {
+    this->animationsEnabled = enabled;
+    for (const auto &[source, manager] : symbolSourceDataManagers) {
+        manager.syncAccess([enabled](const std::shared_ptr<Tiled2dMapVectorSourceSymbolDataManager> manager) {
+            manager->enableAnimations(enabled);
+        });
+    }
 }
 
 void Tiled2dMapVectorLayer::setMinZoomLevelIdentifier(std::optional<int32_t> value) {
@@ -1298,6 +1388,15 @@ std::optional<int32_t> Tiled2dMapVectorLayer::getMaxZoomLevelIdentifier() {
 void Tiled2dMapVectorLayer::invalidateCollisionState() {
     prevCollisionStillValid.clear();
     tilesStillValid.clear();
+    auto mapInterface = this->mapInterface;
+    if (mapInterface) {
+        mapInterface->invalidate();
+    }
+}
+
+void Tiled2dMapVectorLayer::invalidateTilesState() {
+    tilesStillValid.clear();
+    auto mapInterface = this->mapInterface;
     if (mapInterface) {
         mapInterface->invalidate();
     }
@@ -1317,4 +1416,51 @@ void Tiled2dMapVectorLayer::updateReadyStateListenerIfNeeded() {
         listener->stateUpdate(newState);
         lastReadyState = newState;
     }
+}
+
+
+
+/// Returns a list of all the point feature contexts that are currently visible on the screen. This method is blocking and should be run on a background thread
+/// - Parameters:
+///   - paddingPc: padding in percentage, where  0 = consider entire screen and 1.0 = considered rect is half of full width and height
+///   - sourceLayer: If given, only consider this layer (can greatly improve speed)
+std::vector<VectorLayerFeatureCoordInfo> Tiled2dMapVectorLayer::getVisiblePointFeatureContexts(float paddingPc, const std::optional<std::string> & sourceLayer) {
+    auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
+    if (!camera) {
+        return {};
+    }
+
+    std::vector<VectorLayerFeatureCoordInfo> features = {};
+
+    for (const auto &[source, vectorTileSource] : vectorTileSources) {
+        VectorSet<Tiled2dMapVectorTileInfo> currentTileInfos;
+        try {
+            currentTileInfos = vectorTileSource.converse(MFN(&Tiled2dMapVectorSource::getCurrentTiles)).get();
+        } catch (const std::exception &e) {
+            LogError << "Exception while getting future result: " <<= e.what();
+            continue;
+        }
+
+        for (auto const &tile: currentTileInfos) {
+            for (auto it = tile.layerFeatureMaps->begin(); it != tile.layerFeatureMaps->end(); it++) {
+                if (sourceLayer.has_value() && it->first != *sourceLayer) {
+                    continue;
+                }
+                for (auto const &[featureContext, geometry]: *it->second) {
+                    for (auto const &points: geometry->getPointCoordinates()) {
+                        for (auto const &point: points) {
+                            const auto coord = Vec2DHelper::toCoord(point, tile.tileInfo.tileInfo.bounds.topLeft.systemIdentifier);
+                            bool isVisible = camera->coordIsVisibleOnScreen(coord, paddingPc);
+
+                            if (isVisible) {
+                                features.push_back(VectorLayerFeatureCoordInfo(featureContext->getFeatureInfo(), coord));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return features;
 }

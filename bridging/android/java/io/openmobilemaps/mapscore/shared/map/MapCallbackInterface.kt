@@ -12,7 +12,7 @@ abstract class MapCallbackInterface {
 
     abstract fun onMapResumed()
 
-    private class CppProxy : MapCallbackInterface {
+    public class CppProxy : MapCallbackInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

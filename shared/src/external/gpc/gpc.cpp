@@ -2509,6 +2509,44 @@ void gpc_set_polygon (const PolygonCoord& p, gpc_polygon *polygon) {
     }
 }
 
+void gpc_set_polygons (const std::vector<PolygonCoord>& ps, gpc_polygon *polygon) {
+    std::vector<size_t> baseIndices(ps.size());
+    size_t numContours = 0;
+    for (size_t i = 0; i < ps.size(); ++i) {
+        baseIndices[i] = numContours;
+        numContours += (ps[i].positions.empty() ? 0 : 1) + (int)ps[i].holes.size();
+    }
+    polygon->num_contours = (int)numContours;
+    MALLOC(polygon->hole, numContours * sizeof(int), "hole flag array creation", int);
+    MALLOC(polygon->contour, numContours * sizeof(gpc_vertex_list), "contour creation", gpc_vertex_list);
+
+    for (size_t polygonIndex = 0; polygonIndex < ps.size(); ++polygonIndex) {
+        const auto &p = ps[polygonIndex];
+        size_t baseIndex = baseIndices[polygonIndex];
+        if (!p.positions.empty()) {
+            polygon->contour[baseIndex].num_vertices = (int) p.positions.size();
+            polygon->hole[baseIndex] = FALSE; /* Assume the contours to be external */
+            MALLOC(polygon->contour[baseIndex].vertex, polygon->contour[baseIndex].num_vertices * sizeof(gpc_vertex), "vertex creation",
+                   gpc_vertex);
+            for (int v = 0; v < polygon->contour[baseIndex].num_vertices; v++) {
+                polygon->contour[baseIndex].vertex[v].x = p.positions.at(v).x;
+                polygon->contour[baseIndex].vertex[v].y = p.positions.at(v).y;
+            }
+        }
+
+        for (unsigned int i = 0; i < p.holes.size(); i++) {
+            polygon->contour[i + baseIndex + 1].num_vertices = (int) p.holes.at(i).size();
+            polygon->hole[i + baseIndex + 1] = TRUE;
+            MALLOC(polygon->contour[i + baseIndex + 1].vertex, polygon->contour[i + baseIndex + 1].num_vertices * sizeof(gpc_vertex), "vertex creation",
+                   gpc_vertex);
+            for (int v = 0; v < polygon->contour[i + baseIndex + 1].num_vertices; v++) {
+                polygon->contour[i + baseIndex + 1].vertex[v].x = p.holes.at(i).at(v).x;
+                polygon->contour[i + baseIndex + 1].vertex[v].y = p.holes.at(i).at(v).y;
+            }
+        }
+    }
+}
+
 std::vector<::PolygonCoord> gpc_get_polygon_coord (gpc_polygon *polygon, const int32_t systemIdentifier) {
     std::vector<std::vector<Coord>> positions;
     std::vector<std::vector<Coord>> holes;

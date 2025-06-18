@@ -30,13 +30,17 @@ abstract class SceneInterface {
 
     abstract fun getShaderFactory(): io.openmobilemaps.mapscore.shared.graphics.shader.ShaderFactoryInterface
 
-    abstract fun drawFrame()
+    abstract fun prepare()
+
+    abstract fun drawFrame(target: RenderTargetInterface?)
+
+    abstract fun compute()
 
     abstract fun clear()
 
     abstract fun invalidate()
 
-    private class CppProxy : SceneInterface {
+    public class CppProxy : SceneInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 
@@ -93,11 +97,23 @@ abstract class SceneInterface {
         }
         private external fun native_getShaderFactory(_nativeRef: Long): io.openmobilemaps.mapscore.shared.graphics.shader.ShaderFactoryInterface
 
-        override fun drawFrame() {
+        override fun prepare() {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_drawFrame(this.nativeRef)
+            native_prepare(this.nativeRef)
         }
-        private external fun native_drawFrame(_nativeRef: Long)
+        private external fun native_prepare(_nativeRef: Long)
+
+        override fun drawFrame(target: RenderTargetInterface?) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_drawFrame(this.nativeRef, target)
+        }
+        private external fun native_drawFrame(_nativeRef: Long, target: RenderTargetInterface?)
+
+        override fun compute() {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_compute(this.nativeRef)
+        }
+        private external fun native_compute(_nativeRef: Long)
 
         override fun clear() {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

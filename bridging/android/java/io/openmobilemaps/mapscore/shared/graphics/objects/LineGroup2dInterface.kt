@@ -8,11 +8,11 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class LineGroup2dInterface {
 
-    abstract fun setLines(lines: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes, indices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
+    abstract fun setLines(lines: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes, indices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D, is3d: Boolean)
 
     abstract fun asGraphicsObject(): GraphicsObjectInterface
 
-    private class CppProxy : LineGroup2dInterface {
+    public class CppProxy : LineGroup2dInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 
@@ -27,11 +27,11 @@ abstract class LineGroup2dInterface {
             external fun nativeDestroy(nativeRef: Long)
         }
 
-        override fun setLines(lines: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes, indices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes) {
+        override fun setLines(lines: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes, indices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D, is3d: Boolean) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_setLines(this.nativeRef, lines, indices)
+            native_setLines(this.nativeRef, lines, indices, origin, is3d)
         }
-        private external fun native_setLines(_nativeRef: Long, lines: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes, indices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
+        private external fun native_setLines(_nativeRef: Long, lines: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes, indices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D, is3d: Boolean)
 
         override fun asGraphicsObject(): GraphicsObjectInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

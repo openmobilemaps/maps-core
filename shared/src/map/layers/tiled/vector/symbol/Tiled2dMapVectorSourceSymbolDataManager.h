@@ -26,6 +26,10 @@
 #include "Tiled2dMapVectorSymbolFontProviderManager.h"
 #include "Tiled2dMapVectorLayerSymbolDelegateInterface.h"
 
+#ifdef OPENMOBILEMAPS_GL
+#include "TextInstancedShaderOpenGl.h"
+#endif
+
 struct InstanceCounter {
     InstanceCounter() : baseValue(0), decreasingCounter(0) {}
 
@@ -72,7 +76,7 @@ public:
 
     virtual void setAlpha(float alpha) override;
 
-    void onVectorTilesUpdated(const std::string &sourceName, std::unordered_set<Tiled2dMapVectorTileInfo> currentTileInfos) override;
+    void onVectorTilesUpdated(const std::string &sourceName, VectorSet<Tiled2dMapVectorTileInfo> currentTileInfos) override;
 
     void updateLayerDescriptions(std::vector<Tiled2dMapVectorLayerUpdateInformation> layerUpdates) override;
 
@@ -105,6 +109,8 @@ public:
     void onSymbolGroupInitialized(bool success, const Tiled2dMapVersionedTileInfo &tileInfo, const std::string &layerIdentifier, const WeakActor<Tiled2dMapVectorSymbolGroup> &symbolGroup);
 
     void setSymbolDelegate(const /*not-null*/ std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> & symbolDelegate);
+
+    void enableAnimations(bool enabled);
 
 private:
     std::vector<Actor<Tiled2dMapVectorSymbolGroup>>
@@ -148,10 +154,12 @@ private:
 
     bool persistingSymbolPlacement = false;
 
-#ifdef __ANDROID__
-    // Higher counts may cause issues for instanced text rendering
-    int32_t maxNumFeaturesPerGroup = 3500;
+#ifdef OPENMOBILEMAPS_GL
+    // Higher counts can't be handled due to the limited UBO size
+#include "TextInstancedShaderOpenGl.h"
+    int32_t maxNumFeaturesPerGroup = TextInstancedShaderOpenGl::MAX_NUM_TEXT_STYLES;
 #else
     int32_t maxNumFeaturesPerGroup = std::numeric_limits<int32_t>().max();
 #endif
+    VectorSet<Tiled2dMapVectorTileInfo> latestTileInfos;
 };

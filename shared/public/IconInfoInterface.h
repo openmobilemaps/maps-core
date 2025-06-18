@@ -24,8 +24,10 @@ public:
 
     virtual ::Coord getCoordinate() = 0;
 
+    /** iconSize is in meters when scaleType is scale invariant(i.e. FIXED or ROTATION_INVARIANT), screen pixels otherwise */
     virtual void setIconSize(const ::Vec2F & size) = 0;
 
+    /** iconSize is in meters when scaleType is scale invariant(i.e. FIXED or ROTATION_INVARIANT), screen pixels otherwise */
     virtual ::Vec2F getIconSize() = 0;
 
     virtual void setType(IconType scaleType) = 0;

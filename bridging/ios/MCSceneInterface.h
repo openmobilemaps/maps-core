@@ -6,6 +6,7 @@
 #import <Foundation/Foundation.h>
 @class MCSceneInterface;
 @protocol MCCameraInterface;
+@protocol MCRenderTargetInterface;
 @protocol MCRendererInterface;
 @protocol MCRenderingContextInterface;
 @protocol MCSceneCallbackInterface;
@@ -33,7 +34,11 @@
 
 - (nullable id<MCShaderFactoryInterface>)getShaderFactory;
 
-- (void)drawFrame;
+- (void)prepare;
+
+- (void)drawFrame:(nullable id<MCRenderTargetInterface>)target;
+
+- (void)compute;
 
 - (void)clear;
 

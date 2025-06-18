@@ -10,9 +10,9 @@
 
 import Foundation
 import MapCoreSharedModule
-import Metal
+@preconcurrency import Metal
 
-final class Text: BaseGraphicsObject {
+final class Text: BaseGraphicsObject, @unchecked Sendable {
     private var shader: TextShader
 
     private var verticesBuffer: MTLBuffer?
@@ -25,9 +25,11 @@ final class Text: BaseGraphicsObject {
 
     init(shader: MCShaderProgramInterface, metalContext: MetalContext) {
         self.shader = shader as! TextShader
-        super.init(device: metalContext.device,
-                   sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue)!,
-                   label: "Text")
+        super
+            .init(
+                device: metalContext.device,
+                sampler: metalContext.samplerLibrary.value(Sampler.magLinear.rawValue)!,
+                label: "Text")
     }
 
     private func setupStencilStates() {
@@ -46,19 +48,24 @@ final class Text: BaseGraphicsObject {
         stencilState = device.makeDepthStencilState(descriptor: s2)
     }
 
-    override func render(encoder: MTLRenderCommandEncoder,
-                         context: RenderingContext,
-                         renderPass _: MCRenderPassConfig,
-                         mvpMatrix: Int64,
-                         isMasked: Bool,
-                         screenPixelAsRealMeterFactor _: Double) {
+    override func render(
+        encoder: MTLRenderCommandEncoder,
+        context: RenderingContext,
+        renderPass _: MCRenderPassConfig,
+        vpMatrix: Int64,
+        mMatrix: Int64,
+        origin: MCVec3D,
+        isMasked: Bool,
+        screenPixelAsRealMeterFactor _: Double
+    ) {
         lock.lock()
         defer {
             lock.unlock()
         }
 
         guard let verticesBuffer,
-              let indicesBuffer else { return }
+            let indicesBuffer
+        else { return }
 
         if isMasked {
             if stencilState == nil {
@@ -81,9 +88,12 @@ final class Text: BaseGraphicsObject {
         shader.preRender(context)
 
         encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
-        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(mvpMatrix)) {
-            encoder.setVertexBytes(matrixPointer, length: 64, index: 1)
+
+        let vpMatrixBuffer = vpMatrixBuffers.getNextBuffer(context)
+        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(vpMatrix)) {
+            vpMatrixBuffer?.contents().copyMemory(from: matrixPointer, byteCount: 64)
         }
+        encoder.setVertexBuffer(vpMatrixBuffer, offset: 0, index: 1)
 
         encoder.setFragmentSamplerState(sampler, index: 0)
 
@@ -91,19 +101,20 @@ final class Text: BaseGraphicsObject {
             encoder.setFragmentTexture(texture, index: 0)
         }
 
-        encoder.drawIndexedPrimitives(type: .triangle,
-                                      indexCount: indicesCount,
-                                      indexType: .uint16,
-                                      indexBuffer: indicesBuffer,
-                                      indexBufferOffset: 0)
+        encoder.drawIndexedPrimitives(
+            type: .triangle,
+            indexCount: indicesCount,
+            indexType: .uint16,
+            indexBuffer: indicesBuffer,
+            indexBufferOffset: 0)
     }
 }
 
 extension Text: MCTextInterface {
     func setTextsShared(_ vertices: MCSharedBytes, indices: MCSharedBytes) {
         guard let verticesBuffer = device.makeBuffer(from: vertices),
-              let indicesBuffer = device.makeBuffer(from: indices),
-              indices.elementCount > 0
+            let indicesBuffer = device.makeBuffer(from: indices),
+            indices.elementCount > 0
         else {
             lock.withCritical {
                 indicesCount = 0

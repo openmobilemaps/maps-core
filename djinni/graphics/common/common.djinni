@@ -50,14 +50,21 @@ vec_3_d = record {
     x: f64;
     y: f64;
     z: f64;
-}
+} deriving (eq, ord)
 
 quad_2d_d = record {
     top_left: vec_2_d;
     top_right: vec_2_d;
     bottom_right: vec_2_d;
     bottom_left: vec_2_d;
-}
+} deriving (eq, ord)
+
+quad_3d_d = record {
+    top_left: vec_3_d;
+    top_right: vec_3_d;
+    bottom_right: vec_3_d;
+    bottom_left: vec_3_d;
+} deriving (eq, ord)
 
 circle_d = record {
     x: f64;

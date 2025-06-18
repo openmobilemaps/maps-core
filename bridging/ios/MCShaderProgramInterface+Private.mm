@@ -58,6 +58,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (BOOL)usesModelMatrix {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->usesModelMatrix();
+        return ::djinni::Bool::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 namespace djinni_generated {
 
 class ShaderProgramInterface::ObjcProxy final
@@ -90,6 +97,13 @@ public:
     {
         @autoreleasepool {
             [djinni_private_get_proxied_objc_object() setBlendMode:(::djinni::Enum<::BlendMode, MCBlendMode>::fromCpp(c_blendMode))];
+        }
+    }
+    bool usesModelMatrix() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() usesModelMatrix];
+            return ::djinni::Bool::toCpp(objcpp_result_);
         }
     }
 };

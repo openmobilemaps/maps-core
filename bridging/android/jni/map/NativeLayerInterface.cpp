@@ -3,12 +3,14 @@
 
 #include "NativeLayerInterface.h"  // my header
 #include "Marshal.hpp"
+#include "NativeComputePassInterface.h"
 #include "NativeErrorManager.h"
 #include "NativeLayerReadyState.h"
 #include "NativeMapInterface.h"
 #include "NativeMaskingObjectInterface.h"
 #include "NativeRectI.h"
 #include "NativeRenderPassInterface.h"
+#include "NativeRenderTargetInterface.h"
 
 namespace djinni_generated {
 
@@ -42,6 +44,14 @@ std::vector</*not-null*/ std::shared_ptr<::RenderPassInterface>> NativeLayerInte
     auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_buildRenderPasses);
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni::List<::djinni_generated::NativeRenderPassInterface>::toCpp(jniEnv, jret);
+}
+std::vector</*not-null*/ std::shared_ptr<::ComputePassInterface>> NativeLayerInterface::JavaProxy::buildComputePasses() {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeLayerInterface>::get();
+    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_buildComputePasses);
+    ::djinni::jniExceptionCheck(jniEnv);
+    return ::djinni::List<::djinni_generated::NativeComputePassInterface>::toCpp(jniEnv, jret);
 }
 void NativeLayerInterface::JavaProxy::onAdded(const /*not-null*/ std::shared_ptr<::MapInterface> & c_mapInterface, int32_t c_layerIndex) {
     auto jniEnv = ::djinni::jniGetThreadEnv();
@@ -142,6 +152,14 @@ void NativeLayerInterface::JavaProxy::forceReload() {
     jniEnv->CallVoidMethod(Handle::get().get(), data.method_forceReload);
     ::djinni::jniExceptionCheck(jniEnv);
 }
+void NativeLayerInterface::JavaProxy::setPrimaryRenderTarget(const /*nullable*/ std::shared_ptr<::RenderTargetInterface> & c_target) {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeLayerInterface>::get();
+    jniEnv->CallVoidMethod(Handle::get().get(), data.method_setPrimaryRenderTarget,
+                           ::djinni::get(::djinni::Optional<std::optional, ::djinni_generated::NativeRenderTargetInterface>::fromCpp(jniEnv, c_target)));
+    ::djinni::jniExceptionCheck(jniEnv);
+}
 
 CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_LayerInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
@@ -172,6 +190,15 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_LayerInter
         const auto& ref = ::djinni::objectFromHandleAddress<::LayerInterface>(nativeRef);
         auto r = ref->buildRenderPasses();
         return ::djinni::release(::djinni::List<::djinni_generated::NativeRenderPassInterface>::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_LayerInterface_00024CppProxy_native_1buildComputePasses(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::LayerInterface>(nativeRef);
+        auto r = ref->buildComputePasses();
+        return ::djinni::release(::djinni::List<::djinni_generated::NativeComputePassInterface>::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
@@ -279,6 +306,14 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_LayerInterfac
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::LayerInterface>(nativeRef);
         ref->forceReload();
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_LayerInterface_00024CppProxy_native_1setPrimaryRenderTarget(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeRenderTargetInterface::Boxed::JniType j_target)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::LayerInterface>(nativeRef);
+        ref->setPrimaryRenderTarget(::djinni::Optional<std::optional, ::djinni_generated::NativeRenderTargetInterface>::toCpp(jniEnv, j_target));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

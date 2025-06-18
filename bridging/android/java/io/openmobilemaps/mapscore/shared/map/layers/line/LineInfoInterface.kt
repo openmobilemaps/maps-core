@@ -14,7 +14,7 @@ abstract class LineInfoInterface {
 
     abstract fun getStyle(): LineStyle
 
-    private class CppProxy : LineInfoInterface {
+    public class CppProxy : LineInfoInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

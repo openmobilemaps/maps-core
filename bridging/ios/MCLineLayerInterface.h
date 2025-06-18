@@ -34,4 +34,6 @@
 
 - (void)setLayerClickable:(BOOL)isLayerClickable;
 
+- (void)setRenderPassIndex:(int32_t)index;
+
 @end

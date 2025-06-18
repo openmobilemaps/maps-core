@@ -23,6 +23,8 @@ public:
 
     virtual std::vector<Tiled2dMapZoomLevelInfo> getZoomLevelInfos() = 0;
 
+    virtual std::vector<Tiled2dMapZoomLevelInfo> getVirtualZoomLevelInfos() = 0;
+
     virtual Tiled2dMapZoomInfo getZoomInfo() = 0;
 
     virtual std::string getLayerName() = 0;

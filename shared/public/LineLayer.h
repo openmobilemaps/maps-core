@@ -83,6 +83,9 @@ class LineLayer : public LineLayerInterface,
 
     void setSelected(const std::unordered_set<std::string> &selectedIds) override;
 
+    virtual void setRenderPassIndex(int32_t index) override;
+
+
 protected:
     std::shared_ptr<MapInterface> mapInterface;
 
@@ -92,6 +95,7 @@ protected:
     std::vector<std::pair<std::shared_ptr<LineInfoInterface>, std::shared_ptr<Line2dLayerObject>>> lines;
     std::shared_ptr<::MaskingObjectInterface> mask = nullptr;
     std::shared_ptr<GraphicsObjectInterface> maskGraphicsObject = nullptr;
+    std::unordered_set<std::string> animatedLineStyleIds = {};
 
     void generateRenderPasses();
     std::recursive_mutex renderPassMutex;
@@ -105,4 +109,7 @@ protected:
 
     std::atomic<bool> isHidden;
     std::atomic<bool> isLayerClickable = true;
+    std::atomic<bool> hasAnimatedLineStyles = false;
+
+    int32_t renderPassIndex = 0;
 };

@@ -32,13 +32,15 @@ import io.openmobilemaps.mapscore.shared.map.*
 import io.openmobilemaps.mapscore.shared.map.controls.TouchAction
 import io.openmobilemaps.mapscore.shared.map.controls.TouchEvent
 import io.openmobilemaps.mapscore.shared.map.controls.TouchHandlerInterface
+import io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateConversionHelperInterface
 import io.openmobilemaps.mapscore.shared.map.scheduling.TaskInterface
+import io.openmobilemaps.mapscore.shared.map.scheduling.ThreadPoolScheduler
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
+import kotlin.collections.ArrayList
 
 open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) :
 	GlTextureView(context, attrs, defStyleAttr), GLSurfaceView.Renderer, AndroidSchedulerCallback, LifecycleObserver,
@@ -59,14 +61,15 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 	private val mapViewStateMutable = MutableStateFlow(MapViewState.UNINITIALIZED)
 	val mapViewState = mapViewStateMutable.asStateFlow()
 
-	open fun setupMap(mapConfig: MapConfig, useMSAA: Boolean = false) {
-		val densityExact = resources.displayMetrics.xdpi
-
+	open fun setupMap(mapConfig: MapConfig, density: Float = resources.displayMetrics.xdpi, useMSAA: Boolean = false, is3D: Boolean = false) {
 		configureGL(useMSAA)
 		setRenderer(this)
+		val scheduler = ThreadPoolScheduler.create()
 		val mapInterface = MapInterface.createWithOpenGl(
 			mapConfig,
-			densityExact
+			scheduler,
+			density,
+			is3D
 		)
 		mapInterface.setCallbackHandler(object : MapCallbackInterface() {
 			override fun invalidate() {
@@ -74,13 +77,13 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 			}
 
 			override fun onMapResumed() {
-				mapViewStateMutable.value = MapViewState.RESUMED
+				updateMapViewState(MapViewState.RESUMED)
 			}
 		})
 		mapInterface.setBackgroundColor(Color(1f, 1f, 1f, 1f))
 		touchHandler = mapInterface.getTouchHandler()
 		this.mapInterface = mapInterface
-		mapViewStateMutable.value = MapViewState.INITIALIZED
+		updateMapViewState(MapViewState.INITIALIZED)
 	}
 
 	fun registerLifecycle(lifecycle: Lifecycle) {
@@ -97,7 +100,20 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 	}
 
 	override fun onDrawFrame(gl: GL10?) {
-		mapInterface?.drawFrame()
+		mapInterface?.apply {
+			prepare()
+
+			getRenderingContext().let { context ->
+				context.asOpenGlRenderingContext()?.getRenderTargets()?.forEach { renderTarget ->
+					renderTarget.bindFramebuffer(context)
+					drawOffscreenFrame(renderTarget.asRenderTargetInterface())
+					renderTarget.unbindFramebuffer()
+				}
+			}
+
+			compute()
+			drawFrame()
+		}
 		if (saveFrame.getAndSet(false)) {
 			saveFrame()
 		}
@@ -122,19 +138,21 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 	@OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
 	open fun onDestroy() {
 		lifecycle = null
-		mapViewStateMutable.value = MapViewState.DESTROYED
+		updateMapViewState(MapViewState.DESTROYED)
 		finishGlThread()
 	}
 
 	override fun onGlThreadResume() {
 		if (lifecycleResumed) {
+			requireMapInterface().getRenderingContext().asOpenGlRenderingContext()?.resume()
 			requireMapInterface().resume()
 		}
 	}
 
 	override fun onGlThreadPause() {
 		if (mapViewStateMutable.value != MapViewState.PAUSED) {
-			mapViewStateMutable.value = MapViewState.PAUSED
+			updateMapViewState(MapViewState.PAUSED)
+			requireMapInterface().getRenderingContext().asOpenGlRenderingContext()?.pause()
 			requireMapInterface().pause()
 		}
 	}
@@ -225,9 +243,19 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 		requireMapInterface().removeLayer(layer.layerInterface())
 	}
 
-
-	override fun getCamera(): MapCamera2dInterface {
+	override fun getCamera(): MapCameraInterface {
 		return requireMapInterface().getCamera()
+	}
+
+	override fun getCoordinateConversionHelper(): CoordinateConversionHelperInterface {
+		return requireMapInterface().getCoordinateConverterHelper()
+	}
+
+	fun setPerformanceLoggers(performanceLoggers: List<PerformanceLoggerInterface>, captureGlDrawFrame: Boolean = false) {
+		if (captureGlDrawFrame) {
+			super.setPerformanceLoggers(performanceLoggers)
+		}
+		requireMapInterface().setPerformanceLoggers(performanceLoggers.toCollection(ArrayList()))
 	}
 
 	fun saveFrame(saveFrameSpec: SaveFrameSpec, saveFrameCallback: SaveFrameCallback) {
@@ -244,6 +272,13 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 		saveFrameSpec = null
 		SaveFrameUtil.saveCurrentFrame(Vec2I(width, height), spec, callback)
 	}
+
+	private fun updateMapViewState(state: MapViewState) {
+		mapViewStateMutable.value = state
+		onMapViewStateUpdated(state)
+	}
+
+	protected open fun onMapViewStateUpdated(state: MapViewState) {}
 
 	override fun requireMapInterface(): MapInterface = mapInterface ?: throw IllegalStateException("Map is not setup or already destroyed!")
 }

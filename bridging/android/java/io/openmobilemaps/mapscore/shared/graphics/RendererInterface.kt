@@ -10,10 +10,15 @@ abstract class RendererInterface {
 
     abstract fun addToRenderQueue(renderPass: RenderPassInterface)
 
-    /** Ensure calling on graphics thread */
-    abstract fun drawFrame(renderingContext: RenderingContextInterface, camera: CameraInterface)
+    abstract fun addToComputeQueue(computePass: ComputePassInterface)
 
-    private class CppProxy : RendererInterface {
+    /** Ensure calling on graphics thread */
+    abstract fun drawFrame(renderingContext: RenderingContextInterface, camera: CameraInterface, target: RenderTargetInterface?)
+
+    /** Ensure calling on graphics thread */
+    abstract fun compute(renderingContext: RenderingContextInterface, camera: CameraInterface)
+
+    public class CppProxy : RendererInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 
@@ -34,10 +39,22 @@ abstract class RendererInterface {
         }
         private external fun native_addToRenderQueue(_nativeRef: Long, renderPass: RenderPassInterface)
 
-        override fun drawFrame(renderingContext: RenderingContextInterface, camera: CameraInterface) {
+        override fun addToComputeQueue(computePass: ComputePassInterface) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_drawFrame(this.nativeRef, renderingContext, camera)
+            native_addToComputeQueue(this.nativeRef, computePass)
         }
-        private external fun native_drawFrame(_nativeRef: Long, renderingContext: RenderingContextInterface, camera: CameraInterface)
+        private external fun native_addToComputeQueue(_nativeRef: Long, computePass: ComputePassInterface)
+
+        override fun drawFrame(renderingContext: RenderingContextInterface, camera: CameraInterface, target: RenderTargetInterface?) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_drawFrame(this.nativeRef, renderingContext, camera, target)
+        }
+        private external fun native_drawFrame(_nativeRef: Long, renderingContext: RenderingContextInterface, camera: CameraInterface, target: RenderTargetInterface?)
+
+        override fun compute(renderingContext: RenderingContextInterface, camera: CameraInterface) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_compute(this.nativeRef, renderingContext, camera)
+        }
+        private external fun native_compute(_nativeRef: Long, renderingContext: RenderingContextInterface, camera: CameraInterface)
     }
 }

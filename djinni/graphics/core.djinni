@@ -1,11 +1,14 @@
 @extern "../yaml/graphics_object_interface.yaml"
+@extern "../yaml/compute_object_interface.yaml"
 @extern "../yaml/masking_object_interface.yaml"
 @extern "../yaml/graphics_object_factory_interface.yaml"
 @extern "../yaml/shader_factory_interface.yaml"
 @extern "../yaml/vec_3_d.yaml"
+@extern "../yaml/vec_3_f.yaml"
 @extern "../yaml/vec_2_i.yaml"
 @extern "../yaml/rect_i.yaml"
 @extern "../yaml/color.yaml"
+@extern "../yaml/texture_filter_type.yaml"
 
 scene_interface = interface +c {
     static create(graphics_factory: graphics_object_factory_interface, shader_factory: shader_factory_interface, rendering_context: rendering_context_interface) : scene_interface;
@@ -17,7 +20,9 @@ scene_interface = interface +c {
     get_rendering_context() : rendering_context_interface;
     get_graphics_factory(): graphics_object_factory_interface;
     get_shader_factory(): shader_factory_interface;
-    draw_frame();
+    prepare();
+    draw_frame(target: optional<render_target_interface>);
+    compute();
     clear();
     invalidate();
 }
@@ -33,12 +38,34 @@ rendering_context_interface = interface +c +j +o {
     set_viewport_size(size: vec_2_i);
     get_viewport_size() : vec_2_i;
     set_background_color(color: color);
+	set_culling(mode: rendering_cull_mode);
+
     setupDrawFrame();
     pre_render_stencil_mask();
     post_render_stencil_mask();
 
     # optional rectangle, remove scissoring when not set
     apply_scissor_rect(scissor_rect: optional<rect_i>);
+
+    as_open_gl_rendering_context(): optional<open_gl_rendering_context_interface>;
+}
+
+open_gl_rendering_context_interface = interface +c +j +o {
+	resume();
+	pause();
+	get_create_render_target(name: string, texture_filter: texture_filter_type, clear_color: color) : open_gl_render_target_interface;
+	delete_render_target(name: string);
+	get_render_targets() : list<open_gl_render_target_interface>;
+	get_program(name: string) : i32;
+	store_program(name: string, program: i32);
+	get_aspect_ratio() : f32;
+	get_delta_time_ms() : i64;
+}
+
+rendering_cull_mode = enum {
+	front;
+	back;
+	none;
 }
 
 render_object_interface = interface +c +j +o {
@@ -46,6 +73,21 @@ render_object_interface = interface +c +j +o {
     has_custom_model_matrix() : bool;
     is_screen_space_coords() : bool;
     get_custom_model_matrix() : list<f32>;
+    set_hidden(hidden: bool);
+    is_hidden(): bool;
+}
+
+render_target_interface = interface +c +j +o {
+	as_gl_render_target_interface(): optional<open_gl_render_target_interface>;
+}
+
+open_gl_render_target_interface = interface +c +j +o {
+	as_render_target_interface(): render_target_interface;
+	setup(size: vec_2_i);
+	clear();
+	bind_framebuffer(rendering_context: rendering_context_interface);
+	unbind_framebuffer();
+	get_texture_id() : i32;
 }
 
 render_pass_interface = interface +c +j +o {
@@ -56,19 +98,28 @@ render_pass_interface = interface +c +j +o {
     get_scissoring_rect() : optional<rect_i>;
 }
 
+compute_pass_interface = interface +c +j +o {
+	get_compute_objects() : list<compute_object_interface>;
+}
+
 render_pass_config = record {
     render_pass_index: i32;
     is_pass_masked: bool;
+    render_target: optional<render_target_interface>;
 }
 
 renderer_interface = interface +c +j +o {
     add_to_render_queue(render_pass: render_pass_interface);
+    add_to_compute_queue(compute_pass: compute_pass_interface);
     # Ensure calling on graphics thread
-    draw_frame(rendering_context: rendering_context_interface, camera: camera_interface);
+    draw_frame(rendering_context: rendering_context_interface, camera: camera_interface, target: optional<render_target_interface>);
+    # Ensure calling on graphics thread
+    compute(rendering_context: rendering_context_interface, camera: camera_interface);
 }
 
 camera_interface = interface +c +j +o {
     get_vp_matrix() : list<f32>;
     get_scaling_factor(): f64;
+    get_origin(): vec_3_d;
     viewport_size_changed();
 }

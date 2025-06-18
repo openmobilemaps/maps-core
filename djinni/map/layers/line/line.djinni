@@ -15,30 +15,6 @@ line_cap_type = enum {
 	SQUARE;
 }
 
-shader_line_style = record {
-    width: f32;
-    color_r: f32;
-    color_g: f32;
-    color_b: f32;
-    color_a: f32;
-    gap_color_r: f32;
-    gap_color_g: f32;
-    gap_color_b: f32;
-    gap_color_a: f32;
-    width_as_pixel: f32;
-    opacity: f32;
-    blur: f32;
-    lineCap: f32;
-    num_dash_value: f32;
-    dash_value_0: f32;
-    dash_value_1: f32;
-    dash_value_2: f32;
-    dash_value_3: f32;
-    offset: f32;
-    dotted: f32;
-    dotted_skew: f32;
-}
-
 line_style = record {
     color: color_state_list;
     gap_color: color_state_list;
@@ -47,6 +23,8 @@ line_style = record {
     width_type: size_type;
     width: f32;
     dash_array: list<f32>;
+    dash_fade: f32;
+    dash_animation_speed: f32;
     line_cap: line_cap_type;
     offset: f32;
     dotted: bool;
@@ -76,4 +54,5 @@ line_layer_interface = interface +c {
     reset_selection();
     set_selected(selected_ids: set<string>);
     set_layer_clickable(is_layer_clickable: bool);
+    set_render_pass_index(index: i32);
 }

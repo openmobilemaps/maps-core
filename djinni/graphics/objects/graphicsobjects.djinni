@@ -3,6 +3,8 @@
 @extern "../../yaml/shader_program_interface.yaml"
 @extern "../../yaml/rect_d.yaml"
 @extern "../../yaml/quad_2d_d.yaml"
+@extern "../../yaml/quad_3d_d.yaml"
+@extern "../../yaml/vec_3_d.yaml"
 @extern "../../yaml/vec_2_d.yaml"
 @extern "../../yaml/vec_2_f.yaml"
 @extern "../../yaml/shared_bytes.yaml"
@@ -17,20 +19,24 @@ graphics_object_interface = interface +c +j +o {
     # by defaults objects if masked are only rendered where the mask is set
     # if setting this flag the masked is applied inversly
     set_is_inverse_masked(inversed: bool);
-    # Render the graphics object; ensure calling on graphics thread
-
     set_debug_label(label: string);
-    render(context: rendering_context_interface, render_pass: render_pass_config, mvp_matrix: i64, is_masked: bool, screenPixelAsRealMeterFactor: f64);
+    # Render the graphics object; ensure calling on graphics thread
+    render(context: rendering_context_interface, render_pass: render_pass_config, vp_matrix: i64, m_matrix: i64, origin: vec_3_d, is_masked: bool, screenPixelAsRealMeterFactor: f64);
 }
 
 masking_object_interface = interface +c +j +o {
     as_graphics_object(): graphics_object_interface;
-	render_as_mask(context: rendering_context_interface, render_pass: render_pass_config, mvp_matrix: i64, screenPixelAsRealMeterFactor: f64);
+	render_as_mask(context: rendering_context_interface, render_pass: render_pass_config, vp_matrix: i64, m_matrix: i64, origin: vec_3_d, screenPixelAsRealMeterFactor: f64);
+}
+
+compute_object_interface = interface +c +j +o {
+	compute(context: rendering_context_interface, vp_matrix: i64, origin: vec_3_d, screenPixelAsRealMeterFactor: f64);
 }
 
 graphics_object_factory_interface = interface +c +j +o {
     create_quad(shader: shader_program_interface) : quad_2d_interface;
     create_polygon(shader: shader_program_interface) : polygon_2d_interface;
+    create_icosahedron_object(shader: shader_program_interface) : icosahedron_interface;
 
     create_quad_instanced(shader: shader_program_interface): quad_2d_instanced_interface;
     create_quad_stretched_instanced(shader: shader_program_interface): quad_2d_stretched_instanced_interface;
@@ -38,8 +44,8 @@ graphics_object_factory_interface = interface +c +j +o {
     create_polygon_group(shader: shader_program_interface): polygon_group_2d_interface;
     create_polygon_pattern_group(shader: shader_program_interface): polygon_pattern_group_2d_interface;
 
-    create_quad_mask() : quad_2d_interface;
-    create_polygon_mask() : polygon_2d_interface;
+    create_quad_mask(is_3d: bool) : quad_2d_interface;
+    create_polygon_mask(is_3d: bool) : polygon_2d_interface;
 
     create_text(shader: shader_program_interface) : text_interface;
 
@@ -47,7 +53,9 @@ graphics_object_factory_interface = interface +c +j +o {
 }
 
 quad_2d_interface = interface +c +j +o {
-    set_frame(frame: quad_2d_d, texture_coordinates: rect_d);
+    set_frame(frame: quad_3d_d, texture_coordinates: rect_d, origin: vec_3_d, is_3d: bool);
+    set_subdivision_factor(factor: i32);
+    set_min_mag_filter(filter_type: texture_filter_type);
     load_texture(context: rendering_context_interface, texture_holder: texture_holder_interface);
     remove_texture();
     as_graphics_object(): graphics_object_interface;
@@ -55,7 +63,7 @@ quad_2d_interface = interface +c +j +o {
 }
 
 quad_2d_instanced_interface = interface +c +j +o {
-    set_frame(frame: quad_2d_d);
+    set_frame(frame: quad_2d_d, origin: vec_3_d, is_3d: bool);
 
     set_instance_count(count: i32);
     set_positions(positions: shared_bytes);
@@ -65,6 +73,11 @@ quad_2d_instanced_interface = interface +c +j +o {
 
     set_texture_coordinates(textureCoordinates: shared_bytes);
 
+
+    # 2 floats (x and y) for each instance
+    # defines the offset applied to the projected position in viewspace coordinates
+    set_position_offset(offsets: shared_bytes);
+
     load_texture(context: rendering_context_interface, texture_holder: texture_holder_interface);
     remove_texture();
 
@@ -72,8 +85,8 @@ quad_2d_instanced_interface = interface +c +j +o {
     as_masking_object(): masking_object_interface;
 }
 
-    quad_2d_stretched_instanced_interface = interface +c +j +o {
-    set_frame(frame: quad_2d_d);
+quad_2d_stretched_instanced_interface = interface +c +j +o {
+    set_frame(frame: quad_2d_d, origin: vec_3_d, is_3d: bool);
 
     set_instance_count(count: i32);
     set_positions(positions: shared_bytes);
@@ -111,12 +124,12 @@ render_line_description = record {
 }
 
 line_group_2d_interface = interface +c +j +o {
-    set_lines(lines: shared_bytes, indices: shared_bytes);
+    set_lines(lines: shared_bytes, indices: shared_bytes, origin: vec_3_d, is_3d: bool);
     as_graphics_object(): graphics_object_interface;
 }
 
 polygon_2d_interface = interface +c +j +o {
-    set_vertices(vertices: shared_bytes, indices: shared_bytes);
+    set_vertices(vertices: shared_bytes, indices: shared_bytes, origin: vec_3_d);
 
     as_graphics_object(): graphics_object_interface;
     as_masking_object(): masking_object_interface;
@@ -128,12 +141,12 @@ render_vertices_description = record {
 }
 
 polygon_group_2d_interface = interface +c +j +o {
-    set_vertices(vertices: shared_bytes, indices: shared_bytes);
+    set_vertices(vertices: shared_bytes, indices: shared_bytes, origin: vec_3_d);
     as_graphics_object(): graphics_object_interface;
 }
 
 polygon_pattern_group_2d_interface = interface +c +j +o {
-    set_vertices(vertices: shared_bytes, indices: shared_bytes);
+    set_vertices(vertices: shared_bytes, indices: shared_bytes, origin: vec_3_d);
     set_opacities(values: shared_bytes);
     # 4 floats (x, y, width and height) in uv space and 2 uint_16 values for the pixel with and height for each instanced
     set_texture_coordinates(values: shared_bytes);
@@ -153,6 +166,11 @@ texture_holder_interface = interface +j +o {
     clearFromGraphics();
 }
 
+texture_filter_type = enum {
+	nearest;
+	linear;
+}
+
 text_interface = interface +c +j +o {
     set_texts_shared(vertices: shared_bytes, indices: shared_bytes);
 
@@ -163,12 +181,15 @@ text_interface = interface +c +j +o {
 
 text_instanced_interface = interface +c +j +o {
     # set the frame of the root object
-    set_frame(frame: quad_2d_d);
+    set_frame(frame: quad_2d_d, origin: vec_3_d, is_3d: bool);
 
     set_instance_count(count: i32);
 
     # 2 floats (x and y) for each instance
     set_positions(positions: shared_bytes);
+
+    # 2 floats (x and y) for each instance
+    set_reference_positions(positions: shared_bytes);
 
     # 4 floats (x, y, width and height) for each instanced
     set_texture_coordinates(textureCoordinates: shared_bytes);
@@ -178,6 +199,9 @@ text_instanced_interface = interface +c +j +o {
 
     # one float for each instance in degree
     set_rotations(rotations: shared_bytes);
+
+    # one float for each instance
+    set_alphas(alphas: shared_bytes);
 
     # one uint16 for each instance
     set_style_indices(indices: shared_bytes);
@@ -201,4 +225,9 @@ text_description = record {
 glyph_description = record {
     frame: quad_2d_d;
     texture_coordinates: quad_2d_d;
+}
+
+icosahedron_interface = interface +c +j +o {
+    set_vertices(vertices: shared_bytes, indices: shared_bytes, origin: vec_3_d);
+    as_graphics_object(): graphics_object_interface;
 }

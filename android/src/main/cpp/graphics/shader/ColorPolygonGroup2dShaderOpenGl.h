@@ -14,12 +14,13 @@
 #include "PolygonGroupShaderInterface.h"
 #include "ShaderProgramInterface.h"
 #include <vector>
+#include <mutex>
 
 class ColorPolygonGroup2dShaderOpenGl : public BaseShaderProgramOpenGl,
                                         public PolygonGroupShaderInterface,
                                         public std::enable_shared_from_this<ShaderProgramInterface> {
   public:
-    ColorPolygonGroup2dShaderOpenGl(bool isStriped);
+    ColorPolygonGroup2dShaderOpenGl(bool isStriped, bool projectOntoUnitSphere);
 
     virtual std::shared_ptr<ShaderProgramInterface> asShaderProgramInterface() override;
 
@@ -31,19 +32,31 @@ class ColorPolygonGroup2dShaderOpenGl : public BaseShaderProgramOpenGl,
 
     virtual void setStyles(const ::SharedBytes & styles) override;
 
+    void setupGlObjects(const std::shared_ptr<::OpenGlContext> &context) override;
+
+    void clearGlObjects() override;
+
+    virtual bool isRenderable() override;
+
   protected:
     virtual std::string getVertexShader() override;
 
     virtual std::string getFragmentShader() override;
 
   private:
+    static std::string getPolygonStylesUBODefinition(bool isStriped);
+
+    bool projectOntoUnitSphere = false;
     bool isStriped = false;
     const std::string programName;
 
     std::recursive_mutex styleMutex;
+    GLuint polygonStyleBuffer = 0;
     std::vector<GLfloat> polygonStyles;
+    bool stylesUpdated = false;
     GLint numStyles = 0;
 
-    const int sizeStyleValues = isStriped ? 7 : 5;
-    const int sizeStyleValuesArray = sizeStyleValues * 16;
+    const static int MAX_NUM_STYLES = 16;
+    const int sizeStyleValues = 8;// isStriped ? 7 : 5 -> rounded to the nearest multiple of 16 bytes
+    const int sizeStyleValuesArray = sizeStyleValues * MAX_NUM_STYLES;
 };

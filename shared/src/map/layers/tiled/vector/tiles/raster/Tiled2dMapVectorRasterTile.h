@@ -52,9 +52,11 @@ private:
     bool isStyleZoomDependant = true;
     bool isStyleStateDependant = true;
     std::optional<double> lastZoom = std::nullopt;
-    std::optional<bool> lastInZoomRange = std::nullopt;
+    bool isVisible = true;
 
     std::optional<RasterShaderStyle> lastStyle;
 
     Tiled2dMapZoomInfo zoomInfo;
+
+    int32_t subdivisionFactor = 3;
 };

@@ -10,7 +10,7 @@ abstract class ExceptionLoggerDelegateInterface {
 
     abstract fun logMessage(errorDomain: String, code: Int, customValues: HashMap<String, String>, function: String, file: String, line: Int)
 
-    private class CppProxy : ExceptionLoggerDelegateInterface {
+    public class CppProxy : ExceptionLoggerDelegateInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

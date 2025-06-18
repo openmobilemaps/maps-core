@@ -6,9 +6,11 @@
 #import "DJICppWrapperCache+Private.h"
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
+#import "MCCoord+Private.h"
 #import "MCErrorManager+Private.h"
 #import "MCLayerReadyState+Private.h"
 #import "MCRectCoord+Private.h"
+#import "MCVec3D+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -40,6 +42,30 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
         _cppRefHandle.get()->onVisibleBoundsChanged(::djinni_generated::RectCoord::toCpp(visibleBounds),
                                                     ::djinni::I32::toCpp(curT),
                                                     ::djinni::F64::toCpp(zoom));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)onCameraChange:(nonnull NSArray<NSNumber *> *)viewMatrix
+      projectionMatrix:(nonnull NSArray<NSNumber *> *)projectionMatrix
+                origin:(nonnull MCVec3D *)origin
+           verticalFov:(float)verticalFov
+         horizontalFov:(float)horizontalFov
+                 width:(float)width
+                height:(float)height
+    focusPointAltitude:(float)focusPointAltitude
+    focusPointPosition:(nonnull MCCoord *)focusPointPosition
+                  zoom:(float)zoom {
+    try {
+        _cppRefHandle.get()->onCameraChange(::djinni::List<::djinni::F32>::toCpp(viewMatrix),
+                                            ::djinni::List<::djinni::F32>::toCpp(projectionMatrix),
+                                            ::djinni_generated::Vec3D::toCpp(origin),
+                                            ::djinni::F32::toCpp(verticalFov),
+                                            ::djinni::F32::toCpp(horizontalFov),
+                                            ::djinni::F32::toCpp(width),
+                                            ::djinni::F32::toCpp(height),
+                                            ::djinni::F32::toCpp(focusPointAltitude),
+                                            ::djinni_generated::Coord::toCpp(focusPointPosition),
+                                            ::djinni::F32::toCpp(zoom));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

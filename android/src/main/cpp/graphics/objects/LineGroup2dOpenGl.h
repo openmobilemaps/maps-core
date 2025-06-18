@@ -16,6 +16,7 @@
 #include "OpenGlHelper.h"
 #include "RenderLineDescription.h"
 #include "ShaderProgramInterface.h"
+#include "BaseShaderProgramOpenGl.h"
 #include "opengl_wrapper.h"
 #include <mutex>
 
@@ -23,13 +24,13 @@ class LineGroup2dOpenGl : public GraphicsObjectInterface,
                           public LineGroup2dInterface,
                           public std::enable_shared_from_this<GraphicsObjectInterface> {
   public:
-    LineGroup2dOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader);
+    LineGroup2dOpenGl(const std::shared_ptr<BaseShaderProgramOpenGl> &shader);
 
     virtual ~LineGroup2dOpenGl() {}
 
     // LineGroup2dInterface
 
-    virtual void setLines(const ::SharedBytes & lines, const ::SharedBytes & indices) override;
+    virtual void setLines(const ::SharedBytes & lines, const ::SharedBytes & indices, const Vec3D &origin, bool is3d) override;
 
     virtual std::shared_ptr<GraphicsObjectInterface> asGraphicsObject() override;
 
@@ -41,7 +42,7 @@ class LineGroup2dOpenGl : public GraphicsObjectInterface,
     virtual void clear() override;
 
     virtual void render(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
-                        int64_t mvpMatrix, bool isMasked, double screenPixelAsRealMeterFactor) override;
+                        int64_t vpMatrix, int64_t mMatrix, const ::Vec3D & origin, bool isMasked, double screenPixelAsRealMeterFactor) override;
 
     virtual void setIsInverseMasked(bool inversed) override;
 
@@ -51,24 +52,28 @@ protected:
 
     virtual void removeGlBuffers();
 
-    std::shared_ptr<ShaderProgramInterface> shaderProgram;
+    bool is3d = false;
+    std::shared_ptr<BaseShaderProgramOpenGl> shaderProgram;
     std::string programName;
     int program = 0;
 
-    int mvpMatrixHandle;
+    int vpMatrixHandle;
+    int mMatrixHandle;
+    int originOffsetHandle;
+    int lineOriginHandle;
     int scaleFactorHandle;
-    int positionHandle;
-    int widthNormalHandle;
     int pointAHandle;
     int pointBHandle;
     int vertexIndexHandle;
     int segmentStartLPosHandle;
     int styleInfoHandle;
+    GLuint vao;
     GLuint vertexAttribBuffer = -1;
     std::vector<GLfloat> lineAttributes;
     GLuint indexBuffer = -1;
     std::vector<GLuint> lineIndices;
     bool glDataBuffersGenerated = false;
+    Vec3D lineOrigin = Vec3D(0.0, 0.0, 0.0);
 
     bool ready = false;
     bool dataReady = false;

@@ -21,37 +21,74 @@
 #include "StretchShaderOpenGl.h"
 #include "AlphaInstancedShaderOpenGl.h"
 #include "StretchInstancedShaderOpenGl.h"
+#include "IcosahedronColorShaderOpenGl.h"
+#include "SphereEffectShaderOpenGl.h"
+#include "SkySphereShaderOpenGl.h"
 
 std::shared_ptr<AlphaShaderInterface> ShaderFactoryOpenGl::createAlphaShader() {
-    return std::make_shared<AlphaShaderOpenGl>();
+    return std::make_shared<AlphaShaderOpenGl>(false);
+}
+
+std::shared_ptr<AlphaShaderInterface> ShaderFactoryOpenGl::createUnitSphereAlphaShader() {
+    return std::make_shared<AlphaShaderOpenGl>(true);
 }
 
 std::shared_ptr<AlphaInstancedShaderInterface> ShaderFactoryOpenGl::createAlphaInstancedShader() {
-    return std::make_shared<AlphaInstancedShaderOpenGl>();
+    return std::make_shared<AlphaInstancedShaderOpenGl>(false);
+}
+
+std::shared_ptr<AlphaInstancedShaderInterface> ShaderFactoryOpenGl::createUnitSphereAlphaInstancedShader() {
+    return std::make_shared<AlphaInstancedShaderOpenGl>(true);
 }
 
 std::shared_ptr<RasterShaderInterface> ShaderFactoryOpenGl::createRasterShader() {
-    return std::make_shared<RasterShaderOpenGl>();
+    return std::make_shared<RasterShaderOpenGl>(false);
+}
+
+std::shared_ptr<RasterShaderInterface> ShaderFactoryOpenGl::createUnitSphereRasterShader() {
+    return std::make_shared<RasterShaderOpenGl>(true);
 }
 
 std::shared_ptr<LineGroupShaderInterface> ShaderFactoryOpenGl::createLineGroupShader() {
-    return std::make_shared<ColorLineGroup2dShaderOpenGl>();
+    return std::make_shared<ColorLineGroup2dShaderOpenGl>(false, false);
+}
+
+std::shared_ptr<LineGroupShaderInterface> ShaderFactoryOpenGl::createUnitSphereLineGroupShader() {
+    return std::make_shared<ColorLineGroup2dShaderOpenGl>(true, false);
+}
+
+std::shared_ptr<LineGroupShaderInterface> ShaderFactoryOpenGl::createSimpleLineGroupShader() {
+    return std::make_shared<ColorLineGroup2dShaderOpenGl>(false, true);
+}
+
+std::shared_ptr<LineGroupShaderInterface> ShaderFactoryOpenGl::createUnitSphereSimpleLineGroupShader() {
+    return std::make_shared<ColorLineGroup2dShaderOpenGl>(true, true);
 }
 
 std::shared_ptr<ColorShaderInterface> ShaderFactoryOpenGl::createColorShader() {
-    return std::make_shared<ColorShaderOpenGl>();
+    return std::make_shared<ColorShaderOpenGl>(false);
+}
+
+std::shared_ptr<ColorShaderInterface> ShaderFactoryOpenGl::createUnitSphereColorShader() {
+    return std::make_shared<ColorShaderOpenGl>(true);
 }
 
 std::shared_ptr<ColorCircleShaderInterface> ShaderFactoryOpenGl::createColorCircleShader() {
-    return std::make_shared<ColorCircleShaderOpenGl>();
+    return std::make_shared<ColorCircleShaderOpenGl>(false);
 }
 
-std::shared_ptr<PolygonGroupShaderInterface> ShaderFactoryOpenGl::createPolygonGroupShader(bool isStriped) {
-    return std::make_shared<ColorPolygonGroup2dShaderOpenGl>(isStriped);
+std::shared_ptr<ColorCircleShaderInterface> ShaderFactoryOpenGl::createUnitSphereColorCircleShader() {
+    return std::make_shared<ColorCircleShaderOpenGl>(true);
 }
 
-std::shared_ptr<PolygonPatternGroupShaderInterface> ShaderFactoryOpenGl::createPolygonPatternGroupShader(bool fadeInPattern) {
-    return std::make_shared<PolygonPatternGroup2dShaderOpenGl>(fadeInPattern);
+std::shared_ptr<PolygonGroupShaderInterface>
+ShaderFactoryOpenGl::createPolygonGroupShader(bool isStriped, bool projectOntoUnitSphere) {
+    return std::make_shared<ColorPolygonGroup2dShaderOpenGl>(isStriped, projectOntoUnitSphere);
+}
+
+std::shared_ptr<PolygonPatternGroupShaderInterface>
+ShaderFactoryOpenGl::createPolygonPatternGroupShader(bool fadeInPattern, bool projectOntoUnitSphere) {
+    return std::make_shared<PolygonPatternGroup2dShaderOpenGl>(fadeInPattern, projectOntoUnitSphere);
 }
 
 std::shared_ptr<TextShaderInterface> ShaderFactoryOpenGl::createTextShader() {
@@ -59,13 +96,29 @@ std::shared_ptr<TextShaderInterface> ShaderFactoryOpenGl::createTextShader() {
 }
 
 std::shared_ptr<TextInstancedShaderInterface> ShaderFactoryOpenGl::createTextInstancedShader() {
-    return std::make_shared<TextInstancedShaderOpenGl>();
+    return std::make_shared<TextInstancedShaderOpenGl>(false);
+}
+
+std::shared_ptr<TextInstancedShaderInterface> ShaderFactoryOpenGl::createUnitSphereTextInstancedShader() {
+    return std::make_shared<TextInstancedShaderOpenGl>(true);
 }
 
 std::shared_ptr<StretchShaderInterface> ShaderFactoryOpenGl::createStretchShader() {
     return std::make_shared<StretchShaderOpenGl>();
 }
 
-std::shared_ptr<StretchInstancedShaderInterface> ShaderFactoryOpenGl::createStretchInstancedShader() {
-    return std::make_shared<StretchInstancedShaderOpenGl>();
+std::shared_ptr<StretchInstancedShaderInterface> ShaderFactoryOpenGl::createStretchInstancedShader(bool unitSphere) {
+    return std::make_shared<StretchInstancedShaderOpenGl>(unitSphere);
+}
+
+std::shared_ptr<ColorShaderInterface> ShaderFactoryOpenGl::createIcosahedronColorShader() {
+    return std::make_shared<IcosahedronColorShaderOpenGl>();
+}
+
+std::shared_ptr<SphereEffectShaderInterface> ShaderFactoryOpenGl::createSphereEffectShader() {
+    return std::make_shared<SphereEffectShaderOpenGl>();
+}
+
+std::shared_ptr<SkySphereShaderInterface> ShaderFactoryOpenGl::createSkySphereShader() {
+    return std::make_shared<SkySphereShaderOpenGl>();
 }

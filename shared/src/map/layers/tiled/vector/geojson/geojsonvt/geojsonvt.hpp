@@ -19,10 +19,10 @@ struct TileOptions {
     double tolerance = 1.0;
 
     // tile extent
-    uint16_t extent = 4096;
+    uint32_t extent = 4096;
 
     // tile buffer on each side
-    uint16_t buffer = 64;
+    uint32_t buffer = 64;
 };
 
 struct Options : TileOptions {
@@ -52,19 +52,7 @@ public:
     GeoJSONVT(const std::shared_ptr<GeoJson> &geoJson,
               const Options& options_ = Options())
     : options(options_), loadingResult(DataLoaderResult(std::nullopt, std::nullopt, LoaderStatus::OK, std::nullopt)) {
-
-        // If the GeoJSON contains only points, there is no need to split it into smaller tiles,
-        // as there are no opportunities for simplification, merging, or meaningful point reduction.
-        if (geoJson->hasOnlyPoints) {
-            options.maxZoom = options.minZoom;
-        }
-
-
-        const uint32_t z2 = 1u << options.maxZoom;
-
-        convert(geoJson->geometries, (options.tolerance / options.extent) / z2);
-
-        splitTile(geoJson->geometries, 0, 0, 0);
+        initialize(geoJson);
     }
 
     GeoJSONVT(const std::string &sourceName,
@@ -107,7 +95,9 @@ public:
                     self->load(false);
                 }
                 else {
-                    self->delegate.message(&GeoJSONTileDelegate::failedToLoad);
+                    std::lock_guard<std::recursive_mutex> lock(self->mutex);
+                    self->loadingResult = DataLoaderResult(std::nullopt, std::nullopt, result.status, result.errorCode);
+                    self->delegate.message(MFN(&GeoJSONTileDelegate::failedToLoad));
                 }
             } else {
                 auto string = std::string((char*)result.data->buf(), result.data->len());
@@ -116,41 +106,49 @@ public:
                     json = nlohmann::json::parse(string);
                     auto geoJson = GeoJsonParser::getGeoJson(json);
                     if (geoJson) {
+                        self->initialize(geoJson);
+                        std::lock_guard<std::recursive_mutex> lock(self->mutex);
+                        self->loadingResult = DataLoaderResult(std::nullopt, std::nullopt, result.status, result.errorCode);
 
-                        // If the GeoJSON contains only points, there is no need to split it into smaller tiles,
-                        // as there are no opportunities for simplification, merging, or meaningful point reduction.
-                        if (geoJson->hasOnlyPoints) {
-                            self->options.maxZoom = self->options.minZoom;
+                        if (self->delegate) {
+                            // avoid call to null-delegate
+                            // setting the delegate will call didLoad, result won't be lost
+                            self->delegate.message(MFN(&GeoJSONTileDelegate::didLoad), self->options.maxZoom);
                         }
-
-                        const uint32_t z2 = 1u << self->options.maxZoom;
-
-                        convert(geoJson->geometries, (self->options.tolerance / self->options.extent) / z2);
-
-                        self->splitTile(geoJson->geometries, 0, 0, 0);
-
-                        self->delegate.message(&GeoJSONTileDelegate::didLoad, self->options.maxZoom);
                     }
                 }
                 catch (nlohmann::json::parse_error &ex) {
+                    std::lock_guard<std::recursive_mutex> lock(self->mutex);
                     self->loadingResult = DataLoaderResult(std::nullopt, std::nullopt, LoaderStatus::ERROR_OTHER, "parse error");
                     LogError <<= "Unable to parse geoJson";
                     return;
                 }
             }
-            self->loadingResult = DataLoaderResult(std::nullopt, std::nullopt, result.status, result.errorCode);
             self->loaders.clear();
-
-            LogDebug << "GeoJson was loaded from " << self->geoJsonUrl;
 
             self->resolveAllWaitingPromises();
         });
     }
 
+    void initialize(const std::shared_ptr<GeoJson> &geoJson) {
+        // If the GeoJSON contains only points, there is no need to split it into smaller tiles,
+        // as there are no opportunities for simplification, merging, or meaningful point reduction.
+        if (geoJson->hasOnlyPoints) {
+            options.maxZoom = options.minZoom;
+        }
+
+        const uint32_t z2 = 1u << options.maxZoom;
+
+        convert(geoJson->geometries, (options.tolerance / options.extent) / z2);
+
+        splitTile(geoJson->geometries, 0, 0, 0);
+    }
+
     void setDelegate(const WeakActor<GeoJSONTileDelegate> delegate) override {
         this->delegate = delegate;
+        std::lock_guard<std::recursive_mutex> lock(mutex);
         if (loadingResult) {
-            delegate.message(&GeoJSONTileDelegate::didLoad, options.maxZoom);
+            delegate.message(MFN(&GeoJSONTileDelegate::didLoad), options.maxZoom);
         }
     }
 

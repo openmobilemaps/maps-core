@@ -31,7 +31,7 @@ abstract class FeatureInfoValueFactory {
         external fun createListString(value: ArrayList<String>): VectorLayerFeatureInfoValue
     }
 
-    private class CppProxy : FeatureInfoValueFactory {
+    public class CppProxy : FeatureInfoValueFactory {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

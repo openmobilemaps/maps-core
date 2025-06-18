@@ -29,7 +29,7 @@ abstract class SchedulerInterface {
 
     abstract fun setSchedulerGraphicsTaskCallbacks(callbacks: SchedulerGraphicsTaskCallbacks)
 
-    private class CppProxy : SchedulerInterface {
+    public class CppProxy : SchedulerInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

@@ -10,17 +10,21 @@
 
 #include "QuadMaskObject.h"
 #include "Vec2D.h"
-
-QuadMaskObject::QuadMaskObject(const std::shared_ptr<GraphicsObjectFactoryInterface> &graphicsObjectFactory,
-                               const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper)
-    : conversionHelper(conversionHelper)
-    , quad(graphicsObjectFactory->createQuadMask()) {}
+#include <cmath>
 
 QuadMaskObject::QuadMaskObject(const std::shared_ptr<GraphicsObjectFactoryInterface> &graphicsObjectFactory,
                                const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
-                               const RectCoord &rectCoord)
+                               bool is3D)
     : conversionHelper(conversionHelper)
-    , quad(graphicsObjectFactory->createQuadMask()) {
+    , quad(graphicsObjectFactory->createQuadMask(is3D))
+    , is3D(is3D) {}
+
+QuadMaskObject::QuadMaskObject(const std::shared_ptr<GraphicsObjectFactoryInterface> &graphicsObjectFactory,
+                               const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
+                               const RectCoord &rectCoord,
+                               bool is3D)
+    : conversionHelper(conversionHelper)
+    , quad(graphicsObjectFactory->createQuadMask(is3D)) {
     setRectCoord(rectCoord);
 }
 
@@ -38,11 +42,62 @@ void QuadMaskObject::setPosition(const ::Coord &coord, double width, double heig
 
 void QuadMaskObject::setPositions(const QuadCoord &coords) {
     QuadCoord renderCoords = conversionHelper->convertQuadToRenderSystem(coords);
-    quad->setFrame(Quad2dD(Vec2D(renderCoords.topLeft.x, renderCoords.topLeft.y),
-                           Vec2D(renderCoords.topRight.x, renderCoords.topRight.y),
-                           Vec2D(renderCoords.bottomRight.x, renderCoords.bottomRight.y),
-                           Vec2D(renderCoords.bottomLeft.x, renderCoords.bottomLeft.y)),
-                   RectD(0, 0, 1, 1));
+
+    double cx = (renderCoords.bottomRight.x + renderCoords.topLeft.x) / 2.0;
+    double cy = (renderCoords.bottomRight.y + renderCoords.topLeft.y) / 2.0;
+    double cz = 0.0;
+
+    auto origin = Vec3D(cx, cy, cz);
+
+    if (is3D) {
+        origin.x = 1.0 * sin(cy) * cos(cx);
+        origin.y = 1.0 * cos(cy);
+        origin.z = -1.0 * sin(cy) * sin(cx);
+    }
+    
+    auto transform = [&origin](const Coord coordinate) -> Vec3D {
+        double x = coordinate.x;
+        double y = coordinate.y;
+        double z = coordinate.z;
+        return Vec3D(x, y, z);
+    };
+
+    quad->setFrame(Quad3dD(transform(renderCoords.topLeft),
+                     transform(renderCoords.topRight),
+                     transform(renderCoords.bottomRight),
+                           transform(renderCoords.bottomLeft)), RectD(0, 0, 1, 1), origin, is3D);
+//    if (is3D) {
+//        double rx = is3D ? 1.0 * sin(cy) * cos(cx) : cx;
+//        double ry = is3D ? 1.0 * cos(cy) : cy;
+//        double rz = is3D ? -1.0 * sin(cy) * sin(cx) : 0.0;
+//
+//        auto origin = Vec3D(rx, ry, rz);
+//
+//        auto transform = [&origin](const Coord coordinate) -> Vec3D {
+//            double x = 1.0 * sin(coordinate.y) * cos(coordinate.x) - origin.x;
+//            double y =  1.0 * cos(coordinate.y) - origin.y;
+//            double z = -1.0 * sin(coordinate.y) * sin(coordinate.x) - origin.z;
+//            return Vec3D(x, y, z);
+//        };
+//
+//        quad->setFrame(Quad3dD(transform(renderCoords.topLeft),
+//                         transform(renderCoords.topRight),
+//                         transform(renderCoords.bottomRight),
+//                         transform(renderCoords.bottomLeft)), RectD(0, 0, 1, 1), origin);
+//    } else {
+//        auto origin = Vec3D(cx, cy, 0.0);
+//        auto transform = [&origin](const Coord coordinate) -> Vec3D {
+//            double x = coordinate.x - origin.x;
+//            double y = coordinate.y - origin.y;
+//            double z = coordinate.z - origin.z;
+//            return Vec3D(x, y, z);
+//        };
+//
+//        quad->setFrame(Quad3dD(transform(renderCoords.topLeft),
+//                         transform(renderCoords.topRight),
+//                         transform(renderCoords.bottomRight),
+//                         transform(renderCoords.bottomLeft)), RectD(0, 0, 1, 1), origin);
+//    }
 }
 
 std::shared_ptr<Quad2dInterface> QuadMaskObject::getQuadObject() { return quad; }

@@ -27,18 +27,21 @@
 #include "AnimationInterface.h"
 #include "RasterShaderStyle.h"
 
-class Textured2dLayerObject : public LayerObjectInterface {
+class Textured2dLayerObject : public LayerObjectInterface, public std::enable_shared_from_this<Textured2dLayerObject> {
   public:
     Textured2dLayerObject(std::shared_ptr<Quad2dInterface> quad,
                           const std::shared_ptr<AlphaShaderInterface> &shader,
-                          const std::shared_ptr<MapInterface> &mapInterface);
+                          const std::shared_ptr<MapInterface> &mapInterface,
+                          bool is3d = false);
     
     Textured2dLayerObject(std::shared_ptr<Quad2dInterface> quad, 
                           const std::shared_ptr<RasterShaderInterface> &rasterShader,
-                          const std::shared_ptr<MapInterface> &mapInterface);
+                          const std::shared_ptr<MapInterface> &mapInterface,
+                          bool is3d = false);
     
     Textured2dLayerObject(std::shared_ptr<Quad2dInterface> quad, 
-                          const std::shared_ptr<MapInterface> &mapInterface);
+                          const std::shared_ptr<MapInterface> &mapInterface,
+                          bool is3d = false);
 
     virtual ~Textured2dLayerObject() override {}
 
@@ -62,12 +65,14 @@ class Textured2dLayerObject : public LayerObjectInterface {
     
     std::shared_ptr<RenderObjectInterface> getRenderObject();
 
+    std::shared_ptr<ShaderProgramInterface> getShader();
+
     void beginAlphaAnimation(double startAlpha, double targetAlpha, long long duration);
     
     void beginStyleAnimation(RasterShaderStyle start, RasterShaderStyle target, long long duration);
 
   protected:
-    void setFrame(const ::Quad2dD &frame);
+    void setFrame(const ::Quad3dD &frame, const ::Vec3D & origin);
 
   private:
     std::shared_ptr<Quad2dInterface> quad;
@@ -84,4 +89,5 @@ class Textured2dLayerObject : public LayerObjectInterface {
     std::shared_ptr<AnimationInterface> animation;
 
     float alpha = 1.0;
+    bool is3d = false;
 };

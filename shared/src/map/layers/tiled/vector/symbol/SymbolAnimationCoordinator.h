@@ -12,12 +12,12 @@
 
 #include "AnimationInterpolator.h"
 #include "Tiled2dMapTileInfo.h"
-#include "Coord.h"
+#include "Vec2D.h"
 #include <atomic>
 
 class SymbolAnimationCoordinator {
 public:
-    SymbolAnimationCoordinator(const Coord &coordinate,
+    SymbolAnimationCoordinator(const Vec2D &coordinate,
                                const int zoomIdentifier,
                                const double xTolerance,
                                const double yTolerance,
@@ -31,7 +31,7 @@ public:
     animationDuration(animationDuration),
     animationDelay(animationDelay){}
 
-    bool isMatching(const Coord &coordinate, const int zoomIdentifier) const {
+    bool isMatching(const Vec2D &coordinate, const int zoomIdentifier) const {
         const double toleranceFactor = 1 << std::max(0, this->zoomIdentifier - zoomIdentifier); // more efficient than: std::max(1.0, std::pow(2, this->zoomIdentifier - zoomIdentifier))
         const double xDistance = std::abs(this->coordinate.x - coordinate.x);
         const double yDistance = std::abs(this->coordinate.y - coordinate.y);
@@ -113,7 +113,11 @@ public:
         return collides;
     }
 
-    const Coord coordinate;
+    void enableAnimations(bool enabled) {
+        animationsEnabled = enabled;
+    }
+
+    const Vec2D coordinate;
     const int zoomIdentifier;
 private:
     const double xTolerance;
@@ -137,6 +141,7 @@ private:
 
     const int64_t animationDuration;
     const int64_t animationDelay;
+    bool animationsEnabled = true;
 
     float internalGetAlpha(float targetAlpha, long long now, float &lastAlpha, long long &animationStart) {
         if (animationDuration == 0) {
@@ -146,7 +151,7 @@ private:
             if (animationStart == 0) {
                 animationStart = now + animationDelay;
             }
-            float progress = std::min(double(std::max(now - animationStart, 0ll)) / animationDuration, 1.0);
+            float progress = animationsEnabled ? std::min(double(std::max(now - animationStart, 0ll)) / animationDuration, 1.0) : 1.0;
             if (progress == 1.0) {
                 animationStart = 0;
                 lastAlpha = targetAlpha;

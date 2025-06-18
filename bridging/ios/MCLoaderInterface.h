@@ -15,7 +15,7 @@
 - (nonnull MCDataLoaderResult *)loadData:(nonnull NSString *)url
                                     etag:(nullable NSString *)etag;
 
-- (nonnull DJFuture<MCTextureLoaderResult *> *)loadTextureAsnyc:(nonnull NSString *)url
+- (nonnull DJFuture<MCTextureLoaderResult *> *)loadTextureAsync:(nonnull NSString *)url
                                                            etag:(nullable NSString *)etag;
 
 - (nonnull DJFuture<MCDataLoaderResult *> *)loadDataAsync:(nonnull NSString *)url

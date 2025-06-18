@@ -18,7 +18,7 @@
 #include "Tiled2dMapRasterSourceListener.h"
 
 class Tiled2dMapRasterSource
-    : public Tiled2dMapSource<TextureHolderInterface, std::shared_ptr<TextureLoaderResult>, std::shared_ptr<::TextureHolderInterface>> {
+    : public Tiled2dMapSource<std::shared_ptr<TextureLoaderResult>, std::shared_ptr<::TextureHolderInterface>> {
   public:
     Tiled2dMapRasterSource(const MapConfig &mapConfig,
                            const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig,
@@ -29,7 +29,7 @@ class Tiled2dMapRasterSource
                            float screenDensityPpi,
                            std::string layerName);
 
-    std::unordered_set<Tiled2dMapRasterTileInfo> getCurrentTiles();
+    VectorSet<Tiled2dMapRasterTileInfo> getCurrentTiles();
 
     virtual void notifyTilesUpdates() override;
         

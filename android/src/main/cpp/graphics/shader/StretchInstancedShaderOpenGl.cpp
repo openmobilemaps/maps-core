@@ -12,7 +12,9 @@
 #include "OpenGlContext.h"
 #include "OpenGlHelper.h"
 
-const std::string StretchInstancedShaderOpenGl::programName = "UBMAP_StretchInstancedShaderOpenGl";
+StretchInstancedShaderOpenGl::StretchInstancedShaderOpenGl(bool projectOntoUnitSphere)
+        : projectOntoUnitSphere(projectOntoUnitSphere),
+          programName(projectOntoUnitSphere ? "UBMAP_StretchInstancedUnitSphereShaderOpenGl" : "UBMAP_StretchInstancedShaderOpenGl") {}
 
 std::string StretchInstancedShaderOpenGl::getProgramName() { return programName; }
 
@@ -39,8 +41,59 @@ void StretchInstancedShaderOpenGl::setupProgram(const std::shared_ptr<::Renderin
 }
 
 std::string StretchInstancedShaderOpenGl::getVertexShader() {
-    return OMMVersionedGlesShaderCode(320 es,
-                                      uniform mat4 uMVPMatrix;
+    return projectOntoUnitSphere ?
+           OMMVersionedGlesShaderCode(320 es,
+                                      uniform mat4 uvpMatrix;
+                                      uniform vec4 uOriginOffset;
+
+                                      in vec4 vPosition;
+                                      in vec2 texCoordinate;
+
+                                      in vec3 aPosition;
+                                      in vec4 aTexCoordinate;
+                                      in vec2 aScale;
+                                      in float aRotation;
+                                      in float aAlpha;
+                                      in vec2 aStretchScales;
+                                      in vec4 aStretchX;
+                                      in vec4 aStretchY;
+
+                                      out vec2 v_texCoord;
+                                      out vec4 v_texCoordInstance;
+                                      out float v_alpha;
+                                      out vec2 v_stretchScales;
+                                      out vec4 v_stretchX;
+                                      out vec4 v_stretchY;
+
+                                      void main() {
+                                          float angle = aRotation * 3.14159265 / 180.0;
+
+                                          vec4 earthCenter = uvpMatrix * vec4(0.0, 0.0, 0.0, 1.0);
+                                          earthCenter = earthCenter / earthCenter.w;
+                                          vec4 screenPosition = uvpMatrix * (vec4(aPosition, 1.0) + uOriginOffset);
+                                          screenPosition = screenPosition / screenPosition.w;
+
+                                          vec2 scalePosition = vPosition.xy * aScale;
+                                          mat4 scaleRotateMatrix = mat4(cos(angle), -sin(angle), 0.0, 0.0,
+                                                                        sin(angle), cos(angle), 0.0, 0.0,
+                                                                        0.0, 0.0, 1.0, 0.0,
+                                                                        scalePosition.x, scalePosition.y, 0.0, 1.0);
+
+                                          gl_Position = scaleRotateMatrix * screenPosition;
+                                          v_texCoordInstance = aTexCoordinate;
+                                          v_texCoord = texCoordinate;
+                                          v_alpha = aAlpha;
+                                          if (screenPosition.z - earthCenter.z > 0.0) {
+                                              v_alpha = 0.0;
+                                          }
+                                          v_stretchScales = aStretchScales;
+                                          v_stretchX = aStretchX;
+                                          v_stretchY = aStretchY;
+                                      }
+                              )
+    : OMMVersionedGlesShaderCode(320 es,
+                                      uniform mat4 uvpMatrix;
+                                      uniform vec4 uOriginOffset;
 
                                       in vec4 vPosition;
                                       in vec2 texCoordinate;
@@ -67,10 +120,10 @@ std::string StretchInstancedShaderOpenGl::getVertexShader() {
                                                   vec4(cos(angle) * aScale.x, -sin(angle) * aScale.x, 0, 0),
                                                   vec4(sin(angle) * aScale.y, cos(angle) * aScale.y, 0, 0),
                                                   vec4(0, 0, 1, 0),
-                                                  vec4(aPosition.x, aPosition.y, 1.0, 1)
+                                                  vec4(aPosition + uOriginOffset.xy, 0.0, 1.0)
                                           );
 
-                                          mat4 matrix = uMVPMatrix * model_matrix;
+                                          mat4 matrix = uvpMatrix * model_matrix;
 
                                           gl_Position = matrix * vPosition;
                                           v_texCoordInstance = aTexCoordinate;

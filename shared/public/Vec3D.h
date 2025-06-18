@@ -10,6 +10,15 @@ struct Vec3D final {
     double y;
     double z;
 
+    friend bool operator==(const Vec3D& lhs, const Vec3D& rhs);
+    friend bool operator!=(const Vec3D& lhs, const Vec3D& rhs);
+
+    friend bool operator<(const Vec3D& lhs, const Vec3D& rhs);
+    friend bool operator>(const Vec3D& lhs, const Vec3D& rhs);
+
+    friend bool operator<=(const Vec3D& lhs, const Vec3D& rhs);
+    friend bool operator>=(const Vec3D& lhs, const Vec3D& rhs);
+
     Vec3D(double x_,
           double y_,
           double z_)

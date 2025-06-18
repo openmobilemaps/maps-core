@@ -3,10 +3,12 @@
 
 #pragma once
 
+#include "ComputePassInterface.h"
 #include "ErrorManager.h"
 #include "MaskingObjectInterface.h"
 #include "RectI.h"
 #include "RenderPassInterface.h"
+#include "RenderTargetInterface.h"
 #include <cstdint>
 #include <memory>
 #include <optional>
@@ -24,6 +26,8 @@ public:
     virtual void update() = 0;
 
     virtual std::vector</*not-null*/ std::shared_ptr<::RenderPassInterface>> buildRenderPasses() = 0;
+
+    virtual std::vector</*not-null*/ std::shared_ptr<::ComputePassInterface>> buildComputePasses() = 0;
 
     virtual void onAdded(const /*not-null*/ std::shared_ptr<MapInterface> & mapInterface, int32_t layerIndex) = 0;
 
@@ -51,4 +55,6 @@ public:
     virtual void setErrorManager(const /*not-null*/ std::shared_ptr<::ErrorManager> & errorManager) = 0;
 
     virtual void forceReload() = 0;
+
+    virtual void setPrimaryRenderTarget(const /*nullable*/ std::shared_ptr<::RenderTargetInterface> & target) = 0;
 };

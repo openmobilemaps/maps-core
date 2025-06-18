@@ -45,9 +45,23 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
++ (nonnull MCMapCoordinateSystem *)getEpsg4326System {
+    try {
+        auto objcpp_result_ = ::CoordinateSystemFactory::getEpsg4326System();
+        return ::djinni_generated::MapCoordinateSystem::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 + (nonnull MCMapCoordinateSystem *)getEpsg21781System {
     try {
         auto objcpp_result_ = ::CoordinateSystemFactory::getEpsg21781System();
+        return ::djinni_generated::MapCoordinateSystem::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
++ (nonnull MCMapCoordinateSystem *)getUnitSphereSystem {
+    try {
+        auto objcpp_result_ = ::CoordinateSystemFactory::getUnitSphereSystem();
         return ::djinni_generated::MapCoordinateSystem::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }

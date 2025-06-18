@@ -15,6 +15,7 @@
 #include "CoordinateConverterInterface.h"
 #include "CoordinateSystemIdentifiers.h"
 #include "MapCoordinateSystem.h"
+#include <algorithm>
 
 /// Convert WGS84 to WGS 84 / Pseudo-Mercator
 ///  https://epsg.io/4326 to https://epsg.io/3857
@@ -25,7 +26,7 @@ class EPSG4326ToEPSG3857Converter : public CoordinateConverterInterface {
     virtual Coord convert(const Coord &coordinate) override {
 
         const double x = coordinate.x * 20037508.34 / 180;
-        const double y = ((log(tan(((90 + coordinate.y) * M_PI) / 360)) / (M_PI / 180)) * 20037508.34) / 180;
+        const double y = ((log(tan(((90 + std::clamp(coordinate.y, -85.06, 85.06)) * M_PI) / 360)) / (M_PI / 180)) * 20037508.34) / 180;
         return Coord(getTo(), x, y, coordinate.z);
     }
 

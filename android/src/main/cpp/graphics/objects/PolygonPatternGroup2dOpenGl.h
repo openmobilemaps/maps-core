@@ -15,6 +15,7 @@
 #include "OpenGlContext.h"
 #include "PolygonPatternGroup2dInterface.h"
 #include "ShaderProgramInterface.h"
+#include "BaseShaderProgramOpenGl.h"
 #include "opengl_wrapper.h"
 #include <mutex>
 #include <vector>
@@ -26,7 +27,7 @@ class PolygonPatternGroup2dOpenGl : public GraphicsObjectInterface,
                      public PolygonPatternGroup2dInterface,
                      public std::enable_shared_from_this<PolygonPatternGroup2dOpenGl> {
   public:
-    PolygonPatternGroup2dOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader);
+    PolygonPatternGroup2dOpenGl(const std::shared_ptr<::BaseShaderProgramOpenGl> &shader);
 
     ~PolygonPatternGroup2dOpenGl(){};
 
@@ -37,10 +38,10 @@ class PolygonPatternGroup2dOpenGl : public GraphicsObjectInterface,
     virtual void clear() override;
 
     virtual void renderAsMask(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
-                              int64_t mvpMatrix, double screenPixelAsRealMeterFactor) override;
+                              int64_t vpMatrix, int64_t mMatrix, const ::Vec3D & origin, double screenPixelAsRealMeterFactor) override;
 
     virtual void render(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
-                        int64_t mvpMatrix, bool isMasked, double screenPixelAsRealMeterFactor) override;
+                        int64_t vpMatrix, int64_t mMatrix, const ::Vec3D & origin, bool isMasked, double screenPixelAsRealMeterFactor) override;
 
     virtual void loadTexture(const std::shared_ptr<::RenderingContextInterface> &context,
                              const std::shared_ptr<TextureHolderInterface> &textureHolder) override;
@@ -53,7 +54,7 @@ class PolygonPatternGroup2dOpenGl : public GraphicsObjectInterface,
 
     void setDebugLabel(const std::string &label) override;
 
-    void setVertices(const SharedBytes &vertices, const SharedBytes &indices) override;
+    void setVertices(const SharedBytes &vertices, const SharedBytes &indices, const ::Vec3D & origin) override;
 
     void setTextureCoordinates(const ::SharedBytes &textureCoordinates) override;
 
@@ -70,18 +71,22 @@ protected:
 
     void removeGlBuffers();
 
-    std::shared_ptr<ShaderProgramInterface> shaderProgram;
+    std::shared_ptr<BaseShaderProgramOpenGl> shaderProgram;
     std::string programName;
     int program;
 
-    int mvpMatrixHandle;
+    int vpMatrixHandle;
+    int mMatrixHandle;
+    int originOffsetHandle;
     int positionHandle;
     int styleIndexHandle;
+    GLuint vao;
     GLuint vertexBuffer;
     std::vector<GLfloat> vertices;
     GLuint indexBuffer;
     std::vector<GLushort> indices;
     bool glDataBuffersGenerated = false;
+    Vec3D polygonOrigin = Vec3D(0.0, 0.0, 0.0);
 
     std::shared_ptr<TextureHolderInterface> textureHolder;
     int texturePointer;

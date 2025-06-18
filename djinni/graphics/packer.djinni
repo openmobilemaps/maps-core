@@ -1,5 +1,6 @@
 @extern "../yaml/rect_i.yaml"
 @extern "../yaml/vec_2_i.yaml"
+@extern "../yaml/texture_holder_interface.yaml"
 
 rectangle_packer_page = record {
     uvs: map<string, rect_i>;
@@ -7,4 +8,9 @@ rectangle_packer_page = record {
 
 rectangle_packer = interface +c {
     static pack(rectangles: map<string, vec_2_i>, max_page_size: vec_2_i): list<rectangle_packer_page>;
+}
+
+texture_atlas = record {
+    uv_map: map<string, rect_i>;
+    texture: optional<texture_holder_interface>;
 }

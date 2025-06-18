@@ -8,7 +8,11 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class Quad2dInterface {
 
-    abstract fun setFrame(frame: io.openmobilemaps.mapscore.shared.graphics.common.Quad2dD, textureCoordinates: io.openmobilemaps.mapscore.shared.graphics.common.RectD)
+    abstract fun setFrame(frame: io.openmobilemaps.mapscore.shared.graphics.common.Quad3dD, textureCoordinates: io.openmobilemaps.mapscore.shared.graphics.common.RectD, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D, is3d: Boolean)
+
+    abstract fun setSubdivisionFactor(factor: Int)
+
+    abstract fun setMinMagFilter(filterType: TextureFilterType)
 
     abstract fun loadTexture(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, textureHolder: TextureHolderInterface)
 
@@ -18,7 +22,7 @@ abstract class Quad2dInterface {
 
     abstract fun asMaskingObject(): MaskingObjectInterface
 
-    private class CppProxy : Quad2dInterface {
+    public class CppProxy : Quad2dInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 
@@ -33,11 +37,23 @@ abstract class Quad2dInterface {
             external fun nativeDestroy(nativeRef: Long)
         }
 
-        override fun setFrame(frame: io.openmobilemaps.mapscore.shared.graphics.common.Quad2dD, textureCoordinates: io.openmobilemaps.mapscore.shared.graphics.common.RectD) {
+        override fun setFrame(frame: io.openmobilemaps.mapscore.shared.graphics.common.Quad3dD, textureCoordinates: io.openmobilemaps.mapscore.shared.graphics.common.RectD, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D, is3d: Boolean) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_setFrame(this.nativeRef, frame, textureCoordinates)
+            native_setFrame(this.nativeRef, frame, textureCoordinates, origin, is3d)
         }
-        private external fun native_setFrame(_nativeRef: Long, frame: io.openmobilemaps.mapscore.shared.graphics.common.Quad2dD, textureCoordinates: io.openmobilemaps.mapscore.shared.graphics.common.RectD)
+        private external fun native_setFrame(_nativeRef: Long, frame: io.openmobilemaps.mapscore.shared.graphics.common.Quad3dD, textureCoordinates: io.openmobilemaps.mapscore.shared.graphics.common.RectD, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D, is3d: Boolean)
+
+        override fun setSubdivisionFactor(factor: Int) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setSubdivisionFactor(this.nativeRef, factor)
+        }
+        private external fun native_setSubdivisionFactor(_nativeRef: Long, factor: Int)
+
+        override fun setMinMagFilter(filterType: TextureFilterType) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setMinMagFilter(this.nativeRef, filterType)
+        }
+        private external fun native_setMinMagFilter(_nativeRef: Long, filterType: TextureFilterType)
 
         override fun loadTexture(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, textureHolder: TextureHolderInterface) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

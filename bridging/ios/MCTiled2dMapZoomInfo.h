@@ -3,17 +3,20 @@
 
 #import <Foundation/Foundation.h>
 
+NS_SWIFT_SENDABLE
 @interface MCTiled2dMapZoomInfo : NSObject
 - (nonnull instancetype)init NS_UNAVAILABLE;
 + (nonnull instancetype)new NS_UNAVAILABLE;
 - (nonnull instancetype)initWithZoomLevelScaleFactor:(float)zoomLevelScaleFactor
                                numDrawPreviousLayers:(int32_t)numDrawPreviousLayers
+                       numDrawPreviousOrLaterTLayers:(int32_t)numDrawPreviousOrLaterTLayers
                                   adaptScaleToScreen:(BOOL)adaptScaleToScreen
                                             maskTile:(BOOL)maskTile
                                            underzoom:(BOOL)underzoom
                                             overzoom:(BOOL)overzoom NS_DESIGNATED_INITIALIZER;
 + (nonnull instancetype)tiled2dMapZoomInfoWithZoomLevelScaleFactor:(float)zoomLevelScaleFactor
                                              numDrawPreviousLayers:(int32_t)numDrawPreviousLayers
+                                     numDrawPreviousOrLaterTLayers:(int32_t)numDrawPreviousOrLaterTLayers
                                                 adaptScaleToScreen:(BOOL)adaptScaleToScreen
                                                           maskTile:(BOOL)maskTile
                                                          underzoom:(BOOL)underzoom
@@ -23,6 +26,8 @@
 @property (nonatomic, readonly) float zoomLevelScaleFactor;
 
 @property (nonatomic, readonly) int32_t numDrawPreviousLayers;
+
+@property (nonatomic, readonly) int32_t numDrawPreviousOrLaterTLayers;
 
 /**
  * if this flag is set to true the map is scaled according to the wmts scaledenominator (https://gis.stackexchange.com/questions/315881/what-is-wmts-scaledenominator)

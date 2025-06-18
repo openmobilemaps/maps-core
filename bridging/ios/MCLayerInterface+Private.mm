@@ -7,12 +7,14 @@
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
+#import "MCComputePassInterface+Private.h"
 #import "MCErrorManager+Private.h"
 #import "MCLayerReadyState+Private.h"
 #import "MCMapInterface+Private.h"
 #import "MCMaskingObjectInterface+Private.h"
 #import "MCRectI+Private.h"
 #import "MCRenderPassInterface+Private.h"
+#import "MCRenderTargetInterface+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -53,6 +55,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     try {
         auto objcpp_result_ = _cppRefHandle.get()->buildRenderPasses();
         return ::djinni::List<::djinni_generated::RenderPassInterface>::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nonnull NSArray<id<MCComputePassInterface>> *)buildComputePasses {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->buildComputePasses();
+        return ::djinni::List<::djinni_generated::ComputePassInterface>::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -138,6 +147,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)setPrimaryRenderTarget:(nullable id<MCRenderTargetInterface>)target {
+    try {
+        _cppRefHandle.get()->setPrimaryRenderTarget(::djinni::Optional<std::optional, ::djinni_generated::RenderTargetInterface>::toCpp(target));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 namespace djinni_generated {
 
 class LayerInterface::ObjcProxy final
@@ -164,6 +179,13 @@ public:
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() buildRenderPasses];
             return ::djinni::List<::djinni_generated::RenderPassInterface>::toCpp(objcpp_result_);
+        }
+    }
+    std::vector</*not-null*/ std::shared_ptr<::ComputePassInterface>> buildComputePasses() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() buildComputePasses];
+            return ::djinni::List<::djinni_generated::ComputePassInterface>::toCpp(objcpp_result_);
         }
     }
     void onAdded(const /*not-null*/ std::shared_ptr<::MapInterface> & c_mapInterface, int32_t c_layerIndex) override
@@ -245,6 +267,12 @@ public:
     {
         @autoreleasepool {
             [djinni_private_get_proxied_objc_object() forceReload];
+        }
+    }
+    void setPrimaryRenderTarget(const /*nullable*/ std::shared_ptr<::RenderTargetInterface> & c_target) override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() setPrimaryRenderTarget:(::djinni::Optional<std::optional, ::djinni_generated::RenderTargetInterface>::fromCpp(c_target))];
         }
     }
 };

@@ -12,11 +12,12 @@
 #include "ColorShaderInterface.h"
 #include "GraphicsObjectInterface.h"
 #include "LambdaTask.h"
-#include "MapCamera2dInterface.h"
+#include "MapCameraInterface.h"
 #include "MapInterface.h"
 #include "PolygonHelper.h"
 #include "RenderObject.h"
 #include "RenderPass.h"
+#include <algorithm>
 #include <map>
 
 #include "PolygonCompare.h"
@@ -24,7 +25,7 @@
 PolygonLayer::PolygonLayer()
     : isHidden(false) {}
 
-void PolygonLayer::setPolygons(const std::vector<PolygonInfo> &polygons) {
+void PolygonLayer::setPolygons(const std::vector<PolygonInfo> &polygons, const Vec3D & origin) {
     clear();
     for (auto const &polygon : polygons) {
         add(polygon);
@@ -114,23 +115,25 @@ void PolygonLayer::addAll(const std::vector<PolygonInfo> &polygons) {
         return;
     }
 
+    bool is3d = mapInterface->is3d();
+
     std::vector<std::shared_ptr<Polygon2dInterface>> polygonGraphicsObjects;
 
     {
         std::lock_guard<std::recursive_mutex> lock(polygonsMutex);
         for (const auto &polygon : polygons) {
 
-            auto shader = shaderFactory->createColorShader();
+            auto shader = mapInterface->is3d() ? shaderFactory->createUnitSphereColorShader() : shaderFactory->createColorShader();
             auto polygonGraphicsObject = objectFactory->createPolygon(shader->asShaderProgramInterface());
 
             auto polygonObject =
-                std::make_shared<Polygon2dLayerObject>(mapInterface->getCoordinateConverterHelper(), polygonGraphicsObject, shader);
+                std::make_shared<Polygon2dLayerObject>(mapInterface->getCoordinateConverterHelper(), polygonGraphicsObject, shader, is3d);
 
             polygonObject->setPolygon(polygon.coordinates);
             polygonObject->setColor(polygon.color);
 
             polygonGraphicsObjects.push_back(polygonGraphicsObject);
-            this->polygons[polygon.identifier].push_back(std::make_tuple(polygon, polygonObject));
+            this->polygons[polygon.identifier].push_back(std::make_pair(polygon, polygonObject));
         }
     }
 
@@ -145,6 +148,7 @@ void PolygonLayer::addAll(const std::vector<PolygonInfo> &polygons) {
                                      }));
 
     generateRenderPasses();
+    mapInterface->invalidate();
 }
 
 void PolygonLayer::setupPolygonObjects(const std::vector<std::shared_ptr<Polygon2dInterface>> &polygons) {
@@ -176,7 +180,7 @@ void PolygonLayer::clear() {
         auto scheduler = mapInterface->getScheduler();
         if (scheduler) {
             auto polygonsToClear = polygons;
-            scheduler->addTask(std::make_shared<LambdaTask>(TaskConfig("LineLayer_clearLines", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS), [polygonsToClear]{
+            scheduler->addTask(std::make_shared<LambdaTask>(TaskConfig("PolygonLayer_clearLines", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS), [polygonsToClear]{
                 for (const auto &polygon : polygonsToClear) {
                     for (const auto &p : polygon.second) {
                         if (p.second->getPolygonObject()->isReady()) {
@@ -242,7 +246,7 @@ void PolygonLayer::generateRenderPasses() {
     for (auto const &p : polygons) {
         for (auto const &object : p.second) {
             for (auto config : object.second->getRenderConfig()) {
-                renderPassObjectMap[config->getRenderIndex()].push_back(
+                renderPassObjectMap[renderPassIndex].push_back(
                     std::make_shared<RenderObject>(config->getGraphicsObject()));
             }
         }
@@ -250,7 +254,7 @@ void PolygonLayer::generateRenderPasses() {
     std::vector<std::shared_ptr<RenderPassInterface>> newRenderPasses;
     for (const auto &passEntry : renderPassObjectMap) {
         std::shared_ptr<RenderPass> renderPass =
-            std::make_shared<RenderPass>(RenderPassConfig(passEntry.first, false), passEntry.second, mask);
+            std::make_shared<RenderPass>(RenderPassConfig(passEntry.first, false, renderTarget), passEntry.second, mask);
         newRenderPasses.push_back(renderPass);
     }
     {
@@ -330,6 +334,11 @@ void PolygonLayer::resetSelection() {
 }
 
 bool PolygonLayer::onTouchDown(const ::Vec2F &posScreen) {
+    const auto handler = callbackHandler;
+    if (!handler) {
+        return false;
+    }
+
     auto point = mapInterface->getCamera()->coordFromScreenPosition(posScreen);
 
     std::lock_guard<std::recursive_mutex> lock(polygonsMutex);
@@ -355,7 +364,6 @@ bool PolygonLayer::onTouchDown(const ::Vec2F &posScreen) {
             }
 
             mapInterface->invalidate();
-            return true;
         }
     }
     return false;
@@ -376,16 +384,35 @@ void PolygonLayer::clearTouch() {
 }
 
 bool PolygonLayer::onClickUnconfirmed(const ::Vec2F &posScreen) {
+    const auto handler = callbackHandler;
+    if (!handler) {
+        return false;
+    }
     if (highlightedPolygon) {
-        selectedPolygon = highlightedPolygon;
+        if (handler->onClickConfirmed(*highlightedPolygon)) {
+            selectedPolygon = highlightedPolygon;
 
-        if (callbackHandler) {
-            callbackHandler->onClickConfirmed(*selectedPolygon);
+            highlightedPolygon = std::nullopt;
+            mapInterface->invalidate();
+            return true;
         }
+    }
+    return false;
+}
 
-        highlightedPolygon = std::nullopt;
-        mapInterface->invalidate();
-        return true;
+bool PolygonLayer::onClickConfirmed(const ::Vec2F &posScreen) {
+    const auto handler = callbackHandler;
+    if (!handler) {
+        return false;
+    }
+    if (highlightedPolygon) {
+        if (handler->onClickUnconfirmed(*highlightedPolygon)) {
+            selectedPolygon = highlightedPolygon;
+
+            highlightedPolygon = std::nullopt;
+            mapInterface->invalidate();
+            return true;
+        }
     }
     return false;
 }
@@ -410,4 +437,9 @@ void PolygonLayer::setLayerClickable(bool isLayerClickable) {
             mapInterface->getTouchHandler()->removeListener(shared_from_this());
         }
     }
+}
+
+void PolygonLayer::setRenderPassIndex(int32_t index) {
+    renderPassIndex = index;
+    generateRenderPasses();
 }

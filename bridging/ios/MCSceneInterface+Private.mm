@@ -8,6 +8,7 @@
 #import "DJIMarshal+Private.h"
 #import "MCCameraInterface+Private.h"
 #import "MCGraphicsObjectFactoryInterface+Private.h"
+#import "MCRenderTargetInterface+Private.h"
 #import "MCRendererInterface+Private.h"
 #import "MCRenderingContextInterface+Private.h"
 #import "MCSceneCallbackInterface+Private.h"
@@ -101,9 +102,21 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)drawFrame {
+- (void)prepare {
     try {
-        _cppRefHandle.get()->drawFrame();
+        _cppRefHandle.get()->prepare();
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)drawFrame:(nullable id<MCRenderTargetInterface>)target {
+    try {
+        _cppRefHandle.get()->drawFrame(::djinni::Optional<std::optional, ::djinni_generated::RenderTargetInterface>::toCpp(target));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)compute {
+    try {
+        _cppRefHandle.get()->compute();
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

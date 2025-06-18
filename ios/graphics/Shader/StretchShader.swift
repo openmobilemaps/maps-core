@@ -10,7 +10,7 @@
 
 import Foundation
 import MapCoreSharedModule
-import Metal
+@preconcurrency import Metal
 
 struct StretchShaderInfoSwift: Equatable {
     let scaleX: Float
@@ -29,7 +29,10 @@ struct StretchShaderInfoSwift: Equatable {
     var uvOrig: SIMD2<Float>
     var uvSize: SIMD2<Float>
 
-    init(info: MCStretchShaderInfo = MCStretchShaderInfo(scaleX: 1, stretchX0Begin: -1, stretchX0End: -1, stretchX1Begin: -1, stretchX1End: -1, scaleY: 1, stretchY0Begin: -1, stretchY0End: -1, stretchY1Begin: -1, stretchY1End: -1, uv: MCRectD(x: 0, y: 0, width: 0, height: 0))) {
+    init(
+        info: MCStretchShaderInfo = MCStretchShaderInfo(
+            scaleX: 1, stretchX0Begin: -1, stretchX0End: -1, stretchX1Begin: -1, stretchX1End: -1, scaleY: 1, stretchY0Begin: -1, stretchY0End: -1, stretchY1Begin: -1, stretchY1End: -1, uv: MCRectD(x: 0, y: 0, width: 0, height: 0))
+    ) {
         scaleX = info.scaleX
         stretchX0Begin = info.stretchX0Begin
         stretchX0End = info.stretchX0End
@@ -46,20 +49,16 @@ struct StretchShaderInfoSwift: Equatable {
     }
 }
 
-class StretchShader: BaseShader {
+class StretchShader: BaseShader, @unchecked Sendable {
     private let alphaBuffer: MTLBuffer
     private var alphaContent: UnsafeMutablePointer<Float>
 
     private var infoContent: UnsafeMutablePointer<StretchShaderInfoSwift>
     private let infoBuffer: MTLBuffer
 
-    private let shader: PipelineType
-
     private var stretchInfo = StretchShaderInfoSwift()
 
-    init(shader: PipelineType = .stretchShader) {
-        self.shader = shader
-
+    override init(shader: PipelineType = .stretchShader) {
         guard let infoBuffer = MetalContext.current.device.makeBuffer(length: MemoryLayout<StretchShaderInfoSwift>.stride, options: []) else { fatalError("Could not create buffer") }
         self.infoBuffer = infoBuffer
         self.infoContent = self.infoBuffer.contents().bindMemory(to: StretchShaderInfoSwift.self, capacity: 1)
@@ -69,11 +68,13 @@ class StretchShader: BaseShader {
         self.alphaBuffer = alphaBuffer
         self.alphaContent = self.alphaBuffer.contents().bindMemory(to: Float.self, capacity: 1)
         self.alphaContent[0] = 1.0
+
+        super.init(shader: shader)
     }
 
     override func setupProgram(_: MCRenderingContextInterface?) {
         if pipeline == nil {
-            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: shader, blendMode: blendMode).json)
+            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: shader, blendMode: blendMode))
         }
     }
 

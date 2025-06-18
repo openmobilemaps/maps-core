@@ -18,7 +18,7 @@ abstract class RenderPassInterface {
 
     abstract fun getScissoringRect(): io.openmobilemaps.mapscore.shared.graphics.common.RectI?
 
-    private class CppProxy : RenderPassInterface {
+    public class CppProxy : RenderPassInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

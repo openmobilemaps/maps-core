@@ -10,20 +10,23 @@
 
 #pragma once
 
+#include "OpenGlRenderingContextInterface.h"
+#include "OpenGlRenderTargetInterface.h"
 #include "RenderingContextInterface.h"
+#include "RenderingCullMode.h"
+#include <memory>
 #include <string>
 #include <unordered_map>
-#include <vector>
+#include "ChronoUtil.h"
 
-class OpenGlContext : public RenderingContextInterface, std::enable_shared_from_this<OpenGlContext> {
-  public:
+class OpenGlContext
+        : public RenderingContextInterface,
+          public OpenGlRenderingContextInterface,
+          public std::enable_shared_from_this<OpenGlContext> {
+public:
     OpenGlContext();
 
-    int getProgram(const std::string &name);
-
-    void storeProgram(const std::string &name, int program);
-
-    void cleanAll();
+    // RenderingContextInterface
 
     virtual void onSurfaceCreated() override;
 
@@ -33,6 +36,8 @@ class OpenGlContext : public RenderingContextInterface, std::enable_shared_from_
 
     virtual void setBackgroundColor(const ::Color &color) override;
 
+    void setCulling(RenderingCullMode mode) override;
+
     virtual void setupDrawFrame() override;
 
     virtual void preRenderStencilMask() override;
@@ -41,10 +46,43 @@ class OpenGlContext : public RenderingContextInterface, std::enable_shared_from_
 
     virtual void applyScissorRect(const std::optional<::RectI> &scissorRect) override;
 
-  protected:
+    virtual std::shared_ptr<OpenGlRenderingContextInterface> asOpenGlRenderingContext() override;
+
+    // GlRenderingContextInterface
+
+    virtual void resume() override;
+
+    virtual void pause() override;
+
+    virtual /*not-null*/ std::shared_ptr<OpenGlRenderTargetInterface>
+    getCreateRenderTarget(const std::string &name, ::TextureFilterType textureFilter, const ::Color &clearColor) override;
+
+    virtual void deleteRenderTarget(const std::string &name) override;
+
+    virtual std::vector</*not-null*/ std::shared_ptr<OpenGlRenderTargetInterface>> getRenderTargets() override;
+
+    int getProgram(const std::string &name) override;
+
+    void storeProgram(const std::string &name, int program) override;
+
+    virtual float getAspectRatio() override;
+
+    virtual int64_t getDeltaTimeMs() override;
+
+    // OpenGlContext
+
+    void cleanAll();
+
+protected:
+    RenderingCullMode cullMode = RenderingCullMode::NONE;
+    std::atomic_flag backgroundColorValid = ATOMIC_FLAG_INIT;
     Color backgroundColor = Color(0, 0, 0, 1);
 
     std::unordered_map<std::string, int> programs;
+    std::unordered_map<std::string, std::shared_ptr<OpenGlRenderTargetInterface>> renderTargets;
 
     Vec2I viewportSize = Vec2I(0, 0);
+
+    std::chrono::milliseconds timeCreation;
+    long timeFrameDelta = 0;
 };

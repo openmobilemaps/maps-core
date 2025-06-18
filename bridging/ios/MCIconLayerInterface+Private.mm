@@ -120,6 +120,26 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)setRenderPassIndex:(int32_t)index {
+    try {
+        _cppRefHandle.get()->setRenderPassIndex(::djinni::I32::toCpp(index));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)animateIconScale:(nonnull NSString *)identifier
+                    from:(float)from
+                      to:(float)to
+                duration:(float)duration
+             repetitions:(int32_t)repetitions {
+    try {
+        _cppRefHandle.get()->animateIconScale(::djinni::String::toCpp(identifier),
+                                              ::djinni::F32::toCpp(from),
+                                              ::djinni::F32::toCpp(to),
+                                              ::djinni::F32::toCpp(duration),
+                                              ::djinni::I32::toCpp(repetitions));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 namespace djinni_generated {
 
 auto IconLayerInterface::toCpp(ObjcType objc) -> CppType

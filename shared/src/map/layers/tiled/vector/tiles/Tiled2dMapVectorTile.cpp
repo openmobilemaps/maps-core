@@ -12,7 +12,7 @@
 #include "CoordinateSystemIdentifiers.h"
 #include "QuadCoord.h"
 #include "RenderObject.h"
-#include "MapCamera2dInterface.h"
+#include "MapCameraInterface.h"
 
 Tiled2dMapVectorTile::Tiled2dMapVectorTile(const std::weak_ptr<MapInterface> &mapInterface,
                                            const Tiled2dMapVersionedTileInfo &tileInfo,

@@ -15,6 +15,7 @@
 #include "MaskingObjectInterface.h"
 #include "OpenGlContext.h"
 #include "ShaderProgramInterface.h"
+#include "BaseShaderProgramOpenGl.h"
 #include "TextDescription.h"
 #include "TextInterface.h"
 #include "opengl_wrapper.h"
@@ -26,7 +27,7 @@ class Text2dOpenGl : public GraphicsObjectInterface,
                      public TextInterface,
                      public std::enable_shared_from_this<Text2dOpenGl> {
   public:
-    Text2dOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader);
+    Text2dOpenGl(const std::shared_ptr<::BaseShaderProgramOpenGl> &shader);
 
     ~Text2dOpenGl(){};
 
@@ -37,10 +38,10 @@ class Text2dOpenGl : public GraphicsObjectInterface,
     virtual void clear() override;
 
     virtual void renderAsMask(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
-                              int64_t mvpMatrix, double screenPixelAsRealMeterFactor) override;
+                              int64_t vpMatrix, int64_t mMatrix, const ::Vec3D & origin, double screenPixelAsRealMeterFactor) override;
 
     virtual void render(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
-                        int64_t mvpMatrix, bool isMasked, double screenPixelAsRealMeterFactor) override;
+                        int64_t vpMatrix, int64_t mMatrix, const ::Vec3D & origin, bool isMasked, double screenPixelAsRealMeterFactor) override;
 
     void setTextsShared(const SharedBytes &vertices, const SharedBytes &indices) override;
 
@@ -63,16 +64,18 @@ protected:
 
     void removeGlBuffers();
 
-    std::shared_ptr<ShaderProgramInterface> shaderProgram;
+    std::shared_ptr<BaseShaderProgramOpenGl> shaderProgram;
     std::string programName;
     int program;
 
-    int mvpMatrixHandle = -1;
+    int vpMatrixHandle = -1;
+    int mMatrixHandle = -1;
     int positionHandle = -1;
     int textureCoordinateHandle = -1;
-    GLuint vertexAttribBuffer = -1;
+    GLuint vao;
+    GLuint vertexAttribBuffer;
     std::vector<GLfloat> textVertexAttributes;
-    GLuint indexBuffer = -1;
+    GLuint indexBuffer;
     std::vector<GLushort> textIndices;
     bool glDataBuffersGenerated = false;
 

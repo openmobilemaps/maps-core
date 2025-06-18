@@ -195,7 +195,14 @@ void DefaultTouchHandler::handleMove(Vec2F delta) {
 #endif
         if (state == ONE_FINGER_DOUBLE_CLICK_DOWN || state == ONE_FINGER_DOUBLE_CLICK_MOVE) {
             state = ONE_FINGER_DOUBLE_CLICK_MOVE;
-        } else {
+        }
+        else if (state == TWO_FINGER_DOWN) {
+            state = TWO_FINGER_MOVING;
+        }
+        else if (state == ONE_FINGER_AFTER_TWO) {
+            // no action
+        }
+        else {
 #ifdef ENABLE_TOUCH_LOGGING
             LogDebug <<= "TouchHandler: is moving now";
 #endif
@@ -224,6 +231,14 @@ void DefaultTouchHandler::handleTouchUp() {
 #ifdef ENABLE_TOUCH_LOGGING
         LogDebug <<= "TouchHandler: double click move ended";
 #endif
+        {
+            std::lock_guard<std::recursive_mutex> lock(listenerMutex);
+            for (auto &[index, listener]: listeners) {
+                if (listener->onOneFingerDoubleClickMoveComplete()) {
+                    break;
+                }
+            }
+        }
         state = IDLE;
     } else if (state == ONE_FINGER_DOUBLE_CLICK_DOWN) {
 #ifdef ENABLE_TOUCH_LOGGING
@@ -288,7 +303,20 @@ void DefaultTouchHandler::handleTouchUp() {
                 }
             }
         }
-        state = IDLE;
+
+        if (state == TWO_FINGER_DOWN || state == TWO_FINGER_MOVING) {
+            state = ONE_FINGER_AFTER_TWO;
+            stateTime = DateHelper::currentTimeMillis();
+            auto strongScheduler = scheduler.lock();
+            if (strongScheduler) {
+                strongScheduler->addTask(std::make_shared<LambdaTask>(
+                                                                      TaskConfig("OneFingerAfterTwoTask", TWO_FINGER_TOUCH_TIMEOUT, TaskPriority::NORMAL, ExecutionEnvironment::COMPUTATION),
+                                                                      [=] { checkState(); }));
+            }
+        }
+        else {
+            state = IDLE;
+        }
     }
     {
         std::lock_guard<std::recursive_mutex> lock(listenerMutex);
@@ -377,8 +405,14 @@ void DefaultTouchHandler::handleTwoFingerUp(std::tuple<Vec2F, Vec2F> doubleTouch
     std::lock_guard<std::recursive_mutex> lock(stateMutex);
 
     if (state != TWO_FINGER_DOWN) {
-        state = IDLE;
+        state = ONE_FINGER_AFTER_TWO;
         stateTime = DateHelper::currentTimeMillis();
+        auto strongScheduler = scheduler.lock();
+        if (strongScheduler) {
+            strongScheduler->addTask(std::make_shared<LambdaTask>(
+                                                                  TaskConfig("OneFingerAfterTwoTask", TWO_FINGER_TOUCH_TIMEOUT, TaskPriority::NORMAL, ExecutionEnvironment::COMPUTATION),
+                                                                  [=] { checkState(); }));
+        }
         {
             std::lock_guard<std::recursive_mutex> lock(listenerMutex);
             for (auto &[index, listener]: listeners) {
@@ -438,6 +472,10 @@ void DefaultTouchHandler::checkState() {
             stateTime = DateHelper::currentTimeMillis();
         } else if (state == TWO_FINGER_DOWN && stateTime <= DateHelper::currentTimeMillis() - LONG_PRESS_TIMEOUT) {
             state = TWO_FINGER_MOVING;
+            stateTime = DateHelper::currentTimeMillis();
+        }
+        else if (state == ONE_FINGER_AFTER_TWO && stateTime <= DateHelper::currentTimeMillis() - TWO_FINGER_TOUCH_TIMEOUT) {
+            state = IDLE;
             stateTime = DateHelper::currentTimeMillis();
         }
     } // end lock stateMutex

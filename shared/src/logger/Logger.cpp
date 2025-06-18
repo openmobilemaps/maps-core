@@ -24,8 +24,14 @@ int __android_log_print(int prio, const char *tag, const char *fmt, ...);
 }
 #endif
 
-#if defined(__APPLE__) && !defined(BANDIT_TESTING)
+#if defined(__APPLE__) && !defined(CATCH_TESTING)
 #include <os/log.h>
+#endif
+
+//#define SHOW_COLORS 0
+
+#ifndef LOG_LEVEL
+#define LOG_LEVEL 2 // == LogDebug
 #endif
 
 Logger::Logger(int p){
@@ -69,7 +75,7 @@ void Logger::log(int prio, const char *tag, const char *fmt, ...) const {
     va_end(args);
 #endif
 
-#if (defined(__APPLE__) && !defined(BANDIT_TESTING)) || defined(_WIN32)
+#if (defined(__APPLE__) && !defined(CATCH_TESTING)) || defined(_WIN32)
     switch (priority) {
     case 0: {
         os_log(OS_LOG_DEFAULT, "%{public}s", fmt);
@@ -97,7 +103,7 @@ void Logger::log(int prio, const char *tag, const char *fmt, ...) const {
     }
 #endif
 
-#ifdef BANDIT_TESTING
+#if defined(CATCH_TESTING) || (defined(__linux__) && !defined(__ANDROID__))
     if (priority <= LOG_LEVEL) {
         switch (priority) {
         case 0: {

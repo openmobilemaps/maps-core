@@ -3,11 +3,13 @@
 
 #pragma once
 
+#include "BlendMode.h"
 #include "LayerInterface.h"
 #include "LoaderInterface.h"
 #include "MaskingObjectInterface.h"
 #include "RasterShaderStyle.h"
 #include "ShaderProgramInterface.h"
+#include "TextureFilterType.h"
 #include "Tiled2dMapLayerConfig.h"
 #include "Tiled2dMapReadyStateListener.h"
 #include <cstdint>
@@ -46,6 +48,8 @@ public:
 
     virtual ::RasterShaderStyle getStyle() = 0;
 
+    virtual void setMinMagFilter(::TextureFilterType filterType) = 0;
+
     virtual void setMinZoomLevelIdentifier(std::optional<int32_t> value) = 0;
 
     virtual std::optional<int32_t> getMinZoomLevelIdentifier() = 0;
@@ -59,4 +63,8 @@ public:
     virtual void setReadyStateListener(const /*nullable*/ std::shared_ptr<::Tiled2dMapReadyStateListener> & listener) = 0;
 
     virtual /*not-null*/ std::shared_ptr<::Tiled2dMapLayerConfig> getConfig() = 0;
+
+    virtual void set3dSubdivisionFactor(int32_t factor) = 0;
+
+    virtual void setBlendMode(::BlendMode blendMode) = 0;
 };

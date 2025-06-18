@@ -1,21 +1,24 @@
-//
-//  Mailbox.h
-//  
-//
-//  Created by Stefan Mitterrutzner on 08.02.23.
-//
+/*
+ * Copyright (c) 2021 Ubique Innovation AG <https://www.ubique.ch>
+ *
+ *  This Source Code Form is subject to the terms of the Mozilla Public
+ *  License, v. 2.0. If a copy of the MPL was not distributed with this
+ *  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ *
+ *  SPDX-License-Identifier: MPL-2.0
+ */
 
 #pragma once
 
-#include "SchedulerInterface.h"
+#include "Hash.h"
 #include "LambdaTask.h"
-#include <mutex>
+#include "Logger.h"
+#include "SchedulerInterface.h"
+#include <cassert>
 #include <deque>
 #include <future>
-#include <typeinfo>
-#include "assert.h"
-#include "Logger.h"
-#include <functional>
+#include <mutex>
+#include <memory>
 
 enum class MailboxDuplicationStrategy {
     none = 0,
@@ -27,43 +30,62 @@ enum class MailboxExecutionEnvironment {
     graphics = 1
 };
 
+struct MessageDiagnostics {
+    const char * senderFile;
+    const char * senderFunction;
+    const char * senderLine;
+    const char * targetFunction;
+
+    MessageDiagnostics(const char *senderFile, const char *senderFunction, const char *senderLine, const char *targetFunction) : senderFile(senderFile),
+                                                                                                           senderFunction(senderFunction),
+                                                                                                           senderLine(senderLine),
+                                                                                                           targetFunction(targetFunction) {}
+
+    std::string toString() const {
+        return std::string(senderFile) + "::" + std::string(senderFunction) + ":" + std::string(senderLine) + " -> " + std::string(targetFunction);
+    }
+};
+
+template<class MemberFn>
+struct MemberFunctionWrapper {
+    MemberFn memberFn;
+    uint64_t identifier;
+    MessageDiagnostics diagnostics;
+
+    MemberFunctionWrapper(MemberFn memberFn, uint64_t identifier, MessageDiagnostics diagnostics) : memberFn(memberFn), identifier(identifier), diagnostics(diagnostics) {}
+};
+
+#define TO_STRING_IMPL(x) #x
+#define TO_STRING(x) TO_STRING_IMPL(x)
+
+// CAUTION: Ensure that the provided member function is a direct reference (and e.g. not one stored in a variable).
+// Otherwise the hash will be incorrect and the message replacement will not work as expected!
+#define MFN(memberFn) MemberFunctionWrapper(memberFn, const_hash(#memberFn), MessageDiagnostics(__FILE_NAME__, __func__, TO_STRING(__LINE__), #memberFn))
+
 class MailboxMessage {
 public:
-    MailboxMessage(const MailboxDuplicationStrategy &strategy, const MailboxExecutionEnvironment &environment, size_t identifier)
-    : strategy(strategy), environment(environment), identifier(identifier) {}
+    MailboxMessage(const MailboxDuplicationStrategy &strategy, const MailboxExecutionEnvironment &environment, uint64_t identifier, const MessageDiagnostics diagnostics)
+    : strategy(strategy), environment(environment), identifier(identifier), diagnostics(diagnostics) {}
     virtual ~MailboxMessage() = default;
     virtual void operator()() = 0;
     
     const MailboxDuplicationStrategy strategy;
     const MailboxExecutionEnvironment environment;
-    const size_t identifier;
+    const uint64_t identifier;
+    const MessageDiagnostics diagnostics;
 };
 
 template <class Object, class MemberFn, class ArgsTuple>
 class MailboxMessageImpl: public MailboxMessage {
 public:
-    MailboxMessageImpl(Object object_, MemberFn memberFn_, const MailboxDuplicationStrategy &strategy, const MailboxExecutionEnvironment &environment, ArgsTuple argsTuple_)
-      : MailboxMessage(strategy, environment, calculateIdentifier(object_, memberFn_)),
-        object(object_),
+    MailboxMessageImpl(std::weak_ptr<Object> object_, MemberFunctionWrapper<MemberFn> memberFn_, const MailboxDuplicationStrategy &strategy, const MailboxExecutionEnvironment &environment, ArgsTuple argsTuple_)
+      : MailboxMessage(strategy,
+                       environment,
+                       memberFn_.identifier,
+                       memberFn_.diagnostics),
+        object(std::move(object_)),
         memberFn(memberFn_),
-        argsTuple(std::move(argsTuple_)) {
-    }
-
-    static size_t calculateIdentifier(const Object& object, MemberFn memberFn) {
-        size_t hash = typeid(Object).hash_code();
-        size_t hashFn = typeid(MemberFn).hash_code();
-        hash_combine(hash, hashFn);
-        hash_combine(hash, &memberFn);
-        return hash;
-    }
-
-    template <typename T>
-    static void hash_combine(size_t& seed, const T& value) {
-        std::hash<T> hasher;
-        auto v = hasher(value);
-        seed ^= v + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-    }
-
+        argsTuple(std::move(argsTuple_)) { }
 
     void operator()() override {
         invoke(std::make_index_sequence<std::tuple_size_v<ArgsTuple>>());
@@ -72,27 +94,26 @@ public:
     template <std::size_t... I>
     void invoke(std::index_sequence<I...>) {
         if (auto strongObject = object.lock()) {
-            ((*strongObject).*memberFn)(std::move(std::get<I>(argsTuple))...);
+            ((*strongObject).*memberFn.memberFn)(std::move(std::get<I>(argsTuple))...);
         } else {
             LogError <<= "Mailbox Object is expired";
         }
     }
 
-    Object object;
-    MemberFn memberFn;
+    std::weak_ptr<Object> object;
+    MemberFunctionWrapper<MemberFn> memberFn;
     ArgsTuple argsTuple;
 };
 
 template <class ResultType, class Object, class MemberFn, class ArgsTuple>
 class AskMessageImpl : public MailboxMessage {
 public:
-    AskMessageImpl(std::promise<ResultType> promise_, Object object_, MemberFn memberFn_, const MailboxDuplicationStrategy &strategy, const MailboxExecutionEnvironment &environment, ArgsTuple argsTuple_)
-        : MailboxMessage(strategy, environment, typeid(MemberFn).hash_code()),
-          object(object_),
+    AskMessageImpl(std::promise<ResultType> promise_, std::weak_ptr<Object> object_, MemberFunctionWrapper<MemberFn> memberFn_, const MailboxExecutionEnvironment &environment, ArgsTuple argsTuple_)
+        : MailboxMessage(MailboxDuplicationStrategy::none, environment, memberFn_.identifier, memberFn_.diagnostics),
+          object(std::move(object_)),
           memberFn(memberFn_),
           argsTuple(std::move(argsTuple_)),
-          promise(std::move(promise_)) {
-    }
+          promise(std::move(promise_)){}
 
     void operator()() override {
         promise.set_value(ask(std::make_index_sequence<std::tuple_size_v<ArgsTuple>>()));
@@ -101,7 +122,7 @@ public:
     template <std::size_t... I>
     ResultType ask(std::index_sequence<I...>) {
         if (auto strongObject = object.lock()) {
-            return ((*strongObject).*memberFn)(std::move(std::get<I>(argsTuple))...);
+            return ((*strongObject).*memberFn.memberFn)(std::move(std::get<I>(argsTuple))...);
         } else {
             LogError <<= "Mailbox Object is expired";
             throw std::invalid_argument("Mailbox Object is expired");
@@ -109,8 +130,8 @@ public:
         }
     }
 
-    Object object;
-    MemberFn memberFn;
+    std::weak_ptr<Object> object;
+    MemberFunctionWrapper<MemberFn> memberFn;
     ArgsTuple argsTuple;
     std::promise<ResultType> promise;
 };
@@ -157,7 +178,7 @@ public:
             strongScheduler->addTask(makeTask(shared_from_this(), environment));
         }
     };
-    
+
     void receive(const MailboxExecutionEnvironment &environment) {
         // Make sure to never block the graphics queue
         if (environment == MailboxExecutionEnvironment::graphics) {
@@ -199,7 +220,13 @@ public:
 
         receivingMutex.unlock();
     }
-    
+
+    bool isEmpty() {
+        std::lock_guard<std::mutex> computationLock(computationQueueMutex);
+        std::lock_guard<std::mutex> graphicsLock(graphicsQueueMutex);
+        return computationQueue.empty() && graphicsQueue.empty();
+    }
+
     static inline std::shared_ptr<LambdaTask> makeTask(std::weak_ptr<Mailbox> mailbox, MailboxExecutionEnvironment environment){
         ExecutionEnvironment executionEnvironment;
         switch (environment) {

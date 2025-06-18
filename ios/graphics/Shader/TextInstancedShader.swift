@@ -10,12 +10,20 @@
 
 import Foundation
 import MapCoreSharedModule
-import Metal
+@preconcurrency import Metal
 
-class TextInstancedShader: BaseShader {
+class TextInstancedShader: BaseShader, @unchecked Sendable {
+
+    public let isUnitSphere: Bool
+
+    init(unitSphere: Bool = false) {
+        self.isUnitSphere = unitSphere
+        super.init(shader: unitSphere ? .unitSphereTextInstancedShader : .textInstancedShader)
+    }
+
     override func setupProgram(_: MCRenderingContextInterface?) {
         if pipeline == nil {
-            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: .textInstancedShader, blendMode: blendMode).json)
+            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: shader, blendMode: blendMode))
         }
     }
 

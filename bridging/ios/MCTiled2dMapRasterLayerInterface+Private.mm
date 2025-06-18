@@ -6,11 +6,13 @@
 #import "DJICppWrapperCache+Private.h"
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
+#import "MCBlendMode+Private.h"
 #import "MCLayerInterface+Private.h"
 #import "MCLoaderInterface+Private.h"
 #import "MCMaskingObjectInterface+Private.h"
 #import "MCRasterShaderStyle+Private.h"
 #import "MCShaderProgramInterface+Private.h"
+#import "MCTextureFilterType+Private.h"
 #import "MCTiled2dMapLayerConfig+Private.h"
 #import "MCTiled2dMapRasterLayerCallbackInterface+Private.h"
 #import "MCTiled2dMapReadyStateListener+Private.h"
@@ -121,6 +123,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)setMinMagFilter:(MCTextureFilterType)filterType {
+    try {
+        _cppRefHandle.get()->setMinMagFilter(::djinni::Enum<::TextureFilterType, MCTextureFilterType>::toCpp(filterType));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (void)setMinZoomLevelIdentifier:(nullable NSNumber *)value {
     try {
         _cppRefHandle.get()->setMinZoomLevelIdentifier(::djinni::Optional<std::optional, ::djinni::I32>::toCpp(value));
@@ -163,6 +171,18 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     try {
         auto objcpp_result_ = _cppRefHandle.get()->getConfig();
         return ::djinni_generated::Tiled2dMapLayerConfig::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)set3dSubdivisionFactor:(int32_t)factor {
+    try {
+        _cppRefHandle.get()->set3dSubdivisionFactor(::djinni::I32::toCpp(factor));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)setBlendMode:(MCBlendMode)blendMode {
+    try {
+        _cppRefHandle.get()->setBlendMode(::djinni::Enum<::BlendMode, MCBlendMode>::toCpp(blendMode));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

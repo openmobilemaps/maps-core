@@ -10,7 +10,7 @@
 
 import Foundation
 import MapCoreSharedModule
-import Metal
+@preconcurrency import Metal
 
 struct RasterShaderStyle: Equatable {
     let opacity: Float
@@ -19,6 +19,7 @@ struct RasterShaderStyle: Equatable {
     let contrast: Float
     let saturation: Float
     let gamma: Float
+    let brightnessShift: Float
 
     init(style: MCRasterShaderStyle) {
         self.opacity = style.opacity
@@ -27,26 +28,25 @@ struct RasterShaderStyle: Equatable {
         self.contrast = style.contrast > 0 ? (1 / (1 - style.contrast)) : (1 + style.contrast)
         self.saturation = style.saturation > 0 ? (1.0 - 1.0 / (1.001 - style.saturation)) : (-style.saturation)
         self.gamma = style.gamma
+        self.brightnessShift = style.brightnessShift
     }
 }
 
-class RasterShader: BaseShader {
+class RasterShader: BaseShader, @unchecked Sendable {
     private var rasterStyleBuffer: MTLBuffer
     private var rasterStyleBufferContents: UnsafeMutablePointer<RasterShaderStyle>
 
-    private let shader: PipelineType
-
-    init(shader: PipelineType = .rasterShader) {
-        self.shader = shader
+    override init(shader: PipelineType = .rasterShader) {
         guard let buffer = MetalContext.current.device.makeBuffer(length: MemoryLayout<RasterShaderStyle>.stride, options: []) else { fatalError("Could not create buffer") }
         self.rasterStyleBuffer = buffer
         self.rasterStyleBufferContents = self.rasterStyleBuffer.contents().bindMemory(to: RasterShaderStyle.self, capacity: 1)
         self.rasterStyleBufferContents[0] = RasterShaderStyle(style: .default())
+        super.init(shader: shader)
     }
 
     override func setupProgram(_: MCRenderingContextInterface?) {
         if pipeline == nil {
-            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: shader, blendMode: blendMode).json)
+            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: shader, blendMode: blendMode))
         }
     }
 

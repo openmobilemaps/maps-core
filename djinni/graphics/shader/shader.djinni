@@ -16,24 +16,47 @@ shader_program_interface = interface +c +o {
     setup_program(context: rendering_context_interface);
     pre_render(context: rendering_context_interface);
     set_blend_mode(blend_mode: blend_mode);
+
+    uses_model_matrix(): bool;
 }
 
 shader_factory_interface = interface +c +j +o {
     create_alpha_shader() : alpha_shader_interface;
+    create_unit_sphere_alpha_shader() : alpha_shader_interface;
+
     create_alpha_instanced_shader(): alpha_instanced_shader_interface;
+    create_unit_sphere_alpha_instanced_shader(): alpha_instanced_shader_interface;
+
     create_line_group_shader(): line_group_shader_interface;
+    create_unit_sphere_line_group_shader(): line_group_shader_interface;
+
+    create_simple_line_group_shader(): line_group_shader_interface;
+    create_unit_sphere_simple_line_group_shader(): line_group_shader_interface;
+
+    create_unit_sphere_color_shader() : color_shader_interface;
     create_color_shader() : color_shader_interface;
+
     create_color_circle_shader() : color_circle_shader_interface;
-    create_polygon_group_shader(is_striped: bool): polygon_group_shader_interface;
-    create_polygon_pattern_group_shader(fade_in_pattern: bool): polygon_pattern_group_shader_interface;
+    create_unit_sphere_color_circle_shader() : color_circle_shader_interface;
+
+    create_polygon_group_shader(is_striped: bool, unit_sphere: bool): polygon_group_shader_interface;
+    create_polygon_pattern_group_shader(fade_in_pattern: bool, unit_sphere: bool): polygon_pattern_group_shader_interface;
 
     create_text_shader() : text_shader_interface;
     create_text_instanced_shader(): text_instanced_shader_interface;
+    create_unit_sphere_text_instanced_shader(): text_instanced_shader_interface;
 
     create_raster_shader() : raster_shader_interface;
-    create_stretch_shader(): stretch_shader_interface;
+    create_unit_sphere_raster_shader() : raster_shader_interface;
 
-    create_stretch_instanced_shader(): stretch_instanced_shader_interface;
+    create_stretch_shader(): stretch_shader_interface;
+    create_stretch_instanced_shader(unit_sphere: bool): stretch_instanced_shader_interface;
+
+    create_icosahedron_color_shader(): color_shader_interface;
+
+    create_sphere_effect_shader(): sphere_effect_shader_interface;
+
+    create_sky_sphere_shader(): sky_sphere_shader_interface;
 }
 
 raster_shader_style = record {
@@ -43,6 +66,7 @@ raster_shader_style = record {
     contrast: f32;
     saturation: f32;
     gamma: f32;
+    brightness_shift: f32;
 
     const default_style: raster_shader_style = {
         opacity = 1.0,
@@ -50,7 +74,8 @@ raster_shader_style = record {
         brightness_max = 1.0,
         contrast = 0.0,
         saturation = 0.0,
-        gamma = 1.0
+        gamma = 1.0,
+        brightness_shift = 0.0
     };
 } deriving (eq, ord)
 
@@ -66,6 +91,16 @@ alpha_shader_interface = interface +c +o {
 
 alpha_instanced_shader_interface = interface +c +o {
     as_shader_program_interface() : shader_program_interface;
+}
+
+sphere_effect_shader_interface = interface +c +o {
+    as_shader_program_interface() : shader_program_interface;
+    set_ellipse(coefficients: shared_bytes);
+}
+
+sky_sphere_shader_interface = interface +c +o {
+    as_shader_program_interface() : shader_program_interface;
+    set_camera_properties(inverse_v_p: list<f32>, camera_position: vec_3_d);
 }
 
 stretch_shader_info = record {
@@ -125,7 +160,7 @@ polygon_pattern_group_shader_interface = interface +c +o {
 text_shader_interface = interface +c +o {
     set_color(color: color);
     set_opacity(opacity: f32);
-    set_halo_color(color: color, width: f64);
+    set_halo_color(color: color, width: f32, blur: f32);
     as_shader_program_interface() : shader_program_interface;
 }
 

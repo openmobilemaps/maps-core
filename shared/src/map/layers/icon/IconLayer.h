@@ -16,11 +16,26 @@
 #include "MapInterface.h"
 #include "SimpleLayerInterface.h"
 #include "SimpleTouchInterface.h"
-#include "Textured2dLayerObject.h"
+#include "IconLayerObject.h"
+#include "DoubleAnimation.h"
+#include <atomic>
 #include <map>
 #include <mutex>
 #include <unordered_map>
 #include <unordered_set>
+
+struct IconScaleAnimation {
+    IconScaleAnimation() {};
+    
+    Vec2F initialSize = Vec2F(0.0,0.0);
+    int32_t repetitions = 0.0;
+    double from = 0.0;
+    double to = 0.0;
+    double duration = 0.0;
+    std::string identifier;
+    std::shared_ptr<AnimationInterface> animation = nullptr;
+};
+
 
 class IconLayer : public IconLayerInterface,
                   public SimpleLayerInterface,
@@ -90,25 +105,33 @@ class IconLayer : public IconLayerInterface,
 
     virtual float getAlpha() override;
 
-  private:
-    void updateIconPosition(const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
-                            const std::shared_ptr<IconInfoInterface> &iconInfo,
-                            const std::shared_ptr<Textured2dLayerObject> &iconObject);
+    /** scale an icon, use repetitions for pulsating effect (repetions == -1 -> forever) */
+    virtual void animateIconScale(const std::string & identifier, float from, float to, float duration, int32_t repetitions) override;
 
-    virtual void clearSync(const std::vector<std::pair<std::shared_ptr<IconInfoInterface>, std::shared_ptr<Textured2dLayerObject>>> &iconsToClear);
+    virtual void setRenderPassIndex(int32_t index) override;
+
+  private:
+    virtual void clearSync(const std::vector<std::pair<std::shared_ptr<IconInfoInterface>, std::shared_ptr<IconLayerObject>>> &iconsToClear);
 
     void
-    setupIconObjects(const std::vector<std::pair<std::shared_ptr<IconInfoInterface>, std::shared_ptr<Textured2dLayerObject>>>
+    setupIconObjects(const std::vector<std::pair<std::shared_ptr<IconInfoInterface>, std::shared_ptr<IconLayerObject>>>
                          &iconObjects);
+
+    void addScaleAnimation(const IconScaleAnimation& iconScaleAnimation);
+
+    bool isPointInRect(const Vec2F& point, float leftW, float rightW, float topH, float bottomH);
 
     std::vector<std::shared_ptr<IconInfoInterface>> getIconsAtPosition(const ::Vec2F &posScreen);
 
+    const static int32_t SUBDIVISION_FACTOR_3D_DEFAULT = 2;
+
     std::shared_ptr<MapInterface> mapInterface;
+    bool is3D = false;
 
     std::shared_ptr<IconLayerCallbackInterface> callbackHandler;
 
     std::recursive_mutex iconsMutex;
-    std::vector<std::pair<std::shared_ptr<IconInfoInterface>, std::shared_ptr<Textured2dLayerObject>>> icons;
+    std::vector<std::pair<std::shared_ptr<IconInfoInterface>, std::shared_ptr<IconLayerObject>>> icons;
     std::shared_ptr<MaskingObjectInterface> mask = nullptr;
 
     void preGenerateRenderPasses();
@@ -117,7 +140,15 @@ class IconLayer : public IconLayerInterface,
     std::recursive_mutex addingQueueMutex;
     std::vector<std::shared_ptr<IconInfoInterface>> addingQueue;
 
+    std::recursive_mutex scaleAddingQueueMutex;
+    std::vector<IconScaleAnimation> scaleAnimationAddingQueue;
+
     std::atomic<bool> isHidden;
     std::atomic<bool> isLayerClickable = true;
     float alpha = 1.0;
+
+    std::map<std::string, IconScaleAnimation> scaleAnimations;
+    std::recursive_mutex scaleAnimationMutex;
+
+    int32_t renderPassIndex = 0;
 };

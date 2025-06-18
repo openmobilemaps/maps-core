@@ -1,12 +1,12 @@
-// swift-tools-version:5.5
+// swift-tools-version:6.1
 
 import PackageDescription
 
 let package = Package(
     name: "MapCore",
     platforms: [
-        .iOS(.v11),
-        .macOS(.v10_13),
+        .iOS(.v14),
+        .macOS(.v10_14),
     ],
     products: [
         .library(
@@ -23,7 +23,7 @@ let package = Package(
         ),
     ],
     dependencies: [
-        .package(url: "https://github.com/UbiqueInnovation/djinni.git", .upToNextMajor(from: "1.0.6")),
+        .package(url: "https://github.com/UbiqueInnovation/djinni.git", .upToNextMinor(from: "1.0.9"))
     ],
     targets: [
         .target(
@@ -75,7 +75,7 @@ let package = Package(
             ],
             publicHeadersPath: "protozero/include/",
             cxxSettings: [
-                .headerSearchPath("protozero/include/"),
+                .headerSearchPath("protozero/include/")
             ]
         ),
         .target(
@@ -106,7 +106,7 @@ let package = Package(
             ],
             publicHeadersPath: "vtzero/include/",
             cxxSettings: [
-                .headerSearchPath("vtzero/include/"),
+                .headerSearchPath("vtzero/include/")
             ]
         ),
         .target(
@@ -115,7 +115,7 @@ let package = Package(
             path: "ios",
             exclude: ["readme.md"],
             resources: [
-                .process("graphics/Shader/Metal/"),
+                .process("graphics/Shader/Metal/")
             ]
         ),
         .target(
@@ -137,40 +137,47 @@ let package = Package(
             sources: ["src", "public"],
             publicHeadersPath: "public",
             cxxSettings: [
-                .headerSearchPath("**"),
                 .headerSearchPath("public"),
+                .headerSearchPath("src"),
+                .headerSearchPath("src/external/pugixml"),
+                .headerSearchPath("src/external/gpc"),
+                .headerSearchPath("src/logger"),
                 .headerSearchPath("src/graphics"),
                 .headerSearchPath("src/graphics/helpers"),
-                .headerSearchPath("src/logger"),
+                .headerSearchPath("src/map"),
                 .headerSearchPath("src/map/camera"),
                 .headerSearchPath("src/map/controls"),
                 .headerSearchPath("src/map/coordinates"),
+                .headerSearchPath("src/map/layers"),
                 .headerSearchPath("src/map/layers/objects"),
-                .headerSearchPath("src/map/layers/icon"),
-                .headerSearchPath("src/map/layers/line"),
-                .headerSearchPath("src/map/layers/text"),
                 .headerSearchPath("src/map/layers/tiled"),
                 .headerSearchPath("src/map/layers/tiled/raster"),
                 .headerSearchPath("src/map/layers/tiled/wmts"),
                 .headerSearchPath("src/map/layers/tiled/vector"),
                 .headerSearchPath("src/map/layers/tiled/vector/geojson"),
                 .headerSearchPath("src/map/layers/tiled/vector/geojson/geojsonvt"),
-                .headerSearchPath("src/map/layers/tiled/vector/sourcemanagers"),
                 .headerSearchPath("src/map/layers/tiled/vector/tiles"),
-                .headerSearchPath("src/map/layers/tiled/vector/tiles/line"),
-                .headerSearchPath("src/map/layers/tiled/vector/tiles/polygon"),
                 .headerSearchPath("src/map/layers/tiled/vector/tiles/raster"),
-                .headerSearchPath("src/map/layers/tiled/vector/symbol"),
+                .headerSearchPath("src/map/layers/tiled/vector/tiles/polygon"),
+                .headerSearchPath("src/map/layers/tiled/vector/tiles/line"),
+                .headerSearchPath("src/map/layers/tiled/vector/sourcemanagers"),
                 .headerSearchPath("src/map/layers/tiled/vector/sublayers"),
+                .headerSearchPath("src/map/layers/tiled/vector/sublayers/raster"),
+                .headerSearchPath("src/map/layers/tiled/vector/sublayers/line"),
+                .headerSearchPath("src/map/layers/tiled/vector/sublayers/polygon"),
+                .headerSearchPath("src/map/layers/tiled/vector/sublayers/symbol"),
                 .headerSearchPath("src/map/layers/tiled/vector/sublayers/background"),
+                .headerSearchPath("src/map/layers/tiled/vector/symbol"),
+                .headerSearchPath("src/map/layers/tiled/vector/description"),
+                .headerSearchPath("src/map/layers/tiled/vector/parsing"),
+                .headerSearchPath("src/map/layers/polygon"),
+                .headerSearchPath("src/map/layers/icon"),
+                .headerSearchPath("src/map/layers/line"),
+                .headerSearchPath("src/map/layers/text"),
                 .headerSearchPath("src/map/scheduling"),
-                .headerSearchPath("src/map"),
-                .headerSearchPath("src/util"),
-                .headerSearchPath("src/external/pugixml"),
+                .headerSearchPath("src/utils"),
                 .define("DEBUG", to: "1", .when(configuration: .debug)),
                 .define("NDEBUG", to: "1", .when(configuration: .release)),
-                .define("_LIBCPP_DISABLE_AVAILABILITY", to: "1", .when(configuration: .debug)),
-                .define("_LIBCPP_DISABLE_AVAILABILITY", to: "1", .when(configuration: .release)),
             ]
         ),
     ],

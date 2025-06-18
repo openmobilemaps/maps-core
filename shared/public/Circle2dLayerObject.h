@@ -33,6 +33,9 @@ public:
     virtual std::shared_ptr<GraphicsObjectInterface> getGraphicsObject();
 
 private:
+    const static int32_t SUBDIVISION_FACTOR_3D_DEFAULT = 2;
+
+    const bool is3d;
     std::shared_ptr<CoordinateConversionHelperInterface> conversionHelper;
     std::shared_ptr<ColorCircleShaderInterface> shader;
     std::shared_ptr<Quad2dInterface> quad;

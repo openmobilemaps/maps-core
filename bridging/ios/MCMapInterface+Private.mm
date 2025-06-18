@@ -12,10 +12,12 @@
 #import "MCIndexedLayerInterface+Private.h"
 #import "MCLayerInterface+Private.h"
 #import "MCMapCallbackInterface+Private.h"
-#import "MCMapCamera2dInterface+Private.h"
+#import "MCMapCameraInterface+Private.h"
 #import "MCMapConfig+Private.h"
 #import "MCMapReadyCallbackInterface+Private.h"
+#import "MCPerformanceLoggerInterface+Private.h"
 #import "MCRectCoord+Private.h"
+#import "MCRenderTargetInterface+Private.h"
 #import "MCRenderingContextInterface+Private.h"
 #import "MCSchedulerInterface+Private.h"
 #import "MCShaderFactoryInterface+Private.h"
@@ -50,23 +52,29 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
                    renderingContext:(nullable id<MCRenderingContextInterface>)renderingContext
                           mapConfig:(nonnull MCMapConfig *)mapConfig
                           scheduler:(nullable id<MCSchedulerInterface>)scheduler
-                       pixelDensity:(float)pixelDensity {
+                       pixelDensity:(float)pixelDensity
+                               is3D:(BOOL)is3D {
     try {
         auto objcpp_result_ = ::MapInterface::create(::djinni_generated::GraphicsObjectFactoryInterface::toCpp(graphicsFactory),
                                                      ::djinni_generated::ShaderFactoryInterface::toCpp(shaderFactory),
                                                      ::djinni_generated::RenderingContextInterface::toCpp(renderingContext),
                                                      ::djinni_generated::MapConfig::toCpp(mapConfig),
                                                      ::djinni_generated::SchedulerInterface::toCpp(scheduler),
-                                                     ::djinni::F32::toCpp(pixelDensity));
+                                                     ::djinni::F32::toCpp(pixelDensity),
+                                                     ::djinni::Bool::toCpp(is3D));
         return ::djinni_generated::MapInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
 + (nullable MCMapInterface *)createWithOpenGl:(nonnull MCMapConfig *)mapConfig
-                                 pixelDensity:(float)pixelDensity {
+                                    scheduler:(nullable id<MCSchedulerInterface>)scheduler
+                                 pixelDensity:(float)pixelDensity
+                                         is3D:(BOOL)is3D {
     try {
         auto objcpp_result_ = ::MapInterface::createWithOpenGl(::djinni_generated::MapConfig::toCpp(mapConfig),
-                                                               ::djinni::F32::toCpp(pixelDensity));
+                                                               ::djinni_generated::SchedulerInterface::toCpp(scheduler),
+                                                               ::djinni::F32::toCpp(pixelDensity),
+                                                               ::djinni::Bool::toCpp(is3D));
         return ::djinni_generated::MapInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
@@ -119,16 +127,16 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)setCamera:(nullable MCMapCamera2dInterface *)camera {
+- (void)setCamera:(nullable MCMapCameraInterface *)camera {
     try {
-        _cppRefHandle.get()->setCamera(::djinni_generated::MapCamera2dInterface::toCpp(camera));
+        _cppRefHandle.get()->setCamera(::djinni_generated::MapCameraInterface::toCpp(camera));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (nullable MCMapCamera2dInterface *)getCamera {
+- (nullable MCMapCameraInterface *)getCamera {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->getCamera();
-        return ::djinni_generated::MapCamera2dInterface::fromCpp(objcpp_result_);
+        return ::djinni_generated::MapCameraInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -142,6 +150,19 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     try {
         auto objcpp_result_ = _cppRefHandle.get()->getTouchHandler();
         return ::djinni_generated::TouchHandlerInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)setPerformanceLoggers:(nonnull NSArray<id<MCPerformanceLoggerInterface>> *)performanceLoggers {
+    try {
+        _cppRefHandle.get()->setPerformanceLoggers(::djinni::List<::djinni_generated::PerformanceLoggerInterface>::toCpp(performanceLoggers));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nonnull NSArray<id<MCPerformanceLoggerInterface>> *)getPerformanceLoggers {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getPerformanceLoggers();
+        return ::djinni::List<::djinni_generated::PerformanceLoggerInterface>::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -207,15 +228,47 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (BOOL)is3d {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->is3d();
+        return ::djinni::Bool::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (void)invalidate {
     try {
         _cppRefHandle.get()->invalidate();
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)prepare {
+    try {
+        _cppRefHandle.get()->prepare();
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (BOOL)getNeedsCompute {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getNeedsCompute();
+        return ::djinni::Bool::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)drawOffscreenFrame:(nullable id<MCRenderTargetInterface>)target {
+    try {
+        _cppRefHandle.get()->drawOffscreenFrame(::djinni_generated::RenderTargetInterface::toCpp(target));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (void)drawFrame {
     try {
         _cppRefHandle.get()->drawFrame();
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)compute {
+    try {
+        _cppRefHandle.get()->compute();
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -238,10 +291,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 }
 
 - (void)drawReadyFrame:(nonnull MCRectCoord *)bounds
+             paddingPc:(float)paddingPc
                timeout:(float)timeout
              callbacks:(nullable id<MCMapReadyCallbackInterface>)callbacks {
     try {
         _cppRefHandle.get()->drawReadyFrame(::djinni_generated::RectCoord::toCpp(bounds),
+                                            ::djinni::F32::toCpp(paddingPc),
                                             ::djinni::F32::toCpp(timeout),
                                             ::djinni_generated::MapReadyCallbackInterface::toCpp(callbacks));
     } DJINNI_TRANSLATE_EXCEPTIONS()

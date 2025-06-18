@@ -28,7 +28,8 @@ public:
                                    startValue.brightnessMax + (endValue.brightnessMax - startValue.brightnessMax) * adjustedProgress, 
                                    startValue.contrast + (endValue.contrast - startValue.contrast) * adjustedProgress,
                                    startValue.saturation + (endValue.saturation - startValue.saturation) * adjustedProgress,
-                                   startValue.gamma + (endValue.gamma - startValue.gamma) * adjustedProgress));
+                                   startValue.gamma + (endValue.gamma - startValue.gamma) * adjustedProgress,
+                                   startValue.brightnessShift + (endValue.brightnessShift - startValue.brightnessShift) * adjustedProgress));
     };
 };
 

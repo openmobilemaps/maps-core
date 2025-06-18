@@ -8,7 +8,9 @@
 #import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
 #import "MCColor+Private.h"
+#import "MCOpenGlRenderingContextInterface+Private.h"
 #import "MCRectI+Private.h"
+#import "MCRenderingCullMode+Private.h"
 #import "MCVec2I+Private.h"
 #include <exception>
 #include <stdexcept>
@@ -59,6 +61,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)setCulling:(MCRenderingCullMode)mode {
+    try {
+        _cppRefHandle.get()->setCulling(::djinni::Enum<::RenderingCullMode, MCRenderingCullMode>::toCpp(mode));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (void)setupDrawFrame {
     try {
         _cppRefHandle.get()->setupDrawFrame();
@@ -80,6 +88,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 - (void)applyScissorRect:(nullable MCRectI *)scissorRect {
     try {
         _cppRefHandle.get()->applyScissorRect(::djinni::Optional<std::optional, ::djinni_generated::RectI>::toCpp(scissorRect));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nullable id<MCOpenGlRenderingContextInterface>)asOpenGlRenderingContext {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->asOpenGlRenderingContext();
+        return ::djinni::Optional<std::optional, ::djinni_generated::OpenGlRenderingContextInterface>::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -117,6 +132,12 @@ public:
             [djinni_private_get_proxied_objc_object() setBackgroundColor:(::djinni_generated::Color::fromCpp(c_color))];
         }
     }
+    void setCulling(::RenderingCullMode c_mode) override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() setCulling:(::djinni::Enum<::RenderingCullMode, MCRenderingCullMode>::fromCpp(c_mode))];
+        }
+    }
     void setupDrawFrame() override
     {
         @autoreleasepool {
@@ -139,6 +160,13 @@ public:
     {
         @autoreleasepool {
             [djinni_private_get_proxied_objc_object() applyScissorRect:(::djinni::Optional<std::optional, ::djinni_generated::RectI>::fromCpp(c_scissorRect))];
+        }
+    }
+    /*nullable*/ std::shared_ptr<::OpenGlRenderingContextInterface> asOpenGlRenderingContext() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() asOpenGlRenderingContext];
+            return ::djinni::Optional<std::optional, ::djinni_generated::OpenGlRenderingContextInterface>::toCpp(objcpp_result_);
         }
     }
 };

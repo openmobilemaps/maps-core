@@ -15,6 +15,7 @@
 #import "MCTiled2dMapVectorLayerSelectionCallbackInterface+Private.h"
 #import "MCTiled2dMapVectorLayerSymbolDelegateInterface+Private.h"
 #import "MCTiled2dMapZoomInfo+Private.h"
+#import "MCVectorLayerFeatureCoordInfo+Private.h"
 #import "MCVectorLayerFeatureInfoValue+Private.h"
 #include <exception>
 #include <stdexcept>
@@ -133,6 +134,15 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 - (void)setGlobalState:(nonnull NSDictionary<NSString *, MCVectorLayerFeatureInfoValue *> *)properties {
     try {
         _cppRefHandle.get()->setGlobalState(::djinni::Map<::djinni::String, ::djinni_generated::VectorLayerFeatureInfoValue>::toCpp(properties));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nonnull NSArray<MCVectorLayerFeatureCoordInfo *> *)getVisiblePointFeatureContexts:(float)paddingPc
+                                                                         sourceLayer:(nullable NSString *)sourceLayer {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getVisiblePointFeatureContexts(::djinni::F32::toCpp(paddingPc),
+                                                                                  ::djinni::Optional<std::optional, ::djinni::String>::toCpp(sourceLayer));
+        return ::djinni::List<::djinni_generated::VectorLayerFeatureCoordInfo>::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

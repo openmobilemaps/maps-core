@@ -10,16 +10,22 @@
 
 #include "Polygon2dLayerObject.h"
 #include "EarcutVec2D.h"
+#include "PolygonHelper.h"
+#include "BoundingBox.h"
+#include "CoordinateSystemIdentifiers.h"
+#include "CoordinatesUtil.h"
+#include <cmath>
 
 Polygon2dLayerObject::Polygon2dLayerObject(const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                                            const std::shared_ptr<Polygon2dInterface> &polygon,
-                                           const std::shared_ptr<ColorShaderInterface> &shader)
-    : conversionHelper(conversionHelper)
-    , shader(shader)
-    , polygon(polygon)
-    , graphicsObject(polygon->asGraphicsObject())
-    , renderConfig(std::make_shared<RenderConfig>(graphicsObject, 0))
-{}
+                                           const std::shared_ptr<ColorShaderInterface> &shader,
+                                           bool is3D)
+        : conversionHelper(conversionHelper),
+          shader(shader),
+          polygon(polygon),
+          graphicsObject(polygon->asGraphicsObject()),
+          renderConfig(std::make_shared<RenderConfig>(graphicsObject, 0)),
+          is3D(is3D) {}
 
 std::vector<std::shared_ptr<RenderConfigInterface>> Polygon2dLayerObject::getRenderConfig() { return {renderConfig}; }
 
@@ -33,13 +39,20 @@ void Polygon2dLayerObject::setPolygons(const std::vector<PolygonCoord> &polygons
     std::vector<uint16_t> indices;
     std::vector<float> vertices;
     int32_t indexOffset = 0;
+    double avgX = 0.0f, avgY = 0.0f;
+    size_t totalPoints = 0;
 
+    std::vector<Vec2D> vecVertices;
+    mapbox::detail::Earcut<int32_t> earcutter;
+
+    BoundingBox bbox = BoundingBox(CoordinateSystemIdentifiers::RENDERSYSTEM());
     for (auto const &polygon : polygons) {
         std::vector<std::vector<Vec2D>> renderCoords;
         std::vector<Vec2D> polygonCoords;
         for (const Coord &mapCoord : polygon.positions) {
             Coord renderCoord = conversionHelper->convertToRenderSystem(mapCoord);
             polygonCoords.push_back(Vec2D(renderCoord.x, renderCoord.y));
+            bbox.addPoint(renderCoord);
         }
         renderCoords.push_back(polygonCoords);
 
@@ -51,7 +64,8 @@ void Polygon2dLayerObject::setPolygons(const std::vector<PolygonCoord> &polygons
             }
             renderCoords.push_back(holeCoords);
         }
-        std::vector<int32_t> curIndices = mapbox::earcut<int32_t>(renderCoords);
+        earcutter(renderCoords);
+        std::vector<int32_t> curIndices = std::move(earcutter.indices);
 
         for (auto const &index : curIndices) {
             indices.push_back(indexOffset + index);
@@ -61,26 +75,49 @@ void Polygon2dLayerObject::setPolygons(const std::vector<PolygonCoord> &polygons
             indexOffset += list.size();
 
             for(auto& i : list) {
-                vertices.push_back(i.x);
-                vertices.push_back(i.y);
-                // fill for android z
-                vertices.push_back(0.0);
-#ifdef __APPLE__
-                // are needed to fill metal vertex property (position, uv, normal)
-                vertices.push_back(0.0);
-                vertices.push_back(0.0);
-                vertices.push_back(0.0);
-#endif
+                // Accumulate for averaging
+                avgX += i.x;
+                avgY += i.y;
+                totalPoints += 1;
+
+                vecVertices.push_back(Vec2D(i.x, i.y));
             }
         }
     }
 
+    // Calculate the average (origin)
+    if (totalPoints > 0) {
+        avgX /= totalPoints;
+        avgY /= totalPoints;
+    }
+
+    double rx = is3D ? 1.0 * sin(avgY) * cos(avgX) : avgX;
+    double ry = is3D ? 1.0 * cos(avgY) : avgY;
+    double rz = is3D ? -1.0 * sin(avgY) * sin(avgX) : 0.0;
+
+    if (is3D) {
+        auto bboxSize = bbox.getMax() - bbox.getMin();
+        double threshold = std::max(std::max(bboxSize.x, bboxSize.y), bboxSize.z) / std::pow(2, SUBDIVISION_FACTOR_3D_DEFAULT);
+        PolygonHelper::subdivision(vecVertices, indices, threshold);
+    }
+
+    for (const auto& v : vecVertices) {
+        vertices.push_back(is3D ? 1.0 * sin(v.y) * cos(v.x) - rx : v.x - rx);
+        vertices.push_back(is3D ? 1.0 * cos(v.y) - ry : v.y - ry);
+        vertices.push_back(is3D ? -1.0 * sin(v.y) * sin(v.x) - rz : 0.0);
+        #ifdef __APPLE__
+            vertices.push_back(0.0f);
+        #endif
+    }
+
     auto attr = SharedBytes((int64_t)vertices.data(), (int32_t)vertices.size(), (int32_t)sizeof(float));
     auto ind = SharedBytes((int64_t)indices.data(), (int32_t)indices.size(), (int32_t)sizeof(uint16_t));
-    polygon->setVertices(attr, ind);
+    polygon->setVertices(attr, ind, Vec3D(rx, ry, rz));
 }
 
-void Polygon2dLayerObject::setColor(const Color &color) { shader->setColor(color.r, color.g, color.b, color.a); }
+void Polygon2dLayerObject::setColor(const Color &color) {
+    shader->setColor(color.r, color.g, color.b, color.a);
+}
 
 std::shared_ptr<GraphicsObjectInterface> Polygon2dLayerObject::getPolygonObject() { return graphicsObject; }
 

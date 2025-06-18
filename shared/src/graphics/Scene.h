@@ -35,7 +35,11 @@ class Scene : public SceneInterface {
 
     virtual std::shared_ptr<::ShaderFactoryInterface> getShaderFactory() override;
 
-    virtual void drawFrame() override;
+    virtual void drawFrame(const /*nullable*/ std::shared_ptr<RenderTargetInterface> & target) override;
+
+    virtual void prepare() override;
+
+    virtual void compute() override;
 
     virtual void clear() override;
 

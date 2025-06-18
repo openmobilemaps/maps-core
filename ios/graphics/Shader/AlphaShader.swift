@@ -10,26 +10,26 @@
 
 import Foundation
 import MapCoreSharedModule
-import Metal
+@preconcurrency import Metal
 
-class AlphaShader: BaseShader {
+class AlphaShader: BaseShader, @unchecked Sendable {
     private var alpha: Float = 1.0
     private var alphaContent: UnsafeMutablePointer<Float>
 
-    private let shader: PipelineType
     private let buffer: MTLBuffer
 
-    init(shader: PipelineType = .alphaShader) {
-        self.shader = shader
+    override init(shader: PipelineType = .alphaShader) {
         guard let buffer = MetalContext.current.device.makeBuffer(length: MemoryLayout<Float>.stride, options: []) else { fatalError("Could not create buffer") }
         self.buffer = buffer
         self.alphaContent = self.buffer.contents().bindMemory(to: Float.self, capacity: 1)
         self.alphaContent[0] = alpha
+
+        super.init(shader: shader)
     }
 
     override func setupProgram(_: MCRenderingContextInterface?) {
         if pipeline == nil {
-            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: shader, blendMode: blendMode).json)
+            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: shader, blendMode: blendMode))
         }
     }
 

@@ -53,13 +53,14 @@ public:
             featureStates.emplace_back(intIdentifier, std::move(convertedProperties));
             hasNoValues = false;
         } else {
-            hasNoValues = !featureStates.empty() && !globalState.empty();
+            hasNoValues = featureStates.empty() && globalState.empty();
         }
 
         currentState++;
     }
 
-    FeatureState& getFeatureState(const uint64_t &identifier) {
+    const FeatureState& getFeatureState(uint64_t identifier) const {
+       // XXX: dangerous optimisation -- hasNoValues can be modified
         if (hasNoValues) {
             return emptyState;
         }
@@ -76,7 +77,7 @@ public:
         return emptyState;
     }
 
-    bool empty() {
+    bool empty() const {
         return hasNoValues;
     }
 
@@ -87,11 +88,13 @@ public:
             globalState.emplace(property.first, convertToValueVariant(property.second));
         }
 
-        hasNoValues = !properties.empty() && !featureStates.empty();
+        hasNoValues = properties.empty() && featureStates.empty();
         currentState++;
+        globalStateId++;
     }
 
-    ValueVariant getGlobalState(const std::string &key) {
+    ValueVariant getGlobalState(const std::string &key) const {
+        // XXX: dangerous optimisation -- hasNoValues can be modified
         if (hasNoValues) {
             return std::monostate();
         }
@@ -105,17 +108,22 @@ public:
         return std::monostate();
     }
 
-    int32_t getCurrentState() {
+    int32_t getCurrentState() const {
         return currentState;
+    }
+
+    int32_t getGlobalStateId() const {
+        return globalStateId;
     }
 
 private:
     std::unordered_map<std::string, ValueVariant> globalState;
     std::vector<std::pair<uint64_t, FeatureState>> featureStates;
-    std::mutex mutex;
+    mutable std::mutex mutex;
     FeatureState emptyState;
 
     int32_t currentState = 0;
+    int32_t globalStateId = 0;
 
     std::atomic_bool hasNoValues = true;
 

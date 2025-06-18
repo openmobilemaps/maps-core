@@ -11,53 +11,56 @@
 
 #pragma once
 
-#include "Tiled2dMapSource.h"
 #include "DataLoaderResult.h"
 #include "LoaderInterface.h"
-#include "Tiled2dMapVectorTileInfo.h"
+#include "MapCameraInterface.h"
+#include "Tiled2dMapVectorSource.h"
 #include "Tiled2dMapVectorSourceListener.h"
+#include "Tiled2dMapVectorTileInfo.h"
+
+#include <memory>
 #include <unordered_map>
 #include <vector>
-#include "DataRef.hpp"
-#include "geojsonvt.hpp"
-#include "Tiled2dMapVectorSource.h"
-#include "VectorMapSourceDescription.h"
-#include "Tiled2dMapVectorGeoJSONLayerConfig.h"
+#include <string>
 
 class Tiled2dVectorGeoJsonSource : public Tiled2dMapVectorSource, public GeoJSONTileDelegate  {
 public:
-    Tiled2dVectorGeoJsonSource(const std::shared_ptr<::MapCamera2dInterface> &camera,
+    Tiled2dVectorGeoJsonSource(const std::shared_ptr<::MapCameraInterface> &camera,
                                const MapConfig &mapConfig,
                                const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig,
                                const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                                const std::shared_ptr<SchedulerInterface> &scheduler,
-                               const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders,
                                const WeakActor<Tiled2dMapVectorSourceListener> &listener,
                                const std::unordered_set<std::string> &layersToDecode,
                                const std::string &sourceName,
                                float screenDensityPpi,
                                std::shared_ptr<GeoJSONVTInterface> geoJson,
-                               std::string layerName) :
-    Tiled2dMapVectorSource(mapConfig, layerConfig, conversionHelper, scheduler, tileLoaders, listener, layersToDecode, sourceName, screenDensityPpi, layerName),
-    geoJson(geoJson), camera(camera) {}
+                               std::string layerName)
+      : Tiled2dMapVectorSource(mapConfig, layerConfig, conversionHelper, scheduler,
+                               // fake loader entry so that Tiled2dMapSource sees one loader; loadDataAsync in this class does not use loader.
+                               std::vector<std::shared_ptr<LoaderInterface>>{nullptr},
+                               listener, layersToDecode, sourceName,
+                               screenDensityPpi, layerName)
+      , geoJson(geoJson)
+      , camera(camera) {}
 
-    std::unordered_set<Tiled2dMapVectorTileInfo> getCurrentTiles() {
-        std::unordered_set<Tiled2dMapVectorTileInfo> currentTileInfos;
-        std::transform(currentTiles.begin(), currentTiles.end(), std::inserter(currentTileInfos, currentTileInfos.end()), [](const auto& tilePair) {
-                const auto& [tileInfo, tileWrapper] = tilePair;
-                return Tiled2dMapVectorTileInfo(Tiled2dMapVersionedTileInfo(std::move(tileInfo), (size_t)tileWrapper.result.get()), std::move(tileWrapper.result), std::move(tileWrapper.masks), std::move(tileWrapper.state));
-            }
-        );
-        std::transform(outdatedTiles.begin(), outdatedTiles.end(), std::inserter(currentTileInfos, currentTileInfos.end()), [](const auto& tilePair) {
-            const auto& [tileInfo, tileWrapper] = tilePair;
-            return Tiled2dMapVectorTileInfo(Tiled2dMapVersionedTileInfo(std::move(tileInfo), (size_t)tileWrapper.result.get()), std::move(tileWrapper.result), std::move(tileWrapper.masks), std::move(tileWrapper.state));
+    VectorSet<Tiled2dMapVectorTileInfo> getCurrentTiles() {
+        VectorSet<Tiled2dMapVectorTileInfo> currentTileInfos;
+        currentTileInfos.reserve(currentTiles.size() + outdatedTiles.size());
+
+        for (auto it = currentTiles.begin(); it != currentTiles.end(); it++) {
+            const auto& [tileInfo, tileWrapper] = *it;
+            currentTileInfos.insert(Tiled2dMapVectorTileInfo(Tiled2dMapVersionedTileInfo(std::move(tileInfo), (size_t)tileWrapper.result.get()), std::move(tileWrapper.result), std::move(tileWrapper.masks), std::move(tileWrapper.state)));
         }
-                       );
+        for (auto it = outdatedTiles.begin(); it != outdatedTiles.end(); it++) {
+            const auto& [tileInfo, tileWrapper] = *it;
+            currentTileInfos.insert(Tiled2dMapVectorTileInfo(Tiled2dMapVersionedTileInfo(std::move(tileInfo), (size_t)tileWrapper.result.get()), std::move(tileWrapper.result), std::move(tileWrapper.masks), std::move(tileWrapper.state)));
+        };
         return currentTileInfos;
     }
 
     virtual void notifyTilesUpdates() override {
-        listener.message(&Tiled2dMapVectorSourceListener::onTilesUpdated, sourceName, getCurrentTiles());
+        listener.message(MFN(&Tiled2dMapVectorSourceListener::onTilesUpdated), sourceName, getCurrentTiles());
     };
 
     void didLoad(uint8_t maxZoom) override {
@@ -66,6 +69,7 @@ public:
             auto bounds = camera->getVisibleRect();
             auto zoom = camera->getZoom();
             // there is no concept of curT for geoJSON, therefore we just set it to 0
+            lastVisibleTilesHash = 0;
             onVisibleBoundsChanged(bounds, 0, zoom);
         }
     }
@@ -111,7 +115,8 @@ protected:
 
 private:
     const std::shared_ptr<GeoJSONVTInterface> geoJson;
-    const std::weak_ptr<::MapCamera2dInterface> camera;
 
     bool loadFailed = false;
+    const std::weak_ptr<::MapCameraInterface> camera;
+
 };

@@ -55,13 +55,13 @@ private:
         std::vector<uint16_t> indices;
     };
 
-    void addPolygons(const std::vector<std::vector<ObjectDescriptions>> &styleGroupNewPolygonsVector);
+    void addPolygons(const std::vector<std::vector<ObjectDescriptions>> &styleGroupNewPolygonsVector, const Vec3D & origin);
 
     void setupPolygons(const std::vector<std::shared_ptr<GraphicsObjectInterface>> &newPolygonObjects);
 
     void setupTextureCoordinates();
 
-#ifdef __ANDROID__
+#ifdef OPENMOBILEMAPS_GL
     static const int maxStylesPerGroup = 16;
 #else
     static const int maxStylesPerGroup = 256;
@@ -71,19 +71,21 @@ private:
     std::unordered_map<int, std::vector<std::shared_ptr<PolygonPatternGroup2dLayerObject>>> styleGroupPolygonsMap;
     std::vector<std::shared_ptr<PolygonPatternGroup2dLayerObject>> polygonRenderOrder;
     std::vector<std::vector<std::tuple<size_t, std::shared_ptr<FeatureContext>>>> featureGroups;
+    std::vector<std::shared_ptr<RenderObjectInterface>> renderObjects;
+
     std::unordered_map<size_t, std::pair<int, int>> styleHashToGroupMap;
     UsedKeysCollection usedKeys;
     bool isStyleZoomDependant = true;
     bool isStyleStateDependant = true;
     std::optional<double> lastZoom = std::nullopt;
-    std::optional<bool> lastInZoomRange = std::nullopt;
+    bool isVisible = true;
 
     bool fadeInPattern = false;
 
     std::shared_ptr<SpriteData> spriteData;
     std::shared_ptr<TextureHolderInterface> spriteTexture;
 
-    std::vector<std::vector<float>> opacities;
+    std::vector<std::vector<HalfFloat>> opacities;
     std::vector<std::vector<float>> textureCoordinates;
 
     std::vector<std::tuple<VectorTileGeometryHandler::TriangulatedPolygon, std::shared_ptr<FeatureContext>>> hitDetectionPolygons;

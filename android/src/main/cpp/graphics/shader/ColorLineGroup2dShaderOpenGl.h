@@ -13,13 +13,14 @@
 #include "BaseShaderProgramOpenGl.h"
 #include "LineGroupShaderInterface.h"
 #include "ShaderProgramInterface.h"
+#include <mutex>
 #include <vector>
 
 class ColorLineGroup2dShaderOpenGl : public BaseShaderProgramOpenGl,
                                      public LineGroupShaderInterface,
                                      public std::enable_shared_from_this<ShaderProgramInterface> {
-  public:
-    ColorLineGroup2dShaderOpenGl();
+public:
+    ColorLineGroup2dShaderOpenGl(bool projectOntoUnitSphere, bool simple);
 
     virtual std::shared_ptr<ShaderProgramInterface> asShaderProgramInterface() override;
 
@@ -31,28 +32,46 @@ class ColorLineGroup2dShaderOpenGl : public BaseShaderProgramOpenGl,
 
     virtual void setStyles(const ::SharedBytes & styles) override;
 
-    void setDashingScaleFactor(float factor) override;
+    virtual void setDashingScaleFactor(float factor) override;
+
+    virtual void setupGlObjects(const std::shared_ptr<::OpenGlContext> &context) override;
+
+    virtual void clearGlObjects() override;
+
+    virtual bool isRenderable() override;
 
 protected:
     virtual std::string getVertexShader() override;
 
     virtual std::string getFragmentShader() override;
 
-  private:
-    static const std::string programName;
+private:
+    static std::string getLineStylesUBODefinition(bool isSimpleLine);
+
+    const bool projectOntoUnitSphere;
+    const bool isSimpleLine;
+    const std::string programName;
+
+    GLint dashingScaleFactorHandle = -1;
+    GLint timeFrameDeltaHandle = -1;
 
     std::recursive_mutex styleMutex;
+    GLuint lineStyleBuffer = 0;
     std::vector<GLfloat> lineValues;
+    bool stylesUpdated = false;
     GLint numStyles = 0;
 
     float dashingScaleFactor = 1.0;
 
-    const int maxNumStyles = 32;
+    static const int MAX_NUM_STYLES = 32;
     //const int sizeStyleValues = 3;
     //const int sizeColorValues = 4;
     //const int sizeGapColorValues = 4;
     //const int maxNumDashValues = 4;
-   // const int sizeDashValues = maxNumDashValues + 1;
-    const int sizeLineValues = 21;//sizeStyleValues + sizeColorValues + sizeGapColorValues + sizeDashValues + 1;
-    const int sizeLineValuesArray = sizeLineValues * maxNumStyles;
+   // const int sizeDashValues = maxNumDashValues + 3;
+    const int sizeFullLineValues = 24; //sizeStyleValues + sizeColorValues + sizeGapColorValues + sizeDashValues + 1 => 23, with padding (to have styles aligned to 4 floats - std140);
+    const int sizeSimpleLineValues = 8; // ensure size multiple of 4 floats - std140
+
+    const int sizeLineValuesArray;
+    const int sizeLineValues;
 };

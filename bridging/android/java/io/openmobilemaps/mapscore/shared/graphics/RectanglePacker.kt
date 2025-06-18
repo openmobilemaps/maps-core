@@ -13,7 +13,7 @@ abstract class RectanglePacker {
         external fun pack(rectangles: HashMap<String, io.openmobilemaps.mapscore.shared.graphics.common.Vec2I>, maxPageSize: io.openmobilemaps.mapscore.shared.graphics.common.Vec2I): ArrayList<RectanglePackerPage>
     }
 
-    private class CppProxy : RectanglePacker {
+    public class CppProxy : RectanglePacker {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

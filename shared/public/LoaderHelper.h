@@ -57,7 +57,7 @@ private:
         if (loaderIndex >= loaders.size()) {
             promise->setValue(std::move(TextureLoaderResult(nullptr, std::nullopt, LoaderStatus::NOOP, std::nullopt)));
         } else {
-            loaders[loaderIndex]->loadTextureAsnyc(url, etag).then([url, etag, &loaders, loaderIndex, promise](::djinni::Future<::TextureLoaderResult> result) {
+            loaders[loaderIndex]->loadTextureAsync(url, etag).then([url, etag, &loaders, loaderIndex, promise](::djinni::Future<::TextureLoaderResult> result) {
                 const auto textureResult = result.get();
                 if (textureResult.status != LoaderStatus::NOOP || loaderIndex == loaders.size() - 1) {
                     promise->setValue(std::move(textureResult));
@@ -72,7 +72,7 @@ private:
         if (loaderIndex >= loaders.size()) {
             promise->setValue(DataLoaderResult(std::nullopt, std::nullopt, LoaderStatus::NOOP, std::nullopt));
         } else {
-            loaders[loaderIndex]->loadDataAsync(url, etag).then([url, etag, &loaders, loaderIndex, promise](::djinni::Future<::DataLoaderResult> result) {
+            loaders[loaderIndex]->loadDataAsync(url, etag).then([url, etag, loaders, loaderIndex, promise](::djinni::Future<::DataLoaderResult> result) {
                 const auto dataResult = result.get();
                 if (dataResult.status != LoaderStatus::NOOP || loaderIndex == loaders.size() - 1) {
                     promise->setValue(std::move(dataResult));

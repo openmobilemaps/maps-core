@@ -32,6 +32,9 @@
 
 #include <cmath>
 #include <vector>
+#include <string>
+
+#include "Vec4D.h"
 
 class Matrix {
 public:
@@ -57,15 +60,21 @@ public:
 
     static void scaleM(std::vector<float> &m, int mOffset, float x, float y, float z);
 
+    static void mScaled(std::vector<float> &m, int mOffset, float x, float y, float z);
+
     static void translateM(std::vector<float> &tm, int tmOffset, std::vector<float> &m, int mOffset, float x, float y, float z);
 
     static void translateM(std::vector<float> &m, int mOffset, float x, float y, float z);
+
+    static void mTranslated(std::vector<float> &tm, int tmOffset, std::vector<float> &m, int mOffset, float x, float y, float z);
+
+    static void mTranslated(std::vector<float> &m, int mOffset, float x, float y, float z);
 
     static void rotateM(std::vector<float> &m, int mOffset, float a, float x, float y, float z);
 
     static void setRotateM(std::vector<float> &rm, int rmOffset, float a, float x, float y, float z);
 
-    static void multiplyMM(std::vector<float> &r, int resultOffset, std::vector<float> &lhs, int lhsOffset, std::vector<float> &rhs,
+    static void multiplyMM(std::vector<float> &r, int resultOffset, const std::vector<float> &lhs, int lhsOffset, const std::vector<float> &rhs,
                            int rhsOffset);
 
     static void multiplyMMC(std::vector<float> &r, int resultOffset, const std::vector<float> &lhs, int lhsOffset,
@@ -75,5 +84,12 @@ public:
 
     static void multiply(const std::vector<float> &M, const std::vector<float> &x, std::vector<float> &result);
 
+    static Vec4D multiply(const std::vector<float> &M, const Vec4D &x);
+    static void multiply(const std::vector<float> &M, const Vec4D &x, Vec4D &result);
+
     static std::vector<float> sTemp;
+
+    static std::string toMatrixString(const std::vector<float> &M);
+
+    static std::string toVectorString(const std::vector<float> &v);
 };

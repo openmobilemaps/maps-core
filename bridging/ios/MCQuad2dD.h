@@ -4,6 +4,7 @@
 #import "MCVec2D.h"
 #import <Foundation/Foundation.h>
 
+NS_SWIFT_SENDABLE
 @interface MCQuad2dD : NSObject
 - (nonnull instancetype)init NS_UNAVAILABLE;
 + (nonnull instancetype)new NS_UNAVAILABLE;
@@ -23,5 +24,7 @@
 @property (nonatomic, readonly, nonnull) MCVec2D * bottomRight;
 
 @property (nonatomic, readonly, nonnull) MCVec2D * bottomLeft;
+
+- (NSComparisonResult)compare:(nonnull MCQuad2dD *)other;
 
 @end

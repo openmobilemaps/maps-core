@@ -6,9 +6,21 @@ geo_json_feature_parser_interface = interface +c {
     parse(geo_json: string): optional<list<vector_layer_feature_info>>;
 
     parseWithPointGeometry(geo_json: string): optional<list<geo_json_point>>;
+    parseWithLineGeometry(geo_json: string): optional<list<geo_json_line>>;
+}
+
+geo_json_line = record {
+    points: list<coord>;
+    feature_info: vector_layer_feature_info;
 }
 
 geo_json_point = record {
     point: coord;
     feature_info: vector_layer_feature_info;
+}
+
+geo_json_helper_interface = interface +c {
+	static independent_instance(): geo_json_helper_interface;
+	geo_json_string_from_feature_info(point: geo_json_point): string;
+	geo_json_string_from_feature_infos(points: list<geo_json_point>): string;
 }

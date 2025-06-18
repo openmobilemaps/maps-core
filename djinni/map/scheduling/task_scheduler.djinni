@@ -40,18 +40,6 @@ execution_environment = enum {
     graphics;
 }
 
-thread_pool_callbacks = interface +c +j +o {
-    get_current_thread_name(): string;
-
-    set_current_thread_name(name: string);
-
-    set_thread_priority(priority: task_priority);
-
-    attach_thread();
-
-    detachThread();
-}
-
 thread_pool_scheduler = interface +c {
-    static create(callbacks: thread_pool_callbacks): scheduler_interface;
+    static create(): scheduler_interface;
 }

@@ -10,17 +10,21 @@
 
 import Foundation
 import MapCoreSharedModule
-import Metal
+@preconcurrency import Metal
 
-class TextShader: BaseShader {
+class TextShader: BaseShader, @unchecked Sendable {
     private var opacity: Float = 1.0
     private var color = SIMD4<Float>([0.0, 0.0, 0.0, 0.0])
     private var haloColor = SIMD4<Float>([0.0, 0.0, 0.0, 0.0])
     private var haloWidth: Float = 0.0
 
+    init() {
+        super.init(shader: .textShader)
+    }
+
     override func setupProgram(_: MCRenderingContextInterface?) {
         if pipeline == nil {
-            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: .textShader, blendMode: blendMode).json)
+            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: shader, blendMode: blendMode))
         }
     }
 
@@ -39,17 +43,17 @@ class TextShader: BaseShader {
 }
 
 extension TextShader: MCTextShaderInterface {
+    func setHaloColor(_ color: MCColor, width: Float, blur: Float) {
+        self.haloColor = color.simdValues
+        self.haloWidth = Float(width)
+    }
+
     func setOpacity(_ opacity: Float) {
         self.opacity = opacity
     }
 
     func setColor(_ color: MCColor) {
         self.color = color.simdValues
-    }
-
-    func setHaloColor(_ color: MCColor, width: Double) {
-        self.haloColor = color.simdValues
-        self.haloWidth = Float(width)
     }
 
     func asShaderProgram() -> MCShaderProgramInterface? {

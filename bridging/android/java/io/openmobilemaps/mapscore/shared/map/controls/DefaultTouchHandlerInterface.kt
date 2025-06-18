@@ -13,7 +13,7 @@ abstract class DefaultTouchHandlerInterface {
         external fun create(scheduler: io.openmobilemaps.mapscore.shared.map.scheduling.SchedulerInterface, density: Float): TouchHandlerInterface
     }
 
-    private class CppProxy : DefaultTouchHandlerInterface {
+    public class CppProxy : DefaultTouchHandlerInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

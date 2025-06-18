@@ -67,7 +67,7 @@ protected:
 
     virtual void pregenerateRenderPasses();
 
-    virtual void onTileCompletelyReady(const Tiled2dMapVersionedTileInfo tileInfo) = 0;
+    virtual void onTileCompletelyReady(const Tiled2dMapVersionedTileInfo &tileInfo) = 0;
 
     std::unordered_map<Tiled2dMapVersionedTileInfo, std::vector<std::tuple<int32_t, std::vector<std::shared_ptr<RenderObjectInterface>>>>> tileRenderObjectsMap;
     std::unordered_map<Tiled2dMapVersionedTileInfo, std::vector<std::tuple<int32_t, std::string, Actor<Tiled2dMapVectorTile>>>> tiles;

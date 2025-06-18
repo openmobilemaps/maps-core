@@ -12,7 +12,7 @@ abstract class IconLayerCallbackInterface {
 
     abstract fun onLongPress(icons: ArrayList<IconInfoInterface>): Boolean
 
-    private class CppProxy : IconLayerCallbackInterface {
+    public class CppProxy : IconLayerCallbackInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

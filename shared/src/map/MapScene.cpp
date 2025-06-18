@@ -15,21 +15,22 @@
 #include "LambdaTask.h"
 #include "LayerInterface.h"
 #include "MapCallbackInterface.h"
-#include "MapCamera2dInterface.h"
+#include "MapCameraInterface.h"
 #include "MapReadyCallbackInterface.h"
 #include "TouchInterface.h"
 #include "IndexedLayer.h"
 #include "Logger.h"
+#include "RenderingCullMode.h"
 #include <algorithm>
 
 #include "Tiled2dMapRasterLayer.h"
 
 MapScene::MapScene(std::shared_ptr<SceneInterface> scene, const MapConfig &mapConfig,
-                   const std::shared_ptr<::SchedulerInterface> &scheduler, float pixelDensity)
-    : scene(scene)
-    , mapConfig(mapConfig)
-    , scheduler(scheduler)
-    , conversionHelper(std::make_shared<CoordinateConversionHelper>(mapConfig.mapCoordinateSystem)) {
+                   const std::shared_ptr<::SchedulerInterface> &scheduler, float pixelDensity, bool is3D)
+    : scene(scene), mapConfig(mapConfig), mapIs3d(is3D), scheduler(scheduler),
+    conversionHelper(std::make_shared<CoordinateConversionHelper>(mapConfig.mapCoordinateSystem, !is3D))
+    // TODO: Fix unnecessary vertical flip in MapCamera2d (and corresponding issues with rotation and orienation e.g. in the VectorLayer symbols)
+    {
     // add default touch handler
     setTouchHandler(DefaultTouchHandlerInterface::create(scheduler, pixelDensity));
 
@@ -39,7 +40,11 @@ MapScene::MapScene(std::shared_ptr<SceneInterface> scene, const MapConfig &mapCo
     scheduler->setSchedulerGraphicsTaskCallbacks(ptr);
 
     // add default camera
-    setCamera(MapCamera2dInterface::create(ptr, pixelDensity));
+    setCamera(MapCameraInterface::create(ptr, pixelDensity, is3D));
+
+    if (is3D) {
+        scene->getRenderingContext()->setCulling(RenderingCullMode::BACK);
+    }
 }
 
 std::shared_ptr<::GraphicsObjectFactoryInterface> MapScene::getGraphicsObjectFactory() { return scene->getGraphicsFactory(); }
@@ -59,7 +64,7 @@ void MapScene::setCallbackHandler(const std::shared_ptr<MapCallbackInterface> &c
     callbackHandler = callbackInterface;
 }
 
-void MapScene::setCamera(const std::shared_ptr<::MapCamera2dInterface> &camera) {
+void MapScene::setCamera(const std::shared_ptr<::MapCameraInterface> &camera) {
     if (touchHandler && std::dynamic_pointer_cast<TouchInterface>(camera)) {
         auto prevCamera = std::dynamic_pointer_cast<TouchInterface>(scene->getCamera());
         if (prevCamera) {
@@ -72,7 +77,7 @@ void MapScene::setCamera(const std::shared_ptr<::MapCamera2dInterface> &camera) 
     scene->setCamera(camera->asCameraInterface());
 }
 
-std::shared_ptr<::MapCamera2dInterface> MapScene::getCamera() { return camera; }
+std::shared_ptr<::MapCameraInterface> MapScene::getCamera() { return camera; }
 
 void MapScene::setTouchHandler(const std::shared_ptr<::TouchHandlerInterface> &touchHandler) {
     auto currentCamera = std::dynamic_pointer_cast<TouchInterface>(scene->getCamera());
@@ -87,18 +92,34 @@ void MapScene::setTouchHandler(const std::shared_ptr<::TouchHandlerInterface> &t
 
 std::shared_ptr<::TouchHandlerInterface> MapScene::getTouchHandler() { return touchHandler; }
 
+void MapScene::setPerformanceLoggers(const std::vector<std::shared_ptr<::PerformanceLoggerInterface>> &performanceLoggers) {
+    std::lock_guard<std::mutex> loggerLock(performanceLoggersMutex);
+    this->performanceLoggers = performanceLoggers;
+}
+
+std::vector<std::shared_ptr<::PerformanceLoggerInterface>> MapScene::getPerformanceLoggers() {
+    std::lock_guard<std::mutex> loggerLock(performanceLoggersMutex);
+    return performanceLoggers;
+}
+
 std::vector<std::shared_ptr<LayerInterface>> MapScene::getLayers() {
     std::vector<std::shared_ptr<LayerInterface>> layersList;
-    for (const auto &l : layers) {
-        layersList.emplace_back(l.second);
+    {
+        std::lock_guard<std::recursive_mutex> lock(layersMutex);
+        for (const auto &l: layers) {
+            layersList.emplace_back(l.second);
+        }
     }
     return layersList;
 };
 
 std::vector<std::shared_ptr<IndexedLayerInterface>> MapScene::getLayersIndexed() {
     std::vector<std::shared_ptr<IndexedLayerInterface>> layersList;
-    for (const auto &l : layers) {
-        layersList.emplace_back(std::make_shared<IndexedLayer>(l.first, l.second));
+    {
+        std::lock_guard<std::recursive_mutex> lock(layersMutex);
+        for (const auto &l: layers) {
+            layersList.emplace_back(std::make_shared<IndexedLayer>(l.first, l.second));
+        }
     }
     return layersList;
 }
@@ -350,7 +371,7 @@ void MapScene::invalidate() {
     }
 }
 
-void MapScene::drawFrame() {
+void MapScene::prepare() {
     isInvalidated.clear();
 
     if (scheduler && scheduler->hasSeparateGraphicsInvocation()) {
@@ -373,20 +394,43 @@ void MapScene::drawFrame() {
             layer.second->update();
         }
 
+        needsCompute = false;
+
         for (const auto &layer : layers) {
             for (const auto &renderPass : layer.second->buildRenderPasses()) {
                 scene->getRenderer()->addToRenderQueue(renderPass);
             }
+
+            for (const auto &computePass : layer.second->buildComputePasses()) {
+                scene->getRenderer()->addToComputeQueue(computePass);
+                needsCompute = true;
+            }
         }
     }
+}
 
-    scene->drawFrame();
+bool MapScene::getNeedsCompute() {
+    return needsCompute;
+}
+
+void MapScene::compute() {
+    scene->compute();
+}
+
+void MapScene::drawFrame() {
+    scene->drawFrame(nullptr);
+}
+
+void MapScene::drawOffscreenFrame(const /*not-null*/ std::shared_ptr<::RenderTargetInterface> & target) {
+    scene->drawFrame(target);
 }
 
 void MapScene::resume() {
     if (isResumed) {
         return;
     }
+
+    scheduler->resume();
 
     std::lock_guard<std::recursive_mutex> lock(layersMutex);
     for (const auto &layer : layers) {
@@ -407,21 +451,47 @@ void MapScene::pause() {
     for (const auto &layer : layers) {
         layer.second->pause();
     }
+
+    scheduler->pause();
 }
 
 void MapScene::destroy() {
+    std::lock_guard<std::recursive_mutex> lock(layersMutex);
+    for (const auto &layer : layers) {
+        if (isResumed) {
+            layer.second->pause();
+        }
+        layer.second->onRemoved();
+    }
+    layers.clear();
+
     scheduler->destroy();
     scheduler = nullptr;
     callbackHandler = nullptr;
+    if (!performanceLoggers.empty()) {
+        std::lock_guard<std::mutex> loggerLock(performanceLoggersMutex);
+        for (const auto &logger: performanceLoggers) {
+            logger->resetData();
+        }
+        performanceLoggers.clear();
+    }
 }
 
-void MapScene::drawReadyFrame(const ::RectCoord &bounds, float timeout,
+void MapScene::drawReadyFrame(const ::RectCoord &bounds, float paddingPc, float timeout,
                               const std::shared_ptr<MapReadyCallbackInterface> &callbacks) {
+    auto camera = getCamera();
+
+    if (!callbacks || !camera) {
+        return;
+    }
 
     // for now we only support drawing a ready frame, therefore
     // we disable animations in the layers
-    for (const auto &layer : layers) {
-        layer.second->enableAnimations(false);
+    {
+        std::lock_guard<std::recursive_mutex> lock(layersMutex);
+        for (const auto &layer: layers) {
+            layer.second->enableAnimations(false);
+        }
     }
 
     auto state = LayerReadyState::NOT_READY;
@@ -429,8 +499,7 @@ void MapScene::drawReadyFrame(const ::RectCoord &bounds, float timeout,
     invalidate();
     callbacks->stateDidUpdate(state);
 
-    auto camera = getCamera();
-    camera->moveToBoundingBox(bounds, 0.0, false, std::nullopt, std::nullopt);
+    camera->moveToBoundingBox(bounds, paddingPc, false, std::nullopt, std::nullopt);
     camera->freeze(true);
 
     invalidate();
@@ -439,7 +508,20 @@ void MapScene::drawReadyFrame(const ::RectCoord &bounds, float timeout,
     long long timeoutTimestamp = DateHelper::currentTimeMillis() + (long long)(timeout * 1000);
 
     while (state == LayerReadyState::NOT_READY) {
+
+#ifdef __APPLE__
+        while(scheduler->runGraphicsTasks()) {
+            continue;
+            // ensure all graphics tasks are done by polling runGraphicsTasks()
+        }
+#endif
+
         state = getLayersReadyState();
+
+        // sleep for 0.05s to avoid starving main thread
+        if (state == LayerReadyState::NOT_READY) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        }
 
         auto now = DateHelper::currentTimeMillis();
         if (now > timeoutTimestamp) {
@@ -452,8 +534,11 @@ void MapScene::drawReadyFrame(const ::RectCoord &bounds, float timeout,
     // re-enable animations if the map scene is used not only for
     // drawReadyFrame
     camera->freeze(false);
-    for (const auto &layer : layers) {
-        layer.second->enableAnimations(true);
+    {
+        std::lock_guard<std::recursive_mutex> lock(layersMutex);
+        for (const auto &layer: layers) {
+            layer.second->enableAnimations(true);
+        }
     }
 }
 
@@ -482,4 +567,8 @@ void MapScene::forceReload() {
 
 void MapScene::requestGraphicsTaskExecution() {
     invalidate();
+}
+
+bool MapScene::is3d() {
+    return mapIs3d;
 }

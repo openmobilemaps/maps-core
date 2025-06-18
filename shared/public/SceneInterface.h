@@ -6,8 +6,10 @@
 #include "GraphicsObjectFactoryInterface.h"
 #include "ShaderFactoryInterface.h"
 #include <memory>
+#include <optional>
 
 class CameraInterface;
+class RenderTargetInterface;
 class RendererInterface;
 class RenderingContextInterface;
 class SceneCallbackInterface;
@@ -34,7 +36,11 @@ public:
 
     virtual /*not-null*/ std::shared_ptr<::ShaderFactoryInterface> getShaderFactory() = 0;
 
-    virtual void drawFrame() = 0;
+    virtual void prepare() = 0;
+
+    virtual void drawFrame(const /*nullable*/ std::shared_ptr<RenderTargetInterface> & target) = 0;
+
+    virtual void compute() = 0;
 
     virtual void clear() = 0;
 

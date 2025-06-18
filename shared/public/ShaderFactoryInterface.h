@@ -13,6 +13,8 @@ class LineGroupShaderInterface;
 class PolygonGroupShaderInterface;
 class PolygonPatternGroupShaderInterface;
 class RasterShaderInterface;
+class SkySphereShaderInterface;
+class SphereEffectShaderInterface;
 class StretchInstancedShaderInterface;
 class StretchShaderInterface;
 class TextInstancedShaderInterface;
@@ -24,25 +26,49 @@ public:
 
     virtual /*not-null*/ std::shared_ptr<AlphaShaderInterface> createAlphaShader() = 0;
 
+    virtual /*not-null*/ std::shared_ptr<AlphaShaderInterface> createUnitSphereAlphaShader() = 0;
+
     virtual /*not-null*/ std::shared_ptr<AlphaInstancedShaderInterface> createAlphaInstancedShader() = 0;
 
+    virtual /*not-null*/ std::shared_ptr<AlphaInstancedShaderInterface> createUnitSphereAlphaInstancedShader() = 0;
+
     virtual /*not-null*/ std::shared_ptr<LineGroupShaderInterface> createLineGroupShader() = 0;
+
+    virtual /*not-null*/ std::shared_ptr<LineGroupShaderInterface> createUnitSphereLineGroupShader() = 0;
+
+    virtual /*not-null*/ std::shared_ptr<LineGroupShaderInterface> createSimpleLineGroupShader() = 0;
+
+    virtual /*not-null*/ std::shared_ptr<LineGroupShaderInterface> createUnitSphereSimpleLineGroupShader() = 0;
+
+    virtual /*not-null*/ std::shared_ptr<ColorShaderInterface> createUnitSphereColorShader() = 0;
 
     virtual /*not-null*/ std::shared_ptr<ColorShaderInterface> createColorShader() = 0;
 
     virtual /*not-null*/ std::shared_ptr<ColorCircleShaderInterface> createColorCircleShader() = 0;
 
-    virtual /*not-null*/ std::shared_ptr<PolygonGroupShaderInterface> createPolygonGroupShader(bool isStriped) = 0;
+    virtual /*not-null*/ std::shared_ptr<ColorCircleShaderInterface> createUnitSphereColorCircleShader() = 0;
 
-    virtual /*not-null*/ std::shared_ptr<PolygonPatternGroupShaderInterface> createPolygonPatternGroupShader(bool fadeInPattern) = 0;
+    virtual /*not-null*/ std::shared_ptr<PolygonGroupShaderInterface> createPolygonGroupShader(bool isStriped, bool unitSphere) = 0;
+
+    virtual /*not-null*/ std::shared_ptr<PolygonPatternGroupShaderInterface> createPolygonPatternGroupShader(bool fadeInPattern, bool unitSphere) = 0;
 
     virtual /*not-null*/ std::shared_ptr<TextShaderInterface> createTextShader() = 0;
 
     virtual /*not-null*/ std::shared_ptr<TextInstancedShaderInterface> createTextInstancedShader() = 0;
 
+    virtual /*not-null*/ std::shared_ptr<TextInstancedShaderInterface> createUnitSphereTextInstancedShader() = 0;
+
     virtual /*not-null*/ std::shared_ptr<RasterShaderInterface> createRasterShader() = 0;
+
+    virtual /*not-null*/ std::shared_ptr<RasterShaderInterface> createUnitSphereRasterShader() = 0;
 
     virtual /*not-null*/ std::shared_ptr<StretchShaderInterface> createStretchShader() = 0;
 
-    virtual /*not-null*/ std::shared_ptr<StretchInstancedShaderInterface> createStretchInstancedShader() = 0;
+    virtual /*not-null*/ std::shared_ptr<StretchInstancedShaderInterface> createStretchInstancedShader(bool unitSphere) = 0;
+
+    virtual /*not-null*/ std::shared_ptr<ColorShaderInterface> createIcosahedronColorShader() = 0;
+
+    virtual /*not-null*/ std::shared_ptr<SphereEffectShaderInterface> createSphereEffectShader() = 0;
+
+    virtual /*not-null*/ std::shared_ptr<SkySphereShaderInterface> createSkySphereShader() = 0;
 };

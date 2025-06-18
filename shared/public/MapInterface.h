@@ -6,7 +6,9 @@
 #include "Color.h"
 #include "CoordinateConversionHelperInterface.h"
 #include "GraphicsObjectFactoryInterface.h"
+#include "PerformanceLoggerInterface.h"
 #include "RectCoord.h"
+#include "RenderTargetInterface.h"
 #include "RenderingContextInterface.h"
 #include "SchedulerInterface.h"
 #include "ShaderFactoryInterface.h"
@@ -20,7 +22,7 @@
 class IndexedLayerInterface;
 class LayerInterface;
 class MapCallbackInterface;
-class MapCamera2dInterface;
+class MapCameraInterface;
 class MapReadyCallbackInterface;
 struct MapConfig;
 
@@ -28,9 +30,9 @@ class MapInterface {
 public:
     virtual ~MapInterface() = default;
 
-    static /*not-null*/ std::shared_ptr<MapInterface> create(const /*not-null*/ std::shared_ptr<::GraphicsObjectFactoryInterface> & graphicsFactory, const /*not-null*/ std::shared_ptr<::ShaderFactoryInterface> & shaderFactory, const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & renderingContext, const MapConfig & mapConfig, const /*not-null*/ std::shared_ptr<::SchedulerInterface> & scheduler, float pixelDensity);
+    static /*not-null*/ std::shared_ptr<MapInterface> create(const /*not-null*/ std::shared_ptr<::GraphicsObjectFactoryInterface> & graphicsFactory, const /*not-null*/ std::shared_ptr<::ShaderFactoryInterface> & shaderFactory, const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & renderingContext, const MapConfig & mapConfig, const /*not-null*/ std::shared_ptr<::SchedulerInterface> & scheduler, float pixelDensity, bool is3D);
 
-    static /*not-null*/ std::shared_ptr<MapInterface> createWithOpenGl(const MapConfig & mapConfig, float pixelDensity);
+    static /*not-null*/ std::shared_ptr<MapInterface> createWithOpenGl(const MapConfig & mapConfig, const /*not-null*/ std::shared_ptr<::SchedulerInterface> & scheduler, float pixelDensity, bool is3D);
 
     virtual void setCallbackHandler(const /*nullable*/ std::shared_ptr<MapCallbackInterface> & callbackInterface) = 0;
 
@@ -46,13 +48,17 @@ public:
 
     virtual /*not-null*/ std::shared_ptr<::CoordinateConversionHelperInterface> getCoordinateConverterHelper() = 0;
 
-    virtual void setCamera(const /*not-null*/ std::shared_ptr<MapCamera2dInterface> & camera) = 0;
+    virtual void setCamera(const /*not-null*/ std::shared_ptr<MapCameraInterface> & camera) = 0;
 
-    virtual /*not-null*/ std::shared_ptr<MapCamera2dInterface> getCamera() = 0;
+    virtual /*not-null*/ std::shared_ptr<MapCameraInterface> getCamera() = 0;
 
     virtual void setTouchHandler(const /*not-null*/ std::shared_ptr<::TouchHandlerInterface> & touchHandler) = 0;
 
     virtual /*not-null*/ std::shared_ptr<::TouchHandlerInterface> getTouchHandler() = 0;
+
+    virtual void setPerformanceLoggers(const std::vector</*not-null*/ std::shared_ptr<::PerformanceLoggerInterface>> & performanceLoggers) = 0;
+
+    virtual std::vector</*not-null*/ std::shared_ptr<::PerformanceLoggerInterface>> getPerformanceLoggers() = 0;
 
     virtual std::vector</*not-null*/ std::shared_ptr<LayerInterface>> getLayers() = 0;
 
@@ -72,10 +78,21 @@ public:
 
     virtual void setBackgroundColor(const ::Color & color) = 0;
 
+    virtual bool is3d() = 0;
+
     virtual void invalidate() = 0;
+
+    virtual void prepare() = 0;
+
+    virtual bool getNeedsCompute() = 0;
+
+    virtual void drawOffscreenFrame(const /*not-null*/ std::shared_ptr<::RenderTargetInterface> & target) = 0;
 
     /** Must be called on the rendering thread! */
     virtual void drawFrame() = 0;
+
+    /** Must be called on the rendering thread! */
+    virtual void compute() = 0;
 
     /** Must be called on the rendering thread! */
     virtual void resume() = 0;
@@ -89,7 +106,7 @@ public:
      * changes bounds to bounds, checks all layers for readiness, and updates callbacks, timeout in
      * seconds, always draw the frame when state is updated in the ready callbacks
      */
-    virtual void drawReadyFrame(const ::RectCoord & bounds, float timeout, const /*not-null*/ std::shared_ptr<MapReadyCallbackInterface> & callbacks) = 0;
+    virtual void drawReadyFrame(const ::RectCoord & bounds, float paddingPc, float timeout, const /*not-null*/ std::shared_ptr<MapReadyCallbackInterface> & callbacks) = 0;
 
     virtual void forceReload() = 0;
 };

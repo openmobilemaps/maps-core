@@ -11,8 +11,9 @@
 #include "Text2dOpenGl.h"
 #include "OpenGlHelper.h"
 #include "TextureHolderInterface.h"
+#include <cstring>
 
-Text2dOpenGl::Text2dOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader)
+Text2dOpenGl::Text2dOpenGl(const std::shared_ptr<::BaseShaderProgramOpenGl> &shader)
     : shaderProgram(shader) {}
 
 bool Text2dOpenGl::isReady() { return ready && textureHolder; }
@@ -123,25 +124,33 @@ void Text2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface> &con
         program = openGlContext->getProgram(programName);
         }
 
-    glUseProgram(program);
     prepareGlData(program);
 
     ready = true;
 }
 
 void Text2dOpenGl::prepareGlData(int program) {
-    if (positionHandle < 0) {
-        positionHandle = glGetAttribLocation(program, "vPosition");
+    glUseProgram(program);
+
+    if (!glDataBuffersGenerated) {
+        glGenVertexArrays(1, &vao);
     }
-    if (textureCoordinateHandle < 0) {
-        textureCoordinateHandle = glGetAttribLocation(program, "texCoordinate");
-    }
+    glBindVertexArray(vao);
 
     if (!glDataBuffersGenerated) {
         glGenBuffers(1, &vertexAttribBuffer);
     }
     glBindBuffer(GL_ARRAY_BUFFER, vertexAttribBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * textVertexAttributes.size(), &textVertexAttributes[0], GL_STATIC_DRAW);
+
+    positionHandle = glGetAttribLocation(program, "vPosition");
+    textureCoordinateHandle = glGetAttribLocation(program, "texCoordinate");
+
+    glEnableVertexAttribArray(positionHandle);
+    glVertexAttribPointer(positionHandle, 2, GL_FLOAT, false, 6 * sizeof(GLfloat), nullptr);
+    glEnableVertexAttribArray(textureCoordinateHandle);
+    glVertexAttribPointer(textureCoordinateHandle, 2, GL_FLOAT, false, 6 * sizeof(GLfloat), (GLvoid*)(sizeof(GLfloat) * 2));
+
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     if (!glDataBuffersGenerated) {
@@ -149,10 +158,16 @@ void Text2dOpenGl::prepareGlData(int program) {
     }
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort) * textIndices.size(), &textIndices[0], GL_STATIC_DRAW);
+
+    glBindVertexArray(0);
+
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-    if (mvpMatrixHandle < 0) {
-        mvpMatrixHandle = glGetUniformLocation(program, "uMVPMatrix");
+    if (vpMatrixHandle < 0) {
+        vpMatrixHandle = glGetUniformLocation(program, "uvpMatrix");
+    }
+    if (mMatrixHandle < 0) {
+        mMatrixHandle = glGetUniformLocation(program, "umMatrix");
     }
     if (textureCoordScaleFactorHandle < 0) {
         textureCoordScaleFactorHandle = glGetUniformLocation(program, "textureCoordScaleFactor");
@@ -166,6 +181,7 @@ void Text2dOpenGl::removeGlBuffers() {
     if (glDataBuffersGenerated) {
         glDeleteBuffers(1, &vertexAttribBuffer);
         glDeleteBuffers(1, &indexBuffer);
+        glDeleteVertexArrays(1, &vao);
         glDataBuffersGenerated = false;
     }
 }
@@ -197,15 +213,18 @@ void Text2dOpenGl::removeTexture() {
 }
 
 void Text2dOpenGl::renderAsMask(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
-                                int64_t mvpMatrix, double screenPixelAsRealMeterFactor) {
+                                int64_t vpMatrix, int64_t mMatrix, const ::Vec3D &origin,
+                                double screenPixelAsRealMeterFactor) {
     glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-    render(context, renderPass, mvpMatrix, false, screenPixelAsRealMeterFactor);
+    render(context, renderPass, vpMatrix, mMatrix, origin, false, screenPixelAsRealMeterFactor);
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 }
 
 void Text2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
-                          int64_t mvpMatrix, bool isMasked, double screenPixelAsRealMeterFactor) {
-    if (!ready || !textureHolder) {
+                          int64_t vpMatrix, int64_t mMatrix, const ::Vec3D &origin, bool isMasked,
+                          double screenPixelAsRealMeterFactor) {
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
+    if (!ready || !textureHolder || !shaderProgram->isRenderable()) {
         return;
     }
 
@@ -227,39 +246,23 @@ void Text2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &co
     }
 
     glUseProgram(program);
+    glBindVertexArray(vao);
 
     prepareTextureDraw(program);
 
     shaderProgram->preRender(context);
 
-    // enable vPosition attribs
-    glBindBuffer(GL_ARRAY_BUFFER, vertexAttribBuffer);
-    glEnableVertexAttribArray(positionHandle);
-    glVertexAttribPointer(positionHandle, 2, GL_FLOAT, false, 6 * sizeof(GLfloat), nullptr);
-    // enable texture coord vertex attribs
-    glEnableVertexAttribArray(textureCoordinateHandle);
-    glVertexAttribPointer(textureCoordinateHandle, 2, GL_FLOAT, false, 6 * sizeof(GLfloat), (GLvoid*)(sizeof(GLfloat) * 2));
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
     // Set texture coords scale factor
     glUniform2fv(textureCoordScaleFactorHandle, 1, &textureCoordScaleFactor[0]);
 
     // Apply the projection and view transformation
-    glUniformMatrix4fv(mvpMatrixHandle, 1, false, (GLfloat *)mvpMatrix);
+    glUniformMatrix4fv(vpMatrixHandle, 1, false, (GLfloat *)vpMatrix);
+    glUniformMatrix4fv(mMatrixHandle, 1, false, (GLfloat *)mMatrix);
 
     // Draw the triangles
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
     glDrawElements(GL_TRIANGLES, textIndices.size(), GL_UNSIGNED_SHORT, nullptr);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-    // Disable vertex array
-    glDisableVertexAttribArray(positionHandle);
-    glDisableVertexAttribArray(textureCoordinateHandle);
-
-    if (textureHolder) {
-        glDisableVertexAttribArray(textureCoordinateHandle);
-    }
+    glBindVertexArray(0);
 
     glDisable(GL_BLEND);
 }

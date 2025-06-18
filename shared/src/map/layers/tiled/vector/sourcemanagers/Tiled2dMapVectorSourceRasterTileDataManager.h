@@ -18,12 +18,13 @@ public:
     Tiled2dMapVectorSourceRasterTileDataManager(const WeakActor<Tiled2dMapVectorLayer> &vectorLayer,
                                                 const std::shared_ptr<VectorMapDescription> &mapDescription,
                                                 const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
-                                                const std::string &source,
+                                                const std::shared_ptr<VectorLayerDescription> &layerDescription,
                                                 const WeakActor<Tiled2dMapRasterSource> &rasterSource,
                                                 const Actor<Tiled2dMapVectorReadyManager> &readyManager,
-                                                const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager);
+                                                const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager,
+                                                double dpFactor);
 
-    void onRasterTilesUpdated(const std::string &layerName, std::unordered_set<Tiled2dMapRasterTileInfo> currentTileInfos) override;
+    void onRasterTilesUpdated(const std::string &layerName, VectorSet<Tiled2dMapRasterTileInfo> currentTileInfos) override;
 
     virtual void updateLayerDescription(std::shared_ptr<VectorLayerDescription> layerDescription,
                                         int32_t legacyIndex,
@@ -32,10 +33,12 @@ public:
     virtual void reloadLayerContent(const std::vector<std::tuple<std::shared_ptr<VectorLayerDescription>, int32_t>> &descriptionLayerIndexPairs) override;
 
 protected:
-    void onTileCompletelyReady(const Tiled2dMapVersionedTileInfo tileInfo) override;
+    void onTileCompletelyReady(const Tiled2dMapVersionedTileInfo &tileInfo) override;
 
 private:
     void clearTiles(const std::vector<Actor<Tiled2dMapVectorTile>> &tilesToClear);
 
+    const std::shared_ptr<VectorLayerDescription> layerDescription;
     const WeakActor<Tiled2dMapRasterSource> rasterSource;
+    const double dpFactor = 1.0;
 };

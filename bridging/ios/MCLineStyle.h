@@ -6,6 +6,7 @@
 #import "MCSizeType.h"
 #import <Foundation/Foundation.h>
 
+NS_SWIFT_SENDABLE
 @interface MCLineStyle : NSObject
 - (nonnull instancetype)init NS_UNAVAILABLE;
 + (nonnull instancetype)new NS_UNAVAILABLE;
@@ -16,6 +17,8 @@
                             widthType:(MCSizeType)widthType
                                 width:(float)width
                             dashArray:(nonnull NSArray<NSNumber *> *)dashArray
+                             dashFade:(float)dashFade
+                   dashAnimationSpeed:(float)dashAnimationSpeed
                               lineCap:(MCLineCapType)lineCap
                                offset:(float)offset
                                dotted:(BOOL)dotted
@@ -27,6 +30,8 @@
                                  widthType:(MCSizeType)widthType
                                      width:(float)width
                                  dashArray:(nonnull NSArray<NSNumber *> *)dashArray
+                                  dashFade:(float)dashFade
+                        dashAnimationSpeed:(float)dashAnimationSpeed
                                    lineCap:(MCLineCapType)lineCap
                                     offset:(float)offset
                                     dotted:(BOOL)dotted
@@ -45,6 +50,10 @@
 @property (nonatomic, readonly) float width;
 
 @property (nonatomic, readonly, nonnull) NSArray<NSNumber *> * dashArray;
+
+@property (nonatomic, readonly) float dashFade;
+
+@property (nonatomic, readonly) float dashAnimationSpeed;
 
 @property (nonatomic, readonly) MCLineCapType lineCap;
 

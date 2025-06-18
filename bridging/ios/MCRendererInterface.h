@@ -3,7 +3,9 @@
 
 #import <Foundation/Foundation.h>
 @protocol MCCameraInterface;
+@protocol MCComputePassInterface;
 @protocol MCRenderPassInterface;
+@protocol MCRenderTargetInterface;
 @protocol MCRenderingContextInterface;
 
 
@@ -11,8 +13,15 @@
 
 - (void)addToRenderQueue:(nullable id<MCRenderPassInterface>)renderPass;
 
+- (void)addToComputeQueue:(nullable id<MCComputePassInterface>)computePass;
+
 /** Ensure calling on graphics thread */
 - (void)drawFrame:(nullable id<MCRenderingContextInterface>)renderingContext
-           camera:(nullable id<MCCameraInterface>)camera;
+           camera:(nullable id<MCCameraInterface>)camera
+           target:(nullable id<MCRenderTargetInterface>)target;
+
+/** Ensure calling on graphics thread */
+- (void)compute:(nullable id<MCRenderingContextInterface>)renderingContext
+         camera:(nullable id<MCCameraInterface>)camera;
 
 @end

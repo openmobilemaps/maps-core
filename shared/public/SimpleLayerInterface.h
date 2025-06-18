@@ -15,6 +15,7 @@
 
 class SimpleLayerInterface : public LayerInterface {
 
+protected:
     virtual void setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> & maskingObject) {};
 
     virtual void update() {};
@@ -22,6 +23,14 @@ class SimpleLayerInterface : public LayerInterface {
     virtual std::vector<std::shared_ptr<::RenderPassInterface>> buildRenderPasses() {
         return {};
     };
+
+    virtual std::vector<std::shared_ptr<::ComputePassInterface>> buildComputePasses() {
+        return {};
+    };
+
+    virtual void setPrimaryRenderTarget(const /*nullable*/ std::shared_ptr<::RenderTargetInterface> & target) {
+        renderTarget = target;
+    }
 
     virtual void onAdded(const std::shared_ptr<MapInterface> & mapInterface, int32_t layerIndex) {};
 
@@ -49,4 +58,6 @@ class SimpleLayerInterface : public LayerInterface {
     virtual void setErrorManager(const std::shared_ptr<::ErrorManager> & errorManager) {}
 
     virtual void forceReload() {}
+
+    std::shared_ptr<::RenderTargetInterface> renderTarget = nullptr;
 };

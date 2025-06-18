@@ -18,6 +18,8 @@ abstract class RenderingContextInterface {
 
     abstract fun setBackgroundColor(color: io.openmobilemaps.mapscore.shared.graphics.common.Color)
 
+    abstract fun setCulling(mode: RenderingCullMode)
+
     abstract fun setupDrawFrame()
 
     abstract fun preRenderStencilMask()
@@ -27,7 +29,9 @@ abstract class RenderingContextInterface {
     /** optional rectangle, remove scissoring when not set */
     abstract fun applyScissorRect(scissorRect: io.openmobilemaps.mapscore.shared.graphics.common.RectI?)
 
-    private class CppProxy : RenderingContextInterface {
+    abstract fun asOpenGlRenderingContext(): OpenGlRenderingContextInterface?
+
+    public class CppProxy : RenderingContextInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 
@@ -66,6 +70,12 @@ abstract class RenderingContextInterface {
         }
         private external fun native_setBackgroundColor(_nativeRef: Long, color: io.openmobilemaps.mapscore.shared.graphics.common.Color)
 
+        override fun setCulling(mode: RenderingCullMode) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setCulling(this.nativeRef, mode)
+        }
+        private external fun native_setCulling(_nativeRef: Long, mode: RenderingCullMode)
+
         override fun setupDrawFrame() {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             native_setupDrawFrame(this.nativeRef)
@@ -89,5 +99,11 @@ abstract class RenderingContextInterface {
             native_applyScissorRect(this.nativeRef, scissorRect)
         }
         private external fun native_applyScissorRect(_nativeRef: Long, scissorRect: io.openmobilemaps.mapscore.shared.graphics.common.RectI?)
+
+        override fun asOpenGlRenderingContext(): OpenGlRenderingContextInterface? {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_asOpenGlRenderingContext(this.nativeRef)
+        }
+        private external fun native_asOpenGlRenderingContext(_nativeRef: Long): OpenGlRenderingContextInterface?
     }
 }

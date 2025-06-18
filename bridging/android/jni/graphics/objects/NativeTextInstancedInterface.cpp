@@ -8,6 +8,7 @@
 #include "NativeRenderingContextInterface.h"
 #include "NativeSharedBytes.h"
 #include "NativeTextureHolderInterface.h"
+#include "NativeVec3D.h"
 
 namespace djinni_generated {
 
@@ -19,12 +20,14 @@ NativeTextInstancedInterface::JavaProxy::JavaProxy(JniType j) : Handle(::djinni:
 
 NativeTextInstancedInterface::JavaProxy::~JavaProxy() = default;
 
-void NativeTextInstancedInterface::JavaProxy::setFrame(const ::Quad2dD & c_frame) {
+void NativeTextInstancedInterface::JavaProxy::setFrame(const ::Quad2dD & c_frame, const ::Vec3D & c_origin, bool c_is3d) {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
     const auto& data = ::djinni::JniClass<::djinni_generated::NativeTextInstancedInterface>::get();
     jniEnv->CallVoidMethod(Handle::get().get(), data.method_setFrame,
-                           ::djinni::get(::djinni_generated::NativeQuad2dD::fromCpp(jniEnv, c_frame)));
+                           ::djinni::get(::djinni_generated::NativeQuad2dD::fromCpp(jniEnv, c_frame)),
+                           ::djinni::get(::djinni_generated::NativeVec3D::fromCpp(jniEnv, c_origin)),
+                           ::djinni::get(::djinni::Bool::fromCpp(jniEnv, c_is3d)));
     ::djinni::jniExceptionCheck(jniEnv);
 }
 void NativeTextInstancedInterface::JavaProxy::setInstanceCount(int32_t c_count) {
@@ -40,6 +43,14 @@ void NativeTextInstancedInterface::JavaProxy::setPositions(const ::SharedBytes &
     ::djinni::JniLocalScope jscope(jniEnv, 10);
     const auto& data = ::djinni::JniClass<::djinni_generated::NativeTextInstancedInterface>::get();
     jniEnv->CallVoidMethod(Handle::get().get(), data.method_setPositions,
+                           ::djinni::get(::djinni_generated::NativeSharedBytes::fromCpp(jniEnv, c_positions)));
+    ::djinni::jniExceptionCheck(jniEnv);
+}
+void NativeTextInstancedInterface::JavaProxy::setReferencePositions(const ::SharedBytes & c_positions) {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeTextInstancedInterface>::get();
+    jniEnv->CallVoidMethod(Handle::get().get(), data.method_setReferencePositions,
                            ::djinni::get(::djinni_generated::NativeSharedBytes::fromCpp(jniEnv, c_positions)));
     ::djinni::jniExceptionCheck(jniEnv);
 }
@@ -65,6 +76,14 @@ void NativeTextInstancedInterface::JavaProxy::setRotations(const ::SharedBytes &
     const auto& data = ::djinni::JniClass<::djinni_generated::NativeTextInstancedInterface>::get();
     jniEnv->CallVoidMethod(Handle::get().get(), data.method_setRotations,
                            ::djinni::get(::djinni_generated::NativeSharedBytes::fromCpp(jniEnv, c_rotations)));
+    ::djinni::jniExceptionCheck(jniEnv);
+}
+void NativeTextInstancedInterface::JavaProxy::setAlphas(const ::SharedBytes & c_alphas) {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeTextInstancedInterface>::get();
+    jniEnv->CallVoidMethod(Handle::get().get(), data.method_setAlphas,
+                           ::djinni::get(::djinni_generated::NativeSharedBytes::fromCpp(jniEnv, c_alphas)));
     ::djinni::jniExceptionCheck(jniEnv);
 }
 void NativeTextInstancedInterface::JavaProxy::setStyleIndices(const ::SharedBytes & c_indices) {
@@ -115,11 +134,13 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_TextInstancedInterface_00024CppProxy_native_1setFrame(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeQuad2dD::JniType j_frame)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_TextInstancedInterface_00024CppProxy_native_1setFrame(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeQuad2dD::JniType j_frame, ::djinni_generated::NativeVec3D::JniType j_origin, jboolean j_is3d)
 {
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::TextInstancedInterface>(nativeRef);
-        ref->setFrame(::djinni_generated::NativeQuad2dD::toCpp(jniEnv, j_frame));
+        ref->setFrame(::djinni_generated::NativeQuad2dD::toCpp(jniEnv, j_frame),
+                      ::djinni_generated::NativeVec3D::toCpp(jniEnv, j_origin),
+                      ::djinni::Bool::toCpp(jniEnv, j_is3d));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
@@ -136,6 +157,14 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::TextInstancedInterface>(nativeRef);
         ref->setPositions(::djinni_generated::NativeSharedBytes::toCpp(jniEnv, j_positions));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_TextInstancedInterface_00024CppProxy_native_1setReferencePositions(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeSharedBytes::JniType j_positions)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::TextInstancedInterface>(nativeRef);
+        ref->setReferencePositions(::djinni_generated::NativeSharedBytes::toCpp(jniEnv, j_positions));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
@@ -160,6 +189,14 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::TextInstancedInterface>(nativeRef);
         ref->setRotations(::djinni_generated::NativeSharedBytes::toCpp(jniEnv, j_rotations));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_TextInstancedInterface_00024CppProxy_native_1setAlphas(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeSharedBytes::JniType j_alphas)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::TextInstancedInterface>(nativeRef);
+        ref->setAlphas(::djinni_generated::NativeSharedBytes::toCpp(jniEnv, j_alphas));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

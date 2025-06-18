@@ -13,12 +13,13 @@
 #include "LambdaTask.h"
 #include "LineHelper.h"
 #include "LineStyle.h"
-#include "MapCamera2dInterface.h"
+#include "MapCameraInterface.h"
 #include "MapInterface.h"
 #include "RenderObject.h"
 #include "RenderPass.h"
 #include "SizeType.h"
 #include <map>
+#include <algorithm>
 
 LineLayer::LineLayer()
     : isHidden(false){};
@@ -70,6 +71,8 @@ void LineLayer::remove(const std::shared_ptr<LineInfoInterface> &line) {
                             }));
                 }
                 lines.erase(it);
+                animatedLineStyleIds.erase(line->getIdentifier());
+                hasAnimatedLineStyles = !animatedLineStyleIds.empty();
                 break;
             }
         }
@@ -90,14 +93,29 @@ void LineLayer::add(const std::shared_ptr<LineInfoInterface> &line) {
         return;
     }
 
-    auto shader = shaderFactory->createLineGroupShader();
+    auto shader = mapInterface->is3d() ? shaderFactory->createUnitSphereLineGroupShader() : shaderFactory->createLineGroupShader();
     auto lineGraphicsObject = objectFactory->createLineGroup(shader->asShaderProgramInterface());
 
-    auto lineObject = std::make_shared<Line2dLayerObject>(mapInterface->getCoordinateConverterHelper(), lineGraphicsObject, shader);
+    auto lineObject = std::make_shared<Line2dLayerObject>(mapInterface->getCoordinateConverterHelper(), lineGraphicsObject, shader, mapInterface->is3d());
 
-    lineObject->setStyle(line->getStyle());
+    const auto &lineStyle = line->getStyle();
+    lineObject->setStyle(lineStyle);
+    bool isAnimatedLineStyle = lineStyle.dashAnimationSpeed > 0.0;
 
-    lineObject->setPositions(line->getCoordinates());
+    bool is3d = mapInterface->is3d();
+
+    auto origin = Vec3D(0.0, 0.0, 0.0);
+    const auto& coords = line->getCoordinates();
+
+    if(coords.size() > 0) {
+        Coord renderCoord = mapInterface->getCoordinateConverterHelper()->convertToRenderSystem(coords[0]);
+        double x = is3d ? renderCoord.z * sin(renderCoord.y) * cos(renderCoord.x) : renderCoord.x;
+        double y = is3d ? renderCoord.z * cos(renderCoord.y) : renderCoord.y;
+        double z = is3d ? -renderCoord.z * sin(renderCoord.y) * sin(renderCoord.x) : 0.0;
+        origin = Vec3D(x,y,z);
+    }
+
+    lineObject->setPositions(coords, origin);
 
     std::weak_ptr<LineLayer> weakSelfPtr = std::dynamic_pointer_cast<LineLayer>(shared_from_this());
     scheduler->addTask(std::make_shared<LambdaTask>(
@@ -111,6 +129,10 @@ void LineLayer::add(const std::shared_ptr<LineInfoInterface> &line) {
     {
         std::lock_guard<std::recursive_mutex> lock(linesMutex);
         lines.push_back(std::make_pair(line, lineObject));
+        if (isAnimatedLineStyle) {
+            animatedLineStyleIds.insert(line->getIdentifier());
+            hasAnimatedLineStyles = true;
+        }
     }
     generateRenderPasses();
 }
@@ -152,6 +174,8 @@ void LineLayer::clear() {
             }));
         }
         lines.clear();
+        animatedLineStyleIds.clear();
+        hasAnimatedLineStyles = false;
     }
     generateRenderPasses();
     mapInterface->invalidate();
@@ -177,7 +201,7 @@ void LineLayer::generateRenderPasses() {
             if (!lineTuple.first->getCoordinates().empty()) {
                 std::vector<float> modelMatrix =
                     mapInterface->getCamera()->getInvariantModelMatrix(lineTuple.first->getCoordinates()[0], false, false);
-                renderPassObjectMap[config->getRenderIndex()].push_back(
+                renderPassObjectMap[renderPassIndex].push_back(
                     std::make_shared<RenderObject>(config->getGraphicsObject()));
             }
         }
@@ -185,7 +209,7 @@ void LineLayer::generateRenderPasses() {
     std::vector<std::shared_ptr<RenderPassInterface>> newRenderPasses;
     for (const auto &passEntry : renderPassObjectMap) {
         std::shared_ptr<RenderPass> renderPass =
-            std::make_shared<RenderPass>(RenderPassConfig(passEntry.first, false), passEntry.second, mask);
+            std::make_shared<RenderPass>(RenderPassConfig(passEntry.first, false, renderTarget), passEntry.second, mask);
         newRenderPasses.push_back(renderPass);
     }
     {
@@ -195,10 +219,13 @@ void LineLayer::generateRenderPasses() {
 }
 
 void LineLayer::update() {
-    auto mapInterface = this->mapInterface;
-    if (mapInterface && maskGraphicsObject) {
-        if (!maskGraphicsObject->isReady()) {
+    const auto &mapInterface = this->mapInterface;
+    if (mapInterface) {
+        if (maskGraphicsObject && !maskGraphicsObject->isReady()) {
             maskGraphicsObject->setup(mapInterface->getRenderingContext());
+        }
+        if (hasAnimatedLineStyles) {
+            mapInterface->invalidate();
         }
     }
 }
@@ -378,4 +405,13 @@ void LineLayer::setSelected(const std::unordered_set<std::string> &selectedIds) 
     }
     if (mapInterface)
         mapInterface->invalidate();
+}
+
+void LineLayer::setRenderPassIndex(int32_t index) {
+    renderPassIndex = index;
+    generateRenderPasses();
+
+    if (mapInterface) {
+        mapInterface->invalidate();
+    }
 }

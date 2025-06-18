@@ -6,7 +6,9 @@ import io.openmobilemaps.mapscore.map.scheduling.AndroidSchedulerCallback
 import io.openmobilemaps.mapscore.shared.graphics.common.Color
 import io.openmobilemaps.mapscore.shared.graphics.common.Vec2I
 import io.openmobilemaps.mapscore.shared.map.*
+import io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateConversionHelperInterface
 import io.openmobilemaps.mapscore.shared.map.scheduling.TaskInterface
+import io.openmobilemaps.mapscore.shared.map.scheduling.ThreadPoolScheduler
 import kotlinx.coroutines.CoroutineScope
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.microedition.khronos.egl.EGLConfig
@@ -26,9 +28,12 @@ open class OffscreenMapRenderer(val sizePx: Vec2I, val density: Float = 72f) : G
 	private var saveFrameCallback: SaveFrameCallback? = null
 
 	open fun setupMap(coroutineScope: CoroutineScope, mapConfig: MapConfig, useMSAA: Boolean = false) {
+		val scheduler = ThreadPoolScheduler.create()
 		val mapInterface = MapInterface.createWithOpenGl(
 			mapConfig,
-			density
+			scheduler,
+			density,
+			false
 		)
 		mapInterface.setCallbackHandler(object : MapCallbackInterface() {
 			override fun invalidate() {
@@ -80,7 +85,20 @@ open class OffscreenMapRenderer(val sizePx: Vec2I, val density: Float = 72f) : G
 	}
 
 	override fun onDrawFrame(gl: GL10?) {
-		mapInterface?.drawFrame()
+		mapInterface?.apply {
+			prepare()
+
+			getRenderingContext().let { context ->
+				context.asOpenGlRenderingContext()?.getRenderTargets()?.forEach { renderTarget ->
+					renderTarget.bindFramebuffer(context)
+					drawOffscreenFrame(renderTarget.asRenderTargetInterface())
+					renderTarget.unbindFramebuffer()
+				}
+			}
+
+			compute()
+			drawFrame()
+		}
 		if (saveFrame.getAndSet(false)) {
 			saveFrame()
 		}
@@ -123,8 +141,12 @@ open class OffscreenMapRenderer(val sizePx: Vec2I, val density: Float = 72f) : G
 		requireMapInterface().removeLayer(layer)
 	}
 
-	override fun getCamera(): MapCamera2dInterface {
+	override fun getCamera(): MapCameraInterface {
 		return requireMapInterface().getCamera()
+	}
+
+	override fun getCoordinateConversionHelper(): CoordinateConversionHelperInterface {
+		return requireMapInterface().getCoordinateConverterHelper()
 	}
 
 	fun saveFrame(saveFrameSpec: SaveFrameSpec, saveFrameCallback: SaveFrameCallback) {

@@ -5,6 +5,7 @@
 #import "MCVec2F.h"
 #import <Foundation/Foundation.h>
 
+NS_SWIFT_SENDABLE
 @interface MCTouchEvent : NSObject
 - (nonnull instancetype)init NS_UNAVAILABLE;
 + (nonnull instancetype)new NS_UNAVAILABLE;

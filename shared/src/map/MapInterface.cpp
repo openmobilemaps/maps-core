@@ -9,26 +9,20 @@
  */
 
 #include "MapScene.h"
-#ifdef __ANDROID__
-#include "ThreadPoolSchedulerImpl.h"
-#include "AndroidSchedulerCallback.h"
-#endif
 
 std::shared_ptr<MapInterface> MapInterface::create(const std::shared_ptr<::GraphicsObjectFactoryInterface> &graphicsFactory,
                                                    const std::shared_ptr<::ShaderFactoryInterface> &shaderFactory,
                                                    const std::shared_ptr<::RenderingContextInterface> &renderingContext,
                                                    const MapConfig &mapConfig,
-                                                   const std::shared_ptr<::SchedulerInterface> &scheduler, float pixelDensity) {
+                                                   const std::shared_ptr<::SchedulerInterface> &scheduler, float pixelDensity,
+                                                   bool is3D) {
     auto scene = SceneInterface::create(graphicsFactory, shaderFactory, renderingContext);
-    return std::make_shared<MapScene>(scene, mapConfig, scheduler, pixelDensity);
+    return std::make_shared<MapScene>(scene, mapConfig, scheduler, pixelDensity, is3D);
 }
 
 std::shared_ptr<MapInterface> MapInterface::createWithOpenGl(const MapConfig &mapConfig,
-                                                             float pixelDensity) {
-#ifdef __ANDROID__
-    auto scheduler = std::make_shared<ThreadPoolSchedulerImpl>(std::make_shared<AndroidSchedulerCallback>());
-    return std::make_shared<MapScene>(SceneInterface::createWithOpenGl(), mapConfig, scheduler, pixelDensity);
-#else
-    return nullptr;
-#endif
+                                                             const std::shared_ptr<::SchedulerInterface> &scheduler,
+                                                             float pixelDensity,
+                                                             bool is3D) {
+    return std::make_shared<MapScene>(SceneInterface::createWithOpenGl(), mapConfig, scheduler, pixelDensity, is3D);
 }

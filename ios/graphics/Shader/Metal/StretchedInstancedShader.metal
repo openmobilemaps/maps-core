@@ -28,9 +28,10 @@ stretchInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
                              constant float *rotations [[buffer(4)]],
                              constant float4 *texureCoordinates [[buffer(5)]],
                              constant float *alphas [[buffer(6)]],
+                             constant float4 &originOffset [[buffer(7)]],
                              uint instanceId [[instance_id]])
 {
-  const float2 position = positions[instanceId];
+  const float2 position = positions[instanceId] + originOffset.xy;
   const float2 scale = scales[instanceId];
   const float rotation = rotations[instanceId];
 
@@ -50,17 +51,17 @@ stretchInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
     .position = matrix * float4(vertexIn.position.xy, 0.0, 1.0),
     .uv = vertexIn.uv,
     .texureCoordinates = texureCoordinates[instanceId],
-    .alpha = alphas[instanceId],
+    .alpha = alphas[instanceId], 
     .stretchInfoIndex = instanceId
   };
 
   return out;
 }
 
-fragment float4
+fragment half4
 stretchInstancedFragmentShader(StretchedInstancedVertexOut in [[stage_in]],
                                constant float *stretchInfos [[buffer(1)]],
-                               texture2d<float> texture0 [[ texture(0)]],
+                               texture2d<half> texture0 [[ texture(0)]],
                                sampler textureSampler [[sampler(0)]])
 {
   if (in.alpha == 0) {
@@ -110,10 +111,10 @@ stretchInstancedFragmentShader(StretchedInstancedVertexOut in [[stage_in]],
 
   // remap final normalized uv to sprite atlas coordinates
 
-  const float4 color = texture0.sample(textureSampler, in.texureCoordinates.xy + in.texureCoordinates.zw * float2(texCoordNorm.x, 1 - texCoordNorm.y));
+  const half4 color = texture0.sample(textureSampler, in.texureCoordinates.xy + in.texureCoordinates.zw * float2(texCoordNorm.x, 1 - texCoordNorm.y));
   const float a = color.a * in.alpha;
   if (a == 0) {
     discard_fragment();
   }
-  return float4(color.r * a, color.g * a, color.b * a, a);
+  return half4(color.r * a, color.g * a, color.b * a, a);
 }

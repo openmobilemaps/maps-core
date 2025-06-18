@@ -21,6 +21,8 @@ class RasterShaderOpenGl : public BaseShaderProgramOpenGl,
                            public RasterShaderInterface,
                            public std::enable_shared_from_this<ShaderProgramInterface> {
 public:
+    RasterShaderOpenGl(bool projectOntoUnitSphere);
+
     std::string getProgramName() override;
 
     void setupProgram(const std::shared_ptr<RenderingContextInterface> &context) override;
@@ -33,12 +35,15 @@ public:
 
 
 protected:
+    std::string getVertexShader() override;
+
     std::string getFragmentShader() override;
 
 private:
-    const static std::string programName;
+    const std::string programName;
+    bool projectOntoUnitSphere;
 
     std::mutex dataMutex;
-    std::vector<GLfloat> styleValues = {1.0, 1.0, 1.0, 0.0, 1.0, 1.0};
+    std::vector<GLfloat> styleValues = {1.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0};
 };
 

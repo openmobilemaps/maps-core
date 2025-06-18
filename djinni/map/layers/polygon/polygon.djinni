@@ -1,6 +1,7 @@
 @extern "../../../yaml/layer_interface.yaml"
 @extern "../../../yaml/color.yaml"
 @extern "../../../yaml/coord.yaml"
+@extern "../../../yaml/vec_3_d.yaml"
 @extern "../../../yaml/polygon_coord.yaml"
 @extern "../../../yaml/graphics_object_factory_interface.yaml"
 @extern "../../../yaml/coordinate_conversion_helper_interface.yaml"
@@ -19,12 +20,13 @@ polygon_info = record {
 }
 
 polygon_layer_callback_interface = interface +c +j +o {
-    on_click_confirmed(polygon: polygon_info);
+    on_click_confirmed(polygon: polygon_info): bool;
+    on_click_unconfirmed(polygon: polygon_info): bool;
 }
 
 polygon_layer_interface = interface +c {
     static create() : polygon_layer_interface;
-    set_polygons(polygons: list<polygon_info>);
+    set_polygons(polygons: list<polygon_info>, origin: vec_3_d);
     get_polygons(): list<polygon_info>;
     remove(polygon: polygon_info);
     add(polygon: polygon_info);
@@ -34,11 +36,12 @@ polygon_layer_interface = interface +c {
     asLayerInterface(): layer_interface;
     reset_selection();
     set_layer_clickable(is_layer_clickable: bool);
+    set_render_pass_index(index: i32);
 }
 
 polygon_mask_object_interface = interface +c {
-    static create(graphics_object_factory: graphics_object_factory_interface, conversion_helper: coordinate_conversion_helper_interface) : polygon_mask_object_interface;
-    set_polygons(polygons: list<polygon_coord>);
-    set_polygon(polygon: polygon_coord);
+    static create(graphics_object_factory: graphics_object_factory_interface, conversion_helper: coordinate_conversion_helper_interface, is_3d: bool) : polygon_mask_object_interface;
+    set_polygons(polygons: list<polygon_coord>, origin: vec_3_d);
+    set_polygon(polygon: polygon_coord, origin: vec_3_d);
     get_polygon_object(): polygon_2d_interface;
 }

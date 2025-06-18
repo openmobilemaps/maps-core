@@ -10,29 +10,31 @@
 
 import Foundation
 import MapCoreSharedModule
-import Metal
+@preconcurrency import Metal
 import UIKit
 
-class PolygonGroupShader: BaseShader {
+class PolygonGroupShader: BaseShader, @unchecked Sendable {
     var polygonStyleBuffer: MTLBuffer?
 
-    let isStriped : Bool
+    let isStriped: Bool
+    let isUnitSphere: Bool
 
-    init(isStriped: Bool) {
+    init(isStriped: Bool, isUnitSphere: Bool = false) {
         self.isStriped = isStriped
-        super.init()
+        self.isUnitSphere = isUnitSphere
+        super.init(shader: isStriped ? .polygonStripedGroupShader : .polygonGroupShader)
     }
 
     override func setupProgram(_: MCRenderingContextInterface?) {
         if pipeline == nil {
-            let t : PipelineType = isStriped ? .polygonStripedGroupShader : .polygonGroupShader
-            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: t, blendMode: blendMode).json)
+            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: shader, blendMode: blendMode))
         }
     }
 
     override func preRender(encoder: MTLRenderCommandEncoder, context: RenderingContext) {
         guard let encoder = context.encoder,
-              let pipeline else { return }
+            let pipeline
+        else { return }
 
         context.setRenderPipelineStateIfNeeded(pipeline)
         encoder.setFragmentBuffer(polygonStyleBuffer, offset: 0, index: 1)

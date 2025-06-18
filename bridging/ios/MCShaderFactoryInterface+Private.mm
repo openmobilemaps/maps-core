@@ -15,6 +15,8 @@
 #import "MCPolygonGroupShaderInterface+Private.h"
 #import "MCPolygonPatternGroupShaderInterface+Private.h"
 #import "MCRasterShaderInterface+Private.h"
+#import "MCSkySphereShaderInterface+Private.h"
+#import "MCSphereEffectShaderInterface+Private.h"
 #import "MCStretchInstancedShaderInterface+Private.h"
 #import "MCStretchShaderInterface+Private.h"
 #import "MCTextInstancedShaderInterface+Private.h"
@@ -50,9 +52,23 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (nullable id<MCAlphaShaderInterface>)createUnitSphereAlphaShader {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->createUnitSphereAlphaShader();
+        return ::djinni_generated::AlphaShaderInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (nullable id<MCAlphaInstancedShaderInterface>)createAlphaInstancedShader {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->createAlphaInstancedShader();
+        return ::djinni_generated::AlphaInstancedShaderInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nullable id<MCAlphaInstancedShaderInterface>)createUnitSphereAlphaInstancedShader {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->createUnitSphereAlphaInstancedShader();
         return ::djinni_generated::AlphaInstancedShaderInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
@@ -61,6 +77,34 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     try {
         auto objcpp_result_ = _cppRefHandle.get()->createLineGroupShader();
         return ::djinni_generated::LineGroupShaderInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nullable id<MCLineGroupShaderInterface>)createUnitSphereLineGroupShader {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->createUnitSphereLineGroupShader();
+        return ::djinni_generated::LineGroupShaderInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nullable id<MCLineGroupShaderInterface>)createSimpleLineGroupShader {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->createSimpleLineGroupShader();
+        return ::djinni_generated::LineGroupShaderInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nullable id<MCLineGroupShaderInterface>)createUnitSphereSimpleLineGroupShader {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->createUnitSphereSimpleLineGroupShader();
+        return ::djinni_generated::LineGroupShaderInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nullable id<MCColorShaderInterface>)createUnitSphereColorShader {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->createUnitSphereColorShader();
+        return ::djinni_generated::ColorShaderInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -78,16 +122,27 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (nullable id<MCPolygonGroupShaderInterface>)createPolygonGroupShader:(BOOL)isStriped {
+- (nullable id<MCColorCircleShaderInterface>)createUnitSphereColorCircleShader {
     try {
-        auto objcpp_result_ = _cppRefHandle.get()->createPolygonGroupShader(::djinni::Bool::toCpp(isStriped));
+        auto objcpp_result_ = _cppRefHandle.get()->createUnitSphereColorCircleShader();
+        return ::djinni_generated::ColorCircleShaderInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nullable id<MCPolygonGroupShaderInterface>)createPolygonGroupShader:(BOOL)isStriped
+                                                            unitSphere:(BOOL)unitSphere {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->createPolygonGroupShader(::djinni::Bool::toCpp(isStriped),
+                                                                            ::djinni::Bool::toCpp(unitSphere));
         return ::djinni_generated::PolygonGroupShaderInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (nullable id<MCPolygonPatternGroupShaderInterface>)createPolygonPatternGroupShader:(BOOL)fadeInPattern {
+- (nullable id<MCPolygonPatternGroupShaderInterface>)createPolygonPatternGroupShader:(BOOL)fadeInPattern
+                                                                          unitSphere:(BOOL)unitSphere {
     try {
-        auto objcpp_result_ = _cppRefHandle.get()->createPolygonPatternGroupShader(::djinni::Bool::toCpp(fadeInPattern));
+        auto objcpp_result_ = _cppRefHandle.get()->createPolygonPatternGroupShader(::djinni::Bool::toCpp(fadeInPattern),
+                                                                                   ::djinni::Bool::toCpp(unitSphere));
         return ::djinni_generated::PolygonPatternGroupShaderInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
@@ -106,9 +161,23 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (nullable id<MCTextInstancedShaderInterface>)createUnitSphereTextInstancedShader {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->createUnitSphereTextInstancedShader();
+        return ::djinni_generated::TextInstancedShaderInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (nullable id<MCRasterShaderInterface>)createRasterShader {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->createRasterShader();
+        return ::djinni_generated::RasterShaderInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nullable id<MCRasterShaderInterface>)createUnitSphereRasterShader {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->createUnitSphereRasterShader();
         return ::djinni_generated::RasterShaderInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
@@ -120,10 +189,31 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (nullable id<MCStretchInstancedShaderInterface>)createStretchInstancedShader {
+- (nullable id<MCStretchInstancedShaderInterface>)createStretchInstancedShader:(BOOL)unitSphere {
     try {
-        auto objcpp_result_ = _cppRefHandle.get()->createStretchInstancedShader();
+        auto objcpp_result_ = _cppRefHandle.get()->createStretchInstancedShader(::djinni::Bool::toCpp(unitSphere));
         return ::djinni_generated::StretchInstancedShaderInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nullable id<MCColorShaderInterface>)createIcosahedronColorShader {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->createIcosahedronColorShader();
+        return ::djinni_generated::ColorShaderInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nullable id<MCSphereEffectShaderInterface>)createSphereEffectShader {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->createSphereEffectShader();
+        return ::djinni_generated::SphereEffectShaderInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nullable id<MCSkySphereShaderInterface>)createSkySphereShader {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->createSkySphereShader();
+        return ::djinni_generated::SkySphereShaderInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -143,10 +233,24 @@ public:
             return ::djinni_generated::AlphaShaderInterface::toCpp(objcpp_result_);
         }
     }
+    /*not-null*/ std::shared_ptr<::AlphaShaderInterface> createUnitSphereAlphaShader() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createUnitSphereAlphaShader];
+            return ::djinni_generated::AlphaShaderInterface::toCpp(objcpp_result_);
+        }
+    }
     /*not-null*/ std::shared_ptr<::AlphaInstancedShaderInterface> createAlphaInstancedShader() override
     {
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createAlphaInstancedShader];
+            return ::djinni_generated::AlphaInstancedShaderInterface::toCpp(objcpp_result_);
+        }
+    }
+    /*not-null*/ std::shared_ptr<::AlphaInstancedShaderInterface> createUnitSphereAlphaInstancedShader() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createUnitSphereAlphaInstancedShader];
             return ::djinni_generated::AlphaInstancedShaderInterface::toCpp(objcpp_result_);
         }
     }
@@ -155,6 +259,34 @@ public:
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createLineGroupShader];
             return ::djinni_generated::LineGroupShaderInterface::toCpp(objcpp_result_);
+        }
+    }
+    /*not-null*/ std::shared_ptr<::LineGroupShaderInterface> createUnitSphereLineGroupShader() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createUnitSphereLineGroupShader];
+            return ::djinni_generated::LineGroupShaderInterface::toCpp(objcpp_result_);
+        }
+    }
+    /*not-null*/ std::shared_ptr<::LineGroupShaderInterface> createSimpleLineGroupShader() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createSimpleLineGroupShader];
+            return ::djinni_generated::LineGroupShaderInterface::toCpp(objcpp_result_);
+        }
+    }
+    /*not-null*/ std::shared_ptr<::LineGroupShaderInterface> createUnitSphereSimpleLineGroupShader() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createUnitSphereSimpleLineGroupShader];
+            return ::djinni_generated::LineGroupShaderInterface::toCpp(objcpp_result_);
+        }
+    }
+    /*not-null*/ std::shared_ptr<::ColorShaderInterface> createUnitSphereColorShader() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createUnitSphereColorShader];
+            return ::djinni_generated::ColorShaderInterface::toCpp(objcpp_result_);
         }
     }
     /*not-null*/ std::shared_ptr<::ColorShaderInterface> createColorShader() override
@@ -171,17 +303,26 @@ public:
             return ::djinni_generated::ColorCircleShaderInterface::toCpp(objcpp_result_);
         }
     }
-    /*not-null*/ std::shared_ptr<::PolygonGroupShaderInterface> createPolygonGroupShader(bool c_isStriped) override
+    /*not-null*/ std::shared_ptr<::ColorCircleShaderInterface> createUnitSphereColorCircleShader() override
     {
         @autoreleasepool {
-            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createPolygonGroupShader:(::djinni::Bool::fromCpp(c_isStriped))];
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createUnitSphereColorCircleShader];
+            return ::djinni_generated::ColorCircleShaderInterface::toCpp(objcpp_result_);
+        }
+    }
+    /*not-null*/ std::shared_ptr<::PolygonGroupShaderInterface> createPolygonGroupShader(bool c_isStriped, bool c_unitSphere) override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createPolygonGroupShader:(::djinni::Bool::fromCpp(c_isStriped))
+                                                                                          unitSphere:(::djinni::Bool::fromCpp(c_unitSphere))];
             return ::djinni_generated::PolygonGroupShaderInterface::toCpp(objcpp_result_);
         }
     }
-    /*not-null*/ std::shared_ptr<::PolygonPatternGroupShaderInterface> createPolygonPatternGroupShader(bool c_fadeInPattern) override
+    /*not-null*/ std::shared_ptr<::PolygonPatternGroupShaderInterface> createPolygonPatternGroupShader(bool c_fadeInPattern, bool c_unitSphere) override
     {
         @autoreleasepool {
-            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createPolygonPatternGroupShader:(::djinni::Bool::fromCpp(c_fadeInPattern))];
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createPolygonPatternGroupShader:(::djinni::Bool::fromCpp(c_fadeInPattern))
+                                                                                                 unitSphere:(::djinni::Bool::fromCpp(c_unitSphere))];
             return ::djinni_generated::PolygonPatternGroupShaderInterface::toCpp(objcpp_result_);
         }
     }
@@ -199,10 +340,24 @@ public:
             return ::djinni_generated::TextInstancedShaderInterface::toCpp(objcpp_result_);
         }
     }
+    /*not-null*/ std::shared_ptr<::TextInstancedShaderInterface> createUnitSphereTextInstancedShader() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createUnitSphereTextInstancedShader];
+            return ::djinni_generated::TextInstancedShaderInterface::toCpp(objcpp_result_);
+        }
+    }
     /*not-null*/ std::shared_ptr<::RasterShaderInterface> createRasterShader() override
     {
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createRasterShader];
+            return ::djinni_generated::RasterShaderInterface::toCpp(objcpp_result_);
+        }
+    }
+    /*not-null*/ std::shared_ptr<::RasterShaderInterface> createUnitSphereRasterShader() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createUnitSphereRasterShader];
             return ::djinni_generated::RasterShaderInterface::toCpp(objcpp_result_);
         }
     }
@@ -213,11 +368,32 @@ public:
             return ::djinni_generated::StretchShaderInterface::toCpp(objcpp_result_);
         }
     }
-    /*not-null*/ std::shared_ptr<::StretchInstancedShaderInterface> createStretchInstancedShader() override
+    /*not-null*/ std::shared_ptr<::StretchInstancedShaderInterface> createStretchInstancedShader(bool c_unitSphere) override
     {
         @autoreleasepool {
-            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createStretchInstancedShader];
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createStretchInstancedShader:(::djinni::Bool::fromCpp(c_unitSphere))];
             return ::djinni_generated::StretchInstancedShaderInterface::toCpp(objcpp_result_);
+        }
+    }
+    /*not-null*/ std::shared_ptr<::ColorShaderInterface> createIcosahedronColorShader() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createIcosahedronColorShader];
+            return ::djinni_generated::ColorShaderInterface::toCpp(objcpp_result_);
+        }
+    }
+    /*not-null*/ std::shared_ptr<::SphereEffectShaderInterface> createSphereEffectShader() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createSphereEffectShader];
+            return ::djinni_generated::SphereEffectShaderInterface::toCpp(objcpp_result_);
+        }
+    }
+    /*not-null*/ std::shared_ptr<::SkySphereShaderInterface> createSkySphereShader() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createSkySphereShader];
+            return ::djinni_generated::SkySphereShaderInterface::toCpp(objcpp_result_);
         }
     }
 };

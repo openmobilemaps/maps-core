@@ -6,7 +6,11 @@
 #include "Color.h"
 #include "RectI.h"
 #include "Vec2I.h"
+#include <memory>
 #include <optional>
+
+class OpenGlRenderingContextInterface;
+enum class RenderingCullMode;
 
 class RenderingContextInterface {
 public:
@@ -22,6 +26,8 @@ public:
 
     virtual void setBackgroundColor(const ::Color & color) = 0;
 
+    virtual void setCulling(RenderingCullMode mode) = 0;
+
     virtual void setupDrawFrame() = 0;
 
     virtual void preRenderStencilMask() = 0;
@@ -30,4 +36,6 @@ public:
 
     /** optional rectangle, remove scissoring when not set */
     virtual void applyScissorRect(const std::optional<::RectI> & scissorRect) = 0;
+
+    virtual /*nullable*/ std::shared_ptr<OpenGlRenderingContextInterface> asOpenGlRenderingContext() = 0;
 };

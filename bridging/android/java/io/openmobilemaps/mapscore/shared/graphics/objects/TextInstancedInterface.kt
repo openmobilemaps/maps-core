@@ -9,12 +9,15 @@ import java.util.concurrent.atomic.AtomicBoolean
 abstract class TextInstancedInterface {
 
     /** set the frame of the root object */
-    abstract fun setFrame(frame: io.openmobilemaps.mapscore.shared.graphics.common.Quad2dD)
+    abstract fun setFrame(frame: io.openmobilemaps.mapscore.shared.graphics.common.Quad2dD, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D, is3d: Boolean)
 
     abstract fun setInstanceCount(count: Int)
 
     /** 2 floats (x and y) for each instance */
     abstract fun setPositions(positions: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
+
+    /** 2 floats (x and y) for each instance */
+    abstract fun setReferencePositions(positions: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
 
     /** 4 floats (x, y, width and height) for each instanced */
     abstract fun setTextureCoordinates(textureCoordinates: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
@@ -24,6 +27,9 @@ abstract class TextInstancedInterface {
 
     /** one float for each instance in degree */
     abstract fun setRotations(rotations: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
+
+    /** one float for each instance */
+    abstract fun setAlphas(alphas: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
 
     /** one uint16 for each instance */
     abstract fun setStyleIndices(indices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
@@ -43,7 +49,7 @@ abstract class TextInstancedInterface {
 
     abstract fun asGraphicsObject(): GraphicsObjectInterface
 
-    private class CppProxy : TextInstancedInterface {
+    public class CppProxy : TextInstancedInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 
@@ -58,11 +64,11 @@ abstract class TextInstancedInterface {
             external fun nativeDestroy(nativeRef: Long)
         }
 
-        override fun setFrame(frame: io.openmobilemaps.mapscore.shared.graphics.common.Quad2dD) {
+        override fun setFrame(frame: io.openmobilemaps.mapscore.shared.graphics.common.Quad2dD, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D, is3d: Boolean) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_setFrame(this.nativeRef, frame)
+            native_setFrame(this.nativeRef, frame, origin, is3d)
         }
-        private external fun native_setFrame(_nativeRef: Long, frame: io.openmobilemaps.mapscore.shared.graphics.common.Quad2dD)
+        private external fun native_setFrame(_nativeRef: Long, frame: io.openmobilemaps.mapscore.shared.graphics.common.Quad2dD, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D, is3d: Boolean)
 
         override fun setInstanceCount(count: Int) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
@@ -75,6 +81,12 @@ abstract class TextInstancedInterface {
             native_setPositions(this.nativeRef, positions)
         }
         private external fun native_setPositions(_nativeRef: Long, positions: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
+
+        override fun setReferencePositions(positions: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setReferencePositions(this.nativeRef, positions)
+        }
+        private external fun native_setReferencePositions(_nativeRef: Long, positions: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
 
         override fun setTextureCoordinates(textureCoordinates: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
@@ -93,6 +105,12 @@ abstract class TextInstancedInterface {
             native_setRotations(this.nativeRef, rotations)
         }
         private external fun native_setRotations(_nativeRef: Long, rotations: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
+
+        override fun setAlphas(alphas: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setAlphas(this.nativeRef, alphas)
+        }
+        private external fun native_setAlphas(_nativeRef: Long, alphas: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
 
         override fun setStyleIndices(indices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

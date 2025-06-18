@@ -12,6 +12,7 @@
 
 #include "Tiled2dMapVectorSettings.h"
 #include "Logger.h"
+#include <cstring>
 
 WmtsTiled2dMapLayerConfig::WmtsTiled2dMapLayerConfig(const WmtsLayerDescription &description,
                                                      const std::vector<Tiled2dMapZoomLevelInfo> &zoomLevelInfo,
@@ -46,7 +47,11 @@ std::string WmtsTiled2dMapLayerConfig::getTileUrl(int32_t x, int32_t y, int32_t 
         auto placeHolder = "{" + dimension.identifier + "}";
         auto it = urlFormat.find(placeHolder);
         if (it != std::string::npos) {
-            urlFormat.replace(it, placeHolder.length(), dimension.defaultValue);
+            if (0 <= t && t < dimension.values.size()) {
+                urlFormat.replace(it, placeHolder.length(), dimension.values[t]);
+            } else {
+                urlFormat.replace(it, placeHolder.length(), dimension.defaultValue);
+            }
         }
     }
 

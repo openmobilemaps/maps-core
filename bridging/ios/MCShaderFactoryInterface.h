@@ -10,6 +10,8 @@
 @protocol MCPolygonGroupShaderInterface;
 @protocol MCPolygonPatternGroupShaderInterface;
 @protocol MCRasterShaderInterface;
+@protocol MCSkySphereShaderInterface;
+@protocol MCSphereEffectShaderInterface;
 @protocol MCStretchInstancedShaderInterface;
 @protocol MCStretchShaderInterface;
 @protocol MCTextInstancedShaderInterface;
@@ -20,26 +22,52 @@
 
 - (nullable id<MCAlphaShaderInterface>)createAlphaShader;
 
+- (nullable id<MCAlphaShaderInterface>)createUnitSphereAlphaShader;
+
 - (nullable id<MCAlphaInstancedShaderInterface>)createAlphaInstancedShader;
 
+- (nullable id<MCAlphaInstancedShaderInterface>)createUnitSphereAlphaInstancedShader;
+
 - (nullable id<MCLineGroupShaderInterface>)createLineGroupShader;
+
+- (nullable id<MCLineGroupShaderInterface>)createUnitSphereLineGroupShader;
+
+- (nullable id<MCLineGroupShaderInterface>)createSimpleLineGroupShader;
+
+- (nullable id<MCLineGroupShaderInterface>)createUnitSphereSimpleLineGroupShader;
+
+- (nullable id<MCColorShaderInterface>)createUnitSphereColorShader;
 
 - (nullable id<MCColorShaderInterface>)createColorShader;
 
 - (nullable id<MCColorCircleShaderInterface>)createColorCircleShader;
 
-- (nullable id<MCPolygonGroupShaderInterface>)createPolygonGroupShader:(BOOL)isStriped;
+- (nullable id<MCColorCircleShaderInterface>)createUnitSphereColorCircleShader;
 
-- (nullable id<MCPolygonPatternGroupShaderInterface>)createPolygonPatternGroupShader:(BOOL)fadeInPattern;
+- (nullable id<MCPolygonGroupShaderInterface>)createPolygonGroupShader:(BOOL)isStriped
+                                                            unitSphere:(BOOL)unitSphere;
+
+- (nullable id<MCPolygonPatternGroupShaderInterface>)createPolygonPatternGroupShader:(BOOL)fadeInPattern
+                                                                          unitSphere:(BOOL)unitSphere;
 
 - (nullable id<MCTextShaderInterface>)createTextShader;
 
 - (nullable id<MCTextInstancedShaderInterface>)createTextInstancedShader;
 
+- (nullable id<MCTextInstancedShaderInterface>)createUnitSphereTextInstancedShader;
+
 - (nullable id<MCRasterShaderInterface>)createRasterShader;
+
+- (nullable id<MCRasterShaderInterface>)createUnitSphereRasterShader;
 
 - (nullable id<MCStretchShaderInterface>)createStretchShader;
 
-- (nullable id<MCStretchInstancedShaderInterface>)createStretchInstancedShader;
+- (nullable id<MCStretchInstancedShaderInterface>)createStretchInstancedShader:(BOOL)unitSphere;
+
+- (nullable id<MCColorShaderInterface>)createIcosahedronColorShader;
+
+- (nullable id<MCSphereEffectShaderInterface>)createSphereEffectShader;
+
+- (nullable id<MCSkySphereShaderInterface>)createSkySphereShader;
 
 @end

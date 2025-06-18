@@ -46,8 +46,15 @@ coordinate_system_identifiers = interface +c {
     # https://epsg.io/21781
     static EPSG21781(): i32;
 
+    # Unit Sphere Polar
+    # phi, theta, radius with reference to earth as unit sphere
+    static UnitSphere(): i32;
+
     # e.g. urn:ogc:def:crs:EPSG:21781
     static from_crs_identifier(identifier: string): i32;
+
+    # Use supported coordinate system identifiers defined in this class
+	static unit_to_meter_factor(coordinate_system_identifier: i32) : f64;
 }
 
 map_coordinate_system = record {
@@ -59,7 +66,9 @@ map_coordinate_system = record {
 coordinate_system_factory = interface +c {
     static get_epsg_2056_system() : map_coordinate_system;
     static get_epsg_3857_system() : map_coordinate_system;
+    static get_epsg_4326_system() : map_coordinate_system;
     static get_epsg_21781_system() : map_coordinate_system;
+    static get_unit_sphere_system() : map_coordinate_system;
 }
 
 coord = record {

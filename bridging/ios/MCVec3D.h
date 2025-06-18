@@ -3,6 +3,7 @@
 
 #import <Foundation/Foundation.h>
 
+NS_SWIFT_SENDABLE
 @interface MCVec3D : NSObject
 - (nonnull instancetype)init NS_UNAVAILABLE;
 + (nonnull instancetype)new NS_UNAVAILABLE;
@@ -18,5 +19,7 @@
 @property (nonatomic, readonly) double y;
 
 @property (nonatomic, readonly) double z;
+
+- (NSComparisonResult)compare:(nonnull MCVec3D *)other;
 
 @end

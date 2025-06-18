@@ -31,7 +31,7 @@ abstract class WmtsCapabilitiesResource {
 
     abstract fun getAllLayers(): ArrayList<WmtsLayerDescription>
 
-    private class CppProxy : WmtsCapabilitiesResource {
+    public class CppProxy : WmtsCapabilitiesResource {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

@@ -17,17 +17,33 @@ class ShaderFactoryOpenGl : public ShaderFactoryInterface {
 public:
     std::shared_ptr<AlphaShaderInterface> createAlphaShader() override;
 
+    std::shared_ptr<AlphaShaderInterface> createUnitSphereAlphaShader() override;
+
     std::shared_ptr<AlphaInstancedShaderInterface> createAlphaInstancedShader() override;
 
     std::shared_ptr<LineGroupShaderInterface> createLineGroupShader() override;
 
+    std::shared_ptr<LineGroupShaderInterface> createUnitSphereLineGroupShader() override;
+
+    std::shared_ptr<LineGroupShaderInterface> createSimpleLineGroupShader() override;
+
+    std::shared_ptr<LineGroupShaderInterface> createUnitSphereSimpleLineGroupShader() override;
+
     std::shared_ptr<ColorShaderInterface> createColorShader() override;
+
+    std::shared_ptr<ColorShaderInterface> createUnitSphereColorShader() override;
 
     std::shared_ptr<ColorCircleShaderInterface> createColorCircleShader() override;
 
-    std::shared_ptr<PolygonGroupShaderInterface> createPolygonGroupShader(bool isStriped) override;
+    std::shared_ptr<AlphaInstancedShaderInterface> createUnitSphereAlphaInstancedShader() override;
 
-    std::shared_ptr<PolygonPatternGroupShaderInterface> createPolygonPatternGroupShader(bool fadeInPattern) override;
+    std::shared_ptr<TextInstancedShaderInterface> createUnitSphereTextInstancedShader() override;
+
+    std::shared_ptr<ColorCircleShaderInterface> createUnitSphereColorCircleShader() override;
+
+    std::shared_ptr<PolygonGroupShaderInterface> createPolygonGroupShader(bool isStriped, bool unitSphere) override;
+
+    std::shared_ptr<PolygonPatternGroupShaderInterface> createPolygonPatternGroupShader(bool fadeInPattern, bool unitSphere) override;
 
     std::shared_ptr<TextShaderInterface> createTextShader() override;
 
@@ -35,7 +51,15 @@ public:
 
     std::shared_ptr<RasterShaderInterface> createRasterShader() override;
 
+    std::shared_ptr<RasterShaderInterface> createUnitSphereRasterShader() override;
+
     std::shared_ptr<StretchShaderInterface> createStretchShader() override;
 
-    std::shared_ptr<StretchInstancedShaderInterface> createStretchInstancedShader() override;
+    std::shared_ptr<StretchInstancedShaderInterface> createStretchInstancedShader(bool unitSphere) override;
+
+    std::shared_ptr<ColorShaderInterface> createIcosahedronColorShader() override;
+
+    std::shared_ptr<SphereEffectShaderInterface> createSphereEffectShader() override;
+
+    std::shared_ptr<SkySphereShaderInterface> createSkySphereShader() override;
 };

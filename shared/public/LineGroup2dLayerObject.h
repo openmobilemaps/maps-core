@@ -18,11 +18,12 @@
 #include "LineGroup2dInterface.h"
 #include "RenderConfig.h"
 #include "Vec2D.h"
+#include "Vec3D.h"
 
 class LineGroup2dLayerObject : public LayerObjectInterface {
   public:
     LineGroup2dLayerObject(const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
-                      const std::shared_ptr<LineGroup2dInterface> &line, const std::shared_ptr<LineGroupShaderInterface> &shader);
+                      const std::shared_ptr<LineGroup2dInterface> &line, const std::shared_ptr<LineGroupShaderInterface> &shader, bool is3d);
 
     ~LineGroup2dLayerObject(){};
 
@@ -30,7 +31,8 @@ class LineGroup2dLayerObject : public LayerObjectInterface {
 
     virtual std::vector<std::shared_ptr<RenderConfigInterface>> getRenderConfig() override;
 
-    void setLines(const std::vector<std::tuple<std::vector<Coord>, int>> &lines);
+    void setLines(const std::vector<std::tuple<std::vector<Vec2D>, int>> &lines, const int32_t systemIdentifier, const Vec3D & origin);
+    void setLines(const std::vector<std::tuple<std::vector<Coord>, int>> &lines, const Vec3D & origin);
 
     void setStyles(const std::vector<LineStyle> &styles);
 
@@ -45,4 +47,5 @@ class LineGroup2dLayerObject : public LayerObjectInterface {
     std::shared_ptr<LineGroup2dInterface> line;
     std::shared_ptr<LineGroupShaderInterface> shader;
     std::shared_ptr<RenderConfigInterface> renderConfig;
+    bool is3d;
 };

@@ -18,6 +18,10 @@
 #include "EPSG3857ToEPSG2056Converter.h"
 #include "EPSG4326ToEPSG2056Converter.h"
 #include "EPSG4326ToEPSG3857Converter.h"
+#include "EPSG4326ToUnitSphereConverter.h"
+#include "UnitSphereToEPSG4326Converter.h"
+#include "EPSG3857ToUnitSphereConverter.h"
+#include "UnitSphereToEPSG3857Converter.h"
 
 /**
  * This instance is independent of the map and does not know about the rendering system.
@@ -31,9 +35,10 @@ std::shared_ptr<CoordinateConversionHelperInterface> CoordinateConversionHelperI
     return singleton;
 }
 
-CoordinateConversionHelper::CoordinateConversionHelper(MapCoordinateSystem mapCoordinateSystem)
-    : mapCoordinateSystemIdentifier(mapCoordinateSystem.identifier)
-    , renderSystemConverter(std::make_shared<DefaultSystemToRenderConverter>(mapCoordinateSystem)) {
+CoordinateConversionHelper::CoordinateConversionHelper(MapCoordinateSystem mapCoordinateSystem, bool enforceLtrTtb)
+    : mapCoordinateSystemIdentifier(mapCoordinateSystem.identifier),
+    renderSystemConverter(std::make_shared<DefaultSystemToRenderConverter>(mapCoordinateSystem, enforceLtrTtb)),
+    enforceLtrTtb(enforceLtrTtb) {
     registerConverter(renderSystemConverter);
     addDefaultConverters();
 }
@@ -52,6 +57,10 @@ void CoordinateConversionHelper::addDefaultConverters() {
     registerConverter(std::make_shared<EPSG4326ToEPSG2056Converter>());
     registerConverter(std::make_shared<EPSG2056ToEPGS21781Converter>());
     registerConverter(std::make_shared<EPSG21781ToEPGS2056Converter>());
+    registerConverter(std::make_shared<EPSG4326ToUnitSphereConverter>());
+    registerConverter(std::make_shared<UnitSphereToEPSG4326Converter>());
+    registerConverter(std::make_shared<EPSG3857ToUnitSphereConverter>());
+    registerConverter(std::make_shared<UnitSphereToEPSG3857Converter>());
 }
 
 void CoordinateConversionHelper::registerConverter(const std::shared_ptr<CoordinateConverterInterface> &converter) {
@@ -65,14 +74,28 @@ Coord CoordinateConversionHelper::convert(const int32_t to, const Coord &coordin
         return coordinate;
     }
 
+    // Thread-local cache of last used converter
+    thread_local int32_t lastFrom = -1;
+    thread_local int32_t lastTo = -1;
+    thread_local std::shared_ptr<CoordinateConverterInterface> lastConverter = nullptr;
+
+    // see if last converter was the one that we need now
+    if (lastConverter && coordinate.systemIdentifier == lastFrom && to == lastTo) {
+        return lastConverter->convert(coordinate);
+    }
+
     const auto tuple = std::tuple<int32_t, int32_t>(coordinate.systemIdentifier, to);
 
-    // first try if we can directly convert
+    // see if we can convert in one step
     auto c = fromToConverterMap.find(tuple);
     if (c != fromToConverterMap.end()) {
+        lastFrom = coordinate.systemIdentifier;
+        lastTo = to;
+        lastConverter = c->second;
         return c->second->convert(coordinate);
     }
 
+    // see if there is a converter chain
     auto ch = converterHelper.find(tuple);
     if (ch != converterHelper.end()) {
         auto const &converterChain = ch->second;
@@ -113,6 +136,7 @@ QuadCoord CoordinateConversionHelper::convertQuad(const int32_t to, const QuadCo
     Coord topRight = convert(to, quad.topRight);
     Coord bottomRight = convert(to, quad.bottomRight);
     Coord bottomLeft = convert(to, quad.bottomLeft);
+    if (enforceLtrTtb) {
     bool ltr = topRight.x > topLeft.x;
     bool ttb = bottomLeft.y > topLeft.y;
     if (ltr) {
@@ -127,6 +151,9 @@ QuadCoord CoordinateConversionHelper::convertQuad(const int32_t to, const QuadCo
         } else {
             return QuadCoord(bottomRight, bottomLeft, topLeft, topRight);
         }
+    }
+    } else {
+        return QuadCoord(topLeft, topRight, bottomRight, bottomLeft);
     }
 }
 

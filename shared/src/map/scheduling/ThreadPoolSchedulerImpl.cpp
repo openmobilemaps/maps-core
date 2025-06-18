@@ -11,12 +11,30 @@
 #include <cassert>
 #include <cmath>
 
-std::shared_ptr<SchedulerInterface> ThreadPoolScheduler::create(const std::shared_ptr<ThreadPoolCallbacks> &callbacks) {
-    return std::make_shared<ThreadPoolSchedulerImpl>(callbacks);
+#ifdef __linux__
+#include <sys/prctl.h>
+#else
+#include <pthread.h>
+#endif
+
+void ThreadPoolSchedulerImpl::setCurrentThreadName(const std::string& name) {
+#ifdef __linux__
+    // Linux and Android use prctl to set thread name
+    if (prctl(PR_SET_NAME, name.c_str()) == -1) {
+        LogError <<= "Couldn't set thread name: " + name;
+    }
+#else
+    // iOS and macOS use pthread_setname_np
+    pthread_setname_np(name.c_str());
+#endif
 }
 
-ThreadPoolSchedulerImpl::ThreadPoolSchedulerImpl(const std::shared_ptr<ThreadPoolCallbacks> &callbacks)
-        : callbacks(callbacks), separateGraphicsQueue(false), nextWakeup(std::chrono::system_clock::now() + std::chrono::seconds(1)) {
+std::shared_ptr<SchedulerInterface> ThreadPoolScheduler::create() {
+    return std::make_shared<ThreadPoolSchedulerImpl>();
+}
+
+ThreadPoolSchedulerImpl::ThreadPoolSchedulerImpl()
+        : separateGraphicsQueue(false), nextWakeup(std::chrono::system_clock::now() + std::chrono::seconds(1)) {
     unsigned int maxNumThreads = std::thread::hardware_concurrency();
     if (maxNumThreads < DEFAULT_MIN_NUM_THREADS) maxNumThreads = DEFAULT_MIN_NUM_THREADS;
     threads.reserve(maxNumThreads + 1);
@@ -29,11 +47,12 @@ ThreadPoolSchedulerImpl::ThreadPoolSchedulerImpl(const std::shared_ptr<ThreadPoo
 void ThreadPoolSchedulerImpl::addTask(const std::shared_ptr<TaskInterface> & task) {
     assert(task);
     auto const &config = task->getConfig();
-
     if (config.delay != 0) {
         std::lock_guard<std::mutex> lock(delayedTasksMutex);
         delayedTasks.push_back({task,  std::chrono::system_clock::now() + std::chrono::milliseconds(config.delay)});
-        delayedTasksCv.notify_one();
+        if (!paused) {
+            delayedTasksCv.notify_one();
+        }
     } else {
         addTaskIgnoringDelay(task);
     }
@@ -51,7 +70,9 @@ void ThreadPoolSchedulerImpl::addTaskIgnoringDelay(const std::shared_ptr<TaskInt
     } else {
         std::lock_guard<std::mutex> lock(defaultMutex);
         defaultQueue.push_back(task);
-        defaultCv.notify_one();
+        if (!paused) {
+            defaultCv.notify_one();
+        }
     }
 }
 
@@ -94,17 +115,18 @@ void ThreadPoolSchedulerImpl::clear() {
 }
 
 void ThreadPoolSchedulerImpl::pause() {
-    
+    paused = true;
 }
 
 void ThreadPoolSchedulerImpl::resume() {
-    
+    paused = false;
+    defaultCv.notify_all();
+    delayedTasksCv.notify_all();
 }
 
 
 void ThreadPoolSchedulerImpl::destroy() {
     terminated = true;
-    callbacks = nullptr;
 
     {
         std::lock_guard<std::mutex> lock(graphicsMutex);
@@ -131,25 +153,22 @@ void ThreadPoolSchedulerImpl::destroy() {
 
 std::thread ThreadPoolSchedulerImpl::makeSchedulerThread(size_t index, TaskPriority priority) {
     return std::thread([this, index, priority] {
-        auto callbacks = this->callbacks;
-        if (!callbacks) {
-            return;
-        }
-        callbacks->setCurrentThreadName(std::string{"MapSDK_"} + std::to_string(index) + "_" + std::string(toString(priority)));
-        callbacks->attachThread();
-        
+        ThreadPoolSchedulerImpl::setCurrentThreadName(std::string{"MapSDK_"} + std::to_string(index) + "_" + std::string(toString(priority)));
+
         while (true) {
             std::unique_lock<std::mutex> lock(defaultMutex);
             
             defaultCv.wait(lock, [this] { return !defaultQueue.empty() || terminated; });
             
             if (terminated) {
-                callbacks->detachThread();
                 return;
+            }
+            if (paused) {
+                continue;
             }
 
             // execute tasks as long as there are tasks
-            while(!defaultQueue.empty()) {
+            while(!defaultQueue.empty() && !paused) {
                 auto task = std::move(defaultQueue.front());
                 defaultQueue.pop_front();
                 lock.unlock();
@@ -164,7 +183,6 @@ bool ThreadPoolSchedulerImpl::hasSeparateGraphicsInvocation() {
     return separateGraphicsQueue;
 }
 
-std::chrono::time_point<std::chrono::steady_clock> lastEnd;
 bool ThreadPoolSchedulerImpl::runGraphicsTasks() {
     bool noTasksLeft;
     auto start = std::chrono::steady_clock::now();
@@ -204,10 +222,7 @@ bool ThreadPoolSchedulerImpl::runGraphicsTasks() {
 
 std::thread ThreadPoolSchedulerImpl::makeDelayedTasksThread() {
     return std::thread([this] {
-        auto callbacks = this->callbacks;
-        if (callbacks) {
-            callbacks->setCurrentThreadName(std::string{"MapSDK_delayed_tasks"});
-        }
+        ThreadPoolSchedulerImpl::setCurrentThreadName(std::string{"MapSDK_delayed_tasks"});
 
         while (true) {
             std::unique_lock<std::mutex> lock(delayedTasksMutex);
@@ -218,10 +233,13 @@ std::thread ThreadPoolSchedulerImpl::makeDelayedTasksThread() {
             }
 
             auto now = std::chrono::system_clock::now();
-
             nextWakeup = TimeStamp::max();
 
-            for (auto it = delayedTasks.begin(); it != delayedTasks.end();) {
+            if (paused) {
+                continue;
+            }
+
+            for (auto it = delayedTasks.begin(); it != delayedTasks.end() && !paused;) {
                 // lets schedule this task
                 if(it->second <= now) {
                     addTaskIgnoringDelay(it->first);

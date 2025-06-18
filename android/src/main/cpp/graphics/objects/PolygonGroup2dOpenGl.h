@@ -16,6 +16,7 @@
 #include "PolygonGroup2dInterface.h"
 #include "RenderLineDescription.h"
 #include "ShaderProgramInterface.h"
+#include "BaseShaderProgramOpenGl.h"
 #include "opengl_wrapper.h"
 #include <mutex>
 
@@ -23,13 +24,13 @@ class PolygonGroup2dOpenGl : public GraphicsObjectInterface,
                              public PolygonGroup2dInterface,
                              public std::enable_shared_from_this<GraphicsObjectInterface> {
   public:
-    PolygonGroup2dOpenGl(const std::shared_ptr<::ShaderProgramInterface> &shader);
+    PolygonGroup2dOpenGl(const std::shared_ptr<::BaseShaderProgramOpenGl> &shader);
 
     virtual ~PolygonGroup2dOpenGl() {}
 
     // PolygonGroup2dInterface
 
-    virtual void setVertices(const ::SharedBytes & vertices, const ::SharedBytes & indices) override;
+    virtual void setVertices(const ::SharedBytes & vertices, const ::SharedBytes & indices, const ::Vec3D & origin) override;
 
     virtual std::shared_ptr<GraphicsObjectInterface> asGraphicsObject() override;
 
@@ -42,7 +43,7 @@ class PolygonGroup2dOpenGl : public GraphicsObjectInterface,
     virtual void clear() override;
 
     virtual void render(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
-                        int64_t mvpMatrix, bool isMasked, double screenPixelAsRealMeterFactor) override;
+                        int64_t vpMatrix, int64_t mMatrix, const ::Vec3D & origin, bool isMasked, double screenPixelAsRealMeterFactor) override;
 
     virtual void setIsInverseMasked(bool inversed) override;
 
@@ -52,19 +53,23 @@ protected:
 
     virtual void removeGlBuffers();
 
-    std::shared_ptr<ShaderProgramInterface> shaderProgram;
+    std::shared_ptr<BaseShaderProgramOpenGl> shaderProgram;
     std::string programName;
     int program = 0;
 
-    int mvpMatrixHandle;
+    int vpMatrixHandle;
+    int mMatrixHandle;
+    int originOffsetHandle;
     int scaleFactorHandle;
     int positionHandle;
     int styleIndexHandle;
-    GLuint attribBuffer = -1;
+    GLuint vao;
+    GLuint attribBuffer;
     std::vector<GLfloat> polygonAttributes;
-    GLuint indexBuffer = -1;
+    GLuint indexBuffer;
     std::vector<GLushort> polygonIndices;
     bool glDataBuffersGenerated = false;
+    Vec3D polygonOrigin = Vec3D(0.0, 0.0, 0.0);
 
     bool dataReady = false;
     bool ready = false;

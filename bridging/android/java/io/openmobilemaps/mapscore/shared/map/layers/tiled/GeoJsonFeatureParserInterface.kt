@@ -17,7 +17,9 @@ abstract class GeoJsonFeatureParserInterface {
 
     abstract fun parseWithPointGeometry(geoJson: String): ArrayList<GeoJsonPoint>?
 
-    private class CppProxy : GeoJsonFeatureParserInterface {
+    abstract fun parseWithLineGeometry(geoJson: String): ArrayList<GeoJsonLine>?
+
+    public class CppProxy : GeoJsonFeatureParserInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 
@@ -43,5 +45,11 @@ abstract class GeoJsonFeatureParserInterface {
             return native_parseWithPointGeometry(this.nativeRef, geoJson)
         }
         private external fun native_parseWithPointGeometry(_nativeRef: Long, geoJson: String): ArrayList<GeoJsonPoint>?
+
+        override fun parseWithLineGeometry(geoJson: String): ArrayList<GeoJsonLine>? {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_parseWithLineGeometry(this.nativeRef, geoJson)
+        }
+        private external fun native_parseWithLineGeometry(_nativeRef: Long, geoJson: String): ArrayList<GeoJsonLine>?
     }
 }

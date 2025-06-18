@@ -16,7 +16,9 @@ abstract class ShaderProgramInterface {
 
     abstract fun setBlendMode(blendMode: BlendMode)
 
-    private class CppProxy : ShaderProgramInterface {
+    abstract fun usesModelMatrix(): Boolean
+
+    public class CppProxy : ShaderProgramInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 
@@ -54,5 +56,11 @@ abstract class ShaderProgramInterface {
             native_setBlendMode(this.nativeRef, blendMode)
         }
         private external fun native_setBlendMode(_nativeRef: Long, blendMode: BlendMode)
+
+        override fun usesModelMatrix(): Boolean {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_usesModelMatrix(this.nativeRef)
+        }
+        private external fun native_usesModelMatrix(_nativeRef: Long): Boolean
     }
 }

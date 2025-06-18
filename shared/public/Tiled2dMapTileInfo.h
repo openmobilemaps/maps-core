@@ -11,7 +11,6 @@
 #pragma once
 
 #include "RectCoord.h"
-#include <stdint.h>
 #include <string>
 
 struct Tiled2dMapTileInfo {
@@ -21,6 +20,7 @@ struct Tiled2dMapTileInfo {
     int t;
     int zoomIdentifier;
     int zoomLevel;
+    int tessellationFactor = 0;
 
     Tiled2dMapTileInfo(RectCoord bounds, int x, int y, int z, int zoomIdentifier, int zoomLevel)
         : bounds(bounds)
@@ -52,6 +52,11 @@ struct Tiled2dMapTileInfo {
         return std::to_string(zoomIdentifier) + "/" + std::to_string(x)  + "/" + std::to_string(y) + "/" + std::to_string(t);
     }
 };
+
+inline std::ostream& operator<<(std::ostream& os, const Tiled2dMapTileInfo& tile)
+{
+    return os << tile.to_string();
+}
 
 namespace std {
 template <> struct hash<Tiled2dMapTileInfo> {

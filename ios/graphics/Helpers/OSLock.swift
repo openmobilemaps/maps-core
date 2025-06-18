@@ -14,7 +14,7 @@ public class OSLock {
         os_unfair_lock_lock(oslock)
     }
 
-    public  func unlock() {
+    public func unlock() {
         os_unfair_lock_unlock(oslock)
     }
 

@@ -4,6 +4,8 @@
 #pragma once
 
 #include "LayerInterface.h"
+#include "Vec3D.h"
+#include <cstdint>
 #include <memory>
 #include <vector>
 
@@ -16,7 +18,7 @@ public:
 
     static /*not-null*/ std::shared_ptr<PolygonLayerInterface> create();
 
-    virtual void setPolygons(const std::vector<PolygonInfo> & polygons) = 0;
+    virtual void setPolygons(const std::vector<PolygonInfo> & polygons, const ::Vec3D & origin) = 0;
 
     virtual std::vector<PolygonInfo> getPolygons() = 0;
 
@@ -35,4 +37,6 @@ public:
     virtual void resetSelection() = 0;
 
     virtual void setLayerClickable(bool isLayerClickable) = 0;
+
+    virtual void setRenderPassIndex(int32_t index) = 0;
 };

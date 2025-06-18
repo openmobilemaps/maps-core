@@ -16,6 +16,7 @@ import android.opengl.GLSurfaceView
 import android.util.AttributeSet
 import android.view.TextureView
 import android.view.TextureView.SurfaceTextureListener
+import io.openmobilemaps.mapscore.shared.map.PerformanceLoggerInterface
 
 
 open class GlTextureView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) :
@@ -36,7 +37,9 @@ open class GlTextureView @JvmOverloads constructor(context: Context, attrs: Attr
 
 	private val pendingTaskQueue = ArrayDeque<Pair<Boolean, () -> Unit>>()
 	private var pendingTargetFrameRate = -1
+	private var pendingEnforcedFinishInterval: Int? = null
 	private var shouldResume = false
+	private var performanceLoggers: List<PerformanceLoggerInterface> = emptyList()
 
 	override fun onSurfaceTextureAvailable(surfaceTexture: SurfaceTexture, width: Int, height: Int) {
 		glThread = GLThread(onResumeCallback = this::onGlThreadResume,
@@ -47,6 +50,8 @@ open class GlTextureView @JvmOverloads constructor(context: Context, attrs: Attr
 			useMSAA = this@GlTextureView.useMSAA
 			renderer = this@GlTextureView.renderer
 			targetFrameRate = pendingTargetFrameRate
+			enforcedFinishInterval = pendingEnforcedFinishInterval
+			performanceLoggers = this@GlTextureView.performanceLoggers
 			if (shouldResume) {
 				doResume()
 			}
@@ -97,6 +102,11 @@ open class GlTextureView @JvmOverloads constructor(context: Context, attrs: Attr
 		glThread?.targetFrameRate = frameRate
 	}
 
+	fun setEnforcedFinishInterval(enforcedFinishInterval: Int?) {
+		pendingEnforcedFinishInterval = enforcedFinishInterval
+		glThread?.enforcedFinishInterval = enforcedFinishInterval
+	}
+
 	fun pauseGlThread() {
 		shouldResume = false
 		glThread?.doPause()
@@ -111,5 +121,10 @@ open class GlTextureView @JvmOverloads constructor(context: Context, attrs: Attr
 		val glThread = glThread
 		this.glThread = null
 		glThread?.finish()
+	}
+
+	open fun setPerformanceLoggers(performanceLoggers: List<PerformanceLoggerInterface>) {
+		this.performanceLoggers = performanceLoggers
+		glThread?.performanceLoggers = performanceLoggers
 	}
 }

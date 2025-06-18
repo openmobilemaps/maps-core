@@ -10,10 +10,10 @@ abstract class MapInterface {
 
     companion object {
         @JvmStatic
-        external fun create(graphicsFactory: io.openmobilemaps.mapscore.shared.graphics.objects.GraphicsObjectFactoryInterface, shaderFactory: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderFactoryInterface, renderingContext: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, mapConfig: MapConfig, scheduler: io.openmobilemaps.mapscore.shared.map.scheduling.SchedulerInterface, pixelDensity: Float): MapInterface
+        external fun create(graphicsFactory: io.openmobilemaps.mapscore.shared.graphics.objects.GraphicsObjectFactoryInterface, shaderFactory: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderFactoryInterface, renderingContext: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, mapConfig: MapConfig, scheduler: io.openmobilemaps.mapscore.shared.map.scheduling.SchedulerInterface, pixelDensity: Float, is3D: Boolean): MapInterface
 
         @JvmStatic
-        external fun createWithOpenGl(mapConfig: MapConfig, pixelDensity: Float): MapInterface
+        external fun createWithOpenGl(mapConfig: MapConfig, scheduler: io.openmobilemaps.mapscore.shared.map.scheduling.SchedulerInterface, pixelDensity: Float, is3D: Boolean): MapInterface
     }
 
     abstract fun setCallbackHandler(callbackInterface: MapCallbackInterface?)
@@ -30,13 +30,17 @@ abstract class MapInterface {
 
     abstract fun getCoordinateConverterHelper(): io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateConversionHelperInterface
 
-    abstract fun setCamera(camera: MapCamera2dInterface)
+    abstract fun setCamera(camera: MapCameraInterface)
 
-    abstract fun getCamera(): MapCamera2dInterface
+    abstract fun getCamera(): MapCameraInterface
 
     abstract fun setTouchHandler(touchHandler: io.openmobilemaps.mapscore.shared.map.controls.TouchHandlerInterface)
 
     abstract fun getTouchHandler(): io.openmobilemaps.mapscore.shared.map.controls.TouchHandlerInterface
+
+    abstract fun setPerformanceLoggers(performanceLoggers: ArrayList<io.openmobilemaps.mapscore.shared.map.PerformanceLoggerInterface>)
+
+    abstract fun getPerformanceLoggers(): ArrayList<io.openmobilemaps.mapscore.shared.map.PerformanceLoggerInterface>
 
     abstract fun getLayers(): ArrayList<LayerInterface>
 
@@ -56,10 +60,21 @@ abstract class MapInterface {
 
     abstract fun setBackgroundColor(color: io.openmobilemaps.mapscore.shared.graphics.common.Color)
 
+    abstract fun is3d(): Boolean
+
     abstract fun invalidate()
+
+    abstract fun prepare()
+
+    abstract fun getNeedsCompute(): Boolean
+
+    abstract fun drawOffscreenFrame(target: io.openmobilemaps.mapscore.shared.graphics.RenderTargetInterface)
 
     /** Must be called on the rendering thread! */
     abstract fun drawFrame()
+
+    /** Must be called on the rendering thread! */
+    abstract fun compute()
 
     /** Must be called on the rendering thread! */
     abstract fun resume()
@@ -73,11 +88,11 @@ abstract class MapInterface {
      * changes bounds to bounds, checks all layers for readiness, and updates callbacks, timeout in
      * seconds, always draw the frame when state is updated in the ready callbacks
      */
-    abstract fun drawReadyFrame(bounds: io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord, timeout: Float, callbacks: MapReadyCallbackInterface)
+    abstract fun drawReadyFrame(bounds: io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord, paddingPc: Float, timeout: Float, callbacks: MapReadyCallbackInterface)
 
     abstract fun forceReload()
 
-    private class CppProxy : MapInterface {
+    public class CppProxy : MapInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 
@@ -134,17 +149,17 @@ abstract class MapInterface {
         }
         private external fun native_getCoordinateConverterHelper(_nativeRef: Long): io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateConversionHelperInterface
 
-        override fun setCamera(camera: MapCamera2dInterface) {
+        override fun setCamera(camera: MapCameraInterface) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             native_setCamera(this.nativeRef, camera)
         }
-        private external fun native_setCamera(_nativeRef: Long, camera: MapCamera2dInterface)
+        private external fun native_setCamera(_nativeRef: Long, camera: MapCameraInterface)
 
-        override fun getCamera(): MapCamera2dInterface {
+        override fun getCamera(): MapCameraInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             return native_getCamera(this.nativeRef)
         }
-        private external fun native_getCamera(_nativeRef: Long): MapCamera2dInterface
+        private external fun native_getCamera(_nativeRef: Long): MapCameraInterface
 
         override fun setTouchHandler(touchHandler: io.openmobilemaps.mapscore.shared.map.controls.TouchHandlerInterface) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
@@ -157,6 +172,18 @@ abstract class MapInterface {
             return native_getTouchHandler(this.nativeRef)
         }
         private external fun native_getTouchHandler(_nativeRef: Long): io.openmobilemaps.mapscore.shared.map.controls.TouchHandlerInterface
+
+        override fun setPerformanceLoggers(performanceLoggers: ArrayList<io.openmobilemaps.mapscore.shared.map.PerformanceLoggerInterface>) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setPerformanceLoggers(this.nativeRef, performanceLoggers)
+        }
+        private external fun native_setPerformanceLoggers(_nativeRef: Long, performanceLoggers: ArrayList<io.openmobilemaps.mapscore.shared.map.PerformanceLoggerInterface>)
+
+        override fun getPerformanceLoggers(): ArrayList<io.openmobilemaps.mapscore.shared.map.PerformanceLoggerInterface> {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getPerformanceLoggers(this.nativeRef)
+        }
+        private external fun native_getPerformanceLoggers(_nativeRef: Long): ArrayList<io.openmobilemaps.mapscore.shared.map.PerformanceLoggerInterface>
 
         override fun getLayers(): ArrayList<LayerInterface> {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
@@ -212,17 +239,47 @@ abstract class MapInterface {
         }
         private external fun native_setBackgroundColor(_nativeRef: Long, color: io.openmobilemaps.mapscore.shared.graphics.common.Color)
 
+        override fun is3d(): Boolean {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_is3d(this.nativeRef)
+        }
+        private external fun native_is3d(_nativeRef: Long): Boolean
+
         override fun invalidate() {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             native_invalidate(this.nativeRef)
         }
         private external fun native_invalidate(_nativeRef: Long)
 
+        override fun prepare() {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_prepare(this.nativeRef)
+        }
+        private external fun native_prepare(_nativeRef: Long)
+
+        override fun getNeedsCompute(): Boolean {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getNeedsCompute(this.nativeRef)
+        }
+        private external fun native_getNeedsCompute(_nativeRef: Long): Boolean
+
+        override fun drawOffscreenFrame(target: io.openmobilemaps.mapscore.shared.graphics.RenderTargetInterface) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_drawOffscreenFrame(this.nativeRef, target)
+        }
+        private external fun native_drawOffscreenFrame(_nativeRef: Long, target: io.openmobilemaps.mapscore.shared.graphics.RenderTargetInterface)
+
         override fun drawFrame() {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             native_drawFrame(this.nativeRef)
         }
         private external fun native_drawFrame(_nativeRef: Long)
+
+        override fun compute() {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_compute(this.nativeRef)
+        }
+        private external fun native_compute(_nativeRef: Long)
 
         override fun resume() {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
@@ -242,11 +299,11 @@ abstract class MapInterface {
         }
         private external fun native_destroy(_nativeRef: Long)
 
-        override fun drawReadyFrame(bounds: io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord, timeout: Float, callbacks: MapReadyCallbackInterface) {
+        override fun drawReadyFrame(bounds: io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord, paddingPc: Float, timeout: Float, callbacks: MapReadyCallbackInterface) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_drawReadyFrame(this.nativeRef, bounds, timeout, callbacks)
+            native_drawReadyFrame(this.nativeRef, bounds, paddingPc, timeout, callbacks)
         }
-        private external fun native_drawReadyFrame(_nativeRef: Long, bounds: io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord, timeout: Float, callbacks: MapReadyCallbackInterface)
+        private external fun native_drawReadyFrame(_nativeRef: Long, bounds: io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord, paddingPc: Float, timeout: Float, callbacks: MapReadyCallbackInterface)
 
         override fun forceReload() {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

@@ -13,7 +13,7 @@ abstract class MapsCoreSharedModule {
         external fun version(): String
     }
 
-    private class CppProxy : MapsCoreSharedModule {
+    public class CppProxy : MapsCoreSharedModule {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 

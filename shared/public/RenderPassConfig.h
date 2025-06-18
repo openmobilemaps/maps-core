@@ -4,15 +4,22 @@
 #pragma once
 
 #include <cstdint>
+#include <memory>
+#include <optional>
 #include <utility>
+
+class RenderTargetInterface;
 
 struct RenderPassConfig final {
     int32_t renderPassIndex;
     bool isPassMasked;
+    /*nullable*/ std::shared_ptr<RenderTargetInterface> renderTarget;
 
     RenderPassConfig(int32_t renderPassIndex_,
-                     bool isPassMasked_)
+                     bool isPassMasked_,
+                     /*nullable*/ std::shared_ptr<RenderTargetInterface> renderTarget_)
     : renderPassIndex(std::move(renderPassIndex_))
     , isPassMasked(std::move(isPassMasked_))
+    , renderTarget(std::move(renderTarget_))
     {}
 };

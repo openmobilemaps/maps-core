@@ -12,13 +12,13 @@ abstract class LoaderInterface {
 
     abstract fun loadData(url: String, etag: String?): DataLoaderResult
 
-    abstract fun loadTextureAsnyc(url: String, etag: String?): com.snapchat.djinni.Future<TextureLoaderResult>
+    abstract fun loadTextureAsync(url: String, etag: String?): com.snapchat.djinni.Future<TextureLoaderResult>
 
     abstract fun loadDataAsync(url: String, etag: String?): com.snapchat.djinni.Future<DataLoaderResult>
 
     abstract fun cancel(url: String)
 
-    private class CppProxy : LoaderInterface {
+    public class CppProxy : LoaderInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
 
@@ -45,11 +45,11 @@ abstract class LoaderInterface {
         }
         private external fun native_loadData(_nativeRef: Long, url: String, etag: String?): DataLoaderResult
 
-        override fun loadTextureAsnyc(url: String, etag: String?): com.snapchat.djinni.Future<TextureLoaderResult> {
+        override fun loadTextureAsync(url: String, etag: String?): com.snapchat.djinni.Future<TextureLoaderResult> {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            return native_loadTextureAsnyc(this.nativeRef, url, etag)
+            return native_loadTextureAsync(this.nativeRef, url, etag)
         }
-        private external fun native_loadTextureAsnyc(_nativeRef: Long, url: String, etag: String?): com.snapchat.djinni.Future<TextureLoaderResult>
+        private external fun native_loadTextureAsync(_nativeRef: Long, url: String, etag: String?): com.snapchat.djinni.Future<TextureLoaderResult>
 
         override fun loadDataAsync(url: String, etag: String?): com.snapchat.djinni.Future<DataLoaderResult> {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

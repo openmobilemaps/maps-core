@@ -13,7 +13,7 @@
 
 class Tiled2dMapVectorGeoJSONLayerConfig : public Tiled2dMapVectorLayerConfig {
 public:
-    Tiled2dMapVectorGeoJSONLayerConfig(const std::string &sourceName, const std::weak_ptr<GeoJSONVTInterface> geoJSON, const Tiled2dMapZoomInfo &zoomInfo = Tiled2dMapZoomInfo(1.0, 0, false, true, false, true))
+    Tiled2dMapVectorGeoJSONLayerConfig(const std::string &sourceName, const std::weak_ptr<GeoJSONVTInterface> geoJSON, const Tiled2dMapZoomInfo &zoomInfo = Tiled2dMapZoomInfo(1.0, 0, 0, false, true, false, true))
             : Tiled2dMapVectorLayerConfig(nullptr, zoomInfo), geoJSON(geoJSON), sourceName(sourceName) {}
 
     ~Tiled2dMapVectorGeoJSONLayerConfig() {}
@@ -25,10 +25,16 @@ public:
 
     std::vector<Tiled2dMapZoomLevelInfo> getZoomLevelInfos() override {
         int maxZoom = 0;
+        int minZoom = 0;
         if (auto geoJSON = this->geoJSON.lock()){
+            minZoom = geoJSON->getMinZoom();
             maxZoom = geoJSON->getMaxZoom();
         }
-        return getDefaultEpsg3857ZoomLevels(0, maxZoom);
+        return getDefaultEpsg3857ZoomLevels(minZoom, maxZoom, std::nullopt);
+    }
+
+    std::vector<Tiled2dMapZoomLevelInfo> getVirtualZoomLevelInfos() override {
+        return {};
     }
 
     std::string getLayerName() override {

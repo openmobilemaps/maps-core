@@ -21,7 +21,7 @@
 class MapScene : public MapInterface, public SceneCallbackInterface, public SchedulerGraphicsTaskCallbacks, public std::enable_shared_from_this<MapScene> {
   public:
     MapScene(std::shared_ptr<SceneInterface> scene, const MapConfig &mapConfig,
-             const std::shared_ptr<::SchedulerInterface> &scheduler, float pixelDensity);
+             const std::shared_ptr<::SchedulerInterface> &scheduler, float pixelDensity, bool is3D);
 
     virtual std::shared_ptr<::GraphicsObjectFactoryInterface> getGraphicsObjectFactory() override;
 
@@ -37,13 +37,17 @@ class MapScene : public MapInterface, public SceneCallbackInterface, public Sche
 
     virtual void setCallbackHandler(const std::shared_ptr<MapCallbackInterface> &callbackInterface) override;
 
-    virtual void setCamera(const std::shared_ptr<::MapCamera2dInterface> &camera) override;
+    virtual void setCamera(const std::shared_ptr<::MapCameraInterface> &camera) override;
 
-    virtual std::shared_ptr<::MapCamera2dInterface> getCamera() override;
+    virtual std::shared_ptr<::MapCameraInterface> getCamera() override;
 
     virtual void setTouchHandler(const std::shared_ptr<::TouchHandlerInterface> &touchHandler) override;
 
     virtual std::shared_ptr<::TouchHandlerInterface> getTouchHandler() override;
+
+    virtual void setPerformanceLoggers(const /*not-null*/ std::vector<std::shared_ptr<::PerformanceLoggerInterface>> & performanceLoggers) override;
+
+    virtual /*not-null*/ std::vector<std::shared_ptr<::PerformanceLoggerInterface>> getPerformanceLoggers() override;
 
     virtual std::vector<std::shared_ptr<LayerInterface>> getLayers() override;
 
@@ -61,6 +65,8 @@ class MapScene : public MapInterface, public SceneCallbackInterface, public Sche
 
     virtual void removeLayer(const std::shared_ptr<::LayerInterface> &layer) override;
 
+    bool is3d() override;
+
     virtual void setViewportSize(const ::Vec2I &size) override;
 
     virtual void setBackgroundColor(const Color &color) override;
@@ -69,13 +75,21 @@ class MapScene : public MapInterface, public SceneCallbackInterface, public Sche
 
     virtual void drawFrame() override;
 
+    virtual void prepare() override;
+
+    virtual bool getNeedsCompute() override;
+
+    virtual void drawOffscreenFrame(const /*not-null*/ std::shared_ptr<::RenderTargetInterface> & target) override;
+
+    virtual void compute() override;
+
     virtual void resume() override;
 
     virtual void pause() override;
 
     virtual void destroy() override;
 
-    virtual void drawReadyFrame(const ::RectCoord &bounds, float timeout,
+    virtual void drawReadyFrame(const ::RectCoord &bounds, float paddingPc, float timeout,
                                 const std::shared_ptr<MapReadyCallbackInterface> &callbacks) override;
 
     virtual void forceReload() override;
@@ -94,9 +108,10 @@ class MapScene : public MapInterface, public SceneCallbackInterface, public Sche
 
     std::shared_ptr<SceneInterface> scene;
 
-    std::shared_ptr<MapCamera2dInterface> camera;
+    std::shared_ptr<MapCameraInterface> camera;
 
     std::recursive_mutex layersMutex;
+    bool needsCompute = false;
     std::map<int, std::shared_ptr<LayerInterface>> layers;
 
     std::shared_ptr<TouchHandlerInterface> touchHandler;
@@ -105,4 +120,8 @@ class MapScene : public MapInterface, public SceneCallbackInterface, public Sche
 
     bool isResumed = false;
     std::atomic_flag isInvalidated = ATOMIC_FLAG_INIT;
+    bool mapIs3d = false;
+
+    std::mutex performanceLoggersMutex;
+    std::vector<std::shared_ptr<PerformanceLoggerInterface>> performanceLoggers;
 };

@@ -7,21 +7,19 @@
 
 import Foundation
 
-@available(iOS 13.0, *)
-public class AsyncLayer: Layer, ObservableObject {
+public final class AsyncLayer: Layer, ObservableObject, @unchecked Sendable {
     private(set) public var error: Error?
     private(set) public var isLoading = true
 
-    private(set) public var baseLayer: Layer?
+    public private(set) var baseLayer: Layer?
 
     public var interface: MCLayerInterface? { baseLayer?.interface }
 
-    public init(setup: @escaping () async throws -> Layer) {
+    public init(setup: @escaping @Sendable () async throws -> Layer) {
         Task {
             do {
                 self.baseLayer = try await setup()
-            }
-            catch {
+            } catch {
                 self.error = error
             }
             self.isLoading = false
@@ -31,5 +29,7 @@ public class AsyncLayer: Layer, ObservableObject {
         }
     }
 
-    
+    public var beforeAdding: ((MCLayerInterface, MCMapView) -> Void)? {
+        baseLayer?.beforeAdding
+    }
 }

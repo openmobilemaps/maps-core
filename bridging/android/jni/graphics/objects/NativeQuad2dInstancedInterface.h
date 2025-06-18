@@ -33,13 +33,14 @@ private:
         JavaProxy(JniType j);
         ~JavaProxy();
 
-        void setFrame(const ::Quad2dD & frame) override;
+        void setFrame(const ::Quad2dD & frame, const ::Vec3D & origin, bool is3d) override;
         void setInstanceCount(int32_t count) override;
         void setPositions(const ::SharedBytes & positions) override;
         void setScales(const ::SharedBytes & scales) override;
         void setRotations(const ::SharedBytes & rotations) override;
         void setAlphas(const ::SharedBytes & values) override;
         void setTextureCoordinates(const ::SharedBytes & textureCoordinates) override;
+        void setPositionOffset(const ::SharedBytes & offsets) override;
         void loadTexture(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & context, const /*not-null*/ std::shared_ptr<::TextureHolderInterface> & textureHolder) override;
         void removeTexture() override;
         /*not-null*/ std::shared_ptr<::GraphicsObjectInterface> asGraphicsObject() override;
@@ -50,13 +51,14 @@ private:
     };
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/graphics/objects/Quad2dInstancedInterface") };
-    const jmethodID method_setFrame { ::djinni::jniGetMethodID(clazz.get(), "setFrame", "(Lio/openmobilemaps/mapscore/shared/graphics/common/Quad2dD;)V") };
+    const jmethodID method_setFrame { ::djinni::jniGetMethodID(clazz.get(), "setFrame", "(Lio/openmobilemaps/mapscore/shared/graphics/common/Quad2dD;Lio/openmobilemaps/mapscore/shared/graphics/common/Vec3D;Z)V") };
     const jmethodID method_setInstanceCount { ::djinni::jniGetMethodID(clazz.get(), "setInstanceCount", "(I)V") };
     const jmethodID method_setPositions { ::djinni::jniGetMethodID(clazz.get(), "setPositions", "(Lio/openmobilemaps/mapscore/shared/graphics/common/SharedBytes;)V") };
     const jmethodID method_setScales { ::djinni::jniGetMethodID(clazz.get(), "setScales", "(Lio/openmobilemaps/mapscore/shared/graphics/common/SharedBytes;)V") };
     const jmethodID method_setRotations { ::djinni::jniGetMethodID(clazz.get(), "setRotations", "(Lio/openmobilemaps/mapscore/shared/graphics/common/SharedBytes;)V") };
     const jmethodID method_setAlphas { ::djinni::jniGetMethodID(clazz.get(), "setAlphas", "(Lio/openmobilemaps/mapscore/shared/graphics/common/SharedBytes;)V") };
     const jmethodID method_setTextureCoordinates { ::djinni::jniGetMethodID(clazz.get(), "setTextureCoordinates", "(Lio/openmobilemaps/mapscore/shared/graphics/common/SharedBytes;)V") };
+    const jmethodID method_setPositionOffset { ::djinni::jniGetMethodID(clazz.get(), "setPositionOffset", "(Lio/openmobilemaps/mapscore/shared/graphics/common/SharedBytes;)V") };
     const jmethodID method_loadTexture { ::djinni::jniGetMethodID(clazz.get(), "loadTexture", "(Lio/openmobilemaps/mapscore/shared/graphics/RenderingContextInterface;Lio/openmobilemaps/mapscore/shared/graphics/objects/TextureHolderInterface;)V") };
     const jmethodID method_removeTexture { ::djinni::jniGetMethodID(clazz.get(), "removeTexture", "()V") };
     const jmethodID method_asGraphicsObject { ::djinni::jniGetMethodID(clazz.get(), "asGraphicsObject", "()Lio/openmobilemaps/mapscore/shared/graphics/objects/GraphicsObjectInterface;") };

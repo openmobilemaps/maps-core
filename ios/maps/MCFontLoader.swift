@@ -12,21 +12,40 @@ import MapCoreSharedModule
 import UIKit
 import os
 
-open class MCFontLoader: NSObject, MCFontLoaderInterface {
+open class MCFontLoader: NSObject, MCFontLoaderInterface, @unchecked Sendable {
     // MARK: - Font Atlas Dictionary
 
     private let loadingQueue = DispatchQueue(label: "MCFontLoader")
     private var fontAtlasDictionary: [String: TextureHolder] = [:]
     private var fontDataDictionary: [String: MCFontData] = [:]
+    private let pixelsPerInch: Double
 
     // MARK: - Init
-
     private let bundle: Bundle
 
     // the bundle to use for searching for fonts
-    public init(bundle: Bundle) {
+    public init(bundle: Bundle, preload: [String] = []) {
         self.bundle = bundle
+        pixelsPerInch =
+            if Thread.isMainThread {
+                MainActor.assumeIsolated {
+                    UIScreen.pixelsPerInch
+                }
+            } else {
+                DispatchQueue.main.sync {
+                    MainActor.assumeIsolated {
+                        UIScreen.pixelsPerInch
+                    }
+                }
+            }
         super.init()
+        loadingQueue.async {
+            let fonts = preload.map { MCFont(name: $0) }
+            for font in fonts {
+                let _ = self.getFontImage(font: font)
+                let _ = self.getFontData(font: font)
+            }
+        }
     }
 
     // MARK: - Loader
@@ -62,11 +81,12 @@ open class MCFontLoader: NSObject, MCFontLoaderInterface {
                     let size = double(dict: fontInfoJson, value: "size")
                     let imageSize = double(dict: commonJson, value: "scaleW")
 
-                    let fontInfo = MCFontWrapper(name: font.name,
-                                                 lineHeight: double(dict: commonJson, value: "lineHeight") / size,
-                                                 base: double(dict: commonJson, value: "base") / size,
-                                                 bitmapSize: MCVec2D(x: imageSize, y: imageSize),
-                                                 size: Double(UIScreen.pixelsPerInch) * size)
+                    let fontInfo = MCFontWrapper(
+                        name: font.name,
+                        lineHeight: double(dict: commonJson, value: "lineHeight") / size,
+                        base: double(dict: commonJson, value: "base") / size,
+                        bitmapSize: MCVec2D(x: imageSize, y: imageSize),
+                        size: pixelsPerInch * size)
 
                     var glyphs: [MCFontGlyph] = []
 
@@ -92,7 +112,9 @@ open class MCFontLoader: NSObject, MCFontLoaderInterface {
 
                         let uv = MCQuad2dD(topLeft: MCVec2D(x: s0, y: t1), topRight: MCVec2D(x: s1, y: t1), bottomRight: MCVec2D(x: s1, y: t0), bottomLeft: MCVec2D(x: s0, y: t0))
 
-                        let glyphGlyhph = MCFontGlyph(charCode: character, advance: MCVec2D(x: double(dict: glyph, value: "xadvance") / size, y: 0.0), boundingBoxSize: MCVec2D(x: double(dict: glyph, value: "width") / size, y: double(dict: glyph, value: "height") / size), bearing: bearing, uv: uv)
+                        let glyphGlyhph = MCFontGlyph(
+                            charCode: character, advance: MCVec2D(x: double(dict: glyph, value: "xadvance") / size, y: 0.0), boundingBoxSize: MCVec2D(x: double(dict: glyph, value: "width") / size, y: double(dict: glyph, value: "height") / size),
+                            bearing: bearing, uv: uv)
                         glyphs.append(glyphGlyhph)
                     }
 
@@ -125,7 +147,8 @@ open class MCFontLoader: NSObject, MCFontLoaderInterface {
         let image = UIImage(named: font.name, in: bundle, compatibleWith: nil)
 
         guard let cgImage = image?.cgImage,
-              let textureHolder = try? TextureHolder(cgImage) else {
+            let textureHolder = try? TextureHolder(cgImage)
+        else {
             return nil
         }
 

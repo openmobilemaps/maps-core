@@ -10,14 +10,14 @@
 
 import Foundation
 import MapCoreSharedModule
-import MetalKit
+@preconcurrency import MetalKit
 
 enum TextureHolderError: Error {
     case emptyData
 }
 
 @objc
-public class TextureHolder: NSObject {
+public class TextureHolder: NSObject, @unchecked Sendable {
     public let texture: MTLTexture
 
     let textureUsableSize: TextureUsableSize?
@@ -28,9 +28,18 @@ public class TextureHolder: NSObject {
         super.init()
     }
 
-    convenience init(_ url: URL, textureUsableSize: TextureUsableSize? = nil) throws {
+    deinit {
+        let texture = self.texture
+        DispatchQueue.global(qos: .utility)
+            .async {
+                // access texture to make sure it gets deallocated asynchron
+                _ = texture.width
+            }
+    }
+
+    public convenience init(_ url: URL, textureUsableSize: TextureUsableSize? = nil) throws {
         let options: [MTKTextureLoader.Option: Any] = [
-            MTKTextureLoader.Option.SRGB: NSNumber(booleanLiteral: false),
+            MTKTextureLoader.Option.SRGB: NSNumber(booleanLiteral: false)
         ]
         let texture = try MetalContext.current.textureLoader.newTexture(URL: url, options: options)
         self.init(texture, textureUsableSize: textureUsableSize)
@@ -59,7 +68,7 @@ public class TextureHolder: NSObject {
 
     public convenience init(name: String, scaleFactor: Double, bundle: Bundle?) throws {
         let options: [MTKTextureLoader.Option: Any] = [
-            MTKTextureLoader.Option.SRGB: NSNumber(booleanLiteral: false),
+            MTKTextureLoader.Option.SRGB: NSNumber(booleanLiteral: false)
         ]
         let texture = try MetalContext.current.textureLoader.newTexture(name: name, scaleFactor: scaleFactor, bundle: bundle, options: options)
         self.init(texture)
@@ -70,19 +79,19 @@ public class TextureHolder: NSObject {
             throw TextureHolderError.emptyData
         }
         let options: [MTKTextureLoader.Option: Any] = [
-            MTKTextureLoader.Option.SRGB: NSNumber(booleanLiteral: false),
+            MTKTextureLoader.Option.SRGB: NSNumber(booleanLiteral: false)
         ]
         let texture = try MetalContext.current.textureLoader.newTexture(data: data, options: options)
         self.init(texture, textureUsableSize: textureUsableSize)
     }
 
-    public convenience init(_ size: CGSize, drawCallback: ((CGContext) -> Void)) throws {
+    public convenience init(_ size: CGSize, drawCallback: (CGContext) -> Void) throws {
         guard size.width > 0, size.height > 0 else {
             throw TextureHolderError.emptyData
         }
 
-        let width : Int = Int(size.width)
-        let height : Int = Int(size.height)
+        let width: Int = Int(size.width)
+        let height: Int = Int(size.height)
 
         let bytesPerPixel = 4
         let bytesPerRow = bytesPerPixel * width
@@ -100,7 +109,7 @@ public class TextureHolder: NSObject {
         }
 
         let data = NSMutableData(bytesNoCopy: imageData, length: length, freeWhenDone: true)
-        
+
         let colorSpace = CGColorSpaceCreateDeviceRGB()
         let bitmapInfo = CGBitmapInfo(rawValue: CGBitmapInfo.byteOrder32Big.rawValue | CGImageAlphaInfo.premultipliedLast.rawValue)
 
