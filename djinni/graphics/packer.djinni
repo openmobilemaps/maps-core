@@ -7,7 +7,7 @@ rectangle_packer_page = record {
 }
 
 rectangle_packer = interface +c {
-    static pack(rectangles: map<string, vec_2_i>, max_page_size: vec_2_i): list<rectangle_packer_page>;
+    static pack(rectangles: map<string, vec_2_i>, max_page_size: vec_2_i, spacing: i32): list<rectangle_packer_page>;
 }
 
 texture_atlas = record {

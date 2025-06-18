@@ -16,10 +16,10 @@
 #include <algorithm>
 
 
-std::vector<RectanglePackerPage> RectanglePacker::pack(const std::unordered_map<std::string, ::Vec2I> & rectangles, const ::Vec2I & maxPageSize) {
+std::vector<RectanglePackerPage> RectanglePacker::pack(const std::unordered_map<std::string, ::Vec2I> & rectangles, const ::Vec2I & maxPageSize, int32_t spacing) {
 
     std::unordered_map<size_t, RectanglePackerPage> results;
-    dp::rect_pack::RectPacker packer = dp::rect_pack::RectPacker<int32_t>(maxPageSize.x, maxPageSize.y);
+    dp::rect_pack::RectPacker packer = dp::rect_pack::RectPacker<int32_t>(maxPageSize.x, maxPageSize.y, dp::rect_pack::RectPacker<int32_t>::Spacing(spacing));
 
     std::vector<std::tuple<std::string, ::Vec2I>> sortedRectangles;
 

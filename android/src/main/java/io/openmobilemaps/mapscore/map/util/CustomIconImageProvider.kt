@@ -29,7 +29,9 @@ class CustomIconImageProvider(
                     (bitmap?.width ?: 1).toInt(),
                     (bitmap?.height ?: 1).toInt()
                 )
-            }), Vec2I(MAX_SIZE_TEXTURE_PAGE_PX, MAX_SIZE_TEXTURE_PAGE_PX)
+            }),
+			Vec2I(MAX_SIZE_TEXTURE_PAGE_PX, MAX_SIZE_TEXTURE_PAGE_PX),
+			1
         )
 
         return ArrayList(packerResult.map { page ->

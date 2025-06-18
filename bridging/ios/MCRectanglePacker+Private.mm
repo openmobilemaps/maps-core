@@ -33,10 +33,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 }
 
 + (nonnull NSArray<MCRectanglePackerPage *> *)pack:(nonnull NSDictionary<NSString *, MCVec2I *> *)rectangles
-                                       maxPageSize:(nonnull MCVec2I *)maxPageSize {
+                                       maxPageSize:(nonnull MCVec2I *)maxPageSize
+                                           spacing:(int32_t)spacing {
     try {
         auto objcpp_result_ = ::RectanglePacker::pack(::djinni::Map<::djinni::String, ::djinni_generated::Vec2I>::toCpp(rectangles),
-                                                      ::djinni_generated::Vec2I::toCpp(maxPageSize));
+                                                      ::djinni_generated::Vec2I::toCpp(maxPageSize),
+                                                      ::djinni::I32::toCpp(spacing));
         return ::djinni::List<::djinni_generated::RectanglePackerPage>::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
