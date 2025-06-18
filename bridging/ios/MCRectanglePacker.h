@@ -9,6 +9,7 @@
 @interface MCRectanglePacker : NSObject
 
 + (nonnull NSArray<MCRectanglePackerPage *> *)pack:(nonnull NSDictionary<NSString *, MCVec2I *> *)rectangles
-                                       maxPageSize:(nonnull MCVec2I *)maxPageSize;
+                                       maxPageSize:(nonnull MCVec2I *)maxPageSize
+                                           spacing:(int32_t)spacing;
 
 @end

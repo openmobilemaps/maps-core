@@ -10,7 +10,7 @@ abstract class RectanglePacker {
 
     companion object {
         @JvmStatic
-        external fun pack(rectangles: HashMap<String, io.openmobilemaps.mapscore.shared.graphics.common.Vec2I>, maxPageSize: io.openmobilemaps.mapscore.shared.graphics.common.Vec2I): ArrayList<RectanglePackerPage>
+        external fun pack(rectangles: HashMap<String, io.openmobilemaps.mapscore.shared.graphics.common.Vec2I>, maxPageSize: io.openmobilemaps.mapscore.shared.graphics.common.Vec2I, spacing: Int): ArrayList<RectanglePackerPage>
     }
 
     public class CppProxy : RectanglePacker {
