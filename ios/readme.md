@@ -38,12 +38,39 @@ dependencies: [
 
 ## How to use
 
-
-
 ### MapView
 
 The framework provides a view that can be filled with layers. The simplest case is to add a raster layer. TiledRasterLayer provides a convenience initializer to create raster layer with web mercator tiles.
- 
+
+#### SwiftUI
+
+For SwiftUI applications, use the `MapView` which provides a declarative interface:
+
+```swift
+import MapCore
+import SwiftUI
+
+struct ContentView: View {
+    @State private var camera = MapView.Camera(
+        latitude: 46.962592372639634,
+        longitude: 8.378232525377973,
+        zoom: 1000000
+    )
+    
+    var body: some View {
+        MapView(
+            camera: $camera,
+            layers: [
+                TiledRasterLayer("osm", webMercatorUrlFormat: "https://tiles.sample.org/{z}/{x}/{y}.png")
+            ]
+        )
+    }
+}
+```
+
+#### UIKit
+
+For UIKit applications, use the `MCMapView` directly:
 
 ```swift
 import MapCore
@@ -67,6 +94,37 @@ class MapViewController: UIViewController {
 
 Open Mobile Maps supports the [WMTS standard](https://en.wikipedia.org/wiki/Web_Map_Tile_Service) and can parse their Capability XML file to generate raster layer configurations.
 
+##### SwiftUI
+
+```swift
+struct ContentView: View {
+    @State private var camera = MapView.Camera(
+        latitude: 46.962592372639634,
+        longitude: 8.378232525377973,
+        zoom: 1000000
+    )
+    @State private var wmtsLayer: (any Layer)?
+    
+    var body: some View {
+        MapView(
+            camera: $camera,
+            layers: [wmtsLayer]
+        )
+        .onAppear {
+            setupWMTSLayer()
+        }
+    }
+    
+    private func setupWMTSLayer() {
+        let resource = MCWmtsCapabilitiesResource.create(xml)!
+        let loader = MCTextureLoader() // Default implementation
+        wmtsLayer = resource.createLayer("identifier", tileLoader: loader)
+    }
+}
+```
+
+##### UIKit
+
 ```swift
 let resource = MCWmtsCapabilitiesResource.create(xml)!
 ```
@@ -76,6 +134,7 @@ The created resource object is then capable of creating a layer object with a gi
 let layer = resource.createLayer("identifier", tileLoader: loader)
 mapView.add(layer: layer?.asLayerInterface())
 ```
+
 This feature is still being improved to support a wider range of WMTS capabilities.
 
 For this example, we also use the default implementation of the [TextureLoader](https://github.com/openmobilemaps/maps-core/blob/develop/ios/maps/MCTextureLoader.swift), but this can also be implemented by the app itself.
@@ -85,8 +144,31 @@ For this example, we also use the default implementation of the [TextureLoader](
 
 Open Mobile Maps supports most of the [Vector tiles standard](https://docs.mapbox.com/data/tilesets/guides/vector-tiles-standards/). To add a layer simply reference the style URL.
 
+#### SwiftUI
+
 ```swift
-mapView.add(layer: try! VectorLayer("base-map", styleURL: "https://www.sample.org/base-map/style.json")
+struct ContentView: View {
+    @State private var camera = MapView.Camera(
+        latitude: 46.962592372639634,
+        longitude: 8.378232525377973,
+        zoom: 1000000
+    )
+    
+    var body: some View {
+        MapView(
+            camera: $camera,
+            layers: [
+                try! VectorLayer("base-map", styleURL: "https://www.sample.org/base-map/style.json")
+            ]
+        )
+    }
+}
+```
+
+#### UIKit
+
+```swift
+mapView.add(layer: try! VectorLayer("base-map", styleURL: "https://www.sample.org/base-map/style.json"))
 ```
 
 Additional features and differences will be documented soon.
@@ -98,6 +180,47 @@ Additional features and differences will be documented soon.
 #### Polygon layer
 
 Open Mobile Maps provides a simple interface to create a polygon layer. The layer handles the rendering of the given polygons and calls the callback handler in case of user interaction.
+
+##### SwiftUI
+
+```swift
+struct ContentView: View {
+    @State private var camera = MapView.Camera(
+        latitude: 46.962592372639634,
+        longitude: 8.378232525377973,
+        zoom: 1000000
+    )
+    @State private var polygonLayer: MCPolygonLayerInterface?
+    
+    var body: some View {
+        MapView(
+            camera: $camera,
+            layers: [polygonLayer]
+        )
+        .onAppear {
+            setupPolygonLayer()
+        }
+    }
+    
+    private func setupPolygonLayer() {
+        let coords: [MCCoord] = [
+            // your coordinates here
+        ]
+        polygonLayer = MCPolygonLayerInterface.create()
+        let polygonInfo = MCPolygonInfo(
+            identifier: "switzerland",
+            coordinates: MCPolygonCoord(positions: coords, holes: []),
+            color: UIColor.red.mapCoreColor,
+            highlight: UIColor.red.withAlphaComponent(0.2).mapCoreColor
+        )
+        
+        polygonLayer?.add(polygonInfo)
+        // polygonLayer?.setCallbackHandler(handler) // Add callback handler if needed
+    }
+}
+```
+
+##### UIKit
 
 ``` swift
 let coords : [MCCoord] = [
@@ -118,6 +241,47 @@ mapView.add(layer: polygonLayer?.asLayerInterface())
 
 A simple icon layer is implemented as well. This supports displaying textures at the given coordinates. A scale parameter has to be provided which specifies how the icon should be affected by camera movements. In case of user interaction, the given callback handler will be called.
 
+##### SwiftUI
+
+```swift
+struct ContentView: View {
+    @State private var camera = MapView.Camera(
+        latitude: 46.962592372639634,
+        longitude: 8.378232525377973,
+        zoom: 1000000
+    )
+    @State private var iconLayer: MCIconLayerInterface?
+    
+    var body: some View {
+        MapView(
+            camera: $camera,
+            layers: [iconLayer]
+        )
+        .onAppear {
+            setupIconLayer()
+        }
+    }
+    
+    private func setupIconLayer() {
+        iconLayer = MCIconLayerInterface.create()
+        let image = UIImage(named: "image")
+        let texture = try! TextureHolder(image!.cgImage!)
+        let icon = MCIconFactory.createIcon(
+            "icon",
+            coordinate: coordinate,
+            texture: texture,
+            iconSize: .init(x: Float(texture.getImageWidth()), y: Float(texture.getImageHeight())),
+            scale: .FIXED,
+            blendMode: .NORMAL
+        )
+        iconLayer?.add(icon)
+        // iconLayer?.setCallbackHandler(handler) // Add callback handler if needed
+    }
+}
+```
+
+##### UIKit
+
 ```swift
 let iconLayer = MCIconLayerInterface.create()
 let image = UIImage(named: "image")
@@ -134,7 +298,61 @@ mapView.add(layer: iconLayer?.asLayerInterface())
 ```
 
 #### Line layer
+
 A line layer can be added to the mapView as well. Using the MCLineFactory a LineInfo object can be created. The width can be specified in either SCREEN_PIXEL or MAP_UNIT.
+
+##### SwiftUI
+
+```swift
+struct ContentView: View {
+    @State private var camera = MapView.Camera(
+        latitude: 46.962592372639634,
+        longitude: 8.378232525377973,
+        zoom: 1000000
+    )
+    @State private var lineLayer: MCLineLayerInterface?
+    
+    var body: some View {
+        MapView(
+            camera: $camera,
+            layers: [lineLayer]
+        )
+        .onAppear {
+            setupLineLayer()
+        }
+    }
+    
+    private func setupLineLayer() {
+        lineLayer = MCLineLayerInterface.create()
+        let coords: [MCCoord] = [
+            // your coordinates here
+        ]
+        
+        lineLayer?.add(MCLineFactory.createLine(
+            "lineIdentifier",
+            coordinates: coords,
+            style: MCLineStyle(
+                color: MCColorStateList(
+                    normal: UIColor.systemPink.withAlphaComponent(0.5).mapCoreColor,
+                    highlighted: UIColor.blue.withAlphaComponent(0.5).mapCoreColor
+                ),
+                gapColor: MCColorStateList(
+                    normal: UIColor.red.withAlphaComponent(0.5).mapCoreColor,
+                    highlighted: UIColor.gray.withAlphaComponent(0.5).mapCoreColor
+                ),
+                opacity: 1.0,
+                widthType: .SCREEN_PIXEL,
+                width: 50,
+                dashArray: [1,1],
+                lineCap: .BUTT,
+                offset: 0.0
+            )
+        ))
+    }
+}
+```
+
+##### UIKit
 
 ```swift
 let lineLayer = MCLineLayerInterface.create()
@@ -241,11 +459,32 @@ class TiledLayerConfig: MCTiled2dMapLayerConfig {
 
 To render the map using a different coordinate system, initialize the map view with a Map Config. The library provides a factory for the [EPSG3857](https://epsg.io/4326) Coordinate system and others, which we can use to initialize the map view. Layers can have a different projection than the map view itself.
 
+##### SwiftUI
+
+```swift
+struct ContentView: View {
+    @State private var camera = MapView.Camera(
+        latitude: 46.962592372639634,
+        longitude: 8.378232525377973,
+        zoom: 1000000
+    )
+    
+    var body: some View {
+        MapView(
+            camera: $camera,
+            mapConfig: .init(mapCoordinateSystem: MCCoordinateSystemFactory.getEpsg2056System()),
+            layers: [
+                TiledRasterLayer("osm", webMercatorUrlFormat: "https://tiles.sample.org/{z}/{x}/{y}.png")
+            ]
+        )
+    }
+}
+```
+
+##### UIKit
+
 ```swift
 MCMapView(mapConfig: .init(mapCoordinateSystem: MCCoordinateSystemFactory.getEpsg2056System()))
-``
-
-
 ```
 
 ## How to build
