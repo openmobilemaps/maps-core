@@ -90,6 +90,18 @@ struct ContentView: View {
 }
 ```
 
+The `camera` binding allows you to observe and control the map's camera position. The camera will update automatically as users interact with the map, and you can programmatically change the camera position by updating the binding.
+
+For 3D maps, you can enable 3D mode:
+
+```swift
+MapView(
+    camera: $camera,
+    layers: layers,
+    is3D: true
+)
+```
+
 #### UIKit
 
 For UIKit applications, use the `MCMapView` directly:
