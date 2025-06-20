@@ -44,7 +44,7 @@ The framework provides a view that can be filled with layers. The simplest case 
 
 #### SwiftUI
 
-For SwiftUI applications, use the `MapView` which provides a declarative interface:
+For SwiftUI applications, use the `MapView` which provides a declarative interface. Note that the SwiftUI `MapView` requires iOS 17.0 or later.
 
 ```swift
 import MapCore
@@ -62,6 +62,28 @@ struct ContentView: View {
             camera: $camera,
             layers: [
                 TiledRasterLayer("osm", webMercatorUrlFormat: "https://tiles.sample.org/{z}/{x}/{y}.png")
+            ]
+        )
+    }
+}
+```
+
+You can combine multiple layers by passing them in the `layers` array:
+
+```swift
+struct ContentView: View {
+    @State private var camera = MapView.Camera(
+        latitude: 46.962592372639634,
+        longitude: 8.378232525377973,
+        zoom: 1000000
+    )
+    
+    var body: some View {
+        MapView(
+            camera: $camera,
+            layers: [
+                TiledRasterLayer("base", webMercatorUrlFormat: "https://tiles.sample.org/{z}/{x}/{y}.png"),
+                try? VectorLayer("overlay", styleURL: "https://www.sample.org/overlay/style.json")
             ]
         )
     }
@@ -183,30 +205,21 @@ Open Mobile Maps provides a simple interface to create a polygon layer. The laye
 
 ##### SwiftUI
 
+For overlay layers like polygons, icons, and lines in SwiftUI, you'll need to manage them through the underlying `MCMapView`. Here's an example using `UIViewRepresentable`:
+
 ```swift
-struct ContentView: View {
-    @State private var camera = MapView.Camera(
-        latitude: 46.962592372639634,
-        longitude: 8.378232525377973,
-        zoom: 1000000
-    )
-    @State private var polygonLayer: MCPolygonLayerInterface?
+struct MapWithPolygonView: UIViewRepresentable {
+    @Binding var camera: MapView.Camera
+    let coords: [MCCoord]
     
-    var body: some View {
-        MapView(
-            camera: $camera,
-            layers: [polygonLayer]
-        )
-        .onAppear {
-            setupPolygonLayer()
-        }
-    }
-    
-    private func setupPolygonLayer() {
-        let coords: [MCCoord] = [
-            // your coordinates here
-        ]
-        polygonLayer = MCPolygonLayerInterface.create()
+    func makeUIView(context: Context) -> MCMapView {
+        let mapView = MCMapView()
+        
+        // Add base layer
+        mapView.add(layer: TiledRasterLayer("osm", webMercatorUrlFormat: "https://tiles.sample.org/{z}/{x}/{y}.png"))
+        
+        // Add polygon layer
+        let polygonLayer = MCPolygonLayerInterface.create()
         let polygonInfo = MCPolygonInfo(
             identifier: "switzerland",
             coordinates: MCPolygonCoord(positions: coords, holes: []),
@@ -215,7 +228,35 @@ struct ContentView: View {
         )
         
         polygonLayer?.add(polygonInfo)
-        // polygonLayer?.setCallbackHandler(handler) // Add callback handler if needed
+        mapView.add(layer: polygonLayer?.asLayerInterface())
+        
+        // Set initial camera position
+        if let center = camera.center.value, let zoom = camera.zoom.value {
+            mapView.camera.move(toCenterPositionZoom: center, zoom: zoom, animated: false)
+        }
+        
+        return mapView
+    }
+    
+    func updateUIView(_ uiView: MCMapView, context: Context) {
+        // Handle camera updates if needed
+    }
+}
+
+struct ContentView: View {
+    @State private var camera = MapView.Camera(
+        latitude: 46.962592372639634,
+        longitude: 8.378232525377973,
+        zoom: 1000000
+    )
+    
+    var body: some View {
+        MapWithPolygonView(
+            camera: $camera,
+            coords: [
+                // your coordinates here
+            ]
+        )
     }
 }
 ```
@@ -244,27 +285,20 @@ A simple icon layer is implemented as well. This supports displaying textures at
 ##### SwiftUI
 
 ```swift
-struct ContentView: View {
-    @State private var camera = MapView.Camera(
-        latitude: 46.962592372639634,
-        longitude: 8.378232525377973,
-        zoom: 1000000
-    )
-    @State private var iconLayer: MCIconLayerInterface?
+struct MapWithIconView: UIViewRepresentable {
+    @Binding var camera: MapView.Camera
+    let coordinate: MCCoord
+    let imageName: String
     
-    var body: some View {
-        MapView(
-            camera: $camera,
-            layers: [iconLayer]
-        )
-        .onAppear {
-            setupIconLayer()
-        }
-    }
-    
-    private func setupIconLayer() {
-        iconLayer = MCIconLayerInterface.create()
-        let image = UIImage(named: "image")
+    func makeUIView(context: Context) -> MCMapView {
+        let mapView = MCMapView()
+        
+        // Add base layer
+        mapView.add(layer: TiledRasterLayer("osm", webMercatorUrlFormat: "https://tiles.sample.org/{z}/{x}/{y}.png"))
+        
+        // Add icon layer
+        let iconLayer = MCIconLayerInterface.create()
+        let image = UIImage(named: imageName)
         let texture = try! TextureHolder(image!.cgImage!)
         let icon = MCIconFactory.createIcon(
             "icon",
@@ -275,7 +309,34 @@ struct ContentView: View {
             blendMode: .NORMAL
         )
         iconLayer?.add(icon)
-        // iconLayer?.setCallbackHandler(handler) // Add callback handler if needed
+        mapView.add(layer: iconLayer?.asLayerInterface())
+        
+        // Set initial camera position
+        if let center = camera.center.value, let zoom = camera.zoom.value {
+            mapView.camera.move(toCenterPositionZoom: center, zoom: zoom, animated: false)
+        }
+        
+        return mapView
+    }
+    
+    func updateUIView(_ uiView: MCMapView, context: Context) {
+        // Handle updates if needed
+    }
+}
+
+struct ContentView: View {
+    @State private var camera = MapView.Camera(
+        latitude: 46.962592372639634,
+        longitude: 8.378232525377973,
+        zoom: 1000000
+    )
+    
+    var body: some View {
+        MapWithIconView(
+            camera: $camera,
+            coordinate: camera.center.value ?? MCCoord(lat: 46.962592372639634, lon: 8.378232525377973),
+            imageName: "your-image-name"
+        )
     }
 }
 ```
@@ -304,30 +365,18 @@ A line layer can be added to the mapView as well. Using the MCLineFactory a Line
 ##### SwiftUI
 
 ```swift
-struct ContentView: View {
-    @State private var camera = MapView.Camera(
-        latitude: 46.962592372639634,
-        longitude: 8.378232525377973,
-        zoom: 1000000
-    )
-    @State private var lineLayer: MCLineLayerInterface?
+struct MapWithLineView: UIViewRepresentable {
+    @Binding var camera: MapView.Camera
+    let coords: [MCCoord]
     
-    var body: some View {
-        MapView(
-            camera: $camera,
-            layers: [lineLayer]
-        )
-        .onAppear {
-            setupLineLayer()
-        }
-    }
-    
-    private func setupLineLayer() {
-        lineLayer = MCLineLayerInterface.create()
-        let coords: [MCCoord] = [
-            // your coordinates here
-        ]
+    func makeUIView(context: Context) -> MCMapView {
+        let mapView = MCMapView()
         
+        // Add base layer
+        mapView.add(layer: TiledRasterLayer("osm", webMercatorUrlFormat: "https://tiles.sample.org/{z}/{x}/{y}.png"))
+        
+        // Add line layer
+        let lineLayer = MCLineLayerInterface.create()
         lineLayer?.add(MCLineFactory.createLine(
             "lineIdentifier",
             coordinates: coords,
@@ -348,6 +397,35 @@ struct ContentView: View {
                 offset: 0.0
             )
         ))
+        mapView.add(layer: lineLayer?.asLayerInterface())
+        
+        // Set initial camera position
+        if let center = camera.center.value, let zoom = camera.zoom.value {
+            mapView.camera.move(toCenterPositionZoom: center, zoom: zoom, animated: false)
+        }
+        
+        return mapView
+    }
+    
+    func updateUIView(_ uiView: MCMapView, context: Context) {
+        // Handle updates if needed
+    }
+}
+
+struct ContentView: View {
+    @State private var camera = MapView.Camera(
+        latitude: 46.962592372639634,
+        longitude: 8.378232525377973,
+        zoom: 1000000
+    )
+    
+    var body: some View {
+        MapWithLineView(
+            camera: $camera,
+            coords: [
+                // your coordinates here
+            ]
+        )
     }
 }
 ```
