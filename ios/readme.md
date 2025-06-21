@@ -56,14 +56,22 @@ struct ContentView: View {
         longitude: 8.378232525377973,
         zoom: 1000000
     )
+    @State private var layers: [any Layer] = []
     
     var body: some View {
         MapView(
             camera: $camera,
-            layers: [
-                TiledRasterLayer("osm", webMercatorUrlFormat: "https://tiles.sample.org/{z}/{x}/{y}.png")
-            ]
+            layers: layers
         )
+        .onAppear {
+            setupLayers()
+        }
+    }
+    
+    private func setupLayers() {
+        layers = [
+            TiledRasterLayer("osm", webMercatorUrlFormat: "https://tiles.sample.org/{z}/{x}/{y}.png")
+        ]
     }
 }
 ```
@@ -77,15 +85,23 @@ struct ContentView: View {
         longitude: 8.378232525377973,
         zoom: 1000000
     )
+    @State private var layers: [any Layer] = []
     
     var body: some View {
         MapView(
             camera: $camera,
-            layers: [
-                TiledRasterLayer("base", webMercatorUrlFormat: "https://tiles.sample.org/{z}/{x}/{y}.png"),
-                try? VectorLayer("overlay", styleURL: "https://www.sample.org/overlay/style.json")
-            ]
+            layers: layers
         )
+        .onAppear {
+            setupLayers()
+        }
+    }
+    
+    private func setupLayers() {
+        layers = [
+            TiledRasterLayer("base", webMercatorUrlFormat: "https://tiles.sample.org/{z}/{x}/{y}.png"),
+            try! VectorLayer("overlay", styleURL: "https://www.sample.org/overlay/style.json")
+        ]
     }
 }
 ```
@@ -137,12 +153,12 @@ struct ContentView: View {
         longitude: 8.378232525377973,
         zoom: 1000000
     )
-    @State private var wmtsLayer: (any Layer)?
+    @State private var layers: [any Layer] = []
     
     var body: some View {
         MapView(
             camera: $camera,
-            layers: [wmtsLayer]
+            layers: layers
         )
         .onAppear {
             setupWMTSLayer()
@@ -150,9 +166,11 @@ struct ContentView: View {
     }
     
     private func setupWMTSLayer() {
-        let resource = MCWmtsCapabilitiesResource.create(xml)!
-        let loader = MCTextureLoader() // Default implementation
-        wmtsLayer = resource.createLayer("identifier", tileLoader: loader)
+        guard let resource = MCWmtsCapabilitiesResource.create(xml),
+              let wmtsLayer = resource.createLayer("identifier", tileLoader: MCTextureLoader()) else {
+            return
+        }
+        layers = [wmtsLayer]
     }
 }
 ```
@@ -187,14 +205,22 @@ struct ContentView: View {
         longitude: 8.378232525377973,
         zoom: 1000000
     )
+    @State private var layers: [any Layer] = []
     
     var body: some View {
         MapView(
             camera: $camera,
-            layers: [
-                try! VectorLayer("base-map", styleURL: "https://www.sample.org/base-map/style.json")
-            ]
+            layers: layers
         )
+        .onAppear {
+            setupLayers()
+        }
+    }
+    
+    private func setupLayers() {
+        layers = [
+            try! VectorLayer("base-map", styleURL: "https://www.sample.org/base-map/style.json")
+        ]
     }
 }
 ```
@@ -558,15 +584,23 @@ struct ContentView: View {
         longitude: 8.378232525377973,
         zoom: 1000000
     )
+    @State private var layers: [any Layer] = []
     
     var body: some View {
         MapView(
             camera: $camera,
             mapConfig: .init(mapCoordinateSystem: MCCoordinateSystemFactory.getEpsg2056System()),
-            layers: [
-                TiledRasterLayer("osm", webMercatorUrlFormat: "https://tiles.sample.org/{z}/{x}/{y}.png")
-            ]
+            layers: layers
         )
+        .onAppear {
+            setupLayers()
+        }
+    }
+    
+    private func setupLayers() {
+        layers = [
+            TiledRasterLayer("osm", webMercatorUrlFormat: "https://tiles.sample.org/{z}/{x}/{y}.png")
+        ]
     }
 }
 ```
