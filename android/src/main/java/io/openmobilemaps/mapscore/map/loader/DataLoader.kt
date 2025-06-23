@@ -12,6 +12,7 @@ package io.openmobilemaps.mapscore.map.loader
 
 import android.content.Context
 import android.graphics.BitmapFactory
+import android.util.Log
 import com.snapchat.djinni.Future
 import com.snapchat.djinni.Promise
 import io.openmobilemaps.mapscore.graphics.BitmapTextureHolder
@@ -42,8 +43,8 @@ open class DataLoader(
 	companion object {
 		private const val HEADER_NAME_ETAG = "etag"
 
-        private const val TIMEOUT_DUR = 20L
-        private val TIMEOUT_UNIT = TimeUnit.SECONDS
+		private const val TIMEOUT_DUR = 20L
+		private val TIMEOUT_UNIT = TimeUnit.SECONDS
 	}
 
 	protected open var okHttpClient = initializeClient()
@@ -79,63 +80,68 @@ open class DataLoader(
 	}
 
 	override fun loadTexture(url: String, etag: String?): TextureLoaderResult {
-        val resFuture = loadTextureAsync(url, etag)
-        return try {
-            resFuture.get(TIMEOUT_DUR, TIMEOUT_UNIT)
-        } catch (e: Exception) {
-            val status = when (e) {
-                is InterruptedException, is ExecutionException -> LoaderStatus.ERROR_OTHER
-                is TimeoutException -> LoaderStatus.ERROR_TIMEOUT
-                else -> throw e
-            }
-            TextureLoaderResult(null, null, status, null)
-        }
+		val resFuture = loadTextureAsync(url, etag)
+		return try {
+			resFuture.get(TIMEOUT_DUR, TIMEOUT_UNIT)
+		} catch (e: Exception) {
+			val status = when (e) {
+				is InterruptedException, is ExecutionException -> LoaderStatus.ERROR_OTHER
+				is TimeoutException -> LoaderStatus.ERROR_TIMEOUT
+				else -> throw e
+			}
+			TextureLoaderResult(null, null, status, null)
+		}
 	}
 
-    override fun loadTextureAsync(url: String, etag: String?): Future<TextureLoaderResult> {
-        val request = Request.Builder()
-            .url(url)
-            .tag(url)
-            .build()
+	override fun loadTextureAsync(url: String, etag: String?): Future<TextureLoaderResult> {
+		val request = Request.Builder()
+			.url(url)
+			.tag(url)
+			.build()
 
-        val result = Promise<TextureLoaderResult>()
-        okHttpClient.newCall(request).enqueue(object : Callback {
-            override fun onResponse(call: Call, response: Response) {
-                val bytes: ByteArray? = response.body?.bytes()
-                if (response.isSuccessful && bytes != null) {
-                    val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-					if(bitmap==null){
+		val result = Promise<TextureLoaderResult>()
+		okHttpClient.newCall(request).enqueue(object : Callback {
+			override fun onResponse(call: Call, response: Response) {
+				val bytes: ByteArray? = try {
+					response.body?.bytes()
+				} catch (e: IOException) {
+					Log.i(DataLoader::class.java.canonicalName, "Failed to load response body", e)
+					null
+				}
+				if (response.isSuccessful && bytes != null) {
+					val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+					if (bitmap == null) {
 						result.setValue(TextureLoaderResult(null, null, LoaderStatus.ERROR_OTHER, "DECODING"))
 						return
 					}
-                    result.setValue(
-                        TextureLoaderResult(
-                            BitmapTextureHolder(bitmap),
-                            response.header(HEADER_NAME_ETAG, null),
-                            LoaderStatus.OK,
-                            null
-                        )
-                    )
-                } else if (response.code == 204) {
-                    result.setValue(TextureLoaderResult(null, null, LoaderStatus.OK, response.code.toString()))
-                } else if (response.code == 404) {
-                    result.setValue(TextureLoaderResult(null, null, LoaderStatus.ERROR_404, response.code.toString()))
-                } else if (response.code == 400) {
-                    result.setValue(TextureLoaderResult(null, null, LoaderStatus.ERROR_400, response.code.toString()))
-                } else {
-                    result.setValue(TextureLoaderResult(null, null, LoaderStatus.ERROR_OTHER, response.code.toString()))
-                }
-            }
+					result.setValue(
+						TextureLoaderResult(
+							BitmapTextureHolder(bitmap),
+							response.header(HEADER_NAME_ETAG, null),
+							LoaderStatus.OK,
+							null
+						)
+					)
+				} else if (response.code == 204) {
+					result.setValue(TextureLoaderResult(null, null, LoaderStatus.OK, response.code.toString()))
+				} else if (response.code == 404) {
+					result.setValue(TextureLoaderResult(null, null, LoaderStatus.ERROR_404, response.code.toString()))
+				} else if (response.code == 400) {
+					result.setValue(TextureLoaderResult(null, null, LoaderStatus.ERROR_400, response.code.toString()))
+				} else {
+					result.setValue(TextureLoaderResult(null, null, LoaderStatus.ERROR_OTHER, response.code.toString()))
+				}
+			}
 
 			override fun onFailure(call: Call, e: IOException) {
-                when {
-                    call.isCanceled() -> {
-                        // Do nothing, since the result is dropped anyway (setting a LoaderStatus will cause the SharedLib to do further computing)
-                    }
-                    e is SocketTimeoutException -> result.setValue(TextureLoaderResult(null, null, LoaderStatus.ERROR_TIMEOUT, null))
-                    else -> result.setValue(TextureLoaderResult(null, null, LoaderStatus.ERROR_NETWORK, null))
-                }
-            }
+				when {
+					call.isCanceled() -> {
+						// Do nothing, since the result is dropped anyway (setting a LoaderStatus will cause the SharedLib to do further computing)
+					}
+					e is SocketTimeoutException -> result.setValue(TextureLoaderResult(null, null, LoaderStatus.ERROR_TIMEOUT, null))
+					else -> result.setValue(TextureLoaderResult(null, null, LoaderStatus.ERROR_NETWORK, null))
+				}
+			}
 		})
 		return result.future
 	}
@@ -162,17 +168,22 @@ open class DataLoader(
 		val result = Promise<DataLoaderResult>()
 		okHttpClient.newCall(request).enqueue(object : Callback {
 			override fun onFailure(call: Call, e: IOException) {
-                when {
-                    call.isCanceled() -> {
-                        // Do nothing, since the result is dropped anyway (setting a LoaderStatus will cause the SharedLib to do further computing)
-                    }
-                    e is SocketTimeoutException -> result.setValue(DataLoaderResult(null, null, LoaderStatus.ERROR_TIMEOUT, null))
-                    else -> result.setValue(DataLoaderResult(null, null, LoaderStatus.ERROR_NETWORK, null))
-                }
-            }
+				when {
+					call.isCanceled() -> {
+						// Do nothing, since the result is dropped anyway (setting a LoaderStatus will cause the SharedLib to do further computing)
+					}
+					e is SocketTimeoutException -> result.setValue(DataLoaderResult(null, null, LoaderStatus.ERROR_TIMEOUT, null))
+					else -> result.setValue(DataLoaderResult(null, null, LoaderStatus.ERROR_NETWORK, null))
+				}
+			}
 
 			override fun onResponse(call: Call, response: Response) {
-				val bytes: ByteArray? = response.body?.bytes()
+				val bytes: ByteArray? = try {
+					response.body?.bytes()
+				} catch (e: IOException) {
+					Log.i(DataLoader::class.java.canonicalName, "Failed to load response body", e)
+					null
+				}
 				if (response.isSuccessful && bytes != null) {
 					result.setValue(
 						DataLoaderResult(
@@ -193,7 +204,7 @@ open class DataLoader(
 				}
 			}
 		})
-        return result.future
+		return result.future
 	}
 
 	override fun cancel(url: String) {
