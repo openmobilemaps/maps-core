@@ -22,7 +22,9 @@ object TextureAtlasProvider {
         )
 
         return ArrayList(packerResult.map { page ->
-            val pageAtlasBitmap = Bitmap.createBitmap(maxAtlasSize, maxAtlasSize, Bitmap.Config.ARGB_8888)
+            val atlasWidth = page.uvs.maxOf { it.value.x + it.value.width }
+            val atlasHeight = page.uvs.maxOf { it.value.y + it.value.height }
+            val pageAtlasBitmap = Bitmap.createBitmap(atlasWidth, atlasHeight, Bitmap.Config.ARGB_8888)
             val pageAtlasCanvas = Canvas(pageAtlasBitmap)
             page.uvs.forEach { (identifier, uv) ->
                 bitmaps[identifier]?.let { bitmap ->
