@@ -483,15 +483,15 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(VectorModificationWrappe
 
     rotations[countOffset] = iconRotate;
 
-    if ((textSymbolPlacement ==  TextSymbolPlacement::LINE || textSymbolPlacement ==  TextSymbolPlacement::LINE_CENTER) && angle) {
+    if (iconRotationAlignment == SymbolAlignment::VIEWPORT ||
+       (iconRotationAlignment == SymbolAlignment::AUTO && textSymbolPlacement == TextSymbolPlacement::POINT)) {
+       rotations[countOffset] += rotation;
+   } else if ((textSymbolPlacement ==  TextSymbolPlacement::LINE || textSymbolPlacement ==  TextSymbolPlacement::LINE_CENTER) && angle) {
         if (labelObject && labelObject->wasReversed) {
             rotations[countOffset] += std::fmod(*angle + 180.0, 360.0);
         } else {
             rotations[countOffset] += *angle;
         }
-    } else if (iconRotationAlignment == SymbolAlignment::VIEWPORT ||
-        (iconRotationAlignment == SymbolAlignment::AUTO && textSymbolPlacement == TextSymbolPlacement::POINT)) {
-        rotations[countOffset] += rotation;
     }
 
     const auto iconWidth = spriteSize.x * iconSize * (is3d ? 1.0 : scaleFactor);
