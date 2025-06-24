@@ -36,6 +36,14 @@ unitSphereTextInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
                           constant float *alphas [[buffer(12)]],
                           uint instanceId [[instance_id]])
 {
+    float alpha = alphas[instanceId];
+
+    if (alpha == 0) {
+        return TextInstancedVertexOut {
+            .position = float4(-3,-3,-3,-3)
+        };
+    }
+
     const float3 referencePosition = referencePositions[instanceId];
     const float2 offset = positions[instanceId];
     const float2 scale = scales[instanceId];
@@ -55,10 +63,10 @@ unitSphereTextInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
 
     auto diffCenter = screenPosition - earthCenter;
 
-    float alpha = alphas[instanceId];
-
     if (diffCenter.z > 0) {
-        alpha = 0.0;
+        return TextInstancedVertexOut {
+            .position = float4(-3,-3,-3,-3)
+        };
     }
 
     const float sinAngle = sin(angle);
@@ -72,10 +80,6 @@ unitSphereTextInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
                        (pScaled.x * sinAngle + pScaled.y * cosAngle) * aspectRatio);
 
     auto position = float4(screenPosition.xy + offset.xy + pRot, 0.0, 1.0);
-
-    if (alpha == 0) {
-        position = float4(-3,-3,-3,-3);
-    }
 
     TextInstancedVertexOut out {
       .position = position,
