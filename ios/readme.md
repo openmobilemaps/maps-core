@@ -270,3 +270,8 @@ The [Package.swift](../Package.swift) file can be opened in Xcode and build dire
 
 ## License
 This project is licensed under the terms of the MPL 2 license. See the [LICENSE](../LICENSE) file.
+
+## Third-Party Software
+This project depends on:
+
+- [Swift Atomics](https://github.com/apple/swift-atomics) – © 2020 Apple Inc. – Licensed under the [Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0)
