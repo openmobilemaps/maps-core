@@ -36,6 +36,7 @@ unitSphereTextInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
                           constant float *alphas [[buffer(12)]],
                           uint instanceId [[instance_id]])
 {
+    float alpha = alphas[instanceId];
     const float3 referencePosition = referencePositions[instanceId];
     const float2 offset = positions[instanceId];
     const float2 scale = scales[instanceId];
@@ -55,26 +56,29 @@ unitSphereTextInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
 
     auto diffCenter = screenPosition - earthCenter;
 
-    float alpha = alphas[instanceId];
+    float isVisible = float(alpha > 0.0);  // 0 if alpha == 0, 1 otherwise
+    float isInFront = float(diffCenter.z <= 0); // 0 if behind globe, 1 otherwise
 
-    if (diffCenter.z > 0) {
-        alpha = 0.0;
-    }
+    const float mask = isVisible * isInFront;
 
-    float sinAngle = sin(angle);
-    float cosAngle = cos(angle);
+    const float sinAngle = sin(angle) * mask;
+    const float cosAngle = cos(angle) * mask;
 
     const float2 p = (vertexIn.position.xy);
 
     // apply scale, then rotation and aspect ratio correction
-    auto pScaled = float2(p.x * scale.x, p.y * scale.y);
-    auto pRot = float2((pScaled.x * cosAngle - pScaled.y * sinAngle),
-                       (pScaled.x * sinAngle + pScaled.y * cosAngle) * aspectRatio);
+    const float2 pRot = float2(
+        p.x * scale.x * cosAngle - p.y * scale.y * sinAngle,
+        (p.x * scale.x * sinAngle + p.y * scale.y * cosAngle) * aspectRatio
+    );
 
-    auto position = float4(screenPosition.xy + offset.xy + pRot, 0.0, 1.0);
+    const float4 offscreenPlaceholder = float4(-3.0, -3.0, -3.0, -3.0);
+    float4 screenPositionWithOffset = float4(screenPosition.xy + offset.xy + pRot, 0.0, 1.0);
+    screenPositionWithOffset /= screenPosition.w;
+    const float4 finalPosition = mix(offscreenPlaceholder, screenPositionWithOffset, mask);
 
     TextInstancedVertexOut out {
-      .position = position,
+      .position = finalPosition,
       .uv = vertexIn.uv,
       .texureCoordinates = texureCoordinates[instanceId],
       .styleIndex = styleIndices[instanceId],
@@ -170,31 +174,33 @@ textInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
                           constant float *alphas [[buffer(12)]],
                           uint instanceId [[instance_id]])
 {
-    const float2 position = positions[instanceId] + originOffset.xy;
+    float alpha = alphas[instanceId];
+    float mask = float(alpha > 0.0);  // 0 if alpha == 0, 1 otherwise
 
-    const float2 scale = scales[instanceId];
-    const float rotation = rotations[instanceId];
+    float2 pos = (positions[instanceId] + originOffset.xy) * mask;
+    float2 scale = scales[instanceId] * mask;
+    float angle = rotations[instanceId] * mask * M_PI_F / 180.0;
 
-    const float angle = rotation * M_PI_F / 180.0;
+    float sinAngle = sin(angle) * mask;
+    float cosAngle = cos(angle) * mask;
 
-    const float4x4 model_matrix = float4x4(
-                                              float4(cos(angle) * scale.x, -sin(angle) * scale.x, 0, 0),
-                                              float4(sin(angle) * scale.y, cos(angle) * scale.y, 0, 0),
-                                              float4(0, 0, 0, 0),
-                                              float4(position.x, position.y, 0.0, 1)
-                                              );
+    // Apply scale and rotation directly to vertex
+    float2 local = vertexIn.position.xy;
+    float2 rotated = float2(
+        local.x * scale.x * cosAngle - local.y * scale.y * sinAngle,
+        local.x * scale.x * sinAngle + local.y * scale.y * cosAngle
+    );
 
-    const float4x4 matrix = vpMatrix * model_matrix;
+    float4 worldPosition = float4(pos + rotated, 0.0, 1.0);
+    float4 clipPosition = mix(float4(-3.0, -3.0, -3.0, -3.0), vpMatrix * worldPosition, mask);
 
-    TextInstancedVertexOut out {
-      .position = matrix * float4(vertexIn.position.xy, 0.0, 1.0),
-      .uv = vertexIn.uv,
-      .texureCoordinates = texureCoordinates[instanceId],
-      .styleIndex = styleIndices[instanceId],
-      .alpha = alphas[instanceId]
+    return TextInstancedVertexOut {
+        .position = clipPosition,
+        .uv = vertexIn.uv,
+        .texureCoordinates = texureCoordinates[instanceId],
+        .styleIndex = styleIndices[instanceId],
+        .alpha = alpha
     };
-
-    return out;
 }
 
 
