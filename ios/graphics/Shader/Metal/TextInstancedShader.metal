@@ -61,17 +61,21 @@ unitSphereTextInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
         alpha = 0.0;
     }
 
-    float sinAngle = sin(angle);
-    float cosAngle = cos(angle);
+    const float sinAngle = sin(angle);
+    const float cosAngle = cos(angle);
 
     const float2 p = (vertexIn.position.xy);
 
     // apply scale, then rotation and aspect ratio correction
-    auto pScaled = float2(p.x * scale.x, p.y * scale.y);
-    auto pRot = float2((pScaled.x * cosAngle - pScaled.y * sinAngle),
+    const auto pScaled = float2(p.x * scale.x, p.y * scale.y);
+    const auto pRot = float2((pScaled.x * cosAngle - pScaled.y * sinAngle),
                        (pScaled.x * sinAngle + pScaled.y * cosAngle) * aspectRatio);
 
     auto position = float4(screenPosition.xy + offset.xy + pRot, 0.0, 1.0);
+
+    if (alpha == 0) {
+        position = float4(-3,-3,-3,-3);
+    }
 
     TextInstancedVertexOut out {
       .position = position,
