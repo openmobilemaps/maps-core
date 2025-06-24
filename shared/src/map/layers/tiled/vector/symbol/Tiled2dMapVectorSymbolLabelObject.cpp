@@ -648,19 +648,11 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(VectorModification
         countOffset += 1;
     }
 
-    auto rectBoundingBoxTopLeft = (numberOfCharacters > 0) ? boundingBoxMin :  referencePoint;
-    auto rectBoundingBoxBottomRight = (numberOfCharacters > 0) ? boundingBoxMax :  referencePoint;
-
     const float scaledTextPadding = is3d ? textPadding : scaleFactor * textPadding;
 
-    rectBoundingBoxTopLeft.x -= scaledTextPadding;
-    rectBoundingBoxTopLeft.y -= scaledTextPadding;
-
-    rectBoundingBoxBottomRight.x += scaledTextPadding;
-    rectBoundingBoxBottomRight.y += scaledTextPadding;
-
-    dimensions.x = rectBoundingBoxBottomRight.x - rectBoundingBoxTopLeft.x;
-    dimensions.y = rectBoundingBoxBottomRight.y - rectBoundingBoxTopLeft.y;
+    // dimensions before rotation, with padding included
+    dimensions.x = size.x + 2 * scaledTextPadding;
+    dimensions.y = size.y + 2 * scaledTextPadding;
 
     if (rotationAlignment != SymbolAlignment::MAP) {
         if (is3d) {
