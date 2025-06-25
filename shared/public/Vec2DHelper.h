@@ -18,6 +18,7 @@
 #include <vector>
 #include <cmath>
 
+#include "TrigonometryLUT.h"
 
 inline Vec2D operator+( const ::Vec2D& left, const ::Vec2D& right ) {
     return Vec2D(left.x + right.x, left.y + right.y);
@@ -140,8 +141,12 @@ class Vec2DHelper {
             double minY = std::numeric_limits<double>::max();
             double maxY = std::numeric_limits<double>::lowest();
             for (const Vec2D& point : points) {
-                const double rotatedX = (point.x - thisIndexPoint.x) * std::cos(-angle) - (point.y - thisIndexPoint.y) * std::sin(-angle);
-                const double rotatedY = (point.x - thisIndexPoint.x) * std::sin(-angle) + (point.y - thisIndexPoint.y) * std::cos(-angle);
+                double sin, cos;
+                lut::sincos(-angle, sin, cos);
+
+                const double rotatedX = (point.x - thisIndexPoint.x) * cos - (point.y - thisIndexPoint.y) * sin;
+                const double rotatedY = (point.x - thisIndexPoint.x) * sin + (point.y - thisIndexPoint.y) * cos;
+                
                 minX = std::min(minX, rotatedX);
                 maxX = std::max(maxX, rotatedX);
                 minY = std::min(minY, rotatedY);
@@ -154,14 +159,18 @@ class Vec2DHelper {
 
             if (area < minArea) {
                 minArea = area;
-                minRectangle.topLeft.x = thisIndexPoint.x + minX * std::cos(angle) - minY * std::sin(angle);
-                minRectangle.topLeft.y = thisIndexPoint.y + minX * std::sin(angle) + minY * std::cos(angle);
-                minRectangle.topRight.x = thisIndexPoint.x + maxX * std::cos(angle) - minY * std::sin(angle);
-                minRectangle.topRight.y = thisIndexPoint.y + maxX * std::sin(angle) + minY * std::cos(angle);
-                minRectangle.bottomRight.x = thisIndexPoint.x + maxX * std::cos(angle) - maxY * std::sin(angle);
-                minRectangle.bottomRight.y = thisIndexPoint.y + maxX * std::sin(angle) + maxY * std::cos(angle);
-                minRectangle.bottomLeft.x = thisIndexPoint.x + minX * std::cos(angle) - maxY * std::sin(angle);
-                minRectangle.bottomLeft.y = thisIndexPoint.y + minX * std::sin(angle) + maxY * std::cos(angle);
+
+                double sin, cos;
+                lut::sincos(angle, sin, cos);
+
+                minRectangle.topLeft.x = thisIndexPoint.x + minX * cos - minY * sin;
+                minRectangle.topLeft.y = thisIndexPoint.y + minX * sin + minY * cos;
+                minRectangle.topRight.x = thisIndexPoint.x + maxX * cos - minY * sin;
+                minRectangle.topRight.y = thisIndexPoint.y + maxX * sin + minY * cos;
+                minRectangle.bottomRight.x = thisIndexPoint.x + maxX * cos - maxY * sin;
+                minRectangle.bottomRight.y = thisIndexPoint.y + maxX * sin + maxY * cos;
+                minRectangle.bottomLeft.x = thisIndexPoint.x + minX * cos - maxY * sin;
+                minRectangle.bottomLeft.y = thisIndexPoint.y + minX * sin + maxY * cos;
             }
         }
 
