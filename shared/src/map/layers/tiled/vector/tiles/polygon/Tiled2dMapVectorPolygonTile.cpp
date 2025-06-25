@@ -19,6 +19,8 @@
 #include "Tiled2dMapVectorStyleParser.h"
 #include "Tiled2dMapVectorLayerConstants.h"
 
+#include "TrigonometryLUT.h"
+
 Tiled2dMapVectorPolygonTile::Tiled2dMapVectorPolygonTile(const std::weak_ptr<MapInterface> &mapInterface,
                                                          const Tiled2dMapVersionedTileInfo &tileInfo,
                                                          const WeakActor<Tiled2dMapVectorLayerTileCallbackInterface> &tileCallbackInterface,
@@ -268,14 +270,28 @@ void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDa
                         styleGroupNewPolygonsVector[styleGroupIndex].back().indices.push_back(indexOffset + index);
                     }
 
+                    double x,y,z;
+                    auto &v = styleGroupNewPolygonsVector[styleGroupIndex].back().vertices;
+
                     for (auto const &coordinate: coordinates) {
-                        double x = is3d ? 1.0 * sin(coordinate.y) * cos(coordinate.x) - rx : coordinate.x - rx;
-                        double y = is3d ?  1.0 * cos(coordinate.y) - ry : coordinate.y - ry;
-                        double z = is3d ? -1.0 * sin(coordinate.y) * sin(coordinate.x) - rz : 0.0;
-                        styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(x);
-                        styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(y);
-                        styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(z);
-                        styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(styleIndex);
+                        if(is3d) {
+                            double sinX, cosX, sinY, cosY;
+                            lut::sincos(coordinate.y, sinY, cosY);
+                            lut::sincos(coordinate.x, sinX, cosX);
+
+                            x = 1.0 * sinY * cosX - rx;
+                            y = 1.0 * cosY - ry;
+                            z = -1.0 * sinY * sinX - rz;
+                        } else {
+                            x = coordinate.x - rx;
+                            y = coordinate.y - ry;
+                            z = 0.0;
+                        }
+
+                        v.push_back(x);
+                        v.push_back(y);
+                        v.push_back(z);
+                        v.push_back(styleIndex);
                     }
 
                     styleIndicesOffsets[styleGroupIndex] += coordinates.size();

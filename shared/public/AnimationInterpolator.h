@@ -13,6 +13,8 @@
 #include <cmath>
 #include <utility>
 
+#include "TrigonometryLUT.h"
+
 enum InterpolatorFunction {
     Linear,
     EaseIn,
@@ -38,9 +40,9 @@ public:
             case InterpolatorFunction::EaseInOut:
                 return value < 0.5 ? 2 * value * value : value * (4 - 2 * value) - 1;
             case InterpolatorFunction::EaseInBounce:
-                return pow( 2, 6 * (value - 1) ) * std::abs( sin( value * M_PI * 3.5 ) );
+                return pow( 2, 6 * (value - 1) ) * std::abs( lut::sin( value * M_PI * 3.5 ) );
             case InterpolatorFunction::EaseOutBounce:
-                return 1 - pow( 2, -6 * value ) * std::abs( cos( value * M_PI * 3.5 ) );
+                return 1 - pow( 2, -6 * value ) * std::abs( lut::cos( value * M_PI * 3.5 ) );
             default:
 #if __cplusplus >= 202302L
                 std::unreachable();

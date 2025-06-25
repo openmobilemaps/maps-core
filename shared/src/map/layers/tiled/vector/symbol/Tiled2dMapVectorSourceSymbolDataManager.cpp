@@ -17,6 +17,8 @@
 #include "Quad2dInstancedInterface.h"
 #include "RenderObject.h"
 
+#include "TrigonometryLUT.h"
+
 Tiled2dMapVectorSourceSymbolDataManager::Tiled2dMapVectorSourceSymbolDataManager(const WeakActor<Tiled2dMapVectorLayer> &vectorLayer,
                                                                                  const std::shared_ptr<VectorMapDescription> &mapDescription,
                                                                                  const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
@@ -773,8 +775,8 @@ bool Tiled2dMapVectorSourceSymbolDataManager::onClickConfirmed(const std::unorde
     Vec4D temp2 = Vec4D(0.0, 0.0, 0.0, 0.0);
     const double halfWidth = viewportSize.x / 2.0;
     const double halfHeight = viewportSize.y / 2.0;
-    const double sinNegGridAngle = std::sin(rotation * M_PI / 180.0);
-    const double cosNegGridAngle = std::cos(rotation * M_PI / 180.0);
+    const double sinNegGridAngle = lut::sin(rotation * M_PI / 180.0);
+    const double cosNegGridAngle = lut::cos(rotation * M_PI / 180.0);
     auto const origin = camera->asCameraInterface()->getOrigin();
 
     auto collisionEnvironment = CollisionUtil::CollisionEnvironment(vpMatrix, is3d, temp1, temp2, halfWidth, halfHeight, sinNegGridAngle, cosNegGridAngle, origin);

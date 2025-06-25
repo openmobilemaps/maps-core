@@ -19,6 +19,8 @@
 #include "MapCamera3d.h"
 #include "CoordinateSystemIdentifiers.h"
 
+#include "TrigonometryLUT.h"
+
 Tiled2dMapVectorSymbolLabelObject::Tiled2dMapVectorSymbolLabelObject(const std::shared_ptr<CoordinateConversionHelperInterface> &converter,
                                                                      const std::shared_ptr<FeatureContext> featureContext,
                                                                      const std::shared_ptr<SymbolVectorLayerDescription> &description,
@@ -154,18 +156,26 @@ Tiled2dMapVectorSymbolLabelObject::Tiled2dMapVectorSymbolLabelObject(const std::
             return Vec3DHelper::toVec(converter->convertToRenderSystem(Vec2DHelper::toCoord(l, systemIdentifier)));
         });
 
+        double sinX, cosX, sinY, cosY;
+
         if(is3d) {
             for(auto& c : renderLineCoordinates) {
-                double x = c.z * sin(c.y) * cos(c.x);
-                double y = c.z * cos(c.y);
-                double z = -c.z * sin(c.y) * sin(c.x);
+                lut::sincos(c.y, sinY, cosY);
+                lut::sincos(c.x, sinX, cosX);
+
+                double x = c.z * sinY * cosX;
+                double y = c.z * cosY;
+                double z = -c.z * sinY * sinX;
                 cartesianRenderLineCoordinates.emplace_back(x, y, z);
             }
 
             auto &c = referencePoint;
-            cartesianReferencePoint.x = c.z * sin(c.y) * cos(c.x);
-            cartesianReferencePoint.y = c.z * cos(c.y);
-            cartesianReferencePoint.z = -c.z * sin(c.y) * sin(c.x);
+            lut::sincos(c.y, sinY, cosY);
+            lut::sincos(c.x, sinX, cosX);
+
+            cartesianReferencePoint.x = c.z * sinY * cosX;
+            cartesianReferencePoint.y = c.z * cosY;
+            cartesianReferencePoint.z = -c.z * sinY * sinX;
         }
 
         screenLineCoordinates = renderLineCoordinates;
@@ -587,8 +597,8 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(VectorModification
     Vec3D boundingBoxMin(std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), referencePoint.z);
     Vec3D boundingBoxMax(std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest(), referencePoint.z);
 
-    const double sinAngle = sin(angle * M_PI / 180.0);
-    const double cosAngle = cos(angle * M_PI / 180.0);
+    const double sinAngle = lut::sin(angle * M_PI / 180.0);
+    const double cosAngle = lut::cos(angle * M_PI / 180.0);
     Vec2D anchorOffsetRot = Vec2DHelper::rotate(anchorOffset, Vec2D(0, 0), sinAngle, cosAngle);
 
     const auto dx = referencePoint.x + anchorOffset.x;
@@ -1043,14 +1053,12 @@ DistanceIndex Tiled2dMapVectorSymbolLabelObject::findReferencePointIndices() {
     return DistanceIndex(iMin, tMin);
 }
 
-
 void Tiled2dMapVectorSymbolLabelObject::writePosition(const double x_, const double y_, const size_t offset, VectorModificationWrapper<float> &buffer) {
     const size_t baseIndex = positionSize * offset;
     if (is3d) {
-        const double sinY = sin(y_);
-        const double cosY = cos(y_);
-        const double sinX = sin(x_);
-        const double cosX = cos(x_);
+        double sinX, cosX, sinY, cosY;
+        lut::sincos(y_, sinY, cosY);
+        lut::sincos(x_, sinX, cosX);
 
         buffer[baseIndex]     = sinY * cosX - tileOrigin.x;
         buffer[baseIndex + 1] = cosY - tileOrigin.y;
