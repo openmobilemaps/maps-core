@@ -42,7 +42,7 @@ final class ViewportState {
     private func load() -> (Int32, Int32) {
         let packed = packedViewport.load(ordering: .relaxed)
         let x = Int32(bitPattern: UInt32(packed >> 32))
-        let y = Int32(bitPattern: UInt32(packed & 0xFFFFFFFF))
+        let y = Int32(bitPattern: UInt32(packed & 0xFFFF_FFFF))
         return (x, y)
     }
 }
