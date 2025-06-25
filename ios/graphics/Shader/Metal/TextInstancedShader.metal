@@ -174,25 +174,27 @@ textInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
                           constant float *alphas [[buffer(12)]],
                           uint instanceId [[instance_id]])
 {
-    float alpha = alphas[instanceId];
-    float mask = float(alpha > 0.0);  // 0 if alpha == 0, 1 otherwise
+    const float alpha = alphas[instanceId];
+    const float mask = float(alpha > 0.0);  // 0 if alpha == 0, 1 otherwise
 
-    float2 pos = (positions[instanceId] + originOffset.xy) * mask;
-    float2 scale = scales[instanceId] * mask;
-    float angle = rotations[instanceId] * mask * M_PI_F / 180.0;
+    const float2 pos = (positions[instanceId] + originOffset.xy) * mask;
+    const float2 scale = scales[instanceId] * mask;
+    const float angle = rotations[instanceId] * mask * M_PI_F / 180.0;
 
-    float sinAngle = sin(angle) * mask;
-    float cosAngle = cos(angle) * mask;
+    const float sinAngle = sin(angle) * mask;
+    const float cosAngle = cos(angle) * mask;
 
-    // Apply scale and rotation directly to vertex
-    float2 local = vertexIn.position.xy;
-    float2 rotated = float2(
-        local.x * scale.x * cosAngle - local.y * scale.y * sinAngle,
-        local.x * scale.x * sinAngle + local.y * scale.y * cosAngle
+    const float4x4 modelMatrix = float4x4(
+        float4( cosAngle * scale.x, -sinAngle * scale.x, 0.0, 0.0),
+        float4( sinAngle * scale.y,  cosAngle * scale.y, 0.0, 0.0),
+        float4( 0.0,                 0.0,                1.0, 0.0),
+        float4( pos.x,               pos.y,              0.0, 1.0)
     );
 
-    float4 worldPosition = float4(pos + rotated, 0.0, 1.0);
-    float4 clipPosition = mix(float4(-3.0, -3.0, -3.0, -3.0), vpMatrix * worldPosition, mask);
+    const float4x4 matrix = vpMatrix * modelMatrix;
+
+    const float4 worldPosition = matrix * float4(vertexIn.position.xy, 0.0, 1.0);
+    const float4 clipPosition = mix(float4(-3.0, -3.0, -3.0, -3.0), worldPosition, mask);
 
     return TextInstancedVertexOut {
         .position = clipPosition,
