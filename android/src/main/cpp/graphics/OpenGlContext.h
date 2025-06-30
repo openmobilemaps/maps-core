@@ -55,7 +55,7 @@ public:
     virtual void pause() override;
 
     virtual /*not-null*/ std::shared_ptr<OpenGlRenderTargetInterface>
-    getCreateRenderTarget(const std::string &name, ::TextureFilterType textureFilter, const ::Color &clearColor) override;
+    getCreateRenderTarget(const std::string &name, ::TextureFilterType textureFilter, const ::Color &clearColor, bool usesDepthStencil) override;
 
     virtual void deleteRenderTarget(const std::string &name) override;
 

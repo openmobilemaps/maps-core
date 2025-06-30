@@ -53,7 +53,7 @@ rendering_context_interface = interface +c +j +o {
 open_gl_rendering_context_interface = interface +c +j +o {
 	resume();
 	pause();
-	get_create_render_target(name: string, texture_filter: texture_filter_type, clear_color: color) : open_gl_render_target_interface;
+	get_create_render_target(name: string, texture_filter: texture_filter_type, clear_color: color, uses_depth_stencil: bool) : open_gl_render_target_interface;
 	delete_render_target(name: string);
 	get_render_targets() : list<open_gl_render_target_interface>;
 	get_program(name: string) : i32;
