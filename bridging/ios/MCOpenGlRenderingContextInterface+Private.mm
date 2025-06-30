@@ -48,11 +48,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 
 - (nullable id<MCOpenGlRenderTargetInterface>)getCreateRenderTarget:(nonnull NSString *)name
                                                       textureFilter:(MCTextureFilterType)textureFilter
-                                                         clearColor:(nonnull MCColor *)clearColor {
+                                                         clearColor:(nonnull MCColor *)clearColor
+                                                   usesDepthStencil:(BOOL)usesDepthStencil {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->getCreateRenderTarget(::djinni::String::toCpp(name),
                                                                          ::djinni::Enum<::TextureFilterType, MCTextureFilterType>::toCpp(textureFilter),
-                                                                         ::djinni_generated::Color::toCpp(clearColor));
+                                                                         ::djinni_generated::Color::toCpp(clearColor),
+                                                                         ::djinni::Bool::toCpp(usesDepthStencil));
         return ::djinni_generated::OpenGlRenderTargetInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
@@ -120,12 +122,13 @@ public:
             [djinni_private_get_proxied_objc_object() pause];
         }
     }
-    /*not-null*/ std::shared_ptr<::OpenGlRenderTargetInterface> getCreateRenderTarget(const std::string & c_name, ::TextureFilterType c_textureFilter, const ::Color & c_clearColor) override
+    /*not-null*/ std::shared_ptr<::OpenGlRenderTargetInterface> getCreateRenderTarget(const std::string & c_name, ::TextureFilterType c_textureFilter, const ::Color & c_clearColor, bool c_usesDepthStencil) override
     {
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getCreateRenderTarget:(::djinni::String::fromCpp(c_name))
                                                                                     textureFilter:(::djinni::Enum<::TextureFilterType, MCTextureFilterType>::fromCpp(c_textureFilter))
-                                                                                       clearColor:(::djinni_generated::Color::fromCpp(c_clearColor))];
+                                                                                       clearColor:(::djinni_generated::Color::fromCpp(c_clearColor))
+                                                                                 usesDepthStencil:(::djinni::Bool::fromCpp(c_usesDepthStencil))];
             return ::djinni_generated::OpenGlRenderTargetInterface::toCpp(objcpp_result_);
         }
     }

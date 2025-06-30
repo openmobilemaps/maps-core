@@ -92,11 +92,11 @@ std::shared_ptr<OpenGlRenderingContextInterface> OpenGlContext::asOpenGlRenderin
 
 // OpenGlRenderingContextInterface
 
-/*not-null*/ std::shared_ptr<OpenGlRenderTargetInterface> OpenGlContext::getCreateRenderTarget(const std::string & name, ::TextureFilterType textureFilter, const ::Color & clearColor) {
+/*not-null*/ std::shared_ptr<OpenGlRenderTargetInterface> OpenGlContext::getCreateRenderTarget(const std::string & name, ::TextureFilterType textureFilter, const ::Color & clearColor, bool usesDepthStencil) {
     const auto &targetEntry = renderTargets.find(name);
     std::shared_ptr<OpenGlRenderTargetInterface> renderTarget = targetEntry != renderTargets.end() ? targetEntry->second : nullptr;
     if (renderTarget == nullptr) {
-        renderTarget = std::make_shared<OpenGlRenderTarget>(textureFilter, clearColor);
+        renderTarget = std::make_shared<OpenGlRenderTarget>(textureFilter, clearColor, usesDepthStencil);
         renderTargets[name] = renderTarget;
     }
     return renderTarget;

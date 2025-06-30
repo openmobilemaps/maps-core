@@ -20,7 +20,7 @@
 class OpenGlRenderTarget : public RenderTargetInterface, public OpenGlRenderTargetInterface, public std::enable_shared_from_this<OpenGlRenderTarget> {
 public:
 
-    OpenGlRenderTarget(::TextureFilterType textureFilter, const ::Color &clearColor);
+    OpenGlRenderTarget(::TextureFilterType textureFilter, const ::Color &clearColor, bool usesDepthStencil);
 
     // RenderTargetInterface
 
@@ -43,6 +43,7 @@ public:
 private:
     const TextureFilterType textureFilter;
     const Color clearColor;
+    const bool usesDepthStencil;
 
     std::mutex mutex;
 
@@ -50,6 +51,7 @@ private:
 
     GLuint framebufferId;
     GLuint textureId;
+    GLuint depthStencilBufferId;
     Vec2I size = Vec2I(0, 0);
 
     GLfloat tempColorBuffer[4];
