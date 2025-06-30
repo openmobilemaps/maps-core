@@ -491,7 +491,7 @@ void Tiled2dMapRasterLayer::generateRenderPasses() {
         }
 
         if (!renderObjects.empty()) {
-            if (is3D) {
+            if (is3D && layerConfig->getZoomInfo().maskTile) {
                 std::reverse(renderObjects.begin(), renderObjects.end());
             }
 
