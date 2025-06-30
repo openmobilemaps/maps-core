@@ -1088,6 +1088,12 @@ void Tiled2dMapSource<L, R>::performLoadingTask(Tiled2dMapTileInfo tile, size_t 
         if (strongSelf) {
             auto res = result.get();
             if (res->status == LoaderStatus::OK) {
+                if (strongSelf->errorTiles[loaderIndex].count(tile) > 0) {
+                    // This was a retry. It appears that network connectivity has recovered.
+                    // Schedule all erroring tiles to be reloaded now.
+                    weakActor.message(MFN(&Tiled2dMapSource::forceReload));
+                }
+
                 if (strongSelf->hasExpensivePostLoadingTask()) {
                     auto strongScheduler = strongSelf->scheduler.lock();
                     if (strongScheduler) {
@@ -1214,14 +1220,8 @@ void Tiled2dMapSource<L, R>::didFailToLoad(Tiled2dMapTileInfo tile, size_t loade
     case LoaderStatus::ERROR_OTHER:
     case LoaderStatus::ERROR_NETWORK: {
         const auto now = DateHelper::currentTimeMillis();
-        int64_t delay = 0;
-        if (errorTiles[loaderIndex].count(tile) != 0) {
-            errorTiles[loaderIndex].at(tile).lastLoad = now;
-            errorTiles[loaderIndex].at(tile).delay = std::min(2 * errorTiles[loaderIndex].at(tile).delay, MAX_WAIT_TIME);
-        } else {
-            errorTiles[loaderIndex][tile] = {now, MIN_WAIT_TIME};
-        }
-        delay = errorTiles[loaderIndex].at(tile).delay;
+        errorTiles[loaderIndex][tile].lastLoad = now;
+        errorTiles[loaderIndex][tile].loading = false;
 
         if (errorManager) {
             errorManager->addTiledLayerError(TiledLayerError(status, errorCode, layerConfig->getLayerName(),
@@ -1229,8 +1229,8 @@ void Tiled2dMapSource<L, R>::didFailToLoad(Tiled2dMapTileInfo tile, size_t loade
                                                              true, tile.bounds));
         }
 
-        if (!nextDelayTaskExecution || nextDelayTaskExecution > now + delay) {
-            nextDelayTaskExecution = now + delay;
+        if (!nextRetryTaskExecution) {
+            nextRetryTaskExecution = now + RETRY_FREQUENCY;
 
             auto taskIdentifier = "Tiled2dMapSource_loadingErrorTask";
 
@@ -1240,8 +1240,8 @@ void Tiled2dMapSource<L, R>::didFailToLoad(Tiled2dMapTileInfo tile, size_t loade
                         WeakActor<Tiled2dMapSource>(mailbox, std::dynamic_pointer_cast<Tiled2dMapSource>(shared_from_this()));
                 strongScheduler->addTask(
                         std::make_shared<LambdaTask>(
-                                TaskConfig(taskIdentifier, delay, TaskPriority::NORMAL, ExecutionEnvironment::IO),
-                                [weakActor] { weakActor.message(MFN(&Tiled2dMapSource::performDelayedTasks)); }));
+                                TaskConfig(taskIdentifier, RETRY_FREQUENCY, TaskPriority::NORMAL, ExecutionEnvironment::IO),
+                                [weakActor] { weakActor.message(MFN(&Tiled2dMapSource::scheduleRetries)); }));
             }
         }
         break;
@@ -1255,31 +1255,48 @@ void Tiled2dMapSource<L, R>::didFailToLoad(Tiled2dMapTileInfo tile, size_t loade
     notifyTilesUpdates();
 }
 
-template <class L, class R> void Tiled2dMapSource<L, R>::performDelayedTasks() {
-    nextDelayTaskExecution = std::nullopt;
+template <class L, class R> void Tiled2dMapSource<L, R>::scheduleRetries() {
+    nextRetryTaskExecution = std::nullopt;
+    if (isPaused) {
+        return;
+    }
 
     const auto now = DateHelper::currentTimeMillis();
-    long long minDelay = std::numeric_limits<long long>::max();
+    size_t numTriggeredRetries = 0;
+    size_t numWaitingRetries = 0;
+    long long minUnreadyDelay = std::numeric_limits<long long>::max();
 
-    std::vector<std::pair<int, Tiled2dMapTileInfo>> toLoad;
-
+    // Try one randomly selected erroring tile for each loader.
+    std::vector<Tiled2dMapTileInfo> readyToRetry;
     for (auto &[loaderIndex, errors] : errorTiles) {
+        readyToRetry.clear();
         for (auto &[tile, errorInfo] : errors) {
-            if (errorInfo.lastLoad + errorInfo.delay >= now) {
-                toLoad.push_back({loaderIndex, tile});
-            } else {
-                auto tileDelay = now - (errorInfo.lastLoad + errorInfo.delay);
-                minDelay = std::min(minDelay, tileDelay);
+            auto tileUrl = layerConfig->getTileUrl(tile.x, tile.y, tile.t, tile.zoomIdentifier); // DEBUG
+            if (errorInfo.loading) {
+                continue;
             }
+            if (errorInfo.lastLoad + RETRY_MIN_WAIT_TIME <= now) {
+                readyToRetry.push_back(tile);
+            } else {
+                auto tileDelay = (errorInfo.lastLoad + RETRY_MIN_WAIT_TIME) - now;
+                minUnreadyDelay = std::min(minUnreadyDelay, tileDelay);
+                numWaitingRetries++;
+            }
+        }
+
+        if (readyToRetry.size() > 0) {
+            numTriggeredRetries += 1;
+            numWaitingRetries += readyToRetry.size()-1;
+            auto selectedIdx = std::uniform_int_distribution<size_t>(0, readyToRetry.size()-1)(retryRandomGen);
+            auto tile = readyToRetry[selectedIdx];
+            errors[tile].loading = true;
+            performLoadingTask(tile, loaderIndex);
         }
     }
 
-    for (auto &[loaderIndex, tile] : toLoad) {
-        performLoadingTask(tile, loaderIndex);
-    }
-
-    if (minDelay != std::numeric_limits<long long>::max()) {
-        nextDelayTaskExecution = now + minDelay;
+    auto nextExecutionDelay = (numTriggeredRetries > 0) ? RETRY_FREQUENCY : minUnreadyDelay;
+    if (numWaitingRetries > 0) {
+        nextRetryTaskExecution = now + nextExecutionDelay;
 
         auto taskIdentifier = "Tiled2dMapSource_loadingErrorTask";
 
@@ -1288,8 +1305,8 @@ template <class L, class R> void Tiled2dMapSource<L, R>::performDelayedTasks() {
             auto weakActor = WeakActor<Tiled2dMapSource>(mailbox, std::dynamic_pointer_cast<Tiled2dMapSource>(shared_from_this()));
             strongScheduler->addTask(
                     std::make_shared<LambdaTask>(
-                            TaskConfig(taskIdentifier, minDelay, TaskPriority::NORMAL, ExecutionEnvironment::IO),
-                            [weakActor] { weakActor.message(MFN(&Tiled2dMapSource::performDelayedTasks)); }));
+                            TaskConfig(taskIdentifier, nextExecutionDelay, TaskPriority::NORMAL, ExecutionEnvironment::IO),
+                            [weakActor] { weakActor.message(MFN(&Tiled2dMapSource::scheduleRetries)); }));
         }
     }
 }
@@ -1495,11 +1512,13 @@ void Tiled2dMapSource<L, R>::setErrorManager(const std::shared_ptr<::ErrorManage
 
 template <class L, class R> void Tiled2dMapSource<L, R>::forceReload() {
 
-    // set delay to 0 for all error tiles
+    // Attempt to load all erroring tiles right now
     for (auto &[loaderIndex, errors] : errorTiles) {
         for (auto &[tile, errorInfo] : errors) {
-            errorInfo.delay = 1;
-            performLoadingTask(tile, loaderIndex);
+            if(!errorInfo.loading) {
+                errorInfo.loading = true;
+                performLoadingTask(tile, loaderIndex);
+            }
         }
     }
 

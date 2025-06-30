@@ -38,6 +38,7 @@
 #include <set>
 #include <unordered_map>
 #include <unordered_set>
+#include <random>
 
 // Move-only owning holder for a gpc_polygon.
 // Calls gpc_free_polygon on destruction.
@@ -175,8 +176,6 @@ class Tiled2dMapSource : public Tiled2dMapSourceInterface,
     void didFailToLoad(Tiled2dMapTileInfo tile, size_t loaderIndex, const LoaderStatus &status,
                        const std::optional<std::string> &errorCode);
 
-    void performDelayedTasks();
-
   protected:
     virtual bool hasExpensivePostLoadingTask() = 0;
 
@@ -233,22 +232,27 @@ class Tiled2dMapSource : public Tiled2dMapSourceInterface,
     void scheduleFixedNumberOfLoadingTasks();
     void performLoadingTask(Tiled2dMapTileInfo tile, size_t loaderIndex);
 
+    void scheduleRetries();
+
     void updateTileMasks();
 
     std::unordered_map<Tiled2dMapTileInfo, int> currentlyLoading;
 
-    const long long MAX_WAIT_TIME = 32000;
-    const long long MIN_WAIT_TIME = 1000;
+    const long long RETRY_FREQUENCY = 1000;
+    const long long RETRY_MIN_WAIT_TIME = 500;
 
     struct ErrorInfo {
-        long long lastLoad;
-        long long delay;
+        long long lastLoad; //!< timestamp of last end of tile load
+        bool loading; //!< tile loading is currently being retried
     };
 
     std::unordered_map<size_t, std::map<Tiled2dMapTileInfo, ErrorInfo>> errorTiles;
-    std::optional<long long> nextDelayTaskExecution;
+    std::optional<long long> nextRetryTaskExecution;
 
     std::unordered_set<Tiled2dMapTileInfo> notFoundTiles;
 
     std::string layerName;
+
+  private:
+    std::default_random_engine retryRandomGen;
 };
