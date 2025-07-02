@@ -51,7 +51,6 @@ open class BaseShader: MCShaderProgramInterface, @unchecked Sendable {
             guard newBlendMode != self.blendMode else { return }
             self.blendMode = newBlendMode
             self.pipeline = nil
-            self.setupProgram(nil)
         }
 
         if Thread.isMainThread {
