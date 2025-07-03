@@ -634,19 +634,25 @@ void MapCamera3d::update() {
         if (mapInterface) {
             mapInterface->invalidate();
         }
+        notifyListeners(ListenerType::BOUNDS);
     }
     {
         std::lock_guard<std::recursive_mutex> lock(animationMutex);
-        if (zoomAnimation)
+        if (zoomAnimation) {
             std::static_pointer_cast<AnimationInterface>(zoomAnimation)->update();
-        if (rotationAnimation)
+        }
+        if (rotationAnimation) {
             std::static_pointer_cast<AnimationInterface>(rotationAnimation)->update();
-        if (coordAnimation)
+        }
+        if (coordAnimation) {
             std::static_pointer_cast<AnimationInterface>(coordAnimation)->update();
-        if (pitchAnimation)
+        }
+        if (pitchAnimation) {
             std::static_pointer_cast<AnimationInterface>(pitchAnimation)->update();
-        if (verticalDisplacementAnimation)
+        }
+        if (verticalDisplacementAnimation) {
             std::static_pointer_cast<AnimationInterface>(verticalDisplacementAnimation)->update();
+        }
     }
     updateMatrices();
 }
@@ -1634,6 +1640,7 @@ void MapCamera3d::setCameraConfig(const Camera3dConfig &config, std::optional<fl
             [weakSelf](double pitch) {
                 if (auto selfPtr = weakSelf.lock()) {
                     selfPtr->cameraPitch = pitch;
+                    selfPtr->notifyListeners(ListenerType::BOUNDS);
                     auto mapInterface = selfPtr->mapInterface;
                     if (mapInterface) {
                         mapInterface->invalidate();
@@ -1643,6 +1650,7 @@ void MapCamera3d::setCameraConfig(const Camera3dConfig &config, std::optional<fl
             [weakSelf, targetPitch] {
                 if (auto selfPtr = weakSelf.lock()) {
                     selfPtr->cameraPitch = targetPitch;
+                    selfPtr->notifyListeners(ListenerType::BOUNDS);
                     selfPtr->pitchAnimation = nullptr;
                 }
             });
@@ -1653,6 +1661,7 @@ void MapCamera3d::setCameraConfig(const Camera3dConfig &config, std::optional<fl
             [weakSelf](double dis) {
                 if (auto selfPtr = weakSelf.lock()) {
                     selfPtr->cameraVerticalDisplacement = dis;
+                    selfPtr->notifyListeners(ListenerType::BOUNDS);
                     auto mapInterface = selfPtr->mapInterface;
                     if (mapInterface) {
                         mapInterface->invalidate();
@@ -1662,6 +1671,7 @@ void MapCamera3d::setCameraConfig(const Camera3dConfig &config, std::optional<fl
             [weakSelf, targetVerticalDisplacement] {
                 if (auto selfPtr = weakSelf.lock()) {
                     selfPtr->cameraVerticalDisplacement = targetVerticalDisplacement;
+                    selfPtr->notifyListeners(ListenerType::BOUNDS);
                     selfPtr->verticalDisplacementAnimation = nullptr;
                 }
             });
@@ -1673,6 +1683,7 @@ void MapCamera3d::setCameraConfig(const Camera3dConfig &config, std::optional<fl
                 [weakSelf](double zoom) {
                     if (auto selfPtr = weakSelf.lock()) {
                         selfPtr->zoom = zoom;
+                        selfPtr->notifyListeners(ListenerType::BOUNDS);
                         auto mapInterface = selfPtr->mapInterface;
                         if (mapInterface) {
                             mapInterface->invalidate();
@@ -1682,6 +1693,7 @@ void MapCamera3d::setCameraConfig(const Camera3dConfig &config, std::optional<fl
                 [weakSelf, targetZoom] {
                     if (auto selfPtr = weakSelf.lock()) {
                         selfPtr->zoom = *targetZoom;
+                        selfPtr->notifyListeners(ListenerType::BOUNDS);
                         selfPtr->zoomAnimation = nullptr;
                     }
                 });
