@@ -52,6 +52,10 @@ void LineGroup2dLayerObject::setLines(const std::vector<std::tuple<std::vector<V
 
         int pointCount = (int)renderCoords.size();
 
+        if(pointCount < 2) {
+            continue;
+        }
+
         float prefixTotalLineLength = 0.0;
 
         int iSecondToLast = pointCount - 2;
@@ -136,6 +140,10 @@ void LineGroup2dLayerObject::setLines(const std::vector<std::tuple<std::vector<C
         }
 
         int pointCount = (int)renderCoords.size();
+
+        if(pointCount < 2) {
+            continue;
+        }
 
         float prefixTotalLineLength = 0.0;
 

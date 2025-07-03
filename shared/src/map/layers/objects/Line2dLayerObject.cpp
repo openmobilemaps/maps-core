@@ -47,6 +47,10 @@ void Line2dLayerObject::setPositions(const std::vector<Coord> &positions, const 
 
     int pointCount = (int)renderCoords.size();
 
+    if(pointCount < 2) {
+        return;
+    }
+
     float prefixTotalLineLength = 0.0;
 
     int iSecondToLast = pointCount - 2;
