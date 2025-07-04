@@ -82,10 +82,7 @@ open class RenderTargetTexture: Identifiable, Equatable, MCRenderTargetInterface
     }
 
     public func texture(context: RenderingContext) -> MTLTexture? {
-        if context.currentBufferIndex <= textures.count {
-            return nil
-        }
-        return textures[context.currentBufferIndex].color
+        return textures.indices.contains(context.currentBufferIndex) ? textures[context.currentBufferIndex].color : nil
     }
 
     public static func == (lhs: RenderTargetTexture, rhs: RenderTargetTexture) -> Bool {
