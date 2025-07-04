@@ -91,7 +91,7 @@ public class RenderingContext: NSObject, @unchecked Sendable {
         guard currentPipeline !== pipelineState else {
             return
         }
-        
+
         currentPipeline = pipelineState
         encoder?.setRenderPipelineState(pipelineState)
     }
