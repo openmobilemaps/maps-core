@@ -1626,7 +1626,27 @@ void MapCamera3d::setCameraConfig(const Camera3dConfig &config, std::optional<fl
     double targetVerticalDisplacement = getCameraVerticalDisplacement();
     this->zoom = initialZoom;
 
-    if (durationSeconds) {
+
+    auto mapInterface = this->mapInterface;
+    auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
+
+    if (!renderingContext){
+        std::lock_guard<std::recursive_mutex> lock(paramMutex);
+        this->cameraPitch = targetPitch;
+        this->cameraVerticalDisplacement = targetVerticalDisplacement;
+        if (targetZoom) {
+            this->zoom = *targetZoom;
+        }
+        if (targetCoordinate) {
+            this->focusPointPosition = *targetCoordinate;
+        }
+        return;
+    }
+
+    auto viewport = mapInterface->getRenderingContext()->getViewportSize();
+    auto viewPortSize = renderingContext->getViewportSize();
+
+    if (durationSeconds && viewPortSize.x > 0 && viewPortSize.y > 0) {
         long long duration = *durationSeconds * 1000;
         double initialPitch = cameraPitch;
         double initialVerticalDisplacement = cameraVerticalDisplacement;
@@ -1744,7 +1764,6 @@ void MapCamera3d::setCameraConfig(const Camera3dConfig &config, std::optional<fl
         }
     }
 
-    auto mapInterface = this->mapInterface;
     if (mapInterface) {
         mapInterface->invalidate();
     }
