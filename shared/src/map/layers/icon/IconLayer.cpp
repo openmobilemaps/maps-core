@@ -652,6 +652,6 @@ void IconLayer::addScaleAnimation(const IconScaleAnimation& iconScaleAnimation) 
 }
 
 bool IconLayer::isPointInRect(const Vec2F& point, float leftW, float rightW, float topH, float bottomH) {
-    return point.x >  -leftW && point.x < rightW &&
-           point.y > -topH && point.y < bottomH;
+    return point.x > -leftW && point.x < rightW &&
+           point.y < topH && point.y > -bottomH;
 }
