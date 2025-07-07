@@ -174,6 +174,9 @@ void Text2dInstancedOpenGl::prepareGlData(int program) {
     if (is3d) {
         originHandle = glGetUniformLocation(program, "uOrigin");
     }
+    isHaloHandle = glGetUniformLocation(program, "isHalo");
+    textureFactorHandle = glGetUniformLocation(program, "textureFactor");
+    distanceRangeHandle = glGetUniformLocation(program, "distanceRange");
 
     glDataBuffersGenerated = true;
 }
@@ -229,9 +232,13 @@ void Text2dInstancedOpenGl::removeTextureCoordsGlBuffers() {
     }
 }
 
-void Text2dInstancedOpenGl::loadTexture(const std::shared_ptr<::RenderingContextInterface> &context,
-                                        const std::shared_ptr<TextureHolderInterface> &textureHolder) {
+void Text2dInstancedOpenGl::loadFont(const std::shared_ptr<::RenderingContextInterface> &context,
+                                     const ::FontData &fontData,
+                                     const /*not-null*/ std::shared_ptr<TextureHolderInterface> &textureHolder) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
+
+    distanceRange = fontData.info.distanceRange;
+
     removeTexture();
 
     if (textureHolder != nullptr) {
@@ -299,7 +306,6 @@ void Text2dInstancedOpenGl::render(const std::shared_ptr<::RenderingContextInter
 
     if (usesTextureCoords) {
         prepareTextureDraw(program);
-        auto textureFactorHandle = glGetUniformLocation(program, "textureFactor");
         glUniform2f(textureFactorHandle, factorWidth, factorHeight);
     }
 
@@ -317,9 +323,9 @@ void Text2dInstancedOpenGl::render(const std::shared_ptr<::RenderingContextInter
     if (is3d) {
         glUniform4f(originHandle, origin.x, origin.y, origin.z, 0.0);
     }
+    glUniform1f(distanceRangeHandle, distanceRange);
 
     // Draw halos first
-    auto isHaloHandle = glGetUniformLocation(program, "isHalo");
     glUniform1f(isHaloHandle, 1.0);
     glDrawElementsInstanced(GL_TRIANGLES,6, GL_UNSIGNED_BYTE, nullptr, instanceCount);
 

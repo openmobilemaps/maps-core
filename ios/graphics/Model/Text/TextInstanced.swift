@@ -254,11 +254,12 @@ extension TextInstanced: MCTextInstancedInterface {
         }
     }
 
-    func loadTexture(
+    func loadFont(
         _ context: MCRenderingContextInterface?,
-        textureHolder: MCTextureHolderInterface?
+        fontData: MCFontData,
+        fontMsdfTexture: MCTextureHolderInterface?
     ) {
-        guard let textureHolder = textureHolder as? TextureHolder else {
+        guard let textureHolder = fontMsdfTexture as? TextureHolder else {
             fatalError("unexpected TextureHolder")
         }
 

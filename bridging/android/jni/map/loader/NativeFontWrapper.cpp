@@ -18,20 +18,22 @@ auto NativeFontWrapper::fromCpp(JNIEnv* jniEnv, const CppType& c) -> ::djinni::L
                                                            ::djinni::get(::djinni::F64::fromCpp(jniEnv, c.lineHeight)),
                                                            ::djinni::get(::djinni::F64::fromCpp(jniEnv, c.base)),
                                                            ::djinni::get(::djinni_generated::NativeVec2D::fromCpp(jniEnv, c.bitmapSize)),
-                                                           ::djinni::get(::djinni::F64::fromCpp(jniEnv, c.size)))};
+                                                           ::djinni::get(::djinni::F64::fromCpp(jniEnv, c.size)),
+                                                           ::djinni::get(::djinni::F64::fromCpp(jniEnv, c.distanceRange)))};
     ::djinni::jniExceptionCheck(jniEnv);
     return r;
 }
 
 auto NativeFontWrapper::toCpp(JNIEnv* jniEnv, JniType j) -> CppType {
-    ::djinni::JniLocalScope jscope(jniEnv, 6);
+    ::djinni::JniLocalScope jscope(jniEnv, 7);
     assert(j != nullptr);
     const auto& data = ::djinni::JniClass<NativeFontWrapper>::get();
     return {::djinni::String::toCpp(jniEnv, (jstring)jniEnv->GetObjectField(j, data.field_name)),
             ::djinni::F64::toCpp(jniEnv, jniEnv->GetDoubleField(j, data.field_lineHeight)),
             ::djinni::F64::toCpp(jniEnv, jniEnv->GetDoubleField(j, data.field_base)),
             ::djinni_generated::NativeVec2D::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_bitmapSize)),
-            ::djinni::F64::toCpp(jniEnv, jniEnv->GetDoubleField(j, data.field_size))};
+            ::djinni::F64::toCpp(jniEnv, jniEnv->GetDoubleField(j, data.field_size)),
+            ::djinni::F64::toCpp(jniEnv, jniEnv->GetDoubleField(j, data.field_distanceRange))};
 }
 
 } // namespace djinni_generated

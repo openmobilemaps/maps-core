@@ -59,7 +59,6 @@ Tiled2dMapVectorSymbolLabelObject::Tiled2dMapVectorSymbolLabelObject(const std::
           fullText(fullText),
           lineCoordinates(lineCoordinates),
           referencePoint(Vec3DHelper::toVec(converter->convertToRenderSystem(Vec2DHelper::toCoord(coordinate, systemIdentifier)))),
-          referenceSize(fontResult->fontData->info.size),
           animationCoordinator(animationCoordinator),
           stateManager(featureStateManager),
           dpFactor(dpFactor),

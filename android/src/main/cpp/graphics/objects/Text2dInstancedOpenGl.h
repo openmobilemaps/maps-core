@@ -39,8 +39,8 @@ public:
 
     virtual void setFrame(const ::Quad2dD &frame, const Vec3D &origin, bool is3d) override;
 
-    virtual void loadTexture(const std::shared_ptr<::RenderingContextInterface> &context,
-                             const std::shared_ptr<TextureHolderInterface> &textureHolder) override;
+    virtual void loadFont(const std::shared_ptr<::RenderingContextInterface> &context, const ::FontData &fontData,
+                          const /*not-null*/ std::shared_ptr<TextureHolderInterface> &fontMsdfTexture) override;
 
     virtual void removeTexture() override;
 
@@ -91,6 +91,9 @@ protected:
     int originOffsetHandle;
     int originHandle;
     int positionHandle;
+    int isHaloHandle;
+    int textureFactorHandle;
+    int distanceRangeHandle;
     GLuint vao;
     GLuint vertexBuffer;
     std::vector<GLfloat> vertices;
@@ -103,8 +106,11 @@ protected:
     bool texCoordBufferGenerated = false;
     Vec3D quadsOrigin = Vec3D(0.0, 0.0, 0.0);
 
+    // Font texture
     std::shared_ptr<TextureHolderInterface> textureHolder;
     int texturePointer;
+    // Font metadata
+    float distanceRange;
 
     bool usesTextureCoords = false;
 

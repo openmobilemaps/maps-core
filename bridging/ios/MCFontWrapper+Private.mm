@@ -15,7 +15,8 @@ auto FontWrapper::toCpp(ObjcType obj) -> CppType
             ::djinni::F64::toCpp(obj.lineHeight),
             ::djinni::F64::toCpp(obj.base),
             ::djinni_generated::Vec2D::toCpp(obj.bitmapSize),
-            ::djinni::F64::toCpp(obj.size)};
+            ::djinni::F64::toCpp(obj.size),
+            ::djinni::F64::toCpp(obj.distanceRange)};
 }
 
 auto FontWrapper::fromCpp(const CppType& cpp) -> ObjcType
@@ -24,7 +25,8 @@ auto FontWrapper::fromCpp(const CppType& cpp) -> ObjcType
                                     lineHeight:(::djinni::F64::fromCpp(cpp.lineHeight))
                                           base:(::djinni::F64::fromCpp(cpp.base))
                                     bitmapSize:(::djinni_generated::Vec2D::fromCpp(cpp.bitmapSize))
-                                          size:(::djinni::F64::fromCpp(cpp.size))];
+                                          size:(::djinni::F64::fromCpp(cpp.size))
+                                 distanceRange:(::djinni::F64::fromCpp(cpp.distanceRange))];
 }
 
 } // namespace djinni_generated

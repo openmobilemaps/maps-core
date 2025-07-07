@@ -12,12 +12,14 @@ NS_SWIFT_SENDABLE
                           lineHeight:(double)lineHeight
                                 base:(double)base
                           bitmapSize:(nonnull MCVec2D *)bitmapSize
-                                size:(double)size NS_DESIGNATED_INITIALIZER;
+                                size:(double)size
+                       distanceRange:(double)distanceRange NS_DESIGNATED_INITIALIZER;
 + (nonnull instancetype)fontWrapperWithName:(nonnull NSString *)name
                                  lineHeight:(double)lineHeight
                                        base:(double)base
                                  bitmapSize:(nonnull MCVec2D *)bitmapSize
-                                       size:(double)size;
+                                       size:(double)size
+                              distanceRange:(double)distanceRange;
 
 @property (nonatomic, readonly, nonnull) NSString * name;
 
@@ -27,7 +29,10 @@ NS_SWIFT_SENDABLE
 
 @property (nonatomic, readonly, nonnull) MCVec2D * bitmapSize;
 
-/** font size rendered in bitmap multiplied by dpFactor */
+/** font size rendered in distance field bitmap */
 @property (nonatomic, readonly) double size;
+
+/** pixel distance corresponding to max value in signed distance field */
+@property (nonatomic, readonly) double distanceRange;
 
 @end
