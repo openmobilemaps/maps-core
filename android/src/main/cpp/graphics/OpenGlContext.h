@@ -79,6 +79,7 @@ protected:
     Color backgroundColor = Color(0, 0, 0, 1);
 
     std::unordered_map<std::string, int> programs;
+    std::mutex renderTargetMutex;
     std::unordered_map<std::string, std::shared_ptr<OpenGlRenderTargetInterface>> renderTargets;
 
     Vec2I viewportSize = Vec2I(0, 0);

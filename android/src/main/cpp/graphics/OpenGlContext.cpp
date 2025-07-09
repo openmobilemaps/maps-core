@@ -30,8 +30,11 @@ void OpenGlContext::setViewportSize(const ::Vec2I &size) {
     viewportSize = size;
     glViewport(0, 0, size.x, size.y);
 
-    for (const auto &target : renderTargets) {
-        target.second->setup(size);
+    {
+        std::lock_guard<std::mutex> lock(renderTargetMutex);
+        for (const auto &target: renderTargets) {
+            target.second->setup(size);
+        }
     }
 }
 
@@ -93,6 +96,7 @@ std::shared_ptr<OpenGlRenderingContextInterface> OpenGlContext::asOpenGlRenderin
 // OpenGlRenderingContextInterface
 
 /*not-null*/ std::shared_ptr<OpenGlRenderTargetInterface> OpenGlContext::getCreateRenderTarget(const std::string & name, ::TextureFilterType textureFilter, const ::Color & clearColor, bool usesDepthStencil) {
+    std::lock_guard<std::mutex> lock(renderTargetMutex);
     const auto &targetEntry = renderTargets.find(name);
     std::shared_ptr<OpenGlRenderTargetInterface> renderTarget = targetEntry != renderTargets.end() ? targetEntry->second : nullptr;
     if (renderTarget == nullptr) {
@@ -103,6 +107,7 @@ std::shared_ptr<OpenGlRenderingContextInterface> OpenGlContext::asOpenGlRenderin
 }
 
 void OpenGlContext::deleteRenderTarget(const std::string & name) {
+    std::lock_guard<std::mutex> lock(renderTargetMutex);
     const auto &target = renderTargets.find(name);
     if (target != renderTargets.end()) {
         target->second->clear();
@@ -111,6 +116,7 @@ void OpenGlContext::deleteRenderTarget(const std::string & name) {
 }
 
 std::vector</*not-null*/ std::shared_ptr<OpenGlRenderTargetInterface>> OpenGlContext::getRenderTargets() {
+    std::lock_guard<std::mutex> lock(renderTargetMutex);
     std::vector<std::shared_ptr<OpenGlRenderTargetInterface>> targets;
     for (const auto &entry : renderTargets) {
         targets.push_back(entry.second);
@@ -120,14 +126,20 @@ std::vector</*not-null*/ std::shared_ptr<OpenGlRenderTargetInterface>> OpenGlCon
 
 
 void OpenGlContext::resume() {
-    for (const auto &target : renderTargets) {
-        target.second->setup(viewportSize);
+    {
+        std::lock_guard<std::mutex> lock(renderTargetMutex);
+        for (const auto &target: renderTargets) {
+            target.second->setup(viewportSize);
+        }
     }
 }
 
 void OpenGlContext::pause() {
-    for (const auto &target : renderTargets) {
-        target.second->clear();
+    {
+        std::lock_guard<std::mutex> lock(renderTargetMutex);
+        for (const auto &target: renderTargets) {
+            target.second->clear();
+        }
     }
 }
 
@@ -142,19 +154,31 @@ int OpenGlContext::getProgram(const std::string &name) {
     }
 }
 
-void OpenGlContext::storeProgram(const std::string &name, int program) { programs[name] = program; }
+void OpenGlContext::storeProgram(const std::string &name, int program) {
+    auto p = programs.find(name);
+    if (p != programs.end()) {
+        glDeleteProgram(program);
+    } else {
+        programs[name] = program;
+    }
+}
 
 void OpenGlContext::cleanAll() {
-    for (const auto &target : renderTargets) {
-        target.second->clear();
+    {
+        std::lock_guard<std::mutex> lock(renderTargetMutex);
+        for (const auto &target: renderTargets) {
+            target.second->clear();
+        }
     }
 
-    for (const auto &program : programs) {
+
+    for (const auto &program: programs) {
         GLuint programId = program.second;
         glDeleteProgram(programId);
     }
 
     programs.clear();
+
 }
 
 float OpenGlContext::getAspectRatio() {

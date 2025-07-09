@@ -76,6 +76,8 @@ public:
 
     virtual void setSprites(std::shared_ptr<SpriteData> spriteData, std::shared_ptr<TextureHolderInterface> spriteTexture) {}
 
+    virtual LayerReadyState isReadyToRenderOffscreen();
+
 protected:
     std::weak_ptr<MapInterface> mapInterface;
     const WeakActor<Tiled2dMapVectorLayer> vectorLayer;

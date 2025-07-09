@@ -667,6 +667,10 @@ std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapVectorLayer::build
         return {};
     }
     std::lock_guard<std::recursive_mutex> lock(renderPassMutex);
+    size_t numObjectsToRender = 0;
+    for (const auto &pass : currentRenderPasses) {
+        numObjectsToRender += pass->getRenderObjects().size();
+    }
     return currentRenderPasses;
 }
 
@@ -1357,7 +1361,19 @@ LayerReadyState Tiled2dMapVectorLayer::isReadyToRenderOffscreen() {
     if (layerConfigs.empty() || sourceInterfaces.empty()) {
         return LayerReadyState::NOT_READY;
     }
-    return Tiled2dMapLayer::isReadyToRenderOffscreen();
+    auto ready = Tiled2dMapLayer::isReadyToRenderOffscreen();
+    if (ready != LayerReadyState::READY) {
+        return ready;
+    }
+    for (const auto &sourceDataManager : sourceDataManagers) {
+        auto managerState = sourceDataManager.second.syncAccess([](const std::shared_ptr<Tiled2dMapVectorSourceTileDataManager> manager) {
+            return manager->isReadyToRenderOffscreen();
+        });
+        if (managerState != LayerReadyState::READY) {
+            return managerState;
+        }
+    }
+    return ready;
 }
 
 void Tiled2dMapVectorLayer::enableAnimations(bool enabled) {
