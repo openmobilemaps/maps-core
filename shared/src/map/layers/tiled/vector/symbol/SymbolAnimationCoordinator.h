@@ -64,6 +64,10 @@ public:
         }
     }
 
+    void stopIconAnimation() {
+        iconAnimationStart = 0;
+    }
+
     bool isIconAnimating() {
         return iconAnimationStart != 0;
     }

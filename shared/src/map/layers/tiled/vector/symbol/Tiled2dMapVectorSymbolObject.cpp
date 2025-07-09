@@ -582,6 +582,11 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(VectorModificationWrappe
 
     if (!isCoordinateOwner || (labelObject && !labelObject->isPlaced)) {
         alphas[countOffset] = 0.0;
+
+        // if the label is not placed while a animation is running the animation triggers a endless invalidation of the map
+        if (isCoordinateOwner && (labelObject && !labelObject->isPlaced) && animationCoordinator->isIconAnimating()) {
+            animationCoordinator->stopIconAnimation();
+        }
     } else if (!(description->minZoom <= zoomIdentifier && description->maxZoom >= zoomIdentifier)) {
         alphas[countOffset] = animationCoordinator->getIconAlpha(0.0, now);
     } else if (animationCoordinator->isColliding()) {
