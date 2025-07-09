@@ -13,7 +13,7 @@ import OSLog
 
 public enum PipelineDescriptorFactory {
     public static func pipelineDescriptor(
-        vertexDescriptor: MTLVertexDescriptor,
+        vertexDescriptor: MTLVertexDescriptor?,
         label: String,
         vertexShader: String,
         fragmentShader: String,
@@ -138,6 +138,10 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
     case sphereEffectShader
     case skySphereShader
 
+    case tessellatedQuad
+    case tessellatedQuad3D
+
+
     var label: String {
         switch self {
             case .alphaShader: return "Alpha shader with texture"
@@ -165,6 +169,9 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
             case .unitSphereTextInstancedShader: return "Unit Sphere Text Instanced shader"
             case .sphereEffectShader: return "Sphere Effect Shader"
             case .skySphereShader: return "Sky Effect Shader"
+
+            case .tessellatedQuad: return "Tessellated Quad Shader"
+            case .tessellatedQuad3D: return "Tessellated 3D Quad Shader"
         }
     }
 
@@ -174,6 +181,15 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
                 return true
             default:
                 return false
+        }
+    }
+
+    var isTesselation: Bool {
+        switch self {
+            case .tessellatedQuad, .tessellatedQuad3D:
+                true
+            default:
+                false
         }
     }
 
@@ -204,6 +220,9 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
             case .unitSphereTextInstancedShader: return "unitSphereTextInstancedVertexShader"
             case .sphereEffectShader: return "baseVertexShader"
             case .skySphereShader: return "baseVertexShader"
+
+            case .tessellatedQuad: return "tessellatedQuadVertex"
+            case .tessellatedQuad3D: return "tessellatedQuadVertex3D"
         }
     }
 
@@ -234,10 +253,12 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
             case .unitSphereTextInstancedShader: return "unitSphereTextInstancedFragmentShader"
             case .sphereEffectShader: return "sphereEffectFragmentShader"
             case .skySphereShader: return "skySphereFragmentShader"
+
+            case .tessellatedQuad, .tessellatedQuad3D: return "rasterFragmentShader"
         }
     }
 
-    var vertexDescriptor: MTLVertexDescriptor {
+    var vertexDescriptor: MTLVertexDescriptor? {
         switch self {
             case .lineGroupShader, .simpleLineGroupShader:
                 return LineVertex.descriptor
@@ -258,6 +279,8 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
                 .skySphereShader,
                 .roundColorShader:
                 return Vertex3DTexture.descriptor
+            case .tessellatedQuad, .tessellatedQuad3D:
+                return nil
             default:
                 return Vertex.descriptor
         }
@@ -274,6 +297,14 @@ extension PipelineLibrary {
             ) { pipeline -> MTLRenderPipelineState in
                 do {
                     let pipelineDescriptor = PipelineDescriptorFactory.pipelineDescriptor(pipeline: pipeline, library: library)
+                    if pipeline.type.isTesselation {
+                        pipelineDescriptor.tessellationPartitionMode = .pow2
+                        pipelineDescriptor.maxTessellationFactor = 64
+                        pipelineDescriptor.isTessellationFactorScaleEnabled = false
+                        pipelineDescriptor.tessellationFactorFormat = .half
+                        pipelineDescriptor.tessellationControlPointIndexType = .none
+                        pipelineDescriptor.tessellationFactorStepFunction = .constant
+                    }
                     return try device.makeRenderPipelineState(descriptor: pipelineDescriptor)
                 } catch {
                     // Log the JSON (key) and the error
