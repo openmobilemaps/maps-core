@@ -8,7 +8,8 @@ data class SaveFrameSpec(
 	val cropRightPc: Float = 0f,
 	val cropBottomPc: Float = 0f,
 	val outputFormat: OutputFormat = OutputFormat.BYTE_ARRAY,
-	val pixelFormat: PixelFormat = PixelFormat.RGB_565
+	val pixelFormat: PixelFormat = PixelFormat.RGB_565,
+	val frameCountdown: Int = 1
 ) {
 	enum class OutputFormat {
 		BITMAP,
