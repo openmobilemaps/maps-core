@@ -322,29 +322,61 @@ extension Quad2d: MCQuad2dInterface {
 
         let sFactor = self.subdivisionFactor
 
+        func transform(_ coordinate: MCVec3D) -> MCVec3D {
+            if is3d {
+                let x = 1.0 * sin(coordinate.y) * cos(coordinate.x) - origin.x
+                let y = 1.0 * cos(coordinate.y) - origin.y
+                let z = -1.0 * sin(coordinate.y) * sin(coordinate.x) - origin.z
+                return MCVec3D(x: x, y: y, z: z)
+            } else {
+                let x = coordinate.x - origin.x
+                let y = coordinate.y - origin.y
+                return MCVec3D(x: x, y: y, z: 0)
+            }
+        }
+
         if sFactor > 0 {
-            // --- GPU Tessellation Path: Prepare control points ---
             struct ControlPoint {
                 var position: SIMD3<Float>
                 var textureCoordinate: SIMD2<Float>
+                var normal: SIMD3<Float>
             }
 
-            // For 3D spheres, the control points are the raw lat/lon coordinates.
-            // The transformation to Cartesian happens in the tessellation shader.
-            // For 2D, the positions are already in the correct coordinate system.
-            let positionsAreLatLon = is3d
-
-            let blPos = positionsAreLatLon ? frame.bottomLeft.simd3 : SIMD3<Float>(frame.bottomLeft.xF, frame.bottomLeft.yF, frame.bottomLeft.zF)
-            let tlPos = positionsAreLatLon ? frame.topLeft.simd3 : SIMD3<Float>(frame.topLeft.xF, frame.topLeft.yF, frame.topLeft.zF)
-            let trPos = positionsAreLatLon ? frame.topRight.simd3 : SIMD3<Float>(frame.topRight.xF, frame.topRight.yF, frame.topRight.zF)
-            let brPos = positionsAreLatLon ? frame.bottomRight.simd3 : SIMD3<Float>(frame.bottomRight.xF, frame.bottomRight.yF, frame.bottomRight.zF)
+            func getNormal(_ coordinate: MCVec3D) -> SIMD3<Float> {
+                if is3d {
+                    let x = 1.0 * sin(coordinate.y) * cos(coordinate.x)
+                    let y = 1.0 * cos(coordinate.y)
+                    let z = -1.0 * sin(coordinate.y) * sin(coordinate.x)
+                    return MCVec3D(x: x, y: y, z: z).simd3
+                } else {
+                    let x = coordinate.x
+                    let y = coordinate.y
+                    return MCVec3D(x: x, y: y, z: 0).simd3
+                }
+            }
 
             let controlPoints: [ControlPoint] = [
                 // Order must match the vertex shader: BL, TL, TR, BR
-                .init(position: blPos, textureCoordinate: .init(textureCoordinates.xF, textureCoordinates.yF + textureCoordinates.heightF)),
-                .init(position: tlPos, textureCoordinate: .init(textureCoordinates.xF, textureCoordinates.yF)),
-                .init(position: trPos, textureCoordinate: .init(textureCoordinates.xF + textureCoordinates.widthF, textureCoordinates.yF)),
-                .init(position: brPos, textureCoordinate: .init(textureCoordinates.xF + textureCoordinates.widthF, textureCoordinates.yF + textureCoordinates.heightF)),
+                .init(
+                    position: transform(frame.bottomLeft).simd3,
+                    textureCoordinate: .init(textureCoordinates.xF, textureCoordinates.yF + textureCoordinates.heightF),
+                    normal: getNormal(frame.bottomLeft)
+                ),
+                .init(
+                    position: transform(frame.topLeft).simd3,
+                    textureCoordinate: .init(textureCoordinates.xF, textureCoordinates.yF),
+                    normal: getNormal(frame.topLeft)
+                ),
+                .init(
+                    position: transform(frame.topRight).simd3,
+                    textureCoordinate: .init(textureCoordinates.xF + textureCoordinates.widthF, textureCoordinates.yF),
+                    normal: getNormal(frame.topRight)
+                ),
+                .init(
+                    position: transform(frame.bottomRight).simd3,
+                    textureCoordinate: .init(textureCoordinates.xF + textureCoordinates.widthF, textureCoordinates.yF + textureCoordinates.heightF),
+                    normal: getNormal(frame.bottomRight)
+                ),
             ]
             self.controlPointBuffer.copyOrCreate(bytes: controlPoints, length: MemoryLayout<ControlPoint>.stride * 4, device: device)
 
@@ -354,28 +386,50 @@ extension Quad2d: MCQuad2dInterface {
             }
 
         } else {
-            // --- CPU Path: Original logic for sFactor == 0 ---
-            // The origin subtraction is handled by the shader uniforms now.
             let vertices: [Vertex3DTexture]
             if is3d {
-                func transformToSphere(_ coordinate: MCVec3D) -> MCVec3D {
-                    let x = 1.0 * sin(coordinate.y) * cos(coordinate.x)
-                    let y = 1.0 * cos(coordinate.y)
-                    let z = -1.0 * sin(coordinate.y) * sin(coordinate.x)
-                    return MCVec3D(x: x, y: y, z: z)
-                }
                 vertices = [
-                    .init(position: transformToSphere(frame.bottomLeft), textureU: textureCoordinates.xF, textureV: textureCoordinates.yF + textureCoordinates.heightF),
-                    .init(position: transformToSphere(frame.topLeft), textureU: textureCoordinates.xF, textureV: textureCoordinates.yF),
-                    .init(position: transformToSphere(frame.topRight), textureU: textureCoordinates.xF + textureCoordinates.widthF, textureV: textureCoordinates.yF),
-                    .init(position: transformToSphere(frame.bottomRight), textureU: textureCoordinates.xF + textureCoordinates.widthF, textureV: textureCoordinates.yF + textureCoordinates.heightF),
+                    Vertex3DTexture(
+                        position: transform(frame.bottomLeft),
+                        textureU: textureCoordinates.xF,
+                        textureV: textureCoordinates.yF + textureCoordinates.heightF
+                    ),
+                    Vertex3DTexture(
+                        position: transform(frame.topLeft),
+                        textureU: textureCoordinates.xF,
+                        textureV: textureCoordinates.yF
+                    ),
+                    Vertex3DTexture(
+                        position: transform(frame.topRight),
+                        textureU: textureCoordinates.xF + textureCoordinates.widthF,
+                        textureV: textureCoordinates.yF
+                    ),
+                    Vertex3DTexture(
+                        position: transform(frame.bottomRight),
+                        textureU: textureCoordinates.xF + textureCoordinates.widthF,
+                        textureV: textureCoordinates.yF + textureCoordinates.heightF
+                    ),
                 ]
             } else {
                 vertices = [
-                    .init(position: .init(x: frame.bottomLeft.x, y: frame.bottomLeft.y, z: frame.bottomLeft.z), textureU: textureCoordinates.xF, textureV: textureCoordinates.yF + textureCoordinates.heightF),
-                    .init(position: .init(x: frame.topLeft.x, y: frame.topLeft.y, z: frame.topLeft.z), textureU: textureCoordinates.xF, textureV: textureCoordinates.yF),
-                    .init(position: .init(x: frame.topRight.x, y: frame.topRight.y, z: frame.topRight.z), textureU: textureCoordinates.xF + textureCoordinates.widthF, textureV: textureCoordinates.yF),
-                    .init(position: .init(x: frame.bottomRight.x, y: frame.bottomRight.y, z: frame.bottomRight.z), textureU: textureCoordinates.xF + textureCoordinates.widthF, textureV: textureCoordinates.yF + textureCoordinates.heightF),
+                    Vertex3DTexture(
+                        position: transform(frame.bottomLeft),
+                        textureU: textureCoordinates.xF,
+                        textureV: textureCoordinates.yF + textureCoordinates.heightF
+                    ),  // A
+                    Vertex3DTexture(
+                        position: transform(frame.topLeft),
+                        textureU: textureCoordinates.xF,
+                        textureV: textureCoordinates.yF),  // B
+                    Vertex3DTexture(
+                        position: transform(frame.topRight),
+                        textureU: textureCoordinates.xF + textureCoordinates.widthF,
+                        textureV: textureCoordinates.yF),  // C
+                    Vertex3DTexture(
+                        position: transform(frame.bottomRight),
+                        textureU: textureCoordinates.xF + textureCoordinates.widthF,
+                        textureV: textureCoordinates.yF + textureCoordinates.heightF
+                    ),  // D
                 ]
             }
 

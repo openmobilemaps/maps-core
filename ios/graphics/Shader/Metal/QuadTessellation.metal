@@ -8,82 +8,94 @@
 #include <metal_stdlib>
 #include "DataStructures.metal"
 
-// A struct to hold our control point data
+using namespace metal;
+
 struct ControlPoint {
     float3 position;
     float2 textureCoordinate;
+    float3 normal;
 };
 
-// Post-tessellation vertex function for 2D quads
-// --- API CHANGE ---
-// The number of control points must be 4 for a quad patch.
+
 [[patch(quad, 4)]]
 vertex VertexOut tessellatedQuadVertex(
     constant ControlPoint *controlPoints [[buffer(0)]],
     constant float4x4 &vpMatrix [[buffer(1)]],
     constant float4x4 &mMatrix [[buffer(2)]],
     constant float4 &originOffset [[buffer(3)]],
-    float2 positionInPatch [[position_in_patch]] // The (u,v) coordinate from the tessellator
+    float2 positionInPatch [[position_in_patch]]
 ) {
-    // controlPoints order: Bottom-Left, Top-Left, Top-Right, Bottom-Right
+    float u = positionInPatch.x;
+    float v = positionInPatch.y;
 
-    // Bilinear interpolation for position
-    float3 bottom = mix(controlPoints[0].position, controlPoints[3].position, positionInPatch.x);
-    float3 top = mix(controlPoints[1].position, controlPoints[2].position, positionInPatch.x);
-    float3 p = mix(top, bottom, positionInPatch.y);
+    // Bilinear interpolation for the pre-calculated positions.
+    // These positions are already relative to the object's origin.
+    float3 bottom = mix(controlPoints[0].position, controlPoints[3].position, u);
+    float3 top = mix(controlPoints[1].position, controlPoints[2].position, u);
+    float3 p = mix(top, bottom, v);
 
-    // Bilinear interpolation for texture coordinates
-    float2 texBottom = mix(controlPoints[0].textureCoordinate, controlPoints[3].textureCoordinate, positionInPatch.x);
-    float2 texTop = mix(controlPoints[1].textureCoordinate, controlPoints[2].textureCoordinate, positionInPatch.x);
-    float2 uv = mix(texTop, texBottom, positionInPatch.y);
+    // Bilinear interpolation for texture coordinates.
+    float2 texBottom = mix(controlPoints[0].textureCoordinate, controlPoints[3].textureCoordinate, u);
+    float2 texTop = mix(controlPoints[1].textureCoordinate, controlPoints[2].textureCoordinate, u);
+    float2 uv = mix(texTop, texBottom, v);
 
     VertexOut out;
+    // The final vertex position is calculated exactly like the original base shader.
+    // 'p' is the local model-space position. We add the originOffset to get the world-space position.
     out.position = vpMatrix * ((mMatrix * float4(p, 1.0)) + originOffset);
     out.uv = uv;
 
     return out;
 }
 
-// Post-tessellation vertex function for 3D spherical quads
-// --- API CHANGE ---
-// The number of control points must be 4 for a quad patch.
+
 [[patch(quad, 4)]]
 vertex VertexOut tessellatedQuadVertex3D(
     constant ControlPoint *controlPoints [[buffer(0)]],
     constant float4x4 &vpMatrix [[buffer(1)]],
     constant float4x4 &mMatrix [[buffer(2)]],
     constant float4 &originOffset [[buffer(3)]],
-    constant float4 &origin [[buffer(4)]],
+    constant float4 &origin [[buffer(4)]],       // The absolute coordinate of the object's origin
     float2 positionInPatch [[position_in_patch]]
 ) {
-    // This logic replicates the bilinear interpolation of lat/lon coordinates from the original Swift code.
-    float3 topLeft = controlPoints[1].position;
-    float3 topRight = controlPoints[2].position;
-    float3 bottomLeft = controlPoints[0].position;
-    float3 bottomRight = controlPoints[3].position;
+    float u = positionInPatch.x;
+    float v = positionInPatch.y;
 
-    float pcR = positionInPatch.x;
-    float pcD = positionInPatch.y;
+    // --- Step 1: Calculate the starting point on the flat quad ---
+    // We interpolate the high-precision relative positions. This is our trusted starting point.
+    float3 posBottom = mix(controlPoints[0].position, controlPoints[3].position, u);
+    float3 posTop = mix(controlPoints[1].position, controlPoints[2].position, u);
+    float3 interpolatedPosition = mix(posTop, posBottom, v);
 
-    float3 deltaRTop = topRight - topLeft;
-    float3 deltaDLeft = bottomLeft - topLeft;
-    float3 deltaDRight = bottomRight - topRight;
+    // --- Step 2: Calculate the target destination on the sphere ---
+    // We interpolate the absolute target positions. This tells us where we need to go.
+    float3 targetBottom = mix(controlPoints[0].normal, controlPoints[3].normal, u);
+    float3 targetTop = mix(controlPoints[1].normal, controlPoints[2].normal, u);
+    float3 interpolatedAbsoluteTarget = normalize(mix(targetTop, targetBottom, v));
 
-    float3 interpolatedLatLon = topLeft + pcR * deltaRTop + pcD * mix(deltaDLeft, deltaDRight, pcR);
+    // --- Step 3: Calculate the displacement vector ---
+    // To find the vector between our start and end points, they must be in the same coordinate system.
+    // Let's convert our relative starting point to an absolute one.
+    float3 initialAbsolutePosition = interpolatedPosition + origin.xyz;
 
-    // Transform from lat/lon (stored in finalPos) to 3D Cartesian on the sphere
-    float x = 1.0 * sin(interpolatedLatLon.y) * cos(interpolatedLatLon.x) - origin.x;
-    float y = 1.0 * cos(interpolatedLatLon.y) - origin.y;
-    float z = -1.0 * sin(interpolatedLatLon.y) * sin(interpolatedLatLon.x) - origin.z;
-    float3 transformedPos = float3(x, y, z);
+    // The displacement vector is the difference between the target and the start point.
+    float3 displacementVector = interpolatedAbsoluteTarget - initialAbsolutePosition;
 
-    // Bilinear interpolation for texture coordinates
-    float2 texBottom = mix(controlPoints[0].textureCoordinate, controlPoints[3].textureCoordinate, pcR);
-    float2 texTop = mix(controlPoints[1].textureCoordinate, controlPoints[2].textureCoordinate, pcR);
-    float2 uv = mix(texTop, texBottom, pcD);
+    // --- Step 4: Calculate the final relative position ---
+    // Apply the calculated displacement to our original high-precision starting point.
+    // The result `p` is the final, correct position, still relative to the object's origin.
+    float3 p = interpolatedPosition + displacementVector;
+
+    // --- Step 5: Interpolate Texture Coordinates ---
+    float2 texBottom = mix(controlPoints[0].textureCoordinate, controlPoints[3].textureCoordinate, u);
+    float2 texTop = mix(controlPoints[1].textureCoordinate, controlPoints[2].textureCoordinate, u);
+    float2 uv = mix(texTop, texBottom, v);
 
     VertexOut out;
-    out.position = vpMatrix * ((mMatrix * float4(transformedPos, 1.0)) + originOffset);
+
+    // --- Step 6: Final Transformation ---
+    // The rest of the pipeline works perfectly because `p` is the correct, relative position.
+    out.position = vpMatrix * ((mMatrix * float4(p, 1.0)) + originOffset);
     out.uv = uv;
 
     return out;
