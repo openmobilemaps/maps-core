@@ -30,8 +30,8 @@ buildscript {
 		classpath "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:$ksp_version"
 		classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
 
-		classpath 'com.vanniktech:gradle-maven-publish-plugin:0.30.0'
-		classpath 'org.jetbrains.dokka:dokka-gradle-plugin:1.9.10'
+		classpath 'com.vanniktech:gradle-maven-publish-plugin:0.33.0'
+		classpath 'org.jetbrains.dokka:dokka-gradle-plugin:2.0.0'
 	}
 }
 
@@ -45,8 +45,6 @@ apply plugin: 'kotlin-android'
 apply plugin: 'com.vanniktech.maven.publish'
 apply plugin: 'com.google.devtools.ksp'
 apply plugin: 'kotlin-parcelize'
-
-import com.vanniktech.maven.publish.SonatypeHost
 
 android {
 	namespace 'io.openmobilemaps.mapscore'
@@ -184,7 +182,7 @@ publishing {
 }
 
 mavenPublishing {
-	publishToMavenCentral(SonatypeHost.DEFAULT, true)
+	publishToMavenCentral(true)
 	signAllPublications()
 }
 
