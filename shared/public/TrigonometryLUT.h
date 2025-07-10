@@ -60,6 +60,7 @@ namespace lut {
 
         inline LookupInfo reduce(double x) {
             x -= std::floor(x * invTwoPi) * twoPi;
+
             bool negate = false;
             if (x >= pi) {
                 x = twoPi - x;
@@ -73,10 +74,12 @@ namespace lut {
             return { i1 + 3, t, negate };
         }
 
-        inline double interpolate(const std::array<double, paddedSize>& table, const LookupInfo& info) {
+        inline double interpolate(const std::array<double, paddedSize>& table, const LookupInfo& info, bool isCosine = false) {
             const double* base = &table[info.startIndex - 1];
             double value = catmullRom(base[0], base[1], base[2], base[3], info.t);
-            return info.negate ? -value : value;
+
+            // For cosine, don't flip sign on symmetry reduction
+            return (info.negate && !isCosine) ? -value : value;
         }
     }
 
@@ -85,12 +88,12 @@ namespace lut {
     }
 
     inline double cos(double x) {
-        return interpolate(cosTable, reduce(x));
+        return interpolate(cosTable, reduce(x), true);
     }
 
     inline void sincos(double x, double& s, double& c) {
         LookupInfo info = reduce(x);
         s = interpolate(sinTable, info);
-        c = interpolate(cosTable, info);
+        c = interpolate(cosTable, info, true);
     }
 }
