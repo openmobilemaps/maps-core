@@ -33,96 +33,96 @@ extension MCColor {
 // MARK: - UIKit Specific Extensions
 
 #if canImport(UIKit)
-import UIKit
+    import UIKit
 
-public extension UIColor {
-    /// Converts a UIColor to a MapCore MCColor.
-    var mapCoreColor: MCColor {
-        var red: CGFloat = 0
-        var green: CGFloat = 0
-        var blue: CGFloat = 0
-        var alpha: CGFloat = 0
-        // getRed(_:green:blue:alpha:) returns true if the conversion is successful
-        if getRed(&red, green: &green, blue: &blue, alpha: &alpha) {
-            return MCColor(r: Float(red), g: Float(green), b: Float(blue), a: Float(alpha))
+    public extension UIColor {
+        /// Converts a UIColor to a MapCore MCColor.
+        var mapCoreColor: MCColor {
+            var red: CGFloat = 0
+            var green: CGFloat = 0
+            var blue: CGFloat = 0
+            var alpha: CGFloat = 0
+            // getRed(_:green:blue:alpha:) returns true if the conversion is successful
+            if getRed(&red, green: &green, blue: &blue, alpha: &alpha) {
+                return MCColor(r: Float(red), g: Float(green), b: Float(blue), a: Float(alpha))
+            }
+            // Return a default color if conversion fails
+            return MCColor(r: 0, g: 0, b: 0, a: 1.0)
         }
-        // Return a default color if conversion fails
-        return MCColor(r: 0, g: 0, b: 0, a: 1.0)
-    }
 
-    /// Check if a color is opaque.
-    var isOpaque: Bool {
-        var alpha: CGFloat = 0
-        getRed(nil, green: nil, blue: nil, alpha: &alpha)
-        return alpha == 1.0
-    }
-
-    /// Check if a color has transparency.
-    var hasTransparency: Bool {
-        !isOpaque
-    }
-
-    /// The Metal clear color reference that corresponds to the receiver’s color.
-    var metalClearColor: MTLClearColor {
-        var red: CGFloat = 0
-        var green: CGFloat = 0
-        var blue: CGFloat = 0
-        var alpha: CGFloat = 0
-        if getRed(&red, green: &green, blue: &blue, alpha: &alpha) {
-            return MTLClearColorMake(Double(red), Double(green), Double(blue), Double(alpha))
+        /// Check if a color is opaque.
+        var isOpaque: Bool {
+            var alpha: CGFloat = 0
+            getRed(nil, green: nil, blue: nil, alpha: &alpha)
+            return alpha == 1.0
         }
-        return MTLClearColorMake(0, 0, 0, 1.0)
+
+        /// Check if a color has transparency.
+        var hasTransparency: Bool {
+            !isOpaque
+        }
+
+        /// The Metal clear color reference that corresponds to the receiver’s color.
+        var metalClearColor: MTLClearColor {
+            var red: CGFloat = 0
+            var green: CGFloat = 0
+            var blue: CGFloat = 0
+            var alpha: CGFloat = 0
+            if getRed(&red, green: &green, blue: &blue, alpha: &alpha) {
+                return MTLClearColorMake(Double(red), Double(green), Double(blue), Double(alpha))
+            }
+            return MTLClearColorMake(0, 0, 0, 1.0)
+        }
     }
-}
 
 #endif
 
 // MARK: - AppKit Specific Extensions
 
 #if canImport(AppKit)
-import AppKit
+    import AppKit
 
-public extension NSColor {
-    /// Converts an NSColor to a MapCore MCColor.
-    var mapCoreColor: MCColor {
-        // Use the sRGB color space for component extraction to ensure consistency.
-        guard let color = usingColorSpace(.sRGB) else {
-            // Return a default color if conversion to sRGB is not possible
-            return MCColor(r: 0, g: 0, b: 0, a: 1.0)
+    public extension NSColor {
+        /// Converts an NSColor to a MapCore MCColor.
+        var mapCoreColor: MCColor {
+            // Use the sRGB color space for component extraction to ensure consistency.
+            guard let color = usingColorSpace(.sRGB) else {
+                // Return a default color if conversion to sRGB is not possible
+                return MCColor(r: 0, g: 0, b: 0, a: 1.0)
+            }
+
+            var red: CGFloat = 0
+            var green: CGFloat = 0
+            var blue: CGFloat = 0
+            var alpha: CGFloat = 0
+            color.getRed(&red, green: &green, blue: &blue, alpha: &alpha)
+
+            return MCColor(r: Float(red), g: Float(green), b: Float(blue), a: Float(alpha))
         }
 
-        var red: CGFloat = 0
-        var green: CGFloat = 0
-        var blue: CGFloat = 0
-        var alpha: CGFloat = 0
-        color.getRed(&red, green: &green, blue: &blue, alpha: &alpha)
-
-        return MCColor(r: Float(red), g: Float(green), b: Float(blue), a: Float(alpha))
-    }
-
-    /// Check if a color is opaque.
-    var isOpaque: Bool {
-        alphaComponent == 1.0
-    }
-
-    /// Check if a color has transparency.
-    var hasTransparency: Bool {
-        alphaComponent < 1.0
-    }
-
-    /// The Metal clear color reference that corresponds to the receiver’s color.
-    var metalClearColor: MTLClearColor {
-        guard let color = usingColorSpace(.sRGB) else {
-            return MTLClearColorMake(0, 0, 0, 1.0)
+        /// Check if a color is opaque.
+        var isOpaque: Bool {
+            alphaComponent == 1.0
         }
 
-        var red: CGFloat = 0
-        var green: CGFloat = 0
-        var blue: CGFloat = 0
-        var alpha: CGFloat = 0
-        color.getRed(&red, green: &green, blue: &blue, alpha: &alpha)
+        /// Check if a color has transparency.
+        var hasTransparency: Bool {
+            alphaComponent < 1.0
+        }
 
-        return MTLClearColorMake(Double(red), Double(green), Double(blue), Double(alpha))
+        /// The Metal clear color reference that corresponds to the receiver’s color.
+        var metalClearColor: MTLClearColor {
+            guard let color = usingColorSpace(.sRGB) else {
+                return MTLClearColorMake(0, 0, 0, 1.0)
+            }
+
+            var red: CGFloat = 0
+            var green: CGFloat = 0
+            var blue: CGFloat = 0
+            var alpha: CGFloat = 0
+            color.getRed(&red, green: &green, blue: &blue, alpha: &alpha)
+
+            return MTLClearColorMake(Double(red), Double(green), Double(blue), Double(alpha))
+        }
     }
-}
 #endif
