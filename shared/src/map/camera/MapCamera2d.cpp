@@ -96,6 +96,7 @@ void MapCamera2d::moveToCenterPositionZoom(const ::Coord &centerPosition, double
             },
             [weakSelf] {
                 if (auto selfPtr = weakSelf.lock()) {
+                    std::lock_guard<std::recursive_mutex> lock(selfPtr->animationMutex);
                     selfPtr->centerPosition.x = selfPtr->coordAnimation->endValue.x;
                     selfPtr->centerPosition.y = selfPtr->coordAnimation->endValue.y;
                     selfPtr->notifyListeners(ListenerType::BOUNDS);
@@ -155,6 +156,7 @@ void MapCamera2d::moveToCenterPosition(const ::Coord &centerPosition, bool anima
             },
             [weakSelf] {
                 if (auto selfPtr = weakSelf.lock()) {
+                    std::lock_guard<std::recursive_mutex> lock(selfPtr->animationMutex);
                     selfPtr->centerPosition.x = selfPtr->coordAnimation->endValue.x;
                     selfPtr->centerPosition.y = selfPtr->coordAnimation->endValue.y;
                     selfPtr->notifyListeners(ListenerType::BOUNDS);
@@ -305,13 +307,16 @@ void MapCamera2d::setRotation(float angle, bool animated) {
         rotationAnimation->start();
         mapInterface->invalidate();
     } else {
-        if(coordAnimation) {
-            // if a coordinate animation is running during rotation,
-            // we go right to the correct end coordinate such that the rotation
-            // is performed correctly
-            centerPosition = coordAnimation->endValue;
-            coordAnimation->cancel();
-            coordAnimation = nullptr;
+        {
+            std::lock_guard<std::recursive_mutex> lock(animationMutex);
+            if (coordAnimation) {
+                // if a coordinate animation is running during rotation,
+                // we go right to the correct end coordinate such that the rotation
+                // is performed correctly
+                centerPosition = coordAnimation->endValue;
+                coordAnimation->cancel();
+                coordAnimation = nullptr;
+            }
         }
 
         Coord realCenter = getCenterPosition();
