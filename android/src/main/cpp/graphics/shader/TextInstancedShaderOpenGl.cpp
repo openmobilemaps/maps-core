@@ -158,8 +158,12 @@ std::string TextInstancedShaderOpenGl::getFragmentShader() {
                                                   TextStyle styles[) + std::to_string(MAX_NUM_TEXT_STYLES) + OMMShaderCode(];
                                               } uTextStyles;
 
+                                              // MSDF (Multichannel Signed Distance Field) font texture
                                               uniform sampler2D textureSampler;
                                               uniform vec2 textureFactor;
+                                              // MSDF font metadata
+                                              uniform float distanceRange;
+
                                               uniform float isHalo; // 0.0 = false, 1.0 = true
 
                                               in vec2 v_texCoord;
@@ -198,32 +202,35 @@ std::string TextInstancedShaderOpenGl::getFragmentShader() {
 
                                                   vec4 dist = texture(textureSampler, uv);
 
-                                                  float median = max(min(dist.r, dist.g), min(max(dist.r, dist.g), dist.b)) / dist.a;
-                                                  float w = fwidth(median);
+                                                  float pseudoDist = max(min(dist.r, dist.g), min(max(dist.r, dist.g), dist.b));
+                                                  vec2 unitRange = vec2(distanceRange)/vec2(textureSize(textureSampler, 0));
+                                                  vec2 screenTexSize = vec2(1.0)/fwidth(uv);
+                                                  // (pseudo-)dist difference corresponding to one screen pixel
+                                                  float w = 1.0/max(0.5*dot(unitRange, screenTexSize), 1.0);
 
                                                   float fillStart = 0.5 - w;
                                                   float fillEnd = 0.5 + w;
 
-                                                  float innerFallOff = smoothstep(fillStart, fillEnd, median);
+                                                  float innerFallOff = smoothstep(fillStart, fillEnd, pseudoDist);
 
                                                   float edgeAlpha = 0.0;
 
                                                   if(bool(isHalo)) {
                                                       float haloWidth = uTextStyles.styles[styleIndex].haloWidth;
-                                                      float halfHaloBlur = 0.5 * uTextStyles.styles[styleIndex].haloBlur;
+                                                      float haloBlur = uTextStyles.styles[styleIndex].haloBlur;
 
-                                                      if (haloWidth == 0.0 && halfHaloBlur == 0.0) {
+                                                      if (haloWidth == 0.0 && haloBlur == 0.0) {
                                                           discard;
                                                       }
+                                                      float halfHaloBlur = max(min(haloWidth, w), 0.5 * haloBlur);
 
                                                       float start = max(0.0, fillStart - (haloWidth + halfHaloBlur));
                                                       float end = max(0.0, fillStart - max(0.0, haloWidth - halfHaloBlur));
 
-                                                      float sideSwitch = step(median, end);
-                                                      float outerFallOff = smoothstep(start, end, median);
+                                                      float outerFallOff = smoothstep(start, end, pseudoDist);
 
                                                       // Combination of blurred outer falloff and inverse inner fill falloff
-                                                      edgeAlpha = (sideSwitch * outerFallOff + (1.0 - sideSwitch) * (1.0 - innerFallOff)) * color.a;
+                                                      edgeAlpha = outerFallOff * (1.0 - innerFallOff) * color.a;
                                                   } else {
                                                       edgeAlpha = innerFallOff * color.a;
                                                   }

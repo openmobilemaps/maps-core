@@ -110,6 +110,7 @@ fragment half4
 unitSphereTextInstancedFragmentShader(TextInstancedVertexOut in [[stage_in]],
                                       constant TextInstanceStyle *styles [[buffer(1)]],
                                       constant bool &isHalo [[buffer(2)]],
+                                      constant float &distanceRange [[buffer(3)]],
                        texture2d<half> texture0 [[ texture(0)]],
                        sampler textureSampler [[sampler(0)]])
 {
@@ -125,36 +126,38 @@ unitSphereTextInstancedFragmentShader(TextInstancedVertexOut in [[stage_in]],
     const float2 uv = in.texureCoordinates.xy + in.texureCoordinates.zw * float2(in.uv.x, in.uv.y);
     const half4 dist = texture0.sample(textureSampler, uv);
 
-    const float median = max(min(dist.r, dist.g), min(max(dist.r, dist.g), dist.b)) / dist.a;
-    const float w = fwidth(median);
+    const float pseudoDist = max(min(dist.r, dist.g), min(max(dist.r, dist.g), dist.b));
+    const float2 unitRange = float2(distanceRange) / float2(texture0.get_width(), texture0.get_height());
+    const float2 screenTexSize = float2(1.0) / fwidth(uv);
+    // (pseudo-)dist difference corresponding to one screen pixel
+    const float w = 1.0 / max(0.5 * dot(unitRange, screenTexSize), 1.0);
 
     const float fillStart = 0.5 - w;
     const float fillEnd = 0.5 + w;
 
-    const float innerFallOff = smoothstep(fillStart, fillEnd, median);
-
-    half edgeAlpha = 0.0;
+    const float innerFallOff = smoothstep(fillStart, fillEnd, pseudoDist);
 
     if (isHalo) {
-        float halfHaloBlur = 0.5 * style->haloBlur;
+        const float haloWidth = style->haloWidth;
+        const float haloBlur = style->haloBlur;
 
-        if (style->haloWidth == 0.0 && halfHaloBlur == 0.0) {
+        if (haloWidth == 0.0 && haloBlur == 0.0) {
             discard_fragment();
         }
 
-        const float start = max(0.0, fillStart - (style->haloWidth + halfHaloBlur));
-        const float end = max(0.0, fillStart - max(0.0, style->haloWidth - halfHaloBlur));
+        const float halfHaloBlur = max(min(haloWidth, w), 0.5 * haloBlur);
+        const float start = max(0.0, fillStart - (haloWidth + halfHaloBlur));
+        const float end = max(0.0, fillStart - max(0.0, haloWidth - halfHaloBlur));
 
-        const float sideSwitch = step(median, end);
-        const float outerFallOff = smoothstep(start, end, median);
+        const float outerFallOff = smoothstep(start, end, pseudoDist);
 
         // Combination of blurred outer falloff and inverse inner fill falloff
-        edgeAlpha = (sideSwitch * outerFallOff + (1.0 - sideSwitch) * (1.0 - innerFallOff)) * haloColor.a;
+        const float edgeAlpha = outerFallOff * (1.0 - innerFallOff) * color.a;
 
         return half4(half3(haloColor.rgb), 1.0) * edgeAlpha;
 
     } else {
-        edgeAlpha = innerFallOff * color.a;
+        const float edgeAlpha = innerFallOff * color.a;
 
         return half4(half3(color.rgb), 1.0) * edgeAlpha;
     }
@@ -210,6 +213,7 @@ fragment half4
 textInstancedFragmentShader(TextInstancedVertexOut in [[stage_in]],
                             constant TextInstanceStyle *styles [[buffer(1)]],
                             constant bool &isHalo [[buffer(2)]],
+                            constant float &distanceRange [[buffer(3)]],
                        texture2d<half> texture0 [[ texture(0)]],
                        sampler textureSampler [[sampler(0)]])
 {
@@ -225,31 +229,36 @@ textInstancedFragmentShader(TextInstancedVertexOut in [[stage_in]],
     const float2 uv = in.texureCoordinates.xy + in.texureCoordinates.zw * float2(in.uv.x, 1 - in.uv.y);
     const half4 dist = texture0.sample(textureSampler, uv);
 
-    const float median = max(min(dist.r, dist.g), min(max(dist.r, dist.g), dist.b)) / dist.a;
-    const float w = fwidth(median);
+    const float pseudoDist = max(min(dist.r, dist.g), min(max(dist.r, dist.g), dist.b));
+    const float2 unitRange = float2(distanceRange) / float2(texture0.get_width(), texture0.get_height());
+    const float2 screenTexSize = float2(1.0) / fwidth(uv);
+    // (pseudo-)dist difference corresponding to one screen pixel
+    const float w = 1.0 / max(0.5 * dot(unitRange, screenTexSize), 1.0);
 
     const float fillStart = 0.5 - w;
     const float fillEnd = 0.5 + w;
 
-    const float innerFallOff = smoothstep(fillStart, fillEnd, median);
+    const float innerFallOff = smoothstep(fillStart, fillEnd, pseudoDist);
 
     if (isHalo) {
-        float halfHaloBlur = 0.5 * style->haloBlur;
+        const float haloWidth = style->haloWidth;
+        const float haloBlur = style->haloBlur;
 
-        if (style->haloWidth == 0.0 && halfHaloBlur == 0.0) {
+        if (haloWidth == 0.0 && haloBlur == 0.0) {
             discard_fragment();
         }
 
-        const float start = max(0.0, fillStart - (style->haloWidth + halfHaloBlur));
-        const float end = max(0.0, fillStart - max(0.0, style->haloWidth - halfHaloBlur));
+        const float halfHaloBlur = max(min(haloWidth, w), 0.5 * haloBlur);
+        const float start = max(0.0, fillStart - (haloWidth + halfHaloBlur));
+        const float end = max(0.0, fillStart - max(0.0, haloWidth - halfHaloBlur));
 
-        const float sideSwitch = step(median, end);
-        const float outerFallOff = smoothstep(start, end, median);
+        const float outerFallOff = smoothstep(start, end, pseudoDist);
 
         // Combination of blurred outer falloff and inverse inner fill falloff
-        const float edgeAlpha = (sideSwitch * outerFallOff + (1.0 - sideSwitch) * (1.0 - innerFallOff)) * haloColor.a;
+        const float edgeAlpha = outerFallOff * (1.0 - innerFallOff) * color.a;
 
         return half4(half3(haloColor.rgb), 1.0) * edgeAlpha;
+
     } else {
         const float edgeAlpha = innerFallOff * color.a;
 

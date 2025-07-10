@@ -54,8 +54,10 @@ font_wrapper = record {
     base: f64;
     bitmap_size: vec_2_d;
 
-    # font size rendered in bitmap multiplied by dpFactor
+    # font size rendered in distance field bitmap
     size: f64;
+    # pixel distance corresponding to max value in signed distance field
+    distance_range: f64;
 }
 
 font_glyph = record {

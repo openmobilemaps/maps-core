@@ -9,4 +9,5 @@ data class FontWrapper(
     val base: Double,
     val bitmapSize: io.openmobilemaps.mapscore.shared.graphics.common.Vec2D,
     val size: Double,
+    val distanceRange: Double,
 )

@@ -8,6 +8,7 @@
 @extern "../../yaml/vec_2_d.yaml"
 @extern "../../yaml/vec_2_f.yaml"
 @extern "../../yaml/shared_bytes.yaml"
+@extern "../../yaml/font_data.yaml"
 
 graphics_object_interface = interface +c +j +o {
     # Returns true, if graphics object is ready to be drawn
@@ -213,7 +214,7 @@ text_instanced_interface = interface +c +j +o {
     # so a total of 9 floats for each style
     set_styles(values: shared_bytes);
 
-    load_texture(context: rendering_context_interface, texture_holder: texture_holder_interface);
+    load_font(context: rendering_context_interface, font_data: font_data, font_msdf_texture: texture_holder_interface);
     remove_texture();
     as_graphics_object(): graphics_object_interface;
 }

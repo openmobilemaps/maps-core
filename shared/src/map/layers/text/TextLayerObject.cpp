@@ -156,7 +156,7 @@ void TextLayerObject::update(float scale, bool updateObject) {
 }
 
 void TextLayerObject::layoutPoint(float scale, bool updateObject) {
-    float fontSize = fontData.info.size * scale;
+    float fontSize = fontData.info.size * (camera->getScreenDensityPpi() / 160.0) * scale;
     auto pen = Vec2D(0.0, 0.0);
 
     if (scale != lastScale) {

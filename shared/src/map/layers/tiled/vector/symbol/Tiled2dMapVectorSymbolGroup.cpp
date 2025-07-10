@@ -592,7 +592,7 @@ void Tiled2dMapVectorSymbolGroup::setupObjects(const std::shared_ptr<SpriteData>
         const auto &textInstancedObject = textInstancedObjects[i];
         if (this->spriteData == nullptr) {
             textInstancedObject->setFrame(Quad2dD(Vec2D(-0.5, 0.5), Vec2D(0.5, 0.5), Vec2D(0.5, -0.5), Vec2D(-0.5, -0.5)), tileOrigin, is3d);
-            textInstancedObject->loadTexture(context, textDescriptor->fontResult->imageData);
+            textInstancedObject->loadFont(context, *textDescriptor->fontResult->fontData, textDescriptor->fontResult->imageData);
             textInstancedObject->asGraphicsObject()->setup(context);
         }
         textInstancedObject->setTextureCoordinates(
