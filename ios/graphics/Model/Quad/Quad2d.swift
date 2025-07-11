@@ -97,7 +97,7 @@ final class Quad2d: BaseGraphicsObject, @unchecked Sendable {
     }
 
     private func updateTessellationFactors() {
-        let sFactor = self.subdivisionFactor // No lock needed, called from within a locked context or init
+        let sFactor = self.subdivisionFactor  // No lock needed, called from within a locked context or init
         if sFactor <= 0 { return }
 
         let level = pow(2.0, Float(sFactor))
@@ -349,89 +349,93 @@ extension Quad2d: MCQuad2dInterface {
                     let z = -1.0 * sin(coordinate.y) * sin(coordinate.x)
                     return MCVec3D(x: x, y: y, z: z).simd3
                 } else {
-                    let x = coordinate.x
-                    let y = coordinate.y
-                    return MCVec3D(x: x, y: y, z: 0).simd3
+                    return SIMD3<Float>(0, 0, 1)
                 }
             }
 
-            let controlPoints: [ControlPoint] = [
-                // Order must match the vertex shader: BL, TL, TR, BR
-                .init(
-                    position: transform(frame.bottomLeft).simd3,
-                    textureCoordinate: .init(textureCoordinates.xF, textureCoordinates.yF + textureCoordinates.heightF),
-                    normal: getNormal(frame.bottomLeft)
-                ),
-                .init(
-                    position: transform(frame.topLeft).simd3,
-                    textureCoordinate: .init(textureCoordinates.xF, textureCoordinates.yF),
-                    normal: getNormal(frame.topLeft)
-                ),
-                .init(
-                    position: transform(frame.topRight).simd3,
-                    textureCoordinate: .init(textureCoordinates.xF + textureCoordinates.widthF, textureCoordinates.yF),
-                    normal: getNormal(frame.topRight)
-                ),
-                .init(
-                    position: transform(frame.bottomRight).simd3,
-                    textureCoordinate: .init(textureCoordinates.xF + textureCoordinates.widthF, textureCoordinates.yF + textureCoordinates.heightF),
-                    normal: getNormal(frame.bottomRight)
-                ),
+            // Bilinear interpolation for geographic coordinates
+            func interpolateCoord(u: Double, v: Double) -> MCVec3D {
+                let p1 = frame.topLeft.interpolate(frame.topRight, t: u)     // Top edge
+                let p2 = frame.bottomLeft.interpolate(frame.bottomRight, t: u) // Bottom edge
+                return p1.interpolate(p2, t: v)
+            }
+
+            // Interpolation for texture coordinates
+            func getTexCoord(u: Double, v: Double) -> SIMD2<Float> {
+                return SIMD2<Float>(
+                    Float(textureCoordinates.x + u * textureCoordinates.width),
+                    Float(textureCoordinates.y + v * textureCoordinates.height)
+                )
+            }
+
+            let patchUVStarts: [(u: Double, v: Double)] = [
+                (0.0, 0.0), // Top-Left sub-quad
+                (0.5, 0.0), // Top-Right sub-quad
+                (0.0, 0.5), // Bottom-Left sub-quad
+                (0.5, 0.5), // Bottom-Right sub-quad
             ]
-            self.controlPointBuffer.copyOrCreate(bytes: controlPoints, length: MemoryLayout<ControlPoint>.stride * 4, device: device)
+
+            var controlPoints: [ControlPoint] = []
+            controlPoints.reserveCapacity(16)
+
+            for patchUV in patchUVStarts {
+                let u0 = patchUV.u, v0 = patchUV.v
+                let u1 = u0 + 0.5, v1 = v0 + 0.5
+
+                let corners_uv_ordered = [
+                    (u: u0, v: v0), // Top-Left corner of sub-patch
+                    (u: u1, v: v0), // Top-Right corner of sub-patch
+                    (u: u0, v: v1), // Bottom-Left corner of sub-patch
+                    (u: u1, v: v1)  // Bottom-Right corner of sub-patch
+                ]
+
+                for corner_uv in corners_uv_ordered {
+                    let geoCoord = interpolateCoord(u: corner_uv.u, v: corner_uv.v)
+                    controlPoints.append(ControlPoint(
+                        position: transform(geoCoord).simd3,
+                        textureCoordinate: getTexCoord(u: corner_uv.u, v: corner_uv.v),
+                        normal: getNormal(geoCoord)
+                    ))
+                }
+            }
+
+            self.controlPointBuffer.copyOrCreate(bytes: controlPoints, length: MemoryLayout<ControlPoint>.stride * 16, device: device)
 
             if is3d {
                 var originVec = SIMD4<Float>(x: Float(origin.x), y: Float(origin.y), z: Float(origin.z), w: 0)
                 self.originBuffer?.contents().copyMemory(from: &originVec, byteCount: MemoryLayout<SIMD4<Float>>.stride)
             }
 
-        } else {
-            let vertices: [Vertex3DTexture]
-            if is3d {
-                vertices = [
-                    Vertex3DTexture(
-                        position: transform(frame.bottomLeft),
-                        textureU: textureCoordinates.xF,
-                        textureV: textureCoordinates.yF + textureCoordinates.heightF
-                    ),
-                    Vertex3DTexture(
-                        position: transform(frame.topLeft),
-                        textureU: textureCoordinates.xF,
-                        textureV: textureCoordinates.yF
-                    ),
-                    Vertex3DTexture(
-                        position: transform(frame.topRight),
-                        textureU: textureCoordinates.xF + textureCoordinates.widthF,
-                        textureV: textureCoordinates.yF
-                    ),
-                    Vertex3DTexture(
-                        position: transform(frame.bottomRight),
-                        textureU: textureCoordinates.xF + textureCoordinates.widthF,
-                        textureV: textureCoordinates.yF + textureCoordinates.heightF
-                    ),
-                ]
-            } else {
-                vertices = [
-                    Vertex3DTexture(
-                        position: transform(frame.bottomLeft),
-                        textureU: textureCoordinates.xF,
-                        textureV: textureCoordinates.yF + textureCoordinates.heightF
-                    ),  // A
-                    Vertex3DTexture(
-                        position: transform(frame.topLeft),
-                        textureU: textureCoordinates.xF,
-                        textureV: textureCoordinates.yF),  // B
-                    Vertex3DTexture(
-                        position: transform(frame.topRight),
-                        textureU: textureCoordinates.xF + textureCoordinates.widthF,
-                        textureV: textureCoordinates.yF),  // C
-                    Vertex3DTexture(
-                        position: transform(frame.bottomRight),
-                        textureU: textureCoordinates.xF + textureCoordinates.widthF,
-                        textureV: textureCoordinates.yF + textureCoordinates.heightF
-                    ),  // D
-                ]
+            lock.withCritical {
+                self.verticesBuffer = nil
+                self.indicesBuffer = nil
+                self.indicesCount = 0
             }
+
+        } else {
+            // --- CPU-GENERATED MESH PATH (Unchanged) ---
+            let vertices: [Vertex3DTexture] = [
+                Vertex3DTexture(
+                    position: transform(frame.bottomLeft),
+                    textureU: textureCoordinates.xF,
+                    textureV: textureCoordinates.yF + textureCoordinates.heightF
+                ),
+                Vertex3DTexture(
+                    position: transform(frame.topLeft),
+                    textureU: textureCoordinates.xF,
+                    textureV: textureCoordinates.yF
+                ),
+                Vertex3DTexture(
+                    position: transform(frame.topRight),
+                    textureU: textureCoordinates.xF + textureCoordinates.widthF,
+                    textureV: textureCoordinates.yF
+                ),
+                Vertex3DTexture(
+                    position: transform(frame.bottomRight),
+                    textureU: textureCoordinates.xF + textureCoordinates.widthF,
+                    textureV: textureCoordinates.yF + textureCoordinates.heightF
+                ),
+            ]
 
             let indices: [UInt16] = [0, 2, 1, 0, 3, 2]
 
@@ -439,6 +443,8 @@ extension Quad2d: MCQuad2dInterface {
                 self.verticesBuffer.copyOrCreate(bytes: vertices, length: MemoryLayout<Vertex3DTexture>.stride * vertices.count, device: device)
                 self.indicesBuffer.copyOrCreate(bytes: indices, length: MemoryLayout<UInt16>.stride * indices.count, device: device)
                 self.indicesCount = self.indicesBuffer != nil ? indices.count : 0
+
+                self.controlPointBuffer = nil
             }
         }
     }
@@ -473,5 +479,12 @@ extension Quad2d: MCQuad2dInterface {
 fileprivate extension MCVec3D {
     var simd3: SIMD3<Float> {
         SIMD3<Float>(xF, yF, zF)
+    }
+    func interpolate(_ other: MCVec3D, t: Double) -> MCVec3D {
+        return MCVec3D(
+            x: self.x + (other.x - self.x) * t,
+            y: self.y + (other.y - self.y) * t,
+            z: self.z + (other.z - self.z) * t
+        )
     }
 }

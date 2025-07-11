@@ -713,7 +713,7 @@ void Tiled2dMapVectorLayer::pregenerateRenderPasses() {
             continue;
         }
         if ((description->renderPassIndex != lastRenderPassIndex || description->maskingObject != lastMask) && !renderObjects.empty()) {
-            newPasses.emplace_back(std::make_shared<RenderPass>(RenderPassConfig(lastRenderPassIndex, false, renderTarget), renderObjects, lastMask));
+            newPasses.emplace_back(std::make_shared<RenderPass>(RenderPassConfig(lastRenderPassIndex, false, renderTarget), renderObjects, nullptr));
             renderObjects.clear();
             lastMask = nullptr;
             lastRenderPassIndex = 0;
@@ -721,7 +721,7 @@ void Tiled2dMapVectorLayer::pregenerateRenderPasses() {
 
         if (description->isModifyingMask || description->selfMasked) {
             if (!renderObjects.empty()) {
-                newPasses.emplace_back(std::make_shared<RenderPass>(RenderPassConfig(description->renderPassIndex, false, renderTarget), renderObjects, lastMask));
+                newPasses.emplace_back(std::make_shared<RenderPass>(RenderPassConfig(description->renderPassIndex, false, renderTarget), renderObjects, nullptr));
             }
             renderObjects.clear();
             lastMask = nullptr;
@@ -733,7 +733,7 @@ void Tiled2dMapVectorLayer::pregenerateRenderPasses() {
         }
     }
     if (!renderObjects.empty()) {
-        newPasses.emplace_back(std::make_shared<RenderPass>(RenderPassConfig(lastRenderPassIndex, false, renderTarget), renderObjects, lastMask));
+        newPasses.emplace_back(std::make_shared<RenderPass>(RenderPassConfig(lastRenderPassIndex, false, renderTarget), renderObjects, nullptr));
         renderObjects.clear();
         lastMask = nullptr;
     }
