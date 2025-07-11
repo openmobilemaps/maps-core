@@ -12,6 +12,8 @@
 #include "Vec3D.h"
 #include <cmath>
 
+#include "TrigonometryLUT.h"
+
 Line2dLayerObject::Line2dLayerObject(const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                                      const std::shared_ptr<LineGroup2dInterface> &line,
                                      const std::shared_ptr<LineGroupShaderInterface> &shader,
@@ -36,11 +38,15 @@ void Line2dLayerObject::setPositions(const std::vector<Coord> &positions, const 
 
     std::vector<Vec3D> renderCoords;
     for (auto const &mapCoord : positions) {
-        Coord renderCoord = conversionHelper->convertToRenderSystem(mapCoord);
+        const auto& renderCoord = conversionHelper->convertToRenderSystem(mapCoord);
 
-        double x = is3d ? renderCoord.z * sin(renderCoord.y) * cos(renderCoord.x) - origin.x : renderCoord.x - origin.x;
-        double y = is3d ?  renderCoord.z * cos(renderCoord.y) - origin.y : renderCoord.y - origin.y;
-        double z = is3d ? -renderCoord.z * sin(renderCoord.y) * sin(renderCoord.x) - origin.z : 0.0;
+        double sinX, sinY, cosX, cosY;
+        lut::sincos(renderCoord.x, sinX, cosX);
+        lut::sincos(renderCoord.y, sinY, cosY);
+
+        double x = is3d ? renderCoord.z * sinY * cosX - origin.x : renderCoord.x - origin.x;
+        double y = is3d ?  renderCoord.z * cosY - origin.y : renderCoord.y - origin.y;
+        double z = is3d ? -renderCoord.z * sinY * sinX - origin.z : 0.0;
 
         renderCoords.push_back(Vec3D(x, y, z));
     }

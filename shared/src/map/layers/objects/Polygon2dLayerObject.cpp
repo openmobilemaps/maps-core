@@ -14,6 +14,7 @@
 #include "BoundingBox.h"
 #include "CoordinateSystemIdentifiers.h"
 #include "CoordinatesUtil.h"
+#include "TrigonometryLUT.h"
 #include <cmath>
 
 Polygon2dLayerObject::Polygon2dLayerObject(const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
@@ -102,9 +103,20 @@ void Polygon2dLayerObject::setPolygons(const std::vector<PolygonCoord> &polygons
     }
 
     for (const auto& v : vecVertices) {
-        vertices.push_back(is3D ? 1.0 * sin(v.y) * cos(v.x) - rx : v.x - rx);
-        vertices.push_back(is3D ? 1.0 * cos(v.y) - ry : v.y - ry);
-        vertices.push_back(is3D ? -1.0 * sin(v.y) * sin(v.x) - rz : 0.0);
+        if(is3D) {
+            double sinX, sinY, cosX, cosY;
+            lut::sincos(v.x, sinX, cosX);
+            lut::sincos(v.y, sinY, cosY);
+
+            vertices.push_back(1.0 * sinY * cosX - rx);
+            vertices.push_back(1.0 * cosY - ry);
+            vertices.push_back(-1.0 * sinY * sinX - rz);
+        } else {
+            vertices.push_back(v.x - rx);
+            vertices.push_back(v.y - ry);
+            vertices.push_back(0.0);
+        }
+
         #ifdef __APPLE__
             vertices.push_back(0.0f);
         #endif

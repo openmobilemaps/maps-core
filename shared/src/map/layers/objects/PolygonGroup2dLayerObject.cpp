@@ -11,6 +11,7 @@
 #include "PolygonGroup2dLayerObject.h"
 #include "RenderVerticesDescription.h"
 #include "Logger.h"
+#include "TrigonometryLUT.h"
 #include <cmath>
 
 PolygonGroup2dLayerObject::PolygonGroup2dLayerObject(const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
@@ -64,14 +65,24 @@ void PolygonGroup2dLayerObject::setVertices(const std::vector<std::tuple<std::ve
 
     // Adjust the stored render coordinates by subtracting the average (origin)
     for (size_t i = 0; i < renderVertices.size(); i += 4) { // 4 values: x, y, z, s
-        double x = renderVertices[i];
-        double y = renderVertices[i + 1];
-        double z = renderVertices[i + 2];
+        const auto& x = renderVertices[i];
+        const auto& y = renderVertices[i + 1];
+        const auto& z = renderVertices[i + 2];
 
         // Adjust the coordinates by subtracting the average
-        renderVertices[i]     = is3d ? 1.0 * sin(y) * cos(x) - rx : x - rx;
-        renderVertices[i + 1] = is3d ? 1.0 * cos(y) - ry : y - ry;
-        renderVertices[i + 2] = is3d ? -1.0 * sin(y) * sin(x) - rz : 0.0;
+        if(is3d) {
+            double sinX, sinY, cosX, cosY;
+            lut::sincos(x, sinX, cosX);
+            lut::sincos(y, sinY, cosY);
+
+            renderVertices[i]     = 1.0 * sinY * cosX - rx;
+            renderVertices[i + 1] = 1.0 * cosY - ry;
+            renderVertices[i + 2] = -1.0 * sinY * sinX - rz;
+        } else {
+            renderVertices[i]     = x - rx;
+            renderVertices[i + 1] = y - ry;
+            renderVertices[i + 2] = 0.0;
+        }
     }
 
     auto i = SharedBytes((int64_t)indices.data(), (int32_t)indices.size(), (int32_t)sizeof(uint16_t));

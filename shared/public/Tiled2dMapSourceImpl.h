@@ -97,9 +97,13 @@ template <class L, class R>
     const double ry = origin.y;
     const double rz = origin.z;
 
-    std::vector<float> inVec = {(float)((mapCoord.z * sin(mapCoord.y) * cos(mapCoord.x) - rx)),
-                                (float)((mapCoord.z * cos(mapCoord.y) - ry)),
-                                (float)((-mapCoord.z * sin(mapCoord.y) * sin(mapCoord.x) - rz)), 1.0};
+    double sinX, cosX, sinY, cosY;
+    lut::sincos(mapCoord.y, sinY, cosY);
+    lut::sincos(mapCoord.x, sinX, cosX);
+
+    std::vector<float> inVec = {(float)((mapCoord.z * sinY * cosX - rx)),
+                                (float)((mapCoord.z * cosY - ry)),
+                                (float)((-mapCoord.z * sinY * sinX - rz)), 1.0};
     std::vector<float> outVec = {0, 0, 0, 0};
 
     Matrix::multiply(viewMatrix, inVec, outVec);
