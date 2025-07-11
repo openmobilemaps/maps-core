@@ -15,13 +15,20 @@
 #include "MapCameraInterface.h"
 
 Tiled2dMapVectorTile::Tiled2dMapVectorTile(const std::weak_ptr<MapInterface> &mapInterface,
+                                           const std::weak_ptr<Tiled2dMapVectorLayer> &vectorLayer,
                                            const Tiled2dMapVersionedTileInfo &tileInfo,
                                            const std::shared_ptr<VectorLayerDescription> &description,
                                            const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
                                            const WeakActor<Tiled2dMapVectorLayerTileCallbackInterface> &tileReadyInterface,
                                            const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager)
-        : mapInterface(mapInterface), tileInfo(tileInfo), tileCallbackInterface(tileReadyInterface), description(description),
-          layerConfig(layerConfig), featureStateManager(featureStateManager) {
+    : mapInterface(mapInterface)
+    , vectorLayer(vectorLayer)
+    , tileInfo(tileInfo)
+    , tileCallbackInterface(tileReadyInterface)
+    , description(description)
+    , layerConfig(layerConfig)
+    , featureStateManager(featureStateManager)
+{
 
     if (auto strongMapInterface = mapInterface.lock()) {
         dpFactor = strongMapInterface->getCamera()->getScreenDensityPpi() / 160.0;

@@ -241,7 +241,7 @@ Actor<Tiled2dMapVectorTile> Tiled2dMapVectorSourceTileDataManager::createTileAct
         case VectorLayerType::line: {
             auto mailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
 
-            auto lineActor = Actor<Tiled2dMapVectorLineTile>(mailbox, (std::weak_ptr<MapInterface>) mapInterface, tileInfo,
+            auto lineActor = Actor<Tiled2dMapVectorLineTile>(mailbox, (std::weak_ptr<MapInterface>) mapInterface, vectorLayer.unsafe(), tileInfo,
                                                              selfActor,
                                                              std::static_pointer_cast<LineVectorLayerDescription>(layerDescription),
                                                              layerConfig,
@@ -256,13 +256,13 @@ Actor<Tiled2dMapVectorTile> Tiled2dMapVectorSourceTileDataManager::createTileAct
             auto polygonDescription = std::static_pointer_cast<PolygonVectorLayerDescription>(layerDescription);
 
             if (polygonDescription->style.hasPatternPotentially()) {
-                auto polygonActor = Actor<Tiled2dMapVectorPolygonPatternTile>(mailbox, (std::weak_ptr<MapInterface>) mapInterface,
+                auto polygonActor = Actor<Tiled2dMapVectorPolygonPatternTile>(mailbox, (std::weak_ptr<MapInterface>) mapInterface, vectorLayer.unsafe(),
                                                                            tileInfo, selfActor, polygonDescription, layerConfig,
                                                                            spriteData, spriteTexture,
                                                                               featureStateManager);
                 actor = polygonActor.strongActor<Tiled2dMapVectorTile>();
             } else {
-                auto polygonActor = Actor<Tiled2dMapVectorPolygonTile>(mailbox, (std::weak_ptr<MapInterface>) mapInterface,
+                auto polygonActor = Actor<Tiled2dMapVectorPolygonTile>(mailbox, (std::weak_ptr<MapInterface>) mapInterface, vectorLayer.unsafe(),
                                                                        tileInfo, selfActor, polygonDescription, layerConfig,
                                                                        featureStateManager);
                 actor = polygonActor.strongActor<Tiled2dMapVectorTile>();
@@ -276,7 +276,7 @@ Actor<Tiled2dMapVectorTile> Tiled2dMapVectorSourceTileDataManager::createTileAct
         case VectorLayerType::raster: {
             auto mailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
 
-            auto rasterActor = Actor<Tiled2dMapVectorRasterTile>(mailbox, (std::weak_ptr<MapInterface>) mapInterface,
+            auto rasterActor = Actor<Tiled2dMapVectorRasterTile>(mailbox, (std::weak_ptr<MapInterface>) mapInterface, vectorLayer.unsafe(),
                                                                  tileInfo, selfActor,
                                                                  std::static_pointer_cast<RasterVectorLayerDescription>(
                                                                          layerDescription),

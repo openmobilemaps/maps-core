@@ -62,8 +62,9 @@ Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
         remoteStyleJsonUrl(remoteStyleJsonUrl),
         loaders(loaders),
         fontLoader(fontLoader),
+        stringTable(ValueKeys::newStringInterner()),
         customZoomInfo(customZoomInfo),
-        featureStateManager(std::make_shared<Tiled2dMapVectorStateManager>()),
+        featureStateManager(std::make_shared<Tiled2dMapVectorStateManager>(stringTable)),
         symbolDelegate(symbolDelegate),
         sourceUrlParams(sourceUrlParams),
         localDataProvider(localDataProvider)
@@ -84,8 +85,9 @@ Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
         fallbackStyleJsonString(fallbackStyleJsonString),
         loaders(loaders),
         fontLoader(fontLoader),
+        stringTable(ValueKeys::newStringInterner()),
         customZoomInfo(customZoomInfo),
-        featureStateManager(std::make_shared<Tiled2dMapVectorStateManager>()),
+        featureStateManager(std::make_shared<Tiled2dMapVectorStateManager>(stringTable)),
         symbolDelegate(symbolDelegate),
         sourceUrlParams(sourceUrlParams),
         localDataProvider(localDataProvider)
@@ -94,6 +96,7 @@ Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
 
 Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
                                              const std::shared_ptr<VectorMapDescription> &mapDescription,
+                                             StringInterner &&stringTable_,
                                              const std::vector<std::shared_ptr<::LoaderInterface>> &loaders,
                                              const std::shared_ptr<::FontLoaderInterface> &fontLoader,
                                              const std::optional<Tiled2dMapZoomInfo> &customZoomInfo,
@@ -105,8 +108,9 @@ Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
         layerName(layerName),
         loaders(loaders),
         fontLoader(fontLoader),
+        stringTable(std::move(stringTable_)),
         customZoomInfo(customZoomInfo),
-        featureStateManager(std::make_shared<Tiled2dMapVectorStateManager>()),
+        featureStateManager(std::make_shared<Tiled2dMapVectorStateManager>(stringTable)),
         symbolDelegate(symbolDelegate),
         localDataProvider(localDataProvider),
 		sourceUrlParams(sourceUrlParams),
@@ -124,8 +128,9 @@ Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
         layerName(layerName),
         loaders(loaders),
         fontLoader(fontLoader),
+        stringTable(ValueKeys::newStringInterner()),
         customZoomInfo(customZoomInfo),
-        featureStateManager(std::make_shared<Tiled2dMapVectorStateManager>()),
+        featureStateManager(std::make_shared<Tiled2dMapVectorStateManager>(stringTable)),
         symbolDelegate(symbolDelegate),
         sourceUrlParams(sourceUrlParams)
         {}
@@ -176,7 +181,7 @@ std::optional<TiledLayerError> Tiled2dMapVectorLayer::loadStyleJson() {
         if (localDataProvider) {
             auto optionalStyleJson = localDataProvider->getStyleJson();
             if (optionalStyleJson) {
-                auto parseResult = Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromString(layerName, *optionalStyleJson, localDataProvider, loaders, sourceUrlParams);
+                auto parseResult = Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromString(layerName, *optionalStyleJson, localDataProvider, loaders, stringTable, sourceUrlParams);
                 
                 if (parseResult.status == LoaderStatus::OK) {
                     setMapDescription(parseResult.mapDescription);
@@ -201,7 +206,7 @@ std::optional<TiledLayerError> Tiled2dMapVectorLayer::loadStyleJsonRemotely() {
     if (!remoteStyleJsonUrl.has_value()) {
         return std::nullopt;
     }
-    auto parseResult = Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromUrl(layerName, *remoteStyleJsonUrl, localDataProvider, loaders, sourceUrlParams);
+    auto parseResult = Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromUrl(layerName, *remoteStyleJsonUrl, localDataProvider, loaders, stringTable, sourceUrlParams);
     if (parseResult.status == LoaderStatus::OK) {
         setMapDescription(parseResult.mapDescription);
         metadata = parseResult.metadata;
@@ -214,7 +219,7 @@ std::optional<TiledLayerError> Tiled2dMapVectorLayer::loadStyleJsonRemotely() {
 }
 
 std::optional<TiledLayerError> Tiled2dMapVectorLayer::loadStyleJsonLocally(std::string styleJsonString) {
-    auto parseResult = Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromString(layerName, styleJsonString, localDataProvider, loaders, sourceUrlParams);
+    auto parseResult = Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromString(layerName, styleJsonString, localDataProvider, loaders, stringTable, sourceUrlParams);
 
     if (parseResult.status == LoaderStatus::OK) {
         setMapDescription(parseResult.mapDescription);
@@ -393,6 +398,7 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
             auto geoJsonSource = Actor<Tiled2dVectorGeoJsonSource>(sourceMailbox,
                                                                    mapInterface->getCamera(),
                                                                    mapInterface->getMapConfig(),
+                                                                   castedMe,
                                                                    layerConfig,
                                                                    mapInterface->getCoordinateConverterHelper(),
                                                                    mapInterface->getScheduler(),
@@ -409,6 +415,7 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
         } else {
             vectorSource = Actor<Tiled2dMapVectorSource>(sourceMailbox,
                                                               mapInterface->getMapConfig(),
+                                                              castedMe,
                                                               layerConfig,
                                                               mapInterface->getCoordinateConverterHelper(),
                                                               mapInterface->getScheduler(),
@@ -578,7 +585,7 @@ void Tiled2dMapVectorLayer::reloadLocalDataSource(const std::string &sourceName,
 
         try {
             auto json = nlohmann::json::parse(geoJson);
-            geoSource->reload(GeoJsonParser::getGeoJson(json));
+            geoSource->reload(GeoJsonParser::getGeoJson(json, stringTable));
         }
         catch (nlohmann::json::exception &ex) {
             return;
@@ -1485,7 +1492,7 @@ std::vector<VectorLayerFeatureCoordInfo> Tiled2dMapVectorLayer::getVisiblePointF
                             bool isVisible = camera->coordIsVisibleOnScreen(coord, paddingPc);
 
                             if (isVisible) {
-                                features.push_back(VectorLayerFeatureCoordInfo(featureContext->getFeatureInfo(), coord));
+                                features.push_back(VectorLayerFeatureCoordInfo(featureContext->getFeatureInfo(stringTable), coord));
                             }
                         }
                     }

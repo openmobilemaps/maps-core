@@ -22,14 +22,15 @@
 #include "TrigonometryLUT.h"
 
 Tiled2dMapVectorPolygonTile::Tiled2dMapVectorPolygonTile(const std::weak_ptr<MapInterface> &mapInterface,
+                                                         const std::weak_ptr<Tiled2dMapVectorLayer> &vectorLayer,
                                                          const Tiled2dMapVersionedTileInfo &tileInfo,
                                                          const WeakActor<Tiled2dMapVectorLayerTileCallbackInterface> &tileCallbackInterface,
                                                          const std::shared_ptr<PolygonVectorLayerDescription> &description,
                                                          const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
                                                          const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager)
-        : Tiled2dMapVectorTile(mapInterface, tileInfo, description, layerConfig, tileCallbackInterface, featureStateManager),
+        : Tiled2dMapVectorTile(mapInterface, vectorLayer, tileInfo, description, layerConfig, tileCallbackInterface, featureStateManager),
           usedKeys(std::move(description->getUsedKeys())), isStriped(description->style.isStripedPotentially()) {
-    isStyleZoomDependant = usedKeys.containsUsedKey(Tiled2dMapVectorStyleParser::zoomExpression);
+    isStyleZoomDependant = usedKeys.containsUsedKey(ValueKeys::ZOOM);
     isStyleStateDependant = usedKeys.isStateDependant();
 }
 
@@ -38,7 +39,7 @@ void Tiled2dMapVectorPolygonTile::updateVectorLayerDescription(const std::shared
     Tiled2dMapVectorTile::updateVectorLayerDescription(description, tileData);
     auto newUsedKeys = description->getUsedKeys();
     bool usedKeysContainsNewUsedKeys = usedKeys.covers(newUsedKeys);
-    isStyleZoomDependant = newUsedKeys.containsUsedKey(Tiled2dMapVectorStyleParser::zoomExpression);
+    isStyleZoomDependant = newUsedKeys.containsUsedKey(ValueKeys::ZOOM);
     isStyleStateDependant = newUsedKeys.isStateDependant();
     usedKeys = std::move(newUsedKeys);
     lastZoom = std::nullopt;
@@ -404,16 +405,18 @@ bool Tiled2dMapVectorPolygonTile::performClick(const Coord &coord) {
     auto mapInterface = this->mapInterface.lock();
     auto converter = mapInterface ? mapInterface->getCoordinateConverterHelper() : nullptr;
     auto strongSelectionDelegate = selectionDelegate.lock();
-    if (!strongSelectionDelegate || !converter) {
+    auto strongVectorLayer = vectorLayer.lock();
+    if (!strongSelectionDelegate || !converter || !strongVectorLayer) {
         return false;
     }
+    const StringInterner& stringTable = strongVectorLayer->getStringInterner();
 
     std::vector<VectorLayerFeatureInfo> featureInfos;
     for (auto iter = hitDetectionPolygons.rbegin(); iter != hitDetectionPolygons.rend(); ++iter) {
         if (VectorTileGeometryHandler::isPointInTriangulatedPolygon(coord, std::get<0>(*iter), converter)) {
             if (multiselect) {
-                featureInfos.push_back(std::get<1>(*iter)->getFeatureInfo());
-            } else if (strongSelectionDelegate->didSelectFeature(std::get<1>(*iter)->getFeatureInfo(), description->identifier,
+                featureInfos.push_back(std::get<1>(*iter)->getFeatureInfo(stringTable));
+            } else if (strongSelectionDelegate->didSelectFeature(std::get<1>(*iter)->getFeatureInfo(stringTable), description->identifier,
                                                                  converter->convert(CoordinateSystemIdentifiers::EPSG4326(),coord))) {
                 return true;
             }

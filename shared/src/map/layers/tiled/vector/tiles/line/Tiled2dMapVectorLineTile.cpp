@@ -16,14 +16,15 @@
 #include "Tiled2dMapVectorStyleParser.h"
 
 Tiled2dMapVectorLineTile::Tiled2dMapVectorLineTile(const std::weak_ptr<MapInterface> &mapInterface,
-                                                         const Tiled2dMapVersionedTileInfo &tileInfo,
-                                                         const WeakActor<Tiled2dMapVectorLayerTileCallbackInterface> &tileCallbackInterface,
-                                                         const std::shared_ptr<LineVectorLayerDescription> &description,
+                                                   const std::weak_ptr<Tiled2dMapVectorLayer> &vectorLayer,
+                                                   const Tiled2dMapVersionedTileInfo &tileInfo,
+                                                   const WeakActor<Tiled2dMapVectorLayerTileCallbackInterface> &tileCallbackInterface,
+                                                   const std::shared_ptr<LineVectorLayerDescription> &description,
                                                    const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
                                                    const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager)
-        : Tiled2dMapVectorTile(mapInterface, tileInfo, description, layerConfig, tileCallbackInterface, featureStateManager),
+        : Tiled2dMapVectorTile(mapInterface, vectorLayer, tileInfo, description, layerConfig, tileCallbackInterface, featureStateManager),
           usedKeys(description->getUsedKeys()), selectionSizeFactor(description->selectionSizeFactor) {
-    isStyleZoomDependant = usedKeys.usedKeys.contains(Tiled2dMapVectorStyleParser::zoomExpression);
+    isStyleZoomDependant = usedKeys.usedKeys.contains(ValueKeys::ZOOM);
     isStyleStateDependant = usedKeys.isStateDependant();
 
     isSimpleLine = description->style.isSimpleLine();
@@ -34,7 +35,7 @@ void Tiled2dMapVectorLineTile::updateVectorLayerDescription(const std::shared_pt
     Tiled2dMapVectorTile::updateVectorLayerDescription(description, tileData);
     auto newUsedKeys = description->getUsedKeys();
     bool usedKeysContainsNewUsedKeys = usedKeys.covers(newUsedKeys);
-    isStyleZoomDependant = newUsedKeys.containsUsedKey(Tiled2dMapVectorStyleParser::zoomExpression);
+    isStyleZoomDependant = newUsedKeys.containsUsedKey(ValueKeys::ZOOM);
     isStyleStateDependant = newUsedKeys.isStateDependant();
     usedKeys = std::move(newUsedKeys);
     lastZoom = std::nullopt;
@@ -558,13 +559,15 @@ bool Tiled2dMapVectorLineTile::performClick(const Coord &coord) {
     const auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
     const auto coordinateConverter = mapInterface ? mapInterface->getCoordinateConverterHelper() : nullptr;
     auto strongSelectionDelegate = selectionDelegate.lock();
-    if (!camera || !strongSelectionDelegate || !coordinateConverter) {
+    auto strongVectorLayer = vectorLayer.lock();
+    if (!camera || !strongSelectionDelegate || !coordinateConverter || !strongVectorLayer) {
         return false;
     }
 
     double zoomIdentifier = layerConfig->getZoomIdentifier(camera->getZoom());
 
     auto lineDescription = std::static_pointer_cast<LineVectorLayerDescription>(description);
+    const StringInterner& stringTable = strongVectorLayer->getStringInterner();
     
     std::vector<VectorLayerFeatureInfo> featureInfos;
     for (auto const &[lineCoordinateVector, featureContext]: hitDetection) {
@@ -574,8 +577,8 @@ bool Tiled2dMapVectorLineTile::performClick(const Coord &coord) {
             auto lineWidthInMapUnits = camera->mapUnitsFromPixels(lineWidth);
             if (LineHelper::pointWithin(coordinates, coord, tileInfo.tileInfo.bounds.topLeft.systemIdentifier, lineWidthInMapUnits, coordinateConverter)) {
                 if (multiselect) {
-                    featureInfos.push_back(featureContext->getFeatureInfo());
-                } else if (strongSelectionDelegate->didSelectFeature(featureContext->getFeatureInfo(), description->identifier, coord)) {
+                    featureInfos.push_back(featureContext->getFeatureInfo(stringTable));
+                } else if (strongSelectionDelegate->didSelectFeature(featureContext->getFeatureInfo(stringTable), description->identifier, coord)) {
                     return true;
                 }
             }

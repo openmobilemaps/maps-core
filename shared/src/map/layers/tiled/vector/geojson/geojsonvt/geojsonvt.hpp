@@ -4,15 +4,15 @@
 #include "tile.hpp"
 #include "clip.hpp"
 
-#include <chrono>
-#include <cmath>
-#include <map>
-#include <unordered_map>
 #include "GeoJsonTypes.h"
 #include "GeoJsonParser.h"
 
 #include "LoaderInterface.h"
 #include "LoaderHelper.h"
+#include "StringInterner.h"
+
+#include <cmath>
+#include <unordered_map>
 
 struct TileOptions {
     // simplification tolerance (higher means simpler)
@@ -44,23 +44,34 @@ inline uint64_t toID(uint8_t z, uint32_t x, uint32_t y) {
 }
 
 class GeoJSONVT: public GeoJSONVTInterface, public std::enable_shared_from_this<GeoJSONVT> {
+private:
+    StringInterner &stringTable;
+
 public:
     Options options;
 
     const Tile emptyTile = Tile();
 
     GeoJSONVT(const std::shared_ptr<GeoJson> &geoJson,
-              const Options& options_ = Options())
-    : options(options_), loadingResult(DataLoaderResult(std::nullopt, std::nullopt, LoaderStatus::OK, std::nullopt)) {
+              StringInterner &stringTable,
+              const Options &options_ = Options())
+        : options(options_)
+        , loadingResult(DataLoaderResult(std::nullopt, std::nullopt, LoaderStatus::OK, std::nullopt))
+        , stringTable(stringTable) {
         initialize(geoJson);
     }
 
-    GeoJSONVT(const std::string &sourceName,
-              const std::string &geoJsonUrl,
+    GeoJSONVT(const std::string &sourceName, const std::string &geoJsonUrl,
               const std::vector<std::shared_ptr<::LoaderInterface>> &loaders,
               const std::shared_ptr<Tiled2dMapVectorLayerLocalDataProviderInterface> &localDataProvider,
-              const Options& options_ = Options())
-    : options(options_), sourceName(sourceName), geoJsonUrl(geoJsonUrl), loaders(loaders), localDataProvider(localDataProvider) {}
+              StringInterner &stringTable,
+              const Options &options_ = Options())
+        : options(options_)
+        , sourceName(sourceName)
+        , geoJsonUrl(geoJsonUrl)
+        , loaders(loaders)
+        , localDataProvider(localDataProvider)
+        , stringTable(stringTable) {}
 
     const std::string sourceName;
     const std::string geoJsonUrl;
@@ -104,7 +115,7 @@ public:
                 nlohmann::json json;
                 try {
                     json = nlohmann::json::parse(string);
-                    auto geoJson = GeoJsonParser::getGeoJson(json);
+                    auto geoJson = GeoJsonParser::getGeoJson(json, self->stringTable);
                     if (geoJson) {
                         self->initialize(geoJson);
                         std::lock_guard<std::recursive_mutex> lock(self->mutex);

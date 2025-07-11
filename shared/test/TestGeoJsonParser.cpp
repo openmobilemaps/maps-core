@@ -207,12 +207,13 @@ TEST_CASE("GeoJSON Parser valid") {
     SECTION(testCase.file) {
         const std::string jsonString = TestData::readFileToString(testCase.file);
         const auto json = nlohmann::json::parse(jsonString);
+        StringInterner stringTable = ValueKeys::newStringInterner();
 
         std::string log;
         std::shared_ptr<GeoJson> geoJson;
         {
             OstreamCapture logCapture(std::cout);
-            geoJson = GeoJsonParser::getGeoJson(json);
+            geoJson = GeoJsonParser::getGeoJson(json, stringTable);
             log = logCapture.get();
         }
 
@@ -264,7 +265,8 @@ TEST_CASE("GeoJSON Parser invalid") {
         const std::string jsonString = TestData::readFileToString(file);
         // files are valid json, no exception expected here.
         auto json = nlohmann::json::parse(jsonString);
-        REQUIRE_THROWS_AS(GeoJsonParser::getGeoJson(json), nlohmann::json::exception);
+        StringInterner stringTable = ValueKeys::newStringInterner();
+        REQUIRE_THROWS_AS(GeoJsonParser::getGeoJson(json, stringTable), nlohmann::json::exception);
     }
 }
 

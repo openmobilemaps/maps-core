@@ -10,5 +10,15 @@
 
 #include "ValueKeys.h"
 
-const std::string ValueKeys::IDENTIFIER_KEY = "identifier";
-const std::string ValueKeys::TYPE_KEY = "$type";
+
+const char *ValueKeys::IDENTIFIER_KEY_STR = "identifier";
+const char *ValueKeys::TYPE_KEY_STR = "$type";
+
+static StringInterner staticStringTable{};
+const InternedString ValueKeys::IDENTIFIER_KEY = staticStringTable.add(ValueKeys::IDENTIFIER_KEY_STR);
+const InternedString ValueKeys::TYPE_KEY = staticStringTable.add(ValueKeys::TYPE_KEY_STR);
+const InternedString ValueKeys::ZOOM = staticStringTable.add("zoom");
+
+StringInterner ValueKeys::newStringInterner() {
+    return StringInterner(staticStringTable);
+}

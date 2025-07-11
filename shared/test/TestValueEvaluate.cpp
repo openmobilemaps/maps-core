@@ -8,28 +8,27 @@
 #include <vector>
 
 TEST_CASE("GetPropertyValue tests", "[GetPropertyValue]") {
+    StringInterner stringTable = ValueKeys::newStringInterner();
+    auto key = stringTable.add("key");
     auto featureContext = std::make_shared<FeatureContext>(vtzero::GeomType::POINT, FeatureContext::mapType{}, 0);
-    auto featureStateManager = std::make_shared<Tiled2dMapVectorStateManager>();
-    EvaluationContext context = EvaluationContext(0, 0, featureContext, featureStateManager);
+    EvaluationContext context = EvaluationContext(0, 0, featureContext, nullptr);
 
     SECTION("Evaluate when key does not exist") {
-        GetPropertyValue value = GetPropertyValue("key");
+        GetPropertyValue value = GetPropertyValue(key);
         auto result = value.evaluateOr<std::string>(context, "fallback");
         REQUIRE(result == "fallback");
     }
 
     SECTION("Evaluate when key exist") {
-        featureContext->propertiesMap = FeatureContext::mapType{{"key", "value"}};
-        GetPropertyValue value = GetPropertyValue("key");
+        featureContext->propertiesMap = FeatureContext::mapType{{key, "value"}};
+        GetPropertyValue value = GetPropertyValue(key);
         auto result = std::get<std::string>(value.evaluate(context));
         REQUIRE(result == "value");
     }
 }
 
 TEST_CASE("StaticValue tests", "[StaticValue]") {
-    auto featureContext = std::make_shared<FeatureContext>(vtzero::GeomType::POINT, FeatureContext::mapType{}, 0);
-    auto featureStateManager = std::make_shared<Tiled2dMapVectorStateManager>();
-    EvaluationContext context = EvaluationContext(0, 0, featureContext, featureStateManager);
+    EvaluationContext context = EvaluationContext(0, 0, nullptr, nullptr);
 
     SECTION("Evaluate string value") {
         StaticValue value("test");
@@ -48,9 +47,7 @@ TEST_CASE("StaticValue tests", "[StaticValue]") {
 }
 
 TEST_CASE("ToStringValue tests", "[ToStringValue]") {
-    auto featureContext = std::make_shared<FeatureContext>(vtzero::GeomType::POINT, FeatureContext::mapType{}, 0);
-    auto featureStateManager = std::make_shared<Tiled2dMapVectorStateManager>();
-    EvaluationContext context = EvaluationContext(0, 0, featureContext, featureStateManager);
+    EvaluationContext context = EvaluationContext(0, 0, nullptr, nullptr);
 
     SECTION("Evaluate ToStringValue") {
         auto staticValue = std::make_shared<StaticValue>("test");
@@ -60,9 +57,7 @@ TEST_CASE("ToStringValue tests", "[ToStringValue]") {
 }
 
 TEST_CASE("ScaleValue tests", "[ScaleValue]") {
-    auto featureContext = std::make_shared<FeatureContext>(vtzero::GeomType::POINT, FeatureContext::mapType{}, 0);
-    auto featureStateManager = std::make_shared<Tiled2dMapVectorStateManager>();
-    EvaluationContext context = EvaluationContext(0, 0, featureContext, featureStateManager);
+    EvaluationContext context = EvaluationContext(0, 0, nullptr, nullptr);
 
     SECTION("Evaluate ScaleValue with double") {
         auto staticValue = std::make_shared<StaticValue>(2.0);
@@ -78,43 +73,43 @@ TEST_CASE("ScaleValue tests", "[ScaleValue]") {
 }
 
 TEST_CASE("HasPropertyValue tests", "[HasPropertyValue]") {
+    StringInterner stringTable = ValueKeys::newStringInterner();
+    auto key = stringTable.add("key");
     auto featureContext = std::make_shared<FeatureContext>(vtzero::GeomType::POINT, FeatureContext::mapType{}, 0);
-    auto featureStateManager = std::make_shared<Tiled2dMapVectorStateManager>();
-    EvaluationContext context = EvaluationContext(0, 0, featureContext, featureStateManager);
+    EvaluationContext context = EvaluationContext(0, 0, featureContext, nullptr);
 
     SECTION("Evaluate HasPropertyValue when property exists") {
-        featureContext->propertiesMap = FeatureContext::mapType{{"key", "value"}};
-        HasPropertyValue value("key");
+        featureContext->propertiesMap = FeatureContext::mapType{{key, "value"}};
+        HasPropertyValue value(key);
         REQUIRE(std::get<bool>(value.evaluate(context)) == true);
     }
 
     SECTION("Evaluate HasPropertyValue when property does not exist") {
-        HasPropertyValue value("key");
+        HasPropertyValue value(key);
         REQUIRE(std::get<bool>(value.evaluate(context)) == false);
     }
 }
 
 TEST_CASE("HasNotPropertyValue tests", "[HasNotPropertyValue]") {
-    auto featureContext = std::make_shared<FeatureContext>(vtzero::GeomType::POINT, FeatureContext::mapType{}, 0);
-    auto featureStateManager = std::make_shared<Tiled2dMapVectorStateManager>();
-    EvaluationContext context = EvaluationContext(0, 0, featureContext, featureStateManager);
+    StringInterner stringTable = ValueKeys::newStringInterner();
+    auto key = stringTable.add("key");
+      auto featureContext = std::make_shared<FeatureContext>(vtzero::GeomType::POINT, FeatureContext::mapType{}, 0);
+    EvaluationContext context = EvaluationContext(0, 0, featureContext, nullptr);
 
     SECTION("Evaluate HasNotPropertyValue when property exists") {
-        featureContext->propertiesMap = FeatureContext::mapType{{"key", "value"}};
-        HasNotPropertyValue value("key");
+        featureContext->propertiesMap = FeatureContext::mapType{{key, "value"}};
+        HasNotPropertyValue value(key);
         REQUIRE(std::get<bool>(value.evaluate(context)) == false);
     }
 
     SECTION("Evaluate HasNotPropertyValue when property does not exist") {
-        HasNotPropertyValue value("key");
+        HasNotPropertyValue value(key);
         REQUIRE(std::get<bool>(value.evaluate(context)) == true);
     }
 }
 
 TEST_CASE("InterpolatedValue Test", "[InterpolatedValue]") {
-    auto featureContext = std::make_shared<FeatureContext>(vtzero::GeomType::POINT, FeatureContext::mapType{}, 0);
-    auto featureStateManager = std::make_shared<Tiled2dMapVectorStateManager>();
-    EvaluationContext context = EvaluationContext(5.0, 0, featureContext, featureStateManager);
+    EvaluationContext context = EvaluationContext(5.0, 0, nullptr, nullptr);
 
     std::vector<std::pair<double, std::shared_ptr<Value>>> steps = {{0.0, std::make_shared<StaticValue>(ValueVariant(0.0))},
                                                                     {10.0, std::make_shared<StaticValue>(ValueVariant(10.0))}};
@@ -124,9 +119,7 @@ TEST_CASE("InterpolatedValue Test", "[InterpolatedValue]") {
 }
 
 TEST_CASE("BezierInterpolatedValue Test", "[BezierInterpolatedValue]") {
-    auto featureContext = std::make_shared<FeatureContext>(vtzero::GeomType::POINT, FeatureContext::mapType{}, 0);
-    auto featureStateManager = std::make_shared<Tiled2dMapVectorStateManager>();
-    EvaluationContext context = EvaluationContext(5.0, 0, featureContext, featureStateManager);
+    EvaluationContext context = EvaluationContext(5.0, 0, nullptr, nullptr);
 
     std::vector<std::pair<double, std::shared_ptr<Value>>> steps = {{0.0, std::make_shared<StaticValue>(ValueVariant(0.0))},
                                                                     {10.0, std::make_shared<StaticValue>(ValueVariant(10.0))}};
@@ -136,9 +129,7 @@ TEST_CASE("BezierInterpolatedValue Test", "[BezierInterpolatedValue]") {
 }
 
 TEST_CASE("StepValue Test", "[StepValue]") {
-    auto featureContext = std::make_shared<FeatureContext>(vtzero::GeomType::POINT, FeatureContext::mapType{}, 0);
-    auto featureStateManager = std::make_shared<Tiled2dMapVectorStateManager>();
-    EvaluationContext context = EvaluationContext(5.0, 0, featureContext, featureStateManager);
+    EvaluationContext context = EvaluationContext(5.0, 0, nullptr, nullptr);
 
     auto compareValue = std::make_shared<StaticValue>(ValueVariant(5.0));
     std::vector<std::pair<std::shared_ptr<Value>, std::shared_ptr<Value>>> stops = {
@@ -151,14 +142,13 @@ TEST_CASE("StepValue Test", "[StepValue]") {
 }
 
 TEST_CASE("CaseValue Test", "[CaseValue]") {
-    auto featureContext = std::make_shared<FeatureContext>(vtzero::GeomType::POINT, FeatureContext::mapType{}, 0);
-    auto featureStateManager = std::make_shared<Tiled2dMapVectorStateManager>();
-    EvaluationContext context = EvaluationContext(0, 0, featureContext, featureStateManager);
-
-    featureContext->propertiesMap = FeatureContext::mapType{{"key", "value"}};
+    StringInterner stringTable = ValueKeys::newStringInterner();
+    auto key = stringTable.add("key");
+    auto featureContext = std::make_shared<FeatureContext>(vtzero::GeomType::POINT, FeatureContext::mapType{{key, "value"}}, 0);
+    EvaluationContext context = EvaluationContext(0, 0, featureContext, nullptr);
 
     std::vector<std::pair<std::shared_ptr<Value>, std::shared_ptr<Value>>> cases = {
-        {std::make_shared<HasPropertyValue>("key"), std::make_shared<StaticValue>(ValueVariant("value"))}};
+        {std::make_shared<HasPropertyValue>(key), std::make_shared<StaticValue>(ValueVariant("value"))}};
     auto defaultValue = std::make_shared<StaticValue>(ValueVariant("default"));
 
     CaseValue caseValue(cases, defaultValue);
@@ -166,9 +156,7 @@ TEST_CASE("CaseValue Test", "[CaseValue]") {
 }
 
 TEST_CASE("ToNumberValue Test", "[ToNumberValue]") {
-    auto featureContext = std::make_shared<FeatureContext>(vtzero::GeomType::POINT, FeatureContext::mapType{}, 0);
-    auto featureStateManager = std::make_shared<Tiled2dMapVectorStateManager>();
-    EvaluationContext context = EvaluationContext(0, 0, featureContext, featureStateManager);
+    EvaluationContext context = EvaluationContext(0, 0, nullptr, nullptr);
 
     auto value = std::make_shared<StaticValue>(ValueVariant("123.45"));
     ToNumberValue toNumberValue(value);
@@ -177,9 +165,7 @@ TEST_CASE("ToNumberValue Test", "[ToNumberValue]") {
 }
 
 TEST_CASE("ToBooleanValue Test", "[ToBooleanValue]") {
-    auto featureContext = std::make_shared<FeatureContext>(vtzero::GeomType::POINT, FeatureContext::mapType{}, 0);
-    auto featureStateManager = std::make_shared<Tiled2dMapVectorStateManager>();
-    EvaluationContext context = EvaluationContext(0, 0, featureContext, featureStateManager);
+    EvaluationContext context = EvaluationContext(0, 0, nullptr, nullptr);
 
     auto value = std::make_shared<StaticValue>(ValueVariant("true"));
     ToBooleanValue toBooleanValue(value);
@@ -188,9 +174,7 @@ TEST_CASE("ToBooleanValue Test", "[ToBooleanValue]") {
 }
 
 TEST_CASE("BooleanValue Test", "[BooleanValue]") {
-    auto featureContext = std::make_shared<FeatureContext>(vtzero::GeomType::POINT, FeatureContext::mapType{}, 0);
-    auto featureStateManager = std::make_shared<Tiled2dMapVectorStateManager>();
-    EvaluationContext context = EvaluationContext(0, 0, featureContext, featureStateManager);
+    EvaluationContext context = EvaluationContext(0, 0, nullptr, nullptr);
 
     auto value = std::make_shared<StaticValue>(ValueVariant(true));
     BooleanValue booleanValue(value);
@@ -199,9 +183,7 @@ TEST_CASE("BooleanValue Test", "[BooleanValue]") {
 }
 
 TEST_CASE("MatchValue Test", "[MatchValue]") {
-    auto featureContext = std::make_shared<FeatureContext>(vtzero::GeomType::POINT, FeatureContext::mapType{}, 0);
-    auto featureStateManager = std::make_shared<Tiled2dMapVectorStateManager>();
-    EvaluationContext context = EvaluationContext(0, 0, featureContext, featureStateManager);
+    EvaluationContext context = EvaluationContext(0, 0, nullptr, nullptr);
 
     auto compareValue = std::make_shared<StaticValue>(ValueVariant("key"));
     std::vector<std::pair<ValueVariant, std::shared_ptr<Value>>> mapping = {
@@ -213,24 +195,21 @@ TEST_CASE("MatchValue Test", "[MatchValue]") {
 }
 
 TEST_CASE("PropertyFilter Test", "[PropertyFilter]") {
-    auto featureContext = std::make_shared<FeatureContext>(vtzero::GeomType::POINT, FeatureContext::mapType{}, 0);
-    auto featureStateManager = std::make_shared<Tiled2dMapVectorStateManager>();
-    EvaluationContext context = EvaluationContext(0, 0, featureContext, featureStateManager);
-
-    featureContext->propertiesMap = FeatureContext::mapType{{"key", "value"}};
+    StringInterner stringTable = ValueKeys::newStringInterner();
+    auto key = stringTable.add("key");
+    auto featureContext = std::make_shared<FeatureContext>(vtzero::GeomType::POINT, FeatureContext::mapType{{key, "value"}}, 0);
+    EvaluationContext context = EvaluationContext(0, 0, featureContext, nullptr);
 
     std::vector<std::pair<ValueVariant, std::shared_ptr<Value>>> mapping = {
         {ValueVariant("value"), std::make_shared<StaticValue>(ValueVariant("matched"))}};
     auto defaultValue = std::make_shared<StaticValue>(ValueVariant("default"));
 
-    PropertyFilter propertyFilter(mapping, defaultValue, "key");
+    PropertyFilter propertyFilter(mapping, defaultValue, key);
     REQUIRE(std::get<std::string>(propertyFilter.evaluate(context)) == "matched");
 }
 
 TEST_CASE("LogOpValue Test", "[LogOpValue]") {
-    auto featureContext = std::make_shared<FeatureContext>(vtzero::GeomType::POINT, FeatureContext::mapType{}, 0);
-    auto featureStateManager = std::make_shared<Tiled2dMapVectorStateManager>();
-    EvaluationContext context = EvaluationContext(0, 0, featureContext, featureStateManager);
+    EvaluationContext context = EvaluationContext(0, 0, nullptr, nullptr);
 
     auto lhs = std::make_shared<StaticValue>(ValueVariant(true));
     auto rhs = std::make_shared<StaticValue>(ValueVariant(false));
@@ -240,9 +219,7 @@ TEST_CASE("LogOpValue Test", "[LogOpValue]") {
 }
 
 TEST_CASE("AllValue Test", "[AllValue]") {
-    auto featureContext = std::make_shared<FeatureContext>(vtzero::GeomType::POINT, FeatureContext::mapType{}, 0);
-    auto featureStateManager = std::make_shared<Tiled2dMapVectorStateManager>();
-    EvaluationContext context = EvaluationContext(0, 0, featureContext, featureStateManager);
+    EvaluationContext context = EvaluationContext(0, 0, nullptr, nullptr);
 
     std::vector<std::shared_ptr<Value>> values = {std::make_shared<StaticValue>(ValueVariant(true)),
                                                   std::make_shared<StaticValue>(ValueVariant(true))};
@@ -252,9 +229,7 @@ TEST_CASE("AllValue Test", "[AllValue]") {
 }
 
 TEST_CASE("AnyValue Test", "[AnyValue]") {
-    auto featureContext = std::make_shared<FeatureContext>(vtzero::GeomType::POINT, FeatureContext::mapType{}, 0);
-    auto featureStateManager = std::make_shared<Tiled2dMapVectorStateManager>();
-    EvaluationContext context = EvaluationContext(0, 0, featureContext, featureStateManager);
+    EvaluationContext context = EvaluationContext(0, 0, nullptr, nullptr);
 
     std::vector<std::shared_ptr<Value>> values = {std::make_shared<StaticValue>(ValueVariant(false)),
                                                   std::make_shared<StaticValue>(ValueVariant(true))};
@@ -264,9 +239,7 @@ TEST_CASE("AnyValue Test", "[AnyValue]") {
 }
 
 TEST_CASE("PropertyCompareValue Test", "[PropertyCompareValue]") {
-    auto featureContext = std::make_shared<FeatureContext>(vtzero::GeomType::POINT, FeatureContext::mapType{}, 0);
-    auto featureStateManager = std::make_shared<Tiled2dMapVectorStateManager>();
-    EvaluationContext context = EvaluationContext(0, 0, featureContext, featureStateManager);
+    EvaluationContext context = EvaluationContext(0, 0, nullptr, nullptr);
 
     auto lhs = std::make_shared<StaticValue>(ValueVariant(5.0));
     auto rhs = std::make_shared<StaticValue>(ValueVariant(10.0));
@@ -276,37 +249,33 @@ TEST_CASE("PropertyCompareValue Test", "[PropertyCompareValue]") {
 }
 
 TEST_CASE("InFilter Test", "[InFilter]") {
-    auto featureContext = std::make_shared<FeatureContext>(vtzero::GeomType::POINT, FeatureContext::mapType{}, 0);
-    auto featureStateManager = std::make_shared<Tiled2dMapVectorStateManager>();
-    EvaluationContext context = EvaluationContext(0, 0, featureContext, featureStateManager);
-
-    featureContext->propertiesMap = FeatureContext::mapType{{"key", "value"}};
+    StringInterner stringTable = ValueKeys::newStringInterner();
+    auto key = stringTable.add("key");
+    auto featureContext = std::make_shared<FeatureContext>(vtzero::GeomType::POINT, FeatureContext::mapType{{key, "value"}}, 0);
+    EvaluationContext context = EvaluationContext(0, 0, featureContext, nullptr);
 
     std::unordered_set<ValueVariant> values = {ValueVariant("value")};
     auto dynamicValues = std::make_shared<StaticValue>(ValueVariant(std::vector<std::string>{"value"}));
 
-    InFilter inFilter("key", values, dynamicValues);
+    InFilter inFilter(key, values, dynamicValues);
     REQUIRE(std::get<bool>(inFilter.evaluate(context)) == true);
 }
 
 TEST_CASE("NotInFilter Test", "[NotInFilter]") {
-    auto featureContext = std::make_shared<FeatureContext>(vtzero::GeomType::POINT, FeatureContext::mapType{}, 0);
-    auto featureStateManager = std::make_shared<Tiled2dMapVectorStateManager>();
-    EvaluationContext context = EvaluationContext(0, 0, featureContext, featureStateManager);
-
-    featureContext->propertiesMap = FeatureContext::mapType{{"key", "value"}};
+    StringInterner stringTable = ValueKeys::newStringInterner();
+    auto key = stringTable.add("key");
+    auto featureContext = std::make_shared<FeatureContext>(vtzero::GeomType::POINT, FeatureContext::mapType{{key, "value"}}, 0);
+    EvaluationContext context = EvaluationContext(0, 0, featureContext, nullptr);
 
     std::unordered_set<ValueVariant> values = {ValueVariant("other")};
     auto dynamicValues = std::make_shared<StaticValue>(ValueVariant(std::vector<std::string>{"other"}));
 
-    NotInFilter notInFilter("key", values, dynamicValues);
+    NotInFilter notInFilter(key, values, dynamicValues);
     REQUIRE(std::get<bool>(notInFilter.evaluate(context)) == true);
 }
 
 TEST_CASE("FormatValue Test", "[FormatValue]") {
-    auto featureContext = std::make_shared<FeatureContext>(vtzero::GeomType::POINT, FeatureContext::mapType{}, 0);
-    auto featureStateManager = std::make_shared<Tiled2dMapVectorStateManager>();
-    EvaluationContext context = EvaluationContext(0, 0, featureContext, featureStateManager);
+    EvaluationContext context = EvaluationContext(0, 0, nullptr, nullptr);
 
     std::vector<FormatValueWrapper> values = {{std::make_shared<StaticValue>(ValueVariant("test")), 1.0f}};
 
@@ -318,9 +287,7 @@ TEST_CASE("FormatValue Test", "[FormatValue]") {
 }
 
 TEST_CASE("NumberFormatValue Test", "[NumberFormatValue]") {
-    auto featureContext = std::make_shared<FeatureContext>(vtzero::GeomType::POINT, FeatureContext::mapType{}, 0);
-    auto featureStateManager = std::make_shared<Tiled2dMapVectorStateManager>();
-    EvaluationContext context = EvaluationContext(0, 0, featureContext, featureStateManager);
+    EvaluationContext context = EvaluationContext(0, 0, nullptr, nullptr);
 
     auto value = std::make_shared<StaticValue>(ValueVariant(123.456));
     NumberFormatValue numberFormatValue(value, 2, 2);
@@ -329,9 +296,7 @@ TEST_CASE("NumberFormatValue Test", "[NumberFormatValue]") {
 }
 
 TEST_CASE("MathValue Test", "[MathValue]") {
-    auto featureContext = std::make_shared<FeatureContext>(vtzero::GeomType::POINT, FeatureContext::mapType{}, 0);
-    auto featureStateManager = std::make_shared<Tiled2dMapVectorStateManager>();
-    EvaluationContext context = EvaluationContext(0, 0, featureContext, featureStateManager);
+    EvaluationContext context = EvaluationContext(0, 0, nullptr, nullptr);
 
     auto lhs = std::make_shared<StaticValue>(ValueVariant(5.0));
     auto rhs = std::make_shared<StaticValue>(ValueVariant(3.0));
@@ -341,9 +306,7 @@ TEST_CASE("MathValue Test", "[MathValue]") {
 }
 
 TEST_CASE("LengthValue Test", "[LengthValue]") {
-    auto featureContext = std::make_shared<FeatureContext>(vtzero::GeomType::POINT, FeatureContext::mapType{}, 0);
-    auto featureStateManager = std::make_shared<Tiled2dMapVectorStateManager>();
-    EvaluationContext context = EvaluationContext(0, 0, featureContext, featureStateManager);
+    EvaluationContext context = EvaluationContext(0, 0, nullptr, nullptr);
 
     auto value = std::make_shared<StaticValue>(ValueVariant("test"));
     LengthValue lengthValue(value);
@@ -352,9 +315,7 @@ TEST_CASE("LengthValue Test", "[LengthValue]") {
 }
 
 TEST_CASE("CoalesceValue Test", "[CoalesceValue]") {
-    auto featureContext = std::make_shared<FeatureContext>(vtzero::GeomType::POINT, FeatureContext::mapType{}, 0);
-    auto featureStateManager = std::make_shared<Tiled2dMapVectorStateManager>();
-    EvaluationContext context = EvaluationContext(0, 0, featureContext, featureStateManager);
+    EvaluationContext context = EvaluationContext(0, 0, nullptr, nullptr);
 
     std::vector<std::shared_ptr<Value>> values = {std::make_shared<StaticValue>(ValueVariant(std::monostate())),
                                                   std::make_shared<StaticValue>(ValueVariant("value"))};
@@ -364,9 +325,7 @@ TEST_CASE("CoalesceValue Test", "[CoalesceValue]") {
 }
 
 TEST_CASE("ArrayValue Test", "[ArrayValue]") {
-    auto featureContext = std::make_shared<FeatureContext>(vtzero::GeomType::POINT, FeatureContext::mapType{}, 0);
-    auto featureStateManager = std::make_shared<Tiled2dMapVectorStateManager>();
-    EvaluationContext context = EvaluationContext(0, 0, featureContext, featureStateManager);
+    EvaluationContext context = EvaluationContext(0, 0, nullptr, nullptr);
 
     std::vector<std::shared_ptr<Value>> values = {std::make_shared<StaticValue>(ValueVariant("value1")),
                                                   std::make_shared<StaticValue>(ValueVariant("value2"))};

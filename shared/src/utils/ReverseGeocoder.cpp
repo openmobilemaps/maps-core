@@ -98,6 +98,7 @@ std::vector<::VectorLayerFeatureCoordInfo> ReverseGeocoder::reverseGeocode(const
 
     auto conv = conversionHelper->convertRect(4326, tileBounds);
 
+    StringInterner stringTable = ValueKeys::newStringInterner();
     try {
         vtzero::vector_tile tileData((char*)result.data->buf(), result.data->len());
 
@@ -110,7 +111,7 @@ std::vector<::VectorLayerFeatureCoordInfo> ReverseGeocoder::reverseGeocode(const
                 }
                 try {
                     int extent = (int) layer.extent();
-                    auto const featureContext = std::make_shared<FeatureContext>(feature);
+                    auto const featureContext = std::make_shared<FeatureContext>(stringTable, feature);
                     std::shared_ptr<VectorTileGeometryHandler> geometryHandler = std::make_shared<VectorTileGeometryHandler>(tileBounds, extent, std::nullopt, conversionHelper);
                     vtzero::decode_geometry(feature.geometry(), *geometryHandler);
 
@@ -119,7 +120,7 @@ std::vector<::VectorLayerFeatureCoordInfo> ReverseGeocoder::reverseGeocode(const
                             auto coord = Coord(CoordinateSystemIdentifiers::EPSG3857(), point.x, point.y, 0.0);
                             auto d = distance(converted4326, coord);
                             if (d < thresholdMeters) {
-                                resultVector.push_back(VectorLayerFeatureCoordInfo(featureContext->getFeatureInfo(), coord));
+                                resultVector.push_back(VectorLayerFeatureCoordInfo(featureContext->getFeatureInfo(stringTable), coord));
                             }
                         }
                     }

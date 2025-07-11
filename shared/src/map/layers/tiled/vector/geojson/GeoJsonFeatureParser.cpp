@@ -16,12 +16,13 @@
 GeoJsonFeatureParser::GeoJsonFeatureParser() {}
 
 std::optional<std::vector<::VectorLayerFeatureInfo>> GeoJsonFeatureParser::parse(const std::string & geoJson) {
+    StringInterner stringTable{};
     try {
         const auto json = nlohmann::json::parse(geoJson);
-        auto geoJsonObject = GeoJsonParser::getGeoJson(json);
+        auto geoJsonObject = GeoJsonParser::getGeoJson(json, stringTable);
         std::vector<::VectorLayerFeatureInfo> features = {};
         for (auto &geometry: geoJsonObject->geometries) {
-            features.push_back(geometry->featureContext->getFeatureInfo());
+            features.push_back(geometry->featureContext->getFeatureInfo(stringTable));
         }
         return features;
     }

@@ -17,6 +17,7 @@ add_executable(tests
   "TestValueEvaluate.cpp"
   "TestVectorSet.cpp"
   "TestStyleParser.cpp"
+  "TestInternedString.cpp"
   "helper/TestData.cpp"
   "helper/TestLocalDataProvider.h"
 )

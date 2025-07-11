@@ -27,6 +27,7 @@ class Tiled2dVectorGeoJsonSource : public Tiled2dMapVectorSource, public GeoJSON
 public:
     Tiled2dVectorGeoJsonSource(const std::shared_ptr<::MapCameraInterface> &camera,
                                const MapConfig &mapConfig,
+                               const std::weak_ptr<Tiled2dMapVectorLayer> &vectorLayer,
                                const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig,
                                const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                                const std::shared_ptr<SchedulerInterface> &scheduler,
@@ -36,7 +37,7 @@ public:
                                float screenDensityPpi,
                                std::shared_ptr<GeoJSONVTInterface> geoJson,
                                std::string layerName)
-      : Tiled2dMapVectorSource(mapConfig, layerConfig, conversionHelper, scheduler,
+      : Tiled2dMapVectorSource(mapConfig, vectorLayer, layerConfig, conversionHelper, scheduler,
                                // fake loader entry so that Tiled2dMapSource sees one loader; loadDataAsync in this class does not use loader.
                                std::vector<std::shared_ptr<LoaderInterface>>{nullptr},
                                listener, layersToDecode, sourceName,

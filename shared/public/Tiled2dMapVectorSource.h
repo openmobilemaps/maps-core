@@ -14,16 +14,18 @@
 #include "Tiled2dMapSource.h"
 #include "DataLoaderResult.h"
 #include "LoaderInterface.h"
+#include "StringInterner.h"
 #include "Tiled2dMapVectorTileInfo.h"
 #include "Tiled2dMapVectorSourceListener.h"
-#include <unordered_map>
 #include <vector>
-#include "DataRef.hpp"
+
+class Tiled2dMapVectorLayer;
 
 class Tiled2dMapVectorSource : public Tiled2dMapSource<std::shared_ptr<DataLoaderResult>,
                                                        Tiled2dMapVectorTileInfo::FeatureMap> {
 public:
     Tiled2dMapVectorSource(const MapConfig &mapConfig,
+                           const std::weak_ptr<Tiled2dMapVectorLayer> &vectorLayer,
                            const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig,
                            const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                            const std::shared_ptr<SchedulerInterface> &scheduler,
@@ -34,7 +36,7 @@ public:
                            float screenDensityPpi,
                            std::string layerName);
 
-                                                            VectorSet<Tiled2dMapVectorTileInfo> getCurrentTiles();
+    VectorSet<Tiled2dMapVectorTileInfo> getCurrentTiles();
 
     virtual void pause() override;
 
@@ -59,4 +61,6 @@ protected:
     const WeakActor<Tiled2dMapVectorSourceListener> listener;
     
     const std::string sourceName;
+
+    std::weak_ptr<Tiled2dMapVectorLayer> vectorLayer;
 };

@@ -10,6 +10,7 @@
 
 #pragma once
 
+#include "Tiled2dMapVectorLayer.h"
 #include "Tiled2dMapVectorSymbolObject.h"
 #include "MapInterface.h"
 #include "Tiled2dMapTileInfo.h"
@@ -37,6 +38,7 @@ class Tiled2dMapVectorSymbolGroup : public ActorObject, public std::enable_share
 public:
     Tiled2dMapVectorSymbolGroup(uint32_t groupId,
                                 const std::weak_ptr<MapInterface> &mapInterface,
+                                const std::weak_ptr<Tiled2dMapVectorLayer> &vectorLayer,
                                 const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
                                 const WeakActor<Tiled2dMapVectorFontProvider> &fontProvider,
                                 const Tiled2dMapVersionedTileInfo &tileInfo,
@@ -103,6 +105,7 @@ private:
     std::vector<std::shared_ptr<Tiled2dMapVectorSymbolObject>> symbolObjects;
 
     const std::weak_ptr<MapInterface> mapInterface;
+    const std::weak_ptr<Tiled2dMapVectorLayer> vectorLayer;
     std::shared_ptr<Tiled2dMapVectorLayerConfig> layerConfig;
     const Tiled2dMapVersionedTileInfo tileInfo;
     const std::string layerIdentifier;

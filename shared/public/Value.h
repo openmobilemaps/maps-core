@@ -43,6 +43,7 @@
 #include "Tiled2dMapVectorStateManager.h"
 #include "ValueKeys.h"
 #include "VectorSet.h"
+#include "InternedString.h"
 #include "ZoomRange.h"
 #include <iomanip>
 #include <memory>
@@ -101,7 +102,7 @@ struct property_value_mapping : vtzero::property_value_mapping {
 
 class FeatureContext {
 public:
-    using keyType = std::string;
+    using keyType = InternedString;
     using valueType = ValueVariant;
     using mapType = std::vector<std::pair<keyType, valueType>>;
 
@@ -113,26 +114,32 @@ public:
 
     FeatureContext() {}
 
-    FeatureContext(const FeatureContext &other) :
-    propertiesMap(std::move(other.propertiesMap)),
-    geomType(other.geomType),
-    identifier(other.identifier) {}
+    FeatureContext(const FeatureContext &other)
+        : propertiesMap(other.propertiesMap)
+        , geomType(other.geomType)
+        , identifier(other.identifier) {}
 
+    FeatureContext(FeatureContext &&other)
+        : propertiesMap(std::move(other.propertiesMap))
+        , geomType(other.geomType)
+        , identifier(other.identifier) {}
 
     FeatureContext(vtzero::GeomType geomType,
                    mapType propertiesMap,
-                   uint64_t identifier):
-    propertiesMap(std::move(propertiesMap)),
-    geomType(geomType),
-    identifier(identifier){
+                   uint64_t identifier)
+        : propertiesMap(std::move(propertiesMap))
+        , geomType(geomType)
+        , identifier(identifier)
+    {
         initialize();
     }
 
     FeatureContext(vtzero::GeomType geomType,
                    mapType propertiesMap,
-                   const std::string &stringIdentifier):
-    propertiesMap(std::move(propertiesMap)),
-    geomType(geomType) {
+                   const std::string &stringIdentifier)
+        : propertiesMap(std::move(propertiesMap))
+        , geomType(geomType)
+    {
         size_t hash = 0;
         std::hash_combine(hash, std::hash<std::string>{}(stringIdentifier));
         identifier = hash;
@@ -140,11 +147,13 @@ public:
         initialize();
     }
 
-    FeatureContext(vtzero::feature const &feature) {
+    FeatureContext(StringInterner &stringTable, vtzero::feature const &feature)
+    {
         geomType = feature.geometry_type();
 
-        feature.for_each_property([this] (const vtzero::property& p) {
-            this->propertiesMap.push_back(std::make_pair(std::string(p.key()), vtzero::convert_property_value<ValueVariant, property_value_mapping>(p.value())));
+        feature.for_each_property([this, &stringTable] (const vtzero::property& p) {
+            auto key = stringTable.add(std::string{p.key()}); // TODO: strings are already indexed, re-hashing could be avoided. Or at least avoid the copy!
+            this->propertiesMap.push_back(std::make_pair(key, vtzero::convert_property_value<ValueVariant, property_value_mapping>(p.value())));
             return true;
         });
 
@@ -184,7 +193,7 @@ public:
         }
     }
 
-    bool contains(const std::string &key) const {
+    bool contains(InternedString key) const {
         for(const auto& p : propertiesMap) {
             if(p.first == key) {
                 return true;
@@ -194,7 +203,7 @@ public:
         return false;
     }
 
-    ValueVariant getValue(const std::string &key) const {
+    ValueVariant getValue(InternedString key) const {
         for(const auto& p : propertiesMap) {
             if(p.first == key) {
                 return std::move(p.second);
@@ -204,12 +213,12 @@ public:
         return std::monostate();
     }
 
-    VectorLayerFeatureInfo getFeatureInfo() const {
+    VectorLayerFeatureInfo getFeatureInfo(const StringInterner &stringTable) const {
         std::string identifier = std::to_string(this->identifier);
         std::unordered_map<std::string, VectorLayerFeatureInfoValue> properties;
         for(const auto &[key, val]: propertiesMap) {
             properties.insert({
-                key,
+                stringTable.get(key),
                 std::visit(overloaded {
                     [](const std::string &val){
                         return VectorLayerFeatureInfoValue(val, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
@@ -280,17 +289,17 @@ public:
 
 class UsedKeysCollection {
 public:
-    VectorSet<std::string> usedKeys;
-    VectorSet<std::string> featureStateKeys;
-    VectorSet<std::string> globalStateKeys;
+    VectorSet<InternedString> usedKeys;
+    VectorSet<InternedString> featureStateKeys;
+    VectorSet<InternedString> globalStateKeys;
 
     UsedKeysCollection() {};
 
-    UsedKeysCollection(VectorSet<std::string> &&usedKeys) : usedKeys(std::move(usedKeys)) {};
+    UsedKeysCollection(VectorSet<InternedString> &&usedKeys) : usedKeys(std::move(usedKeys)) {};
 
-    UsedKeysCollection(VectorSet<std::string> &&usedKeys,
-                       VectorSet<std::string> &&featureStateKeys,
-                       VectorSet<std::string> &&globalStateKeys)
+    UsedKeysCollection(VectorSet<InternedString> &&usedKeys,
+                       VectorSet<InternedString> &&featureStateKeys,
+                       VectorSet<InternedString> &&globalStateKeys)
             : usedKeys(std::move(usedKeys)),
               featureStateKeys(std::move(featureStateKeys)),
               globalStateKeys(std::move(globalStateKeys)) {};
@@ -305,7 +314,7 @@ public:
         return !(featureStateKeys.empty() && globalStateKeys.empty());
     };
 
-    bool containsUsedKey(const std::string &key) const {
+    bool containsUsedKey(InternedString key) const {
         return usedKeys.contains(key);
     }
 
@@ -683,7 +692,7 @@ inline std::vector<Anchor> Value::evaluateOr(const EvaluationContext &context, c
 
 class GetPropertyValue : public Value {
 public:
-    GetPropertyValue(const std::string key) : key(key) {};
+    GetPropertyValue(InternedString key) : key(key) {};
 
     std::unique_ptr<Value> clone() override {
         return std::make_unique<GetPropertyValue>(key);
@@ -694,7 +703,7 @@ public:
     }
 
     ValueVariant evaluate(const EvaluationContext &context) const override {
-        if (key == "zoom") {
+        if (key == ValueKeys::ZOOM) {
             return context.zoomLevel ? *context.zoomLevel : ValueVariant{};
         }
 
@@ -709,13 +718,13 @@ public:
     };
 
     virtual void evaluateZoomRange(ZoomRange& zoomRange) override {
-        if(key == "zoom") {
+        if(key == ValueKeys::ZOOM) {
             zoomRange.setFullRange();
         }
     }
 
 private:
-    const std::string key;
+    const InternedString key;
 };
 
 // MaybeGetPropertyValue is roughly equivalent to
@@ -729,10 +738,12 @@ private:
 // This functionality serves as shorthand syntax for property lookups in logical operators.
 class MaybeGetPropertyValue : public Value {
 public:
-    MaybeGetPropertyValue(const std::string key) : key(key) {};
+    MaybeGetPropertyValue(InternedString key, std::string keyString)
+        : key(key)
+        , keyString(keyString){}
 
     std::unique_ptr<Value> clone() override {
-        return std::make_unique<MaybeGetPropertyValue>(key);
+        return std::make_unique<MaybeGetPropertyValue>(key, keyString);
     }
 
     UsedKeysCollection getUsedKeys() const override {
@@ -744,7 +755,7 @@ public:
         if(!std::holds_alternative<std::monostate>(lookupResult)) {
             return lookupResult;
         }
-        return key;
+        return keyString;
     }
 
     bool isEqual(const std::shared_ptr<Value> &other) const override {
@@ -756,12 +767,13 @@ public:
 
 
 private:
-    const std::string key;
+    const InternedString key;
+    const std::string keyString;
 };
 
 class FeatureStateValue : public Value {
 public:
-    FeatureStateValue(const std::string key) : key(key) {};
+    FeatureStateValue(InternedString key) : key(key) {};
 
     std::unique_ptr<Value> clone() override {
         return std::make_unique<FeatureStateValue>(key);
@@ -792,12 +804,12 @@ public:
         return false;
     };
 private:
-    const std::string key;
+    InternedString key;
 };
 
 class GlobalStateValue : public Value {
 public:
-    GlobalStateValue(const std::string key) : key(key) {};
+    GlobalStateValue(InternedString key) : key(key) {};
 
     std::unique_ptr<Value> clone() override {
         return std::make_unique<GlobalStateValue>(key);
@@ -822,7 +834,7 @@ public:
     };
 
 private:
-    const std::string key;
+    InternedString key;
 };
 
 class ToStringValue: public Value {
@@ -869,7 +881,7 @@ public:
 
     ValueVariant evaluate(const EvaluationContext &context) const override {
           return value;
-    };
+    }
 
     bool isStaticNumber() {
         return std::holds_alternative<double>(value) ||
@@ -905,7 +917,7 @@ private:
 // corresponding to string interpolation expressions like "part0{key0}part1{key1}part2..."
 class StringInterpolationValue : public Value {
 public:
-    StringInterpolationValue(std::vector<std::string> keys_, std::vector<std::string> parts_)
+    StringInterpolationValue(std::vector<InternedString> keys_, std::vector<std::string> parts_)
         : keys(std::move(keys_))
         , parts(std::move(parts_)) {
         assert(parts.size() == keys.size() + 1);
@@ -920,7 +932,7 @@ public:
     }
 
     UsedKeysCollection getUsedKeys() const override {
-        VectorSet<std::string> usedKeys;
+        VectorSet<InternedString> usedKeys;
         for(const auto &key : keys) {
           usedKeys.insert(key);
         }
@@ -945,7 +957,7 @@ public:
     }
 
 private:
-    const std::vector<std::string> keys;
+    const std::vector<InternedString> keys;
     const std::vector<std::string> parts;
     std::vector<ToStringValue> toStringExprs;
 };
@@ -956,7 +968,7 @@ class ZoomValue: public Value {
     }
 
     UsedKeysCollection getUsedKeys() const override {
-          return UsedKeysCollection({ "zoom" });
+          return UsedKeysCollection({ ValueKeys::ZOOM });
     }
 
     ValueVariant evaluate(const EvaluationContext &context) const override {
@@ -970,7 +982,7 @@ class ZoomValue: public Value {
 
 class HasPropertyValue : public Value {
 public:
-    HasPropertyValue(const std::string key) : key(key) {};
+    HasPropertyValue(InternedString key) : key(key) {};
 
     std::unique_ptr<Value> clone() override {
         return std::make_unique<HasPropertyValue>(key);
@@ -991,12 +1003,12 @@ public:
         return false;
     };
 private:
-    const std::string key;
+    InternedString key;
 };
 
 class HasNotPropertyValue : public Value {
 public:
-    HasNotPropertyValue(const std::string key) : key(key) {};
+    HasNotPropertyValue(InternedString key) : key(key) {};
 
     std::unique_ptr<Value> clone() override {
         return std::make_unique<HasNotPropertyValue>(key);
@@ -1017,7 +1029,7 @@ public:
         return false;
     };
 private:
-    const std::string key;
+    InternedString key;
 };
 
 
@@ -1119,7 +1131,7 @@ public:
     }
 
     UsedKeysCollection getUsedKeys() const override {
-        UsedKeysCollection usedKeys = UsedKeysCollection({ "zoom" });
+        UsedKeysCollection usedKeys = UsedKeysCollection({ ValueKeys::ZOOM });
         for (auto const &step: steps) {
             auto const stepKeys = step.second->getUsedKeys();
             usedKeys.includeOther(stepKeys);
@@ -1333,7 +1345,7 @@ public:
     }
 
     UsedKeysCollection getUsedKeys() const override {
-        UsedKeysCollection usedKeys = UsedKeysCollection({"zoom"});
+        UsedKeysCollection usedKeys = UsedKeysCollection({ValueKeys::ZOOM });
         for (auto const &step: steps) {
             auto const stepKeys = step.second->getUsedKeys();
             usedKeys.includeOther(stepKeys);
@@ -1986,11 +1998,11 @@ class PropertyFilter : public Value {
 private:
     std::shared_ptr<Value> defaultValue;
     std::vector<std::pair<ValueVariant, std::shared_ptr<Value>>> valueMapping;
-    const std::string key;
+    const InternedString key;
 
 public:
     PropertyFilter(const std::map<std::set<ValueVariant>, std::shared_ptr<Value>> mapping,
-                const std::shared_ptr<Value> defaultValue, const std::string &key): defaultValue(defaultValue), key(key) {
+                const std::shared_ptr<Value> defaultValue, InternedString key): defaultValue(defaultValue), key(key) {
         for (auto const &entry: mapping) {
             for(auto const& v : entry.first) {
                 valueMapping.emplace_back(std::make_pair(v, entry.second));
@@ -1999,7 +2011,7 @@ public:
     }
 
     PropertyFilter(const std::vector<std::pair<ValueVariant, std::shared_ptr<Value>>> &mapping,
-                const std::shared_ptr<Value> defaultValue, const std::string &key)
+                const std::shared_ptr<Value> defaultValue, InternedString key)
                 : defaultValue(defaultValue), valueMapping(mapping), key(key) {}
 
     std::unique_ptr<Value> clone() override {
@@ -2383,9 +2395,9 @@ class InFilter : public Value {
 private:
     const std::unordered_set<ValueVariant> values;
     const std::shared_ptr<Value> dynamicValues;
-    const std::string key;
+    InternedString key;
 public:
-    InFilter(const std::string &key, const std::unordered_set<ValueVariant> values, const std::shared_ptr<Value> dynamicValues) :values(values), key(key), dynamicValues(dynamicValues) {}
+    InFilter(InternedString key, const std::unordered_set<ValueVariant> values, const std::shared_ptr<Value> dynamicValues) :values(values), key(key), dynamicValues(dynamicValues) {}
 
     std::unique_ptr<Value> clone() override {
         return std::make_unique<InFilter>(key, values, dynamicValues);
@@ -2475,9 +2487,9 @@ class NotInFilter : public Value {
 private:
     const std::unordered_set<ValueVariant> values;
     const std::shared_ptr<Value> dynamicValues;
-    const std::string key;
+    InternedString key;
 public:
-    NotInFilter(const std::string &key, const std::unordered_set<ValueVariant> values, const std::shared_ptr<Value> dynamicValues) :values(values), key(key), dynamicValues(dynamicValues) {}
+    NotInFilter(InternedString key, const std::unordered_set<ValueVariant> values, const std::shared_ptr<Value> dynamicValues) :values(values), key(key), dynamicValues(dynamicValues) {}
 
     std::unique_ptr<Value> clone() override {
         return std::make_unique<NotInFilter>(key, values, dynamicValues);

@@ -26,12 +26,15 @@
 #include "LoaderHelper.h"
 #include "GeoJsonParser.h"
 #include "GeoJsonVTFactory.h"
+#include "InternedString.h"
 
 
 Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromUrl(const std::string &layerName,
                                                         const std::string &styleJsonUrl,
                                                         const std::shared_ptr<Tiled2dMapVectorLayerLocalDataProviderInterface> &localDataProvider,
-                                                        const std::vector<std::shared_ptr<::LoaderInterface>> &loaders, const std::unordered_map<std::string, std::string> & sourceUrlParams) {
+                                                        const std::vector<std::shared_ptr<::LoaderInterface>> &loaders,
+                                                        StringInterner &stringTable,
+                                                        const std::unordered_map<std::string, std::string> & sourceUrlParams) {
     DataLoaderResult result = LoaderHelper::loadData(styleJsonUrl, std::nullopt, loaders);
     if (result.status != LoaderStatus::OK) {
         LogError <<= "Unable to Load style.json from " + styleJsonUrl + " errorCode: " + (result.errorCode ? *result.errorCode : "");
@@ -39,7 +42,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
     }
     auto string = std::string((char*)result.data->buf(), result.data->len());
 
-    return parseStyleJsonFromString(layerName, string, localDataProvider, loaders, sourceUrlParams);
+    return parseStyleJsonFromString(layerName, string, localDataProvider, loaders, stringTable, sourceUrlParams);
 };
 
 std::string Tiled2dMapVectorLayerParserHelper::replaceUrlParams(const std::string & url, const std::unordered_map<std::string, std::string> & sourceUrlParams) {
@@ -55,7 +58,9 @@ std::string Tiled2dMapVectorLayerParserHelper::replaceUrlParams(const std::strin
 Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromString(const std::string &layerName,
                                                         const std::string &styleJsonString,
                                                         const std::shared_ptr<Tiled2dMapVectorLayerLocalDataProviderInterface> &localDataProvider,
-                                                        const std::vector<std::shared_ptr<::LoaderInterface>> &loaders, const std::unordered_map<std::string, std::string> & sourceUrlParams) {
+                                                        const std::vector<std::shared_ptr<::LoaderInterface>> &loaders,
+                                                        StringInterner &stringTable,
+                                                        const std::unordered_map<std::string, std::string> & sourceUrlParams) {
 
     nlohmann::json json;
 
@@ -221,10 +226,10 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                 options.extent = val["extent"].get<uint32_t>();
             }
             if (val["data"].is_string()) {
-                geojsonSources[key] = GeoJsonVTFactory::getGeoJsonVt(key, replaceUrlParams(val["data"].get<std::string>(), sourceUrlParams), loaders, localDataProvider, options);
+                geojsonSources[key] = GeoJsonVTFactory::getGeoJsonVt(key, replaceUrlParams(val["data"].get<std::string>(), sourceUrlParams), loaders, localDataProvider, stringTable, options);
             } else {
                 try {
-                    geojsonSources[key] = GeoJsonVTFactory::getGeoJsonVt(GeoJsonParser::getGeoJson(val["data"]), options);
+                    geojsonSources[key] = GeoJsonVTFactory::getGeoJsonVt(GeoJsonParser::getGeoJson(val["data"], stringTable), stringTable, options);
                 }
                 catch (nlohmann::json::exception &ex) {
                     return Tiled2dMapVectorLayerParserResult(nullptr, LoaderStatus::ERROR_OTHER, ex.what(), std::nullopt);
@@ -286,7 +291,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
     }
 
 
-    Tiled2dMapVectorStyleParser parser;
+    Tiled2dMapVectorStyleParser parser(stringTable);
 
     std::optional<std::string> metadata;
     std::shared_ptr<Value> globalIsInteractable;

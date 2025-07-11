@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "InternedString.h"
+#include "StringInterner.h"
 #include "ValueVariant.h"
 #include "VectorLayerFeatureInfoValue.h"
 #include <string>
@@ -19,10 +21,13 @@
 #include <atomic>
 
 class Tiled2dMapVectorStateManager {
-public:
-    using FeatureState = std::unordered_map<std::string, ValueVariant>;
 
-    Tiled2dMapVectorStateManager() {};
+private:
+    StringInterner &stringTable;
+public:
+    using FeatureState = std::unordered_map<InternedString, ValueVariant>;
+
+    Tiled2dMapVectorStateManager(StringInterner &stringTable) : stringTable(stringTable) {};
 
     void setFeatureState(const std::string & identifier, const std::unordered_map<std::string, VectorLayerFeatureInfoValue> & properties) {
         uint64_t intIdentifier = 0;
@@ -39,7 +44,7 @@ public:
         std::transform(properties.begin(), properties.end(),
                        std::inserter(convertedProperties, convertedProperties.end()),
                        [&](const auto& entry) {
-            return std::make_pair(entry.first, convertToValueVariant(entry.second));
+            return std::make_pair(stringTable.add(entry.first), convertToValueVariant(entry.second));
         });
 
         std::lock_guard<std::mutex> lock(mutex);
@@ -85,7 +90,7 @@ public:
         std::lock_guard<std::mutex> lock(mutex);
         globalState.clear();
         for (const auto &property : properties) {
-            globalState.emplace(property.first, convertToValueVariant(property.second));
+            globalState.emplace(stringTable.add(property.first), convertToValueVariant(property.second));
         }
 
         hasNoValues = properties.empty() && featureStates.empty();
@@ -93,7 +98,7 @@ public:
         globalStateId++;
     }
 
-    ValueVariant getGlobalState(const std::string &key) const {
+    ValueVariant getGlobalState(InternedString key) const {
         // XXX: dangerous optimisation -- hasNoValues can be modified
         if (hasNoValues) {
             return std::monostate();
@@ -113,7 +118,7 @@ public:
     }
 
 private:
-    std::unordered_map<std::string, ValueVariant> globalState;
+    std::unordered_map<InternedString, ValueVariant> globalState;
     std::vector<std::pair<uint64_t, FeatureState>> featureStates;
     mutable std::mutex mutex;
     FeatureState emptyState;
