@@ -52,6 +52,8 @@ class LineGroupShader: BaseShader, @unchecked Sendable {
             encoder.setFragmentBuffer(timeBuffer, offset: 0, index: 2)
         }
 
+        encoder.setFragmentBytes(&screenPixelAsRealMeterFactor, length: MemoryLayout<Float>.stride, index: 3)
+
     }
 }
 

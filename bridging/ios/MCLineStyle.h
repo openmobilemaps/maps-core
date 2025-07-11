@@ -3,6 +3,7 @@
 
 #import "MCColorStateList.h"
 #import "MCLineCapType.h"
+#import "MCLineJoinType.h"
 #import "MCSizeType.h"
 #import <Foundation/Foundation.h>
 
@@ -20,6 +21,7 @@ NS_SWIFT_SENDABLE
                              dashFade:(float)dashFade
                    dashAnimationSpeed:(float)dashAnimationSpeed
                               lineCap:(MCLineCapType)lineCap
+                             lineJoin:(MCLineJoinType)lineJoin
                                offset:(float)offset
                                dotted:(BOOL)dotted
                            dottedSkew:(float)dottedSkew NS_DESIGNATED_INITIALIZER;
@@ -33,6 +35,7 @@ NS_SWIFT_SENDABLE
                                   dashFade:(float)dashFade
                         dashAnimationSpeed:(float)dashAnimationSpeed
                                    lineCap:(MCLineCapType)lineCap
+                                  lineJoin:(MCLineJoinType)lineJoin
                                     offset:(float)offset
                                     dotted:(BOOL)dotted
                                 dottedSkew:(float)dottedSkew;
@@ -56,6 +59,8 @@ NS_SWIFT_SENDABLE
 @property (nonatomic, readonly) float dashAnimationSpeed;
 
 @property (nonatomic, readonly) MCLineCapType lineCap;
+
+@property (nonatomic, readonly) MCLineJoinType lineJoin;
 
 @property (nonatomic, readonly) float offset;
 

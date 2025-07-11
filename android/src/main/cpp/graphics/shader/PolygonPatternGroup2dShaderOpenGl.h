@@ -31,7 +31,9 @@ class PolygonPatternGroup2dShaderOpenGl : public BaseShaderProgramOpenGl,
 
     virtual std::shared_ptr<ShaderProgramInterface> asShaderProgramInterface() override;
 
-  protected:
+    virtual bool usesModelMatrix() override { return false; };
+
+protected:
     const bool projectOntoUnitSphere;
     const bool fadeInPattern;
     const std::string programName;

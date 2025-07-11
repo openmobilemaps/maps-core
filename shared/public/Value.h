@@ -28,6 +28,7 @@
 #include "TextJustify.h"
 #include "FormattedStringEntry.h"
 #include "LineCapType.h"
+#include "LineJoinType.h"
 #include "TextTransform.h"
 #include "TextSymbolPlacement.h"
 #include <sstream>
@@ -523,6 +524,18 @@ public:
         return std::nullopt;
     }
 
+    std::optional<LineJoinType> joinTypeFromString(const std::string &value) const {
+        if (value == "miter") {
+            return LineJoinType::MITER;
+        } else if (value == "round") {
+            return LineJoinType::ROUND;
+        } else if (value == "bevel") {
+            return LineJoinType::BEVEL;
+        }
+
+        return std::nullopt;
+    }
+
     std::optional<TextTransform> textTransformFromString(const std::string &value) const {
         if (value == "none") {
             return TextTransform::NONE;
@@ -619,6 +632,16 @@ template<>
 inline LineCapType Value::evaluateOr(const EvaluationContext &context, const LineCapType &alternative) const {
     auto const &value = evaluateOr(context, std::string(""));
     auto type = capTypeFromString(value);
+    if (type) {
+        return *type;
+    }
+    return alternative;
+}
+
+template<>
+inline LineJoinType Value::evaluateOr(const EvaluationContext &context, const LineJoinType &alternative) const {
+    auto const &value = evaluateOr(context, std::string(""));
+    auto type = joinTypeFromString(value);
     if (type) {
         return *type;
     }

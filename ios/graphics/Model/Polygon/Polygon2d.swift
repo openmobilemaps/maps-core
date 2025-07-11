@@ -94,8 +94,10 @@ final class Polygon2d: BaseGraphicsObject, @unchecked Sendable {
         }
         encoder.setVertexBuffer(vpMatrixBuffer, offset: 0, index: 1)
 
-        if let mMatrixPointer = UnsafeRawPointer(bitPattern: Int(mMatrix)) {
-            encoder.setVertexBytes(mMatrixPointer, length: 64, index: 2)
+        if shader.usesModelMatrix() {
+            if let mMatrixPointer = UnsafeRawPointer(bitPattern: Int(mMatrix)) {
+                encoder.setVertexBytes(mMatrixPointer, length: 64, index: 2)
+            }
         }
 
         let originOffsetBuffer = originOffsetBuffers.getNextBuffer(context)
@@ -184,8 +186,10 @@ extension Polygon2d: MCMaskingObjectInterface {
         }
         encoder.setVertexBuffer(vpMatrixBuffer, offset: 0, index: 1)
 
-        if let mMatrixPointer = UnsafeRawPointer(bitPattern: Int(mMatrix)) {
-            encoder.setVertexBytes(mMatrixPointer, length: 64, index: 2)
+        if shader.usesModelMatrix() {
+            if let mMatrixPointer = UnsafeRawPointer(bitPattern: Int(mMatrix)) {
+                encoder.setVertexBytes(mMatrixPointer, length: 64, index: 2)
+            }
         }
 
         let originOffsetBuffer = originOffsetBuffers.getNextBuffer(context)
