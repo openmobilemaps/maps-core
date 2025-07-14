@@ -68,21 +68,22 @@ std::string AlphaInstancedShaderOpenGl::getVertexShader() {
                                           earthCenter = earthCenter / earthCenter.w;
                                           vec4 screenPosition = uvpMatrix * (vec4(aPosition, 1.0) + uOriginOffset);
                                           screenPosition = screenPosition / screenPosition.w;
-
+                                          float mask = float(aAlpha > 0.0) * float(screenPosition.z - earthCenter.z < 0.0);
 
                                           vec2 scaleOffset = vPosition.xy * aScale + aOffset;
-                                          mat4 scaleRotateMatrix = mat4(cos(angle), -sin(angle), 0.0, 0.0,
-                                                                        sin(angle), cos(angle), 0.0, 0.0,
+                                          float sinAngle = sin(angle) * mask;
+                                          float cosAngle = cos(angle) * mask;
+                                          mat4 scaleRotateMatrix = mat4(cosAngle, -sinAngle, 0.0, 0.0,
+                                                                        sinAngle, cosAngle, 0.0, 0.0,
                                                                         0.0, 0.0, 1.0, 0.0,
                                                                         scaleOffset.x, scaleOffset.y, 0.0, 1.0);
 
-                                          gl_Position = scaleRotateMatrix * screenPosition;
+                                          gl_Position = mix(vec4(-10.0, -10.0, -10.0, -10.0),
+                                                            scaleRotateMatrix * screenPosition,
+                                                            mask);
                                           v_texcoordInstance = aTexCoordinate;
                                           v_texCoord = vTexCoordinate;
-                                          v_alpha = aAlpha;
-                                          if (screenPosition.z - earthCenter.z > 0.0) {
-                                              v_alpha = 0.0;
-                                          }
+                                          v_alpha = aAlpha * mask;
                                       }
                                       )
     : OMMVersionedGlesShaderCode(320 es,
@@ -104,20 +105,23 @@ std::string AlphaInstancedShaderOpenGl::getVertexShader() {
                                       out float v_alpha;
 
                                       void main() {
+                                          float mask = float(aAlpha > 0.0);
                                           float angle = aRotation * 3.14159265 / 180.0;
+                                          float sinAngle = sin(angle) * mask;
+                                          float cosAngle = cos(angle) * mask;
                                           mat4 model_matrix = mat4(
-                                                  vec4(cos(angle) * aScale.x, -sin(angle) * aScale.x, 0.0, 0.0),
-                                                  vec4(sin(angle) * aScale.y, cos(angle) * aScale.y, 0.0, 0.0),
+                                                  vec4(cosAngle * aScale.x, -sinAngle * aScale.x, 0.0, 0.0),
+                                                  vec4(sinAngle * aScale.y, cosAngle * aScale.y, 0.0, 0.0),
                                                   vec4(0.0, 0.0, 1.0, 0.0),
                                                   vec4(aPosition + uOriginOffset.xy + aOffset, 0.0, 1.0)
                                           );
 
                                           mat4 matrix = uvpMatrix * model_matrix;
 
-                                          gl_Position = matrix * vec4(vPosition, 1.0);
+                                          gl_Position = mix(vec4(-10.0, -10.0, -10.0, -10.0), matrix * vec4(vPosition, 1.0), mask);
                                           v_texcoordInstance = aTexCoordinate;
                                           v_texCoord = vTexCoordinate;
-                                          v_alpha = aAlpha;
+                                          v_alpha = aAlpha * mask;
                                       }
     );
 }
