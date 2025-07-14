@@ -318,7 +318,7 @@ std::vector<std::shared_ptr<::RenderPassInterface>> IconLayer::buildRenderPasses
         std::vector<std::shared_ptr<RenderPassInterface>> renderPasses;
         for (const auto &passEntry : renderPassObjectMap) {
             std::shared_ptr<RenderPass> renderPass =
-                std::make_shared<RenderPass>(RenderPassConfig(passEntry.first, false), passEntry.second, mask, renderTarget);
+                std::make_shared<RenderPass>(RenderPassConfig(passEntry.first, false, renderTarget), passEntry.second, mask);
             renderPasses.push_back(renderPass);
         }
         return renderPasses;
@@ -652,6 +652,6 @@ void IconLayer::addScaleAnimation(const IconScaleAnimation& iconScaleAnimation) 
 }
 
 bool IconLayer::isPointInRect(const Vec2F& point, float leftW, float rightW, float topH, float bottomH) {
-    return point.x >  -leftW && point.x < rightW &&
-           point.y > -topH && point.y < bottomH;
+    return point.x > -leftW && point.x < rightW &&
+           point.y < topH && point.y > -bottomH;
 }

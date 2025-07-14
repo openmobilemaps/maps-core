@@ -6,6 +6,7 @@
 #import "MCRenderingCullMode.h"
 #import "MCVec2I.h"
 #import <Foundation/Foundation.h>
+@protocol MCOpenGlRenderingContextInterface;
 
 
 @protocol MCRenderingContextInterface
@@ -30,5 +31,7 @@
 
 /** optional rectangle, remove scissoring when not set */
 - (void)applyScissorRect:(nullable MCRectI *)scissorRect;
+
+- (nullable id<MCOpenGlRenderingContextInterface>)asOpenGlRenderingContext;
 
 @end

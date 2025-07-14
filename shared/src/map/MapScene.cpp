@@ -516,20 +516,20 @@ void MapScene::drawReadyFrame(const ::RectCoord &bounds, float paddingPc, float 
         }
 #endif
 
-        state = getLayersReadyState();
+        auto now = DateHelper::currentTimeMillis();
+        if (now > timeoutTimestamp) {
+            state = LayerReadyState::TIMEOUT_ERROR;
+        } else {
+            state = getLayersReadyState();
+        }
 
         // sleep for 0.05s to avoid starving main thread
         if (state == LayerReadyState::NOT_READY) {
             std::this_thread::sleep_for(std::chrono::milliseconds(50));
         }
 
-        auto now = DateHelper::currentTimeMillis();
-        if (now > timeoutTimestamp) {
-            state = LayerReadyState::TIMEOUT_ERROR;
-        }
-
-        invalidate();
         callbacks->stateDidUpdate(state);
+        invalidate();
     }
     // re-enable animations if the map scene is used not only for
     // drawReadyFrame

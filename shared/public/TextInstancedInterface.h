@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "FontData.h"
 #include "Quad2dD.h"
 #include "RenderingContextInterface.h"
 #include "SharedBytes.h"
@@ -52,7 +53,7 @@ public:
      */
     virtual void setStyles(const ::SharedBytes & values) = 0;
 
-    virtual void loadTexture(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & context, const /*not-null*/ std::shared_ptr<TextureHolderInterface> & textureHolder) = 0;
+    virtual void loadFont(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & context, const ::FontData & fontData, const /*not-null*/ std::shared_ptr<TextureHolderInterface> & fontMsdfTexture) = 0;
 
     virtual void removeTexture() = 0;
 

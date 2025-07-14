@@ -76,13 +76,10 @@ public class RenderingContext: NSObject, @unchecked Sendable {
     }()
 
     public var aspectRatio: Float {
-        viewportQueue.sync {
-            Float(viewportSize.x) / Float(viewportSize.y)
-        }
+        viewportState.aspectRatio
     }
 
-    private var viewportSize: MCVec2I = .init(x: 0, y: 0)
-    private let viewportQueue = DispatchQueue(label: "RenderingContextViewportQueue", attributes: .concurrent)
+    private var viewportState = ViewportState()
 
     var isScissoringDirty = false
 
@@ -91,9 +88,10 @@ public class RenderingContext: NSObject, @unchecked Sendable {
     open func setRenderPipelineStateIfNeeded(
         _ pipelineState: MTLRenderPipelineState
     ) {
-        guard currentPipeline?.hash != pipelineState.hash else {
+        guard currentPipeline !== pipelineState else {
             return
         }
+
         currentPipeline = pipelineState
         encoder?.setRenderPipelineState(pipelineState)
     }
@@ -121,7 +119,7 @@ public class RenderingContext: NSObject, @unchecked Sendable {
         stencilClearQuad.render(
             encoder: encoder,
             context: self,
-            renderPass: .init(renderPass: 0, isPassMasked: false),
+            renderPass: .init(renderPass: 0, isPassMasked: false, renderTarget: renderTarget),
             vpMatrix: 0,
             mMatrix: 0,
             origin: .init(x: 0, y: 0, z: 0),
@@ -131,6 +129,10 @@ public class RenderingContext: NSObject, @unchecked Sendable {
 }
 
 extension RenderingContext: MCRenderingContextInterface {
+    public func asOpenGlRenderingContext() -> (any MCOpenGlRenderingContextInterface)? {
+        nil
+    }
+
     public func setCulling(_ mode: MCRenderingCullMode) {
         self.cullMode = mode
     }
@@ -165,15 +167,11 @@ extension RenderingContext: MCRenderingContextInterface {
     }
 
     public func setViewportSize(_ newSize: MCVec2I) {
-        viewportQueue.async(flags: .barrier) {
-            self.viewportSize = newSize
-        }
+        viewportState.setViewportSize(x: newSize.x, y: newSize.y)
     }
 
     public func getViewportSize() -> MCVec2I {
-        viewportQueue.sync {
-            viewportSize
-        }
+        viewportState.viewportSize
     }
 
     public func setBackgroundColor(_ color: MCColor) {
@@ -206,7 +204,7 @@ extension RenderingContext: MCRenderingContextInterface {
                 }
             }
 
-            var size = viewportSize.scissorRect
+            var size = getViewportSize().scissorRect
             size.width = min(size.width, Int(s.width))
             size.height = min(size.height, Int(s.height))
 

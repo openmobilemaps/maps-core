@@ -14,6 +14,7 @@
 #include "BoundingBox.h"
 #include "CoordinateSystemIdentifiers.h"
 #include <cmath>
+#include "TrigonometryLUT.h"
 
 PolygonPatternGroup2dLayerObject::PolygonPatternGroup2dLayerObject(const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                                                      const std::shared_ptr<PolygonPatternGroup2dInterface> &polygon,
@@ -71,9 +72,19 @@ void PolygonPatternGroup2dLayerObject::setVertices(const std::vector<std::tuple<
         double z = renderVertices[i + 2];
 
         // Adjust the coordinates by subtracting the average
-        renderVertices[i]     = is3d ? 1.0 * sin(y) * cos(x) - rx : x - rx;
-        renderVertices[i + 1] = is3d ? 1.0 * cos(y) - ry : y - ry;
-        renderVertices[i + 2] = is3d ? -1.0 * sin(y) * sin(x) - rz : 0.0;
+        if(is3d) {
+            double sinX, sinY, cosX, cosY;
+            lut::sincos(x, sinX, cosX);
+            lut::sincos(y, sinY, cosY);
+
+            renderVertices[i]     = 1.0 * sinY * cosX - rx;
+            renderVertices[i + 1] = 1.0 * cosY - ry;
+            renderVertices[i + 2] = -1.0 * sinY * sinX - rz;
+        } else {
+            renderVertices[i]     = x - rx;
+            renderVertices[i + 1] = y - ry;
+            renderVertices[i + 2] = 0.0;
+        }
     }
 
     auto i = SharedBytes((int64_t)indices.data(), (int32_t)indices.size(), (int32_t)sizeof(uint16_t));

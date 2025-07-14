@@ -7,6 +7,7 @@
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
+#import "MCFontData+Private.h"
 #import "MCGraphicsObjectInterface+Private.h"
 #import "MCQuad2dD+Private.h"
 #import "MCRenderingContextInterface+Private.h"
@@ -101,11 +102,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)loadTexture:(nullable id<MCRenderingContextInterface>)context
-      textureHolder:(nullable id<MCTextureHolderInterface>)textureHolder {
+- (void)loadFont:(nullable id<MCRenderingContextInterface>)context
+        fontData:(nonnull MCFontData *)fontData
+ fontMsdfTexture:(nullable id<MCTextureHolderInterface>)fontMsdfTexture {
     try {
-        _cppRefHandle.get()->loadTexture(::djinni_generated::RenderingContextInterface::toCpp(context),
-                                         ::djinni_generated::TextureHolderInterface::toCpp(textureHolder));
+        _cppRefHandle.get()->loadFont(::djinni_generated::RenderingContextInterface::toCpp(context),
+                                      ::djinni_generated::FontData::toCpp(fontData),
+                                      ::djinni_generated::TextureHolderInterface::toCpp(fontMsdfTexture));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -193,11 +196,12 @@ public:
             [djinni_private_get_proxied_objc_object() setStyles:(::djinni_generated::SharedBytes::fromCpp(c_values))];
         }
     }
-    void loadTexture(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & c_context, const /*not-null*/ std::shared_ptr<::TextureHolderInterface> & c_textureHolder) override
+    void loadFont(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & c_context, const ::FontData & c_fontData, const /*not-null*/ std::shared_ptr<::TextureHolderInterface> & c_fontMsdfTexture) override
     {
         @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() loadTexture:(::djinni_generated::RenderingContextInterface::fromCpp(c_context))
-                                                    textureHolder:(::djinni_generated::TextureHolderInterface::fromCpp(c_textureHolder))];
+            [djinni_private_get_proxied_objc_object() loadFont:(::djinni_generated::RenderingContextInterface::fromCpp(c_context))
+                                                      fontData:(::djinni_generated::FontData::fromCpp(c_fontData))
+                                               fontMsdfTexture:(::djinni_generated::TextureHolderInterface::fromCpp(c_fontMsdfTexture))];
         }
     }
     void removeTexture() override

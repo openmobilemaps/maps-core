@@ -23,7 +23,8 @@ let package = Package(
         ),
     ],
     dependencies: [
-        .package(url: "https://github.com/UbiqueInnovation/djinni.git", .upToNextMinor(from: "1.0.9"))
+        .package(url: "https://github.com/UbiqueInnovation/djinni.git", .upToNextMinor(from: "1.0.9")),
+        .package(url: "https://github.com/apple/swift-atomics.git", from: "1.3.0"),
     ],
     targets: [
         .target(
@@ -111,7 +112,10 @@ let package = Package(
         ),
         .target(
             name: "MapCore",
-            dependencies: ["MapCoreSharedModule"],
+            dependencies: [
+                "MapCoreSharedModule",
+                .product(name: "Atomics", package: "swift-atomics"),
+            ],
             path: "ios",
             exclude: ["readme.md"],
             resources: [

@@ -33,12 +33,14 @@ private:
         JavaProxy(JniType j);
         ~JavaProxy();
 
+        /*nullable*/ std::shared_ptr<::OpenGlRenderTargetInterface> asGlRenderTargetInterface() override;
 
     private:
         friend ::djinni::JniInterface<::RenderTargetInterface, ::djinni_generated::NativeRenderTargetInterface>;
     };
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/graphics/RenderTargetInterface") };
+    const jmethodID method_asGlRenderTargetInterface { ::djinni::jniGetMethodID(clazz.get(), "asGlRenderTargetInterface", "()Lio/openmobilemaps/mapscore/shared/graphics/OpenGlRenderTargetInterface;") };
 };
 
 } // namespace djinni_generated

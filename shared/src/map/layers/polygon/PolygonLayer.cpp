@@ -254,7 +254,7 @@ void PolygonLayer::generateRenderPasses() {
     std::vector<std::shared_ptr<RenderPassInterface>> newRenderPasses;
     for (const auto &passEntry : renderPassObjectMap) {
         std::shared_ptr<RenderPass> renderPass =
-            std::make_shared<RenderPass>(RenderPassConfig(passEntry.first, false), passEntry.second, mask, renderTarget);
+            std::make_shared<RenderPass>(RenderPassConfig(passEntry.first, false, renderTarget), passEntry.second, mask);
         newRenderPasses.push_back(renderPass);
     }
     {

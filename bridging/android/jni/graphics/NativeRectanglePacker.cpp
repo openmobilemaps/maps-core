@@ -20,11 +20,12 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_Rectangl
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_RectanglePacker_pack(JNIEnv* jniEnv, jobject /*this*/, jobject j_rectangles, ::djinni_generated::NativeVec2I::JniType j_maxPageSize)
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_RectanglePacker_pack(JNIEnv* jniEnv, jobject /*this*/, jobject j_rectangles, ::djinni_generated::NativeVec2I::JniType j_maxPageSize, jint j_spacing)
 {
     try {
         auto r = ::RectanglePacker::pack(::djinni::Map<::djinni::String, ::djinni_generated::NativeVec2I>::toCpp(jniEnv, j_rectangles),
-                                         ::djinni_generated::NativeVec2I::toCpp(jniEnv, j_maxPageSize));
+                                         ::djinni_generated::NativeVec2I::toCpp(jniEnv, j_maxPageSize),
+                                         ::djinni::I32::toCpp(jniEnv, j_spacing));
         return ::djinni::release(::djinni::List<::djinni_generated::NativeRectanglePackerPage>::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }

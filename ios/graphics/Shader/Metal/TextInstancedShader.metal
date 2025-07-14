@@ -36,6 +36,7 @@ unitSphereTextInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
                           constant float *alphas [[buffer(12)]],
                           uint instanceId [[instance_id]])
 {
+    float alpha = alphas[instanceId];
     const float3 referencePosition = referencePositions[instanceId];
     const float2 offset = positions[instanceId];
     const float2 scale = scales[instanceId];
@@ -55,26 +56,29 @@ unitSphereTextInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
 
     auto diffCenter = screenPosition - earthCenter;
 
-    float alpha = alphas[instanceId];
+    float isVisible = float(alpha > 0.0);  // 0 if alpha == 0, 1 otherwise
+    float isInFront = float(diffCenter.z <= 0); // 0 if behind globe, 1 otherwise
 
-    if (diffCenter.z > 0) {
-        alpha = 0.0;
-    }
+    const float mask = isVisible * isInFront;
 
-    float sinAngle = sin(angle);
-    float cosAngle = cos(angle);
+    const float sinAngle = sin(angle) * mask;
+    const float cosAngle = cos(angle) * mask;
 
     const float2 p = (vertexIn.position.xy);
 
     // apply scale, then rotation and aspect ratio correction
-    auto pScaled = float2(p.x * scale.x, p.y * scale.y);
-    auto pRot = float2((pScaled.x * cosAngle - pScaled.y * sinAngle),
-                       (pScaled.x * sinAngle + pScaled.y * cosAngle) * aspectRatio);
+    const float2 pRot = float2(
+        p.x * scale.x * cosAngle - p.y * scale.y * sinAngle,
+        (p.x * scale.x * sinAngle + p.y * scale.y * cosAngle) * aspectRatio
+    );
 
-    auto position = float4(screenPosition.xy + offset.xy + pRot, 0.0, 1.0);
+    const float4 offscreenPlaceholder = float4(-3.0, -3.0, -3.0, -3.0);
+    float4 screenPositionWithOffset = float4(screenPosition.xy + offset.xy + pRot, 0.0, 1.0);
+    screenPositionWithOffset /= screenPosition.w;
+    const float4 finalPosition = mix(offscreenPlaceholder, screenPositionWithOffset, mask);
 
     TextInstancedVertexOut out {
-      .position = position,
+      .position = finalPosition,
       .uv = vertexIn.uv,
       .texureCoordinates = texureCoordinates[instanceId],
       .styleIndex = styleIndices[instanceId],
@@ -106,6 +110,7 @@ fragment half4
 unitSphereTextInstancedFragmentShader(TextInstancedVertexOut in [[stage_in]],
                                       constant TextInstanceStyle *styles [[buffer(1)]],
                                       constant bool &isHalo [[buffer(2)]],
+                                      constant float &distanceRange [[buffer(3)]],
                        texture2d<half> texture0 [[ texture(0)]],
                        sampler textureSampler [[sampler(0)]])
 {
@@ -121,36 +126,38 @@ unitSphereTextInstancedFragmentShader(TextInstancedVertexOut in [[stage_in]],
     const float2 uv = in.texureCoordinates.xy + in.texureCoordinates.zw * float2(in.uv.x, in.uv.y);
     const half4 dist = texture0.sample(textureSampler, uv);
 
-    const float median = max(min(dist.r, dist.g), min(max(dist.r, dist.g), dist.b)) / dist.a;
-    const float w = fwidth(median);
+    const float pseudoDist = max(min(dist.r, dist.g), min(max(dist.r, dist.g), dist.b));
+    const float2 unitRange = float2(distanceRange) / float2(texture0.get_width(), texture0.get_height());
+    const float2 screenTexSize = float2(1.0) / fwidth(uv);
+    // (pseudo-)dist difference corresponding to one screen pixel
+    const float w = 1.0 / max(0.5 * dot(unitRange, screenTexSize), 1.0);
 
     const float fillStart = 0.5 - w;
     const float fillEnd = 0.5 + w;
 
-    const float innerFallOff = smoothstep(fillStart, fillEnd, median);
-
-    half edgeAlpha = 0.0;
+    const float innerFallOff = smoothstep(fillStart, fillEnd, pseudoDist);
 
     if (isHalo) {
-        float halfHaloBlur = 0.5 * style->haloBlur;
+        const float haloWidth = style->haloWidth;
+        const float haloBlur = style->haloBlur;
 
-        if (style->haloWidth == 0.0 && halfHaloBlur == 0.0) {
+        if (haloWidth == 0.0 && haloBlur == 0.0) {
             discard_fragment();
         }
 
-        const float start = max(0.0, fillStart - (style->haloWidth + halfHaloBlur));
-        const float end = max(0.0, fillStart - max(0.0, style->haloWidth - halfHaloBlur));
+        const float halfHaloBlur = max(min(haloWidth, w), 0.5 * haloBlur);
+        const float start = max(0.0, fillStart - (haloWidth + halfHaloBlur));
+        const float end = max(0.0, fillStart - max(0.0, haloWidth - halfHaloBlur));
 
-        const float sideSwitch = step(median, end);
-        const float outerFallOff = smoothstep(start, end, median);
+        const float outerFallOff = smoothstep(start, end, pseudoDist);
 
         // Combination of blurred outer falloff and inverse inner fill falloff
-        edgeAlpha = (sideSwitch * outerFallOff + (1.0 - sideSwitch) * (1.0 - innerFallOff)) * haloColor.a;
+        const float edgeAlpha = outerFallOff * (1.0 - innerFallOff) * color.a;
 
         return half4(half3(haloColor.rgb), 1.0) * edgeAlpha;
 
     } else {
-        edgeAlpha = innerFallOff * color.a;
+        const float edgeAlpha = innerFallOff * color.a;
 
         return half4(half3(color.rgb), 1.0) * edgeAlpha;
     }
@@ -170,31 +177,35 @@ textInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
                           constant float *alphas [[buffer(12)]],
                           uint instanceId [[instance_id]])
 {
-    const float2 position = positions[instanceId] + originOffset.xy;
+    const float alpha = alphas[instanceId];
+    const float mask = float(alpha > 0.0);  // 0 if alpha == 0, 1 otherwise
 
-    const float2 scale = scales[instanceId];
-    const float rotation = rotations[instanceId];
+    const float2 pos = (positions[instanceId] + originOffset.xy) * mask;
+    const float2 scale = scales[instanceId] * mask;
+    const float angle = rotations[instanceId] * mask * M_PI_F / 180.0;
 
-    const float angle = rotation * M_PI_F / 180.0;
+    const float sinAngle = sin(angle) * mask;
+    const float cosAngle = cos(angle) * mask;
 
-    const float4x4 model_matrix = float4x4(
-                                              float4(cos(angle) * scale.x, -sin(angle) * scale.x, 0, 0),
-                                              float4(sin(angle) * scale.y, cos(angle) * scale.y, 0, 0),
-                                              float4(0, 0, 0, 0),
-                                              float4(position.x, position.y, 0.0, 1)
-                                              );
+    const float4x4 modelMatrix = float4x4(
+        float4( cosAngle * scale.x, -sinAngle * scale.x, 0.0, 0.0),
+        float4( sinAngle * scale.y,  cosAngle * scale.y, 0.0, 0.0),
+        float4( 0.0,                 0.0,                1.0, 0.0),
+        float4( pos.x,               pos.y,              0.0, 1.0)
+    );
 
-    const float4x4 matrix = vpMatrix * model_matrix;
+    const float4x4 matrix = vpMatrix * modelMatrix;
 
-    TextInstancedVertexOut out {
-      .position = matrix * float4(vertexIn.position.xy, 0.0, 1.0),
-      .uv = vertexIn.uv,
-      .texureCoordinates = texureCoordinates[instanceId],
-      .styleIndex = styleIndices[instanceId],
-      .alpha = alphas[instanceId]
+    const float4 worldPosition = matrix * float4(vertexIn.position.xy, 0.0, 1.0);
+    const float4 clipPosition = mix(float4(-3.0, -3.0, -3.0, -3.0), worldPosition, mask);
+
+    return TextInstancedVertexOut {
+        .position = clipPosition,
+        .uv = vertexIn.uv,
+        .texureCoordinates = texureCoordinates[instanceId],
+        .styleIndex = styleIndices[instanceId],
+        .alpha = alpha
     };
-
-    return out;
 }
 
 
@@ -202,6 +213,7 @@ fragment half4
 textInstancedFragmentShader(TextInstancedVertexOut in [[stage_in]],
                             constant TextInstanceStyle *styles [[buffer(1)]],
                             constant bool &isHalo [[buffer(2)]],
+                            constant float &distanceRange [[buffer(3)]],
                        texture2d<half> texture0 [[ texture(0)]],
                        sampler textureSampler [[sampler(0)]])
 {
@@ -217,31 +229,36 @@ textInstancedFragmentShader(TextInstancedVertexOut in [[stage_in]],
     const float2 uv = in.texureCoordinates.xy + in.texureCoordinates.zw * float2(in.uv.x, 1 - in.uv.y);
     const half4 dist = texture0.sample(textureSampler, uv);
 
-    const float median = max(min(dist.r, dist.g), min(max(dist.r, dist.g), dist.b)) / dist.a;
-    const float w = fwidth(median);
+    const float pseudoDist = max(min(dist.r, dist.g), min(max(dist.r, dist.g), dist.b));
+    const float2 unitRange = float2(distanceRange) / float2(texture0.get_width(), texture0.get_height());
+    const float2 screenTexSize = float2(1.0) / fwidth(uv);
+    // (pseudo-)dist difference corresponding to one screen pixel
+    const float w = 1.0 / max(0.5 * dot(unitRange, screenTexSize), 1.0);
 
     const float fillStart = 0.5 - w;
     const float fillEnd = 0.5 + w;
 
-    const float innerFallOff = smoothstep(fillStart, fillEnd, median);
+    const float innerFallOff = smoothstep(fillStart, fillEnd, pseudoDist);
 
     if (isHalo) {
-        float halfHaloBlur = 0.5 * style->haloBlur;
+        const float haloWidth = style->haloWidth;
+        const float haloBlur = style->haloBlur;
 
-        if (style->haloWidth == 0.0 && halfHaloBlur == 0.0) {
+        if (haloWidth == 0.0 && haloBlur == 0.0) {
             discard_fragment();
         }
 
-        const float start = max(0.0, fillStart - (style->haloWidth + halfHaloBlur));
-        const float end = max(0.0, fillStart - max(0.0, style->haloWidth - halfHaloBlur));
+        const float halfHaloBlur = max(min(haloWidth, w), 0.5 * haloBlur);
+        const float start = max(0.0, fillStart - (haloWidth + halfHaloBlur));
+        const float end = max(0.0, fillStart - max(0.0, haloWidth - halfHaloBlur));
 
-        const float sideSwitch = step(median, end);
-        const float outerFallOff = smoothstep(start, end, median);
+        const float outerFallOff = smoothstep(start, end, pseudoDist);
 
         // Combination of blurred outer falloff and inverse inner fill falloff
-        const float edgeAlpha = (sideSwitch * outerFallOff + (1.0 - sideSwitch) * (1.0 - innerFallOff)) * haloColor.a;
+        const float edgeAlpha = outerFallOff * (1.0 - innerFallOff) * color.a;
 
         return half4(half3(haloColor.rgb), 1.0) * edgeAlpha;
+
     } else {
         const float edgeAlpha = innerFallOff * color.a;
 

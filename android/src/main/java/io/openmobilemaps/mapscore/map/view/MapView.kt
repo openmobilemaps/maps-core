@@ -37,7 +37,6 @@ import io.openmobilemaps.mapscore.shared.map.scheduling.TaskInterface
 import io.openmobilemaps.mapscore.shared.map.scheduling.ThreadPoolScheduler
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
@@ -103,6 +102,15 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 	override fun onDrawFrame(gl: GL10?) {
 		mapInterface?.apply {
 			prepare()
+
+			getRenderingContext().let { context ->
+				context.asOpenGlRenderingContext()?.getRenderTargets()?.forEach { renderTarget ->
+					renderTarget.bindFramebuffer(context)
+					drawOffscreenFrame(renderTarget.asRenderTargetInterface())
+					renderTarget.unbindFramebuffer()
+				}
+			}
+
 			compute()
 			drawFrame()
 		}
@@ -136,6 +144,7 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 
 	override fun onGlThreadResume() {
 		if (lifecycleResumed) {
+			requireMapInterface().getRenderingContext().asOpenGlRenderingContext()?.resume()
 			requireMapInterface().resume()
 		}
 	}
@@ -143,6 +152,7 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 	override fun onGlThreadPause() {
 		if (mapViewStateMutable.value != MapViewState.PAUSED) {
 			updateMapViewState(MapViewState.PAUSED)
+			requireMapInterface().getRenderingContext().asOpenGlRenderingContext()?.pause()
 			requireMapInterface().pause()
 		}
 	}

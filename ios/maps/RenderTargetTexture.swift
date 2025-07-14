@@ -29,6 +29,10 @@ open class RenderTargetTexture: Identifiable, Equatable, MCRenderTargetInterface
 
     public func prepareOffscreenEncoder(_ commandBuffer: MTLCommandBuffer?, size: MCVec2I, context: RenderingContext) -> MTLRenderCommandEncoder? {
 
+        if size.x == 0 || size.y == 0 {
+            return nil
+        }
+
         setSize(size)
 
         let renderPassDescriptor = MTLRenderPassDescriptor()
@@ -66,7 +70,9 @@ open class RenderTargetTexture: Identifiable, Equatable, MCRenderTargetInterface
 
         for _ in 0..<RenderingContext.bufferCount {
             texDescriptor.pixelFormat = MetalContext.colorPixelFormat
-            let texture = MetalContext.current.device.makeTexture(descriptor: texDescriptor)!
+            guard let texture = MetalContext.current.device.makeTexture(descriptor: texDescriptor) else {
+                continue
+            }
 
             texDescriptor.pixelFormat = .stencil8
             let stencilTexture = MetalContext.current.device.makeTexture(descriptor: texDescriptor)!
@@ -76,10 +82,14 @@ open class RenderTargetTexture: Identifiable, Equatable, MCRenderTargetInterface
     }
 
     public func texture(context: RenderingContext) -> MTLTexture? {
-        return textures[context.currentBufferIndex].color
+        return textures.indices.contains(context.currentBufferIndex) ? textures[context.currentBufferIndex].color : nil
     }
 
     public static func == (lhs: RenderTargetTexture, rhs: RenderTargetTexture) -> Bool {
         return lhs.id == rhs.id
+    }
+
+    public func asGlRenderTargetInterface() -> (any MCOpenGlRenderTargetInterface)? {
+        nil
     }
 }

@@ -43,7 +43,7 @@ abstract class TextInstancedInterface {
      */
     abstract fun setStyles(values: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
 
-    abstract fun loadTexture(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, textureHolder: TextureHolderInterface)
+    abstract fun loadFont(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, fontData: io.openmobilemaps.mapscore.shared.map.loader.FontData, fontMsdfTexture: TextureHolderInterface)
 
     abstract fun removeTexture()
 
@@ -124,11 +124,11 @@ abstract class TextInstancedInterface {
         }
         private external fun native_setStyles(_nativeRef: Long, values: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes)
 
-        override fun loadTexture(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, textureHolder: TextureHolderInterface) {
+        override fun loadFont(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, fontData: io.openmobilemaps.mapscore.shared.map.loader.FontData, fontMsdfTexture: TextureHolderInterface) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_loadTexture(this.nativeRef, context, textureHolder)
+            native_loadFont(this.nativeRef, context, fontData, fontMsdfTexture)
         }
-        private external fun native_loadTexture(_nativeRef: Long, context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, textureHolder: TextureHolderInterface)
+        private external fun native_loadFont(_nativeRef: Long, context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, fontData: io.openmobilemaps.mapscore.shared.map.loader.FontData, fontMsdfTexture: TextureHolderInterface)
 
         override fun removeTexture() {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

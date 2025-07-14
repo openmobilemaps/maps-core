@@ -27,9 +27,7 @@ open class MCMapView: MTKView {
 
     public var pausesAutomatically = true
     private var framesToRender: Int = 1
-    private let framesToRenderAfterInvalidate: Int = 25
-    private var lastInvalidate = Date()
-    private let renderAfterInvalidate: TimeInterval = 3  // Collision detection might be delayed 3s
+    private let framesToRenderAfterInvalidate: Int = 2
     private var renderSemaphore = DispatchSemaphore(value: 3)  // using triple buffers
 
     private let touchHandler: MCMapViewTouchHandler
@@ -106,10 +104,6 @@ open class MCMapView: MTKView {
 
         depthStencilPixelFormat = .stencil8
 
-        // if #available(iOS 16.0, *) {
-        //   depthStencilStorageMode = .private
-        // }
-
         isMultipleTouchEnabled = true
 
         preferredFramesPerSecond = 120
@@ -176,7 +170,6 @@ open class MCMapView: MTKView {
     public func invalidate() {
         isPaused = false
         framesToRender = framesToRenderAfterInvalidate
-        lastInvalidate = Date()
     }
 
     public func renderTarget(named name: String) -> RenderTargetTexture {
@@ -204,8 +197,7 @@ extension MCMapView: MTKViewDelegate {
         }
 
         guard
-            framesToRender > 0
-                || -lastInvalidate.timeIntervalSinceNow < renderAfterInvalidate || !pausesAutomatically
+            framesToRender > 0 || !pausesAutomatically
         else {
             isPaused = true
             return

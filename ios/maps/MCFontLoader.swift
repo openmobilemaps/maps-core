@@ -77,6 +77,7 @@ open class MCFontLoader: NSObject, MCFontLoaderInterface, @unchecked Sendable {
                 if let jsonResult = jsonResult as? [String: AnyObject] {
                     let fontInfoJson = jsonResult["info"] as! [String: AnyObject]
                     let commonJson = jsonResult["common"] as! [String: AnyObject]
+                    let distanceFieldJson = jsonResult["distanceField"] as! [String: AnyObject]
 
                     let size = double(dict: fontInfoJson, value: "size")
                     let imageSize = double(dict: commonJson, value: "scaleW")
@@ -86,7 +87,8 @@ open class MCFontLoader: NSObject, MCFontLoaderInterface, @unchecked Sendable {
                         lineHeight: double(dict: commonJson, value: "lineHeight") / size,
                         base: double(dict: commonJson, value: "base") / size,
                         bitmapSize: MCVec2D(x: imageSize, y: imageSize),
-                        size: pixelsPerInch * size)
+                        size: size,
+                        distanceRange: double(dict: distanceFieldJson, value: "distanceRange"))
 
                     var glyphs: [MCFontGlyph] = []
 

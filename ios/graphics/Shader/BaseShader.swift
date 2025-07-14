@@ -46,12 +46,19 @@ open class BaseShader: MCShaderProgramInterface, @unchecked Sendable {
     ) {
     }
 
-    open func setBlendMode(_ blendMode: MCBlendMode) {
-        DispatchQueue.main.async {
-            guard blendMode != self.blendMode else { return }
-            self.blendMode = blendMode
+    open func setBlendMode(_ newBlendMode: MCBlendMode) {
+        let updateBlock = { @MainActor in
+            guard newBlendMode != self.blendMode else { return }
+            self.blendMode = newBlendMode
             self.pipeline = nil
-            self.setupProgram(nil)
+        }
+
+        if Thread.isMainThread {
+            MainActor.assumeIsolated {
+                updateBlock()
+            }
+        } else {
+            DispatchQueue.main.async(execute: updateBlock)
         }
     }
 }

@@ -23,9 +23,9 @@ abstract class GraphicsObjectInterface {
      */
     abstract fun setIsInverseMasked(inversed: Boolean)
 
-    /** Render the graphics object; ensure calling on graphics thread */
     abstract fun setDebugLabel(label: String)
 
+    /** Render the graphics object; ensure calling on graphics thread */
     abstract fun render(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, renderPass: io.openmobilemaps.mapscore.shared.graphics.RenderPassConfig, vpMatrix: Long, mMatrix: Long, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D, isMasked: Boolean, screenPixelAsRealMeterFactor: Double)
 
     public class CppProxy : GraphicsObjectInterface {

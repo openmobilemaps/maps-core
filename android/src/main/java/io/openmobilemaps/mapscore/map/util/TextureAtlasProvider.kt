@@ -11,16 +11,20 @@ import io.openmobilemaps.mapscore.shared.graphics.common.Vec2I
 object TextureAtlasProvider {
     fun createTextureAtlas(
         bitmaps: Map<String, Bitmap>,
-        maxAtlasSize: Int = 1024
+        maxAtlasSize: Int = 1024,
+		spacing: Int = 1
     ): ArrayList<TextureAtlas> {
         val packerResult = RectanglePacker.pack(
             HashMap(bitmaps.mapValues { (identifier, bitmap) ->
                 Vec2I(bitmap.width, bitmap.height)
-            }), Vec2I(maxAtlasSize, maxAtlasSize)
+            }), Vec2I(maxAtlasSize, maxAtlasSize),
+			spacing
         )
 
         return ArrayList(packerResult.map { page ->
-            val pageAtlasBitmap = Bitmap.createBitmap(maxAtlasSize, maxAtlasSize, Bitmap.Config.ARGB_8888)
+            val atlasWidth = page.uvs.maxOf { it.value.x + it.value.width }
+            val atlasHeight = page.uvs.maxOf { it.value.y + it.value.height }
+            val pageAtlasBitmap = Bitmap.createBitmap(atlasWidth, atlasHeight, Bitmap.Config.ARGB_8888)
             val pageAtlasCanvas = Canvas(pageAtlasBitmap)
             page.uvs.forEach { (identifier, uv) ->
                 bitmaps[identifier]?.let { bitmap ->

@@ -217,7 +217,15 @@ public struct MapView: UIViewRepresentable {
         }
 
         if is3D, coordinator.lastWrittenCamera?.cameraConfig.key != camera.cameraConfig.key {
-            mapView.camera.asMapCamera3d()?.setCameraConfig(camera.cameraConfig, durationSeconds: nil, targetZoom: nil, targetCoordinate: nil)
+            mapView.camera.asMapCamera3d()?
+                .setCameraConfig(
+                    camera.cameraConfig,
+                    durationSeconds: NSNumber(
+                        value: Double(camera.cameraConfig.animationDurationMs) / 1000.0
+                    ),
+                    targetZoom: nil,
+                    targetCoordinate: nil
+                )
         }
 
         if let center = camera.center.value, let zoom = camera.zoom.value, camera.center.mode == .user, camera.zoom.mode == .user {

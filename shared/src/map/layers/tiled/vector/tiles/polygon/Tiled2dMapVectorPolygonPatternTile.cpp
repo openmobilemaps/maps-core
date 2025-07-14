@@ -19,6 +19,7 @@
 #include "PolygonHelper.h"
 #include "TextureHolderInterface.h"
 #include "Tiled2dMapVectorStyleParser.h"
+#include "TrigonometryLUT.h"
 
 Tiled2dMapVectorPolygonPatternTile::Tiled2dMapVectorPolygonPatternTile(const std::weak_ptr<MapInterface> &mapInterface,
                                                                        const Tiled2dMapVersionedTileInfo &tileInfo,
@@ -256,10 +257,24 @@ void Tiled2dMapVectorPolygonPatternTile::setVectorTileData(const Tiled2dMapVecto
                         styleGroupNewPolygonsVector[styleGroupIndex].back().indices.push_back(indexOffset + index);
                     }
 
+
+                    double x,y,z;
+
                     for (auto const &coordinate: polygon.coordinates) {
-                        double x = is3d ? 1.0 * sin(coordinate.y) * cos(coordinate.x) - rx : coordinate.x - rx;
-                        double y = is3d ?  1.0 * cos(coordinate.y) - ry : coordinate.y - ry;
-                        double z = is3d ? -1.0 * sin(coordinate.y) * sin(coordinate.x) - rz : 0.0;
+                        if(is3d) {
+                            double sinX, cosX, sinY, cosY;
+                            lut::sincos(coordinate.y, sinY, cosY);
+                            lut::sincos(coordinate.x, sinX, cosX);
+
+                            x = 1.0 * sinY * cosX - rx;
+                            y = 1.0 * cosY - ry;
+                            z = -1.0 * sinY * sinX - rz;
+                        } else {
+                            x = coordinate.x - rx;
+                            y = coordinate.y - ry;
+                            z = 0.0;
+                        }
+
                         styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(x);
                         styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(y);
                         styleGroupNewPolygonsVector[styleGroupIndex].back().vertices.push_back(z);

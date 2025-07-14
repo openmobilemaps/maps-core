@@ -45,7 +45,7 @@ void SphereEffectLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterfac
 
     renderObjects.push_back(std::make_shared<RenderObject>(this->quad->asGraphicsObject(), true));
 
-    auto renderPass = std::make_shared<RenderPass>(RenderPassConfig(0, false), renderObjects, renderTarget );
+    auto renderPass = std::make_shared<RenderPass>(RenderPassConfig(0, false, renderTarget), renderObjects);
     renderPasses = {
         renderPass
     };

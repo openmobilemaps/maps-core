@@ -19,13 +19,15 @@ public enum MCTextureAtlasProvider {
 
     public static func createTextureAtlas(
         images: [String: PlatformImage],
-        maxAtlasSize: CGSize = CGSize(width: 4096, height: 4096)
+        maxAtlasSize: CGSize = CGSize(width: 4096, height: 4096),
+        spacing: Int32 = 1
     ) -> [MCTextureAtlas] {
         let packerResult = MCRectanglePacker.pack(
             images.mapValues {
                 MCVec2I(x: Int32($0.size.width), y: Int32($0.size.height))
             },
-            maxPageSize: .init(x: Int32(maxAtlasSize.width), y: Int32(maxAtlasSize.height))
+            maxPageSize: .init(x: Int32(maxAtlasSize.width), y: Int32(maxAtlasSize.height)),
+            spacing: spacing
         )
 
         return packerResult.compactMap { page -> MCTextureAtlas? in
@@ -62,13 +64,13 @@ public enum MCTextureAtlasProvider {
 
             for (key, rect) in uvs {
                 if let image = images[key] {
-                    image.draw(
-                        in: CGRect(
-                            x: CGFloat(rect.x),
-                            y: CGFloat(rect.y),
-                            width: CGFloat(rect.width),
-                            height: CGFloat(rect.height)
-                        ))
+                    let cgRect = CGRect(
+                        x: CGFloat(rect.x),
+                        y: CGFloat(rect.y),
+                        width: CGFloat(rect.width),
+                        height: CGFloat(rect.height)
+                    )
+                    image.draw(in: cgRect)
                 }
             }
 

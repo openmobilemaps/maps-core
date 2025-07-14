@@ -66,3 +66,7 @@ void Tiled2dMapVectorSourceDataManager::updateLayerDescriptions(std::vector<Tile
         updateLayerDescription(layerUpdate.layerDescription, layerUpdate.legacyIndex, layerUpdate.needsTileReplace);
     }
 }
+
+LayerReadyState Tiled2dMapVectorSourceDataManager::isReadyToRenderOffscreen() {
+    return !mailbox || !mailbox->isEmpty() ? LayerReadyState::NOT_READY : LayerReadyState::READY;
+}

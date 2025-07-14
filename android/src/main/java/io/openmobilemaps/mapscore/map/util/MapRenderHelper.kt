@@ -79,7 +79,7 @@ open class MapRenderHelper {
 			boundsPaddingPc: Float
 		) {
 			val coroutineContext = currentCoroutineContext()
-			val drawSemaphore = Semaphore(1, true)
+			val drawSemaphore = Semaphore(0, true)
 			mapRenderer.requireMapInterface().drawReadyFrame(renderBounds, boundsPaddingPc, timeoutSeconds, object : MapReadyCallbackInterface() {
 				var prevState: LayerReadyState? = null
 				override fun stateDidUpdate(state: LayerReadyState) {
@@ -89,12 +89,10 @@ open class MapRenderHelper {
 						return
 					}
 
-					drawSemaphore.acquire()
 					mapRenderer.setOnDrawCallback {
 						drawSemaphore.release()
 					}
 					drawSemaphore.acquire()
-					drawSemaphore.release()
 
 					if (prevState == state) return
 					prevState = state

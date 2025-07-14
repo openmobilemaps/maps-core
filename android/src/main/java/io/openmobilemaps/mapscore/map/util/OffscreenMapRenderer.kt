@@ -10,7 +10,7 @@ import io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateConversionHel
 import io.openmobilemaps.mapscore.shared.map.scheduling.TaskInterface
 import io.openmobilemaps.mapscore.shared.map.scheduling.ThreadPoolScheduler
 import kotlinx.coroutines.CoroutineScope
-import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 
@@ -23,7 +23,7 @@ open class OffscreenMapRenderer(val sizePx: Vec2I, val density: Float = 72f) : G
 	var mapInterface: MapInterface? = null
 		private set
 
-	private val saveFrame: AtomicBoolean = AtomicBoolean(false)
+	private var saveFrame: AtomicInteger? = null
 	private var saveFrameSpec: SaveFrameSpec? = null
 	private var saveFrameCallback: SaveFrameCallback? = null
 
@@ -51,6 +51,7 @@ open class OffscreenMapRenderer(val sizePx: Vec2I, val density: Float = 72f) : G
 			onPauseCallback = this::onGlThreadPause,
 			onFinishingCallback = this::onGlThreadFinishing).apply {
 			this.useMSAA = useMSAA
+			this.enforcedFinishInterval = 3
 			onWindowResize(sizePx.x, sizePx.y)
 			renderer = this@OffscreenMapRenderer
 			doResume()
@@ -85,13 +86,27 @@ open class OffscreenMapRenderer(val sizePx: Vec2I, val density: Float = 72f) : G
 	}
 
 	override fun onDrawFrame(gl: GL10?) {
+		val saveNextFrame = saveFrame?.decrementAndGet()?.let { it < 0 }
 		mapInterface?.apply {
 			prepare()
+
+			getRenderingContext().let { context ->
+				context.asOpenGlRenderingContext()?.getRenderTargets()?.forEach { renderTarget ->
+					renderTarget.bindFramebuffer(context)
+					drawOffscreenFrame(renderTarget.asRenderTargetInterface())
+					renderTarget.unbindFramebuffer()
+				}
+			}
+
 			compute()
 			drawFrame()
 		}
-		if (saveFrame.getAndSet(false)) {
-			saveFrame()
+		saveNextFrame?.let {
+			if (saveNextFrame) {
+				saveFrame()
+			} else {
+				glThread.requestRender()
+			}
 		}
 	}
 
@@ -143,7 +158,7 @@ open class OffscreenMapRenderer(val sizePx: Vec2I, val density: Float = 72f) : G
 	fun saveFrame(saveFrameSpec: SaveFrameSpec, saveFrameCallback: SaveFrameCallback) {
 		this.saveFrameSpec = saveFrameSpec
 		this.saveFrameCallback = saveFrameCallback
-		saveFrame.set(true)
+		saveFrame = AtomicInteger(saveFrameSpec.frameCountdown)
 	}
 
 	private fun saveFrame() {
@@ -151,6 +166,7 @@ open class OffscreenMapRenderer(val sizePx: Vec2I, val density: Float = 72f) : G
 		val spec = saveFrameSpec ?: return
 		saveFrameCallback = null
 		saveFrameSpec = null
+		saveFrame = null
 		SaveFrameUtil.saveCurrentFrame(sizePx, spec, callback)
 	}
 
