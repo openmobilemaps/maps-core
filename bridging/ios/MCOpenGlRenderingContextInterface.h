@@ -15,7 +15,8 @@
 
 - (nullable id<MCOpenGlRenderTargetInterface>)getCreateRenderTarget:(nonnull NSString *)name
                                                       textureFilter:(MCTextureFilterType)textureFilter
-                                                         clearColor:(nonnull MCColor *)clearColor;
+                                                         clearColor:(nonnull MCColor *)clearColor
+                                                   usesDepthStencil:(BOOL)usesDepthStencil;
 
 - (void)deleteRenderTarget:(nonnull NSString *)name;
 

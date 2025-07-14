@@ -28,13 +28,15 @@ class FontJsonManifestReader {
         var name = info.required("face").asText();
         var size = info.required("size").asDouble();
 
+        var distanceRange = object.required("distanceField").required("distanceRange").asDouble();
+
         var common = object.required("common");
         var lineHeight = common.required("lineHeight").asDouble();
         var base = common.required("base").asDouble();
         var imageSize = common.required("scaleW").asDouble(); // XXX: really ignore scaleH?
 
         var fontWrapper =
-                new FontWrapper(name, lineHeight, base, new Vec2D(imageSize, imageSize), size);
+                new FontWrapper(name, lineHeight / size, base / size, new Vec2D(imageSize, imageSize), size, distanceRange);
 
         var chars = object.required("chars");
         var glyphs = new ArrayList<FontGlyph>();

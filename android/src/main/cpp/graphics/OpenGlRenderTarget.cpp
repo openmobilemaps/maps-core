@@ -12,7 +12,8 @@
 #include "RenderConfigInterface.h"
 #include "Logger.h"
 
-OpenGlRenderTarget::OpenGlRenderTarget(::TextureFilterType textureFilter, const ::Color &clearColor) : textureFilter(textureFilter), clearColor(clearColor) {}
+OpenGlRenderTarget::OpenGlRenderTarget(::TextureFilterType textureFilter, const ::Color &clearColor, bool usesDepthStencil)
+        : textureFilter(textureFilter), clearColor(clearColor), usesDepthStencil(usesDepthStencil) {}
 
 // RenderTargetInterface
 
@@ -35,6 +36,9 @@ void OpenGlRenderTarget::setup(const Vec2I &size) {
     if (!isSetup) {
         glGenFramebuffers(1, &framebufferId);
         glGenTextures(1, &textureId);
+        if (usesDepthStencil) {
+            glGenRenderbuffers(1, &depthStencilBufferId);
+        }
         this->size = size;
 
         glBindTexture(GL_TEXTURE_2D, textureId);
@@ -43,8 +47,16 @@ void OpenGlRenderTarget::setup(const Vec2I &size) {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filterParam);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filterParam);
 
+        if (usesDepthStencil) {
+            glBindRenderbuffer(GL_RENDERBUFFER, depthStencilBufferId);
+            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, size.x, size.y);
+        }
+
         glBindFramebuffer(GL_FRAMEBUFFER, framebufferId);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureId, 0);
+        if (usesDepthStencil) {
+            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depthStencilBufferId);
+        }
 
         if(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE) {
             isSetup = true;
@@ -62,6 +74,9 @@ void OpenGlRenderTarget::clear() {
     if (isSetup) {
         glDeleteTextures(1, &textureId);
         glDeleteFramebuffers(1, &framebufferId);
+        if (usesDepthStencil) {
+            glDeleteRenderbuffers(1, &depthStencilBufferId);
+        }
         isSetup = false;
     }
 }
@@ -77,7 +92,11 @@ void OpenGlRenderTarget::bindFramebuffer(const std::shared_ptr<RenderingContextI
 
     glBindFramebuffer(GL_FRAMEBUFFER, framebufferId);
     glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
-    glClear(GL_COLOR_BUFFER_BIT);
+    if (usesDepthStencil) {
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    } else {
+        glClear(GL_COLOR_BUFFER_BIT);
+    }
 }
 
 void OpenGlRenderTarget::unbindFramebuffer() {

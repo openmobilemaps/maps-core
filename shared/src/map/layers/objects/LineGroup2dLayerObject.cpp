@@ -13,7 +13,7 @@
 #include "Logger.h"
 #include "ShaderLineStyle.h"
 
-#include <cmath>
+#include "TrigonometryLUT.h"
 
 LineGroup2dLayerObject::LineGroup2dLayerObject(const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                                                const std::shared_ptr<LineGroup2dInterface> &line,
@@ -43,14 +43,22 @@ void LineGroup2dLayerObject::setLines(const std::vector<std::tuple<std::vector<V
         for (auto const &mapCoord : std::get<0>(lines[lineIndex])) {
             Coord renderCoord = conversionHelper->convertToRenderSystem(Coord(systemIdentifier, mapCoord.x, mapCoord.y, 0.0));
 
-            double x = is3d ? 1.0 * sin(renderCoord.y) * cos(renderCoord.x) - origin.x : renderCoord.x - origin.x;
-            double y = is3d ?  1.0 * cos(renderCoord.y) - origin.y : renderCoord.y - origin.y;
-            double z = is3d ? -1.0 * sin(renderCoord.y) * sin(renderCoord.x) - origin.z : 0.0;
+            double sinX, cosX, sinY, cosY;
+            lut::sincos(renderCoord.y, sinY, cosY);
+            lut::sincos(renderCoord.x, sinX, cosX);
+
+            double x = is3d ? 1.0 * sinY * cosX - origin.x : renderCoord.x - origin.x;
+            double y = is3d ?  1.0 * cosY - origin.y : renderCoord.y - origin.y;
+            double z = is3d ? -1.0 * sinY * sinX - origin.z : 0.0;
 
             renderCoords.push_back(Vec3D(x, y, z));
         }
 
         int pointCount = (int)renderCoords.size();
+
+        if(pointCount < 2) {
+            continue;
+        }
 
         float prefixTotalLineLength = 0.0;
 
@@ -126,16 +134,24 @@ void LineGroup2dLayerObject::setLines(const std::vector<std::tuple<std::vector<C
 
         std::vector<Vec3D> renderCoords;
         for (auto const &mapCoord : std::get<0>(lines[lineIndex])) {
-            Coord renderCoord = conversionHelper->convertToRenderSystem(mapCoord);
-            
-            double x = is3d ? 1.0 * sin(renderCoord.y) * cos(renderCoord.x) - origin.x : renderCoord.x - origin.x;
-            double y = is3d ?  1.0 * cos(renderCoord.y) - origin.y : renderCoord.y - origin.y;
-            double z = is3d ? -1.0 * sin(renderCoord.y) * sin(renderCoord.x) - origin.z : 0.0;
+            const auto& renderCoord = conversionHelper->convertToRenderSystem(mapCoord);
+
+            double sinX, cosX, sinY, cosY;
+            lut::sincos(renderCoord.y, sinY, cosY);
+            lut::sincos(renderCoord.x, sinX, cosX);
+
+            double x = is3d ? 1.0 * sinY * cosX - origin.x : renderCoord.x - origin.x;
+            double y = is3d ?  1.0 * cosY - origin.y : renderCoord.y - origin.y;
+            double z = is3d ? -1.0 * sinY * sinX - origin.z : 0.0;
 
             renderCoords.push_back(Vec3D(x, y, z));
         }
 
         int pointCount = (int)renderCoords.size();
+
+        if(pointCount < 2) {
+            continue;
+        }
 
         float prefixTotalLineLength = 0.0;
 

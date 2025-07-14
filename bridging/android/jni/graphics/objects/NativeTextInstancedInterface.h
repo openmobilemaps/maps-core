@@ -43,7 +43,7 @@ private:
         void setAlphas(const ::SharedBytes & alphas) override;
         void setStyleIndices(const ::SharedBytes & indices) override;
         void setStyles(const ::SharedBytes & values) override;
-        void loadTexture(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & context, const /*not-null*/ std::shared_ptr<::TextureHolderInterface> & textureHolder) override;
+        void loadFont(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & context, const ::FontData & fontData, const /*not-null*/ std::shared_ptr<::TextureHolderInterface> & fontMsdfTexture) override;
         void removeTexture() override;
         /*not-null*/ std::shared_ptr<::GraphicsObjectInterface> asGraphicsObject() override;
 
@@ -62,7 +62,7 @@ private:
     const jmethodID method_setAlphas { ::djinni::jniGetMethodID(clazz.get(), "setAlphas", "(Lio/openmobilemaps/mapscore/shared/graphics/common/SharedBytes;)V") };
     const jmethodID method_setStyleIndices { ::djinni::jniGetMethodID(clazz.get(), "setStyleIndices", "(Lio/openmobilemaps/mapscore/shared/graphics/common/SharedBytes;)V") };
     const jmethodID method_setStyles { ::djinni::jniGetMethodID(clazz.get(), "setStyles", "(Lio/openmobilemaps/mapscore/shared/graphics/common/SharedBytes;)V") };
-    const jmethodID method_loadTexture { ::djinni::jniGetMethodID(clazz.get(), "loadTexture", "(Lio/openmobilemaps/mapscore/shared/graphics/RenderingContextInterface;Lio/openmobilemaps/mapscore/shared/graphics/objects/TextureHolderInterface;)V") };
+    const jmethodID method_loadFont { ::djinni::jniGetMethodID(clazz.get(), "loadFont", "(Lio/openmobilemaps/mapscore/shared/graphics/RenderingContextInterface;Lio/openmobilemaps/mapscore/shared/map/loader/FontData;Lio/openmobilemaps/mapscore/shared/graphics/objects/TextureHolderInterface;)V") };
     const jmethodID method_removeTexture { ::djinni::jniGetMethodID(clazz.get(), "removeTexture", "()V") };
     const jmethodID method_asGraphicsObject { ::djinni::jniGetMethodID(clazz.get(), "asGraphicsObject", "()Lio/openmobilemaps/mapscore/shared/graphics/objects/GraphicsObjectInterface;") };
 };

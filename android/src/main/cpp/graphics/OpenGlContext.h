@@ -55,7 +55,7 @@ public:
     virtual void pause() override;
 
     virtual /*not-null*/ std::shared_ptr<OpenGlRenderTargetInterface>
-    getCreateRenderTarget(const std::string &name, ::TextureFilterType textureFilter, const ::Color &clearColor) override;
+    getCreateRenderTarget(const std::string &name, ::TextureFilterType textureFilter, const ::Color &clearColor, bool usesDepthStencil) override;
 
     virtual void deleteRenderTarget(const std::string &name) override;
 
@@ -79,6 +79,7 @@ protected:
     Color backgroundColor = Color(0, 0, 0, 1);
 
     std::unordered_map<std::string, int> programs;
+    std::mutex renderTargetMutex;
     std::unordered_map<std::string, std::shared_ptr<OpenGlRenderTargetInterface>> renderTargets;
 
     Vec2I viewportSize = Vec2I(0, 0);

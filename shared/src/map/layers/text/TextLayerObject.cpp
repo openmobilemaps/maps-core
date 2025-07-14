@@ -156,7 +156,7 @@ void TextLayerObject::update(float scale, bool updateObject) {
 }
 
 void TextLayerObject::layoutPoint(float scale, bool updateObject) {
-    float fontSize = fontData.info.size * scale;
+    float fontSize = fontData.info.size * (camera->getScreenDensityPpi() / 160.0) * scale;
     auto pen = Vec2D(0.0, 0.0);
 
     if (scale != lastScale) {
@@ -469,8 +469,8 @@ float TextLayerObject::layoutLine(float scale, bool updateObject) {
 
             Quad2dD quad = Quad2dD(tl, tr, br, bl);
 
-            auto sinAngle = sin(angle * M_PI / 180.0);
-            auto cosAngle = cos(angle * M_PI / 180.0);
+            auto sinAngle = lut::sin(angle * M_PI / 180.0);
+            auto cosAngle = lut::cos(angle * M_PI / 180.0);
             quad = TextHelper::rotateQuad2d(quad, Vec2D(p.x, p.y), sinAngle, cosAngle);
 
             auto dy = Vec2DHelper::normalize(Vec2D(quad.bottomLeft.x - quad.topLeft.x, quad.bottomLeft.y - quad.topLeft.y));

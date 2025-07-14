@@ -3,6 +3,7 @@
 
 #include "NativeTextInstancedInterface.h"  // my header
 #include "Marshal.hpp"
+#include "NativeFontData.h"
 #include "NativeGraphicsObjectInterface.h"
 #include "NativeQuad2dD.h"
 #include "NativeRenderingContextInterface.h"
@@ -102,13 +103,14 @@ void NativeTextInstancedInterface::JavaProxy::setStyles(const ::SharedBytes & c_
                            ::djinni::get(::djinni_generated::NativeSharedBytes::fromCpp(jniEnv, c_values)));
     ::djinni::jniExceptionCheck(jniEnv);
 }
-void NativeTextInstancedInterface::JavaProxy::loadTexture(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & c_context, const /*not-null*/ std::shared_ptr<::TextureHolderInterface> & c_textureHolder) {
+void NativeTextInstancedInterface::JavaProxy::loadFont(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & c_context, const ::FontData & c_fontData, const /*not-null*/ std::shared_ptr<::TextureHolderInterface> & c_fontMsdfTexture) {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
     const auto& data = ::djinni::JniClass<::djinni_generated::NativeTextInstancedInterface>::get();
-    jniEnv->CallVoidMethod(Handle::get().get(), data.method_loadTexture,
+    jniEnv->CallVoidMethod(Handle::get().get(), data.method_loadFont,
                            ::djinni::get(::djinni_generated::NativeRenderingContextInterface::fromCpp(jniEnv, c_context)),
-                           ::djinni::get(::djinni_generated::NativeTextureHolderInterface::fromCpp(jniEnv, c_textureHolder)));
+                           ::djinni::get(::djinni_generated::NativeFontData::fromCpp(jniEnv, c_fontData)),
+                           ::djinni::get(::djinni_generated::NativeTextureHolderInterface::fromCpp(jniEnv, c_fontMsdfTexture)));
     ::djinni::jniExceptionCheck(jniEnv);
 }
 void NativeTextInstancedInterface::JavaProxy::removeTexture() {
@@ -216,12 +218,13 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_TextInstancedInterface_00024CppProxy_native_1loadTexture(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeRenderingContextInterface::JniType j_context, jobject j_textureHolder)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_TextInstancedInterface_00024CppProxy_native_1loadFont(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeRenderingContextInterface::JniType j_context, ::djinni_generated::NativeFontData::JniType j_fontData, jobject j_fontMsdfTexture)
 {
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::TextInstancedInterface>(nativeRef);
-        ref->loadTexture(::djinni_generated::NativeRenderingContextInterface::toCpp(jniEnv, j_context),
-                         ::djinni_generated::NativeTextureHolderInterface::toCpp(jniEnv, j_textureHolder));
+        ref->loadFont(::djinni_generated::NativeRenderingContextInterface::toCpp(jniEnv, j_context),
+                      ::djinni_generated::NativeFontData::toCpp(jniEnv, j_fontData),
+                      ::djinni_generated::NativeTextureHolderInterface::toCpp(jniEnv, j_fontMsdfTexture));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

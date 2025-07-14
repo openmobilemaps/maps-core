@@ -22,6 +22,8 @@
 #include "MapCamera3dInterface.h"
 #include "MapCamera3d.h"
 
+#include "TrigonometryLUT.h"
+
 Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<MapInterface> &mapInterface,
                                                            const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
                                                            const WeakActor<Tiled2dMapVectorFontProvider> &fontProvider,
@@ -561,12 +563,21 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(VectorModificationWrappe
         renderCoordinate = getRenderCoordinates(iconAnchor, -rotations[countOffset], iconWidth, iconHeight);
     }
 
-    const double iconOffsetX = iconOffset.x * iconSize * scaleFactor;
-    const double iconOffsetY = iconOffset.y * iconSize * scaleFactor;
-    const double rotatedOffsetX = iconOffsetX * cos(-rotations[countOffset] * M_PI / 180.0) - iconOffsetY * sin(-rotations[countOffset] * M_PI / 180.0);
-    const double rotatedOffsetY = iconOffsetX * sin(-rotations[countOffset] * M_PI / 180.0) + iconOffsetY * cos(-rotations[countOffset] * M_PI / 180.0);
-    const double x = renderCoordinate.x + (is3d ? 0.0 : rotatedOffsetX);
-    const double y = renderCoordinate.y + (is3d ? 0.0 : rotatedOffsetY);
+    double x = renderCoordinate.x;
+    double y = renderCoordinate.y;
+
+    if(!is3d) {
+        double a = -rotations[countOffset] * M_PI / 180.0;
+        double sin, cos;
+        lut::sincos(a, sin, cos);
+
+        const double iconOffsetX = iconOffset.x * iconSize * scaleFactor;
+        const double iconOffsetY = iconOffset.y * iconSize * scaleFactor;
+
+        // add rotation offset
+        x += iconOffsetX * cos - iconOffsetY * sin;
+        y += iconOffsetX * sin + iconOffsetY * cos;
+    }
 
     writePosition(x, y, countOffset, positions);
 
@@ -582,6 +593,11 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(VectorModificationWrappe
 
     if (!isCoordinateOwner || (labelObject && !labelObject->isPlaced)) {
         alphas[countOffset] = 0.0;
+
+        // if the label is not placed while a animation is running the animation triggers a endless invalidation of the map
+        if (isCoordinateOwner && (labelObject && !labelObject->isPlaced) && animationCoordinator->isIconAnimating()) {
+            animationCoordinator->stopIconAnimation();
+        }
     } else if (!(description->minZoom <= zoomIdentifier && description->maxZoom >= zoomIdentifier)) {
         alphas[countOffset] = animationCoordinator->getIconAlpha(0.0, now);
     } else if (animationCoordinator->isColliding()) {
@@ -604,10 +620,9 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(VectorModificationWrappe
 void Tiled2dMapVectorSymbolObject::writePosition(const double x_, const double y_, const size_t offset, VectorModificationWrapper<float> &buffer) {
     const size_t baseIndex = positionSize * offset;
     if (is3d) {
-        const double sinY = sin(y_);
-        const double cosY = cos(y_);
-        const double sinX = sin(x_);
-        const double cosX = cos(x_);
+        double sinX, cosX, sinY, cosY;
+        lut::sincos(y_, sinY, cosY);
+        lut::sincos(x_, sinX, cosX);
 
         buffer[baseIndex]     = sinY * cosX - tileOrigin.x;
         buffer[baseIndex + 1] = cosY - tileOrigin.y;

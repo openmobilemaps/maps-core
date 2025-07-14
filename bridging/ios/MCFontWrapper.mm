@@ -11,6 +11,7 @@
                                 base:(double)base
                           bitmapSize:(nonnull MCVec2D *)bitmapSize
                                 size:(double)size
+                       distanceRange:(double)distanceRange
 {
     if (self = [super init]) {
         _name = [name copy];
@@ -18,6 +19,7 @@
         _base = base;
         _bitmapSize = bitmapSize;
         _size = size;
+        _distanceRange = distanceRange;
     }
     return self;
 }
@@ -27,18 +29,20 @@
                                        base:(double)base
                                  bitmapSize:(nonnull MCVec2D *)bitmapSize
                                        size:(double)size
+                              distanceRange:(double)distanceRange
 {
     return [[self alloc] initWithName:name
                            lineHeight:lineHeight
                                  base:base
                            bitmapSize:bitmapSize
-                                 size:size];
+                                 size:size
+                        distanceRange:distanceRange];
 }
 
 #ifndef DJINNI_DISABLE_DESCRIPTION_METHODS
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@ %p name:%@ lineHeight:%@ base:%@ bitmapSize:%@ size:%@>", self.class, (void *)self, self.name, @(self.lineHeight), @(self.base), self.bitmapSize, @(self.size)];
+    return [NSString stringWithFormat:@"<%@ %p name:%@ lineHeight:%@ base:%@ bitmapSize:%@ size:%@ distanceRange:%@>", self.class, (void *)self, self.name, @(self.lineHeight), @(self.base), self.bitmapSize, @(self.size), @(self.distanceRange)];
 }
 
 #endif

@@ -118,9 +118,13 @@ public:
 
             double earthCenterZ = env.temp1.z / env.temp1.w;
 
-            env.temp2.x = 1.0 * sin(circle.y) * cos(circle.x) - env.origin.x;
-            env.temp2.y = 1.0 * cos(circle.y) - env.origin.y;
-            env.temp2.z = -1.0 * sin(circle.y) * sin(circle.x) - env.origin.z;
+            double sinX, cosX, sinY, cosY;
+            lut::sincos(circle.y, sinY, cosY);
+            lut::sincos(circle.x, sinX, cosX);
+
+            env.temp2.x = 1.0 * sinY * cosX - env.origin.x;
+            env.temp2.y = 1.0 * cosY - env.origin.y;
+            env.temp2.z = -1.0 * sinY * sinX - env.origin.z;
             env.temp2.w = 1.0;
 
             MatrixD::multiply(env.vpMatrix, env.temp2, env.temp1);
@@ -177,9 +181,13 @@ public:
 
             double earthCenterZ = env.temp1.z / env.temp1.w;
 
-            env.temp2.x = 1.0 * sin(rectangle.anchorY) * cos(rectangle.anchorX) - env.origin.x;
-            env.temp2.y = 1.0 * cos(rectangle.anchorY) - env.origin.y;
-            env.temp2.z = -1.0 * sin(rectangle.anchorY) * sin(rectangle.anchorX) - env.origin.z;
+            double sinX, cosX, sinY, cosY;
+            lut::sincos(rectangle.anchorY, sinY, cosY);
+            lut::sincos(rectangle.anchorX, sinX, cosX);
+
+            env.temp2.x = 1.0 * sinY * cosX - env.origin.x;
+            env.temp2.y = 1.0 * cosY - env.origin.y;
+            env.temp2.z = -1.0 * sinY * sinX - env.origin.z;
             env.temp2.w = 1.0;
 
             MatrixD::multiply(env.vpMatrix, env.temp2, env.temp1);

@@ -23,8 +23,6 @@ public class FontLoader extends FontLoaderInterface {
 
     private static final Logger logger = LoggerFactory.getLogger(FontLoader.class);
     private final ConcurrentHashMap<String, FontLoaderResult> fontCache;
-    private final double
-            dpFactor; // !< render-DPI / 160.0, factor for "Density Independent Pixel" size.
     private final ClassLoader classLoader;
     private final String fontDirectory;
     private final String fallbackFontName;
@@ -40,7 +38,6 @@ public class FontLoader extends FontLoaderInterface {
             @NotNull ClassLoader classLoader,
             @NotNull String fontDirectory,
             String fallbackFontName) {
-        this.dpFactor = dpi / 160.0; // see android DisplayMetrics.density.
         this.classLoader = classLoader;
         this.fontDirectory = fontDirectory;
         this.fallbackFontName = fallbackFontName;
@@ -101,19 +98,6 @@ public class FontLoader extends FontLoaderInterface {
     protected FontLoaderResult readFont(InputStream imageStream, InputStream manifestStream) {
         try {
             var manifest = FontJsonManifestReader.read(manifestStream);
-
-            // Adapt size for render resolution.
-            // Note: this feels a bit clunky, couldn't this be done in the shader?
-            manifest =
-                    new FontData(
-                            new FontWrapper(
-                                    manifest.getInfo().getName(),
-                                    manifest.getInfo().getLineHeight(),
-                                    manifest.getInfo().getBase(),
-                                    manifest.getInfo().getBitmapSize(),
-                                    manifest.getInfo().getSize() * dpFactor // <-
-                            ),
-                            manifest.getGlyphs());
 
             logger.debug("Font manifest: {}", manifest.getInfo());
 

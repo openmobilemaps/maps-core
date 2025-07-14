@@ -52,7 +52,8 @@ open class FontLoader(context: Context, private val dpFactor: Float = context.re
 			fontJson.common.lineHeight.toDouble() / size,
 			fontJson.common.base.toDouble() / size,
 			Vec2D(imageSize, imageSize),
-			size * dpFactor
+			size,
+      fontJson.distanceField.distanceRange.toDouble(),
 		)
 
 		val glyphs = fontJson.chars.map { glyphEntry ->
@@ -108,6 +109,7 @@ open class FontLoader(context: Context, private val dpFactor: Float = context.re
 		val pages: List<String>, // unused
 		val info: FontInfoData,
 		val common: FontCommonData,
+		val distanceField: DistanceFieldData,
 	)
 
 	@JsonClass(generateAdapter = true)
@@ -152,7 +154,6 @@ open class FontLoader(context: Context, private val dpFactor: Float = context.re
 		val redChnl: Int, // unused
 		val blueChnl: Int, // unused
 		val greenChnl: Int, // unused
-		val distanceField: DistanceFieldData? = null, // unused
 		val kernings: List<Int>? = null, // unused
 	)
 

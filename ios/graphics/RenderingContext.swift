@@ -88,9 +88,10 @@ public class RenderingContext: NSObject, @unchecked Sendable {
     open func setRenderPipelineStateIfNeeded(
         _ pipelineState: MTLRenderPipelineState
     ) {
-        guard currentPipeline?.hash != pipelineState.hash else {
+        guard currentPipeline !== pipelineState else {
             return
         }
+
         currentPipeline = pipelineState
         encoder?.setRenderPipelineState(pipelineState)
     }

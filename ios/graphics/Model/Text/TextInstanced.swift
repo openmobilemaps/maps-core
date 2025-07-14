@@ -33,6 +33,7 @@ final class TextInstanced: BaseGraphicsObject, @unchecked Sendable {
     private var aspectRatioBuffers: MultiBuffer<simd_float1>
 
     private var texture: MTLTexture?
+    private var distanceRange: Float = 0
 
     private var stencilState: MTLDepthStencilState?
 
@@ -183,6 +184,8 @@ final class TextInstanced: BaseGraphicsObject, @unchecked Sendable {
         encoder.setFragmentBytes(
             &isHalo, length: MemoryLayout<Bool>.stride, index: 2)
 
+        encoder.setFragmentBytes(&distanceRange, length: MemoryLayout<Float>.stride, index: 3)
+
         encoder.drawIndexedPrimitives(
             type: .triangle,
             indexCount: indicesCount,
@@ -254,16 +257,18 @@ extension TextInstanced: MCTextInstancedInterface {
         }
     }
 
-    func loadTexture(
+    func loadFont(
         _ context: MCRenderingContextInterface?,
-        textureHolder: MCTextureHolderInterface?
+        fontData: MCFontData,
+        fontMsdfTexture: MCTextureHolderInterface?
     ) {
-        guard let textureHolder = textureHolder as? TextureHolder else {
+        guard let textureHolder = fontMsdfTexture as? TextureHolder else {
             fatalError("unexpected TextureHolder")
         }
 
         lock.withCritical {
             texture = textureHolder.texture
+            distanceRange = Float(fontData.info.distanceRange)
         }
     }
 

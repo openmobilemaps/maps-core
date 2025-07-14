@@ -204,7 +204,6 @@ private:
     Vec3D referencePoint = Vec3D(0.0, 0.0, 0.0);
     Vec3D cartesianReferencePoint = Vec3D(0.0, 0.0, 0.0);
     Vec3D referencePointScreen = Vec3D(0.0, 0.0, 0);
-    float referenceSize;
 
 
     std::vector<Vec2D> centerPositions;

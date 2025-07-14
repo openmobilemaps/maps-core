@@ -12,7 +12,7 @@ abstract class OpenGlRenderingContextInterface {
 
     abstract fun pause()
 
-    abstract fun getCreateRenderTarget(name: String, textureFilter: io.openmobilemaps.mapscore.shared.graphics.objects.TextureFilterType, clearColor: io.openmobilemaps.mapscore.shared.graphics.common.Color): OpenGlRenderTargetInterface
+    abstract fun getCreateRenderTarget(name: String, textureFilter: io.openmobilemaps.mapscore.shared.graphics.objects.TextureFilterType, clearColor: io.openmobilemaps.mapscore.shared.graphics.common.Color, usesDepthStencil: Boolean): OpenGlRenderTargetInterface
 
     abstract fun deleteRenderTarget(name: String)
 
@@ -53,11 +53,11 @@ abstract class OpenGlRenderingContextInterface {
         }
         private external fun native_pause(_nativeRef: Long)
 
-        override fun getCreateRenderTarget(name: String, textureFilter: io.openmobilemaps.mapscore.shared.graphics.objects.TextureFilterType, clearColor: io.openmobilemaps.mapscore.shared.graphics.common.Color): OpenGlRenderTargetInterface {
+        override fun getCreateRenderTarget(name: String, textureFilter: io.openmobilemaps.mapscore.shared.graphics.objects.TextureFilterType, clearColor: io.openmobilemaps.mapscore.shared.graphics.common.Color, usesDepthStencil: Boolean): OpenGlRenderTargetInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            return native_getCreateRenderTarget(this.nativeRef, name, textureFilter, clearColor)
+            return native_getCreateRenderTarget(this.nativeRef, name, textureFilter, clearColor, usesDepthStencil)
         }
-        private external fun native_getCreateRenderTarget(_nativeRef: Long, name: String, textureFilter: io.openmobilemaps.mapscore.shared.graphics.objects.TextureFilterType, clearColor: io.openmobilemaps.mapscore.shared.graphics.common.Color): OpenGlRenderTargetInterface
+        private external fun native_getCreateRenderTarget(_nativeRef: Long, name: String, textureFilter: io.openmobilemaps.mapscore.shared.graphics.objects.TextureFilterType, clearColor: io.openmobilemaps.mapscore.shared.graphics.common.Color, usesDepthStencil: Boolean): OpenGlRenderTargetInterface
 
         override fun deleteRenderTarget(name: String) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
