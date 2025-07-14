@@ -1,5 +1,8 @@
 # Changelog for Open Mobile Maps
 
+## Version 3.2.1
+- Fixed concurrency issues in the MapCamera2d
+
 ## Version 3.2.0
 - Updated to [djinni 1.1.1](https://github.com/UbiqueInnovation/djinni/releases/tag/1.1.1)
 - Improved WebGL compatibility of OpenGL objects
