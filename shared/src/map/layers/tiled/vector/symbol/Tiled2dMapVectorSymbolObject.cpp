@@ -79,7 +79,8 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
     }
     
     const auto evalContext = EvaluationContext(tileInfo.tileInfo.zoomIdentifier, dpFactor, featureContext, featureStateManager);
-    std::string iconName = description->style.getIconImage(evalContext);
+    std::string iconName = description->style.getIconImage(evalContext).value;
+
     contentHash = std::hash<std::tuple<std::string, std::string, std::string>>()(std::tuple<std::string, std::string, std::string>(layerIdentifier, iconName, fullText));
     
     const bool hasIcon = description->style.hasIconImagePotentially();
@@ -142,7 +143,7 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
             const auto textRadialOffset = description->style.getTextRadialOffset(evalContext);
             const auto letterSpacing = description->style.getTextLetterSpacing(evalContext);
 
-            SymbolAlignment labelRotationAlignment = description->style.getTextRotationAlignment(evalContext);
+            SymbolAlignment labelRotationAlignment = description->style.getTextRotationAlignment(evalContext).value;
             boundingBoxRotationAlignment = labelRotationAlignment;
             labelObject = std::make_shared<Tiled2dMapVectorSymbolLabelObject>(converter, featureContext, description, text, fullText,
                                                                               coordinate, lineCoordinates, textAnchor,
@@ -233,6 +234,14 @@ void Tiled2dMapVectorSymbolObject::updateLayerDescription(const std::shared_ptr<
 
     lastTextUpdateScaleFactor = -1;
     lastTextUpdateRotation = -1;
+
+    textAllowOverlap.invalidate();
+    iconAllowOverlap.invalidate();
+    iconOpacity.invalidate();
+    iconRotate.invalidate();
+    iconSize.invalidate();
+    iconImage.invalidate();
+    iconOffset.invalidate();
 }
 
 void Tiled2dMapVectorSymbolObject::evaluateStyleProperties(const double zoomIdentifier) {
@@ -249,20 +258,40 @@ void Tiled2dMapVectorSymbolObject::evaluateStyleProperties(const double zoomIden
     
     const auto evalContext = EvaluationContext(roundedZoom, dpFactor, featureContext, featureStateManager);
 
-    iconOpacity = description->style.getIconOpacity(evalContext);
+    if (iconOpacity.isReevaluationNeeded(evalContext)) {
+        iconOpacity = description->style.getIconOpacity(evalContext);
+    }
 
-    if (iconOpacity == 0.0) {
+    if (iconOpacity.value == 0.0) {
         lastZoomEvaluation = roundedZoom;
         return;
     }
 
-    textAllowOverlap = description->style.getTextAllowOverlap(evalContext);
-    iconAllowOverlap = description->style.getIconAllowOverlap(evalContext);
+    if(textAllowOverlap.isReevaluationNeeded(evalContext)) {
+        textAllowOverlap = description->style.getTextAllowOverlap(evalContext);
+    }
 
-    iconImage = description->style.getIconImage(evalContext);
-    iconRotate = -description->style.getIconRotate(evalContext);
-    iconSize = description->style.getIconSize(evalContext);
-    iconOffset = description->style.getIconOffset(evalContext);
+    if(iconAllowOverlap.isReevaluationNeeded(evalContext)) {
+        iconAllowOverlap = description->style.getIconAllowOverlap(evalContext);
+    }
+
+    if(iconImage.isReevaluationNeeded(evalContext)) {
+        iconImage = description->style.getIconImage(evalContext);
+    }
+
+    if(iconRotate.isReevaluationNeeded(evalContext)) {
+        iconRotate = description->style.getIconRotate(evalContext);
+        iconRotate.value *= -1;
+    }
+
+    if(iconSize.isReevaluationNeeded(evalContext)) {
+        iconSize = description->style.getIconSize(evalContext);
+    }
+
+    if(iconOffset.isReevaluationNeeded(evalContext)) {
+        iconOffset = description->style.getIconOffset(evalContext);
+    }
+
     iconTextFit = description->style.getIconTextFit(evalContext);
     iconPadding = description->style.getIconPadding(evalContext);
 
@@ -347,7 +376,7 @@ void Tiled2dMapVectorSymbolObject::setupIconProperties(VectorModificationWrapper
 
     iconImage = description->style.getIconImage(evalContext);
 
-    if ((iconImage.empty() && !hasCustomTexture) || !spriteTexture) {
+    if ((iconImage.value.empty() && !hasCustomTexture) || !spriteTexture) {
         // TODO: make sure icon is not rendered
     } else {
         const auto textureWidth = (double) spriteTexture->getImageWidth();
@@ -367,9 +396,9 @@ void Tiled2dMapVectorSymbolObject::setupIconProperties(VectorModificationWrapper
         float spritePixelRatio = dpFactor;
 
         if (!hasCustomTexture) {
-            const auto spriteIt = spriteData->sprites.find(iconImage);
+            const auto spriteIt = spriteData->sprites.find(iconImage.value);
             if (spriteIt == spriteData->sprites.end()) {
-                LogError << "Unable to find sprite " <<= iconImage;
+                LogError << "Unable to find sprite " <<= iconImage.value;
                 writePosition(0, 0, countOffset, positions);
                 countOffset += instanceCounts.icons;
                 return;
@@ -401,7 +430,7 @@ void Tiled2dMapVectorSymbolObject::setupIconProperties(VectorModificationWrapper
         lastIconUpdateAlpha = -1;
     }
 
-    lastIconImage = iconImage;
+    lastIconImage = iconImage.value;
 
     writePosition(renderCoordinate.x, renderCoordinate.y, countOffset, positions);
 
@@ -440,7 +469,7 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(VectorModificationWrappe
 
     evaluateStyleProperties(zoomIdentifier);
 
-    if (iconImage != lastIconImage && !((iconImage.empty() && !hasCustomTexture) || !spriteTexture)) {
+    if (iconImage.value != lastIconImage && !((iconImage.value.empty() && !hasCustomTexture) || !spriteTexture)) {
         const auto textureWidth = (double) spriteTexture->getImageWidth();
         const auto textureHeight = (double) spriteTexture->getImageHeight();
 
@@ -451,9 +480,9 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(VectorModificationWrappe
         float spritePixelRatio = dpFactor;
 
         if (!hasCustomTexture) {
-            const auto spriteIt = spriteData->sprites.find(iconImage);
+            const auto spriteIt = spriteData->sprites.find(iconImage.value);
             if (spriteIt == spriteData->sprites.end()) {
-                LogError << "Unable to find sprite " <<= iconImage;
+                LogError << "Unable to find sprite " <<= iconImage.value;
                 writePosition(0, 0, countOffset, positions);
                 countOffset += instanceCounts.icons;
                 return;
@@ -480,10 +509,10 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(VectorModificationWrappe
         textureCoordinates[4 * countOffset + 2] = ((double) spriteWidth) / textureWidth;
         textureCoordinates[4 * countOffset + 3] = ((double) spriteHeight) / textureHeight;
 
-        lastIconImage = iconImage;
+        lastIconImage = iconImage.value;
     }
 
-    rotations[countOffset] = iconRotate;
+    rotations[countOffset] = iconRotate.value;
 
     if (iconRotationAlignment == SymbolAlignment::VIEWPORT ||
        (iconRotationAlignment == SymbolAlignment::AUTO && textSymbolPlacement == TextSymbolPlacement::POINT)) {
@@ -496,8 +525,8 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(VectorModificationWrappe
         }
     }
 
-    const auto iconWidth = spriteSize.x * iconSize * (is3d ? 1.0 : scaleFactor);
-    const auto iconHeight = spriteSize.y * iconSize * (is3d ? 1.0 : scaleFactor);
+    const auto iconWidth = spriteSize.x * iconSize.value * (is3d ? 1.0 : scaleFactor);
+    const auto iconHeight = spriteSize.y * iconSize.value * (is3d ? 1.0 : scaleFactor);
 
     const float scaledIconPadding = iconPadding * (is3d ? 1.0 : scaleFactor);
 
@@ -557,8 +586,8 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(VectorModificationWrappe
         iconBoundingBoxViewportAligned.x = (-iconWidth * 0.5) - scaledIconPadding + offsets[2 * countOffset] * viewPortSize.x * 0.5;
         iconBoundingBoxViewportAligned.y = (-iconHeight * 0.5) - scaledIconPadding - offsets[2 * countOffset + 1] * viewPortSize.y * 0.5;
 
-        offsets[2 * countOffset] += (iconOffset.x * iconSize) * 1.0 / viewPortSize.x;
-        offsets[2 * countOffset + 1] += (iconOffset.y * iconSize) * 1.0 / viewPortSize.y;
+        offsets[2 * countOffset] += (iconOffset.value.x * iconSize.value) * 1.0 / viewPortSize.x;
+        offsets[2 * countOffset + 1] += (iconOffset.value.y * iconSize.value) * 1.0 / viewPortSize.y;
     } else {
         renderCoordinate = getRenderCoordinates(iconAnchor, -rotations[countOffset], iconWidth, iconHeight);
     }
@@ -571,8 +600,8 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(VectorModificationWrappe
         double sin, cos;
         lut::sincos(a, sin, cos);
 
-        const double iconOffsetX = iconOffset.x * iconSize * scaleFactor;
-        const double iconOffsetY = iconOffset.y * iconSize * scaleFactor;
+        const double iconOffsetX = iconOffset.value.x * iconSize.value * scaleFactor;
+        const double iconOffsetY = iconOffset.value.y * iconSize.value * scaleFactor;
 
         // add rotation offset
         x += iconOffsetX * cos - iconOffsetY * sin;
@@ -603,7 +632,7 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(VectorModificationWrappe
     } else if (animationCoordinator->isColliding()) {
         alphas[countOffset] = animationCoordinator->getIconAlpha(0.0, now);
     } else {
-        alphas[countOffset] = animationCoordinator->getIconAlpha(iconOpacity * alpha, now);
+        alphas[countOffset] = animationCoordinator->getIconAlpha(iconOpacity.value * alpha, now);
     }
 
     isIconOpaque = alphas[countOffset] == 0;
@@ -651,7 +680,7 @@ void Tiled2dMapVectorSymbolObject::setupStretchIconProperties(VectorModification
 
     auto iconImage = description->style.getIconImage(evalContext);
 
-    if (iconImage.empty() || !spriteTexture) {
+    if (iconImage.value.empty() || !spriteTexture) {
         // TODO: make sure icon is not rendered
     } else {
         const auto textureWidth = (double) spriteTexture->getImageWidth();
@@ -659,9 +688,9 @@ void Tiled2dMapVectorSymbolObject::setupStretchIconProperties(VectorModification
 
         renderCoordinate = getRenderCoordinates(iconAnchor, 0.0, textureWidth, textureHeight);
 
-        const auto spriteIt = spriteData->sprites.find(iconImage);
+        const auto spriteIt = spriteData->sprites.find(iconImage.value);
         if (spriteIt == spriteData->sprites.end()) {
-            LogError << "Unable to find sprite " <<= iconImage;
+            LogError << "Unable to find sprite " <<= iconImage.value;
             writePosition(0, 0, countOffset, positions);
             countOffset += instanceCounts.stretchedIcons;
             return;
@@ -679,7 +708,7 @@ void Tiled2dMapVectorSymbolObject::setupStretchIconProperties(VectorModification
         textureCoordinates[4 * countOffset + 2] = ((double) spriteIt->second.width) / textureWidth;
         textureCoordinates[4 * countOffset + 3] = ((double) spriteIt->second.height) / textureHeight;
 
-        lastIconImage = iconImage;
+        lastIconImage = iconImage.value;
     }
 
     writePosition(renderCoordinate.x, renderCoordinate.y, countOffset, positions);
@@ -719,15 +748,15 @@ void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(VectorModificatio
 
     evaluateStyleProperties(zoomIdentifier);
 
-    if (iconImage != lastIconImage && !(iconImage.empty() || !spriteTexture))  {
+    if (iconImage.value != lastIconImage && !(iconImage.value.empty() || !spriteTexture))  {
         const auto textureWidth = (double) spriteTexture->getImageWidth();
         const auto textureHeight = (double) spriteTexture->getImageHeight();
 
         renderCoordinate = getRenderCoordinates(iconAnchor, 0.0, textureWidth, textureHeight);
 
-        const auto spriteIt = spriteData->sprites.find(iconImage);
+        const auto spriteIt = spriteData->sprites.find(iconImage.value);
         if (spriteIt == spriteData->sprites.end()) {
-            LogError << "Unable to find sprite " <<= iconImage;
+            LogError << "Unable to find sprite " <<= iconImage.value;
             writePosition(0, 0, countOffset, positions);
             countOffset += instanceCounts.stretchedIcons;
             return;
@@ -745,7 +774,7 @@ void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(VectorModificatio
         textureCoordinates[4 * countOffset + 2] = ((double) spriteIt->second.width) / textureWidth;
         textureCoordinates[4 * countOffset + 3] = ((double) spriteIt->second.height) / textureHeight;
 
-        lastIconImage = iconImage;
+        lastIconImage = iconImage.value;
     }
 
     if (!isCoordinateOwner) {
@@ -753,7 +782,7 @@ void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(VectorModificatio
     } else if (animationCoordinator->isColliding() || !(description->minZoom <= zoomIdentifier && description->maxZoom >= zoomIdentifier) || !stretchSpriteInfo) {
         alphas[countOffset] = animationCoordinator->getStretchIconAlpha(0.0, now);
     } else {
-        alphas[countOffset] = animationCoordinator->getStretchIconAlpha(iconOpacity * alpha, now);
+        alphas[countOffset] = animationCoordinator->getStretchIconAlpha(iconOpacity.value * alpha, now);
     }
 
     if (!animationCoordinator->isStretchIconAnimating()) {
@@ -763,7 +792,7 @@ void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(VectorModificatio
 
     isStretchIconOpaque = alphas[countOffset] == 0;
 
-    rotations[countOffset] = iconRotate;
+    rotations[countOffset] = iconRotate.value;
 
     if (lastIconUpdateRotation != rotation && iconRotationAlignment != SymbolAlignment::MAP) {
         rotations[countOffset] += rotation;
@@ -794,8 +823,8 @@ void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(VectorModificatio
     if (labelObject) {
         const double textWidth = labelObject->dimensions.x + (leftPadding + rightPadding);
         const double textHeight = labelObject->dimensions.y + (topPadding + bottomPadding);
-        scaleX = std::max(1.0, textWidth / (spriteWidth * iconSize));
-        scaleY = std::max(1.0, textHeight / (spriteHeight * iconSize));
+        scaleX = std::max(1.0, textWidth / (spriteWidth * iconSize.value));
+        scaleY = std::max(1.0, textHeight / (spriteHeight * iconSize.value));
     }
 
     if (iconTextFit == IconTextFit::WIDTH || iconTextFit == IconTextFit::BOTH) {
@@ -811,34 +840,35 @@ void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(VectorModificatio
     renderCoordinate = getRenderCoordinates(iconAnchor, -rotations[countOffset], spriteWidth, spriteHeight);
         
     Vec2D offset = Vec2D(0, 0);
-    
+    const auto& icOffset = iconOffset.value;
+
     switch (iconAnchor) {
         case Anchor::CENTER:
-            offset = Vec2D((-iconOffset.x) * scaleFactor - leftPadding * 0.5 + rightPadding * 0.5, iconOffset.y * scaleFactor - topPadding * 0.5 + bottomPadding * 0.5);
+            offset = Vec2D((-icOffset.x) * scaleFactor - leftPadding * 0.5 + rightPadding * 0.5, icOffset.y * scaleFactor - topPadding * 0.5 + bottomPadding * 0.5);
             break;
         case Anchor::LEFT:
-            offset = Vec2D((-iconOffset.x) * scaleFactor - leftPadding, iconOffset.y * scaleFactor - topPadding * 0.5 + bottomPadding * 0.5);
+            offset = Vec2D((-icOffset.x) * scaleFactor - leftPadding, icOffset.y * scaleFactor - topPadding * 0.5 + bottomPadding * 0.5);
             break;
         case Anchor::RIGHT:
-            offset = Vec2D((-iconOffset.x) * scaleFactor + rightPadding, iconOffset.y * scaleFactor - topPadding * 0.5 + bottomPadding * 0.5);
+            offset = Vec2D((-icOffset.x) * scaleFactor + rightPadding, icOffset.y * scaleFactor - topPadding * 0.5 + bottomPadding * 0.5);
             break;
         case Anchor::TOP:
-            offset = Vec2D((-iconOffset.x) * scaleFactor - leftPadding * 0.5 + rightPadding * 0.5, iconOffset.y * scaleFactor - topPadding);
+            offset = Vec2D((-icOffset.x) * scaleFactor - leftPadding * 0.5 + rightPadding * 0.5, icOffset.y * scaleFactor - topPadding);
             break;
         case Anchor::BOTTOM:
-            offset = Vec2D((-iconOffset.x) * scaleFactor - leftPadding * 0.5 + rightPadding * 0.5, iconOffset.y * scaleFactor + bottomPadding);
+            offset = Vec2D((-icOffset.x) * scaleFactor - leftPadding * 0.5 + rightPadding * 0.5, icOffset.y * scaleFactor + bottomPadding);
             break;
         case Anchor::TOP_LEFT:
-            offset = Vec2D((-iconOffset.x) * scaleFactor - leftPadding, iconOffset.y * scaleFactor - topPadding);
+            offset = Vec2D((-icOffset.x) * scaleFactor - leftPadding, icOffset.y * scaleFactor - topPadding);
             break;
         case Anchor::TOP_RIGHT:
-            offset = Vec2D((-iconOffset.x) * scaleFactor + rightPadding, iconOffset.y * scaleFactor - topPadding);
+            offset = Vec2D((-icOffset.x) * scaleFactor + rightPadding, icOffset.y * scaleFactor - topPadding);
             break;
         case Anchor::BOTTOM_LEFT:
-            offset = Vec2D((-iconOffset.x) * scaleFactor - leftPadding, iconOffset.y * scaleFactor + bottomPadding);
+            offset = Vec2D((-icOffset.x) * scaleFactor - leftPadding, icOffset.y * scaleFactor + bottomPadding);
             break;
         case Anchor::BOTTOM_RIGHT:
-            offset = Vec2D((-iconOffset.x) * scaleFactor + rightPadding, iconOffset.y * scaleFactor + bottomPadding);
+            offset = Vec2D((-icOffset.x) * scaleFactor + rightPadding, icOffset.y * scaleFactor + bottomPadding);
             break;
         default:
             break;
@@ -966,7 +996,7 @@ std::optional<CollisionRectD> Tiled2dMapVectorSymbolObject::getViewportAlignedBo
     double anchorX = renderCoordinate.x;
     double anchorY = renderCoordinate.y;
 
-    if ((!considerOverlapFlag || !textAllowOverlap) && labelObject && labelObject->boundingBoxViewportAligned.has_value()) {
+    if ((!considerOverlapFlag || !textAllowOverlap.value) && labelObject && labelObject->boundingBoxViewportAligned.has_value()) {
         minX = std::min(minX, std::min(labelObject->boundingBoxViewportAligned->x, labelObject->boundingBoxViewportAligned->x + labelObject->boundingBoxViewportAligned->width));
         maxX = std::max(maxX, std::max(labelObject->boundingBoxViewportAligned->x, labelObject->boundingBoxViewportAligned->x + labelObject->boundingBoxViewportAligned->width));
         minY = std::min(minY, std::min(labelObject->boundingBoxViewportAligned->y, labelObject->boundingBoxViewportAligned->y + labelObject->boundingBoxViewportAligned->height));
@@ -975,14 +1005,14 @@ std::optional<CollisionRectD> Tiled2dMapVectorSymbolObject::getViewportAlignedBo
         anchorY = labelObject->boundingBoxViewportAligned->anchorY;
         hasBox = true;
     }
-    if ((!considerOverlapFlag || !iconAllowOverlap) && iconBoundingBoxViewportAligned.x != 0) {
+    if ((!considerOverlapFlag || !iconAllowOverlap.value) && iconBoundingBoxViewportAligned.x != 0) {
         minX = std::min(minX, std::min(iconBoundingBoxViewportAligned.x, iconBoundingBoxViewportAligned.x + iconBoundingBoxViewportAligned.width));
         maxX = std::max(maxX, std::max(iconBoundingBoxViewportAligned.x, iconBoundingBoxViewportAligned.x + iconBoundingBoxViewportAligned.width));
         minY = std::min(minY, std::min(iconBoundingBoxViewportAligned.y, iconBoundingBoxViewportAligned.y + iconBoundingBoxViewportAligned.height));
         maxY = std::max(maxY, std::max(iconBoundingBoxViewportAligned.y, iconBoundingBoxViewportAligned.y + iconBoundingBoxViewportAligned.height));
         hasBox = true;
     }
-    if ((!considerOverlapFlag || !iconAllowOverlap) && stretchIconBoundingBoxViewportAligned.x != 0) {
+    if ((!considerOverlapFlag || !iconAllowOverlap.value) && stretchIconBoundingBoxViewportAligned.x != 0) {
         minX = std::min(minX, std::min(stretchIconBoundingBoxViewportAligned.x, stretchIconBoundingBoxViewportAligned.x + stretchIconBoundingBoxViewportAligned.width));
         maxX = std::max(maxX, std::max(stretchIconBoundingBoxViewportAligned.x, stretchIconBoundingBoxViewportAligned.x + stretchIconBoundingBoxViewportAligned.width));
         minY = std::min(minY, std::min(stretchIconBoundingBoxViewportAligned.y, stretchIconBoundingBoxViewportAligned.y + stretchIconBoundingBoxViewportAligned.height));
@@ -1016,17 +1046,17 @@ std::optional<std::vector<CollisionCircleD>> Tiled2dMapVectorSymbolObject::getMa
         contentHash = this->contentHash;
     }
 
-    if ((!considerOverlapFlag || !textAllowOverlap) && labelObject && labelObject->boundingBoxCircles.has_value()) {
+    if ((!considerOverlapFlag || !textAllowOverlap.value) && labelObject && labelObject->boundingBoxCircles.has_value()) {
         for (const auto &circle: *labelObject->boundingBoxCircles) {
             circles.emplace_back(circle.x, circle.y, circle.radius, contentHash, symbolSpacingPx);
         }
     }
-    if ((!considerOverlapFlag || !iconAllowOverlap) && iconBoundingBoxViewportAligned.width != 0) {
+    if ((!considerOverlapFlag || !iconAllowOverlap.value) && iconBoundingBoxViewportAligned.width != 0) {
         circles.emplace_back(iconBoundingBoxViewportAligned.x + 0.5 * iconBoundingBoxViewportAligned.width,
                              iconBoundingBoxViewportAligned.y + 0.5 * iconBoundingBoxViewportAligned.height,
                              iconBoundingBoxViewportAligned.width * 0.5, contentHash, symbolSpacingPx);
     }
-    if ((!considerOverlapFlag || !iconAllowOverlap) && stretchIconBoundingBoxViewportAligned.width != 0) {
+    if ((!considerOverlapFlag || !iconAllowOverlap.value) && stretchIconBoundingBoxViewportAligned.width != 0) {
         circles.emplace_back(stretchIconBoundingBoxViewportAligned.x + 0.5 * stretchIconBoundingBoxViewportAligned.width,
                              stretchIconBoundingBoxViewportAligned.y + 0.5 * stretchIconBoundingBoxViewportAligned.height,
                              stretchIconBoundingBoxViewportAligned.width * 0.5, contentHash, symbolSpacingPx);

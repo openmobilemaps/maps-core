@@ -986,7 +986,7 @@ void Tiled2dMapVectorLayer::loadSpriteData(int scale, bool fromLocal) {
             if (self) {
                 if (scale == 3 && self->mapDescription->use3xSprites.has_value() == false) {
                     LogError <<= "You have not specified whether to use @3x sprites or not, yet we could fetch and find @3x sprites. Please either add 'use3xSprites': true to your style json or explicitly set it to false.";
-                    abort();
+                    //abort();
                 }
             }
 #endif

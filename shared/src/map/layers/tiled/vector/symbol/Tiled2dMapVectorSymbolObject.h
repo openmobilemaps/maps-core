@@ -26,6 +26,7 @@
 #include "Vec3D.h"
 #include "SymbolAnimationCoordinatorMap.h"
 #include "VectorModificationWrapper.h"
+#include "SymbolVectorLayerDescription.h"
 
 class Tiled2dMapVectorSymbolObject {
 public:
@@ -169,8 +170,8 @@ private:
     double lastTextUpdateScaleFactor = -1;
     double lastTextUpdateRotation = -1;
 
-    bool textAllowOverlap = false;
-    bool iconAllowOverlap = false;
+    EvaluatedResult<bool> textAllowOverlap = false;
+    EvaluatedResult<bool> iconAllowOverlap = false;
 
     bool persistingSymbolPlacement = false;
 
@@ -179,17 +180,19 @@ private:
     bool isIconOpaque = true;
     bool isStretchIconOpaque = true;
 
-    float iconOpacity = 0;
-    float iconRotate = 0;
-    float iconSize = 0;
-    std::string iconImage;
+    EvaluatedResult<double> iconOpacity = 0.0;
+    EvaluatedResult<double> iconRotate = 0.0;
+    EvaluatedResult<double> iconSize = 0.0;
+    EvaluatedResult<std::string> iconImage = std::string();
+
     std::string lastIconImage;
     std::vector<float> iconTextFitPadding;
     TextSymbolPlacement textSymbolPlacement;
     SymbolAlignment boundingBoxRotationAlignment = SymbolAlignment::AUTO;
     float iconPadding = 0;
     Anchor iconAnchor = Anchor::CENTER;
-    Vec2F iconOffset = Vec2F(0.0, 0.0);
+    
+    EvaluatedResult<Vec2F> iconOffset = Vec2F(0.0, 0.0);
     IconTextFit iconTextFit = IconTextFit::NONE;
 
     std::optional<RectI> customIconUv;

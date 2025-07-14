@@ -46,6 +46,8 @@
 #include <iomanip>
 #include <memory>
 #include <utility>
+#include <optional>
+
 #include "Logger.h"
 
 namespace std {
@@ -674,6 +676,39 @@ inline std::vector<Anchor> Value::evaluateOr(const EvaluationContext &context, c
     return alternative;
 }
 
+template<typename T>
+struct EvaluatedResult {
+    T value;
+    bool needsReevaluation;
+    std::optional<int32_t> currentStateId;
+
+    EvaluatedResult(const T& val, bool needsReevaluation, std::optional<int32_t> currentStateId = std::nullopt)
+    : value(val),
+      needsReevaluation(needsReevaluation),
+      currentStateId(currentStateId)
+    {};
+
+    EvaluatedResult(const T& val)
+    : value(val),
+      needsReevaluation(true),
+      currentStateId(std::nullopt)
+    {};
+
+    bool isReevaluationNeeded(const EvaluationContext &context) {
+        if (!currentStateId) {
+            return needsReevaluation;
+        }
+        
+        return context.featureStateManager
+            ? *currentStateId != context.featureStateManager->getCurrentState()
+            : needsReevaluation;
+    }
+
+    void invalidate() {
+        needsReevaluation = true;
+        currentStateId = std::nullopt;
+    }
+};
 
 template<class ResultType>
 class ValueEvaluator {
@@ -700,15 +735,15 @@ public:
         isStatic = usedKeysCollection.empty();
         isZoomDependent = usedKeysCollection.usedKeys.contains("zoom");
         isStateDependant = usedKeysCollection.isStateDependant();
-        onlyGlobalStateDependant = usedKeysCollection.onlyGlobalStateDependant();
+        needsReevaluation = isZoomDependent || isStateDependant;
 
         lastResults.clear();
+        staticValue = std::nullopt;
     }
 
-
-    inline ResultType getResult(const EvaluationContext &context, const ResultType &defaultValue) {
+    inline EvaluatedResult<ResultType> getResult(const EvaluationContext &context, const ResultType &defaultValue) {
         if (!value) {
-            return defaultValue;
+            return EvaluatedResult<ResultType>(defaultValue, false);
         }
 
         if (isStatic) {
@@ -716,30 +751,23 @@ public:
                 staticValue = value->evaluateOr(context, defaultValue);
             }
 
-            return *staticValue;
+            return EvaluatedResult<ResultType>(*staticValue, false);
         }
 
-        if(value->isGettingPropertyValues()) {
+        if(!needsReevaluation) {
+            return EvaluatedResult<ResultType>(value->evaluateOr(context, defaultValue), needsReevaluation);
+        }
+
+        if (!isZoomDependent && isStateDependant && context.featureStateManager) {
+            auto currentStateId = context.featureStateManager->getCurrentState();
+            return EvaluatedResult<ResultType>(value->evaluateOr(context, defaultValue), needsReevaluation, currentStateId);
+        }
+
+        if (isZoomDependent) {
             return value->evaluateOr(context, defaultValue);
-        }
-
-        if (isZoomDependent || (isStateDependant && context.featureStateManager && !context.featureStateManager->empty())) {
-            return value->evaluateOr(context, defaultValue);
-        }
-
-        if(onlyGlobalStateDependant && context.featureStateManager) {
-            auto currentGlobalId = context.featureStateManager->getCurrentState();
-
-            if(currentGlobalId != globalId) {
-                globalValue = value->evaluateOr(context, defaultValue);
-                globalId = currentGlobalId;
-            } else if(globalValue) {
-                return *globalValue;
-            }
         }
 
         int64_t identifier = usedKeysCollection.getHash(context);
-
         std::lock_guard<std::mutex> lock(mutex);
 
         const auto &lastResultIt = lastResults.find(identifier);
@@ -760,13 +788,10 @@ private:
     std::optional<ResultType> staticValue;
     std::optional<ResultType> globalValue;
 
-
     bool isStatic = false;
     bool isZoomDependent = false;
     bool isStateDependant = false;
-    bool onlyGlobalStateDependant = false;
-
-    int64_t globalId = -1;
+    bool needsReevaluation = true;
 
     std::unordered_map<uint64_t, ResultType> lastResults;
 };
@@ -2721,6 +2746,7 @@ public:
     }
 
     ValueVariant evaluate(const EvaluationContext &context) const override {
+
         auto const lhsValue = lhs->evaluateOr(context, (double) 0.0);
         auto const rhsValue = rhs ? rhs->evaluateOr(context, (double) 0.0) : 0;
         switch (operation) {
@@ -2770,6 +2796,8 @@ private:
     const std::shared_ptr<Value> lhs;
     const std::shared_ptr<Value> rhs;
     const MathOperation operation;
+
+    std::optional<ValueVariant> staticValue;
 };
 
 class LengthValue: public Value {

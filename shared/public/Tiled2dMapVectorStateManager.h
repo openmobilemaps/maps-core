@@ -112,10 +112,6 @@ public:
         return currentState;
     }
 
-    int32_t getGlobalStateId() const {
-        return globalStateId;
-    }
-
 private:
     std::unordered_map<std::string, ValueVariant> globalState;
     std::vector<std::pair<uint64_t, FeatureState>> featureStates;

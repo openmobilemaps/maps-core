@@ -229,16 +229,16 @@ private:
     std::optional<std::vector<Vec2D>> lineCoordinates;
     DistanceIndex currentReferencePointIndex = DistanceIndex(0, 0.0);
 
-    double textSize = 0;
-    double textRotate = 0;
-    double textPadding = 0;
-    SymbolAlignment textAlignment = SymbolAlignment::AUTO;
+    EvaluatedResult<double> textSize = 0.0;
+    EvaluatedResult<double> textRotate = 0.0;
+    EvaluatedResult<double> textPadding = 0.0;
+    EvaluatedResult<SymbolAlignment> textAlignment = SymbolAlignment::AUTO;
 
-    double textOpacity;
-    Color textColor = Color(0.0 ,0.0, 0.0, 0.0);
-    Color haloColor = Color(0.0 ,0.0, 0.0, 0.0);
-    double haloWidth;
-    double haloBlur;
+    EvaluatedResult<double> textOpacity = 0.0;
+    EvaluatedResult<Color> textColor = Color(0.0 ,0.0, 0.0, 0.0);
+    EvaluatedResult<Color> haloColor = Color(0.0 ,0.0, 0.0, 0.0);
+    EvaluatedResult<double> haloWidth = 0.0;
+    EvaluatedResult<double> haloBlur = 0.0;
 
     std::shared_ptr<SymbolAnimationCoordinator> animationCoordinator;
     static constexpr double collisionDistanceBias = 0.75;

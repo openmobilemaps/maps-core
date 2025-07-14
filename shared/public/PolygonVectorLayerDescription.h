@@ -56,22 +56,22 @@ public:
 
     BlendMode getBlendMode(const EvaluationContext &context) {
         static const BlendMode defaultValue = BlendMode::NORMAL;
-        return blendModeEvaluator.getResult(context, defaultValue);
+        return blendModeEvaluator.getResult(context, defaultValue).value;
     }
 
     Color getFillColor(const EvaluationContext &context) {
         static const Color defaultValue = ColorUtil::c(0, 0, 0, 1.0);
-        return fillColorEvaluator.getResult(context, defaultValue);
+        return fillColorEvaluator.getResult(context, defaultValue).value;
     }
 
     double getFillOpacity(const EvaluationContext &context) {
         static const double defaultValue = 1.0;
-        return fillOpacityEvaluator.getResult(context, defaultValue);
+        return fillOpacityEvaluator.getResult(context, defaultValue).value;
     }
 
     std::string getFillPattern(const EvaluationContext &context) {
         static const std::string defaultValue = "";
-        return fillPatternEvaluator.getResult(context, defaultValue);
+        return fillPatternEvaluator.getResult(context, defaultValue).value;
     }
 
     bool hasPatternPotentially() {
@@ -80,7 +80,7 @@ public:
 
     std::vector<float> getStripeWidth(const EvaluationContext &context) {
         static const std::vector<float> defaultValue = {1.0, 1.0};
-        auto stripeInfo = stripeWidthEvaluator.getResult(context, defaultValue);
+        auto stripeInfo = stripeWidthEvaluator.getResult(context, defaultValue).value;
         for (int i = 0; i < stripeInfo.size(); ++i) {
             stripeInfo[i] = stripeInfo[i] * context.dpFactor;
         }

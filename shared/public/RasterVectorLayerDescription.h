@@ -66,7 +66,7 @@ public:
 
     BlendMode getBlendMode(const EvaluationContext &context) {
         static const BlendMode defaultValue = BlendMode::NORMAL;
-        return blendModeEvaluator.getResult(context, defaultValue);
+        return blendModeEvaluator.getResult(context, defaultValue).value;
     }
     
     RasterShaderStyle getRasterStyle(const EvaluationContext &context) {
@@ -83,38 +83,38 @@ public:
 
     double getRasterOpacity(const EvaluationContext &context) {
         double defaultValue = 1.0;
-        return rasterOpacityEvaluator.getResult(context, defaultValue);
+        return rasterOpacityEvaluator.getResult(context, defaultValue).value;
     }
     
     double getRasterBrightnessMin(const EvaluationContext &context) {
         double defaultValue = 0.0;
-        return rasterBrightnessMinEvaluator.getResult(context, defaultValue);
+        return rasterBrightnessMinEvaluator.getResult(context, defaultValue).value;
     }
     
     double getRasterBrightnessMax(const EvaluationContext &context) {
         double defaultValue = 1.0;
-        return rasterBrightnessMaxEvaluator.getResult(context, defaultValue);
+        return rasterBrightnessMaxEvaluator.getResult(context, defaultValue).value;
     }
     
     double getRasterContrast(const EvaluationContext &context) {
         double defaultValue = 0.0;
-        return rasterContrastEvaluator.getResult(context, defaultValue);
+        return rasterContrastEvaluator.getResult(context, defaultValue).value;
     }
 
     double getRasterSaturation(const EvaluationContext &context) {
         double defaultValue = 0.0;
-        return rasterSaturationEvaluator.getResult(context, defaultValue);
+        return rasterSaturationEvaluator.getResult(context, defaultValue).value;
     }
 
     double getRasterGamma(const EvaluationContext &context) {
         double defaultValue = 1.0;
-        return rasterGammaEvaluator.getResult(context, defaultValue);
+        return rasterGammaEvaluator.getResult(context, defaultValue).value;
     }
 
 
     double getRasterBrightnessShift(const EvaluationContext &context) {
         double defaultValue = 0.0;
-        return rasterBrightnessShiftEvaluator.getResult(context, defaultValue);
+        return rasterBrightnessShiftEvaluator.getResult(context, defaultValue).value;
     }
 
     ValueEvaluator<double> rasterOpacityEvaluator;
