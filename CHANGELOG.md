@@ -1,5 +1,8 @@
 # Changelog for Open Mobile Maps
 
+## Version 3.3.1
+- Fixed concurrency issues in the MapCamera2d
+
 ## Version 3.3.0
 - @3x sprites are now opt-in, that is per default we do not try to fetch the @3x sprites anymore. To enable it, explicitly add the 'use3xSprites' property to the metadata property in your style json.
  - Fixed rotation and stretching issues for icons in vector layers
