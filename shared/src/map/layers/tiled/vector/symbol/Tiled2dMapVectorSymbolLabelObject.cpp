@@ -597,8 +597,8 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(VectorModification
     Vec3D boundingBoxMin(std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), referencePoint.z);
     Vec3D boundingBoxMax(std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest(), referencePoint.z);
 
-    const double sinAngle = lut::sin(angle * M_PI / 180.0);
-    const double cosAngle = lut::cos(angle * M_PI / 180.0);
+    double sinAngle, cosAngle;
+    lut::sincos(angle * M_PI / 180.0, sinAngle, cosAngle);
     Vec2D anchorOffsetRot = Vec2DHelper::rotate(anchorOffset, Vec2D(0, 0), sinAngle, cosAngle);
 
     const auto dx = referencePoint.x + anchorOffset.x;
