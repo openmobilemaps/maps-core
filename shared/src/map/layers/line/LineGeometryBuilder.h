@@ -45,7 +45,7 @@ class LineGeometryBuilder {
                 float turnDirection = 0;
                 LineJoinType vertexJoinType = defaultJoinType;
 
-                Vec3D extrude(0, 0, 0), extrudeLineVec(0, 0, 0);
+                Vec3D extrude(0, 0, 0), extrudeMirror(0, 0, 0), extrudeMirrorLast(0, 0, 0), extrudeLineVec(0, 0, 0);
 
                 if (currentIndex > 0) {
                     lastNormal = normal;
@@ -78,9 +78,20 @@ class LineGeometryBuilder {
 
                     if (currentIndex > 0) {
                         extrude = (normal + lastNormal);
+                        extrudeMirrorLast = extrude - 2.0 * (lastLineVec * (Vec3DHelper::dotProduct(extrude, lastLineVec)));
+                        extrudeMirror = extrude - 2.0 * (lineVec * (Vec3DHelper::dotProduct(extrude, lineVec)));
+
                         double extrudeLength = Vec3DHelper::length(extrude);
                         if (extrudeLength > 0) {
                             extrude /= extrudeLength;
+                        }
+                        double extrudeMirrorLastLength = Vec3DHelper::length(extrudeMirrorLast);
+                        if (extrudeMirrorLastLength > 0) {
+                            extrudeMirrorLast /= extrudeMirrorLastLength;
+                        }
+                        double extrudeMirrorLength = Vec3DHelper::length(extrudeMirror);
+                        if (extrudeMirrorLength > 0) {
+                            extrudeMirror /= extrudeMirrorLength;
                         }
 
                         if (is3d) {
@@ -147,36 +158,77 @@ class LineGeometryBuilder {
                     if (capType == LineCapType::SQUARE && endSide != 0) {
                         pointExtrude = pointExtrude + extrudeLineVec * endSide;
                     }
-                    if (side * turnDirection < 0 && endSide == 0 && extrudeScale > 1.1 && vertexJoinType != LineJoinType::MITER) {
-                        if (optimizeForDots) {
-                            if (side == -1) {
-                                pushLineVertex(p, extrude - lastNormal * 2, 1.0, -1, prefixTotalLineLength, lineStyleIndex, true, true,
-                                               vertexCount, prePreIndex, preIndex, lineAttributes, lineIndices, is3d);
-                                pushLineVertex(p, extrude, extrudeScale, 1, prefixTotalLineLength, lineStyleIndex, true, false, vertexCount,
-                                               prePreIndex, preIndex, lineAttributes, lineIndices, is3d);
-                            }
-                            else {
-                                pushLineVertex(p, -extrude + lastNormal * 2, 1.0, 1, prefixTotalLineLength, lineStyleIndex, true, false,
-                                               vertexCount, prePreIndex, preIndex, lineAttributes, lineIndices, is3d);
-                                std::swap(prePreIndex, preIndex);
-                            }
-                        }
+                    bool shouldRound = extrudeScale > 1.1 || optimizeForDots;
+                    if (side * turnDirection < 0 && endSide == 0 && shouldRound && vertexJoinType != LineJoinType::MITER) {
+//                        if (optimizeForDots) {
+//                            if (side == -1) {
+//                                pushLineVertex(p, extrude - lastNormal * 2, 1.0, -1, prefixTotalLineLength, lineStyleIndex, true, true,
+//                                               vertexCount, prePreIndex, preIndex, lineAttributes, lineIndices, is3d);
+//                                pushLineVertex(p, extrude, extrudeScale, 1, prefixTotalLineLength, lineStyleIndex, true, false, vertexCount,
+//                                               prePreIndex, preIndex, lineAttributes, lineIndices, is3d);
+//                            }
+//                            else {
+//                                pushLineVertex(p, -extrude + lastNormal * 2, 1.0, 1, prefixTotalLineLength, lineStyleIndex, true, false,
+//                                               vertexCount, prePreIndex, preIndex, lineAttributes, lineIndices, is3d);
+//                                std::swap(prePreIndex, preIndex);
+//                            }
+//                        }
+
+                        pushLineVertex(p, extrudeMirrorLast * (double)side, extrudeScale, side, prefixTotalLineLength, lineStyleIndex, true, side == -1,
+                                       vertexCount, prePreIndex, preIndex, lineAttributes, lineIndices, is3d);
+//
+//                        pushLineVertex(p, pointExtrude * (double)side, extrudeScale, side, prefixTotalLineLength, lineStyleIndex, true, side == -1,
+//                                       vertexCount, prePreIndex, preIndex, lineAttributes, lineIndices, is3d);
+//                        std::swap(prePreIndex, preIndex);
+
+
+                    } else {
+                        pushLineVertex(p, pointExtrude, extrudeScale, side, prefixTotalLineLength, lineStyleIndex, true, side == -1,
+                                       vertexCount, prePreIndex, preIndex, lineAttributes, lineIndices, is3d);
+                    }
+                }
+
+                for (int8_t side = -1; side <= 1; side += 2) {
+                    Vec3D pointExtrude = extrude * (double)side;
+                    if (capType == LineCapType::SQUARE && endSide != 0) {
+                        pointExtrude = pointExtrude + extrudeLineVec * endSide;
+                    }
+                    bool shouldRound = extrudeScale > 1.1 || optimizeForDots;
+                    if (side * turnDirection < 0 && endSide == 0 && shouldRound && vertexJoinType != LineJoinType::MITER) {
+
+//                        if (side == -1) {
+//                            std::swap(prePreIndex, preIndex);
+//                        }
                         const double approxAngle = 2 * std::sqrt(2 - 2 * cosHalfAngle);
                         // 2.86 ~= 180/pi / 20 -> approximately one slice per 20 degrees
                         const int stepCount = (vertexJoinType == LineJoinType::ROUND) ? round(approxAngle * 2.86) : 1;
                         for (int step = 0; step <= stepCount; step++) {
                             double r = (double)step / (double)stepCount;
                             pointExtrude = Vec3DHelper::normalize(lastNormal * (1.0 - r) + normal * r) * (double)side;
+                            if (side == 1) {
+                                std::swap(prePreIndex, preIndex);
+                            }
                             pushLineVertex(p, pointExtrude, 1.0, side, prefixTotalLineLength, lineStyleIndex, true, side == -1,
                                            vertexCount, prePreIndex, preIndex, lineAttributes, lineIndices, is3d);
+                            if (side == -1) {
+                                std::swap(prePreIndex, preIndex);
+                            }
+                        }
+                        if (side == 1) {
                             std::swap(prePreIndex, preIndex);
                         }
-                        std::swap(prePreIndex, preIndex);
-                    } else {
-                        pushLineVertex(p, pointExtrude, extrudeScale, side, prefixTotalLineLength, lineStyleIndex, true, side == -1,
+//
+                        pushLineVertex(p, extrudeMirror * (double)side, extrudeScale, side, prefixTotalLineLength, lineStyleIndex, true, side == -1,
                                        vertexCount, prePreIndex, preIndex, lineAttributes, lineIndices, is3d);
+                        if (side == -1) {
+                            std::swap(prePreIndex, preIndex);
+                        }
                     }
+
+
                 }
+
+
             }
         }
 

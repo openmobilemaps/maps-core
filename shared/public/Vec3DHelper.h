@@ -33,6 +33,10 @@ inline Vec3D operator*( const ::Vec3D& left, const double& val) {
     return Vec3D(left.x * val, left.y * val, left.z * val);
 }
 
+inline Vec3D operator*(const double& val, const ::Vec3D& right) {
+    return Vec3D(right.x * val, right.y * val, right.z * val);
+}
+
 inline Vec3D operator/( const ::Vec3D& left, const double& val ) {
     return Vec3D(left.x / val, left.y / val, left.z / val);
 }
