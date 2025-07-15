@@ -682,17 +682,33 @@ struct EvaluatedResult {
     bool needsReevaluation;
     std::optional<int32_t> currentStateId;
 
+    // Copy constructor
     EvaluatedResult(const T& val, bool needsReevaluation, std::optional<int32_t> currentStateId = std::nullopt)
     : value(val),
       needsReevaluation(needsReevaluation),
       currentStateId(currentStateId)
-    {};
+    {}
 
+    // Move constructor
+    EvaluatedResult(T&& val, bool needsReevaluation, std::optional<int32_t> currentStateId = std::nullopt)
+    : value(std::move(val)),
+      needsReevaluation(needsReevaluation),
+      currentStateId(currentStateId)
+    {}
+
+    // Convenience (copy)
     EvaluatedResult(const T& val)
     : value(val),
       needsReevaluation(true),
       currentStateId(std::nullopt)
-    {};
+    {}
+
+    // Convenience (move)
+    EvaluatedResult(T&& val)
+    : value(std::move(val)),
+      needsReevaluation(true),
+      currentStateId(std::nullopt)
+    {}
 
     bool isReevaluationNeeded(const EvaluationContext &context) {
         if (!currentStateId) {
