@@ -42,8 +42,7 @@ void StretchInstancedShaderOpenGl::setupProgram(const std::shared_ptr<::Renderin
 
 std::string StretchInstancedShaderOpenGl::getVertexShader() {
     return projectOntoUnitSphere ?
-           OMMVersionedGlesShaderCode(320 es,
-                                      uniform mat4 uvpMatrix;
+           OMMVersionedGlesShaderCodeWithFrameUBO(320 es,
                                       uniform vec4 uOriginOffset;
 
                                       in vec4 vPosition;
@@ -68,9 +67,9 @@ std::string StretchInstancedShaderOpenGl::getVertexShader() {
                                       void main() {
                                           float angle = aRotation * 3.14159265 / 180.0;
 
-                                          vec4 earthCenter = uvpMatrix * vec4(0.0, 0.0, 0.0, 1.0);
+                                          vec4 earthCenter = uFrameUniforms.vpMatrix * vec4(0.0, 0.0, 0.0, 1.0);
                                           earthCenter = earthCenter / earthCenter.w;
-                                          vec4 screenPosition = uvpMatrix * (vec4(aPosition, 1.0) + uOriginOffset);
+                                          vec4 screenPosition = uFrameUniforms.vpMatrix * (vec4(aPosition, 1.0) + uOriginOffset);
                                           screenPosition = screenPosition / screenPosition.w;
                                           float mask = float(aAlpha > 0.0) * float(screenPosition.z - earthCenter.z < 0.0);
 
@@ -93,8 +92,7 @@ std::string StretchInstancedShaderOpenGl::getVertexShader() {
                                           v_stretchY = aStretchY;
                                       }
                               )
-    : OMMVersionedGlesShaderCode(320 es,
-                                      uniform mat4 uvpMatrix;
+    : OMMVersionedGlesShaderCodeWithFrameUBO(320 es,
                                       uniform vec4 uOriginOffset;
 
                                       in vec4 vPosition;
@@ -128,7 +126,7 @@ std::string StretchInstancedShaderOpenGl::getVertexShader() {
                                                   vec4(aPosition + uOriginOffset.xy, 0.0, 1.0)
                                           );
 
-                                          mat4 matrix = uvpMatrix * model_matrix;
+                                          mat4 matrix = uFrameUniforms.vpMatrix * model_matrix;
 
                                           gl_Position = mix(vec4(-10.0, -10.0, -10.0, -10.0), matrix * vPosition, mask);
                                           v_texCoordInstance = aTexCoordinate;

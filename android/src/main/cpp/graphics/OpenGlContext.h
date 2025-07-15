@@ -14,10 +14,11 @@
 #include "OpenGlRenderTargetInterface.h"
 #include "RenderingContextInterface.h"
 #include "RenderingCullMode.h"
+#include "ChronoUtil.h"
+#include <opengl_wrapper.h>
 #include <memory>
 #include <string>
 #include <unordered_map>
-#include "ChronoUtil.h"
 
 class OpenGlContext
         : public RenderingContextInterface,
@@ -38,7 +39,7 @@ public:
 
     void setCulling(RenderingCullMode mode) override;
 
-    virtual void setupDrawFrame() override;
+    virtual void setupDrawFrame(int64_t vpMatrix, const ::Vec3D & origin, double screenPixelAsRealMeterFactor) override;
 
     virtual void preRenderStencilMask() override;
 
@@ -73,6 +74,8 @@ public:
 
     void cleanAll();
 
+    GLuint getFrameUniformsBuffer();
+
 protected:
     RenderingCullMode cullMode = RenderingCullMode::NONE;
     std::atomic_flag backgroundColorValid = ATOMIC_FLAG_INIT;
@@ -81,6 +84,8 @@ protected:
     std::unordered_map<std::string, int> programs;
     std::mutex renderTargetMutex;
     std::unordered_map<std::string, std::shared_ptr<OpenGlRenderTargetInterface>> renderTargets;
+
+    GLuint frameUniformsBuffer = GL_INVALID_INDEX;
 
     Vec2I viewportSize = Vec2I(0, 0);
 

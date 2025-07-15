@@ -53,11 +53,9 @@ void TextInstancedShaderOpenGl::preRender(const std::shared_ptr<::RenderingConte
 
 std::string TextInstancedShaderOpenGl::getVertexShader() {
     return projectOntoUnitSphere ?
-    OMMVersionedGlesShaderCode(320 es,
-                               uniform mat4 uvpMatrix;
+    OMMVersionedGlesShaderCodeWithFrameUBO(320 es,
                                uniform mat4 umMatrix;
                                uniform vec4 uOriginOffset;
-                               uniform vec4 uOrigin;
                                uniform float uAspectRatio;
 
                                in vec4 vPosition;
@@ -81,9 +79,9 @@ std::string TextInstancedShaderOpenGl::getVertexShader() {
 
                                    vec4 newVertex = umMatrix * vec4(aReferencePosition + uOriginOffset.xyz, 1.0);
 
-                                   vec4 earthCenter = uvpMatrix * vec4(0.0 - uOrigin.x, 0.0 - uOrigin.y, 0.0 - uOrigin.z, 1.0);
+                                   vec4 earthCenter = uFrameUniforms.vpMatrix * vec4(-uFrameUniforms.origin.xyz, 1.0);
                                    earthCenter = earthCenter / earthCenter.w;
-                                   vec4 screenPosition = uvpMatrix * newVertex;
+                                   vec4 screenPosition = uFrameUniforms.vpMatrix * newVertex;
                                    screenPosition = screenPosition / screenPosition.w;
                                    float mask = float(aAlpha > 0.0) * float(screenPosition.z - earthCenter.z < 0.0);
 
@@ -105,8 +103,7 @@ std::string TextInstancedShaderOpenGl::getVertexShader() {
                                    v_alpha = aAlpha * mask;
                                }
                            )
-    : OMMVersionedGlesShaderCode(320 es,
-                                  uniform mat4 uvpMatrix;
+    : OMMVersionedGlesShaderCodeWithFrameUBO(320 es,
                                   uniform vec4 uOriginOffset;
 
                                   in vec4 vPosition;
@@ -137,7 +134,7 @@ std::string TextInstancedShaderOpenGl::getVertexShader() {
                                               vec4(aPosition.xy + uOriginOffset.xy, 1.0, 1.0)
                                       );
 
-                                      mat4 matrix = uvpMatrix * model_matrix;
+                                      mat4 matrix = uFrameUniforms.vpMatrix * model_matrix;
 
                                       gl_Position = mix(vec4(-10.0, -10.0, -10.0, -10.0), matrix * vPosition, mask);
                                       v_texCoordInstance = aTexCoordinate;
@@ -157,7 +154,7 @@ std::string TextInstancedShaderOpenGl::getFragmentShader() {
                                                   float haloWidth;
                                                   float haloBlur;
                                               };
-                                              layout(std140, binding = 0) uniform TextStyleCollection {
+                                              layout(std140, binding = 1) uniform TextStyleCollection {
                                                   TextStyle styles[) + std::to_string(MAX_NUM_TEXT_STYLES) + OMMShaderCode(];
                                               } uTextStyles;
 

@@ -40,7 +40,7 @@ rendering_context_interface = interface +c +j +o {
     set_background_color(color: color);
 	set_culling(mode: rendering_cull_mode);
 
-    setupDrawFrame();
+    setup_draw_frame(vp_matrix: i64, origin: vec_3_d, screenPixelAsRealMeterFactor: f64);
     pre_render_stencil_mask();
     post_render_stencil_mask();
 

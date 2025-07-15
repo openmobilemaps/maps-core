@@ -161,12 +161,12 @@ void Text2dInstancedOpenGl::prepareGlData(int program) {
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
     }
 
-    // Bind TextStyleCollection at binding index 0 (see TextInstancedShaderOpenGl)
+    // Bind TextStyleCollection at binding index 1 (see TextInstancedShaderOpenGl)
     GLuint textStyleUniformBlockIdx = glGetUniformBlockIndex(program, "TextStyleCollection");
     if (textStyleUniformBlockIdx == GL_INVALID_INDEX) {
         LogError <<= "Uniform block TextStyleCollection not found";
     }
-    glUniformBlockBinding(program, textStyleUniformBlockIdx, 0);
+    glUniformBlockBinding(program, textStyleUniformBlockIdx, 1);
 
     vpMatrixHandle = glGetUniformLocation(program, "uvpMatrix");
     mMatrixHandle = glGetUniformLocation(program, "umMatrix");
@@ -309,7 +309,7 @@ void Text2dInstancedOpenGl::render(const std::shared_ptr<::RenderingContextInter
         glUniform2f(textureFactorHandle, factorWidth, factorHeight);
     }
 
-    glBindBufferBase(GL_UNIFORM_BUFFER, 0, textStyleBuffer); // TextStyleCollection is at binding index 0
+    glBindBufferBase(GL_UNIFORM_BUFFER, 1, textStyleBuffer); // TextStyleCollection is at binding index 0
 
     shaderProgram->preRender(context);
 

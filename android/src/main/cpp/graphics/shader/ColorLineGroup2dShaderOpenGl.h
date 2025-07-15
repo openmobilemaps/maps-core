@@ -53,7 +53,6 @@ private:
     const std::string programName;
 
     GLint dashingScaleFactorHandle = -1;
-    GLint timeFrameDeltaHandle = -1;
 
     std::recursive_mutex styleMutex;
     GLuint lineStyleBuffer = 0;

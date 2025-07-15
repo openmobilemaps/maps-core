@@ -20,7 +20,7 @@ abstract class RenderingContextInterface {
 
     abstract fun setCulling(mode: RenderingCullMode)
 
-    abstract fun setupDrawFrame()
+    abstract fun setupDrawFrame(vpMatrix: Long, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D, screenPixelAsRealMeterFactor: Double)
 
     abstract fun preRenderStencilMask()
 
@@ -76,11 +76,11 @@ abstract class RenderingContextInterface {
         }
         private external fun native_setCulling(_nativeRef: Long, mode: RenderingCullMode)
 
-        override fun setupDrawFrame() {
+        override fun setupDrawFrame(vpMatrix: Long, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D, screenPixelAsRealMeterFactor: Double) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_setupDrawFrame(this.nativeRef)
+            native_setupDrawFrame(this.nativeRef, vpMatrix, origin, screenPixelAsRealMeterFactor)
         }
-        private external fun native_setupDrawFrame(_nativeRef: Long)
+        private external fun native_setupDrawFrame(_nativeRef: Long, vpMatrix: Long, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D, screenPixelAsRealMeterFactor: Double)
 
         override fun preRenderStencilMask() {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

@@ -5,6 +5,7 @@
 #import "MCRectI.h"
 #import "MCRenderingCullMode.h"
 #import "MCVec2I.h"
+#import "MCVec3D.h"
 #import <Foundation/Foundation.h>
 @protocol MCOpenGlRenderingContextInterface;
 
@@ -23,7 +24,9 @@
 
 - (void)setCulling:(MCRenderingCullMode)mode;
 
-- (void)setupDrawFrame;
+- (void)setupDrawFrame:(int64_t)vpMatrix
+                origin:(nonnull MCVec3D *)origin
+screenPixelAsRealMeterFactor:(double)screenPixelAsRealMeterFactor;
 
 - (void)preRenderStencilMask;
 

@@ -44,12 +44,12 @@ void ColorPolygonGroup2dShaderOpenGl::setupProgram(const std::shared_ptr<::Rende
 
     openGlContext->storeProgram(programName, program);
 
-    // Bind PolygonStyleCollection at binding index 0
+    // Bind PolygonStyleCollection at binding index 1
     GLuint blockIdx = glGetUniformBlockIndex(program, "PolygonStyleCollection");
     if (blockIdx == GL_INVALID_INDEX) {
         LogError <<= "Uniform block PolygonStyleCollection not found";
     }
-    glUniformBlockBinding(program, blockIdx, 0);
+    glUniformBlockBinding(program, blockIdx, 1);
 }
 
 void ColorPolygonGroup2dShaderOpenGl::setupGlObjects(const std::shared_ptr<::OpenGlContext> &context) {
@@ -77,7 +77,7 @@ void ColorPolygonGroup2dShaderOpenGl::clearGlObjects() {
 void ColorPolygonGroup2dShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context) {
     BaseShaderProgramOpenGl::preRender(context);
 
-    glBindBufferBase(GL_UNIFORM_BUFFER, 0, polygonStyleBuffer); // PolygonStyleCollection is at binding index 0
+    glBindBufferBase(GL_UNIFORM_BUFFER, 1, polygonStyleBuffer); // PolygonStyleCollection is at binding index 0 // TODO UBCM: Needed?
 
     {
         std::lock_guard<std::recursive_mutex> overlayLock(styleMutex);
@@ -122,7 +122,7 @@ std::string ColorPolygonGroup2dShaderOpenGl::getPolygonStylesUBODefinition(bool 
                     float gapWidth; // 6
                 }; // padded to 8 floats
 
-                layout (std140) uniform PolygonStyleCollection {
+                layout (std140, binding = 1) uniform PolygonStyleCollection {
                     StripedPolygonStyle polygonStyles[) + std::to_string(MAX_NUM_STYLES) + OMMShaderCode(];
                     lowp int numStyles;
                     // padding
@@ -138,7 +138,7 @@ std::string ColorPolygonGroup2dShaderOpenGl::getPolygonStylesUBODefinition(bool 
                     float opacity; // 4
                 }; // padded to 8 floats
 
-                layout (std140) uniform PolygonStyleCollection {
+                layout (std140, binding = 1) uniform PolygonStyleCollection {
                     PolygonStyle polygonStyles[) + std::to_string(MAX_NUM_STYLES) + OMMShaderCode(];
                     lowp int numStyles;
                     // padding
@@ -148,14 +148,13 @@ std::string ColorPolygonGroup2dShaderOpenGl::getPolygonStylesUBODefinition(bool 
 }
 
 std::string ColorPolygonGroup2dShaderOpenGl::getVertexShader() {
-    return isStriped ? OMMVersionedGlesShaderCode(320 es,
+    return isStriped ? OMMVersionedGlesShaderCodeWithFrameUBO(320 es,
                 // Striped Shader
                 precision highp float;
 
                 ) + getPolygonStylesUBODefinition(isStriped) + OMMShaderCode(
 
                 uniform mat4 umMatrix;
-                uniform mat4 uvpMatrix;
                 uniform vec4 uOriginOffset;
 
                 in vec3 vPosition;
@@ -165,19 +164,18 @@ std::string ColorPolygonGroup2dShaderOpenGl::getVertexShader() {
                 out vec2 uv;
 
                 void main() {
-                    gl_Position = uvpMatrix * ((umMatrix * vec4(vPosition, 1.0)) + uOriginOffset);
+                    gl_Position = uFrameUniforms.vpMatrix * ((umMatrix * vec4(vPosition, 1.0)) + uOriginOffset);
 
                     styleIndex = clamp(int(floor(vStyleIndex + 0.5)), 0, uPolygonStyles.numStyles);
                     uv = vPosition.xy;
                 }
-            ) : OMMVersionedGlesShaderCode(320 es,
+            ) : OMMVersionedGlesShaderCodeWithFrameUBO(320 es,
                 // Default Color Shader
                 precision highp float;
 
                 ) + getPolygonStylesUBODefinition(isStriped) + OMMShaderCode(
 
                 uniform mat4 umMatrix;
-                uniform mat4 uvpMatrix;
                 uniform vec4 uOriginOffset;
 
                 in vec3 vPosition;
@@ -186,7 +184,7 @@ std::string ColorPolygonGroup2dShaderOpenGl::getVertexShader() {
                 flat out int styleIndex;
 
                 void main() {
-                    gl_Position = uvpMatrix * ((umMatrix * vec4(vPosition, 1.0)) + uOriginOffset);
+                    gl_Position = uFrameUniforms.vpMatrix * ((umMatrix * vec4(vPosition, 1.0)) + uOriginOffset);
 
                     styleIndex = clamp(int(floor(vStyleIndex + 0.5)), 0, uPolygonStyles.numStyles);
                 });

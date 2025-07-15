@@ -42,10 +42,8 @@ void AlphaInstancedShaderOpenGl::setupProgram(const std::shared_ptr<::RenderingC
 
 std::string AlphaInstancedShaderOpenGl::getVertexShader() {
     return projectOntoUnitSphere ?
-           OMMVersionedGlesShaderCode(320 es,
-                                      uniform mat4 uvpMatrix;
+           OMMVersionedGlesShaderCodeWithFrameUBO(320 es,
                                       uniform vec4 uOriginOffset;
-                                      uniform vec4 uOrigin;
 
                                       in vec3 vPosition;
                                       in vec2 vTexCoordinate;
@@ -64,9 +62,9 @@ std::string AlphaInstancedShaderOpenGl::getVertexShader() {
                                       void main() {
                                           float angle = aRotation * 3.14159265 / 180.0;
 
-                                          vec4 earthCenter = uvpMatrix * vec4(0.0 - uOrigin.x, 0.0 - uOrigin.y, 0.0 - uOrigin.z, 1.0);
+                                          vec4 earthCenter = uFrameUniforms.vpMatrix * vec4(-uFrameUniforms.origin.xyz, 1.0);
                                           earthCenter = earthCenter / earthCenter.w;
-                                          vec4 screenPosition = uvpMatrix * (vec4(aPosition, 1.0) + uOriginOffset);
+                                          vec4 screenPosition = uFrameUniforms.vpMatrix * (vec4(aPosition, 1.0) + uOriginOffset);
                                           screenPosition = screenPosition / screenPosition.w;
                                           float mask = float(aAlpha > 0.0) * float(screenPosition.z - earthCenter.z < 0.0);
 
@@ -86,8 +84,7 @@ std::string AlphaInstancedShaderOpenGl::getVertexShader() {
                                           v_alpha = aAlpha * mask;
                                       }
                                       )
-    : OMMVersionedGlesShaderCode(320 es,
-                                      uniform mat4 uvpMatrix;
+    : OMMVersionedGlesShaderCodeWithFrameUBO(320 es,
                                       uniform vec4 uOriginOffset;
 
                                       in vec3 vPosition;
@@ -116,7 +113,7 @@ std::string AlphaInstancedShaderOpenGl::getVertexShader() {
                                                   vec4(aPosition + uOriginOffset.xy + aOffset, 0.0, 1.0)
                                           );
 
-                                          mat4 matrix = uvpMatrix * model_matrix;
+                                          mat4 matrix = uFrameUniforms.vpMatrix * model_matrix;
 
                                           gl_Position = mix(vec4(-10.0, -10.0, -10.0, -10.0), matrix * vec4(vPosition, 1.0), mask);
                                           v_texcoordInstance = aTexCoordinate;

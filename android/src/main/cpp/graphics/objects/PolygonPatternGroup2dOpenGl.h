@@ -75,7 +75,6 @@ protected:
     std::string programName;
     int program;
 
-    int vpMatrixHandle;
     int mMatrixHandle;
     int originOffsetHandle;
     int positionHandle;

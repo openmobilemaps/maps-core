@@ -10,6 +10,7 @@
 
 #include "OpenGlContext.h"
 #include "OpenGlRenderTarget.h"
+#include "BaseShaderProgramOpenGl.h"
 #include "opengl_wrapper.h"
 
 OpenGlContext::OpenGlContext()
@@ -45,12 +46,17 @@ void OpenGlContext::setBackgroundColor(const Color &color) {
     backgroundColorValid.clear();
 }
 
-void OpenGlContext::setupDrawFrame() {
+void OpenGlContext::setupDrawFrame(int64_t vpMatrix, const ::Vec3D & origin, double screenPixelAsRealMeterFactor) {
     if (!backgroundColorValid.test_and_set()) {
         glClearColor(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
     }
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     timeFrameDelta = (chronoutil::getCurrentTimestamp() - timeCreation).count();
+
+    if (frameUniformsBuffer != GL_INVALID_INDEX) {
+        BaseShaderProgramOpenGl::setupFrameUniforms(frameUniformsBuffer, vpMatrix, origin, screenPixelAsRealMeterFactor,
+                                                   timeFrameDelta / 1000.0);
+    }
 }
 
 void OpenGlContext::preRenderStencilMask() {
@@ -132,6 +138,14 @@ void OpenGlContext::resume() {
             target.second->setup(viewportSize);
         }
     }
+
+    if (frameUniformsBuffer == GL_INVALID_INDEX) {
+        glGenBuffers(1, &frameUniformsBuffer);
+        glBindBuffer(GL_UNIFORM_BUFFER, frameUniformsBuffer);
+        // Reserve the size of the frame uniforms. Adjust,
+        glBufferData(GL_UNIFORM_BUFFER, BaseShaderProgramOpenGl::FRAME_UBO_SIZE, nullptr, GL_DYNAMIC_DRAW);
+        glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    }
 }
 
 void OpenGlContext::pause() {
@@ -140,6 +154,10 @@ void OpenGlContext::pause() {
         for (const auto &target: renderTargets) {
             target.second->clear();
         }
+    }
+
+    if (frameUniformsBuffer != GL_INVALID_INDEX) {
+        glDeleteBuffers(1, &frameUniformsBuffer);
     }
 }
 
@@ -187,4 +205,8 @@ float OpenGlContext::getAspectRatio() {
 
 int64_t OpenGlContext::getDeltaTimeMs() {
     return timeFrameDelta;
+}
+
+GLuint OpenGlContext::getFrameUniformsBuffer() {
+    return frameUniformsBuffer;
 }

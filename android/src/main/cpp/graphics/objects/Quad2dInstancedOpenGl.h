@@ -89,10 +89,8 @@ protected:
     std::string programName;
     int program;
 
-    int vpMatrixHandle;
     int mMatrixHandle;
     int originOffsetHandle;
-    int originHandle;
     int positionHandle;
     GLuint vao;
     GLuint vertexBuffer;
