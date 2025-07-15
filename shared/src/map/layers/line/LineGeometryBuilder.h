@@ -201,7 +201,7 @@ class LineGeometryBuilder {
 //                        }
                         const double approxAngle = 2 * std::sqrt(2 - 2 * cosHalfAngle);
                         // 2.86 ~= 180/pi / 20 -> approximately one slice per 20 degrees
-                        const int stepCount = (vertexJoinType == LineJoinType::ROUND) ? round(approxAngle * 2.86) : 1;
+                        const int stepCount = (vertexJoinType == LineJoinType::ROUND) ? std::max(1.0, round(approxAngle * 2.86)) : 1;
                         for (int step = 0; step <= stepCount; step++) {
                             double r = (double)step / (double)stepCount;
                             pointExtrude = Vec3DHelper::normalize(lastNormal * (1.0 - r) + normal * r) * (double)side;
@@ -241,6 +241,11 @@ class LineGeometryBuilder {
                                const float prefixTotalLineLength, const int lineStyleIndex, const bool addTriangle,
                                const bool reverse, uint32_t &vertexCount, int32_t &prePreIndex, int32_t &preIndex,
                                std::vector<float> &lineAttributes, std::vector<uint32_t> &lineIndices, bool is3d) {
+
+        if(isnan(extrude.x) || isnan(extrude.y)) {
+            printf("");
+        }
+
         lineAttributes.push_back(p.x);
         lineAttributes.push_back(p.y);
         if (is3d) {
