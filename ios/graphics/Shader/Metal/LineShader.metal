@@ -16,7 +16,8 @@ struct LineVertexIn {
     float2 extrude [[attribute(1)]];
     float lineSide [[attribute(2)]];
     float lengthPrefix [[attribute(3)]];
-    float stylingIndex [[attribute(4)]];
+    float lengthCorrection [[attribute(4)]];
+    float stylingIndex [[attribute(5)]];
 };
 
 struct LineVertexUnitSphereIn {
@@ -24,7 +25,8 @@ struct LineVertexUnitSphereIn {
     float3 extrude [[attribute(1)]];
     float lineSide [[attribute(2)]];
     float lengthPrefix [[attribute(3)]];
-    float stylingIndex [[attribute(4)]];
+    float lengthCorrection [[attribute(4)]];
+    float stylingIndex [[attribute(5)]];
 };
 
 struct LineVertexOut {
@@ -165,7 +167,7 @@ unitSphereLineGroupVertexShader(const LineVertexUnitSphereIn vertexIn [[stage_in
         .position = vpMatrix * extendedPosition,
         .stylingIndex = styleIndex,
         .lineSide = vertexIn.lineSide,
-        .lengthPrefix = vertexIn.lengthPrefix,
+        .lengthPrefix = vertexIn.lengthPrefix + vertexIn.lengthCorrection * width,
     };
 
     return out;
@@ -196,7 +198,7 @@ lineGroupVertexShader(const LineVertexIn vertexIn [[stage_in]],
         .position = vpMatrix * extendedPosition,
         .stylingIndex = styleIndex,
         .lineSide = vertexIn.lineSide,
-        .lengthPrefix = vertexIn.lengthPrefix + correction,
+        .lengthPrefix = vertexIn.lengthPrefix + vertexIn.lengthCorrection * width,
     };
 
     return out;

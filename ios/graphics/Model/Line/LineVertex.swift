@@ -42,10 +42,16 @@ public struct LineVertex: Equatable {
         vertexDescriptor.attributes[3].offset = offset
         offset += MemoryLayout<Float>.stride
 
-        // Line Style Info
+        // Length Correction
         vertexDescriptor.attributes[4].bufferIndex = bufferIndex
         vertexDescriptor.attributes[4].format = .float
         vertexDescriptor.attributes[4].offset = offset
+        offset += MemoryLayout<Float>.stride
+
+        // Line Style Info
+        vertexDescriptor.attributes[5].bufferIndex = bufferIndex
+        vertexDescriptor.attributes[5].format = .float
+        vertexDescriptor.attributes[5].offset = offset
         offset += MemoryLayout<Float>.stride
 
         vertexDescriptor.layouts[0].stride = offset
@@ -81,10 +87,16 @@ public struct LineVertex: Equatable {
         vertexDescriptor.attributes[3].offset = offset
         offset += MemoryLayout<Float>.stride
 
-        // Line Style Info
+        // Length Correction
         vertexDescriptor.attributes[4].bufferIndex = bufferIndex
         vertexDescriptor.attributes[4].format = .float
         vertexDescriptor.attributes[4].offset = offset
+        offset += MemoryLayout<Float>.stride
+
+        // Line Style Info
+        vertexDescriptor.attributes[5].bufferIndex = bufferIndex
+        vertexDescriptor.attributes[5].format = .float
+        vertexDescriptor.attributes[5].offset = offset
         offset += MemoryLayout<Float>.stride
 
         vertexDescriptor.layouts[0].stride = offset
