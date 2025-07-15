@@ -168,10 +168,11 @@ void BaseShaderProgramOpenGl::preRender(const std::shared_ptr<::RenderingContext
             if (frameUniformsBufferBlockIdx == GL_INVALID_INDEX) {
                 LogError <<= "Uniform block FrameUniforms not found - update shader to use the frame-wide uniform values.";
                 frameUniformsBufferBlockIdx = -2;
+            } else {
+                glUniformBlockBinding(program, frameUniformsBufferBlockIdx, FRAME_UBO_BINDING_POINT);
             }
         }
         if (frameUniformsBufferBlockIdx >= 0) {
-            glUniformBlockBinding(program, frameUniformsBufferBlockIdx, FRAME_UBO_BINDING_POINT);
             glBindBufferBase(GL_UNIFORM_BUFFER, 0, openGlContext->getFrameUniformsBuffer());
         }
     }

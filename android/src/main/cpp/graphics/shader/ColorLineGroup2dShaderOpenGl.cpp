@@ -82,7 +82,7 @@ void ColorLineGroup2dShaderOpenGl::clearGlObjects() {
 void ColorLineGroup2dShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context) {
     BaseShaderProgramOpenGl::preRender(context);
 
-    glBindBufferBase(GL_UNIFORM_BUFFER, 1, lineStyleBuffer); // LineStyleCollection is at binding index 1 // TODO UBCM: Needed?
+    glBindBufferBase(GL_UNIFORM_BUFFER, 1, lineStyleBuffer); // LineStyleCollection is at binding index 1
 
     {
         std::lock_guard<std::recursive_mutex> lock(styleMutex);

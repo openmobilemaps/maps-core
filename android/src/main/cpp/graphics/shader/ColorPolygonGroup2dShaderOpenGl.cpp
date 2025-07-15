@@ -77,7 +77,7 @@ void ColorPolygonGroup2dShaderOpenGl::clearGlObjects() {
 void ColorPolygonGroup2dShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context) {
     BaseShaderProgramOpenGl::preRender(context);
 
-    glBindBufferBase(GL_UNIFORM_BUFFER, 1, polygonStyleBuffer); // PolygonStyleCollection is at binding index 0 // TODO UBCM: Needed?
+    glBindBufferBase(GL_UNIFORM_BUFFER, 1, polygonStyleBuffer); // PolygonStyleCollection is at binding index 1
 
     {
         std::lock_guard<std::recursive_mutex> overlayLock(styleMutex);

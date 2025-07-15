@@ -158,6 +158,7 @@ void OpenGlContext::pause() {
 
     if (frameUniformsBuffer != GL_INVALID_INDEX) {
         glDeleteBuffers(1, &frameUniformsBuffer);
+        frameUniformsBuffer = GL_INVALID_INDEX;
     }
 }
 
