@@ -124,10 +124,6 @@ final class LineGroup2d: BaseGraphicsObject, @unchecked Sendable {
             indexType: .uint32,
             indexBuffer: lineIndicesBuffer,
             indexBufferOffset: 0)
-
-        if !isMasked {
-            context.clearStencilBuffer()
-        }
     }
 }
 

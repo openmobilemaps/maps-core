@@ -132,7 +132,7 @@ class LineGeometryBuilder {
                     endSide = 1;
                 }
 
-                if (endSide != 0 && capType == LineCapType::ROUND) {
+                if (endSide == -1 && capType == LineCapType::ROUND) {
                     auto originalPrePreIndex = prePreIndex;
                     auto originalPreIndex = preIndex;
                     pushLineVertex(p, Vec3D(0, 0, 0), 1.0, 0, prefixTotalLineLength, lineStyleIndex, true, false, vertexCount,
@@ -158,30 +158,9 @@ class LineGeometryBuilder {
                     if (capType == LineCapType::SQUARE && endSide != 0) {
                         pointExtrude = pointExtrude + extrudeLineVec * endSide;
                     }
-                    bool shouldRound = extrudeScale > 1.1 || optimizeForDots;
-                    if (side * turnDirection < 0 && endSide == 0 && shouldRound && vertexJoinType != LineJoinType::MITER) {
-//                        if (optimizeForDots) {
-//                            if (side == -1) {
-//                                pushLineVertex(p, extrude - lastNormal * 2, 1.0, -1, prefixTotalLineLength, lineStyleIndex, true, true,
-//                                               vertexCount, prePreIndex, preIndex, lineAttributes, lineIndices, is3d);
-//                                pushLineVertex(p, extrude, extrudeScale, 1, prefixTotalLineLength, lineStyleIndex, true, false, vertexCount,
-//                                               prePreIndex, preIndex, lineAttributes, lineIndices, is3d);
-//                            }
-//                            else {
-//                                pushLineVertex(p, -extrude + lastNormal * 2, 1.0, 1, prefixTotalLineLength, lineStyleIndex, true, false,
-//                                               vertexCount, prePreIndex, preIndex, lineAttributes, lineIndices, is3d);
-//                                std::swap(prePreIndex, preIndex);
-//                            }
-//                        }
-
+                    if (side * turnDirection < 0 && endSide == 0) {
                         pushLineVertex(p, extrudeMirrorLast * (double)side, extrudeScale, side, prefixTotalLineLength, lineStyleIndex, true, side == -1,
                                        vertexCount, prePreIndex, preIndex, lineAttributes, lineIndices, is3d);
-//
-//                        pushLineVertex(p, pointExtrude * (double)side, extrudeScale, side, prefixTotalLineLength, lineStyleIndex, true, side == -1,
-//                                       vertexCount, prePreIndex, preIndex, lineAttributes, lineIndices, is3d);
-//                        std::swap(prePreIndex, preIndex);
-
-
                     } else {
                         pushLineVertex(p, pointExtrude, extrudeScale, side, prefixTotalLineLength, lineStyleIndex, true, side == -1,
                                        vertexCount, prePreIndex, preIndex, lineAttributes, lineIndices, is3d);
@@ -193,28 +172,34 @@ class LineGeometryBuilder {
                     if (capType == LineCapType::SQUARE && endSide != 0) {
                         pointExtrude = pointExtrude + extrudeLineVec * endSide;
                     }
-                    bool shouldRound = extrudeScale > 1.1 || optimizeForDots;
-                    if (side * turnDirection < 0 && endSide == 0 && shouldRound && vertexJoinType != LineJoinType::MITER) {
-
-//                        if (side == -1) {
-//                            std::swap(prePreIndex, preIndex);
-//                        }
-                        const double approxAngle = 2 * std::sqrt(2 - 2 * cosHalfAngle);
-                        // 2.86 ~= 180/pi / 20 -> approximately one slice per 20 degrees
-                        const int stepCount = (vertexJoinType == LineJoinType::ROUND) ? std::max(1.0, round(approxAngle * 2.86)) : 1;
-                        for (int step = 0; step <= stepCount; step++) {
-                            double r = (double)step / (double)stepCount;
-                            pointExtrude = Vec3DHelper::normalize(lastNormal * (1.0 - r) + normal * r) * (double)side;
+                    if (side * turnDirection < 0 && endSide == 0) {
+                        bool shouldRound = extrudeScale > 1.1 || optimizeForDots;
+                        if (shouldRound && vertexJoinType != LineJoinType::MITER) {
+                            const double approxAngle = 2 * std::sqrt(2 - 2 * cosHalfAngle);
+                            // 2.86 ~= 180/pi / 20 -> approximately one slice per 20 degrees
+                            const int stepCount = (vertexJoinType == LineJoinType::ROUND) ? std::max(1.0, round(approxAngle * 2.86)) : 1;
+                            for (int step = 0; step <= stepCount; step++) {
+                                double r = (double)step / (double)stepCount;
+                                pointExtrude = Vec3DHelper::normalize(lastNormal * (1.0 - r) + normal * r) * (double)side;
+                                if (side == 1) {
+                                    std::swap(prePreIndex, preIndex);
+                                }
+                                pushLineVertex(p, pointExtrude, 1.0, side, prefixTotalLineLength, lineStyleIndex, true, side == -1,
+                                               vertexCount, prePreIndex, preIndex, lineAttributes, lineIndices, is3d);
+                                if (side == -1) {
+                                    std::swap(prePreIndex, preIndex);
+                                }
+                            }
                             if (side == 1) {
                                 std::swap(prePreIndex, preIndex);
                             }
-                            pushLineVertex(p, pointExtrude, 1.0, side, prefixTotalLineLength, lineStyleIndex, true, side == -1,
-                                           vertexCount, prePreIndex, preIndex, lineAttributes, lineIndices, is3d);
-                            if (side == -1) {
+                        }
+                        else {
+                            if (side == 1) {
                                 std::swap(prePreIndex, preIndex);
                             }
-                        }
-                        if (side == 1) {
+                            pushLineVertex(p, extrude * (double)side, 1.0, side, prefixTotalLineLength, lineStyleIndex, true, side == -1,
+                                           vertexCount, prePreIndex, preIndex, lineAttributes, lineIndices, is3d);
                             std::swap(prePreIndex, preIndex);
                         }
 //
@@ -226,6 +211,27 @@ class LineGeometryBuilder {
                     }
 
 
+                }
+
+                if (endSide == 1 && capType == LineCapType::ROUND) {
+                    auto originalPrePreIndex = prePreIndex;
+                    auto originalPreIndex = preIndex;
+                    pushLineVertex(p, Vec3D(0, 0, 0), 1.0, 0, prefixTotalLineLength, lineStyleIndex, true, false, vertexCount,
+                                   prePreIndex, preIndex, lineAttributes, lineIndices, is3d);
+                    int32_t centerIndex = preIndex, firstIndex = -1, lastIndex = -1;
+                    for (float r = -1; r <= 1; r += 0.2) {
+                        Vec3D roundExtrude = Vec3DHelper::normalize(extrude * r - extrudeLineVec * (1.0 - abs(r)));
+                        pushLineVertex(p, roundExtrude, 1.0, r, prefixTotalLineLength, lineStyleIndex, true, endSide == -1,
+                                       vertexCount, prePreIndex, preIndex, lineAttributes, lineIndices, is3d);
+                        if (r == 0) {
+                            firstIndex = preIndex;
+                        } else {
+                            lastIndex = preIndex;
+                        }
+                        prePreIndex = centerIndex;
+                    }
+                    prePreIndex = originalPrePreIndex;
+                    preIndex = originalPreIndex;
                 }
 
 
@@ -241,10 +247,6 @@ class LineGeometryBuilder {
                                const float prefixTotalLineLength, const int lineStyleIndex, const bool addTriangle,
                                const bool reverse, uint32_t &vertexCount, int32_t &prePreIndex, int32_t &preIndex,
                                std::vector<float> &lineAttributes, std::vector<uint32_t> &lineIndices, bool is3d) {
-
-        if(isnan(extrude.x) || isnan(extrude.y)) {
-            printf("");
-        }
 
         lineAttributes.push_back(p.x);
         lineAttributes.push_back(p.y);
