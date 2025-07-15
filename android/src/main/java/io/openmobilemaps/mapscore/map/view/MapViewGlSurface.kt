@@ -139,6 +139,7 @@ open class MapViewGlSurface @JvmOverloads constructor(context: Context, attrs: A
 
 	private fun onGlThreadResume() {
 		if (!shouldPause.get()) {
+			requireMapInterface().getRenderingContext().asOpenGlRenderingContext()?.resume()
 			requireMapInterface().resume()
 		}
 	}
@@ -146,6 +147,7 @@ open class MapViewGlSurface @JvmOverloads constructor(context: Context, attrs: A
 	private fun onGlThreadPause() {
 		if (mapViewStateMutable.value != MapViewState.PAUSED) {
 			updateMapViewState(MapViewState.PAUSED)
+			requireMapInterface().getRenderingContext().asOpenGlRenderingContext()?.pause()
 			requireMapInterface().pause()
 		}
 	}
