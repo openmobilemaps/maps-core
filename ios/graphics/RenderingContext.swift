@@ -144,7 +144,7 @@ extension RenderingContext: MCRenderingContextInterface {
         clearStencilBuffer()
     }
 
-    public func setupDrawFrame(_ vpMatrix: Int64, _ origin: MCVec3D, _ screenPixelAsRealMeterFactor: Double) {
+    public func setupDrawFrame(_ vpMatrix: Int64, origin: MCVec3D, screenPixelAsRealMeterFactor: Double) {
         currentPipeline = nil
         if let cullMode {
             /*
