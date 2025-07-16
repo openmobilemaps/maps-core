@@ -13,7 +13,7 @@
 #include "VectorLayerDescription.h"
 #include "Color.h"
 #include "ColorUtil.h"
-#include "ValueEvaluator.h"
+#include "FeatureValueEvaluator.h"
 
 class PolygonVectorStyle {
 public:
@@ -98,11 +98,11 @@ public:
 
     bool fadeInPattern;
 
-    ValueEvaluator<Color> fillColorEvaluator;
-    ValueEvaluator<double> fillOpacityEvaluator;
-    ValueEvaluator<std::string> fillPatternEvaluator;
-    ValueEvaluator<BlendMode> blendModeEvaluator;
-    ValueEvaluator<std::vector<float>> stripeWidthEvaluator;
+    FeatureValueEvaluator<Color> fillColorEvaluator;
+    FeatureValueEvaluator<double> fillOpacityEvaluator;
+    FeatureValueEvaluator<std::string> fillPatternEvaluator;
+    FeatureValueEvaluator<BlendMode> blendModeEvaluator;
+    FeatureValueEvaluator<std::vector<float>> stripeWidthEvaluator;
 };
 
 class PolygonVectorLayerDescription: public VectorLayerDescription {

@@ -11,12 +11,12 @@
 #pragma once
 
 #include "Value.h"
-#include "EvaluatedResult.h"
+#include "FeatureValueEvaluationResult.h"
 
 template<class ResultType>
-class ValueEvaluator {
+class FeatureValueEvaluator {
 public:
-    ValueEvaluator(const std::shared_ptr<Value> &value) : value(value) {
+    FeatureValueEvaluator(const std::shared_ptr<Value> &value) : value(value) {
         if(!value) {
             return;
         }
@@ -24,7 +24,7 @@ public:
         updateValue(value);
     }
 
-    ValueEvaluator(const ValueEvaluator& evaluator) : ValueEvaluator(evaluator.getValue()) {};
+    FeatureValueEvaluator(const FeatureValueEvaluator& evaluator) : FeatureValueEvaluator(evaluator.getValue()) {};
 
     std::shared_ptr<Value> getValue() const {
         return value;
@@ -58,9 +58,9 @@ public:
         }
     }
 
-    EvaluatedResult<ResultType> getResult(const EvaluationContext &context, const ResultType &defaultValue) {
+    FeatureValueEvaluationResult<ResultType> getResult(const EvaluationContext &context, const ResultType &defaultValue) {
         if (!value) {
-            return EvaluatedResult<ResultType>::constant(defaultValue);
+            return FeatureValueEvaluationResult<ResultType>::constant(defaultValue);
         }
 
         if (isStatic) {
@@ -68,11 +68,11 @@ public:
                 staticValue = value->evaluateOr(context, defaultValue);
             }
 
-            return EvaluatedResult<ResultType>::constant(*staticValue);
+            return FeatureValueEvaluationResult<ResultType>::constant(*staticValue);
         }
 
         if(!needsReevaluation) {
-            return EvaluatedResult<ResultType>::constant(value->evaluateOr(context, defaultValue));
+            return FeatureValueEvaluationResult<ResultType>::constant(value->evaluateOr(context, defaultValue));
         }
 
         bool stateDependent = isStateDependant && context.featureStateManager;
@@ -83,12 +83,12 @@ public:
 
         if(stateDependent && isZoomDependent) {
             auto currentStateId = context.featureStateManager->getCurrentState();
-            return EvaluatedResult<ResultType>::zoomAndState(value->evaluateOr(context, defaultValue), currentStateId, zoomRange);
+            return FeatureValueEvaluationResult<ResultType>::zoomAndState(value->evaluateOr(context, defaultValue), currentStateId, zoomRange);
         } else if(stateDependent) {
             auto currentStateId = context.featureStateManager->getCurrentState();
-            return EvaluatedResult<ResultType>::stateOnly(value->evaluateOr(context, defaultValue), currentStateId);
+            return FeatureValueEvaluationResult<ResultType>::stateOnly(value->evaluateOr(context, defaultValue), currentStateId);
         } else if(isZoomDependent) {
-            return EvaluatedResult<ResultType>::zoomOnly(value->evaluateOr(context, defaultValue), zoomRange);
+            return FeatureValueEvaluationResult<ResultType>::zoomOnly(value->evaluateOr(context, defaultValue), zoomRange);
         }
 
         int64_t identifier = usedKeysCollection.getHash(context);

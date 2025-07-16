@@ -170,8 +170,8 @@ private:
     double lastTextUpdateScaleFactor = -1;
     double lastTextUpdateRotation = -1;
 
-    EvaluatedResult<bool> textAllowOverlap = false;
-    EvaluatedResult<bool> iconAllowOverlap = false;
+    FeatureValueEvaluationResult<bool> textAllowOverlap = false;
+    FeatureValueEvaluationResult<bool> iconAllowOverlap = false;
 
     bool persistingSymbolPlacement = false;
 
@@ -180,10 +180,10 @@ private:
     bool isIconOpaque = true;
     bool isStretchIconOpaque = true;
 
-    EvaluatedResult<double> iconOpacity = 0.0;
-    EvaluatedResult<double> iconRotate = 0.0;
-    EvaluatedResult<double> iconSize = 0.0;
-    EvaluatedResult<std::string> iconImage = std::string();
+    FeatureValueEvaluationResult<double> iconOpacity = 0.0;
+    FeatureValueEvaluationResult<double> iconRotate = 0.0;
+    FeatureValueEvaluationResult<double> iconSize = 0.0;
+    FeatureValueEvaluationResult<std::string> iconImage = std::string();
 
     std::string lastIconImage;
     std::vector<float> iconTextFitPadding;
@@ -192,7 +192,7 @@ private:
     float iconPadding = 0;
     Anchor iconAnchor = Anchor::CENTER;
     
-    EvaluatedResult<Vec2F> iconOffset = Vec2F(0.0, 0.0);
+    FeatureValueEvaluationResult<Vec2F> iconOffset = Vec2F(0.0, 0.0);
     IconTextFit iconTextFit = IconTextFit::NONE;
 
     std::optional<RectI> customIconUv;

@@ -13,6 +13,7 @@
 #include "Color.h"
 #include "ColorUtil.h"
 #include "LineCapType.h"
+#include "FeatureValueEvaluator.h"
 #include "LineJoinType.h"
 #include "VectorLayerDescription.h"
 #include "ValueEvaluator.h"
@@ -131,17 +132,17 @@ class LineVectorStyle {
                lineDottedSkewEvaluator.getValue() == nullptr;
     }
 
-    ValueEvaluator<Color> lineColorEvaluator;
-    ValueEvaluator<double> lineOpacityEvaluator;
-    ValueEvaluator<double> lineBlurEvaluator;
-    ValueEvaluator<double> lineWidthEvaluator;
-    ValueEvaluator<std::vector<float>> lineDashArrayEvaluator;
-    ValueEvaluator<LineCapType> lineCapEvaluator;
-    ValueEvaluator<LineJoinType> lineJoinEvaluator;
-    ValueEvaluator<double> lineOffsetEvaluator;
-    ValueEvaluator<BlendMode> blendModeEvaluator;
-    ValueEvaluator<bool> lineDottedEvaluator;
-    ValueEvaluator<double> lineDottedSkewEvaluator;
+    FeatureValueEvaluator<Color> lineColorEvaluator;
+    FeatureValueEvaluator<double> lineOpacityEvaluator;
+    FeatureValueEvaluator<double> lineBlurEvaluator;
+    FeatureValueEvaluator<double> lineWidthEvaluator;
+    FeatureValueEvaluator<std::vector<float>> lineDashArrayEvaluator;
+    FeatureValueEvaluator<LineCapType> lineCapEvaluator;
+    FeatureValueEvaluator<LineJoinType> lineJoinEvaluator;
+    FeatureValueEvaluator<double> lineOffsetEvaluator;
+    FeatureValueEvaluator<BlendMode> blendModeEvaluator;
+    FeatureValueEvaluator<bool> lineDottedEvaluator;
+    FeatureValueEvaluator<double> lineDottedSkewEvaluator;
 };
 
 class LineVectorLayerDescription : public VectorLayerDescription {

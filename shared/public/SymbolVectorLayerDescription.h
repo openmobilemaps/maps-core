@@ -21,7 +21,7 @@
 #include "ColorUtil.h"
 #include "IconTextFit.h"
 #include "SymbolZOrder.h"
-#include "ValueEvaluator.h"
+#include "FeatureValueEvaluator.h"
 
 class SymbolVectorStyle {
 public:
@@ -192,7 +192,7 @@ public:
         return blendModeEvaluator.getResult(context, defaultValue).value;
     }
 
-    EvaluatedResult<double> getTextSize(const EvaluationContext &context) {
+    FeatureValueEvaluationResult<double> getTextSize(const EvaluationContext &context) {
         static const double defaultValue = 16.0;
         auto res = textSizeEvaluator.getResult(context, defaultValue);
         res.value *= context.dpFactor;
@@ -234,17 +234,17 @@ public:
         return textRadialOffsetEvaluator.getResult(context, defaultValue).value;
     }
 
-    EvaluatedResult<Color> getTextColor(const EvaluationContext &context){
+    FeatureValueEvaluationResult<Color> getTextColor(const EvaluationContext &context){
         static const Color defaultValue = ColorUtil::c(0, 0, 0, 1.0);
         return textColorEvaluator.getResult(context, defaultValue);
     }
 
-    EvaluatedResult<Color> getTextHaloColor(const EvaluationContext &context){
+    FeatureValueEvaluationResult<Color> getTextHaloColor(const EvaluationContext &context){
         static const Color defaultValue = ColorUtil::c(0.0, 0.0, 0.0, 0.0);
         return textHaloColorEvaluator.getResult(context, defaultValue);
     }
 
-    EvaluatedResult<double> getTextHaloWidth(const EvaluationContext &context, const EvaluatedResult<double> &size) {
+    FeatureValueEvaluationResult<double> getTextHaloWidth(const EvaluationContext &context, const FeatureValueEvaluationResult<double> &size) {
         static double defaultValue = 0.0;
         auto width = textHaloWidthEvaluator.getResult(context, defaultValue);
 
@@ -257,7 +257,7 @@ public:
         return width;
     }
 
-    EvaluatedResult<double> getTextHaloBlur(const EvaluationContext &context, const EvaluatedResult<double> &size) {
+    FeatureValueEvaluationResult<double> getTextHaloBlur(const EvaluationContext &context, const FeatureValueEvaluationResult<double> &size) {
         static double defaultValue = 0.0;
 
         auto width = textHaloBlurEvaluator.getResult(context, defaultValue);
@@ -271,7 +271,7 @@ public:
         return width;
     }
 
-    EvaluatedResult<double> getTextPadding(const EvaluationContext &context) {
+    FeatureValueEvaluationResult<double> getTextPadding(const EvaluationContext &context) {
         static const double defaultValue = 2.0;
 
         auto res = textPaddingEvaluator.getResult(context, defaultValue);
@@ -290,17 +290,17 @@ public:
         return textLetterSpacingEvaluator.getResult(context, defaultValue).value;
     }
 
-    EvaluatedResult<double> getTextOpacity(const EvaluationContext &context) {
+    FeatureValueEvaluationResult<double> getTextOpacity(const EvaluationContext &context) {
         static const double defaultValue = 1.0;
         return textOpacityEvaluator.getResult(context, defaultValue);
     }
 
-    EvaluatedResult<double> getIconOpacity(const EvaluationContext &context) {
+    FeatureValueEvaluationResult<double> getIconOpacity(const EvaluationContext &context) {
         static const double defaultValue = 1.0;
         return iconOpacityEvaluator.getResult(context, defaultValue);
     }
 
-    EvaluatedResult<bool> getTextAllowOverlap(const EvaluationContext &context) {
+    FeatureValueEvaluationResult<bool> getTextAllowOverlap(const EvaluationContext &context) {
         static const bool defaultValue = false;
         return textAllowOverlapEvaluator.getResult(context, defaultValue);
     }
@@ -310,7 +310,7 @@ public:
         return symbolSortKeyEvaluator.getResult(context, defaultValue).value;
     }
 
-    EvaluatedResult<std::string> getIconImage(const EvaluationContext &context) {
+    FeatureValueEvaluationResult<std::string> getIconImage(const EvaluationContext &context) {
         static const std::string defaultValue = "";
         return iconImageEvaluator.getResult(context, defaultValue);
     }
@@ -329,7 +329,7 @@ public:
         return iconAnchorEvaluator.getResult(context, defaultValue).value;
     }
 
-    EvaluatedResult<Vec2F> getIconOffset(const EvaluationContext &context) {
+    FeatureValueEvaluationResult<Vec2F> getIconOffset(const EvaluationContext &context) {
         static const Vec2F defaultValue(0.0, 0.0);
 
         auto res = iconOffsetEvaluator.getResult(context, defaultValue);
@@ -367,12 +367,12 @@ public:
         return textVariableAnchorEvaluator.getResult(context, defaultValue).value;
     }
 
-    EvaluatedResult<double> getTextRotate(const EvaluationContext &context) {
+    FeatureValueEvaluationResult<double> getTextRotate(const EvaluationContext &context) {
         static const double defaultValue = 0.0;
         return textRotateEvaluator.getResult(context, defaultValue);
     }
 
-    EvaluatedResult<double> getIconRotate(const EvaluationContext &context) {
+    FeatureValueEvaluationResult<double> getIconRotate(const EvaluationContext &context) {
         static const double defaultValue = 0.0;
         return iconRotateEvaluator.getResult(context, defaultValue);
     }
@@ -382,12 +382,12 @@ public:
         return symbolSpacingEvaluator.getResult(context, defaultValue).value;
     }
 
-    EvaluatedResult<double> getIconSize(const EvaluationContext &context) {
+    FeatureValueEvaluationResult<double> getIconSize(const EvaluationContext &context) {
         static const double defaultValue = 1;
         return iconSizeEvaluator.getResult(context, defaultValue);
     }
 
-    EvaluatedResult<bool> getIconAllowOverlap(const EvaluationContext &context) {
+    FeatureValueEvaluationResult<bool> getIconAllowOverlap(const EvaluationContext &context) {
         static const bool defaultValue = false;
         return iconAllowOverlapEvaluator.getResult(context, defaultValue);
     }
@@ -408,7 +408,7 @@ public:
         return textMaxAngleEvaluator.getResult(context, defaultValue).value;
     }
 
-    EvaluatedResult<SymbolAlignment> getTextRotationAlignment(const EvaluationContext &context) {
+    FeatureValueEvaluationResult<SymbolAlignment> getTextRotationAlignment(const EvaluationContext &context) {
         static const SymbolAlignment defaultValue = SymbolAlignment::AUTO;
         return textRotationAlignmentEvaluator.getResult(context, defaultValue);
     }
@@ -449,47 +449,47 @@ public:
     int64_t transitionDuration;
     int64_t transitionDelay;
 
-    ValueEvaluator<BlendMode> blendModeEvaluator;
-    ValueEvaluator<double> textSizeEvaluator;
-    ValueEvaluator<std::vector<std::string>> textFontEvaluator;
-    ValueEvaluator<std::vector<FormattedStringEntry>> textFieldEvaluator;
-    ValueEvaluator<TextTransform> textTransformEvaluator;
-    ValueEvaluator<Vec2F> textOffsetEvaluator;
-    ValueEvaluator<double> textRadialOffsetEvaluator;
-    ValueEvaluator<Color> textColorEvaluator;
-    ValueEvaluator<Color> textHaloColorEvaluator;
-    ValueEvaluator<double> textHaloWidthEvaluator;
-    ValueEvaluator<double> textHaloBlurEvaluator;
-    ValueEvaluator<double> textPaddingEvaluator;
-    ValueEvaluator<double> iconPaddingEvaluator;
-    ValueEvaluator<double> textLetterSpacingEvaluator;
-    ValueEvaluator<double> textOpacityEvaluator;
-    ValueEvaluator<double> iconOpacityEvaluator;
-    ValueEvaluator<bool> textAllowOverlapEvaluator;
-    ValueEvaluator<double> symbolSortKeyEvaluator;
-    ValueEvaluator<std::string> iconImageEvaluator;
-    ValueEvaluator<bool> iconImageCustomProviderEvaluator;
-    ValueEvaluator<Anchor> iconAnchorEvaluator;
-    ValueEvaluator<Vec2F> iconOffsetEvaluator;
-    ValueEvaluator<bool> iconOptionalEvaluator;
-    ValueEvaluator<bool> textOptionalEvaluator;
-    ValueEvaluator<Anchor> textAnchorEvaluator;
-    ValueEvaluator<TextJustify> textJustifyEvaluator;
-    ValueEvaluator<TextSymbolPlacement> symbolPlacementEvaluator;
-    ValueEvaluator<std::vector<Anchor>> textVariableAnchorEvaluator;
-    ValueEvaluator<double> textRotateEvaluator;
-    ValueEvaluator<double> iconRotateEvaluator;
-    ValueEvaluator<double> symbolSpacingEvaluator;
-    ValueEvaluator<double> iconSizeEvaluator;
-    ValueEvaluator<bool> iconAllowOverlapEvaluator;
-    ValueEvaluator<double> textLineHeightEvaluator;
-    ValueEvaluator<int64_t> textMaxWidthEvaluator;
-    ValueEvaluator<double> textMaxAngleEvaluator;
-    ValueEvaluator<SymbolAlignment> textRotationAlignmentEvaluator;
-    ValueEvaluator<SymbolAlignment> iconRotationAlignmentEvaluator;
-    ValueEvaluator<IconTextFit> iconTextFitEvaluator;
-    ValueEvaluator<std::vector<float>> iconTextFitPaddingEvaluator;
-    ValueEvaluator<SymbolZOrder> symbolZOrderEvaluator;
+    FeatureValueEvaluator<BlendMode> blendModeEvaluator;
+    FeatureValueEvaluator<double> textSizeEvaluator;
+    FeatureValueEvaluator<std::vector<std::string>> textFontEvaluator;
+    FeatureValueEvaluator<std::vector<FormattedStringEntry>> textFieldEvaluator;
+    FeatureValueEvaluator<TextTransform> textTransformEvaluator;
+    FeatureValueEvaluator<Vec2F> textOffsetEvaluator;
+    FeatureValueEvaluator<double> textRadialOffsetEvaluator;
+    FeatureValueEvaluator<Color> textColorEvaluator;
+    FeatureValueEvaluator<Color> textHaloColorEvaluator;
+    FeatureValueEvaluator<double> textHaloWidthEvaluator;
+    FeatureValueEvaluator<double> textHaloBlurEvaluator;
+    FeatureValueEvaluator<double> textPaddingEvaluator;
+    FeatureValueEvaluator<double> iconPaddingEvaluator;
+    FeatureValueEvaluator<double> textLetterSpacingEvaluator;
+    FeatureValueEvaluator<double> textOpacityEvaluator;
+    FeatureValueEvaluator<double> iconOpacityEvaluator;
+    FeatureValueEvaluator<bool> textAllowOverlapEvaluator;
+    FeatureValueEvaluator<double> symbolSortKeyEvaluator;
+    FeatureValueEvaluator<std::string> iconImageEvaluator;
+    FeatureValueEvaluator<bool> iconImageCustomProviderEvaluator;
+    FeatureValueEvaluator<Anchor> iconAnchorEvaluator;
+    FeatureValueEvaluator<Vec2F> iconOffsetEvaluator;
+    FeatureValueEvaluator<bool> iconOptionalEvaluator;
+    FeatureValueEvaluator<bool> textOptionalEvaluator;
+    FeatureValueEvaluator<Anchor> textAnchorEvaluator;
+    FeatureValueEvaluator<TextJustify> textJustifyEvaluator;
+    FeatureValueEvaluator<TextSymbolPlacement> symbolPlacementEvaluator;
+    FeatureValueEvaluator<std::vector<Anchor>> textVariableAnchorEvaluator;
+    FeatureValueEvaluator<double> textRotateEvaluator;
+    FeatureValueEvaluator<double> iconRotateEvaluator;
+    FeatureValueEvaluator<double> symbolSpacingEvaluator;
+    FeatureValueEvaluator<double> iconSizeEvaluator;
+    FeatureValueEvaluator<bool> iconAllowOverlapEvaluator;
+    FeatureValueEvaluator<double> textLineHeightEvaluator;
+    FeatureValueEvaluator<int64_t> textMaxWidthEvaluator;
+    FeatureValueEvaluator<double> textMaxAngleEvaluator;
+    FeatureValueEvaluator<SymbolAlignment> textRotationAlignmentEvaluator;
+    FeatureValueEvaluator<SymbolAlignment> iconRotationAlignmentEvaluator;
+    FeatureValueEvaluator<IconTextFit> iconTextFitEvaluator;
+    FeatureValueEvaluator<std::vector<float>> iconTextFitPaddingEvaluator;
+    FeatureValueEvaluator<SymbolZOrder> symbolZOrderEvaluator;
 
     bool symbolSortKeyIsIndependent = true;
 };

@@ -13,7 +13,7 @@
 #include "VectorLayerDescription.h"
 #include "Color.h"
 #include "RasterShaderStyle.h"
-#include "ValueEvaluator.h"
+#include "FeatureValueEvaluator.h"
 
 class RasterVectorStyle {
 public:
@@ -117,14 +117,14 @@ public:
         return rasterBrightnessShiftEvaluator.getResult(context, defaultValue).value;
     }
 
-    ValueEvaluator<double> rasterOpacityEvaluator;
-    ValueEvaluator<double> rasterBrightnessMinEvaluator;
-    ValueEvaluator<double> rasterBrightnessMaxEvaluator;
-    ValueEvaluator<double> rasterContrastEvaluator;
-    ValueEvaluator<double> rasterSaturationEvaluator;
-    ValueEvaluator<double> rasterGammaEvaluator;
-    ValueEvaluator<double> rasterBrightnessShiftEvaluator;
-    ValueEvaluator<BlendMode> blendModeEvaluator;
+    FeatureValueEvaluator<double> rasterOpacityEvaluator;
+    FeatureValueEvaluator<double> rasterBrightnessMinEvaluator;
+    FeatureValueEvaluator<double> rasterBrightnessMaxEvaluator;
+    FeatureValueEvaluator<double> rasterContrastEvaluator;
+    FeatureValueEvaluator<double> rasterSaturationEvaluator;
+    FeatureValueEvaluator<double> rasterGammaEvaluator;
+    FeatureValueEvaluator<double> rasterBrightnessShiftEvaluator;
+    FeatureValueEvaluator<BlendMode> blendModeEvaluator;
 };
 
 class RasterVectorLayerDescription: public VectorLayerDescription  {
