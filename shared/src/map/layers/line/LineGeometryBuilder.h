@@ -113,8 +113,10 @@ class LineGeometryBuilder {
                         }
 
                         extrudeScale = cosHalfAngle != 0 ? std::abs(1.0 / cosHalfAngle) : 1.0;
-                        if (extrudeScale > 2.0 && vertexJoinType == LineJoinType::MITER) {
-                            vertexJoinType = LineJoinType::BEVEL;
+                        if (extrudeScale > 2.0) {
+                            if (vertexJoinType == LineJoinType::MITER) {
+                                vertexJoinType = LineJoinType::BEVEL;
+                            }
                             extrudeScale = 2.0;
                         }
                     } else {
