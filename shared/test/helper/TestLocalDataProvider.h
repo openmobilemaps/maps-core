@@ -14,9 +14,8 @@ public:
         auto promise = ::djinni::Promise<DataLoaderResult>();
         auto it = geojsonMapping.find(sourceName);
         if (it != geojsonMapping.end()) {
-            auto data = TestData::readFileToBuffer(("style/" + it->second).c_str());
-            std::vector<uint8_t> uint8Vec(data.begin(), data.end());
-            promise.setValue(DataLoaderResult(::djinni::DataRef(uint8Vec), std::nullopt, LoaderStatus::OK, std::nullopt));
+            auto data = TestData::readFileToString(("style/" + it->second).c_str());
+            promise.setValue(DataLoaderResult(::djinni::DataRef(data), std::nullopt, LoaderStatus::OK, std::nullopt));
         } else {
             throw std::runtime_error("Failed to load geojson from file");
         }
