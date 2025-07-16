@@ -13,7 +13,7 @@
 #include "VectorLayerDescription.h"
 #include "Color.h"
 #include "RasterShaderStyle.h"
-
+#include "ValueEvaluator.h"
 
 class RasterVectorStyle {
 public:

@@ -21,6 +21,7 @@
 #include "ColorUtil.h"
 #include "IconTextFit.h"
 #include "SymbolZOrder.h"
+#include "ValueEvaluator.h"
 
 class SymbolVectorStyle {
 public:
@@ -193,8 +194,9 @@ public:
 
     EvaluatedResult<double> getTextSize(const EvaluationContext &context) {
         static const double defaultValue = 16.0;
-        const auto& res = textSizeEvaluator.getResult(context, defaultValue);
-        return EvaluatedResult<double>(res.value * context.dpFactor, res.needsReevaluation);
+        auto res = textSizeEvaluator.getResult(context, defaultValue);
+        res.value *= context.dpFactor;
+        return res;
     }
 
     std::vector<std::string> getTextFont(const EvaluationContext &context) {
@@ -251,25 +253,30 @@ public:
         double relativeMax = 7.0 / 41.0;
         double relative = width.value / size.value;
 
-        return EvaluatedResult<double>(std::max(0.0, std::min(1.0, relative / relativeMax)), width.needsReevaluation || size.needsReevaluation, width.currentStateId);
+        width.value = std::max(0.0, std::min(1.0, relative / relativeMax));
+        return width;
     }
 
     EvaluatedResult<double> getTextHaloBlur(const EvaluationContext &context, const EvaluatedResult<double> &size) {
         static double defaultValue = 0.0;
-        const auto &width = textHaloBlurEvaluator.getResult(context, defaultValue);
+
+        auto width = textHaloBlurEvaluator.getResult(context, defaultValue);
 
         // in a font of size 41pt, we can show around 7pt of halo
         // (due to generation of font atlasses)
         double relativeMax = 7.0 / 41.0;
         double relative = width.value / size.value;
 
-        return EvaluatedResult<double>(std::max(0.0, std::min(1.0, relative / relativeMax)), width.needsReevaluation || size.needsReevaluation, width.currentStateId);
+        width.value = std::max(0.0, std::min(1.0, relative / relativeMax));
+        return width;
     }
 
     EvaluatedResult<double> getTextPadding(const EvaluationContext &context) {
         static const double defaultValue = 2.0;
-        const auto &res = textPaddingEvaluator.getResult(context, defaultValue);
-        return EvaluatedResult<double>(res.value * context.dpFactor, res.needsReevaluation, res.currentStateId);
+
+        auto res = textPaddingEvaluator.getResult(context, defaultValue);
+        res.value *= context.dpFactor;
+        return res;
     }
 
     double getIconPadding(const EvaluationContext &context) {
@@ -324,12 +331,10 @@ public:
 
     EvaluatedResult<Vec2F> getIconOffset(const EvaluationContext &context) {
         static const Vec2F defaultValue(0.0, 0.0);
-        const auto &result = iconOffsetEvaluator.getResult(context, defaultValue);
 
-        return EvaluatedResult<Vec2F>(
-                    Vec2F(result.value.x * context.dpFactor, result.value.y * context.dpFactor),
-                    result.needsReevaluation, result.currentStateId
-                );
+        auto res = iconOffsetEvaluator.getResult(context, defaultValue);
+        res.value = Vec2F(res.value.x * context.dpFactor, res.value.y * context.dpFactor);
+        return res;
     }
 
     bool getIconOptional(const EvaluationContext &context) {

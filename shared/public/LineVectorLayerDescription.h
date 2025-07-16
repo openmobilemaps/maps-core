@@ -15,6 +15,7 @@
 #include "LineCapType.h"
 #include "LineJoinType.h"
 #include "VectorLayerDescription.h"
+#include "ValueEvaluator.h"
 
 class LineVectorStyle {
   public:

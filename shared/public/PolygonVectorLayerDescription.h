@@ -13,6 +13,7 @@
 #include "VectorLayerDescription.h"
 #include "Color.h"
 #include "ColorUtil.h"
+#include "ValueEvaluator.h"
 
 class PolygonVectorStyle {
 public:
