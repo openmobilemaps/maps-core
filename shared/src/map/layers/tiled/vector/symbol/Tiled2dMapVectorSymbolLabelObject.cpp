@@ -829,22 +829,11 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(VectorModificatio
 
             // Punkt auf Linie
             const auto &p = pointAtIndex(currentIndex, true);
-            const auto &currentIndexPoint = pointForIndex(currentIndex, p);
+            auto currentIndexPoint = pointForIndex(currentIndex, p);
 
             // get before and after to calculate angle
             indexAtDistance(currentIndex, currentIndexPoint, -halfSpace * scaleCorrection, indexBefore);
-
-            // if our current index + the percentage diff is still smaller than zero,
-            // we can just add this percentage Diff
-            auto pDiff = currentIndex.percentage - indexBefore.percentage;
-            auto takeShortcut = indexBefore.index == currentIndex.index && pDiff != currentIndex.percentage;
-
-            if(takeShortcut && currentIndex.percentage + pDiff < 1.0) {
-                indexAfter.index = currentIndex.index;
-                indexAfter.percentage = currentIndex.percentage + pDiff;
-            } else {
-                indexAtDistance(currentIndex, currentIndexPoint, halfSpace * scaleCorrection, indexAfter);
-            }
+            indexAtDistance(currentIndex, currentIndexPoint, halfSpace * scaleCorrection, indexAfter);
 
             const auto &before = is3d ? screenPointAtIndex(indexBefore) : pointAtIndex(indexBefore, false);
             const auto &after = is3d ? screenPointAtIndex(indexAfter) : pointAtIndex(indexAfter, false);
@@ -892,14 +881,7 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(VectorModificatio
             auto lastIndex = currentIndex;
             // update currentIndex
 
-            auto adv = advance.x * (1.0 + letterSpacing);
-            auto p2 = pDiff * adv / halfSpace;
-
-            if(takeShortcut && currentIndex.percentage + p2 <= 1.0) {
-                currentIndex.percentage += p2;
-            } else {
-                indexAtDistance(currentIndex, currentIndexPoint, adv * scaleCorrection, currentIndex);
-            }
+            indexAtDistance(currentIndex, currentIndexPoint, advance.x * (1.0 + letterSpacing) * scaleCorrection, currentIndex);
 
             // if we are at the end, and we were at the end (lastIndex), then clear and skip
             if(currentIndex.index == renderLineCoordinatesCount - 1 && lastIndex.index == currentIndex.index && (lastIndex.percentage == currentIndex.percentage)) {
