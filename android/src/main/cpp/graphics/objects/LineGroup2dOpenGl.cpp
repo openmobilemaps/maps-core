@@ -66,6 +66,7 @@ void LineGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface>
     extrudeHandle = glGetAttribLocation(program, "extrude");
     lineSideHandle = glGetAttribLocation(program, "lineSide");
     lengthPrefixHandle = glGetAttribLocation(program, "lengthPrefix");
+    lengthCorrectionHandle = glGetAttribLocation(program, "lengthCorrection");
     stylingIndexHandle = glGetAttribLocation(program, "stylingIndex");
 
     if (!glDataBuffersGenerated) {
@@ -77,7 +78,7 @@ void LineGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface>
     size_t floatSize = sizeof(GLfloat);
     size_t dimensionality = is3d ? 3 : 2;
     size_t sizeAttribGroup = floatSize * dimensionality;
-    size_t stride = sizeAttribGroup * 2 + 3 * floatSize;
+    size_t stride = sizeAttribGroup * 2 + 4 * floatSize;
 
     glEnableVertexAttribArray(positionHandle);
     glVertexAttribPointer(positionHandle, dimensionality, GL_FLOAT, false, stride, nullptr);
@@ -91,8 +92,11 @@ void LineGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface>
     glEnableVertexAttribArray(lengthPrefixHandle);
     glVertexAttribPointer(lengthPrefixHandle, 1, GL_FLOAT, false, stride, (float *)(sizeAttribGroup * 2 + 1 * floatSize));
 
+    glEnableVertexAttribArray(lengthCorrectionHandle);
+    glVertexAttribPointer(lengthCorrectionHandle, 1, GL_FLOAT, false, stride, (float *)(sizeAttribGroup * 2 + 2 * floatSize));
+
     glEnableVertexAttribArray(stylingIndexHandle);
-    glVertexAttribPointer(stylingIndexHandle, 1, GL_FLOAT, false, stride, (float *)(sizeAttribGroup * 2 + 2 * floatSize));
+    glVertexAttribPointer(stylingIndexHandle, 1, GL_FLOAT, false, stride, (float *)(sizeAttribGroup * 2 + 3 * floatSize));
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 

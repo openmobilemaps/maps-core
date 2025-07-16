@@ -67,6 +67,7 @@ protected:
     int extrudeHandle;
     int lineSideHandle;
     int lengthPrefixHandle;
+    int lengthCorrectionHandle;
     int stylingIndexHandle;
 
     GLuint vao;
