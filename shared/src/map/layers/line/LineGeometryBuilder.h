@@ -48,7 +48,6 @@ class LineGeometryBuilder {
 
                 float extrudeScale = 1.0;
                 float turnDirection = 0;
-                float prefixCorrectionSum = 0.0;
                 LineJoinType vertexJoinType = defaultJoinType;
 
                 Vec3D extrude(0, 0, 0), extrudeMirror(0, 0, 0), extrudeMirrorLast(0, 0, 0), extrudeLineVec(0, 0, 0);
@@ -142,13 +141,13 @@ class LineGeometryBuilder {
                     auto originalPrePreIndex = prePreIndex;
                     auto originalPreIndex = preIndex;
                     float prefixCorrection = 0.0;
-                    pushLineVertex(p, Vec3D(0, 0, 0), 1.0, 0, prefixTotalLineLength, prefixCorrection + prefixCorrectionSum, lineStyleIndex, true, false, vertexCount,
+                    pushLineVertex(p, Vec3D(0, 0, 0), 1.0, 0, prefixTotalLineLength, prefixCorrection, lineStyleIndex, true, false, vertexCount,
                                    prePreIndex, preIndex, lineAttributes, lineIndices, is3d);
                     int32_t centerIndex = preIndex, firstIndex = -1, lastIndex = -1;
                     for (float r = -1; r <= 1; r += 0.2) {
                         Vec3D roundExtrude = Vec3DHelper::normalize(extrude * r - extrudeLineVec * (1.0 - abs(r)));
                         prefixCorrection = Vec3DHelper::dotProduct(roundExtrude, lastLineVec);
-                        pushLineVertex(p, roundExtrude, 1.0, r, prefixTotalLineLength, prefixCorrection + prefixCorrectionSum, lineStyleIndex, true, endSide == -1,
+                        pushLineVertex(p, roundExtrude, 1.0, r, prefixTotalLineLength, prefixCorrection, lineStyleIndex, true, endSide == -1,
                                        vertexCount, prePreIndex, preIndex, lineAttributes, lineIndices, is3d);
                         if (r == 0) {
                             firstIndex = preIndex;
@@ -168,11 +167,12 @@ class LineGeometryBuilder {
                     }
                     if (side * turnDirection < 0 && endSide == 0) {
                         float prefixCorrection = Vec3DHelper::dotProduct(extrudeMirrorLast * (double)side * extrudeScale, lastLineVec);
-                        pushLineVertex(p, extrudeMirrorLast * (double)side, extrudeScale, side, prefixTotalLineLength, prefixCorrection + prefixCorrectionSum, lineStyleIndex, true, side == -1,
+                        pushLineVertex(p, extrudeMirrorLast * (double)side, extrudeScale, side, prefixTotalLineLength, prefixCorrection, lineStyleIndex, true, side == -1,
                                        vertexCount, prePreIndex, preIndex, lineAttributes, lineIndices, is3d);
                     } else {
                         float prefixCorrection = Vec3DHelper::dotProduct(pointExtrude * extrudeScale, lastLineVec);
-                        pushLineVertex(p, pointExtrude, extrudeScale, side, prefixTotalLineLength, prefixCorrection + prefixCorrectionSum, lineStyleIndex, true, side == -1,
+
+                        pushLineVertex(p, pointExtrude, extrudeScale, side, prefixTotalLineLength, prefixCorrection, lineStyleIndex, true, side == -1,
                                        vertexCount, prePreIndex, preIndex, lineAttributes, lineIndices, is3d);
                     }
                 }
@@ -195,16 +195,14 @@ class LineGeometryBuilder {
                                     std::swap(prePreIndex, preIndex);
                                 }
                                 float prefixCorrection = Vec3DHelper::dotProduct(pointExtrude, lastLineVec);
-                                pushLineVertex(p, pointExtrude, 1.0, side, prefixTotalLineLength, prefixCorrection + prefixCorrectionSum, lineStyleIndex, true, side == -1,
+                                pushLineVertex(p, pointExtrude, 1.0, side, prefixTotalLineLength, prefixCorrection, lineStyleIndex, true, side == -1,
                                                vertexCount, prePreIndex, preIndex, lineAttributes, lineIndices, is3d);
                                 if (side == -1) {
                                     std::swap(prePreIndex, preIndex);
                                 }
                             }
-                            float lastPrefixCorrection = Vec3DHelper::dotProduct(extrude * (double)-side * extrudeScale, lastLineVec);
                             float prefixCorrection = Vec3DHelper::dotProduct(extrude * (double)-side * extrudeScale, lineVec);
-//                            prefixCorrectionSum += (lastPrefixCorrection - prefixCorrection);
-                            pushLineVertex(p, extrude * (double)-side, extrudeScale, -side, prefixTotalLineLength, prefixCorrection + prefixCorrectionSum, lineStyleIndex, false, -side == -1,
+                            pushLineVertex(p, extrude * (double)-side, extrudeScale, -side, prefixTotalLineLength, prefixCorrection, lineStyleIndex, false, -side == -1,
                                            vertexCount, prePreIndex, preIndex, lineAttributes, lineIndices, is3d);
                             if (side == 1) {
                                 std::swap(prePreIndex, preIndex);
@@ -216,7 +214,7 @@ class LineGeometryBuilder {
                                     std::swap(prePreIndex, preIndex);
                                 }
                                 float prefixCorrection = Vec3DHelper::dotProduct(pointExtrude, lineVec);
-                                pushLineVertex(p, pointExtrude, 1.0, side, prefixTotalLineLength, prefixCorrection + prefixCorrectionSum, lineStyleIndex, true, side == -1,
+                                pushLineVertex(p, pointExtrude, 1.0, side, prefixTotalLineLength, prefixCorrection, lineStyleIndex, true, side == -1,
                                                vertexCount, prePreIndex, preIndex, lineAttributes, lineIndices, is3d);
                                 if (side == -1) {
                                     std::swap(prePreIndex, preIndex);
@@ -231,17 +229,17 @@ class LineGeometryBuilder {
                                 std::swap(prePreIndex, preIndex);
                             }
                             float prefixCorrection = Vec3DHelper::dotProduct(extrude * (double)side, lastLineVec);
-                            pushLineVertex(p, extrude * (double)side, 1.0, side, prefixTotalLineLength, prefixCorrection + prefixCorrectionSum, lineStyleIndex, true, side == -1,
+                            pushLineVertex(p, extrude * (double)side, 1.0, side, prefixTotalLineLength, prefixCorrection, lineStyleIndex, true, side == -1,
                                            vertexCount, prePreIndex, preIndex, lineAttributes, lineIndices, is3d);
                             std::swap(prePreIndex, preIndex);
                             prefixCorrection = Vec3DHelper::dotProduct(extrude * (double)side, lineVec);
-                            pushLineVertex(p, extrude * (double)side, 1.0, side, prefixTotalLineLength, prefixCorrection + prefixCorrectionSum, lineStyleIndex, false, side == -1,
+                            pushLineVertex(p, extrude * (double)side, 1.0, side, prefixTotalLineLength, prefixCorrection, lineStyleIndex, false, side == -1,
                                            vertexCount, prePreIndex, preIndex, lineAttributes, lineIndices, is3d);
                             std::swap(prePreIndex, preIndex);
                         }
-//
+
                         float prefixCorrection = Vec3DHelper::dotProduct(extrudeMirror * (double)side * extrudeScale, lineVec);
-                        pushLineVertex(p, extrudeMirror * (double)side, extrudeScale, side, prefixTotalLineLength, prefixCorrection + prefixCorrectionSum, lineStyleIndex, true, side == -1,
+                        pushLineVertex(p, extrudeMirror * (double)side, extrudeScale, side, prefixTotalLineLength, prefixCorrection, lineStyleIndex, true, side == -1,
                                        vertexCount, prePreIndex, preIndex, lineAttributes, lineIndices, is3d);
                         if (side == -1) {
                             std::swap(prePreIndex, preIndex);
@@ -255,13 +253,13 @@ class LineGeometryBuilder {
                     auto originalPrePreIndex = prePreIndex;
                     auto originalPreIndex = preIndex;
                     float prefixCorrection = 0;
-                    pushLineVertex(p, Vec3D(0, 0, 0), 1.0, 0, prefixTotalLineLength, prefixCorrection + prefixCorrectionSum, lineStyleIndex, true, false, vertexCount,
+                    pushLineVertex(p, Vec3D(0, 0, 0), 1.0, 0, prefixTotalLineLength, prefixCorrection, lineStyleIndex, true, false, vertexCount,
                                    prePreIndex, preIndex, lineAttributes, lineIndices, is3d);
                     int32_t centerIndex = preIndex, firstIndex = -1, lastIndex = -1;
                     for (float r = -1; r <= 1; r += 0.2) {
                         Vec3D roundExtrude = Vec3DHelper::normalize(extrude * r - extrudeLineVec * (1.0 - abs(r)));
                         float prefixCorrection = Vec3DHelper::dotProduct(roundExtrude, lineVec);
-                        pushLineVertex(p, roundExtrude, 1.0, r, prefixTotalLineLength, prefixCorrection + prefixCorrectionSum, lineStyleIndex, true, endSide == -1,
+                        pushLineVertex(p, roundExtrude, 1.0, r, prefixTotalLineLength, prefixCorrection, lineStyleIndex, true, endSide == -1,
                                        vertexCount, prePreIndex, preIndex, lineAttributes, lineIndices, is3d);
                         if (r == 0) {
                             firstIndex = preIndex;
@@ -310,11 +308,6 @@ class LineGeometryBuilder {
         lineAttributes.push_back(lineStyleIndex);
 
         uint32_t newIndex = vertexCount++;
-
-        if (newIndex == 10) {
-            printf("LineGeometryBuilder: newIndex == 87, %f\n", prefixCorrection);
-            printf("\n");
-        }
 
         if (addTriangle) {
             if (prePreIndex != -1 && preIndex != -1) {
