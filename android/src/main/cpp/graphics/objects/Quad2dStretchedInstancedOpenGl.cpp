@@ -287,7 +287,9 @@ void Quad2dStretchedInstancedOpenGl::render(const std::shared_ptr<::RenderingCon
 
     shaderProgram->preRender(context);
 
-    glUniformMatrix4fv(mMatrixHandle, 1, false, (GLfloat *)mMatrix);
+    if(shaderProgram->usesModelMatrix()) {
+        glUniformMatrix4fv(mMatrixHandle, 1, false, (GLfloat *) mMatrix);
+    }
 
     glUniform4f(originOffsetHandle, quadsOrigin.x - origin.x, quadsOrigin.y - origin.y, quadsOrigin.z - origin.z, 0.0);
 

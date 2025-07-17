@@ -252,7 +252,9 @@ void Text2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &co
     // Set texture coords scale factor
     glUniform2fv(textureCoordScaleFactorHandle, 1, &textureCoordScaleFactor[0]);
 
-    glUniformMatrix4fv(mMatrixHandle, 1, false, (GLfloat *)mMatrix);
+    if(shaderProgram->usesModelMatrix()) {
+        glUniformMatrix4fv(mMatrixHandle, 1, false, (GLfloat *) mMatrix);
+    }
 
     // Draw the triangles
     glDrawElements(GL_TRIANGLES, textIndices.size(), GL_UNSIGNED_SHORT, nullptr);

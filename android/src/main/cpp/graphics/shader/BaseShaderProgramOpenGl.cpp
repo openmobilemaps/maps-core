@@ -41,6 +41,7 @@ int BaseShaderProgramOpenGl::loadShader(int type, std::string shaderCode) {
         }
 
         LogError << errorSS.str() <<= ".";
+        abort();
     }
     return shader;
 }

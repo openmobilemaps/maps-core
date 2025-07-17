@@ -35,7 +35,9 @@ class TextShaderOpenGl : public BaseShaderProgramOpenGl,
 
     virtual std::shared_ptr<ShaderProgramInterface> asShaderProgramInterface() override;
 
-  protected:
+    virtual bool usesModelMatrix() override { return false; };
+
+protected:
     virtual std::string getFragmentShader() override;
 
     virtual std::string getVertexShader() override;

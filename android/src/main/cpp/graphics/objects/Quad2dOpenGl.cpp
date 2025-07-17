@@ -354,7 +354,10 @@ void Quad2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &co
 
     shaderProgram->preRender(context);
 
-    glUniformMatrix4fv(mMatrixHandle, 1, false, (GLfloat *)mMatrix);
+    if(shaderProgram->usesModelMatrix()) {
+        glUniformMatrix4fv(mMatrixHandle, 1, false, (GLfloat *) mMatrix);
+    }
+
     glUniform4f(originOffsetHandle, quadOrigin.x - origin.x, quadOrigin.y - origin.y, quadOrigin.z - origin.z, 0.0);
 
     // Draw the triangles

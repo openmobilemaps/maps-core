@@ -31,8 +31,9 @@ class LineGroup2dLayerObject : public LayerObjectInterface {
 
     virtual std::vector<std::shared_ptr<RenderConfigInterface>> getRenderConfig() override;
 
-    void setLines(const std::vector<std::tuple<std::vector<Vec2D>, int>> &lines, const int32_t systemIdentifier, const Vec3D & origin);
-    void setLines(const std::vector<std::tuple<std::vector<Coord>, int>> &lines, const Vec3D & origin);
+    void setLines(const std::vector<std::tuple<std::vector<Vec2D>, int>> &lines, const int32_t systemIdentifier, const Vec3D & origin, LineCapType capType = LineCapType::BUTT, LineJoinType joinType = LineJoinType::MITER, bool optimizeForDots = false);
+
+    void setLines(const std::vector<std::tuple<std::vector<Coord>, int>> &lines, const Vec3D & origin, LineCapType capType = LineCapType::BUTT, LineJoinType joinType = LineJoinType::MITER, bool optimizeForDots = false);
 
     void setStyles(const std::vector<LineStyle> &styles);
 
@@ -43,6 +44,8 @@ class LineGroup2dLayerObject : public LayerObjectInterface {
     std::shared_ptr<ShaderProgramInterface> getShaderProgram();
 
   private:
+    void buildLines(const std::vector<std::tuple<std::vector<Vec3D>, int>> &renderCoords, const Vec3D & origin, LineCapType capType, LineJoinType joinType);
+    void pushLineVertex(const Vec3D &p, const Vec3D &extrude, const float extrudeScale, const float side, const float prefixTotalLineLength, const int lineStyleIndex, const bool addTriangle, const bool reverse, uint32_t &vertexCount, int32_t &prePreIndex, int32_t &preIndex, std::vector<float> &lineAttributes, std::vector<uint32_t> &lineIndices);
     std::shared_ptr<CoordinateConversionHelperInterface> conversionHelper;
     std::shared_ptr<LineGroup2dInterface> line;
     std::shared_ptr<LineGroupShaderInterface> shader;

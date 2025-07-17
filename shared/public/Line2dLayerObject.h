@@ -39,6 +39,8 @@ class Line2dLayerObject : public LayerObjectInterface {
 
     void setHighlighted(bool highlighted);
 
+    void setScalingFactor(float factor);
+
     std::shared_ptr<GraphicsObjectInterface> getLineObject();
 
     std::shared_ptr<ShaderProgramInterface> getShaderProgram();

@@ -314,7 +314,8 @@ void Text2dInstancedOpenGl::render(const std::shared_ptr<::RenderingContextInter
 
     // Apply the projection and view transformation
     glUniformMatrix4fv(vpMatrixHandle, 1, false, (GLfloat *) vpMatrix);
-    if (mMatrixHandle >= 0) {
+
+    if(shaderProgram->usesModelMatrix()) {
         glUniformMatrix4fv(mMatrixHandle, 1, false, (GLfloat *) mMatrix);
     }
 

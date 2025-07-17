@@ -33,8 +33,30 @@ inline Vec3D operator*( const ::Vec3D& left, const double& val) {
     return Vec3D(left.x * val, left.y * val, left.z * val);
 }
 
+inline Vec3D operator*(const double& val, const ::Vec3D& right) {
+    return Vec3D(right.x * val, right.y * val, right.z * val);
+}
+
 inline Vec3D operator/( const ::Vec3D& left, const double& val ) {
     return Vec3D(left.x / val, left.y / val, left.z / val);
+}
+
+inline Vec3D& operator*=(Vec3D& left, const double& val) {
+    left.x *= val;
+    left.y *= val;
+    left.z *= val;
+    return left;
+}
+
+inline Vec3D& operator/=(Vec3D& left, const double& val) {
+    left.x /= val;
+    left.y /= val;
+    left.z /= val;
+    return left;
+}
+
+inline Vec3D operator-(const Vec3D& vec) {
+    return Vec3D(-vec.x, -vec.y, -vec.z);
 }
 
 class Vec3DHelper {
@@ -55,8 +77,12 @@ class Vec3DHelper {
         return vector * vector;
     }
 
+    static inline double length(const ::Vec3D &vector) {
+        return std::sqrt(vector * vector);
+    }
+
     static inline ::Vec3D normalize(const ::Vec3D &vector) {
-        return vector / std::sqrt(Vec3DHelper::squaredLength(vector));
+        return vector / Vec3DHelper::length(vector);
     }
 
     static inline ::Vec3D toVec(const ::Coord &coordinate) {
@@ -65,5 +91,17 @@ class Vec3DHelper {
 
     static inline ::Coord toCoord(const ::Vec3D &vec, const int32_t systemIdentifier) {
         return Coord(systemIdentifier, vec.x, vec.y, vec.z);
+    }
+
+    static inline double dotProduct(const Vec3D& A, const Vec3D& B) {
+        return A.x * B.x + A.y * B.y + A.z * B.z;
+    }
+
+    static inline Vec3D crossProduct(const Vec3D& A, const Vec3D& B) {
+        return {
+            A.y * B.z - A.z * B.y,
+            A.z * B.x - A.x * B.z,
+            A.x * B.y - A.y * B.x
+        };
     }
 };

@@ -153,7 +153,6 @@ std::string ColorPolygonGroup2dShaderOpenGl::getVertexShader() {
 
                 ) + getPolygonStylesUBODefinition(isStriped) + OMMShaderCode(
 
-                uniform mat4 umMatrix;
                 uniform vec4 uOriginOffset;
 
                 in vec3 vPosition;
@@ -163,7 +162,7 @@ std::string ColorPolygonGroup2dShaderOpenGl::getVertexShader() {
                 out vec2 uv;
 
                 void main() {
-                    gl_Position = uFrameUniforms.vpMatrix * ((umMatrix * vec4(vPosition, 1.0)) + uOriginOffset);
+                    gl_Position = uFrameUniforms.vpMatrix * (vec4(vPosition, 1.0) + uOriginOffset);
 
                     styleIndex = clamp(int(floor(vStyleIndex + 0.5)), 0, uPolygonStyles.numStyles);
                     uv = vPosition.xy;
@@ -174,7 +173,6 @@ std::string ColorPolygonGroup2dShaderOpenGl::getVertexShader() {
 
                 ) + getPolygonStylesUBODefinition(isStriped) + OMMShaderCode(
 
-                uniform mat4 umMatrix;
                 uniform vec4 uOriginOffset;
 
                 in vec3 vPosition;
@@ -183,7 +181,7 @@ std::string ColorPolygonGroup2dShaderOpenGl::getVertexShader() {
                 flat out int styleIndex;
 
                 void main() {
-                    gl_Position = uFrameUniforms.vpMatrix * ((umMatrix * vec4(vPosition, 1.0)) + uOriginOffset);
+                    gl_Position = uFrameUniforms.vpMatrix * (vec4(vPosition, 1.0) + uOriginOffset);
 
                     styleIndex = clamp(int(floor(vStyleIndex + 0.5)), 0, uPolygonStyles.numStyles);
                 });

@@ -21,7 +21,6 @@ final class LineGroup2d: BaseGraphicsObject, @unchecked Sendable {
     private var indicesCount: Int = 0
 
     private var stencilState: MTLDepthStencilState?
-    private var maskedStencilState: MTLDepthStencilState?
 
     private var customScreenPixelFactor: Float = 0
     private var tileOriginBuffer: MTLBuffer?
@@ -41,35 +40,20 @@ final class LineGroup2d: BaseGraphicsObject, @unchecked Sendable {
 
     }
 
-    private func setupStencilBufferDescriptor() {
-        let ss = MTLStencilDescriptor()
-        ss.stencilCompareFunction = .equal
-        ss.stencilFailureOperation = .keep
-        ss.depthFailureOperation = .keep
-        ss.depthStencilPassOperation = .incrementClamp
-        ss.writeMask = 0b0111_1111
-        ss.readMask = 0b1111_1111
+    private func setupStencilStates() {
+        let ss2 = MTLStencilDescriptor()
+        ss2.stencilCompareFunction = .equal
+        ss2.stencilFailureOperation = .zero
+        ss2.depthFailureOperation = .keep
+        ss2.depthStencilPassOperation = .keep
+        ss2.readMask = 0b1100_0000
+        ss2.writeMask = 0b0000_0000
 
-        let s = MTLDepthStencilDescriptor()
-        s.frontFaceStencil = ss
-        s.backFaceStencil = ss
-        s.label = "LineGroup2d.maskedStencilState"
+        let s2 = MTLDepthStencilDescriptor()
+        s2.frontFaceStencil = ss2
+        s2.backFaceStencil = ss2
 
-        maskedStencilState = MetalContext.current.device.makeDepthStencilState(descriptor: s)
-
-        let mss = MTLStencilDescriptor()
-        mss.stencilCompareFunction = .notEqual
-        mss.stencilFailureOperation = .keep
-        mss.depthFailureOperation = .keep
-        mss.depthStencilPassOperation = .replace
-        ss.writeMask = 0xFF
-
-        let ms = MTLDepthStencilDescriptor()
-        ms.frontFaceStencil = mss
-        ms.backFaceStencil = mss
-        ms.label = "LineGroup2d.stencilState"
-
-        stencilState = MetalContext.current.device.makeDepthStencilState(descriptor: ms)
+        stencilState = device.makeDepthStencilState(descriptor: s2)
     }
 
     override func render(
@@ -99,18 +83,17 @@ final class LineGroup2d: BaseGraphicsObject, @unchecked Sendable {
             }
         #endif
 
-        if stencilState == nil {
-            setupStencilBufferDescriptor()
-        }
-
-        // draw call
 
         if isMasked {
-            encoder.setDepthStencilState(maskedStencilState)
-            encoder.setStencilReferenceValue(0b1100_0000)
-        } else {
+            if stencilState == nil {
+                setupStencilStates()
+            }
             encoder.setDepthStencilState(stencilState)
-            encoder.setStencilReferenceValue(0xFF)
+            if maskInverse {
+                encoder.setStencilReferenceValue(0b0000_0000)
+            } else {
+                encoder.setStencilReferenceValue(0b1100_0000)
+            }
         }
 
         shader.screenPixelAsRealMeterFactor = Float(screenPixelAsRealMeterFactor)
@@ -132,8 +115,8 @@ final class LineGroup2d: BaseGraphicsObject, @unchecked Sendable {
             bufferPointer.pointee.y = Float(originOffset.y - origin.y)
             bufferPointer.pointee.z = Float(originOffset.z - origin.z)
         }
-        encoder.setVertexBuffer(originOffsetBuffer, offset: 0, index: 5)
-        encoder.setVertexBuffer(tileOriginBuffer, offset: 0, index: 6)
+        encoder.setVertexBuffer(originOffsetBuffer, offset: 0, index: 4)
+        encoder.setVertexBuffer(tileOriginBuffer, offset: 0, index: 5)
 
         encoder.drawIndexedPrimitives(
             type: .triangle,
@@ -141,10 +124,6 @@ final class LineGroup2d: BaseGraphicsObject, @unchecked Sendable {
             indexType: .uint32,
             indexBuffer: lineIndicesBuffer,
             indexBufferOffset: 0)
-
-        if !isMasked {
-            context.clearStencilBuffer()
-        }
     }
 }
 

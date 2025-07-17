@@ -18,19 +18,19 @@ public struct LineVertex: Equatable {
         var offset = 0
         let bufferIndex = 0
 
-        // lineA
+        // Position
         vertexDescriptor.attributes[0].bufferIndex = bufferIndex
         vertexDescriptor.attributes[0].format = .float3
         vertexDescriptor.attributes[0].offset = offset
         offset += 3 * MemoryLayout<Float>.stride
 
-        // lineB
+        // Extrude
         vertexDescriptor.attributes[1].bufferIndex = bufferIndex
         vertexDescriptor.attributes[1].format = .float3
         vertexDescriptor.attributes[1].offset = offset
         offset += 3 * MemoryLayout<Float>.stride
 
-        // Vertex Index
+        // Side
         vertexDescriptor.attributes[2].bufferIndex = bufferIndex
         vertexDescriptor.attributes[2].format = .float
         vertexDescriptor.attributes[2].offset = offset
@@ -42,10 +42,16 @@ public struct LineVertex: Equatable {
         vertexDescriptor.attributes[3].offset = offset
         offset += MemoryLayout<Float>.stride
 
-        // Line Style Info
+        // Length Correction
         vertexDescriptor.attributes[4].bufferIndex = bufferIndex
         vertexDescriptor.attributes[4].format = .float
         vertexDescriptor.attributes[4].offset = offset
+        offset += MemoryLayout<Float>.stride
+
+        // Line Style Info
+        vertexDescriptor.attributes[5].bufferIndex = bufferIndex
+        vertexDescriptor.attributes[5].format = .float
+        vertexDescriptor.attributes[5].offset = offset
         offset += MemoryLayout<Float>.stride
 
         vertexDescriptor.layouts[0].stride = offset
@@ -57,19 +63,19 @@ public struct LineVertex: Equatable {
         var offset = 0
         let bufferIndex = 0
 
-        // lineA
+        // Position
         vertexDescriptor.attributes[0].bufferIndex = bufferIndex
         vertexDescriptor.attributes[0].format = .float2
         vertexDescriptor.attributes[0].offset = offset
         offset += 2 * MemoryLayout<Float>.stride
 
-        // lineB
+        // Extrude
         vertexDescriptor.attributes[1].bufferIndex = bufferIndex
         vertexDescriptor.attributes[1].format = .float2
         vertexDescriptor.attributes[1].offset = offset
         offset += 2 * MemoryLayout<Float>.stride
 
-        // Vertex Index
+        // Side
         vertexDescriptor.attributes[2].bufferIndex = bufferIndex
         vertexDescriptor.attributes[2].format = .float
         vertexDescriptor.attributes[2].offset = offset
@@ -81,10 +87,16 @@ public struct LineVertex: Equatable {
         vertexDescriptor.attributes[3].offset = offset
         offset += MemoryLayout<Float>.stride
 
-        // Line Style Info
+        // Length Correction
         vertexDescriptor.attributes[4].bufferIndex = bufferIndex
         vertexDescriptor.attributes[4].format = .float
         vertexDescriptor.attributes[4].offset = offset
+        offset += MemoryLayout<Float>.stride
+
+        // Line Style Info
+        vertexDescriptor.attributes[5].bufferIndex = bufferIndex
+        vertexDescriptor.attributes[5].format = .float
+        vertexDescriptor.attributes[5].offset = offset
         offset += MemoryLayout<Float>.stride
 
         vertexDescriptor.layouts[0].stride = offset

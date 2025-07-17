@@ -11,6 +11,7 @@
 #include "Line2dLayerObject.h"
 #include "Vec3D.h"
 #include <cmath>
+#include "LineGeometryBuilder.h"
 
 #include "TrigonometryLUT.h"
 
@@ -21,7 +22,20 @@ Line2dLayerObject::Line2dLayerObject(const std::shared_ptr<CoordinateConversionH
     : conversionHelper(conversionHelper)
     , line(line)
     , shader(shader)
-    , style(ColorStateList(Color(0.0f,0.0f,0.0f,0.0f), Color(0.0f,0.0f,0.0f,0.0f)), ColorStateList(Color(0.0f,0.0f,0.0f,0.0f), Color(0.0f,0.0f,0.0f,0.0f)), 0.0, 0.0, SizeType::SCREEN_PIXEL, 0.0, std::vector<float>(), 0, 0, LineCapType::BUTT, 0.0, false, 1.0)
+, style(ColorStateList(Color(0.0f,0.0f,0.0f,0.0f), Color(0.0f,0.0f,0.0f,0.0f)),
+        ColorStateList(Color(0.0f,0.0f,0.0f,0.0f), Color(0.0f,0.0f,0.0f,0.0f)),
+        0.0,
+        0.0,
+        SizeType::SCREEN_PIXEL,
+        0.0,
+        std::vector<float>(),
+        0,
+        0,
+        LineCapType::BUTT,
+        LineJoinType::MITER,
+        0.0,
+        false,
+        1.0)
     , highlighted(false)
     , is3d(is3d)
 {
@@ -51,71 +65,7 @@ void Line2dLayerObject::setPositions(const std::vector<Coord> &positions, const 
         renderCoords.push_back(Vec3D(x, y, z));
     }
 
-    int pointCount = (int)renderCoords.size();
-
-    if(pointCount < 2) {
-        return;
-    }
-
-    float prefixTotalLineLength = 0.0;
-
-    int iSecondToLast = pointCount - 2;
-    for (int i = 0; i <= iSecondToLast; i++) {
-        const Vec3D &p = renderCoords[i];
-        const Vec3D &pNext = renderCoords[i + 1];
-
-        double lengthNormalX = pNext.x - p.x;
-        double lengthNormalY = pNext.y - p.y;
-        double lengthNormalZ = pNext.z - p.z;
-        float lineLength = std::sqrt(lengthNormalX * lengthNormalX + lengthNormalY * lengthNormalY + lengthNormalZ * lengthNormalZ);
-
-        // SegmentType (0 inner, 1 start, 2 end, 3 single segment) | lineStyleIndex
-        // (each one Byte, i.e. up to 256 styles if supported by shader!)
-        float lineStyleInfo = 0 + (i == 0 && i == iSecondToLast ? (3 << 8)
-                : (i == 0 ? (float) (1 << 8)
-                : (i == iSecondToLast ? (float) (2 << 8)
-                : 0.0)));
-
-        for (uint8_t vertexIndex = 4; vertexIndex > 0; --vertexIndex) {
-            // Vertex
-            // Position pointA and pointB
-            lineAttributes.push_back(p.x);
-            lineAttributes.push_back(p.y);
-            if (is3d) {
-                lineAttributes.push_back(p.z);
-            }
-            lineAttributes.push_back(pNext.x);
-            lineAttributes.push_back(pNext.y);
-            if (is3d) {
-                lineAttributes.push_back(pNext.z);
-            }
-
-            // Vertex Index
-            lineAttributes.push_back((float) (vertexIndex - 1));
-
-            // Segment Start Length Position (length prefix sum)
-            lineAttributes.push_back(prefixTotalLineLength);
-
-            // Style Info
-            lineAttributes.push_back(lineStyleInfo);
-        }
-
-        // Vertex indices
-        lineIndices.push_back(4 * i);
-        lineIndices.push_back(4 * i + 1);
-        lineIndices.push_back(4 * i + 2);
-
-        lineIndices.push_back(4 * i);
-        lineIndices.push_back(4 * i + 2);
-        lineIndices.push_back(4 * i + 3);
-
-        prefixTotalLineLength += lineLength;
-    }
-
-    auto attributes = SharedBytes((int64_t) lineAttributes.data(), (int32_t) lineAttributes.size(), (int32_t) sizeof(float));
-    auto indices = SharedBytes((int64_t) lineIndices.data(), (int32_t) lineIndices.size(), (int32_t) sizeof(uint32_t));
-
-    line->setLines(attributes, indices, origin, is3d);
+    LineGeometryBuilder::buildLines(line, {std::make_tuple(renderCoords, 0)}, origin, style.lineCap, style.lineJoin, is3d, style.dotted);
 }
 
 void Line2dLayerObject::setStyle(const LineStyle &style_) {
@@ -168,10 +118,17 @@ void Line2dLayerObject::setStyle(const LineStyle &style, bool highlighted) {
     auto dashArray = style.dashArray;
     auto dn = dashArray.size();
     s.numDashValue = toHalfFloat(dn);
-    s.dashValue0 = toHalfFloat(dn > 0 ? dashArray[0] : 0.0);
-    s.dashValue1 = toHalfFloat((dn > 1 ? dashArray[1] : 0.0) + s.dashValue0);
-    s.dashValue2 = toHalfFloat((dn > 2 ? dashArray[2] : 0.0) + s.dashValue1);
-    s.dashValue3 = toHalfFloat((dn > 3 ? dashArray[3] : 0.0) + s.dashValue2);
+
+    float dashValue0 = (dn > 0 ? dashArray[0] : 0.0);
+    float dashValue1 = ((dn > 1 ? dashArray[1] : 0.0) + dashValue0);
+    float dashValue2 = ((dn > 2 ? dashArray[2] : 0.0) + dashValue1);
+    float dashValue3 = ((dn > 3 ? dashArray[3] : 0.0) + dashValue2);
+
+    s.dashValue0 = toHalfFloat(dashValue0);
+    s.dashValue1 = toHalfFloat(dashValue1);
+    s.dashValue2 = toHalfFloat(dashValue2);
+    s.dashValue3 = toHalfFloat(dashValue3);
+
     s.dashFade = toHalfFloat(style.dashFade);
     s.dashAnimationSpeed = toHalfFloat(style.dashAnimationSpeed);
 
@@ -184,6 +141,8 @@ void Line2dLayerObject::setStyle(const LineStyle &style, bool highlighted) {
     auto buffer = SharedBytes((int64_t)&s, 1, sizeof(ShaderLineStyle));
     shader->setStyles(buffer);
 }
+
+void Line2dLayerObject::setScalingFactor(float factor) { shader->setDashingScaleFactor(factor); }
 
 std::shared_ptr<GraphicsObjectInterface> Line2dLayerObject::getLineObject() { return line->asGraphicsObject(); }
 

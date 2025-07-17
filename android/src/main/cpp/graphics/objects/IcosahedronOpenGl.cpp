@@ -141,8 +141,9 @@ void IcosahedronOpenGl::render(const std::shared_ptr<::RenderingContextInterface
 
     shaderProgram->preRender(context);
 
-    // Apply the projection and view transformation
-    glUniformMatrix4fv(mMatrixHandle, 1, false, (GLfloat *)mMatrix);
+    if(shaderProgram->usesModelMatrix()) {
+        glUniformMatrix4fv(mMatrixHandle, 1, false, (GLfloat *) mMatrix);
+    }
 
     // Draw the triangle
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);

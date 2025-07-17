@@ -53,7 +53,6 @@ std::string PolygonPatternGroup2dShaderOpenGl::getVertexShader() {
                                       in vec3 vPosition;
                                               in float vStyleIndex;
 
-                                              uniform mat4 umMatrix;
                                               uniform vec2 uScalingFactor;
                                               uniform vec4 uOriginOffset;
 
@@ -63,7 +62,7 @@ std::string PolygonPatternGroup2dShaderOpenGl::getVertexShader() {
                                               void main() {
                                                   // fadeInPattern
                                                   pixelPosition = vPosition.xy / vec2(uFrameUniforms.frameSpecs.x);
-                                                  gl_Position = uFrameUniforms.vpMatrix * ((umMatrix * vec4(vPosition, 1.0)) + uOriginOffset);
+                                                  gl_Position = uFrameUniforms.vpMatrix * (vec4(vPosition, 1.0) + uOriginOffset);
                                                   styleIndex = uint(floor(vStyleIndex + 0.5));
                                               }
            ) :
@@ -72,7 +71,6 @@ std::string PolygonPatternGroup2dShaderOpenGl::getVertexShader() {
                                       in vec3 vPosition;
                                               in float vStyleIndex;
 
-                                              uniform mat4 umMatrix;
                                               uniform vec2 uScalingFactor;
                                               uniform vec4 uOriginOffset;
 
@@ -82,7 +80,7 @@ std::string PolygonPatternGroup2dShaderOpenGl::getVertexShader() {
                                               void main() {
                                                   // DefaultBehavior
                                                   pixelPosition = vPosition.xy / uScalingFactor;
-                                                  gl_Position = uFrameUniforms.vpMatrix * ((umMatrix * vec4(vPosition, 1.0)) + uOriginOffset);
+                                                  gl_Position = uFrameUniforms.vpMatrix * (vec4(vPosition, 1.0) + uOriginOffset);
                                                   styleIndex = uint(floor(vStyleIndex + 0.5));
                                               }
            );

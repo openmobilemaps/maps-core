@@ -59,11 +59,16 @@ protected:
 
     int mMatrixHandle;
     int originOffsetHandle;
-    int pointAHandle;
-    int pointBHandle;
-    int vertexIndexHandle;
-    int segmentStartLPosHandle;
-    int styleInfoHandle;
+    int lineOriginHandle;
+    int scaleFactorHandle;
+
+    int positionHandle;
+    int extrudeHandle;
+    int lineSideHandle;
+    int lengthPrefixHandle;
+    int lengthCorrectionHandle;
+    int stylingIndexHandle;
+
     GLuint vao;
     GLuint vertexAttribBuffer = -1;
     std::vector<GLfloat> lineAttributes;

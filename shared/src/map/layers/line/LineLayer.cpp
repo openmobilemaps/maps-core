@@ -227,6 +227,21 @@ void LineLayer::update() {
         if (hasAnimatedLineStyles) {
             mapInterface->invalidate();
         }
+
+        auto camera = mapInterface->getCamera();
+        if (camera) {
+            auto cameraZoom = camera->getZoom();
+
+            auto zoomIdentifier = std::max(0.0, std::round(log(500000000.0 * 1.0 / cameraZoom) / log(2) * 100) / 100);
+            double factor = pow(2, floor(zoomIdentifier));
+            auto zoom = 500000000.0 * 1.0 / factor;
+
+            auto scalingFactor = (camera->asCameraInterface()->getScalingFactor() / cameraZoom) * zoom;
+
+            for (auto const &line: lines) {
+                line.second->setScalingFactor(scalingFactor);
+            }
+        }
     }
 }
 

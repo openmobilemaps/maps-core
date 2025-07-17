@@ -151,7 +151,9 @@ void PolygonGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterf
     glUseProgram(program);
     glBindVertexArray(vao);
 
-    glUniformMatrix4fv(mMatrixHandle, 1, false, (GLfloat *)mMatrix);
+    if(shaderProgram->usesModelMatrix()) {
+        glUniformMatrix4fv(mMatrixHandle, 1, false, (GLfloat *) mMatrix);
+    }
 
     glUniform4f(originOffsetHandle, polygonOrigin.x - origin.x, polygonOrigin.y - origin.y, polygonOrigin.z - origin.z, 0.0);
 
