@@ -83,7 +83,6 @@ final class LineGroup2d: BaseGraphicsObject, @unchecked Sendable {
             }
         #endif
 
-
         if isMasked {
             if stencilState == nil {
                 setupStencilStates()
