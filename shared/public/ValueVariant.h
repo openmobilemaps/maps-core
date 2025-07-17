@@ -19,9 +19,17 @@
 #include <vector>
 
 // never change order!!!!!
-typedef std::variant<std::string, double, int64_t, bool, Color, std::vector<float>, std::vector<std::string>,
-                     std::vector<FormattedStringEntry>, std::monostate>
-    ValueVariant;
+typedef std::variant<
+    std::string, // 0
+    double,      // 1
+    int64_t,     // 2
+    bool,        // 3
+    Color,       // 4
+    std::vector<float>,       // 5
+    std::vector<std::string>, // 6
+    std::vector<FormattedStringEntry>, // 7
+    std::monostate> // 8
+ValueVariant;
 
 // helper type for the visitor #4
 template <class... Ts> struct overloaded : Ts... {
@@ -33,30 +41,25 @@ template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 
 // implement custom == operator for ValueVariant
 inline bool operator==(const ValueVariant &lhs, const ValueVariant &rhs) {
+    const auto lhsIndex = lhs.index();
+    const auto rhsIndex = rhs.index();
+
+    if (lhsIndex == rhsIndex) {
+        return std::visit([](const auto &a, const auto &b) { return a == b; }, lhs, rhs);
+    }
+
     return std::visit(
-        overloaded{
-
-            // Same types
-            [](const std::string &lhs, const std::string &rhs) { return lhs == rhs; },
-            [](double lhs, double rhs) { return lhs == rhs; }, [](int64_t lhs, int64_t rhs) { return lhs == rhs; },
-            [](bool lhs, bool rhs) { return lhs == rhs; }, [](const Color &lhs, const Color &rhs) { return lhs == rhs; },
-            [](const std::vector<float> &lhs, const std::vector<float> &rhs) { return lhs == rhs; },
-            [](const std::vector<std::string> &lhs, const std::vector<std::string> &rhs) { return lhs == rhs; },
-            [](const std::vector<FormattedStringEntry> &lhs, const std::vector<FormattedStringEntry> &rhs) { return lhs == rhs; },
-
-            // Double-int and int-double
-            [](double lhs, int64_t rhs) { return lhs == rhs; }, [](int64_t lhs, double rhs) { return lhs == rhs; },
-
-            // Bool and numbers
-            [](bool lhs, double rhs) { return lhs == rhs; }, [](double lhs, bool rhs) { return lhs == rhs; },
-            [](bool lhs, int64_t rhs) { return lhs == rhs; }, [](int64_t lhs, bool rhs) { return lhs == rhs; },
-
-            // Monostate
-            [](const std::monostate &lhs, const std::monostate &rhs) { return true; },
-
-            // No match
-            [](const auto &lhs, const auto &rhs) { return false; }},
-        lhs, rhs);
+        overloaded {
+            [](double lhs, int64_t rhs) { return lhs == rhs; },
+            [](int64_t lhs, double rhs) { return lhs == rhs; },
+            [](bool lhs, double rhs)    { return lhs == rhs; },
+            [](double lhs, bool rhs)    { return lhs == rhs; },
+            [](bool lhs, int64_t rhs)   { return lhs == rhs; },
+            [](int64_t lhs, bool rhs)   { return lhs == rhs; },
+            [](const auto &lhs, const auto &rhs) { return false; }
+        },
+        lhs, rhs
+    );
 };
 
 const static auto valueVariantToStringVisitor =
