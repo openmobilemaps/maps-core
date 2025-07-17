@@ -245,7 +245,8 @@ lineGroupFragmentShader(LineVertexOut in [[stage_in]],
     const float skew = style->dottedSkew;
 
     const float cycleLength = style->width * scalingFactor * skew;
-    const float positionInCycle = fmod(in.lengthPrefix * skew, 2.0 * cycleLength) / cycleLength;
+    const float timeOffset = time * style->dash_animation_speed * scaledWidth;
+    const float positionInCycle = fmod(in.lengthPrefix * skew  + timeOffset, 2.0 * cycleLength) / cycleLength;
 
     float2 pos = float2(positionInCycle * 2.0 - 1.0, in.lineSide);
 
@@ -254,7 +255,8 @@ lineGroupFragmentShader(LineVertexOut in [[stage_in]],
     }
   } else if(numDash > 0) {
 
-    const float intraDashPos = fmod(in.lengthPrefix, (float)style->dashArray.w * scaledWidth);
+    const float timeOffset = time * style->dash_animation_speed * scaledWidth;
+    const float intraDashPos = fmod(in.lengthPrefix + timeOffset, (float)style->dashArray.w * scaledWidth);
 
     half4 dashArray = style->dashArray * scaledWidth;
     float dxt = dashArray.x;
