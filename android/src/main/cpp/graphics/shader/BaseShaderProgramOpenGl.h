@@ -42,7 +42,7 @@ public:
     virtual void setBlendMode(BlendMode blendMode) override;
 
     const static size_t FRAME_UBO_SIZE = sizeof(GLfloat) * 6 * 4; // mat4, vec4, vec2 (padded for std140!)
-    const static GLuint FRAME_UBO_BINDING_POINT;
+    const static GLuint FRAME_UBO_BINDING_POINT = 0;
     const static std::string FRAME_UBO_DEFINITION;
 protected:
     GLint frameUniformsBufferBlockIdx = GL_INVALID_INDEX;
@@ -53,7 +53,4 @@ protected:
     virtual std::string getFragmentShader();
 
     BlendMode blendMode = BlendMode::NORMAL;
-
-private:
-    static std::vector<GLfloat> tempVec4FrameUniforms;
 };

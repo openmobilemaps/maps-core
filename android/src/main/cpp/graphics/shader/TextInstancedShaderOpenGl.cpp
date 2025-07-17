@@ -154,7 +154,7 @@ std::string TextInstancedShaderOpenGl::getFragmentShader() {
                                                   float haloWidth;
                                                   float haloBlur;
                                               };
-                                              layout(std140, binding = 1) uniform TextStyleCollection {
+                                              layout(std140) uniform TextStyleCollection {
                                                   TextStyle styles[) + std::to_string(MAX_NUM_TEXT_STYLES) + OMMShaderCode(];
                                               } uTextStyles;
 

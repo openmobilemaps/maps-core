@@ -44,12 +44,11 @@ void ColorPolygonGroup2dShaderOpenGl::setupProgram(const std::shared_ptr<::Rende
 
     openGlContext->storeProgram(programName, program);
 
-    // Bind PolygonStyleCollection at binding index 1
     GLuint blockIdx = glGetUniformBlockIndex(program, "PolygonStyleCollection");
     if (blockIdx == GL_INVALID_INDEX) {
         LogError <<= "Uniform block PolygonStyleCollection not found";
     }
-    glUniformBlockBinding(program, blockIdx, 1);
+    glUniformBlockBinding(program, blockIdx, STYLE_UBO_BINDING);
 }
 
 void ColorPolygonGroup2dShaderOpenGl::setupGlObjects(const std::shared_ptr<::OpenGlContext> &context) {
@@ -77,7 +76,7 @@ void ColorPolygonGroup2dShaderOpenGl::clearGlObjects() {
 void ColorPolygonGroup2dShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context) {
     BaseShaderProgramOpenGl::preRender(context);
 
-    glBindBufferBase(GL_UNIFORM_BUFFER, 1, polygonStyleBuffer); // PolygonStyleCollection is at binding index 1
+    glBindBufferBase(GL_UNIFORM_BUFFER, STYLE_UBO_BINDING, polygonStyleBuffer);
 
     {
         std::lock_guard<std::recursive_mutex> overlayLock(styleMutex);
@@ -122,7 +121,7 @@ std::string ColorPolygonGroup2dShaderOpenGl::getPolygonStylesUBODefinition(bool 
                     float gapWidth; // 6
                 }; // padded to 8 floats
 
-                layout (std140, binding = 1) uniform PolygonStyleCollection {
+                layout (std140) uniform PolygonStyleCollection {
                     StripedPolygonStyle polygonStyles[) + std::to_string(MAX_NUM_STYLES) + OMMShaderCode(];
                     lowp int numStyles;
                     // padding
@@ -138,7 +137,7 @@ std::string ColorPolygonGroup2dShaderOpenGl::getPolygonStylesUBODefinition(bool 
                     float opacity; // 4
                 }; // padded to 8 floats
 
-                layout (std140, binding = 1) uniform PolygonStyleCollection {
+                layout (std140) uniform PolygonStyleCollection {
                     PolygonStyle polygonStyles[) + std::to_string(MAX_NUM_STYLES) + OMMShaderCode(];
                     lowp int numStyles;
                     // padding

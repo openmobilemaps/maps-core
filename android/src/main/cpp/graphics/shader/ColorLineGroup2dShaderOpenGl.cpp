@@ -47,12 +47,11 @@ void ColorLineGroup2dShaderOpenGl::setupProgram(const std::shared_ptr<::Renderin
 
     openGlContext->storeProgram(programName, program);
 
-    // Bind LineStyleCollection at binding index 1
     GLuint lineStyleUniformBlockIdx = glGetUniformBlockIndex(program, "LineStyleCollection");
     if (lineStyleUniformBlockIdx == GL_INVALID_INDEX) {
         LogError <<= "Uniform block LineStyleCollection not found";
     }
-    glUniformBlockBinding(program, lineStyleUniformBlockIdx, 1);
+    glUniformBlockBinding(program, lineStyleUniformBlockIdx, STYLE_UBO_BINDING);
 }
 
 void ColorLineGroup2dShaderOpenGl::setupGlObjects(const std::shared_ptr<::OpenGlContext> &context) {
@@ -82,7 +81,7 @@ void ColorLineGroup2dShaderOpenGl::clearGlObjects() {
 void ColorLineGroup2dShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context) {
     BaseShaderProgramOpenGl::preRender(context);
 
-    glBindBufferBase(GL_UNIFORM_BUFFER, 1, lineStyleBuffer); // LineStyleCollection is at binding index 1
+    glBindBufferBase(GL_UNIFORM_BUFFER, STYLE_UBO_BINDING, lineStyleBuffer);
 
     {
         std::lock_guard<std::recursive_mutex> lock(styleMutex);
@@ -144,7 +143,7 @@ std::string ColorLineGroup2dShaderOpenGl::getLineStylesUBODefinition(bool isSimp
                     float capType; // 7
                 };
 
-                layout (std140, binding = 1) uniform LineStyleCollection {
+                layout (std140) uniform LineStyleCollection {
                     SimpleLineStyle lineValues[) + std::to_string(MAX_NUM_STYLES) + OMMShaderCode(];
                     lowp int numStyles;
                 } uLineStyles;
@@ -177,7 +176,7 @@ std::string ColorLineGroup2dShaderOpenGl::getLineStylesUBODefinition(bool isSimp
                     float dottedSkew; // 22
                 };
 
-                layout (std140, binding = 1) uniform LineStyleCollection {
+                layout (std140) uniform LineStyleCollection {
                     LineStyle lineValues[) + std::to_string(MAX_NUM_STYLES) + OMMShaderCode(];
                     lowp int numStyles;
                 } uLineStyles;
