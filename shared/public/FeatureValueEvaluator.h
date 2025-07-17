@@ -40,7 +40,6 @@ public:
         isStateDependant = usedKeysCollection.isStateDependant();
         needsReevaluation = isZoomDependent || isStateDependant;
 
-        lastResults.clear();
         staticValue = std::nullopt;
 
         if(isZoomDependent) {
@@ -91,22 +90,11 @@ public:
             return FeatureValueEvaluationResult<ResultType>::zoomOnly(value->evaluateOr(context, defaultValue), zoomRange, context.zoomLevel ? *context.zoomLevel : 0.0);
         }
 
-        int64_t identifier = usedKeysCollection.getHash(context);
-        std::lock_guard<std::mutex> lock(mutex);
-
-        const auto &lastResultIt = lastResults.find(identifier);
-        if (lastResultIt != lastResults.end()) {
-            return lastResultIt->second;
-        }
-
-        const auto &result = value->evaluateOr(context, defaultValue);
-        lastResults.insert({identifier, result});
-
-        return result;
+        // shouldn't happen, one of the cases above covers this
+        return value->evaluateOr(context, defaultValue);
     }
 
 private:
-    std::mutex mutex;
     std::shared_ptr<Value> value;
     UsedKeysCollection usedKeysCollection;
     std::optional<ResultType> staticValue;
@@ -117,8 +105,6 @@ private:
     bool usesFullZoomRange = true;
     bool isStateDependant = false;
     bool needsReevaluation = true;
-
-    std::unordered_map<uint64_t, ResultType> lastResults;
 
     ZoomRange zoomRange;
 };

@@ -339,8 +339,6 @@ void Tiled2dMapVectorSymbolLabelObject::evaluateStyleProperties(const double zoo
         textSize = description->style.getTextSize(evalContext);
     }
 
-
-
     if(textAlignment.isReevaluationNeeded(evalContext)) {
         textAlignment = description->style.getTextRotationAlignment(evalContext);
     }
