@@ -69,10 +69,49 @@ void BaseShaderProgramOpenGl::checkGlProgramLinking(GLuint program) {
     }
 }
 
+/*
+ * Returns the uniform block definition for the frame-wide render values.
+ * Caution! The binding location is fixed to BaseShaderProgramOpenGl::FRAME_UBO_BINDING_POINT. To use this buffer and
+ * to avoid collisions with other UBOs, other shaders must comply.
+ *
+ * (Padded to 16 bytes due to std140!)
+ */
+const std::string BaseShaderProgramOpenGl::FRAME_UBO_DEFINITION =
+        OMMShaderCode(layout(std140) uniform FrameUniforms
+        {
+            highp mat4 vpMatrix;
+            highp vec4 origin;
+            highp vec2 frameSpecs; // x: screenPixelAsRealMeterFactor, y: timeFrameDeltaSeconds
+        } uFrameUniforms;
+);
+
+void BaseShaderProgramOpenGl::setupFrameUniforms(GLuint frameUniformsBuffer, int64_t vpMatrix, const Vec3D &origin,
+                                                 double screenPixelAsRealMeterFactor, double timeFrameDeltaSeconds) {
+    glBindBuffer(GL_UNIFORM_BUFFER, frameUniformsBuffer);
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, 4 * 4 * sizeof(GLfloat), (GLfloat *)vpMatrix);
+    std::array<GLfloat, 6> temp{
+        (GLfloat) origin.x,
+        (GLfloat) origin.y,
+        (GLfloat) origin.z,
+        1.0f,
+        (GLfloat) screenPixelAsRealMeterFactor,
+        (GLfloat) timeFrameDeltaSeconds,
+    };
+    glBufferSubData(GL_UNIFORM_BUFFER, 4 * 4 * sizeof(GLfloat), 6 * sizeof(GLfloat), &temp[0]);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+}
+
+void BaseShaderProgramOpenGl::setupGlObjects(const std::shared_ptr<::OpenGlContext> &context) {
+    // not used currently
+}
+
+void BaseShaderProgramOpenGl::clearGlObjects() {
+    program = GL_INVALID_INDEX;
+    frameUniformsBufferBlockIdx = GL_INVALID_INDEX;
+}
 
 std::string BaseShaderProgramOpenGl::getVertexShader() {
-    return OMMVersionedGlesShaderCode(320 es,
-                                      uniform mat4 uvpMatrix;
+    return OMMVersionedGlesShaderCodeWithFrameUBO(320 es,
                                       uniform mat4 umMatrix;
                                       uniform vec4 uOriginOffset;
                                       in vec4 vPosition;
@@ -80,7 +119,7 @@ std::string BaseShaderProgramOpenGl::getVertexShader() {
                                       out vec2 v_texcoord;
 
                                       void main() {
-                                          gl_Position = uvpMatrix * ((umMatrix * vPosition) + uOriginOffset);
+                                          gl_Position = uFrameUniforms.vpMatrix * ((umMatrix * vPosition) + uOriginOffset);
                                           v_texcoord = texCoordinate;
                                       }
     );
@@ -113,6 +152,26 @@ void BaseShaderProgramOpenGl::preRender(const std::shared_ptr<::RenderingContext
         case BlendMode::MULTIPLY: {
             glBlendFuncSeparate(GL_DST_COLOR, GL_ONE_MINUS_SRC_ALPHA, GL_DST_ALPHA, GL_ONE_MINUS_CONSTANT_ALPHA);
             break;
+        }
+    }
+
+    std::shared_ptr<OpenGlContext> openGlContext = std::dynamic_pointer_cast<OpenGlContext>(context);
+    if (openGlContext) {
+        if (program == GL_INVALID_INDEX) {
+            program = openGlContext->getProgram(getProgramName());
+        }
+
+        if (frameUniformsBufferBlockIdx == GL_INVALID_INDEX) {
+            frameUniformsBufferBlockIdx = glGetUniformBlockIndex(program, "FrameUniforms");
+            if (frameUniformsBufferBlockIdx == GL_INVALID_INDEX) {
+                LogError << "Uniform block FrameUniforms not found in shader " << getProgramName() <<= " - update shader to use the frame-wide uniform values.";
+                frameUniformsBufferBlockIdx = -2;
+            } else {
+                glUniformBlockBinding(program, frameUniformsBufferBlockIdx, FRAME_UBO_BINDING_POINT);
+            }
+        }
+        if (frameUniformsBufferBlockIdx >= 0) {
+            glBindBufferBase(GL_UNIFORM_BUFFER, FRAME_UBO_BINDING_POINT, openGlContext->getFrameUniformsBuffer());
         }
     }
 }

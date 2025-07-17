@@ -67,9 +67,11 @@ open class OffscreenMapRenderer(val sizePx: Vec2I, val density: Float = 72f) : G
 
 	protected open fun onGlThreadPause() {
 		requireMapInterface().pause()
+		requireMapInterface().getRenderingContext().asOpenGlRenderingContext()?.pause()
 	}
 
 	protected open fun onGlThreadResume() {
+		requireMapInterface().getRenderingContext().asOpenGlRenderingContext()?.resume()
 		requireMapInterface().resume()
 	}
 

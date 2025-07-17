@@ -38,7 +38,7 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
 
     const auto identityMatrixPointer = (int64_t) identityMatrix.data();
 
-    renderingContext->setupDrawFrame();
+    renderingContext->setupDrawFrame(vpMatrixPointer, origin, factor);
 
     for (const auto &[index, passes] : renderQueue) {
         for (const auto &pass : passes) {

@@ -89,7 +89,6 @@ void PolygonGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterfa
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-    vpMatrixHandle = glGetUniformLocation(program, "uvpMatrix");
     mMatrixHandle = glGetUniformLocation(program, "umMatrix");
     originOffsetHandle = glGetUniformLocation(program, "uOriginOffset");
     scaleFactorHandle = glGetUniformLocation(program, "scaleFactors");
@@ -151,8 +150,6 @@ void PolygonGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterf
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
     glUseProgram(program);
     glBindVertexArray(vao);
-
-    glUniformMatrix4fv(vpMatrixHandle, 1, false, (GLfloat *)vpMatrix);
 
     if(shaderProgram->usesModelMatrix()) {
         glUniformMatrix4fv(mMatrixHandle, 1, false, (GLfloat *) mMatrix);

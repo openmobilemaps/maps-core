@@ -58,6 +58,7 @@ protected:
     bool stylesUpdated = false;
     GLint numStyles = 0;
 
+    const static GLuint STYLE_UBO_BINDING = 1;
     const static int MAX_NUM_STYLES = 16;
     const int sizeStyleValues = 8;// isStriped ? 7 : 5 -> rounded to the nearest multiple of 16 bytes
     const int sizeStyleValuesArray = sizeStyleValues * MAX_NUM_STYLES;

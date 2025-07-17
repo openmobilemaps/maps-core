@@ -47,12 +47,11 @@ void ColorLineGroup2dShaderOpenGl::setupProgram(const std::shared_ptr<::Renderin
 
     openGlContext->storeProgram(programName, program);
 
-    // Bind LineStyleCollection at binding index 0
     GLuint lineStyleUniformBlockIdx = glGetUniformBlockIndex(program, "LineStyleCollection");
     if (lineStyleUniformBlockIdx == GL_INVALID_INDEX) {
         LogError <<= "Uniform block LineStyleCollection not found";
     }
-    glUniformBlockBinding(program, lineStyleUniformBlockIdx, 0);
+    glUniformBlockBinding(program, lineStyleUniformBlockIdx, STYLE_UBO_BINDING);
 }
 
 void ColorLineGroup2dShaderOpenGl::setupGlObjects(const std::shared_ptr<::OpenGlContext> &context) {
@@ -67,7 +66,6 @@ void ColorLineGroup2dShaderOpenGl::setupGlObjects(const std::shared_ptr<::OpenGl
 
     int program = context->getProgram(programName);
     dashingScaleFactorHandle = glGetUniformLocation(program, "dashingScaleFactor");
-    timeFrameDeltaHandle = glGetUniformLocation(program, "timeFrameDeltaSeconds");
 }
 
 void ColorLineGroup2dShaderOpenGl::clearGlObjects() {
@@ -78,13 +76,12 @@ void ColorLineGroup2dShaderOpenGl::clearGlObjects() {
         glDeleteBuffers(1, &lineStyleBuffer);
     }
     dashingScaleFactorHandle = -1;
-    timeFrameDeltaHandle = -1;
 }
 
 void ColorLineGroup2dShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context) {
     BaseShaderProgramOpenGl::preRender(context);
 
-    glBindBufferBase(GL_UNIFORM_BUFFER, 0, lineStyleBuffer); // LineStyleCollection is at binding index 0
+    glBindBufferBase(GL_UNIFORM_BUFFER, STYLE_UBO_BINDING, lineStyleBuffer);
 
     {
         std::lock_guard<std::recursive_mutex> lock(styleMutex);
@@ -94,10 +91,6 @@ void ColorLineGroup2dShaderOpenGl::preRender(const std::shared_ptr<::RenderingCo
 
         if (dashingScaleFactorHandle >= 0) {
             glUniform1f(dashingScaleFactorHandle, dashingScaleFactor);
-        }
-        if (timeFrameDeltaHandle >= 0) {
-            std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
-            glUniform1f(timeFrameDeltaHandle, (float) openGlContext->getDeltaTimeMs() / 1000.0f);
         }
 
         if (stylesUpdated) {
@@ -196,11 +189,9 @@ std::string ColorLineGroup2dShaderOpenGl::getVertexShader() {
     bool isSimple = isSimpleLine;
 
     return
-        OMMVersionedGlesShaderCode(320 es,
+        OMMVersionedGlesShaderCodeWithFrameUBO(320 es,
         precision highp float;
-        uniform mat4 uvpMatrix;
         uniform vec4 originOffset;
-        uniform float scalingFactor;
         ) +
 
         (is3d ? OMMShaderCode(
@@ -234,7 +225,7 @@ std::string ColorLineGroup2dShaderOpenGl::getVertexShader() {
             void main() {
                 float fStylingIndex = mod(stylingIndex, 256.0);
                 int index = clamp(int(floor(fStylingIndex + 0.5)), 0, uLineStyles.numStyles);
-                float width = uLineStyles.lineValues[index].width / 2.0 * scalingFactor;
+                float width = uLineStyles.lineValues[index].width / 2.0 * uFrameUniforms.frameSpecs.x;
                 ) +
 
                 (is3d ? OMMShaderCode(
@@ -257,7 +248,7 @@ std::string ColorLineGroup2dShaderOpenGl::getVertexShader() {
                                     uLineStyles.lineValues[index].colorB,
                                     uLineStyles.lineValues[index].colorA);
 
-                    gl_Position = uvpMatrix * extendedPosition;
+                    gl_Position = uFrameUniforms.vpMatrix * extendedPosition;
                 }
         );
 }
@@ -284,16 +275,14 @@ std::string ColorLineGroup2dShaderOpenGl::getSimpleLineFragmentShader() {
 }
 
 std::string ColorLineGroup2dShaderOpenGl::getLineFragmentShader() {
-    return OMMVersionedGlesShaderCode(320 es,
+    return OMMVersionedGlesShaderCodeWithFrameUBO(320 es,
                                       precision highp float;
            )
 
            + getLineStylesUBODefinition(isSimpleLine) +
 
            OMMShaderCode(
-                   uniform float scalingFactor;
                    uniform float dashingScaleFactor;
-                   uniform float timeFrameDeltaSeconds;
 
                    in vec4 outColor;
                    in float outLengthPrefix;
@@ -314,9 +303,9 @@ std::string ColorLineGroup2dShaderOpenGl::getLineFragmentShader() {
                        float aGap = style.gapColorA * opacity;
 
                        if(style.blur > 0.0) {
-                           float scaledWidth = style.width * scalingFactor;
+                           float scaledWidth = style.width * uFrameUniforms.frameSpecs.x;
                            float halfScaledWidth = scaledWidth / 2.0;
-                           float blur = style.blur * scalingFactor;
+                           float blur = style.blur * uFrameUniforms.frameSpecs.x;
                            float lineEdgeDistance = (1.0 - abs(outLineSide)) * halfScaledWidth;
                            float blurAlpha = clamp(lineEdgeDistance / blur, 0.0, 1.0);
 
@@ -337,10 +326,10 @@ std::string ColorLineGroup2dShaderOpenGl::getLineFragmentShader() {
                            float scaledWidth = style.width * dashingScaleFactor;
                            float halfScaledWidth = scaledWidth / 2.0;
                            float cycleLength = scaledWidth * skew;
-                           float timeOffset = timeFrameDeltaSeconds * style.dashAnimationSpeed * scaledWidth;
+                           float timeOffset = uFrameUniforms.frameSpecs.y * style.dashAnimationSpeed * scaledWidth;
                            float positionInCycle = mod(outLengthPrefix * skew + timeOffset, 2.0 * cycleLength) / cycleLength;
 
-                           float scalingRatio =  dashingScaleFactor / scalingFactor;
+                           float scalingRatio =  dashingScaleFactor / uFrameUniforms.frameSpecs.x;
                            vec2 pos = vec2((positionInCycle * 2.0 - 1.0) * scalingRatio, outLineSide);
 
                            if(dot(pos, pos) >= 1.0) {
@@ -348,7 +337,7 @@ std::string ColorLineGroup2dShaderOpenGl::getLineFragmentShader() {
                            }
                        } else if(style.numDashValues > 0.0) {
                            float scaledWidth = style.width * dashingScaleFactor;
-                           float timeOffset = timeFrameDeltaSeconds * style.dashAnimationSpeed * scaledWidth;
+                           float timeOffset = uFrameUniforms.frameSpecs.y * style.dashAnimationSpeed * scaledWidth;
                            float intraDashPos = mod(outLengthPrefix + timeOffset, style.dashArray3 * scaledWidth);
 
                            float dxt = style.dashArray0 * scaledWidth;

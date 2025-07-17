@@ -161,4 +161,5 @@ protected:
 private:
     bool writeToDynamicInstanceDataBuffer(const ::SharedBytes &data, GLuint targetOffsetBytes);
 
+    static const GLuint STYLE_UBO_BINDING = 1;
 };

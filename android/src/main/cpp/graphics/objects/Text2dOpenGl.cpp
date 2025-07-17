@@ -163,9 +163,6 @@ void Text2dOpenGl::prepareGlData(int program) {
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-    if (vpMatrixHandle < 0) {
-        vpMatrixHandle = glGetUniformLocation(program, "uvpMatrix");
-    }
     if (mMatrixHandle < 0) {
         mMatrixHandle = glGetUniformLocation(program, "umMatrix");
     }
@@ -254,9 +251,6 @@ void Text2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &co
 
     // Set texture coords scale factor
     glUniform2fv(textureCoordScaleFactorHandle, 1, &textureCoordScaleFactor[0]);
-
-    // Apply the projection and view transformation
-    glUniformMatrix4fv(vpMatrixHandle, 1, false, (GLfloat *)vpMatrix);
 
     if(shaderProgram->usesModelMatrix()) {
         glUniformMatrix4fv(mMatrixHandle, 1, false, (GLfloat *) mMatrix);

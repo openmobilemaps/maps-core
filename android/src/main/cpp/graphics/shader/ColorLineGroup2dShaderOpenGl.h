@@ -58,7 +58,6 @@ private:
     const std::string programName;
 
     GLint dashingScaleFactorHandle = -1;
-    GLint timeFrameDeltaHandle = -1;
 
     std::recursive_mutex styleMutex;
     GLuint lineStyleBuffer = 0;
@@ -68,6 +67,7 @@ private:
 
     float dashingScaleFactor = 1.0;
 
+    static const GLuint STYLE_UBO_BINDING = 1;
     static const int MAX_NUM_STYLES = 32;
     //const int sizeStyleValues = 3;
     //const int sizeColorValues = 4;

@@ -180,6 +180,10 @@ Tiled2dMapVectorSymbolLabelObject::Tiled2dMapVectorSymbolLabelObject(const std::
 
         screenLineCoordinates = renderLineCoordinates;
         renderLineCoordinatesCount = renderLineCoordinates.size();
+
+        if(!is3d) {
+            currentReferencePointIndex = findReferencePointIndices();
+        }
     } else {
         renderLineCoordinatesCount = 0;
     }
@@ -376,7 +380,7 @@ void Tiled2dMapVectorSymbolLabelObject::updateProperties(VectorModificationWrapp
             if (rotationAlignment == SymbolAlignment::VIEWPORT) {
                 updatePropertiesPoint(positions, referencePositions, scales, rotations, alphas, countOffset, alphaFactor, zoomIdentifier, scaleFactor, rotation, viewportSize);
             } else {
-                setupCamera(vpMatrix, origin, viewportSize);
+                setupCameraFor3D(vpMatrix, origin, viewportSize);
                 auto rotatedFactor = updatePropertiesLine(positions, referencePositions, scales, rotations, alphas, countOffset, alphaFactor, zoomIdentifier, scaleFactor, rotation, viewportSize);
 
                 if(rotatedFactor > 0.5 && lineCoordinates) {
@@ -384,12 +388,16 @@ void Tiled2dMapVectorSymbolLabelObject::updateProperties(VectorModificationWrapp
                     std::reverse(renderLineCoordinates.begin(), renderLineCoordinates.end());
                     std::reverse(screenLineCoordinates.begin(), screenLineCoordinates.end());
                     std::reverse(cartesianRenderLineCoordinates.begin(), cartesianRenderLineCoordinates.end());
+                    if(!is3d) {
+                        currentReferencePointIndex = findReferencePointIndices();
+                    }
 
                     wasReversed = !wasReversed;
 
                     countOffset -= characterCount;
 
-                    setupCamera(vpMatrix, origin, viewportSize);
+                    setupCameraFor3D(vpMatrix, origin, viewportSize);
+
                     updatePropertiesLine(positions, referencePositions, scales, rotations, alphas, countOffset, alphaFactor, zoomIdentifier, scaleFactor, rotation, viewportSize);
                 }
             }
@@ -597,8 +605,8 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(VectorModification
     Vec3D boundingBoxMin(std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), referencePoint.z);
     Vec3D boundingBoxMax(std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest(), referencePoint.z);
 
-    const double sinAngle = lut::sin(angle * M_PI / 180.0);
-    const double cosAngle = lut::cos(angle * M_PI / 180.0);
+    double sinAngle, cosAngle;
+    lut::sincos(angle * M_PI / 180.0, sinAngle, cosAngle);
     Vec2D anchorOffsetRot = Vec2DHelper::rotate(anchorOffset, Vec2D(0, 0), sinAngle, cosAngle);
 
     const auto dx = referencePoint.x + anchorOffset.x;
@@ -710,7 +718,7 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(VectorModificatio
     centerPositions.clear();
     centerPositions.reserve(characterCount);
 
-    auto currentIndex = findReferencePointIndices();
+    auto currentIndex = currentReferencePointIndex;
 
     double size = 0;
     const auto &glyphs = fontResult->fontData->glyphs;
@@ -971,7 +979,7 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(VectorModificatio
     return diff > 95.0 ? 1.0 : 0.0; // flip with margin to prevent rapid flips
 }
 
-void Tiled2dMapVectorSymbolLabelObject::setupCamera(const std::vector<float>& vpMatrix, const Vec3D& origin, const Vec2I& viewportSize) {
+void Tiled2dMapVectorSymbolLabelObject::setupCameraFor3D(const std::vector<float>& vpMatrix, const Vec3D& origin, const Vec2I& viewportSize) {
 
     // only needed for 3d text on line rendering
     if(!is3d || (renderLineCoordinatesCount == 0)) { return; }
@@ -1006,6 +1014,7 @@ void Tiled2dMapVectorSymbolLabelObject::setupCamera(const std::vector<float>& vp
 
     // don't care about systemIdentifier, only used for findReferencePointIndices
     referencePointScreen = Vec3D((double)posScreenX, (double)posScreenY, 0.0);
+    currentReferencePointIndex = findReferencePointIndices();
 }
 
 DistanceIndex Tiled2dMapVectorSymbolLabelObject::findReferencePointIndices() {

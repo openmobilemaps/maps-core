@@ -416,6 +416,12 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                     maxZoom = sourceDesc->maxZoom;
                 }
             }
+            for (const auto &[identifier, source] : geojsonSources) {
+                if (identifier == val["source"]) {
+                    minZoom = source->getMinZoom();
+                    maxZoom = source->getMaxZoom();
+                }
+            }
 
             float selectionSizeFactor = 1.0;
             if (!val["metadata"].is_null()) {
@@ -496,6 +502,12 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                     maxZoom = sourceDesc->maxZoom;
                 }
             }
+            for (const auto &[identifier, source] : geojsonSources) {
+                if (identifier == val["source"]) {
+                    minZoom = source->getMinZoom();
+                    maxZoom = source->getMaxZoom();
+                }
+            }
 
             auto layerDesc = std::make_shared<SymbolVectorLayerDescription>(val["id"],
                                                                             val["source"],
@@ -527,6 +539,12 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                 if (sourceDesc->identifier == val["source"]) {
                     minZoom = sourceDesc->minZoom;
                     maxZoom = sourceDesc->maxZoom;
+                }
+            }
+            for (const auto &[identifier, source] : geojsonSources) {
+                if (identifier == val["source"]) {
+                    minZoom = source->getMinZoom();
+                    maxZoom = source->getMaxZoom();
                 }
             }
 

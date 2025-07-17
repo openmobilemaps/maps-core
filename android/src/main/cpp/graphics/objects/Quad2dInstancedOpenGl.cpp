@@ -148,12 +148,8 @@ void Quad2dInstancedOpenGl::prepareGlData(int program) {
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-    vpMatrixHandle = glGetUniformLocation(program, "uvpMatrix");
     mMatrixHandle = glGetUniformLocation(program, "umMatrix");
     originOffsetHandle = glGetUniformLocation(program, "uOriginOffset");
-    if (is3d) {
-        originHandle = glGetUniformLocation(program, "uOrigin");
-    }
 
     glDataBuffersGenerated = true;
 }
@@ -291,17 +287,11 @@ void Quad2dInstancedOpenGl::render(const std::shared_ptr<::RenderingContextInter
 
     shaderProgram->preRender(context);
 
-    // Apply the projection and view transformation
-    glUniformMatrix4fv(vpMatrixHandle, 1, false, (GLfloat *)vpMatrix);
-
     if(shaderProgram->usesModelMatrix()) {
         glUniformMatrix4fv(mMatrixHandle, 1, false, (GLfloat *) mMatrix);
     }
 
     glUniform4f(originOffsetHandle, quadsOrigin.x - origin.x, quadsOrigin.y - origin.y, quadsOrigin.z - origin.z, 0.0);
-    if (is3d) {
-        glUniform4f(originHandle, origin.x, origin.y, origin.z, 0.0);
-    }
 
     // Draw the triangles
     glDrawElementsInstanced(GL_TRIANGLES,6, GL_UNSIGNED_BYTE, nullptr, instanceCount);

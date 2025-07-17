@@ -98,7 +98,6 @@ void PolygonPatternGroup2dOpenGl::prepareGlData(int program) {
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-    vpMatrixHandle = glGetUniformLocation(program, "uvpMatrix");
     mMatrixHandle = glGetUniformLocation(program, "umMatrix");
     originOffsetHandle = glGetUniformLocation(program, "uOriginOffset");
 
@@ -203,9 +202,6 @@ PolygonPatternGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInte
     glUniform1fv(opacitiesHandle, sizeOpacitiesValuesArray, &opacities[0]);
 
     shaderProgram->preRender(context);
-
-    // Apply the projection and view transformation
-    glUniformMatrix4fv(vpMatrixHandle, 1, false, (GLfloat *)vpMatrix);
 
     if(shaderProgram->usesModelMatrix()) {
         glUniformMatrix4fv(mMatrixHandle, 1, false, (GLfloat *) mMatrix);

@@ -95,7 +95,7 @@ public:
 private:
     void precomputeMedianIfNeeded();
 
-    void setupCamera(const std::vector<float>& vpMatrix, const Vec3D& origin, const Vec2I& viewportSize);
+    void setupCameraFor3D(const std::vector<float>& vpMatrix, const Vec3D& origin, const Vec2I& viewportSize);
 
     void writePosition(const double x, const double y, const size_t offset, VectorModificationWrapper<float> &buffer);
 
@@ -227,6 +227,7 @@ private:
     std::vector<Vec3D> screenLineCoordinates;
     std::vector<Vec3D> cartesianRenderLineCoordinates;
     std::optional<std::vector<Vec2D>> lineCoordinates;
+    DistanceIndex currentReferencePointIndex = DistanceIndex(0, 0.0);
 
     double textSize = 0;
     double textRotate = 0;

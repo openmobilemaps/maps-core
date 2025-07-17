@@ -49,31 +49,28 @@ void PolygonPatternGroup2dShaderOpenGl::preRender(const std::shared_ptr<::Render
 std::string PolygonPatternGroup2dShaderOpenGl::getVertexShader() {
     return fadeInPattern ?
            // Fade-In Pattern Shader
-           OMMVersionedGlesShaderCode(320 es,
+           OMMVersionedGlesShaderCodeWithFrameUBO(320 es,
                                       in vec3 vPosition;
                                               in float vStyleIndex;
 
-                                              uniform mat4 uvpMatrix;
                                               uniform vec2 uScalingFactor;
                                               uniform vec4 uOriginOffset;
-                                              uniform float uScreenPixelAsRealMeterFactor;
 
                                               out vec2 pixelPosition;
                                               out flat uint styleIndex;
 
                                               void main() {
                                                   // fadeInPattern
-                                                  pixelPosition = vPosition.xy / vec2(uScreenPixelAsRealMeterFactor);
-                                                  gl_Position = uvpMatrix * (vec4(vPosition, 1.0) + uOriginOffset);
+                                                  pixelPosition = vPosition.xy / vec2(uFrameUniforms.frameSpecs.x);
+                                                  gl_Position = uFrameUniforms.vpMatrix * (vec4(vPosition, 1.0) + uOriginOffset);
                                                   styleIndex = uint(floor(vStyleIndex + 0.5));
                                               }
            ) :
            // Default Pattern Shader
-           OMMVersionedGlesShaderCode(320 es,
+           OMMVersionedGlesShaderCodeWithFrameUBO(320 es,
                                       in vec3 vPosition;
                                               in float vStyleIndex;
 
-                                              uniform mat4 uvpMatrix;
                                               uniform vec2 uScalingFactor;
                                               uniform vec4 uOriginOffset;
 
@@ -83,7 +80,7 @@ std::string PolygonPatternGroup2dShaderOpenGl::getVertexShader() {
                                               void main() {
                                                   // DefaultBehavior
                                                   pixelPosition = vPosition.xy / uScalingFactor;
-                                                  gl_Position = uvpMatrix * (vec4(vPosition, 1.0) + uOriginOffset);
+                                                  gl_Position = uFrameUniforms.vpMatrix * (vec4(vPosition, 1.0) + uOriginOffset);
                                                   styleIndex = uint(floor(vStyleIndex + 0.5));
                                               }
            );
@@ -92,14 +89,13 @@ std::string PolygonPatternGroup2dShaderOpenGl::getVertexShader() {
 std::string PolygonPatternGroup2dShaderOpenGl::getFragmentShader() {
     return fadeInPattern ?
            // Fade-In Pattern Shader
-           OMMVersionedGlesShaderCode(320 es,
+           OMMVersionedGlesShaderCodeWithFrameUBO(320 es,
                                       precision highp float;
 
                                               uniform sampler2D uTextureSampler;
                                               uniform vec2 uTextureFactor;
                                               uniform float textureCoordinates[5 * 16];
                                               uniform float opacities[16];
-                                              uniform float uScreenPixelAsRealMeterFactor;
                                               uniform vec2 uScalingFactor;
 
                                               in vec2 pixelPosition;
@@ -128,7 +124,7 @@ std::string PolygonPatternGroup2dShaderOpenGl::getFragmentShader() {
                                                   vec2 pixelSize = vec2(mod(combined, 65536.0), combined / 65536.0);
                                                   vec4 resultColor = vec4(0.0, 0.0, 0.0, 0.0);
                                                   float scalingFactorFactor =
-                                                          (uScalingFactor.x / uScreenPixelAsRealMeterFactor) - 1.0;
+                                                          (uScalingFactor.x / uFrameUniforms.frameSpecs.x) - 1.0;
                                                   vec2 spacing = pixelSize * scalingFactorFactor;
                                                   vec2 totalSize = pixelSize + spacing;
                                                   vec2 adjustedPixelPosition = pixelPosition + pixelSize * 0.5;

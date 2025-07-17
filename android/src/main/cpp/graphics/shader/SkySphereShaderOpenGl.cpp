@@ -58,8 +58,7 @@ void SkySphereShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextIn
 }
 
 std::string SkySphereShaderOpenGl::getVertexShader() {
-    return OMMVersionedGlesShaderCode(320 es,
-                                      uniform mat4 uvpMatrix;
+    return OMMVersionedGlesShaderCodeWithFrameUBO(320 es,
                                       uniform mat4 umMatrix;
                                       in vec4 vPosition;
                                       in vec2 texCoordinate;
@@ -74,10 +73,9 @@ std::string SkySphereShaderOpenGl::getVertexShader() {
 }
 
 std::string SkySphereShaderOpenGl::getFragmentShader() {
-    return OMMVersionedGlesShaderCode(320 es,
+    return OMMVersionedGlesShaderCodeWithFrameUBO(320 es,
                                       precision mediump float;
                                       uniform vec4 uOriginOffset;
-                                      uniform vec4 uOrigin;
                                       uniform vec4 uCameraPosition;
                                       uniform mat4 uInverseVPMatrix;
                                       uniform sampler2D textureSampler;

@@ -109,8 +109,7 @@ Coord CoordinateConversionHelper::convert(const int32_t to, const Coord &coordin
         return intermediateCoord;
     }
 
-    throw std::invalid_argument("Could not find an eligible converter from: \'" + std::to_string(coordinate.systemIdentifier) + "\' to \'" + std::to_string(to) +
-                                "\'");
+    abort();
 }
 
 RectCoord CoordinateConversionHelper::convertRect(const int32_t to, const RectCoord &rect) {

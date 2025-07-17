@@ -806,6 +806,50 @@ private:
     const std::string key;
 };
 
+// MaybeGetPropertyValue is roughly equivalent to
+//   if [ has key ] {
+//      [ get key ]
+//   } else {
+//      [ literal key ]
+//   }
+//
+// Does _not_ lookup "zoom".
+// This functionality serves as shorthand syntax for property lookups in logical operators.
+class MaybeGetPropertyValue : public Value {
+public:
+    MaybeGetPropertyValue(const std::string key) : key(key) {};
+
+    std::unique_ptr<Value> clone() override {
+        return std::make_unique<MaybeGetPropertyValue>(key);
+    }
+
+    UsedKeysCollection getUsedKeys() const override {
+        return UsedKeysCollection({ key });
+    }
+
+    ValueVariant evaluate(const EvaluationContext &context) const override {
+        const auto lookupResult = context.feature->getValue(key);
+        if(!std::holds_alternative<std::monostate>(lookupResult)) {
+            return lookupResult;
+        }
+        return key;
+    }
+
+    bool isEqual(const std::shared_ptr<Value> &other) const override {
+        if (auto casted = std::dynamic_pointer_cast<MaybeGetPropertyValue>(other)) {
+            return casted->key == key;
+        }
+        return false;
+    };
+
+    bool isGettingPropertyValues() override {
+        return true;
+    }
+
+private:
+    const std::string key;
+};
+
 class FeatureStateValue : public Value {
 public:
     FeatureStateValue(const std::string key) : key(key) {};
@@ -907,87 +951,12 @@ public:
     }
 
     UsedKeysCollection getUsedKeys() const override {
-        if (std::holds_alternative<std::string>(value)) {
-            std::string res = std::get<std::string>(value);
-            VectorSet<std::string> usedKeys = { res };
-
-            auto begin = res.find("{");
-            auto end = res.find("}", begin);
-
-            while ( begin != std::string::npos &&
-                    end != std::string::npos &&
-                    end > begin &&
-                    (begin == 0 || res[begin - 1] != '\\') &&
-                    (end == 0 || res[end - 1] != '\\')) {
-
-                std::string key = res.substr (begin + 1,(end - begin) - 1);
-                usedKeys.insert(key);
-                begin = res.find("{", (begin + key.size()));
-                end = res.find("}", begin);
-            }
-
-            return std::move(usedKeys);
-
-        } else if (std::holds_alternative<std::vector<std::string>>(value)) {
-            const auto& res = std::get<std::vector<std::string>>(value);
-            if (!res.empty() && *res.begin() == "zoom") {
-                return UsedKeysCollection({ "zoom" });
-            }
-            return UsedKeysCollection();
-        } else {
-            return UsedKeysCollection();
-        }
-
+          return UsedKeysCollection();
     }
 
     ValueVariant evaluate(const EvaluationContext &context) const override {
-        if (std::holds_alternative<std::string>(value)) {
-            std::string res = std::get<std::string>(value);
-
-            const auto &result = context.feature->getValue(res);
-
-            if(!std::holds_alternative<std::monostate>(result)) {
-                return result;
-            }
-
-            auto begin = res.find("{");
-            auto end = res.find("}", begin);
-
-            while ( begin != std::string::npos &&
-                   end != std::string::npos &&
-                   end > begin &&
-                   (begin == 0 || res[begin - 1] != '\\') &&
-                   (end == 0 || res[end - 1] != '\\')) {
-
-                std::string key = res.substr (begin + 1,(end - begin) - 1);
-
-                std::string replacement = ToStringValue(std::make_shared<GetPropertyValue>(key)).evaluateOr(context, std::string());
-
-                res.replace(begin,end + 1, replacement);
-
-                begin = res.find("{", (begin + replacement.size()));
-                end = res.find("}", begin);
-            }
-
-            return res;
-
-        } else if (std::holds_alternative<std::vector<std::string>>(value)) {
-            const auto& res = std::get<std::vector<std::string>>(value);
-            if (!res.empty() && *res.begin() == "zoom") {
-                return context.zoomLevel ? *context.zoomLevel : ValueVariant{};
-            }
-
-            return value;
-        } else {
-
-            return value;
-        }
-
+          return value;
     };
-
-    bool isGettingPropertyValues() override {
-        return true;
-    }
 
     bool isStaticNumber() {
         return std::holds_alternative<double>(value) ||
@@ -1016,6 +985,78 @@ public:
     };
 private:
     const ValueVariant value;
+};
+
+// StringInterpolationValue builds a string value from literal string "parts" and property lookups:
+//   parts[0] + ["get" keys[0]] + parts[1] + ["get" keys[1]] + ... + parts[N] + ["get" keys[N]] + parts[N+1]
+// corresponding to string interpolation expressions like "part0{key0}part1{key1}part2..."
+class StringInterpolationValue : public Value {
+public:
+    StringInterpolationValue(std::vector<std::string> keys_, std::vector<std::string> parts_)
+        : keys(std::move(keys_))
+        , parts(std::move(parts_)) {
+        assert(parts.size() == keys.size() + 1);
+
+        for (const auto &key : keys) {
+            toStringExprs.emplace_back(std::make_shared<GetPropertyValue>(key));
+        }
+    }
+
+    std::unique_ptr<Value> clone() override {
+        return std::make_unique<StringInterpolationValue>(keys, parts);
+    }
+
+    UsedKeysCollection getUsedKeys() const override {
+        VectorSet<std::string> usedKeys;
+        for(const auto &key : keys) {
+          usedKeys.insert(key);
+        }
+        return usedKeys;
+    }
+
+    ValueVariant evaluate(const EvaluationContext &context) const override {
+        std::stringstream ss;
+        for(size_t i = 0; i < toStringExprs.size(); ++i) {
+            ss << parts[i];
+            ss << toStringExprs[i].evaluateOr(context, std::string());
+        }
+        ss << parts[parts.size()-1];
+        return ss.str();
+    }
+
+    bool isGettingPropertyValues() override {
+        return true;
+    }
+
+    bool isEqual(const std::shared_ptr<Value> &other) const override {
+        if (auto casted = std::dynamic_pointer_cast<StringInterpolationValue>(other)) {
+            return casted->keys == keys && casted->parts == parts;
+        }
+        return false;
+    }
+
+private:
+    const std::vector<std::string> keys;
+    const std::vector<std::string> parts;
+    std::vector<ToStringValue> toStringExprs;
+};
+
+class ZoomValue: public Value {
+    std::unique_ptr<Value> clone() override {
+        return std::make_unique<ZoomValue>();
+    }
+
+    UsedKeysCollection getUsedKeys() const override {
+          return UsedKeysCollection({ "zoom" });
+    }
+
+    ValueVariant evaluate(const EvaluationContext &context) const override {
+        return context.zoomLevel ? *context.zoomLevel : ValueVariant{};
+    };
+
+    bool isEqual(const std::shared_ptr<Value> &other) const override {
+        return (std::dynamic_pointer_cast<StaticValue>(other) != nullptr);
+    };
 };
 
 class HasPropertyValue : public Value {

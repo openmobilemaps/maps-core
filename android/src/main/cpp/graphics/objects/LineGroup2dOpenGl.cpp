@@ -110,7 +110,6 @@ void LineGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface>
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-    vpMatrixHandle = glGetUniformLocation(program, "uvpMatrix");
     mMatrixHandle = glGetUniformLocation(program, "umMatrix");
     originOffsetHandle = glGetUniformLocation(program, "originOffset");
     lineOriginHandle = glGetUniformLocation(program, "uLineOrigin");
@@ -161,18 +160,11 @@ void LineGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface
 
     glBindVertexArray(vao);
 
-    // Apply the projection and view transformation
-    glUniformMatrix4fv(vpMatrixHandle, 1, false, (GLfloat *)vpMatrix);
-
     if(shaderProgram->usesModelMatrix()) {
         glUniformMatrix4fv(mMatrixHandle, 1, false, (GLfloat *)mMatrix);
     }
 
     glUniform4f(originOffsetHandle, lineOrigin.x - origin.x, lineOrigin.y - origin.y, lineOrigin.z - origin.z, 0.0);
-    if (lineOriginHandle >= 0) {
-        glUniform4f(lineOriginHandle, lineOrigin.x, lineOrigin.y, lineOrigin.z, 0.0);
-    }
-    glUniform1f(scaleFactorHandle, screenPixelAsRealMeterFactor);
 
     shaderProgram->preRender(openGlContext);
 

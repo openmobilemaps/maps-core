@@ -57,14 +57,13 @@ void SphereEffectShaderOpenGl::setEllipse(const SharedBytes &coefficients) {
 
 std::string SphereEffectShaderOpenGl::getVertexShader() {
     return OMMVersionedGlesShaderCode(320 es,
-                                      uniform mat4 uvpMatrix;
                                               uniform mat4 umMatrix;
                                               in vec4 vPosition;
                                               in vec2 texCoordinate;
                                               out vec2 v_texcoord;
 
                                               void main() {
-                                                  gl_Position = uvpMatrix * umMatrix * vPosition;
+                                                  gl_Position = umMatrix * vPosition;
                                                   v_texcoord = texCoordinate;
                                               }
     );
