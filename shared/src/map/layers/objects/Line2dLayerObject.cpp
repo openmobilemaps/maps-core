@@ -142,6 +142,8 @@ void Line2dLayerObject::setStyle(const LineStyle &style, bool highlighted) {
     shader->setStyles(buffer);
 }
 
+void Line2dLayerObject::setScalingFactor(float factor) { shader->setDashingScaleFactor(factor); }
+
 std::shared_ptr<GraphicsObjectInterface> Line2dLayerObject::getLineObject() { return line->asGraphicsObject(); }
 
 std::shared_ptr<ShaderProgramInterface> Line2dLayerObject::getShaderProgram() { return shader->asShaderProgramInterface(); }

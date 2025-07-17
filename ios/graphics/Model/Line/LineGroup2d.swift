@@ -115,8 +115,8 @@ final class LineGroup2d: BaseGraphicsObject, @unchecked Sendable {
             bufferPointer.pointee.y = Float(originOffset.y - origin.y)
             bufferPointer.pointee.z = Float(originOffset.z - origin.z)
         }
-        encoder.setVertexBuffer(originOffsetBuffer, offset: 0, index: 5)
-        encoder.setVertexBuffer(tileOriginBuffer, offset: 0, index: 6)
+        encoder.setVertexBuffer(originOffsetBuffer, offset: 0, index: 4)
+        encoder.setVertexBuffer(tileOriginBuffer, offset: 0, index: 5)
 
         encoder.drawIndexedPrimitives(
             type: .triangle,

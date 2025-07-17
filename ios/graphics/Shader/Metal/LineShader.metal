@@ -150,10 +150,9 @@ vertex LineVertexOut
 unitSphereLineGroupVertexShader(const LineVertexUnitSphereIn vertexIn [[stage_in]],
                       constant float4x4 &vpMatrix [[buffer(1)]],
                       constant float &scalingFactor [[buffer(2)]],
-                      constant float &dashingScalingFactor [[buffer(3)]],
-                      constant half *styling [[buffer(4)]],
-                      constant float4 &originOffset [[buffer(5)]],
-                      constant float4 &tileOrigin [[buffer(6)]])
+                      constant half *styling [[buffer(3)]],
+                      constant float4 &originOffset [[buffer(4)]],
+                      constant float4 &tileOrigin [[buffer(5)]])
 {
     int styleIndex = (int(vertexIn.stylingIndex) & 0xFF) * 23;
     constant LineStyling *style = (constant LineStyling *)(styling + styleIndex);
@@ -177,10 +176,9 @@ vertex LineVertexOut
 lineGroupVertexShader(const LineVertexIn vertexIn [[stage_in]],
                       constant float4x4 &vpMatrix [[buffer(1)]],
                       constant float &scalingFactor [[buffer(2)]],
-                      constant float &dashingScalingFactor [[buffer(3)]],
-                      constant half *styling [[buffer(4)]],
-                      constant float4 &originOffset [[buffer(5)]],
-                      constant float4 &tileOrigin [[buffer(6)]])
+                      constant half *styling [[buffer(3)]],
+                      constant float4 &originOffset [[buffer(4)]],
+                      constant float4 &tileOrigin [[buffer(5)]])
 {
     int styleIndex = (int(vertexIn.stylingIndex) & 0xFF) * 23;
     constant LineStyling *style = (constant LineStyling *)(styling + styleIndex);
@@ -205,7 +203,8 @@ fragment half4
 lineGroupFragmentShader(LineVertexOut in [[stage_in]],
                         constant half *styling [[buffer(1)]],
                         constant float &time [[buffer(2)]],
-                        constant float &scalingFactor [[buffer(3)]])
+                        constant float &scalingFactor [[buffer(3)]],
+                        constant float &dashingScalingFactor [[buffer(4)]])
 {
   constant LineStyling *style = (constant LineStyling *)(styling + in.stylingIndex);
 
@@ -215,8 +214,6 @@ lineGroupFragmentShader(LineVertexOut in [[stage_in]],
       discard_fragment();
   }
 
-  const float scaledWidth = style->width * scalingFactor;
-  const float halfScaledWidth = scaledWidth / 2.0;
 
   float a = style->color.a * opacity;
   float aGap = style->gapColor.a * opacity;
@@ -226,6 +223,8 @@ lineGroupFragmentShader(LineVertexOut in [[stage_in]],
   const half numDash = style->numDashValues;
 
   if (style->blur > 0) {
+      const float scaledWidth = style->width * scalingFactor;
+      const float halfScaledWidth = scaledWidth / 2.0;
       const float blur = (style->blur) * scalingFactor; // screen units
       const float lineEdgeDistance = (1.0 - abs(in.lineSide)) * halfScaledWidth; // screen units
       const float blurAlpha = clamp(lineEdgeDistance / blur, 0.0, 1.0);
@@ -244,21 +243,27 @@ lineGroupFragmentShader(LineVertexOut in [[stage_in]],
   if (dottedLine == 1) {
     const float skew = style->dottedSkew;
 
-    const float cycleLength = style->width * scalingFactor * skew;
-    const float timeOffset = time * style->dash_animation_speed * scaledWidth;
-    const float positionInCycle = fmod(in.lengthPrefix * skew  + timeOffset, 2.0 * cycleLength) / cycleLength;
+    const float scaledWidth = style->width * dashingScalingFactor;
 
-    float2 pos = float2(positionInCycle * 2.0 - 1.0, in.lineSide);
+    const float cycleLength = style->width * dashingScalingFactor * skew;
+
+    const float timeOffset = time * style->dash_animation_speed * scaledWidth;
+    const float positionInCycle = fmod(in.lengthPrefix * skew + timeOffset, 2.0 * cycleLength) / cycleLength;
+
+    const float scalingRatio =  dashingScalingFactor / scalingFactor;
+    float2 pos = float2((positionInCycle * 2.0 - 1.0) * scalingRatio, in.lineSide);
 
     if(dot(pos, pos) >= 1.0) {
       discard_fragment();
     }
   } else if(numDash > 0) {
 
+    const float scaledWidth = style->width * dashingScalingFactor;
     const float timeOffset = time * style->dash_animation_speed * scaledWidth;
     const float intraDashPos = fmod(in.lengthPrefix + timeOffset, (float)style->dashArray.w * scaledWidth);
 
-    half4 dashArray = style->dashArray * scaledWidth;
+    // here float has to be used for accuracy
+    float4 dashArray = float4(style->dashArray) * scaledWidth;
     float dxt = dashArray.x;
     float dyt = dashArray.y;
     float dzt = dashArray.z;

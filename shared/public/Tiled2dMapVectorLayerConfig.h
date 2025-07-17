@@ -105,7 +105,6 @@ public:
     virtual double getZoomFactorAtIdentifier(double zoomIdentifier) {
         double factor = pow(2, zoomIdentifier);
         return baseValueZoom * zoomInfo.zoomLevelScaleFactor / factor;
-
     }
 
     std::optional<::RectCoord> getBounds() override {

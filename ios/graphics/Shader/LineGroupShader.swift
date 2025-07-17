@@ -39,9 +39,7 @@ class LineGroupShader: BaseShader, @unchecked Sendable {
 
         encoder.setVertexBytes(&screenPixelAsRealMeterFactor, length: MemoryLayout<Float>.stride, index: 2)
 
-        encoder.setVertexBytes(&dashingScaleFactor, length: MemoryLayout<Float>.stride, index: 3)
-
-        encoder.setVertexBuffer(lineStyleBuffer, offset: 0, index: 4)
+        encoder.setVertexBuffer(lineStyleBuffer, offset: 0, index: 3)
 
         encoder.setFragmentBuffer(lineStyleBuffer, offset: 0, index: 1)
 
@@ -53,6 +51,7 @@ class LineGroupShader: BaseShader, @unchecked Sendable {
         }
 
         encoder.setFragmentBytes(&screenPixelAsRealMeterFactor, length: MemoryLayout<Float>.stride, index: 3)
+        encoder.setFragmentBytes(&dashingScaleFactor, length: MemoryLayout<Float>.stride, index: 4)
 
     }
 }
