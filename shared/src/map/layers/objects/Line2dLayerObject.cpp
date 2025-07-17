@@ -118,10 +118,17 @@ void Line2dLayerObject::setStyle(const LineStyle &style, bool highlighted) {
     auto dashArray = style.dashArray;
     auto dn = dashArray.size();
     s.numDashValue = toHalfFloat(dn);
-    s.dashValue0 = toHalfFloat(dn > 0 ? dashArray[0] : 0.0);
-    s.dashValue1 = toHalfFloat((dn > 1 ? dashArray[1] : 0.0) + s.dashValue0);
-    s.dashValue2 = toHalfFloat((dn > 2 ? dashArray[2] : 0.0) + s.dashValue1);
-    s.dashValue3 = toHalfFloat((dn > 3 ? dashArray[3] : 0.0) + s.dashValue2);
+
+    float dashValue0 = (dn > 0 ? dashArray[0] : 0.0);
+    float dashValue1 = ((dn > 1 ? dashArray[1] : 0.0) + dashValue0);
+    float dashValue2 = ((dn > 2 ? dashArray[2] : 0.0) + dashValue1);
+    float dashValue3 = ((dn > 3 ? dashArray[3] : 0.0) + dashValue2);
+
+    s.dashValue0 = toHalfFloat(dashValue0);
+    s.dashValue1 = toHalfFloat(dashValue1);
+    s.dashValue2 = toHalfFloat(dashValue2);
+    s.dashValue3 = toHalfFloat(dashValue3);
+
     s.dashFade = toHalfFloat(style.dashFade);
     s.dashAnimationSpeed = toHalfFloat(style.dashAnimationSpeed);
 

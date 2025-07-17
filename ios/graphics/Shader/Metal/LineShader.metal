@@ -190,10 +190,6 @@ lineGroupVertexShader(const LineVertexIn vertexIn [[stage_in]],
 
     const float4 extendedPosition = float4(vertexIn.position + vertexIn.extrude * width, 0.0, 1.0) + originOffset;
 
-    float2 lineDir = float2(-vertexIn.extrude.y, vertexIn.extrude.x);
-    float2 offset = vertexIn.extrude * vertexIn.lineSide;
-    float correction = dot(offset, lineDir);
-
     LineVertexOut out {
         .position = vpMatrix * extendedPosition,
         .stylingIndex = styleIndex,
