@@ -52,6 +52,7 @@ public class OffscreenMapRenderer {
         map.getRenderingContext().onSurfaceCreated();
         map.setViewportSize(new Vec2I(width, height));
         map.setBackgroundColor(new Color(0.0f, 0.0f, 0.0f, 0.0f));
+        map.getRenderingContext().asOpenGlRenderingContext().resume();
     }
 
     public void destroy() {
