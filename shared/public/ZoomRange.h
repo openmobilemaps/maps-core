@@ -20,10 +20,6 @@ struct ZoomRange {
         return minZoom == 0.0 && maxZoom == std::numeric_limits<double>::infinity();
     }
 
-    bool contains(double zoom) const {
-        return zoom >= minZoom && zoom <= maxZoom;
-    }
-
     void merge(double min, double max) {
         if (min < minZoom) { minZoom = min; }
         if (max > maxZoom) { maxZoom = max; }
@@ -34,3 +30,31 @@ struct ZoomRange {
         maxZoom = std::numeric_limits<double>::infinity();
     }
 };
+
+struct ZoomEvaluation {
+    ZoomEvaluation() {};
+
+    ZoomEvaluation(double evaluatedZoom, const ZoomRange& range)
+    : zoomRange(range), evaluatedZoom(evaluatedZoom) {}
+
+    bool needsReevaluation(float currentZoom) const {
+        if(evaluatedZoom > zoomRange.maxZoom && currentZoom > zoomRange.maxZoom) {
+            return false;
+        }
+
+        if(evaluatedZoom < zoomRange.minZoom && currentZoom < zoomRange.minZoom) {
+            return false;
+        }
+
+        return true;
+    }
+
+    void setFullRange() {
+        zoomRange.setFullRange();
+        evaluatedZoom = 0.0;
+    }
+
+    ZoomRange zoomRange;
+    double evaluatedZoom = 0.0;
+};
+

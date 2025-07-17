@@ -30,7 +30,7 @@ struct FeatureValueEvaluationResult {
 private:
     ReevaluationPolicy policy = ReevaluationPolicy::ALWAYS;
     int32_t stateId = -1;
-    ZoomRange zoomRange = ZoomRange();
+    ZoomEvaluation zoomEvaluation = ZoomEvaluation();
 
 public:
     bool isReevaluationNeeded(const EvaluationContext& context) const;
@@ -44,13 +44,13 @@ public:
     static FeatureValueEvaluationResult constant(const T& val);
     static FeatureValueEvaluationResult constant(T&& val);
     static FeatureValueEvaluationResult always(T&& val);
-    static FeatureValueEvaluationResult zoomOnly(T&& val, const ZoomRange& range);
+    static FeatureValueEvaluationResult zoomOnly(T&& val, const ZoomRange& range, double zoom);
     static FeatureValueEvaluationResult stateOnly(T&& val, int32_t stateId);
-    static FeatureValueEvaluationResult zoomAndState(T&& val, int32_t stateId, const ZoomRange& range);
+    static FeatureValueEvaluationResult zoomAndState(T&& val, int32_t stateId, const ZoomRange& range, double zoom);
 
 private:
-    FeatureValueEvaluationResult(const T& val, ReevaluationPolicy policy, int32_t stateId, const ZoomRange& range);
-    FeatureValueEvaluationResult(T&& val, ReevaluationPolicy policy, int32_t stateId, const ZoomRange& range);
+    FeatureValueEvaluationResult(const T& val, ReevaluationPolicy policy, int32_t stateId, const ZoomEvaluation& zoomEvaluation);
+    FeatureValueEvaluationResult(T&& val, ReevaluationPolicy policy, int32_t stateId, const ZoomEvaluation& zoomEvaluation);
 };
 
 extern template struct FeatureValueEvaluationResult<double>;

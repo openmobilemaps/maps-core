@@ -83,12 +83,12 @@ public:
 
         if(stateDependent && isZoomDependent) {
             auto currentStateId = context.featureStateManager->getCurrentState();
-            return FeatureValueEvaluationResult<ResultType>::zoomAndState(value->evaluateOr(context, defaultValue), currentStateId, zoomRange);
+            return FeatureValueEvaluationResult<ResultType>::zoomAndState(value->evaluateOr(context, defaultValue), currentStateId, zoomRange, context.zoomLevel ? *context.zoomLevel : 0.0);
         } else if(stateDependent) {
             auto currentStateId = context.featureStateManager->getCurrentState();
             return FeatureValueEvaluationResult<ResultType>::stateOnly(value->evaluateOr(context, defaultValue), currentStateId);
         } else if(isZoomDependent) {
-            return FeatureValueEvaluationResult<ResultType>::zoomOnly(value->evaluateOr(context, defaultValue), zoomRange);
+            return FeatureValueEvaluationResult<ResultType>::zoomOnly(value->evaluateOr(context, defaultValue), zoomRange, context.zoomLevel ? *context.zoomLevel : 0.0);
         }
 
         int64_t identifier = usedKeysCollection.getHash(context);

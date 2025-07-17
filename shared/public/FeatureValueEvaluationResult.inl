@@ -20,12 +20,12 @@ bool FeatureValueEvaluationResult<T>::isReevaluationNeeded(const EvaluationConte
         case ReevaluationPolicy::ALWAYS:
             return true;
         case ReevaluationPolicy::ZOOM:
-            return context.zoomLevel && zoomRange.contains(*context.zoomLevel);
+            return context.zoomLevel && zoomEvaluation.needsReevaluation(*context.zoomLevel);
         case ReevaluationPolicy::STATE:
             return context.featureStateManager &&
                    stateId != context.featureStateManager->getCurrentState();
         case ReevaluationPolicy::ZOOM_AND_STATE:
-            return (context.zoomLevel && zoomRange.contains(*context.zoomLevel)) ||
+            return (context.zoomLevel && zoomEvaluation.needsReevaluation(*context.zoomLevel)) ||
                    (context.featureStateManager &&
                     stateId != context.featureStateManager->getCurrentState());
     }
@@ -36,7 +36,7 @@ template<typename T>
 void FeatureValueEvaluationResult<T>::invalidate() {
     policy = ReevaluationPolicy::ALWAYS;
     stateId = -1;
-    zoomRange.setFullRange();
+    zoomEvaluation.setFullRange();
 }
 
 template<typename T>
@@ -51,42 +51,42 @@ template<typename T>
 FeatureValueEvaluationResult<T>::FeatureValueEvaluationResult(const T& val,
                                      ReevaluationPolicy policy,
                                      int32_t stateId,
-                                     const ZoomRange& range)
-    : value(val), policy(policy), stateId(stateId), zoomRange(range) {}
+                                     const ZoomEvaluation& zoomEvaluation)
+    : value(val), policy(policy), stateId(stateId), zoomEvaluation(zoomEvaluation) {}
 
 template<typename T>
 FeatureValueEvaluationResult<T>::FeatureValueEvaluationResult(T&& val,
                                      ReevaluationPolicy policy,
                                      int32_t stateId,
-                                     const ZoomRange& range)
-    : value(std::move(val)), policy(policy), stateId(stateId), zoomRange(range) {}
+                                     const ZoomEvaluation& zoomEvaluation)
+    : value(std::move(val)), policy(policy), stateId(stateId), zoomEvaluation(zoomEvaluation) {}
 
 template<typename T>
 FeatureValueEvaluationResult<T> FeatureValueEvaluationResult<T>::constant(const T& val) {
-    return FeatureValueEvaluationResult(val, ReevaluationPolicy::NEVER, -1, ZoomRange());
+    return FeatureValueEvaluationResult(val, ReevaluationPolicy::NEVER, -1, ZoomEvaluation());
 }
 
 template<typename T>
 FeatureValueEvaluationResult<T> FeatureValueEvaluationResult<T>::constant(T&& val) {
-    return FeatureValueEvaluationResult(std::move(val), ReevaluationPolicy::NEVER, -1, ZoomRange());
+    return FeatureValueEvaluationResult(std::move(val), ReevaluationPolicy::NEVER, -1, ZoomEvaluation());
 }
 
 template<typename T>
 FeatureValueEvaluationResult<T> FeatureValueEvaluationResult<T>::always(T&& val) {
-    return FeatureValueEvaluationResult(std::move(val), ReevaluationPolicy::ALWAYS, -1, ZoomRange());
+    return FeatureValueEvaluationResult(std::move(val), ReevaluationPolicy::ALWAYS, -1, ZoomEvaluation());
 }
 
 template<typename T>
-FeatureValueEvaluationResult<T> FeatureValueEvaluationResult<T>::zoomOnly(T&& val, const ZoomRange& range) {
-    return FeatureValueEvaluationResult(std::move(val), ReevaluationPolicy::ZOOM, -1, range);
+FeatureValueEvaluationResult<T> FeatureValueEvaluationResult<T>::zoomOnly(T&& val, const ZoomRange& range, double zoom) {
+    return FeatureValueEvaluationResult(std::move(val), ReevaluationPolicy::ZOOM, -1, ZoomEvaluation(zoom, range));
 }
 
 template<typename T>
 FeatureValueEvaluationResult<T> FeatureValueEvaluationResult<T>::stateOnly(T&& val, int32_t stateId) {
-    return FeatureValueEvaluationResult(std::move(val), ReevaluationPolicy::STATE, stateId, ZoomRange());
+    return FeatureValueEvaluationResult(std::move(val), ReevaluationPolicy::STATE, stateId, ZoomEvaluation());
 }
 
 template<typename T>
-FeatureValueEvaluationResult<T> FeatureValueEvaluationResult<T>::zoomAndState(T&& val, int32_t stateId, const ZoomRange& range) {
-    return FeatureValueEvaluationResult(std::move(val), ReevaluationPolicy::ZOOM_AND_STATE, stateId, range);
+FeatureValueEvaluationResult<T> FeatureValueEvaluationResult<T>::zoomAndState(T&& val, int32_t stateId, const ZoomRange& range, double zoom) {
+    return FeatureValueEvaluationResult(std::move(val), ReevaluationPolicy::ZOOM_AND_STATE, stateId, ZoomEvaluation(zoom, range));
 }

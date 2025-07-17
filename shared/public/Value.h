@@ -708,10 +708,6 @@ public:
         return false;
     };
 
-    bool isGettingPropertyValues() override {
-        return true;
-    }
-
     virtual void evaluateZoomRange(ZoomRange& zoomRange) override {
         if(key == "zoom") {
             zoomRange.setFullRange();
@@ -758,9 +754,6 @@ public:
         return false;
     };
 
-    bool isGettingPropertyValues() override {
-        return true;
-    }
 
 private:
     const std::string key;
@@ -942,10 +935,6 @@ public:
         }
         ss << parts[parts.size()-1];
         return ss.str();
-    }
-
-    bool isGettingPropertyValues() override {
-        return true;
     }
 
     bool isEqual(const std::shared_ptr<Value> &other) const override {
@@ -1179,11 +1168,18 @@ public:
         double min = std::numeric_limits<double>::infinity();
         double max = -std::numeric_limits<double>::infinity();
 
-        for(const auto& s : steps) {
-            s.second->evaluateZoomRange(zoomRange);
+        if(isFast) {
+            for(const auto& s : fastSteps) {
+                min = std::min(s.first, min);
+                max = std::max(s.first, max);
+            }
+        } else {
+            for(const auto& s : steps) {
+                s.second->evaluateZoomRange(zoomRange);
 
-            min = std::min(s.first, min);
-            max = std::max(s.first, max);
+                min = std::min(s.first, min);
+                max = std::max(s.first, max);
+            }
         }
 
         zoomRange.merge(min, max);
@@ -2939,16 +2935,6 @@ public:
         return false; // Not the same type or nullptr
     }
 
-    virtual bool isGettingPropertyValues() override {
-        for (const auto &value: values) {
-            if(!value->isGettingPropertyValues()) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
     virtual void evaluateZoomRange(ZoomRange& zoomRange) override {
         for(const auto& s : values) {
             s->evaluateZoomRange(zoomRange);
@@ -3006,7 +2992,6 @@ public:
         return std::monostate();
     };
 
-
     bool isEqual(const std::shared_ptr<Value>& other) const override {
         if (auto casted = std::dynamic_pointer_cast<ArrayValue>(other)) {
             // Compare the value members
@@ -3025,16 +3010,6 @@ public:
             return true; // All members are equal
         }
         return false; // Not the same type or nullptr
-    }
-
-    virtual bool isGettingPropertyValues() override {
-        for (const auto &value: values) {
-            if(!value->isGettingPropertyValues()) {
-                return false;
-            }
-        }
-
-        return true;
     }
 
     virtual void evaluateZoomRange(ZoomRange& zoomRange) override {
