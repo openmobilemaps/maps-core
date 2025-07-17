@@ -310,15 +310,14 @@ std::string ColorLineGroup2dShaderOpenGl::getLineFragmentShader() {
                            discard;
                        }
 
-                       float scaledWidth = style.width * scalingFactor;
-                       float halfScaledWidth = scaledWidth / 2.0;
-
                        float a = outColor.a * opacity;
                        float aGap = style.gapColorA * opacity;
 
                        if(style.blur > 0.0) {
+                           float scaledWidth = style.width * scalingFactor;
+                           float halfScaledWidth = scaledWidth / 2.0;
                            float blur = style.blur * scalingFactor;
-                           float lineEdgeDistance = (1.0 - abs(outLineSide));
+                           float lineEdgeDistance = (1.0 - abs(outLineSide)) * halfScaledWidth;
                            float blurAlpha = clamp(lineEdgeDistance / blur, 0.0, 1.0);
 
                            if(blurAlpha == 0.0) {
@@ -335,16 +334,20 @@ std::string ColorLineGroup2dShaderOpenGl::getLineFragmentShader() {
                        if (style.dotted == 1.0) {
                            float skew = style.dottedSkew;
 
+                           float scaledWidth = style.width * dashingScaleFactor;
+                           float halfScaledWidth = scaledWidth / 2.0;
                            float cycleLength = scaledWidth * skew;
                            float timeOffset = timeFrameDeltaSeconds * style.dashAnimationSpeed * scaledWidth;
                            float positionInCycle = mod(outLengthPrefix * skew + timeOffset, 2.0 * cycleLength) / cycleLength;
 
-                           vec2 pos = vec2(positionInCycle * 2.0 - 1.0, outLineSide);
+                           float scalingRatio =  dashingScaleFactor / scalingFactor;
+                           vec2 pos = vec2((positionInCycle * 2.0 - 1.0) * scalingRatio, outLineSide);
 
                            if(dot(pos, pos) >= 1.0) {
                                discard;
                            }
                        } else if(style.numDashValues > 0.0) {
+                           float scaledWidth = style.width * dashingScaleFactor;
                            float timeOffset = timeFrameDeltaSeconds * style.dashAnimationSpeed * scaledWidth;
                            float intraDashPos = mod(outLengthPrefix + timeOffset, style.dashArray3 * scaledWidth);
 
