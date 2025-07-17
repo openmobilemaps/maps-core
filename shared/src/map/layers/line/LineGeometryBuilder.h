@@ -147,7 +147,7 @@ class LineGeometryBuilder {
                                    prePreIndex, preIndex, lineAttributes, lineIndices, is3d);
                     int32_t centerIndex = preIndex, firstIndex = -1, lastIndex = -1;
                     for (float r = -1; r <= 1; r += 0.2) {
-                        Vec3D roundExtrude = Vec3DHelper::normalize(extrude * r - extrudeLineVec * (1.0 - abs(r)));
+                        Vec3D roundExtrude = Vec3DHelper::normalize(extrude * r - extrudeLineVec * (1.0 - std::abs(r)));
                         prefixCorrection = Vec3DHelper::dotProduct(roundExtrude, lastLineVec);
                         pushLineVertex(p, roundExtrude, 1.0, r, prefixTotalLineLength, prefixCorrection, lineStyleIndex, true, endSide == -1,
                                        vertexCount, prePreIndex, preIndex, lineAttributes, lineIndices, is3d);
@@ -259,7 +259,7 @@ class LineGeometryBuilder {
                                    prePreIndex, preIndex, lineAttributes, lineIndices, is3d);
                     int32_t centerIndex = preIndex, firstIndex = -1, lastIndex = -1;
                     for (float r = -1; r <= 1; r += 0.2) {
-                        Vec3D roundExtrude = Vec3DHelper::normalize(extrude * r - extrudeLineVec * (1.0 - abs(r)));
+                        Vec3D roundExtrude = Vec3DHelper::normalize(extrude * r - extrudeLineVec * (1.0 - std::abs(r)));
                         float prefixCorrection = Vec3DHelper::dotProduct(roundExtrude, lineVec);
                         pushLineVertex(p, roundExtrude, 1.0, r, prefixTotalLineLength, prefixCorrection, lineStyleIndex, true, endSide == -1,
                                        vertexCount, prePreIndex, preIndex, lineAttributes, lineIndices, is3d);
