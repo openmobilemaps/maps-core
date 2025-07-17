@@ -293,6 +293,7 @@ std::string ColorLineGroup2dShaderOpenGl::getLineFragmentShader() {
            OMMShaderCode(
                    uniform float scalingFactor;
                    uniform float dashingScaleFactor;
+                   uniform float timeFrameDeltaSeconds;
 
                    in vec4 outColor;
                    in float outLengthPrefix;
@@ -334,8 +335,9 @@ std::string ColorLineGroup2dShaderOpenGl::getLineFragmentShader() {
                        if (style.dotted == 1.0) {
                            float skew = style.dottedSkew;
 
-                           float cycleLength = style.width * scalingFactor * skew;
-                           float positionInCycle = mod(outLengthPrefix * skew, 2.0 * cycleLength) / cycleLength;
+                           float cycleLength = scaledWidth * skew;
+                           float timeOffset = timeFrameDeltaSeconds * style.dashAnimationSpeed * scaledWidth;
+                           float positionInCycle = mod(outLengthPrefix * skew + timeOffset, 2.0 * cycleLength) / cycleLength;
 
                            vec2 pos = vec2(positionInCycle * 2.0 - 1.0, outLineSide);
 
@@ -343,7 +345,8 @@ std::string ColorLineGroup2dShaderOpenGl::getLineFragmentShader() {
                                discard;
                            }
                        } else if(style.numDashValues > 0.0) {
-                           float intraDashPos = mod(outLengthPrefix, style.dashArray3 * scaledWidth);
+                           float timeOffset = timeFrameDeltaSeconds * style.dashAnimationSpeed * scaledWidth;
+                           float intraDashPos = mod(outLengthPrefix + timeOffset, style.dashArray3 * scaledWidth);
 
                            float dxt = style.dashArray0 * scaledWidth;
                            float dyt = style.dashArray1 * scaledWidth;
