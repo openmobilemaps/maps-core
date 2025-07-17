@@ -79,10 +79,9 @@ vertex SimpleLineVertexOut
 unitSphereSimpleLineGroupVertexShader(const LineVertexUnitSphereIn vertexIn [[stage_in]],
                       constant float4x4 &vpMatrix [[buffer(1)]],
                       constant float &scalingFactor [[buffer(2)]],
-                      constant float &dashingScalingFactor [[buffer(3)]],
-                      constant half *styling [[buffer(4)]],
-                      constant float4 &originOffset [[buffer(5)]],
-                      constant float4 &tileOrigin [[buffer(6)]])
+                      constant half *styling [[buffer(3)]],
+                      constant float4 &originOffset [[buffer(4)]],
+                      constant float4 &tileOrigin [[buffer(5)]])
 {
     int styleIndex = (int(vertexIn.stylingIndex) & 0xFF) * 8;
     constant SimpleLineStyling *style = (constant SimpleLineStyling *)(styling + styleIndex);
@@ -104,10 +103,9 @@ vertex SimpleLineVertexOut
 simpleLineGroupVertexShader(const LineVertexIn vertexIn [[stage_in]],
                       constant float4x4 &vpMatrix [[buffer(1)]],
                       constant float &scalingFactor [[buffer(2)]],
-                      constant float &dashingScalingFactor [[buffer(3)]],
-                      constant half *styling [[buffer(4)]],
-                      constant float4 &originOffset [[buffer(5)]],
-                      constant float4 &tileOrigin [[buffer(6)]])
+                      constant half *styling [[buffer(3)]],
+                      constant float4 &originOffset [[buffer(4)]],
+                      constant float4 &tileOrigin [[buffer(5)]])
 {
     int styleIndex = (int(vertexIn.stylingIndex) & 0xFF) * 8;
     constant SimpleLineStyling *style = (constant SimpleLineStyling *)(styling + styleIndex);
