@@ -12,6 +12,7 @@
 #import "MCRectI+Private.h"
 #import "MCRenderingCullMode+Private.h"
 #import "MCVec2I+Private.h"
+#import "MCVec3D+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -67,9 +68,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)setupDrawFrame {
+- (void)setupDrawFrame:(int64_t)vpMatrix
+                origin:(nonnull MCVec3D *)origin
+screenPixelAsRealMeterFactor:(double)screenPixelAsRealMeterFactor {
     try {
-        _cppRefHandle.get()->setupDrawFrame();
+        _cppRefHandle.get()->setupDrawFrame(::djinni::I64::toCpp(vpMatrix),
+                                            ::djinni_generated::Vec3D::toCpp(origin),
+                                            ::djinni::F64::toCpp(screenPixelAsRealMeterFactor));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -138,10 +143,12 @@ public:
             [djinni_private_get_proxied_objc_object() setCulling:(::djinni::Enum<::RenderingCullMode, MCRenderingCullMode>::fromCpp(c_mode))];
         }
     }
-    void setupDrawFrame() override
+    void setupDrawFrame(int64_t c_vpMatrix, const ::Vec3D & c_origin, double c_screenPixelAsRealMeterFactor) override
     {
         @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() setupDrawFrame];
+            [djinni_private_get_proxied_objc_object() setupDrawFrame:(::djinni::I64::fromCpp(c_vpMatrix))
+                                                              origin:(::djinni_generated::Vec3D::fromCpp(c_origin))
+                                        screenPixelAsRealMeterFactor:(::djinni::F64::fromCpp(c_screenPixelAsRealMeterFactor))];
         }
     }
     void preRenderStencilMask() override

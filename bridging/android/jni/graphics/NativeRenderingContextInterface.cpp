@@ -8,6 +8,7 @@
 #include "NativeRectI.h"
 #include "NativeRenderingCullMode.h"
 #include "NativeVec2I.h"
+#include "NativeVec3D.h"
 
 namespace djinni_generated {
 
@@ -58,11 +59,14 @@ void NativeRenderingContextInterface::JavaProxy::setCulling(::RenderingCullMode 
                            ::djinni::get(::djinni_generated::NativeRenderingCullMode::fromCpp(jniEnv, c_mode)));
     ::djinni::jniExceptionCheck(jniEnv);
 }
-void NativeRenderingContextInterface::JavaProxy::setupDrawFrame() {
+void NativeRenderingContextInterface::JavaProxy::setupDrawFrame(int64_t c_vpMatrix, const ::Vec3D & c_origin, double c_screenPixelAsRealMeterFactor) {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
     const auto& data = ::djinni::JniClass<::djinni_generated::NativeRenderingContextInterface>::get();
-    jniEnv->CallVoidMethod(Handle::get().get(), data.method_setupDrawFrame);
+    jniEnv->CallVoidMethod(Handle::get().get(), data.method_setupDrawFrame,
+                           ::djinni::get(::djinni::I64::fromCpp(jniEnv, c_vpMatrix)),
+                           ::djinni::get(::djinni_generated::NativeVec3D::fromCpp(jniEnv, c_origin)),
+                           ::djinni::get(::djinni::F64::fromCpp(jniEnv, c_screenPixelAsRealMeterFactor)));
     ::djinni::jniExceptionCheck(jniEnv);
 }
 void NativeRenderingContextInterface::JavaProxy::preRenderStencilMask() {
@@ -144,11 +148,13 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_Renderin
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_RenderingContextInterface_00024CppProxy_native_1setupDrawFrame(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_RenderingContextInterface_00024CppProxy_native_1setupDrawFrame(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jlong j_vpMatrix, ::djinni_generated::NativeVec3D::JniType j_origin, jdouble j_screenPixelAsRealMeterFactor)
 {
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::RenderingContextInterface>(nativeRef);
-        ref->setupDrawFrame();
+        ref->setupDrawFrame(::djinni::I64::toCpp(jniEnv, j_vpMatrix),
+                            ::djinni_generated::NativeVec3D::toCpp(jniEnv, j_origin),
+                            ::djinni::F64::toCpp(jniEnv, j_screenPixelAsRealMeterFactor));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

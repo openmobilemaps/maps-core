@@ -6,6 +6,8 @@
 #include "Color.h"
 #include "RectI.h"
 #include "Vec2I.h"
+#include "Vec3D.h"
+#include <cstdint>
 #include <memory>
 #include <optional>
 
@@ -28,7 +30,7 @@ public:
 
     virtual void setCulling(RenderingCullMode mode) = 0;
 
-    virtual void setupDrawFrame() = 0;
+    virtual void setupDrawFrame(int64_t vpMatrix, const ::Vec3D & origin, double screenPixelAsRealMeterFactor) = 0;
 
     virtual void preRenderStencilMask() = 0;
 

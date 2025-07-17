@@ -57,11 +57,8 @@ protected:
     std::string programName;
     int program = 0;
 
-    int vpMatrixHandle;
     int mMatrixHandle;
     int originOffsetHandle;
-    int lineOriginHandle;
-    int scaleFactorHandle;
     int pointAHandle;
     int pointBHandle;
     int vertexIndexHandle;

@@ -56,15 +56,14 @@ void ColorShaderOpenGl::setColor(float red, float green, float blue, float alpha
 }
 
 std::string ColorShaderOpenGl::getVertexShader() {
-    return OMMVersionedGlesShaderCode(320 es,
+    return OMMVersionedGlesShaderCodeWithFrameUBO(320 es,
                                         precision highp float;
-                                                uniform mat4 uvpMatrix;
                                                 uniform mat4 umMatrix;
                                                 uniform vec4 uOriginOffset;
                                                 in vec4 vPosition;
 
                                                 void main() {
-                                                    gl_Position = uvpMatrix * ((umMatrix * vPosition) + uOriginOffset);
+                                                    gl_Position = uFrameUniforms.vpMatrix * ((umMatrix * vPosition) + uOriginOffset);
                                                 }
            );
 }

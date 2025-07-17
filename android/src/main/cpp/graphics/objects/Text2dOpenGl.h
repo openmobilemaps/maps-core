@@ -68,7 +68,6 @@ protected:
     std::string programName;
     int program;
 
-    int vpMatrixHandle = -1;
     int mMatrixHandle = -1;
     int positionHandle = -1;
     int textureCoordinateHandle = -1;

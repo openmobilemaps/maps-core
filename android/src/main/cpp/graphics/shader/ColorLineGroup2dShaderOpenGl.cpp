@@ -47,12 +47,11 @@ void ColorLineGroup2dShaderOpenGl::setupProgram(const std::shared_ptr<::Renderin
 
     openGlContext->storeProgram(programName, program);
 
-    // Bind LineStyleCollection at binding index 0
     GLuint lineStyleUniformBlockIdx = glGetUniformBlockIndex(program, "LineStyleCollection");
     if (lineStyleUniformBlockIdx == GL_INVALID_INDEX) {
         LogError <<= "Uniform block LineStyleCollection not found";
     }
-    glUniformBlockBinding(program, lineStyleUniformBlockIdx, 0);
+    glUniformBlockBinding(program, lineStyleUniformBlockIdx, STYLE_UBO_BINDING);
 }
 
 void ColorLineGroup2dShaderOpenGl::setupGlObjects(const std::shared_ptr<::OpenGlContext> &context) {
@@ -67,7 +66,6 @@ void ColorLineGroup2dShaderOpenGl::setupGlObjects(const std::shared_ptr<::OpenGl
 
     int program = context->getProgram(programName);
     dashingScaleFactorHandle = glGetUniformLocation(program, "dashingScaleFactor");
-    timeFrameDeltaHandle = glGetUniformLocation(program, "timeFrameDeltaSeconds");
 }
 
 void ColorLineGroup2dShaderOpenGl::clearGlObjects() {
@@ -78,13 +76,12 @@ void ColorLineGroup2dShaderOpenGl::clearGlObjects() {
         glDeleteBuffers(1, &lineStyleBuffer);
     }
     dashingScaleFactorHandle = -1;
-    timeFrameDeltaHandle = -1;
 }
 
 void ColorLineGroup2dShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context) {
     BaseShaderProgramOpenGl::preRender(context);
 
-    glBindBufferBase(GL_UNIFORM_BUFFER, 0, lineStyleBuffer); // LineStyleCollection is at binding index 0
+    glBindBufferBase(GL_UNIFORM_BUFFER, STYLE_UBO_BINDING, lineStyleBuffer);
 
     {
         std::lock_guard<std::recursive_mutex> lock(styleMutex);
@@ -94,10 +91,6 @@ void ColorLineGroup2dShaderOpenGl::preRender(const std::shared_ptr<::RenderingCo
 
         if (dashingScaleFactorHandle >= 0) {
             glUniform1f(dashingScaleFactorHandle, dashingScaleFactor);
-        }
-        if (timeFrameDeltaHandle >= 0) {
-            std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
-            glUniform1f(timeFrameDeltaHandle, (float) openGlContext->getDeltaTimeMs() / 1000.0f);
         }
 
         if (stylesUpdated) {
@@ -193,14 +186,12 @@ std::string ColorLineGroup2dShaderOpenGl::getLineStylesUBODefinition(bool isSimp
 
 std::string ColorLineGroup2dShaderOpenGl::getVertexShader() {
     if (isSimpleLine) {
-        return OMMVersionedGlesShaderCode(320 es,
+        return OMMVersionedGlesShaderCodeWithFrameUBO(320 es,
                                           precision highp float;
                                                   uniform mat4 umMatrix;
-                                                  uniform mat4 uvpMatrix;
                                                   uniform vec4 uOriginOffset;
                ) + (projectOntoUnitSphere ?
                    OMMShaderCode(
-                           uniform vec4 uLineOrigin;
                            in vec3 vPointA;
                            in vec3 vPointB;
                    ) : OMMShaderCode(
@@ -212,7 +203,6 @@ std::string ColorLineGroup2dShaderOpenGl::getVertexShader() {
 
                        ) + getLineStylesUBODefinition(isSimpleLine) + OMMShaderCode(
 
-                       uniform float scaleFactor;
                        uniform float dashingScaleFactor;
                        flat out int lineIndex;
                        out float radius;
@@ -255,7 +245,7 @@ std::string ColorLineGroup2dShaderOpenGl::getVertexShader() {
                        }
 
            ) + (projectOntoUnitSphere ? OMMShaderCode(
-                   vec3 radialNormal = normalize(vertexPosition + uLineOrigin.xyz);
+                   vec3 radialNormal = normalize(vertexPosition + (uOriginOffset.xyz + uFrameUniforms.origin.xyz));
                 ) : "")
            + OMMShaderCode(
                    vec3 widthNormal = normalize(cross(radialNormal, lengthNormal));
@@ -268,7 +258,7 @@ std::string ColorLineGroup2dShaderOpenGl::getVertexShader() {
 
                    float scaledWidth = width * 0.5;
                    if (isScaled > 0.0) {
-                       scaledWidth = scaledWidth * scaleFactor;
+                       scaledWidth = scaledWidth * uFrameUniforms.frameSpecs.x;
                    }
 
                    vec3 displ = uOriginOffset.xyz + vec3(lengthNormal + widthNormal) * vec3(scaledWidth);
@@ -279,7 +269,7 @@ std::string ColorLineGroup2dShaderOpenGl::getVertexShader() {
                        vec4(vertexPosition, 0.0, 1.0);
                )) + OMMShaderCode(
                        extendedPosition.xyz += displ;
-                       gl_Position = uvpMatrix * extendedPosition;
+                       gl_Position = uFrameUniforms.vpMatrix * extendedPosition;
                        radius = scaledWidth;
            ) + (projectOntoUnitSphere ? OMMShaderCode(
                        pointDeltaA = extendedPosition.xyz - ((vPointA + uOriginOffset.xyz));
@@ -291,13 +281,11 @@ std::string ColorLineGroup2dShaderOpenGl::getVertexShader() {
                        }
         );
     } else {
-        return OMMVersionedGlesShaderCode(320 es,
+        return OMMVersionedGlesShaderCodeWithFrameUBO(320 es,
                                           precision highp float;
                                                   uniform mat4 umMatrix;
-                                                  uniform mat4 uvpMatrix;
                                                   uniform vec4 uOriginOffset;
                ) + (projectOntoUnitSphere ? OMMShaderCode(
-                uniform vec4 uLineOrigin;
                 in vec3 vPointA;
                 in vec3 vPointB;
         ) : OMMShaderCode(
@@ -310,7 +298,6 @@ std::string ColorLineGroup2dShaderOpenGl::getVertexShader() {
 
                        ) + getLineStylesUBODefinition(isSimpleLine) + OMMShaderCode(
 
-                        uniform float scaleFactor;
                         uniform float dashingScaleFactor;
                         flat out int lineIndex;
                         out float radius;
@@ -358,11 +345,11 @@ std::string ColorLineGroup2dShaderOpenGl::getVertexShader() {
                        }
 
                ) + (projectOntoUnitSphere ? OMMShaderCode(
-                vec3 radialNormal = normalize(vertexPosition + uLineOrigin.xyz);
+                vec3 radialNormal = normalize(vertexPosition + (uOriginOffset.xyz + uFrameUniforms.origin.xyz));
         ) : "") + OMMShaderCode(
                        vec3 widthNormal = normalize(cross(radialNormal, lengthNormal));
 
-                       float offsetFloat = uLineStyles.lineValues[lineIndex].offset * scaleFactor;
+                       float offsetFloat = uLineStyles.lineValues[lineIndex].offset * uFrameUniforms.frameSpecs.x;
                        vec3 offset = vec3(widthNormal * offsetFloat);
 
                        widthNormal *= widthNormalFactor;
@@ -371,8 +358,8 @@ std::string ColorLineGroup2dShaderOpenGl::getVertexShader() {
                        float scaledWidth = width * 0.5;
                        dashingSize = width;
                        if (isScaled > 0.0) {
-                           scaledWidth = scaledWidth * scaleFactor;
-                           blur = blur * scaleFactor;
+                           scaledWidth = scaledWidth * uFrameUniforms.frameSpecs.x;
+                           blur = blur * uFrameUniforms.frameSpecs.x;
                            dashingSize *= dashingScaleFactor;
                        }
 
@@ -384,7 +371,7 @@ std::string ColorLineGroup2dShaderOpenGl::getVertexShader() {
                             vec4(vertexPosition, 0.0, 1.0);
                     )) + OMMShaderCode(
                        extendedPosition.xyz += displ;
-                       gl_Position = uvpMatrix * extendedPosition;
+                       gl_Position = uFrameUniforms.vpMatrix * extendedPosition;
 
                        radius = scaledWidth;
                        scaledBlur = blur;
@@ -453,12 +440,11 @@ std::string ColorLineGroup2dShaderOpenGl::getFragmentShader() {
                                         fragmentColor *= fragColor.a * opacity;
                                 });
     } else {
-        return OMMVersionedGlesShaderCode(320 es,
+        return OMMVersionedGlesShaderCodeWithFrameUBO(320 es,
                                           precision highp float;
 
                                           ) + getLineStylesUBODefinition(isSimpleLine) + OMMShaderCode(
 
-                                          uniform float timeFrameDeltaSeconds;
                                           flat in int lineIndex;
                                           in float radius;
                                           in float segmentStartLPos;
@@ -542,7 +528,7 @@ std::string ColorLineGroup2dShaderOpenGl::getFragmentShader() {
                                                   float factorToT = (radius * 2.0) / lineLength;
                                                   float dashTotal = uLineStyles.lineValues[lineIndex].dashArray3 * factorToT;
                                                   float startOffsetSegment = mod(segmentStartLPos / lineLength, dashTotal);
-                                                  float timeOffset = timeFrameDeltaSeconds * uLineStyles.lineValues[lineIndex].dashAnimationSpeed * factorToT;
+                                                  float timeOffset = uFrameUniforms.frameSpecs.y * uLineStyles.lineValues[lineIndex].dashAnimationSpeed * factorToT;
                                                   float intraDashPos = mod(t + startOffsetSegment + timeOffset, dashTotal);
 
                                                   float dashFade = uLineStyles.lineValues[lineIndex].dashFade;

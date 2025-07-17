@@ -17,6 +17,7 @@ import android.view.MotionEvent
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
+import androidx.lifecycle.coroutineScope
 import io.openmobilemaps.mapscore.graphics.GlTextureView
 import io.openmobilemaps.mapscore.map.layers.TiledRasterLayer
 import io.openmobilemaps.mapscore.map.layers.TiledVectorLayer
@@ -35,8 +36,10 @@ import io.openmobilemaps.mapscore.shared.map.controls.TouchHandlerInterface
 import io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateConversionHelperInterface
 import io.openmobilemaps.mapscore.shared.map.scheduling.TaskInterface
 import io.openmobilemaps.mapscore.shared.map.scheduling.ThreadPoolScheduler
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
@@ -176,20 +179,22 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 			return false
 		}
 
-		val action: TouchAction? = when (event.actionMasked) {
-			MotionEvent.ACTION_DOWN, MotionEvent.ACTION_POINTER_DOWN -> TouchAction.DOWN
-			MotionEvent.ACTION_MOVE -> TouchAction.MOVE
-			MotionEvent.ACTION_UP, MotionEvent.ACTION_POINTER_UP -> TouchAction.UP
-			MotionEvent.ACTION_CANCEL -> TouchAction.CANCEL
-			else -> null
-		}
-
-		if (action != null) {
-			val pointers = ArrayList<Vec2F>(10)
-			for (i in 0 until event.pointerCount) {
-				pointers.add(Vec2F(event.getX(i), event.getY(i)))
+		lifecycle?.coroutineScope?.launch(Dispatchers.Default) {
+			val action: TouchAction? = when (event.actionMasked) {
+				MotionEvent.ACTION_DOWN, MotionEvent.ACTION_POINTER_DOWN -> TouchAction.DOWN
+				MotionEvent.ACTION_MOVE -> TouchAction.MOVE
+				MotionEvent.ACTION_UP, MotionEvent.ACTION_POINTER_UP -> TouchAction.UP
+				MotionEvent.ACTION_CANCEL -> TouchAction.CANCEL
+				else -> null
 			}
-			touchHandler?.onTouchEvent(TouchEvent(pointers, action))
+
+			if (action != null) {
+				val pointers = ArrayList<Vec2F>(10)
+				for (i in 0 until event.pointerCount) {
+					pointers.add(Vec2F(event.getX(i), event.getY(i)))
+				}
+				touchHandler?.onTouchEvent(TouchEvent(pointers, action))
+			}
 		}
 
 		return true
