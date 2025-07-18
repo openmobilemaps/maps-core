@@ -147,12 +147,14 @@ public:
         initialize();
     }
 
+    // Convenience construction from vtzero::feature.
+    // NOTE: key stings are indexed for the vtzero::layer and can be used to avoid re-hashing. See Tiled2dMapVectorSource.
     FeatureContext(StringInterner &stringTable, vtzero::feature const &feature)
     {
         geomType = feature.geometry_type();
 
         feature.for_each_property([this, &stringTable] (const vtzero::property& p) {
-            auto key = stringTable.add(std::string{p.key()}); // TODO: strings are already indexed, re-hashing could be avoided. Or at least avoid the copy!
+            auto key = stringTable.add(std::string{p.key()});
             this->propertiesMap.push_back(std::make_pair(key, vtzero::convert_property_value<ValueVariant, property_value_mapping>(p.value())));
             return true;
         });

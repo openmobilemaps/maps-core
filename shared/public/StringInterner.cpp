@@ -18,7 +18,10 @@ StringInterner::StringInterner(StringInterner &&o)
 
 InternedString StringInterner::add(const std::string &s) {
     std::lock_guard lock(mutex);
+    return addLocked(s);
+}
 
+InternedString StringInterner::addLocked(const std::string &s) {
     size_t nextId = strings.size();
     if (nextId >= std::numeric_limits<InternedString::StringId>::max()) {
         throw new std::runtime_error("string table full");

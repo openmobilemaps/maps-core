@@ -24,12 +24,24 @@ class StringInterner {
     // Thread-safe.
     InternedString add(const std::string &s);
 
+    // Batch add(), keeping the lock.
+    template <typename InputIterator, typename OutputIterator>
+    void add(InputIterator begin, InputIterator end, OutputIterator out) {
+        std::lock_guard lock(mutex);
+        for (auto it = begin; it != end; it++) {
+            *out++ = addLocked(*it);
+        }
+    }
+
     // Return string for interned string reference s.
     // Thread-safe.
     const std::string &get(InternedString s) const {
         std::lock_guard lock(mutex);
         return strings[s.id()];
     }
+
+  private:
+    InternedString addLocked(const std::string &s);
 
   private:
     struct TableRef {
