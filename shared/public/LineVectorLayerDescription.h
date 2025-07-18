@@ -13,6 +13,7 @@
 #include "Color.h"
 #include "ColorUtil.h"
 #include "LineCapType.h"
+#include "FeatureValueEvaluator.h"
 #include "LineJoinType.h"
 #include "VectorLayerDescription.h"
 
@@ -68,60 +69,60 @@ class LineVectorStyle {
 
     BlendMode getBlendMode(const EvaluationContext &context) {
         static const BlendMode defaultValue = BlendMode::NORMAL;
-        return blendModeEvaluator.getResult(context, defaultValue);
+        return blendModeEvaluator.getResult(context, defaultValue).value;
     }
 
     Color getLineColor(const EvaluationContext &context) {
         static const Color defaultValue = ColorUtil::c(0, 0, 0, 1.0);
-        return lineColorEvaluator.getResult(context, defaultValue);
+        return lineColorEvaluator.getResult(context, defaultValue).value;
     }
 
     double getLineOpacity(const EvaluationContext &context) {
         static const double defaultValue = 1.0;
-        return lineOpacityEvaluator.getResult(context, defaultValue);
+        return lineOpacityEvaluator.getResult(context, defaultValue).value;
     }
 
     double getLineBlur(const EvaluationContext &context) {
         static const double defaultValue = 0.0;
-        double value = lineBlurEvaluator.getResult(context, defaultValue);
+        double value = lineBlurEvaluator.getResult(context, defaultValue).value;
         return value * context.dpFactor;
     }
 
     double getLineWidth(const EvaluationContext &context) {
         static const double defaultValue = 1.0;
-        double value = lineWidthEvaluator.getResult(context, defaultValue);
+        double value = lineWidthEvaluator.getResult(context, defaultValue).value;
         return value * context.dpFactor;
     }
 
     std::vector<float> getLineDashArray(const EvaluationContext &context) {
         static const std::vector<float> defaultValue = {};
-        return lineDashArrayEvaluator.getResult(context, defaultValue);
+        return lineDashArrayEvaluator.getResult(context, defaultValue).value;
     }
 
     LineCapType getLineCap(const EvaluationContext &context) {
         static const LineCapType defaultValue = LineCapType::BUTT;
-        return lineCapEvaluator.getResult(context, defaultValue);
+        return lineCapEvaluator.getResult(context, defaultValue).value;
     }
 
     LineJoinType getLineJoin(const EvaluationContext &context) {
         static const LineJoinType defaultValue = LineJoinType::MITER;
-        return lineJoinEvaluator.getResult(context, defaultValue);
+        return lineJoinEvaluator.getResult(context, defaultValue).value;
     }
 
     double getLineOffset(const EvaluationContext &context, double width) {
         static const double defaultValue = 0.0;
-        double offset = lineOffsetEvaluator.getResult(context, defaultValue);
+        double offset = lineOffsetEvaluator.getResult(context, defaultValue).value;
         return std::min(offset * context.dpFactor, width * 0.5);
     }
 
     bool getLineDotted(const EvaluationContext &context) {
         static const bool defaultValue = false;
-        return lineDottedEvaluator.getResult(context, defaultValue);
+        return lineDottedEvaluator.getResult(context, defaultValue).value;
     }
 
     double getLineDottedSkew(const EvaluationContext &context) {
         static const bool defaultValue = 1.0;
-        return lineDottedSkewEvaluator.getResult(context, defaultValue);
+        return lineDottedSkewEvaluator.getResult(context, defaultValue).value;
     }
 
     bool isSimpleLine() {
@@ -130,17 +131,17 @@ class LineVectorStyle {
                lineDottedSkewEvaluator.getValue() == nullptr;
     }
 
-    ValueEvaluator<Color> lineColorEvaluator;
-    ValueEvaluator<double> lineOpacityEvaluator;
-    ValueEvaluator<double> lineBlurEvaluator;
-    ValueEvaluator<double> lineWidthEvaluator;
-    ValueEvaluator<std::vector<float>> lineDashArrayEvaluator;
-    ValueEvaluator<LineCapType> lineCapEvaluator;
-    ValueEvaluator<LineJoinType> lineJoinEvaluator;
-    ValueEvaluator<double> lineOffsetEvaluator;
-    ValueEvaluator<BlendMode> blendModeEvaluator;
-    ValueEvaluator<bool> lineDottedEvaluator;
-    ValueEvaluator<double> lineDottedSkewEvaluator;
+    FeatureValueEvaluator<Color> lineColorEvaluator;
+    FeatureValueEvaluator<double> lineOpacityEvaluator;
+    FeatureValueEvaluator<double> lineBlurEvaluator;
+    FeatureValueEvaluator<double> lineWidthEvaluator;
+    FeatureValueEvaluator<std::vector<float>> lineDashArrayEvaluator;
+    FeatureValueEvaluator<LineCapType> lineCapEvaluator;
+    FeatureValueEvaluator<LineJoinType> lineJoinEvaluator;
+    FeatureValueEvaluator<double> lineOffsetEvaluator;
+    FeatureValueEvaluator<BlendMode> blendModeEvaluator;
+    FeatureValueEvaluator<bool> lineDottedEvaluator;
+    FeatureValueEvaluator<double> lineDottedSkewEvaluator;
 };
 
 class LineVectorLayerDescription : public VectorLayerDescription {

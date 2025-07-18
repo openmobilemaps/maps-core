@@ -43,9 +43,12 @@
 #include "Tiled2dMapVectorStateManager.h"
 #include "ValueKeys.h"
 #include "VectorSet.h"
+#include "ZoomRange.h"
 #include <iomanip>
 #include <memory>
 #include <utility>
+#include <optional>
+
 #include "Logger.h"
 
 namespace std {
@@ -412,6 +415,10 @@ public:
         return alternative;
     }
 
+    virtual void evaluateZoomRange(ZoomRange& zoomRange) {
+        // implement in subclasses if needed.
+    }
+
     std::optional<::Anchor> anchorFromString(const std::string &value) const {
         if (value == "center") {
             return Anchor::CENTER;
@@ -674,103 +681,6 @@ inline std::vector<Anchor> Value::evaluateOr(const EvaluationContext &context, c
     return alternative;
 }
 
-
-template<class ResultType>
-class ValueEvaluator {
-public:
-    ValueEvaluator(const std::shared_ptr<Value> &value) : value(value) {
-        if(!value) {
-            return;
-        }
-
-        updateValue(value);
-    }
-
-    ValueEvaluator(const ValueEvaluator& evaluator) : ValueEvaluator(evaluator.getValue()) {};
-
-    std::shared_ptr<Value> getValue() const {
-        return value;
-    }
-
-    void updateValue(std::shared_ptr<Value> newValue) {
-        value = newValue;
-
-        usedKeysCollection = newValue ? std::move(newValue->getUsedKeys()) : std::move(UsedKeysCollection());
-
-        isStatic = usedKeysCollection.empty();
-        isZoomDependent = usedKeysCollection.usedKeys.contains("zoom");
-        isStateDependant = usedKeysCollection.isStateDependant();
-        onlyGlobalStateDependant = usedKeysCollection.onlyGlobalStateDependant();
-
-        lastResults.clear();
-    }
-
-
-    inline ResultType getResult(const EvaluationContext &context, const ResultType &defaultValue) {
-        if (!value) {
-            return defaultValue;
-        }
-
-        if (isStatic) {
-            if(!staticValue) {
-                staticValue = value->evaluateOr(context, defaultValue);
-            }
-
-            return *staticValue;
-        }
-
-        if(value->isGettingPropertyValues()) {
-            return value->evaluateOr(context, defaultValue);
-        }
-
-        if (isZoomDependent || (isStateDependant && context.featureStateManager && !context.featureStateManager->empty())) {
-            return value->evaluateOr(context, defaultValue);
-        }
-
-        if(onlyGlobalStateDependant && context.featureStateManager) {
-            auto currentGlobalId = context.featureStateManager->getCurrentState();
-
-            if(currentGlobalId != globalId) {
-                globalValue = value->evaluateOr(context, defaultValue);
-                globalId = currentGlobalId;
-            } else if(globalValue) {
-                return *globalValue;
-            }
-        }
-
-        int64_t identifier = usedKeysCollection.getHash(context);
-
-        std::lock_guard<std::mutex> lock(mutex);
-
-        const auto &lastResultIt = lastResults.find(identifier);
-        if (lastResultIt != lastResults.end()) {
-            return lastResultIt->second;
-        }
-
-        const auto &result = value->evaluateOr(context, defaultValue);
-        lastResults.insert({identifier, result});
-
-        return result;
-    }
-
-private:
-    std::mutex mutex;
-    std::shared_ptr<Value> value;
-    UsedKeysCollection usedKeysCollection;
-    std::optional<ResultType> staticValue;
-    std::optional<ResultType> globalValue;
-
-
-    bool isStatic = false;
-    bool isZoomDependent = false;
-    bool isStateDependant = false;
-    bool onlyGlobalStateDependant = false;
-
-    int64_t globalId = -1;
-
-    std::unordered_map<uint64_t, ResultType> lastResults;
-};
-
 class GetPropertyValue : public Value {
 public:
     GetPropertyValue(const std::string key) : key(key) {};
@@ -798,8 +708,10 @@ public:
         return false;
     };
 
-    bool isGettingPropertyValues() override {
-        return true;
+    virtual void evaluateZoomRange(ZoomRange& zoomRange) override {
+        if(key == "zoom") {
+            zoomRange.setFullRange();
+        }
     }
 
 private:
@@ -842,9 +754,6 @@ public:
         return false;
     };
 
-    bool isGettingPropertyValues() override {
-        return true;
-    }
 
 private:
     const std::string key;
@@ -940,6 +849,10 @@ public:
         }
         return false;
     };
+
+    virtual void evaluateZoomRange(ZoomRange& zoomRange) override {
+        value->evaluateZoomRange(zoomRange);
+    }
 };
 
 class StaticValue : public Value {
@@ -1022,10 +935,6 @@ public:
         }
         ss << parts[parts.size()-1];
         return ss.str();
-    }
-
-    bool isGettingPropertyValues() override {
-        return true;
     }
 
     bool isEqual(const std::shared_ptr<Value> &other) const override {
@@ -1160,6 +1069,11 @@ public:
         }
         return false;
     };
+
+    virtual void evaluateZoomRange(ZoomRange& zoomRange) override {
+        value->evaluateZoomRange(zoomRange);
+    }
+
 private:
     const std::shared_ptr<Value> value;
     const double scale;
@@ -1248,6 +1162,27 @@ public:
         }
 
         return steps[maxStepInd].second->evaluate(context);
+    }
+
+    virtual void evaluateZoomRange(ZoomRange& zoomRange) override {
+        double min = std::numeric_limits<double>::infinity();
+        double max = -std::numeric_limits<double>::infinity();
+
+        if(isFast) {
+            for(const auto& s : fastSteps) {
+                min = std::min(s.first, min);
+                max = std::max(s.first, max);
+            }
+        } else {
+            for(const auto& s : steps) {
+                s.second->evaluateZoomRange(zoomRange);
+
+                min = std::min(s.first, min);
+                max = std::max(s.first, max);
+            }
+        }
+
+        zoomRange.merge(min, max);
     }
 
     bool isEqual(const std::shared_ptr<Value> &other) const override {
@@ -1427,6 +1362,20 @@ public:
 
         int index = (steps.size() > 0 && *context.zoomLevel <= steps[0].first) ? 0 : maxStepInd;
         return steps[index].second->evaluate(context);
+    }
+
+    virtual void evaluateZoomRange(ZoomRange& zoomRange) override {
+        double min = std::numeric_limits<double>::infinity();
+        double max = -std::numeric_limits<double>::infinity();
+
+        for(const auto& s : steps) {
+            s.second->evaluateZoomRange(zoomRange);
+
+            min = std::min(s.first, min);
+            max = std::max(s.first, max);
+        }
+
+        zoomRange.merge(min, max);
     }
 
     bool isEqual(const std::shared_ptr<Value> &other) const override {
@@ -1637,6 +1586,15 @@ public:
         return false; // Not the same type or nullptr
     }
 
+    virtual void evaluateZoomRange(ZoomRange& zoomRange) override {
+        compareValue->evaluateZoomRange(zoomRange);
+
+        for(const auto& s : stops) {
+            s.first->evaluateZoomRange(zoomRange);
+            s.second->evaluateZoomRange(zoomRange);
+        }
+    }
+
 private:
     const std::shared_ptr<Value> compareValue;
     std::vector<std::pair<std::shared_ptr<Value>, std::shared_ptr<Value>>> stops;
@@ -1715,6 +1673,15 @@ public:
         return false; // Not the same type or nullptr
     }
 
+    virtual void evaluateZoomRange(ZoomRange& zoomRange) override {
+        defaultValue->evaluateZoomRange(zoomRange);
+
+        for(const auto& s : cases) {
+            s.first->evaluateZoomRange(zoomRange);
+            s.second->evaluateZoomRange(zoomRange);
+        }
+    }
+
 private:
     const std::vector<std::pair<std::shared_ptr<Value>, std::shared_ptr<Value>>> cases;
     const std::shared_ptr<Value> defaultValue;
@@ -1783,6 +1750,10 @@ public:
         }
         return false; // Not the same type or nullptr
     }
+
+    virtual void evaluateZoomRange(ZoomRange& zoomRange) override {
+        value->evaluateZoomRange(zoomRange);
+    }
 };
 
 class ToBooleanValue: public Value {
@@ -1841,6 +1812,10 @@ public:
         }
         return false; // Not the same type or nullptr
     }
+
+    virtual void evaluateZoomRange(ZoomRange& zoomRange) override {
+        value->evaluateZoomRange(zoomRange);
+    }
 };
 
 class BooleanValue: public Value {
@@ -1896,6 +1871,12 @@ public:
             return true; // All members are equal
         }
         return false; // Not the same type or nullptr
+    }
+
+    virtual void evaluateZoomRange(ZoomRange& zoomRange) override {
+        for(const auto& v : values) {
+            v->evaluateZoomRange(zoomRange);
+        }
     }
 };
 
@@ -1990,6 +1971,14 @@ public:
         }
         return false; // Not the same type or nullptr
     };
+
+    virtual void evaluateZoomRange(ZoomRange& zoomRange) override {
+        compareValue->evaluateZoomRange(zoomRange);
+
+        for(const auto& s : valueMapping) {
+            s.second->evaluateZoomRange(zoomRange);
+        }
+    }
 };
 
 
@@ -2076,9 +2065,15 @@ public:
 
         return false; // Not the same type or nullptr
     };
+
+    virtual void evaluateZoomRange(ZoomRange& zoomRange) override {
+        defaultValue->evaluateZoomRange(zoomRange);
+
+        for(const auto& s : valueMapping) {
+            s.second->evaluateZoomRange(zoomRange);
+        }
+    }
 };
-
-
 
 enum class LogOpType {
     AND,
@@ -2158,6 +2153,14 @@ public:
         return false; // Not the same type or nullptr
     };
 
+    virtual void evaluateZoomRange(ZoomRange& zoomRange) override {
+        lhs->evaluateZoomRange(zoomRange);
+
+        if(rhs) {
+            rhs->evaluateZoomRange(zoomRange);
+        }
+    }
+
 private:
     const LogOpType logOpType;
     const std::shared_ptr<Value> lhs;
@@ -2213,6 +2216,11 @@ public:
         return false; // Not the same type or nullptr
     };
 
+    virtual void evaluateZoomRange(ZoomRange& zoomRange) override {
+        for(const auto &v : values) {
+            v->evaluateZoomRange(zoomRange);
+        }
+    }
 
 private:
     const std::vector<std::shared_ptr<Value>> values;
@@ -2265,6 +2273,12 @@ public:
         }
         
         return false; // Not the same type or nullptr
+    }
+
+    virtual void evaluateZoomRange(ZoomRange& zoomRange) override {
+        for(const auto &v : values) {
+            v->evaluateZoomRange(zoomRange);
+        }
     }
 
 private:
@@ -2352,6 +2366,11 @@ public:
         }
 
         return false; // Not the same type or nullptr
+    }
+
+    virtual void evaluateZoomRange(ZoomRange& zoomRange) override {
+        lhs->evaluateZoomRange(zoomRange);
+        rhs->evaluateZoomRange(zoomRange);
     }
 
 private:
@@ -2447,6 +2466,9 @@ public:
         return false; // Not the same type or nullptr
     }
 
+    virtual void evaluateZoomRange(ZoomRange& zoomRange) override {
+        dynamicValues->evaluateZoomRange(zoomRange);
+    }
 };
 
 class NotInFilter : public Value {
@@ -2534,6 +2556,10 @@ public:
         }
         return false; // Not the same type or nullptr
     }
+
+    virtual void evaluateZoomRange(ZoomRange& zoomRange) override {
+        dynamicValues->evaluateZoomRange(zoomRange);
+    }
 };
 
 struct FormatValueWrapper {
@@ -2595,6 +2621,12 @@ public:
         }
 
         return false; // Not the same type or nullptr
+    }
+
+    virtual void evaluateZoomRange(ZoomRange& zoomRange) override {
+        for(const auto& f : values) {
+            f.value->evaluateZoomRange(zoomRange);
+        }
     }
 
 private:
@@ -2681,6 +2713,10 @@ public:
         return false;
     }
 
+    virtual void evaluateZoomRange(ZoomRange& zoomRange) override {
+        value->evaluateZoomRange(zoomRange);
+    }
+
 private:
     const std::shared_ptr<Value> value;
     int minFractionDigits = 0;
@@ -2721,6 +2757,7 @@ public:
     }
 
     ValueVariant evaluate(const EvaluationContext &context) const override {
+
         auto const lhsValue = lhs->evaluateOr(context, (double) 0.0);
         auto const rhsValue = rhs ? rhs->evaluateOr(context, (double) 0.0) : 0;
         switch (operation) {
@@ -2765,11 +2802,18 @@ public:
         return false; // Not the same type or nullptr
     }
 
+    virtual void evaluateZoomRange(ZoomRange& zoomRange) override {
+        lhs->evaluateZoomRange(zoomRange);
+        rhs->evaluateZoomRange(zoomRange);
+    }
+
 
 private:
     const std::shared_ptr<Value> lhs;
     const std::shared_ptr<Value> rhs;
     const MathOperation operation;
+
+    std::optional<ValueVariant> staticValue;
 };
 
 class LengthValue: public Value {
@@ -2830,6 +2874,10 @@ public:
 
         return false; // Not the same type or nullptr
     }
+
+    virtual void evaluateZoomRange(ZoomRange& zoomRange) override {
+        value->evaluateZoomRange(zoomRange);
+    }
 };
 
 class CoalesceValue : public Value {
@@ -2887,14 +2935,10 @@ public:
         return false; // Not the same type or nullptr
     }
 
-    virtual bool isGettingPropertyValues() override {
-        for (const auto &value: values) {
-            if(!value->isGettingPropertyValues()) {
-                return false;
-            }
+    virtual void evaluateZoomRange(ZoomRange& zoomRange) override {
+        for(const auto& s : values) {
+            s->evaluateZoomRange(zoomRange);
         }
-
-        return true;
     }
 };
 
@@ -2948,7 +2992,6 @@ public:
         return std::monostate();
     };
 
-
     bool isEqual(const std::shared_ptr<Value>& other) const override {
         if (auto casted = std::dynamic_pointer_cast<ArrayValue>(other)) {
             // Compare the value members
@@ -2969,14 +3012,10 @@ public:
         return false; // Not the same type or nullptr
     }
 
-    virtual bool isGettingPropertyValues() override {
-        for (const auto &value: values) {
-            if(!value->isGettingPropertyValues()) {
-                return false;
-            }
+    virtual void evaluateZoomRange(ZoomRange& zoomRange) override {
+        for(const auto& s : values) {
+            s->evaluateZoomRange(zoomRange);
         }
-
-        return true;
     }
 };
 

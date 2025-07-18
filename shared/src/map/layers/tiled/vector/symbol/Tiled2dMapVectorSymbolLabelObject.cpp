@@ -280,8 +280,18 @@ void Tiled2dMapVectorSymbolLabelObject::updateLayerDescription(const std::shared
     const auto &usedKeys = description->getUsedKeys();
     isStyleStateDependant = usedKeys.isStateDependant();
     lastZoomEvaluation = -1;
-}
 
+    textSize.invalidate();
+    textRotate.invalidate();
+    textPadding.invalidate();
+    textAlignment.invalidate();
+
+    textOpacity.invalidate();
+    textColor.invalidate();
+    haloColor.invalidate();
+    haloWidth.invalidate();
+    haloBlur.invalidate();
+}
 
 int Tiled2dMapVectorSymbolLabelObject::getCharacterCount(){
     return characterCount;
@@ -307,7 +317,6 @@ void Tiled2dMapVectorSymbolLabelObject::setupProperties(VectorModificationWrappe
     }
 }
 
-
 void Tiled2dMapVectorSymbolLabelObject::evaluateStyleProperties(const double zoomIdentifier) {
     auto roundedZoom = std::round(zoomIdentifier * 100.0) / 100.0;
 
@@ -317,21 +326,47 @@ void Tiled2dMapVectorSymbolLabelObject::evaluateStyleProperties(const double zoo
 
     const auto evalContext = EvaluationContext(roundedZoom, dpFactor, featureContext, stateManager);
 
-    textOpacity = description->style.getTextOpacity(evalContext);
-    if (textOpacity == 0.0) {
+    if(textOpacity.isReevaluationNeeded(evalContext)) {
+        textOpacity = description->style.getTextOpacity(evalContext);
+    }
+    
+    if (textOpacity.value == 0.0) {
         lastZoomEvaluation = roundedZoom;
         return;
     }
 
-    textSize = description->style.getTextSize(evalContext);
-    textAlignment = description->style.getTextRotationAlignment(evalContext);
-    textRotate = description->style.getTextRotate(evalContext);
-    textPadding = description->style.getTextPadding(evalContext);
+    if(textSize.isReevaluationNeeded(evalContext)) {
+        textSize = description->style.getTextSize(evalContext);
+    }
 
-    textColor = description->style.getTextColor(evalContext);
-    haloColor = description->style.getTextHaloColor(evalContext);
-    haloWidth = description->style.getTextHaloWidth(evalContext, textSize);
-    haloBlur = description->style.getTextHaloBlur(evalContext);
+    if(textAlignment.isReevaluationNeeded(evalContext)) {
+        textAlignment = description->style.getTextRotationAlignment(evalContext);
+    }
+
+    if(textRotate.isReevaluationNeeded(evalContext)) {
+        textRotate = description->style.getTextRotate(evalContext);
+    }
+
+    if(textPadding.isReevaluationNeeded(evalContext)) {
+        textPadding = description->style.getTextPadding(evalContext);
+    }
+
+    if(textColor.isReevaluationNeeded(evalContext)) {
+        textColor = description->style.getTextColor(evalContext);
+    }
+
+    if(haloColor.isReevaluationNeeded(evalContext)) {
+        haloColor = description->style.getTextHaloColor(evalContext);
+    }
+
+    auto textSizeReeval = textSize.isReevaluationNeeded(evalContext);
+    if(haloWidth.isReevaluationNeeded(evalContext) || textSizeReeval) {
+        haloWidth = description->style.getTextHaloWidth(evalContext, textSize);
+    }
+
+    if(haloBlur.isReevaluationNeeded(evalContext) || textSizeReeval) {
+        haloBlur = description->style.getTextHaloBlur(evalContext, textSize);
+    }
 
     lastZoomEvaluation = roundedZoom;
 }
@@ -348,25 +383,25 @@ void Tiled2dMapVectorSymbolLabelObject::updateProperties(VectorModificationWrapp
     } else if (collides || !(description->minZoom <= zoomIdentifier && description->maxZoom >= zoomIdentifier)) {
         alphaFactor = animationCoordinator->getTextAlpha(0.0, now);
     } else {
-        float targetAlpha = textOpacity * alpha;
+        float targetAlpha = textOpacity.value * alpha;
         alphaFactor = animationCoordinator->getTextAlpha(targetAlpha, now);
     }
 
-    float colorAlpha = textColor.a * alphaFactor;
+    float colorAlpha = textColor.value.a * alphaFactor;
 
     union { uint32_t i; float f; } packedColorConverter{};
-    packedColorConverter.i = ((uint8_t) round(textColor.r * 255) << 24)
-                           | ((uint8_t) round(textColor.g * 255) << 16)
-                           | ((uint8_t) round(textColor.b * 255) << 8)
+    packedColorConverter.i = ((uint8_t) round(textColor.value.r * 255) << 24)
+                           | ((uint8_t) round(textColor.value.g * 255) << 16)
+                           | ((uint8_t) round(textColor.value.b * 255) << 8)
                            | ((uint8_t) round(colorAlpha * 255)); // color RGBA
     styles[4 * styleIndex + 0] = packedColorConverter.f;
-    packedColorConverter.i = ((uint8_t) round(haloColor.r * 255) << 24)
-                  | ((uint8_t) round(haloColor.g * 255) << 16)
-                  | ((uint8_t) round(haloColor.b * 255) << 8)
-                  | ((uint8_t) round(haloColor.a * alphaFactor * 255)); // halo color RGBA
+    packedColorConverter.i = ((uint8_t) round(haloColor.value.r * 255) << 24)
+                  | ((uint8_t) round(haloColor.value.g * 255) << 16)
+                  | ((uint8_t) round(haloColor.value.b * 255) << 8)
+                  | ((uint8_t) round(haloColor.value.a * alphaFactor * 255)); // halo color RGBA
     styles[4 * styleIndex + 1] = packedColorConverter.f;
-    styles[4 * styleIndex + 2] = haloWidth; // halo width
-    styles[4 * styleIndex + 3] = haloBlur; // halo blur
+    styles[4 * styleIndex + 2] = haloWidth.value; // halo width
+    styles[4 * styleIndex + 3] = haloBlur.value; // halo blur
 
     isOpaque = colorAlpha > 0.0;
 
@@ -410,7 +445,7 @@ void Tiled2dMapVectorSymbolLabelObject::updateProperties(VectorModificationWrapp
 void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &referencePositions, VectorModificationWrapper<float> &scales, VectorModificationWrapper<float> &rotations, VectorModificationWrapper<float> &alphas, int &countOffset, float alphaFactor, const double zoomIdentifier, const double scaleFactor, const double rotation, const Vec2I &viewportSize) {
 
     const auto evalContext = EvaluationContext(zoomIdentifier, dpFactor, featureContext, stateManager);
-    const float fontSize = is3d ? textSize : (scaleFactor * textSize);
+    const float fontSize = is3d ? textSize.value : (scaleFactor * textSize.value);
 
     Vec2D boxMin(std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
     Vec2D boxMax(std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest());
@@ -425,7 +460,7 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(VectorModification
 
     auto pen = zero;
 
-    const float angle = (textAlignment == SymbolAlignment::MAP) ? textRotate : textRotate - rotation;
+    const float angle = (textAlignment.value == SymbolAlignment::MAP) ? textRotate.value : textRotate.value - rotation;
 
     Vec2D anchorOffset(0.0, 0.0);
     float yOffset = 0;
@@ -665,7 +700,7 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(VectorModification
         countOffset += 1;
     }
 
-    const float scaledTextPadding = is3d ? textPadding : scaleFactor * textPadding;
+    const float scaledTextPadding = is3d ? textPadding.value : scaleFactor * textPadding.value;
 
     // dimensions before rotation, with padding included
     dimensions.x = size.x + 2 * scaledTextPadding;
@@ -709,7 +744,7 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(VectorModificatio
 
     auto evalContext = EvaluationContext(zoomIdentifier, dpFactor, featureContext, stateManager);
 
-    const double fontSize = scaleFactor * textSize;
+    const double fontSize = scaleFactor * textSize.value;
     const double scaleCorrection = is3d ? (1.0 / scaleFactor) : 1.0;
 
     Vec2D boxMin(std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
@@ -873,7 +908,7 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(VectorModificatio
                 const size_t centerPositionSize = centerPositions.size();
 
                 if (is3d) {
-                    auto charScaled = Vec2D(d.boundingBoxSize.x * textSize * i.scale, d.boundingBoxSize.y * textSize * i.scale);
+                    auto charScaled = Vec2D(d.boundingBoxSize.x * textSize.value * i.scale, d.boundingBoxSize.y * textSize.value * i.scale);
                     scales[2 * (countOffset + centerPositionSize) + 0] = (charScaled.x / viewportSize.x) * 2.0;
                     scales[2 * (countOffset + centerPositionSize) + 1] = (charScaled.y / viewportSize.x) * 2.0;
 
@@ -946,7 +981,7 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(VectorModificatio
     assert(countOffset == countBefore + characterCount);
 
     if (boxMin.x != std::numeric_limits<float>::max()) {
-        const float scaledTextPadding = is3d ? textPadding : scaleFactor * textPadding;
+        const float scaledTextPadding = is3d ? textPadding.value : scaleFactor * textPadding.value;
 
         std::vector<CircleD> circles;
         Vec2D lastCirclePosition = Vec2D(0, 0);
