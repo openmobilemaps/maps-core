@@ -326,13 +326,33 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
 
         auto lineDescription = std::dynamic_pointer_cast<LineVectorLayerDescription>(description);
 
+        std::unordered_map<size_t, bool> filterCache;
+
         for (auto featureIt = tileData->rbegin(); featureIt != tileData->rend(); ++featureIt) {
             std::shared_ptr<FeatureContext> featureContext = std::get<0>(*featureIt);
             
             if (featureContext->geomType != vtzero::GeomType::POLYGON && featureContext->geomType != vtzero::GeomType::LINESTRING) { continue; }
 
             EvaluationContext evalContext = EvaluationContext(tileInfo.tileInfo.zoomIdentifier, dpFactor, featureContext, featureStateManager);
-            if ((description->filter == nullptr || description->filter->evaluateOr(evalContext, false))) {
+
+            bool inside = true;
+            if (description->filter) {
+                if (featureContext->hasCustomId) {
+                    // Every ID is unique → no cache possible
+                    inside = description->filter->evaluateOr(evalContext, false);
+                } else {
+                    auto hash = featureContext->identifier;
+                    auto it = filterCache.find(hash);
+                    if (it != filterCache.end()) {
+                        inside = it->second;
+                    } else {
+                        inside = description->filter->evaluateOr(evalContext, false);
+                        filterCache[hash] = inside;
+                    }
+                }
+            }
+
+            if (inside) {
                 int styleGroupIndex = -1;
                 int styleIndex = -1;
                 {
