@@ -75,7 +75,7 @@ class Tiled2dMapVectorLayer : public Tiled2dMapLayer,
 
     Tiled2dMapVectorLayer(const std::string &layerName,
                           const std::shared_ptr<VectorMapDescription> & mapDescription,
-                          StringInterner &&stringTable,
+                          const std::shared_ptr<StringInterner> &stringTable,
                           const std::vector<std::shared_ptr<::LoaderInterface>> & loaders,
                           const std::shared_ptr<::FontLoaderInterface> & fontLoader,
                           const std::optional<Tiled2dMapZoomInfo> &customZoomInfo = std::nullopt,
@@ -211,8 +211,8 @@ class Tiled2dMapVectorLayer : public Tiled2dMapLayer,
 
     virtual void setReadyStateListener(const /*not-null*/ std::shared_ptr<::Tiled2dMapReadyStateListener> &listener) override;
 
-    StringInterner& getStringInterner() { return stringTable; }
-    const StringInterner& getStringInterner() const { return stringTable; }
+    StringInterner& getStringInterner() { return *stringTable; }
+    const StringInterner& getStringInterner() const { return *stringTable; }
 
 	protected:
     virtual void setMapDescription(const std::shared_ptr<VectorMapDescription> &mapDescription);
@@ -231,7 +231,11 @@ class Tiled2dMapVectorLayer : public Tiled2dMapLayer,
     std::vector<Actor<Tiled2dMapRasterSource>> rasterTileSources;
 
     const std::vector<std::shared_ptr<::LoaderInterface>> loaders;
-    StringInterner stringTable;
+    // StringInterner is conceptually scoped to a vector layer.
+    // It's kept as a shared_ptr here because some sub-components (in
+    // particular, GeoJsonVT) need a reference to this but are constructed
+    // before the vector layer.
+    std::shared_ptr<StringInterner> stringTable;
 
     virtual std::optional<TiledLayerError> loadStyleJson();
     virtual std::optional<TiledLayerError> loadStyleJsonRemotely();
