@@ -42,7 +42,7 @@ nlohmann::json GeoJsonHelper::jsonFromFeatureInfo(const GeoJsonPoint &point) {
     featureJson["geometry"] = {{"coordinates", {epsg4326Coord.x, epsg4326Coord.y}}, {"type", "Point"}};
 
     for (const auto property: point.featureInfo.properties) {
-        if (property.first == ValueKeys::TYPE_KEY || property.first == ValueKeys::IDENTIFIER_KEY) {
+        if (property.first == ValueKeys::TYPE_KEY_STR || property.first == ValueKeys::IDENTIFIER_KEY_STR) {
             continue;
         }
 

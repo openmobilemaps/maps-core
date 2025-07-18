@@ -23,6 +23,7 @@ void parseAndTriangulate(const char *filePath, ParsingResult expectedResult, Cat
     auto data = TestData::readFileToBuffer(filePath);
 
     ParsingResult result = {0, 0, 0};
+    StringInterner stringTable = ValueKeys::newStringInterner();
 
     meter.measure([&](int run) {
         vtzero::vector_tile tileData(data.data(), data.size());
@@ -32,7 +33,7 @@ void parseAndTriangulate(const char *filePath, ParsingResult expectedResult, Cat
 
             while (const auto &feature = layer.next_feature()) {
                 int extent = (int) layer.extent();
-                auto const featureContext = std::make_shared<FeatureContext>(feature);
+                auto const featureContext = std::make_shared<FeatureContext>(stringTable, feature);
                 VectorTileGeometryHandler geometryHandler = VectorTileGeometryHandler(tileCoords, extent, std::nullopt, conversionHelper);
                 decode_geometry(feature.geometry(), geometryHandler);
                 size_t polygonCount = geometryHandler.beginTriangulatePolygons();

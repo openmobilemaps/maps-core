@@ -75,7 +75,7 @@ static size_t findNotEscaped(const std::string &s, char ch, size_t pos) {
  *
  * @returns StringInterpolationValue or nullptr
  */
-static std::shared_ptr<Value> tryParseStringInterpolationValue(const nlohmann::json &json) {
+static std::shared_ptr<Value> tryParseStringInterpolationValue(const nlohmann::json &json, StringInterner &stringTable) {
     if(!json.is_string()) {
       return nullptr;
     }
@@ -87,7 +87,7 @@ static std::shared_ptr<Value> tryParseStringInterpolationValue(const nlohmann::j
     // There are always keys.size()+1 part, even if some of the parts are empty strings.
     //   part0 {key0} part1 {key1} part2
     std::vector<std::string> parts;
-    std::vector<std::string> keys;
+    std::vector<InternedString> keys;
 
     auto partBegin = 0;
     auto exprBegin = findNotEscaped(s, '{', partBegin);
@@ -107,7 +107,7 @@ static std::shared_ptr<Value> tryParseStringInterpolationValue(const nlohmann::j
         while (keyBegin < keyEnd && std::isspace(s[keyEnd-1])) {
             keyEnd--;
         };
-        keys.push_back(s.substr(keyBegin, keyEnd - keyBegin));
+        keys.push_back(stringTable.add(s.substr(keyBegin, keyEnd - keyBegin)));
 
         partBegin = exprLast + 1;
         exprBegin = findNotEscaped(s, '{', partBegin);
@@ -166,30 +166,30 @@ std::shared_ptr<Value> Tiled2dMapVectorStyleParser::parseValue(nlohmann::json js
 
             // Example: [ "get", "class" ]
         } else if (isExpression(json[0], getExpression) && json.size() == 2 && json[1].is_string()) {
-            auto key = json[1].get<std::string>();
-            if (json[1].is_array() && json[1][0] == "geometry-type") {
-                key = ValueKeys::TYPE_KEY;
-            }
+            InternedString key = (json[1].is_array() && json[1][0] == "geometry-type")
+                                     ? ValueKeys::TYPE_KEY
+                                     : stringTable.add(json[1].get<std::string>());
+
             return std::make_shared<GetPropertyValue>(key);
 
             // Example: [ "feature-state", "hover" ]
         } else if (isExpression(json[0], featureStateExpression) && json.size() == 2 && json[1].is_string()) {
             auto key = json[1].get<std::string>();
-            return std::make_shared<FeatureStateValue>(key);
+            return std::make_shared<FeatureStateValue>(stringTable.add(key));
 
             // Example: [ "global-state",  "hover" ]
         } else if (isExpression(json[0], globalStateExpression) && json.size() == 2 && json[1].is_string()) {
             auto key = json[1].get<std::string>();
-            return std::make_shared<GlobalStateValue>(key);
+            return std::make_shared<GlobalStateValue>(stringTable.add(key));
 
             // Example: [ "has",  "ref" ]
             //          [ "!has", "ref"]
         } else if ((isExpression(json[0], hasExpression) || isExpression(json[0], hasNotExpression)) && json.size() == 2 && json[1].is_string()) {
             if (isExpression(json[0], hasExpression)) {
-                return std::make_shared<HasPropertyValue>(json[1].get<std::string>());
+                return std::make_shared<HasPropertyValue>(stringTable.add(json[1].get<std::string>()));
             }
             else {
-                return std::make_shared<HasNotPropertyValue>(json[1].get<std::string>());
+                return std::make_shared<HasNotPropertyValue>(stringTable.add(json[1].get<std::string>()));
             }
 
             // Example: [ "in", "admin_level", 2, 4 ]
@@ -226,16 +226,16 @@ std::shared_ptr<Value> Tiled2dMapVectorStyleParser::parseValue(nlohmann::json js
             }
 
             if (isExpression(json[0], inExpression)) {
-                return std::make_shared<InFilter>(key, values, dynamicValues);
+                return std::make_shared<InFilter>(stringTable.add(key), values, dynamicValues);
             } else {
-                return std::make_shared<NotInFilter>(key, values, dynamicValues);
+                return std::make_shared<NotInFilter>(stringTable.add(key), values, dynamicValues);
             }
 
         // Example: [ "!=", "intermittent", 1 ]
         //          ["!=",["get","brunnel"],"tunnel"]
         } else if (isExpression(json[0], compareExpression)) {
             // MaybeGetProperty implements deprecated [ OPERATOR, key, value ] as shorthand for [ OPERATOR, ["get" key], value ]
-            auto lhs = (json[1].is_string()) ? std::make_shared<MaybeGetPropertyValue>(json[1])
+            auto lhs = (json[1].is_string()) ? std::make_shared<MaybeGetPropertyValue>(stringTable.add(json[1]), json[1])
                                              : parseValue(json[1]);
             auto rhs = parseValue(json[2]);
 
@@ -500,7 +500,7 @@ std::shared_ptr<Value> Tiled2dMapVectorStyleParser::parseValue(nlohmann::json js
         return std::make_shared<InterpolatedValue>(1.0, steps);
 
     } else if (!json.is_null() && json.is_primitive()) {
-        if (auto stringInterpolationValue = tryParseStringInterpolationValue(json)) {
+        if (auto stringInterpolationValue = tryParseStringInterpolationValue(json, stringTable)) {
             return stringInterpolationValue;
         } else {
             return std::make_shared<StaticValue>(getVariant(json));

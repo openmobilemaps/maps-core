@@ -21,7 +21,7 @@ class GeoJsonParser {
      * @throws json::exception on malformed data
      * @returns not-null
      */
-    static std::shared_ptr<GeoJson> getGeoJson(const nlohmann::json &geojson);
+    static std::shared_ptr<GeoJson> getGeoJson(const nlohmann::json &geojson, StringInterner &stringTable);
     /**
      * Decode GeoJSON object, looking only for Points in a FeatureCollection
      * @throws json::exception on malformed data

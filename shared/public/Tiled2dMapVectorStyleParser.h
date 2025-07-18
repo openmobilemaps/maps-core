@@ -19,7 +19,10 @@
 #include <unordered_set>
 
 class Tiled2dMapVectorStyleParser {
-public:
+  private:
+    StringInterner &stringTable;
+
+  public:
     static const std::string literalExpression;
     static const std::string getExpression;
     static const std::string hasExpression;
@@ -48,6 +51,9 @@ public:
     static const std::string featureStateExpression;
     static const std::string globalStateExpression;
     static const std::string coalesceExpression;
+
+    Tiled2dMapVectorStyleParser(StringInterner &stringTable)
+        : stringTable(stringTable) {}
 
     std::shared_ptr<Value> parseValue(nlohmann::json json);
     ValueVariant getVariant(const nlohmann::json &json);

@@ -449,6 +449,7 @@ std::vector<Actor<Tiled2dMapVectorSymbolGroup>> Tiled2dMapVectorSourceSymbolData
         Actor<Tiled2dMapVectorSymbolGroup> symbolGroupActor = Actor<Tiled2dMapVectorSymbolGroup>(mailbox,
                                                                                                  featuresBase, // unique within tile
                                                                                                  mapInterface,
+                                                                                                 vectorLayer.unsafe(),
                                                                                                  layerConfig,
                                                                                                  fontProviderManager.weakActor<Tiled2dMapVectorFontProvider>(),
                                                                                                  tileInfo,

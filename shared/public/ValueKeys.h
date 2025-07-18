@@ -10,10 +10,18 @@
 
 #pragma once
 
-#include <string>
+#include "InternedString.h"
+#include "StringInterner.h"
 
 class ValueKeys {
 public:
-    const static std::string IDENTIFIER_KEY;
-    const static std::string TYPE_KEY;
+    const static char *IDENTIFIER_KEY_STR;
+    const static char *TYPE_KEY_STR;
+
+    const static InternedString IDENTIFIER_KEY;
+    const static InternedString TYPE_KEY;
+    const static InternedString ZOOM;
+
+    // Create a StringInterner containing the pre-defined values above
+    static StringInterner newStringInterner();
 };

@@ -181,10 +181,11 @@ static VectorLayerFeatureInfo getFeatureInfo(const nlohmann::json &properties, c
     return info;
 }
 
-static FeatureContext::mapType parseProperties(const nlohmann::json &properties) {
+static FeatureContext::mapType parseProperties(const nlohmann::json &properties, StringInterner &stringTable) {
     FeatureContext::mapType propertyMap;
     if (properties.is_object()) {
-        for (const auto &[key, val] : properties.items()) {
+        for (const auto &[keyStr, val] : properties.items()) {
+            InternedString key = stringTable.add(keyStr);
             if (val.is_string()) {
                 propertyMap.emplace_back(key, val.get<std::string>());
             } else if (val.is_number_integer()) {
@@ -256,11 +257,11 @@ static std::tuple<std::shared_ptr<GeoJsonGeometry>, vtzero::GeomType> parseGeome
 /** Decode `feature` as a Feature Object.
  * @throws
  */
-static std::shared_ptr<GeoJsonGeometry> parseFeature(UUIDGenerator &uuidGenerator, const nlohmann::json &feature) {
+static std::shared_ptr<GeoJsonGeometry> parseFeature(const nlohmann::json &feature, UUIDGenerator &uuidGenerator, StringInterner &stringTable) {
 
     auto [geometry, geomType] = parseGeometry(feature.at("geometry"));
 
-    const auto &properties = feature.contains("properties") ? parseProperties(feature["properties"]) : FeatureContext::mapType();
+    const auto &properties = feature.contains("properties") ? parseProperties(feature["properties"], stringTable) : FeatureContext::mapType();
 
     if (feature.contains("id") && feature["id"].is_string()) {
         geometry->featureContext = std::make_shared<FeatureContext>(geomType, properties, feature["id"].get<std::string>());
@@ -270,13 +271,13 @@ static std::shared_ptr<GeoJsonGeometry> parseFeature(UUIDGenerator &uuidGenerato
     return geometry;
 }
 
-std::shared_ptr<GeoJson> GeoJsonParser::getGeoJson(const nlohmann::json &geojson) {
+std::shared_ptr<GeoJson> GeoJsonParser::getGeoJson(const nlohmann::json &geojson, StringInterner &stringTable) {
     UUIDGenerator generator;
 
     std::shared_ptr<GeoJson> geoJson = std::make_shared<GeoJson>();
     const auto &type = geojson.at("type").get<std::string>();
     if (type == "Feature") {
-        auto geometry = parseFeature(generator, geojson);
+        auto geometry = parseFeature(geojson, generator, stringTable);
         geoJson->geometries.emplace_back(std::move(geometry));
     } else if (type == "FeatureCollection") {
         const auto &features = geojson.at("features");
@@ -292,7 +293,7 @@ std::shared_ptr<GeoJson> GeoJsonParser::getGeoJson(const nlohmann::json &geojson
                             599, std::string("\"type\" must be \"Feature\" but is \"") + type + "\"", &feature.at("type"));
                     }
                 }
-                auto geometry = parseFeature(generator, feature);
+                auto geometry = parseFeature(feature, generator, stringTable);
                 geoJson->geometries.emplace_back(std::move(geometry));
             } catch (nlohmann::json::exception &ex) {
                 LogError << "Geojson feature is not valid: " <<= ex.what();

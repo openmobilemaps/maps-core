@@ -8,14 +8,15 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-
 #include "Tiled2dMapVectorSource.h"
-#include "vtzero/vector_tile.hpp"
 #include "Logger.h"
-#include "Tiled2dMapVectorTileInfo.h"
 #include "PerformanceLogger.h"
+#include "Tiled2dMapVectorLayer.h"
+#include "Tiled2dMapVectorTileInfo.h"
+#include "vtzero/vector_tile.hpp"
 
 Tiled2dMapVectorSource::Tiled2dMapVectorSource(const MapConfig &mapConfig,
+                                               const std::weak_ptr<Tiled2dMapVectorLayer> &vectorLayer,
                                                const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig,
                                                const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                                                const std::shared_ptr<SchedulerInterface> &scheduler,
@@ -26,7 +27,7 @@ Tiled2dMapVectorSource::Tiled2dMapVectorSource(const MapConfig &mapConfig,
                                                float screenDensityPpi,
                                                std::string layerName)
         : Tiled2dMapSource<std::shared_ptr<DataLoaderResult>, Tiled2dMapVectorTileInfo::FeatureMap>(mapConfig, layerConfig, conversionHelper, scheduler, screenDensityPpi, tileLoaders.size(), layerName),
-loaders(tileLoaders), layersToDecode(layersToDecode), listener(listener), sourceName(sourceName) {}
+loaders(tileLoaders), layersToDecode(layersToDecode), listener(listener), sourceName(sourceName), vectorLayer(vectorLayer) {}
 
 ::djinni::Future<std::shared_ptr<DataLoaderResult>> Tiled2dMapVectorSource::loadDataAsync(Tiled2dMapTileInfo tile, size_t loaderIndex) {
     {
@@ -54,10 +55,55 @@ bool Tiled2dMapVectorSource::hasExpensivePostLoadingTask() {
     return true;
 }
 
+static void internAllLayerKeys(const vtzero::layer &layer,
+                               StringInterner &stringTable,
+                               std::vector<std::string> &outKeys,
+                               std::vector<InternedString> &outInternedKeys)
+{
+    outKeys.clear();
+    outKeys.reserve(layer.key_table_size());
+    for (auto &k : layer.key_table()) {
+        outKeys.push_back(std::string{k});
+    }
+    outInternedKeys.clear();
+    outInternedKeys.reserve(outKeys.size());
+    stringTable.add(outKeys.begin(), outKeys.end(), std::back_inserter(outInternedKeys));
+}
+
+static std::shared_ptr<FeatureContext> convertToFeatureContext(const vtzero::feature &feature, const vtzero::layer &layer,
+                                                               std::vector<InternedString> internedLayerKeys) {
+    FeatureContext::mapType propertiesMap;
+    propertiesMap.reserve(feature.num_properties());
+    feature.for_each_property_indexes([&](vtzero::index_value_pair property) {
+        auto key = internedLayerKeys[property.key().value()];
+        auto value = vtzero::convert_property_value<ValueVariant, property_value_mapping>(layer.value(property.value().value())); // value! gaah
+        propertiesMap.emplace_back(key, std::move(value));
+        return true;
+    });
+
+    uint64_t identifier;
+    if (feature.has_id()) {
+        identifier = feature.id();
+    } else {
+        size_t hash = 0;
+        for (auto const &[key, val] : propertiesMap) {
+            std::hash_combine(hash, std::hash<FeatureContext::valueType>{}(val));
+        }
+        identifier = hash;
+    }
+    return std::make_shared<FeatureContext>(feature.geometry_type(), std::move(propertiesMap), identifier);
+}
+
 Tiled2dMapVectorTileInfo::FeatureMap Tiled2dMapVectorSource::postLoadingTask(std::shared_ptr<DataLoaderResult> loadedData, Tiled2dMapTileInfo tile) {
     PERF_LOG_START(sourceName + "_postLoadingTask");
     auto layerFeatureMap = std::make_shared<std::unordered_map<std::string, std::shared_ptr<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>>>>();
     
+    auto strongVectorLayer = vectorLayer.lock();
+    if (!strongVectorLayer) {
+        return layerFeatureMap;
+    }
+    StringInterner &stringTable = strongVectorLayer->getStringInterner();
+
     if (!loadedData->data.has_value()) {
         LogError <<= "postLoadingTask, but data has no value for " + layerConfig->getLayerName() + ": " + std::to_string(tile.zoomIdentifier) + "/" +
         std::to_string(tile.x) + "/" + std::to_string(tile.y);
@@ -67,6 +113,8 @@ Tiled2dMapVectorTileInfo::FeatureMap Tiled2dMapVectorSource::postLoadingTask(std
     try {
         vtzero::vector_tile tileData((char*)loadedData->data->buf(), loadedData->data->len());
 
+        std::vector<std::string> layerKeys;
+        std::vector<InternedString> internedLayerKeys;
         mapbox::detail::Earcut<uint16_t> earcutter;
         while (auto layer = tileData.next_layer()) {
             std::string sourceLayerName = std::string(layer.name());
@@ -74,6 +122,8 @@ Tiled2dMapVectorTileInfo::FeatureMap Tiled2dMapVectorSource::postLoadingTask(std
                 int extent = (int) layer.extent();
                 layerFeatureMap->emplace(sourceLayerName, std::make_shared<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>>());
                 layerFeatureMap->at(sourceLayerName)->reserve(layer.num_features());
+
+                internAllLayerKeys(layer, stringTable, layerKeys, internedLayerKeys);
                 while (const auto &feature = layer.next_feature()) {
 
                     {
@@ -83,7 +133,7 @@ Tiled2dMapVectorTileInfo::FeatureMap Tiled2dMapVectorSource::postLoadingTask(std
                         }
                     }
 
-                    auto const featureContext = std::make_shared<FeatureContext>(feature);
+                    auto const featureContext = convertToFeatureContext(feature, layer, internedLayerKeys);
                     PERF_LOG_START(sourceLayerName + "_decode");
                     try {
                         std::shared_ptr<VectorTileGeometryHandler> geometryHandler = std::make_shared<VectorTileGeometryHandler>(tile.bounds, extent, layerConfig->getVectorSettings(), conversionHelper);

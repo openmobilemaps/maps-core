@@ -36,7 +36,7 @@ public:
         usedKeysCollection = newValue ? std::move(newValue->getUsedKeys()) : std::move(UsedKeysCollection());
 
         isStatic = usedKeysCollection.empty();
-        isZoomDependent = usedKeysCollection.usedKeys.contains("zoom");
+        isZoomDependent = usedKeysCollection.usedKeys.contains(ValueKeys::ZOOM);
         isStateDependant = usedKeysCollection.isStateDependant();
         needsReevaluation = isZoomDependent || isStateDependant;
 

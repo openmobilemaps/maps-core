@@ -16,14 +16,15 @@
 #include "Tiled2dMapVectorStyleParser.h"
 
 Tiled2dMapVectorRasterTile::Tiled2dMapVectorRasterTile(const std::weak_ptr<MapInterface> &mapInterface,
+                                                       const std::weak_ptr<Tiled2dMapVectorLayer> &vectorLayer,
                                                        const Tiled2dMapVersionedTileInfo &tileInfo,
                                                        const WeakActor<Tiled2dMapVectorLayerTileCallbackInterface> &tileCallbackInterface,
                                                        const std::shared_ptr<RasterVectorLayerDescription> &description,
                                                        const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
                                                        const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager)
-                                                       : Tiled2dMapVectorTile(mapInterface, tileInfo, description, layerConfig, tileCallbackInterface, featureStateManager),
+                                                       : Tiled2dMapVectorTile(mapInterface, vectorLayer, tileInfo, description, layerConfig, tileCallbackInterface, featureStateManager),
                                                        usedKeys(description->getUsedKeys()), zoomInfo(layerConfig->getZoomInfo()) {
-    isStyleZoomDependant = usedKeys.containsUsedKey(Tiled2dMapVectorStyleParser::zoomExpression);
+    isStyleZoomDependant = usedKeys.containsUsedKey(ValueKeys::ZOOM);
     isStyleStateDependant = usedKeys.isStateDependant();
     auto pMapInterface = mapInterface.lock();
     if (pMapInterface) {
@@ -45,7 +46,7 @@ Tiled2dMapVectorRasterTile::Tiled2dMapVectorRasterTile(const std::weak_ptr<MapIn
 void Tiled2dMapVectorRasterTile::updateRasterLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
                                                         const Tiled2dMapVectorTileDataRaster &tileData) {
     Tiled2dMapVectorTile::updateRasterLayerDescription(description, tileData);
-    isStyleZoomDependant = usedKeys.containsUsedKey(Tiled2dMapVectorStyleParser::zoomExpression);
+    isStyleZoomDependant = usedKeys.containsUsedKey(ValueKeys::ZOOM);
     isStyleStateDependant = usedKeys.isStateDependant();
     lastZoom = std::nullopt;
     setRasterTileData(tileData);
@@ -85,7 +86,7 @@ void Tiled2dMapVectorRasterTile::update() {
     lastZoom = zoomIdentifier;
     lastAlpha = alpha;
 
-    const EvaluationContext evalContext(zoomIdentifier, dpFactor, std::make_shared<FeatureContext>(), featureStateManager);
+    const EvaluationContext evalContext(zoomIdentifier, dpFactor, nullptr, featureStateManager);
     auto rasterStyle = rasterDescription->style.getRasterStyle(evalContext);
 
     if(rasterStyle == lastStyle) {

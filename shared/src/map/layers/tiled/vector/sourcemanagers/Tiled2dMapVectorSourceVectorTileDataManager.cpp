@@ -12,6 +12,7 @@
 #include "PolygonCompare.h"
 #include "Tiled2dMapVectorLayer.h"
 #include "Tiled2dMapVectorLayerConstants.h"
+#include "Tiled2dMapVectorTile.h"
 
 Tiled2dMapVectorSourceVectorTileDataManager::Tiled2dMapVectorSourceVectorTileDataManager(
                                                                                          const WeakActor<Tiled2dMapVectorLayer> &vectorLayer,

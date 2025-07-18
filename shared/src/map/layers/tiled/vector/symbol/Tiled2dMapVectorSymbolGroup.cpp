@@ -22,6 +22,7 @@
 
 Tiled2dMapVectorSymbolGroup::Tiled2dMapVectorSymbolGroup(uint32_t groupId,
                                                          const std::weak_ptr<MapInterface> &mapInterface,
+                                                         const std::weak_ptr<Tiled2dMapVectorLayer> &vectorLayer,
                                                          const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
                                                          const WeakActor<Tiled2dMapVectorFontProvider> &fontProvider,
                                                          const Tiled2dMapVersionedTileInfo &tileInfo,
@@ -32,6 +33,7 @@ Tiled2dMapVectorSymbolGroup::Tiled2dMapVectorSymbolGroup(uint32_t groupId,
                                                          const bool persistingSymbolPlacement)
 : groupId(groupId),
 mapInterface(mapInterface),
+vectorLayer(vectorLayer),
 layerConfig(layerConfig),
 tileInfo(tileInfo),
 layerIdentifier(layerIdentifier),
@@ -71,8 +73,9 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
 
 
     auto strongMapInterface = this->mapInterface.lock();
+    auto strongVectorLayer = vectorLayer.lock();
     auto camera = strongMapInterface ? strongMapInterface->getCamera() : nullptr;
-    if (!strongMapInterface || !camera) {
+    if (!strongMapInterface || !camera || !strongVectorLayer) {
         symbolManagerActor.message(MFN(&Tiled2dMapVectorSourceSymbolDataManager::onSymbolGroupInitialized), false, tileInfo, layerIdentifier, selfActor);
         return;
     }
@@ -344,7 +347,7 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
         if (wasPlaced) {
             // load custom icon if flag is set
             if (hasImageFromCustomProvider && symbolDelegate) {
-                featureInfosWithCustomAssets.push_back(context->getFeatureInfo());
+                featureInfosWithCustomAssets.push_back(context->getFeatureInfo(strongVectorLayer->getStringInterner()));
             }
         }
     }
@@ -1057,12 +1060,17 @@ std::optional<std::tuple<Coord, VectorLayerFeatureInfo>> Tiled2dMapVectorSymbolG
     if (!anyInteractable) {
         return std::nullopt;
     }
+    auto strongVectorLayer = vectorLayer.lock();
+    if (!strongVectorLayer) {
+        return std::nullopt;
+    }
+    const StringInterner& stringTable = strongVectorLayer->getStringInterner();
 #ifdef DRAW_TEXT_BOUNDING_BOX
     lastClickHitCircle = clickHitCircle;
     mapInterface.lock()->invalidate();
 #endif
     for (auto iter = symbolObjects.rbegin(); iter != symbolObjects.rend(); ++iter) {
-        const auto result = (*iter)->onClickConfirmed(clickHitCircle, zoomIdentifier, collisionEnvironment);
+        const auto result = (*iter)->onClickConfirmed(clickHitCircle, zoomIdentifier, collisionEnvironment, stringTable);
         if (result) {
             return result;
         }

@@ -12,20 +12,17 @@
 
 #include "Actor.h"
 #include "FontLoaderInterface.h"
-#include "PolygonMaskObject.h"
+#include "SpriteData.h"
+#include "StringInterner.h"
 #include "Tiled2dMapLayer.h"
-#include "Tiled2dMapLayerMaskWrapper.h"
 #include "Tiled2dMapRasterSource.h"
 #include "Tiled2dMapRasterSourceListener.h"
 #include "Tiled2dMapVectorLayerConfig.h"
 #include "Tiled2dMapVectorLayerInterface.h"
 #include "Tiled2dMapVectorLayerLocalDataProviderInterface.h"
-#include "Tiled2dMapVectorLayerTileCallbackInterface.h"
 #include "Tiled2dMapVectorSource.h"
 #include "Tiled2dMapVectorSourceListener.h"
 #include "Tiled2dMapVectorStateManager.h"
-#include "Tiled2dMapVectorSubLayer.h"
-#include "Tiled2dMapVectorTile.h"
 #include "TiledLayerError.h"
 #include "VectorMapSourceDescription.h"
 #include "VectorSet.h"
@@ -76,9 +73,11 @@ class Tiled2dMapVectorLayer : public Tiled2dMapLayer,
                           const std::unordered_map<std::string, std::string> &sourceUrlParams = {},
                           const std::shared_ptr<Tiled2dMapVectorLayerLocalDataProviderInterface> &localDataProvider = nullptr);
 
-    Tiled2dMapVectorLayer(const std::string &layerName, const std::shared_ptr<VectorMapDescription> &mapDescription,
-                          const std::vector<std::shared_ptr<::LoaderInterface>> &loaders,
-                          const std::shared_ptr<::FontLoaderInterface> &fontLoader,
+    Tiled2dMapVectorLayer(const std::string &layerName,
+                          const std::shared_ptr<VectorMapDescription> & mapDescription,
+                          StringInterner &&stringTable,
+                          const std::vector<std::shared_ptr<::LoaderInterface>> & loaders,
+                          const std::shared_ptr<::FontLoaderInterface> & fontLoader,
                           const std::optional<Tiled2dMapZoomInfo> &customZoomInfo = std::nullopt,
                           const std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> &symbolDelegate = nullptr,
                           const std::shared_ptr<Tiled2dMapVectorLayerLocalDataProviderInterface> &localDataProvider = nullptr,
@@ -212,7 +211,10 @@ class Tiled2dMapVectorLayer : public Tiled2dMapLayer,
 
     virtual void setReadyStateListener(const /*not-null*/ std::shared_ptr<::Tiled2dMapReadyStateListener> &listener) override;
 
-  protected:
+    StringInterner& getStringInterner() { return stringTable; }
+    const StringInterner& getStringInterner() const { return stringTable; }
+
+	protected:
     virtual void setMapDescription(const std::shared_ptr<VectorMapDescription> &mapDescription);
 
     virtual std::shared_ptr<Tiled2dMapVectorLayerConfig> getLayerConfig(const std::shared_ptr<VectorMapSourceDescription> &source);
@@ -229,6 +231,7 @@ class Tiled2dMapVectorLayer : public Tiled2dMapLayer,
     std::vector<Actor<Tiled2dMapRasterSource>> rasterTileSources;
 
     const std::vector<std::shared_ptr<::LoaderInterface>> loaders;
+    StringInterner stringTable;
 
     virtual std::optional<TiledLayerError> loadStyleJson();
     virtual std::optional<TiledLayerError> loadStyleJsonRemotely();
