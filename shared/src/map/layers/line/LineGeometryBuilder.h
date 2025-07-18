@@ -12,17 +12,18 @@ class LineGeometryBuilder {
     static void buildLines(const std::shared_ptr<LineGroup2dInterface> &line,
                            const std::vector<std::tuple<std::vector<Vec3D>, int>> &lines, const Vec3D &origin, LineCapType capType,
                            LineJoinType defaultJoinType, bool is3d, bool optimizeForDots) {
-        std::vector<uint32_t> lineIndices;
-        std::vector<float> lineAttributes;
-        uint32_t vertexCount = 0;
 
         if (optimizeForDots) {
             defaultJoinType = LineJoinType::ROUND; // Force miter join for dot optimization
             capType = LineCapType::ROUND; // Force round cap for dot optimization
         }
 
-        int numLines = (int)lines.size();
+        std::vector<float> lineAttributes;
+        std::vector<uint32_t> lineIndices;
+        reserveEstimatedNumVertices(lines, defaultJoinType, capType, is3d, lineAttributes, lineIndices);
 
+        uint32_t vertexCount = 0;
+        int numLines = (int)lines.size();
         for (int lineIndex = numLines - 1; lineIndex >= 0; lineIndex--) {
             auto const &[renderCoords, lineStyleIndex] = lines[lineIndex];
 
@@ -71,8 +72,6 @@ class LineGeometryBuilder {
                 if (lineLength > 0 && nextIndex < pointCount) {
 
                     lineVec /= lineLength;
-
-                    const Vec3D &pNext = renderCoords[nextIndex];
 
                     if (is3d) {
                         pOriginLine = Vec3DHelper::normalize(Vec3D(p.x + origin.x, p.y + origin.y, p.z + origin.z));
@@ -326,5 +325,38 @@ class LineGeometryBuilder {
         }
         prePreIndex = preIndex;
         preIndex = newIndex;
+    }
+
+  private:
+    static void reserveEstimatedNumVertices(const std::vector<std::tuple<std::vector<Vec3D>, int>> &lines,
+                                            LineJoinType joinType, LineCapType capType, bool is3d,
+                                            std::vector<float> &lineAttributes, std::vector<uint32_t> &lineIndices)
+    {
+        // Empirical values: simple linear fit for observed number of vertices and triangles,
+        // biased to lightly overestimate -- slightly too large reservation is less wasted memory
+        // than slightly understimating and then doubling it.
+        // JoinType does not appear to make a large enough difference to warrant using different parameters here.
+        const int64_t numVertexPointFactor = 5; // fitted value was ~4.999, integer seems close enough
+        const int64_t numVertexOffset = -3;
+        const int64_t numTrianglePointFactor = 4; // fitted value was ~4.03, integer seems close enough
+        const int64_t numTriangleOffset = -5;
+
+        const int64_t capVertices = capType == LineCapType::ROUND ? 24 : 0;
+        const int64_t capTriangles = capType == LineCapType::ROUND ? 24 : 0;
+
+        size_t numVertices = 0;
+        size_t numTriangles = 0;
+        for(auto &[lineCoords, lineStyleIndex]  : lines) {
+            int64_t numPoints = (int64_t)lineCoords.size();
+            if(numPoints < 2) {
+                continue;
+            }
+            numVertices += numPoints*numVertexPointFactor + numVertexOffset + capVertices;
+            numTriangles += numPoints*numTrianglePointFactor + numTriangleOffset + capTriangles;
+        }
+
+        size_t numAttributesPerVertex = is3d ? 9 : 7;
+        lineAttributes.reserve(numVertices * numAttributesPerVertex);
+        lineIndices.reserve(numTriangles * 3);
     }
 };
