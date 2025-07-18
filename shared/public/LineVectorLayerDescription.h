@@ -16,7 +16,6 @@
 #include "FeatureValueEvaluator.h"
 #include "LineJoinType.h"
 #include "VectorLayerDescription.h"
-#include "ValueEvaluator.h"
 
 class LineVectorStyle {
   public:
@@ -107,7 +106,7 @@ class LineVectorStyle {
 
     LineJoinType getLineJoin(const EvaluationContext &context) {
         static const LineJoinType defaultValue = LineJoinType::MITER;
-        return lineJoinEvaluator.getResult(context, defaultValue);
+        return lineJoinEvaluator.getResult(context, defaultValue).value;
     }
 
     double getLineOffset(const EvaluationContext &context, double width) {
