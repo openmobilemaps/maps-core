@@ -33,7 +33,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                                                         const std::string &styleJsonUrl,
                                                         const std::shared_ptr<Tiled2dMapVectorLayerLocalDataProviderInterface> &localDataProvider,
                                                         const std::vector<std::shared_ptr<::LoaderInterface>> &loaders,
-                                                        StringInterner &stringTable,
+                                                        const std::shared_ptr<StringInterner> &stringTable,
                                                         const std::unordered_map<std::string, std::string> & sourceUrlParams) {
     DataLoaderResult result = LoaderHelper::loadData(styleJsonUrl, std::nullopt, loaders);
     if (result.status != LoaderStatus::OK) {
@@ -59,7 +59,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                                                         const std::string &styleJsonString,
                                                         const std::shared_ptr<Tiled2dMapVectorLayerLocalDataProviderInterface> &localDataProvider,
                                                         const std::vector<std::shared_ptr<::LoaderInterface>> &loaders,
-                                                        StringInterner &stringTable,
+                                                        const std::shared_ptr<StringInterner> &stringTable,
                                                         const std::unordered_map<std::string, std::string> & sourceUrlParams) {
 
     nlohmann::json json;
@@ -229,7 +229,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                 geojsonSources[key] = GeoJsonVTFactory::getGeoJsonVt(key, replaceUrlParams(val["data"].get<std::string>(), sourceUrlParams), loaders, localDataProvider, stringTable, options);
             } else {
                 try {
-                    geojsonSources[key] = GeoJsonVTFactory::getGeoJsonVt(GeoJsonParser::getGeoJson(val["data"], stringTable), stringTable, options);
+                    geojsonSources[key] = GeoJsonVTFactory::getGeoJsonVt(GeoJsonParser::getGeoJson(val["data"], *stringTable), stringTable, options);
                 }
                 catch (nlohmann::json::exception &ex) {
                     return Tiled2dMapVectorLayerParserResult(nullptr, LoaderStatus::ERROR_OTHER, ex.what(), std::nullopt);
@@ -291,7 +291,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
     }
 
 
-    Tiled2dMapVectorStyleParser parser(stringTable);
+    Tiled2dMapVectorStyleParser parser(*stringTable);
 
     std::optional<std::string> metadata;
     std::shared_ptr<Value> globalIsInteractable;
