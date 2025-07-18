@@ -34,17 +34,16 @@ std::vector<std::shared_ptr<RenderConfigInterface>> LineGroup2dLayerObject::getR
 
 void LineGroup2dLayerObject::setLines(const std::vector<std::tuple<std::vector<Vec2D>, int>> &lines, const int32_t systemIdentifier,
                                       const Vec3D &origin, LineCapType capType, LineJoinType joinType, bool optimizeForDots) {
-    std::vector<uint32_t> lineIndices;
-    std::vector<float> lineAttributes;
-
     int numLines = (int)lines.size();
 
     std::vector<std::tuple<std::vector<Vec3D>, int>> convertedLines;
+    convertedLines.reserve(numLines);
 
     for (int lineIndex = 0; lineIndex < numLines; lineIndex++) {
         auto const &[mapCoords, lineStyleIndex] = lines[lineIndex];
 
         std::vector<Vec3D> renderCoords;
+        renderCoords.reserve(mapCoords.size());
         for (auto const &mapCoord : mapCoords) {
             const auto& renderCoord = conversionHelper->convertToRenderSystem(Coord(systemIdentifier, mapCoord.x, mapCoord.y, 0.0));
 
@@ -68,12 +67,10 @@ void LineGroup2dLayerObject::setLines(const std::vector<std::tuple<std::vector<V
 void LineGroup2dLayerObject::setLines(const std::vector<std::tuple<std::vector<Coord>, int>> &lines, const Vec3D &origin,
                                       LineCapType capType, LineJoinType joinType, bool optimizeForDots) {
 
-    std::vector<uint32_t> lineIndices;
-    std::vector<float> lineAttributes;
-
     int numLines = (int)lines.size();
 
     std::vector<std::tuple<std::vector<Vec3D>, int>> convertedLines;
+    convertedLines.reserve(numLines);
 
     for (int lineIndex = 0; lineIndex < numLines; lineIndex++) {
         auto const &[mapCoords, lineStyleIndex] = lines[lineIndex];
