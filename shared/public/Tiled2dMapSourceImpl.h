@@ -1504,7 +1504,7 @@ template <class L, class R> void Tiled2dMapSource<L, R>::forceReload() {
     for (auto &[loaderIndex, errors] : errorTiles) {
         for (auto &[tile, errorInfo] : errors) {
             errorInfo.delay = 1;
-            newLoadingTasks.push_back(std::make_pair(tile, loaderIndex));
+            newLoadingTasks.emplace_back(tile, loaderIndex);
         }
     }
     for (const auto &task : newLoadingTasks) {
