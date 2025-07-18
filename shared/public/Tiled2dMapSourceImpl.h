@@ -1500,11 +1500,15 @@ void Tiled2dMapSource<L, R>::setErrorManager(const std::shared_ptr<::ErrorManage
 template <class L, class R> void Tiled2dMapSource<L, R>::forceReload() {
 
     // set delay to 0 for all error tiles
+    std::vector<std::pair<Tiled2dMapTileInfo, size_t>> newLoadingTasks;
     for (auto &[loaderIndex, errors] : errorTiles) {
         for (auto &[tile, errorInfo] : errors) {
             errorInfo.delay = 1;
-            performLoadingTask(tile, loaderIndex);
+            newLoadingTasks.emplace_back(tile, loaderIndex);
         }
+    }
+    for (const auto &[tile, loaderIndex] : newLoadingTasks) {
+        performLoadingTask(tile, loaderIndex);
     }
 
     onVisibleTilesChanged(currentPyramid, currentKeepZoomLevelOffset);
