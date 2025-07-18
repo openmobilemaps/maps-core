@@ -45,7 +45,7 @@ inline uint64_t toID(uint8_t z, uint32_t x, uint32_t y) {
 
 class GeoJSONVT: public GeoJSONVTInterface, public std::enable_shared_from_this<GeoJSONVT> {
 private:
-    StringInterner &stringTable;
+    std::weak_ptr<StringInterner> stringTable;
 
 public:
     Options options;
@@ -53,7 +53,7 @@ public:
     const Tile emptyTile = Tile();
 
     GeoJSONVT(const std::shared_ptr<GeoJson> &geoJson,
-              StringInterner &stringTable,
+              const std::shared_ptr<StringInterner> &stringTable,
               const Options &options_ = Options())
         : options(options_)
         , loadingResult(DataLoaderResult(std::nullopt, std::nullopt, LoaderStatus::OK, std::nullopt))
@@ -64,7 +64,7 @@ public:
     GeoJSONVT(const std::string &sourceName, const std::string &geoJsonUrl,
               const std::vector<std::shared_ptr<::LoaderInterface>> &loaders,
               const std::shared_ptr<Tiled2dMapVectorLayerLocalDataProviderInterface> &localDataProvider,
-              StringInterner &stringTable,
+              const std::shared_ptr<StringInterner> &stringTable,
               const Options &options_ = Options())
         : options(options_)
         , sourceName(sourceName)
@@ -96,6 +96,8 @@ public:
 
             auto self = weakSelf.lock();
             if (!self) return;
+            auto strongStringTable = self->stringTable.lock();
+            if (!strongStringTable) return;
             auto result = resultFuture.get();
 
             if (result.status != LoaderStatus::OK) {
@@ -115,7 +117,7 @@ public:
                 nlohmann::json json;
                 try {
                     json = nlohmann::json::parse(string);
-                    auto geoJson = GeoJsonParser::getGeoJson(json, self->stringTable);
+                    auto geoJson = GeoJsonParser::getGeoJson(json, *strongStringTable);
                     if (geoJson) {
                         self->initialize(geoJson);
                         std::lock_guard<std::recursive_mutex> lock(self->mutex);

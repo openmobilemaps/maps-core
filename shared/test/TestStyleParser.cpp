@@ -27,7 +27,7 @@ public:
 
 TEST_CASE("TestStyleParser", "[GeoJson inline]") {
     auto jsonString = TestData::readFileToString("style/geojson_style_inline.json");
-    StringInterner stringTable = ValueKeys::newStringInterner();
+    std::shared_ptr<StringInterner> stringTable = std::make_shared<StringInterner>(ValueKeys::newStringInterner());
     auto result = Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromString("test", jsonString, nullptr, {}, stringTable, {});
     REQUIRE(result.mapDescription != nullptr);
     REQUIRE(!result.mapDescription->geoJsonSources.empty());
@@ -47,7 +47,7 @@ TEST_CASE("TestStyleParser", "[GeoJson local provider]") {
     auto provider = std::make_shared<TestLocalDataProvider>(std::unordered_map<std::string, std::string>{
         {"wsource", "geojson.geojson"}
     });
-    StringInterner stringTable = ValueKeys::newStringInterner();
+    std::shared_ptr<StringInterner> stringTable = std::make_shared<StringInterner>(ValueKeys::newStringInterner());
     auto result = Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromString("test", jsonString, provider, {}, stringTable, {});
     REQUIRE(result.mapDescription != nullptr);
     REQUIRE(!result.mapDescription->geoJsonSources.empty());

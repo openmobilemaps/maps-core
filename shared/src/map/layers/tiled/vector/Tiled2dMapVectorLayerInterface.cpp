@@ -37,7 +37,7 @@ Tiled2dMapVectorLayerInterface::createExplicitly(const std::string &layerName,
 
     if ((localStyleJson.has_value() && *localStyleJson) || localDataProvider) {
         std::optional<Tiled2dMapVectorLayerParserResult> parserResult = std::nullopt;
-        StringInterner stringTable = ValueKeys::newStringInterner();
+        std::shared_ptr<StringInterner> stringTable = std::make_shared<StringInterner>(ValueKeys::newStringInterner());
 
         if (localDataProvider) {
             auto localProvidedStyleJson = localDataProvider->getStyleJson();
