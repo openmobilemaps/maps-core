@@ -790,7 +790,7 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
             }
 
             if (stretchedIconTextureCoordinates.wasModified()) {
-                stretchedInstancedObject->setStretchInfos(SharedBytes((int64_t) stretchedIconTextureCoordinates.data(), iconCount,
+                stretchedInstancedObject->setTextureCoordinates(SharedBytes((int64_t) stretchedIconTextureCoordinates.data(), iconCount,
                                                                       4 * (int32_t) sizeof(float)));
                 stretchedIconTextureCoordinates.resetModificationFlag();
             }
