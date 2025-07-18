@@ -1507,8 +1507,8 @@ template <class L, class R> void Tiled2dMapSource<L, R>::forceReload() {
             newLoadingTasks.emplace_back(tile, loaderIndex);
         }
     }
-    for (const auto &task : newLoadingTasks) {
-        performLoadingTask(task.first, task.second);
+    for (const auto &[tile, loaderIndex] : newLoadingTasks) {
+        performLoadingTask(tile, loaderIndex);
     }
 
     onVisibleTilesChanged(currentPyramid, currentKeepZoomLevelOffset);
