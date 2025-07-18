@@ -179,20 +179,20 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 			return false
 		}
 
-		lifecycle?.coroutineScope?.launch(Dispatchers.Default) {
-			val action: TouchAction? = when (event.actionMasked) {
-				MotionEvent.ACTION_DOWN, MotionEvent.ACTION_POINTER_DOWN -> TouchAction.DOWN
-				MotionEvent.ACTION_MOVE -> TouchAction.MOVE
-				MotionEvent.ACTION_UP, MotionEvent.ACTION_POINTER_UP -> TouchAction.UP
-				MotionEvent.ACTION_CANCEL -> TouchAction.CANCEL
-				else -> null
-			}
+		val action: TouchAction? = when (event.actionMasked) {
+			MotionEvent.ACTION_DOWN, MotionEvent.ACTION_POINTER_DOWN -> TouchAction.DOWN
+			MotionEvent.ACTION_MOVE -> TouchAction.MOVE
+			MotionEvent.ACTION_UP, MotionEvent.ACTION_POINTER_UP -> TouchAction.UP
+			MotionEvent.ACTION_CANCEL -> TouchAction.CANCEL
+			else -> null
+		}
 
-			if (action != null) {
-				val pointers = ArrayList<Vec2F>(10)
-				for (i in 0 until event.pointerCount) {
-					pointers.add(Vec2F(event.getX(i), event.getY(i)))
-				}
+		if (action != null) {
+			val pointers = ArrayList<Vec2F>(10)
+			for (i in 0 until event.pointerCount) {
+				pointers.add(Vec2F(event.getX(i), event.getY(i)))
+			}
+			lifecycle?.coroutineScope?.launch(Dispatchers.Default) {
 				touchHandler?.onTouchEvent(TouchEvent(pointers, action))
 			}
 		}
