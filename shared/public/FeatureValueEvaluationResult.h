@@ -72,5 +72,4 @@ extern template struct FeatureValueEvaluationResult<int64_t>;
 extern template struct FeatureValueEvaluationResult<IconTextFit>;
 extern template struct FeatureValueEvaluationResult<std::vector<float>>;
 extern template struct FeatureValueEvaluationResult<SymbolZOrder>;
-
-#include "FeatureValueEvaluationResult.inl"
+extern template struct FeatureValueEvaluationResult<LineCapType>;

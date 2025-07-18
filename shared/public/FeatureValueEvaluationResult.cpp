@@ -21,6 +21,7 @@
 #include "TextSymbolPlacement.h"
 #include "IconTextFit.h"
 #include "SymbolZOrder.h"
+#include "LineCapType.h"
 
 #include "FeatureValueEvaluationResult.h"
 #include "FeatureValueEvaluationResult.inl"
@@ -43,3 +44,4 @@ template struct FeatureValueEvaluationResult<int64_t>;
 template struct FeatureValueEvaluationResult<IconTextFit>;
 template struct FeatureValueEvaluationResult<std::vector<float>>;
 template struct FeatureValueEvaluationResult<SymbolZOrder>;
+template struct FeatureValueEvaluationResult<LineCapType>;
