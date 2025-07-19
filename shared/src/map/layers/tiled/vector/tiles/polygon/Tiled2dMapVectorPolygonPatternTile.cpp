@@ -187,6 +187,8 @@ void Tiled2dMapVectorPolygonPatternTile::setVectorTileData(const Tiled2dMapVecto
         std::vector<std::vector<ObjectDescriptions>> styleGroupNewPolygonsVector;
         std::unordered_map<int, int32_t> styleIndicesOffsets;
 
+        std::unordered_map<size_t, bool> filterCache;
+        
         std::int32_t indices_offset = 0;
 
         for (auto featureIt = tileData->begin(); featureIt != tileData->end(); featureIt++) {
@@ -196,7 +198,25 @@ void Tiled2dMapVectorPolygonPatternTile::setVectorTileData(const Tiled2dMapVecto
             if (featureContext->geomType != vtzero::GeomType::POLYGON) { continue; }
 
             EvaluationContext evalContext = EvaluationContext(tileInfo.tileInfo.zoomIdentifier, dpFactor, featureContext, featureStateManager);
-            if (description->filter == nullptr || description->filter->evaluateOr(evalContext, false)) {
+
+            bool inside = true;
+            if (description->filter) {
+                if (featureContext->hasCustomId) {
+                    // Every ID is unique → no cache possible
+                    inside = description->filter->evaluateOr(evalContext, false);
+                } else {
+                    auto hash = featureContext->identifier;
+                    auto it = filterCache.find(hash);
+                    if (it != filterCache.end()) {
+                        inside = it->second;
+                    } else {
+                        inside = description->filter->evaluateOr(evalContext, false);
+                        filterCache[hash] = inside;
+                    }
+                }
+            }
+
+            if (inside) {
 
                 std::vector<Coord> positions;
 
