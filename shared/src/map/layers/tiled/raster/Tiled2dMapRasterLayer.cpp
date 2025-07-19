@@ -20,6 +20,20 @@
 #include <chrono>
 #include <map>
 
+struct TileInfoHasherIgnoringT {
+    std::size_t operator()(const Tiled2dMapTileInfo& info) const {
+        return std::hash<decltype(info.keyTupleWithoutT())>()(info.keyTupleWithoutT());
+    }
+};
+
+struct TileInfoEqualIgnoringT {
+    bool operator()(const Tiled2dMapTileInfo& a, const Tiled2dMapTileInfo& b) const {
+        return a.keyTupleWithoutT() == b.keyTupleWithoutT();
+    }
+};
+
+using TileGroupBestTMap = std::unordered_map<Tiled2dMapTileInfo, int, TileInfoHasherIgnoringT, TileInfoEqualIgnoringT>;
+
 Tiled2dMapRasterLayer::Tiled2dMapRasterLayer(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
                                              const std::vector<std::shared_ptr<::LoaderInterface>> &tileLoaders,
                                              bool registerToTouchHandler)
@@ -451,22 +465,20 @@ void Tiled2dMapRasterLayer::generateRenderPasses() {
     {
         std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
 
-        std::map<Tiled2dMapTileInfo, int> bestT;
+        TileGroupBestTMap bestT;
 
-        for (const auto &entry : tileObjectMap) {
-            auto ti = entry.first.tileInfo.tileInfo;
-            int t = ti.t;
-            ti.t = 0;
+        for (const auto& entry : tileObjectMap) {
+            const auto& ti = entry.first.tileInfo.tileInfo;
+
             auto it = bestT.find(ti);
-            if (it == bestT.end() || abs(it->second - curT) > abs(t - curT)) {
-                bestT[ti] = t;
+            if (it == bestT.end() || abs(it->second - curT) > abs(ti.t - curT)) {
+                bestT[ti] = ti.t;
             }
         }
 
         for (const auto &entry : tileObjectMap) {
-            auto ti = entry.first.tileInfo.tileInfo;
-            ti.t = 0;
-            if (entry.first.tileInfo.tileInfo.t != bestT[ti]) {
+            const auto& tileInfo = entry.first.tileInfo;
+            if (tileInfo.tileInfo.t != bestT[tileInfo.tileInfo]) {
                 continue;
             }
 
@@ -477,7 +489,7 @@ void Tiled2dMapRasterLayer::generateRenderPasses() {
             auto const &renderObject = entry.second->getRenderObject();
 
             if (layerConfig->getZoomInfo().maskTile) {
-                const auto &mask = tileMaskMap.at(entry.first.tileInfo);
+                const auto &mask = tileMaskMap.at(tileInfo);
 
                 mask.getGraphicsObject()->setup(renderingContext);
                 std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(

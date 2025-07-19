@@ -34,6 +34,10 @@ struct Tiled2dMapTileInfo {
         return x == o.x && y == o.y  && t == o.t && zoomIdentifier == o.zoomIdentifier;
     }
 
+    auto keyTupleWithoutT() const {
+        return std::tuple { x, y, zoomIdentifier };
+    }
+
     bool operator!=(const Tiled2dMapTileInfo &o) const {
         return !(x == o.x && y == o.y  && t == o.t && zoomIdentifier == o.zoomIdentifier);
     }
