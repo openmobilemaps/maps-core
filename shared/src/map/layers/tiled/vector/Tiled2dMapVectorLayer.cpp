@@ -674,10 +674,6 @@ std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapVectorLayer::build
         return {};
     }
     std::lock_guard<std::recursive_mutex> lock(renderPassMutex);
-    size_t numObjectsToRender = 0;
-    for (const auto &pass : currentRenderPasses) {
-        numObjectsToRender += pass->getRenderObjects().size();
-    }
     return currentRenderPasses;
 }
 
