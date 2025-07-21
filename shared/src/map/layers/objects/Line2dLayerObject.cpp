@@ -95,7 +95,6 @@ void Line2dLayerObject::setStyle(const LineStyle &style, bool highlighted) {
     s.blur = toHalfFloat(style.blur);
 
     // width type
-    auto widthType = SizeType::SCREEN_PIXEL;
     auto widthAsPixel = (style.widthType == SizeType::SCREEN_PIXEL ? 1 : 0);
     s.widthAsPixel = toHalfFloat(widthAsPixel);
 

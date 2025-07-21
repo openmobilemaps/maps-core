@@ -706,7 +706,6 @@ bool MapCamera2d::onDoubleClick(const ::Vec2F &posScreen) {
 
     auto position = coordFromScreenPosition(posScreen);
 
-    auto config = mapInterface->getMapConfig();
     auto bottomRight = bounds.bottomRight;
     auto topLeft = bounds.topLeft;
 
@@ -734,7 +733,6 @@ bool MapCamera2d::onTwoFingerClick(const ::Vec2F &posScreen1, const ::Vec2F &pos
 
     auto position = coordFromScreenPosition(Vec2FHelper::midpoint(posScreen1, posScreen2));
 
-    auto config = mapInterface->getMapConfig();
     auto bottomRight = bounds.bottomRight;
     auto topLeft = bounds.topLeft;
 

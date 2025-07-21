@@ -471,7 +471,6 @@ std::optional<std::tuple<std::vector<double>, std::vector<double>, Vec3D>> MapCa
     // aspect ratio
     const double vpr = (double)sizeViewport.x / (double)sizeViewport.y;
     double fovy = fovx / vpr;
-    const double fovyRad = fovy * M_PI / 180.0;
 
     // initial perspective projection
     std::vector<double> basicProjectionMatrix(16, 0.0);
@@ -727,13 +726,12 @@ RectCoord MapCamera3d::getRectFromViewport(const Vec2I &sizeViewport, const Coor
 
 void MapCamera3d::notifyListeners(const int &listenerType) {
     // TODO: Add back bounds listener as soon as visibleRect is implemented correctly
-    std::optional<RectCoord> visibleRect =
-        (listenerType & ListenerType::BOUNDS) ? std::optional<RectCoord>(getVisibleRect()) : std::nullopt;
+    // std::optional<RectCoord> visibleRect =
+    //     (listenerType & ListenerType::BOUNDS) ? std::optional<RectCoord>(getVisibleRect()) : std::nullopt;
 
     //    std::optional<RectCoord> visibleRect = std::nullopt;
 
     double angle = this->angle;
-    double zoom = this->zoom;
 
     std::vector<float> viewMatrix;
     std::vector<float> projectionMatrix;
@@ -802,8 +800,8 @@ bool MapCamera3d::onTouchDown(const ::Vec2F &posScreen) {
         initialTouchDownPoint = posScreen;
         lastOnTouchDownFocusCoord = focusPointPosition;
 
-        auto northPole = screenPosFromCoord(Coord(CoordinateSystemIdentifiers::EPSG4326(), 0, 90, 0));
-        auto southPole = screenPosFromCoord(Coord(CoordinateSystemIdentifiers::EPSG4326(), 0, -90, 0));
+        // auto northPole = screenPosFromCoord(Coord(CoordinateSystemIdentifiers::EPSG4326(), 0, 90, 0));
+        // auto southPole = screenPosFromCoord(Coord(CoordinateSystemIdentifiers::EPSG4326(), 0, -90, 0));
         lastOnTouchDownCoord = coordFromScreenPosition(posScreen);
         reverseLongitudeRotation = std::abs(focusPointPosition.x - lastOnTouchDownCoord->x) > 90;
         return true;
@@ -1643,7 +1641,6 @@ void MapCamera3d::setCameraConfig(const Camera3dConfig &config, std::optional<fl
         return;
     }
 
-    auto viewport = mapInterface->getRenderingContext()->getViewportSize();
     auto viewPortSize = renderingContext->getViewportSize();
 
     if (durationSeconds && viewPortSize.x > 0 && viewPortSize.y > 0) {
@@ -1806,9 +1803,6 @@ double MapCamera3d::zoomForMeterWidth(Vec2I sizeViewport, Vec2F sizeMeters) {
     if (vpr < 1) {
         vpr = 1.0 / vpr;
     }
-
-    double vprX = 1.0;
-    double vprY = 1.0;
 
     double fx = getCameraFieldOfView();
     double halfAngleRadianX = fx * 0.5 * M_PI / 180.0;

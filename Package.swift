@@ -182,6 +182,11 @@ let package = Package(
                 .headerSearchPath("src/utils"),
                 .define("DEBUG", to: "1", .when(configuration: .debug)),
                 .define("NDEBUG", to: "1", .when(configuration: .release)),
+                // Warnings, needs Swift 6.2:
+                // .treatAllWarnings(as: .error),
+                // .enableWarning("unused"),
+                // .disableWarning("deprecated-declarations"),
+                // .disableWarning("reorder"),
             ]
         ),
     ],

@@ -55,7 +55,7 @@ void QuadMaskObject::setPositions(const QuadCoord &coords) {
         origin.z = -1.0 * sin(cy) * sin(cx);
     }
     
-    auto transform = [&origin](const Coord coordinate) -> Vec3D {
+    auto transform = [](const Coord coordinate) -> Vec3D {
         double x = coordinate.x;
         double y = coordinate.y;
         double z = coordinate.z;

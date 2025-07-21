@@ -63,8 +63,7 @@ public:
                                             const WeakActor<Tiled2dMapVectorSource> &vectorSource,
                                             const Actor<Tiled2dMapVectorReadyManager> &readyManager,
                                             const std::shared_ptr<Tiled2dMapVectorStateManager> &featureStateManager,
-                                            const std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> &symbolDelegate,
-                                            bool persistingSymbolPlacement);
+                                            const std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> &symbolDelegate);
 
     void onAdded(const std::weak_ptr<::MapInterface> &mapInterface) override;
 
@@ -151,8 +150,6 @@ private:
 
     std::shared_ptr<SymbolAnimationCoordinatorMap> animationCoordinatorMap;
     std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> symbolDelegate;
-
-    bool persistingSymbolPlacement = false;
 
 #ifdef OPENMOBILEMAPS_GL
     // Higher counts can't be handled due to the limited UBO size
