@@ -41,6 +41,8 @@ public:
     virtual int32_t getTextureId() override;
 
 private:
+    void clearGlData();
+
     const TextureFilterType textureFilter;
     const Color clearColor;
     const bool usesDepthStencil;

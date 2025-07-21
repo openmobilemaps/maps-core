@@ -30,7 +30,7 @@ std::shared_ptr<RenderTargetInterface> OpenGlRenderTarget::asRenderTargetInterfa
 void OpenGlRenderTarget::setup(const Vec2I &size) {
     std::lock_guard<std::mutex> lock(mutex);
     if (isSetup && (size.x != this->size.x || size.y != this->size.y)) {
-        clear();
+        clearGlData();
     }
 
     if (!isSetup) {
@@ -71,6 +71,11 @@ void OpenGlRenderTarget::setup(const Vec2I &size) {
 
 void OpenGlRenderTarget::clear() {
     std::lock_guard<std::mutex> lock(mutex);
+    clearGlData();
+}
+
+void OpenGlRenderTarget::clearGlData() {
+    // Mutex locking by caller
     if (isSetup) {
         glDeleteTextures(1, &textureId);
         glDeleteFramebuffers(1, &framebufferId);
