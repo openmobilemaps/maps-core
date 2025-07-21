@@ -52,6 +52,7 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 	var mapInterface: MapInterface? = null
 		private set
 
+	private var touchHandlerDispatcher = Dispatchers.Default.limitedParallelism(1)
 	private var touchHandler: TouchHandlerInterface? = null
 	private var touchDisabled = false
 
@@ -192,7 +193,7 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 			for (i in 0 until event.pointerCount) {
 				pointers.add(Vec2F(event.getX(i), event.getY(i)))
 			}
-			lifecycle?.coroutineScope?.launch(Dispatchers.Default) {
+			lifecycle?.coroutineScope?.launch(touchHandlerDispatcher) {
 				touchHandler?.onTouchEvent(TouchEvent(pointers, action))
 			}
 		}
