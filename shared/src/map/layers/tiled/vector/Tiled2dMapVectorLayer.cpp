@@ -62,9 +62,9 @@ Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
         remoteStyleJsonUrl(remoteStyleJsonUrl),
         loaders(loaders),
         fontLoader(fontLoader),
-        stringTable(ValueKeys::newStringInterner()),
+        stringTable(std::make_shared<StringInterner>(ValueKeys::newStringInterner())),
         customZoomInfo(customZoomInfo),
-        featureStateManager(std::make_shared<Tiled2dMapVectorStateManager>(stringTable)),
+        featureStateManager(std::make_shared<Tiled2dMapVectorStateManager>(*stringTable)),
         symbolDelegate(symbolDelegate),
         sourceUrlParams(sourceUrlParams),
         localDataProvider(localDataProvider)
@@ -85,9 +85,9 @@ Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
         fallbackStyleJsonString(fallbackStyleJsonString),
         loaders(loaders),
         fontLoader(fontLoader),
-        stringTable(ValueKeys::newStringInterner()),
+        stringTable(std::make_shared<StringInterner>(ValueKeys::newStringInterner())),
         customZoomInfo(customZoomInfo),
-        featureStateManager(std::make_shared<Tiled2dMapVectorStateManager>(stringTable)),
+        featureStateManager(std::make_shared<Tiled2dMapVectorStateManager>(*stringTable)),
         symbolDelegate(symbolDelegate),
         sourceUrlParams(sourceUrlParams),
         localDataProvider(localDataProvider)
@@ -96,7 +96,7 @@ Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
 
 Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
                                              const std::shared_ptr<VectorMapDescription> &mapDescription,
-                                             StringInterner &&stringTable_,
+                                             const std::shared_ptr<StringInterner> &stringTable,
                                              const std::vector<std::shared_ptr<::LoaderInterface>> &loaders,
                                              const std::shared_ptr<::FontLoaderInterface> &fontLoader,
                                              const std::optional<Tiled2dMapZoomInfo> &customZoomInfo,
@@ -108,9 +108,9 @@ Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
         layerName(layerName),
         loaders(loaders),
         fontLoader(fontLoader),
-        stringTable(std::move(stringTable_)),
+        stringTable(stringTable),
         customZoomInfo(customZoomInfo),
-        featureStateManager(std::make_shared<Tiled2dMapVectorStateManager>(stringTable)),
+        featureStateManager(std::make_shared<Tiled2dMapVectorStateManager>(*stringTable)),
         symbolDelegate(symbolDelegate),
         localDataProvider(localDataProvider),
 		sourceUrlParams(sourceUrlParams),
@@ -128,9 +128,9 @@ Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
         layerName(layerName),
         loaders(loaders),
         fontLoader(fontLoader),
-        stringTable(ValueKeys::newStringInterner()),
+        stringTable(std::make_shared<StringInterner>(ValueKeys::newStringInterner())),
         customZoomInfo(customZoomInfo),
-        featureStateManager(std::make_shared<Tiled2dMapVectorStateManager>(stringTable)),
+        featureStateManager(std::make_shared<Tiled2dMapVectorStateManager>(*stringTable)),
         symbolDelegate(symbolDelegate),
         sourceUrlParams(sourceUrlParams)
         {}
@@ -585,7 +585,7 @@ void Tiled2dMapVectorLayer::reloadLocalDataSource(const std::string &sourceName,
 
         try {
             auto json = nlohmann::json::parse(geoJson);
-            geoSource->reload(GeoJsonParser::getGeoJson(json, stringTable));
+            geoSource->reload(GeoJsonParser::getGeoJson(json, *stringTable));
         }
         catch (nlohmann::json::exception &ex) {
             return;
@@ -1488,7 +1488,7 @@ std::vector<VectorLayerFeatureCoordInfo> Tiled2dMapVectorLayer::getVisiblePointF
                             bool isVisible = camera->coordIsVisibleOnScreen(coord, paddingPc);
 
                             if (isVisible) {
-                                features.push_back(VectorLayerFeatureCoordInfo(featureContext->getFeatureInfo(stringTable), coord));
+                                features.push_back(VectorLayerFeatureCoordInfo(featureContext->getFeatureInfo(*stringTable), coord));
                             }
                         }
                     }
