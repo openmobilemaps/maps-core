@@ -14,7 +14,7 @@
 #include "OpenGlRenderTargetInterface.h"
 #include "RenderingContextInterface.h"
 #include "RenderingCullMode.h"
-#include "ChronoUtil.h"
+#include <chrono>
 #include <opengl_wrapper.h>
 #include <memory>
 #include <string>

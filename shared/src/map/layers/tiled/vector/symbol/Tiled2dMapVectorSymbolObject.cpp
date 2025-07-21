@@ -47,7 +47,6 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
                                                            const size_t symbolTileIndex,
                                                            const bool hasCustomTexture,
                                                            const double dpFactor,
-                                                           const bool persistingSymbolPlacement,
                                                            bool is3d,
                                                            const Vec3D &tileOrigin,
                                                            const uint16_t styleIndex) :
@@ -66,7 +65,6 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
     is3d(is3d),
     positionSize(is3d ? 3 : 2),
     tileOrigin(tileOrigin),
-    persistingSymbolPlacement(persistingSymbolPlacement),
     angle(angle),
     systemIdentifier(tileInfo.tileInfo.bounds.topLeft.systemIdentifier) {
     auto strongMapInterface = mapInterface.lock();

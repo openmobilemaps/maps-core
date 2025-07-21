@@ -189,8 +189,6 @@ void Tiled2dMapVectorPolygonPatternTile::setVectorTileData(const Tiled2dMapVecto
 
         std::unordered_map<size_t, bool> filterCache;
         
-        std::int32_t indices_offset = 0;
-
         for (auto featureIt = tileData->begin(); featureIt != tileData->end(); featureIt++) {
 
             const auto [featureContext, geometryHandler] = *featureIt;

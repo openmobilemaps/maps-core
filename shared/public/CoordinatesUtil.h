@@ -18,7 +18,7 @@
 
 namespace coordsutil {
 
-    static bool checkIntersectionRectCoords2d(const RectCoord &r1, const RectCoord &r2) {
+    inline bool checkIntersectionRectCoords2d(const RectCoord &r1, const RectCoord &r2) {
         assert(r1.topLeft.systemIdentifier == r2.topLeft.systemIdentifier);
         return !(std::min(r2.topLeft.x, r2.bottomRight.x) > std::max(r1.topLeft.x, r1.bottomRight.x) ||
                  std::max(r2.topLeft.x, r2.bottomRight.x) < std::min(r1.topLeft.x, r1.bottomRight.x) ||
@@ -26,7 +26,7 @@ namespace coordsutil {
                  std::max(r2.topLeft.y, r2.bottomRight.y) < std::min(r1.topLeft.y, r1.bottomRight.y));
     }
 
-    static bool checkRectContainsCoord(const RectCoord &rect, const Coord &coord, const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper) {
+    inline bool checkRectContainsCoord(const RectCoord &rect, const Coord &coord, const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper) {
         assert(rect.topLeft.systemIdentifier == rect.bottomRight.systemIdentifier);
         
         auto convCoord = conversionHelper->convert(rect.topLeft.systemIdentifier, coord);

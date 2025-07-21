@@ -75,10 +75,8 @@ void IconLayerObject::update() {
 
     if(!context || !camera) { return; }
 
-    auto zoom = camera->getZoom();
     auto viewport = context->getViewportSize();
 
-    const double rotation = camera->getRotation();
     const auto scaleFactor = camera->getScalingFactor();
 
     auto iconSize = icon->getIconSize();
