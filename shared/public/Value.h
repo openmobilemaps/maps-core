@@ -111,18 +111,21 @@ public:
 public:
     uint64_t identifier;
     vtzero::GeomType geomType;
+    bool hasCustomId = false;
 
     FeatureContext() {}
 
     FeatureContext(const FeatureContext &other)
         : propertiesMap(other.propertiesMap)
         , geomType(other.geomType)
-        , identifier(other.identifier) {}
+        , identifier(other.identifier)
+        , hasCustomId(other.hasCustomId) {}
 
     FeatureContext(FeatureContext &&other)
         : propertiesMap(std::move(other.propertiesMap))
         , geomType(other.geomType)
-        , identifier(other.identifier) {}
+        , identifier(other.identifier)
+        , hasCustomId(other.hasCustomId) {}
 
     FeatureContext(vtzero::GeomType geomType,
                    mapType propertiesMap,
@@ -143,6 +146,7 @@ public:
         size_t hash = 0;
         std::hash_combine(hash, std::hash<std::string>{}(stringIdentifier));
         identifier = hash;
+        hasCustomId = true;
 
         initialize();
     }
@@ -161,6 +165,7 @@ public:
 
         if (feature.has_id()) {
             identifier = feature.id();
+            hasCustomId = true;
         } else {
             size_t hash = 0;
             for(auto const &[key, val]: propertiesMap) {
