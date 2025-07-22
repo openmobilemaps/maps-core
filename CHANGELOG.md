@@ -1,5 +1,18 @@
 # Changelog for Open Mobile Maps
 
+## Version 3.4.0
+- Improved OpenGL render targets handling and added support for depth/stencil buffers
+- Improved Metal render targets stability
+- Several fixes and stability improvements in MapCamera2D and MapCamera3D 
+- Numerous performance and stability improvements for vector layers, including a major overhaul of the line rendering architecture and more efficient style evaluations
+- Fixed icon touch area check by @FabioMartignoni89 in https://github.com/openmobilemaps/maps-core/pull/796
+- Add documentation for SwiftUI in the [iOS Readme](ios/readme.md)
+- Improved offscreen rendering on Android
+- Improved label rendering in vector layers
+- Updated to Kotlin 2.2.0, AGP 8.11.0, okhttp 5.1.0 and Moshi 1.15.2 for Android
+- Reduced drawing of unnecessary frames on iOS
+- Added convenience extension functions for VectorLayerFeatureInfoValue
+
 ## Version 3.3.1
 - Fixed concurrency issues in the MapCamera2d
 
