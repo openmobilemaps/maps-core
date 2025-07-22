@@ -133,6 +133,7 @@ public:
         : propertiesMap(std::move(propertiesMap))
         , geomType(geomType)
         , identifier(identifier)
+        , hasCustomId(true)
     {
         initialize();
     }
