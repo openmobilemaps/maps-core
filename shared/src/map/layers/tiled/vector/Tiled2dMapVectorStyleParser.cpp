@@ -237,8 +237,9 @@ std::shared_ptr<Value> Tiled2dMapVectorStyleParser::parseValue(nlohmann::json js
             // MaybeGetProperty implements deprecated [ OPERATOR, key, value ] as shorthand for [ OPERATOR, ["get" key], value ]
             auto lhs = (json[1].is_string()) ? std::make_shared<MaybeGetPropertyValue>(stringTable.add(json[1]), json[1])
                                              : parseValue(json[1]);
-            auto rhs = parseValue(json[2]);
-
+            // Also support rhs for MaybeGetProperty
+            auto rhs = (json[2].is_string()) ? std::make_shared<MaybeGetPropertyValue>(stringTable.add(json[2]), json[2])
+                                             : parseValue(json[2]);
             if (lhs && rhs) {
                 return std::make_shared<PropertyCompareValue>(lhs, rhs, getCompareOperator(json[0]));
             }
