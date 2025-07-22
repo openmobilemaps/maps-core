@@ -1,5 +1,8 @@
 # Changelog for Open Mobile Maps
 
+## Version 3.4.1
+- Fixed an issue when using a string only get-expression on the right-hand side of a vector style value comparison
+
 ## Version 3.4.0
 - Improved OpenGL render targets handling and added support for depth/stencil buffers
 - Improved Metal render targets stability
