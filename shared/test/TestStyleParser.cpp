@@ -223,13 +223,13 @@ TEST_CASE("MaybeGet expressions") {
             .expectedEvaluation = false,
         },
         TestCase{
-            .name = "comparison operator uses maybe-get only for first param",
+            .name = "comparison operator uses maybe-get both params",
             .expression = {"==", "key1", "key1"},
-            .expectedEvaluation = false,
+            .expectedEvaluation = true,
         },
         TestCase{
             .name = "comparison operator uses maybe-get only for simple strings",
-            .expression = {"==", {"literal", "key1"}, "key1"},
+            .expression = {"==", {"literal", "value1"}, "key1"},
             .expectedEvaluation = true,
         },
         TestCase{
