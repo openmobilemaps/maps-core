@@ -6,10 +6,38 @@ on:
 jobs:
     build:
         name: Build JVM Project
-        uses: UbiqueInnovation/workflows-backend/.github/workflows/mvn_install.yml@main
-        with:
-            ref_name: ${{ github.sha }}
-            checkout_submodules: recursive
-            parent_pom: jvm/pom.xml
-            install_apt_packages: "cmake make clang libgl-dev libgles-dev libosmesa6-dev"
-            use_mvn_central: true
+        # Based on: UbiqueInnovation/workflows-backend/.github/workflows/mvn_install.yml
+        runs-on: ubuntu-24.04
+        steps:
+            -   uses: actions/checkout@v4
+                with:
+                    fetch-depth: 0
+                    submodules: recursive
+
+            -   name: Set up JDK
+                uses: actions/setup-java@v4
+                with:
+                    java-version: '21'
+                    distribution: 'temurin'
+
+            -   name: Cache Maven packages
+                uses: actions/cache@v4
+                with:
+                    path: ~/.m2/repository
+                    key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+                    restore-keys: |
+                      ${{ runner.os }}-m2-
+
+            -   name: ccache
+                uses: hendrikmuhs/ccache-action@v1.2
+                with:
+                  key: jvm-build-ccache-${{ runner.os }}-${{ runner.arch }}
+
+            -   name: Install build dependency apt packages
+                run: |
+                    sudo apt-get update && sudo apt-get install cmake make clang libgl-dev libgles-dev libosmesa6-dev
+
+            -   name: Build with Maven
+                env:
+                  CMAKE_CXX_COMPILER_LAUNCHER: ccache
+                run: mvn -f jvm/pom.xml --update-snapshots install

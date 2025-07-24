@@ -13,11 +13,10 @@ jobs:
     build:
         name: Build JVM package and deploy to Maven repo
         # Based on: UbiqueInnovation/workflows-backend/.github/workflows/mvn_package_deploy.yml@feature/alt-deployment-repository
-        runs-on: ubuntu-22.04
+        runs-on: ubuntu-24.04
         steps:
             -   uses: actions/checkout@v4
                 with:
-                    fetch-depth: 0
                     submodules: recursive
 
             -   name: Set up JDK
@@ -31,11 +30,12 @@ jobs:
                 with:
                     path: ~/.m2/repository
                     key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-                    restore-keys: ${{ runner.os }}-m2-
+                    restore-keys: |
+                      ${{ runner.os }}-m2-
 
             -   name: Install build dependency apt packages
                 run: |
-                    sudo apt install cmake make clang libgl-dev libgles-dev libosmesa6-dev
+                    sudo apt-get update && sudo apt-get install cmake make clang libgl-dev libgles-dev libosmesa6-dev
 
             -   name: Create custom artifactory settings.xml
                 uses: whelk-io/maven-settings-xml-action@9dc09b23833fa9aa7f27b63db287951856f3433d
