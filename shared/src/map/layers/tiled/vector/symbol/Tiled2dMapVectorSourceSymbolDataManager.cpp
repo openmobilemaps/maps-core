@@ -83,7 +83,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::resume() {
         for (const auto &[s, symbolGroups]: tileSymbolGroups) {
             for (const auto &symbolGroup: std::get<1>(symbolGroups)) {
                 symbolGroup.syncAccess([&](auto group){
-                    group->setupObjects(spriteData, spriteTexture);
+                    group->setupObjects(sprites);
                 });
             }
         }
@@ -507,7 +507,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::setupSymbolGroups(const Tiled2dMap
 
     for (const auto &symbolGroup: std::get<1>(layerIt->second)) {
         symbolGroup.syncAccess([&](auto group){
-            group->setupObjects(spriteData, spriteTexture);
+            group->setupObjects(sprites);
         });
     }
     vectorLayer.message(MFN(&Tiled2dMapVectorLayer::invalidateCollisionState));
@@ -583,19 +583,19 @@ void Tiled2dMapVectorSourceSymbolDataManager::updateSymbolGroups() {
     vectorLayer.message(MFN(&Tiled2dMapVectorLayer::invalidateCollisionState));
 }
 
-void Tiled2dMapVectorSourceSymbolDataManager::setSprites(std::shared_ptr<SpriteData> spriteData, std::shared_ptr<TextureHolderInterface> spriteTexture) {
-    this->spriteData = spriteData;
-    this->spriteTexture = spriteTexture;
+void Tiled2dMapVectorSourceSymbolDataManager::setSprites(std::string spriteId, std::shared_ptr<SpriteData> spriteData, std::shared_ptr<TextureHolderInterface> spriteTexture) {
+    sprites.emplace_back(spriteData, spriteTexture);
 
     if (!tileSymbolGroupMap.empty()) {
         auto selfActor = WeakActor(mailbox, weak_from_this());
-        selfActor.message(MailboxExecutionEnvironment::graphics, MFN(&Tiled2dMapVectorSourceSymbolDataManager::setupExistingSymbolWithSprite));
+        selfActor.message(MailboxExecutionEnvironment::graphics, MFN(&Tiled2dMapVectorSourceSymbolDataManager::setupExistingSymbolWithSprite), spriteData, spriteTexture);
     }
 }
 
-void Tiled2dMapVectorSourceSymbolDataManager::setupExistingSymbolWithSprite() {
-    auto mapInterface = this->mapInterface.lock();
+void Tiled2dMapVectorSourceSymbolDataManager::setupExistingSymbolWithSprite(std::shared_ptr<SpriteData> spriteData, std::shared_ptr<TextureHolderInterface> spriteTexture) {
+    LogError << "setupExistingSymbolWithSprite: " <<= spriteData->identifier;
 
+    auto mapInterface = this->mapInterface.lock();
     if (!mapInterface) {
         return;
     }
@@ -603,12 +603,13 @@ void Tiled2dMapVectorSourceSymbolDataManager::setupExistingSymbolWithSprite() {
     for (const auto &[tile, symbolGroupMap]: tileSymbolGroupMap) {
         for (const auto &[layerIdentifier, symbolGroups]: symbolGroupMap) {
             for (auto &symbolGroup: std::get<1>(symbolGroups)) {
-                symbolGroup.message(MailboxExecutionEnvironment::graphics, MFN(&Tiled2dMapVectorSymbolGroup::setupObjects), spriteData, spriteTexture, std::nullopt);
+                //MailboxExecutionEnvironment::graphics, MFN(&Tiled2dMapVectorSymbolGroup::addSprite), spriteData, spriteTexture);
+                symbolGroup.syncAccess([spriteData, spriteTexture](auto group) {
+                    group->addSprite(spriteData, spriteTexture);
+                });
             }
         }
     }
-
-    pregenerateRenderPasses();
 }
 
 void Tiled2dMapVectorSourceSymbolDataManager::collisionDetection(std::vector<std::string> layerIdentifiers, std::shared_ptr<CollisionGrid> collisionGrid) {
@@ -684,6 +685,7 @@ bool Tiled2dMapVectorSourceSymbolDataManager::update(long long now) {
     const auto vpMatrix = camera->asCameraInterface()->getVpMatrix();
     const auto origin = camera->asCameraInterface()->getOrigin();
 
+    bool anyRenderObjectsChanged = false;
     for (const auto &[tile, symbolGroupsMap]: tileSymbolGroupMap) {
         const auto tileState = tileStateMap.find(tile);
         if (tileState == tileStateMap.end() || tileState->second != TileState::VISIBLE) {
@@ -691,11 +693,16 @@ bool Tiled2dMapVectorSourceSymbolDataManager::update(long long now) {
         }
         for (const auto &[layerIdentifier, symbolGroups]: symbolGroupsMap) {
             for (auto &symbolGroup: std::get<1>(symbolGroups)) {
-                symbolGroup.syncAccess([&zoomIdentifier, &rotation, &scaleFactor, &now, &viewPortSize, &vpMatrix, &origin](auto group){
-                    group->update(zoomIdentifier, rotation, scaleFactor, now, viewPortSize, vpMatrix, origin);
+                bool renderObjectsChanged = symbolGroup.syncAccess([&zoomIdentifier, &rotation, &scaleFactor, &now, &viewPortSize, &vpMatrix, &origin](auto group){
+                    return group->update(zoomIdentifier, rotation, scaleFactor, now, viewPortSize, vpMatrix, origin);
                 });
+                anyRenderObjectsChanged |= renderObjectsChanged;
             }
         }
+    }
+
+    if (anyRenderObjectsChanged) {
+        pregenerateRenderPasses();
     }
 
     if (animationCoordinatorMap->isAnimating()) {

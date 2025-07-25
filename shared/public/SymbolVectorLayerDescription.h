@@ -310,8 +310,8 @@ public:
         return symbolSortKeyEvaluator.getResult(context, defaultValue).value;
     }
 
-    FeatureValueEvaluationResult<std::string> getIconImage(const EvaluationContext &context) {
-        static const std::string defaultValue = "";
+    FeatureValueEvaluationResult<SpriteIconId> getIconImage(const EvaluationContext &context) {
+        static const SpriteIconId defaultValue;
         return iconImageEvaluator.getResult(context, defaultValue);
     }
 
@@ -467,7 +467,7 @@ public:
     FeatureValueEvaluator<double> iconOpacityEvaluator;
     FeatureValueEvaluator<bool> textAllowOverlapEvaluator;
     FeatureValueEvaluator<double> symbolSortKeyEvaluator;
-    FeatureValueEvaluator<std::string> iconImageEvaluator;
+    FeatureValueEvaluator<SpriteIconId> iconImageEvaluator;
     FeatureValueEvaluator<bool> iconImageCustomProviderEvaluator;
     FeatureValueEvaluator<Anchor> iconAnchorEvaluator;
     FeatureValueEvaluator<Vec2F> iconOffsetEvaluator;
