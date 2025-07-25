@@ -84,7 +84,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::resume() {
         for (const auto &[s, symbolGroups]: tileSymbolGroups) {
             for (const auto &symbolGroup: std::get<1>(symbolGroups)) {
                 symbolGroup.syncAccess([&](auto group){
-                    group->setupObjects(spriteData, spriteTexture);
+                    group->setupObjects(sprites);
                 });
             }
         }
@@ -509,7 +509,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::setupSymbolGroups(const Tiled2dMap
 
     for (const auto &symbolGroup: std::get<1>(layerIt->second)) {
         symbolGroup.syncAccess([&](auto group){
-            group->setupObjects(spriteData, spriteTexture);
+            group->setupObjects(sprites);
         });
     }
     vectorLayer.message(MFN(&Tiled2dMapVectorLayer::invalidateCollisionState));
@@ -585,17 +585,16 @@ void Tiled2dMapVectorSourceSymbolDataManager::updateSymbolGroups() {
     vectorLayer.message(MFN(&Tiled2dMapVectorLayer::invalidateCollisionState));
 }
 
-void Tiled2dMapVectorSourceSymbolDataManager::setSprites(std::shared_ptr<SpriteData> spriteData, std::shared_ptr<TextureHolderInterface> spriteTexture) {
-    this->spriteData = spriteData;
-    this->spriteTexture = spriteTexture;
+void Tiled2dMapVectorSourceSymbolDataManager::setSprites(std::string spriteId, std::shared_ptr<SpriteData> spriteData, std::shared_ptr<TextureHolderInterface> spriteTexture) {
+    sprites.emplace(spriteData, spriteTexture);
 
     if (!tileSymbolGroupMap.empty()) {
         auto selfActor = WeakActor(mailbox, weak_from_this());
-        selfActor.message(MailboxExecutionEnvironment::graphics, MFN(&Tiled2dMapVectorSourceSymbolDataManager::setupExistingSymbolWithSprite));
+        selfActor.message(MailboxExecutionEnvironment::graphics, MFN(&Tiled2dMapVectorSourceSymbolDataManager::setupExistingSymbolWithSprite), spriteData, spriteTexture);
     }
 }
 
-void Tiled2dMapVectorSourceSymbolDataManager::setupExistingSymbolWithSprite() {
+void Tiled2dMapVectorSourceSymbolDataManager::setupExistingSymbolWithSprite(std::string spriteId, std::shared_ptr<SpriteData> spriteData, std::shared_ptr<TextureHolderInterface> spriteTexture) {
     auto mapInterface = this->mapInterface.lock();
 
     if (!mapInterface) {
@@ -605,7 +604,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::setupExistingSymbolWithSprite() {
     for (const auto &[tile, symbolGroupMap]: tileSymbolGroupMap) {
         for (const auto &[layerIdentifier, symbolGroups]: symbolGroupMap) {
             for (auto &symbolGroup: std::get<1>(symbolGroups)) {
-                symbolGroup.message(MailboxExecutionEnvironment::graphics, MFN(&Tiled2dMapVectorSymbolGroup::setupObjects), spriteData, spriteTexture, std::nullopt);
+                symbolGroup.message(MailboxExecutionEnvironment::graphics, MFN(&Tiled2dMapVectorSymbolGroup::addSprite), spriteData, spriteTexture, std::nullopt);
             }
         }
     }

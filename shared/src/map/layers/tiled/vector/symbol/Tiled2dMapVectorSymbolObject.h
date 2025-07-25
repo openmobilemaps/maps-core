@@ -68,8 +68,8 @@ public:
 
     const SymbolObjectInstanceCounts getInstanceCounts() const;
 
+    std::optional<std::string> getUpdatedSpriteSheetId(const double zoomIdentifier, const double scaleFactor, const double rotation) {
     void setupIconProperties(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &rotations, VectorModificationWrapper<float> &textureCoordinates, int &countOffset, const double zoomIdentifier, const std::shared_ptr<TextureHolderInterface> spriteTexture, const std::shared_ptr<SpriteData> spriteData, const std::optional<RectI> customUv);
-
     void updateIconProperties(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &scales, VectorModificationWrapper<float> &rotations, VectorModificationWrapper<float> &alphas, VectorModificationWrapper<float> &offsets, VectorModificationWrapper<float> &textureCoordinates, int &countOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, long long now, const Vec2I viewPortSize, const std::shared_ptr<TextureHolderInterface> spriteTexture, const std::shared_ptr<SpriteData> spriteData);
 
     void setupTextProperties(VectorModificationWrapper<float> &textureCoordinates, VectorModificationWrapper<uint16_t> &styleIndices, int &countOffset, const double zoomIdentifier);
@@ -181,9 +181,9 @@ private:
     FeatureValueEvaluationResult<double> iconOpacity = 0.0;
     FeatureValueEvaluationResult<double> iconRotate = 0.0;
     FeatureValueEvaluationResult<double> iconSize = 0.0;
-    FeatureValueEvaluationResult<std::string> iconImage = std::string();
+    FeatureValueEvaluationResult<SpriteIconId> iconImage;
 
-    std::string lastIconImage;
+    SpriteIconId lastIconImage;
     std::vector<float> iconTextFitPadding;
     TextSymbolPlacement textSymbolPlacement;
     SymbolAlignment boundingBoxRotationAlignment = SymbolAlignment::AUTO;
