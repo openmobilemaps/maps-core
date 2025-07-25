@@ -221,9 +221,9 @@ class Tiled2dMapVectorLayer : public Tiled2dMapLayer,
     virtual std::shared_ptr<Tiled2dMapVectorLayerConfig> getGeoJSONLayerConfig(const std::string &sourceName,
                                                                                const std::shared_ptr<GeoJSONVTInterface> &source);
 
-    virtual void loadSpriteData(int scale, bool fromLocal = true);
+    virtual void loadSpriteData(SpriteSourceDescription spriteSoure, int scale, bool fromLocal = true);
 
-    virtual void didLoadSpriteData(std::shared_ptr<SpriteData> spriteData, std::shared_ptr<::TextureHolderInterface> spriteTexture);
+    virtual void didLoadSpriteData(std::string spriteId, std::shared_ptr<SpriteData> spriteData, std::shared_ptr<::TextureHolderInterface> spriteTexture);
 
     void enableAnimations(bool enabled) override;
 
@@ -305,8 +305,7 @@ class Tiled2dMapVectorLayer : public Tiled2dMapLayer,
     float alpha = 1.0;
     std::optional<::RectI> scissorRect = std::nullopt;
 
-    std::shared_ptr<SpriteData> spriteData;
-    std::shared_ptr<::TextureHolderInterface> spriteTexture;
+    std::unordered_map<std::string, std::pair<std::shared_ptr<SpriteData>, std::shared_ptr<::TextureHolderInterface>>> sprites;
 
     std::shared_ptr<Tiled2dMapVectorStateManager> featureStateManager;
     std::atomic_flag noPendingStateUpdate;

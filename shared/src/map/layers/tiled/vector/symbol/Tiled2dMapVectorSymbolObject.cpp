@@ -275,6 +275,7 @@ void Tiled2dMapVectorSymbolObject::evaluateStyleProperties(const double zoomIden
         iconAllowOverlap = description->style.getIconAllowOverlap(evalContext);
     }
 
+    // XXX: avoid re-re-evaluation-check?
     if(iconImage.isReevaluationNeeded(evalContext)) {
         iconImage = description->style.getIconImage(evalContext);
     }
@@ -358,6 +359,8 @@ const Tiled2dMapVectorSymbolObject::SymbolObjectInstanceCounts Tiled2dMapVectorS
 
 void Tiled2dMapVectorSymbolObject::setupIconProperties(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &rotations, VectorModificationWrapper<float> &textureCoordinates, int &countOffset, const double zoomIdentifier, const std::shared_ptr<TextureHolderInterface> spriteTexture, const std::shared_ptr<SpriteData> spriteData, const std::optional<RectI> customUv) {
 
+  // XXX: how is this different from update?!
+
     if (instanceCounts.icons == 0) {
         return;
     }
@@ -437,11 +440,30 @@ void Tiled2dMapVectorSymbolObject::setupIconProperties(VectorModificationWrapper
     countOffset += instanceCounts.icons;
 }
 
-void Tiled2dMapVectorSymbolObject::updateIconProperties(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &scales, VectorModificationWrapper<float> &rotations, VectorModificationWrapper<float> &alphas, VectorModificationWrapper<float> &offsets, VectorModificationWrapper<float> &textureCoordinates, int &countOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, long long now, const Vec2I viewPortSize, const std::shared_ptr<TextureHolderInterface> spriteTexture, const std::shared_ptr<SpriteData> spriteData) {
-
+std::optional<std::string> Tiled2dMapVectorSymbolObject::getUpdatedSpriteSheetId(const double zoomIdentifier, const double scaleFactor, const double rotation) {
+    // XXX: uggh, strings!? use string interner or some other way to get a non-string ID?
+    // FWIW, maplibre has some type "resolvedIcon" or so; possibly implementing this cleanly would directly allow to get rid of the strings... 
+    
     if (instanceCounts.icons == 0) {
-        return;
+        return std::nullopt;
     }
+    // TODO simplify bool
+    if (!(lastIconUpdateScaleFactor != -1 && !isStyleZoomDependant) ||
+        !(!isStyleStateDependant && lastIconUpdateScaleFactor == scaleFactor && lastIconUpdateRotation == rotation && lastIconUpdateAlpha == alpha)) {
+   
+        // TODO only evaluation icon-image?
+        evaluateStyleProperties(zoomIdentifier);
+    }
+    if (iconImage.value,empty()) {
+        return std::nullopt;
+    }
+    if (iconImage.value.sheet.empty()) {
+        return "default";
+    }
+    return iconImage.value.sheet;
+}
+
+void Tiled2dMapVectorSymbolObject::updateIconProperties(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &scales, VectorModificationWrapper<float> &rotations, VectorModificationWrapper<float> &alphas, VectorModificationWrapper<float> &offsets, VectorModificationWrapper<float> &textureCoordinates, int &countOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, long long now, const Vec2I viewPortSize, const std::shared_ptr<TextureHolderInterface> spriteTexture, const std::shared_ptr<SpriteData> spriteData) {
 
     if (!isCoordinateOwner) {
         if (!animationCoordinator->isOwned.test_and_set()) {
@@ -463,11 +485,15 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(VectorModificationWrappe
         return;
     }
 
+    /*
+     * XXX: just left-over or important???
     auto strongMapInterface = mapInterface.lock();
     auto converter = strongMapInterface ? strongMapInterface->getCoordinateConverterHelper() : nullptr;
     auto camera = strongMapInterface ? strongMapInterface->getCamera() : nullptr;
+    */
 
-    evaluateStyleProperties(zoomIdentifier);
+    // XXX already evaluated? :/
+    // evaluateStyleProperties(zoomIdentifier);
 
     if (iconImage.value != lastIconImage && !((iconImage.value.empty() && !hasCustomTexture) || !spriteTexture)) {
         const auto textureWidth = (double) spriteTexture->getImageWidth();
@@ -480,7 +506,7 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(VectorModificationWrappe
         float spritePixelRatio = dpFactor;
 
         if (!hasCustomTexture) {
-            const auto spriteIt = spriteData->sprites.find(iconImage.value);
+            const auto spriteIt = spriteData->sprites.find(iconImage.value.icon);
             if (spriteIt == spriteData->sprites.end()) {
                 LogError << "Unable to find sprite " <<= iconImage.value;
                 writePosition(0, 0, countOffset, positions);

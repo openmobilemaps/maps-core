@@ -49,7 +49,8 @@ inline void from_json(const nlohmann::json& j, SpriteDesc& spriteDesc) {
 }
 
 struct SpriteData {
+    std::string identifier;
     std::unordered_map<std::string, SpriteDesc> sprites;
 
-    SpriteData(std::unordered_map<std::string, SpriteDesc> sprites): sprites(sprites) {}
+    SpriteData(std::string identifier, std::unordered_map<std::string, SpriteDesc> sprites): sprites(sprites) {}
 };

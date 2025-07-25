@@ -45,6 +45,7 @@
 #include "VectorSet.h"
 #include "InternedString.h"
 #include "ZoomRange.h"
+#include "SpriteIconId.h"
 #include <iomanip>
 #include <memory>
 #include <utility>
@@ -619,6 +620,12 @@ inline SymbolAlignment Value::evaluateOr(const EvaluationContext &context, const
         return *alignment;
     }
     return alternative;
+}
+
+template <>
+inline SpriteIconId Value::evaluateOr(const EvaluationContext &context, const SpriteIconId &alternative) const {
+    auto const &value = evaluateOr(context, std::string(""));
+    return SpriteIconId(value);
 }
 
 template<>
