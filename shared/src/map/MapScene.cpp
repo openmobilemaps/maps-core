@@ -363,12 +363,18 @@ void MapScene::setViewportSize(const ::Vec2I &size) {
 void MapScene::setBackgroundColor(const Color &color) { getRenderingContext()->setBackgroundColor(color); }
 
 void MapScene::invalidate() {
-    if (isInvalidated.test_and_set())
-        return;
-
     if (auto handler = callbackHandler) {
-        handler->invalidate();
+        if (isInvalidated.test_and_set()) {
+            return;
+        }
+        else {
+            handler->invalidate();
+        }
     }
+}
+
+void MapScene::resetIsInvalidated() {
+    isInvalidated.clear();
 }
 
 void MapScene::prepare() {

@@ -62,6 +62,8 @@ map_interface = interface +c {
 
     invalidate();
 
+    reset_is_invalidated();
+
     prepare();
 
     get_needs_compute(): bool;

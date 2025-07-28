@@ -82,6 +82,8 @@ public:
 
     virtual void invalidate() = 0;
 
+    virtual void resetIsInvalidated() = 0;
+
     virtual void prepare() = 0;
 
     virtual bool getNeedsCompute() = 0;

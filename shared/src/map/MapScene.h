@@ -73,6 +73,8 @@ class MapScene : public MapInterface, public SceneCallbackInterface, public Sche
 
     virtual void invalidate() override;
 
+    virtual void resetIsInvalidated() override;
+
     virtual void drawFrame() override;
 
     virtual void prepare() override;
