@@ -21,6 +21,7 @@ final class LineGroup2d: BaseGraphicsObject, @unchecked Sendable {
     private var indicesCount: Int = 0
 
     private var stencilState: MTLDepthStencilState?
+    private var renderPassStencilState: MTLDepthStencilState?
 
     private var customScreenPixelFactor: Float = 0
     private var tileOriginBuffer: MTLBuffer?
@@ -40,26 +41,10 @@ final class LineGroup2d: BaseGraphicsObject, @unchecked Sendable {
 
     }
 
-    private func setupStencilStates() {
-        let ss2 = MTLStencilDescriptor()
-        ss2.stencilCompareFunction = .equal
-        ss2.stencilFailureOperation = .zero
-        ss2.depthFailureOperation = .keep
-        ss2.depthStencilPassOperation = .keep
-        ss2.readMask = 0b1100_0000
-        ss2.writeMask = 0b0000_0000
-
-        let s2 = MTLDepthStencilDescriptor()
-        s2.frontFaceStencil = ss2
-        s2.backFaceStencil = ss2
-
-        stencilState = device.makeDepthStencilState(descriptor: s2)
-    }
-
     override func render(
         encoder: MTLRenderCommandEncoder,
         context: RenderingContext,
-        renderPass _: MCRenderPassConfig,
+        renderPass pass: MCRenderPassConfig,
         vpMatrix: Int64,
         mMatrix: Int64,
         origin: MCVec3D,
@@ -85,7 +70,7 @@ final class LineGroup2d: BaseGraphicsObject, @unchecked Sendable {
 
         if isMasked {
             if stencilState == nil {
-                setupStencilStates()
+                stencilState = self.maskStencilState()
             }
             encoder.setDepthStencilState(stencilState)
             if maskInverse {
@@ -93,6 +78,13 @@ final class LineGroup2d: BaseGraphicsObject, @unchecked Sendable {
             } else {
                 encoder.setStencilReferenceValue(0b1100_0000)
             }
+        } else if pass.isPassMasked {
+            if renderPassStencilState == nil {
+                renderPassStencilState = self.renderPassMaskStencilState()
+            }
+
+            encoder.setDepthStencilState(renderPassStencilState)
+            encoder.setStencilReferenceValue(0b0000_0000)
         }
 
         shader.screenPixelAsRealMeterFactor = Float(screenPixelAsRealMeterFactor)
