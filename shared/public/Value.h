@@ -986,6 +986,10 @@ class ZoomValue: public Value {
     bool isEqual(const std::shared_ptr<Value> &other) const override {
         return (std::dynamic_pointer_cast<StaticValue>(other) != nullptr);
     };
+
+    void evaluateZoomRange(ZoomRange& zoomRange) override {
+        zoomRange.setFullRange();
+    }
 };
 
 class HasPropertyValue : public Value {
