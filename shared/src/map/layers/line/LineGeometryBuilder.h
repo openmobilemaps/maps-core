@@ -47,9 +47,11 @@ class LineGeometryBuilder {
 
                 prefixTotalLineLength += lineLength;
 
-                float extrudeScale = 1.0;
+                float unlimitedExtrudeScale = 1.0;
+                float outerExtrudeScale = 1.0;
+                LineJoinType actualJoinType = defaultJoinType;
+
                 float turnDirection = 0;
-                LineJoinType vertexJoinType = defaultJoinType;
 
                 Vec3D extrude(0, 0, 0), extrudeMirror(0, 0, 0), extrudeMirrorLast(0, 0, 0), extrudeLineVec(0, 0, 0);
 
@@ -111,12 +113,12 @@ class LineGeometryBuilder {
                             turnDirection = (lastNormal.x * normal.y - lastNormal.y * normal.x); // 2D cross product
                         }
 
-                        extrudeScale = cosHalfAngle != 0 ? std::abs(1.0 / cosHalfAngle) : 1.0;
-                        if (extrudeScale > 2.0) {
-                            if (vertexJoinType == LineJoinType::MITER) {
-                                vertexJoinType = LineJoinType::BEVEL;
-                            }
-                            extrudeScale = 2.0;
+                        unlimitedExtrudeScale = cosHalfAngle != 0 ? std::abs(1.0 / cosHalfAngle) : 1.0;
+                        outerExtrudeScale = unlimitedExtrudeScale;
+
+                        if (defaultJoinType == LineJoinType::MITER && unlimitedExtrudeScale > 2.0) {
+                            actualJoinType = LineJoinType::BEVEL;
+                            outerExtrudeScale = 2.0; // Limit the outer miter, but keep unlimitedExtrudeScale for the inner corner.
                         }
                     } else {
                         extrude = normal;
@@ -166,14 +168,13 @@ class LineGeometryBuilder {
                     if (capType == LineCapType::SQUARE && endSide != 0) {
                         pointExtrude = pointExtrude + extrudeLineVec * endSide;
                     }
-                    if (side * turnDirection < 0 && endSide == 0) {
-                        float prefixCorrection = Vec3DHelper::dotProduct(extrudeMirrorLast * (double)side * extrudeScale, lastLineVec);
-                        pushLineVertex(p, extrudeMirrorLast * (double)side, extrudeScale, side, prefixTotalLineLength, prefixCorrection, lineStyleIndex, true, side == -1,
+                    if (side * turnDirection < 0 && endSide == 0) { // This is the INNER ("mirrored") side of the turn
+                        float prefixCorrection = Vec3DHelper::dotProduct(extrudeMirrorLast * (double)side * unlimitedExtrudeScale, lastLineVec);
+                        pushLineVertex(p, extrudeMirrorLast * (double)side, unlimitedExtrudeScale, side, prefixTotalLineLength, prefixCorrection, lineStyleIndex, true, side == -1,
                                        vertexCount, prePreIndex, preIndex, lineAttributes, lineIndices, is3d);
-                    } else {
-                        float prefixCorrection = Vec3DHelper::dotProduct(pointExtrude * extrudeScale, lastLineVec);
-
-                        pushLineVertex(p, pointExtrude, extrudeScale, side, prefixTotalLineLength, prefixCorrection, lineStyleIndex, true, side == -1,
+                    } else { 
+                        float prefixCorrection = Vec3DHelper::dotProduct(pointExtrude * unlimitedExtrudeScale, lastLineVec);
+                        pushLineVertex(p, pointExtrude, unlimitedExtrudeScale, side, prefixTotalLineLength, prefixCorrection, lineStyleIndex, true, side == -1,
                                        vertexCount, prePreIndex, preIndex, lineAttributes, lineIndices, is3d);
                     }
                 }
@@ -184,11 +185,11 @@ class LineGeometryBuilder {
                         pointExtrude = pointExtrude + extrudeLineVec * endSide;
                     }
                     if (side * turnDirection < 0 && endSide == 0) {
-                        bool shouldRound = extrudeScale > 1.1 || optimizeForDots;
-                        if (shouldRound && vertexJoinType != LineJoinType::MITER) {
+                        bool shouldRound = unlimitedExtrudeScale > 1.1 || optimizeForDots;
+                        if (shouldRound && actualJoinType != LineJoinType::MITER) {
                             const double approxAngle = 2 * std::sqrt(2 - 2 * cosHalfAngle);
                             // 2.86 ~= 180/pi / 20 -> approximately one slice per 20 degrees
-                            const int stepCount = (vertexJoinType == LineJoinType::ROUND) ? std::max(1.0, round(approxAngle * 1.46)) : 1;
+                            const int stepCount = (actualJoinType == LineJoinType::ROUND) ? std::max(1.0, round(approxAngle * 1.46)) : 1;
                             for (int step = 0; step <= stepCount; step++) {
                                 double r = (double)step / (double)stepCount * 0.5;
                                 pointExtrude = Vec3DHelper::normalize(lastNormal * (1.0 - r) + normal * r) * (double)side;
@@ -202,8 +203,8 @@ class LineGeometryBuilder {
                                     std::swap(prePreIndex, preIndex);
                                 }
                             }
-                            float prefixCorrection = Vec3DHelper::dotProduct(extrude * (double)-side * extrudeScale, lineVec);
-                            pushLineVertex(p, extrude * (double)-side, extrudeScale, -side, prefixTotalLineLength, prefixCorrection, lineStyleIndex, false, -side == -1,
+                            float prefixCorrection = Vec3DHelper::dotProduct(extrude * (double)-side * unlimitedExtrudeScale, lineVec);
+                            pushLineVertex(p, extrude * (double)-side, unlimitedExtrudeScale, -side, prefixTotalLineLength, prefixCorrection, lineStyleIndex, false, -side == -1,
                                            vertexCount, prePreIndex, preIndex, lineAttributes, lineIndices, is3d);
                             if (side == 1) {
                                 std::swap(prePreIndex, preIndex);
@@ -239,8 +240,8 @@ class LineGeometryBuilder {
                             std::swap(prePreIndex, preIndex);
                         }
 
-                        float prefixCorrection = Vec3DHelper::dotProduct(extrudeMirror * (double)side * extrudeScale, lineVec);
-                        pushLineVertex(p, extrudeMirror * (double)side, extrudeScale, side, prefixTotalLineLength, prefixCorrection, lineStyleIndex, true, side == -1,
+                        float prefixCorrection = Vec3DHelper::dotProduct(extrudeMirror * (double)side * unlimitedExtrudeScale, lineVec);
+                        pushLineVertex(p, extrudeMirror * (double)side, unlimitedExtrudeScale, side, prefixTotalLineLength, prefixCorrection, lineStyleIndex, true, side == -1,
                                        vertexCount, prePreIndex, preIndex, lineAttributes, lineIndices, is3d);
                         if (side == -1) {
                             std::swap(prePreIndex, preIndex);
