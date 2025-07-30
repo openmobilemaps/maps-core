@@ -197,6 +197,7 @@ extension MCMapView: MTKViewDelegate {
     public func draw(in view: MTKView) {
         guard !backgroundDisable else {
             isPaused = true
+            mapInterface.resetIsInvalidated()
             return  // don't execute metal calls in background
         }
 
@@ -204,6 +205,7 @@ extension MCMapView: MTKViewDelegate {
             framesToRender > 0 || !pausesAutomatically
         else {
             isPaused = true
+            mapInterface.resetIsInvalidated()
             return
         }
 

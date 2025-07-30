@@ -88,6 +88,8 @@
 
 - (void)invalidate;
 
+- (void)resetIsInvalidated;
+
 - (void)prepare;
 
 - (BOOL)getNeedsCompute;

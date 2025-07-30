@@ -64,6 +64,8 @@ abstract class MapInterface {
 
     abstract fun invalidate()
 
+    abstract fun resetIsInvalidated()
+
     abstract fun prepare()
 
     abstract fun getNeedsCompute(): Boolean
@@ -250,6 +252,12 @@ abstract class MapInterface {
             native_invalidate(this.nativeRef)
         }
         private external fun native_invalidate(_nativeRef: Long)
+
+        override fun resetIsInvalidated() {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_resetIsInvalidated(this.nativeRef)
+        }
+        private external fun native_resetIsInvalidated(_nativeRef: Long)
 
         override fun prepare() {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

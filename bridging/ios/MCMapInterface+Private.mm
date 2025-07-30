@@ -241,6 +241,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)resetIsInvalidated {
+    try {
+        _cppRefHandle.get()->resetIsInvalidated();
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (void)prepare {
     try {
         _cppRefHandle.get()->prepare();
