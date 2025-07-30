@@ -15,19 +15,19 @@
 #include <string>
 
 namespace chronoutil {
-    static std::chrono::milliseconds getCurrentTimestamp() {
+    inline std::chrono::milliseconds getCurrentTimestamp() {
         return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
     }
 
-    static std::chrono::nanoseconds getCurrentTimestampNs() {
+    inline std::chrono::nanoseconds getCurrentTimestampNs() {
         return std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch());
     }
 
-    static std::string getTimestampDeltaString(std::chrono::milliseconds start, std::chrono::milliseconds end) {
+    inline std::string getTimestampDeltaString(std::chrono::milliseconds start, std::chrono::milliseconds end) {
         return std::to_string((end - start).count()) + "ms";
     }
 
-    static void logDebugTimeDeltaToNow(std::string tag, std::chrono::milliseconds start) {
+    inline void logDebugTimeDeltaToNow(std::string tag, std::chrono::milliseconds start) {
         LogDebug <<= tag + ": " + getTimestampDeltaString(start, getCurrentTimestamp());
     }
 }

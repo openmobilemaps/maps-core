@@ -16,7 +16,6 @@ JNIEXPORT jint JNICALL Java_io_openmobilemaps_mapscore_graphics_util_GlTextureHe
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    const jsize outLen = env->GetArrayLength(data);
     jint *dataBuf = env->GetIntArrayElements(data, NULL);
 
     // NOTE: little-endian! Implicit byte-order conversion from ARGB ints (highest-order byte is A) into BGRA byte buffer

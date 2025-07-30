@@ -67,7 +67,6 @@ void PolygonGroup2dLayerObject::setVertices(const std::vector<std::tuple<std::ve
     for (size_t i = 0; i < renderVertices.size(); i += 4) { // 4 values: x, y, z, s
         const auto& x = renderVertices[i];
         const auto& y = renderVertices[i + 1];
-        const auto& z = renderVertices[i + 2];
 
         // Adjust the coordinates by subtracting the average
         if(is3d) {
