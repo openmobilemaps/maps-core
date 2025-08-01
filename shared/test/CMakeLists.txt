@@ -14,10 +14,10 @@ add_executable(tests
   "TestTileSource.cpp"
   "TestGeometryHandler.cpp"
   "TestStyleParser.cpp"
-  "TestValueEvaluate.cpp"
-  "TestVectorSet.cpp"
+        "TestVectorSet.cpp"
   "TestStyleParser.cpp"
   "TestInternedString.cpp"
+  "TestExpressions.cpp"
   "helper/TestData.cpp"
   "helper/TestLocalDataProvider.h"
 )
