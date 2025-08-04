@@ -14,6 +14,7 @@ import MapCoreSharedModule
 
 enum TextureHolderError: Error {
     case emptyData
+    case conversionFailed
 }
 
 @objc
@@ -64,6 +65,55 @@ public class TextureHolder: NSObject, @unchecked Sendable {
 
             self.init(texture)
         }
+    }
+
+    public convenience init(uint8 cgImage: CGImage) throws {
+        let width = cgImage.width
+        let height = cgImage.height
+
+        // Step 1: Create context for RGBA bytes
+        let bytesPerPixel = 4
+        let bytesPerRow = bytesPerPixel * width
+        let dataSize = bytesPerRow * height
+        var rawData = [UInt8](repeating: 0, count: dataSize)
+
+        guard let colorSpace = cgImage.colorSpace else { throw TextureHolderError.conversionFailed }
+        guard let context = CGContext(
+            data: &rawData,
+            width: width,
+            height: height,
+            bitsPerComponent: 8,
+            bytesPerRow: bytesPerRow,
+            space: colorSpace,
+            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue | CGBitmapInfo.byteOrder32Big.rawValue
+        ) else {
+            throw TextureHolderError.conversionFailed
+        }
+
+        // Step 2: Draw image into buffer
+        context.draw(cgImage, in: CGRect(x: 0, y: 0, width: width, height: height))
+
+        // Step 3: Create texture
+        let descriptor = MTLTextureDescriptor.texture2DDescriptor(
+            pixelFormat: .rgba8Uint,
+            width: width,
+            height: height,
+            mipmapped: false
+        )
+        descriptor.usage = [.shaderRead]
+
+        guard let texture = MetalContext.current.device.makeTexture(descriptor: descriptor) else {
+            throw TextureHolderError.conversionFailed
+        }
+
+        texture.replace(
+            region: MTLRegionMake2D(0, 0, width, height),
+            mipmapLevel: 0,
+            withBytes: rawData,
+            bytesPerRow: bytesPerRow
+        )
+
+        self.init(texture)
     }
 
     public convenience init(name: String, scaleFactor: Double, bundle: Bundle?) throws {
