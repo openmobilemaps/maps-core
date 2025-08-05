@@ -52,6 +52,10 @@
 
 #include "Logger.h"
 
+#if DEBUG
+//#define RENDER_INVISIBLE_ELEMENTS 1
+#endif
+
 namespace std {
     template <>
     struct hash<Color> {

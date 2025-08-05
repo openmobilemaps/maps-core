@@ -122,6 +122,11 @@ void Tiled2dMapVectorPolygonPatternTile::update() {
             const auto &ec = EvaluationContext(zoomIdentifier, dpFactor, feature, featureStateManager);
             const auto &opacity = polygonDescription->style.getFillOpacity(ec);
             opacities[styleGroupId][index] = toHalfFloat(alpha * opacity);
+#if defined(RENDER_INVISIBLE_ELEMENTS)
+            if (opacity == 0 ) {
+                opacities[styleGroupId][index]  = toHalfFloat(1.0);
+            }
+#endif // defined(RENDER_INVISIBLE_ELEMENTS)
             index++;
         }
         for (const auto &polygon: styleGroupPolygonsMap.at(styleGroupId)) {

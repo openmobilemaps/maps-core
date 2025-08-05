@@ -155,6 +155,18 @@ void Tiled2dMapVectorLineTile::update() {
                     needsUpdate = true;
                 }
 
+#if defined(RENDER_INVISIBLE_ELEMENTS)
+                if (width == 0 || opacity == 0 || color.a == 0) {
+                    style.colorR = toHalfFloat(1.0);
+                    style.colorG = toHalfFloat(0.0);
+                    style.colorB = toHalfFloat(0.0);
+                    style.colorA = toHalfFloat(1.0);
+                    style.opacity = toHalfFloat(1.0);
+                    style.width = toHalfFloat(3.0);
+                    needsUpdate = true;
+                }
+#endif // defined(RENDER_INVISIBLE_ELEMENTS)
+
                 // line caps
                 auto lineCap = lineDescription->style.getLineCap(context);
 
