@@ -18,7 +18,8 @@ public enum PipelineDescriptorFactory {
         vertexShader: String,
         fragmentShader: String,
         blendMode: MCBlendMode,
-        library: MTLLibrary
+        library: MTLLibrary,
+        constants: MTLFunctionConstantValues? = nil
     ) -> MTLRenderPipelineDescriptor {
         let pipelineDescriptor = MTLRenderPipelineDescriptor()
         pipelineDescriptor.colorAttachments[0].pixelFormat = MetalContext.colorPixelFormat
@@ -54,14 +55,27 @@ public enum PipelineDescriptorFactory {
         pipelineDescriptor.stencilAttachmentPixelFormat = .stencil8
         pipelineDescriptor.label = label
 
-        guard let vertexFunction = library.makeFunction(name: vertexShader),
-            let fragmentFunction = library.makeFunction(name: fragmentShader)
-        else {
-            fatalError("Cannot locate the shaders for \(label)")
+        if let constants = constants {
+            guard let vertexFunction = try? library.makeFunction(name: vertexShader, constantValues: constants),
+                let fragmentFunction = try? library.makeFunction(name: fragmentShader, constantValues: constants)
+            else {
+                fatalError("Cannot locate the shaders for \(label)")
+            }
+
+            pipelineDescriptor.vertexFunction = vertexFunction
+            pipelineDescriptor.fragmentFunction = fragmentFunction
+        } else {
+            guard let vertexFunction = library.makeFunction(name: vertexShader),
+                  let fragmentFunction = library.makeFunction(name: fragmentShader)
+            else {
+                fatalError("Cannot locate the shaders for \(label)")
+            }
+
+            pipelineDescriptor.vertexFunction = vertexFunction
+            pipelineDescriptor.fragmentFunction = fragmentFunction
         }
 
-        pipelineDescriptor.vertexFunction = vertexFunction
-        pipelineDescriptor.fragmentFunction = fragmentFunction
+
 
         return pipelineDescriptor
     }
