@@ -62,12 +62,12 @@ protected:
     int lineOriginHandle;
     int scaleFactorHandle;
 
-    int positionHandle;
-    int extrudeHandle;
-    int lineSideHandle;
-    int lengthPrefixHandle;
-    int lengthCorrectionHandle;
-    int stylingIndexHandle;
+    int positionHandle = -1;
+    int extrudeHandle = -1;
+    int lineSideHandle = -1;
+    int lengthPrefixHandle = -1;
+    int lengthCorrectionHandle = -1;
+    int stylingIndexHandle = -1;
 
     GLuint vao;
     GLuint vertexAttribBuffer = -1;
