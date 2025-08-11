@@ -19,75 +19,75 @@ import SwiftUI
     typealias PlatformColor = NSColor
 #endif
 
-extension String {
+public extension String {
     func toVectorLayerFeatureValue() -> MCVectorLayerFeatureInfoValue {
         return MCVectorLayerFeatureInfoValue(stringVal: self, doubleVal: nil, intVal: nil, boolVal: nil, colorVal: nil, listFloatVal: nil, listStringVal: nil)
     }
 }
 
-extension Bool {
+public extension Bool {
     func toVectorLayerFeatureValue() -> MCVectorLayerFeatureInfoValue {
         return MCVectorLayerFeatureInfoValue(stringVal: nil, doubleVal: nil, intVal: nil, boolVal: self as NSNumber, colorVal: nil, listFloatVal: nil, listStringVal: nil)
     }
 }
 
-extension Double {
+public extension Double {
     func toVectorLayerFeatureValue() -> MCVectorLayerFeatureInfoValue {
         return MCVectorLayerFeatureInfoValue(stringVal: nil, doubleVal: self as NSNumber, intVal: nil, boolVal: nil, colorVal: nil, listFloatVal: nil, listStringVal: nil)
     }
 }
 
-extension Float {
+public extension Float {
     func toVectorLayerFeatureValue() -> MCVectorLayerFeatureInfoValue {
         return MCVectorLayerFeatureInfoValue(stringVal: nil, doubleVal: self as NSNumber, intVal: nil, boolVal: nil, colorVal: nil, listFloatVal: nil, listStringVal: nil)
     }
 }
 
-extension Int {
+public extension Int {
     func toVectorLayerFeatureValue() -> MCVectorLayerFeatureInfoValue {
         return MCVectorLayerFeatureInfoValue(stringVal: nil, doubleVal: nil, intVal: self as NSNumber, boolVal: nil, colorVal: nil, listFloatVal: nil, listStringVal: nil)
     }
 }
 
-extension Int64 {
+public extension Int64 {
     func toVectorLayerFeatureValue() -> MCVectorLayerFeatureInfoValue {
         return MCVectorLayerFeatureInfoValue(stringVal: nil, doubleVal: nil, intVal: self as NSNumber, boolVal: nil, colorVal: nil, listFloatVal: nil, listStringVal: nil)
     }
 }
 
-extension Color {
+public extension Color {
     func toVectorLayerFeatureValue() -> MCVectorLayerFeatureInfoValue {
         return PlatformColor(self).toVectorLayerFeatureValue()
     }
 }
 
 #if canImport(UIKit)
-    extension UIColor {
+    public extension UIColor {
         func toVectorLayerFeatureValue() -> MCVectorLayerFeatureInfoValue {
             return MCVectorLayerFeatureInfoValue(stringVal: nil, doubleVal: nil, intVal: nil, boolVal: nil, colorVal: self.mapCoreColor, listFloatVal: nil, listStringVal: nil)
         }
     }
 #elseif canImport(AppKit)
-    extension NSColor {
+    public extension NSColor {
         func toVectorLayerFeatureValue() -> MCVectorLayerFeatureInfoValue {
             return MCVectorLayerFeatureInfoValue(stringVal: nil, doubleVal: nil, intVal: nil, boolVal: nil, colorVal: self.mapCoreColor, listFloatVal: nil, listStringVal: nil)
         }
     }
 #endif
 
-extension Array where Element == String {
+public extension Array where Element == String {
     func toVectorLayerFeatureValue() -> MCVectorLayerFeatureInfoValue {
         return MCVectorLayerFeatureInfoValue(stringVal: nil, doubleVal: nil, intVal: nil, boolVal: nil, colorVal: nil, listFloatVal: nil, listStringVal: self)
     }
 }
 
-extension Array where Element == Float {
+public extension Array where Element == Float {
     func toVectorLayerFeatureValue() -> MCVectorLayerFeatureInfoValue {
         return MCVectorLayerFeatureInfoValue(stringVal: nil, doubleVal: nil, intVal: nil, boolVal: nil, colorVal: nil, listFloatVal: self.map { $0 as NSNumber }, listStringVal: nil)
     }
 }
 
-extension Array where Element == Double {
+public extension Array where Element == Double {
     func toVectorLayerFeatureValue() -> MCVectorLayerFeatureInfoValue {
         return MCVectorLayerFeatureInfoValue(stringVal: nil, doubleVal: nil, intVal: nil, boolVal: nil, colorVal: nil, listFloatVal: self.map { $0 as NSNumber }, listStringVal: nil)
     }
