@@ -86,14 +86,20 @@ void LineGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface>
     glEnableVertexAttribArray(extrudeHandle);
     glVertexAttribPointer(extrudeHandle, dimensionality, GL_FLOAT, false, stride, (float *)(sizeAttribGroup * 1));
 
-    glEnableVertexAttribArray(lineSideHandle);
-    glVertexAttribPointer(lineSideHandle, 1, GL_FLOAT, false, stride, (float *)(sizeAttribGroup * 2));
+    if (lineSideHandle >= 0) {
+        glEnableVertexAttribArray(lineSideHandle);
+        glVertexAttribPointer(lineSideHandle, 1, GL_FLOAT, false, stride, (float *) (sizeAttribGroup * 2));
+    }
 
-    glEnableVertexAttribArray(lengthPrefixHandle);
-    glVertexAttribPointer(lengthPrefixHandle, 1, GL_FLOAT, false, stride, (float *)(sizeAttribGroup * 2 + 1 * floatSize));
+    if (lengthPrefixHandle >= 0) {
+        glEnableVertexAttribArray(lengthPrefixHandle);
+        glVertexAttribPointer(lengthPrefixHandle, 1, GL_FLOAT, false, stride, (float *) (sizeAttribGroup * 2 + 1 * floatSize));
+    }
 
-    glEnableVertexAttribArray(lengthCorrectionHandle);
-    glVertexAttribPointer(lengthCorrectionHandle, 1, GL_FLOAT, false, stride, (float *)(sizeAttribGroup * 2 + 2 * floatSize));
+    if (lengthCorrectionHandle >= 0) {
+        glEnableVertexAttribArray(lengthCorrectionHandle);
+        glVertexAttribPointer(lengthCorrectionHandle, 1, GL_FLOAT, false, stride, (float *) (sizeAttribGroup * 2 + 2 * floatSize));
+    }
 
     glEnableVertexAttribArray(stylingIndexHandle);
     glVertexAttribPointer(stylingIndexHandle, 1, GL_FLOAT, false, stride, (float *)(sizeAttribGroup * 2 + 3 * floatSize));
