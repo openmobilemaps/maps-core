@@ -53,9 +53,9 @@ private:
 
 
 #ifdef OPENMOBILEMAPS_GL
-    static const int maxNumLinePoints = std::numeric_limits<uint16_t>::max() / 4 + 1; // 4 vertices per line coord, only 2 at the start/end
+    static const int maxNumLineVertices = std::numeric_limits<uint16_t>::max();
 #else
-    static const int maxNumLinePoints = std::numeric_limits<uint32_t>::max() / 4 + 1; // on iOS we use 32 bit for the indices
+    static const int maxNumLineVertices = std::numeric_limits<uint32_t>::max(); // on iOS we use 32 bit for the indices
 #endif
 
 #ifdef OPENMOBILEMAPS_GL

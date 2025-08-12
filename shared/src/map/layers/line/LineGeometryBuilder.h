@@ -7,6 +7,12 @@
 
 #include "Vec3DHelper.h"
 
+#ifdef OPENMOBILEMAPS_GL
+    using uint_index = uint16_t;
+#else
+    using uint_index = uint32_t;
+#endif
+
 class LineGeometryBuilder {
   public:
     static void buildLines(const std::shared_ptr<LineGroup2dInterface> &line,
@@ -19,7 +25,7 @@ class LineGeometryBuilder {
         }
 
         std::vector<float> lineAttributes;
-        std::vector<uint32_t> lineIndices;
+        std::vector<uint_index> lineIndices;
         reserveEstimatedNumVertices(lines, defaultJoinType, capType, is3d, lineAttributes, lineIndices);
 
         uint32_t vertexCount = 0;
@@ -305,14 +311,14 @@ class LineGeometryBuilder {
         }
 
         auto attributes = SharedBytes((int64_t)lineAttributes.data(), (int32_t)lineAttributes.size(), (int32_t)sizeof(float));
-        auto indices = SharedBytes((int64_t)lineIndices.data(), (int32_t)lineIndices.size(), (int32_t)sizeof(uint32_t));
+        auto indices = SharedBytes((int64_t)lineIndices.data(), (int32_t)lineIndices.size(), (int32_t)sizeof(uint_index));
         line->setLines(attributes, indices, origin, is3d);
     }
 
     static void pushLineVertex(const Vec3D &p, const Vec3D &extrude, const float extrudeScale, const float side,
                                const float prefixTotalLineLength, const float prefixCorrection, const int lineStyleIndex, const bool addTriangle,
                                const bool reverse, uint32_t &vertexCount, int32_t &prePreIndex, int32_t &preIndex,
-                               std::vector<float> &lineAttributes, std::vector<uint32_t> &lineIndices, bool is3d) {
+                               std::vector<float> &lineAttributes, std::vector<uint_index> &lineIndices, bool is3d) {
 
         lineAttributes.push_back(p.x);
         lineAttributes.push_back(p.y);
@@ -354,22 +360,31 @@ class LineGeometryBuilder {
         preIndex = newIndex;
     }
 
+    static uint64_t estimateVertexCount(const size_t countCoordinates, const uint64_t capVertices = roundCapVertexCount) {
+        return countCoordinates * numVertexPointFactor + numVertexOffset + capVertices;
+    }
+
+    static uint64_t getMaxNumLineCoordsForVertexLimit(const uint64_t vertexLimit, const uint64_t capVertices = roundCapVertexCount) {
+        return (vertexLimit - capVertices - numVertexOffset) / numVertexPointFactor;
+    }
+
   private:
+    // Empirical values: simple linear fit for observed number of vertices and triangles,
+    // biased to lightly overestimate -- slightly too large reservation is less wasted memory
+    // than slightly understimating and then doubling it.
+    // JoinType does not appear to make a large enough difference to warrant using different parameters here.
+    const static int64_t numVertexPointFactor = 5; // fitted value was ~4.999, integer seems close enough
+    const static int64_t numVertexOffset = -3;
+    const static int64_t numTrianglePointFactor = 4; // fitted value was ~4.03, integer seems close enough
+    const static int64_t numTriangleOffset = -5;
+    const static int64_t roundCapVertexCount = 24;
+
     static void reserveEstimatedNumVertices(const std::vector<std::tuple<std::vector<Vec3D>, int>> &lines,
                                             LineJoinType joinType, LineCapType capType, bool is3d,
-                                            std::vector<float> &lineAttributes, std::vector<uint32_t> &lineIndices)
+                                            std::vector<float> &lineAttributes, std::vector<uint_index> &lineIndices)
     {
-        // Empirical values: simple linear fit for observed number of vertices and triangles,
-        // biased to lightly overestimate -- slightly too large reservation is less wasted memory
-        // than slightly understimating and then doubling it.
-        // JoinType does not appear to make a large enough difference to warrant using different parameters here.
-        const int64_t numVertexPointFactor = 5; // fitted value was ~4.999, integer seems close enough
-        const int64_t numVertexOffset = -3;
-        const int64_t numTrianglePointFactor = 4; // fitted value was ~4.03, integer seems close enough
-        const int64_t numTriangleOffset = -5;
-
-        const int64_t capVertices = capType == LineCapType::ROUND ? 24 : 0;
-        const int64_t capTriangles = capType == LineCapType::ROUND ? 24 : 0;
+        const int64_t capVertices = capType == LineCapType::ROUND ? roundCapVertexCount : 0;
+        const int64_t capTriangles = capType == LineCapType::ROUND ? roundCapVertexCount : 0;
 
         size_t numVertices = 0;
         size_t numTriangles = 0;
@@ -378,7 +393,7 @@ class LineGeometryBuilder {
             if(numPoints < 2) {
                 continue;
             }
-            numVertices += numPoints*numVertexPointFactor + numVertexOffset + capVertices;
+            numVertices += estimateVertexCount(numPoints, capVertices);
             numTriangles += numPoints*numTrianglePointFactor + numTriangleOffset + capTriangles;
         }
 

@@ -110,7 +110,7 @@ void LineGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface>
         glGenBuffers(1, &indexBuffer);
     }
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * lineIndices.size(), &lineIndices[0], GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort) * lineIndices.size(), &lineIndices[0], GL_STATIC_DRAW);
 
     glBindVertexArray(0);
 
@@ -188,7 +188,7 @@ void LineGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface
     shaderProgram->preRender(openGlContext);
 
     // Draw the triangle
-    glDrawElements(GL_TRIANGLES, lineIndices.size(), GL_UNSIGNED_INT, nullptr);
+    glDrawElements(GL_TRIANGLES, lineIndices.size(), GL_UNSIGNED_SHORT, nullptr);
 
     glBindVertexArray(0);
 
