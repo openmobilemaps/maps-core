@@ -318,8 +318,14 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
     bool is3d = mapInterface->is3d();
 
     if (!tileData->empty()) {
+        // Track how many coordinates are in each style group's current subgroup
         std::unordered_map<int, int> subGroupCoordCount;
+
+        // Main container: [styleGroup][subGroup][line] = (coordinates, styleIndex)
+        // This allows splitting large groups into multiple graphics objects
         std::vector<std::vector<std::vector<std::tuple<std::vector<Vec2D>, int>>>> styleGroupNewLinesVector;
+
+        // Working container for current subgroup being built for each style group
         std::vector<std::vector<std::tuple<std::vector<Vec2D>, int>>> styleGroupLineSubGroupVector;
 
         bool anyInteractable = false;
@@ -431,12 +437,17 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
 
                     const auto &coordinates = is3d ? LineHelper::subdividePolyline(lineCoordinates, maxSegmentLength) : lineCoordinates;
 
+                    // Check if adding this line would exceed vertex limit for current subgroup
                     int numCoords = (int)coordinates.size();
                     int coordCount = subGroupCoordCount[styleGroupIndex];
+
+                    // Split into new subgroup if we exceed the limit
                     if (coordCount + numCoords > maxNumLinePoints
                         && !styleGroupLineSubGroupVector[styleGroupIndex].empty()) {
+                        // Move current subgroup to final container
                         styleGroupNewLinesVector[styleGroupIndex].push_back(styleGroupLineSubGroupVector[styleGroupIndex]);
-                        styleGroupLineSubGroupVector.push_back(std::vector<std::tuple<std::vector<Vec2D>, int>>());
+                        // Clear current subgroup
+                        styleGroupLineSubGroupVector[styleGroupIndex].clear();
                         subGroupCoordCount[styleGroupIndex] = 0;
                     }
 
@@ -454,6 +465,7 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
             }
         }
 
+        // Finalize all subgroups - move any remaining lines to final container
         for (int styleGroupIndex = 0; styleGroupIndex < styleGroupLineSubGroupVector.size(); styleGroupIndex++) {
             const auto &lineSubGroup = styleGroupLineSubGroupVector[styleGroupIndex];
             if (!lineSubGroup.empty() && subGroupCoordCount[styleGroupIndex] > 0) {
