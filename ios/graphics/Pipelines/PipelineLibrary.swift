@@ -66,7 +66,7 @@ public enum PipelineDescriptorFactory {
             pipelineDescriptor.fragmentFunction = fragmentFunction
         } else {
             guard let vertexFunction = library.makeFunction(name: vertexShader),
-                  let fragmentFunction = library.makeFunction(name: fragmentShader)
+                let fragmentFunction = library.makeFunction(name: fragmentShader)
             else {
                 fatalError("Cannot locate the shaders for \(label)")
             }
@@ -74,8 +74,6 @@ public enum PipelineDescriptorFactory {
             pipelineDescriptor.vertexFunction = vertexFunction
             pipelineDescriptor.fragmentFunction = fragmentFunction
         }
-
-
 
         return pipelineDescriptor
     }
