@@ -11,6 +11,7 @@
 #include "Tiled2dMapVectorLineTile.h"
 #include "MapCameraInterface.h"
 #include "RenderObject.h"
+#include "LineGeometryBuilder.h"
 #include "LineHelper.h"
 #include "Tiled2dMapVectorLayerConfig.h"
 #include "Tiled2dMapVectorStyleParser.h"
@@ -319,7 +320,9 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
 
     if (!tileData->empty()) {
         // Track how many coordinates are in each style group's current subgroup
-        std::unordered_map<int, int> subGroupCoordCount;
+        std::unordered_map<int, uint32_t> subGroupVertexCount;
+        // Get a (conservative) estimate of the maximum number of line coordinates allowed per object
+        const size_t maxNumLineCoords = LineGeometryBuilder::getMaxNumLineCoordsForVertexLimit(maxNumLineVertices);
 
         // Main container: [styleGroup][subGroup][line] = (coordinates, styleIndex)
         // This allows splitting large groups into multiple graphics objects
@@ -422,8 +425,8 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
                     }
                 }
 
-                if (subGroupCoordCount.count(styleGroupIndex) == 0) {
-                    subGroupCoordCount.try_emplace(styleGroupIndex, 0);
+                if (subGroupVertexCount.count(styleGroupIndex) == 0) {
+                    subGroupVertexCount.try_emplace(styleGroupIndex, 0);
                 }
 
                 const std::shared_ptr<VectorTileGeometryHandler> geometryHandler = std::get<1>(*featureIt);
@@ -437,22 +440,28 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
 
                     const auto &coordinates = is3d ? LineHelper::subdividePolyline(lineCoordinates, maxSegmentLength) : lineCoordinates;
 
-                    // Check if adding this line would exceed vertex limit for current subgroup
-                    int numCoords = (int)coordinates.size();
-                    int coordCount = subGroupCoordCount[styleGroupIndex];
+                    for (size_t coordinateOffset = 0; coordinateOffset < coordinates.size(); coordinateOffset += maxNumLineCoords) {
+                        // Split line, if it is too long for the given limits
+                        size_t endOffset = std::min(coordinateOffset + maxNumLineCoords, coordinates.size() - 1);
 
-                    // Split into new subgroup if we exceed the limit
-                    if (coordCount + numCoords > maxNumLinePoints
-                        && !styleGroupLineSubGroupVector[styleGroupIndex].empty()) {
-                        // Move current subgroup to final container
-                        styleGroupNewLinesVector[styleGroupIndex].push_back(styleGroupLineSubGroupVector[styleGroupIndex]);
-                        // Clear current subgroup
-                        styleGroupLineSubGroupVector[styleGroupIndex].clear();
-                        subGroupCoordCount[styleGroupIndex] = 0;
+                        uint64_t newLineVertexCount = LineGeometryBuilder::estimateVertexCount(endOffset - coordinateOffset);
+                        int vertexCount = subGroupVertexCount[styleGroupIndex];
+
+                        // Check if adding this line would exceed vertex limit for current subgroup
+                        // Split into new subgroup if we exceed the limit
+                        if (newLineVertexCount + vertexCount > maxNumLineVertices
+                            && !styleGroupLineSubGroupVector[styleGroupIndex].empty()) {
+                            // Move current subgroup to final container
+                            styleGroupNewLinesVector[styleGroupIndex].push_back(styleGroupLineSubGroupVector[styleGroupIndex]);
+                            // Clear current subgroup
+                            styleGroupLineSubGroupVector[styleGroupIndex].clear();
+                            subGroupVertexCount[styleGroupIndex] = 0;
+                        }
+
+                        styleGroupLineSubGroupVector[styleGroupIndex].push_back({std::vector<::Vec2D>(coordinates.begin() + coordinateOffset, coordinates.begin() + endOffset), std::min(maxStylesPerGroup - 1, styleIndex)});
+                        subGroupVertexCount[styleGroupIndex] = (int)subGroupVertexCount[styleGroupIndex] + newLineVertexCount;
                     }
 
-                    styleGroupLineSubGroupVector[styleGroupIndex].push_back({coordinates, std::min(maxStylesPerGroup - 1, styleIndex)});
-                    subGroupCoordCount[styleGroupIndex] = (int)subGroupCoordCount[styleGroupIndex] + numCoords;
                     if (isInteractable) {
                         lineCoordinatesVector.push_back(coordinates);
                     }
@@ -468,7 +477,7 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
         // Finalize all subgroups - move any remaining lines to final container
         for (int styleGroupIndex = 0; styleGroupIndex < styleGroupLineSubGroupVector.size(); styleGroupIndex++) {
             const auto &lineSubGroup = styleGroupLineSubGroupVector[styleGroupIndex];
-            if (!lineSubGroup.empty() && subGroupCoordCount[styleGroupIndex] > 0) {
+            if (!lineSubGroup.empty() && subGroupVertexCount[styleGroupIndex] > 0) {
                 styleGroupNewLinesVector[styleGroupIndex].push_back(lineSubGroup);
             }
         }
