@@ -52,7 +52,12 @@ private:
     void setupLines(const std::vector<std::shared_ptr<GraphicsObjectInterface>> &newLineGraphicsObjects);
 
 
+#ifdef OPENMOBILEMAPS_GL
     static const int maxNumLinePoints = std::numeric_limits<uint16_t>::max() / 4 + 1; // 4 vertices per line coord, only 2 at the start/end
+#else
+    static const int maxNumLinePoints = std::numeric_limits<uint32_t>::max() / 4 + 1; // on iOS we use 32 bit for the indices
+#endif
+
 #ifdef OPENMOBILEMAPS_GL
     static const int maxStylesPerGroup = 32;
 #else
