@@ -252,21 +252,24 @@ void Tiled2dMapVectorSymbolLabelObject::precomputeMedianIfNeeded() {
         }
     }
 
-    if (heights.empty()) {
+    // Last line is a new line or there are no heights,
+    // just take where the penY is at the end
+    int lastLineLength = c - baseLineStartIndex;
+    if(lastLineLength == 0) {
+        medianLastBaseLine = penY;
         return;
     }
 
+    // Otherwise compute the median indices
     std::sort(
         heights.begin() + baseLineStartIndex,
         heights.begin() + c
     );
 
-    // Compute the median indices
-    int lineLength = c - baseLineStartIndex;
-    int medianOffset = lineLength / 2;
+    int medianOffset = lastLineLength / 2;
     int median = baseLineStartIndex + medianOffset;
 
-    if (lineLength % 2 == 0) {
+    if (lastLineLength % 2 == 0) {
         double medianBaseLineLow = heights[median - 1];
         double medianBaseLineHigh = heights[median];
         medianLastBaseLine = 0.5 * (medianBaseLineHigh + medianBaseLineLow);
