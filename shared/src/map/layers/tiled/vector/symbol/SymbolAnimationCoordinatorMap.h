@@ -105,7 +105,8 @@ public:
                 ++next_it;
                 for (auto setIt = it->second.begin(), nextSetIt = setIt; setIt != it->second.end(); setIt = nextSetIt) {
                     ++nextSetIt;
-                    for (auto coordsIt = setIt->second.begin(); coordsIt != setIt->second.end();) {                        if (!coordsIt->get()->isUsed()) {
+                    for (auto coordsIt = setIt->second.begin(); coordsIt != setIt->second.end();) {
+                        if (!coordsIt->get()->isUsed()) {
                             coordsIt = setIt->second.erase(coordsIt);
                         } else {
                             ++coordsIt;
