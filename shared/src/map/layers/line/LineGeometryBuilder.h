@@ -6,12 +6,9 @@
 //
 
 #include "Vec3DHelper.h"
-
-#ifdef OPENMOBILEMAPS_GL
-    using uint_index = uint16_t;
-#else
-    using uint_index = uint32_t;
-#endif
+#include "LineGroup2dInterface.h"
+#include "LineCapType.h"
+#include "LineJoinType.h"
 
 class LineGeometryBuilder {
   public:
@@ -25,7 +22,7 @@ class LineGeometryBuilder {
         }
 
         std::vector<float> lineAttributes;
-        std::vector<uint_index> lineIndices;
+        std::vector<uint32_t> lineIndices;
         reserveEstimatedNumVertices(lines, defaultJoinType, capType, is3d, lineAttributes, lineIndices);
 
         uint32_t vertexCount = 0;
@@ -311,14 +308,14 @@ class LineGeometryBuilder {
         }
 
         auto attributes = SharedBytes((int64_t)lineAttributes.data(), (int32_t)lineAttributes.size(), (int32_t)sizeof(float));
-        auto indices = SharedBytes((int64_t)lineIndices.data(), (int32_t)lineIndices.size(), (int32_t)sizeof(uint_index));
+        auto indices = SharedBytes((int64_t)lineIndices.data(), (int32_t)lineIndices.size(), (int32_t)sizeof(uint32_t));
         line->setLines(attributes, indices, origin, is3d);
     }
 
     static void pushLineVertex(const Vec3D &p, const Vec3D &extrude, const float extrudeScale, const float side,
                                const float prefixTotalLineLength, const float prefixCorrection, const int lineStyleIndex, const bool addTriangle,
                                const bool reverse, uint32_t &vertexCount, int32_t &prePreIndex, int32_t &preIndex,
-                               std::vector<float> &lineAttributes, std::vector<uint_index> &lineIndices, bool is3d) {
+                               std::vector<float> &lineAttributes, std::vector<uint32_t> &lineIndices, bool is3d) {
 
         lineAttributes.push_back(p.x);
         lineAttributes.push_back(p.y);
@@ -381,7 +378,7 @@ class LineGeometryBuilder {
 
     static void reserveEstimatedNumVertices(const std::vector<std::tuple<std::vector<Vec3D>, int>> &lines,
                                             LineJoinType joinType, LineCapType capType, bool is3d,
-                                            std::vector<float> &lineAttributes, std::vector<uint_index> &lineIndices)
+                                            std::vector<float> &lineAttributes, std::vector<uint32_t> &lineIndices)
     {
         const int64_t capVertices = capType == LineCapType::ROUND ? roundCapVertexCount : 0;
         const int64_t capTriangles = capType == LineCapType::ROUND ? roundCapVertexCount : 0;

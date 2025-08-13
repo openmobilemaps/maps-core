@@ -73,7 +73,7 @@ protected:
     GLuint vertexAttribBuffer = -1;
     std::vector<GLfloat> lineAttributes;
     GLuint indexBuffer = -1;
-    std::vector<GLushort> lineIndices;
+    std::vector<GLuint> lineIndices;
     bool glDataBuffersGenerated = false;
     Vec3D lineOrigin = Vec3D(0.0, 0.0, 0.0);
 

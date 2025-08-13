@@ -440,11 +440,12 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
 
                     const auto &coordinates = is3d ? LineHelper::subdividePolyline(lineCoordinates, maxSegmentLength) : lineCoordinates;
 
-                    for (size_t coordinateOffset = 0; coordinateOffset < coordinates.size(); coordinateOffset += maxNumLineCoords) {
+                    for (size_t coordinateOffset = 0; coordinateOffset < coordinates.size(); coordinateOffset += (maxNumLineCoords - 1)) {
                         // Split line, if it is too long for the given limits
-                        size_t endOffset = std::min(coordinateOffset + maxNumLineCoords, coordinates.size() - 1);
+                        size_t excludingEndOffset = std::min(coordinateOffset + maxNumLineCoords, coordinates.size());
+                        size_t startOffset = coordinateOffset > 0 ? coordinateOffset - 1 : 0; // always include first coordinate of last split (if any)
 
-                        uint64_t newLineVertexCount = LineGeometryBuilder::estimateVertexCount(endOffset - coordinateOffset);
+                        uint64_t newLineVertexCount = LineGeometryBuilder::estimateVertexCount(excludingEndOffset - startOffset);
                         int vertexCount = subGroupVertexCount[styleGroupIndex];
 
                         // Check if adding this line would exceed vertex limit for current subgroup
@@ -458,7 +459,7 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
                             subGroupVertexCount[styleGroupIndex] = 0;
                         }
 
-                        styleGroupLineSubGroupVector[styleGroupIndex].push_back({std::vector<::Vec2D>(coordinates.begin() + coordinateOffset, coordinates.begin() + endOffset), std::min(maxStylesPerGroup - 1, styleIndex)});
+                        styleGroupLineSubGroupVector[styleGroupIndex].push_back({std::vector<::Vec2D>(coordinates.begin() + startOffset, coordinates.begin() + excludingEndOffset), std::min(maxStylesPerGroup - 1, styleIndex)});
                         subGroupVertexCount[styleGroupIndex] = (int)subGroupVertexCount[styleGroupIndex] + newLineVertexCount;
                     }
 
