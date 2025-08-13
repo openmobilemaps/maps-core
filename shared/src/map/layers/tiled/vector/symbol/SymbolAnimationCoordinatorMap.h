@@ -44,10 +44,10 @@ public:
         auto coordinatorIt = shard.animationCoordinators.find(crossTileIdentifier);
         if (coordinatorIt != shard.animationCoordinators.end()) {
             for (auto &[levelZoomIdentifier, coordinators]: coordinatorIt->second) {
-                if (levelZoomIdentifier == zoomIdentifier) {
-                    // limit comparisons with equal zoomIdentifier entries
-                    continue;
-                }
+//                if (levelZoomIdentifier == zoomIdentifier) {
+//                    // limit comparisons with equal zoomIdentifier entries
+//                    continue;
+//                }
 
                 double toleranceFactor = 1 << std::max(0, levelZoomIdentifier - zoomIdentifier);
                 double maxXTolerance = toleranceFactor * xTolerance;
@@ -110,8 +110,7 @@ public:
                 ++next_it;
                 for (auto setIt = it->second.begin(), nextSetIt = setIt; setIt != it->second.end(); setIt = nextSetIt) {
                     ++nextSetIt;
-                    for (auto coordsIt = setIt->second.begin(); coordsIt != setIt->second.end();) {
-                        if (!coordsIt->get()->isUsed()) {
+                    for (auto coordsIt = setIt->second.begin(); coordsIt != setIt->second.end();) {                        if (!coordsIt->get()->isUsed()) {
                             coordsIt = setIt->second.erase(coordsIt);
                         } else {
                             ++coordsIt;
