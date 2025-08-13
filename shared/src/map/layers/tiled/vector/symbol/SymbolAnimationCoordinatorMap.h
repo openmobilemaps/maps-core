@@ -44,11 +44,6 @@ public:
         auto coordinatorIt = shard.animationCoordinators.find(crossTileIdentifier);
         if (coordinatorIt != shard.animationCoordinators.end()) {
             for (auto &[levelZoomIdentifier, coordinators]: coordinatorIt->second) {
-//                if (levelZoomIdentifier == zoomIdentifier) {
-//                    // limit comparisons with equal zoomIdentifier entries
-//                    continue;
-//                }
-
                 double toleranceFactor = 1 << std::max(0, levelZoomIdentifier - zoomIdentifier);
                 double maxXTolerance = toleranceFactor * xTolerance;
 
