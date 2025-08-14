@@ -79,10 +79,10 @@ TEST_CASE("functionality") {
         REQUIRE(first != second);
     }
 
-    SECTION("return different coordinator for same crossTileIdentifier and zoomIdentifier") {
+    SECTION("return same coordinator for same crossTileIdentifier and zoomIdentifier") {
         auto first = coordinatorMap.getOrAddAnimationController(1, Vec2D(0, 0), 0, 0.0, 0.0, 10, 0);
         auto second = coordinatorMap.getOrAddAnimationController(1, Vec2D(0, 0), 0, 0.0, 0.0, 10, 0);
-        REQUIRE(first != second);
+        REQUIRE(first == second);
     }
 
     SECTION("return same coordinators for same crossTileIdentifier but different zoomIdentifiers") {

@@ -319,7 +319,7 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
                         wasPlaced = true;
                     }
 
-                    if (hasIconPotentially) {
+                    if (hasIconPotentially && !fullText.empty()) {
                         if (textOptional) {
                             const auto symbolObject = createSymbolObject(tileInfo, layerIdentifier, layerDescription, layerConfig,
                                                                          context, {}, "", mp, std::nullopt, fontList, anchor, angle,
