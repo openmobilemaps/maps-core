@@ -41,6 +41,4 @@ private:
     std::shared_ptr<Quad2dInterface> quad;
     std::shared_ptr<GraphicsObjectInterface> graphicsObject;
     std::shared_ptr<RenderConfig> renderConfig;
-
-    double radius = 0;
 };

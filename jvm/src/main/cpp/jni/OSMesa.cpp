@@ -132,7 +132,6 @@ JNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_graphics_util_OSMesa_read
     }
 
     // NOTE: little-endian! Implicit byte-order conversion from BGRA byte buffer into ARGB ints (highest-order byte is A)
-    const jsize outLen = env->GetArrayLength(out);
     jint *outBuf = env->GetIntArrayElements(out, NULL);
 
     // memcpy(outBuf, buf, sizeof(jint) * outLen); // NOTE for whatever reason, the blit above does not seem to directly affect
