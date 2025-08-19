@@ -108,7 +108,7 @@ void MapCamera2d::moveToCenterPositionZoom(const ::Coord &centerPosition, double
                 }
             });
         coordAnimation->start();
-        double targetZoom = std::clamp(adjustedZoom, zoomMax, zoomMin);
+        double targetZoom = zoomMin > 0 ? std::clamp(adjustedZoom, zoomMax, zoomMin) : std::min(adjustedZoom, zoomMax);
         zoomAnimation = std::make_shared<DoubleAnimation>(
               DEFAULT_ANIM_LENGTH, this->zoom, targetZoom, InterpolatorFunction::EaseIn,
               [weakSelf](double zoom) {

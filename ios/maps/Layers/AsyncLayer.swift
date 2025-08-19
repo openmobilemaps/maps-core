@@ -15,7 +15,7 @@ public final class AsyncLayer: Layer, ObservableObject, @unchecked Sendable {
 
     public var interface: MCLayerInterface? { baseLayer?.interface }
 
-    public init(setup: @escaping @Sendable () async throws -> Layer) {
+    public init(setup: @escaping @Sendable @MainActor () async throws -> Layer) {
         Task {
             do {
                 self.baseLayer = try await setup()

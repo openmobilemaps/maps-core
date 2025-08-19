@@ -44,7 +44,11 @@ class MapCamera3d : public MapCameraInterface,
 
     virtual void moveToCenterPositionZoom(const ::Coord &centerPosition, double zoom, bool animated) override;
 
+    virtual void moveToCenterPositionZoom(const ::Coord &centerPosition, double zoom, bool animated, const int &listenerType);
+
     virtual void moveToCenterPosition(const ::Coord &centerPosition, bool animated) override;
+
+    virtual void moveToCenterPosition(const ::Coord &centerPosition, bool animated, const int &listenerType);
 
     virtual void moveToBoundingBox(const ::RectCoord &boundingBox, float paddingPc, bool animated, std::optional<double> minZoom,
                                    std::optional<double> maxZoom) override;
@@ -52,6 +56,8 @@ class MapCamera3d : public MapCameraInterface,
     virtual ::Coord getCenterPosition() override;
 
     virtual void setZoom(double zoom, bool animated) override;
+
+    virtual void setZoom(double zoom, bool animated, const int &listenerType);
 
     virtual double getZoom() override;
 
