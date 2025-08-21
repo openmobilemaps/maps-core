@@ -1,43 +1,121 @@
 name: Maven build JVM
+
 on:
-    pull_request:
-        branches: [ main, develop, release/** ]
+  pull_request:
+    branches: [ main, develop, release/** ]
+  workflow_dispatch:
+    inputs:
+      approve_golden_images:
+        description: 'Update golden images (approve changes)'
+        required: false
+        type: boolean
+        default: false
+
+# Needed to write PR comments
+permissions:
+  contents: read
+  pull-requests: write
 
 jobs:
-    build:
-        name: Build JVM Project
-        # Based on: UbiqueInnovation/workflows-backend/.github/workflows/mvn_install.yml
-        runs-on: ubuntu-24.04
-        steps:
-            -   uses: actions/checkout@v4
-                with:
-                    fetch-depth: 0
-                    submodules: recursive
+  build:
+    name: Build JVM Project
+    runs-on: ubuntu-24.04
 
-            -   name: Set up JDK
-                uses: actions/setup-java@v4
-                with:
-                    java-version: '21'
-                    distribution: 'temurin'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: recursive
 
-            -   name: Cache Maven packages
-                uses: actions/cache@v4
-                with:
-                    path: ~/.m2/repository
-                    key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-                    restore-keys: |
-                      ${{ runner.os }}-m2-
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
 
-            -   name: ccache
-                uses: hendrikmuhs/ccache-action@v1.2
-                with:
-                  key: jvm-build-ccache-${{ runner.os }}-${{ runner.arch }}
+      - name: Cache Maven packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-m2-
 
-            -   name: Install build dependency apt packages
-                run: |
-                    sudo apt-get update && sudo apt-get install cmake make clang libgl-dev libgles-dev libosmesa6-dev
+      - name: ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: jvm-build-ccache-${{ runner.os }}-${{ runner.arch }}
 
-            -   name: Build with Maven
-                env:
-                  CMAKE_CXX_COMPILER_LAUNCHER: ccache
-                run: mvn -f jvm/pom.xml --update-snapshots install
+      - name: Install build dependency apt packages
+        run: |
+          sudo apt-get update && sudo apt-get install -y \
+            cmake make clang libgl-dev libgles-dev libosmesa6-dev
+
+      - name: Build with Maven
+        env:
+          CMAKE_CXX_COMPILER_LAUNCHER: ccache
+        run: |
+          if [ "${{ inputs.approve_golden_images }}" = "true" ]; then
+            echo "Running tests with golden image update enabled"
+            mvn -f jvm/pom.xml test -DupdateGolden=true
+          else
+            echo "Running normal build"
+            mvn -f jvm/pom.xml --update-snapshots install
+          fi
+
+      - name: Upload test artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-image-diffs-${{ github.run_number }}
+          path: jvm/test-diffs/
+          retention-days: 30
+          if-no-files-found: warn
+
+      # === PR comment handling (no comment-id needed) ===
+
+      - name: Post/Update image diff comment on failure
+        if: failure() && github.event_name == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: image-diff
+          message: |
+            ## 🖼️ Image Diff Test Failure
+
+            The image comparison tests failed. Rendered images don't match the expected golden images.
+
+            **Investigate:**
+            1. 📎 **[Download image diff artifacts](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})** (look for `test-image-diffs-${{ github.run_number }}`)
+            2. Check `*_diff.png` (red = differences)
+            3. Compare `*_actual.png` vs `*_golden.png`
+
+            **To approve the changes:**
+            - Run this workflow manually and check **“Update golden images (approve changes)”**
+            - Or locally:
+              ```bash
+              mvn -f jvm/pom.xml test -DupdateGolden=true
+              ```
+
+            ---
+            _Last updated: [Run #${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})_
+
+      - name: Delete image diff comment on success
+        if: success() && github.event_name == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: image-diff
+          delete: true
+
+      # Only push golden images when this was a manual approval run
+      - name: Commit updated golden images
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.approve_golden_images == true }}
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add jvm/src/test/resources/golden/
+          if git diff --staged --quiet; then
+            echo "No golden images to update"
+          else
+            git commit -m "Update golden images"
+            git push
+          fi

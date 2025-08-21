@@ -17,13 +17,15 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class OffscreenMapRendererTest {
-    private static final boolean updateGolden = false;
+    private static final boolean updateGolden = Boolean.parseBoolean(System.getProperty("updateGolden", "false"));
 
     private static String loadResource(String resourceName) {
         try {
@@ -51,6 +53,15 @@ public class OffscreenMapRendererTest {
                 .build();
     }
 
+    private static String addSuffixBeforeExtension(String filename, String suffix) {
+        int dotIndex = filename.lastIndexOf('.');
+        if (dotIndex == -1) {
+            return filename + suffix; // no extension found
+        }
+        return filename.substring(0, dotIndex) + suffix + filename.substring(dotIndex);
+    }
+
+
     private static RectCoord bboxCH() {
         // rough bbox of geojson data in in style_geojson_ch.json
         return new RectCoord(
@@ -58,19 +69,34 @@ public class OffscreenMapRendererTest {
                 new Coord(CoordinateSystemIdentifiers.EPSG4326(), 10.5, 45.8, 0.0));
     }
 
-    // TODO: replace this by/make this into a generic image comparison test
-    // TODO: what is a _good_ place to dump the "actual" image? Use perceptual diff instead of
-    // simple comparison? Create a diff?
     private static void assertImageMatchesGolden(BufferedImage actual, String name) {
         final String fileName =
                 OffscreenMapRendererTest.class.getSimpleName() + "_" + name + ".png";
+
+        // Create test-diffs directory for better organization
+        File diffDir = new File("test-diffs");
+        diffDir.mkdirs();
+
         // Dump the actual image for analysis and/or updating the golden file.
+        File actualFile = new File(diffDir, addSuffixBeforeExtension(fileName, "_actual"));
         try {
-            ImageIO.write(actual, "png", new File(fileName));
+            ImageIO.write(actual, "png", actualFile);
+            System.out.println("Wrote actual image to: " + actualFile.getAbsolutePath());
         } catch (IOException e) {
-            // ignore
+            System.err.println("Failed to write actual image: " + e.getMessage());
         }
+
         if (updateGolden) {
+            // Copy the actual image to resources directory when updating golden
+            // NOTE: path is relative to current working directory.
+            try {
+                Path goldenResource = Paths.get("src","test","resources", "golden", fileName);
+                goldenResource.getParent().toFile().mkdirs();
+                ImageIO.write(actual, "png", goldenResource.toFile());
+                System.out.println("Updated golden image: " + goldenResource.toAbsolutePath());
+            } catch (IOException e) {
+                System.err.println("Failed to update golden image: " + e.getMessage());
+            }
             return;
         }
 
@@ -83,7 +109,6 @@ public class OffscreenMapRendererTest {
         BufferedImage golden = null;
         try {
             golden = ImageIO.read(goldenImgStream);
-
         } catch (IOException e) {
             fail("Could not get ground truth image: " + e.getMessage());
         }
@@ -94,7 +119,73 @@ public class OffscreenMapRendererTest {
         final int h = golden.getHeight();
         int[] goldenRGB = golden.getRGB(0, 0, w, h, null, 0, w);
         int[] actualRGB = actual.getRGB(0, 0, w, h, null, 0, w);
-        assertArrayEquals(goldenRGB, actualRGB, "Images differ");
+
+        // Save golden image for comparison
+        File goldenFile = new File(diffDir, addSuffixBeforeExtension(fileName, "_golden"));
+        try {
+            ImageIO.write(golden, "png", goldenFile);
+            System.out.println("Wrote golden image to: " + goldenFile.getAbsolutePath());
+        } catch (IOException e) {
+            System.err.println("Failed to write golden image for comparison: " + e.getMessage());
+        }
+
+        // Create visual diff
+        BufferedImage diffImage = createDiffImage(golden, actual);
+        File diffFile = new File(diffDir, addSuffixBeforeExtension(fileName, "_diff"));
+        try {
+            ImageIO.write(diffImage, "png", diffFile);
+            System.out.println("Wrote diff image to: " + diffFile.getAbsolutePath());
+        } catch (IOException e) {
+            System.err.println("Failed to write diff image: " + e.getMessage());
+        }
+
+        // Count different pixels for a more informative error message
+        int differentPixels = 0;
+        for (int i = 0; i < goldenRGB.length; i++) {
+            if (goldenRGB[i] != actualRGB[i]) {
+                differentPixels++;
+            }
+        }
+
+        if (differentPixels > 0) {
+            double percentDifferent = (differentPixels * 100.0) / goldenRGB.length;
+            String errorMsg =
+                    String.format("""
+                            Images differ: %d pixels (%.2f%%) are different.
+                            Check artifacts: %s, %s, %s.
+                            To approve changes, run: mvn test -DupdateGolden=true
+                            """,
+                            differentPixels,
+                            percentDifferent,
+                            actualFile.getName(),
+                            goldenFile.getName(),
+                            diffFile.getName());
+            fail(errorMsg);
+        }
+    }
+
+    private static BufferedImage createDiffImage(BufferedImage golden, BufferedImage actual) {
+        int w = golden.getWidth();
+        int h = golden.getHeight();
+        BufferedImage diff = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+
+        for (int x = 0; x < w; x++) {
+            for (int y = 0; y < h; y++) {
+                int goldenRGB = golden.getRGB(x, y);
+                int actualRGB = actual.getRGB(x, y);
+
+                if (goldenRGB == actualRGB) {
+                    // Same pixel - show in grayscale
+                    int gray = (goldenRGB >> 16) & 0xFF; // Use red component
+                    gray = gray / 3; // Darken for better contrast with differences
+                    diff.setRGB(x, y, (gray << 16) | (gray << 8) | gray);
+                } else {
+                    // Different pixel - highlight in red
+                    diff.setRGB(x, y, 0xFF0000);
+                }
+            }
+        }
+        return diff;
     }
 
     @BeforeAll
