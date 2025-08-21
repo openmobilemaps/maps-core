@@ -17,6 +17,8 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.ArrayList;
 
@@ -70,11 +72,11 @@ public class OffscreenMapRendererTest {
     private static void assertImageMatchesGolden(BufferedImage actual, String name) {
         final String fileName =
                 OffscreenMapRendererTest.class.getSimpleName() + "_" + name + ".png";
-        
+
         // Create test-diffs directory for better organization
         File diffDir = new File("test-diffs");
         diffDir.mkdirs();
-        
+
         // Dump the actual image for analysis and/or updating the golden file.
         File actualFile = new File(diffDir, addSuffixBeforeExtension(fileName, "_actual"));
         try {
@@ -83,14 +85,15 @@ public class OffscreenMapRendererTest {
         } catch (IOException e) {
             System.err.println("Failed to write actual image: " + e.getMessage());
         }
-        
+
         if (updateGolden) {
             // Copy the actual image to resources directory when updating golden
+            // NOTE: path is relative to current working directory.
             try {
-                File goldenFile = new File(diffDir, addSuffixBeforeExtension(fileName, "_golden"));
-                goldenFile.getParentFile().mkdirs();
-                ImageIO.write(actual, "png", goldenFile);
-                System.out.println("Updated golden image: " + goldenFile.getAbsolutePath());
+                Path goldenResource = Paths.get("src","test","resources", "golden", fileName);
+                goldenResource.getParent().toFile().mkdirs();
+                ImageIO.write(actual, "png", goldenResource.toFile());
+                System.out.println("Updated golden image: " + goldenResource.toAbsolutePath());
             } catch (IOException e) {
                 System.err.println("Failed to update golden image: " + e.getMessage());
             }
@@ -116,16 +119,16 @@ public class OffscreenMapRendererTest {
         final int h = golden.getHeight();
         int[] goldenRGB = golden.getRGB(0, 0, w, h, null, 0, w);
         int[] actualRGB = actual.getRGB(0, 0, w, h, null, 0, w);
-        
+
         // Save golden image for comparison
-        File goldenFile = new File(diffDir, fileName + "_golden");
+        File goldenFile = new File(diffDir, addSuffixBeforeExtension(fileName, "_golden"));
         try {
             ImageIO.write(golden, "png", goldenFile);
             System.out.println("Wrote golden image to: " + goldenFile.getAbsolutePath());
         } catch (IOException e) {
             System.err.println("Failed to write golden image for comparison: " + e.getMessage());
         }
-        
+
         // Create visual diff
         BufferedImage diffImage = createDiffImage(golden, actual);
         File diffFile = new File(diffDir, addSuffixBeforeExtension(fileName, "_diff"));
@@ -135,7 +138,7 @@ public class OffscreenMapRendererTest {
         } catch (IOException e) {
             System.err.println("Failed to write diff image: " + e.getMessage());
         }
-        
+
         // Count different pixels for a more informative error message
         int differentPixels = 0;
         for (int i = 0; i < goldenRGB.length; i++) {
@@ -143,29 +146,34 @@ public class OffscreenMapRendererTest {
                 differentPixels++;
             }
         }
-        
+
         if (differentPixels > 0) {
             double percentDifferent = (differentPixels * 100.0) / goldenRGB.length;
-            String errorMsg = String.format(
-                "Images differ: %d pixels (%.2f%%) are different. " +
-                "Check artifacts: %s+_actual, %s_golden, %s_diff. " +
-                "To approve changes, run: mvn test -DupdateGolden=true",
-                differentPixels, percentDifferent, fileName, fileName, fileName
-            );
+            String errorMsg =
+                    String.format("""
+                            Images differ: %d pixels (%.2f%%) are different.
+                            Check artifacts: %s, %s, %s.
+                            To approve changes, run: mvn test -DupdateGolden=true
+                            """,
+                            differentPixels,
+                            percentDifferent,
+                            actualFile.getName(),
+                            goldenFile.getName(),
+                            diffFile.getName());
             fail(errorMsg);
         }
     }
-    
+
     private static BufferedImage createDiffImage(BufferedImage golden, BufferedImage actual) {
         int w = golden.getWidth();
         int h = golden.getHeight();
         BufferedImage diff = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
-        
+
         for (int x = 0; x < w; x++) {
             for (int y = 0; y < h; y++) {
                 int goldenRGB = golden.getRGB(x, y);
                 int actualRGB = actual.getRGB(x, y);
-                
+
                 if (goldenRGB == actualRGB) {
                     // Same pixel - show in grayscale
                     int gray = (goldenRGB >> 16) & 0xFF; // Use red component
