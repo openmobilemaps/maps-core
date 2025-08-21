@@ -22,6 +22,14 @@ dist/
 target/
 dist/
 
+# Eclipse / eclipse-lsp4j
+.settings
+.project
+.classpath
+
+# test output
+/jvm/test-diffs/
+
 # JetBrains IDE
 .idea/
 
