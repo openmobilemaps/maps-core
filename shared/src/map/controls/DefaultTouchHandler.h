@@ -73,7 +73,6 @@ private:
     int32_t LONG_PRESS_TIMEOUT = 500;
     int32_t CLICK_DISTANCE_MM = 3;
 
-    float density;
     float clickDistancePx;
 
     std::recursive_mutex listenerMutex;

@@ -185,7 +185,7 @@ void Tiled2dMapSource<L, R>::onCameraChange(const std::vector<float> &viewMatrix
                         },
                         {})},
                     &currentViewBoundsPolygon);
-    auto clipAndFreeLambda = [&currentViewBoundsPolygon, system = layerSystemId](gpc_polygon &polygon) {
+    auto clipAndFreeLambda = [&currentViewBoundsPolygon](gpc_polygon &polygon) {
         gpc_polygon_clip(GPC_DIFF, &currentViewBoundsPolygon, &polygon, &currentViewBoundsPolygon);
         gpc_free_polygon(&polygon);
     };
@@ -547,10 +547,10 @@ void Tiled2dMapSource<L, R>::onCameraChange(const std::vector<float> &viewMatrix
                 const double tLength = tileWidth / 256;
                 const double tHeight = tileHeight / 256;
 
-                const double tileWidthAdj = leftToRight ? tileWidth : -tileWidth;
-                const double tileHeightAdj = topToBottom ? tileHeight : -tileHeight;
-                const double tWidthAdj = leftToRight ? tLength : -tLength;
-                const double tHeightAdj = topToBottom ? tHeight : -tHeight;
+                // const double tileWidthAdj = leftToRight ? tileWidth : -tileWidth;
+                // const double tileHeightAdj = topToBottom ? tileHeight : -tileHeight;
+                // const double tWidthAdj = leftToRight ? tLength : -tLength;
+                // const double tHeightAdj = topToBottom ? tHeight : -tHeight;
                 const double originX = leftToRight ? zoomLevelInfo.bounds.topLeft.x : -zoomLevelInfo.bounds.bottomRight.x;
                 const double originY = topToBottom ? zoomLevelInfo.bounds.bottomRight.y : -zoomLevelInfo.bounds.topLeft.y;
                 const double minAvailableX = leftToRight ? std::min(availableTiles.topLeft.x, availableTiles.bottomRight.x)
@@ -804,8 +804,8 @@ void Tiled2dMapSource<L, R>::onVisibleBoundsChanged(const ::RectCoord &visibleBo
 
             const double tLength = tileWidth / 256;
             const double tHeight = tileHeight / 256;
-            const double tWidthAdj = leftToRight ? tLength : -tLength;
-            const double tHeightAdj = topToBottom ? tHeight : -tHeight;
+            // const double tWidthAdj = leftToRight ? tLength : -tLength;
+            // const double tHeightAdj = topToBottom ? tHeight : -tHeight;
             const double originX = leftToRight ? zoomLevelInfo.bounds.topLeft.x : -zoomLevelInfo.bounds.bottomRight.x;
             const double originY = topToBottom ? zoomLevelInfo.bounds.bottomRight.y : -zoomLevelInfo.bounds.topLeft.y;
             const double minAvailableX = leftToRight ? std::min(availableTiles.topLeft.x, availableTiles.bottomRight.x)

@@ -88,6 +88,5 @@ class Textured2dLayerObject : public LayerObjectInterface, public std::enable_sh
 
     std::shared_ptr<AnimationInterface> animation;
 
-    float alpha = 1.0;
     bool is3d = false;
 };
