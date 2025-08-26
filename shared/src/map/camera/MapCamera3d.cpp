@@ -1600,11 +1600,11 @@ void MapCamera3d::setCameraConfig(const Camera3dConfig &config, std::optional<fl
             verticalDisplacementAnimation->cancel();
             verticalDisplacementAnimation = nullptr;
         }
-        if (zoomAnimation) {
+        if (targetZoom && zoomAnimation) {
             zoomAnimation->cancel();
             zoomAnimation = nullptr;
         }
-        if (coordAnimation) {
+        if (targetCoordinate && coordAnimation) {
             coordAnimation->cancel();
             coordAnimation = nullptr;
         }
