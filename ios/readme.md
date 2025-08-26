@@ -20,6 +20,23 @@
 
 <h1>iOS</h1>
 
+## Table of Contents
+- [Quick Start](#quick-start)
+- [System Requirements](#system-requirements)
+- [Installation](#installation)
+- [How to use](#how-to-use)
+  - [MapView](#mapview)
+  - [Vector Tiles](#vector-tiles)
+  - [Camera and Gesture Handling](#camera-and-gesture-handling)
+  - [Performance Considerations](#performance-considerations)
+  - [Overlays](#overlays)
+  - [Customisation](#customisation)
+- [Troubleshooting](#troubleshooting)
+- [How to build](#how-to-build)
+- [Testing and Debugging](#testing-and-debugging)
+- [License](#license)
+- [Third-Party Software](#third-party-software)
+
 ## Quick Start
 
 Get up and running with Open Mobile Maps in just a few steps:
@@ -480,6 +497,34 @@ To ensure optimal performance with Open Mobile Maps:
 ```swift
 // Configure cache size (in bytes)
 MCTileLoader.setMaxCacheSize(100 * 1024 * 1024) // 100 MB cache
+
+// Clear cache when needed
+MCTileLoader.clearCache()
+
+// Check cache status
+let cacheSize = MCTileLoader.getCurrentCacheSize()
+print("Current cache size: \(cacheSize) bytes")
+```
+
+#### Offline Support
+- **Tile pre-caching**: Download tiles in advance for offline use
+- **Local tile sources**: Serve tiles from app bundle or documents directory
+- **Cache management**: Monitor storage usage and implement cache eviction policies
+
+```swift
+// Example: Pre-cache tiles for a specific area
+func precacheTilesForRegion(_ bounds: MCRectCoord, maxZoom: Int) {
+    let tileLoader = MCTileLoader()
+    
+    // Calculate tile coordinates for the bounds and zoom levels
+    for zoom in 0...maxZoom {
+        let tiles = calculateTilesForBounds(bounds, zoom: zoom)
+        for tileCoord in tiles {
+            let request = MCTileLoaderRequest(x: tileCoord.x, y: tileCoord.y, zoom: tileCoord.zoom)
+            tileLoader.load(request)
+        }
+    }
+}
 ```
 
 #### Rendering Optimization
@@ -613,18 +658,28 @@ struct MapWithIconView: UIViewRepresentable {
         
         // Add icon layer
         let iconLayer = MCIconLayerInterface.create()
-        let image = UIImage(named: imageName)
-        let texture = try! TextureHolder(image!.cgImage!)
-        let icon = MCIconFactory.createIcon(
-            "icon",
-            coordinate: coordinate,
-            texture: texture,
-            iconSize: .init(x: Float(texture.getImageWidth()), y: Float(texture.getImageHeight())),
-            scale: .FIXED,
-            blendMode: .NORMAL
-        )
-        iconLayer?.add(icon)
-        mapView.add(layer: iconLayer?.asLayerInterface())
+        
+        guard let image = UIImage(named: imageName),
+              let cgImage = image.cgImage else {
+            print("Failed to load image: \(imageName)")
+            return mapView
+        }
+        
+        do {
+            let texture = try TextureHolder(cgImage)
+            let icon = MCIconFactory.createIcon(
+                "icon",
+                coordinate: coordinate,
+                texture: texture,
+                iconSize: .init(x: Float(texture.getImageWidth()), y: Float(texture.getImageHeight())),
+                scale: .FIXED,
+                blendMode: .NORMAL
+            )
+            iconLayer?.add(icon)
+            mapView.add(layer: iconLayer?.asLayerInterface())
+        } catch {
+            print("Failed to create texture: \(error)")
+        }
         
         // Set initial camera position
         if let center = camera.center.value, let zoom = camera.zoom.value {
@@ -660,17 +715,27 @@ struct ContentView: View {
 
 ```swift
 let iconLayer = MCIconLayerInterface.create()
-let image = UIImage(named: "image")
-let texture = try! TextureHolder(image!.cgImage!)
-let icon = MCIconFactory.createIcon("icon",
-                         coordinate: coordinate,
-                         texture: texture,
-                         iconSize: .init(x: Float(texture.getImageWidth()), y: Float(texture.getImageHeight())),
-                         scale: .FIXED,
-                         blendMode: .NORMAL)
-iconLayer?.add(icon)
-iconLayer?.setCallbackHandler(handler)
-mapView.add(layer: iconLayer?.asLayerInterface())
+
+guard let image = UIImage(named: "image"),
+      let cgImage = image.cgImage else {
+    print("Failed to load image")
+    return
+}
+
+do {
+    let texture = try TextureHolder(cgImage)
+    let icon = MCIconFactory.createIcon("icon",
+                             coordinate: coordinate,
+                             texture: texture,
+                             iconSize: .init(x: Float(texture.getImageWidth()), y: Float(texture.getImageHeight())),
+                             scale: .FIXED,
+                             blendMode: .NORMAL)
+    iconLayer?.add(icon)
+    iconLayer?.setCallbackHandler(handler)
+    mapView.add(layer: iconLayer?.asLayerInterface())
+} catch {
+    print("Failed to create texture: \(error)")
+}
 ```
 
 #### Line layer
@@ -850,7 +915,16 @@ class TiledLayerConfig: MCTiled2dMapLayerConfig {
 
 #### Change map projection
 
-To render the map using a different coordinate system, initialize the map view with a Map Config. The library provides a factory for the [EPSG3857](https://epsg.io/4326) Coordinate system and others, which we can use to initialize the map view. Layers can have a different projection than the map view itself.
+Open Mobile Maps supports different coordinate systems and projections. The library provides built-in support for common coordinate systems and allows for custom implementations.
+
+##### Supported Coordinate Systems
+
+- **EPSG:3857** (Web Mercator) - Default for most web mapping services
+- **EPSG:4326** (WGS84) - Standard latitude/longitude coordinates  
+- **EPSG:2056** (LV95/LV03+) - Swiss coordinate system
+- **Custom coordinate systems** can be implemented by extending the coordinate system interfaces
+
+To render the map using a different coordinate system, initialize the map view with a Map Config. The library provides a factory for coordinate systems which we can use to initialize the map view. Layers can have a different projection than the map view itself.
 
 ##### SwiftUI
 
@@ -886,6 +960,112 @@ struct ContentView: View {
 
 ```swift
 MCMapView(mapConfig: .init(mapCoordinateSystem: MCCoordinateSystemFactory.getEpsg2056System()))
+```
+
+#### Advanced Customization Examples
+
+##### Custom Map Configuration
+
+```swift
+// Create a custom map configuration with specific settings
+let mapConfig = MCMapConfig(
+    mapCoordinateSystem: MCCoordinateSystemFactory.getEpsg3857System(),
+    camera3dConfig: MCCamera3dConfigFactory.getBasicConfig()
+)
+
+// Configure rendering settings
+mapConfig.renderingBackend = .METAL  // Use Metal rendering on iOS
+mapConfig.multisampling = true      // Enable anti-aliasing
+```
+
+##### Custom Tile Loading
+
+```swift
+// Implement custom tile loader for specialized data sources
+class CustomTileLoader: MCTileLoaderInterface {
+    func load(_ request: MCTileLoaderRequest) {
+        // Custom tile loading logic
+        // Could load from local storage, custom server, etc.
+        DispatchQueue.global().async {
+            // Load tile data
+            let tileData = self.loadCustomTileData(request)
+            DispatchQueue.main.async {
+                request.onLoaded(tileData)
+            }
+        }
+    }
+    
+    func cancel(_ request: MCTileLoaderRequest) {
+        // Cancel loading if needed
+    }
+}
+
+// Use custom loader
+let customLayer = TiledRasterLayer("custom", config: customConfig, tileLoader: CustomTileLoader())
+```
+
+##### Custom Rendering Callbacks
+
+```swift
+class MapCallbackHandler: MCMapViewCallbackHandler {
+    func onMapReady() {
+        print("Map is ready for interaction")
+    }
+    
+    func onCameraChanged() {
+        print("Camera position changed")
+    }
+    
+    func onRenderingError(_ error: String) {
+        print("Rendering error: \(error)")
+    }
+}
+
+mapView.callbackHandler = MapCallbackHandler()
+```
+
+##### Styling and Theming
+
+```swift
+// Customize map appearance
+extension MCMapView {
+    func applyDarkTheme() {
+        // Apply dark styling to layers
+        backgroundColor = .black
+        
+        // Update existing raster layers with dark tiles
+        layers.compactMap { $0 as? TiledRasterLayer }.forEach { layer in
+            // Switch to dark tile variant if available
+            layer.updateUrlFormat("https://dark-tiles.example.com/{z}/{x}/{y}.png")
+        }
+    }
+    
+    func applyCustomStyling() {
+        // Custom visual settings
+        layer.cornerRadius = 10
+        layer.borderWidth = 2
+        layer.borderColor = UIColor.systemBlue.cgColor
+    }
+}
+```
+
+##### Accessibility Support
+
+```swift
+// Make map accessible
+mapView.isAccessibilityElement = true
+mapView.accessibilityLabel = "Interactive map"
+mapView.accessibilityHint = "Double tap to interact, drag to pan"
+
+// Custom accessibility for map features
+class AccessibleMapView: MCMapView {
+    override func accessibilityElementDidBecomeFocused() {
+        // Announce current map region
+        let center = camera.getCenterPosition()
+        UIAccessibility.post(notification: .announcement, 
+                           argument: "Map centered at \(center.lat), \(center.lon)")
+    }
+}
 ```
 
 ## Troubleshooting
