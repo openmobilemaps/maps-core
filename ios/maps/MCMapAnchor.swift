@@ -92,6 +92,15 @@ open class MCMapAnchor: NSObject {
         // Update constraints to position the internal view at the screen location
         centerXConstraint?.constant = CGFloat(screenPosition.x)
         centerYConstraint?.constant = CGFloat(screenPosition.y)
+        
+        // Force layout update if needed
+        if Thread.isMainThread {
+            mapView.setNeedsLayout()
+        } else {
+            DispatchQueue.main.async {
+                mapView.setNeedsLayout()
+            }
+        }
     }
     
     /// Cleanup method called when the anchor is removed

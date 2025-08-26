@@ -78,6 +78,9 @@ open class MCMapView: MTKView {
     }
 
     deinit {
+        // Clean up anchors before deallocation
+        removeAllAnchors()
+        
         // nasty workaround for the dispatch_semaphore crash
         for _ in 0..<3 {
             renderSemaphore.signal()
@@ -582,23 +585,30 @@ extension MCMapView {
     /// Removes the specified anchor
     /// - Parameter anchor: The anchor to remove
     public func removeAnchor(_ anchor: MCMapAnchor) {
-        if let index = _anchors.firstIndex(of: anchor) {
-            _anchors.remove(at: index)
-            anchor.cleanup()
-            
-            // Remove camera listener if no anchors remain
-            if _anchors.isEmpty {
-                removeCameraListener()
-            }
+        guard let index = _anchors.firstIndex(of: anchor) else {
+            // Anchor not found, nothing to remove
+            return
+        }
+        
+        _anchors.remove(at: index)
+        anchor.cleanup()
+        
+        // Remove camera listener if no anchors remain
+        if _anchors.isEmpty {
+            removeCameraListener()
         }
     }
     
     /// Removes all anchors
     public func removeAllAnchors() {
-        for anchor in _anchors {
+        let anchorsToRemove = _anchors
+        _anchors.removeAll()
+        
+        // Clean up all anchors
+        for anchor in anchorsToRemove {
             anchor.cleanup()
         }
-        _anchors.removeAll()
+        
         removeCameraListener()
     }
     
