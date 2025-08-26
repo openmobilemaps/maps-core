@@ -12,6 +12,7 @@ import Foundation
 @_exported import MapCoreSharedModule
 @preconcurrency import MetalKit
 import os
+import ObjectiveC
 
 open class MCMapView: MTKView {
     public let mapInterface: MCMapInterface
@@ -531,5 +532,128 @@ private final class MCMapViewMapReadyCallbacks:
                     self.semaphore.signal()
                 }
         }
+    }
+}
+
+// MARK: - Anchor Management Extension
+extension MCMapView {
+    
+    /// Array of active anchors managed by this map view
+    private var _anchors: [MCMapAnchor] {
+        get {
+            return objc_getAssociatedObject(self, &anchorsAssociatedObjectKey) as? [MCMapAnchor] ?? []
+        }
+        set {
+            objc_setAssociatedObject(self, &anchorsAssociatedObjectKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        }
+    }
+    
+    /// Camera listener wrapper for anchor updates
+    private var _cameraListenerWrapper: CameraListenerWrapper? {
+        get {
+            return objc_getAssociatedObject(self, &cameraListenerAssociatedObjectKey) as? CameraListenerWrapper
+        }
+        set {
+            objc_setAssociatedObject(self, &cameraListenerAssociatedObjectKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        }
+    }
+    
+    /// All currently active anchors
+    public var activeAnchors: [MCMapAnchor] {
+        return _anchors
+    }
+    
+    /// Creates a new anchor for the specified coordinate
+    /// - Parameter coordinate: The map coordinate to create an anchor for
+    /// - Returns: A new MCMapAnchor instance
+    @discardableResult
+    public func createAnchor(for coordinate: MCCoord) -> MCMapAnchor {
+        let anchor = MCMapAnchor(coordinate: coordinate, mapView: self)
+        _anchors.append(anchor)
+        
+        // Set up camera listener if this is the first anchor
+        if _anchors.count == 1 {
+            setupCameraListener()
+        }
+        
+        return anchor
+    }
+    
+    /// Removes the specified anchor
+    /// - Parameter anchor: The anchor to remove
+    public func removeAnchor(_ anchor: MCMapAnchor) {
+        if let index = _anchors.firstIndex(of: anchor) {
+            _anchors.remove(at: index)
+            anchor.cleanup()
+            
+            // Remove camera listener if no anchors remain
+            if _anchors.isEmpty {
+                removeCameraListener()
+            }
+        }
+    }
+    
+    /// Removes all anchors
+    public func removeAllAnchors() {
+        for anchor in _anchors {
+            anchor.cleanup()
+        }
+        _anchors.removeAll()
+        removeCameraListener()
+    }
+    
+    // MARK: - Private Camera Listener Management
+    
+    private func setupCameraListener() {
+        guard _cameraListenerWrapper == nil else { return }
+        
+        let wrapper = CameraListenerWrapper { [weak self] in
+            self?.updateAllAnchors()
+        }
+        _cameraListenerWrapper = wrapper
+        camera.addListener(wrapper)
+    }
+    
+    private func removeCameraListener() {
+        if let wrapper = _cameraListenerWrapper {
+            camera.removeListener(wrapper)
+            _cameraListenerWrapper = nil
+        }
+    }
+    
+    private func updateAllAnchors() {
+        for anchor in _anchors {
+            anchor.updatePosition()
+        }
+    }
+}
+
+// MARK: - Associated Object Keys
+private var anchorsAssociatedObjectKey: UInt8 = 0
+private var cameraListenerAssociatedObjectKey: UInt8 = 0
+
+// MARK: - Camera Listener Wrapper
+private class CameraListenerWrapper: NSObject, MCMapCameraListenerInterface {
+    private let updateCallback: () -> Void
+    
+    init(updateCallback: @escaping () -> Void) {
+        self.updateCallback = updateCallback
+        super.init()
+    }
+    
+    func onVisibleBoundsChanged(_ visibleBounds: MCRectCoord, zoom: Double) {
+        updateCallback()
+    }
+    
+    func onRotationChanged(_ angle: Float) {
+        updateCallback()
+    }
+    
+    func onMapInteraction() {
+        // Don't need to update on every interaction, only when camera actually changes
+    }
+    
+    func onCameraChange(_ viewMatrix: [NSNumber], projectionMatrix: [NSNumber], origin: MCVec3D, verticalFov: Float, horizontalFov: Float, width: Float, height: Float, focusPointAltitude: Float, focusPointPosition: MCCoord, zoom: Float) {
+        updateCallback()
     }
 }
