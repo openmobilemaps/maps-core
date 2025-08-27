@@ -64,7 +64,7 @@ This library is available on MavenCentral. To add it to your Android project, ad
 
 ```
 dependencies {
-  implementation 'io.openmobilemaps:mapscore:3.4.1'
+  implementation 'io.openmobilemaps:mapscore:3.5.0'
 }
 ```
 
@@ -324,7 +324,10 @@ val line = LineFactory.createLine(
         widthType = SizeType.SCREEN_PIXEL,
         width = lineWidth,
         dashArray = arrayListOf(4.0f, 2.0f),
+        dashFade = 0f,
+        dashAnimationSpeed = 0f,
         lineCap = LineCapType.SQUARE,
+        lineJoin = LineJoinType.ROUND,
         offset = 0f,
         dotted = false,
         dottedSkew = 0.0

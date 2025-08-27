@@ -31,7 +31,7 @@ For App integration within XCode, add this package to your App target. To do thi
 Once you have your Swift package set up, adding Open Mobile Maps as a dependency is as easy as adding it to the dependencies value of your Package.swift.
 ```swift
 dependencies: [
-    .package(url: "https://github.com/openmobilemaps/maps-core", from: .init(stringLiteral: "3.4.1"))
+    .package(url: "https://github.com/openmobilemaps/maps-core", from: .init(stringLiteral: "3.5.0"))
 ]
 ```
 
@@ -431,8 +431,13 @@ struct MapWithLineView: UIViewRepresentable {
                 widthType: .SCREEN_PIXEL,
                 width: 50,
                 dashArray: [1,1],
+                dashFade: 0.0,
+                dashAnimationSpeed: 0.0,
                 lineCap: .BUTT,
-                offset: 0.0
+                lineJoin: .ROUND,
+                offset: 0.0,
+                dotted: false,
+                dottedSkew: 0.0
             )
         ))
         mapView.add(layer: lineLayer?.asLayerInterface())
