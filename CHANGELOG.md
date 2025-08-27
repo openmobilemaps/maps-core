@@ -1,5 +1,16 @@
 # Changelog for Open Mobile Maps
 
+## Version 3.5.0
+- Added support for self-masking for vector layer lines
+- Improved the rendering of lines with sharp corners
+- Fixed issues with line creation, reducing superfluous vertex data
+- Improved the grouping and splitting of lines
+- Fixed certain cases in the handling of the zoom property in vector styles
+- Fixed a crash when encountering trailing new lines in vector layer labels
+- Fixed issues with vector layer icon animations
+- Better cancellation of running camera animations when setting a 3d camera config
+- Support for 16KB page sizes on Android (including the upgrade to target sdk 36 of the containing project)
+
 ## Version 3.4.1
 - Fixed an issue when using a string only get-expression on the right-hand side of a vector style value comparison
 
