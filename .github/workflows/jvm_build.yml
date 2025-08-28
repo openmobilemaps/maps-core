@@ -11,9 +11,9 @@ on:
         type: boolean
         default: false
 
-# Needed to write PR comments
+# Needed to write PR comments and push commits
 permissions:
-  contents: read
+  contents: write
   pull-requests: write
 
 jobs:
