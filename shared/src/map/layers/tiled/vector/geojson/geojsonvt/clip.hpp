@@ -116,7 +116,6 @@ private:
 
     void clipLine(const std::vector<Coord>& line,std::vector<std::vector<Coord>> &slices) const {
         const size_t len = line.size();
-        double segLen = 0.0;
         double t = 0.0;
 
         if (len < 2)

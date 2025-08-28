@@ -236,7 +236,7 @@ void Tiled2dMapVectorSymbolLabelObject::precomputeMedianIfNeeded() {
             auto scale = i.scale;
             auto size = Vec2D(d.boundingBoxSize.x * scale, d.boundingBoxSize.y * scale);
             auto bearing = Vec2D(d.bearing.x * scale, d.bearing.y * scale);
-            auto advance = Vec2D(d.advance.x * scale, d.advance.y * scale);
+            // auto advance = Vec2D(d.advance.x * scale, d.advance.y * scale);
 
             if(i.glyphIndex != spaceIndex) {
                 auto y = penY - bearing.y;
@@ -301,8 +301,6 @@ int Tiled2dMapVectorSymbolLabelObject::getCharacterCount(){
 }
 
 void Tiled2dMapVectorSymbolLabelObject::setupProperties(VectorModificationWrapper<float> &textureCoordinates, VectorModificationWrapper<uint16_t> &styleIndices, int &countOffset, const double zoomIdentifier) {
-    const auto evalContext = EvaluationContext(zoomIdentifier, dpFactor, featureContext, stateManager);
-
     evaluateStyleProperties(zoomIdentifier);
 
     for(auto &i : splittedTextInfo) {
@@ -376,8 +374,6 @@ void Tiled2dMapVectorSymbolLabelObject::evaluateStyleProperties(const double zoo
 
 
 void Tiled2dMapVectorSymbolLabelObject::updateProperties(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &referencePositions, VectorModificationWrapper<float> &scales, VectorModificationWrapper<float> &rotations, VectorModificationWrapper<float> &alphas, VectorModificationWrapper<float> &styles, int &countOffset, const double zoomIdentifier, const double scaleFactor, const bool collides, const double rotation, const float alpha, const bool isCoordinateOwner, long long now, const Vec2I &viewportSize, const std::vector<float>& vpMatrix, const Vec3D& origin) {
-    const auto evalContext = EvaluationContext(zoomIdentifier, dpFactor, featureContext, stateManager);
-
     evaluateStyleProperties(zoomIdentifier);
 
     float alphaFactor;
@@ -447,7 +443,6 @@ void Tiled2dMapVectorSymbolLabelObject::updateProperties(VectorModificationWrapp
 
 void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &referencePositions, VectorModificationWrapper<float> &scales, VectorModificationWrapper<float> &rotations, VectorModificationWrapper<float> &alphas, int &countOffset, float alphaFactor, const double zoomIdentifier, const double scaleFactor, const double rotation, const Vec2I &viewportSize) {
 
-    const auto evalContext = EvaluationContext(zoomIdentifier, dpFactor, featureContext, stateManager);
     const float fontSize = is3d ? textSize.value : (scaleFactor * textSize.value);
 
     Vec2D boxMin(std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
@@ -471,7 +466,6 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(VectorModification
     pen.y -= fontSize * lineHeight * 0.25;
 
     int numberOfCharacters = 0;
-    int baseLineStartIndex = 0;
     int lineEndIndicesIndex = 0;
     const auto &glyphs = fontResult->fontData->glyphs;
 
@@ -530,8 +524,6 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(VectorModification
             }
             pen.x = 0.0;
             pen.y += fontSize * lineHeight;
-
-            baseLineStartIndex = numberOfCharacters;
         }
         else {
             assert(false);
@@ -647,8 +639,8 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(VectorModification
     lut::sincos(angle * M_PI / 180.0, sinAngle, cosAngle);
     Vec2D anchorOffsetRot = Vec2DHelper::rotate(anchorOffset, Vec2D(0, 0), sinAngle, cosAngle);
 
-    const auto dx = referencePoint.x + anchorOffset.x;
-    const auto dy = referencePoint.y + anchorOffset.y;
+    // const auto dx = referencePoint.x + anchorOffset.x;
+    // const auto dy = referencePoint.y + anchorOffset.y;
     const auto dxRot = referencePoint.x + anchorOffsetRot.x;
     const auto dyRot = referencePoint.y + anchorOffsetRot.y;
 
@@ -718,7 +710,7 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(VectorModification
         boundingBoxCircles = std::nullopt;
     } else {
         std::vector<CircleD> circles;
-        Vec2D origin = Vec2D(dx, dy);
+        // Vec2D origin = Vec2D(dx, dy);
         Vec2D lastCirclePosition = Vec2D(0, 0);
         const double distanceThreshold = (2.0 * maxSymbolRadius) * collisionDistanceBias;
         const double distanceThresholdSq = distanceThreshold * distanceThreshold;
@@ -744,8 +736,6 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(VectorModificatio
         countOffset += characterCount;
         return 0;
     }
-
-    auto evalContext = EvaluationContext(zoomIdentifier, dpFactor, featureContext, stateManager);
 
     const double fontSize = scaleFactor * textSize.value;
     const double scaleCorrection = is3d ? (1.0 / scaleFactor) : 1.0;
@@ -945,7 +935,7 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(VectorModificatio
         }
     }
 
-    int countBefore = countOffset;
+    [[ maybe_unused ]] int countBefore = countOffset;
     if (!centerPositions.empty()) {
         assert(centerPositions.size() == characterCount);
 

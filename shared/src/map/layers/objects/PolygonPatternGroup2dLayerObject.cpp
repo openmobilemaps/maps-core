@@ -69,7 +69,6 @@ void PolygonPatternGroup2dLayerObject::setVertices(const std::vector<std::tuple<
     for (size_t i = 0; i < renderVertices.size(); i += 4) { // 4 values: x, y, z, s
         double x = renderVertices[i];
         double y = renderVertices[i + 1];
-        double z = renderVertices[i + 2];
 
         // Adjust the coordinates by subtracting the average
         if(is3d) {

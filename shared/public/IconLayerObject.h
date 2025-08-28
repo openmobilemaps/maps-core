@@ -78,7 +78,6 @@ class IconLayerObject : public LayerObjectInterface, public std::enable_shared_f
 
     std::shared_ptr<AnimationInterface> animation;
 
-    float alpha = 1.0;
     bool is3d = false;
 
     Vec3D origin = Vec3D(0.0, 0.0, 0.0);

@@ -22,8 +22,12 @@ add_executable(tests
   "helper/TestLocalDataProvider.h"
 )
 # Use mapscore _private_ include to allow testing functionality declared in internal headers.
+# Use regex to reconstruct -I vs -isystem for external libs. Not nice, but cant find other cmake way.
+target_include_directories(tests SYSTEM PRIVATE
+  "$<FILTER:$<TARGET_PROPERTY:mapscore,INCLUDE_DIRECTORIES>,INCLUDE,../external>"
+)
 target_include_directories(tests PRIVATE
-  "$<TARGET_PROPERTY:mapscore,INCLUDE_DIRECTORIES>"
+  "$<FILTER:$<TARGET_PROPERTY:mapscore,INCLUDE_DIRECTORIES>,EXCLUDE,../external>"
 )
 cmake_path(SET TESTDATA_DIR "data/")
 cmake_path(ABSOLUTE_PATH TESTDATA_DIR NORMALIZE)
@@ -33,7 +37,7 @@ target_compile_definitions(tests PRIVATE
   OPENMOBILEMAPS_TESTDATA_DIR=${TESTDATA_DIR}
 )
 target_compile_features(tests PRIVATE cxx_std_20)
-target_compile_options(tests PRIVATE -Werror -Wno-deprecated)
+target_compile_options(tests PRIVATE -Werror -Wunused -Wno-deprecated-declarations)
 
 # Test via CTest 
 enable_testing()
