@@ -79,9 +79,9 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
     }
     
     const auto evalContext = EvaluationContext(tileInfo.tileInfo.zoomIdentifier, dpFactor, featureContext, featureStateManager);
-    std::string iconName = description->style.getIconImage(evalContext).value;
+    SpriteIconId iconId = description->style.getIconImage(evalContext).value;
 
-    contentHash = std::hash<std::tuple<std::string, std::string, std::string>>()(std::tuple<std::string, std::string, std::string>(layerIdentifier, iconName, fullText));
+    contentHash = std::hash<std::tuple<std::string, SpriteIconId, std::string>>()({layerIdentifier, iconId, fullText});
     
     const bool hasIcon = description->style.hasIconImagePotentially();
 
@@ -359,7 +359,7 @@ const Tiled2dMapVectorSymbolObject::SymbolObjectInstanceCounts Tiled2dMapVectorS
 
 void Tiled2dMapVectorSymbolObject::setupIconProperties(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &rotations, VectorModificationWrapper<float> &textureCoordinates, int &countOffset, const double zoomIdentifier, const std::shared_ptr<TextureHolderInterface> spriteTexture, const std::shared_ptr<SpriteData> spriteData, const std::optional<RectI> customUv) {
 
-  // XXX: how is this different from update?!
+  // XXX: why/how is this different from update?!
 
     if (instanceCounts.icons == 0) {
         return;
@@ -399,7 +399,7 @@ void Tiled2dMapVectorSymbolObject::setupIconProperties(VectorModificationWrapper
         float spritePixelRatio = dpFactor;
 
         if (!hasCustomTexture) {
-            const auto spriteIt = spriteData->sprites.find(iconImage.value);
+            const auto spriteIt = spriteData->sprites.find(iconImage.value.icon);
             if (spriteIt == spriteData->sprites.end()) {
                 LogError << "Unable to find sprite " <<= iconImage.value;
                 writePosition(0, 0, countOffset, positions);
@@ -440,21 +440,21 @@ void Tiled2dMapVectorSymbolObject::setupIconProperties(VectorModificationWrapper
     countOffset += instanceCounts.icons;
 }
 
-std::optional<std::string> Tiled2dMapVectorSymbolObject::getUpdatedSpriteSheetId(const double zoomIdentifier, const double scaleFactor, const double rotation) {
+std::optional<std::string> Tiled2dMapVectorSymbolObject::getUpdatedSpriteSheetId(const double zoomIdentifier) {
     // XXX: uggh, strings!? use string interner or some other way to get a non-string ID?
     // FWIW, maplibre has some type "resolvedIcon" or so; possibly implementing this cleanly would directly allow to get rid of the strings... 
     
-    if (instanceCounts.icons == 0) {
+    if (instanceCounts.icons == 0 && instanceCounts.stretchedIcons == 0) {
         return std::nullopt;
     }
-    // TODO simplify bool
+
+    // TODO only evaluation icon-image? simplify bool. Also, wtf alpha?
     if (!(lastIconUpdateScaleFactor != -1 && !isStyleZoomDependant) ||
-        !(!isStyleStateDependant && lastIconUpdateScaleFactor == scaleFactor && lastIconUpdateRotation == rotation && lastIconUpdateAlpha == alpha)) {
+        !(!isStyleStateDependant && lastIconUpdateAlpha == alpha)) {
    
-        // TODO only evaluation icon-image?
         evaluateStyleProperties(zoomIdentifier);
     }
-    if (iconImage.value,empty()) {
+    if (iconImage.value.empty()) {
         return std::nullopt;
     }
     if (iconImage.value.sheet.empty()) {
@@ -475,6 +475,8 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(VectorModificationWrappe
         }
     }
 
+    // XXX: always update because maybe this is what is different from setup?!
+    /*
     if (lastIconUpdateScaleFactor != -1 && !isStyleZoomDependant) {
         countOffset += instanceCounts.icons;
         return;
@@ -484,6 +486,7 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(VectorModificationWrappe
         countOffset += instanceCounts.icons;
         return;
     }
+    */
 
     /*
      * XXX: just left-over or important???
@@ -498,6 +501,13 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(VectorModificationWrappe
     if (iconImage.value != lastIconImage && !((iconImage.value.empty() && !hasCustomTexture) || !spriteTexture)) {
         const auto textureWidth = (double) spriteTexture->getImageWidth();
         const auto textureHeight = (double) spriteTexture->getImageHeight();
+       
+        // XXX: copy-pasted from setup. Und häääää wiso zentriert mit image width und nicht icon grösse???
+        if (is3d) {
+            renderCoordinate = getRenderCoordinates(Anchor::CENTER, -rotations[countOffset], textureWidth, textureHeight);
+        } else {
+            renderCoordinate = getRenderCoordinates(iconAnchor, -rotations[countOffset], textureWidth, textureHeight);
+        }
 
         int spriteX = 0;
         int spriteY = 0;
@@ -537,6 +547,8 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(VectorModificationWrappe
 
         lastIconImage = iconImage.value;
     }
+    // XXX:
+    writePosition(renderCoordinate.x, renderCoordinate.y, countOffset, positions);
 
     rotations[countOffset] = iconRotate.value;
 
@@ -714,7 +726,7 @@ void Tiled2dMapVectorSymbolObject::setupStretchIconProperties(VectorModification
 
         renderCoordinate = getRenderCoordinates(iconAnchor, 0.0, textureWidth, textureHeight);
 
-        const auto spriteIt = spriteData->sprites.find(iconImage.value);
+        const auto spriteIt = spriteData->sprites.find(iconImage.value.icon);
         if (spriteIt == spriteData->sprites.end()) {
             LogError << "Unable to find sprite " <<= iconImage.value;
             writePosition(0, 0, countOffset, positions);
@@ -780,7 +792,7 @@ void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(VectorModificatio
 
         renderCoordinate = getRenderCoordinates(iconAnchor, 0.0, textureWidth, textureHeight);
 
-        const auto spriteIt = spriteData->sprites.find(iconImage.value);
+        const auto spriteIt = spriteData->sprites.find(iconImage.value.icon);
         if (spriteIt == spriteData->sprites.end()) {
             LogError << "Unable to find sprite " <<= iconImage.value;
             writePosition(0, 0, countOffset, positions);

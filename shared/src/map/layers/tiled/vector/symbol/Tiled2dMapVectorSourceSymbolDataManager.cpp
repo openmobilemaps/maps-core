@@ -586,7 +586,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::updateSymbolGroups() {
 }
 
 void Tiled2dMapVectorSourceSymbolDataManager::setSprites(std::string spriteId, std::shared_ptr<SpriteData> spriteData, std::shared_ptr<TextureHolderInterface> spriteTexture) {
-    sprites.emplace(spriteData, spriteTexture);
+    sprites.emplace_back(spriteData, spriteTexture);
 
     if (!tileSymbolGroupMap.empty()) {
         auto selfActor = WeakActor(mailbox, weak_from_this());
@@ -594,9 +594,10 @@ void Tiled2dMapVectorSourceSymbolDataManager::setSprites(std::string spriteId, s
     }
 }
 
-void Tiled2dMapVectorSourceSymbolDataManager::setupExistingSymbolWithSprite(std::string spriteId, std::shared_ptr<SpriteData> spriteData, std::shared_ptr<TextureHolderInterface> spriteTexture) {
-    auto mapInterface = this->mapInterface.lock();
+void Tiled2dMapVectorSourceSymbolDataManager::setupExistingSymbolWithSprite(std::shared_ptr<SpriteData> spriteData, std::shared_ptr<TextureHolderInterface> spriteTexture) {
+    LogError << "setupExistingSymbolWithSprite: " <<= spriteData->identifier;
 
+    auto mapInterface = this->mapInterface.lock();
     if (!mapInterface) {
         return;
     }
@@ -604,12 +605,16 @@ void Tiled2dMapVectorSourceSymbolDataManager::setupExistingSymbolWithSprite(std:
     for (const auto &[tile, symbolGroupMap]: tileSymbolGroupMap) {
         for (const auto &[layerIdentifier, symbolGroups]: symbolGroupMap) {
             for (auto &symbolGroup: std::get<1>(symbolGroups)) {
-                symbolGroup.message(MailboxExecutionEnvironment::graphics, MFN(&Tiled2dMapVectorSymbolGroup::addSprite), spriteData, spriteTexture, std::nullopt);
+                symbolGroup.message(MailboxExecutionEnvironment::graphics, MFN(&Tiled2dMapVectorSymbolGroup::addSprite), spriteData, spriteTexture);
             }
         }
     }
 
-    pregenerateRenderPasses();
+    // XXX: this needs to happen _after_ all addSprite done. Different actor, ordering still guaranteed?
+    if (!tileSymbolGroupMap.empty()) {
+        auto selfActor = WeakActor(mailbox, weak_from_this());
+        selfActor.message(MailboxExecutionEnvironment::graphics, MFN(&Tiled2dMapVectorSourceSymbolDataManager::pregenerateRenderPasses));
+    }
 }
 
 void Tiled2dMapVectorSourceSymbolDataManager::collisionDetection(std::vector<std::string> layerIdentifiers, std::shared_ptr<CollisionGrid> collisionGrid) {

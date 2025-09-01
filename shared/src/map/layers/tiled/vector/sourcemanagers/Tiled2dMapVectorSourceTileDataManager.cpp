@@ -545,7 +545,11 @@ void Tiled2dMapVectorSourceTileDataManager::clearTouch() {
     }
 }
 
-void Tiled2dMapVectorSourceTileDataManager::setSprites(std::shared_ptr<SpriteData> spriteData, std::shared_ptr<TextureHolderInterface> spriteTexture) {
+void Tiled2dMapVectorSourceTileDataManager::setSprites(std::string spriteId, std::shared_ptr<SpriteData> spriteData, std::shared_ptr<TextureHolderInterface> spriteTexture) {
+    // TODO support multi-sprite (for PolygonPatternLayer (?)
+    if (spriteId != "default") {
+      return;
+    }
     this->spriteData = spriteData;
     this->spriteTexture = spriteTexture;
 

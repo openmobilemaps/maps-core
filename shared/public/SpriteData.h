@@ -52,5 +52,7 @@ struct SpriteData {
     std::string identifier;
     std::unordered_map<std::string, SpriteDesc> sprites;
 
-    SpriteData(std::string identifier, std::unordered_map<std::string, SpriteDesc> sprites): sprites(sprites) {}
+    SpriteData(std::string identifier, std::unordered_map<std::string, SpriteDesc> sprites)
+        : identifier(identifier)
+        , sprites(sprites) {}
 };

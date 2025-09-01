@@ -74,7 +74,7 @@ public:
 
     virtual bool performClick(const std::unordered_set<std::string> &layers, const Coord &coord) = 0;
 
-    virtual void setSprites(std::shared_ptr<SpriteData> spriteData, std::shared_ptr<TextureHolderInterface> spriteTexture) {}
+    virtual void setSprites(std::string spriteId, std::shared_ptr<SpriteData> spriteData, std::shared_ptr<TextureHolderInterface> spriteTexture) {}
 
     virtual LayerReadyState isReadyToRenderOffscreen();
 

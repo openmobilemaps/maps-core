@@ -1,6 +1,8 @@
 #pragma once
 
+#include "HashedTuple.h"
 #include <string>
+#include <ostream>
 
 struct SpriteIconId {
     std::string sheet; // Identifier of the spritesheet
@@ -29,3 +31,16 @@ struct SpriteIconId {
     bool operator==(const SpriteIconId &o) const { return sheet == o.sheet && icon == o.icon; }
     bool operator!=(const SpriteIconId &o) const { return sheet != o.sheet || icon != o.icon; }
 };
+
+namespace std {
+template<> struct hash<SpriteIconId> {
+    size_t operator()(const SpriteIconId &id) const {
+        size_t hash = 0;
+        hash_combine(hash, std::hash<std::string>()(id.sheet)); 
+        hash_combine(hash, std::hash<std::string>()(id.icon)); 
+        return hash;
+    }
+};
+}
+
+inline std::ostream &operator<<(std::ostream &os, const SpriteIconId &id) { return os << id.sheet << ':' << id.icon; }

@@ -77,10 +77,10 @@ public:
     std::vector<std::shared_ptr< ::RenderObjectInterface>> getRenderObjects();
 private:
 
-    inline std::optional<Tiled2dMapVectorSymbolSubLayerPositioningWrapper>
+    std::optional<Tiled2dMapVectorSymbolSubLayerPositioningWrapper>
     getPositioning(std::vector<::Vec2D>::const_iterator &iterator, const std::vector<::Vec2D> &collection, const double interpolationValue);
 
-    inline std::shared_ptr<Tiled2dMapVectorSymbolObject> createSymbolObject(const Tiled2dMapVersionedTileInfo &tileInfo,
+    std::shared_ptr<Tiled2dMapVectorSymbolObject> createSymbolObject(const Tiled2dMapVersionedTileInfo &tileInfo,
                                                                             const std::string &layerIdentifier,
                                                                             const std::shared_ptr<SymbolVectorLayerDescription> &description,
                                                                             const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
@@ -100,6 +100,7 @@ private:
                                                                             const bool hasCustomTexture,
                                                                             const uint16_t styleIndex);
 
+
 public:
     uint32_t groupId;
 private:
@@ -111,12 +112,14 @@ private:
     const Tiled2dMapVersionedTileInfo tileInfo;
     const std::string layerIdentifier;
     std::shared_ptr<SymbolVectorLayerDescription> layerDescription;
+    BlendMode layerBlendMode;
     const WeakActor<Tiled2dMapVectorFontProvider> fontProvider;
+    WeakActor<Tiled2dMapVectorSourceSymbolDataManager> symbolManagerActor;
     const bool persistingSymbolPlacement = false;
 
     struct SpriteIconDescriptor {
-        std::shared_ptr<TextureHolderInterface> spriteTexture;
-        std::shared_ptr<SpriteData> spriteData;
+        std::shared_ptr<TextureHolderInterface> spriteTexture; // XXX: needed?
+        std::shared_ptr<SpriteData> spriteData; // XXX: needed?
 
         VectorModificationWrapper<float> iconPositions;
         VectorModificationWrapper<float> iconScales;
@@ -132,7 +135,7 @@ private:
         VectorModificationWrapper<float> stretchedIconStretchInfos;
         VectorModificationWrapper<float> stretchedIconTextureCoordinates;
 
-        std::shared_ptr<Quad2dInstancedInterface> iconInstancedObjects;
+        std::shared_ptr<Quad2dInstancedInterface> iconInstancedObject;
         std::shared_ptr<Quad2dStretchedInstancedInterface> stretchedInstancedObject;
     };
     std::unordered_map<std::string, SpriteIconDescriptor> sprites;
@@ -216,4 +219,8 @@ private:
 #endif
 
     UsedKeysCollection usedKeys;
+
+private:
+    void prepareIconObject(SpriteIconDescriptor &spriteIconDescriptor, size_t iconCount, size_t stretchedIconCount);
+
 };

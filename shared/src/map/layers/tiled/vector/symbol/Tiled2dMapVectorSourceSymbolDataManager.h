@@ -121,10 +121,12 @@ private:
 
     void updateSymbolGroups();
 
-    void setupExistingSymbolWithSprite(std::string spriteId);
+    void setupExistingSymbolWithSprite(std::shared_ptr<SpriteData> spriteData, std::shared_ptr<TextureHolderInterface> spriteTexture);
 
+public: // XXX no!?
     void pregenerateRenderPasses();
 
+private:
     const WeakActor<Tiled2dMapVectorSource> vectorSource;
 
     std::unordered_map<Tiled2dMapVersionedTileInfo, std::unordered_map<std::string, std::tuple<InstanceCounter, std::vector<Actor<Tiled2dMapVectorSymbolGroup>>>>> tileSymbolGroupMap;
