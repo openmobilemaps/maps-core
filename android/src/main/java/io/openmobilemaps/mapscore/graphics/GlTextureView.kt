@@ -30,8 +30,6 @@ open class GlTextureView @JvmOverloads constructor(context: Context, attrs: Attr
 
 	private var renderer: GLSurfaceView.Renderer? = null
 	private var glThread: GLThread? = null
-	protected var surfaceAvailable = false
-		private set
 
 	private var useMSAA = false
 
@@ -42,25 +40,37 @@ open class GlTextureView @JvmOverloads constructor(context: Context, attrs: Attr
 	private var performanceLoggers: List<PerformanceLoggerInterface> = emptyList()
 
 	override fun onSurfaceTextureAvailable(surfaceTexture: SurfaceTexture, width: Int, height: Int) {
-		glThread = GLThread(onResumeCallback = this::onGlThreadResume,
-			onPauseCallback = this::onGlThreadPause,
-			onFinishingCallback = this::onGlThreadFinishing).apply {
-			surface = surfaceTexture
-			onWindowResize(getWidth(), getHeight())
-			useMSAA = this@GlTextureView.useMSAA
-			renderer = this@GlTextureView.renderer
-			targetFrameRate = pendingTargetFrameRate
-			enforcedFinishInterval = pendingEnforcedFinishInterval
-			performanceLoggers = this@GlTextureView.performanceLoggers
-			if (shouldResume) {
-				doResume()
+		val currentGlThread = glThread
+		if (currentGlThread != null) {
+			currentGlThread.apply {
+				surface = surfaceTexture
+				onWindowResize(width, height)
+				if (shouldResume) {
+					doResume()
+				}
 			}
-			start()
+		} else {
+			glThread = GLThread(
+				onResumeCallback = this::onGlThreadResume,
+				onPauseCallback = this::onGlThreadPause,
+				onFinishingCallback = this::onGlThreadFinishing
+			).apply {
+				surface = surfaceTexture
+				onWindowResize(getWidth(), getHeight())
+				useMSAA = this@GlTextureView.useMSAA
+				renderer = this@GlTextureView.renderer
+				targetFrameRate = pendingTargetFrameRate
+				enforcedFinishInterval = pendingEnforcedFinishInterval
+				performanceLoggers = this@GlTextureView.performanceLoggers
+				if (shouldResume) {
+					doResume()
+				}
+				start()
+			}
 		}
 		while (pendingTaskQueue.isNotEmpty()) {
 			pendingTaskQueue.removeFirstOrNull()?.let { queueEvent(it.first, it.second) }
 		}
-		surfaceAvailable = true
 	}
 
 	override fun onSurfaceTextureSizeChanged(surface: SurfaceTexture, width: Int, height: Int) {
@@ -68,8 +78,7 @@ open class GlTextureView @JvmOverloads constructor(context: Context, attrs: Attr
 	}
 
 	override fun onSurfaceTextureDestroyed(surface: SurfaceTexture): Boolean {
-		surfaceAvailable = false
-		finishGlThread()
+		pauseGlThread()
 		return false
 	}
 

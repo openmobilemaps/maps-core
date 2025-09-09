@@ -141,9 +141,12 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 
 	@OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
 	open fun onDestroy() {
+		lifecycle?.removeObserver(this)
 		lifecycle = null
-		updateMapViewState(MapViewState.DESTROYED)
-		finishGlThread()
+		if (mapViewState.value != MapViewState.DESTROYED) {
+			updateMapViewState(MapViewState.DESTROYED)
+			finishGlThread()
+		}
 	}
 
 	override fun onGlThreadResume() {
@@ -154,7 +157,7 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 	}
 
 	override fun onGlThreadPause() {
-		if (mapViewStateMutable.value != MapViewState.PAUSED) {
+		if (mapViewStateMutable.value == MapViewState.RESUMED) {
 			updateMapViewState(MapViewState.PAUSED)
 			requireMapInterface().getRenderingContext().asOpenGlRenderingContext()?.pause()
 			requireMapInterface().pause()
