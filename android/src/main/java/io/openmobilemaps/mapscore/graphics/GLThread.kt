@@ -314,11 +314,32 @@ class GLThread constructor(
 	}
 
 	private fun finishGL() {
-		egl?.eglDestroyContext(eglDisplay, eglContext)
-		egl?.eglTerminate(eglDisplay)
-		egl?.eglDestroySurface(eglDisplay, eglSurface)
+		if (egl != null && eglDisplay != null) {
+			egl?.eglMakeCurrent(
+				eglDisplay,
+				EGL10.EGL_NO_SURFACE,
+				EGL10.EGL_NO_SURFACE,
+				EGL10.EGL_NO_CONTEXT
+			)
+
+			if (eglSurface != null && eglSurface !== EGL10.EGL_NO_SURFACE) {
+				egl?.eglDestroySurface(eglDisplay, eglSurface)
+				eglSurface = null
+			}
+
+			if (eglContext != null && eglContext !== EGL10.EGL_NO_CONTEXT) {
+				egl?.eglDestroyContext(eglDisplay, eglContext)
+				eglContext = null
+			}
+
+			egl?.eglTerminate(eglDisplay)
+			eglDisplay = null
+		}
+
 		surface?.release()
 		surface = null
+		gl = null
+		egl = null
 	}
 
 	private fun initGL() {
