@@ -18,7 +18,7 @@ extension EnvironmentValues {
     }
 }
 extension View {
-    func mapPadding(_ insets: EdgeInsets) -> some View {
+    public func mapPadding(_ insets: EdgeInsets) -> some View {
         environment(\.mapPadding, insets)
     }
 }

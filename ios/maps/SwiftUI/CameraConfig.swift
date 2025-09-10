@@ -9,11 +9,11 @@ import SwiftUI
 
 public struct CameraConfig: Sendable, Equatable {
 
-    static let basic: CameraConfig = CameraConfig(mcConfig: MCCamera3dConfigFactory.getBasicConfig())
+    public static let basic: CameraConfig = CameraConfig(mcConfig: MCCamera3dConfigFactory.getBasicConfig())
 
-    static let restor: CameraConfig = CameraConfig(mcConfig: MCCamera3dConfigFactory.getRestorConfig())
+    public static let restor: CameraConfig = CameraConfig(mcConfig: MCCamera3dConfigFactory.getRestorConfig())
 
-    static func custom(_ config: MCCamera3dConfig) -> CameraConfig {
+    public static func custom(_ config: MCCamera3dConfig) -> CameraConfig {
         CameraConfig(mcConfig: config)
     }
 

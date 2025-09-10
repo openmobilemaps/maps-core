@@ -7,7 +7,6 @@
 
 public struct Coordinate: Sendable, Codable, Equatable, Hashable, CustomStringConvertible {
 
-
     public var x: Double
     public var y: Double
     public var z: Double
@@ -31,13 +30,13 @@ public struct Coordinate: Sendable, Codable, Equatable, Hashable, CustomStringCo
 }
 
 #if canImport(SwiftUI)
-import SwiftUI
+    import SwiftUI
 
-extension LocalizedStringKey.StringInterpolation {
-    public mutating func appendInterpolation(_ coordinate: Coordinate) {
-        appendInterpolation(coordinate.description)
+    extension LocalizedStringKey.StringInterpolation {
+        public mutating func appendInterpolation(_ coordinate: Coordinate) {
+            appendInterpolation(coordinate.description)
+        }
     }
-}
 
 #endif
 
@@ -61,9 +60,11 @@ extension Coordinate {
     public init(_ coord: MCCoord) {
         self.init(x: coord.x, y: coord.y, z: coord.z, systemIdentifier: coord.systemIdentifier)
     }
+}
 
-    var mcCoord: MCCoord {
-        MCCoord(systemIdentifier: systemIdentifier, x: x, y: y, z: z)
+extension MCCoord {
+    public convenience init(_ coord: Coordinate) {
+        self.init(systemIdentifier: coord.systemIdentifier, x: coord.x, y: coord.y, z: coord.z)
     }
 }
 
@@ -74,5 +75,9 @@ extension Coordinate {
         public init(_ locationCoordinate: CLLocationCoordinate2D) {
             self.init(x: locationCoordinate.longitude, y: locationCoordinate.latitude, z: 0, systemIdentifier: MCCoordinateSystemIdentifiers.epsg4326())
         }
+        public init(_ location: CLLocation) {
+            self.init(x: location.coordinate.longitude, y: location.coordinate.latitude, z: 0, systemIdentifier: MCCoordinateSystemIdentifiers.epsg4326())
+        }
+
     }
 #endif

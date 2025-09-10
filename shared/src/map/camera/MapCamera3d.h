@@ -194,6 +194,8 @@ class MapCamera3d : public MapCameraInterface,
 
     void updateZoom(double zoom);
 
+    void removeAnimationsAndInertia();
+
     virtual void setupInertia();
 
     double getCameraDistance(Vec2I sizeViewport, double zoom);

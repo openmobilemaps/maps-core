@@ -80,20 +80,8 @@ void MapCamera3d::viewportSizeChanged() {
 
 void MapCamera3d::freeze(bool freeze) {
     cameraFrozen = freeze;
-    {
-        std::lock_guard<std::recursive_mutex> lock(animationMutex);
-        if (coordAnimation)
-            coordAnimation->cancel();
-        if (zoomAnimation)
-            zoomAnimation->cancel();
-        if (rotationAnimation)
-            rotationAnimation->cancel();
-        if (pitchAnimation)
-            pitchAnimation->cancel();
-    }
-    inertia = std::nullopt;
+    removeAnimationsAndInertia();
 }
-
 
 void MapCamera3d::moveToCenterPositionZoom(const ::Coord &centerPosition, double zoom, bool animated) {
     moveToCenterPositionZoom(centerPosition, zoom, animated, ListenerType::BOUNDS);
@@ -102,7 +90,7 @@ void MapCamera3d::moveToCenterPositionZoom(const ::Coord &centerPosition, double
 void MapCamera3d::moveToCenterPositionZoom(const ::Coord &centerPosition, double zoom, bool animated, const int &listenerType) {
     if (cameraFrozen)
         return;
-    inertia = std::nullopt;
+    removeAnimationsAndInertia();
     auto [focusPosition, focusZoom] =
         getBoundsCorrectedCoords(conversionHelper->convert(focusPointPosition.systemIdentifier, centerPosition), zoom);
 
@@ -172,7 +160,6 @@ void MapCamera3d::moveToCenterPositionZoom(const ::Coord &centerPosition, double
     }
 }
 
-
 void MapCamera3d::moveToCenterPosition(const ::Coord &centerPosition, bool animated) {
     moveToCenterPosition(centerPosition, animated, ListenerType::BOUNDS);
 }
@@ -180,7 +167,7 @@ void MapCamera3d::moveToCenterPosition(const ::Coord &centerPosition, bool anima
 void MapCamera3d::moveToCenterPosition(const ::Coord &centerPosition, bool animated, const int &listenerType) {
     if (cameraFrozen)
         return;
-    inertia = std::nullopt;
+    removeAnimationsAndInertia();
     auto [focusPosition, focusZoom] =
         getBoundsCorrectedCoords(conversionHelper->convert(focusPointPosition.systemIdentifier, centerPosition), zoom);
 
@@ -276,15 +263,14 @@ void MapCamera3d::moveToBoundingBox(const RectCoord &boundingBox, float paddingP
     return focusPointPosition;
 }
 
-
-void MapCamera3d::setZoom(double zoom, bool animated) {
-    setZoom(zoom, animated, ListenerType::BOUNDS);
-}
+void MapCamera3d::setZoom(double zoom, bool animated) { setZoom(zoom, animated, ListenerType::BOUNDS); }
 
 void MapCamera3d::setZoom(double zoom, bool animated, const int &listenerType) {
     if (cameraFrozen) {
         return;
     }
+
+    removeAnimationsAndInertia();
 
     double targetZoom = std::clamp(zoom, zoomMax, zoomMin);
 
@@ -319,6 +305,9 @@ double MapCamera3d::getZoom() { return zoom; }
 void MapCamera3d::setRotation(float angle, bool animated) {
     if (cameraFrozen)
         return;
+
+    removeAnimationsAndInertia();
+
     double newAngle = (angle > 360 || angle < 0) ? fmod(angle + 360.0, 360.0) : angle;
     if (animated) {
         double currentAngle = fmod(this->angle, 360.0);
@@ -803,7 +792,7 @@ void MapCamera3d::notifyListeners(const int &listenerType) {
 }
 
 bool MapCamera3d::onTouchDown(const ::Vec2F &posScreen) {
-    inertia = std::nullopt;
+    removeAnimationsAndInertia();
     auto pos = coordFromScreenPosition(posScreen);
     if (pos.systemIdentifier == -1) {
         lastOnTouchDownPoint = std::nullopt;
@@ -831,7 +820,7 @@ bool MapCamera3d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
         return false;
     }
 
-    inertia = std::nullopt;
+    removeAnimationsAndInertia();
 
     if (doubleClick) {
         double newZoom = zoom * (1.0 - (deltaScreen.y * 0.003));
@@ -960,12 +949,16 @@ void MapCamera3d::setupInertia() {
     inertia = Inertia(DateHelper::currentTimeMicros(), currentDragVelocity, t1, t2);
     currentDragVelocity = {0, 0};
     currentDragTimestamp = 0;
+
+    printf("inertia setup\n");
 }
 
 void MapCamera3d::inertiaStep() {
     if (inertia == std::nullopt) {
         return;
     }
+
+    printf("inertia step\n");
 
     long long now = DateHelper::currentTimeMicros();
     double delta = (now - inertia->timestampStart) / 16000.0;
@@ -999,15 +992,38 @@ void MapCamera3d::inertiaStep() {
     mapInterface->invalidate();
 }
 
+void MapCamera3d::removeAnimationsAndInertia() {
+
+    std::lock_guard<std::recursive_mutex> lock(animationMutex);
+    if (inertia) {
+        printf("inertia remove\n");
+        inertia = std::nullopt;
+    }
+
+    if (pitchAnimation) {
+        pitchAnimation->cancel();
+        pitchAnimation = nullptr;
+    }
+    if (verticalDisplacementAnimation) {
+        verticalDisplacementAnimation->cancel();
+        verticalDisplacementAnimation = nullptr;
+    }
+    if (zoomAnimation) {
+        zoomAnimation->cancel();
+        zoomAnimation = nullptr;
+    }
+    if (coordAnimation) {
+        coordAnimation->cancel();
+        coordAnimation = nullptr;
+    }
+}
+
 bool MapCamera3d::onDoubleClick(const ::Vec2F &posScreen) {
     if (!config.doubleClickZoomEnabled || cameraFrozen) {
         return false;
     }
 
-    {
-        std::lock_guard<std::recursive_mutex> lock(animationMutex);
-        inertia = std::nullopt;
-    }
+    removeAnimationsAndInertia();
 
     auto targetZoom = zoom / 2;
     targetZoom = std::max(std::min(targetZoom, zoomMin), zoomMax);
@@ -1060,7 +1076,7 @@ bool MapCamera3d::onTwoFingerClick(const ::Vec2F &posScreen1, const ::Vec2F &pos
     if (!config.doubleClickZoomEnabled || cameraFrozen)
         return false;
 
-    inertia = std::nullopt;
+    removeAnimationsAndInertia();
 
     auto targetZoom = zoom * 2;
     targetZoom = std::max(std::min(targetZoom, zoomMin), zoomMax);
@@ -1117,7 +1133,7 @@ bool MapCamera3d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, cons
     if (!config.twoFingerZoomEnabled || cameraFrozen)
         return false;
 
-    inertia = std::nullopt;
+    removeAnimationsAndInertia();
 
     if (posScreenOld.size() >= 2) {
 
@@ -1646,11 +1662,10 @@ void MapCamera3d::setCameraConfig(const Camera3dConfig &config, std::optional<fl
     double targetVerticalDisplacement = getCameraVerticalDisplacement();
     this->zoom = initialZoom;
 
-
     auto mapInterface = this->mapInterface;
     auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
 
-    if (!renderingContext){
+    if (!renderingContext) {
         std::lock_guard<std::recursive_mutex> lock(paramMutex);
         this->cameraPitch = targetPitch;
         this->cameraVerticalDisplacement = targetVerticalDisplacement;
