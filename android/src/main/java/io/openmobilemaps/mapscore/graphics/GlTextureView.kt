@@ -45,7 +45,9 @@ open class GlTextureView @JvmOverloads constructor(context: Context, attrs: Attr
 			currentGlThread.apply {
 				surface = surfaceTexture
 				onWindowResize(width, height)
-				doResume()
+				if (shouldResume) {
+					doResume()
+				}
 			}
 		} else {
 			glThread = GLThread(
@@ -76,7 +78,7 @@ open class GlTextureView @JvmOverloads constructor(context: Context, attrs: Attr
 	}
 
 	override fun onSurfaceTextureDestroyed(surface: SurfaceTexture): Boolean {
-		pauseGlThread()
+		glThread?.doPause()
 		return false
 	}
 
