@@ -32,11 +32,11 @@ struct RasterShaderStyle: Equatable {
     }
 }
 
-class RasterShader: BaseShader, @unchecked Sendable {
+open class RasterShader: BaseShader, @unchecked Sendable {
     private var rasterStyleBuffer: MTLBuffer
     private var rasterStyleBufferContents: UnsafeMutablePointer<RasterShaderStyle>
 
-    override init(shader: PipelineType = .rasterShader) {
+    override public init(shader: PipelineType = .rasterShader) {
         guard let buffer = MetalContext.current.device.makeBuffer(length: MemoryLayout<RasterShaderStyle>.stride, options: []) else { fatalError("Could not create buffer") }
         self.rasterStyleBuffer = buffer
         self.rasterStyleBufferContents = self.rasterStyleBuffer.contents().bindMemory(to: RasterShaderStyle.self, capacity: 1)
@@ -44,13 +44,13 @@ class RasterShader: BaseShader, @unchecked Sendable {
         super.init(shader: shader)
     }
 
-    override func setupProgram(_: MCRenderingContextInterface?) {
+    override open func setupProgram(_: MCRenderingContextInterface?) {
         if pipeline == nil {
             pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: shader, blendMode: blendMode))
         }
     }
 
-    override func preRender(encoder: MTLRenderCommandEncoder, context: RenderingContext) {
+    override open func preRender(encoder: MTLRenderCommandEncoder, context: RenderingContext) {
         guard let pipeline else { return }
 
         context.setRenderPipelineStateIfNeeded(pipeline)
@@ -59,11 +59,11 @@ class RasterShader: BaseShader, @unchecked Sendable {
 }
 
 extension RasterShader: MCRasterShaderInterface {
-    func setStyle(_ style: MCRasterShaderStyle) {
+    open func setStyle(_ style: MCRasterShaderStyle) {
         rasterStyleBufferContents[0] = RasterShaderStyle(style: style)
     }
 
-    func asShaderProgram() -> MCShaderProgramInterface? {
+    open func asShaderProgram() -> MCShaderProgramInterface? {
         self
     }
 }
