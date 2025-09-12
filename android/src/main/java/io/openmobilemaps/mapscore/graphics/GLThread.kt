@@ -205,7 +205,14 @@ class GLThread constructor(
 		}
 		onPauseCallback?.invoke()
 		onFinishingCallback?.invoke()
-		finishGL()
+
+		GLES32.glFinish()
+		val error = GLES32.glGetError()
+		if (error != GLES32.GL_NO_ERROR) {
+			Log.e(TAG, "Final glFinish failed with error: $error")
+		}
+
+		destroyGL()
 	}
 
 	private fun destroySurface() {
@@ -313,7 +320,7 @@ class GLThread constructor(
 		}
 	}
 
-	private fun finishGL() {
+	private fun destroyGL() {
 		if (egl != null && eglDisplay != null) {
 			egl?.eglMakeCurrent(
 				eglDisplay,

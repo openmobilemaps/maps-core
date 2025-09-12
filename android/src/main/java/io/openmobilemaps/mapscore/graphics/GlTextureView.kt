@@ -45,9 +45,7 @@ open class GlTextureView @JvmOverloads constructor(context: Context, attrs: Attr
 			currentGlThread.apply {
 				surface = surfaceTexture
 				onWindowResize(width, height)
-				if (shouldResume) {
-					doResume()
-				}
+				doResume()
 			}
 		} else {
 			glThread = GLThread(
