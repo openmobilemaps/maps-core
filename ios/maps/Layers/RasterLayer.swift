@@ -10,9 +10,14 @@ import MapCoreSharedModule
 
 open class TiledRasterLayer: Layer, ObservableObject, @unchecked Sendable {
     public init(
-        config: MCTiled2dMapLayerConfig, loaders: [MCLoaderInterface] = [MCTextureLoader()], callbackHandler: MCTiled2dMapRasterLayerCallbackInterface? = nil, layerIndex: Int? = nil, beforeAdding: ((MCTiled2dMapRasterLayerInterface, MCMapView) -> Void)? = nil
+        config: MCTiled2dMapLayerConfig, loaders: [MCLoaderInterface] = [MCTextureLoader()], shader: MCShaderProgramInterface? = nil, callbackHandler: MCTiled2dMapRasterLayerCallbackInterface? = nil, layerIndex: Int? = nil, beforeAdding: ((MCTiled2dMapRasterLayerInterface, MCMapView) -> Void)? = nil
     ) {
-        self.tiledLayerInterface = MCTiled2dMapRasterLayerInterface.create(config, loaders: loaders) !! fatalError("create is non-null")
+        if let shader {
+            self.tiledLayerInterface = MCTiled2dMapRasterLayerInterface.create(withShader: config, loaders: loaders, shader: shader) !! fatalError("create is non-null")
+        }
+        else {
+            self.tiledLayerInterface = MCTiled2dMapRasterLayerInterface.create(config, loaders: loaders) !! fatalError("create is non-null")
+        }
         self.tiledLayerInterface.setCallbackHandler(callbackHandler)
         self.layerIndex = layerIndex
         if let beforeAdding {
