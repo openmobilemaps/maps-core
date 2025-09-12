@@ -220,9 +220,9 @@ public struct MapView: UIViewRepresentable {
             mapView.camera.asMapCamera3d()?
                 .setCameraConfig(
                     camera.cameraConfig,
-                    durationSeconds: NSNumber(
+                    durationSeconds: animated ? NSNumber(
                         value: Double(camera.cameraConfig.animationDurationMs) / 1000.0
-                    ),
+                    ) : nil,
                     targetZoom: nil,
                     targetCoordinate: nil
                 )
