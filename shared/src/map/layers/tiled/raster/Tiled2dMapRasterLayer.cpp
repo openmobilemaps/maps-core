@@ -308,18 +308,18 @@ std::vector<Tiled2dMapRasterTileInfo> sortedTileInfos(currentTileInfos.begin(), 
                     quad->setMinMagFilter(textureFilterType);
                     tileObject = std::make_shared<Textured2dLayerObject>(
                         quad, rasterShader, mapInterface, is3D);
+                    if (zoomInfo.numDrawPreviousLayers == 0 || !animationsEnabled || zoomInfo.maskTile || is3D) {
+                        tileObject->setStyle(style);
+                    } else {
+                        auto startStyle = style;
+                        startStyle.opacity = 0.0;
+
+                        tileObject->beginStyleAnimation(startStyle, style, 150);
+                    }
                 }
                 if (is3D) {
                     tileObject->getQuadObject()->setSubdivisionFactor(
                         std::clamp(subdivisionFactor + tile.tessellationFactor, 0, 5));
-                }
-                if (zoomInfo.numDrawPreviousLayers == 0 || !animationsEnabled || zoomInfo.maskTile || is3D) {
-                    tileObject->setStyle(style);
-                } else {
-                    auto startStyle = style;
-                    startStyle.opacity = 0.0;
-
-                    tileObject->beginStyleAnimation(startStyle, style, 150);
                 }
                 tileObject->setRectCoord(tile.tileInfo.tileInfo.bounds);
                 tilesToSetup.emplace_back(std::make_pair(tile, tileObject));
