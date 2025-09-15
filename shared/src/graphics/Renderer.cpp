@@ -56,6 +56,7 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
             auto scissoringRect = pass->getScissoringRect();
 
             for (const auto &renderObject : renderObjects) {
+                bool isScreenSpaceCoords = renderObject->isScreenSpaceCoords();
 
                 if (renderObject->isHidden()) {
                     continue;
@@ -71,7 +72,8 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
                     }
 
                     if (hasMask) {
-                        maskObject->renderAsMask(renderingContext, pass->getRenderPassConfig(), vpMatrixPointer, identityMatrixPointer, origin, factor);
+                        maskObject->renderAsMask(renderingContext, pass->getRenderPassConfig(), vpMatrixPointer,
+                                                 identityMatrixPointer, origin, factor, isScreenSpaceCoords);
                     }
 
                     prepared = true;
@@ -79,14 +81,16 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
 
                 const auto &graphicsObject = renderObject->getGraphicsObject();
                 if (renderObject->isScreenSpaceCoords()) {
-                    graphicsObject->render(renderingContext, pass->getRenderPassConfig(), identityMatrixPointer, identityMatrixPointer, zeroOrigin, hasMask, factor);
+                    graphicsObject->render(renderingContext, pass->getRenderPassConfig(), identityMatrixPointer,
+                                           identityMatrixPointer, zeroOrigin, hasMask, factor, isScreenSpaceCoords);
                 } else if (renderObject->hasCustomModelMatrix()) {
                     const auto mMatrix = renderObject->getCustomModelMatrix();
-                    const auto mMatrixPointer = (int64_t)mMatrix.data();
-                    graphicsObject->render(renderingContext, pass->getRenderPassConfig(), vpMatrixPointer, mMatrixPointer, origin, hasMask,
-                                           factor);
+                    const auto mMatrixPointer = (int64_t) mMatrix.data();
+                    graphicsObject->render(renderingContext, pass->getRenderPassConfig(), vpMatrixPointer, mMatrixPointer, origin,
+                                           hasMask, factor, isScreenSpaceCoords);
                 } else {
-                    graphicsObject->render(renderingContext, pass->getRenderPassConfig(), vpMatrixPointer, identityMatrixPointer, origin, hasMask, factor);
+                    graphicsObject->render(renderingContext, pass->getRenderPassConfig(), vpMatrixPointer, identityMatrixPointer,
+                                           origin, hasMask, factor, isScreenSpaceCoords);
                 }
             }
 

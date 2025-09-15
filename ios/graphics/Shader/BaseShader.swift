@@ -36,7 +36,7 @@ open class BaseShader: MCShaderProgramInterface, @unchecked Sendable {
         }
     }
 
-    open func preRender(_ context: MCRenderingContextInterface?) {
+    open func preRender(_ context: MCRenderingContextInterface?, _ isScreenSpaceCoords: Bool) {
         guard let context = context as? RenderingContext,
             let encoder = context.encoder
         else { return }

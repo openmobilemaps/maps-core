@@ -27,7 +27,7 @@ class ColorShaderOpenGl : public BaseShaderProgramOpenGl,
 
     virtual void setupProgram(const std::shared_ptr<::RenderingContextInterface> &context) override;
 
-    virtual void preRender(const std::shared_ptr<::RenderingContextInterface> &context) override;
+    virtual void preRender(const std::shared_ptr<::RenderingContextInterface> &context, bool isScreenSpaceCoords) override;
 
     virtual void setColor(float red, float green, float blue, float alpha) override;
 

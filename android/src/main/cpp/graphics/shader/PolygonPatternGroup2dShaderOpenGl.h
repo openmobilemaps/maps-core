@@ -27,8 +27,6 @@ class PolygonPatternGroup2dShaderOpenGl : public BaseShaderProgramOpenGl,
 
     virtual void setupProgram(const std::shared_ptr<::RenderingContextInterface> &context) override;
 
-    virtual void preRender(const std::shared_ptr<::RenderingContextInterface> &context) override;
-
     virtual std::shared_ptr<ShaderProgramInterface> asShaderProgramInterface() override;
 
     virtual bool usesModelMatrix() override { return false; };

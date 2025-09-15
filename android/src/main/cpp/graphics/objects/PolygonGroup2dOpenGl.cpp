@@ -125,7 +125,7 @@ void PolygonGroup2dOpenGl::setIsInverseMasked(bool inversed) { isMaskInversed = 
 
 void PolygonGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
                                   int64_t vpMatrix, int64_t mMatrix, const ::Vec3D &origin,
-                                  bool isMasked, double screenPixelAsRealMeterFactor) {
+                                  bool isMasked, double screenPixelAsRealMeterFactor, bool isScreenSpaceCoords) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
     if (!ready || !shaderProgram->isRenderable())
         return;
@@ -162,7 +162,7 @@ void PolygonGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterf
                     pow(2.0, ceil(log2(screenPixelAsRealMeterFactor))));
     }
 
-    shaderProgram->preRender(context);
+    shaderProgram->preRender(context, isScreenSpaceCoords);
 
     glDrawElements(GL_TRIANGLES, polygonIndices.size(), GL_UNSIGNED_SHORT, nullptr);
 

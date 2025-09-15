@@ -35,10 +35,12 @@ class Polygon2dOpenGl : public GraphicsObjectInterface,
     virtual void clear() override;
 
     virtual void render(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
-                        int64_t vpMatrix, int64_t mMatrix, const ::Vec3D & origin, bool isMasked, double screenPixelAsRealMeterFactor) override;
+                        int64_t vpMatrix, int64_t mMatrix, const ::Vec3D & origin, bool isMasked,
+                        double screenPixelAsRealMeterFactor, bool isScreenSpaceCoords) override;
 
     virtual void renderAsMask(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
-                              int64_t vpMatrix, int64_t mMatrix, const ::Vec3D & origin, double screenPixelAsRealMeterFactor) override;
+                              int64_t vpMatrix, int64_t mMatrix, const ::Vec3D & origin,
+                              double screenPixelAsRealMeterFactor, bool isScreenSpaceCoords) override;
 
     virtual void setVertices(const ::SharedBytes & vertices, const ::SharedBytes & indices, const ::Vec3D & origin) override;
 
@@ -55,7 +57,8 @@ protected:
 
     void removeGlBuffers();
 
-    inline void drawPolygon(const std::shared_ptr<::RenderingContextInterface> &context, int program, int64_t vpMatrix, int64_t mMatrix, const Vec3D &origin);
+    inline void drawPolygon(const std::shared_ptr<::RenderingContextInterface> &context, int program, int64_t vpMatrix,
+                            int64_t mMatrix, const Vec3D &origin, bool isScreenSpaceCoords);
 
     std::shared_ptr<BaseShaderProgramOpenGl> shaderProgram;
     std::string programName;

@@ -26,7 +26,7 @@ abstract class GraphicsObjectInterface {
     abstract fun setDebugLabel(label: String)
 
     /** Render the graphics object; ensure calling on graphics thread */
-    abstract fun render(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, renderPass: io.openmobilemaps.mapscore.shared.graphics.RenderPassConfig, vpMatrix: Long, mMatrix: Long, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D, isMasked: Boolean, screenPixelAsRealMeterFactor: Double)
+    abstract fun render(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, renderPass: io.openmobilemaps.mapscore.shared.graphics.RenderPassConfig, vpMatrix: Long, mMatrix: Long, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D, isMasked: Boolean, screenPixelAsRealMeterFactor: Double, isScreenSpaceCoords: Boolean)
 
     public class CppProxy : GraphicsObjectInterface {
         private val nativeRef: Long
@@ -73,10 +73,10 @@ abstract class GraphicsObjectInterface {
         }
         private external fun native_setDebugLabel(_nativeRef: Long, label: String)
 
-        override fun render(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, renderPass: io.openmobilemaps.mapscore.shared.graphics.RenderPassConfig, vpMatrix: Long, mMatrix: Long, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D, isMasked: Boolean, screenPixelAsRealMeterFactor: Double) {
+        override fun render(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, renderPass: io.openmobilemaps.mapscore.shared.graphics.RenderPassConfig, vpMatrix: Long, mMatrix: Long, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D, isMasked: Boolean, screenPixelAsRealMeterFactor: Double, isScreenSpaceCoords: Boolean) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_render(this.nativeRef, context, renderPass, vpMatrix, mMatrix, origin, isMasked, screenPixelAsRealMeterFactor)
+            native_render(this.nativeRef, context, renderPass, vpMatrix, mMatrix, origin, isMasked, screenPixelAsRealMeterFactor, isScreenSpaceCoords)
         }
-        private external fun native_render(_nativeRef: Long, context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, renderPass: io.openmobilemaps.mapscore.shared.graphics.RenderPassConfig, vpMatrix: Long, mMatrix: Long, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D, isMasked: Boolean, screenPixelAsRealMeterFactor: Double)
+        private external fun native_render(_nativeRef: Long, context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, renderPass: io.openmobilemaps.mapscore.shared.graphics.RenderPassConfig, vpMatrix: Long, mMatrix: Long, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D, isMasked: Boolean, screenPixelAsRealMeterFactor: Double, isScreenSpaceCoords: Boolean)
     }
 }

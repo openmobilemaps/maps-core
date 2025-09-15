@@ -112,7 +112,7 @@ void IcosahedronOpenGl::setIsInverseMasked(bool inversed) { isMaskInversed = inv
 
 void IcosahedronOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
                                int64_t vpMatrix, int64_t mMatrix, const ::Vec3D &origin, bool isMasked,
-                               double screenPixelAsRealMeterFactor) {
+                               double screenPixelAsRealMeterFactor, bool isScreenSpaceCoords) {
     if (!ready)
         return;
 
@@ -139,7 +139,7 @@ void IcosahedronOpenGl::render(const std::shared_ptr<::RenderingContextInterface
     glUseProgram(program);
     glBindVertexArray(vao);
 
-    shaderProgram->preRender(context);
+    shaderProgram->preRender(context, isScreenSpaceCoords);
 
     if(shaderProgram->usesModelMatrix()) {
         glUniformMatrix4fv(mMatrixHandle, 1, false, (GLfloat *) mMatrix);

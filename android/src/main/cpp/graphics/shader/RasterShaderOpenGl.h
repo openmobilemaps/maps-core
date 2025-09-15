@@ -27,7 +27,7 @@ public:
 
     void setupProgram(const std::shared_ptr<RenderingContextInterface> &context) override;
 
-    void preRender(const std::shared_ptr<RenderingContextInterface> &context) override;
+    void preRender(const std::shared_ptr<RenderingContextInterface> &context, bool isScreenSpaceCoords) override;
 
     std::shared_ptr<ShaderProgramInterface> asShaderProgramInterface() override;
 

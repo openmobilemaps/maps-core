@@ -78,8 +78,8 @@ void ColorLineGroup2dShaderOpenGl::clearGlObjects() {
     dashingScaleFactorHandle = -1;
 }
 
-void ColorLineGroup2dShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context) {
-    BaseShaderProgramOpenGl::preRender(context);
+void ColorLineGroup2dShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context, bool isScreenSpaceCoords) {
+    BaseShaderProgramOpenGl::preRender(context, isScreenSpaceCoords);
 
     glBindBufferBase(GL_UNIFORM_BUFFER, STYLE_UBO_BINDING, lineStyleBuffer);
 

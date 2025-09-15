@@ -277,7 +277,7 @@ void Text2dInstancedOpenGl::adjustTextureCoordinates() {
 
 void Text2dInstancedOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
                                    int64_t vpMatrix, int64_t mMatrix, const ::Vec3D &origin,
-                                   bool isMasked, double screenPixelAsRealMeterFactor) {
+                                   bool isMasked, double screenPixelAsRealMeterFactor, bool isScreenSpaceCoords) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
     if (!ready || (usesTextureCoords && !textureCoordsReady) || instanceCount == 0 || buffersNotReady || !shaderProgram->isRenderable()) {
         return;
@@ -310,7 +310,7 @@ void Text2dInstancedOpenGl::render(const std::shared_ptr<::RenderingContextInter
 
     glBindBufferBase(GL_UNIFORM_BUFFER, STYLE_UBO_BINDING, textStyleBuffer);
 
-    shaderProgram->preRender(context);
+    shaderProgram->preRender(context, isScreenSpaceCoords);
 
     // Apply the projection and view transformation
     glUniformMatrix4fv(vpMatrixHandle, 1, false, (GLfloat *) vpMatrix);

@@ -14,7 +14,7 @@ blend_mode = enum {
 shader_program_interface = interface +c +o {
     get_program_name() : string;
     setup_program(context: rendering_context_interface);
-    pre_render(context: rendering_context_interface);
+    pre_render(context: rendering_context_interface, is_screen_space_coords: bool);
     set_blend_mode(blend_mode: blend_mode);
 
     uses_model_matrix(): bool;

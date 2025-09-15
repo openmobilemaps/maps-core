@@ -46,9 +46,11 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (void)preRender:(nullable id<MCRenderingContextInterface>)context {
+- (void)preRender:(nullable id<MCRenderingContextInterface>)context
+isScreenSpaceCoords:(BOOL)isScreenSpaceCoords {
     try {
-        _cppRefHandle.get()->preRender(::djinni_generated::RenderingContextInterface::toCpp(context));
+        _cppRefHandle.get()->preRender(::djinni_generated::RenderingContextInterface::toCpp(context),
+                                       ::djinni::Bool::toCpp(isScreenSpaceCoords));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -87,10 +89,11 @@ public:
             [djinni_private_get_proxied_objc_object() setupProgram:(::djinni_generated::RenderingContextInterface::fromCpp(c_context))];
         }
     }
-    void preRender(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & c_context) override
+    void preRender(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & c_context, bool c_isScreenSpaceCoords) override
     {
         @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() preRender:(::djinni_generated::RenderingContextInterface::fromCpp(c_context))];
+            [djinni_private_get_proxied_objc_object() preRender:(::djinni_generated::RenderingContextInterface::fromCpp(c_context))
+                                            isScreenSpaceCoords:(::djinni::Bool::fromCpp(c_isScreenSpaceCoords))];
         }
     }
     void setBlendMode(::BlendMode c_blendMode) override

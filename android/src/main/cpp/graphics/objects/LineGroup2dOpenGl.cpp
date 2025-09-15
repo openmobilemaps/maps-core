@@ -149,7 +149,7 @@ void LineGroup2dOpenGl::setIsInverseMasked(bool inversed) { isMaskInversed = inv
 
 void LineGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
                                int64_t vpMatrix, int64_t mMatrix, const ::Vec3D &origin, bool isMasked,
-                               double screenPixelAsRealMeterFactor) {
+                               double screenPixelAsRealMeterFactor, bool isScreenSpaceCoords) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
     if (!ready || !shaderProgram->isRenderable()) {
         return;
@@ -185,7 +185,7 @@ void LineGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface
 
     glUniform4f(originOffsetHandle, lineOrigin.x - origin.x, lineOrigin.y - origin.y, lineOrigin.z - origin.z, 0.0);
 
-    shaderProgram->preRender(openGlContext);
+    shaderProgram->preRender(openGlContext, isScreenSpaceCoords);
 
     // Draw the triangle
     glDrawElements(GL_TRIANGLES, lineIndices.size(), GL_UNSIGNED_INT, nullptr);

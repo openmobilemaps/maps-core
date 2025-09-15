@@ -84,8 +84,9 @@ const std::string BaseShaderProgramOpenGl::FRAME_UBO_DEFINITION =
         } uFrameUniforms;
 );
 
-void BaseShaderProgramOpenGl::setupFrameUniforms(GLuint frameUniformsBuffer, int64_t vpMatrix, const Vec3D &origin,
-                                                 double screenPixelAsRealMeterFactor, double timeFrameDeltaSeconds) {
+void BaseShaderProgramOpenGl::setupFrameUniforms(GLuint frameUniformsBuffer, GLuint identityFrameUniformsBuffer, int64_t vpMatrix,
+                                                 const Vec3D &origin, double screenPixelAsRealMeterFactor,
+                                                 double timeFrameDeltaSeconds) {
     glBindBuffer(GL_UNIFORM_BUFFER, frameUniformsBuffer);
     glBufferSubData(GL_UNIFORM_BUFFER, 0, 4 * 4 * sizeof(GLfloat), (GLfloat *)vpMatrix);
     std::array<GLfloat, 6> temp{
@@ -96,6 +97,9 @@ void BaseShaderProgramOpenGl::setupFrameUniforms(GLuint frameUniformsBuffer, int
         (GLfloat) screenPixelAsRealMeterFactor,
         (GLfloat) timeFrameDeltaSeconds,
     };
+    glBufferSubData(GL_UNIFORM_BUFFER, 4 * 4 * sizeof(GLfloat), 6 * sizeof(GLfloat), &temp[0]);
+    glBindBuffer(GL_UNIFORM_BUFFER, identityFrameUniformsBuffer);
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, 4 * 4 * sizeof(GLfloat), (GLfloat *)IDENTITY_MATRIX);
     glBufferSubData(GL_UNIFORM_BUFFER, 4 * 4 * sizeof(GLfloat), 6 * sizeof(GLfloat), &temp[0]);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
@@ -141,7 +145,7 @@ void BaseShaderProgramOpenGl::setBlendMode(BlendMode blendMode) {
     this->blendMode = blendMode;
 }
 
-void BaseShaderProgramOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context) {
+void BaseShaderProgramOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context, bool isScreenSpaceCoords) {
     glEnable(GL_BLEND);
     switch (blendMode) {
         case BlendMode::NORMAL: {
@@ -172,7 +176,7 @@ void BaseShaderProgramOpenGl::preRender(const std::shared_ptr<::RenderingContext
             }
         }
         if (frameUniformsBufferBlockIdx >= 0) {
-            glBindBufferBase(GL_UNIFORM_BUFFER, FRAME_UBO_BINDING_POINT, openGlContext->getFrameUniformsBuffer());
+            glBindBufferBase(GL_UNIFORM_BUFFER, FRAME_UBO_BINDING_POINT, openGlContext->getFrameUniformsBuffer(isScreenSpaceCoords));
         }
     }
 }

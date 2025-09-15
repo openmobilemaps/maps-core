@@ -16,8 +16,8 @@ const std::string StretchShaderOpenGl::programName = "UBMAP_StretchShaderOpenGl"
 
 std::string StretchShaderOpenGl::getProgramName() { return programName; }
 
-void StretchShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context) {
-    BaseShaderProgramOpenGl::preRender(context);
+void StretchShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context, bool isScreenSpaceCoords) {
+    BaseShaderProgramOpenGl::preRender(context, isScreenSpaceCoords);
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
     int alphaLocation = glGetUniformLocation(openGlContext->getProgram(programName), "alpha");
     glUniform1f(alphaLocation, alpha);

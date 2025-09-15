@@ -34,8 +34,8 @@ void SphereEffectShaderOpenGl::setupProgram(const std::shared_ptr<::RenderingCon
     openGlContext->storeProgram(programName, program);
 }
 
-void SphereEffectShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context) {
-    BaseShaderProgramOpenGl::preRender(context);
+void SphereEffectShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context, bool isScreenSpaceCoords) {
+    BaseShaderProgramOpenGl::preRender(context, isScreenSpaceCoords);
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
     int program = openGlContext->getProgram(programName);
 

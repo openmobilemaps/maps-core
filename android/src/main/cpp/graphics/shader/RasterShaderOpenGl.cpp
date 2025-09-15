@@ -38,8 +38,8 @@ void RasterShaderOpenGl::setupProgram(const std::shared_ptr<::RenderingContextIn
     openGlContext->storeProgram(programName, program);
 }
 
-void RasterShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context) {
-    BaseShaderProgramOpenGl::preRender(context);
+void RasterShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context, bool isScreenSpaceCoords) {
+    BaseShaderProgramOpenGl::preRender(context, isScreenSpaceCoords);
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
     int styleValuesLocation = glGetUniformLocation(openGlContext->getProgram(programName), "styleValues");
     {

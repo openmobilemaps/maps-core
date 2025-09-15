@@ -116,7 +116,7 @@ void Polygon2dOpenGl::setIsInverseMasked(bool inversed) { isMaskInversed = inver
 
 void Polygon2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
                              int64_t vpMatrix, int64_t mMatrix, const ::Vec3D &origin, bool isMasked,
-                             double screenPixelAsRealMeterFactor) {
+                             double screenPixelAsRealMeterFactor, bool isScreenSpaceCoords) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
     if (!ready || !shaderProgram->isRenderable())
         return;
@@ -142,16 +142,17 @@ void Polygon2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> 
 
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
-    drawPolygon(openGlContext, program, vpMatrix, mMatrix, origin);
+    drawPolygon(openGlContext, program, vpMatrix, mMatrix, origin, isScreenSpaceCoords);
 }
 
-void Polygon2dOpenGl::drawPolygon(const std::shared_ptr<::RenderingContextInterface> &context, int program, int64_t vpMatrix, int64_t mMatrix, const Vec3D &origin) {
+void Polygon2dOpenGl::drawPolygon(const std::shared_ptr<::RenderingContextInterface> &context, int program, int64_t vpMatrix,
+                                  int64_t mMatrix, const Vec3D &origin, bool isScreenSpaceCoords) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
     // Add program to OpenGL environment
     glUseProgram(program);
     glBindVertexArray(vao);
 
-    shaderProgram->preRender(context);
+    shaderProgram->preRender(context, isScreenSpaceCoords);
 
     if(shaderProgram->usesModelMatrix()) {
         glUniformMatrix4fv(mMatrixHandle, 1, false, (GLfloat *) mMatrix);
@@ -169,14 +170,14 @@ void Polygon2dOpenGl::drawPolygon(const std::shared_ptr<::RenderingContextInterf
 
 void Polygon2dOpenGl::renderAsMask(const std::shared_ptr<::RenderingContextInterface> &context,
                                    const ::RenderPassConfig &renderPass, int64_t vpMatrix, int64_t mMatrix,
-                                   const ::Vec3D &origin, double screenPixelAsRealMeterFactor) {
+                                   const ::Vec3D &origin, double screenPixelAsRealMeterFactor, bool isScreenSpaceCoords) {
     if (!ready)
         return;
 
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
 
     glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-    drawPolygon(openGlContext, program, vpMatrix, mMatrix, origin);
+    drawPolygon(openGlContext, program, vpMatrix, mMatrix, origin, isScreenSpaceCoords);
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 }
 

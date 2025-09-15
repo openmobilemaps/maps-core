@@ -147,16 +147,17 @@ void PolygonPatternGroup2dOpenGl::removeTexture() {
 }
 
 void PolygonPatternGroup2dOpenGl::renderAsMask(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
-                                               int64_t vpMatrix, int64_t mMatrix, const ::Vec3D & origin, double screenPixelAsRealMeterFactor) {
+                                               int64_t vpMatrix, int64_t mMatrix, const ::Vec3D & origin,
+                                               double screenPixelAsRealMeterFactor, bool isScreenSpaceCoords) {
     glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-    render(context, renderPass, vpMatrix, mMatrix, origin, false, screenPixelAsRealMeterFactor);
+    render(context, renderPass, vpMatrix, mMatrix, origin, false, screenPixelAsRealMeterFactor, isScreenSpaceCoords);
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 }
 
 void
 PolygonPatternGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
                                     int64_t vpMatrix, int64_t mMatrix, const ::Vec3D &origin,
-                                    bool isMasked, double screenPixelAsRealMeterFactor) {
+                                    bool isMasked, double screenPixelAsRealMeterFactor, bool isScreenSpaceCoords) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
     if (!ready || buffersNotReady || !textureHolder || !shaderProgram->isRenderable()) {
         return;
@@ -201,7 +202,7 @@ PolygonPatternGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInte
     int opacitiesHandle = glGetUniformLocation(program, "opacities");
     glUniform1fv(opacitiesHandle, sizeOpacitiesValuesArray, &opacities[0]);
 
-    shaderProgram->preRender(context);
+    shaderProgram->preRender(context, isScreenSpaceCoords);
 
     if(shaderProgram->usesModelMatrix()) {
         glUniformMatrix4fv(mMatrixHandle, 1, false, (GLfloat *) mMatrix);

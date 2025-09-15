@@ -89,7 +89,7 @@ extension BaseGraphicsObject: MCGraphicsObjectInterface {
     public func render(
         _ context: MCRenderingContextInterface?, renderPass: MCRenderPassConfig,
         vpMatrix: Int64, mMatrix: Int64, origin: MCVec3D, isMasked: Bool,
-        screenPixelAsRealMeterFactor: Double
+        screenPixelAsRealMeterFactor: Double, isScreenSpaceCoords: Bool
     ) {
         guard isReady(),
             let context = context as? RenderingContext,

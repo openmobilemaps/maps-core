@@ -74,7 +74,7 @@ public:
 
     void cleanAll();
 
-    GLuint getFrameUniformsBuffer();
+    GLuint getFrameUniformsBuffer(bool isScreenSpaceCoords);
 
 protected:
     RenderingCullMode cullMode = RenderingCullMode::NONE;
@@ -86,6 +86,7 @@ protected:
     std::unordered_map<std::string, std::shared_ptr<OpenGlRenderTargetInterface>> renderTargets;
 
     GLuint frameUniformsBuffer = GL_INVALID_INDEX;
+    GLuint identityFrameUniformsBuffer = GL_INVALID_INDEX;
 
     Vec2I viewportSize = Vec2I(0, 0);
 

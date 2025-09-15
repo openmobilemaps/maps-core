@@ -33,6 +33,7 @@
        mMatrix:(int64_t)mMatrix
         origin:(nonnull MCVec3D *)origin
       isMasked:(BOOL)isMasked
-screenPixelAsRealMeterFactor:(double)screenPixelAsRealMeterFactor;
+screenPixelAsRealMeterFactor:(double)screenPixelAsRealMeterFactor
+isScreenSpaceCoords:(BOOL)isScreenSpaceCoords;
 
 @end

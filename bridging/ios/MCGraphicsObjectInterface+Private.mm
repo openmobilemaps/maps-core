@@ -71,7 +71,8 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
        mMatrix:(int64_t)mMatrix
         origin:(nonnull MCVec3D *)origin
       isMasked:(BOOL)isMasked
-screenPixelAsRealMeterFactor:(double)screenPixelAsRealMeterFactor {
+screenPixelAsRealMeterFactor:(double)screenPixelAsRealMeterFactor
+isScreenSpaceCoords:(BOOL)isScreenSpaceCoords {
     try {
         _cppRefHandle.get()->render(::djinni_generated::RenderingContextInterface::toCpp(context),
                                     ::djinni_generated::RenderPassConfig::toCpp(renderPass),
@@ -79,7 +80,8 @@ screenPixelAsRealMeterFactor:(double)screenPixelAsRealMeterFactor {
                                     ::djinni::I64::toCpp(mMatrix),
                                     ::djinni_generated::Vec3D::toCpp(origin),
                                     ::djinni::Bool::toCpp(isMasked),
-                                    ::djinni::F64::toCpp(screenPixelAsRealMeterFactor));
+                                    ::djinni::F64::toCpp(screenPixelAsRealMeterFactor),
+                                    ::djinni::Bool::toCpp(isScreenSpaceCoords));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -123,7 +125,7 @@ public:
             [djinni_private_get_proxied_objc_object() setDebugLabel:(::djinni::String::fromCpp(c_label))];
         }
     }
-    void render(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & c_context, const ::RenderPassConfig & c_renderPass, int64_t c_vpMatrix, int64_t c_mMatrix, const ::Vec3D & c_origin, bool c_isMasked, double c_screenPixelAsRealMeterFactor) override
+    void render(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & c_context, const ::RenderPassConfig & c_renderPass, int64_t c_vpMatrix, int64_t c_mMatrix, const ::Vec3D & c_origin, bool c_isMasked, double c_screenPixelAsRealMeterFactor, bool c_isScreenSpaceCoords) override
     {
         @autoreleasepool {
             [djinni_private_get_proxied_objc_object() render:(::djinni_generated::RenderingContextInterface::fromCpp(c_context))
@@ -132,7 +134,8 @@ public:
                                                      mMatrix:(::djinni::I64::fromCpp(c_mMatrix))
                                                       origin:(::djinni_generated::Vec3D::fromCpp(c_origin))
                                                     isMasked:(::djinni::Bool::fromCpp(c_isMasked))
-                                screenPixelAsRealMeterFactor:(::djinni::F64::fromCpp(c_screenPixelAsRealMeterFactor))];
+                                screenPixelAsRealMeterFactor:(::djinni::F64::fromCpp(c_screenPixelAsRealMeterFactor))
+                                         isScreenSpaceCoords:(::djinni::Bool::fromCpp(c_isScreenSpaceCoords))];
         }
     }
 };
