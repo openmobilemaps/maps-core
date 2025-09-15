@@ -173,18 +173,10 @@ struct ContentView: View {
     }
     
     private func setupLayers() {
-        do {
-            layers = [
-                TiledRasterLayer("base", webMercatorUrlFormat: "https://tiles.sample.org/{z}/{x}/{y}.png"),
-                try VectorLayer("overlay", styleURL: "https://www.sample.org/overlay/style.json")
-            ]
-        } catch {
-            print("Failed to create vector layer: \(error)")
-            // Fallback to raster layer only
-            layers = [
-                TiledRasterLayer("base", webMercatorUrlFormat: "https://tiles.sample.org/{z}/{x}/{y}.png")
-            ]
-        }
+        layers = [
+            TiledRasterLayer("base", webMercatorUrlFormat: "https://tiles.sample.org/{z}/{x}/{y}.png"),
+            try! VectorLayer("overlay", styleURL: "https://www.sample.org/overlay/style.json")
+        ]
     }
 }
 ```
@@ -311,17 +303,9 @@ struct ContentView: View {
     }
     
     private func setupLayers() {
-        do {
-            layers = [
-                try VectorLayer("base-map", styleURL: "https://www.sample.org/base-map/style.json")
-            ]
-        } catch {
-            print("Failed to create vector layer: \(error)")
-            // Fallback to a simple raster layer
-            layers = [
-                TiledRasterLayer("osm", webMercatorUrlFormat: "https://tile.openstreetmap.org/{z}/{x}/{y}.png")
-            ]
-        }
+        layers = [
+            try! VectorLayer("base-map", styleURL: "https://www.sample.org/base-map/style.json")
+        ]
     }
 }
 ```
@@ -329,14 +313,7 @@ struct ContentView: View {
 #### UIKit
 
 ```swift
-do {
-    let vectorLayer = try VectorLayer("base-map", styleURL: "https://www.sample.org/base-map/style.json")
-    mapView.add(layer: vectorLayer)
-} catch {
-    print("Failed to create vector layer: \(error)")
-    // Fallback to a raster layer
-    mapView.add(layer: TiledRasterLayer("osm", webMercatorUrlFormat: "https://tile.openstreetmap.org/{z}/{x}/{y}.png"))
-}
+mapView.add(layer: try! VectorLayer("base-map", styleURL: "https://www.sample.org/base-map/style.json"))
 ```
 
 Additional features and differences will be documented soon.
@@ -665,21 +642,17 @@ struct MapWithIconView: UIViewRepresentable {
             return mapView
         }
         
-        do {
-            let texture = try TextureHolder(cgImage)
-            let icon = MCIconFactory.createIcon(
-                "icon",
-                coordinate: coordinate,
-                texture: texture,
-                iconSize: .init(x: Float(texture.getImageWidth()), y: Float(texture.getImageHeight())),
-                scale: .FIXED,
-                blendMode: .NORMAL
-            )
-            iconLayer?.add(icon)
-            mapView.add(layer: iconLayer?.asLayerInterface())
-        } catch {
-            print("Failed to create texture: \(error)")
-        }
+        let texture = try! TextureHolder(cgImage)
+        let icon = MCIconFactory.createIcon(
+            "icon",
+            coordinate: coordinate,
+            texture: texture,
+            iconSize: .init(x: Float(texture.getImageWidth()), y: Float(texture.getImageHeight())),
+            scale: .FIXED,
+            blendMode: .NORMAL
+        )
+        iconLayer?.add(icon)
+        mapView.add(layer: iconLayer?.asLayerInterface())
         
         // Set initial camera position
         if let center = camera.center.value, let zoom = camera.zoom.value {
@@ -722,20 +695,16 @@ guard let image = UIImage(named: "image"),
     return
 }
 
-do {
-    let texture = try TextureHolder(cgImage)
-    let icon = MCIconFactory.createIcon("icon",
-                             coordinate: coordinate,
-                             texture: texture,
-                             iconSize: .init(x: Float(texture.getImageWidth()), y: Float(texture.getImageHeight())),
-                             scale: .FIXED,
-                             blendMode: .NORMAL)
-    iconLayer?.add(icon)
-    iconLayer?.setCallbackHandler(handler)
-    mapView.add(layer: iconLayer?.asLayerInterface())
-} catch {
-    print("Failed to create texture: \(error)")
-}
+let texture = try! TextureHolder(cgImage)
+let icon = MCIconFactory.createIcon("icon",
+                         coordinate: coordinate,
+                         texture: texture,
+                         iconSize: .init(x: Float(texture.getImageWidth()), y: Float(texture.getImageHeight())),
+                         scale: .FIXED,
+                         blendMode: .NORMAL)
+iconLayer?.add(icon)
+iconLayer?.setCallbackHandler(handler)
+mapView.add(layer: iconLayer?.asLayerInterface())
 ```
 
 #### Line layer
