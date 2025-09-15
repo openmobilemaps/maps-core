@@ -149,6 +149,7 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
     case unitSphereTextInstancedShader
     case sphereEffectShader
     case skySphereShader
+    case elevationInterpolation
 
     var label: String {
         switch self {
@@ -177,12 +178,13 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
             case .unitSphereTextInstancedShader: return "Unit Sphere Text Instanced shader"
             case .sphereEffectShader: return "Sphere Effect Shader"
             case .skySphereShader: return "Sky Effect Shader"
+            case .elevationInterpolation: return "Elevation Interpolation"
         }
     }
 
     var vertexShaderUsesModelMatrix: Bool {
         switch self {
-            case .rasterShader, .roundColorShader, .unitSphereRoundColorShader, .alphaShader, .unitSphereAlphaShader, .sphereEffectShader, .skySphereShader:
+            case .rasterShader, .roundColorShader, .unitSphereRoundColorShader, .alphaShader, .unitSphereAlphaShader, .sphereEffectShader, .skySphereShader, .elevationInterpolation:
                 return true
             default:
                 return false
@@ -216,6 +218,7 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
             case .unitSphereTextInstancedShader: return "unitSphereTextInstancedVertexShader"
             case .sphereEffectShader: return "baseVertexShader"
             case .skySphereShader: return "baseVertexShader"
+            case .elevationInterpolation: return "baseVertexShaderModel"
         }
     }
 
@@ -246,6 +249,7 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
             case .unitSphereTextInstancedShader: return "unitSphereTextInstancedFragmentShader"
             case .sphereEffectShader: return "sphereEffectFragmentShader"
             case .skySphereShader: return "skySphereFragmentShader"
+            case .elevationInterpolation: return "elevationInterpolationFragmentShader"
         }
     }
 
@@ -268,7 +272,8 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
                 .unitSphereRoundColorShader,
                 .sphereEffectShader,
                 .skySphereShader,
-                .roundColorShader:
+                .roundColorShader,
+                .elevationInterpolation:
                 return Vertex3DTexture.descriptor
             default:
                 return Vertex.descriptor

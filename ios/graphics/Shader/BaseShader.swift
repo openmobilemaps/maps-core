@@ -31,6 +31,9 @@ open class BaseShader: MCShaderProgramInterface, @unchecked Sendable {
     }
 
     open func setupProgram(_: MCRenderingContextInterface?) {
+        if pipeline == nil {
+            pipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: shader, blendMode: blendMode))
+        }
     }
 
     open func preRender(_ context: MCRenderingContextInterface?) {
@@ -42,8 +45,11 @@ open class BaseShader: MCShaderProgramInterface, @unchecked Sendable {
 
     open func preRender(
         encoder _: MTLRenderCommandEncoder,
-        context _: RenderingContext
+        context: RenderingContext
     ) {
+        guard let pipeline else { return }
+
+        context.setRenderPipelineStateIfNeeded(pipeline)
     }
 
     open func setBlendMode(_ newBlendMode: MCBlendMode) {
