@@ -80,8 +80,9 @@ final class Quad2dStretchedInstanced: BaseGraphicsObject, @unchecked Sendable {
         mMatrix: Int64,
         origin: MCVec3D,
         isMasked: Bool,
-        screenPixelAsRealMeterFactor _: Double
-    ) {
+        screenPixelAsRealMeterFactor _: Double,
+        isScreenSpaceCoords: Bool
+    ){
 
         lock.lock()
         defer {
@@ -123,7 +124,7 @@ final class Quad2dStretchedInstanced: BaseGraphicsObject, @unchecked Sendable {
         }
 
         shader.setupProgram(context)
-        shader.preRender(context)
+        shader.preRender(context, isScreenSpaceCoords: isScreenSpaceCoords)
 
         encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
 
@@ -174,7 +175,8 @@ extension Quad2dStretchedInstanced: MCMaskingObjectInterface {
         vpMatrix: Int64,
         mMatrix: Int64,
         origin: MCVec3D,
-        screenPixelAsRealMeterFactor: Double
+        screenPixelAsRealMeterFactor: Double,
+        isScreenSpaceCoords: Bool
     ) {
         guard isReady(),
             let context = context as? RenderingContext,
@@ -191,7 +193,8 @@ extension Quad2dStretchedInstanced: MCMaskingObjectInterface {
             mMatrix: mMatrix,
             origin: origin,
             isMasked: false,
-            screenPixelAsRealMeterFactor: screenPixelAsRealMeterFactor)
+            screenPixelAsRealMeterFactor: screenPixelAsRealMeterFactor,
+            isScreenSpaceCoords: isScreenSpaceCoords)
     }
 }
 

@@ -124,7 +124,9 @@ public class RenderingContext: NSObject, @unchecked Sendable {
             mMatrix: 0,
             origin: .init(x: 0, y: 0, z: 0),
             isMasked: false,
-            screenPixelAsRealMeterFactor: 1)
+            screenPixelAsRealMeterFactor: 1,
+            isScreenSpaceCoords: true
+        )
     }
 }
 

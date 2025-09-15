@@ -53,7 +53,8 @@ open class BaseGraphicsObject: @unchecked Sendable {
         mMatrix _: Int64,
         origin: MCVec3D,
         isMasked _: Bool,
-        screenPixelAsRealMeterFactor _: Double
+        screenPixelAsRealMeterFactor _: Double,
+        isScreenSpaceCoords _: Bool
     ) {
         fatalError("has to be overwritten by subclass")
     }
@@ -104,7 +105,8 @@ extension BaseGraphicsObject: MCGraphicsObjectInterface {
             mMatrix: mMatrix,
             origin: origin,
             isMasked: isMasked,
-            screenPixelAsRealMeterFactor: screenPixelAsRealMeterFactor)
+            screenPixelAsRealMeterFactor: screenPixelAsRealMeterFactor,
+            isScreenSpaceCoords: isScreenSpaceCoords)
     }
 
     public func compute(
