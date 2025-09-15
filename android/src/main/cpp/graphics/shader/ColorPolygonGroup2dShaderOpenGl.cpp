@@ -73,8 +73,8 @@ void ColorPolygonGroup2dShaderOpenGl::clearGlObjects() {
     }
 }
 
-void ColorPolygonGroup2dShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context) {
-    BaseShaderProgramOpenGl::preRender(context);
+void ColorPolygonGroup2dShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context, bool isScreenSpaceCoords) {
+    BaseShaderProgramOpenGl::preRender(context, isScreenSpaceCoords);
 
     glBindBufferBase(GL_UNIFORM_BUFFER, STYLE_UBO_BINDING, polygonStyleBuffer);
 

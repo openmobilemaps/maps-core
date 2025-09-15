@@ -12,7 +12,8 @@
 
 - (void)setupProgram:(nullable id<MCRenderingContextInterface>)context;
 
-- (void)preRender:(nullable id<MCRenderingContextInterface>)context;
+- (void)preRender:(nullable id<MCRenderingContextInterface>)context
+isScreenSpaceCoords:(BOOL)isScreenSpaceCoords;
 
 - (void)setBlendMode:(MCBlendMode)blendMode;
 

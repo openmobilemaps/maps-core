@@ -37,11 +37,12 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_S
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_ShaderProgramInterface_00024CppProxy_native_1preRender(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeRenderingContextInterface::JniType j_context)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_ShaderProgramInterface_00024CppProxy_native_1preRender(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeRenderingContextInterface::JniType j_context, jboolean j_isScreenSpaceCoords)
 {
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::ShaderProgramInterface>(nativeRef);
-        ref->preRender(::djinni_generated::NativeRenderingContextInterface::toCpp(jniEnv, j_context));
+        ref->preRender(::djinni_generated::NativeRenderingContextInterface::toCpp(jniEnv, j_context),
+                       ::djinni::Bool::toCpp(jniEnv, j_isScreenSpaceCoords));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

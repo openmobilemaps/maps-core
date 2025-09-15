@@ -56,8 +56,9 @@ final class Text: BaseGraphicsObject, @unchecked Sendable {
         mMatrix: Int64,
         origin: MCVec3D,
         isMasked: Bool,
-        screenPixelAsRealMeterFactor _: Double
-    ) {
+        screenPixelAsRealMeterFactor _: Double,
+        isScreenSpaceCoords: Bool
+    ){
         lock.lock()
         defer {
             lock.unlock()
@@ -85,7 +86,7 @@ final class Text: BaseGraphicsObject, @unchecked Sendable {
         #endif
 
         shader.setupProgram(context)
-        shader.preRender(context)
+        shader.preRender(context, isScreenSpaceCoords: isScreenSpaceCoords)
 
         encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
 

@@ -20,8 +20,8 @@ std::string AlphaShaderOpenGl::getProgramName() { return programName; }
 
 void AlphaShaderOpenGl::updateAlpha(float value) { alpha = value; }
 
-void AlphaShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context) {
-    BaseShaderProgramOpenGl::preRender(context);
+void AlphaShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context, bool isScreenSpaceCoords) {
+    BaseShaderProgramOpenGl::preRender(context, isScreenSpaceCoords);
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
     int alphaLocation = glGetUniformLocation(openGlContext->getProgram(programName), "alpha");
     glUniform1f(alphaLocation, alpha);

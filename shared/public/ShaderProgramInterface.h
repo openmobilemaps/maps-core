@@ -17,7 +17,7 @@ public:
 
     virtual void setupProgram(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & context) = 0;
 
-    virtual void preRender(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & context) = 0;
+    virtual void preRender(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & context, bool isScreenSpaceCoords) = 0;
 
     virtual void setBlendMode(BlendMode blendMode) = 0;
 

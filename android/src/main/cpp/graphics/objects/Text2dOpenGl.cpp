@@ -211,15 +211,15 @@ void Text2dOpenGl::removeTexture() {
 
 void Text2dOpenGl::renderAsMask(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
                                 int64_t vpMatrix, int64_t mMatrix, const ::Vec3D &origin,
-                                double screenPixelAsRealMeterFactor) {
+                                double screenPixelAsRealMeterFactor, bool isScreenSpaceCoords) {
     glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-    render(context, renderPass, vpMatrix, mMatrix, origin, false, screenPixelAsRealMeterFactor);
+    render(context, renderPass, vpMatrix, mMatrix, origin, false, screenPixelAsRealMeterFactor, isScreenSpaceCoords);
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 }
 
 void Text2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
                           int64_t vpMatrix, int64_t mMatrix, const ::Vec3D &origin, bool isMasked,
-                          double screenPixelAsRealMeterFactor) {
+                          double screenPixelAsRealMeterFactor, bool isScreenSpaceCoords) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
     if (!ready || !textureHolder || !shaderProgram->isRenderable()) {
         return;
@@ -247,7 +247,7 @@ void Text2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &co
 
     prepareTextureDraw(program);
 
-    shaderProgram->preRender(context);
+    shaderProgram->preRender(context, isScreenSpaceCoords);
 
     // Set texture coords scale factor
     glUniform2fv(textureCoordScaleFactorHandle, 1, &textureCoordScaleFactor[0]);

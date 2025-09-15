@@ -54,8 +54,8 @@ void TextShaderOpenGl::setupProgram(const std::shared_ptr<::RenderingContextInte
     openGlContext->storeProgram(programName, program);
 }
 
-void TextShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context) {
-    BaseShaderProgramOpenGl::preRender(context);
+void TextShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context, bool isScreenSpaceCoords) {
+    BaseShaderProgramOpenGl::preRender(context, isScreenSpaceCoords);
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
     int program = openGlContext->getProgram(programName);
 

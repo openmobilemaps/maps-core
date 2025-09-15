@@ -12,7 +12,7 @@ abstract class ShaderProgramInterface {
 
     abstract fun setupProgram(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface)
 
-    abstract fun preRender(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface)
+    abstract fun preRender(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, isScreenSpaceCoords: Boolean)
 
     abstract fun setBlendMode(blendMode: BlendMode)
 
@@ -45,11 +45,11 @@ abstract class ShaderProgramInterface {
         }
         private external fun native_setupProgram(_nativeRef: Long, context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface)
 
-        override fun preRender(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface) {
+        override fun preRender(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, isScreenSpaceCoords: Boolean) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_preRender(this.nativeRef, context)
+            native_preRender(this.nativeRef, context, isScreenSpaceCoords)
         }
-        private external fun native_preRender(_nativeRef: Long, context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface)
+        private external fun native_preRender(_nativeRef: Long, context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, isScreenSpaceCoords: Boolean)
 
         override fun setBlendMode(blendMode: BlendMode) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

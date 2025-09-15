@@ -25,7 +25,7 @@ public:
 
     virtual void setupProgram(const std::shared_ptr<::RenderingContextInterface> &context) override;
 
-    virtual void preRender(const std::shared_ptr<::RenderingContextInterface> &context) override;
+    virtual void preRender(const std::shared_ptr<::RenderingContextInterface> &context, bool isScreenSpaceCoords) override;
 
     virtual void setEllipse(const SharedBytes & coefficients) override;
 

@@ -48,8 +48,8 @@ void SkySphereShaderOpenGl::setCameraProperties(const std::vector<float> &invers
     this->cameraPosition = cameraPosition;
 }
 
-void SkySphereShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context) {
-    BaseShaderProgramOpenGl::preRender(context);
+void SkySphereShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context, bool isScreenSpaceCoords) {
+    BaseShaderProgramOpenGl::preRender(context, isScreenSpaceCoords);
     {
         std::lock_guard<std::mutex> lock(dataMutex);
         glUniformMatrix4fv(inverseVPMatrixHandle, 1, false, (GLfloat *)inverseVPMatrix.data());

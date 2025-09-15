@@ -18,8 +18,8 @@ StretchInstancedShaderOpenGl::StretchInstancedShaderOpenGl(bool projectOntoUnitS
 
 std::string StretchInstancedShaderOpenGl::getProgramName() { return programName; }
 
-void StretchInstancedShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context) {
-    BaseShaderProgramOpenGl::preRender(context);
+void StretchInstancedShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context, bool isScreenSpaceCoords) {
+    BaseShaderProgramOpenGl::preRender(context, isScreenSpaceCoords);
 }
 
 void StretchInstancedShaderOpenGl::setupProgram(const std::shared_ptr<::RenderingContextInterface> &context) {

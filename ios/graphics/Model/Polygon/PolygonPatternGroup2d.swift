@@ -53,7 +53,8 @@ final class PolygonPatternGroup2d: BaseGraphicsObject, @unchecked Sendable {
         mMatrix: Int64,
         origin: MCVec3D,
         isMasked: Bool,
-        screenPixelAsRealMeterFactor: Double
+        screenPixelAsRealMeterFactor: Double,
+        isScreenSpaceCoords: Bool
     ) {
         lock.lock()
         defer {
@@ -95,7 +96,7 @@ final class PolygonPatternGroup2d: BaseGraphicsObject, @unchecked Sendable {
         }
 
         shader.setupProgram(context)
-        shader.preRender(context)
+        shader.preRender(context, isScreenSpaceCoords: isScreenSpaceCoords)
 
         encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
 

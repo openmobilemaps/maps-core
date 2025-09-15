@@ -315,15 +315,15 @@ void Quad2dOpenGl::removeTexture() {
 
 void Quad2dOpenGl::renderAsMask(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
                                 int64_t vpMatrix, int64_t mMatrix, const ::Vec3D &origin,
-                                double screenPixelAsRealMeterFactor) {
+                                double screenPixelAsRealMeterFactor, bool isScreenSpaceCoords) {
     glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-    render(context, renderPass, vpMatrix, mMatrix, origin, false, screenPixelAsRealMeterFactor);
+    render(context, renderPass, vpMatrix, mMatrix, origin, false, screenPixelAsRealMeterFactor, isScreenSpaceCoords);
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 }
 #include "Logger.h"
 void Quad2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
                           int64_t vpMatrix, int64_t mMatrix, const ::Vec3D &origin, bool isMasked,
-                          double screenPixelAsRealMeterFactor) {
+                          double screenPixelAsRealMeterFactor, bool isScreenSpaceCoords) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
     if (!ready || (usesTextureCoords && !textureCoordsReady) || !shaderProgram->isRenderable())
         return;
@@ -352,7 +352,7 @@ void Quad2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &co
         prepareTextureDraw(program);
     }
 
-    shaderProgram->preRender(context);
+    shaderProgram->preRender(context, isScreenSpaceCoords);
 
     if(shaderProgram->usesModelMatrix()) {
         glUniformMatrix4fv(mMatrixHandle, 1, false, (GLfloat *) mMatrix);

@@ -35,8 +35,8 @@ void ColorShaderOpenGl::setupProgram(const std::shared_ptr<::RenderingContextInt
     openGlContext->storeProgram(programName, program);
 }
 
-void ColorShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context) {
-    BaseShaderProgramOpenGl::preRender(context);
+void ColorShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context, bool isScreenSpaceCoords) {
+    BaseShaderProgramOpenGl::preRender(context, isScreenSpaceCoords);
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
     int program = openGlContext->getProgram(programName);
 

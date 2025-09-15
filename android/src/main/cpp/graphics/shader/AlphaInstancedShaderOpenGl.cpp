@@ -18,8 +18,8 @@ AlphaInstancedShaderOpenGl::AlphaInstancedShaderOpenGl(bool projectOntoUnitSpher
 
 std::string AlphaInstancedShaderOpenGl::getProgramName() { return programName; }
 
-void AlphaInstancedShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context) {
-    BaseShaderProgramOpenGl::preRender(context);
+void AlphaInstancedShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterface> &context, bool isScreenSpaceCoords) {
+    BaseShaderProgramOpenGl::preRender(context, isScreenSpaceCoords);
 }
 
 void AlphaInstancedShaderOpenGl::setupProgram(const std::shared_ptr<::RenderingContextInterface> &context) {

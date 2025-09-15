@@ -26,7 +26,7 @@ public:
 
     void setCameraProperties(const std::vector<float> &inverseVP, const Vec3D &cameraPosition) override;
 
-    void preRender(const std::shared_ptr<::RenderingContextInterface> &context) override;
+    void preRender(const std::shared_ptr<::RenderingContextInterface> &context, bool isScreenSpaceCoords) override;
 
     std::string getVertexShader() override;
 

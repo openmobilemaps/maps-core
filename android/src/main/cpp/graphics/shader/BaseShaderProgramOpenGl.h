@@ -26,10 +26,10 @@ public:
 
     static void checkGlProgramLinking(GLuint program);
 
-    static void setupFrameUniforms(GLuint frameUniformsBuffer, int64_t vpMatrix, const ::Vec3D & origin,
-                                   double screenPixelAsRealMeterFactor, double timeFrameDeltaSeconds);
+    static void setupFrameUniforms(GLuint frameUniformsBuffer, GLuint identityFrameUniformsBuffer, int64_t vpMatrix,
+                                   const ::Vec3D & origin, double screenPixelAsRealMeterFactor, double timeFrameDeltaSeconds);
 
-    virtual void preRender(const std::shared_ptr<::RenderingContextInterface> &context) override;
+    virtual void preRender(const std::shared_ptr<::RenderingContextInterface> &context, bool isScreenSpaceCoords) override;
 
     virtual bool usesModelMatrix() override { return true; };
 
@@ -45,6 +45,11 @@ public:
     const static GLuint FRAME_UBO_BINDING_POINT = 0;
     const static std::string FRAME_UBO_DEFINITION;
 protected:
+    constexpr static GLfloat IDENTITY_MATRIX[16] = {1.0, 0.0, 0.0, 0.0,
+                                                    0.0, 1.0, 0.0, 0.0,
+                                                    0.0, 0.0, 1.0, 0.0,
+                                                    0.0, 0.0, 0.0, 1.0};
+
     GLint frameUniformsBufferBlockIdx = GL_INVALID_INDEX;
     GLint program = GL_INVALID_INDEX;
 

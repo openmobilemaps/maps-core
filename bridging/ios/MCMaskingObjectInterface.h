@@ -17,6 +17,7 @@
             vpMatrix:(int64_t)vpMatrix
              mMatrix:(int64_t)mMatrix
               origin:(nonnull MCVec3D *)origin
-screenPixelAsRealMeterFactor:(double)screenPixelAsRealMeterFactor;
+screenPixelAsRealMeterFactor:(double)screenPixelAsRealMeterFactor
+ isScreenSpaceCoords:(BOOL)isScreenSpaceCoords;
 
 @end

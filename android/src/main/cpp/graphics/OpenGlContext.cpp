@@ -53,9 +53,9 @@ void OpenGlContext::setupDrawFrame(int64_t vpMatrix, const ::Vec3D & origin, dou
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     timeFrameDelta = (chronoutil::getCurrentTimestamp() - timeCreation).count();
 
-    if (frameUniformsBuffer != GL_INVALID_INDEX) {
-        BaseShaderProgramOpenGl::setupFrameUniforms(frameUniformsBuffer, vpMatrix, origin, screenPixelAsRealMeterFactor,
-                                                   timeFrameDelta / 1000.0);
+    if (frameUniformsBuffer != GL_INVALID_INDEX && identityFrameUniformsBuffer != GL_INVALID_INDEX) {
+        BaseShaderProgramOpenGl::setupFrameUniforms(frameUniformsBuffer, identityFrameUniformsBuffer, vpMatrix, origin,
+                                                    screenPixelAsRealMeterFactor, timeFrameDelta / 1000.0);
     }
 }
 
@@ -142,7 +142,13 @@ void OpenGlContext::resume() {
     if (frameUniformsBuffer == GL_INVALID_INDEX) {
         glGenBuffers(1, &frameUniformsBuffer);
         glBindBuffer(GL_UNIFORM_BUFFER, frameUniformsBuffer);
-        // Reserve the size of the frame uniforms. Adjust,
+        glBufferData(GL_UNIFORM_BUFFER, BaseShaderProgramOpenGl::FRAME_UBO_SIZE, nullptr, GL_DYNAMIC_DRAW);
+        glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    }
+
+    if (identityFrameUniformsBuffer == GL_INVALID_INDEX) {
+        glGenBuffers(1, &identityFrameUniformsBuffer);
+        glBindBuffer(GL_UNIFORM_BUFFER, identityFrameUniformsBuffer);
         glBufferData(GL_UNIFORM_BUFFER, BaseShaderProgramOpenGl::FRAME_UBO_SIZE, nullptr, GL_DYNAMIC_DRAW);
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
     }
@@ -159,6 +165,11 @@ void OpenGlContext::pause() {
     if (frameUniformsBuffer != GL_INVALID_INDEX) {
         glDeleteBuffers(1, &frameUniformsBuffer);
         frameUniformsBuffer = GL_INVALID_INDEX;
+    }
+
+    if (identityFrameUniformsBuffer != GL_INVALID_INDEX) {
+        glDeleteBuffers(1, &identityFrameUniformsBuffer);
+        identityFrameUniformsBuffer = GL_INVALID_INDEX;
     }
 }
 
@@ -208,6 +219,6 @@ int64_t OpenGlContext::getDeltaTimeMs() {
     return timeFrameDelta;
 }
 
-GLuint OpenGlContext::getFrameUniformsBuffer() {
-    return frameUniformsBuffer;
+GLuint OpenGlContext::getFrameUniformsBuffer(bool isScreenSpaceCoords) {
+    return isScreenSpaceCoords ? identityFrameUniformsBuffer : frameUniformsBuffer;
 }
