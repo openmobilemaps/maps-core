@@ -79,13 +79,15 @@ final class LineGroup2d: BaseGraphicsObject, @unchecked Sendable {
             } else {
                 encoder.setStencilReferenceValue(0b1100_0000)
             }
-        } else if pass.isPassMasked {
+        }
+
+        if pass.isPassMasked {
             if renderPassStencilState == nil {
                 renderPassStencilState = self.renderPassMaskStencilState()
             }
 
             encoder.setDepthStencilState(renderPassStencilState)
-            encoder.setStencilReferenceValue(0b0000_0000)
+            encoder.setStencilReferenceValue(0b1100_0000)
         }
 
         shader.screenPixelAsRealMeterFactor = Float(screenPixelAsRealMeterFactor)
