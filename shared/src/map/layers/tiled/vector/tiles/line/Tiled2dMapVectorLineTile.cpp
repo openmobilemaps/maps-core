@@ -126,7 +126,10 @@ void Tiled2dMapVectorLineTile::update() {
 
                 // color
                 auto color = inZoomRange ? lineDescription->style.getLineColor(context) : Color(0.0, 0.0, 0.0, 0.0);
-                if (color.r != style.colorR || color.g != style.colorG || color.b != style.colorB || color.a != style.colorA) {
+                if (toHalfFloat(color.r) != style.colorR ||
+                    toHalfFloat(color.g) != style.colorG ||
+                    toHalfFloat(color.b) != style.colorB ||
+                    toHalfFloat(color.a) != style.colorA) {
                     style.colorR = toHalfFloat(color.r);
                     style.colorG = toHalfFloat(color.g);
                     style.colorB = toHalfFloat(color.b);
@@ -136,7 +139,7 @@ void Tiled2dMapVectorLineTile::update() {
 
                 // opacity
                 float opacity = inZoomRange ? lineDescription->style.getLineOpacity(context) * alpha : 0.0;
-                if (opacity != style.opacity) {
+                if (toHalfFloat(opacity) != style.opacity) {
                     style.opacity = toHalfFloat(opacity);
                     needsUpdate = true;
                 }
@@ -144,14 +147,14 @@ void Tiled2dMapVectorLineTile::update() {
                 // width type
                 auto widthType = SizeType::SCREEN_PIXEL;
                 auto widthAsPixel = (widthType == SizeType::SCREEN_PIXEL ? 1 : 0);
-                if (widthAsPixel != style.widthAsPixel) {
+                if (toHalfFloat(widthAsPixel) != style.widthAsPixel) {
                     style.widthAsPixel = toHalfFloat(widthAsPixel);
                     needsUpdate = true;
                 }
 
                 // width
                 float width = inZoomRange ? lineDescription->style.getLineWidth(context) : 0.0;
-                if (width != style.width) {
+                if (toHalfFloat(width) != style.width) {
                     style.width = toHalfFloat(width);
                     needsUpdate = true;
                 }
@@ -167,7 +170,7 @@ void Tiled2dMapVectorLineTile::update() {
                     default: { cap = 1; }
                 }
 
-                if (cap != style.lineCap) {
+                if (toHalfFloat(cap) != style.lineCap) {
                     style.lineCap = toHalfFloat(cap);
                     needsUpdate = true;
                 }
@@ -176,7 +179,10 @@ void Tiled2dMapVectorLineTile::update() {
 
                 // color
                 auto color = inZoomRange ? lineDescription->style.getLineColor(context) : Color(0.0, 0.0, 0.0, 0.0);
-                if (color.r != style.colorR || color.g != style.colorG || color.b != style.colorB || color.a != style.colorA) {
+                if (toHalfFloat(color.r) != style.colorR ||
+                    toHalfFloat(color.g) != style.colorG ||
+                    toHalfFloat(color.b) != style.colorB ||
+                    toHalfFloat(color.a) != style.colorA) {
                     style.colorR = toHalfFloat(color.r);
                     style.colorG = toHalfFloat(color.g);
                     style.colorB = toHalfFloat(color.b);
@@ -186,14 +192,14 @@ void Tiled2dMapVectorLineTile::update() {
 
                 // opacity
                 float opacity = inZoomRange ? lineDescription->style.getLineOpacity(context) * alpha : 0.0;
-                if (opacity != style.opacity) {
+                if (toHalfFloat(opacity) != style.opacity) {
                     style.opacity = toHalfFloat(opacity);
                     needsUpdate = true;
                 }
 
                 // blue
                 float blur = inZoomRange ? lineDescription->style.getLineBlur(context) : 0.0;
-                if (blur != style.blur) {
+                if (toHalfFloat(blur) != style.blur) {
                     style.blur = toHalfFloat(blur);
                     needsUpdate = true;
                 }
@@ -201,14 +207,14 @@ void Tiled2dMapVectorLineTile::update() {
                 // width type
                 auto widthType = SizeType::SCREEN_PIXEL;
                 auto widthAsPixel = (widthType == SizeType::SCREEN_PIXEL ? 1 : 0);
-                if (widthAsPixel != style.widthAsPixel) {
+                if (toHalfFloat(widthAsPixel) != style.widthAsPixel) {
                     style.widthAsPixel = toHalfFloat(widthAsPixel);
                     needsUpdate = true;
                 }
 
                 // width
                 float width = inZoomRange ? lineDescription->style.getLineWidth(context) : 0.0;
-                if (width != style.width) {
+                if (toHalfFloat(width) != style.width) {
                     style.width = toHalfFloat(width);
                     needsUpdate = true;
                 }
@@ -221,7 +227,11 @@ void Tiled2dMapVectorLineTile::update() {
                 auto dValue2 = (dn > 2 ? dashArray[2] : 0.0) + dValue1;
                 auto dValue3 = (dn > 3 ? dashArray[3] : 0.0) + dValue2;
 
-                if (style.numDashValue != dn || dValue0 != style.dashValue0 || dValue1 != style.dashValue1 || dValue2 != style.dashValue2 || dValue3 != style.dashValue3) {
+                if (style.numDashValue != dn ||
+                    toHalfFloat(dValue0) != style.dashValue0 ||
+                    toHalfFloat(dValue1) != style.dashValue1 ||
+                    toHalfFloat(dValue2) != style.dashValue2 ||
+                    toHalfFloat(dValue3) != style.dashValue3) {
                     style.numDashValue = dn;
                     style.dashValue0 = toHalfFloat(dValue0);
                     style.dashValue1 = toHalfFloat(dValue1);
@@ -242,14 +252,14 @@ void Tiled2dMapVectorLineTile::update() {
                     default: { cap = 1; }
                 }
 
-                if (cap != style.lineCap) {
+                if (toHalfFloat(cap) != style.lineCap) {
                     style.lineCap = toHalfFloat(cap);
                     needsUpdate = true;
                 }
 
                 // offset
                 auto offset = inZoomRange ? lineDescription->style.getLineOffset(context, width) : 0.0;
-                if(offset != style.offset) {
+                if(toHalfFloat(offset) != style.offset) {
                     style.offset = toHalfFloat(offset);
                     needsUpdate = true;
                 }
@@ -258,14 +268,14 @@ void Tiled2dMapVectorLineTile::update() {
                 bool lineDotted = lineDescription->style.getLineDotted(context);
 
                 auto dotted = lineDotted ? 1 : 0;
-                if(dotted != style.dotted) {
+                if(toHalfFloat(dotted) != style.dotted) {
                     style.dotted = toHalfFloat(dotted);
                     needsUpdate = true;
                 }
 
                 // dotted skew
                 auto dottedSkew = lineDescription->style.getLineDottedSkew(context);
-                if(dottedSkew != style.dottedSkew) {
+                if(toHalfFloat(dottedSkew) != style.dottedSkew) {
                     style.dottedSkew = toHalfFloat(dottedSkew);
                     needsUpdate = true;
                 }
