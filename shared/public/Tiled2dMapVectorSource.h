@@ -25,7 +25,7 @@ class Tiled2dMapVectorSource : public Tiled2dMapSource<std::shared_ptr<DataLoade
                                                        Tiled2dMapVectorTileInfo::FeatureMap> {
 public:
     Tiled2dMapVectorSource(const MapConfig &mapConfig,
-                           const std::weak_ptr<Tiled2dMapVectorLayer> &vectorLayer,
+                           const std::weak_ptr<StringInterner> &stringTable,
                            const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig,
                            const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                            const std::shared_ptr<SchedulerInterface> &scheduler,
@@ -62,5 +62,5 @@ protected:
     
     const std::string sourceName;
 
-    std::weak_ptr<Tiled2dMapVectorLayer> vectorLayer;
+    const std::weak_ptr<StringInterner> stringTable;
 };

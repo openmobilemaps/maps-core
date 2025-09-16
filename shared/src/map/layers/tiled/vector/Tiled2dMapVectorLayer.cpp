@@ -398,7 +398,7 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
             auto geoJsonSource = Actor<Tiled2dVectorGeoJsonSource>(sourceMailbox,
                                                                    mapInterface->getCamera(),
                                                                    mapInterface->getMapConfig(),
-                                                                   castedMe,
+                                                                   stringTable,
                                                                    layerConfig,
                                                                    mapInterface->getCoordinateConverterHelper(),
                                                                    mapInterface->getScheduler(),
@@ -415,7 +415,7 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
         } else {
             vectorSource = Actor<Tiled2dMapVectorSource>(sourceMailbox,
                                                               mapInterface->getMapConfig(),
-                                                              castedMe,
+                                                              stringTable,
                                                               layerConfig,
                                                               mapInterface->getCoordinateConverterHelper(),
                                                               mapInterface->getScheduler(),

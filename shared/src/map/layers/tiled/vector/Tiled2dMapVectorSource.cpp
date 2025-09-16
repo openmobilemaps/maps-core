@@ -16,7 +16,7 @@
 #include "vtzero/vector_tile.hpp"
 
 Tiled2dMapVectorSource::Tiled2dMapVectorSource(const MapConfig &mapConfig,
-                                               const std::weak_ptr<Tiled2dMapVectorLayer> &vectorLayer,
+                                               const std::weak_ptr<StringInterner> &stringTable,
                                                const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig,
                                                const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                                                const std::shared_ptr<SchedulerInterface> &scheduler,
@@ -27,7 +27,7 @@ Tiled2dMapVectorSource::Tiled2dMapVectorSource(const MapConfig &mapConfig,
                                                float screenDensityPpi,
                                                std::string layerName)
         : Tiled2dMapSource<std::shared_ptr<DataLoaderResult>, Tiled2dMapVectorTileInfo::FeatureMap>(mapConfig, layerConfig, conversionHelper, scheduler, screenDensityPpi, tileLoaders.size(), layerName),
-loaders(tileLoaders), layersToDecode(layersToDecode), listener(listener), sourceName(sourceName), vectorLayer(vectorLayer) {}
+loaders(tileLoaders), layersToDecode(layersToDecode), listener(listener), sourceName(sourceName), stringTable(stringTable) {}
 
 ::djinni::Future<std::shared_ptr<DataLoaderResult>> Tiled2dMapVectorSource::loadDataAsync(Tiled2dMapTileInfo tile, size_t loaderIndex) {
     {
@@ -98,11 +98,11 @@ Tiled2dMapVectorTileInfo::FeatureMap Tiled2dMapVectorSource::postLoadingTask(std
     PERF_LOG_START(sourceName + "_postLoadingTask");
     auto layerFeatureMap = std::make_shared<std::unordered_map<std::string, std::shared_ptr<std::vector<Tiled2dMapVectorTileInfo::FeatureTuple>>>>();
     
-    auto strongVectorLayer = vectorLayer.lock();
-    if (!strongVectorLayer) {
+    auto strongStringTable = stringTable.lock();
+    if (!strongStringTable) {
         return layerFeatureMap;
     }
-    StringInterner &stringTable = strongVectorLayer->getStringInterner();
+    StringInterner &stringTable = *strongStringTable.get();
 
     if (!loadedData->data.has_value()) {
         LogError <<= "postLoadingTask, but data has no value for " + layerConfig->getLayerName() + ": " + std::to_string(tile.zoomIdentifier) + "/" +
