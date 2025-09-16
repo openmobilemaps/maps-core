@@ -95,7 +95,7 @@ final class Quad2dInstanced: BaseGraphicsObject, @unchecked Sendable {
         isMasked: Bool,
         screenPixelAsRealMeterFactor _: Double,
         isScreenSpaceCoords: Bool
-    ){
+    ) {
 
         lock.lock()
         defer {

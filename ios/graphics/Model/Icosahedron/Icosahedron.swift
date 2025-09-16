@@ -46,7 +46,7 @@ final class Icosahedron: BaseGraphicsObject, @unchecked Sendable {
         isMasked: Bool,
         screenPixelAsRealMeterFactor _: Double,
         isScreenSpaceCoords: Bool
-    ){
+    ) {
         lock.lock()
         defer {
             lock.unlock()
