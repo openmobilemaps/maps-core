@@ -66,6 +66,7 @@ public:
                 auto animationCoordinator = std::make_shared<SymbolAnimationCoordinator>(coord, zoomIdentifier, xTolerance,
                                                                                          yTolerance, animationDuration,
                                                                                          animationDelay);
+                animationCoordinator->enableAnimations(animationsEnabled);
                 coordinators.insert(animationCoordinator);
                 return animationCoordinator;
             }
