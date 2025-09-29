@@ -296,7 +296,7 @@ private:
         //if it's the first-pass tiling
         if (cz == 0u) {
             // stop tiling if we reached max zoom, or if the tile is too simple
-            if (z == options.indexMaxZoom || tile.tile.num_points <= options.indexMaxPoints) {
+            if (z > options.minZoom && (z == options.indexMaxZoom || tile.tile.num_points <= options.indexMaxPoints)) {
                 tile.source_features = geometries;
                 return;
             }
