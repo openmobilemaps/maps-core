@@ -19,9 +19,6 @@ file(GLOB_RECURSE mapscore_jni_SRC
 add_library(mapscore_jni SHARED ${mapscore_jni_SRC})
 
 target_include_directories(mapscore_jni PRIVATE
-  ../external/djinni/support-lib/jni
-  ${JNI_INCLUDE_DIRS}
-  
   ../bridging/android/jni/graphics
   ../bridging/android/jni/graphics/common
   ../bridging/android/jni/graphics/objects
@@ -41,12 +38,25 @@ target_include_directories(mapscore_jni PRIVATE
   ../bridging/android/jni/map/scheduling
   ../bridging/android/jni/map/coordinates
   ../bridging/android/jni/map/camera
-
+)
+target_include_directories(mapscore_jni SYSTEM PRIVATE
+  ../external/djinni/support-lib/jni
+  ${JNI_INCLUDE_DIRS}
   ${OSMESA_INCLUDE_DIRS}
 )
+
 target_compile_features(mapscore_jni PRIVATE cxx_std_20)
-target_compile_options(mapscore_jni PRIVATE -Werror -Wno-deprecated -Wno-reorder)
+target_compile_options(mapscore_jni PRIVATE -Werror -Wunused -Wno-deprecated-declarations)
 target_link_libraries(mapscore_jni mapscore ${OSMESA_LIBRARIES})
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+set_property(
+  SOURCE ../external/djinni/support-lib/jni/djinni_support.cpp
+  APPEND
+  PROPERTY COMPILE_OPTIONS
+  -Wno-unused)
+endif()
+
 # Fiddle with cmake system  TARGET_OS/TARGET_ARCH to form string "linux_amd64" for library filename.
 string(TOLOWER ${CMAKE_SYSTEM_NAME} TARGET_OS)
 string(REPLACE "x86_64" "amd64" TARGET_ARCHITECTURE ${CMAKE_SYSTEM_PROCESSOR})

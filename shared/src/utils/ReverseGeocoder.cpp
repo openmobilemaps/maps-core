@@ -83,8 +83,6 @@ std::vector<::VectorLayerFeatureCoordInfo> ReverseGeocoder::reverseGeocode(const
         return resultVector;
     }
 
-    auto targetVec = Vec2D(converted.x, converted.y);
-
 
     // Calculate the bounds
     double minx = x * tileSize - ORIGIN_SHIFT;
@@ -95,8 +93,6 @@ std::vector<::VectorLayerFeatureCoordInfo> ReverseGeocoder::reverseGeocode(const
     auto topLeft = Coord(CoordinateSystemIdentifiers::EPSG3857(), minx, maxy, 0.0);
     auto bottomRight = Coord(CoordinateSystemIdentifiers::EPSG3857(), maxx, miny, 0.0);
     auto tileBounds = RectCoord(topLeft, bottomRight);
-
-    auto conv = conversionHelper->convertRect(4326, tileBounds);
 
     StringInterner stringTable = ValueKeys::newStringInterner();
     try {

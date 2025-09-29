@@ -38,7 +38,6 @@ class AlphaShaderOpenGl : public BaseShaderProgramOpenGl,
     virtual std::string getFragmentShader() override;
 
   private:
-    const bool projectOntoUnitSphere;
     const std::string programName;
 
     float alpha = 1;

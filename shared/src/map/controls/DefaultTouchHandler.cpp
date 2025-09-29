@@ -18,7 +18,6 @@
 
 DefaultTouchHandler::DefaultTouchHandler(std::shared_ptr<SchedulerInterface> scheduler, float density)
     : scheduler(scheduler)
-    , density(density)
     , clickDistancePx(CLICK_DISTANCE_MM * density / 25.4)
     , state(IDLE)
     , stateTime(0)
@@ -169,7 +168,7 @@ void DefaultTouchHandler::handleTouchDown(Vec2F position) {
     if (strongScheduler) {
         strongScheduler->addTask(std::make_shared<LambdaTask>(
                                                               TaskConfig("LongPressTask", LONG_PRESS_TIMEOUT, TaskPriority::NORMAL, ExecutionEnvironment::COMPUTATION),
-                                                              [=] { checkState(); }));
+                                                              [this] { checkState(); }));
     }
     {
         std::lock_guard<std::recursive_mutex> lock(listenerMutex);
@@ -275,7 +274,7 @@ void DefaultTouchHandler::handleTouchUp() {
             if (strongScheduler) {
                 strongScheduler->addTask(std::make_shared<LambdaTask>(
                                                                       TaskConfig("DoubleTapTask", DOUBLE_TAP_TIMEOUT, TaskPriority::NORMAL, ExecutionEnvironment::COMPUTATION),
-                                                                      [=] { checkState(); }));
+                                                                      [this] { checkState(); }));
             }
         }
 
@@ -311,7 +310,7 @@ void DefaultTouchHandler::handleTouchUp() {
             if (strongScheduler) {
                 strongScheduler->addTask(std::make_shared<LambdaTask>(
                                                                       TaskConfig("OneFingerAfterTwoTask", TWO_FINGER_TOUCH_TIMEOUT, TaskPriority::NORMAL, ExecutionEnvironment::COMPUTATION),
-                                                                      [=] { checkState(); }));
+                                                                      [this] { checkState(); }));
             }
         }
         else {
@@ -361,7 +360,7 @@ void DefaultTouchHandler::handleTwoFingerDown() {
     if (strongScheduler) {
         strongScheduler->addTask(std::make_shared<LambdaTask>(
                                                               TaskConfig("LongPressTask", LONG_PRESS_TIMEOUT, TaskPriority::NORMAL, ExecutionEnvironment::COMPUTATION),
-                                                              [=] { checkState(); }));
+                                                              [this] { checkState(); }));
     }
     {
         std::lock_guard<std::recursive_mutex> lock(listenerMutex);
@@ -411,7 +410,7 @@ void DefaultTouchHandler::handleTwoFingerUp(std::tuple<Vec2F, Vec2F> doubleTouch
         if (strongScheduler) {
             strongScheduler->addTask(std::make_shared<LambdaTask>(
                                                                   TaskConfig("OneFingerAfterTwoTask", TWO_FINGER_TOUCH_TIMEOUT, TaskPriority::NORMAL, ExecutionEnvironment::COMPUTATION),
-                                                                  [=] { checkState(); }));
+                                                                  [this] { checkState(); }));
         }
         {
             std::lock_guard<std::recursive_mutex> lock(listenerMutex);

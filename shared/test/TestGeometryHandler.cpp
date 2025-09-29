@@ -17,7 +17,6 @@ struct ParsingResult {
 
 void parseAndTriangulate(const char *filePath, ParsingResult expectedResult, Catch::Benchmark::Chronometer meter) {
     ::RectCoord tileCoords = {Coord(3857,1224991.657211,6287508.342789,0), Coord(3857,1849991.657211,5662508.342789,0)};
-    const std::optional<Tiled2dMapVectorSettings> vectorSettings = std::nullopt;
     const auto conversionHelper = std::make_shared<CoordinateConversionHelper>(CoordinateSystemFactory::getEpsg3857System(), false);;
 
     auto data = TestData::readFileToBuffer(filePath);

@@ -51,7 +51,6 @@ public:
                                  const size_t symbolTileIndex,
                                  const bool hasCustomTexture,
                                  const double dpFactor,
-                                 const bool persistingSymbolPlacement,
                                  bool is3d,
                                  const Vec3D &tileOrigin,
                                  const uint16_t styleIndex);
@@ -171,8 +170,6 @@ private:
     FeatureValueEvaluationResult<bool> textAllowOverlap = false;
     FeatureValueEvaluationResult<bool> iconAllowOverlap = false;
 
-    bool persistingSymbolPlacement = false;
-
     double dpFactor = 1.0;
     float alpha = 1.0;
     bool isIconOpaque = true;
@@ -196,8 +193,6 @@ private:
     std::optional<RectI> customIconUv;
 
     size_t contentHash = 0;
-
-    double maxCollisionZoom = -1;
 
     bool isPlaced();
 

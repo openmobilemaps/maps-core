@@ -125,8 +125,6 @@ void LineGroup2dLayerObject::setStyles(const std::vector<LineStyle> &styles) {
         auto dValue2 = (dn > 2 ? s.dashArray[2] : 0.0) + dValue1;
         auto dValue3 = (dn > 3 ? s.dashArray[3] : 0.0) + dValue2;
 
-        float dotted = s.dotted ? 0 : 1;
-
         shaderLineStyles.emplace_back(ShaderLineStyle{toHalfFloat(s.width),
                                                       toHalfFloat(s.color.normal.r),
                                                       toHalfFloat(s.color.normal.g),

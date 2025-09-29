@@ -87,11 +87,6 @@ class TextLayerObject : public LayerObjectInterface {
 
     std::shared_ptr<TextShaderInterface> shader;
 
-    Vec2D currentSize = Vec2D(1.0, 1.0);
-    RectD currentUv = RectD(0.0, 0.0, 1.0, 1.0);
-    Anchor currentIconAnchor = Anchor::CENTER;
-    Vec2F currentIconOffset = Vec2F(0.0, 0.0);
-    
     std::vector<std::shared_ptr<RenderConfigInterface>> renderConfig;
 
     Coord referencePoint;
@@ -101,7 +96,6 @@ class TextLayerObject : public LayerObjectInterface {
 
     FontData fontData;
     Vec2F offset;
-    double lineHeight;
     double letterSpacing;
     double maxCharacterAngle;
     float spaceAdvance = 0.0f;
@@ -109,8 +103,6 @@ class TextLayerObject : public LayerObjectInterface {
     std::shared_ptr<MapCameraInterface> camera;
     std::optional<std::vector<::Coord>> lineCoordinates;
     std::vector<::Coord> renderLineCoordinates;
-
-    SymbolAlignment rotationAlignment;
 
 #ifdef DRAW_TEXT_LETTER_BOXES
     std::vector<Quad2dD> letterBoxes;

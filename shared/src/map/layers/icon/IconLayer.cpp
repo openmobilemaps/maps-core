@@ -206,7 +206,6 @@ void IconLayer::setupIconObjects(
     }
 
     for (const auto &iconPair : iconObjects) {
-        const auto &icon = iconPair.first;
         const auto &iconObject = iconPair.second;
 
         iconObject->setup(renderingContext);

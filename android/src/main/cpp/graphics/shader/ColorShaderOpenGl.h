@@ -37,7 +37,6 @@ class ColorShaderOpenGl : public BaseShaderProgramOpenGl,
     virtual std::string getFragmentShader() override;
 
   private:
-    const bool projectOntoUnitSphere;
     const std::string programName;
 
     std::mutex dataMutex;

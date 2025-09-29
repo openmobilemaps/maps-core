@@ -34,10 +34,9 @@ TextLayerObject::TextLayerObject(const std::shared_ptr<TextInterface> &text, con
   referencePoint(Coord(0, 0.0, 0.0, 0.0)),
   fontData(fontData),
   offset(offset),
-  lineHeight(lineHeight),
   letterSpacing(letterSpacing),
   maxCharacterAngle(maxCharacterAngle),
-  boundingBox(Coord(0, 0.0, 0.0, 0.0), Coord(0, 0.0, 0.0, 0.0)), rotationAlignment(rotationAlignment)
+  boundingBox(Coord(0, 0.0, 0.0, 0.0), Coord(0, 0.0, 0.0, 0.0))
 {
     if (text) {
         renderConfig = { std::make_shared<RenderConfig>(text->asGraphicsObject(), 1) };

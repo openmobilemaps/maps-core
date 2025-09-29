@@ -456,8 +456,7 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
                                                                         vectorSource.weakActor<Tiled2dMapVectorSource>(),
                                                                         readyManager,
                                                                         featureStateManager,
-                                                                        symbolDelegate,
-                                                                        mapDescription->persistingSymbolPlacement);
+                                                                        symbolDelegate);
             actor.unsafe()->setAlpha(alpha);
             actor.unsafe()->enableAnimations(animationsEnabled);
             symbolSourceDataManagers[source] = actor;
@@ -939,7 +938,7 @@ void Tiled2dMapVectorLayer::loadSpriteData(int scale, bool fromLocal) {
 
     auto castedMe = std::static_pointer_cast<Tiled2dMapVectorLayer>(shared_from_this());
     std::weak_ptr<Tiled2dMapVectorLayer> weakSelf = castedMe;
-    jsonLoaderFuture->then([context, scale, weakSelf, fromLocal] (auto result) {
+    jsonLoaderFuture->then([context] (auto result) {
         context->jsonResult =  std::make_shared<DataLoaderResult>(result.get());
         
         if (--(context->counter) == 0) {

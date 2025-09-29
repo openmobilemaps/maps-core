@@ -15,8 +15,7 @@
 #include <cstring>
 
 ColorPolygonGroup2dShaderOpenGl::ColorPolygonGroup2dShaderOpenGl(bool isStriped, bool projectOntoUnitSphere)
-        : projectOntoUnitSphere(projectOntoUnitSphere),
-          isStriped(isStriped),
+        : isStriped(isStriped),
           programName(std::string("UBMAP_ColorPolygonGroupShaderOpenGl_") + (projectOntoUnitSphere ? "UnitSphere_" : "")
           + (isStriped ? "striped" : "std")) {
     this->polygonStyles.resize(sizeStyleValuesArray);
@@ -60,8 +59,6 @@ void ColorPolygonGroup2dShaderOpenGl::setupGlObjects(const std::shared_ptr<::Ope
                      GL_DYNAMIC_DRAW);
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
     }
-
-    int program = context->getProgram(programName);
 }
 
 void ColorPolygonGroup2dShaderOpenGl::clearGlObjects() {

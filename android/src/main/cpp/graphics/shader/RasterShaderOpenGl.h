@@ -41,7 +41,6 @@ protected:
 
 private:
     const std::string programName;
-    bool projectOntoUnitSphere;
 
     std::mutex dataMutex;
     std::vector<GLfloat> styleValues = {1.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0};

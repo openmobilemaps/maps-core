@@ -13,8 +13,7 @@
 #include "OpenGlHelper.h"
 
 ColorCircleShaderOpenGl::ColorCircleShaderOpenGl(bool projectOntoUnitSphere)
-        : projectOntoUnitSphere(projectOntoUnitSphere),
-          programName(projectOntoUnitSphere ? "UBMAP_ColorCircleShaderUnitSphereOpenGl" : "UBMAP_ColorCircleShaderOpenGl") {}
+        : programName(projectOntoUnitSphere ? "UBMAP_ColorCircleShaderUnitSphereOpenGl" : "UBMAP_ColorCircleShaderOpenGl") {}
 
 std::string ColorCircleShaderOpenGl::getProgramName() { return programName; }
 

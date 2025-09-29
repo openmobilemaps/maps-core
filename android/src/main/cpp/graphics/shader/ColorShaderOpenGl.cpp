@@ -12,8 +12,8 @@
 #include "OpenGlContext.h"
 
 ColorShaderOpenGl::ColorShaderOpenGl(bool projectOntoUnitSphere)
-        : programName(projectOntoUnitSphere ? "UBMAP_ColorShaderUnitSphereOpenGl" : "UBMAP_ColorShaderOpenGl"),
-          projectOntoUnitSphere(projectOntoUnitSphere) {}
+        : programName(projectOntoUnitSphere ? "UBMAP_ColorShaderUnitSphereOpenGl" : "UBMAP_ColorShaderOpenGl")
+{}
 
 std::string ColorShaderOpenGl::getProgramName() { return programName; }
 

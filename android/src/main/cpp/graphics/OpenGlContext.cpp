@@ -8,6 +8,7 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
+#include "ChronoUtil.h"
 #include "OpenGlContext.h"
 #include "OpenGlRenderTarget.h"
 #include "BaseShaderProgramOpenGl.h"

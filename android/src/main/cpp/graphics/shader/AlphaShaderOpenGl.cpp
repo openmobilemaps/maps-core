@@ -13,8 +13,7 @@
 #include "OpenGlHelper.h"
 
 AlphaShaderOpenGl::AlphaShaderOpenGl(bool projectOntoUnitSphere)
-: projectOntoUnitSphere(projectOntoUnitSphere),
-programName(projectOntoUnitSphere ? "UBMAP_AlphaUnitSphereShaderOpenGl" : "UBMAP_AlphaShaderOpenGl") {}
+: programName(projectOntoUnitSphere ? "UBMAP_AlphaUnitSphereShaderOpenGl" : "UBMAP_AlphaShaderOpenGl") {}
 
 std::string AlphaShaderOpenGl::getProgramName() { return programName; }
 

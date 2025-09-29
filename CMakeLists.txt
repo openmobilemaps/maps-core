@@ -27,9 +27,6 @@ add_library(mapscore STATIC ${mapscore_SRC})
 find_package(OpenGL)
 
 target_include_directories(mapscore PRIVATE
-  external/protozero/protozero/include/
-  external/vtzero/vtzero/include/
-  external/earcut/earcut/include/mapbox/
   shared/src
   shared/src/external/pugixml
   shared/src/external/gpc
@@ -69,6 +66,11 @@ target_include_directories(mapscore PRIVATE
   shared/src/map/scheduling
   shared/src/utils
 )
+target_include_directories(mapscore SYSTEM PRIVATE
+  external/earcut/earcut/include/mapbox/
+  external/protozero/protozero/include/
+  external/vtzero/vtzero/include/
+)
 
 if(NOT APPLE)
   target_include_directories(mapscore PRIVATE
@@ -82,6 +84,8 @@ endif()
 
 target_include_directories(mapscore PUBLIC
   shared/public
+)
+target_include_directories(mapscore SYSTEM PUBLIC
   external/djinni/support-lib/
   external/djinni/support-lib/cpp
 )
@@ -100,7 +104,9 @@ else()
 endif()
 
 target_compile_features(mapscore PRIVATE cxx_std_20)
-target_compile_options(mapscore PRIVATE -Werror -Wno-deprecated -Wno-reorder -fPIC) # fPIC so we can "embed" into shared mapscore_jni
+# -Wmno-deprecated-declarations: djinni uses some deprecated functions in its cpp support library headers. 
+#   Clang thinks that its important enough to warn about (certain) deprecations even in system headers.
+target_compile_options(mapscore PRIVATE -Werror -Wunused -Wno-deprecated-declarations -Wno-reorder -fPIC) # fPIC so we can "embed" into shared mapscore_jni
 target_link_libraries(mapscore ${OPENGL_LIBRARIES})
 
 add_subdirectory(shared/test)

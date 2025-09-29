@@ -74,7 +74,7 @@ void Textured2dLayerObject::setPositions(const ::QuadCoord &coords) {
         origin.z = -1.0 * sin(cy) * sin(cx);
     }
 
-    auto transform = [&origin](const Coord coordinate) -> Vec3D {
+    auto transform = [](const Coord coordinate) -> Vec3D {
         const double x = coordinate.x;
         const double y = coordinate.y;
         const double z = coordinate.z;

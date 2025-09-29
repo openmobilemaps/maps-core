@@ -48,7 +48,6 @@ protected:
   private:
     static std::string getPolygonStylesUBODefinition(bool isStriped);
 
-    bool projectOntoUnitSphere = false;
     bool isStriped = false;
     const std::string programName;
 
