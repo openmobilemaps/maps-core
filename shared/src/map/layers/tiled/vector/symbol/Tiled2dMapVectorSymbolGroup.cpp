@@ -585,11 +585,6 @@ bool Tiled2dMapVectorSymbolGroup::prepareIconObject(SpriteIconDescriptor &sprite
     if(spriteDescriptor.iconInstancedObject && spriteDescriptor.iconAlphas.size() != iconCount) {
         spriteDescriptor.iconInstancedObject->setInstanceCount(iconCount);
         
-        // XXX: changing instance count should not require re-setup!?
-        auto strongMapInterface = this->mapInterface.lock();
-        const auto context = strongMapInterface->getRenderingContext();
-        spriteDescriptor.iconInstancedObject->asGraphicsObject()->setup(context);
-
         spriteDescriptor.iconAlphas.resize(iconCount, 0.0);
         spriteDescriptor.iconRotations.resize(iconCount, 0.0);
         spriteDescriptor.iconScales.resize(iconCount * 2, 0.0);
@@ -602,11 +597,6 @@ bool Tiled2dMapVectorSymbolGroup::prepareIconObject(SpriteIconDescriptor &sprite
     if(spriteDescriptor.stretchedInstancedObject && spriteDescriptor.stretchedIconAlphas.size() != stretchedIconCount) {
         spriteDescriptor.stretchedInstancedObject->setInstanceCount(stretchedIconCount);
         
-        // XXX: changing instance count should not require re-setup!?
-        auto strongMapInterface = this->mapInterface.lock();
-        const auto context = strongMapInterface->getRenderingContext();
-        spriteDescriptor.stretchedInstancedObject->asGraphicsObject()->setup(context);
-
         spriteDescriptor.stretchedIconAlphas.resize(stretchedIconCount, 0.0);
         spriteDescriptor.stretchedIconRotations.resize(stretchedIconCount, 0.0);
         spriteDescriptor.stretchedIconScales.resize(stretchedIconCount * 2, 0.0);
