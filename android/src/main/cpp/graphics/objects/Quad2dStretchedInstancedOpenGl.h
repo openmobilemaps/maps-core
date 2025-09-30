@@ -115,6 +115,7 @@ class Quad2dStretchedInstancedOpenGl : public GraphicsObjectInterface,
     double factorWidth = 1.0;
 
     bool ready = false;
+    uint8_t buffersNotReadyResetValue = 0b00111111;
     uint8_t buffersNotReady = 0b00111111;
     bool textureCoordsReady = false;
     std::recursive_mutex dataMutex;
@@ -122,6 +123,7 @@ class Quad2dStretchedInstancedOpenGl : public GraphicsObjectInterface,
     bool isMaskInversed = false;
 
     int instanceCount = 0;
+    int bufferInstanceCapacity = 0;
 
     GLuint dynamicInstanceDataBuffer;
     int instPositionsHandle;
@@ -155,4 +157,5 @@ class Quad2dStretchedInstancedOpenGl : public GraphicsObjectInterface,
 
 private:
     bool writeToDynamicInstanceDataBuffer(const ::SharedBytes &data, GLuint targetOffsetBytes);
+    void setBufferInstanceCapacity(int count);
 };

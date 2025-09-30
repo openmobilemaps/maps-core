@@ -123,6 +123,7 @@ protected:
     bool isMaskInversed = false;
 
     int instanceCount = 0;
+    int bufferInstanceCapacity = 0;
 
     GLuint dynamicInstanceDataBuffer;
     int instPositionsHandle;
@@ -150,5 +151,5 @@ protected:
 
 private:
     bool writeToDynamicInstanceDataBuffer(const ::SharedBytes &data, int targetOffsetBytes);
-
+    void setBufferInstanceCapacity(int count);
 };
