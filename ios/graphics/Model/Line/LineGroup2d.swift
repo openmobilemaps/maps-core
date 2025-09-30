@@ -87,7 +87,11 @@ final class LineGroup2d: BaseGraphicsObject, @unchecked Sendable {
             }
 
             encoder.setDepthStencilState(renderPassStencilState)
-            encoder.setStencilReferenceValue(0b1100_0000)
+            if isMasked {
+                encoder.setStencilReferenceValue(0b1100_0000)
+            } else {
+                encoder.setStencilReferenceValue(0b0000_0000)
+            }
         }
 
         shader.screenPixelAsRealMeterFactor = Float(screenPixelAsRealMeterFactor)
