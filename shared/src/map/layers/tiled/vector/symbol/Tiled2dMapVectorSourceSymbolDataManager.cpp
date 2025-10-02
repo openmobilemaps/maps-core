@@ -605,15 +605,12 @@ void Tiled2dMapVectorSourceSymbolDataManager::setupExistingSymbolWithSprite(std:
     for (const auto &[tile, symbolGroupMap]: tileSymbolGroupMap) {
         for (const auto &[layerIdentifier, symbolGroups]: symbolGroupMap) {
             for (auto &symbolGroup: std::get<1>(symbolGroups)) {
-                symbolGroup.message(MailboxExecutionEnvironment::graphics, MFN(&Tiled2dMapVectorSymbolGroup::addSprite), spriteData, spriteTexture);
+                //MailboxExecutionEnvironment::graphics, MFN(&Tiled2dMapVectorSymbolGroup::addSprite), spriteData, spriteTexture);
+                symbolGroup.syncAccess([spriteData, spriteTexture](auto group) {
+                    group->addSprite(spriteData, spriteTexture);
+                });
             }
         }
-    }
-
-    // XXX: this needs to happen _after_ all addSprite done. Different actor, ordering still guaranteed?
-    if (!tileSymbolGroupMap.empty()) {
-        auto selfActor = WeakActor(mailbox, weak_from_this());
-        selfActor.message(MailboxExecutionEnvironment::graphics, MFN(&Tiled2dMapVectorSourceSymbolDataManager::pregenerateRenderPasses));
     }
 }
 
@@ -690,6 +687,7 @@ bool Tiled2dMapVectorSourceSymbolDataManager::update(long long now) {
     const auto vpMatrix = camera->asCameraInterface()->getVpMatrix();
     const auto origin = camera->asCameraInterface()->getOrigin();
 
+    bool anyRenderObjectsChanged = false;
     for (const auto &[tile, symbolGroupsMap]: tileSymbolGroupMap) {
         const auto tileState = tileStateMap.find(tile);
         if (tileState == tileStateMap.end() || tileState->second != TileState::VISIBLE) {
@@ -698,11 +696,16 @@ bool Tiled2dMapVectorSourceSymbolDataManager::update(long long now) {
         for (const auto &[layerIdentifier, symbolGroups]: symbolGroupsMap) {
             const auto &description = layerDescriptions.at(layerIdentifier);
             for (auto &symbolGroup: std::get<1>(symbolGroups)) {
-                symbolGroup.syncAccess([&zoomIdentifier, &rotation, &scaleFactor, &now, &viewPortSize, &vpMatrix, &origin](auto group){
-                    group->update(zoomIdentifier, rotation, scaleFactor, now, viewPortSize, vpMatrix, origin);
+                bool renderObjectsChanged = symbolGroup.syncAccess([&zoomIdentifier, &rotation, &scaleFactor, &now, &viewPortSize, &vpMatrix, &origin](auto group){
+                    return group->update(zoomIdentifier, rotation, scaleFactor, now, viewPortSize, vpMatrix, origin);
                 });
+                anyRenderObjectsChanged |= renderObjectsChanged;
             }
         }
+    }
+
+    if (anyRenderObjectsChanged) {
+        pregenerateRenderPasses();
     }
 
     if (animationCoordinatorMap->isAnimating()) {
@@ -746,6 +749,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::pregenerateRenderPasses() {
     }
 
 
+    // XXX: not good, this could re-generate the render passes for the tile layer many times for the same frame. Options just set a flag or send a message?
     vectorLayer.syncAccess([source = this->source, &renderDescriptions](const auto &layer){
         if(auto strong = layer.lock()) {
             strong->onRenderPassUpdate(source, true, renderDescriptions);

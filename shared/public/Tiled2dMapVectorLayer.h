@@ -132,8 +132,6 @@ class Tiled2dMapVectorLayer : public Tiled2dMapLayer,
 
     virtual float getAlpha() override;
 
-    void pregenerateRenderPasses();
-
     void forceReload() override;
 
     void onTilesUpdated(const std::string &layerName, VectorSet<Tiled2dMapRasterTileInfo> currentTileInfos) override;
@@ -248,6 +246,8 @@ class Tiled2dMapVectorLayer : public Tiled2dMapLayer,
     virtual void didLoadStyleJson(const std::optional<TiledLayerError> &error);
 
   private:
+    void pregenerateRenderPasses();
+
     void scheduleStyleJsonLoading();
 
     void initializeVectorLayer();
