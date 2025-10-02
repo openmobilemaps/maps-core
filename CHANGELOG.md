@@ -1,5 +1,14 @@
 # Changelog for Open Mobile Maps
 
+## Version 3.6.0
+- Improved camera behavior for initial 3d configurations on iOS
+- Made the Tiled2dMapVectorSource layer independent
+- Fixed the comparison logic for determining necessary line style updates
+- Fixed a bug with propagating transition configuration values to vector layer symbols and labels
+- Adjusted the behavior of a geojson source when limiting it with a minimal zoom level
+- Fixed iOS line rendering when isPassMasked 
+- Multiple smaller improvements and code clean-ups
+
 ## Version 3.5.0
 - Added support for self-masking for vector layer lines
 - Improved the rendering of lines with sharp corners
