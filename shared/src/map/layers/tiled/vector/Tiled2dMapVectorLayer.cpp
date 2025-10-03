@@ -936,8 +936,7 @@ void Tiled2dMapVectorLayer::loadSpriteData(SpriteSourceDescription spriteSource,
 
     std::shared_ptr<::djinni::Future<::DataLoaderResult>> jsonLoaderFuture;
     if(localDataProvider && fromLocal) {
-        // TODO: extend local data API to allow different sprite sources
-        jsonLoaderFuture = std::make_shared<::djinni::Future<::DataLoaderResult>>(localDataProvider->loadSpriteJsonAsync(scale));
+        jsonLoaderFuture = std::make_shared<::djinni::Future<::DataLoaderResult>>(localDataProvider->loadSpriteJsonAsync(spriteSource.identifier, urlData, scale));
     } else {
         jsonLoaderFuture = std::make_shared<::djinni::Future<::DataLoaderResult>>(LoaderHelper::loadDataAsync(urlData, std::nullopt, loaders));
     }
@@ -953,8 +952,8 @@ void Tiled2dMapVectorLayer::loadSpriteData(SpriteSourceDescription spriteSource,
     });
 
     std::shared_ptr<::djinni::Future<::TextureLoaderResult>> textureLoaderFuture;
-    if(localDataProvider) {
-        textureLoaderFuture = std::make_shared<::djinni::Future<::TextureLoaderResult>>(localDataProvider->loadSpriteAsync(scale));
+    if(localDataProvider && fromLocal) {
+        textureLoaderFuture = std::make_shared<::djinni::Future<::TextureLoaderResult>>(localDataProvider->loadSpriteAsync(spriteSource.identifier, urlTexture, scale));
     } else {
         textureLoaderFuture = std::make_shared<::djinni::Future<::TextureLoaderResult>>(LoaderHelper::loadTextureAsync(urlTexture, std::nullopt, loaders));
     }
@@ -1030,18 +1029,20 @@ void Tiled2dMapVectorLayer::loadSpriteData(SpriteSourceDescription spriteSource,
                 return;
             }
         }
-        
-       
-        selfActor.message(MFN(&Tiled2dMapVectorLayer::didLoadSpriteData), spriteSource.identifier, jsonData, spriteTexture);
+        if (jsonData && spriteTexture) {        
+            selfActor.message(MFN(&Tiled2dMapVectorLayer::didLoadSpriteData), spriteSource.identifier, jsonData, spriteTexture);
+        }
     });
 }
 
 void Tiled2dMapVectorLayer::didLoadSpriteData(std::string spriteId, std::shared_ptr<SpriteData> spriteData, std::shared_ptr<::TextureHolderInterface> spriteTexture) {
-    LogError << "didLoadSpriteData: " <<= spriteId;
     this->sprites.emplace(spriteId, std::make_pair(spriteData, spriteTexture));
 
     for (const auto &[source, manager] : symbolSourceDataManagers) {
         manager.message(MFN(&Tiled2dMapVectorSourceSymbolDataManager::setSprites), spriteId, spriteData, spriteTexture);
+    }
+    for (const auto &[source, manager] : sourceDataManagers) {
+        manager.message(MFN(&Tiled2dMapVectorSourceTileDataManager::setSprites), spriteId, spriteData, spriteTexture);
     }
 
     // TODO: support multi sprite everywhere 
@@ -1049,10 +1050,6 @@ void Tiled2dMapVectorLayer::didLoadSpriteData(std::string spriteId, std::shared_
     // - Tiled2dMapVectorBackgroundSubLayer
     if(spriteId != "default") {
       return;
-    }
-
-    for (const auto &[source, manager] : sourceDataManagers) {
-        manager.message(MFN(&Tiled2dMapVectorSourceTileDataManager::setSprites), spriteId, spriteData, spriteTexture);
     }
 
     if (backgroundLayer) {
