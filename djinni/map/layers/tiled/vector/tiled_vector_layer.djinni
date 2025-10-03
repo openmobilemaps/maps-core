@@ -110,8 +110,8 @@ tiled_2d_map_vector_layer_selection_callback_interface = interface +c +j +o {
 tiled_2d_map_vector_layer_local_data_provider_interface = interface +c +j +o {
     get_style_json(): optional<string>;
 
-    load_sprite_async(scale: i32): future<texture_loader_result>;
-    load_sprite_json_async(scale: i32): future<data_loader_result>;
+    load_sprite_async(sprite_id: string, url: string, scale: i32): future<texture_loader_result>;
+    load_sprite_json_async(sprite_id: string, url: string, scale: i32): future<data_loader_result>;
     load_geojson(source_name: string, url: string): future<data_loader_result>;
 }
 

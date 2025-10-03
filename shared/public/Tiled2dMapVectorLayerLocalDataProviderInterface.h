@@ -16,9 +16,9 @@ public:
 
     virtual std::optional<std::string> getStyleJson() = 0;
 
-    virtual ::djinni::Future<::TextureLoaderResult> loadSpriteAsync(int32_t scale) = 0;
+    virtual ::djinni::Future<::TextureLoaderResult> loadSpriteAsync(const std::string & spriteId, const std::string & url, int32_t scale) = 0;
 
-    virtual ::djinni::Future<::DataLoaderResult> loadSpriteJsonAsync(int32_t scale) = 0;
+    virtual ::djinni::Future<::DataLoaderResult> loadSpriteJsonAsync(const std::string & spriteId, const std::string & url, int32_t scale) = 0;
 
     virtual ::djinni::Future<::DataLoaderResult> loadGeojson(const std::string & sourceName, const std::string & url) = 0;
 };
