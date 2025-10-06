@@ -1,0 +1,500 @@
+{
+  "scree_very_large_1": {
+    "width": 128,
+    "height": 128,
+    "x": 0,
+    "y": 0,
+    "pixelRatio": 1.0
+  },
+  "scree_very_large_2": {
+    "width": 128,
+    "height": 128,
+    "x": 128,
+    "y": 0,
+    "pixelRatio": 1.0
+  },
+  "scree_very_large_3": {
+    "width": 128,
+    "height": 128,
+    "x": 0,
+    "y": 128,
+    "pixelRatio": 1.0
+  },
+  "scree_very_large_4": {
+    "width": 128,
+    "height": 128,
+    "x": 128,
+    "y": 128,
+    "pixelRatio": 1.0
+  },
+  "scree_large_1": {
+    "width": 64,
+    "height": 64,
+    "x": 256,
+    "y": 0,
+    "pixelRatio": 1.0
+  },
+  "scree_large_2": {
+    "width": 64,
+    "height": 64,
+    "x": 320,
+    "y": 0,
+    "pixelRatio": 1.0
+  },
+  "scree_large_3": {
+    "width": 64,
+    "height": 64,
+    "x": 384,
+    "y": 0,
+    "pixelRatio": 1.0
+  },
+  "scree_large_4": {
+    "width": 64,
+    "height": 64,
+    "x": 448,
+    "y": 0,
+    "pixelRatio": 1.0
+  },
+  "wetland_blue": {
+    "width": 64,
+    "height": 64,
+    "x": 256,
+    "y": 128,
+    "pixelRatio": 1.0
+  },
+  "hazard_grey": {
+    "width": 39,
+    "height": 35,
+    "x": 320,
+    "y": 128,
+    "pixelRatio": 1.0
+  },
+  "scree_medium_1": {
+    "width": 32,
+    "height": 32,
+    "x": 359,
+    "y": 128,
+    "pixelRatio": 1.0
+  },
+  "scree_medium_2": {
+    "width": 32,
+    "height": 32,
+    "x": 391,
+    "y": 128,
+    "pixelRatio": 1.0
+  },
+  "scree_medium_3": {
+    "width": 32,
+    "height": 32,
+    "x": 423,
+    "y": 128,
+    "pixelRatio": 1.0
+  },
+  "scree_medium_4": {
+    "width": 32,
+    "height": 32,
+    "x": 455,
+    "y": 128,
+    "pixelRatio": 1.0
+  },
+  "windturbine_grey": {
+    "width": 24,
+    "height": 32,
+    "x": 487,
+    "y": 128,
+    "pixelRatio": 1.0
+  },
+  "airplane_large_grey": {
+    "width": 28,
+    "height": 28,
+    "x": 0,
+    "y": 256,
+    "pixelRatio": 1.0
+  },
+  "airplane_medium_grey": {
+    "width": 26,
+    "height": 26,
+    "x": 28,
+    "y": 256,
+    "pixelRatio": 1.0
+  },
+  "communications_tower_grey": {
+    "width": 18,
+    "height": 26,
+    "x": 54,
+    "y": 256,
+    "pixelRatio": 1.0
+  },
+  "observation_tower_grey": {
+    "width": 18,
+    "height": 25,
+    "x": 72,
+    "y": 256,
+    "pixelRatio": 1.0
+  },
+  "airplane_small_grey": {
+    "width": 24,
+    "height": 24,
+    "x": 90,
+    "y": 256,
+    "pixelRatio": 1.0
+  },
+  "arrow_line_blue": {
+    "width": 24,
+    "height": 19,
+    "x": 114,
+    "y": 256,
+    "pixelRatio": 1.0
+  },
+  "golf_grey": {
+    "width": 14,
+    "height": 18,
+    "x": 138,
+    "y": 256,
+    "pixelRatio": 1.0
+  },
+  "arrow_blue": {
+    "width": 6,
+    "height": 16,
+    "x": 152,
+    "y": 256,
+    "pixelRatio": 1.0
+  },
+  "arrow_brown": {
+    "width": 6,
+    "height": 16,
+    "x": 158,
+    "y": 256,
+    "pixelRatio": 1.0
+  },
+  "arrow_grey": {
+    "width": 6,
+    "height": 16,
+    "x": 164,
+    "y": 256,
+    "pixelRatio": 1.0
+  },
+  "castle_grey": {
+    "width": 10,
+    "height": 16,
+    "x": 170,
+    "y": 256,
+    "pixelRatio": 1.0
+  },
+  "forkknife_crossed_grey": {
+    "width": 17,
+    "height": 16,
+    "x": 180,
+    "y": 256,
+    "pixelRatio": 1.0
+  },
+  "orchard_green": {
+    "width": 16,
+    "height": 16,
+    "x": 197,
+    "y": 256,
+    "pixelRatio": 1.0
+  },
+  "scree_small_1": {
+    "width": 16,
+    "height": 16,
+    "x": 213,
+    "y": 256,
+    "pixelRatio": 1.0
+  },
+  "scree_small_2": {
+    "width": 16,
+    "height": 16,
+    "x": 229,
+    "y": 256,
+    "pixelRatio": 1.0
+  },
+  "scree_small_3": {
+    "width": 16,
+    "height": 16,
+    "x": 245,
+    "y": 256,
+    "pixelRatio": 1.0
+  },
+  "scree_small_4": {
+    "width": 16,
+    "height": 16,
+    "x": 261,
+    "y": 256,
+    "pixelRatio": 1.0
+  },
+  "vinyard_green": {
+    "width": 16,
+    "height": 16,
+    "x": 277,
+    "y": 256,
+    "pixelRatio": 1.0
+  },
+  "viewpoint_grey": {
+    "width": 18,
+    "height": 15,
+    "x": 293,
+    "y": 256,
+    "pixelRatio": 1.0
+  },
+  "box_white_grey_casing_stretch": {
+    "width": 12,
+    "height": 14,
+    "x": 311,
+    "y": 256,
+    "pixelRatio": 1.0,
+    "stretchX":[[4,8]]
+  },
+  "box_white_grey_casing_10": {
+    "width": 60,
+    "height": 14,
+    "x": 323,
+    "y": 256,
+    "pixelRatio": 1.0
+  },
+  "box_white_grey_casing_11": {
+    "width": 66,
+    "height": 14,
+    "x": 383,
+    "y": 256,
+    "pixelRatio": 1.0
+  },
+  "box_white_grey_casing_12": {
+    "width": 72,
+    "height": 14,
+    "x": 0,
+    "y": 284,
+    "pixelRatio": 1.0
+  },
+  "box_white_grey_casing_2": {
+    "width": 18,
+    "height": 14,
+    "x": 72,
+    "y": 284,
+    "pixelRatio": 1.0
+  },
+  "box_white_grey_casing_3": {
+    "width": 22,
+    "height": 14,
+    "x": 90,
+    "y": 284,
+    "pixelRatio": 1.0
+  },
+  "box_white_grey_casing_4": {
+    "width": 28,
+    "height": 14,
+    "x": 112,
+    "y": 284,
+    "pixelRatio": 1.0
+  },
+  "box_white_grey_casing_5": {
+    "width": 34,
+    "height": 14,
+    "x": 140,
+    "y": 284,
+    "pixelRatio": 1.0
+  },
+  "box_white_grey_casing_6": {
+    "width": 38,
+    "height": 14,
+    "x": 174,
+    "y": 284,
+    "pixelRatio": 1.0
+  },
+  "box_white_grey_casing_7": {
+    "width": 44,
+    "height": 14,
+    "x": 212,
+    "y": 284,
+    "pixelRatio": 1.0
+  },
+  "box_white_grey_casing_8": {
+    "width": 50,
+    "height": 14,
+    "x": 256,
+    "y": 284,
+    "pixelRatio": 1.0
+  },
+  "box_white_grey_casing_9": {
+    "width": 54,
+    "height": 14,
+    "x": 306,
+    "y": 284,
+    "pixelRatio": 1.0
+  },
+  "camping_grey": {
+    "width": 16,
+    "height": 14,
+    "x": 360,
+    "y": 284,
+    "pixelRatio": 1.0
+  },
+  "hospital_grey": {
+    "width": 14,
+    "height": 14,
+    "x": 376,
+    "y": 284,
+    "pixelRatio": 1.0
+  },
+  "cave_grey": {
+    "width": 18,
+    "height": 13,
+    "x": 390,
+    "y": 284,
+    "pixelRatio": 1.0
+  },
+  "helicopter_grey": {
+    "width": 25,
+    "height": 13,
+    "x": 408,
+    "y": 284,
+    "pixelRatio": 1.0
+  },
+  "circle_circle_dark_grey_12": {
+    "width": 12,
+    "height": 12,
+    "x": 433,
+    "y": 284,
+    "pixelRatio": 1.0
+  },
+  "circle_dark_grey_12": {
+    "width": 12,
+    "height": 12,
+    "x": 445,
+    "y": 284,
+    "pixelRatio": 1.0
+  },
+  "dot_circle_dark_grey_12": {
+    "width": 12,
+    "height": 12,
+    "x": 457,
+    "y": 284,
+    "pixelRatio": 1.0
+  },
+  "circle_circle_dark_grey_10": {
+    "width": 10,
+    "height": 10,
+    "x": 469,
+    "y": 284,
+    "pixelRatio": 1.0
+  },
+  "circle_dark_grey_10": {
+    "width": 10,
+    "height": 10,
+    "x": 479,
+    "y": 284,
+    "pixelRatio": 1.0
+  },
+  "dot_circle_dark_grey_10": {
+    "width": 10,
+    "height": 10,
+    "x": 489,
+    "y": 284,
+    "pixelRatio": 1.0
+  },
+  "waterfall_blue": {
+    "width": 6,
+    "height": 9,
+    "x": 499,
+    "y": 284,
+    "pixelRatio": 1.0
+  },
+  "circle_dark_grey_8": {
+    "width": 8,
+    "height": 8,
+    "x": 449,
+    "y": 256,
+    "pixelRatio": 1.0
+  },
+  "dot_circle_dark_grey_8": {
+    "width": 8,
+    "height": 8,
+    "x": 457,
+    "y": 256,
+    "pixelRatio": 1.0
+  },
+  "dot_dark_grey_8": {
+    "width": 8,
+    "height": 8,
+    "x": 465,
+    "y": 256,
+    "pixelRatio": 1.0
+  },
+  "square_red": {
+    "width": 7,
+    "height": 7,
+    "x": 505,
+    "y": 284,
+    "pixelRatio": 1.0
+  },
+  "circle_dark_grey_6": {
+    "width": 6,
+    "height": 6,
+    "x": 473,
+    "y": 256,
+    "pixelRatio": 1.0
+  },
+  "dot_circle_dark_grey_6": {
+    "width": 6,
+    "height": 6,
+    "x": 479,
+    "y": 256,
+    "pixelRatio": 1.0
+  },
+  "dot_dark_grey_6": {
+    "width": 6,
+    "height": 6,
+    "x": 485,
+    "y": 256,
+    "pixelRatio": 1.0
+  },
+  "circle_dark_grey_4": {
+    "width": 4,
+    "height": 4,
+    "x": 491,
+    "y": 256,
+    "pixelRatio": 1.0
+  },
+  "dot_blue": {
+    "width": 4,
+    "height": 4,
+    "x": 495,
+    "y": 256,
+    "pixelRatio": 1.0
+  },
+  "dot_dark_grey_4": {
+    "width": 4,
+    "height": 4,
+    "x": 499,
+    "y": 256,
+    "pixelRatio": 1.0
+  },
+  "dot_red": {
+    "width": 4,
+    "height": 4,
+    "x": 503,
+    "y": 256,
+    "pixelRatio": 1.0
+  },
+  "dot_dark_grey_3": {
+    "width": 3,
+    "height": 3,
+    "x": 507,
+    "y": 256,
+    "pixelRatio": 1.0
+  },
+  "line_blue_long": {
+    "width": 24,
+    "height": 2,
+    "x": 0,
+    "y": 298,
+    "pixelRatio": 1.0
+  },
+  "line_blue_short": {
+    "width": 18,
+    "height": 2,
+    "x": 24,
+    "y": 298,
+    "pixelRatio": 1.0
+  }
+}

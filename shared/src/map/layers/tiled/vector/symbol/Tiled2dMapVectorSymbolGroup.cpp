@@ -625,9 +625,12 @@ bool Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
         size_t icons;
         size_t stretchedIcons;
     };
+    // TODO: avoid the strings. One way could be to invert the evaluation;
+    // instead of giving back a string getUpdatedSpriteSheetId, pass in the
+    // available sprite sheets and do the lookup directly during the
+    // evaluation; return a sprite icon reference.
     std::unordered_map<std::string, IconCount> iconCounts;
     for (auto const &object: symbolObjects) {
-        // TODO: invert this evaluation; instead of giving back a string here, pass in the available sprite sheets and do the lookup directly during the evaluation; return a sprite icon reference.
         auto spriteSheetId = object->getUpdatedSpriteSheetId(zoomIdentifier);
         SpriteIconDescriptor *spriteDescriptor = nullptr;
         if(!object->hasCustomTexture) {
@@ -635,7 +638,6 @@ bool Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
             spriteDescriptor = spriteIt != sprites.end() ? &spriteIt->second : nullptr;
         }
         if(spriteDescriptor) {
-            // XXX still no guarantee that icon image will exist... but good enought for now. See TODO above.
             const auto objectInstanceCounts = object->getInstanceCounts();
             auto &sheetCounts = iconCounts[*spriteSheetId];
             sheetCounts.icons += objectInstanceCounts.icons;
@@ -664,11 +666,11 @@ bool Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
                 object->updateIconProperties(page.iconPositions, page.iconScales, page.iconRotations, page.iconAlphas, page.iconOffsets, page.iconTextureCoordinates, offset, zoomIdentifier,scaleFactor, rotation, now, viewPortSize, nullptr, nullptr);
             } else if (spriteDescriptor) {
                 if(object->getInstanceCounts().icons) {
-                    int &iconOffset = iconOffsets[spriteDescriptor->spriteData->identifier]; // XXX string
+                    int &iconOffset = iconOffsets[spriteDescriptor->spriteData->identifier];
                     object->updateIconProperties(spriteDescriptor->iconPositions, spriteDescriptor->iconScales, spriteDescriptor->iconRotations, spriteDescriptor->iconAlphas, spriteDescriptor->iconOffsets, spriteDescriptor->iconTextureCoordinates, iconOffset, zoomIdentifier,
                                                  scaleFactor, rotation, now, viewPortSize, spriteDescriptor->spriteTexture, spriteDescriptor->spriteData);
                 } else {
-                    int &stretchedIconOffset = stretchedIconOffsets[spriteDescriptor->spriteData->identifier]; // XXX string
+                    int &stretchedIconOffset = stretchedIconOffsets[spriteDescriptor->spriteData->identifier];
                     object->updateStretchIconProperties(spriteDescriptor->stretchedIconPositions, spriteDescriptor->stretchedIconScales, spriteDescriptor->stretchedIconRotations,
                                                         spriteDescriptor->stretchedIconAlphas, spriteDescriptor->stretchedIconStretchInfos, spriteDescriptor->stretchedIconTextureCoordinates, stretchedIconOffset, zoomIdentifier,
                                                         scaleFactor, rotation, now, viewPortSize, spriteDescriptor->spriteTexture, spriteDescriptor->spriteData);

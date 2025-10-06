@@ -372,7 +372,7 @@ bool Quad2dInstancedOpenGl::writeToDynamicInstanceDataBuffer(const ::SharedBytes
         return false;
     }
     glBindBuffer(GL_ARRAY_BUFFER, dynamicInstanceDataBuffer);
-    glBufferSubData(GL_ARRAY_BUFFER, targetOffsetBytes * instanceCount, data.elementCount * data.bytesPerElement, (void *) data.address);
+    glBufferSubData(GL_ARRAY_BUFFER, targetOffsetBytes * bufferInstanceCapacity, data.elementCount * data.bytesPerElement, (void *) data.address);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     return true;
 }
