@@ -115,8 +115,8 @@ private:
     const WeakActor<Tiled2dMapVectorFontProvider> fontProvider;
 
     struct SpriteIconDescriptor {
-        std::shared_ptr<TextureHolderInterface> spriteTexture; // XXX: needed?
-        std::shared_ptr<SpriteData> spriteData; // XXX: needed?
+        std::shared_ptr<TextureHolderInterface> spriteTexture;
+        std::shared_ptr<SpriteData> spriteData;
 
         VectorModificationWrapper<float> iconPositions;
         VectorModificationWrapper<float> iconScales;

@@ -1,0 +1,44 @@
+{
+  "version": 8,
+  "name": "s",
+  "sources": {
+    "wsource": {
+      "type": "geojson",
+      "minzoom": 0,
+      "maxzoom": 25,
+      "data": {
+        "type": "Point",
+        "coordinates": [102.0, 0.5]
+      }
+    }
+  },
+  "sprite": [
+    {
+      "id": "roadsigns",
+      "url": "https://example.com/myroadsigns"
+    },
+    {
+      "id": "shops",
+      "url": "https://example2.com/someurl"
+    },
+    {
+      "id": "default",
+      "url": "https://example2.com/anotherurl"
+    }
+  ],
+  "layers": [
+    {
+      "id": "w",
+      "type": "fill",
+      "metadata": {
+        "blend-mode": "multiply"
+      },
+      "minzoom": 0,
+      "maxzoom": 6,
+      "source": "wsource",
+      "paint": {
+        "fill-color": "rgb(202, 154, 255)"
+      }
+    }
+  ]
+}

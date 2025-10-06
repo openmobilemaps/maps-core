@@ -1,5 +1,7 @@
 package io.openmobilemaps.mapscore;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import io.openmobilemaps.mapscore.map.util.MapTileRenderer;
 import io.openmobilemaps.mapscore.map.util.OffscreenMapRenderer;
 import io.openmobilemaps.mapscore.map.util.Tiled2dMapVectorLayerBuilder;
@@ -8,11 +10,12 @@ import io.openmobilemaps.mapscore.shared.map.coordinates.Coord;
 import io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateSystemIdentifiers;
 import io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord;
 import io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.Tiled2dMapVectorLayerInterface;
+import io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.VectorLayerFeatureInfoValue;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -21,16 +24,19 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import javax.imageio.ImageIO;
 
 public class OffscreenMapRendererTest {
-    private static final boolean updateGolden = Boolean.parseBoolean(System.getProperty("updateGolden", "false"));
+    private static final boolean updateGolden =
+            Boolean.parseBoolean(System.getProperty("updateGolden", "false"));
 
     private static String loadResource(String resourceName) {
         try {
             try (InputStream resource =
-                         OffscreenMapRendererTest.class.getResourceAsStream("/" + resourceName)) {
+                    OffscreenMapRendererTest.class.getResourceAsStream("/" + resourceName)) {
                 if (resource == null) {
                     fail("Resource not found: " + resourceName);
                 }
@@ -38,6 +44,20 @@ public class OffscreenMapRendererTest {
             }
         } catch (IOException e) {
             return fail("Failed to load resource", e);
+        }
+    }
+
+    private static BufferedImage loadImageResource(String resourceName) {
+        try {
+            try (InputStream resource =
+                    OffscreenMapRendererTest.class.getResourceAsStream("/" + resourceName)) {
+                if (resource == null) {
+                    fail("Resource not found: " + resourceName);
+                }
+                return ImageIO.read(resource);
+            }
+        } catch (IOException e) {
+            return fail("Failed to load image resource", e);
         }
     }
 
@@ -53,15 +73,6 @@ public class OffscreenMapRendererTest {
                 .build();
     }
 
-    private static String addSuffixBeforeExtension(String filename, String suffix) {
-        int dotIndex = filename.lastIndexOf('.');
-        if (dotIndex == -1) {
-            return filename + suffix; // no extension found
-        }
-        return filename.substring(0, dotIndex) + suffix + filename.substring(dotIndex);
-    }
-
-
     private static RectCoord bboxCH() {
         // rough bbox of geojson data in in style_geojson_ch.json
         return new RectCoord(
@@ -69,28 +80,88 @@ public class OffscreenMapRendererTest {
                 new Coord(CoordinateSystemIdentifiers.EPSG4326(), 10.5, 45.8, 0.0));
     }
 
-    private static void assertImageMatchesGolden(BufferedImage actual, String name) {
+    private static File dumpTestImage(BufferedImage image, String name, String state) {
         final String fileName =
-                OffscreenMapRendererTest.class.getSimpleName() + "_" + name + ".png";
+                OffscreenMapRendererTest.class.getSimpleName() + "_" + name + "_" + state + ".png";
 
         // Create test-diffs directory for better organization
         File diffDir = new File("test-diffs");
         diffDir.mkdirs();
 
-        // Dump the actual image for analysis and/or updating the golden file.
-        File actualFile = new File(diffDir, addSuffixBeforeExtension(fileName, "_actual"));
+        File file = new File(diffDir, fileName);
         try {
-            ImageIO.write(actual, "png", actualFile);
-            System.out.println("Wrote actual image to: " + actualFile.getAbsolutePath());
+            ImageIO.write(image, "png", file);
+            System.out.println("Wrote " + state + " image to: " + file.getAbsolutePath());
         } catch (IOException e) {
-            System.err.println("Failed to write actual image: " + e.getMessage());
+            System.err.println("Failed to write image: " + e.getMessage());
         }
+        return file;
+    }
+
+    private static void assertImageMatchesReference(
+            BufferedImage expected, BufferedImage actual, String name) {
+        assertImageMatchesReference(expected, actual, name, null);
+    }
+
+    private static void assertImageMatchesReference(
+            BufferedImage expected, BufferedImage actual, String name, String message) {
+        final String fileName =
+                OffscreenMapRendererTest.class.getSimpleName() + "_" + name + ".png";
+
+        // Dump the actual image for analysis.
+        final var actualFile = dumpTestImage(actual, name, "actual");
+
+        assertEquals(expected.getHeight(), actual.getHeight());
+        assertEquals(expected.getWidth(), actual.getWidth());
+        final int w = expected.getWidth();
+        final int h = expected.getHeight();
+        int[] expectedRGB = expected.getRGB(0, 0, w, h, null, 0, w);
+        int[] actualRGB = actual.getRGB(0, 0, w, h, null, 0, w);
+
+        // Save golden image for comparison
+        final var expectedFile = dumpTestImage(expected, name, "expected");
+
+        // Create visual diff
+        BufferedImage diffImage = createDiffImage(expected, actual);
+        final var diffFile = dumpTestImage(diffImage, name, "diff");
+
+        // Count different pixels for a more informative error message
+        int differentPixels = 0;
+        for (int i = 0; i < expectedRGB.length; i++) {
+            if (expectedRGB[i] != actualRGB[i]) {
+                differentPixels++;
+            }
+        }
+
+        if (differentPixels > 0) {
+            double percentDifferent = (differentPixels * 100.0) / expectedRGB.length;
+            String errorMsg =
+                    String.format(
+                            """
+                            Images differ: %d pixels (%.2f%%) are different.
+                            Check artifacts: %s, %s, %s.
+                            """,
+                            differentPixels,
+                            percentDifferent,
+                            actualFile.getName(),
+                            expectedFile.getName(),
+                            diffFile.getName());
+            if (message != null) {
+                errorMsg += "\n" + message;
+            }
+            fail(errorMsg);
+        }
+    }
+
+    private static void assertImageMatchesGolden(BufferedImage actual, String name) {
+        final String fileName =
+                OffscreenMapRendererTest.class.getSimpleName() + "_" + name + ".png";
 
         if (updateGolden) {
             // Copy the actual image to resources directory when updating golden
             // NOTE: path is relative to current working directory.
             try {
-                Path goldenResource = Paths.get("src","test","resources", "golden", fileName);
+                Path goldenResource = Paths.get("src", "test", "resources", "golden", fileName);
                 goldenResource.getParent().toFile().mkdirs();
                 ImageIO.write(actual, "png", goldenResource.toFile());
                 System.out.println("Updated golden image: " + goldenResource.toAbsolutePath());
@@ -104,64 +175,19 @@ public class OffscreenMapRendererTest {
         InputStream goldenImgStream =
                 OffscreenMapRendererTest.class.getResourceAsStream(goldenImgResource);
         if (goldenImgStream == null) {
+            dumpTestImage(actual, name, "actual");
             fail("required resource " + goldenImgResource + " not found.");
         }
         BufferedImage golden = null;
         try {
             golden = ImageIO.read(goldenImgStream);
         } catch (IOException e) {
+            dumpTestImage(actual, name, "actual");
             fail("Could not get ground truth image: " + e.getMessage());
         }
 
-        assertEquals(golden.getHeight(), actual.getHeight());
-        assertEquals(golden.getWidth(), actual.getWidth());
-        final int w = golden.getWidth();
-        final int h = golden.getHeight();
-        int[] goldenRGB = golden.getRGB(0, 0, w, h, null, 0, w);
-        int[] actualRGB = actual.getRGB(0, 0, w, h, null, 0, w);
-
-        // Save golden image for comparison
-        File goldenFile = new File(diffDir, addSuffixBeforeExtension(fileName, "_golden"));
-        try {
-            ImageIO.write(golden, "png", goldenFile);
-            System.out.println("Wrote golden image to: " + goldenFile.getAbsolutePath());
-        } catch (IOException e) {
-            System.err.println("Failed to write golden image for comparison: " + e.getMessage());
-        }
-
-        // Create visual diff
-        BufferedImage diffImage = createDiffImage(golden, actual);
-        File diffFile = new File(diffDir, addSuffixBeforeExtension(fileName, "_diff"));
-        try {
-            ImageIO.write(diffImage, "png", diffFile);
-            System.out.println("Wrote diff image to: " + diffFile.getAbsolutePath());
-        } catch (IOException e) {
-            System.err.println("Failed to write diff image: " + e.getMessage());
-        }
-
-        // Count different pixels for a more informative error message
-        int differentPixels = 0;
-        for (int i = 0; i < goldenRGB.length; i++) {
-            if (goldenRGB[i] != actualRGB[i]) {
-                differentPixels++;
-            }
-        }
-
-        if (differentPixels > 0) {
-            double percentDifferent = (differentPixels * 100.0) / goldenRGB.length;
-            String errorMsg =
-                    String.format("""
-                            Images differ: %d pixels (%.2f%%) are different.
-                            Check artifacts: %s, %s, %s.
-                            To approve changes, run: mvn test -DupdateGolden=true
-                            """,
-                            differentPixels,
-                            percentDifferent,
-                            actualFile.getName(),
-                            goldenFile.getName(),
-                            diffFile.getName());
-            fail(errorMsg);
-        }
+        assertImageMatchesReference(
+                golden, actual, name, "To approve changes, run: mvn test -DupdateGolden=true");
     }
 
     private static BufferedImage createDiffImage(BufferedImage golden, BufferedImage actual) {
@@ -200,7 +226,7 @@ public class OffscreenMapRendererTest {
         OffscreenMapRenderer renderer = new OffscreenMapRenderer(1200, 800, 4);
 
         var map = renderer.getMap();
-        addTestStyleLayer(renderer.getMap(), "style_geojson_ch.json");
+        addTestStyleLayer(renderer.getMap(), "styles/style_geojson_ch.json");
         map.getCamera().moveToBoundingBox(bboxCH(), 0.0f, false, null, null);
 
         try {
@@ -218,7 +244,7 @@ public class OffscreenMapRendererTest {
         OffscreenMapRenderer renderer = new OffscreenMapRenderer(400, 700, 4);
 
         var map = renderer.getMap();
-        addTestStyleLayer(renderer.getMap(), "style_geojson_ch.json");
+        addTestStyleLayer(renderer.getMap(), "styles/style_geojson_ch.json");
         map.getCamera().moveToBoundingBox(bboxCH(), 0.0f, false, null, null);
 
         try {
@@ -236,7 +262,7 @@ public class OffscreenMapRendererTest {
         OffscreenMapRenderer renderer = new OffscreenMapRenderer(1200, 800, 4);
 
         var map = renderer.getMap();
-        addTestStyleLayer(map, "style_geojson_ch_label.json");
+        addTestStyleLayer(map, "styles/style_geojson_ch_label.json");
         map.getCamera().moveToBoundingBox(bboxCH(), 0.0f, false, null, null);
 
         try {
@@ -253,7 +279,7 @@ public class OffscreenMapRendererTest {
     public void testTiler() {
         OffscreenMapRenderer renderer = new OffscreenMapRenderer(256, 256, 4);
 
-        addTestStyleLayer(renderer.getMap(), "style_geojson_ch.json");
+        addTestStyleLayer(renderer.getMap(), "styles/style_geojson_ch.json");
 
         MapTileRenderer tiler = new MapTileRenderer(renderer);
 
@@ -277,6 +303,104 @@ public class OffscreenMapRendererTest {
                 }
             }
             assertAll(subtests);
+        } finally {
+            renderer.destroy();
+        }
+    }
+
+    @Test
+    public void testSprites() {
+        OffscreenMapRenderer renderer = new OffscreenMapRenderer(1200, 800, 4);
+
+        var map = renderer.getMap();
+        var layer =
+                new Tiled2dMapVectorLayerBuilder(map)
+                        .withLayerName("test-layer")
+                        .withFontLoader(
+                                OffscreenMapRendererTest.class.getClassLoader(),
+                                "fonts",
+                                "Roboto-Regular")
+                        .withLocalDataProvider(
+                                loadResource("styles/multisprite/style.json"),
+                                (spriteId, url, scale) ->
+                                        switch (spriteId) {
+                                            case "default" ->
+                                                    loadImageResource(
+                                                            "styles/multisprite/sprite.png");
+                                            case "light" ->
+                                                    loadImageResource(
+                                                            "styles/multisprite/lightbasemap.png");
+                                            default -> null;
+                                        },
+                                (spriteId, url, scale) ->
+                                        switch (spriteId) {
+                                            case "default" ->
+                                                    loadResource("styles/multisprite/sprite.json");
+                                            case "light" ->
+                                                    loadResource(
+                                                            "styles/multisprite/lightbasemap.json");
+                                            default -> null;
+                                        },
+                                (sourceName, url) ->
+                                        switch (sourceName) {
+                                            case "country_ch" -> loadResource("ch.geojson");
+                                            default -> null;
+                                        })
+                        .build();
+        var camera = map.getCamera();
+        camera.moveToBoundingBox(bboxCH(), 0.0f, false, null, null);
+        final var initialZoom = camera.getZoom();
+
+        try {
+            BufferedImage baseFrame = renderer.drawFrame();
+            assertImageMatchesGolden(baseFrame, "testSprites");
+
+            // Set and reset state
+            layer.setGlobalState(
+                    new HashMap<>(
+                            Map.of(
+                                    "state-icon-image",
+                                    new VectorLayerFeatureInfoValue(
+                                            "default:hazard",
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null))));
+
+            var image = renderer.drawFrame();
+            assertImageMatchesGolden(image, "testSprites_state");
+
+            layer.setGlobalState(new HashMap<>());
+            image = renderer.drawFrame();
+            assertImageMatchesReference(baseFrame, image, "testSprites_state_reset");
+
+            // Zoom in and back out
+            camera.setZoom(1_000_000.0, false);
+            image = renderer.drawFrame();
+            assertImageMatchesGolden(image, "testSprites_zoom");
+
+            camera.setZoom(initialZoom, false);
+            image = renderer.drawFrame();
+            assertImageMatchesReference(baseFrame, image, "testSprites_zoom_reset");
+
+            // Rotate a little
+            camera.setRotation(45.0f, false);
+            image = renderer.drawFrame();
+            assertImageMatchesGolden(image, "testSprites_rotate");
+
+            camera.setRotation(0, false);
+            image = renderer.drawFrame();
+            assertImageMatchesReference(baseFrame, image, "testSprites_rotate_reset");
+
+            map.pause();
+            map.resume();
+            image = renderer.drawFrame();
+            assertImageMatchesReference(baseFrame, image, "testSprites_pause-resume");
+
+        } catch (Exception e) {
+            fail(e.getMessage());
         } finally {
             renderer.destroy();
         }
