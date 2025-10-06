@@ -310,6 +310,15 @@ public class OffscreenMapRendererTest {
 
     @Test
     public void testSprites() {
+        sharedSpriteTest("testSprites", true);
+    }
+
+    @Test
+    public void testSpritesMissingSheet() {
+        sharedSpriteTest("testSpritesMissingSheet", false);
+    }
+
+    private void sharedSpriteTest(String name, boolean loadLightSprites) {
         OffscreenMapRenderer renderer = new OffscreenMapRenderer(1200, 800, 4);
 
         var map = renderer.getMap();
@@ -328,8 +337,10 @@ public class OffscreenMapRendererTest {
                                                     loadImageResource(
                                                             "styles/multisprite/sprite.png");
                                             case "light" ->
-                                                    loadImageResource(
-                                                            "styles/multisprite/lightbasemap.png");
+                                                    loadLightSprites
+                                                            ? loadImageResource(
+                                                                    "styles/multisprite/lightbasemap.png")
+                                                            : null;
                                             default -> null;
                                         },
                                 (spriteId, url, scale) ->
@@ -337,8 +348,10 @@ public class OffscreenMapRendererTest {
                                             case "default" ->
                                                     loadResource("styles/multisprite/sprite.json");
                                             case "light" ->
-                                                    loadResource(
-                                                            "styles/multisprite/lightbasemap.json");
+                                                    loadLightSprites
+                                                            ? loadResource(
+                                                                    "styles/multisprite/lightbasemap.json")
+                                                            : null;
                                             default -> null;
                                         },
                                 (sourceName, url) ->
@@ -353,7 +366,7 @@ public class OffscreenMapRendererTest {
 
         try {
             BufferedImage baseFrame = renderer.drawFrame();
-            assertImageMatchesGolden(baseFrame, "testSprites");
+            assertImageMatchesGolden(baseFrame, name);
 
             // Set and reset state
             layer.setGlobalState(
@@ -370,34 +383,35 @@ public class OffscreenMapRendererTest {
                                             null))));
 
             var image = renderer.drawFrame();
-            assertImageMatchesGolden(image, "testSprites_state");
+            assertImageMatchesGolden(image, name + "_state");
 
             layer.setGlobalState(new HashMap<>());
             image = renderer.drawFrame();
-            assertImageMatchesReference(baseFrame, image, "testSprites_state_reset");
+            assertImageMatchesReference(baseFrame, image, name + "_state_reset");
 
             // Zoom in and back out
             camera.setZoom(1_000_000.0, false);
             image = renderer.drawFrame();
-            assertImageMatchesGolden(image, "testSprites_zoom");
+            assertImageMatchesGolden(image, name + "_zoom");
 
             camera.setZoom(initialZoom, false);
             image = renderer.drawFrame();
-            assertImageMatchesReference(baseFrame, image, "testSprites_zoom_reset");
+            assertImageMatchesReference(baseFrame, image, name +"_zoom_reset");
 
             // Rotate a little
             camera.setRotation(45.0f, false);
             image = renderer.drawFrame();
-            assertImageMatchesGolden(image, "testSprites_rotate");
+            assertImageMatchesGolden(image, name + "_rotate");
 
             camera.setRotation(0, false);
             image = renderer.drawFrame();
-            assertImageMatchesReference(baseFrame, image, "testSprites_rotate_reset");
+            assertImageMatchesReference(baseFrame, image, name + "_rotate_reset");
 
+            // Pause/resume
             map.pause();
             map.resume();
             image = renderer.drawFrame();
-            assertImageMatchesReference(baseFrame, image, "testSprites_pause-resume");
+            assertImageMatchesReference(baseFrame, image, name + "_pause-resume");
 
         } catch (Exception e) {
             fail(e.getMessage());
