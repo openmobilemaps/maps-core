@@ -675,6 +675,8 @@ bool Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
                                                         spriteDescriptor->stretchedIconAlphas, spriteDescriptor->stretchedIconStretchInfos, spriteDescriptor->stretchedIconTextureCoordinates, stretchedIconOffset, zoomIdentifier,
                                                         scaleFactor, rotation, now, viewPortSize, spriteDescriptor->spriteTexture, spriteDescriptor->spriteData);
                 }
+            } else {
+                object->resetLastIconProperties();
             }
 
             auto font = object->getFont();
@@ -1128,7 +1130,7 @@ void Tiled2dMapVectorSymbolGroup::clear() {
     }
     sprites.clear();
     for (auto const &object: symbolObjects) {
-        object->forceUpdateIconProperties();
+        object->resetLastIconProperties();
     }
     for (const auto &textInstancedObject : textInstancedObjects) {
         textInstancedObject->asGraphicsObject()->clear();
