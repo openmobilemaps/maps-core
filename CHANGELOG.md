@@ -1,5 +1,8 @@
 # Changelog for Open Mobile Maps
 
+## Version 3.7.0
+- Add support for multiple sprite sources, breaking change in LocalDataProvider interface
+
 ## Version 3.6.0
 - Improved camera behavior for initial 3d configurations on iOS
 - Made the Tiled2dMapVectorSource layer independent
