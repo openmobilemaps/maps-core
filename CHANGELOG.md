@@ -1,5 +1,9 @@
 # Changelog for Open Mobile Maps
 
+## Version 2.6.0-16kB
+- Update to AGP 8.6.1
+- Support for 16KB page sizes on Android
+
 ## Version 2.6.0
 - Increases Deployment target to iOS 14
 - fixes iOS builds with Xcode 16

@@ -32,7 +32,7 @@ jobs:
           SIGNING_KEY_ID: ${{secrets.MAVEN_SIGNING_KEY_ID}}
           SIGNING_KEY_PASSWORD: ${{secrets.MAVEN_SIGNING_KEY_PASSPHRASE}}
           UB_ARTIFACTORY_URL_ANDROID: ${{secrets.UBIQUE_ARTIFACTORY_URL}}
-          UB_ARTIFACTORY_USERNAME: ${{secrets.UBIQUE_ARTIFACTORY_USER}}
+          UB_ARTIFACTORY_USER: ${{secrets.UBIQUE_ARTIFACTORY_USER}}
           UB_ARTIFACTORY_PASSWORD: ${{secrets.UBIQUE_ARTIFACTORY_PASS}}
         run: |
           echo "Create .gpg key from secret"
@@ -52,12 +52,12 @@ jobs:
           SONATYPE_NEXUS_USERNAME: ${{secrets.SONATYPE_NEXUS_USERNAME}}
           SONATYPE_NEXUS_PASSWORD: ${{secrets.SONATYPE_NEXUS_PASSWORD}}
           UB_ARTIFACTORY_URL_ANDROID: ${{secrets.UBIQUE_ARTIFACTORY_URL}}
-          UB_ARTIFACTORY_USERNAME: ${{secrets.UBIQUE_ARTIFACTORY_USER}}
+          UB_ARTIFACTORY_USER: ${{secrets.UBIQUE_ARTIFACTORY_USER}}
           UB_ARTIFACTORY_PASSWORD: ${{secrets.UBIQUE_ARTIFACTORY_PASS}}
         run: |
           cd android
           echo "### Maven Dependency - Maven Central" >> $GITHUB_STEP_SUMMARY
-          ./gradlew publishAllPublicationsToMavenCentral -Psigning.secretKeyRingFile=$GITHUB_WORKSPACE/signingkey.gpg -Psigning.password=$SIGNING_KEY_PASSWORD -Psigning.keyId=$SIGNING_KEY_ID -PmavenCentralUsername=$SONATYPE_NEXUS_USERNAME -PmavenCentralPassword=$SONATYPE_NEXUS_PASSWORD
+          ./gradlew publishAndReleaseToMavenCentral -Psigning.secretKeyRingFile=$GITHUB_WORKSPACE/signingkey.gpg -Psigning.password=$SIGNING_KEY_PASSWORD -Psigning.keyId=$SIGNING_KEY_ID -PmavenCentralUsername=$SONATYPE_NEXUS_USERNAME -PmavenCentralPassword=$SONATYPE_NEXUS_PASSWORD
               echo "[Maven Central](https://search.maven.org/artifact/io.openmobilemaps/${{ steps.vars.outputs.artifactId }}/${{ steps.vars.outputs.version }}/aar)" >> $GITHUB_STEP_SUMMARY
               echo "| Git Commit | Artifact ID | Maven Version |" >> $GITHUB_STEP_SUMMARY
               echo "| --- | --- | --- |" >> $GITHUB_STEP_SUMMARY
