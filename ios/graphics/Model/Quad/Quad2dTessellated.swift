@@ -17,9 +17,8 @@ import simd
 final class Quad2dTessellated: BaseGraphicsObject, @unchecked Sendable {
     private var verticesBuffer: MTLBuffer?
     
-    private var originBuffers: MultiBuffer<simd_float4>
-    
     private var tessellationFactorsBuffer: MTLBuffer?
+    private var originBuffers: MultiBuffer<simd_float4>
     
     private var is3d = false
 
@@ -46,9 +45,9 @@ final class Quad2dTessellated: BaseGraphicsObject, @unchecked Sendable {
         label: String = "Quad2dTessellated"
     ) {
         self.shader = shader
+        originBuffers = .init(device: metalContext.device)
         nearestSampler = metalContext.samplerLibrary.value(
             Sampler.magNearest.rawValue)!
-        originBuffers = .init(device: metalContext.device)
         super
             .init(
                 device: metalContext.device,
@@ -192,8 +191,6 @@ final class Quad2dTessellated: BaseGraphicsObject, @unchecked Sendable {
         
         encoder.setTessellationFactorBuffer(tessellationFactorsBuffer, offset: 0, instanceStride: 0)
         
-        //encoder.setTriangleFillMode(.lines)
-        
         encoder.drawPatches(
             numberOfPatchControlPoints: 4,
             patchStart: 0,
@@ -202,8 +199,6 @@ final class Quad2dTessellated: BaseGraphicsObject, @unchecked Sendable {
             patchIndexBufferOffset: 0,
             instanceCount: 1,
             baseInstance: 0)
-        
-        //encoder.setTriangleFillMode(.fill)
     }
 }
 
@@ -272,8 +267,8 @@ extension Quad2dTessellated: MCQuad2dInterface {
         _ frame: MCQuad3dD, textureCoordinates: MCRectD, origin: MCVec3D,
         is3d: Bool
     ) {
-        //let sFactor = lock.withCritical { subdivisionFactor }
-        let tFactor: Float16 = 10; //Float16(sFactor)
+        let sFactor = lock.withCritical { subdivisionFactor }
+        let tFactor = Float16(pow(2.0, Double(sFactor)))
         
         let tessellationFactors: [Float16] = [
             tFactor, // edge 0
@@ -286,19 +281,6 @@ extension Quad2dTessellated: MCQuad2dInterface {
         
         var vertices: [Vertex3DTexture] = []
 
-        func transform(_ coordinate: MCVec3D) -> MCVec3D {
-            if is3d {
-                let x = 1.0 * sin(coordinate.y) * cos(coordinate.x) - origin.x
-                let y = 1.0 * cos(coordinate.y) - origin.y
-                let z = -1.0 * sin(coordinate.y) * sin(coordinate.x) - origin.z
-                return MCVec3D(x: x, y: y, z: z)
-            } else {
-                let x = coordinate.x - origin.x
-                let y = coordinate.y - origin.y
-                return MCVec3D(x: x, y: y, z: 0)
-            }
-        }
-
         /*
          The quad is made out of 4 vertices as following
          B----C
@@ -309,19 +291,19 @@ extension Quad2dTessellated: MCQuad2dInterface {
          */
         vertices = [
             Vertex3DTexture(
-                position: transform(frame.topLeft),
+                position: frame.topLeft,
                 textureU: textureCoordinates.xF,
                 textureV: textureCoordinates.yF),  // B
             Vertex3DTexture(
-                position: transform(frame.topRight),
+                position: frame.topRight,
                 textureU: textureCoordinates.xF + textureCoordinates.widthF,
                 textureV: textureCoordinates.yF),  // C
             Vertex3DTexture(
-                position: transform(frame.bottomLeft),
+                position: frame.bottomLeft,
                 textureU: textureCoordinates.xF,
                 textureV: textureCoordinates.yF + textureCoordinates.heightF),  // A
             Vertex3DTexture(
-                position: transform(frame.bottomRight),
+                position: frame.bottomRight,
                 textureU: textureCoordinates.xF + textureCoordinates.widthF,
                 textureV: textureCoordinates.yF + textureCoordinates.heightF),  // D
         ]
