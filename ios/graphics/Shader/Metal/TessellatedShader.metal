@@ -27,16 +27,28 @@ T bilerp(T c00, T c01, T c10, T c11, float2 uv) {
     return mix(c0, c1, T(uv[1]));
 }
 
+// TODO: is3d
+float4 transform(float4 coordinate, float4 origin) {
+    if (true/*is3d*/) {
+        float x = 1.0 * sin(coordinate.y) * cos(coordinate.x) - origin.x;
+        float y = 1.0 * cos(coordinate.y) - origin.y;
+        float z = -1.0 * sin(coordinate.y) * sin(coordinate.x) - origin.z;
+        return float4(x, y, z, 1);
+    } else {
+        float x = coordinate.x - origin.x;
+        float y = coordinate.y - origin.y;
+        return float4(x, y, 0, 1);
+    }
+}
 
 [[patch(quad, 4)]] vertex VertexOut
 tessellationVertexShader(const patch_control_point<Vertex3DTextureIn> controlPoints [[stage_in]],
                          const float2 positionInPatch [[position_in_patch]],
                          constant float4x4 &vpMatrix [[buffer(1)]],
                          constant float4x4 &mMatrix [[buffer(2)]],
-                         constant float4 &originOffset [[buffer(3)]], /* from focus point on surface to quad center */
-                         constant float4 &cameraOrigin [[buffer(4)]]) /* from earth center to focus point on surface */
+                         constant float4 &originOffset [[buffer(3)]],
+                         constant float4 &origin [[buffer(4)]])
 {
-    /* from quad center to quad corners */
     Vertex3DTextureIn vA = controlPoints[0];
     Vertex3DTextureIn vB = controlPoints[1];
     Vertex3DTextureIn vC = controlPoints[2];
@@ -45,13 +57,10 @@ tessellationVertexShader(const patch_control_point<Vertex3DTextureIn> controlPoi
     float4 vertexPosition = bilerp(vA.position, vB.position, vC.position, vD.position, positionInPatch);
     float2 vertexUV = bilerp(vA.uv, vB.uv, vC.uv, vD.uv, positionInPatch);
     
-    float3 focusToVertex = ((mMatrix * vertexPosition) + originOffset).xyz; /* from focus point on surface to vertex */
-    float3 earthToVertex = focusToVertex + cameraOrigin.xyz; /* from earth center to vertex */
-    float3 curvedVertex = normalize(earthToVertex);
-    float3 backToFocus = curvedVertex - cameraOrigin.xyz; /* from focus point on surface to vertex */
+    float4 position = transform(vertexPosition, origin) - originOffset;
     
     VertexOut out {
-        .position = vpMatrix * float4(backToFocus, 1),
+        .position = vpMatrix * ((mMatrix * position) + originOffset),
         .uv = vertexUV
     };
 
