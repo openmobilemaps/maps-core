@@ -63,6 +63,8 @@ public:
 
     virtual /*not-null*/ std::shared_ptr<RasterShaderInterface> createUnitSphereRasterShader() = 0;
 
+    virtual /*not-null*/ std::shared_ptr<RasterShaderInterface> createUnitSphereTessellatedShader() = 0;
+
     virtual /*not-null*/ std::shared_ptr<StretchShaderInterface> createStretchShader() = 0;
 
     virtual /*not-null*/ std::shared_ptr<StretchInstancedShaderInterface> createStretchInstancedShader(bool unitSphere) = 0;

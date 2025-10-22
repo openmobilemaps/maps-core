@@ -49,6 +49,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (nullable id<MCQuad2dInterface>)createQuadTessellated:(nullable id<MCShaderProgramInterface>)shader {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->createQuadTessellated(::djinni_generated::ShaderProgramInterface::toCpp(shader));
+        return ::djinni_generated::Quad2dInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (nullable id<MCPolygon2dInterface>)createPolygon:(nullable id<MCShaderProgramInterface>)shader {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->createPolygon(::djinni_generated::ShaderProgramInterface::toCpp(shader));
@@ -139,6 +146,13 @@ public:
     {
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createQuad:(::djinni_generated::ShaderProgramInterface::fromCpp(c_shader))];
+            return ::djinni_generated::Quad2dInterface::toCpp(objcpp_result_);
+        }
+    }
+    /*not-null*/ std::shared_ptr<::Quad2dInterface> createQuadTessellated(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & c_shader) override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createQuadTessellated:(::djinni_generated::ShaderProgramInterface::fromCpp(c_shader))];
             return ::djinni_generated::Quad2dInterface::toCpp(objcpp_result_);
         }
     }
