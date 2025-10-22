@@ -36,6 +36,11 @@ class GraphicsFactory: MCGraphicsObjectFactoryInterface {
         guard let shader else { fatalError("No Shader provided") }
         return Quad2d(shader: shader, metalContext: .current)
     }
+    
+    func createQuadTessellated(_ shader: MCShaderProgramInterface?) -> MCQuad2dInterface? {
+        guard let shader else { fatalError("No Shader provided") }
+        return Quad2dTessellated(shader: shader, metalContext: .current)
+    }
 
     func createQuadInstanced(_ shader: MCShaderProgramInterface?) -> MCQuad2dInstancedInterface? {
         guard let shader else { fatalError("No Shader provided") }

@@ -10,6 +10,8 @@ abstract class GraphicsObjectFactoryInterface {
 
     abstract fun createQuad(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): Quad2dInterface
 
+    abstract fun createQuadTessellated(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): Quad2dInterface
+
     abstract fun createPolygon(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): Polygon2dInterface
 
     abstract fun createIcosahedronObject(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): IcosahedronInterface
@@ -52,6 +54,12 @@ abstract class GraphicsObjectFactoryInterface {
             return native_createQuad(this.nativeRef, shader)
         }
         private external fun native_createQuad(_nativeRef: Long, shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): Quad2dInterface
+
+        override fun createQuadTessellated(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): Quad2dInterface {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_createQuadTessellated(this.nativeRef, shader)
+        }
+        private external fun native_createQuadTessellated(_nativeRef: Long, shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): Quad2dInterface
 
         override fun createPolygon(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): Polygon2dInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

@@ -19,6 +19,8 @@
 
 - (nullable id<MCQuad2dInterface>)createQuad:(nullable id<MCShaderProgramInterface>)shader;
 
+- (nullable id<MCQuad2dInterface>)createQuadTessellated:(nullable id<MCShaderProgramInterface>)shader;
+
 - (nullable id<MCPolygon2dInterface>)createPolygon:(nullable id<MCShaderProgramInterface>)shader;
 
 - (nullable id<MCIcosahedronInterface>)createIcosahedronObject:(nullable id<MCShaderProgramInterface>)shader;
