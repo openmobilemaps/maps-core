@@ -74,6 +74,21 @@ public enum PipelineDescriptorFactory {
             pipelineDescriptor.vertexFunction = vertexFunction
             pipelineDescriptor.fragmentFunction = fragmentFunction
         }
+        
+        // TODO: Change to clean input of a optional config
+        if label == PipelineType.tessellatedShader.label {
+            
+            //pipelineDescriptor.vertexDescriptor!.layouts[0].stepRate = 1
+            pipelineDescriptor.vertexDescriptor!.layouts[0].stepFunction = .perPatchControlPoint
+            
+            //pipelineDescriptor.maxTessellationFactor = 64
+            pipelineDescriptor.tessellationPartitionMode = .pow2
+            //pipelineDescriptor.tessellationFactorFormat = .half
+            pipelineDescriptor.tessellationFactorStepFunction = .constant
+            //pipelineDescriptor.tessellationOutputWindingOrder = .clockwise
+            pipelineDescriptor.tessellationControlPointIndexType = .none
+            //pipelineDescriptor.isTessellationFactorScaleEnabled = false
+        }
 
         return pipelineDescriptor
     }
@@ -141,6 +156,7 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
     case textShader
     case textInstancedShader
     case rasterShader
+    case tessellatedShader
     case stretchShader
     case stretchInstancedShader
     case unitSphereAlphaShader
@@ -170,6 +186,7 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
             case .textShader: return "Text shader"
             case .textInstancedShader: return "Text Instanced shader"
             case .rasterShader: return "Raster shader"
+            case .tessellatedShader: return "Tessellated shader"
             case .stretchShader: return "Stretch shader"
             case .stretchInstancedShader: return "Stretch Instanced shader"
             case .unitSphereAlphaShader: return "Unit Sphere Alpha shader with texture"
@@ -184,7 +201,7 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
 
     var vertexShaderUsesModelMatrix: Bool {
         switch self {
-            case .rasterShader, .roundColorShader, .unitSphereRoundColorShader, .alphaShader, .unitSphereAlphaShader, .sphereEffectShader, .skySphereShader, .elevationInterpolation:
+            case .rasterShader, .tessellatedShader, .roundColorShader, .unitSphereRoundColorShader, .alphaShader, .unitSphereAlphaShader, .sphereEffectShader, .skySphereShader, .elevationInterpolation:
                 return true
             default:
                 return false
@@ -210,6 +227,7 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
             case .textShader: return "textVertexShader"
             case .textInstancedShader: return "textInstancedVertexShader"
             case .rasterShader: return "baseVertexShaderModel"
+            case .tessellatedShader: return "tessellationVertexShader"
             case .stretchShader: return "stretchVertexShader"
             case .stretchInstancedShader: return "stretchInstancedVertexShader"
             case .unitSphereAlphaShader: return "baseVertexShader"
@@ -241,6 +259,7 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
             case .textShader: return "textFragmentShader"
             case .textInstancedShader: return "textInstancedFragmentShader"
             case .rasterShader: return "rasterFragmentShader"
+            case .tessellatedShader: return "rasterFragmentShader"
             case .stretchShader: return "stretchFragmentShader"
             case .stretchInstancedShader: return "stretchInstancedFragmentShader"
             case .unitSphereAlphaShader: return "baseFragmentShader"
@@ -266,6 +285,7 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
                 .colorShader, .maskShader:
                 return Vertex4F.descriptor
             case .rasterShader,
+                .tessellatedShader,
                 .clearStencilShader,
                 .alphaShader,
                 .unitSphereAlphaShader,

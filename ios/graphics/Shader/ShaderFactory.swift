@@ -23,6 +23,10 @@ class ShaderFactory: MCShaderFactoryInterface {
     func createUnitSphereRasterShader() -> MCRasterShaderInterface? {
         RasterShader()
     }
+    
+    func createUnitSphereTessellatedShader() -> MCRasterShaderInterface? {
+        RasterShader(shader: .tessellatedShader)
+    }
 
     func createTextShader() -> MCTextShaderInterface? {
         TextShader()
