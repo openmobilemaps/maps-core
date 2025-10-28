@@ -1,6 +1,7 @@
 package io.openmobilemaps.mapscore.map.util
 
 import android.graphics.Bitmap
+import io.openmobilemaps.mapscore.extensions.isTerminal
 import io.openmobilemaps.mapscore.shared.graphics.common.Vec2I
 import io.openmobilemaps.mapscore.shared.map.LayerReadyState
 import io.openmobilemaps.mapscore.shared.map.MapConfig
@@ -83,8 +84,13 @@ open class MapRenderHelper {
 			mapRenderer.requireMapInterface().drawReadyFrame(renderBounds, boundsPaddingPc, timeoutSeconds, object : MapReadyCallbackInterface() {
 				var prevState: LayerReadyState? = null
 				override fun stateDidUpdate(state: LayerReadyState) {
+					if (prevState.isTerminal()) return
+
 					if (coroutineContext[Job]?.isActive == false) {
-						mapRenderer.destroy()
+						if (destroyAfterRenderAction) {
+							mapRenderer.destroy()
+						}
+						prevState = LayerReadyState.ERROR
 						onStateUpdate(MapViewRenderState.Error)
 						return
 					}
@@ -94,7 +100,7 @@ open class MapRenderHelper {
 					}
 					drawSemaphore.acquire()
 
-					if (prevState == state) return
+					if (prevState == state || prevState.isTerminal()) return
 					prevState = state
 					when (state) {
 						LayerReadyState.READY -> {
