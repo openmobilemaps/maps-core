@@ -14,6 +14,7 @@
 #include "Vec2F.h"
 
 class EvaluationContext;
+class SpriteIconId;
 
 enum class ReevaluationPolicy : int {
     NEVER,
@@ -73,3 +74,4 @@ extern template struct FeatureValueEvaluationResult<IconTextFit>;
 extern template struct FeatureValueEvaluationResult<std::vector<float>>;
 extern template struct FeatureValueEvaluationResult<SymbolZOrder>;
 extern template struct FeatureValueEvaluationResult<LineCapType>;
+extern template struct FeatureValueEvaluationResult<SpriteIconId>;
