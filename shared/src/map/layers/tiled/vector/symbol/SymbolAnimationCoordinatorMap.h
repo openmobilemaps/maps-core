@@ -112,7 +112,7 @@ public:
           std::erase_if(setByX, [](const auto &p){ return !p->isUsed(); });
         }
 
-        // leere Zoom-Buckets entfernen
+        // Remove empty zoom buckets
         std::erase_if(zoomMap, [](const auto &kv2){ return kv2.second.empty(); });
       }
 
