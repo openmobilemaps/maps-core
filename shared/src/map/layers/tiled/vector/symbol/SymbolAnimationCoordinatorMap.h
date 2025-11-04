@@ -153,7 +153,7 @@ private:
                  double xTolerance)
   {
     const int dz = levelZoomIdentifier - searchZoomIdentifier;
-    // 2^max(0,dz) als double (robuster als 1<<dz)
+    // 2^max(0,dz) as double (more robust than 1<<dz)
     const double factor = std::ldexp(1.0, std::max(0, dz));
     const double maxXtol = factor * xTolerance;
 
