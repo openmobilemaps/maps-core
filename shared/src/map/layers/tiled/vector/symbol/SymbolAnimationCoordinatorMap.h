@@ -137,7 +137,7 @@ public:
 
 private:
   using SetByX  = std::set<std::shared_ptr<SymbolAnimationCoordinator>, CoordinatorXCompare>;
-  using ZoomMap = std::unordered_map<int, SetByX>;      // schneller als std::map<int,...> bei wenigen Keys
+  using ZoomMap = std::unordered_map<int, SetByX>;      // faster than std::map<int,...> for few keys
   using CrossMap= std::unordered_map<size_t, ZoomMap>;
 
   struct Shard {
