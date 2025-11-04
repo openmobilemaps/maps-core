@@ -106,7 +106,7 @@ public:
       for (auto &kv : shard.animationCoordinators) {
         auto &zoomMap = kv.second;
 
-        // Elemente in Sets entfernen
+        // Remove elements from sets
         for (auto &zv : zoomMap) {
           auto &setByX = zv.second;
           std::erase_if(setByX, [](const auto &p){ return !p->isUsed(); });
