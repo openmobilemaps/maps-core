@@ -187,7 +187,7 @@ private:
         return hit;
       }
     }
-    // 2) andere Zoom-Level
+    // 2) other zoom levels
     for (const auto &kv : zoomMap) {
       const int levelZoomIdentifier = kv.first;
       if (levelZoomIdentifier == zoomIdentifier) continue;
