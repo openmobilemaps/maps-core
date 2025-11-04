@@ -224,7 +224,7 @@ private:
 
 private:
   bool animationsEnabled = true;
-  static constexpr size_t numShards = 32; // bei Bedarf an CPU-Kerne anpassen
+  static constexpr size_t numShards = 32; // adjust to CPU cores if needed
   std::array<Shard, numShards> shards;
   std::hash<size_t> hasher;
 };
