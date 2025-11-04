@@ -116,7 +116,7 @@ public:
         std::erase_if(zoomMap, [](const auto &kv2){ return kv2.second.empty(); });
       }
 
-      // leere CrossTile-Einträge entfernen
+      // Remove empty cross-tile entries
       std::erase_if(shard.animationCoordinators, [](const auto &kv){ return kv.second.empty(); });
     }
   }
