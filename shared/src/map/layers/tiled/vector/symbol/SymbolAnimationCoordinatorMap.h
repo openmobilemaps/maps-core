@@ -215,7 +215,7 @@ private:
                                                                              coord, zoomIdentifier, xTolerance, yTolerance, animationDuration, animationDelay);
     animationCoordinator->enableAnimations(animationsEnabled);
 
-    // hinted insert via heterogenem lower_bound
+    // hinted insert via heterogeneous lower_bound
     auto hint = setForZoom.lower_bound(coord.x);
     auto it = setForZoom.emplace_hint(hint, std::move(animationCoordinator));
 
