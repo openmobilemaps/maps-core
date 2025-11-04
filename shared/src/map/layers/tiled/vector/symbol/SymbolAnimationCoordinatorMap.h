@@ -62,7 +62,7 @@ public:
     const size_t shardIndex = hasher(crossTileIdentifier) % numShards;
     auto &shard = shards[shardIndex];
 
-    // 1) read-lock: schnelle Suche ohne Contention
+    // 1) read-lock: fast search without contention
     {
       shard_read_lock_t rlock(shard.mutex);
       if (auto hit = findExistingLocked(shard, crossTileIdentifier, coord, zoomIdentifier, xTolerance)) {
