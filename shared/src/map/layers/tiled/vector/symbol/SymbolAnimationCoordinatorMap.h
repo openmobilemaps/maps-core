@@ -109,33 +109,15 @@ public:
         // Elemente in Sets entfernen
         for (auto &zv : zoomMap) {
           auto &setByX = zv.second;
-#if __cplusplus >= 202002L
           std::erase_if(setByX, [](const auto &p){ return !p->isUsed(); });
-#else
-          for (auto it = setByX.begin(); it != setByX.end(); ) {
-            it = (!(*it)->isUsed()) ? setByX.erase(it) : std::next(it);
-          }
-#endif
         }
 
         // leere Zoom-Buckets entfernen
-#if __cplusplus >= 202002L
         std::erase_if(zoomMap, [](const auto &kv2){ return kv2.second.empty(); });
-#else
-        for (auto it = zoomMap.begin(); it != zoomMap.end(); ) {
-          it = it->second.empty() ? zoomMap.erase(it) : std::next(it);
-        }
-#endif
       }
 
       // leere CrossTile-Einträge entfernen
-#if __cplusplus >= 202002L
       std::erase_if(shard.animationCoordinators, [](const auto &kv){ return kv.second.empty(); });
-#else
-      for (auto it = shard.animationCoordinators.begin(); it != shard.animationCoordinators.end(); ) {
-        it = it->second.empty() ? shard.animationCoordinators.erase(it) : std::next(it);
-      }
-#endif
     }
   }
 
