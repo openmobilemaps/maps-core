@@ -29,7 +29,7 @@ using shard_mutex_t = std::shared_mutex;
 using shard_read_lock_t  = std::shared_lock<shard_mutex_t>;
 using shard_write_lock_t = std::unique_lock<shard_mutex_t>;
 
-// Comparator mit heterogenem Lookup (double) + stabilem Tie-Break
+// Comparator with heterogeneous lookup (double) + stable tie-break
 struct CoordinatorXCompare {
   using is_transparent = void;
 
