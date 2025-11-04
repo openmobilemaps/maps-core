@@ -181,7 +181,7 @@ private:
 
     auto &zoomMap = ctIt->second;
 
-    // 1) gleicher Zoom zuerst
+    // 1) same zoom level first
     if (auto itZ = zoomMap.find(zoomIdentifier); itZ != zoomMap.end()) {
       if (auto hit = searchInSetByX(itZ->second, coord, zoomIdentifier, zoomIdentifier, xTolerance)) {
         return hit;
