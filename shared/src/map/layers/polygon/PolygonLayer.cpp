@@ -243,15 +243,23 @@ void PolygonLayer::generateRenderPasses() {
 
     std::lock_guard<std::recursive_mutex> lock(polygonsMutex);
     std::map<int, std::vector<std::shared_ptr<RenderObjectInterface>>> renderPassObjectMap;
-    for (auto const &p : polygons) {
-        for (auto const &object : p.second) {
-            for (auto config : object.second->getRenderConfig()) {
-                renderPassObjectMap[renderPassIndex].push_back(
-                    std::make_shared<RenderObject>(config->getGraphicsObject()));
+    size_t renderObjectCount = 0;
+    for (const auto &p : polygons) {
+        for (const auto &object : p.second) {
+            renderObjectCount += object.second->getRenderConfig().size();
+        }
+    }
+    auto &renderObjects = renderPassObjectMap[renderPassIndex];
+    renderObjects.reserve(renderObjectCount);
+    for (const auto &p : polygons) {
+        for (const auto &object : p.second) {
+            for (const auto &config : object.second->getRenderConfig()) {
+                renderObjects.push_back(std::make_shared<RenderObject>(config->getGraphicsObject()));
             }
         }
     }
     std::vector<std::shared_ptr<RenderPassInterface>> newRenderPasses;
+    newRenderPasses.reserve(renderPassObjectMap.size());
     for (const auto &passEntry : renderPassObjectMap) {
         std::shared_ptr<RenderPass> renderPass =
             std::make_shared<RenderPass>(RenderPassConfig(passEntry.first, false, renderTarget), passEntry.second, mask);

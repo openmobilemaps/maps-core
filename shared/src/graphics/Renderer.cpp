@@ -80,7 +80,7 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
                 }
 
                 const auto &graphicsObject = renderObject->getGraphicsObject();
-                if (renderObject->isScreenSpaceCoords()) {
+                if (isScreenSpaceCoords) {
                     graphicsObject->render(renderingContext, pass->getRenderPassConfig(), identityMatrixPointer,
                                            identityMatrixPointer, zeroOrigin, hasMask, factor, isScreenSpaceCoords);
                 } else if (renderObject->hasCustomModelMatrix()) {

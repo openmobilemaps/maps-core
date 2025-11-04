@@ -181,14 +181,15 @@ void TextLayer::generateRenderPasses() {
 
     std::map<int, std::vector<std::shared_ptr<RenderObjectInterface>>> renderPassObjectMap;
 
-    for (auto const &textTuple : texts) {
-        for (auto config : textTuple.second->getRenderConfig()) {
+    for (const auto &textTuple : texts) {
+        for (const auto &config : textTuple.second->getRenderConfig()) {
 
             renderPassObjectMap[config->getRenderIndex()].push_back(std::make_shared<RenderObject>(config->getGraphicsObject()));
         }
     }
 
     std::vector<std::shared_ptr<RenderPassInterface>> newRenderPasses;
+    newRenderPasses.reserve(renderPassObjectMap.size());
     for (const auto &passEntry : renderPassObjectMap) {
         std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(RenderPassConfig(passEntry.first, false, renderTarget), passEntry.second);
         newRenderPasses.push_back(renderPass);
@@ -215,6 +216,7 @@ void TextLayer::addTexts(const std::vector<std::shared_ptr<TextInfoInterface>> &
     }
 
     std::vector<std::tuple<const std::shared_ptr<TextInfoInterface>, std::shared_ptr<TextLayerObject>>> textObjects;
+    textObjects.reserve(texts.size());
 
     auto textHelper = TextHelper(mapInterface);
 

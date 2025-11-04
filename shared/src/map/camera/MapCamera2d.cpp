@@ -577,7 +577,7 @@ void MapCamera2d::notifyListeners(const int &listenerType) {
     double angle = this->angle;
     double zoom = this->zoom;
     std::lock_guard<std::recursive_mutex> lock(listenerMutex);
-    for (auto listener : listeners) {
+    for (const auto &listener : listeners) {
         if (listenerType & ListenerType::BOUNDS) {
             listener->onVisibleBoundsChanged(*visibleRect, zoom);
         }

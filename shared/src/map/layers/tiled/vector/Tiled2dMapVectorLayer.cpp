@@ -1081,7 +1081,7 @@ void Tiled2dMapVectorLayer::updateLayerDescriptions(const std::vector<std::share
 
     std::map<std::string, UpdateVector> updateInformationsMap;
 
-    for (const auto layerDescription: layerDescriptions) {
+    for (const auto &layerDescription: layerDescriptions) {
         std::shared_ptr<VectorLayerDescription> legacyDescription;
         int32_t legacyIndex = -1;
         {
@@ -1128,7 +1128,7 @@ void Tiled2dMapVectorLayer::updateLayerDescriptions(const std::vector<std::share
         }
     }
 
-    for (const auto [updateSource, updateInformations]: updateInformationsMap) {
+    for (const auto &[updateSource, updateInformations]: updateInformationsMap) {
         if (!updateInformations.symbolUpdates.empty()) {
             for (const auto &[source, sourceDataManager]: symbolSourceDataManagers) {
                 if (updateSource == source) {

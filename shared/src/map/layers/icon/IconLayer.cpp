@@ -143,6 +143,7 @@ void IconLayer::addIcons(const std::vector<std::shared_ptr<IconInfoInterface>> &
     auto scheduler = mapInterface ? mapInterface->getScheduler() : nullptr;
     if (!objectFactory || !shaderFactory || !scheduler) {
         std::lock_guard<std::recursive_mutex> lock(addingQueueMutex);
+        addingQueue.reserve(addingQueue.size() + iconsToAdd.size());
         for (const auto &icon : iconsToAdd) {
             addingQueue.push_back(icon);
         }
@@ -150,6 +151,7 @@ void IconLayer::addIcons(const std::vector<std::shared_ptr<IconInfoInterface>> &
     }
 
     std::vector<std::pair<std::shared_ptr<IconInfoInterface>, std::shared_ptr<IconLayerObject>>> iconObjects;
+    iconObjects.reserve(iconsToAdd.size());
 
     for (const auto &icon : iconsToAdd) {
         auto shader = is3D ? shaderFactory->createUnitSphereAlphaInstancedShader() : shaderFactory->createAlphaInstancedShader();
@@ -167,9 +169,13 @@ void IconLayer::addIcons(const std::vector<std::shared_ptr<IconInfoInterface>> &
 
         iconObjects.push_back(std::make_pair(icon, iconObject));
 
-        {
-            std::lock_guard<std::recursive_mutex> lock(iconsMutex);
-            this->icons.push_back(std::make_pair(icon, iconObject));
+    }
+
+    {
+        std::lock_guard<std::recursive_mutex> lock(iconsMutex);
+        icons.reserve(icons.size() + iconObjects.size());
+        for (const auto &iconEntry : iconObjects) {
+            icons.push_back(iconEntry);
         }
     }
 
@@ -315,6 +321,7 @@ std::vector<std::shared_ptr<::RenderPassInterface>> IconLayer::buildRenderPasses
     } else {
         std::lock_guard<std::recursive_mutex> lock(iconsMutex);
         std::vector<std::shared_ptr<RenderPassInterface>> renderPasses;
+        renderPasses.reserve(renderPassObjectMap.size());
         for (const auto &passEntry : renderPassObjectMap) {
             std::shared_ptr<RenderPass> renderPass =
                 std::make_shared<RenderPass>(RenderPassConfig(passEntry.first, false, renderTarget), passEntry.second, mask);
@@ -327,9 +334,15 @@ std::vector<std::shared_ptr<::RenderPassInterface>> IconLayer::buildRenderPasses
 void IconLayer::preGenerateRenderPasses() {
     std::lock_guard<std::recursive_mutex> lock(iconsMutex);
     std::map<int, std::vector<std::shared_ptr<RenderObjectInterface>>> newRenderPassObjectMap;
-    for (auto const &iconTuple : icons) {
+    size_t renderObjectCount = 0;
+    for (const auto &iconTuple : icons) {
+        renderObjectCount += iconTuple.second->getRenderConfig().size();
+    }
+    auto &renderObjects = newRenderPassObjectMap[renderPassIndex];
+    renderObjects.reserve(renderObjectCount);
+    for (const auto &iconTuple : icons) {
         for (const auto &config : iconTuple.second->getRenderConfig()) {
-            newRenderPassObjectMap[renderPassIndex].push_back(std::make_shared<RenderObject>(config->getGraphicsObject()));
+            renderObjects.push_back(std::make_shared<RenderObject>(config->getGraphicsObject()));
         }
     }
 

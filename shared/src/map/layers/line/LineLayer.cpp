@@ -196,17 +196,27 @@ void LineLayer::generateRenderPasses() {
 
     std::lock_guard<std::recursive_mutex> lock(linesMutex);
     std::map<int, std::vector<std::shared_ptr<RenderObjectInterface>>> renderPassObjectMap;
-    for (auto const &lineTuple : lines) {
-        for (auto config : lineTuple.second->getRenderConfig()) {
-            if (!lineTuple.first->getCoordinates().empty()) {
-                std::vector<float> modelMatrix =
-                    mapInterface->getCamera()->getInvariantModelMatrix(lineTuple.first->getCoordinates()[0], false, false);
-                renderPassObjectMap[renderPassIndex].push_back(
-                    std::make_shared<RenderObject>(config->getGraphicsObject()));
+    size_t renderObjectCount = 0;
+    for (const auto &lineTuple : lines) {
+        if (!lineTuple.first->getCoordinates().empty()) {
+            renderObjectCount += lineTuple.second->getRenderConfig().size();
+        }
+    }
+    auto &renderObjects = renderPassObjectMap[renderPassIndex];
+    renderObjects.reserve(renderObjectCount);
+    for (const auto &lineTuple : lines) {
+        if (!lineTuple.first->getCoordinates().empty()) {
+            const auto &coordinates = lineTuple.first->getCoordinates();
+            std::vector<float> modelMatrix =
+                mapInterface->getCamera()->getInvariantModelMatrix(coordinates[0], false, false);
+            (void)modelMatrix;
+            for (const auto &config : lineTuple.second->getRenderConfig()) {
+                renderObjects.push_back(std::make_shared<RenderObject>(config->getGraphicsObject()));
             }
         }
     }
     std::vector<std::shared_ptr<RenderPassInterface>> newRenderPasses;
+    newRenderPasses.reserve(renderPassObjectMap.size());
     for (const auto &passEntry : renderPassObjectMap) {
         std::shared_ptr<RenderPass> renderPass =
             std::make_shared<RenderPass>(RenderPassConfig(passEntry.first, false, renderTarget), passEntry.second, mask);

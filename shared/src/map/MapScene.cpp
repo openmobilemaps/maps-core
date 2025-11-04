@@ -106,6 +106,7 @@ std::vector<std::shared_ptr<LayerInterface>> MapScene::getLayers() {
     std::vector<std::shared_ptr<LayerInterface>> layersList;
     {
         std::lock_guard<std::recursive_mutex> lock(layersMutex);
+        layersList.reserve(layers.size());
         for (const auto &l: layers) {
             layersList.emplace_back(l.second);
         }
@@ -117,6 +118,7 @@ std::vector<std::shared_ptr<IndexedLayerInterface>> MapScene::getLayersIndexed()
     std::vector<std::shared_ptr<IndexedLayerInterface>> layersList;
     {
         std::lock_guard<std::recursive_mutex> lock(layersMutex);
+        layersList.reserve(layers.size());
         for (const auto &l: layers) {
             layersList.emplace_back(std::make_shared<IndexedLayer>(l.first, l.second));
         }

@@ -108,11 +108,21 @@ std::vector<::VectorLayerFeatureCoordInfo> ReverseGeocoder::reverseGeocode(const
                 try {
                     int extent = (int) layer.extent();
                     auto const featureContext = std::make_shared<FeatureContext>(stringTable, feature);
-                    std::shared_ptr<VectorTileGeometryHandler> geometryHandler = std::make_shared<VectorTileGeometryHandler>(tileBounds, extent, std::nullopt, conversionHelper);
+                    std::shared_ptr<VectorTileGeometryHandler> geometryHandler =
+                        std::make_shared<VectorTileGeometryHandler>(tileBounds, extent, std::nullopt, conversionHelper);
                     vtzero::decode_geometry(feature.geometry(), *geometryHandler);
 
-                    for (auto points: geometryHandler->getPointCoordinates()) {
-                        for (auto point: points) {
+                    const auto &pointCoordinates = geometryHandler->getPointCoordinates();
+                    size_t totalPoints = 0;
+                    for (const auto &points : pointCoordinates) {
+                        totalPoints += points.size();
+                    }
+                    if (totalPoints > 0) {
+                        resultVector.reserve(resultVector.size() + totalPoints);
+                    }
+
+                    for (const auto &points : pointCoordinates) {
+                        for (const auto &point : points) {
                             auto coord = Coord(CoordinateSystemIdentifiers::EPSG3857(), point.x, point.y, 0.0);
                             auto d = distance(converted4326, coord);
                             if (d < thresholdMeters) {

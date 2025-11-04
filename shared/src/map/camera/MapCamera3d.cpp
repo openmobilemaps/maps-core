@@ -767,7 +767,7 @@ void MapCamera3d::notifyListeners(const int &listenerType) {
     }
 
     std::lock_guard<std::recursive_mutex> lock(listenerMutex);
-    for (auto listener : listeners) {
+    for (const auto &listener : listeners) {
         if (listenerType & (ListenerType::BOUNDS)) {
 
             std::vector<float> viewMatrixF = VectorHelper::clone(viewMatrix);
