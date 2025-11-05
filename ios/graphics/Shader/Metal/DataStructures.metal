@@ -21,6 +21,12 @@ struct Vertex3DTextureIn {
     float2 uv [[attribute(1)]];
 };
 
+struct TessellatedVertex3DTextureIn {
+    float3 relativePosition [[attribute(0)]];
+    float3 absolutePosition [[attribute(1)]];
+    float2 uv [[attribute(2)]];
+};
+
 // NOTE: float3 also take up 4 * sizeOf(float) bytes
 // therefore we always use float4 for better alignment and to reduce errors when filling the buffer
 struct Vertex4FIn {

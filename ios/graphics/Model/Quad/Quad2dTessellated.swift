@@ -189,6 +189,20 @@ final class Quad2dTessellated: BaseGraphicsObject, @unchecked Sendable {
         }
         encoder.setVertexBuffer(originBuffer, offset: 0, index: 4)
         
+        /* ELEVATION PROTOTYPE TEST
+        if samplerToUse == .magNearest {
+            encoder.setVertexSamplerState(nearestSampler, index: 0)
+        } else {
+            encoder.setVertexSamplerState(sampler, index: 0)
+        }
+         
+        if let texture {
+            encoder.setVertexTexture(texture, index: 0)
+        }
+        */
+        
+        encoder.setVertexBytes(&self.is3d, length: MemoryLayout<Bool>.stride, index: 5)
+        
         encoder.setTessellationFactorBuffer(tessellationFactorsBuffer, offset: 0, instanceStride: 0)
         
         encoder.drawPatches(
@@ -279,8 +293,21 @@ extension Quad2dTessellated: MCQuad2dInterface {
             tFactor  // inside 1
         ]
         
-        var vertices: [Vertex3DTexture] = []
+        var vertices: [TessellatedVertex3DTexture] = []
 
+        func transform(_ coordinate: MCVec3D) -> MCVec3D {
+            if is3d {
+                let x = 1.0 * sin(coordinate.y) * cos(coordinate.x) - origin.x
+                let y = 1.0 * cos(coordinate.y) - origin.y
+                let z = -1.0 * sin(coordinate.y) * sin(coordinate.x) - origin.z
+                return MCVec3D(x: x, y: y, z: z)
+            } else {
+                let x = coordinate.x - origin.x
+                let y = coordinate.y - origin.y
+                return MCVec3D(x: x, y: y, z: 0)
+            }
+        }
+        
         /*
          The quad is made out of 4 vertices as following
          B----C
@@ -290,20 +317,24 @@ extension Quad2dTessellated: MCQuad2dInterface {
          Where A-C are joined to form two triangles
          */
         vertices = [
-            Vertex3DTexture(
-                position: frame.topLeft,
+            TessellatedVertex3DTexture(
+                relativePosition: transform(frame.topLeft),
+                absolutePosition: frame.topLeft,
                 textureU: textureCoordinates.xF,
                 textureV: textureCoordinates.yF),  // B
-            Vertex3DTexture(
-                position: frame.topRight,
+            TessellatedVertex3DTexture(
+                relativePosition: transform(frame.topRight),
+                absolutePosition: frame.topRight,
                 textureU: textureCoordinates.xF + textureCoordinates.widthF,
                 textureV: textureCoordinates.yF),  // C
-            Vertex3DTexture(
-                position: frame.bottomLeft,
+            TessellatedVertex3DTexture(
+                relativePosition: transform(frame.bottomLeft),
+                absolutePosition: frame.bottomLeft,
                 textureU: textureCoordinates.xF,
                 textureV: textureCoordinates.yF + textureCoordinates.heightF),  // A
-            Vertex3DTexture(
-                position: frame.bottomRight,
+            TessellatedVertex3DTexture(
+                relativePosition: transform(frame.bottomRight),
+                absolutePosition: frame.bottomRight,
                 textureU: textureCoordinates.xF + textureCoordinates.widthF,
                 textureV: textureCoordinates.yF + textureCoordinates.heightF),  // D
         ]
@@ -315,7 +346,7 @@ extension Quad2dTessellated: MCQuad2dInterface {
             self.textureCoordinates = textureCoordinates
             self.verticesBuffer.copyOrCreate(
                 bytes: vertices,
-                length: MemoryLayout<Vertex3DTexture>.stride * vertices.count,
+                length: MemoryLayout<TessellatedVertex3DTexture>.stride * vertices.count,
                 device: device)
             self.tessellationFactorsBuffer.copyOrCreate(
                 bytes: tessellationFactors,
