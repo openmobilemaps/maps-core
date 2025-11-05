@@ -302,12 +302,20 @@ std::vector<Tiled2dMapRasterTileInfo> sortedTileInfos(currentTileInfos.begin(), 
                     quad->setMinMagFilter(textureFilterType);
                     tileObject = std::make_shared<Textured2dLayerObject>(quad, mapInterface, is3D);
                 } else {
-                    auto rasterShader = is3D ? shaderFactory->createUnitSphereRasterShader() : shaderFactory->createRasterShader();
-                    rasterShader->asShaderProgramInterface()->setBlendMode(blendMode);
-                    auto quad = graphicsFactory->createQuad(rasterShader->asShaderProgramInterface());
+                     /*
+                    auto rShader = is3D ? shaderFactory->createUnitSphereRasterShader() : shaderFactory->createRasterShader();
+                    rShader->asShaderProgramInterface()->setBlendMode(blendMode);
+                    auto quad = graphicsFactory->createQuad(rShader->asShaderProgramInterface());
+                     */
+                    // /*
+                    auto rShader = shaderFactory->createUnitSphereTessellatedShader();
+                    rShader->asShaderProgramInterface()->setBlendMode(blendMode);
+                    auto quad = graphicsFactory->createQuadTessellated(rShader->asShaderProgramInterface());
+                    // */
+                     
                     quad->setMinMagFilter(textureFilterType);
                     tileObject = std::make_shared<Textured2dLayerObject>(
-                        quad, rasterShader, mapInterface, is3D);
+                        quad, rShader, mapInterface, is3D);
                     if (zoomInfo.numDrawPreviousLayers == 0 || !animationsEnabled || zoomInfo.maskTile || is3D) {
                         tileObject->setStyle(style);
                     } else {

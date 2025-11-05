@@ -19,7 +19,8 @@ public enum PipelineDescriptorFactory {
         fragmentShader: String,
         blendMode: MCBlendMode,
         library: MTLLibrary,
-        constants: MTLFunctionConstantValues? = nil
+        constants: MTLFunctionConstantValues? = nil,
+        tessellated: Bool = false
     ) -> MTLRenderPipelineDescriptor {
         let pipelineDescriptor = MTLRenderPipelineDescriptor()
         pipelineDescriptor.colorAttachments[0].pixelFormat = MetalContext.colorPixelFormat
@@ -75,21 +76,14 @@ public enum PipelineDescriptorFactory {
             pipelineDescriptor.fragmentFunction = fragmentFunction
         }
         
-        // TODO: Change to clean input of a optional config
-        if label == PipelineType.tessellatedShader.label {
-            
-            //pipelineDescriptor.vertexDescriptor!.layouts[0].stepRate = 1
-            pipelineDescriptor.vertexDescriptor!.layouts[0].stepFunction = .perPatchControlPoint
-            
-            //pipelineDescriptor.maxTessellationFactor = 64
+        if tessellated {
+            pipelineDescriptor.maxTessellationFactor = 64
             pipelineDescriptor.tessellationPartitionMode = .pow2
-            //pipelineDescriptor.tessellationFactorFormat = .half
+            pipelineDescriptor.tessellationFactorFormat = .half
             pipelineDescriptor.tessellationFactorStepFunction = .constant
-            //pipelineDescriptor.tessellationOutputWindingOrder = .clockwise
+            pipelineDescriptor.tessellationOutputWindingOrder = .clockwise
             pipelineDescriptor.tessellationControlPointIndexType = .none
-            //pipelineDescriptor.isTessellationFactorScaleEnabled = false
         }
-
         return pipelineDescriptor
     }
 }
@@ -102,7 +96,9 @@ extension PipelineDescriptorFactory {
             vertexShader: pipeline.type.vertexShader,
             fragmentShader: pipeline.type.fragmentShader,
             blendMode: pipeline.blendMode,
-            library: library)
+            library: library,
+            tessellated: pipeline.type.tessellated
+        )
     }
 }
 
@@ -285,7 +281,6 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
                 .colorShader, .maskShader:
                 return Vertex4F.descriptor
             case .rasterShader,
-                .tessellatedShader,
                 .clearStencilShader,
                 .alphaShader,
                 .unitSphereAlphaShader,
@@ -295,8 +290,19 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
                 .roundColorShader,
                 .elevationInterpolation:
                 return Vertex3DTexture.descriptor
+            case .tessellatedShader:
+                return TessellatedVertex3DTexture.descriptor
             default:
                 return Vertex.descriptor
+        }
+    }
+    
+    var tessellated: Bool {
+        switch self {
+            case .tessellatedShader:
+                return true
+            default:
+                return false
         }
     }
 }
