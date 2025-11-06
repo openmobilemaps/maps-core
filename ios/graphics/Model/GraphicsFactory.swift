@@ -25,10 +25,8 @@ class GraphicsFactory: MCGraphicsObjectFactoryInterface {
     }
     
     func createPolygonMaskTessellated(_ is3d: Bool) -> (any MCPolygon2dInterface)? {
-        let shader = MaskShader()
-        return Polygon2d(shader: shader, metalContext: .current)
-        //let shader = MaskShader(shader: .maskTessellatedShader)
-        //return Polygon2dTessellated(shader: shader, metalContext: .current)
+        let shader = MaskShader(shader: .maskTessellatedShader)
+        return Polygon2dTessellated(shader: shader, metalContext: .current)
     }
 
     func createPolygonGroup(_ shader: MCShaderProgramInterface?) -> MCPolygonGroup2dInterface? {

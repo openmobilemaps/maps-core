@@ -135,18 +135,16 @@ polygonTessellationVertexShader(const patch_control_point<Vertex4FIn> controlPoi
                                 const float3 positionInPatch [[position_in_patch]],
                                 constant float4x4 &vpMatrix [[buffer(1)]],
                                 constant float4x4 &mMatrix [[buffer(2)]],
-                                constant float3 &originOffset [[buffer(3)]])
+                                constant float4 &originOffset [[buffer(3)]])
 {
     Vertex4FIn vA = controlPoints[0];
     Vertex4FIn vB = controlPoints[1];
     Vertex4FIn vC = controlPoints[2];
     
     float4 vertexPosition = baryinterp(vA.position, vB.position, vC.position, positionInPatch);
-  
-    float3 position = vertexPosition.xyz;
      
     VertexOut out {
-        .position = vpMatrix * (float4(position, 1) + float4(originOffset, 0)),
+        .position = vpMatrix * (float4(vertexPosition.xyz, 1) + originOffset),
     };
 
     return out;
