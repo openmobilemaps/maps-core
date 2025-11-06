@@ -587,8 +587,10 @@ void Tiled2dMapVectorSourceSymbolDataManager::setSprites(std::string spriteId, s
     sprites.emplace_back(spriteData, spriteTexture);
 
     if (!tileSymbolGroupMap.empty()) {
-        auto selfActor = WeakActor(mailbox, weak_from_this());
-        selfActor.message(MailboxExecutionEnvironment::graphics, MFN(&Tiled2dMapVectorSourceSymbolDataManager::setupExistingSymbolWithSprite), spriteData, spriteTexture);
+        //auto selfActor = WeakActor(mailbox, weak_from_this());
+        //selfActor.message(MailboxExecutionEnvironment::graphics, MFN(&Tiled2dMapVectorSourceSymbolDataManager::setupExistingSymbolWithSprite), spriteData, spriteTexture);
+        // Call directly, this does not need graphics environment.
+        setupExistingSymbolWithSprite(spriteData, spriteTexture);
     }
 }
 
