@@ -146,13 +146,14 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
     case polygonPatternGroupShader
     case polygonPatternFadeInGroupShader
     case maskShader
+    //case maskTessellatedShader
     case colorShader
     case roundColorShader
     case clearStencilShader
     case textShader
     case textInstancedShader
     case rasterShader
-    case tessellatedShader
+    case quadTessellatedShader
     case stretchShader
     case stretchInstancedShader
     case unitSphereAlphaShader
@@ -176,13 +177,14 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
             case .polygonPatternGroupShader: return "Polygon Group Pattern shader"
             case .polygonPatternFadeInGroupShader: return "Polygon Group Pattern (fade in) shader"
             case .maskShader: return "Mask shader"
+            //case .maskTessellatedShader: return "Mask Tessellated shader"
             case .colorShader: return "Color shader"
             case .roundColorShader: return "Round color shader"
             case .clearStencilShader: return "Clear stencil shader"
             case .textShader: return "Text shader"
             case .textInstancedShader: return "Text Instanced shader"
             case .rasterShader: return "Raster shader"
-            case .tessellatedShader: return "Tessellated shader"
+            case .quadTessellatedShader: return "Quad Tessellated shader"
             case .stretchShader: return "Stretch shader"
             case .stretchInstancedShader: return "Stretch Instanced shader"
             case .unitSphereAlphaShader: return "Unit Sphere Alpha shader with texture"
@@ -197,7 +199,7 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
 
     var vertexShaderUsesModelMatrix: Bool {
         switch self {
-            case .rasterShader, .tessellatedShader, .roundColorShader, .unitSphereRoundColorShader, .alphaShader, .unitSphereAlphaShader, .sphereEffectShader, .skySphereShader, .elevationInterpolation:
+            case .rasterShader, .quadTessellatedShader, .roundColorShader, .unitSphereRoundColorShader, .alphaShader, .unitSphereAlphaShader, .sphereEffectShader, .skySphereShader, .elevationInterpolation:
                 return true
             default:
                 return false
@@ -217,13 +219,14 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
             case .polygonPatternGroupShader: return "polygonPatternGroupVertexShader"
             case .polygonPatternFadeInGroupShader: return "polygonPatternGroupVertexShader"
             case .maskShader: return "colorVertexShader"
+            //case .maskTessellatedShader: return "polygonTessellationVertexShader"
             case .colorShader: return "colorVertexShader"
             case .roundColorShader: return "baseVertexShaderModel"
             case .clearStencilShader: return "stencilClearVertexShader"
             case .textShader: return "textVertexShader"
             case .textInstancedShader: return "textInstancedVertexShader"
             case .rasterShader: return "baseVertexShaderModel"
-            case .tessellatedShader: return "tessellationVertexShader"
+            case .quadTessellatedShader: return "quadTessellationVertexShader"
             case .stretchShader: return "stretchVertexShader"
             case .stretchInstancedShader: return "stretchInstancedVertexShader"
             case .unitSphereAlphaShader: return "baseVertexShader"
@@ -249,13 +252,14 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
             case .polygonPatternGroupShader: return "polygonPatternGroupFragmentShader"
             case .polygonPatternFadeInGroupShader: return "polygonPatternGroupFadeInFragmentShader"
             case .maskShader: return "maskFragmentShader"
+            //case .maskTessellatedShader: return "maskFragmentShader"
             case .colorShader: return "colorFragmentShader"
             case .roundColorShader: return "roundColorFragmentShader"
             case .clearStencilShader: return "stencilClearFragmentShader"
             case .textShader: return "textFragmentShader"
             case .textInstancedShader: return "textInstancedFragmentShader"
             case .rasterShader: return "rasterFragmentShader"
-            case .tessellatedShader: return "rasterFragmentShader"
+            case .quadTessellatedShader: return "rasterFragmentShader"
             case .stretchShader: return "stretchFragmentShader"
             case .stretchInstancedShader: return "stretchInstancedFragmentShader"
             case .unitSphereAlphaShader: return "baseFragmentShader"
@@ -290,17 +294,21 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
                 .roundColorShader,
                 .elevationInterpolation:
                 return Vertex3DTexture.descriptor
-            case .tessellatedShader:
+            case .quadTessellatedShader:
                 return TessellatedVertex3DTexture.descriptor
+            //case .maskTessellatedShader:
+            //    return Vertex4F.descriptor // later... TessellatedVertex4f.descriptor
             default:
                 return Vertex.descriptor
         }
     }
     
-    var tessellated: Bool {
+    var tessellated: Bool { //tessellation config?!
         switch self {
-            case .tessellatedShader:
+            case .quadTessellatedShader:
                 return true
+            //case .maskTessellatedShader:
+            //    return true // but indexed
             default:
                 return false
         }

@@ -78,6 +78,11 @@ T bilerp(T c00, T c01, T c10, T c11, float2 uv) {
     return mix(c0, c1, T(uv[1]));
 }
 
+template <typename T>
+T baryinterp(T c0, T c1, T c2, float3 bary) {
+    return c0 * bary[0] + c1 * bary[1] + c2 * bary[2];
+}
+
 float3 transform(float3 coordinate, float3 origin) {
     float x = 1.0 * sin(coordinate.y) * cos(coordinate.x) - origin.x;
     float y = 1.0 * cos(coordinate.y) - origin.y;
@@ -86,16 +91,16 @@ float3 transform(float3 coordinate, float3 origin) {
 }
 
 [[patch(quad, 4)]] vertex VertexOut
-tessellationVertexShader(const patch_control_point<TessellatedVertex3DTextureIn> controlPoints [[stage_in]],
-                         const float2 positionInPatch [[position_in_patch]],
-                         constant float4x4 &vpMatrix [[buffer(1)]],
-                         constant float4x4 &mMatrix [[buffer(2)]],
-                         constant float3 &originOffset [[buffer(3)]],
-                         constant float3 &origin [[buffer(4)]],
-                         /* ELEVATION PROTOTYPE TEST
-                         texture2d<float> texture0 [[ texture(0)]],
-                         sampler sampler0 [[sampler(0)]], */
-                         constant bool &is3d [[buffer(5)]])
+quadTessellationVertexShader(const patch_control_point<TessellatedVertex3DTextureIn> controlPoints [[stage_in]],
+                             const float2 positionInPatch [[position_in_patch]],
+                             constant float4x4 &vpMatrix [[buffer(1)]],
+                             constant float4x4 &mMatrix [[buffer(2)]],
+                             constant float3 &originOffset [[buffer(3)]],
+                             constant float3 &origin [[buffer(4)]],
+                             /* ELEVATION PROTOTYPE TEST
+                             texture2d<float> texture0 [[ texture(0)]],
+                             sampler sampler0 [[sampler(0)]], */
+                             constant bool &is3d [[buffer(5)]])
 {
     TessellatedVertex3DTextureIn vA = controlPoints[0];
     TessellatedVertex3DTextureIn vB = controlPoints[1];
@@ -120,6 +125,28 @@ tessellationVertexShader(const patch_control_point<TessellatedVertex3DTextureIn>
     VertexOut out {
         .position = vpMatrix * ((mMatrix * float4(position, 1)) + float4(originOffset, 0)),
         .uv = vertexUV
+    };
+  
+    return out;
+}
+
+[[patch(triangle, 3)]] vertex VertexOut
+polygonTessellationVertexShader(const patch_control_point<Vertex4FIn> controlPoints [[stage_in]],
+                                const float3 positionInPatch [[position_in_patch]],
+                                constant float4x4 &vpMatrix [[buffer(1)]],
+                                constant float4x4 &mMatrix [[buffer(2)]],
+                                constant float3 &originOffset [[buffer(3)]])
+{
+    Vertex4FIn vA = controlPoints[0];
+    Vertex4FIn vB = controlPoints[1];
+    Vertex4FIn vC = controlPoints[2];
+    
+    float4 vertexPosition = baryinterp(vA.position, vB.position, vC.position, positionInPatch);
+  
+    float3 position = vertexPosition.xyz;
+     
+    VertexOut out {
+        .position = vpMatrix * (float4(position, 1) + float4(originOffset, 0)),
     };
 
     return out;

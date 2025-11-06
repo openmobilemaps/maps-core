@@ -29,11 +29,13 @@ Tiled2dMapVectorRasterTile::Tiled2dMapVectorRasterTile(const std::weak_ptr<MapIn
     auto pMapInterface = mapInterface.lock();
     if (pMapInterface) {
          /*
+        // deprecated? (createUnitSphereRasterShader and createRasterShader both return RasterShader)
         auto shader = pMapInterface->is3d() ? pMapInterface->getShaderFactory()->createUnitSphereRasterShader() : pMapInterface->getShaderFactory()->createRasterShader();
+        shader->asShaderProgramInterface()->setBlendMode(description->style.getBlendMode(EvaluationContext(0.0, dpFactor, std::make_shared<FeatureContext>(), featureStateManager)));
         auto quad = pMapInterface->getGraphicsObjectFactory()->createQuad(shader->asShaderProgramInterface());
          */
         // /*
-        auto shader = pMapInterface->getShaderFactory()->createUnitSphereTessellatedShader();
+        auto shader = pMapInterface->getShaderFactory()->createQuadTessellatedShader();
         shader->asShaderProgramInterface()->setBlendMode(description->style.getBlendMode(EvaluationContext(0.0, dpFactor, std::make_shared<FeatureContext>(), featureStateManager)));
         auto quad = pMapInterface->getGraphicsObjectFactory()->createQuadTessellated(shader->asShaderProgramInterface());
         // */

@@ -24,8 +24,8 @@ class ShaderFactory: MCShaderFactoryInterface {
         RasterShader()
     }
     
-    func createUnitSphereTessellatedShader() -> MCRasterShaderInterface? {
-        RasterShader(shader: .tessellatedShader)
+    func createQuadTessellatedShader() -> MCRasterShaderInterface? {
+        RasterShader(shader: .quadTessellatedShader)
     }
 
     func createTextShader() -> MCTextShaderInterface? {

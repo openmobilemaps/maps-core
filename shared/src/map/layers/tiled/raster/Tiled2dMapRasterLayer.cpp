@@ -303,12 +303,13 @@ std::vector<Tiled2dMapRasterTileInfo> sortedTileInfos(currentTileInfos.begin(), 
                     tileObject = std::make_shared<Textured2dLayerObject>(quad, mapInterface, is3D);
                 } else {
                      /*
+                    // deprecated? (createUnitSphereRasterShader and createRasterShader both return RasterShader)
                     auto rShader = is3D ? shaderFactory->createUnitSphereRasterShader() : shaderFactory->createRasterShader();
                     rShader->asShaderProgramInterface()->setBlendMode(blendMode);
                     auto quad = graphicsFactory->createQuad(rShader->asShaderProgramInterface());
                      */
                     // /*
-                    auto rShader = shaderFactory->createUnitSphereTessellatedShader();
+                    auto rShader = shaderFactory->createQuadTessellatedShader();
                     rShader->asShaderProgramInterface()->setBlendMode(blendMode);
                     auto quad = graphicsFactory->createQuadTessellated(rShader->asShaderProgramInterface());
                     // */
