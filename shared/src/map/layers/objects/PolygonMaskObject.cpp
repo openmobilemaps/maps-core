@@ -24,7 +24,8 @@ PolygonMaskObject::PolygonMaskObject(const std::shared_ptr<GraphicsObjectFactory
                                      const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                                      bool is3D)
     : conversionHelper(conversionHelper)
-    , polygon(graphicsObjectFactory->createPolygonMask(is3D))
+    , polygon(graphicsObjectFactory->createPolygonMaskTessellated(is3D))
+    //, polygon(graphicsObjectFactory->createPolygonMask(is3D))
     , is3D(is3D) {}
 
 void PolygonMaskObject::setPositions(const std::vector<Coord> &positions,
@@ -81,9 +82,12 @@ void PolygonMaskObject::setPolygons(const std::vector<::PolygonCoord> &polygons,
         }
     }
 
-    if(maxSegmentLength) {
+    /* todo send to gpu in a absolute factor */
+    if (maxSegmentLength) {
         PolygonHelper::subdivision(vecVertices, indices, *maxSegmentLength); // here, do on gpu
     }
+    
+    
     for (const auto& v : vecVertices) {
         double rx = origin.x;
         double ry = origin.y;
