@@ -52,6 +52,15 @@ NativeGraphicsObjectFactoryInterface::JavaProxy::~JavaProxy() = default;
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni_generated::NativePolygon2dInterface::toCpp(jniEnv, jret);
 }
+/*not-null*/ std::shared_ptr<::Polygon2dInterface> NativeGraphicsObjectFactoryInterface::JavaProxy::createPolygonTessellated(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & c_shader) {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeGraphicsObjectFactoryInterface>::get();
+    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_createPolygonTessellated,
+                                         ::djinni::get(::djinni_generated::NativeShaderProgramInterface::fromCpp(jniEnv, c_shader)));
+    ::djinni::jniExceptionCheck(jniEnv);
+    return ::djinni_generated::NativePolygon2dInterface::toCpp(jniEnv, jret);
+}
 /*not-null*/ std::shared_ptr<::IcosahedronInterface> NativeGraphicsObjectFactoryInterface::JavaProxy::createIcosahedronObject(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & c_shader) {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
@@ -124,6 +133,15 @@ NativeGraphicsObjectFactoryInterface::JavaProxy::~JavaProxy() = default;
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni_generated::NativePolygon2dInterface::toCpp(jniEnv, jret);
 }
+/*not-null*/ std::shared_ptr<::Polygon2dInterface> NativeGraphicsObjectFactoryInterface::JavaProxy::createPolygonMaskTessellated(bool c_is3d) {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeGraphicsObjectFactoryInterface>::get();
+    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_createPolygonMaskTessellated,
+                                         ::djinni::get(::djinni::Bool::fromCpp(jniEnv, c_is3d)));
+    ::djinni::jniExceptionCheck(jniEnv);
+    return ::djinni_generated::NativePolygon2dInterface::toCpp(jniEnv, jret);
+}
 /*not-null*/ std::shared_ptr<::TextInterface> NativeGraphicsObjectFactoryInterface::JavaProxy::createText(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & c_shader) {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
@@ -173,6 +191,15 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objec
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::GraphicsObjectFactoryInterface>(nativeRef);
         auto r = ref->createPolygon(::djinni_generated::NativeShaderProgramInterface::toCpp(jniEnv, j_shader));
+        return ::djinni::release(::djinni_generated::NativePolygon2dInterface::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_GraphicsObjectFactoryInterface_00024CppProxy_native_1createPolygonTessellated(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeShaderProgramInterface::JniType j_shader)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::GraphicsObjectFactoryInterface>(nativeRef);
+        auto r = ref->createPolygonTessellated(::djinni_generated::NativeShaderProgramInterface::toCpp(jniEnv, j_shader));
         return ::djinni::release(::djinni_generated::NativePolygon2dInterface::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
@@ -245,6 +272,15 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objec
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::GraphicsObjectFactoryInterface>(nativeRef);
         auto r = ref->createPolygonMask(::djinni::Bool::toCpp(jniEnv, j_is3d));
+        return ::djinni::release(::djinni_generated::NativePolygon2dInterface::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_GraphicsObjectFactoryInterface_00024CppProxy_native_1createPolygonMaskTessellated(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jboolean j_is3d)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::GraphicsObjectFactoryInterface>(nativeRef);
+        auto r = ref->createPolygonMaskTessellated(::djinni::Bool::toCpp(jniEnv, j_is3d));
         return ::djinni::release(::djinni_generated::NativePolygon2dInterface::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }

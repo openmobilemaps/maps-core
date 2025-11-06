@@ -23,6 +23,8 @@
 
 - (nullable id<MCPolygon2dInterface>)createPolygon:(nullable id<MCShaderProgramInterface>)shader;
 
+- (nullable id<MCPolygon2dInterface>)createPolygonTessellated:(nullable id<MCShaderProgramInterface>)shader;
+
 - (nullable id<MCIcosahedronInterface>)createIcosahedronObject:(nullable id<MCShaderProgramInterface>)shader;
 
 - (nullable id<MCQuad2dInstancedInterface>)createQuadInstanced:(nullable id<MCShaderProgramInterface>)shader;
@@ -38,6 +40,8 @@
 - (nullable id<MCQuad2dInterface>)createQuadMask:(BOOL)is3d;
 
 - (nullable id<MCPolygon2dInterface>)createPolygonMask:(BOOL)is3d;
+
+- (nullable id<MCPolygon2dInterface>)createPolygonMaskTessellated:(BOOL)is3d;
 
 - (nullable id<MCTextInterface>)createText:(nullable id<MCShaderProgramInterface>)shader;
 

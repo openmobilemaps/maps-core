@@ -82,7 +82,7 @@ void PolygonMaskObject::setPolygons(const std::vector<::PolygonCoord> &polygons,
     }
 
     if(maxSegmentLength) {
-        PolygonHelper::subdivision(vecVertices, indices, *maxSegmentLength);
+        PolygonHelper::subdivision(vecVertices, indices, *maxSegmentLength); // here, do on gpu
     }
     for (const auto& v : vecVertices) {
         double rx = origin.x;
