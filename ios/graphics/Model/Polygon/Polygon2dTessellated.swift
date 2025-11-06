@@ -113,35 +113,17 @@ final class Polygon2dTessellated: BaseGraphicsObject, @unchecked Sendable {
             bufferPointer.pointee.z = Float(originOffset.z - origin.z)
         }
         encoder.setVertexBuffer(originOffsetBuffer, offset: 0, index: 3)
-
-        /*
-        encoder.drawIndexedPrimitives(
-            type: .triangle,
-            indexCount: indicesCount,
-            indexType: .uint16,
-            indexBuffer: indicesBuffer,
-            indexBufferOffset: 0)
-        */
-        
-        let tessellationFactors: [Float16] = [
-            1, // edge 0
-            0, // edge 1
-            0, // edge 2
-            0, // inside 0
-        ]
-        self.tessellationFactorsBuffer.copyOrCreate(
-            bytes: tessellationFactors,
-            length: MemoryLayout<Float16>.stride * tessellationFactors.count,
-            device: device)
          
         encoder.setTessellationFactorBuffer(tessellationFactorsBuffer, offset: 0, instanceStride: 0)
         
-        encoder.drawPatches(
-            numberOfPatchControlPoints: 4,
+        encoder.drawIndexedPatches(
+            numberOfPatchControlPoints: 3,
             patchStart: 0,
-            patchCount: 1,
+            patchCount: indicesCount / 3,
             patchIndexBuffer: nil,
             patchIndexBufferOffset: 0,
+            controlPointIndexBuffer: indicesBuffer,
+            controlPointIndexBufferOffset: 0,
             instanceCount: 1,
             baseInstance: 0)
     }
@@ -185,11 +167,12 @@ extension Polygon2dTessellated: MCMaskingObjectInterface {
         else { return }
 
         guard let verticesBuffer,
-            let indicesBuffer
+            let indicesBuffer,
+            let tessellationFactorsBuffer
         else { return }
 
         #if DEBUG
-            encoder.pushDebugGroup("Polygon2dMask")
+            encoder.pushDebugGroup("Polygon2dTessellated")
             defer {
                 encoder.popDebugGroup()
             }
@@ -229,35 +212,17 @@ extension Polygon2dTessellated: MCMaskingObjectInterface {
             bufferPointer.pointee.z = Float(originOffset.z - origin.z)
         }
         encoder.setVertexBuffer(originOffsetBuffer, offset: 0, index: 3)
-
-        /*
-        encoder.drawIndexedPrimitives(
-            type: .triangle,
-            indexCount: indicesCount,
-            indexType: .uint16,
-            indexBuffer: indicesBuffer,
-            indexBufferOffset: 0)
-         */
-        
-        let tessellationFactors: [Float16] = [
-            1, // edge 0
-            0, // edge 1
-            0, // edge 2
-            0, // inside 0
-        ]
-        self.tessellationFactorsBuffer.copyOrCreate(
-            bytes: tessellationFactors,
-            length: MemoryLayout<Float16>.stride * tessellationFactors.count,
-            device: device)
-        
+         
         encoder.setTessellationFactorBuffer(tessellationFactorsBuffer, offset: 0, instanceStride: 0)
         
-        encoder.drawPatches(
-            numberOfPatchControlPoints: 4,
+        encoder.drawIndexedPatches(
+            numberOfPatchControlPoints: 3,
             patchStart: 0,
-            patchCount: 1,
+            patchCount: indicesCount / 3,
             patchIndexBuffer: nil,
             patchIndexBufferOffset: 0,
+            controlPointIndexBuffer: indicesBuffer,
+            controlPointIndexBufferOffset: 0,
             instanceCount: 1,
             baseInstance: 0)
     }
@@ -276,6 +241,18 @@ extension Polygon2dTessellated: MCPolygon2dInterface {
                 self.indicesCount = 0
             }
             self.originOffset = origin
+            
+            // todo determine from cpu version
+            let tessellationFactors: [Float16] = [
+                2, // edge 0
+                2, // edge 1
+                2, // edge 2
+                2, // inside 0
+            ]
+            self.tessellationFactorsBuffer.copyOrCreate(
+                bytes: tessellationFactors,
+                length: MemoryLayout<Float16>.stride * tessellationFactors.count,
+                device: device)
         }
     }
 

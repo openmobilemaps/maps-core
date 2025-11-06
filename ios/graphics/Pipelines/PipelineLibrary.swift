@@ -83,6 +83,13 @@ public enum PipelineDescriptorFactory {
             pipelineDescriptor.tessellationFactorStepFunction = .constant
             pipelineDescriptor.tessellationOutputWindingOrder = .clockwise
             pipelineDescriptor.tessellationControlPointIndexType = .none
+            pipelineDescriptor.isTessellationFactorScaleEnabled = false
+            
+            //temporary
+            if label == PipelineType.maskTessellatedShader.label {
+                pipelineDescriptor.vertexDescriptor!.layouts[0].stepFunction = .perPatchControlPoint
+                pipelineDescriptor.tessellationControlPointIndexType = .uint16
+            }
         }
         return pipelineDescriptor
     }
@@ -146,7 +153,7 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
     case polygonPatternGroupShader
     case polygonPatternFadeInGroupShader
     case maskShader
-    //case maskTessellatedShader
+    case maskTessellatedShader
     case colorShader
     case roundColorShader
     case clearStencilShader
@@ -177,7 +184,7 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
             case .polygonPatternGroupShader: return "Polygon Group Pattern shader"
             case .polygonPatternFadeInGroupShader: return "Polygon Group Pattern (fade in) shader"
             case .maskShader: return "Mask shader"
-            //case .maskTessellatedShader: return "Mask Tessellated shader"
+            case .maskTessellatedShader: return "Mask Tessellated shader"
             case .colorShader: return "Color shader"
             case .roundColorShader: return "Round color shader"
             case .clearStencilShader: return "Clear stencil shader"
@@ -219,7 +226,7 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
             case .polygonPatternGroupShader: return "polygonPatternGroupVertexShader"
             case .polygonPatternFadeInGroupShader: return "polygonPatternGroupVertexShader"
             case .maskShader: return "colorVertexShader"
-            //case .maskTessellatedShader: return "polygonTessellationVertexShader"
+            case .maskTessellatedShader: return "polygonTessellationVertexShader"
             case .colorShader: return "colorVertexShader"
             case .roundColorShader: return "baseVertexShaderModel"
             case .clearStencilShader: return "stencilClearVertexShader"
@@ -252,7 +259,7 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
             case .polygonPatternGroupShader: return "polygonPatternGroupFragmentShader"
             case .polygonPatternFadeInGroupShader: return "polygonPatternGroupFadeInFragmentShader"
             case .maskShader: return "maskFragmentShader"
-            //case .maskTessellatedShader: return "maskFragmentShader"
+            case .maskTessellatedShader: return "maskFragmentShader"
             case .colorShader: return "colorFragmentShader"
             case .roundColorShader: return "roundColorFragmentShader"
             case .clearStencilShader: return "stencilClearFragmentShader"
@@ -296,8 +303,8 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
                 return Vertex3DTexture.descriptor
             case .quadTessellatedShader:
                 return TessellatedVertex3DTexture.descriptor
-            //case .maskTessellatedShader:
-            //    return Vertex4F.descriptor // later... TessellatedVertex4f.descriptor
+            case .maskTessellatedShader:
+                return Vertex4F.descriptor // later... TessellatedVertex4f.descriptor
             default:
                 return Vertex.descriptor
         }
@@ -307,8 +314,8 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
         switch self {
             case .quadTessellatedShader:
                 return true
-            //case .maskTessellatedShader:
-            //    return true // but indexed
+            case .maskTessellatedShader:
+               return true // but indexed
             default:
                 return false
         }
