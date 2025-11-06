@@ -183,9 +183,9 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (nullable id<MCRasterShaderInterface>)createUnitSphereTessellatedShader {
+- (nullable id<MCRasterShaderInterface>)createQuadTessellatedShader {
     try {
-        auto objcpp_result_ = _cppRefHandle.get()->createUnitSphereTessellatedShader();
+        auto objcpp_result_ = _cppRefHandle.get()->createQuadTessellatedShader();
         return ::djinni_generated::RasterShaderInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
@@ -376,10 +376,10 @@ public:
             return ::djinni_generated::RasterShaderInterface::toCpp(objcpp_result_);
         }
     }
-    /*not-null*/ std::shared_ptr<::RasterShaderInterface> createUnitSphereTessellatedShader() override
+    /*not-null*/ std::shared_ptr<::RasterShaderInterface> createQuadTessellatedShader() override
     {
         @autoreleasepool {
-            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createUnitSphereTessellatedShader];
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createQuadTessellatedShader];
             return ::djinni_generated::RasterShaderInterface::toCpp(objcpp_result_);
         }
     }

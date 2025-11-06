@@ -27,6 +27,8 @@ baseVertexShader(const Vertex3DTextureIn vertexIn [[stage_in]],
     return out;
 }
 
+// deprecated? (baseVertexShader and baseVertexShaderModel identical)
+
 vertex VertexOut
 baseVertexShaderModel(const Vertex3DTextureIn vertexIn [[stage_in]],
                 constant float4x4 &vpMatrix [[buffer(1)]],
