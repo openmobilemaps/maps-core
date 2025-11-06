@@ -20,6 +20,9 @@ struct SpriteIconId {
         if(separatorPos != std::string::npos) {
             sheet = iconImage.substr(0, separatorPos);
             icon = iconImage.substr(separatorPos + 1, iconImage.size() - separatorPos - 1);
+            if(sheet == "default") {
+                sheet = "";
+            }
         } else {
             // sheet = "";
             icon = iconImage;
