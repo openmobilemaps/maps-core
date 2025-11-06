@@ -115,8 +115,8 @@ private:
     const WeakActor<Tiled2dMapVectorFontProvider> fontProvider;
 
     struct SpriteIconDescriptor {
+        std::string identifier;
         std::shared_ptr<TextureHolderInterface> spriteTexture;
-        std::shared_ptr<SpriteData> spriteData;
 
         VectorModificationWrapper<float> iconPositions;
         VectorModificationWrapper<float> iconScales;
@@ -134,8 +134,17 @@ private:
 
         std::shared_ptr<Quad2dInstancedInterface> iconInstancedObject;
         std::shared_ptr<Quad2dStretchedInstancedInterface> stretchedInstancedObject;
+
+        // Temporary counters. Kept here to avoid having to allocate these in each update call.
+        uint32_t tmpIconCounter;
+        uint32_t tmpStretchedIconCounter;
     };
-    std::unordered_map<std::string, SpriteIconDescriptor> sprites;
+    std::vector<SpriteIconDescriptor> sprites;
+
+    // Simple resolution of sprites names
+    std::unordered_map<SpriteIconId, ResolvedSpriteIconId> spriteLookup; 
+    // Metadata for individual sprite images of all sprite sheets. Indexed by ResolvedSpriteIconId.icon
+    std::vector<SpriteDesc> spriteIconData;
 
     std::vector<std::shared_ptr<TextInstancedInterface>> textInstancedObjects;
     std::shared_ptr<PolygonGroup2dLayerObject> boundingBoxLayerObject;
