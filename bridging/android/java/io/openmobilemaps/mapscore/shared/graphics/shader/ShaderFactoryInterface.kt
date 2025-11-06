@@ -46,7 +46,7 @@ abstract class ShaderFactoryInterface {
 
     abstract fun createUnitSphereRasterShader(): RasterShaderInterface
 
-    abstract fun createUnitSphereTessellatedShader(): RasterShaderInterface
+    abstract fun createQuadTessellatedShader(): RasterShaderInterface
 
     abstract fun createStretchShader(): StretchShaderInterface
 
@@ -189,11 +189,11 @@ abstract class ShaderFactoryInterface {
         }
         private external fun native_createUnitSphereRasterShader(_nativeRef: Long): RasterShaderInterface
 
-        override fun createUnitSphereTessellatedShader(): RasterShaderInterface {
+        override fun createQuadTessellatedShader(): RasterShaderInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            return native_createUnitSphereTessellatedShader(this.nativeRef)
+            return native_createQuadTessellatedShader(this.nativeRef)
         }
-        private external fun native_createUnitSphereTessellatedShader(_nativeRef: Long): RasterShaderInterface
+        private external fun native_createQuadTessellatedShader(_nativeRef: Long): RasterShaderInterface
 
         override fun createStretchShader(): StretchShaderInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

@@ -61,7 +61,7 @@
 
 - (nullable id<MCRasterShaderInterface>)createUnitSphereRasterShader;
 
-- (nullable id<MCRasterShaderInterface>)createUnitSphereTessellatedShader;
+- (nullable id<MCRasterShaderInterface>)createQuadTessellatedShader;
 
 - (nullable id<MCStretchShaderInterface>)createStretchShader;
 
