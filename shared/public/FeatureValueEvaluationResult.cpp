@@ -24,7 +24,7 @@
 #include "LineCapType.h"
 
 #include "FeatureValueEvaluationResult.h"
-#include "FeatureValueEvaluationResult.inl"
+#include "FeatureValueEvaluationResultImpl.h"
 
 template struct FeatureValueEvaluationResult<double>;
 template struct FeatureValueEvaluationResult<Color>;
