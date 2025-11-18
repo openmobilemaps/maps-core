@@ -41,10 +41,9 @@ std::shared_ptr<ShaderProgramInterface> ElevationInterpolationShaderOpenGl::asSh
 std::string ElevationInterpolationShaderOpenGl::getFragmentShader() {
     return OMMVersionedGlesShaderCode(320 es,
                                       precision highp float;
-                                      precision highp int;
-                                      precision highp sampler2D;
+                                              precision highp int;
+                                              precision highp sampler2D;
                                               uniform sampler2D textureSampler;
-                                              uniform float alpha;
                                               in vec2 v_texcoord;
                                               out vec4 fragmentColor;
 
@@ -113,7 +112,6 @@ std::string ElevationInterpolationShaderOpenGl::getFragmentShader() {
 
                                               void main()
                                               {
-                                                  vec4 c = texture(textureSampler, v_texcoord);
                                                   float elevation = bilinearSampleElevation(textureSampler, v_texcoord);
                                                   fragmentColor = encodeElevation(elevation);
                                               }
