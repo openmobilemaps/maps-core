@@ -6,6 +6,7 @@
 @protocol MCAlphaShaderInterface;
 @protocol MCColorCircleShaderInterface;
 @protocol MCColorShaderInterface;
+@protocol MCElevationInterpolationShaderInterface;
 @protocol MCLineGroupShaderInterface;
 @protocol MCPolygonGroupShaderInterface;
 @protocol MCPolygonPatternGroupShaderInterface;
@@ -69,5 +70,7 @@
 - (nullable id<MCSphereEffectShaderInterface>)createSphereEffectShader;
 
 - (nullable id<MCSkySphereShaderInterface>)createSkySphereShader;
+
+- (nullable id<MCElevationInterpolationShaderInterface>)createElevationInterpolationShader;
 
 @end
