@@ -56,6 +56,8 @@ abstract class ShaderFactoryInterface {
 
     abstract fun createSkySphereShader(): SkySphereShaderInterface
 
+    abstract fun createElevationInterpolationShader(): ElevationInterpolationShaderInterface
+
     public class CppProxy : ShaderFactoryInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -214,5 +216,11 @@ abstract class ShaderFactoryInterface {
             return native_createSkySphereShader(this.nativeRef)
         }
         private external fun native_createSkySphereShader(_nativeRef: Long): SkySphereShaderInterface
+
+        override fun createElevationInterpolationShader(): ElevationInterpolationShaderInterface {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_createElevationInterpolationShader(this.nativeRef)
+        }
+        private external fun native_createElevationInterpolationShader(_nativeRef: Long): ElevationInterpolationShaderInterface
     }
 }

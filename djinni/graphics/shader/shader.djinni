@@ -57,6 +57,8 @@ shader_factory_interface = interface +c +j +o {
     create_sphere_effect_shader(): sphere_effect_shader_interface;
 
     create_sky_sphere_shader(): sky_sphere_shader_interface;
+
+    create_elevation_interpolation_shader(): elevation_interpolation_shader_interface;
 }
 
 raster_shader_style = record {
@@ -165,5 +167,9 @@ text_shader_interface = interface +c +o {
 }
 
 text_instanced_shader_interface = interface +c +o {
+    as_shader_program_interface() : shader_program_interface;
+}
+
+elevation_interpolation_shader_interface = interface +c +o {
     as_shader_program_interface() : shader_program_interface;
 }

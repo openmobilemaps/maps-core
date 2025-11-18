@@ -57,6 +57,7 @@ private:
         /*not-null*/ std::shared_ptr<::ColorShaderInterface> createIcosahedronColorShader() override;
         /*not-null*/ std::shared_ptr<::SphereEffectShaderInterface> createSphereEffectShader() override;
         /*not-null*/ std::shared_ptr<::SkySphereShaderInterface> createSkySphereShader() override;
+        /*not-null*/ std::shared_ptr<::ElevationInterpolationShaderInterface> createElevationInterpolationShader() override;
 
     private:
         friend ::djinni::JniInterface<::ShaderFactoryInterface, ::djinni_generated::NativeShaderFactoryInterface>;
@@ -87,6 +88,7 @@ private:
     const jmethodID method_createIcosahedronColorShader { ::djinni::jniGetMethodID(clazz.get(), "createIcosahedronColorShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/ColorShaderInterface;") };
     const jmethodID method_createSphereEffectShader { ::djinni::jniGetMethodID(clazz.get(), "createSphereEffectShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/SphereEffectShaderInterface;") };
     const jmethodID method_createSkySphereShader { ::djinni::jniGetMethodID(clazz.get(), "createSkySphereShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/SkySphereShaderInterface;") };
+    const jmethodID method_createElevationInterpolationShader { ::djinni::jniGetMethodID(clazz.get(), "createElevationInterpolationShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/ElevationInterpolationShaderInterface;") };
 };
 
 } // namespace djinni_generated

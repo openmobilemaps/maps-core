@@ -9,6 +9,7 @@ class AlphaInstancedShaderInterface;
 class AlphaShaderInterface;
 class ColorCircleShaderInterface;
 class ColorShaderInterface;
+class ElevationInterpolationShaderInterface;
 class LineGroupShaderInterface;
 class PolygonGroupShaderInterface;
 class PolygonPatternGroupShaderInterface;
@@ -71,4 +72,6 @@ public:
     virtual /*not-null*/ std::shared_ptr<SphereEffectShaderInterface> createSphereEffectShader() = 0;
 
     virtual /*not-null*/ std::shared_ptr<SkySphereShaderInterface> createSkySphereShader() = 0;
+
+    virtual /*not-null*/ std::shared_ptr<ElevationInterpolationShaderInterface> createElevationInterpolationShader() = 0;
 };
