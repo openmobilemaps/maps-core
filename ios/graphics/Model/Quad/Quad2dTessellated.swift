@@ -281,17 +281,12 @@ extension Quad2dTessellated: MCQuad2dInterface {
         _ frame: MCQuad3dD, textureCoordinates: MCRectD, origin: MCVec3D,
         is3d: Bool
     ) {
-        let sFactor = lock.withCritical { subdivisionFactor }
-        let tFactor = Float16(pow(2.0, Double(sFactor)))
+        let factor = Half(pow(2, Float(lock.withCritical { subdivisionFactor }))).bits;
         
-        let tessellationFactors: [Float16] = [
-            tFactor, // edge 0
-            tFactor, // edge 1
-            tFactor, // edge 2
-            tFactor, // edge 3
-            tFactor, // inside 0
-            tFactor  // inside 1
-        ]
+        var tessellationFactors = MTLQuadTessellationFactorsHalf(
+            edgeTessellationFactor: (factor, factor, factor, factor),
+            insideTessellationFactor: (factor, factor)
+        );
         
         var vertices: [TessellatedVertex3DTexture] = []
 
@@ -349,8 +344,8 @@ extension Quad2dTessellated: MCQuad2dInterface {
                 length: MemoryLayout<TessellatedVertex3DTexture>.stride * vertices.count,
                 device: device)
             self.tessellationFactorsBuffer.copyOrCreate(
-                bytes: tessellationFactors,
-                length: MemoryLayout<Float16>.stride * tessellationFactors.count,
+                bytes: &tessellationFactors,
+                length: MemoryLayout<MTLQuadTessellationFactorsHalf>.stride,
                 device: device)
         }
     }
