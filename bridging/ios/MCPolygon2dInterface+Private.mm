@@ -37,11 +37,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 
 - (void)setVertices:(nonnull MCSharedBytes *)vertices
             indices:(nonnull MCSharedBytes *)indices
-             origin:(nonnull MCVec3D *)origin {
+             origin:(nonnull MCVec3D *)origin
+  subdivisionFactor:(int32_t)subdivisionFactor {
     try {
         _cppRefHandle.get()->setVertices(::djinni_generated::SharedBytes::toCpp(vertices),
                                          ::djinni_generated::SharedBytes::toCpp(indices),
-                                         ::djinni_generated::Vec3D::toCpp(origin));
+                                         ::djinni_generated::Vec3D::toCpp(origin),
+                                         ::djinni::I32::toCpp(subdivisionFactor));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -68,12 +70,13 @@ class Polygon2dInterface::ObjcProxy final
     friend class ::djinni_generated::Polygon2dInterface;
 public:
     using ObjcProxyBase::ObjcProxyBase;
-    void setVertices(const ::SharedBytes & c_vertices, const ::SharedBytes & c_indices, const ::Vec3D & c_origin) override
+    void setVertices(const ::SharedBytes & c_vertices, const ::SharedBytes & c_indices, const ::Vec3D & c_origin, int32_t c_subdivisionFactor) override
     {
         @autoreleasepool {
             [djinni_private_get_proxied_objc_object() setVertices:(::djinni_generated::SharedBytes::fromCpp(c_vertices))
                                                           indices:(::djinni_generated::SharedBytes::fromCpp(c_indices))
-                                                           origin:(::djinni_generated::Vec3D::fromCpp(c_origin))];
+                                                           origin:(::djinni_generated::Vec3D::fromCpp(c_origin))
+                                                subdivisionFactor:(::djinni::I32::fromCpp(c_subdivisionFactor))];
         }
     }
     /*not-null*/ std::shared_ptr<::GraphicsObjectInterface> asGraphicsObject() override

@@ -215,7 +215,7 @@ extension Polygon2d: MCMaskingObjectInterface {
 
 extension Polygon2d: MCPolygon2dInterface {
     func setVertices(
-        _ vertices: MCSharedBytes, indices: MCSharedBytes, origin: MCVec3D
+        _ vertices: MCSharedBytes, indices: MCSharedBytes, origin: MCVec3D, subdivisionFactor: Int32
     ) {
         lock.withCritical {
             self.verticesBuffer.copyOrCreate(from: vertices, device: device)

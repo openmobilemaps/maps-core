@@ -11,6 +11,12 @@ blend_mode = enum {
     multiply;
 }
 
+tessellation_mode = enum {
+    none;
+    quad;
+    triangle;
+}
+
 shader_program_interface = interface +c +o {
     get_program_name() : string;
     setup_program(context: rendering_context_interface);
