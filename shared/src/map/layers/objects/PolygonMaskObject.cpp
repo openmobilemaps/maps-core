@@ -82,10 +82,9 @@ void PolygonMaskObject::setPolygons(const std::vector<::PolygonCoord> &polygons,
         }
     }
 
-    /* todo send to gpu in a absolute factor */
-    if (maxSegmentLength) {
-        PolygonHelper::subdivision(vecVertices, indices, *maxSegmentLength); // here, do on gpu
-    }
+    //if (maxSegmentLength) {
+    //    PolygonHelper::subdivision(vecVertices, indices, *maxSegmentLength);
+    //}
     
     
     for (const auto& v : vecVertices) {
@@ -103,12 +102,20 @@ void PolygonMaskObject::setPolygons(const std::vector<::PolygonCoord> &polygons,
     #ifdef __APPLE__
         vertices.push_back(0.0f);
     #endif
+        
+        vertices.push_back(v.x);
+        vertices.push_back(v.y);
+        vertices.push_back(0.0f);
+    #ifdef __APPLE__
+        vertices.push_back(0.0f);
+    #endif
     }
 
     auto attr = SharedBytes((int64_t)vertices.data(), (int32_t)vertices.size(), (int32_t)sizeof(float));
     auto ind = SharedBytes((int64_t)indices.data(), (int32_t)indices.size(), (int32_t)sizeof(uint16_t));
-
-    polygon->setVertices(attr, ind, origin);
+    int32_t subdivisionFactor = (int32_t)(maxSegmentLength.value_or(1.0f));
+    
+    polygon->setVertices(attr, ind, origin, subdivisionFactor);
 }
 
 std::shared_ptr<Polygon2dInterface> PolygonMaskObject::getPolygonObject() { return polygon; }

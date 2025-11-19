@@ -124,7 +124,7 @@ void Polygon2dLayerObject::setPolygons(const std::vector<PolygonCoord> &polygons
 
     auto attr = SharedBytes((int64_t)vertices.data(), (int32_t)vertices.size(), (int32_t)sizeof(float));
     auto ind = SharedBytes((int64_t)indices.data(), (int32_t)indices.size(), (int32_t)sizeof(uint16_t));
-    polygon->setVertices(attr, ind, Vec3D(rx, ry, rz));
+    polygon->setVertices(attr, ind, Vec3D(rx, ry, rz), 0);
 }
 
 void Polygon2dLayerObject::setColor(const Color &color) {
