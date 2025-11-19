@@ -22,8 +22,8 @@ struct Vertex3DTextureIn {
 };
 
 struct TessellatedVertex3DTextureIn {
-    float3 relativePosition [[attribute(0)]];
-    float3 absolutePosition [[attribute(1)]];
+    float4 relativePosition [[attribute(0)]];
+    float4 absolutePosition [[attribute(1)]];
     float2 uv [[attribute(2)]];
 };
 
@@ -31,6 +31,11 @@ struct TessellatedVertex3DTextureIn {
 // therefore we always use float4 for better alignment and to reduce errors when filling the buffer
 struct Vertex4FIn {
     float4 position [[attribute(0)]];
+};
+
+struct TessellatedVertex4FIn {
+  float4 relativePosition [[attribute(0)]];
+  float4 absolutePosition [[attribute(1)]];
 };
 
 struct VertexOut {

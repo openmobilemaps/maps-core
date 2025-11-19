@@ -20,7 +20,7 @@ public enum PipelineDescriptorFactory {
         blendMode: MCBlendMode,
         library: MTLLibrary,
         constants: MTLFunctionConstantValues? = nil,
-        tessellated: Bool = false
+        tessellation: MCTessellationMode = MCTessellationMode.NONE
     ) -> MTLRenderPipelineDescriptor {
         let pipelineDescriptor = MTLRenderPipelineDescriptor()
         pipelineDescriptor.colorAttachments[0].pixelFormat = MetalContext.colorPixelFormat
@@ -76,7 +76,7 @@ public enum PipelineDescriptorFactory {
             pipelineDescriptor.fragmentFunction = fragmentFunction
         }
         
-        if tessellated {
+        if tessellation != MCTessellationMode.NONE {
             pipelineDescriptor.maxTessellationFactor = 64
             pipelineDescriptor.tessellationPartitionMode = .pow2
             pipelineDescriptor.tessellationFactorFormat = .half
@@ -85,9 +85,8 @@ public enum PipelineDescriptorFactory {
             pipelineDescriptor.tessellationControlPointIndexType = .none
             pipelineDescriptor.isTessellationFactorScaleEnabled = false
             
-            //temporary
-            if label == PipelineType.maskTessellatedShader.label {
-                pipelineDescriptor.vertexDescriptor!.layouts[0].stepFunction = .perPatchControlPoint
+            if tessellation == MCTessellationMode.TRIANGLE {
+                pipelineDescriptor.tessellationOutputWindingOrder = .counterClockwise
                 pipelineDescriptor.tessellationControlPointIndexType = .uint16
             }
         }
@@ -104,7 +103,7 @@ extension PipelineDescriptorFactory {
             fragmentShader: pipeline.type.fragmentShader,
             blendMode: pipeline.blendMode,
             library: library,
-            tessellated: pipeline.type.tessellated
+            tessellation: pipeline.type.tessellation
         )
     }
 }
@@ -304,20 +303,20 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
             case .quadTessellatedShader:
                 return TessellatedVertex3DTexture.descriptor
             case .maskTessellatedShader:
-                return Vertex4F.descriptor // later... TessellatedVertex4f.descriptor
+                return TessellatedVertex4F.descriptor
             default:
                 return Vertex.descriptor
         }
     }
     
-    var tessellated: Bool { //tessellation config?!
+    var tessellation: MCTessellationMode {
         switch self {
             case .quadTessellatedShader:
-                return true
+                return MCTessellationMode.QUAD
             case .maskTessellatedShader:
-               return true // but indexed
+               return MCTessellationMode.TRIANGLE
             default:
-                return false
+                return MCTessellationMode.NONE
         }
     }
 }
