@@ -73,13 +73,12 @@ void MapCamera3d::viewportSizeChanged() {
         updateZoom(zoom);
     }
 
-    // Apply pending bounds if they were set before viewport size was known
-    if (pendingBounds.has_value()) {
-        this->bounds = pendingBounds.value();
-        const auto [adjPosition, adjZoom] = getBoundsCorrectedCoords(focusPointPosition, zoom);
-        focusPointPosition = adjPosition;
-        zoom = adjZoom;
-        pendingBounds = std::nullopt;
+    // Apply pending bounding box if viewport size is now known
+    if (pendingBoundingBox.has_value() && viewportSize.x > 0 && viewportSize.y > 0) {
+        auto pending = pendingBoundingBox.value();
+        pendingBoundingBox = std::nullopt;
+        moveToBoundingBox(pending.boundingBox, pending.paddingPc, pending.animated, 
+                         pending.minZoom, pending.maxZoom);
     }
 
     updateMatrices();
@@ -250,6 +249,15 @@ void MapCamera3d::moveToBoundingBox(const RectCoord &boundingBox, float paddingP
     assert(boundingBox.topLeft.systemIdentifier == 4326);
 
     Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
+    
+    if (sizeViewport.x == 0 && sizeViewport.y == 0) {
+        // Viewport size not yet known, store parameters for later
+        pendingBoundingBox = PendingBoundingBox(boundingBox, paddingPc, animated, minZoom, maxZoom);
+        return;
+    }
+
+    // Clear any pending bounding box since we're applying it now
+    pendingBoundingBox = std::nullopt;
 
     auto distance =
         calculateDistance(boundingBox.topLeft.y, boundingBox.topLeft.x, boundingBox.bottomRight.y, boundingBox.bottomRight.x);
@@ -1500,25 +1508,11 @@ void MapCamera3d::setBounds(const RectCoord &bounds) {
     RectCoord boundsMapSpace = conversionHelper->convertRect(mapCoordinateSystem.identifier, bounds);
     this->bounds = boundsMapSpace;
 
-    auto mapInterface = this->mapInterface;
-    auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
-    if (renderingContext) {
-        Vec2I viewportSize = renderingContext->getViewportSize();
-        if (viewportSize.x == 0 || viewportSize.y == 0) {
-            // Viewport size not yet known, store bounds to apply later
-            pendingBounds = boundsMapSpace;
-        } else {
-            // Viewport size is known, apply bounds correction immediately
-            pendingBounds = std::nullopt;
-            const auto [adjPosition, adjZoom] = getBoundsCorrectedCoords(focusPointPosition, zoom);
-            focusPointPosition = adjPosition;
-            zoom = adjZoom;
-        }
-    } else {
-        // No rendering context, store bounds to apply later
-        pendingBounds = boundsMapSpace;
-    }
+    const auto [adjPosition, adjZoom] = getBoundsCorrectedCoords(focusPointPosition, zoom);
+    focusPointPosition = adjPosition;
+    zoom = adjZoom;
 
+    auto mapInterface = this->mapInterface;
     if (mapInterface) {
         mapInterface->invalidate();
     }

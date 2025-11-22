@@ -184,7 +184,20 @@ protected:
     double zoomMax = 200.0;
 
     RectCoord bounds;
-    std::optional<RectCoord> pendingBounds = std::nullopt;
+
+    struct PendingBoundingBox {
+        RectCoord boundingBox;
+        float paddingPc;
+        bool animated;
+        std::optional<double> minZoom;
+        std::optional<double> maxZoom;
+        
+        PendingBoundingBox(const RectCoord &bbox, float padding, bool anim, 
+                          std::optional<double> minZ, std::optional<double> maxZ)
+            : boundingBox(bbox), paddingPc(padding), animated(anim), 
+              minZoom(minZ), maxZoom(maxZ) {}
+    };
+    std::optional<PendingBoundingBox> pendingBoundingBox = std::nullopt;
 
     std::recursive_mutex vpDataMutex;
     std::optional<RectCoord> lastVpBounds = std::nullopt;
