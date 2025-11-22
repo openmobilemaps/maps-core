@@ -184,6 +184,7 @@ protected:
     double zoomMax = 200.0;
 
     RectCoord bounds;
+    std::optional<RectCoord> pendingBounds = std::nullopt;
 
     std::recursive_mutex vpDataMutex;
     std::optional<RectCoord> lastVpBounds = std::nullopt;

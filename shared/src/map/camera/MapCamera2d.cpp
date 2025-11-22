@@ -55,6 +55,15 @@ void MapCamera2d::viewportSizeChanged() {
         zoom = std::clamp(zoom, zoomMax, zoomMin);
     }
 
+    // Apply pending bounds if they were set before viewport size was known
+    if (pendingBounds.has_value()) {
+        this->bounds = pendingBounds.value();
+        const auto [adjPosition, adjZoom] = getBoundsCorrectedCoords(centerPosition, zoom);
+        centerPosition = adjPosition;
+        zoom = adjZoom;
+        pendingBounds = std::nullopt;
+    }
+
     notifyListeners(ListenerType::BOUNDS);
 }
 
@@ -982,9 +991,17 @@ void MapCamera2d::setBounds(const RectCoord &bounds) {
     RectCoord boundsMapSpace = mapInterface->getCoordinateConverterHelper()->convertRect(mapCoordinateSystem.identifier, bounds);
     this->bounds = boundsMapSpace;
 
-    const auto [adjPosition, adjZoom] = getBoundsCorrectedCoords(centerPosition, zoom);
-    centerPosition = adjPosition;
-    zoom = adjZoom;
+    Vec2I viewportSize = mapInterface->getRenderingContext()->getViewportSize();
+    if (viewportSize.x == 0 || viewportSize.y == 0) {
+        // Viewport size not yet known, store bounds to apply later
+        pendingBounds = boundsMapSpace;
+    } else {
+        // Viewport size is known, apply bounds correction immediately
+        pendingBounds = std::nullopt;
+        const auto [adjPosition, adjZoom] = getBoundsCorrectedCoords(centerPosition, zoom);
+        centerPosition = adjPosition;
+        zoom = adjZoom;
+    }
 
     mapInterface->invalidate();
 }

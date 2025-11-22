@@ -231,6 +231,7 @@ class MapCamera3d : public MapCameraInterface,
     double zoomMax = 10000;
 
     RectCoord bounds;
+    std::optional<RectCoord> pendingBounds = std::nullopt;
 
     std::optional<RectCoord> lastVpBounds = std::nullopt;
     std::optional<double> lastVpRotation = std::nullopt;
