@@ -58,9 +58,12 @@ void MapCamera2d::viewportSizeChanged() {
     // Apply pending bounding box if viewport size is now known
     if (pendingBoundingBox.has_value() && viewportSize.x > 0 && viewportSize.y > 0) {
         auto pending = pendingBoundingBox.value();
-        pendingBoundingBox = std::nullopt;
+		bool frozenBefore = cameraFrozen;
+		cameraFrozen = false;
         moveToBoundingBox(pending.boundingBox, pending.paddingPc, pending.animated, 
                          pending.minZoom, pending.maxZoom);
+		cameraFrozen = frozenBefore;
+		pendingBoundingBox = std::nullopt;
     }
 
     notifyListeners(ListenerType::BOUNDS);
@@ -589,6 +592,9 @@ void MapCamera2d::notifyListeners(const int &listenerType) {
         (listenerType & ListenerType::BOUNDS) ? std::optional<RectCoord>(getVisibleRect()) : std::nullopt;
     double angle = this->angle;
     double zoom = this->zoom;
+	if (pendingBoundingBox) {
+		return;
+	}
     std::lock_guard<std::recursive_mutex> lock(listenerMutex);
     for (auto listener : listeners) {
         if (listenerType & ListenerType::BOUNDS) {
