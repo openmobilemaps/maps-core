@@ -22,6 +22,7 @@ class RasterShaderOpenGl : public BaseShaderProgramOpenGl,
                            public std::enable_shared_from_this<ShaderProgramInterface> {
 public:
     RasterShaderOpenGl(bool projectOntoUnitSphere);
+    RasterShaderOpenGl(const std::string &programName);
 
     std::string getProgramName() override;
 

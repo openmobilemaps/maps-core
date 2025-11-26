@@ -24,6 +24,7 @@
 #include "IcosahedronColorShaderOpenGl.h"
 #include "SphereEffectShaderOpenGl.h"
 #include "SkySphereShaderOpenGl.h"
+#include "TessellatedRasterShaderOpenGl.h"
 #include "ElevationInterpolationShaderOpenGl.h"
 
 std::shared_ptr<AlphaShaderInterface> ShaderFactoryOpenGl::createAlphaShader() {
@@ -48,6 +49,10 @@ std::shared_ptr<RasterShaderInterface> ShaderFactoryOpenGl::createRasterShader()
 
 std::shared_ptr<RasterShaderInterface> ShaderFactoryOpenGl::createUnitSphereRasterShader() {
     return std::make_shared<RasterShaderOpenGl>(true);
+}
+
+std::shared_ptr<RasterShaderInterface> ShaderFactoryOpenGl::createQuadTessellatedShader() {
+    return std::make_shared<TessellatedRasterShaderOpenGl>(true);
 }
 
 std::shared_ptr<LineGroupShaderInterface> ShaderFactoryOpenGl::createLineGroupShader() {
