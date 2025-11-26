@@ -53,6 +53,8 @@ public:
 
     std::shared_ptr<RasterShaderInterface> createUnitSphereRasterShader() override;
 
+    std::shared_ptr<RasterShaderInterface> createQuadTessellatedShader() override;
+
     std::shared_ptr<StretchShaderInterface> createStretchShader() override;
 
     std::shared_ptr<StretchInstancedShaderInterface> createStretchInstancedShader(bool unitSphere) override;

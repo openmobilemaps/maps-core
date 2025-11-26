@@ -82,9 +82,10 @@ void PolygonMaskObject::setPolygons(const std::vector<::PolygonCoord> &polygons,
         }
     }
 
-    //if (maxSegmentLength) {
-    //    PolygonHelper::subdivision(vecVertices, indices, *maxSegmentLength);
-    //}
+    // Re-comment-out when implementing polygon tessellation on android !
+    if (maxSegmentLength) {
+        PolygonHelper::subdivision(vecVertices, indices, *maxSegmentLength);
+    }
     
     
     for (const auto& v : vecVertices) {
@@ -103,12 +104,13 @@ void PolygonMaskObject::setPolygons(const std::vector<::PolygonCoord> &polygons,
         vertices.push_back(0.0f);
     #endif
         
-        vertices.push_back(v.x);
-        vertices.push_back(v.y);
-        vertices.push_back(0.0f);
-    #ifdef __APPLE__
-        vertices.push_back(0.0f);
-    #endif
+    // Remove comment-out when implementing polygon tessellation on android !
+    //    vertices.push_back(v.x);
+    //    vertices.push_back(v.y);
+    //    vertices.push_back(0.0f);
+    //#ifdef __APPLE__
+    //    vertices.push_back(0.0f);
+    //#endif
     }
 
     auto attr = SharedBytes((int64_t)vertices.data(), (int32_t)vertices.size(), (int32_t)sizeof(float));
