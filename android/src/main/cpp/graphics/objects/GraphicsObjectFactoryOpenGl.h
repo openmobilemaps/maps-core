@@ -17,7 +17,11 @@ class GraphicsObjectFactoryOpenGl : public GraphicsObjectFactoryInterface {
 public:
     std::shared_ptr<Quad2dInterface> createQuad(const std::shared_ptr<::ShaderProgramInterface> &shader) override;
 
+    std::shared_ptr<Quad2dInterface> createQuadTessellated(const std::shared_ptr<::ShaderProgramInterface> &shader) override;
+
     std::shared_ptr<Polygon2dInterface> createPolygon(const std::shared_ptr<::ShaderProgramInterface> &shader) override;
+
+    std::shared_ptr<Polygon2dInterface> createPolygonTessellated(const std::shared_ptr<::ShaderProgramInterface> &shader) override;
 
     std::shared_ptr<LineGroup2dInterface> createLineGroup(const std::shared_ptr<::ShaderProgramInterface> &shader) override;
 
@@ -25,9 +29,12 @@ public:
 
     std::shared_ptr<PolygonPatternGroup2dInterface> createPolygonPatternGroup(const std::shared_ptr<::ShaderProgramInterface> &shader) override;
 
+    /* Deprecated? */
     std::shared_ptr<Quad2dInterface> createQuadMask(bool is3D) override;
 
     std::shared_ptr<Polygon2dInterface> createPolygonMask(bool is3D) override;
+
+    std::shared_ptr<Polygon2dInterface> createPolygonMaskTessellated(bool is3D) override;
 
     std::shared_ptr<TextInterface> createText(const std::shared_ptr<::ShaderProgramInterface> &shader) override;
 

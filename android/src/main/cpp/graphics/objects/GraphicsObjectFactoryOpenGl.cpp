@@ -20,14 +20,26 @@
 #include "Text2dInstancedOpenGl.h"
 #include "Quad2dStretchedInstancedOpenGl.h"
 #include "IcosahedronOpenGl.h"
+#include "Quad2dTessellatedOpenGl.h"
 
 std::shared_ptr<Quad2dInterface> GraphicsObjectFactoryOpenGl::createQuad(const std::shared_ptr<::ShaderProgramInterface> &shader) {
     return std::make_shared<Quad2dOpenGl>(enforceGlShader(shader));
 }
 
+std::shared_ptr<Quad2dInterface> GraphicsObjectFactoryOpenGl::createQuadTessellated(const std::shared_ptr<::ShaderProgramInterface> &shader) {
+    return std::make_shared<Quad2dTessellatedOpenGl>(enforceGlShader(shader));
+}
+
 std::shared_ptr<Polygon2dInterface>
 GraphicsObjectFactoryOpenGl::createPolygon(const std::shared_ptr<::ShaderProgramInterface> &shader) {
     return std::make_shared<Polygon2dOpenGl>(enforceGlShader(shader));
+}
+
+// TODO
+std::shared_ptr<Polygon2dInterface>
+GraphicsObjectFactoryOpenGl::createPolygonTessellated(const std::shared_ptr<::ShaderProgramInterface> &shader) {
+    return std::make_shared<Polygon2dOpenGl>(enforceGlShader(shader));
+    //return std::make_shared<Polygon2dTessellatedOpenGl>(enforceGlShader(shader));
 }
 
 std::shared_ptr<LineGroup2dInterface>
@@ -45,6 +57,7 @@ GraphicsObjectFactoryOpenGl::createPolygonPatternGroup(const std::shared_ptr<::S
     return std::make_shared<PolygonPatternGroup2dOpenGl>(enforceGlShader(shader));
 }
 
+/* Deprecated? */
 std::shared_ptr<Quad2dInterface> GraphicsObjectFactoryOpenGl::createQuadMask(bool is3D) {
     return std::make_shared<Quad2dOpenGl>(std::make_shared<ColorShaderOpenGl>(is3D));
 }
@@ -53,6 +66,15 @@ std::shared_ptr<Polygon2dInterface> GraphicsObjectFactoryOpenGl::createPolygonMa
     std::shared_ptr<ColorShaderOpenGl> shader = std::make_shared<ColorShaderOpenGl>(is3D);
     shader->setColor(1, 1, 1, 1);
     return std::make_shared<Polygon2dOpenGl>(enforceGlShader(shader));
+}
+
+// TODO
+std::shared_ptr<Polygon2dInterface> GraphicsObjectFactoryOpenGl::createPolygonMaskTessellated(bool is3D) {
+    std::shared_ptr<ColorShaderOpenGl> shader = std::make_shared<ColorShaderOpenGl>(is3D);
+    //different shader! tessellated!
+    shader->setColor(1, 1, 1, 1);
+    return std::make_shared<Polygon2dOpenGl>(enforceGlShader(shader));
+    //return std::make_shared<Polygon2dTessellatedOpenGl>(enforceGlShader(shader));
 }
 
 std::shared_ptr<TextInterface> GraphicsObjectFactoryOpenGl::createText(const std::shared_ptr<::ShaderProgramInterface> &shader) {

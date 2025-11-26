@@ -16,6 +16,10 @@ RasterShaderOpenGl::RasterShaderOpenGl(bool projectOntoUnitSphere)
         : programName(projectOntoUnitSphere ? "UBMAP_RasterShaderUnitSphereOpenGl" : "UBMAP_RasterShaderOpenGl")
 {}
 
+RasterShaderOpenGl::RasterShaderOpenGl(const std::string &programName)
+        : programName(programName)
+{}
+
 std::string RasterShaderOpenGl::getProgramName() {
     return programName;
 }
