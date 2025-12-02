@@ -1608,7 +1608,10 @@ void MapCamera3d::setCameraConfig(const Camera3dConfig &config, std::optional<fl
         }
     }
 
-    cameraZoomConfig = config;
+		{
+			std::lock_guard<std::recursive_mutex> lock(paramMutex);
+			cameraZoomConfig = config;
+		}
 
     double initialZoom = zoom;
 
@@ -1781,12 +1784,10 @@ void MapCamera3d::updateZoom(double zoom_) {
 }
 
 double MapCamera3d::getCameraVerticalDisplacement() {
-	std::lock_guard<std::recursive_mutex> lock(paramMutex);
     return valueForZoom(cameraZoomConfig.verticalDisplacementInterpolationValues, zoom);
 }
 
 double MapCamera3d::getCameraPitch() {
-	std::lock_guard<std::recursive_mutex> lock(paramMutex);
 	return valueForZoom(cameraZoomConfig.pitchInterpolationValues, zoom);
 }
 
