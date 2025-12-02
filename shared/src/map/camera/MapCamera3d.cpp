@@ -1788,7 +1788,7 @@ double MapCamera3d::getCameraVerticalDisplacement() {
 }
 
 double MapCamera3d::getCameraPitch() {
-	return valueForZoom(cameraZoomConfig.pitchInterpolationValues, zoom);
+    return valueForZoom(cameraZoomConfig.pitchInterpolationValues, zoom);
 }
 
 double MapCamera3d::getCameraFieldOfView() { return 42; }
