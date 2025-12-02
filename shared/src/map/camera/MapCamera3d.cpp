@@ -1608,10 +1608,10 @@ void MapCamera3d::setCameraConfig(const Camera3dConfig &config, std::optional<fl
         }
     }
 
-		{
-			std::lock_guard<std::recursive_mutex> lock(paramMutex);
-			cameraZoomConfig = config;
-		}
+    {
+        std::lock_guard<std::recursive_mutex> lock(paramMutex);
+        cameraZoomConfig = config;
+    }
 
     double initialZoom = zoom;
 
