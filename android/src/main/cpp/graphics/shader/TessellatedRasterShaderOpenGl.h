@@ -27,5 +27,8 @@ protected:
     virtual std::string getControlShader();
 
     virtual std::string getEvaluationShader();
+
+    /* WIREFRAME DEBUG */
+    virtual std::string getGeometryShader();
 };
 

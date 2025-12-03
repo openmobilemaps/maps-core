@@ -21,6 +21,10 @@ void TessellatedRasterShaderOpenGl::setupProgram(const std::shared_ptr<::Renderi
     int vertexShader = loadShader(GL_VERTEX_SHADER, getVertexShader());
     int controlShader = loadShader(GL_TESS_CONTROL_SHADER, getControlShader());
     int evalutationShader = loadShader(GL_TESS_EVALUATION_SHADER, getEvaluationShader());
+
+    /* WIREFRAME DEBUG */
+    //int geometryShader = loadShader(GL_GEOMETRY_SHADER, getGeometryShader());
+
     int fragmentShader = loadShader(GL_FRAGMENT_SHADER, getFragmentShader());
 
     GLuint program = glCreateProgram();
@@ -32,6 +36,11 @@ void TessellatedRasterShaderOpenGl::setupProgram(const std::shared_ptr<::Renderi
     glDeleteShader(evalutationShader);
     glAttachShader(program, fragmentShader);
     glDeleteShader(fragmentShader);
+
+    /* WIREFRAME DEBUG */
+    //glAttachShader(program, geometryShader);
+    //glDeleteShader(geometryShader);
+
     glLinkProgram(program);
 
     checkGlProgramLinking(program);
@@ -42,11 +51,14 @@ void TessellatedRasterShaderOpenGl::setupProgram(const std::shared_ptr<::Renderi
 std::string TessellatedRasterShaderOpenGl::getVertexShader() {
     return OMMVersionedGlesShaderCodeWithFrameUBO(320 es,
                                         in vec4 vPosition;
+                                        in vec2 vFlatPosition;
                                         in vec2 texCoordinate;
+                                        out vec2 c_flatposition;
                                         out vec2 c_texcoord;
 
                                         void main() {
                                             gl_Position = vPosition;
+                                            c_flatposition = vFlatPosition;
                                             c_texcoord = texCoordinate;
                                         }
     );
@@ -58,17 +70,20 @@ std::string TessellatedRasterShaderOpenGl::getControlShader() {
 
                                         uniform int uSubdivisionFactor;
 
+                                        in vec2 c_flatposition[];
                                         in vec2 c_texcoord[];
+                                        out vec2 e_flatposition[];
                                         out vec2 e_texcoord[];
 
                                         void main()
                                         {
                                             gl_out[gl_InvocationID].gl_Position = gl_in[gl_InvocationID].gl_Position;
+                                            e_flatposition[gl_InvocationID] = c_flatposition[gl_InvocationID];
                                             e_texcoord[gl_InvocationID] = c_texcoord[gl_InvocationID];
 
                                             if (gl_InvocationID == 0)
                                             {
-                                                float tessFactor = 16.0; //float(uSubdivisionFactor);
+                                                float tessFactor = pow(2.0, float(uSubdivisionFactor));
 
                                                 gl_TessLevelOuter[0] = tessFactor;
                                                 gl_TessLevelOuter[1] = tessFactor;
@@ -82,16 +97,21 @@ std::string TessellatedRasterShaderOpenGl::getControlShader() {
            );
 }
 
-
 std::string TessellatedRasterShaderOpenGl::getEvaluationShader() {
     return OMMVersionedGlesShaderCodeWithFrameUBO(320 es,
                                         layout(quads, fractional_odd_spacing, cw) in;
 
                                         uniform mat4 umMatrix;
                                         uniform vec4 uOriginOffset;
+                                        uniform vec4 uOrigin;
+                                        uniform bool uIs3d;
 
+                                        in vec2 e_flatposition[];
                                         in vec2 e_texcoord[];
-                                        out vec2 v_texcoord;
+                                        out vec2 v_texcoord; // out vec2 g_texcoord; /* WIREFRAME DEBUG */
+
+                                        const float BlendScale = 1000.0;
+                                        const float BlendOffset = 0.01;
 
                                         vec2 bilerp(vec2 c00, vec2 c01, vec2 c10, vec2 c11, vec2 uv) {
                                             vec2 c0 = mix(c00, c01, uv.x);
@@ -105,6 +125,13 @@ std::string TessellatedRasterShaderOpenGl::getEvaluationShader() {
                                             return mix(c0, c1, uv.y);
                                         }
 
+                                        vec4 transform(vec2 coordinate, vec4 origin) {
+                                            float x = 1.0 * sin(coordinate.y) * cos(coordinate.x) - origin.x;
+                                            float y = 1.0 * cos(coordinate.y) - origin.y;
+                                            float z = -1.0 * sin(coordinate.y) * sin(coordinate.x) - origin.z;
+                                            return vec4(x, y, z, 0.0);
+                                        }
+
                                         void main() {
                                             vec2 uv = gl_TessCoord.xy;
 
@@ -112,17 +139,60 @@ std::string TessellatedRasterShaderOpenGl::getEvaluationShader() {
                                             vec4 p01 = gl_in[1].gl_Position;
                                             vec4 p10 = gl_in[2].gl_Position;
                                             vec4 p11 = gl_in[3].gl_Position;
-
                                             vec4 position = bilerp(p00, p01, p10, p11, uv);
-                                            gl_Position = uFrameUniforms.vpMatrix * ((umMatrix * position) + uOriginOffset);
+
+                                            vec2 f00 = e_flatposition[0];
+                                            vec2 f01 = e_flatposition[1];
+                                            vec2 f10 = e_flatposition[2];
+                                            vec2 f11 = e_flatposition[3];
+                                            vec2 flatPosition = bilerp(f00, f01, f10, f11, uv);
 
                                             vec2 t00 = e_texcoord[0];
                                             vec2 t01 = e_texcoord[1];
                                             vec2 t10 = e_texcoord[2];
                                             vec2 t11 = e_texcoord[3];
+                                            vec2 texCoord = bilerp(t00, t01, t10, t11, uv);
 
-                                            v_texcoord = bilerp(t00, t01, t10, t11, uv);
+                                            if (uIs3d) {
+                                                vec4 bent = transform(flatPosition, uOrigin) - uOriginOffset;
+                                                float blend = clamp(length(uOriginOffset) * BlendScale - BlendOffset, 0.0, 1.0);
+                                                position = mix(position, bent, blend);
+
+                                                //vec4 normal = normalize(transform(flatPosition, vec4(0.0, 0.0, 0.0, 0.0)));
+                                                //position += normal * 0.1 * sin(flatPosition.x * 10000.0) * sin(flatPosition.y * 10000.0);
+                                            }
+
+                                            gl_Position = uFrameUniforms.vpMatrix * ((umMatrix * vec4(position.xyz, 1.0)) + uOriginOffset);
+                                            v_texcoord = texCoord; // g_texcoord = texCoord; /* WIREFRAME DEBUG */
                                         }
    );
 }
 
+/* WIREFRAME DEBUG */
+std::string TessellatedRasterShaderOpenGl::getGeometryShader() {
+    return OMMVersionedGlesShaderCodeWithFrameUBO(320 es,
+                                        layout(triangles) in;
+                                        layout(line_strip, max_vertices = 6) out;
+
+                                        in vec2 g_texcoord[];
+                                        out vec2 v_texcoord;
+
+                                        void edgeLine(int a, int b) {
+                                            gl_Position = gl_in[a].gl_Position;
+                                            v_texcoord = g_texcoord[a];
+                                            EmitVertex();
+
+                                            gl_Position = gl_in[b].gl_Position;
+                                            v_texcoord = g_texcoord[b];
+                                            EmitVertex();
+
+                                            EndPrimitive();
+                                        }
+
+                                        void main() {
+                                            edgeLine(0, 1);
+                                            edgeLine(1, 2);
+                                            edgeLine(2, 0);
+                                        }
+    );
+}
