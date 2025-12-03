@@ -51,16 +51,19 @@ public class TextureHolder: NSObject, @unchecked Sendable {
             MTKTextureLoader.Option.textureStorageMode: MTLStorageMode.shared.rawValue,
         ]
 
+        let premultipliedImage = TextureHolder.premultipliedImage(from: cgImage) ?? cgImage
+
         do {
-            let texture = try MetalContext.current.textureLoader.newTexture(cgImage: cgImage, options: options)
+            let texture = try MetalContext.current.textureLoader.newTexture(cgImage: premultipliedImage, options: options)
 
             self.init(texture)
         } catch {
-            guard let fixedImage = UIImage(cgImage: cgImage).ub_metalFixMe().cgImage else {
+            guard let fixedImage = UIImage(cgImage: premultipliedImage).ub_metalFixMe().cgImage else {
                 throw error
             }
 
-            let texture = try MetalContext.current.textureLoader.newTexture(cgImage: fixedImage, options: options)
+            let fixedPremultiplied = TextureHolder.premultipliedImage(from: fixedImage) ?? fixedImage
+            let texture = try MetalContext.current.textureLoader.newTexture(cgImage: fixedPremultiplied, options: options)
 
             self.init(texture)
         }
@@ -81,6 +84,15 @@ public class TextureHolder: NSObject, @unchecked Sendable {
         let options: [MTKTextureLoader.Option: Any] = [
             MTKTextureLoader.Option.SRGB: NSNumber(booleanLiteral: false)
         ]
+
+        // Decode via UIImage to ensure premultiplied alpha, avoiding bright edges on semi-transparent PNGs.
+        if let uiImage = UIImage(data: data), let cgImage = uiImage.cgImage {
+            let premultipliedImage = TextureHolder.premultipliedImage(from: cgImage) ?? cgImage
+            let texture = try MetalContext.current.textureLoader.newTexture(cgImage: premultipliedImage, options: options)
+            self.init(texture, textureUsableSize: textureUsableSize)
+            return
+        }
+
         let texture = try MetalContext.current.textureLoader.newTexture(data: data, options: options)
         self.init(texture, textureUsableSize: textureUsableSize)
     }
@@ -158,5 +170,35 @@ public extension TextureHolder {
     struct TextureUsableSize {
         let width: Int
         let height: Int
+    }
+}
+
+private extension TextureHolder {
+    /// Ensures image data uses premultiplied alpha (Metal blend state expects premultiplied source to avoid bright halos).
+    static func premultipliedImage(from cgImage: CGImage) -> CGImage? {
+        let width = cgImage.width
+        let height = cgImage.height
+        guard width > 0, height > 0 else { return nil }
+
+        let colorSpace = CGColorSpaceCreateDeviceRGB()
+        let bitmapInfo = CGBitmapInfo(
+            rawValue: CGImageAlphaInfo.premultipliedLast.rawValue | CGBitmapInfo.byteOrder32Big.rawValue
+        )
+        let bytesPerRow = width * 4
+
+        guard let context = CGContext(
+            data: nil,
+            width: width,
+            height: height,
+            bitsPerComponent: 8,
+            bytesPerRow: bytesPerRow,
+            space: colorSpace,
+            bitmapInfo: bitmapInfo.rawValue
+        ) else {
+            return nil
+        }
+
+        context.draw(cgImage, in: CGRect(x: 0, y: 0, width: width, height: height))
+        return context.makeImage()
     }
 }
