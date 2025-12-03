@@ -89,25 +89,52 @@ void Quad2dTessellatedOpenGl::computeGeometry(bool texCoordsOnly) {
                     (float) (1.0 * std::sin(frame.topLeft.y) * std::cos(frame.topLeft.x) - quadOrigin.x),
                     (float) (1.0 * cos(frame.topLeft.y) - quadOrigin.y),
                     (float) (-1.0 * std::sin(frame.topLeft.x) * std::sin(frame.topLeft.y) - quadOrigin.z),
+                    (float) (frame.topLeft.x),
+                    (float) (frame.topLeft.y),
 
                     (float) (1.0 * std::sin(frame.topRight.y) * std::cos(frame.topRight.x) - quadOrigin.x),
                     (float) (1.0 * cos(frame.topRight.y) - quadOrigin.y),
                     (float) (-1.0 * std::sin(frame.topRight.x) * std::sin(frame.topRight.y) - quadOrigin.z),
+                    (float) (frame.topRight.x),
+                    (float) (frame.topRight.y),
 
                     (float) (1.0 * std::sin(frame.bottomLeft.y) * std::cos(frame.bottomLeft.x) - quadOrigin.x),
                     (float) (1.0 * cos(frame.bottomLeft.y) - quadOrigin.y),
                     (float) (-1.0 * std::sin(frame.bottomLeft.x) * std::sin(frame.bottomLeft.y) - quadOrigin.z),
+                    (float) (frame.bottomLeft.x),
+                    (float) (frame.bottomLeft.y),
 
                     (float) (1.0 * std::sin(frame.bottomRight.y) * std::cos(frame.bottomRight.x) - quadOrigin.x),
                     (float) (1.0 * cos(frame.bottomRight.y) - quadOrigin.y),
                     (float) (-1.0 * std::sin(frame.bottomRight.x) * std::sin(frame.bottomRight.y) - quadOrigin.z),
+                    (float) (frame.bottomRight.x),
+                    (float) (frame.bottomRight.y),
             };
         } else {
             vertices = {
-                    (float) (frame.topLeft.x - quadOrigin.x), (float) (frame.topLeft.y - quadOrigin.y), (float) (-quadOrigin.z),
-                    (float) (frame.topRight.x - quadOrigin.x), (float) (frame.topRight.y - quadOrigin.y), (float) (-quadOrigin.z),
-                    (float) (frame.bottomLeft.x - quadOrigin.x), (float) (frame.bottomLeft.y - quadOrigin.y), (float) (-quadOrigin.z),
-                    (float) (frame.bottomRight.x - quadOrigin.x), (float) (frame.bottomRight.y - quadOrigin.y), (float) (-quadOrigin.z),
+                    (float) (frame.topLeft.x - quadOrigin.x),
+                    (float) (frame.topLeft.y - quadOrigin.y),
+                    (float) (-quadOrigin.z),
+                    (float) (frame.topLeft.x),
+                    (float) (frame.topLeft.y),
+
+                    (float) (frame.topRight.x - quadOrigin.x),
+                    (float) (frame.topRight.y - quadOrigin.y),
+                    (float) (-quadOrigin.z),
+                    (float) (frame.topRight.x),
+                    (float) (frame.topRight.y),
+
+                    (float) (frame.bottomLeft.x - quadOrigin.x),
+                    (float) (frame.bottomLeft.y - quadOrigin.y),
+                    (float) (-quadOrigin.z),
+                    (float) (frame.bottomLeft.x),
+                    (float) (frame.bottomLeft.y),
+
+                    (float) (frame.bottomRight.x - quadOrigin.x),
+                    (float) (frame.bottomRight.y - quadOrigin.y),
+                    (float) (-quadOrigin.z),
+                    (float) (frame.bottomRight.x),
+                    (float) (frame.bottomRight.y),
             };
         }
     }
@@ -129,15 +156,19 @@ void Quad2dTessellatedOpenGl::prepareGlData(int program) {
     glBindVertexArray(vao);
 
     positionHandle = glGetAttribLocation(program, "vPosition");
+    flatPositionHandle = glGetAttribLocation(program, "vFlatPosition");
+
     if (!glDataBuffersGenerated) {
         glGenBuffers(1, &vertexBuffer);
     }
     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
 
-    // enable vPosition attribs
+    size_t stride = sizeof(GLfloat) * 5;
     glEnableVertexAttribArray(positionHandle);
-    glVertexAttribPointer(positionHandle, 3, GL_FLOAT, false, 0, nullptr);
+    glVertexAttribPointer(positionHandle, 3, GL_FLOAT, false, stride, nullptr);
+    glEnableVertexAttribArray(flatPositionHandle);
+    glVertexAttribPointer(flatPositionHandle, 2, GL_FLOAT, false, stride, (float*)(sizeof(GLfloat) * 3));
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -147,7 +178,9 @@ void Quad2dTessellatedOpenGl::prepareGlData(int program) {
 
     mMatrixHandle = glGetUniformLocation(program, "umMatrix");
     originOffsetHandle = glGetUniformLocation(program, "uOriginOffset");
-    uSubdivisionFactorHandle = glGetUniformLocation(program, "uSubdivisionFactor");
+    subdivisionFactorHandle = glGetUniformLocation(program, "uSubdivisionFactor");
+    originHandle = glGetUniformLocation(program, "uOrigin");
+    is3dHandle = glGetUniformLocation(program, "uIs3d");
 
     glDataBuffersGenerated = true;
 }
@@ -286,7 +319,11 @@ void Quad2dTessellatedOpenGl::render(const std::shared_ptr<::RenderingContextInt
 
     glPatchParameteri(GL_PATCH_VERTICES, 4);
 
-    glUniform1i(uSubdivisionFactorHandle, subdivisionFactor);
+    glUniform1i(subdivisionFactorHandle, subdivisionFactor);
+
+    glUniform4f(originHandle, origin.x, origin.y, origin.z, 0.0);
+
+    glUniform1i(is3dHandle, is3d);
 
     glDrawArrays(GL_PATCHES, 0, 4);
 

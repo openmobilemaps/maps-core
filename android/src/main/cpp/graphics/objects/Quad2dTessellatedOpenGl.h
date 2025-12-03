@@ -83,8 +83,11 @@ protected:
     bool texCoordBufferGenerated = false;
     int mMatrixHandle;
     int originOffsetHandle;
-    int uSubdivisionFactorHandle;
+    int subdivisionFactorHandle;
+    int originHandle;
+    int is3dHandle;
     int positionHandle;
+    int flatPositionHandle;
     GLuint vao;
     GLuint vertexBuffer;
     std::vector<GLfloat> vertices;
