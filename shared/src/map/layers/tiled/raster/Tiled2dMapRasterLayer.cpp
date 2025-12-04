@@ -302,18 +302,9 @@ std::vector<Tiled2dMapRasterTileInfo> sortedTileInfos(currentTileInfos.begin(), 
                     quad->setMinMagFilter(textureFilterType);
                     tileObject = std::make_shared<Textured2dLayerObject>(quad, mapInterface, is3D);
                 } else {
-                     /*
-                    // deprecated? (createUnitSphereRasterShader and createRasterShader both return RasterShader)
-                    auto rShader = is3D ? shaderFactory->createUnitSphereRasterShader() : shaderFactory->createRasterShader();
-                    rShader->asShaderProgramInterface()->setBlendMode(blendMode);
-                    auto quad = graphicsFactory->createQuad(rShader->asShaderProgramInterface());
-                     */
-                    // /*
                     auto rShader = shaderFactory->createQuadTessellatedShader();
                     rShader->asShaderProgramInterface()->setBlendMode(blendMode);
                     auto quad = graphicsFactory->createQuadTessellated(rShader->asShaderProgramInterface());
-                    // */
-                     
                     quad->setMinMagFilter(textureFilterType);
                     tileObject = std::make_shared<Textured2dLayerObject>(
                         quad, rShader, mapInterface, is3D);
@@ -327,7 +318,7 @@ std::vector<Tiled2dMapRasterTileInfo> sortedTileInfos(currentTileInfos.begin(), 
                     }
                 }
                 if (is3D) {
-                    tileObject->getQuadObject()->setSubdivisionFactor(
+                    tileObject->getQuadObject()->setSubdivisionFactor( //todo here!
                         std::clamp(subdivisionFactor + tile.tessellationFactor, 0, 5));
                 }
                 tileObject->setRectCoord(tile.tileInfo.tileInfo.bounds);

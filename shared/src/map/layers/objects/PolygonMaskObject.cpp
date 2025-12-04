@@ -24,8 +24,7 @@ PolygonMaskObject::PolygonMaskObject(const std::shared_ptr<GraphicsObjectFactory
                                      const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                                      bool is3D)
     : conversionHelper(conversionHelper)
-    , polygon(graphicsObjectFactory->createPolygonMaskTessellated(is3D))
-    //, polygon(graphicsObjectFactory->createPolygonMask(is3D))
+    , polygon(graphicsObjectFactory->createPolygonMaskTessellated(is3D)) //is3d here?
     , is3D(is3D) {}
 
 void PolygonMaskObject::setPositions(const std::vector<Coord> &positions,
@@ -35,13 +34,13 @@ void PolygonMaskObject::setPositions(const std::vector<Coord> &positions,
 }
 
 void PolygonMaskObject::setPolygon(const ::PolygonCoord &polygon,
-                                   const Vec3D & origin, std::optional<float> maxSegmentLength) {
-    setPolygons({polygon}, origin, maxSegmentLength);
+                                   const Vec3D & origin, std::optional<float> subdivisionFactor) {
+    setPolygons({polygon}, origin, subdivisionFactor);
 }
 
 void PolygonMaskObject::setPolygons(const std::vector<::PolygonCoord> &polygons,
                                     const Vec3D & origin,
-                                    std::optional<float> maxSegmentLength) {
+                                    std::optional<float> subdivisionFactor) {
     std::vector<uint16_t> indices;
     std::vector<float> vertices;
     int32_t indexOffset = 0;
@@ -81,11 +80,6 @@ void PolygonMaskObject::setPolygons(const std::vector<::PolygonCoord> &polygons,
             }
         }
     }
-
-    //if (maxSegmentLength) {
-    //    PolygonHelper::subdivision(vecVertices, indices, *maxSegmentLength);
-    //}
-    
     
     for (const auto& v : vecVertices) {
         double rx = origin.x;
@@ -102,16 +96,14 @@ void PolygonMaskObject::setPolygons(const std::vector<::PolygonCoord> &polygons,
     #ifdef __APPLE__
         vertices.push_back(0.0f);
     #endif
-        
         vertices.push_back(v.x);
         vertices.push_back(v.y);
     }
 
     auto attr = SharedBytes((int64_t)vertices.data(), (int32_t)vertices.size(), (int32_t)sizeof(float));
     auto ind = SharedBytes((int64_t)indices.data(), (int32_t)indices.size(), (int32_t)sizeof(uint16_t));
-    int32_t subdivisionFactor = (int32_t)(maxSegmentLength.value_or(1.0f));
     
-    polygon->setVertices(attr, ind, origin, subdivisionFactor);
+    polygon->setVertices(attr, ind, origin, (int32_t)(subdivisionFactor.value_or(1.0f)));
 }
 
 std::shared_ptr<Polygon2dInterface> PolygonMaskObject::getPolygonObject() { return polygon; }
