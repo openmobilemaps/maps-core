@@ -25,9 +25,9 @@ struct TessellatedVertex4F: Equatable {
         
         // Absolute Position
         vertexDescriptor.attributes[1].bufferIndex = bufferIndex
-        vertexDescriptor.attributes[1].format = .float4
+        vertexDescriptor.attributes[1].format = .float2
         vertexDescriptor.attributes[1].offset = offset
-        offset += MemoryLayout<SIMD4<Float>>.stride
+        offset += MemoryLayout<SIMD2<Float>>.stride
         
         vertexDescriptor.layouts[0].stride = offset
         vertexDescriptor.layouts[0].stepRate = 1

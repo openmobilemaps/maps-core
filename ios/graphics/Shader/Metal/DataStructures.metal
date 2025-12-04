@@ -23,7 +23,7 @@ struct Vertex3DTextureIn {
 
 struct TessellatedVertex3DTextureIn {
     float4 relativePosition [[attribute(0)]];
-    float4 absolutePosition [[attribute(1)]];
+    float2 absolutePosition [[attribute(1)]];
     float2 uv [[attribute(2)]];
 };
 
@@ -35,7 +35,7 @@ struct Vertex4FIn {
 
 struct TessellatedVertex4FIn {
   float4 relativePosition [[attribute(0)]];
-  float4 absolutePosition [[attribute(1)]];
+  float2 absolutePosition [[attribute(1)]];
 };
 
 struct VertexOut {

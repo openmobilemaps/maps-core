@@ -10,12 +10,12 @@
 
 #pragma once
 
-#include "RasterShaderOpenGl.h"
+#include "ColorShaderOpenGl.h"
 #include "RenderingContextInterface.h"
 
-class TessellatedRasterShaderOpenGl : public RasterShaderOpenGl {
+class TessellatedColorShaderOpenGl : public ColorShaderOpenGl {
 public:
-    TessellatedRasterShaderOpenGl(bool projectOntoUnitSphere);
+    TessellatedColorShaderOpenGl(bool projectOntoUnitSphere);
 
     void setupProgram(const std::shared_ptr<RenderingContextInterface> &context) override;
 
