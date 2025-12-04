@@ -108,12 +108,12 @@ quadTessellationVertexShader(const patch_control_point<TessellatedVertex3DTextur
     TessellatedVertex3DTextureIn vD = controlPoints[3];
     
     float4 vertexRelativePosition = bilerp(vA.relativePosition, vB.relativePosition, vC.relativePosition, vD.relativePosition, positionInPatch);
-    float4 vertexAbsolutePosition = bilerp(vA.absolutePosition, vB.absolutePosition, vC.absolutePosition, vD.absolutePosition, positionInPatch);
+    float2 vertexAbsolutePosition = bilerp(vA.absolutePosition, vB.absolutePosition, vC.absolutePosition, vD.absolutePosition, positionInPatch);
     float2 vertexUV = bilerp(vA.uv, vB.uv, vC.uv, vD.uv, positionInPatch);
     
     float4 position = vertexRelativePosition;
     if (is3d) {
-        float4 bent = transform(vertexAbsolutePosition.xy, origin) - originOffset;
+        float4 bent = transform(vertexAbsolutePosition, origin) - originOffset;
         float blend = saturate(length(originOffset) * BlendScale - BlendOffset);
         position = mix(position, bent, blend);
         
@@ -144,11 +144,11 @@ polygonTessellationVertexShader(const patch_control_point<TessellatedVertex4FIn>
     TessellatedVertex4FIn vC = controlPoints[2];
     
     float4 vertexRelativePosition = baryinterp(vA.relativePosition, vB.relativePosition, vC.relativePosition, positionInPatch);
-    float4 vertexAbsolutePosition = baryinterp(vA.absolutePosition, vB.absolutePosition, vC.absolutePosition, positionInPatch);
+    float2 vertexAbsolutePosition = baryinterp(vA.absolutePosition, vB.absolutePosition, vC.absolutePosition, positionInPatch);
     
     float4 position = vertexRelativePosition;
     if (is3d) {
-        float4 bent = transform(vertexAbsolutePosition.xy, origin) - originOffset;
+        float4 bent = transform(vertexAbsolutePosition, origin) - originOffset;
         float blend = saturate(length(originOffset) * BlendScale - BlendOffset);
         position = mix(position, bent, blend);
     }

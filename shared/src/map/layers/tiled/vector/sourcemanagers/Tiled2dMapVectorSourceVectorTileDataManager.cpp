@@ -107,12 +107,11 @@ void Tiled2dMapVectorSourceVectorTileDataManager::onVectorTilesUpdated(const std
                                                                                is3D);
                     auto convertedTileBounds = coordinateConverterHelper->convertRectToRenderSystem(tileEntry->tileInfo.tileInfo.bounds);
                     
-                    // Re-comment-out when implementing polygon tessellation on android !
-                    std::optional<float> maxSegmentLength = std::nullopt;
-                    if (is3D) {
-                        maxSegmentLength = std::min(std::abs(convertedTileBounds.bottomRight.x - convertedTileBounds.topLeft.x) /
-                                 POLYGON_MASK_SUBDIVISION_FACTOR, (M_PI * 2.0) / POLYGON_MASK_SUBDIVISION_FACTOR);
-                    }
+                    //std::optional<float> maxSegmentLength = std::nullopt;
+                    //if (is3D) {
+                    //    maxSegmentLength = std::min(std::abs(convertedTileBounds.bottomRight.x - convertedTileBounds.topLeft.x) /
+                    //             POLYGON_MASK_SUBDIVISION_FACTOR, (M_PI * 2.0) / POLYGON_MASK_SUBDIVISION_FACTOR);
+                    //}
                     
                     double cx = (convertedTileBounds.bottomRight.x + convertedTileBounds.topLeft.x) / 2.0;
                     double cy = (convertedTileBounds.bottomRight.y + convertedTileBounds.topLeft.y) / 2.0;
@@ -122,9 +121,8 @@ void Tiled2dMapVectorSourceVectorTileDataManager::onVectorTilesUpdated(const std
 
                     Vec3D origin(rx, ry, rz);
 
-                    // Re-comment-out when implementing polygon tessellation on android !
-                    tileMask->setPolygons(tileEntry->masks, origin, maxSegmentLength);
-                    //tileMask->setPolygons(tileEntry->masks, origin, float(POLYGON_MASK_SUBDIVISION_FACTOR));
+                    //tileMask->setPolygons(tileEntry->masks, origin, maxSegmentLength);
+                    tileMask->setPolygons(tileEntry->masks, origin, float(POLYGON_MASK_SUBDIVISION_FACTOR));
 
                     newTileMasks[tileEntry->tileInfo] = Tiled2dMapLayerMaskWrapper(tileMask, hash);
                 }

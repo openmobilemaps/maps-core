@@ -16,7 +16,7 @@ public struct TessellatedVertex3DTexture: Equatable {
     /// The 3D position of the vertex in the plane
     var relativePosition: SIMD3<Float>
     /// The 3D position of the vertex in the world
-    var absolutePosition: SIMD3<Float>
+    var absolutePosition: SIMD2<Float>
     /// The texture coordinates mapped to the vertex in U-V coordinate space
     var textureCoordinate: SIMD2<Float>
     /// Returns the descriptor to use when passed to a metal shader
@@ -33,9 +33,9 @@ public struct TessellatedVertex3DTexture: Equatable {
         
         // Absolute Position
         vertexDescriptor.attributes[1].bufferIndex = bufferIndex
-        vertexDescriptor.attributes[1].format = .float3
+        vertexDescriptor.attributes[1].format = .float2
         vertexDescriptor.attributes[1].offset = offset
-        offset += MemoryLayout<SIMD3<Float>>.stride
+        offset += MemoryLayout<SIMD2<Float>>.stride
 
         // UV
         vertexDescriptor.attributes[2].bufferIndex = bufferIndex
@@ -61,18 +61,18 @@ public struct TessellatedVertex3DTexture: Equatable {
     ///   - textureV: The texture V-coordinate mapping
     public init(
         relativeX: Float, relativeY: Float, relativeZ: Float,
-        absoluteX: Float, absoluteY: Float, absoluteZ: Float,
+        absoluteX: Float, absoluteY: Float,
         textureU: Float, textureV: Float,
     ) {
         relativePosition = SIMD3([relativeX, relativeY, relativeZ])
-        absolutePosition = SIMD3([absoluteX, absoluteY, absoluteZ])
+        absolutePosition = SIMD2([absoluteX, absoluteY])
         textureCoordinate = SIMD2([textureU, textureV])
     }
 
-    public init(relativePosition: MCVec3D, absolutePosition: MCVec3D, textureU: Float, textureV: Float) {
+    public init(relativePosition: MCVec3D, absolutePositionX: Float, absolutePositionY: Float, textureU: Float, textureV: Float) {
         self.init(
             relativeX: relativePosition.xF, relativeY: relativePosition.yF, relativeZ: relativePosition.zF,
-            absoluteX: absolutePosition.xF, absoluteY: absolutePosition.yF, absoluteZ: absolutePosition.zF,
+            absoluteX: absolutePositionX, absoluteY: absolutePositionY,
             textureU: textureU, textureV: textureV,
         )
     }
@@ -89,8 +89,6 @@ extension TessellatedVertex3DTexture {
     var absoluteX: Float { absolutePosition.x }
     /// The Y-coordinate position in the world
     var absoluteY: Float { absolutePosition.y }
-    /// The Z-coordinate position in the world
-    var absoluteZ: Float { absolutePosition.z }
     /// The texture U-coordinate mapping
     var textureU: Float { textureCoordinate.x }
     /// The texture V-coordinate mapping
@@ -99,6 +97,6 @@ extension TessellatedVertex3DTexture {
 
 extension TessellatedVertex3DTexture: CustomDebugStringConvertible {
     public var debugDescription: String {
-        "<RelativeXYZ: (\(relativeX), \(relativeY), \(relativeZ)), AbsoluteXYZ: (\(absoluteX), \(absoluteY), \(absoluteZ)), UV: (\(textureU), \(textureV))>"
+        "<RelativeXYZ: (\(relativeX), \(relativeY), \(relativeZ)), AbsoluteXY: (\(absoluteX), \(absoluteY)), UV: (\(textureU), \(textureV))>"
     }
 }
