@@ -1817,17 +1817,25 @@ void MapCamera3d::updateZoom(double zoom_) {
 
     std::lock_guard<std::recursive_mutex> lock(paramMutex);
     zoom = std::clamp(zoom_, zoomMax, zoomMin);
-    cameraVerticalDisplacement = getCameraVerticalDisplacement();
-    cameraPitch = getCameraPitch();
+    cameraVerticalDisplacement = getCameraVerticalDisplacementUnlocked();
+    cameraPitch = getCameraPitchUnlocked();
 }
 
 double MapCamera3d::getCameraVerticalDisplacement() {
     std::lock_guard<std::recursive_mutex> lock(paramMutex);
+    return getCameraVerticalDisplacementUnlocked();
+}
+
+double MapCamera3d::getCameraVerticalDisplacementUnlocked() {
     return valueForZoom(cameraZoomConfig.verticalDisplacementInterpolationValues, zoom);
 }
 
 double MapCamera3d::getCameraPitch() {
     std::lock_guard<std::recursive_mutex> lock(paramMutex);
+    return getCameraPitchUnlocked();
+}
+
+double MapCamera3d::getCameraPitchUnlocked() {
     return valueForZoom(cameraZoomConfig.pitchInterpolationValues, zoom);
 }
 
