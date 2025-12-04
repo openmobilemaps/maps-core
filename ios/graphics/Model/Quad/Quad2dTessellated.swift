@@ -279,7 +279,7 @@ extension Quad2dTessellated: MCQuad2dInterface {
 
     func setFrame(
         _ frame: MCQuad3dD, textureCoordinates: MCRectD, origin: MCVec3D,
-        is3d: Bool
+        is3d: Bool // maybe move subdivision factor also here? or both own setter? same as in polygon 2d tessellation
     ) {
         let factor = Half(pow(2, Float(lock.withCritical { subdivisionFactor }))).bits;
         
@@ -314,22 +314,26 @@ extension Quad2dTessellated: MCQuad2dInterface {
         vertices = [
             TessellatedVertex3DTexture(
                 relativePosition: transform(frame.topLeft),
-                absolutePosition: frame.topLeft,
+                absolutePositionX: frame.topLeft.xF,
+                absolutePositionY: frame.topLeft.yF,
                 textureU: textureCoordinates.xF,
                 textureV: textureCoordinates.yF),  // B
             TessellatedVertex3DTexture(
                 relativePosition: transform(frame.topRight),
-                absolutePosition: frame.topRight,
+                absolutePositionX: frame.topRight.xF,
+                absolutePositionY: frame.topRight.yF,
                 textureU: textureCoordinates.xF + textureCoordinates.widthF,
                 textureV: textureCoordinates.yF),  // C
             TessellatedVertex3DTexture(
                 relativePosition: transform(frame.bottomLeft),
-                absolutePosition: frame.bottomLeft,
+                absolutePositionX: frame.bottomLeft.xF,
+                absolutePositionY: frame.bottomLeft.yF,
                 textureU: textureCoordinates.xF,
                 textureV: textureCoordinates.yF + textureCoordinates.heightF),  // A
             TessellatedVertex3DTexture(
                 relativePosition: transform(frame.bottomRight),
-                absolutePosition: frame.bottomRight,
+                absolutePositionX: frame.bottomRight.xF,
+                absolutePositionY: frame.bottomRight.yF,
                 textureU: textureCoordinates.xF + textureCoordinates.widthF,
                 textureV: textureCoordinates.yF + textureCoordinates.heightF),  // D
         ]
