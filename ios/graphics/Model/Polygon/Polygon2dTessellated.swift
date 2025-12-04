@@ -31,7 +31,7 @@ final class Polygon2dTessellated: BaseGraphicsObject, @unchecked Sendable {
     init(shader: MCShaderProgramInterface, metalContext: MetalContext, is3d: Bool) {
         self.shader = shader
         originBuffers = .init(device: metalContext.device)
-        self.is3d = is3d
+        self.is3d = is3d // move is3d to set vertices or make own setter? if so also make own subdivision setter
         super
             .init(
                 device: metalContext.device,
@@ -153,6 +153,9 @@ final class Polygon2dTessellated: BaseGraphicsObject, @unchecked Sendable {
         
         encoder.setTessellationFactorBuffer(tessellationFactorsBuffer, offset: 0, instanceStride: 0)
         
+        /* WIREFRAME DEBUG */
+        //encoder.setTriangleFillMode(.lines)
+        
         encoder.drawIndexedPatches(
             numberOfPatchControlPoints: 3,
             patchStart: 0,
@@ -163,6 +166,9 @@ final class Polygon2dTessellated: BaseGraphicsObject, @unchecked Sendable {
             controlPointIndexBufferOffset: 0,
             instanceCount: 1,
             baseInstance: 0)
+        
+        /* WIREFRAME DEBUG */
+        //encoder.setTriangleFillMode(.fill)
     }
 
     private func setupStencilStates() {
@@ -228,7 +234,7 @@ extension Polygon2dTessellated: MCMaskingObjectInterface {
 
 extension Polygon2dTessellated: MCPolygon2dInterface {
     func setVertices(
-        _ vertices: MCSharedBytes, indices: MCSharedBytes, origin: MCVec3D, subdivisionFactor: Int32
+        _ vertices: MCSharedBytes, indices: MCSharedBytes, origin: MCVec3D, subdivisionFactor: Int32 // move is3d and subdivisonfactor to own setter?
     ) {
         let factor = Half(subdivisionFactor).bits;
         
