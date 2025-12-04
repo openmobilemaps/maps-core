@@ -25,10 +25,10 @@ public:
                       bool is3D);
 
     virtual void setPolygons(const std::vector<::PolygonCoord> & polygons,
-                             const Vec3D & origin, std::optional<float> maxSegmentLength = std::nullopt);
+                             const Vec3D & origin, std::optional<float> subdivisionFactor = std::nullopt);
 
     virtual void setPolygon(const ::PolygonCoord & polygon,
-                            const Vec3D & origin, std::optional<float> maxSegmentLength = std::nullopt);
+                            const Vec3D & origin, std::optional<float> subdivisionFactor = std::nullopt);
 
     virtual void setPolygons(const std::vector<::PolygonCoord> & polygons,
                              const Vec3D & origin) override {
