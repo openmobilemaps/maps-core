@@ -327,9 +327,10 @@ std::string ColorLineGroup2dShaderOpenGl::getLineFragmentShader() {
                            float halfScaledWidth = scaledWidth / 2.0;
                            float cycleLength = scaledWidth * skew;
                            float timeOffset = uFrameUniforms.frameSpecs.y * style.dashAnimationSpeed * scaledWidth;
-                           float positionInCycle = mod(outLengthPrefix * skew + timeOffset, 2.0 * cycleLength) / cycleLength;
+                           float skewOffset = (1.0 - skew) * style.width * dashingScaleFactor * 0.5;
+                           float positionInCycle = mod(outLengthPrefix + timeOffset + skewOffset, 2.0 * cycleLength) / cycleLength * skew;
 
-                           float scalingRatio =  dashingScaleFactor / uFrameUniforms.frameSpecs.x;
+                           float scalingRatio = dashingScaleFactor / uFrameUniforms.frameSpecs.x;
                            vec2 pos = vec2((positionInCycle * 2.0 - 1.0) * scalingRatio, outLineSide);
 
                            if(dot(pos, pos) >= 1.0) {
