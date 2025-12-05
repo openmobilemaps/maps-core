@@ -113,6 +113,6 @@ class ShaderFactory: MCShaderFactoryInterface {
     }
 
     func createElevationInterpolationShader() -> (any MCElevationInterpolationShaderInterface)? {
-      ElevationInterpolationShader()
+        ElevationInterpolationShader()
     }
 }
