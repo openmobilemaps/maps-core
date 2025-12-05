@@ -246,7 +246,8 @@ lineGroupFragmentShader(LineVertexOut in [[stage_in]],
     const float cycleLength = style->width * dashingScalingFactor * skew;
 
     const float timeOffset = time * style->dash_animation_speed * scaledWidth;
-    const float positionInCycle = fmod(in.lengthPrefix * skew + timeOffset, 2.0 * cycleLength) / cycleLength;
+      const float skewOffset = (1.0 - skew) * style->width * dashingScalingFactor * 0.5;
+    const float positionInCycle = fmod(in.lengthPrefix + timeOffset + skewOffset, 2.0 * cycleLength) / cycleLength * skew;
 
     const float scalingRatio =  dashingScalingFactor / scalingFactor;
     float2 pos = float2((positionInCycle * 2.0 - 1.0) * scalingRatio, in.lineSide);
