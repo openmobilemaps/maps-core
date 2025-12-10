@@ -157,9 +157,6 @@ std::string TessellatedRasterShaderOpenGl::getEvaluationShader() {
                                                 vec4 bent = transform(flatPosition, uOrigin) - uOriginOffset;
                                                 float blend = clamp(length(uOriginOffset) * BlendScale - BlendOffset, 0.0, 1.0);
                                                 position = mix(position, bent, blend);
-
-                                                //vec4 normal = normalize(transform(flatPosition, vec4(0.0, 0.0, 0.0, 0.0)));
-                                                //position += normal * 0.1 * sin(flatPosition.x * 10000.0) * sin(flatPosition.y * 10000.0);
                                             }
 
                                             gl_Position = uFrameUniforms.vpMatrix * ((umMatrix * vec4(position.xyz, 1.0)) + uOriginOffset);
