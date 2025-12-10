@@ -33,6 +33,7 @@ open class MCMapView: MTKView {
     private let touchHandler: MCMapViewTouchHandler
     private let callbackHandler = MCMapViewCallbackHandler()
 
+    private var touchForwardingGestureRecognizer: TouchForwardingGestureRecognizer!
     private var pinch: UIPinchGestureRecognizer!
     private var pan: UIPanGestureRecognizer!
 
@@ -122,6 +123,14 @@ open class MCMapView: MTKView {
         mapInterface.setCallbackHandler(callbackHandler)
 
         touchHandler.mapView = self
+
+        touchForwardingGestureRecognizer = TouchForwardingGestureRecognizer(
+            touchHandler: touchHandler)
+        touchForwardingGestureRecognizer.delegate = self
+        touchForwardingGestureRecognizer.delaysTouchesBegan = false
+        touchForwardingGestureRecognizer.delaysTouchesEnded = false
+        touchForwardingGestureRecognizer.cancelsTouchesInView = false
+        addGestureRecognizer(touchForwardingGestureRecognizer)
 
         mapInterface.resume()
 
@@ -346,34 +355,6 @@ extension CGSize {
 }
 
 extension MCMapView {
-    public override func touchesBegan(
-        _ touches: Set<UITouch>, with event: UIEvent?
-    ) {
-        super.touchesBegan(touches, with: event)
-        touchHandler.touchesBegan(touches, with: event)
-    }
-
-    public override func touchesEnded(
-        _ touches: Set<UITouch>, with event: UIEvent?
-    ) {
-        super.touchesEnded(touches, with: event)
-        touchHandler.touchesEnded(touches, with: event)
-    }
-
-    public override func touchesCancelled(
-        _ touches: Set<UITouch>, with event: UIEvent?
-    ) {
-        super.touchesCancelled(touches, with: event)
-        touchHandler.touchesCancelled(touches, with: event)
-    }
-
-    public override func touchesMoved(
-        _ touches: Set<UITouch>, with event: UIEvent?
-    ) {
-        super.touchesMoved(touches, with: event)
-        touchHandler.touchesMoved(touches, with: event)
-    }
-
     public override func gestureRecognizerShouldBegin(
         _ gestureRecognizer: UIGestureRecognizer
     ) -> Bool {
@@ -489,6 +470,84 @@ extension MCMapView: UIGestureRecognizerDelegate {
     @objc func panned(_ gestureRecognizer: UIPanGestureRecognizer) {
         self.touchHandler.handlePan(panGestureRecognizer: gestureRecognizer)
     }
+}
+
+private final class TouchForwardingGestureRecognizer: UIGestureRecognizer {
+    private let touchHandler: MCMapViewTouchHandler
+    private var trackedTouches = Set<UITouch>()
+    private var initialTouchPoint: CGPoint?
+    private let leftEdgeThreshold: CGFloat = 44.0
+
+    init(touchHandler: MCMapViewTouchHandler) {
+        self.touchHandler = touchHandler
+        super.init(target: nil, action: nil)
+    }
+
+    var startedAwayFromLeftEdge: Bool {
+        guard let point = initialTouchPoint else { return false }
+        return point.x > leftEdgeThreshold
+    }
+
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent) {
+        super.touchesBegan(touches, with: event)
+        trackedTouches.formUnion(touches)
+        if initialTouchPoint == nil, let touch = touches.first, let view {
+            initialTouchPoint = touch.location(in: view)
+        }
+        if state == .possible {
+            state = .began
+        } else {
+            state = .changed
+        }
+        touchHandler.touchesBegan(touches, with: event)
+    }
+
+    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent) {
+        super.touchesMoved(touches, with: event)
+        if state == .possible {
+            state = .began
+        } else {
+            state = .changed
+        }
+        touchHandler.touchesMoved(touches, with: event)
+    }
+
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent) {
+        super.touchesEnded(touches, with: event)
+        touchHandler.touchesEnded(touches, with: event)
+        trackedTouches.subtract(touches)
+        state = trackedTouches.isEmpty ? .ended : .changed
+    }
+
+    override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent) {
+        super.touchesCancelled(touches, with: event)
+        touchHandler.touchesCancelled(touches, with: event)
+        trackedTouches.subtract(touches)
+        state = .cancelled
+    }
+
+    override func reset() {
+        super.reset()
+        trackedTouches.removeAll()
+        initialTouchPoint = nil
+    }
+
+    override func shouldBeRequiredToFail(by otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        if startedAwayFromLeftEdge {
+            return true
+        } else {
+            return super.shouldBeRequiredToFail(by: otherGestureRecognizer)
+        }
+    }
+
+    override func shouldRequireFailure(of otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        if startedAwayFromLeftEdge {
+            return super.shouldRequireFailure(of: otherGestureRecognizer)
+        } else {
+            return true
+        }
+    }
+
 }
 
 private final class MCMapViewMapReadyCallbacks:
