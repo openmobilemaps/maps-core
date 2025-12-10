@@ -24,7 +24,7 @@ PolygonMaskObject::PolygonMaskObject(const std::shared_ptr<GraphicsObjectFactory
                                      const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                                      bool is3D)
     : conversionHelper(conversionHelper)
-    , polygon(graphicsObjectFactory->createPolygonMaskTessellated(is3D)) //is3d here?
+    , polygon(graphicsObjectFactory->createPolygonMaskTessellated(is3D))
     , is3D(is3D) {}
 
 void PolygonMaskObject::setPositions(const std::vector<Coord> &positions,
@@ -90,12 +90,14 @@ void PolygonMaskObject::setPolygons(const std::vector<::PolygonCoord> &polygons,
         double y = is3D ? (1.0 * cos(v.y) - ry) : v.y - ry;
         double z = is3D ? (-1.0 * sin(v.y) * sin(v.x) - rz) : 0.0;
 
+        // Position
         vertices.push_back(x);
         vertices.push_back(y);
         vertices.push_back(z);
     #ifdef __APPLE__
         vertices.push_back(0.0f);
     #endif
+        // Frame Coord
         vertices.push_back(v.x);
         vertices.push_back(v.y);
     }
@@ -103,7 +105,8 @@ void PolygonMaskObject::setPolygons(const std::vector<::PolygonCoord> &polygons,
     auto attr = SharedBytes((int64_t)vertices.data(), (int32_t)vertices.size(), (int32_t)sizeof(float));
     auto ind = SharedBytes((int64_t)indices.data(), (int32_t)indices.size(), (int32_t)sizeof(uint16_t));
     
-    polygon->setVertices(attr, ind, origin, (int32_t)(subdivisionFactor.value_or(1.0f)));
+    polygon->setSubdivisionFactor((int32_t)(subdivisionFactor.value_or(1.0f)));
+    polygon->setVertices(attr, ind, origin, is3D);
 }
 
 std::shared_ptr<Polygon2dInterface> PolygonMaskObject::getPolygonObject() { return polygon; }

@@ -21,6 +21,7 @@ final class Quad2dTessellated: BaseGraphicsObject, @unchecked Sendable {
     private var originBuffers: MultiBuffer<simd_float4>
     
     private var is3d = false
+    private var subdivisionFactor: Int32 = -1
 
     private var texture: MTLTexture?
 
@@ -30,8 +31,6 @@ final class Quad2dTessellated: BaseGraphicsObject, @unchecked Sendable {
     private var renderPassStencilState: MTLDepthStencilState?
 
     private var renderAsMask = false
-
-    private var subdivisionFactor: Int32 = 0
 
     private var frame: MCQuad3dD?
     private var textureCoordinates: MCRectD?
@@ -54,6 +53,7 @@ final class Quad2dTessellated: BaseGraphicsObject, @unchecked Sendable {
                 sampler: metalContext.samplerLibrary.value(
                     Sampler.magLinear.rawValue)!,
                 label: label)
+        setSubdivisionFactor(0) // ensure tessellationFactorBuffer creation
     }
 
     private func setupStencilStates() {
@@ -195,7 +195,7 @@ final class Quad2dTessellated: BaseGraphicsObject, @unchecked Sendable {
         
         /* WIREFRAME DEBUG */
         //encoder.setTriangleFillMode(.lines)
-        
+    
         encoder.drawPatches(
             numberOfPatchControlPoints: 4,
             patchStart: 0,
@@ -253,35 +253,28 @@ extension Quad2dTessellated: MCQuad2dInterface {
     }
 
     func setSubdivisionFactor(_ factor: Int32) {
-        let (optFrame, optTextureCoordinates) = lock.withCritical {
-            () -> (MCQuad3dD?, MCRectD?) in
+        lock.withCritical {
             if self.subdivisionFactor != factor {
                 self.subdivisionFactor = factor
-                return (frame, textureCoordinates)
-            } else {
-                return (nil, nil)
+                
+                let factorH = Half(pow(2, Float(self.subdivisionFactor))).bits;
+                
+                var tessellationFactors = MTLQuadTessellationFactorsHalf(
+                    edgeTessellationFactor: (factorH, factorH, factorH, factorH),
+                    insideTessellationFactor: (factorH, factorH)
+                );
+                    
+                self.tessellationFactorsBuffer.copyOrCreate(
+                    bytes: &tessellationFactors,
+                    length: MemoryLayout<MTLQuadTessellationFactorsHalf>.stride,
+                    device: device)
             }
-        }
-        if let frame = optFrame,
-            let textureCoordinates = optTextureCoordinates
-        {
-            setFrame(
-                frame, textureCoordinates: textureCoordinates,
-                origin: self.originOffset, is3d: is3d)
         }
     }
 
     func setFrame(
-        _ frame: MCQuad3dD, textureCoordinates: MCRectD, origin: MCVec3D,
-        is3d: Bool // maybe move subdivision factor also here? or both own setter? same as in polygon 2d tessellation
+        _ frame: MCQuad3dD, textureCoordinates: MCRectD, origin: MCVec3D, is3d: Bool
     ) {
-        let factor = Half(pow(2, Float(lock.withCritical { subdivisionFactor }))).bits;
-        
-        var tessellationFactors = MTLQuadTessellationFactorsHalf(
-            edgeTessellationFactor: (factor, factor, factor, factor),
-            insideTessellationFactor: (factor, factor)
-        );
-        
         var vertices: [Vertex3DTextureTessellated] = []
 
         func transform(_ coordinate: MCVec3D) -> MCVec3D {
@@ -340,10 +333,6 @@ extension Quad2dTessellated: MCQuad2dInterface {
             self.verticesBuffer.copyOrCreate(
                 bytes: vertices,
                 length: MemoryLayout<Vertex3DTextureTessellated>.stride * vertices.count,
-                device: device)
-            self.tessellationFactorsBuffer.copyOrCreate(
-                bytes: &tessellationFactors,
-                length: MemoryLayout<MTLQuadTessellationFactorsHalf>.stride,
                 device: device)
         }
     }

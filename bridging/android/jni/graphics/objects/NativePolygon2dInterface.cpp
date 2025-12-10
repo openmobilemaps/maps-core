@@ -18,7 +18,7 @@ NativePolygon2dInterface::JavaProxy::JavaProxy(JniType j) : Handle(::djinni::jni
 
 NativePolygon2dInterface::JavaProxy::~JavaProxy() = default;
 
-void NativePolygon2dInterface::JavaProxy::setVertices(const ::SharedBytes & c_vertices, const ::SharedBytes & c_indices, const ::Vec3D & c_origin, int32_t c_subdivisionFactor) {
+void NativePolygon2dInterface::JavaProxy::setVertices(const ::SharedBytes & c_vertices, const ::SharedBytes & c_indices, const ::Vec3D & c_origin, bool c_is3d) {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
     const auto& data = ::djinni::JniClass<::djinni_generated::NativePolygon2dInterface>::get();
@@ -26,7 +26,15 @@ void NativePolygon2dInterface::JavaProxy::setVertices(const ::SharedBytes & c_ve
                            ::djinni::get(::djinni_generated::NativeSharedBytes::fromCpp(jniEnv, c_vertices)),
                            ::djinni::get(::djinni_generated::NativeSharedBytes::fromCpp(jniEnv, c_indices)),
                            ::djinni::get(::djinni_generated::NativeVec3D::fromCpp(jniEnv, c_origin)),
-                           ::djinni::get(::djinni::I32::fromCpp(jniEnv, c_subdivisionFactor)));
+                           ::djinni::get(::djinni::Bool::fromCpp(jniEnv, c_is3d)));
+    ::djinni::jniExceptionCheck(jniEnv);
+}
+void NativePolygon2dInterface::JavaProxy::setSubdivisionFactor(int32_t c_factor) {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativePolygon2dInterface>::get();
+    jniEnv->CallVoidMethod(Handle::get().get(), data.method_setSubdivisionFactor,
+                           ::djinni::get(::djinni::I32::fromCpp(jniEnv, c_factor)));
     ::djinni::jniExceptionCheck(jniEnv);
 }
 /*not-null*/ std::shared_ptr<::GraphicsObjectInterface> NativePolygon2dInterface::JavaProxy::asGraphicsObject() {
@@ -53,14 +61,22 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_Polygon2dInterface_00024CppProxy_native_1setVertices(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeSharedBytes::JniType j_vertices, ::djinni_generated::NativeSharedBytes::JniType j_indices, ::djinni_generated::NativeVec3D::JniType j_origin, jint j_subdivisionFactor)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_Polygon2dInterface_00024CppProxy_native_1setVertices(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeSharedBytes::JniType j_vertices, ::djinni_generated::NativeSharedBytes::JniType j_indices, ::djinni_generated::NativeVec3D::JniType j_origin, jboolean j_is3d)
 {
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::Polygon2dInterface>(nativeRef);
         ref->setVertices(::djinni_generated::NativeSharedBytes::toCpp(jniEnv, j_vertices),
                          ::djinni_generated::NativeSharedBytes::toCpp(jniEnv, j_indices),
                          ::djinni_generated::NativeVec3D::toCpp(jniEnv, j_origin),
-                         ::djinni::I32::toCpp(jniEnv, j_subdivisionFactor));
+                         ::djinni::Bool::toCpp(jniEnv, j_is3d));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_Polygon2dInterface_00024CppProxy_native_1setSubdivisionFactor(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jint j_factor)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::Polygon2dInterface>(nativeRef);
+        ref->setSubdivisionFactor(::djinni::I32::toCpp(jniEnv, j_factor));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
