@@ -51,14 +51,14 @@ void TessellatedRasterShaderOpenGl::setupProgram(const std::shared_ptr<::Renderi
 std::string TessellatedRasterShaderOpenGl::getVertexShader() {
     return OMMVersionedGlesShaderCodeWithFrameUBO(320 es,
                                         in vec4 vPosition;
-                                        in vec2 vFlatPosition;
+                                        in vec2 vFrameCoord;
                                         in vec2 texCoordinate;
-                                        out vec2 c_flatposition;
+                                        out vec2 c_framecoord;
                                         out vec2 c_texcoord;
 
                                         void main() {
                                             gl_Position = vPosition;
-                                            c_flatposition = vFlatPosition;
+                                            c_framecoord = vFrameCoord;
                                             c_texcoord = texCoordinate;
                                         }
     );
@@ -70,15 +70,15 @@ std::string TessellatedRasterShaderOpenGl::getControlShader() {
 
                                         uniform int uSubdivisionFactor;
 
-                                        in vec2 c_flatposition[];
+                                        in vec2 c_framecoord[];
                                         in vec2 c_texcoord[];
-                                        out vec2 e_flatposition[];
+                                        out vec2 e_framecoord[];
                                         out vec2 e_texcoord[];
 
                                         void main()
                                         {
                                             gl_out[gl_InvocationID].gl_Position = gl_in[gl_InvocationID].gl_Position;
-                                            e_flatposition[gl_InvocationID] = c_flatposition[gl_InvocationID];
+                                            e_framecoord[gl_InvocationID] = c_framecoord[gl_InvocationID];
                                             e_texcoord[gl_InvocationID] = c_texcoord[gl_InvocationID];
 
                                             if (gl_InvocationID == 0)
@@ -106,7 +106,7 @@ std::string TessellatedRasterShaderOpenGl::getEvaluationShader() {
                                         uniform vec4 uOrigin;
                                         uniform bool uIs3d;
 
-                                        in vec2 e_flatposition[];
+                                        in vec2 e_framecoord[];
                                         in vec2 e_texcoord[];
                                         out vec2 v_texcoord; // out vec2 g_texcoord; /* WIREFRAME DEBUG */
 
@@ -141,11 +141,11 @@ std::string TessellatedRasterShaderOpenGl::getEvaluationShader() {
                                             vec4 p11 = gl_in[3].gl_Position;
                                             vec4 position = bilerp(p00, p01, p10, p11, uv);
 
-                                            vec2 f00 = e_flatposition[0];
-                                            vec2 f01 = e_flatposition[1];
-                                            vec2 f10 = e_flatposition[2];
-                                            vec2 f11 = e_flatposition[3];
-                                            vec2 flatPosition = bilerp(f00, f01, f10, f11, uv);
+                                            vec2 f00 = e_framecoord[0];
+                                            vec2 f01 = e_framecoord[1];
+                                            vec2 f10 = e_framecoord[2];
+                                            vec2 f11 = e_framecoord[3];
+                                            vec2 frameCoord = bilerp(f00, f01, f10, f11, uv);
 
                                             vec2 t00 = e_texcoord[0];
                                             vec2 t01 = e_texcoord[1];
@@ -154,7 +154,7 @@ std::string TessellatedRasterShaderOpenGl::getEvaluationShader() {
                                             vec2 texCoord = bilerp(t00, t01, t10, t11, uv);
 
                                             if (uIs3d) {
-                                                vec4 bent = transform(flatPosition, uOrigin) - uOriginOffset;
+                                                vec4 bent = transform(frameCoord, uOrigin) - uOriginOffset;
                                                 float blend = clamp(length(uOriginOffset) * BlendScale - BlendOffset, 0.0, 1.0);
                                                 position = mix(position, bent, blend);
                                             }

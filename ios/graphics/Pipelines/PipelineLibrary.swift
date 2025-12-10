@@ -289,7 +289,7 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
                 .polygonPatternFadeInGroupShader,
                 .polygonStripedGroupShader,
                 .colorShader, .maskShader:
-                return Vertex4F.descriptor
+                return Vertex3D.descriptor
             case .rasterShader,
                 .clearStencilShader,
                 .alphaShader,
@@ -300,10 +300,10 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
                 .roundColorShader,
                 .elevationInterpolation:
                 return Vertex3DTexture.descriptor
-            case .quadTessellatedShader:
-                return TessellatedVertex3DTexture.descriptor
             case .maskTessellatedShader:
-                return TessellatedVertex4F.descriptor
+                return Vertex3DTessellated.descriptor
+            case .quadTessellatedShader:
+                return Vertex3DTextureTessellated.descriptor
             default:
                 return Vertex.descriptor
         }
