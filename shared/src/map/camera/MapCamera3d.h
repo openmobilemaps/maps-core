@@ -39,8 +39,6 @@ class MapCamera3d : public MapCameraInterface,
     MapCamera3d(const std::shared_ptr<MapInterface> &mapInterface, float screenDensityPpi);
     ~MapCamera3d();
 
-    ~MapCamera3d(){};
-
     void freeze(bool freeze) override;
 
     virtual void moveToCenterPositionZoom(const ::Coord &centerPosition, double zoom, bool animated) override;
