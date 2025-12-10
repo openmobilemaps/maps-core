@@ -35,7 +35,7 @@ float4 transform(float2 coordinate, float4 origin) {
 }
 
 [[patch(quad, 4)]] vertex VertexOut
-quadTessellationVertexShader(const patch_control_point<TessellatedVertex3DTextureIn> controlPoints [[stage_in]],
+quadTessellationVertexShader(const patch_control_point<Vertex3DTextureTessellatedIn> controlPoints [[stage_in]],
                              const float2 positionInPatch [[position_in_patch]],
                              constant float4x4 &vpMatrix [[buffer(1)]],
                              constant float4x4 &mMatrix [[buffer(2)]],
@@ -43,18 +43,18 @@ quadTessellationVertexShader(const patch_control_point<TessellatedVertex3DTextur
                              constant float4 &origin [[buffer(4)]],
                              constant bool &is3d [[buffer(5)]])
 {
-    TessellatedVertex3DTextureIn vA = controlPoints[0];
-    TessellatedVertex3DTextureIn vB = controlPoints[1];
-    TessellatedVertex3DTextureIn vC = controlPoints[2];
-    TessellatedVertex3DTextureIn vD = controlPoints[3];
+    Vertex3DTextureTessellatedIn vA = controlPoints[0];
+    Vertex3DTextureTessellatedIn vB = controlPoints[1];
+    Vertex3DTextureTessellatedIn vC = controlPoints[2];
+    Vertex3DTextureTessellatedIn vD = controlPoints[3];
     
-    float4 vertexRelativePosition = bilerp(vA.relativePosition, vB.relativePosition, vC.relativePosition, vD.relativePosition, positionInPatch);
-    float2 vertexAbsolutePosition = bilerp(vA.absolutePosition, vB.absolutePosition, vC.absolutePosition, vD.absolutePosition, positionInPatch);
+    float4 vertexPosition = bilerp(vA.position, vB.position, vC.position, vD.position, positionInPatch);
+    float2 vertexFrameCoord = bilerp(vA.frameCoord, vB.frameCoord, vC.frameCoord, vD.frameCoord, positionInPatch);
     float2 vertexUV = bilerp(vA.uv, vB.uv, vC.uv, vD.uv, positionInPatch);
     
-    float4 position = vertexRelativePosition;
+    float4 position = vertexPosition;
     if (is3d) {
-        float4 bent = transform(vertexAbsolutePosition, origin) - originOffset;
+        float4 bent = transform(vertexFrameCoord, origin) - originOffset;
         float blend = saturate(length(originOffset) * BlendScale - BlendOffset);
         position = mix(position, bent, blend);
     }
@@ -68,7 +68,7 @@ quadTessellationVertexShader(const patch_control_point<TessellatedVertex3DTextur
 }
 
 [[patch(triangle, 3)]] vertex VertexOut
-polygonTessellationVertexShader(const patch_control_point<TessellatedVertex4FIn> controlPoints [[stage_in]],
+polygonTessellationVertexShader(const patch_control_point<Vertex3DTessellatedIn> controlPoints [[stage_in]],
                                 const float3 positionInPatch [[position_in_patch]],
                                 constant float4x4 &vpMatrix [[buffer(1)]],
                                 constant float4x4 &mMatrix [[buffer(2)]],
@@ -76,16 +76,16 @@ polygonTessellationVertexShader(const patch_control_point<TessellatedVertex4FIn>
                                 constant float4 &origin [[buffer(4)]],
                                 constant bool &is3d [[buffer(5)]])
 {
-    TessellatedVertex4FIn vA = controlPoints[0];
-    TessellatedVertex4FIn vB = controlPoints[1];
-    TessellatedVertex4FIn vC = controlPoints[2];
+    Vertex3DTessellatedIn vA = controlPoints[0];
+    Vertex3DTessellatedIn vB = controlPoints[1];
+    Vertex3DTessellatedIn vC = controlPoints[2];
     
-    float4 vertexRelativePosition = baryinterp(vA.relativePosition, vB.relativePosition, vC.relativePosition, positionInPatch);
-    float2 vertexAbsolutePosition = baryinterp(vA.absolutePosition, vB.absolutePosition, vC.absolutePosition, positionInPatch);
+    float4 vertexPosition = baryinterp(vA.position, vB.position, vC.position, positionInPatch);
+    float2 vertexFrameCoord = baryinterp(vA.frameCoord, vB.frameCoord, vC.frameCoord, positionInPatch);
     
-    float4 position = vertexRelativePosition;
+    float4 position = vertexPosition;
     if (is3d) {
-        float4 bent = transform(vertexAbsolutePosition, origin) - originOffset;
+        float4 bent = transform(vertexFrameCoord, origin) - originOffset;
         float blend = saturate(length(originOffset) * BlendScale - BlendOffset);
         position = mix(position, bent, blend);
     }
