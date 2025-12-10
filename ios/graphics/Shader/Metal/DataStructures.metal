@@ -16,26 +16,26 @@ struct VertexIn {
     float2 uv [[attribute(1)]];
 };
 
+// NOTE: float3 also take up 4 * sizeOf(float) bytes
+// therefore we always use float4 for better alignment and to reduce errors when filling the buffer
+struct Vertex3DIn {
+    float4 position [[attribute(0)]];
+};
+
+struct Vertex3DTessellatedIn {
+  float4 position [[attribute(0)]];
+  float2 frameCoord [[attribute(1)]];
+};
+
 struct Vertex3DTextureIn {
     float4 position [[attribute(0)]];
     float2 uv [[attribute(1)]];
 };
 
-struct TessellatedVertex3DTextureIn {
-    float4 relativePosition [[attribute(0)]];
-    float2 absolutePosition [[attribute(1)]];
-    float2 uv [[attribute(2)]];
-};
-
-// NOTE: float3 also take up 4 * sizeOf(float) bytes
-// therefore we always use float4 for better alignment and to reduce errors when filling the buffer
-struct Vertex4FIn {
+struct Vertex3DTextureTessellatedIn {
     float4 position [[attribute(0)]];
-};
-
-struct TessellatedVertex4FIn {
-  float4 relativePosition [[attribute(0)]];
-  float2 absolutePosition [[attribute(1)]];
+    float2 frameCoord [[attribute(1)]];
+    float2 uv [[attribute(2)]];
 };
 
 struct VertexOut {

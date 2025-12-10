@@ -156,7 +156,7 @@ void Quad2dTessellatedOpenGl::prepareGlData(int program) {
     glBindVertexArray(vao);
 
     positionHandle = glGetAttribLocation(program, "vPosition");
-    flatPositionHandle = glGetAttribLocation(program, "vFlatPosition");
+    frameCoordHandle = glGetAttribLocation(program, "vFrameCoord");
 
     if (!glDataBuffersGenerated) {
         glGenBuffers(1, &vertexBuffer);
@@ -167,8 +167,8 @@ void Quad2dTessellatedOpenGl::prepareGlData(int program) {
     size_t stride = sizeof(GLfloat) * 5;
     glEnableVertexAttribArray(positionHandle);
     glVertexAttribPointer(positionHandle, 3, GL_FLOAT, false, stride, nullptr);
-    glEnableVertexAttribArray(flatPositionHandle);
-    glVertexAttribPointer(flatPositionHandle, 2, GL_FLOAT, false, stride, (float*)(sizeof(GLfloat) * 3));
+    glEnableVertexAttribArray(frameCoordHandle);
+    glVertexAttribPointer(frameCoordHandle, 2, GL_FLOAT, false, stride, (float*)(sizeof(GLfloat) * 3));
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 

@@ -87,7 +87,7 @@ protected:
     int originHandle;
     int is3dHandle;
     int positionHandle;
-    int flatPositionHandle;
+    int frameCoordHandle;
     GLuint vao;
     GLuint vertexBuffer;
     std::vector<GLfloat> vertices;

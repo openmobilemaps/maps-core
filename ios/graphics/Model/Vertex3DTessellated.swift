@@ -11,19 +11,19 @@
 import MapCoreSharedModule
 @preconcurrency import MetalKit
 
-struct TessellatedVertex4F: Equatable {
+struct Vertex3DTessellated: Equatable {
     nonisolated(unsafe) static let descriptor: MTLVertexDescriptor = {
         let vertexDescriptor = MTLVertexDescriptor()
         let bufferIndex = 0
         var offset = 0
         
-        // Relative Position
+        // Position
         vertexDescriptor.attributes[0].bufferIndex = bufferIndex
         vertexDescriptor.attributes[0].format = .float4
         vertexDescriptor.attributes[0].offset = offset
         offset += MemoryLayout<SIMD4<Float>>.stride
         
-        // Absolute Position
+        // Frame Coord (2D coord used to transform onto unit sphere)
         vertexDescriptor.attributes[1].bufferIndex = bufferIndex
         vertexDescriptor.attributes[1].format = .float2
         vertexDescriptor.attributes[1].offset = offset
