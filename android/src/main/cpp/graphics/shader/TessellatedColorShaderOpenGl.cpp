@@ -51,12 +51,12 @@ void TessellatedColorShaderOpenGl::setupProgram(const std::shared_ptr<::Renderin
 std::string TessellatedColorShaderOpenGl::getVertexShader() {
     return OMMVersionedGlesShaderCodeWithFrameUBO(320 es,
                                         in vec4 vPosition;
-                                        in vec2 vFlatPosition;
-                                        out vec2 c_flatposition;
+                                        in vec2 vFrameCoord;
+                                        out vec2 c_framecoord;
 
                                         void main() {
                                             gl_Position = vPosition;
-                                            c_flatposition = vFlatPosition;
+                                            c_framecoord = vFrameCoord;
                                         }
     );
 }
@@ -67,13 +67,13 @@ std::string TessellatedColorShaderOpenGl::getControlShader() {
 
                                         uniform int uSubdivisionFactor;
 
-                                        in vec2 c_flatposition[];
-                                        out vec2 e_flatposition[];
+                                        in vec2 c_framecoord[];
+                                        out vec2 e_framecoord[];
 
                                         void main()
                                         {
                                             gl_out[gl_InvocationID].gl_Position = gl_in[gl_InvocationID].gl_Position;
-                                            e_flatposition[gl_InvocationID] = c_flatposition[gl_InvocationID];
+                                            e_framecoord[gl_InvocationID] = c_framecoord[gl_InvocationID];
 
                                             if (gl_InvocationID == 0)
                                             {
@@ -98,7 +98,7 @@ std::string TessellatedColorShaderOpenGl::getEvaluationShader() {
                                         uniform vec4 uOrigin;
                                         uniform bool uIs3d;
 
-                                        in vec2 e_flatposition[];
+                                        in vec2 e_framecoord[];
 
                                         const float BlendScale = 1000.0;
                                         const float BlendOffset = 0.01;
@@ -126,13 +126,13 @@ std::string TessellatedColorShaderOpenGl::getEvaluationShader() {
                                             vec4 p2 = gl_in[2].gl_Position;
                                             vec4 position = baryinterp(p0, p1, p2, bary);
 
-                                            vec2 f0 = e_flatposition[0];
-                                            vec2 f1 = e_flatposition[1];
-                                            vec2 f2 = e_flatposition[2];
-                                            vec2 flatPosition = baryinterp(f0, f1, f2, bary);
+                                            vec2 f0 = e_framecoord[0];
+                                            vec2 f1 = e_framecoord[1];
+                                            vec2 f2 = e_framecoord[2];
+                                            vec2 frameCoord = baryinterp(f0, f1, f2, bary);
 
                                             if (uIs3d) {
-                                                vec4 bent = transform(flatPosition, uOrigin) - uOriginOffset;
+                                                vec4 bent = transform(frameCoord, uOrigin) - uOriginOffset;
                                                 float blend = clamp(length(uOriginOffset) * BlendScale - BlendOffset, 0.0, 1.0);
                                                 position = mix(position, bent, blend);
                                             }
