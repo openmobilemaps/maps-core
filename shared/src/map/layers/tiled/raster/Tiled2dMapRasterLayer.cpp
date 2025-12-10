@@ -318,7 +318,7 @@ std::vector<Tiled2dMapRasterTileInfo> sortedTileInfos(currentTileInfos.begin(), 
                     }
                 }
                 if (is3D) {
-                    tileObject->getQuadObject()->setSubdivisionFactor( //todo here!
+                    tileObject->getQuadObject()->setSubdivisionFactor(
                         std::clamp(subdivisionFactor + tile.tessellationFactor, 0, 5));
                 }
                 tileObject->setRectCoord(tile.tileInfo.tileInfo.bounds);

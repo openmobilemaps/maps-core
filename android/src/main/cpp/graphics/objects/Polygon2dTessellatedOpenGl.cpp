@@ -12,8 +12,8 @@
 #include "OpenGlHelper.h"
 #include <cstring>
 
-Polygon2dTessellatedOpenGl::Polygon2dTessellatedOpenGl(const std::shared_ptr<::BaseShaderProgramOpenGl> &shader, bool is3D)
-    : shaderProgram(shader), is3d(is3D) {}
+Polygon2dTessellatedOpenGl::Polygon2dTessellatedOpenGl(const std::shared_ptr<::BaseShaderProgramOpenGl> &shader)
+    : shaderProgram(shader) {}
 
 std::shared_ptr<GraphicsObjectInterface> Polygon2dTessellatedOpenGl::asGraphicsObject() { return shared_from_this(); }
 
@@ -21,7 +21,14 @@ std::shared_ptr<MaskingObjectInterface> Polygon2dTessellatedOpenGl::asMaskingObj
 
 bool Polygon2dTessellatedOpenGl::isReady() { return ready; }
 
-void Polygon2dTessellatedOpenGl::setVertices(const ::SharedBytes & vertices_, const ::SharedBytes & indices_, const ::Vec3D & origin, int32_t subdivisionFactor) {
+void Polygon2dTessellatedOpenGl::setSubdivisionFactor(int32_t factor) {
+    if (factor != subdivisionFactor) {
+        subdivisionFactor = factor;
+        ready = false; // necessary? ask Christoph
+    }
+}
+
+void Polygon2dTessellatedOpenGl::setVertices(const ::SharedBytes & vertices_, const ::SharedBytes & indices_, const ::Vec3D & origin, bool is3d) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
     ready = false;
     dataReady = false;
@@ -30,7 +37,7 @@ void Polygon2dTessellatedOpenGl::setVertices(const ::SharedBytes & vertices_, co
     vertices.resize(vertices_.elementCount);
     polygonOrigin = origin;
 
-    this->subdivisionFactor = subdivisionFactor;
+    this->is3d = is3d;
 
     if(indices_.elementCount > 0) {
         std::memcpy(indices.data(), (void *)indices_.address, indices_.elementCount * indices_.bytesPerElement);

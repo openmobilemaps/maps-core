@@ -24,21 +24,21 @@ final class Polygon2dTessellated: BaseGraphicsObject, @unchecked Sendable {
     private var originBuffers: MultiBuffer<simd_float4>
     
     private var is3d = false
+    private var subdivisionFactor: Int32 = -1
 
     private var stencilState: MTLDepthStencilState?
     private var renderPassStencilState: MTLDepthStencilState?
 
-    init(shader: MCShaderProgramInterface, metalContext: MetalContext, is3d: Bool) {
+    init(shader: MCShaderProgramInterface, metalContext: MetalContext) {
         self.shader = shader
         originBuffers = .init(device: metalContext.device)
-        self.is3d = is3d // move is3d to set vertices or make own setter? if so also make own subdivision setter
         super
             .init(
                 device: metalContext.device,
                 sampler: metalContext.samplerLibrary.value(
                     Sampler.magLinear.rawValue)!,
                 label: "Polygon2dTessellated")
-
+        setSubdivisionFactor(0) // ensure tessellationFactorBuffer creation
     }
 
     override func render(
@@ -233,17 +233,31 @@ extension Polygon2dTessellated: MCMaskingObjectInterface {
 }
 
 extension Polygon2dTessellated: MCPolygon2dInterface {
-    func setVertices(
-        _ vertices: MCSharedBytes, indices: MCSharedBytes, origin: MCVec3D, subdivisionFactor: Int32 // move is3d and subdivisonfactor to own setter?
-    ) {
-        let factor = Half(subdivisionFactor).bits;
-        
-        var tessellationFactors = MTLTriangleTessellationFactorsHalf(
-            edgeTessellationFactor: (factor, factor, factor),
-            insideTessellationFactor: factor
-        );
-
+    func setSubdivisionFactor(_ factor: Int32) {
         lock.withCritical {
+            if self.subdivisionFactor != factor {
+                self.subdivisionFactor = factor
+                
+                let factorH = Half(self.subdivisionFactor).bits;
+                
+                var tessellationFactors = MTLTriangleTessellationFactorsHalf(
+                    edgeTessellationFactor: (factorH, factorH, factorH),
+                    insideTessellationFactor: factorH
+                );
+                
+                self.tessellationFactorsBuffer.copyOrCreate(
+                    bytes: &tessellationFactors,
+                    length: MemoryLayout<MTLTriangleTessellationFactorsHalf>.stride,
+                    device: device)
+            }
+        }
+    }
+    
+    func setVertices(
+        _ vertices: MCSharedBytes, indices: MCSharedBytes, origin: MCVec3D, is3d: Bool
+    ) {
+        lock.withCritical {
+            self.is3d = is3d
             self.verticesBuffer.copyOrCreate(from: vertices, device: device)
             self.indicesBuffer.copyOrCreate(from: indices, device: device)
             if self.verticesBuffer != nil, self.indicesBuffer != nil {
@@ -252,10 +266,6 @@ extension Polygon2dTessellated: MCPolygon2dInterface {
                 self.indicesCount = 0
             }
             self.originOffset = origin
-            self.tessellationFactorsBuffer.copyOrCreate(
-                bytes: &tessellationFactors,
-                length: MemoryLayout<MTLTriangleTessellationFactorsHalf>.stride,
-                device: device)
         }
     }
 

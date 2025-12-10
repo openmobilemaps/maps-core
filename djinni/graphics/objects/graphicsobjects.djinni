@@ -133,7 +133,8 @@ line_group_2d_interface = interface +c +j +o {
 }
 
 polygon_2d_interface = interface +c +j +o {
-    set_vertices(vertices: shared_bytes, indices: shared_bytes, origin: vec_3_d, subdivisionFactor: i32);
+    set_vertices(vertices: shared_bytes, indices: shared_bytes, origin: vec_3_d, is_3d: bool);
+    set_subdivision_factor(factor: i32);
 
     as_graphics_object(): graphics_object_interface;
     as_masking_object(): masking_object_interface;

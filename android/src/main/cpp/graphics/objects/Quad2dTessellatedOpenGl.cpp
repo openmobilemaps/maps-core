@@ -50,7 +50,7 @@ void Quad2dTessellatedOpenGl::setFrame(const Quad3dD &frame, const RectD &textur
 void Quad2dTessellatedOpenGl::setSubdivisionFactor(int32_t factor) {
     if (factor != subdivisionFactor) {
         subdivisionFactor = factor;
-        ready = false;
+        ready = false; // necessary? ask Christoph
     }
 }
 
@@ -86,53 +86,69 @@ void Quad2dTessellatedOpenGl::computeGeometry(bool texCoordsOnly) {
     if (!texCoordsOnly) {
         if (is3d) {
             vertices = {
+                    // Position
                     (float) (1.0 * std::sin(frame.topLeft.y) * std::cos(frame.topLeft.x) - quadOrigin.x),
                     (float) (1.0 * cos(frame.topLeft.y) - quadOrigin.y),
                     (float) (-1.0 * std::sin(frame.topLeft.x) * std::sin(frame.topLeft.y) - quadOrigin.z),
+                    // Frame Coord
                     (float) (frame.topLeft.x),
                     (float) (frame.topLeft.y),
 
+                    // Position
                     (float) (1.0 * std::sin(frame.topRight.y) * std::cos(frame.topRight.x) - quadOrigin.x),
                     (float) (1.0 * cos(frame.topRight.y) - quadOrigin.y),
                     (float) (-1.0 * std::sin(frame.topRight.x) * std::sin(frame.topRight.y) - quadOrigin.z),
+                    // Frame Coord
                     (float) (frame.topRight.x),
                     (float) (frame.topRight.y),
 
+                    // Position
                     (float) (1.0 * std::sin(frame.bottomLeft.y) * std::cos(frame.bottomLeft.x) - quadOrigin.x),
                     (float) (1.0 * cos(frame.bottomLeft.y) - quadOrigin.y),
                     (float) (-1.0 * std::sin(frame.bottomLeft.x) * std::sin(frame.bottomLeft.y) - quadOrigin.z),
+                    // Frame Coord
                     (float) (frame.bottomLeft.x),
                     (float) (frame.bottomLeft.y),
 
+                    // Position
                     (float) (1.0 * std::sin(frame.bottomRight.y) * std::cos(frame.bottomRight.x) - quadOrigin.x),
                     (float) (1.0 * cos(frame.bottomRight.y) - quadOrigin.y),
                     (float) (-1.0 * std::sin(frame.bottomRight.x) * std::sin(frame.bottomRight.y) - quadOrigin.z),
+                    // Frame Coord
                     (float) (frame.bottomRight.x),
                     (float) (frame.bottomRight.y),
             };
         } else {
             vertices = {
+                    // Position
                     (float) (frame.topLeft.x - quadOrigin.x),
                     (float) (frame.topLeft.y - quadOrigin.y),
                     (float) (-quadOrigin.z),
+                    // Frame Coord
                     (float) (frame.topLeft.x),
                     (float) (frame.topLeft.y),
 
+                    // Position
                     (float) (frame.topRight.x - quadOrigin.x),
                     (float) (frame.topRight.y - quadOrigin.y),
                     (float) (-quadOrigin.z),
+                    // Frame Coord
                     (float) (frame.topRight.x),
                     (float) (frame.topRight.y),
 
+                    // Position
                     (float) (frame.bottomLeft.x - quadOrigin.x),
                     (float) (frame.bottomLeft.y - quadOrigin.y),
                     (float) (-quadOrigin.z),
+                    // Frame Coord
                     (float) (frame.bottomLeft.x),
                     (float) (frame.bottomLeft.y),
 
+                    // Position
                     (float) (frame.bottomRight.x - quadOrigin.x),
                     (float) (frame.bottomRight.y - quadOrigin.y),
                     (float) (-quadOrigin.z),
+                    // Frame Coord
                     (float) (frame.bottomRight.x),
                     (float) (frame.bottomRight.y),
             };

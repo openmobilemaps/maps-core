@@ -39,7 +39,7 @@ GraphicsObjectFactoryOpenGl::createPolygon(const std::shared_ptr<::ShaderProgram
 
 std::shared_ptr<Polygon2dInterface>
 GraphicsObjectFactoryOpenGl::createPolygonTessellated(const std::shared_ptr<::ShaderProgramInterface> &shader) {
-    return std::make_shared<Polygon2dTessellatedOpenGl>(enforceGlShader(shader), false); // ?
+    return std::make_shared<Polygon2dTessellatedOpenGl>(enforceGlShader(shader));
 }
 
 std::shared_ptr<LineGroup2dInterface>
@@ -71,7 +71,7 @@ std::shared_ptr<Polygon2dInterface> GraphicsObjectFactoryOpenGl::createPolygonMa
 std::shared_ptr<Polygon2dInterface> GraphicsObjectFactoryOpenGl::createPolygonMaskTessellated(bool is3D) {
     std::shared_ptr<TessellatedColorShaderOpenGl> shader = std::make_shared<TessellatedColorShaderOpenGl>(is3D);
     shader->setColor(1, 1, 1, 1);
-    return std::make_shared<Polygon2dTessellatedOpenGl>(enforceGlShader(shader), is3D);
+    return std::make_shared<Polygon2dTessellatedOpenGl>(enforceGlShader(shader));
 }
 
 std::shared_ptr<TextInterface> GraphicsObjectFactoryOpenGl::createText(const std::shared_ptr<::ShaderProgramInterface> &shader) {
