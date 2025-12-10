@@ -21,7 +21,9 @@ std::shared_ptr<MaskingObjectInterface> Polygon2dOpenGl::asMaskingObject() { ret
 
 bool Polygon2dOpenGl::isReady() { return ready; }
 
-void Polygon2dOpenGl::setVertices(const ::SharedBytes & vertices_, const ::SharedBytes & indices_, const ::Vec3D & origin, int32_t subdivisionFactor) {
+void Polygon2dOpenGl::setSubdivisionFactor(int32_t factor) {}
+
+void Polygon2dOpenGl::setVertices(const ::SharedBytes & vertices_, const ::SharedBytes & indices_, const ::Vec3D & origin, bool is3d) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
     ready = false;
     dataReady = false;
