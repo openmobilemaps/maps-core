@@ -44,6 +44,11 @@ MapCamera2d::MapCamera2d(const std::shared_ptr<MapInterface> &mapInterface, floa
     zoom = zoomMax;
 }
 
+MapCamera2d::~MapCamera2d() {
+    // Stop any ongoing animations to avoid callbacks after destruction.
+    freeze(true);
+}
+
 void MapCamera2d::viewportSizeChanged() {
     Vec2I viewportSize = mapInterface->getRenderingContext()->getViewportSize();
     if (viewportSize.x > 0 && viewportSize.y > 0 && zoomMin < 0) {

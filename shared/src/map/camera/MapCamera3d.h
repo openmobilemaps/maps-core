@@ -37,6 +37,7 @@ class MapCamera3d : public MapCameraInterface,
                     public std::enable_shared_from_this<MapCamera3d> {
   public:
     MapCamera3d(const std::shared_ptr<MapInterface> &mapInterface, float screenDensityPpi);
+    ~MapCamera3d();
 
     ~MapCamera3d(){};
 

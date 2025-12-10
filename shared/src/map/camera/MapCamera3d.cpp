@@ -56,6 +56,11 @@ MapCamera3d::MapCamera3d(const std::shared_ptr<MapInterface> &mapInterface, floa
     updateZoom(GLOBE_MIN_ZOOM);
 }
 
+MapCamera3d::~MapCamera3d() {
+    // Ensure no animation callback touches a partially destroyed camera.
+    freeze(true);
+}
+
 void MapCamera3d::viewportSizeChanged() {
     auto mapInterface = this->mapInterface;
     auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
