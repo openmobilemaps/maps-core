@@ -189,21 +189,12 @@ final class Quad2dTessellated: BaseGraphicsObject, @unchecked Sendable {
         }
         encoder.setVertexBuffer(originBuffer, offset: 0, index: 4)
         
-        /* ELEVATION PROTOTYPE TEST
-        if samplerToUse == .magNearest {
-            encoder.setVertexSamplerState(nearestSampler, index: 0)
-        } else {
-            encoder.setVertexSamplerState(sampler, index: 0)
-        }
-         
-        if let texture {
-            encoder.setVertexTexture(texture, index: 0)
-        }
-        */
-        
         encoder.setVertexBytes(&self.is3d, length: MemoryLayout<Bool>.stride, index: 5)
         
         encoder.setTessellationFactorBuffer(tessellationFactorsBuffer, offset: 0, instanceStride: 0)
+        
+        /* WIREFRAME DEBUG */
+        //encoder.setTriangleFillMode(.lines)
         
         encoder.drawPatches(
             numberOfPatchControlPoints: 4,
@@ -213,6 +204,9 @@ final class Quad2dTessellated: BaseGraphicsObject, @unchecked Sendable {
             patchIndexBufferOffset: 0,
             instanceCount: 1,
             baseInstance: 0)
+        
+        /* WIREFRAME DEBUG */
+        //encoder.setTriangleFillMode(.fill)
     }
 }
 

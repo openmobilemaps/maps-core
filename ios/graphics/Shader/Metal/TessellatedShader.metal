@@ -12,62 +12,6 @@
 #include "DataStructures.metal"
 using namespace metal;
 
-// ELEVATION PROTOTYPE TEST
-/**
- * Decode elevation from RGBA encoded altitude texture
- * This matches the existing decoding logic in the shader
- */
-/*
-float decodeElevation(float4 rgbaAltitude) {
-    return (rgbaAltitude.r * 256.0 * 256.0 * 255.0 +
-            rgbaAltitude.g * 256.0 * 255.0 +
-            rgbaAltitude.b * 255.0) / 10.0 - 10000.0;
-}
-*/
-
-/**
- * Sample elevation with linear interpolation
- * This function first samples the four neighboring pixels, decodes each elevation value,
- * then performs bilinear interpolation on the decoded values
- *
- * @param altitudeTexture The altitude texture with encoded elevation data
- * @param uv The texture coordinates to sample
- * @param linearSampler A linear sampler for texture sampling
- * @return The linearly interpolated elevation value
- */
-/*
-float sampleLinearElevation(texture2d<float> altitudeTexture, float2 uv, sampler linearSampler) {
-    // Get texture dimensions
-    float2 texSize = float2(altitudeTexture.get_width(), altitudeTexture.get_height());
-
-    // Convert UV to pixel coordinates
-    float2 pixelCoord = uv * texSize - 0.5;
-    float2 pixelFloor = floor(pixelCoord);
-    float2 pixelFrac = pixelCoord - pixelFloor;
-
-    // Calculate UV coordinates for the four neighboring pixels
-    float2 texelSize = 1.0 / texSize;
-    float2 uv00 = (pixelFloor + float2(0.0, 0.0)) * texelSize;
-    float2 uv10 = (pixelFloor + float2(1.0, 0.0)) * texelSize;
-    float2 uv01 = (pixelFloor + float2(0.0, 1.0)) * texelSize;
-    float2 uv11 = (pixelFloor + float2(1.0, 1.0)) * texelSize;
-
-    // Sample and decode the four neighboring pixels
-    // Use nearest sampling to get the raw encoded values
-    constexpr sampler nearestSampler(coord::normalized, address::clamp_to_edge, filter::nearest);
-
-    float elevation00 = decodeElevation(altitudeTexture.sample(nearestSampler, uv00));
-    float elevation10 = decodeElevation(altitudeTexture.sample(nearestSampler, uv10));
-    float elevation01 = decodeElevation(altitudeTexture.sample(nearestSampler, uv01));
-    float elevation11 = decodeElevation(altitudeTexture.sample(nearestSampler, uv11));
-
-    // Perform bilinear interpolation on the decoded elevation values
-    float elevation0 = mix(elevation00, elevation10, pixelFrac.x);
-    float elevation1 = mix(elevation01, elevation11, pixelFrac.x);
-    return mix(elevation0, elevation1, pixelFrac.y);
-}
-*/
-
 const constant float BlendScale = 1000;
 const constant float BlendOffset = 0.01;
 
@@ -97,9 +41,6 @@ quadTessellationVertexShader(const patch_control_point<TessellatedVertex3DTextur
                              constant float4x4 &mMatrix [[buffer(2)]],
                              constant float4 &originOffset [[buffer(3)]],
                              constant float4 &origin [[buffer(4)]],
-                             /* ELEVATION PROTOTYPE TEST
-                             texture2d<float> texture0 [[ texture(0)]],
-                             sampler sampler0 [[sampler(0)]], */
                              constant bool &is3d [[buffer(5)]])
 {
     TessellatedVertex3DTextureIn vA = controlPoints[0];
@@ -116,10 +57,6 @@ quadTessellationVertexShader(const patch_control_point<TessellatedVertex3DTextur
         float4 bent = transform(vertexAbsolutePosition, origin) - originOffset;
         float blend = saturate(length(originOffset) * BlendScale - BlendOffset);
         position = mix(position, bent, blend);
-        
-        /* ELEVATION PROTOTYPE TEST
-        float3 normal = normalize(transform(vertexAbsolutePosition, float3(0, 0, 0)));
-        position += normal * sampleLinearElevation(texture0, vertexUV, sampler0) * 0.00001 * 1.0; */
     }
      
     VertexOut out {
