@@ -96,7 +96,9 @@ protected:
     GLuint textureCoordsBuffer;
     std::vector<GLfloat> textureCoords;
     Vec3D quadOrigin = Vec3D(0.0, 0.0, 0.0);
+
     bool is3d = false;
+    int32_t subdivisionFactor = 0;
 
     std::shared_ptr<TextureHolderInterface> textureHolder;
     int texturePointer;
@@ -104,7 +106,6 @@ protected:
 
     bool usesTextureCoords = false;
 
-    int32_t subdivisionFactor = 0;
     Quad3dD frame = Quad3dD(Vec3D(0.0, 0.0, 0.0), Vec3D(0.0, 0.0, 0.0), Vec3D(0.0, 0.0, 0.0), Vec3D(0.0, 0.0, 0.0));
     RectD textureCoordinates = RectD(0.0, 0.0, 0.0, 0.0);
     double factorHeight = 1.0;

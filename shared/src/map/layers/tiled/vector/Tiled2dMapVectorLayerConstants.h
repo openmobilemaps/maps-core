@@ -11,5 +11,5 @@
 #pragma once
 
 #define POLYGON_SUBDIVISION_FACTOR 10.0
-#define POLYGON_MASK_SUBDIVISION_FACTOR 20.0
+#define POLYGON_MASK_SUBDIVISION_FACTOR 10.0 // also good enough?
 

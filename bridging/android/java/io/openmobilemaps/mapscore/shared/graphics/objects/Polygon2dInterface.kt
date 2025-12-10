@@ -8,7 +8,9 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class Polygon2dInterface {
 
-    abstract fun setVertices(vertices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes, indices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D, subdivisionFactor: Int)
+    abstract fun setVertices(vertices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes, indices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D, is3d: Boolean)
+
+    abstract fun setSubdivisionFactor(factor: Int)
 
     abstract fun asGraphicsObject(): GraphicsObjectInterface
 
@@ -29,11 +31,17 @@ abstract class Polygon2dInterface {
             external fun nativeDestroy(nativeRef: Long)
         }
 
-        override fun setVertices(vertices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes, indices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D, subdivisionFactor: Int) {
+        override fun setVertices(vertices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes, indices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D, is3d: Boolean) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_setVertices(this.nativeRef, vertices, indices, origin, subdivisionFactor)
+            native_setVertices(this.nativeRef, vertices, indices, origin, is3d)
         }
-        private external fun native_setVertices(_nativeRef: Long, vertices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes, indices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D, subdivisionFactor: Int)
+        private external fun native_setVertices(_nativeRef: Long, vertices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes, indices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D, is3d: Boolean)
+
+        override fun setSubdivisionFactor(factor: Int) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setSubdivisionFactor(this.nativeRef, factor)
+        }
+        private external fun native_setSubdivisionFactor(_nativeRef: Long, factor: Int)
 
         override fun asGraphicsObject(): GraphicsObjectInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

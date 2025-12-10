@@ -38,12 +38,18 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 - (void)setVertices:(nonnull MCSharedBytes *)vertices
             indices:(nonnull MCSharedBytes *)indices
              origin:(nonnull MCVec3D *)origin
-  subdivisionFactor:(int32_t)subdivisionFactor {
+               is3d:(BOOL)is3d {
     try {
         _cppRefHandle.get()->setVertices(::djinni_generated::SharedBytes::toCpp(vertices),
                                          ::djinni_generated::SharedBytes::toCpp(indices),
                                          ::djinni_generated::Vec3D::toCpp(origin),
-                                         ::djinni::I32::toCpp(subdivisionFactor));
+                                         ::djinni::Bool::toCpp(is3d));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)setSubdivisionFactor:(int32_t)factor {
+    try {
+        _cppRefHandle.get()->setSubdivisionFactor(::djinni::I32::toCpp(factor));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -70,13 +76,19 @@ class Polygon2dInterface::ObjcProxy final
     friend class ::djinni_generated::Polygon2dInterface;
 public:
     using ObjcProxyBase::ObjcProxyBase;
-    void setVertices(const ::SharedBytes & c_vertices, const ::SharedBytes & c_indices, const ::Vec3D & c_origin, int32_t c_subdivisionFactor) override
+    void setVertices(const ::SharedBytes & c_vertices, const ::SharedBytes & c_indices, const ::Vec3D & c_origin, bool c_is3d) override
     {
         @autoreleasepool {
             [djinni_private_get_proxied_objc_object() setVertices:(::djinni_generated::SharedBytes::fromCpp(c_vertices))
                                                           indices:(::djinni_generated::SharedBytes::fromCpp(c_indices))
                                                            origin:(::djinni_generated::Vec3D::fromCpp(c_origin))
-                                                subdivisionFactor:(::djinni::I32::fromCpp(c_subdivisionFactor))];
+                                                             is3d:(::djinni::Bool::fromCpp(c_is3d))];
+        }
+    }
+    void setSubdivisionFactor(int32_t c_factor) override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() setSubdivisionFactor:(::djinni::I32::fromCpp(c_factor))];
         }
     }
     /*not-null*/ std::shared_ptr<::GraphicsObjectInterface> asGraphicsObject() override
