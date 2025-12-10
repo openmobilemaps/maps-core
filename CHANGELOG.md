@@ -1,5 +1,16 @@
 # Changelog for Open Mobile Maps
 
+## Version 3.7.0
+- Added the iOS equivalent for the elevation interpolation shader for OpenGL
+- Support non-premultiplied Android Bitmaps in the OpenGL BitmapTextureHolder
+- Improved concurrent CameraConfig accesses in the MapCamera3d
+- Fixed the dottedSkew factor for dotted lines
+- Updated to AGP 8.13.1
+
+## Version 3.6.1
+- Fixed the propagation of offscreen rendering updates in a cancelled job on Android
+- Fixed the perfomance impact of symbol collision check improvements introduced in 3.6.0
+
 ## Version 3.6.0
 - Improved camera behavior for initial 3d configurations on iOS
 - Made the Tiled2dMapVectorSource layer independent

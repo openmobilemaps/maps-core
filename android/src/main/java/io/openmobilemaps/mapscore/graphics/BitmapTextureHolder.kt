@@ -120,68 +120,77 @@ class BitmapTextureHolder(
 	}
 
 	init {
-		var bitmap = bitmap
-		var width = 2
-		while (width < bitmap.width) {
-			width *= 2
-		}
-		var height = 2
-		while (height < bitmap.height) {
-			height *= 2
-		}
-		imageWidth = bitmap.width
-		imageHeight = bitmap.height
-		textureWidth = width
-		textureHeight = height
-		if (bitmap.width != width || bitmap.height != height) {
-			val large = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-			val c = Canvas(large)
-			c.drawBitmap(bitmap, 0f, 0f, null)
-
-			//Draw the picture mirrored again to fake clamp mode
-			when (edgeFillMode) {
-				is CanvasEdgeFillMode.Clamped -> {
-					c.drawBitmap(
-						bitmap,
-						Rect(0, bitmap.height - 1, bitmap.width, bitmap.height),
-						Rect(0, bitmap.height, bitmap.width, min(height, bitmap.height + edgeFillMode.borderWidthPx)),
-						null
-					)
-					c.drawBitmap(
-						bitmap,
-						Rect(bitmap.width - 1, 0, bitmap.width, bitmap.height),
-						Rect(bitmap.width, 0, min(width, bitmap.width + edgeFillMode.borderWidthPx), bitmap.height),
-						null
-					)
-					c.drawBitmap(
-						bitmap,
-						Rect(bitmap.width - 1, bitmap.height - 1, bitmap.width, bitmap.height),
-						Rect(
-							bitmap.width,
-							bitmap.height,
-							min(width, bitmap.width + edgeFillMode.borderWidthPx),
-							min(height, bitmap.height + edgeFillMode.borderWidthPx)
-						),
-						null
-					)
-				}
-				CanvasEdgeFillMode.Mirorred -> {
-					c.save()
-					c.scale(1f, -1f, 0f, bitmap.height.toFloat())
-					c.drawBitmap(bitmap, 0f, 0f, null)
-					c.restore()
-					c.save()
-					c.scale(-1f, 1f, bitmap.width.toFloat(), 0f)
-					c.drawBitmap(bitmap, 0f, 0f, null)
-					c.restore()
-					c.scale(-1f, -1f, bitmap.width.toFloat(), bitmap.height.toFloat())
-					c.drawBitmap(bitmap, 0f, 0f, null)
-				}
-				CanvasEdgeFillMode.None -> {}
+		if (!bitmap.isPremultiplied) {
+			// Android doesn't allow operations on a canvas with non-premultiplied bitmap
+			imageWidth = bitmap.width
+			imageHeight = bitmap.height
+			textureWidth = imageWidth
+			textureHeight = imageHeight
+			this.bitmap = bitmap
+		} else {
+			var bitmap = bitmap
+			var width = 2
+			while (width < bitmap.width) {
+				width *= 2
 			}
-			bitmap.recycle()
-			bitmap = large
+			var height = 2
+			while (height < bitmap.height) {
+				height *= 2
+			}
+			imageWidth = bitmap.width
+			imageHeight = bitmap.height
+			textureWidth = width
+			textureHeight = height
+			if (bitmap.width != width || bitmap.height != height) {
+				val large = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+				val c = Canvas(large)
+				c.drawBitmap(bitmap, 0f, 0f, null)
+
+				//Draw the picture mirrored again to fake clamp mode
+				when (edgeFillMode) {
+					is CanvasEdgeFillMode.Clamped -> {
+						c.drawBitmap(
+							bitmap,
+							Rect(0, bitmap.height - 1, bitmap.width, bitmap.height),
+							Rect(0, bitmap.height, bitmap.width, min(height, bitmap.height + edgeFillMode.borderWidthPx)),
+							null
+						)
+						c.drawBitmap(
+							bitmap,
+							Rect(bitmap.width - 1, 0, bitmap.width, bitmap.height),
+							Rect(bitmap.width, 0, min(width, bitmap.width + edgeFillMode.borderWidthPx), bitmap.height),
+							null
+						)
+						c.drawBitmap(
+							bitmap,
+							Rect(bitmap.width - 1, bitmap.height - 1, bitmap.width, bitmap.height),
+							Rect(
+								bitmap.width,
+								bitmap.height,
+								min(width, bitmap.width + edgeFillMode.borderWidthPx),
+								min(height, bitmap.height + edgeFillMode.borderWidthPx)
+							),
+							null
+						)
+					}
+					CanvasEdgeFillMode.Mirorred -> {
+						c.save()
+						c.scale(1f, -1f, 0f, bitmap.height.toFloat())
+						c.drawBitmap(bitmap, 0f, 0f, null)
+						c.restore()
+						c.save()
+						c.scale(-1f, 1f, bitmap.width.toFloat(), 0f)
+						c.drawBitmap(bitmap, 0f, 0f, null)
+						c.restore()
+						c.scale(-1f, -1f, bitmap.width.toFloat(), bitmap.height.toFloat())
+						c.drawBitmap(bitmap, 0f, 0f, null)
+					}
+					CanvasEdgeFillMode.None -> {}
+				}
+				bitmap.recycle()
+				bitmap = large
+			}
+			this.bitmap = bitmap
 		}
-		this.bitmap = bitmap
 	}
 }

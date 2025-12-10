@@ -111,4 +111,8 @@ class ShaderFactory: MCShaderFactoryInterface {
     func createSphereEffectShader() -> (any MCSphereEffectShaderInterface)? {
         SphereEffectShader()
     }
+
+    func createElevationInterpolationShader() -> (any MCElevationInterpolationShaderInterface)? {
+        ElevationInterpolationShader()
+    }
 }
