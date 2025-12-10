@@ -114,8 +114,12 @@ void Tiled2dMapVectorSourceVectorTileDataManager::onVectorTilesUpdated(const std
                     double rz = is3D ? -1.0 * sin(cy) * sin(cx) : 0.0;
 
                     Vec3D origin(rx, ry, rz);
-
-                    tileMask->setPolygons(tileEntry->masks, origin, float(POLYGON_MASK_SUBDIVISION_FACTOR));
+                    
+                    std::optional<float> subdivisionFactor =
+                        is3D ? std::optional<float>(float(POLYGON_MASK_SUBDIVISION_FACTOR))
+                             : std::nullopt;
+                    
+                    tileMask->setPolygons(tileEntry->masks, origin, subdivisionFactor);
 
                     newTileMasks[tileEntry->tileInfo] = Tiled2dMapLayerMaskWrapper(tileMask, hash);
                 }
