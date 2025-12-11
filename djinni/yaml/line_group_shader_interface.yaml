@@ -36,4 +36,4 @@ wasm:
   typename: em::val
 ts:
   typename: LineGroupShaderInterface
-  module: './module'
+  module: '@djinni/maps-core/graphics/shader/shader'

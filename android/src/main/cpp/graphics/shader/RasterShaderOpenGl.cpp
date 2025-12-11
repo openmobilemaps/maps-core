@@ -67,8 +67,10 @@ std::string RasterShaderOpenGl::getVertexShader() {
     return BaseShaderProgramOpenGl::getVertexShader();
 }
 
+// TO_CHANGE
 std::string RasterShaderOpenGl::getFragmentShader() {
-    return OMMVersionedGlesShaderCode(320 es,
+    // WEB EXTRAS - set version to 300 es (from 320)
+    return OMMVersionedGlesShaderCode(300 es,
                                       precision highp float;
                                       uniform sampler2D textureSampler;
                                       // [0] opacity, 0-1 | [1] contrast, 0-1 | [2] saturation, 1-0 | [3] brightnessMin, 0-1 | [4] brightnessMax, 0-1 | [5] gamma, 0.1-10 | [6] brightnessShift, -1-1

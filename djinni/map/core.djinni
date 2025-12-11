@@ -101,6 +101,13 @@ map_callback_interface = interface +c +j +o {
     on_map_resumed();
 }
 
+# Web only
+web_map_callback_interface = interface +c {
+    static create(): web_map_callback_interface;
+    get_and_reset_invalid(): bool;
+    as_callback_interface(): map_callback_interface;
+}
+
 map_ready_callback_interface = interface +j +o {
     state_did_update(state: layer_ready_state);
 }

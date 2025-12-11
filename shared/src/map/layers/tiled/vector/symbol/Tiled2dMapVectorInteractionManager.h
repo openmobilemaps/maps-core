@@ -43,6 +43,8 @@ public:
 
     bool onTwoFingerMoveComplete() override;
 
+    bool onScroll(const Vec2F &posScreen, float scrollDelta) override;
+
     void clearTouch() override;
 
     void performClick(const Coord &coord);

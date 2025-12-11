@@ -42,7 +42,7 @@ void AlphaInstancedShaderOpenGl::setupProgram(const std::shared_ptr<::RenderingC
 
 std::string AlphaInstancedShaderOpenGl::getVertexShader() {
     return projectOntoUnitSphere ?
-           OMMVersionedGlesShaderCodeWithFrameUBO(320 es,
+           OMMVersionedGlesShaderCodeWithFrameUBO(300 es,
                                       uniform vec4 uOriginOffset;
 
                                       in vec3 vPosition;
@@ -84,7 +84,8 @@ std::string AlphaInstancedShaderOpenGl::getVertexShader() {
                                           v_alpha = aAlpha * mask;
                                       }
                                       )
-    : OMMVersionedGlesShaderCodeWithFrameUBO(320 es,
+    // TO_CHANGE
+    : OMMVersionedGlesShaderCodeWithFrameUBO(300 es,
                                       uniform vec4 uOriginOffset;
 
                                       in vec3 vPosition;
@@ -125,7 +126,7 @@ std::string AlphaInstancedShaderOpenGl::getVertexShader() {
 
 
 std::string AlphaInstancedShaderOpenGl::getFragmentShader() {
-    return OMMVersionedGlesShaderCode(320 es,
+    return OMMVersionedGlesShaderCode(300 es,
                                       precision highp float;
                                       uniform sampler2D textureSampler;
 
@@ -148,7 +149,8 @@ std::string AlphaInstancedShaderOpenGl::getFragmentShader() {
                                           )) + OMMShaderCode(
                                           vec4 c = texture(textureSampler, uv);
                                           float alpha = c.a * v_alpha;
-                                          fragmentColor = vec4(c.rgb * v_alpha, alpha);
+                                          // WEB EXTRAS: c is not premultiplied! Cannot easily preprocess an image (sprites.png), so we multiply here in the shader (just like the metal shader does)
+                                          fragmentColor = vec4(c.rgb * alpha, alpha);
                                       }
     );
 }

@@ -9,7 +9,7 @@
 - (void)logMessage:(nonnull NSString *)errorDomain
               code:(int32_t)code
       customValues:(nonnull NSDictionary<NSString *, NSString *> *)customValues
-          function:(nonnull NSString *)function
+      functionName:(nonnull NSString *)functionName
               file:(nonnull NSString *)file
               line:(int32_t)line;
 

@@ -39,6 +39,19 @@ loader_interface = interface +c +j +o {
     cancel(url: string);
 }
 
+# only needed for web
+global_loader_interface = interface +c {
+    static create(): global_loader_interface;
+    
+    create_loader(): loader_interface;
+    create_font_loader(loader: loader_interface, base_url: string): font_loader_interface;
+    
+    process_load_requests();
+    enqueueDataLoadRequest(url: string, etag: optional<string>): future<data_loader_result>;
+    enqueueTextureLoadRequest(url: string, etag: optional<string>): future<texture_loader_result>;
+    cancel(url: string);
+}
+
 font = record {
     name: string;
 }

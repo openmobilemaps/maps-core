@@ -32,5 +32,7 @@ public:
 
     virtual bool onTwoFingerMoveComplete() = 0;
 
+    virtual bool onScroll(const ::Vec2F & posScreen, float scrollDelta) = 0;
+
     virtual void clearTouch() = 0;
 };

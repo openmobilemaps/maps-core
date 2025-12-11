@@ -49,7 +49,8 @@ std::string AlphaShaderOpenGl::getVertexShader() {
 }
 
 std::string AlphaShaderOpenGl::getFragmentShader() {
-    return OMMVersionedGlesShaderCode(320 es,
+    // TO_CHANGE
+    return OMMVersionedGlesShaderCode(300 es,
                                       precision mediump float;
                                       uniform sampler2D textureSampler;
                                       uniform highp float alpha;

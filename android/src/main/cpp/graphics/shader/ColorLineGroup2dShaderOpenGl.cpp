@@ -189,7 +189,8 @@ std::string ColorLineGroup2dShaderOpenGl::getVertexShader() {
     bool isSimple = isSimpleLine;
 
     return
-        OMMVersionedGlesShaderCodeWithFrameUBO(320 es,
+        // TO_CHANGE
+        OMMVersionedGlesShaderCodeWithFrameUBO(300 es,
         precision highp float;
         uniform vec4 originOffset;
         ) +
@@ -226,13 +227,15 @@ std::string ColorLineGroup2dShaderOpenGl::getVertexShader() {
                 float fStylingIndex = mod(stylingIndex, 256.0);
                 int index = clamp(int(floor(fStylingIndex + 0.5)), 0, uLineStyles.numStyles);
                 float width = uLineStyles.lineValues[index].width / 2.0 * uFrameUniforms.frameSpecs.x;
+                float blurRadiusPx = 1.0;
+                float blur = max(blurRadiusPx, uLineStyles.lineValues[index].blur) * uFrameUniforms.frameSpecs.x;
                 ) +
 
                 (is3d ? OMMShaderCode(
-                    vec4 extendedPosition = vec4(position + extrude * width, 1.0) + originOffset;
+                    vec4 extendedPosition = vec4(position + extrude * (width + blur), 1.0) + originOffset;
                 ) :
                 OMMShaderCode(
-                    vec4 extendedPosition = vec4(position + extrude * width, 0.0, 1.0) + originOffset;
+                    vec4 extendedPosition = vec4(position + extrude * (width + blur), 0.0, 1.0) + originOffset;
                 )) +
 
                 (isSimple ? " " :
@@ -254,7 +257,7 @@ std::string ColorLineGroup2dShaderOpenGl::getVertexShader() {
 }
 
 std::string ColorLineGroup2dShaderOpenGl::getSimpleLineFragmentShader() {
-    return OMMVersionedGlesShaderCode(320 es,
+    return OMMVersionedGlesShaderCode(300 es,
            precision highp float;
            )
 
@@ -275,7 +278,7 @@ std::string ColorLineGroup2dShaderOpenGl::getSimpleLineFragmentShader() {
 }
 
 std::string ColorLineGroup2dShaderOpenGl::getLineFragmentShader() {
-    return OMMVersionedGlesShaderCodeWithFrameUBO(320 es,
+    return OMMVersionedGlesShaderCodeWithFrameUBO(300 es,
                                       precision highp float;
            )
 
@@ -302,12 +305,17 @@ std::string ColorLineGroup2dShaderOpenGl::getLineFragmentShader() {
                        float a = outColor.a * opacity;
                        float aGap = style.gapColorA * opacity;
 
-                       if(style.blur > 0.0) {
+                       // TO_CHECK
+                       {
+                           float blurRadiusPx = 1.0;
                            float scaledWidth = style.width * uFrameUniforms.frameSpecs.x;
                            float halfScaledWidth = scaledWidth / 2.0;
-                           float blur = style.blur * uFrameUniforms.frameSpecs.x;
-                           float lineEdgeDistance = (1.0 - abs(outLineSide)) * halfScaledWidth;
-                           float blurAlpha = clamp(lineEdgeDistance / blur, 0.0, 1.0);
+                           float scaledBlur = max(blurRadiusPx, style.blur) * uFrameUniforms.frameSpecs.x;
+                           float lineEdgeDistance      = halfScaledWidth - abs(outLineSide) * (halfScaledWidth + scaledBlur);
+                           float otherLineEdgeDistance = halfScaledWidth + abs(outLineSide) * (halfScaledWidth + scaledBlur);
+                           float blurAlpha =  smoothstep(-scaledBlur, scaledBlur, lineEdgeDistance)
+                                            * smoothstep(-scaledBlur, scaledBlur, otherLineEdgeDistance) // for lines narrower than blur-diameter (halfWidth < halfBlur), take into account fade towards _other_ edge
+                                            * min(1.0, halfScaledWidth / scaledBlur); // scaling for thin lines to preserve overall "energy"
 
                            if(blurAlpha == 0.0) {
                                discard;
@@ -324,7 +332,6 @@ std::string ColorLineGroup2dShaderOpenGl::getLineFragmentShader() {
                            float skew = style.dottedSkew;
 
                            float scaledWidth = style.width * dashingScaleFactor;
-                           float halfScaledWidth = scaledWidth / 2.0;
                            float cycleLength = scaledWidth * skew;
                            float timeOffset = uFrameUniforms.frameSpecs.y * style.dashAnimationSpeed * scaledWidth;
                            float skewOffset = (1.0 - skew) * style.width * dashingScaleFactor * 0.5;

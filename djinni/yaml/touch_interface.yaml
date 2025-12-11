@@ -36,4 +36,4 @@ wasm:
   typename: em::val
 ts:
   typename: TouchInterface
-  module: './module'
+  module: '@djinni/maps-core/map/controls/touch_handler'

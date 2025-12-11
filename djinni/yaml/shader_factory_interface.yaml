@@ -36,4 +36,4 @@ wasm:
   typename: em::val
 ts:
   typename: ShaderFactoryInterface
-  module: './module'
+  module: '@djinni/maps-core/graphics/shader/shader'

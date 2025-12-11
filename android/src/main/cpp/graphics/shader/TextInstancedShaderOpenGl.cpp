@@ -51,9 +51,10 @@ void TextInstancedShaderOpenGl::preRender(const std::shared_ptr<::RenderingConte
     glUniform1f(aspectRatioHandle, openGlContext->getAspectRatio());
 }
 
+// TO_CHANGE
 std::string TextInstancedShaderOpenGl::getVertexShader() {
     return projectOntoUnitSphere ?
-    OMMVersionedGlesShaderCodeWithFrameUBO(320 es,
+    OMMVersionedGlesShaderCodeWithFrameUBO(300 es,
                                uniform mat4 umMatrix;
                                uniform vec4 uOriginOffset;
                                uniform float uAspectRatio;
@@ -71,7 +72,7 @@ std::string TextInstancedShaderOpenGl::getVertexShader() {
 
                                out vec2 v_texCoord;
                                out vec4 v_texCoordInstance;
-                               out flat highp uint vStyleIndex;
+                               flat out highp uint vStyleIndex;
                                out float v_alpha;
 
                                void main() {
@@ -103,7 +104,7 @@ std::string TextInstancedShaderOpenGl::getVertexShader() {
                                    v_alpha = aAlpha * mask;
                                }
                            )
-    : OMMVersionedGlesShaderCodeWithFrameUBO(320 es,
+    : OMMVersionedGlesShaderCodeWithFrameUBO(300 es,
                                   uniform vec4 uOriginOffset;
 
                                   in vec4 vPosition;
@@ -118,7 +119,7 @@ std::string TextInstancedShaderOpenGl::getVertexShader() {
 
                                   out vec2 v_texCoord;
                                   out vec4 v_texCoordInstance;
-                                  out flat highp uint vStyleIndex;
+                                  flat out highp uint vStyleIndex;
                                   out float v_alpha;
 
                                   void main() {
@@ -146,7 +147,7 @@ std::string TextInstancedShaderOpenGl::getVertexShader() {
 }
 
 std::string TextInstancedShaderOpenGl::getFragmentShader() {
-    return OMMVersionedGlesShaderCode(320 es,
+    return OMMVersionedGlesShaderCode(300 es,
                                       precision highp float;
                                               struct TextStyle {
                                                   float colorRGBA;
@@ -168,7 +169,7 @@ std::string TextInstancedShaderOpenGl::getFragmentShader() {
 
                                               in vec2 v_texCoord;
                                               in vec4 v_texCoordInstance;
-                                              in flat highp uint vStyleIndex;
+                                              flat in highp uint vStyleIndex;
                                               in float v_alpha;
 
                                               out vec4 fragmentColor;

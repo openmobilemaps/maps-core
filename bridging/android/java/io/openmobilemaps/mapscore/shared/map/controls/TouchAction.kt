@@ -7,5 +7,6 @@ enum class TouchAction {
     DOWN,
     MOVE,
     UP,
+    SCROLL,
     CANCEL,
 }

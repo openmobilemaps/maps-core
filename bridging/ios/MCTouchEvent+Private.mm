@@ -13,12 +13,14 @@ auto TouchEvent::toCpp(ObjcType obj) -> CppType
 {
     assert(obj);
     return {::djinni::List<::djinni_generated::Vec2F>::toCpp(obj.pointers),
+            ::djinni::F32::toCpp(obj.scrollDelta),
             ::djinni::Enum<::TouchAction, MCTouchAction>::toCpp(obj.touchAction)};
 }
 
 auto TouchEvent::fromCpp(const CppType& cpp) -> ObjcType
 {
     return [[MCTouchEvent alloc] initWithPointers:(::djinni::List<::djinni_generated::Vec2F>::fromCpp(cpp.pointers))
+                                      scrollDelta:(::djinni::F32::fromCpp(cpp.scrollDelta))
                                       touchAction:(::djinni::Enum<::TouchAction, MCTouchAction>::fromCpp(cpp.touchAction))];
 }
 

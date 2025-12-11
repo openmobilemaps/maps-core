@@ -36,4 +36,4 @@ wasm:
   typename: em::val
 ts:
   typename: MaskingObjectInterface
-  module: './module'
+  module: '@djinni/maps-core/graphics/objects/graphicsobjects'

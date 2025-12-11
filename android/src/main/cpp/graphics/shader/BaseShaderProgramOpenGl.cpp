@@ -114,7 +114,9 @@ void BaseShaderProgramOpenGl::clearGlObjects() {
 }
 
 std::string BaseShaderProgramOpenGl::getVertexShader() {
-    return OMMVersionedGlesShaderCodeWithFrameUBO(320 es,
+    // WEB EXTRAS - set version to 300 es (from 320)
+    // TO_CHANGE
+    return OMMVersionedGlesShaderCodeWithFrameUBO(300 es,
                                       uniform mat4 umMatrix;
                                       uniform vec4 uOriginOffset;
                                       in vec4 vPosition;
@@ -129,7 +131,7 @@ std::string BaseShaderProgramOpenGl::getVertexShader() {
 }
 
 std::string BaseShaderProgramOpenGl::getFragmentShader() {
-    return OMMVersionedGlesShaderCode(320 es,
+    return OMMVersionedGlesShaderCode(300 es,
                                       precision mediump float;
                                       uniform sampler2D textureSampler;
                                       in vec2 v_texcoord;
