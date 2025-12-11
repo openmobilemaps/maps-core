@@ -99,7 +99,7 @@ void Polygon2dLayerObject::setPolygons(const std::vector<PolygonCoord> &polygons
     if (is3D) {
         auto bboxSize = bbox.getMax() - bbox.getMin();
         double threshold = std::max(std::max(bboxSize.x, bboxSize.y), bboxSize.z) / std::pow(2, SUBDIVISION_FACTOR_3D_DEFAULT);
-        PolygonHelper::subdivision(vecVertices, indices, threshold); // here, do on gpu
+        PolygonHelper::subdivision(vecVertices, indices, threshold);
     }
 
     for (const auto& v : vecVertices) {

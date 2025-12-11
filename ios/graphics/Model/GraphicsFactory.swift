@@ -13,7 +13,6 @@ import MapCoreSharedModule
 
 class GraphicsFactory: MCGraphicsObjectFactoryInterface {
     
-    /* Deprecated? */
     func createQuadMask(_ is3d: Bool) -> (any MCQuad2dInterface)? {
         let shader = ColorShader(shader: .colorShader)
         return Quad2d(shader: shader, metalContext: .current)

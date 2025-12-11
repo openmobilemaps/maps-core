@@ -10,6 +10,7 @@
 
 #include "TessellatedColorShaderOpenGl.h"
 #include "OpenGlContext.h"
+#include "Tiled2dMapVectorLayerConstants.h"
 
 TessellatedColorShaderOpenGl::TessellatedColorShaderOpenGl(bool projectOntoUnitSphere)
         : ColorShaderOpenGl(projectOntoUnitSphere ? "UBMAP_TessellatedColorShaderUnitSphereOpenGl" : "UBMAP_TessellatedColorShaderOpenGl")
@@ -22,8 +23,9 @@ void TessellatedColorShaderOpenGl::setupProgram(const std::shared_ptr<::Renderin
     int controlShader = loadShader(GL_TESS_CONTROL_SHADER, getControlShader());
     int evalutationShader = loadShader(GL_TESS_EVALUATION_SHADER, getEvaluationShader());
 
-    /* WIREFRAME DEBUG */
-    //int geometryShader = loadShader(GL_GEOMETRY_SHADER, getGeometryShader());
+#if TESSELLATION_WIREFRAME_MODE
+    int geometryShader = loadShader(GL_GEOMETRY_SHADER, getGeometryShader());
+#endif
 
     int fragmentShader = loadShader(GL_FRAGMENT_SHADER, getFragmentShader());
 
@@ -37,9 +39,10 @@ void TessellatedColorShaderOpenGl::setupProgram(const std::shared_ptr<::Renderin
     glAttachShader(program, fragmentShader);
     glDeleteShader(fragmentShader);
 
-    /* WIREFRAME DEBUG */
-    //glAttachShader(program, geometryShader);
-    //glDeleteShader(geometryShader);
+#if TESSELLATION_WIREFRAME_MODE
+    glAttachShader(program, geometryShader);
+    glDeleteShader(geometryShader);
+#endif
 
     glLinkProgram(program);
 
@@ -142,7 +145,6 @@ std::string TessellatedColorShaderOpenGl::getEvaluationShader() {
    );
 }
 
-/* WIREFRAME DEBUG */
 std::string TessellatedColorShaderOpenGl::getGeometryShader() {
     return OMMVersionedGlesShaderCodeWithFrameUBO(320 es,
                                         layout(triangles) in;
