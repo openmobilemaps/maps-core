@@ -129,12 +129,12 @@ std::string TessellatedColorShaderOpenGl::getEvaluationShader() {
                                             vec4 p2 = gl_in[2].gl_Position;
                                             vec4 position = baryinterp(p0, p1, p2, bary);
 
-                                            vec2 f0 = e_framecoord[0];
-                                            vec2 f1 = e_framecoord[1];
-                                            vec2 f2 = e_framecoord[2];
-                                            vec2 frameCoord = baryinterp(f0, f1, f2, bary);
-
                                             if (uIs3d) {
+                                                vec2 f0 = e_framecoord[0];
+                                                vec2 f1 = e_framecoord[1];
+                                                vec2 f2 = e_framecoord[2];
+                                                vec2 frameCoord = baryinterp(f0, f1, f2, bary);
+
                                                 vec4 bent = transform(frameCoord, uOrigin) - uOriginOffset;
                                                 float blend = clamp(length(uOriginOffset) * BlendScale - BlendOffset, 0.0, 1.0);
                                                 position = mix(position, bent, blend);
