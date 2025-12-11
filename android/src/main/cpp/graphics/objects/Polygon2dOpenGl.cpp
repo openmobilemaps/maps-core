@@ -32,11 +32,11 @@ void Polygon2dOpenGl::setVertices(const ::SharedBytes & vertices_, const ::Share
     vertices.resize(vertices_.elementCount);
     polygonOrigin = origin;
 
-    if(indices_.elementCount > 0) {
+    if (indices_.elementCount > 0) {
         std::memcpy(indices.data(), (void *)indices_.address, indices_.elementCount * indices_.bytesPerElement);
     }
 
-    if(vertices_.elementCount > 0) {
+    if (vertices_.elementCount > 0) {
         std::memcpy(vertices.data(), (void *)vertices_.address,
                     vertices_.elementCount * vertices_.bytesPerElement);
     }
@@ -46,8 +46,9 @@ void Polygon2dOpenGl::setVertices(const ::SharedBytes & vertices_, const ::Share
 
 void Polygon2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface> &context) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
-    if (ready || !dataReady)
+    if (ready || !dataReady) {
         return;
+    }
 
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
     programName = shaderProgram->getProgramName();
@@ -120,8 +121,9 @@ void Polygon2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> 
                              int64_t vpMatrix, int64_t mMatrix, const ::Vec3D &origin, bool isMasked,
                              double screenPixelAsRealMeterFactor, bool isScreenSpaceCoords) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
-    if (!ready || !shaderProgram->isRenderable())
+    if (!ready || !shaderProgram->isRenderable()) {
         return;
+    }
 
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
 
@@ -173,8 +175,9 @@ void Polygon2dOpenGl::drawPolygon(const std::shared_ptr<::RenderingContextInterf
 void Polygon2dOpenGl::renderAsMask(const std::shared_ptr<::RenderingContextInterface> &context,
                                    const ::RenderPassConfig &renderPass, int64_t vpMatrix, int64_t mMatrix,
                                    const ::Vec3D &origin, double screenPixelAsRealMeterFactor, bool isScreenSpaceCoords) {
-    if (!ready)
+    if (!ready) {
         return;
+    }
 
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
 

@@ -57,7 +57,6 @@ GraphicsObjectFactoryOpenGl::createPolygonPatternGroup(const std::shared_ptr<::S
     return std::make_shared<PolygonPatternGroup2dOpenGl>(enforceGlShader(shader));
 }
 
-/* Deprecated? */
 std::shared_ptr<Quad2dInterface> GraphicsObjectFactoryOpenGl::createQuadMask(bool is3D) {
     return std::make_shared<Quad2dOpenGl>(std::make_shared<ColorShaderOpenGl>(is3D));
 }

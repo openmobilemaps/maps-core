@@ -29,7 +29,6 @@ public:
 
     std::shared_ptr<PolygonPatternGroup2dInterface> createPolygonPatternGroup(const std::shared_ptr<::ShaderProgramInterface> &shader) override;
 
-    /* Deprecated? */
     std::shared_ptr<Quad2dInterface> createQuadMask(bool is3D) override;
 
     std::shared_ptr<Polygon2dInterface> createPolygonMask(bool is3D) override;

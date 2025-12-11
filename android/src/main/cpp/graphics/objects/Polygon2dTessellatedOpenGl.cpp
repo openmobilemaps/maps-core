@@ -24,7 +24,6 @@ bool Polygon2dTessellatedOpenGl::isReady() { return ready; }
 void Polygon2dTessellatedOpenGl::setSubdivisionFactor(int32_t factor) {
     if (factor != subdivisionFactor) {
         subdivisionFactor = factor;
-        ready = false; // necessary? ask Christoph
     }
 }
 
@@ -39,11 +38,11 @@ void Polygon2dTessellatedOpenGl::setVertices(const ::SharedBytes & vertices_, co
 
     this->is3d = is3d;
 
-    if(indices_.elementCount > 0) {
+    if (indices_.elementCount > 0) {
         std::memcpy(indices.data(), (void *)indices_.address, indices_.elementCount * indices_.bytesPerElement);
     }
 
-    if(vertices_.elementCount > 0) {
+    if (vertices_.elementCount > 0) {
         std::memcpy(vertices.data(), (void *)vertices_.address,
                     vertices_.elementCount * vertices_.bytesPerElement);
     }
@@ -53,8 +52,9 @@ void Polygon2dTessellatedOpenGl::setVertices(const ::SharedBytes & vertices_, co
 
 void Polygon2dTessellatedOpenGl::setup(const std::shared_ptr<::RenderingContextInterface> &context) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
-    if (ready || !dataReady)
+    if (ready || !dataReady) {
         return;
+    }
 
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
     programName = shaderProgram->getProgramName();
@@ -134,8 +134,9 @@ void Polygon2dTessellatedOpenGl::render(const std::shared_ptr<::RenderingContext
                                         int64_t vpMatrix, int64_t mMatrix, const ::Vec3D &origin, bool isMasked,
                                         double screenPixelAsRealMeterFactor, bool isScreenSpaceCoords) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
-    if (!ready || !shaderProgram->isRenderable())
+    if (!ready || !shaderProgram->isRenderable()) {
         return;
+    }
 
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
 
@@ -194,8 +195,9 @@ void Polygon2dTessellatedOpenGl::drawPolygon(const std::shared_ptr<::RenderingCo
 void Polygon2dTessellatedOpenGl::renderAsMask(const std::shared_ptr<::RenderingContextInterface> &context,
                                               const ::RenderPassConfig &renderPass, int64_t vpMatrix, int64_t mMatrix,
                                               const ::Vec3D &origin, double screenPixelAsRealMeterFactor, bool isScreenSpaceCoords) {
-    if (!ready)
+    if (!ready) {
         return;
+    }
 
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
 

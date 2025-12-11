@@ -50,7 +50,6 @@ void Quad2dTessellatedOpenGl::setFrame(const Quad3dD &frame, const RectD &textur
 void Quad2dTessellatedOpenGl::setSubdivisionFactor(int32_t factor) {
     if (factor != subdivisionFactor) {
         subdivisionFactor = factor;
-        ready = false; // necessary? ask Christoph
     }
 }
 
@@ -298,8 +297,9 @@ void Quad2dTessellatedOpenGl::render(const std::shared_ptr<::RenderingContextInt
                           int64_t vpMatrix, int64_t mMatrix, const ::Vec3D &origin, bool isMasked,
                           double screenPixelAsRealMeterFactor, bool isScreenSpaceCoords) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
-    if (!ready || (usesTextureCoords && !textureCoordsReady) || !shaderProgram->isRenderable())
+    if (!ready || (usesTextureCoords && !textureCoordsReady) || !shaderProgram->isRenderable()) {
         return;
+    }
 
     GLuint stencilMask = 0;
     GLuint validTarget = 0;
