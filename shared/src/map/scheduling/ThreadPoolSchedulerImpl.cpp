@@ -13,6 +13,8 @@
 
 #ifdef __linux__
 #include <sys/prctl.h>
+#elif defined(__EMSCRIPTEN__)
+#include <emscripten/threading.h>
 #else
 #include <pthread.h>
 #endif
@@ -23,6 +25,10 @@ void ThreadPoolSchedulerImpl::setCurrentThreadName(const std::string& name) {
     if (prctl(PR_SET_NAME, name.c_str()) == -1) {
         LogError <<= "Couldn't set thread name: " + name;
     }
+#elif defined(__EMSCRIPTEN__)
+    // WEB_EXTRAS
+    // NOTE: hard-coded wasm solution
+    emscripten_set_thread_name(pthread_self(), name.c_str());
 #else
     // iOS and macOS use pthread_setname_np
     pthread_setname_np(name.c_str());
@@ -35,8 +41,12 @@ std::shared_ptr<SchedulerInterface> ThreadPoolScheduler::create() {
 
 ThreadPoolSchedulerImpl::ThreadPoolSchedulerImpl()
         : separateGraphicsQueue(false), nextWakeup(std::chrono::system_clock::now() + std::chrono::seconds(1)) {
+#ifdef __EMSCRIPTEN__
+    unsigned int maxNumThreads = 2;
+#else
     unsigned int maxNumThreads = std::thread::hardware_concurrency();
     if (maxNumThreads < DEFAULT_MIN_NUM_THREADS) maxNumThreads = DEFAULT_MIN_NUM_THREADS;
+#endif
     threads.reserve(maxNumThreads + 1);
     for (std::size_t i = 0u; i < maxNumThreads; ++i) {
         threads.emplace_back(makeSchedulerThread(i, TaskPriority::NORMAL));

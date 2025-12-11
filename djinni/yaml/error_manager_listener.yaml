@@ -36,4 +36,4 @@ wasm:
   typename: em::val
 ts:
   typename: ErrorManagerListener
-  module: './module'
+  module: '@djinni/maps-core/map/map_helpers'

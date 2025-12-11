@@ -44,6 +44,7 @@ private:
         bool onTwoFingerClick(const ::Vec2F & posScreen1, const ::Vec2F & posScreen2) override;
         bool onTwoFingerMove(const std::vector<::Vec2F> & posScreenOld, const std::vector<::Vec2F> & posScreenNew) override;
         bool onTwoFingerMoveComplete() override;
+        bool onScroll(const ::Vec2F & posScreen, float scrollDelta) override;
         void clearTouch() override;
 
     private:
@@ -62,6 +63,7 @@ private:
     const jmethodID method_onTwoFingerClick { ::djinni::jniGetMethodID(clazz.get(), "onTwoFingerClick", "(Lio/openmobilemaps/mapscore/shared/graphics/common/Vec2F;Lio/openmobilemaps/mapscore/shared/graphics/common/Vec2F;)Z") };
     const jmethodID method_onTwoFingerMove { ::djinni::jniGetMethodID(clazz.get(), "onTwoFingerMove", "(Ljava/util/ArrayList;Ljava/util/ArrayList;)Z") };
     const jmethodID method_onTwoFingerMoveComplete { ::djinni::jniGetMethodID(clazz.get(), "onTwoFingerMoveComplete", "()Z") };
+    const jmethodID method_onScroll { ::djinni::jniGetMethodID(clazz.get(), "onScroll", "(Lio/openmobilemaps/mapscore/shared/graphics/common/Vec2F;F)Z") };
     const jmethodID method_clearTouch { ::djinni::jniGetMethodID(clazz.get(), "clearTouch", "()V") };
 };
 

@@ -36,4 +36,4 @@ wasm:
   typename: em::val
 ts:
   typename: OpenGlRenderTargetInterface
-  module: './module'
+  module: './graphics_core'

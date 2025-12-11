@@ -117,6 +117,15 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (BOOL)onScroll:(nonnull MCVec2F *)posScreen
+     scrollDelta:(float)scrollDelta {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->onScroll(::djinni_generated::Vec2F::toCpp(posScreen),
+                                                            ::djinni::F32::toCpp(scrollDelta));
+        return ::djinni::Bool::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (void)clearTouch {
     try {
         _cppRefHandle.get()->clearTouch();
@@ -210,6 +219,14 @@ public:
     {
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() onTwoFingerMoveComplete];
+            return ::djinni::Bool::toCpp(objcpp_result_);
+        }
+    }
+    bool onScroll(const ::Vec2F & c_posScreen, float c_scrollDelta) override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() onScroll:(::djinni_generated::Vec2F::fromCpp(c_posScreen))
+                                                                         scrollDelta:(::djinni::F32::fromCpp(c_scrollDelta))];
             return ::djinni::Bool::toCpp(objcpp_result_);
         }
     }

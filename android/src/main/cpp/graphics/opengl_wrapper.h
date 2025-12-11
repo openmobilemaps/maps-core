@@ -11,6 +11,13 @@
 #if defined(__linux__) // also matches __ANDROID__
   #include <GLES3/gl32.h>
   #include <GLES3/gl3ext.h>
+#elif defined(__EMSCRIPTEN__)
+  #include <GLES3/gl3.h>
+  #include <GLES3/gl3platform.h>
+  #include <GLES3/gl2ext.h>
+  #include <GLES3/gl32.h>
+  #include <emscripten/emscripten.h>
+  #include <emscripten/html5.h>
 #elif defined(__APPLE__)
   #include <OpenGLES/ES1/glext.h>
   #include <OpenGLES/ES2/gl.h>

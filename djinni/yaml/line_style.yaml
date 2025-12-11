@@ -36,4 +36,4 @@ wasm:
   typename: em::val
 ts:
   typename: LineStyle
-  module: './module'
+  module: '@djinni/maps-core/map/layers/line/line'

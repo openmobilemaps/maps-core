@@ -10,11 +10,15 @@ NS_SWIFT_SENDABLE
 - (nonnull instancetype)init NS_UNAVAILABLE;
 + (nonnull instancetype)new NS_UNAVAILABLE;
 - (nonnull instancetype)initWithPointers:(nonnull NSArray<MCVec2F *> *)pointers
+                             scrollDelta:(float)scrollDelta
                              touchAction:(MCTouchAction)touchAction NS_DESIGNATED_INITIALIZER;
 + (nonnull instancetype)touchEventWithPointers:(nonnull NSArray<MCVec2F *> *)pointers
+                                   scrollDelta:(float)scrollDelta
                                    touchAction:(MCTouchAction)touchAction;
 
 @property (nonatomic, readonly, nonnull) NSArray<MCVec2F *> * pointers;
+
+@property (nonatomic, readonly) float scrollDelta;
 
 @property (nonatomic, readonly) MCTouchAction touchAction;
 

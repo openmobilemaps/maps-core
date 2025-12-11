@@ -36,4 +36,4 @@ wasm:
   typename: em::val
 ts:
   typename: VectorLayerFeatureInfo
-  module: './module'
+  module: '@djinni/maps-core/map/layers/tiled/vector/tiled_vector_layer'

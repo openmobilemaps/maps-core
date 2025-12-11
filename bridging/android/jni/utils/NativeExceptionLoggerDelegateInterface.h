@@ -33,7 +33,7 @@ private:
         JavaProxy(JniType j);
         ~JavaProxy();
 
-        void logMessage(const std::string & errorDomain, int32_t code, const std::unordered_map<std::string, std::string> & customValues, const std::string & function, const std::string & file, int32_t line) override;
+        void logMessage(const std::string & errorDomain, int32_t code, const std::unordered_map<std::string, std::string> & customValues, const std::string & functionName, const std::string & file, int32_t line) override;
 
     private:
         friend ::djinni::JniInterface<::ExceptionLoggerDelegateInterface, ::djinni_generated::NativeExceptionLoggerDelegateInterface>;

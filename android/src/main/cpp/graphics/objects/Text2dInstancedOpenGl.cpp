@@ -325,6 +325,8 @@ void Text2dInstancedOpenGl::render(const std::shared_ptr<::RenderingContextInter
     }
     glUniform1f(distanceRangeHandle, distanceRange);
 
+    glUniform1f(distanceRangeHandle, distanceRange);
+
     // Draw halos first
     glUniform1f(isHaloHandle, 1.0);
     glDrawElementsInstanced(GL_TRIANGLES,6, GL_UNSIGNED_BYTE, nullptr, instanceCount);
@@ -413,7 +415,6 @@ void Text2dInstancedOpenGl::setStyles(const ::SharedBytes &values) {
     if (!ready) {
         return;
     }
-
     assert(values.elementCount * values.bytesPerElement <= TextInstancedShaderOpenGl::MAX_NUM_TEXT_STYLES * TextInstancedShaderOpenGl::BYTE_SIZE_TEXT_STYLES);
 
     glBindBuffer(GL_UNIFORM_BUFFER, textStyleBuffer);

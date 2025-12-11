@@ -15,7 +15,24 @@
 #include "opengl_wrapper.h"
 
 OpenGlContext::OpenGlContext()
-        : programs(), timeCreation(chronoutil::getCurrentTimestamp()) {}
+    : programs()
+    , timeCreation(chronoutil::getCurrentTimestamp()) {
+#ifdef __EMSCRIPTEN__
+    EmscriptenWebGLContextAttributes attrs;
+    attrs.majorVersion = 2;
+    attrs.explicitSwapControl = false;
+    attrs.stencil = true;
+    attrs.antialias = true;
+    EMSCRIPTEN_WEBGL_CONTEXT_HANDLE context = emscripten_webgl_create_context("#glCanvas", &attrs);
+    if (context == 0) {
+        return;
+    }
+    EMSCRIPTEN_RESULT res = emscripten_webgl_make_context_current(context);
+    if (res != EMSCRIPTEN_RESULT_SUCCESS) {
+        return;
+    }
+#endif
+}
 
 // RenderingContextInterface
 

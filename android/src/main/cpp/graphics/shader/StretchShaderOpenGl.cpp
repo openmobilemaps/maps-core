@@ -55,8 +55,9 @@ void StretchShaderOpenGl::updateStretchInfo(const StretchShaderInfo &info) {
     stretchShaderInfo = info;
 }
 
+// TO_CHANGE
 std::string StretchShaderOpenGl::getFragmentShader() {
-    return OMMVersionedGlesShaderCode(320 es,
+    return OMMVersionedGlesShaderCode(300 es,
                                       precision highp float;
                                       uniform sampler2D textureSampler;
                                       uniform float alpha;

@@ -42,10 +42,11 @@ void PolygonPatternGroup2dShaderOpenGl::setupProgram(const std::shared_ptr<::Ren
     openGlContext->storeProgram(programName, program);
 }
 
+// TO_CHANGE
 std::string PolygonPatternGroup2dShaderOpenGl::getVertexShader() {
     return fadeInPattern ?
            // Fade-In Pattern Shader
-           OMMVersionedGlesShaderCodeWithFrameUBO(320 es,
+           OMMVersionedGlesShaderCodeWithFrameUBO(300 es,
                                       in vec3 vPosition;
                                               in float vStyleIndex;
 
@@ -53,7 +54,7 @@ std::string PolygonPatternGroup2dShaderOpenGl::getVertexShader() {
                                               uniform vec4 uOriginOffset;
 
                                               out vec2 pixelPosition;
-                                              out flat uint styleIndex;
+                                              flat out uint styleIndex;
 
                                               void main() {
                                                   // fadeInPattern
@@ -63,7 +64,7 @@ std::string PolygonPatternGroup2dShaderOpenGl::getVertexShader() {
                                               }
            ) :
            // Default Pattern Shader
-           OMMVersionedGlesShaderCodeWithFrameUBO(320 es,
+           OMMVersionedGlesShaderCodeWithFrameUBO(300 es,
                                       in vec3 vPosition;
                                               in float vStyleIndex;
 
@@ -71,7 +72,7 @@ std::string PolygonPatternGroup2dShaderOpenGl::getVertexShader() {
                                               uniform vec4 uOriginOffset;
 
                                               out vec2 pixelPosition;
-                                              out flat uint styleIndex;
+                                              flat out uint styleIndex;
 
                                               void main() {
                                                   // DefaultBehavior
@@ -85,7 +86,7 @@ std::string PolygonPatternGroup2dShaderOpenGl::getVertexShader() {
 std::string PolygonPatternGroup2dShaderOpenGl::getFragmentShader() {
     return fadeInPattern ?
            // Fade-In Pattern Shader
-           OMMVersionedGlesShaderCodeWithFrameUBO(320 es,
+           OMMVersionedGlesShaderCodeWithFrameUBO(300 es,
                                       precision highp float;
 
                                               uniform sampler2D uTextureSampler;
@@ -95,7 +96,7 @@ std::string PolygonPatternGroup2dShaderOpenGl::getFragmentShader() {
                                               uniform vec2 uScalingFactor;
 
                                               in vec2 pixelPosition;
-                                              in flat uint styleIndex;
+                                              flat in uint styleIndex;
 
                                               out vec4 fragmentColor;
 
@@ -181,7 +182,7 @@ std::string PolygonPatternGroup2dShaderOpenGl::getFragmentShader() {
                                               }
            ) :
            // Default Pattern Shader
-           OMMVersionedGlesShaderCode(320 es,
+           OMMVersionedGlesShaderCode(300 es,
                                       precision highp float;
 
                                               uniform sampler2D uTextureSampler;
@@ -190,7 +191,7 @@ std::string PolygonPatternGroup2dShaderOpenGl::getFragmentShader() {
                                               uniform float opacities[16];
 
                                               in vec2 pixelPosition;
-                                              in flat uint styleIndex;
+                                              flat in uint styleIndex;
 
                                               out vec4 fragmentColor;
 

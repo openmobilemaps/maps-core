@@ -1316,6 +1316,10 @@ bool Tiled2dMapVectorLayer::onTwoFingerMove(const std::vector<::Vec2F> &posScree
     return interactionManager->onTwoFingerMove(posScreenOld, posScreenNew);
 }
 
+bool Tiled2dMapVectorLayer::onScroll(const Vec2F &posScreen, float scrollDelta) {
+    return interactionManager->onScroll(posScreen, scrollDelta);
+}
+
 bool Tiled2dMapVectorLayer::onTwoFingerMoveComplete() {
     return interactionManager->onTwoFingerMoveComplete();
 }

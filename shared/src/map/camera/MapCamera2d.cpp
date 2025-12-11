@@ -887,6 +887,49 @@ bool MapCamera2d::onTwoFingerMoveComplete() {
     return false;
 }
 
+bool MapCamera2d::onScroll(const ::Vec2F &posScreen, float zoomFactor) {
+    if (cameraFrozen) {
+        return false;
+    }
+
+    // zoomFactor > 0.0 means zoom in, zoomFactor < 0.0 means zoom out
+
+    inertia = std::nullopt;
+
+    zoomFactor = std::clamp(zoomFactor, -500.0f, 500.0f);
+    auto newZoom = zoom - (zoomFactor * zoom * 0.001);
+    auto scaleFactor = newZoom / zoom;
+
+    newZoom = std::clamp(newZoom, zoomMax, zoomMin);
+
+    Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
+    auto centerScreen = Vec2F(sizeViewport.x * 0.5f, sizeViewport.y * 0.5f);
+
+    float dx = (scaleFactor - 1) * (posScreen.x - centerScreen.x);
+    float dy = (scaleFactor - 1) * (posScreen.y - centerScreen.y);
+
+    float sinAngle = sin(angle * M_PI / 180.0);
+    float cosAngle = cos(angle * M_PI / 180.0);
+
+    float leftDiff = (cosAngle * dx + sinAngle * dy);
+    float topDiff = (-sinAngle * dx + cosAngle * dy);
+
+    double diffCenterX = -leftDiff * zoom * screenPixelAsRealMeterFactor;
+    double diffCenterY = topDiff * zoom * screenPixelAsRealMeterFactor;
+
+    Coord newPos =
+        Coord(centerPosition.systemIdentifier, centerPosition.x + diffCenterX, centerPosition.y + diffCenterY, centerPosition.z);
+
+    const auto [adjPosition, adjZoom] = getBoundsCorrectedCoords(newPos, newZoom);
+    centerPosition = adjPosition;
+    zoom = adjZoom;
+
+    notifyListeners(ListenerType::BOUNDS | ListenerType::MAP_INTERACTION);
+    mapInterface->invalidate();
+
+    return true;
+}
+
 ::Coord MapCamera2d::coordFromScreenPositionZoom(const ::Vec2F & posScreen, float zoom) {
     Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
     double zoomFactor = screenPixelAsRealMeterFactor * zoom;

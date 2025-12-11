@@ -131,6 +131,8 @@ class MapCamera3d : public MapCameraInterface,
 
     virtual bool onTwoFingerMoveComplete() override;
 
+    virtual bool onScroll(const ::Vec2F &posScreen, float scrollDelta) override;
+
     virtual void clearTouch() override;
 
     virtual void viewportSizeChanged() override;

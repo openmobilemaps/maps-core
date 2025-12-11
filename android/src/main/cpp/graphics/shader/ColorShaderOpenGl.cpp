@@ -55,8 +55,9 @@ void ColorShaderOpenGl::setColor(float red, float green, float blue, float alpha
     color[3] = alpha;
 }
 
+// TO_CHANGE
 std::string ColorShaderOpenGl::getVertexShader() {
-    return OMMVersionedGlesShaderCodeWithFrameUBO(320 es,
+    return OMMVersionedGlesShaderCodeWithFrameUBO(300 es,
                                         precision highp float;
                                                 uniform mat4 umMatrix;
                                                 uniform vec4 uOriginOffset;
@@ -69,7 +70,7 @@ std::string ColorShaderOpenGl::getVertexShader() {
 }
 
 std::string ColorShaderOpenGl::getFragmentShader() {
-    return OMMVersionedGlesShaderCode(320 es,
+    return OMMVersionedGlesShaderCode(300 es,
                                 precision mediump float;
                                 uniform vec4 vColor;
                                 out vec4 fragmentColor;

@@ -36,4 +36,4 @@ wasm:
   typename: em::val
 ts:
   typename: Tiled2dMapRasterLayerInterface
-  module: './module'
+  module: '@djinni/maps-core/map/layers/tiled/raster/tiled_raster_layer'
