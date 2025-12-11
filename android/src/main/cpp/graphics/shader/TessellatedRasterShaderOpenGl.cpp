@@ -10,6 +10,7 @@
 
 #include "TessellatedRasterShaderOpenGl.h"
 #include "OpenGlContext.h"
+#include "Tiled2dMapVectorLayerConstants.h"
 
 TessellatedRasterShaderOpenGl::TessellatedRasterShaderOpenGl(bool projectOntoUnitSphere)
         : RasterShaderOpenGl(projectOntoUnitSphere ? "UBMAP_TessellatedRasterShaderUnitSphereOpenGl" : "UBMAP_TessellatedRasterShaderOpenGl")
@@ -22,8 +23,9 @@ void TessellatedRasterShaderOpenGl::setupProgram(const std::shared_ptr<::Renderi
     int controlShader = loadShader(GL_TESS_CONTROL_SHADER, getControlShader());
     int evalutationShader = loadShader(GL_TESS_EVALUATION_SHADER, getEvaluationShader());
 
-    /* WIREFRAME DEBUG */
-    //int geometryShader = loadShader(GL_GEOMETRY_SHADER, getGeometryShader());
+#if TESSELLATION_WIREFRAME_MODE
+    int geometryShader = loadShader(GL_GEOMETRY_SHADER, getGeometryShader());
+#endif
 
     int fragmentShader = loadShader(GL_FRAGMENT_SHADER, getFragmentShader());
 
@@ -37,9 +39,10 @@ void TessellatedRasterShaderOpenGl::setupProgram(const std::shared_ptr<::Renderi
     glAttachShader(program, fragmentShader);
     glDeleteShader(fragmentShader);
 
-    /* WIREFRAME DEBUG */
-    //glAttachShader(program, geometryShader);
-    //glDeleteShader(geometryShader);
+#if TESSELLATION_WIREFRAME_MODE
+    glAttachShader(program, geometryShader);
+    glDeleteShader(geometryShader);
+#endif
 
     glLinkProgram(program);
 
@@ -108,8 +111,11 @@ std::string TessellatedRasterShaderOpenGl::getEvaluationShader() {
 
                                         in vec2 e_framecoord[];
                                         in vec2 e_texcoord[];
-                                        out vec2 v_texcoord; // out vec2 g_texcoord; /* WIREFRAME DEBUG */
-
+#if TESSELLATION_WIREFRAME_MODE
+                                        out vec2 g_texcoord;
+#else
+                                        out vec2 v_texcoord;
+#endif
                                         const float BlendScale = 1000.0;
                                         const float BlendOffset = 0.01;
 
@@ -160,12 +166,15 @@ std::string TessellatedRasterShaderOpenGl::getEvaluationShader() {
                                             }
 
                                             gl_Position = uFrameUniforms.vpMatrix * ((umMatrix * vec4(position.xyz, 1.0)) + uOriginOffset);
-                                            v_texcoord = texCoord; // g_texcoord = texCoord; /* WIREFRAME DEBUG */
+#if TESSELLATION_WIREFRAME_MODE
+                                            g_texcoord = texCoord;
+#else
+                                            v_texcoord = texCoord;
+#endif
                                         }
    );
 }
 
-/* WIREFRAME DEBUG */
 std::string TessellatedRasterShaderOpenGl::getGeometryShader() {
     return OMMVersionedGlesShaderCodeWithFrameUBO(320 es,
                                         layout(triangles) in;
