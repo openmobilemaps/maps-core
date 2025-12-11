@@ -32,6 +32,14 @@ open class AssetLocalDataProvider(
         else -> ""
     }
 
+    protected open fun fileNameSprite(spriteId: String): String {
+        return if (spriteId == "default") {
+            fileNameSprite
+        } else {
+            spriteId
+        }
+    }
+
     protected open fun modifyLoadedStyleJson(styleJson: String): String = styleJson
 
     override fun getStyleJson(): String? {
@@ -50,11 +58,11 @@ open class AssetLocalDataProvider(
         }
     }
 
-    override fun loadSpriteAsync(scale: Int): Future<TextureLoaderResult> {
+    override fun loadSpriteAsync(spriteId: String, url: String, scale: Int): Future<TextureLoaderResult> {
         val resultPromise = Promise<TextureLoaderResult>()
 
         coroutineScope.launch(Dispatchers.IO) {
-            val assetPath = "${folderAssetsBase}/${folderSprite}/${fileNameSprite}${scaleSuffix(scale)}.png"
+            val assetPath = "${folderAssetsBase}/${folderSprite}/${fileNameSprite(spriteId)}${scaleSuffix(scale)}.png"
             val texture = try {
                 val assetStream = assets.open(assetPath)
                 val decodedTexture = BitmapFactory.decodeStream(assetStream)?.let { BitmapTextureHolder(it) }
@@ -75,11 +83,11 @@ open class AssetLocalDataProvider(
         return resultPromise.future
     }
 
-    override fun loadSpriteJsonAsync(scale: Int): Future<DataLoaderResult> {
+    override fun loadSpriteJsonAsync(spriteId: String, url: String, scale: Int): Future<DataLoaderResult> {
         val resultPromise = Promise<DataLoaderResult>()
 
         coroutineScope.launch(Dispatchers.IO) {
-            val assetPath = "${folderAssetsBase}/${folderSprite}/${fileNameSprite}${scaleSuffix(scale)}.json"
+            val assetPath = "${folderAssetsBase}/${folderSprite}/${fileNameSprite(spriteId)}${scaleSuffix(scale)}.json"
             val spriteJson = try {
                 val assetStream = assets.open(assetPath)
                 val bytes = assetStream.readBytes()

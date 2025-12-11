@@ -25,20 +25,24 @@ std::optional<std::string> NativeTiled2dMapVectorLayerLocalDataProviderInterface
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni::Optional<std::optional, ::djinni::String>::toCpp(jniEnv, jret);
 }
-::djinni::Future<::TextureLoaderResult> NativeTiled2dMapVectorLayerLocalDataProviderInterface::JavaProxy::loadSpriteAsync(int32_t c_scale) {
+::djinni::Future<::TextureLoaderResult> NativeTiled2dMapVectorLayerLocalDataProviderInterface::JavaProxy::loadSpriteAsync(const std::string & c_spriteId, const std::string & c_url, int32_t c_scale) {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
     const auto& data = ::djinni::JniClass<::djinni_generated::NativeTiled2dMapVectorLayerLocalDataProviderInterface>::get();
     auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_loadSpriteAsync,
+                                         ::djinni::get(::djinni::String::fromCpp(jniEnv, c_spriteId)),
+                                         ::djinni::get(::djinni::String::fromCpp(jniEnv, c_url)),
                                          ::djinni::get(::djinni::I32::fromCpp(jniEnv, c_scale)));
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni::FutureAdaptor<::djinni_generated::NativeTextureLoaderResult>::toCpp(jniEnv, jret);
 }
-::djinni::Future<::DataLoaderResult> NativeTiled2dMapVectorLayerLocalDataProviderInterface::JavaProxy::loadSpriteJsonAsync(int32_t c_scale) {
+::djinni::Future<::DataLoaderResult> NativeTiled2dMapVectorLayerLocalDataProviderInterface::JavaProxy::loadSpriteJsonAsync(const std::string & c_spriteId, const std::string & c_url, int32_t c_scale) {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
     const auto& data = ::djinni::JniClass<::djinni_generated::NativeTiled2dMapVectorLayerLocalDataProviderInterface>::get();
     auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_loadSpriteJsonAsync,
+                                         ::djinni::get(::djinni::String::fromCpp(jniEnv, c_spriteId)),
+                                         ::djinni::get(::djinni::String::fromCpp(jniEnv, c_url)),
                                          ::djinni::get(::djinni::I32::fromCpp(jniEnv, c_scale)));
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni::FutureAdaptor<::djinni_generated::NativeDataLoaderResult>::toCpp(jniEnv, jret);
@@ -70,20 +74,24 @@ CJNIEXPORT jstring JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_til
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT ::djinni::FutureAdaptor<::djinni_generated::NativeTextureLoaderResult>::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_vector_Tiled2dMapVectorLayerLocalDataProviderInterface_00024CppProxy_native_1loadSpriteAsync(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jint j_scale)
+CJNIEXPORT ::djinni::FutureAdaptor<::djinni_generated::NativeTextureLoaderResult>::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_vector_Tiled2dMapVectorLayerLocalDataProviderInterface_00024CppProxy_native_1loadSpriteAsync(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jstring j_spriteId, jstring j_url, jint j_scale)
 {
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapVectorLayerLocalDataProviderInterface>(nativeRef);
-        auto r = ref->loadSpriteAsync(::djinni::I32::toCpp(jniEnv, j_scale));
+        auto r = ref->loadSpriteAsync(::djinni::String::toCpp(jniEnv, j_spriteId),
+                                      ::djinni::String::toCpp(jniEnv, j_url),
+                                      ::djinni::I32::toCpp(jniEnv, j_scale));
         return ::djinni::release(::djinni::FutureAdaptor<::djinni_generated::NativeTextureLoaderResult>::fromCpp(jniEnv, std::move(r)));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT ::djinni::FutureAdaptor<::djinni_generated::NativeDataLoaderResult>::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_vector_Tiled2dMapVectorLayerLocalDataProviderInterface_00024CppProxy_native_1loadSpriteJsonAsync(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jint j_scale)
+CJNIEXPORT ::djinni::FutureAdaptor<::djinni_generated::NativeDataLoaderResult>::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_vector_Tiled2dMapVectorLayerLocalDataProviderInterface_00024CppProxy_native_1loadSpriteJsonAsync(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jstring j_spriteId, jstring j_url, jint j_scale)
 {
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapVectorLayerLocalDataProviderInterface>(nativeRef);
-        auto r = ref->loadSpriteJsonAsync(::djinni::I32::toCpp(jniEnv, j_scale));
+        auto r = ref->loadSpriteJsonAsync(::djinni::String::toCpp(jniEnv, j_spriteId),
+                                          ::djinni::String::toCpp(jniEnv, j_url),
+                                          ::djinni::I32::toCpp(jniEnv, j_scale));
         return ::djinni::release(::djinni::FutureAdaptor<::djinni_generated::NativeDataLoaderResult>::fromCpp(jniEnv, std::move(r)));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }

@@ -55,7 +55,7 @@ public:
 
     bool performClick(const std::unordered_set<std::string> &layers, const Coord &coord) override;
 
-    void setSprites(std::shared_ptr<SpriteData> spriteData, std::shared_ptr<TextureHolderInterface> spriteTexture) override;
+    void setSprites(std::string spriteId, std::shared_ptr<SpriteData> spriteData, std::shared_ptr<TextureHolderInterface> spriteTexture) override;
 
     virtual void reloadLayerContent(const std::vector<std::tuple<std::shared_ptr<VectorLayerDescription>, int32_t>> &descriptionLayerIndexPairs) = 0;
 

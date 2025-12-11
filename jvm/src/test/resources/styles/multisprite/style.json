@@ -1,0 +1,374 @@
+{
+  "metadata": {
+    "use3xSprites": false
+  },
+  "version": 8,
+  "id": "1af109be-cf00-4357-b4de-1d515b56b489",
+  "name": "test-sprites",
+  "sources": {
+    "test_label": {
+      "type": "geojson",
+      "data": {
+        "type": "FeatureCollection",
+        "features": [
+          {
+            "type": "Feature",
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                8.0,
+                47.5
+              ]
+            },
+            "properties": {
+              "type": "a"
+            }
+          },
+          {
+            "type": "Feature",
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                8.5,
+                47.5
+              ]
+            },
+            "properties": {
+              "type": "b"
+            }
+          },
+          {
+            "type": "Feature",
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                9.0,
+                47.5
+              ]
+            },
+            "properties": {
+              "label": "C1",
+              "icon": "default:tourist_information",
+              "type": "c"
+            }
+          },
+          {
+            "type": "Feature",
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                9.0,
+                47.3
+              ]
+            },
+            "properties": {
+              "label": "C2",
+              "icon": "light:airplane_large_grey",
+              "type": "c"
+            }
+          },
+          {
+            "type": "Feature",
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                8.0,
+                47.1
+              ]
+            },
+            "properties": {
+              "type": "d",
+              "label": "D: zoom dependent"
+            }
+          },
+          {
+            "type": "Feature",
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                8.0,
+                46.95
+              ]
+            },
+            "properties": {
+              "type": "d",
+              "label": "D: default",
+              "icon": "default:restaurant"
+            }
+          },
+          {
+            "type": "Feature",
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                8.3,
+                47.1
+              ]
+            },
+            "properties": {
+              "type": "d",
+              "label": "D: light",
+              "icon": "light:forkknife_crossed_grey"
+            }
+          },
+          {
+            "type": "Feature",
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                9.0,
+                47.1
+              ]
+            },
+            "properties": {
+              "id": "4444",
+              "type": "e"
+            }
+          },
+          {
+            "type": "Feature",
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                8.0,
+                46.7
+              ]
+            },
+            "properties": {
+              "label": "111 222",
+              "icon": "default:box_orange_black",
+              "type": "f"
+            }
+          },
+          {
+            "type": "Feature",
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                8.5,
+                46.7
+              ]
+            },
+            "properties": {
+              "label": "333 444",
+              "icon": "light:box_white_grey_casing_stretch",
+              "type": "f"
+            }
+          },
+          {
+            "type": "Feature",
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                8.0,
+                46.62
+              ]
+            },
+            "properties": {
+              "label": "555 zoom",
+              "type": "f"
+            }
+          }
+        ]
+      }
+    },
+    "country_ch": {
+      "type": "geojson",
+      "minzoom": 0,
+      "maxzoom": 0,
+      "data": "local://ch.geojson"
+    }
+  },
+  "sprite": [
+    {
+      "id": "default",
+      "url": "https://vectortiles.geo.admin.ch/styles/ch.swisstopo.basemap.vt/sprite/sprite"
+    },
+    {
+      "id": "light",
+      "url": "https://vectortiles.geo.admin.ch/styles/ch.swisstopo.lightbasemap.vt/sprite/sprite"
+    }
+  ],
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "rgba(250, 250, 255, 1)"
+      }
+    },
+    {
+      "id": "ch_fill",
+      "type": "fill",
+      "source": "country_ch",
+      "paint": {
+        "fill-color": "#E4FDE1"
+      }
+    },
+    {
+      "id": "test_label_a",
+      "type": "symbol",
+      "source": "test_label",
+      "layout": {
+        "text-font": [
+          "Roboto-Regular"
+        ],
+        "text-size": 10,
+        "visibility": "visible",
+        "text-field": "A: default",
+        "text-anchor": "bottom",
+        "icon-image": "police",
+        "icon-anchor": "top"
+      },
+      "filter": [
+        "in",
+        "type",
+        "a"
+      ]
+    },
+    {
+      "id": "test_label_b",
+      "type": "symbol",
+      "source": "test_label",
+      "layout": {
+        "text-font": [
+          "Roboto-Regular"
+        ],
+        "text-size": 10,
+        "visibility": "visible",
+        "text-field": "B: light",
+        "text-anchor": "bottom",
+        "icon-image": "light:hazard_grey",
+        "icon-anchor": "top"
+      },
+      "filter": [
+        "in",
+        "type",
+        "b"
+      ]
+    },
+    {
+      "id": "test_label_c",
+      "type": "symbol",
+      "source": "test_label",
+      "layout": {
+        "text-font": [
+          "Roboto-Regular"
+        ],
+        "text-size": 10,
+        "visibility": "visible",
+        "text-field": "{label}",
+        "text-anchor": "bottom",
+        "icon-image": ["get", "icon"],
+        "icon-anchor": "top"
+      },
+      "filter": [
+        "in",
+        "type",
+        "c"
+      ]
+    },
+    {
+      "id": "test_label_d",
+      "type": "symbol",
+      "source": "test_label",
+      "layout": {
+        "text-font": [
+          "Roboto-Regular"
+        ],
+        "text-size": 10,
+        "visibility": "visible",
+        "text-field": "{label}",
+        "text-anchor": "bottom-right",
+        "icon-image": ["case", ["has", "icon"], ["get", "icon"], ["step", ["zoom"], "light:airplane_small_grey", 8, "airplane_small"]],
+        "icon-anchor": "top"
+      },
+      "filter": [
+        "in",
+        "type",
+        "d"
+      ]
+    },
+    {
+      "id": "test_label_e",
+      "type": "symbol",
+      "source": "test_label",
+      "layout": {
+        "text-font": [
+          "Roboto-Regular"
+        ],
+        "text-size": 10,
+        "visibility": "visible",
+        "text-field": "E: state dependent",
+        "text-anchor": "bottom",
+        "icon-image": ["coalesce", ["global-state", "state-icon-image"], "light:circle_dark_grey_8"],
+        "icon-anchor": "top"
+      },
+      "filter": [
+        "in",
+        "type",
+        "e"
+      ]
+    },
+    {
+      "id": "test_label_f_stretch",
+      "type": "symbol",
+      "source": "test_label",
+      "layout": {
+        "text-font": [
+          "Roboto-Regular"
+        ],
+        "text-size": 10,
+        "icon-image": ["coalesce", ["get", "icon"], ["step", ["zoom"], "box_red_black", 8, "light:box_white_grey_casing_stretch"]],
+        "text-field": "F: {label}",
+        "visibility": "visible",
+        "icon-offset": [
+          0,
+          -0.75
+        ],
+        "text-anchor": "center",
+        "icon-padding": 2,
+        "text-justify": "center",
+        "text-padding": 1,
+        "icon-optional": false,
+        "icon-text-fit": "both",
+        "text-optional": false,
+        "symbol-z-order": "auto",
+        "symbol-placement": "line",
+        "icon-keep-upright": false,
+        "text-keep-upright": true,
+        "icon-allow-overlap": false,
+        "symbol-avoid-edges": false,
+        "text-letter-spacing": 0.03,
+        "icon-pitch-alignment": "viewport",
+        "text-pitch-alignment": "viewport",
+        "icon-ignore-placement": false,
+        "icon-text-fit-padding": [
+          1,
+          3,
+          1,
+          3
+        ],
+        "icon-rotation-alignment": "viewport",
+        "text-rotation-alignment": "viewport"
+      },
+      "filter": [
+        "in",
+        "type",
+        "f"
+      ]
+    }
+  ],
+
+  "bearing": 0.0,
+  "pitch": 0.0,
+  "center": [
+    7.453077,
+    46.928482
+  ],
+  "zoom": 15.47,
+  "transition": {
+    "duration": 0,
+    "delay": 0
+  }
+}
