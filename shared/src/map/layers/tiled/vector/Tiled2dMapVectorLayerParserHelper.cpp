@@ -316,6 +316,17 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
     }
 
     for (auto&[key, val]: json["layers"].items()) {
+        bool layerEnabled = true;
+        if (val["metadata"].is_object()) {
+            const auto enabledIt = val["metadata"].find("enabled");
+            if (enabledIt != val["metadata"].end() && enabledIt->is_boolean()) {
+                layerEnabled = enabledIt->get<bool>();
+            }
+        }
+        if (!layerEnabled) {
+            continue;
+        }
+
         if (val["layout"].is_object() && val["layout"]["visibility"] == "none") {
             continue;
         }

@@ -25,6 +25,17 @@ public:
 };
 
 
+TEST_CASE("Layer metadata can disable a layer") {
+    auto jsonString = TestData::readFileToString("style/geojson_style_disabled_layer.json");
+    std::shared_ptr<StringInterner> stringTable = std::make_shared<StringInterner>(ValueKeys::newStringInterner());
+    auto result = Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromString("test", jsonString, nullptr, {}, stringTable, {});
+
+    REQUIRE(result.mapDescription != nullptr);
+    REQUIRE(result.mapDescription->layers.size() == 1);
+    REQUIRE(result.mapDescription->layers.front()->identifier == "visible");
+}
+
+
 TEST_CASE("TestStyleParser", "[GeoJson inline]") {
     auto jsonString = TestData::readFileToString("style/geojson_style_inline.json");
     std::shared_ptr<StringInterner> stringTable = std::make_shared<StringInterner>(ValueKeys::newStringInterner());

@@ -1,0 +1,36 @@
+{
+  "version": 8,
+  "name": "disable-layer",
+  "sources": {
+    "wsource": {
+      "type": "geojson",
+      "data": {
+        "type": "Point",
+        "coordinates": [0.0, 0.0]
+      }
+    }
+  },
+  "layers": [
+    {
+      "id": "hidden",
+      "type": "fill",
+      "metadata": {
+        "enabled": false
+      },
+      "source": "wsource",
+      "paint": {
+        "fill-color": "rgb(0, 0, 0)"
+      },
+      "layout": {}
+    },
+    {
+      "id": "visible",
+      "type": "fill",
+      "source": "wsource",
+      "paint": {
+        "fill-color": "rgb(255, 0, 0)"
+      },
+      "layout": {}
+    }
+  ]
+}
