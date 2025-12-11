@@ -47,21 +47,19 @@ quadTessellationVertexShader(const patch_control_point<Vertex3DTextureTessellate
     Vertex3DTextureTessellatedIn vB = controlPoints[1];
     Vertex3DTextureTessellatedIn vC = controlPoints[2];
     Vertex3DTextureTessellatedIn vD = controlPoints[3];
-    
-    float4 vertexPosition = bilerp(vA.position, vB.position, vC.position, vD.position, positionInPatch);
-    float2 vertexFrameCoord = bilerp(vA.frameCoord, vB.frameCoord, vC.frameCoord, vD.frameCoord, positionInPatch);
-    float2 vertexUV = bilerp(vA.uv, vB.uv, vC.uv, vD.uv, positionInPatch);
-    
-    float4 position = vertexPosition;
+     
+    float4 position = bilerp(vA.position, vB.position, vC.position, vD.position, positionInPatch);
     if (is3d) {
-        float4 bent = transform(vertexFrameCoord, origin) - originOffset;
+        float2 frameCoord = bilerp(vA.frameCoord, vB.frameCoord, vC.frameCoord, vD.frameCoord, positionInPatch);
+        float4 bent = transform(frameCoord, origin) - originOffset;
         float blend = saturate(length(originOffset) * BlendScale - BlendOffset);
         position = mix(position, bent, blend);
     }
-     
+    float2 uv = bilerp(vA.uv, vB.uv, vC.uv, vD.uv, positionInPatch);
+    
     VertexOut out {
         .position = vpMatrix * ((mMatrix * float4(position.xyz, 1)) + originOffset),
-        .uv = vertexUV
+        .uv = uv
     };
   
     return out;
@@ -80,12 +78,10 @@ polygonTessellationVertexShader(const patch_control_point<Vertex3DTessellatedIn>
     Vertex3DTessellatedIn vB = controlPoints[1];
     Vertex3DTessellatedIn vC = controlPoints[2];
     
-    float4 vertexPosition = baryinterp(vA.position, vB.position, vC.position, positionInPatch);
-    float2 vertexFrameCoord = baryinterp(vA.frameCoord, vB.frameCoord, vC.frameCoord, positionInPatch);
-    
-    float4 position = vertexPosition;
+    float4 position = baryinterp(vA.position, vB.position, vC.position, positionInPatch);
     if (is3d) {
-        float4 bent = transform(vertexFrameCoord, origin) - originOffset;
+        float2 frameCoord = baryinterp(vA.frameCoord, vB.frameCoord, vC.frameCoord, positionInPatch);
+        float4 bent = transform(frameCoord, origin) - originOffset;
         float blend = saturate(length(originOffset) * BlendScale - BlendOffset);
         position = mix(position, bent, blend);
     }

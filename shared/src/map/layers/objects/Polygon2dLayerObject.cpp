@@ -124,7 +124,7 @@ void Polygon2dLayerObject::setPolygons(const std::vector<PolygonCoord> &polygons
     auto attr = SharedBytes((int64_t)vertices.data(), (int32_t)vertices.size(), (int32_t)sizeof(float));
     auto ind = SharedBytes((int64_t)indices.data(), (int32_t)indices.size(), (int32_t)sizeof(uint16_t));
     
-    int32_t subdivisionFactor = is3D ? std::pow(2, SUBDIVISION_FACTOR_3D_DEFAULT) : 0; // correct? debug wireframe
+    int32_t subdivisionFactor = is3D ? std::pow(2, SUBDIVISION_FACTOR_3D_DEFAULT) : 0;
     
     polygon->setSubdivisionFactor(subdivisionFactor);
     polygon->setVertices(attr, ind, Vec3D(rx, ry, rz), is3D);
