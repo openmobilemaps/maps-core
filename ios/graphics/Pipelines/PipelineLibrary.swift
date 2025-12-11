@@ -154,6 +154,7 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
     case maskShader
     case maskTessellatedShader
     case colorShader
+    case polygonTessellatedShader
     case roundColorShader
     case clearStencilShader
     case textShader
@@ -185,6 +186,7 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
             case .maskShader: return "Mask shader"
             case .maskTessellatedShader: return "Mask Tessellated shader"
             case .colorShader: return "Color shader"
+            case .polygonTessellatedShader: return "Polygon Tessellated shader"
             case .roundColorShader: return "Round color shader"
             case .clearStencilShader: return "Clear stencil shader"
             case .textShader: return "Text shader"
@@ -227,6 +229,7 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
             case .maskShader: return "colorVertexShader"
             case .maskTessellatedShader: return "polygonTessellationVertexShader"
             case .colorShader: return "colorVertexShader"
+            case .polygonTessellatedShader: return "polygonTessellationVertexShader"
             case .roundColorShader: return "baseVertexShaderModel"
             case .clearStencilShader: return "stencilClearVertexShader"
             case .textShader: return "textVertexShader"
@@ -260,6 +263,7 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
             case .maskShader: return "maskFragmentShader"
             case .maskTessellatedShader: return "maskFragmentShader"
             case .colorShader: return "colorFragmentShader"
+            case .polygonTessellatedShader: return "colorFragmentShader"
             case .roundColorShader: return "roundColorFragmentShader"
             case .clearStencilShader: return "stencilClearFragmentShader"
             case .textShader: return "textFragmentShader"
@@ -300,7 +304,8 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
                 .roundColorShader,
                 .elevationInterpolation:
                 return Vertex3DTexture.descriptor
-            case .maskTessellatedShader:
+            case .maskTessellatedShader,
+                .polygonTessellatedShader:
                 return Vertex3DTessellated.descriptor
             case .quadTessellatedShader:
                 return Vertex3DTextureTessellated.descriptor
@@ -313,7 +318,8 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
         switch self {
             case .quadTessellatedShader:
                 return MCTessellationMode.QUAD
-            case .maskTessellatedShader:
+            case .maskTessellatedShader,
+                .polygonTessellatedShader:
                return MCTessellationMode.TRIANGLE
             default:
                 return MCTessellationMode.NONE
