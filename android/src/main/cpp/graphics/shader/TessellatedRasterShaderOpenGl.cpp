@@ -147,23 +147,23 @@ std::string TessellatedRasterShaderOpenGl::getEvaluationShader() {
                                             vec4 p11 = gl_in[3].gl_Position;
                                             vec4 position = bilerp(p00, p01, p10, p11, uv);
 
-                                            vec2 f00 = e_framecoord[0];
-                                            vec2 f01 = e_framecoord[1];
-                                            vec2 f10 = e_framecoord[2];
-                                            vec2 f11 = e_framecoord[3];
-                                            vec2 frameCoord = bilerp(f00, f01, f10, f11, uv);
+                                            if (uIs3d) {
+                                                vec2 f00 = e_framecoord[0];
+                                                vec2 f01 = e_framecoord[1];
+                                                vec2 f10 = e_framecoord[2];
+                                                vec2 f11 = e_framecoord[3];
+                                                vec2 frameCoord = bilerp(f00, f01, f10, f11, uv);
+
+                                                vec4 bent = transform(frameCoord, uOrigin) - uOriginOffset;
+                                                float blend = clamp(length(uOriginOffset) * BlendScale - BlendOffset, 0.0, 1.0);
+                                                position = mix(position, bent, blend);
+                                            }
 
                                             vec2 t00 = e_texcoord[0];
                                             vec2 t01 = e_texcoord[1];
                                             vec2 t10 = e_texcoord[2];
                                             vec2 t11 = e_texcoord[3];
                                             vec2 texCoord = bilerp(t00, t01, t10, t11, uv);
-
-                                            if (uIs3d) {
-                                                vec4 bent = transform(frameCoord, uOrigin) - uOriginOffset;
-                                                float blend = clamp(length(uOriginOffset) * BlendScale - BlendOffset, 0.0, 1.0);
-                                                position = mix(position, bent, blend);
-                                            }
 
                                             gl_Position = uFrameUniforms.vpMatrix * ((umMatrix * vec4(position.xyz, 1.0)) + uOriginOffset);
 #if TESSELLATION_WIREFRAME_MODE
