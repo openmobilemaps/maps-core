@@ -96,13 +96,9 @@ void Polygon2dLayerObject::setPolygons(const std::vector<PolygonCoord> &polygons
     double ry = is3D ? 1.0 * cos(avgY) : avgY;
     double rz = is3D ? -1.0 * sin(avgY) * sin(avgX) : 0.0;
 
-    if (is3D) {
-        auto bboxSize = bbox.getMax() - bbox.getMin();
-        double threshold = std::max(std::max(bboxSize.x, bboxSize.y), bboxSize.z) / std::pow(2, SUBDIVISION_FACTOR_3D_DEFAULT);
-        PolygonHelper::subdivision(vecVertices, indices, threshold);
-    }
-
     for (const auto& v : vecVertices) {
+        
+        // Position
         if(is3D) {
             double sinX, sinY, cosX, cosY;
             lut::sincos(v.x, sinX, cosX);
@@ -116,15 +112,21 @@ void Polygon2dLayerObject::setPolygons(const std::vector<PolygonCoord> &polygons
             vertices.push_back(v.y - ry);
             vertices.push_back(0.0);
         }
-
         #ifdef __APPLE__
             vertices.push_back(0.0f);
         #endif
+        
+        // Frame Coord
+        vertices.push_back(v.x);
+        vertices.push_back(v.y);
     }
 
     auto attr = SharedBytes((int64_t)vertices.data(), (int32_t)vertices.size(), (int32_t)sizeof(float));
     auto ind = SharedBytes((int64_t)indices.data(), (int32_t)indices.size(), (int32_t)sizeof(uint16_t));
-    //polygon->setSubdivisionFactor(0); // use it when switching to tessellated polygon
+    
+    int32_t subdivisionFactor = is3D ? std::pow(2, SUBDIVISION_FACTOR_3D_DEFAULT) : 0; // correct? debug wireframe
+    
+    polygon->setSubdivisionFactor(subdivisionFactor);
     polygon->setVertices(attr, ind, Vec3D(rx, ry, rz), is3D);
 }
 

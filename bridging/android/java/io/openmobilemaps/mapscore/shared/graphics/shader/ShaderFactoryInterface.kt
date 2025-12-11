@@ -28,6 +28,8 @@ abstract class ShaderFactoryInterface {
 
     abstract fun createColorShader(): ColorShaderInterface
 
+    abstract fun createPolygonTessellatedShader(unitSphere: Boolean): ColorShaderInterface
+
     abstract fun createColorCircleShader(): ColorCircleShaderInterface
 
     abstract fun createUnitSphereColorCircleShader(): ColorCircleShaderInterface
@@ -134,6 +136,12 @@ abstract class ShaderFactoryInterface {
             return native_createColorShader(this.nativeRef)
         }
         private external fun native_createColorShader(_nativeRef: Long): ColorShaderInterface
+
+        override fun createPolygonTessellatedShader(unitSphere: Boolean): ColorShaderInterface {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_createPolygonTessellatedShader(this.nativeRef, unitSphere)
+        }
+        private external fun native_createPolygonTessellatedShader(_nativeRef: Long, unitSphere: Boolean): ColorShaderInterface
 
         override fun createColorCircleShader(): ColorCircleShaderInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
