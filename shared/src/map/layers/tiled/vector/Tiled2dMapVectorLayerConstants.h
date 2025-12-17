@@ -11,6 +11,10 @@
 #pragma once
 
 #define POLYGON_SUBDIVISION_FACTOR 10.0
-#define POLYGON_MASK_SUBDIVISION_FACTOR 10.0 // also good enough?
+#define POLYGON_MASK_SUBDIVISION_FACTOR 10.0
+
+#if defined(__APPLE__) || defined(__ANDROID__)
+    #define TESSELLATION_ACTIVATED
+#endif
 
 #define TESSELLATION_WIREFRAME_MODE 0

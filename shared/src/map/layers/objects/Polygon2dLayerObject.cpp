@@ -16,6 +16,7 @@
 #include "CoordinatesUtil.h"
 #include "TrigonometryLUT.h"
 #include <cmath>
+#include "Tiled2dMapVectorLayerConstants.h"
 
 Polygon2dLayerObject::Polygon2dLayerObject(const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                                            const std::shared_ptr<Polygon2dInterface> &polygon,
@@ -96,6 +97,14 @@ void Polygon2dLayerObject::setPolygons(const std::vector<PolygonCoord> &polygons
     double ry = is3D ? 1.0 * cos(avgY) : avgY;
     double rz = is3D ? -1.0 * sin(avgY) * sin(avgX) : 0.0;
 
+#ifndef TESSELLATION_ACTIVATED
+    if (is3D) {
+        auto bboxSize = bbox.getMax() - bbox.getMin();
+        double threshold = std::max(std::max(bboxSize.x, bboxSize.y), bboxSize.z) / std::pow(2, SUBDIVISION_FACTOR_3D_DEFAULT);
+        PolygonHelper::subdivision(vecVertices, indices, threshold);
+    }
+#endif
+    
     for (const auto& v : vecVertices) {
         
         // Position
@@ -112,22 +121,25 @@ void Polygon2dLayerObject::setPolygons(const std::vector<PolygonCoord> &polygons
             vertices.push_back(v.y - ry);
             vertices.push_back(0.0);
         }
-        #ifdef __APPLE__
-            vertices.push_back(0.0f);
-        #endif
-        
+    #ifdef __APPLE__
+        vertices.push_back(0.0f);
+    #endif
+    
+    #ifdef TESSELLATION_ACTIVATED
         // Frame Coord
         vertices.push_back(v.x);
         vertices.push_back(v.y);
+    #endif
     }
 
     auto attr = SharedBytes((int64_t)vertices.data(), (int32_t)vertices.size(), (int32_t)sizeof(float));
     auto ind = SharedBytes((int64_t)indices.data(), (int32_t)indices.size(), (int32_t)sizeof(uint16_t));
-    
-    int32_t subdivisionFactor = is3D ? std::pow(2, SUBDIVISION_FACTOR_3D_DEFAULT) : 0;
-    
-    polygon->setSubdivisionFactor(subdivisionFactor);
     polygon->setVertices(attr, ind, Vec3D(rx, ry, rz), is3D);
+    
+#ifdef TESSELLATION_ACTIVATED
+    int32_t subdivisionFactor = is3D ? std::pow(2, SUBDIVISION_FACTOR_3D_DEFAULT) : 0;
+    polygon->setSubdivisionFactor(subdivisionFactor);
+#endif
 }
 
 void Polygon2dLayerObject::setColor(const Color &color) {

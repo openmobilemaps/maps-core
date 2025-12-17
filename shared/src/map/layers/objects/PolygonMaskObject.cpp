@@ -12,6 +12,7 @@
 #include "EarcutVec2D.h"
 #include "PolygonHelper.h"
 #include <unordered_map>
+#include "Tiled2dMapVectorLayerConstants.h"
 
 std::shared_ptr<PolygonMaskObjectInterface>
 PolygonMaskObjectInterface::create(const std::shared_ptr<::GraphicsObjectFactoryInterface> &graphicsObjectFactory,
@@ -24,7 +25,11 @@ PolygonMaskObject::PolygonMaskObject(const std::shared_ptr<GraphicsObjectFactory
                                      const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                                      bool is3D)
     : conversionHelper(conversionHelper)
+#ifdef TESSELLATION_ACTIVATED
     , polygon(graphicsObjectFactory->createPolygonMaskTessellated(is3D))
+#else
+    , polygon(graphicsObjectFactory->createPolygonMask(is3D))
+#endif
     , is3D(is3D) {}
 
 void PolygonMaskObject::setPositions(const std::vector<Coord> &positions,
@@ -81,6 +86,12 @@ void PolygonMaskObject::setPolygons(const std::vector<::PolygonCoord> &polygons,
         }
     }
     
+#ifndef TESSELLATION_ACTIVATED
+    if(subdivisionFactor) {
+        PolygonHelper::subdivision(vecVertices, indices, *subdivisionFactor);
+    }
+#endif
+    
     for (const auto& v : vecVertices) {
         double rx = origin.x;
         double ry = origin.y;
@@ -97,16 +108,21 @@ void PolygonMaskObject::setPolygons(const std::vector<::PolygonCoord> &polygons,
     #ifdef __APPLE__
         vertices.push_back(0.0f);
     #endif
+        
+    #ifdef TESSELLATION_ACTIVATED
         // Frame Coord
         vertices.push_back(v.x);
         vertices.push_back(v.y);
+    #endif
     }
 
     auto attr = SharedBytes((int64_t)vertices.data(), (int32_t)vertices.size(), (int32_t)sizeof(float));
     auto ind = SharedBytes((int64_t)indices.data(), (int32_t)indices.size(), (int32_t)sizeof(uint16_t));
-    
-    polygon->setSubdivisionFactor((int32_t)(subdivisionFactor.value_or(1.0f)));
     polygon->setVertices(attr, ind, origin, is3D);
+    
+#ifdef TESSELLATION_ACTIVATED
+    polygon->setSubdivisionFactor((int32_t)(subdivisionFactor.value_or(1.0f)));
+#endif
 }
 
 std::shared_ptr<Polygon2dInterface> PolygonMaskObject::getPolygonObject() { return polygon; }
