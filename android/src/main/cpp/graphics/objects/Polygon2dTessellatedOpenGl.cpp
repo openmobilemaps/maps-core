@@ -22,6 +22,7 @@ std::shared_ptr<MaskingObjectInterface> Polygon2dTessellatedOpenGl::asMaskingObj
 bool Polygon2dTessellatedOpenGl::isReady() { return ready; }
 
 void Polygon2dTessellatedOpenGl::setSubdivisionFactor(int32_t factor) {
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
     if (factor != subdivisionFactor) {
         subdivisionFactor = factor;
     }

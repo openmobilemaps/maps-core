@@ -1,4 +1,4 @@
-    /*
+/*
  * Copyright (c) 2021 Ubique Innovation AG <https://www.ubique.ch>
  *
  *  This Source Code Form is subject to the terms of the Mozilla Public
