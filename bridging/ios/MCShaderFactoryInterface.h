@@ -41,6 +41,8 @@
 
 - (nullable id<MCColorShaderInterface>)createColorShader;
 
+- (nullable id<MCColorShaderInterface>)createPolygonTessellatedShader:(BOOL)unitSphere;
+
 - (nullable id<MCColorCircleShaderInterface>)createColorCircleShader;
 
 - (nullable id<MCColorCircleShaderInterface>)createUnitSphereColorCircleShader;
@@ -60,6 +62,8 @@
 - (nullable id<MCRasterShaderInterface>)createRasterShader;
 
 - (nullable id<MCRasterShaderInterface>)createUnitSphereRasterShader;
+
+- (nullable id<MCRasterShaderInterface>)createQuadTessellatedShader;
 
 - (nullable id<MCStretchShaderInterface>)createStretchShader;
 

@@ -19,7 +19,7 @@
 #include "RenderPass.h"
 #include <algorithm>
 #include <map>
-
+#include "Tiled2dMapVectorLayerConstants.h"
 #include "PolygonCompare.h"
 
 PolygonLayer::PolygonLayer()
@@ -123,9 +123,14 @@ void PolygonLayer::addAll(const std::vector<PolygonInfo> &polygons) {
         std::lock_guard<std::recursive_mutex> lock(polygonsMutex);
         for (const auto &polygon : polygons) {
 
+        #ifdef TESSELLATION_ACTIVATED
+            auto shader = shaderFactory->createPolygonTessellatedShader(mapInterface->is3d());
+            auto polygonGraphicsObject = objectFactory->createPolygonTessellated(shader->asShaderProgramInterface());
+        #else
             auto shader = mapInterface->is3d() ? shaderFactory->createUnitSphereColorShader() : shaderFactory->createColorShader();
             auto polygonGraphicsObject = objectFactory->createPolygon(shader->asShaderProgramInterface());
-
+        #endif
+            
             auto polygonObject =
                 std::make_shared<Polygon2dLayerObject>(mapInterface->getCoordinateConverterHelper(), polygonGraphicsObject, shader, is3d);
 

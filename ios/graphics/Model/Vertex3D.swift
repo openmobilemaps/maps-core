@@ -11,10 +11,11 @@
 import MapCoreSharedModule
 @preconcurrency import MetalKit
 
-struct Vertex4F: Equatable {
+struct Vertex3D: Equatable {
     nonisolated(unsafe) static let descriptor: MTLVertexDescriptor = {
         let vertexDescriptor = MTLVertexDescriptor()
 
+        // Position
         vertexDescriptor.attributes[0].bufferIndex = 0
         vertexDescriptor.attributes[0].format = .float4
         vertexDescriptor.attributes[0].offset = 0
