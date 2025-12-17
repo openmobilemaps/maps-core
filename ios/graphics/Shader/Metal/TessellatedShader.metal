@@ -16,18 +16,35 @@ const constant float BlendScale = 1000;
 const constant float BlendOffset = 0.01;
 
 template <typename T>
-T bilerp(T c00, T c01, T c10, T c11, float2 uv) {
+inline T bilerp(T c00, T c01, T c10, T c11, float2 uv) {
     T c0 = mix(c00, c01, T(uv[0]));
     T c1 = mix(c10, c11, T(uv[0]));
     return mix(c0, c1, T(uv[1]));
 }
 
+template<typename T>
+inline T bilerp_fast(T c00, T c01, T c10, T c11, half2 uv)
+{
+    half u = uv.x;
+    half v = uv.y;
+    half w00 = (half)1 - u;
+    half w01 = u;
+    half w10 = (half)1 - u;
+    half w11 = u;
+    half oneMinusV = (half)1 - v;
+    w00 *= oneMinusV;
+    w01 *= oneMinusV;
+    w10 *= v;
+    w11 *= v;
+    return c00 * float(w00) + c01 * float(w01) + c10 * float(w10) + c11 * float(w11);
+}
+
 template <typename T>
-T baryinterp(T c0, T c1, T c2, float3 bary) {
+inline T baryinterp(T c0, T c1, T c2, float3 bary) {
     return c0 * bary[0] + c1 * bary[1] + c2 * bary[2];
 }
 
-float4 transform(float2 coordinate, float4 origin) {
+inline float4 transform(float2 coordinate, float4 origin) {
     float x = 1.0 * sin(coordinate.y) * cos(coordinate.x) - origin.x;
     float y = 1.0 * cos(coordinate.y) - origin.y;
     float z = -1.0 * sin(coordinate.y) * sin(coordinate.x) - origin.z;
@@ -47,15 +64,16 @@ quadTessellationVertexShader(const patch_control_point<Vertex3DTextureTessellate
     Vertex3DTextureTessellatedIn vB = controlPoints[1];
     Vertex3DTextureTessellatedIn vC = controlPoints[2];
     Vertex3DTextureTessellatedIn vD = controlPoints[3];
-     
-    float4 position = bilerp(vA.position, vB.position, vC.position, vD.position, positionInPatch);
+    half2 p = half2(positionInPatch);
+    
+    float4 position = bilerp_fast(vA.position, vB.position, vC.position, vD.position, p);
     if (is3d) {
-        float2 frameCoord = bilerp(vA.frameCoord, vB.frameCoord, vC.frameCoord, vD.frameCoord, positionInPatch);
+        float2 frameCoord = bilerp_fast(vA.frameCoord, vB.frameCoord, vC.frameCoord, vD.frameCoord, p);
         float4 bent = transform(frameCoord, origin) - originOffset;
         float blend = saturate(length(originOffset) * BlendScale - BlendOffset);
         position = mix(position, bent, blend);
     }
-    float2 uv = bilerp(vA.uv, vB.uv, vC.uv, vD.uv, positionInPatch);
+    float2 uv = bilerp_fast(vA.uv, vB.uv, vC.uv, vD.uv, p);
     
     VertexOut out {
         .position = vpMatrix * ((mMatrix * float4(position.xyz, 1)) + originOffset),
