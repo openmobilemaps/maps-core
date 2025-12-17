@@ -12,6 +12,7 @@
 #include "TextureHolderInterface.h"
 #include "TextureFilterType.h"
 #include <cmath>
+#include "Logger.h"
 
 Quad2dTessellatedOpenGl::Quad2dTessellatedOpenGl(const std::shared_ptr<::BaseShaderProgramOpenGl> &shader)
     : shaderProgram(shader) {}
@@ -48,6 +49,7 @@ void Quad2dTessellatedOpenGl::setFrame(const Quad3dD &frame, const RectD &textur
 }
 
 void Quad2dTessellatedOpenGl::setSubdivisionFactor(int32_t factor) {
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
     if (factor != subdivisionFactor) {
         subdivisionFactor = factor;
     }
@@ -292,7 +294,7 @@ void Quad2dTessellatedOpenGl::renderAsMask(const std::shared_ptr<::RenderingCont
     render(context, renderPass, vpMatrix, mMatrix, origin, false, screenPixelAsRealMeterFactor, isScreenSpaceCoords);
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 }
-#include "Logger.h"
+
 void Quad2dTessellatedOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
                           int64_t vpMatrix, int64_t mMatrix, const ::Vec3D &origin, bool isMasked,
                           double screenPixelAsRealMeterFactor, bool isScreenSpaceCoords) {

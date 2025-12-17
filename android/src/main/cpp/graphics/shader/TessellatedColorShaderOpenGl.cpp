@@ -21,7 +21,7 @@ void TessellatedColorShaderOpenGl::setupProgram(const std::shared_ptr<::Renderin
 
     int vertexShader = loadShader(GL_VERTEX_SHADER, getVertexShader());
     int controlShader = loadShader(GL_TESS_CONTROL_SHADER, getControlShader());
-    int evalutationShader = loadShader(GL_TESS_EVALUATION_SHADER, getEvaluationShader());
+    int evaluationShader = loadShader(GL_TESS_EVALUATION_SHADER, getEvaluationShader());
 
 #if TESSELLATION_WIREFRAME_MODE
     int geometryShader = loadShader(GL_GEOMETRY_SHADER, getGeometryShader());
@@ -34,8 +34,8 @@ void TessellatedColorShaderOpenGl::setupProgram(const std::shared_ptr<::Renderin
     glDeleteShader(vertexShader);
     glAttachShader(program, controlShader);
     glDeleteShader(controlShader);
-    glAttachShader(program, evalutationShader);
-    glDeleteShader(evalutationShader);
+    glAttachShader(program, evaluationShader);
+    glDeleteShader(evaluationShader);
     glAttachShader(program, fragmentShader);
     glDeleteShader(fragmentShader);
 
