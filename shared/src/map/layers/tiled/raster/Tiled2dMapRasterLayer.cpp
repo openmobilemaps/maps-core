@@ -19,6 +19,7 @@
 #include <Logger.h>
 #include <chrono>
 #include <map>
+#include "Tiled2dMapVectorLayerConstants.h"
 
 struct TileInfoHasherIgnoringT {
     std::size_t operator()(const Tiled2dMapTileInfo& info) const {
@@ -302,12 +303,20 @@ std::vector<Tiled2dMapRasterTileInfo> sortedTileInfos(currentTileInfos.begin(), 
                     quad->setMinMagFilter(textureFilterType);
                     tileObject = std::make_shared<Textured2dLayerObject>(quad, mapInterface, is3D);
                 } else {
-                    auto rShader = shaderFactory->createQuadTessellatedShader();
-                    rShader->asShaderProgramInterface()->setBlendMode(blendMode);
-                    auto quad = graphicsFactory->createQuadTessellated(rShader->asShaderProgramInterface());
+                                    
+                #ifdef TESSELLATION_ACTIVATED
+                    auto rasterShader = shaderFactory->createQuadTessellatedShader();
+                    auto quad = graphicsFactory->createQuadTessellated(rasterShader->asShaderProgramInterface());
+                #else
+                    auto rasterShader = is3D ? shaderFactory->createUnitSphereRasterShader() : shaderFactory->createRasterShader();
+                    auto quad = graphicsFactory->createQuad(rasterShader->asShaderProgramInterface());
+                #endif
+                    
+                    rasterShader->asShaderProgramInterface()->setBlendMode(blendMode);
                     quad->setMinMagFilter(textureFilterType);
+                    
                     tileObject = std::make_shared<Textured2dLayerObject>(
-                        quad, rShader, mapInterface, is3D);
+                        quad, rasterShader, mapInterface, is3D);
                     if (zoomInfo.numDrawPreviousLayers == 0 || !animationsEnabled || zoomInfo.maskTile || is3D) {
                         tileObject->setStyle(style);
                     } else {
