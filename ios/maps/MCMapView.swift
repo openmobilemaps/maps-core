@@ -576,7 +576,10 @@ private final class MCMapViewMapReadyCallbacks:
         semaphore.wait()
 
         Task { @MainActor in
-            guard let delegate = self.delegate else { return }
+          guard let delegate = self.delegate else {
+            semaphore.signal()
+            return
+          }
 
 			delegate.draw(in: delegate, present: false)
 
