@@ -12,7 +12,10 @@
 
 - (void)setVertices:(nonnull MCSharedBytes *)vertices
             indices:(nonnull MCSharedBytes *)indices
-             origin:(nonnull MCVec3D *)origin;
+             origin:(nonnull MCVec3D *)origin
+               is3d:(BOOL)is3d;
+
+- (void)setSubdivisionFactor:(int32_t)factor;
 
 - (nullable id<MCGraphicsObjectInterface>)asGraphicsObject;
 

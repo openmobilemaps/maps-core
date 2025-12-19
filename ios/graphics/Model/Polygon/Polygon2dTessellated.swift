@@ -13,25 +13,32 @@ import MapCoreSharedModule
 @preconcurrency import Metal
 import simd
 
-final class Polygon2d: BaseGraphicsObject, @unchecked Sendable {
+final class Polygon2dTessellated: BaseGraphicsObject, @unchecked Sendable {
     private var shader: MCShaderProgramInterface
 
     private var verticesBuffer: MTLBuffer?
     private var indicesBuffer: MTLBuffer?
     private var indicesCount: Int = 0
+    
+    private var tessellationFactorsBuffer: MTLBuffer?
+    private var originBuffers: MultiBuffer<simd_float4>
+    
+    private var is3d = false
+    private var subdivisionFactor: Int32 = -1
 
     private var stencilState: MTLDepthStencilState?
     private var renderPassStencilState: MTLDepthStencilState?
 
     init(shader: MCShaderProgramInterface, metalContext: MetalContext) {
         self.shader = shader
+        originBuffers = .init(device: metalContext.device)
         super
             .init(
                 device: metalContext.device,
                 sampler: metalContext.samplerLibrary.value(
                     Sampler.magLinear.rawValue)!,
-                label: "Polygon2d")
-
+                label: "Polygon2dTessellated")
+        setSubdivisionFactor(0) // ensure tessellationFactorBuffer creation
     }
 
     override func render(
@@ -49,10 +56,6 @@ final class Polygon2d: BaseGraphicsObject, @unchecked Sendable {
         defer {
             lock.unlock()
         }
-
-        guard let verticesBuffer,
-            let indicesBuffer
-        else { return }
 
         #if DEBUG
             encoder.pushDebugGroup(label)
@@ -81,7 +84,29 @@ final class Polygon2d: BaseGraphicsObject, @unchecked Sendable {
             encoder.setDepthStencilState(renderPassStencilState)
             encoder.setStencilReferenceValue(0b0000_0000)
         }
-
+        
+        renderMain(
+            encoder: encoder,
+            context: context,
+            vpMatrix: vpMatrix,
+            mMatrix: mMatrix,
+            origin: origin,
+            isScreenSpaceCoords: isScreenSpaceCoords)
+    }
+    
+    private func renderMain(
+        encoder: MTLRenderCommandEncoder,
+        context: RenderingContext,
+        vpMatrix: Int64,
+        mMatrix: Int64,
+        origin: MCVec3D,
+        isScreenSpaceCoords: Bool
+    ) {
+        guard let verticesBuffer,
+            let indicesBuffer,
+            let tessellationFactorsBuffer
+        else { return }
+        
         shader.setupProgram(context)
         shader.preRender(context, isScreenSpaceCoords: isScreenSpaceCoords)
 
@@ -110,14 +135,40 @@ final class Polygon2d: BaseGraphicsObject, @unchecked Sendable {
             bufferPointer.pointee.z = Float(originOffset.z - origin.z)
         }
         encoder.setVertexBuffer(originOffsetBuffer, offset: 0, index: 3)
-
-        encoder.drawIndexedPrimitives(
-            type: .triangle,
-            indexCount: indicesCount,
-            indexType: .uint16,
-            indexBuffer: indicesBuffer,
-            indexBufferOffset: 0)
-
+         
+        let originBuffer = originBuffers.getNextBuffer(context)
+        if let bufferPointer = originBuffer?.contents()
+            .assumingMemoryBound(
+                to: simd_float4.self)
+        {
+            bufferPointer.pointee.x = Float(origin.x)
+            bufferPointer.pointee.y = Float(origin.y)
+            bufferPointer.pointee.z = Float(origin.z)
+        } else {
+            fatalError()
+        }
+        encoder.setVertexBuffer(originBuffer, offset: 0, index: 4)
+        
+        encoder.setVertexBytes(&self.is3d, length: MemoryLayout<Bool>.stride, index: 5)
+        
+        encoder.setTessellationFactorBuffer(tessellationFactorsBuffer, offset: 0, instanceStride: 0)
+        
+        /* WIREFRAME DEBUG */
+        //encoder.setTriangleFillMode(.lines)
+        
+        encoder.drawIndexedPatches(
+            numberOfPatchControlPoints: 3,
+            patchStart: 0,
+            patchCount: indicesCount / 3,
+            patchIndexBuffer: nil,
+            patchIndexBufferOffset: 0,
+            controlPointIndexBuffer: indicesBuffer,
+            controlPointIndexBufferOffset: 0,
+            instanceCount: 1,
+            baseInstance: 0)
+        
+        /* WIREFRAME DEBUG */
+        //encoder.setTriangleFillMode(.fill)
     }
 
     private func setupStencilStates() {
@@ -137,7 +188,7 @@ final class Polygon2d: BaseGraphicsObject, @unchecked Sendable {
     }
 }
 
-extension Polygon2d: MCMaskingObjectInterface {
+extension Polygon2dTessellated: MCMaskingObjectInterface {
     func render(
         asMask context: MCRenderingContextInterface?,
         renderPass _: MCRenderPassConfig,
@@ -158,12 +209,8 @@ extension Polygon2d: MCMaskingObjectInterface {
             let encoder = context.encoder
         else { return }
 
-        guard let verticesBuffer,
-            let indicesBuffer
-        else { return }
-
         #if DEBUG
-            encoder.pushDebugGroup("Polygon2dMask")
+            encoder.pushDebugGroup(label)
             defer {
                 encoder.popDebugGroup()
             }
@@ -175,51 +222,42 @@ extension Polygon2d: MCMaskingObjectInterface {
         }
 
         // stencil prepare pass
-        shader.setupProgram(context)
-        shader.preRender(context, isScreenSpaceCoords: isScreenSpaceCoords)
-
-        encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
-
-        let vpMatrixBuffer = vpMatrixBuffers.getNextBuffer(context)
-        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(vpMatrix)) {
-            vpMatrixBuffer?.contents()
-                .copyMemory(
-                    from: matrixPointer, byteCount: 64)
-        }
-        encoder.setVertexBuffer(vpMatrixBuffer, offset: 0, index: 1)
-
-        if shader.usesModelMatrix() {
-            if let mMatrixPointer = UnsafeRawPointer(bitPattern: Int(mMatrix)) {
-                encoder.setVertexBytes(mMatrixPointer, length: 64, index: 2)
-            }
-        }
-
-        let originOffsetBuffer = originOffsetBuffers.getNextBuffer(context)
-        if let bufferPointer = originOffsetBuffer?.contents()
-            .assumingMemoryBound(to: simd_float4.self)
-        {
-            bufferPointer.pointee.x = Float(originOffset.x - origin.x)
-            bufferPointer.pointee.y = Float(originOffset.y - origin.y)
-            bufferPointer.pointee.z = Float(originOffset.z - origin.z)
-        }
-        encoder.setVertexBuffer(originOffsetBuffer, offset: 0, index: 3)
-
-        encoder.drawIndexedPrimitives(
-            type: .triangle,
-            indexCount: indicesCount,
-            indexType: .uint16,
-            indexBuffer: indicesBuffer,
-            indexBufferOffset: 0)
+        renderMain(
+            encoder: encoder,
+            context: context,
+            vpMatrix: vpMatrix,
+            mMatrix: mMatrix,
+            origin: origin,
+            isScreenSpaceCoords: isScreenSpaceCoords)
     }
 }
 
-extension Polygon2d: MCPolygon2dInterface {
-    func setSubdivisionFactor(_ factor: Int32) {}
+extension Polygon2dTessellated: MCPolygon2dInterface {
+    func setSubdivisionFactor(_ factor: Int32) {
+        lock.withCritical {
+            if self.subdivisionFactor != factor {
+                self.subdivisionFactor = factor
+                
+                let factorH = Half(self.subdivisionFactor).bits;
+                
+                var tessellationFactors = MTLTriangleTessellationFactorsHalf(
+                    edgeTessellationFactor: (factorH, factorH, factorH),
+                    insideTessellationFactor: factorH
+                );
+                
+                self.tessellationFactorsBuffer.copyOrCreate(
+                    bytes: &tessellationFactors,
+                    length: MemoryLayout<MTLTriangleTessellationFactorsHalf>.stride,
+                    device: device)
+            }
+        }
+    }
     
     func setVertices(
         _ vertices: MCSharedBytes, indices: MCSharedBytes, origin: MCVec3D, is3d: Bool
     ) {
         lock.withCritical {
+            self.is3d = is3d
             self.verticesBuffer.copyOrCreate(from: vertices, device: device)
             self.indicesBuffer.copyOrCreate(from: indices, device: device)
             if self.verticesBuffer != nil, self.indicesBuffer != nil {

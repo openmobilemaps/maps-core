@@ -36,7 +36,7 @@ struct PolygonGroupStripeStyling {
 };
 
 vertex PolygonGroupVertexOut
-polygonGroupVertexShader(const Vertex4FIn vertexIn [[stage_in]],
+polygonGroupVertexShader(const Vertex3DIn vertexIn [[stage_in]],
                  constant float4x4 &vpMatrix [[buffer(1)]],
                  constant float4 &originOffset [[buffer(2)]])
 {
@@ -63,7 +63,7 @@ struct PolygonPatternGroupVertexOut {
 };
 
 vertex PolygonGroupStripedVertexOut
-polygonStripedGroupVertexShader(const Vertex4FIn vertexIn [[stage_in]],
+polygonStripedGroupVertexShader(const Vertex3DIn vertexIn [[stage_in]],
                                 constant float4x4 &vpMatrix [[buffer(1)]],
                                 constant float4 &originOffset [[buffer(2)]],
                                 constant float2 &posOffset [[buffer(3)]]
@@ -97,7 +97,7 @@ polygonGroupStripedFragmentShader(PolygonGroupStripedVertexOut in [[stage_in]],
 }
 
 vertex PolygonPatternGroupVertexOut
-polygonPatternGroupVertexShader(const Vertex4FIn vertexIn [[stage_in]],
+polygonPatternGroupVertexShader(const Vertex3DIn vertexIn [[stage_in]],
                                 constant float4x4 &vpMatrix [[buffer(1)]],
                                 constant float2 &scalingFactor [[buffer(2)]],
                                 constant float2 &posOffset [[buffer(3)]],

@@ -49,9 +49,23 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (nullable id<MCQuad2dInterface>)createQuadTessellated:(nullable id<MCShaderProgramInterface>)shader {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->createQuadTessellated(::djinni_generated::ShaderProgramInterface::toCpp(shader));
+        return ::djinni_generated::Quad2dInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (nullable id<MCPolygon2dInterface>)createPolygon:(nullable id<MCShaderProgramInterface>)shader {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->createPolygon(::djinni_generated::ShaderProgramInterface::toCpp(shader));
+        return ::djinni_generated::Polygon2dInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nullable id<MCPolygon2dInterface>)createPolygonTessellated:(nullable id<MCShaderProgramInterface>)shader {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->createPolygonTessellated(::djinni_generated::ShaderProgramInterface::toCpp(shader));
         return ::djinni_generated::Polygon2dInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
@@ -112,6 +126,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (nullable id<MCPolygon2dInterface>)createPolygonMaskTessellated:(BOOL)is3d {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->createPolygonMaskTessellated(::djinni::Bool::toCpp(is3d));
+        return ::djinni_generated::Polygon2dInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (nullable id<MCTextInterface>)createText:(nullable id<MCShaderProgramInterface>)shader {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->createText(::djinni_generated::ShaderProgramInterface::toCpp(shader));
@@ -142,10 +163,24 @@ public:
             return ::djinni_generated::Quad2dInterface::toCpp(objcpp_result_);
         }
     }
+    /*not-null*/ std::shared_ptr<::Quad2dInterface> createQuadTessellated(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & c_shader) override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createQuadTessellated:(::djinni_generated::ShaderProgramInterface::fromCpp(c_shader))];
+            return ::djinni_generated::Quad2dInterface::toCpp(objcpp_result_);
+        }
+    }
     /*not-null*/ std::shared_ptr<::Polygon2dInterface> createPolygon(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & c_shader) override
     {
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createPolygon:(::djinni_generated::ShaderProgramInterface::fromCpp(c_shader))];
+            return ::djinni_generated::Polygon2dInterface::toCpp(objcpp_result_);
+        }
+    }
+    /*not-null*/ std::shared_ptr<::Polygon2dInterface> createPolygonTessellated(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & c_shader) override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createPolygonTessellated:(::djinni_generated::ShaderProgramInterface::fromCpp(c_shader))];
             return ::djinni_generated::Polygon2dInterface::toCpp(objcpp_result_);
         }
     }
@@ -202,6 +237,13 @@ public:
     {
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createPolygonMask:(::djinni::Bool::fromCpp(c_is3d))];
+            return ::djinni_generated::Polygon2dInterface::toCpp(objcpp_result_);
+        }
+    }
+    /*not-null*/ std::shared_ptr<::Polygon2dInterface> createPolygonMaskTessellated(bool c_is3d) override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createPolygonMaskTessellated:(::djinni::Bool::fromCpp(c_is3d))];
             return ::djinni_generated::Polygon2dInterface::toCpp(objcpp_result_);
         }
     }

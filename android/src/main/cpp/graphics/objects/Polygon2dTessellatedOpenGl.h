@@ -19,14 +19,14 @@
 #include "opengl_wrapper.h"
 #include <mutex>
 
-class Polygon2dOpenGl : public GraphicsObjectInterface,
-                        public MaskingObjectInterface,
-                        public Polygon2dInterface,
-                        public std::enable_shared_from_this<Polygon2dOpenGl> {
+class Polygon2dTessellatedOpenGl : public GraphicsObjectInterface,
+                                   public MaskingObjectInterface,
+                                   public Polygon2dInterface,
+                                   public std::enable_shared_from_this<Polygon2dTessellatedOpenGl> {
   public:
-    Polygon2dOpenGl(const std::shared_ptr<::BaseShaderProgramOpenGl> &shader);
+    Polygon2dTessellatedOpenGl(const std::shared_ptr<::BaseShaderProgramOpenGl> &shader);
 
-    ~Polygon2dOpenGl(){};
+    ~Polygon2dTessellatedOpenGl(){};
 
     virtual bool isReady() override;
 
@@ -66,16 +66,23 @@ protected:
     std::string programName;
     int program = 0;
 
-    int mMatrixHandle;
-    int originOffsetHandle;
-    int positionHandle;
-    GLuint vao;
-    GLuint vertexBuffer;
+    int mMatrixHandle{};
+    int originOffsetHandle{};
+    int subdivisionFactorHandle{};
+    int originHandle{};
+    int is3dHandle{};
+    int positionHandle{};
+    int frameCoordHandle{};
+    GLuint vao{};
+    GLuint vertexBuffer{};
     std::vector<GLfloat> vertices;
-    GLuint indexBuffer;
+    GLuint indexBuffer{};
     std::vector<GLushort> indices;
     bool glDataBuffersGenerated = false;
     Vec3D polygonOrigin = Vec3D(0.0, 0.0, 0.0);
+
+    bool is3d = false;
+    int32_t subdivisionFactor = 0;
 
     bool dataReady = false;
     bool ready = false;

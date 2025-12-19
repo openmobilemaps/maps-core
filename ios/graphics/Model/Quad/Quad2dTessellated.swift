@@ -14,13 +14,14 @@ import MapCoreSharedModule
 import UIKit
 import simd
 
-final class Quad2d: BaseGraphicsObject, @unchecked Sendable {
+final class Quad2dTessellated: BaseGraphicsObject, @unchecked Sendable {
     private var verticesBuffer: MTLBuffer?
-
-    private var indicesBuffer: MTLBuffer?
+    
+    private var tessellationFactorsBuffer: MTLBuffer?
+    private var originBuffers: MultiBuffer<simd_float4>
+    
     private var is3d = false
-
-    private var indicesCount: Int = 0
+    private var subdivisionFactor: Int32 = -1
 
     private var texture: MTLTexture?
 
@@ -31,8 +32,6 @@ final class Quad2d: BaseGraphicsObject, @unchecked Sendable {
 
     private var renderAsMask = false
 
-    private var subdivisionFactor: Int32 = 0
-
     private var frame: MCQuad3dD?
     private var textureCoordinates: MCRectD?
 
@@ -42,9 +41,10 @@ final class Quad2d: BaseGraphicsObject, @unchecked Sendable {
 
     init(
         shader: MCShaderProgramInterface, metalContext: MetalContext,
-        label: String = "Quad2d"
+        label: String = "Quad2dTessellated"
     ) {
         self.shader = shader
+        originBuffers = .init(device: metalContext.device)
         nearestSampler = metalContext.samplerLibrary.value(
             Sampler.magNearest.rawValue)!
         super
@@ -53,6 +53,7 @@ final class Quad2d: BaseGraphicsObject, @unchecked Sendable {
                 sampler: metalContext.samplerLibrary.value(
                     Sampler.magLinear.rawValue)!,
                 label: label)
+        setSubdivisionFactor(0) // ensure tessellationFactorBuffer creation
     }
 
     private func setupStencilStates() {
@@ -99,7 +100,7 @@ final class Quad2d: BaseGraphicsObject, @unchecked Sendable {
 
         guard isReady(),
             let verticesBuffer,
-            let indicesBuffer
+            let tessellationFactorsBuffer
         else { return }
 
         if shader is AlphaShader || shader is RasterShader, texture == nil {
@@ -174,17 +175,42 @@ final class Quad2d: BaseGraphicsObject, @unchecked Sendable {
         if let texture {
             encoder.setFragmentTexture(texture, index: 0)
         }
-
-        encoder.drawIndexedPrimitives(
-            type: .triangle,
-            indexCount: indicesCount,
-            indexType: .uint16,
-            indexBuffer: indicesBuffer,
-            indexBufferOffset: 0)
+        
+        let originBuffer = originBuffers.getNextBuffer(context)
+        if let bufferPointer = originBuffer?.contents()
+            .assumingMemoryBound(
+                to: simd_float4.self)
+        {
+            bufferPointer.pointee.x = Float(origin.x)
+            bufferPointer.pointee.y = Float(origin.y)
+            bufferPointer.pointee.z = Float(origin.z)
+        } else {
+            fatalError()
+        }
+        encoder.setVertexBuffer(originBuffer, offset: 0, index: 4)
+        
+        encoder.setVertexBytes(&self.is3d, length: MemoryLayout<Bool>.stride, index: 5)
+        
+        encoder.setTessellationFactorBuffer(tessellationFactorsBuffer, offset: 0, instanceStride: 0)
+        
+        /* WIREFRAME DEBUG */
+        //encoder.setTriangleFillMode(.lines)
+    
+        encoder.drawPatches(
+            numberOfPatchControlPoints: 4,
+            patchStart: 0,
+            patchCount: 1,
+            patchIndexBuffer: nil,
+            patchIndexBufferOffset: 0,
+            instanceCount: 1,
+            baseInstance: 0)
+        
+        /* WIREFRAME DEBUG */
+        //encoder.setTriangleFillMode(.fill)
     }
 }
 
-extension Quad2d: MCMaskingObjectInterface {
+extension Quad2dTessellated: MCMaskingObjectInterface {
     func render(
         asMask context: MCRenderingContextInterface?,
         renderPass: MCRenderPassConfig,
@@ -214,7 +240,7 @@ extension Quad2d: MCMaskingObjectInterface {
     }
 }
 
-extension Quad2d: MCQuad2dInterface {
+extension Quad2dTessellated: MCQuad2dInterface {
     func setMinMagFilter(_ filterType: MCTextureFilterType) {
         switch filterType {
             case .NEAREST:
@@ -227,31 +253,29 @@ extension Quad2d: MCQuad2dInterface {
     }
 
     func setSubdivisionFactor(_ factor: Int32) {
-        let (optFrame, optTextureCoordinates) = lock.withCritical {
-            () -> (MCQuad3dD?, MCRectD?) in
+        lock.withCritical {
             if self.subdivisionFactor != factor {
                 self.subdivisionFactor = factor
-                return (frame, textureCoordinates)
-            } else {
-                return (nil, nil)
+                
+                let factorH = Half(pow(2, Float(self.subdivisionFactor))).bits;
+                
+                var tessellationFactors = MTLQuadTessellationFactorsHalf(
+                    edgeTessellationFactor: (factorH, factorH, factorH, factorH),
+                    insideTessellationFactor: (factorH, factorH)
+                );
+                    
+                self.tessellationFactorsBuffer.copyOrCreate(
+                    bytes: &tessellationFactors,
+                    length: MemoryLayout<MTLQuadTessellationFactorsHalf>.stride,
+                    device: device)
             }
-        }
-        if let frame = optFrame,
-            let textureCoordinates = optTextureCoordinates
-        {
-            setFrame(
-                frame, textureCoordinates: textureCoordinates,
-                origin: self.originOffset, is3d: is3d)
         }
     }
 
     func setFrame(
         _ frame: MCQuad3dD, textureCoordinates: MCRectD, origin: MCVec3D, is3d: Bool
     ) {
-        var vertices: [Vertex3DTexture] = []
-        var indices: [UInt16] = []
-
-        let sFactor = lock.withCritical { subdivisionFactor }
+        var vertices: [Vertex3DTextureTessellated] = []
 
         func transform(_ coordinate: MCVec3D) -> MCVec3D {
             if is3d {
@@ -265,98 +289,42 @@ extension Quad2d: MCQuad2dInterface {
                 return MCVec3D(x: x, y: y, z: 0)
             }
         }
-
-        if sFactor == 0 {
-            /*
-             The quad is made out of 4 vertices as following
-             B----C
-             |    |
-             |    |
-             A----D
-             Where A-C are joined to form two triangles
-             */
-            vertices = [
-                Vertex3DTexture(
-                    position: transform(frame.bottomLeft),
-                    textureU: textureCoordinates.xF,
-                    textureV: textureCoordinates.yF + textureCoordinates.heightF
-                ),  // A
-                Vertex3DTexture(
-                    position: transform(frame.topLeft),
-                    textureU: textureCoordinates.xF,
-                    textureV: textureCoordinates.yF),  // B
-                Vertex3DTexture(
-                    position: transform(frame.topRight),
-                    textureU: textureCoordinates.xF + textureCoordinates.widthF,
-                    textureV: textureCoordinates.yF),  // C
-                Vertex3DTexture(
-                    position: transform(frame.bottomRight),
-                    textureU: textureCoordinates.xF + textureCoordinates.widthF,
-                    textureV: textureCoordinates.yF + textureCoordinates.heightF
-                ),  // D
-            ]
-            indices = [
-                0, 2, 1,  // ACB
-                0, 3, 2,  // ADC
-            ]
-
-        } else {
-
-            let numSubd = Int(pow(2.0, Double(sFactor)))
-
-            let deltaRTop = MCVec3D(
-                x: Double(frame.topRight.x - frame.topLeft.x),
-                y: Double(frame.topRight.y - frame.topLeft.y),
-                z: Double(frame.topRight.z - frame.topLeft.z))
-            let deltaDLeft = MCVec3D(
-                x: Double(frame.bottomLeft.x - frame.topLeft.x),
-                y: Double(frame.bottomLeft.y - frame.topLeft.y),
-                z: Double(frame.bottomLeft.z - frame.topLeft.z))
-            let deltaDRight = MCVec3D(
-                x: Double(frame.bottomRight.x - frame.topRight.x),
-                y: Double(frame.bottomRight.y - frame.topRight.y),
-                z: Double(frame.bottomRight.z - frame.topRight.z))
-
-            for iR in 0...numSubd {
-                let pcR = Double(iR) / Double(numSubd)
-                let originX = frame.topLeft.x + pcR * deltaRTop.x
-                let originY = frame.topLeft.y + pcR * deltaRTop.y
-                let originZ = frame.topLeft.z + pcR * deltaRTop.z
-                for iD in 0...numSubd {
-                    let pcD = Double(iD) / Double(numSubd)
-                    let deltaDX =
-                        pcD * ((1.0 - pcR) * deltaDLeft.x + pcR * deltaDRight.x)
-                    let deltaDY =
-                        pcD * ((1.0 - pcR) * deltaDLeft.y + pcR * deltaDRight.y)
-                    let deltaDZ =
-                        pcD * ((1.0 - pcR) * deltaDLeft.z + pcR * deltaDRight.z)
-
-                    let u: Float = Float(
-                        textureCoordinates.x + pcR * textureCoordinates.width)
-                    let v: Float = Float(
-                        textureCoordinates.y + pcD * textureCoordinates.height)
-
-                    vertices.append(
-                        Vertex3DTexture(
-                            position: transform(
-                                .init(
-                                    x: originX + deltaDX, y: originY + deltaDY,
-                                    z: originZ + deltaDZ)), textureU: u,
-                            textureV: v))
-
-                    if iR < numSubd && iD < numSubd {
-                        let baseInd = UInt16(iD + (iR * (numSubd + 1)))
-                        let baseIndNextCol = UInt16(
-                            baseInd + UInt16(numSubd + 1))
-                        indices.append(contentsOf: [
-                            baseInd, baseInd + 1, baseIndNextCol + 1, baseInd,
-                            baseIndNextCol + 1, baseIndNextCol,
-                        ])
-                    }
-                }
-            }
-        }
-
+        
+        /*
+         The quad is made out of 4 vertices as following
+         B----C
+         |    |
+         |    |
+         A----D
+         Where A-C are joined to form two triangles
+         */
+        vertices = [
+            Vertex3DTextureTessellated(
+                position: transform(frame.topLeft),
+                frameCoordX: frame.topLeft.xF,
+                frameCoordY: frame.topLeft.yF,
+                textureU: textureCoordinates.xF,
+                textureV: textureCoordinates.yF),  // B
+            Vertex3DTextureTessellated(
+                position: transform(frame.topRight),
+                frameCoordX: frame.topRight.xF,
+                frameCoordY: frame.topRight.yF,
+                textureU: textureCoordinates.xF + textureCoordinates.widthF,
+                textureV: textureCoordinates.yF),  // C
+            Vertex3DTextureTessellated(
+                position: transform(frame.bottomLeft),
+                frameCoordX: frame.bottomLeft.xF,
+                frameCoordY: frame.bottomLeft.yF,
+                textureU: textureCoordinates.xF,
+                textureV: textureCoordinates.yF + textureCoordinates.heightF),  // A
+            Vertex3DTextureTessellated(
+                position: transform(frame.bottomRight),
+                frameCoordX: frame.bottomRight.xF,
+                frameCoordY: frame.bottomRight.yF,
+                textureU: textureCoordinates.xF + textureCoordinates.widthF,
+                textureV: textureCoordinates.yF + textureCoordinates.heightF),  // D
+        ]
+    
         lock.withCritical {
             self.is3d = is3d
             self.originOffset = origin
@@ -364,20 +332,8 @@ extension Quad2d: MCQuad2dInterface {
             self.textureCoordinates = textureCoordinates
             self.verticesBuffer.copyOrCreate(
                 bytes: vertices,
-                length: MemoryLayout<Vertex3DTexture>.stride * vertices.count,
+                length: MemoryLayout<Vertex3DTextureTessellated>.stride * vertices.count,
                 device: device)
-            self.indicesBuffer.copyOrCreate(
-                bytes: indices,
-                length: MemoryLayout<UInt16>.stride * indices.count,
-                device: device)
-            if self.verticesBuffer != nil, self.indicesBuffer != nil {
-                self.indicesCount = indices.count
-                assert(
-                    self.indicesCount * 2 == MemoryLayout<UInt16>.stride
-                        * indices.count)
-            } else {
-                self.indicesCount = 0
-            }
         }
     }
 

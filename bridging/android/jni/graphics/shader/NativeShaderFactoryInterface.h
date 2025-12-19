@@ -43,6 +43,7 @@ private:
         /*not-null*/ std::shared_ptr<::LineGroupShaderInterface> createUnitSphereSimpleLineGroupShader() override;
         /*not-null*/ std::shared_ptr<::ColorShaderInterface> createUnitSphereColorShader() override;
         /*not-null*/ std::shared_ptr<::ColorShaderInterface> createColorShader() override;
+        /*not-null*/ std::shared_ptr<::ColorShaderInterface> createPolygonTessellatedShader(bool unitSphere) override;
         /*not-null*/ std::shared_ptr<::ColorCircleShaderInterface> createColorCircleShader() override;
         /*not-null*/ std::shared_ptr<::ColorCircleShaderInterface> createUnitSphereColorCircleShader() override;
         /*not-null*/ std::shared_ptr<::PolygonGroupShaderInterface> createPolygonGroupShader(bool isStriped, bool unitSphere) override;
@@ -52,6 +53,7 @@ private:
         /*not-null*/ std::shared_ptr<::TextInstancedShaderInterface> createUnitSphereTextInstancedShader() override;
         /*not-null*/ std::shared_ptr<::RasterShaderInterface> createRasterShader() override;
         /*not-null*/ std::shared_ptr<::RasterShaderInterface> createUnitSphereRasterShader() override;
+        /*not-null*/ std::shared_ptr<::RasterShaderInterface> createQuadTessellatedShader() override;
         /*not-null*/ std::shared_ptr<::StretchShaderInterface> createStretchShader() override;
         /*not-null*/ std::shared_ptr<::StretchInstancedShaderInterface> createStretchInstancedShader(bool unitSphere) override;
         /*not-null*/ std::shared_ptr<::ColorShaderInterface> createIcosahedronColorShader() override;
@@ -74,6 +76,7 @@ private:
     const jmethodID method_createUnitSphereSimpleLineGroupShader { ::djinni::jniGetMethodID(clazz.get(), "createUnitSphereSimpleLineGroupShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/LineGroupShaderInterface;") };
     const jmethodID method_createUnitSphereColorShader { ::djinni::jniGetMethodID(clazz.get(), "createUnitSphereColorShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/ColorShaderInterface;") };
     const jmethodID method_createColorShader { ::djinni::jniGetMethodID(clazz.get(), "createColorShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/ColorShaderInterface;") };
+    const jmethodID method_createPolygonTessellatedShader { ::djinni::jniGetMethodID(clazz.get(), "createPolygonTessellatedShader", "(Z)Lio/openmobilemaps/mapscore/shared/graphics/shader/ColorShaderInterface;") };
     const jmethodID method_createColorCircleShader { ::djinni::jniGetMethodID(clazz.get(), "createColorCircleShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/ColorCircleShaderInterface;") };
     const jmethodID method_createUnitSphereColorCircleShader { ::djinni::jniGetMethodID(clazz.get(), "createUnitSphereColorCircleShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/ColorCircleShaderInterface;") };
     const jmethodID method_createPolygonGroupShader { ::djinni::jniGetMethodID(clazz.get(), "createPolygonGroupShader", "(ZZ)Lio/openmobilemaps/mapscore/shared/graphics/shader/PolygonGroupShaderInterface;") };
@@ -83,6 +86,7 @@ private:
     const jmethodID method_createUnitSphereTextInstancedShader { ::djinni::jniGetMethodID(clazz.get(), "createUnitSphereTextInstancedShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/TextInstancedShaderInterface;") };
     const jmethodID method_createRasterShader { ::djinni::jniGetMethodID(clazz.get(), "createRasterShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/RasterShaderInterface;") };
     const jmethodID method_createUnitSphereRasterShader { ::djinni::jniGetMethodID(clazz.get(), "createUnitSphereRasterShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/RasterShaderInterface;") };
+    const jmethodID method_createQuadTessellatedShader { ::djinni::jniGetMethodID(clazz.get(), "createQuadTessellatedShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/RasterShaderInterface;") };
     const jmethodID method_createStretchShader { ::djinni::jniGetMethodID(clazz.get(), "createStretchShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/StretchShaderInterface;") };
     const jmethodID method_createStretchInstancedShader { ::djinni::jniGetMethodID(clazz.get(), "createStretchInstancedShader", "(Z)Lio/openmobilemaps/mapscore/shared/graphics/shader/StretchInstancedShaderInterface;") };
     const jmethodID method_createIcosahedronColorShader { ::djinni::jniGetMethodID(clazz.get(), "createIcosahedronColorShader", "()Lio/openmobilemaps/mapscore/shared/graphics/shader/ColorShaderInterface;") };
