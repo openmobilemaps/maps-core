@@ -32,7 +32,8 @@ class GLThread constructor(
 	var onDrawCallback: (() -> Unit)? = null,
 	var onResumeCallback: (() -> Unit)? = null,
 	var onPauseCallback: (() -> Unit)? = null,
-	var onFinishingCallback: (() -> Unit)? = null
+	var onFinishingCallback: (() -> Unit)? = null,
+	val usePbufferSurface: Boolean = false
 ) :
 	Thread(TAG) {
 
@@ -84,35 +85,35 @@ class GLThread constructor(
 	var enforcedFinishInterval: Int? = null
 	private var currentFrameIndex = 0
 
-	var renderer: GLSurfaceView.Renderer? = null
-	var surface: SurfaceTexture? = null
+	@Volatile var renderer: GLSurfaceView.Renderer? = null
+	@Volatile var surface: SurfaceTexture? = null
 
 	var useMSAA: Boolean = false
 	var targetFrameRate = -1
 
 	var performanceLoggers: List<PerformanceLoggerInterface>? = null
 
-	@Volatile
-	private var finished = false
-	private var isPaused = true
+	@Volatile private var finished = false
+	@Volatile private var isPaused = true
 	private var egl: EGL10? = null
 	private var eglDisplay: EGLDisplay? = null
 	private var eglConfig: EGLConfig? = null
 	private var eglContext: EGLContext? = null
 	private var eglSurface: EGLSurface? = null
 	private var gl: GL? = null
-	private var width = 0
-	private var height = 0
+	@Volatile private var width = 0
+	@Volatile private var height = 0
 
 	@Volatile
-	private var sizeChanged = true
+	private var surfaceInvalidated = true
 
 	override fun run() {
 		initGL()
 		val gl10 = gl as GL10?
-		val renderer = renderer ?: throw IllegalStateException("No renderer attached to GlTextureView")
-		renderer.onSurfaceCreated(gl10, eglConfig)
-		renderer.onSurfaceChanged(gl10, width, height)
+		requireNotNull(renderer, { "No renderer attached to GlTextureView!" }).apply {
+			onSurfaceCreated(gl10, eglConfig)
+			onSurfaceChanged(gl10, width, height)
+		}
 
 		if (!isPaused) {
 			onResumeCallback?.invoke()
@@ -131,7 +132,7 @@ class GLThread constructor(
 						firstPause = true
 					}
 					var finishDuration = 0L
-					if (firstPause || !hasFinishedSinceDirty) {
+					if (!(finished || surface == null) && (firstPause || !hasFinishedSinceDirty)) {
 						finishDuration = System.currentTimeMillis()
 						GLES32.glFinish()
 						hasFinishedSinceDirty = true
@@ -139,7 +140,7 @@ class GLThread constructor(
 					}
 
 					try {
-						if (finishDuration < BREAK_RENDER_INTERVAL) {
+						if (!finished && finishDuration < BREAK_RENDER_INTERVAL) {
 							synchronized(runNotifier) { runNotifier.wait(if (isPaused) PAUSE_RENDER_INTERVAL else BREAK_RENDER_INTERVAL - finishDuration) }
 						}
 					} catch (e: InterruptedException) {
@@ -155,12 +156,14 @@ class GLThread constructor(
 			isDirty.set(false)
 
 			val timestampStartRender = System.nanoTime()
-			checkCurrent()
-			if (sizeChanged) {
-				createSurface()
-				renderer.onSurfaceChanged(gl10, width, height)
-				sizeChanged = false
+			if (surfaceInvalidated) {
+				if (!createSurface()) {
+					continue
+				}
+				renderer?.onSurfaceChanged(gl10, width, height)
+				surfaceInvalidated = false
 			}
+			checkCurrent()
 			var i = 0
 			while (glRunList.isNotEmpty() && i < MAX_NUM_GRAPHICS_PRE_TASKS) {
 				glRunList.poll()?.invoke()
@@ -168,7 +171,7 @@ class GLThread constructor(
 			}
 
 			performanceLoggers?.forEach { it.startLog(LOG_TAG_DRAW_FRAME) }
-			renderer.onDrawFrame(gl10)
+			renderer?.onDrawFrame(gl10)
 			if (BuildConfig.DEBUG) {
 				GLES32.glGetError().let {
 					if (it != GLES32.GL_NO_ERROR) {
@@ -184,16 +187,18 @@ class GLThread constructor(
 				}
 			}
 
-			enforcedFinishInterval?.let { interval ->
-				if (currentFrameIndex++ >= interval) {
-					GLES32.glFinish()
-					currentFrameIndex = 0
+			if (!finished) {
+				enforcedFinishInterval?.let { interval ->
+					if (currentFrameIndex++ >= interval) {
+						GLES32.glFinish()
+						currentFrameIndex = 0
+					}
 				}
 			}
 
 			onDrawCallback?.invoke()
 
-			if (targetFrameRate > 0) {
+			if (!finished && targetFrameRate > 0) {
 				val renderTime = (System.nanoTime() - timestampStartRender) / 1000000
 				try {
 					val sleepTime = max(0, 1000 / min(1000, targetFrameRate) - renderTime)
@@ -204,7 +209,10 @@ class GLThread constructor(
 			}
 		}
 		onPauseCallback?.invoke()
+		onPauseCallback = null
 		onFinishingCallback?.invoke()
+		onFinishingCallback = null
+		onResumeCallback = null
 		finishGL()
 	}
 
@@ -244,29 +252,33 @@ class GLThread constructor(
 		/*
 		 * Create an EGL surface we can render into.
 		 */
-		if (surface != null) {
-			eglSurface = try {
-				egl?.eglCreateWindowSurface(eglDisplay, eglConfig, surface, null)
-			} catch (e: IllegalArgumentException) {
-				// This exception indicates that the surface flinger surface
-				// is not valid. This can happen if the surface flinger surface has
-				// been torn down, but the application has not yet been
-				// notified via SurfaceHolder.Callback.surfaceDestroyed.
-				// In theory the application should be notified first,
-				// but in practice sometimes it is not. See b/4588890
-				Log.e(TAG, "eglCreateWindowSurface", e)
-				return false
-			}
-		} else {
+		if (usePbufferSurface) {
 			/*
-			*   If no window surface is provided, create a matching one
+			*   Create a matching surface
 			 */
 			val surfAttr = intArrayOf(
-					EGL10.EGL_WIDTH, width,
-					EGL10.EGL_HEIGHT, height,
-					EGL10.EGL_NONE
+				EGL10.EGL_WIDTH, width,
+				EGL10.EGL_HEIGHT, height,
+				EGL10.EGL_NONE
 			)
 			eglSurface = egl?.eglCreatePbufferSurface(eglDisplay, eglConfig, surfAttr)
+		} else {
+			if (surface != null) {
+				eglSurface = try {
+					egl?.eglCreateWindowSurface(eglDisplay, eglConfig, surface, null)
+				} catch (e: IllegalArgumentException) {
+					// This exception indicates that the surface flinger surface
+					// is not valid. This can happen if the surface flinger surface has
+					// been torn down, but the application has not yet been
+					// notified via SurfaceHolder.Callback.surfaceDestroyed.
+					// In theory the application should be notified first,
+					// but in practice sometimes it is not. See b/4588890
+					Log.e(TAG, "eglCreateWindowSurface", e)
+					return false
+				}
+			} else {
+				return false
+			}
 		}
 
 		if (eglSurface == null || eglSurface === EGL10.EGL_NO_SURFACE) {
@@ -380,8 +392,12 @@ class GLThread constructor(
 		synchronized(runNotifier) { runNotifier.notify() }
 	}
 
-	fun doPause() {
+	fun doPause(clearSurface: Boolean = false) {
 		isPaused = true
+		if (clearSurface) {
+			surface = null
+			surfaceInvalidated = true
+		}
 	}
 
 	fun doResume() {
@@ -409,7 +425,7 @@ class GLThread constructor(
 	fun onWindowResize(w: Int, h: Int) {
 		width = w
 		height = h
-		sizeChanged = true
+		surfaceInvalidated = true
 		requestRender()
 	}
 

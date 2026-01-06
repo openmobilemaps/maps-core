@@ -55,7 +55,7 @@ void Scene::compute() {
 void Scene::clear() {}
 
 void Scene::invalidate() {
-    if (auto handler = callbackHandler) {
+    if (auto handler = callbackHandler.lock()) {
         handler->invalidate();
     }
 }
