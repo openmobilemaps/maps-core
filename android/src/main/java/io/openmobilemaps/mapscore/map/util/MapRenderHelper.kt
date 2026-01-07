@@ -29,11 +29,12 @@ open class MapRenderHelper {
 			renderDensity: Float = 72f,
 			renderTimeoutSeconds: Float = 20f,
 			destroyAfterRenderAction: Boolean = true,
+			useMSAA: Boolean = false,
 		) : OffscreenMapRenderer {
 			onStateUpdate.invoke(MapViewRenderState.Loading)
 
 			val mapRenderer = OffscreenMapRenderer(renderSizePx, renderDensity)
-			mapRenderer.setupMap(coroutineScope, mapConfig, true)
+			mapRenderer.setupMap(coroutineScope, mapConfig, useMSAA)
 			onSetupMap(mapRenderer)
 
 			mapRenderer.requireMapInterface().getScheduler().addTask(object : TaskInterface() {
