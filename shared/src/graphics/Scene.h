@@ -49,7 +49,7 @@ class Scene : public SceneInterface {
     std::shared_ptr<RenderingContextInterface> renderingContext;
     std::shared_ptr<CameraInterface> camera;
 
-    std::shared_ptr<SceneCallbackInterface> callbackHandler;
+    std::weak_ptr<SceneCallbackInterface> callbackHandler;
     const std::shared_ptr<::GraphicsObjectFactoryInterface> graphicsFactory;
     const std::shared_ptr<::ShaderFactoryInterface> shaderFactory;
 
