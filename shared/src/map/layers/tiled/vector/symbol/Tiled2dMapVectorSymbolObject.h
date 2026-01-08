@@ -69,6 +69,7 @@ public:
 
     const SymbolObjectInstanceCounts getInstanceCounts() const;
 
+    void setupCustomIconInfo(RectI customUv);
     std::optional<ResolvedSpriteIconId> getUpdatedSpriteIconRef(const double zoomIdentifier, const std::unordered_map<SpriteIconId, ResolvedSpriteIconId> &spriteData);
     std::optional<ResolvedSpriteIconId> getSpriteIconRef() const;
     void resetLastIconProperties();

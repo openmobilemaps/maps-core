@@ -369,6 +369,10 @@ const Tiled2dMapVectorSymbolObject::SymbolObjectInstanceCounts Tiled2dMapVectorS
     return ::Vec2D(rotated.x, rotated.y);
 }
 
+void Tiled2dMapVectorSymbolObject::setupCustomIconInfo(RectI customUv) {
+    customIconUv = customUv;
+}
+
 std::optional<ResolvedSpriteIconId> Tiled2dMapVectorSymbolObject::getUpdatedSpriteIconRef(const double zoomIdentifier, const std::unordered_map<SpriteIconId, ResolvedSpriteIconId> &spriteLookup) {
     if (instanceCounts.icons == 0 && instanceCounts.stretchedIcons == 0) {
         return std::nullopt;

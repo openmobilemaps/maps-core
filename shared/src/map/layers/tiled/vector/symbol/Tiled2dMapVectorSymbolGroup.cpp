@@ -91,6 +91,8 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
 
     std::vector<VectorLayerFeatureInfo> featureInfosWithCustomAssets;
 
+    bool warnedCustomImageWithoutSymbolDelegate = false;
+
     size_t featureTileIndex = -1;
     int32_t featuresRBase = (int32_t)features->size() - (featuresBase + featuresCount);
     for (auto it = features->rbegin() + featuresRBase; it != features->rbegin() + featuresRBase + featuresCount; it++) {
@@ -136,11 +138,20 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
         const double symbolSpacingPx = layerDescription->style.getSymbolSpacing(evalContext);
         const double symbolSpacingMeters = symbolSpacingPx * tilePixelFactor;
 
-        const bool hasImageFromCustomProvider = layerDescription->style.getIconImageCustomProvider(evalContext);
+        const bool hasImageFromCustomProviderRequested = layerDescription->style.getIconImageCustomProvider(evalContext);
+        if (hasImageFromCustomProviderRequested && !symbolDelegate) {
+            if (!warnedCustomImageWithoutSymbolDelegate) {
+                LogError << layerIdentifier
+                         <<= ": icon-image-custom-provider enabled but no symbol delegate present.";
+                warnedCustomImageWithoutSymbolDelegate = true;
+            }
+        }
+        const bool hasImageFromCustomProvider = (hasImageFromCustomProviderRequested && symbolDelegate);
+
         bool hasIconPotentially;
         if (hasImageFromCustomProvider) {
             hasIconPotentially = true;
-        } else if (layerDescription->style.iconImageEvaluator.getValue()) {
+        } else if (!hasImageFromCustomProviderRequested && layerDescription->style.iconImageEvaluator.getValue()) {
             // Attempt to evaluate without zoom and state
             const auto zoomAndStateIndependentEvalCtx = EvaluationContext(dpFactor, context.get(), nullptr);
             const auto value = layerDescription->style.iconImageEvaluator.getValue();
@@ -359,7 +370,8 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
         return;
     }
 
-    if (symbolDelegate && !featureInfosWithCustomAssets.empty()) {
+    if (!featureInfosWithCustomAssets.empty()) {
+        assert(symbolDelegate != nullptr);
         auto customAssetPages = symbolDelegate->getCustomAssetsFor(featureInfosWithCustomAssets, layerDescription->identifier);
         for (const auto &page: customAssetPages) {
             auto object = strongMapInterface->getGraphicsObjectFactory()->createQuadInstanced(alphaInstancedShader);
@@ -468,8 +480,8 @@ void Tiled2dMapVectorSymbolGroup::setupObjects(const std::vector<std::pair<std::
 
                     [[ maybe_unused ]] int offset = object->customTextureOffset;
                     assert(offset < customTextures[i].iconRotations.size());
-                    // XXX: No reason to initialize these values?
-                    //object->setupIconProperties(customTextures[i].iconPositions, customTextures[i].iconRotations, customTextures[i].iconTextureCoordinates, offset, tileInfo.tileInfo.zoomIdentifier, customTextures[i].texture, nullptr, uvIt->second);
+
+                    object->setupCustomIconInfo(uvIt->second);
                     break;
                 }
             }
@@ -677,7 +689,7 @@ bool Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
             if (object->hasCustomTexture) {
                 auto &page = customTextures[object->customTexturePage];
                 uint32_t offset = object->customTextureOffset;
-                object->updateIconProperties(page.iconPositions, page.iconScales, page.iconRotations, page.iconAlphas, page.iconOffsets, page.iconTextureCoordinates, offset, zoomIdentifier,scaleFactor, rotation, now, viewPortSize, nullptr, spriteIconData);
+                object->updateIconProperties(page.iconPositions, page.iconScales, page.iconRotations, page.iconAlphas, page.iconOffsets, page.iconTextureCoordinates, offset, zoomIdentifier,scaleFactor, rotation, now, viewPortSize, page.texture, spriteIconData);
             } else if (spriteIconRef) {
                 SpriteIconDescriptor &spriteDescriptor = sprites.at(spriteIconRef->sheet);
                 if(object->getInstanceCounts().icons) {
