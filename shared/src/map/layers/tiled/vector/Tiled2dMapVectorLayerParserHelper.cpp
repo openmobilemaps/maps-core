@@ -65,7 +65,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
     nlohmann::json json;
 
     try {
-        json = nlohmann::json::parse(styleJsonString);
+        json = nlohmann::json::parse(styleJsonString, nullptr, true, true);
     }
     catch (nlohmann::json::parse_error &ex) {
         return Tiled2dMapVectorLayerParserResult(nullptr, LoaderStatus::ERROR_OTHER, ex.what(), std::nullopt);
@@ -147,7 +147,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                 auto string = std::string((char *) result.data->buf(), result.data->len());
                 nlohmann::json json;
                 try {
-                    json = nlohmann::json::parse(string);
+                    json = nlohmann::json::parse(string, nullptr, true, true);
                 }
                 catch (nlohmann::json::parse_error &ex) {
                     return Tiled2dMapVectorLayerParserResult(nullptr, LoaderStatus::ERROR_OTHER, "", std::nullopt);
@@ -204,7 +204,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
             }
             auto string = std::string((char*)result.data->buf(), result.data->len());
             try {
-                tileJsons[key] = nlohmann::json::parse(string);
+                tileJsons[key] = nlohmann::json::parse(string, nullptr, true, true);
             }
             catch (nlohmann::json::parse_error &ex) {
                 return Tiled2dMapVectorLayerParserResult(nullptr, LoaderStatus::ERROR_OTHER, "", std::nullopt);

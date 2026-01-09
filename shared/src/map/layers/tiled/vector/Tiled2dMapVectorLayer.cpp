@@ -583,7 +583,7 @@ void Tiled2dMapVectorLayer::reloadLocalDataSource(const std::string &sourceName,
     if (const auto &geoSource = mapDescription->geoJsonSources[sourceName]) {
 
         try {
-            auto json = nlohmann::json::parse(geoJson);
+            auto json = nlohmann::json::parse(geoJson, nullptr, true, true);
             geoSource->reload(GeoJsonParser::getGeoJson(json, *stringTable));
         }
         catch (nlohmann::json::exception &ex) {
@@ -996,7 +996,7 @@ void Tiled2dMapVectorLayer::loadSpriteData(int scale, bool fromLocal) {
             nlohmann::json json;
             try
             {
-                json = nlohmann::json::parse(string);
+                json = nlohmann::json::parse(string, nullptr, true, true);
 
                 std::unordered_map<std::string, SpriteDesc> sprites;
 

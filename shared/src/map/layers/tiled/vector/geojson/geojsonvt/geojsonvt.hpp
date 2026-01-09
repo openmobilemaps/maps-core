@@ -116,7 +116,7 @@ public:
                 auto string = std::string((char*)result.data->buf(), result.data->len());
                 nlohmann::json json;
                 try {
-                    json = nlohmann::json::parse(string);
+                    json = nlohmann::json::parse(string, nullptr, true, true);
                     auto geoJson = GeoJsonParser::getGeoJson(json, *strongStringTable);
                     if (geoJson) {
                         self->initialize(geoJson);
