@@ -5,6 +5,7 @@
 
 #include "SharedBytes.h"
 #include "Vec3D.h"
+#include <cstdint>
 #include <memory>
 
 class GraphicsObjectInterface;
@@ -14,7 +15,9 @@ class Polygon2dInterface {
 public:
     virtual ~Polygon2dInterface() = default;
 
-    virtual void setVertices(const ::SharedBytes & vertices, const ::SharedBytes & indices, const ::Vec3D & origin) = 0;
+    virtual void setVertices(const ::SharedBytes & vertices, const ::SharedBytes & indices, const ::Vec3D & origin, bool is3d) = 0;
+
+    virtual void setSubdivisionFactor(int32_t factor) = 0;
 
     virtual /*not-null*/ std::shared_ptr<GraphicsObjectInterface> asGraphicsObject() = 0;
 

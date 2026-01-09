@@ -36,7 +36,9 @@ compute_object_interface = interface +c +j +o {
 
 graphics_object_factory_interface = interface +c +j +o {
     create_quad(shader: shader_program_interface) : quad_2d_interface;
+    create_quad_tessellated(shader: shader_program_interface) : quad_2d_interface;
     create_polygon(shader: shader_program_interface) : polygon_2d_interface;
+    create_polygon_tessellated(shader: shader_program_interface) : polygon_2d_interface;
     create_icosahedron_object(shader: shader_program_interface) : icosahedron_interface;
 
     create_quad_instanced(shader: shader_program_interface): quad_2d_instanced_interface;
@@ -47,6 +49,7 @@ graphics_object_factory_interface = interface +c +j +o {
 
     create_quad_mask(is_3d: bool) : quad_2d_interface;
     create_polygon_mask(is_3d: bool) : polygon_2d_interface;
+    create_polygon_mask_tessellated(is_3d: bool) : polygon_2d_interface;
 
     create_text(shader: shader_program_interface) : text_interface;
 
@@ -130,7 +133,8 @@ line_group_2d_interface = interface +c +j +o {
 }
 
 polygon_2d_interface = interface +c +j +o {
-    set_vertices(vertices: shared_bytes, indices: shared_bytes, origin: vec_3_d);
+    set_vertices(vertices: shared_bytes, indices: shared_bytes, origin: vec_3_d, is_3d: bool);
+    set_subdivision_factor(factor: i32);
 
     as_graphics_object(): graphics_object_interface;
     as_masking_object(): masking_object_interface;

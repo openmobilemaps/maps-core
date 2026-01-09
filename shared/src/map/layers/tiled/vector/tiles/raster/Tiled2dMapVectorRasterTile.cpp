@@ -14,6 +14,7 @@
 #include "RasterShaderInterface.h"
 #include "RenderPass.h"
 #include "Tiled2dMapVectorStyleParser.h"
+#include "Tiled2dMapVectorLayerConstants.h"
 
 Tiled2dMapVectorRasterTile::Tiled2dMapVectorRasterTile(const std::weak_ptr<MapInterface> &mapInterface,
                                                        const std::weak_ptr<Tiled2dMapVectorLayer> &vectorLayer,
@@ -28,12 +29,20 @@ Tiled2dMapVectorRasterTile::Tiled2dMapVectorRasterTile(const std::weak_ptr<MapIn
     isStyleStateDependant = usedKeys.isStateDependant();
     auto pMapInterface = mapInterface.lock();
     if (pMapInterface) {
+        
+    #ifdef TESSELLATION_ACTIVATED
+        auto shader = pMapInterface->getShaderFactory()->createQuadTessellatedShader();
+        auto quad = pMapInterface->getGraphicsObjectFactory()->createQuadTessellated(shader->asShaderProgramInterface());
+    #else
         auto shader = pMapInterface->is3d() ? pMapInterface->getShaderFactory()->createUnitSphereRasterShader() : pMapInterface->getShaderFactory()->createRasterShader();
-        shader->asShaderProgramInterface()->setBlendMode(description->style.getBlendMode(EvaluationContext(0.0, dpFactor, std::make_shared<FeatureContext>(), featureStateManager)));
         auto quad = pMapInterface->getGraphicsObjectFactory()->createQuad(shader->asShaderProgramInterface());
-#if DEBUG
+    #endif
+        
+        shader->asShaderProgramInterface()->setBlendMode(description->style.getBlendMode(EvaluationContext(0.0, dpFactor, std::make_shared<FeatureContext>(), featureStateManager)));
+        
+    #if DEBUG
         quad->asGraphicsObject()->setDebugLabel(description->identifier + "_" + tileInfo.tileInfo.to_string_short());
-#endif
+    #endif
         tileObject = std::make_shared<Textured2dLayerObject>(quad, shader, pMapInterface, pMapInterface->is3d());
         tileObject->setRectCoord(tileInfo.tileInfo.bounds);
 

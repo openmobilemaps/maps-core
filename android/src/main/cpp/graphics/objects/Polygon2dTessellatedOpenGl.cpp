@@ -8,22 +8,27 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-#include "Polygon2dOpenGl.h"
+#include "Polygon2dTessellatedOpenGl.h"
 #include "OpenGlHelper.h"
 #include <cstring>
 
-Polygon2dOpenGl::Polygon2dOpenGl(const std::shared_ptr<::BaseShaderProgramOpenGl> &shader)
+Polygon2dTessellatedOpenGl::Polygon2dTessellatedOpenGl(const std::shared_ptr<::BaseShaderProgramOpenGl> &shader)
     : shaderProgram(shader) {}
 
-std::shared_ptr<GraphicsObjectInterface> Polygon2dOpenGl::asGraphicsObject() { return shared_from_this(); }
+std::shared_ptr<GraphicsObjectInterface> Polygon2dTessellatedOpenGl::asGraphicsObject() { return shared_from_this(); }
 
-std::shared_ptr<MaskingObjectInterface> Polygon2dOpenGl::asMaskingObject() { return shared_from_this(); }
+std::shared_ptr<MaskingObjectInterface> Polygon2dTessellatedOpenGl::asMaskingObject() { return shared_from_this(); }
 
-bool Polygon2dOpenGl::isReady() { return ready; }
+bool Polygon2dTessellatedOpenGl::isReady() { return ready; }
 
-void Polygon2dOpenGl::setSubdivisionFactor(int32_t factor) {}
+void Polygon2dTessellatedOpenGl::setSubdivisionFactor(int32_t factor) {
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
+    if (factor != subdivisionFactor) {
+        subdivisionFactor = factor;
+    }
+}
 
-void Polygon2dOpenGl::setVertices(const ::SharedBytes & vertices_, const ::SharedBytes & indices_, const ::Vec3D & origin, bool is3d) {
+void Polygon2dTessellatedOpenGl::setVertices(const ::SharedBytes & vertices_, const ::SharedBytes & indices_, const ::Vec3D & origin, bool is3d) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
     ready = false;
     dataReady = false;
@@ -31,6 +36,8 @@ void Polygon2dOpenGl::setVertices(const ::SharedBytes & vertices_, const ::Share
     indices.resize(indices_.elementCount);
     vertices.resize(vertices_.elementCount);
     polygonOrigin = origin;
+
+    this->is3d = is3d;
 
     if (indices_.elementCount > 0) {
         std::memcpy(indices.data(), (void *)indices_.address, indices_.elementCount * indices_.bytesPerElement);
@@ -44,7 +51,7 @@ void Polygon2dOpenGl::setVertices(const ::SharedBytes & vertices_, const ::Share
     dataReady = true;
 }
 
-void Polygon2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface> &context) {
+void Polygon2dTessellatedOpenGl::setup(const std::shared_ptr<::RenderingContextInterface> &context) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
     if (ready || !dataReady) {
         return;
@@ -62,7 +69,7 @@ void Polygon2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface> &
     ready = true;
 }
 
-void Polygon2dOpenGl::prepareGlData(int program) {
+void Polygon2dTessellatedOpenGl::prepareGlData(int program) {
     glUseProgram(program);
 
     if (!glDataBuffersGenerated) {
@@ -71,14 +78,18 @@ void Polygon2dOpenGl::prepareGlData(int program) {
     glBindVertexArray(vao);
 
     positionHandle = glGetAttribLocation(program, "vPosition");
+    frameCoordHandle = glGetAttribLocation(program, "vFrameCoord");
     if (!glDataBuffersGenerated) {
         glGenBuffers(1, &vertexBuffer);
     }
     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
 
+    size_t stride = sizeof(GLfloat) * 5;
     glEnableVertexAttribArray(positionHandle);
-    glVertexAttribPointer(positionHandle, 3, GL_FLOAT, false, 0, nullptr);
+    glVertexAttribPointer(positionHandle, 3, GL_FLOAT, false, stride, nullptr);
+    glEnableVertexAttribArray(frameCoordHandle);
+    glVertexAttribPointer(frameCoordHandle, 2, GL_FLOAT, false, stride, (float*)(sizeof(GLfloat) * 3));
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -94,11 +105,14 @@ void Polygon2dOpenGl::prepareGlData(int program) {
 
     mMatrixHandle = glGetUniformLocation(program, "umMatrix");
     originOffsetHandle = glGetUniformLocation(program, "uOriginOffset");
+    subdivisionFactorHandle = glGetUniformLocation(program, "uSubdivisionFactor");
+    originHandle = glGetUniformLocation(program, "uOrigin");
+    is3dHandle = glGetUniformLocation(program, "uIs3d");
 
     glDataBuffersGenerated = true;
 }
 
-void Polygon2dOpenGl::clear() {
+void Polygon2dTessellatedOpenGl::clear() {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
     if (ready) {
         removeGlBuffers();
@@ -106,7 +120,7 @@ void Polygon2dOpenGl::clear() {
     }
 }
 
-void Polygon2dOpenGl::removeGlBuffers() {
+void Polygon2dTessellatedOpenGl::removeGlBuffers() {
     if (glDataBuffersGenerated) {
         glDeleteBuffers(1, &vertexBuffer);
         glDeleteBuffers(1, &indexBuffer);
@@ -115,11 +129,11 @@ void Polygon2dOpenGl::removeGlBuffers() {
     }
 }
 
-void Polygon2dOpenGl::setIsInverseMasked(bool inversed) { isMaskInversed = inversed; }
+void Polygon2dTessellatedOpenGl::setIsInverseMasked(bool inversed) { isMaskInversed = inversed; }
 
-void Polygon2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
-                             int64_t vpMatrix, int64_t mMatrix, const ::Vec3D &origin, bool isMasked,
-                             double screenPixelAsRealMeterFactor, bool isScreenSpaceCoords) {
+void Polygon2dTessellatedOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
+                                        int64_t vpMatrix, int64_t mMatrix, const ::Vec3D &origin, bool isMasked,
+                                        double screenPixelAsRealMeterFactor, bool isScreenSpaceCoords) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
     if (!ready || !shaderProgram->isRenderable()) {
         return;
@@ -149,8 +163,8 @@ void Polygon2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> 
     drawPolygon(openGlContext, program, vpMatrix, mMatrix, origin, isScreenSpaceCoords);
 }
 
-void Polygon2dOpenGl::drawPolygon(const std::shared_ptr<::RenderingContextInterface> &context, int program, int64_t vpMatrix,
-                                  int64_t mMatrix, const Vec3D &origin, bool isScreenSpaceCoords) {
+void Polygon2dTessellatedOpenGl::drawPolygon(const std::shared_ptr<::RenderingContextInterface> &context, int program, int64_t vpMatrix,
+                                             int64_t mMatrix, const Vec3D &origin, bool isScreenSpaceCoords) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
     // Add program to OpenGL environment
     glUseProgram(program);
@@ -164,17 +178,24 @@ void Polygon2dOpenGl::drawPolygon(const std::shared_ptr<::RenderingContextInterf
 
     glUniform4f(originOffsetHandle, polygonOrigin.x - origin.x, polygonOrigin.y - origin.y, polygonOrigin.z - origin.z, 0.0);
 
-    // Draw the triangle
-    glDrawElements(GL_TRIANGLES, (unsigned short)indices.size(), GL_UNSIGNED_SHORT, nullptr);
+    glPatchParameteri(GL_PATCH_VERTICES, 3);
+
+    glUniform1i(subdivisionFactorHandle, subdivisionFactor);
+
+    glUniform4f(originHandle, origin.x, origin.y, origin.z, 0.0);
+
+    glUniform1i(is3dHandle, is3d);
+
+    glDrawElements(GL_PATCHES, (unsigned short)indices.size(), GL_UNSIGNED_SHORT, nullptr);
 
     glBindVertexArray(0);
 
     glDisable(GL_BLEND);
 }
 
-void Polygon2dOpenGl::renderAsMask(const std::shared_ptr<::RenderingContextInterface> &context,
-                                   const ::RenderPassConfig &renderPass, int64_t vpMatrix, int64_t mMatrix,
-                                   const ::Vec3D &origin, double screenPixelAsRealMeterFactor, bool isScreenSpaceCoords) {
+void Polygon2dTessellatedOpenGl::renderAsMask(const std::shared_ptr<::RenderingContextInterface> &context,
+                                              const ::RenderPassConfig &renderPass, int64_t vpMatrix, int64_t mMatrix,
+                                              const ::Vec3D &origin, double screenPixelAsRealMeterFactor, bool isScreenSpaceCoords) {
     if (!ready) {
         return;
     }
@@ -186,6 +207,6 @@ void Polygon2dOpenGl::renderAsMask(const std::shared_ptr<::RenderingContextInter
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 }
 
-void Polygon2dOpenGl::setDebugLabel(const std::string &label) {
+void Polygon2dTessellatedOpenGl::setDebugLabel(const std::string &label) {
     // not used
 }

@@ -20,14 +20,14 @@
 #include <mutex>
 #include <vector>
 
-class Quad2dOpenGl : public GraphicsObjectInterface,
-                     public MaskingObjectInterface,
-                     public Quad2dInterface,
-                     public std::enable_shared_from_this<Quad2dOpenGl> {
+class Quad2dTessellatedOpenGl : public GraphicsObjectInterface,
+                                public MaskingObjectInterface,
+                                public Quad2dInterface,
+                                public std::enable_shared_from_this<Quad2dTessellatedOpenGl> {
   public:
-    Quad2dOpenGl(const std::shared_ptr<::BaseShaderProgramOpenGl> &shader);
+    Quad2dTessellatedOpenGl(const std::shared_ptr<::BaseShaderProgramOpenGl> &shader);
 
-    ~Quad2dOpenGl(){};
+    ~Quad2dTessellatedOpenGl(){};
 
     virtual bool isReady() override;
 
@@ -83,7 +83,11 @@ protected:
     bool texCoordBufferGenerated = false;
     int mMatrixHandle;
     int originOffsetHandle;
+    int subdivisionFactorHandle;
+    int originHandle;
+    int is3dHandle;
     int positionHandle;
+    int frameCoordHandle;
     GLuint vao;
     GLuint vertexBuffer;
     std::vector<GLfloat> vertices;
@@ -91,8 +95,6 @@ protected:
     int textureCoordinateHandle;
     GLuint textureCoordsBuffer;
     std::vector<GLfloat> textureCoords;
-    GLuint indexBuffer;
-    std::vector<GLushort> indices;
     Vec3D quadOrigin = Vec3D(0.0, 0.0, 0.0);
 
     bool is3d = false;

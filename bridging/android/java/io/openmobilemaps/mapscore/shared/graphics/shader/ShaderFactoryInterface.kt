@@ -28,6 +28,8 @@ abstract class ShaderFactoryInterface {
 
     abstract fun createColorShader(): ColorShaderInterface
 
+    abstract fun createPolygonTessellatedShader(unitSphere: Boolean): ColorShaderInterface
+
     abstract fun createColorCircleShader(): ColorCircleShaderInterface
 
     abstract fun createUnitSphereColorCircleShader(): ColorCircleShaderInterface
@@ -45,6 +47,8 @@ abstract class ShaderFactoryInterface {
     abstract fun createRasterShader(): RasterShaderInterface
 
     abstract fun createUnitSphereRasterShader(): RasterShaderInterface
+
+    abstract fun createQuadTessellatedShader(): RasterShaderInterface
 
     abstract fun createStretchShader(): StretchShaderInterface
 
@@ -133,6 +137,12 @@ abstract class ShaderFactoryInterface {
         }
         private external fun native_createColorShader(_nativeRef: Long): ColorShaderInterface
 
+        override fun createPolygonTessellatedShader(unitSphere: Boolean): ColorShaderInterface {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_createPolygonTessellatedShader(this.nativeRef, unitSphere)
+        }
+        private external fun native_createPolygonTessellatedShader(_nativeRef: Long, unitSphere: Boolean): ColorShaderInterface
+
         override fun createColorCircleShader(): ColorCircleShaderInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             return native_createColorCircleShader(this.nativeRef)
@@ -186,6 +196,12 @@ abstract class ShaderFactoryInterface {
             return native_createUnitSphereRasterShader(this.nativeRef)
         }
         private external fun native_createUnitSphereRasterShader(_nativeRef: Long): RasterShaderInterface
+
+        override fun createQuadTessellatedShader(): RasterShaderInterface {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_createQuadTessellatedShader(this.nativeRef)
+        }
+        private external fun native_createQuadTessellatedShader(_nativeRef: Long): RasterShaderInterface
 
         override fun createStretchShader(): StretchShaderInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
