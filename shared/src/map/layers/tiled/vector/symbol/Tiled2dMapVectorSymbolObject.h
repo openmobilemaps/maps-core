@@ -25,6 +25,8 @@
 #include "SymbolAnimationCoordinatorMap.h"
 #include "VectorModificationWrapper.h"
 #include "SymbolVectorLayerDescription.h"
+#include "SpriteIconId.h"
+#include "ResolvedSpriteIconId.h"
 
 class Tiled2dMapVectorSymbolObject {
 public:
@@ -67,15 +69,15 @@ public:
 
     const SymbolObjectInstanceCounts getInstanceCounts() const;
 
-    void setupIconProperties(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &rotations, VectorModificationWrapper<float> &textureCoordinates, int &countOffset, const double zoomIdentifier, const std::shared_ptr<TextureHolderInterface> spriteTexture, const std::shared_ptr<SpriteData> spriteData, const std::optional<RectI> customUv);
-
-    void updateIconProperties(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &scales, VectorModificationWrapper<float> &rotations, VectorModificationWrapper<float> &alphas, VectorModificationWrapper<float> &offsets, VectorModificationWrapper<float> &textureCoordinates, int &countOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, long long now, const Vec2I viewPortSize, const std::shared_ptr<TextureHolderInterface> spriteTexture, const std::shared_ptr<SpriteData> spriteData);
+    void setupCustomIconInfo(RectI customUv);
+    std::optional<ResolvedSpriteIconId> getUpdatedSpriteIconRef(const double zoomIdentifier, const std::unordered_map<SpriteIconId, ResolvedSpriteIconId> &spriteData);
+    std::optional<ResolvedSpriteIconId> getSpriteIconRef() const;
+    void resetLastIconProperties();
+    void updateIconProperties(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &scales, VectorModificationWrapper<float> &rotations, VectorModificationWrapper<float> &alphas, VectorModificationWrapper<float> &offsets, VectorModificationWrapper<float> &textureCoordinates, uint32_t &countOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, long long now, const Vec2I viewPortSize, const std::shared_ptr<TextureHolderInterface> spriteTexture, const std::vector<SpriteDesc> &spriteIconData);
+    void updateStretchIconProperties(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &scales, VectorModificationWrapper<float> &rotations, VectorModificationWrapper<float> &alphas, VectorModificationWrapper<float> &stretchInfos, VectorModificationWrapper<float> &textureCoordinates, uint32_t &countOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, long long now, const Vec2I viewPortSize, const std::shared_ptr<TextureHolderInterface> spriteTexture, const std::vector<SpriteDesc> &spriteIconData);
 
     void setupTextProperties(VectorModificationWrapper<float> &textureCoordinates, VectorModificationWrapper<uint16_t> &styleIndices, int &countOffset, const double zoomIdentifier);
     void updateTextProperties(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &referencePositions, VectorModificationWrapper<float> &scales, VectorModificationWrapper<float> &rotations, VectorModificationWrapper<float> &alphas, VectorModificationWrapper<float> &styles, int &countOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, long long now, const Vec2I viewPortSize, const std::vector<float>& vpMatrix, const Vec3D& origin);
-
-    void setupStretchIconProperties(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &textureCoordinates, int &countOffset, const double zoomIdentifier, const std::shared_ptr<TextureHolderInterface> spriteTexture, const std::shared_ptr<SpriteData> spriteData);
-    void updateStretchIconProperties(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &scales, VectorModificationWrapper<float> &rotations, VectorModificationWrapper<float> &alphas, VectorModificationWrapper<float> &stretchInfos, VectorModificationWrapper<float> &textureCoordinates, int &countOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, long long now, const Vec2I viewPortSize, const std::shared_ptr<TextureHolderInterface> spriteTexture, const std::shared_ptr<SpriteData> spriteData);
 
     std::shared_ptr<FontLoaderResult> getFont() {
         if (labelObject) {
@@ -112,14 +114,15 @@ public:
     bool hasCustomTexture;
 
     size_t customTexturePage = 0;
-    int customTextureOffset = 0;
+    uint32_t customTextureOffset = 0;
     std::string stringIdentifier;
 
     Vec3D tileOrigin = Vec3D(0,0,0);
 
 private:
     double lastZoomEvaluation = -1;
-    void evaluateStyleProperties(const double zoomIdentifier);
+    void evaluateStyleProperties(const double zoomIdentifier, const std::unordered_map<SpriteIconId, ResolvedSpriteIconId> *spriteLookup);
+    void resolveIconImage(const std::unordered_map<SpriteIconId, ResolvedSpriteIconId> &spriteLookup);
 
     void writePosition(const double x, const double y, const size_t offset, VectorModificationWrapper<float> &buffer);
 
@@ -145,9 +148,6 @@ private:
 
     Vec2D spriteSize = Vec2D(0.0, 0.0);
 
-    Vec2D stretchSpriteSize = Vec2D(0.0, 0.0);
-    std::optional<SpriteDesc> stretchSpriteInfo;
-
     RectD iconBoundingBoxViewportAligned;
     RectD stretchIconBoundingBoxViewportAligned;
 
@@ -163,6 +163,7 @@ private:
 
     double lastStretchIconUpdateScaleFactor = -1;
     double lastStretchIconUpdateRotation = -1;
+    double lastStretchIconUpdateAlpha = -1;
 
     double lastTextUpdateScaleFactor = -1;
     double lastTextUpdateRotation = -1;
@@ -178,9 +179,13 @@ private:
     FeatureValueEvaluationResult<double> iconOpacity = 0.0;
     FeatureValueEvaluationResult<double> iconRotate = 0.0;
     FeatureValueEvaluationResult<double> iconSize = 0.0;
-    FeatureValueEvaluationResult<std::string> iconImage = std::string();
+    FeatureValueEvaluationResult<SpriteIconId> iconImage = SpriteIconId{};
+    std::optional<ResolvedSpriteIconId> iconImageResolved;
+    // Number of sprites at last attempt to resolve iconImage. This is sufficient to identify changes to sprites, because we only _add_ sprites.
+    std::optional<size_t> iconImageResolutionAttemptNumSprites;
 
-    std::string lastIconImage;
+    std::optional<ResolvedSpriteIconId> lastIconImageResolved;
+    std::optional<uint32_t> lastIconOffset; // index of this symbol instance during last call to updateIconProperties
     std::vector<float> iconTextFitPadding;
     TextSymbolPlacement textSymbolPlacement;
     SymbolAlignment boundingBoxRotationAlignment = SymbolAlignment::AUTO;

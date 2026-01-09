@@ -41,16 +41,24 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (nonnull DJFuture<MCTextureLoaderResult *> *)loadSpriteAsync:(int32_t)scale {
+- (nonnull DJFuture<MCTextureLoaderResult *> *)loadSpriteAsync:(nonnull NSString *)spriteId
+                                                           url:(nonnull NSString *)url
+                                                         scale:(int32_t)scale {
     try {
-        auto objcpp_result_ = _cppRefHandle.get()->loadSpriteAsync(::djinni::I32::toCpp(scale));
+        auto objcpp_result_ = _cppRefHandle.get()->loadSpriteAsync(::djinni::String::toCpp(spriteId),
+                                                                   ::djinni::String::toCpp(url),
+                                                                   ::djinni::I32::toCpp(scale));
         return ::djinni::FutureAdaptor<::djinni_generated::TextureLoaderResult>::fromCpp(std::move(objcpp_result_));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-- (nonnull DJFuture<MCDataLoaderResult *> *)loadSpriteJsonAsync:(int32_t)scale {
+- (nonnull DJFuture<MCDataLoaderResult *> *)loadSpriteJsonAsync:(nonnull NSString *)spriteId
+                                                            url:(nonnull NSString *)url
+                                                          scale:(int32_t)scale {
     try {
-        auto objcpp_result_ = _cppRefHandle.get()->loadSpriteJsonAsync(::djinni::I32::toCpp(scale));
+        auto objcpp_result_ = _cppRefHandle.get()->loadSpriteJsonAsync(::djinni::String::toCpp(spriteId),
+                                                                       ::djinni::String::toCpp(url),
+                                                                       ::djinni::I32::toCpp(scale));
         return ::djinni::FutureAdaptor<::djinni_generated::DataLoaderResult>::fromCpp(std::move(objcpp_result_));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
@@ -80,17 +88,21 @@ public:
             return ::djinni::Optional<std::optional, ::djinni::String>::toCpp(objcpp_result_);
         }
     }
-    ::djinni::Future<::TextureLoaderResult> loadSpriteAsync(int32_t c_scale) override
+    ::djinni::Future<::TextureLoaderResult> loadSpriteAsync(const std::string & c_spriteId, const std::string & c_url, int32_t c_scale) override
     {
         @autoreleasepool {
-            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() loadSpriteAsync:(::djinni::I32::fromCpp(c_scale))];
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() loadSpriteAsync:(::djinni::String::fromCpp(c_spriteId))
+                                                                                        url:(::djinni::String::fromCpp(c_url))
+                                                                                      scale:(::djinni::I32::fromCpp(c_scale))];
             return ::djinni::FutureAdaptor<::djinni_generated::TextureLoaderResult>::toCpp(objcpp_result_);
         }
     }
-    ::djinni::Future<::DataLoaderResult> loadSpriteJsonAsync(int32_t c_scale) override
+    ::djinni::Future<::DataLoaderResult> loadSpriteJsonAsync(const std::string & c_spriteId, const std::string & c_url, int32_t c_scale) override
     {
         @autoreleasepool {
-            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() loadSpriteJsonAsync:(::djinni::I32::fromCpp(c_scale))];
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() loadSpriteJsonAsync:(::djinni::String::fromCpp(c_spriteId))
+                                                                                            url:(::djinni::String::fromCpp(c_url))
+                                                                                          scale:(::djinni::I32::fromCpp(c_scale))];
             return ::djinni::FutureAdaptor<::djinni_generated::DataLoaderResult>::toCpp(objcpp_result_);
         }
     }

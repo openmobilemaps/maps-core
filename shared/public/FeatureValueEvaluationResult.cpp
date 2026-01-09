@@ -22,6 +22,7 @@
 #include "IconTextFit.h"
 #include "SymbolZOrder.h"
 #include "LineCapType.h"
+#include "SpriteIconId.h"
 
 #include "FeatureValueEvaluationResult.h"
 #include "FeatureValueEvaluationResultImpl.h"
@@ -45,3 +46,4 @@ template struct FeatureValueEvaluationResult<IconTextFit>;
 template struct FeatureValueEvaluationResult<std::vector<float>>;
 template struct FeatureValueEvaluationResult<SymbolZOrder>;
 template struct FeatureValueEvaluationResult<LineCapType>;
+template struct FeatureValueEvaluationResult<SpriteIconId>;

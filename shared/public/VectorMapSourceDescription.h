@@ -45,12 +45,21 @@ public:
             zoomLevelScaleFactor(zoomLevelScaleFactor), underzoom(underzoom), overzoom(overzoom), levels(levels) {}
 };
 
+struct SpriteSourceDescription {
+    std::string identifier;
+    std::string baseUrl;
+
+    SpriteSourceDescription(std::string identifier, std::string baseUrl)
+        : identifier(identifier)
+        , baseUrl(baseUrl) {}
+};
+
 class VectorMapDescription {
 public:
     std::string identifier;
     std::vector<std::shared_ptr<VectorMapSourceDescription>> vectorSources;
     std::vector<std::shared_ptr<VectorLayerDescription>> layers;
-    std::optional<std::string> spriteBaseUrl;
+    std::vector<SpriteSourceDescription> sprites;
     std::map<std::string, std::shared_ptr<GeoJSONVTInterface>> geoJsonSources;
     bool persistingSymbolPlacement;
     std::optional<bool> use3xSprites;
@@ -58,10 +67,15 @@ public:
     VectorMapDescription(std::string identifier,
                          std::vector<std::shared_ptr<VectorMapSourceDescription>> vectorSources,
                          std::vector<std::shared_ptr<VectorLayerDescription>> layers,
-                         std::optional<std::string> spriteBaseUrl,
+                         std::vector<SpriteSourceDescription> sprites,
                          std::map<std::string, std::shared_ptr<GeoJSONVTInterface>> geoJsonSources,
                          bool persistingSymbolPlacement,
-                         std::optional<bool> use3xSprites):
-    identifier(identifier), vectorSources(vectorSources), layers(layers), spriteBaseUrl(spriteBaseUrl),
-    geoJsonSources(geoJsonSources), persistingSymbolPlacement(persistingSymbolPlacement), use3xSprites(use3xSprites) {}
+                         std::optional<bool> use3xSprites)
+        : identifier(std::move(identifier))
+        , vectorSources(std::move(vectorSources))
+        , layers(std::move(layers))
+        , sprites(std::move(sprites))
+        , geoJsonSources(std::move(geoJsonSources))
+        , persistingSymbolPlacement(persistingSymbolPlacement)
+        , use3xSprites(use3xSprites) {}
 };
