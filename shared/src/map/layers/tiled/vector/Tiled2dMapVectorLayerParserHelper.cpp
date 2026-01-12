@@ -28,6 +28,40 @@
 #include "GeoJsonVTFactory.h"
 #include "InternedString.h"
 
+#include <algorithm>
+#include <cctype>
+
+namespace {
+std::optional<std::string> extractCoordinateReferenceSystem(const nlohmann::json &json) {
+    std::optional<std::string> crs;
+    if (json.contains("profile") && json["profile"].is_string()) {
+        crs = json["profile"].get<std::string>();
+    } else if (json.contains("metadata") && json["metadata"].is_object() && json["metadata"].contains("crs") &&
+               json["metadata"]["crs"].is_string()) {
+        crs = json["metadata"]["crs"].get<std::string>();
+    }
+
+    if (!crs.has_value()) {
+        return std::nullopt;
+    }
+
+    std::string normalized = *crs;
+    std::string lower = normalized;
+    std::transform(lower.begin(), lower.end(), lower.begin(), [](unsigned char ch) { return std::tolower(ch); });
+    if (lower == "mercator") {
+        return std::string("EPSG:3857");
+    }
+    if (lower == "geodetic") {
+        return std::string("EPSG:4326");
+    }
+    if (lower.rfind("epsg:", 0) == 0) {
+        return std::string("EPSG:") + normalized.substr(5);
+    }
+
+    return normalized;
+}
+} // namespace
+
 
 Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromUrl(const std::string &layerName,
                                                         const std::string &styleJsonUrl,
@@ -135,9 +169,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                     }
                 }
 
-                if(val["metadata"].is_object() && val["metadata"].contains("crs") && val["metadata"]["crs"].is_string()) {
-                    coordinateReferenceSystem = val["metadata"]["crs"].get<std::string>();
-                }
+                coordinateReferenceSystem = extractCoordinateReferenceSystem(val);
 
             } else if (val["url"].is_string()) {
                 auto result = LoaderHelper::loadData(replaceUrlParams(val["url"].get<std::string>(), sourceUrlParams), std::nullopt, loaders);
@@ -166,9 +198,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                     }
                 }
 
-                if(json["metadata"].is_object() && json["metadata"].contains("crs") && json["metadata"]["crs"].is_string()) {
-                    coordinateReferenceSystem = json["metadata"]["crs"].get<std::string>();
-                }
+                coordinateReferenceSystem = extractCoordinateReferenceSystem(json);
 
                 minZoom = json.value("minzoom", 0);
                 maxZoom = json.value("maxzoom", 22);
