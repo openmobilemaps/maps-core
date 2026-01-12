@@ -15,14 +15,20 @@
 #include "VectorMapSourceDescription.h"
 #include "VectorLayerDescription.h"
 #include "CoordinateSystemIdentifiers.h"
+#include "CoordinateSystemFactory.h"
+#include "MapCoordinateSystem.h"
 #include "Tiled2dMapVectorSettings.h"
 #include "Logger.h"
+#include <cmath>
+#include <stdexcept>
 
 class Tiled2dMapVectorLayerConfig : public Tiled2dMapLayerConfig {
 public:
     Tiled2dMapVectorLayerConfig(const std::shared_ptr<VectorMapSourceDescription> &sourceDescription,
                                 const Tiled2dMapZoomInfo &zoomInfo)
-            : sourceDescription(sourceDescription), zoomInfo(zoomInfo) {}
+            : sourceDescription(sourceDescription),
+              zoomInfo(zoomInfo),
+              mapCoordinateSystem(resolveMapCoordinateSystem(sourceDescription)) {}
 
     Tiled2dMapVectorLayerConfig(const std::shared_ptr<VectorMapSourceDescription> &sourceDescription,
                                 const bool is3d)
@@ -34,38 +40,45 @@ public:
                       sourceDescription->adaptScaleToScreen ? *sourceDescription->adaptScaleToScreen : false,
                       true,
                       sourceDescription->underzoom ? *sourceDescription->underzoom : false,
-                      sourceDescription->overzoom ? *sourceDescription->overzoom : true)) {}
+                      sourceDescription->overzoom ? *sourceDescription->overzoom : true)),
+              mapCoordinateSystem(resolveMapCoordinateSystem(sourceDescription)) {}
 
     ~Tiled2dMapVectorLayerConfig() {}
 
     int32_t getCoordinateSystemIdentifier() override {
-        return epsg3857Id;
+        return mapCoordinateSystem.identifier;
     }
 
     std::string getTileUrl(int32_t x, int32_t y, int32_t t, int32_t zoom) override {
         std::string url = sourceDescription->vectorUrl;
-        size_t epsg3857Index = url.find("{bbox-epsg-3857}", 0);
-        if (epsg3857Index != std::string::npos) {
-            const auto zoomLevelInfos = getDefaultEpsg3857ZoomLevels(zoom, zoom, std::nullopt);
-            const Tiled2dMapZoomLevelInfo &zoomLevelInfo = zoomLevelInfos.at(0);
-            RectCoord layerBounds = zoomLevelInfo.bounds;
-            const double tileWidth = zoomLevelInfo.tileWidthLayerSystemUnits;
+        const std::string bboxPrefix = "{bbox-epsg-";
+        size_t bboxIndex = url.find(bboxPrefix, 0);
+        if (bboxIndex != std::string::npos) {
+            size_t bboxEndIndex = url.find("}", bboxIndex);
+            if (bboxEndIndex != std::string::npos) {
+                const auto coordinateSystemIdentifier = std::stoi(url.substr(bboxIndex + bboxPrefix.size(),
+                                                                             bboxEndIndex - bboxIndex - bboxPrefix.size()));
+                const auto zoomLevelInfos = getDefaultZoomLevels(getCoordinateSystem(coordinateSystemIdentifier), zoom, zoom, std::nullopt);
+                const Tiled2dMapZoomLevelInfo &zoomLevelInfo = zoomLevelInfos.at(0);
+                RectCoord layerBounds = zoomLevelInfo.bounds;
+                const double tileWidth = zoomLevelInfo.tileWidthLayerSystemUnits;
 
-            const bool leftToRight = layerBounds.topLeft.x < layerBounds.bottomRight.x;
-            const bool topToBottom = layerBounds.topLeft.y < layerBounds.bottomRight.y;
-            const double tileWidthAdj = leftToRight ? tileWidth : -tileWidth;
-            const double tileHeightAdj = topToBottom ? tileWidth : -tileWidth;
+                const bool leftToRight = layerBounds.topLeft.x < layerBounds.bottomRight.x;
+                const bool topToBottom = layerBounds.topLeft.y < layerBounds.bottomRight.y;
+                const double tileWidthAdj = leftToRight ? tileWidth : -tileWidth;
+                const double tileHeightAdj = topToBottom ? tileWidth : -tileWidth;
 
-            const double boundsLeft = layerBounds.topLeft.x;
-            const double boundsTop = layerBounds.topLeft.y;
+                const double boundsLeft = layerBounds.topLeft.x;
+                const double boundsTop = layerBounds.topLeft.y;
 
-            const Coord topLeft = Coord(epsg3857Id, x * tileWidthAdj + boundsLeft, y * tileHeightAdj + boundsTop, 0);
-            const Coord bottomRight = Coord(epsg3857Id, topLeft.x + tileWidthAdj, topLeft.y + tileHeightAdj, 0);
+                const Coord topLeft = Coord(coordinateSystemIdentifier, x * tileWidthAdj + boundsLeft, y * tileHeightAdj + boundsTop, 0);
+                const Coord bottomRight = Coord(coordinateSystemIdentifier, topLeft.x + tileWidthAdj, topLeft.y + tileHeightAdj, 0);
 
-            std::string boxString = std::to_string(topLeft.x) + "," + std::to_string(bottomRight.y) + "," + std::to_string(bottomRight.x) + "," + std::to_string(topLeft.y);
-            url = url.replace(epsg3857Index, 16, boxString);
-            return url;
-
+                std::string boxString = std::to_string(topLeft.x) + "," + std::to_string(bottomRight.y) + "," +
+                                        std::to_string(bottomRight.x) + "," + std::to_string(topLeft.y);
+                url = url.replace(bboxIndex, bboxEndIndex - bboxIndex + 1, boxString);
+                return url;
+            }
         }
         size_t zoomIndex = url.find("{z}", 0);
         if (zoomIndex == std::string::npos) throw std::invalid_argument("Layer url \'" + url + "\' has no valid format!");
@@ -79,11 +92,11 @@ public:
     }
 
     std::vector<Tiled2dMapZoomLevelInfo> getZoomLevelInfos() override {
-        return getDefaultEpsg3857ZoomLevels(sourceDescription->minZoom, sourceDescription->maxZoom, sourceDescription->levels);
+        return getDefaultZoomLevels(mapCoordinateSystem, sourceDescription->minZoom, sourceDescription->maxZoom, sourceDescription->levels);
     }
 
     std::vector<Tiled2dMapZoomLevelInfo> getVirtualZoomLevelInfos() override {
-        return getDefaultEpsg3857ZoomLevels(0, sourceDescription->minZoom - 1, sourceDescription->levels);
+        return getDefaultZoomLevels(mapCoordinateSystem, 0, sourceDescription->minZoom - 1, sourceDescription->levels);
     };
 
     Tiled2dMapZoomInfo getZoomInfo() override {
@@ -116,38 +129,68 @@ public:
         }
     }
 
-    static std::vector<Tiled2dMapZoomLevelInfo> getDefaultEpsg3857ZoomLevels(int minZoom, int maxZoom, const std::optional<std::vector<int>> &levels) {
+    static std::vector<Tiled2dMapZoomLevelInfo> getDefaultZoomLevels(const MapCoordinateSystem &coordinateSystem,
+                                                                     int minZoom,
+                                                                     int maxZoom,
+                                                                     const std::optional<std::vector<int>> &levels) {
         std::vector<Tiled2dMapZoomLevelInfo> infos;
+        const double baseWidth = std::abs(coordinateSystem.bounds.bottomRight.x - coordinateSystem.bounds.topLeft.x);
         if (levels.has_value()) {
             for (const auto &level : levels.value()) {
                 double factor = pow(2, level);
                 double zoom = baseValueZoom / factor;
-                double width = baseValueWidth / factor;
-                infos.push_back(Tiled2dMapZoomLevelInfo(zoom, width, factor, factor, 1, level, epsg3857Bounds));
+                double width = baseWidth / factor;
+                infos.push_back(Tiled2dMapZoomLevelInfo(zoom, width, factor, factor, 1, level, coordinateSystem.bounds));
             }
         } else {
             for (int i = minZoom; i <= maxZoom; i++) {
                 double factor = pow(2, i);
                 double zoom = baseValueZoom / factor;
-                double width = baseValueWidth / factor;
-                infos.push_back(Tiled2dMapZoomLevelInfo(zoom, width, factor, factor, 1, i, epsg3857Bounds));
+                double width = baseWidth / factor;
+                infos.push_back(Tiled2dMapZoomLevelInfo(zoom, width, factor, factor, 1, i, coordinateSystem.bounds));
             }
         }
         return infos;
     }
 
+    static std::vector<Tiled2dMapZoomLevelInfo> getDefaultEpsg3857ZoomLevels(int minZoom, int maxZoom, const std::optional<std::vector<int>> &levels) {
+        return getDefaultZoomLevels(CoordinateSystemFactory::getEpsg3857System(), minZoom, maxZoom, levels);
+    }
 
 protected:
     std::shared_ptr<VectorMapSourceDescription> sourceDescription;
     Tiled2dMapZoomInfo zoomInfo;
+    MapCoordinateSystem mapCoordinateSystem;
 
     static constexpr double baseValueZoom = 500000000.0;
-    static constexpr double baseValueWidth = 40075016.0;
-    static const inline int32_t epsg3857Id = CoordinateSystemIdentifiers::EPSG3857();
-    static const inline RectCoord epsg3857Bounds = RectCoord(
-            Coord(epsg3857Id, -20037508.34, 20037508.34, 0.0),
-            Coord(epsg3857Id, 20037508.34, -20037508.34, 0.0)
-    );
 
+    static MapCoordinateSystem resolveMapCoordinateSystem(const std::shared_ptr<VectorMapSourceDescription> &sourceDescription) {
+        if (sourceDescription && sourceDescription->coordinateReferenceSystem.has_value()) {
+            try {
+                const auto coordinateSystemIdentifier =
+                    CoordinateSystemIdentifiers::fromCrsIdentifier(*sourceDescription->coordinateReferenceSystem);
+                return getCoordinateSystem(coordinateSystemIdentifier);
+            } catch (const std::invalid_argument &ex) {
+                LogError <<= "Unsupported CRS " + *sourceDescription->coordinateReferenceSystem + ": " + ex.what();
+            }
+        }
+        return CoordinateSystemFactory::getEpsg3857System();
+    }
+
+    static MapCoordinateSystem getCoordinateSystem(int32_t coordinateSystemIdentifier) {
+        if (coordinateSystemIdentifier == CoordinateSystemIdentifiers::EPSG3857()) {
+            return CoordinateSystemFactory::getEpsg3857System();
+        }
+        if (coordinateSystemIdentifier == CoordinateSystemIdentifiers::EPSG4326()) {
+            return CoordinateSystemFactory::getEpsg4326System();
+        }
+        if (coordinateSystemIdentifier == CoordinateSystemIdentifiers::EPSG2056()) {
+            return CoordinateSystemFactory::getEpsg2056System();
+        }
+        if (coordinateSystemIdentifier == CoordinateSystemIdentifiers::EPSG21781()) {
+            return CoordinateSystemFactory::getEpsg21781System();
+        }
+        throw std::invalid_argument("Unsupported coordinate system identifier: " + std::to_string(coordinateSystemIdentifier));
+    }
 
 };

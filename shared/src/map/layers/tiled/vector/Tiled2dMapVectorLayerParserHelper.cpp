@@ -258,6 +258,10 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
         auto numDrawPreviousLayers = tileJson.contains("numDrawPreviousLayers") ? std::optional<int>(tileJson["numDrawPreviousLayers"].get<int>()) : std::nullopt;
         auto underzoom = tileJson.contains("underzoom") ? std::optional<bool>(tileJson["underzoom"].get<bool>()) : std::nullopt;
         auto overzoom = tileJson.contains("overzoom") ? std::optional<bool>(tileJson["overzoom"].get<bool>()) : std::nullopt;
+        std::optional<std::string> coordinateReferenceSystem;
+        if (tileJson["metadata"].is_object() && tileJson["metadata"].contains("crs") && tileJson["metadata"]["crs"].is_string()) {
+            coordinateReferenceSystem = tileJson["metadata"]["crs"].get<std::string>();
+        }
 
         std::optional<std::vector<int>> levels;
         int minZoom = std::numeric_limits<int>::max();
@@ -282,6 +286,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                                                                                   minZoom,
                                                                                   maxZoom,
                                                                                   bounds,
+                                                                                  coordinateReferenceSystem,
                                                                                   zoomLevelScaleFactor,
                                                                                   adaptScaleToScreen,
                                                                                   numDrawPreviousLayers,

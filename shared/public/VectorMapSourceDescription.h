@@ -22,6 +22,7 @@ public:
     int minZoom;
     int maxZoom;
     std::optional<::RectCoord> bounds;
+    std::optional<std::string> coordinateReferenceSystem;
     std::optional<bool> adaptScaleToScreen;
     std::optional<int> numDrawPreviousLayers;
     std::optional<float> zoomLevelScaleFactor;
@@ -34,6 +35,7 @@ public:
                                int minZoom,
                                int maxZoom,
                                std::optional<::RectCoord> bounds,
+                               std::optional<std::string> coordinateReferenceSystem,
                                std::optional<float> zoomLevelScaleFactor,
                                std::optional<bool> adaptScaleToScreen,
                                std::optional<int> numDrawPreviousLayers,
@@ -41,6 +43,7 @@ public:
                                std::optional<bool> overzoom,
                                std::optional<std::vector<int>> levels) :
             identifier(identifier), vectorUrl(vectorUrl), minZoom(minZoom), maxZoom(maxZoom), bounds(bounds),
+            coordinateReferenceSystem(coordinateReferenceSystem),
             adaptScaleToScreen(adaptScaleToScreen), numDrawPreviousLayers(numDrawPreviousLayers),
             zoomLevelScaleFactor(zoomLevelScaleFactor), underzoom(underzoom), overzoom(overzoom), levels(levels) {}
 };
