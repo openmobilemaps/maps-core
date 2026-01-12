@@ -14,10 +14,13 @@
 #include "Tiled2dMapVectorLayerConfig.h"
 #include "Tiled2dMapZoomInfo.h"
 #include "CoordinateSystemIdentifiers.h"
+#include "CoordinateSystemFactory.h"
 #include "Tiled2dMapZoomLevelInfo.h"
 #include "Logger.h"
 #include "Tiled2dMapVectorSettings.h"
+#include "CustomTiled2dMapLayerConfig.h"
 #include "Epsg4326Tiled2dMapLayerConfig.h"
+#include <stdexcept>
 
 class Tiled2dMapVectorRasterSubLayerConfig : public Tiled2dMapVectorLayerConfig {
 public:
@@ -27,6 +30,7 @@ public:
             : Tiled2dMapVectorLayerConfig(
                                           std::make_shared<VectorMapSourceDescription>(layerDescription->source, layerDescription->url, layerDescription->sourceMinZoom,
                                                                                        layerDescription->sourceMaxZoom, layerDescription->bounds,
+                                                                                       layerDescription->coordinateReferenceSystem,
                                                          layerDescription->zoomLevelScaleFactor,
                                                          layerDescription->adaptScaleToScreen,
                                                          layerDescription->numDrawPreviousLayers,
@@ -48,12 +52,26 @@ public:
                                           description->overzoom);
         }
 
-        if (description->coordinateReferenceSystem == "EPSG:4326") {
-            customConfig = std::make_shared<Epsg4326Tiled2dMapLayerConfig>(layerDescription->source,
-                                                                           layerDescription->url,
-                                                                           zoomInfo,
-                                                                           layerDescription->sourceMinZoom,
-                                                                           layerDescription->sourceMaxZoom);
+        if (description->coordinateReferenceSystem.has_value()) {
+            try {
+                const auto coordinateSystemIdentifier = CoordinateSystemIdentifiers::fromCrsIdentifier(*description->coordinateReferenceSystem);
+                if (coordinateSystemIdentifier == CoordinateSystemIdentifiers::EPSG4326()) {
+                    customConfig = std::make_shared<Epsg4326Tiled2dMapLayerConfig>(layerDescription->source,
+                                                                                   layerDescription->url,
+                                                                                   zoomInfo,
+                                                                                   layerDescription->sourceMinZoom,
+                                                                                   layerDescription->sourceMaxZoom);
+                } else if (coordinateSystemIdentifier != CoordinateSystemIdentifiers::EPSG3857()) {
+                    customConfig = std::make_shared<CustomTiled2dMapLayerConfig>(layerDescription->source,
+                                                                                 layerDescription->url,
+                                                                                 getCoordinateSystem(coordinateSystemIdentifier),
+                                                                                 zoomInfo,
+                                                                                 layerDescription->sourceMinZoom,
+                                                                                 layerDescription->sourceMaxZoom);
+                }
+            } catch (const std::invalid_argument &ex) {
+                LogError <<= "Unsupported CRS " + *description->coordinateReferenceSystem + ": " + ex.what();
+            }
         }
     }
 
@@ -118,4 +136,20 @@ private:
     std::shared_ptr<RasterVectorLayerDescription> description;
 
     std::shared_ptr<Tiled2dMapLayerConfig> customConfig;
+
+    static MapCoordinateSystem getCoordinateSystem(int32_t coordinateSystemIdentifier) {
+        if (coordinateSystemIdentifier == CoordinateSystemIdentifiers::EPSG3857()) {
+            return CoordinateSystemFactory::getEpsg3857System();
+        }
+        if (coordinateSystemIdentifier == CoordinateSystemIdentifiers::EPSG4326()) {
+            return CoordinateSystemFactory::getEpsg4326System();
+        }
+        if (coordinateSystemIdentifier == CoordinateSystemIdentifiers::EPSG2056()) {
+            return CoordinateSystemFactory::getEpsg2056System();
+        }
+        if (coordinateSystemIdentifier == CoordinateSystemIdentifiers::EPSG21781()) {
+            return CoordinateSystemFactory::getEpsg21781System();
+        }
+        throw std::invalid_argument("Unsupported coordinate system identifier: " + std::to_string(coordinateSystemIdentifier));
+    }
 };
