@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Web Map SDK Playground</title>
+    <link rel="stylesheet" href="./assets/style.css" />
+  </head>
+  <body>
+    <h1>Web Map SDK Playground</h1>
+    <hr />
+    <figure style="overflow: visible" id="spinner">
+      <div class="spinner"></div>
+      <center style="margin-top: 0.5em"><strong>emscripten</strong></center>
+    </figure>
+    <div class="emscripten" id="status">Downloading...</div>
+    <div class="emscripten">
+      <progress value="0" max="100" id="progress" hidden="1"></progress>
+    </div>
+    <div class="emscripten_border">
+      <canvas class="emscripten" id="glCanvas" tabindex="-1"></canvas>
+    </div>
+    <hr />
+    <div class="emscripten">
+      <input
+        type="radio"
+        id="layerSelectVector"
+        name="layerSelect"
+        value="vector"
+      />
+      <label for="layerSelectVector">Vector</label>
+      <input
+        type="radio"
+        id="layerSelectRaster"
+        name="layerSelect"
+        value="raster"
+      />
+      <label for="layerSelectRaster">Raster</label>
+
+      <input
+        type="button"
+        value="Stop Animation"
+        onclick="window.cancelAnimationFrame(window.cameraAnimation)"
+      />
+    </div>
+
+    <hr />
+    <textarea class="emscripten" id="output" rows="8"></textarea>
+    <hr />
+    <script type="module">
+      import { initialize, registerAnimationLoop } from "./assets/map_setup.js";
+
+      initialize("glCanvas", 160)
+        .then(({ mapInterface, wmsdkModule, globalLoader }) => {
+          const layerConfig =
+            wmsdkModule.DefaultTiled2dMapLayerConfigs.webMercatorCustom(
+              "testlayer",
+              "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+              {
+                zoomLevelScaleFactor: 1.0,
+                numDrawPreviousLayers: 2,
+                numDrawPreviousOrLaterTLayers: 0,
+                adaptScaleToScreen: true,
+                maskTile: false,
+                underzoom: true,
+                overzoom: true,
+              },
+              0,
+              20
+            );
+          const dataLoader = globalLoader.createLoader();
+          const rasterLayer = wmsdkModule.Tiled2dMapRasterLayerInterface.create(
+            layerConfig,
+            [dataLoader]
+          );
+          mapInterface.addLayer(rasterLayer.asLayerInterface());
+
+          const vectorLayer =
+            wmsdkModule.Tiled2dMapVectorLayerInterface.createFromStyleJson(
+              "testlayer",
+              "assets/basemap-style.json",
+              [dataLoader],
+              globalLoader.createFontLoader(dataLoader, "assets/fonts/")
+            );
+          mapInterface.addLayer(vectorLayer.asLayerInterface());
+
+          layerSelectVector.addEventListener("change", (event) => {
+            if (event.target.checked) {
+              rasterLayer.asLayerInterface().hide();
+              vectorLayer.asLayerInterface().show();
+            }
+          });
+          layerSelectRaster.addEventListener("change", (event) => {
+            if (event.target.checked) {
+              vectorLayer.asLayerInterface().hide();
+              rasterLayer.asLayerInterface().show();
+            }
+          });
+          layerSelectVector.checked = true;
+          rasterLayer.asLayerInterface().hide();
+
+          const camera = mapInterface.getCamera();
+          camera.moveToCenterPosition(
+            {
+              systemIdentifier:
+                wmsdkModule.CoordinateSystemIdentifiers.EPSG4326(),
+              x: 8.54359994,
+              y: 47.37560515,
+              z: 0,
+            },
+            false
+          );
+          camera.setZoom(1000, false);
+          mapInterface.resume();
+
+          // .. animation loop..
+          var startTime = document.timeline.currentTime;
+          function animateMap(now) {
+            const t = now - startTime;
+            const cycleLen = 60 * 1000; // milliseconds
+            const cycle = Math.floor(t / cycleLen);
+            const minZoom = 1000;
+            const maxZoom = cycle % 2 == 0 ? 3000000 : 100000000;
+            /*
+          if(cycle % 2 == 0) {
+            layerSelectVector.checked = true;
+          } else {
+            layerSelectRaster.checked = true;
+          }
+          */
+
+            const fz = Math.log2(maxZoom / minZoom);
+            const zt = (fz * (1 - Math.cos((t * 2 * Math.PI) / cycleLen))) / 2;
+            camera.setZoom(minZoom * Math.pow(2, zt), false);
+
+            window.cameraAnimation = window.requestAnimationFrame(animateMap);
+          }
+          window.cameraAnimation = window.requestAnimationFrame(animateMap);
+
+          registerAnimationLoop();
+        })
+        .catch((err) => {
+          console.error("Failed to run WebMapSDK", err);
+        });
+    </script>
+  </body>
+</html>

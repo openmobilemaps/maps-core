@@ -1,0 +1,1056 @@
+{
+  "version": 8,
+  "name": "ubmeteo-colored-light",
+  "metadata": {
+    "persistingSymbolPlacement": true,
+    "use3xSprites": true
+  },
+  "center": [
+    0,
+    0
+  ],
+  "zoom": 5,
+  "sources": {
+    "base-map": {
+      "type": "vector",
+      "tiles": [
+        "https://static-dev.ubmeteo.io/v1/map/3857/vector/base/{z}/{x}/{y}.pbf"
+      ],
+      "minzoom": 0,
+      "maxzoom": 10
+    },
+    "relief_shading": {
+      "type": "raster",
+      "tiles": [
+          "https://static-dev.ubmeteo.io/v1/map/4326/hillshade/light/{z}/{x}/{y}.png"
+      ],
+      "minzoom": 0,
+      "maxzoom": 10,
+      "metadata": {
+          "crs": "EPSG:4326"
+      }
+    },
+    "relief_color": {
+      "type": "raster",
+      "tiles": [
+        "https://static-dev.ubmeteo.io/v1/map/4326/relief-color/light/{z}/{x}/{y}.png"
+      ],
+      "minzoom": 0,
+      "maxzoom": 10,
+      "metadata": {
+          "crs": "EPSG:4326"
+      }
+    },
+    "selected": {
+      "type": "geojson",
+      "minzoom": 0,
+      "maxzoom": 0,
+      "data": {
+        "type": "FeatureCollection",
+        "features": []
+      }
+    }
+  },
+  "sprite": "https://static-dev.ubmeteo.io/v1/map/styles/colored-light-globe/sprite",
+  "glyphs": "https://static-dev.openmobilemaps.io/fonts/{fontstack}/{range}.pbf",
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "layout": {
+        "visibility": "visible"
+      },
+      "paint": {
+        "background-color": "rgba(255, 255, 255, 1)"
+      }
+    },
+    {
+      "id": "relief_shading",
+      "type": "raster",
+      "source": "relief_shading"
+    },
+    {
+      "id": "relief_color",
+      "type": "raster",
+      "metadata": {
+        "blend-mode": "multiply"
+      },
+      "source": "relief_color"
+    },
+    {
+      "id": "water_river_line",
+      "type": "line",
+      "source": "base-map",
+      "source-layer": "water",
+      "filter": [
+        "all",
+        [
+          "==",
+          "type",
+          "river"
+        ],
+        [
+          "==",
+          "isPolygon",
+          false
+        ]
+      ],
+      "paint": {
+        "line-color": "#A6C0F1",
+        "line-opacity": [
+          "match",
+          [
+            "get",
+            "minZoom"
+          ],
+          0,
+          [
+            "interpolate",
+            [
+              "linear"
+            ],
+            [
+              "zoom"
+            ],
+            0,
+            0,
+            2,
+            1
+          ],
+          1,
+          [
+            "interpolate",
+            [
+              "linear"
+            ],
+            [
+              "zoom"
+            ],
+            2,
+            0,
+            3,
+            1
+          ],
+          2,
+          [
+            "interpolate",
+            [
+              "linear"
+            ],
+            [
+              "zoom"
+            ],
+            3,
+            0,
+            4,
+            1
+          ],
+          3,
+          [
+            "interpolate",
+            [
+              "linear"
+            ],
+            [
+              "zoom"
+            ],
+            4,
+            0,
+            5,
+            1
+          ],
+          4,
+          [
+            "interpolate",
+            [
+              "linear"
+            ],
+            [
+              "zoom"
+            ],
+            5,
+            0,
+            6,
+            1
+          ],
+          5,
+          [
+            "interpolate",
+            [
+              "linear"
+            ],
+            [
+              "zoom"
+            ],
+            6,
+            0,
+            7,
+            1
+          ],
+          6,
+          [
+            "interpolate",
+            [
+              "linear"
+            ],
+            [
+              "zoom"
+            ],
+            7,
+            0,
+            8,
+            1
+          ],
+          7,
+          [
+            "interpolate",
+            [
+              "linear"
+            ],
+            [
+              "zoom"
+            ],
+            8,
+            0,
+            9,
+            1
+          ],
+          8,
+          [
+            "interpolate",
+            [
+              "linear"
+            ],
+            [
+              "zoom"
+            ],
+            9,
+            0,
+            10,
+            1
+          ],
+          9,
+          [
+            "interpolate",
+            [
+              "linear"
+            ],
+            [
+              "zoom"
+            ],
+            10,
+            0,
+            11,
+            1
+          ],
+          0
+        ]
+      }
+    },
+    {
+      "id": "water_river_fill",
+      "type": "fill",
+      "source": "base-map",
+      "source-layer": "water",
+      "filter": [
+        "all",
+        [
+          "in",
+          "type",
+          "river",
+          "canal",
+          "lock",
+          "oxbow"
+        ],
+        [
+          "==",
+          "isPolygon",
+          true
+        ]
+      ],
+      "layout": {
+        "visibility": "visible"
+      },
+      "paint": {
+        "fill-color": "#A6C0F1"
+      }
+    },
+    {
+      "id": "water_river_outline",
+      "type": "line",
+      "source": "base-map",
+      "source-layer": "water",
+      "layout": {
+        "visibility": "visible"
+      },
+      "filter": [
+        "all",
+        [
+          "in",
+          "type",
+          "river",
+          "canal",
+          "lock",
+          "oxbow"
+        ],
+        [
+          "==",
+          "isPolygon",
+          true
+        ]
+      ],
+      "paint": {
+        "line-color": "#A6C0F1",
+        "line-opacity": [
+          "interpolate",
+          [
+            "exponential",
+            2
+          ],
+          [
+            "zoom"
+          ],
+          6,
+          0,
+          10,
+          1
+        ]
+      }
+    },
+    {
+      "id": "water_lakes_fill",
+      "type": "fill",
+      "source": "base-map",
+      "source-layer": "water",
+      "filter": [
+        "all",
+        [
+          "in",
+          "type",
+          "lake",
+          "reservoir",
+          "basin",
+          "lagoon",
+          "moat",
+          "harbor",
+          "reflecting_pool"
+        ],
+        [
+          "==",
+          "isPolygon",
+          true
+        ]
+      ],
+      "layout": {
+        "visibility": "visible"
+      },
+      "paint": {
+        "fill-color": "#A6C0F1"
+      }
+    },
+    {
+      "id": "water_lakes_outline",
+      "type": "line",
+      "source": "base-map",
+      "source-layer": "water",
+      "filter": [
+        "all",
+        [
+          "in",
+          "type",
+          "lake",
+          "reservoir",
+          "basin",
+          "lagoon",
+          "moat",
+          "harbor",
+          "reflecting_pool"
+        ],
+        [
+          "==",
+          "isPolygon",
+          true
+        ]
+      ],
+      "layout": {
+        "visibility": "visible"
+      },
+      "paint": {
+        "line-color": "#A6C0F1",
+        "line-width": 1,
+        "line-opacity": [
+          "interpolate",
+          [
+            "exponential",
+            2
+          ],
+          [
+            "zoom"
+          ],
+          6,
+          0,
+          10,
+          1
+        ]
+      }
+    },
+    {
+      "id": "highway_primary_bottom",
+      "type": "line",
+      "source": "base-map",
+      "source-layer": "highway",
+      "minzoom": 8,
+      "filter": [
+        "any",
+        ["any", ["==", "type", "primary"], ["==", "type", "trunk"]]
+      ],
+      "layout": {
+        "line-cap": "round",
+        "line-join": "round",
+        "visibility": "visible"
+      },
+      "paint": {
+        "line-color": "rgba(165, 174, 182, 1)",
+        "line-opacity": [
+          "interpolate",
+          ["exponential", 3],
+          ["zoom"],
+          7,
+          0,
+          9,
+          1
+        ],
+        "line-width": [
+          "interpolate",
+          ["exponential", 3],
+          ["zoom"],
+          5,
+          3,
+          10,
+          5,
+          15,
+          50
+        ],
+        "line-offset": 0
+      }
+    },
+    {
+      "id": "highway_primary_top",
+      "type": "line",
+      "source": "base-map",
+      "source-layer": "highway",
+      "minzoom": 8,
+      "maxzoom": 24,
+      "filter": [
+        "any",
+        ["any", ["==", "type", "primary"], ["==", "type", "trunk"]]
+      ],
+      "layout": {
+        "line-cap": "round",
+        "line-join": "round",
+        "visibility": "visible"
+      },
+      "paint": {
+        "line-color": [
+          "interpolate",
+          ["exponential", 3],
+          ["zoom"],
+          7,
+          "rgba(255, 255, 255, 1)",
+          9,
+          "rgba(249, 251, 254, 1)"
+        ],
+        "line-width": [
+          "interpolate",
+          ["exponential", 3],
+          ["zoom"],
+          5,
+          2,
+          10,
+          4,
+          15,
+          48
+        ],
+        "line-offset": 0,
+        "line-opacity": [
+          "interpolate",
+          ["exponential", 3],
+          ["zoom"],
+          7,
+          0,
+          8,
+          1
+        ]
+      }
+    },
+    {
+      "id": "highway_motorway_bottom",
+      "type": "line",
+      "source": "base-map",
+      "source-layer": "highway",
+      "minzoom": 6,
+      "filter": ["any", ["==", "type", "motorway"]],
+      "layout": {"line-cap": "round", "line-join": "round"},
+      "paint": {
+        "line-color": "rgba(165, 174, 182, 1)",
+        "line-opacity": [
+          "interpolate",
+          ["exponential", 2],
+          ["zoom"],
+          6,
+          0,
+          8,
+          1
+        ],
+        "line-width": [
+          "interpolate",
+          ["exponential", 2],
+          ["zoom"],
+          5,
+          3,
+          10,
+          5,
+          15,
+          50
+        ],
+        "line-offset": 0
+      }
+    },
+    {
+      "id": "highway_motorway_top",
+      "type": "line",
+      "source": "base-map",
+      "source-layer": "highway",
+      "minzoom": 6,
+      "maxzoom": 24,
+      "filter": ["any", ["==", "type", "motorway"]],
+      "layout": {"line-cap": "round", "line-join": "round"},
+      "paint": {
+        "line-color": [
+          "interpolate",
+          ["exponential", 2],
+          ["zoom"],
+          6,
+          "rgba(249, 251, 254, 1)",
+          8,
+          "rgba(249, 251, 254, 1)"
+        ],
+        "line-width": [
+          "interpolate",
+          ["exponential", 2],
+          ["zoom"],
+          5,
+          2,
+          10,
+          4,
+          15,
+          48
+        ],
+        "line-offset": 0,
+        "line-opacity": [
+          "interpolate",
+          ["exponential", 2],
+          ["zoom"],
+          6,
+          0,
+          7,
+          1
+        ]
+      }
+    },
+    {
+      "id": "boundary_country",
+      "type": "line",
+      "source": "base-map",
+      "source-layer": "boundary",
+      "metadata": {
+        "render-pass-index": 2
+      },
+      "filter": [
+        "all",
+        [
+          "==",
+          "adminLevel",
+          2
+        ],
+        [
+          "==",
+          "maritime",
+          false
+        ]
+      ],
+      "layout": {
+        "line-cap": [
+          "literal",
+          "round"
+        ],
+        "line-join": "round"
+      },
+      "paint": {
+        "line-color": "#717764",
+        "line-opacity": 1,
+        "line-width": {
+          "stops": [
+            [
+              3,
+              0.75
+            ],
+            [
+              4,
+              1.75
+            ]
+          ]
+        },
+        "line-blur": 0
+      }
+    },
+    {
+      "id": "boundary_country_ocean",
+      "type": "line",
+      "source": "base-map",
+      "source-layer": "ocean",
+      "metadata": {
+        "render-pass-index": 2
+      },
+      "layout": {
+        "line-cap": [
+          "literal",
+          "round"
+        ],
+        "line-join": "round"
+      },
+      "paint": {
+        "line-color": "#717764",
+        "line-opacity": 1,
+        "line-width": {
+          "stops": [
+            [
+              3,
+              0.75
+            ],
+            [
+              4,
+              1.75
+            ]
+          ]
+        },
+        "line-blur": 0
+      }
+    },
+    {
+      "id": "boundary_regions",
+      "type": "line",
+      "source": "base-map",
+      "source-layer": "boundary",
+      "metadata": {
+        "render-pass-index": 2
+      },
+      "filter": [
+        "all",
+        [
+          "==",
+          "adminLevel",
+          3
+        ],
+        [
+          "==",
+          "adminLevel",
+          4
+        ],
+        [
+          "==",
+          "maritime",
+          false
+        ]
+      ],
+      "layout": {
+        "line-cap": [
+          "literal",
+          "round"
+        ],
+        "line-join": "round"
+      },
+      "paint": {
+        "line-color": "rgba(143, 152, 159, 1)",
+        "line-opacity": 1,
+        "line-width": {
+          "stops": [
+            [
+              3,
+              0.75
+            ],
+            [
+              4,
+              1.75
+            ]
+          ]
+        },
+        "line-blur": 0
+      }
+    },
+    {
+      "id": "ocean_fill",
+      "type": "fill",
+      "source": "base-map",
+      "source-layer": "ocean",
+      "layout": {
+        "visibility": "visible"
+      },
+      "paint": {
+        "fill-color": "#A6C0F1"
+      }
+    },
+    {
+      "id": "ocean_coastline",
+      "type": "line",
+      "source": "base-map",
+      "source-layer": "coastline",
+      "filter": [
+        "all"
+      ],
+      "layout": {
+        "visibility": "visible"
+      },
+      "paint": {
+        "line-color": "rgba(143, 152, 159, 1)",
+        "line-width": {
+          "stops": [
+            [
+              3,
+              0.75
+            ],
+            [
+              4,
+              1.75
+            ]
+          ]
+        },
+        "line-opacity": [
+          "interpolate",
+          [
+            "exponential",
+            2
+          ],
+          [
+            "zoom"
+          ],
+          6,
+          0,
+          10,
+          1
+        ],
+        "line-blur": 0
+      }
+    },
+    {
+      "id": "place_village",
+      "type": "symbol",
+      "metadata": {
+        "render-pass-index": 3,
+        "interactable": true
+      },
+      "source": "base-map",
+      "source-layer": "place",
+      "minzoom": 2,
+      "maxzoom": 24,
+      "filter": [
+        "all",
+        [
+          "==",
+          "type",
+          "village"
+        ],
+        [
+            "any",
+            ["==", "regionCode", ["global-state", "localRegionName"]],
+            ["!", ["to-boolean", ["global-state", "localRegionName"]]]
+        ]
+      ],
+      "layout": {
+        "text-font": [
+          "Figtree-SemiBold"
+        ],
+        "text-size": 12,
+        "text-field": [
+          "coalesce",
+          [
+            "get",
+            "name_de"
+          ],
+          [
+            "get",
+            "name_en"
+          ],
+          [
+            "get",
+            "name"
+          ]
+        ],
+        "visibility": "visible",
+        "text-max-width": 10,
+        "icon-image": "small_dot",
+        "text-anchor": "bottom",
+        "text-offset": [
+          0,
+          -0.4
+        ],
+        "icon-size": 1,
+        "text-padding": 10,
+        "symbol-sort-key": [
+          "*",
+          -1,
+          [
+            "get",
+            "weight"
+          ]
+        ]
+      },
+      "paint": {
+        "text-color": "#38434E",
+        "text-halo-blur": 0,
+        "text-halo-color": "#F3F3F3",
+        "text-halo-width": 1.0
+      }
+    },
+    {
+      "id": "place_town",
+      "type": "symbol",
+      "metadata": {
+        "render-pass-index": 3,
+        "interactable": true
+      },
+      "source": "base-map",
+      "source-layer": "place",
+      "minzoom": 2,
+      "maxzoom": 24,
+      "filter": [
+        "all",
+        [
+          "==",
+          "type",
+          "town"
+        ],
+        [
+            "any",
+            ["==", "regionCode", ["global-state", "localRegionName"]],
+            ["!", ["to-boolean", ["global-state", "localRegionName"]]]
+        ]
+      ],
+      "layout": {
+        "text-font": [
+          "Figtree-SemiBold"
+        ],
+        "text-size": 12,
+        "text-field": [
+          "coalesce",
+          [
+            "get",
+            "name_de"
+          ],
+          [
+            "get",
+            "name_en"
+          ],
+          [
+            "get",
+            "name"
+          ]
+        ],
+        "visibility": "visible",
+        "text-max-width": 10,
+        "icon-image": "small_dot",
+        "text-anchor": "bottom",
+        "text-offset": [
+          0,
+          -0.4
+        ],
+        "icon-size": 1,
+        "text-padding": 10,
+        "symbol-sort-key": [
+          "*",
+          -1,
+          [
+            "get",
+            "weight"
+          ]
+        ]
+      },
+      "paint": {
+        "text-color": "#38434E",
+        "text-halo-blur": 0,
+        "text-halo-color": "#F3F3F3",
+        "text-halo-width": 1.0
+      }
+    },
+    {
+      "id": "place_city",
+      "type": "symbol",
+      "metadata": {
+        "render-pass-index": 3,
+        "interactable": true
+      },
+      "source": "base-map",
+      "source-layer": "place",
+      "minzoom": 2,
+      "maxzoom": 24,
+      "filter": [
+        "all",
+        [
+          "==",
+          "type",
+          "city"
+        ],
+        [
+            "any",
+            ["==", "regionCode", ["global-state", "localRegionName"]],
+            ["!", ["to-boolean", ["global-state", "localRegionName"]]]
+        ]
+      ],
+      "layout": {
+        "text-font": [
+          "Figtree-SemiBold"
+        ],
+        "text-size": 14,
+        "text-field": [
+          "coalesce",
+          [
+            "get",
+            "name_de"
+          ],
+          [
+            "get",
+            "name_en"
+          ],
+          [
+            "get",
+            "name"
+          ]
+        ],
+        "visibility": "visible",
+        "text-max-width": 10,
+        "icon-image": "small_dot",
+        "text-anchor": "bottom",
+        "text-offset": [
+          0,
+          -0.4
+        ],
+        "icon-size": 1,
+        "text-padding": 10,
+        "symbol-sort-key": [
+          "*",
+          -1,
+          [
+            "get",
+            "weight"
+          ]
+        ]
+      },
+      "paint": {
+        "text-color": "#38434E",
+        "text-halo-blur": 0,
+        "text-halo-color": "#F3F3F3",
+        "text-halo-width": 1.1
+      }
+    },
+    {
+      "id": "boundary_country_highlighted",
+      "type": "line",
+      "source": "base-map",
+      "source-layer": "countries",
+      "filter": [
+        "in",
+        "isoCode",
+        [
+          "global-state",
+          "highlightedIsoCodes"
+        ]
+      ],
+      "metadata": {
+        "render-pass-index": 2
+      },
+      "layout": {
+        "line-cap": [
+          "literal",
+          "round"
+        ],
+        "line-join": "round"
+      },
+      "paint": {
+        "line-color": "#40517C",
+        "line-width": [
+            "interpolate",
+            [
+                "exponential",
+                2
+            ],
+            [
+                "zoom"
+            ],
+            3,
+            1.5,
+            5.5,
+            3.0
+        ]
+      }
+    },
+    {
+      "id": "selected_label",
+      "type": "symbol",
+      "source": "selected",
+      "metadata": {
+        "render-pass-index": 3
+      },
+      "layout": {
+        "text-font": [
+          "Figtree-Bold"
+        ],
+        "text-size": 19,
+        "text-field": [
+          "get",
+          "name"
+        ],
+        "visibility": "visible",
+        "text-max-width": 10,
+        "icon-image": [
+            "case",
+            ["==", ["get", "is_gps"], true],
+            "ic_gps_location",
+            "large_dot"
+        ],
+        "text-anchor": "bottom",
+        "text-offset": [
+          0,
+          -0.31
+        ],
+        "icon-size": 1,
+        "text-padding": 14
+      },
+      "paint": {
+        "text-color": "#000000",
+        "text-halo-blur": 0,
+        "text-halo-color": "#F3F3F3",
+        "text-halo-width": 1.4
+      }
+    },
+    {
+      "id": "selected_pin",
+      "type": "symbol",
+      "source": "selected",
+      "icon-ignore-placement": true,
+      "icon-allow-overlap": true,
+      "metadata": {
+        "render-pass-index": 3
+      },
+      "filter": [
+        "==",
+        "isSelected",
+        true
+      ],
+      "layout": {
+        "icon-anchor": "bottom",
+        "icon-image": "pin"
+      }
+    }
+  ],
+  "id": "im23y1155"
+}
