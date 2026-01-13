@@ -203,7 +203,11 @@ extension MCMapView: MTKViewDelegate {
         invalidate()
     }
 
-    public func draw(in view: MTKView) {
+	public func draw(in view: MTKView) {
+		draw(in: view, present: true)
+	}
+
+	public func draw(in view: MTKView, present: Bool) {
         guard !backgroundDisable else {
             isPaused = true
             mapInterface.resetIsInvalidated()
@@ -291,7 +295,7 @@ extension MCMapView: MTKViewDelegate {
         if self.renderToImage {
             commandBuffer.commit()
             commandBuffer.waitUntilCompleted()
-        } else {
+        } else if present {
 
             guard let drawable = view.currentDrawable else {
                 self.renderSemaphore.signal()
@@ -321,6 +325,9 @@ extension MCMapView: MTKViewDelegate {
         renderToImageQueue.async { @Sendable [weak mapInterface] in
             DispatchQueue.main.sync {
                 MainActor.assumeIsolated {
+					// also need to set size
+					self.frame.size = size
+
                     // set the drawable size to get correctly sized texture
                     self.drawableSize = size
                 }
@@ -571,7 +578,7 @@ private final class MCMapViewMapReadyCallbacks:
         Task { @MainActor in
             guard let delegate = self.delegate else { return }
 
-            delegate.draw(in: delegate)
+			delegate.draw(in: delegate, present: false)
 
             callbackQueue?
                 .async {
