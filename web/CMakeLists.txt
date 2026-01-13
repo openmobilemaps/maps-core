@@ -9,115 +9,83 @@ project(mapscore
 # some shared defintions with cmake-macros etc.
 
 file(GLOB_RECURSE mapscore_SRC CONFIGURE_DEPENDS
-  "maps-core/shared/public/*.cpp"
-  "maps-core/shared/src/*.cpp"
-  "maps-core/android/src/main/cpp/graphics/*.cpp"
-  "maps-core/android/src/main/cpp/utils/*.cpp"
-  "maps-core/external/djinni/support-lib/cpp/*.cpp"
+  "../shared/public/*.cpp"
+  "../shared/src/*.cpp"
+  "../android/src/main/cpp/graphics/*.cpp"
+  "../android/src/main/cpp/utils/*.cpp"
+  "../external/djinni/support-lib/cpp/*.cpp"
 )
 file(GLOB webmapsdk_SRC CONFIGURE_DEPENDS
-  "maps-core/web-extras/*.cpp"
-  "maps-core/bridging/wasm/*.cpp"
-  "maps-core/external/djinni/support-lib/wasm/*.cpp"
+  "../web/src/*.cpp"
+  "../bridging/wasm/*.cpp"
+  "../external/djinni/support-lib/wasm/*.cpp"
 )
 
-file(GLOB_RECURSE layeranimation_SRC CONFIGURE_DEPENDS
-  "layer-animation/shared/src/*.cpp"
-  "layer-animation/bridging/wasm/*.cpp"
-  # XXX: Filtered WindParticle 
-  layer-animation/android/src/main/cpp/graphics/LayerAnimationGraphicsFactoryOpenGl.cpp
-  layer-animation/android/src/main/cpp/graphics/LayerAnimationShaderFactoryOpenGl.cpp
-  layer-animation/android/src/main/cpp/graphics/objects/Quad3dInterpolatedOpenGl.cpp
-  layer-animation/android/src/main/cpp/graphics/shader/CloudInterpolationShaderOpenGl.cpp
-  layer-animation/android/src/main/cpp/graphics/shader/FullSpritePatternInterpolationShaderOpenGl.cpp
-  layer-animation/android/src/main/cpp/graphics/shader/InterpolationShaderCommonsOpenGl.cpp
-  layer-animation/android/src/main/cpp/graphics/shader/PrecipitationShaderOpenGl.cpp
-  layer-animation/android/src/main/cpp/graphics/shader/TextureInterpolationShaderOpenGl.cpp
-  layer-animation/android/src/main/cpp/graphics/shader/WindAreaInterpolationShaderOpenGl.cpp
-  layer-animation/android/src/main/cpp/graphics/shader/WindPatternShaderOpenGl.cpp
 
-  layer-animation/web-extras/WebAnimationLayerCallback.cpp
-  layer-animation/web-extras/BitmapTextureHolder.cpp
-)
+# file(GLOB_RECURSE webp_SRC CONFIGURE_DEPENDS
+#   "layer-animation/external/libwebp/src/*.c"
+# )
+# add_library(webp STATIC ${webp_SRC})
+# target_include_directories(webp PRIVATE layer-animation/external/libwebp)
 
-file(GLOB_RECURSE webp_SRC CONFIGURE_DEPENDS
-  "layer-animation/external/libwebp/src/*.c"
-)
-add_library(webp STATIC ${webp_SRC})
-target_include_directories(webp PRIVATE layer-animation/external/libwebp)
-
-add_library(fpng STATIC "layer-animation/external/fpng/src/fpng.cpp")
-target_include_directories(fpng PUBLIC layer-animation/external/fpng/public)
+# add_library(fpng STATIC "layer-animation/external/fpng/src/fpng.cpp")
+# target_include_directories(fpng PUBLIC layer-animation/external/fpng/public)
 
 
-add_executable(webmapsdk ${mapscore_SRC} ${webmapsdk_SRC} ${layeranimation_SRC})
+add_executable(webmapsdk ${mapscore_SRC} ${webmapsdk_SRC}) # ${layeranimation_SRC})
 
 target_include_directories(webmapsdk PRIVATE
-  maps-core/external/protozero/protozero/include/
-  maps-core/external/vtzero/vtzero/include/
-  maps-core/external/earcut/earcut/include/mapbox/
-  maps-core/shared/src
-  maps-core/shared/src/external/pugixml
-  maps-core/shared/src/external/gpc
-  maps-core/shared/src/logger
-  maps-core/shared/src/graphics
-  maps-core/shared/src/graphics/helpers
-  maps-core/shared/src/map
-  maps-core/shared/src/map/camera
-  maps-core/shared/src/map/controls
-  maps-core/shared/src/map/coordinates
-  maps-core/shared/src/map/layers
-  maps-core/shared/src/map/layers/objects
-  maps-core/shared/src/map/layers/tiled
-  maps-core/shared/src/map/layers/tiled/raster
-  maps-core/shared/src/map/layers/tiled/wmts
-  maps-core/shared/src/map/layers/tiled/vector
-  maps-core/shared/src/map/layers/tiled/vector/geojson
-  maps-core/shared/src/map/layers/tiled/vector/geojson/geojsonvt
-  maps-core/shared/src/map/layers/tiled/vector/tiles
-  maps-core/shared/src/map/layers/tiled/vector/tiles/raster
-  maps-core/shared/src/map/layers/tiled/vector/tiles/polygon
-  maps-core/shared/src/map/layers/tiled/vector/tiles/line
-  maps-core/shared/src/map/layers/tiled/vector/sourcemanagers
-  maps-core/shared/src/map/layers/tiled/vector/sublayers
-  maps-core/shared/src/map/layers/tiled/vector/sublayers/raster
-  maps-core/shared/src/map/layers/tiled/vector/sublayers/line
-  maps-core/shared/src/map/layers/tiled/vector/sublayers/polygon
-  maps-core/shared/src/map/layers/tiled/vector/sublayers/symbol
-  maps-core/shared/src/map/layers/tiled/vector/sublayers/background
-  maps-core/shared/src/map/layers/tiled/vector/symbol
-  maps-core/shared/src/map/layers/tiled/vector/description
-  maps-core/shared/src/map/layers/tiled/vector/parsing
-  maps-core/shared/src/map/layers/polygon
-  maps-core/shared/src/map/layers/icon
-  maps-core/shared/src/map/layers/line
-  maps-core/shared/src/map/layers/text
-  maps-core/shared/src/map/scheduling
-  maps-core/shared/src/utils
-  maps-core/android/src/main/cpp
-  maps-core/android/src/main/cpp/graphics
-  maps-core/android/src/main/cpp/graphics/objects
-  maps-core/android/src/main/cpp/graphics/shader
-  maps-core/android/src/main/cpp/utils
-  maps-core/shared/public
-  maps-core/bridging/wasm
-  maps-core/external/djinni/support-lib/
-  maps-core/external/djinni/support-lib/cpp
-  maps-core/external/djinni/support-lib/wasm
-  layer-animation/shared/src
-  layer-animation/shared/src/models
-  layer-animation/shared/src/animation
-  layer-animation/shared/src/animation/layerObject
-  layer-animation/shared/src/animation/util
-  layer-animation/shared/src/animation/tiled
-  layer-animation/shared/src/animation/tiled/source
-  layer-animation/shared/src/networking
-  layer-animation/shared/src/networking/decoder
-  layer-animation/shared/public
-  layer-animation/bridging/wasm
-  layer-animation/android/src/main/cpp/graphics
-  layer-animation/android/src/main/cpp/graphics/objects
-  layer-animation/android/src/main/cpp/graphics/shader
+  ../external/protozero/protozero/include/
+  ../external/vtzero/vtzero/include/
+  ../external/earcut/earcut/include/mapbox/
+  ../shared/src
+  ../shared/src/external/pugixml
+  ../shared/src/external/gpc
+  ../shared/src/logger
+  ../shared/src/graphics
+  ../shared/src/graphics/helpers
+  ../shared/src/map
+  ../shared/src/map/camera
+  ../shared/src/map/controls
+  ../shared/src/map/coordinates
+  ../shared/src/map/layers
+  ../shared/src/map/layers/objects
+  ../shared/src/map/layers/tiled
+  ../shared/src/map/layers/tiled/raster
+  ../shared/src/map/layers/tiled/wmts
+  ../shared/src/map/layers/tiled/vector
+  ../shared/src/map/layers/tiled/vector/geojson
+  ../shared/src/map/layers/tiled/vector/geojson/geojsonvt
+  ../shared/src/map/layers/tiled/vector/tiles
+  ../shared/src/map/layers/tiled/vector/tiles/raster
+  ../shared/src/map/layers/tiled/vector/tiles/polygon
+  ../shared/src/map/layers/tiled/vector/tiles/line
+  ../shared/src/map/layers/tiled/vector/sourcemanagers
+  ../shared/src/map/layers/tiled/vector/sublayers
+  ../shared/src/map/layers/tiled/vector/sublayers/raster
+  ../shared/src/map/layers/tiled/vector/sublayers/line
+  ../shared/src/map/layers/tiled/vector/sublayers/polygon
+  ../shared/src/map/layers/tiled/vector/sublayers/symbol
+  ../shared/src/map/layers/tiled/vector/sublayers/background
+  ../shared/src/map/layers/tiled/vector/symbol
+  ../shared/src/map/layers/tiled/vector/description
+  ../shared/src/map/layers/tiled/vector/parsing
+  ../shared/src/map/layers/polygon
+  ../shared/src/map/layers/icon
+  ../shared/src/map/layers/line
+  ../shared/src/map/layers/text
+  ../shared/src/map/scheduling
+  ../shared/src/utils
+  ../android/src/main/cpp
+  ../android/src/main/cpp/graphics
+  ../android/src/main/cpp/graphics/objects
+  ../android/src/main/cpp/graphics/shader
+  ../android/src/main/cpp/utils
+  ../shared/public
+  ../bridging/wasm
+  ../external/djinni/support-lib/
+  ../external/djinni/support-lib/cpp
+  ../external/djinni/support-lib/wasm
 )
 set_property(
   SOURCE maps-core/shared/src/logger/Logger.cpp
@@ -126,19 +94,19 @@ set_property(
   $<$<CONFIG:Debug>:LOG_LEVEL=4>    # LogTrace
   $<$<CONFIG:Release>:LOG_LEVEL=1>) # LogWarning
 
-set_property(
-  SOURCE layer-animation/shared/src/networking/decoder/WebpAnimationDecoder.cpp
-  APPEND
-  PROPERTY INCLUDE_DIRECTORIES
-  ${PROJECT_SOURCE_DIR}/layer-animation/external/libwebp/src/
-)
+# set_property(
+#   SOURCE layer-animation/shared/src/networking/decoder/WebpAnimationDecoder.cpp
+#   APPEND
+#   PROPERTY INCLUDE_DIRECTORIES
+#   ${PROJECT_SOURCE_DIR}/layer-animation/external/libwebp/src/
+# )
 
 target_compile_definitions(webmapsdk PRIVATE OPENMOBILEMAPS_GL=1)
 
 target_compile_features(webmapsdk PRIVATE cxx_std_20)
 target_compile_options(webmapsdk PRIVATE -sUSE_PTHREADS=1 -Werror -Wno-deprecated -Wno-reorder)
 
-target_link_libraries(webmapsdk PRIVATE webp fpng)
+target_link_libraries(webmapsdk PRIVATE) # webp fpng)
 target_link_options(webmapsdk PRIVATE
   -lembind
   -sMODULARIZE=1
