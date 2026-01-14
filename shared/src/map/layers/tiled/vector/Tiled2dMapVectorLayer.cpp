@@ -332,10 +332,8 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
                 break;
             }
             case raster: {
-                auto rasterSubLayerConfig = customZoomInfo.has_value() ? std::make_shared<Tiled2dMapVectorRasterSubLayerConfig>(
-                        std::static_pointer_cast<RasterVectorLayerDescription>(layerDesc), is3d,*customZoomInfo)
-                                                                       : std::make_shared<Tiled2dMapVectorRasterSubLayerConfig>(
-                                std::static_pointer_cast<RasterVectorLayerDescription>(layerDesc), is3d);
+                auto rasterSubLayerConfig = std::make_shared<Tiled2dMapVectorRasterSubLayerConfig>(
+                    std::dynamic_pointer_cast<RasterVectorLayerDescription>(layerDesc), is3d, customZoomInfo);
 
                 auto sourceMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
                 auto sourceActor = Actor<Tiled2dMapRasterSource>(sourceMailbox,

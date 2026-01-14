@@ -11,7 +11,8 @@
 #pragma once
 
 #include "Value.h"
-#include <vector>
+#include <memory>
+#include <optional>
 
 enum VectorLayerType {
  background, raster, line, polygon, symbol, custom

@@ -11,7 +11,7 @@
 #pragma once
 
 #include "VectorLayerDescription.h"
-#include "Color.h"
+#include "VectorMapSourceDescription.h"
 #include "RasterShaderStyle.h"
 #include "FeatureValueEvaluator.h"
 
@@ -127,68 +127,53 @@ public:
     FeatureValueEvaluator<BlendMode> blendModeEvaluator;
 };
 
+struct RasterVectorMapSourceDescription : public VectorMapSourceDescription {
+    bool maskTiles;
+    
+    RasterVectorMapSourceDescription(std::string identifier,
+                               std::string url,
+                               int minZoom,
+                               int maxZoom,
+                               std::optional<::RectCoord> bounds,
+                               std::optional<float> zoomLevelScaleFactor,
+                               std::optional<bool> adaptScaleToScreen,
+                               std::optional<int> numDrawPreviousLayers,
+                               std::optional<bool> underzoom,
+                               std::optional<bool> overzoom,
+                               std::optional<std::vector<int>> levels,
+                               bool maskTiles) :
+            VectorMapSourceDescription(identifier, url, minZoom, maxZoom, bounds, zoomLevelScaleFactor, adaptScaleToScreen, numDrawPreviousLayers, underzoom, overzoom, levels),
+            maskTiles(maskTiles) {}
+};
+
 class RasterVectorLayerDescription: public VectorLayerDescription  {
 public:
     VectorLayerType getType() override { return VectorLayerType::raster; };
 
-    std::string url;
+    std::shared_ptr<RasterVectorMapSourceDescription> source;
     RasterVectorStyle style;
-    bool adaptScaleToScreen;
-    int32_t numDrawPreviousLayers;
-    bool maskTiles;
-    double zoomLevelScaleFactor;
-    bool overzoom;
-    bool underzoom;
-    std::optional<::RectCoord> bounds;
-    std::optional<std::string> coordinateReferenceSystem;
-    std::optional<std::vector<int>> levels;
 
     RasterVectorLayerDescription(std::string identifier,
-                                 std::string source,
+                                 std::shared_ptr<RasterVectorMapSourceDescription> source,
                                  int minZoom,
                                  int maxZoom,
-                                 int sourceMinZoom,
-                                 int sourceMaxZoom,
-                                 std::string url,
                                  std::shared_ptr<Value> filter,
-                                 RasterVectorStyle style,
-                                 bool adaptScaleToScreen,
-                                 int32_t numDrawPreviousLayers,
-                                 bool maskTiles,
-                                 double zoomLevelScaleFactor,
                                  std::optional<int32_t> renderPassIndex,
                                  std::shared_ptr<Value> interactable,
-                                 bool underzoom,
-                                 bool overzoom,
-                                 std::optional<::RectCoord> bounds,
-                                 std::optional<std::string> coordinateReferenceSystem,
-                                 std::optional<std::vector<int>> levels) :
-    VectorLayerDescription(identifier, source, "", minZoom, maxZoom, sourceMinZoom, sourceMaxZoom, filter, renderPassIndex, interactable, false, false),
-    style(style), url(url), underzoom(underzoom), overzoom(overzoom), adaptScaleToScreen(adaptScaleToScreen), numDrawPreviousLayers(numDrawPreviousLayers),
-    maskTiles(maskTiles), zoomLevelScaleFactor(zoomLevelScaleFactor), bounds(bounds), coordinateReferenceSystem(coordinateReferenceSystem), levels(levels) {};
-
+                                 RasterVectorStyle style)
+    : VectorLayerDescription(identifier, source->identifier, "", minZoom, maxZoom, source->minZoom, source->maxZoom, filter, renderPassIndex, interactable, false, false)
+    , source(source)
+    , style(style) {}
 
     std::unique_ptr<VectorLayerDescription> clone() override {
         return std::make_unique<RasterVectorLayerDescription>(identifier,
                                             source,
                                             minZoom,
                                             maxZoom,
-                                            sourceMinZoom,
-                                            sourceMaxZoom,
-                                            url,
                                             filter,
-                                            style,
-                                            adaptScaleToScreen,
-                                            numDrawPreviousLayers,
-                                            maskTiles,
-                                            zoomLevelScaleFactor,
                                             renderPassIndex,
                                             interactable ? interactable->clone() : nullptr,
-                                            underzoom,
-                                            overzoom,
-                                            bounds,
-                                            coordinateReferenceSystem,
-                                            levels);
+                                            style);
     }
 
     virtual UsedKeysCollection getUsedKeys() const override {

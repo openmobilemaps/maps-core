@@ -11,7 +11,6 @@
 #pragma once
 
 #include "VectorLayerDescription.h"
-#include "Color.h"
 #include "GeoJsonTypes.h"
 #include "RectCoord.h"
 
@@ -28,6 +27,7 @@ public:
     std::optional<bool> underzoom;
     std::optional<bool> overzoom;
     std::optional<std::vector<int>> levels;
+    std::optional<std::string> coordinateReferenceSystem;
 
     VectorMapSourceDescription(std::string identifier,
                                std::string vectorUrl,

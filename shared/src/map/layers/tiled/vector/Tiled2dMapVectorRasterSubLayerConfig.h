@@ -24,33 +24,22 @@ public:
     Tiled2dMapVectorRasterSubLayerConfig(const std::shared_ptr<RasterVectorLayerDescription> &layerDescription,
                                          const bool is3d,
                                          const std::optional<Tiled2dMapZoomInfo> &customZoomInfo = std::nullopt)
-            : Tiled2dMapVectorLayerConfig(
-                                          std::make_shared<VectorMapSourceDescription>(layerDescription->source, layerDescription->url, layerDescription->sourceMinZoom,
-                                                                                       layerDescription->sourceMaxZoom, layerDescription->bounds,
-                                                         layerDescription->zoomLevelScaleFactor,
-                                                         layerDescription->adaptScaleToScreen,
-                                                         layerDescription->numDrawPreviousLayers,
-                                                         layerDescription->underzoom,
-                                                         layerDescription->overzoom,
-                                                         layerDescription->levels), is3d),
+            : Tiled2dMapVectorLayerConfig(std::static_pointer_cast<VectorMapSourceDescription>(layerDescription->source), is3d),
               description(layerDescription) {
         if (customZoomInfo.has_value()) {
-            zoomInfo = Tiled2dMapZoomInfo(customZoomInfo->zoomLevelScaleFactor * description->zoomLevelScaleFactor,
-                                          std::max(customZoomInfo->numDrawPreviousLayers, description->numDrawPreviousLayers),
-                                          0,
-                                          customZoomInfo->adaptScaleToScreen || description->adaptScaleToScreen,
-                                          customZoomInfo->maskTile || description->maskTiles,
-                                          customZoomInfo->underzoom && description->underzoom,
-                                          customZoomInfo->overzoom && description->overzoom);
-        } else {
-            zoomInfo = Tiled2dMapZoomInfo(description->zoomLevelScaleFactor, description->numDrawPreviousLayers, 0,
-                                          description->adaptScaleToScreen, description->maskTiles, description->underzoom,
-                                          description->overzoom);
+            // zoomInfo is already initialized in super from the source-description
+            zoomInfo.zoomLevelScaleFactor *= customZoomInfo->zoomLevelScaleFactor;
+            zoomInfo.numDrawPreviousLayers = std::max(customZoomInfo->numDrawPreviousLayers, zoomInfo.numDrawPreviousLayers);
+            zoomInfo.numDrawPreviousOrLaterTLayers = 0;
+            zoomInfo.adaptScaleToScreen |= customZoomInfo->adaptScaleToScreen;
+            zoomInfo.maskTile |= customZoomInfo->maskTile;
+            zoomInfo.underzoom &= customZoomInfo->underzoom;
+            zoomInfo.overzoom &= customZoomInfo->overzoom;
         }
 
-        if (description->coordinateReferenceSystem == "EPSG:4326") {
-            customConfig = std::make_shared<Epsg4326Tiled2dMapLayerConfig>(layerDescription->source,
-                                                                           layerDescription->url,
+        if (description->source->coordinateReferenceSystem == "EPSG:4326") {
+            customConfig = std::make_shared<Epsg4326Tiled2dMapLayerConfig>(layerDescription->source->identifier,
+                                                                           layerDescription->source->vectorUrl,
                                                                            zoomInfo,
                                                                            layerDescription->sourceMinZoom,
                                                                            layerDescription->sourceMaxZoom);

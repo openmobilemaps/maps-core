@@ -73,7 +73,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
 
     std::vector<std::shared_ptr<VectorLayerDescription>> layers;
 
-    std::map<std::string, std::shared_ptr<RasterVectorLayerDescription>> rasterLayerMap;
+    std::map<std::string, std::shared_ptr<RasterVectorMapSourceDescription>> rasterSourceMap;
 
     std::map<std::string, std::shared_ptr<GeoJSONVTInterface>> geojsonSources;
 
@@ -174,28 +174,22 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                 maxZoom = json.value("maxzoom", 22);
             }
 
-
-            RasterVectorStyle style = RasterVectorStyle(nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
-            rasterLayerMap[key] = std::make_shared<RasterVectorLayerDescription>(layerName,
-                                                                                 key,
-                                                                                 0,
-                                                                                 24,
-                                                                                 minZoom,
-                                                                                 maxZoom,
-                                                                                 url,
-                                                                                 nullptr,
-                                                                                 style,
-                                                                                 adaptScaleToScreen,
-                                                                                 numDrawPreviousLayers,
-                                                                                 maskTiles,
-                                                                                 zoomLevelScaleFactor,
-                                                                                 std::nullopt,
-                                                                                 nullptr,
-                                                                                 underzoom,
-                                                                                 overzoom,
-                                                                                 bounds,
-                                                                                 coordinateReferenceSystem,
-                                                                                 levels);
+            // XXX: coordinateReferenceSystem
+            // XXX: maskTiles
+            rasterSourceMap[key] = std::make_shared<RasterVectorMapSourceDescription>(
+              key,
+              url,
+              minZoom,
+              maxZoom,
+              bounds,
+              adaptScaleToScreen,
+              numDrawPreviousLayers,
+              zoomLevelScaleFactor,
+              underzoom,
+              overzoom,
+              levels,
+              maskTiles
+              );
 
         } else if (type == "vector" && val["url"].is_string()) {
             auto result = LoaderHelper::loadData(replaceUrlParams(val["url"].get<std::string>(), sourceUrlParams), std::nullopt, loaders);
@@ -361,8 +355,8 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                                                                                 interactable);
             layers.push_back(layerDesc);
 
-        } else if (val["type"] == "raster" && rasterLayerMap.count(val["source"]) != 0) {
-            auto layer = rasterLayerMap[val["source"]];
+        } else if (val["type"] == "raster" && rasterSourceMap.count(val["source"]) != 0) {
+            const auto &source = rasterSourceMap[val["source"]];
             RasterVectorStyle style = RasterVectorStyle(parser.parseValue(val["paint"]["raster-opacity"]),
                                                         parser.parseValue(val["paint"]["raster-brightness-min"]),
                                                         parser.parseValue(val["paint"]["raster-brightness-max"]),
@@ -373,30 +367,21 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                                                         blendMode);
             std::shared_ptr<Value> filter = parser.parseValue(val["filter"]);
 
-            bool underzoom = layer->underzoom && !val.contains("minzoom");
-            bool overzoom = layer->overzoom && !val.contains("maxzoom");
+            // TODO
+            [[maybe_unused]]
+            bool underzoom = source->underzoom && !val.contains("minzoom");
+            [[maybe_unused]]
+            bool overzoom = source->overzoom && !val.contains("maxzoom");
 
-            auto newLayer = std::make_shared<RasterVectorLayerDescription>(val["id"],
-                                                                           val["source"],
-                                                                           val.value("minzoom", layer->minZoom),
-                                                                           val.value("maxzoom", layer->maxZoom),
-                                                                           layer->sourceMinZoom,
-                                                                           layer->sourceMaxZoom,
-                                                                           layer->url,
+            auto layer = std::make_shared<RasterVectorLayerDescription>(val["id"],
+                                                                           source,
+                                                                           val.value("minzoom", source->minZoom),
+                                                                           val.value("maxzoom", source->maxZoom),
                                                                            filter,
-                                                                           style,
-                                                                           layer->adaptScaleToScreen,
-                                                                           layer->numDrawPreviousLayers,
-                                                                           layer->maskTiles,
-                                                                           layer->zoomLevelScaleFactor,
-                                                                           layer->renderPassIndex,
+                                                                           renderPassIndex,
                                                                            interactable,
-                                                                           underzoom,
-                                                                           overzoom,
-                                                                           layer->bounds,
-                                                                           layer->coordinateReferenceSystem,
-                                                                           layer->levels);
-            layers.push_back(newLayer);
+                                                                           style);
+            layers.push_back(layer);
         } else if (val["type"] == "line") {
 
             std::shared_ptr<Value> filter = parser.parseValue(val["filter"]);
