@@ -42,7 +42,7 @@ void AlphaInstancedShaderOpenGl::setupProgram(const std::shared_ptr<::RenderingC
 
 std::string AlphaInstancedShaderOpenGl::getVertexShader() {
     return projectOntoUnitSphere ?
-           OMMVersionedGlesShaderCodeWithFrameUBO(300 es,
+           OMMVersionedGlesShaderCodeWithFrameUBO(320 es, 300 es,
                                       uniform vec4 uOriginOffset;
 
                                       in vec3 vPosition;
@@ -84,8 +84,7 @@ std::string AlphaInstancedShaderOpenGl::getVertexShader() {
                                           v_alpha = aAlpha * mask;
                                       }
                                       )
-    // TO_CHANGE
-    : OMMVersionedGlesShaderCodeWithFrameUBO(300 es,
+    : OMMVersionedGlesShaderCodeWithFrameUBO(320 es, 300 es,
                                       uniform vec4 uOriginOffset;
 
                                       in vec3 vPosition;
@@ -126,7 +125,7 @@ std::string AlphaInstancedShaderOpenGl::getVertexShader() {
 
 
 std::string AlphaInstancedShaderOpenGl::getFragmentShader() {
-    return OMMVersionedGlesShaderCode(300 es,
+    return OMMVersionedGlesShaderCode(320 es, 300 es,
                                       precision highp float;
                                       uniform sampler2D textureSampler;
 

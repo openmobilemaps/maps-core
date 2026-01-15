@@ -55,9 +55,8 @@ void SphereEffectShaderOpenGl::setEllipse(const SharedBytes &coefficients) {
     }
 }
 
-// TO_CHANGE
 std::string SphereEffectShaderOpenGl::getVertexShader() {
-    return OMMVersionedGlesShaderCode(300 es,
+    return OMMVersionedGlesShaderCode(320 es, 300 es,
                                               uniform mat4 umMatrix;
                                               in vec4 vPosition;
                                               in vec2 texCoordinate;
@@ -71,7 +70,7 @@ std::string SphereEffectShaderOpenGl::getVertexShader() {
 }
 
 std::string SphereEffectShaderOpenGl::getFragmentShader() {
-    return OMMVersionedGlesShaderCode(300 es,
+    return OMMVersionedGlesShaderCode(320 es, 300 es,
                                       precision highp float;
                                               uniform mat4 vCoefficients;
                                               in vec2 v_texcoord;

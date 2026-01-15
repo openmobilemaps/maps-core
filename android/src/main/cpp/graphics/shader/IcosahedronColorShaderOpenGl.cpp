@@ -56,7 +56,7 @@ void IcosahedronColorShaderOpenGl::setColor(float red, float green, float blue, 
 }
 
 std::string IcosahedronColorShaderOpenGl::getVertexShader() {
-    return OMMVersionedGlesShaderCodeWithFrameUBO(300 es,
+    return OMMVersionedGlesShaderCodeWithFrameUBO(320 es, 300 es,
                                       precision highp float;
                                       in vec3 vLatLon;
                                       in float vValue;
@@ -77,9 +77,8 @@ std::string IcosahedronColorShaderOpenGl::getVertexShader() {
 }
 
 
-// TO_CHANGE
 std::string IcosahedronColorShaderOpenGl::getFragmentShader() {
-    return OMMVersionedGlesShaderCode(300 es,
+    return OMMVersionedGlesShaderCode(320 es, 300 es,
                                 precision mediump float;
                                 uniform vec4 vColor;
                                 in float gridValue;

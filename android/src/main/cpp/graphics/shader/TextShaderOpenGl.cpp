@@ -77,9 +77,8 @@ void TextShaderOpenGl::preRender(const std::shared_ptr<::RenderingContextInterfa
 
 }
 
-// TO_CHANGE
 std::string TextShaderOpenGl::getVertexShader() {
-    return OMMVersionedGlesShaderCodeWithFrameUBO(300 es,
+    return OMMVersionedGlesShaderCodeWithFrameUBO(320 es, 300 es,
                                       uniform vec2 textureCoordScaleFactor;
                                       in vec2 vPosition;
                                       in vec2 texCoordinate;
@@ -92,7 +91,7 @@ std::string TextShaderOpenGl::getVertexShader() {
 }
 
 std::string TextShaderOpenGl::getFragmentShader() {
-    return OMMVersionedGlesShaderCode(300 es,
+    return OMMVersionedGlesShaderCode(320 es, 300 es,
                                       precision highp float;
                                       uniform sampler2D textureSampler;
                                       uniform vec4 color;

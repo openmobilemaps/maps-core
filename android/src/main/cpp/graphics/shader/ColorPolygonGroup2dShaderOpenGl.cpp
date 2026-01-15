@@ -144,8 +144,7 @@ std::string ColorPolygonGroup2dShaderOpenGl::getPolygonStylesUBODefinition(bool 
 }
 
 std::string ColorPolygonGroup2dShaderOpenGl::getVertexShader() {
-    // TO_CHANGE
-    return isStriped ? OMMVersionedGlesShaderCodeWithFrameUBO(300 es,
+    return isStriped ? OMMVersionedGlesShaderCodeWithFrameUBO(320 es, 300 es,
                 // Striped Shader
                 precision highp float;
 
@@ -165,7 +164,7 @@ std::string ColorPolygonGroup2dShaderOpenGl::getVertexShader() {
                     styleIndex = clamp(int(floor(vStyleIndex + 0.5)), 0, uPolygonStyles.numStyles);
                     uv = vPosition.xy;
                 }
-            ) : OMMVersionedGlesShaderCodeWithFrameUBO(300 es,
+            ) : OMMVersionedGlesShaderCodeWithFrameUBO(320 es, 300 es,
                 // Default Color Shader
                 precision highp float;
 
@@ -186,7 +185,7 @@ std::string ColorPolygonGroup2dShaderOpenGl::getVertexShader() {
 }
 
 std::string ColorPolygonGroup2dShaderOpenGl::getFragmentShader() {
-    return isStriped ? OMMVersionedGlesShaderCode(300 es,
+    return isStriped ? OMMVersionedGlesShaderCode(320 es, 300 es,
                         // Striped Shader
                         precision highp float;
 
@@ -214,7 +213,7 @@ std::string ColorPolygonGroup2dShaderOpenGl::getFragmentShader() {
                             fragmentColor.a = 1.0;
                             fragmentColor *= color.a;
                         }
-                  ) : OMMVersionedGlesShaderCode(300 es,
+                  ) : OMMVersionedGlesShaderCode(320 es, 300 es,
                         // Default Color Shader
                         precision highp float;
 

@@ -51,10 +51,9 @@ void TextInstancedShaderOpenGl::preRender(const std::shared_ptr<::RenderingConte
     glUniform1f(aspectRatioHandle, openGlContext->getAspectRatio());
 }
 
-// TO_CHANGE
 std::string TextInstancedShaderOpenGl::getVertexShader() {
     return projectOntoUnitSphere ?
-    OMMVersionedGlesShaderCodeWithFrameUBO(300 es,
+    OMMVersionedGlesShaderCodeWithFrameUBO(320 es, 300 es,
                                uniform mat4 umMatrix;
                                uniform vec4 uOriginOffset;
                                uniform float uAspectRatio;
@@ -104,7 +103,7 @@ std::string TextInstancedShaderOpenGl::getVertexShader() {
                                    v_alpha = aAlpha * mask;
                                }
                            )
-    : OMMVersionedGlesShaderCodeWithFrameUBO(300 es,
+    : OMMVersionedGlesShaderCodeWithFrameUBO(320 es, 300 es,
                                   uniform vec4 uOriginOffset;
 
                                   in vec4 vPosition;
@@ -147,7 +146,7 @@ std::string TextInstancedShaderOpenGl::getVertexShader() {
 }
 
 std::string TextInstancedShaderOpenGl::getFragmentShader() {
-    return OMMVersionedGlesShaderCode(300 es,
+    return OMMVersionedGlesShaderCode(320 es, 300 es,
                                       precision highp float;
                                               struct TextStyle {
                                                   float colorRGBA;
