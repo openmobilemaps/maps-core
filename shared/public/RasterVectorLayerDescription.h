@@ -44,7 +44,7 @@ public:
 
     UsedKeysCollection getUsedKeys() const {
         UsedKeysCollection usedKeys;
-        std::shared_ptr<Value> values[] = { 
+        std::shared_ptr<Value> values[] = {
             rasterOpacityEvaluator.getValue(),
             rasterBrightnessMinEvaluator.getValue(),
             rasterBrightnessMaxEvaluator.getValue(),
@@ -68,7 +68,7 @@ public:
         static const BlendMode defaultValue = BlendMode::NORMAL;
         return blendModeEvaluator.getResult(context, defaultValue).value;
     }
-    
+
     RasterShaderStyle getRasterStyle(const EvaluationContext &context) {
         return {
             (float) getRasterOpacity(context),
@@ -85,17 +85,17 @@ public:
         double defaultValue = 1.0;
         return rasterOpacityEvaluator.getResult(context, defaultValue).value;
     }
-    
+
     double getRasterBrightnessMin(const EvaluationContext &context) {
         double defaultValue = 0.0;
         return rasterBrightnessMinEvaluator.getResult(context, defaultValue).value;
     }
-    
+
     double getRasterBrightnessMax(const EvaluationContext &context) {
         double defaultValue = 1.0;
         return rasterBrightnessMaxEvaluator.getResult(context, defaultValue).value;
     }
-    
+
     double getRasterContrast(const EvaluationContext &context) {
         double defaultValue = 0.0;
         return rasterContrastEvaluator.getResult(context, defaultValue).value;
@@ -129,7 +129,7 @@ public:
 
 struct RasterVectorMapSourceDescription : public VectorMapSourceDescription {
     bool maskTiles;
-    
+
     RasterVectorMapSourceDescription(std::string identifier,
                                std::string url,
                                int minZoom,
@@ -141,9 +141,16 @@ struct RasterVectorMapSourceDescription : public VectorMapSourceDescription {
                                std::optional<bool> underzoom,
                                std::optional<bool> overzoom,
                                std::optional<std::vector<int>> levels,
-                               bool maskTiles) :
-            VectorMapSourceDescription(identifier, url, minZoom, maxZoom, bounds, zoomLevelScaleFactor, adaptScaleToScreen, numDrawPreviousLayers, underzoom, overzoom, levels),
-            maskTiles(maskTiles) {}
+                               std::optional<int32_t> coordinateReferenceSystem,
+                               bool maskTiles)
+    : VectorMapSourceDescription(identifier, url, minZoom, maxZoom, bounds, zoomLevelScaleFactor, adaptScaleToScreen, numDrawPreviousLayers, underzoom, overzoom, levels, coordinateReferenceSystem)
+    , maskTiles(maskTiles) {}
+
+    virtual Tiled2dMapZoomInfo getZoomInfo(bool is3d) const {
+        auto zoomInfo = VectorMapSourceDescription::getZoomInfo(is3d);
+        zoomInfo.maskTile = maskTiles;
+        return zoomInfo;
+    }
 };
 
 class RasterVectorLayerDescription: public VectorLayerDescription  {

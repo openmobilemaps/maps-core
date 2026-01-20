@@ -92,8 +92,8 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
             bool maskTiles = true;
             double zoomLevelScaleFactor = 1.0;
 
-            bool overzoom = val.contains("overzoom")  ? tileJsons["overzoom"].get<bool>() : true;
-            bool underzoom = val.contains("underzoom")  ? tileJsons["underzoom"].get<bool>() : false;
+            bool overzoom = val.contains("overzoom")  ? val["overzoom"].get<bool>() : true;
+            bool underzoom = val.contains("underzoom")  ? val["underzoom"].get<bool>() : false;
 
             std::optional<std::vector<int>> levels;
             int minZoom = std::numeric_limits<int>::max();
@@ -111,9 +111,14 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                 minZoom = val.value("minzoom", 0);
                 maxZoom = val.value("maxzoom", 22);
             }
+            std::optional<int32_t> coordinateReferenceSystem;
+            if(val.contains("crs") && val["crs"].is_string()) {
+                coordinateReferenceSystem = CoordinateSystemIdentifiers::fromCrsIdentifier(val["crs"].get<std::string>());
+            } else if(val["metadata"].is_object() && val["metadata"].contains("crs") && val["metadata"]["crs"].is_string()) {
+                coordinateReferenceSystem = CoordinateSystemIdentifiers::fromCrsIdentifier(val["metadata"]["crs"].get<std::string>());
+            }
             
             std::optional<::RectCoord> bounds;
-            std::optional<std::string> coordinateReferenceSystem;
 
             if (val["tiles"].is_array()) {
                 auto str = val.dump();
@@ -135,9 +140,6 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                     }
                 }
 
-                if(val["metadata"].is_object() && val["metadata"].contains("crs") && val["metadata"]["crs"].is_string()) {
-                    coordinateReferenceSystem = val["metadata"]["crs"].get<std::string>();
-                }
 
             } else if (val["url"].is_string()) {
                 auto result = LoaderHelper::loadData(replaceUrlParams(val["url"].get<std::string>(), sourceUrlParams), std::nullopt, loaders);
@@ -166,30 +168,26 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                     }
                 }
 
-                if(json["metadata"].is_object() && json["metadata"].contains("crs") && json["metadata"]["crs"].is_string()) {
-                    coordinateReferenceSystem = json["metadata"]["crs"].get<std::string>();
-                }
 
                 minZoom = json.value("minzoom", 0);
                 maxZoom = json.value("maxzoom", 22);
             }
 
-            // XXX: coordinateReferenceSystem
-            // XXX: maskTiles
             rasterSourceMap[key] = std::make_shared<RasterVectorMapSourceDescription>(
-              key,
-              url,
-              minZoom,
-              maxZoom,
-              bounds,
-              adaptScaleToScreen,
-              numDrawPreviousLayers,
-              zoomLevelScaleFactor,
-              underzoom,
-              overzoom,
-              levels,
-              maskTiles
-              );
+                key,
+                url,
+                minZoom,
+                maxZoom,
+                bounds,
+                zoomLevelScaleFactor,
+                adaptScaleToScreen,
+                numDrawPreviousLayers,
+                underzoom,
+                overzoom,
+                levels,
+                coordinateReferenceSystem,
+                maskTiles
+            );
 
         } else if (type == "vector" && val["url"].is_string()) {
             auto result = LoaderHelper::loadData(replaceUrlParams(val["url"].get<std::string>(), sourceUrlParams), std::nullopt, loaders);
@@ -269,6 +267,10 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
             minZoom = tileJson.value("minzoom", 0);
             maxZoom = tileJson.value("maxzoom", 22);
         }
+        std::optional<int32_t> coordinateReferenceSystem;
+        if(tileJson.contains("crs") && tileJson["crs"].is_string()) {
+            coordinateReferenceSystem = CoordinateSystemIdentifiers::fromCrsIdentifier(tileJson["crs"].get<std::string>());
+        }
 
         sourceDescriptions.push_back(
                                      std::make_shared<VectorMapSourceDescription>(identifier,
@@ -281,7 +283,9 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                                                                                   numDrawPreviousLayers,
                                                                                   underzoom,
                                                                                   overzoom,
-                                                                                  levels));
+                                                                                  levels,
+                                                                                  coordinateReferenceSystem
+                                                                                  ));
     }
 
 
@@ -374,13 +378,13 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
             bool overzoom = source->overzoom && !val.contains("maxzoom");
 
             auto layer = std::make_shared<RasterVectorLayerDescription>(val["id"],
-                                                                           source,
-                                                                           val.value("minzoom", source->minZoom),
-                                                                           val.value("maxzoom", source->maxZoom),
-                                                                           filter,
-                                                                           renderPassIndex,
-                                                                           interactable,
-                                                                           style);
+                                                                        source,
+                                                                        val.value("minzoom", source->minZoom),
+                                                                        val.value("maxzoom", source->maxZoom),
+                                                                        filter,
+                                                                        renderPassIndex,
+                                                                        interactable,
+                                                                        style);
             layers.push_back(layer);
         } else if (val["type"] == "line") {
 
