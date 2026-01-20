@@ -1,9 +1,9 @@
 #include "CoordinateSystemFactory.h"
 #include "DataLoaderResult.h"
+#include "Epsg3857Tiled2dMapLayerConfig.h"
 #include "LoaderInterface.h"
 #include "TextureLoaderResult.h"
 #include "Tiled2dMapSource.h"
-#include "WebMercatorTiled2dMapLayerConfig.h"
 #include "helper/TestScheduler.h"
 
 #include "Tiled2dMapSourceImpl.h"
@@ -219,9 +219,18 @@ class BlockingTestLoader : public LoaderInterface {
     std::list<BlockedLoad> blockedLoads;
 };
 
+static std::shared_ptr<Epsg3857Tiled2dMapLayerConfig> createTestLayerConfig() {
+	auto zoomInfo = Tiled2dMapVectorLayerConfig::defaultMapZoomInfo();
+	zoomInfo.adaptScaleToScreen = false; // Important, otherwise the onVisibleBoundsChanged does not pick up the (in the tests) expected zoom level.
+    return std::make_shared<Epsg3857Tiled2dMapLayerConfig>("mock", "test-data://tile/{z}/{x}/{y}",
+		std::nullopt,
+		zoomInfo,
+		Tiled2dMapVectorLayerConfig::generateLevelsFromMinMax(0, 20)
+	);
+}
+
 TEST_CASE("VectorTileSource") {
-    auto layerConfig = std::make_shared<WebMercatorTiled2dMapLayerConfig>(
-        "mock", "{z}/{x}/{y}", Tiled2dMapZoomInfo(1.0, 0, 0, false, true, false, true), 0, 20);
+    auto layerConfig = createTestLayerConfig();
     auto scheduler = std::make_shared<TestScheduler>();
     std::shared_ptr<TestTiled2dMapVectorSource> source = std::make_shared<TestTiled2dMapVectorSource>(
         layerConfig, scheduler, std::vector<std::shared_ptr<LoaderInterface>>{std::make_shared<NothingTestLoader>()});
@@ -273,11 +282,10 @@ static std::unordered_map<std::string, std::string> generateDummyData(const std:
  */
 TEST_CASE("Tiled2dMapSource slow fallback does not block local loads") {
 
-    auto layerConfig = std::make_shared<WebMercatorTiled2dMapLayerConfig>(
-        "mock", "test-data://tile/{z}/{x}/{y}", Tiled2dMapZoomInfo(1.0, 0, 0, false, true, false, true), 0, 20);
+    auto layerConfig = createTestLayerConfig();
 
     // Load the entire world.
-    auto rect = *layerConfig->getBounds();
+    auto rect = CoordinateSystemFactory::getEpsg3857System().bounds;
     auto zoomLevelInfos = layerConfig->getZoomLevelInfos();
     // Try with different zoom levels; that's 1, 16, 256 or 1024 tiles
     const int z = GENERATE(0, 2, 4, 5);
@@ -320,6 +328,7 @@ TEST_CASE("Tiled2dMapSource slow fallback does not block local loads") {
 
     // Complete all "local" loads
     scheduler->drain();
+	CAPTURE(z);
     REQUIRE(source->numLoadingOrQueued() == expectedTiles.size());
     while (localLoader->unblockAll()) {
         scheduler->drain();
@@ -347,11 +356,10 @@ TEST_CASE("Tiled2dMapSource slow fallback does not block local loads") {
 
 TEST_CASE("Tiled2dMapSource error load retry") {
     
-    auto layerConfig = std::make_shared<WebMercatorTiled2dMapLayerConfig>(
-        "mock", "test-data://tile/{z}/{x}/{y}", Tiled2dMapZoomInfo(1.0, 0, 0, false, true, false, true), 0, 20);
+	auto layerConfig = createTestLayerConfig();
 
     // Load the entire world at zoom level 3
-    auto rect = *layerConfig->getBounds();
+    auto rect = CoordinateSystemFactory::getEpsg3857System().bounds;
     auto zoomLevelInfos = layerConfig->getZoomLevelInfos();
     const int z = 3;
     std::vector<Tiled2dMapTileInfo> expectedTiles = {{rect, 0, 0, 0, 0, int(zoomLevelInfos[0].zoom)}};

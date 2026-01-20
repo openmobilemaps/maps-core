@@ -13,20 +13,23 @@
 #include "RegularTiled2dMapLayerConfig.h"
 #include "Tiled2dMapZoomInfo.h"
 
-class Epsg4326Tiled2dMapLayerConfig : public RegularTiled2dMapLayerConfig {
+class Epsg3857Tiled2dMapLayerConfig : public RegularTiled2dMapLayerConfig {
 public:
-    Epsg4326Tiled2dMapLayerConfig(
+    Epsg3857Tiled2dMapLayerConfig(
         std::string layerName,
         std::string urlFormat
     );
 
-    Epsg4326Tiled2dMapLayerConfig(
+    Epsg3857Tiled2dMapLayerConfig(
         std::string layerName,
         std::string urlFormat,
         const std::optional<RectCoord> &bounds,
         const Tiled2dMapZoomInfo &zoomInfo,
         const std::vector<int> &levels
     );
+
+    virtual std::string getTileUrl(int32_t x, int32_t y, int32_t t, int32_t zoom) override;
+
 private:
     const static double BASE_ZOOM;
 };
