@@ -175,6 +175,7 @@ std::string TessellatedRasterShaderOpenGl::getEvaluationShader() {
    );
 }
 
+#if TESSELLATION_WIREFRAME_MODE
 std::string TessellatedRasterShaderOpenGl::getGeometryShader() {
     return OMMVersionedGlesShaderCodeWithFrameUBO(320 es,
                                         layout(triangles) in;
@@ -202,3 +203,4 @@ std::string TessellatedRasterShaderOpenGl::getGeometryShader() {
                                         }
     );
 }
+#endif

@@ -10,6 +10,7 @@
 
 @preconcurrency import Metal
 import OSLog
+import MapCoreSharedModule
 
 public enum PipelineDescriptorFactory {
     public static func pipelineDescriptor(
@@ -129,14 +130,18 @@ public struct Pipeline: Codable, CaseIterable, Hashable, Sendable {
     }
 
     public static var allCases: [Pipeline] {
-        Array(
-            PipelineType.allCases
-                .map { type in
-                    MCBlendMode.allCases.map { blendMode in
-                        Pipeline(type: type, blendMode: blendMode)
-                    }
-                }
-                .joined())
+        let allPipelines = PipelineType.allCases.flatMap { type in
+            MCBlendMode.allCases.map { blendMode in
+                Pipeline(type: type, blendMode: blendMode)
+            }
+        }
+    #if targetEnvironment(simulator)
+        return allPipelines.filter {
+            $0.type.tessellation == MCTessellationMode.NONE
+        }
+    #else
+        return allPipelines
+    #endif
     }
 }
 
@@ -207,7 +212,15 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
 
     var vertexShaderUsesModelMatrix: Bool {
         switch self {
-            case .rasterShader, .quadTessellatedShader, .roundColorShader, .unitSphereRoundColorShader, .alphaShader, .unitSphereAlphaShader, .sphereEffectShader, .skySphereShader, .elevationInterpolation:
+            case .rasterShader,
+                .quadTessellatedShader,
+                .roundColorShader,
+                .unitSphereRoundColorShader,
+                .alphaShader,
+                .unitSphereAlphaShader,
+                .sphereEffectShader,
+                .skySphereShader,
+                .elevationInterpolation:
                 return true
             default:
                 return false

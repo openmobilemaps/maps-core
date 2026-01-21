@@ -12,6 +12,7 @@
 
 #include "RasterShaderOpenGl.h"
 #include "RenderingContextInterface.h"
+#include "Tiled2dMapVectorLayerConstants.h"
 
 class TessellatedRasterShaderOpenGl : public RasterShaderOpenGl {
 public:
@@ -26,7 +27,8 @@ protected:
 
     virtual std::string getEvaluationShader();
 
-    /* WIREFRAME DEBUG */
+#if TESSELLATION_WIREFRAME_MODE
     virtual std::string getGeometryShader();
+#endif
 };
 

@@ -13,8 +13,15 @@
 #define POLYGON_SUBDIVISION_FACTOR 10.0
 #define POLYGON_MASK_SUBDIVISION_FACTOR 10.0
 
-#if defined(__APPLE__) || defined(__ANDROID__)
+#if defined(__ANDROID__)
     #define TESSELLATION_ACTIVATED
+#endif
+
+#if defined(__APPLE__)
+    #include <TargetConditionals.h>
+    #if !TARGET_OS_SIMULATOR
+        #define TESSELLATION_ACTIVATED
+    #endif
 #endif
 
 #define TESSELLATION_WIREFRAME_MODE 0
