@@ -66,17 +66,17 @@ protected:
     std::string programName;
     int program = 0;
 
-    int mMatrixHandle{};
-    int originOffsetHandle{};
-    int subdivisionFactorHandle{};
-    int originHandle{};
-    int is3dHandle{};
-    int positionHandle{};
-    int frameCoordHandle{};
-    GLuint vao{};
-    GLuint vertexBuffer{};
+    int mMatrixHandle;
+    int originOffsetHandle;
+    int subdivisionFactorHandle;
+    int originHandle;
+    int is3dHandle;
+    int positionHandle;
+    int frameCoordHandle;
+    GLuint vao;
+    GLuint vertexBuffer;
     std::vector<GLfloat> vertices;
-    GLuint indexBuffer{};
+    GLuint indexBuffer;
     std::vector<GLushort> indices;
     bool glDataBuffersGenerated = false;
     Vec3D polygonOrigin = Vec3D(0.0, 0.0, 0.0);

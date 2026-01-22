@@ -30,7 +30,7 @@ Tiled2dMapVectorRasterTile::Tiled2dMapVectorRasterTile(const std::weak_ptr<MapIn
     auto pMapInterface = mapInterface.lock();
     if (pMapInterface) {
         
-    #ifdef TESSELLATION_ACTIVATED
+    #ifdef HARDWARE_TESSELLATION_SUPPORTED
         auto shader = pMapInterface->getShaderFactory()->createQuadTessellatedShader();
         auto quad = pMapInterface->getGraphicsObjectFactory()->createQuadTessellated(shader->asShaderProgramInterface());
     #else

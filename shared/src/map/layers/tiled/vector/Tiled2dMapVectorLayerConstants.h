@@ -14,14 +14,14 @@
 #define POLYGON_MASK_SUBDIVISION_FACTOR 10.0
 
 #if defined(__ANDROID__)
-    #define TESSELLATION_ACTIVATED
+    #define HARDWARE_TESSELLATION_SUPPORTED
 #endif
 
 #if defined(__APPLE__)
     #include <TargetConditionals.h>
     #if !TARGET_OS_SIMULATOR
-        #define TESSELLATION_ACTIVATED
+        #define HARDWARE_TESSELLATION_SUPPORTED
     #endif
 #endif
 
-#define TESSELLATION_WIREFRAME_MODE 0
+#define HARDWARE_TESSELLATION_WIREFRAME 0

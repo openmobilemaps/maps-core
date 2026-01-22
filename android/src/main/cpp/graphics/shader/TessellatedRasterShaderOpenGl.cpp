@@ -23,7 +23,7 @@ void TessellatedRasterShaderOpenGl::setupProgram(const std::shared_ptr<::Renderi
     int controlShader = loadShader(GL_TESS_CONTROL_SHADER, getControlShader());
     int evaluationShader = loadShader(GL_TESS_EVALUATION_SHADER, getEvaluationShader());
 
-#if TESSELLATION_WIREFRAME_MODE
+#if HARDWARE_TESSELLATION_WIREFRAME
     int geometryShader = loadShader(GL_GEOMETRY_SHADER, getGeometryShader());
 #endif
 
@@ -39,7 +39,7 @@ void TessellatedRasterShaderOpenGl::setupProgram(const std::shared_ptr<::Renderi
     glAttachShader(program, fragmentShader);
     glDeleteShader(fragmentShader);
 
-#if TESSELLATION_WIREFRAME_MODE
+#if HARDWARE_TESSELLATION_WIREFRAME
     glAttachShader(program, geometryShader);
     glDeleteShader(geometryShader);
 #endif
@@ -111,7 +111,7 @@ std::string TessellatedRasterShaderOpenGl::getEvaluationShader() {
 
                                         in vec2 e_framecoord[];
                                         in vec2 e_texcoord[];
-#if TESSELLATION_WIREFRAME_MODE
+#if HARDWARE_TESSELLATION_WIREFRAME
                                         out vec2 g_texcoord;
 #else
                                         out vec2 v_texcoord;
@@ -166,7 +166,7 @@ std::string TessellatedRasterShaderOpenGl::getEvaluationShader() {
                                             vec2 texCoord = bilerp(t00, t01, t10, t11, uv);
 
                                             gl_Position = uFrameUniforms.vpMatrix * ((umMatrix * vec4(position.xyz, 1.0)) + uOriginOffset);
-#if TESSELLATION_WIREFRAME_MODE
+#if HARDWARE_TESSELLATION_WIREFRAME
                                             g_texcoord = texCoord;
 #else
                                             v_texcoord = texCoord;
@@ -175,7 +175,7 @@ std::string TessellatedRasterShaderOpenGl::getEvaluationShader() {
    );
 }
 
-#if TESSELLATION_WIREFRAME_MODE
+#if HARDWARE_TESSELLATION_WIREFRAME
 std::string TessellatedRasterShaderOpenGl::getGeometryShader() {
     return OMMVersionedGlesShaderCodeWithFrameUBO(320 es,
                                         layout(triangles) in;

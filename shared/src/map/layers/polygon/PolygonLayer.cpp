@@ -123,7 +123,7 @@ void PolygonLayer::addAll(const std::vector<PolygonInfo> &polygons) {
         std::lock_guard<std::recursive_mutex> lock(polygonsMutex);
         for (const auto &polygon : polygons) {
 
-        #ifdef TESSELLATION_ACTIVATED
+        #ifdef HARDWARE_TESSELLATION_SUPPORTED
             auto shader = shaderFactory->createPolygonTessellatedShader(mapInterface->is3d());
             auto polygonGraphicsObject = objectFactory->createPolygonTessellated(shader->asShaderProgramInterface());
         #else
