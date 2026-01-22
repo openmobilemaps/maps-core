@@ -304,7 +304,7 @@ std::vector<Tiled2dMapRasterTileInfo> sortedTileInfos(currentTileInfos.begin(), 
                     tileObject = std::make_shared<Textured2dLayerObject>(quad, mapInterface, is3D);
                 } else {
                                     
-                #ifdef TESSELLATION_ACTIVATED
+                #ifdef HARDWARE_TESSELLATION_SUPPORTED
                     auto rasterShader = shaderFactory->createQuadTessellatedShader();
                     auto quad = graphicsFactory->createQuadTessellated(rasterShader->asShaderProgramInterface());
                 #else

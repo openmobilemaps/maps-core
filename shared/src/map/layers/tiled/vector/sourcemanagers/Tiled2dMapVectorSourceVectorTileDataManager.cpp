@@ -115,7 +115,7 @@ void Tiled2dMapVectorSourceVectorTileDataManager::onVectorTilesUpdated(const std
 
                     Vec3D origin(rx, ry, rz);
                     
-                #ifdef TESSELLATION_ACTIVATED
+                #ifdef HARDWARE_TESSELLATION_SUPPORTED
                     std::optional<float> subdivisionFactor =
                         is3D ? std::optional<float>(float(POLYGON_MASK_SUBDIVISION_FACTOR))
                              : std::nullopt;

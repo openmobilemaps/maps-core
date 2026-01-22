@@ -23,7 +23,7 @@ void TessellatedColorShaderOpenGl::setupProgram(const std::shared_ptr<::Renderin
     int controlShader = loadShader(GL_TESS_CONTROL_SHADER, getControlShader());
     int evaluationShader = loadShader(GL_TESS_EVALUATION_SHADER, getEvaluationShader());
 
-#if TESSELLATION_WIREFRAME_MODE
+#if HARDWARE_TESSELLATION_WIREFRAME
     int geometryShader = loadShader(GL_GEOMETRY_SHADER, getGeometryShader());
 #endif
 
@@ -39,7 +39,7 @@ void TessellatedColorShaderOpenGl::setupProgram(const std::shared_ptr<::Renderin
     glAttachShader(program, fragmentShader);
     glDeleteShader(fragmentShader);
 
-#if TESSELLATION_WIREFRAME_MODE
+#if HARDWARE_TESSELLATION_WIREFRAME
     glAttachShader(program, geometryShader);
     glDeleteShader(geometryShader);
 #endif
@@ -145,7 +145,7 @@ std::string TessellatedColorShaderOpenGl::getEvaluationShader() {
    );
 }
 
-#if TESSELLATION_WIREFRAME_MODE
+#if HARDWARE_TESSELLATION_WIREFRAME
 std::string TessellatedColorShaderOpenGl::getGeometryShader() {
     return OMMVersionedGlesShaderCodeWithFrameUBO(320 es,
                                         layout(triangles) in;
