@@ -22,7 +22,9 @@
 #include "Logger.h"
 #include "RenderingCullMode.h"
 #include <algorithm>
-#include <emscripten/threading.h>
+#ifdef __EMSCRIPTEN__
+    #include <emscripten/threading.h>
+#endif
 
 #include "Tiled2dMapRasterLayer.h"
 

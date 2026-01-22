@@ -36,4 +36,4 @@ wasm:
   typename: em::val
 ts:
   typename: OpenGlRenderTargetInterface
-  module: './graphics_core'
+  module: '@djinni/maps-core/graphics/core'

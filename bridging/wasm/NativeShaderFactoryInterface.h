@@ -47,6 +47,7 @@ struct NativeShaderFactoryInterface : ::djinni::JsInterface<::ShaderFactoryInter
     static em::val createIcosahedronColorShader(const CppType& self);
     static em::val createSphereEffectShader(const CppType& self);
     static em::val createSkySphereShader(const CppType& self);
+    static em::val createElevationInterpolationShader(const CppType& self);
 
 };
 

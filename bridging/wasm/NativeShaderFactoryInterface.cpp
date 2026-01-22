@@ -6,6 +6,7 @@
 #include "NativeAlphaShaderInterface.h"
 #include "NativeColorCircleShaderInterface.h"
 #include "NativeColorShaderInterface.h"
+#include "NativeElevationInterpolationShaderInterface.h"
 #include "NativeLineGroupShaderInterface.h"
 #include "NativePolygonGroupShaderInterface.h"
 #include "NativePolygonPatternGroupShaderInterface.h"
@@ -45,6 +46,7 @@ em::val NativeShaderFactoryInterface::cppProxyMethods() {
         "createIcosahedronColorShader",
         "createSphereEffectShader",
         "createSkySphereShader",
+        "createElevationInterpolationShader",
     });
     return methods;
 }
@@ -267,6 +269,15 @@ em::val NativeShaderFactoryInterface::createSkySphereShader(const CppType& self)
         return ::djinni::ExceptionHandlingTraits<::djinni_generated::NativeSkySphereShaderInterface>::handleNativeException(e);
     }
 }
+em::val NativeShaderFactoryInterface::createElevationInterpolationShader(const CppType& self) {
+    try {
+        auto r = self->createElevationInterpolationShader();
+        return ::djinni_generated::NativeElevationInterpolationShaderInterface::fromCpp(r);
+    }
+    catch(const std::exception& e) {
+        return ::djinni::ExceptionHandlingTraits<::djinni_generated::NativeElevationInterpolationShaderInterface>::handleNativeException(e);
+    }
+}
 
 EMSCRIPTEN_BINDINGS(_shader_factory_interface) {
     em::class_<::ShaderFactoryInterface>("ShaderFactoryInterface")
@@ -296,6 +307,7 @@ EMSCRIPTEN_BINDINGS(_shader_factory_interface) {
         .function("createIcosahedronColorShader", NativeShaderFactoryInterface::createIcosahedronColorShader)
         .function("createSphereEffectShader", NativeShaderFactoryInterface::createSphereEffectShader)
         .function("createSkySphereShader", NativeShaderFactoryInterface::createSkySphereShader)
+        .function("createElevationInterpolationShader", NativeShaderFactoryInterface::createElevationInterpolationShader)
         ;
 }
 

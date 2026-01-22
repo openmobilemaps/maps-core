@@ -36,4 +36,4 @@ wasm:
   typename: int32_t
 ts:
   typename: LineJoinType
-  module: './map_layers_line_line'
+  module: '@djinni/maps-core/map/layers/line/line'

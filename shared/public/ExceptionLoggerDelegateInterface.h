@@ -11,6 +11,5 @@ class ExceptionLoggerDelegateInterface {
 public:
     virtual ~ExceptionLoggerDelegateInterface() = default;
 
-    // TO_CHANGE -> fix in ios/android
     virtual void logMessage(const std::string & errorDomain, int32_t code, const std::unordered_map<std::string, std::string> & customValues, const std::string & functionName, const std::string & file, int32_t line) = 0;
 };

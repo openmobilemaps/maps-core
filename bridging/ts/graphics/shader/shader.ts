@@ -42,6 +42,7 @@ export interface ShaderFactoryInterface {
     createIcosahedronColorShader(): ColorShaderInterface;
     createSphereEffectShader(): SphereEffectShaderInterface;
     createSkySphereShader(): SkySphereShaderInterface;
+    createElevationInterpolationShader(): ElevationInterpolationShaderInterface;
 }
 
 export interface /*record*/ RasterShaderStyle {
@@ -149,6 +150,10 @@ export interface TextShaderInterface {
 }
 
 export interface TextInstancedShaderInterface {
+    asShaderProgramInterface(): ShaderProgramInterface;
+}
+
+export interface ElevationInterpolationShaderInterface {
     asShaderProgramInterface(): ShaderProgramInterface;
 }
 
