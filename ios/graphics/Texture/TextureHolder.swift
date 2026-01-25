@@ -16,7 +16,7 @@ enum TextureHolderError: Error {
     case emptyData
 }
 
-@objc
+@objcMembers
 public class TextureHolder: NSObject, @unchecked Sendable {
     public let texture: MTLTexture
 
@@ -83,6 +83,15 @@ public class TextureHolder: NSObject, @unchecked Sendable {
         ]
         let texture = try MetalContext.current.textureLoader.newTexture(data: data, options: options)
         self.init(texture, textureUsableSize: textureUsableSize)
+    }
+
+    @objc(initWithData:)
+    public convenience init?(data: Data) {
+        do {
+            try self.init(data, textureUsableSize: nil)
+        } catch {
+            return nil
+        }
     }
 
     public convenience init(_ size: CGSize, drawCallback: (CGContext) -> Void) throws {

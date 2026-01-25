@@ -12,6 +12,7 @@ import MapCoreSharedModule
 import UIKit
 import os
 
+@objcMembers
 open class MCFontLoader: NSObject, MCFontLoaderInterface, @unchecked Sendable {
     // MARK: - Font Atlas Dictionary
 
