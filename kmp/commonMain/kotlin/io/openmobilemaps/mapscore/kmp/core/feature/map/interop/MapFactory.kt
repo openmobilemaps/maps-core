@@ -7,12 +7,12 @@ expect abstract class MapFactory constructor(
 	coroutineScope: CoroutineScope? = null,
 	lifecycle: Any? = null,
 ) {
-	abstract fun _createVectorLayer(
+	abstract fun createVectorLayer(
 		layerName: String,
 		dataProvider: MapDataProviderProtocol,
 	): MapVectorLayer?
-	abstract fun _createRasterLayer(config: MapTiled2dMapLayerConfig): MapRasterLayer?
-	abstract fun _createGpsLayer(): MapGpsLayer?
+	abstract fun createRasterLayer(config: MapTiled2dMapLayerConfig): MapRasterLayer?
+	abstract fun createGpsLayer(): MapGpsLayer?
 
 	companion object {
 		fun create(

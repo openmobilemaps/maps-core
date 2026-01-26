@@ -11,18 +11,18 @@ import MapCoreSharedModule.MCVectorLayerFeatureInfoValue
 actual abstract class MapVectorLayer actual constructor(nativeHandle: Any?) {
 	protected val nativeHandle: Any? = nativeHandle
 
-	actual abstract fun _setSelectionDelegate(delegate: MapVectorLayerSelectionCallbackProxy?)
-	actual abstract fun _setGlobalState(state: Map<String, MapVectorLayerFeatureInfoValue>)
+	actual abstract fun setSelectionDelegate(delegate: MapVectorLayerSelectionCallbackProxy?)
+	actual abstract fun setGlobalState(state: Map<String, MapVectorLayerFeatureInfoValue>)
 }
 
 class MapVectorLayerImpl(nativeHandle: Any?) : MapVectorLayer(nativeHandle) {
 	private val layer = nativeHandle as? MCTiled2dMapVectorLayerInterface
 
-	override fun _setSelectionDelegate(delegate: MapVectorLayerSelectionCallbackProxy?) {
+	override fun setSelectionDelegate(delegate: MapVectorLayerSelectionCallbackProxy?) {
 		layer?.setSelectionDelegate(delegate)
 	}
 
-	override fun _setGlobalState(state: Map<String, MapVectorLayerFeatureInfoValue>) {
+	override fun setGlobalState(state: Map<String, MapVectorLayerFeatureInfoValue>) {
 		val mapped = mutableMapOf<Any?, Any?>()
 		state.forEach { (key, value) ->
 			mapped[key] = value.asMapCore()

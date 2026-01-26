@@ -4,7 +4,6 @@ import io.openmobilemaps.mapscore.kmp.feature.map.model.GpsMode
 import io.openmobilemaps.gps.GpsLayer
 import io.openmobilemaps.gps.providers.LocationProviderInterface
 import io.openmobilemaps.gps.shared.gps.GpsMode as MapscoreGpsMode
-import io.openmobilemaps.mapscore.map.layers.TiledRasterLayer
 import io.openmobilemaps.mapscore.map.view.MapView as MapscoreMapView
 import io.openmobilemaps.mapscore.shared.map.LayerInterface
 import io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.Tiled2dMapVectorLayerInterface as MapscoreVectorLayer
@@ -17,13 +16,13 @@ import io.openmobilemaps.mapscore.kmp.feature.map.interop.MapVectorLayerFeatureI
 actual abstract class MapInterface actual constructor(nativeHandle: Any?) {
 	protected val nativeHandle: Any? = nativeHandle
 
-	actual abstract fun _addVectorLayer(layer: MapVectorLayer?)
-	actual abstract fun _removeVectorLayer(layer: MapVectorLayer?)
-	actual abstract fun _addRasterLayer(layer: MapRasterLayer?)
-	actual abstract fun _removeRasterLayer(layer: MapRasterLayer?)
-	actual abstract fun _addGpsLayer(layer: MapGpsLayer?)
-	actual abstract fun _removeGpsLayer(layer: MapGpsLayer?)
-	actual abstract fun _getCamera(): MapCameraInterface?
+	actual abstract fun addVectorLayer(layer: MapVectorLayer?)
+	actual abstract fun removeVectorLayer(layer: MapVectorLayer?)
+	actual abstract fun addRasterLayer(layer: MapRasterLayer?)
+	actual abstract fun removeRasterLayer(layer: MapRasterLayer?)
+	actual abstract fun addGpsLayer(layer: MapGpsLayer?)
+	actual abstract fun removeGpsLayer(layer: MapGpsLayer?)
+	actual abstract fun getCamera(): MapCameraInterface?
 
 	actual companion object {
 		actual fun create(nativeHandle: Any?): MapInterface = MapInterfaceImpl(nativeHandle)
@@ -34,67 +33,65 @@ private class MapInterfaceImpl(nativeHandle: Any?) : MapInterface(nativeHandle) 
 	private val mapView = nativeHandle as? MapscoreMapView
 	private val cameraInterface = MapCameraInterfaceImpl(mapView?.getCamera())
 
-	override fun _addVectorLayer(layer: MapVectorLayer?) {
+	override fun addVectorLayer(layer: MapVectorLayer?) {
 		val handle = layer as? MapVectorLayerImpl ?: return
 		handle.layerInterface()?.let { mapView?.addLayer(it) }
 	}
 
-	override fun _removeVectorLayer(layer: MapVectorLayer?) {
+	override fun removeVectorLayer(layer: MapVectorLayer?) {
 		val handle = layer as? MapVectorLayerImpl ?: return
 		handle.layerInterface()?.let { mapView?.removeLayer(it) }
 	}
 
-	override fun _addRasterLayer(layer: MapRasterLayer?) {
+	override fun addRasterLayer(layer: MapRasterLayer?) {
 		layer?.layerInterface()?.let { mapView?.addLayer(it) }
 	}
 
-	override fun _removeRasterLayer(layer: MapRasterLayer?) {
+	override fun removeRasterLayer(layer: MapRasterLayer?) {
 		layer?.layerInterface()?.let { mapView?.removeLayer(it) }
 	}
 
-	override fun _addGpsLayer(layer: MapGpsLayer?) {
+	override fun addGpsLayer(layer: MapGpsLayer?) {
 		val handle = layer as? MapGpsLayerImpl ?: return
 		handle.layerInterface()?.let { mapView?.addLayer(it) }
 	}
 
-	override fun _removeGpsLayer(layer: MapGpsLayer?) {
+	override fun removeGpsLayer(layer: MapGpsLayer?) {
 		val handle = layer as? MapGpsLayerImpl ?: return
 		handle.layerInterface()?.let { mapView?.removeLayer(it) }
 	}
 
-	override fun _getCamera(): MapCameraInterface? = cameraInterface
+	override fun getCamera(): MapCameraInterface? = cameraInterface
 }
 
-actual abstract class MapCameraInterface actual constructor(nativeHandle: Any?) {
-	protected val nativeHandle: Any? = nativeHandle
-
-	actual abstract fun _setBounds(bounds: RectCoord)
-	actual abstract fun _moveToCenterPositionZoom(coord: Coord, zoom: Double, animated: Boolean)
-	actual abstract fun _setMinZoom(zoom: Double)
-	actual abstract fun _setMaxZoom(zoom: Double)
-	actual abstract fun _setBoundsRestrictWholeVisibleRect(enabled: Boolean)
+actual abstract class MapCameraInterface actual constructor() {
+	actual abstract fun setBounds(bounds: RectCoord)
+	actual abstract fun moveToCenterPositionZoom(coord: Coord, zoom: Double, animated: Boolean)
+	actual abstract fun setMinZoom(zoom: Double)
+	actual abstract fun setMaxZoom(zoom: Double)
+	actual abstract fun setBoundsRestrictWholeVisibleRect(enabled: Boolean)
 }
 
-private class MapCameraInterfaceImpl(nativeHandle: Any?) : MapCameraInterface(nativeHandle) {
+private class MapCameraInterfaceImpl(private val nativeHandle: Any?) : MapCameraInterface() {
 	private val camera = nativeHandle as? io.openmobilemaps.mapscore.shared.map.MapCameraInterface
 
-	override fun _setBounds(bounds: RectCoord) {
+	override fun setBounds(bounds: RectCoord) {
 		camera?.setBounds(bounds)
 	}
 
-	override fun _moveToCenterPositionZoom(coord: Coord, zoom: Double, animated: Boolean) {
+	override fun moveToCenterPositionZoom(coord: Coord, zoom: Double, animated: Boolean) {
 		camera?.moveToCenterPositionZoom(coord, zoom, animated)
 	}
 
-	override fun _setMinZoom(zoom: Double) {
+	override fun setMinZoom(zoom: Double) {
 		camera?.setMinZoom(zoom)
 	}
 
-	override fun _setMaxZoom(zoom: Double) {
+	override fun setMaxZoom(zoom: Double) {
 		camera?.setMaxZoom(zoom)
 	}
 
-	override fun _setBoundsRestrictWholeVisibleRect(enabled: Boolean) {
+	override fun setBoundsRestrictWholeVisibleRect(enabled: Boolean) {
 		camera?.setBoundsRestrictWholeVisibleRect(enabled)
 	}
 }
@@ -102,19 +99,19 @@ private class MapCameraInterfaceImpl(nativeHandle: Any?) : MapCameraInterface(na
 actual abstract class MapVectorLayer actual constructor(nativeHandle: Any?) {
 	protected val nativeHandle: Any? = nativeHandle
 
-	actual abstract fun _setSelectionDelegate(delegate: MapVectorLayerSelectionCallbackProxy?)
-	actual abstract fun _setGlobalState(state: Map<String, SharedFeatureInfoValue>)
+	actual abstract fun setSelectionDelegate(delegate: MapVectorLayerSelectionCallbackProxy?)
+	actual abstract fun setGlobalState(state: Map<String, SharedFeatureInfoValue>)
 }
 
 class MapVectorLayerImpl(nativeHandle: Any?) : MapVectorLayer(nativeHandle) {
 	private val layer = nativeHandle as? MapscoreVectorLayer
 
-	override fun _setSelectionDelegate(delegate: MapVectorLayerSelectionCallbackProxy?) {
+	override fun setSelectionDelegate(delegate: MapVectorLayerSelectionCallbackProxy?) {
 		val callback = delegate?.let { MapVectorLayerSelectionCallbackAdapterImplementation(it) }
 		layer?.setSelectionDelegate(callback)
 	}
 
-	override fun _setGlobalState(state: Map<String, SharedFeatureInfoValue>) {
+	override fun setGlobalState(state: Map<String, SharedFeatureInfoValue>) {
 		val mapped = HashMap<String, MapscoreFeatureInfoValue>()
 		state.forEach { (key, value) ->
 			mapped[key] = value.asMapscore()
@@ -125,23 +122,14 @@ class MapVectorLayerImpl(nativeHandle: Any?) : MapVectorLayer(nativeHandle) {
 	internal fun layerInterface(): LayerInterface? = layer?.asLayerInterface()
 }
 
-actual open class MapRasterLayer actual constructor(nativeHandle: Any?) {
-	protected val nativeHandle: Any? = nativeHandle
-
-	internal fun layerInterface(): LayerInterface? =
-		(nativeHandle as? TiledRasterLayer)?.layerInterface()
-}
-
-class MapRasterLayerImpl(nativeHandle: Any?) : MapRasterLayer(nativeHandle)
-
 actual abstract class MapGpsLayer actual constructor(nativeHandle: Any?) {
 	protected val nativeHandle: Any? = nativeHandle
 
-	actual abstract fun _setMode(mode: GpsMode)
-	actual abstract fun _getMode(): GpsMode
-	actual abstract fun _setOnModeChangedListener(listener: ((GpsMode) -> Unit)?)
-	actual abstract fun _notifyPermissionGranted()
-	actual abstract fun _lastLocation(): Coord?
+	actual abstract fun setMode(mode: GpsMode)
+	actual abstract fun getMode(): GpsMode
+	actual abstract fun setOnModeChangedListener(listener: ((GpsMode) -> Unit)?)
+	actual abstract fun notifyPermissionGranted()
+	actual abstract fun lastLocation(): Coord?
 }
 
 class MapGpsLayerImpl(nativeHandle: Any?) : MapGpsLayer(nativeHandle) {
@@ -156,21 +144,21 @@ class MapGpsLayerImpl(nativeHandle: Any?) : MapGpsLayer(nativeHandle) {
 		}
 	}
 
-	override fun _setMode(mode: GpsMode) {
+	override fun setMode(mode: GpsMode) {
 		gpsLayer?.setMode(mode.asMapscore())
 	}
 
-	override fun _getMode(): GpsMode = gpsLayer?.layerInterface?.getMode()?.asShared() ?: GpsMode.DISABLED
+	override fun getMode(): GpsMode = gpsLayer?.layerInterface?.getMode()?.asShared() ?: GpsMode.DISABLED
 
-	override fun _setOnModeChangedListener(listener: ((GpsMode) -> Unit)?) {
+	override fun setOnModeChangedListener(listener: ((GpsMode) -> Unit)?) {
 		modeListener = listener
 	}
 
-	override fun _notifyPermissionGranted() {
+	override fun notifyPermissionGranted() {
 		locationProvider?.notifyLocationPermissionGranted()
 	}
 
-	override fun _lastLocation(): Coord? = locationProvider?.getLastLocation()
+	override fun lastLocation(): Coord? = locationProvider?.getLastLocation()
 
 	internal fun layerInterface(): LayerInterface? = gpsLayer?.asLayerInterface()
 }

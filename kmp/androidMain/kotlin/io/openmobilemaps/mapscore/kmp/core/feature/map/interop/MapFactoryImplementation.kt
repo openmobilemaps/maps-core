@@ -21,14 +21,14 @@ actual abstract class MapFactory actual constructor(
 	protected val coroutineScope = coroutineScope
 	protected val lifecycle = lifecycle as? Lifecycle
 
-	actual abstract fun _createVectorLayer(
+	actual abstract fun createVectorLayer(
 		layerName: String,
 		dataProvider: MapDataProviderProtocol,
 	): MapVectorLayer?
 
-	actual abstract fun _createRasterLayer(config: MapTiled2dMapLayerConfig): MapRasterLayer?
+	actual abstract fun createRasterLayer(config: MapTiled2dMapLayerConfig): MapRasterLayer?
 
-	actual abstract fun _createGpsLayer(): MapGpsLayer?
+	actual abstract fun createGpsLayer(): MapGpsLayer?
 
 	actual companion object {
 		actual fun create(
@@ -44,7 +44,7 @@ private class MapFactoryImpl(
 	coroutineScope: CoroutineScope?,
 	lifecycle: Any?,
 ) : MapFactory(platformContext, coroutineScope, lifecycle) {
-	override fun _createVectorLayer(
+	override fun createVectorLayer(
 		layerName: String,
 		dataProvider: MapDataProviderProtocol,
 	): MapVectorLayer? {
@@ -68,15 +68,16 @@ private class MapFactoryImpl(
 		).let { MapVectorLayerImpl(it) }
 	}
 
-	override fun _createRasterLayer(config: MapTiled2dMapLayerConfig): MapRasterLayer? {
+	override fun createRasterLayer(config: MapTiled2dMapLayerConfig): MapRasterLayer? {
 		val context = requireNotNull(context) { "MapFactory requires an Android Context" }
 		val cacheDir = File(context.cacheDir, "raster").apply { mkdirs() }
 		val loader = DataLoader(context, cacheDir, 25L * 1024 * 1024)
-		return TiledRasterLayer(MapTiled2dMapLayerConfigImplementation(config), arrayListOf(loader))
-			.let { MapRasterLayerImpl(it) }
+		return MapRasterLayer(
+			TiledRasterLayer(MapTiled2dMapLayerConfigImplementation(config), arrayListOf(loader)),
+		)
 	}
 
-	override fun _createGpsLayer(): MapGpsLayer? {
+	override fun createGpsLayer(): MapGpsLayer? {
 		val context = requireNotNull(context) { "MapFactory requires an Android Context" }
 		val locationProvider = GpsProviderType.GOOGLE_FUSED.getProvider(context)
 		val gpsLayer = GpsLayer(

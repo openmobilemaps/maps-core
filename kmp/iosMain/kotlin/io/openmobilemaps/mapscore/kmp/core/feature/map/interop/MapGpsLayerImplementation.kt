@@ -31,11 +31,11 @@ import platform.UIKit.UIImagePNGRepresentation
 actual abstract class MapGpsLayer actual constructor(nativeHandle: Any?) {
 	protected val nativeHandle: Any? = nativeHandle
 
-	actual abstract fun _setMode(mode: GpsMode)
-	actual abstract fun _getMode(): GpsMode
-	actual abstract fun _setOnModeChangedListener(listener: ((GpsMode) -> Unit)?)
-	actual abstract fun _notifyPermissionGranted()
-	actual abstract fun _lastLocation(): Coord?
+	actual abstract fun setMode(mode: GpsMode)
+	actual abstract fun getMode(): GpsMode
+	actual abstract fun setOnModeChangedListener(listener: ((GpsMode) -> Unit)?)
+	actual abstract fun notifyPermissionGranted()
+	actual abstract fun lastLocation(): Coord?
 }
 
 class MapGpsLayerImpl(nativeHandle: Any?) : MapGpsLayer(nativeHandle) {
@@ -55,22 +55,22 @@ class MapGpsLayerImpl(nativeHandle: Any?) : MapGpsLayer(nativeHandle) {
 		locationManager.headingFilter = 1.0
 	}
 
-	override fun _setMode(mode: GpsMode) {
+	override fun setMode(mode: GpsMode) {
 		gpsLayer.setMode(mode.asLayerMode())
 	}
 
-	override fun _getMode(): GpsMode = gpsLayer.getMode().asSharedMode()
+	override fun getMode(): GpsMode = gpsLayer.getMode().asSharedMode()
 
-	override fun _setOnModeChangedListener(listener: ((GpsMode) -> Unit)?) {
+	override fun setOnModeChangedListener(listener: ((GpsMode) -> Unit)?) {
 		modeListener = listener
 	}
 
-	override fun _notifyPermissionGranted() {
+	override fun notifyPermissionGranted() {
 		locationManager.startUpdatingLocation()
 		locationManager.startUpdatingHeading()
 	}
 
-	override fun _lastLocation(): Coord? = lastKnownLocation
+	override fun lastLocation(): Coord? = lastKnownLocation
 
 	internal fun layerInterface(): MapCoreLayerInterfaceProtocol? =
 		gpsLayer.asLayerInterface() as? MapCoreLayerInterfaceProtocol
@@ -131,7 +131,7 @@ private class GpsLocationDelegate(
 	}
 
 	override fun locationManager(manager: CLLocationManager, didFailWithError: platform.Foundation.NSError) {
-		layer._setMode(GpsMode.DISABLED)
+		layer.setMode(GpsMode.DISABLED)
 	}
 }
 

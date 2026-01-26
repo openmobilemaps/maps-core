@@ -23,12 +23,12 @@ actual abstract class MapFactory actual constructor(
 	protected val coroutineScope: kotlinx.coroutines.CoroutineScope? = coroutineScope
 	protected val lifecycle: Any? = lifecycle
 
-	actual abstract fun _createVectorLayer(
+	actual abstract fun createVectorLayer(
 		layerName: String,
 		dataProvider: MapDataProviderProtocol,
 	): MapVectorLayer?
-	actual abstract fun _createRasterLayer(config: MapTiled2dMapLayerConfig): MapRasterLayer?
-	actual abstract fun _createGpsLayer(): MapGpsLayer?
+	actual abstract fun createRasterLayer(config: MapTiled2dMapLayerConfig): MapRasterLayer?
+	actual abstract fun createGpsLayer(): MapGpsLayer?
 
 	actual companion object {
 		actual fun create(
@@ -57,7 +57,7 @@ private class MapFactoryImpl(
 	coroutineScope: kotlinx.coroutines.CoroutineScope?,
 	lifecycle: Any?,
 ) : MapFactory(platformContext, coroutineScope, lifecycle) {
-	override fun _createVectorLayer(
+	override fun createVectorLayer(
 		layerName: String,
 		dataProvider: MapDataProviderProtocol,
 	): MapVectorLayer? {
@@ -95,7 +95,7 @@ private class MapFactoryImpl(
 		return layer?.let { MapVectorLayerImpl(it) }
 	}
 
-	override fun _createRasterLayer(config: MapTiled2dMapLayerConfig): MapRasterLayer? {
+	override fun createRasterLayer(config: MapTiled2dMapLayerConfig): MapRasterLayer? {
 		val loader = MCMapCoreObjCFactory.createTextureLoader() as? MCLoaderInterfaceProtocol
 			?: run {
 				logMissing("texture loader")
@@ -106,10 +106,10 @@ private class MapFactoryImpl(
 			MapTiled2dMapLayerConfigImplementation(config),
 			loaders = loaders,
 		)
-		return layer?.let { MapRasterLayerImpl(it) }
+		return layer?.let { MapRasterLayer(it) }
 	}
 
-	override fun _createGpsLayer(): MapGpsLayer? {
+	override fun createGpsLayer(): MapGpsLayer? {
 		return MapGpsLayerImpl(null)
 	}
 }
