@@ -82,6 +82,7 @@ kotlin {
             }
         }
         val iosMain by creating {
+            dependsOn(commonMain)
             kotlin.srcDir("kmp/iosMain/kotlin")
         }
         val iosArm64Main by getting {
