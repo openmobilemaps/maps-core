@@ -14,5 +14,5 @@ actual open class MapRasterLayer actual constructor(
 	private val layer = nativeHandle as? MCTiled2dMapRasterLayerInterface
 
 	internal fun layerInterface(): MCLayerInterfaceProtocol? =
-		layer?.asLayerInterface() as? MCLayerInterfaceProtocol
+		layer?.asLayerInterface()
 }
