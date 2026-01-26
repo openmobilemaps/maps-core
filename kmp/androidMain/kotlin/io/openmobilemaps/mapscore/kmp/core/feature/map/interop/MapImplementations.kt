@@ -68,13 +68,13 @@ actual open class MapCameraInterface actual constructor() {
 	open fun setBounds(bounds: RectCoord) {
 	}
 
-	open fun moveToCenterPositionZoom(coord: Coord, zoom: Double, animated: Boolean) {
+	open fun moveToCenterPositionZoom(centerPosition: Coord, zoom: Double, animated: Boolean) {
 	}
 
-	open fun setMinZoom(zoom: Double) {
+	open fun setMinZoom(minZoom: Double) {
 	}
 
-	open fun setMaxZoom(zoom: Double) {
+	open fun setMaxZoom(maxZoom: Double) {
 	}
 
 	open fun setBoundsRestrictWholeVisibleRect(enabled: Boolean) {
@@ -88,16 +88,16 @@ private class MapCameraInterfaceImpl(private val nativeHandle: Any?) : MapCamera
 		camera?.setBounds(bounds)
 	}
 
-	override fun moveToCenterPositionZoom(coord: Coord, zoom: Double, animated: Boolean) {
-		camera?.moveToCenterPositionZoom(coord, zoom, animated)
+	override fun moveToCenterPositionZoom(centerPosition: Coord, zoom: Double, animated: Boolean) {
+		camera?.moveToCenterPositionZoom(centerPosition, zoom, animated)
 	}
 
-	override fun setMinZoom(zoom: Double) {
-		camera?.setMinZoom(zoom)
+	override fun setMinZoom(minZoom: Double) {
+		camera?.setMinZoom(minZoom)
 	}
 
-	override fun setMaxZoom(zoom: Double) {
-		camera?.setMaxZoom(zoom)
+	override fun setMaxZoom(maxZoom: Double) {
+		camera?.setMaxZoom(maxZoom)
 	}
 
 	override fun setBoundsRestrictWholeVisibleRect(enabled: Boolean) {
