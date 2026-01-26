@@ -141,22 +141,28 @@ val mapCoreSpmSimulatorDir =
 
 afterEvaluate {
     val deviceTaskName = "SwiftPackageConfigAppleMapCoreKmpCompileSwiftPackageIosArm64"
-    if (tasks.findByName(deviceTaskName) != null) return@afterEvaluate
-
     val simulatorTaskName = "SwiftPackageConfigAppleMapCoreKmpCompileSwiftPackageIosSimulatorArm64"
-    tasks.register(deviceTaskName) {
-        group = "io.github.frankois944.spmForKmp.tasks"
-        description = "Fallback: copy simulator SwiftPM output for iOS device metal compilation"
-        dependsOn(simulatorTaskName)
-        doLast {
-            val sourceDir = mapCoreSpmSimulatorDir.get().asFile
-            if (!sourceDir.exists()) return@doLast
-            val targetDir = mapCoreSpmDeviceDir.get().asFile
-            targetDir.mkdirs()
-            copy {
-                from(sourceDir)
-                into(targetDir)
+    if (tasks.findByName(deviceTaskName) != null) return@afterEvaluate
+    runCatching {
+        tasks.register(deviceTaskName) {
+            group = "io.github.frankois944.spmForKmp.tasks"
+            description = "Fallback: copy simulator SwiftPM output for iOS device metal compilation"
+            dependsOn(simulatorTaskName)
+            doLast {
+                val sourceDir = mapCoreSpmSimulatorDir.get().asFile
+                if (!sourceDir.exists()) return@doLast
+                val targetDir = mapCoreSpmDeviceDir.get().asFile
+                targetDir.mkdirs()
+                copy {
+                    from(sourceDir)
+                    into(targetDir)
+                }
             }
+        }
+    }.onFailure { error ->
+        val message = error.message.orEmpty()
+        if (!message.contains("already exists")) {
+            throw error
         }
     }
 }
