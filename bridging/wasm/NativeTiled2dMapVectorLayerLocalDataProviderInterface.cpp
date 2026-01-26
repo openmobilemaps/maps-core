@@ -27,18 +27,22 @@ em::val NativeTiled2dMapVectorLayerLocalDataProviderInterface::getStyleJson(cons
         return ::djinni::ExceptionHandlingTraits<::djinni::Optional<std::optional, ::djinni::String>>::handleNativeException(e);
     }
 }
-em::val NativeTiled2dMapVectorLayerLocalDataProviderInterface::loadSpriteAsync(const CppType& self, int32_t w_scale) {
+em::val NativeTiled2dMapVectorLayerLocalDataProviderInterface::loadSpriteAsync(const CppType& self, const std::string& w_spriteId,const std::string& w_url,int32_t w_scale) {
     try {
-        auto r = self->loadSpriteAsync(::djinni::I32::toCpp(w_scale));
+        auto r = self->loadSpriteAsync(::djinni::String::toCpp(w_spriteId),
+                        ::djinni::String::toCpp(w_url),
+                        ::djinni::I32::toCpp(w_scale));
         return ::djinni::FutureAdaptor<::djinni_generated::NativeTextureLoaderResult>::fromCpp(std::move(r));
     }
     catch(const std::exception& e) {
         return ::djinni::ExceptionHandlingTraits<::djinni::FutureAdaptor<::djinni_generated::NativeTextureLoaderResult>>::handleNativeException(e);
     }
 }
-em::val NativeTiled2dMapVectorLayerLocalDataProviderInterface::loadSpriteJsonAsync(const CppType& self, int32_t w_scale) {
+em::val NativeTiled2dMapVectorLayerLocalDataProviderInterface::loadSpriteJsonAsync(const CppType& self, const std::string& w_spriteId,const std::string& w_url,int32_t w_scale) {
     try {
-        auto r = self->loadSpriteJsonAsync(::djinni::I32::toCpp(w_scale));
+        auto r = self->loadSpriteJsonAsync(::djinni::String::toCpp(w_spriteId),
+                            ::djinni::String::toCpp(w_url),
+                            ::djinni::I32::toCpp(w_scale));
         return ::djinni::FutureAdaptor<::djinni_generated::NativeDataLoaderResult>::fromCpp(std::move(r));
     }
     catch(const std::exception& e) {

@@ -37,19 +37,6 @@ export interface LoaderInterface {
     cancel(url: string): void;
 }
 
-/** only needed for web */
-export interface GlobalLoaderInterface {
-    createLoader(): LoaderInterface;
-    createFontLoader(loader: LoaderInterface, baseUrl: string): FontLoaderInterface;
-    processLoadRequests(): void;
-    enqueueDataLoadRequest(url: string, etag: string | undefined): Promise<DataLoaderResult>;
-    enqueueTextureLoadRequest(url: string, etag: string | undefined): Promise<TextureLoaderResult>;
-    cancel(url: string): void;
-}
-export interface GlobalLoaderInterface_statics {
-    create(): GlobalLoaderInterface;
-}
-
 export interface /*record*/ Font {
     name: string;
 }
@@ -90,5 +77,4 @@ export interface FontLoaderInterface {
 }
 
 export interface Loader_statics {
-    GlobalLoaderInterface: GlobalLoaderInterface_statics;
 }

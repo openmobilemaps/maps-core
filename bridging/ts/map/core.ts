@@ -71,15 +71,6 @@ export interface MapCallbackInterface {
     onMapResumed(): void;
 }
 
-/** Web only */
-export interface WebMapCallbackInterface {
-    getAndResetInvalid(): boolean;
-    asCallbackInterface(): MapCallbackInterface;
-}
-export interface WebMapCallbackInterface_statics {
-    create(): WebMapCallbackInterface;
-}
-
 export interface MapReadyCallbackInterface {
     stateDidUpdate(state: LayerReadyState): void;
 }
@@ -208,7 +199,6 @@ export interface Camera3dConfigFactory_statics {
 
 export interface Core_statics {
     MapInterface: MapInterface_statics;
-    WebMapCallbackInterface: WebMapCallbackInterface_statics;
     MapCameraInterface: MapCameraInterface_statics;
     Camera3dConfigFactory: Camera3dConfigFactory_statics;
 }

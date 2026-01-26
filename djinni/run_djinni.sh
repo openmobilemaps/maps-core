@@ -62,9 +62,13 @@ done
 
 echo "printing"
 
-cd $base_dir
+cd "$base_dir"
+
+echo "Generating shared djinni files"
 for file in $(git ls-files "*.djinni"); do
   [[ ! -e $file ]] && continue # continue, if file does not exist
+  # skip web-only files
+  [[ "$file" == web/* ]] && continue
 
   SUB=$(echo "$file" | sed -n "s/\(.*\)\/[^\/]*.djinni/\1/p")
   SUBPOINT=".$(echo "$SUB" | tr "/" ".")"
@@ -106,6 +110,43 @@ for file in $(git ls-files "*.djinni"); do
     --objc-type-prefix "$OBJC_PREFIX" \
     --ident-objc-enum "$IDENT_CPP_ENUM" \
     --objc-strict-protocols false \
+    \
+    --yaml-out "$YAML_OUT" \
+    --idl "$file" 
+
+done
+
+echo "Generating web-only djinni files"
+echo $(git ls-files "web/*.djinni")
+for file in $(git ls-files "web/*.djinni"); do
+  [[ ! -e $file ]] && continue # continue, if file does not exist
+
+  SUB=$(echo "$file" | sed -n "s/\(.*\)\/[^\/]*.djinni/\1/p")
+  SUBPOINT=".$(echo "$SUB" | tr "/" ".")"
+  if [[ "$SUBPOINT" == "." ]]; then
+    SUBPOINT=""
+  fi
+
+  TS_MODULE_NAME=$(basename "$file")
+  TS_MODULE_NAME="${TS_MODULE_NAME%.*}"
+
+
+  "$base_dir/../external/djinni/src/run-assume-built" \
+    --cpp-out "$CPP_OUT" \
+    --hpp-ext "$HPP_EXT" \
+    --ident-cpp-type "$IDENT_CPP" \
+    --ident-cpp-file "$IDENT_CPP" \
+    --ident-cpp-enum "$IDENT_CPP_ENUM" \
+    --ident-cpp-type-param "$IDENT_CPP_METHOD" \
+    --ident-cpp-method "$IDENT_CPP_METHOD" \
+    --ident-cpp-local "$IDENT_CPP_METHOD" \
+    --ident-cpp-field "$IDENT_CPP_FIELD" \
+    \
+    --wasm-out "$WASM_OUT" \
+    --ts-out "$TS_OUT/$SUB" \
+    --ts-module "$TS_MODULE_NAME" \
+    --ts-import-prefix "@djinni/maps-core/$SUB/" \
+    --ident-jni-file "$IDENT_JNI_CLASS" \
     \
     --yaml-out "$YAML_OUT" \
     --idl "$file" 

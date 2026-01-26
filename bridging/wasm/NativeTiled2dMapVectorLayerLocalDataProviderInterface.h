@@ -24,8 +24,8 @@ struct NativeTiled2dMapVectorLayerLocalDataProviderInterface : ::djinni::JsInter
     static em::val cppProxyMethods();
 
     static em::val getStyleJson(const CppType& self);
-    static em::val loadSpriteAsync(const CppType& self, int32_t w_scale);
-    static em::val loadSpriteJsonAsync(const CppType& self, int32_t w_scale);
+    static em::val loadSpriteAsync(const CppType& self, const std::string& w_spriteId,const std::string& w_url,int32_t w_scale);
+    static em::val loadSpriteJsonAsync(const CppType& self, const std::string& w_spriteId,const std::string& w_url,int32_t w_scale);
     static em::val loadGeojson(const CppType& self, const std::string& w_sourceName,const std::string& w_url);
 
 };

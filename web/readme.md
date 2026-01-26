@@ -58,10 +58,10 @@ For ARM64 systems, use the `emscripten/emsdk:4.0.11-arm64` Docker image.
 
 ## Generating the TypeScript Module
 
-To enable TypeScript support, run the following command:
+To enable TypeScript support, run the following command in the `web` directory:
 
 ```bash
-node generate-module.js --src=./maps-core/bridging/ts --import-prefix=@djinni/maps-core --out=build-wasm-release/webmapsdk.d.ts
+node generate-module.js --src=./bridging/ts --import-prefix=@djinni/maps-core --out=build-wasm-release/webmapsdk.d.ts
 ```
 
 This generates a TypeScript declaration file for the entry point.

@@ -83,8 +83,8 @@ export interface Tiled2dMapVectorLayerSelectionCallbackInterface {
 
 export interface Tiled2dMapVectorLayerLocalDataProviderInterface {
     getStyleJson(): string | undefined;
-    loadSpriteAsync(scale: number): Promise<TextureLoaderResult>;
-    loadSpriteJsonAsync(scale: number): Promise<DataLoaderResult>;
+    loadSpriteAsync(spriteId: string, url: string, scale: number): Promise<TextureLoaderResult>;
+    loadSpriteJsonAsync(spriteId: string, url: string, scale: number): Promise<DataLoaderResult>;
     loadGeojson(sourceName: string, url: string): Promise<DataLoaderResult>;
 }
 
