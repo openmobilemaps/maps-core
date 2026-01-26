@@ -57,11 +57,9 @@ kotlin {
     )
 
     iosTargets.forEach { iosTarget ->
-        if (iosTarget.name == "iosSimulatorArm64") {
-            iosTarget.compilations {
-                val main by getting {
-                    cinterops.create(mapCoreCinteropName)
-                }
+        iosTarget.compilations {
+            val main by getting {
+                cinterops.create(mapCoreCinteropName)
             }
         }
     }
@@ -135,6 +133,33 @@ tasks.withType<CInteropProcess>().configureEach {
 val mapCoreSpmBuiltDir =
     project.layout.buildDirectory.dir("spmKmpPlugin/MapCoreKmp/scratch/arm64 x86_64-apple-ios-simulator/release").get().asFile
 mapCoreSpmBuiltDir.mkdirs()
+
+val mapCoreSpmDeviceDir =
+    project.layout.buildDirectory.dir("spmKmpPlugin/MapCoreKmp/scratch/arm64-apple-ios/release")
+val mapCoreSpmSimulatorDir =
+    project.layout.buildDirectory.dir("spmKmpPlugin/MapCoreKmp/scratch/arm64-apple-ios-simulator/release")
+
+afterEvaluate {
+    val deviceTaskName = "SwiftPackageConfigAppleMapCoreKmpCompileSwiftPackageIosArm64"
+    if (tasks.findByName(deviceTaskName) != null) return@afterEvaluate
+
+    val simulatorTaskName = "SwiftPackageConfigAppleMapCoreKmpCompileSwiftPackageIosSimulatorArm64"
+    tasks.register(deviceTaskName) {
+        group = "io.github.frankois944.spmForKmp.tasks"
+        description = "Fallback: copy simulator SwiftPM output for iOS device metal compilation"
+        dependsOn(simulatorTaskName)
+        doLast {
+            val sourceDir = mapCoreSpmSimulatorDir.get().asFile
+            if (!sourceDir.exists()) return@doLast
+            val targetDir = mapCoreSpmDeviceDir.get().asFile
+            targetDir.mkdirs()
+            copy {
+                from(sourceDir)
+                into(targetDir)
+            }
+        }
+    }
+}
 
 abstract class CompileMapCoreMetallibTask : DefaultTask() {
     @get:Input
