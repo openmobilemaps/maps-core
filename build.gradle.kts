@@ -33,9 +33,9 @@ val mapCoreMetalTargetDevice = providers.environmentVariable("MAPCORE_METAL_TARG
     .orElse("air64-apple-ios26.0")
 
 plugins {
-    alias(libs.plugins.kotlin.multiplatform)
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.spmForKmp)
+    id("org.jetbrains.kotlin.multiplatform") version "2.3.0"
+    id("com.android.library") version "8.12.0"
+    id("io.github.frankois944.spmForKmp") version "1.4.6"
 }
 
 @OptIn(ExperimentalKotlinGradlePluginApi::class)
@@ -70,15 +70,15 @@ kotlin {
         val commonMain by getting {
             kotlin.srcDir("kmp/commonMain/kotlin")
             dependencies {
-                api(libs.kotlinx.coroutines)
+                api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
             }
         }
         val androidMain by getting {
             kotlin.srcDir("kmp/androidMain/kotlin")
             dependencies {
-                api(libs.openmobilemaps.mapscore)
-                api(libs.openmobilemaps.layer.gps)
-                implementation(libs.androidx.lifecycle.viewmodelKtx)
+                api("io.openmobilemaps:mapscore:3.6.0")
+                api("io.openmobilemaps:layer-gps:3.6.0")
+                implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.9.3")
             }
         }
         val iosMain by getting {
