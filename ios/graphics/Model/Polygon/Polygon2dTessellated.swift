@@ -24,7 +24,7 @@ final class Polygon2dTessellated: BaseGraphicsObject, @unchecked Sendable {
     private var originBuffers: MultiBuffer<simd_float4>
     
     private var is3d = false
-    private var subdivisionFactor: Int32 = -1
+    private var subdivisionFactor: Int32 = 0
 
     private var stencilState: MTLDepthStencilState?
     private var renderPassStencilState: MTLDepthStencilState?
@@ -38,7 +38,18 @@ final class Polygon2dTessellated: BaseGraphicsObject, @unchecked Sendable {
                 sampler: metalContext.samplerLibrary.value(
                     Sampler.magLinear.rawValue)!,
                 label: "Polygon2dTessellated")
-        setSubdivisionFactor(0) // ensure tessellationFactorBuffer creation
+        
+        let factorH = Half(pow(2, Float(self.subdivisionFactor))).bits;
+        
+        var tessellationFactors = MTLTriangleTessellationFactorsHalf(
+            edgeTessellationFactor: (factorH, factorH, factorH),
+            insideTessellationFactor: factorH
+        );
+        
+        self.tessellationFactorsBuffer.copyOrCreate(
+            bytes: &tessellationFactors,
+            length: MemoryLayout<MTLTriangleTessellationFactorsHalf>.stride,
+            device: device)
     }
 
     override func render(
@@ -238,7 +249,7 @@ extension Polygon2dTessellated: MCPolygon2dInterface {
             if self.subdivisionFactor != factor {
                 self.subdivisionFactor = factor
                 
-                let factorH = Half(self.subdivisionFactor).bits;
+                let factorH = Half(pow(2, Float(self.subdivisionFactor))).bits;
                 
                 var tessellationFactors = MTLTriangleTessellationFactorsHalf(
                     edgeTessellationFactor: (factorH, factorH, factorH),

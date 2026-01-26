@@ -137,7 +137,7 @@ void Polygon2dLayerObject::setPolygons(const std::vector<PolygonCoord> &polygons
     polygon->setVertices(attr, ind, Vec3D(rx, ry, rz), is3D);
     
 #ifdef HARDWARE_TESSELLATION_SUPPORTED
-    int32_t subdivisionFactor = is3D ? std::pow(2, SUBDIVISION_FACTOR_3D_DEFAULT) : 1;
+    int32_t subdivisionFactor = is3D ? SUBDIVISION_FACTOR_3D_DEFAULT : 0;
     polygon->setSubdivisionFactor(subdivisionFactor);
 #endif
 }

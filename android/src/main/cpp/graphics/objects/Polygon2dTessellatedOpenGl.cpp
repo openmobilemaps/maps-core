@@ -180,7 +180,7 @@ void Polygon2dTessellatedOpenGl::drawPolygon(const std::shared_ptr<::RenderingCo
 
     glPatchParameteri(GL_PATCH_VERTICES, 3);
 
-    glUniform1i(subdivisionFactorHandle, subdivisionFactor);
+    glUniform1i(subdivisionFactorHandle, pow(2, subdivisionFactor));
 
     glUniform4f(originHandle, origin.x, origin.y, origin.z, 0.0);
 
