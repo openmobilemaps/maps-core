@@ -16,6 +16,8 @@ import org.jetbrains.kotlin.gradle.tasks.CInteropProcess
 import java.net.URI
 import javax.inject.Inject
 
+group = "io.openmobilemaps.mapscore"
+
 val mapCoreCheckoutPath = project.layout.projectDirectory.asFile.absolutePath
 val mapCoreMetalToolchain = providers.environmentVariable("MAPCORE_METAL_TOOLCHAIN")
     .orElse(providers.gradleProperty("mapCoreMetalToolchain"))
