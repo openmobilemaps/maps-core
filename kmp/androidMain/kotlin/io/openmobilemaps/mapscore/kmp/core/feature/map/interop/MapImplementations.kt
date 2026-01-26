@@ -45,13 +45,11 @@ private class MapInterfaceImpl(nativeHandle: Any?) : MapInterface(nativeHandle) 
 	}
 
 	override fun _addRasterLayer(layer: MapRasterLayer?) {
-		val handle = layer as? MapRasterLayer ?: return
-		handle.layerInterface()?.let { mapView?.addLayer(it) }
+		layer?.layerInterface()?.let { mapView?.addLayer(it) }
 	}
 
 	override fun _removeRasterLayer(layer: MapRasterLayer?) {
-		val handle = layer as? MapRasterLayer ?: return
-		handle.layerInterface()?.let { mapView?.removeLayer(it) }
+		layer?.layerInterface()?.let { mapView?.removeLayer(it) }
 	}
 
 	override fun _addGpsLayer(layer: MapGpsLayer?) {
@@ -78,7 +76,7 @@ actual abstract class MapCameraInterface actual constructor(nativeHandle: Any?) 
 }
 
 private class MapCameraInterfaceImpl(nativeHandle: Any?) : MapCameraInterface(nativeHandle) {
-	private val camera = nativeHandle as? io.openmobilemaps.mapscore.map.camera.MapCamera
+	private val camera = nativeHandle as? io.openmobilemaps.mapscore.shared.map.MapCameraInterface
 
 	override fun _setBounds(bounds: RectCoord) {
 		camera?.setBounds(bounds)
@@ -108,7 +106,7 @@ actual abstract class MapVectorLayer actual constructor(nativeHandle: Any?) {
 	actual abstract fun _setGlobalState(state: Map<String, SharedFeatureInfoValue>)
 }
 
-internal class MapVectorLayerImpl(nativeHandle: Any?) : MapVectorLayer(nativeHandle) {
+class MapVectorLayerImpl(nativeHandle: Any?) : MapVectorLayer(nativeHandle) {
 	private val layer = nativeHandle as? MapscoreVectorLayer
 
 	override fun _setSelectionDelegate(delegate: MapVectorLayerSelectionCallbackProxy?) {
@@ -134,6 +132,8 @@ actual open class MapRasterLayer actual constructor(nativeHandle: Any?) {
 		(nativeHandle as? TiledRasterLayer)?.layerInterface()
 }
 
+class MapRasterLayerImpl(nativeHandle: Any?) : MapRasterLayer(nativeHandle)
+
 actual abstract class MapGpsLayer actual constructor(nativeHandle: Any?) {
 	protected val nativeHandle: Any? = nativeHandle
 
@@ -144,7 +144,7 @@ actual abstract class MapGpsLayer actual constructor(nativeHandle: Any?) {
 	actual abstract fun _lastLocation(): Coord?
 }
 
-internal class MapGpsLayerImpl(nativeHandle: Any?) : MapGpsLayer(nativeHandle) {
+class MapGpsLayerImpl(nativeHandle: Any?) : MapGpsLayer(nativeHandle) {
 	private val handle = nativeHandle as? GpsLayerHandle
 	private val gpsLayer = handle?.layer
 	private val locationProvider = handle?.locationProvider

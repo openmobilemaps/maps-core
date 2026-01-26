@@ -47,8 +47,7 @@ actual abstract class MapFactory actual constructor(
 	}
 
 	protected fun sharedResourcesBundle(): NSBundle? {
-		val path = NSBundle.mainBundle.pathForResource("SharedResources", ofType = "bundle") ?: return null
-		return NSBundle(path)
+		return MapResourceBundleRegistry.bundleProvider?.invoke()
 	}
 
 }

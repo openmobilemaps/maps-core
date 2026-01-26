@@ -15,7 +15,7 @@ actual abstract class MapVectorLayer actual constructor(nativeHandle: Any?) {
 	actual abstract fun _setGlobalState(state: Map<String, MapVectorLayerFeatureInfoValue>)
 }
 
-internal class MapVectorLayerImpl(nativeHandle: Any?) : MapVectorLayer(nativeHandle) {
+class MapVectorLayerImpl(nativeHandle: Any?) : MapVectorLayer(nativeHandle) {
 	private val layer = nativeHandle as? MCTiled2dMapVectorLayerInterface
 
 	override fun _setSelectionDelegate(delegate: MapVectorLayerSelectionCallbackProxy?) {

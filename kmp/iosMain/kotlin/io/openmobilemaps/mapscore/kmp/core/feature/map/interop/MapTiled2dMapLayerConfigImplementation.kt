@@ -8,7 +8,7 @@ import MapCoreSharedModule.MCTiled2dMapZoomLevelInfo
 import kotlin.math.pow
 import platform.darwin.NSObject
 
-internal class MapTiled2dMapLayerConfigImplementation(
+class MapTiled2dMapLayerConfigImplementation(
 	private val config: MapTiled2dMapLayerConfig,
 ) : NSObject(), MCTiled2dMapLayerConfigProtocol {
 	private val coordinateConverter = MCCoordinateConversionHelperInterface.independentInstance()

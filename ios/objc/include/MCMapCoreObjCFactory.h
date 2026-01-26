@@ -7,6 +7,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (id<MCLoaderInterface>)createTextureLoader;
 + (id<MCFontLoaderInterface>)createFontLoaderWithBundle:(NSBundle *)bundle;
++ (id<MCFontLoaderInterface>)createFontLoaderWithBundle:(NSBundle *)bundle
+                                           resourcePath:(nullable NSString *)resourcePath;
 + (id<MCTextureHolderInterface>)createTextureHolderWithData:(NSData *)data;
 
 @end

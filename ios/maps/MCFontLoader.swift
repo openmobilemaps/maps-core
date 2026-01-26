@@ -23,10 +23,18 @@ open class MCFontLoader: NSObject, MCFontLoaderInterface, @unchecked Sendable {
 
     // MARK: - Init
     private let bundle: Bundle
+    private let resourcePath: String?
 
     // the bundle to use for searching for fonts
-    public init(bundle: Bundle, preload: [String] = []) {
+    @objc(initWithBundle:preload:)
+    public convenience init(bundle: Bundle, preload: [String] = []) {
+        self.init(bundle: bundle, resourcePath: nil, preload: preload)
+    }
+
+    @objc(initWithBundle:resourcePath:preload:)
+    public init(bundle: Bundle, resourcePath: String?, preload: [String] = []) {
         self.bundle = bundle
+        self.resourcePath = resourcePath
         pixelsPerInch =
             if Thread.isMainThread {
                 MainActor.assumeIsolated {
@@ -71,7 +79,7 @@ open class MCFontLoader: NSObject, MCFontLoaderInterface, @unchecked Sendable {
         if let fontData = fontDataDictionary[font.name] {
             return fontData
         }
-        if let path = bundle.path(forResource: font.name, ofType: "json") {
+        if let path = fontResourcePath(name: font.name, ext: "json") {
             do {
                 let data = try Data(contentsOf: URL(fileURLWithPath: path), options: .mappedIfSafe)
                 let jsonResult = try JSONSerialization.jsonObject(with: data, options: .mutableLeaves)
@@ -147,16 +155,21 @@ open class MCFontLoader: NSObject, MCFontLoaderInterface, @unchecked Sendable {
             return fontData
         }
 
-        let image = UIImage(named: font.name, in: bundle, compatibleWith: nil)
-
-        guard let cgImage = image?.cgImage,
+        guard let path = fontResourcePath(name: font.name, ext: "png"),
+            let image = UIImage(contentsOfFile: path),
+            let cgImage = image.cgImage,
             let textureHolder = try? TextureHolder(cgImage)
-        else {
-            return nil
-        }
+        else { return nil }
 
         fontAtlasDictionary[font.name] = textureHolder
 
         return textureHolder
+    }
+
+    private func fontResourcePath(name: String, ext: String) -> String? {
+        if let resourcePath {
+            return bundle.path(forResource: name, ofType: ext, inDirectory: resourcePath)
+        }
+        return bundle.path(forResource: name, ofType: ext)
     }
 }

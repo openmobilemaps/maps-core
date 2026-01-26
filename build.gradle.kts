@@ -78,7 +78,9 @@ kotlin {
             dependencies {
                 api("io.openmobilemaps:mapscore:3.6.0")
                 api("io.openmobilemaps:layer-gps:3.6.0")
+                implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.9.3")
                 implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.9.3")
+                implementation("ch.ubique.android:djinni-support-lib:1.1.1")
             }
         }
         val iosMain by creating {

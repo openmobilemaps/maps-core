@@ -38,7 +38,7 @@ actual abstract class MapGpsLayer actual constructor(nativeHandle: Any?) {
 	actual abstract fun _lastLocation(): Coord?
 }
 
-internal class MapGpsLayerImpl(nativeHandle: Any?) : MapGpsLayer(nativeHandle) {
+class MapGpsLayerImpl(nativeHandle: Any?) : MapGpsLayer(nativeHandle) {
 	private val gpsLayer: MCGpsLayerInterface =
 		requireNotNull(MCGpsLayerInterface.create(styleInfo = defaultStyle()))
 	private val locationManager = CLLocationManager()

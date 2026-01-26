@@ -91,7 +91,7 @@ class MapTiled2dMapLayerConfigImplementation(
 
 	override fun getVectorSettings(): Tiled2dMapVectorSettings? = null
 
-	override fun getBounds() = config.bounds.asMapscore()
+	override fun getBounds() = config.bounds
 
 	private fun createZoomLevelInfo(zoomLevel: Int): Tiled2dMapZoomLevelInfo {
 		val tileCount = 2.0.pow(zoomLevel.toDouble())
@@ -104,7 +104,7 @@ class MapTiled2dMapLayerConfigImplementation(
 			numTilesY = tileCount.toInt(),
 			numTilesT = 1,
 			zoomLevelIdentifier = zoomLevel,
-			bounds = config.bounds.asMapscore(),
+			bounds = config.bounds,
 		)
 	}
 }

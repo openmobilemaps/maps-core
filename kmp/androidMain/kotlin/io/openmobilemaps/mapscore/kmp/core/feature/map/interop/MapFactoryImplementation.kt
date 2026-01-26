@@ -17,11 +17,34 @@ actual abstract class MapFactory actual constructor(
 	coroutineScope: CoroutineScope?,
 	lifecycle: Any?,
 ) {
-	private val context = platformContext as? Context
-	private val coroutineScope = coroutineScope
-	private val lifecycle = lifecycle as? Lifecycle
+	protected val context = platformContext as? Context
+	protected val coroutineScope = coroutineScope
+	protected val lifecycle = lifecycle as? Lifecycle
 
-	actual fun _createVectorLayer(
+	actual abstract fun _createVectorLayer(
+		layerName: String,
+		dataProvider: MapDataProviderProtocol,
+	): MapVectorLayer?
+
+	actual abstract fun _createRasterLayer(config: MapTiled2dMapLayerConfig): MapRasterLayer?
+
+	actual abstract fun _createGpsLayer(): MapGpsLayer?
+
+	actual companion object {
+		actual fun create(
+			platformContext: Any?,
+			coroutineScope: CoroutineScope?,
+			lifecycle: Any?,
+		): MapFactory = MapFactoryImpl(platformContext, coroutineScope, lifecycle)
+	}
+}
+
+private class MapFactoryImpl(
+	platformContext: Any?,
+	coroutineScope: CoroutineScope?,
+	lifecycle: Any?,
+) : MapFactory(platformContext, coroutineScope, lifecycle) {
+	override fun _createVectorLayer(
 		layerName: String,
 		dataProvider: MapDataProviderProtocol,
 	): MapVectorLayer? {
@@ -42,10 +65,10 @@ actual abstract class MapFactory actual constructor(
 			null,
 			null,
 			null,
-		)?.let { MapVectorLayerImpl(it) }
+		).let { MapVectorLayerImpl(it) }
 	}
 
-	actual fun _createRasterLayer(config: MapTiled2dMapLayerConfig): MapRasterLayer? {
+	override fun _createRasterLayer(config: MapTiled2dMapLayerConfig): MapRasterLayer? {
 		val context = requireNotNull(context) { "MapFactory requires an Android Context" }
 		val cacheDir = File(context.cacheDir, "raster").apply { mkdirs() }
 		val loader = DataLoader(context, cacheDir, 25L * 1024 * 1024)
@@ -53,7 +76,7 @@ actual abstract class MapFactory actual constructor(
 			.let { MapRasterLayerImpl(it) }
 	}
 
-	actual fun _createGpsLayer(): MapGpsLayer? {
+	override fun _createGpsLayer(): MapGpsLayer? {
 		val context = requireNotNull(context) { "MapFactory requires an Android Context" }
 		val locationProvider = GpsProviderType.GOOGLE_FUSED.getProvider(context)
 		val gpsLayer = GpsLayer(
@@ -67,18 +90,4 @@ actual abstract class MapFactory actual constructor(
 		}
 		return MapGpsLayerImpl(GpsLayerHandle(gpsLayer, locationProvider))
 	}
-
-	actual companion object {
-		actual fun create(
-			platformContext: Any?,
-			coroutineScope: CoroutineScope?,
-			lifecycle: Any?,
-		): MapFactory = MapFactoryImpl(platformContext, coroutineScope, lifecycle)
-	}
 }
-
-private class MapFactoryImpl(
-	platformContext: Any?,
-	coroutineScope: CoroutineScope?,
-	lifecycle: Any?,
-) : MapFactory(platformContext, coroutineScope, lifecycle)

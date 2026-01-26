@@ -15,4 +15,4 @@ actual open class MapRasterLayer actual constructor(
 	internal fun layerInterface() = layer?.asLayerInterface()
 }
 
-internal class MapRasterLayerImpl(nativeHandle: Any?) : MapRasterLayer(nativeHandle)
+class MapRasterLayerImpl(nativeHandle: Any?) : MapRasterLayer(nativeHandle)
