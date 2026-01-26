@@ -68,16 +68,21 @@ kotlin {
 
     sourceSets {
         val commonMain by getting {
+            kotlin.srcDir("kmp/commonMain/kotlin")
             dependencies {
                 api(libs.kotlinx.coroutines)
             }
         }
         val androidMain by getting {
+            kotlin.srcDir("kmp/androidMain/kotlin")
             dependencies {
                 api(libs.openmobilemaps.mapscore)
                 api(libs.openmobilemaps.layer.gps)
                 implementation(libs.androidx.lifecycle.viewmodelKtx)
             }
+        }
+        val iosMain by getting {
+            kotlin.srcDir("kmp/iosMain/kotlin")
         }
         val iosArm64Main by getting {
             languageSettings.optIn("kotlinx.cinterop.ExperimentalForeignApi")
