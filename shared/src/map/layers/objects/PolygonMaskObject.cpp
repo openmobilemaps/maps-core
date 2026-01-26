@@ -121,7 +121,7 @@ void PolygonMaskObject::setPolygons(const std::vector<::PolygonCoord> &polygons,
     polygon->setVertices(attr, ind, origin, is3D);
     
 #ifdef HARDWARE_TESSELLATION_SUPPORTED
-    polygon->setSubdivisionFactor((int32_t)(subdivisionFactor.value_or(1.0f)));
+    polygon->setSubdivisionFactor((int32_t)(subdivisionFactor.value_or(0.0f)));
 #endif
 }
 

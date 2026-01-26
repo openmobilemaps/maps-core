@@ -21,7 +21,7 @@ final class Quad2dTessellated: BaseGraphicsObject, @unchecked Sendable {
     private var originBuffers: MultiBuffer<simd_float4>
     
     private var is3d = false
-    private var subdivisionFactor: Int32 = -1
+    private var subdivisionFactor: Int32 = 0
 
     private var texture: MTLTexture?
 
@@ -53,7 +53,19 @@ final class Quad2dTessellated: BaseGraphicsObject, @unchecked Sendable {
                 sampler: metalContext.samplerLibrary.value(
                     Sampler.magLinear.rawValue)!,
                 label: label)
-        setSubdivisionFactor(0) // ensure tessellationFactorBuffer creation
+        
+        
+        let factorH = Half(pow(2, Float(self.subdivisionFactor))).bits;
+        
+        var tessellationFactors = MTLQuadTessellationFactorsHalf(
+            edgeTessellationFactor: (factorH, factorH, factorH, factorH),
+            insideTessellationFactor: (factorH, factorH)
+        );
+            
+        self.tessellationFactorsBuffer.copyOrCreate(
+            bytes: &tessellationFactors,
+            length: MemoryLayout<MTLQuadTessellationFactorsHalf>.stride,
+            device: device)
     }
 
     private func setupStencilStates() {
