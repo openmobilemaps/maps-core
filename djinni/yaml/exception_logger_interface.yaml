@@ -36,4 +36,4 @@ wasm:
   typename: em::val
 ts:
   typename: ExceptionLoggerInterface
-  module: './module'
+  module: '@djinni/maps-core/utils/exception_logger'

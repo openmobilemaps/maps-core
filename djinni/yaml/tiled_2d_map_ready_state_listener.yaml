@@ -36,4 +36,4 @@ wasm:
   typename: em::val
 ts:
   typename: Tiled2dMapReadyStateListener
-  module: './module'
+  module: '@djinni/maps-core/map/layers/tiled/tiled_layer'

@@ -36,4 +36,4 @@ wasm:
   typename: em::val
 ts:
   typename: Camera3dConfigFactory
-  module: './module'
+  module: '@djinni/maps-core/map/core'

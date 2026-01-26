@@ -24,6 +24,12 @@ int __android_log_print(int prio, const char *tag, const char *fmt, ...);
 }
 #endif
 
+#ifdef __EMSCRIPTEN__
+extern "C" {
+int printf(const char *fmt, ...);
+}
+#endif
+
 #if defined(__APPLE__) && !defined(CATCH_TESTING)
 #include <os/log.h>
 #endif
@@ -41,7 +47,12 @@ Logger::Logger(int p){
 std::stringstream &Logger::stream() const { return ss; }
 
 void Logger::log(int prio, const char *tag, const char *fmt, ...) const {
-#ifdef __ANDROID__
+#ifdef __EMSCRIPTEN__
+    va_list args;
+    va_start(args, fmt);
+    printf(fmt, args);
+    puts("");
+#elif defined(__ANDROID__)
     int androidPrio = 3;
     switch (priority) {
     case 0: {

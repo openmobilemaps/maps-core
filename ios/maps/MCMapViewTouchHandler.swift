@@ -157,7 +157,7 @@ private extension Set<UITouch> {
     }
 
     func asMCTouchEvent(in view: UIView, scale: Float, action: MCTouchAction) -> MCTouchEvent {
-        MCTouchEvent(pointers: asMCTouchLocation(in: view, scale: scale), touchAction: action)
+        MCTouchEvent(pointers: asMCTouchLocation(in: view, scale: scale), scrollDelta: 0, touchAction: action)
     }
 }
 
@@ -171,6 +171,6 @@ private extension [CGPoint] {
     }
 
     func asMCTouchEvent(scale: Float, action: MCTouchAction) -> MCTouchEvent {
-        MCTouchEvent(pointers: asMCTouchLocation(scale: scale), touchAction: action)
+        MCTouchEvent(pointers: asMCTouchLocation(scale: scale), scrollDelta: 0, touchAction: action)
     }
 }

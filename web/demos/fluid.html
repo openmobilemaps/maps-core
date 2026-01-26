@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Web Map SDK Playground</title>
+    <link rel="stylesheet" href="./assets/style.css" />
+
+    <style>
+      .controls {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+      }
+
+      #timeSlider {
+        width: 30%;
+      }
+      #timeSliderTimestamp {
+        width: 15em;
+      }
+
+      .play-button {
+        width: 2.5em;
+        height: 2.5em;
+        background-color: #8ea572;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .play-button .icon {
+        width: 80%;
+        height: 80%;
+      }
+
+      .play-button.paused .play-icon {
+        display: block; /* Show play icon by default */
+      }
+
+      .play-button.paused .pause-icon {
+        display: none; /* Hide pause icon by default */
+      }
+
+      .play-button.playing .play-icon {
+        display: none; /* Hide play icon when playing */
+      }
+
+      .play-button.playing .pause-icon {
+        display: block; /* Show pause icon when playing */
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Web Map SDK Playground</h1>
+    <hr />
+    <figure style="overflow: visible" id="spinner">
+      <div class="spinner"></div>
+      <center style="margin-top: 0.5em"><strong>emscripten</strong></center>
+    </figure>
+    <div class="emscripten" id="status">Downloading...</div>
+    <div class="emscripten">
+      <progress value="0" max="100" id="progress" hidden="1"></progress>
+    </div>
+    <div class="emscripten_border">
+      <canvas class="emscripten" id="glCanvas" tabindex="-1"></canvas>
+    </div>
+    <div class="controls">
+      <label for="timeSlider">Time (-6 hours, +72 hours from now):</label>
+      <button type="button" class="play-button paused" id="playButton">
+        <svg class="icon" viewBox="0 0 24 24">
+          <g class="play-icon">
+            <polygon points="5,3 5,21 19,12" fill="white" />
+          </g>
+          <g class="pause-icon">
+            <rect x="5" y="3" width="4" height="18" fill="white" />
+            <rect x="15" y="3" width="4" height="18" fill="white" />
+          </g>
+        </svg>
+      </button>
+      <input
+        type="range"
+        id="timeSlider"
+        min="-720"
+        max="4320"
+        step="1"
+        value="0"
+      />
+      <p id="timeSliderTimestamp"></p>
+    </div>
+    <div class="controls" id="layerSelector"></div>
+
+    <hr />
+
+    <hr />
+    <textarea class="emscripten" id="output" rows="8"></textarea>
+    <hr />
+    <script type="module">
+      import {
+        initialize,
+        registerTouchHandler,
+        registerAnimationLoop,
+      } from "./assets/map_setup.js";
+
+      function hexToRgb(hex) {
+        var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})?$/i.exec(hex);
+        return result ? {
+          r: parseInt(result[1], 16) / 255.0,
+          g: parseInt(result[2], 16) / 255.0,
+          b: parseInt(result[3], 16) / 255.0,
+          a: result.lenght > 4 ? parseInt([4], 16) / 255.0 : 1.0,
+        } : null;
+      }
+      function colorRGB(r, g, b) {
+        return {r: r, g: g, b: b, a: 1.0};
+      }
+      function colorRGBA(r, g, b, a) {
+        return {r: r, g: g, b: b, a: a};
+      }
+
+      initialize("glCanvas", 160, true)
+        .then(({ mapInterface, wmsdkModule, globalLoader }) => {
+          registerTouchHandler();
+
+
+          // Background globe:
+          const dataLoader = globalLoader.createLoader();
+          const vectorLayer =
+            wmsdkModule.Tiled2dMapVectorLayerInterface.createFromStyleJson(
+              "testlayer",
+              "assets/fluid-style.json",
+              [dataLoader],
+              globalLoader.createFontLoader(dataLoader, "assets/fonts/")
+            );
+          mapInterface.addLayer(vectorLayer.asLayerInterface());
+
+          const glowLayer = wmsdkModule.SphereEffectLayerInterface.create();
+          mapInterface.addLayer(glowLayer.asLayerInterface());
+
+          // Cloud layer
+          var cloudLayer = wmsdkModule.TiledAnimationLayerInterface.createWithOpenGl(
+            {
+              overviewUrlPath: "https://static-dev.ubmeteo.io/v1/animation/global/animation_overview.json",
+              baseUrl: "https://static-dev.ubmeteo.io/",
+              typeIdentifier: "CLOUD",
+              fileTypeIdentifier: "CLOUD",
+              shaderConfig: wmsdkModule.InterpolatedCloudShaderConfigInterface.createWithGreyFactor(wmsdkModule.BlendMode.NORMAL, 0.9).asShaderConfig(),
+            },
+            wmsdkModule.WebAnimationLayerCallbackInterface.create().asCallbackInterface(),
+            dataLoader,
+            null,
+            true
+          );
+        
+          // Temperatur layer
+          // XXX: temperature scale seems to be offset somehow even though this is copied from fluid.
+          const temperatureColors = [
+            [-51.0, "#A3A3FF"],
+            [-50.0, "#C4C4FF"],
+            [-40.0, "#FFFFFF"],
+            [-30.0, "#E6F4FD"],
+            [-28.0, "#DCF0FC"],
+            [-26.0, "#D2ECFC"],
+            [-24.0, "#C8E8FB"],
+            [-22.0, "#BFE4FB"],
+            [-20.0, "#A3D9F9"],
+            [-18.0, "#99D2F6"],
+            [-16.0, "#8FCCF4"],
+            [-14.0, "#84C6F2"],
+            [-12.0, "#7BC0F0"],
+            [-10.0, "#71BAEE"],
+            [-8.0, "#67B4EC"],
+            [-6.0, "#5DAEEA"],
+            [-4.0, "#53A8E8"],
+            [-2.0, "#49A2E6"],
+            [0.0, "#00CC00"],
+            [2.0, "#33D11C"],
+            [4.0, "#5ED633"],
+            [6.0, "#7FDB28"],
+            [8.0, "#8CDF17"],
+            [10.0, "#C6DF00"],
+            [12.0, "#D0DE01"],
+            [14.0, "#E2DC01"],
+            [16.0, "#F5DA01"],
+            [18.0, "#FFCF00"],
+            [20.0, "#FDA700"],
+            [22.0, "#FD9200"],
+            [24.0, "#FE7C00"],
+            [26.0, "#FE6700"],
+            [28.0, "#FE5200"],
+            [30.0, "#EF0015"],
+            [32.0, "#EB003C"],
+            [34.0, "#E70064"],
+            [36.0, "#E3008C"],
+            [38.0, "#DF00B4"],
+            [40.0, "#DC00DC"],
+            [45.0, "#B000B0"],
+            [50.0, "#9A009A"],
+		      ]
+
+          function encodeTemp(t) {
+            const minT = -70.0;
+            const step = 0.5;
+            const maxT = minT + step * 255;
+            var clamped = Math.min(Math.max(t, minT), maxT);
+            return (clamped - minT) / step;
+          }
+
+          var temperatureLayer = wmsdkModule.TiledAnimationLayerInterface.createWithOpenGl(
+            {
+              overviewUrlPath: "https://static-dev.ubmeteo.io/v1/animation/global/animation_overview.json",
+              baseUrl: "https://static-dev.ubmeteo.io/",
+              typeIdentifier: "TEMPERATURE_850_HPA",
+              fileTypeIdentifier: "TEMPERATURE_850_HPA",
+              shaderConfig: wmsdkModule.InterpolatedColorScaleShaderConfigInterface.create(
+                  wmsdkModule.BlendMode.NORMAL,
+                  wmsdkModule.ColorChannel.GREEN,
+                  wmsdkModule.ColorChannel.RED,
+                  {
+                    maxValue: 255.0,
+                    buckets:
+                    temperatureColors.map((tc) => {
+                      return { minValue: encodeTemp(tc[0]), color: hexToRgb(tc[1]) }
+                    }),
+                  },
+                  { r: 0.0, g: 0.0, b: 0.0, a: 0.0 },
+                  false,
+                  0.0
+                ).asShaderConfig(),
+            },
+            wmsdkModule.WebAnimationLayerCallbackInterface.create().asCallbackInterface(),
+            dataLoader,
+            null,
+            true
+          );
+
+          // Precipitation
+
+          const rainbowIIPrecipitationColors = [
+            [0.01, "#E7DEE6B2"],
+            [0.2, "#D1BDCAB2"],
+            [0.5, "#D3ACC7"],
+            [1.0, "#0B6FE4"],
+            [1.5, "#18539A"],
+            [2.5, "#13B72C"],
+            [4.0, "#70E713"],
+            [6.0, "#FFFF00"],
+            [10.0, "#FFB800"],
+            [15.0, "#FF7300"],
+            [30.0, "#F20000"],
+            [50.0, "#B80000"],
+            [80.0, "#8C0000"],
+            [1000.0, "#8C0000"],
+		      ];
+          var precipitationLayer = wmsdkModule.TiledAnimationLayerInterface.createWithOpenGl(
+            {
+              overviewUrlPath: "https://static-dev.ubmeteo.io/v1/animation/global/animation_overview.json",
+              baseUrl: "https://static-dev.ubmeteo.io/",
+              typeIdentifier: "PRECIPITATION",
+              fileTypeIdentifier: "PRECIPITATION",
+              shaderConfig: wmsdkModule.InterpolatedPrecipitationShaderConfigInterface.create(
+                  wmsdkModule.BlendMode.MULTIPLY,
+                  {
+                    maxValue: 1.0, textureSize: {x: 64, y: 512}, textureScale: 2.5,
+                    buckets: [
+                      { minValue: 0,                      uv: { x: 0, y: 0,   width: 64, height: 64 }, color: colorRGBA(0, 0, 0, 0) }, // RAIN
+                      { minValue: 1.0 / 255.0 + 0.000001, uv: { x: 0, y: 64,  width: 64, height: 64 }, color: colorRGBA(0, 0, 0, 0) }, // HAIL
+                      { minValue: 2.0 / 255.0 + 0.000001, uv: { x: 0, y: 128, width: 64, height: 64 }, color: colorRGBA(0, 0, 0, 0) }, // GRAUPEL
+                      { minValue: 3.0 / 255.0 + 0.000001, uv: { x: 0, y: 256, width: 64, height: 64 }, color: colorRGBA(0, 0, 0, 0) }, // SNOW_RAIN
+                      { minValue: 4.0 / 255.0 + 0.000001, uv: { x: 0, y: 0,   width: 64, height: 64 }, color: colorRGBA(0, 0, 0, 0) }, // RAIN
+                      { minValue: 1.0,                    uv: { x: 0, y: 192, width: 64, height: 64 }, color: colorRGBA(0, 0, 0, 0) }, // SNOW
+                    ]
+                  },
+			            null, // XXX: this is not really supported and probably is the reason why this layer shows broken
+                  {
+                    maxValue: 1000.0,
+                    buckets:
+                    rainbowIIPrecipitationColors.map((pc) => {
+                      return { minValue: pc[0], color: hexToRgb(pc[1]) }
+                    }),
+                  },
+                  colorRGBA(0.6, 0.6, 0.6, 0.8),
+                  colorRGBA(0.6, 0.6, 0.6, 0.8),
+                  1.5,
+                  false,
+                  false,
+                  wmsdkModule.ReconstructionMappingType.CUSTOM_MAPPING_FLUID,
+                ).asShaderConfig(),
+            },
+            wmsdkModule.WebAnimationLayerCallbackInterface.create().asCallbackInterface(),
+            dataLoader,
+            null,
+            true
+          );
+
+
+          //// UI: layer selector and activation
+          var layers = [
+            { layer: temperatureLayer, id: "TEMPERATURE_850_HPA" },
+            { layer: cloudLayer, id: "CLOUD" },
+            { layer: precipitationLayer, id: "PRECIPITATION" },
+          ];
+
+
+          for (const layer of layers) {
+              mapInterface.addLayer(layer.layer.asLayerInterface());
+              layer.layer.asLayerInterface().hide();
+          }
+
+          var activeLayer = null;
+          function activateLayer(newLayer) {
+              if (activeLayer != null && newLayer.id == activeLayer.id) {
+                  return
+              }
+              if (activeLayer != null) {
+                  activeLayer.layer.asLayerInterface().hide()
+              }
+              newLayer.layer.asLayerInterface().show();
+              activeLayer = newLayer;
+          }
+          activateLayer(layers[0]);
+
+          var layerSelectorDiv = document.getElementById('layerSelector');
+          for (const layer of layers) {
+
+              mapInterface.addLayer(layer.layer.asLayerInterface());
+
+              var input = document.createElement("input");
+              input.type = "radio"
+              input.name = "layerSelect"
+              input.id = "layerSelect" + layer.id
+              input.value = layer.id
+              input.addEventListener("change", function() {
+                  activateLayer(layer);
+              });
+              input.checked = (layer.id == activeLayer.id)
+              var label = document.createElement("label");
+              label.for = "layerSelect" + layer.id
+              label.appendChild(document.createTextNode(layer.id))
+              layerSelectorDiv.appendChild(input);
+              layerSelectorDiv.appendChild(label);
+          }
+
+          // Generic map start
+          const camera = mapInterface.getCamera();
+          camera.moveToCenterPosition(
+            {
+              systemIdentifier:
+                wmsdkModule.CoordinateSystemIdentifiers.EPSG4326(),
+              x: 8.54359994,
+              y: 47.37560515,
+              z: 0,
+            },
+            false
+          );
+          camera.setZoom(10_000_000, false);
+          mapInterface.resume();
+
+          registerAnimationLoop();
+
+          // Start/stop time animation and time slider logic
+          const currentTimeMillis = Date.now();
+
+          const timeSlider = document.getElementById("timeSlider");
+          const timeSliderTimestamp = document.getElementById(
+            "timeSliderTimestamp"
+          );
+
+          function setAnimationTime(offsetMillis) {
+              const time = currentTimeMillis + offsetMillis;
+              for(var layer of layers) {
+                layer.layer.setState({
+                  time: time,
+                  typeIdentifier: layer.id,
+                  fileTypeIdentifier: layer.id,
+                  sectionTransitionProgress: null
+                })
+              }
+              // Display the current timestamp for verification
+              timeSliderTimestamp.innerText = new Date(time).toLocaleTimeString('default', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+          }
+          setAnimationTime(0);
+          var playButton = document.getElementById("playButton");
+          var timeAnimation = null;
+          timeSlider.addEventListener("input", (event) => {
+            stopAnimation();
+            const minuteOffset = event.target.value;
+            setAnimationTime(minuteOffset * 60 * 1000);
+          });
+
+          var animationStartT = null;
+          var animationStartTimeSliderValue = null;
+          function animateTimeSlider(t) {
+            if (animationStartT == null) {
+              animationStartT = t;
+              animationStartTimeSliderValue = timeSlider.value;
+            }
+            const elapsedT = t - animationStartT;
+            const animationMinutesPerSecond = 90;
+            const rangeMinutes = timeSlider.max - timeSlider.min;
+            const animatedMinutes = Math.floor(animationMinutesPerSecond * elapsedT / 1000);
+            const offsetMinutes = ((animationStartTimeSliderValue - timeSlider.min + animatedMinutes) % rangeMinutes) - (-timeSlider.min);
+            timeSlider.value = offsetMinutes;
+            setAnimationTime(offsetMinutes * 60 * 1000);
+
+            timeAnimation = window.requestAnimationFrame(animateTimeSlider);
+          }
+
+          function startAnimation() {
+            animationStartT = null;
+            animationStartTimeSliderValue = null;
+            timeAnimation = window.requestAnimationFrame(animateTimeSlider);
+            playButton.classList.remove("paused");
+            playButton.classList.add("playing");
+          }
+
+          function stopAnimation() {
+            if (timeAnimation) {
+              window.cancelAnimationFrame(timeAnimation);
+              timeAnimation = null;
+              playButton.classList.remove("playing");
+              playButton.classList.add("paused");
+            }
+          }
+
+          function toggleAnimation() {
+            if (timeAnimation) {
+              stopAnimation();
+            } else {
+              startAnimation();
+            }
+          }
+          playButton.addEventListener("click", toggleAnimation);
+        })
+        .catch((err) => {
+          console.error("Failed to initialize map", err);
+        });
+    </script>
+  </body>
+</html>

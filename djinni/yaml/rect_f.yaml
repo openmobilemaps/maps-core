@@ -36,4 +36,4 @@ wasm:
   typename: em::val
 ts:
   typename: RectF
-  module: './module'
+  module: '@djinni/maps-core/graphics/common/common'

@@ -36,4 +36,4 @@ wasm:
   typename: em::val
 ts:
   typename: TextShaderInterface
-  module: './module'
+  module: '@djinni/maps-core/graphics/shader/shader'

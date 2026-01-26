@@ -59,7 +59,7 @@ std::string ColorCircleShaderOpenGl::getVertexShader() {
 }
 
 std::string ColorCircleShaderOpenGl::getFragmentShader() {
-    return OMMVersionedGlesShaderCode(320 es,
+    return OMMVersionedGlesShaderCode(320 es, 300 es,
                                       precision mediump float;
                                       uniform vec4 vColor;
                                       in vec2 v_texcoord;

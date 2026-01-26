@@ -33,6 +33,9 @@
 
 - (BOOL)onTwoFingerMoveComplete;
 
+- (BOOL)onScroll:(nonnull MCVec2F *)posScreen
+     scrollDelta:(float)scrollDelta;
+
 - (void)clearTouch;
 
 @end

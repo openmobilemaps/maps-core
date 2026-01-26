@@ -36,4 +36,4 @@ wasm:
   typename: em::val
 ts:
   typename: IconLayerCallbackInterface
-  module: './module'
+  module: '@djinni/maps-core/map/layers/icon/icon'

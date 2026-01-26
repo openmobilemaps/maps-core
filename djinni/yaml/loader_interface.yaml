@@ -36,4 +36,4 @@ wasm:
   typename: em::val
 ts:
   typename: LoaderInterface
-  module: './module'
+  module: '@djinni/maps-core/map/loader/loader'

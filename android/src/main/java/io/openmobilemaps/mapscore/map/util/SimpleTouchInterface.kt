@@ -48,5 +48,9 @@ open class SimpleTouchInterface : TouchInterface() {
 		return false
 	}
 
+    override fun onScroll(posScreen: Vec2F, scrollDelta: Float): Boolean {
+        return false
+    }
+
 	override fun clearTouch() {}
 }

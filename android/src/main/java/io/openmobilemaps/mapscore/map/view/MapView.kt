@@ -196,7 +196,7 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 				pointers.add(Vec2F(event.getX(i), event.getY(i)))
 			}
 			lifecycle?.coroutineScope?.launch(touchHandlerDispatcher) {
-				touchHandler?.onTouchEvent(TouchEvent(pointers, action))
+				touchHandler?.onTouchEvent(TouchEvent(pointers, 0.0F,action))
 			}
 		}
 

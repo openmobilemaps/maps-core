@@ -9,7 +9,8 @@ enum class TouchAction : int {
     DOWN = 0,
     MOVE = 1,
     UP = 2,
-    CANCEL = 3,
+    SCROLL = 3,
+    CANCEL = 4,
 };
 
 constexpr const char* toString(TouchAction e) noexcept {
@@ -17,6 +18,7 @@ constexpr const char* toString(TouchAction e) noexcept {
         "down",
         "move",
         "up",
+        "scroll",
         "cancel",
     };
     return names[static_cast<int>(e)];

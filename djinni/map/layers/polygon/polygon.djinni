@@ -19,7 +19,7 @@ polygon_info = record {
     highlight_color: color;
 }
 
-polygon_layer_callback_interface = interface +c +j +o {
+polygon_layer_callback_interface = interface +c +j +o +w {
     on_click_confirmed(polygon: polygon_info): bool;
     on_click_unconfirmed(polygon: polygon_info): bool;
 }

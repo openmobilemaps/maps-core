@@ -36,4 +36,4 @@ wasm:
   typename: em::val
 ts:
   typename: FontLoaderResult
-  module: './module'
+  module: '@djinni/maps-core/map/loader/loader'

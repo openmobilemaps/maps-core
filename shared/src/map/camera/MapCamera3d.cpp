@@ -1205,6 +1205,49 @@ bool MapCamera3d::onTwoFingerMoveComplete() {
     return false;
 }
 
+bool MapCamera3d::onScroll(const ::Vec2F &posScreen, float zoomFactor) {
+    if (cameraFrozen) {
+        return false;
+    }
+
+    inertia = std::nullopt;
+
+    zoomFactor = std::clamp(zoomFactor, -500.0f, 500.0f);
+    auto newZoom = zoom - (zoomFactor * zoom * 0.001);
+    auto scaleFactor = newZoom / zoom;
+
+    newZoom = std::clamp(newZoom, zoomMax, zoomMin);
+
+    Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
+    auto centerScreen = Vec2F(sizeViewport.x * 0.5f, sizeViewport.y * 0.5f);
+
+    auto targetScreenCenter = posScreen;
+    auto targetCenterCoord = coordFromScreenPosition(targetScreenCenter);
+
+    auto oldCenterCoord = coordFromScreenPosition(centerScreen);
+
+    updateZoom(newZoom);
+    updateMatrices();
+
+    double dx = (oldCenterCoord.x - targetCenterCoord.x) * (scaleFactor - 1);
+    double dy = (oldCenterCoord.y - targetCenterCoord.y) * (scaleFactor - 1);
+
+    focusPointPosition.x = focusPointPosition.x + dx;
+    focusPointPosition.y = focusPointPosition.y + dy;
+
+    focusPointPosition.x = std::fmod((focusPointPosition.x + 180 + 360), 360.0) - 180;
+    focusPointPosition.y = std::clamp(focusPointPosition.y, -90.0, 90.0);
+
+    const auto [adjPosition, adjZoom] = getBoundsCorrectedCoords(focusPointPosition, newZoom);
+    focusPointPosition = adjPosition;
+    updateZoom(adjZoom);
+
+    notifyListeners(ListenerType::BOUNDS | ListenerType::MAP_INTERACTION);
+    mapInterface->invalidate();
+
+    return true;
+}
+
 Coord MapCamera3d::coordFromScreenPosition(const ::Vec2F &posScreen) {
     std::lock_guard<std::recursive_mutex> lock(matrixMutex);
     return coordFromScreenPosition(inverseVPMatrix, posScreen);

@@ -25,8 +25,9 @@ private:
     friend ::djinni::JniClass<NativeTouchEvent>;
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/map/controls/TouchEvent") };
-    const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(Ljava/util/ArrayList;Lio/openmobilemaps/mapscore/shared/map/controls/TouchAction;)V") };
+    const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(Ljava/util/ArrayList;FLio/openmobilemaps/mapscore/shared/map/controls/TouchAction;)V") };
     const jfieldID field_pointers { ::djinni::jniGetFieldID(clazz.get(), "pointers", "Ljava/util/ArrayList;") };
+    const jfieldID field_scrollDelta { ::djinni::jniGetFieldID(clazz.get(), "scrollDelta", "F") };
     const jfieldID field_touchAction { ::djinni::jniGetFieldID(clazz.get(), "touchAction", "Lio/openmobilemaps/mapscore/shared/map/controls/TouchAction;") };
 };
 
