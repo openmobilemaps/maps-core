@@ -64,12 +64,21 @@ private class MapInterfaceImpl(nativeHandle: Any?) : MapInterface(nativeHandle) 
 	override fun getCamera(): MapCameraInterface? = cameraInterface
 }
 
-actual abstract class MapCameraInterface actual constructor() {
-	actual abstract fun setBounds(bounds: RectCoord)
-	actual abstract fun moveToCenterPositionZoom(coord: Coord, zoom: Double, animated: Boolean)
-	actual abstract fun setMinZoom(zoom: Double)
-	actual abstract fun setMaxZoom(zoom: Double)
-	actual abstract fun setBoundsRestrictWholeVisibleRect(enabled: Boolean)
+actual open class MapCameraInterface actual constructor() {
+	open fun setBounds(bounds: RectCoord) {
+	}
+
+	open fun moveToCenterPositionZoom(coord: Coord, zoom: Double, animated: Boolean) {
+	}
+
+	open fun setMinZoom(zoom: Double) {
+	}
+
+	open fun setMaxZoom(zoom: Double) {
+	}
+
+	open fun setBoundsRestrictWholeVisibleRect(enabled: Boolean) {
+	}
 }
 
 private class MapCameraInterfaceImpl(private val nativeHandle: Any?) : MapCameraInterface() {

@@ -9,7 +9,7 @@ import MapCoreSharedModule.MCLayerInterfaceProtocol
 @OptIn(ExperimentalObjCName::class)
 @ObjCName("MapRasterLayer", exact = true)
 actual open class MapRasterLayer actual constructor(
-	nativeHandle: Any? = null,
+	nativeHandle: Any?,
 ) {
 	private val layer = nativeHandle as? MCTiled2dMapRasterLayerInterface
 
