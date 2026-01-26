@@ -235,7 +235,7 @@ private fun MapscoreGpsMode.asShared(): GpsMode = when (this) {
 	MapscoreGpsMode.FOLLOW_AND_TURN -> GpsMode.FOLLOW
 }
 
-internal data class GpsLayerHandle(
+data class GpsLayerHandle(
 	val layer: GpsLayer,
 	val locationProvider: LocationProviderInterface,
 )
