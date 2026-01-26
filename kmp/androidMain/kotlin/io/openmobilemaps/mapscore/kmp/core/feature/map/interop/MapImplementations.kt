@@ -65,19 +65,19 @@ private class MapInterfaceImpl(nativeHandle: Any?) : MapInterface(nativeHandle) 
 }
 
 actual open class MapCameraInterface actual constructor() {
-	open fun setBounds(bounds: RectCoord) {
+	actual open fun setBounds(bounds: RectCoord) {
 	}
 
-	open fun moveToCenterPositionZoom(centerPosition: Coord, zoom: Double, animated: Boolean) {
+	actual open fun moveToCenterPositionZoom(centerPosition: Coord, zoom: Double, animated: Boolean) {
 	}
 
-	open fun setMinZoom(minZoom: Double) {
+	actual open fun setMinZoom(minZoom: Double) {
 	}
 
-	open fun setMaxZoom(maxZoom: Double) {
+	actual open fun setMaxZoom(maxZoom: Double) {
 	}
 
-	open fun setBoundsRestrictWholeVisibleRect(enabled: Boolean) {
+	actual open fun setBoundsRestrictWholeVisibleRect(enabled: Boolean) {
 	}
 }
 
