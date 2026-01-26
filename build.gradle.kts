@@ -81,13 +81,15 @@ kotlin {
                 implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.9.3")
             }
         }
-        val iosMain by getting {
+        val iosMain by creating {
             kotlin.srcDir("kmp/iosMain/kotlin")
         }
         val iosArm64Main by getting {
+            dependsOn(iosMain)
             languageSettings.optIn("kotlinx.cinterop.ExperimentalForeignApi")
         }
         val iosSimulatorArm64Main by getting {
+            dependsOn(iosMain)
             languageSettings.optIn("kotlinx.cinterop.ExperimentalForeignApi")
         }
     }
