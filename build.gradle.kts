@@ -125,6 +125,37 @@ swiftPackageConfig {
     }
 }
 
+// Avoid overlapping Package.resolved outputs between per-target SwiftPM compile tasks.
+tasks
+    .matching { it.name.startsWith("SwiftPackageConfigAppleMapCoreKmpCompileSwiftPackage") }
+    .configureEach {
+        val packageResolveFileGetter = javaClass.methods.firstOrNull { it.name == "getPackageResolveFile" }
+        val packageResolveFile =
+            project.layout.buildDirectory.file(
+                "spmKmpPlugin/MapCoreKmp/package-resolved/${name}/Package.resolved",
+            )
+        val packageResolveProperty =
+            packageResolveFileGetter
+                ?.invoke(this) as? RegularFileProperty
+        packageResolveProperty?.set(packageResolveFile)
+
+        doLast {
+            val sourceFile =
+                project.layout.buildDirectory
+                    .file("spmKmpPlugin/MapCoreKmp/Package.resolved")
+                    .get()
+                    .asFile
+            if (!sourceFile.exists()) return@doLast
+            val targetFile =
+                project.layout.buildDirectory
+                    .file("spmKmpPlugin/MapCoreKmp/package-resolved/${name}/Package.resolved")
+                    .get()
+                    .asFile
+            targetFile.parentFile.mkdirs()
+            sourceFile.copyTo(targetFile, overwrite = true)
+        }
+    }
+
 tasks.withType<CInteropProcess>().configureEach {
     if (name.contains("MapCoreKmp")) {
         settings.compilerOpts("-I$mapCoreCheckoutPath/external/djinni/support-lib/objc")
