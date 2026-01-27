@@ -84,16 +84,13 @@ kotlin {
                 implementation("ch.ubique.android:djinni-support-lib:1.1.1")
             }
         }
-        val iosMain by creating {
-            dependsOn(commonMain)
+        val iosMain by getting {
             kotlin.srcDir("kmp/iosMain/kotlin")
         }
         val iosArm64Main by getting {
-            dependsOn(iosMain)
             languageSettings.optIn("kotlinx.cinterop.ExperimentalForeignApi")
         }
         val iosSimulatorArm64Main by getting {
-            dependsOn(iosMain)
             languageSettings.optIn("kotlinx.cinterop.ExperimentalForeignApi")
         }
     }
