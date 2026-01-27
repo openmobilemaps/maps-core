@@ -324,6 +324,11 @@ val compileMapCoreMetallibIosArm64 = tasks.register<CompileMapCoreMetallibTask>(
     metallibFile.set(bundleDir.map { it.file("default.metallib") })
 }
 
+tasks.matching { it.name == "SwiftPackageConfigAppleMapCoreKmpCopyPackageResourcesIosSimulatorArm64" }
+    .configureEach { dependsOn(compileMapCoreMetallibIosSimulator) }
+tasks.matching { it.name == "SwiftPackageConfigAppleMapCoreKmpCopyPackageResourcesIosArm64" }
+    .configureEach { dependsOn(compileMapCoreMetallibIosArm64) }
+
 tasks.matching { it.name == "compileKotlinIosSimulatorArm64" }
     .configureEach { dependsOn(compileMapCoreMetallibIosSimulator) }
 tasks.matching { it.name == "compileKotlinIosArm64" }
