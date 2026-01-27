@@ -88,6 +88,7 @@ kotlin {
         }
         val iosMain by getting {
             kotlin.srcDir("kmp/iosMain/kotlin")
+            languageSettings.optIn("kotlinx.cinterop.ExperimentalForeignApi")
         }
         val iosArm64Main by getting {
             languageSettings.optIn("kotlinx.cinterop.ExperimentalForeignApi")
