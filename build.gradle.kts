@@ -34,7 +34,7 @@ val mapCoreMetalTargetDevice = providers.environmentVariable("MAPCORE_METAL_TARG
 
 plugins {
     id("org.jetbrains.kotlin.multiplatform") version "2.3.0"
-    id("com.android.library") version "8.12.0"
+    id("com.android.kotlin.multiplatform.library") version "8.12.0"
     id("io.github.frankois944.spmForKmp") version "1.4.6"
 }
 
@@ -44,10 +44,13 @@ kotlin {
         freeCompilerArgs.add("-Xexpect-actual-classes") // Opt-in for expect/actual classes
     }
 
-    androidTarget {
+    android {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_17)
         }
+        namespace = "io.openmobilemaps.mapscore.kmp"
+        compileSdk = 36
+        minSdk = 31
     }
 
     val mapCoreCinteropName = "MapCoreKmp"
@@ -295,15 +298,3 @@ tasks.matching { it.name == "compileKotlinIosSimulatorArm64" }
     .configureEach { dependsOn(compileMapCoreMetallibIosSimulator) }
 tasks.matching { it.name == "compileKotlinIosArm64" }
     .configureEach { dependsOn(compileMapCoreMetallibIosArm64) }
-
-android {
-    namespace = "io.openmobilemaps.mapscore.kmp"
-    compileSdk = 36
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-    defaultConfig {
-        minSdk = 31
-    }
-}

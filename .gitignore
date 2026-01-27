@@ -90,3 +90,4 @@ compile_commands.json
 
 cmake-build-test
 /local.properties
+/.gradle
