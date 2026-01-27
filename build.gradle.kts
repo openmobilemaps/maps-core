@@ -44,6 +44,8 @@ kotlin {
         freeCompilerArgs.add("-Xexpect-actual-classes") // Opt-in for expect/actual classes
     }
 
+    applyDefaultHierarchyTemplate()
+
     android {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_17)
