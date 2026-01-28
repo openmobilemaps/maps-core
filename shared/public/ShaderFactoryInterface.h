@@ -45,6 +45,8 @@ public:
 
     virtual /*not-null*/ std::shared_ptr<ColorShaderInterface> createColorShader() = 0;
 
+    virtual /*not-null*/ std::shared_ptr<ColorShaderInterface> createPolygonTessellatedShader(bool unitSphere) = 0;
+
     virtual /*not-null*/ std::shared_ptr<ColorCircleShaderInterface> createColorCircleShader() = 0;
 
     virtual /*not-null*/ std::shared_ptr<ColorCircleShaderInterface> createUnitSphereColorCircleShader() = 0;
@@ -62,6 +64,8 @@ public:
     virtual /*not-null*/ std::shared_ptr<RasterShaderInterface> createRasterShader() = 0;
 
     virtual /*not-null*/ std::shared_ptr<RasterShaderInterface> createUnitSphereRasterShader() = 0;
+
+    virtual /*not-null*/ std::shared_ptr<RasterShaderInterface> createQuadTessellatedShader() = 0;
 
     virtual /*not-null*/ std::shared_ptr<StretchShaderInterface> createStretchShader() = 0;
 

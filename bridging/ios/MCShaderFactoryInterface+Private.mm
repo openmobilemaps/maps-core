@@ -116,6 +116,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (nullable id<MCColorShaderInterface>)createPolygonTessellatedShader:(BOOL)unitSphere {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->createPolygonTessellatedShader(::djinni::Bool::toCpp(unitSphere));
+        return ::djinni_generated::ColorShaderInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (nullable id<MCColorCircleShaderInterface>)createColorCircleShader {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->createColorCircleShader();
@@ -179,6 +186,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 - (nullable id<MCRasterShaderInterface>)createUnitSphereRasterShader {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->createUnitSphereRasterShader();
+        return ::djinni_generated::RasterShaderInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nullable id<MCRasterShaderInterface>)createQuadTessellatedShader {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->createQuadTessellatedShader();
         return ::djinni_generated::RasterShaderInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
@@ -304,6 +318,13 @@ public:
             return ::djinni_generated::ColorShaderInterface::toCpp(objcpp_result_);
         }
     }
+    /*not-null*/ std::shared_ptr<::ColorShaderInterface> createPolygonTessellatedShader(bool c_unitSphere) override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createPolygonTessellatedShader:(::djinni::Bool::fromCpp(c_unitSphere))];
+            return ::djinni_generated::ColorShaderInterface::toCpp(objcpp_result_);
+        }
+    }
     /*not-null*/ std::shared_ptr<::ColorCircleShaderInterface> createColorCircleShader() override
     {
         @autoreleasepool {
@@ -366,6 +387,13 @@ public:
     {
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createUnitSphereRasterShader];
+            return ::djinni_generated::RasterShaderInterface::toCpp(objcpp_result_);
+        }
+    }
+    /*not-null*/ std::shared_ptr<::RasterShaderInterface> createQuadTessellatedShader() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() createQuadTessellatedShader];
             return ::djinni_generated::RasterShaderInterface::toCpp(objcpp_result_);
         }
     }

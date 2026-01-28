@@ -15,6 +15,10 @@ ColorShaderOpenGl::ColorShaderOpenGl(bool projectOntoUnitSphere)
         : programName(projectOntoUnitSphere ? "UBMAP_ColorShaderUnitSphereOpenGl" : "UBMAP_ColorShaderOpenGl")
 {}
 
+ColorShaderOpenGl::ColorShaderOpenGl(const std::string &programName)
+        : programName(programName)
+{}
+
 std::string ColorShaderOpenGl::getProgramName() { return programName; }
 
 void ColorShaderOpenGl::setupProgram(const std::shared_ptr<::RenderingContextInterface> &context) {
@@ -58,27 +62,28 @@ void ColorShaderOpenGl::setColor(float red, float green, float blue, float alpha
 std::string ColorShaderOpenGl::getVertexShader() {
     return OMMVersionedGlesShaderCodeWithFrameUBO(320 es,
                                         precision highp float;
-                                                uniform mat4 umMatrix;
-                                                uniform vec4 uOriginOffset;
-                                                in vec4 vPosition;
+                                        uniform mat4 umMatrix;
+                                        uniform vec4 uOriginOffset;
+                                        in vec4 vPosition;
 
-                                                void main() {
-                                                    gl_Position = uFrameUniforms.vpMatrix * ((umMatrix * vPosition) + uOriginOffset);
-                                                }
-           );
+                                        void main() {
+                                            gl_Position = uFrameUniforms.vpMatrix * ((umMatrix * vPosition) + uOriginOffset);
+                                        }
+    );
 }
 
 std::string ColorShaderOpenGl::getFragmentShader() {
     return OMMVersionedGlesShaderCode(320 es,
-                                precision mediump float;
-                                uniform vec4 vColor;
-                                out vec4 fragmentColor;
+                                        precision mediump float;
+                                        uniform vec4 vColor;
+                                        out vec4 fragmentColor;
 
-                                void main() {
-                                    fragmentColor = vColor;
-                                    fragmentColor.a = 1.0;
-                                    fragmentColor *= vColor.a;
-                                });
+                                        void main() {
+                                            fragmentColor = vColor;
+                                            fragmentColor.a = 1.0;
+                                            fragmentColor *= vColor.a;
+                                        }
+    );
 }
 
 std::shared_ptr<ShaderProgramInterface> ColorShaderOpenGl::asShaderProgramInterface() { return shared_from_this(); }
