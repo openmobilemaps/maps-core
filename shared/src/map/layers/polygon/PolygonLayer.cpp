@@ -124,8 +124,10 @@ void PolygonLayer::addAll(const std::vector<PolygonInfo> &polygons) {
         for (const auto &polygon : polygons) {
 
         #ifdef HARDWARE_TESSELLATION_SUPPORTED
-            auto shader = shaderFactory->createPolygonTessellatedShader(mapInterface->is3d());
-            auto polygonGraphicsObject = objectFactory->createPolygonTessellated(shader->asShaderProgramInterface());
+            auto shader = mapInterface->is3d() ? shaderFactory->createPolygonTessellatedShader(mapInterface->is3d()) :
+                shaderFactory->createColorShader();
+            auto polygonGraphicsObject = mapInterface->is3d() ? objectFactory->createPolygonTessellated(shader->asShaderProgramInterface()) :
+                objectFactory->createPolygon(shader->asShaderProgramInterface());
         #else
             auto shader = mapInterface->is3d() ? shaderFactory->createUnitSphereColorShader() : shaderFactory->createColorShader();
             auto polygonGraphicsObject = objectFactory->createPolygon(shader->asShaderProgramInterface());
