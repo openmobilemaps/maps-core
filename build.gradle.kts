@@ -12,6 +12,7 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.process.ExecOperations
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinAndroidTarget
 import org.jetbrains.kotlin.gradle.tasks.CInteropProcess
 import java.net.URI
 import javax.inject.Inject
@@ -34,7 +35,7 @@ val mapCoreMetalTargetDevice = providers.environmentVariable("MAPCORE_METAL_TARG
 
 plugins {
     id("org.jetbrains.kotlin.multiplatform") version "2.3.0"
-    id("com.android.kotlin.multiplatform.library") version "8.12.0"
+    id("com.android.kotlin.multiplatform.library") version "8.13.2"
     id("io.github.frankois944.spmForKmp") version "1.4.6"
 }
 
@@ -52,7 +53,7 @@ kotlin {
         }
         namespace = "io.openmobilemaps.mapscore.kmp"
         compileSdk = 36
-        minSdk = 31
+        minSdk = 28
     }
 
     val mapCoreCinteropName = "MapCoreKmp"
