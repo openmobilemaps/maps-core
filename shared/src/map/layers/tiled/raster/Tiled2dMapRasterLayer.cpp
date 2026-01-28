@@ -305,8 +305,8 @@ std::vector<Tiled2dMapRasterTileInfo> sortedTileInfos(currentTileInfos.begin(), 
                 } else {
                                     
                 #ifdef HARDWARE_TESSELLATION_SUPPORTED
-                    auto rasterShader = shaderFactory->createQuadTessellatedShader();
-                    auto quad = graphicsFactory->createQuadTessellated(rasterShader->asShaderProgramInterface());
+                    auto rasterShader = is3D ? shaderFactory->createQuadTessellatedShader() : shaderFactory->createRasterShader();
+                    auto quad = is3D ? graphicsFactory->createQuadTessellated(rasterShader->asShaderProgramInterface()) : graphicsFactory->createQuad(rasterShader->asShaderProgramInterface());
                 #else
                     auto rasterShader = is3D ? shaderFactory->createUnitSphereRasterShader() : shaderFactory->createRasterShader();
                     auto quad = graphicsFactory->createQuad(rasterShader->asShaderProgramInterface());

@@ -26,7 +26,7 @@ PolygonMaskObject::PolygonMaskObject(const std::shared_ptr<GraphicsObjectFactory
                                      bool is3D)
     : conversionHelper(conversionHelper)
 #ifdef HARDWARE_TESSELLATION_SUPPORTED
-    , polygon(graphicsObjectFactory->createPolygonMaskTessellated(is3D))
+    , polygon(is3D ? graphicsObjectFactory->createPolygonMaskTessellated(is3D) : graphicsObjectFactory->createPolygonMask(is3D))
 #else
     , polygon(graphicsObjectFactory->createPolygonMask(is3D))
 #endif
@@ -80,14 +80,14 @@ void PolygonMaskObject::setPolygons(const std::vector<::PolygonCoord> &polygons,
         for (auto const &list : renderCoords) {
             indexOffset += list.size();
 
-            for(auto& i : list) {
+            for (auto& i : list) {
                 vecVertices.push_back(i);
             }
         }
     }
     
 #ifndef HARDWARE_TESSELLATION_SUPPORTED
-    if(subdivisionFactor) {
+    if (subdivisionFactor) {
         PolygonHelper::subdivision(vecVertices, indices, *subdivisionFactor);
     }
 #endif
@@ -110,9 +110,11 @@ void PolygonMaskObject::setPolygons(const std::vector<::PolygonCoord> &polygons,
     #endif
         
     #ifdef HARDWARE_TESSELLATION_SUPPORTED
-        // Frame Coord
-        vertices.push_back(v.x);
-        vertices.push_back(v.y);
+        if (subdivisionFactor) {
+            // Frame Coord
+            vertices.push_back(v.x);
+            vertices.push_back(v.y);
+        }
     #endif
     }
 
@@ -121,7 +123,9 @@ void PolygonMaskObject::setPolygons(const std::vector<::PolygonCoord> &polygons,
     polygon->setVertices(attr, ind, origin, is3D);
     
 #ifdef HARDWARE_TESSELLATION_SUPPORTED
-    polygon->setSubdivisionFactor((int32_t)(subdivisionFactor.value_or(0.0f)));
+    if (subdivisionFactor) {
+        polygon->setSubdivisionFactor((int32_t)(subdivisionFactor.value_or(0.0f)));
+    }
 #endif
 }
 
