@@ -10,8 +10,10 @@
 
 #pragma once
 
+#include <cstdint>
+
 class DateHelper {
   public:
-    static long long currentTimeMillis();
-    static long long currentTimeMicros();
+    static int64_t currentTimeMillis();
+    static int64_t currentTimeMicros();
 };

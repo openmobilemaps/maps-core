@@ -14,7 +14,7 @@
 
 class RasterStyleAnimation: public DefaultAnimator<RasterShaderStyle> {
 public:
-    RasterStyleAnimation(long long duration,
+    RasterStyleAnimation(int64_t duration,
                     RasterShaderStyle startValue,
                     RasterShaderStyle endValue,
                     InterpolatorFunction interpolatorFunction,

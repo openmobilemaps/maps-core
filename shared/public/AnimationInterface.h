@@ -13,7 +13,7 @@
 class AnimationInterface {
 public:
     virtual void start() = 0;
-    virtual void start(long long delay) = 0;
+    virtual void start(int64_t delay) = 0;
     virtual void cancel() = 0;
     virtual void finish() = 0;
     virtual bool isFinished() = 0;

@@ -20,6 +20,7 @@
 #include "MapCamera3dInterface.h"
 #include "MapCameraInterface.h"
 #include "MapCameraListenerInterface.h"
+#include "MapCameraInertia.h"
 #include "MapCoordinateSystem.h"
 #include "SimpleTouchInterface.h"
 #include "Vec2F.h"
@@ -248,27 +249,10 @@ class MapCamera3d : public MapCameraInterface,
         bool boundsRestrictWholeVisibleRect = false;
     };
 
-    long long currentDragTimestamp = 0;
+    int64_t currentDragTimestamp = 0;
     Vec2F currentDragVelocity = {0, 0};
 
-    /// object describing parameters of inertia
-    /// currently only dragging inertia is implemented
-    /// zoom and rotation are still missing
-    struct Inertia {
-        long timestampStart;
-        long timestampUpdate;
-        Vec2F velocity;
-        double t1;
-        double t2;
-
-        Inertia(long long timestampStart, Vec2F velocity, double t1, double t2)
-            : timestampStart(timestampStart)
-            , timestampUpdate(timestampStart)
-            , velocity(velocity)
-            , t1(t1)
-            , t2(t2) {}
-    };
-    std::optional<Inertia> inertia;
+    std::optional<MapCameraInertia> inertia;
     void inertiaStep();
 
     CameraConfiguration config;
