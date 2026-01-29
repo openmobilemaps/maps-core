@@ -53,7 +53,7 @@ class IconLayerObject : public LayerObjectInterface, public std::enable_shared_f
 
     std::shared_ptr<ShaderProgramInterface> getShader();
 
-    void beginAlphaAnimation(double startAlpha, double targetAlpha, long long duration);
+    void beginAlphaAnimation(double startAlpha, double targetAlpha, int64_t duration);
 
   private:
     std::shared_ptr<IconInfoInterface> icon;

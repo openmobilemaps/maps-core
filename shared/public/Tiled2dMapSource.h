@@ -237,16 +237,16 @@ class Tiled2dMapSource : public Tiled2dMapSourceInterface,
 
     std::unordered_map<Tiled2dMapTileInfo, int> currentlyLoading;
 
-    const long long MAX_WAIT_TIME = 32000;
-    const long long MIN_WAIT_TIME = 1000;
+    const int64_t MAX_WAIT_TIME = 32000;
+    const int64_t MIN_WAIT_TIME = 1000;
 
     struct ErrorInfo {
-        long long lastLoad;
-        long long delay;
+        int64_t lastLoad;
+        int64_t delay;
     };
 
     std::unordered_map<size_t, std::map<Tiled2dMapTileInfo, ErrorInfo>> errorTiles;
-    std::optional<long long> nextDelayTaskExecution;
+    std::optional<int64_t> nextDelayTaskExecution;
 
     std::unordered_set<Tiled2dMapTileInfo> notFoundTiles;
 
