@@ -39,12 +39,12 @@ final class Polygon2dTessellated: BaseGraphicsObject, @unchecked Sendable {
                     Sampler.magLinear.rawValue)!,
                 label: "Polygon2dTessellated")
         
-        let factorH = Half(pow(2, Float(self.subdivisionFactor))).bits;
+        let factorH = Half(pow(2, Float(self.subdivisionFactor))).bits
         
         var tessellationFactors = MTLTriangleTessellationFactorsHalf(
             edgeTessellationFactor: (factorH, factorH, factorH),
             insideTessellationFactor: factorH
-        );
+        )
         
         self.tessellationFactorsBuffer.copyOrCreate(
             bytes: &tessellationFactors,
