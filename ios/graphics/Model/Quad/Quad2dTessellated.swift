@@ -205,9 +205,6 @@ final class Quad2dTessellated: BaseGraphicsObject, @unchecked Sendable {
         
         encoder.setTessellationFactorBuffer(tessellationFactorsBuffer, offset: 0, instanceStride: 0)
         
-        /* WIREFRAME DEBUG */
-        //encoder.setTriangleFillMode(.lines)
-    
         encoder.drawPatches(
             numberOfPatchControlPoints: 4,
             patchStart: 0,
@@ -216,9 +213,26 @@ final class Quad2dTessellated: BaseGraphicsObject, @unchecked Sendable {
             patchIndexBufferOffset: 0,
             instanceCount: 1,
             baseInstance: 0)
-        
-        /* WIREFRAME DEBUG */
-        //encoder.setTriangleFillMode(.fill)
+        #if HARDWARE_TESSELLATION_WIREFRAME_METAL
+        let wireframePipeline = MetalContext.current.pipelineLibrary.value(
+            Pipeline(
+                type: .quadTessellatedWireframeShader,
+                blendMode: (shader as? BaseShader)?.blendMode ?? .NORMAL)
+        )
+        if let wireframePipeline {
+            context.setRenderPipelineStateIfNeeded(wireframePipeline)
+        }
+        encoder.setTriangleFillMode(.lines)
+        encoder.drawPatches(
+            numberOfPatchControlPoints: 4,
+            patchStart: 0,
+            patchCount: 1,
+            patchIndexBuffer: nil,
+            patchIndexBufferOffset: 0,
+            instanceCount: 1,
+            baseInstance: 0)
+        encoder.setTriangleFillMode(.fill)
+        #endif
     }
 }
 

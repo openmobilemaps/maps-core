@@ -24,4 +24,7 @@
     #endif
 #endif
 
-#define HARDWARE_TESSELLATION_WIREFRAME 0
+// OpenGL wireframe overlay (set to 1 to enable).
+#define HARDWARE_TESSELLATION_WIREFRAME_OPENGL 0
+// Metal wireframe overlay is controlled by Swift build settings in:
+// maps-core/Package.swift (swiftSettings). Define HARDWARE_TESSELLATION_WIREFRAME_METAL.

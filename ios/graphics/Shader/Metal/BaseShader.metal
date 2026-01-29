@@ -79,6 +79,12 @@ colorFragmentShader(constant float4 &color [[buffer(1)]])
     return float4(color.r * a, color.g * a, color.b * a, a);
 }
 
+fragment float4
+wireframeFragmentShader()
+{
+    return float4(0.0, 0.0, 0.0, 1.0);
+}
+
 fragment half4
 maskFragmentShader()
 {

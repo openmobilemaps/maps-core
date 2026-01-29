@@ -27,8 +27,7 @@ protected:
 
     virtual std::string getEvaluationShader();
 
-#if HARDWARE_TESSELLATION_WIREFRAME
+#if HARDWARE_TESSELLATION_WIREFRAME_OPENGL
     virtual std::string getGeometryShader();
 #endif
 };
-

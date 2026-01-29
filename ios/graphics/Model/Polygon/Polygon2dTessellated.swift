@@ -164,9 +164,6 @@ final class Polygon2dTessellated: BaseGraphicsObject, @unchecked Sendable {
         
         encoder.setTessellationFactorBuffer(tessellationFactorsBuffer, offset: 0, instanceStride: 0)
         
-        /* WIREFRAME DEBUG */
-        //encoder.setTriangleFillMode(.lines)
-        
         encoder.drawIndexedPatches(
             numberOfPatchControlPoints: 3,
             patchStart: 0,
@@ -178,8 +175,28 @@ final class Polygon2dTessellated: BaseGraphicsObject, @unchecked Sendable {
             instanceCount: 1,
             baseInstance: 0)
         
-        /* WIREFRAME DEBUG */
-        //encoder.setTriangleFillMode(.fill)
+        #if HARDWARE_TESSELLATION_WIREFRAME_METAL
+        let wireframePipeline = MetalContext.current.pipelineLibrary.value(
+            Pipeline(
+                type: .polygonTessellatedWireframeShader,
+                blendMode: (shader as? BaseShader)?.blendMode ?? .NORMAL)
+        )
+        if let wireframePipeline {
+            context.setRenderPipelineStateIfNeeded(wireframePipeline)
+        }
+        encoder.setTriangleFillMode(.lines)
+        encoder.drawIndexedPatches(
+            numberOfPatchControlPoints: 3,
+            patchStart: 0,
+            patchCount: indicesCount / 3,
+            patchIndexBuffer: nil,
+            patchIndexBufferOffset: 0,
+            controlPointIndexBuffer: indicesBuffer,
+            controlPointIndexBufferOffset: 0,
+            instanceCount: 1,
+            baseInstance: 0)
+        encoder.setTriangleFillMode(.fill)
+        #endif
     }
 
     private func setupStencilStates() {
