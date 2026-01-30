@@ -11,6 +11,7 @@
 #include "Polygon2dTessellatedOpenGl.h"
 #include "OpenGlHelper.h"
 #include <cstring>
+#include <cmath>
 
 Polygon2dTessellatedOpenGl::Polygon2dTessellatedOpenGl(const std::shared_ptr<::BaseShaderProgramOpenGl> &shader)
     : shaderProgram(shader) {}
