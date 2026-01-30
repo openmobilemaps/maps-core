@@ -159,7 +159,7 @@ void PolygonGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterf
 
     if (scaleFactorHandle >= 0) {
         glUniform2f(scaleFactorHandle, screenPixelAsRealMeterFactor,
-                    pow(2.0, ceil(log2(screenPixelAsRealMeterFactor))));
+                std::pow(2.0, ceil(log2(screenPixelAsRealMeterFactor))));
     }
 
     shaderProgram->preRender(context, isScreenSpaceCoords);

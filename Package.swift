@@ -120,6 +120,9 @@ let package = Package(
             exclude: ["readme.md"],
             resources: [
                 .process("graphics/Shader/Metal/")
+            ],
+            swiftSettings: [
+                //.define("HARDWARE_TESSELLATION_WIREFRAME_METAL")
             ]
         ),
         .target(

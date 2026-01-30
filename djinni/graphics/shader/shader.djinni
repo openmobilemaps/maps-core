@@ -11,6 +11,12 @@ blend_mode = enum {
     multiply;
 }
 
+tessellation_mode = enum {
+    none;
+    quad;
+    triangle;
+}
+
 shader_program_interface = interface +c +o {
     get_program_name() : string;
     setup_program(context: rendering_context_interface);
@@ -35,6 +41,7 @@ shader_factory_interface = interface +c +j +o {
 
     create_unit_sphere_color_shader() : color_shader_interface;
     create_color_shader() : color_shader_interface;
+    create_polygon_tessellated_shader(unit_sphere: bool) : color_shader_interface;
 
     create_color_circle_shader() : color_circle_shader_interface;
     create_unit_sphere_color_circle_shader() : color_circle_shader_interface;
@@ -48,6 +55,7 @@ shader_factory_interface = interface +c +j +o {
 
     create_raster_shader() : raster_shader_interface;
     create_unit_sphere_raster_shader() : raster_shader_interface;
+    create_quad_tessellated_shader() : raster_shader_interface;
 
     create_stretch_shader(): stretch_shader_interface;
     create_stretch_instanced_shader(unit_sphere: bool): stretch_instanced_shader_interface;

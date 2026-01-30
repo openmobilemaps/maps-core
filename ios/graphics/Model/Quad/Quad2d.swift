@@ -246,8 +246,7 @@ extension Quad2d: MCQuad2dInterface {
     }
 
     func setFrame(
-        _ frame: MCQuad3dD, textureCoordinates: MCRectD, origin: MCVec3D,
-        is3d: Bool
+        _ frame: MCQuad3dD, textureCoordinates: MCRectD, origin: MCVec3D, is3d: Bool
     ) {
         var vertices: [Vertex3DTexture] = []
         var indices: [UInt16] = []
