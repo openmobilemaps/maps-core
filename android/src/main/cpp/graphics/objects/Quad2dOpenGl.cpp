@@ -133,7 +133,7 @@ void Quad2dOpenGl::computeGeometry(bool texCoordsOnly) {
 
 
 
-        int32_t numSubd = pow(2.0, subdivisionFactor);
+        int32_t numSubd = std::pow(2.0, subdivisionFactor);
         std::vector<float> deltaRTop = {(float) (frame.topRight.x - frame.topLeft.x),
                                         (float) (frame.topRight.y - frame.topLeft.y),
                                         (float) (frame.topRight.z - frame.topLeft.z)};

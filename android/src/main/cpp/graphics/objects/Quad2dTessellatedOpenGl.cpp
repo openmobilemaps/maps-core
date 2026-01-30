@@ -337,7 +337,7 @@ void Quad2dTessellatedOpenGl::render(const std::shared_ptr<::RenderingContextInt
 
     glPatchParameteri(GL_PATCH_VERTICES, 4);
 
-    glUniform1i(subdivisionFactorHandle, pow(2, subdivisionFactor));
+    glUniform1i(subdivisionFactorHandle, std::pow(2, subdivisionFactor));
 
     glUniform4f(originHandle, origin.x, origin.y, origin.z, 0.0);
 
