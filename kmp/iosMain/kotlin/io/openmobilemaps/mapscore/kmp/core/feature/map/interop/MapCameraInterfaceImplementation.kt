@@ -3,7 +3,6 @@ package io.openmobilemaps.mapscore.kmp.feature.map.interop
 import MapCoreSharedModule.MCMapCamera3dInterface
 import MapCoreSharedModule.MCMapCameraInterface
 import MapCoreSharedModule.MCMapCameraListenerInterfaceProtocol
-import platform.Foundation.NSArray
 import platform.Foundation.NSNumber
 import platform.darwin.NSObject
 
@@ -183,15 +182,15 @@ private class MapCameraListenerProxy(
 	}
 
 	override fun onCameraChange(
-		viewMatrix: NSArray,
-		projectionMatrix: NSArray,
-		origin: Vec3D,
+		viewMatrix: List<*>,
+		projectionMatrix: List<*>,
+		origin: MapCoreSharedModule.MCVec3D,
 		verticalFov: Float,
 		horizontalFov: Float,
 		width: Float,
 		height: Float,
 		focusPointAltitude: Float,
-		focusPointPosition: Coord,
+		focusPointPosition: MapCoreSharedModule.MCCoord,
 		zoom: Float,
 	) {
 		val view = viewMatrix.mapNotNull { (it as? NSNumber)?.floatValue }

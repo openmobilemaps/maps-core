@@ -12,7 +12,7 @@ import MapCoreSharedModule.MCRenderingContextInterfaceProtocol
 import MapCoreSharedModule.MCSchedulerInterfaceProtocol
 import MapCoreSharedModule.MCShaderFactoryInterfaceProtocol
 import MapCoreSharedModule.MCTouchHandlerInterfaceProtocol
-import MapCoreSharedModule.MCCoordinateConversionHelperInterfaceProtocol
+import MapCoreSharedModule.MCCoordinateConversionHelperInterface
 
 actual open class GraphicsObjectFactoryInterface actual constructor(nativeHandle: Any?) {
 	protected actual val nativeHandle: Any? = nativeHandle
@@ -59,8 +59,8 @@ actual open class PerformanceLoggerInterface actual constructor(nativeHandle: An
 actual open class CoordinateConversionHelperInterface actual constructor(nativeHandle: Any?) {
 	protected actual val nativeHandle: Any? = nativeHandle
 
-	internal fun asMapCore(): MCCoordinateConversionHelperInterfaceProtocol? =
-		nativeHandle as? MCCoordinateConversionHelperInterfaceProtocol
+	internal fun asMapCore(): MCCoordinateConversionHelperInterface? =
+		nativeHandle as? MCCoordinateConversionHelperInterface
 }
 
 actual open class RenderTargetInterface actual constructor(nativeHandle: Any?) {

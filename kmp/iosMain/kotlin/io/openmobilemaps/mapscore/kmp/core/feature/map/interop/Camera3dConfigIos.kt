@@ -49,7 +49,11 @@ internal fun CameraInterpolationValueFromMapCore(value: MCCameraInterpolationVal
     CameraInterpolationValue(stop = value.stop, value = value.value)
 
 internal fun CameraInterpolationFromMapCore(value: MCCameraInterpolation): CameraInterpolation =
-    CameraInterpolation(stops = value.stops.map { CameraInterpolationValueFromMapCore(it) })
+    CameraInterpolation(
+        stops = value.stops
+            .mapNotNull { it as? MCCameraInterpolationValue }
+            .map { CameraInterpolationValueFromMapCore(it) },
+    )
 
 internal fun Camera3dConfig.asMapCore(): MCCamera3dConfig =
     MCCamera3dConfig.camera3dConfigWithKey(
