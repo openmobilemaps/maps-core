@@ -47,14 +47,11 @@ kotlin {
 
     applyDefaultHierarchyTemplate()
 
-    android {
+    androidTarget {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_17)
         }
         publishLibraryVariants("debug", "release")
-        namespace = "io.openmobilemaps.mapscore.kmp"
-        compileSdk = 36
-        minSdk = 28
     }
 
     val mapCoreCinteropName = "MapCoreKmp"
@@ -99,6 +96,12 @@ kotlin {
             languageSettings.optIn("kotlinx.cinterop.ExperimentalForeignApi")
         }
     }
+}
+
+android {
+    namespace = "io.openmobilemaps.mapscore.kmp"
+    compileSdk = 36
+    minSdk = 28
 }
 
 swiftPackageConfig {
