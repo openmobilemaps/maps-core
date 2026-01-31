@@ -51,6 +51,7 @@ kotlin {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_17)
         }
+        publishLibraryVariants("debug", "release")
         namespace = "io.openmobilemaps.mapscore.kmp"
         compileSdk = 36
         minSdk = 28
