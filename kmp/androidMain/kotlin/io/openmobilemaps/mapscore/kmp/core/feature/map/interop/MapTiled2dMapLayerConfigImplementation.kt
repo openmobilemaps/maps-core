@@ -1,7 +1,6 @@
 package io.openmobilemaps.mapscore.kmp.feature.map.interop
 
 import io.openmobilemaps.mapscore.kmp.feature.map.interop.MapTiled2dMapLayerConfig as SharedLayerConfig
-import io.openmobilemaps.mapscore.kmp.feature.map.interop.MapTiled2dMapZoomInfo as SharedZoomInfo
 import io.openmobilemaps.mapscore.shared.map.coordinates.Coord as MapscoreCoord
 import io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateConversionHelperInterface
 import io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig as MapscoreLayerConfig
@@ -85,7 +84,7 @@ class MapTiled2dMapLayerConfigImplementation(
 			}
 		}
 
-	override fun getZoomInfo(): MapscoreZoomInfo = config.zoomInfo.asMapscore()
+	override fun getZoomInfo(): MapscoreZoomInfo = config.zoomInfo
 
 	override fun getLayerName(): String = config.layerName
 
@@ -108,13 +107,3 @@ class MapTiled2dMapLayerConfigImplementation(
 		)
 	}
 }
-
-private fun SharedZoomInfo.asMapscore(): MapscoreZoomInfo = MapscoreZoomInfo(
-	zoomLevelScaleFactor = zoomLevelScaleFactor.toFloat(),
-	numDrawPreviousLayers = numDrawPreviousLayers,
-	numDrawPreviousOrLaterTLayers = numDrawPreviousOrLaterTLayers,
-	adaptScaleToScreen = adaptScaleToScreen,
-	maskTile = maskTile,
-	underzoom = underzoom,
-	overzoom = overzoom,
-)

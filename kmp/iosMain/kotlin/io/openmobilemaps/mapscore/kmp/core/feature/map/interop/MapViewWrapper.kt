@@ -14,7 +14,7 @@ actual typealias PlatformMapView = UIView
 actual class MapViewWrapper actual constructor() {
     private val mapView = MCMapViewObjC()
     @Suppress("CAST_NEVER_SUCCEEDS")
-    private val mapInterfaceImplementation = MapInterface.create(mapView.mapInterface as MCMapInterface)
+    private val mapInterfaceImplementation = MapInterface(mapView.mapInterface as MCMapInterface)
 
     actual val view: UIView = mapView
     actual val mapInterface: MapInterface = mapInterfaceImplementation

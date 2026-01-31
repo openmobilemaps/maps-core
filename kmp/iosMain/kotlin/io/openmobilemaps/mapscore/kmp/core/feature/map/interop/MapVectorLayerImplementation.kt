@@ -1,28 +1,20 @@
 package io.openmobilemaps.mapscore.kmp.feature.map.interop
 
-import kotlin.experimental.ExperimentalObjCName
-import kotlin.native.ObjCName
-
 import MapCoreSharedModule.MCTiled2dMapVectorLayerInterface
 import MapCoreSharedModule.MCVectorLayerFeatureInfoValue
+import platform.Foundation.NSNumber
 
-@OptIn(ExperimentalObjCName::class)
-@ObjCName("MapVectorLayer", exact = true)
-actual abstract class MapVectorLayer actual constructor(nativeHandle: Any?) {
-	protected val nativeHandle: Any? = nativeHandle
-
-	actual abstract fun setSelectionDelegate(delegate: MapVectorLayerSelectionCallbackProxy?)
-	actual abstract fun setGlobalState(state: Map<String, MapVectorLayerFeatureInfoValue>)
-}
-
-class MapVectorLayerImpl(nativeHandle: Any?) : MapVectorLayer(nativeHandle) {
+actual class MapVectorLayer actual constructor(nativeHandle: Any?) : LayerInterface(
+	(nativeHandle as? MCTiled2dMapVectorLayerInterface)?.asLayerInterface(),
+) {
 	private val layer = nativeHandle as? MCTiled2dMapVectorLayerInterface
 
-	override fun setSelectionDelegate(delegate: MapVectorLayerSelectionCallbackProxy?) {
-		layer?.setSelectionDelegate(delegate)
+	actual fun setSelectionDelegate(delegate: MapVectorLayerSelectionCallback?) {
+		val proxy = delegate?.let { MapVectorLayerSelectionCallbackProxy(it) }
+		layer?.setSelectionDelegate(proxy)
 	}
 
-	override fun setGlobalState(state: Map<String, MapVectorLayerFeatureInfoValue>) {
+	actual fun setGlobalState(state: Map<String, MapVectorLayerFeatureInfoValue>) {
 		val mapped = mutableMapOf<Any?, Any?>()
 		state.forEach { (key, value) ->
 			mapped[key] = value.asMapCore()
@@ -30,16 +22,19 @@ class MapVectorLayerImpl(nativeHandle: Any?) : MapVectorLayer(nativeHandle) {
 		layer?.setGlobalState(mapped)
 	}
 
-	internal fun layerInterface() = layer?.asLayerInterface()
+	internal fun vectorLayerInterface(): MCTiled2dMapVectorLayerInterface? = layer
 }
 
-private fun MapVectorLayerFeatureInfoValue.asMapCore() =
-    MCVectorLayerFeatureInfoValue(
-        stringVal = stringVal,
-        doubleVal = null,
-        intVal = null,
-        boolVal = null,
-        colorVal = null,
-        listFloatVal = null,
-        listStringVal = listStringVal,
-    )
+private fun MapVectorLayerFeatureInfoValue.asMapCore(): MCVectorLayerFeatureInfoValue {
+	val floatList = listFloatVal?.map { NSNumber(float = it) }
+	val stringList = listStringVal?.map { it as String }
+	return MCVectorLayerFeatureInfoValue(
+		stringVal = stringVal,
+		doubleVal = doubleVal?.let { NSNumber(double = it) },
+		intVal = intVal?.let { NSNumber(longLong = it) },
+		boolVal = boolVal?.let { NSNumber(bool = it) },
+		colorVal = colorVal,
+		listFloatVal = floatList,
+		listStringVal = stringList,
+	)
+}

@@ -92,7 +92,7 @@ private class MapFactoryImpl(
 			symbolDelegate = null,
 			sourceUrlParams = null,
 		)
-		return layer?.let { MapVectorLayerImpl(it) }
+		return layer?.let { MapVectorLayer(it) }
 	}
 
 	override fun createRasterLayer(config: MapTiled2dMapLayerConfig): MapRasterLayer? {

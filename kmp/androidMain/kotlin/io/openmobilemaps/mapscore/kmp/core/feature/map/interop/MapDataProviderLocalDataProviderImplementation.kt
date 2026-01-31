@@ -4,7 +4,7 @@ import android.graphics.BitmapFactory
 import com.snapchat.djinni.Future
 import com.snapchat.djinni.Promise
 import io.openmobilemaps.mapscore.graphics.BitmapTextureHolder
-import io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.Tiled2dMapVectorLayerLocalDataProviderInterface
+import io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.Tiled2dMapVectorLayerLocalDataProviderInterface as MapscoreLocalDataProvider
 import io.openmobilemaps.mapscore.shared.map.loader.DataLoaderResult
 import io.openmobilemaps.mapscore.shared.map.loader.LoaderStatus
 import io.openmobilemaps.mapscore.shared.map.loader.TextureLoaderResult
@@ -16,7 +16,7 @@ import java.nio.ByteBuffer
 internal class MapDataProviderLocalDataProviderImplementation(
 	private val dataProvider: MapDataProviderProtocol,
 	private val coroutineScope: CoroutineScope,
-) : Tiled2dMapVectorLayerLocalDataProviderInterface() {
+) : MapscoreLocalDataProvider() {
 
 	override fun getStyleJson(): String? = dataProvider.getStyleJson()
 

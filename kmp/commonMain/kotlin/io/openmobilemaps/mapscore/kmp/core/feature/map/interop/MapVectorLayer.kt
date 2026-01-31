@@ -1,6 +1,6 @@
 package io.openmobilemaps.mapscore.kmp.feature.map.interop
 
-expect abstract class MapVectorLayer constructor(nativeHandle: Any? = null) {
-	abstract fun setSelectionDelegate(delegate: MapVectorLayerSelectionCallbackProxy?)
-	abstract fun setGlobalState(state: Map<String, MapVectorLayerFeatureInfoValue>)
+expect class MapVectorLayer constructor(nativeHandle: Any? = null) : LayerInterface {
+    fun setSelectionDelegate(delegate: MapVectorLayerSelectionCallback?)
+    fun setGlobalState(state: Map<String, MapVectorLayerFeatureInfoValue>)
 }

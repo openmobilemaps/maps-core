@@ -1,11 +1,11 @@
 package io.openmobilemaps.mapscore.kmp.feature.map.interop
 
 import io.openmobilemaps.mapscore.map.layers.TiledRasterLayer
-import io.openmobilemaps.mapscore.shared.map.LayerInterface
 
-actual open class MapRasterLayer actual constructor(nativeHandle: Any?) {
-	protected val nativeHandle: Any? = nativeHandle
+actual open class MapRasterLayer actual constructor(nativeHandle: Any?) : LayerInterface(
+	(nativeHandle as? TiledRasterLayer)?.layerInterface(),
+) {
+	private val rasterLayer = nativeHandle as? TiledRasterLayer
 
-	internal fun layerInterface(): LayerInterface? =
-		(nativeHandle as? TiledRasterLayer)?.layerInterface()
+	internal fun rasterLayerInterface(): TiledRasterLayer? = rasterLayer
 }

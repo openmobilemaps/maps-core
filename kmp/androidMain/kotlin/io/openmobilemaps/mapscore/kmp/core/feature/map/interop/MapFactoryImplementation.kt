@@ -65,7 +65,7 @@ private class MapFactoryImpl(
 			null,
 			null,
 			null,
-		).let { MapVectorLayerImpl(it) }
+		).let { MapVectorLayer(it) }
 	}
 
 	override fun createRasterLayer(config: MapTiled2dMapLayerConfig): MapRasterLayer? {

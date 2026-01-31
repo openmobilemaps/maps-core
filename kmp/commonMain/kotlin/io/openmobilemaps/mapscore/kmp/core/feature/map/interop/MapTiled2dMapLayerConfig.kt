@@ -1,19 +1,27 @@
 package io.openmobilemaps.mapscore.kmp.feature.map.interop
 
-data class MapTiled2dMapZoomInfo(
-	val zoomLevelScaleFactor: Double,
-	val numDrawPreviousLayers: Int,
-	val numDrawPreviousOrLaterTLayers: Int,
-	val adaptScaleToScreen: Boolean,
-	val maskTile: Boolean,
-	val underzoom: Boolean,
-	val overzoom: Boolean,
-)
+expect class Tiled2dMapZoomInfo(
+	zoomLevelScaleFactor: Float,
+	numDrawPreviousLayers: Int,
+	numDrawPreviousOrLaterTLayers: Int,
+	adaptScaleToScreen: Boolean,
+	maskTile: Boolean,
+	underzoom: Boolean,
+	overzoom: Boolean,
+) {
+	val zoomLevelScaleFactor: Float
+	val numDrawPreviousLayers: Int
+	val numDrawPreviousOrLaterTLayers: Int
+	val adaptScaleToScreen: Boolean
+	val maskTile: Boolean
+	val underzoom: Boolean
+	val overzoom: Boolean
+}
 
 data class MapTiled2dMapLayerConfig(
 	val layerName: String,
 	val urlFormat: String,
-	val zoomInfo: MapTiled2dMapZoomInfo,
+	val zoomInfo: Tiled2dMapZoomInfo,
 	val minZoomLevel: Int,
 	val maxZoomLevel: Int,
 	val coordinateSystemIdentifier: Int,

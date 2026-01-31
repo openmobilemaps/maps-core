@@ -1,8 +1,5 @@
 package io.openmobilemaps.mapscore.kmp.feature.map.interop
 
-import kotlin.experimental.ExperimentalObjCName
-import kotlin.native.ObjCName
-
 import LayerGpsSharedModule.MCGpsLayerCallbackInterfaceProtocol
 import LayerGpsSharedModule.MCGpsLayerInterface
 import LayerGpsSharedModule.MCGpsMode
@@ -15,7 +12,6 @@ import LayerGpsSharedModule.MCColor
 import LayerGpsSharedModule.MCTextureHolderInterfaceProtocol as GpsTextureHolderInterfaceProtocol
 import MapCoreObjC.MCMapCoreObjCFactory
 import MapCoreSharedModule.MCCoordinateSystemIdentifiers
-import MapCoreSharedModule.MCLayerInterfaceProtocol as MapCoreLayerInterfaceProtocol
 import io.openmobilemaps.mapscore.kmp.feature.map.model.GpsMode
 import kotlinx.cinterop.useContents
 import platform.CoreLocation.CLHeading
@@ -26,11 +22,9 @@ import platform.darwin.NSObject
 import platform.UIKit.UIImage
 import platform.UIKit.UIImagePNGRepresentation
 
-@OptIn(ExperimentalObjCName::class)
-@ObjCName("MapGpsLayer", exact = true)
-actual abstract class MapGpsLayer actual constructor(nativeHandle: Any?) {
-	protected val nativeHandle: Any? = nativeHandle
-
+actual abstract class MapGpsLayer actual constructor(nativeHandle: Any?) : LayerInterface(
+	(nativeHandle as? MCGpsLayerInterface)?.asLayerInterface(),
+) {
 	actual abstract fun setMode(mode: GpsMode)
 	actual abstract fun getMode(): GpsMode
 	actual abstract fun setOnModeChangedListener(listener: ((GpsMode) -> Unit)?)
@@ -71,9 +65,6 @@ class MapGpsLayerImpl(nativeHandle: Any?) : MapGpsLayer(nativeHandle) {
 	}
 
 	override fun lastLocation(): Coord? = lastKnownLocation
-
-	internal fun layerInterface(): MapCoreLayerInterfaceProtocol? =
-		gpsLayer.asLayerInterface() as? MapCoreLayerInterfaceProtocol
 
 	internal fun updateLocation(location: CLLocation) {
 		val coord = location.coordinate.useContents {

@@ -74,16 +74,7 @@ class MapTiled2dMapLayerConfigImplementation(
 	}
 
 	override fun getZoomInfo(): MCTiled2dMapZoomInfo {
-		val info = config.zoomInfo
-		return MCTiled2dMapZoomInfo(
-			zoomLevelScaleFactor = info.zoomLevelScaleFactor.toFloat(),
-			numDrawPreviousLayers = info.numDrawPreviousLayers,
-			numDrawPreviousOrLaterTLayers = info.numDrawPreviousOrLaterTLayers,
-			adaptScaleToScreen = info.adaptScaleToScreen,
-			maskTile = info.maskTile,
-			underzoom = info.underzoom,
-			overzoom = info.overzoom,
-		)
+		return config.zoomInfo
 	}
 
 	override fun getLayerName(): String = config.layerName

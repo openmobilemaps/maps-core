@@ -6,6 +6,7 @@ import kotlin.native.ObjCName
 import MapCoreSharedModule.MCVectorLayerFeatureInfo
 import MapCoreSharedModule.MCVectorLayerFeatureInfoValue
 import MapCoreSharedModule.MCTiled2dMapVectorLayerSelectionCallbackInterfaceProtocol
+import platform.Foundation.NSNumber
 import platform.darwin.NSObject
 
 @OptIn(ExperimentalObjCName::class)
@@ -15,8 +16,8 @@ actual class MapVectorLayerSelectionCallbackProxy actual constructor(
 ) : NSObject(), MCTiled2dMapVectorLayerSelectionCallbackInterfaceProtocol {
 	actual val handler: MapVectorLayerSelectionCallback = handler
 	override fun didSelectFeature(featureInfo: MCVectorLayerFeatureInfo, layerIdentifier: String, coord: Coord): Boolean {
-		val sharedFeatureInfo = featureInfo.asShared(layerIdentifier)
-		return handler._didSelectFeature(featureInfo = sharedFeatureInfo, coord = coord)
+		val sharedFeatureInfo = featureInfo.asShared()
+		return handler.didSelectFeature(featureInfo = sharedFeatureInfo, layerIdentifier = layerIdentifier, coord = coord)
 	}
 
 	override fun didMultiSelectLayerFeatures(
@@ -24,16 +25,22 @@ actual class MapVectorLayerSelectionCallbackProxy actual constructor(
 		layerIdentifier: String,
 		coord: Coord,
 	): Boolean {
-		return handler._didMultiSelectLayerFeatures(layerIdentifier = layerIdentifier, coord = coord)
+		val sharedFeatureInfos = featureInfos.mapNotNull { it as? MCVectorLayerFeatureInfo }
+			.map { it.asShared() }
+		return handler.didMultiSelectLayerFeatures(
+			featureInfos = sharedFeatureInfos,
+			layerIdentifier = layerIdentifier,
+			coord = coord,
+		)
 	}
 
 	override fun didClickBackgroundConfirmed(coord: Coord): Boolean {
-		return handler._didClickBackgroundConfirmed(coord = coord)
+		return handler.didClickBackgroundConfirmed(coord = coord)
 	}
 }
 
-private fun MCVectorLayerFeatureInfo.asShared(layerIdentifier: String): MapVectorLayerFeatureInfo {
-	val props = mutableMapOf<String, MapVectorLayerFeatureInfoValue>()
+private fun MCVectorLayerFeatureInfo.asShared(): MapVectorLayerFeatureInfo {
+	val props = HashMap<String, MapVectorLayerFeatureInfoValue>()
 	for (entry in properties.entries) {
 		val key = entry.key as? String ?: continue
 		val value = entry.value as? MCVectorLayerFeatureInfoValue ?: continue
@@ -41,16 +48,24 @@ private fun MCVectorLayerFeatureInfo.asShared(layerIdentifier: String): MapVecto
 	}
 	return MapVectorLayerFeatureInfo(
 		identifier = identifier,
-		layerIdentifier = layerIdentifier,
 		properties = props,
 	)
 }
 
 private fun MCVectorLayerFeatureInfoValue.asShared(): MapVectorLayerFeatureInfoValue {
-	val stringValue = stringVal
-		?: intVal?.stringValue
-		?: doubleVal?.stringValue
-		?: boolVal?.stringValue
-	val list = listStringVal?.mapNotNull { it as? String }
-	return MapVectorLayerFeatureInfoValue(stringVal = stringValue, listStringVal = list)
+	val floatList = listFloatVal
+		?.mapNotNull { (it as? NSNumber)?.floatValue }
+		?.let { ArrayList(it) }
+	val stringList = listStringVal
+		?.mapNotNull { it as? String }
+		?.let { ArrayList(it) }
+	return MapVectorLayerFeatureInfoValue(
+		stringVal = stringVal,
+		doubleVal = doubleVal?.doubleValue,
+		intVal = intVal?.longLongValue,
+		boolVal = boolVal?.boolValue,
+		colorVal = colorVal,
+		listFloatVal = floatList,
+		listStringVal = stringList,
+	)
 }
