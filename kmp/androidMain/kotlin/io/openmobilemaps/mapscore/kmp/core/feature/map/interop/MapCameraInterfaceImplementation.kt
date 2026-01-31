@@ -205,7 +205,8 @@ actual open class MapCamera3dInterface actual constructor(nativeHandle: Any?) {
 	protected actual val nativeHandle: Any? = nativeHandle
 	private val camera3d = nativeHandle as? MapscoreMapCamera3dInterface
 
-	actual fun getCameraConfig(): Camera3dConfig = requireNotNull(camera3d?.getCameraConfig())
+	actual fun getCameraConfig(): Camera3dConfig =
+		Camera3dConfigFromMapscore(requireNotNull(camera3d?.getCameraConfig()))
 
 	actual fun setCameraConfig(
 		config: Camera3dConfig,
@@ -213,7 +214,7 @@ actual open class MapCamera3dInterface actual constructor(nativeHandle: Any?) {
 		targetZoom: Float?,
 		targetCoordinate: Coord?,
 	) {
-		camera3d?.setCameraConfig(config, durationSeconds, targetZoom, targetCoordinate)
+		camera3d?.setCameraConfig(config.asMapscore(), durationSeconds, targetZoom, targetCoordinate)
 	}
 }
 
@@ -222,9 +223,13 @@ actual open class Camera3dConfigFactory actual constructor(nativeHandle: Any?) {
 
 	actual companion object {
 		actual fun getBasicConfig(): Camera3dConfig =
-			io.openmobilemaps.mapscore.shared.map.Camera3dConfigFactory.getBasicConfig()
+			Camera3dConfigFromMapscore(
+				io.openmobilemaps.mapscore.shared.map.Camera3dConfigFactory.getBasicConfig(),
+			)
 
 		actual fun getRestorConfig(): Camera3dConfig =
-			io.openmobilemaps.mapscore.shared.map.Camera3dConfigFactory.getRestorConfig()
+			Camera3dConfigFromMapscore(
+				io.openmobilemaps.mapscore.shared.map.Camera3dConfigFactory.getRestorConfig(),
+			)
 	}
 }

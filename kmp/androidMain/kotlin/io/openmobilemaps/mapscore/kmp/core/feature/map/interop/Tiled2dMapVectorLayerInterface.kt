@@ -24,7 +24,7 @@ actual open class Tiled2dMapVectorLayerInterface actual constructor(nativeHandle
 			val typedLoaders = ArrayList<MapscoreLoaderInterface>(loaders.size).apply {
 				loaders.forEach { add(requireNotNull(it.asMapscore())) }
 			}
-			val typedFontLoader = fontLoader?.asMapscore()
+			val typedFontLoader = fontLoader?.asMapscore() ?: return null
 			val typedLocalDataProvider = localDataProvider?.asMapscore()
 			val typedZoomInfo = customZoomInfo
 			val typedSymbolDelegate = symbolDelegate?.asMapscore()

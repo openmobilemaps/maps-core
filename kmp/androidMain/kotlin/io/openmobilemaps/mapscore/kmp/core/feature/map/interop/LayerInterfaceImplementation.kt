@@ -28,7 +28,8 @@ actual open class LayerInterface actual constructor(nativeHandle: Any?) {
 	}
 
 	actual fun onAdded(mapInterface: MapInterface, layerIndex: Int) {
-		layer?.onAdded(mapInterface.asMapscore(), layerIndex)
+		val typedMap = requireNotNull(mapInterface.asMapscore())
+		layer?.onAdded(typedMap, layerIndex)
 	}
 
 	actual fun onRemoved() {
@@ -69,7 +70,8 @@ actual open class LayerInterface actual constructor(nativeHandle: Any?) {
 	}
 
 	actual fun setErrorManager(errorManager: ErrorManager) {
-		layer?.setErrorManager(errorManager.asMapscore())
+		val typedErrorManager = requireNotNull(errorManager.asMapscore())
+		layer?.setErrorManager(typedErrorManager)
 	}
 
 	actual fun forceReload() {

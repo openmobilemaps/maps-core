@@ -2,7 +2,7 @@ package io.openmobilemaps.mapscore.kmp.feature.map.interop
 
 import io.openmobilemaps.mapscore.shared.graphics.CameraInterface as MapscoreCameraInterface
 import io.openmobilemaps.mapscore.shared.graphics.ComputePassInterface as MapscoreComputePassInterface
-import io.openmobilemaps.mapscore.shared.graphics.MaskingObjectInterface as MapscoreMaskingObjectInterface
+import io.openmobilemaps.mapscore.shared.graphics.objects.MaskingObjectInterface as MapscoreMaskingObjectInterface
 import io.openmobilemaps.mapscore.shared.graphics.RenderPassInterface as MapscoreRenderPassInterface
 import io.openmobilemaps.mapscore.shared.graphics.RenderTargetInterface as MapscoreRenderTargetInterface
 import io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface as MapscoreRenderingContextInterface
