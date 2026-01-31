@@ -3,7 +3,7 @@ package io.openmobilemaps.mapscore.kmp.feature.map.interop
 import MapCoreSharedModule.MCTiled2dMapVectorLayerInterface
 import platform.Foundation.NSNumber
 
-actual class Tiled2dMapVectorLayerInterface actual constructor(nativeHandle: Any?) {
+actual open class Tiled2dMapVectorLayerInterface actual constructor(nativeHandle: Any?) {
 	protected actual val nativeHandle: Any? = nativeHandle
 
 	internal fun asMapCore(): MCTiled2dMapVectorLayerInterface? =

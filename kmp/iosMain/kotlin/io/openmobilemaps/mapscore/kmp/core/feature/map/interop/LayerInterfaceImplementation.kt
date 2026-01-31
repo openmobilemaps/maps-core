@@ -11,6 +11,9 @@ actual open class LayerInterface actual constructor(nativeHandle: Any?) {
 	protected actual val nativeHandle: Any? = nativeHandle
 	private val layer = nativeHandle as? MCLayerInterfaceProtocol
 
+	internal fun asMapCore(): MCLayerInterfaceProtocol? =
+		nativeHandle as? MCLayerInterfaceProtocol
+
 	actual fun setMaskingObject(maskingObject: MaskingObjectInterface?) {
 		layer?.setMaskingObject(maskingObject?.asMapCore())
 	}
@@ -79,13 +82,11 @@ actual open class LayerInterface actual constructor(nativeHandle: Any?) {
 	}
 }
 
-internal fun LayerInterface.asMapCore(): MCLayerInterfaceProtocol? =
-	nativeHandle as? MCLayerInterfaceProtocol
-
 private fun MCLayerReadyState?.asShared(): LayerReadyState = when (this) {
 	MCLayerReadyStateREADY -> LayerReadyState.READY
 	MCLayerReadyStateNOT_READY -> LayerReadyState.NOT_READY
 	MCLayerReadyStateERROR -> LayerReadyState.ERROR
 	MCLayerReadyStateTIMEOUT_ERROR -> LayerReadyState.TIMEOUT_ERROR
 	null -> LayerReadyState.NOT_READY
+	else -> LayerReadyState.NOT_READY
 }

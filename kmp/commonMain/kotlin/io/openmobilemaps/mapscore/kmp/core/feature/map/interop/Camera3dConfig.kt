@@ -34,7 +34,7 @@ expect class Camera3dConfig(
     val verticalDisplacementInterpolationValues: CameraInterpolation
 }
 
-expect class Camera3dConfigFactory constructor(nativeHandle: Any? = null) {
+expect open class Camera3dConfigFactory constructor(nativeHandle: Any? = null) {
     protected val nativeHandle: Any?
 
     companion object {

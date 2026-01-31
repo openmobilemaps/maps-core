@@ -6,11 +6,11 @@ actual open class IndexedLayerInterface actual constructor(nativeHandle: Any?) {
 	protected actual val nativeHandle: Any? = nativeHandle
 	private val indexedLayer = nativeHandle as? MapscoreIndexedLayerInterface
 
+	internal fun asMapscore(): MapscoreIndexedLayerInterface? =
+		nativeHandle as? MapscoreIndexedLayerInterface
+
 	actual fun getLayerInterface(): LayerInterface =
 		LayerInterface(indexedLayer?.getLayerInterface())
 
 	actual fun getIndex(): Int = indexedLayer?.getIndex() ?: 0
 }
-
-internal fun IndexedLayerInterface.asMapscore(): MapscoreIndexedLayerInterface? =
-	nativeHandle as? MapscoreIndexedLayerInterface

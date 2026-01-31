@@ -6,9 +6,6 @@ import MapCoreSharedModule.MCVec2F as MapCoreVec2F
 import MapCoreSharedModule.MCVec2I as MapCoreVec2I
 import MapCoreSharedModule.MCVec3D as MapCoreVec3D
 import MapCoreSharedModule.MCRectI as MapCoreRectI
-import MapCoreSharedModule.MCCameraInterpolation as MapCoreCameraInterpolation
-import MapCoreSharedModule.MCCameraInterpolationValue as MapCoreCameraInterpolationValue
-import MapCoreSharedModule.MCCamera3dConfig as MapCoreCamera3dConfig
 import MapCoreSharedModule.MCTiled2dMapZoomInfo as MapCoreTiled2dMapZoomInfo
 
 actual typealias Vec2F = MapCoreVec2F
@@ -17,7 +14,4 @@ actual typealias Vec3D = MapCoreVec3D
 actual typealias RectI = MapCoreRectI
 actual typealias MapConfig = MapCoreMapConfig
 actual typealias MapCoordinateSystem = MapCoreMapCoordinateSystem
-actual typealias CameraInterpolation = MapCoreCameraInterpolation
-actual typealias CameraInterpolationValue = MapCoreCameraInterpolationValue
-actual typealias Camera3dConfig = MapCoreCamera3dConfig
 actual typealias Tiled2dMapZoomInfo = MapCoreTiled2dMapZoomInfo

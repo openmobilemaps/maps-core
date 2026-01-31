@@ -14,6 +14,9 @@ actual open class MapInterface actual constructor(nativeHandle: Any?) {
 	protected actual val nativeHandle: Any? = nativeHandle
 	private val map = nativeHandle as? MCMapInterface
 
+	internal fun asMapCore(): MCMapInterface? =
+		nativeHandle as? MCMapInterface
+
 	actual companion object {
 		actual fun create(
 			graphicsFactory: GraphicsObjectFactoryInterface,
@@ -177,9 +180,6 @@ actual open class MapInterface actual constructor(nativeHandle: Any?) {
 		map?.forceReload()
 	}
 }
-
-internal fun MapInterface.asMapCore(): MCMapInterface? =
-	nativeHandle as? MCMapInterface
 
 private class MapCallbackInterfaceProxy(
 	private val handler: MapCallbackInterface,

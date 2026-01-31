@@ -16,91 +16,91 @@ import io.openmobilemaps.mapscore.shared.map.scheduling.SchedulerInterface as Ma
 
 actual open class GraphicsObjectFactoryInterface actual constructor(nativeHandle: Any?) {
 	protected actual val nativeHandle: Any? = nativeHandle
+
+	internal fun asMapscore(): MapscoreGraphicsObjectFactoryInterface? =
+		nativeHandle as? MapscoreGraphicsObjectFactoryInterface
 }
 
 actual open class ShaderFactoryInterface actual constructor(nativeHandle: Any?) {
 	protected actual val nativeHandle: Any? = nativeHandle
+
+	internal fun asMapscore(): MapscoreShaderFactoryInterface? =
+		nativeHandle as? MapscoreShaderFactoryInterface
 }
 
 actual open class RenderingContextInterface actual constructor(nativeHandle: Any?) {
 	protected actual val nativeHandle: Any? = nativeHandle
+
+	internal fun asMapscore(): MapscoreRenderingContextInterface? =
+		nativeHandle as? MapscoreRenderingContextInterface
 }
 
 actual open class SchedulerInterface actual constructor(nativeHandle: Any?) {
 	protected actual val nativeHandle: Any? = nativeHandle
+
+	internal fun asMapscore(): MapscoreSchedulerInterface? =
+		nativeHandle as? MapscoreSchedulerInterface
 }
 
 actual open class TouchHandlerInterface actual constructor(nativeHandle: Any?) {
 	protected actual val nativeHandle: Any? = nativeHandle
+
+	internal fun asMapscore(): MapscoreTouchHandlerInterface? =
+		nativeHandle as? MapscoreTouchHandlerInterface
 }
 
 actual open class PerformanceLoggerInterface actual constructor(nativeHandle: Any?) {
 	protected actual val nativeHandle: Any? = nativeHandle
+
+	internal fun asMapscore(): MapscorePerformanceLoggerInterface? =
+		nativeHandle as? MapscorePerformanceLoggerInterface
 }
 
 actual open class CoordinateConversionHelperInterface actual constructor(nativeHandle: Any?) {
 	protected actual val nativeHandle: Any? = nativeHandle
+
+	internal fun asMapscore(): MapscoreCoordinateConversionHelperInterface? =
+		nativeHandle as? MapscoreCoordinateConversionHelperInterface
 }
 
 actual open class RenderTargetInterface actual constructor(nativeHandle: Any?) {
 	protected actual val nativeHandle: Any? = nativeHandle
+
+	internal fun asMapscore(): MapscoreRenderTargetInterface? =
+		nativeHandle as? MapscoreRenderTargetInterface
 }
 
 actual open class RenderPassInterface actual constructor(nativeHandle: Any?) {
 	protected actual val nativeHandle: Any? = nativeHandle
+
+	internal fun asMapscore(): MapscoreRenderPassInterface? =
+		nativeHandle as? MapscoreRenderPassInterface
 }
 
 actual open class ComputePassInterface actual constructor(nativeHandle: Any?) {
 	protected actual val nativeHandle: Any? = nativeHandle
+
+	internal fun asMapscore(): MapscoreComputePassInterface? =
+		nativeHandle as? MapscoreComputePassInterface
 }
 
 actual open class MaskingObjectInterface actual constructor(nativeHandle: Any?) {
 	protected actual val nativeHandle: Any? = nativeHandle
+
+	internal fun asMapscore(): MapscoreMaskingObjectInterface? =
+		nativeHandle as? MapscoreMaskingObjectInterface
 }
 
 actual open class ErrorManager actual constructor(nativeHandle: Any?) {
 	protected actual val nativeHandle: Any? = nativeHandle
+
+	internal fun asMapscore(): MapscoreErrorManager? =
+		nativeHandle as? MapscoreErrorManager
 }
 
 actual open class CameraInterface actual constructor(nativeHandle: Any?) {
 	protected actual val nativeHandle: Any? = nativeHandle
+
+	internal fun asMapscore(): MapscoreCameraInterface? =
+		nativeHandle as? MapscoreCameraInterface
 }
-
-internal fun GraphicsObjectFactoryInterface.asMapscore(): MapscoreGraphicsObjectFactoryInterface? =
-	nativeHandle as? MapscoreGraphicsObjectFactoryInterface
-
-internal fun ShaderFactoryInterface.asMapscore(): MapscoreShaderFactoryInterface? =
-	nativeHandle as? MapscoreShaderFactoryInterface
-
-internal fun RenderingContextInterface.asMapscore(): MapscoreRenderingContextInterface? =
-	nativeHandle as? MapscoreRenderingContextInterface
-
-internal fun SchedulerInterface.asMapscore(): MapscoreSchedulerInterface? =
-	nativeHandle as? MapscoreSchedulerInterface
-
-internal fun TouchHandlerInterface.asMapscore(): MapscoreTouchHandlerInterface? =
-	nativeHandle as? MapscoreTouchHandlerInterface
-
-internal fun PerformanceLoggerInterface.asMapscore(): MapscorePerformanceLoggerInterface? =
-	nativeHandle as? MapscorePerformanceLoggerInterface
-
-internal fun CoordinateConversionHelperInterface.asMapscore(): MapscoreCoordinateConversionHelperInterface? =
-	nativeHandle as? MapscoreCoordinateConversionHelperInterface
-
-internal fun RenderTargetInterface.asMapscore(): MapscoreRenderTargetInterface? =
-	nativeHandle as? MapscoreRenderTargetInterface
-
-internal fun RenderPassInterface.asMapscore(): MapscoreRenderPassInterface? =
-	nativeHandle as? MapscoreRenderPassInterface
-
-internal fun ComputePassInterface.asMapscore(): MapscoreComputePassInterface? =
-	nativeHandle as? MapscoreComputePassInterface
-
-internal fun MaskingObjectInterface.asMapscore(): MapscoreMaskingObjectInterface? =
-	nativeHandle as? MapscoreMaskingObjectInterface
-
-internal fun ErrorManager.asMapscore(): MapscoreErrorManager? =
-	nativeHandle as? MapscoreErrorManager
-
-internal fun CameraInterface.asMapscore(): MapscoreCameraInterface? =
-	nativeHandle as? MapscoreCameraInterface

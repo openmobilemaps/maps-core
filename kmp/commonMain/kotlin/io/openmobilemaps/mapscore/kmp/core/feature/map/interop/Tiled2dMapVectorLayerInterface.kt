@@ -1,6 +1,6 @@
 package io.openmobilemaps.mapscore.kmp.feature.map.interop
 
-expect class Tiled2dMapVectorLayerInterface constructor(nativeHandle: Any? = null) {
+expect open class Tiled2dMapVectorLayerInterface constructor(nativeHandle: Any? = null) {
 	protected val nativeHandle: Any?
 
 	companion object {

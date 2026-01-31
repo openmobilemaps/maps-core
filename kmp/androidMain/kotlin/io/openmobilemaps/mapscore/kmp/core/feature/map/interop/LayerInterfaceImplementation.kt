@@ -8,6 +8,9 @@ actual open class LayerInterface actual constructor(nativeHandle: Any?) {
 
 	private val layer = nativeHandle as? MapscoreLayerInterface
 
+	internal fun asMapscore(): MapscoreLayerInterface? =
+		nativeHandle as? MapscoreLayerInterface
+
 	actual fun setMaskingObject(maskingObject: MaskingObjectInterface?) {
 		layer?.setMaskingObject(maskingObject?.asMapscore())
 	}
@@ -77,9 +80,6 @@ actual open class LayerInterface actual constructor(nativeHandle: Any?) {
 		layer?.setPrimaryRenderTarget(target?.asMapscore())
 	}
 }
-
-internal fun LayerInterface.asMapscore(): MapscoreLayerInterface? =
-	nativeHandle as? MapscoreLayerInterface
 
 internal fun MapscoreLayerReadyState?.asShared(): LayerReadyState = when (this) {
 	MapscoreLayerReadyState.READY -> LayerReadyState.READY

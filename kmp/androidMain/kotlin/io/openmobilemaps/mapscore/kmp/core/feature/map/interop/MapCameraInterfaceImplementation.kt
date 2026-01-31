@@ -8,6 +8,9 @@ actual open class MapCameraInterface actual constructor(nativeHandle: Any?) {
 	protected actual val nativeHandle: Any? = nativeHandle
 	private val camera = nativeHandle as? MapscoreMapCameraInterface
 
+	internal fun asMapscore(): MapscoreMapCameraInterface? =
+		nativeHandle as? MapscoreMapCameraInterface
+
 	actual companion object {
 		actual fun create(mapInterface: MapInterface, screenDensityPpi: Float, is3d: Boolean): MapCameraInterface {
 			val created = MapscoreMapCameraInterface.create(requireNotNull(mapInterface.asMapscore()), screenDensityPpi, is3d)
@@ -156,9 +159,6 @@ actual open class MapCameraInterface actual constructor(nativeHandle: Any?) {
 	actual fun asMapCamera3d(): MapCamera3dInterface? = camera?.asMapCamera3d()?.let { MapCamera3dInterface(it) }
 }
 
-internal fun MapCameraInterface.asMapscore(): MapscoreMapCameraInterface? =
-	nativeHandle as? MapscoreMapCameraInterface
-
 private class MapCameraListenerProxy(
 	private val handler: MapCameraListenerInterface,
 ) : MapscoreMapCameraListenerInterface() {
@@ -217,7 +217,7 @@ actual open class MapCamera3dInterface actual constructor(nativeHandle: Any?) {
 	}
 }
 
-actual class Camera3dConfigFactory actual constructor(nativeHandle: Any?) {
+actual open class Camera3dConfigFactory actual constructor(nativeHandle: Any?) {
 	protected actual val nativeHandle: Any? = nativeHandle
 
 	actual companion object {

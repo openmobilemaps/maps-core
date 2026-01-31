@@ -8,6 +8,9 @@ actual open class MapInterface actual constructor(nativeHandle: Any?) {
 	protected actual val nativeHandle: Any? = nativeHandle
 	private val map = nativeHandle as? MapscoreMapInterface
 
+	internal fun asMapscore(): MapscoreMapInterface? =
+		nativeHandle as? MapscoreMapInterface
+
 	actual companion object {
 		actual fun create(
 			graphicsFactory: GraphicsObjectFactoryInterface,
@@ -172,9 +175,6 @@ actual open class MapInterface actual constructor(nativeHandle: Any?) {
 		map?.forceReload()
 	}
 }
-
-internal fun MapInterface.asMapscore(): MapscoreMapInterface? =
-	nativeHandle as? MapscoreMapInterface
 
 private class MapCallbackInterfaceProxy(
 	private val handler: MapCallbackInterface,
