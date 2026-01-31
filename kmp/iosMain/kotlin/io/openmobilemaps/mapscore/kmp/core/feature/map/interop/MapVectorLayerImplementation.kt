@@ -27,7 +27,7 @@ actual class MapVectorLayer actual constructor(nativeHandle: Any?) : LayerInterf
 
 private fun MapVectorLayerFeatureInfoValue.asMapCore(): MCVectorLayerFeatureInfoValue {
 	val floatList = listFloatVal?.map { NSNumber(float = it) }
-	val stringList = listStringVal?.map { it as String }
+	val stringList = listStringVal?.map { it }
 	return MCVectorLayerFeatureInfoValue(
 		stringVal = stringVal,
 		doubleVal = doubleVal?.let { NSNumber(double = it) },

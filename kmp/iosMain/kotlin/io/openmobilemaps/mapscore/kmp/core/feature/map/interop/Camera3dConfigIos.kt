@@ -72,7 +72,7 @@ internal fun Camera3dConfigFromMapCore(value: MCCamera3dConfig): Camera3dConfig 
         key = value.key,
         allowUserInteraction = value.allowUserInteraction,
         rotationSpeed = value.rotationSpeed?.floatValue,
-        animationDurationMs = value.animationDurationMs.toInt(),
+        animationDurationMs = value.animationDurationMs,
         minZoom = value.minZoom,
         maxZoom = value.maxZoom,
         pitchInterpolationValues = CameraInterpolationFromMapCore(value.pitchInterpolationValues),
