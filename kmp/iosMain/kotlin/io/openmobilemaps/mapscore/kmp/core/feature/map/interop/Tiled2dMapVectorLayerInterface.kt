@@ -6,6 +6,9 @@ import platform.Foundation.NSNumber
 actual class Tiled2dMapVectorLayerInterface actual constructor(nativeHandle: Any?) {
 	protected actual val nativeHandle: Any? = nativeHandle
 
+	internal fun asMapCore(): MCTiled2dMapVectorLayerInterface? =
+		nativeHandle as? MCTiled2dMapVectorLayerInterface
+
 	actual companion object {
 		actual fun createExplicitly(
 			layerName: String,
@@ -41,6 +44,3 @@ actual class Tiled2dMapVectorLayerInterface actual constructor(nativeHandle: Any
 		}
 	}
 }
-
-internal fun Tiled2dMapVectorLayerInterface.asMapCore(): MCTiled2dMapVectorLayerInterface? =
-	nativeHandle as? MCTiled2dMapVectorLayerInterface

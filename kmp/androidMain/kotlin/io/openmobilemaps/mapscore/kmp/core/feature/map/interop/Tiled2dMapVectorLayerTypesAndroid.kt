@@ -7,28 +7,28 @@ import io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface as MapscoreL
 
 actual open class LoaderInterface actual constructor(nativeHandle: Any?) {
 	protected actual val nativeHandle: Any? = nativeHandle
+
+	internal fun asMapscore(): MapscoreLoader? =
+		nativeHandle as? MapscoreLoader
 }
 
 actual open class FontLoaderInterface actual constructor(nativeHandle: Any?) {
 	protected actual val nativeHandle: Any? = nativeHandle
+
+	internal fun asMapscore(): MapscoreFontLoader? =
+		nativeHandle as? MapscoreFontLoader
 }
 
 actual open class Tiled2dMapVectorLayerLocalDataProviderInterface actual constructor(nativeHandle: Any?) {
 	protected actual val nativeHandle: Any? = nativeHandle
+
+	internal fun asMapscore(): MapscoreLocalDataProvider? =
+		nativeHandle as? MapscoreLocalDataProvider
 }
 
 actual open class Tiled2dMapVectorLayerSymbolDelegateInterface actual constructor(nativeHandle: Any?) {
 	protected actual val nativeHandle: Any? = nativeHandle
+
+	internal fun asMapscore(): MapscoreSymbolDelegate? =
+		nativeHandle as? MapscoreSymbolDelegate
 }
-
-internal fun LoaderInterface.asMapscore(): MapscoreLoader? =
-	nativeHandle as? MapscoreLoader
-
-internal fun FontLoaderInterface.asMapscore(): MapscoreFontLoader? =
-	nativeHandle as? MapscoreFontLoader
-
-internal fun Tiled2dMapVectorLayerLocalDataProviderInterface.asMapscore(): MapscoreLocalDataProvider? =
-	nativeHandle as? MapscoreLocalDataProvider
-
-internal fun Tiled2dMapVectorLayerSymbolDelegateInterface.asMapscore(): MapscoreSymbolDelegate? =
-	nativeHandle as? MapscoreSymbolDelegate

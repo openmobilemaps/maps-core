@@ -6,6 +6,9 @@ import io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface as MapscoreL
 actual class Tiled2dMapVectorLayerInterface actual constructor(nativeHandle: Any?) {
 	protected actual val nativeHandle: Any? = nativeHandle
 
+	internal fun asMapscore(): MapscoreVectorLayerInterface? =
+		nativeHandle as? MapscoreVectorLayerInterface
+
 	actual companion object {
 		actual fun createExplicitly(
 			layerName: String,
@@ -41,6 +44,3 @@ actual class Tiled2dMapVectorLayerInterface actual constructor(nativeHandle: Any
 		}
 	}
 }
-
-internal fun Tiled2dMapVectorLayerInterface.asMapscore(): MapscoreVectorLayerInterface? =
-	nativeHandle as? MapscoreVectorLayerInterface
