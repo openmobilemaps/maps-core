@@ -37,7 +37,7 @@ val mapCoreMetalTargetDevice = providers.environmentVariable("MAPCORE_METAL_TARG
 
 plugins {
     id("org.jetbrains.kotlin.multiplatform") version "2.3.0"
-    id("com.android.library") version "8.13.2"
+    id("com.android.library") version "8.12.0"
     id("maven-publish")
     id("io.github.frankois944.spmForKmp") version "1.4.6"
 }
