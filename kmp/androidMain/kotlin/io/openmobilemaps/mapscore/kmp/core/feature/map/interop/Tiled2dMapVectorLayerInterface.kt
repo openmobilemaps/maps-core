@@ -40,7 +40,7 @@ actual open class Tiled2dMapVectorLayerInterface actual constructor(nativeHandle
 				symbolDelegate = typedSymbolDelegate,
 				sourceUrlParams = typedSourceUrlParams,
 			)
-			return layer?.let { Tiled2dMapVectorLayerInterface(it) }
+			return Tiled2dMapVectorLayerInterface(layer)
 		}
 	}
 }

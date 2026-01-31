@@ -17,7 +17,7 @@ actual abstract class MapGpsLayer actual constructor(nativeHandle: Any?) : Layer
 	actual abstract fun lastLocation(): Coord?
 }
 
-internal class MapGpsLayerImpl(nativeHandle: Any?) : MapGpsLayer(nativeHandle) {
+class MapGpsLayerImpl(nativeHandle: Any?) : MapGpsLayer(nativeHandle) {
 	private val handle = gpsHandle
 	private val gpsLayer = handle?.layer
 	private val locationProvider = handle?.locationProvider
