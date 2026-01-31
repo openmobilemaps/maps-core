@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
@@ -101,7 +103,9 @@ kotlin {
 android {
     namespace = "io.openmobilemaps.mapscore.kmp"
     compileSdk = 36
-    minSdk = 28
+    defaultConfig {
+        minSdk = 28
+    }
 }
 
 swiftPackageConfig {
