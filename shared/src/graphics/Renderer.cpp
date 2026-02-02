@@ -105,11 +105,8 @@ void Renderer::drawFrame(const std::shared_ptr<RenderingContextInterface> &rende
             }
         }
     }
-    // TO_CHECK
     if (!target) {
-        for (auto &[index, passes] : renderQueue) {
-            passes.clear();
-        }
+        renderQueue.clear();
     }
 }
 
