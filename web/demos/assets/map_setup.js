@@ -7,7 +7,7 @@ const spinnerElement = document.getElementById("spinner");
 let Module;
 let Density;
 let MapInterface;
-let GlobalLoader;
+let Loader;
 const PixelRatio = window.devicePixelRatio;
 
 // polyfill for requestIdleCallback for safari/**
@@ -145,7 +145,7 @@ export async function initialize(canvasId, density, is3d = false) {
     );
     mapInterface.getRenderingContext().onSurfaceCreated();
     mapInterface.getRenderingContext().asOpenGlRenderingContext().resume();
-    const globalLoader = wmsdkModule.GlobalLoaderInterface.create();
+    const loader = wmsdkModule.WebLoaderInterface.create();
 
     const canvas = document.getElementById(canvasId);
     function setViewportSize() {
@@ -180,9 +180,9 @@ export async function initialize(canvasId, density, is3d = false) {
     Module = wmsdkModule;
     Density = density;
     MapInterface = mapInterface;
-    GlobalLoader = globalLoader;
+    Loader = loader;
 
-    return { mapInterface, wmsdkModule, globalLoader };
+    return { mapInterface, wmsdkModule, loader };
   } catch (err) {
     console.error("Failed to load WebMapSDK", err);
   }
@@ -202,7 +202,7 @@ export function registerAnimationLoop() {
   //  thread
   // - draw frames
   function idleProcessLoadRequests() {
-    GlobalLoader.processLoadRequests();
+    Loader.processLoadRequests();
     window.requestIdleCallback(idleProcessLoadRequests, { timeout: 10 });
   }
   window.requestIdleCallback(idleProcessLoadRequests, { timeout: 10 });

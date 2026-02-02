@@ -45,10 +45,9 @@
       } from "./assets/map_setup.js";
 
       initialize("glCanvas", 160, true)
-        .then(({ mapInterface, wmsdkModule, globalLoader }) => {
+        .then(({ mapInterface, wmsdkModule, loader }) => {
           registerTouchHandler();
 
-          const dataLoader = globalLoader.createLoader();
           const rasterLayer = wmsdkModule.Tiled2dMapRasterLayerInterface.create(
             wmsdkModule.DefaultTiled2dMapLayerConfigs.epsg4326Custom(
               "World",
@@ -65,7 +64,7 @@
               0,
               7
             ),
-            [dataLoader]
+            [loader.asLoaderInterface()]
           );
           mapInterface.addLayer(rasterLayer.asLayerInterface());
 

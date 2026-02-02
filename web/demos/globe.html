@@ -41,8 +41,7 @@
       import { initialize, registerAnimationLoop } from "./assets/map_setup.js";
 
       initialize("glCanvas", 320, true)
-        .then(({ mapInterface, wmsdkModule, globalLoader }) => {
-          const dataLoader = globalLoader.createLoader();
+        .then(({ mapInterface, wmsdkModule, loader }) => {
           const rasterLayer = wmsdkModule.Tiled2dMapRasterLayerInterface.create(
             wmsdkModule.DefaultTiled2dMapLayerConfigs.epsg4326Custom(
               "World",
@@ -59,7 +58,7 @@
               0,
               7
             ),
-            [dataLoader]
+            [loader.asLoaderInterface()]
           );
           mapInterface.addLayer(rasterLayer.asLayerInterface());
 

@@ -8,18 +8,34 @@
     <link rel="stylesheet" href="./assets/style.css" />
 
     <style>
-      .controls {
+      .time-controls {
         display: flex;
         align-items: center;
         justify-content: center;
         gap: 10px;
+        margin-top: 1em;
+      }
+      .layer-detail-controls {
+        display: flex;
+        align-items: top;
+        justify-content: center;
+        gap: 80px;
+        margin-top: 2em;
+      }
+      .layer-details {
+        display: inline-flex;
+        flex-direction: column;
+      }
+      .layer-details-note {
+        font-size: smaller;
+        color: gray;
       }
 
       #timeSlider {
         width: 30%;
       }
       #timeSliderTimestamp {
-        width: 15em;
+        width: 20em;
       }
 
       .play-button {
@@ -69,7 +85,7 @@
     <div class="emscripten_border">
       <canvas class="emscripten" id="glCanvas" tabindex="-1"></canvas>
     </div>
-    <div class="controls">
+    <div class="time-controls">
       <label for="timeSlider">Time (-6 hours, +72 hours from now):</label>
       <button type="button" class="play-button paused" id="playButton">
         <svg class="icon" viewBox="0 0 24 24">
@@ -92,7 +108,8 @@
       />
       <p id="timeSliderTimestamp"></p>
     </div>
-    <div class="controls" id="layerSelector"></div>
+    <div class="layer-detail-controls" id="layerSelector">
+    </div>
 
     <hr />
 
@@ -123,18 +140,19 @@
       }
 
       initialize("glCanvas", 160, true)
-        .then(({ mapInterface, wmsdkModule, globalLoader }) => {
+        .then(({ mapInterface, wmsdkModule, loader }) => {
           registerTouchHandler();
 
+          let precipPattern;
+          loader.asLoaderInterface().loadTextureAsync("assets/precipitation_pattern.png").then((result) => { console.log(result); precipPattern = result.data });
 
           // Background globe:
-          const dataLoader = globalLoader.createLoader();
           const vectorLayer =
             wmsdkModule.Tiled2dMapVectorLayerInterface.createFromStyleJson(
               "testlayer",
               "assets/fluid-style.json",
-              [dataLoader],
-              globalLoader.createFontLoader(dataLoader, "assets/fonts/")
+              [loader.asLoaderInterface()],
+              loader.createFontLoader("assets/fonts/")
             );
           mapInterface.addLayer(vectorLayer.asLayerInterface());
 
@@ -151,11 +169,11 @@
               shaderConfig: wmsdkModule.InterpolatedCloudShaderConfigInterface.createWithGreyFactor(wmsdkModule.BlendMode.NORMAL, 0.9).asShaderConfig(),
             },
             wmsdkModule.WebAnimationLayerCallbackInterface.create().asCallbackInterface(),
-            dataLoader,
+            loader.asLoaderInterface(),
             null,
             true
           );
-        
+
           // Temperatur layer
           // XXX: temperature scale seems to be offset somehow even though this is copied from fluid.
           const temperatureColors = [
@@ -233,7 +251,7 @@
                 ).asShaderConfig(),
             },
             wmsdkModule.WebAnimationLayerCallbackInterface.create().asCallbackInterface(),
-            dataLoader,
+            loader.asLoaderInterface(),
             null,
             true
           );
@@ -275,7 +293,7 @@
                       { minValue: 1.0,                    uv: { x: 0, y: 192, width: 64, height: 64 }, color: colorRGBA(0, 0, 0, 0) }, // SNOW
                     ]
                   },
-			            null, // XXX: this is not really supported and probably is the reason why this layer shows broken
+			            precipPattern,
                   {
                     maxValue: 1000.0,
                     buckets:
@@ -292,7 +310,7 @@
                 ).asShaderConfig(),
             },
             wmsdkModule.WebAnimationLayerCallbackInterface.create().asCallbackInterface(),
-            dataLoader,
+            loader.asLoaderInterface(),
             null,
             true
           );
@@ -300,9 +318,21 @@
 
           //// UI: layer selector and activation
           var layers = [
-            { layer: temperatureLayer, id: "TEMPERATURE_850_HPA" },
-            { layer: cloudLayer, id: "CLOUD" },
-            { layer: precipitationLayer, id: "PRECIPITATION" },
+            {
+              layer: temperatureLayer,
+              id: "TEMPERATURE_850_HPA",
+              note: "Temperature scale seems to be offset",
+            },
+            {
+              layer: cloudLayer,
+              id: "CLOUD",
+              note: "",
+            },
+            {
+              layer: precipitationLayer,
+              id: "PRECIPITATION",
+              note: "Broken rendering",
+            },
           ];
 
 
@@ -329,6 +359,7 @@
 
               mapInterface.addLayer(layer.layer.asLayerInterface());
 
+              var label = document.createElement("label");
               var input = document.createElement("input");
               input.type = "radio"
               input.name = "layerSelect"
@@ -338,10 +369,17 @@
                   activateLayer(layer);
               });
               input.checked = (layer.id == activeLayer.id)
-              var label = document.createElement("label");
-              label.for = "layerSelect" + layer.id
-              label.appendChild(document.createTextNode(layer.id))
-              layerSelectorDiv.appendChild(input);
+              label.appendChild(input);
+              var div = document.createElement("div");
+              div.classList.add("layer-details");
+              var text = document.createElement("span");
+              text.appendChild(document.createTextNode(layer.id));
+              var note = document.createElement("span");
+              note.classList.add("layer-details-note");
+              note.appendChild(document.createTextNode(layer.note ? layer.note : "-"));
+              div.appendChild(text);
+              div.appendChild(note);
+              label.appendChild(div);
               layerSelectorDiv.appendChild(label);
           }
 

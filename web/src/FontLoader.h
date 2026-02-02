@@ -1,6 +1,7 @@
 #pragma once
 
 #include "FontLoaderInterface.h"
+#include "FontLoaderResult.h"
 #include "LoaderInterface.h"
 
 #include <mutex>

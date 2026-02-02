@@ -1,5 +1,5 @@
 #! /usr/bin/env bash
-set -xeuo pipefail
+set -euo pipefail
 shopt -s nullglob
 
 # Locate the script file.  Cross symlinks if necessary.

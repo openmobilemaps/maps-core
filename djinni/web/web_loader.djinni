@@ -1,0 +1,16 @@
+@extern "../yaml/loader_interface.yaml"
+@extern "../yaml/font_loader_interface.yaml"
+@extern "../yaml/data_loader_result.yaml"
+@extern "../yaml/texture_loader_result.yaml"
+@extern "../../external/djinni/support-lib/future.yaml"
+
+
+# only needed for web
+web_loader_interface = interface +c {
+    static create(): web_loader_interface;
+    
+    as_loader_interface(): loader_interface;
+    create_font_loader(base_url: string): font_loader_interface;
+    
+    process_load_requests();
+}

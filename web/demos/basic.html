@@ -52,7 +52,7 @@
       import { initialize, registerAnimationLoop } from "./assets/map_setup.js";
 
       initialize("glCanvas", 160)
-        .then(({ mapInterface, wmsdkModule, globalLoader }) => {
+        .then(({ mapInterface, wmsdkModule, loader }) => {
           const layerConfig =
             wmsdkModule.DefaultTiled2dMapLayerConfigs.webMercatorCustom(
               "testlayer",
@@ -69,10 +69,9 @@
               0,
               20
             );
-          const dataLoader = globalLoader.createLoader();
           const rasterLayer = wmsdkModule.Tiled2dMapRasterLayerInterface.create(
             layerConfig,
-            [dataLoader]
+            [loader.asLoaderInterface()]
           );
           mapInterface.addLayer(rasterLayer.asLayerInterface());
 
@@ -80,8 +79,8 @@
             wmsdkModule.Tiled2dMapVectorLayerInterface.createFromStyleJson(
               "testlayer",
               "assets/basemap-style.json",
-              [dataLoader],
-              globalLoader.createFontLoader(dataLoader, "assets/fonts/")
+              [loader.asLoaderInterface()],
+              loader.createFontLoader("assets/fonts/")
             );
           mapInterface.addLayer(vectorLayer.asLayerInterface());
 

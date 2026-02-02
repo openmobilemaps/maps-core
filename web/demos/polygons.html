@@ -59,7 +59,7 @@
       var layerSelectRaster = document.getElementById("layerSelectRaster");
 
       initialize("glCanvas", 160)
-        .then(({ mapInterface, wmsdkModule, globalLoader }) => {
+        .then(({ mapInterface, wmsdkModule, loader }) => {
           registerTouchHandler();
 
           const layerConfig =
@@ -78,7 +78,6 @@
               0,
               20
             );
-          const dataLoader = globalLoader.createLoader();
           const rasterLayer = wmsdkModule.Tiled2dMapRasterLayerInterface.create(
             layerConfig,
             [dataLoader]
@@ -89,8 +88,8 @@
             wmsdkModule.Tiled2dMapVectorLayerInterface.createFromStyleJson(
               "testlayer",
               "assets/basemap-style.json",
-              [dataLoader],
-              globalLoader.createFontLoader(dataLoader, "assets/fonts/")
+              [loader.asLoaderInterface()],
+              loader.createFontLoader("assets/fonts/")
             );
           mapInterface.addLayer(vectorLayer.asLayerInterface());
 

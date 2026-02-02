@@ -1,8 +1,14 @@
 #pragma once
 
 #include "DataLoaderResult.h"
-#include "FontLoader.h"
-#include "FontLoaderResult.h" // Added to ensure FontLoaderResult is fully defined
+#include "TextureLoaderResult.h"
+
+#include "Future.hpp"
+
+#include <string>
+#include <optional>
+
+class WebLoader;
 
 struct DataLoadRequest {
     DataLoadRequest(const std::string &url, const std::optional<std::string> &etag)
@@ -12,7 +18,9 @@ struct DataLoadRequest {
     std::string url;
     std::optional<std::string> etag;
     djinni::Promise<DataLoaderResult> promise;
+    std::weak_ptr<WebLoader> loader; // link back to loader, for bookeeping in fetch callbacks
 };
+
 struct TextureLoadRequest {
     TextureLoadRequest(const std::string &url, const std::optional<std::string> &etag)
         : url(url)
