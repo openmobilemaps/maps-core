@@ -147,6 +147,7 @@ let package = Package(
             cxxSettings: [
                 .headerSearchPath("public"),
                 .headerSearchPath("src"),
+                .headerSearchPath("../external/djinni/support-lib/objc"),
                 .headerSearchPath("src/external/pugixml"),
                 .headerSearchPath("src/external/gpc"),
                 .headerSearchPath("src/logger"),

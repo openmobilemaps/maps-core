@@ -1,5 +1,8 @@
 @file:Suppress("DEPRECATION")
+@file:OptIn(ExperimentalSpmForKmpFeature::class)
 
+import io.github.frankois944.spmForKmp.swiftPackageConfig
+import io.github.frankois944.spmForKmp.utils.ExperimentalSpmForKmpFeature
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
@@ -17,6 +20,8 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinAndroidTarget
 import org.jetbrains.kotlin.gradle.tasks.CInteropProcess
 import java.net.URI
+import java.nio.file.FileSystems
+import java.nio.file.Files
 import javax.inject.Inject
 
 group = "io.openmobilemaps.mapscore"
@@ -34,6 +39,10 @@ val mapCoreMetalTargetSimulator = providers.environmentVariable("MAPCORE_METAL_T
 val mapCoreMetalTargetDevice = providers.environmentVariable("MAPCORE_METAL_TARGET_DEVICE")
     .orElse(providers.gradleProperty("mapCoreMetalTargetDevice"))
     .orElse("air64-apple-ios26.0")
+val mapCoreSpmBuildType = (project.findProperty("KOTLIN_FRAMEWORK_BUILD_TYPE") as? String)
+    ?.lowercase()
+    ?.takeIf { it == "debug" || it == "release" }
+    ?: "release"
 
 plugins {
     id("org.jetbrains.kotlin.multiplatform") version "2.3.0"
@@ -64,9 +73,37 @@ kotlin {
     )
 
     iosTargets.forEach { iosTarget ->
+        iosTarget.binaries.framework {
+            isStatic = true
+        }
         iosTarget.compilations {
             val main by getting {
                 cinterops.create(mapCoreCinteropName)
+            }
+        }
+        iosTarget.swiftPackageConfig(cinteropName = mapCoreCinteropName) {
+            minIos = "14.0"
+            debug = mapCoreSpmBuildType == "debug"
+            bridgeSettings {
+                cSetting {
+                    headerSearchPath = listOf("Sources/djinni-objc")
+                }
+            }
+            dependency {
+                localPackage(
+                    mapCoreCheckoutPath,
+                    "maps-core"
+                ) {
+                    add("MapCoreObjC", exportToKotlin = true)
+                    add("MapCoreSharedModule", exportToKotlin = true)
+                }
+                remotePackageVersion(
+                    url = URI("https://github.com/openmobilemaps/layer-gps"),
+                    packageName = "layer-gps",
+                    version = "3.6.0",
+                ) {
+                    add("LayerGpsSharedModule", exportToKotlin = true)
+                }
             }
         }
     }
@@ -109,32 +146,7 @@ android {
     }
 }
 
-swiftPackageConfig {
-    create("MapCoreKmp") {
-        minIos = "14.0"
-        bridgeSettings {
-            cSetting {
-                headerSearchPath = listOf("Sources/djinni-objc")
-            }
-        }
-        dependency {
-            localPackage(
-                mapCoreCheckoutPath,
-                "maps-core"
-            ) {
-                add("MapCoreObjC", exportToKotlin = true)
-                add("MapCoreSharedModule", exportToKotlin = true)
-            }
-            remotePackageVersion(
-                url = URI("https://github.com/openmobilemaps/layer-gps"),
-                packageName = "layer-gps",
-                version = "3.6.0",
-            ) {
-                add("LayerGpsSharedModule", exportToKotlin = true)
-            }
-        }
-    }
-}
+
 
 // Avoid overlapping Package.resolved outputs between per-target SwiftPM compile tasks.
 tasks
@@ -168,20 +180,95 @@ tasks
     }
 
 tasks.withType<CInteropProcess>().configureEach {
-    if (name.contains("MapCoreKmp")) {
+    if (name.contains("MapCore") || name.contains("LayerGpsSharedModule")) {
         settings.compilerOpts("-I$mapCoreCheckoutPath/external/djinni/support-lib/objc")
         settings.compilerOpts("-I$mapCoreCheckoutPath/bridging/ios")
     }
 }
 
+fun stripStaticLibrariesFromText(file: File) {
+    val lines = file.readLines()
+    val filtered = lines.filterNot { it.startsWith("staticLibraries=") }
+    if (filtered != lines) {
+        file.writeText(filtered.joinToString("\n") + "\n")
+    }
+}
+
+fun stripStaticLibrariesFromKlib(klibFile: File) {
+    if (!klibFile.exists()) return
+    val uri = URI.create("jar:${klibFile.toURI()}")
+    FileSystems.newFileSystem(uri, mapOf("create" to "false")).use { fs ->
+        val manifestPath = fs.getPath("default/manifest")
+        if (!Files.exists(manifestPath)) return@use
+        val lines = Files.readAllLines(manifestPath)
+        val filtered = lines.filterNot { it.startsWith("staticLibraries=") }
+        if (filtered != lines) {
+            Files.write(manifestPath, filtered)
+        }
+    }
+}
+
+val stripMapCoreLinkerOpts = tasks.register("stripMapCoreLinkerOpts") {
+    doLast {
+        val defRoot = layout.buildDirectory.dir("spmKmpPlugin/MapCoreKmp/defFiles").get().asFile
+        if (!defRoot.exists()) return@doLast
+        defRoot
+            .walkTopDown()
+            .filter { it.isFile }
+            .filter {
+                it.name == "MapCoreObjC.def" ||
+                    it.name == "MapCoreSharedModule.def" ||
+                    it.name == "MapCoreKmp_bridge.def"
+            }
+            .forEach { defFile ->
+                val lines = defFile.readLines()
+                val filtered = lines.filterNot {
+                    it.startsWith("linkerOpts") || it.startsWith("staticLibraries")
+                }
+                if (filtered != lines) {
+                    defFile.writeText(filtered.joinToString("\n") + "\n")
+                }
+            }
+    }
+}
+
+tasks.withType<CInteropProcess>().configureEach {
+    if (name.contains("MapCoreObjC") || name.contains("MapCoreSharedModule") || name.contains("MapCoreKmp")) {
+        dependsOn(stripMapCoreLinkerOpts)
+    }
+}
+
+tasks.withType<CInteropProcess>().configureEach {
+    if (!name.contains("MapCoreKmp")) return@configureEach
+    doLast {
+        val buildDirFile = project.layout.buildDirectory.asFile.get()
+        buildDirFile
+            .walkTopDown()
+            .filter { it.isFile && it.name.endsWith("MapCoreKmpMain.klib") }
+            .forEach { stripStaticLibrariesFromKlib(it) }
+
+        buildDirFile
+            .walkTopDown()
+            .filter { it.isFile && it.name == "manifest.properties" }
+            .filter { it.readText().contains("staticLibraries=libMapCoreKmp.a") }
+            .forEach { stripStaticLibrariesFromText(it) }
+    }
+}
+
+tasks.matching {
+    it.name.startsWith("SwiftPackageConfigAppleMapCoreKmpGenerateCInteropDefinition")
+}.configureEach {
+    finalizedBy(stripMapCoreLinkerOpts)
+}
+
 val mapCoreSpmBuiltDir =
-    project.layout.buildDirectory.dir("spmKmpPlugin/MapCoreKmp/scratch/arm64 x86_64-apple-ios-simulator/release").get().asFile
+    project.layout.buildDirectory.dir("spmKmpPlugin/MapCoreKmp/scratch/arm64 x86_64-apple-ios-simulator/$mapCoreSpmBuildType").get().asFile
 mapCoreSpmBuiltDir.mkdirs()
 
 val mapCoreSpmDeviceDir =
-    project.layout.buildDirectory.dir("spmKmpPlugin/MapCoreKmp/scratch/arm64-apple-ios/release")
+    project.layout.buildDirectory.dir("spmKmpPlugin/MapCoreKmp/scratch/arm64-apple-ios/$mapCoreSpmBuildType")
 val mapCoreSpmSimulatorDir =
-    project.layout.buildDirectory.dir("spmKmpPlugin/MapCoreKmp/scratch/arm64-apple-ios-simulator/release")
+    project.layout.buildDirectory.dir("spmKmpPlugin/MapCoreKmp/scratch/arm64-apple-ios-simulator/$mapCoreSpmBuildType")
 
 afterEvaluate {
     val deviceTaskName = "SwiftPackageConfigAppleMapCoreKmpCompileSwiftPackageIosArm64"
@@ -313,7 +400,7 @@ val compileMapCoreMetallibIosSimulator = tasks.register<CompileMapCoreMetallibTa
     targetTriple.set(mapCoreMetalTargetSimulator)
     bundleDir.set(
         project.layout.buildDirectory
-            .dir("spmKmpPlugin/MapCoreKmp/scratch/arm64-apple-ios-simulator/release/MapCore_MapCore.bundle"),
+            .dir("spmKmpPlugin/MapCoreKmp/scratch/arm64-apple-ios-simulator/$mapCoreSpmBuildType/MapCore_MapCore.bundle"),
     )
     outputDir.set(project.layout.buildDirectory.dir("spmKmpPlugin/MapCoreKmp/metal/iphonesimulator"))
     metalSources.from(bundleDir.map { it.asFileTree.matching { include("**/*.metal") } })
@@ -328,7 +415,7 @@ val compileMapCoreMetallibIosArm64 = tasks.register<CompileMapCoreMetallibTask>(
     targetTriple.set(mapCoreMetalTargetDevice)
     bundleDir.set(
         project.layout.buildDirectory
-            .dir("spmKmpPlugin/MapCoreKmp/scratch/arm64-apple-ios/release/MapCore_MapCore.bundle"),
+            .dir("spmKmpPlugin/MapCoreKmp/scratch/arm64-apple-ios/$mapCoreSpmBuildType/MapCore_MapCore.bundle"),
     )
     outputDir.set(project.layout.buildDirectory.dir("spmKmpPlugin/MapCoreKmp/metal/iphoneos"))
     metalSources.from(bundleDir.map { it.asFileTree.matching { include("**/*.metal") } })

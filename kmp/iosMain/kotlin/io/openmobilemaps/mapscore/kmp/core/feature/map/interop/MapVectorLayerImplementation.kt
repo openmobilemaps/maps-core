@@ -9,6 +9,8 @@ actual class MapVectorLayer actual constructor(nativeHandle: Any?) : LayerInterf
 ) {
 	private val layer = nativeHandle as? MCTiled2dMapVectorLayerInterface
 
+	actual constructor(layerInterface: Tiled2dMapVectorLayerInterface) : this(layerInterface.asMapCore())
+
 	actual fun setSelectionDelegate(delegate: MapVectorLayerSelectionCallback?) {
 		val proxy = delegate?.let { MapVectorLayerSelectionCallbackProxy(it) }
 		layer?.setSelectionDelegate(proxy)

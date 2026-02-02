@@ -110,7 +110,7 @@ private class MapFactoryImpl(
 	}
 
 	override fun createGpsLayer(): MapGpsLayer? {
-		return MapGpsLayerImpl(null)
+		return MapGpsLayerImpl.create()
 	}
 }
 

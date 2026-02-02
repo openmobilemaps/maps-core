@@ -3,8 +3,6 @@
 @import MapCore;
 @import MapCoreSharedModule;
 
-#import "MapCore-Swift.h"
-
 @interface MCMapViewObjC ()
 @property (nonatomic, strong) MCMapView *mapViewInternal;
 @end

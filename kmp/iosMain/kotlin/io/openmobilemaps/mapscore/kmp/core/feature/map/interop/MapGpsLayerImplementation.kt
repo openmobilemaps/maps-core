@@ -32,9 +32,9 @@ actual abstract class MapGpsLayer actual constructor(nativeHandle: Any?) : Layer
 	actual abstract fun lastLocation(): Coord?
 }
 
-class MapGpsLayerImpl(nativeHandle: Any?) : MapGpsLayer(nativeHandle) {
-	private val gpsLayer: MCGpsLayerInterface =
-		requireNotNull(MCGpsLayerInterface.create(styleInfo = defaultStyle()))
+class MapGpsLayerImpl private constructor(
+	private val gpsLayer: MCGpsLayerInterface,
+) : MapGpsLayer(gpsLayer) {
 	private val locationManager = CLLocationManager()
 	private val locationDelegate = GpsLocationDelegate(this)
 	private val callbackHandler = GpsLayerCallbackHandler(this)
@@ -95,6 +95,13 @@ class MapGpsLayerImpl(nativeHandle: Any?) : MapGpsLayer(nativeHandle) {
 	}
 
 	private fun shouldDrawHeading(): Boolean = true
+
+	companion object {
+		fun create(): MapGpsLayerImpl? {
+			val layer = MCGpsLayerInterface.create(styleInfo = defaultStyle()) ?: return null
+			return MapGpsLayerImpl(layer)
+		}
+	}
 }
 
 private class GpsLayerCallbackHandler(
