@@ -44,14 +44,14 @@ git submodule update
 You will need Emscripten 4 to build the WASM binary.
 To ensure a reproducable build environment, we build in a Docker container:
 
-**Build** (run from the `/web` directory):
+**Build** (run from the projects root directory):
   - Configure:  
     ```bash
-    docker run -ti --rm -v $(pwd):/src -u $(id -u):$(id -g) emscripten/emsdk:4.0.11 cmake --preset wasm-release
+    docker run -ti --rm -v $(pwd):/src -u $(id -u):$(id -g) -w /src/web emscripten/emsdk:4.0.11 cmake --preset wasm-release
     ```
   - Build:  
     ```bash
-    docker run -ti --rm -v $(pwd):/src -u $(id -u):$(id -g) emscripten/emsdk:4.0.11 cmake --build --preset wasm-release
+    docker run -ti --rm -v $(pwd):/src -u $(id -u):$(id -g) -w /src/web emscripten/emsdk:4.0.11 cmake --build --preset wasm-release
     ```
 
 For ARM64 systems, use the `emscripten/emsdk:4.0.11-arm64` Docker image.
