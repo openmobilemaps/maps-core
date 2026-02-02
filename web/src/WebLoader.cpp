@@ -7,6 +7,9 @@
 #include <emscripten.h>
 #include <emscripten/bind.h>
 #include <emscripten/fetch.h>
+#ifndef NDEBUG
+#include <emscripten/threading.h>
+#endif
 
 #include <memory>
 #include <mutex>

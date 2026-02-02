@@ -6,15 +6,6 @@
 #include "FontManifestParser.h"
 #include "Logger.h"
 
-#include "NativeFontLoaderInterface.h"
-#include "NativeLoaderInterface.h"
-
-#include <emscripten.h>
-#include <emscripten/bind.h>
-#include <emscripten/fetch.h>
-#include <memory>
-#include <unordered_map>
-
 static FontLoaderResult loadFontFromUrls(LoaderInterface &loader, const std::string &fontManifestUrl, const std::string &fontTextureUrl);
 
 FontLoader::FontLoader(std::shared_ptr<LoaderInterface> dataLoader, std::string baseUrl)
@@ -22,15 +13,6 @@ FontLoader::FontLoader(std::shared_ptr<LoaderInterface> dataLoader, std::string 
     , baseUrl(baseUrl) {}
 
 FontLoaderResult FontLoader::loadFont(const Font &font) {
-    std::lock_guard lock(cacheMutex);
-
-    auto cacheEntry = cache.find(font.name);
-    if (cacheEntry != cache.end()) {
-        return cacheEntry->second;
-    }
-
-    // perform the load with the mutex kept _locked_.
-    // -> no parallel loading of different fonts
     const std::string manifestUrl = baseUrl + font.name + ".json";
     const std::string textureUrl = baseUrl + font.name + ".png";
     return loadFontFromUrls(*dataLoader, manifestUrl, textureUrl);

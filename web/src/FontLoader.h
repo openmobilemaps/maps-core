@@ -1,12 +1,12 @@
 #pragma once
 
+#include "Font.h"
 #include "FontLoaderInterface.h"
 #include "FontLoaderResult.h"
 #include "LoaderInterface.h"
 
-#include <mutex>
+#include <memory>
 #include <string>
-#include <unordered_map>
 
 class FontLoader : public FontLoaderInterface {
   public:
@@ -17,7 +17,4 @@ class FontLoader : public FontLoaderInterface {
   private:
     std::shared_ptr<LoaderInterface> dataLoader;
     std::string baseUrl;
-
-    std::mutex cacheMutex;
-    std::unordered_map<std::string, FontLoaderResult> cache;
 };

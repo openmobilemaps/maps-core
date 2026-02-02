@@ -1,8 +1,6 @@
 #include "MapCallbackInterface.h"
 #include "WebMapCallbackInterface.h"
 
-#include <emscripten/bind.h>
-
 #include <atomic>
 #include <memory>
 
