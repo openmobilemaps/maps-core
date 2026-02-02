@@ -21,6 +21,14 @@ struct NativeTextureHolderInterface : ::djinni::JsInterface<::TextureHolderInter
         return fromCppOpt(c);
     }
 
+    static em::val cppProxyMethods();
+
+    static int32_t getImageWidth(const CppType& self);
+    static int32_t getImageHeight(const CppType& self);
+    static int32_t getTextureWidth(const CppType& self);
+    static int32_t getTextureHeight(const CppType& self);
+    static int32_t attachToGraphics(const CppType& self);
+    static void clearFromGraphics(const CppType& self);
 
 };
 

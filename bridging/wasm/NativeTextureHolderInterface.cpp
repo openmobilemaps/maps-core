@@ -5,11 +5,82 @@
 
 namespace djinni_generated {
 
+em::val NativeTextureHolderInterface::cppProxyMethods() {
+    static const em::val methods = em::val::array(std::vector<std::string> {
+        "getImageWidth",
+        "getImageHeight",
+        "getTextureWidth",
+        "getTextureHeight",
+        "attachToGraphics",
+        "clearFromGraphics",
+    });
+    return methods;
+}
+
+int32_t NativeTextureHolderInterface::getImageWidth(const CppType& self) {
+    try {
+        auto r = self->getImageWidth();
+        return ::djinni::I32::fromCpp(r);
+    }
+    catch(const std::exception& e) {
+        return ::djinni::ExceptionHandlingTraits<::djinni::I32>::handleNativeException(e);
+    }
+}
+int32_t NativeTextureHolderInterface::getImageHeight(const CppType& self) {
+    try {
+        auto r = self->getImageHeight();
+        return ::djinni::I32::fromCpp(r);
+    }
+    catch(const std::exception& e) {
+        return ::djinni::ExceptionHandlingTraits<::djinni::I32>::handleNativeException(e);
+    }
+}
+int32_t NativeTextureHolderInterface::getTextureWidth(const CppType& self) {
+    try {
+        auto r = self->getTextureWidth();
+        return ::djinni::I32::fromCpp(r);
+    }
+    catch(const std::exception& e) {
+        return ::djinni::ExceptionHandlingTraits<::djinni::I32>::handleNativeException(e);
+    }
+}
+int32_t NativeTextureHolderInterface::getTextureHeight(const CppType& self) {
+    try {
+        auto r = self->getTextureHeight();
+        return ::djinni::I32::fromCpp(r);
+    }
+    catch(const std::exception& e) {
+        return ::djinni::ExceptionHandlingTraits<::djinni::I32>::handleNativeException(e);
+    }
+}
+int32_t NativeTextureHolderInterface::attachToGraphics(const CppType& self) {
+    try {
+        auto r = self->attachToGraphics();
+        return ::djinni::I32::fromCpp(r);
+    }
+    catch(const std::exception& e) {
+        return ::djinni::ExceptionHandlingTraits<::djinni::I32>::handleNativeException(e);
+    }
+}
+void NativeTextureHolderInterface::clearFromGraphics(const CppType& self) {
+    try {
+        self->clearFromGraphics();
+    }
+    catch(const std::exception& e) {
+        return ::djinni::ExceptionHandlingTraits<void>::handleNativeException(e);
+    }
+}
 
 EMSCRIPTEN_BINDINGS(_texture_holder_interface) {
     em::class_<::TextureHolderInterface>("TextureHolderInterface")
         .smart_ptr<std::shared_ptr<::TextureHolderInterface>>("TextureHolderInterface")
         .function("nativeDestroy", &NativeTextureHolderInterface::nativeDestroy)
+        .function("getImageWidth", NativeTextureHolderInterface::getImageWidth)
+        .function("getImageHeight", NativeTextureHolderInterface::getImageHeight)
+        .function("getTextureWidth", NativeTextureHolderInterface::getTextureWidth)
+        .function("getTextureHeight", NativeTextureHolderInterface::getTextureHeight)
+        .function("attachToGraphics", NativeTextureHolderInterface::attachToGraphics)
+        .function("clearFromGraphics", NativeTextureHolderInterface::clearFromGraphics)
         ;
 }
 

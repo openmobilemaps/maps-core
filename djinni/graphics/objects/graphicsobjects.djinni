@@ -158,7 +158,7 @@ polygon_pattern_group_2d_interface = interface +c +j +o {
     as_graphics_object(): graphics_object_interface;
 }
 
-texture_holder_interface = interface +j +o {
+texture_holder_interface = interface +c +j +o {
     get_image_width() : i32;
     get_image_height() : i32;
     get_texture_width() : i32;
