@@ -5,7 +5,6 @@ import androidx.lifecycle.Lifecycle
 import io.openmobilemaps.gps.GpsLayer
 import io.openmobilemaps.gps.GpsProviderType
 import io.openmobilemaps.gps.style.GpsStyleInfoFactory
-import io.openmobilemaps.mapscore.map.layers.TiledRasterLayer
 import io.openmobilemaps.mapscore.map.loader.DataLoader
 import io.openmobilemaps.mapscore.map.loader.FontLoader
 import io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.Tiled2dMapVectorLayerInterface as MapscoreVectorLayer
@@ -72,9 +71,11 @@ private class MapFactoryImpl(
 		val context = requireNotNull(context) { "MapFactory requires an Android Context" }
 		val cacheDir = File(context.cacheDir, "raster").apply { mkdirs() }
 		val loader = DataLoader(context, cacheDir, 25L * 1024 * 1024)
-		return MapRasterLayer(
-			TiledRasterLayer(MapTiled2dMapLayerConfigImplementation(config), arrayListOf(loader)),
-		)
+		val layer = Tiled2dMapRasterLayerInterface.create(
+			layerConfig = config,
+			loaders = listOf(LoaderInterface(loader)),
+		) ?: return null
+		return MapRasterLayer(layer)
 	}
 
 	override fun createGpsLayer(): MapGpsLayer? {

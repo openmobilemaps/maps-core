@@ -10,7 +10,7 @@ import LayerGpsSharedModule.MCGpsModeSTANDARD
 import LayerGpsSharedModule.MCGpsStyleInfoInterface
 import LayerGpsSharedModule.MCColor
 import LayerGpsSharedModule.MCTextureHolderInterfaceProtocol as GpsTextureHolderInterfaceProtocol
-import MapCoreObjC.MCMapCoreObjCFactory
+import MapCoreKmp.MapCoreKmpBridge
 import MapCoreSharedModule.MCCoordinateSystemIdentifiers
 import io.openmobilemaps.mapscore.kmp.feature.map.model.GpsMode
 import kotlinx.cinterop.useContents
@@ -30,6 +30,12 @@ actual abstract class MapGpsLayer actual constructor(nativeHandle: Any?) : Layer
 	actual abstract fun setOnModeChangedListener(listener: ((GpsMode) -> Unit)?)
 	actual abstract fun notifyPermissionGranted()
 	actual abstract fun lastLocation(): Coord?
+
+	actual companion object {
+		actual fun create(platformContext: Any?, lifecycle: Any?): MapGpsLayer? {
+			return MapGpsLayerImpl.create()
+		}
+	}
 }
 
 class MapGpsLayerImpl private constructor(
@@ -158,7 +164,7 @@ private fun loadTexture(name: String): GpsTextureHolderInterfaceProtocol? {
 	val bundle = findBundleWithImage(name) ?: return null
 	val image = UIImage.imageNamed(name, inBundle = bundle, compatibleWithTraitCollection = null) ?: return null
 	val data = UIImagePNGRepresentation(image) ?: return null
-	return MCMapCoreObjCFactory.createTextureHolderWithData(data) as? GpsTextureHolderInterfaceProtocol
+	return MapCoreKmpBridge.createTextureHolderWithData(data) as? GpsTextureHolderInterfaceProtocol
 }
 
 private fun findBundleWithImage(name: String): platform.Foundation.NSBundle? {

@@ -3,14 +3,11 @@ package io.openmobilemaps.mapscore.kmp.feature.map.interop
 import kotlin.experimental.ExperimentalObjCName
 import kotlin.native.ObjCName
 
-import MapCoreObjC.MCMapCoreObjCFactory
+import MapCoreKmp.MapCoreKmpBridge
 import MapCoreSharedModule.MCFontLoaderInterfaceProtocol
 import MapCoreSharedModule.MCLoaderInterfaceProtocol
-import MapCoreSharedModule.MCTiled2dMapRasterLayerInterface
-import MapCoreSharedModule.MCTiled2dMapVectorLayerInterface
 import platform.Foundation.NSBundle
 import platform.Foundation.NSLog
-import platform.Foundation.NSNumber
 
 @OptIn(ExperimentalObjCName::class)
 @ObjCName("MapFactory", exact = true)
@@ -69,44 +66,43 @@ private class MapFactoryImpl(
 			logMissing("bundle for MapFonts")
 			return null
 		}
-		val fontLoader = MCMapCoreObjCFactory.createFontLoaderWithBundle(bundle) as? MCFontLoaderInterfaceProtocol
+		val fontLoader = MapCoreKmpBridge.createFontLoaderWithBundle(bundle) as? MCFontLoaderInterfaceProtocol
 			?: run {
 				logMissing("font loader")
 				return null
 			}
-		val loader = MCMapCoreObjCFactory.createTextureLoader() as? MCLoaderInterfaceProtocol
+		val loader = MapCoreKmpBridge.createTextureLoader() as? MCLoaderInterfaceProtocol
 			?: run {
 				logMissing("texture loader")
 				return null
 			}
 		val loaders = listOf(loader)
 		val provider = MapDataProviderLocalDataProviderImplementation(dataProvider)
-		val layer = MCTiled2dMapVectorLayerInterface.createExplicitly(
-			layerName,
+		val layer = Tiled2dMapVectorLayerInterface.createExplicitly(
+			layerName = layerName,
 			styleJson = styleJson,
-			localStyleJson = NSNumber(bool = true),
-			loaders = loaders,
-			fontLoader = fontLoader,
-			localDataProvider = provider,
+			localStyleJson = true,
+			loaders = loaders.map { LoaderInterface(it) },
+			fontLoader = FontLoaderInterface(fontLoader),
+			localDataProvider = Tiled2dMapVectorLayerLocalDataProviderInterface(provider),
 			customZoomInfo = null,
 			symbolDelegate = null,
 			sourceUrlParams = null,
-		)
-		return layer?.let { MapVectorLayer(it) }
+		) ?: return null
+		return MapVectorLayer(layer)
 	}
 
 	override fun createRasterLayer(config: MapTiled2dMapLayerConfig): MapRasterLayer? {
-		val loader = MCMapCoreObjCFactory.createTextureLoader() as? MCLoaderInterfaceProtocol
+		val loader = MapCoreKmpBridge.createTextureLoader() as? MCLoaderInterfaceProtocol
 			?: run {
 				logMissing("texture loader")
 				return null
 			}
-		val loaders = listOf(loader)
-		val layer = MCTiled2dMapRasterLayerInterface.create(
-			MapTiled2dMapLayerConfigImplementation(config),
-			loaders = loaders,
-		)
-		return layer?.let { MapRasterLayer(it) }
+		val layer = Tiled2dMapRasterLayerInterface.create(
+			layerConfig = config,
+			loaders = listOf(LoaderInterface(loader)),
+		) ?: return null
+		return MapRasterLayer(layer)
 	}
 
 	override fun createGpsLayer(): MapGpsLayer? {

@@ -1,8 +1,12 @@
 package io.openmobilemaps.mapscore.kmp.feature.map.interop
 
+import android.content.Context
+import androidx.lifecycle.Lifecycle
 import io.openmobilemaps.gps.GpsLayer
+import io.openmobilemaps.gps.GpsProviderType
 import io.openmobilemaps.gps.providers.LocationProviderInterface
 import io.openmobilemaps.gps.shared.gps.GpsMode as MapscoreGpsMode
+import io.openmobilemaps.gps.style.GpsStyleInfoFactory
 import io.openmobilemaps.mapscore.kmp.feature.map.model.GpsMode
 
 actual abstract class MapGpsLayer actual constructor(nativeHandle: Any?) : LayerInterface(
@@ -15,6 +19,23 @@ actual abstract class MapGpsLayer actual constructor(nativeHandle: Any?) : Layer
 	actual abstract fun setOnModeChangedListener(listener: ((GpsMode) -> Unit)?)
 	actual abstract fun notifyPermissionGranted()
 	actual abstract fun lastLocation(): Coord?
+
+	actual companion object {
+		actual fun create(platformContext: Any?, lifecycle: Any?): MapGpsLayer? {
+			val context = platformContext as? Context ?: return null
+			val locationProvider = GpsProviderType.GOOGLE_FUSED.getProvider(context)
+			val gpsLayer = GpsLayer(
+				context = context,
+				style = GpsStyleInfoFactory.createDefaultStyle(context),
+				initialLocationProvider = locationProvider,
+			).apply {
+				setHeadingEnabled(false)
+				setFollowInitializeZoom(25_000f)
+				(lifecycle as? Lifecycle)?.let { registerLifecycle(it) }
+			}
+			return MapGpsLayerImpl(GpsLayerHandle(gpsLayer, locationProvider))
+		}
+	}
 }
 
 class MapGpsLayerImpl(nativeHandle: Any?) : MapGpsLayer(nativeHandle) {

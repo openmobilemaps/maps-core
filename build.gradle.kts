@@ -11,6 +11,8 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
@@ -94,7 +96,7 @@ kotlin {
                     mapCoreCheckoutPath,
                     "maps-core"
                 ) {
-                    add("MapCoreObjC", exportToKotlin = true)
+                    add("MapCore")
                     add("MapCoreSharedModule", exportToKotlin = true)
                 }
                 remotePackageVersion(
@@ -216,8 +218,7 @@ val stripMapCoreLinkerOpts = tasks.register("stripMapCoreLinkerOpts") {
             .walkTopDown()
             .filter { it.isFile }
             .filter {
-                it.name == "MapCoreObjC.def" ||
-                    it.name == "MapCoreSharedModule.def" ||
+                it.name == "MapCoreSharedModule.def" ||
                     it.name == "MapCoreKmp_bridge.def"
             }
             .forEach { defFile ->
@@ -233,7 +234,7 @@ val stripMapCoreLinkerOpts = tasks.register("stripMapCoreLinkerOpts") {
 }
 
 tasks.withType<CInteropProcess>().configureEach {
-    if (name.contains("MapCoreObjC") || name.contains("MapCoreSharedModule") || name.contains("MapCoreKmp")) {
+    if (name.contains("MapCoreSharedModule") || name.contains("MapCoreKmp")) {
         dependsOn(stripMapCoreLinkerOpts)
     }
 }
@@ -311,7 +312,7 @@ abstract class CompileMapCoreMetallibTask : DefaultTask() {
     @get:Input
     abstract val targetTriple: Property<String>
 
-    @get:InputDirectory
+    @get:Internal
     abstract val bundleDir: DirectoryProperty
 
     @get:InputFiles

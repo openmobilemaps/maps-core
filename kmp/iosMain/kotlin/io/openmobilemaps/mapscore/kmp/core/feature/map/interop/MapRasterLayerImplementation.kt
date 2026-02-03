@@ -9,5 +9,7 @@ actual open class MapRasterLayer actual constructor(
 ) {
 	private val layer = nativeHandle as? MCTiled2dMapRasterLayerInterface
 
+	actual constructor(layerInterface: Tiled2dMapRasterLayerInterface) : this(layerInterface.asMapCore())
+
 	internal fun rasterLayerInterface(): MCTiled2dMapRasterLayerInterface? = layer
 }

@@ -8,4 +8,8 @@ expect abstract class MapGpsLayer constructor(nativeHandle: Any? = null) : Layer
     abstract fun setOnModeChangedListener(listener: ((GpsMode) -> Unit)?)
     abstract fun notifyPermissionGranted()
     abstract fun lastLocation(): Coord?
+
+    companion object {
+        fun create(platformContext: Any? = null, lifecycle: Any? = null): MapGpsLayer?
+    }
 }

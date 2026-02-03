@@ -21,10 +21,6 @@ let package = Package(
             name: "MapCoreSharedModuleCpp",
             targets: ["MapCoreSharedModuleCpp"]
         ),
-        .library(
-            name: "MapCoreObjC",
-            targets: ["MapCoreObjC"]
-        ),
     ],
     dependencies: [
         .package(url: "https://github.com/UbiqueInnovation/djinni.git", .upToNextMinor(from: "1.0.9")),
@@ -193,15 +189,6 @@ let package = Package(
                 // .disableWarning("deprecated-declarations"),
                 // .disableWarning("reorder"),
             ]
-        ),
-        .target(
-            name: "MapCoreObjC",
-            dependencies: [
-                "MapCore",
-                "MapCoreSharedModule",
-            ],
-            path: "ios/objc",
-            publicHeadersPath: "include"
         ),
     ],
     cxxLanguageStandard: .cxx17

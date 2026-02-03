@@ -3,7 +3,6 @@ package io.openmobilemaps.mapscore.kmp.feature.map.interop
 import kotlin.experimental.ExperimentalObjCName
 import kotlin.native.ObjCName
 
-import MapCoreObjC.MCMapViewObjC
 import MapCoreSharedModule.MCMapInterface
 import platform.UIKit.UIView
 

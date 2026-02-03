@@ -1,6 +1,5 @@
 package io.openmobilemaps.mapscore.kmp.feature.map.interop
 
-import MapCoreObjC.MCMapCoreObjCFactory
 import MapCoreSharedModule.MCDataLoaderResult
 import MapCoreSharedModule.DJFuture
 import MapCoreSharedModule.DJPromise
@@ -8,6 +7,7 @@ import MapCoreSharedModule.MCLoaderStatusOK
 import MapCoreSharedModule.MCTextureLoaderResult
 import MapCoreSharedModule.MCTextureHolderInterfaceProtocol
 import MapCoreSharedModule.MCTiled2dMapVectorLayerLocalDataProviderInterfaceProtocol
+import MapCoreKmp.MapCoreKmpBridge
 import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.usePinned
 import kotlinx.coroutines.CoroutineScope
@@ -40,7 +40,7 @@ internal class MapDataProviderLocalDataProviderImplementation(
 		scope.launch {
 			val result = runCatching { dataProvider.loadSpriteAsync(spriteId, url, scale) }.getOrNull()
 			val holder = result?.toNSData()
-				?.let { MCMapCoreObjCFactory.createTextureHolderWithData(it) as? MCTextureHolderInterfaceProtocol }
+				?.let { MapCoreKmpBridge.createTextureHolderWithData(it) as? MCTextureHolderInterfaceProtocol }
 			promise.setValue(MCTextureLoaderResult(data = holder, etag = null, status = MCLoaderStatusOK, errorCode = null))
 		}
 		return promise.getFuture()
