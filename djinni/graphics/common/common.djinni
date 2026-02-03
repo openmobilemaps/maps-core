@@ -96,3 +96,15 @@ shared_bytes = record {
     element_count: i32;
     bytes_per_element: i32;
 }
+
+# Pass ownership over byte buffer to callee.
+# The new owner must ensure to call owned_bytes_destructor.free() or equivalent eventually.
+owned_bytes = record {
+    address: i64;
+    element_count: i32;
+    bytes_per_element: i32;
+} 
+
+owned_bytes_destructor = interface +c {
+    static free(bytes: owned_bytes);
+}
