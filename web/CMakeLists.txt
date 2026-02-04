@@ -26,17 +26,7 @@ file(GLOB webmapsdk_SRC CONFIGURE_DEPENDS
   "../external/djinni/support-lib/wasm/*.cpp"
 )
 
-# file(GLOB_RECURSE webp_SRC CONFIGURE_DEPENDS
-#   "layer-animation/external/libwebp/src/*.c"
-# )
-# add_library(webp STATIC ${webp_SRC})
-# target_include_directories(webp PRIVATE layer-animation/external/libwebp)
-
-# add_library(fpng STATIC "layer-animation/external/fpng/src/fpng.cpp")
-# target_include_directories(fpng PUBLIC layer-animation/external/fpng/public)
-
-
-add_executable(webmapsdk ${mapscore_SRC} ${webmapsdk_SRC}) # ${layeranimation_SRC})
+add_executable(webmapsdk ${mapscore_SRC} ${webmapsdk_SRC})
 
 target_include_directories(webmapsdk PRIVATE
   ../external/protozero/protozero/include/
@@ -98,19 +88,12 @@ set_property(
   $<$<CONFIG:Debug>:LOG_LEVEL=4>    # LogTrace
   $<$<CONFIG:Release>:LOG_LEVEL=1>) # LogWarning
 
-# set_property(
-#   SOURCE layer-animation/shared/src/networking/decoder/WebpAnimationDecoder.cpp
-#   APPEND
-#   PROPERTY INCLUDE_DIRECTORIES
-#   ${PROJECT_SOURCE_DIR}/layer-animation/external/libwebp/src/
-# )
-
 target_compile_definitions(webmapsdk PRIVATE OPENMOBILEMAPS_GL=1)
 
 target_compile_features(webmapsdk PRIVATE cxx_std_20)
 target_compile_options(webmapsdk PRIVATE -sUSE_PTHREADS=1 -Werror -Wno-deprecated -Wno-reorder)
 
-target_link_libraries(webmapsdk PRIVATE) # webp fpng)
+target_link_libraries(webmapsdk PRIVATE)
 target_link_options(webmapsdk PRIVATE
   -lembind
   -sMODULARIZE=1
@@ -122,14 +105,12 @@ target_link_options(webmapsdk PRIVATE
   -sFETCH
   -sUSE_PTHREADS=1
   -sPTHREAD_POOL_SIZE=3
-  -sSTACK_SIZE=128MB
-  -sDEFAULT_PTHREAD_STACK_SIZE=128MB
   -sINITIAL_MEMORY=2000MB
   -sSHARED_MEMORY=1
-  -sMALLOC=mimalloc
+  -sMALLOC=dlmalloc
   -sENVIRONMENT=web,worker
   --no-entry
-  $<$<CONFIG:Debug>:-sASSERTIONS=2 -sEXCEPTION_DEBUG=1>
+  $<$<CONFIG:Debug>:-sASSERTIONS=2 -sEXCEPTION_DEBUG=1 -sDISABLE_EXCEPTION_CATCHING=0>
   $<$<OR:$<CONFIG:RelWithDebInfo>,$<CONFIG:Debug>>:-gseparate-dwarf -gsource-map>
 )
 
