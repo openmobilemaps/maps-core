@@ -203,10 +203,8 @@ void Quad2dInstancedOpenGl::loadTexture(const std::shared_ptr<::RenderingContext
 
     if (textureHolder != nullptr) {
         texturePointer = textureHolder->attachToGraphics();
-        // WEB_EXTRAS: generate mipmaps -- this is useful for sprites as icons can be
+        // Generate mipmap -- this is useful for sprites, as icons are often
         // scaled down and can look bad with only GL_LINEAR min filtering
-        // TODO: perhaps make this an opt in so it can be controlled by the caller?
-        // TO_CHECK
         glBindTexture(GL_TEXTURE_2D, (unsigned int)texturePointer);
         glGenerateMipmap(GL_TEXTURE_2D);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
