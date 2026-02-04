@@ -16,7 +16,7 @@
 
 class CoordAnimation: public DefaultAnimator<Coord> {
 public:
-     CoordAnimation(long long duration,
+     CoordAnimation(int64_t duration,
                     Coord startValue,
                     Coord endValue,
                     std::optional<Coord> helperCoord,

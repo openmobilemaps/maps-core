@@ -19,7 +19,7 @@
 template <typename T>
 class DefaultAnimator: public AnimationInterface {
 public:
-    DefaultAnimator(long long duration,
+    DefaultAnimator(int64_t duration,
                      T startValue,
                      T endValue,
                      InterpolatorFunction interpolatorFunction,
@@ -36,7 +36,7 @@ public:
         start(0);
     };
 
-    virtual void start(long long delay) override {
+    virtual void start(int64_t delay) override {
         startTime = DateHelper::currentTimeMillis();
         this->delay = delay;
         animationState = State::started;
@@ -85,9 +85,9 @@ public:
     T endValue;
 
 protected:
-    long long duration;
-    long long startTime = 0;
-    long long delay = 0;
+    int64_t duration;
+    int64_t startTime = 0;
+    int64_t delay = 0;
 
     AnimationInterpolator interpolator;
     std::function<void(T)> onUpdate;

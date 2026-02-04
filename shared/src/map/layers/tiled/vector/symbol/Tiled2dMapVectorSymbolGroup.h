@@ -54,7 +54,7 @@ public:
                     const WeakActor<Tiled2dMapVectorSourceSymbolDataManager> &symbolManagerActor,
                     float alpha = 1.0);
 
-    bool update(const double zoomIdentifier, const double rotation, const double scaleFactor, long long now, const Vec2I viewPortSize, const std::vector<float>& vpMatrix, const Vec3D& origin);
+    bool update(const double zoomIdentifier, const double rotation, const double scaleFactor, int64_t now, const Vec2I viewPortSize, const std::vector<float>& vpMatrix, const Vec3D& origin);
 
     void setupObjects(const std::vector<std::pair<std::shared_ptr<SpriteData>, std::shared_ptr<::TextureHolderInterface>>> &sprites, const std::optional<WeakActor<Tiled2dMapVectorSourceSymbolDataManager>> &symbolDataManager = std::nullopt);
     void addSprite(const std::shared_ptr<SpriteData> &spriteData, const std::shared_ptr<TextureHolderInterface> &spriteTexture);

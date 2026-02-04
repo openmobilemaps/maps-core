@@ -634,8 +634,9 @@ bool MapCamera2d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
         currentDragVelocity.x = 0;
         currentDragVelocity.y = 0;
     } else {
-        long long newTimestamp = DateHelper::currentTimeMicros();
-        long long deltaMcs = std::max(newTimestamp - currentDragTimestamp, 8000ll);
+        auto newTimestamp = DateHelper::currentTimeMicros();
+        auto deltaMcs = std::max(newTimestamp - currentDragTimestamp, MapCameraInertia::minimumInertiaDeltaMicroSeconds);
+
         float averageFactor = currentDragVelocity.x == 0 && currentDragVelocity.y == 0 ? 1.0 : 0.5;
         currentDragVelocity.x = (1 - averageFactor) * currentDragVelocity.x + averageFactor * xDiffMap / (deltaMcs / 16000.0);
         currentDragVelocity.y = (1 - averageFactor) * currentDragVelocity.y + averageFactor * yDiffMap / (deltaMcs / 16000.0);
@@ -658,16 +659,17 @@ void MapCamera2d::setupInertia() {
     float vel = sqrt(currentDragVelocity.x * currentDragVelocity.x + currentDragVelocity.y * currentDragVelocity.y);
     double t1 = vel >= 1.0 ? -19.4957 * std::log(1.0 / vel) : 0.0;
     double t2 = vel >= 0.01 ? -1.95762 * std::log(0.01 / 1.0) : 0.0;
-    inertia = Inertia(DateHelper::currentTimeMicros(), currentDragVelocity, t1, t2);
+    inertia = MapCameraInertia(DateHelper::currentTimeMicros(), currentDragVelocity, t1, t2);
     currentDragVelocity = {0, 0};
     currentDragTimestamp = 0;
 }
 
 void MapCamera2d::inertiaStep() {
-    if (inertia == std::nullopt)
+    if (inertia == std::nullopt) {
         return;
+    }
 
-    long long now = DateHelper::currentTimeMicros();
+    auto now = DateHelper::currentTimeMicros();
     double delta = (now - inertia->timestampStart) / 16000.0;
     double deltaPrev = (now - inertia->timestampUpdate) / 16000.0;
 
@@ -803,8 +805,8 @@ bool MapCamera2d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, cons
             currentDragVelocity.x = 0;
             currentDragVelocity.y = 0;
         } else {
-            long long newTimestamp = DateHelper::currentTimeMicros();
-            long long deltaMcs = std::max(newTimestamp - currentDragTimestamp, 8000ll);
+            auto newTimestamp = DateHelper::currentTimeMicros();
+            auto deltaMcs = std::max(newTimestamp - currentDragTimestamp, MapCameraInertia::minimumInertiaDeltaMicroSeconds);
             float averageFactor = currentDragVelocity.x == 0 && currentDragVelocity.y == 0 ? 1.0 : 0.5;
             currentDragVelocity.x = (1 - averageFactor) * currentDragVelocity.x + averageFactor * diffCenterX / (deltaMcs / 16000.0);
             currentDragVelocity.y = (1 - averageFactor) * currentDragVelocity.y + averageFactor * diffCenterY / (deltaMcs / 16000.0);

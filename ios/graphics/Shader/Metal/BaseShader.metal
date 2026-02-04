@@ -60,7 +60,7 @@ baseFragmentShader(VertexOut in [[stage_in]],
 
 
 vertex VertexOut
-colorVertexShader(const Vertex4FIn vertexIn [[stage_in]],
+colorVertexShader(const Vertex3DIn vertexIn [[stage_in]],
                   constant float4x4 &vpMatrix [[buffer(1)]],
                    constant float4x4 &mMatrix [[buffer(2)]],
                   constant float4 &originOffset [[buffer(3)]])
@@ -77,6 +77,12 @@ colorFragmentShader(constant float4 &color [[buffer(1)]])
 {
     float a = color.a;
     return float4(color.r * a, color.g * a, color.b * a, a);
+}
+
+fragment float4
+wireframeFragmentShader()
+{
+    return float4(0.0, 0.0, 0.0, 1.0);
 }
 
 fragment half4

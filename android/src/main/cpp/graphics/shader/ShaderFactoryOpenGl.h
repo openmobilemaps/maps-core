@@ -33,6 +33,8 @@ public:
 
     std::shared_ptr<ColorShaderInterface> createUnitSphereColorShader() override;
 
+    std::shared_ptr<ColorShaderInterface> createPolygonTessellatedShader(bool projectOntoUnitSphere) override;
+
     std::shared_ptr<ColorCircleShaderInterface> createColorCircleShader() override;
 
     std::shared_ptr<AlphaInstancedShaderInterface> createUnitSphereAlphaInstancedShader() override;
@@ -52,6 +54,8 @@ public:
     std::shared_ptr<RasterShaderInterface> createRasterShader() override;
 
     std::shared_ptr<RasterShaderInterface> createUnitSphereRasterShader() override;
+
+    std::shared_ptr<RasterShaderInterface> createQuadTessellatedShader() override;
 
     std::shared_ptr<StretchShaderInterface> createStretchShader() override;
 

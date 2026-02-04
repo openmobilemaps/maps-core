@@ -47,7 +47,7 @@ std::vector<::VectorLayerFeatureCoordInfo> ReverseGeocoder::reverseGeocode(const
     auto converted4326 = conversionHelper->convert(CoordinateSystemIdentifiers::EPSG4326(), coord);
 
     const double ORIGIN_SHIFT = 20037508.34;
-    int tileCount = pow(2, zoomLevel);
+    int tileCount = std::pow(2, zoomLevel);
 
     double tileSize = (2 * ORIGIN_SHIFT) / (tileCount);
 

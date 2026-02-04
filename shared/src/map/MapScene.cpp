@@ -520,7 +520,7 @@ void MapScene::drawReadyFrame(const ::RectCoord &bounds, float paddingPc, float 
     invalidate();
     callbacks->stateDidUpdate(state);
 
-    long long timeoutTimestamp = DateHelper::currentTimeMillis() + (long long)(timeout * 1000);
+    auto timeoutTimestamp = DateHelper::currentTimeMillis() + (int64_t)(timeout * 1000);
 
     while (state == LayerReadyState::NOT_READY) {
 
