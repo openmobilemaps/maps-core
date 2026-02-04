@@ -147,9 +147,13 @@ std::string AlphaInstancedShaderOpenGl::getFragmentShader() {
                                               vec2 uv = (v_texcoordInstance.xy + v_texcoordInstance.zw * vec2(v_texCoord.x, (1.0 - v_texCoord.y))) * textureFactor;
                                           )) + OMMShaderCode(
                                           vec4 c = texture(textureSampler, uv);
-                                          float alpha = c.a * v_alpha;
-                                          // WEB EXTRAS: c is not premultiplied! Cannot easily preprocess an image (sprites.png), so we multiply here in the shader (just like the metal shader does)
-                                          fragmentColor = vec4(c.rgb * alpha, alpha);
+#ifdef __EMSCRIPTEN__
+                                          // Web: c is not premultiplied-alpha! Cannot easily preprocess image.
+                                          fragmentColor = vec4(c.rgb, 1.0) * c.a * v_alpha;
+#else
+                                          // c is premultiplied-alpha.
+                                          fragmentColor = c * v_alpha;
+#endif
                                       }
     );
 }
