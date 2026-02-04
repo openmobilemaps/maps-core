@@ -14,11 +14,12 @@ while [ -h "$loc" ]; do
     fi
 done
 base_dir=$(cd "`dirname "$loc"`" && pwd)
+cd "$base_dir"
 
 JAVA_PACKAGE="io.openmobilemaps.mapscore.shared"
 PROJECT_PREFIX="MC"
 
-DJINNI_OUT_DIR="../bridging"
+DJINNI_OUT_DIR="$base_dir/../bridging"
 
 OBJC_OUT="$DJINNI_OUT_DIR/ios"
 OBJC_PREFIX="$PROJECT_PREFIX"
@@ -27,7 +28,14 @@ OBJCPP_OUT="$DJINNI_OUT_DIR/ios"
 KOTLIN_OUT="$DJINNI_OUT_DIR/android/java/io/openmobilemaps/mapscore/shared"
 JNI_OUT="$DJINNI_OUT_DIR/android/jni"
 
-CPP_OUT="../shared/public"
+KMP_COMMON_OUT="$base_dir/../kmp/commonMain/kotlin/io/openmobilemaps/mapscore/kmp"
+KMP_ANDROID_OUT="$base_dir/../kmp/androidMain/kotlin/io/openmobilemaps/mapscore/kmp"
+KMP_IOS_OUT="$base_dir/../kmp/iosMain/kotlin/io/openmobilemaps/mapscore/kmp"
+KMP_PACKAGE="io.openmobilemaps.mapscore.kmp"
+KMP_IOS_MODULE="MapCoreSharedModule"
+KMP_BRIDGE_PREFIX="KM"
+
+CPP_OUT="$base_dir/../shared/public"
 HPP_EXT="h"
 
 IDENT_CPP="FooBar"
@@ -37,7 +45,7 @@ IDENT_CPP_METHOD="fooBar"
 IDENT_JNI_CLASS="NativeFooBar"
 IDENT_JAVA="fooBar"
 
-for dir in "$OBJCPP_OUT" "$OBJC_OUT" "$JNI_OUT" "$KOTLIN_OUT"; do
+for dir in "$OBJCPP_OUT" "$OBJC_OUT" "$JNI_OUT" "$KOTLIN_OUT" "$KMP_COMMON_OUT" "$KMP_ANDROID_OUT" "$KMP_IOS_OUT"; do
         if [ -e "$dir" ]; then
             echo "Deleting \"$dir\"..."
             rm -r "$dir"
@@ -75,6 +83,14 @@ for file in $(find . -name "*.djinni" -type f -print); do
         --ident-java-field "$IDENT_JAVA" \
         --ident-java-enum "$IDENT_CPP_ENUM" \
         \
+        --kotlin-kmp-common-out "$KMP_COMMON_OUT" \
+        --kotlin-kmp-android-out "$KMP_ANDROID_OUT" \
+        --kotlin-kmp-ios-out "$KMP_IOS_OUT" \
+        --kotlin-kmp-package "$KMP_PACKAGE" \
+        --kotlin-kmp-ios-module "$KMP_IOS_MODULE" \
+        --kotlin-kmp-bridge-prefix "$KMP_BRIDGE_PREFIX" \
+        --kotlin-kmp-objc-name-prefix "$KMP_BRIDGE_PREFIX" \
+        \
         --cpp-out "$CPP_OUT" \
         --hpp-ext "$HPP_EXT" \
         --ident-cpp-type "$IDENT_CPP" \
@@ -101,5 +117,26 @@ for file in $(find . -name "*.djinni" -type f -print); do
 
 done
 
+
+MANUAL_KMP_DIR="$base_dir/kmp_manual"
+MANUAL_KMP_COMMON="$MANUAL_KMP_DIR/commonMain/kotlin/io/openmobilemaps/mapscore/kmp"
+MANUAL_KMP_ANDROID="$MANUAL_KMP_DIR/androidMain/kotlin/io/openmobilemaps/mapscore/kmp"
+MANUAL_KMP_IOS="$MANUAL_KMP_DIR/iosMain/kotlin/io/openmobilemaps/mapscore/kmp"
+
+if [ -d "$MANUAL_KMP_DIR" ]; then
+    echo "Copying manual KMP files..."
+    if [ -d "$MANUAL_KMP_COMMON" ]; then
+        mkdir -p "$KMP_COMMON_OUT"
+        cp -R "$MANUAL_KMP_COMMON/." "$KMP_COMMON_OUT/"
+    fi
+    if [ -d "$MANUAL_KMP_ANDROID" ]; then
+        mkdir -p "$KMP_ANDROID_OUT"
+        cp -R "$MANUAL_KMP_ANDROID/." "$KMP_ANDROID_OUT/"
+    fi
+    if [ -d "$MANUAL_KMP_IOS" ]; then
+        mkdir -p "$KMP_IOS_OUT"
+        cp -R "$MANUAL_KMP_IOS/." "$KMP_IOS_OUT/"
+    fi
+fi
 
 echo "djinni completed."

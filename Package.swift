@@ -11,14 +11,17 @@ let package = Package(
     products: [
         .library(
             name: "MapCore",
+            type: .dynamic,
             targets: ["MapCore"]
         ),
         .library(
             name: "MapCoreSharedModule",
+            type: .static,
             targets: ["MapCoreSharedModule"]
         ),
         .library(
             name: "MapCoreSharedModuleCpp",
+            type: .static,
             targets: ["MapCoreSharedModuleCpp"]
         ),
     ],
@@ -117,7 +120,7 @@ let package = Package(
                 .product(name: "Atomics", package: "swift-atomics"),
             ],
             path: "ios",
-            exclude: ["readme.md", "objc"],
+            exclude: ["readme.md"],
             resources: [
                 .process("graphics/Shader/Metal/")
             ]
@@ -128,7 +131,12 @@ let package = Package(
                 "MapCoreSharedModuleCpp"
             ],
             path: "bridging/ios",
-            publicHeadersPath: ""
+            publicHeadersPath: "",
+            linkerSettings: [
+                .linkedFramework("Foundation"),
+                .linkedFramework("CoreFoundation"),
+                .linkedLibrary("objc"),
+            ]
         ),
         .target(
             name: "MapCoreSharedModuleCpp",
