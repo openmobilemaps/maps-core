@@ -13,6 +13,10 @@
 #include "OpenGlRenderTarget.h"
 #include "BaseShaderProgramOpenGl.h"
 #include "opengl_wrapper.h"
+#ifdef __EMSCRIPTEN__
+#include <emscripten/emscripten.h>
+#include <emscripten/html5.h>
+#endif
 
 OpenGlContext::OpenGlContext()
     : programs()
