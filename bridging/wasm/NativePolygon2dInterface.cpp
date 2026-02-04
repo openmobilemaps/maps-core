@@ -12,17 +12,27 @@ namespace djinni_generated {
 em::val NativePolygon2dInterface::cppProxyMethods() {
     static const em::val methods = em::val::array(std::vector<std::string> {
         "setVertices",
+        "setSubdivisionFactor",
         "asGraphicsObject",
         "asMaskingObject",
     });
     return methods;
 }
 
-void NativePolygon2dInterface::setVertices(const CppType& self, const em::val& w_vertices,const em::val& w_indices,const em::val& w_origin) {
+void NativePolygon2dInterface::setVertices(const CppType& self, const em::val& w_vertices,const em::val& w_indices,const em::val& w_origin,bool w_is3d) {
     try {
         self->setVertices(::djinni_generated::NativeSharedBytes::toCpp(w_vertices),
                     ::djinni_generated::NativeSharedBytes::toCpp(w_indices),
-                    ::djinni_generated::NativeVec3D::toCpp(w_origin));
+                    ::djinni_generated::NativeVec3D::toCpp(w_origin),
+                    ::djinni::Bool::toCpp(w_is3d));
+    }
+    catch(const std::exception& e) {
+        return ::djinni::ExceptionHandlingTraits<void>::handleNativeException(e);
+    }
+}
+void NativePolygon2dInterface::setSubdivisionFactor(const CppType& self, int32_t w_factor) {
+    try {
+        self->setSubdivisionFactor(::djinni::I32::toCpp(w_factor));
     }
     catch(const std::exception& e) {
         return ::djinni::ExceptionHandlingTraits<void>::handleNativeException(e);
@@ -52,6 +62,7 @@ EMSCRIPTEN_BINDINGS(_polygon_2d_interface) {
         .smart_ptr<std::shared_ptr<::Polygon2dInterface>>("Polygon2dInterface")
         .function("nativeDestroy", &NativePolygon2dInterface::nativeDestroy)
         .function("setVertices", NativePolygon2dInterface::setVertices)
+        .function("setSubdivisionFactor", NativePolygon2dInterface::setSubdivisionFactor)
         .function("asGraphicsObject", NativePolygon2dInterface::asGraphicsObject)
         .function("asMaskingObject", NativePolygon2dInterface::asMaskingObject)
         ;

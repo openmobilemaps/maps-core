@@ -9,6 +9,12 @@ export enum BlendMode {
     MULTIPLY = 1,
 }
 
+export enum TessellationMode {
+    NONE = 0,
+    QUAD = 1,
+    TRIANGLE = 2,
+}
+
 export interface ShaderProgramInterface {
     getProgramName(): string;
     setupProgram(context: RenderingContextInterface): void;
@@ -28,6 +34,7 @@ export interface ShaderFactoryInterface {
     createUnitSphereSimpleLineGroupShader(): LineGroupShaderInterface;
     createUnitSphereColorShader(): ColorShaderInterface;
     createColorShader(): ColorShaderInterface;
+    createPolygonTessellatedShader(unitSphere: boolean): ColorShaderInterface;
     createColorCircleShader(): ColorCircleShaderInterface;
     createUnitSphereColorCircleShader(): ColorCircleShaderInterface;
     createPolygonGroupShader(isStriped: boolean, unitSphere: boolean): PolygonGroupShaderInterface;
@@ -37,6 +44,7 @@ export interface ShaderFactoryInterface {
     createUnitSphereTextInstancedShader(): TextInstancedShaderInterface;
     createRasterShader(): RasterShaderInterface;
     createUnitSphereRasterShader(): RasterShaderInterface;
+    createQuadTessellatedShader(): RasterShaderInterface;
     createStretchShader(): StretchShaderInterface;
     createStretchInstancedShader(unitSphere: boolean): StretchInstancedShaderInterface;
     createIcosahedronColorShader(): ColorShaderInterface;

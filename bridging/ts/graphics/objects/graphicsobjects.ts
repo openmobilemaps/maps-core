@@ -34,7 +34,9 @@ export interface ComputeObjectInterface {
 
 export interface GraphicsObjectFactoryInterface {
     createQuad(shader: ShaderProgramInterface): Quad2dInterface;
+    createQuadTessellated(shader: ShaderProgramInterface): Quad2dInterface;
     createPolygon(shader: ShaderProgramInterface): Polygon2dInterface;
+    createPolygonTessellated(shader: ShaderProgramInterface): Polygon2dInterface;
     createIcosahedronObject(shader: ShaderProgramInterface): IcosahedronInterface;
     createQuadInstanced(shader: ShaderProgramInterface): Quad2dInstancedInterface;
     createQuadStretchedInstanced(shader: ShaderProgramInterface): Quad2dStretchedInstancedInterface;
@@ -43,6 +45,7 @@ export interface GraphicsObjectFactoryInterface {
     createPolygonPatternGroup(shader: ShaderProgramInterface): PolygonPatternGroup2dInterface;
     createQuadMask(is3d: boolean): Quad2dInterface;
     createPolygonMask(is3d: boolean): Polygon2dInterface;
+    createPolygonMaskTessellated(is3d: boolean): Polygon2dInterface;
     createText(shader: ShaderProgramInterface): TextInterface;
     createTextInstanced(shader: ShaderProgramInterface): TextInstancedInterface;
 }
@@ -117,7 +120,8 @@ export interface LineGroup2dInterface {
 }
 
 export interface Polygon2dInterface {
-    setVertices(vertices: SharedBytes, indices: SharedBytes, origin: Vec3D): void;
+    setVertices(vertices: SharedBytes, indices: SharedBytes, origin: Vec3D, is3d: boolean): void;
+    setSubdivisionFactor(factor: number): void;
     asGraphicsObject(): GraphicsObjectInterface;
     asMaskingObject(): MaskingObjectInterface;
 }

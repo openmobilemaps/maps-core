@@ -33,6 +33,7 @@ struct NativeShaderFactoryInterface : ::djinni::JsInterface<::ShaderFactoryInter
     static em::val createUnitSphereSimpleLineGroupShader(const CppType& self);
     static em::val createUnitSphereColorShader(const CppType& self);
     static em::val createColorShader(const CppType& self);
+    static em::val createPolygonTessellatedShader(const CppType& self, bool w_unitSphere);
     static em::val createColorCircleShader(const CppType& self);
     static em::val createUnitSphereColorCircleShader(const CppType& self);
     static em::val createPolygonGroupShader(const CppType& self, bool w_isStriped,bool w_unitSphere);
@@ -42,6 +43,7 @@ struct NativeShaderFactoryInterface : ::djinni::JsInterface<::ShaderFactoryInter
     static em::val createUnitSphereTextInstancedShader(const CppType& self);
     static em::val createRasterShader(const CppType& self);
     static em::val createUnitSphereRasterShader(const CppType& self);
+    static em::val createQuadTessellatedShader(const CppType& self);
     static em::val createStretchShader(const CppType& self);
     static em::val createStretchInstancedShader(const CppType& self, bool w_unitSphere);
     static em::val createIcosahedronColorShader(const CppType& self);

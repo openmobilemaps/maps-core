@@ -32,6 +32,7 @@ em::val NativeShaderFactoryInterface::cppProxyMethods() {
         "createUnitSphereSimpleLineGroupShader",
         "createUnitSphereColorShader",
         "createColorShader",
+        "createPolygonTessellatedShader",
         "createColorCircleShader",
         "createUnitSphereColorCircleShader",
         "createPolygonGroupShader",
@@ -41,6 +42,7 @@ em::val NativeShaderFactoryInterface::cppProxyMethods() {
         "createUnitSphereTextInstancedShader",
         "createRasterShader",
         "createUnitSphereRasterShader",
+        "createQuadTessellatedShader",
         "createStretchShader",
         "createStretchInstancedShader",
         "createIcosahedronColorShader",
@@ -141,6 +143,15 @@ em::val NativeShaderFactoryInterface::createColorShader(const CppType& self) {
         return ::djinni::ExceptionHandlingTraits<::djinni_generated::NativeColorShaderInterface>::handleNativeException(e);
     }
 }
+em::val NativeShaderFactoryInterface::createPolygonTessellatedShader(const CppType& self, bool w_unitSphere) {
+    try {
+        auto r = self->createPolygonTessellatedShader(::djinni::Bool::toCpp(w_unitSphere));
+        return ::djinni_generated::NativeColorShaderInterface::fromCpp(r);
+    }
+    catch(const std::exception& e) {
+        return ::djinni::ExceptionHandlingTraits<::djinni_generated::NativeColorShaderInterface>::handleNativeException(e);
+    }
+}
 em::val NativeShaderFactoryInterface::createColorCircleShader(const CppType& self) {
     try {
         auto r = self->createColorCircleShader();
@@ -224,6 +235,15 @@ em::val NativeShaderFactoryInterface::createUnitSphereRasterShader(const CppType
         return ::djinni::ExceptionHandlingTraits<::djinni_generated::NativeRasterShaderInterface>::handleNativeException(e);
     }
 }
+em::val NativeShaderFactoryInterface::createQuadTessellatedShader(const CppType& self) {
+    try {
+        auto r = self->createQuadTessellatedShader();
+        return ::djinni_generated::NativeRasterShaderInterface::fromCpp(r);
+    }
+    catch(const std::exception& e) {
+        return ::djinni::ExceptionHandlingTraits<::djinni_generated::NativeRasterShaderInterface>::handleNativeException(e);
+    }
+}
 em::val NativeShaderFactoryInterface::createStretchShader(const CppType& self) {
     try {
         auto r = self->createStretchShader();
@@ -293,6 +313,7 @@ EMSCRIPTEN_BINDINGS(_shader_factory_interface) {
         .function("createUnitSphereSimpleLineGroupShader", NativeShaderFactoryInterface::createUnitSphereSimpleLineGroupShader)
         .function("createUnitSphereColorShader", NativeShaderFactoryInterface::createUnitSphereColorShader)
         .function("createColorShader", NativeShaderFactoryInterface::createColorShader)
+        .function("createPolygonTessellatedShader", NativeShaderFactoryInterface::createPolygonTessellatedShader)
         .function("createColorCircleShader", NativeShaderFactoryInterface::createColorCircleShader)
         .function("createUnitSphereColorCircleShader", NativeShaderFactoryInterface::createUnitSphereColorCircleShader)
         .function("createPolygonGroupShader", NativeShaderFactoryInterface::createPolygonGroupShader)
@@ -302,6 +323,7 @@ EMSCRIPTEN_BINDINGS(_shader_factory_interface) {
         .function("createUnitSphereTextInstancedShader", NativeShaderFactoryInterface::createUnitSphereTextInstancedShader)
         .function("createRasterShader", NativeShaderFactoryInterface::createRasterShader)
         .function("createUnitSphereRasterShader", NativeShaderFactoryInterface::createUnitSphereRasterShader)
+        .function("createQuadTessellatedShader", NativeShaderFactoryInterface::createQuadTessellatedShader)
         .function("createStretchShader", NativeShaderFactoryInterface::createStretchShader)
         .function("createStretchInstancedShader", NativeShaderFactoryInterface::createStretchInstancedShader)
         .function("createIcosahedronColorShader", NativeShaderFactoryInterface::createIcosahedronColorShader)

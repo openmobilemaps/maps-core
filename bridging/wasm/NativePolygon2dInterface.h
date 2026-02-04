@@ -23,7 +23,8 @@ struct NativePolygon2dInterface : ::djinni::JsInterface<::Polygon2dInterface, Na
 
     static em::val cppProxyMethods();
 
-    static void setVertices(const CppType& self, const em::val& w_vertices,const em::val& w_indices,const em::val& w_origin);
+    static void setVertices(const CppType& self, const em::val& w_vertices,const em::val& w_indices,const em::val& w_origin,bool w_is3d);
+    static void setSubdivisionFactor(const CppType& self, int32_t w_factor);
     static em::val asGraphicsObject(const CppType& self);
     static em::val asMaskingObject(const CppType& self);
 

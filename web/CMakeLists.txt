@@ -15,12 +15,16 @@ file(GLOB_RECURSE mapscore_SRC CONFIGURE_DEPENDS
   "../android/src/main/cpp/utils/*.cpp"
   "../external/djinni/support-lib/cpp/*.cpp"
 )
+# No tessellation support in webgl; skipping to even build this, as it requires some functions (glPatchParameteri) that are not available in emscripten gl.
+list(FILTER mapscore_SRC EXCLUDE REGEX
+  "Polygon2dTessellatedOpenGl.cpp$|Quad2dTessellatedOpenGl.cpp$"
+)
+
 file(GLOB webmapsdk_SRC CONFIGURE_DEPENDS
   "../web/src/*.cpp"
   "../bridging/wasm/*.cpp"
   "../external/djinni/support-lib/wasm/*.cpp"
 )
-
 
 # file(GLOB_RECURSE webp_SRC CONFIGURE_DEPENDS
 #   "layer-animation/external/libwebp/src/*.c"

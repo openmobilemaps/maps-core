@@ -19,7 +19,9 @@ namespace djinni_generated {
 em::val NativeGraphicsObjectFactoryInterface::cppProxyMethods() {
     static const em::val methods = em::val::array(std::vector<std::string> {
         "createQuad",
+        "createQuadTessellated",
         "createPolygon",
+        "createPolygonTessellated",
         "createIcosahedronObject",
         "createQuadInstanced",
         "createQuadStretchedInstanced",
@@ -28,6 +30,7 @@ em::val NativeGraphicsObjectFactoryInterface::cppProxyMethods() {
         "createPolygonPatternGroup",
         "createQuadMask",
         "createPolygonMask",
+        "createPolygonMaskTessellated",
         "createText",
         "createTextInstanced",
     });
@@ -43,9 +46,27 @@ em::val NativeGraphicsObjectFactoryInterface::createQuad(const CppType& self, co
         return ::djinni::ExceptionHandlingTraits<::djinni_generated::NativeQuad2dInterface>::handleNativeException(e);
     }
 }
+em::val NativeGraphicsObjectFactoryInterface::createQuadTessellated(const CppType& self, const em::val& w_shader) {
+    try {
+        auto r = self->createQuadTessellated(::djinni_generated::NativeShaderProgramInterface::toCpp(w_shader));
+        return ::djinni_generated::NativeQuad2dInterface::fromCpp(r);
+    }
+    catch(const std::exception& e) {
+        return ::djinni::ExceptionHandlingTraits<::djinni_generated::NativeQuad2dInterface>::handleNativeException(e);
+    }
+}
 em::val NativeGraphicsObjectFactoryInterface::createPolygon(const CppType& self, const em::val& w_shader) {
     try {
         auto r = self->createPolygon(::djinni_generated::NativeShaderProgramInterface::toCpp(w_shader));
+        return ::djinni_generated::NativePolygon2dInterface::fromCpp(r);
+    }
+    catch(const std::exception& e) {
+        return ::djinni::ExceptionHandlingTraits<::djinni_generated::NativePolygon2dInterface>::handleNativeException(e);
+    }
+}
+em::val NativeGraphicsObjectFactoryInterface::createPolygonTessellated(const CppType& self, const em::val& w_shader) {
+    try {
+        auto r = self->createPolygonTessellated(::djinni_generated::NativeShaderProgramInterface::toCpp(w_shader));
         return ::djinni_generated::NativePolygon2dInterface::fromCpp(r);
     }
     catch(const std::exception& e) {
@@ -124,6 +145,15 @@ em::val NativeGraphicsObjectFactoryInterface::createPolygonMask(const CppType& s
         return ::djinni::ExceptionHandlingTraits<::djinni_generated::NativePolygon2dInterface>::handleNativeException(e);
     }
 }
+em::val NativeGraphicsObjectFactoryInterface::createPolygonMaskTessellated(const CppType& self, bool w_is3d) {
+    try {
+        auto r = self->createPolygonMaskTessellated(::djinni::Bool::toCpp(w_is3d));
+        return ::djinni_generated::NativePolygon2dInterface::fromCpp(r);
+    }
+    catch(const std::exception& e) {
+        return ::djinni::ExceptionHandlingTraits<::djinni_generated::NativePolygon2dInterface>::handleNativeException(e);
+    }
+}
 em::val NativeGraphicsObjectFactoryInterface::createText(const CppType& self, const em::val& w_shader) {
     try {
         auto r = self->createText(::djinni_generated::NativeShaderProgramInterface::toCpp(w_shader));
@@ -148,7 +178,9 @@ EMSCRIPTEN_BINDINGS(_graphics_object_factory_interface) {
         .smart_ptr<std::shared_ptr<::GraphicsObjectFactoryInterface>>("GraphicsObjectFactoryInterface")
         .function("nativeDestroy", &NativeGraphicsObjectFactoryInterface::nativeDestroy)
         .function("createQuad", NativeGraphicsObjectFactoryInterface::createQuad)
+        .function("createQuadTessellated", NativeGraphicsObjectFactoryInterface::createQuadTessellated)
         .function("createPolygon", NativeGraphicsObjectFactoryInterface::createPolygon)
+        .function("createPolygonTessellated", NativeGraphicsObjectFactoryInterface::createPolygonTessellated)
         .function("createIcosahedronObject", NativeGraphicsObjectFactoryInterface::createIcosahedronObject)
         .function("createQuadInstanced", NativeGraphicsObjectFactoryInterface::createQuadInstanced)
         .function("createQuadStretchedInstanced", NativeGraphicsObjectFactoryInterface::createQuadStretchedInstanced)
@@ -157,6 +189,7 @@ EMSCRIPTEN_BINDINGS(_graphics_object_factory_interface) {
         .function("createPolygonPatternGroup", NativeGraphicsObjectFactoryInterface::createPolygonPatternGroup)
         .function("createQuadMask", NativeGraphicsObjectFactoryInterface::createQuadMask)
         .function("createPolygonMask", NativeGraphicsObjectFactoryInterface::createPolygonMask)
+        .function("createPolygonMaskTessellated", NativeGraphicsObjectFactoryInterface::createPolygonMaskTessellated)
         .function("createText", NativeGraphicsObjectFactoryInterface::createText)
         .function("createTextInstanced", NativeGraphicsObjectFactoryInterface::createTextInstanced)
         ;

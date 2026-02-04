@@ -24,7 +24,9 @@ struct NativeGraphicsObjectFactoryInterface : ::djinni::JsInterface<::GraphicsOb
     static em::val cppProxyMethods();
 
     static em::val createQuad(const CppType& self, const em::val& w_shader);
+    static em::val createQuadTessellated(const CppType& self, const em::val& w_shader);
     static em::val createPolygon(const CppType& self, const em::val& w_shader);
+    static em::val createPolygonTessellated(const CppType& self, const em::val& w_shader);
     static em::val createIcosahedronObject(const CppType& self, const em::val& w_shader);
     static em::val createQuadInstanced(const CppType& self, const em::val& w_shader);
     static em::val createQuadStretchedInstanced(const CppType& self, const em::val& w_shader);
@@ -33,6 +35,7 @@ struct NativeGraphicsObjectFactoryInterface : ::djinni::JsInterface<::GraphicsOb
     static em::val createPolygonPatternGroup(const CppType& self, const em::val& w_shader);
     static em::val createQuadMask(const CppType& self, bool w_is3d);
     static em::val createPolygonMask(const CppType& self, bool w_is3d);
+    static em::val createPolygonMaskTessellated(const CppType& self, bool w_is3d);
     static em::val createText(const CppType& self, const em::val& w_shader);
     static em::val createTextInstanced(const CppType& self, const em::val& w_shader);
 
