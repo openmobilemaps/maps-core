@@ -17,8 +17,8 @@
 
 ::MapCoordinateSystem CoordinateSystemFactory::getEpsg2056System() {
     return MapCoordinateSystem(CoordinateSystemIdentifiers::EPSG2056(),
-                               RectCoord(Coord(CoordinateSystemIdentifiers::EPSG2056(), 2485000.0, 1300000.0, 0),
-                                         Coord(CoordinateSystemIdentifiers::EPSG2056(), 2840000.0, 1070000.0, 0)),
+                               RectCoord(Coord(CoordinateSystemIdentifiers::EPSG2056(), 2420000.0, 1350000.0, 0),
+                                         Coord(CoordinateSystemIdentifiers::EPSG2056(), 2900000.0, 1030000.0, 0)),
                                1.0);
 }
 
