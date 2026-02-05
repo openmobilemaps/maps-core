@@ -21,6 +21,7 @@ import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinAndroidTarget
 import org.jetbrains.kotlin.gradle.tasks.CInteropProcess
+import java.io.ByteArrayOutputStream
 import javax.inject.Inject
 
 group = "io.openmobilemaps.mapscore"
@@ -81,7 +82,7 @@ fun stripLinkerOpts(defFile: File, optsToRemove: Set<String>) {
 
 plugins {
     id("org.jetbrains.kotlin.multiplatform") version "2.3.0"
-    id("com.android.library") version "8.12.0"
+    id("com.android.library") version "8.13.2"
     id("maven-publish")
     id("io.github.frankois944.spmForKmp") version "1.4.6"
 }
@@ -109,9 +110,7 @@ kotlin {
 
     iosTargets.forEach { iosTarget ->
         iosTarget.binaries.framework {
-            isStatic = false
-            // Allow unresolved Obj-C symbols; they will be provided by another binary at final app link.
-            linkerOpts("-Wl,-undefined,dynamic_lookup")
+            isStatic = true
         }
         iosTarget.compilations {
             val main by getting {
@@ -179,7 +178,47 @@ android {
     }
 }
 
+abstract class CheckMapCoreGitTagTask : DefaultTask() {
+    @get:Internal
+    abstract val repoDir: DirectoryProperty
 
+    @get:Inject
+    abstract val execOperations: ExecOperations
+
+    @TaskAction
+    fun run() {
+        val stderr = ByteArrayOutputStream()
+        val result =
+            execOperations.exec {
+                workingDir(repoDir.get().asFile)
+                commandLine("git", "describe", "--tags", "--exact-match", "HEAD")
+                isIgnoreExitValue = true
+                errorOutput = stderr
+            }
+        if (result.exitValue == 0) return
+        val errorText = stderr.toString().trim()
+        val detail = if (errorText.isNotBlank()) ": $errorText" else ""
+        logger.warn(
+            "MapCore KMP build: current commit is not tagged. " +
+                "Please use a release-tagged version of maps-core. " +
+                "(git describe --tags --exact-match HEAD failed$detail)",
+        )
+    }
+}
+
+val checkMapCoreGitTag = tasks.register<CheckMapCoreGitTagTask>("checkMapCoreGitTag") {
+    group = "verification"
+    description = "Warn if the current maps-core commit does not have a tag."
+    repoDir.set(project.layout.projectDirectory)
+}
+
+tasks.matching { it.name.startsWith("compileKotlin") }
+    .configureEach { dependsOn(checkMapCoreGitTag) }
+tasks
+    .matching { it.name.startsWith("SwiftPackageConfigAppleMapCoreKmpCompileSwiftPackage") }
+    .configureEach { dependsOn(checkMapCoreGitTag) }
+tasks.matching { it.name == "build" || it.name == "assemble" }
+    .configureEach { dependsOn(checkMapCoreGitTag) }
 
 // Avoid overlapping Package.resolved outputs between per-target SwiftPM compile tasks.
 tasks
@@ -212,7 +251,7 @@ tasks
         }
     }
 
-// Ensure MapCoreKmp is built as a dynamic SwiftPM library to avoid duplicate MapCore symbols.
+// Ensure MapCoreKmp is built as a static SwiftPM library; MapCore symbols should be provided by the host app.
 tasks
     .matching { it.name.startsWith("SwiftPackageConfigAppleMapCoreKmpGenerateSwiftPackage") }
     .configureEach {
@@ -224,7 +263,7 @@ tasks
                     .asFile
             if (!packageFile.exists()) return@doLast
             val original = packageFile.readText()
-            var updated = original.replace("type: .static", "type: .dynamic")
+            var updated = original.replace("type: .dynamic", "type: .static")
             updated =
                 updated.replace(
                     ".product(name: \"MapCore\", package: \"maps-core\"),.product(name: \"MapCoreSharedModule\", package: \"maps-core\")",
@@ -248,7 +287,7 @@ tasks
         }
     }
 
-// When MapCoreKmp is dynamic, SwiftPM emits libMapCoreKmp.dylib (no .a). Point cinterop to the dylib.
+// SwiftPM emits libMapCoreKmp.a for static builds (debug + release).
 gradle.projectsEvaluated {
 tasks
     .matching { it.name.startsWith("SwiftPackageConfigAppleMapCoreKmpGenerateCInteropDefinition") }
@@ -263,7 +302,7 @@ tasks
             javaClass.getMethod("getCompiledBinary").invoke(this) as RegularFileProperty
         compiledBinaryProp.set(
             project.layout.buildDirectory.file(
-                "spmKmpPlugin/MapCoreKmp/scratch/$platformDir/$mapCoreSpmBuildType/libMapCoreKmp.dylib",
+                "spmKmpPlugin/MapCoreKmp/scratch/$platformDir/$mapCoreSpmBuildType/libMapCoreKmp.a",
             ),
         )
         doLast {

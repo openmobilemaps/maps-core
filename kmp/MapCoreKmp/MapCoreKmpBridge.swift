@@ -2,6 +2,8 @@ import Foundation
 import MapCore
 import MapCoreSharedModule
 
+/// Pure swift classes like MCTextureLoader or MCFontLoader can't be created in KMP
+/// Bridge helps to expose those APIs.
 @objcMembers
 public class MapCoreKmpBridge: NSObject {
     @objc(createTextureLoader)
