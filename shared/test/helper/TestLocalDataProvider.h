@@ -24,12 +24,12 @@ public:
     std::optional<std::string> getStyleJson() override {
         return std::nullopt;
     }
-    djinni::Future<TextureLoaderResult> loadSpriteAsync(int32_t scale) override {
+    djinni::Future<TextureLoaderResult> loadSpriteAsync(const std::string &spriteId, const std::string &url, int32_t scale) override {
         auto promise = ::djinni::Promise<TextureLoaderResult>();
         promise.setValue(TextureLoaderResult(nullptr, std::nullopt, LoaderStatus::ERROR_404, std::nullopt));
         return promise.getFuture();
     }
-    djinni::Future<DataLoaderResult> loadSpriteJsonAsync(int32_t scale) override {
+    djinni::Future<DataLoaderResult> loadSpriteJsonAsync(const std::string &spriteId, const std::string &url, int32_t scale) override {
         auto promise = ::djinni::Promise<DataLoaderResult>();
         promise.setValue(DataLoaderResult(std::nullopt, std::nullopt, LoaderStatus::ERROR_404, std::nullopt));
         return promise.getFuture();

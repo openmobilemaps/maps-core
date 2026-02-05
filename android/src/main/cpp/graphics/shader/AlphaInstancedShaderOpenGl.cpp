@@ -42,7 +42,7 @@ void AlphaInstancedShaderOpenGl::setupProgram(const std::shared_ptr<::RenderingC
 
 std::string AlphaInstancedShaderOpenGl::getVertexShader() {
     return projectOntoUnitSphere ?
-           OMMVersionedGlesShaderCodeWithFrameUBO(320 es,
+           OMMVersionedGlesShaderCodeWithFrameUBO(320 es, 300 es,
                                       uniform vec4 uOriginOffset;
 
                                       in vec3 vPosition;
@@ -84,7 +84,7 @@ std::string AlphaInstancedShaderOpenGl::getVertexShader() {
                                           v_alpha = aAlpha * mask;
                                       }
                                       )
-    : OMMVersionedGlesShaderCodeWithFrameUBO(320 es,
+    : OMMVersionedGlesShaderCodeWithFrameUBO(320 es, 300 es,
                                       uniform vec4 uOriginOffset;
 
                                       in vec3 vPosition;
@@ -125,7 +125,7 @@ std::string AlphaInstancedShaderOpenGl::getVertexShader() {
 
 
 std::string AlphaInstancedShaderOpenGl::getFragmentShader() {
-    return OMMVersionedGlesShaderCode(320 es,
+    return OMMVersionedGlesShaderCode(320 es, 300 es,
                                       precision highp float;
                                       uniform sampler2D textureSampler;
 
@@ -147,8 +147,13 @@ std::string AlphaInstancedShaderOpenGl::getFragmentShader() {
                                               vec2 uv = (v_texcoordInstance.xy + v_texcoordInstance.zw * vec2(v_texCoord.x, (1.0 - v_texCoord.y))) * textureFactor;
                                           )) + OMMShaderCode(
                                           vec4 c = texture(textureSampler, uv);
-                                          float alpha = c.a * v_alpha;
-                                          fragmentColor = vec4(c.rgb * v_alpha, alpha);
+#ifdef __EMSCRIPTEN__
+                                          // Web: c is not premultiplied-alpha! Cannot easily preprocess image.
+                                          fragmentColor = vec4(c.rgb, 1.0) * c.a * v_alpha;
+#else
+                                          // c is premultiplied-alpha.
+                                          fragmentColor = c * v_alpha;
+#endif
                                       }
     );
 }

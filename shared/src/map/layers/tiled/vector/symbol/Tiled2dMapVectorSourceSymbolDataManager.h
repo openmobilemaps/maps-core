@@ -87,9 +87,9 @@ public:
 
     void collisionDetection(std::vector<std::string> layerIdentifiers, std::shared_ptr<CollisionGrid> collisionGrid);
 
-    bool update(long long now);
+    bool update(int64_t now);
 
-    void setSprites(std::shared_ptr<SpriteData> spriteData, std::shared_ptr<TextureHolderInterface> spriteTexture) override;
+    void setSprites(std::string spriteId, std::shared_ptr<SpriteData> spriteData, std::shared_ptr<TextureHolderInterface> spriteTexture) override;
 
     bool onClickUnconfirmed(const std::unordered_set<std::string> &layers, const Vec2F &posScreen) override;
 
@@ -120,7 +120,7 @@ private:
 
     void updateSymbolGroups();
 
-    void setupExistingSymbolWithSprite();
+    void setupExistingSymbolWithSprite(std::shared_ptr<SpriteData> spriteData, std::shared_ptr<TextureHolderInterface> spriteTexture);
 
     void pregenerateRenderPasses();
 
@@ -141,8 +141,7 @@ private:
     std::shared_ptr<FontLoaderInterface> fontLoader;
     Actor<Tiled2dMapVectorSymbolFontProviderManager> fontProviderManager;
 
-    std::shared_ptr<TextureHolderInterface> spriteTexture;
-    std::shared_ptr<SpriteData> spriteData;
+    std::vector<std::pair<std::shared_ptr<SpriteData>, std::shared_ptr<::TextureHolderInterface>>> sprites;
 
     float alpha = 1.0;
 

@@ -11,6 +11,7 @@ import io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.Tiled2dMapVecto
 import io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.Tiled2dMapVectorLayerLocalDataProviderInterface;
 import io.openmobilemaps.mapscore.shared.map.loader.*;
 
+import io.openmobilemaps.mapscore.util.TriFunction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,7 +20,6 @@ import java.net.http.HttpClient;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 
 /** Convenience helper to build a style.json layer with the default loaders. */
 @SuppressWarnings("unused")
@@ -67,19 +67,19 @@ public class Tiled2dMapVectorLayerBuilder {
         return this;
     }
 
-    ///! Append a loader to list of loaders.
+    /// ! Append a loader to list of loaders.
     public Tiled2dMapVectorLayerBuilder withLoader(LoaderInterface loader) {
         this.loaders.add(loader);
         return this;
     }
 
-    ///! Append a default-constructed {@link HttpDataLoader} to list of loaders.
+    /// ! Append a default-constructed {@link HttpDataLoader} to list of loaders.
     public Tiled2dMapVectorLayerBuilder withHttpLoader() {
         loaders.add(new HttpDataLoader());
         return this;
     }
 
-    ///! Append a {@link HttpDataLoader} constructed with the given client to list of loaders.
+    /// ! Append a {@link HttpDataLoader} constructed with the given client to list of loaders.
     public Tiled2dMapVectorLayerBuilder withHttpLoader(HttpClient httpClient) {
         loaders.add(new HttpDataLoader(httpClient));
         return this;
@@ -111,8 +111,8 @@ public class Tiled2dMapVectorLayerBuilder {
 
     public Tiled2dMapVectorLayerBuilder withLocalDataProvider(
             String styleJson,
-            Function<Integer, BufferedImage> loadSprite,
-            Function<Integer, String> loadSpriteJson,
+            TriFunction<String, String, Integer, BufferedImage> loadSprite,
+            TriFunction<String, String, Integer, String> loadSpriteJson,
             BiFunction<String, String, String> loadGeojson) {
 
         this.localDataProvider =
@@ -131,14 +131,14 @@ public class Tiled2dMapVectorLayerBuilder {
     private static class LocalDataProviderAdapter
             extends Tiled2dMapVectorLayerLocalDataProviderInterface {
         private final String styleJson;
-        private final Function<Integer, BufferedImage> loadSprite;
-        private final Function<Integer, String> loadSpriteJson;
+        private final TriFunction<String, String, Integer, BufferedImage> loadSprite;
+        private final TriFunction<String, String, Integer, String> loadSpriteJson;
         private final BiFunction<String, String, String> loadGeojson;
 
         LocalDataProviderAdapter(
                 String styleJson,
-                Function<Integer, BufferedImage> loadSprite,
-                Function<Integer, String> loadSpriteJson,
+                TriFunction<String, String, Integer, BufferedImage> loadSprite,
+                TriFunction<String, String, Integer, String> loadSpriteJson,
                 BiFunction<String, String, String> loadGeojson) {
             this.styleJson = styleJson;
             this.loadSprite = loadSprite;
@@ -187,15 +187,23 @@ public class Tiled2dMapVectorLayerBuilder {
 
         @NotNull
         @Override
-        public Future<TextureLoaderResult> loadSpriteAsync(int scale) {
-            BufferedImage image = loadSprite.apply(scale);
+        public Future<TextureLoaderResult> loadSpriteAsync(
+                @NotNull String spriteId, @NotNull String url, int scale) {
+            BufferedImage image = null;
+            if (loadSprite != null) {
+                image = loadSprite.apply(spriteId, url, scale);
+            }
             return wrapTextureLoaderResult(image);
         }
 
         @NotNull
         @Override
-        public Future<DataLoaderResult> loadSpriteJsonAsync(int scale) {
-            String data = loadSpriteJson.apply(scale);
+        public Future<DataLoaderResult> loadSpriteJsonAsync(
+                @NotNull String spriteId, @NotNull String url, int scale) {
+            String data = null;
+            if (loadSpriteJson != null) {
+                data = loadSpriteJson.apply(spriteId, url, scale);
+            }
             return wrapDataLoaderResult(data);
         }
 
@@ -203,7 +211,10 @@ public class Tiled2dMapVectorLayerBuilder {
         @Override
         public Future<DataLoaderResult> loadGeojson(
                 @NotNull String sourceName, @NotNull String url) {
-            String geoJson = loadGeojson.apply(sourceName, url);
+            String geoJson = null;
+            if (loadGeojson != null) {
+                geoJson = loadGeojson.apply(sourceName, url);
+            }
             return wrapDataLoaderResult(geoJson);
         }
     }

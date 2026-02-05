@@ -33,7 +33,8 @@ private:
         JavaProxy(JniType j);
         ~JavaProxy();
 
-        void setVertices(const ::SharedBytes & vertices, const ::SharedBytes & indices, const ::Vec3D & origin) override;
+        void setVertices(const ::SharedBytes & vertices, const ::SharedBytes & indices, const ::Vec3D & origin, bool is3d) override;
+        void setSubdivisionFactor(int32_t factor) override;
         /*not-null*/ std::shared_ptr<::GraphicsObjectInterface> asGraphicsObject() override;
         /*not-null*/ std::shared_ptr<::MaskingObjectInterface> asMaskingObject() override;
 
@@ -42,7 +43,8 @@ private:
     };
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/graphics/objects/Polygon2dInterface") };
-    const jmethodID method_setVertices { ::djinni::jniGetMethodID(clazz.get(), "setVertices", "(Lio/openmobilemaps/mapscore/shared/graphics/common/SharedBytes;Lio/openmobilemaps/mapscore/shared/graphics/common/SharedBytes;Lio/openmobilemaps/mapscore/shared/graphics/common/Vec3D;)V") };
+    const jmethodID method_setVertices { ::djinni::jniGetMethodID(clazz.get(), "setVertices", "(Lio/openmobilemaps/mapscore/shared/graphics/common/SharedBytes;Lio/openmobilemaps/mapscore/shared/graphics/common/SharedBytes;Lio/openmobilemaps/mapscore/shared/graphics/common/Vec3D;Z)V") };
+    const jmethodID method_setSubdivisionFactor { ::djinni::jniGetMethodID(clazz.get(), "setSubdivisionFactor", "(I)V") };
     const jmethodID method_asGraphicsObject { ::djinni::jniGetMethodID(clazz.get(), "asGraphicsObject", "()Lio/openmobilemaps/mapscore/shared/graphics/objects/GraphicsObjectInterface;") };
     const jmethodID method_asMaskingObject { ::djinni::jniGetMethodID(clazz.get(), "asMaskingObject", "()Lio/openmobilemaps/mapscore/shared/graphics/objects/MaskingObjectInterface;") };
 };

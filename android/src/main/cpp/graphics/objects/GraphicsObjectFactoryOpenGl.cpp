@@ -20,14 +20,37 @@
 #include "Text2dInstancedOpenGl.h"
 #include "Quad2dStretchedInstancedOpenGl.h"
 #include "IcosahedronOpenGl.h"
+#ifdef HARDWARE_TESSELLATION_SUPPORTED
+#include "Quad2dTessellatedOpenGl.h"
+#include "Polygon2dTessellatedOpenGl.h"
+#include "TessellatedColorShaderOpenGl.h"
+#endif
 
 std::shared_ptr<Quad2dInterface> GraphicsObjectFactoryOpenGl::createQuad(const std::shared_ptr<::ShaderProgramInterface> &shader) {
     return std::make_shared<Quad2dOpenGl>(enforceGlShader(shader));
 }
 
+std::shared_ptr<Quad2dInterface> GraphicsObjectFactoryOpenGl::createQuadTessellated(const std::shared_ptr<::ShaderProgramInterface> &shader) {
+#ifdef HARDWARE_TESSELLATION_SUPPORTED
+    return std::make_shared<Quad2dTessellatedOpenGl>(enforceGlShader(shader));
+#else
+    return nullptr;
+#endif
+
+}
+
 std::shared_ptr<Polygon2dInterface>
 GraphicsObjectFactoryOpenGl::createPolygon(const std::shared_ptr<::ShaderProgramInterface> &shader) {
     return std::make_shared<Polygon2dOpenGl>(enforceGlShader(shader));
+}
+
+std::shared_ptr<Polygon2dInterface>
+GraphicsObjectFactoryOpenGl::createPolygonTessellated(const std::shared_ptr<::ShaderProgramInterface> &shader) {
+#ifdef HARDWARE_TESSELLATION_SUPPORTED
+    return std::make_shared<Polygon2dTessellatedOpenGl>(enforceGlShader(shader));
+#else
+    return nullptr;
+#endif
 }
 
 std::shared_ptr<LineGroup2dInterface>
@@ -53,6 +76,16 @@ std::shared_ptr<Polygon2dInterface> GraphicsObjectFactoryOpenGl::createPolygonMa
     std::shared_ptr<ColorShaderOpenGl> shader = std::make_shared<ColorShaderOpenGl>(is3D);
     shader->setColor(1, 1, 1, 1);
     return std::make_shared<Polygon2dOpenGl>(enforceGlShader(shader));
+}
+
+std::shared_ptr<Polygon2dInterface> GraphicsObjectFactoryOpenGl::createPolygonMaskTessellated(bool is3D) {
+#ifdef HARDWARE_TESSELLATION_SUPPORTED
+    std::shared_ptr<TessellatedColorShaderOpenGl> shader = std::make_shared<TessellatedColorShaderOpenGl>(is3D);
+    shader->setColor(1, 1, 1, 1);
+    return std::make_shared<Polygon2dTessellatedOpenGl>(enforceGlShader(shader));
+#else
+    return nullptr;
+#endif
 }
 
 std::shared_ptr<TextInterface> GraphicsObjectFactoryOpenGl::createText(const std::shared_ptr<::ShaderProgramInterface> &shader) {

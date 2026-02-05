@@ -36,4 +36,4 @@ wasm:
   typename: em::val
 ts:
   typename: Polygon2dInterface
-  module: './module'
+  module: '@djinni/maps-core/graphics/objects/graphicsobjects'

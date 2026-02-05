@@ -42,7 +42,9 @@ class Polygon2dOpenGl : public GraphicsObjectInterface,
                               int64_t vpMatrix, int64_t mMatrix, const ::Vec3D & origin,
                               double screenPixelAsRealMeterFactor, bool isScreenSpaceCoords) override;
 
-    virtual void setVertices(const ::SharedBytes & vertices, const ::SharedBytes & indices, const ::Vec3D & origin) override;
+    void setSubdivisionFactor(int32_t factor) override;
+
+    virtual void setVertices(const ::SharedBytes & vertices, const ::SharedBytes & indices, const ::Vec3D & origin, bool is3d) override;
 
     virtual std::shared_ptr<GraphicsObjectInterface> asGraphicsObject() override;
 

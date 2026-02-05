@@ -55,20 +55,20 @@ public:
 
 private:
     struct ThreadLocalData {
-        std::unordered_map<std::string, long long> local_map;
+        std::unordered_map<std::string, int64_t> local_map;
         std::unordered_map<std::string, std::chrono::high_resolution_clock::time_point> start_times;
         std::unordered_map<std::string, size_t> counts;
         int estimated_global_size = 0;  // Estimate of the global map size
     };
 
     static thread_local ThreadLocalData local_data;
-    std::unordered_map<std::string, std::pair<long long, long long>> global_map;
+    std::unordered_map<std::string, std::pair<int64_t, int64_t>> global_map;
     std::mutex global_map_mutex;
     std::chrono::steady_clock::time_point last_print_time = std::chrono::steady_clock::now();
 
     PerformanceLogger() {}
 
-    void log(const std::string& key, long long duration) {
+    void log(const std::string& key, int64_t duration) {
         local_data.local_map[key] += duration;
         local_data.counts[key]++;
 

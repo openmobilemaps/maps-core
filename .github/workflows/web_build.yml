@@ -1,0 +1,35 @@
+name: "WASM build"
+
+on:
+  pull_request:
+    branches: [ main, develop, release/** ]
+  push:
+    branches: [ main, develop, release/** ]
+
+jobs:
+  test:
+    name: "WASM build"
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+           submodules: 'recursive'
+      - uses: actions/cache@v5
+        with:
+          path: web/build-wasm-release
+          key: emscripten-cmake-cache-${{ runner.os }}-${{ runner.arch }}
+
+      - name: Build
+        run: |
+          docker run --rm -v $(pwd):/src -u $(id -u):$(id -g) -w /src/web emscripten/emsdk:4.0.11 \
+            cmake --preset wasm-release
+
+          docker run --rm -v $(pwd):/src -u $(id -u):$(id -g) -w /src/web emscripten/emsdk:4.0.11 \
+            cmake --build --preset wasm-release
+
+      - name: Upload binary
+        uses: actions/upload-artifact@v6
+        with:
+            name: webmapsdk
+            path: web/build-wasm-release/webmapsdk.*

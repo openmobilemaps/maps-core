@@ -16,6 +16,10 @@ RasterShaderOpenGl::RasterShaderOpenGl(bool projectOntoUnitSphere)
         : programName(projectOntoUnitSphere ? "UBMAP_RasterShaderUnitSphereOpenGl" : "UBMAP_RasterShaderOpenGl")
 {}
 
+RasterShaderOpenGl::RasterShaderOpenGl(const std::string &programName)
+        : programName(programName)
+{}
+
 std::string RasterShaderOpenGl::getProgramName() {
     return programName;
 }
@@ -68,7 +72,7 @@ std::string RasterShaderOpenGl::getVertexShader() {
 }
 
 std::string RasterShaderOpenGl::getFragmentShader() {
-    return OMMVersionedGlesShaderCode(320 es,
+    return OMMVersionedGlesShaderCode(320 es, 300 es,
                                       precision highp float;
                                       uniform sampler2D textureSampler;
                                       // [0] opacity, 0-1 | [1] contrast, 0-1 | [2] saturation, 1-0 | [3] brightnessMin, 0-1 | [4] brightnessMax, 0-1 | [5] gamma, 0.1-10 | [6] brightnessShift, -1-1

@@ -511,8 +511,8 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
     
     auto scale = (use3xSprites && mapInterface->getCamera()->getScreenDensityPpi() > 326.0) ? 3 : (mapInterface->getCamera()->getScreenDensityPpi() >= 264.0 ? 2 : 1);
     
-    if (mapDescription->spriteBaseUrl) {
-        loadSpriteData(scale);
+    for(const auto &spriteSource : mapDescription->sprites) {
+        loadSpriteData(spriteSource, scale);
     }
 
     auto backgroundLayerDesc = std::find_if(mapDescription->layers.begin(), mapDescription->layers.end(), [](auto const &layer){
@@ -520,7 +520,10 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
     });
     if (backgroundLayerDesc != mapDescription->layers.end()) {
         backgroundLayer = std::make_shared<Tiled2dMapVectorBackgroundSubLayer>(std::static_pointer_cast<BackgroundVectorLayerDescription>(*backgroundLayerDesc), featureStateManager);
-        if (spriteData && spriteTexture) {
+        // TODO: support multi sprite in background layer
+        auto defaultSpriteIt = sprites.find("default");
+        if (defaultSpriteIt != sprites.end()) {
+            auto &[spriteData, spriteTexture] = defaultSpriteIt->second;
             backgroundLayer->setSprites(spriteData, spriteTexture);
         }
         backgroundLayer->onAdded(mapInterface, layerIndex);
@@ -583,7 +586,7 @@ void Tiled2dMapVectorLayer::reloadLocalDataSource(const std::string &sourceName,
     if (const auto &geoSource = mapDescription->geoJsonSources[sourceName]) {
 
         try {
-            auto json = nlohmann::json::parse(geoJson);
+            auto json = nlohmann::json::parse(geoJson, nullptr, true, true);
             geoSource->reload(GeoJsonParser::getGeoJson(json, *stringTable));
         }
         catch (nlohmann::json::exception &ex) {
@@ -897,7 +900,7 @@ void Tiled2dMapVectorLayer::onTilesUpdated(const std::string &sourceName, Vector
     tilesStillValid.clear();
 }
 
-void Tiled2dMapVectorLayer::loadSpriteData(int scale, bool fromLocal) {
+void Tiled2dMapVectorLayer::loadSpriteData(SpriteSourceDescription spriteSource, int scale, bool fromLocal) {
     auto lockSelfPtr = shared_from_this();
     auto mapInterface = this->mapInterface;
     auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
@@ -911,8 +914,8 @@ void Tiled2dMapVectorLayer::loadSpriteData(int scale, bool fromLocal) {
     std::stringstream ssData;
     {
         std::lock_guard<std::recursive_mutex> lock(mapDescriptionMutex);
-        ssTexture << *mapDescription->spriteBaseUrl << scalePrefix << ".png";
-        ssData << *mapDescription->spriteBaseUrl << scalePrefix << ".json";
+        ssTexture << spriteSource.baseUrl << scalePrefix << ".png";
+        ssData << spriteSource.baseUrl << scalePrefix << ".json";
     }
     std::string urlTexture = ssTexture.str();
     std::string urlData = ssData.str();
@@ -931,7 +934,7 @@ void Tiled2dMapVectorLayer::loadSpriteData(int scale, bool fromLocal) {
 
     std::shared_ptr<::djinni::Future<::DataLoaderResult>> jsonLoaderFuture;
     if(localDataProvider && fromLocal) {
-        jsonLoaderFuture = std::make_shared<::djinni::Future<::DataLoaderResult>>(localDataProvider->loadSpriteJsonAsync(scale));
+        jsonLoaderFuture = std::make_shared<::djinni::Future<::DataLoaderResult>>(localDataProvider->loadSpriteJsonAsync(spriteSource.identifier, urlData, scale));
     } else {
         jsonLoaderFuture = std::make_shared<::djinni::Future<::DataLoaderResult>>(LoaderHelper::loadDataAsync(urlData, std::nullopt, loaders));
     }
@@ -947,8 +950,8 @@ void Tiled2dMapVectorLayer::loadSpriteData(int scale, bool fromLocal) {
     });
 
     std::shared_ptr<::djinni::Future<::TextureLoaderResult>> textureLoaderFuture;
-    if(localDataProvider) {
-        textureLoaderFuture = std::make_shared<::djinni::Future<::TextureLoaderResult>>(localDataProvider->loadSpriteAsync(scale));
+    if(localDataProvider && fromLocal) {
+        textureLoaderFuture = std::make_shared<::djinni::Future<::TextureLoaderResult>>(localDataProvider->loadSpriteAsync(spriteSource.identifier, urlTexture, scale));
     } else {
         textureLoaderFuture = std::make_shared<::djinni::Future<::TextureLoaderResult>>(LoaderHelper::loadTextureAsync(urlTexture, std::nullopt, loaders));
     }
@@ -962,7 +965,7 @@ void Tiled2dMapVectorLayer::loadSpriteData(int scale, bool fromLocal) {
     });
 
     auto selfActor = WeakActor<Tiled2dMapVectorLayer>(mailbox, castedMe);
-    context->promise.getFuture().then([context, selfActor, fromLocal, weakSelf, scale] (auto result) {
+    context->promise.getFuture().then([context, selfActor, fromLocal, weakSelf, spriteSource, scale] (auto result) {
         auto jsonResultStatus = context->jsonResult->status;
         auto textureResultStatus = context->textureResult->status;
         
@@ -973,7 +976,7 @@ void Tiled2dMapVectorLayer::loadSpriteData(int scale, bool fromLocal) {
                 // We tried to load @3x sprite even though the user has not specified any use3xSprite flag
                 // We do this to notify him ion case he or she forgot to set the flag
                 // Since we could not find the @3x sprite we now load the @2x sprites
-                self->loadSpriteData(2, fromLocal);
+                self->loadSpriteData(spriteSource, 2, fromLocal);
                 return;
             }
         }
@@ -996,7 +999,7 @@ void Tiled2dMapVectorLayer::loadSpriteData(int scale, bool fromLocal) {
             nlohmann::json json;
             try
             {
-                json = nlohmann::json::parse(string);
+                json = nlohmann::json::parse(string, nullptr, true, true);
 
                 std::unordered_map<std::string, SpriteDesc> sprites;
 
@@ -1005,7 +1008,7 @@ void Tiled2dMapVectorLayer::loadSpriteData(int scale, bool fromLocal) {
                     sprites.insert({key, val.get<SpriteDesc>()});
                 }
 
-                jsonData = std::make_shared<SpriteData>(sprites);
+                jsonData = std::make_shared<SpriteData>(spriteSource.identifier, sprites);
             }
             catch (nlohmann::json::parse_error& ex)
             {
@@ -1020,26 +1023,31 @@ void Tiled2dMapVectorLayer::loadSpriteData(int scale, bool fromLocal) {
         if (!jsonData && !spriteTexture && fromLocal) {
             auto self = weakSelf.lock();
             if (self) {
-                self->loadSpriteData(scale, false);
+                self->loadSpriteData(spriteSource, scale, false);
                 return;
             }
         }
-        
-        
-        selfActor.message(MFN(&Tiled2dMapVectorLayer::didLoadSpriteData), jsonData, spriteTexture);
+        if (jsonData && spriteTexture) {        
+            selfActor.message(MFN(&Tiled2dMapVectorLayer::didLoadSpriteData), spriteSource.identifier, jsonData, spriteTexture);
+        }
     });
 }
 
-void Tiled2dMapVectorLayer::didLoadSpriteData(std::shared_ptr<SpriteData> spriteData, std::shared_ptr<::TextureHolderInterface> spriteTexture) {
-    this->spriteData = spriteData;
-    this->spriteTexture = spriteTexture;
+void Tiled2dMapVectorLayer::didLoadSpriteData(std::string spriteId, std::shared_ptr<SpriteData> spriteData, std::shared_ptr<::TextureHolderInterface> spriteTexture) {
+    this->sprites.emplace(spriteId, std::make_pair(spriteData, spriteTexture));
 
     for (const auto &[source, manager] : symbolSourceDataManagers) {
-        manager.message(MFN(&Tiled2dMapVectorSourceSymbolDataManager::setSprites), spriteData, spriteTexture);
+        manager.message(MFN(&Tiled2dMapVectorSourceSymbolDataManager::setSprites), spriteId, spriteData, spriteTexture);
+    }
+    for (const auto &[source, manager] : sourceDataManagers) {
+        manager.message(MFN(&Tiled2dMapVectorSourceTileDataManager::setSprites), spriteId, spriteData, spriteTexture);
     }
 
-    for (const auto &[source, manager] : sourceDataManagers) {
-        manager.message(MFN(&Tiled2dMapVectorSourceTileDataManager::setSprites), spriteData, spriteTexture);
+    // TODO: support multi sprite everywhere 
+    // - Tiled2dMapVectorPolygonPatternTile
+    // - Tiled2dMapVectorBackgroundSubLayer
+    if(spriteId != "default") {
+      return;
     }
 
     if (backgroundLayer) {
@@ -1306,6 +1314,10 @@ bool Tiled2dMapVectorLayer::onTwoFingerClick(const Vec2F &posScreen1, const Vec2
 
 bool Tiled2dMapVectorLayer::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, const std::vector<::Vec2F> &posScreenNew) {
     return interactionManager->onTwoFingerMove(posScreenOld, posScreenNew);
+}
+
+bool Tiled2dMapVectorLayer::onScroll(const Vec2F &posScreen, float scrollDelta) {
+    return interactionManager->onScroll(posScreen, scrollDelta);
 }
 
 bool Tiled2dMapVectorLayer::onTwoFingerMoveComplete() {

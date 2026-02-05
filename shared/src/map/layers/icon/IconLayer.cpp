@@ -155,9 +155,8 @@ void IconLayer::addIcons(const std::vector<std::shared_ptr<IconInfoInterface>> &
         auto shader = is3D ? shaderFactory->createUnitSphereAlphaInstancedShader() : shaderFactory->createAlphaInstancedShader();
         shader->asShaderProgramInterface()->setBlendMode(icon->getBlendMode());
         auto quadObject = objectFactory->createQuadInstanced(shader->asShaderProgramInterface());
-        if (is3D) {
-            //quadObject->setSubdivisionFactor(SUBDIVISION_FACTOR_3D_DEFAULT);
-        }
+        //int32_t subdivisionFactor = is3D ? SUBDIVISION_FACTOR_3D_DEFAULT : 0;
+        //quadObject->setSubdivisionFactor(subdivisionFactor);
 
 #if DEBUG
         quadObject->asGraphicsObject()->setDebugLabel("IconLayerID:" + icon->getIdentifier());

@@ -36,4 +36,4 @@ wasm:
   typename: em::val
 ts:
   typename: MapsCoreSharedModule
-  module: './module'
+  module: '@djinni/maps-core//maps_core'

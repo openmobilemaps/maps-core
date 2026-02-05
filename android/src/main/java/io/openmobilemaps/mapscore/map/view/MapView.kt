@@ -39,6 +39,7 @@ import io.openmobilemaps.mapscore.shared.map.scheduling.ThreadPoolScheduler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.microedition.khronos.egl.EGLConfig
@@ -141,8 +142,9 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 
 	@OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
 	open fun onDestroy() {
-		lifecycle = null
 		updateMapViewState(MapViewState.DESTROYED)
+		lifecycle = null
+		mapInterface?.setCallbackHandler(null)
 		finishGlThread()
 	}
 
@@ -194,7 +196,7 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 				pointers.add(Vec2F(event.getX(i), event.getY(i)))
 			}
 			lifecycle?.coroutineScope?.launch(touchHandlerDispatcher) {
-				touchHandler?.onTouchEvent(TouchEvent(pointers, action))
+				touchHandler?.onTouchEvent(TouchEvent(pointers, 0.0F,action))
 			}
 		}
 
@@ -280,8 +282,11 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 	}
 
 	private fun updateMapViewState(state: MapViewState) {
+		if (mapViewStateMutable.value == MapViewState.DESTROYED) {
+			return
+		}
 		mapViewStateMutable.value = state
-		onMapViewStateUpdated(state)
+		onMapViewStateUpdated(mapViewStateMutable.value)
 	}
 
 	protected open fun onMapViewStateUpdated(state: MapViewState) {}

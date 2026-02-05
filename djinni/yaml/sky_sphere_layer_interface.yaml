@@ -36,4 +36,4 @@ wasm:
   typename: em::val
 ts:
   typename: SkySphereLayerInterface
-  module: './module'
+  module: '@djinni/maps-core/map/layers/skysphere/sky_sphere'

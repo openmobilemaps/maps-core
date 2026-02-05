@@ -1,4 +1,5 @@
 {
+   /* test comment */
    "type": "FeatureCollection",
    "features": [{
        "type": "Feature",

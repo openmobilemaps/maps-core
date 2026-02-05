@@ -36,4 +36,4 @@ wasm:
   typename: em::val
 ts:
   typename: Quad2dInstancedInterface
-  module: './module'
+  module: '@djinni/maps-core/graphics/objects/graphicsobjects'

@@ -9,21 +9,17 @@
 #include <catch2/benchmark/catch_benchmark.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
+#include <catch2/matchers/catch_matchers_range_equals.hpp>
 
 class TestGeoJSONTileDelegate : public GeoJSONTileDelegate, public ActorObject {
-public:
+  public:
     bool didLoadCalled = false;
     bool failedToLoadCalled = false;
 
-    void didLoad(uint8_t maxZoom) override {
-        didLoadCalled = true;
-    }
+    void didLoad(uint8_t maxZoom) override { didLoadCalled = true; }
 
-    void failedToLoad() override {
-        failedToLoadCalled = true;
-    }
+    void failedToLoad() override { failedToLoadCalled = true; }
 };
-
 
 TEST_CASE("TestStyleParser", "[GeoJson inline]") {
     auto jsonString = TestData::readFileToString("style/geojson_style_inline.json");
@@ -38,15 +34,14 @@ TEST_CASE("TestStyleParser", "[GeoJson inline]") {
 
     REQUIRE(result.mapDescription->layers[0]->sourceMinZoom == 0);
     REQUIRE(result.mapDescription->layers[0]->sourceMaxZoom == 0);
-    REQUIRE_NOTHROW(geojsonSource->getTile(0,0,0));
-    REQUIRE_THROWS(geojsonSource->getTile(6,33,22));
+    REQUIRE_NOTHROW(geojsonSource->getTile(0, 0, 0));
+    REQUIRE_THROWS(geojsonSource->getTile(6, 33, 22));
 }
 
 TEST_CASE("TestStyleParser", "[GeoJson local provider]") {
     auto jsonString = TestData::readFileToString("style/geojson_style_provider.json");
-    auto provider = std::make_shared<TestLocalDataProvider>(std::unordered_map<std::string, std::string>{
-        {"wsource", "geojson.geojson"}
-    });
+    auto provider =
+        std::make_shared<TestLocalDataProvider>(std::unordered_map<std::string, std::string>{{"wsource", "geojson.geojson"}});
     std::shared_ptr<StringInterner> stringTable = std::make_shared<StringInterner>(ValueKeys::newStringInterner());
     auto result = Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromString("test", jsonString, provider, {}, stringTable, {});
     REQUIRE(result.mapDescription != nullptr);
@@ -55,7 +50,8 @@ TEST_CASE("TestStyleParser", "[GeoJson local provider]") {
     std::shared_ptr<GeoJSONVTInterface> geojsonSource = result.mapDescription->geoJsonSources.begin()->second;
 
     auto scheduler = std::make_shared<TestScheduler>();
-    auto delegate = Actor<TestGeoJSONTileDelegate>(std::make_shared<Mailbox>(scheduler), std::make_shared<TestGeoJSONTileDelegate>());
+    auto delegate =
+        Actor<TestGeoJSONTileDelegate>(std::make_shared<Mailbox>(scheduler), std::make_shared<TestGeoJSONTileDelegate>());
 
     geojsonSource->setDelegate(delegate.weakActor<GeoJSONTileDelegate>());
 
@@ -72,9 +68,39 @@ TEST_CASE("TestStyleParser", "[GeoJson local provider]") {
     REQUIRE(geojsonSource->getMinZoom() == 0);
     REQUIRE(geojsonSource->getMaxZoom() == 25);
 
-    const auto &tile = geojsonSource->getTile(6,33,22);
+    const auto &tile = geojsonSource->getTile(6, 33, 22);
 
     REQUIRE(!tile.getFeatures().empty());
+}
+
+static bool equalSpriteSource(const SpriteSourceDescription &a, const SpriteSourceDescription &b) {
+    return a.identifier == b.identifier && a.baseUrl == b.baseUrl;
+};
+
+TEST_CASE("TestStyleParser", "[Single Sprite]") {
+    auto jsonString = TestData::readFileToString("style/single_sprite.json");
+    std::shared_ptr<StringInterner> stringTable = std::make_shared<StringInterner>(ValueKeys::newStringInterner());
+    auto result = Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromString("test", jsonString, nullptr, {}, stringTable, {});
+    REQUIRE(result.mapDescription != nullptr);
+    REQUIRE(result.mapDescription->sprites.size() == 1);
+
+    std::vector<SpriteSourceDescription> expectedSprites = {{"default", "https://example.com/someurl"}};
+
+    REQUIRE_THAT(result.mapDescription->sprites, Catch::Matchers::UnorderedRangeEquals(expectedSprites, equalSpriteSource));
+}
+
+TEST_CASE("TestStyleParser", "[Multi Sprite]") {
+    auto jsonString = TestData::readFileToString("style/multiple_sprites.json");
+    std::shared_ptr<StringInterner> stringTable = std::make_shared<StringInterner>(ValueKeys::newStringInterner());
+    auto result = Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromString("test", jsonString, nullptr, {}, stringTable, {});
+    REQUIRE(result.mapDescription != nullptr);
+    REQUIRE(result.mapDescription->sprites.size() == 3);
+
+    std::vector<SpriteSourceDescription> expectedSprites = {{"roadsigns", "https://example.com/myroadsigns"},
+                                                            {"shops", "https://example2.com/someurl"},
+                                                            {"default", "https://example2.com/anotherurl"}};
+
+    REQUIRE_THAT(result.mapDescription->sprites, Catch::Matchers::UnorderedRangeEquals(expectedSprites, equalSpriteSource));
 }
 
 TEST_CASE("String interpolation expressions") {
@@ -261,47 +287,33 @@ TEST_CASE("Step and zoom expressions") {
         nlohmann::json expression;
     };
 
-
     auto testCase = GENERATE(
         TestCase{
-          .name = "step with [zoom]",
-          .expression = {"step",
-                         {"zoom"},
-                         "circle_black_lt6",
-                         6, "circle_black_6-8",
-                         8, "circle_black_gt8"},
+            .name = "step with [zoom]",
+            .expression = {"step", {"zoom"}, "circle_black_lt6", 6, "circle_black_6-8", 8, "circle_black_gt8"},
         },
         TestCase{
-          .name = "step with [get zoom]",
-          .expression = {"step",
-                         {"get", "zoom"},
-                         "circle_black_lt6",
-                         6, "circle_black_6-8",
-                         8, "circle_black_gt8"},
+            .name = "step with [get zoom]",
+            .expression = {"step", {"get", "zoom"}, "circle_black_lt6", 6, "circle_black_6-8", 8, "circle_black_gt8"},
         },
         TestCase{
-          .name = "step with [get property]",
-          .expression = {"step",
-                         {"get", "property1"},
-                         "circle_black_lt6",
-                         6, "circle_black_6-8",
-                         8, "circle_black_gt8"},
-        }
-    );
+            .name = "step with [get property]",
+            .expression = {"step", {"get", "property1"}, "circle_black_lt6", 6, "circle_black_6-8", 8, "circle_black_gt8"},
+        });
 
     StringInterner stringTable = ValueKeys::newStringInterner();
     Tiled2dMapVectorStyleParser parser(stringTable);
     auto value = parser.parseValue(testCase.expression);
 
-    std::vector<std::pair<double, std::string>> testEvals {
-      {5.0, "circle_black_lt6"},
-      {7.0, "circle_black_6-8"},
-      {9.0, "circle_black_gt8"},
+    std::vector<std::pair<double, std::string>> testEvals{
+        {5.0, "circle_black_lt6"},
+        {7.0, "circle_black_6-8"},
+        {9.0, "circle_black_gt8"},
     };
 
     CAPTURE(testCase.name, testCase.expression);
 
-    for(auto &[evalInput, expectedOutput] : testEvals) {
+    for (auto &[evalInput, expectedOutput] : testEvals) {
         CAPTURE(evalInput);
         auto featureContext = std::make_shared<FeatureContext>(vtzero::GeomType::POINT,
                                                                FeatureContext::mapType{

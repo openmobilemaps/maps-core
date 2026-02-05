@@ -3,6 +3,9 @@
 
 package io.openmobilemaps.mapscore.shared.graphics.objects
 
+import com.snapchat.djinni.NativeObjectManager
+import java.util.concurrent.atomic.AtomicBoolean
+
 abstract class TextureHolderInterface {
 
     abstract fun getImageWidth(): Int
@@ -16,4 +19,56 @@ abstract class TextureHolderInterface {
     abstract fun attachToGraphics(): Int
 
     abstract fun clearFromGraphics()
+
+    public class CppProxy : TextureHolderInterface {
+        private val nativeRef: Long
+        private val destroyed: AtomicBoolean = AtomicBoolean(false)
+
+        private constructor(nativeRef: Long) {
+            if (nativeRef == 0L) error("nativeRef is zero")
+            this.nativeRef = nativeRef
+            NativeObjectManager.register(this, nativeRef)
+        }
+
+        companion object {
+            @JvmStatic
+            external fun nativeDestroy(nativeRef: Long)
+        }
+
+        override fun getImageWidth(): Int {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getImageWidth(this.nativeRef)
+        }
+        private external fun native_getImageWidth(_nativeRef: Long): Int
+
+        override fun getImageHeight(): Int {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getImageHeight(this.nativeRef)
+        }
+        private external fun native_getImageHeight(_nativeRef: Long): Int
+
+        override fun getTextureWidth(): Int {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getTextureWidth(this.nativeRef)
+        }
+        private external fun native_getTextureWidth(_nativeRef: Long): Int
+
+        override fun getTextureHeight(): Int {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getTextureHeight(this.nativeRef)
+        }
+        private external fun native_getTextureHeight(_nativeRef: Long): Int
+
+        override fun attachToGraphics(): Int {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_attachToGraphics(this.nativeRef)
+        }
+        private external fun native_attachToGraphics(_nativeRef: Long): Int
+
+        override fun clearFromGraphics() {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_clearFromGraphics(this.nativeRef)
+        }
+        private external fun native_clearFromGraphics(_nativeRef: Long)
+    }
 }

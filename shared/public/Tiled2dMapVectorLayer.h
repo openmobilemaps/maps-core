@@ -132,8 +132,6 @@ class Tiled2dMapVectorLayer : public Tiled2dMapLayer,
 
     virtual float getAlpha() override;
 
-    void pregenerateRenderPasses();
-
     void forceReload() override;
 
     void onTilesUpdated(const std::string &layerName, VectorSet<Tiled2dMapRasterTileInfo> currentTileInfos) override;
@@ -189,6 +187,8 @@ class Tiled2dMapVectorLayer : public Tiled2dMapLayer,
 
     bool onTwoFingerMoveComplete() override;
 
+    bool onScroll(const Vec2F &posScreen, float scrollDelta) override;
+
     std::vector<VectorLayerFeatureCoordInfo> getVisiblePointFeatureContexts(float paddingPc,
                                                                             const std::optional<std::string> &sourceLayer) override;
 
@@ -221,9 +221,9 @@ class Tiled2dMapVectorLayer : public Tiled2dMapLayer,
     virtual std::shared_ptr<Tiled2dMapVectorLayerConfig> getGeoJSONLayerConfig(const std::string &sourceName,
                                                                                const std::shared_ptr<GeoJSONVTInterface> &source);
 
-    virtual void loadSpriteData(int scale, bool fromLocal = true);
+    virtual void loadSpriteData(SpriteSourceDescription spriteSoure, int scale, bool fromLocal = true);
 
-    virtual void didLoadSpriteData(std::shared_ptr<SpriteData> spriteData, std::shared_ptr<::TextureHolderInterface> spriteTexture);
+    virtual void didLoadSpriteData(std::string spriteId, std::shared_ptr<SpriteData> spriteData, std::shared_ptr<::TextureHolderInterface> spriteTexture);
 
     void enableAnimations(bool enabled) override;
 
@@ -248,6 +248,8 @@ class Tiled2dMapVectorLayer : public Tiled2dMapLayer,
     virtual void didLoadStyleJson(const std::optional<TiledLayerError> &error);
 
   private:
+    void pregenerateRenderPasses();
+
     void scheduleStyleJsonLoading();
 
     void initializeVectorLayer();
@@ -281,8 +283,8 @@ class Tiled2dMapVectorLayer : public Tiled2dMapLayer,
     std::atomic_flag tilesStillValid;
     std::shared_ptr<Tiled2dMapVectorInteractionManager> interactionManager;
 
-    long long lastDataManagerUpdate = 0;
-    long long lastCollitionCheck = 0;
+    int64_t lastDataManagerUpdate = 0;
+    int64_t lastCollitionCheck = 0;
     double lastDataManagerZoom = 0;
     bool isAnimating = false;
 
@@ -305,8 +307,7 @@ class Tiled2dMapVectorLayer : public Tiled2dMapLayer,
     float alpha = 1.0;
     std::optional<::RectI> scissorRect = std::nullopt;
 
-    std::shared_ptr<SpriteData> spriteData;
-    std::shared_ptr<::TextureHolderInterface> spriteTexture;
+    std::unordered_map<std::string, std::pair<std::shared_ptr<SpriteData>, std::shared_ptr<::TextureHolderInterface>>> sprites;
 
     std::shared_ptr<Tiled2dMapVectorStateManager> featureStateManager;
     std::atomic_flag noPendingStateUpdate;

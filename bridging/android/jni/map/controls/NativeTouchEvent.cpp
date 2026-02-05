@@ -16,16 +16,18 @@ auto NativeTouchEvent::fromCpp(JNIEnv* jniEnv, const CppType& c) -> ::djinni::Lo
     const auto& data = ::djinni::JniClass<NativeTouchEvent>::get();
     auto r = ::djinni::LocalRef<JniType>{jniEnv->NewObject(data.clazz.get(), data.jconstructor,
                                                            ::djinni::get(::djinni::List<::djinni_generated::NativeVec2F>::fromCpp(jniEnv, c.pointers)),
+                                                           ::djinni::get(::djinni::F32::fromCpp(jniEnv, c.scrollDelta)),
                                                            ::djinni::get(::djinni_generated::NativeTouchAction::fromCpp(jniEnv, c.touchAction)))};
     ::djinni::jniExceptionCheck(jniEnv);
     return r;
 }
 
 auto NativeTouchEvent::toCpp(JNIEnv* jniEnv, JniType j) -> CppType {
-    ::djinni::JniLocalScope jscope(jniEnv, 3);
+    ::djinni::JniLocalScope jscope(jniEnv, 4);
     assert(j != nullptr);
     const auto& data = ::djinni::JniClass<NativeTouchEvent>::get();
     return {::djinni::List<::djinni_generated::NativeVec2F>::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_pointers)),
+            ::djinni::F32::toCpp(jniEnv, jniEnv->GetFloatField(j, data.field_scrollDelta)),
             ::djinni_generated::NativeTouchAction::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_touchAction))};
 }
 

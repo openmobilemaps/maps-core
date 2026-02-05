@@ -91,5 +91,5 @@ protected:
     Vec2I viewportSize = Vec2I(0, 0);
 
     std::chrono::milliseconds timeCreation;
-    long timeFrameDelta = 0;
+    int64_t timeFrameDelta = 0;
 };

@@ -78,7 +78,11 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
         return;
     }
 
-    auto alphaInstancedShader = is3d ? strongMapInterface->getShaderFactory()->createUnitSphereAlphaInstancedShader()->asShaderProgramInterface() : strongMapInterface->getShaderFactory()->createAlphaInstancedShader()->asShaderProgramInterface();
+    layerBlendMode = layerDescription->style.getBlendMode(EvaluationContext(0.0, dpFactor, std::make_shared<FeatureContext>(), featureStateManager));
+    auto alphaInstancedShader =
+        is3d ? strongMapInterface->getShaderFactory()->createUnitSphereAlphaInstancedShader()->asShaderProgramInterface()
+             : strongMapInterface->getShaderFactory()->createAlphaInstancedShader()->asShaderProgramInterface();
+    alphaInstancedShader->setBlendMode(layerBlendMode);
 
     const double tilePixelFactor =
             (0.0254 / camera->getScreenDensityPpi()) * layerConfig->getZoomFactorAtIdentifier(tileInfo.tileInfo.zoomIdentifier - 1);
@@ -86,6 +90,8 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
     std::unordered_map<std::string, std::vector<Vec2D>> textPositionMap;
 
     std::vector<VectorLayerFeatureInfo> featureInfosWithCustomAssets;
+
+    bool warnedCustomImageWithoutSymbolDelegate = false;
 
     size_t featureTileIndex = -1;
     int32_t featuresRBase = (int32_t)features->size() - (featuresBase + featuresCount);
@@ -132,11 +138,20 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
         const double symbolSpacingPx = layerDescription->style.getSymbolSpacing(evalContext);
         const double symbolSpacingMeters = symbolSpacingPx * tilePixelFactor;
 
-        const bool hasImageFromCustomProvider = layerDescription->style.getIconImageCustomProvider(evalContext);
+        const bool hasImageFromCustomProviderRequested = layerDescription->style.getIconImageCustomProvider(evalContext);
+        if (hasImageFromCustomProviderRequested && !symbolDelegate) {
+            if (!warnedCustomImageWithoutSymbolDelegate) {
+                LogError << layerIdentifier
+                         <<= ": icon-image-custom-provider enabled but no symbol delegate present.";
+                warnedCustomImageWithoutSymbolDelegate = true;
+            }
+        }
+        const bool hasImageFromCustomProvider = (hasImageFromCustomProviderRequested && symbolDelegate);
+
         bool hasIconPotentially;
         if (hasImageFromCustomProvider) {
             hasIconPotentially = true;
-        } else if (layerDescription->style.iconImageEvaluator.getValue()) {
+        } else if (!hasImageFromCustomProviderRequested && layerDescription->style.iconImageEvaluator.getValue()) {
             // Attempt to evaluate without zoom and state
             const auto zoomAndStateIndependentEvalCtx = EvaluationContext(dpFactor, context.get(), nullptr);
             const auto value = layerDescription->style.iconImageEvaluator.getValue();
@@ -355,7 +370,8 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
         return;
     }
 
-    if (symbolDelegate && !featureInfosWithCustomAssets.empty()) {
+    if (!featureInfosWithCustomAssets.empty()) {
+        assert(symbolDelegate != nullptr);
         auto customAssetPages = symbolDelegate->getCustomAssetsFor(featureInfosWithCustomAssets, layerDescription->identifier);
         for (const auto &page: customAssetPages) {
             auto object = strongMapInterface->getGraphicsObjectFactory()->createQuadInstanced(alphaInstancedShader);
@@ -364,18 +380,11 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
         }
     }
 
-    int positionSize = is3d ? 3 : 2;
-
     //Tiled2dMapVectorSymbolObject::SymbolObjectInstanceCounts instanceCounts{0, 0, 0};
-    int32_t iconCount = 0;
-    int32_t stretchedIconCount = 0;
     std::unordered_map<std::shared_ptr<FontLoaderResult>, std::tuple<int32_t, int32_t>> fontStylesAndCharactersCountMap;
 
     for (auto const object: symbolObjects) {
         const auto &counts = object->getInstanceCounts();
-        if (!object->hasCustomTexture) {
-            iconCount += counts.icons;
-        }
         if (counts.textCharacters > 0) {
             auto font = object->getFont();
             int32_t charactersCount = 0;
@@ -385,45 +394,6 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
             }
             fontStylesAndCharactersCountMap[font] = {featuresCount, charactersCount + counts.textCharacters};
         }
-        stretchedIconCount += counts.stretchedIcons;
-    }
-
-    if (iconCount != 0) {
-        alphaInstancedShader->setBlendMode(
-                layerDescription->style.getBlendMode(EvaluationContext(0.0, dpFactor, std::make_shared<FeatureContext>(), featureStateManager)));
-        iconInstancedObject = strongMapInterface->getGraphicsObjectFactory()->createQuadInstanced(alphaInstancedShader);
-#if DEBUG
-        iconInstancedObject->asGraphicsObject()->setDebugLabel(layerDescription->identifier + "_" + tileInfo.tileInfo.to_string_short());
-#endif
-
-        iconInstancedObject->setInstanceCount(iconCount);
-
-        iconAlphas.resize(iconCount, 0.0);
-        iconRotations.resize(iconCount, 0.0);
-        iconScales.resize(iconCount * 2, 0.0);
-        iconPositions.resize(iconCount * positionSize, 0.0);
-        iconTextureCoordinates.resize(iconCount * 4, 0.0);
-        iconOffsets.resize(iconCount * 2, 0.0);
-    }
-
-
-    if (stretchedIconCount != 0) {
-        auto shader = strongMapInterface->getShaderFactory()->createStretchInstancedShader(is3d)->asShaderProgramInterface();
-        shader->setBlendMode(
-                layerDescription->style.getBlendMode(EvaluationContext(0.0, dpFactor, std::make_shared<FeatureContext>(), featureStateManager)));
-        stretchedInstancedObject = strongMapInterface->getGraphicsObjectFactory()->createQuadStretchedInstanced(shader);
-#if DEBUG
-        stretchedInstancedObject->asGraphicsObject()->setDebugLabel(layerDescription->identifier + "_" + tileInfo.tileInfo.to_string_short());
-#endif
-
-        stretchedInstancedObject->setInstanceCount(stretchedIconCount);
-
-        stretchedIconAlphas.resize(stretchedIconCount, 0.0);
-        stretchedIconRotations.resize(stretchedIconCount, 0.0);
-        stretchedIconScales.resize(stretchedIconCount * 2, 0.0);
-        stretchedIconPositions.resize(stretchedIconCount * positionSize, 0.0);
-        stretchedIconStretchInfos.resize(stretchedIconCount * 10, 1.0);
-        stretchedIconTextureCoordinates.resize(stretchedIconCount * 4, 0.0);
     }
 
     if (!fontStylesAndCharactersCountMap.empty()) {
@@ -483,28 +453,24 @@ void Tiled2dMapVectorSymbolGroup::updateLayerDescription(const std::shared_ptr<S
     for (auto const &object: symbolObjects) {
         object->updateLayerDescription(layerDescription, usedKeys);
     }
-    if (spriteData && spriteTexture) {
-        setupObjects(spriteData, spriteTexture);
-    }
 }
 
-void Tiled2dMapVectorSymbolGroup::setupObjects(const std::shared_ptr<SpriteData> &spriteData,
-                                               const std::shared_ptr<TextureHolderInterface> &spriteTexture,
-                                               const std::optional<WeakActor<Tiled2dMapVectorSourceSymbolDataManager>> &symbolDataManager) {
+void Tiled2dMapVectorSymbolGroup::setupObjects(const std::vector<std::pair<std::shared_ptr<SpriteData>, std::shared_ptr<::TextureHolderInterface>>> &sprites, const std::optional<WeakActor<Tiled2dMapVectorSourceSymbolDataManager>> &symbolDataManager) {
+    if(isInitialized) {
+        // TODO: it appears that we land here (at least) twice
+        // - during resume
+        // - onSymbolGroupInitialized
+        // -> figure out if/how we can avoid this
+        return;
+    }
     const auto context = mapInterface.lock()->getRenderingContext();
 
-    int iconOffset = 0;
-    int stretchedIconOffset = 0;
     std::unordered_map<std::string, int32_t> textOffsets;
 
     int positionSize = is3d ? 3 : 2;
 
     for (auto const &object: symbolObjects) {
-
-        if (!object->hasCustomTexture && spriteTexture && spriteData) {
-            object->setupIconProperties(iconPositions, iconRotations, iconTextureCoordinates, iconOffset, tileInfo.tileInfo.zoomIdentifier,
-                                        spriteTexture, spriteData, std::nullopt);
-        } else {
+        if (object->hasCustomTexture) {
             for (size_t i = 0; i != customTextures.size(); i++) {
                 auto identifier = object->stringIdentifier;
                 auto uvIt = customTextures[i].featureIdentifiersUv.find(identifier);
@@ -512,15 +478,15 @@ void Tiled2dMapVectorSymbolGroup::setupObjects(const std::shared_ptr<SpriteData>
                     object->customTexturePage = i;
                     object->customTextureOffset = (int)std::distance(customTextures[i].featureIdentifiersUv.begin(),uvIt);
 
-                    int offset = object->customTextureOffset;
+                    [[ maybe_unused ]] int offset = object->customTextureOffset;
                     assert(offset < customTextures[i].iconRotations.size());
-                    object->setupIconProperties(customTextures[i].iconPositions, customTextures[i].iconRotations, customTextures[i].iconTextureCoordinates, offset, tileInfo.tileInfo.zoomIdentifier, customTextures[i].texture, nullptr, uvIt->second);
+
+                    object->setupCustomIconInfo(uvIt->second);
                     break;
                 }
             }
         }
-        object->setupStretchIconProperties(stretchedIconPositions, stretchedIconTextureCoordinates, stretchedIconOffset,
-                                           tileInfo.tileInfo.zoomIdentifier, spriteTexture, spriteData);
+
         auto font = object->getFont();
         if (font) {
             const auto &textDescriptor = std::find_if(textDescriptors.begin(), textDescriptors.end(),
@@ -554,48 +520,12 @@ void Tiled2dMapVectorSymbolGroup::setupObjects(const std::shared_ptr<SpriteData>
 
     }
 
-    if (spriteTexture && spriteData && iconInstancedObject) {
-        if (this->spriteData == nullptr) {
-            iconInstancedObject->setFrame(Quad2dD(Vec2D(-0.5, 0.5), Vec2D(0.5, 0.5), Vec2D(0.5, -0.5), Vec2D(-0.5, -0.5)), tileOrigin, is3d);
-            iconInstancedObject->loadTexture(context, spriteTexture);
-            iconInstancedObject->asGraphicsObject()->setup(context);
-        }
-        iconInstancedObject->setPositions(
-                SharedBytes((int64_t) iconPositions.data(), (int32_t) iconAlphas.size(), positionSize * (int32_t) sizeof(float)));
-        iconInstancedObject->setTextureCoordinates(
-                SharedBytes((int64_t) iconTextureCoordinates.data(), (int32_t) iconAlphas.size(), 4 * (int32_t) sizeof(float)));
-        iconAlphas.setModified();
-        iconScales.setModified();
-        iconRotations.setModified();
-        iconOffsets.setModified();
-    }
-
-    if (spriteTexture && spriteData && stretchedInstancedObject) {
-        if (this->spriteData == nullptr) {
-            stretchedInstancedObject->setFrame(Quad2dD(Vec2D(-0.5, 0.5), Vec2D(0.5, 0.5), Vec2D(0.5, -0.5), Vec2D(-0.5, -0.5)), tileOrigin, is3d);
-            stretchedInstancedObject->loadTexture(context, spriteTexture);
-            stretchedInstancedObject->asGraphicsObject()->setup(context);
-        }
-        stretchedInstancedObject->setPositions(
-                SharedBytes((int64_t) stretchedIconPositions.data(), (int32_t) stretchedIconAlphas.size(),
-                            positionSize * (int32_t) sizeof(float)));
-        stretchedInstancedObject->setTextureCoordinates(
-                SharedBytes((int64_t) stretchedIconTextureCoordinates.data(), (int32_t) stretchedIconAlphas.size(),
-                            4 * (int32_t) sizeof(float)));
-        stretchedIconAlphas.setModified();
-        stretchedIconScales.setModified();
-        stretchedIconRotations.setModified();
-        stretchedIconStretchInfos.setModified();
-    }
-
     for (size_t i = 0; i < textDescriptors.size(); i++) {
         const auto &textDescriptor = textDescriptors[i];
         const auto &textInstancedObject = textInstancedObjects[i];
-        if (this->spriteData == nullptr) {
-            textInstancedObject->setFrame(Quad2dD(Vec2D(-0.5, 0.5), Vec2D(0.5, 0.5), Vec2D(0.5, -0.5), Vec2D(-0.5, -0.5)), tileOrigin, is3d);
-            textInstancedObject->loadFont(context, *textDescriptor->fontResult->fontData, textDescriptor->fontResult->imageData);
-            textInstancedObject->asGraphicsObject()->setup(context);
-        }
+        textInstancedObject->setFrame(Quad2dD(Vec2D(-0.5, 0.5), Vec2D(0.5, 0.5), Vec2D(0.5, -0.5), Vec2D(-0.5, -0.5)), tileOrigin, is3d);
+        textInstancedObject->loadFont(context, *textDescriptor->fontResult->fontData, textDescriptor->fontResult->imageData);
+        textInstancedObject->asGraphicsObject()->setup(context);
         textInstancedObject->setTextureCoordinates(
                 SharedBytes((int64_t) textDescriptor->textTextureCoordinates.data(), (int32_t) textDescriptor->textRotations.size(), 4 * (int32_t) sizeof(float)));
         textInstancedObject->setStyleIndices(
@@ -606,8 +536,10 @@ void Tiled2dMapVectorSymbolGroup::setupObjects(const std::shared_ptr<SpriteData>
         textDescriptor->textRotations.setModified();
     }
 
-    this->spriteData = spriteData;
-    this->spriteTexture = spriteTexture;
+    for(auto &[spriteData, spriteTexture] : sprites) {
+        addSprite(spriteData, spriteTexture);
+    }
+
 
     if (symbolDataManager.has_value()) {
         auto selfActor = WeakActor<Tiled2dMapVectorSymbolGroup>(mailbox, shared_from_this());
@@ -618,33 +550,162 @@ void Tiled2dMapVectorSymbolGroup::setupObjects(const std::shared_ptr<SpriteData>
     isInitialized = true;
 }
 
-void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const double rotation, const double scaleFactor, long long now, const Vec2I viewPortSize, const std::vector<float>& vpMatrix, const Vec3D& origin) {
-    if (!isInitialized) {
+void Tiled2dMapVectorSymbolGroup::addSprite(const std::shared_ptr<SpriteData> &spriteData, const std::shared_ptr<TextureHolderInterface> &spriteTexture) {
+   
+    // Skip if sprite already added.
+    // This can occur because it is called when a sprite is done loading via
+    // setupExistingSymbolWithSprite; this can race with the group being setup,
+    // and the list passed to setupObjects may or may not contain that sprite.
+    auto it = std::find_if(sprites.begin(), sprites.end(), [&spriteData](const SpriteIconDescriptor &spriteDescriptor) {
+        return spriteData->identifier == spriteDescriptor.identifier;
+    });
+    if (it != sprites.end()) {
         return;
     }
 
-    int positionSize = is3d ? 3 : 2;
-    // icons
-    if (!symbolObjects.empty()) {
+    SpriteIconDescriptor &spriteDescriptor = sprites.emplace_back();
+    spriteDescriptor.identifier = spriteData->identifier;
+    spriteDescriptor.spriteTexture = spriteTexture;
 
-        int iconOffset = 0;
-        int stretchedIconOffset = 0;
+    uint32_t sheetIndex = (uint32_t)sprites.size() - 1;
+    std::string sheetName = spriteData->identifier;
+    if (sheetName == "default") {
+        sheetName = "";
+    }
+    spriteLookup.reserve(spriteLookup.size() + spriteData->sprites.size());
+    spriteIconData.reserve(spriteLookup.size() + spriteData->sprites.size());
+    for (auto &[iconName, spriteDesc] : spriteData->sprites) {
+        SpriteIconId iconId{sheetName, iconName};
+        assert(spriteLookup.count(iconId) == 0);
+        uint32_t iconIndex = (uint32_t)spriteIconData.size();
+        spriteLookup[iconId] = ResolvedSpriteIconId{sheetIndex, iconIndex};
+        spriteIconData.push_back(spriteDesc);
+    }
+}
+
+// Initialize or update sprite icon instanced object and buffers. Adapt the graphics objects to changed icon counts, initializing it only if icons should be visible.
+// Returns true if a different render objects will need to be displayed (i.e. the render passes list needs to be updated).
+bool Tiled2dMapVectorSymbolGroup::prepareIconObject(SpriteIconDescriptor &spriteDescriptor, size_t iconCount, size_t stretchedIconCount) {
+    bool renderObjectsChanged = false;
+    if(iconCount != 0 && spriteDescriptor.iconInstancedObject == nullptr) {
+        auto strongMapInterface = this->mapInterface.lock();
+        const auto context = strongMapInterface->getRenderingContext();
+
+        auto alphaInstancedShader =
+            is3d ? strongMapInterface->getShaderFactory()->createUnitSphereAlphaInstancedShader()->asShaderProgramInterface()
+                 : strongMapInterface->getShaderFactory()->createAlphaInstancedShader()->asShaderProgramInterface();
+        alphaInstancedShader->setBlendMode(layerBlendMode);
+        spriteDescriptor.iconInstancedObject = strongMapInterface->getGraphicsObjectFactory()->createQuadInstanced(alphaInstancedShader);
+#if DEBUG
+        spriteDescriptor.iconInstancedObject->asGraphicsObject()->setDebugLabel(layerDescription->identifier + "_" + tileInfo.tileInfo.to_string_short());
+#endif
+        spriteDescriptor.iconInstancedObject->setFrame(Quad2dD(Vec2D(-0.5, 0.5), Vec2D(0.5, 0.5), Vec2D(0.5, -0.5), Vec2D(-0.5, -0.5)), tileOrigin, is3d);
+        spriteDescriptor.iconInstancedObject->loadTexture(context, spriteDescriptor.spriteTexture);
+        spriteDescriptor.iconInstancedObject->asGraphicsObject()->setup(context);
+        renderObjectsChanged = true;
+    }
+
+    if (stretchedIconCount != 0 && spriteDescriptor.stretchedInstancedObject == nullptr) {
+        auto strongMapInterface = this->mapInterface.lock();
+        const auto context = strongMapInterface->getRenderingContext();
+
+        auto shader = strongMapInterface->getShaderFactory()->createStretchInstancedShader(is3d)->asShaderProgramInterface();
+        shader->setBlendMode(layerBlendMode);
+        spriteDescriptor.stretchedInstancedObject = strongMapInterface->getGraphicsObjectFactory()->createQuadStretchedInstanced(shader);
+#if DEBUG
+        spriteDescriptor.stretchedInstancedObject->asGraphicsObject()->setDebugLabel(layerDescription->identifier + "_" + tileInfo.tileInfo.to_string_short());
+#endif
+
+        spriteDescriptor.stretchedInstancedObject->setFrame(Quad2dD(Vec2D(-0.5, 0.5), Vec2D(0.5, 0.5), Vec2D(0.5, -0.5), Vec2D(-0.5, -0.5)), tileOrigin, is3d);
+        spriteDescriptor.stretchedInstancedObject->loadTexture(context, spriteDescriptor.spriteTexture);
+        spriteDescriptor.stretchedInstancedObject->asGraphicsObject()->setup(context);
+        renderObjectsChanged = true;
+    }
+
+    const int positionSize = is3d ? 3 : 2;
+
+    if(spriteDescriptor.iconInstancedObject && spriteDescriptor.iconAlphas.size() != iconCount) {
+        spriteDescriptor.iconInstancedObject->setInstanceCount(iconCount);
+        
+        spriteDescriptor.iconAlphas.resize(iconCount, 0.0);
+        spriteDescriptor.iconRotations.resize(iconCount, 0.0);
+        spriteDescriptor.iconScales.resize(iconCount * 2, 0.0);
+        spriteDescriptor.iconPositions.resize(iconCount * positionSize, 0.0);
+        spriteDescriptor.iconTextureCoordinates.resize(iconCount * 4, 0.0);
+        spriteDescriptor.iconOffsets.resize(iconCount * 2, 0.0);
+    }
+
+
+    if(spriteDescriptor.stretchedInstancedObject && spriteDescriptor.stretchedIconAlphas.size() != stretchedIconCount) {
+        spriteDescriptor.stretchedInstancedObject->setInstanceCount(stretchedIconCount);
+        
+        spriteDescriptor.stretchedIconAlphas.resize(stretchedIconCount, 0.0);
+        spriteDescriptor.stretchedIconRotations.resize(stretchedIconCount, 0.0);
+        spriteDescriptor.stretchedIconScales.resize(stretchedIconCount * 2, 0.0);
+        spriteDescriptor.stretchedIconPositions.resize(stretchedIconCount * positionSize, 0.0);
+        spriteDescriptor.stretchedIconStretchInfos.resize(stretchedIconCount * 10, 1.0);
+        spriteDescriptor.stretchedIconTextureCoordinates.resize(stretchedIconCount * 4, 0.0);
+    }
+    return renderObjectsChanged;
+}
+
+bool Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const double rotation, const double scaleFactor, int64_t now, const Vec2I viewPortSize, const std::vector<float>& vpMatrix, const Vec3D& origin) {
+    bool renderObjectsChanged = false;
+    if (!isInitialized) {
+        return renderObjectsChanged;
+    }
+    if (symbolObjects.empty()) {
+        return renderObjectsChanged;
+    }
+
+    // Count the number of icons per sheet to update instance counts and buffer sizes.
+    for(auto &spriteDescriptor : sprites) {
+        spriteDescriptor.tmpIconCounter = 0;
+        spriteDescriptor.tmpStretchedIconCounter = 0;
+    }
+    for (auto const &object: symbolObjects) {
+        auto spriteIconRef = object->getUpdatedSpriteIconRef(zoomIdentifier, spriteLookup);
+        if(spriteIconRef && !object->hasCustomTexture) {
+            const auto objectInstanceCounts = object->getInstanceCounts();
+            
+            auto &spriteDescriptor = sprites.at(spriteIconRef->sheet);
+            spriteDescriptor.tmpIconCounter += objectInstanceCounts.icons;
+            spriteDescriptor.tmpStretchedIconCounter += objectInstanceCounts.stretchedIcons;
+        }
+    }
+    for(auto &spriteDescriptor : sprites) {
+        renderObjectsChanged |= prepareIconObject(spriteDescriptor, spriteDescriptor.tmpIconCounter, spriteDescriptor.tmpStretchedIconCounter);
+        spriteDescriptor.tmpIconCounter = 0;
+        spriteDescriptor.tmpStretchedIconCounter = 0;
+    }
+    
+
         std::unordered_map<std::string, int32_t> textOffsets;
         int32_t singleTextOffset = 0;
 
-        for (auto const &object: symbolObjects) {
+        for (auto &object : symbolObjects) {
+            auto spriteIconRef = object->getSpriteIconRef();
+
             if (object->hasCustomTexture) {
                 auto &page = customTextures[object->customTexturePage];
-                int offset = (int)object->customTextureOffset;
-                object->updateIconProperties(page.iconPositions, page.iconScales, page.iconRotations, page.iconAlphas, page.iconOffsets, page.iconTextureCoordinates, offset, zoomIdentifier,scaleFactor, rotation, now, viewPortSize, spriteTexture, spriteData);
-
+                uint32_t offset = object->customTextureOffset;
+                object->updateIconProperties(page.iconPositions, page.iconScales, page.iconRotations, page.iconAlphas, page.iconOffsets, page.iconTextureCoordinates, offset, zoomIdentifier,scaleFactor, rotation, now, viewPortSize, page.texture, spriteIconData);
+            } else if (spriteIconRef) {
+                SpriteIconDescriptor &spriteDescriptor = sprites.at(spriteIconRef->sheet);
+                if(object->getInstanceCounts().icons) {
+                    uint32_t &iconOffset = spriteDescriptor.tmpIconCounter;
+                    object->updateIconProperties(spriteDescriptor.iconPositions, spriteDescriptor.iconScales, spriteDescriptor.iconRotations, spriteDescriptor.iconAlphas, spriteDescriptor.iconOffsets, spriteDescriptor.iconTextureCoordinates, iconOffset, zoomIdentifier,
+                                                 scaleFactor, rotation, now, viewPortSize, spriteDescriptor.spriteTexture, spriteIconData);
+                } else {
+                    uint32_t &stretchedIconOffset = spriteDescriptor.tmpStretchedIconCounter;
+                    object->updateStretchIconProperties(spriteDescriptor.stretchedIconPositions, spriteDescriptor.stretchedIconScales, spriteDescriptor.stretchedIconRotations,
+                                                        spriteDescriptor.stretchedIconAlphas, spriteDescriptor.stretchedIconStretchInfos, spriteDescriptor.stretchedIconTextureCoordinates, stretchedIconOffset, zoomIdentifier,
+                                                        scaleFactor, rotation, now, viewPortSize, spriteDescriptor.spriteTexture, spriteIconData);
+                }
             } else {
-                object->updateIconProperties(iconPositions, iconScales, iconRotations, iconAlphas, iconOffsets, iconTextureCoordinates, iconOffset, zoomIdentifier,
-                                             scaleFactor, rotation, now, viewPortSize, spriteTexture, spriteData);
+                object->resetLastIconProperties();
             }
-            object->updateStretchIconProperties(stretchedIconPositions, stretchedIconScales, stretchedIconRotations,
-                                                stretchedIconAlphas, stretchedIconStretchInfos, stretchedIconTextureCoordinates, stretchedIconOffset, zoomIdentifier,
-                                                scaleFactor, rotation, now, viewPortSize, spriteTexture, spriteData);
+
             auto font = object->getFont();
             if (font) {
                 auto n = textDescriptors.size();
@@ -679,6 +740,7 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
             }
         }
 
+        const int positionSize = is3d ? 3 : 2;
         for (auto &customDescriptor: customTextures) {
             int32_t count = (int32_t)customDescriptor.featureIdentifiersUv.size();
 
@@ -719,81 +781,83 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
             }
         }
 
-        if (iconInstancedObject) {
-            int32_t iconCount = (int32_t) iconAlphas.size();
-            if (iconPositions.wasModified()) {
-                iconInstancedObject->setPositions(
-                                                  SharedBytes((int64_t) iconPositions.data(), iconCount, positionSize * (int32_t) sizeof(float)));
-                iconPositions.resetModificationFlag();
+        for (auto &spriteDescriptor: sprites) {
+            if(spriteDescriptor.iconInstancedObject) {
+                int32_t iconCount = (int32_t) spriteDescriptor.iconAlphas.size();
+                if (spriteDescriptor.iconPositions.wasModified()) {
+                    spriteDescriptor.iconInstancedObject->setPositions(
+                                                      SharedBytes((int64_t) spriteDescriptor.iconPositions.data(), iconCount, positionSize * (int32_t) sizeof(float)));
+                    spriteDescriptor.iconPositions.resetModificationFlag();
+                }
+
+                if (spriteDescriptor.iconAlphas.wasModified()) {
+                    spriteDescriptor.iconInstancedObject->setAlphas(
+                                                   SharedBytes((int64_t) spriteDescriptor.iconAlphas.data(), iconCount, (int32_t) sizeof(float)));
+                    spriteDescriptor.iconAlphas.resetModificationFlag();
+                }
+
+                if (spriteDescriptor.iconScales.wasModified()) {
+                    spriteDescriptor.iconInstancedObject->setScales(
+                                                   SharedBytes((int64_t) spriteDescriptor.iconScales.data(), iconCount, 2 * (int32_t) sizeof(float)));
+                    spriteDescriptor.iconScales.resetModificationFlag();
+                }
+
+                if (spriteDescriptor.iconRotations.wasModified()) {
+                    spriteDescriptor.iconInstancedObject->setRotations(
+                                                      SharedBytes((int64_t) spriteDescriptor.iconRotations.data(), iconCount, 1 * (int32_t) sizeof(float)));
+                    spriteDescriptor.iconRotations.resetModificationFlag();
+                }
+
+                if (spriteDescriptor.iconOffsets.wasModified()) {
+                    spriteDescriptor.iconInstancedObject->setPositionOffset(
+                                                           SharedBytes((int64_t) spriteDescriptor.iconOffsets.data(), iconCount, 2 * (int32_t) sizeof(float)));
+                    spriteDescriptor.iconOffsets.resetModificationFlag();
+                }
+
+                if (spriteDescriptor.iconTextureCoordinates.wasModified()) {
+                    spriteDescriptor.iconInstancedObject->setTextureCoordinates(
+                                                           SharedBytes((int64_t) spriteDescriptor.iconTextureCoordinates.data(), iconCount, 4 * (int32_t) sizeof(float)));
+                    spriteDescriptor.iconTextureCoordinates.resetModificationFlag();
+                }
             }
 
-            if (iconAlphas.wasModified()) {
-                iconInstancedObject->setAlphas(
-                                               SharedBytes((int64_t) iconAlphas.data(), iconCount, (int32_t) sizeof(float)));
-                iconAlphas.resetModificationFlag();
-            }
+            if(spriteDescriptor.stretchedInstancedObject) {
+                int32_t iconCount = (int32_t) spriteDescriptor.stretchedIconAlphas.size();
+                if (spriteDescriptor.stretchedIconPositions.wasModified()) {
+                    spriteDescriptor.stretchedInstancedObject->setPositions(SharedBytes((int64_t) spriteDescriptor.stretchedIconPositions.data(), iconCount,
+                                                                       positionSize * (int32_t) sizeof(float)));
+                    spriteDescriptor.stretchedIconPositions.resetModificationFlag();
+                }
 
-            if (iconScales.wasModified()) {
-                iconInstancedObject->setScales(
-                                               SharedBytes((int64_t) iconScales.data(), iconCount, 2 * (int32_t) sizeof(float)));
-                iconScales.resetModificationFlag();
-            }
+                if (spriteDescriptor.stretchedIconAlphas.wasModified()) {
+                    spriteDescriptor.stretchedInstancedObject->setAlphas(SharedBytes((int64_t) spriteDescriptor.stretchedIconAlphas.data(), iconCount,
+                                                                    (int32_t) sizeof(float)));
+                    spriteDescriptor.stretchedIconAlphas.resetModificationFlag();
+                }
 
-            if (iconRotations.wasModified()) {
-                iconInstancedObject->setRotations(
-                                                  SharedBytes((int64_t) iconRotations.data(), iconCount, 1 * (int32_t) sizeof(float)));
-                iconRotations.resetModificationFlag();
-            }
+                if (spriteDescriptor.stretchedIconScales.wasModified()) {
+                    spriteDescriptor.stretchedInstancedObject->setScales(SharedBytes((int64_t) spriteDescriptor.stretchedIconScales.data(), iconCount,
+                                                                    2 * (int32_t) sizeof(float)));
+                    spriteDescriptor.stretchedIconScales.resetModificationFlag();
+                }
 
-            if (iconOffsets.wasModified()) {
-                iconInstancedObject->setPositionOffset(
-                                                       SharedBytes((int64_t) iconOffsets.data(), iconCount, 2 * (int32_t) sizeof(float)));
-                iconOffsets.resetModificationFlag();
-            }
+                if (spriteDescriptor.stretchedIconRotations.wasModified()) {
+                    spriteDescriptor.stretchedInstancedObject->setRotations(SharedBytes((int64_t) spriteDescriptor.stretchedIconRotations.data(), iconCount,
+                                                                       1 * (int32_t) sizeof(float)));
+                    spriteDescriptor.stretchedIconRotations.resetModificationFlag();
+                }
 
-            if (iconTextureCoordinates.wasModified()) {
-                iconInstancedObject->setTextureCoordinates(
-                                                       SharedBytes((int64_t) iconTextureCoordinates.data(), iconCount, 4 * (int32_t) sizeof(float)));
-                iconTextureCoordinates.resetModificationFlag();
-            }
-        }
+                if (spriteDescriptor.stretchedIconStretchInfos.wasModified()) {
+                    spriteDescriptor.stretchedInstancedObject->setStretchInfos(SharedBytes((int64_t) spriteDescriptor.stretchedIconStretchInfos.data(), iconCount,
+                                                                          10 * (int32_t) sizeof(float)));
+                    spriteDescriptor.stretchedIconStretchInfos.resetModificationFlag();
+                }
 
-        if (stretchedInstancedObject) {
-            int32_t iconCount = (int32_t) stretchedIconAlphas.size();
-            if (stretchedIconPositions.wasModified()) {
-                stretchedInstancedObject->setPositions(SharedBytes((int64_t) stretchedIconPositions.data(), iconCount,
-                                                                   positionSize * (int32_t) sizeof(float)));
-                stretchedIconPositions.resetModificationFlag();
-            }
-
-            if (stretchedIconAlphas.wasModified()) {
-                stretchedInstancedObject->setAlphas(SharedBytes((int64_t) stretchedIconAlphas.data(), iconCount,
-                                                                (int32_t) sizeof(float)));
-                stretchedIconAlphas.resetModificationFlag();
-            }
-
-            if (stretchedIconScales.wasModified()) {
-                stretchedInstancedObject->setScales(SharedBytes((int64_t) stretchedIconScales.data(), iconCount,
-                                                                2 * (int32_t) sizeof(float)));
-                stretchedIconScales.resetModificationFlag();
-            }
-
-            if (stretchedIconRotations.wasModified()) {
-                stretchedInstancedObject->setRotations(SharedBytes((int64_t) stretchedIconRotations.data(), iconCount,
-                                                                   1 * (int32_t) sizeof(float)));
-                stretchedIconRotations.resetModificationFlag();
-            }
-
-            if (stretchedIconStretchInfos.wasModified()) {
-                stretchedInstancedObject->setStretchInfos(SharedBytes((int64_t) stretchedIconStretchInfos.data(), iconCount,
-                                                                      10 * (int32_t) sizeof(float)));
-                stretchedIconStretchInfos.resetModificationFlag();
-            }
-
-            if (stretchedIconTextureCoordinates.wasModified()) {
-                stretchedInstancedObject->setTextureCoordinates(SharedBytes((int64_t) stretchedIconTextureCoordinates.data(), iconCount,
-                                                                      4 * (int32_t) sizeof(float)));
-                stretchedIconTextureCoordinates.resetModificationFlag();
+                if (spriteDescriptor.stretchedIconTextureCoordinates.wasModified()) {
+                    spriteDescriptor.stretchedInstancedObject->setTextureCoordinates(SharedBytes((int64_t) spriteDescriptor.stretchedIconTextureCoordinates.data(), iconCount,
+                                                                          4 * (int32_t) sizeof(float)));
+                    spriteDescriptor.stretchedIconTextureCoordinates.resetModificationFlag();
+                }
             }
         }
 
@@ -972,7 +1036,7 @@ void Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const doub
             }
         }
 #endif
-    }
+    return renderObjectsChanged;
 }
 
 std::optional<Tiled2dMapVectorSymbolSubLayerPositioningWrapper>
@@ -1083,17 +1147,24 @@ void Tiled2dMapVectorSymbolGroup::setAlpha(float alpha) {
 }
 
 void Tiled2dMapVectorSymbolGroup::clear() {
-    if (iconInstancedObject) {
-        iconInstancedObject->asGraphicsObject()->clear();
+    for(auto &spriteDescriptor : sprites) {
+        if (spriteDescriptor.iconInstancedObject) {
+            spriteDescriptor.iconInstancedObject->asGraphicsObject()->clear();
+        }
+        if (spriteDescriptor.stretchedInstancedObject) {
+            spriteDescriptor.stretchedInstancedObject->asGraphicsObject()->clear();
+        }
     }
-    if (stretchedInstancedObject) {
-        stretchedInstancedObject->asGraphicsObject()->clear();
+    sprites.clear();
+    spriteLookup.clear();
+    spriteIconData.clear();
+    for (auto const &object: symbolObjects) {
+        object->resetLastIconProperties();
     }
     for (const auto &textInstancedObject : textInstancedObjects) {
         textInstancedObject->asGraphicsObject()->clear();
     }
-    this->spriteData = nullptr;
-    this->spriteTexture = nullptr;
+    isInitialized = false;
 }
 
 void Tiled2dMapVectorSymbolGroup::placedInCache() {
@@ -1112,19 +1183,21 @@ void Tiled2dMapVectorSymbolGroup::removeFromCache() {
 std::vector<std::shared_ptr< ::RenderObjectInterface>> Tiled2dMapVectorSymbolGroup::getRenderObjects() {
     std::vector<std::shared_ptr< ::RenderObjectInterface>> renderObjects;
 
-    auto iconObject = iconInstancedObject;
-    if (iconObject) {
-        renderObjects.push_back(std::make_shared<RenderObject>(iconObject->asGraphicsObject()));
+    for(auto &spriteDescriptor : sprites) {
+        auto iconObject = spriteDescriptor.iconInstancedObject;
+        if (iconObject) {
+            renderObjects.push_back(std::make_shared<RenderObject>(iconObject->asGraphicsObject()));
+        }
+        auto stretchIconObject = spriteDescriptor.stretchedInstancedObject;
+        if (stretchIconObject) {
+            renderObjects.push_back(std::make_shared<RenderObject>(stretchIconObject->asGraphicsObject()));
+        }
     }
 
     for (const auto &descriptor: customTextures) {
         renderObjects.push_back(std::make_shared<RenderObject>(descriptor.renderObject->asGraphicsObject()));
     }
 
-    auto stretchIconObject = stretchedInstancedObject;
-    if (stretchIconObject) {
-        renderObjects.push_back(std::make_shared<RenderObject>(stretchIconObject->asGraphicsObject()));
-    }
     for (const auto &textInstancedObject : textInstancedObjects) {
         renderObjects.push_back(std::make_shared<RenderObject>(textInstancedObject->asGraphicsObject()));
     }

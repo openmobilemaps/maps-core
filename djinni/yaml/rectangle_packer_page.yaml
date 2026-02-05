@@ -36,4 +36,4 @@ wasm:
   typename: em::val
 ts:
   typename: RectanglePackerPage
-  module: './module'
+  module: '@djinni/maps-core/graphics/packer'

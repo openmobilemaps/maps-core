@@ -36,4 +36,4 @@ wasm:
   typename: em::val
 ts:
   typename: MapCoordinateSystem
-  module: './module'
+  module: '@djinni/maps-core/map/coordinates/coordinate_system'

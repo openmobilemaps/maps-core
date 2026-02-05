@@ -36,4 +36,4 @@ wasm:
   typename: em::val
 ts:
   typename: GeoJsonPoint
-  module: './module'
+  module: '@djinni/maps-core/map/layers/tiled/geo_json_parser'

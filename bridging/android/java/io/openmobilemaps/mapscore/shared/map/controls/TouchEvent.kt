@@ -5,5 +5,6 @@ package io.openmobilemaps.mapscore.shared.map.controls
 
 data class TouchEvent(
     val pointers: ArrayList<io.openmobilemaps.mapscore.shared.graphics.common.Vec2F>,
+    val scrollDelta: Float,
     val touchAction: TouchAction,
 )

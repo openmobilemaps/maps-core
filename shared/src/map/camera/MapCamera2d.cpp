@@ -634,8 +634,9 @@ bool MapCamera2d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
         currentDragVelocity.x = 0;
         currentDragVelocity.y = 0;
     } else {
-        long long newTimestamp = DateHelper::currentTimeMicros();
-        long long deltaMcs = std::max(newTimestamp - currentDragTimestamp, 8000ll);
+        auto newTimestamp = DateHelper::currentTimeMicros();
+        auto deltaMcs = std::max(newTimestamp - currentDragTimestamp, MapCameraInertia::minimumInertiaDeltaMicroSeconds);
+
         float averageFactor = currentDragVelocity.x == 0 && currentDragVelocity.y == 0 ? 1.0 : 0.5;
         currentDragVelocity.x = (1 - averageFactor) * currentDragVelocity.x + averageFactor * xDiffMap / (deltaMcs / 16000.0);
         currentDragVelocity.y = (1 - averageFactor) * currentDragVelocity.y + averageFactor * yDiffMap / (deltaMcs / 16000.0);
@@ -658,16 +659,17 @@ void MapCamera2d::setupInertia() {
     float vel = sqrt(currentDragVelocity.x * currentDragVelocity.x + currentDragVelocity.y * currentDragVelocity.y);
     double t1 = vel >= 1.0 ? -19.4957 * std::log(1.0 / vel) : 0.0;
     double t2 = vel >= 0.01 ? -1.95762 * std::log(0.01 / 1.0) : 0.0;
-    inertia = Inertia(DateHelper::currentTimeMicros(), currentDragVelocity, t1, t2);
+    inertia = MapCameraInertia(DateHelper::currentTimeMicros(), currentDragVelocity, t1, t2);
     currentDragVelocity = {0, 0};
     currentDragTimestamp = 0;
 }
 
 void MapCamera2d::inertiaStep() {
-    if (inertia == std::nullopt)
+    if (inertia == std::nullopt) {
         return;
+    }
 
-    long long now = DateHelper::currentTimeMicros();
+    auto now = DateHelper::currentTimeMicros();
     double delta = (now - inertia->timestampStart) / 16000.0;
     double deltaPrev = (now - inertia->timestampUpdate) / 16000.0;
 
@@ -803,8 +805,8 @@ bool MapCamera2d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, cons
             currentDragVelocity.x = 0;
             currentDragVelocity.y = 0;
         } else {
-            long long newTimestamp = DateHelper::currentTimeMicros();
-            long long deltaMcs = std::max(newTimestamp - currentDragTimestamp, 8000ll);
+            auto newTimestamp = DateHelper::currentTimeMicros();
+            auto deltaMcs = std::max(newTimestamp - currentDragTimestamp, MapCameraInertia::minimumInertiaDeltaMicroSeconds);
             float averageFactor = currentDragVelocity.x == 0 && currentDragVelocity.y == 0 ? 1.0 : 0.5;
             currentDragVelocity.x = (1 - averageFactor) * currentDragVelocity.x + averageFactor * diffCenterX / (deltaMcs / 16000.0);
             currentDragVelocity.y = (1 - averageFactor) * currentDragVelocity.y + averageFactor * diffCenterY / (deltaMcs / 16000.0);
@@ -885,6 +887,49 @@ bool MapCamera2d::onTwoFingerMoveComplete() {
     }
 
     return false;
+}
+
+bool MapCamera2d::onScroll(const ::Vec2F &posScreen, float zoomFactor) {
+    if (cameraFrozen) {
+        return false;
+    }
+
+    // zoomFactor > 0.0 means zoom in, zoomFactor < 0.0 means zoom out
+
+    inertia = std::nullopt;
+
+    zoomFactor = std::clamp(zoomFactor, -500.0f, 500.0f);
+    auto newZoom = zoom - (zoomFactor * zoom * 0.001);
+    auto scaleFactor = newZoom / zoom;
+
+    newZoom = std::clamp(newZoom, zoomMax, zoomMin);
+
+    Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
+    auto centerScreen = Vec2F(sizeViewport.x * 0.5f, sizeViewport.y * 0.5f);
+
+    float dx = (scaleFactor - 1) * (posScreen.x - centerScreen.x);
+    float dy = (scaleFactor - 1) * (posScreen.y - centerScreen.y);
+
+    float sinAngle = sin(angle * M_PI / 180.0);
+    float cosAngle = cos(angle * M_PI / 180.0);
+
+    float leftDiff = (cosAngle * dx + sinAngle * dy);
+    float topDiff = (-sinAngle * dx + cosAngle * dy);
+
+    double diffCenterX = -leftDiff * zoom * screenPixelAsRealMeterFactor;
+    double diffCenterY = topDiff * zoom * screenPixelAsRealMeterFactor;
+
+    Coord newPos =
+        Coord(centerPosition.systemIdentifier, centerPosition.x + diffCenterX, centerPosition.y + diffCenterY, centerPosition.z);
+
+    const auto [adjPosition, adjZoom] = getBoundsCorrectedCoords(newPos, newZoom);
+    centerPosition = adjPosition;
+    zoom = adjZoom;
+
+    notifyListeners(ListenerType::BOUNDS | ListenerType::MAP_INTERACTION);
+    mapInterface->invalidate();
+
+    return true;
 }
 
 ::Coord MapCamera2d::coordFromScreenPositionZoom(const ::Vec2F & posScreen, float zoom) {

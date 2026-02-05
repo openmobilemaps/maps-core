@@ -18,7 +18,7 @@ GeoJsonFeatureParser::GeoJsonFeatureParser() {}
 std::optional<std::vector<::VectorLayerFeatureInfo>> GeoJsonFeatureParser::parse(const std::string & geoJson) {
     StringInterner stringTable{};
     try {
-        const auto json = nlohmann::json::parse(geoJson);
+        const auto json = nlohmann::json::parse(geoJson, nullptr, true, true);
         auto geoJsonObject = GeoJsonParser::getGeoJson(json, stringTable);
         std::vector<::VectorLayerFeatureInfo> features = {};
         for (auto &geometry: geoJsonObject->geometries) {
@@ -34,7 +34,7 @@ std::optional<std::vector<::VectorLayerFeatureInfo>> GeoJsonFeatureParser::parse
 
 std::optional<std::vector<GeoJsonPoint>> GeoJsonFeatureParser::parseWithPointGeometry(const std::string & geoJson) {
     try {
-        const auto& json = nlohmann::json::parse(geoJson);
+        const auto& json = nlohmann::json::parse(geoJson, nullptr, true, true);
         return GeoJsonParser::getPointsWithProperties(json);
     }
     catch (nlohmann::json::exception &ex) {
@@ -46,7 +46,7 @@ std::optional<std::vector<GeoJsonPoint>> GeoJsonFeatureParser::parseWithPointGeo
 
 std::optional<std::vector<GeoJsonLine>> GeoJsonFeatureParser::parseWithLineGeometry(const std::string & geoJson) {
     try {
-        const auto& json = nlohmann::json::parse(geoJson);
+        const auto& json = nlohmann::json::parse(geoJson, nullptr, true, true);
         return GeoJsonParser::getLinesWithProperties(json);
     }
     catch (nlohmann::json::exception &ex) {

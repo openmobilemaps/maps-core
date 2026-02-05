@@ -54,9 +54,10 @@ public:
                     const WeakActor<Tiled2dMapVectorSourceSymbolDataManager> &symbolManagerActor,
                     float alpha = 1.0);
 
-    void update(const double zoomIdentifier, const double rotation, const double scaleFactor, long long now, const Vec2I viewPortSize, const std::vector<float>& vpMatrix, const Vec3D& origin);
+    bool update(const double zoomIdentifier, const double rotation, const double scaleFactor, int64_t now, const Vec2I viewPortSize, const std::vector<float>& vpMatrix, const Vec3D& origin);
 
-    void setupObjects(const std::shared_ptr<SpriteData> &spriteData, const std::shared_ptr<TextureHolderInterface> &spriteTexture, const std::optional<WeakActor<Tiled2dMapVectorSourceSymbolDataManager>> &symbolDataManager = std::nullopt);
+    void setupObjects(const std::vector<std::pair<std::shared_ptr<SpriteData>, std::shared_ptr<::TextureHolderInterface>>> &sprites, const std::optional<WeakActor<Tiled2dMapVectorSourceSymbolDataManager>> &symbolDataManager = std::nullopt);
+    void addSprite(const std::shared_ptr<SpriteData> &spriteData, const std::shared_ptr<TextureHolderInterface> &spriteTexture);
 
     const std::vector<std::shared_ptr<Tiled2dMapVectorSymbolObject>>& getSymbolObjectsForCollision() const;
 
@@ -75,10 +76,10 @@ public:
     std::vector<std::shared_ptr< ::RenderObjectInterface>> getRenderObjects();
 private:
 
-    inline std::optional<Tiled2dMapVectorSymbolSubLayerPositioningWrapper>
+    std::optional<Tiled2dMapVectorSymbolSubLayerPositioningWrapper>
     getPositioning(std::vector<::Vec2D>::const_iterator &iterator, const std::vector<::Vec2D> &collection, const double interpolationValue);
 
-    inline std::shared_ptr<Tiled2dMapVectorSymbolObject> createSymbolObject(const Tiled2dMapVersionedTileInfo &tileInfo,
+    std::shared_ptr<Tiled2dMapVectorSymbolObject> createSymbolObject(const Tiled2dMapVersionedTileInfo &tileInfo,
                                                                             const std::string &layerIdentifier,
                                                                             const std::shared_ptr<SymbolVectorLayerDescription> &description,
                                                                             const std::shared_ptr<Tiled2dMapVectorLayerConfig> &layerConfig,
@@ -98,6 +99,7 @@ private:
                                                                             const bool hasCustomTexture,
                                                                             const uint16_t styleIndex);
 
+
 public:
     uint32_t groupId;
 private:
@@ -109,16 +111,45 @@ private:
     const Tiled2dMapVersionedTileInfo tileInfo;
     const std::string layerIdentifier;
     std::shared_ptr<SymbolVectorLayerDescription> layerDescription;
+    BlendMode layerBlendMode;
     const WeakActor<Tiled2dMapVectorFontProvider> fontProvider;
 
-    std::shared_ptr<Quad2dInstancedInterface> iconInstancedObject;
-    std::shared_ptr<Quad2dStretchedInstancedInterface> stretchedInstancedObject;
+    struct SpriteIconDescriptor {
+        std::string identifier;
+        std::shared_ptr<TextureHolderInterface> spriteTexture;
+
+        VectorModificationWrapper<float> iconPositions;
+        VectorModificationWrapper<float> iconScales;
+        VectorModificationWrapper<float> iconRotations;
+        VectorModificationWrapper<float> iconAlphas;
+        VectorModificationWrapper<float> iconOffsets;
+        VectorModificationWrapper<float> iconTextureCoordinates;
+
+        VectorModificationWrapper<float> stretchedIconPositions;
+        VectorModificationWrapper<float> stretchedIconScales;
+        VectorModificationWrapper<float> stretchedIconRotations;
+        VectorModificationWrapper<float> stretchedIconAlphas;
+        VectorModificationWrapper<float> stretchedIconStretchInfos;
+        VectorModificationWrapper<float> stretchedIconTextureCoordinates;
+
+        std::shared_ptr<Quad2dInstancedInterface> iconInstancedObject;
+        std::shared_ptr<Quad2dStretchedInstancedInterface> stretchedInstancedObject;
+
+        // Temporary counters. Kept here to avoid having to allocate these in each update call.
+        uint32_t tmpIconCounter;
+        uint32_t tmpStretchedIconCounter;
+    };
+    std::vector<SpriteIconDescriptor> sprites;
+
+    // Simple resolution of sprites names
+    std::unordered_map<SpriteIconId, ResolvedSpriteIconId> spriteLookup; 
+    // Metadata for individual sprite images of all sprite sheets. Indexed by ResolvedSpriteIconId.icon
+    std::vector<SpriteDesc> spriteIconData;
+
     std::vector<std::shared_ptr<TextInstancedInterface>> textInstancedObjects;
     std::shared_ptr<PolygonGroup2dLayerObject> boundingBoxLayerObject;
 
-    std::shared_ptr<TextureHolderInterface> spriteTexture;
-    std::shared_ptr<SpriteData> spriteData;
-
+    // TODO: combine this special case with regular sprites
     struct CustomIconDescriptor {
         VectorModificationWrapper<float> iconPositions;
         VectorModificationWrapper<float> iconScales;
@@ -147,14 +178,6 @@ private:
 
     std::vector<CustomIconDescriptor> customTextures;
 
-
-    VectorModificationWrapper<float> iconPositions;
-    VectorModificationWrapper<float> iconScales;
-    VectorModificationWrapper<float> iconRotations;
-    VectorModificationWrapper<float> iconAlphas;
-    VectorModificationWrapper<float> iconOffsets;
-    VectorModificationWrapper<float> iconTextureCoordinates;
-
     struct TextDescriptor {
         std::shared_ptr<FontLoaderResult> fontResult;
         VectorModificationWrapper<float> textPositions;
@@ -182,13 +205,6 @@ private:
     };
     std::vector<std::shared_ptr<TextDescriptor>> textDescriptors;
 
-    VectorModificationWrapper<float> stretchedIconPositions;
-    VectorModificationWrapper<float> stretchedIconScales;
-    VectorModificationWrapper<float> stretchedIconRotations;
-    VectorModificationWrapper<float> stretchedIconAlphas;
-    VectorModificationWrapper<float> stretchedIconStretchInfos;
-    VectorModificationWrapper<float> stretchedIconTextureCoordinates;
-
     float alpha = 1.0;
     double dpFactor = 1.0;
 
@@ -209,4 +225,8 @@ private:
 #endif
 
     UsedKeysCollection usedKeys;
+
+private:
+    bool prepareIconObject(SpriteIconDescriptor &spriteIconDescriptor, size_t iconCount, size_t stretchedIconCount);
+
 };

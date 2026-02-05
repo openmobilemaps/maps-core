@@ -1,0 +1,88 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 22,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "default",
+      "displayName": "Debug build",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_CXX_COMPILER": "clang++"
+      }
+    },
+    {
+      "name": "release",
+      "inherits": "default",
+      "displayName": "Release build",
+      "binaryDir": "${sourceDir}/build-release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+      }
+    },
+    {
+      "name": "asan",
+      "displayName": "AddressSanitizer Configuration",
+      "inherits": "default",
+      "binaryDir": "${sourceDir}/build-asan",
+      "cacheVariables": {
+        "CMAKE_CXX_COMPILER": "clang++",
+        "CMAKE_LINKER": "clang++",
+        "CMAKE_CXX_FLAGS": "-fsanitize=address -fno-omit-frame-pointer"
+      }
+    },
+    {
+      "name": "wasm",
+      "displayName": "Emscripten / WASM build",
+      "generator": "Unix Makefiles",
+      "binaryDir": "${sourceDir}/build-wasm",
+      "toolchainFile": "emscripten.cmake",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+      }
+    },
+    {
+      "name": "wasm-debug",
+      "displayName": "Emscripten / WASM Debug build",
+      "inherits": "wasm",
+      "binaryDir": "${sourceDir}/build-wasm-debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "wasm-release",
+      "displayName": "Emscripten / WASM Release build",
+      "inherits": "wasm",
+      "binaryDir": "${sourceDir}/build-wasm-release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "default",
+      "displayName": "Default Build Preset",
+      "configurePreset": "default"
+    },
+    {
+      "name": "wasm",
+      "displayName": "Emscripten / WASM",
+      "configurePreset": "wasm",
+      "jobs": 16
+    },
+    {
+      "name": "wasm-release",
+      "displayName": "Emscripten / WASM Release",
+      "configurePreset": "wasm-release",
+      "jobs": 16
+    }
+  ]
+}

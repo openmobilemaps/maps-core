@@ -10,9 +10,11 @@
 
 #pragma once
 
-#include <unordered_map>
-#include <string>
 #include "json.h"
+#include <array>
+#include <optional>
+#include <string>
+#include <unordered_map>
 
 struct SpriteDesc {
     int x;
@@ -21,14 +23,14 @@ struct SpriteDesc {
     int height;
     float pixelRatio;
 
-    std::vector<float> content;
-    std::vector<std::pair<float,float>> stretchX;
+    std::optional<std::array<float, 4>> content;
+    std::vector<std::pair<float, float>> stretchX;
     std::vector<std::pair<float, float>> stretchY;
 };
 
-inline void to_json(nlohmann::json& j, const SpriteDesc& spriteDesc) {}
+inline void to_json(nlohmann::json &j, const SpriteDesc &spriteDesc) {}
 
-inline void from_json(const nlohmann::json& j, SpriteDesc& spriteDesc) {
+inline void from_json(const nlohmann::json &j, SpriteDesc &spriteDesc) {
     j.at("x").get_to(spriteDesc.x);
     j.at("y").get_to(spriteDesc.y);
     j.at("width").get_to(spriteDesc.width);
@@ -36,7 +38,7 @@ inline void from_json(const nlohmann::json& j, SpriteDesc& spriteDesc) {
     j.at("pixelRatio").get_to(spriteDesc.pixelRatio);
 
     if (j.contains("content")) {
-        j.at("content").get_to(spriteDesc.content);
+        spriteDesc.content = j.at("content").get<std::array<float, 4>>();
     }
 
     if (j.contains("stretchX")) {
@@ -49,7 +51,10 @@ inline void from_json(const nlohmann::json& j, SpriteDesc& spriteDesc) {
 }
 
 struct SpriteData {
+    std::string identifier;
     std::unordered_map<std::string, SpriteDesc> sprites;
 
-    SpriteData(std::unordered_map<std::string, SpriteDesc> sprites): sprites(sprites) {}
+    SpriteData(std::string identifier, std::unordered_map<std::string, SpriteDesc> sprites)
+        : identifier(identifier)
+        , sprites(sprites) {}
 };

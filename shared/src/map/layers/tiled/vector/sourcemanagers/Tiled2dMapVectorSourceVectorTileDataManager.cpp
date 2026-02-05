@@ -106,11 +106,7 @@ void Tiled2dMapVectorSourceVectorTileDataManager::onVectorTilesUpdated(const std
                                                                                coordinateConverterHelper,
                                                                                is3D);
                     auto convertedTileBounds = coordinateConverterHelper->convertRectToRenderSystem(tileEntry->tileInfo.tileInfo.bounds);
-                    std::optional<float> maxSegmentLength = std::nullopt;
-                    if (is3D) {
-                        maxSegmentLength = std::min(std::abs(convertedTileBounds.bottomRight.x - convertedTileBounds.topLeft.x) /
-                                                    POLYGON_MASK_SUBDIVISION_FACTOR, (M_PI * 2.0) / POLYGON_MASK_SUBDIVISION_FACTOR);
-                    }
+                    
                     double cx = (convertedTileBounds.bottomRight.x + convertedTileBounds.topLeft.x) / 2.0;
                     double cy = (convertedTileBounds.bottomRight.y + convertedTileBounds.topLeft.y) / 2.0;
                     double rx = is3D ? 1.0 * sin(cy) * cos(cx) : cx;
@@ -118,8 +114,23 @@ void Tiled2dMapVectorSourceVectorTileDataManager::onVectorTilesUpdated(const std
                     double rz = is3D ? -1.0 * sin(cy) * sin(cx) : 0.0;
 
                     Vec3D origin(rx, ry, rz);
-
+                    
+                #ifdef HARDWARE_TESSELLATION_SUPPORTED
+                    std::optional<float> subdivisionFactor = std::nullopt;
+                    if (is3D) {
+                        subdivisionFactor = std::optional<float>(float(POLYGON_MASK_SUBDIVISION_FACTOR));
+                    }
+                    tileMask->setPolygons(tileEntry->masks, origin, subdivisionFactor);
+                #else
+                    std::optional<float> maxSegmentLength = std::nullopt;
+                    if (is3D) {
+                        maxSegmentLength = std::min(
+                            std::abs(convertedTileBounds.bottomRight.x - convertedTileBounds.topLeft.x) / std::pow(2, POLYGON_MASK_SUBDIVISION_FACTOR),
+                            (M_PI * 2.0) / std::pow(2, POLYGON_MASK_SUBDIVISION_FACTOR));
+                    }
+                    
                     tileMask->setPolygons(tileEntry->masks, origin, maxSegmentLength);
+                #endif
 
                     newTileMasks[tileEntry->tileInfo] = Tiled2dMapLayerMaskWrapper(tileMask, hash);
                 }

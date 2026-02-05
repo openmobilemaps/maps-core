@@ -39,15 +39,15 @@ public:
         return matching;
     }
 
-    float getIconAlpha(float targetAlpha, long long now) {
+    float getIconAlpha(float targetAlpha, int64_t now) {
         return internalGetAlpha(targetAlpha, now, lastIconAlpha, iconAnimationStart);
     }
 
-    float getStretchIconAlpha(float targetAlpha, long long now) {
+    float getStretchIconAlpha(float targetAlpha, int64_t now) {
         return internalGetAlpha(targetAlpha, now, lastStretchIconAlpha, stretchIconAnimationStart);
     }
 
-    float getTextAlpha(float targetAlpha, long long now) {
+    float getTextAlpha(float targetAlpha, int64_t now) {
         return internalGetAlpha(targetAlpha, now, lastTextAlpha, textAnimationStart);
     }
 
@@ -127,13 +127,13 @@ private:
     const double xTolerance;
     const double yTolerance;
 
-    long long iconAnimationStart = 0;
+    int64_t iconAnimationStart = 0;
     float lastIconAlpha = 0;
 
-    long long stretchIconAnimationStart = 0;
+    int64_t stretchIconAnimationStart = 0;
     float lastStretchIconAlpha = 0;
 
-    long long textAnimationStart = 0;
+    int64_t textAnimationStart = 0;
     float lastTextAlpha = 0;
 
     std::atomic_int usageCount = 0;
@@ -147,7 +147,7 @@ private:
     const int64_t animationDelay;
     bool animationsEnabled = true;
 
-    float internalGetAlpha(float targetAlpha, long long now, float &lastAlpha, long long &animationStart) {
+    float internalGetAlpha(float targetAlpha, int64_t now, float &lastAlpha, int64_t &animationStart) {
         if (animationDuration == 0) {
             return targetAlpha;
         }
@@ -155,7 +155,7 @@ private:
             if (animationStart == 0) {
                 animationStart = now + animationDelay;
             }
-            float progress = animationsEnabled ? std::min(double(std::max(now - animationStart, 0ll)) / animationDuration, 1.0) : 1.0;
+            float progress = animationsEnabled ? std::min(double(std::max(now - animationStart, (int64_t)0)) / animationDuration, 1.0) : 1.0;
             if (progress == 1.0) {
                 animationStart = 0;
                 lastAlpha = targetAlpha;

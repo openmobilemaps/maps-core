@@ -28,8 +28,8 @@ open class GlTextureView @JvmOverloads constructor(context: Context, attrs: Attr
 		surfaceTextureListener = this
 	}
 
-	private var renderer: GLSurfaceView.Renderer? = null
-	private var glThread: GLThread? = null
+	@Volatile private var renderer: GLSurfaceView.Renderer? = null
+	@Volatile private var glThread: GLThread? = null
 	protected var surfaceAvailable = false
 		private set
 
@@ -42,9 +42,19 @@ open class GlTextureView @JvmOverloads constructor(context: Context, attrs: Attr
 	private var performanceLoggers: List<PerformanceLoggerInterface> = emptyList()
 
 	override fun onSurfaceTextureAvailable(surfaceTexture: SurfaceTexture, width: Int, height: Int) {
-		glThread = GLThread(onResumeCallback = this::onGlThreadResume,
+		val glThread = this.glThread
+		this.glThread = glThread?.apply {
+			surface = surfaceTexture
+			onWindowResize(getWidth(), getHeight())
+			if (shouldResume) {
+				doResume()
+			}
+		} ?: GLThread(
+			onResumeCallback = this::onGlThreadResume,
 			onPauseCallback = this::onGlThreadPause,
-			onFinishingCallback = this::onGlThreadFinishing).apply {
+			onFinishingCallback = this::onGlThreadFinishing,
+			usePbufferSurface = false
+		).apply {
 			surface = surfaceTexture
 			onWindowResize(getWidth(), getHeight())
 			useMSAA = this@GlTextureView.useMSAA
@@ -69,7 +79,7 @@ open class GlTextureView @JvmOverloads constructor(context: Context, attrs: Attr
 
 	override fun onSurfaceTextureDestroyed(surface: SurfaceTexture): Boolean {
 		surfaceAvailable = false
-		finishGlThread()
+		pauseGlThread(true)
 		return false
 	}
 
@@ -83,6 +93,7 @@ open class GlTextureView @JvmOverloads constructor(context: Context, attrs: Attr
 
 	fun setRenderer(renderer: GLSurfaceView.Renderer?) {
 		this.renderer = renderer
+		glThread?.renderer = renderer
 	}
 
 	fun configureGL(useMSAA: Boolean) {
@@ -107,9 +118,9 @@ open class GlTextureView @JvmOverloads constructor(context: Context, attrs: Attr
 		glThread?.enforcedFinishInterval = enforcedFinishInterval
 	}
 
-	fun pauseGlThread() {
+	fun pauseGlThread(clearSurface: Boolean = false) {
 		shouldResume = false
-		glThread?.doPause()
+		glThread?.doPause(clearSurface)
 	}
 
 	fun resumeGlThread() {
@@ -120,7 +131,10 @@ open class GlTextureView @JvmOverloads constructor(context: Context, attrs: Attr
 	fun finishGlThread() {
 		val glThread = glThread
 		this.glThread = null
-		glThread?.finish()
+		glThread?.apply {
+			renderer = null
+			finish()
+		}
 	}
 
 	open fun setPerformanceLoggers(performanceLoggers: List<PerformanceLoggerInterface>) {

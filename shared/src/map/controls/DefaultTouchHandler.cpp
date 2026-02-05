@@ -90,6 +90,12 @@ void DefaultTouchHandler::onTouchEvent(const TouchEvent &touchEvent) {
             break;
         }
 
+        case TouchAction::SCROLL: {
+            touchPosition = touchEvent.pointers[0];
+            handleScroll(touchPosition, touchEvent.scrollDelta);
+            break;
+        }
+
         case TouchAction::CANCEL: {
             handleTouchCancel();
             break;
@@ -121,6 +127,12 @@ void DefaultTouchHandler::onTouchEvent(const TouchEvent &touchEvent) {
 
         case TouchAction::UP: {
             handleTwoFingerUp(oldPointer);
+            break;
+        }
+        case TouchAction::SCROLL: {
+            // TO_CHECK
+            // idk how to handle zoom/scroll with two fingers - does this even make sense?
+            // doing nothing for now
             break;
         }
 
@@ -324,6 +336,27 @@ void DefaultTouchHandler::handleTouchUp() {
         }
     }
     stateTime = DateHelper::currentTimeMillis();
+}
+
+void DefaultTouchHandler::handleScroll(Vec2F position, float delta) {
+
+    std::lock_guard<std::recursive_mutex> lock(stateMutex);
+
+#ifdef ENABLE_TOUCH_LOGGING
+    LogDebug <<= "TouchHandler: is scrolling";
+#endif
+    // let's ignore the state atm
+    // state = SCROLLING;
+
+    stateTime = DateHelper::currentTimeMillis();
+    {
+        std::lock_guard<std::recursive_mutex> lock(listenerMutex);
+        for (auto &[index, listener] : listeners) {
+            if (listener->onScroll(position, delta)) {
+                break;
+            }
+        }
+    }
 }
 
 void DefaultTouchHandler::handleTouchCancel() {

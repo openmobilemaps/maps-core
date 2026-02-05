@@ -3,11 +3,74 @@
 
 #import "MCTextureHolderInterface+Private.h"
 #import "MCTextureHolderInterface.h"
+#import "DJICppWrapperCache+Private.h"
+#import "DJIError.h"
 #import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
+#include <exception>
 #include <stdexcept>
+#include <utility>
 
 static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for this file");
+
+@interface MCTextureHolderInterfaceCppProxy : NSObject<MCTextureHolderInterface>
+
+- (id)initWithCpp:(const std::shared_ptr<::TextureHolderInterface>&)cppRef;
+
+@end
+
+@implementation MCTextureHolderInterfaceCppProxy {
+    ::djinni::CppProxyCache::Handle<std::shared_ptr<::TextureHolderInterface>> _cppRefHandle;
+}
+
+- (id)initWithCpp:(const std::shared_ptr<::TextureHolderInterface>&)cppRef
+{
+    if (self = [super init]) {
+        _cppRefHandle.assign(cppRef);
+    }
+    return self;
+}
+
+- (int32_t)getImageWidth {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getImageWidth();
+        return ::djinni::I32::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (int32_t)getImageHeight {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getImageHeight();
+        return ::djinni::I32::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (int32_t)getTextureWidth {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getTextureWidth();
+        return ::djinni::I32::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (int32_t)getTextureHeight {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getTextureHeight();
+        return ::djinni::I32::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (int32_t)attachToGraphics {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->attachToGraphics();
+        return ::djinni::I32::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)clearFromGraphics {
+    try {
+        _cppRefHandle.get()->clearFromGraphics();
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
 
 namespace djinni_generated {
 
@@ -70,6 +133,9 @@ auto TextureHolderInterface::toCpp(ObjcType objc) -> CppType
     if (!objc) {
         return nullptr;
     }
+    if ([(id)objc isKindOfClass:[MCTextureHolderInterfaceCppProxy class]]) {
+        return ((MCTextureHolderInterfaceCppProxy*)objc)->_cppRefHandle.get();
+    }
     return ::djinni::get_objc_proxy<ObjcProxy>(objc);
 }
 
@@ -78,7 +144,12 @@ auto TextureHolderInterface::fromCppOpt(const CppOptType& cpp) -> ObjcType
     if (!cpp) {
         return nil;
     }
-    return dynamic_cast<ObjcProxy&>(*cpp).djinni_private_get_proxied_objc_object();
+    if (auto cppPtr = dynamic_cast<ObjcProxy*>(cpp.get())) {
+        return cppPtr->djinni_private_get_proxied_objc_object();
+    }
+    return ::djinni::get_cpp_proxy<MCTextureHolderInterfaceCppProxy>(cpp);
 }
 
 } // namespace djinni_generated
+
+@end

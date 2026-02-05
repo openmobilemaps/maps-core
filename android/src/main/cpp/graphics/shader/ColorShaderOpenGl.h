@@ -20,6 +20,7 @@ class ColorShaderOpenGl : public BaseShaderProgramOpenGl,
                           public std::enable_shared_from_this<ShaderProgramInterface> {
   public:
     ColorShaderOpenGl(bool projectOntoUnitSphere);
+    ColorShaderOpenGl(const std::string &programName);
 
     virtual std::shared_ptr<ShaderProgramInterface> asShaderProgramInterface() override;
 

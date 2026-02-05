@@ -10,7 +10,7 @@ find_path(OSMESA_INCLUDE_DIRS
   NAMES "GL/osmesa.h" 
   REQUIRED)
 
-file(GLOB_RECURSE mapscore_jni_SRC
+file(GLOB_RECURSE mapscore_jni_SRC CONFIGURE_DEPENDS
   "../external/djinni/support-lib/jni/*.cpp"
   "../bridging/android/jni/*.cpp"
   "src/main/cpp/jni/*.cpp"

@@ -115,6 +115,16 @@ bool NativeTouchInterface::JavaProxy::onTwoFingerMoveComplete() {
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni::Bool::toCpp(jniEnv, jret);
 }
+bool NativeTouchInterface::JavaProxy::onScroll(const ::Vec2F & c_posScreen, float c_scrollDelta) {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeTouchInterface>::get();
+    auto jret = jniEnv->CallBooleanMethod(Handle::get().get(), data.method_onScroll,
+                                          ::djinni::get(::djinni_generated::NativeVec2F::fromCpp(jniEnv, c_posScreen)),
+                                          ::djinni::get(::djinni::F32::fromCpp(jniEnv, c_scrollDelta)));
+    ::djinni::jniExceptionCheck(jniEnv);
+    return ::djinni::Bool::toCpp(jniEnv, jret);
+}
 void NativeTouchInterface::JavaProxy::clearTouch() {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
@@ -229,6 +239,16 @@ CJNIEXPORT jboolean JNICALL Java_io_openmobilemaps_mapscore_shared_map_controls_
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::TouchInterface>(nativeRef);
         auto r = ref->onTwoFingerMoveComplete();
+        return ::djinni::release(::djinni::Bool::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT jboolean JNICALL Java_io_openmobilemaps_mapscore_shared_map_controls_TouchInterface_00024CppProxy_native_1onScroll(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeVec2F::JniType j_posScreen, jfloat j_scrollDelta)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::TouchInterface>(nativeRef);
+        auto r = ref->onScroll(::djinni_generated::NativeVec2F::toCpp(jniEnv, j_posScreen),
+                               ::djinni::F32::toCpp(jniEnv, j_scrollDelta));
         return ::djinni::release(::djinni::Bool::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }

@@ -65,7 +65,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
     nlohmann::json json;
 
     try {
-        json = nlohmann::json::parse(styleJsonString);
+        json = nlohmann::json::parse(styleJsonString, nullptr, true, true);
     }
     catch (nlohmann::json::parse_error &ex) {
         return Tiled2dMapVectorLayerParserResult(nullptr, LoaderStatus::ERROR_OTHER, ex.what(), std::nullopt);
@@ -147,7 +147,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                 auto string = std::string((char *) result.data->buf(), result.data->len());
                 nlohmann::json json;
                 try {
-                    json = nlohmann::json::parse(string);
+                    json = nlohmann::json::parse(string, nullptr, true, true);
                 }
                 catch (nlohmann::json::parse_error &ex) {
                     return Tiled2dMapVectorLayerParserResult(nullptr, LoaderStatus::ERROR_OTHER, "", std::nullopt);
@@ -204,7 +204,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
             }
             auto string = std::string((char*)result.data->buf(), result.data->len());
             try {
-                tileJsons[key] = nlohmann::json::parse(string);
+                tileJsons[key] = nlohmann::json::parse(string, nullptr, true, true);
             }
             catch (nlohmann::json::parse_error &ex) {
                 return Tiled2dMapVectorLayerParserResult(nullptr, LoaderStatus::ERROR_OTHER, "", std::nullopt);
@@ -303,6 +303,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
         globalIsInteractable = parser.parseValue(json["metadata"]["interactable"]);
         persistingSymbolPlacement = json["metadata"].value("persistingSymbolPlacement", false);
         
+        // XXX: make this a per sprite option?
         if (json["metadata"].contains("use3xSprites")) {
             use3xSprites = json["metadata"]["use3xSprites"].get<bool>();
         }
@@ -572,15 +573,20 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
     }
 
 
-    std::optional<std::string> sprite;
+    // https://maplibre.org/maplibre-style-spec/sprite/#multiple-sprite-sources
+    std::vector<SpriteSourceDescription> sprites;
     if (json["sprite"].is_string()) {
-        sprite = json["sprite"].get<std::string>();
+        sprites.emplace_back("default", json["sprite"].get<std::string>());
+    } else if (json["sprite"].is_array()) {
+        for (const auto &sprite : json["sprite"]) {
+            sprites.emplace_back(sprite["id"].get<std::string>(), sprite["url"].get<std::string>());
+        }
     }
 
     auto mapDesc = std::make_shared<VectorMapDescription>(layerName,
                                                           sourceDescriptions,
                                                           layers,
-                                                          sprite,
+                                                          sprites,
                                                           geojsonSources,
                                                           persistingSymbolPlacement,
                                                           use3xSprites);

@@ -206,7 +206,7 @@ TEST_CASE("GeoJSON Parser valid") {
 
     SECTION(testCase.file) {
         const std::string jsonString = TestData::readFileToString(testCase.file);
-        const auto json = nlohmann::json::parse(jsonString);
+        const auto json = nlohmann::json::parse(jsonString, nullptr, true, true);
         StringInterner stringTable = ValueKeys::newStringInterner();
 
         std::string log;
@@ -264,7 +264,7 @@ TEST_CASE("GeoJSON Parser invalid") {
     SECTION(file) {
         const std::string jsonString = TestData::readFileToString(file);
         // files are valid json, no exception expected here.
-        auto json = nlohmann::json::parse(jsonString);
+        auto json = nlohmann::json::parse(jsonString, nullptr, true, true);
         StringInterner stringTable = ValueKeys::newStringInterner();
         REQUIRE_THROWS_AS(GeoJsonParser::getGeoJson(json, stringTable), nlohmann::json::exception);
     }
@@ -274,7 +274,7 @@ TEST_CASE("GeoJSON Parser Points") {
     SECTION("skip everything but Point") {
         auto file = "geojson/featurecollection_all-types.json";
         const std::string jsonString = TestData::readFileToString(file);
-        auto json = nlohmann::json::parse(jsonString);
+        auto json = nlohmann::json::parse(jsonString, nullptr, true, true);
         auto points = GeoJsonParser::getPointsWithProperties(json);
         REQUIRE(points.size() == 1);
         REQUIRE(points[0].featureInfo.identifier == "point0");
@@ -283,7 +283,7 @@ TEST_CASE("GeoJSON Parser Points") {
     SECTION("properties") {
         auto file = "geojson/featurecollection_points.json";
         const std::string jsonString = TestData::readFileToString(file);
-        auto json = nlohmann::json::parse(jsonString);
+        auto json = nlohmann::json::parse(jsonString, nullptr, true, true);
         std::string log;
         std::vector<GeoJsonPoint> points;
         {
@@ -346,7 +346,7 @@ TEST_CASE("GeoJSON Parser Lines") {
     SECTION("skip everything but LineString") {
         auto file = "geojson/featurecollection_all-types.json";
         const std::string jsonString = TestData::readFileToString(file);
-        auto json = nlohmann::json::parse(jsonString);
+        auto json = nlohmann::json::parse(jsonString, nullptr, true, true);
         auto lines = GeoJsonParser::getLinesWithProperties(json);
         REQUIRE(lines.size() == 1);
         REQUIRE(lines[0].featureInfo.identifier == "line0");
@@ -356,7 +356,7 @@ TEST_CASE("GeoJSON Parser Lines") {
     SECTION("properties") {
         auto file = "geojson/featurecollection_lines.json";
         const std::string jsonString = TestData::readFileToString(file);
-        auto json = nlohmann::json::parse(jsonString);
+        auto json = nlohmann::json::parse(jsonString, nullptr, true, true);
         std::string log;
         std::vector<GeoJsonLine> lines;
         {

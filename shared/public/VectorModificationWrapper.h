@@ -55,12 +55,12 @@ class VectorModificationWrapper {
     const T *data() const { return vec.data(); }
 
     void resize(size_t newSize) {
-        modified = true;
+        modified |= (newSize != vec.size());
         vec.resize(newSize);
     }
 
     void resize(size_t newSize, const T &value) {
-        modified = true;
+        modified |= (newSize != vec.size());
         vec.resize(newSize, value);
     }
 

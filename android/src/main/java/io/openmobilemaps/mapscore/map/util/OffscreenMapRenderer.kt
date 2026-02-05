@@ -18,7 +18,7 @@ import javax.microedition.khronos.opengles.GL10
 open class OffscreenMapRenderer(val sizePx: Vec2I, val density: Float = 72f) : GLSurfaceView.Renderer, AndroidSchedulerCallback,
 	MapViewInterface {
 
-	private lateinit var glThread: GLThread
+	private var glThread: GLThread? = null
 
 	var mapInterface: MapInterface? = null
 		private set
@@ -37,7 +37,7 @@ open class OffscreenMapRenderer(val sizePx: Vec2I, val density: Float = 72f) : G
 		)
 		mapInterface.setCallbackHandler(object : MapCallbackInterface() {
 			override fun invalidate() {
-				glThread.requestRender()
+				glThread?.requestRender()
 			}
 
 			override fun onMapResumed() {
@@ -47,9 +47,12 @@ open class OffscreenMapRenderer(val sizePx: Vec2I, val density: Float = 72f) : G
 		mapInterface.setBackgroundColor(Color(1f, 1f, 1f, 1f))
 		this.mapInterface = mapInterface
 
-		glThread = GLThread(onResumeCallback = this::onGlThreadResume,
+		glThread = GLThread(
+			onResumeCallback = this::onGlThreadResume,
 			onPauseCallback = this::onGlThreadPause,
-			onFinishingCallback = this::onGlThreadFinishing).apply {
+			onFinishingCallback = this::onGlThreadFinishing,
+			usePbufferSurface = true
+		).apply {
 			this.useMSAA = useMSAA
 			this.enforcedFinishInterval = 3
 			onWindowResize(sizePx.x, sizePx.y)
@@ -60,7 +63,7 @@ open class OffscreenMapRenderer(val sizePx: Vec2I, val density: Float = 72f) : G
 	}
 
 	protected open fun onGlThreadFinishing() {
-		glThread.renderer = null
+		glThread?.renderer = null
 		mapInterface?.destroy()
 		mapInterface = null
 	}
@@ -76,7 +79,7 @@ open class OffscreenMapRenderer(val sizePx: Vec2I, val density: Float = 72f) : G
 	}
 
 	fun setOnDrawCallback(onDrawCallback: (() -> Unit)? = null) {
-		glThread.onDrawCallback = onDrawCallback
+		glThread?.onDrawCallback = onDrawCallback
 	}
 
 	override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
@@ -107,22 +110,27 @@ open class OffscreenMapRenderer(val sizePx: Vec2I, val density: Float = 72f) : G
 			if (saveNextFrame) {
 				saveFrame()
 			} else {
-				glThread.requestRender()
+				glThread?.requestRender()
 			}
 		}
 	}
 
 	override fun scheduleOnGlThread(task: TaskInterface) {
-		glThread.queueEvent { task.run() }
+		glThread?.queueEvent { task.run() }
 	}
 
 	fun resume() {
-		glThread.doResume()
+		glThread?.doResume()
 	}
 
 	fun destroy() {
-		glThread.doPause()
-		glThread.finish()
+		mapInterface?.setCallbackHandler(null)
+		val glThread = glThread
+		this.glThread = null
+		glThread?.apply {
+			doPause()
+			finish()
+		}
 	}
 
 	override fun setBackgroundColor(color: Color) {
