@@ -28,9 +28,9 @@ OBJCPP_OUT="$DJINNI_OUT_DIR/ios"
 KOTLIN_OUT="$DJINNI_OUT_DIR/android/java/io/openmobilemaps/mapscore/shared"
 JNI_OUT="$DJINNI_OUT_DIR/android/jni"
 
-KMP_COMMON_OUT="$base_dir/../kmp/commonMain/kotlin/io/openmobilemaps/mapscore/kmp"
-KMP_ANDROID_OUT="$base_dir/../kmp/androidMain/kotlin/io/openmobilemaps/mapscore/kmp"
-KMP_IOS_OUT="$base_dir/../kmp/iosMain/kotlin/io/openmobilemaps/mapscore/kmp"
+KMP_COMMON_OUT="$base_dir/../bridging/kmp/commonMain/kotlin/io/openmobilemaps/mapscore/kmp"
+KMP_ANDROID_OUT="$base_dir/../bridging/kmp/androidMain/kotlin/io/openmobilemaps/mapscore/kmp"
+KMP_IOS_OUT="$base_dir/../bridging/kmp/iosMain/kotlin/io/openmobilemaps/mapscore/kmp"
 KMP_PACKAGE="io.openmobilemaps.mapscore.kmp"
 KMP_IOS_MODULE="MapCoreSharedModule"
 KMP_BRIDGE_PREFIX="KM"
@@ -126,7 +126,7 @@ for dir in "$KMP_COMMON_OUT" "$KMP_ANDROID_OUT" "$KMP_IOS_OUT"; do
 done
 
 
-MANUAL_KMP_DIR="$base_dir/../kmp/bridging"
+MANUAL_KMP_DIR="$base_dir/../kmp"
 MANUAL_KMP_COMMON="$MANUAL_KMP_DIR/commonMain/kotlin/io/openmobilemaps/mapscore/kmp"
 MANUAL_KMP_ANDROID="$MANUAL_KMP_DIR/androidMain/kotlin/io/openmobilemaps/mapscore/kmp"
 MANUAL_KMP_IOS="$MANUAL_KMP_DIR/iosMain/kotlin/io/openmobilemaps/mapscore/kmp"

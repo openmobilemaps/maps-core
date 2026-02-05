@@ -141,13 +141,13 @@ kotlin {
 
     sourceSets {
         val commonMain by getting {
-            kotlin.srcDir("kmp/commonMain/kotlin")
+            kotlin.srcDir("bridging/kmp/commonMain/kotlin")
             dependencies {
                 api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
             }
         }
         val androidMain by getting {
-            kotlin.srcDir("kmp/androidMain/kotlin")
+            kotlin.srcDir("bridging/kmp/androidMain/kotlin")
             dependencies {
                 api("io.openmobilemaps:mapscore:3.6.0")
                 implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.9.3")
@@ -156,7 +156,7 @@ kotlin {
             }
         }
         val iosMain by getting {
-            kotlin.srcDir("kmp/iosMain/kotlin")
+            kotlin.srcDir("bridging/kmp/iosMain/kotlin")
             languageSettings.optIn("kotlinx.cinterop.ExperimentalForeignApi")
         }
         val iosArm64Main by getting {
