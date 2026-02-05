@@ -117,6 +117,7 @@ kotlin {
             }
         }
         iosTarget.swiftPackageConfig(cinteropName = mapCoreCinteropName) {
+            customPackageSourcePath = "$mapCoreCheckoutPath/kmp"
             minIos = "16.4"
             debug = mapCoreSpmBuildType == "debug"
             bridgeSettings {
