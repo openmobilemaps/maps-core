@@ -110,6 +110,8 @@ kotlin {
     iosTargets.forEach { iosTarget ->
         iosTarget.binaries.framework {
             isStatic = false
+            // Allow unresolved Obj-C symbols; they will be provided by another binary at final app link.
+            linkerOpts("-Wl,-undefined,dynamic_lookup")
         }
         iosTarget.compilations {
             val main by getting {

@@ -117,8 +117,16 @@ for file in $(find . -name "*.djinni" -type f -print); do
 
 done
 
+for dir in "$KMP_COMMON_OUT" "$KMP_ANDROID_OUT" "$KMP_IOS_OUT"; do
+    for base in DataRef Future MapInterfaceBridge; do
+        if [ -f "$dir/$base.kt" ]; then
+            mv "$dir/$base.kt" "$dir/KM$base.kt"
+        fi
+    done
+done
 
-MANUAL_KMP_DIR="$base_dir/kmp_manual"
+
+MANUAL_KMP_DIR="$base_dir/../kmp/bridging"
 MANUAL_KMP_COMMON="$MANUAL_KMP_DIR/commonMain/kotlin/io/openmobilemaps/mapscore/kmp"
 MANUAL_KMP_ANDROID="$MANUAL_KMP_DIR/androidMain/kotlin/io/openmobilemaps/mapscore/kmp"
 MANUAL_KMP_IOS="$MANUAL_KMP_DIR/iosMain/kotlin/io/openmobilemaps/mapscore/kmp"
