@@ -3,9 +3,10 @@
 
 package io.openmobilemaps.mapscore.kmp
 
-actual class KMPolygonLayerInterface actual constructor(
-    internal val nativeHandle: Any,
+actual class KMPolygonLayerInterface actual public constructor(
+    nativeHandle: Any,
 ) {
+    internal val nativeHandle: Any = nativeHandle
     private val native = nativeHandle as io.openmobilemaps.mapscore.shared.map.layers.polygon.PolygonLayerInterface
 
     actual fun setPolygons(polygons: ArrayList<KMPolygonInfo>, origin: KMVec3D) {

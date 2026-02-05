@@ -3,9 +3,10 @@
 
 package io.openmobilemaps.mapscore.kmp
 
-actual class KMSphereEffectLayerInterface actual constructor(
-    internal val nativeHandle: Any,
+actual class KMSphereEffectLayerInterface actual public constructor(
+    nativeHandle: Any,
 ) {
+    internal val nativeHandle: Any = nativeHandle
     private val native = nativeHandle as io.openmobilemaps.mapscore.shared.map.layers.effect.SphereEffectLayerInterface
 
     actual fun asLayerInterface(): KMLayerInterface {

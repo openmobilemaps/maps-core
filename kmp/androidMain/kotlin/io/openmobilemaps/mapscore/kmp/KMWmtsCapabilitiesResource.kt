@@ -3,9 +3,10 @@
 
 package io.openmobilemaps.mapscore.kmp
 
-actual class KMWmtsCapabilitiesResource actual constructor(
-    internal val nativeHandle: Any,
+actual class KMWmtsCapabilitiesResource actual public constructor(
+    nativeHandle: Any,
 ) {
+    internal val nativeHandle: Any = nativeHandle
     private val native = nativeHandle as io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.wmts.WmtsCapabilitiesResource
 
     actual fun createLayer(identifier: String, tileLoaders: ArrayList<KMLoaderInterface>): KMTiled2dMapRasterLayerInterface? {

@@ -3,9 +3,10 @@
 
 package io.openmobilemaps.mapscore.kmp
 
-actual class KMMapInterface actual constructor(
-    internal val nativeHandle: Any,
+actual class KMMapInterface actual public constructor(
+    nativeHandle: Any,
 ) {
+    internal val nativeHandle: Any = nativeHandle
     private val native = nativeHandle as io.openmobilemaps.mapscore.shared.map.MapInterface
 
     actual fun setCallbackHandler(callbackInterface: KMMapCallbackInterface?) {

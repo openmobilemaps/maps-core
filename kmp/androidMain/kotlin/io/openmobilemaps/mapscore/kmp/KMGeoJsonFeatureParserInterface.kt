@@ -3,9 +3,10 @@
 
 package io.openmobilemaps.mapscore.kmp
 
-actual class KMGeoJsonFeatureParserInterface actual constructor(
-    internal val nativeHandle: Any,
+actual class KMGeoJsonFeatureParserInterface actual public constructor(
+    nativeHandle: Any,
 ) {
+    internal val nativeHandle: Any = nativeHandle
     private val native = nativeHandle as io.openmobilemaps.mapscore.shared.map.layers.tiled.GeoJsonFeatureParserInterface
 
     actual fun parse(geoJson: String): ArrayList<KMVectorLayerFeatureInfo>? {

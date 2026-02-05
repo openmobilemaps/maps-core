@@ -3,9 +3,10 @@
 
 package io.openmobilemaps.mapscore.kmp
 
-actual class KMLineGroupShaderInterface actual constructor(
-    internal val nativeHandle: Any,
+actual class KMLineGroupShaderInterface actual public constructor(
+    nativeHandle: Any,
 ) {
+    internal val nativeHandle: Any = nativeHandle
     private val native = nativeHandle as io.openmobilemaps.mapscore.shared.graphics.shader.LineGroupShaderInterface
 
     actual fun setStyles(styles: KMSharedBytes) {

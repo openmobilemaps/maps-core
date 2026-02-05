@@ -3,9 +3,10 @@
 
 package io.openmobilemaps.mapscore.kmp
 
-actual class KMTextLayerInterface actual constructor(
-    internal val nativeHandle: Any,
+actual class KMTextLayerInterface actual public constructor(
+    nativeHandle: Any,
 ) {
+    internal val nativeHandle: Any = nativeHandle
     private val native = nativeHandle as io.openmobilemaps.mapscore.shared.map.layers.text.TextLayerInterface
 
     actual fun setTexts(texts: ArrayList<KMTextInfoInterface>) {

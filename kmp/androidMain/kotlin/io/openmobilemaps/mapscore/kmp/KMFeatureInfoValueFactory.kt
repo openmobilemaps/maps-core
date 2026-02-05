@@ -3,9 +3,10 @@
 
 package io.openmobilemaps.mapscore.kmp
 
-actual class KMFeatureInfoValueFactory actual constructor(
-    internal val nativeHandle: Any,
+actual class KMFeatureInfoValueFactory actual public constructor(
+    nativeHandle: Any,
 ) {
+    internal val nativeHandle: Any = nativeHandle
     private val native = nativeHandle as io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.FeatureInfoValueFactory
 
     actual companion object

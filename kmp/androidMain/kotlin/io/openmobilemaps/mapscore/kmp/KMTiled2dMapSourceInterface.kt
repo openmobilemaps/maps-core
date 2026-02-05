@@ -3,9 +3,10 @@
 
 package io.openmobilemaps.mapscore.kmp
 
-actual class KMTiled2dMapSourceInterface actual constructor(
-    internal val nativeHandle: Any,
+actual class KMTiled2dMapSourceInterface actual public constructor(
+    nativeHandle: Any,
 ) {
+    internal val nativeHandle: Any = nativeHandle
     private val native = nativeHandle as io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapSourceInterface
 
     actual fun onVisibleBoundsChanged(visibleBounds: KMRectCoord, curT: Int, zoom: Double) {

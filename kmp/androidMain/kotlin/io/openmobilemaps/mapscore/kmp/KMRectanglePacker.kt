@@ -3,9 +3,10 @@
 
 package io.openmobilemaps.mapscore.kmp
 
-actual class KMRectanglePacker actual constructor(
-    internal val nativeHandle: Any,
+actual class KMRectanglePacker actual public constructor(
+    nativeHandle: Any,
 ) {
+    internal val nativeHandle: Any = nativeHandle
     private val native = nativeHandle as io.openmobilemaps.mapscore.shared.graphics.RectanglePacker
 
     actual companion object

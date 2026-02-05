@@ -3,9 +3,10 @@
 
 package io.openmobilemaps.mapscore.kmp
 
-actual class KMThreadPoolScheduler actual constructor(
-    internal val nativeHandle: Any,
+actual class KMThreadPoolScheduler actual public constructor(
+    nativeHandle: Any,
 ) {
+    internal val nativeHandle: Any = nativeHandle
     private val native = nativeHandle as io.openmobilemaps.mapscore.shared.map.scheduling.ThreadPoolScheduler
 
     actual companion object

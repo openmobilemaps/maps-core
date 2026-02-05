@@ -7,7 +7,7 @@ actual class KMFuture<T> {
         native = null
     }
 
-    constructor(native: MapCoreSharedModule.DJFuture) {
+    internal constructor(native: MapCoreSharedModule.DJFuture) {
         this.native = native
     }
 }

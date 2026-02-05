@@ -3,9 +3,10 @@
 
 package io.openmobilemaps.mapscore.kmp
 
-actual class KMLineLayerInterface actual constructor(
-    internal val nativeHandle: Any,
+actual class KMLineLayerInterface actual public constructor(
+    nativeHandle: Any,
 ) {
+    internal val nativeHandle: Any = nativeHandle
     private val native = nativeHandle as io.openmobilemaps.mapscore.shared.map.layers.line.LineLayerInterface
 
     actual fun setLines(lines: ArrayList<KMLineInfoInterface>) {

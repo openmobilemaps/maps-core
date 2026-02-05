@@ -3,9 +3,10 @@
 
 package io.openmobilemaps.mapscore.kmp
 
-actual class KMShaderProgramInterface actual constructor(
-    internal val nativeHandle: Any,
+actual class KMShaderProgramInterface actual public constructor(
+    nativeHandle: Any,
 ) {
+    internal val nativeHandle: Any = nativeHandle
     private val native = nativeHandle as io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface
 
     actual fun getProgramName(): String {

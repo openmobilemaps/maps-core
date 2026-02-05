@@ -3,9 +3,10 @@
 
 package io.openmobilemaps.mapscore.kmp
 
-actual class KMReverseGeocoderInterface actual constructor(
-    internal val nativeHandle: Any,
+actual class KMReverseGeocoderInterface actual public constructor(
+    nativeHandle: Any,
 ) {
+    internal val nativeHandle: Any = nativeHandle
     private val native = nativeHandle as io.openmobilemaps.mapscore.shared.utils.ReverseGeocoderInterface
 
     actual fun reverseGeocode(coord: KMCoord, thresholdMeters: Long): ArrayList<KMVectorLayerFeatureCoordInfo> {

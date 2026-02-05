@@ -3,9 +3,10 @@
 
 package io.openmobilemaps.mapscore.kmp
 
-actual class KMCamera3dConfigFactory actual constructor(
-    internal val nativeHandle: Any,
+actual class KMCamera3dConfigFactory actual public constructor(
+    nativeHandle: Any,
 ) {
+    internal val nativeHandle: Any = nativeHandle
     private val native = nativeHandle as io.openmobilemaps.mapscore.shared.map.Camera3dConfigFactory
 
     actual companion object

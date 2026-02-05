@@ -3,9 +3,10 @@
 
 package io.openmobilemaps.mapscore.kmp
 
-actual class KMCpuPerformanceLoggerInterface actual constructor(
-    internal val nativeHandle: Any,
+actual class KMCpuPerformanceLoggerInterface actual public constructor(
+    nativeHandle: Any,
 ) {
+    internal val nativeHandle: Any = nativeHandle
     private val native = nativeHandle as io.openmobilemaps.mapscore.shared.map.CpuPerformanceLoggerInterface
 
     actual fun asPerformanceLoggerInterface(): KMPerformanceLoggerInterface {

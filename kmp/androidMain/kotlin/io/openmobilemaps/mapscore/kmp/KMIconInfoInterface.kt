@@ -3,9 +3,10 @@
 
 package io.openmobilemaps.mapscore.kmp
 
-actual class KMIconInfoInterface actual constructor(
-    internal val nativeHandle: Any,
+actual class KMIconInfoInterface actual public constructor(
+    nativeHandle: Any,
 ) {
+    internal val nativeHandle: Any = nativeHandle
     private val native = nativeHandle as io.openmobilemaps.mapscore.shared.map.layers.icon.IconInfoInterface
 
     actual fun getIdentifier(): String {

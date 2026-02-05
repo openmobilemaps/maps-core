@@ -3,9 +3,10 @@
 
 package io.openmobilemaps.mapscore.kmp
 
-actual class KMCoordinateSystemIdentifiers actual constructor(
-    internal val nativeHandle: Any,
+actual class KMCoordinateSystemIdentifiers actual public constructor(
+    nativeHandle: Any,
 ) {
+    internal val nativeHandle: Any = nativeHandle
     private val native = nativeHandle as io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateSystemIdentifiers
 
     actual companion object

@@ -3,9 +3,10 @@
 
 package io.openmobilemaps.mapscore.kmp
 
-actual class KMDefaultTiled2dMapLayerConfigs actual constructor(
-    internal val nativeHandle: Any,
+actual class KMDefaultTiled2dMapLayerConfigs actual public constructor(
+    nativeHandle: Any,
 ) {
+    internal val nativeHandle: Any = nativeHandle
     private val native = nativeHandle as io.openmobilemaps.mapscore.shared.map.layers.tiled.DefaultTiled2dMapLayerConfigs
 
     actual companion object
