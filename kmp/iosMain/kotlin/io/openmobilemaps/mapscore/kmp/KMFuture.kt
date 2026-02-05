@@ -12,6 +12,24 @@ actual class KMFuture<T> {
     }
 }
 
+class KMPromise<T> {
+    private val promise = MapCoreSharedModule.DJPromise()
+
+    fun setValue(value: T) {
+        promise.setValue(value)
+    }
+
+    fun setValue(value: KMDataLoaderResult) {
+        promise.setValue(value.asPlatform())
+    }
+
+    fun setValue(value: KMTextureLoaderResult) {
+        promise.setValue(value.asPlatform())
+    }
+
+    fun future(): KMFuture<T> = promise.getFuture().asKmp()
+}
+
 internal fun <T> KMFuture<T>.asPlatform(): MapCoreSharedModule.DJFuture =
     requireNotNull(native)
 
