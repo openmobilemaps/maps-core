@@ -36,4 +36,4 @@ wasm:
   typename: int32_t
 ts:
   typename: TessellationMode
-  module: './module'
+  module: '@djinni/maps-core/graphics/shader/shader'

@@ -36,4 +36,4 @@ wasm:
   typename: em::val
 ts:
   typename: ReverseGeocoderInterface
-  module: './module'
+  module: '@djinni/maps-core/utils/reverse_geocoder'

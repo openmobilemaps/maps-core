@@ -19,7 +19,7 @@ if (CCACHE_FOUND)
     set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
 endif (CCACHE_FOUND)
 
-file(GLOB_RECURSE cpp_SRC
+file(GLOB_RECURSE cpp_SRC CONFIGURE_DEPENDS
         "../bridging/android/jni/*.cpp"
         "../shared/public/*.cpp"
         "../shared/src/*.cpp"

@@ -189,7 +189,7 @@ std::string ColorLineGroup2dShaderOpenGl::getVertexShader() {
     bool isSimple = isSimpleLine;
 
     return
-        OMMVersionedGlesShaderCodeWithFrameUBO(320 es,
+        OMMVersionedGlesShaderCodeWithFrameUBO(320 es, 300 es,
         precision highp float;
         uniform vec4 originOffset;
         ) +
@@ -254,7 +254,7 @@ std::string ColorLineGroup2dShaderOpenGl::getVertexShader() {
 }
 
 std::string ColorLineGroup2dShaderOpenGl::getSimpleLineFragmentShader() {
-    return OMMVersionedGlesShaderCode(320 es,
+    return OMMVersionedGlesShaderCode(320 es, 300 es,
            precision highp float;
            )
 
@@ -275,7 +275,7 @@ std::string ColorLineGroup2dShaderOpenGl::getSimpleLineFragmentShader() {
 }
 
 std::string ColorLineGroup2dShaderOpenGl::getLineFragmentShader() {
-    return OMMVersionedGlesShaderCodeWithFrameUBO(320 es,
+    return OMMVersionedGlesShaderCodeWithFrameUBO(320 es, 300 es,
                                       precision highp float;
            )
 

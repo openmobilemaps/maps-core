@@ -42,4 +42,6 @@ class OpenGlHelper {
             return "UNKNOWN_ERROR(" + std::to_string(errorCode) + ")";
         }
     }
+
+    static void generateMipmap(uint32_t texturePointer);
 };

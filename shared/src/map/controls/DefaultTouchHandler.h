@@ -54,6 +54,8 @@ private:
 
     void handleTouchUp();
 
+    void handleScroll(Vec2F position, float delta);
+
     void handleTouchCancel();
 
     void handleTwoFingerDown();

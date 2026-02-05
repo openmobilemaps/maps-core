@@ -36,4 +36,4 @@ wasm:
   typename: em::val
 ts:
   typename: RenderConfigInterface
-  module: './module'
+  module: '@djinni/maps-core/map/layers/objects/layer_object'

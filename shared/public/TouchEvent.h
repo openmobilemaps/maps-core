@@ -10,11 +10,14 @@
 
 struct TouchEvent final {
     std::vector<::Vec2F> pointers;
+    float scrollDelta;
     TouchAction touchAction;
 
     TouchEvent(std::vector<::Vec2F> pointers_,
+               float scrollDelta_,
                TouchAction touchAction_)
     : pointers(std::move(pointers_))
+    , scrollDelta(std::move(scrollDelta_))
     , touchAction(std::move(touchAction_))
     {}
 };

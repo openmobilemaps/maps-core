@@ -36,4 +36,4 @@ wasm:
   typename: em::val
 ts:
   typename: CpuPerformanceLoggerInterface
-  module: './module'
+  module: '@djinni/maps-core/map/map_helpers'

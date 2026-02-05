@@ -7,26 +7,30 @@
 @implementation MCTouchEvent
 
 - (nonnull instancetype)initWithPointers:(nonnull NSArray<MCVec2F *> *)pointers
+                             scrollDelta:(float)scrollDelta
                              touchAction:(MCTouchAction)touchAction
 {
     if (self = [super init]) {
         _pointers = [pointers copy];
+        _scrollDelta = scrollDelta;
         _touchAction = touchAction;
     }
     return self;
 }
 
 + (nonnull instancetype)touchEventWithPointers:(nonnull NSArray<MCVec2F *> *)pointers
+                                   scrollDelta:(float)scrollDelta
                                    touchAction:(MCTouchAction)touchAction
 {
     return [[self alloc] initWithPointers:pointers
+                              scrollDelta:scrollDelta
                               touchAction:touchAction];
 }
 
 #ifndef DJINNI_DISABLE_DESCRIPTION_METHODS
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@ %p pointers:%@ touchAction:%@>", self.class, (void *)self, self.pointers, @(self.touchAction)];
+    return [NSString stringWithFormat:@"<%@ %p pointers:%@ scrollDelta:%@ touchAction:%@>", self.class, (void *)self, self.pointers, @(self.scrollDelta), @(self.touchAction)];
 }
 
 #endif

@@ -36,4 +36,4 @@ wasm:
   typename: em::val
 ts:
   typename: AlphaInstancedShaderInterface
-  module: './module'
+  module: '@djinni/maps-core/graphics/shader/shader'

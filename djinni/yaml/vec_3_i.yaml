@@ -36,4 +36,4 @@ wasm:
   typename: em::val
 ts:
   typename: Vec3I
-  module: './module'
+  module: '@djinni/maps-core/graphics/common/common'

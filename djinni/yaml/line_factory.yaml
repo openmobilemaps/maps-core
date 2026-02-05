@@ -36,4 +36,4 @@ wasm:
   typename: em::val
 ts:
   typename: LineFactory
-  module: './module'
+  module: '@djinni/maps-core/map/layers/line/line'

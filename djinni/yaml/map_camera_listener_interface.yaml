@@ -36,4 +36,4 @@ wasm:
   typename: em::val
 ts:
   typename: MapCameraListenerInterface
-  module: './module'
+  module: '@djinni/maps-core/map/camera/camera'

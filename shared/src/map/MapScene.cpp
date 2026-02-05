@@ -22,6 +22,9 @@
 #include "Logger.h"
 #include "RenderingCullMode.h"
 #include <algorithm>
+#ifdef __EMSCRIPTEN__
+    #include <emscripten/threading.h>
+#endif
 
 #include "Tiled2dMapRasterLayer.h"
 
@@ -444,7 +447,13 @@ void MapScene::resume() {
     }
 
     isResumed = true;
-    callbackHandler->onMapResumed();
+
+    // TO_CHECK
+    // WEBEXTRA - callback sometimes on wrong thread - ignoring them for now
+    if (auto handler = callbackHandler)
+    {
+        handler->onMapResumed();
+    }
 }
 
 void MapScene::pause() {

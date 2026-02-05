@@ -36,4 +36,4 @@ wasm:
   typename: em::val
 ts:
   typename: PolygonInfo
-  module: './module'
+  module: '@djinni/maps-core/map/layers/polygon/polygon'

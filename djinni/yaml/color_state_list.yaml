@@ -36,4 +36,4 @@ wasm:
   typename: em::val
 ts:
   typename: ColorStateList
-  module: './module'
+  module: '@djinni/maps-core/map/layers/styling'
