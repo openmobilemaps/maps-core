@@ -36,4 +36,4 @@ wasm:
   typename: em::val
 ts:
   typename: Color
-  module: './module'
+  module: '@djinni/maps-core/graphics/common/common'

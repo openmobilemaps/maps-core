@@ -54,6 +54,8 @@ private:
 
     void handleTouchUp();
 
+    void handleScroll(Vec2F position, float delta);
+
     void handleTouchCancel();
 
     void handleTwoFingerDown();
@@ -81,7 +83,7 @@ private:
     const std::weak_ptr<SchedulerInterface> scheduler;
 
     TouchHandlingState state;
-    long long stateTime;
+    int64_t stateTime;
 
     Vec2F touchPosition;
     Vec2F touchStartPosition;

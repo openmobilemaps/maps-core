@@ -67,9 +67,9 @@ class Textured2dLayerObject : public LayerObjectInterface, public std::enable_sh
 
     std::shared_ptr<ShaderProgramInterface> getShader();
 
-    void beginAlphaAnimation(double startAlpha, double targetAlpha, long long duration);
+    void beginAlphaAnimation(double startAlpha, double targetAlpha, int64_t duration);
     
-    void beginStyleAnimation(RasterShaderStyle start, RasterShaderStyle target, long long duration);
+    void beginStyleAnimation(RasterShaderStyle start, RasterShaderStyle target, int64_t duration);
 
   protected:
     void setFrame(const ::Quad3dD &frame, const ::Vec3D & origin);

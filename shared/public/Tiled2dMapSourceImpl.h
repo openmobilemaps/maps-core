@@ -1263,7 +1263,7 @@ template <class L, class R> void Tiled2dMapSource<L, R>::performDelayedTasks() {
     nextDelayTaskExecution = std::nullopt;
 
     const auto now = DateHelper::currentTimeMillis();
-    long long minDelay = std::numeric_limits<long long>::max();
+    int64_t minDelay = std::numeric_limits<int64_t>::max();
 
     std::vector<std::pair<int, Tiled2dMapTileInfo>> toLoad;
 
@@ -1282,7 +1282,7 @@ template <class L, class R> void Tiled2dMapSource<L, R>::performDelayedTasks() {
         performLoadingTask(tile, loaderIndex);
     }
 
-    if (minDelay != std::numeric_limits<long long>::max()) {
+    if (minDelay != std::numeric_limits<int64_t>::max()) {
         nextDelayTaskExecution = now + minDelay;
 
         auto taskIdentifier = "Tiled2dMapSource_loadingErrorTask";

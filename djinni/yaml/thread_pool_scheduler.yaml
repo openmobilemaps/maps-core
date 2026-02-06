@@ -36,4 +36,4 @@ wasm:
   typename: em::val
 ts:
   typename: ThreadPoolScheduler
-  module: './module'
+  module: '@djinni/maps-core/map/scheduling/task_scheduler'

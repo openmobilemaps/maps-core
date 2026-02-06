@@ -125,7 +125,7 @@ std::shared_ptr<RenderObjectInterface> Textured2dLayerObject::getRenderObject() 
     return renderObject;
 }
 
-void Textured2dLayerObject::beginAlphaAnimation(double startAlpha, double targetAlpha, long long duration) {
+void Textured2dLayerObject::beginAlphaAnimation(double startAlpha, double targetAlpha, int64_t duration) {
     assert(shader != nullptr);
     std::weak_ptr<Textured2dLayerObject> weakSelf = weak_from_this();
     animation = std::make_shared<DoubleAnimation>(
@@ -145,7 +145,7 @@ void Textured2dLayerObject::beginAlphaAnimation(double startAlpha, double target
     mapInterface->invalidate();
 }
 
-void Textured2dLayerObject::beginStyleAnimation(RasterShaderStyle start, RasterShaderStyle target, long long duration) {
+void Textured2dLayerObject::beginStyleAnimation(RasterShaderStyle start, RasterShaderStyle target, int64_t duration) {
     assert(rasterShader != nullptr);
     std::weak_ptr<Textured2dLayerObject> weakSelf = weak_from_this();
     animation = std::make_shared<RasterStyleAnimation>(

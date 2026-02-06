@@ -24,6 +24,8 @@
 #include "IcosahedronColorShaderOpenGl.h"
 #include "SphereEffectShaderOpenGl.h"
 #include "SkySphereShaderOpenGl.h"
+#include "TessellatedRasterShaderOpenGl.h"
+#include "TessellatedColorShaderOpenGl.h"
 #include "ElevationInterpolationShaderOpenGl.h"
 
 std::shared_ptr<AlphaShaderInterface> ShaderFactoryOpenGl::createAlphaShader() {
@@ -50,6 +52,10 @@ std::shared_ptr<RasterShaderInterface> ShaderFactoryOpenGl::createUnitSphereRast
     return std::make_shared<RasterShaderOpenGl>(true);
 }
 
+std::shared_ptr<RasterShaderInterface> ShaderFactoryOpenGl::createQuadTessellatedShader() {
+    return std::make_shared<TessellatedRasterShaderOpenGl>(true);
+}
+
 std::shared_ptr<LineGroupShaderInterface> ShaderFactoryOpenGl::createLineGroupShader() {
     return std::make_shared<ColorLineGroup2dShaderOpenGl>(false, false);
 }
@@ -72,6 +78,10 @@ std::shared_ptr<ColorShaderInterface> ShaderFactoryOpenGl::createColorShader() {
 
 std::shared_ptr<ColorShaderInterface> ShaderFactoryOpenGl::createUnitSphereColorShader() {
     return std::make_shared<ColorShaderOpenGl>(true);
+}
+
+std::shared_ptr<ColorShaderInterface> ShaderFactoryOpenGl::createPolygonTessellatedShader(bool projectOntoUnitSphere) {
+    return std::make_shared<TessellatedColorShaderOpenGl>(projectOntoUnitSphere);
 }
 
 std::shared_ptr<ColorCircleShaderInterface> ShaderFactoryOpenGl::createColorCircleShader() {

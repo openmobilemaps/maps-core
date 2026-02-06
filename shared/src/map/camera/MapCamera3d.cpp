@@ -899,8 +899,8 @@ bool MapCamera3d::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleCl
         currentDragVelocity.x = 0;
         currentDragVelocity.y = 0;
     } else {
-        long long newTimestamp = DateHelper::currentTimeMicros();
-        long long deltaMcs = std::max(newTimestamp - currentDragTimestamp, 8000ll);
+        auto newTimestamp = DateHelper::currentTimeMicros();
+        auto deltaMcs = std::max(newTimestamp - currentDragTimestamp, MapCameraInertia::minimumInertiaDeltaMicroSeconds);
         float averageFactor = currentDragVelocity.x == 0 && currentDragVelocity.y == 0 ? 1.0 : 0.5;
         currentDragVelocity.x = (1 - averageFactor) * currentDragVelocity.x + averageFactor * dx / (deltaMcs / 16000.0);
         currentDragVelocity.y = (1 - averageFactor) * currentDragVelocity.y + averageFactor * dy / (deltaMcs / 16000.0);
@@ -940,7 +940,7 @@ void MapCamera3d::setupInertia() {
     double t1 = velocityFactor >= t1Factor ? 30.0 : 0.0;
     double t2 = velocityFactor >= t2Factor ? 200.0 : 0.0;
 
-    inertia = Inertia(DateHelper::currentTimeMicros(), currentDragVelocity, t1, t2);
+    inertia = MapCameraInertia(DateHelper::currentTimeMicros(), currentDragVelocity, t1, t2);
     currentDragVelocity = {0, 0};
     currentDragTimestamp = 0;
 }
@@ -950,7 +950,7 @@ void MapCamera3d::inertiaStep() {
         return;
     }
 
-    long long now = DateHelper::currentTimeMicros();
+    auto now = DateHelper::currentTimeMicros();
     double delta = (now - inertia->timestampStart) / 16000.0;
     double deltaPrev = (now - inertia->timestampUpdate) / 16000.0;
 
@@ -1142,8 +1142,8 @@ bool MapCamera3d::onTwoFingerMove(const std::vector<::Vec2F> &posScreenOld, cons
                 currentDragVelocity.x = 0;
                 currentDragVelocity.y = 0;
             } else {
-                long long newTimestamp = DateHelper::currentTimeMicros();
-                long long deltaMcs = std::max(newTimestamp - currentDragTimestamp, 8000ll);
+                int64_t newTimestamp = DateHelper::currentTimeMicros();
+                int64_t deltaMcs = std::max(newTimestamp - currentDragTimestamp, MapCameraInertia::minimumInertiaDeltaMicroSeconds);
                 float averageFactor = currentDragVelocity.x == 0 && currentDragVelocity.y == 0 ? 1.0 : 0.5;
                 currentDragVelocity.x = (1 - averageFactor) * currentDragVelocity.x + averageFactor * dx / (deltaMcs / 16000.0);
                 currentDragVelocity.y = (1 - averageFactor) * currentDragVelocity.y + averageFactor * dy / (deltaMcs / 16000.0);
@@ -1203,6 +1203,49 @@ bool MapCamera3d::onTwoFingerMoveComplete() {
     }
 
     return false;
+}
+
+bool MapCamera3d::onScroll(const ::Vec2F &posScreen, float zoomFactor) {
+    if (cameraFrozen) {
+        return false;
+    }
+
+    inertia = std::nullopt;
+
+    zoomFactor = std::clamp(zoomFactor, -500.0f, 500.0f);
+    auto newZoom = zoom - (zoomFactor * zoom * 0.001);
+    auto scaleFactor = newZoom / zoom;
+
+    newZoom = std::clamp(newZoom, zoomMax, zoomMin);
+
+    Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
+    auto centerScreen = Vec2F(sizeViewport.x * 0.5f, sizeViewport.y * 0.5f);
+
+    auto targetScreenCenter = posScreen;
+    auto targetCenterCoord = coordFromScreenPosition(targetScreenCenter);
+
+    auto oldCenterCoord = coordFromScreenPosition(centerScreen);
+
+    updateZoom(newZoom);
+    updateMatrices();
+
+    double dx = (oldCenterCoord.x - targetCenterCoord.x) * (scaleFactor - 1);
+    double dy = (oldCenterCoord.y - targetCenterCoord.y) * (scaleFactor - 1);
+
+    focusPointPosition.x = focusPointPosition.x + dx;
+    focusPointPosition.y = focusPointPosition.y + dy;
+
+    focusPointPosition.x = std::fmod((focusPointPosition.x + 180 + 360), 360.0) - 180;
+    focusPointPosition.y = std::clamp(focusPointPosition.y, -90.0, 90.0);
+
+    const auto [adjPosition, adjZoom] = getBoundsCorrectedCoords(focusPointPosition, newZoom);
+    focusPointPosition = adjPosition;
+    updateZoom(adjZoom);
+
+    notifyListeners(ListenerType::BOUNDS | ListenerType::MAP_INTERACTION);
+    mapInterface->invalidate();
+
+    return true;
 }
 
 Coord MapCamera3d::coordFromScreenPosition(const ::Vec2F &posScreen) {
@@ -1647,7 +1690,7 @@ void MapCamera3d::setCameraConfig(const Camera3dConfig &config, std::optional<fl
     auto viewPortSize = renderingContext->getViewportSize();
 
     if (durationSeconds && viewPortSize.x > 0 && viewPortSize.y > 0) {
-        long long duration = *durationSeconds * 1000;
+        int64_t duration = *durationSeconds * 1000;
         double initialPitch = cameraPitch;
         double initialVerticalDisplacement = cameraVerticalDisplacement;
 

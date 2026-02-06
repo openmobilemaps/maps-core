@@ -36,4 +36,4 @@ wasm:
   typename: int32_t
 ts:
   typename: LoaderStatus
-  module: './module'
+  module: '@djinni/maps-core/map/loader/loader'

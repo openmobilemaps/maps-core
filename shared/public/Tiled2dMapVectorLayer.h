@@ -187,6 +187,8 @@ class Tiled2dMapVectorLayer : public Tiled2dMapLayer,
 
     bool onTwoFingerMoveComplete() override;
 
+    bool onScroll(const Vec2F &posScreen, float scrollDelta) override;
+
     std::vector<VectorLayerFeatureCoordInfo> getVisiblePointFeatureContexts(float paddingPc,
                                                                             const std::optional<std::string> &sourceLayer) override;
 
@@ -281,8 +283,8 @@ class Tiled2dMapVectorLayer : public Tiled2dMapLayer,
     std::atomic_flag tilesStillValid;
     std::shared_ptr<Tiled2dMapVectorInteractionManager> interactionManager;
 
-    long long lastDataManagerUpdate = 0;
-    long long lastCollitionCheck = 0;
+    int64_t lastDataManagerUpdate = 0;
+    int64_t lastCollitionCheck = 0;
     double lastDataManagerZoom = 0;
     bool isAnimating = false;
 

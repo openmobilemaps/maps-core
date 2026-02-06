@@ -201,6 +201,7 @@ void Quad2dStretchedInstancedOpenGl::loadTexture(const std::shared_ptr<::Renderi
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
     if (textureHolder != nullptr) {
         texturePointer = textureHolder->attachToGraphics();
+        OpenGlHelper::generateMipmap(texturePointer);
 
         factorHeight = textureHolder->getImageHeight() * 1.0f / textureHolder->getTextureHeight();
         factorWidth = textureHolder->getImageWidth() * 1.0f / textureHolder->getTextureWidth();
@@ -306,6 +307,10 @@ void Quad2dStretchedInstancedOpenGl::prepareTextureDraw(int program) {
 
     // Bind the texture to this unit.
     glBindTexture(GL_TEXTURE_2D, (unsigned int)texturePointer);
+
+    // Enable mipmap min filtering
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     // Tell the texture uniform sampler to use this texture in the shader by binding to texture unit 0.
     int textureUniformHandle = glGetUniformLocation(program, "textureSampler");

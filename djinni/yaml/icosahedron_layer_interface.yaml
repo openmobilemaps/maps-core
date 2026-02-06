@@ -36,4 +36,4 @@ wasm:
   typename: em::val
 ts:
   typename: IcosahedronLayerInterface
-  module: './module'
+  module: '@djinni/maps-core/map/layers/icosahedron/icosahedron'

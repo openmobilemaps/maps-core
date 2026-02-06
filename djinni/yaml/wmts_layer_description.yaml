@@ -36,4 +36,4 @@ wasm:
   typename: em::val
 ts:
   typename: WmtsLayerDescription
-  module: './module'
+  module: '@djinni/maps-core/map/layers/tiled/raster/wmts/wmts_capabilities'

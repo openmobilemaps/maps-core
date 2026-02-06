@@ -13,7 +13,7 @@
 
 class DoubleAnimation: public DefaultAnimator<double> {
 public:
-    DoubleAnimation(long long duration,
+    DoubleAnimation(int64_t duration,
                      double startValue,
                     double endValue,
                     InterpolatorFunction interpolatorFunction,

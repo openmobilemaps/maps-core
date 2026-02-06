@@ -396,7 +396,7 @@ void Tiled2dMapVectorSymbolObject::resetLastIconProperties() {
     iconImageResolutionAttemptNumSprites = std::nullopt;
 }
 
-void Tiled2dMapVectorSymbolObject::updateIconProperties(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &scales, VectorModificationWrapper<float> &rotations, VectorModificationWrapper<float> &alphas, VectorModificationWrapper<float> &offsets, VectorModificationWrapper<float> &textureCoordinates, uint32_t &countOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, long long now, const Vec2I viewPortSize, const std::shared_ptr<TextureHolderInterface> spriteTexture, const std::vector<SpriteDesc> &spriteIconData) {
+void Tiled2dMapVectorSymbolObject::updateIconProperties(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &scales, VectorModificationWrapper<float> &rotations, VectorModificationWrapper<float> &alphas, VectorModificationWrapper<float> &offsets, VectorModificationWrapper<float> &textureCoordinates, uint32_t &countOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, int64_t now, const Vec2I viewPortSize, const std::shared_ptr<TextureHolderInterface> spriteTexture, const std::vector<SpriteDesc> &spriteIconData) {
 
     if (instanceCounts.icons == 0) {
         return;
@@ -616,7 +616,7 @@ void Tiled2dMapVectorSymbolObject::writePosition(const double x_, const double y
     }
 }
 
-void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &scales, VectorModificationWrapper<float> &rotations, VectorModificationWrapper<float> &alphas, VectorModificationWrapper<float> &stretchInfos, VectorModificationWrapper<float> &textureCoordinates, uint32_t &countOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, long long now, const Vec2I viewPortSize, const std::shared_ptr<TextureHolderInterface> spriteTexture, const std::vector<SpriteDesc> &spriteIconData) {
+void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &scales, VectorModificationWrapper<float> &rotations, VectorModificationWrapper<float> &alphas, VectorModificationWrapper<float> &stretchInfos, VectorModificationWrapper<float> &textureCoordinates, uint32_t &countOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, int64_t now, const Vec2I viewPortSize, const std::shared_ptr<TextureHolderInterface> spriteTexture, const std::vector<SpriteDesc> &spriteIconData) {
 
     if (instanceCounts.stretchedIcons == 0) {
         return;
@@ -847,7 +847,7 @@ void Tiled2dMapVectorSymbolObject::setupTextProperties(VectorModificationWrapper
     labelObject->setupProperties(textureCoordinates, styleIndices, countOffset, zoomIdentifier);
 }
 
-void Tiled2dMapVectorSymbolObject::updateTextProperties(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &referencePositions, VectorModificationWrapper<float> &scales, VectorModificationWrapper<float> &rotations, VectorModificationWrapper<float> &alphas, VectorModificationWrapper<float> &styles, int &countOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, long long now, const Vec2I viewPortSize, const std::vector<float>& vpMatrix, const Vec3D& origin) {
+void Tiled2dMapVectorSymbolObject::updateTextProperties(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &referencePositions, VectorModificationWrapper<float> &scales, VectorModificationWrapper<float> &rotations, VectorModificationWrapper<float> &alphas, VectorModificationWrapper<float> &styles, int &countOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, int64_t now, const Vec2I viewPortSize, const std::vector<float>& vpMatrix, const Vec3D& origin) {
     if (instanceCounts.textCharacters ==  0 || !labelObject) {
         return;
     }

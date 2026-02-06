@@ -92,6 +92,10 @@ bool Tiled2dMapVectorInteractionManager::onTwoFingerMoveComplete() {
     return false;
 }
 
+bool Tiled2dMapVectorInteractionManager::onScroll(const Vec2F &posScreen, float scrollDelta) {
+    return false;
+}
+
 void Tiled2dMapVectorInteractionManager::clearTouch() {
     for (const auto &[source, sourceDataManagers] : sourceDataManagersMap) {
         for (auto const &sourceDataManager: sourceDataManagers) {

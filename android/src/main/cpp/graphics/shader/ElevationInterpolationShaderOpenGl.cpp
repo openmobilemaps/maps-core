@@ -39,7 +39,7 @@ std::shared_ptr<ShaderProgramInterface> ElevationInterpolationShaderOpenGl::asSh
 }
 
 std::string ElevationInterpolationShaderOpenGl::getFragmentShader() {
-    return OMMVersionedGlesShaderCode(320 es,
+    return OMMVersionedGlesShaderCode(320 es, 300 es,
                                       precision highp float;
                                               precision highp int;
                                               precision highp sampler2D;

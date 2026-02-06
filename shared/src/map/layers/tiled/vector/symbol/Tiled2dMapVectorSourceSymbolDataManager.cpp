@@ -511,6 +511,8 @@ void Tiled2dMapVectorSourceSymbolDataManager::setupSymbolGroups(const Tiled2dMap
         });
     }
     vectorLayer.message(MFN(&Tiled2dMapVectorLayer::invalidateCollisionState));
+    auto selfActor = WeakActor(mailbox, weak_from_this());
+    selfActor.message(MailboxExecutionEnvironment::graphics, MFN(&Tiled2dMapVectorSourceSymbolDataManager::pregenerateRenderPasses));
     readyManager.message(MFN(&Tiled2dMapVectorReadyManager::setReady), readyManagerIndex, tileInfo, std::get<0>(layerIt->second).baseValue);
 }
 
@@ -664,7 +666,7 @@ void Tiled2dMapVectorSourceSymbolDataManager::collisionDetection(std::vector<std
     }
 }
 
-bool Tiled2dMapVectorSourceSymbolDataManager::update(long long now) {
+bool Tiled2dMapVectorSourceSymbolDataManager::update(int64_t now) {
     auto mapInterface = this->mapInterface.lock();
     auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
     auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;

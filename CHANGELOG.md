@@ -3,6 +3,9 @@
 ## Version 3.8.0
 - Add support for multiple sprite sources, breaking change in LocalDataProvider interface
 
+## Version 3.7.1
+- Fixed an issue on iOS where vector layer symbols didn't invalidate properly after global state changes
+
 ## Version 3.7.0
 - Added the iOS equivalent for the elevation interpolation shader for OpenGL
 - Support non-premultiplied Android Bitmaps in the OpenGL BitmapTextureHolder

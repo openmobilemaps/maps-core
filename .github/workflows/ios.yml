@@ -1,7 +1,7 @@
 name: ios
 
 env:
-  XCODE_VERSION: 'Xcode_26.0'
+  XCODE_VERSION: 'Xcode_26.2'
 
 on:
   pull_request:
@@ -17,4 +17,4 @@ jobs:
     - name: Switch to Xcode ${{ env.XCODE_VERSION }}
       run: sudo xcode-select --switch /Applications/${{ env.XCODE_VERSION }}.app
     - name: Build
-      run: xcodebuild -scheme MapCore -destination 'platform=iOS Simulator,OS=18.6,name=iPhone 16 Pro'
+      run: xcodebuild -scheme MapCore -destination 'generic/platform=iOS Simulator'

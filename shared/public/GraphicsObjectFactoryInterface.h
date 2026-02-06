@@ -23,7 +23,11 @@ public:
 
     virtual /*not-null*/ std::shared_ptr<Quad2dInterface> createQuad(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & shader) = 0;
 
+    virtual /*not-null*/ std::shared_ptr<Quad2dInterface> createQuadTessellated(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & shader) = 0;
+
     virtual /*not-null*/ std::shared_ptr<Polygon2dInterface> createPolygon(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & shader) = 0;
+
+    virtual /*not-null*/ std::shared_ptr<Polygon2dInterface> createPolygonTessellated(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & shader) = 0;
 
     virtual /*not-null*/ std::shared_ptr<IcosahedronInterface> createIcosahedronObject(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & shader) = 0;
 
@@ -40,6 +44,8 @@ public:
     virtual /*not-null*/ std::shared_ptr<Quad2dInterface> createQuadMask(bool is3d) = 0;
 
     virtual /*not-null*/ std::shared_ptr<Polygon2dInterface> createPolygonMask(bool is3d) = 0;
+
+    virtual /*not-null*/ std::shared_ptr<Polygon2dInterface> createPolygonMaskTessellated(bool is3d) = 0;
 
     virtual /*not-null*/ std::shared_ptr<TextInterface> createText(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & shader) = 0;
 

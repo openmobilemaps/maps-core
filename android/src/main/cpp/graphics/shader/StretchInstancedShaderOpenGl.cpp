@@ -42,7 +42,7 @@ void StretchInstancedShaderOpenGl::setupProgram(const std::shared_ptr<::Renderin
 
 std::string StretchInstancedShaderOpenGl::getVertexShader() {
     return projectOntoUnitSphere ?
-           OMMVersionedGlesShaderCodeWithFrameUBO(320 es,
+           OMMVersionedGlesShaderCodeWithFrameUBO(320 es, 300 es,
                                       uniform vec4 uOriginOffset;
 
                                       in vec4 vPosition;
@@ -92,7 +92,7 @@ std::string StretchInstancedShaderOpenGl::getVertexShader() {
                                           v_stretchY = aStretchY;
                                       }
                               )
-    : OMMVersionedGlesShaderCodeWithFrameUBO(320 es,
+    : OMMVersionedGlesShaderCodeWithFrameUBO(320 es, 300 es,
                                       uniform vec4 uOriginOffset;
 
                                       in vec4 vPosition;
@@ -141,7 +141,7 @@ std::string StretchInstancedShaderOpenGl::getVertexShader() {
 
 
 std::string StretchInstancedShaderOpenGl::getFragmentShader() {
-    return OMMVersionedGlesShaderCode(320 es,
+    return OMMVersionedGlesShaderCode(320 es, 300 es,
                                       precision mediump float;
                                       uniform sampler2D textureSampler;
 

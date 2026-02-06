@@ -129,6 +129,24 @@ void ColorLineGroup2dShaderOpenGl::setDashingScaleFactor(float factor) {
     }
 }
 
+static const std::string definitionsLineBlur = OMMShaderCode
+(
+    const float blurRadiusPx = 1.0; // Anti-aliasing blur radius
+
+    // @param lineSide signed distance from line center
+    float lineBlurAlpha(float lineSide, float styleWidth, float styleBlur, float scaleFactor) {
+        float scaledWidth = styleWidth * scaleFactor;
+        float halfScaledWidth = scaledWidth / 2.0;
+        float scaledBlur = max(blurRadiusPx, styleBlur) * scaleFactor;
+        float lineEdgeDistance      = halfScaledWidth - abs(lineSide) * (halfScaledWidth + scaledBlur);
+        float otherLineEdgeDistance = halfScaledWidth + abs(lineSide) * (halfScaledWidth + scaledBlur);
+        return  smoothstep(-scaledBlur, scaledBlur, lineEdgeDistance)
+              * smoothstep(-scaledBlur, scaledBlur, otherLineEdgeDistance) // for lines narrower than blur-diameter (halfWidth < halfBlur), take into account fade towards _other_ edge
+              * min(1.0, halfScaledWidth / scaledBlur); // scaling for thin lines to preserve overall "energy"
+    }
+);
+
+
 std::string ColorLineGroup2dShaderOpenGl::getLineStylesUBODefinition(bool isSimpleLine) {
     if (isSimpleLine) {
         return OMMShaderCode(
@@ -189,7 +207,7 @@ std::string ColorLineGroup2dShaderOpenGl::getVertexShader() {
     bool isSimple = isSimpleLine;
 
     return
-        OMMVersionedGlesShaderCodeWithFrameUBO(320 es,
+        OMMVersionedGlesShaderCodeWithFrameUBO(320 es, 300 es,
         precision highp float;
         uniform vec4 originOffset;
         ) +
@@ -211,37 +229,41 @@ std::string ColorLineGroup2dShaderOpenGl::getVertexShader() {
 
             out vec4 outColor;
             flat out int outStylingIndex;
+            out float outLineSide;
         )
-
         + (isSimple ? " " :
-           OMMShaderCode(
-                out float outLengthPrefix;
-                out float outLineSide;
+        OMMShaderCode(
+            out float outLengthPrefix;
         ))
 
-        + getLineStylesUBODefinition(isSimple) +
+        + getLineStylesUBODefinition(isSimple)
+        + definitionsLineBlur
 
-        OMMShaderCode(
+        + OMMShaderCode(
             void main() {
                 float fStylingIndex = mod(stylingIndex, 256.0);
                 int index = clamp(int(floor(fStylingIndex + 0.5)), 0, uLineStyles.numStyles);
                 float width = uLineStyles.lineValues[index].width / 2.0 * uFrameUniforms.frameSpecs.x;
                 ) +
-
+                (isSimple ? OMMShaderCode(
+                    float blur = blurRadiusPx * uFrameUniforms.frameSpecs.x;
+                ) : OMMShaderCode(
+                    float blur = max(blurRadiusPx, uLineStyles.lineValues[index].blur) * uFrameUniforms.frameSpecs.x;
+                )) +
                 (is3d ? OMMShaderCode(
-                    vec4 extendedPosition = vec4(position + extrude * width, 1.0) + originOffset;
+                    vec4 extendedPosition = vec4(position + extrude * (width + blur), 1.0) + originOffset;
                 ) :
                 OMMShaderCode(
-                    vec4 extendedPosition = vec4(position + extrude * width, 0.0, 1.0) + originOffset;
+                    vec4 extendedPosition = vec4(position + extrude * (width + blur), 0.0, 1.0) + originOffset;
                 )) +
 
                 (isSimple ? " " :
                 OMMShaderCode(
                     outLengthPrefix = lengthPrefix + lengthCorrection * width;
-                    outLineSide = lineSide;
                 )) +
 
                 OMMShaderCode(
+                    outLineSide = lineSide;
                     outStylingIndex = index;
                     outColor = vec4(uLineStyles.lineValues[index].colorR,
                                     uLineStyles.lineValues[index].colorG,
@@ -254,34 +276,36 @@ std::string ColorLineGroup2dShaderOpenGl::getVertexShader() {
 }
 
 std::string ColorLineGroup2dShaderOpenGl::getSimpleLineFragmentShader() {
-    return OMMVersionedGlesShaderCode(320 es,
+    return OMMVersionedGlesShaderCodeWithFrameUBO(320 es, 300 es,
            precision highp float;
            )
 
-           + getLineStylesUBODefinition(isSimpleLine) +
+           + getLineStylesUBODefinition(isSimpleLine)
+           + definitionsLineBlur
 
-           OMMShaderCode(
+           + OMMShaderCode(
            in vec4 outColor;
+           in float outLineSide;
            flat in int outStylingIndex;
            out vec4 fragmentColor;
 
            void main() {
-               float opacity = uLineStyles.lineValues[outStylingIndex].opacity;
-
-               fragmentColor = outColor;
-               fragmentColor.a = 1.0;
-               fragmentColor *= outColor.a * opacity;
+               SimpleLineStyle style = uLineStyles.lineValues[outStylingIndex];
+               float a = outColor.a * style.opacity;
+               a *= lineBlurAlpha(outLineSide, style.width, 0.0, uFrameUniforms.frameSpecs.x);
+               fragmentColor = vec4(outColor.rgb, 1.0) * a;
            });
 }
 
 std::string ColorLineGroup2dShaderOpenGl::getLineFragmentShader() {
-    return OMMVersionedGlesShaderCodeWithFrameUBO(320 es,
+    return OMMVersionedGlesShaderCodeWithFrameUBO(320 es, 300 es,
                                       precision highp float;
            )
 
-           + getLineStylesUBODefinition(isSimpleLine) +
+           + getLineStylesUBODefinition(isSimpleLine)
+           + definitionsLineBlur
 
-           OMMShaderCode(
+           + OMMShaderCode(
                    uniform float dashingScaleFactor;
 
                    in vec4 outColor;
@@ -302,20 +326,12 @@ std::string ColorLineGroup2dShaderOpenGl::getLineFragmentShader() {
                        float a = outColor.a * opacity;
                        float aGap = style.gapColorA * opacity;
 
-                       if(style.blur > 0.0) {
-                           float scaledWidth = style.width * uFrameUniforms.frameSpecs.x;
-                           float halfScaledWidth = scaledWidth / 2.0;
-                           float blur = style.blur * uFrameUniforms.frameSpecs.x;
-                           float lineEdgeDistance = (1.0 - abs(outLineSide)) * halfScaledWidth;
-                           float blurAlpha = clamp(lineEdgeDistance / blur, 0.0, 1.0);
-
-                           if(blurAlpha == 0.0) {
-                               discard;
-                           }
-
-                           a *= blurAlpha;
-                           aGap *= blurAlpha;
+                       float blurAlpha = lineBlurAlpha(outLineSide, style.width, style.blur, uFrameUniforms.frameSpecs.x);
+                       if(blurAlpha == 0.0) {
+                           discard;
                        }
+                       a *= blurAlpha;
+                       aGap *= blurAlpha;
 
                        vec4 mainColor = vec4(outColor.r, outColor.g, outColor.b, 1.0) * a;
                        vec4 gapColor = vec4(style.gapColorR, style.gapColorG, style.gapColorB, 1.0) * aGap;
@@ -324,7 +340,6 @@ std::string ColorLineGroup2dShaderOpenGl::getLineFragmentShader() {
                            float skew = style.dottedSkew;
 
                            float scaledWidth = style.width * dashingScaleFactor;
-                           float halfScaledWidth = scaledWidth / 2.0;
                            float cycleLength = scaledWidth * skew;
                            float timeOffset = uFrameUniforms.frameSpecs.y * style.dashAnimationSpeed * scaledWidth;
                            float skewOffset = (1.0 - skew) * style.width * dashingScaleFactor * 0.5;

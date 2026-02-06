@@ -193,7 +193,7 @@ std::shared_ptr<RenderObjectInterface> IconLayerObject::getRenderObject() {
     return renderObject;
 }
 
-void IconLayerObject::beginAlphaAnimation(double startAlpha, double targetAlpha, long long duration) {
+void IconLayerObject::beginAlphaAnimation(double startAlpha, double targetAlpha, int64_t duration) {
     assert(shader != nullptr);
     std::weak_ptr<IconLayerObject> weakSelf = weak_from_this();
     animation = std::make_shared<DoubleAnimation>(

@@ -10,9 +10,16 @@
 
 #pragma once
 
+#ifdef __EMSCRIPTEN__
+#define OOM_VERSION(version, versionWasm) #versionWasm
+#else
+#define OOM_VERSION(version, versionWasm) #version
+#endif
+
 #define OMMShaderCode(...) std::string(#__VA_ARGS__)
-#define OMMVersionedGlesShaderCode(version, ...) std::string("#version " #version "\n" #__VA_ARGS__)
-#define OMMVersionedGlesShaderCodeWithFrameUBO(version, ...) std::string("#version " #version "\n") + FRAME_UBO_DEFINITION + ("\n" #__VA_ARGS__)
+
+#define OMMVersionedGlesShaderCode(version, versionWasm, ...) std::string("#version " OOM_VERSION(version, versionWasm) "\n" #__VA_ARGS__)
+#define OMMVersionedGlesShaderCodeWithFrameUBO(version, versionWasm, ...) std::string("#version " OOM_VERSION(version, versionWasm) "\n") + FRAME_UBO_DEFINITION + ("\n" #__VA_ARGS__)
 
 #include "Logger.h"
 #include "ShaderProgramInterface.h"

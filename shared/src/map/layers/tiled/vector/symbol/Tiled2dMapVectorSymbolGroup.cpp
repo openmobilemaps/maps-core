@@ -649,7 +649,7 @@ bool Tiled2dMapVectorSymbolGroup::prepareIconObject(SpriteIconDescriptor &sprite
     return renderObjectsChanged;
 }
 
-bool Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const double rotation, const double scaleFactor, long long now, const Vec2I viewPortSize, const std::vector<float>& vpMatrix, const Vec3D& origin) {
+bool Tiled2dMapVectorSymbolGroup::update(const double zoomIdentifier, const double rotation, const double scaleFactor, int64_t now, const Vec2I viewPortSize, const std::vector<float>& vpMatrix, const Vec3D& origin) {
     bool renderObjectsChanged = false;
     if (!isInitialized) {
         return renderObjectsChanged;
