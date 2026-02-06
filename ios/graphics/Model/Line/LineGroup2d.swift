@@ -127,7 +127,7 @@ final class LineGroup2d: BaseGraphicsObject, @unchecked Sendable {
 
 extension LineGroup2d: MCLineGroup2dInterface {
 
-    func setLines(_ lines: MCSharedBytes, indices: MCSharedBytes, origin: MCVec3D, is3d: Bool) {
+    func setLines(_ lines: MCOwnedBytes, indices: MCOwnedBytes, origin: MCVec3D, is3d: Bool) {
         guard lines.elementCount != 0 else {
             lock.withCritical {
                 lineVerticesBuffer = nil
@@ -146,8 +146,8 @@ extension LineGroup2d: MCLineGroup2dInterface {
             } else {
                 fatalError()
             }
-            self.lineVerticesBuffer.copyOrCreate(from: lines, device: device)
-            self.lineIndicesBuffer.copyOrCreate(from: indices, device: device)
+            self.lineVerticesBuffer = device.makeBuffer(from: lines)
+            self.lineIndicesBuffer = device.makeBuffer(from: indices)
             if self.lineVerticesBuffer != nil, self.lineIndicesBuffer != nil {
                 self.lineVerticesBuffer?.label = "LineGroup2d.verticesBuffer"
                 self.lineIndicesBuffer?.label = "LineGroup2d.indicesBuffer"

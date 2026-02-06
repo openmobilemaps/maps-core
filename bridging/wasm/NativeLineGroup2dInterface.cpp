@@ -3,7 +3,7 @@
 
 #include "NativeLineGroup2dInterface.h"  // my header
 #include "NativeGraphicsObjectInterface.h"
-#include "NativeSharedBytes.h"
+#include "NativeOwnedBytes.h"
 #include "NativeVec3D.h"
 
 namespace djinni_generated {
@@ -18,8 +18,8 @@ em::val NativeLineGroup2dInterface::cppProxyMethods() {
 
 void NativeLineGroup2dInterface::setLines(const CppType& self, const em::val& w_lines,const em::val& w_indices,const em::val& w_origin,bool w_is3d) {
     try {
-        self->setLines(::djinni_generated::NativeSharedBytes::toCpp(w_lines),
-                 ::djinni_generated::NativeSharedBytes::toCpp(w_indices),
+        self->setLines(::djinni_generated::NativeOwnedBytes::toCpp(w_lines),
+                 ::djinni_generated::NativeOwnedBytes::toCpp(w_indices),
                  ::djinni_generated::NativeVec3D::toCpp(w_origin),
                  ::djinni::Bool::toCpp(w_is3d));
     }
