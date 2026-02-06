@@ -3,7 +3,27 @@
 
 package io.openmobilemaps.mapscore.kmp
 
-actual typealias KMTextureLoaderResult = io.openmobilemaps.mapscore.shared.map.loader.TextureLoaderResult
+actual class KMTextureLoaderResult actual public constructor(
+    data: KMTextureHolderInterface?,
+    etag: String?,
+    status: KMLoaderStatus,
+    errorCode: String?,
+) {
+    actual val data: KMTextureHolderInterface? = data
+    actual val etag: String? = etag
+    actual val status: KMLoaderStatus = status
+    actual val errorCode: String? = errorCode
+}
 
-internal fun KMTextureLoaderResult.asPlatform(): io.openmobilemaps.mapscore.shared.map.loader.TextureLoaderResult = this
-internal fun io.openmobilemaps.mapscore.shared.map.loader.TextureLoaderResult.asKmp(): KMTextureLoaderResult = this
+internal fun KMTextureLoaderResult.asPlatform(): io.openmobilemaps.mapscore.shared.map.loader.TextureLoaderResult = io.openmobilemaps.mapscore.shared.map.loader.TextureLoaderResult(
+    data = data?.let { it.asPlatform() },
+    etag = etag?.let { it },
+    status = status.asPlatform(),
+    errorCode = errorCode?.let { it },
+)
+internal fun io.openmobilemaps.mapscore.shared.map.loader.TextureLoaderResult.asKmp(): KMTextureLoaderResult = KMTextureLoaderResult(
+    data = this.data?.let { requireNotNull((it as io.openmobilemaps.mapscore.shared.graphics.objects.TextureHolderInterface)).asKmp() },
+    etag = this.etag?.let { it },
+    status = (this.status as io.openmobilemaps.mapscore.shared.map.loader.LoaderStatus).asKmp(),
+    errorCode = this.errorCode?.let { it },
+)
