@@ -70,6 +70,18 @@ val isIosOnlyInvocation =
                     looksLikeIosTask && !looksLikeAndroidTask
                 }
             )
+val isAndroidOrIdeInvocation =
+    requestedTasksLower.any { task ->
+        task.contains("android") ||
+            task.contains("assemble") ||
+            task.contains("bundle") ||
+            task.contains("lint") ||
+            task.contains("install") ||
+            task.contains("connected") ||
+            task.contains("preparekotlinbuildscriptmodel") ||
+            task.contains("kotlinbuildscriptmodel")
+    }
+val skipIosTasksForCurrentInvocation = !isIosOnlyInvocation && isAndroidOrIdeInvocation
 
 plugins {
     id("org.jetbrains.kotlin.multiplatform") version "2.3.0"
@@ -378,6 +390,19 @@ tasks
             "spmForKmp tasks access task/project state during execution",
         )
     }
+if (skipIosTasksForCurrentInvocation) {
+    tasks.configureEach {
+        val taskName = name.lowercase()
+        val isIosSpecificTask =
+            taskName.contains("ios") ||
+                taskName.startsWith("swiftpackageconfigapplemapcorekmp") ||
+                taskName.contains("mapcoremetallib") ||
+                taskName.startsWith("syncmapcorepackageresolvedios")
+        if (isIosSpecificTask) {
+            enabled = false
+        }
+    }
+}
 
 // Avoid overlapping Package.resolved outputs between per-target SwiftPM compile tasks.
 val syncPackageResolvedIosArm64 = tasks.register<CopyFileIfExistsTask>("syncMapCorePackageResolvedIosArm64") {
@@ -397,6 +422,12 @@ val syncPackageResolvedIosSimulatorArm64 =
             ),
         )
     }
+listOf(syncPackageResolvedIosArm64, syncPackageResolvedIosSimulatorArm64).forEach { syncTask ->
+    syncTask.configure {
+        mustRunAfter("SwiftPackageConfigAppleMapCoreKmpCompileSwiftPackageIosArm64")
+        mustRunAfter("SwiftPackageConfigAppleMapCoreKmpCompileSwiftPackageIosSimulatorArm64")
+    }
+}
 
 tasks.matching { it.name == "SwiftPackageConfigAppleMapCoreKmpCompileSwiftPackageIosArm64" }
     .configureEach {
