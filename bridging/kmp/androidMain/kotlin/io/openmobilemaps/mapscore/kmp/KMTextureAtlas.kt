@@ -3,7 +3,19 @@
 
 package io.openmobilemaps.mapscore.kmp
 
-actual typealias KMTextureAtlas = io.openmobilemaps.mapscore.shared.graphics.TextureAtlas
+actual class KMTextureAtlas actual public constructor(
+    uvMap: HashMap<String, KMRectI>,
+    texture: KMTextureHolderInterface?,
+) {
+    actual val uvMap: HashMap<String, KMRectI> = uvMap
+    actual val texture: KMTextureHolderInterface? = texture
+}
 
-internal fun KMTextureAtlas.asPlatform(): io.openmobilemaps.mapscore.shared.graphics.TextureAtlas = this
-internal fun io.openmobilemaps.mapscore.shared.graphics.TextureAtlas.asKmp(): KMTextureAtlas = this
+internal fun KMTextureAtlas.asPlatform(): io.openmobilemaps.mapscore.shared.graphics.TextureAtlas = io.openmobilemaps.mapscore.shared.graphics.TextureAtlas(
+    uvMap = HashMap(uvMap.map { it.key to it.value.asPlatform() }.toMap()),
+    texture = texture?.let { it.asPlatform() },
+)
+internal fun io.openmobilemaps.mapscore.shared.graphics.TextureAtlas.asKmp(): KMTextureAtlas = KMTextureAtlas(
+    uvMap = HashMap(uvMap.map { it.key to it.value.asKmp() }.toMap()),
+    texture = texture?.let { it.asKmp() },
+)

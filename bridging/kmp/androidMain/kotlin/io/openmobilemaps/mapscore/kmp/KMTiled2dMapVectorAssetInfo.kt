@@ -3,7 +3,19 @@
 
 package io.openmobilemaps.mapscore.kmp
 
-actual typealias KMTiled2dMapVectorAssetInfo = io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.Tiled2dMapVectorAssetInfo
+actual class KMTiled2dMapVectorAssetInfo actual public constructor(
+    featureIdentifiersUv: HashMap<String, KMRectI>,
+    texture: KMTextureHolderInterface?,
+) {
+    actual val featureIdentifiersUv: HashMap<String, KMRectI> = featureIdentifiersUv
+    actual val texture: KMTextureHolderInterface? = texture
+}
 
-internal fun KMTiled2dMapVectorAssetInfo.asPlatform(): io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.Tiled2dMapVectorAssetInfo = this
-internal fun io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.Tiled2dMapVectorAssetInfo.asKmp(): KMTiled2dMapVectorAssetInfo = this
+internal fun KMTiled2dMapVectorAssetInfo.asPlatform(): io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.Tiled2dMapVectorAssetInfo = io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.Tiled2dMapVectorAssetInfo(
+    featureIdentifiersUv = HashMap(featureIdentifiersUv.map { it.key to it.value.asPlatform() }.toMap()),
+    texture = texture?.let { it.asPlatform() },
+)
+internal fun io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.Tiled2dMapVectorAssetInfo.asKmp(): KMTiled2dMapVectorAssetInfo = KMTiled2dMapVectorAssetInfo(
+    featureIdentifiersUv = HashMap(featureIdentifiersUv.map { it.key to it.value.asKmp() }.toMap()),
+    texture = texture?.let { it.asKmp() },
+)

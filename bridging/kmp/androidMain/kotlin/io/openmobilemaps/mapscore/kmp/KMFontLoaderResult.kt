@@ -3,7 +3,23 @@
 
 package io.openmobilemaps.mapscore.kmp
 
-actual typealias KMFontLoaderResult = io.openmobilemaps.mapscore.shared.map.loader.FontLoaderResult
+actual class KMFontLoaderResult actual public constructor(
+    imageData: KMTextureHolderInterface?,
+    fontData: KMFontData?,
+    status: KMLoaderStatus,
+) {
+    actual val imageData: KMTextureHolderInterface? = imageData
+    actual val fontData: KMFontData? = fontData
+    actual val status: KMLoaderStatus = status
+}
 
-internal fun KMFontLoaderResult.asPlatform(): io.openmobilemaps.mapscore.shared.map.loader.FontLoaderResult = this
-internal fun io.openmobilemaps.mapscore.shared.map.loader.FontLoaderResult.asKmp(): KMFontLoaderResult = this
+internal fun KMFontLoaderResult.asPlatform(): io.openmobilemaps.mapscore.shared.map.loader.FontLoaderResult = io.openmobilemaps.mapscore.shared.map.loader.FontLoaderResult(
+    imageData = imageData?.let { it.asPlatform() },
+    fontData = fontData?.let { it.asPlatform() },
+    status = status.asPlatform(),
+)
+internal fun io.openmobilemaps.mapscore.shared.map.loader.FontLoaderResult.asKmp(): KMFontLoaderResult = KMFontLoaderResult(
+    imageData = imageData?.let { it.asKmp() },
+    fontData = fontData?.let { it.asKmp() },
+    status = status.asKmp(),
+)

@@ -32,7 +32,8 @@ private class KMLoaderInterfacePlatformWrapper(internal val nativeHandle: io.ope
 
     override fun loadTextureAsync(url: String, etag: String?): KMFuture<KMTextureLoaderResult> {
         val result = nativeHandle.loadTextureAsync(url, etag?.let { it })
-        return (result as com.snapchat.djinni.Future<io.openmobilemaps.mapscore.shared.map.loader.TextureLoaderResult>).asKmp()
+        @Suppress("UNCHECKED_CAST")
+        return (result as com.snapchat.djinni.Future<KMTextureLoaderResult>).asKmp()
     }
 
     override fun loadDataAsync(url: String, etag: String?): KMFuture<KMDataLoaderResult> {
@@ -60,7 +61,8 @@ private class KMLoaderInterfacePlatformProxy(private val delegate: KMLoaderInter
 
     override fun loadTextureAsync(url: String, etag: String?): com.snapchat.djinni.Future<io.openmobilemaps.mapscore.shared.map.loader.TextureLoaderResult> {
         val result = delegate.loadTextureAsync(url, etag?.let { it })
-        return result.asPlatform()
+        @Suppress("UNCHECKED_CAST")
+        return result.asPlatform() as com.snapchat.djinni.Future<io.openmobilemaps.mapscore.shared.map.loader.TextureLoaderResult>
     }
 
     override fun loadDataAsync(url: String, etag: String?): com.snapchat.djinni.Future<io.openmobilemaps.mapscore.shared.map.loader.DataLoaderResult> {

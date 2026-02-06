@@ -25,7 +25,8 @@ private class KMTiled2dMapVectorLayerLocalDataProviderInterfacePlatformWrapper(i
 
     override fun loadSpriteAsync(spriteId: String, url: String, scale: Int): KMFuture<KMTextureLoaderResult> {
         val result = nativeHandle.loadSpriteAsync(spriteId, url, scale)
-        return (result as com.snapchat.djinni.Future<io.openmobilemaps.mapscore.shared.map.loader.TextureLoaderResult>).asKmp()
+        @Suppress("UNCHECKED_CAST")
+        return (result as com.snapchat.djinni.Future<KMTextureLoaderResult>).asKmp()
     }
 
     override fun loadSpriteJsonAsync(spriteId: String, url: String, scale: Int): KMFuture<KMDataLoaderResult> {
@@ -49,7 +50,8 @@ private class KMTiled2dMapVectorLayerLocalDataProviderInterfacePlatformProxy(pri
 
     override fun loadSpriteAsync(spriteId: String, url: String, scale: Int): com.snapchat.djinni.Future<io.openmobilemaps.mapscore.shared.map.loader.TextureLoaderResult> {
         val result = delegate.loadSpriteAsync(spriteId, url, scale)
-        return result.asPlatform()
+        @Suppress("UNCHECKED_CAST")
+        return result.asPlatform() as com.snapchat.djinni.Future<io.openmobilemaps.mapscore.shared.map.loader.TextureLoaderResult>
     }
 
     override fun loadSpriteJsonAsync(spriteId: String, url: String, scale: Int): com.snapchat.djinni.Future<io.openmobilemaps.mapscore.shared.map.loader.DataLoaderResult> {
