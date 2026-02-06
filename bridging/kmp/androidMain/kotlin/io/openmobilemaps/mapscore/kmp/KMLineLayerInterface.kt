@@ -3,11 +3,13 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.map.layers.line.LineLayerInterface
+
 actual class KMLineLayerInterface actual public constructor(
     nativeHandle: Any,
 ) {
     internal val nativeHandle: Any = nativeHandle
-    private val native = nativeHandle as io.openmobilemaps.mapscore.shared.map.layers.line.LineLayerInterface
+    private val native = nativeHandle as LineLayerInterface
 
     actual fun setLines(lines: ArrayList<KMLineInfoInterface>) {
         native.setLines(ArrayList(lines.map { it.asPlatform() }))
@@ -63,11 +65,11 @@ actual class KMLineLayerInterface actual public constructor(
     {
 
         actual fun create(): KMLineLayerInterface {
-            val result = io.openmobilemaps.mapscore.shared.map.layers.line.LineLayerInterface.create()
+            val result = LineLayerInterface.create()
             return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.layers.line.LineLayerInterface)).asKmp()
         }
     }
 }
 
-internal fun KMLineLayerInterface.asPlatform(): io.openmobilemaps.mapscore.shared.map.layers.line.LineLayerInterface = nativeHandle as io.openmobilemaps.mapscore.shared.map.layers.line.LineLayerInterface
-internal fun io.openmobilemaps.mapscore.shared.map.layers.line.LineLayerInterface.asKmp(): KMLineLayerInterface = KMLineLayerInterface(this)
+internal fun KMLineLayerInterface.asPlatform(): LineLayerInterface = nativeHandle as LineLayerInterface
+internal fun LineLayerInterface.asKmp(): KMLineLayerInterface = KMLineLayerInterface(this)

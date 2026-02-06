@@ -3,6 +3,8 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.graphics.objects.GraphicsObjectInterface
+
 actual interface KMGraphicsObjectInterface
 {
 
@@ -19,7 +21,7 @@ actual interface KMGraphicsObjectInterface
     actual fun render(context: KMRenderingContextInterface, renderPass: KMRenderPassConfig, vpMatrix: Long, mMatrix: Long, origin: KMVec3D, isMasked: Boolean, screenPixelAsRealMeterFactor: Double, isScreenSpaceCoords: Boolean)
 }
 
-private class KMGraphicsObjectInterfacePlatformWrapper(internal val nativeHandle: io.openmobilemaps.mapscore.shared.graphics.objects.GraphicsObjectInterface) : KMGraphicsObjectInterface
+private class KMGraphicsObjectInterfacePlatformWrapper(internal val nativeHandle: GraphicsObjectInterface) : KMGraphicsObjectInterface
 {
 
     override fun isReady(): Boolean {
@@ -48,7 +50,7 @@ private class KMGraphicsObjectInterfacePlatformWrapper(internal val nativeHandle
     }
 }
 
-private class KMGraphicsObjectInterfacePlatformProxy(private val delegate: KMGraphicsObjectInterface) : io.openmobilemaps.mapscore.shared.graphics.objects.GraphicsObjectInterface()
+private class KMGraphicsObjectInterfacePlatformProxy(private val delegate: KMGraphicsObjectInterface) : GraphicsObjectInterface()
 {
 
     override fun isReady(): Boolean {
@@ -77,8 +79,8 @@ private class KMGraphicsObjectInterfacePlatformProxy(private val delegate: KMGra
     }
 }
 
-internal fun KMGraphicsObjectInterface.asPlatform(): io.openmobilemaps.mapscore.shared.graphics.objects.GraphicsObjectInterface = when (this) {
+internal fun KMGraphicsObjectInterface.asPlatform(): GraphicsObjectInterface = when (this) {
     is KMGraphicsObjectInterfacePlatformWrapper -> this.nativeHandle
     else -> KMGraphicsObjectInterfacePlatformProxy(this)
 }
-internal fun io.openmobilemaps.mapscore.shared.graphics.objects.GraphicsObjectInterface.asKmp(): KMGraphicsObjectInterface = KMGraphicsObjectInterfacePlatformWrapper(this)
+internal fun GraphicsObjectInterface.asKmp(): KMGraphicsObjectInterface = KMGraphicsObjectInterfacePlatformWrapper(this)

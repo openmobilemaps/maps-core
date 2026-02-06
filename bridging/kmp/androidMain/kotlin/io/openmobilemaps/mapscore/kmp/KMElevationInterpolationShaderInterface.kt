@@ -3,11 +3,13 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.graphics.shader.ElevationInterpolationShaderInterface
+
 actual class KMElevationInterpolationShaderInterface actual public constructor(
     nativeHandle: Any,
 ) {
     internal val nativeHandle: Any = nativeHandle
-    private val native = nativeHandle as io.openmobilemaps.mapscore.shared.graphics.shader.ElevationInterpolationShaderInterface
+    private val native = nativeHandle as ElevationInterpolationShaderInterface
 
     actual fun asShaderProgramInterface(): KMShaderProgramInterface {
         val result = native.asShaderProgramInterface()
@@ -15,5 +17,5 @@ actual class KMElevationInterpolationShaderInterface actual public constructor(
     }
 }
 
-internal fun KMElevationInterpolationShaderInterface.asPlatform(): io.openmobilemaps.mapscore.shared.graphics.shader.ElevationInterpolationShaderInterface = nativeHandle as io.openmobilemaps.mapscore.shared.graphics.shader.ElevationInterpolationShaderInterface
-internal fun io.openmobilemaps.mapscore.shared.graphics.shader.ElevationInterpolationShaderInterface.asKmp(): KMElevationInterpolationShaderInterface = KMElevationInterpolationShaderInterface(this)
+internal fun KMElevationInterpolationShaderInterface.asPlatform(): ElevationInterpolationShaderInterface = nativeHandle as ElevationInterpolationShaderInterface
+internal fun ElevationInterpolationShaderInterface.asKmp(): KMElevationInterpolationShaderInterface = KMElevationInterpolationShaderInterface(this)

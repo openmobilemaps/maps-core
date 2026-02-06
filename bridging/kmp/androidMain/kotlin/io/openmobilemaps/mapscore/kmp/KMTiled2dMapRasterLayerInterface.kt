@@ -3,11 +3,13 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.Tiled2dMapRasterLayerInterface
+
 actual class KMTiled2dMapRasterLayerInterface actual public constructor(
     nativeHandle: Any,
 ) {
     internal val nativeHandle: Any = nativeHandle
-    private val native = nativeHandle as io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.Tiled2dMapRasterLayerInterface
+    private val native = nativeHandle as Tiled2dMapRasterLayerInterface
 
     actual fun asLayerInterface(): KMLayerInterface {
         val result = native.asLayerInterface()
@@ -92,21 +94,21 @@ actual class KMTiled2dMapRasterLayerInterface actual public constructor(
     {
 
         actual fun createWithMask(layerConfig: KMTiled2dMapLayerConfig, loaders: ArrayList<KMLoaderInterface>, mask: KMMaskingObjectInterface): KMTiled2dMapRasterLayerInterface {
-            val result = io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.Tiled2dMapRasterLayerInterface.createWithMask(layerConfig.asPlatform(), ArrayList(loaders.map { it.asPlatform() }), mask.asPlatform())
+            val result = Tiled2dMapRasterLayerInterface.createWithMask(layerConfig.asPlatform(), ArrayList(loaders.map { it.asPlatform() }), mask.asPlatform())
             return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.Tiled2dMapRasterLayerInterface)).asKmp()
         }
 
         actual fun createWithShader(layerConfig: KMTiled2dMapLayerConfig, loaders: ArrayList<KMLoaderInterface>, shader: KMShaderProgramInterface): KMTiled2dMapRasterLayerInterface {
-            val result = io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.Tiled2dMapRasterLayerInterface.createWithShader(layerConfig.asPlatform(), ArrayList(loaders.map { it.asPlatform() }), shader.asPlatform())
+            val result = Tiled2dMapRasterLayerInterface.createWithShader(layerConfig.asPlatform(), ArrayList(loaders.map { it.asPlatform() }), shader.asPlatform())
             return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.Tiled2dMapRasterLayerInterface)).asKmp()
         }
 
         actual fun create(layerConfig: KMTiled2dMapLayerConfig, loaders: ArrayList<KMLoaderInterface>): KMTiled2dMapRasterLayerInterface {
-            val result = io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.Tiled2dMapRasterLayerInterface.create(layerConfig.asPlatform(), ArrayList(loaders.map { it.asPlatform() }))
+            val result = Tiled2dMapRasterLayerInterface.create(layerConfig.asPlatform(), ArrayList(loaders.map { it.asPlatform() }))
             return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.Tiled2dMapRasterLayerInterface)).asKmp()
         }
     }
 }
 
-internal fun KMTiled2dMapRasterLayerInterface.asPlatform(): io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.Tiled2dMapRasterLayerInterface = nativeHandle as io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.Tiled2dMapRasterLayerInterface
-internal fun io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.Tiled2dMapRasterLayerInterface.asKmp(): KMTiled2dMapRasterLayerInterface = KMTiled2dMapRasterLayerInterface(this)
+internal fun KMTiled2dMapRasterLayerInterface.asPlatform(): Tiled2dMapRasterLayerInterface = nativeHandle as Tiled2dMapRasterLayerInterface
+internal fun Tiled2dMapRasterLayerInterface.asKmp(): KMTiled2dMapRasterLayerInterface = KMTiled2dMapRasterLayerInterface(this)

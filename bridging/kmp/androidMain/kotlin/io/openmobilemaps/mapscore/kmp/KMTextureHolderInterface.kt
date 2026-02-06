@@ -3,6 +3,8 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.graphics.objects.TextureHolderInterface
+
 actual interface KMTextureHolderInterface
 {
 
@@ -19,7 +21,7 @@ actual interface KMTextureHolderInterface
     actual fun clearFromGraphics()
 }
 
-private class KMTextureHolderInterfacePlatformWrapper(internal val nativeHandle: io.openmobilemaps.mapscore.shared.graphics.objects.TextureHolderInterface) : KMTextureHolderInterface
+private class KMTextureHolderInterfacePlatformWrapper(internal val nativeHandle: TextureHolderInterface) : KMTextureHolderInterface
 {
 
     override fun getImageWidth(): Int {
@@ -52,7 +54,7 @@ private class KMTextureHolderInterfacePlatformWrapper(internal val nativeHandle:
     }
 }
 
-private class KMTextureHolderInterfacePlatformProxy(private val delegate: KMTextureHolderInterface) : io.openmobilemaps.mapscore.shared.graphics.objects.TextureHolderInterface()
+private class KMTextureHolderInterfacePlatformProxy(private val delegate: KMTextureHolderInterface) : TextureHolderInterface()
 {
 
     override fun getImageWidth(): Int {
@@ -85,8 +87,8 @@ private class KMTextureHolderInterfacePlatformProxy(private val delegate: KMText
     }
 }
 
-internal fun KMTextureHolderInterface.asPlatform(): io.openmobilemaps.mapscore.shared.graphics.objects.TextureHolderInterface = when (this) {
+internal fun KMTextureHolderInterface.asPlatform(): TextureHolderInterface = when (this) {
     is KMTextureHolderInterfacePlatformWrapper -> this.nativeHandle
     else -> KMTextureHolderInterfacePlatformProxy(this)
 }
-internal fun io.openmobilemaps.mapscore.shared.graphics.objects.TextureHolderInterface.asKmp(): KMTextureHolderInterface = KMTextureHolderInterfacePlatformWrapper(this)
+internal fun TextureHolderInterface.asKmp(): KMTextureHolderInterface = KMTextureHolderInterfacePlatformWrapper(this)

@@ -3,11 +3,13 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.map.layers.tiled.GeoJsonFeatureParserInterface
+
 actual class KMGeoJsonFeatureParserInterface actual public constructor(
     nativeHandle: Any,
 ) {
     internal val nativeHandle: Any = nativeHandle
-    private val native = nativeHandle as io.openmobilemaps.mapscore.shared.map.layers.tiled.GeoJsonFeatureParserInterface
+    private val native = nativeHandle as GeoJsonFeatureParserInterface
 
     actual fun parse(geoJson: String): ArrayList<KMVectorLayerFeatureInfo>? {
         val result = native.parse(geoJson)
@@ -28,11 +30,11 @@ actual class KMGeoJsonFeatureParserInterface actual public constructor(
     {
 
         actual fun create(): KMGeoJsonFeatureParserInterface {
-            val result = io.openmobilemaps.mapscore.shared.map.layers.tiled.GeoJsonFeatureParserInterface.create()
+            val result = GeoJsonFeatureParserInterface.create()
             return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.layers.tiled.GeoJsonFeatureParserInterface)).asKmp()
         }
     }
 }
 
-internal fun KMGeoJsonFeatureParserInterface.asPlatform(): io.openmobilemaps.mapscore.shared.map.layers.tiled.GeoJsonFeatureParserInterface = nativeHandle as io.openmobilemaps.mapscore.shared.map.layers.tiled.GeoJsonFeatureParserInterface
-internal fun io.openmobilemaps.mapscore.shared.map.layers.tiled.GeoJsonFeatureParserInterface.asKmp(): KMGeoJsonFeatureParserInterface = KMGeoJsonFeatureParserInterface(this)
+internal fun KMGeoJsonFeatureParserInterface.asPlatform(): GeoJsonFeatureParserInterface = nativeHandle as GeoJsonFeatureParserInterface
+internal fun GeoJsonFeatureParserInterface.asKmp(): KMGeoJsonFeatureParserInterface = KMGeoJsonFeatureParserInterface(this)

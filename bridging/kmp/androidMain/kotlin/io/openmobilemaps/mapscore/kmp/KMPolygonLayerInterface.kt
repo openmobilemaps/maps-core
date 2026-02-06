@@ -3,11 +3,13 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.map.layers.polygon.PolygonLayerInterface
+
 actual class KMPolygonLayerInterface actual public constructor(
     nativeHandle: Any,
 ) {
     internal val nativeHandle: Any = nativeHandle
-    private val native = nativeHandle as io.openmobilemaps.mapscore.shared.map.layers.polygon.PolygonLayerInterface
+    private val native = nativeHandle as PolygonLayerInterface
 
     actual fun setPolygons(polygons: ArrayList<KMPolygonInfo>, origin: KMVec3D) {
         native.setPolygons(ArrayList(polygons.map { it.asPlatform() }), origin.asPlatform())
@@ -59,11 +61,11 @@ actual class KMPolygonLayerInterface actual public constructor(
     {
 
         actual fun create(): KMPolygonLayerInterface {
-            val result = io.openmobilemaps.mapscore.shared.map.layers.polygon.PolygonLayerInterface.create()
+            val result = PolygonLayerInterface.create()
             return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.layers.polygon.PolygonLayerInterface)).asKmp()
         }
     }
 }
 
-internal fun KMPolygonLayerInterface.asPlatform(): io.openmobilemaps.mapscore.shared.map.layers.polygon.PolygonLayerInterface = nativeHandle as io.openmobilemaps.mapscore.shared.map.layers.polygon.PolygonLayerInterface
-internal fun io.openmobilemaps.mapscore.shared.map.layers.polygon.PolygonLayerInterface.asKmp(): KMPolygonLayerInterface = KMPolygonLayerInterface(this)
+internal fun KMPolygonLayerInterface.asPlatform(): PolygonLayerInterface = nativeHandle as PolygonLayerInterface
+internal fun PolygonLayerInterface.asKmp(): KMPolygonLayerInterface = KMPolygonLayerInterface(this)

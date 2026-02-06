@@ -3,11 +3,13 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.map.layers.skysphere.SkySphereLayerInterface
+
 actual class KMSkySphereLayerInterface actual public constructor(
     nativeHandle: Any,
 ) {
     internal val nativeHandle: Any = nativeHandle
-    private val native = nativeHandle as io.openmobilemaps.mapscore.shared.map.layers.skysphere.SkySphereLayerInterface
+    private val native = nativeHandle as SkySphereLayerInterface
 
     actual fun asLayerInterface(): KMLayerInterface {
         val result = native.asLayerInterface()
@@ -22,11 +24,11 @@ actual class KMSkySphereLayerInterface actual public constructor(
     {
 
         actual fun create(): KMSkySphereLayerInterface {
-            val result = io.openmobilemaps.mapscore.shared.map.layers.skysphere.SkySphereLayerInterface.create()
+            val result = SkySphereLayerInterface.create()
             return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.layers.skysphere.SkySphereLayerInterface)).asKmp()
         }
     }
 }
 
-internal fun KMSkySphereLayerInterface.asPlatform(): io.openmobilemaps.mapscore.shared.map.layers.skysphere.SkySphereLayerInterface = nativeHandle as io.openmobilemaps.mapscore.shared.map.layers.skysphere.SkySphereLayerInterface
-internal fun io.openmobilemaps.mapscore.shared.map.layers.skysphere.SkySphereLayerInterface.asKmp(): KMSkySphereLayerInterface = KMSkySphereLayerInterface(this)
+internal fun KMSkySphereLayerInterface.asPlatform(): SkySphereLayerInterface = nativeHandle as SkySphereLayerInterface
+internal fun SkySphereLayerInterface.asKmp(): KMSkySphereLayerInterface = KMSkySphereLayerInterface(this)

@@ -3,21 +3,23 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.map.scheduling.ThreadPoolScheduler
+
 actual class KMThreadPoolScheduler actual public constructor(
     nativeHandle: Any,
 ) {
     internal val nativeHandle: Any = nativeHandle
-    private val native = nativeHandle as io.openmobilemaps.mapscore.shared.map.scheduling.ThreadPoolScheduler
+    private val native = nativeHandle as ThreadPoolScheduler
 
     actual companion object
     {
 
         actual fun create(): KMSchedulerInterface {
-            val result = io.openmobilemaps.mapscore.shared.map.scheduling.ThreadPoolScheduler.create()
+            val result = ThreadPoolScheduler.create()
             return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.scheduling.SchedulerInterface)).asKmp()
         }
     }
 }
 
-internal fun KMThreadPoolScheduler.asPlatform(): io.openmobilemaps.mapscore.shared.map.scheduling.ThreadPoolScheduler = nativeHandle as io.openmobilemaps.mapscore.shared.map.scheduling.ThreadPoolScheduler
-internal fun io.openmobilemaps.mapscore.shared.map.scheduling.ThreadPoolScheduler.asKmp(): KMThreadPoolScheduler = KMThreadPoolScheduler(this)
+internal fun KMThreadPoolScheduler.asPlatform(): ThreadPoolScheduler = nativeHandle as ThreadPoolScheduler
+internal fun ThreadPoolScheduler.asKmp(): KMThreadPoolScheduler = KMThreadPoolScheduler(this)

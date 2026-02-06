@@ -3,13 +3,15 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.graphics.objects.ComputeObjectInterface
+
 actual interface KMComputeObjectInterface
 {
 
     actual fun compute(context: KMRenderingContextInterface, vpMatrix: Long, origin: KMVec3D, screenPixelAsRealMeterFactor: Double)
 }
 
-private class KMComputeObjectInterfacePlatformWrapper(internal val nativeHandle: io.openmobilemaps.mapscore.shared.graphics.objects.ComputeObjectInterface) : KMComputeObjectInterface
+private class KMComputeObjectInterfacePlatformWrapper(internal val nativeHandle: ComputeObjectInterface) : KMComputeObjectInterface
 {
 
     override fun compute(context: KMRenderingContextInterface, vpMatrix: Long, origin: KMVec3D, screenPixelAsRealMeterFactor: Double) {
@@ -17,7 +19,7 @@ private class KMComputeObjectInterfacePlatformWrapper(internal val nativeHandle:
     }
 }
 
-private class KMComputeObjectInterfacePlatformProxy(private val delegate: KMComputeObjectInterface) : io.openmobilemaps.mapscore.shared.graphics.objects.ComputeObjectInterface()
+private class KMComputeObjectInterfacePlatformProxy(private val delegate: KMComputeObjectInterface) : ComputeObjectInterface()
 {
 
     override fun compute(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, vpMatrix: Long, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D, screenPixelAsRealMeterFactor: Double) {
@@ -25,8 +27,8 @@ private class KMComputeObjectInterfacePlatformProxy(private val delegate: KMComp
     }
 }
 
-internal fun KMComputeObjectInterface.asPlatform(): io.openmobilemaps.mapscore.shared.graphics.objects.ComputeObjectInterface = when (this) {
+internal fun KMComputeObjectInterface.asPlatform(): ComputeObjectInterface = when (this) {
     is KMComputeObjectInterfacePlatformWrapper -> this.nativeHandle
     else -> KMComputeObjectInterfacePlatformProxy(this)
 }
-internal fun io.openmobilemaps.mapscore.shared.graphics.objects.ComputeObjectInterface.asKmp(): KMComputeObjectInterface = KMComputeObjectInterfacePlatformWrapper(this)
+internal fun ComputeObjectInterface.asKmp(): KMComputeObjectInterface = KMComputeObjectInterfacePlatformWrapper(this)

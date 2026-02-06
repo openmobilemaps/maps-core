@@ -3,20 +3,22 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.utils.ExceptionLoggerInterface
+
 actual class KMExceptionLoggerInterface actual public constructor(
     nativeHandle: Any,
 ) {
     internal val nativeHandle: Any = nativeHandle
-    private val native = nativeHandle as io.openmobilemaps.mapscore.shared.utils.ExceptionLoggerInterface
+    private val native = nativeHandle as ExceptionLoggerInterface
 
     actual companion object
     {
 
         actual fun setLoggerDelegate(delegate: KMExceptionLoggerDelegateInterface) {
-            io.openmobilemaps.mapscore.shared.utils.ExceptionLoggerInterface.setLoggerDelegate(delegate.asPlatform())
+            ExceptionLoggerInterface.setLoggerDelegate(delegate.asPlatform())
         }
     }
 }
 
-internal fun KMExceptionLoggerInterface.asPlatform(): io.openmobilemaps.mapscore.shared.utils.ExceptionLoggerInterface = nativeHandle as io.openmobilemaps.mapscore.shared.utils.ExceptionLoggerInterface
-internal fun io.openmobilemaps.mapscore.shared.utils.ExceptionLoggerInterface.asKmp(): KMExceptionLoggerInterface = KMExceptionLoggerInterface(this)
+internal fun KMExceptionLoggerInterface.asPlatform(): ExceptionLoggerInterface = nativeHandle as ExceptionLoggerInterface
+internal fun ExceptionLoggerInterface.asKmp(): KMExceptionLoggerInterface = KMExceptionLoggerInterface(this)

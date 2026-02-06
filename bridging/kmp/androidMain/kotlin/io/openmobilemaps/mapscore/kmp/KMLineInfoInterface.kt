@@ -3,11 +3,13 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.map.layers.line.LineInfoInterface
+
 actual class KMLineInfoInterface actual public constructor(
     nativeHandle: Any,
 ) {
     internal val nativeHandle: Any = nativeHandle
-    private val native = nativeHandle as io.openmobilemaps.mapscore.shared.map.layers.line.LineInfoInterface
+    private val native = nativeHandle as LineInfoInterface
 
     actual fun getIdentifier(): String {
         val result = native.getIdentifier()
@@ -25,5 +27,5 @@ actual class KMLineInfoInterface actual public constructor(
     }
 }
 
-internal fun KMLineInfoInterface.asPlatform(): io.openmobilemaps.mapscore.shared.map.layers.line.LineInfoInterface = nativeHandle as io.openmobilemaps.mapscore.shared.map.layers.line.LineInfoInterface
-internal fun io.openmobilemaps.mapscore.shared.map.layers.line.LineInfoInterface.asKmp(): KMLineInfoInterface = KMLineInfoInterface(this)
+internal fun KMLineInfoInterface.asPlatform(): LineInfoInterface = nativeHandle as LineInfoInterface
+internal fun LineInfoInterface.asKmp(): KMLineInfoInterface = KMLineInfoInterface(this)

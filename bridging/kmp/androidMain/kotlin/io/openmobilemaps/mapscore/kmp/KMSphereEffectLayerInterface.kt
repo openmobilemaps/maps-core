@@ -3,11 +3,13 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.map.layers.effect.SphereEffectLayerInterface
+
 actual class KMSphereEffectLayerInterface actual public constructor(
     nativeHandle: Any,
 ) {
     internal val nativeHandle: Any = nativeHandle
-    private val native = nativeHandle as io.openmobilemaps.mapscore.shared.map.layers.effect.SphereEffectLayerInterface
+    private val native = nativeHandle as SphereEffectLayerInterface
 
     actual fun asLayerInterface(): KMLayerInterface {
         val result = native.asLayerInterface()
@@ -18,11 +20,11 @@ actual class KMSphereEffectLayerInterface actual public constructor(
     {
 
         actual fun create(): KMSphereEffectLayerInterface {
-            val result = io.openmobilemaps.mapscore.shared.map.layers.effect.SphereEffectLayerInterface.create()
+            val result = SphereEffectLayerInterface.create()
             return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.layers.effect.SphereEffectLayerInterface)).asKmp()
         }
     }
 }
 
-internal fun KMSphereEffectLayerInterface.asPlatform(): io.openmobilemaps.mapscore.shared.map.layers.effect.SphereEffectLayerInterface = nativeHandle as io.openmobilemaps.mapscore.shared.map.layers.effect.SphereEffectLayerInterface
-internal fun io.openmobilemaps.mapscore.shared.map.layers.effect.SphereEffectLayerInterface.asKmp(): KMSphereEffectLayerInterface = KMSphereEffectLayerInterface(this)
+internal fun KMSphereEffectLayerInterface.asPlatform(): SphereEffectLayerInterface = nativeHandle as SphereEffectLayerInterface
+internal fun SphereEffectLayerInterface.asKmp(): KMSphereEffectLayerInterface = KMSphereEffectLayerInterface(this)

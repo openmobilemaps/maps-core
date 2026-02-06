@@ -3,6 +3,8 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.Tiled2dMapVectorLayerSelectionCallbackInterface
+
 actual interface KMTiled2dMapVectorLayerSelectionCallbackInterface
 {
 
@@ -13,7 +15,7 @@ actual interface KMTiled2dMapVectorLayerSelectionCallbackInterface
     actual fun didClickBackgroundConfirmed(coord: KMCoord): Boolean
 }
 
-private class KMTiled2dMapVectorLayerSelectionCallbackInterfacePlatformWrapper(internal val nativeHandle: io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.Tiled2dMapVectorLayerSelectionCallbackInterface) : KMTiled2dMapVectorLayerSelectionCallbackInterface
+private class KMTiled2dMapVectorLayerSelectionCallbackInterfacePlatformWrapper(internal val nativeHandle: Tiled2dMapVectorLayerSelectionCallbackInterface) : KMTiled2dMapVectorLayerSelectionCallbackInterface
 {
 
     override fun didSelectFeature(featureInfo: KMVectorLayerFeatureInfo, layerIdentifier: String, coord: KMCoord): Boolean {
@@ -32,7 +34,7 @@ private class KMTiled2dMapVectorLayerSelectionCallbackInterfacePlatformWrapper(i
     }
 }
 
-private class KMTiled2dMapVectorLayerSelectionCallbackInterfacePlatformProxy(private val delegate: KMTiled2dMapVectorLayerSelectionCallbackInterface) : io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.Tiled2dMapVectorLayerSelectionCallbackInterface()
+private class KMTiled2dMapVectorLayerSelectionCallbackInterfacePlatformProxy(private val delegate: KMTiled2dMapVectorLayerSelectionCallbackInterface) : Tiled2dMapVectorLayerSelectionCallbackInterface()
 {
 
     override fun didSelectFeature(featureInfo: io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.VectorLayerFeatureInfo, layerIdentifier: String, coord: io.openmobilemaps.mapscore.shared.map.coordinates.Coord): Boolean {
@@ -51,8 +53,8 @@ private class KMTiled2dMapVectorLayerSelectionCallbackInterfacePlatformProxy(pri
     }
 }
 
-internal fun KMTiled2dMapVectorLayerSelectionCallbackInterface.asPlatform(): io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.Tiled2dMapVectorLayerSelectionCallbackInterface = when (this) {
+internal fun KMTiled2dMapVectorLayerSelectionCallbackInterface.asPlatform(): Tiled2dMapVectorLayerSelectionCallbackInterface = when (this) {
     is KMTiled2dMapVectorLayerSelectionCallbackInterfacePlatformWrapper -> this.nativeHandle
     else -> KMTiled2dMapVectorLayerSelectionCallbackInterfacePlatformProxy(this)
 }
-internal fun io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.Tiled2dMapVectorLayerSelectionCallbackInterface.asKmp(): KMTiled2dMapVectorLayerSelectionCallbackInterface = KMTiled2dMapVectorLayerSelectionCallbackInterfacePlatformWrapper(this)
+internal fun Tiled2dMapVectorLayerSelectionCallbackInterface.asKmp(): KMTiled2dMapVectorLayerSelectionCallbackInterface = KMTiled2dMapVectorLayerSelectionCallbackInterfacePlatformWrapper(this)

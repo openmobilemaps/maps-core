@@ -3,21 +3,23 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.wmts.WmtsTiled2dMapLayerConfigFactory
+
 actual class KMWmtsTiled2dMapLayerConfigFactory actual public constructor(
     nativeHandle: Any,
 ) {
     internal val nativeHandle: Any = nativeHandle
-    private val native = nativeHandle as io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.wmts.WmtsTiled2dMapLayerConfigFactory
+    private val native = nativeHandle as WmtsTiled2dMapLayerConfigFactory
 
     actual companion object
     {
 
         actual fun create(wmtsLayerConfiguration: KMWmtsLayerDescription, zoomLevelInfo: ArrayList<KMTiled2dMapZoomLevelInfo>, zoomInfo: KMTiled2dMapZoomInfo, coordinateSystemIdentifier: Int, matrixSetIdentifier: String): KMTiled2dMapLayerConfig {
-            val result = io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.wmts.WmtsTiled2dMapLayerConfigFactory.create(wmtsLayerConfiguration.asPlatform(), ArrayList(zoomLevelInfo.map { it.asPlatform() }), zoomInfo.asPlatform(), coordinateSystemIdentifier, matrixSetIdentifier)
+            val result = WmtsTiled2dMapLayerConfigFactory.create(wmtsLayerConfiguration.asPlatform(), ArrayList(zoomLevelInfo.map { it.asPlatform() }), zoomInfo.asPlatform(), coordinateSystemIdentifier, matrixSetIdentifier)
             return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig)).asKmp()
         }
     }
 }
 
-internal fun KMWmtsTiled2dMapLayerConfigFactory.asPlatform(): io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.wmts.WmtsTiled2dMapLayerConfigFactory = nativeHandle as io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.wmts.WmtsTiled2dMapLayerConfigFactory
-internal fun io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.wmts.WmtsTiled2dMapLayerConfigFactory.asKmp(): KMWmtsTiled2dMapLayerConfigFactory = KMWmtsTiled2dMapLayerConfigFactory(this)
+internal fun KMWmtsTiled2dMapLayerConfigFactory.asPlatform(): WmtsTiled2dMapLayerConfigFactory = nativeHandle as WmtsTiled2dMapLayerConfigFactory
+internal fun WmtsTiled2dMapLayerConfigFactory.asKmp(): KMWmtsTiled2dMapLayerConfigFactory = KMWmtsTiled2dMapLayerConfigFactory(this)

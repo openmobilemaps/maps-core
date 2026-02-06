@@ -3,6 +3,8 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.map.camera.MapCameraListenerInterface
+
 actual interface KMMapCameraListenerInterface
 {
 
@@ -15,7 +17,7 @@ actual interface KMMapCameraListenerInterface
     actual fun onCameraChange(viewMatrix: ArrayList<Float>, projectionMatrix: ArrayList<Float>, origin: KMVec3D, verticalFov: Float, horizontalFov: Float, width: Float, height: Float, focusPointAltitude: Float, focusPointPosition: KMCoord, zoom: Float)
 }
 
-private class KMMapCameraListenerInterfacePlatformWrapper(internal val nativeHandle: io.openmobilemaps.mapscore.shared.map.camera.MapCameraListenerInterface) : KMMapCameraListenerInterface
+private class KMMapCameraListenerInterfacePlatformWrapper(internal val nativeHandle: MapCameraListenerInterface) : KMMapCameraListenerInterface
 {
 
     override fun onVisibleBoundsChanged(visibleBounds: KMRectCoord, zoom: Double) {
@@ -35,7 +37,7 @@ private class KMMapCameraListenerInterfacePlatformWrapper(internal val nativeHan
     }
 }
 
-private class KMMapCameraListenerInterfacePlatformProxy(private val delegate: KMMapCameraListenerInterface) : io.openmobilemaps.mapscore.shared.map.camera.MapCameraListenerInterface()
+private class KMMapCameraListenerInterfacePlatformProxy(private val delegate: KMMapCameraListenerInterface) : MapCameraListenerInterface()
 {
 
     override fun onVisibleBoundsChanged(visibleBounds: io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord, zoom: Double) {
@@ -55,8 +57,8 @@ private class KMMapCameraListenerInterfacePlatformProxy(private val delegate: KM
     }
 }
 
-internal fun KMMapCameraListenerInterface.asPlatform(): io.openmobilemaps.mapscore.shared.map.camera.MapCameraListenerInterface = when (this) {
+internal fun KMMapCameraListenerInterface.asPlatform(): MapCameraListenerInterface = when (this) {
     is KMMapCameraListenerInterfacePlatformWrapper -> this.nativeHandle
     else -> KMMapCameraListenerInterfacePlatformProxy(this)
 }
-internal fun io.openmobilemaps.mapscore.shared.map.camera.MapCameraListenerInterface.asKmp(): KMMapCameraListenerInterface = KMMapCameraListenerInterfacePlatformWrapper(this)
+internal fun MapCameraListenerInterface.asKmp(): KMMapCameraListenerInterface = KMMapCameraListenerInterfacePlatformWrapper(this)

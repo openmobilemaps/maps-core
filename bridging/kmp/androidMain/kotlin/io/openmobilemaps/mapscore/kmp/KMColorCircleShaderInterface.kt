@@ -3,11 +3,13 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.graphics.shader.ColorCircleShaderInterface
+
 actual class KMColorCircleShaderInterface actual public constructor(
     nativeHandle: Any,
 ) {
     internal val nativeHandle: Any = nativeHandle
-    private val native = nativeHandle as io.openmobilemaps.mapscore.shared.graphics.shader.ColorCircleShaderInterface
+    private val native = nativeHandle as ColorCircleShaderInterface
 
     actual fun setColor(red: Float, green: Float, blue: Float, alpha: Float) {
         native.setColor(red, green, blue, alpha)
@@ -19,5 +21,5 @@ actual class KMColorCircleShaderInterface actual public constructor(
     }
 }
 
-internal fun KMColorCircleShaderInterface.asPlatform(): io.openmobilemaps.mapscore.shared.graphics.shader.ColorCircleShaderInterface = nativeHandle as io.openmobilemaps.mapscore.shared.graphics.shader.ColorCircleShaderInterface
-internal fun io.openmobilemaps.mapscore.shared.graphics.shader.ColorCircleShaderInterface.asKmp(): KMColorCircleShaderInterface = KMColorCircleShaderInterface(this)
+internal fun KMColorCircleShaderInterface.asPlatform(): ColorCircleShaderInterface = nativeHandle as ColorCircleShaderInterface
+internal fun ColorCircleShaderInterface.asKmp(): KMColorCircleShaderInterface = KMColorCircleShaderInterface(this)

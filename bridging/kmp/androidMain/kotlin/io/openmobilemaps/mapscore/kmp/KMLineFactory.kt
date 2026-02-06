@@ -3,21 +3,23 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.map.layers.line.LineFactory
+
 actual class KMLineFactory actual public constructor(
     nativeHandle: Any,
 ) {
     internal val nativeHandle: Any = nativeHandle
-    private val native = nativeHandle as io.openmobilemaps.mapscore.shared.map.layers.line.LineFactory
+    private val native = nativeHandle as LineFactory
 
     actual companion object
     {
 
         actual fun createLine(identifier: String, coordinates: ArrayList<KMCoord>, style: KMLineStyle): KMLineInfoInterface {
-            val result = io.openmobilemaps.mapscore.shared.map.layers.line.LineFactory.createLine(identifier, ArrayList(coordinates.map { it.asPlatform() }), style.asPlatform())
+            val result = LineFactory.createLine(identifier, ArrayList(coordinates.map { it.asPlatform() }), style.asPlatform())
             return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.layers.line.LineInfoInterface)).asKmp()
         }
     }
 }
 
-internal fun KMLineFactory.asPlatform(): io.openmobilemaps.mapscore.shared.map.layers.line.LineFactory = nativeHandle as io.openmobilemaps.mapscore.shared.map.layers.line.LineFactory
-internal fun io.openmobilemaps.mapscore.shared.map.layers.line.LineFactory.asKmp(): KMLineFactory = KMLineFactory(this)
+internal fun KMLineFactory.asPlatform(): LineFactory = nativeHandle as LineFactory
+internal fun LineFactory.asKmp(): KMLineFactory = KMLineFactory(this)

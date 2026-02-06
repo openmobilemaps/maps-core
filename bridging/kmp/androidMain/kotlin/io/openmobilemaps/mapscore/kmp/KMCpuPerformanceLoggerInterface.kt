@@ -3,11 +3,13 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.map.CpuPerformanceLoggerInterface
+
 actual class KMCpuPerformanceLoggerInterface actual public constructor(
     nativeHandle: Any,
 ) {
     internal val nativeHandle: Any = nativeHandle
-    private val native = nativeHandle as io.openmobilemaps.mapscore.shared.map.CpuPerformanceLoggerInterface
+    private val native = nativeHandle as CpuPerformanceLoggerInterface
 
     actual fun asPerformanceLoggerInterface(): KMPerformanceLoggerInterface {
         val result = native.asPerformanceLoggerInterface()
@@ -18,16 +20,16 @@ actual class KMCpuPerformanceLoggerInterface actual public constructor(
     {
 
         actual fun create(): KMCpuPerformanceLoggerInterface {
-            val result = io.openmobilemaps.mapscore.shared.map.CpuPerformanceLoggerInterface.create()
+            val result = CpuPerformanceLoggerInterface.create()
             return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.CpuPerformanceLoggerInterface)).asKmp()
         }
 
         actual fun createSpecifically(numBuckets: Int, bucketSizeMs: Long): KMCpuPerformanceLoggerInterface {
-            val result = io.openmobilemaps.mapscore.shared.map.CpuPerformanceLoggerInterface.createSpecifically(numBuckets, bucketSizeMs)
+            val result = CpuPerformanceLoggerInterface.createSpecifically(numBuckets, bucketSizeMs)
             return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.CpuPerformanceLoggerInterface)).asKmp()
         }
     }
 }
 
-internal fun KMCpuPerformanceLoggerInterface.asPlatform(): io.openmobilemaps.mapscore.shared.map.CpuPerformanceLoggerInterface = nativeHandle as io.openmobilemaps.mapscore.shared.map.CpuPerformanceLoggerInterface
-internal fun io.openmobilemaps.mapscore.shared.map.CpuPerformanceLoggerInterface.asKmp(): KMCpuPerformanceLoggerInterface = KMCpuPerformanceLoggerInterface(this)
+internal fun KMCpuPerformanceLoggerInterface.asPlatform(): CpuPerformanceLoggerInterface = nativeHandle as CpuPerformanceLoggerInterface
+internal fun CpuPerformanceLoggerInterface.asKmp(): KMCpuPerformanceLoggerInterface = KMCpuPerformanceLoggerInterface(this)

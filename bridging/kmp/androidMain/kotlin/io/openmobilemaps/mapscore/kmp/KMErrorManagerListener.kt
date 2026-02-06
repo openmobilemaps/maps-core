@@ -3,13 +3,15 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.map.ErrorManagerListener
+
 actual interface KMErrorManagerListener
 {
 
     actual fun onTiledLayerErrorStateChanged(errors: ArrayList<KMTiledLayerError>)
 }
 
-private class KMErrorManagerListenerPlatformWrapper(internal val nativeHandle: io.openmobilemaps.mapscore.shared.map.ErrorManagerListener) : KMErrorManagerListener
+private class KMErrorManagerListenerPlatformWrapper(internal val nativeHandle: ErrorManagerListener) : KMErrorManagerListener
 {
 
     override fun onTiledLayerErrorStateChanged(errors: ArrayList<KMTiledLayerError>) {
@@ -17,7 +19,7 @@ private class KMErrorManagerListenerPlatformWrapper(internal val nativeHandle: i
     }
 }
 
-private class KMErrorManagerListenerPlatformProxy(private val delegate: KMErrorManagerListener) : io.openmobilemaps.mapscore.shared.map.ErrorManagerListener()
+private class KMErrorManagerListenerPlatformProxy(private val delegate: KMErrorManagerListener) : ErrorManagerListener()
 {
 
     override fun onTiledLayerErrorStateChanged(errors: ArrayList<io.openmobilemaps.mapscore.shared.map.TiledLayerError>) {
@@ -25,8 +27,8 @@ private class KMErrorManagerListenerPlatformProxy(private val delegate: KMErrorM
     }
 }
 
-internal fun KMErrorManagerListener.asPlatform(): io.openmobilemaps.mapscore.shared.map.ErrorManagerListener = when (this) {
+internal fun KMErrorManagerListener.asPlatform(): ErrorManagerListener = when (this) {
     is KMErrorManagerListenerPlatformWrapper -> this.nativeHandle
     else -> KMErrorManagerListenerPlatformProxy(this)
 }
-internal fun io.openmobilemaps.mapscore.shared.map.ErrorManagerListener.asKmp(): KMErrorManagerListener = KMErrorManagerListenerPlatformWrapper(this)
+internal fun ErrorManagerListener.asKmp(): KMErrorManagerListener = KMErrorManagerListenerPlatformWrapper(this)

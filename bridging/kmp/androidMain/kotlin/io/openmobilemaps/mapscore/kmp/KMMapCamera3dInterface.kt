@@ -3,11 +3,13 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.map.MapCamera3dInterface
+
 actual class KMMapCamera3dInterface actual public constructor(
     nativeHandle: Any,
 ) {
     internal val nativeHandle: Any = nativeHandle
-    private val native = nativeHandle as io.openmobilemaps.mapscore.shared.map.MapCamera3dInterface
+    private val native = nativeHandle as MapCamera3dInterface
 
     actual fun getCameraConfig(): KMCamera3dConfig {
         val result = native.getCameraConfig()
@@ -19,5 +21,5 @@ actual class KMMapCamera3dInterface actual public constructor(
     }
 }
 
-internal fun KMMapCamera3dInterface.asPlatform(): io.openmobilemaps.mapscore.shared.map.MapCamera3dInterface = nativeHandle as io.openmobilemaps.mapscore.shared.map.MapCamera3dInterface
-internal fun io.openmobilemaps.mapscore.shared.map.MapCamera3dInterface.asKmp(): KMMapCamera3dInterface = KMMapCamera3dInterface(this)
+internal fun KMMapCamera3dInterface.asPlatform(): MapCamera3dInterface = nativeHandle as MapCamera3dInterface
+internal fun MapCamera3dInterface.asKmp(): KMMapCamera3dInterface = KMMapCamera3dInterface(this)

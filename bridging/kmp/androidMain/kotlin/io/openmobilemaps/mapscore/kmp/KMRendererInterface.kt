@@ -3,6 +3,8 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.graphics.RendererInterface
+
 actual interface KMRendererInterface
 {
 
@@ -15,7 +17,7 @@ actual interface KMRendererInterface
     actual fun compute(renderingContext: KMRenderingContextInterface, camera: KMCameraInterface)
 }
 
-private class KMRendererInterfacePlatformWrapper(internal val nativeHandle: io.openmobilemaps.mapscore.shared.graphics.RendererInterface) : KMRendererInterface
+private class KMRendererInterfacePlatformWrapper(internal val nativeHandle: RendererInterface) : KMRendererInterface
 {
 
     override fun addToRenderQueue(renderPass: KMRenderPassInterface) {
@@ -35,7 +37,7 @@ private class KMRendererInterfacePlatformWrapper(internal val nativeHandle: io.o
     }
 }
 
-private class KMRendererInterfacePlatformProxy(private val delegate: KMRendererInterface) : io.openmobilemaps.mapscore.shared.graphics.RendererInterface()
+private class KMRendererInterfacePlatformProxy(private val delegate: KMRendererInterface) : RendererInterface()
 {
 
     override fun addToRenderQueue(renderPass: io.openmobilemaps.mapscore.shared.graphics.RenderPassInterface) {
@@ -55,8 +57,8 @@ private class KMRendererInterfacePlatformProxy(private val delegate: KMRendererI
     }
 }
 
-internal fun KMRendererInterface.asPlatform(): io.openmobilemaps.mapscore.shared.graphics.RendererInterface = when (this) {
+internal fun KMRendererInterface.asPlatform(): RendererInterface = when (this) {
     is KMRendererInterfacePlatformWrapper -> this.nativeHandle
     else -> KMRendererInterfacePlatformProxy(this)
 }
-internal fun io.openmobilemaps.mapscore.shared.graphics.RendererInterface.asKmp(): KMRendererInterface = KMRendererInterfacePlatformWrapper(this)
+internal fun RendererInterface.asKmp(): KMRendererInterface = KMRendererInterfacePlatformWrapper(this)

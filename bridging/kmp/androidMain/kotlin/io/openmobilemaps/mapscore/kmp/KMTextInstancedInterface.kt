@@ -3,6 +3,8 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.graphics.objects.TextInstancedInterface
+
 actual interface KMTextInstancedInterface
 {
 
@@ -33,7 +35,7 @@ actual interface KMTextInstancedInterface
     actual fun asGraphicsObject(): KMGraphicsObjectInterface
 }
 
-private class KMTextInstancedInterfacePlatformWrapper(internal val nativeHandle: io.openmobilemaps.mapscore.shared.graphics.objects.TextInstancedInterface) : KMTextInstancedInterface
+private class KMTextInstancedInterfacePlatformWrapper(internal val nativeHandle: TextInstancedInterface) : KMTextInstancedInterface
 {
 
     override fun setFrame(frame: KMQuad2dD, origin: KMVec3D, is3d: Boolean) {
@@ -90,7 +92,7 @@ private class KMTextInstancedInterfacePlatformWrapper(internal val nativeHandle:
     }
 }
 
-private class KMTextInstancedInterfacePlatformProxy(private val delegate: KMTextInstancedInterface) : io.openmobilemaps.mapscore.shared.graphics.objects.TextInstancedInterface()
+private class KMTextInstancedInterfacePlatformProxy(private val delegate: KMTextInstancedInterface) : TextInstancedInterface()
 {
 
     override fun setFrame(frame: io.openmobilemaps.mapscore.shared.graphics.common.Quad2dD, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D, is3d: Boolean) {
@@ -147,8 +149,8 @@ private class KMTextInstancedInterfacePlatformProxy(private val delegate: KMText
     }
 }
 
-internal fun KMTextInstancedInterface.asPlatform(): io.openmobilemaps.mapscore.shared.graphics.objects.TextInstancedInterface = when (this) {
+internal fun KMTextInstancedInterface.asPlatform(): TextInstancedInterface = when (this) {
     is KMTextInstancedInterfacePlatformWrapper -> this.nativeHandle
     else -> KMTextInstancedInterfacePlatformProxy(this)
 }
-internal fun io.openmobilemaps.mapscore.shared.graphics.objects.TextInstancedInterface.asKmp(): KMTextInstancedInterface = KMTextInstancedInterfacePlatformWrapper(this)
+internal fun TextInstancedInterface.asKmp(): KMTextInstancedInterface = KMTextInstancedInterfacePlatformWrapper(this)

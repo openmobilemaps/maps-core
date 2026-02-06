@@ -3,6 +3,8 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.graphics.objects.IcosahedronInterface
+
 actual interface KMIcosahedronInterface
 {
 
@@ -11,7 +13,7 @@ actual interface KMIcosahedronInterface
     actual fun asGraphicsObject(): KMGraphicsObjectInterface
 }
 
-private class KMIcosahedronInterfacePlatformWrapper(internal val nativeHandle: io.openmobilemaps.mapscore.shared.graphics.objects.IcosahedronInterface) : KMIcosahedronInterface
+private class KMIcosahedronInterfacePlatformWrapper(internal val nativeHandle: IcosahedronInterface) : KMIcosahedronInterface
 {
 
     override fun setVertices(vertices: KMSharedBytes, indices: KMSharedBytes, origin: KMVec3D) {
@@ -24,7 +26,7 @@ private class KMIcosahedronInterfacePlatformWrapper(internal val nativeHandle: i
     }
 }
 
-private class KMIcosahedronInterfacePlatformProxy(private val delegate: KMIcosahedronInterface) : io.openmobilemaps.mapscore.shared.graphics.objects.IcosahedronInterface()
+private class KMIcosahedronInterfacePlatformProxy(private val delegate: KMIcosahedronInterface) : IcosahedronInterface()
 {
 
     override fun setVertices(vertices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes, indices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D) {
@@ -37,8 +39,8 @@ private class KMIcosahedronInterfacePlatformProxy(private val delegate: KMIcosah
     }
 }
 
-internal fun KMIcosahedronInterface.asPlatform(): io.openmobilemaps.mapscore.shared.graphics.objects.IcosahedronInterface = when (this) {
+internal fun KMIcosahedronInterface.asPlatform(): IcosahedronInterface = when (this) {
     is KMIcosahedronInterfacePlatformWrapper -> this.nativeHandle
     else -> KMIcosahedronInterfacePlatformProxy(this)
 }
-internal fun io.openmobilemaps.mapscore.shared.graphics.objects.IcosahedronInterface.asKmp(): KMIcosahedronInterface = KMIcosahedronInterfacePlatformWrapper(this)
+internal fun IcosahedronInterface.asKmp(): KMIcosahedronInterface = KMIcosahedronInterfacePlatformWrapper(this)

@@ -3,11 +3,13 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.Tiled2dMapVectorLayerInterface
+
 actual class KMTiled2dMapVectorLayerInterface actual public constructor(
     nativeHandle: Any,
 ) {
     internal val nativeHandle: Any = nativeHandle
-    private val native = nativeHandle as io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.Tiled2dMapVectorLayerInterface
+    private val native = nativeHandle as Tiled2dMapVectorLayerInterface
 
     actual fun setSelectionDelegate(selectionDelegate: KMTiled2dMapVectorLayerSelectionCallbackInterface?) {
         native.setSelectionDelegate(selectionDelegate?.let { it.asPlatform() })
@@ -74,16 +76,16 @@ actual class KMTiled2dMapVectorLayerInterface actual public constructor(
     {
 
         actual fun createFromStyleJson(layerName: String, styleJsonUrl: String, loaders: ArrayList<KMLoaderInterface>, fontLoader: KMFontLoaderInterface): KMTiled2dMapVectorLayerInterface {
-            val result = io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.Tiled2dMapVectorLayerInterface.createFromStyleJson(layerName, styleJsonUrl, ArrayList(loaders.map { it.asPlatform() }), fontLoader.asPlatform())
+            val result = Tiled2dMapVectorLayerInterface.createFromStyleJson(layerName, styleJsonUrl, ArrayList(loaders.map { it.asPlatform() }), fontLoader.asPlatform())
             return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.Tiled2dMapVectorLayerInterface)).asKmp()
         }
 
         actual fun createExplicitly(layerName: String, styleJson: String?, localStyleJson: Boolean?, loaders: ArrayList<KMLoaderInterface>, fontLoader: KMFontLoaderInterface, localDataProvider: KMTiled2dMapVectorLayerLocalDataProviderInterface?, customZoomInfo: KMTiled2dMapZoomInfo?, symbolDelegate: KMTiled2dMapVectorLayerSymbolDelegateInterface?, sourceUrlParams: HashMap<String, String>?): KMTiled2dMapVectorLayerInterface {
-            val result = io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.Tiled2dMapVectorLayerInterface.createExplicitly(layerName, styleJson?.let { it }, localStyleJson?.let { it }, ArrayList(loaders.map { it.asPlatform() }), fontLoader.asPlatform(), localDataProvider?.let { it.asPlatform() }, customZoomInfo?.let { it.asPlatform() }, symbolDelegate?.let { it.asPlatform() }, sourceUrlParams?.let { HashMap(it.map { it.key to it.value }.toMap()) })
+            val result = Tiled2dMapVectorLayerInterface.createExplicitly(layerName, styleJson?.let { it }, localStyleJson?.let { it }, ArrayList(loaders.map { it.asPlatform() }), fontLoader.asPlatform(), localDataProvider?.let { it.asPlatform() }, customZoomInfo?.let { it.asPlatform() }, symbolDelegate?.let { it.asPlatform() }, sourceUrlParams?.let { HashMap(it.map { it.key to it.value }.toMap()) })
             return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.Tiled2dMapVectorLayerInterface)).asKmp()
         }
     }
 }
 
-internal fun KMTiled2dMapVectorLayerInterface.asPlatform(): io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.Tiled2dMapVectorLayerInterface = nativeHandle as io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.Tiled2dMapVectorLayerInterface
-internal fun io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.Tiled2dMapVectorLayerInterface.asKmp(): KMTiled2dMapVectorLayerInterface = KMTiled2dMapVectorLayerInterface(this)
+internal fun KMTiled2dMapVectorLayerInterface.asPlatform(): Tiled2dMapVectorLayerInterface = nativeHandle as Tiled2dMapVectorLayerInterface
+internal fun Tiled2dMapVectorLayerInterface.asKmp(): KMTiled2dMapVectorLayerInterface = KMTiled2dMapVectorLayerInterface(this)

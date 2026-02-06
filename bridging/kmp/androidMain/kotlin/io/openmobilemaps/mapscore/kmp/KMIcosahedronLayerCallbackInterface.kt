@@ -3,13 +3,15 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.map.layers.icosahedron.IcosahedronLayerCallbackInterface
+
 actual interface KMIcosahedronLayerCallbackInterface
 {
 
     actual fun getData(): KMFuture<KMDataRef>
 }
 
-private class KMIcosahedronLayerCallbackInterfacePlatformWrapper(internal val nativeHandle: io.openmobilemaps.mapscore.shared.map.layers.icosahedron.IcosahedronLayerCallbackInterface) : KMIcosahedronLayerCallbackInterface
+private class KMIcosahedronLayerCallbackInterfacePlatformWrapper(internal val nativeHandle: IcosahedronLayerCallbackInterface) : KMIcosahedronLayerCallbackInterface
 {
 
     override fun getData(): KMFuture<KMDataRef> {
@@ -18,7 +20,7 @@ private class KMIcosahedronLayerCallbackInterfacePlatformWrapper(internal val na
     }
 }
 
-private class KMIcosahedronLayerCallbackInterfacePlatformProxy(private val delegate: KMIcosahedronLayerCallbackInterface) : io.openmobilemaps.mapscore.shared.map.layers.icosahedron.IcosahedronLayerCallbackInterface()
+private class KMIcosahedronLayerCallbackInterfacePlatformProxy(private val delegate: KMIcosahedronLayerCallbackInterface) : IcosahedronLayerCallbackInterface()
 {
 
     override fun getData(): com.snapchat.djinni.Future<java.nio.ByteBuffer> {
@@ -27,8 +29,8 @@ private class KMIcosahedronLayerCallbackInterfacePlatformProxy(private val deleg
     }
 }
 
-internal fun KMIcosahedronLayerCallbackInterface.asPlatform(): io.openmobilemaps.mapscore.shared.map.layers.icosahedron.IcosahedronLayerCallbackInterface = when (this) {
+internal fun KMIcosahedronLayerCallbackInterface.asPlatform(): IcosahedronLayerCallbackInterface = when (this) {
     is KMIcosahedronLayerCallbackInterfacePlatformWrapper -> this.nativeHandle
     else -> KMIcosahedronLayerCallbackInterfacePlatformProxy(this)
 }
-internal fun io.openmobilemaps.mapscore.shared.map.layers.icosahedron.IcosahedronLayerCallbackInterface.asKmp(): KMIcosahedronLayerCallbackInterface = KMIcosahedronLayerCallbackInterfacePlatformWrapper(this)
+internal fun IcosahedronLayerCallbackInterface.asKmp(): KMIcosahedronLayerCallbackInterface = KMIcosahedronLayerCallbackInterfacePlatformWrapper(this)

@@ -3,11 +3,13 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateConversionHelperInterface
+
 actual class KMCoordinateConversionHelperInterface actual public constructor(
     nativeHandle: Any,
 ) {
     internal val nativeHandle: Any = nativeHandle
-    private val native = nativeHandle as io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateConversionHelperInterface
+    private val native = nativeHandle as CoordinateConversionHelperInterface
 
     actual fun registerConverter(converter: KMCoordinateConverterInterface) {
         native.registerConverter(converter.asPlatform())
@@ -47,11 +49,11 @@ actual class KMCoordinateConversionHelperInterface actual public constructor(
     {
 
         actual fun independentInstance(): KMCoordinateConversionHelperInterface {
-            val result = io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateConversionHelperInterface.independentInstance()
+            val result = CoordinateConversionHelperInterface.independentInstance()
             return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateConversionHelperInterface)).asKmp()
         }
     }
 }
 
-internal fun KMCoordinateConversionHelperInterface.asPlatform(): io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateConversionHelperInterface = nativeHandle as io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateConversionHelperInterface
-internal fun io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateConversionHelperInterface.asKmp(): KMCoordinateConversionHelperInterface = KMCoordinateConversionHelperInterface(this)
+internal fun KMCoordinateConversionHelperInterface.asPlatform(): CoordinateConversionHelperInterface = nativeHandle as CoordinateConversionHelperInterface
+internal fun CoordinateConversionHelperInterface.asKmp(): KMCoordinateConversionHelperInterface = KMCoordinateConversionHelperInterface(this)

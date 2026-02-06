@@ -3,6 +3,8 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.graphics.CameraInterface
+
 actual interface KMCameraInterface
 {
 
@@ -15,7 +17,7 @@ actual interface KMCameraInterface
     actual fun viewportSizeChanged()
 }
 
-private class KMCameraInterfacePlatformWrapper(internal val nativeHandle: io.openmobilemaps.mapscore.shared.graphics.CameraInterface) : KMCameraInterface
+private class KMCameraInterfacePlatformWrapper(internal val nativeHandle: CameraInterface) : KMCameraInterface
 {
 
     override fun getVpMatrix(): ArrayList<Float> {
@@ -38,7 +40,7 @@ private class KMCameraInterfacePlatformWrapper(internal val nativeHandle: io.ope
     }
 }
 
-private class KMCameraInterfacePlatformProxy(private val delegate: KMCameraInterface) : io.openmobilemaps.mapscore.shared.graphics.CameraInterface()
+private class KMCameraInterfacePlatformProxy(private val delegate: KMCameraInterface) : CameraInterface()
 {
 
     override fun getVpMatrix(): ArrayList<Float> {
@@ -61,8 +63,8 @@ private class KMCameraInterfacePlatformProxy(private val delegate: KMCameraInter
     }
 }
 
-internal fun KMCameraInterface.asPlatform(): io.openmobilemaps.mapscore.shared.graphics.CameraInterface = when (this) {
+internal fun KMCameraInterface.asPlatform(): CameraInterface = when (this) {
     is KMCameraInterfacePlatformWrapper -> this.nativeHandle
     else -> KMCameraInterfacePlatformProxy(this)
 }
-internal fun io.openmobilemaps.mapscore.shared.graphics.CameraInterface.asKmp(): KMCameraInterface = KMCameraInterfacePlatformWrapper(this)
+internal fun CameraInterface.asKmp(): KMCameraInterface = KMCameraInterfacePlatformWrapper(this)

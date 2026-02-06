@@ -3,11 +3,13 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.map.layers.text.TextLayerInterface
+
 actual class KMTextLayerInterface actual public constructor(
     nativeHandle: Any,
 ) {
     internal val nativeHandle: Any = nativeHandle
-    private val native = nativeHandle as io.openmobilemaps.mapscore.shared.map.layers.text.TextLayerInterface
+    private val native = nativeHandle as TextLayerInterface
 
     actual fun setTexts(texts: ArrayList<KMTextInfoInterface>) {
         native.setTexts(ArrayList(texts.map { it.asPlatform() }))
@@ -26,11 +28,11 @@ actual class KMTextLayerInterface actual public constructor(
     {
 
         actual fun create(fontLoader: KMFontLoaderInterface): KMTextLayerInterface {
-            val result = io.openmobilemaps.mapscore.shared.map.layers.text.TextLayerInterface.create(fontLoader.asPlatform())
+            val result = TextLayerInterface.create(fontLoader.asPlatform())
             return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.layers.text.TextLayerInterface)).asKmp()
         }
     }
 }
 
-internal fun KMTextLayerInterface.asPlatform(): io.openmobilemaps.mapscore.shared.map.layers.text.TextLayerInterface = nativeHandle as io.openmobilemaps.mapscore.shared.map.layers.text.TextLayerInterface
-internal fun io.openmobilemaps.mapscore.shared.map.layers.text.TextLayerInterface.asKmp(): KMTextLayerInterface = KMTextLayerInterface(this)
+internal fun KMTextLayerInterface.asPlatform(): TextLayerInterface = nativeHandle as TextLayerInterface
+internal fun TextLayerInterface.asKmp(): KMTextLayerInterface = KMTextLayerInterface(this)

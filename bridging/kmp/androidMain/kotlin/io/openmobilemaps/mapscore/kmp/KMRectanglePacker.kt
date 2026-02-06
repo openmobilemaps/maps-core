@@ -3,21 +3,23 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.graphics.RectanglePacker
+
 actual class KMRectanglePacker actual public constructor(
     nativeHandle: Any,
 ) {
     internal val nativeHandle: Any = nativeHandle
-    private val native = nativeHandle as io.openmobilemaps.mapscore.shared.graphics.RectanglePacker
+    private val native = nativeHandle as RectanglePacker
 
     actual companion object
     {
 
         actual fun pack(rectangles: HashMap<String, KMVec2I>, maxPageSize: KMVec2I, spacing: Int): ArrayList<KMRectanglePackerPage> {
-            val result = io.openmobilemaps.mapscore.shared.graphics.RectanglePacker.pack(HashMap(rectangles.map { it.key to it.value.asPlatform() }.toMap()), maxPageSize.asPlatform(), spacing)
+            val result = RectanglePacker.pack(HashMap(rectangles.map { it.key to it.value.asPlatform() }.toMap()), maxPageSize.asPlatform(), spacing)
             return ArrayList(result.map { (it as io.openmobilemaps.mapscore.shared.graphics.RectanglePackerPage).asKmp() })
         }
     }
 }
 
-internal fun KMRectanglePacker.asPlatform(): io.openmobilemaps.mapscore.shared.graphics.RectanglePacker = nativeHandle as io.openmobilemaps.mapscore.shared.graphics.RectanglePacker
-internal fun io.openmobilemaps.mapscore.shared.graphics.RectanglePacker.asKmp(): KMRectanglePacker = KMRectanglePacker(this)
+internal fun KMRectanglePacker.asPlatform(): RectanglePacker = nativeHandle as RectanglePacker
+internal fun RectanglePacker.asKmp(): KMRectanglePacker = KMRectanglePacker(this)

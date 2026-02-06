@@ -3,6 +3,8 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.graphics.RenderPassInterface
+
 actual interface KMRenderPassInterface
 {
 
@@ -17,7 +19,7 @@ actual interface KMRenderPassInterface
     actual fun getScissoringRect(): KMRectI?
 }
 
-private class KMRenderPassInterfacePlatformWrapper(internal val nativeHandle: io.openmobilemaps.mapscore.shared.graphics.RenderPassInterface) : KMRenderPassInterface
+private class KMRenderPassInterfacePlatformWrapper(internal val nativeHandle: RenderPassInterface) : KMRenderPassInterface
 {
 
     override fun getRenderObjects(): ArrayList<KMRenderObjectInterface> {
@@ -45,7 +47,7 @@ private class KMRenderPassInterfacePlatformWrapper(internal val nativeHandle: io
     }
 }
 
-private class KMRenderPassInterfacePlatformProxy(private val delegate: KMRenderPassInterface) : io.openmobilemaps.mapscore.shared.graphics.RenderPassInterface()
+private class KMRenderPassInterfacePlatformProxy(private val delegate: KMRenderPassInterface) : RenderPassInterface()
 {
 
     override fun getRenderObjects(): ArrayList<io.openmobilemaps.mapscore.shared.graphics.RenderObjectInterface> {
@@ -73,8 +75,8 @@ private class KMRenderPassInterfacePlatformProxy(private val delegate: KMRenderP
     }
 }
 
-internal fun KMRenderPassInterface.asPlatform(): io.openmobilemaps.mapscore.shared.graphics.RenderPassInterface = when (this) {
+internal fun KMRenderPassInterface.asPlatform(): RenderPassInterface = when (this) {
     is KMRenderPassInterfacePlatformWrapper -> this.nativeHandle
     else -> KMRenderPassInterfacePlatformProxy(this)
 }
-internal fun io.openmobilemaps.mapscore.shared.graphics.RenderPassInterface.asKmp(): KMRenderPassInterface = KMRenderPassInterfacePlatformWrapper(this)
+internal fun RenderPassInterface.asKmp(): KMRenderPassInterface = KMRenderPassInterfacePlatformWrapper(this)

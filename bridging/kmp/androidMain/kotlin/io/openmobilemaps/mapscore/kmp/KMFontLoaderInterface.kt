@@ -3,13 +3,15 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.map.loader.FontLoaderInterface
+
 actual interface KMFontLoaderInterface
 {
 
     actual fun loadFont(font: KMFont): KMFontLoaderResult
 }
 
-private class KMFontLoaderInterfacePlatformWrapper(internal val nativeHandle: io.openmobilemaps.mapscore.shared.map.loader.FontLoaderInterface) : KMFontLoaderInterface
+private class KMFontLoaderInterfacePlatformWrapper(internal val nativeHandle: FontLoaderInterface) : KMFontLoaderInterface
 {
 
     override fun loadFont(font: KMFont): KMFontLoaderResult {
@@ -18,7 +20,7 @@ private class KMFontLoaderInterfacePlatformWrapper(internal val nativeHandle: io
     }
 }
 
-private class KMFontLoaderInterfacePlatformProxy(private val delegate: KMFontLoaderInterface) : io.openmobilemaps.mapscore.shared.map.loader.FontLoaderInterface()
+private class KMFontLoaderInterfacePlatformProxy(private val delegate: KMFontLoaderInterface) : FontLoaderInterface()
 {
 
     override fun loadFont(font: io.openmobilemaps.mapscore.shared.map.loader.Font): io.openmobilemaps.mapscore.shared.map.loader.FontLoaderResult {
@@ -27,8 +29,8 @@ private class KMFontLoaderInterfacePlatformProxy(private val delegate: KMFontLoa
     }
 }
 
-internal fun KMFontLoaderInterface.asPlatform(): io.openmobilemaps.mapscore.shared.map.loader.FontLoaderInterface = when (this) {
+internal fun KMFontLoaderInterface.asPlatform(): FontLoaderInterface = when (this) {
     is KMFontLoaderInterfacePlatformWrapper -> this.nativeHandle
     else -> KMFontLoaderInterfacePlatformProxy(this)
 }
-internal fun io.openmobilemaps.mapscore.shared.map.loader.FontLoaderInterface.asKmp(): KMFontLoaderInterface = KMFontLoaderInterfacePlatformWrapper(this)
+internal fun FontLoaderInterface.asKmp(): KMFontLoaderInterface = KMFontLoaderInterfacePlatformWrapper(this)

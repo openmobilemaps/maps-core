@@ -3,11 +3,13 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.map.layers.icosahedron.IcosahedronLayerInterface
+
 actual class KMIcosahedronLayerInterface actual public constructor(
     nativeHandle: Any,
 ) {
     internal val nativeHandle: Any = nativeHandle
-    private val native = nativeHandle as io.openmobilemaps.mapscore.shared.map.layers.icosahedron.IcosahedronLayerInterface
+    private val native = nativeHandle as IcosahedronLayerInterface
 
     actual fun asLayerInterface(): KMLayerInterface {
         val result = native.asLayerInterface()
@@ -18,11 +20,11 @@ actual class KMIcosahedronLayerInterface actual public constructor(
     {
 
         actual fun create(callbackHandler: KMIcosahedronLayerCallbackInterface): KMIcosahedronLayerInterface {
-            val result = io.openmobilemaps.mapscore.shared.map.layers.icosahedron.IcosahedronLayerInterface.create(callbackHandler.asPlatform())
+            val result = IcosahedronLayerInterface.create(callbackHandler.asPlatform())
             return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.layers.icosahedron.IcosahedronLayerInterface)).asKmp()
         }
     }
 }
 
-internal fun KMIcosahedronLayerInterface.asPlatform(): io.openmobilemaps.mapscore.shared.map.layers.icosahedron.IcosahedronLayerInterface = nativeHandle as io.openmobilemaps.mapscore.shared.map.layers.icosahedron.IcosahedronLayerInterface
-internal fun io.openmobilemaps.mapscore.shared.map.layers.icosahedron.IcosahedronLayerInterface.asKmp(): KMIcosahedronLayerInterface = KMIcosahedronLayerInterface(this)
+internal fun KMIcosahedronLayerInterface.asPlatform(): IcosahedronLayerInterface = nativeHandle as IcosahedronLayerInterface
+internal fun IcosahedronLayerInterface.asKmp(): KMIcosahedronLayerInterface = KMIcosahedronLayerInterface(this)

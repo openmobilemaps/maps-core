@@ -3,11 +3,13 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.map.layers.icon.IconLayerInterface
+
 actual class KMIconLayerInterface actual public constructor(
     nativeHandle: Any,
 ) {
     internal val nativeHandle: Any = nativeHandle
-    private val native = nativeHandle as io.openmobilemaps.mapscore.shared.map.layers.icon.IconLayerInterface
+    private val native = nativeHandle as IconLayerInterface
 
     actual fun setIcons(icons: ArrayList<KMIconInfoInterface>) {
         native.setIcons(ArrayList(icons.map { it.asPlatform() }))
@@ -75,11 +77,11 @@ actual class KMIconLayerInterface actual public constructor(
     {
 
         actual fun create(): KMIconLayerInterface {
-            val result = io.openmobilemaps.mapscore.shared.map.layers.icon.IconLayerInterface.create()
+            val result = IconLayerInterface.create()
             return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.layers.icon.IconLayerInterface)).asKmp()
         }
     }
 }
 
-internal fun KMIconLayerInterface.asPlatform(): io.openmobilemaps.mapscore.shared.map.layers.icon.IconLayerInterface = nativeHandle as io.openmobilemaps.mapscore.shared.map.layers.icon.IconLayerInterface
-internal fun io.openmobilemaps.mapscore.shared.map.layers.icon.IconLayerInterface.asKmp(): KMIconLayerInterface = KMIconLayerInterface(this)
+internal fun KMIconLayerInterface.asPlatform(): IconLayerInterface = nativeHandle as IconLayerInterface
+internal fun IconLayerInterface.asKmp(): KMIconLayerInterface = KMIconLayerInterface(this)

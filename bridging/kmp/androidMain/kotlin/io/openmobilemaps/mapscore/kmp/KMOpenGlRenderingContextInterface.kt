@@ -3,6 +3,8 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.graphics.OpenGlRenderingContextInterface
+
 actual interface KMOpenGlRenderingContextInterface
 {
 
@@ -25,7 +27,7 @@ actual interface KMOpenGlRenderingContextInterface
     actual fun getDeltaTimeMs(): Long
 }
 
-private class KMOpenGlRenderingContextInterfacePlatformWrapper(internal val nativeHandle: io.openmobilemaps.mapscore.shared.graphics.OpenGlRenderingContextInterface) : KMOpenGlRenderingContextInterface
+private class KMOpenGlRenderingContextInterfacePlatformWrapper(internal val nativeHandle: OpenGlRenderingContextInterface) : KMOpenGlRenderingContextInterface
 {
 
     override fun resume() {
@@ -70,7 +72,7 @@ private class KMOpenGlRenderingContextInterfacePlatformWrapper(internal val nati
     }
 }
 
-private class KMOpenGlRenderingContextInterfacePlatformProxy(private val delegate: KMOpenGlRenderingContextInterface) : io.openmobilemaps.mapscore.shared.graphics.OpenGlRenderingContextInterface()
+private class KMOpenGlRenderingContextInterfacePlatformProxy(private val delegate: KMOpenGlRenderingContextInterface) : OpenGlRenderingContextInterface()
 {
 
     override fun resume() {
@@ -115,8 +117,8 @@ private class KMOpenGlRenderingContextInterfacePlatformProxy(private val delegat
     }
 }
 
-internal fun KMOpenGlRenderingContextInterface.asPlatform(): io.openmobilemaps.mapscore.shared.graphics.OpenGlRenderingContextInterface = when (this) {
+internal fun KMOpenGlRenderingContextInterface.asPlatform(): OpenGlRenderingContextInterface = when (this) {
     is KMOpenGlRenderingContextInterfacePlatformWrapper -> this.nativeHandle
     else -> KMOpenGlRenderingContextInterfacePlatformProxy(this)
 }
-internal fun io.openmobilemaps.mapscore.shared.graphics.OpenGlRenderingContextInterface.asKmp(): KMOpenGlRenderingContextInterface = KMOpenGlRenderingContextInterfacePlatformWrapper(this)
+internal fun OpenGlRenderingContextInterface.asKmp(): KMOpenGlRenderingContextInterface = KMOpenGlRenderingContextInterfacePlatformWrapper(this)

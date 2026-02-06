@@ -3,11 +3,13 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.map.layers.objects.RenderConfigInterface
+
 actual class KMRenderConfigInterface actual public constructor(
     nativeHandle: Any,
 ) {
     internal val nativeHandle: Any = nativeHandle
-    private val native = nativeHandle as io.openmobilemaps.mapscore.shared.map.layers.objects.RenderConfigInterface
+    private val native = nativeHandle as RenderConfigInterface
 
     actual fun getGraphicsObject(): KMGraphicsObjectInterface {
         val result = native.getGraphicsObject()
@@ -20,5 +22,5 @@ actual class KMRenderConfigInterface actual public constructor(
     }
 }
 
-internal fun KMRenderConfigInterface.asPlatform(): io.openmobilemaps.mapscore.shared.map.layers.objects.RenderConfigInterface = nativeHandle as io.openmobilemaps.mapscore.shared.map.layers.objects.RenderConfigInterface
-internal fun io.openmobilemaps.mapscore.shared.map.layers.objects.RenderConfigInterface.asKmp(): KMRenderConfigInterface = KMRenderConfigInterface(this)
+internal fun KMRenderConfigInterface.asPlatform(): RenderConfigInterface = nativeHandle as RenderConfigInterface
+internal fun RenderConfigInterface.asKmp(): KMRenderConfigInterface = KMRenderConfigInterface(this)

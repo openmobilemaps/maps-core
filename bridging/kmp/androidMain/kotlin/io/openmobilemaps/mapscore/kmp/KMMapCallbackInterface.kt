@@ -3,6 +3,8 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.map.MapCallbackInterface
+
 actual interface KMMapCallbackInterface
 {
 
@@ -11,7 +13,7 @@ actual interface KMMapCallbackInterface
     actual fun onMapResumed()
 }
 
-private class KMMapCallbackInterfacePlatformWrapper(internal val nativeHandle: io.openmobilemaps.mapscore.shared.map.MapCallbackInterface) : KMMapCallbackInterface
+private class KMMapCallbackInterfacePlatformWrapper(internal val nativeHandle: MapCallbackInterface) : KMMapCallbackInterface
 {
 
     override fun invalidate() {
@@ -23,7 +25,7 @@ private class KMMapCallbackInterfacePlatformWrapper(internal val nativeHandle: i
     }
 }
 
-private class KMMapCallbackInterfacePlatformProxy(private val delegate: KMMapCallbackInterface) : io.openmobilemaps.mapscore.shared.map.MapCallbackInterface()
+private class KMMapCallbackInterfacePlatformProxy(private val delegate: KMMapCallbackInterface) : MapCallbackInterface()
 {
 
     override fun invalidate() {
@@ -35,8 +37,8 @@ private class KMMapCallbackInterfacePlatformProxy(private val delegate: KMMapCal
     }
 }
 
-internal fun KMMapCallbackInterface.asPlatform(): io.openmobilemaps.mapscore.shared.map.MapCallbackInterface = when (this) {
+internal fun KMMapCallbackInterface.asPlatform(): MapCallbackInterface = when (this) {
     is KMMapCallbackInterfacePlatformWrapper -> this.nativeHandle
     else -> KMMapCallbackInterfacePlatformProxy(this)
 }
-internal fun io.openmobilemaps.mapscore.shared.map.MapCallbackInterface.asKmp(): KMMapCallbackInterface = KMMapCallbackInterfacePlatformWrapper(this)
+internal fun MapCallbackInterface.asKmp(): KMMapCallbackInterface = KMMapCallbackInterfacePlatformWrapper(this)

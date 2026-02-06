@@ -3,6 +3,8 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.graphics.objects.Quad2dStretchedInstancedInterface
+
 actual interface KMQuad2dStretchedInstancedInterface
 {
 
@@ -31,7 +33,7 @@ actual interface KMQuad2dStretchedInstancedInterface
     actual fun asMaskingObject(): KMMaskingObjectInterface
 }
 
-private class KMQuad2dStretchedInstancedInterfacePlatformWrapper(internal val nativeHandle: io.openmobilemaps.mapscore.shared.graphics.objects.Quad2dStretchedInstancedInterface) : KMQuad2dStretchedInstancedInterface
+private class KMQuad2dStretchedInstancedInterfacePlatformWrapper(internal val nativeHandle: Quad2dStretchedInstancedInterface) : KMQuad2dStretchedInstancedInterface
 {
 
     override fun setFrame(frame: KMQuad2dD, origin: KMVec3D, is3d: Boolean) {
@@ -85,7 +87,7 @@ private class KMQuad2dStretchedInstancedInterfacePlatformWrapper(internal val na
     }
 }
 
-private class KMQuad2dStretchedInstancedInterfacePlatformProxy(private val delegate: KMQuad2dStretchedInstancedInterface) : io.openmobilemaps.mapscore.shared.graphics.objects.Quad2dStretchedInstancedInterface()
+private class KMQuad2dStretchedInstancedInterfacePlatformProxy(private val delegate: KMQuad2dStretchedInstancedInterface) : Quad2dStretchedInstancedInterface()
 {
 
     override fun setFrame(frame: io.openmobilemaps.mapscore.shared.graphics.common.Quad2dD, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D, is3d: Boolean) {
@@ -139,8 +141,8 @@ private class KMQuad2dStretchedInstancedInterfacePlatformProxy(private val deleg
     }
 }
 
-internal fun KMQuad2dStretchedInstancedInterface.asPlatform(): io.openmobilemaps.mapscore.shared.graphics.objects.Quad2dStretchedInstancedInterface = when (this) {
+internal fun KMQuad2dStretchedInstancedInterface.asPlatform(): Quad2dStretchedInstancedInterface = when (this) {
     is KMQuad2dStretchedInstancedInterfacePlatformWrapper -> this.nativeHandle
     else -> KMQuad2dStretchedInstancedInterfacePlatformProxy(this)
 }
-internal fun io.openmobilemaps.mapscore.shared.graphics.objects.Quad2dStretchedInstancedInterface.asKmp(): KMQuad2dStretchedInstancedInterface = KMQuad2dStretchedInstancedInterfacePlatformWrapper(this)
+internal fun Quad2dStretchedInstancedInterface.asKmp(): KMQuad2dStretchedInstancedInterface = KMQuad2dStretchedInstancedInterfacePlatformWrapper(this)

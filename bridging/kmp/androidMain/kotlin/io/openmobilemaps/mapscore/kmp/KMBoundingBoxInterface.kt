@@ -3,11 +3,13 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.map.coordinates.BoundingBoxInterface
+
 actual class KMBoundingBoxInterface actual public constructor(
     nativeHandle: Any,
 ) {
     internal val nativeHandle: Any = nativeHandle
-    private val native = nativeHandle as io.openmobilemaps.mapscore.shared.map.coordinates.BoundingBoxInterface
+    private val native = nativeHandle as BoundingBoxInterface
 
     actual fun addPoint(p: KMCoord) {
         native.addPoint(p.asPlatform())
@@ -42,11 +44,11 @@ actual class KMBoundingBoxInterface actual public constructor(
     {
 
         actual fun create(systemIdentifier: Int): KMBoundingBoxInterface {
-            val result = io.openmobilemaps.mapscore.shared.map.coordinates.BoundingBoxInterface.create(systemIdentifier)
+            val result = BoundingBoxInterface.create(systemIdentifier)
             return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.coordinates.BoundingBoxInterface)).asKmp()
         }
     }
 }
 
-internal fun KMBoundingBoxInterface.asPlatform(): io.openmobilemaps.mapscore.shared.map.coordinates.BoundingBoxInterface = nativeHandle as io.openmobilemaps.mapscore.shared.map.coordinates.BoundingBoxInterface
-internal fun io.openmobilemaps.mapscore.shared.map.coordinates.BoundingBoxInterface.asKmp(): KMBoundingBoxInterface = KMBoundingBoxInterface(this)
+internal fun KMBoundingBoxInterface.asPlatform(): BoundingBoxInterface = nativeHandle as BoundingBoxInterface
+internal fun BoundingBoxInterface.asKmp(): KMBoundingBoxInterface = KMBoundingBoxInterface(this)

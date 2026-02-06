@@ -3,6 +3,8 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.map.controls.TouchInterface
+
 actual interface KMTouchInterface
 {
 
@@ -31,7 +33,7 @@ actual interface KMTouchInterface
     actual fun clearTouch()
 }
 
-private class KMTouchInterfacePlatformWrapper(internal val nativeHandle: io.openmobilemaps.mapscore.shared.map.controls.TouchInterface) : KMTouchInterface
+private class KMTouchInterfacePlatformWrapper(internal val nativeHandle: TouchInterface) : KMTouchInterface
 {
 
     override fun onTouchDown(posScreen: KMVec2F): Boolean {
@@ -94,7 +96,7 @@ private class KMTouchInterfacePlatformWrapper(internal val nativeHandle: io.open
     }
 }
 
-private class KMTouchInterfacePlatformProxy(private val delegate: KMTouchInterface) : io.openmobilemaps.mapscore.shared.map.controls.TouchInterface()
+private class KMTouchInterfacePlatformProxy(private val delegate: KMTouchInterface) : TouchInterface()
 {
 
     override fun onTouchDown(posScreen: io.openmobilemaps.mapscore.shared.graphics.common.Vec2F): Boolean {
@@ -157,8 +159,8 @@ private class KMTouchInterfacePlatformProxy(private val delegate: KMTouchInterfa
     }
 }
 
-internal fun KMTouchInterface.asPlatform(): io.openmobilemaps.mapscore.shared.map.controls.TouchInterface = when (this) {
+internal fun KMTouchInterface.asPlatform(): TouchInterface = when (this) {
     is KMTouchInterfacePlatformWrapper -> this.nativeHandle
     else -> KMTouchInterfacePlatformProxy(this)
 }
-internal fun io.openmobilemaps.mapscore.shared.map.controls.TouchInterface.asKmp(): KMTouchInterface = KMTouchInterfacePlatformWrapper(this)
+internal fun TouchInterface.asKmp(): KMTouchInterface = KMTouchInterfacePlatformWrapper(this)

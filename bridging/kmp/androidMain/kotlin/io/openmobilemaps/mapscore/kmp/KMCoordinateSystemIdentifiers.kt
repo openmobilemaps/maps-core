@@ -3,56 +3,58 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateSystemIdentifiers
+
 actual class KMCoordinateSystemIdentifiers actual public constructor(
     nativeHandle: Any,
 ) {
     internal val nativeHandle: Any = nativeHandle
-    private val native = nativeHandle as io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateSystemIdentifiers
+    private val native = nativeHandle as CoordinateSystemIdentifiers
 
     actual companion object
     {
 
         actual fun RENDERSYSTEM(): Int {
-            val result = io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateSystemIdentifiers.RENDERSYSTEM()
+            val result = CoordinateSystemIdentifiers.RENDERSYSTEM()
             return result
         }
 
         actual fun EPSG3857(): Int {
-            val result = io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateSystemIdentifiers.EPSG3857()
+            val result = CoordinateSystemIdentifiers.EPSG3857()
             return result
         }
 
         actual fun EPSG4326(): Int {
-            val result = io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateSystemIdentifiers.EPSG4326()
+            val result = CoordinateSystemIdentifiers.EPSG4326()
             return result
         }
 
         actual fun EPSG2056(): Int {
-            val result = io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateSystemIdentifiers.EPSG2056()
+            val result = CoordinateSystemIdentifiers.EPSG2056()
             return result
         }
 
         actual fun EPSG21781(): Int {
-            val result = io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateSystemIdentifiers.EPSG21781()
+            val result = CoordinateSystemIdentifiers.EPSG21781()
             return result
         }
 
         actual fun UnitSphere(): Int {
-            val result = io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateSystemIdentifiers.UnitSphere()
+            val result = CoordinateSystemIdentifiers.UnitSphere()
             return result
         }
 
         actual fun fromCrsIdentifier(identifier: String): Int {
-            val result = io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateSystemIdentifiers.fromCrsIdentifier(identifier)
+            val result = CoordinateSystemIdentifiers.fromCrsIdentifier(identifier)
             return result
         }
 
         actual fun unitToMeterFactor(coordinateSystemIdentifier: Int): Double {
-            val result = io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateSystemIdentifiers.unitToMeterFactor(coordinateSystemIdentifier)
+            val result = CoordinateSystemIdentifiers.unitToMeterFactor(coordinateSystemIdentifier)
             return result
         }
     }
 }
 
-internal fun KMCoordinateSystemIdentifiers.asPlatform(): io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateSystemIdentifiers = nativeHandle as io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateSystemIdentifiers
-internal fun io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateSystemIdentifiers.asKmp(): KMCoordinateSystemIdentifiers = KMCoordinateSystemIdentifiers(this)
+internal fun KMCoordinateSystemIdentifiers.asPlatform(): CoordinateSystemIdentifiers = nativeHandle as CoordinateSystemIdentifiers
+internal fun CoordinateSystemIdentifiers.asKmp(): KMCoordinateSystemIdentifiers = KMCoordinateSystemIdentifiers(this)

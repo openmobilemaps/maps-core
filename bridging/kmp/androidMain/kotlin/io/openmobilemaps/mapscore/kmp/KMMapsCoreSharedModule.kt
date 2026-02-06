@@ -3,21 +3,23 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.MapsCoreSharedModule
+
 actual class KMMapsCoreSharedModule actual public constructor(
     nativeHandle: Any,
 ) {
     internal val nativeHandle: Any = nativeHandle
-    private val native = nativeHandle as io.openmobilemaps.mapscore.shared.MapsCoreSharedModule
+    private val native = nativeHandle as MapsCoreSharedModule
 
     actual companion object
     {
 
         actual fun version(): String {
-            val result = io.openmobilemaps.mapscore.shared.MapsCoreSharedModule.version()
+            val result = MapsCoreSharedModule.version()
             return result
         }
     }
 }
 
-internal fun KMMapsCoreSharedModule.asPlatform(): io.openmobilemaps.mapscore.shared.MapsCoreSharedModule = nativeHandle as io.openmobilemaps.mapscore.shared.MapsCoreSharedModule
-internal fun io.openmobilemaps.mapscore.shared.MapsCoreSharedModule.asKmp(): KMMapsCoreSharedModule = KMMapsCoreSharedModule(this)
+internal fun KMMapsCoreSharedModule.asPlatform(): MapsCoreSharedModule = nativeHandle as MapsCoreSharedModule
+internal fun MapsCoreSharedModule.asKmp(): KMMapsCoreSharedModule = KMMapsCoreSharedModule(this)

@@ -3,6 +3,8 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.graphics.objects.PolygonGroup2dInterface
+
 actual interface KMPolygonGroup2dInterface
 {
 
@@ -11,7 +13,7 @@ actual interface KMPolygonGroup2dInterface
     actual fun asGraphicsObject(): KMGraphicsObjectInterface
 }
 
-private class KMPolygonGroup2dInterfacePlatformWrapper(internal val nativeHandle: io.openmobilemaps.mapscore.shared.graphics.objects.PolygonGroup2dInterface) : KMPolygonGroup2dInterface
+private class KMPolygonGroup2dInterfacePlatformWrapper(internal val nativeHandle: PolygonGroup2dInterface) : KMPolygonGroup2dInterface
 {
 
     override fun setVertices(vertices: KMSharedBytes, indices: KMSharedBytes, origin: KMVec3D) {
@@ -24,7 +26,7 @@ private class KMPolygonGroup2dInterfacePlatformWrapper(internal val nativeHandle
     }
 }
 
-private class KMPolygonGroup2dInterfacePlatformProxy(private val delegate: KMPolygonGroup2dInterface) : io.openmobilemaps.mapscore.shared.graphics.objects.PolygonGroup2dInterface()
+private class KMPolygonGroup2dInterfacePlatformProxy(private val delegate: KMPolygonGroup2dInterface) : PolygonGroup2dInterface()
 {
 
     override fun setVertices(vertices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes, indices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D) {
@@ -37,8 +39,8 @@ private class KMPolygonGroup2dInterfacePlatformProxy(private val delegate: KMPol
     }
 }
 
-internal fun KMPolygonGroup2dInterface.asPlatform(): io.openmobilemaps.mapscore.shared.graphics.objects.PolygonGroup2dInterface = when (this) {
+internal fun KMPolygonGroup2dInterface.asPlatform(): PolygonGroup2dInterface = when (this) {
     is KMPolygonGroup2dInterfacePlatformWrapper -> this.nativeHandle
     else -> KMPolygonGroup2dInterfacePlatformProxy(this)
 }
-internal fun io.openmobilemaps.mapscore.shared.graphics.objects.PolygonGroup2dInterface.asKmp(): KMPolygonGroup2dInterface = KMPolygonGroup2dInterfacePlatformWrapper(this)
+internal fun PolygonGroup2dInterface.asKmp(): KMPolygonGroup2dInterface = KMPolygonGroup2dInterfacePlatformWrapper(this)

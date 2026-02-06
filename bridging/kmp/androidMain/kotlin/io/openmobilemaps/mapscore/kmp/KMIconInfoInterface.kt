@@ -3,11 +3,13 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.map.layers.icon.IconInfoInterface
+
 actual class KMIconInfoInterface actual public constructor(
     nativeHandle: Any,
 ) {
     internal val nativeHandle: Any = nativeHandle
-    private val native = nativeHandle as io.openmobilemaps.mapscore.shared.map.layers.icon.IconInfoInterface
+    private val native = nativeHandle as IconInfoInterface
 
     actual fun getIdentifier(): String {
         val result = native.getIdentifier()
@@ -57,5 +59,5 @@ actual class KMIconInfoInterface actual public constructor(
     }
 }
 
-internal fun KMIconInfoInterface.asPlatform(): io.openmobilemaps.mapscore.shared.map.layers.icon.IconInfoInterface = nativeHandle as io.openmobilemaps.mapscore.shared.map.layers.icon.IconInfoInterface
-internal fun io.openmobilemaps.mapscore.shared.map.layers.icon.IconInfoInterface.asKmp(): KMIconInfoInterface = KMIconInfoInterface(this)
+internal fun KMIconInfoInterface.asPlatform(): IconInfoInterface = nativeHandle as IconInfoInterface
+internal fun IconInfoInterface.asKmp(): KMIconInfoInterface = KMIconInfoInterface(this)

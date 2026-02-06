@@ -3,11 +3,13 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.wmts.WmtsCapabilitiesResource
+
 actual class KMWmtsCapabilitiesResource actual public constructor(
     nativeHandle: Any,
 ) {
     internal val nativeHandle: Any = nativeHandle
-    private val native = nativeHandle as io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.wmts.WmtsCapabilitiesResource
+    private val native = nativeHandle as WmtsCapabilitiesResource
 
     actual fun createLayer(identifier: String, tileLoaders: ArrayList<KMLoaderInterface>): KMTiled2dMapRasterLayerInterface? {
         val result = native.createLayer(identifier, ArrayList(tileLoaders.map { it.asPlatform() }))
@@ -58,11 +60,11 @@ actual class KMWmtsCapabilitiesResource actual public constructor(
     {
 
         actual fun create(xml: String): KMWmtsCapabilitiesResource {
-            val result = io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.wmts.WmtsCapabilitiesResource.create(xml)
+            val result = WmtsCapabilitiesResource.create(xml)
             return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.wmts.WmtsCapabilitiesResource)).asKmp()
         }
     }
 }
 
-internal fun KMWmtsCapabilitiesResource.asPlatform(): io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.wmts.WmtsCapabilitiesResource = nativeHandle as io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.wmts.WmtsCapabilitiesResource
-internal fun io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.wmts.WmtsCapabilitiesResource.asKmp(): KMWmtsCapabilitiesResource = KMWmtsCapabilitiesResource(this)
+internal fun KMWmtsCapabilitiesResource.asPlatform(): WmtsCapabilitiesResource = nativeHandle as WmtsCapabilitiesResource
+internal fun WmtsCapabilitiesResource.asKmp(): KMWmtsCapabilitiesResource = KMWmtsCapabilitiesResource(this)

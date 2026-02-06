@@ -3,13 +3,15 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.map.layers.line.LineLayerCallbackInterface
+
 actual interface KMLineLayerCallbackInterface
 {
 
     actual fun onLineClickConfirmed(line: KMLineInfoInterface)
 }
 
-private class KMLineLayerCallbackInterfacePlatformWrapper(internal val nativeHandle: io.openmobilemaps.mapscore.shared.map.layers.line.LineLayerCallbackInterface) : KMLineLayerCallbackInterface
+private class KMLineLayerCallbackInterfacePlatformWrapper(internal val nativeHandle: LineLayerCallbackInterface) : KMLineLayerCallbackInterface
 {
 
     override fun onLineClickConfirmed(line: KMLineInfoInterface) {
@@ -17,7 +19,7 @@ private class KMLineLayerCallbackInterfacePlatformWrapper(internal val nativeHan
     }
 }
 
-private class KMLineLayerCallbackInterfacePlatformProxy(private val delegate: KMLineLayerCallbackInterface) : io.openmobilemaps.mapscore.shared.map.layers.line.LineLayerCallbackInterface()
+private class KMLineLayerCallbackInterfacePlatformProxy(private val delegate: KMLineLayerCallbackInterface) : LineLayerCallbackInterface()
 {
 
     override fun onLineClickConfirmed(line: io.openmobilemaps.mapscore.shared.map.layers.line.LineInfoInterface) {
@@ -25,8 +27,8 @@ private class KMLineLayerCallbackInterfacePlatformProxy(private val delegate: KM
     }
 }
 
-internal fun KMLineLayerCallbackInterface.asPlatform(): io.openmobilemaps.mapscore.shared.map.layers.line.LineLayerCallbackInterface = when (this) {
+internal fun KMLineLayerCallbackInterface.asPlatform(): LineLayerCallbackInterface = when (this) {
     is KMLineLayerCallbackInterfacePlatformWrapper -> this.nativeHandle
     else -> KMLineLayerCallbackInterfacePlatformProxy(this)
 }
-internal fun io.openmobilemaps.mapscore.shared.map.layers.line.LineLayerCallbackInterface.asKmp(): KMLineLayerCallbackInterface = KMLineLayerCallbackInterfacePlatformWrapper(this)
+internal fun LineLayerCallbackInterface.asKmp(): KMLineLayerCallbackInterface = KMLineLayerCallbackInterfacePlatformWrapper(this)

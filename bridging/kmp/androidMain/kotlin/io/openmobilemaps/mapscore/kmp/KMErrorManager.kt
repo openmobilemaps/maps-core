@@ -3,11 +3,13 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.map.ErrorManager
+
 actual class KMErrorManager actual public constructor(
     nativeHandle: Any,
 ) {
     internal val nativeHandle: Any = nativeHandle
-    private val native = nativeHandle as io.openmobilemaps.mapscore.shared.map.ErrorManager
+    private val native = nativeHandle as ErrorManager
 
     actual fun addTiledLayerError(error: KMTiledLayerError) {
         native.addTiledLayerError(error.asPlatform())
@@ -37,11 +39,11 @@ actual class KMErrorManager actual public constructor(
     {
 
         actual fun create(): KMErrorManager {
-            val result = io.openmobilemaps.mapscore.shared.map.ErrorManager.create()
+            val result = ErrorManager.create()
             return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.ErrorManager)).asKmp()
         }
     }
 }
 
-internal fun KMErrorManager.asPlatform(): io.openmobilemaps.mapscore.shared.map.ErrorManager = nativeHandle as io.openmobilemaps.mapscore.shared.map.ErrorManager
-internal fun io.openmobilemaps.mapscore.shared.map.ErrorManager.asKmp(): KMErrorManager = KMErrorManager(this)
+internal fun KMErrorManager.asPlatform(): ErrorManager = nativeHandle as ErrorManager
+internal fun ErrorManager.asKmp(): KMErrorManager = KMErrorManager(this)

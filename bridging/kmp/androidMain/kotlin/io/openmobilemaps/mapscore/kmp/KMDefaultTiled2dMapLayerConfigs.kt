@@ -3,36 +3,38 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.map.layers.tiled.DefaultTiled2dMapLayerConfigs
+
 actual class KMDefaultTiled2dMapLayerConfigs actual public constructor(
     nativeHandle: Any,
 ) {
     internal val nativeHandle: Any = nativeHandle
-    private val native = nativeHandle as io.openmobilemaps.mapscore.shared.map.layers.tiled.DefaultTiled2dMapLayerConfigs
+    private val native = nativeHandle as DefaultTiled2dMapLayerConfigs
 
     actual companion object
     {
 
         actual fun webMercator(layerName: String, urlFormat: String): KMTiled2dMapLayerConfig {
-            val result = io.openmobilemaps.mapscore.shared.map.layers.tiled.DefaultTiled2dMapLayerConfigs.webMercator(layerName, urlFormat)
+            val result = DefaultTiled2dMapLayerConfigs.webMercator(layerName, urlFormat)
             return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig)).asKmp()
         }
 
         actual fun webMercatorCustom(layerName: String, urlFormat: String, zoomInfo: KMTiled2dMapZoomInfo?, minZoomLevel: Int, maxZoomLevel: Int): KMTiled2dMapLayerConfig {
-            val result = io.openmobilemaps.mapscore.shared.map.layers.tiled.DefaultTiled2dMapLayerConfigs.webMercatorCustom(layerName, urlFormat, zoomInfo?.let { it.asPlatform() }, minZoomLevel, maxZoomLevel)
+            val result = DefaultTiled2dMapLayerConfigs.webMercatorCustom(layerName, urlFormat, zoomInfo?.let { it.asPlatform() }, minZoomLevel, maxZoomLevel)
             return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig)).asKmp()
         }
 
         actual fun epsg4326(layerName: String, urlFormat: String): KMTiled2dMapLayerConfig {
-            val result = io.openmobilemaps.mapscore.shared.map.layers.tiled.DefaultTiled2dMapLayerConfigs.epsg4326(layerName, urlFormat)
+            val result = DefaultTiled2dMapLayerConfigs.epsg4326(layerName, urlFormat)
             return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig)).asKmp()
         }
 
         actual fun epsg4326Custom(layerName: String, urlFormat: String, zoomInfo: KMTiled2dMapZoomInfo, minZoomLevel: Int, maxZoomLevel: Int): KMTiled2dMapLayerConfig {
-            val result = io.openmobilemaps.mapscore.shared.map.layers.tiled.DefaultTiled2dMapLayerConfigs.epsg4326Custom(layerName, urlFormat, zoomInfo.asPlatform(), minZoomLevel, maxZoomLevel)
+            val result = DefaultTiled2dMapLayerConfigs.epsg4326Custom(layerName, urlFormat, zoomInfo.asPlatform(), minZoomLevel, maxZoomLevel)
             return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig)).asKmp()
         }
     }
 }
 
-internal fun KMDefaultTiled2dMapLayerConfigs.asPlatform(): io.openmobilemaps.mapscore.shared.map.layers.tiled.DefaultTiled2dMapLayerConfigs = nativeHandle as io.openmobilemaps.mapscore.shared.map.layers.tiled.DefaultTiled2dMapLayerConfigs
-internal fun io.openmobilemaps.mapscore.shared.map.layers.tiled.DefaultTiled2dMapLayerConfigs.asKmp(): KMDefaultTiled2dMapLayerConfigs = KMDefaultTiled2dMapLayerConfigs(this)
+internal fun KMDefaultTiled2dMapLayerConfigs.asPlatform(): DefaultTiled2dMapLayerConfigs = nativeHandle as DefaultTiled2dMapLayerConfigs
+internal fun DefaultTiled2dMapLayerConfigs.asKmp(): KMDefaultTiled2dMapLayerConfigs = KMDefaultTiled2dMapLayerConfigs(this)

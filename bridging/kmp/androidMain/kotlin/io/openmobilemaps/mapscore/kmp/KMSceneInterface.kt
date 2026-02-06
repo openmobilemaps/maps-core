@@ -3,11 +3,13 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.graphics.SceneInterface
+
 actual class KMSceneInterface actual public constructor(
     nativeHandle: Any,
 ) {
     internal val nativeHandle: Any = nativeHandle
-    private val native = nativeHandle as io.openmobilemaps.mapscore.shared.graphics.SceneInterface
+    private val native = nativeHandle as SceneInterface
 
     actual fun setCallbackHandler(callbackInterface: KMSceneCallbackInterface) {
         native.setCallbackHandler(callbackInterface.asPlatform())
@@ -66,16 +68,16 @@ actual class KMSceneInterface actual public constructor(
     {
 
         actual fun create(graphicsFactory: KMGraphicsObjectFactoryInterface, shaderFactory: KMShaderFactoryInterface, renderingContext: KMRenderingContextInterface): KMSceneInterface {
-            val result = io.openmobilemaps.mapscore.shared.graphics.SceneInterface.create(graphicsFactory.asPlatform(), shaderFactory.asPlatform(), renderingContext.asPlatform())
+            val result = SceneInterface.create(graphicsFactory.asPlatform(), shaderFactory.asPlatform(), renderingContext.asPlatform())
             return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.SceneInterface)).asKmp()
         }
 
         actual fun createWithOpenGl(): KMSceneInterface {
-            val result = io.openmobilemaps.mapscore.shared.graphics.SceneInterface.createWithOpenGl()
+            val result = SceneInterface.createWithOpenGl()
             return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.SceneInterface)).asKmp()
         }
     }
 }
 
-internal fun KMSceneInterface.asPlatform(): io.openmobilemaps.mapscore.shared.graphics.SceneInterface = nativeHandle as io.openmobilemaps.mapscore.shared.graphics.SceneInterface
-internal fun io.openmobilemaps.mapscore.shared.graphics.SceneInterface.asKmp(): KMSceneInterface = KMSceneInterface(this)
+internal fun KMSceneInterface.asPlatform(): SceneInterface = nativeHandle as SceneInterface
+internal fun SceneInterface.asKmp(): KMSceneInterface = KMSceneInterface(this)

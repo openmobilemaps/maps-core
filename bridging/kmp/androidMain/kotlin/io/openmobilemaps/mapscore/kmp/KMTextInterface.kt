@@ -3,6 +3,8 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.graphics.objects.TextInterface
+
 actual interface KMTextInterface
 {
 
@@ -15,7 +17,7 @@ actual interface KMTextInterface
     actual fun asGraphicsObject(): KMGraphicsObjectInterface
 }
 
-private class KMTextInterfacePlatformWrapper(internal val nativeHandle: io.openmobilemaps.mapscore.shared.graphics.objects.TextInterface) : KMTextInterface
+private class KMTextInterfacePlatformWrapper(internal val nativeHandle: TextInterface) : KMTextInterface
 {
 
     override fun setTextsShared(vertices: KMSharedBytes, indices: KMSharedBytes) {
@@ -36,7 +38,7 @@ private class KMTextInterfacePlatformWrapper(internal val nativeHandle: io.openm
     }
 }
 
-private class KMTextInterfacePlatformProxy(private val delegate: KMTextInterface) : io.openmobilemaps.mapscore.shared.graphics.objects.TextInterface()
+private class KMTextInterfacePlatformProxy(private val delegate: KMTextInterface) : TextInterface()
 {
 
     override fun setTextsShared(vertices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes, indices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes) {
@@ -57,8 +59,8 @@ private class KMTextInterfacePlatformProxy(private val delegate: KMTextInterface
     }
 }
 
-internal fun KMTextInterface.asPlatform(): io.openmobilemaps.mapscore.shared.graphics.objects.TextInterface = when (this) {
+internal fun KMTextInterface.asPlatform(): TextInterface = when (this) {
     is KMTextInterfacePlatformWrapper -> this.nativeHandle
     else -> KMTextInterfacePlatformProxy(this)
 }
-internal fun io.openmobilemaps.mapscore.shared.graphics.objects.TextInterface.asKmp(): KMTextInterface = KMTextInterfacePlatformWrapper(this)
+internal fun TextInterface.asKmp(): KMTextInterface = KMTextInterfacePlatformWrapper(this)

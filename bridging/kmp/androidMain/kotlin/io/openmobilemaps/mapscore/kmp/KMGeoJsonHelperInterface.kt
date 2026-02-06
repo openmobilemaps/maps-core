@@ -3,11 +3,13 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.map.layers.tiled.GeoJsonHelperInterface
+
 actual class KMGeoJsonHelperInterface actual public constructor(
     nativeHandle: Any,
 ) {
     internal val nativeHandle: Any = nativeHandle
-    private val native = nativeHandle as io.openmobilemaps.mapscore.shared.map.layers.tiled.GeoJsonHelperInterface
+    private val native = nativeHandle as GeoJsonHelperInterface
 
     actual fun geoJsonStringFromFeatureInfo(point: KMGeoJsonPoint): String {
         val result = native.geoJsonStringFromFeatureInfo(point.asPlatform())
@@ -23,11 +25,11 @@ actual class KMGeoJsonHelperInterface actual public constructor(
     {
 
         actual fun independentInstance(): KMGeoJsonHelperInterface {
-            val result = io.openmobilemaps.mapscore.shared.map.layers.tiled.GeoJsonHelperInterface.independentInstance()
+            val result = GeoJsonHelperInterface.independentInstance()
             return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.layers.tiled.GeoJsonHelperInterface)).asKmp()
         }
     }
 }
 
-internal fun KMGeoJsonHelperInterface.asPlatform(): io.openmobilemaps.mapscore.shared.map.layers.tiled.GeoJsonHelperInterface = nativeHandle as io.openmobilemaps.mapscore.shared.map.layers.tiled.GeoJsonHelperInterface
-internal fun io.openmobilemaps.mapscore.shared.map.layers.tiled.GeoJsonHelperInterface.asKmp(): KMGeoJsonHelperInterface = KMGeoJsonHelperInterface(this)
+internal fun KMGeoJsonHelperInterface.asPlatform(): GeoJsonHelperInterface = nativeHandle as GeoJsonHelperInterface
+internal fun GeoJsonHelperInterface.asKmp(): KMGeoJsonHelperInterface = KMGeoJsonHelperInterface(this)

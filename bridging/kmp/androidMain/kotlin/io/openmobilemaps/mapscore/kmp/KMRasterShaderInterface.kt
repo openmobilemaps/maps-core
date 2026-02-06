@@ -3,11 +3,13 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.graphics.shader.RasterShaderInterface
+
 actual class KMRasterShaderInterface actual public constructor(
     nativeHandle: Any,
 ) {
     internal val nativeHandle: Any = nativeHandle
-    private val native = nativeHandle as io.openmobilemaps.mapscore.shared.graphics.shader.RasterShaderInterface
+    private val native = nativeHandle as RasterShaderInterface
 
     actual fun setStyle(style: KMRasterShaderStyle) {
         native.setStyle(style.asPlatform())
@@ -19,5 +21,5 @@ actual class KMRasterShaderInterface actual public constructor(
     }
 }
 
-internal fun KMRasterShaderInterface.asPlatform(): io.openmobilemaps.mapscore.shared.graphics.shader.RasterShaderInterface = nativeHandle as io.openmobilemaps.mapscore.shared.graphics.shader.RasterShaderInterface
-internal fun io.openmobilemaps.mapscore.shared.graphics.shader.RasterShaderInterface.asKmp(): KMRasterShaderInterface = KMRasterShaderInterface(this)
+internal fun KMRasterShaderInterface.asPlatform(): RasterShaderInterface = nativeHandle as RasterShaderInterface
+internal fun RasterShaderInterface.asKmp(): KMRasterShaderInterface = KMRasterShaderInterface(this)

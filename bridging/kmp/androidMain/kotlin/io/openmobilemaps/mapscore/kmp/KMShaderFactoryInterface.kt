@@ -3,6 +3,8 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.graphics.shader.ShaderFactoryInterface
+
 actual interface KMShaderFactoryInterface
 {
 
@@ -57,7 +59,7 @@ actual interface KMShaderFactoryInterface
     actual fun createElevationInterpolationShader(): KMElevationInterpolationShaderInterface
 }
 
-private class KMShaderFactoryInterfacePlatformWrapper(internal val nativeHandle: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderFactoryInterface) : KMShaderFactoryInterface
+private class KMShaderFactoryInterfacePlatformWrapper(internal val nativeHandle: ShaderFactoryInterface) : KMShaderFactoryInterface
 {
 
     override fun createAlphaShader(): KMAlphaShaderInterface {
@@ -186,7 +188,7 @@ private class KMShaderFactoryInterfacePlatformWrapper(internal val nativeHandle:
     }
 }
 
-private class KMShaderFactoryInterfacePlatformProxy(private val delegate: KMShaderFactoryInterface) : io.openmobilemaps.mapscore.shared.graphics.shader.ShaderFactoryInterface()
+private class KMShaderFactoryInterfacePlatformProxy(private val delegate: KMShaderFactoryInterface) : ShaderFactoryInterface()
 {
 
     override fun createAlphaShader(): io.openmobilemaps.mapscore.shared.graphics.shader.AlphaShaderInterface {
@@ -315,8 +317,8 @@ private class KMShaderFactoryInterfacePlatformProxy(private val delegate: KMShad
     }
 }
 
-internal fun KMShaderFactoryInterface.asPlatform(): io.openmobilemaps.mapscore.shared.graphics.shader.ShaderFactoryInterface = when (this) {
+internal fun KMShaderFactoryInterface.asPlatform(): ShaderFactoryInterface = when (this) {
     is KMShaderFactoryInterfacePlatformWrapper -> this.nativeHandle
     else -> KMShaderFactoryInterfacePlatformProxy(this)
 }
-internal fun io.openmobilemaps.mapscore.shared.graphics.shader.ShaderFactoryInterface.asKmp(): KMShaderFactoryInterface = KMShaderFactoryInterfacePlatformWrapper(this)
+internal fun ShaderFactoryInterface.asKmp(): KMShaderFactoryInterface = KMShaderFactoryInterfacePlatformWrapper(this)

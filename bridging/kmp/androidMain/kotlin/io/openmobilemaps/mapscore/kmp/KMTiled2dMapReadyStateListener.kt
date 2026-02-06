@@ -3,13 +3,15 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapReadyStateListener
+
 actual interface KMTiled2dMapReadyStateListener
 {
 
     actual fun stateUpdate(state: KMLayerReadyState)
 }
 
-private class KMTiled2dMapReadyStateListenerPlatformWrapper(internal val nativeHandle: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapReadyStateListener) : KMTiled2dMapReadyStateListener
+private class KMTiled2dMapReadyStateListenerPlatformWrapper(internal val nativeHandle: Tiled2dMapReadyStateListener) : KMTiled2dMapReadyStateListener
 {
 
     override fun stateUpdate(state: KMLayerReadyState) {
@@ -17,7 +19,7 @@ private class KMTiled2dMapReadyStateListenerPlatformWrapper(internal val nativeH
     }
 }
 
-private class KMTiled2dMapReadyStateListenerPlatformProxy(private val delegate: KMTiled2dMapReadyStateListener) : io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapReadyStateListener()
+private class KMTiled2dMapReadyStateListenerPlatformProxy(private val delegate: KMTiled2dMapReadyStateListener) : Tiled2dMapReadyStateListener()
 {
 
     override fun stateUpdate(state: io.openmobilemaps.mapscore.shared.map.LayerReadyState) {
@@ -25,8 +27,8 @@ private class KMTiled2dMapReadyStateListenerPlatformProxy(private val delegate: 
     }
 }
 
-internal fun KMTiled2dMapReadyStateListener.asPlatform(): io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapReadyStateListener = when (this) {
+internal fun KMTiled2dMapReadyStateListener.asPlatform(): Tiled2dMapReadyStateListener = when (this) {
     is KMTiled2dMapReadyStateListenerPlatformWrapper -> this.nativeHandle
     else -> KMTiled2dMapReadyStateListenerPlatformProxy(this)
 }
-internal fun io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapReadyStateListener.asKmp(): KMTiled2dMapReadyStateListener = KMTiled2dMapReadyStateListenerPlatformWrapper(this)
+internal fun Tiled2dMapReadyStateListener.asKmp(): KMTiled2dMapReadyStateListener = KMTiled2dMapReadyStateListenerPlatformWrapper(this)

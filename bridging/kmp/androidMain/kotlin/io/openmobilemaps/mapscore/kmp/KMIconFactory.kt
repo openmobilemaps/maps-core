@@ -3,26 +3,28 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.map.layers.icon.IconFactory
+
 actual class KMIconFactory actual public constructor(
     nativeHandle: Any,
 ) {
     internal val nativeHandle: Any = nativeHandle
-    private val native = nativeHandle as io.openmobilemaps.mapscore.shared.map.layers.icon.IconFactory
+    private val native = nativeHandle as IconFactory
 
     actual companion object
     {
 
         actual fun createIcon(identifier: String, coordinate: KMCoord, texture: KMTextureHolderInterface, iconSize: KMVec2F, scaleType: KMIconType, blendMode: KMBlendMode): KMIconInfoInterface {
-            val result = io.openmobilemaps.mapscore.shared.map.layers.icon.IconFactory.createIcon(identifier, coordinate.asPlatform(), texture.asPlatform(), iconSize.asPlatform(), scaleType.asPlatform(), blendMode.asPlatform())
+            val result = IconFactory.createIcon(identifier, coordinate.asPlatform(), texture.asPlatform(), iconSize.asPlatform(), scaleType.asPlatform(), blendMode.asPlatform())
             return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.layers.icon.IconInfoInterface)).asKmp()
         }
 
         actual fun createIconWithAnchor(identifier: String, coordinate: KMCoord, texture: KMTextureHolderInterface, iconSize: KMVec2F, scaleType: KMIconType, blendMode: KMBlendMode, iconAnchor: KMVec2F): KMIconInfoInterface {
-            val result = io.openmobilemaps.mapscore.shared.map.layers.icon.IconFactory.createIconWithAnchor(identifier, coordinate.asPlatform(), texture.asPlatform(), iconSize.asPlatform(), scaleType.asPlatform(), blendMode.asPlatform(), iconAnchor.asPlatform())
+            val result = IconFactory.createIconWithAnchor(identifier, coordinate.asPlatform(), texture.asPlatform(), iconSize.asPlatform(), scaleType.asPlatform(), blendMode.asPlatform(), iconAnchor.asPlatform())
             return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.layers.icon.IconInfoInterface)).asKmp()
         }
     }
 }
 
-internal fun KMIconFactory.asPlatform(): io.openmobilemaps.mapscore.shared.map.layers.icon.IconFactory = nativeHandle as io.openmobilemaps.mapscore.shared.map.layers.icon.IconFactory
-internal fun io.openmobilemaps.mapscore.shared.map.layers.icon.IconFactory.asKmp(): KMIconFactory = KMIconFactory(this)
+internal fun KMIconFactory.asPlatform(): IconFactory = nativeHandle as IconFactory
+internal fun IconFactory.asKmp(): KMIconFactory = KMIconFactory(this)

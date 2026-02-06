@@ -3,11 +3,13 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.map.layers.polygon.PolygonMaskObjectInterface
+
 actual class KMPolygonMaskObjectInterface actual public constructor(
     nativeHandle: Any,
 ) {
     internal val nativeHandle: Any = nativeHandle
-    private val native = nativeHandle as io.openmobilemaps.mapscore.shared.map.layers.polygon.PolygonMaskObjectInterface
+    private val native = nativeHandle as PolygonMaskObjectInterface
 
     actual fun setPolygons(polygons: ArrayList<KMPolygonCoord>, origin: KMVec3D) {
         native.setPolygons(ArrayList(polygons.map { it.asPlatform() }), origin.asPlatform())
@@ -26,11 +28,11 @@ actual class KMPolygonMaskObjectInterface actual public constructor(
     {
 
         actual fun create(graphicsObjectFactory: KMGraphicsObjectFactoryInterface, conversionHelper: KMCoordinateConversionHelperInterface, is3d: Boolean): KMPolygonMaskObjectInterface {
-            val result = io.openmobilemaps.mapscore.shared.map.layers.polygon.PolygonMaskObjectInterface.create(graphicsObjectFactory.asPlatform(), conversionHelper.asPlatform(), is3d)
+            val result = PolygonMaskObjectInterface.create(graphicsObjectFactory.asPlatform(), conversionHelper.asPlatform(), is3d)
             return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.layers.polygon.PolygonMaskObjectInterface)).asKmp()
         }
     }
 }
 
-internal fun KMPolygonMaskObjectInterface.asPlatform(): io.openmobilemaps.mapscore.shared.map.layers.polygon.PolygonMaskObjectInterface = nativeHandle as io.openmobilemaps.mapscore.shared.map.layers.polygon.PolygonMaskObjectInterface
-internal fun io.openmobilemaps.mapscore.shared.map.layers.polygon.PolygonMaskObjectInterface.asKmp(): KMPolygonMaskObjectInterface = KMPolygonMaskObjectInterface(this)
+internal fun KMPolygonMaskObjectInterface.asPlatform(): PolygonMaskObjectInterface = nativeHandle as PolygonMaskObjectInterface
+internal fun PolygonMaskObjectInterface.asKmp(): KMPolygonMaskObjectInterface = KMPolygonMaskObjectInterface(this)

@@ -3,6 +3,8 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.map.layers.text.TextInfoInterface
+
 actual interface KMTextInfoInterface
 {
 
@@ -21,7 +23,7 @@ actual interface KMTextInfoInterface
     actual fun getLineCoordinates(): ArrayList<KMCoord>?
 }
 
-private class KMTextInfoInterfacePlatformWrapper(internal val nativeHandle: io.openmobilemaps.mapscore.shared.map.layers.text.TextInfoInterface) : KMTextInfoInterface
+private class KMTextInfoInterfacePlatformWrapper(internal val nativeHandle: TextInfoInterface) : KMTextInfoInterface
 {
 
     override fun getText(): ArrayList<KMFormattedStringEntry> {
@@ -60,7 +62,7 @@ private class KMTextInfoInterfacePlatformWrapper(internal val nativeHandle: io.o
     }
 }
 
-private class KMTextInfoInterfacePlatformProxy(private val delegate: KMTextInfoInterface) : io.openmobilemaps.mapscore.shared.map.layers.text.TextInfoInterface()
+private class KMTextInfoInterfacePlatformProxy(private val delegate: KMTextInfoInterface) : TextInfoInterface()
 {
 
     override fun getText(): ArrayList<io.openmobilemaps.mapscore.shared.map.layers.text.FormattedStringEntry> {
@@ -99,8 +101,8 @@ private class KMTextInfoInterfacePlatformProxy(private val delegate: KMTextInfoI
     }
 }
 
-internal fun KMTextInfoInterface.asPlatform(): io.openmobilemaps.mapscore.shared.map.layers.text.TextInfoInterface = when (this) {
+internal fun KMTextInfoInterface.asPlatform(): TextInfoInterface = when (this) {
     is KMTextInfoInterfacePlatformWrapper -> this.nativeHandle
     else -> KMTextInfoInterfacePlatformProxy(this)
 }
-internal fun io.openmobilemaps.mapscore.shared.map.layers.text.TextInfoInterface.asKmp(): KMTextInfoInterface = KMTextInfoInterfacePlatformWrapper(this)
+internal fun TextInfoInterface.asKmp(): KMTextInfoInterface = KMTextInfoInterfacePlatformWrapper(this)

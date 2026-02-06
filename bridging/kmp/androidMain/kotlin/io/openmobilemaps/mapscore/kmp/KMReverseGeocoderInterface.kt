@@ -3,11 +3,13 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.utils.ReverseGeocoderInterface
+
 actual class KMReverseGeocoderInterface actual public constructor(
     nativeHandle: Any,
 ) {
     internal val nativeHandle: Any = nativeHandle
-    private val native = nativeHandle as io.openmobilemaps.mapscore.shared.utils.ReverseGeocoderInterface
+    private val native = nativeHandle as ReverseGeocoderInterface
 
     actual fun reverseGeocode(coord: KMCoord, thresholdMeters: Long): ArrayList<KMVectorLayerFeatureCoordInfo> {
         val result = native.reverseGeocode(coord.asPlatform(), thresholdMeters)
@@ -23,11 +25,11 @@ actual class KMReverseGeocoderInterface actual public constructor(
     {
 
         actual fun create(loader: KMLoaderInterface, tileUrlTemplate: String, zoomLevel: Int): KMReverseGeocoderInterface {
-            val result = io.openmobilemaps.mapscore.shared.utils.ReverseGeocoderInterface.create(loader.asPlatform(), tileUrlTemplate, zoomLevel)
+            val result = ReverseGeocoderInterface.create(loader.asPlatform(), tileUrlTemplate, zoomLevel)
             return requireNotNull((result as io.openmobilemaps.mapscore.shared.utils.ReverseGeocoderInterface)).asKmp()
         }
     }
 }
 
-internal fun KMReverseGeocoderInterface.asPlatform(): io.openmobilemaps.mapscore.shared.utils.ReverseGeocoderInterface = nativeHandle as io.openmobilemaps.mapscore.shared.utils.ReverseGeocoderInterface
-internal fun io.openmobilemaps.mapscore.shared.utils.ReverseGeocoderInterface.asKmp(): KMReverseGeocoderInterface = KMReverseGeocoderInterface(this)
+internal fun KMReverseGeocoderInterface.asPlatform(): ReverseGeocoderInterface = nativeHandle as ReverseGeocoderInterface
+internal fun ReverseGeocoderInterface.asKmp(): KMReverseGeocoderInterface = KMReverseGeocoderInterface(this)

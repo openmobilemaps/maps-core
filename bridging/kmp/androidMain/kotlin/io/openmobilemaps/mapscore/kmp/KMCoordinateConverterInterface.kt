@@ -3,6 +3,8 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateConverterInterface
+
 actual interface KMCoordinateConverterInterface
 {
 
@@ -13,7 +15,7 @@ actual interface KMCoordinateConverterInterface
     actual fun getTo(): Int
 }
 
-private class KMCoordinateConverterInterfacePlatformWrapper(internal val nativeHandle: io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateConverterInterface) : KMCoordinateConverterInterface
+private class KMCoordinateConverterInterfacePlatformWrapper(internal val nativeHandle: CoordinateConverterInterface) : KMCoordinateConverterInterface
 {
 
     override fun convert(coordinate: KMCoord): KMCoord {
@@ -32,7 +34,7 @@ private class KMCoordinateConverterInterfacePlatformWrapper(internal val nativeH
     }
 }
 
-private class KMCoordinateConverterInterfacePlatformProxy(private val delegate: KMCoordinateConverterInterface) : io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateConverterInterface()
+private class KMCoordinateConverterInterfacePlatformProxy(private val delegate: KMCoordinateConverterInterface) : CoordinateConverterInterface()
 {
 
     override fun convert(coordinate: io.openmobilemaps.mapscore.shared.map.coordinates.Coord): io.openmobilemaps.mapscore.shared.map.coordinates.Coord {
@@ -51,8 +53,8 @@ private class KMCoordinateConverterInterfacePlatformProxy(private val delegate: 
     }
 }
 
-internal fun KMCoordinateConverterInterface.asPlatform(): io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateConverterInterface = when (this) {
+internal fun KMCoordinateConverterInterface.asPlatform(): CoordinateConverterInterface = when (this) {
     is KMCoordinateConverterInterfacePlatformWrapper -> this.nativeHandle
     else -> KMCoordinateConverterInterfacePlatformProxy(this)
 }
-internal fun io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateConverterInterface.asKmp(): KMCoordinateConverterInterface = KMCoordinateConverterInterfacePlatformWrapper(this)
+internal fun CoordinateConverterInterface.asKmp(): KMCoordinateConverterInterface = KMCoordinateConverterInterfacePlatformWrapper(this)

@@ -3,11 +3,13 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.graphics.shader.SphereEffectShaderInterface
+
 actual class KMSphereEffectShaderInterface actual public constructor(
     nativeHandle: Any,
 ) {
     internal val nativeHandle: Any = nativeHandle
-    private val native = nativeHandle as io.openmobilemaps.mapscore.shared.graphics.shader.SphereEffectShaderInterface
+    private val native = nativeHandle as SphereEffectShaderInterface
 
     actual fun asShaderProgramInterface(): KMShaderProgramInterface {
         val result = native.asShaderProgramInterface()
@@ -19,5 +21,5 @@ actual class KMSphereEffectShaderInterface actual public constructor(
     }
 }
 
-internal fun KMSphereEffectShaderInterface.asPlatform(): io.openmobilemaps.mapscore.shared.graphics.shader.SphereEffectShaderInterface = nativeHandle as io.openmobilemaps.mapscore.shared.graphics.shader.SphereEffectShaderInterface
-internal fun io.openmobilemaps.mapscore.shared.graphics.shader.SphereEffectShaderInterface.asKmp(): KMSphereEffectShaderInterface = KMSphereEffectShaderInterface(this)
+internal fun KMSphereEffectShaderInterface.asPlatform(): SphereEffectShaderInterface = nativeHandle as SphereEffectShaderInterface
+internal fun SphereEffectShaderInterface.asKmp(): KMSphereEffectShaderInterface = KMSphereEffectShaderInterface(this)

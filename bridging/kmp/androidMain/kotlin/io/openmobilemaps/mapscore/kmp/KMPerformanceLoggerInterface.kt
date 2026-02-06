@@ -3,6 +3,8 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.map.PerformanceLoggerInterface
+
 actual interface KMPerformanceLoggerInterface
 {
 
@@ -21,7 +23,7 @@ actual interface KMPerformanceLoggerInterface
     actual fun setLoggingEnabled(enabled: Boolean)
 }
 
-private class KMPerformanceLoggerInterfacePlatformWrapper(internal val nativeHandle: io.openmobilemaps.mapscore.shared.map.PerformanceLoggerInterface) : KMPerformanceLoggerInterface
+private class KMPerformanceLoggerInterfacePlatformWrapper(internal val nativeHandle: PerformanceLoggerInterface) : KMPerformanceLoggerInterface
 {
 
     override fun getLoggerName(): String {
@@ -56,7 +58,7 @@ private class KMPerformanceLoggerInterfacePlatformWrapper(internal val nativeHan
     }
 }
 
-private class KMPerformanceLoggerInterfacePlatformProxy(private val delegate: KMPerformanceLoggerInterface) : io.openmobilemaps.mapscore.shared.map.PerformanceLoggerInterface()
+private class KMPerformanceLoggerInterfacePlatformProxy(private val delegate: KMPerformanceLoggerInterface) : PerformanceLoggerInterface()
 {
 
     override fun getLoggerName(): String {
@@ -91,8 +93,8 @@ private class KMPerformanceLoggerInterfacePlatformProxy(private val delegate: KM
     }
 }
 
-internal fun KMPerformanceLoggerInterface.asPlatform(): io.openmobilemaps.mapscore.shared.map.PerformanceLoggerInterface = when (this) {
+internal fun KMPerformanceLoggerInterface.asPlatform(): PerformanceLoggerInterface = when (this) {
     is KMPerformanceLoggerInterfacePlatformWrapper -> this.nativeHandle
     else -> KMPerformanceLoggerInterfacePlatformProxy(this)
 }
-internal fun io.openmobilemaps.mapscore.shared.map.PerformanceLoggerInterface.asKmp(): KMPerformanceLoggerInterface = KMPerformanceLoggerInterfacePlatformWrapper(this)
+internal fun PerformanceLoggerInterface.asKmp(): KMPerformanceLoggerInterface = KMPerformanceLoggerInterfacePlatformWrapper(this)

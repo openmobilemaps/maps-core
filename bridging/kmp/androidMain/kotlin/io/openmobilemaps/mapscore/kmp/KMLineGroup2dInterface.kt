@@ -3,6 +3,8 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.graphics.objects.LineGroup2dInterface
+
 actual interface KMLineGroup2dInterface
 {
 
@@ -11,7 +13,7 @@ actual interface KMLineGroup2dInterface
     actual fun asGraphicsObject(): KMGraphicsObjectInterface
 }
 
-private class KMLineGroup2dInterfacePlatformWrapper(internal val nativeHandle: io.openmobilemaps.mapscore.shared.graphics.objects.LineGroup2dInterface) : KMLineGroup2dInterface
+private class KMLineGroup2dInterfacePlatformWrapper(internal val nativeHandle: LineGroup2dInterface) : KMLineGroup2dInterface
 {
 
     override fun setLines(lines: KMSharedBytes, indices: KMSharedBytes, origin: KMVec3D, is3d: Boolean) {
@@ -24,7 +26,7 @@ private class KMLineGroup2dInterfacePlatformWrapper(internal val nativeHandle: i
     }
 }
 
-private class KMLineGroup2dInterfacePlatformProxy(private val delegate: KMLineGroup2dInterface) : io.openmobilemaps.mapscore.shared.graphics.objects.LineGroup2dInterface()
+private class KMLineGroup2dInterfacePlatformProxy(private val delegate: KMLineGroup2dInterface) : LineGroup2dInterface()
 {
 
     override fun setLines(lines: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes, indices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D, is3d: Boolean) {
@@ -37,8 +39,8 @@ private class KMLineGroup2dInterfacePlatformProxy(private val delegate: KMLineGr
     }
 }
 
-internal fun KMLineGroup2dInterface.asPlatform(): io.openmobilemaps.mapscore.shared.graphics.objects.LineGroup2dInterface = when (this) {
+internal fun KMLineGroup2dInterface.asPlatform(): LineGroup2dInterface = when (this) {
     is KMLineGroup2dInterfacePlatformWrapper -> this.nativeHandle
     else -> KMLineGroup2dInterfacePlatformProxy(this)
 }
-internal fun io.openmobilemaps.mapscore.shared.graphics.objects.LineGroup2dInterface.asKmp(): KMLineGroup2dInterface = KMLineGroup2dInterfacePlatformWrapper(this)
+internal fun LineGroup2dInterface.asKmp(): KMLineGroup2dInterface = KMLineGroup2dInterfacePlatformWrapper(this)

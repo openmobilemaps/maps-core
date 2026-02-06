@@ -3,21 +3,23 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.map.layers.text.TextFactory
+
 actual class KMTextFactory actual public constructor(
     nativeHandle: Any,
 ) {
     internal val nativeHandle: Any = nativeHandle
-    private val native = nativeHandle as io.openmobilemaps.mapscore.shared.map.layers.text.TextFactory
+    private val native = nativeHandle as TextFactory
 
     actual companion object
     {
 
         actual fun createText(text: ArrayList<KMFormattedStringEntry>, coordinate: KMCoord, font: KMFont, textAnchor: KMAnchor, textJustify: KMTextJustify): KMTextInfoInterface {
-            val result = io.openmobilemaps.mapscore.shared.map.layers.text.TextFactory.createText(ArrayList(text.map { it.asPlatform() }), coordinate.asPlatform(), font.asPlatform(), textAnchor.asPlatform(), textJustify.asPlatform())
+            val result = TextFactory.createText(ArrayList(text.map { it.asPlatform() }), coordinate.asPlatform(), font.asPlatform(), textAnchor.asPlatform(), textJustify.asPlatform())
             return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.layers.text.TextInfoInterface)).asKmp()
         }
     }
 }
 
-internal fun KMTextFactory.asPlatform(): io.openmobilemaps.mapscore.shared.map.layers.text.TextFactory = nativeHandle as io.openmobilemaps.mapscore.shared.map.layers.text.TextFactory
-internal fun io.openmobilemaps.mapscore.shared.map.layers.text.TextFactory.asKmp(): KMTextFactory = KMTextFactory(this)
+internal fun KMTextFactory.asPlatform(): TextFactory = nativeHandle as TextFactory
+internal fun TextFactory.asKmp(): KMTextFactory = KMTextFactory(this)

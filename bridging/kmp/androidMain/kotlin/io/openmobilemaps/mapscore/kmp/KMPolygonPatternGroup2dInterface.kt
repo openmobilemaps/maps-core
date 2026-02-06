@@ -3,6 +3,8 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.graphics.objects.PolygonPatternGroup2dInterface
+
 actual interface KMPolygonPatternGroup2dInterface
 {
 
@@ -23,7 +25,7 @@ actual interface KMPolygonPatternGroup2dInterface
     actual fun asGraphicsObject(): KMGraphicsObjectInterface
 }
 
-private class KMPolygonPatternGroup2dInterfacePlatformWrapper(internal val nativeHandle: io.openmobilemaps.mapscore.shared.graphics.objects.PolygonPatternGroup2dInterface) : KMPolygonPatternGroup2dInterface
+private class KMPolygonPatternGroup2dInterfacePlatformWrapper(internal val nativeHandle: PolygonPatternGroup2dInterface) : KMPolygonPatternGroup2dInterface
 {
 
     override fun setVertices(vertices: KMSharedBytes, indices: KMSharedBytes, origin: KMVec3D) {
@@ -60,7 +62,7 @@ private class KMPolygonPatternGroup2dInterfacePlatformWrapper(internal val nativ
     }
 }
 
-private class KMPolygonPatternGroup2dInterfacePlatformProxy(private val delegate: KMPolygonPatternGroup2dInterface) : io.openmobilemaps.mapscore.shared.graphics.objects.PolygonPatternGroup2dInterface()
+private class KMPolygonPatternGroup2dInterfacePlatformProxy(private val delegate: KMPolygonPatternGroup2dInterface) : PolygonPatternGroup2dInterface()
 {
 
     override fun setVertices(vertices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes, indices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D) {
@@ -97,8 +99,8 @@ private class KMPolygonPatternGroup2dInterfacePlatformProxy(private val delegate
     }
 }
 
-internal fun KMPolygonPatternGroup2dInterface.asPlatform(): io.openmobilemaps.mapscore.shared.graphics.objects.PolygonPatternGroup2dInterface = when (this) {
+internal fun KMPolygonPatternGroup2dInterface.asPlatform(): PolygonPatternGroup2dInterface = when (this) {
     is KMPolygonPatternGroup2dInterfacePlatformWrapper -> this.nativeHandle
     else -> KMPolygonPatternGroup2dInterfacePlatformProxy(this)
 }
-internal fun io.openmobilemaps.mapscore.shared.graphics.objects.PolygonPatternGroup2dInterface.asKmp(): KMPolygonPatternGroup2dInterface = KMPolygonPatternGroup2dInterfacePlatformWrapper(this)
+internal fun PolygonPatternGroup2dInterface.asKmp(): KMPolygonPatternGroup2dInterface = KMPolygonPatternGroup2dInterfacePlatformWrapper(this)

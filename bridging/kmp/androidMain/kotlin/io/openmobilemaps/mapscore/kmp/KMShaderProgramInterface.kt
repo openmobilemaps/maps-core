@@ -3,11 +3,13 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface
+
 actual class KMShaderProgramInterface actual public constructor(
     nativeHandle: Any,
 ) {
     internal val nativeHandle: Any = nativeHandle
-    private val native = nativeHandle as io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface
+    private val native = nativeHandle as ShaderProgramInterface
 
     actual fun getProgramName(): String {
         val result = native.getProgramName()
@@ -32,5 +34,5 @@ actual class KMShaderProgramInterface actual public constructor(
     }
 }
 
-internal fun KMShaderProgramInterface.asPlatform(): io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface = nativeHandle as io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface
-internal fun io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface.asKmp(): KMShaderProgramInterface = KMShaderProgramInterface(this)
+internal fun KMShaderProgramInterface.asPlatform(): ShaderProgramInterface = nativeHandle as ShaderProgramInterface
+internal fun ShaderProgramInterface.asKmp(): KMShaderProgramInterface = KMShaderProgramInterface(this)

@@ -3,11 +3,13 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.map.MapInterface
+
 actual class KMMapInterface actual public constructor(
     nativeHandle: Any,
 ) {
     internal val nativeHandle: Any = nativeHandle
-    private val native = nativeHandle as io.openmobilemaps.mapscore.shared.map.MapInterface
+    private val native = nativeHandle as MapInterface
 
     actual fun setCallbackHandler(callbackInterface: KMMapCallbackInterface?) {
         native.setCallbackHandler(callbackInterface?.let { it.asPlatform() })
@@ -166,16 +168,16 @@ actual class KMMapInterface actual public constructor(
     {
 
         actual fun create(graphicsFactory: KMGraphicsObjectFactoryInterface, shaderFactory: KMShaderFactoryInterface, renderingContext: KMRenderingContextInterface, mapConfig: KMMapConfig, scheduler: KMSchedulerInterface, pixelDensity: Float, is3D: Boolean): KMMapInterface {
-            val result = io.openmobilemaps.mapscore.shared.map.MapInterface.create(graphicsFactory.asPlatform(), shaderFactory.asPlatform(), renderingContext.asPlatform(), mapConfig.asPlatform(), scheduler.asPlatform(), pixelDensity, is3D)
+            val result = MapInterface.create(graphicsFactory.asPlatform(), shaderFactory.asPlatform(), renderingContext.asPlatform(), mapConfig.asPlatform(), scheduler.asPlatform(), pixelDensity, is3D)
             return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.MapInterface)).asKmp()
         }
 
         actual fun createWithOpenGl(mapConfig: KMMapConfig, scheduler: KMSchedulerInterface, pixelDensity: Float, is3D: Boolean): KMMapInterface {
-            val result = io.openmobilemaps.mapscore.shared.map.MapInterface.createWithOpenGl(mapConfig.asPlatform(), scheduler.asPlatform(), pixelDensity, is3D)
+            val result = MapInterface.createWithOpenGl(mapConfig.asPlatform(), scheduler.asPlatform(), pixelDensity, is3D)
             return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.MapInterface)).asKmp()
         }
     }
 }
 
-internal fun KMMapInterface.asPlatform(): io.openmobilemaps.mapscore.shared.map.MapInterface = nativeHandle as io.openmobilemaps.mapscore.shared.map.MapInterface
-internal fun io.openmobilemaps.mapscore.shared.map.MapInterface.asKmp(): KMMapInterface = KMMapInterface(this)
+internal fun KMMapInterface.asPlatform(): MapInterface = nativeHandle as MapInterface
+internal fun MapInterface.asKmp(): KMMapInterface = KMMapInterface(this)

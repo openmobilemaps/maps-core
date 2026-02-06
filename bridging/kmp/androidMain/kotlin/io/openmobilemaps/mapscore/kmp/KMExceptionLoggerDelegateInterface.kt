@@ -3,13 +3,15 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.utils.ExceptionLoggerDelegateInterface
+
 actual interface KMExceptionLoggerDelegateInterface
 {
 
     actual fun logMessage(errorDomain: String, code: Int, customValues: HashMap<String, String>, function: String, file: String, line: Int)
 }
 
-private class KMExceptionLoggerDelegateInterfacePlatformWrapper(internal val nativeHandle: io.openmobilemaps.mapscore.shared.utils.ExceptionLoggerDelegateInterface) : KMExceptionLoggerDelegateInterface
+private class KMExceptionLoggerDelegateInterfacePlatformWrapper(internal val nativeHandle: ExceptionLoggerDelegateInterface) : KMExceptionLoggerDelegateInterface
 {
 
     override fun logMessage(errorDomain: String, code: Int, customValues: HashMap<String, String>, function: String, file: String, line: Int) {
@@ -17,7 +19,7 @@ private class KMExceptionLoggerDelegateInterfacePlatformWrapper(internal val nat
     }
 }
 
-private class KMExceptionLoggerDelegateInterfacePlatformProxy(private val delegate: KMExceptionLoggerDelegateInterface) : io.openmobilemaps.mapscore.shared.utils.ExceptionLoggerDelegateInterface()
+private class KMExceptionLoggerDelegateInterfacePlatformProxy(private val delegate: KMExceptionLoggerDelegateInterface) : ExceptionLoggerDelegateInterface()
 {
 
     override fun logMessage(errorDomain: String, code: Int, customValues: HashMap<String, String>, function: String, file: String, line: Int) {
@@ -25,8 +27,8 @@ private class KMExceptionLoggerDelegateInterfacePlatformProxy(private val delega
     }
 }
 
-internal fun KMExceptionLoggerDelegateInterface.asPlatform(): io.openmobilemaps.mapscore.shared.utils.ExceptionLoggerDelegateInterface = when (this) {
+internal fun KMExceptionLoggerDelegateInterface.asPlatform(): ExceptionLoggerDelegateInterface = when (this) {
     is KMExceptionLoggerDelegateInterfacePlatformWrapper -> this.nativeHandle
     else -> KMExceptionLoggerDelegateInterfacePlatformProxy(this)
 }
-internal fun io.openmobilemaps.mapscore.shared.utils.ExceptionLoggerDelegateInterface.asKmp(): KMExceptionLoggerDelegateInterface = KMExceptionLoggerDelegateInterfacePlatformWrapper(this)
+internal fun ExceptionLoggerDelegateInterface.asKmp(): KMExceptionLoggerDelegateInterface = KMExceptionLoggerDelegateInterfacePlatformWrapper(this)

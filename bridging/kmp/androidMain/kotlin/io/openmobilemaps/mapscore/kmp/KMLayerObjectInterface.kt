@@ -3,11 +3,13 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.map.layers.objects.LayerObjectInterface
+
 actual class KMLayerObjectInterface actual public constructor(
     nativeHandle: Any,
 ) {
     internal val nativeHandle: Any = nativeHandle
-    private val native = nativeHandle as io.openmobilemaps.mapscore.shared.map.layers.objects.LayerObjectInterface
+    private val native = nativeHandle as LayerObjectInterface
 
     actual fun update() {
         native.update()
@@ -19,5 +21,5 @@ actual class KMLayerObjectInterface actual public constructor(
     }
 }
 
-internal fun KMLayerObjectInterface.asPlatform(): io.openmobilemaps.mapscore.shared.map.layers.objects.LayerObjectInterface = nativeHandle as io.openmobilemaps.mapscore.shared.map.layers.objects.LayerObjectInterface
-internal fun io.openmobilemaps.mapscore.shared.map.layers.objects.LayerObjectInterface.asKmp(): KMLayerObjectInterface = KMLayerObjectInterface(this)
+internal fun KMLayerObjectInterface.asPlatform(): LayerObjectInterface = nativeHandle as LayerObjectInterface
+internal fun LayerObjectInterface.asKmp(): KMLayerObjectInterface = KMLayerObjectInterface(this)

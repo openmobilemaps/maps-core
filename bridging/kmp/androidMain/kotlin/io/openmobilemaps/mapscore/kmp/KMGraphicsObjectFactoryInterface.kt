@@ -3,6 +3,8 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.graphics.objects.GraphicsObjectFactoryInterface
+
 actual interface KMGraphicsObjectFactoryInterface
 {
 
@@ -31,7 +33,7 @@ actual interface KMGraphicsObjectFactoryInterface
     actual fun createTextInstanced(shader: KMShaderProgramInterface): KMTextInstancedInterface
 }
 
-private class KMGraphicsObjectFactoryInterfacePlatformWrapper(internal val nativeHandle: io.openmobilemaps.mapscore.shared.graphics.objects.GraphicsObjectFactoryInterface) : KMGraphicsObjectFactoryInterface
+private class KMGraphicsObjectFactoryInterfacePlatformWrapper(internal val nativeHandle: GraphicsObjectFactoryInterface) : KMGraphicsObjectFactoryInterface
 {
 
     override fun createQuad(shader: KMShaderProgramInterface): KMQuad2dInterface {
@@ -95,7 +97,7 @@ private class KMGraphicsObjectFactoryInterfacePlatformWrapper(internal val nativ
     }
 }
 
-private class KMGraphicsObjectFactoryInterfacePlatformProxy(private val delegate: KMGraphicsObjectFactoryInterface) : io.openmobilemaps.mapscore.shared.graphics.objects.GraphicsObjectFactoryInterface()
+private class KMGraphicsObjectFactoryInterfacePlatformProxy(private val delegate: KMGraphicsObjectFactoryInterface) : GraphicsObjectFactoryInterface()
 {
 
     override fun createQuad(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): io.openmobilemaps.mapscore.shared.graphics.objects.Quad2dInterface {
@@ -159,8 +161,8 @@ private class KMGraphicsObjectFactoryInterfacePlatformProxy(private val delegate
     }
 }
 
-internal fun KMGraphicsObjectFactoryInterface.asPlatform(): io.openmobilemaps.mapscore.shared.graphics.objects.GraphicsObjectFactoryInterface = when (this) {
+internal fun KMGraphicsObjectFactoryInterface.asPlatform(): GraphicsObjectFactoryInterface = when (this) {
     is KMGraphicsObjectFactoryInterfacePlatformWrapper -> this.nativeHandle
     else -> KMGraphicsObjectFactoryInterfacePlatformProxy(this)
 }
-internal fun io.openmobilemaps.mapscore.shared.graphics.objects.GraphicsObjectFactoryInterface.asKmp(): KMGraphicsObjectFactoryInterface = KMGraphicsObjectFactoryInterfacePlatformWrapper(this)
+internal fun GraphicsObjectFactoryInterface.asKmp(): KMGraphicsObjectFactoryInterface = KMGraphicsObjectFactoryInterfacePlatformWrapper(this)

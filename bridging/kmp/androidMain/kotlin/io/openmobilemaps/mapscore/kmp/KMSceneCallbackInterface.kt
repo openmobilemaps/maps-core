@@ -3,13 +3,15 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.graphics.SceneCallbackInterface
+
 actual interface KMSceneCallbackInterface
 {
 
     actual fun invalidate()
 }
 
-private class KMSceneCallbackInterfacePlatformWrapper(internal val nativeHandle: io.openmobilemaps.mapscore.shared.graphics.SceneCallbackInterface) : KMSceneCallbackInterface
+private class KMSceneCallbackInterfacePlatformWrapper(internal val nativeHandle: SceneCallbackInterface) : KMSceneCallbackInterface
 {
 
     override fun invalidate() {
@@ -17,7 +19,7 @@ private class KMSceneCallbackInterfacePlatformWrapper(internal val nativeHandle:
     }
 }
 
-private class KMSceneCallbackInterfacePlatformProxy(private val delegate: KMSceneCallbackInterface) : io.openmobilemaps.mapscore.shared.graphics.SceneCallbackInterface()
+private class KMSceneCallbackInterfacePlatformProxy(private val delegate: KMSceneCallbackInterface) : SceneCallbackInterface()
 {
 
     override fun invalidate() {
@@ -25,8 +27,8 @@ private class KMSceneCallbackInterfacePlatformProxy(private val delegate: KMScen
     }
 }
 
-internal fun KMSceneCallbackInterface.asPlatform(): io.openmobilemaps.mapscore.shared.graphics.SceneCallbackInterface = when (this) {
+internal fun KMSceneCallbackInterface.asPlatform(): SceneCallbackInterface = when (this) {
     is KMSceneCallbackInterfacePlatformWrapper -> this.nativeHandle
     else -> KMSceneCallbackInterfacePlatformProxy(this)
 }
-internal fun io.openmobilemaps.mapscore.shared.graphics.SceneCallbackInterface.asKmp(): KMSceneCallbackInterface = KMSceneCallbackInterfacePlatformWrapper(this)
+internal fun SceneCallbackInterface.asKmp(): KMSceneCallbackInterface = KMSceneCallbackInterfacePlatformWrapper(this)

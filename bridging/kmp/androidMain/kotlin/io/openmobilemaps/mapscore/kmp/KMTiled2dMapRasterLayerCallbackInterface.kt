@@ -3,6 +3,8 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.Tiled2dMapRasterLayerCallbackInterface
+
 actual interface KMTiled2dMapRasterLayerCallbackInterface
 {
 
@@ -11,7 +13,7 @@ actual interface KMTiled2dMapRasterLayerCallbackInterface
     actual fun onLongPress(coord: KMCoord): Boolean
 }
 
-private class KMTiled2dMapRasterLayerCallbackInterfacePlatformWrapper(internal val nativeHandle: io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.Tiled2dMapRasterLayerCallbackInterface) : KMTiled2dMapRasterLayerCallbackInterface
+private class KMTiled2dMapRasterLayerCallbackInterfacePlatformWrapper(internal val nativeHandle: Tiled2dMapRasterLayerCallbackInterface) : KMTiled2dMapRasterLayerCallbackInterface
 {
 
     override fun onClickConfirmed(coord: KMCoord): Boolean {
@@ -25,7 +27,7 @@ private class KMTiled2dMapRasterLayerCallbackInterfacePlatformWrapper(internal v
     }
 }
 
-private class KMTiled2dMapRasterLayerCallbackInterfacePlatformProxy(private val delegate: KMTiled2dMapRasterLayerCallbackInterface) : io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.Tiled2dMapRasterLayerCallbackInterface()
+private class KMTiled2dMapRasterLayerCallbackInterfacePlatformProxy(private val delegate: KMTiled2dMapRasterLayerCallbackInterface) : Tiled2dMapRasterLayerCallbackInterface()
 {
 
     override fun onClickConfirmed(coord: io.openmobilemaps.mapscore.shared.map.coordinates.Coord): Boolean {
@@ -39,8 +41,8 @@ private class KMTiled2dMapRasterLayerCallbackInterfacePlatformProxy(private val 
     }
 }
 
-internal fun KMTiled2dMapRasterLayerCallbackInterface.asPlatform(): io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.Tiled2dMapRasterLayerCallbackInterface = when (this) {
+internal fun KMTiled2dMapRasterLayerCallbackInterface.asPlatform(): Tiled2dMapRasterLayerCallbackInterface = when (this) {
     is KMTiled2dMapRasterLayerCallbackInterfacePlatformWrapper -> this.nativeHandle
     else -> KMTiled2dMapRasterLayerCallbackInterfacePlatformProxy(this)
 }
-internal fun io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.Tiled2dMapRasterLayerCallbackInterface.asKmp(): KMTiled2dMapRasterLayerCallbackInterface = KMTiled2dMapRasterLayerCallbackInterfacePlatformWrapper(this)
+internal fun Tiled2dMapRasterLayerCallbackInterface.asKmp(): KMTiled2dMapRasterLayerCallbackInterface = KMTiled2dMapRasterLayerCallbackInterfacePlatformWrapper(this)

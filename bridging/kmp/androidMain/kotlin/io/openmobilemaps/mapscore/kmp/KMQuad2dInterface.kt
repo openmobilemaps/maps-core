@@ -3,6 +3,8 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.graphics.objects.Quad2dInterface
+
 actual interface KMQuad2dInterface
 {
 
@@ -21,7 +23,7 @@ actual interface KMQuad2dInterface
     actual fun asMaskingObject(): KMMaskingObjectInterface
 }
 
-private class KMQuad2dInterfacePlatformWrapper(internal val nativeHandle: io.openmobilemaps.mapscore.shared.graphics.objects.Quad2dInterface) : KMQuad2dInterface
+private class KMQuad2dInterfacePlatformWrapper(internal val nativeHandle: Quad2dInterface) : KMQuad2dInterface
 {
 
     override fun setFrame(frame: KMQuad3dD, textureCoordinates: KMRectD, origin: KMVec3D, is3d: Boolean) {
@@ -55,7 +57,7 @@ private class KMQuad2dInterfacePlatformWrapper(internal val nativeHandle: io.ope
     }
 }
 
-private class KMQuad2dInterfacePlatformProxy(private val delegate: KMQuad2dInterface) : io.openmobilemaps.mapscore.shared.graphics.objects.Quad2dInterface()
+private class KMQuad2dInterfacePlatformProxy(private val delegate: KMQuad2dInterface) : Quad2dInterface()
 {
 
     override fun setFrame(frame: io.openmobilemaps.mapscore.shared.graphics.common.Quad3dD, textureCoordinates: io.openmobilemaps.mapscore.shared.graphics.common.RectD, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D, is3d: Boolean) {
@@ -89,8 +91,8 @@ private class KMQuad2dInterfacePlatformProxy(private val delegate: KMQuad2dInter
     }
 }
 
-internal fun KMQuad2dInterface.asPlatform(): io.openmobilemaps.mapscore.shared.graphics.objects.Quad2dInterface = when (this) {
+internal fun KMQuad2dInterface.asPlatform(): Quad2dInterface = when (this) {
     is KMQuad2dInterfacePlatformWrapper -> this.nativeHandle
     else -> KMQuad2dInterfacePlatformProxy(this)
 }
-internal fun io.openmobilemaps.mapscore.shared.graphics.objects.Quad2dInterface.asKmp(): KMQuad2dInterface = KMQuad2dInterfacePlatformWrapper(this)
+internal fun Quad2dInterface.asKmp(): KMQuad2dInterface = KMQuad2dInterfacePlatformWrapper(this)

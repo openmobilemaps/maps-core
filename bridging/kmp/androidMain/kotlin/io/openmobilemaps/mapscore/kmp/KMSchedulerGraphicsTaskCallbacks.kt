@@ -3,16 +3,18 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.map.scheduling.SchedulerGraphicsTaskCallbacks
+
 actual class KMSchedulerGraphicsTaskCallbacks actual public constructor(
     nativeHandle: Any,
 ) {
     internal val nativeHandle: Any = nativeHandle
-    private val native = nativeHandle as io.openmobilemaps.mapscore.shared.map.scheduling.SchedulerGraphicsTaskCallbacks
+    private val native = nativeHandle as SchedulerGraphicsTaskCallbacks
 
     actual fun requestGraphicsTaskExecution() {
         native.requestGraphicsTaskExecution()
     }
 }
 
-internal fun KMSchedulerGraphicsTaskCallbacks.asPlatform(): io.openmobilemaps.mapscore.shared.map.scheduling.SchedulerGraphicsTaskCallbacks = nativeHandle as io.openmobilemaps.mapscore.shared.map.scheduling.SchedulerGraphicsTaskCallbacks
-internal fun io.openmobilemaps.mapscore.shared.map.scheduling.SchedulerGraphicsTaskCallbacks.asKmp(): KMSchedulerGraphicsTaskCallbacks = KMSchedulerGraphicsTaskCallbacks(this)
+internal fun KMSchedulerGraphicsTaskCallbacks.asPlatform(): SchedulerGraphicsTaskCallbacks = nativeHandle as SchedulerGraphicsTaskCallbacks
+internal fun SchedulerGraphicsTaskCallbacks.asKmp(): KMSchedulerGraphicsTaskCallbacks = KMSchedulerGraphicsTaskCallbacks(this)

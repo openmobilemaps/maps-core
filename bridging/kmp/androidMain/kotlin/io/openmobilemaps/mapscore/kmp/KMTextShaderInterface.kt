@@ -3,11 +3,13 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.graphics.shader.TextShaderInterface
+
 actual class KMTextShaderInterface actual public constructor(
     nativeHandle: Any,
 ) {
     internal val nativeHandle: Any = nativeHandle
-    private val native = nativeHandle as io.openmobilemaps.mapscore.shared.graphics.shader.TextShaderInterface
+    private val native = nativeHandle as TextShaderInterface
 
     actual fun setColor(color: KMColor) {
         native.setColor(color.asPlatform())
@@ -27,5 +29,5 @@ actual class KMTextShaderInterface actual public constructor(
     }
 }
 
-internal fun KMTextShaderInterface.asPlatform(): io.openmobilemaps.mapscore.shared.graphics.shader.TextShaderInterface = nativeHandle as io.openmobilemaps.mapscore.shared.graphics.shader.TextShaderInterface
-internal fun io.openmobilemaps.mapscore.shared.graphics.shader.TextShaderInterface.asKmp(): KMTextShaderInterface = KMTextShaderInterface(this)
+internal fun KMTextShaderInterface.asPlatform(): TextShaderInterface = nativeHandle as TextShaderInterface
+internal fun TextShaderInterface.asKmp(): KMTextShaderInterface = KMTextShaderInterface(this)

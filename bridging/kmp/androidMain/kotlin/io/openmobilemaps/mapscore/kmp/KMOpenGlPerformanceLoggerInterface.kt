@@ -3,11 +3,13 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.map.OpenGlPerformanceLoggerInterface
+
 actual class KMOpenGlPerformanceLoggerInterface actual public constructor(
     nativeHandle: Any,
 ) {
     internal val nativeHandle: Any = nativeHandle
-    private val native = nativeHandle as io.openmobilemaps.mapscore.shared.map.OpenGlPerformanceLoggerInterface
+    private val native = nativeHandle as OpenGlPerformanceLoggerInterface
 
     actual fun asPerformanceLoggerInterface(): KMPerformanceLoggerInterface {
         val result = native.asPerformanceLoggerInterface()
@@ -18,16 +20,16 @@ actual class KMOpenGlPerformanceLoggerInterface actual public constructor(
     {
 
         actual fun create(): KMOpenGlPerformanceLoggerInterface {
-            val result = io.openmobilemaps.mapscore.shared.map.OpenGlPerformanceLoggerInterface.create()
+            val result = OpenGlPerformanceLoggerInterface.create()
             return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.OpenGlPerformanceLoggerInterface)).asKmp()
         }
 
         actual fun createSpecifically(numBuckets: Int, bucketSizeMs: Long): KMOpenGlPerformanceLoggerInterface {
-            val result = io.openmobilemaps.mapscore.shared.map.OpenGlPerformanceLoggerInterface.createSpecifically(numBuckets, bucketSizeMs)
+            val result = OpenGlPerformanceLoggerInterface.createSpecifically(numBuckets, bucketSizeMs)
             return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.OpenGlPerformanceLoggerInterface)).asKmp()
         }
     }
 }
 
-internal fun KMOpenGlPerformanceLoggerInterface.asPlatform(): io.openmobilemaps.mapscore.shared.map.OpenGlPerformanceLoggerInterface = nativeHandle as io.openmobilemaps.mapscore.shared.map.OpenGlPerformanceLoggerInterface
-internal fun io.openmobilemaps.mapscore.shared.map.OpenGlPerformanceLoggerInterface.asKmp(): KMOpenGlPerformanceLoggerInterface = KMOpenGlPerformanceLoggerInterface(this)
+internal fun KMOpenGlPerformanceLoggerInterface.asPlatform(): OpenGlPerformanceLoggerInterface = nativeHandle as OpenGlPerformanceLoggerInterface
+internal fun OpenGlPerformanceLoggerInterface.asKmp(): KMOpenGlPerformanceLoggerInterface = KMOpenGlPerformanceLoggerInterface(this)

@@ -3,6 +3,8 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.map.layers.polygon.PolygonLayerCallbackInterface
+
 actual interface KMPolygonLayerCallbackInterface
 {
 
@@ -11,7 +13,7 @@ actual interface KMPolygonLayerCallbackInterface
     actual fun onClickUnconfirmed(polygon: KMPolygonInfo): Boolean
 }
 
-private class KMPolygonLayerCallbackInterfacePlatformWrapper(internal val nativeHandle: io.openmobilemaps.mapscore.shared.map.layers.polygon.PolygonLayerCallbackInterface) : KMPolygonLayerCallbackInterface
+private class KMPolygonLayerCallbackInterfacePlatformWrapper(internal val nativeHandle: PolygonLayerCallbackInterface) : KMPolygonLayerCallbackInterface
 {
 
     override fun onClickConfirmed(polygon: KMPolygonInfo): Boolean {
@@ -25,7 +27,7 @@ private class KMPolygonLayerCallbackInterfacePlatformWrapper(internal val native
     }
 }
 
-private class KMPolygonLayerCallbackInterfacePlatformProxy(private val delegate: KMPolygonLayerCallbackInterface) : io.openmobilemaps.mapscore.shared.map.layers.polygon.PolygonLayerCallbackInterface()
+private class KMPolygonLayerCallbackInterfacePlatformProxy(private val delegate: KMPolygonLayerCallbackInterface) : PolygonLayerCallbackInterface()
 {
 
     override fun onClickConfirmed(polygon: io.openmobilemaps.mapscore.shared.map.layers.polygon.PolygonInfo): Boolean {
@@ -39,8 +41,8 @@ private class KMPolygonLayerCallbackInterfacePlatformProxy(private val delegate:
     }
 }
 
-internal fun KMPolygonLayerCallbackInterface.asPlatform(): io.openmobilemaps.mapscore.shared.map.layers.polygon.PolygonLayerCallbackInterface = when (this) {
+internal fun KMPolygonLayerCallbackInterface.asPlatform(): PolygonLayerCallbackInterface = when (this) {
     is KMPolygonLayerCallbackInterfacePlatformWrapper -> this.nativeHandle
     else -> KMPolygonLayerCallbackInterfacePlatformProxy(this)
 }
-internal fun io.openmobilemaps.mapscore.shared.map.layers.polygon.PolygonLayerCallbackInterface.asKmp(): KMPolygonLayerCallbackInterface = KMPolygonLayerCallbackInterfacePlatformWrapper(this)
+internal fun PolygonLayerCallbackInterface.asKmp(): KMPolygonLayerCallbackInterface = KMPolygonLayerCallbackInterfacePlatformWrapper(this)

@@ -3,41 +3,43 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateSystemFactory
+
 actual class KMCoordinateSystemFactory actual public constructor(
     nativeHandle: Any,
 ) {
     internal val nativeHandle: Any = nativeHandle
-    private val native = nativeHandle as io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateSystemFactory
+    private val native = nativeHandle as CoordinateSystemFactory
 
     actual companion object
     {
 
         actual fun getEpsg2056System(): KMMapCoordinateSystem {
-            val result = io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateSystemFactory.getEpsg2056System()
+            val result = CoordinateSystemFactory.getEpsg2056System()
             return (result as io.openmobilemaps.mapscore.shared.map.coordinates.MapCoordinateSystem).asKmp()
         }
 
         actual fun getEpsg3857System(): KMMapCoordinateSystem {
-            val result = io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateSystemFactory.getEpsg3857System()
+            val result = CoordinateSystemFactory.getEpsg3857System()
             return (result as io.openmobilemaps.mapscore.shared.map.coordinates.MapCoordinateSystem).asKmp()
         }
 
         actual fun getEpsg4326System(): KMMapCoordinateSystem {
-            val result = io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateSystemFactory.getEpsg4326System()
+            val result = CoordinateSystemFactory.getEpsg4326System()
             return (result as io.openmobilemaps.mapscore.shared.map.coordinates.MapCoordinateSystem).asKmp()
         }
 
         actual fun getEpsg21781System(): KMMapCoordinateSystem {
-            val result = io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateSystemFactory.getEpsg21781System()
+            val result = CoordinateSystemFactory.getEpsg21781System()
             return (result as io.openmobilemaps.mapscore.shared.map.coordinates.MapCoordinateSystem).asKmp()
         }
 
         actual fun getUnitSphereSystem(): KMMapCoordinateSystem {
-            val result = io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateSystemFactory.getUnitSphereSystem()
+            val result = CoordinateSystemFactory.getUnitSphereSystem()
             return (result as io.openmobilemaps.mapscore.shared.map.coordinates.MapCoordinateSystem).asKmp()
         }
     }
 }
 
-internal fun KMCoordinateSystemFactory.asPlatform(): io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateSystemFactory = nativeHandle as io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateSystemFactory
-internal fun io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateSystemFactory.asKmp(): KMCoordinateSystemFactory = KMCoordinateSystemFactory(this)
+internal fun KMCoordinateSystemFactory.asPlatform(): CoordinateSystemFactory = nativeHandle as CoordinateSystemFactory
+internal fun CoordinateSystemFactory.asKmp(): KMCoordinateSystemFactory = KMCoordinateSystemFactory(this)

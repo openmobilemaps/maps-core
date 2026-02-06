@@ -3,21 +3,23 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.map.controls.DefaultTouchHandlerInterface
+
 actual class KMDefaultTouchHandlerInterface actual public constructor(
     nativeHandle: Any,
 ) {
     internal val nativeHandle: Any = nativeHandle
-    private val native = nativeHandle as io.openmobilemaps.mapscore.shared.map.controls.DefaultTouchHandlerInterface
+    private val native = nativeHandle as DefaultTouchHandlerInterface
 
     actual companion object
     {
 
         actual fun create(scheduler: KMSchedulerInterface, density: Float): KMTouchHandlerInterface {
-            val result = io.openmobilemaps.mapscore.shared.map.controls.DefaultTouchHandlerInterface.create(scheduler.asPlatform(), density)
+            val result = DefaultTouchHandlerInterface.create(scheduler.asPlatform(), density)
             return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.controls.TouchHandlerInterface)).asKmp()
         }
     }
 }
 
-internal fun KMDefaultTouchHandlerInterface.asPlatform(): io.openmobilemaps.mapscore.shared.map.controls.DefaultTouchHandlerInterface = nativeHandle as io.openmobilemaps.mapscore.shared.map.controls.DefaultTouchHandlerInterface
-internal fun io.openmobilemaps.mapscore.shared.map.controls.DefaultTouchHandlerInterface.asKmp(): KMDefaultTouchHandlerInterface = KMDefaultTouchHandlerInterface(this)
+internal fun KMDefaultTouchHandlerInterface.asPlatform(): DefaultTouchHandlerInterface = nativeHandle as DefaultTouchHandlerInterface
+internal fun DefaultTouchHandlerInterface.asKmp(): KMDefaultTouchHandlerInterface = KMDefaultTouchHandlerInterface(this)

@@ -3,6 +3,8 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.map.layers.icon.IconLayerCallbackInterface
+
 actual interface KMIconLayerCallbackInterface
 {
 
@@ -11,7 +13,7 @@ actual interface KMIconLayerCallbackInterface
     actual fun onLongPress(icons: ArrayList<KMIconInfoInterface>): Boolean
 }
 
-private class KMIconLayerCallbackInterfacePlatformWrapper(internal val nativeHandle: io.openmobilemaps.mapscore.shared.map.layers.icon.IconLayerCallbackInterface) : KMIconLayerCallbackInterface
+private class KMIconLayerCallbackInterfacePlatformWrapper(internal val nativeHandle: IconLayerCallbackInterface) : KMIconLayerCallbackInterface
 {
 
     override fun onClickConfirmed(icons: ArrayList<KMIconInfoInterface>): Boolean {
@@ -25,7 +27,7 @@ private class KMIconLayerCallbackInterfacePlatformWrapper(internal val nativeHan
     }
 }
 
-private class KMIconLayerCallbackInterfacePlatformProxy(private val delegate: KMIconLayerCallbackInterface) : io.openmobilemaps.mapscore.shared.map.layers.icon.IconLayerCallbackInterface()
+private class KMIconLayerCallbackInterfacePlatformProxy(private val delegate: KMIconLayerCallbackInterface) : IconLayerCallbackInterface()
 {
 
     override fun onClickConfirmed(icons: ArrayList<io.openmobilemaps.mapscore.shared.map.layers.icon.IconInfoInterface>): Boolean {
@@ -39,8 +41,8 @@ private class KMIconLayerCallbackInterfacePlatformProxy(private val delegate: KM
     }
 }
 
-internal fun KMIconLayerCallbackInterface.asPlatform(): io.openmobilemaps.mapscore.shared.map.layers.icon.IconLayerCallbackInterface = when (this) {
+internal fun KMIconLayerCallbackInterface.asPlatform(): IconLayerCallbackInterface = when (this) {
     is KMIconLayerCallbackInterfacePlatformWrapper -> this.nativeHandle
     else -> KMIconLayerCallbackInterfacePlatformProxy(this)
 }
-internal fun io.openmobilemaps.mapscore.shared.map.layers.icon.IconLayerCallbackInterface.asKmp(): KMIconLayerCallbackInterface = KMIconLayerCallbackInterfacePlatformWrapper(this)
+internal fun IconLayerCallbackInterface.asKmp(): KMIconLayerCallbackInterface = KMIconLayerCallbackInterfacePlatformWrapper(this)

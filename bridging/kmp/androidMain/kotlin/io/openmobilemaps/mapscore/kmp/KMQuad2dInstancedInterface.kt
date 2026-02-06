@@ -3,6 +3,8 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.graphics.objects.Quad2dInstancedInterface
+
 actual interface KMQuad2dInstancedInterface
 {
 
@@ -31,7 +33,7 @@ actual interface KMQuad2dInstancedInterface
     actual fun asMaskingObject(): KMMaskingObjectInterface
 }
 
-private class KMQuad2dInstancedInterfacePlatformWrapper(internal val nativeHandle: io.openmobilemaps.mapscore.shared.graphics.objects.Quad2dInstancedInterface) : KMQuad2dInstancedInterface
+private class KMQuad2dInstancedInterfacePlatformWrapper(internal val nativeHandle: Quad2dInstancedInterface) : KMQuad2dInstancedInterface
 {
 
     override fun setFrame(frame: KMQuad2dD, origin: KMVec3D, is3d: Boolean) {
@@ -85,7 +87,7 @@ private class KMQuad2dInstancedInterfacePlatformWrapper(internal val nativeHandl
     }
 }
 
-private class KMQuad2dInstancedInterfacePlatformProxy(private val delegate: KMQuad2dInstancedInterface) : io.openmobilemaps.mapscore.shared.graphics.objects.Quad2dInstancedInterface()
+private class KMQuad2dInstancedInterfacePlatformProxy(private val delegate: KMQuad2dInstancedInterface) : Quad2dInstancedInterface()
 {
 
     override fun setFrame(frame: io.openmobilemaps.mapscore.shared.graphics.common.Quad2dD, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D, is3d: Boolean) {
@@ -139,8 +141,8 @@ private class KMQuad2dInstancedInterfacePlatformProxy(private val delegate: KMQu
     }
 }
 
-internal fun KMQuad2dInstancedInterface.asPlatform(): io.openmobilemaps.mapscore.shared.graphics.objects.Quad2dInstancedInterface = when (this) {
+internal fun KMQuad2dInstancedInterface.asPlatform(): Quad2dInstancedInterface = when (this) {
     is KMQuad2dInstancedInterfacePlatformWrapper -> this.nativeHandle
     else -> KMQuad2dInstancedInterfacePlatformProxy(this)
 }
-internal fun io.openmobilemaps.mapscore.shared.graphics.objects.Quad2dInstancedInterface.asKmp(): KMQuad2dInstancedInterface = KMQuad2dInstancedInterfacePlatformWrapper(this)
+internal fun Quad2dInstancedInterface.asKmp(): KMQuad2dInstancedInterface = KMQuad2dInstancedInterfacePlatformWrapper(this)

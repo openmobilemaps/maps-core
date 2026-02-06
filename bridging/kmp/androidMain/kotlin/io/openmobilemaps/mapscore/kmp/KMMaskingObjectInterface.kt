@@ -3,6 +3,8 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.graphics.objects.MaskingObjectInterface
+
 actual interface KMMaskingObjectInterface
 {
 
@@ -11,7 +13,7 @@ actual interface KMMaskingObjectInterface
     actual fun renderAsMask(context: KMRenderingContextInterface, renderPass: KMRenderPassConfig, vpMatrix: Long, mMatrix: Long, origin: KMVec3D, screenPixelAsRealMeterFactor: Double, isScreenSpaceCoords: Boolean)
 }
 
-private class KMMaskingObjectInterfacePlatformWrapper(internal val nativeHandle: io.openmobilemaps.mapscore.shared.graphics.objects.MaskingObjectInterface) : KMMaskingObjectInterface
+private class KMMaskingObjectInterfacePlatformWrapper(internal val nativeHandle: MaskingObjectInterface) : KMMaskingObjectInterface
 {
 
     override fun asGraphicsObject(): KMGraphicsObjectInterface {
@@ -24,7 +26,7 @@ private class KMMaskingObjectInterfacePlatformWrapper(internal val nativeHandle:
     }
 }
 
-private class KMMaskingObjectInterfacePlatformProxy(private val delegate: KMMaskingObjectInterface) : io.openmobilemaps.mapscore.shared.graphics.objects.MaskingObjectInterface()
+private class KMMaskingObjectInterfacePlatformProxy(private val delegate: KMMaskingObjectInterface) : MaskingObjectInterface()
 {
 
     override fun asGraphicsObject(): io.openmobilemaps.mapscore.shared.graphics.objects.GraphicsObjectInterface {
@@ -37,8 +39,8 @@ private class KMMaskingObjectInterfacePlatformProxy(private val delegate: KMMask
     }
 }
 
-internal fun KMMaskingObjectInterface.asPlatform(): io.openmobilemaps.mapscore.shared.graphics.objects.MaskingObjectInterface = when (this) {
+internal fun KMMaskingObjectInterface.asPlatform(): MaskingObjectInterface = when (this) {
     is KMMaskingObjectInterfacePlatformWrapper -> this.nativeHandle
     else -> KMMaskingObjectInterfacePlatformProxy(this)
 }
-internal fun io.openmobilemaps.mapscore.shared.graphics.objects.MaskingObjectInterface.asKmp(): KMMaskingObjectInterface = KMMaskingObjectInterfacePlatformWrapper(this)
+internal fun MaskingObjectInterface.asKmp(): KMMaskingObjectInterface = KMMaskingObjectInterfacePlatformWrapper(this)

@@ -3,26 +3,28 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.map.Camera3dConfigFactory
+
 actual class KMCamera3dConfigFactory actual public constructor(
     nativeHandle: Any,
 ) {
     internal val nativeHandle: Any = nativeHandle
-    private val native = nativeHandle as io.openmobilemaps.mapscore.shared.map.Camera3dConfigFactory
+    private val native = nativeHandle as Camera3dConfigFactory
 
     actual companion object
     {
 
         actual fun getBasicConfig(): KMCamera3dConfig {
-            val result = io.openmobilemaps.mapscore.shared.map.Camera3dConfigFactory.getBasicConfig()
+            val result = Camera3dConfigFactory.getBasicConfig()
             return (result as io.openmobilemaps.mapscore.shared.map.Camera3dConfig).asKmp()
         }
 
         actual fun getRestorConfig(): KMCamera3dConfig {
-            val result = io.openmobilemaps.mapscore.shared.map.Camera3dConfigFactory.getRestorConfig()
+            val result = Camera3dConfigFactory.getRestorConfig()
             return (result as io.openmobilemaps.mapscore.shared.map.Camera3dConfig).asKmp()
         }
     }
 }
 
-internal fun KMCamera3dConfigFactory.asPlatform(): io.openmobilemaps.mapscore.shared.map.Camera3dConfigFactory = nativeHandle as io.openmobilemaps.mapscore.shared.map.Camera3dConfigFactory
-internal fun io.openmobilemaps.mapscore.shared.map.Camera3dConfigFactory.asKmp(): KMCamera3dConfigFactory = KMCamera3dConfigFactory(this)
+internal fun KMCamera3dConfigFactory.asPlatform(): Camera3dConfigFactory = nativeHandle as Camera3dConfigFactory
+internal fun Camera3dConfigFactory.asKmp(): KMCamera3dConfigFactory = KMCamera3dConfigFactory(this)

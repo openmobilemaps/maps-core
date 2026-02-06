@@ -3,11 +3,13 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapSourceInterface
+
 actual class KMTiled2dMapSourceInterface actual public constructor(
     nativeHandle: Any,
 ) {
     internal val nativeHandle: Any = nativeHandle
-    private val native = nativeHandle as io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapSourceInterface
+    private val native = nativeHandle as Tiled2dMapSourceInterface
 
     actual fun onVisibleBoundsChanged(visibleBounds: KMRectCoord, curT: Int, zoom: Double) {
         native.onVisibleBoundsChanged(visibleBounds.asPlatform(), curT, zoom)
@@ -61,5 +63,5 @@ actual class KMTiled2dMapSourceInterface actual public constructor(
     }
 }
 
-internal fun KMTiled2dMapSourceInterface.asPlatform(): io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapSourceInterface = nativeHandle as io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapSourceInterface
-internal fun io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapSourceInterface.asKmp(): KMTiled2dMapSourceInterface = KMTiled2dMapSourceInterface(this)
+internal fun KMTiled2dMapSourceInterface.asPlatform(): Tiled2dMapSourceInterface = nativeHandle as Tiled2dMapSourceInterface
+internal fun Tiled2dMapSourceInterface.asKmp(): KMTiled2dMapSourceInterface = KMTiled2dMapSourceInterface(this)

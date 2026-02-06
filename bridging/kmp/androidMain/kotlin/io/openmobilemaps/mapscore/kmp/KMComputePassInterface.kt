@@ -3,13 +3,15 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.graphics.ComputePassInterface
+
 actual interface KMComputePassInterface
 {
 
     actual fun getComputeObjects(): ArrayList<KMComputeObjectInterface>
 }
 
-private class KMComputePassInterfacePlatformWrapper(internal val nativeHandle: io.openmobilemaps.mapscore.shared.graphics.ComputePassInterface) : KMComputePassInterface
+private class KMComputePassInterfacePlatformWrapper(internal val nativeHandle: ComputePassInterface) : KMComputePassInterface
 {
 
     override fun getComputeObjects(): ArrayList<KMComputeObjectInterface> {
@@ -18,7 +20,7 @@ private class KMComputePassInterfacePlatformWrapper(internal val nativeHandle: i
     }
 }
 
-private class KMComputePassInterfacePlatformProxy(private val delegate: KMComputePassInterface) : io.openmobilemaps.mapscore.shared.graphics.ComputePassInterface()
+private class KMComputePassInterfacePlatformProxy(private val delegate: KMComputePassInterface) : ComputePassInterface()
 {
 
     override fun getComputeObjects(): ArrayList<io.openmobilemaps.mapscore.shared.graphics.objects.ComputeObjectInterface> {
@@ -27,8 +29,8 @@ private class KMComputePassInterfacePlatformProxy(private val delegate: KMComput
     }
 }
 
-internal fun KMComputePassInterface.asPlatform(): io.openmobilemaps.mapscore.shared.graphics.ComputePassInterface = when (this) {
+internal fun KMComputePassInterface.asPlatform(): ComputePassInterface = when (this) {
     is KMComputePassInterfacePlatformWrapper -> this.nativeHandle
     else -> KMComputePassInterfacePlatformProxy(this)
 }
-internal fun io.openmobilemaps.mapscore.shared.graphics.ComputePassInterface.asKmp(): KMComputePassInterface = KMComputePassInterfacePlatformWrapper(this)
+internal fun ComputePassInterface.asKmp(): KMComputePassInterface = KMComputePassInterfacePlatformWrapper(this)

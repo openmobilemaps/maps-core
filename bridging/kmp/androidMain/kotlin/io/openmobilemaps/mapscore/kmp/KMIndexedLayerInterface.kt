@@ -3,6 +3,8 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.map.IndexedLayerInterface
+
 actual interface KMIndexedLayerInterface
 {
 
@@ -11,7 +13,7 @@ actual interface KMIndexedLayerInterface
     actual fun getIndex(): Int
 }
 
-private class KMIndexedLayerInterfacePlatformWrapper(internal val nativeHandle: io.openmobilemaps.mapscore.shared.map.IndexedLayerInterface) : KMIndexedLayerInterface
+private class KMIndexedLayerInterfacePlatformWrapper(internal val nativeHandle: IndexedLayerInterface) : KMIndexedLayerInterface
 {
 
     override fun getLayerInterface(): KMLayerInterface {
@@ -25,7 +27,7 @@ private class KMIndexedLayerInterfacePlatformWrapper(internal val nativeHandle: 
     }
 }
 
-private class KMIndexedLayerInterfacePlatformProxy(private val delegate: KMIndexedLayerInterface) : io.openmobilemaps.mapscore.shared.map.IndexedLayerInterface()
+private class KMIndexedLayerInterfacePlatformProxy(private val delegate: KMIndexedLayerInterface) : IndexedLayerInterface()
 {
 
     override fun getLayerInterface(): io.openmobilemaps.mapscore.shared.map.LayerInterface {
@@ -39,8 +41,8 @@ private class KMIndexedLayerInterfacePlatformProxy(private val delegate: KMIndex
     }
 }
 
-internal fun KMIndexedLayerInterface.asPlatform(): io.openmobilemaps.mapscore.shared.map.IndexedLayerInterface = when (this) {
+internal fun KMIndexedLayerInterface.asPlatform(): IndexedLayerInterface = when (this) {
     is KMIndexedLayerInterfacePlatformWrapper -> this.nativeHandle
     else -> KMIndexedLayerInterfacePlatformProxy(this)
 }
-internal fun io.openmobilemaps.mapscore.shared.map.IndexedLayerInterface.asKmp(): KMIndexedLayerInterface = KMIndexedLayerInterfacePlatformWrapper(this)
+internal fun IndexedLayerInterface.asKmp(): KMIndexedLayerInterface = KMIndexedLayerInterfacePlatformWrapper(this)

@@ -3,13 +3,15 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.Tiled2dMapVectorLayerSymbolDelegateInterface
+
 actual interface KMTiled2dMapVectorLayerSymbolDelegateInterface
 {
 
     actual fun getCustomAssetsFor(featureInfos: ArrayList<KMVectorLayerFeatureInfo>, layerIdentifier: String): ArrayList<KMTiled2dMapVectorAssetInfo>
 }
 
-private class KMTiled2dMapVectorLayerSymbolDelegateInterfacePlatformWrapper(internal val nativeHandle: io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.Tiled2dMapVectorLayerSymbolDelegateInterface) : KMTiled2dMapVectorLayerSymbolDelegateInterface
+private class KMTiled2dMapVectorLayerSymbolDelegateInterfacePlatformWrapper(internal val nativeHandle: Tiled2dMapVectorLayerSymbolDelegateInterface) : KMTiled2dMapVectorLayerSymbolDelegateInterface
 {
 
     override fun getCustomAssetsFor(featureInfos: ArrayList<KMVectorLayerFeatureInfo>, layerIdentifier: String): ArrayList<KMTiled2dMapVectorAssetInfo> {
@@ -18,7 +20,7 @@ private class KMTiled2dMapVectorLayerSymbolDelegateInterfacePlatformWrapper(inte
     }
 }
 
-private class KMTiled2dMapVectorLayerSymbolDelegateInterfacePlatformProxy(private val delegate: KMTiled2dMapVectorLayerSymbolDelegateInterface) : io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.Tiled2dMapVectorLayerSymbolDelegateInterface()
+private class KMTiled2dMapVectorLayerSymbolDelegateInterfacePlatformProxy(private val delegate: KMTiled2dMapVectorLayerSymbolDelegateInterface) : Tiled2dMapVectorLayerSymbolDelegateInterface()
 {
 
     override fun getCustomAssetsFor(featureInfos: ArrayList<io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.VectorLayerFeatureInfo>, layerIdentifier: String): ArrayList<io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.Tiled2dMapVectorAssetInfo> {
@@ -27,8 +29,8 @@ private class KMTiled2dMapVectorLayerSymbolDelegateInterfacePlatformProxy(privat
     }
 }
 
-internal fun KMTiled2dMapVectorLayerSymbolDelegateInterface.asPlatform(): io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.Tiled2dMapVectorLayerSymbolDelegateInterface = when (this) {
+internal fun KMTiled2dMapVectorLayerSymbolDelegateInterface.asPlatform(): Tiled2dMapVectorLayerSymbolDelegateInterface = when (this) {
     is KMTiled2dMapVectorLayerSymbolDelegateInterfacePlatformWrapper -> this.nativeHandle
     else -> KMTiled2dMapVectorLayerSymbolDelegateInterfacePlatformProxy(this)
 }
-internal fun io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.Tiled2dMapVectorLayerSymbolDelegateInterface.asKmp(): KMTiled2dMapVectorLayerSymbolDelegateInterface = KMTiled2dMapVectorLayerSymbolDelegateInterfacePlatformWrapper(this)
+internal fun Tiled2dMapVectorLayerSymbolDelegateInterface.asKmp(): KMTiled2dMapVectorLayerSymbolDelegateInterface = KMTiled2dMapVectorLayerSymbolDelegateInterfacePlatformWrapper(this)

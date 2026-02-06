@@ -3,6 +3,8 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.graphics.OpenGlRenderTargetInterface
+
 actual interface KMOpenGlRenderTargetInterface
 {
 
@@ -19,7 +21,7 @@ actual interface KMOpenGlRenderTargetInterface
     actual fun getTextureId(): Int
 }
 
-private class KMOpenGlRenderTargetInterfacePlatformWrapper(internal val nativeHandle: io.openmobilemaps.mapscore.shared.graphics.OpenGlRenderTargetInterface) : KMOpenGlRenderTargetInterface
+private class KMOpenGlRenderTargetInterfacePlatformWrapper(internal val nativeHandle: OpenGlRenderTargetInterface) : KMOpenGlRenderTargetInterface
 {
 
     override fun asRenderTargetInterface(): KMRenderTargetInterface {
@@ -49,7 +51,7 @@ private class KMOpenGlRenderTargetInterfacePlatformWrapper(internal val nativeHa
     }
 }
 
-private class KMOpenGlRenderTargetInterfacePlatformProxy(private val delegate: KMOpenGlRenderTargetInterface) : io.openmobilemaps.mapscore.shared.graphics.OpenGlRenderTargetInterface()
+private class KMOpenGlRenderTargetInterfacePlatformProxy(private val delegate: KMOpenGlRenderTargetInterface) : OpenGlRenderTargetInterface()
 {
 
     override fun asRenderTargetInterface(): io.openmobilemaps.mapscore.shared.graphics.RenderTargetInterface {
@@ -79,8 +81,8 @@ private class KMOpenGlRenderTargetInterfacePlatformProxy(private val delegate: K
     }
 }
 
-internal fun KMOpenGlRenderTargetInterface.asPlatform(): io.openmobilemaps.mapscore.shared.graphics.OpenGlRenderTargetInterface = when (this) {
+internal fun KMOpenGlRenderTargetInterface.asPlatform(): OpenGlRenderTargetInterface = when (this) {
     is KMOpenGlRenderTargetInterfacePlatformWrapper -> this.nativeHandle
     else -> KMOpenGlRenderTargetInterfacePlatformProxy(this)
 }
-internal fun io.openmobilemaps.mapscore.shared.graphics.OpenGlRenderTargetInterface.asKmp(): KMOpenGlRenderTargetInterface = KMOpenGlRenderTargetInterfacePlatformWrapper(this)
+internal fun OpenGlRenderTargetInterface.asKmp(): KMOpenGlRenderTargetInterface = KMOpenGlRenderTargetInterfacePlatformWrapper(this)

@@ -3,51 +3,53 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.FeatureInfoValueFactory
+
 actual class KMFeatureInfoValueFactory actual public constructor(
     nativeHandle: Any,
 ) {
     internal val nativeHandle: Any = nativeHandle
-    private val native = nativeHandle as io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.FeatureInfoValueFactory
+    private val native = nativeHandle as FeatureInfoValueFactory
 
     actual companion object
     {
 
         actual fun createString(value: String): KMVectorLayerFeatureInfoValue {
-            val result = io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.FeatureInfoValueFactory.createString(value)
+            val result = FeatureInfoValueFactory.createString(value)
             return (result as io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.VectorLayerFeatureInfoValue).asKmp()
         }
 
         actual fun createDouble(value: Double): KMVectorLayerFeatureInfoValue {
-            val result = io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.FeatureInfoValueFactory.createDouble(value)
+            val result = FeatureInfoValueFactory.createDouble(value)
             return (result as io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.VectorLayerFeatureInfoValue).asKmp()
         }
 
         actual fun createInt(value: Long): KMVectorLayerFeatureInfoValue {
-            val result = io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.FeatureInfoValueFactory.createInt(value)
+            val result = FeatureInfoValueFactory.createInt(value)
             return (result as io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.VectorLayerFeatureInfoValue).asKmp()
         }
 
         actual fun createBool(value: Boolean): KMVectorLayerFeatureInfoValue {
-            val result = io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.FeatureInfoValueFactory.createBool(value)
+            val result = FeatureInfoValueFactory.createBool(value)
             return (result as io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.VectorLayerFeatureInfoValue).asKmp()
         }
 
         actual fun createColor(value: KMColor): KMVectorLayerFeatureInfoValue {
-            val result = io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.FeatureInfoValueFactory.createColor(value.asPlatform())
+            val result = FeatureInfoValueFactory.createColor(value.asPlatform())
             return (result as io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.VectorLayerFeatureInfoValue).asKmp()
         }
 
         actual fun createListFloat(value: ArrayList<Float>): KMVectorLayerFeatureInfoValue {
-            val result = io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.FeatureInfoValueFactory.createListFloat(ArrayList(value.map { it }))
+            val result = FeatureInfoValueFactory.createListFloat(ArrayList(value.map { it }))
             return (result as io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.VectorLayerFeatureInfoValue).asKmp()
         }
 
         actual fun createListString(value: ArrayList<String>): KMVectorLayerFeatureInfoValue {
-            val result = io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.FeatureInfoValueFactory.createListString(ArrayList(value.map { it }))
+            val result = FeatureInfoValueFactory.createListString(ArrayList(value.map { it }))
             return (result as io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.VectorLayerFeatureInfoValue).asKmp()
         }
     }
 }
 
-internal fun KMFeatureInfoValueFactory.asPlatform(): io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.FeatureInfoValueFactory = nativeHandle as io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.FeatureInfoValueFactory
-internal fun io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.FeatureInfoValueFactory.asKmp(): KMFeatureInfoValueFactory = KMFeatureInfoValueFactory(this)
+internal fun KMFeatureInfoValueFactory.asPlatform(): FeatureInfoValueFactory = nativeHandle as FeatureInfoValueFactory
+internal fun FeatureInfoValueFactory.asKmp(): KMFeatureInfoValueFactory = KMFeatureInfoValueFactory(this)

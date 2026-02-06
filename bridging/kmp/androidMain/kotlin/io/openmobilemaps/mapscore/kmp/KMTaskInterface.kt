@@ -3,6 +3,8 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.map.scheduling.TaskInterface
+
 actual interface KMTaskInterface
 {
 
@@ -11,7 +13,7 @@ actual interface KMTaskInterface
     actual fun run()
 }
 
-private class KMTaskInterfacePlatformWrapper(internal val nativeHandle: io.openmobilemaps.mapscore.shared.map.scheduling.TaskInterface) : KMTaskInterface
+private class KMTaskInterfacePlatformWrapper(internal val nativeHandle: TaskInterface) : KMTaskInterface
 {
 
     override fun getConfig(): KMTaskConfig {
@@ -24,7 +26,7 @@ private class KMTaskInterfacePlatformWrapper(internal val nativeHandle: io.openm
     }
 }
 
-private class KMTaskInterfacePlatformProxy(private val delegate: KMTaskInterface) : io.openmobilemaps.mapscore.shared.map.scheduling.TaskInterface()
+private class KMTaskInterfacePlatformProxy(private val delegate: KMTaskInterface) : TaskInterface()
 {
 
     override fun getConfig(): io.openmobilemaps.mapscore.shared.map.scheduling.TaskConfig {
@@ -37,8 +39,8 @@ private class KMTaskInterfacePlatformProxy(private val delegate: KMTaskInterface
     }
 }
 
-internal fun KMTaskInterface.asPlatform(): io.openmobilemaps.mapscore.shared.map.scheduling.TaskInterface = when (this) {
+internal fun KMTaskInterface.asPlatform(): TaskInterface = when (this) {
     is KMTaskInterfacePlatformWrapper -> this.nativeHandle
     else -> KMTaskInterfacePlatformProxy(this)
 }
-internal fun io.openmobilemaps.mapscore.shared.map.scheduling.TaskInterface.asKmp(): KMTaskInterface = KMTaskInterfacePlatformWrapper(this)
+internal fun TaskInterface.asKmp(): KMTaskInterface = KMTaskInterfacePlatformWrapper(this)

@@ -3,11 +3,13 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.graphics.shader.PolygonGroupShaderInterface
+
 actual class KMPolygonGroupShaderInterface actual public constructor(
     nativeHandle: Any,
 ) {
     internal val nativeHandle: Any = nativeHandle
-    private val native = nativeHandle as io.openmobilemaps.mapscore.shared.graphics.shader.PolygonGroupShaderInterface
+    private val native = nativeHandle as PolygonGroupShaderInterface
 
     actual fun setStyles(styles: KMSharedBytes) {
         native.setStyles(styles.asPlatform())
@@ -19,5 +21,5 @@ actual class KMPolygonGroupShaderInterface actual public constructor(
     }
 }
 
-internal fun KMPolygonGroupShaderInterface.asPlatform(): io.openmobilemaps.mapscore.shared.graphics.shader.PolygonGroupShaderInterface = nativeHandle as io.openmobilemaps.mapscore.shared.graphics.shader.PolygonGroupShaderInterface
-internal fun io.openmobilemaps.mapscore.shared.graphics.shader.PolygonGroupShaderInterface.asKmp(): KMPolygonGroupShaderInterface = KMPolygonGroupShaderInterface(this)
+internal fun KMPolygonGroupShaderInterface.asPlatform(): PolygonGroupShaderInterface = nativeHandle as PolygonGroupShaderInterface
+internal fun PolygonGroupShaderInterface.asKmp(): KMPolygonGroupShaderInterface = KMPolygonGroupShaderInterface(this)

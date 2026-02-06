@@ -3,6 +3,8 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.map.LayerInterface
+
 actual interface KMLayerInterface
 {
 
@@ -43,7 +45,7 @@ actual interface KMLayerInterface
     actual fun setPrimaryRenderTarget(target: KMRenderTargetInterface?)
 }
 
-private class KMLayerInterfacePlatformWrapper(internal val nativeHandle: io.openmobilemaps.mapscore.shared.map.LayerInterface) : KMLayerInterface
+private class KMLayerInterfacePlatformWrapper(internal val nativeHandle: LayerInterface) : KMLayerInterface
 {
 
     override fun setMaskingObject(maskingObject: KMMaskingObjectInterface?) {
@@ -123,7 +125,7 @@ private class KMLayerInterfacePlatformWrapper(internal val nativeHandle: io.open
     }
 }
 
-private class KMLayerInterfacePlatformProxy(private val delegate: KMLayerInterface) : io.openmobilemaps.mapscore.shared.map.LayerInterface()
+private class KMLayerInterfacePlatformProxy(private val delegate: KMLayerInterface) : LayerInterface()
 {
 
     override fun setMaskingObject(maskingObject: io.openmobilemaps.mapscore.shared.graphics.objects.MaskingObjectInterface?) {
@@ -203,8 +205,8 @@ private class KMLayerInterfacePlatformProxy(private val delegate: KMLayerInterfa
     }
 }
 
-internal fun KMLayerInterface.asPlatform(): io.openmobilemaps.mapscore.shared.map.LayerInterface = when (this) {
+internal fun KMLayerInterface.asPlatform(): LayerInterface = when (this) {
     is KMLayerInterfacePlatformWrapper -> this.nativeHandle
     else -> KMLayerInterfacePlatformProxy(this)
 }
-internal fun io.openmobilemaps.mapscore.shared.map.LayerInterface.asKmp(): KMLayerInterface = KMLayerInterfacePlatformWrapper(this)
+internal fun LayerInterface.asKmp(): KMLayerInterface = KMLayerInterfacePlatformWrapper(this)

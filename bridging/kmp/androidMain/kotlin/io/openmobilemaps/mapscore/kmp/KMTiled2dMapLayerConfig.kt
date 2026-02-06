@@ -3,6 +3,8 @@
 
 package io.openmobilemaps.mapscore.kmp
 
+import io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig
+
 actual interface KMTiled2dMapLayerConfig
 {
 
@@ -23,7 +25,7 @@ actual interface KMTiled2dMapLayerConfig
     actual fun getBounds(): KMRectCoord?
 }
 
-private class KMTiled2dMapLayerConfigPlatformWrapper(internal val nativeHandle: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig) : KMTiled2dMapLayerConfig
+private class KMTiled2dMapLayerConfigPlatformWrapper(internal val nativeHandle: Tiled2dMapLayerConfig) : KMTiled2dMapLayerConfig
 {
 
     override fun getCoordinateSystemIdentifier(): Int {
@@ -67,7 +69,7 @@ private class KMTiled2dMapLayerConfigPlatformWrapper(internal val nativeHandle: 
     }
 }
 
-private class KMTiled2dMapLayerConfigPlatformProxy(private val delegate: KMTiled2dMapLayerConfig) : io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig()
+private class KMTiled2dMapLayerConfigPlatformProxy(private val delegate: KMTiled2dMapLayerConfig) : Tiled2dMapLayerConfig()
 {
 
     override fun getCoordinateSystemIdentifier(): Int {
@@ -111,8 +113,8 @@ private class KMTiled2dMapLayerConfigPlatformProxy(private val delegate: KMTiled
     }
 }
 
-internal fun KMTiled2dMapLayerConfig.asPlatform(): io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig = when (this) {
+internal fun KMTiled2dMapLayerConfig.asPlatform(): Tiled2dMapLayerConfig = when (this) {
     is KMTiled2dMapLayerConfigPlatformWrapper -> this.nativeHandle
     else -> KMTiled2dMapLayerConfigPlatformProxy(this)
 }
-internal fun io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig.asKmp(): KMTiled2dMapLayerConfig = KMTiled2dMapLayerConfigPlatformWrapper(this)
+internal fun Tiled2dMapLayerConfig.asKmp(): KMTiled2dMapLayerConfig = KMTiled2dMapLayerConfigPlatformWrapper(this)

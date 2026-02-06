@@ -3,23 +3,7 @@
 
 package io.openmobilemaps.mapscore.kmp
 
-actual class KMRenderPassConfig actual public constructor(
-    renderPassIndex: Int,
-    isPassMasked: Boolean,
-    renderTarget: KMRenderTargetInterface?,
-) {
-    actual val renderPassIndex: Int = renderPassIndex
-    actual val isPassMasked: Boolean = isPassMasked
-    actual val renderTarget: KMRenderTargetInterface? = renderTarget
-}
+actual typealias KMRenderPassConfig = io.openmobilemaps.mapscore.shared.graphics.RenderPassConfig
 
-internal fun KMRenderPassConfig.asPlatform(): io.openmobilemaps.mapscore.shared.graphics.RenderPassConfig = io.openmobilemaps.mapscore.shared.graphics.RenderPassConfig(
-    renderPassIndex = renderPassIndex,
-    isPassMasked = isPassMasked,
-    renderTarget = renderTarget?.let { it.asPlatform() },
-)
-internal fun io.openmobilemaps.mapscore.shared.graphics.RenderPassConfig.asKmp(): KMRenderPassConfig = KMRenderPassConfig(
-    renderPassIndex = renderPassIndex,
-    isPassMasked = isPassMasked,
-    renderTarget = renderTarget?.let { it.asKmp() },
-)
+internal fun KMRenderPassConfig.asPlatform(): io.openmobilemaps.mapscore.shared.graphics.RenderPassConfig = this
+internal fun io.openmobilemaps.mapscore.shared.graphics.RenderPassConfig.asKmp(): KMRenderPassConfig = this
