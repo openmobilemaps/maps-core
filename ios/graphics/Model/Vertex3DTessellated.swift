@@ -16,19 +16,19 @@ struct Vertex3DTessellated: Equatable {
         let vertexDescriptor = MTLVertexDescriptor()
         let bufferIndex = 0
         var offset = 0
-        
+
         // Position
         vertexDescriptor.attributes[0].bufferIndex = bufferIndex
         vertexDescriptor.attributes[0].format = .float4
         vertexDescriptor.attributes[0].offset = offset
         offset += MemoryLayout<SIMD4<Float>>.stride
-        
+
         // Frame Coord (2D coord used to transform onto unit sphere)
         vertexDescriptor.attributes[1].bufferIndex = bufferIndex
         vertexDescriptor.attributes[1].format = .float2
         vertexDescriptor.attributes[1].offset = offset
         offset += MemoryLayout<SIMD2<Float>>.stride
-        
+
         vertexDescriptor.layouts[0].stride = offset
         vertexDescriptor.layouts[0].stepRate = 1
         vertexDescriptor.layouts[0].stepFunction = .perPatchControlPoint

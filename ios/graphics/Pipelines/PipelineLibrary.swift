@@ -8,9 +8,9 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
+import MapCoreSharedModule
 @preconcurrency import Metal
 import OSLog
-import MapCoreSharedModule
 
 public enum PipelineDescriptorFactory {
     public static func pipelineDescriptor(
@@ -76,7 +76,7 @@ public enum PipelineDescriptorFactory {
             pipelineDescriptor.vertexFunction = vertexFunction
             pipelineDescriptor.fragmentFunction = fragmentFunction
         }
-        
+
         if tessellation != MCTessellationMode.NONE {
             pipelineDescriptor.maxTessellationFactor = 64
             pipelineDescriptor.tessellationPartitionMode = .pow2
@@ -85,7 +85,7 @@ public enum PipelineDescriptorFactory {
             pipelineDescriptor.tessellationOutputWindingOrder = .clockwise
             pipelineDescriptor.tessellationControlPointIndexType = .none
             pipelineDescriptor.isTessellationFactorScaleEnabled = false
-            
+
             if tessellation == MCTessellationMode.TRIANGLE {
                 pipelineDescriptor.tessellationOutputWindingOrder = .counterClockwise
                 pipelineDescriptor.tessellationControlPointIndexType = .uint16
@@ -135,13 +135,13 @@ public struct Pipeline: Codable, CaseIterable, Hashable, Sendable {
                 Pipeline(type: type, blendMode: blendMode)
             }
         }
-    #if targetEnvironment(simulator)
-        return allPipelines.filter {
-            $0.type.tessellation == MCTessellationMode.NONE
-        }
-    #else
-        return allPipelines
-    #endif
+        #if targetEnvironment(simulator)
+            return allPipelines.filter {
+                $0.type.tessellation == MCTessellationMode.NONE
+            }
+        #else
+            return allPipelines
+        #endif
     }
 }
 
@@ -337,7 +337,7 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
                 return Vertex.descriptor
         }
     }
-    
+
     var tessellation: MCTessellationMode {
         switch self {
             case .quadTessellatedShader:
@@ -345,7 +345,7 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
             case .maskTessellatedShader,
                 .polygonTessellatedShader,
                 .polygonTessellatedWireframeShader:
-               return MCTessellationMode.TRIANGLE
+                return MCTessellationMode.TRIANGLE
             case .quadTessellatedWireframeShader:
                 return MCTessellationMode.QUAD
             default:

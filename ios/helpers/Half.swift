@@ -29,7 +29,7 @@ public struct Half: Equatable, Hashable, Sendable {
     private static func floatToHalfBits(_ value: Float) -> UInt16 {
         let f = value.bitPattern
         let sign = UInt16((f >> 31) & 0x1)
-        let exp  = Int((f >> 23) & 0xFF) - 127 + 15
+        let exp = Int((f >> 23) & 0xFF) - 127 + 15
         var mant = UInt16((f >> 13) & 0x3FF)
 
         if exp <= 0 {
