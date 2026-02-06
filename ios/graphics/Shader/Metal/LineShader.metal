@@ -57,6 +57,7 @@ struct LineStyling {
 struct SimpleLineVertexOut {
     float4 position [[ position ]];
     int stylingIndex;
+    float lineSide;
 };
 
 struct SimpleLineStyling {
@@ -67,6 +68,7 @@ struct SimpleLineStyling {
     half capType; // 7
 } __attribute__((__packed__));
 
+constant float blurRadiusPx = 1.0;
 
 /**
 
@@ -87,13 +89,15 @@ unitSphereSimpleLineGroupVertexShader(const LineVertexUnitSphereIn vertexIn [[st
     constant SimpleLineStyling *style = (constant SimpleLineStyling *)(styling + styleIndex);
 
     // extend position in extrude direction by width / 2.0
-    float width = style->width / 2.0 * scalingFactor;
+    const float width = style->width / 2.0 * scalingFactor;
+    const float blur = blurRadiusPx * scalingFactor;
 
-    const float4 extendedPosition = float4(vertexIn.position + vertexIn.extrude * width, 1.0) + originOffset;
+    const float4 extendedPosition = float4(vertexIn.position + vertexIn.extrude * (width + blur), 1.0) + originOffset;
 
     SimpleLineVertexOut out {
         .position = vpMatrix * extendedPosition,
         .stylingIndex = styleIndex,
+        .lineSide = vertexIn.lineSide,
     };
 
     return out;
@@ -109,32 +113,45 @@ simpleLineGroupVertexShader(const LineVertexIn vertexIn [[stage_in]],
 {
     int styleIndex = (int(vertexIn.stylingIndex) & 0xFF) * 8;
     constant SimpleLineStyling *style = (constant SimpleLineStyling *)(styling + styleIndex);
-  
-    // extend position in extrude direction by width / 2.0
-    float width = style->width / 2.0 * scalingFactor;
 
-    const float4 extendedPosition = float4(vertexIn.position + vertexIn.extrude * width, 0.0, 1.0) + originOffset;
+    // extend position in extrude direction by width / 2.0
+    const float width = style->width / 2.0 * scalingFactor;
+    const float blur = blurRadiusPx * scalingFactor;
+
+    const float4 extendedPosition = float4(vertexIn.position + vertexIn.extrude * (width + blur), 0.0, 1.0) + originOffset;
 
     SimpleLineVertexOut out {
         .position = vpMatrix * extendedPosition,
         .stylingIndex = styleIndex,
+        .lineSide = vertexIn.lineSide,
     };
 
     return out;
 }
 
+// @param lineSide signed distance from line center
+float lineBlurAlpha(float lineSide, float styleWidth, float styleBlur, float scaleFactor) {
+    float scaledWidth = styleWidth * scaleFactor;
+    float halfScaledWidth = scaledWidth / 2.0;
+    float scaledBlur = max(blurRadiusPx, styleBlur) * scaleFactor;
+    float lineEdgeDistance      = halfScaledWidth - abs(lineSide) * (halfScaledWidth + scaledBlur);
+    float otherLineEdgeDistance = halfScaledWidth + abs(lineSide) * (halfScaledWidth + scaledBlur);
+    return  smoothstep(-scaledBlur, scaledBlur, lineEdgeDistance)
+          * smoothstep(-scaledBlur, scaledBlur, otherLineEdgeDistance) // for lines narrower than blur-diameter (halfWidth < halfBlur), take into account fade towards _other_ edge
+          * min(1.0, halfScaledWidth / scaledBlur); // scaling for thin lines to preserve overall "energy"
+}
 
 fragment half4
 simpleLineGroupFragmentShader(SimpleLineVertexOut in [[stage_in]],
-                        constant half *styling [[buffer(1)]])
+                        constant half *styling [[buffer(1)]],
+                        constant float &scalingFactor [[buffer(3)]])
 {
   constant SimpleLineStyling *style = (constant SimpleLineStyling *)(styling + in.stylingIndex);
 
   const half opacity = style->opacity;
   const half colorA = style->color.a;
 
-  half a = colorA * opacity;
-
+  half a = colorA * opacity * lineBlurAlpha(in.lineSide, style->width, 0.0, scalingFactor);
   if(a == 0) {
     discard_fragment();
   }
@@ -156,9 +173,10 @@ unitSphereLineGroupVertexShader(const LineVertexUnitSphereIn vertexIn [[stage_in
     constant LineStyling *style = (constant LineStyling *)(styling + styleIndex);
 
     // extend position in extrude direction by width / 2.0
-    float width = style->width / 2.0 * scalingFactor;
+    const float width = style->width / 2.0 * scalingFactor;
+    const float blur = max(blurRadiusPx, (float)style->blur) * scalingFactor;
 
-    const float4 extendedPosition = float4(vertexIn.position + vertexIn.extrude * width, 1.0)  + originOffset;
+    const float4 extendedPosition = float4(vertexIn.position + vertexIn.extrude * (width + blur), 1.0)  + originOffset;
 
     LineVertexOut out {
         .position = vpMatrix * extendedPosition,
@@ -182,9 +200,10 @@ lineGroupVertexShader(const LineVertexIn vertexIn [[stage_in]],
     constant LineStyling *style = (constant LineStyling *)(styling + styleIndex);
 
     // extend position in extrude direction by width / 2.0
-    float width = style->width / 2.0 * scalingFactor;
+    const float width = style->width / 2.0 * scalingFactor;
+    const float blur = max(blurRadiusPx, (float)style->blur) * scalingFactor;
 
-    const float4 extendedPosition = float4(vertexIn.position + vertexIn.extrude * width, 0.0, 1.0) + originOffset;
+    const float4 extendedPosition = float4(vertexIn.position + vertexIn.extrude * (width + blur), 0.0, 1.0) + originOffset;
 
     LineVertexOut out {
         .position = vpMatrix * extendedPosition,
@@ -220,20 +239,15 @@ lineGroupFragmentShader(LineVertexOut in [[stage_in]],
 
   const half numDash = style->numDashValues;
 
-  if (style->blur > 0) {
-      const float scaledWidth = style->width * scalingFactor;
-      const float halfScaledWidth = scaledWidth / 2.0;
-      const float blur = (style->blur) * scalingFactor; // screen units
-      const float lineEdgeDistance = (1.0 - abs(in.lineSide)) * halfScaledWidth; // screen units
-      const float blurAlpha = clamp(lineEdgeDistance / blur, 0.0, 1.0);
+  const float blurAlpha = lineBlurAlpha(in.lineSide, style->width, (float)style->blur, scalingFactor);
 
-      if(blurAlpha == 0.0) {
-        discard_fragment();
-      }
+  if(blurAlpha == 0.0) {
+            discard_fragment();
+          }
 
-      a *= blurAlpha;
-      aGap *= blurAlpha;
-  }
+          a *= blurAlpha;
+          aGap *= blurAlpha;
+
 
   half4 mainColor = half4(half3(style->color.rgb), 1.0) * a;
   half4 gapColor  = half4(half3(style->gapColor.rgb), 1.0) * aGap;
