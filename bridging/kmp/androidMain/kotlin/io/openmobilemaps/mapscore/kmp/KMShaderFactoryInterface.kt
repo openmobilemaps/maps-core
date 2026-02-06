@@ -28,6 +28,8 @@ actual interface KMShaderFactoryInterface
 
     actual fun createColorShader(): KMColorShaderInterface
 
+    actual fun createPolygonTessellatedShader(unitSphere: Boolean): KMColorShaderInterface
+
     actual fun createColorCircleShader(): KMColorCircleShaderInterface
 
     actual fun createUnitSphereColorCircleShader(): KMColorCircleShaderInterface
@@ -45,6 +47,8 @@ actual interface KMShaderFactoryInterface
     actual fun createRasterShader(): KMRasterShaderInterface
 
     actual fun createUnitSphereRasterShader(): KMRasterShaderInterface
+
+    actual fun createQuadTessellatedShader(): KMRasterShaderInterface
 
     actual fun createStretchShader(): KMStretchShaderInterface
 
@@ -112,6 +116,11 @@ private class KMShaderFactoryInterfacePlatformWrapper(internal val nativeHandle:
         return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.shader.ColorShaderInterface)).asKmp()
     }
 
+    override fun createPolygonTessellatedShader(unitSphere: Boolean): KMColorShaderInterface {
+        val result = nativeHandle.createPolygonTessellatedShader(unitSphere)
+        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.shader.ColorShaderInterface)).asKmp()
+    }
+
     override fun createColorCircleShader(): KMColorCircleShaderInterface {
         val result = nativeHandle.createColorCircleShader()
         return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.shader.ColorCircleShaderInterface)).asKmp()
@@ -154,6 +163,11 @@ private class KMShaderFactoryInterfacePlatformWrapper(internal val nativeHandle:
 
     override fun createUnitSphereRasterShader(): KMRasterShaderInterface {
         val result = nativeHandle.createUnitSphereRasterShader()
+        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.shader.RasterShaderInterface)).asKmp()
+    }
+
+    override fun createQuadTessellatedShader(): KMRasterShaderInterface {
+        val result = nativeHandle.createQuadTessellatedShader()
         return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.shader.RasterShaderInterface)).asKmp()
     }
 
@@ -241,6 +255,11 @@ private class KMShaderFactoryInterfacePlatformProxy(private val delegate: KMShad
         return result.asPlatform()
     }
 
+    override fun createPolygonTessellatedShader(unitSphere: Boolean): io.openmobilemaps.mapscore.shared.graphics.shader.ColorShaderInterface {
+        val result = delegate.createPolygonTessellatedShader(unitSphere)
+        return result.asPlatform()
+    }
+
     override fun createColorCircleShader(): io.openmobilemaps.mapscore.shared.graphics.shader.ColorCircleShaderInterface {
         val result = delegate.createColorCircleShader()
         return result.asPlatform()
@@ -283,6 +302,11 @@ private class KMShaderFactoryInterfacePlatformProxy(private val delegate: KMShad
 
     override fun createUnitSphereRasterShader(): io.openmobilemaps.mapscore.shared.graphics.shader.RasterShaderInterface {
         val result = delegate.createUnitSphereRasterShader()
+        return result.asPlatform()
+    }
+
+    override fun createQuadTessellatedShader(): io.openmobilemaps.mapscore.shared.graphics.shader.RasterShaderInterface {
+        val result = delegate.createQuadTessellatedShader()
         return result.asPlatform()
     }
 

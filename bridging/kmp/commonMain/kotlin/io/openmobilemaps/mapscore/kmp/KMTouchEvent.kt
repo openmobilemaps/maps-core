@@ -5,8 +5,10 @@ package io.openmobilemaps.mapscore.kmp
 
 expect class KMTouchEvent(
     pointers: ArrayList<KMVec2F>,
+    scrollDelta: Float,
     touchAction: KMTouchAction,
 ) {
     val pointers: ArrayList<KMVec2F>
+    val scrollDelta: Float
     val touchAction: KMTouchAction
 }

@@ -7,5 +7,6 @@ expect enum class KMTouchAction {
     DOWN,
     MOVE,
     UP,
+    SCROLL,
     CANCEL,
 }

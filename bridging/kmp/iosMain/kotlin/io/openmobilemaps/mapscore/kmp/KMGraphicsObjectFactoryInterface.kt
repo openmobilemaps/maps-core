@@ -16,7 +16,11 @@ actual interface KMGraphicsObjectFactoryInterface
 
     actual fun createQuad(shader: KMShaderProgramInterface): KMQuad2dInterface
 
+    actual fun createQuadTessellated(shader: KMShaderProgramInterface): KMQuad2dInterface
+
     actual fun createPolygon(shader: KMShaderProgramInterface): KMPolygon2dInterface
+
+    actual fun createPolygonTessellated(shader: KMShaderProgramInterface): KMPolygon2dInterface
 
     actual fun createIcosahedronObject(shader: KMShaderProgramInterface): KMIcosahedronInterface
 
@@ -34,6 +38,8 @@ actual interface KMGraphicsObjectFactoryInterface
 
     actual fun createPolygonMask(is3d: Boolean): KMPolygon2dInterface
 
+    actual fun createPolygonMaskTessellated(is3d: Boolean): KMPolygon2dInterface
+
     actual fun createText(shader: KMShaderProgramInterface): KMTextInterface
 
     actual fun createTextInstanced(shader: KMShaderProgramInterface): KMTextInstancedInterface
@@ -47,8 +53,18 @@ private class KMGraphicsObjectFactoryInterfacePlatformWrapper(internal val nativ
         return requireNotNull((result as MapCoreSharedModule.MCQuad2dInterfaceProtocol)).asKmp()
     }
 
+    override fun createQuadTessellated(shader: KMShaderProgramInterface): KMQuad2dInterface {
+        val result = nativeHandle.createQuadTessellated(shader.asPlatform())
+        return requireNotNull((result as MapCoreSharedModule.MCQuad2dInterfaceProtocol)).asKmp()
+    }
+
     override fun createPolygon(shader: KMShaderProgramInterface): KMPolygon2dInterface {
         val result = nativeHandle.createPolygon(shader.asPlatform())
+        return requireNotNull((result as MapCoreSharedModule.MCPolygon2dInterfaceProtocol)).asKmp()
+    }
+
+    override fun createPolygonTessellated(shader: KMShaderProgramInterface): KMPolygon2dInterface {
+        val result = nativeHandle.createPolygonTessellated(shader.asPlatform())
         return requireNotNull((result as MapCoreSharedModule.MCPolygon2dInterfaceProtocol)).asKmp()
     }
 
@@ -92,6 +108,11 @@ private class KMGraphicsObjectFactoryInterfacePlatformWrapper(internal val nativ
         return requireNotNull((result as MapCoreSharedModule.MCPolygon2dInterfaceProtocol)).asKmp()
     }
 
+    override fun createPolygonMaskTessellated(is3d: Boolean): KMPolygon2dInterface {
+        val result = nativeHandle.createPolygonMaskTessellated(is3d)
+        return requireNotNull((result as MapCoreSharedModule.MCPolygon2dInterfaceProtocol)).asKmp()
+    }
+
     override fun createText(shader: KMShaderProgramInterface): KMTextInterface {
         val result = nativeHandle.createText(shader.asPlatform())
         return requireNotNull((result as MapCoreSharedModule.MCTextInterfaceProtocol)).asKmp()
@@ -111,8 +132,18 @@ private class KMGraphicsObjectFactoryInterfacePlatformProxy(private val delegate
         return result.asPlatform()
     }
 
+    override fun createQuadTessellated(shader: MapCoreSharedModule.MCShaderProgramInterfaceProtocol?): MapCoreSharedModule.MCQuad2dInterfaceProtocol? {
+        val result = delegate.createQuadTessellated(requireNotNull((shader as MapCoreSharedModule.MCShaderProgramInterfaceProtocol)).asKmp())
+        return result.asPlatform()
+    }
+
     override fun createPolygon(shader: MapCoreSharedModule.MCShaderProgramInterfaceProtocol?): MapCoreSharedModule.MCPolygon2dInterfaceProtocol? {
         val result = delegate.createPolygon(requireNotNull((shader as MapCoreSharedModule.MCShaderProgramInterfaceProtocol)).asKmp())
+        return result.asPlatform()
+    }
+
+    override fun createPolygonTessellated(shader: MapCoreSharedModule.MCShaderProgramInterfaceProtocol?): MapCoreSharedModule.MCPolygon2dInterfaceProtocol? {
+        val result = delegate.createPolygonTessellated(requireNotNull((shader as MapCoreSharedModule.MCShaderProgramInterfaceProtocol)).asKmp())
         return result.asPlatform()
     }
 
@@ -153,6 +184,11 @@ private class KMGraphicsObjectFactoryInterfacePlatformProxy(private val delegate
 
     override fun createPolygonMask(is3d: Boolean): MapCoreSharedModule.MCPolygon2dInterfaceProtocol? {
         val result = delegate.createPolygonMask(is3d)
+        return result.asPlatform()
+    }
+
+    override fun createPolygonMaskTessellated(is3d: Boolean): MapCoreSharedModule.MCPolygon2dInterfaceProtocol? {
+        val result = delegate.createPolygonMaskTessellated(is3d)
         return result.asPlatform()
     }
 

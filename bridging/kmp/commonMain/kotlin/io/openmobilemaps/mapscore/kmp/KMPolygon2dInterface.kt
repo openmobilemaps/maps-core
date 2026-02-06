@@ -5,7 +5,9 @@ package io.openmobilemaps.mapscore.kmp
 
 expect interface KMPolygon2dInterface {
 
-    fun setVertices(vertices: KMSharedBytes, indices: KMSharedBytes, origin: KMVec3D)
+    fun setVertices(vertices: KMSharedBytes, indices: KMSharedBytes, origin: KMVec3D, is3d: Boolean)
+
+    fun setSubdivisionFactor(factor: Int)
 
     fun asGraphicsObject(): KMGraphicsObjectInterface
 

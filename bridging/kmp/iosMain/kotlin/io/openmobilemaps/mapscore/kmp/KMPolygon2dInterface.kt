@@ -14,7 +14,9 @@ import platform.darwin.NSObject
 actual interface KMPolygon2dInterface
 {
 
-    actual fun setVertices(vertices: KMSharedBytes, indices: KMSharedBytes, origin: KMVec3D)
+    actual fun setVertices(vertices: KMSharedBytes, indices: KMSharedBytes, origin: KMVec3D, is3d: Boolean)
+
+    actual fun setSubdivisionFactor(factor: Int)
 
     actual fun asGraphicsObject(): KMGraphicsObjectInterface
 
@@ -24,8 +26,12 @@ actual interface KMPolygon2dInterface
 private class KMPolygon2dInterfacePlatformWrapper(internal val nativeHandle: MapCoreSharedModule.MCPolygon2dInterfaceProtocol) : KMPolygon2dInterface
 {
 
-    override fun setVertices(vertices: KMSharedBytes, indices: KMSharedBytes, origin: KMVec3D) {
-        nativeHandle.setVertices(vertices.asPlatform(), indices.asPlatform(), origin.asPlatform())
+    override fun setVertices(vertices: KMSharedBytes, indices: KMSharedBytes, origin: KMVec3D, is3d: Boolean) {
+        nativeHandle.setVertices(vertices.asPlatform(), indices.asPlatform(), origin.asPlatform(), is3d)
+    }
+
+    override fun setSubdivisionFactor(factor: Int) {
+        nativeHandle.setSubdivisionFactor(factor)
     }
 
     override fun asGraphicsObject(): KMGraphicsObjectInterface {
@@ -42,8 +48,12 @@ private class KMPolygon2dInterfacePlatformWrapper(internal val nativeHandle: Map
 private class KMPolygon2dInterfacePlatformProxy(private val delegate: KMPolygon2dInterface) : NSObject(), MapCoreSharedModule.MCPolygon2dInterfaceProtocol
 {
 
-    override fun setVertices(vertices: MapCoreSharedModule.MCSharedBytes, indices: MapCoreSharedModule.MCSharedBytes, origin: MapCoreSharedModule.MCVec3D) {
-        delegate.setVertices((vertices as MapCoreSharedModule.MCSharedBytes).asKmp(), (indices as MapCoreSharedModule.MCSharedBytes).asKmp(), (origin as MapCoreSharedModule.MCVec3D).asKmp())
+    override fun setVertices(vertices: MapCoreSharedModule.MCSharedBytes, indices: MapCoreSharedModule.MCSharedBytes, origin: MapCoreSharedModule.MCVec3D, is3d: Boolean) {
+        delegate.setVertices((vertices as MapCoreSharedModule.MCSharedBytes).asKmp(), (indices as MapCoreSharedModule.MCSharedBytes).asKmp(), (origin as MapCoreSharedModule.MCVec3D).asKmp(), is3d)
+    }
+
+    override fun setSubdivisionFactor(factor: Int) {
+        delegate.setSubdivisionFactor(factor)
     }
 
     override fun asGraphicsObject(): MapCoreSharedModule.MCGraphicsObjectInterfaceProtocol? {

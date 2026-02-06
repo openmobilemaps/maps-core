@@ -25,6 +25,8 @@ expect interface KMShaderFactoryInterface {
 
     fun createColorShader(): KMColorShaderInterface
 
+    fun createPolygonTessellatedShader(unitSphere: Boolean): KMColorShaderInterface
+
     fun createColorCircleShader(): KMColorCircleShaderInterface
 
     fun createUnitSphereColorCircleShader(): KMColorCircleShaderInterface
@@ -42,6 +44,8 @@ expect interface KMShaderFactoryInterface {
     fun createRasterShader(): KMRasterShaderInterface
 
     fun createUnitSphereRasterShader(): KMRasterShaderInterface
+
+    fun createQuadTessellatedShader(): KMRasterShaderInterface
 
     fun createStretchShader(): KMStretchShaderInterface
 

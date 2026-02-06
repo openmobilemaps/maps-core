@@ -30,6 +30,8 @@ actual interface KMTouchInterface
 
     actual fun onTwoFingerMoveComplete(): Boolean
 
+    actual fun onScroll(posScreen: KMVec2F, scrollDelta: Float): Boolean
+
     actual fun clearTouch()
 }
 
@@ -88,6 +90,11 @@ private class KMTouchInterfacePlatformWrapper(internal val nativeHandle: TouchIn
 
     override fun onTwoFingerMoveComplete(): Boolean {
         val result = nativeHandle.onTwoFingerMoveComplete()
+        return result
+    }
+
+    override fun onScroll(posScreen: KMVec2F, scrollDelta: Float): Boolean {
+        val result = nativeHandle.onScroll(posScreen.asPlatform(), scrollDelta)
         return result
     }
 
@@ -151,6 +158,11 @@ private class KMTouchInterfacePlatformProxy(private val delegate: KMTouchInterfa
 
     override fun onTwoFingerMoveComplete(): Boolean {
         val result = delegate.onTwoFingerMoveComplete()
+        return result
+    }
+
+    override fun onScroll(posScreen: io.openmobilemaps.mapscore.shared.graphics.common.Vec2F, scrollDelta: Float): Boolean {
+        val result = delegate.onScroll((posScreen as io.openmobilemaps.mapscore.shared.graphics.common.Vec2F).asKmp(), scrollDelta)
         return result
     }
 

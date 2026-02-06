@@ -8,7 +8,9 @@ import io.openmobilemaps.mapscore.shared.graphics.objects.Polygon2dInterface
 actual interface KMPolygon2dInterface
 {
 
-    actual fun setVertices(vertices: KMSharedBytes, indices: KMSharedBytes, origin: KMVec3D)
+    actual fun setVertices(vertices: KMSharedBytes, indices: KMSharedBytes, origin: KMVec3D, is3d: Boolean)
+
+    actual fun setSubdivisionFactor(factor: Int)
 
     actual fun asGraphicsObject(): KMGraphicsObjectInterface
 
@@ -18,8 +20,12 @@ actual interface KMPolygon2dInterface
 private class KMPolygon2dInterfacePlatformWrapper(internal val nativeHandle: Polygon2dInterface) : KMPolygon2dInterface
 {
 
-    override fun setVertices(vertices: KMSharedBytes, indices: KMSharedBytes, origin: KMVec3D) {
-        nativeHandle.setVertices(vertices.asPlatform(), indices.asPlatform(), origin.asPlatform())
+    override fun setVertices(vertices: KMSharedBytes, indices: KMSharedBytes, origin: KMVec3D, is3d: Boolean) {
+        nativeHandle.setVertices(vertices.asPlatform(), indices.asPlatform(), origin.asPlatform(), is3d)
+    }
+
+    override fun setSubdivisionFactor(factor: Int) {
+        nativeHandle.setSubdivisionFactor(factor)
     }
 
     override fun asGraphicsObject(): KMGraphicsObjectInterface {
@@ -36,8 +42,12 @@ private class KMPolygon2dInterfacePlatformWrapper(internal val nativeHandle: Pol
 private class KMPolygon2dInterfacePlatformProxy(private val delegate: KMPolygon2dInterface) : Polygon2dInterface()
 {
 
-    override fun setVertices(vertices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes, indices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D) {
-        delegate.setVertices((vertices as io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes).asKmp(), (indices as io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes).asKmp(), (origin as io.openmobilemaps.mapscore.shared.graphics.common.Vec3D).asKmp())
+    override fun setVertices(vertices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes, indices: io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D, is3d: Boolean) {
+        delegate.setVertices((vertices as io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes).asKmp(), (indices as io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes).asKmp(), (origin as io.openmobilemaps.mapscore.shared.graphics.common.Vec3D).asKmp(), is3d)
+    }
+
+    override fun setSubdivisionFactor(factor: Int) {
+        delegate.setSubdivisionFactor(factor)
     }
 
     override fun asGraphicsObject(): io.openmobilemaps.mapscore.shared.graphics.objects.GraphicsObjectInterface {

@@ -8,22 +8,22 @@ import io.openmobilemaps.mapscore.shared.utils.ExceptionLoggerDelegateInterface
 actual interface KMExceptionLoggerDelegateInterface
 {
 
-    actual fun logMessage(errorDomain: String, code: Int, customValues: HashMap<String, String>, function: String, file: String, line: Int)
+    actual fun logMessage(errorDomain: String, code: Int, customValues: HashMap<String, String>, functionName: String, file: String, line: Int)
 }
 
 private class KMExceptionLoggerDelegateInterfacePlatformWrapper(internal val nativeHandle: ExceptionLoggerDelegateInterface) : KMExceptionLoggerDelegateInterface
 {
 
-    override fun logMessage(errorDomain: String, code: Int, customValues: HashMap<String, String>, function: String, file: String, line: Int) {
-        nativeHandle.logMessage(errorDomain, code, HashMap(customValues.map { it.key to it.value }.toMap()), function, file, line)
+    override fun logMessage(errorDomain: String, code: Int, customValues: HashMap<String, String>, functionName: String, file: String, line: Int) {
+        nativeHandle.logMessage(errorDomain, code, HashMap(customValues.map { it.key to it.value }.toMap()), functionName, file, line)
     }
 }
 
 private class KMExceptionLoggerDelegateInterfacePlatformProxy(private val delegate: KMExceptionLoggerDelegateInterface) : ExceptionLoggerDelegateInterface()
 {
 
-    override fun logMessage(errorDomain: String, code: Int, customValues: HashMap<String, String>, function: String, file: String, line: Int) {
-        delegate.logMessage(errorDomain, code, HashMap(customValues.map { it.key to it.value }.toMap()), function, file, line)
+    override fun logMessage(errorDomain: String, code: Int, customValues: HashMap<String, String>, functionName: String, file: String, line: Int) {
+        delegate.logMessage(errorDomain, code, HashMap(customValues.map { it.key to it.value }.toMap()), functionName, file, line)
     }
 }
 

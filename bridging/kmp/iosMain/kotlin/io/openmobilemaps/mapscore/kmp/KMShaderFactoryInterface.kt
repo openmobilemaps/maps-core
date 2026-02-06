@@ -34,6 +34,8 @@ actual interface KMShaderFactoryInterface
 
     actual fun createColorShader(): KMColorShaderInterface
 
+    actual fun createPolygonTessellatedShader(unitSphere: Boolean): KMColorShaderInterface
+
     actual fun createColorCircleShader(): KMColorCircleShaderInterface
 
     actual fun createUnitSphereColorCircleShader(): KMColorCircleShaderInterface
@@ -51,6 +53,8 @@ actual interface KMShaderFactoryInterface
     actual fun createRasterShader(): KMRasterShaderInterface
 
     actual fun createUnitSphereRasterShader(): KMRasterShaderInterface
+
+    actual fun createQuadTessellatedShader(): KMRasterShaderInterface
 
     actual fun createStretchShader(): KMStretchShaderInterface
 
@@ -118,6 +122,11 @@ private class KMShaderFactoryInterfacePlatformWrapper(internal val nativeHandle:
         return requireNotNull((result as MapCoreSharedModule.MCColorShaderInterfaceProtocol)).asKmp()
     }
 
+    override fun createPolygonTessellatedShader(unitSphere: Boolean): KMColorShaderInterface {
+        val result = nativeHandle.createPolygonTessellatedShader(unitSphere)
+        return requireNotNull((result as MapCoreSharedModule.MCColorShaderInterfaceProtocol)).asKmp()
+    }
+
     override fun createColorCircleShader(): KMColorCircleShaderInterface {
         val result = nativeHandle.createColorCircleShader()
         return requireNotNull((result as MapCoreSharedModule.MCColorCircleShaderInterfaceProtocol)).asKmp()
@@ -160,6 +169,11 @@ private class KMShaderFactoryInterfacePlatformWrapper(internal val nativeHandle:
 
     override fun createUnitSphereRasterShader(): KMRasterShaderInterface {
         val result = nativeHandle.createUnitSphereRasterShader()
+        return requireNotNull((result as MapCoreSharedModule.MCRasterShaderInterfaceProtocol)).asKmp()
+    }
+
+    override fun createQuadTessellatedShader(): KMRasterShaderInterface {
+        val result = nativeHandle.createQuadTessellatedShader()
         return requireNotNull((result as MapCoreSharedModule.MCRasterShaderInterfaceProtocol)).asKmp()
     }
 
@@ -247,6 +261,11 @@ private class KMShaderFactoryInterfacePlatformProxy(private val delegate: KMShad
         return result.asPlatform()
     }
 
+    override fun createPolygonTessellatedShader(unitSphere: Boolean): MapCoreSharedModule.MCColorShaderInterfaceProtocol? {
+        val result = delegate.createPolygonTessellatedShader(unitSphere)
+        return result.asPlatform()
+    }
+
     override fun createColorCircleShader(): MapCoreSharedModule.MCColorCircleShaderInterfaceProtocol? {
         val result = delegate.createColorCircleShader()
         return result.asPlatform()
@@ -289,6 +308,11 @@ private class KMShaderFactoryInterfacePlatformProxy(private val delegate: KMShad
 
     override fun createUnitSphereRasterShader(): MapCoreSharedModule.MCRasterShaderInterfaceProtocol? {
         val result = delegate.createUnitSphereRasterShader()
+        return result.asPlatform()
+    }
+
+    override fun createQuadTessellatedShader(): MapCoreSharedModule.MCRasterShaderInterfaceProtocol? {
+        val result = delegate.createQuadTessellatedShader()
         return result.asPlatform()
     }
 

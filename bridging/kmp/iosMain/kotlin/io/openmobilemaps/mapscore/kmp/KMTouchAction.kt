@@ -14,7 +14,8 @@ actual enum class KMTouchAction(val rawValue: Long) {
     DOWN(0L),
     MOVE(1L),
     UP(2L),
-    CANCEL(3L),
+    SCROLL(3L),
+    CANCEL(4L),
     ;
 
     companion object {
@@ -24,7 +25,8 @@ actual enum class KMTouchAction(val rawValue: Long) {
                 0L -> KMTouchAction.DOWN
                 1L -> KMTouchAction.MOVE
                 2L -> KMTouchAction.UP
-                3L -> KMTouchAction.CANCEL
+                3L -> KMTouchAction.SCROLL
+                4L -> KMTouchAction.CANCEL
                 else -> throw IllegalArgumentException("Unknown KMTouchAction value: " + raw)
             }
         }

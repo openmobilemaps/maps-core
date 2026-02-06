@@ -5,5 +5,5 @@ package io.openmobilemaps.mapscore.kmp
 
 expect interface KMExceptionLoggerDelegateInterface {
 
-    fun logMessage(errorDomain: String, code: Int, customValues: HashMap<String, String>, function: String, file: String, line: Int)
+    fun logMessage(errorDomain: String, code: Int, customValues: HashMap<String, String>, functionName: String, file: String, line: Int)
 }

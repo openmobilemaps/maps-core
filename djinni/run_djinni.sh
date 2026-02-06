@@ -107,8 +107,6 @@ for file in $(git ls-files "*.djinni"); do
     --ident-cpp-file "$IDENT_CPP" \
     --ident-cpp-enum "$IDENT_CPP_ENUM" \
     --ident-cpp-type-param "$IDENT_CPP_METHOD" \
-        --kotlin-kmp-objc-name-prefix "$KMP_BRIDGE_PREFIX" \
-        \
     --ident-cpp-method "$IDENT_CPP_METHOD" \
     --ident-cpp-local "$IDENT_CPP_METHOD" \
     --ident-cpp-field "$IDENT_CPP_FIELD" \

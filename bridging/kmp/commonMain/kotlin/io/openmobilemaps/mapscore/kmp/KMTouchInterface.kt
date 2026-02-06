@@ -27,5 +27,7 @@ expect interface KMTouchInterface {
 
     fun onTwoFingerMoveComplete(): Boolean
 
+    fun onScroll(posScreen: KMVec2F, scrollDelta: Float): Boolean
+
     fun clearTouch()
 }

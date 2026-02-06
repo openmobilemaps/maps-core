@@ -7,7 +7,11 @@ expect interface KMGraphicsObjectFactoryInterface {
 
     fun createQuad(shader: KMShaderProgramInterface): KMQuad2dInterface
 
+    fun createQuadTessellated(shader: KMShaderProgramInterface): KMQuad2dInterface
+
     fun createPolygon(shader: KMShaderProgramInterface): KMPolygon2dInterface
+
+    fun createPolygonTessellated(shader: KMShaderProgramInterface): KMPolygon2dInterface
 
     fun createIcosahedronObject(shader: KMShaderProgramInterface): KMIcosahedronInterface
 
@@ -24,6 +28,8 @@ expect interface KMGraphicsObjectFactoryInterface {
     fun createQuadMask(is3d: Boolean): KMQuad2dInterface
 
     fun createPolygonMask(is3d: Boolean): KMPolygon2dInterface
+
+    fun createPolygonMaskTessellated(is3d: Boolean): KMPolygon2dInterface
 
     fun createText(shader: KMShaderProgramInterface): KMTextInterface
 
