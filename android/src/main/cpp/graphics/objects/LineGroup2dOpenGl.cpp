@@ -9,6 +9,7 @@
  */
 
 #include "LineGroup2dOpenGl.h"
+#include "OwnedBytesHelper.h"
 #include <cmath>
 #include <cstring>
 #include <string>
@@ -21,22 +22,16 @@ std::shared_ptr<GraphicsObjectInterface> LineGroup2dOpenGl::asGraphicsObject() {
 bool LineGroup2dOpenGl::isReady() { return ready; }
 
 
-void LineGroup2dOpenGl::setLines(const ::SharedBytes & lines, const ::SharedBytes & indices, const Vec3D &origin, bool is3d) {
+void LineGroup2dOpenGl::setLines(const ::OwnedBytes & lines, const ::OwnedBytes & indices, const Vec3D &origin, bool is3d) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
     ready = false;
     dataReady = false;
 
-    lineIndices.resize(indices.elementCount);
-    lineAttributes.resize(lines.elementCount);
+    std::tie(lineAttributes, lineAttributesSize) = OwnedBytesHelper::toUniquePtr<GLfloat>(lines);
+    std::tie(lineIndices, lineIndicesSize) = OwnedBytesHelper::toUniquePtr<GLuint>(indices);
+
     lineOrigin = origin;
     this->is3d = is3d;
-
-    if (indices.elementCount > 0) {
-        std::memcpy(lineIndices.data(), (void *) indices.address, indices.elementCount * indices.bytesPerElement);
-    }
-    if (lines.elementCount > 0) {
-        std::memcpy(lineAttributes.data(), (void *) lines.address, lines.elementCount * lines.bytesPerElement);
-    }
 
     dataReady = true;
 }
@@ -73,7 +68,7 @@ void LineGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface>
         glGenBuffers(1, &vertexAttribBuffer);
     }
     glBindBuffer(GL_ARRAY_BUFFER, vertexAttribBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * lineAttributes.size(), &lineAttributes[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * lineAttributesSize, lineAttributes.get(), GL_STATIC_DRAW);
 
     size_t floatSize = sizeof(GLfloat);
     size_t dimensionality = is3d ? 3 : 2;
@@ -110,7 +105,7 @@ void LineGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface>
         glGenBuffers(1, &indexBuffer);
     }
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * lineIndices.size(), &lineIndices[0], GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * lineIndicesSize, lineIndices.get(), GL_STATIC_DRAW);
 
     glBindVertexArray(0);
 
@@ -188,7 +183,7 @@ void LineGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface
     shaderProgram->preRender(openGlContext, isScreenSpaceCoords);
 
     // Draw the triangle
-    glDrawElements(GL_TRIANGLES, lineIndices.size(), GL_UNSIGNED_INT, nullptr);
+    glDrawElements(GL_TRIANGLES, lineIndicesSize, GL_UNSIGNED_INT, nullptr);
 
     glBindVertexArray(0);
 

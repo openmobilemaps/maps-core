@@ -20,6 +20,18 @@ extension MTLDevice {
 
         return self.makeBuffer(bytes: pointer, length: Int(sharedBytes.elementCount * sharedBytes.bytesPerElement), options: [])
     }
+
+    func makeBuffer(from ownedBytes: MCOwnedBytes) -> MTLBuffer? {
+        guard let pointer = UnsafeRawPointer(bitPattern: Int(ownedBytes.address)),
+            ownedBytes.elementCount > 0
+        else { return nil }
+        return self.makeBuffer(
+            bytesNoCopy: p,
+            length: Int(ownedBytes.elementCount * ownedBytes.bytesPerElement), options: [],
+            deallocator: { (UnsafeMutableRawPointer, Int) -> Void in 
+                MCOwnedBytesDestructor.free(ownedBytes);
+            })
+    }
 }
 
 extension MTLBuffer {

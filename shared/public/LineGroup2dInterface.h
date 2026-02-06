@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "SharedBytes.h"
+#include "OwnedBytes.h"
 #include "Vec3D.h"
 #include <memory>
 
@@ -13,7 +13,7 @@ class LineGroup2dInterface {
 public:
     virtual ~LineGroup2dInterface() = default;
 
-    virtual void setLines(const ::SharedBytes & lines, const ::SharedBytes & indices, const ::Vec3D & origin, bool is3d) = 0;
+    virtual void setLines(const ::OwnedBytes & lines, const ::OwnedBytes & indices, const ::Vec3D & origin, bool is3d) = 0;
 
     virtual /*not-null*/ std::shared_ptr<GraphicsObjectInterface> asGraphicsObject() = 0;
 };

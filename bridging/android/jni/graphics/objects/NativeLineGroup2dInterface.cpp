@@ -4,7 +4,7 @@
 #include "NativeLineGroup2dInterface.h"  // my header
 #include "Marshal.hpp"
 #include "NativeGraphicsObjectInterface.h"
-#include "NativeSharedBytes.h"
+#include "NativeOwnedBytes.h"
 #include "NativeVec3D.h"
 
 namespace djinni_generated {
@@ -17,13 +17,13 @@ NativeLineGroup2dInterface::JavaProxy::JavaProxy(JniType j) : Handle(::djinni::j
 
 NativeLineGroup2dInterface::JavaProxy::~JavaProxy() = default;
 
-void NativeLineGroup2dInterface::JavaProxy::setLines(const ::SharedBytes & c_lines, const ::SharedBytes & c_indices, const ::Vec3D & c_origin, bool c_is3d) {
+void NativeLineGroup2dInterface::JavaProxy::setLines(const ::OwnedBytes & c_lines, const ::OwnedBytes & c_indices, const ::Vec3D & c_origin, bool c_is3d) {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
     const auto& data = ::djinni::JniClass<::djinni_generated::NativeLineGroup2dInterface>::get();
     jniEnv->CallVoidMethod(Handle::get().get(), data.method_setLines,
-                           ::djinni::get(::djinni_generated::NativeSharedBytes::fromCpp(jniEnv, c_lines)),
-                           ::djinni::get(::djinni_generated::NativeSharedBytes::fromCpp(jniEnv, c_indices)),
+                           ::djinni::get(::djinni_generated::NativeOwnedBytes::fromCpp(jniEnv, c_lines)),
+                           ::djinni::get(::djinni_generated::NativeOwnedBytes::fromCpp(jniEnv, c_indices)),
                            ::djinni::get(::djinni_generated::NativeVec3D::fromCpp(jniEnv, c_origin)),
                            ::djinni::get(::djinni::Bool::fromCpp(jniEnv, c_is3d)));
     ::djinni::jniExceptionCheck(jniEnv);
@@ -44,12 +44,12 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_LineGroup2dInterface_00024CppProxy_native_1setLines(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeSharedBytes::JniType j_lines, ::djinni_generated::NativeSharedBytes::JniType j_indices, ::djinni_generated::NativeVec3D::JniType j_origin, jboolean j_is3d)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_LineGroup2dInterface_00024CppProxy_native_1setLines(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeOwnedBytes::JniType j_lines, ::djinni_generated::NativeOwnedBytes::JniType j_indices, ::djinni_generated::NativeVec3D::JniType j_origin, jboolean j_is3d)
 {
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::LineGroup2dInterface>(nativeRef);
-        ref->setLines(::djinni_generated::NativeSharedBytes::toCpp(jniEnv, j_lines),
-                      ::djinni_generated::NativeSharedBytes::toCpp(jniEnv, j_indices),
+        ref->setLines(::djinni_generated::NativeOwnedBytes::toCpp(jniEnv, j_lines),
+                      ::djinni_generated::NativeOwnedBytes::toCpp(jniEnv, j_indices),
                       ::djinni_generated::NativeVec3D::toCpp(jniEnv, j_origin),
                       ::djinni::Bool::toCpp(jniEnv, j_is3d));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )

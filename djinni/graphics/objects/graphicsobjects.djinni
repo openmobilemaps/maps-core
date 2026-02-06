@@ -7,6 +7,7 @@
 @extern "../../yaml/vec_3_d.yaml"
 @extern "../../yaml/vec_2_d.yaml"
 @extern "../../yaml/vec_2_f.yaml"
+@extern "../../yaml/owned_bytes.yaml"
 @extern "../../yaml/shared_bytes.yaml"
 @extern "../../yaml/font_data.yaml"
 
@@ -128,7 +129,7 @@ render_line_description = record {
 }
 
 line_group_2d_interface = interface +c +j +o {
-    set_lines(lines: shared_bytes, indices: shared_bytes, origin: vec_3_d, is_3d: bool);
+    set_lines(lines: owned_bytes, indices: owned_bytes, origin: vec_3_d, is_3d: bool);
     as_graphics_object(): graphics_object_interface;
 }
 
