@@ -19,10 +19,10 @@ final class Polygon2dTessellated: BaseGraphicsObject, @unchecked Sendable {
     private var verticesBuffer: MTLBuffer?
     private var indicesBuffer: MTLBuffer?
     private var indicesCount: Int = 0
-    
+
     private var tessellationFactorsBuffer: MTLBuffer?
     private var originBuffers: MultiBuffer<simd_float4>
-    
+
     private var is3d = false
     private var subdivisionFactor: Int32 = 0
 
@@ -38,14 +38,14 @@ final class Polygon2dTessellated: BaseGraphicsObject, @unchecked Sendable {
                 sampler: metalContext.samplerLibrary.value(
                     Sampler.magLinear.rawValue)!,
                 label: "Polygon2dTessellated")
-        
+
         let factorH = Half(pow(2, Float(self.subdivisionFactor))).bits
-        
+
         var tessellationFactors = MTLTriangleTessellationFactorsHalf(
             edgeTessellationFactor: (factorH, factorH, factorH),
             insideTessellationFactor: factorH
         )
-        
+
         self.tessellationFactorsBuffer.copyOrCreate(
             bytes: &tessellationFactors,
             length: MemoryLayout<MTLTriangleTessellationFactorsHalf>.stride,
@@ -95,7 +95,7 @@ final class Polygon2dTessellated: BaseGraphicsObject, @unchecked Sendable {
             encoder.setDepthStencilState(renderPassStencilState)
             encoder.setStencilReferenceValue(0b0000_0000)
         }
-        
+
         renderMain(
             encoder: encoder,
             context: context,
@@ -104,7 +104,7 @@ final class Polygon2dTessellated: BaseGraphicsObject, @unchecked Sendable {
             origin: origin,
             isScreenSpaceCoords: isScreenSpaceCoords)
     }
-    
+
     private func renderMain(
         encoder: MTLRenderCommandEncoder,
         context: RenderingContext,
@@ -117,7 +117,7 @@ final class Polygon2dTessellated: BaseGraphicsObject, @unchecked Sendable {
             let indicesBuffer,
             let tessellationFactorsBuffer
         else { return }
-        
+
         shader.setupProgram(context)
         shader.preRender(context, isScreenSpaceCoords: isScreenSpaceCoords)
 
@@ -146,7 +146,7 @@ final class Polygon2dTessellated: BaseGraphicsObject, @unchecked Sendable {
             bufferPointer.pointee.z = Float(originOffset.z - origin.z)
         }
         encoder.setVertexBuffer(originOffsetBuffer, offset: 0, index: 3)
-         
+
         let originBuffer = originBuffers.getNextBuffer(context)
         if let bufferPointer = originBuffer?.contents()
             .assumingMemoryBound(
@@ -159,35 +159,35 @@ final class Polygon2dTessellated: BaseGraphicsObject, @unchecked Sendable {
             fatalError()
         }
         encoder.setVertexBuffer(originBuffer, offset: 0, index: 4)
-        
+
         encoder.setVertexBytes(&self.is3d, length: MemoryLayout<Bool>.stride, index: 5)
-        
+
         encoder.setTessellationFactorBuffer(tessellationFactorsBuffer, offset: 0, instanceStride: 0)
-        
+
         #if HARDWARE_TESSELLATION_WIREFRAME_METAL
-        let wireframePipeline = MetalContext.current.pipelineLibrary.value(
-            Pipeline(
-                type: .polygonTessellatedWireframeShader,
-                blendMode: (shader as? BaseShader)?.blendMode ?? .NORMAL)
-        )
-        if let wireframePipeline {
-            context.setRenderPipelineStateIfNeeded(wireframePipeline)
-        }
-        encoder.setTriangleFillMode(.lines)
-        encoder.drawIndexedPatches(
-            numberOfPatchControlPoints: 3,
-            patchStart: 0,
-            patchCount: indicesCount / 3,
-            patchIndexBuffer: nil,
-            patchIndexBufferOffset: 0,
-            controlPointIndexBuffer: indicesBuffer,
-            controlPointIndexBufferOffset: 0,
-            instanceCount: 1,
-            baseInstance: 0)
-        encoder.setTriangleFillMode(.fill)
-        shader.preRender(context, isScreenSpaceCoords: isScreenSpaceCoords)
+            let wireframePipeline = MetalContext.current.pipelineLibrary.value(
+                Pipeline(
+                    type: .polygonTessellatedWireframeShader,
+                    blendMode: (shader as? BaseShader)?.blendMode ?? .NORMAL)
+            )
+            if let wireframePipeline {
+                context.setRenderPipelineStateIfNeeded(wireframePipeline)
+            }
+            encoder.setTriangleFillMode(.lines)
+            encoder.drawIndexedPatches(
+                numberOfPatchControlPoints: 3,
+                patchStart: 0,
+                patchCount: indicesCount / 3,
+                patchIndexBuffer: nil,
+                patchIndexBufferOffset: 0,
+                controlPointIndexBuffer: indicesBuffer,
+                controlPointIndexBufferOffset: 0,
+                instanceCount: 1,
+                baseInstance: 0)
+            encoder.setTriangleFillMode(.fill)
+            shader.preRender(context, isScreenSpaceCoords: isScreenSpaceCoords)
         #endif
-        
+
         encoder.drawIndexedPatches(
             numberOfPatchControlPoints: 3,
             patchStart: 0,
@@ -266,14 +266,14 @@ extension Polygon2dTessellated: MCPolygon2dInterface {
         lock.withCritical {
             if self.subdivisionFactor != factor {
                 self.subdivisionFactor = factor
-                
-                let factorH = Half(pow(2, Float(self.subdivisionFactor))).bits;
-                
+
+                let factorH = Half(pow(2, Float(self.subdivisionFactor))).bits
+
                 var tessellationFactors = MTLTriangleTessellationFactorsHalf(
                     edgeTessellationFactor: (factorH, factorH, factorH),
                     insideTessellationFactor: factorH
-                );
-                
+                )
+
                 self.tessellationFactorsBuffer.copyOrCreate(
                     bytes: &tessellationFactors,
                     length: MemoryLayout<MTLTriangleTessellationFactorsHalf>.stride,
@@ -281,7 +281,7 @@ extension Polygon2dTessellated: MCPolygon2dInterface {
             }
         }
     }
-    
+
     func setVertices(
         _ vertices: MCSharedBytes, indices: MCSharedBytes, origin: MCVec3D, is3d: Bool
     ) {
