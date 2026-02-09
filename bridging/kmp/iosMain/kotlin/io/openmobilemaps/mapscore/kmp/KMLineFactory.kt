@@ -21,7 +21,7 @@ actual class KMLineFactory actual public constructor(
 
         actual fun createLine(identifier: String, coordinates: ArrayList<KMCoord>, style: KMLineStyle): KMLineInfoInterface {
             val result = MapCoreSharedModule.MCLineFactory.createLine(identifier, ArrayList(coordinates.map { it.asPlatform() }), style.asPlatform())
-            return requireNotNull((result as MapCoreSharedModule.MCLineInfoInterface)).asKmp()
+            return (result as MapCoreSharedModule.MCLineInfoInterface).asKmp()
         }
     }
 }

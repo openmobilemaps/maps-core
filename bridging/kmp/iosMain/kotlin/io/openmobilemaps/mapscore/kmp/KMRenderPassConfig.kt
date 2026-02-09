@@ -28,5 +28,5 @@ internal fun KMRenderPassConfig.asPlatform(): MapCoreSharedModule.MCRenderPassCo
 internal fun MapCoreSharedModule.MCRenderPassConfig.asKmp(): KMRenderPassConfig = KMRenderPassConfig(
     renderPassIndex = this.renderPassIndex,
     isPassMasked = this.isPassMasked,
-    renderTarget = this.renderTarget?.let { requireNotNull((it as MapCoreSharedModule.MCRenderTargetInterfaceProtocol)).asKmp() },
+    renderTarget = this.renderTarget?.let { (it as MapCoreSharedModule.MCRenderTargetInterfaceProtocol).asKmp() },
 )

@@ -17,7 +17,7 @@ actual class KMTextLayerInterface actual public constructor(
 
     actual fun asLayerInterface(): KMLayerInterface {
         val result = native.asLayerInterface()
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.LayerInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.map.LayerInterface).asKmp()
     }
 
     actual fun invalidate() {
@@ -29,7 +29,7 @@ actual class KMTextLayerInterface actual public constructor(
 
         actual fun create(fontLoader: KMFontLoaderInterface): KMTextLayerInterface {
             val result = TextLayerInterface.create(fontLoader.asPlatform())
-            return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.layers.text.TextLayerInterface)).asKmp()
+            return (result as io.openmobilemaps.mapscore.shared.map.layers.text.TextLayerInterface).asKmp()
         }
     }
 }

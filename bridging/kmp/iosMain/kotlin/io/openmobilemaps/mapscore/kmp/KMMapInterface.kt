@@ -22,22 +22,22 @@ actual class KMMapInterface actual public constructor(
 
     actual fun getGraphicsObjectFactory(): KMGraphicsObjectFactoryInterface {
         val result = native.getGraphicsObjectFactory()
-        return requireNotNull((result as MapCoreSharedModule.MCGraphicsObjectFactoryInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCGraphicsObjectFactoryInterfaceProtocol).asKmp()
     }
 
     actual fun getShaderFactory(): KMShaderFactoryInterface {
         val result = native.getShaderFactory()
-        return requireNotNull((result as MapCoreSharedModule.MCShaderFactoryInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCShaderFactoryInterfaceProtocol).asKmp()
     }
 
     actual fun getScheduler(): KMSchedulerInterface {
         val result = native.getScheduler()
-        return requireNotNull((result as MapCoreSharedModule.MCSchedulerInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCSchedulerInterfaceProtocol).asKmp()
     }
 
     actual fun getRenderingContext(): KMRenderingContextInterface {
         val result = native.getRenderingContext()
-        return requireNotNull((result as MapCoreSharedModule.MCRenderingContextInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCRenderingContextInterfaceProtocol).asKmp()
     }
 
     actual fun getMapConfig(): KMMapConfig {
@@ -47,7 +47,7 @@ actual class KMMapInterface actual public constructor(
 
     actual fun getCoordinateConverterHelper(): KMCoordinateConversionHelperInterface {
         val result = native.getCoordinateConverterHelper()
-        return requireNotNull((result as MapCoreSharedModule.MCCoordinateConversionHelperInterface)).asKmp()
+        return (result as MapCoreSharedModule.MCCoordinateConversionHelperInterface).asKmp()
     }
 
     actual fun setCamera(camera: KMMapCameraInterface) {
@@ -56,7 +56,7 @@ actual class KMMapInterface actual public constructor(
 
     actual fun getCamera(): KMMapCameraInterface {
         val result = native.getCamera()
-        return requireNotNull((result as MapCoreSharedModule.MCMapCameraInterface)).asKmp()
+        return (result as MapCoreSharedModule.MCMapCameraInterface).asKmp()
     }
 
     actual fun setTouchHandler(touchHandler: KMTouchHandlerInterface) {
@@ -65,7 +65,7 @@ actual class KMMapInterface actual public constructor(
 
     actual fun getTouchHandler(): KMTouchHandlerInterface {
         val result = native.getTouchHandler()
-        return requireNotNull((result as MapCoreSharedModule.MCTouchHandlerInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCTouchHandlerInterfaceProtocol).asKmp()
     }
 
     actual fun setPerformanceLoggers(performanceLoggers: ArrayList<KMPerformanceLoggerInterface>) {
@@ -74,17 +74,17 @@ actual class KMMapInterface actual public constructor(
 
     actual fun getPerformanceLoggers(): ArrayList<KMPerformanceLoggerInterface> {
         val result = native.getPerformanceLoggers()
-        return ArrayList(((result as? List<*>)?.map { requireNotNull((it as MapCoreSharedModule.MCPerformanceLoggerInterfaceProtocol)).asKmp() } ?: (0 until (result as platform.Foundation.NSArray).count.toInt()).map { idx -> requireNotNull(((result as platform.Foundation.NSArray).objectAtIndex(idx.toULong()) as MapCoreSharedModule.MCPerformanceLoggerInterfaceProtocol)).asKmp() }))
+        return ArrayList(((result as? List<*>)?.map { (it as MapCoreSharedModule.MCPerformanceLoggerInterfaceProtocol).asKmp() } ?: (0 until (result as platform.Foundation.NSArray).count.toInt()).map { idx -> ((result as platform.Foundation.NSArray).objectAtIndex(idx.toULong()) as MapCoreSharedModule.MCPerformanceLoggerInterfaceProtocol).asKmp() }))
     }
 
     actual fun getLayers(): ArrayList<KMLayerInterface> {
         val result = native.getLayers()
-        return ArrayList(((result as? List<*>)?.map { requireNotNull((it as MapCoreSharedModule.MCLayerInterfaceProtocol)).asKmp() } ?: (0 until (result as platform.Foundation.NSArray).count.toInt()).map { idx -> requireNotNull(((result as platform.Foundation.NSArray).objectAtIndex(idx.toULong()) as MapCoreSharedModule.MCLayerInterfaceProtocol)).asKmp() }))
+        return ArrayList(((result as? List<*>)?.map { (it as MapCoreSharedModule.MCLayerInterfaceProtocol).asKmp() } ?: (0 until (result as platform.Foundation.NSArray).count.toInt()).map { idx -> ((result as platform.Foundation.NSArray).objectAtIndex(idx.toULong()) as MapCoreSharedModule.MCLayerInterfaceProtocol).asKmp() }))
     }
 
     actual fun getLayersIndexed(): ArrayList<KMIndexedLayerInterface> {
         val result = native.getLayersIndexed()
-        return ArrayList(((result as? List<*>)?.map { requireNotNull((it as MapCoreSharedModule.MCIndexedLayerInterfaceProtocol)).asKmp() } ?: (0 until (result as platform.Foundation.NSArray).count.toInt()).map { idx -> requireNotNull(((result as platform.Foundation.NSArray).objectAtIndex(idx.toULong()) as MapCoreSharedModule.MCIndexedLayerInterfaceProtocol)).asKmp() }))
+        return ArrayList(((result as? List<*>)?.map { (it as MapCoreSharedModule.MCIndexedLayerInterfaceProtocol).asKmp() } ?: (0 until (result as platform.Foundation.NSArray).count.toInt()).map { idx -> ((result as platform.Foundation.NSArray).objectAtIndex(idx.toULong()) as MapCoreSharedModule.MCIndexedLayerInterfaceProtocol).asKmp() }))
     }
 
     actual fun addLayer(layer: KMLayerInterface) {
@@ -174,12 +174,12 @@ actual class KMMapInterface actual public constructor(
 
         actual fun create(graphicsFactory: KMGraphicsObjectFactoryInterface, shaderFactory: KMShaderFactoryInterface, renderingContext: KMRenderingContextInterface, mapConfig: KMMapConfig, scheduler: KMSchedulerInterface, pixelDensity: Float, is3D: Boolean): KMMapInterface {
             val result = MapCoreSharedModule.MCMapInterface.create(graphicsFactory.asPlatform(), shaderFactory.asPlatform(), renderingContext.asPlatform(), mapConfig.asPlatform(), scheduler.asPlatform(), pixelDensity, is3D)
-            return requireNotNull((result as MapCoreSharedModule.MCMapInterface)).asKmp()
+            return (result as MapCoreSharedModule.MCMapInterface).asKmp()
         }
 
         actual fun createWithOpenGl(mapConfig: KMMapConfig, scheduler: KMSchedulerInterface, pixelDensity: Float, is3D: Boolean): KMMapInterface {
             val result = MapCoreSharedModule.MCMapInterface.createWithOpenGl(mapConfig.asPlatform(), scheduler.asPlatform(), pixelDensity, is3D)
-            return requireNotNull((result as MapCoreSharedModule.MCMapInterface)).asKmp()
+            return (result as MapCoreSharedModule.MCMapInterface).asKmp()
         }
     }
 }

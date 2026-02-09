@@ -22,7 +22,7 @@ actual class KMLineLayerInterface actual public constructor(
 
     actual fun getLines(): ArrayList<KMLineInfoInterface> {
         val result = native.getLines()
-        return ArrayList(((result as? List<*>)?.map { requireNotNull((it as MapCoreSharedModule.MCLineInfoInterface)).asKmp() } ?: (0 until (result as platform.Foundation.NSArray).count.toInt()).map { idx -> requireNotNull(((result as platform.Foundation.NSArray).objectAtIndex(idx.toULong()) as MapCoreSharedModule.MCLineInfoInterface)).asKmp() }))
+        return ArrayList(((result as? List<*>)?.map { (it as MapCoreSharedModule.MCLineInfoInterface).asKmp() } ?: (0 until (result as platform.Foundation.NSArray).count.toInt()).map { idx -> ((result as platform.Foundation.NSArray).objectAtIndex(idx.toULong()) as MapCoreSharedModule.MCLineInfoInterface).asKmp() }))
     }
 
     actual fun remove(line: KMLineInfoInterface) {
@@ -43,7 +43,7 @@ actual class KMLineLayerInterface actual public constructor(
 
     actual fun asLayerInterface(): KMLayerInterface {
         val result = native.asLayerInterface()
-        return requireNotNull((result as MapCoreSharedModule.MCLayerInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCLayerInterfaceProtocol).asKmp()
     }
 
     actual fun invalidate() {
@@ -71,7 +71,7 @@ actual class KMLineLayerInterface actual public constructor(
 
         actual fun create(): KMLineLayerInterface {
             val result = MapCoreSharedModule.MCLineLayerInterface.create()
-            return requireNotNull((result as MapCoreSharedModule.MCLineLayerInterface)).asKmp()
+            return (result as MapCoreSharedModule.MCLineLayerInterface).asKmp()
         }
     }
 }

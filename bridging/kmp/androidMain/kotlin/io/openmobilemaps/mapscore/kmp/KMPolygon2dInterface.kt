@@ -30,12 +30,12 @@ private class KMPolygon2dInterfacePlatformWrapper(internal val nativeHandle: Pol
 
     override fun asGraphicsObject(): KMGraphicsObjectInterface {
         val result = nativeHandle.asGraphicsObject()
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.objects.GraphicsObjectInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.objects.GraphicsObjectInterface).asKmp()
     }
 
     override fun asMaskingObject(): KMMaskingObjectInterface {
         val result = nativeHandle.asMaskingObject()
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.objects.MaskingObjectInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.objects.MaskingObjectInterface).asKmp()
     }
 }
 

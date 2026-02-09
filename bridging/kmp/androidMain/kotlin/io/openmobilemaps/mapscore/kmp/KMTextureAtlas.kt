@@ -17,5 +17,5 @@ internal fun KMTextureAtlas.asPlatform(): io.openmobilemaps.mapscore.shared.grap
 )
 internal fun io.openmobilemaps.mapscore.shared.graphics.TextureAtlas.asKmp(): KMTextureAtlas = KMTextureAtlas(
     uvMap = HashMap(this.uvMap.map { it.key to (it.value as io.openmobilemaps.mapscore.shared.graphics.common.RectI).asKmp() }.toMap()),
-    texture = this.texture?.let { requireNotNull((it as io.openmobilemaps.mapscore.shared.graphics.objects.TextureHolderInterface)).asKmp() },
+    texture = this.texture?.let { (it as io.openmobilemaps.mapscore.shared.graphics.objects.TextureHolderInterface).asKmp() },
 )

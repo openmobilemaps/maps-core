@@ -71,7 +71,7 @@ private class KMRenderingContextInterfacePlatformWrapper(internal val nativeHand
 
     override fun asOpenGlRenderingContext(): KMOpenGlRenderingContextInterface? {
         val result = nativeHandle.asOpenGlRenderingContext()
-        return result?.let { requireNotNull((it as io.openmobilemaps.mapscore.shared.graphics.OpenGlRenderingContextInterface)).asKmp() }
+        return result?.let { (it as io.openmobilemaps.mapscore.shared.graphics.OpenGlRenderingContextInterface).asKmp() }
     }
 }
 

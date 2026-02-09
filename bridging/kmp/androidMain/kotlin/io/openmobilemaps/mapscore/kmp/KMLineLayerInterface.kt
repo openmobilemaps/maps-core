@@ -17,7 +17,7 @@ actual class KMLineLayerInterface actual public constructor(
 
     actual fun getLines(): ArrayList<KMLineInfoInterface> {
         val result = native.getLines()
-        return ArrayList(result.map { requireNotNull((it as io.openmobilemaps.mapscore.shared.map.layers.line.LineInfoInterface)).asKmp() })
+        return ArrayList(result.map { (it as io.openmobilemaps.mapscore.shared.map.layers.line.LineInfoInterface).asKmp() })
     }
 
     actual fun remove(line: KMLineInfoInterface) {
@@ -38,7 +38,7 @@ actual class KMLineLayerInterface actual public constructor(
 
     actual fun asLayerInterface(): KMLayerInterface {
         val result = native.asLayerInterface()
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.LayerInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.map.LayerInterface).asKmp()
     }
 
     actual fun invalidate() {
@@ -66,7 +66,7 @@ actual class KMLineLayerInterface actual public constructor(
 
         actual fun create(): KMLineLayerInterface {
             val result = LineLayerInterface.create()
-            return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.layers.line.LineLayerInterface)).asKmp()
+            return (result as io.openmobilemaps.mapscore.shared.map.layers.line.LineLayerInterface).asKmp()
         }
     }
 }

@@ -17,22 +17,22 @@ actual class KMMapInterface actual public constructor(
 
     actual fun getGraphicsObjectFactory(): KMGraphicsObjectFactoryInterface {
         val result = native.getGraphicsObjectFactory()
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.objects.GraphicsObjectFactoryInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.objects.GraphicsObjectFactoryInterface).asKmp()
     }
 
     actual fun getShaderFactory(): KMShaderFactoryInterface {
         val result = native.getShaderFactory()
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.shader.ShaderFactoryInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.shader.ShaderFactoryInterface).asKmp()
     }
 
     actual fun getScheduler(): KMSchedulerInterface {
         val result = native.getScheduler()
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.scheduling.SchedulerInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.map.scheduling.SchedulerInterface).asKmp()
     }
 
     actual fun getRenderingContext(): KMRenderingContextInterface {
         val result = native.getRenderingContext()
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface).asKmp()
     }
 
     actual fun getMapConfig(): KMMapConfig {
@@ -42,7 +42,7 @@ actual class KMMapInterface actual public constructor(
 
     actual fun getCoordinateConverterHelper(): KMCoordinateConversionHelperInterface {
         val result = native.getCoordinateConverterHelper()
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateConversionHelperInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateConversionHelperInterface).asKmp()
     }
 
     actual fun setCamera(camera: KMMapCameraInterface) {
@@ -51,7 +51,7 @@ actual class KMMapInterface actual public constructor(
 
     actual fun getCamera(): KMMapCameraInterface {
         val result = native.getCamera()
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.MapCameraInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.map.MapCameraInterface).asKmp()
     }
 
     actual fun setTouchHandler(touchHandler: KMTouchHandlerInterface) {
@@ -60,7 +60,7 @@ actual class KMMapInterface actual public constructor(
 
     actual fun getTouchHandler(): KMTouchHandlerInterface {
         val result = native.getTouchHandler()
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.controls.TouchHandlerInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.map.controls.TouchHandlerInterface).asKmp()
     }
 
     actual fun setPerformanceLoggers(performanceLoggers: ArrayList<KMPerformanceLoggerInterface>) {
@@ -69,17 +69,17 @@ actual class KMMapInterface actual public constructor(
 
     actual fun getPerformanceLoggers(): ArrayList<KMPerformanceLoggerInterface> {
         val result = native.getPerformanceLoggers()
-        return ArrayList(result.map { requireNotNull((it as io.openmobilemaps.mapscore.shared.map.PerformanceLoggerInterface)).asKmp() })
+        return ArrayList(result.map { (it as io.openmobilemaps.mapscore.shared.map.PerformanceLoggerInterface).asKmp() })
     }
 
     actual fun getLayers(): ArrayList<KMLayerInterface> {
         val result = native.getLayers()
-        return ArrayList(result.map { requireNotNull((it as io.openmobilemaps.mapscore.shared.map.LayerInterface)).asKmp() })
+        return ArrayList(result.map { (it as io.openmobilemaps.mapscore.shared.map.LayerInterface).asKmp() })
     }
 
     actual fun getLayersIndexed(): ArrayList<KMIndexedLayerInterface> {
         val result = native.getLayersIndexed()
-        return ArrayList(result.map { requireNotNull((it as io.openmobilemaps.mapscore.shared.map.IndexedLayerInterface)).asKmp() })
+        return ArrayList(result.map { (it as io.openmobilemaps.mapscore.shared.map.IndexedLayerInterface).asKmp() })
     }
 
     actual fun addLayer(layer: KMLayerInterface) {
@@ -169,12 +169,12 @@ actual class KMMapInterface actual public constructor(
 
         actual fun create(graphicsFactory: KMGraphicsObjectFactoryInterface, shaderFactory: KMShaderFactoryInterface, renderingContext: KMRenderingContextInterface, mapConfig: KMMapConfig, scheduler: KMSchedulerInterface, pixelDensity: Float, is3D: Boolean): KMMapInterface {
             val result = MapInterface.create(graphicsFactory.asPlatform(), shaderFactory.asPlatform(), renderingContext.asPlatform(), mapConfig.asPlatform(), scheduler.asPlatform(), pixelDensity, is3D)
-            return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.MapInterface)).asKmp()
+            return (result as io.openmobilemaps.mapscore.shared.map.MapInterface).asKmp()
         }
 
         actual fun createWithOpenGl(mapConfig: KMMapConfig, scheduler: KMSchedulerInterface, pixelDensity: Float, is3D: Boolean): KMMapInterface {
             val result = MapInterface.createWithOpenGl(mapConfig.asPlatform(), scheduler.asPlatform(), pixelDensity, is3D)
-            return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.MapInterface)).asKmp()
+            return (result as io.openmobilemaps.mapscore.shared.map.MapInterface).asKmp()
         }
     }
 }

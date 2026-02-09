@@ -17,7 +17,7 @@ actual class KMLayerObjectInterface actual public constructor(
 
     actual fun getRenderConfig(): ArrayList<KMRenderConfigInterface> {
         val result = native.getRenderConfig()
-        return ArrayList(result.map { requireNotNull((it as io.openmobilemaps.mapscore.shared.map.layers.objects.RenderConfigInterface)).asKmp() })
+        return ArrayList(result.map { (it as io.openmobilemaps.mapscore.shared.map.layers.objects.RenderConfigInterface).asKmp() })
     }
 }
 

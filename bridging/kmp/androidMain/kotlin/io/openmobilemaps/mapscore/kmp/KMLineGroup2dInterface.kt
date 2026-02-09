@@ -22,7 +22,7 @@ private class KMLineGroup2dInterfacePlatformWrapper(internal val nativeHandle: L
 
     override fun asGraphicsObject(): KMGraphicsObjectInterface {
         val result = nativeHandle.asGraphicsObject()
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.objects.GraphicsObjectInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.objects.GraphicsObjectInterface).asKmp()
     }
 }
 

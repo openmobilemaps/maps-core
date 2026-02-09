@@ -18,7 +18,7 @@ actual class KMOpenGlPerformanceLoggerInterface actual public constructor(
 
     actual fun asPerformanceLoggerInterface(): KMPerformanceLoggerInterface {
         val result = native.asPerformanceLoggerInterface()
-        return requireNotNull((result as MapCoreSharedModule.MCPerformanceLoggerInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCPerformanceLoggerInterfaceProtocol).asKmp()
     }
 
     actual companion object
@@ -26,12 +26,12 @@ actual class KMOpenGlPerformanceLoggerInterface actual public constructor(
 
         actual fun create(): KMOpenGlPerformanceLoggerInterface {
             val result = MapCoreSharedModule.MCOpenGlPerformanceLoggerInterface.create()
-            return requireNotNull((result as MapCoreSharedModule.MCOpenGlPerformanceLoggerInterface)).asKmp()
+            return (result as MapCoreSharedModule.MCOpenGlPerformanceLoggerInterface).asKmp()
         }
 
         actual fun createSpecifically(numBuckets: Int, bucketSizeMs: Long): KMOpenGlPerformanceLoggerInterface {
             val result = MapCoreSharedModule.MCOpenGlPerformanceLoggerInterface.createSpecifically(numBuckets, bucketSizeMs)
-            return requireNotNull((result as MapCoreSharedModule.MCOpenGlPerformanceLoggerInterface)).asKmp()
+            return (result as MapCoreSharedModule.MCOpenGlPerformanceLoggerInterface).asKmp()
         }
     }
 }

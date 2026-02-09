@@ -44,77 +44,77 @@ private class KMGraphicsObjectFactoryInterfacePlatformWrapper(internal val nativ
 
     override fun createQuad(shader: KMShaderProgramInterface): KMQuad2dInterface {
         val result = nativeHandle.createQuad(shader.asPlatform())
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.objects.Quad2dInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.objects.Quad2dInterface).asKmp()
     }
 
     override fun createQuadTessellated(shader: KMShaderProgramInterface): KMQuad2dInterface {
         val result = nativeHandle.createQuadTessellated(shader.asPlatform())
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.objects.Quad2dInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.objects.Quad2dInterface).asKmp()
     }
 
     override fun createPolygon(shader: KMShaderProgramInterface): KMPolygon2dInterface {
         val result = nativeHandle.createPolygon(shader.asPlatform())
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.objects.Polygon2dInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.objects.Polygon2dInterface).asKmp()
     }
 
     override fun createPolygonTessellated(shader: KMShaderProgramInterface): KMPolygon2dInterface {
         val result = nativeHandle.createPolygonTessellated(shader.asPlatform())
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.objects.Polygon2dInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.objects.Polygon2dInterface).asKmp()
     }
 
     override fun createIcosahedronObject(shader: KMShaderProgramInterface): KMIcosahedronInterface {
         val result = nativeHandle.createIcosahedronObject(shader.asPlatform())
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.objects.IcosahedronInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.objects.IcosahedronInterface).asKmp()
     }
 
     override fun createQuadInstanced(shader: KMShaderProgramInterface): KMQuad2dInstancedInterface {
         val result = nativeHandle.createQuadInstanced(shader.asPlatform())
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.objects.Quad2dInstancedInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.objects.Quad2dInstancedInterface).asKmp()
     }
 
     override fun createQuadStretchedInstanced(shader: KMShaderProgramInterface): KMQuad2dStretchedInstancedInterface {
         val result = nativeHandle.createQuadStretchedInstanced(shader.asPlatform())
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.objects.Quad2dStretchedInstancedInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.objects.Quad2dStretchedInstancedInterface).asKmp()
     }
 
     override fun createLineGroup(shader: KMShaderProgramInterface): KMLineGroup2dInterface {
         val result = nativeHandle.createLineGroup(shader.asPlatform())
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.objects.LineGroup2dInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.objects.LineGroup2dInterface).asKmp()
     }
 
     override fun createPolygonGroup(shader: KMShaderProgramInterface): KMPolygonGroup2dInterface {
         val result = nativeHandle.createPolygonGroup(shader.asPlatform())
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.objects.PolygonGroup2dInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.objects.PolygonGroup2dInterface).asKmp()
     }
 
     override fun createPolygonPatternGroup(shader: KMShaderProgramInterface): KMPolygonPatternGroup2dInterface {
         val result = nativeHandle.createPolygonPatternGroup(shader.asPlatform())
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.objects.PolygonPatternGroup2dInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.objects.PolygonPatternGroup2dInterface).asKmp()
     }
 
     override fun createQuadMask(is3d: Boolean): KMQuad2dInterface {
         val result = nativeHandle.createQuadMask(is3d)
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.objects.Quad2dInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.objects.Quad2dInterface).asKmp()
     }
 
     override fun createPolygonMask(is3d: Boolean): KMPolygon2dInterface {
         val result = nativeHandle.createPolygonMask(is3d)
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.objects.Polygon2dInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.objects.Polygon2dInterface).asKmp()
     }
 
     override fun createPolygonMaskTessellated(is3d: Boolean): KMPolygon2dInterface {
         val result = nativeHandle.createPolygonMaskTessellated(is3d)
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.objects.Polygon2dInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.objects.Polygon2dInterface).asKmp()
     }
 
     override fun createText(shader: KMShaderProgramInterface): KMTextInterface {
         val result = nativeHandle.createText(shader.asPlatform())
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.objects.TextInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.objects.TextInterface).asKmp()
     }
 
     override fun createTextInstanced(shader: KMShaderProgramInterface): KMTextInstancedInterface {
         val result = nativeHandle.createTextInstanced(shader.asPlatform())
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.objects.TextInstancedInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.objects.TextInstancedInterface).asKmp()
     }
 }
 
@@ -122,52 +122,52 @@ private class KMGraphicsObjectFactoryInterfacePlatformProxy(private val delegate
 {
 
     override fun createQuad(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): io.openmobilemaps.mapscore.shared.graphics.objects.Quad2dInterface {
-        val result = delegate.createQuad(requireNotNull((shader as io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface)).asKmp())
+        val result = delegate.createQuad((shader as io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface).asKmp())
         return result.asPlatform()
     }
 
     override fun createQuadTessellated(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): io.openmobilemaps.mapscore.shared.graphics.objects.Quad2dInterface {
-        val result = delegate.createQuadTessellated(requireNotNull((shader as io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface)).asKmp())
+        val result = delegate.createQuadTessellated((shader as io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface).asKmp())
         return result.asPlatform()
     }
 
     override fun createPolygon(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): io.openmobilemaps.mapscore.shared.graphics.objects.Polygon2dInterface {
-        val result = delegate.createPolygon(requireNotNull((shader as io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface)).asKmp())
+        val result = delegate.createPolygon((shader as io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface).asKmp())
         return result.asPlatform()
     }
 
     override fun createPolygonTessellated(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): io.openmobilemaps.mapscore.shared.graphics.objects.Polygon2dInterface {
-        val result = delegate.createPolygonTessellated(requireNotNull((shader as io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface)).asKmp())
+        val result = delegate.createPolygonTessellated((shader as io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface).asKmp())
         return result.asPlatform()
     }
 
     override fun createIcosahedronObject(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): io.openmobilemaps.mapscore.shared.graphics.objects.IcosahedronInterface {
-        val result = delegate.createIcosahedronObject(requireNotNull((shader as io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface)).asKmp())
+        val result = delegate.createIcosahedronObject((shader as io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface).asKmp())
         return result.asPlatform()
     }
 
     override fun createQuadInstanced(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): io.openmobilemaps.mapscore.shared.graphics.objects.Quad2dInstancedInterface {
-        val result = delegate.createQuadInstanced(requireNotNull((shader as io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface)).asKmp())
+        val result = delegate.createQuadInstanced((shader as io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface).asKmp())
         return result.asPlatform()
     }
 
     override fun createQuadStretchedInstanced(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): io.openmobilemaps.mapscore.shared.graphics.objects.Quad2dStretchedInstancedInterface {
-        val result = delegate.createQuadStretchedInstanced(requireNotNull((shader as io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface)).asKmp())
+        val result = delegate.createQuadStretchedInstanced((shader as io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface).asKmp())
         return result.asPlatform()
     }
 
     override fun createLineGroup(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): io.openmobilemaps.mapscore.shared.graphics.objects.LineGroup2dInterface {
-        val result = delegate.createLineGroup(requireNotNull((shader as io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface)).asKmp())
+        val result = delegate.createLineGroup((shader as io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface).asKmp())
         return result.asPlatform()
     }
 
     override fun createPolygonGroup(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): io.openmobilemaps.mapscore.shared.graphics.objects.PolygonGroup2dInterface {
-        val result = delegate.createPolygonGroup(requireNotNull((shader as io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface)).asKmp())
+        val result = delegate.createPolygonGroup((shader as io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface).asKmp())
         return result.asPlatform()
     }
 
     override fun createPolygonPatternGroup(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): io.openmobilemaps.mapscore.shared.graphics.objects.PolygonPatternGroup2dInterface {
-        val result = delegate.createPolygonPatternGroup(requireNotNull((shader as io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface)).asKmp())
+        val result = delegate.createPolygonPatternGroup((shader as io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface).asKmp())
         return result.asPlatform()
     }
 
@@ -187,12 +187,12 @@ private class KMGraphicsObjectFactoryInterfacePlatformProxy(private val delegate
     }
 
     override fun createText(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): io.openmobilemaps.mapscore.shared.graphics.objects.TextInterface {
-        val result = delegate.createText(requireNotNull((shader as io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface)).asKmp())
+        val result = delegate.createText((shader as io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface).asKmp())
         return result.asPlatform()
     }
 
     override fun createTextInstanced(shader: io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface): io.openmobilemaps.mapscore.shared.graphics.objects.TextInstancedInterface {
-        val result = delegate.createTextInstanced(requireNotNull((shader as io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface)).asKmp())
+        val result = delegate.createTextInstanced((shader as io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface).asKmp())
         return result.asPlatform()
     }
 }

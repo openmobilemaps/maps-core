@@ -16,7 +16,7 @@ actual class KMDefaultTouchHandlerInterface actual public constructor(
 
         actual fun create(scheduler: KMSchedulerInterface, density: Float): KMTouchHandlerInterface {
             val result = DefaultTouchHandlerInterface.create(scheduler.asPlatform(), density)
-            return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.controls.TouchHandlerInterface)).asKmp()
+            return (result as io.openmobilemaps.mapscore.shared.map.controls.TouchHandlerInterface).asKmp()
         }
     }
 }

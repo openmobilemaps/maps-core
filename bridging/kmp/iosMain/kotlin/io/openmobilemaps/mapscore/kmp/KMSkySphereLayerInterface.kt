@@ -18,7 +18,7 @@ actual class KMSkySphereLayerInterface actual public constructor(
 
     actual fun asLayerInterface(): KMLayerInterface {
         val result = native.asLayerInterface()
-        return requireNotNull((result as MapCoreSharedModule.MCLayerInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCLayerInterfaceProtocol).asKmp()
     }
 
     actual fun setTexture(texture: KMTextureHolderInterface) {
@@ -30,7 +30,7 @@ actual class KMSkySphereLayerInterface actual public constructor(
 
         actual fun create(): KMSkySphereLayerInterface {
             val result = MapCoreSharedModule.MCSkySphereLayerInterface.create()
-            return requireNotNull((result as MapCoreSharedModule.MCSkySphereLayerInterface)).asKmp()
+            return (result as MapCoreSharedModule.MCSkySphereLayerInterface).asKmp()
         }
     }
 }

@@ -51,15 +51,15 @@ private class KMTouchHandlerInterfacePlatformProxy(private val delegate: KMTouch
     }
 
     override fun insertListener(listener: MapCoreSharedModule.MCTouchInterfaceProtocol?, index: Int) {
-        delegate.insertListener(requireNotNull((listener as MapCoreSharedModule.MCTouchInterfaceProtocol)).asKmp(), index)
+        delegate.insertListener((listener as MapCoreSharedModule.MCTouchInterfaceProtocol).asKmp(), index)
     }
 
     override fun addListener(listener: MapCoreSharedModule.MCTouchInterfaceProtocol?) {
-        delegate.addListener(requireNotNull((listener as MapCoreSharedModule.MCTouchInterfaceProtocol)).asKmp())
+        delegate.addListener((listener as MapCoreSharedModule.MCTouchInterfaceProtocol).asKmp())
     }
 
     override fun removeListener(listener: MapCoreSharedModule.MCTouchInterfaceProtocol?) {
-        delegate.removeListener(requireNotNull((listener as MapCoreSharedModule.MCTouchInterfaceProtocol)).asKmp())
+        delegate.removeListener((listener as MapCoreSharedModule.MCTouchInterfaceProtocol).asKmp())
     }
 }
 

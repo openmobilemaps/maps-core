@@ -18,7 +18,7 @@ actual class KMRenderConfigInterface actual public constructor(
 
     actual fun getGraphicsObject(): KMGraphicsObjectInterface {
         val result = native.getGraphicsObject()
-        return requireNotNull((result as MapCoreSharedModule.MCGraphicsObjectInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCGraphicsObjectInterfaceProtocol).asKmp()
     }
 
     actual fun getRenderIndex(): Int {

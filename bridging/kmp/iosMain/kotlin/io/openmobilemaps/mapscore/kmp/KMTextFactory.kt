@@ -21,7 +21,7 @@ actual class KMTextFactory actual public constructor(
 
         actual fun createText(text: ArrayList<KMFormattedStringEntry>, coordinate: KMCoord, font: KMFont, textAnchor: KMAnchor, textJustify: KMTextJustify): KMTextInfoInterface {
             val result = MapCoreSharedModule.MCTextFactory.createText(ArrayList(text.map { it.asPlatform() }), coordinate.asPlatform(), font.asPlatform(), textAnchor.asPlatform(), textJustify.asPlatform())
-            return requireNotNull((result as MapCoreSharedModule.MCTextInfoInterfaceProtocol)).asKmp()
+            return (result as MapCoreSharedModule.MCTextInfoInterfaceProtocol).asKmp()
         }
     }
 }

@@ -26,7 +26,7 @@ actual class KMGeoJsonHelperInterface actual public constructor(
 
         actual fun independentInstance(): KMGeoJsonHelperInterface {
             val result = GeoJsonHelperInterface.independentInstance()
-            return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.layers.tiled.GeoJsonHelperInterface)).asKmp()
+            return (result as io.openmobilemaps.mapscore.shared.map.layers.tiled.GeoJsonHelperInterface).asKmp()
         }
     }
 }

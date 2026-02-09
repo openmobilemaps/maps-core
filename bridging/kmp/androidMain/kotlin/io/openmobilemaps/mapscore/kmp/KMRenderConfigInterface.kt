@@ -13,7 +13,7 @@ actual class KMRenderConfigInterface actual public constructor(
 
     actual fun getGraphicsObject(): KMGraphicsObjectInterface {
         val result = native.getGraphicsObject()
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.objects.GraphicsObjectInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.objects.GraphicsObjectInterface).asKmp()
     }
 
     actual fun getRenderIndex(): Int {

@@ -58,7 +58,7 @@ private class KMPolygonPatternGroup2dInterfacePlatformWrapper(internal val nativ
 
     override fun asGraphicsObject(): KMGraphicsObjectInterface {
         val result = nativeHandle.asGraphicsObject()
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.objects.GraphicsObjectInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.objects.GraphicsObjectInterface).asKmp()
     }
 }
 
@@ -86,7 +86,7 @@ private class KMPolygonPatternGroup2dInterfacePlatformProxy(private val delegate
     }
 
     override fun loadTexture(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, textureHolder: io.openmobilemaps.mapscore.shared.graphics.objects.TextureHolderInterface) {
-        delegate.loadTexture(requireNotNull((context as io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface)).asKmp(), requireNotNull((textureHolder as io.openmobilemaps.mapscore.shared.graphics.objects.TextureHolderInterface)).asKmp())
+        delegate.loadTexture((context as io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface).asKmp(), (textureHolder as io.openmobilemaps.mapscore.shared.graphics.objects.TextureHolderInterface).asKmp())
     }
 
     override fun removeTexture() {

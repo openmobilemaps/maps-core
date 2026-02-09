@@ -85,11 +85,11 @@ private class KMSchedulerInterfacePlatformProxy(private val delegate: KMSchedule
 {
 
     override fun addTask(task: MapCoreSharedModule.MCTaskInterfaceProtocol?) {
-        delegate.addTask(requireNotNull((task as MapCoreSharedModule.MCTaskInterfaceProtocol)).asKmp())
+        delegate.addTask((task as MapCoreSharedModule.MCTaskInterfaceProtocol).asKmp())
     }
 
     override fun addTasks(tasks: List<*>) {
-        delegate.addTasks(ArrayList(((tasks as? List<*>)?.map { requireNotNull((it as MapCoreSharedModule.MCTaskInterfaceProtocol)).asKmp() } ?: (0 until (tasks as platform.Foundation.NSArray).count.toInt()).map { idx -> requireNotNull(((tasks as platform.Foundation.NSArray).objectAtIndex(idx.toULong()) as MapCoreSharedModule.MCTaskInterfaceProtocol)).asKmp() })))
+        delegate.addTasks(ArrayList(((tasks as? List<*>)?.map { (it as MapCoreSharedModule.MCTaskInterfaceProtocol).asKmp() } ?: (0 until (tasks as platform.Foundation.NSArray).count.toInt()).map { idx -> ((tasks as platform.Foundation.NSArray).objectAtIndex(idx.toULong()) as MapCoreSharedModule.MCTaskInterfaceProtocol).asKmp() })))
     }
 
     override fun removeTask(id: String) {
@@ -123,7 +123,7 @@ private class KMSchedulerInterfacePlatformProxy(private val delegate: KMSchedule
     }
 
     override fun setSchedulerGraphicsTaskCallbacks(callbacks: MapCoreSharedModule.MCSchedulerGraphicsTaskCallbacks?) {
-        delegate.setSchedulerGraphicsTaskCallbacks(requireNotNull((callbacks as MapCoreSharedModule.MCSchedulerGraphicsTaskCallbacks)).asKmp())
+        delegate.setSchedulerGraphicsTaskCallbacks((callbacks as MapCoreSharedModule.MCSchedulerGraphicsTaskCallbacks).asKmp())
     }
 }
 

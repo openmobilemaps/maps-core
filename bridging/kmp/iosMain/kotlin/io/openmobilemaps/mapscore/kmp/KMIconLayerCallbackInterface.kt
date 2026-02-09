@@ -37,12 +37,12 @@ private class KMIconLayerCallbackInterfacePlatformProxy(private val delegate: KM
 {
 
     override fun onClickConfirmed(icons: List<*>): Boolean {
-        val result = delegate.onClickConfirmed(ArrayList(((icons as? List<*>)?.map { requireNotNull((it as MapCoreSharedModule.MCIconInfoInterface)).asKmp() } ?: (0 until (icons as platform.Foundation.NSArray).count.toInt()).map { idx -> requireNotNull(((icons as platform.Foundation.NSArray).objectAtIndex(idx.toULong()) as MapCoreSharedModule.MCIconInfoInterface)).asKmp() })))
+        val result = delegate.onClickConfirmed(ArrayList(((icons as? List<*>)?.map { (it as MapCoreSharedModule.MCIconInfoInterface).asKmp() } ?: (0 until (icons as platform.Foundation.NSArray).count.toInt()).map { idx -> ((icons as platform.Foundation.NSArray).objectAtIndex(idx.toULong()) as MapCoreSharedModule.MCIconInfoInterface).asKmp() })))
         return result
     }
 
     override fun onLongPress(icons: List<*>): Boolean {
-        val result = delegate.onLongPress(ArrayList(((icons as? List<*>)?.map { requireNotNull((it as MapCoreSharedModule.MCIconInfoInterface)).asKmp() } ?: (0 until (icons as platform.Foundation.NSArray).count.toInt()).map { idx -> requireNotNull(((icons as platform.Foundation.NSArray).objectAtIndex(idx.toULong()) as MapCoreSharedModule.MCIconInfoInterface)).asKmp() })))
+        val result = delegate.onLongPress(ArrayList(((icons as? List<*>)?.map { (it as MapCoreSharedModule.MCIconInfoInterface).asKmp() } ?: (0 until (icons as platform.Foundation.NSArray).count.toInt()).map { idx -> ((icons as platform.Foundation.NSArray).objectAtIndex(idx.toULong()) as MapCoreSharedModule.MCIconInfoInterface).asKmp() })))
         return result
     }
 }

@@ -79,11 +79,11 @@ private class KMSchedulerInterfacePlatformProxy(private val delegate: KMSchedule
 {
 
     override fun addTask(task: io.openmobilemaps.mapscore.shared.map.scheduling.TaskInterface) {
-        delegate.addTask(requireNotNull((task as io.openmobilemaps.mapscore.shared.map.scheduling.TaskInterface)).asKmp())
+        delegate.addTask((task as io.openmobilemaps.mapscore.shared.map.scheduling.TaskInterface).asKmp())
     }
 
     override fun addTasks(tasks: ArrayList<io.openmobilemaps.mapscore.shared.map.scheduling.TaskInterface>) {
-        delegate.addTasks(ArrayList(tasks.map { requireNotNull((it as io.openmobilemaps.mapscore.shared.map.scheduling.TaskInterface)).asKmp() }))
+        delegate.addTasks(ArrayList(tasks.map { (it as io.openmobilemaps.mapscore.shared.map.scheduling.TaskInterface).asKmp() }))
     }
 
     override fun removeTask(id: String) {
@@ -117,7 +117,7 @@ private class KMSchedulerInterfacePlatformProxy(private val delegate: KMSchedule
     }
 
     override fun setSchedulerGraphicsTaskCallbacks(callbacks: io.openmobilemaps.mapscore.shared.map.scheduling.SchedulerGraphicsTaskCallbacks) {
-        delegate.setSchedulerGraphicsTaskCallbacks(requireNotNull((callbacks as io.openmobilemaps.mapscore.shared.map.scheduling.SchedulerGraphicsTaskCallbacks)).asKmp())
+        delegate.setSchedulerGraphicsTaskCallbacks((callbacks as io.openmobilemaps.mapscore.shared.map.scheduling.SchedulerGraphicsTaskCallbacks).asKmp())
     }
 }
 

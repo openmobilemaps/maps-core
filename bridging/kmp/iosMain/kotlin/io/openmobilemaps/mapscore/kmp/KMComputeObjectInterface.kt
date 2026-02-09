@@ -29,7 +29,7 @@ private class KMComputeObjectInterfacePlatformProxy(private val delegate: KMComp
 {
 
     override fun compute(context: MapCoreSharedModule.MCRenderingContextInterfaceProtocol?, vpMatrix: Long, origin: MapCoreSharedModule.MCVec3D, screenPixelAsRealMeterFactor: Double) {
-        delegate.compute(requireNotNull((context as MapCoreSharedModule.MCRenderingContextInterfaceProtocol)).asKmp(), vpMatrix, (origin as MapCoreSharedModule.MCVec3D).asKmp(), screenPixelAsRealMeterFactor)
+        delegate.compute((context as MapCoreSharedModule.MCRenderingContextInterfaceProtocol).asKmp(), vpMatrix, (origin as MapCoreSharedModule.MCVec3D).asKmp(), screenPixelAsRealMeterFactor)
     }
 }
 

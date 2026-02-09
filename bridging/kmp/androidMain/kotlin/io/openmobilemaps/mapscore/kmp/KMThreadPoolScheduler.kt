@@ -16,7 +16,7 @@ actual class KMThreadPoolScheduler actual public constructor(
 
         actual fun create(): KMSchedulerInterface {
             val result = ThreadPoolScheduler.create()
-            return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.scheduling.SchedulerInterface)).asKmp()
+            return (result as io.openmobilemaps.mapscore.shared.map.scheduling.SchedulerInterface).asKmp()
         }
     }
 }

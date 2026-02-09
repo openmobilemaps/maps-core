@@ -13,7 +13,7 @@ actual class KMCpuPerformanceLoggerInterface actual public constructor(
 
     actual fun asPerformanceLoggerInterface(): KMPerformanceLoggerInterface {
         val result = native.asPerformanceLoggerInterface()
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.PerformanceLoggerInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.map.PerformanceLoggerInterface).asKmp()
     }
 
     actual companion object
@@ -21,12 +21,12 @@ actual class KMCpuPerformanceLoggerInterface actual public constructor(
 
         actual fun create(): KMCpuPerformanceLoggerInterface {
             val result = CpuPerformanceLoggerInterface.create()
-            return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.CpuPerformanceLoggerInterface)).asKmp()
+            return (result as io.openmobilemaps.mapscore.shared.map.CpuPerformanceLoggerInterface).asKmp()
         }
 
         actual fun createSpecifically(numBuckets: Int, bucketSizeMs: Long): KMCpuPerformanceLoggerInterface {
             val result = CpuPerformanceLoggerInterface.createSpecifically(numBuckets, bucketSizeMs)
-            return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.CpuPerformanceLoggerInterface)).asKmp()
+            return (result as io.openmobilemaps.mapscore.shared.map.CpuPerformanceLoggerInterface).asKmp()
         }
     }
 }

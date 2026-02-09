@@ -13,7 +13,7 @@ actual class KMSphereEffectLayerInterface actual public constructor(
 
     actual fun asLayerInterface(): KMLayerInterface {
         val result = native.asLayerInterface()
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.LayerInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.map.LayerInterface).asKmp()
     }
 
     actual companion object
@@ -21,7 +21,7 @@ actual class KMSphereEffectLayerInterface actual public constructor(
 
         actual fun create(): KMSphereEffectLayerInterface {
             val result = SphereEffectLayerInterface.create()
-            return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.layers.effect.SphereEffectLayerInterface)).asKmp()
+            return (result as io.openmobilemaps.mapscore.shared.map.layers.effect.SphereEffectLayerInterface).asKmp()
         }
     }
 }

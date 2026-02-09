@@ -17,7 +17,7 @@ actual class KMIconLayerInterface actual public constructor(
 
     actual fun getIcons(): ArrayList<KMIconInfoInterface> {
         val result = native.getIcons()
-        return ArrayList(result.map { requireNotNull((it as io.openmobilemaps.mapscore.shared.map.layers.icon.IconInfoInterface)).asKmp() })
+        return ArrayList(result.map { (it as io.openmobilemaps.mapscore.shared.map.layers.icon.IconInfoInterface).asKmp() })
     }
 
     actual fun remove(icon: KMIconInfoInterface) {
@@ -54,7 +54,7 @@ actual class KMIconLayerInterface actual public constructor(
 
     actual fun asLayerInterface(): KMLayerInterface {
         val result = native.asLayerInterface()
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.LayerInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.map.LayerInterface).asKmp()
     }
 
     actual fun invalidate() {
@@ -78,7 +78,7 @@ actual class KMIconLayerInterface actual public constructor(
 
         actual fun create(): KMIconLayerInterface {
             val result = IconLayerInterface.create()
-            return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.layers.icon.IconLayerInterface)).asKmp()
+            return (result as io.openmobilemaps.mapscore.shared.map.layers.icon.IconLayerInterface).asKmp()
         }
     }
 }

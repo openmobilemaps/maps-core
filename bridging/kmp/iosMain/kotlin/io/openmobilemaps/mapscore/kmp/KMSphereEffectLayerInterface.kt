@@ -18,7 +18,7 @@ actual class KMSphereEffectLayerInterface actual public constructor(
 
     actual fun asLayerInterface(): KMLayerInterface {
         val result = native.asLayerInterface()
-        return requireNotNull((result as MapCoreSharedModule.MCLayerInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCLayerInterfaceProtocol).asKmp()
     }
 
     actual companion object
@@ -26,7 +26,7 @@ actual class KMSphereEffectLayerInterface actual public constructor(
 
         actual fun create(): KMSphereEffectLayerInterface {
             val result = MapCoreSharedModule.MCSphereEffectLayerInterface.create()
-            return requireNotNull((result as MapCoreSharedModule.MCSphereEffectLayerInterface)).asKmp()
+            return (result as MapCoreSharedModule.MCSphereEffectLayerInterface).asKmp()
         }
     }
 }

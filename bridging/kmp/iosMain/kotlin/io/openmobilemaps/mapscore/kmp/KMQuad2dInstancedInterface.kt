@@ -84,12 +84,12 @@ private class KMQuad2dInstancedInterfacePlatformWrapper(internal val nativeHandl
 
     override fun asGraphicsObject(): KMGraphicsObjectInterface {
         val result = nativeHandle.asGraphicsObject()
-        return requireNotNull((result as MapCoreSharedModule.MCGraphicsObjectInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCGraphicsObjectInterfaceProtocol).asKmp()
     }
 
     override fun asMaskingObject(): KMMaskingObjectInterface {
         val result = nativeHandle.asMaskingObject()
-        return requireNotNull((result as MapCoreSharedModule.MCMaskingObjectInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCMaskingObjectInterfaceProtocol).asKmp()
     }
 }
 
@@ -129,7 +129,7 @@ private class KMQuad2dInstancedInterfacePlatformProxy(private val delegate: KMQu
     }
 
     override fun loadTexture(context: MapCoreSharedModule.MCRenderingContextInterfaceProtocol?, textureHolder: MapCoreSharedModule.MCTextureHolderInterfaceProtocol?) {
-        delegate.loadTexture(requireNotNull((context as MapCoreSharedModule.MCRenderingContextInterfaceProtocol)).asKmp(), requireNotNull((textureHolder as MapCoreSharedModule.MCTextureHolderInterfaceProtocol)).asKmp())
+        delegate.loadTexture((context as MapCoreSharedModule.MCRenderingContextInterfaceProtocol).asKmp(), (textureHolder as MapCoreSharedModule.MCTextureHolderInterfaceProtocol).asKmp())
     }
 
     override fun removeTexture() {

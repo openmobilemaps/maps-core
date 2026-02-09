@@ -40,7 +40,7 @@ private class KMOpenGlRenderingContextInterfacePlatformWrapper(internal val nati
 
     override fun getCreateRenderTarget(name: String, textureFilter: KMTextureFilterType, clearColor: KMColor, usesDepthStencil: Boolean): KMOpenGlRenderTargetInterface {
         val result = nativeHandle.getCreateRenderTarget(name, textureFilter.asPlatform(), clearColor.asPlatform(), usesDepthStencil)
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.OpenGlRenderTargetInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.OpenGlRenderTargetInterface).asKmp()
     }
 
     override fun deleteRenderTarget(name: String) {
@@ -49,7 +49,7 @@ private class KMOpenGlRenderingContextInterfacePlatformWrapper(internal val nati
 
     override fun getRenderTargets(): ArrayList<KMOpenGlRenderTargetInterface> {
         val result = nativeHandle.getRenderTargets()
-        return ArrayList(result.map { requireNotNull((it as io.openmobilemaps.mapscore.shared.graphics.OpenGlRenderTargetInterface)).asKmp() })
+        return ArrayList(result.map { (it as io.openmobilemaps.mapscore.shared.graphics.OpenGlRenderTargetInterface).asKmp() })
     }
 
     override fun getProgram(name: String): Int {

@@ -17,7 +17,7 @@ actual class KMTiled2dMapVectorLayerInterface actual public constructor(
 
     actual fun asLayerInterface(): KMLayerInterface {
         val result = native.asLayerInterface()
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.LayerInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.map.LayerInterface).asKmp()
     }
 
     actual fun setMinZoomLevelIdentifier(value: Int?) {
@@ -77,12 +77,12 @@ actual class KMTiled2dMapVectorLayerInterface actual public constructor(
 
         actual fun createFromStyleJson(layerName: String, styleJsonUrl: String, loaders: ArrayList<KMLoaderInterface>, fontLoader: KMFontLoaderInterface): KMTiled2dMapVectorLayerInterface {
             val result = Tiled2dMapVectorLayerInterface.createFromStyleJson(layerName, styleJsonUrl, ArrayList(loaders.map { it.asPlatform() }), fontLoader.asPlatform())
-            return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.Tiled2dMapVectorLayerInterface)).asKmp()
+            return (result as io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.Tiled2dMapVectorLayerInterface).asKmp()
         }
 
         actual fun createExplicitly(layerName: String, styleJson: String?, localStyleJson: Boolean?, loaders: ArrayList<KMLoaderInterface>, fontLoader: KMFontLoaderInterface, localDataProvider: KMTiled2dMapVectorLayerLocalDataProviderInterface?, customZoomInfo: KMTiled2dMapZoomInfo?, symbolDelegate: KMTiled2dMapVectorLayerSymbolDelegateInterface?, sourceUrlParams: HashMap<String, String>?): KMTiled2dMapVectorLayerInterface {
             val result = Tiled2dMapVectorLayerInterface.createExplicitly(layerName, styleJson?.let { it }, localStyleJson?.let { it }, ArrayList(loaders.map { it.asPlatform() }), fontLoader.asPlatform(), localDataProvider?.let { it.asPlatform() }, customZoomInfo?.let { it.asPlatform() }, symbolDelegate?.let { it.asPlatform() }, sourceUrlParams?.let { HashMap(it.map { it.key to it.value }.toMap()) })
-            return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.Tiled2dMapVectorLayerInterface)).asKmp()
+            return (result as io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.Tiled2dMapVectorLayerInterface).asKmp()
         }
     }
 }

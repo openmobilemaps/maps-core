@@ -64,7 +64,7 @@ private class KMPolygonPatternGroup2dInterfacePlatformWrapper(internal val nativ
 
     override fun asGraphicsObject(): KMGraphicsObjectInterface {
         val result = nativeHandle.asGraphicsObject()
-        return requireNotNull((result as MapCoreSharedModule.MCGraphicsObjectInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCGraphicsObjectInterfaceProtocol).asKmp()
     }
 }
 
@@ -92,7 +92,7 @@ private class KMPolygonPatternGroup2dInterfacePlatformProxy(private val delegate
     }
 
     override fun loadTexture(context: MapCoreSharedModule.MCRenderingContextInterfaceProtocol?, textureHolder: MapCoreSharedModule.MCTextureHolderInterfaceProtocol?) {
-        delegate.loadTexture(requireNotNull((context as MapCoreSharedModule.MCRenderingContextInterfaceProtocol)).asKmp(), requireNotNull((textureHolder as MapCoreSharedModule.MCTextureHolderInterfaceProtocol)).asKmp())
+        delegate.loadTexture((context as MapCoreSharedModule.MCRenderingContextInterfaceProtocol).asKmp(), (textureHolder as MapCoreSharedModule.MCTextureHolderInterfaceProtocol).asKmp())
     }
 
     override fun removeTexture() {

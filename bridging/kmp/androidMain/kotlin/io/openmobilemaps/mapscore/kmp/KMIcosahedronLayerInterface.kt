@@ -13,7 +13,7 @@ actual class KMIcosahedronLayerInterface actual public constructor(
 
     actual fun asLayerInterface(): KMLayerInterface {
         val result = native.asLayerInterface()
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.LayerInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.map.LayerInterface).asKmp()
     }
 
     actual companion object
@@ -21,7 +21,7 @@ actual class KMIcosahedronLayerInterface actual public constructor(
 
         actual fun create(callbackHandler: KMIcosahedronLayerCallbackInterface): KMIcosahedronLayerInterface {
             val result = IcosahedronLayerInterface.create(callbackHandler.asPlatform())
-            return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.layers.icosahedron.IcosahedronLayerInterface)).asKmp()
+            return (result as io.openmobilemaps.mapscore.shared.map.layers.icosahedron.IcosahedronLayerInterface).asKmp()
         }
     }
 }

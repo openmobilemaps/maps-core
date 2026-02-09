@@ -40,7 +40,7 @@ actual class KMErrorManager actual public constructor(
 
         actual fun create(): KMErrorManager {
             val result = ErrorManager.create()
-            return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.ErrorManager)).asKmp()
+            return (result as io.openmobilemaps.mapscore.shared.map.ErrorManager).asKmp()
         }
     }
 }

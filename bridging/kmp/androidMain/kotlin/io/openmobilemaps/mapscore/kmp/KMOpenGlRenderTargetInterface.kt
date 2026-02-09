@@ -26,7 +26,7 @@ private class KMOpenGlRenderTargetInterfacePlatformWrapper(internal val nativeHa
 
     override fun asRenderTargetInterface(): KMRenderTargetInterface {
         val result = nativeHandle.asRenderTargetInterface()
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.RenderTargetInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.RenderTargetInterface).asKmp()
     }
 
     override fun setup(size: KMVec2I) {
@@ -68,7 +68,7 @@ private class KMOpenGlRenderTargetInterfacePlatformProxy(private val delegate: K
     }
 
     override fun bindFramebuffer(renderingContext: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface) {
-        delegate.bindFramebuffer(requireNotNull((renderingContext as io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface)).asKmp())
+        delegate.bindFramebuffer((renderingContext as io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface).asKmp())
     }
 
     override fun unbindFramebuffer() {

@@ -24,7 +24,7 @@ private class KMMaskingObjectInterfacePlatformWrapper(internal val nativeHandle:
 
     override fun asGraphicsObject(): KMGraphicsObjectInterface {
         val result = nativeHandle.asGraphicsObject()
-        return requireNotNull((result as MapCoreSharedModule.MCGraphicsObjectInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCGraphicsObjectInterfaceProtocol).asKmp()
     }
 
     override fun renderAsMask(context: KMRenderingContextInterface, renderPass: KMRenderPassConfig, vpMatrix: Long, mMatrix: Long, origin: KMVec3D, screenPixelAsRealMeterFactor: Double, isScreenSpaceCoords: Boolean) {
@@ -41,7 +41,7 @@ private class KMMaskingObjectInterfacePlatformProxy(private val delegate: KMMask
     }
 
     override fun renderAsMask(context: MapCoreSharedModule.MCRenderingContextInterfaceProtocol?, renderPass: MapCoreSharedModule.MCRenderPassConfig, vpMatrix: Long, mMatrix: Long, origin: MapCoreSharedModule.MCVec3D, screenPixelAsRealMeterFactor: Double, isScreenSpaceCoords: Boolean) {
-        delegate.renderAsMask(requireNotNull((context as MapCoreSharedModule.MCRenderingContextInterfaceProtocol)).asKmp(), (renderPass as MapCoreSharedModule.MCRenderPassConfig).asKmp(), vpMatrix, mMatrix, (origin as MapCoreSharedModule.MCVec3D).asKmp(), screenPixelAsRealMeterFactor, isScreenSpaceCoords)
+        delegate.renderAsMask((context as MapCoreSharedModule.MCRenderingContextInterfaceProtocol).asKmp(), (renderPass as MapCoreSharedModule.MCRenderPassConfig).asKmp(), vpMatrix, mMatrix, (origin as MapCoreSharedModule.MCVec3D).asKmp(), screenPixelAsRealMeterFactor, isScreenSpaceCoords)
     }
 }
 

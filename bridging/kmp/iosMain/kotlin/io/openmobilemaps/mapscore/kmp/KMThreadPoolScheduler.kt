@@ -21,7 +21,7 @@ actual class KMThreadPoolScheduler actual public constructor(
 
         actual fun create(): KMSchedulerInterface {
             val result = MapCoreSharedModule.MCThreadPoolScheduler.create()
-            return requireNotNull((result as MapCoreSharedModule.MCSchedulerInterfaceProtocol)).asKmp()
+            return (result as MapCoreSharedModule.MCSchedulerInterfaceProtocol).asKmp()
         }
     }
 }

@@ -16,22 +16,22 @@ actual class KMDefaultTiled2dMapLayerConfigs actual public constructor(
 
         actual fun webMercator(layerName: String, urlFormat: String): KMTiled2dMapLayerConfig {
             val result = DefaultTiled2dMapLayerConfigs.webMercator(layerName, urlFormat)
-            return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig)).asKmp()
+            return (result as io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig).asKmp()
         }
 
         actual fun webMercatorCustom(layerName: String, urlFormat: String, zoomInfo: KMTiled2dMapZoomInfo?, minZoomLevel: Int, maxZoomLevel: Int): KMTiled2dMapLayerConfig {
             val result = DefaultTiled2dMapLayerConfigs.webMercatorCustom(layerName, urlFormat, zoomInfo?.let { it.asPlatform() }, minZoomLevel, maxZoomLevel)
-            return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig)).asKmp()
+            return (result as io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig).asKmp()
         }
 
         actual fun epsg4326(layerName: String, urlFormat: String): KMTiled2dMapLayerConfig {
             val result = DefaultTiled2dMapLayerConfigs.epsg4326(layerName, urlFormat)
-            return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig)).asKmp()
+            return (result as io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig).asKmp()
         }
 
         actual fun epsg4326Custom(layerName: String, urlFormat: String, zoomInfo: KMTiled2dMapZoomInfo, minZoomLevel: Int, maxZoomLevel: Int): KMTiled2dMapLayerConfig {
             val result = DefaultTiled2dMapLayerConfigs.epsg4326Custom(layerName, urlFormat, zoomInfo.asPlatform(), minZoomLevel, maxZoomLevel)
-            return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig)).asKmp()
+            return (result as io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig).asKmp()
         }
     }
 }

@@ -29,7 +29,7 @@ private class KMLineLayerCallbackInterfacePlatformProxy(private val delegate: KM
 {
 
     override fun onLineClickConfirmed(line: MapCoreSharedModule.MCLineInfoInterface?) {
-        delegate.onLineClickConfirmed(requireNotNull((line as MapCoreSharedModule.MCLineInfoInterface)).asKmp())
+        delegate.onLineClickConfirmed((line as MapCoreSharedModule.MCLineInfoInterface).asKmp())
     }
 }
 

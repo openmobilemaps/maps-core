@@ -45,7 +45,7 @@ actual class KMBoundingBoxInterface actual public constructor(
 
         actual fun create(systemIdentifier: Int): KMBoundingBoxInterface {
             val result = BoundingBoxInterface.create(systemIdentifier)
-            return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.coordinates.BoundingBoxInterface)).asKmp()
+            return (result as io.openmobilemaps.mapscore.shared.map.coordinates.BoundingBoxInterface).asKmp()
         }
     }
 }

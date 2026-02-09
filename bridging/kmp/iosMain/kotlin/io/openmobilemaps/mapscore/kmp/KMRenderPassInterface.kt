@@ -30,7 +30,7 @@ private class KMRenderPassInterfacePlatformWrapper(internal val nativeHandle: Ma
 
     override fun getRenderObjects(): ArrayList<KMRenderObjectInterface> {
         val result = nativeHandle.getRenderObjects()
-        return ArrayList(((result as? List<*>)?.map { requireNotNull((it as MapCoreSharedModule.MCRenderObjectInterfaceProtocol)).asKmp() } ?: (0 until (result as platform.Foundation.NSArray).count.toInt()).map { idx -> requireNotNull(((result as platform.Foundation.NSArray).objectAtIndex(idx.toULong()) as MapCoreSharedModule.MCRenderObjectInterfaceProtocol)).asKmp() }))
+        return ArrayList(((result as? List<*>)?.map { (it as MapCoreSharedModule.MCRenderObjectInterfaceProtocol).asKmp() } ?: (0 until (result as platform.Foundation.NSArray).count.toInt()).map { idx -> ((result as platform.Foundation.NSArray).objectAtIndex(idx.toULong()) as MapCoreSharedModule.MCRenderObjectInterfaceProtocol).asKmp() }))
     }
 
     override fun addRenderObject(renderObject: KMRenderObjectInterface) {
@@ -44,7 +44,7 @@ private class KMRenderPassInterfacePlatformWrapper(internal val nativeHandle: Ma
 
     override fun getMaskingObject(): KMMaskingObjectInterface? {
         val result = nativeHandle.getMaskingObject()
-        return result?.let { requireNotNull((it as MapCoreSharedModule.MCMaskingObjectInterfaceProtocol)).asKmp() }
+        return result?.let { (it as MapCoreSharedModule.MCMaskingObjectInterfaceProtocol).asKmp() }
     }
 
     override fun getScissoringRect(): KMRectI? {
@@ -62,7 +62,7 @@ private class KMRenderPassInterfacePlatformProxy(private val delegate: KMRenderP
     }
 
     override fun addRenderObject(renderObject: MapCoreSharedModule.MCRenderObjectInterfaceProtocol?) {
-        delegate.addRenderObject(requireNotNull((renderObject as MapCoreSharedModule.MCRenderObjectInterfaceProtocol)).asKmp())
+        delegate.addRenderObject((renderObject as MapCoreSharedModule.MCRenderObjectInterfaceProtocol).asKmp())
     }
 
     override fun getRenderPassConfig(): MapCoreSharedModule.MCRenderPassConfig {

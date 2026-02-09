@@ -24,7 +24,7 @@ private class KMRenderPassInterfacePlatformWrapper(internal val nativeHandle: Re
 
     override fun getRenderObjects(): ArrayList<KMRenderObjectInterface> {
         val result = nativeHandle.getRenderObjects()
-        return ArrayList(result.map { requireNotNull((it as io.openmobilemaps.mapscore.shared.graphics.RenderObjectInterface)).asKmp() })
+        return ArrayList(result.map { (it as io.openmobilemaps.mapscore.shared.graphics.RenderObjectInterface).asKmp() })
     }
 
     override fun addRenderObject(renderObject: KMRenderObjectInterface) {
@@ -38,7 +38,7 @@ private class KMRenderPassInterfacePlatformWrapper(internal val nativeHandle: Re
 
     override fun getMaskingObject(): KMMaskingObjectInterface? {
         val result = nativeHandle.getMaskingObject()
-        return result?.let { requireNotNull((it as io.openmobilemaps.mapscore.shared.graphics.objects.MaskingObjectInterface)).asKmp() }
+        return result?.let { (it as io.openmobilemaps.mapscore.shared.graphics.objects.MaskingObjectInterface).asKmp() }
     }
 
     override fun getScissoringRect(): KMRectI? {
@@ -56,7 +56,7 @@ private class KMRenderPassInterfacePlatformProxy(private val delegate: KMRenderP
     }
 
     override fun addRenderObject(renderObject: io.openmobilemaps.mapscore.shared.graphics.RenderObjectInterface) {
-        delegate.addRenderObject(requireNotNull((renderObject as io.openmobilemaps.mapscore.shared.graphics.RenderObjectInterface)).asKmp())
+        delegate.addRenderObject((renderObject as io.openmobilemaps.mapscore.shared.graphics.RenderObjectInterface).asKmp())
     }
 
     override fun getRenderPassConfig(): io.openmobilemaps.mapscore.shared.graphics.RenderPassConfig {

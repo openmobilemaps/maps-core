@@ -23,7 +23,7 @@ actual class KMIconInfoInterface actual public constructor(
 
     actual fun getTexture(): KMTextureHolderInterface {
         val result = native.getTexture()
-        return requireNotNull((result as MapCoreSharedModule.MCTextureHolderInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCTextureHolderInterfaceProtocol).asKmp()
     }
 
     actual fun setCoordinate(coord: KMCoord) {

@@ -47,7 +47,7 @@ actual class KMPolygonLayerInterface actual public constructor(
 
     actual fun asLayerInterface(): KMLayerInterface {
         val result = native.asLayerInterface()
-        return requireNotNull((result as MapCoreSharedModule.MCLayerInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCLayerInterfaceProtocol).asKmp()
     }
 
     actual fun resetSelection() {
@@ -67,7 +67,7 @@ actual class KMPolygonLayerInterface actual public constructor(
 
         actual fun create(): KMPolygonLayerInterface {
             val result = MapCoreSharedModule.MCPolygonLayerInterface.create()
-            return requireNotNull((result as MapCoreSharedModule.MCPolygonLayerInterface)).asKmp()
+            return (result as MapCoreSharedModule.MCPolygonLayerInterface).asKmp()
         }
     }
 }

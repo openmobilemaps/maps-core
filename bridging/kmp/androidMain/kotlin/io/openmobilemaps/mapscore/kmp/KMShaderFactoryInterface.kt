@@ -68,137 +68,137 @@ private class KMShaderFactoryInterfacePlatformWrapper(internal val nativeHandle:
 
     override fun createAlphaShader(): KMAlphaShaderInterface {
         val result = nativeHandle.createAlphaShader()
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.shader.AlphaShaderInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.shader.AlphaShaderInterface).asKmp()
     }
 
     override fun createUnitSphereAlphaShader(): KMAlphaShaderInterface {
         val result = nativeHandle.createUnitSphereAlphaShader()
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.shader.AlphaShaderInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.shader.AlphaShaderInterface).asKmp()
     }
 
     override fun createAlphaInstancedShader(): KMAlphaInstancedShaderInterface {
         val result = nativeHandle.createAlphaInstancedShader()
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.shader.AlphaInstancedShaderInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.shader.AlphaInstancedShaderInterface).asKmp()
     }
 
     override fun createUnitSphereAlphaInstancedShader(): KMAlphaInstancedShaderInterface {
         val result = nativeHandle.createUnitSphereAlphaInstancedShader()
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.shader.AlphaInstancedShaderInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.shader.AlphaInstancedShaderInterface).asKmp()
     }
 
     override fun createLineGroupShader(): KMLineGroupShaderInterface {
         val result = nativeHandle.createLineGroupShader()
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.shader.LineGroupShaderInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.shader.LineGroupShaderInterface).asKmp()
     }
 
     override fun createUnitSphereLineGroupShader(): KMLineGroupShaderInterface {
         val result = nativeHandle.createUnitSphereLineGroupShader()
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.shader.LineGroupShaderInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.shader.LineGroupShaderInterface).asKmp()
     }
 
     override fun createSimpleLineGroupShader(): KMLineGroupShaderInterface {
         val result = nativeHandle.createSimpleLineGroupShader()
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.shader.LineGroupShaderInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.shader.LineGroupShaderInterface).asKmp()
     }
 
     override fun createUnitSphereSimpleLineGroupShader(): KMLineGroupShaderInterface {
         val result = nativeHandle.createUnitSphereSimpleLineGroupShader()
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.shader.LineGroupShaderInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.shader.LineGroupShaderInterface).asKmp()
     }
 
     override fun createUnitSphereColorShader(): KMColorShaderInterface {
         val result = nativeHandle.createUnitSphereColorShader()
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.shader.ColorShaderInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.shader.ColorShaderInterface).asKmp()
     }
 
     override fun createColorShader(): KMColorShaderInterface {
         val result = nativeHandle.createColorShader()
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.shader.ColorShaderInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.shader.ColorShaderInterface).asKmp()
     }
 
     override fun createPolygonTessellatedShader(unitSphere: Boolean): KMColorShaderInterface {
         val result = nativeHandle.createPolygonTessellatedShader(unitSphere)
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.shader.ColorShaderInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.shader.ColorShaderInterface).asKmp()
     }
 
     override fun createColorCircleShader(): KMColorCircleShaderInterface {
         val result = nativeHandle.createColorCircleShader()
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.shader.ColorCircleShaderInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.shader.ColorCircleShaderInterface).asKmp()
     }
 
     override fun createUnitSphereColorCircleShader(): KMColorCircleShaderInterface {
         val result = nativeHandle.createUnitSphereColorCircleShader()
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.shader.ColorCircleShaderInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.shader.ColorCircleShaderInterface).asKmp()
     }
 
     override fun createPolygonGroupShader(isStriped: Boolean, unitSphere: Boolean): KMPolygonGroupShaderInterface {
         val result = nativeHandle.createPolygonGroupShader(isStriped, unitSphere)
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.shader.PolygonGroupShaderInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.shader.PolygonGroupShaderInterface).asKmp()
     }
 
     override fun createPolygonPatternGroupShader(fadeInPattern: Boolean, unitSphere: Boolean): KMPolygonPatternGroupShaderInterface {
         val result = nativeHandle.createPolygonPatternGroupShader(fadeInPattern, unitSphere)
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.shader.PolygonPatternGroupShaderInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.shader.PolygonPatternGroupShaderInterface).asKmp()
     }
 
     override fun createTextShader(): KMTextShaderInterface {
         val result = nativeHandle.createTextShader()
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.shader.TextShaderInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.shader.TextShaderInterface).asKmp()
     }
 
     override fun createTextInstancedShader(): KMTextInstancedShaderInterface {
         val result = nativeHandle.createTextInstancedShader()
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.shader.TextInstancedShaderInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.shader.TextInstancedShaderInterface).asKmp()
     }
 
     override fun createUnitSphereTextInstancedShader(): KMTextInstancedShaderInterface {
         val result = nativeHandle.createUnitSphereTextInstancedShader()
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.shader.TextInstancedShaderInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.shader.TextInstancedShaderInterface).asKmp()
     }
 
     override fun createRasterShader(): KMRasterShaderInterface {
         val result = nativeHandle.createRasterShader()
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.shader.RasterShaderInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.shader.RasterShaderInterface).asKmp()
     }
 
     override fun createUnitSphereRasterShader(): KMRasterShaderInterface {
         val result = nativeHandle.createUnitSphereRasterShader()
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.shader.RasterShaderInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.shader.RasterShaderInterface).asKmp()
     }
 
     override fun createQuadTessellatedShader(): KMRasterShaderInterface {
         val result = nativeHandle.createQuadTessellatedShader()
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.shader.RasterShaderInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.shader.RasterShaderInterface).asKmp()
     }
 
     override fun createStretchShader(): KMStretchShaderInterface {
         val result = nativeHandle.createStretchShader()
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.shader.StretchShaderInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.shader.StretchShaderInterface).asKmp()
     }
 
     override fun createStretchInstancedShader(unitSphere: Boolean): KMStretchInstancedShaderInterface {
         val result = nativeHandle.createStretchInstancedShader(unitSphere)
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.shader.StretchInstancedShaderInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.shader.StretchInstancedShaderInterface).asKmp()
     }
 
     override fun createIcosahedronColorShader(): KMColorShaderInterface {
         val result = nativeHandle.createIcosahedronColorShader()
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.shader.ColorShaderInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.shader.ColorShaderInterface).asKmp()
     }
 
     override fun createSphereEffectShader(): KMSphereEffectShaderInterface {
         val result = nativeHandle.createSphereEffectShader()
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.shader.SphereEffectShaderInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.shader.SphereEffectShaderInterface).asKmp()
     }
 
     override fun createSkySphereShader(): KMSkySphereShaderInterface {
         val result = nativeHandle.createSkySphereShader()
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.shader.SkySphereShaderInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.shader.SkySphereShaderInterface).asKmp()
     }
 
     override fun createElevationInterpolationShader(): KMElevationInterpolationShaderInterface {
         val result = nativeHandle.createElevationInterpolationShader()
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.shader.ElevationInterpolationShaderInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.shader.ElevationInterpolationShaderInterface).asKmp()
     }
 }
 

@@ -31,12 +31,12 @@ private class KMIconLayerCallbackInterfacePlatformProxy(private val delegate: KM
 {
 
     override fun onClickConfirmed(icons: ArrayList<io.openmobilemaps.mapscore.shared.map.layers.icon.IconInfoInterface>): Boolean {
-        val result = delegate.onClickConfirmed(ArrayList(icons.map { requireNotNull((it as io.openmobilemaps.mapscore.shared.map.layers.icon.IconInfoInterface)).asKmp() }))
+        val result = delegate.onClickConfirmed(ArrayList(icons.map { (it as io.openmobilemaps.mapscore.shared.map.layers.icon.IconInfoInterface).asKmp() }))
         return result
     }
 
     override fun onLongPress(icons: ArrayList<io.openmobilemaps.mapscore.shared.map.layers.icon.IconInfoInterface>): Boolean {
-        val result = delegate.onLongPress(ArrayList(icons.map { requireNotNull((it as io.openmobilemaps.mapscore.shared.map.layers.icon.IconInfoInterface)).asKmp() }))
+        val result = delegate.onLongPress(ArrayList(icons.map { (it as io.openmobilemaps.mapscore.shared.map.layers.icon.IconInfoInterface).asKmp() }))
         return result
     }
 }

@@ -13,7 +13,7 @@ actual class KMSkySphereLayerInterface actual public constructor(
 
     actual fun asLayerInterface(): KMLayerInterface {
         val result = native.asLayerInterface()
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.LayerInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.map.LayerInterface).asKmp()
     }
 
     actual fun setTexture(texture: KMTextureHolderInterface) {
@@ -25,7 +25,7 @@ actual class KMSkySphereLayerInterface actual public constructor(
 
         actual fun create(): KMSkySphereLayerInterface {
             val result = SkySphereLayerInterface.create()
-            return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.layers.skysphere.SkySphereLayerInterface)).asKmp()
+            return (result as io.openmobilemaps.mapscore.shared.map.layers.skysphere.SkySphereLayerInterface).asKmp()
         }
     }
 }

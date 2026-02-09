@@ -25,7 +25,7 @@ actual class KMTextShaderInterface actual public constructor(
 
     actual fun asShaderProgramInterface(): KMShaderProgramInterface {
         val result = native.asShaderProgramInterface()
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.shader.ShaderProgramInterface).asKmp()
     }
 }
 

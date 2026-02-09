@@ -16,7 +16,7 @@ private class KMRenderTargetInterfacePlatformWrapper(internal val nativeHandle: 
 
     override fun asGlRenderTargetInterface(): KMOpenGlRenderTargetInterface? {
         val result = nativeHandle.asGlRenderTargetInterface()
-        return result?.let { requireNotNull((it as io.openmobilemaps.mapscore.shared.graphics.OpenGlRenderTargetInterface)).asKmp() }
+        return result?.let { (it as io.openmobilemaps.mapscore.shared.graphics.OpenGlRenderTargetInterface).asKmp() }
     }
 }
 

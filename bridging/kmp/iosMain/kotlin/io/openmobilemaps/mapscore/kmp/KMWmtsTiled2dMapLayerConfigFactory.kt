@@ -21,7 +21,7 @@ actual class KMWmtsTiled2dMapLayerConfigFactory actual public constructor(
 
         actual fun create(wmtsLayerConfiguration: KMWmtsLayerDescription, zoomLevelInfo: ArrayList<KMTiled2dMapZoomLevelInfo>, zoomInfo: KMTiled2dMapZoomInfo, coordinateSystemIdentifier: Int, matrixSetIdentifier: String): KMTiled2dMapLayerConfig {
             val result = MapCoreSharedModule.MCWmtsTiled2dMapLayerConfigFactory.create(wmtsLayerConfiguration.asPlatform(), ArrayList(zoomLevelInfo.map { it.asPlatform() }), zoomInfo.asPlatform(), coordinateSystemIdentifier, matrixSetIdentifier)
-            return requireNotNull((result as MapCoreSharedModule.MCTiled2dMapLayerConfigProtocol)).asKmp()
+            return (result as MapCoreSharedModule.MCTiled2dMapLayerConfigProtocol).asKmp()
         }
     }
 }

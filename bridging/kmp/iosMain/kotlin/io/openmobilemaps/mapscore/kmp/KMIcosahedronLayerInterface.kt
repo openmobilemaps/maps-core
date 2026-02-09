@@ -18,7 +18,7 @@ actual class KMIcosahedronLayerInterface actual public constructor(
 
     actual fun asLayerInterface(): KMLayerInterface {
         val result = native.asLayerInterface()
-        return requireNotNull((result as MapCoreSharedModule.MCLayerInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCLayerInterfaceProtocol).asKmp()
     }
 
     actual companion object
@@ -26,7 +26,7 @@ actual class KMIcosahedronLayerInterface actual public constructor(
 
         actual fun create(callbackHandler: KMIcosahedronLayerCallbackInterface): KMIcosahedronLayerInterface {
             val result = MapCoreSharedModule.MCIcosahedronLayerInterface.create(callbackHandler.asPlatform())
-            return requireNotNull((result as MapCoreSharedModule.MCIcosahedronLayerInterface)).asKmp()
+            return (result as MapCoreSharedModule.MCIcosahedronLayerInterface).asKmp()
         }
     }
 }

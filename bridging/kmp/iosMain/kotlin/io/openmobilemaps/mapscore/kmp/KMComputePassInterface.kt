@@ -22,7 +22,7 @@ private class KMComputePassInterfacePlatformWrapper(internal val nativeHandle: M
 
     override fun getComputeObjects(): ArrayList<KMComputeObjectInterface> {
         val result = nativeHandle.getComputeObjects()
-        return ArrayList(((result as? List<*>)?.map { requireNotNull((it as MapCoreSharedModule.MCComputeObjectInterfaceProtocol)).asKmp() } ?: (0 until (result as platform.Foundation.NSArray).count.toInt()).map { idx -> requireNotNull(((result as platform.Foundation.NSArray).objectAtIndex(idx.toULong()) as MapCoreSharedModule.MCComputeObjectInterfaceProtocol)).asKmp() }))
+        return ArrayList(((result as? List<*>)?.map { (it as MapCoreSharedModule.MCComputeObjectInterfaceProtocol).asKmp() } ?: (0 until (result as platform.Foundation.NSArray).count.toInt()).map { idx -> ((result as platform.Foundation.NSArray).objectAtIndex(idx.toULong()) as MapCoreSharedModule.MCComputeObjectInterfaceProtocol).asKmp() }))
     }
 }
 

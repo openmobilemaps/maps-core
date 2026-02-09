@@ -183,7 +183,7 @@ actual class KMMapCameraInterface actual public constructor(
 
     actual fun asCameraInterface(): KMCameraInterface {
         val result = native.asCameraInterface()
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.CameraInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.CameraInterface).asKmp()
     }
 
     actual fun getLastVpMatrixD(): ArrayList<Double>? {
@@ -223,7 +223,7 @@ actual class KMMapCameraInterface actual public constructor(
 
     actual fun asMapCamera3d(): KMMapCamera3dInterface? {
         val result = native.asMapCamera3d()
-        return result?.let { requireNotNull((it as io.openmobilemaps.mapscore.shared.map.MapCamera3dInterface)).asKmp() }
+        return result?.let { (it as io.openmobilemaps.mapscore.shared.map.MapCamera3dInterface).asKmp() }
     }
 
     actual companion object
@@ -231,7 +231,7 @@ actual class KMMapCameraInterface actual public constructor(
 
         actual fun create(mapInterface: KMMapInterface, screenDensityPpi: Float, is3D: Boolean): KMMapCameraInterface {
             val result = MapCameraInterface.create(mapInterface.asPlatform(), screenDensityPpi, is3D)
-            return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.MapCameraInterface)).asKmp()
+            return (result as io.openmobilemaps.mapscore.shared.map.MapCameraInterface).asKmp()
         }
     }
 }

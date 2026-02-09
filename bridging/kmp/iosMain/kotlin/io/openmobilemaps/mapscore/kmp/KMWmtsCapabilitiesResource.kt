@@ -18,42 +18,42 @@ actual class KMWmtsCapabilitiesResource actual public constructor(
 
     actual fun createLayer(identifier: String, tileLoaders: ArrayList<KMLoaderInterface>): KMTiled2dMapRasterLayerInterface? {
         val result = native.createLayer(identifier, ArrayList(tileLoaders.map { it.asPlatform() }))
-        return result?.let { requireNotNull((it as MapCoreSharedModule.MCTiled2dMapRasterLayerInterface)).asKmp() }
+        return result?.let { (it as MapCoreSharedModule.MCTiled2dMapRasterLayerInterface).asKmp() }
     }
 
     actual fun createLayerTimed(identifier: String, tileLoaders: ArrayList<KMLoaderInterface>, numT: Int): KMTiled2dMapRasterLayerInterface? {
         val result = native.createLayerTimed(identifier, ArrayList(tileLoaders.map { it.asPlatform() }), numT)
-        return result?.let { requireNotNull((it as MapCoreSharedModule.MCTiled2dMapRasterLayerInterface)).asKmp() }
+        return result?.let { (it as MapCoreSharedModule.MCTiled2dMapRasterLayerInterface).asKmp() }
     }
 
     actual fun createLayerWithZoomInfo(identifier: String, tileLoaders: ArrayList<KMLoaderInterface>, zoomInfo: KMTiled2dMapZoomInfo): KMTiled2dMapRasterLayerInterface? {
         val result = native.createLayerWithZoomInfo(identifier, ArrayList(tileLoaders.map { it.asPlatform() }), zoomInfo.asPlatform())
-        return result?.let { requireNotNull((it as MapCoreSharedModule.MCTiled2dMapRasterLayerInterface)).asKmp() }
+        return result?.let { (it as MapCoreSharedModule.MCTiled2dMapRasterLayerInterface).asKmp() }
     }
 
     actual fun createLayerWithZoomInfoTimed(identifier: String, tileLoaders: ArrayList<KMLoaderInterface>, zoomInfo: KMTiled2dMapZoomInfo, numT: Int): KMTiled2dMapRasterLayerInterface? {
         val result = native.createLayerWithZoomInfoTimed(identifier, ArrayList(tileLoaders.map { it.asPlatform() }), zoomInfo.asPlatform(), numT)
-        return result?.let { requireNotNull((it as MapCoreSharedModule.MCTiled2dMapRasterLayerInterface)).asKmp() }
+        return result?.let { (it as MapCoreSharedModule.MCTiled2dMapRasterLayerInterface).asKmp() }
     }
 
     actual fun createLayerConfig(identifier: String): KMTiled2dMapLayerConfig? {
         val result = native.createLayerConfig(identifier)
-        return result?.let { requireNotNull((it as MapCoreSharedModule.MCTiled2dMapLayerConfigProtocol)).asKmp() }
+        return result?.let { (it as MapCoreSharedModule.MCTiled2dMapLayerConfigProtocol).asKmp() }
     }
 
     actual fun createLayerConfigTimed(identifier: String, numT: Int): KMTiled2dMapLayerConfig? {
         val result = native.createLayerConfigTimed(identifier, numT)
-        return result?.let { requireNotNull((it as MapCoreSharedModule.MCTiled2dMapLayerConfigProtocol)).asKmp() }
+        return result?.let { (it as MapCoreSharedModule.MCTiled2dMapLayerConfigProtocol).asKmp() }
     }
 
     actual fun createLayerConfigWithZoomInfo(identifier: String, zoomInfo: KMTiled2dMapZoomInfo): KMTiled2dMapLayerConfig? {
         val result = native.createLayerConfigWithZoomInfo(identifier, zoomInfo.asPlatform())
-        return result?.let { requireNotNull((it as MapCoreSharedModule.MCTiled2dMapLayerConfigProtocol)).asKmp() }
+        return result?.let { (it as MapCoreSharedModule.MCTiled2dMapLayerConfigProtocol).asKmp() }
     }
 
     actual fun createLayerConfigWithZoomInfoTimed(identifier: String, zoomInfo: KMTiled2dMapZoomInfo, numT: Int): KMTiled2dMapLayerConfig? {
         val result = native.createLayerConfigWithZoomInfoTimed(identifier, zoomInfo.asPlatform(), numT)
-        return result?.let { requireNotNull((it as MapCoreSharedModule.MCTiled2dMapLayerConfigProtocol)).asKmp() }
+        return result?.let { (it as MapCoreSharedModule.MCTiled2dMapLayerConfigProtocol).asKmp() }
     }
 
     actual fun getAllLayers(): ArrayList<KMWmtsLayerDescription> {
@@ -66,7 +66,7 @@ actual class KMWmtsCapabilitiesResource actual public constructor(
 
         actual fun create(xml: String): KMWmtsCapabilitiesResource {
             val result = MapCoreSharedModule.MCWmtsCapabilitiesResource.create(xml)
-            return requireNotNull((result as MapCoreSharedModule.MCWmtsCapabilitiesResource)).asKmp()
+            return (result as MapCoreSharedModule.MCWmtsCapabilitiesResource).asKmp()
         }
     }
 }

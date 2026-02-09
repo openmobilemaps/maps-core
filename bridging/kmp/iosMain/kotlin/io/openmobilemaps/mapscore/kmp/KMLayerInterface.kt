@@ -64,12 +64,12 @@ private class KMLayerInterfacePlatformWrapper(internal val nativeHandle: MapCore
 
     override fun buildRenderPasses(): ArrayList<KMRenderPassInterface> {
         val result = nativeHandle.buildRenderPasses()
-        return ArrayList(((result as? List<*>)?.map { requireNotNull((it as MapCoreSharedModule.MCRenderPassInterfaceProtocol)).asKmp() } ?: (0 until (result as platform.Foundation.NSArray).count.toInt()).map { idx -> requireNotNull(((result as platform.Foundation.NSArray).objectAtIndex(idx.toULong()) as MapCoreSharedModule.MCRenderPassInterfaceProtocol)).asKmp() }))
+        return ArrayList(((result as? List<*>)?.map { (it as MapCoreSharedModule.MCRenderPassInterfaceProtocol).asKmp() } ?: (0 until (result as platform.Foundation.NSArray).count.toInt()).map { idx -> ((result as platform.Foundation.NSArray).objectAtIndex(idx.toULong()) as MapCoreSharedModule.MCRenderPassInterfaceProtocol).asKmp() }))
     }
 
     override fun buildComputePasses(): ArrayList<KMComputePassInterface> {
         val result = nativeHandle.buildComputePasses()
-        return ArrayList(((result as? List<*>)?.map { requireNotNull((it as MapCoreSharedModule.MCComputePassInterfaceProtocol)).asKmp() } ?: (0 until (result as platform.Foundation.NSArray).count.toInt()).map { idx -> requireNotNull(((result as platform.Foundation.NSArray).objectAtIndex(idx.toULong()) as MapCoreSharedModule.MCComputePassInterfaceProtocol)).asKmp() }))
+        return ArrayList(((result as? List<*>)?.map { (it as MapCoreSharedModule.MCComputePassInterfaceProtocol).asKmp() } ?: (0 until (result as platform.Foundation.NSArray).count.toInt()).map { idx -> ((result as platform.Foundation.NSArray).objectAtIndex(idx.toULong()) as MapCoreSharedModule.MCComputePassInterfaceProtocol).asKmp() }))
     }
 
     override fun onAdded(mapInterface: KMMapInterface, layerIndex: Int) {
@@ -135,7 +135,7 @@ private class KMLayerInterfacePlatformProxy(private val delegate: KMLayerInterfa
 {
 
     override fun setMaskingObject(maskingObject: MapCoreSharedModule.MCMaskingObjectInterfaceProtocol?) {
-        delegate.setMaskingObject(maskingObject?.let { requireNotNull((it as MapCoreSharedModule.MCMaskingObjectInterfaceProtocol)).asKmp() })
+        delegate.setMaskingObject(maskingObject?.let { (it as MapCoreSharedModule.MCMaskingObjectInterfaceProtocol).asKmp() })
     }
 
     override fun update() {
@@ -153,7 +153,7 @@ private class KMLayerInterfacePlatformProxy(private val delegate: KMLayerInterfa
     }
 
     override fun onAdded(mapInterface: MapCoreSharedModule.MCMapInterface?, layerIndex: Int) {
-        delegate.onAdded(requireNotNull((mapInterface as MapCoreSharedModule.MCMapInterface)).asKmp(), layerIndex)
+        delegate.onAdded((mapInterface as MapCoreSharedModule.MCMapInterface).asKmp(), layerIndex)
     }
 
     override fun onRemoved() {
@@ -199,7 +199,7 @@ private class KMLayerInterfacePlatformProxy(private val delegate: KMLayerInterfa
     }
 
     override fun setErrorManager(errorManager: MapCoreSharedModule.MCErrorManager?) {
-        delegate.setErrorManager(requireNotNull((errorManager as MapCoreSharedModule.MCErrorManager)).asKmp())
+        delegate.setErrorManager((errorManager as MapCoreSharedModule.MCErrorManager).asKmp())
     }
 
     override fun forceReload() {
@@ -207,7 +207,7 @@ private class KMLayerInterfacePlatformProxy(private val delegate: KMLayerInterfa
     }
 
     override fun setPrimaryRenderTarget(target: MapCoreSharedModule.MCRenderTargetInterfaceProtocol?) {
-        delegate.setPrimaryRenderTarget(target?.let { requireNotNull((it as MapCoreSharedModule.MCRenderTargetInterfaceProtocol)).asKmp() })
+        delegate.setPrimaryRenderTarget(target?.let { (it as MapCoreSharedModule.MCRenderTargetInterfaceProtocol).asKmp() })
     }
 }
 

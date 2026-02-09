@@ -16,7 +16,7 @@ actual class KMLineFactory actual public constructor(
 
         actual fun createLine(identifier: String, coordinates: ArrayList<KMCoord>, style: KMLineStyle): KMLineInfoInterface {
             val result = LineFactory.createLine(identifier, ArrayList(coordinates.map { it.asPlatform() }), style.asPlatform())
-            return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.layers.line.LineInfoInterface)).asKmp()
+            return (result as io.openmobilemaps.mapscore.shared.map.layers.line.LineInfoInterface).asKmp()
         }
     }
 }

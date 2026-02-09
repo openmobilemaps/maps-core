@@ -59,7 +59,7 @@ private class KMGraphicsObjectInterfacePlatformProxy(private val delegate: KMGra
     }
 
     override fun setup(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface) {
-        delegate.setup(requireNotNull((context as io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface)).asKmp())
+        delegate.setup((context as io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface).asKmp())
     }
 
     override fun clear() {
@@ -75,7 +75,7 @@ private class KMGraphicsObjectInterfacePlatformProxy(private val delegate: KMGra
     }
 
     override fun render(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, renderPass: io.openmobilemaps.mapscore.shared.graphics.RenderPassConfig, vpMatrix: Long, mMatrix: Long, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D, isMasked: Boolean, screenPixelAsRealMeterFactor: Double, isScreenSpaceCoords: Boolean) {
-        delegate.render(requireNotNull((context as io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface)).asKmp(), (renderPass as io.openmobilemaps.mapscore.shared.graphics.RenderPassConfig).asKmp(), vpMatrix, mMatrix, (origin as io.openmobilemaps.mapscore.shared.graphics.common.Vec3D).asKmp(), isMasked, screenPixelAsRealMeterFactor, isScreenSpaceCoords)
+        delegate.render((context as io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface).asKmp(), (renderPass as io.openmobilemaps.mapscore.shared.graphics.RenderPassConfig).asKmp(), vpMatrix, mMatrix, (origin as io.openmobilemaps.mapscore.shared.graphics.common.Vec3D).asKmp(), isMasked, screenPixelAsRealMeterFactor, isScreenSpaceCoords)
     }
 }
 

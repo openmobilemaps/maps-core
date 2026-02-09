@@ -18,7 +18,7 @@ actual class KMIconInfoInterface actual public constructor(
 
     actual fun getTexture(): KMTextureHolderInterface {
         val result = native.getTexture()
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.objects.TextureHolderInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.objects.TextureHolderInterface).asKmp()
     }
 
     actual fun setCoordinate(coord: KMCoord) {

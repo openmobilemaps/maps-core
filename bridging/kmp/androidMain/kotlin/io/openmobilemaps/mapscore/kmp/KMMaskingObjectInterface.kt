@@ -18,7 +18,7 @@ private class KMMaskingObjectInterfacePlatformWrapper(internal val nativeHandle:
 
     override fun asGraphicsObject(): KMGraphicsObjectInterface {
         val result = nativeHandle.asGraphicsObject()
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.objects.GraphicsObjectInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.objects.GraphicsObjectInterface).asKmp()
     }
 
     override fun renderAsMask(context: KMRenderingContextInterface, renderPass: KMRenderPassConfig, vpMatrix: Long, mMatrix: Long, origin: KMVec3D, screenPixelAsRealMeterFactor: Double, isScreenSpaceCoords: Boolean) {
@@ -35,7 +35,7 @@ private class KMMaskingObjectInterfacePlatformProxy(private val delegate: KMMask
     }
 
     override fun renderAsMask(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, renderPass: io.openmobilemaps.mapscore.shared.graphics.RenderPassConfig, vpMatrix: Long, mMatrix: Long, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D, screenPixelAsRealMeterFactor: Double, isScreenSpaceCoords: Boolean) {
-        delegate.renderAsMask(requireNotNull((context as io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface)).asKmp(), (renderPass as io.openmobilemaps.mapscore.shared.graphics.RenderPassConfig).asKmp(), vpMatrix, mMatrix, (origin as io.openmobilemaps.mapscore.shared.graphics.common.Vec3D).asKmp(), screenPixelAsRealMeterFactor, isScreenSpaceCoords)
+        delegate.renderAsMask((context as io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface).asKmp(), (renderPass as io.openmobilemaps.mapscore.shared.graphics.RenderPassConfig).asKmp(), vpMatrix, mMatrix, (origin as io.openmobilemaps.mapscore.shared.graphics.common.Vec3D).asKmp(), screenPixelAsRealMeterFactor, isScreenSpaceCoords)
     }
 }
 

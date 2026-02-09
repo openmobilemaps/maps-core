@@ -45,7 +45,7 @@ actual class KMErrorManager actual public constructor(
 
         actual fun create(): KMErrorManager {
             val result = MapCoreSharedModule.MCErrorManager.create()
-            return requireNotNull((result as MapCoreSharedModule.MCErrorManager)).asKmp()
+            return (result as MapCoreSharedModule.MCErrorManager).asKmp()
         }
     }
 }

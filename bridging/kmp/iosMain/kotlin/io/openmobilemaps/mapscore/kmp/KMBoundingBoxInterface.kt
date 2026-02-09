@@ -50,7 +50,7 @@ actual class KMBoundingBoxInterface actual public constructor(
 
         actual fun create(systemIdentifier: Int): KMBoundingBoxInterface {
             val result = MapCoreSharedModule.MCBoundingBoxInterface.create(systemIdentifier)
-            return requireNotNull((result as MapCoreSharedModule.MCBoundingBoxInterface)).asKmp()
+            return (result as MapCoreSharedModule.MCBoundingBoxInterface).asKmp()
         }
     }
 }

@@ -45,15 +45,15 @@ private class KMTouchHandlerInterfacePlatformProxy(private val delegate: KMTouch
     }
 
     override fun insertListener(listener: io.openmobilemaps.mapscore.shared.map.controls.TouchInterface, index: Int) {
-        delegate.insertListener(requireNotNull((listener as io.openmobilemaps.mapscore.shared.map.controls.TouchInterface)).asKmp(), index)
+        delegate.insertListener((listener as io.openmobilemaps.mapscore.shared.map.controls.TouchInterface).asKmp(), index)
     }
 
     override fun addListener(listener: io.openmobilemaps.mapscore.shared.map.controls.TouchInterface) {
-        delegate.addListener(requireNotNull((listener as io.openmobilemaps.mapscore.shared.map.controls.TouchInterface)).asKmp())
+        delegate.addListener((listener as io.openmobilemaps.mapscore.shared.map.controls.TouchInterface).asKmp())
     }
 
     override fun removeListener(listener: io.openmobilemaps.mapscore.shared.map.controls.TouchInterface) {
-        delegate.removeListener(requireNotNull((listener as io.openmobilemaps.mapscore.shared.map.controls.TouchInterface)).asKmp())
+        delegate.removeListener((listener as io.openmobilemaps.mapscore.shared.map.controls.TouchInterface).asKmp())
     }
 }
 

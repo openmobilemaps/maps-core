@@ -22,7 +22,7 @@ actual class KMRasterShaderInterface actual public constructor(
 
     actual fun asShaderProgramInterface(): KMShaderProgramInterface {
         val result = native.asShaderProgramInterface()
-        return requireNotNull((result as MapCoreSharedModule.MCShaderProgramInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCShaderProgramInterfaceProtocol).asKmp()
     }
 }
 

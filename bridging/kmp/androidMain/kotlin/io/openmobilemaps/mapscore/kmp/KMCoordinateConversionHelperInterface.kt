@@ -50,7 +50,7 @@ actual class KMCoordinateConversionHelperInterface actual public constructor(
 
         actual fun independentInstance(): KMCoordinateConversionHelperInterface {
             val result = CoordinateConversionHelperInterface.independentInstance()
-            return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateConversionHelperInterface)).asKmp()
+            return (result as io.openmobilemaps.mapscore.shared.map.coordinates.CoordinateConversionHelperInterface).asKmp()
         }
     }
 }

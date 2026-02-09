@@ -22,7 +22,7 @@ actual class KMTextLayerInterface actual public constructor(
 
     actual fun asLayerInterface(): KMLayerInterface {
         val result = native.asLayerInterface()
-        return requireNotNull((result as MapCoreSharedModule.MCLayerInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCLayerInterfaceProtocol).asKmp()
     }
 
     actual fun invalidate() {
@@ -34,7 +34,7 @@ actual class KMTextLayerInterface actual public constructor(
 
         actual fun create(fontLoader: KMFontLoaderInterface): KMTextLayerInterface {
             val result = MapCoreSharedModule.MCTextLayerInterface.create(fontLoader.asPlatform())
-            return requireNotNull((result as MapCoreSharedModule.MCTextLayerInterface)).asKmp()
+            return (result as MapCoreSharedModule.MCTextLayerInterface).asKmp()
         }
     }
 }

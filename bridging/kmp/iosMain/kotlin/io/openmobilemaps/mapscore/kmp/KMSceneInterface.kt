@@ -26,27 +26,27 @@ actual class KMSceneInterface actual public constructor(
 
     actual fun getCamera(): KMCameraInterface {
         val result = native.getCamera()
-        return requireNotNull((result as MapCoreSharedModule.MCCameraInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCCameraInterfaceProtocol).asKmp()
     }
 
     actual fun getRenderer(): KMRendererInterface {
         val result = native.getRenderer()
-        return requireNotNull((result as MapCoreSharedModule.MCRendererInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCRendererInterfaceProtocol).asKmp()
     }
 
     actual fun getRenderingContext(): KMRenderingContextInterface {
         val result = native.getRenderingContext()
-        return requireNotNull((result as MapCoreSharedModule.MCRenderingContextInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCRenderingContextInterfaceProtocol).asKmp()
     }
 
     actual fun getGraphicsFactory(): KMGraphicsObjectFactoryInterface {
         val result = native.getGraphicsFactory()
-        return requireNotNull((result as MapCoreSharedModule.MCGraphicsObjectFactoryInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCGraphicsObjectFactoryInterfaceProtocol).asKmp()
     }
 
     actual fun getShaderFactory(): KMShaderFactoryInterface {
         val result = native.getShaderFactory()
-        return requireNotNull((result as MapCoreSharedModule.MCShaderFactoryInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCShaderFactoryInterfaceProtocol).asKmp()
     }
 
     actual fun prepare() {
@@ -74,12 +74,12 @@ actual class KMSceneInterface actual public constructor(
 
         actual fun create(graphicsFactory: KMGraphicsObjectFactoryInterface, shaderFactory: KMShaderFactoryInterface, renderingContext: KMRenderingContextInterface): KMSceneInterface {
             val result = MapCoreSharedModule.MCSceneInterface.create(graphicsFactory.asPlatform(), shaderFactory.asPlatform(), renderingContext.asPlatform())
-            return requireNotNull((result as MapCoreSharedModule.MCSceneInterface)).asKmp()
+            return (result as MapCoreSharedModule.MCSceneInterface).asKmp()
         }
 
         actual fun createWithOpenGl(): KMSceneInterface {
             val result = MapCoreSharedModule.MCSceneInterface.createWithOpenGl()
-            return requireNotNull((result as MapCoreSharedModule.MCSceneInterface)).asKmp()
+            return (result as MapCoreSharedModule.MCSceneInterface).asKmp()
         }
     }
 }

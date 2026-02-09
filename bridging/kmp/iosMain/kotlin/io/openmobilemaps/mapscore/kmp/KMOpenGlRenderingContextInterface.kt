@@ -46,7 +46,7 @@ private class KMOpenGlRenderingContextInterfacePlatformWrapper(internal val nati
 
     override fun getCreateRenderTarget(name: String, textureFilter: KMTextureFilterType, clearColor: KMColor, usesDepthStencil: Boolean): KMOpenGlRenderTargetInterface {
         val result = nativeHandle.getCreateRenderTarget(name, textureFilter.asPlatform(), clearColor.asPlatform(), usesDepthStencil)
-        return requireNotNull((result as MapCoreSharedModule.MCOpenGlRenderTargetInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCOpenGlRenderTargetInterfaceProtocol).asKmp()
     }
 
     override fun deleteRenderTarget(name: String) {
@@ -55,7 +55,7 @@ private class KMOpenGlRenderingContextInterfacePlatformWrapper(internal val nati
 
     override fun getRenderTargets(): ArrayList<KMOpenGlRenderTargetInterface> {
         val result = nativeHandle.getRenderTargets()
-        return ArrayList(((result as? List<*>)?.map { requireNotNull((it as MapCoreSharedModule.MCOpenGlRenderTargetInterfaceProtocol)).asKmp() } ?: (0 until (result as platform.Foundation.NSArray).count.toInt()).map { idx -> requireNotNull(((result as platform.Foundation.NSArray).objectAtIndex(idx.toULong()) as MapCoreSharedModule.MCOpenGlRenderTargetInterfaceProtocol)).asKmp() }))
+        return ArrayList(((result as? List<*>)?.map { (it as MapCoreSharedModule.MCOpenGlRenderTargetInterfaceProtocol).asKmp() } ?: (0 until (result as platform.Foundation.NSArray).count.toInt()).map { idx -> ((result as platform.Foundation.NSArray).objectAtIndex(idx.toULong()) as MapCoreSharedModule.MCOpenGlRenderTargetInterfaceProtocol).asKmp() }))
     }
 
     override fun getProgram(name: String): Int {

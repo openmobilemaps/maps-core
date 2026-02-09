@@ -36,7 +36,7 @@ actual class KMGeoJsonFeatureParserInterface actual public constructor(
 
         actual fun create(): KMGeoJsonFeatureParserInterface {
             val result = MapCoreSharedModule.MCGeoJsonFeatureParserInterface.create()
-            return requireNotNull((result as MapCoreSharedModule.MCGeoJsonFeatureParserInterface)).asKmp()
+            return (result as MapCoreSharedModule.MCGeoJsonFeatureParserInterface).asKmp()
         }
     }
 }

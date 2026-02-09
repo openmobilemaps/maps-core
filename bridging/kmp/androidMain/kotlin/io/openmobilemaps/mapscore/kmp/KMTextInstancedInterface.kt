@@ -88,7 +88,7 @@ private class KMTextInstancedInterfacePlatformWrapper(internal val nativeHandle:
 
     override fun asGraphicsObject(): KMGraphicsObjectInterface {
         val result = nativeHandle.asGraphicsObject()
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.objects.GraphicsObjectInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.objects.GraphicsObjectInterface).asKmp()
     }
 }
 
@@ -136,7 +136,7 @@ private class KMTextInstancedInterfacePlatformProxy(private val delegate: KMText
     }
 
     override fun loadFont(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, fontData: io.openmobilemaps.mapscore.shared.map.loader.FontData, fontMsdfTexture: io.openmobilemaps.mapscore.shared.graphics.objects.TextureHolderInterface) {
-        delegate.loadFont(requireNotNull((context as io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface)).asKmp(), (fontData as io.openmobilemaps.mapscore.shared.map.loader.FontData).asKmp(), requireNotNull((fontMsdfTexture as io.openmobilemaps.mapscore.shared.graphics.objects.TextureHolderInterface)).asKmp())
+        delegate.loadFont((context as io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface).asKmp(), (fontData as io.openmobilemaps.mapscore.shared.map.loader.FontData).asKmp(), (fontMsdfTexture as io.openmobilemaps.mapscore.shared.graphics.objects.TextureHolderInterface).asKmp())
     }
 
     override fun removeTexture() {

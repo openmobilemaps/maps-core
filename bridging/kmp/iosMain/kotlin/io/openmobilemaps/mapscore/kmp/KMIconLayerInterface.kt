@@ -22,7 +22,7 @@ actual class KMIconLayerInterface actual public constructor(
 
     actual fun getIcons(): ArrayList<KMIconInfoInterface> {
         val result = native.getIcons()
-        return ArrayList(((result as? List<*>)?.map { requireNotNull((it as MapCoreSharedModule.MCIconInfoInterface)).asKmp() } ?: (0 until (result as platform.Foundation.NSArray).count.toInt()).map { idx -> requireNotNull(((result as platform.Foundation.NSArray).objectAtIndex(idx.toULong()) as MapCoreSharedModule.MCIconInfoInterface)).asKmp() }))
+        return ArrayList(((result as? List<*>)?.map { (it as MapCoreSharedModule.MCIconInfoInterface).asKmp() } ?: (0 until (result as platform.Foundation.NSArray).count.toInt()).map { idx -> ((result as platform.Foundation.NSArray).objectAtIndex(idx.toULong()) as MapCoreSharedModule.MCIconInfoInterface).asKmp() }))
     }
 
     actual fun remove(icon: KMIconInfoInterface) {
@@ -59,7 +59,7 @@ actual class KMIconLayerInterface actual public constructor(
 
     actual fun asLayerInterface(): KMLayerInterface {
         val result = native.asLayerInterface()
-        return requireNotNull((result as MapCoreSharedModule.MCLayerInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCLayerInterfaceProtocol).asKmp()
     }
 
     actual fun invalidate() {
@@ -83,7 +83,7 @@ actual class KMIconLayerInterface actual public constructor(
 
         actual fun create(): KMIconLayerInterface {
             val result = MapCoreSharedModule.MCIconLayerInterface.create()
-            return requireNotNull((result as MapCoreSharedModule.MCIconLayerInterface)).asKmp()
+            return (result as MapCoreSharedModule.MCIconLayerInterface).asKmp()
         }
     }
 }

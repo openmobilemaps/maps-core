@@ -50,77 +50,77 @@ private class KMGraphicsObjectFactoryInterfacePlatformWrapper(internal val nativ
 
     override fun createQuad(shader: KMShaderProgramInterface): KMQuad2dInterface {
         val result = nativeHandle.createQuad(shader.asPlatform())
-        return requireNotNull((result as MapCoreSharedModule.MCQuad2dInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCQuad2dInterfaceProtocol).asKmp()
     }
 
     override fun createQuadTessellated(shader: KMShaderProgramInterface): KMQuad2dInterface {
         val result = nativeHandle.createQuadTessellated(shader.asPlatform())
-        return requireNotNull((result as MapCoreSharedModule.MCQuad2dInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCQuad2dInterfaceProtocol).asKmp()
     }
 
     override fun createPolygon(shader: KMShaderProgramInterface): KMPolygon2dInterface {
         val result = nativeHandle.createPolygon(shader.asPlatform())
-        return requireNotNull((result as MapCoreSharedModule.MCPolygon2dInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCPolygon2dInterfaceProtocol).asKmp()
     }
 
     override fun createPolygonTessellated(shader: KMShaderProgramInterface): KMPolygon2dInterface {
         val result = nativeHandle.createPolygonTessellated(shader.asPlatform())
-        return requireNotNull((result as MapCoreSharedModule.MCPolygon2dInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCPolygon2dInterfaceProtocol).asKmp()
     }
 
     override fun createIcosahedronObject(shader: KMShaderProgramInterface): KMIcosahedronInterface {
         val result = nativeHandle.createIcosahedronObject(shader.asPlatform())
-        return requireNotNull((result as MapCoreSharedModule.MCIcosahedronInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCIcosahedronInterfaceProtocol).asKmp()
     }
 
     override fun createQuadInstanced(shader: KMShaderProgramInterface): KMQuad2dInstancedInterface {
         val result = nativeHandle.createQuadInstanced(shader.asPlatform())
-        return requireNotNull((result as MapCoreSharedModule.MCQuad2dInstancedInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCQuad2dInstancedInterfaceProtocol).asKmp()
     }
 
     override fun createQuadStretchedInstanced(shader: KMShaderProgramInterface): KMQuad2dStretchedInstancedInterface {
         val result = nativeHandle.createQuadStretchedInstanced(shader.asPlatform())
-        return requireNotNull((result as MapCoreSharedModule.MCQuad2dStretchedInstancedInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCQuad2dStretchedInstancedInterfaceProtocol).asKmp()
     }
 
     override fun createLineGroup(shader: KMShaderProgramInterface): KMLineGroup2dInterface {
         val result = nativeHandle.createLineGroup(shader.asPlatform())
-        return requireNotNull((result as MapCoreSharedModule.MCLineGroup2dInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCLineGroup2dInterfaceProtocol).asKmp()
     }
 
     override fun createPolygonGroup(shader: KMShaderProgramInterface): KMPolygonGroup2dInterface {
         val result = nativeHandle.createPolygonGroup(shader.asPlatform())
-        return requireNotNull((result as MapCoreSharedModule.MCPolygonGroup2dInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCPolygonGroup2dInterfaceProtocol).asKmp()
     }
 
     override fun createPolygonPatternGroup(shader: KMShaderProgramInterface): KMPolygonPatternGroup2dInterface {
         val result = nativeHandle.createPolygonPatternGroup(shader.asPlatform())
-        return requireNotNull((result as MapCoreSharedModule.MCPolygonPatternGroup2dInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCPolygonPatternGroup2dInterfaceProtocol).asKmp()
     }
 
     override fun createQuadMask(is3d: Boolean): KMQuad2dInterface {
         val result = nativeHandle.createQuadMask(is3d)
-        return requireNotNull((result as MapCoreSharedModule.MCQuad2dInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCQuad2dInterfaceProtocol).asKmp()
     }
 
     override fun createPolygonMask(is3d: Boolean): KMPolygon2dInterface {
         val result = nativeHandle.createPolygonMask(is3d)
-        return requireNotNull((result as MapCoreSharedModule.MCPolygon2dInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCPolygon2dInterfaceProtocol).asKmp()
     }
 
     override fun createPolygonMaskTessellated(is3d: Boolean): KMPolygon2dInterface {
         val result = nativeHandle.createPolygonMaskTessellated(is3d)
-        return requireNotNull((result as MapCoreSharedModule.MCPolygon2dInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCPolygon2dInterfaceProtocol).asKmp()
     }
 
     override fun createText(shader: KMShaderProgramInterface): KMTextInterface {
         val result = nativeHandle.createText(shader.asPlatform())
-        return requireNotNull((result as MapCoreSharedModule.MCTextInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCTextInterfaceProtocol).asKmp()
     }
 
     override fun createTextInstanced(shader: KMShaderProgramInterface): KMTextInstancedInterface {
         val result = nativeHandle.createTextInstanced(shader.asPlatform())
-        return requireNotNull((result as MapCoreSharedModule.MCTextInstancedInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCTextInstancedInterfaceProtocol).asKmp()
     }
 }
 
@@ -128,52 +128,52 @@ private class KMGraphicsObjectFactoryInterfacePlatformProxy(private val delegate
 {
 
     override fun createQuad(shader: MapCoreSharedModule.MCShaderProgramInterfaceProtocol?): MapCoreSharedModule.MCQuad2dInterfaceProtocol? {
-        val result = delegate.createQuad(requireNotNull((shader as MapCoreSharedModule.MCShaderProgramInterfaceProtocol)).asKmp())
+        val result = delegate.createQuad((shader as MapCoreSharedModule.MCShaderProgramInterfaceProtocol).asKmp())
         return result.asPlatform()
     }
 
     override fun createQuadTessellated(shader: MapCoreSharedModule.MCShaderProgramInterfaceProtocol?): MapCoreSharedModule.MCQuad2dInterfaceProtocol? {
-        val result = delegate.createQuadTessellated(requireNotNull((shader as MapCoreSharedModule.MCShaderProgramInterfaceProtocol)).asKmp())
+        val result = delegate.createQuadTessellated((shader as MapCoreSharedModule.MCShaderProgramInterfaceProtocol).asKmp())
         return result.asPlatform()
     }
 
     override fun createPolygon(shader: MapCoreSharedModule.MCShaderProgramInterfaceProtocol?): MapCoreSharedModule.MCPolygon2dInterfaceProtocol? {
-        val result = delegate.createPolygon(requireNotNull((shader as MapCoreSharedModule.MCShaderProgramInterfaceProtocol)).asKmp())
+        val result = delegate.createPolygon((shader as MapCoreSharedModule.MCShaderProgramInterfaceProtocol).asKmp())
         return result.asPlatform()
     }
 
     override fun createPolygonTessellated(shader: MapCoreSharedModule.MCShaderProgramInterfaceProtocol?): MapCoreSharedModule.MCPolygon2dInterfaceProtocol? {
-        val result = delegate.createPolygonTessellated(requireNotNull((shader as MapCoreSharedModule.MCShaderProgramInterfaceProtocol)).asKmp())
+        val result = delegate.createPolygonTessellated((shader as MapCoreSharedModule.MCShaderProgramInterfaceProtocol).asKmp())
         return result.asPlatform()
     }
 
     override fun createIcosahedronObject(shader: MapCoreSharedModule.MCShaderProgramInterfaceProtocol?): MapCoreSharedModule.MCIcosahedronInterfaceProtocol? {
-        val result = delegate.createIcosahedronObject(requireNotNull((shader as MapCoreSharedModule.MCShaderProgramInterfaceProtocol)).asKmp())
+        val result = delegate.createIcosahedronObject((shader as MapCoreSharedModule.MCShaderProgramInterfaceProtocol).asKmp())
         return result.asPlatform()
     }
 
     override fun createQuadInstanced(shader: MapCoreSharedModule.MCShaderProgramInterfaceProtocol?): MapCoreSharedModule.MCQuad2dInstancedInterfaceProtocol? {
-        val result = delegate.createQuadInstanced(requireNotNull((shader as MapCoreSharedModule.MCShaderProgramInterfaceProtocol)).asKmp())
+        val result = delegate.createQuadInstanced((shader as MapCoreSharedModule.MCShaderProgramInterfaceProtocol).asKmp())
         return result.asPlatform()
     }
 
     override fun createQuadStretchedInstanced(shader: MapCoreSharedModule.MCShaderProgramInterfaceProtocol?): MapCoreSharedModule.MCQuad2dStretchedInstancedInterfaceProtocol? {
-        val result = delegate.createQuadStretchedInstanced(requireNotNull((shader as MapCoreSharedModule.MCShaderProgramInterfaceProtocol)).asKmp())
+        val result = delegate.createQuadStretchedInstanced((shader as MapCoreSharedModule.MCShaderProgramInterfaceProtocol).asKmp())
         return result.asPlatform()
     }
 
     override fun createLineGroup(shader: MapCoreSharedModule.MCShaderProgramInterfaceProtocol?): MapCoreSharedModule.MCLineGroup2dInterfaceProtocol? {
-        val result = delegate.createLineGroup(requireNotNull((shader as MapCoreSharedModule.MCShaderProgramInterfaceProtocol)).asKmp())
+        val result = delegate.createLineGroup((shader as MapCoreSharedModule.MCShaderProgramInterfaceProtocol).asKmp())
         return result.asPlatform()
     }
 
     override fun createPolygonGroup(shader: MapCoreSharedModule.MCShaderProgramInterfaceProtocol?): MapCoreSharedModule.MCPolygonGroup2dInterfaceProtocol? {
-        val result = delegate.createPolygonGroup(requireNotNull((shader as MapCoreSharedModule.MCShaderProgramInterfaceProtocol)).asKmp())
+        val result = delegate.createPolygonGroup((shader as MapCoreSharedModule.MCShaderProgramInterfaceProtocol).asKmp())
         return result.asPlatform()
     }
 
     override fun createPolygonPatternGroup(shader: MapCoreSharedModule.MCShaderProgramInterfaceProtocol?): MapCoreSharedModule.MCPolygonPatternGroup2dInterfaceProtocol? {
-        val result = delegate.createPolygonPatternGroup(requireNotNull((shader as MapCoreSharedModule.MCShaderProgramInterfaceProtocol)).asKmp())
+        val result = delegate.createPolygonPatternGroup((shader as MapCoreSharedModule.MCShaderProgramInterfaceProtocol).asKmp())
         return result.asPlatform()
     }
 
@@ -193,12 +193,12 @@ private class KMGraphicsObjectFactoryInterfacePlatformProxy(private val delegate
     }
 
     override fun createText(shader: MapCoreSharedModule.MCShaderProgramInterfaceProtocol?): MapCoreSharedModule.MCTextInterfaceProtocol? {
-        val result = delegate.createText(requireNotNull((shader as MapCoreSharedModule.MCShaderProgramInterfaceProtocol)).asKmp())
+        val result = delegate.createText((shader as MapCoreSharedModule.MCShaderProgramInterfaceProtocol).asKmp())
         return result.asPlatform()
     }
 
     override fun createTextInstanced(shader: MapCoreSharedModule.MCShaderProgramInterfaceProtocol?): MapCoreSharedModule.MCTextInstancedInterfaceProtocol? {
-        val result = delegate.createTextInstanced(requireNotNull((shader as MapCoreSharedModule.MCShaderProgramInterfaceProtocol)).asKmp())
+        val result = delegate.createTextInstanced((shader as MapCoreSharedModule.MCShaderProgramInterfaceProtocol).asKmp())
         return result.asPlatform()
     }
 }

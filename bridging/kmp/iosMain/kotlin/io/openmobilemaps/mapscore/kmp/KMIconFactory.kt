@@ -21,12 +21,12 @@ actual class KMIconFactory actual public constructor(
 
         actual fun createIcon(identifier: String, coordinate: KMCoord, texture: KMTextureHolderInterface, iconSize: KMVec2F, scaleType: KMIconType, blendMode: KMBlendMode): KMIconInfoInterface {
             val result = MapCoreSharedModule.MCIconFactory.createIcon(identifier, coordinate.asPlatform(), texture.asPlatform(), iconSize.asPlatform(), scaleType.asPlatform(), blendMode.asPlatform())
-            return requireNotNull((result as MapCoreSharedModule.MCIconInfoInterface)).asKmp()
+            return (result as MapCoreSharedModule.MCIconInfoInterface).asKmp()
         }
 
         actual fun createIconWithAnchor(identifier: String, coordinate: KMCoord, texture: KMTextureHolderInterface, iconSize: KMVec2F, scaleType: KMIconType, blendMode: KMBlendMode, iconAnchor: KMVec2F): KMIconInfoInterface {
             val result = MapCoreSharedModule.MCIconFactory.createIconWithAnchor(identifier, coordinate.asPlatform(), texture.asPlatform(), iconSize.asPlatform(), scaleType.asPlatform(), blendMode.asPlatform(), iconAnchor.asPlatform())
-            return requireNotNull((result as MapCoreSharedModule.MCIconInfoInterface)).asKmp()
+            return (result as MapCoreSharedModule.MCIconInfoInterface).asKmp()
         }
     }
 }

@@ -55,7 +55,7 @@ actual class KMCoordinateConversionHelperInterface actual public constructor(
 
         actual fun independentInstance(): KMCoordinateConversionHelperInterface {
             val result = MapCoreSharedModule.MCCoordinateConversionHelperInterface.independentInstance()
-            return requireNotNull((result as MapCoreSharedModule.MCCoordinateConversionHelperInterface)).asKmp()
+            return (result as MapCoreSharedModule.MCCoordinateConversionHelperInterface).asKmp()
         }
     }
 }

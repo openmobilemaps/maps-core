@@ -21,7 +21,7 @@ actual class KMPolygonMaskObjectInterface actual public constructor(
 
     actual fun getPolygonObject(): KMPolygon2dInterface {
         val result = native.getPolygonObject()
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.objects.Polygon2dInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.objects.Polygon2dInterface).asKmp()
     }
 
     actual companion object
@@ -29,7 +29,7 @@ actual class KMPolygonMaskObjectInterface actual public constructor(
 
         actual fun create(graphicsObjectFactory: KMGraphicsObjectFactoryInterface, conversionHelper: KMCoordinateConversionHelperInterface, is3d: Boolean): KMPolygonMaskObjectInterface {
             val result = PolygonMaskObjectInterface.create(graphicsObjectFactory.asPlatform(), conversionHelper.asPlatform(), is3d)
-            return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.layers.polygon.PolygonMaskObjectInterface)).asKmp()
+            return (result as io.openmobilemaps.mapscore.shared.map.layers.polygon.PolygonMaskObjectInterface).asKmp()
         }
     }
 }

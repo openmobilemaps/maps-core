@@ -32,7 +32,7 @@ private class KMOpenGlRenderTargetInterfacePlatformWrapper(internal val nativeHa
 
     override fun asRenderTargetInterface(): KMRenderTargetInterface {
         val result = nativeHandle.asRenderTargetInterface()
-        return requireNotNull((result as MapCoreSharedModule.MCRenderTargetInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCRenderTargetInterfaceProtocol).asKmp()
     }
 
     override fun setup(size: KMVec2I) {
@@ -74,7 +74,7 @@ private class KMOpenGlRenderTargetInterfacePlatformProxy(private val delegate: K
     }
 
     override fun bindFramebuffer(renderingContext: MapCoreSharedModule.MCRenderingContextInterfaceProtocol?) {
-        delegate.bindFramebuffer(requireNotNull((renderingContext as MapCoreSharedModule.MCRenderingContextInterfaceProtocol)).asKmp())
+        delegate.bindFramebuffer((renderingContext as MapCoreSharedModule.MCRenderingContextInterfaceProtocol).asKmp())
     }
 
     override fun unbindFramebuffer() {

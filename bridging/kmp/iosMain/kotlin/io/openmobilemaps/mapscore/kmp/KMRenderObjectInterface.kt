@@ -32,7 +32,7 @@ private class KMRenderObjectInterfacePlatformWrapper(internal val nativeHandle: 
 
     override fun getGraphicsObject(): KMGraphicsObjectInterface {
         val result = nativeHandle.getGraphicsObject()
-        return requireNotNull((result as MapCoreSharedModule.MCGraphicsObjectInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCGraphicsObjectInterfaceProtocol).asKmp()
     }
 
     override fun hasCustomModelMatrix(): Boolean {

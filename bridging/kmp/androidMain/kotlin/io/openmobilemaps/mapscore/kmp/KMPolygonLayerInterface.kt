@@ -42,7 +42,7 @@ actual class KMPolygonLayerInterface actual public constructor(
 
     actual fun asLayerInterface(): KMLayerInterface {
         val result = native.asLayerInterface()
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.LayerInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.map.LayerInterface).asKmp()
     }
 
     actual fun resetSelection() {
@@ -62,7 +62,7 @@ actual class KMPolygonLayerInterface actual public constructor(
 
         actual fun create(): KMPolygonLayerInterface {
             val result = PolygonLayerInterface.create()
-            return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.layers.polygon.PolygonLayerInterface)).asKmp()
+            return (result as io.openmobilemaps.mapscore.shared.map.layers.polygon.PolygonLayerInterface).asKmp()
         }
     }
 }

@@ -21,22 +21,22 @@ actual class KMDefaultTiled2dMapLayerConfigs actual public constructor(
 
         actual fun webMercator(layerName: String, urlFormat: String): KMTiled2dMapLayerConfig {
             val result = MapCoreSharedModule.MCDefaultTiled2dMapLayerConfigs.webMercator(layerName, urlFormat)
-            return requireNotNull((result as MapCoreSharedModule.MCTiled2dMapLayerConfigProtocol)).asKmp()
+            return (result as MapCoreSharedModule.MCTiled2dMapLayerConfigProtocol).asKmp()
         }
 
         actual fun webMercatorCustom(layerName: String, urlFormat: String, zoomInfo: KMTiled2dMapZoomInfo?, minZoomLevel: Int, maxZoomLevel: Int): KMTiled2dMapLayerConfig {
             val result = MapCoreSharedModule.MCDefaultTiled2dMapLayerConfigs.webMercatorCustom(layerName, urlFormat, zoomInfo?.let { it.asPlatform() }, minZoomLevel, maxZoomLevel)
-            return requireNotNull((result as MapCoreSharedModule.MCTiled2dMapLayerConfigProtocol)).asKmp()
+            return (result as MapCoreSharedModule.MCTiled2dMapLayerConfigProtocol).asKmp()
         }
 
         actual fun epsg4326(layerName: String, urlFormat: String): KMTiled2dMapLayerConfig {
             val result = MapCoreSharedModule.MCDefaultTiled2dMapLayerConfigs.epsg4326(layerName, urlFormat)
-            return requireNotNull((result as MapCoreSharedModule.MCTiled2dMapLayerConfigProtocol)).asKmp()
+            return (result as MapCoreSharedModule.MCTiled2dMapLayerConfigProtocol).asKmp()
         }
 
         actual fun epsg4326Custom(layerName: String, urlFormat: String, zoomInfo: KMTiled2dMapZoomInfo, minZoomLevel: Int, maxZoomLevel: Int): KMTiled2dMapLayerConfig {
             val result = MapCoreSharedModule.MCDefaultTiled2dMapLayerConfigs.epsg4326Custom(layerName, urlFormat, zoomInfo.asPlatform(), minZoomLevel, maxZoomLevel)
-            return requireNotNull((result as MapCoreSharedModule.MCTiled2dMapLayerConfigProtocol)).asKmp()
+            return (result as MapCoreSharedModule.MCTiled2dMapLayerConfigProtocol).asKmp()
         }
     }
 }

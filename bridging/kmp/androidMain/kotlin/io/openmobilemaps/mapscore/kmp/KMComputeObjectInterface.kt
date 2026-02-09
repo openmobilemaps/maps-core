@@ -23,7 +23,7 @@ private class KMComputeObjectInterfacePlatformProxy(private val delegate: KMComp
 {
 
     override fun compute(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, vpMatrix: Long, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D, screenPixelAsRealMeterFactor: Double) {
-        delegate.compute(requireNotNull((context as io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface)).asKmp(), vpMatrix, (origin as io.openmobilemaps.mapscore.shared.graphics.common.Vec3D).asKmp(), screenPixelAsRealMeterFactor)
+        delegate.compute((context as io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface).asKmp(), vpMatrix, (origin as io.openmobilemaps.mapscore.shared.graphics.common.Vec3D).asKmp(), screenPixelAsRealMeterFactor)
     }
 }
 

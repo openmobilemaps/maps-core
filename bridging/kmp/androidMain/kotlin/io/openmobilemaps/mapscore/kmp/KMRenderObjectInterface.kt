@@ -26,7 +26,7 @@ private class KMRenderObjectInterfacePlatformWrapper(internal val nativeHandle: 
 
     override fun getGraphicsObject(): KMGraphicsObjectInterface {
         val result = nativeHandle.getGraphicsObject()
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.objects.GraphicsObjectInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.objects.GraphicsObjectInterface).asKmp()
     }
 
     override fun hasCustomModelMatrix(): Boolean {

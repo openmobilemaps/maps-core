@@ -16,7 +16,7 @@ actual class KMWmtsTiled2dMapLayerConfigFactory actual public constructor(
 
         actual fun create(wmtsLayerConfiguration: KMWmtsLayerDescription, zoomLevelInfo: ArrayList<KMTiled2dMapZoomLevelInfo>, zoomInfo: KMTiled2dMapZoomInfo, coordinateSystemIdentifier: Int, matrixSetIdentifier: String): KMTiled2dMapLayerConfig {
             val result = WmtsTiled2dMapLayerConfigFactory.create(wmtsLayerConfiguration.asPlatform(), ArrayList(zoomLevelInfo.map { it.asPlatform() }), zoomInfo.asPlatform(), coordinateSystemIdentifier, matrixSetIdentifier)
-            return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig)).asKmp()
+            return (result as io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig).asKmp()
         }
     }
 }

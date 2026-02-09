@@ -94,7 +94,7 @@ private class KMTextInstancedInterfacePlatformWrapper(internal val nativeHandle:
 
     override fun asGraphicsObject(): KMGraphicsObjectInterface {
         val result = nativeHandle.asGraphicsObject()
-        return requireNotNull((result as MapCoreSharedModule.MCGraphicsObjectInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCGraphicsObjectInterfaceProtocol).asKmp()
     }
 }
 
@@ -142,7 +142,7 @@ private class KMTextInstancedInterfacePlatformProxy(private val delegate: KMText
     }
 
     override fun loadFont(context: MapCoreSharedModule.MCRenderingContextInterfaceProtocol?, fontData: MapCoreSharedModule.MCFontData, fontMsdfTexture: MapCoreSharedModule.MCTextureHolderInterfaceProtocol?) {
-        delegate.loadFont(requireNotNull((context as MapCoreSharedModule.MCRenderingContextInterfaceProtocol)).asKmp(), (fontData as MapCoreSharedModule.MCFontData).asKmp(), requireNotNull((fontMsdfTexture as MapCoreSharedModule.MCTextureHolderInterfaceProtocol)).asKmp())
+        delegate.loadFont((context as MapCoreSharedModule.MCRenderingContextInterfaceProtocol).asKmp(), (fontData as MapCoreSharedModule.MCFontData).asKmp(), (fontMsdfTexture as MapCoreSharedModule.MCTextureHolderInterfaceProtocol).asKmp())
     }
 
     override fun removeTexture() {

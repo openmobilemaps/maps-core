@@ -31,7 +31,7 @@ actual class KMGeoJsonFeatureParserInterface actual public constructor(
 
         actual fun create(): KMGeoJsonFeatureParserInterface {
             val result = GeoJsonFeatureParserInterface.create()
-            return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.layers.tiled.GeoJsonFeatureParserInterface)).asKmp()
+            return (result as io.openmobilemaps.mapscore.shared.map.layers.tiled.GeoJsonFeatureParserInterface).asKmp()
         }
     }
 }

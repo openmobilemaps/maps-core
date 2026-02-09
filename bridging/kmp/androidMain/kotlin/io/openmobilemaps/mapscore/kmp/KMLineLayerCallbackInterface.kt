@@ -23,7 +23,7 @@ private class KMLineLayerCallbackInterfacePlatformProxy(private val delegate: KM
 {
 
     override fun onLineClickConfirmed(line: io.openmobilemaps.mapscore.shared.map.layers.line.LineInfoInterface) {
-        delegate.onLineClickConfirmed(requireNotNull((line as io.openmobilemaps.mapscore.shared.map.layers.line.LineInfoInterface)).asKmp())
+        delegate.onLineClickConfirmed((line as io.openmobilemaps.mapscore.shared.map.layers.line.LineInfoInterface).asKmp())
     }
 }
 

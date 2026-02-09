@@ -16,7 +16,7 @@ private class KMComputePassInterfacePlatformWrapper(internal val nativeHandle: C
 
     override fun getComputeObjects(): ArrayList<KMComputeObjectInterface> {
         val result = nativeHandle.getComputeObjects()
-        return ArrayList(result.map { requireNotNull((it as io.openmobilemaps.mapscore.shared.graphics.objects.ComputeObjectInterface)).asKmp() })
+        return ArrayList(result.map { (it as io.openmobilemaps.mapscore.shared.graphics.objects.ComputeObjectInterface).asKmp() })
     }
 }
 

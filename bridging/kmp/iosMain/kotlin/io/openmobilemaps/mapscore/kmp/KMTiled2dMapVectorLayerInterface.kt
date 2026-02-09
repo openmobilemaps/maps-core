@@ -22,7 +22,7 @@ actual class KMTiled2dMapVectorLayerInterface actual public constructor(
 
     actual fun asLayerInterface(): KMLayerInterface {
         val result = native.asLayerInterface()
-        return requireNotNull((result as MapCoreSharedModule.MCLayerInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCLayerInterfaceProtocol).asKmp()
     }
 
     actual fun setMinZoomLevelIdentifier(value: Int?) {
@@ -82,12 +82,12 @@ actual class KMTiled2dMapVectorLayerInterface actual public constructor(
 
         actual fun createFromStyleJson(layerName: String, styleJsonUrl: String, loaders: ArrayList<KMLoaderInterface>, fontLoader: KMFontLoaderInterface): KMTiled2dMapVectorLayerInterface {
             val result = MapCoreSharedModule.MCTiled2dMapVectorLayerInterface.createFromStyleJson(layerName, styleJsonUrl, ArrayList(loaders.map { it.asPlatform() }), fontLoader.asPlatform())
-            return requireNotNull((result as MapCoreSharedModule.MCTiled2dMapVectorLayerInterface)).asKmp()
+            return (result as MapCoreSharedModule.MCTiled2dMapVectorLayerInterface).asKmp()
         }
 
         actual fun createExplicitly(layerName: String, styleJson: String?, localStyleJson: Boolean?, loaders: ArrayList<KMLoaderInterface>, fontLoader: KMFontLoaderInterface, localDataProvider: KMTiled2dMapVectorLayerLocalDataProviderInterface?, customZoomInfo: KMTiled2dMapZoomInfo?, symbolDelegate: KMTiled2dMapVectorLayerSymbolDelegateInterface?, sourceUrlParams: HashMap<String, String>?): KMTiled2dMapVectorLayerInterface {
             val result = MapCoreSharedModule.MCTiled2dMapVectorLayerInterface.createExplicitly(layerName, styleJson?.let { it }, localStyleJson?.let { platform.Foundation.NSNumber(bool = it) }, ArrayList(loaders.map { it.asPlatform() }), fontLoader.asPlatform(), localDataProvider?.let { it.asPlatform() }, customZoomInfo?.let { it.asPlatform() }, symbolDelegate?.let { it.asPlatform() }, sourceUrlParams?.let { HashMap(it.map { it.key to it.value }.toMap()) })
-            return requireNotNull((result as MapCoreSharedModule.MCTiled2dMapVectorLayerInterface)).asKmp()
+            return (result as MapCoreSharedModule.MCTiled2dMapVectorLayerInterface).asKmp()
         }
     }
 }

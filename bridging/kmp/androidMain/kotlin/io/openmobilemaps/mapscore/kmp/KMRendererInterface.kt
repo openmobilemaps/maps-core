@@ -41,19 +41,19 @@ private class KMRendererInterfacePlatformProxy(private val delegate: KMRendererI
 {
 
     override fun addToRenderQueue(renderPass: io.openmobilemaps.mapscore.shared.graphics.RenderPassInterface) {
-        delegate.addToRenderQueue(requireNotNull((renderPass as io.openmobilemaps.mapscore.shared.graphics.RenderPassInterface)).asKmp())
+        delegate.addToRenderQueue((renderPass as io.openmobilemaps.mapscore.shared.graphics.RenderPassInterface).asKmp())
     }
 
     override fun addToComputeQueue(computePass: io.openmobilemaps.mapscore.shared.graphics.ComputePassInterface) {
-        delegate.addToComputeQueue(requireNotNull((computePass as io.openmobilemaps.mapscore.shared.graphics.ComputePassInterface)).asKmp())
+        delegate.addToComputeQueue((computePass as io.openmobilemaps.mapscore.shared.graphics.ComputePassInterface).asKmp())
     }
 
     override fun drawFrame(renderingContext: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, camera: io.openmobilemaps.mapscore.shared.graphics.CameraInterface, target: io.openmobilemaps.mapscore.shared.graphics.RenderTargetInterface?) {
-        delegate.drawFrame(requireNotNull((renderingContext as io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface)).asKmp(), requireNotNull((camera as io.openmobilemaps.mapscore.shared.graphics.CameraInterface)).asKmp(), target?.let { requireNotNull((it as io.openmobilemaps.mapscore.shared.graphics.RenderTargetInterface)).asKmp() })
+        delegate.drawFrame((renderingContext as io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface).asKmp(), (camera as io.openmobilemaps.mapscore.shared.graphics.CameraInterface).asKmp(), target?.let { (it as io.openmobilemaps.mapscore.shared.graphics.RenderTargetInterface).asKmp() })
     }
 
     override fun compute(renderingContext: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, camera: io.openmobilemaps.mapscore.shared.graphics.CameraInterface) {
-        delegate.compute(requireNotNull((renderingContext as io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface)).asKmp(), requireNotNull((camera as io.openmobilemaps.mapscore.shared.graphics.CameraInterface)).asKmp())
+        delegate.compute((renderingContext as io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface).asKmp(), (camera as io.openmobilemaps.mapscore.shared.graphics.CameraInterface).asKmp())
     }
 }
 

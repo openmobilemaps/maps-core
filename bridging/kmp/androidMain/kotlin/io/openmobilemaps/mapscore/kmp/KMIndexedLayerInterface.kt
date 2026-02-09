@@ -18,7 +18,7 @@ private class KMIndexedLayerInterfacePlatformWrapper(internal val nativeHandle: 
 
     override fun getLayerInterface(): KMLayerInterface {
         val result = nativeHandle.getLayerInterface()
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.map.LayerInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.map.LayerInterface).asKmp()
     }
 
     override fun getIndex(): Int {

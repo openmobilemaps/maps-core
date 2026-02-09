@@ -21,27 +21,27 @@ actual class KMSceneInterface actual public constructor(
 
     actual fun getCamera(): KMCameraInterface {
         val result = native.getCamera()
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.CameraInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.CameraInterface).asKmp()
     }
 
     actual fun getRenderer(): KMRendererInterface {
         val result = native.getRenderer()
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.RendererInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.RendererInterface).asKmp()
     }
 
     actual fun getRenderingContext(): KMRenderingContextInterface {
         val result = native.getRenderingContext()
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface).asKmp()
     }
 
     actual fun getGraphicsFactory(): KMGraphicsObjectFactoryInterface {
         val result = native.getGraphicsFactory()
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.objects.GraphicsObjectFactoryInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.objects.GraphicsObjectFactoryInterface).asKmp()
     }
 
     actual fun getShaderFactory(): KMShaderFactoryInterface {
         val result = native.getShaderFactory()
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.shader.ShaderFactoryInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.shader.ShaderFactoryInterface).asKmp()
     }
 
     actual fun prepare() {
@@ -69,12 +69,12 @@ actual class KMSceneInterface actual public constructor(
 
         actual fun create(graphicsFactory: KMGraphicsObjectFactoryInterface, shaderFactory: KMShaderFactoryInterface, renderingContext: KMRenderingContextInterface): KMSceneInterface {
             val result = SceneInterface.create(graphicsFactory.asPlatform(), shaderFactory.asPlatform(), renderingContext.asPlatform())
-            return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.SceneInterface)).asKmp()
+            return (result as io.openmobilemaps.mapscore.shared.graphics.SceneInterface).asKmp()
         }
 
         actual fun createWithOpenGl(): KMSceneInterface {
             val result = SceneInterface.createWithOpenGl()
-            return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.SceneInterface)).asKmp()
+            return (result as io.openmobilemaps.mapscore.shared.graphics.SceneInterface).asKmp()
         }
     }
 }

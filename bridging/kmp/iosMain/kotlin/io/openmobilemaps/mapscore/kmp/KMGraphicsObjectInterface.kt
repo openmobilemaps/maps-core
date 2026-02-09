@@ -65,7 +65,7 @@ private class KMGraphicsObjectInterfacePlatformProxy(private val delegate: KMGra
     }
 
     override fun setup(context: MapCoreSharedModule.MCRenderingContextInterfaceProtocol?) {
-        delegate.setup(requireNotNull((context as MapCoreSharedModule.MCRenderingContextInterfaceProtocol)).asKmp())
+        delegate.setup((context as MapCoreSharedModule.MCRenderingContextInterfaceProtocol).asKmp())
     }
 
     override fun clear() {
@@ -81,7 +81,7 @@ private class KMGraphicsObjectInterfacePlatformProxy(private val delegate: KMGra
     }
 
     override fun render(context: MapCoreSharedModule.MCRenderingContextInterfaceProtocol?, renderPass: MapCoreSharedModule.MCRenderPassConfig, vpMatrix: Long, mMatrix: Long, origin: MapCoreSharedModule.MCVec3D, isMasked: Boolean, screenPixelAsRealMeterFactor: Double, isScreenSpaceCoords: Boolean) {
-        delegate.render(requireNotNull((context as MapCoreSharedModule.MCRenderingContextInterfaceProtocol)).asKmp(), (renderPass as MapCoreSharedModule.MCRenderPassConfig).asKmp(), vpMatrix, mMatrix, (origin as MapCoreSharedModule.MCVec3D).asKmp(), isMasked, screenPixelAsRealMeterFactor, isScreenSpaceCoords)
+        delegate.render((context as MapCoreSharedModule.MCRenderingContextInterfaceProtocol).asKmp(), (renderPass as MapCoreSharedModule.MCRenderPassConfig).asKmp(), vpMatrix, mMatrix, (origin as MapCoreSharedModule.MCVec3D).asKmp(), isMasked, screenPixelAsRealMeterFactor, isScreenSpaceCoords)
     }
 }
 

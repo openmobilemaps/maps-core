@@ -47,19 +47,19 @@ private class KMRendererInterfacePlatformProxy(private val delegate: KMRendererI
 {
 
     override fun addToRenderQueue(renderPass: MapCoreSharedModule.MCRenderPassInterfaceProtocol?) {
-        delegate.addToRenderQueue(requireNotNull((renderPass as MapCoreSharedModule.MCRenderPassInterfaceProtocol)).asKmp())
+        delegate.addToRenderQueue((renderPass as MapCoreSharedModule.MCRenderPassInterfaceProtocol).asKmp())
     }
 
     override fun addToComputeQueue(computePass: MapCoreSharedModule.MCComputePassInterfaceProtocol?) {
-        delegate.addToComputeQueue(requireNotNull((computePass as MapCoreSharedModule.MCComputePassInterfaceProtocol)).asKmp())
+        delegate.addToComputeQueue((computePass as MapCoreSharedModule.MCComputePassInterfaceProtocol).asKmp())
     }
 
     override fun drawFrame(renderingContext: MapCoreSharedModule.MCRenderingContextInterfaceProtocol?, camera: MapCoreSharedModule.MCCameraInterfaceProtocol?, target: MapCoreSharedModule.MCRenderTargetInterfaceProtocol?) {
-        delegate.drawFrame(requireNotNull((renderingContext as MapCoreSharedModule.MCRenderingContextInterfaceProtocol)).asKmp(), requireNotNull((camera as MapCoreSharedModule.MCCameraInterfaceProtocol)).asKmp(), target?.let { requireNotNull((it as MapCoreSharedModule.MCRenderTargetInterfaceProtocol)).asKmp() })
+        delegate.drawFrame((renderingContext as MapCoreSharedModule.MCRenderingContextInterfaceProtocol).asKmp(), (camera as MapCoreSharedModule.MCCameraInterfaceProtocol).asKmp(), target?.let { (it as MapCoreSharedModule.MCRenderTargetInterfaceProtocol).asKmp() })
     }
 
     override fun compute(renderingContext: MapCoreSharedModule.MCRenderingContextInterfaceProtocol?, camera: MapCoreSharedModule.MCCameraInterfaceProtocol?) {
-        delegate.compute(requireNotNull((renderingContext as MapCoreSharedModule.MCRenderingContextInterfaceProtocol)).asKmp(), requireNotNull((camera as MapCoreSharedModule.MCCameraInterfaceProtocol)).asKmp())
+        delegate.compute((renderingContext as MapCoreSharedModule.MCRenderingContextInterfaceProtocol).asKmp(), (camera as MapCoreSharedModule.MCCameraInterfaceProtocol).asKmp())
     }
 }
 

@@ -74,137 +74,137 @@ private class KMShaderFactoryInterfacePlatformWrapper(internal val nativeHandle:
 
     override fun createAlphaShader(): KMAlphaShaderInterface {
         val result = nativeHandle.createAlphaShader()
-        return requireNotNull((result as MapCoreSharedModule.MCAlphaShaderInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCAlphaShaderInterfaceProtocol).asKmp()
     }
 
     override fun createUnitSphereAlphaShader(): KMAlphaShaderInterface {
         val result = nativeHandle.createUnitSphereAlphaShader()
-        return requireNotNull((result as MapCoreSharedModule.MCAlphaShaderInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCAlphaShaderInterfaceProtocol).asKmp()
     }
 
     override fun createAlphaInstancedShader(): KMAlphaInstancedShaderInterface {
         val result = nativeHandle.createAlphaInstancedShader()
-        return requireNotNull((result as MapCoreSharedModule.MCAlphaInstancedShaderInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCAlphaInstancedShaderInterfaceProtocol).asKmp()
     }
 
     override fun createUnitSphereAlphaInstancedShader(): KMAlphaInstancedShaderInterface {
         val result = nativeHandle.createUnitSphereAlphaInstancedShader()
-        return requireNotNull((result as MapCoreSharedModule.MCAlphaInstancedShaderInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCAlphaInstancedShaderInterfaceProtocol).asKmp()
     }
 
     override fun createLineGroupShader(): KMLineGroupShaderInterface {
         val result = nativeHandle.createLineGroupShader()
-        return requireNotNull((result as MapCoreSharedModule.MCLineGroupShaderInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCLineGroupShaderInterfaceProtocol).asKmp()
     }
 
     override fun createUnitSphereLineGroupShader(): KMLineGroupShaderInterface {
         val result = nativeHandle.createUnitSphereLineGroupShader()
-        return requireNotNull((result as MapCoreSharedModule.MCLineGroupShaderInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCLineGroupShaderInterfaceProtocol).asKmp()
     }
 
     override fun createSimpleLineGroupShader(): KMLineGroupShaderInterface {
         val result = nativeHandle.createSimpleLineGroupShader()
-        return requireNotNull((result as MapCoreSharedModule.MCLineGroupShaderInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCLineGroupShaderInterfaceProtocol).asKmp()
     }
 
     override fun createUnitSphereSimpleLineGroupShader(): KMLineGroupShaderInterface {
         val result = nativeHandle.createUnitSphereSimpleLineGroupShader()
-        return requireNotNull((result as MapCoreSharedModule.MCLineGroupShaderInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCLineGroupShaderInterfaceProtocol).asKmp()
     }
 
     override fun createUnitSphereColorShader(): KMColorShaderInterface {
         val result = nativeHandle.createUnitSphereColorShader()
-        return requireNotNull((result as MapCoreSharedModule.MCColorShaderInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCColorShaderInterfaceProtocol).asKmp()
     }
 
     override fun createColorShader(): KMColorShaderInterface {
         val result = nativeHandle.createColorShader()
-        return requireNotNull((result as MapCoreSharedModule.MCColorShaderInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCColorShaderInterfaceProtocol).asKmp()
     }
 
     override fun createPolygonTessellatedShader(unitSphere: Boolean): KMColorShaderInterface {
         val result = nativeHandle.createPolygonTessellatedShader(unitSphere)
-        return requireNotNull((result as MapCoreSharedModule.MCColorShaderInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCColorShaderInterfaceProtocol).asKmp()
     }
 
     override fun createColorCircleShader(): KMColorCircleShaderInterface {
         val result = nativeHandle.createColorCircleShader()
-        return requireNotNull((result as MapCoreSharedModule.MCColorCircleShaderInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCColorCircleShaderInterfaceProtocol).asKmp()
     }
 
     override fun createUnitSphereColorCircleShader(): KMColorCircleShaderInterface {
         val result = nativeHandle.createUnitSphereColorCircleShader()
-        return requireNotNull((result as MapCoreSharedModule.MCColorCircleShaderInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCColorCircleShaderInterfaceProtocol).asKmp()
     }
 
     override fun createPolygonGroupShader(isStriped: Boolean, unitSphere: Boolean): KMPolygonGroupShaderInterface {
         val result = nativeHandle.createPolygonGroupShader(isStriped, unitSphere)
-        return requireNotNull((result as MapCoreSharedModule.MCPolygonGroupShaderInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCPolygonGroupShaderInterfaceProtocol).asKmp()
     }
 
     override fun createPolygonPatternGroupShader(fadeInPattern: Boolean, unitSphere: Boolean): KMPolygonPatternGroupShaderInterface {
         val result = nativeHandle.createPolygonPatternGroupShader(fadeInPattern, unitSphere)
-        return requireNotNull((result as MapCoreSharedModule.MCPolygonPatternGroupShaderInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCPolygonPatternGroupShaderInterfaceProtocol).asKmp()
     }
 
     override fun createTextShader(): KMTextShaderInterface {
         val result = nativeHandle.createTextShader()
-        return requireNotNull((result as MapCoreSharedModule.MCTextShaderInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCTextShaderInterfaceProtocol).asKmp()
     }
 
     override fun createTextInstancedShader(): KMTextInstancedShaderInterface {
         val result = nativeHandle.createTextInstancedShader()
-        return requireNotNull((result as MapCoreSharedModule.MCTextInstancedShaderInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCTextInstancedShaderInterfaceProtocol).asKmp()
     }
 
     override fun createUnitSphereTextInstancedShader(): KMTextInstancedShaderInterface {
         val result = nativeHandle.createUnitSphereTextInstancedShader()
-        return requireNotNull((result as MapCoreSharedModule.MCTextInstancedShaderInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCTextInstancedShaderInterfaceProtocol).asKmp()
     }
 
     override fun createRasterShader(): KMRasterShaderInterface {
         val result = nativeHandle.createRasterShader()
-        return requireNotNull((result as MapCoreSharedModule.MCRasterShaderInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCRasterShaderInterfaceProtocol).asKmp()
     }
 
     override fun createUnitSphereRasterShader(): KMRasterShaderInterface {
         val result = nativeHandle.createUnitSphereRasterShader()
-        return requireNotNull((result as MapCoreSharedModule.MCRasterShaderInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCRasterShaderInterfaceProtocol).asKmp()
     }
 
     override fun createQuadTessellatedShader(): KMRasterShaderInterface {
         val result = nativeHandle.createQuadTessellatedShader()
-        return requireNotNull((result as MapCoreSharedModule.MCRasterShaderInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCRasterShaderInterfaceProtocol).asKmp()
     }
 
     override fun createStretchShader(): KMStretchShaderInterface {
         val result = nativeHandle.createStretchShader()
-        return requireNotNull((result as MapCoreSharedModule.MCStretchShaderInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCStretchShaderInterfaceProtocol).asKmp()
     }
 
     override fun createStretchInstancedShader(unitSphere: Boolean): KMStretchInstancedShaderInterface {
         val result = nativeHandle.createStretchInstancedShader(unitSphere)
-        return requireNotNull((result as MapCoreSharedModule.MCStretchInstancedShaderInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCStretchInstancedShaderInterfaceProtocol).asKmp()
     }
 
     override fun createIcosahedronColorShader(): KMColorShaderInterface {
         val result = nativeHandle.createIcosahedronColorShader()
-        return requireNotNull((result as MapCoreSharedModule.MCColorShaderInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCColorShaderInterfaceProtocol).asKmp()
     }
 
     override fun createSphereEffectShader(): KMSphereEffectShaderInterface {
         val result = nativeHandle.createSphereEffectShader()
-        return requireNotNull((result as MapCoreSharedModule.MCSphereEffectShaderInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCSphereEffectShaderInterfaceProtocol).asKmp()
     }
 
     override fun createSkySphereShader(): KMSkySphereShaderInterface {
         val result = nativeHandle.createSkySphereShader()
-        return requireNotNull((result as MapCoreSharedModule.MCSkySphereShaderInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCSkySphereShaderInterfaceProtocol).asKmp()
     }
 
     override fun createElevationInterpolationShader(): KMElevationInterpolationShaderInterface {
         val result = nativeHandle.createElevationInterpolationShader()
-        return requireNotNull((result as MapCoreSharedModule.MCElevationInterpolationShaderInterfaceProtocol)).asKmp()
+        return (result as MapCoreSharedModule.MCElevationInterpolationShaderInterfaceProtocol).asKmp()
     }
 }
 

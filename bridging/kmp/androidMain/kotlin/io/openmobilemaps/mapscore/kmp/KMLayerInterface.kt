@@ -58,12 +58,12 @@ private class KMLayerInterfacePlatformWrapper(internal val nativeHandle: LayerIn
 
     override fun buildRenderPasses(): ArrayList<KMRenderPassInterface> {
         val result = nativeHandle.buildRenderPasses()
-        return ArrayList(result.map { requireNotNull((it as io.openmobilemaps.mapscore.shared.graphics.RenderPassInterface)).asKmp() })
+        return ArrayList(result.map { (it as io.openmobilemaps.mapscore.shared.graphics.RenderPassInterface).asKmp() })
     }
 
     override fun buildComputePasses(): ArrayList<KMComputePassInterface> {
         val result = nativeHandle.buildComputePasses()
-        return ArrayList(result.map { requireNotNull((it as io.openmobilemaps.mapscore.shared.graphics.ComputePassInterface)).asKmp() })
+        return ArrayList(result.map { (it as io.openmobilemaps.mapscore.shared.graphics.ComputePassInterface).asKmp() })
     }
 
     override fun onAdded(mapInterface: KMMapInterface, layerIndex: Int) {
@@ -129,7 +129,7 @@ private class KMLayerInterfacePlatformProxy(private val delegate: KMLayerInterfa
 {
 
     override fun setMaskingObject(maskingObject: io.openmobilemaps.mapscore.shared.graphics.objects.MaskingObjectInterface?) {
-        delegate.setMaskingObject(maskingObject?.let { requireNotNull((it as io.openmobilemaps.mapscore.shared.graphics.objects.MaskingObjectInterface)).asKmp() })
+        delegate.setMaskingObject(maskingObject?.let { (it as io.openmobilemaps.mapscore.shared.graphics.objects.MaskingObjectInterface).asKmp() })
     }
 
     override fun update() {
@@ -147,7 +147,7 @@ private class KMLayerInterfacePlatformProxy(private val delegate: KMLayerInterfa
     }
 
     override fun onAdded(mapInterface: io.openmobilemaps.mapscore.shared.map.MapInterface, layerIndex: Int) {
-        delegate.onAdded(requireNotNull((mapInterface as io.openmobilemaps.mapscore.shared.map.MapInterface)).asKmp(), layerIndex)
+        delegate.onAdded((mapInterface as io.openmobilemaps.mapscore.shared.map.MapInterface).asKmp(), layerIndex)
     }
 
     override fun onRemoved() {
@@ -193,7 +193,7 @@ private class KMLayerInterfacePlatformProxy(private val delegate: KMLayerInterfa
     }
 
     override fun setErrorManager(errorManager: io.openmobilemaps.mapscore.shared.map.ErrorManager) {
-        delegate.setErrorManager(requireNotNull((errorManager as io.openmobilemaps.mapscore.shared.map.ErrorManager)).asKmp())
+        delegate.setErrorManager((errorManager as io.openmobilemaps.mapscore.shared.map.ErrorManager).asKmp())
     }
 
     override fun forceReload() {
@@ -201,7 +201,7 @@ private class KMLayerInterfacePlatformProxy(private val delegate: KMLayerInterfa
     }
 
     override fun setPrimaryRenderTarget(target: io.openmobilemaps.mapscore.shared.graphics.RenderTargetInterface?) {
-        delegate.setPrimaryRenderTarget(target?.let { requireNotNull((it as io.openmobilemaps.mapscore.shared.graphics.RenderTargetInterface)).asKmp() })
+        delegate.setPrimaryRenderTarget(target?.let { (it as io.openmobilemaps.mapscore.shared.graphics.RenderTargetInterface).asKmp() })
     }
 }
 

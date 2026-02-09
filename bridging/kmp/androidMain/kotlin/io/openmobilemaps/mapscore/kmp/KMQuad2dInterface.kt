@@ -48,12 +48,12 @@ private class KMQuad2dInterfacePlatformWrapper(internal val nativeHandle: Quad2d
 
     override fun asGraphicsObject(): KMGraphicsObjectInterface {
         val result = nativeHandle.asGraphicsObject()
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.objects.GraphicsObjectInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.objects.GraphicsObjectInterface).asKmp()
     }
 
     override fun asMaskingObject(): KMMaskingObjectInterface {
         val result = nativeHandle.asMaskingObject()
-        return requireNotNull((result as io.openmobilemaps.mapscore.shared.graphics.objects.MaskingObjectInterface)).asKmp()
+        return (result as io.openmobilemaps.mapscore.shared.graphics.objects.MaskingObjectInterface).asKmp()
     }
 }
 
@@ -73,7 +73,7 @@ private class KMQuad2dInterfacePlatformProxy(private val delegate: KMQuad2dInter
     }
 
     override fun loadTexture(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, textureHolder: io.openmobilemaps.mapscore.shared.graphics.objects.TextureHolderInterface) {
-        delegate.loadTexture(requireNotNull((context as io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface)).asKmp(), requireNotNull((textureHolder as io.openmobilemaps.mapscore.shared.graphics.objects.TextureHolderInterface)).asKmp())
+        delegate.loadTexture((context as io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface).asKmp(), (textureHolder as io.openmobilemaps.mapscore.shared.graphics.objects.TextureHolderInterface).asKmp())
     }
 
     override fun removeTexture() {

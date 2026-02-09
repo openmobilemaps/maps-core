@@ -31,7 +31,7 @@ actual class KMGeoJsonHelperInterface actual public constructor(
 
         actual fun independentInstance(): KMGeoJsonHelperInterface {
             val result = MapCoreSharedModule.MCGeoJsonHelperInterface.independentInstance()
-            return requireNotNull((result as MapCoreSharedModule.MCGeoJsonHelperInterface)).asKmp()
+            return (result as MapCoreSharedModule.MCGeoJsonHelperInterface).asKmp()
         }
     }
 }

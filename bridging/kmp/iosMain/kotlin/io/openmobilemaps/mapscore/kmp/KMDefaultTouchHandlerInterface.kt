@@ -21,7 +21,7 @@ actual class KMDefaultTouchHandlerInterface actual public constructor(
 
         actual fun create(scheduler: KMSchedulerInterface, density: Float): KMTouchHandlerInterface {
             val result = MapCoreSharedModule.MCDefaultTouchHandlerInterface.create(scheduler.asPlatform(), density)
-            return requireNotNull((result as MapCoreSharedModule.MCTouchHandlerInterfaceProtocol)).asKmp()
+            return (result as MapCoreSharedModule.MCTouchHandlerInterfaceProtocol).asKmp()
         }
     }
 }

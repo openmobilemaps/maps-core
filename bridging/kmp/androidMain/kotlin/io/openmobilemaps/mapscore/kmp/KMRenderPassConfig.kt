@@ -21,5 +21,5 @@ internal fun KMRenderPassConfig.asPlatform(): io.openmobilemaps.mapscore.shared.
 internal fun io.openmobilemaps.mapscore.shared.graphics.RenderPassConfig.asKmp(): KMRenderPassConfig = KMRenderPassConfig(
     renderPassIndex = this.renderPassIndex,
     isPassMasked = this.isPassMasked,
-    renderTarget = this.renderTarget?.let { requireNotNull((it as io.openmobilemaps.mapscore.shared.graphics.RenderTargetInterface)).asKmp() },
+    renderTarget = this.renderTarget?.let { (it as io.openmobilemaps.mapscore.shared.graphics.RenderTargetInterface).asKmp() },
 )

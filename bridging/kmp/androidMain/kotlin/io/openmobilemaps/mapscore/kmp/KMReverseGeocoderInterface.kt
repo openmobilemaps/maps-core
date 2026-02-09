@@ -26,7 +26,7 @@ actual class KMReverseGeocoderInterface actual public constructor(
 
         actual fun create(loader: KMLoaderInterface, tileUrlTemplate: String, zoomLevel: Int): KMReverseGeocoderInterface {
             val result = ReverseGeocoderInterface.create(loader.asPlatform(), tileUrlTemplate, zoomLevel)
-            return requireNotNull((result as io.openmobilemaps.mapscore.shared.utils.ReverseGeocoderInterface)).asKmp()
+            return (result as io.openmobilemaps.mapscore.shared.utils.ReverseGeocoderInterface).asKmp()
         }
     }
 }

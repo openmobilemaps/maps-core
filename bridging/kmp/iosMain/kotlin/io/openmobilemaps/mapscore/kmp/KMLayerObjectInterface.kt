@@ -22,7 +22,7 @@ actual class KMLayerObjectInterface actual public constructor(
 
     actual fun getRenderConfig(): ArrayList<KMRenderConfigInterface> {
         val result = native.getRenderConfig()
-        return ArrayList(((result as? List<*>)?.map { requireNotNull((it as MapCoreSharedModule.MCRenderConfigInterface)).asKmp() } ?: (0 until (result as platform.Foundation.NSArray).count.toInt()).map { idx -> requireNotNull(((result as platform.Foundation.NSArray).objectAtIndex(idx.toULong()) as MapCoreSharedModule.MCRenderConfigInterface)).asKmp() }))
+        return ArrayList(((result as? List<*>)?.map { (it as MapCoreSharedModule.MCRenderConfigInterface).asKmp() } ?: (0 until (result as platform.Foundation.NSArray).count.toInt()).map { idx -> ((result as platform.Foundation.NSArray).objectAtIndex(idx.toULong()) as MapCoreSharedModule.MCRenderConfigInterface).asKmp() }))
     }
 }
 
