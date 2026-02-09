@@ -293,8 +293,8 @@ std::shared_ptr<Value> Tiled2dMapVectorStyleParser::parseValue(nlohmann::json js
 
             std::map<std::set<ValueVariant>, std::shared_ptr<Value>> mapping;
 
-            auto const countElements = json.size() - 3;
-            for (int i = 0; i != countElements; i += 2) {
+            auto const countElements = json.size() >= 3 ? json.size() - 3 : 0;
+            for (int i = 0; i < countElements; i += 2) {
                 std::set<ValueVariant> values;
                 if (json[2 + i].is_array()) {
                     for(auto const value: json[2 + i]) {
@@ -521,6 +521,8 @@ ValueVariant Tiled2dMapVectorStyleParser::getVariant(const nlohmann::json &json)
         return json.get<int64_t>();
     } else if (json.is_boolean()) {
         return json.get<bool>();
+    } else if (json.is_array() && json.empty()) {
+        return std::vector<float>();
     } else if (json.is_array() && json[0].is_number()) {
         auto floatVector = std::vector<float>();
         floatVector.reserve(json.size());
