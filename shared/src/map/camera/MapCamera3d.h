@@ -38,8 +38,7 @@ class MapCamera3d : public MapCameraInterface,
                     public std::enable_shared_from_this<MapCamera3d> {
   public:
     MapCamera3d(const std::shared_ptr<MapInterface> &mapInterface, float screenDensityPpi);
-
-    ~MapCamera3d(){};
+    ~MapCamera3d();
 
     void freeze(bool freeze) override;
 
@@ -198,6 +197,11 @@ class MapCamera3d : public MapCameraInterface,
     double getCameraVerticalDisplacement();
     double getCameraPitch();
 
+  private:
+    // Unlocked versions - caller must hold paramMutex
+    double getCameraVerticalDisplacementUnlocked();
+    double getCameraPitchUnlocked();
+
     Vec2F calculateDistance(double latTopLeft, double lonTopLeft, double latBottomRight, double lonBottomRight);
     double haversineDistance(double lat1, double lon1, double lat2, double lon2);
     double zoomForMeterWidth(Vec2I sizeViewport, Vec2F sizeMeters);
@@ -216,7 +220,6 @@ class MapCamera3d : public MapCameraInterface,
     Coord focusPointPosition;
     double cameraVerticalDisplacement = 0.0;
     double cameraPitch = 0; // looking up or down
-    double fieldOfView = 10.0f;
 
     double zoom;
     double angle = 0;

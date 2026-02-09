@@ -56,6 +56,11 @@ MapCamera3d::MapCamera3d(const std::shared_ptr<MapInterface> &mapInterface, floa
     updateZoom(GLOBE_MIN_ZOOM);
 }
 
+MapCamera3d::~MapCamera3d() {
+    // Ensure no animation callback touches a partially destroyed camera.
+    freeze(true);
+}
+
 void MapCamera3d::viewportSizeChanged() {
     auto mapInterface = this->mapInterface;
     auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
@@ -114,8 +119,14 @@ void MapCamera3d::moveToCenterPositionZoom(const ::Coord &centerPosition, double
     if (animated) {
         std::weak_ptr<MapCamera3d> weakSelf = std::static_pointer_cast<MapCamera3d>(shared_from_this());
         std::lock_guard<std::recursive_mutex> lock(animationMutex);
+        long long animationDurationMs;
+        {
+            std::lock_guard<std::recursive_mutex> lock(paramMutex);
+            animationDurationMs = cameraZoomConfig.animationDurationMs;
+        }
+
         coordAnimation = std::make_shared<CoordAnimation>(
-            cameraZoomConfig.animationDurationMs, focusPointPosition, focusPosition, centerPosition,
+            animationDurationMs, focusPointPosition, focusPosition, centerPosition,
             InterpolatorFunction::EaseInOut,
             [weakSelf](Coord positionMapSystem) {
                 if (auto selfPtr = weakSelf.lock()) {
@@ -187,8 +198,14 @@ void MapCamera3d::moveToCenterPosition(const ::Coord &centerPosition, bool anima
     if (animated) {
         std::weak_ptr<MapCamera3d> weakSelf = std::static_pointer_cast<MapCamera3d>(shared_from_this());
         std::lock_guard<std::recursive_mutex> lock(animationMutex);
+        long long animationDurationMs;
+        {
+            std::lock_guard<std::recursive_mutex> lock(paramMutex);
+            animationDurationMs = cameraZoomConfig.animationDurationMs;
+        }
+
         coordAnimation = std::make_shared<CoordAnimation>(
-            cameraZoomConfig.animationDurationMs, focusPointPosition, focusPosition, centerPosition,
+            animationDurationMs, focusPointPosition, focusPosition, centerPosition,
             InterpolatorFunction::EaseInOut,
             [weakSelf](Coord positionMapSystem) {
                 if (auto selfPtr = weakSelf.lock()) {
@@ -251,7 +268,11 @@ void MapCamera3d::moveToBoundingBox(const RectCoord &boundingBox, float paddingP
     // the user of moveToBoundingBox wants that the bounding box is centered,
     // if you have camera verticaldisplacement, this is not the case, this should
     // be fixed for this function as it only works with 0
-    assert(valueForZoom(cameraZoomConfig.verticalDisplacementInterpolationValues, zoom) == 0);
+    {
+        // Protect against concurrent config updates while reading interpolation values
+        std::lock_guard<std::recursive_mutex> lock(paramMutex);
+        assert(valueForZoom(cameraZoomConfig.verticalDisplacementInterpolationValues, zoom) == 0);
+    }
 
     auto x = 0.5 * boundingBox.topLeft.x + 0.5 * boundingBox.bottomRight.x;
     auto y = 0.5 * boundingBox.topLeft.y + 0.5 * boundingBox.bottomRight.y;
@@ -275,9 +296,15 @@ void MapCamera3d::setZoom(double zoom, bool animated) {
 
     if (animated) {
         std::weak_ptr<MapCamera3d> weakSelf = std::static_pointer_cast<MapCamera3d>(shared_from_this());
+        long long animationDurationMs;
+        {
+            std::lock_guard<std::recursive_mutex> lock(paramMutex);
+            animationDurationMs = cameraZoomConfig.animationDurationMs;
+        }
+
         std::lock_guard<std::recursive_mutex> lock(animationMutex);
         zoomAnimation = std::make_shared<DoubleAnimation>(
-            cameraZoomConfig.animationDurationMs, this->zoom, targetZoom, InterpolatorFunction::EaseIn,
+            animationDurationMs, this->zoom, targetZoom, InterpolatorFunction::EaseIn,
             [weakSelf](double zoom) {
                 if (auto selfPtr = weakSelf.lock()) {
                     selfPtr->setZoom(zoom, false);
@@ -313,9 +340,15 @@ void MapCamera3d::setRotation(float angle, bool animated) {
             newAngle -= 360.0;
         }
         std::weak_ptr<MapCamera3d> weakSelf = std::static_pointer_cast<MapCamera3d>(shared_from_this());
+        long long animationDurationMs;
+        {
+            std::lock_guard<std::recursive_mutex> lock(paramMutex);
+            animationDurationMs = cameraZoomConfig.animationDurationMs;
+        }
+
         std::lock_guard<std::recursive_mutex> lock(animationMutex);
         rotationAnimation = std::make_shared<DoubleAnimation>(
-            cameraZoomConfig.animationDurationMs, currentAngle, newAngle, InterpolatorFunction::Linear,
+            animationDurationMs, currentAngle, newAngle, InterpolatorFunction::Linear,
             [weakSelf](double angle) {
                 if (auto selfPtr = weakSelf.lock()) {
                     selfPtr->setRotation(angle, false);
@@ -1169,9 +1202,16 @@ bool MapCamera3d::onTwoFingerMoveComplete() {
 
     if (config.snapToNorthEnabled && !cameraFrozen && (angle < ROTATION_LOCKING_ANGLE || angle > (360 - ROTATION_LOCKING_ANGLE))) {
         std::weak_ptr<MapCamera3d> weakSelf = std::static_pointer_cast<MapCamera3d>(shared_from_this());
+
+        long long animationDurationMs;
+        {
+            std::lock_guard<std::recursive_mutex> lock(paramMutex);
+            animationDurationMs = cameraZoomConfig.animationDurationMs;
+        }
+
         std::lock_guard<std::recursive_mutex> lock(animationMutex);
         rotationAnimation = std::make_shared<DoubleAnimation>(
-            cameraZoomConfig.animationDurationMs, this->angle, angle < ROTATION_LOCKING_ANGLE ? 0 : 360,
+            animationDurationMs, this->angle, angle < ROTATION_LOCKING_ANGLE ? 0 : 360,
             InterpolatorFunction::EaseInOut,
             [weakSelf](double angle) {
                 if (auto selfPtr = weakSelf.lock()) {
@@ -1812,7 +1852,10 @@ void MapCamera3d::setCameraConfig(const Camera3dConfig &config, std::optional<fl
     }
 }
 
-Camera3dConfig MapCamera3d::getCameraConfig() { return cameraZoomConfig; }
+Camera3dConfig MapCamera3d::getCameraConfig() {
+    std::lock_guard<std::recursive_mutex> lock(paramMutex);
+    return cameraZoomConfig;
+}
 
 void MapCamera3d::notifyListenerBoundsChange() { notifyListeners(ListenerType::BOUNDS); }
 
@@ -1822,15 +1865,25 @@ void MapCamera3d::updateZoom(double zoom_) {
 
     std::lock_guard<std::recursive_mutex> lock(paramMutex);
     zoom = std::clamp(zoom_, zoomMax, zoomMin);
-    cameraVerticalDisplacement = getCameraVerticalDisplacement();
-    cameraPitch = getCameraPitch();
+    cameraVerticalDisplacement = getCameraVerticalDisplacementUnlocked();
+    cameraPitch = getCameraPitchUnlocked();
 }
 
 double MapCamera3d::getCameraVerticalDisplacement() {
+    std::lock_guard<std::recursive_mutex> lock(paramMutex);
+    return getCameraVerticalDisplacementUnlocked();
+}
+
+double MapCamera3d::getCameraVerticalDisplacementUnlocked() {
     return valueForZoom(cameraZoomConfig.verticalDisplacementInterpolationValues, zoom);
 }
 
 double MapCamera3d::getCameraPitch() {
+    std::lock_guard<std::recursive_mutex> lock(paramMutex);
+    return getCameraPitchUnlocked();
+}
+
+double MapCamera3d::getCameraPitchUnlocked() {
     return valueForZoom(cameraZoomConfig.pitchInterpolationValues, zoom);
 }
 

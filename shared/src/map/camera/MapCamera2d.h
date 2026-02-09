@@ -33,7 +33,7 @@ class MapCamera2d : public MapCameraInterface,
   public:
     MapCamera2d(const std::shared_ptr<MapInterface> &mapInterface, float screenDensityPpi);
 
-    ~MapCamera2d(){};
+    ~MapCamera2d();
 
     void freeze(bool freeze) override;
 
