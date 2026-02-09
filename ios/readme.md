@@ -4,7 +4,7 @@
   <img width="200" height="45" src="../logo.svg" />
   <br />
   <br />
-  The lightweight and modern Map SDK for Android (6.0+) and iOS (14+)
+  The lightweight and modern Map SDK for Android (8.0+, OpenGL ES 3.2) and iOS (14+)
   <br />
   <br />
   <a href="https://openmobilemaps.io/">openmobilemaps.io</a>
@@ -19,6 +19,81 @@
 </div>
 
 <h1>iOS</h1>
+
+## Table of Contents
+- [Quick Start](#quick-start)
+- [System Requirements](#system-requirements)
+- [Installation](#installation)
+- [How to use](#how-to-use)
+  - [MapView](#mapview)
+  - [Vector Tiles](#vector-tiles)
+  - [Camera and Gesture Handling](#camera-and-gesture-handling)
+  - [Performance Considerations](#performance-considerations)
+  - [Overlays](#overlays)
+  - [Customisation](#customisation)
+- [Troubleshooting](#troubleshooting)
+- [How to build](#how-to-build)
+- [Testing and Debugging](#testing-and-debugging)
+- [License](#license)
+- [Third-Party Software](#third-party-software)
+
+## Quick Start
+
+Get up and running with Open Mobile Maps in just a few steps:
+
+1. **Add the package dependency** to your iOS project (iOS 14.0+ required)
+2. **Import MapCore** in your Swift file
+3. **Create a MapView** with a raster layer
+4. **Display your map**
+
+### SwiftUI (iOS 17.0+)
+```swift
+import MapCore
+import SwiftUI
+
+struct ContentView: View {
+    @State private var camera = MapView.Camera(
+        latitude: 46.962592372639634,
+        longitude: 8.378232525377973,
+        zoom: 1000000
+    )
+    
+    var body: some View {
+        MapView(
+            camera: $camera,
+            layers: [
+                TiledRasterLayer("osm", webMercatorUrlFormat: "https://tile.openstreetmap.org/{z}/{x}/{y}.png")
+            ]
+        )
+    }
+}
+```
+
+### UIKit
+```swift
+import MapCore
+
+class MapViewController: UIViewController {
+    lazy var mapView = MCMapView()
+    
+    override func loadView() { 
+        view = mapView 
+    }
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        mapView.add(layer: TiledRasterLayer("osm", webMercatorUrlFormat: "https://tile.openstreetmap.org/{z}/{x}/{y}.png"))
+        mapView.camera.move(toCenterPositionZoom: MCCoord(lat: 46.962592372639634, lon: 8.378232525377973), zoom: 1000000, animated: true)
+    }
+}
+```
+
+## System Requirements
+
+- **iOS 14.0+** (SwiftUI MapView requires iOS 17.0+)
+- **Xcode 14.0+**
+- **Swift 5.7+**
 
 ## Installation
 Open Mobile Maps is available through [Swift Package Manager](https://swift.org/package-manager/).
@@ -168,6 +243,10 @@ struct ContentView: View {
     private func setupWMTSLayer() {
         guard let resource = MCWmtsCapabilitiesResource.create(xml),
               let wmtsLayer = resource.createLayer("identifier", tileLoader: MCTextureLoader()) else {
+            print("Failed to create WMTS layer - falling back to raster layer")
+            layers = [
+                TiledRasterLayer("fallback", webMercatorUrlFormat: "https://tile.openstreetmap.org/{z}/{x}/{y}.png")
+            ]
             return
         }
         layers = [wmtsLayer]
@@ -178,13 +257,19 @@ struct ContentView: View {
 ##### UIKit
 
 ```swift
-let resource = MCWmtsCapabilitiesResource.create(xml)!
+guard let resource = MCWmtsCapabilitiesResource.create(xml) else {
+    print("Failed to parse WMTS capabilities")
+    return
+}
 ```
 The created resource object is then capable of creating a layer object with a given identifier.
 
 ```swift
-let layer = resource.createLayer("identifier", tileLoader: loader)
-mapView.add(layer: layer?.asLayerInterface())
+guard let layer = resource.createLayer("identifier", tileLoader: loader) else {
+    print("Failed to create WMTS layer with identifier")
+    return
+}
+mapView.add(layer: layer.asLayerInterface())
 ```
 
 This feature is still being improved to support a wider range of WMTS capabilities.
@@ -233,7 +318,221 @@ mapView.add(layer: try! VectorLayer("base-map", styleURL: "https://www.sample.or
 
 Additional features and differences will be documented soon.
 
+### Camera and Gesture Handling
 
+Open Mobile Maps provides comprehensive camera control and gesture handling for both SwiftUI and UIKit.
+
+#### Camera Control
+
+The camera system allows you to programmatically control the map's view, including position, zoom, and in 3D mode, the viewing angle.
+
+##### SwiftUI Camera Binding
+
+In SwiftUI, the camera is bound to your view state, allowing for reactive updates:
+
+```swift
+struct ContentView: View {
+    @State private var camera = MapView.Camera(
+        latitude: 46.962592372639634,
+        longitude: 8.378232525377973,
+        zoom: 1000000
+    )
+    
+    var body: some View {
+        VStack {
+            // Camera position updates automatically as user interacts
+            Text("Lat: \(camera.center.value?.lat ?? 0, specifier: "%.6f")")
+            Text("Lon: \(camera.center.value?.lon ?? 0, specifier: "%.6f")")
+            Text("Zoom: \(camera.zoom.value ?? 0, specifier: "%.0f")")
+            
+            MapView(camera: $camera, layers: layers)
+            
+            // Programmatic camera control
+            HStack {
+                Button("Zoom In") {
+                    if let currentZoom = camera.zoom.value {
+                        camera = MapView.Camera(
+                            center: camera.center.value,
+                            zoom: currentZoom * 0.5,  // Zoom in
+                            animated: true
+                        )
+                    }
+                }
+                Button("Reset") {
+                    camera = MapView.Camera(
+                        latitude: 46.962592372639634,
+                        longitude: 8.378232525377973,
+                        zoom: 1000000,
+                        animated: true
+                    )
+                }
+            }
+        }
+    }
+}
+```
+
+##### UIKit Camera Control
+
+For UIKit, use the `MCMapView.camera` property:
+
+```swift
+class MapViewController: UIViewController {
+    lazy var mapView = MCMapView()
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        // Move camera with animation
+        mapView.camera.move(
+            toCenterPositionZoom: MCCoord(lat: 46.962592372639634, lon: 8.378232525377973),
+            zoom: 1000000,
+            animated: true
+        )
+        
+        // Set camera bounds (restrict panning area)
+        let bounds = MCRectCoord(
+            topLeft: MCCoord(lat: 47.8, lon: 5.9),
+            bottomRight: MCCoord(lat: 45.8, lon: 10.5)
+        )
+        mapView.camera.setBounds(bounds, paddingLeft: 50, paddingRight: 50, paddingTop: 100, paddingBottom: 50)
+        
+        // Set zoom limits
+        mapView.camera.setMinZoom(100000)    // Min zoom level
+        mapView.camera.setMaxZoom(1000)      // Max zoom level
+    }
+    
+    // Listen to camera changes
+    private func setupCameraListener() {
+        mapView.callbackHandler = MapCallbackHandler { [weak self] in
+            let currentPosition = self?.mapView.camera.getCenterPosition()
+            print("Camera moved to: \(currentPosition?.lat ?? 0), \(currentPosition?.lon ?? 0)")
+        }
+    }
+}
+```
+
+#### Custom Gesture Handling
+
+You can customize gesture behavior or add custom touch handling:
+
+##### Custom Touch Handler (UIKit)
+
+```swift
+class CustomTouchHandler: MCMapViewTouchHandler {
+    override func onTap(_ posScreen: MCVec2F, posMap: MCCoord, confirmed: Bool) {
+        if confirmed {
+            print("Tapped at map coordinate: \(posMap.lat), \(posMap.lon)")
+            // Handle tap event
+        }
+    }
+    
+    override func onLongPress(_ posScreen: MCVec2F, posMap: MCCoord) {
+        print("Long press at: \(posMap.lat), \(posMap.lon)")
+        // Handle long press event
+    }
+    
+    override func onPan(_ posScreen: MCVec2F, posMap: MCCoord, translation: MCVec2F, state: MCGestureState) {
+        // Handle custom pan behavior
+        if state == .BEGAN {
+            print("Pan started")
+        }
+    }
+}
+
+// In your view controller:
+mapView.touchHandler = CustomTouchHandler()
+```
+
+##### Disabling Gestures
+
+```swift
+// Disable specific gestures
+mapView.setGestureEnabled(.PAN, enabled: false)
+mapView.setGestureEnabled(.ZOOM, enabled: false)
+mapView.setGestureEnabled(.ROTATION, enabled: false)
+```
+
+
+
+```
+
+### Performance Considerations
+
+To ensure optimal performance with Open Mobile Maps:
+
+#### Layer Management
+- **Limit concurrent layers**: Too many layers can impact rendering performance
+- **Remove unused layers**: Call `mapView.remove(layer:)` when layers are no longer needed
+- **Use appropriate tile sizes**: Standard 256x256 or 512x512 tiles work best
+
+#### Memory Management
+- **Dispose of resources**: Large textures and layers should be properly cleaned up
+- **Monitor memory usage**: Use Xcode's memory debugger to track texture and layer memory usage
+- **Cache management**: The SDK automatically manages tile caching, but you can customize cache size
+
+```swift
+// Configure cache size (in bytes)
+MCTileLoader.setMaxCacheSize(100 * 1024 * 1024) // 100 MB cache
+
+// Clear cache when needed
+MCTileLoader.clearCache()
+
+// Check cache status
+let cacheSize = MCTileLoader.getCurrentCacheSize()
+print("Current cache size: \(cacheSize) bytes")
+```
+
+#### Offline Support
+- **Tile pre-caching**: Download tiles in advance for offline use
+- **Local tile sources**: Serve tiles from app bundle or documents directory
+- **Cache management**: Monitor storage usage and implement cache eviction policies
+
+```swift
+// Example: Pre-cache tiles for a specific area
+func precacheTilesForRegion(_ bounds: MCRectCoord, maxZoom: Int) {
+    let tileLoader = MCTileLoader()
+    
+    // Calculate tile coordinates for the bounds and zoom levels
+    for zoom in 0...maxZoom {
+        let tiles = calculateTilesForBounds(bounds, zoom: zoom)
+        for tileCoord in tiles {
+            let request = MCTileLoaderRequest(x: tileCoord.x, y: tileCoord.y, zoom: tileCoord.zoom)
+            tileLoader.load(request)
+        }
+    }
+}
+```
+
+#### Rendering Optimization
+- **Minimize overdraw**: Avoid overlapping opaque layers
+- **Use appropriate zoom levels**: Don't load unnecessarily high-resolution tiles
+- **Batch layer updates**: Group multiple layer changes together when possible
+
+```swift
+// Good: Batch layer changes
+mapView.beginLayerTransaction()
+mapView.add(layer: layer1)
+mapView.add(layer: layer2)
+mapView.remove(layer: oldLayer)
+mapView.commitLayerTransaction()
+```
+
+#### Thread Safety
+- **Main thread UI updates**: Always update MapView properties on the main thread
+- **Background processing**: Heavy processing should be done on background queues
+
+```swift
+DispatchQueue.global(qos: .userInitiated).async {
+    // Heavy processing
+    let processedData = self.processMapData()
+    
+    DispatchQueue.main.async {
+        // Update UI on main thread
+        self.mapView.add(layer: processedData)
+    }
+}
+```
 
 ### Overlays
 
@@ -336,8 +635,14 @@ struct MapWithIconView: UIViewRepresentable {
         
         // Add icon layer
         let iconLayer = MCIconLayerInterface.create()
-        let image = UIImage(named: imageName)
-        let texture = try! TextureHolder(image!.cgImage!)
+        
+        guard let image = UIImage(named: imageName),
+              let cgImage = image.cgImage else {
+            print("Failed to load image: \(imageName)")
+            return mapView
+        }
+        
+        let texture = try! TextureHolder(cgImage)
         let icon = MCIconFactory.createIcon(
             "icon",
             coordinate: coordinate,
@@ -383,8 +688,14 @@ struct ContentView: View {
 
 ```swift
 let iconLayer = MCIconLayerInterface.create()
-let image = UIImage(named: "image")
-let texture = try! TextureHolder(image!.cgImage!)
+
+guard let image = UIImage(named: "image"),
+      let cgImage = image.cgImage else {
+    print("Failed to load image")
+    return
+}
+
+let texture = try! TextureHolder(cgImage)
 let icon = MCIconFactory.createIcon("icon",
                          coordinate: coordinate,
                          texture: texture,
@@ -578,7 +889,16 @@ class TiledLayerConfig: MCTiled2dMapLayerConfig {
 
 #### Change map projection
 
-To render the map using a different coordinate system, initialize the map view with a Map Config. The library provides a factory for the [EPSG3857](https://epsg.io/4326) Coordinate system and others, which we can use to initialize the map view. Layers can have a different projection than the map view itself.
+Open Mobile Maps supports different coordinate systems and projections. The library provides built-in support for common coordinate systems and allows for custom implementations.
+
+##### Supported Coordinate Systems
+
+- **EPSG:3857** (Web Mercator) - Default for most web mapping services
+- **EPSG:4326** (WGS84) - Standard latitude/longitude coordinates  
+- **EPSG:2056** (LV95/LV03+) - Swiss coordinate system
+- **Custom coordinate systems** can be implemented by extending the coordinate system interfaces
+
+To render the map using a different coordinate system, initialize the map view with a Map Config. The library provides a factory for coordinate systems which we can use to initialize the map view. Layers can have a different projection than the map view itself.
 
 ##### SwiftUI
 
@@ -616,6 +936,187 @@ struct ContentView: View {
 MCMapView(mapConfig: .init(mapCoordinateSystem: MCCoordinateSystemFactory.getEpsg2056System()))
 ```
 
+#### Advanced Customization Examples
+
+##### Custom Map Configuration
+
+```swift
+// Create a custom map configuration with specific settings
+let mapConfig = MCMapConfig(
+    mapCoordinateSystem: MCCoordinateSystemFactory.getEpsg3857System(),
+    camera3dConfig: MCCamera3dConfigFactory.getBasicConfig()
+)
+
+// Configure rendering settings
+mapConfig.renderingBackend = .METAL  // Use Metal rendering on iOS
+mapConfig.multisampling = true      // Enable anti-aliasing
+```
+
+##### Custom Tile Loading
+
+```swift
+// Implement custom tile loader for specialized data sources
+class CustomTileLoader: MCTileLoaderInterface {
+    func load(_ request: MCTileLoaderRequest) {
+        // Custom tile loading logic
+        // Could load from local storage, custom server, etc.
+        DispatchQueue.global().async {
+            // Load tile data
+            let tileData = self.loadCustomTileData(request)
+            DispatchQueue.main.async {
+                request.onLoaded(tileData)
+            }
+        }
+    }
+    
+    func cancel(_ request: MCTileLoaderRequest) {
+        // Cancel loading if needed
+    }
+}
+
+// Use custom loader
+let customLayer = TiledRasterLayer("custom", config: customConfig, tileLoader: CustomTileLoader())
+```
+
+##### Custom Rendering Callbacks
+
+```swift
+class MapCallbackHandler: MCMapViewCallbackHandler {
+    func onMapReady() {
+        print("Map is ready for interaction")
+    }
+    
+    func onCameraChanged() {
+        print("Camera position changed")
+    }
+    
+    func onRenderingError(_ error: String) {
+        print("Rendering error: \(error)")
+    }
+}
+
+mapView.callbackHandler = MapCallbackHandler()
+```
+
+##### Styling and Theming
+
+```swift
+// Customize map appearance
+extension MCMapView {
+    func applyDarkTheme() {
+        // Apply dark styling to layers
+        backgroundColor = .black
+        
+        // Update existing raster layers with dark tiles
+        layers.compactMap { $0 as? TiledRasterLayer }.forEach { layer in
+            // Switch to dark tile variant if available
+            layer.updateUrlFormat("https://dark-tiles.example.com/{z}/{x}/{y}.png")
+        }
+    }
+    
+    func applyCustomStyling() {
+        // Custom visual settings
+        layer.cornerRadius = 10
+        layer.borderWidth = 2
+        layer.borderColor = UIColor.systemBlue.cgColor
+    }
+}
+```
+
+##### Accessibility Support
+
+```swift
+// Make map accessible
+mapView.isAccessibilityElement = true
+mapView.accessibilityLabel = "Interactive map"
+mapView.accessibilityHint = "Double tap to interact, drag to pan"
+
+// Custom accessibility for map features
+class AccessibleMapView: MCMapView {
+    override func accessibilityElementDidBecomeFocused() {
+        // Announce current map region
+        let center = camera.getCenterPosition()
+        UIAccessibility.post(notification: .announcement, 
+                           argument: "Map centered at \(center.lat), \(center.lon)")
+    }
+}
+```
+
+## Troubleshooting
+
+### Common Issues and Solutions
+
+#### Build Issues
+
+**"Module 'MapCore' not found"**
+- Ensure you've added the package dependency correctly
+- Try cleaning your build folder (⇧⌘K)
+- Reset package caches: File → Package Dependencies → Reset Package Caches
+
+**"Minimum deployment target"**
+- Verify your project deployment target is iOS 14.0 or later
+- For SwiftUI MapView, iOS 17.0+ is required
+
+#### Runtime Issues
+
+**"Failed to create vector layer"**
+```swift
+do {
+    let layer = try VectorLayer("layer-id", styleURL: styleURL)
+    mapView.add(layer: layer)
+} catch VectorLayerError.invalidStyleURL {
+    print("Style URL is not valid or accessible")
+} catch VectorLayerError.networkError {
+    print("Network error loading style")
+} catch {
+    print("Other error: \(error)")
+}
+```
+
+**Memory warnings or crashes**
+- Reduce the number of simultaneous layers
+- Lower tile cache size: `MCTileLoader.setMaxCacheSize(50 * 1024 * 1024)`
+- Remove unused layers promptly
+
+**Poor rendering performance**
+- Ensure you're not blocking the main thread
+- Check for excessive layer overdraw
+- Verify map view size constraints are properly set
+
+#### Layer Issues
+
+**Tiles not loading**
+- Verify the tile URL pattern is correct
+- Check network connectivity
+- Ensure tile server supports CORS (for web requests)
+- Test the tile URL in a browser: `https://example.com/1/0/0.png`
+
+**Vector layer styling issues**
+- Validate your style JSON against the Mapbox style specification
+- Check console for style parsing errors
+- Ensure sprite and glyph URLs are accessible
+
+### Debugging Tips
+
+#### Enable Debug Logging
+```swift
+// Enable detailed logging (debug builds only)
+#if DEBUG
+MCLogger.setLogLevel(.DEBUG)
+#endif
+```
+
+#### Performance Debugging
+```swift
+// Monitor rendering performance
+mapView.isRenderingDebugEnabled = true  // Shows frame time overlay
+```
+
+#### Network Debugging
+- Use Charles Proxy or similar tools to monitor network requests
+- Check tile loading patterns and response times
+- Verify HTTP status codes for tile requests
+
 ## How to build
 
 If you'd like to build Open Mobile Maps yourself, make sure you have all submodules initialized and updated. To do this, use
@@ -638,6 +1139,136 @@ The [Package.swift](../Package.swift) file can be opened in Xcode and build dire
 
 ## License
 This project is licensed under the terms of the MPL 2 license. See the [LICENSE](../LICENSE) file.
+
+## Testing and Debugging
+
+### Unit Testing Map Components
+
+Open Mobile Maps components can be tested using standard XCTest frameworks:
+
+```swift
+import XCTest
+import MapCore
+
+class MapTests: XCTestCase {
+    
+    func testMapViewInitialization() {
+        let mapView = MCMapView()
+        XCTAssertNotNil(mapView)
+        XCTAssertNotNil(mapView.camera)
+    }
+    
+    func testLayerCreation() {
+        let layer = TiledRasterLayer("test", webMercatorUrlFormat: "https://example.com/{z}/{x}/{y}.png")
+        XCTAssertEqual(layer.layerName, "test")
+    }
+    
+    func testVectorLayerCreation() {
+        do {
+            let layer = try VectorLayer("vector-test", styleURL: "https://example.com/style.json")
+            XCTAssertEqual(layer.layerName, "vector-test")
+        } catch {
+            XCTFail("Vector layer creation failed: \(error)")
+        }
+    }
+}
+```
+
+### Integration Testing
+
+For testing map interactions and rendering:
+
+```swift
+class MapIntegrationTests: XCTestCase {
+    var mapView: MCMapView!
+    
+    override func setUp() {
+        super.setUp()
+        mapView = MCMapView()
+        // Add to a test window for proper lifecycle
+        let window = UIWindow(frame: CGRect(x: 0, y: 0, width: 300, height: 300))
+        window.addSubview(mapView)
+        mapView.frame = window.bounds
+    }
+    
+    func testLayerAddition() {
+        let layer = TiledRasterLayer("test", webMercatorUrlFormat: "https://tile.openstreetmap.org/{z}/{x}/{y}.png")
+        
+        let expectation = self.expectation(description: "Layer added")
+        
+        mapView.add(layer: layer)
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            // Verify layer was added
+            XCTAssertTrue(self.mapView.layers.contains { $0.layerName == "test" })
+            expectation.fulfill()
+        }
+        
+        wait(for: [expectation], timeout: 1.0)
+    }
+}
+```
+
+### SwiftUI Testing
+
+For SwiftUI MapView testing:
+
+```swift
+import SwiftUI
+import ViewInspector
+
+@available(iOS 17.0, *)
+class SwiftUIMapTests: XCTestCase {
+    
+    func testMapViewCreation() throws {
+        let camera = MapView.Camera(latitude: 0, longitude: 0, zoom: 1000)
+        let mapView = MapView(camera: .constant(camera), layers: [])
+        
+        XCTAssertNoThrow(try mapView.inspect())
+    }
+}
+```
+
+### Performance Testing
+
+Monitor performance characteristics:
+
+```swift
+class MapPerformanceTests: XCTestCase {
+    
+    func testLayerLoadingPerformance() {
+        let mapView = MCMapView()
+        
+        measure {
+            for i in 0..<10 {
+                let layer = TiledRasterLayer("layer\(i)", webMercatorUrlFormat: "https://example.com/{z}/{x}/{y}.png")
+                mapView.add(layer: layer)
+            }
+        }
+    }
+}
+```
+
+### Debugging Tools
+
+#### Xcode Integration
+- Use Xcode's **Memory Graph Debugger** to detect memory leaks
+- **View Debugger** can help inspect map view hierarchy
+- **Network Link Conditioner** to test poor network conditions
+
+#### Custom Debugging
+```swift
+extension MCMapView {
+    func debugInfo() -> String {
+        return """
+        Camera Position: \(camera.getCenterPosition())
+        Zoom Level: \(camera.getZoom())
+        Layer Count: \(layers.count)
+        Active Layers: \(layers.map { $0.layerName }.joined(separator: ", "))
+        """
+    }
+}
+```
 
 ## Third-Party Software
 This project depends on:
