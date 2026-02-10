@@ -123,4 +123,4 @@ internal fun KMTiled2dMapLayerConfig.asPlatform(): MapCoreSharedModule.MCTiled2d
     is KMTiled2dMapLayerConfigPlatformWrapper -> this.nativeHandle
     else -> KMTiled2dMapLayerConfigPlatformProxy(this)
 }
-internal fun MapCoreSharedModule.MCTiled2dMapLayerConfigProtocol.asKmp(): KMTiled2dMapLayerConfig = KMTiled2dMapLayerConfigPlatformWrapper(this)
+public fun MapCoreSharedModule.MCTiled2dMapLayerConfigProtocol.asKmp(): KMTiled2dMapLayerConfig = KMTiled2dMapLayerConfigPlatformWrapper(this)

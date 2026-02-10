@@ -57,4 +57,4 @@ actual class KMFeatureInfoValueFactory actual public constructor(
 }
 
 internal fun KMFeatureInfoValueFactory.asPlatform(): MapCoreSharedModule.MCFeatureInfoValueFactory = nativeHandle as MapCoreSharedModule.MCFeatureInfoValueFactory
-internal fun MapCoreSharedModule.MCFeatureInfoValueFactory.asKmp(): KMFeatureInfoValueFactory = KMFeatureInfoValueFactory(this)
+public fun MapCoreSharedModule.MCFeatureInfoValueFactory.asKmp(): KMFeatureInfoValueFactory = KMFeatureInfoValueFactory(this)

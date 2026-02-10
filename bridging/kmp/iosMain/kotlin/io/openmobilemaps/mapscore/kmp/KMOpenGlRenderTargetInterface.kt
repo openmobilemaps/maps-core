@@ -91,4 +91,4 @@ internal fun KMOpenGlRenderTargetInterface.asPlatform(): MapCoreSharedModule.MCO
     is KMOpenGlRenderTargetInterfacePlatformWrapper -> this.nativeHandle
     else -> KMOpenGlRenderTargetInterfacePlatformProxy(this)
 }
-internal fun MapCoreSharedModule.MCOpenGlRenderTargetInterfaceProtocol.asKmp(): KMOpenGlRenderTargetInterface = KMOpenGlRenderTargetInterfacePlatformWrapper(this)
+public fun MapCoreSharedModule.MCOpenGlRenderTargetInterfaceProtocol.asKmp(): KMOpenGlRenderTargetInterface = KMOpenGlRenderTargetInterfacePlatformWrapper(this)

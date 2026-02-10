@@ -105,4 +105,4 @@ internal fun KMTextInfoInterface.asPlatform(): TextInfoInterface = when (this) {
     is KMTextInfoInterfacePlatformWrapper -> this.nativeHandle
     else -> KMTextInfoInterfacePlatformProxy(this)
 }
-internal fun TextInfoInterface.asKmp(): KMTextInfoInterface = KMTextInfoInterfacePlatformWrapper(this)
+public fun TextInfoInterface.asKmp(): KMTextInfoInterface = KMTextInfoInterfacePlatformWrapper(this)

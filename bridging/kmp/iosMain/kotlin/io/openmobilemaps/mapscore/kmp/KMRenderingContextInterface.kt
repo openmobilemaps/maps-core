@@ -131,4 +131,4 @@ internal fun KMRenderingContextInterface.asPlatform(): MapCoreSharedModule.MCRen
     is KMRenderingContextInterfacePlatformWrapper -> this.nativeHandle
     else -> KMRenderingContextInterfacePlatformProxy(this)
 }
-internal fun MapCoreSharedModule.MCRenderingContextInterfaceProtocol.asKmp(): KMRenderingContextInterface = KMRenderingContextInterfacePlatformWrapper(this)
+public fun MapCoreSharedModule.MCRenderingContextInterfaceProtocol.asKmp(): KMRenderingContextInterface = KMRenderingContextInterfacePlatformWrapper(this)

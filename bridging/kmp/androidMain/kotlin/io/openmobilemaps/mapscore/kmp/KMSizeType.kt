@@ -6,4 +6,4 @@ package io.openmobilemaps.mapscore.kmp
 actual typealias KMSizeType = io.openmobilemaps.mapscore.shared.map.layers.SizeType
 
 internal fun KMSizeType.asPlatform(): io.openmobilemaps.mapscore.shared.map.layers.SizeType = this
-internal fun io.openmobilemaps.mapscore.shared.map.layers.SizeType.asKmp(): KMSizeType = this
+public fun io.openmobilemaps.mapscore.shared.map.layers.SizeType.asKmp(): KMSizeType = this

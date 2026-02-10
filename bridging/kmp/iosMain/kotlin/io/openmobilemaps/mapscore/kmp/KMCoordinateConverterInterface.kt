@@ -63,4 +63,4 @@ internal fun KMCoordinateConverterInterface.asPlatform(): MapCoreSharedModule.MC
     is KMCoordinateConverterInterfacePlatformWrapper -> this.nativeHandle
     else -> KMCoordinateConverterInterfacePlatformProxy(this)
 }
-internal fun MapCoreSharedModule.MCCoordinateConverterInterfaceProtocol.asKmp(): KMCoordinateConverterInterface = KMCoordinateConverterInterfacePlatformWrapper(this)
+public fun MapCoreSharedModule.MCCoordinateConverterInterfaceProtocol.asKmp(): KMCoordinateConverterInterface = KMCoordinateConverterInterfacePlatformWrapper(this)

@@ -22,7 +22,7 @@ internal fun KMTextureAtlas.asPlatform(): MapCoreSharedModule.MCTextureAtlas = M
     uvMap = HashMap(uvMap.map { it.key to it.value.asPlatform() }.toMap()),
     texture = texture?.let { it.asPlatform() },
 )
-internal fun MapCoreSharedModule.MCTextureAtlas.asKmp(): KMTextureAtlas = KMTextureAtlas(
+public fun MapCoreSharedModule.MCTextureAtlas.asKmp(): KMTextureAtlas = KMTextureAtlas(
     uvMap = HashMap(((this.uvMap as? Map<*, *>)?.map { (it.key as String) to (it.value as MapCoreSharedModule.MCRectI).asKmp() }?.toMap() ?: run { val e = (this.uvMap as platform.Foundation.NSDictionary).keyEnumerator(); generateSequence { e.nextObject() }.associate { key -> (key as String) to ((this.uvMap as platform.Foundation.NSDictionary).objectForKey(key) as MapCoreSharedModule.MCRectI).asKmp() } })),
     texture = this.texture?.let { (it as MapCoreSharedModule.MCTextureHolderInterfaceProtocol).asKmp() },
 )

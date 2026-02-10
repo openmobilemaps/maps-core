@@ -65,4 +65,4 @@ actual class KMIconInfoInterface actual public constructor(
 }
 
 internal fun KMIconInfoInterface.asPlatform(): MapCoreSharedModule.MCIconInfoInterface = nativeHandle as MapCoreSharedModule.MCIconInfoInterface
-internal fun MapCoreSharedModule.MCIconInfoInterface.asKmp(): KMIconInfoInterface = KMIconInfoInterface(this)
+public fun MapCoreSharedModule.MCIconInfoInterface.asKmp(): KMIconInfoInterface = KMIconInfoInterface(this)

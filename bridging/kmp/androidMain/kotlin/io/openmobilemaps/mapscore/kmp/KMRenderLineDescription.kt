@@ -6,4 +6,4 @@ package io.openmobilemaps.mapscore.kmp
 actual typealias KMRenderLineDescription = io.openmobilemaps.mapscore.shared.graphics.objects.RenderLineDescription
 
 internal fun KMRenderLineDescription.asPlatform(): io.openmobilemaps.mapscore.shared.graphics.objects.RenderLineDescription = this
-internal fun io.openmobilemaps.mapscore.shared.graphics.objects.RenderLineDescription.asKmp(): KMRenderLineDescription = this
+public fun io.openmobilemaps.mapscore.shared.graphics.objects.RenderLineDescription.asKmp(): KMRenderLineDescription = this

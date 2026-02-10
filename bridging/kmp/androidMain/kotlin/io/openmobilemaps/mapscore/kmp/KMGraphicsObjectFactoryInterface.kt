@@ -201,4 +201,4 @@ internal fun KMGraphicsObjectFactoryInterface.asPlatform(): GraphicsObjectFactor
     is KMGraphicsObjectFactoryInterfacePlatformWrapper -> this.nativeHandle
     else -> KMGraphicsObjectFactoryInterfacePlatformProxy(this)
 }
-internal fun GraphicsObjectFactoryInterface.asKmp(): KMGraphicsObjectFactoryInterface = KMGraphicsObjectFactoryInterfacePlatformWrapper(this)
+public fun GraphicsObjectFactoryInterface.asKmp(): KMGraphicsObjectFactoryInterface = KMGraphicsObjectFactoryInterfacePlatformWrapper(this)

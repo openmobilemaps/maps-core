@@ -33,4 +33,4 @@ internal fun KMComputePassInterface.asPlatform(): ComputePassInterface = when (t
     is KMComputePassInterfacePlatformWrapper -> this.nativeHandle
     else -> KMComputePassInterfacePlatformProxy(this)
 }
-internal fun ComputePassInterface.asKmp(): KMComputePassInterface = KMComputePassInterfacePlatformWrapper(this)
+public fun ComputePassInterface.asKmp(): KMComputePassInterface = KMComputePassInterfacePlatformWrapper(this)

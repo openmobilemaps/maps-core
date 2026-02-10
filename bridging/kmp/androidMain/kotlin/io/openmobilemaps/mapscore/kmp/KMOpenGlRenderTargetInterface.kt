@@ -85,4 +85,4 @@ internal fun KMOpenGlRenderTargetInterface.asPlatform(): OpenGlRenderTargetInter
     is KMOpenGlRenderTargetInterfacePlatformWrapper -> this.nativeHandle
     else -> KMOpenGlRenderTargetInterfacePlatformProxy(this)
 }
-internal fun OpenGlRenderTargetInterface.asKmp(): KMOpenGlRenderTargetInterface = KMOpenGlRenderTargetInterfacePlatformWrapper(this)
+public fun OpenGlRenderTargetInterface.asKmp(): KMOpenGlRenderTargetInterface = KMOpenGlRenderTargetInterfacePlatformWrapper(this)

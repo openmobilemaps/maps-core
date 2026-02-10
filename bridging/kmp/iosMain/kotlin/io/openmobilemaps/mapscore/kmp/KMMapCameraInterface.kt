@@ -242,4 +242,4 @@ actual class KMMapCameraInterface actual public constructor(
 }
 
 internal fun KMMapCameraInterface.asPlatform(): MapCoreSharedModule.MCMapCameraInterface = nativeHandle as MapCoreSharedModule.MCMapCameraInterface
-internal fun MapCoreSharedModule.MCMapCameraInterface.asKmp(): KMMapCameraInterface = KMMapCameraInterface(this)
+public fun MapCoreSharedModule.MCMapCameraInterface.asKmp(): KMMapCameraInterface = KMMapCameraInterface(this)

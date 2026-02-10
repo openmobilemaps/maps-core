@@ -6,4 +6,4 @@ package io.openmobilemaps.mapscore.kmp
 actual typealias KMRectanglePackerPage = io.openmobilemaps.mapscore.shared.graphics.RectanglePackerPage
 
 internal fun KMRectanglePackerPage.asPlatform(): io.openmobilemaps.mapscore.shared.graphics.RectanglePackerPage = this
-internal fun io.openmobilemaps.mapscore.shared.graphics.RectanglePackerPage.asKmp(): KMRectanglePackerPage = this
+public fun io.openmobilemaps.mapscore.shared.graphics.RectanglePackerPage.asKmp(): KMRectanglePackerPage = this

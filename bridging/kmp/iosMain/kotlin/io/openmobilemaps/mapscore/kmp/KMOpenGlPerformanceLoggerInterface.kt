@@ -37,4 +37,4 @@ actual class KMOpenGlPerformanceLoggerInterface actual public constructor(
 }
 
 internal fun KMOpenGlPerformanceLoggerInterface.asPlatform(): MapCoreSharedModule.MCOpenGlPerformanceLoggerInterface = nativeHandle as MapCoreSharedModule.MCOpenGlPerformanceLoggerInterface
-internal fun MapCoreSharedModule.MCOpenGlPerformanceLoggerInterface.asKmp(): KMOpenGlPerformanceLoggerInterface = KMOpenGlPerformanceLoggerInterface(this)
+public fun MapCoreSharedModule.MCOpenGlPerformanceLoggerInterface.asKmp(): KMOpenGlPerformanceLoggerInterface = KMOpenGlPerformanceLoggerInterface(this)

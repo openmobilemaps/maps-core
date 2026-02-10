@@ -6,4 +6,4 @@ package io.openmobilemaps.mapscore.kmp
 actual typealias KMIconTextFit = io.openmobilemaps.mapscore.shared.map.layers.text.IconTextFit
 
 internal fun KMIconTextFit.asPlatform(): io.openmobilemaps.mapscore.shared.map.layers.text.IconTextFit = this
-internal fun io.openmobilemaps.mapscore.shared.map.layers.text.IconTextFit.asKmp(): KMIconTextFit = this
+public fun io.openmobilemaps.mapscore.shared.map.layers.text.IconTextFit.asKmp(): KMIconTextFit = this

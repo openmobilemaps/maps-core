@@ -351,4 +351,4 @@ internal fun KMShaderFactoryInterface.asPlatform(): MapCoreSharedModule.MCShader
     is KMShaderFactoryInterfacePlatformWrapper -> this.nativeHandle
     else -> KMShaderFactoryInterfacePlatformProxy(this)
 }
-internal fun MapCoreSharedModule.MCShaderFactoryInterfaceProtocol.asKmp(): KMShaderFactoryInterface = KMShaderFactoryInterfacePlatformWrapper(this)
+public fun MapCoreSharedModule.MCShaderFactoryInterfaceProtocol.asKmp(): KMShaderFactoryInterface = KMShaderFactoryInterfacePlatformWrapper(this)

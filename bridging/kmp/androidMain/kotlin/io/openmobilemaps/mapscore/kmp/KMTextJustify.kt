@@ -6,4 +6,4 @@ package io.openmobilemaps.mapscore.kmp
 actual typealias KMTextJustify = io.openmobilemaps.mapscore.shared.map.layers.text.TextJustify
 
 internal fun KMTextJustify.asPlatform(): io.openmobilemaps.mapscore.shared.map.layers.text.TextJustify = this
-internal fun io.openmobilemaps.mapscore.shared.map.layers.text.TextJustify.asKmp(): KMTextJustify = this
+public fun io.openmobilemaps.mapscore.shared.map.layers.text.TextJustify.asKmp(): KMTextJustify = this

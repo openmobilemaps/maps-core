@@ -57,4 +57,4 @@ internal fun KMTiled2dMapVectorLayerSelectionCallbackInterface.asPlatform(): Til
     is KMTiled2dMapVectorLayerSelectionCallbackInterfacePlatformWrapper -> this.nativeHandle
     else -> KMTiled2dMapVectorLayerSelectionCallbackInterfacePlatformProxy(this)
 }
-internal fun Tiled2dMapVectorLayerSelectionCallbackInterface.asKmp(): KMTiled2dMapVectorLayerSelectionCallbackInterface = KMTiled2dMapVectorLayerSelectionCallbackInterfacePlatformWrapper(this)
+public fun Tiled2dMapVectorLayerSelectionCallbackInterface.asKmp(): KMTiled2dMapVectorLayerSelectionCallbackInterface = KMTiled2dMapVectorLayerSelectionCallbackInterfacePlatformWrapper(this)

@@ -85,4 +85,4 @@ internal fun KMLoaderInterface.asPlatform(): MapCoreSharedModule.MCLoaderInterfa
     is KMLoaderInterfacePlatformWrapper -> this.nativeHandle
     else -> KMLoaderInterfacePlatformProxy(this)
 }
-internal fun MapCoreSharedModule.MCLoaderInterfaceProtocol.asKmp(): KMLoaderInterface = KMLoaderInterfacePlatformWrapper(this)
+public fun MapCoreSharedModule.MCLoaderInterfaceProtocol.asKmp(): KMLoaderInterface = KMLoaderInterfacePlatformWrapper(this)

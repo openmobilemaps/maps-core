@@ -25,7 +25,7 @@ internal fun KMCircleD.asPlatform(): MapCoreSharedModule.MCCircleD = MapCoreShar
     y = y,
     radius = radius,
 )
-internal fun MapCoreSharedModule.MCCircleD.asKmp(): KMCircleD = KMCircleD(
+public fun MapCoreSharedModule.MCCircleD.asKmp(): KMCircleD = KMCircleD(
     x = this.x,
     y = this.y,
     radius = this.radius,

@@ -31,4 +31,4 @@ internal fun KMTiled2dMapReadyStateListener.asPlatform(): Tiled2dMapReadyStateLi
     is KMTiled2dMapReadyStateListenerPlatformWrapper -> this.nativeHandle
     else -> KMTiled2dMapReadyStateListenerPlatformProxy(this)
 }
-internal fun Tiled2dMapReadyStateListener.asKmp(): KMTiled2dMapReadyStateListener = KMTiled2dMapReadyStateListenerPlatformWrapper(this)
+public fun Tiled2dMapReadyStateListener.asKmp(): KMTiled2dMapReadyStateListener = KMTiled2dMapReadyStateListenerPlatformWrapper(this)

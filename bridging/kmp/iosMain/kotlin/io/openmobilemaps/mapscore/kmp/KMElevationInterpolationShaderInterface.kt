@@ -23,4 +23,4 @@ actual class KMElevationInterpolationShaderInterface actual public constructor(
 }
 
 internal fun KMElevationInterpolationShaderInterface.asPlatform(): MapCoreSharedModule.MCElevationInterpolationShaderInterfaceProtocol = nativeHandle as MapCoreSharedModule.MCElevationInterpolationShaderInterfaceProtocol
-internal fun MapCoreSharedModule.MCElevationInterpolationShaderInterfaceProtocol.asKmp(): KMElevationInterpolationShaderInterface = KMElevationInterpolationShaderInterface(this)
+public fun MapCoreSharedModule.MCElevationInterpolationShaderInterfaceProtocol.asKmp(): KMElevationInterpolationShaderInterface = KMElevationInterpolationShaderInterface(this)

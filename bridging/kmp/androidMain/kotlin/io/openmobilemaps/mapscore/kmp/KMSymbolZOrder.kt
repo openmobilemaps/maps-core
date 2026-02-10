@@ -6,4 +6,4 @@ package io.openmobilemaps.mapscore.kmp
 actual typealias KMSymbolZOrder = io.openmobilemaps.mapscore.shared.map.layers.text.SymbolZOrder
 
 internal fun KMSymbolZOrder.asPlatform(): io.openmobilemaps.mapscore.shared.map.layers.text.SymbolZOrder = this
-internal fun io.openmobilemaps.mapscore.shared.map.layers.text.SymbolZOrder.asKmp(): KMSymbolZOrder = this
+public fun io.openmobilemaps.mapscore.shared.map.layers.text.SymbolZOrder.asKmp(): KMSymbolZOrder = this

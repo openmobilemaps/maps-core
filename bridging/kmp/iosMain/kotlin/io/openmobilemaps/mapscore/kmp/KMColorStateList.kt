@@ -22,7 +22,7 @@ internal fun KMColorStateList.asPlatform(): MapCoreSharedModule.MCColorStateList
     normal = normal.asPlatform(),
     highlighted = highlighted.asPlatform(),
 )
-internal fun MapCoreSharedModule.MCColorStateList.asKmp(): KMColorStateList = KMColorStateList(
+public fun MapCoreSharedModule.MCColorStateList.asKmp(): KMColorStateList = KMColorStateList(
     normal = (this.normal as MapCoreSharedModule.MCColor).asKmp(),
     highlighted = (this.highlighted as MapCoreSharedModule.MCColor).asKmp(),
 )

@@ -6,4 +6,4 @@ package io.openmobilemaps.mapscore.kmp
 actual typealias KMFormattedStringEntry = io.openmobilemaps.mapscore.shared.map.layers.text.FormattedStringEntry
 
 internal fun KMFormattedStringEntry.asPlatform(): io.openmobilemaps.mapscore.shared.map.layers.text.FormattedStringEntry = this
-internal fun io.openmobilemaps.mapscore.shared.map.layers.text.FormattedStringEntry.asKmp(): KMFormattedStringEntry = this
+public fun io.openmobilemaps.mapscore.shared.map.layers.text.FormattedStringEntry.asKmp(): KMFormattedStringEntry = this

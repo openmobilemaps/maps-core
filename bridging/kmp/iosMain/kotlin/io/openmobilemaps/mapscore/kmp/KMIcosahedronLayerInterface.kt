@@ -32,4 +32,4 @@ actual class KMIcosahedronLayerInterface actual public constructor(
 }
 
 internal fun KMIcosahedronLayerInterface.asPlatform(): MapCoreSharedModule.MCIcosahedronLayerInterface = nativeHandle as MapCoreSharedModule.MCIcosahedronLayerInterface
-internal fun MapCoreSharedModule.MCIcosahedronLayerInterface.asKmp(): KMIcosahedronLayerInterface = KMIcosahedronLayerInterface(this)
+public fun MapCoreSharedModule.MCIcosahedronLayerInterface.asKmp(): KMIcosahedronLayerInterface = KMIcosahedronLayerInterface(this)

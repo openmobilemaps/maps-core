@@ -6,4 +6,4 @@ package io.openmobilemaps.mapscore.kmp
 actual typealias KMLayerReadyState = io.openmobilemaps.mapscore.shared.map.LayerReadyState
 
 internal fun KMLayerReadyState.asPlatform(): io.openmobilemaps.mapscore.shared.map.LayerReadyState = this
-internal fun io.openmobilemaps.mapscore.shared.map.LayerReadyState.asKmp(): KMLayerReadyState = this
+public fun io.openmobilemaps.mapscore.shared.map.LayerReadyState.asKmp(): KMLayerReadyState = this

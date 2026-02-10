@@ -6,4 +6,4 @@ package io.openmobilemaps.mapscore.kmp
 actual typealias KMLoggerData = io.openmobilemaps.mapscore.shared.map.LoggerData
 
 internal fun KMLoggerData.asPlatform(): io.openmobilemaps.mapscore.shared.map.LoggerData = this
-internal fun io.openmobilemaps.mapscore.shared.map.LoggerData.asKmp(): KMLoggerData = this
+public fun io.openmobilemaps.mapscore.shared.map.LoggerData.asKmp(): KMLoggerData = this

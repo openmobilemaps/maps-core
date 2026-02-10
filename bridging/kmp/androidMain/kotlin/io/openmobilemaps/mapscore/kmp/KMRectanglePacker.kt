@@ -22,4 +22,4 @@ actual class KMRectanglePacker actual public constructor(
 }
 
 internal fun KMRectanglePacker.asPlatform(): RectanglePacker = nativeHandle as RectanglePacker
-internal fun RectanglePacker.asKmp(): KMRectanglePacker = KMRectanglePacker(this)
+public fun RectanglePacker.asKmp(): KMRectanglePacker = KMRectanglePacker(this)

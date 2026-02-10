@@ -51,4 +51,4 @@ internal fun KMTiled2dMapRasterLayerCallbackInterface.asPlatform(): MapCoreShare
     is KMTiled2dMapRasterLayerCallbackInterfacePlatformWrapper -> this.nativeHandle
     else -> KMTiled2dMapRasterLayerCallbackInterfacePlatformProxy(this)
 }
-internal fun MapCoreSharedModule.MCTiled2dMapRasterLayerCallbackInterfaceProtocol.asKmp(): KMTiled2dMapRasterLayerCallbackInterface = KMTiled2dMapRasterLayerCallbackInterfacePlatformWrapper(this)
+public fun MapCoreSharedModule.MCTiled2dMapRasterLayerCallbackInterfaceProtocol.asKmp(): KMTiled2dMapRasterLayerCallbackInterface = KMTiled2dMapRasterLayerCallbackInterfacePlatformWrapper(this)

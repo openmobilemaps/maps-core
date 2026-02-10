@@ -22,7 +22,7 @@ internal fun KMCameraInterpolationValue.asPlatform(): MapCoreSharedModule.MCCame
     stop = stop,
     value = value,
 )
-internal fun MapCoreSharedModule.MCCameraInterpolationValue.asKmp(): KMCameraInterpolationValue = KMCameraInterpolationValue(
+public fun MapCoreSharedModule.MCCameraInterpolationValue.asKmp(): KMCameraInterpolationValue = KMCameraInterpolationValue(
     stop = this.stop,
     value = this.value,
 )

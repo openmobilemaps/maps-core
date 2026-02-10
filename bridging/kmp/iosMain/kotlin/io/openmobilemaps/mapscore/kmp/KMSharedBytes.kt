@@ -25,7 +25,7 @@ internal fun KMSharedBytes.asPlatform(): MapCoreSharedModule.MCSharedBytes = Map
     elementCount = elementCount,
     bytesPerElement = bytesPerElement,
 )
-internal fun MapCoreSharedModule.MCSharedBytes.asKmp(): KMSharedBytes = KMSharedBytes(
+public fun MapCoreSharedModule.MCSharedBytes.asKmp(): KMSharedBytes = KMSharedBytes(
     address = this.address,
     elementCount = this.elementCount,
     bytesPerElement = this.bytesPerElement,

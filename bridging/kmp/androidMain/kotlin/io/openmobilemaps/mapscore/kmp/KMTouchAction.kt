@@ -6,4 +6,4 @@ package io.openmobilemaps.mapscore.kmp
 actual typealias KMTouchAction = io.openmobilemaps.mapscore.shared.map.controls.TouchAction
 
 internal fun KMTouchAction.asPlatform(): io.openmobilemaps.mapscore.shared.map.controls.TouchAction = this
-internal fun io.openmobilemaps.mapscore.shared.map.controls.TouchAction.asKmp(): KMTouchAction = this
+public fun io.openmobilemaps.mapscore.shared.map.controls.TouchAction.asKmp(): KMTouchAction = this

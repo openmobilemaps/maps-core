@@ -22,4 +22,4 @@ actual class KMColorShaderInterface actual public constructor(
 }
 
 internal fun KMColorShaderInterface.asPlatform(): ColorShaderInterface = nativeHandle as ColorShaderInterface
-internal fun ColorShaderInterface.asKmp(): KMColorShaderInterface = KMColorShaderInterface(this)
+public fun ColorShaderInterface.asKmp(): KMColorShaderInterface = KMColorShaderInterface(this)

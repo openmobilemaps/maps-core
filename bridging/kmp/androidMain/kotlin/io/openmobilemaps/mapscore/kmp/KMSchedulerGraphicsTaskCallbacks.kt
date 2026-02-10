@@ -17,4 +17,4 @@ actual class KMSchedulerGraphicsTaskCallbacks actual public constructor(
 }
 
 internal fun KMSchedulerGraphicsTaskCallbacks.asPlatform(): SchedulerGraphicsTaskCallbacks = nativeHandle as SchedulerGraphicsTaskCallbacks
-internal fun SchedulerGraphicsTaskCallbacks.asKmp(): KMSchedulerGraphicsTaskCallbacks = KMSchedulerGraphicsTaskCallbacks(this)
+public fun SchedulerGraphicsTaskCallbacks.asKmp(): KMSchedulerGraphicsTaskCallbacks = KMSchedulerGraphicsTaskCallbacks(this)

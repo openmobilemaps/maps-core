@@ -19,6 +19,6 @@ actual class KMTextDescription actual public constructor(
 internal fun KMTextDescription.asPlatform(): MapCoreSharedModule.MCTextDescription = MapCoreSharedModule.MCTextDescription(
     glyphs = ArrayList(glyphs.map { it.asPlatform() }),
 )
-internal fun MapCoreSharedModule.MCTextDescription.asKmp(): KMTextDescription = KMTextDescription(
+public fun MapCoreSharedModule.MCTextDescription.asKmp(): KMTextDescription = KMTextDescription(
     glyphs = ArrayList(((this.glyphs as? List<*>)?.map { (it as MapCoreSharedModule.MCGlyphDescription).asKmp() } ?: (0 until (this.glyphs as platform.Foundation.NSArray).count.toInt()).map { idx -> ((this.glyphs as platform.Foundation.NSArray).objectAtIndex(idx.toULong()) as MapCoreSharedModule.MCGlyphDescription).asKmp() })),
 )

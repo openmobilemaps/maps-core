@@ -45,4 +45,4 @@ internal fun KMTiled2dMapRasterLayerCallbackInterface.asPlatform(): Tiled2dMapRa
     is KMTiled2dMapRasterLayerCallbackInterfacePlatformWrapper -> this.nativeHandle
     else -> KMTiled2dMapRasterLayerCallbackInterfacePlatformProxy(this)
 }
-internal fun Tiled2dMapRasterLayerCallbackInterface.asKmp(): KMTiled2dMapRasterLayerCallbackInterface = KMTiled2dMapRasterLayerCallbackInterfacePlatformWrapper(this)
+public fun Tiled2dMapRasterLayerCallbackInterface.asKmp(): KMTiled2dMapRasterLayerCallbackInterface = KMTiled2dMapRasterLayerCallbackInterfacePlatformWrapper(this)

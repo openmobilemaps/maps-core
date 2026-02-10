@@ -67,4 +67,4 @@ actual class KMWmtsCapabilitiesResource actual public constructor(
 }
 
 internal fun KMWmtsCapabilitiesResource.asPlatform(): WmtsCapabilitiesResource = nativeHandle as WmtsCapabilitiesResource
-internal fun WmtsCapabilitiesResource.asKmp(): KMWmtsCapabilitiesResource = KMWmtsCapabilitiesResource(this)
+public fun WmtsCapabilitiesResource.asKmp(): KMWmtsCapabilitiesResource = KMWmtsCapabilitiesResource(this)

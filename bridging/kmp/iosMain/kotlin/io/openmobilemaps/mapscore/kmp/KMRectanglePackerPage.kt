@@ -19,6 +19,6 @@ actual class KMRectanglePackerPage actual public constructor(
 internal fun KMRectanglePackerPage.asPlatform(): MapCoreSharedModule.MCRectanglePackerPage = MapCoreSharedModule.MCRectanglePackerPage(
     uvs = HashMap(uvs.map { it.key to it.value.asPlatform() }.toMap()),
 )
-internal fun MapCoreSharedModule.MCRectanglePackerPage.asKmp(): KMRectanglePackerPage = KMRectanglePackerPage(
+public fun MapCoreSharedModule.MCRectanglePackerPage.asKmp(): KMRectanglePackerPage = KMRectanglePackerPage(
     uvs = HashMap(((this.uvs as? Map<*, *>)?.map { (it.key as String) to (it.value as MapCoreSharedModule.MCRectI).asKmp() }?.toMap() ?: run { val e = (this.uvs as platform.Foundation.NSDictionary).keyEnumerator(); generateSequence { e.nextObject() }.associate { key -> (key as String) to ((this.uvs as platform.Foundation.NSDictionary).objectForKey(key) as MapCoreSharedModule.MCRectI).asKmp() } })),
 )

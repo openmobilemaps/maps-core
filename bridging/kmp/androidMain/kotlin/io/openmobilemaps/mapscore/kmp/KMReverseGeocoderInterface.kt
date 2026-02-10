@@ -32,4 +32,4 @@ actual class KMReverseGeocoderInterface actual public constructor(
 }
 
 internal fun KMReverseGeocoderInterface.asPlatform(): ReverseGeocoderInterface = nativeHandle as ReverseGeocoderInterface
-internal fun ReverseGeocoderInterface.asKmp(): KMReverseGeocoderInterface = KMReverseGeocoderInterface(this)
+public fun ReverseGeocoderInterface.asKmp(): KMReverseGeocoderInterface = KMReverseGeocoderInterface(this)

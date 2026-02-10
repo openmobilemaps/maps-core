@@ -97,4 +97,4 @@ internal fun KMTextureHolderInterface.asPlatform(): MapCoreSharedModule.MCTextur
     is KMTextureHolderInterfacePlatformWrapper -> this.nativeHandle
     else -> KMTextureHolderInterfacePlatformProxy(this)
 }
-internal fun MapCoreSharedModule.MCTextureHolderInterfaceProtocol.asKmp(): KMTextureHolderInterface = KMTextureHolderInterfacePlatformWrapper(this)
+public fun MapCoreSharedModule.MCTextureHolderInterfaceProtocol.asKmp(): KMTextureHolderInterface = KMTextureHolderInterfacePlatformWrapper(this)

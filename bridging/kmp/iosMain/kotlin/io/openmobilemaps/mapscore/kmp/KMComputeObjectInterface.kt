@@ -37,4 +37,4 @@ internal fun KMComputeObjectInterface.asPlatform(): MapCoreSharedModule.MCComput
     is KMComputeObjectInterfacePlatformWrapper -> this.nativeHandle
     else -> KMComputeObjectInterfacePlatformProxy(this)
 }
-internal fun MapCoreSharedModule.MCComputeObjectInterfaceProtocol.asKmp(): KMComputeObjectInterface = KMComputeObjectInterfacePlatformWrapper(this)
+public fun MapCoreSharedModule.MCComputeObjectInterfaceProtocol.asKmp(): KMComputeObjectInterface = KMComputeObjectInterfacePlatformWrapper(this)

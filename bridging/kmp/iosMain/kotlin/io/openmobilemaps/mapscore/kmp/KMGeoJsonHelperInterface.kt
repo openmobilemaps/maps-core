@@ -37,4 +37,4 @@ actual class KMGeoJsonHelperInterface actual public constructor(
 }
 
 internal fun KMGeoJsonHelperInterface.asPlatform(): MapCoreSharedModule.MCGeoJsonHelperInterface = nativeHandle as MapCoreSharedModule.MCGeoJsonHelperInterface
-internal fun MapCoreSharedModule.MCGeoJsonHelperInterface.asKmp(): KMGeoJsonHelperInterface = KMGeoJsonHelperInterface(this)
+public fun MapCoreSharedModule.MCGeoJsonHelperInterface.asKmp(): KMGeoJsonHelperInterface = KMGeoJsonHelperInterface(this)

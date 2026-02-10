@@ -89,4 +89,4 @@ actual class KMIconLayerInterface actual public constructor(
 }
 
 internal fun KMIconLayerInterface.asPlatform(): MapCoreSharedModule.MCIconLayerInterface = nativeHandle as MapCoreSharedModule.MCIconLayerInterface
-internal fun MapCoreSharedModule.MCIconLayerInterface.asKmp(): KMIconLayerInterface = KMIconLayerInterface(this)
+public fun MapCoreSharedModule.MCIconLayerInterface.asKmp(): KMIconLayerInterface = KMIconLayerInterface(this)

@@ -27,4 +27,4 @@ actual class KMPolygonGroupShaderInterface actual public constructor(
 }
 
 internal fun KMPolygonGroupShaderInterface.asPlatform(): MapCoreSharedModule.MCPolygonGroupShaderInterfaceProtocol = nativeHandle as MapCoreSharedModule.MCPolygonGroupShaderInterfaceProtocol
-internal fun MapCoreSharedModule.MCPolygonGroupShaderInterfaceProtocol.asKmp(): KMPolygonGroupShaderInterface = KMPolygonGroupShaderInterface(this)
+public fun MapCoreSharedModule.MCPolygonGroupShaderInterfaceProtocol.asKmp(): KMPolygonGroupShaderInterface = KMPolygonGroupShaderInterface(this)

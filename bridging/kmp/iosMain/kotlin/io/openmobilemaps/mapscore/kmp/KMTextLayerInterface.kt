@@ -40,4 +40,4 @@ actual class KMTextLayerInterface actual public constructor(
 }
 
 internal fun KMTextLayerInterface.asPlatform(): MapCoreSharedModule.MCTextLayerInterface = nativeHandle as MapCoreSharedModule.MCTextLayerInterface
-internal fun MapCoreSharedModule.MCTextLayerInterface.asKmp(): KMTextLayerInterface = KMTextLayerInterface(this)
+public fun MapCoreSharedModule.MCTextLayerInterface.asKmp(): KMTextLayerInterface = KMTextLayerInterface(this)

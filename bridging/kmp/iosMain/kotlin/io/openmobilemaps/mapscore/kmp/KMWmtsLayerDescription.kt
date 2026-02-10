@@ -40,7 +40,7 @@ internal fun KMWmtsLayerDescription.asPlatform(): MapCoreSharedModule.MCWmtsLaye
     resourceTemplate = resourceTemplate,
     resourceFormat = resourceFormat,
 )
-internal fun MapCoreSharedModule.MCWmtsLayerDescription.asKmp(): KMWmtsLayerDescription = KMWmtsLayerDescription(
+public fun MapCoreSharedModule.MCWmtsLayerDescription.asKmp(): KMWmtsLayerDescription = KMWmtsLayerDescription(
     identifier = this.identifier,
     title = this.title?.let { (it as String) },
     abstractText = this.abstractText?.let { (it as String) },

@@ -6,4 +6,4 @@ package io.openmobilemaps.mapscore.kmp
 actual typealias KMColorStateList = io.openmobilemaps.mapscore.shared.map.layers.ColorStateList
 
 internal fun KMColorStateList.asPlatform(): io.openmobilemaps.mapscore.shared.map.layers.ColorStateList = this
-internal fun io.openmobilemaps.mapscore.shared.map.layers.ColorStateList.asKmp(): KMColorStateList = this
+public fun io.openmobilemaps.mapscore.shared.map.layers.ColorStateList.asKmp(): KMColorStateList = this

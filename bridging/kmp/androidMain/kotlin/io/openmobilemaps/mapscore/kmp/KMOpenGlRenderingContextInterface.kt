@@ -121,4 +121,4 @@ internal fun KMOpenGlRenderingContextInterface.asPlatform(): OpenGlRenderingCont
     is KMOpenGlRenderingContextInterfacePlatformWrapper -> this.nativeHandle
     else -> KMOpenGlRenderingContextInterfacePlatformProxy(this)
 }
-internal fun OpenGlRenderingContextInterface.asKmp(): KMOpenGlRenderingContextInterface = KMOpenGlRenderingContextInterfacePlatformWrapper(this)
+public fun OpenGlRenderingContextInterface.asKmp(): KMOpenGlRenderingContextInterface = KMOpenGlRenderingContextInterfacePlatformWrapper(this)

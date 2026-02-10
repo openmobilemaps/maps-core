@@ -22,7 +22,7 @@ internal fun KMVectorLayerFeatureCoordInfo.asPlatform(): MapCoreSharedModule.MCV
     featureInfo = featureInfo.asPlatform(),
     coordinates = coordinates.asPlatform(),
 )
-internal fun MapCoreSharedModule.MCVectorLayerFeatureCoordInfo.asKmp(): KMVectorLayerFeatureCoordInfo = KMVectorLayerFeatureCoordInfo(
+public fun MapCoreSharedModule.MCVectorLayerFeatureCoordInfo.asKmp(): KMVectorLayerFeatureCoordInfo = KMVectorLayerFeatureCoordInfo(
     featureInfo = (this.featureInfo as MapCoreSharedModule.MCVectorLayerFeatureInfo).asKmp(),
     coordinates = (this.coordinates as MapCoreSharedModule.MCCoord).asKmp(),
 )

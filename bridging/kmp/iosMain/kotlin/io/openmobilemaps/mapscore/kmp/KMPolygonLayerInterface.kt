@@ -73,4 +73,4 @@ actual class KMPolygonLayerInterface actual public constructor(
 }
 
 internal fun KMPolygonLayerInterface.asPlatform(): MapCoreSharedModule.MCPolygonLayerInterface = nativeHandle as MapCoreSharedModule.MCPolygonLayerInterface
-internal fun MapCoreSharedModule.MCPolygonLayerInterface.asKmp(): KMPolygonLayerInterface = KMPolygonLayerInterface(this)
+public fun MapCoreSharedModule.MCPolygonLayerInterface.asKmp(): KMPolygonLayerInterface = KMPolygonLayerInterface(this)

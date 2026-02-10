@@ -185,4 +185,4 @@ actual class KMMapInterface actual public constructor(
 }
 
 internal fun KMMapInterface.asPlatform(): MapCoreSharedModule.MCMapInterface = nativeHandle as MapCoreSharedModule.MCMapInterface
-internal fun MapCoreSharedModule.MCMapInterface.asKmp(): KMMapInterface = KMMapInterface(this)
+public fun MapCoreSharedModule.MCMapInterface.asKmp(): KMMapInterface = KMMapInterface(this)

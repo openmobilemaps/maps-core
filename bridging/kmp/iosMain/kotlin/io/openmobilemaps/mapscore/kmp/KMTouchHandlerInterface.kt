@@ -67,4 +67,4 @@ internal fun KMTouchHandlerInterface.asPlatform(): MapCoreSharedModule.MCTouchHa
     is KMTouchHandlerInterfacePlatformWrapper -> this.nativeHandle
     else -> KMTouchHandlerInterfacePlatformProxy(this)
 }
-internal fun MapCoreSharedModule.MCTouchHandlerInterfaceProtocol.asKmp(): KMTouchHandlerInterface = KMTouchHandlerInterfacePlatformWrapper(this)
+public fun MapCoreSharedModule.MCTouchHandlerInterfaceProtocol.asKmp(): KMTouchHandlerInterface = KMTouchHandlerInterfacePlatformWrapper(this)

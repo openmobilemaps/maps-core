@@ -68,4 +68,4 @@ actual class KMPolygonLayerInterface actual public constructor(
 }
 
 internal fun KMPolygonLayerInterface.asPlatform(): PolygonLayerInterface = nativeHandle as PolygonLayerInterface
-internal fun PolygonLayerInterface.asKmp(): KMPolygonLayerInterface = KMPolygonLayerInterface(this)
+public fun PolygonLayerInterface.asKmp(): KMPolygonLayerInterface = KMPolygonLayerInterface(this)

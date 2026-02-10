@@ -18,4 +18,4 @@ actual class KMTextInstancedShaderInterface actual public constructor(
 }
 
 internal fun KMTextInstancedShaderInterface.asPlatform(): TextInstancedShaderInterface = nativeHandle as TextInstancedShaderInterface
-internal fun TextInstancedShaderInterface.asKmp(): KMTextInstancedShaderInterface = KMTextInstancedShaderInterface(this)
+public fun TextInstancedShaderInterface.asKmp(): KMTextInstancedShaderInterface = KMTextInstancedShaderInterface(this)

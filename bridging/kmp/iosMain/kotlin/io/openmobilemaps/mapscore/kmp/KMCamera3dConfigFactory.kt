@@ -32,4 +32,4 @@ actual class KMCamera3dConfigFactory actual public constructor(
 }
 
 internal fun KMCamera3dConfigFactory.asPlatform(): MapCoreSharedModule.MCCamera3dConfigFactory = nativeHandle as MapCoreSharedModule.MCCamera3dConfigFactory
-internal fun MapCoreSharedModule.MCCamera3dConfigFactory.asKmp(): KMCamera3dConfigFactory = KMCamera3dConfigFactory(this)
+public fun MapCoreSharedModule.MCCamera3dConfigFactory.asKmp(): KMCamera3dConfigFactory = KMCamera3dConfigFactory(this)

@@ -6,4 +6,4 @@ package io.openmobilemaps.mapscore.kmp
 actual typealias KMTaskPriority = io.openmobilemaps.mapscore.shared.map.scheduling.TaskPriority
 
 internal fun KMTaskPriority.asPlatform(): io.openmobilemaps.mapscore.shared.map.scheduling.TaskPriority = this
-internal fun io.openmobilemaps.mapscore.shared.map.scheduling.TaskPriority.asKmp(): KMTaskPriority = this
+public fun io.openmobilemaps.mapscore.shared.map.scheduling.TaskPriority.asKmp(): KMTaskPriority = this

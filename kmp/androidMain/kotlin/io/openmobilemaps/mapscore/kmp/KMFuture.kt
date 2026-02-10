@@ -1,5 +1,7 @@
 package io.openmobilemaps.mapscore.kmp
 
+import com.snapchat.djinni.Promise
+
 actual class KMFuture<T> {
     internal val native: com.snapchat.djinni.Future<*>?
 
@@ -10,6 +12,16 @@ actual class KMFuture<T> {
     internal constructor(native: com.snapchat.djinni.Future<*>) {
         this.native = native
     }
+}
+
+actual class KMPromise<T> {
+    private val promise: Promise<T> = Promise()
+
+    actual fun setValue(value: T) {
+        promise.setValue(value)
+    }
+
+    actual fun future(): KMFuture<T> = promise.future.asKmp()
 }
 
 @Suppress("UNCHECKED_CAST")

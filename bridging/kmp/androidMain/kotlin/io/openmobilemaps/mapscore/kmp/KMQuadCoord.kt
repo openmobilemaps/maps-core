@@ -6,4 +6,4 @@ package io.openmobilemaps.mapscore.kmp
 actual typealias KMQuadCoord = io.openmobilemaps.mapscore.shared.map.coordinates.QuadCoord
 
 internal fun KMQuadCoord.asPlatform(): io.openmobilemaps.mapscore.shared.map.coordinates.QuadCoord = this
-internal fun io.openmobilemaps.mapscore.shared.map.coordinates.QuadCoord.asKmp(): KMQuadCoord = this
+public fun io.openmobilemaps.mapscore.shared.map.coordinates.QuadCoord.asKmp(): KMQuadCoord = this

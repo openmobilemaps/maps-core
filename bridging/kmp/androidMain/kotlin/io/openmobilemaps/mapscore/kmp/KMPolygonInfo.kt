@@ -6,4 +6,4 @@ package io.openmobilemaps.mapscore.kmp
 actual typealias KMPolygonInfo = io.openmobilemaps.mapscore.shared.map.layers.polygon.PolygonInfo
 
 internal fun KMPolygonInfo.asPlatform(): io.openmobilemaps.mapscore.shared.map.layers.polygon.PolygonInfo = this
-internal fun io.openmobilemaps.mapscore.shared.map.layers.polygon.PolygonInfo.asKmp(): KMPolygonInfo = this
+public fun io.openmobilemaps.mapscore.shared.map.layers.polygon.PolygonInfo.asKmp(): KMPolygonInfo = this

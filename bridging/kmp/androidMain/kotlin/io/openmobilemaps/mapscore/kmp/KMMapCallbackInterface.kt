@@ -41,4 +41,4 @@ internal fun KMMapCallbackInterface.asPlatform(): MapCallbackInterface = when (t
     is KMMapCallbackInterfacePlatformWrapper -> this.nativeHandle
     else -> KMMapCallbackInterfacePlatformProxy(this)
 }
-internal fun MapCallbackInterface.asKmp(): KMMapCallbackInterface = KMMapCallbackInterfacePlatformWrapper(this)
+public fun MapCallbackInterface.asKmp(): KMMapCallbackInterface = KMMapCallbackInterfacePlatformWrapper(this)

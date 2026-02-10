@@ -37,4 +37,4 @@ actual class KMCpuPerformanceLoggerInterface actual public constructor(
 }
 
 internal fun KMCpuPerformanceLoggerInterface.asPlatform(): MapCoreSharedModule.MCCpuPerformanceLoggerInterface = nativeHandle as MapCoreSharedModule.MCCpuPerformanceLoggerInterface
-internal fun MapCoreSharedModule.MCCpuPerformanceLoggerInterface.asKmp(): KMCpuPerformanceLoggerInterface = KMCpuPerformanceLoggerInterface(this)
+public fun MapCoreSharedModule.MCCpuPerformanceLoggerInterface.asKmp(): KMCpuPerformanceLoggerInterface = KMCpuPerformanceLoggerInterface(this)

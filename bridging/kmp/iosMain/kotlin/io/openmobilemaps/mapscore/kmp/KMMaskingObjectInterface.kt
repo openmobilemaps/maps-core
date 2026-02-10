@@ -49,4 +49,4 @@ internal fun KMMaskingObjectInterface.asPlatform(): MapCoreSharedModule.MCMaskin
     is KMMaskingObjectInterfacePlatformWrapper -> this.nativeHandle
     else -> KMMaskingObjectInterfacePlatformProxy(this)
 }
-internal fun MapCoreSharedModule.MCMaskingObjectInterfaceProtocol.asKmp(): KMMaskingObjectInterface = KMMaskingObjectInterfacePlatformWrapper(this)
+public fun MapCoreSharedModule.MCMaskingObjectInterfaceProtocol.asKmp(): KMMaskingObjectInterface = KMMaskingObjectInterfacePlatformWrapper(this)

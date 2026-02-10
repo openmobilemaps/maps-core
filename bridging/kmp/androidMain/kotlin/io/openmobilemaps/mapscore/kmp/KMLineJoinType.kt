@@ -6,4 +6,4 @@ package io.openmobilemaps.mapscore.kmp
 actual typealias KMLineJoinType = io.openmobilemaps.mapscore.shared.map.layers.line.LineJoinType
 
 internal fun KMLineJoinType.asPlatform(): io.openmobilemaps.mapscore.shared.map.layers.line.LineJoinType = this
-internal fun io.openmobilemaps.mapscore.shared.map.layers.line.LineJoinType.asKmp(): KMLineJoinType = this
+public fun io.openmobilemaps.mapscore.shared.map.layers.line.LineJoinType.asKmp(): KMLineJoinType = this

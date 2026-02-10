@@ -145,4 +145,4 @@ internal fun KMQuad2dInstancedInterface.asPlatform(): Quad2dInstancedInterface =
     is KMQuad2dInstancedInterfacePlatformWrapper -> this.nativeHandle
     else -> KMQuad2dInstancedInterfacePlatformProxy(this)
 }
-internal fun Quad2dInstancedInterface.asKmp(): KMQuad2dInstancedInterface = KMQuad2dInstancedInterfacePlatformWrapper(this)
+public fun Quad2dInstancedInterface.asKmp(): KMQuad2dInstancedInterface = KMQuad2dInstancedInterfacePlatformWrapper(this)

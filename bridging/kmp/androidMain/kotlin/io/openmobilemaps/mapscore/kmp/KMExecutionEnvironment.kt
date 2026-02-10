@@ -6,4 +6,4 @@ package io.openmobilemaps.mapscore.kmp
 actual typealias KMExecutionEnvironment = io.openmobilemaps.mapscore.shared.map.scheduling.ExecutionEnvironment
 
 internal fun KMExecutionEnvironment.asPlatform(): io.openmobilemaps.mapscore.shared.map.scheduling.ExecutionEnvironment = this
-internal fun io.openmobilemaps.mapscore.shared.map.scheduling.ExecutionEnvironment.asKmp(): KMExecutionEnvironment = this
+public fun io.openmobilemaps.mapscore.shared.map.scheduling.ExecutionEnvironment.asKmp(): KMExecutionEnvironment = this

@@ -26,4 +26,4 @@ actual class KMExceptionLoggerInterface actual public constructor(
 }
 
 internal fun KMExceptionLoggerInterface.asPlatform(): MapCoreSharedModule.MCExceptionLoggerInterface = nativeHandle as MapCoreSharedModule.MCExceptionLoggerInterface
-internal fun MapCoreSharedModule.MCExceptionLoggerInterface.asKmp(): KMExceptionLoggerInterface = KMExceptionLoggerInterface(this)
+public fun MapCoreSharedModule.MCExceptionLoggerInterface.asKmp(): KMExceptionLoggerInterface = KMExceptionLoggerInterface(this)

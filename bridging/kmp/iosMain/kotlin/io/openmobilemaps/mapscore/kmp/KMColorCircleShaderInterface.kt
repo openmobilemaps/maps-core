@@ -27,4 +27,4 @@ actual class KMColorCircleShaderInterface actual public constructor(
 }
 
 internal fun KMColorCircleShaderInterface.asPlatform(): MapCoreSharedModule.MCColorCircleShaderInterfaceProtocol = nativeHandle as MapCoreSharedModule.MCColorCircleShaderInterfaceProtocol
-internal fun MapCoreSharedModule.MCColorCircleShaderInterfaceProtocol.asKmp(): KMColorCircleShaderInterface = KMColorCircleShaderInterface(this)
+public fun MapCoreSharedModule.MCColorCircleShaderInterfaceProtocol.asKmp(): KMColorCircleShaderInterface = KMColorCircleShaderInterface(this)

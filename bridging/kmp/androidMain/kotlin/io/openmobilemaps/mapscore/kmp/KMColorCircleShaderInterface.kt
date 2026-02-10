@@ -22,4 +22,4 @@ actual class KMColorCircleShaderInterface actual public constructor(
 }
 
 internal fun KMColorCircleShaderInterface.asPlatform(): ColorCircleShaderInterface = nativeHandle as ColorCircleShaderInterface
-internal fun ColorCircleShaderInterface.asKmp(): KMColorCircleShaderInterface = KMColorCircleShaderInterface(this)
+public fun ColorCircleShaderInterface.asKmp(): KMColorCircleShaderInterface = KMColorCircleShaderInterface(this)

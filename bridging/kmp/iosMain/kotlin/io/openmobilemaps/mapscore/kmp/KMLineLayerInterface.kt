@@ -77,4 +77,4 @@ actual class KMLineLayerInterface actual public constructor(
 }
 
 internal fun KMLineLayerInterface.asPlatform(): MapCoreSharedModule.MCLineLayerInterface = nativeHandle as MapCoreSharedModule.MCLineLayerInterface
-internal fun MapCoreSharedModule.MCLineLayerInterface.asKmp(): KMLineLayerInterface = KMLineLayerInterface(this)
+public fun MapCoreSharedModule.MCLineLayerInterface.asKmp(): KMLineLayerInterface = KMLineLayerInterface(this)

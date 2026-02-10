@@ -31,4 +31,4 @@ internal fun KMLineLayerCallbackInterface.asPlatform(): LineLayerCallbackInterfa
     is KMLineLayerCallbackInterfacePlatformWrapper -> this.nativeHandle
     else -> KMLineLayerCallbackInterfacePlatformProxy(this)
 }
-internal fun LineLayerCallbackInterface.asKmp(): KMLineLayerCallbackInterface = KMLineLayerCallbackInterfacePlatformWrapper(this)
+public fun LineLayerCallbackInterface.asKmp(): KMLineLayerCallbackInterface = KMLineLayerCallbackInterfacePlatformWrapper(this)

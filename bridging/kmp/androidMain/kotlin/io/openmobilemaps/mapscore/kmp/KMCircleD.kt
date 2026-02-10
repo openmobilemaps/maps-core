@@ -6,4 +6,4 @@ package io.openmobilemaps.mapscore.kmp
 actual typealias KMCircleD = io.openmobilemaps.mapscore.shared.graphics.common.CircleD
 
 internal fun KMCircleD.asPlatform(): io.openmobilemaps.mapscore.shared.graphics.common.CircleD = this
-internal fun io.openmobilemaps.mapscore.shared.graphics.common.CircleD.asKmp(): KMCircleD = this
+public fun io.openmobilemaps.mapscore.shared.graphics.common.CircleD.asKmp(): KMCircleD = this

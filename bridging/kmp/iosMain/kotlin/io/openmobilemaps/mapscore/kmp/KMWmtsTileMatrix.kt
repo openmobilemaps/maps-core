@@ -40,7 +40,7 @@ internal fun KMWmtsTileMatrix.asPlatform(): MapCoreSharedModule.MCWmtsTileMatrix
     matrixWidth = matrixWidth,
     matrixHeight = matrixHeight,
 )
-internal fun MapCoreSharedModule.MCWmtsTileMatrix.asKmp(): KMWmtsTileMatrix = KMWmtsTileMatrix(
+public fun MapCoreSharedModule.MCWmtsTileMatrix.asKmp(): KMWmtsTileMatrix = KMWmtsTileMatrix(
     identifier = this.identifier,
     scaleDenominator = this.scaleDenominator,
     topLeftCornerX = this.topLeftCornerX,

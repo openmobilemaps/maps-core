@@ -22,7 +22,7 @@ internal fun KMRectCoord.asPlatform(): MapCoreSharedModule.MCRectCoord = MapCore
     topLeft = topLeft.asPlatform(),
     bottomRight = bottomRight.asPlatform(),
 )
-internal fun MapCoreSharedModule.MCRectCoord.asKmp(): KMRectCoord = KMRectCoord(
+public fun MapCoreSharedModule.MCRectCoord.asKmp(): KMRectCoord = KMRectCoord(
     topLeft = (this.topLeft as MapCoreSharedModule.MCCoord).asKmp(),
     bottomRight = (this.bottomRight as MapCoreSharedModule.MCCoord).asKmp(),
 )

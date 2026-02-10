@@ -57,4 +57,4 @@ actual class KMCoordinateSystemIdentifiers actual public constructor(
 }
 
 internal fun KMCoordinateSystemIdentifiers.asPlatform(): CoordinateSystemIdentifiers = nativeHandle as CoordinateSystemIdentifiers
-internal fun CoordinateSystemIdentifiers.asKmp(): KMCoordinateSystemIdentifiers = KMCoordinateSystemIdentifiers(this)
+public fun CoordinateSystemIdentifiers.asKmp(): KMCoordinateSystemIdentifiers = KMCoordinateSystemIdentifiers(this)

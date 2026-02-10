@@ -27,4 +27,4 @@ actual class KMDefaultTouchHandlerInterface actual public constructor(
 }
 
 internal fun KMDefaultTouchHandlerInterface.asPlatform(): MapCoreSharedModule.MCDefaultTouchHandlerInterface = nativeHandle as MapCoreSharedModule.MCDefaultTouchHandlerInterface
-internal fun MapCoreSharedModule.MCDefaultTouchHandlerInterface.asKmp(): KMDefaultTouchHandlerInterface = KMDefaultTouchHandlerInterface(this)
+public fun MapCoreSharedModule.MCDefaultTouchHandlerInterface.asKmp(): KMDefaultTouchHandlerInterface = KMDefaultTouchHandlerInterface(this)

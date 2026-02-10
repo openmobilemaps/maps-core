@@ -83,4 +83,4 @@ internal fun KMGraphicsObjectInterface.asPlatform(): GraphicsObjectInterface = w
     is KMGraphicsObjectInterfacePlatformWrapper -> this.nativeHandle
     else -> KMGraphicsObjectInterfacePlatformProxy(this)
 }
-internal fun GraphicsObjectInterface.asKmp(): KMGraphicsObjectInterface = KMGraphicsObjectInterfacePlatformWrapper(this)
+public fun GraphicsObjectInterface.asKmp(): KMGraphicsObjectInterface = KMGraphicsObjectInterfacePlatformWrapper(this)

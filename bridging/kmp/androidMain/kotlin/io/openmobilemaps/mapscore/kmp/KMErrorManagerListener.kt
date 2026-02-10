@@ -31,4 +31,4 @@ internal fun KMErrorManagerListener.asPlatform(): ErrorManagerListener = when (t
     is KMErrorManagerListenerPlatformWrapper -> this.nativeHandle
     else -> KMErrorManagerListenerPlatformProxy(this)
 }
-internal fun ErrorManagerListener.asKmp(): KMErrorManagerListener = KMErrorManagerListenerPlatformWrapper(this)
+public fun ErrorManagerListener.asKmp(): KMErrorManagerListener = KMErrorManagerListenerPlatformWrapper(this)

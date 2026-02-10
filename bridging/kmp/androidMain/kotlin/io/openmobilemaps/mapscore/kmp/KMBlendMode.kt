@@ -6,4 +6,4 @@ package io.openmobilemaps.mapscore.kmp
 actual typealias KMBlendMode = io.openmobilemaps.mapscore.shared.graphics.shader.BlendMode
 
 internal fun KMBlendMode.asPlatform(): io.openmobilemaps.mapscore.shared.graphics.shader.BlendMode = this
-internal fun io.openmobilemaps.mapscore.shared.graphics.shader.BlendMode.asKmp(): KMBlendMode = this
+public fun io.openmobilemaps.mapscore.shared.graphics.shader.BlendMode.asKmp(): KMBlendMode = this

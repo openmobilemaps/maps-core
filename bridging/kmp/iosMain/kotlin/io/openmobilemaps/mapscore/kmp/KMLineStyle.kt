@@ -58,7 +58,7 @@ internal fun KMLineStyle.asPlatform(): MapCoreSharedModule.MCLineStyle = MapCore
     dotted = dotted,
     dottedSkew = dottedSkew,
 )
-internal fun MapCoreSharedModule.MCLineStyle.asKmp(): KMLineStyle = KMLineStyle(
+public fun MapCoreSharedModule.MCLineStyle.asKmp(): KMLineStyle = KMLineStyle(
     color = (this.color as MapCoreSharedModule.MCColorStateList).asKmp(),
     gapColor = (this.gapColor as MapCoreSharedModule.MCColorStateList).asKmp(),
     opacity = this.opacity,

@@ -84,4 +84,4 @@ actual class KMIconLayerInterface actual public constructor(
 }
 
 internal fun KMIconLayerInterface.asPlatform(): IconLayerInterface = nativeHandle as IconLayerInterface
-internal fun IconLayerInterface.asKmp(): KMIconLayerInterface = KMIconLayerInterface(this)
+public fun IconLayerInterface.asKmp(): KMIconLayerInterface = KMIconLayerInterface(this)

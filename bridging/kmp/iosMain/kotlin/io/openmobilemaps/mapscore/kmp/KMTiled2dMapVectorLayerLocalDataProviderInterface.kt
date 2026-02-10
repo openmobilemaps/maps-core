@@ -75,4 +75,4 @@ internal fun KMTiled2dMapVectorLayerLocalDataProviderInterface.asPlatform(): Map
     is KMTiled2dMapVectorLayerLocalDataProviderInterfacePlatformWrapper -> this.nativeHandle
     else -> KMTiled2dMapVectorLayerLocalDataProviderInterfacePlatformProxy(this)
 }
-internal fun MapCoreSharedModule.MCTiled2dMapVectorLayerLocalDataProviderInterfaceProtocol.asKmp(): KMTiled2dMapVectorLayerLocalDataProviderInterface = KMTiled2dMapVectorLayerLocalDataProviderInterfacePlatformWrapper(this)
+public fun MapCoreSharedModule.MCTiled2dMapVectorLayerLocalDataProviderInterfaceProtocol.asKmp(): KMTiled2dMapVectorLayerLocalDataProviderInterface = KMTiled2dMapVectorLayerLocalDataProviderInterfacePlatformWrapper(this)

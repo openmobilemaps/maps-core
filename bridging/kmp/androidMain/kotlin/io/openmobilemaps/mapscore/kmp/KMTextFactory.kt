@@ -22,4 +22,4 @@ actual class KMTextFactory actual public constructor(
 }
 
 internal fun KMTextFactory.asPlatform(): TextFactory = nativeHandle as TextFactory
-internal fun TextFactory.asKmp(): KMTextFactory = KMTextFactory(this)
+public fun TextFactory.asKmp(): KMTextFactory = KMTextFactory(this)

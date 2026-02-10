@@ -26,4 +26,4 @@ actual class KMLineGroupShaderInterface actual public constructor(
 }
 
 internal fun KMLineGroupShaderInterface.asPlatform(): LineGroupShaderInterface = nativeHandle as LineGroupShaderInterface
-internal fun LineGroupShaderInterface.asKmp(): KMLineGroupShaderInterface = KMLineGroupShaderInterface(this)
+public fun LineGroupShaderInterface.asKmp(): KMLineGroupShaderInterface = KMLineGroupShaderInterface(this)

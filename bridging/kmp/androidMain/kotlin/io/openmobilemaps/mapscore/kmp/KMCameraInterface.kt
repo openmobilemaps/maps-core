@@ -67,4 +67,4 @@ internal fun KMCameraInterface.asPlatform(): CameraInterface = when (this) {
     is KMCameraInterfacePlatformWrapper -> this.nativeHandle
     else -> KMCameraInterfacePlatformProxy(this)
 }
-internal fun CameraInterface.asKmp(): KMCameraInterface = KMCameraInterfacePlatformWrapper(this)
+public fun CameraInterface.asKmp(): KMCameraInterface = KMCameraInterfacePlatformWrapper(this)

@@ -40,7 +40,7 @@ internal fun KMCamera3dConfig.asPlatform(): MapCoreSharedModule.MCCamera3dConfig
     pitchInterpolationValues = pitchInterpolationValues.asPlatform(),
     verticalDisplacementInterpolationValues = verticalDisplacementInterpolationValues.asPlatform(),
 )
-internal fun MapCoreSharedModule.MCCamera3dConfig.asKmp(): KMCamera3dConfig = KMCamera3dConfig(
+public fun MapCoreSharedModule.MCCamera3dConfig.asKmp(): KMCamera3dConfig = KMCamera3dConfig(
     key = this.key,
     allowUserInteraction = this.allowUserInteraction,
     rotationSpeed = this.rotationSpeed?.let { (it as platform.Foundation.NSNumber).floatValue },

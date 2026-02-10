@@ -49,7 +49,7 @@ internal fun KMStretchShaderInfo.asPlatform(): MapCoreSharedModule.MCStretchShad
     stretchY1End = stretchY1End,
     uv = uv.asPlatform(),
 )
-internal fun MapCoreSharedModule.MCStretchShaderInfo.asKmp(): KMStretchShaderInfo = KMStretchShaderInfo(
+public fun MapCoreSharedModule.MCStretchShaderInfo.asKmp(): KMStretchShaderInfo = KMStretchShaderInfo(
     scaleX = this.scaleX,
     stretchX0Begin = this.stretchX0Begin,
     stretchX0End = this.stretchX0End,

@@ -22,4 +22,4 @@ actual class KMRasterShaderInterface actual public constructor(
 }
 
 internal fun KMRasterShaderInterface.asPlatform(): RasterShaderInterface = nativeHandle as RasterShaderInterface
-internal fun RasterShaderInterface.asKmp(): KMRasterShaderInterface = KMRasterShaderInterface(this)
+public fun RasterShaderInterface.asKmp(): KMRasterShaderInterface = KMRasterShaderInterface(this)

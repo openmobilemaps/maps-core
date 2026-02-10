@@ -61,4 +61,4 @@ actual class KMCoordinateConversionHelperInterface actual public constructor(
 }
 
 internal fun KMCoordinateConversionHelperInterface.asPlatform(): MapCoreSharedModule.MCCoordinateConversionHelperInterface = nativeHandle as MapCoreSharedModule.MCCoordinateConversionHelperInterface
-internal fun MapCoreSharedModule.MCCoordinateConversionHelperInterface.asKmp(): KMCoordinateConversionHelperInterface = KMCoordinateConversionHelperInterface(this)
+public fun MapCoreSharedModule.MCCoordinateConversionHelperInterface.asKmp(): KMCoordinateConversionHelperInterface = KMCoordinateConversionHelperInterface(this)

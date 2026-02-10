@@ -22,4 +22,4 @@ actual class KMSchedulerGraphicsTaskCallbacks actual public constructor(
 }
 
 internal fun KMSchedulerGraphicsTaskCallbacks.asPlatform(): MapCoreSharedModule.MCSchedulerGraphicsTaskCallbacks = nativeHandle as MapCoreSharedModule.MCSchedulerGraphicsTaskCallbacks
-internal fun MapCoreSharedModule.MCSchedulerGraphicsTaskCallbacks.asKmp(): KMSchedulerGraphicsTaskCallbacks = KMSchedulerGraphicsTaskCallbacks(this)
+public fun MapCoreSharedModule.MCSchedulerGraphicsTaskCallbacks.asKmp(): KMSchedulerGraphicsTaskCallbacks = KMSchedulerGraphicsTaskCallbacks(this)

@@ -32,4 +32,4 @@ actual class KMGeoJsonHelperInterface actual public constructor(
 }
 
 internal fun KMGeoJsonHelperInterface.asPlatform(): GeoJsonHelperInterface = nativeHandle as GeoJsonHelperInterface
-internal fun GeoJsonHelperInterface.asKmp(): KMGeoJsonHelperInterface = KMGeoJsonHelperInterface(this)
+public fun GeoJsonHelperInterface.asKmp(): KMGeoJsonHelperInterface = KMGeoJsonHelperInterface(this)

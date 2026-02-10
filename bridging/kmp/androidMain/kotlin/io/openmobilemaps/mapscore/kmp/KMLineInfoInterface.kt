@@ -28,4 +28,4 @@ actual class KMLineInfoInterface actual public constructor(
 }
 
 internal fun KMLineInfoInterface.asPlatform(): LineInfoInterface = nativeHandle as LineInfoInterface
-internal fun LineInfoInterface.asKmp(): KMLineInfoInterface = KMLineInfoInterface(this)
+public fun LineInfoInterface.asKmp(): KMLineInfoInterface = KMLineInfoInterface(this)

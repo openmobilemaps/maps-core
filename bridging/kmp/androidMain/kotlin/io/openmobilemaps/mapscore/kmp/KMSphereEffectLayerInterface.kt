@@ -27,4 +27,4 @@ actual class KMSphereEffectLayerInterface actual public constructor(
 }
 
 internal fun KMSphereEffectLayerInterface.asPlatform(): SphereEffectLayerInterface = nativeHandle as SphereEffectLayerInterface
-internal fun SphereEffectLayerInterface.asKmp(): KMSphereEffectLayerInterface = KMSphereEffectLayerInterface(this)
+public fun SphereEffectLayerInterface.asKmp(): KMSphereEffectLayerInterface = KMSphereEffectLayerInterface(this)

@@ -19,6 +19,6 @@ actual class KMTiled2dMapVectorSettings actual public constructor(
 internal fun KMTiled2dMapVectorSettings.asPlatform(): MapCoreSharedModule.MCTiled2dMapVectorSettings = MapCoreSharedModule.MCTiled2dMapVectorSettings(
     tileOrigin = tileOrigin.asPlatform(),
 )
-internal fun MapCoreSharedModule.MCTiled2dMapVectorSettings.asKmp(): KMTiled2dMapVectorSettings = KMTiled2dMapVectorSettings(
+public fun MapCoreSharedModule.MCTiled2dMapVectorSettings.asKmp(): KMTiled2dMapVectorSettings = KMTiled2dMapVectorSettings(
     tileOrigin = KMTiled2dMapVectorTileOrigin.fromPlatform((this.tileOrigin as MapCoreSharedModule.MCTiled2dMapVectorTileOrigin)),
 )

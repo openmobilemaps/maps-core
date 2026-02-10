@@ -39,4 +39,4 @@ internal fun KMFontLoaderInterface.asPlatform(): MapCoreSharedModule.MCFontLoade
     is KMFontLoaderInterfacePlatformWrapper -> this.nativeHandle
     else -> KMFontLoaderInterfacePlatformProxy(this)
 }
-internal fun MapCoreSharedModule.MCFontLoaderInterfaceProtocol.asKmp(): KMFontLoaderInterface = KMFontLoaderInterfacePlatformWrapper(this)
+public fun MapCoreSharedModule.MCFontLoaderInterfaceProtocol.asKmp(): KMFontLoaderInterface = KMFontLoaderInterfacePlatformWrapper(this)

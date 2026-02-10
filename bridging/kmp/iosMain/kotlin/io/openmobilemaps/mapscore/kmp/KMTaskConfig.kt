@@ -28,7 +28,7 @@ internal fun KMTaskConfig.asPlatform(): MapCoreSharedModule.MCTaskConfig = MapCo
     priority = priority.asPlatform(),
     executionEnvironment = executionEnvironment.asPlatform(),
 )
-internal fun MapCoreSharedModule.MCTaskConfig.asKmp(): KMTaskConfig = KMTaskConfig(
+public fun MapCoreSharedModule.MCTaskConfig.asKmp(): KMTaskConfig = KMTaskConfig(
     id = this.id,
     delay = this.delay,
     priority = KMTaskPriority.fromPlatform((this.priority as MapCoreSharedModule.MCTaskPriority)),

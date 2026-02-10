@@ -42,4 +42,4 @@ actual class KMGeoJsonFeatureParserInterface actual public constructor(
 }
 
 internal fun KMGeoJsonFeatureParserInterface.asPlatform(): MapCoreSharedModule.MCGeoJsonFeatureParserInterface = nativeHandle as MapCoreSharedModule.MCGeoJsonFeatureParserInterface
-internal fun MapCoreSharedModule.MCGeoJsonFeatureParserInterface.asKmp(): KMGeoJsonFeatureParserInterface = KMGeoJsonFeatureParserInterface(this)
+public fun MapCoreSharedModule.MCGeoJsonFeatureParserInterface.asKmp(): KMGeoJsonFeatureParserInterface = KMGeoJsonFeatureParserInterface(this)

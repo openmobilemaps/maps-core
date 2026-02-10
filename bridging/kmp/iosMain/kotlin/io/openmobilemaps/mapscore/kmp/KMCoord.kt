@@ -28,7 +28,7 @@ internal fun KMCoord.asPlatform(): MapCoreSharedModule.MCCoord = MapCoreSharedMo
     y = y,
     z = z,
 )
-internal fun MapCoreSharedModule.MCCoord.asKmp(): KMCoord = KMCoord(
+public fun MapCoreSharedModule.MCCoord.asKmp(): KMCoord = KMCoord(
     systemIdentifier = this.systemIdentifier,
     x = this.x,
     y = this.y,

@@ -28,7 +28,7 @@ internal fun KMRectI.asPlatform(): MapCoreSharedModule.MCRectI = MapCoreSharedMo
     width = width,
     height = height,
 )
-internal fun MapCoreSharedModule.MCRectI.asKmp(): KMRectI = KMRectI(
+public fun MapCoreSharedModule.MCRectI.asKmp(): KMRectI = KMRectI(
     x = this.x,
     y = this.y,
     width = this.width,

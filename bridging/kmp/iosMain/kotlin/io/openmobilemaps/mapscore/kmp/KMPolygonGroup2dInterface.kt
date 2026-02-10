@@ -49,4 +49,4 @@ internal fun KMPolygonGroup2dInterface.asPlatform(): MapCoreSharedModule.MCPolyg
     is KMPolygonGroup2dInterfacePlatformWrapper -> this.nativeHandle
     else -> KMPolygonGroup2dInterfacePlatformProxy(this)
 }
-internal fun MapCoreSharedModule.MCPolygonGroup2dInterfaceProtocol.asKmp(): KMPolygonGroup2dInterface = KMPolygonGroup2dInterfacePlatformWrapper(this)
+public fun MapCoreSharedModule.MCPolygonGroup2dInterfaceProtocol.asKmp(): KMPolygonGroup2dInterface = KMPolygonGroup2dInterfacePlatformWrapper(this)

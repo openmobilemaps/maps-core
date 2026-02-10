@@ -47,4 +47,4 @@ actual class KMCoordinateSystemFactory actual public constructor(
 }
 
 internal fun KMCoordinateSystemFactory.asPlatform(): MapCoreSharedModule.MCCoordinateSystemFactory = nativeHandle as MapCoreSharedModule.MCCoordinateSystemFactory
-internal fun MapCoreSharedModule.MCCoordinateSystemFactory.asKmp(): KMCoordinateSystemFactory = KMCoordinateSystemFactory(this)
+public fun MapCoreSharedModule.MCCoordinateSystemFactory.asKmp(): KMCoordinateSystemFactory = KMCoordinateSystemFactory(this)

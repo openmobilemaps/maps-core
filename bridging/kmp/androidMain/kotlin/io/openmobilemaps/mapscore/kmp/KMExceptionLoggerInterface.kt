@@ -21,4 +21,4 @@ actual class KMExceptionLoggerInterface actual public constructor(
 }
 
 internal fun KMExceptionLoggerInterface.asPlatform(): ExceptionLoggerInterface = nativeHandle as ExceptionLoggerInterface
-internal fun ExceptionLoggerInterface.asKmp(): KMExceptionLoggerInterface = KMExceptionLoggerInterface(this)
+public fun ExceptionLoggerInterface.asKmp(): KMExceptionLoggerInterface = KMExceptionLoggerInterface(this)

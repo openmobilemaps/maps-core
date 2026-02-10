@@ -22,4 +22,4 @@ actual class KMDefaultTouchHandlerInterface actual public constructor(
 }
 
 internal fun KMDefaultTouchHandlerInterface.asPlatform(): DefaultTouchHandlerInterface = nativeHandle as DefaultTouchHandlerInterface
-internal fun DefaultTouchHandlerInterface.asKmp(): KMDefaultTouchHandlerInterface = KMDefaultTouchHandlerInterface(this)
+public fun DefaultTouchHandlerInterface.asKmp(): KMDefaultTouchHandlerInterface = KMDefaultTouchHandlerInterface(this)

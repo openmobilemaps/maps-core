@@ -37,4 +37,4 @@ internal fun KMLineLayerCallbackInterface.asPlatform(): MapCoreSharedModule.MCLi
     is KMLineLayerCallbackInterfacePlatformWrapper -> this.nativeHandle
     else -> KMLineLayerCallbackInterfacePlatformProxy(this)
 }
-internal fun MapCoreSharedModule.MCLineLayerCallbackInterfaceProtocol.asKmp(): KMLineLayerCallbackInterface = KMLineLayerCallbackInterfacePlatformWrapper(this)
+public fun MapCoreSharedModule.MCLineLayerCallbackInterfaceProtocol.asKmp(): KMLineLayerCallbackInterface = KMLineLayerCallbackInterfacePlatformWrapper(this)

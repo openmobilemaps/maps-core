@@ -131,4 +131,4 @@ internal fun KMSchedulerInterface.asPlatform(): MapCoreSharedModule.MCSchedulerI
     is KMSchedulerInterfacePlatformWrapper -> this.nativeHandle
     else -> KMSchedulerInterfacePlatformProxy(this)
 }
-internal fun MapCoreSharedModule.MCSchedulerInterfaceProtocol.asKmp(): KMSchedulerInterface = KMSchedulerInterfacePlatformWrapper(this)
+public fun MapCoreSharedModule.MCSchedulerInterfaceProtocol.asKmp(): KMSchedulerInterface = KMSchedulerInterfacePlatformWrapper(this)

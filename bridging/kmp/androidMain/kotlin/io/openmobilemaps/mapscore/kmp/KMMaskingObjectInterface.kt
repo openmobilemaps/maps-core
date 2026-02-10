@@ -43,4 +43,4 @@ internal fun KMMaskingObjectInterface.asPlatform(): MaskingObjectInterface = whe
     is KMMaskingObjectInterfacePlatformWrapper -> this.nativeHandle
     else -> KMMaskingObjectInterfacePlatformProxy(this)
 }
-internal fun MaskingObjectInterface.asKmp(): KMMaskingObjectInterface = KMMaskingObjectInterfacePlatformWrapper(this)
+public fun MaskingObjectInterface.asKmp(): KMMaskingObjectInterface = KMMaskingObjectInterfacePlatformWrapper(this)

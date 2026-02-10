@@ -22,7 +22,7 @@ internal fun KMVectorLayerFeatureInfo.asPlatform(): MapCoreSharedModule.MCVector
     identifier = identifier,
     properties = HashMap(properties.map { it.key to it.value.asPlatform() }.toMap()),
 )
-internal fun MapCoreSharedModule.MCVectorLayerFeatureInfo.asKmp(): KMVectorLayerFeatureInfo = KMVectorLayerFeatureInfo(
+public fun MapCoreSharedModule.MCVectorLayerFeatureInfo.asKmp(): KMVectorLayerFeatureInfo = KMVectorLayerFeatureInfo(
     identifier = this.identifier,
     properties = HashMap(((this.properties as? Map<*, *>)?.map { (it.key as String) to (it.value as MapCoreSharedModule.MCVectorLayerFeatureInfoValue).asKmp() }?.toMap() ?: run { val e = (this.properties as platform.Foundation.NSDictionary).keyEnumerator(); generateSequence { e.nextObject() }.associate { key -> (key as String) to ((this.properties as platform.Foundation.NSDictionary).objectForKey(key) as MapCoreSharedModule.MCVectorLayerFeatureInfoValue).asKmp() } })),
 )

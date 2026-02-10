@@ -32,4 +32,4 @@ actual class KMIconFactory actual public constructor(
 }
 
 internal fun KMIconFactory.asPlatform(): MapCoreSharedModule.MCIconFactory = nativeHandle as MapCoreSharedModule.MCIconFactory
-internal fun MapCoreSharedModule.MCIconFactory.asKmp(): KMIconFactory = KMIconFactory(this)
+public fun MapCoreSharedModule.MCIconFactory.asKmp(): KMIconFactory = KMIconFactory(this)

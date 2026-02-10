@@ -15,7 +15,7 @@ internal fun KMTiled2dMapVectorAssetInfo.asPlatform(): io.openmobilemaps.mapscor
     featureIdentifiersUv = HashMap(featureIdentifiersUv.map { it.key to it.value.asPlatform() }.toMap()),
     texture = texture?.let { it.asPlatform() },
 )
-internal fun io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.Tiled2dMapVectorAssetInfo.asKmp(): KMTiled2dMapVectorAssetInfo = KMTiled2dMapVectorAssetInfo(
+public fun io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.Tiled2dMapVectorAssetInfo.asKmp(): KMTiled2dMapVectorAssetInfo = KMTiled2dMapVectorAssetInfo(
     featureIdentifiersUv = HashMap(this.featureIdentifiersUv.map { it.key to (it.value as io.openmobilemaps.mapscore.shared.graphics.common.RectI).asKmp() }.toMap()),
     texture = this.texture?.let { (it as io.openmobilemaps.mapscore.shared.graphics.objects.TextureHolderInterface).asKmp() },
 )

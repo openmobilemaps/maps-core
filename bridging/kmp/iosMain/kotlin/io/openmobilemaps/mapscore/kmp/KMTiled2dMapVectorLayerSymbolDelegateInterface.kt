@@ -39,4 +39,4 @@ internal fun KMTiled2dMapVectorLayerSymbolDelegateInterface.asPlatform(): MapCor
     is KMTiled2dMapVectorLayerSymbolDelegateInterfacePlatformWrapper -> this.nativeHandle
     else -> KMTiled2dMapVectorLayerSymbolDelegateInterfacePlatformProxy(this)
 }
-internal fun MapCoreSharedModule.MCTiled2dMapVectorLayerSymbolDelegateInterfaceProtocol.asKmp(): KMTiled2dMapVectorLayerSymbolDelegateInterface = KMTiled2dMapVectorLayerSymbolDelegateInterfacePlatformWrapper(this)
+public fun MapCoreSharedModule.MCTiled2dMapVectorLayerSymbolDelegateInterfaceProtocol.asKmp(): KMTiled2dMapVectorLayerSymbolDelegateInterface = KMTiled2dMapVectorLayerSymbolDelegateInterfacePlatformWrapper(this)

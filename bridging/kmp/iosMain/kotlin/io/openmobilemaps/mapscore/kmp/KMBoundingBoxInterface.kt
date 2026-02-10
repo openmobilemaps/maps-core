@@ -56,4 +56,4 @@ actual class KMBoundingBoxInterface actual public constructor(
 }
 
 internal fun KMBoundingBoxInterface.asPlatform(): MapCoreSharedModule.MCBoundingBoxInterface = nativeHandle as MapCoreSharedModule.MCBoundingBoxInterface
-internal fun MapCoreSharedModule.MCBoundingBoxInterface.asKmp(): KMBoundingBoxInterface = KMBoundingBoxInterface(this)
+public fun MapCoreSharedModule.MCBoundingBoxInterface.asKmp(): KMBoundingBoxInterface = KMBoundingBoxInterface(this)

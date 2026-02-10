@@ -28,7 +28,7 @@ internal fun KMDataLoaderResult.asPlatform(): MapCoreSharedModule.MCDataLoaderRe
     status = status.asPlatform(),
     errorCode = errorCode?.let { it },
 )
-internal fun MapCoreSharedModule.MCDataLoaderResult.asKmp(): KMDataLoaderResult = KMDataLoaderResult(
+public fun MapCoreSharedModule.MCDataLoaderResult.asKmp(): KMDataLoaderResult = KMDataLoaderResult(
     data = this.data?.let { (it as platform.Foundation.NSData).asKmp() },
     etag = this.etag?.let { (it as String) },
     status = KMLoaderStatus.fromPlatform((this.status as MapCoreSharedModule.MCLoaderStatus)),

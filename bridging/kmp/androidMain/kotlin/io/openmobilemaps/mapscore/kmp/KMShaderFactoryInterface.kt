@@ -345,4 +345,4 @@ internal fun KMShaderFactoryInterface.asPlatform(): ShaderFactoryInterface = whe
     is KMShaderFactoryInterfacePlatformWrapper -> this.nativeHandle
     else -> KMShaderFactoryInterfacePlatformProxy(this)
 }
-internal fun ShaderFactoryInterface.asKmp(): KMShaderFactoryInterface = KMShaderFactoryInterfacePlatformWrapper(this)
+public fun ShaderFactoryInterface.asKmp(): KMShaderFactoryInterface = KMShaderFactoryInterfacePlatformWrapper(this)

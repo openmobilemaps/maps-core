@@ -52,4 +52,4 @@ actual class KMFeatureInfoValueFactory actual public constructor(
 }
 
 internal fun KMFeatureInfoValueFactory.asPlatform(): FeatureInfoValueFactory = nativeHandle as FeatureInfoValueFactory
-internal fun FeatureInfoValueFactory.asKmp(): KMFeatureInfoValueFactory = KMFeatureInfoValueFactory(this)
+public fun FeatureInfoValueFactory.asKmp(): KMFeatureInfoValueFactory = KMFeatureInfoValueFactory(this)

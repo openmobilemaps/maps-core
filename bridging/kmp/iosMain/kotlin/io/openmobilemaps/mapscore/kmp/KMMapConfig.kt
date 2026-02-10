@@ -19,6 +19,6 @@ actual class KMMapConfig actual public constructor(
 internal fun KMMapConfig.asPlatform(): MapCoreSharedModule.MCMapConfig = MapCoreSharedModule.MCMapConfig(
     mapCoordinateSystem = mapCoordinateSystem.asPlatform(),
 )
-internal fun MapCoreSharedModule.MCMapConfig.asKmp(): KMMapConfig = KMMapConfig(
+public fun MapCoreSharedModule.MCMapConfig.asKmp(): KMMapConfig = KMMapConfig(
     mapCoordinateSystem = (this.mapCoordinateSystem as MapCoreSharedModule.MCMapCoordinateSystem).asKmp(),
 )

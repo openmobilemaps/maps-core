@@ -27,4 +27,4 @@ actual class KMThreadPoolScheduler actual public constructor(
 }
 
 internal fun KMThreadPoolScheduler.asPlatform(): MapCoreSharedModule.MCThreadPoolScheduler = nativeHandle as MapCoreSharedModule.MCThreadPoolScheduler
-internal fun MapCoreSharedModule.MCThreadPoolScheduler.asKmp(): KMThreadPoolScheduler = KMThreadPoolScheduler(this)
+public fun MapCoreSharedModule.MCThreadPoolScheduler.asKmp(): KMThreadPoolScheduler = KMThreadPoolScheduler(this)

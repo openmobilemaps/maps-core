@@ -27,4 +27,4 @@ actual class KMRasterShaderInterface actual public constructor(
 }
 
 internal fun KMRasterShaderInterface.asPlatform(): MapCoreSharedModule.MCRasterShaderInterfaceProtocol = nativeHandle as MapCoreSharedModule.MCRasterShaderInterfaceProtocol
-internal fun MapCoreSharedModule.MCRasterShaderInterfaceProtocol.asKmp(): KMRasterShaderInterface = KMRasterShaderInterface(this)
+public fun MapCoreSharedModule.MCRasterShaderInterfaceProtocol.asKmp(): KMRasterShaderInterface = KMRasterShaderInterface(this)

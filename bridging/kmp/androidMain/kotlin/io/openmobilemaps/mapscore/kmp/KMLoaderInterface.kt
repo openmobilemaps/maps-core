@@ -79,4 +79,4 @@ internal fun KMLoaderInterface.asPlatform(): LoaderInterface = when (this) {
     is KMLoaderInterfacePlatformWrapper -> this.nativeHandle
     else -> KMLoaderInterfacePlatformProxy(this)
 }
-internal fun LoaderInterface.asKmp(): KMLoaderInterface = KMLoaderInterfacePlatformWrapper(this)
+public fun LoaderInterface.asKmp(): KMLoaderInterface = KMLoaderInterfacePlatformWrapper(this)

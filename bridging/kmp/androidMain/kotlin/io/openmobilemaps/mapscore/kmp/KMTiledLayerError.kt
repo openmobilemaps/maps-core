@@ -6,4 +6,4 @@ package io.openmobilemaps.mapscore.kmp
 actual typealias KMTiledLayerError = io.openmobilemaps.mapscore.shared.map.TiledLayerError
 
 internal fun KMTiledLayerError.asPlatform(): io.openmobilemaps.mapscore.shared.map.TiledLayerError = this
-internal fun io.openmobilemaps.mapscore.shared.map.TiledLayerError.asKmp(): KMTiledLayerError = this
+public fun io.openmobilemaps.mapscore.shared.map.TiledLayerError.asKmp(): KMTiledLayerError = this

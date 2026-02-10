@@ -37,4 +37,4 @@ internal fun KMSceneCallbackInterface.asPlatform(): MapCoreSharedModule.MCSceneC
     is KMSceneCallbackInterfacePlatformWrapper -> this.nativeHandle
     else -> KMSceneCallbackInterfacePlatformProxy(this)
 }
-internal fun MapCoreSharedModule.MCSceneCallbackInterfaceProtocol.asKmp(): KMSceneCallbackInterface = KMSceneCallbackInterfacePlatformWrapper(this)
+public fun MapCoreSharedModule.MCSceneCallbackInterfaceProtocol.asKmp(): KMSceneCallbackInterface = KMSceneCallbackInterfacePlatformWrapper(this)

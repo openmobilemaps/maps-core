@@ -51,4 +51,4 @@ actual class KMBoundingBoxInterface actual public constructor(
 }
 
 internal fun KMBoundingBoxInterface.asPlatform(): BoundingBoxInterface = nativeHandle as BoundingBoxInterface
-internal fun BoundingBoxInterface.asKmp(): KMBoundingBoxInterface = KMBoundingBoxInterface(this)
+public fun BoundingBoxInterface.asKmp(): KMBoundingBoxInterface = KMBoundingBoxInterface(this)

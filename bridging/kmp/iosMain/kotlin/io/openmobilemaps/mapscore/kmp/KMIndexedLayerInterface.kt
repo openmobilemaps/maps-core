@@ -51,4 +51,4 @@ internal fun KMIndexedLayerInterface.asPlatform(): MapCoreSharedModule.MCIndexed
     is KMIndexedLayerInterfacePlatformWrapper -> this.nativeHandle
     else -> KMIndexedLayerInterfacePlatformProxy(this)
 }
-internal fun MapCoreSharedModule.MCIndexedLayerInterfaceProtocol.asKmp(): KMIndexedLayerInterface = KMIndexedLayerInterfacePlatformWrapper(this)
+public fun MapCoreSharedModule.MCIndexedLayerInterfaceProtocol.asKmp(): KMIndexedLayerInterface = KMIndexedLayerInterfacePlatformWrapper(this)

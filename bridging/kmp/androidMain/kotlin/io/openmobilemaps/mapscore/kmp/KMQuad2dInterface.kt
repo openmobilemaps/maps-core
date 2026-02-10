@@ -95,4 +95,4 @@ internal fun KMQuad2dInterface.asPlatform(): Quad2dInterface = when (this) {
     is KMQuad2dInterfacePlatformWrapper -> this.nativeHandle
     else -> KMQuad2dInterfacePlatformProxy(this)
 }
-internal fun Quad2dInterface.asKmp(): KMQuad2dInterface = KMQuad2dInterfacePlatformWrapper(this)
+public fun Quad2dInterface.asKmp(): KMQuad2dInterface = KMQuad2dInterfacePlatformWrapper(this)

@@ -153,4 +153,4 @@ internal fun KMTextInstancedInterface.asPlatform(): TextInstancedInterface = whe
     is KMTextInstancedInterfacePlatformWrapper -> this.nativeHandle
     else -> KMTextInstancedInterfacePlatformProxy(this)
 }
-internal fun TextInstancedInterface.asKmp(): KMTextInstancedInterface = KMTextInstancedInterfacePlatformWrapper(this)
+public fun TextInstancedInterface.asKmp(): KMTextInstancedInterface = KMTextInstancedInterfacePlatformWrapper(this)

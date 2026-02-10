@@ -6,4 +6,4 @@ package io.openmobilemaps.mapscore.kmp
 actual typealias KMRectD = io.openmobilemaps.mapscore.shared.graphics.common.RectD
 
 internal fun KMRectD.asPlatform(): io.openmobilemaps.mapscore.shared.graphics.common.RectD = this
-internal fun io.openmobilemaps.mapscore.shared.graphics.common.RectD.asKmp(): KMRectD = this
+public fun io.openmobilemaps.mapscore.shared.graphics.common.RectD.asKmp(): KMRectD = this

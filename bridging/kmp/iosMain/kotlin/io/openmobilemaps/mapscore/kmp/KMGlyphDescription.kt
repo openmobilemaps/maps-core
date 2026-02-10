@@ -22,7 +22,7 @@ internal fun KMGlyphDescription.asPlatform(): MapCoreSharedModule.MCGlyphDescrip
     frame = frame.asPlatform(),
     textureCoordinates = textureCoordinates.asPlatform(),
 )
-internal fun MapCoreSharedModule.MCGlyphDescription.asKmp(): KMGlyphDescription = KMGlyphDescription(
+public fun MapCoreSharedModule.MCGlyphDescription.asKmp(): KMGlyphDescription = KMGlyphDescription(
     frame = (this.frame as MapCoreSharedModule.MCQuad2dD).asKmp(),
     textureCoordinates = (this.textureCoordinates as MapCoreSharedModule.MCQuad2dD).asKmp(),
 )

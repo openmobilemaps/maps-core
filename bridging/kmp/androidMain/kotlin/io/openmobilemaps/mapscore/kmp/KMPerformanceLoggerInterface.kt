@@ -97,4 +97,4 @@ internal fun KMPerformanceLoggerInterface.asPlatform(): PerformanceLoggerInterfa
     is KMPerformanceLoggerInterfacePlatformWrapper -> this.nativeHandle
     else -> KMPerformanceLoggerInterfacePlatformProxy(this)
 }
-internal fun PerformanceLoggerInterface.asKmp(): KMPerformanceLoggerInterface = KMPerformanceLoggerInterfacePlatformWrapper(this)
+public fun PerformanceLoggerInterface.asKmp(): KMPerformanceLoggerInterface = KMPerformanceLoggerInterfacePlatformWrapper(this)

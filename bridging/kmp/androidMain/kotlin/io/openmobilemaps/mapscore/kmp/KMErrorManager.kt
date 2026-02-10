@@ -46,4 +46,4 @@ actual class KMErrorManager actual public constructor(
 }
 
 internal fun KMErrorManager.asPlatform(): ErrorManager = nativeHandle as ErrorManager
-internal fun ErrorManager.asKmp(): KMErrorManager = KMErrorManager(this)
+public fun ErrorManager.asKmp(): KMErrorManager = KMErrorManager(this)

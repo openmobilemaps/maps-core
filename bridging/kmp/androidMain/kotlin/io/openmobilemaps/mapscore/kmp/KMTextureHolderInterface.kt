@@ -91,4 +91,4 @@ internal fun KMTextureHolderInterface.asPlatform(): TextureHolderInterface = whe
     is KMTextureHolderInterfacePlatformWrapper -> this.nativeHandle
     else -> KMTextureHolderInterfacePlatformProxy(this)
 }
-internal fun TextureHolderInterface.asKmp(): KMTextureHolderInterface = KMTextureHolderInterfacePlatformWrapper(this)
+public fun TextureHolderInterface.asKmp(): KMTextureHolderInterface = KMTextureHolderInterfacePlatformWrapper(this)

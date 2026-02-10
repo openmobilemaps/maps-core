@@ -25,7 +25,7 @@ internal fun KMWmtsTileMatrixSet.asPlatform(): MapCoreSharedModule.MCWmtsTileMat
     coordinateSystemIdentifier = coordinateSystemIdentifier,
     matrices = ArrayList(matrices.map { it.asPlatform() }),
 )
-internal fun MapCoreSharedModule.MCWmtsTileMatrixSet.asKmp(): KMWmtsTileMatrixSet = KMWmtsTileMatrixSet(
+public fun MapCoreSharedModule.MCWmtsTileMatrixSet.asKmp(): KMWmtsTileMatrixSet = KMWmtsTileMatrixSet(
     identifier = this.identifier,
     coordinateSystemIdentifier = this.coordinateSystemIdentifier,
     matrices = ArrayList(((this.matrices as? List<*>)?.map { (it as MapCoreSharedModule.MCWmtsTileMatrix).asKmp() } ?: (0 until (this.matrices as platform.Foundation.NSArray).count.toInt()).map { idx -> ((this.matrices as platform.Foundation.NSArray).objectAtIndex(idx.toULong()) as MapCoreSharedModule.MCWmtsTileMatrix).asKmp() })),

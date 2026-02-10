@@ -25,7 +25,7 @@ internal fun KMMapCoordinateSystem.asPlatform(): MapCoreSharedModule.MCMapCoordi
     bounds = bounds.asPlatform(),
     unitToScreenMeterFactor = unitToScreenMeterFactor,
 )
-internal fun MapCoreSharedModule.MCMapCoordinateSystem.asKmp(): KMMapCoordinateSystem = KMMapCoordinateSystem(
+public fun MapCoreSharedModule.MCMapCoordinateSystem.asKmp(): KMMapCoordinateSystem = KMMapCoordinateSystem(
     identifier = this.identifier,
     bounds = (this.bounds as MapCoreSharedModule.MCRectCoord).asKmp(),
     unitToScreenMeterFactor = this.unitToScreenMeterFactor,

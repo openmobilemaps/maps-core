@@ -25,7 +25,7 @@ internal fun KMTouchEvent.asPlatform(): MapCoreSharedModule.MCTouchEvent = MapCo
     scrollDelta = scrollDelta,
     touchAction = touchAction.asPlatform(),
 )
-internal fun MapCoreSharedModule.MCTouchEvent.asKmp(): KMTouchEvent = KMTouchEvent(
+public fun MapCoreSharedModule.MCTouchEvent.asKmp(): KMTouchEvent = KMTouchEvent(
     pointers = ArrayList(((this.pointers as? List<*>)?.map { (it as MapCoreSharedModule.MCVec2F).asKmp() } ?: (0 until (this.pointers as platform.Foundation.NSArray).count.toInt()).map { idx -> ((this.pointers as platform.Foundation.NSArray).objectAtIndex(idx.toULong()) as MapCoreSharedModule.MCVec2F).asKmp() })),
     scrollDelta = this.scrollDelta,
     touchAction = KMTouchAction.fromPlatform((this.touchAction as MapCoreSharedModule.MCTouchAction)),

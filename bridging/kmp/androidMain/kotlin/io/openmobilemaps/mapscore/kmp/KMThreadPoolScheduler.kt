@@ -22,4 +22,4 @@ actual class KMThreadPoolScheduler actual public constructor(
 }
 
 internal fun KMThreadPoolScheduler.asPlatform(): ThreadPoolScheduler = nativeHandle as ThreadPoolScheduler
-internal fun ThreadPoolScheduler.asKmp(): KMThreadPoolScheduler = KMThreadPoolScheduler(this)
+public fun ThreadPoolScheduler.asKmp(): KMThreadPoolScheduler = KMThreadPoolScheduler(this)

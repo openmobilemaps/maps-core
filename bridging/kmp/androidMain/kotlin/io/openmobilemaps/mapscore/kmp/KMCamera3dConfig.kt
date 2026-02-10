@@ -6,4 +6,4 @@ package io.openmobilemaps.mapscore.kmp
 actual typealias KMCamera3dConfig = io.openmobilemaps.mapscore.shared.map.Camera3dConfig
 
 internal fun KMCamera3dConfig.asPlatform(): io.openmobilemaps.mapscore.shared.map.Camera3dConfig = this
-internal fun io.openmobilemaps.mapscore.shared.map.Camera3dConfig.asKmp(): KMCamera3dConfig = this
+public fun io.openmobilemaps.mapscore.shared.map.Camera3dConfig.asKmp(): KMCamera3dConfig = this

@@ -209,4 +209,4 @@ internal fun KMLayerInterface.asPlatform(): LayerInterface = when (this) {
     is KMLayerInterfacePlatformWrapper -> this.nativeHandle
     else -> KMLayerInterfacePlatformProxy(this)
 }
-internal fun LayerInterface.asKmp(): KMLayerInterface = KMLayerInterfacePlatformWrapper(this)
+public fun LayerInterface.asKmp(): KMLayerInterface = KMLayerInterfacePlatformWrapper(this)

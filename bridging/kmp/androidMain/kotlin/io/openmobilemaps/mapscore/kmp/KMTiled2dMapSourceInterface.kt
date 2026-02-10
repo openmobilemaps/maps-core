@@ -64,4 +64,4 @@ actual class KMTiled2dMapSourceInterface actual public constructor(
 }
 
 internal fun KMTiled2dMapSourceInterface.asPlatform(): Tiled2dMapSourceInterface = nativeHandle as Tiled2dMapSourceInterface
-internal fun Tiled2dMapSourceInterface.asKmp(): KMTiled2dMapSourceInterface = KMTiled2dMapSourceInterface(this)
+public fun Tiled2dMapSourceInterface.asKmp(): KMTiled2dMapSourceInterface = KMTiled2dMapSourceInterface(this)

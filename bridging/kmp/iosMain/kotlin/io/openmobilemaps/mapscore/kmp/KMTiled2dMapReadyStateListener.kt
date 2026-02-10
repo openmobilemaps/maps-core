@@ -37,4 +37,4 @@ internal fun KMTiled2dMapReadyStateListener.asPlatform(): MapCoreSharedModule.MC
     is KMTiled2dMapReadyStateListenerPlatformWrapper -> this.nativeHandle
     else -> KMTiled2dMapReadyStateListenerPlatformProxy(this)
 }
-internal fun MapCoreSharedModule.MCTiled2dMapReadyStateListenerProtocol.asKmp(): KMTiled2dMapReadyStateListener = KMTiled2dMapReadyStateListenerPlatformWrapper(this)
+public fun MapCoreSharedModule.MCTiled2dMapReadyStateListenerProtocol.asKmp(): KMTiled2dMapReadyStateListener = KMTiled2dMapReadyStateListenerPlatformWrapper(this)

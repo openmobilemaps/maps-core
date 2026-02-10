@@ -27,4 +27,4 @@ actual class KMColorShaderInterface actual public constructor(
 }
 
 internal fun KMColorShaderInterface.asPlatform(): MapCoreSharedModule.MCColorShaderInterfaceProtocol = nativeHandle as MapCoreSharedModule.MCColorShaderInterfaceProtocol
-internal fun MapCoreSharedModule.MCColorShaderInterfaceProtocol.asKmp(): KMColorShaderInterface = KMColorShaderInterface(this)
+public fun MapCoreSharedModule.MCColorShaderInterfaceProtocol.asKmp(): KMColorShaderInterface = KMColorShaderInterface(this)

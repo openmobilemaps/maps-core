@@ -69,4 +69,4 @@ internal fun KMTiled2dMapVectorLayerLocalDataProviderInterface.asPlatform(): Til
     is KMTiled2dMapVectorLayerLocalDataProviderInterfacePlatformWrapper -> this.nativeHandle
     else -> KMTiled2dMapVectorLayerLocalDataProviderInterfacePlatformProxy(this)
 }
-internal fun Tiled2dMapVectorLayerLocalDataProviderInterface.asKmp(): KMTiled2dMapVectorLayerLocalDataProviderInterface = KMTiled2dMapVectorLayerLocalDataProviderInterfacePlatformWrapper(this)
+public fun Tiled2dMapVectorLayerLocalDataProviderInterface.asKmp(): KMTiled2dMapVectorLayerLocalDataProviderInterface = KMTiled2dMapVectorLayerLocalDataProviderInterfacePlatformWrapper(this)

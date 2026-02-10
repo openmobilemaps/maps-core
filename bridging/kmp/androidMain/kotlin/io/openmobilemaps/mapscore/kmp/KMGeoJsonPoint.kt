@@ -6,4 +6,4 @@ package io.openmobilemaps.mapscore.kmp
 actual typealias KMGeoJsonPoint = io.openmobilemaps.mapscore.shared.map.layers.tiled.GeoJsonPoint
 
 internal fun KMGeoJsonPoint.asPlatform(): io.openmobilemaps.mapscore.shared.map.layers.tiled.GeoJsonPoint = this
-internal fun io.openmobilemaps.mapscore.shared.map.layers.tiled.GeoJsonPoint.asKmp(): KMGeoJsonPoint = this
+public fun io.openmobilemaps.mapscore.shared.map.layers.tiled.GeoJsonPoint.asKmp(): KMGeoJsonPoint = this

@@ -6,4 +6,4 @@ package io.openmobilemaps.mapscore.kmp
 actual typealias KMWmtsLayerDescription = io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.wmts.WmtsLayerDescription
 
 internal fun KMWmtsLayerDescription.asPlatform(): io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.wmts.WmtsLayerDescription = this
-internal fun io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.wmts.WmtsLayerDescription.asKmp(): KMWmtsLayerDescription = this
+public fun io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.wmts.WmtsLayerDescription.asKmp(): KMWmtsLayerDescription = this

@@ -49,4 +49,4 @@ internal fun KMLineGroup2dInterface.asPlatform(): MapCoreSharedModule.MCLineGrou
     is KMLineGroup2dInterfacePlatformWrapper -> this.nativeHandle
     else -> KMLineGroup2dInterfacePlatformProxy(this)
 }
-internal fun MapCoreSharedModule.MCLineGroup2dInterfaceProtocol.asKmp(): KMLineGroup2dInterface = KMLineGroup2dInterfacePlatformWrapper(this)
+public fun MapCoreSharedModule.MCLineGroup2dInterfaceProtocol.asKmp(): KMLineGroup2dInterface = KMLineGroup2dInterfacePlatformWrapper(this)

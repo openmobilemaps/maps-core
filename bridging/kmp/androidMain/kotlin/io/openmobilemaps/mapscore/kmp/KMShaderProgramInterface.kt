@@ -35,4 +35,4 @@ actual class KMShaderProgramInterface actual public constructor(
 }
 
 internal fun KMShaderProgramInterface.asPlatform(): ShaderProgramInterface = nativeHandle as ShaderProgramInterface
-internal fun ShaderProgramInterface.asKmp(): KMShaderProgramInterface = KMShaderProgramInterface(this)
+public fun ShaderProgramInterface.asKmp(): KMShaderProgramInterface = KMShaderProgramInterface(this)

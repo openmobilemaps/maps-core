@@ -111,4 +111,4 @@ internal fun KMTextInfoInterface.asPlatform(): MapCoreSharedModule.MCTextInfoInt
     is KMTextInfoInterfacePlatformWrapper -> this.nativeHandle
     else -> KMTextInfoInterfacePlatformProxy(this)
 }
-internal fun MapCoreSharedModule.MCTextInfoInterfaceProtocol.asKmp(): KMTextInfoInterface = KMTextInfoInterfacePlatformWrapper(this)
+public fun MapCoreSharedModule.MCTextInfoInterfaceProtocol.asKmp(): KMTextInfoInterface = KMTextInfoInterfacePlatformWrapper(this)

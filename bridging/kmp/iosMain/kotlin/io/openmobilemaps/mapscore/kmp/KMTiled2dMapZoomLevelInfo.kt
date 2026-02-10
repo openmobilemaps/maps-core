@@ -37,7 +37,7 @@ internal fun KMTiled2dMapZoomLevelInfo.asPlatform(): MapCoreSharedModule.MCTiled
     zoomLevelIdentifier = zoomLevelIdentifier,
     bounds = bounds.asPlatform(),
 )
-internal fun MapCoreSharedModule.MCTiled2dMapZoomLevelInfo.asKmp(): KMTiled2dMapZoomLevelInfo = KMTiled2dMapZoomLevelInfo(
+public fun MapCoreSharedModule.MCTiled2dMapZoomLevelInfo.asKmp(): KMTiled2dMapZoomLevelInfo = KMTiled2dMapZoomLevelInfo(
     zoom = this.zoom,
     tileWidthLayerSystemUnits = this.tileWidthLayerSystemUnits,
     numTilesX = this.numTilesX,

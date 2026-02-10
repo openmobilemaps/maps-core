@@ -35,4 +35,4 @@ actual class KMTextLayerInterface actual public constructor(
 }
 
 internal fun KMTextLayerInterface.asPlatform(): TextLayerInterface = nativeHandle as TextLayerInterface
-internal fun TextLayerInterface.asKmp(): KMTextLayerInterface = KMTextLayerInterface(this)
+public fun TextLayerInterface.asKmp(): KMTextLayerInterface = KMTextLayerInterface(this)

@@ -97,4 +97,4 @@ internal fun KMRenderObjectInterface.asPlatform(): MapCoreSharedModule.MCRenderO
     is KMRenderObjectInterfacePlatformWrapper -> this.nativeHandle
     else -> KMRenderObjectInterfacePlatformProxy(this)
 }
-internal fun MapCoreSharedModule.MCRenderObjectInterfaceProtocol.asKmp(): KMRenderObjectInterface = KMRenderObjectInterfacePlatformWrapper(this)
+public fun MapCoreSharedModule.MCRenderObjectInterfaceProtocol.asKmp(): KMRenderObjectInterface = KMRenderObjectInterfacePlatformWrapper(this)

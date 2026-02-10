@@ -6,4 +6,4 @@ package io.openmobilemaps.mapscore.kmp
 actual typealias KMLineStyle = io.openmobilemaps.mapscore.shared.map.layers.line.LineStyle
 
 internal fun KMLineStyle.asPlatform(): io.openmobilemaps.mapscore.shared.map.layers.line.LineStyle = this
-internal fun io.openmobilemaps.mapscore.shared.map.layers.line.LineStyle.asKmp(): KMLineStyle = this
+public fun io.openmobilemaps.mapscore.shared.map.layers.line.LineStyle.asKmp(): KMLineStyle = this

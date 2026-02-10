@@ -22,7 +22,7 @@ internal fun KMRenderLineDescription.asPlatform(): MapCoreSharedModule.MCRenderL
     positions = ArrayList(positions.map { it.asPlatform() }),
     styleIndex = styleIndex,
 )
-internal fun MapCoreSharedModule.MCRenderLineDescription.asKmp(): KMRenderLineDescription = KMRenderLineDescription(
+public fun MapCoreSharedModule.MCRenderLineDescription.asKmp(): KMRenderLineDescription = KMRenderLineDescription(
     positions = ArrayList(((this.positions as? List<*>)?.map { (it as MapCoreSharedModule.MCVec2D).asKmp() } ?: (0 until (this.positions as platform.Foundation.NSArray).count.toInt()).map { idx -> ((this.positions as platform.Foundation.NSArray).objectAtIndex(idx.toULong()) as MapCoreSharedModule.MCVec2D).asKmp() })),
     styleIndex = this.styleIndex,
 )

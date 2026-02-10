@@ -31,4 +31,4 @@ actual class KMStretchShaderInterface actual public constructor(
 }
 
 internal fun KMStretchShaderInterface.asPlatform(): MapCoreSharedModule.MCStretchShaderInterfaceProtocol = nativeHandle as MapCoreSharedModule.MCStretchShaderInterfaceProtocol
-internal fun MapCoreSharedModule.MCStretchShaderInterfaceProtocol.asKmp(): KMStretchShaderInterface = KMStretchShaderInterface(this)
+public fun MapCoreSharedModule.MCStretchShaderInterfaceProtocol.asKmp(): KMStretchShaderInterface = KMStretchShaderInterface(this)

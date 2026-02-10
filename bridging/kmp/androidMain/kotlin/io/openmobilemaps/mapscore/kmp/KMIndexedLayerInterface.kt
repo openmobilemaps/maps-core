@@ -45,4 +45,4 @@ internal fun KMIndexedLayerInterface.asPlatform(): IndexedLayerInterface = when 
     is KMIndexedLayerInterfacePlatformWrapper -> this.nativeHandle
     else -> KMIndexedLayerInterfacePlatformProxy(this)
 }
-internal fun IndexedLayerInterface.asKmp(): KMIndexedLayerInterface = KMIndexedLayerInterfacePlatformWrapper(this)
+public fun IndexedLayerInterface.asKmp(): KMIndexedLayerInterface = KMIndexedLayerInterfacePlatformWrapper(this)

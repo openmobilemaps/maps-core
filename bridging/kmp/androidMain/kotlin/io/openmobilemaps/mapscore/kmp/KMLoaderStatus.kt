@@ -6,4 +6,4 @@ package io.openmobilemaps.mapscore.kmp
 actual typealias KMLoaderStatus = io.openmobilemaps.mapscore.shared.map.loader.LoaderStatus
 
 internal fun KMLoaderStatus.asPlatform(): io.openmobilemaps.mapscore.shared.map.loader.LoaderStatus = this
-internal fun io.openmobilemaps.mapscore.shared.map.loader.LoaderStatus.asKmp(): KMLoaderStatus = this
+public fun io.openmobilemaps.mapscore.shared.map.loader.LoaderStatus.asKmp(): KMLoaderStatus = this

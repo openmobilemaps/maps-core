@@ -35,4 +35,4 @@ actual class KMPolygonMaskObjectInterface actual public constructor(
 }
 
 internal fun KMPolygonMaskObjectInterface.asPlatform(): PolygonMaskObjectInterface = nativeHandle as PolygonMaskObjectInterface
-internal fun PolygonMaskObjectInterface.asKmp(): KMPolygonMaskObjectInterface = KMPolygonMaskObjectInterface(this)
+public fun PolygonMaskObjectInterface.asKmp(): KMPolygonMaskObjectInterface = KMPolygonMaskObjectInterface(this)

@@ -6,4 +6,4 @@ package io.openmobilemaps.mapscore.kmp
 actual typealias KMTiled2dMapVectorTileOrigin = io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapVectorTileOrigin
 
 internal fun KMTiled2dMapVectorTileOrigin.asPlatform(): io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapVectorTileOrigin = this
-internal fun io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapVectorTileOrigin.asKmp(): KMTiled2dMapVectorTileOrigin = this
+public fun io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapVectorTileOrigin.asKmp(): KMTiled2dMapVectorTileOrigin = this

@@ -28,7 +28,7 @@ internal fun KMQuad2dD.asPlatform(): MapCoreSharedModule.MCQuad2dD = MapCoreShar
     bottomRight = bottomRight.asPlatform(),
     bottomLeft = bottomLeft.asPlatform(),
 )
-internal fun MapCoreSharedModule.MCQuad2dD.asKmp(): KMQuad2dD = KMQuad2dD(
+public fun MapCoreSharedModule.MCQuad2dD.asKmp(): KMQuad2dD = KMQuad2dD(
     topLeft = (this.topLeft as MapCoreSharedModule.MCVec2D).asKmp(),
     topRight = (this.topRight as MapCoreSharedModule.MCVec2D).asKmp(),
     bottomRight = (this.bottomRight as MapCoreSharedModule.MCVec2D).asKmp(),

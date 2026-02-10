@@ -127,4 +127,4 @@ internal fun KMOpenGlRenderingContextInterface.asPlatform(): MapCoreSharedModule
     is KMOpenGlRenderingContextInterfacePlatformWrapper -> this.nativeHandle
     else -> KMOpenGlRenderingContextInterfacePlatformProxy(this)
 }
-internal fun MapCoreSharedModule.MCOpenGlRenderingContextInterfaceProtocol.asKmp(): KMOpenGlRenderingContextInterface = KMOpenGlRenderingContextInterfacePlatformWrapper(this)
+public fun MapCoreSharedModule.MCOpenGlRenderingContextInterfaceProtocol.asKmp(): KMOpenGlRenderingContextInterface = KMOpenGlRenderingContextInterfacePlatformWrapper(this)

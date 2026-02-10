@@ -22,7 +22,7 @@ internal fun KMPolygonStyle.asPlatform(): MapCoreSharedModule.MCPolygonStyle = M
     color = color.asPlatform(),
     opacity = opacity,
 )
-internal fun MapCoreSharedModule.MCPolygonStyle.asKmp(): KMPolygonStyle = KMPolygonStyle(
+public fun MapCoreSharedModule.MCPolygonStyle.asKmp(): KMPolygonStyle = KMPolygonStyle(
     color = (this.color as MapCoreSharedModule.MCColor).asKmp(),
     opacity = this.opacity,
 )

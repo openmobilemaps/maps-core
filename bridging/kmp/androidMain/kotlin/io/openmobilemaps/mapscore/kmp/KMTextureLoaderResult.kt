@@ -21,7 +21,7 @@ internal fun KMTextureLoaderResult.asPlatform(): io.openmobilemaps.mapscore.shar
     status = status.asPlatform(),
     errorCode = errorCode?.let { it },
 )
-internal fun io.openmobilemaps.mapscore.shared.map.loader.TextureLoaderResult.asKmp(): KMTextureLoaderResult = KMTextureLoaderResult(
+public fun io.openmobilemaps.mapscore.shared.map.loader.TextureLoaderResult.asKmp(): KMTextureLoaderResult = KMTextureLoaderResult(
     data = this.data?.let { (it as io.openmobilemaps.mapscore.shared.graphics.objects.TextureHolderInterface).asKmp() },
     etag = this.etag?.let { it },
     status = (this.status as io.openmobilemaps.mapscore.shared.map.loader.LoaderStatus).asKmp(),

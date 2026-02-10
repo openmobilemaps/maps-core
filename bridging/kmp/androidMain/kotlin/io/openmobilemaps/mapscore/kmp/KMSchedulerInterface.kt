@@ -125,4 +125,4 @@ internal fun KMSchedulerInterface.asPlatform(): SchedulerInterface = when (this)
     is KMSchedulerInterfacePlatformWrapper -> this.nativeHandle
     else -> KMSchedulerInterfacePlatformProxy(this)
 }
-internal fun SchedulerInterface.asKmp(): KMSchedulerInterface = KMSchedulerInterfacePlatformWrapper(this)
+public fun SchedulerInterface.asKmp(): KMSchedulerInterface = KMSchedulerInterfacePlatformWrapper(this)

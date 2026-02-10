@@ -27,4 +27,4 @@ actual class KMLineFactory actual public constructor(
 }
 
 internal fun KMLineFactory.asPlatform(): MapCoreSharedModule.MCLineFactory = nativeHandle as MapCoreSharedModule.MCLineFactory
-internal fun MapCoreSharedModule.MCLineFactory.asKmp(): KMLineFactory = KMLineFactory(this)
+public fun MapCoreSharedModule.MCLineFactory.asKmp(): KMLineFactory = KMLineFactory(this)

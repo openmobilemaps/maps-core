@@ -42,4 +42,4 @@ actual class KMCoordinateSystemFactory actual public constructor(
 }
 
 internal fun KMCoordinateSystemFactory.asPlatform(): CoordinateSystemFactory = nativeHandle as CoordinateSystemFactory
-internal fun CoordinateSystemFactory.asKmp(): KMCoordinateSystemFactory = KMCoordinateSystemFactory(this)
+public fun CoordinateSystemFactory.asKmp(): KMCoordinateSystemFactory = KMCoordinateSystemFactory(this)

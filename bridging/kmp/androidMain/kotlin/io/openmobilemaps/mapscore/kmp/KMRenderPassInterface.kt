@@ -79,4 +79,4 @@ internal fun KMRenderPassInterface.asPlatform(): RenderPassInterface = when (thi
     is KMRenderPassInterfacePlatformWrapper -> this.nativeHandle
     else -> KMRenderPassInterfacePlatformProxy(this)
 }
-internal fun RenderPassInterface.asKmp(): KMRenderPassInterface = KMRenderPassInterfacePlatformWrapper(this)
+public fun RenderPassInterface.asKmp(): KMRenderPassInterface = KMRenderPassInterfacePlatformWrapper(this)

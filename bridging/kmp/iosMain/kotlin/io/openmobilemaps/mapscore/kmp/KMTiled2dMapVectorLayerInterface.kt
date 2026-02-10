@@ -93,4 +93,4 @@ actual class KMTiled2dMapVectorLayerInterface actual public constructor(
 }
 
 internal fun KMTiled2dMapVectorLayerInterface.asPlatform(): MapCoreSharedModule.MCTiled2dMapVectorLayerInterface = nativeHandle as MapCoreSharedModule.MCTiled2dMapVectorLayerInterface
-internal fun MapCoreSharedModule.MCTiled2dMapVectorLayerInterface.asKmp(): KMTiled2dMapVectorLayerInterface = KMTiled2dMapVectorLayerInterface(this)
+public fun MapCoreSharedModule.MCTiled2dMapVectorLayerInterface.asKmp(): KMTiled2dMapVectorLayerInterface = KMTiled2dMapVectorLayerInterface(this)

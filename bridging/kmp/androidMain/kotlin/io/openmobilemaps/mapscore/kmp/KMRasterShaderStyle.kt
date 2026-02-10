@@ -6,4 +6,4 @@ package io.openmobilemaps.mapscore.kmp
 actual typealias KMRasterShaderStyle = io.openmobilemaps.mapscore.shared.graphics.shader.RasterShaderStyle
 
 internal fun KMRasterShaderStyle.asPlatform(): io.openmobilemaps.mapscore.shared.graphics.shader.RasterShaderStyle = this
-internal fun io.openmobilemaps.mapscore.shared.graphics.shader.RasterShaderStyle.asKmp(): KMRasterShaderStyle = this
+public fun io.openmobilemaps.mapscore.shared.graphics.shader.RasterShaderStyle.asKmp(): KMRasterShaderStyle = this

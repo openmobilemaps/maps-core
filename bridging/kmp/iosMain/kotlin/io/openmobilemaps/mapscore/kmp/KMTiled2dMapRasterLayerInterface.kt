@@ -116,4 +116,4 @@ actual class KMTiled2dMapRasterLayerInterface actual public constructor(
 }
 
 internal fun KMTiled2dMapRasterLayerInterface.asPlatform(): MapCoreSharedModule.MCTiled2dMapRasterLayerInterface = nativeHandle as MapCoreSharedModule.MCTiled2dMapRasterLayerInterface
-internal fun MapCoreSharedModule.MCTiled2dMapRasterLayerInterface.asKmp(): KMTiled2dMapRasterLayerInterface = KMTiled2dMapRasterLayerInterface(this)
+public fun MapCoreSharedModule.MCTiled2dMapRasterLayerInterface.asKmp(): KMTiled2dMapRasterLayerInterface = KMTiled2dMapRasterLayerInterface(this)

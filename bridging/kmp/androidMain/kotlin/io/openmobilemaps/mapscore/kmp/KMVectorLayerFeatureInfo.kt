@@ -6,4 +6,4 @@ package io.openmobilemaps.mapscore.kmp
 actual typealias KMVectorLayerFeatureInfo = io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.VectorLayerFeatureInfo
 
 internal fun KMVectorLayerFeatureInfo.asPlatform(): io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.VectorLayerFeatureInfo = this
-internal fun io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.VectorLayerFeatureInfo.asKmp(): KMVectorLayerFeatureInfo = this
+public fun io.openmobilemaps.mapscore.shared.map.layers.tiled.vector.VectorLayerFeatureInfo.asKmp(): KMVectorLayerFeatureInfo = this

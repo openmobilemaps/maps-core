@@ -62,4 +62,4 @@ actual class KMCoordinateSystemIdentifiers actual public constructor(
 }
 
 internal fun KMCoordinateSystemIdentifiers.asPlatform(): MapCoreSharedModule.MCCoordinateSystemIdentifiers = nativeHandle as MapCoreSharedModule.MCCoordinateSystemIdentifiers
-internal fun MapCoreSharedModule.MCCoordinateSystemIdentifiers.asKmp(): KMCoordinateSystemIdentifiers = KMCoordinateSystemIdentifiers(this)
+public fun MapCoreSharedModule.MCCoordinateSystemIdentifiers.asKmp(): KMCoordinateSystemIdentifiers = KMCoordinateSystemIdentifiers(this)

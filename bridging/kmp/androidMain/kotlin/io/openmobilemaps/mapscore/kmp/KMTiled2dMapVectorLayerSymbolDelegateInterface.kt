@@ -33,4 +33,4 @@ internal fun KMTiled2dMapVectorLayerSymbolDelegateInterface.asPlatform(): Tiled2
     is KMTiled2dMapVectorLayerSymbolDelegateInterfacePlatformWrapper -> this.nativeHandle
     else -> KMTiled2dMapVectorLayerSymbolDelegateInterfacePlatformProxy(this)
 }
-internal fun Tiled2dMapVectorLayerSymbolDelegateInterface.asKmp(): KMTiled2dMapVectorLayerSymbolDelegateInterface = KMTiled2dMapVectorLayerSymbolDelegateInterfacePlatformWrapper(this)
+public fun Tiled2dMapVectorLayerSymbolDelegateInterface.asKmp(): KMTiled2dMapVectorLayerSymbolDelegateInterface = KMTiled2dMapVectorLayerSymbolDelegateInterfacePlatformWrapper(this)

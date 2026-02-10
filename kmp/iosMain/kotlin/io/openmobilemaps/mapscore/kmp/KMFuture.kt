@@ -12,10 +12,10 @@ actual class KMFuture<T> {
     }
 }
 
-class KMPromise<T> {
+actual class KMPromise<T> {
     private val promise = MapCoreSharedModule.DJPromise()
 
-    fun setValue(value: T) {
+    actual fun setValue(value: T) {
         promise.setValue(value)
     }
 
@@ -27,7 +27,7 @@ class KMPromise<T> {
         promise.setValue(value.asPlatform())
     }
 
-    fun future(): KMFuture<T> = promise.getFuture().asKmp()
+    actual fun future(): KMFuture<T> = promise.getFuture().asKmp()
 }
 
 internal fun <T> KMFuture<T>.asPlatform(): MapCoreSharedModule.DJFuture =

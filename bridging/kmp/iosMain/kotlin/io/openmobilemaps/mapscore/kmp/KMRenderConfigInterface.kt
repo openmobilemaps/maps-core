@@ -28,4 +28,4 @@ actual class KMRenderConfigInterface actual public constructor(
 }
 
 internal fun KMRenderConfigInterface.asPlatform(): MapCoreSharedModule.MCRenderConfigInterface = nativeHandle as MapCoreSharedModule.MCRenderConfigInterface
-internal fun MapCoreSharedModule.MCRenderConfigInterface.asKmp(): KMRenderConfigInterface = KMRenderConfigInterface(this)
+public fun MapCoreSharedModule.MCRenderConfigInterface.asKmp(): KMRenderConfigInterface = KMRenderConfigInterface(this)

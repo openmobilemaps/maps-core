@@ -6,4 +6,4 @@ package io.openmobilemaps.mapscore.kmp
 actual typealias KMRenderVerticesDescription = io.openmobilemaps.mapscore.shared.graphics.objects.RenderVerticesDescription
 
 internal fun KMRenderVerticesDescription.asPlatform(): io.openmobilemaps.mapscore.shared.graphics.objects.RenderVerticesDescription = this
-internal fun io.openmobilemaps.mapscore.shared.graphics.objects.RenderVerticesDescription.asKmp(): KMRenderVerticesDescription = this
+public fun io.openmobilemaps.mapscore.shared.graphics.objects.RenderVerticesDescription.asKmp(): KMRenderVerticesDescription = this

@@ -18,4 +18,4 @@ actual class KMAlphaInstancedShaderInterface actual public constructor(
 }
 
 internal fun KMAlphaInstancedShaderInterface.asPlatform(): AlphaInstancedShaderInterface = nativeHandle as AlphaInstancedShaderInterface
-internal fun AlphaInstancedShaderInterface.asKmp(): KMAlphaInstancedShaderInterface = KMAlphaInstancedShaderInterface(this)
+public fun AlphaInstancedShaderInterface.asKmp(): KMAlphaInstancedShaderInterface = KMAlphaInstancedShaderInterface(this)

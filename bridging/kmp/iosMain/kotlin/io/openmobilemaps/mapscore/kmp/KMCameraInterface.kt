@@ -73,4 +73,4 @@ internal fun KMCameraInterface.asPlatform(): MapCoreSharedModule.MCCameraInterfa
     is KMCameraInterfacePlatformWrapper -> this.nativeHandle
     else -> KMCameraInterfacePlatformProxy(this)
 }
-internal fun MapCoreSharedModule.MCCameraInterfaceProtocol.asKmp(): KMCameraInterface = KMCameraInterfacePlatformWrapper(this)
+public fun MapCoreSharedModule.MCCameraInterfaceProtocol.asKmp(): KMCameraInterface = KMCameraInterfacePlatformWrapper(this)

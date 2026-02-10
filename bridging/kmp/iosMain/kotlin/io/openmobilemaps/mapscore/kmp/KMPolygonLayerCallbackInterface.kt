@@ -51,4 +51,4 @@ internal fun KMPolygonLayerCallbackInterface.asPlatform(): MapCoreSharedModule.M
     is KMPolygonLayerCallbackInterfacePlatformWrapper -> this.nativeHandle
     else -> KMPolygonLayerCallbackInterfacePlatformProxy(this)
 }
-internal fun MapCoreSharedModule.MCPolygonLayerCallbackInterfaceProtocol.asKmp(): KMPolygonLayerCallbackInterface = KMPolygonLayerCallbackInterfacePlatformWrapper(this)
+public fun MapCoreSharedModule.MCPolygonLayerCallbackInterfaceProtocol.asKmp(): KMPolygonLayerCallbackInterface = KMPolygonLayerCallbackInterfacePlatformWrapper(this)

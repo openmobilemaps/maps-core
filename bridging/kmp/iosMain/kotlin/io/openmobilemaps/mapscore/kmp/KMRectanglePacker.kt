@@ -27,4 +27,4 @@ actual class KMRectanglePacker actual public constructor(
 }
 
 internal fun KMRectanglePacker.asPlatform(): MapCoreSharedModule.MCRectanglePacker = nativeHandle as MapCoreSharedModule.MCRectanglePacker
-internal fun MapCoreSharedModule.MCRectanglePacker.asKmp(): KMRectanglePacker = KMRectanglePacker(this)
+public fun MapCoreSharedModule.MCRectanglePacker.asKmp(): KMRectanglePacker = KMRectanglePacker(this)

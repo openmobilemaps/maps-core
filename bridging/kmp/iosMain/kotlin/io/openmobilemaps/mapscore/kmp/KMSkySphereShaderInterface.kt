@@ -27,4 +27,4 @@ actual class KMSkySphereShaderInterface actual public constructor(
 }
 
 internal fun KMSkySphereShaderInterface.asPlatform(): MapCoreSharedModule.MCSkySphereShaderInterfaceProtocol = nativeHandle as MapCoreSharedModule.MCSkySphereShaderInterfaceProtocol
-internal fun MapCoreSharedModule.MCSkySphereShaderInterfaceProtocol.asKmp(): KMSkySphereShaderInterface = KMSkySphereShaderInterface(this)
+public fun MapCoreSharedModule.MCSkySphereShaderInterfaceProtocol.asKmp(): KMSkySphereShaderInterface = KMSkySphereShaderInterface(this)

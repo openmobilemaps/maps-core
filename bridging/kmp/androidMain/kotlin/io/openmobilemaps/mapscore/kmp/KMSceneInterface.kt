@@ -80,4 +80,4 @@ actual class KMSceneInterface actual public constructor(
 }
 
 internal fun KMSceneInterface.asPlatform(): SceneInterface = nativeHandle as SceneInterface
-internal fun SceneInterface.asKmp(): KMSceneInterface = KMSceneInterface(this)
+public fun SceneInterface.asKmp(): KMSceneInterface = KMSceneInterface(this)

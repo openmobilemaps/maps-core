@@ -22,7 +22,7 @@ internal fun KMFormattedStringEntry.asPlatform(): MapCoreSharedModule.MCFormatte
     text = text,
     scale = scale,
 )
-internal fun MapCoreSharedModule.MCFormattedStringEntry.asKmp(): KMFormattedStringEntry = KMFormattedStringEntry(
+public fun MapCoreSharedModule.MCFormattedStringEntry.asKmp(): KMFormattedStringEntry = KMFormattedStringEntry(
     text = this.text,
     scale = this.scale,
 )

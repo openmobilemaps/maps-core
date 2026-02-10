@@ -49,4 +49,4 @@ internal fun KMTaskInterface.asPlatform(): MapCoreSharedModule.MCTaskInterfacePr
     is KMTaskInterfacePlatformWrapper -> this.nativeHandle
     else -> KMTaskInterfacePlatformProxy(this)
 }
-internal fun MapCoreSharedModule.MCTaskInterfaceProtocol.asKmp(): KMTaskInterface = KMTaskInterfacePlatformWrapper(this)
+public fun MapCoreSharedModule.MCTaskInterfaceProtocol.asKmp(): KMTaskInterface = KMTaskInterfacePlatformWrapper(this)

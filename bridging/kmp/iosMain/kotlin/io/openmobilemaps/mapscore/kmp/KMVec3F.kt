@@ -25,7 +25,7 @@ internal fun KMVec3F.asPlatform(): MapCoreSharedModule.MCVec3F = MapCoreSharedMo
     y = y,
     z = z,
 )
-internal fun MapCoreSharedModule.MCVec3F.asKmp(): KMVec3F = KMVec3F(
+public fun MapCoreSharedModule.MCVec3F.asKmp(): KMVec3F = KMVec3F(
     x = this.x,
     y = this.y,
     z = this.z,

@@ -6,4 +6,4 @@ package io.openmobilemaps.mapscore.kmp
 actual typealias KMRenderingCullMode = io.openmobilemaps.mapscore.shared.graphics.RenderingCullMode
 
 internal fun KMRenderingCullMode.asPlatform(): io.openmobilemaps.mapscore.shared.graphics.RenderingCullMode = this
-internal fun io.openmobilemaps.mapscore.shared.graphics.RenderingCullMode.asKmp(): KMRenderingCullMode = this
+public fun io.openmobilemaps.mapscore.shared.graphics.RenderingCullMode.asKmp(): KMRenderingCullMode = this

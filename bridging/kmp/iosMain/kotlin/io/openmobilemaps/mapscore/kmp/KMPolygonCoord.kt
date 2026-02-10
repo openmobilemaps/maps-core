@@ -22,7 +22,7 @@ internal fun KMPolygonCoord.asPlatform(): MapCoreSharedModule.MCPolygonCoord = M
     positions = ArrayList(positions.map { it.asPlatform() }),
     holes = ArrayList(holes.map { ArrayList(it.map { it.asPlatform() }) }),
 )
-internal fun MapCoreSharedModule.MCPolygonCoord.asKmp(): KMPolygonCoord = KMPolygonCoord(
+public fun MapCoreSharedModule.MCPolygonCoord.asKmp(): KMPolygonCoord = KMPolygonCoord(
     positions = ArrayList(((this.positions as? List<*>)?.map { (it as MapCoreSharedModule.MCCoord).asKmp() } ?: (0 until (this.positions as platform.Foundation.NSArray).count.toInt()).map { idx -> ((this.positions as platform.Foundation.NSArray).objectAtIndex(idx.toULong()) as MapCoreSharedModule.MCCoord).asKmp() })),
     holes = ArrayList(((this.holes as? List<*>)?.map { ArrayList(((it as? List<*>)?.map { (it as MapCoreSharedModule.MCCoord).asKmp() } ?: (0 until (it as platform.Foundation.NSArray).count.toInt()).map { idx -> ((it as platform.Foundation.NSArray).objectAtIndex(idx.toULong()) as MapCoreSharedModule.MCCoord).asKmp() })) } ?: (0 until (this.holes as platform.Foundation.NSArray).count.toInt()).map { idx -> ArrayList((((this.holes as platform.Foundation.NSArray).objectAtIndex(idx.toULong()) as? List<*>)?.map { (it as MapCoreSharedModule.MCCoord).asKmp() } ?: (0 until ((this.holes as platform.Foundation.NSArray).objectAtIndex(idx.toULong()) as platform.Foundation.NSArray).count.toInt()).map { idx -> (((this.holes as platform.Foundation.NSArray).objectAtIndex(idx.toULong()) as platform.Foundation.NSArray).objectAtIndex(idx.toULong()) as MapCoreSharedModule.MCCoord).asKmp() })) })),
 )

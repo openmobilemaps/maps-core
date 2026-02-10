@@ -39,4 +39,4 @@ internal fun KMIcosahedronLayerCallbackInterface.asPlatform(): MapCoreSharedModu
     is KMIcosahedronLayerCallbackInterfacePlatformWrapper -> this.nativeHandle
     else -> KMIcosahedronLayerCallbackInterfacePlatformProxy(this)
 }
-internal fun MapCoreSharedModule.MCIcosahedronLayerCallbackInterfaceProtocol.asKmp(): KMIcosahedronLayerCallbackInterface = KMIcosahedronLayerCallbackInterfacePlatformWrapper(this)
+public fun MapCoreSharedModule.MCIcosahedronLayerCallbackInterfaceProtocol.asKmp(): KMIcosahedronLayerCallbackInterface = KMIcosahedronLayerCallbackInterfacePlatformWrapper(this)

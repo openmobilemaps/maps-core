@@ -37,4 +37,4 @@ actual class KMDefaultTiled2dMapLayerConfigs actual public constructor(
 }
 
 internal fun KMDefaultTiled2dMapLayerConfigs.asPlatform(): DefaultTiled2dMapLayerConfigs = nativeHandle as DefaultTiled2dMapLayerConfigs
-internal fun DefaultTiled2dMapLayerConfigs.asKmp(): KMDefaultTiled2dMapLayerConfigs = KMDefaultTiled2dMapLayerConfigs(this)
+public fun DefaultTiled2dMapLayerConfigs.asKmp(): KMDefaultTiled2dMapLayerConfigs = KMDefaultTiled2dMapLayerConfigs(this)

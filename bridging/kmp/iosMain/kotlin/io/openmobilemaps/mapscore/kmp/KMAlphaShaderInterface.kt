@@ -27,4 +27,4 @@ actual class KMAlphaShaderInterface actual public constructor(
 }
 
 internal fun KMAlphaShaderInterface.asPlatform(): MapCoreSharedModule.MCAlphaShaderInterfaceProtocol = nativeHandle as MapCoreSharedModule.MCAlphaShaderInterfaceProtocol
-internal fun MapCoreSharedModule.MCAlphaShaderInterfaceProtocol.asKmp(): KMAlphaShaderInterface = KMAlphaShaderInterface(this)
+public fun MapCoreSharedModule.MCAlphaShaderInterfaceProtocol.asKmp(): KMAlphaShaderInterface = KMAlphaShaderInterface(this)

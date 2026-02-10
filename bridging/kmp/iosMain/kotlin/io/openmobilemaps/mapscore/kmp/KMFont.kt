@@ -19,6 +19,6 @@ actual class KMFont actual public constructor(
 internal fun KMFont.asPlatform(): MapCoreSharedModule.MCFont = MapCoreSharedModule.MCFont(
     name = name,
 )
-internal fun MapCoreSharedModule.MCFont.asKmp(): KMFont = KMFont(
+public fun MapCoreSharedModule.MCFont.asKmp(): KMFont = KMFont(
     name = this.name,
 )

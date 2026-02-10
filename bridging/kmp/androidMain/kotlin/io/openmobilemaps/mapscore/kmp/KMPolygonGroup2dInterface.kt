@@ -43,4 +43,4 @@ internal fun KMPolygonGroup2dInterface.asPlatform(): PolygonGroup2dInterface = w
     is KMPolygonGroup2dInterfacePlatformWrapper -> this.nativeHandle
     else -> KMPolygonGroup2dInterfacePlatformProxy(this)
 }
-internal fun PolygonGroup2dInterface.asKmp(): KMPolygonGroup2dInterface = KMPolygonGroup2dInterfacePlatformWrapper(this)
+public fun PolygonGroup2dInterface.asKmp(): KMPolygonGroup2dInterface = KMPolygonGroup2dInterfacePlatformWrapper(this)

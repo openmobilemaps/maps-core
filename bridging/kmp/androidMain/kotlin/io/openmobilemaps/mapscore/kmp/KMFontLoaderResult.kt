@@ -18,7 +18,7 @@ internal fun KMFontLoaderResult.asPlatform(): io.openmobilemaps.mapscore.shared.
     fontData = fontData?.let { it.asPlatform() },
     status = status.asPlatform(),
 )
-internal fun io.openmobilemaps.mapscore.shared.map.loader.FontLoaderResult.asKmp(): KMFontLoaderResult = KMFontLoaderResult(
+public fun io.openmobilemaps.mapscore.shared.map.loader.FontLoaderResult.asKmp(): KMFontLoaderResult = KMFontLoaderResult(
     imageData = this.imageData?.let { (it as io.openmobilemaps.mapscore.shared.graphics.objects.TextureHolderInterface).asKmp() },
     fontData = this.fontData?.let { (it as io.openmobilemaps.mapscore.shared.map.loader.FontData).asKmp() },
     status = (this.status as io.openmobilemaps.mapscore.shared.map.loader.LoaderStatus).asKmp(),

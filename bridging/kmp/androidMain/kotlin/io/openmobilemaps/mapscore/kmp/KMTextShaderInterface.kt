@@ -30,4 +30,4 @@ actual class KMTextShaderInterface actual public constructor(
 }
 
 internal fun KMTextShaderInterface.asPlatform(): TextShaderInterface = nativeHandle as TextShaderInterface
-internal fun TextShaderInterface.asKmp(): KMTextShaderInterface = KMTextShaderInterface(this)
+public fun TextShaderInterface.asKmp(): KMTextShaderInterface = KMTextShaderInterface(this)

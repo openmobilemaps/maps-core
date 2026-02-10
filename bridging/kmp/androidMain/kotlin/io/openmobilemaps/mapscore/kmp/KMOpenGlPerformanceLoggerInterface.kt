@@ -32,4 +32,4 @@ actual class KMOpenGlPerformanceLoggerInterface actual public constructor(
 }
 
 internal fun KMOpenGlPerformanceLoggerInterface.asPlatform(): OpenGlPerformanceLoggerInterface = nativeHandle as OpenGlPerformanceLoggerInterface
-internal fun OpenGlPerformanceLoggerInterface.asKmp(): KMOpenGlPerformanceLoggerInterface = KMOpenGlPerformanceLoggerInterface(this)
+public fun OpenGlPerformanceLoggerInterface.asKmp(): KMOpenGlPerformanceLoggerInterface = KMOpenGlPerformanceLoggerInterface(this)

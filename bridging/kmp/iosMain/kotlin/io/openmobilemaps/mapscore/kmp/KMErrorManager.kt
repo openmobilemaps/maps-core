@@ -51,4 +51,4 @@ actual class KMErrorManager actual public constructor(
 }
 
 internal fun KMErrorManager.asPlatform(): MapCoreSharedModule.MCErrorManager = nativeHandle as MapCoreSharedModule.MCErrorManager
-internal fun MapCoreSharedModule.MCErrorManager.asKmp(): KMErrorManager = KMErrorManager(this)
+public fun MapCoreSharedModule.MCErrorManager.asKmp(): KMErrorManager = KMErrorManager(this)

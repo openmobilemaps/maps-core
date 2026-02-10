@@ -22,4 +22,4 @@ actual class KMWmtsTiled2dMapLayerConfigFactory actual public constructor(
 }
 
 internal fun KMWmtsTiled2dMapLayerConfigFactory.asPlatform(): WmtsTiled2dMapLayerConfigFactory = nativeHandle as WmtsTiled2dMapLayerConfigFactory
-internal fun WmtsTiled2dMapLayerConfigFactory.asKmp(): KMWmtsTiled2dMapLayerConfigFactory = KMWmtsTiled2dMapLayerConfigFactory(this)
+public fun WmtsTiled2dMapLayerConfigFactory.asKmp(): KMWmtsTiled2dMapLayerConfigFactory = KMWmtsTiled2dMapLayerConfigFactory(this)

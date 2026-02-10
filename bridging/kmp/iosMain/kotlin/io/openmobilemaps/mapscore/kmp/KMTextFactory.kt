@@ -27,4 +27,4 @@ actual class KMTextFactory actual public constructor(
 }
 
 internal fun KMTextFactory.asPlatform(): MapCoreSharedModule.MCTextFactory = nativeHandle as MapCoreSharedModule.MCTextFactory
-internal fun MapCoreSharedModule.MCTextFactory.asKmp(): KMTextFactory = KMTextFactory(this)
+public fun MapCoreSharedModule.MCTextFactory.asKmp(): KMTextFactory = KMTextFactory(this)

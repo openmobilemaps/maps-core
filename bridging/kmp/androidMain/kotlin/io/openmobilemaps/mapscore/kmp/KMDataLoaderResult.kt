@@ -6,4 +6,4 @@ package io.openmobilemaps.mapscore.kmp
 actual typealias KMDataLoaderResult = io.openmobilemaps.mapscore.shared.map.loader.DataLoaderResult
 
 internal fun KMDataLoaderResult.asPlatform(): io.openmobilemaps.mapscore.shared.map.loader.DataLoaderResult = this
-internal fun io.openmobilemaps.mapscore.shared.map.loader.DataLoaderResult.asKmp(): KMDataLoaderResult = this
+public fun io.openmobilemaps.mapscore.shared.map.loader.DataLoaderResult.asKmp(): KMDataLoaderResult = this

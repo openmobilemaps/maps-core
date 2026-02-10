@@ -31,4 +31,4 @@ actual class KMLineGroupShaderInterface actual public constructor(
 }
 
 internal fun KMLineGroupShaderInterface.asPlatform(): MapCoreSharedModule.MCLineGroupShaderInterfaceProtocol = nativeHandle as MapCoreSharedModule.MCLineGroupShaderInterfaceProtocol
-internal fun MapCoreSharedModule.MCLineGroupShaderInterfaceProtocol.asKmp(): KMLineGroupShaderInterface = KMLineGroupShaderInterface(this)
+public fun MapCoreSharedModule.MCLineGroupShaderInterfaceProtocol.asKmp(): KMLineGroupShaderInterface = KMLineGroupShaderInterface(this)

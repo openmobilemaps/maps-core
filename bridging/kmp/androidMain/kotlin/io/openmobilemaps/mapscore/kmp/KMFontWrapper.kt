@@ -6,4 +6,4 @@ package io.openmobilemaps.mapscore.kmp
 actual typealias KMFontWrapper = io.openmobilemaps.mapscore.shared.map.loader.FontWrapper
 
 internal fun KMFontWrapper.asPlatform(): io.openmobilemaps.mapscore.shared.map.loader.FontWrapper = this
-internal fun io.openmobilemaps.mapscore.shared.map.loader.FontWrapper.asKmp(): KMFontWrapper = this
+public fun io.openmobilemaps.mapscore.shared.map.loader.FontWrapper.asKmp(): KMFontWrapper = this

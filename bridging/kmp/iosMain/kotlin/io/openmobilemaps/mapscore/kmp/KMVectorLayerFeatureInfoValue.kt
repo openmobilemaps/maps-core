@@ -37,7 +37,7 @@ internal fun KMVectorLayerFeatureInfoValue.asPlatform(): MapCoreSharedModule.MCV
     listFloatVal = listFloatVal?.let { ArrayList(it.map { platform.Foundation.NSNumber(float = it) }) },
     listStringVal = listStringVal?.let { ArrayList(it.map { it }) },
 )
-internal fun MapCoreSharedModule.MCVectorLayerFeatureInfoValue.asKmp(): KMVectorLayerFeatureInfoValue = KMVectorLayerFeatureInfoValue(
+public fun MapCoreSharedModule.MCVectorLayerFeatureInfoValue.asKmp(): KMVectorLayerFeatureInfoValue = KMVectorLayerFeatureInfoValue(
     stringVal = this.stringVal?.let { (it as String) },
     doubleVal = this.doubleVal?.let { (it as platform.Foundation.NSNumber).doubleValue },
     intVal = this.intVal?.let { (it as platform.Foundation.NSNumber).longLongValue },

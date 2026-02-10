@@ -22,7 +22,7 @@ internal fun KMRenderVerticesDescription.asPlatform(): MapCoreSharedModule.MCRen
     vertices = ArrayList(vertices.map { it.asPlatform() }),
     styleIndex = styleIndex,
 )
-internal fun MapCoreSharedModule.MCRenderVerticesDescription.asKmp(): KMRenderVerticesDescription = KMRenderVerticesDescription(
+public fun MapCoreSharedModule.MCRenderVerticesDescription.asKmp(): KMRenderVerticesDescription = KMRenderVerticesDescription(
     vertices = ArrayList(((this.vertices as? List<*>)?.map { (it as MapCoreSharedModule.MCVec2D).asKmp() } ?: (0 until (this.vertices as platform.Foundation.NSArray).count.toInt()).map { idx -> ((this.vertices as platform.Foundation.NSArray).objectAtIndex(idx.toULong()) as MapCoreSharedModule.MCVec2D).asKmp() })),
     styleIndex = this.styleIndex,
 )

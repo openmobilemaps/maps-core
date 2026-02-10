@@ -65,4 +65,4 @@ internal fun KMPolygon2dInterface.asPlatform(): Polygon2dInterface = when (this)
     is KMPolygon2dInterfacePlatformWrapper -> this.nativeHandle
     else -> KMPolygon2dInterfacePlatformProxy(this)
 }
-internal fun Polygon2dInterface.asKmp(): KMPolygon2dInterface = KMPolygon2dInterfacePlatformWrapper(this)
+public fun Polygon2dInterface.asKmp(): KMPolygon2dInterface = KMPolygon2dInterfacePlatformWrapper(this)

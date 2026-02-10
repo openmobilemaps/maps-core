@@ -25,7 +25,7 @@ internal fun KMFontLoaderResult.asPlatform(): MapCoreSharedModule.MCFontLoaderRe
     fontData = fontData?.let { it.asPlatform() },
     status = status.asPlatform(),
 )
-internal fun MapCoreSharedModule.MCFontLoaderResult.asKmp(): KMFontLoaderResult = KMFontLoaderResult(
+public fun MapCoreSharedModule.MCFontLoaderResult.asKmp(): KMFontLoaderResult = KMFontLoaderResult(
     imageData = this.imageData?.let { (it as MapCoreSharedModule.MCTextureHolderInterfaceProtocol).asKmp() },
     fontData = this.fontData?.let { (it as MapCoreSharedModule.MCFontData).asKmp() },
     status = KMLoaderStatus.fromPlatform((this.status as MapCoreSharedModule.MCLoaderStatus)),

@@ -35,4 +35,4 @@ actual class KMTextShaderInterface actual public constructor(
 }
 
 internal fun KMTextShaderInterface.asPlatform(): MapCoreSharedModule.MCTextShaderInterfaceProtocol = nativeHandle as MapCoreSharedModule.MCTextShaderInterfaceProtocol
-internal fun MapCoreSharedModule.MCTextShaderInterfaceProtocol.asKmp(): KMTextShaderInterface = KMTextShaderInterface(this)
+public fun MapCoreSharedModule.MCTextShaderInterfaceProtocol.asKmp(): KMTextShaderInterface = KMTextShaderInterface(this)

@@ -6,4 +6,4 @@ package io.openmobilemaps.mapscore.kmp
 actual typealias KMPolygonStyle = io.openmobilemaps.mapscore.shared.map.layers.polygon.PolygonStyle
 
 internal fun KMPolygonStyle.asPlatform(): io.openmobilemaps.mapscore.shared.map.layers.polygon.PolygonStyle = this
-internal fun io.openmobilemaps.mapscore.shared.map.layers.polygon.PolygonStyle.asKmp(): KMPolygonStyle = this
+public fun io.openmobilemaps.mapscore.shared.map.layers.polygon.PolygonStyle.asKmp(): KMPolygonStyle = this

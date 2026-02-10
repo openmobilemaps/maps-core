@@ -6,4 +6,4 @@ package io.openmobilemaps.mapscore.kmp
 actual typealias KMSharedBytes = io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes
 
 internal fun KMSharedBytes.asPlatform(): io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes = this
-internal fun io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes.asKmp(): KMSharedBytes = this
+public fun io.openmobilemaps.mapscore.shared.graphics.common.SharedBytes.asKmp(): KMSharedBytes = this

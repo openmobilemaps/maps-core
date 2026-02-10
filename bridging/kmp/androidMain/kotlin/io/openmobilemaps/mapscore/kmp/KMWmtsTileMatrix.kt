@@ -6,4 +6,4 @@ package io.openmobilemaps.mapscore.kmp
 actual typealias KMWmtsTileMatrix = io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.wmts.WmtsTileMatrix
 
 internal fun KMWmtsTileMatrix.asPlatform(): io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.wmts.WmtsTileMatrix = this
-internal fun io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.wmts.WmtsTileMatrix.asKmp(): KMWmtsTileMatrix = this
+public fun io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.wmts.WmtsTileMatrix.asKmp(): KMWmtsTileMatrix = this

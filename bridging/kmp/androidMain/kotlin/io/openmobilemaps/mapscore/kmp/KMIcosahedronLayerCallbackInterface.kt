@@ -33,4 +33,4 @@ internal fun KMIcosahedronLayerCallbackInterface.asPlatform(): IcosahedronLayerC
     is KMIcosahedronLayerCallbackInterfacePlatformWrapper -> this.nativeHandle
     else -> KMIcosahedronLayerCallbackInterfacePlatformProxy(this)
 }
-internal fun IcosahedronLayerCallbackInterface.asKmp(): KMIcosahedronLayerCallbackInterface = KMIcosahedronLayerCallbackInterfacePlatformWrapper(this)
+public fun IcosahedronLayerCallbackInterface.asKmp(): KMIcosahedronLayerCallbackInterface = KMIcosahedronLayerCallbackInterfacePlatformWrapper(this)

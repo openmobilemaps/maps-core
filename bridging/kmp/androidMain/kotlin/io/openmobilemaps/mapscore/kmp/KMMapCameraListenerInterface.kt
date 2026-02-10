@@ -61,4 +61,4 @@ internal fun KMMapCameraListenerInterface.asPlatform(): MapCameraListenerInterfa
     is KMMapCameraListenerInterfacePlatformWrapper -> this.nativeHandle
     else -> KMMapCameraListenerInterfacePlatformProxy(this)
 }
-internal fun MapCameraListenerInterface.asKmp(): KMMapCameraListenerInterface = KMMapCameraListenerInterfacePlatformWrapper(this)
+public fun MapCameraListenerInterface.asKmp(): KMMapCameraListenerInterface = KMMapCameraListenerInterfacePlatformWrapper(this)

@@ -117,4 +117,4 @@ internal fun KMTiled2dMapLayerConfig.asPlatform(): Tiled2dMapLayerConfig = when 
     is KMTiled2dMapLayerConfigPlatformWrapper -> this.nativeHandle
     else -> KMTiled2dMapLayerConfigPlatformProxy(this)
 }
-internal fun Tiled2dMapLayerConfig.asKmp(): KMTiled2dMapLayerConfig = KMTiled2dMapLayerConfigPlatformWrapper(this)
+public fun Tiled2dMapLayerConfig.asKmp(): KMTiled2dMapLayerConfig = KMTiled2dMapLayerConfigPlatformWrapper(this)

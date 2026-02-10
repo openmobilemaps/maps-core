@@ -72,4 +72,4 @@ actual class KMLineLayerInterface actual public constructor(
 }
 
 internal fun KMLineLayerInterface.asPlatform(): LineLayerInterface = nativeHandle as LineLayerInterface
-internal fun LineLayerInterface.asKmp(): KMLineLayerInterface = KMLineLayerInterface(this)
+public fun LineLayerInterface.asKmp(): KMLineLayerInterface = KMLineLayerInterface(this)

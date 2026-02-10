@@ -37,4 +37,4 @@ actual class KMGeoJsonFeatureParserInterface actual public constructor(
 }
 
 internal fun KMGeoJsonFeatureParserInterface.asPlatform(): GeoJsonFeatureParserInterface = nativeHandle as GeoJsonFeatureParserInterface
-internal fun GeoJsonFeatureParserInterface.asKmp(): KMGeoJsonFeatureParserInterface = KMGeoJsonFeatureParserInterface(this)
+public fun GeoJsonFeatureParserInterface.asKmp(): KMGeoJsonFeatureParserInterface = KMGeoJsonFeatureParserInterface(this)

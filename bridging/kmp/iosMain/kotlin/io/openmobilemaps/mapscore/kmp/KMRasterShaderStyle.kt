@@ -37,7 +37,7 @@ internal fun KMRasterShaderStyle.asPlatform(): MapCoreSharedModule.MCRasterShade
     gamma = gamma,
     brightnessShift = brightnessShift,
 )
-internal fun MapCoreSharedModule.MCRasterShaderStyle.asKmp(): KMRasterShaderStyle = KMRasterShaderStyle(
+public fun MapCoreSharedModule.MCRasterShaderStyle.asKmp(): KMRasterShaderStyle = KMRasterShaderStyle(
     opacity = this.opacity,
     brightnessMin = this.brightnessMin,
     brightnessMax = this.brightnessMax,

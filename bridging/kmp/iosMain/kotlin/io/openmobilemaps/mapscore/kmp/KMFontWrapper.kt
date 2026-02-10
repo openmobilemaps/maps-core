@@ -34,7 +34,7 @@ internal fun KMFontWrapper.asPlatform(): MapCoreSharedModule.MCFontWrapper = Map
     size = size,
     distanceRange = distanceRange,
 )
-internal fun MapCoreSharedModule.MCFontWrapper.asKmp(): KMFontWrapper = KMFontWrapper(
+public fun MapCoreSharedModule.MCFontWrapper.asKmp(): KMFontWrapper = KMFontWrapper(
     name = this.name,
     lineHeight = this.lineHeight,
     base = this.base,

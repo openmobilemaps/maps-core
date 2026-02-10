@@ -6,4 +6,4 @@ package io.openmobilemaps.mapscore.kmp
 actual typealias KMMapConfig = io.openmobilemaps.mapscore.shared.map.MapConfig
 
 internal fun KMMapConfig.asPlatform(): io.openmobilemaps.mapscore.shared.map.MapConfig = this
-internal fun io.openmobilemaps.mapscore.shared.map.MapConfig.asKmp(): KMMapConfig = this
+public fun io.openmobilemaps.mapscore.shared.map.MapConfig.asKmp(): KMMapConfig = this

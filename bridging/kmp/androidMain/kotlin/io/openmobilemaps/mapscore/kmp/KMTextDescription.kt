@@ -6,4 +6,4 @@ package io.openmobilemaps.mapscore.kmp
 actual typealias KMTextDescription = io.openmobilemaps.mapscore.shared.graphics.objects.TextDescription
 
 internal fun KMTextDescription.asPlatform(): io.openmobilemaps.mapscore.shared.graphics.objects.TextDescription = this
-internal fun io.openmobilemaps.mapscore.shared.graphics.objects.TextDescription.asKmp(): KMTextDescription = this
+public fun io.openmobilemaps.mapscore.shared.graphics.objects.TextDescription.asKmp(): KMTextDescription = this

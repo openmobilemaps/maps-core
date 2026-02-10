@@ -33,4 +33,4 @@ actual class KMLineInfoInterface actual public constructor(
 }
 
 internal fun KMLineInfoInterface.asPlatform(): MapCoreSharedModule.MCLineInfoInterface = nativeHandle as MapCoreSharedModule.MCLineInfoInterface
-internal fun MapCoreSharedModule.MCLineInfoInterface.asKmp(): KMLineInfoInterface = KMLineInfoInterface(this)
+public fun MapCoreSharedModule.MCLineInfoInterface.asKmp(): KMLineInfoInterface = KMLineInfoInterface(this)

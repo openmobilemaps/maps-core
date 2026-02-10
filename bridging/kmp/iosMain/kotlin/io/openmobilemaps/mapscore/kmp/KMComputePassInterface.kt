@@ -39,4 +39,4 @@ internal fun KMComputePassInterface.asPlatform(): MapCoreSharedModule.MCComputeP
     is KMComputePassInterfacePlatformWrapper -> this.nativeHandle
     else -> KMComputePassInterfacePlatformProxy(this)
 }
-internal fun MapCoreSharedModule.MCComputePassInterfaceProtocol.asKmp(): KMComputePassInterface = KMComputePassInterfacePlatformWrapper(this)
+public fun MapCoreSharedModule.MCComputePassInterfaceProtocol.asKmp(): KMComputePassInterface = KMComputePassInterfacePlatformWrapper(this)

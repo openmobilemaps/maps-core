@@ -27,4 +27,4 @@ actual class KMIcosahedronLayerInterface actual public constructor(
 }
 
 internal fun KMIcosahedronLayerInterface.asPlatform(): IcosahedronLayerInterface = nativeHandle as IcosahedronLayerInterface
-internal fun IcosahedronLayerInterface.asKmp(): KMIcosahedronLayerInterface = KMIcosahedronLayerInterface(this)
+public fun IcosahedronLayerInterface.asKmp(): KMIcosahedronLayerInterface = KMIcosahedronLayerInterface(this)

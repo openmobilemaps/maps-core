@@ -43,4 +43,4 @@ internal fun KMLineGroup2dInterface.asPlatform(): LineGroup2dInterface = when (t
     is KMLineGroup2dInterfacePlatformWrapper -> this.nativeHandle
     else -> KMLineGroup2dInterfacePlatformProxy(this)
 }
-internal fun LineGroup2dInterface.asKmp(): KMLineGroup2dInterface = KMLineGroup2dInterfacePlatformWrapper(this)
+public fun LineGroup2dInterface.asKmp(): KMLineGroup2dInterface = KMLineGroup2dInterfacePlatformWrapper(this)

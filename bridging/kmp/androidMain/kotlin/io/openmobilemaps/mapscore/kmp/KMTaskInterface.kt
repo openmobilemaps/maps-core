@@ -43,4 +43,4 @@ internal fun KMTaskInterface.asPlatform(): TaskInterface = when (this) {
     is KMTaskInterfacePlatformWrapper -> this.nativeHandle
     else -> KMTaskInterfacePlatformProxy(this)
 }
-internal fun TaskInterface.asKmp(): KMTaskInterface = KMTaskInterfacePlatformWrapper(this)
+public fun TaskInterface.asKmp(): KMTaskInterface = KMTaskInterfacePlatformWrapper(this)

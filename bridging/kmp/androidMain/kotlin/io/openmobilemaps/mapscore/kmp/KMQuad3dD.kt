@@ -6,4 +6,4 @@ package io.openmobilemaps.mapscore.kmp
 actual typealias KMQuad3dD = io.openmobilemaps.mapscore.shared.graphics.common.Quad3dD
 
 internal fun KMQuad3dD.asPlatform(): io.openmobilemaps.mapscore.shared.graphics.common.Quad3dD = this
-internal fun io.openmobilemaps.mapscore.shared.graphics.common.Quad3dD.asKmp(): KMQuad3dD = this
+public fun io.openmobilemaps.mapscore.shared.graphics.common.Quad3dD.asKmp(): KMQuad3dD = this

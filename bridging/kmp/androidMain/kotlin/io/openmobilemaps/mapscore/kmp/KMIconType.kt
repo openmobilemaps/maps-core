@@ -6,4 +6,4 @@ package io.openmobilemaps.mapscore.kmp
 actual typealias KMIconType = io.openmobilemaps.mapscore.shared.map.layers.icon.IconType
 
 internal fun KMIconType.asPlatform(): io.openmobilemaps.mapscore.shared.map.layers.icon.IconType = this
-internal fun io.openmobilemaps.mapscore.shared.map.layers.icon.IconType.asKmp(): KMIconType = this
+public fun io.openmobilemaps.mapscore.shared.map.layers.icon.IconType.asKmp(): KMIconType = this

@@ -180,4 +180,4 @@ actual class KMMapInterface actual public constructor(
 }
 
 internal fun KMMapInterface.asPlatform(): MapInterface = nativeHandle as MapInterface
-internal fun MapInterface.asKmp(): KMMapInterface = KMMapInterface(this)
+public fun MapInterface.asKmp(): KMMapInterface = KMMapInterface(this)

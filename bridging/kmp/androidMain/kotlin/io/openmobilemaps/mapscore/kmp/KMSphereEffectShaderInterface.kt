@@ -22,4 +22,4 @@ actual class KMSphereEffectShaderInterface actual public constructor(
 }
 
 internal fun KMSphereEffectShaderInterface.asPlatform(): SphereEffectShaderInterface = nativeHandle as SphereEffectShaderInterface
-internal fun SphereEffectShaderInterface.asKmp(): KMSphereEffectShaderInterface = KMSphereEffectShaderInterface(this)
+public fun SphereEffectShaderInterface.asKmp(): KMSphereEffectShaderInterface = KMSphereEffectShaderInterface(this)

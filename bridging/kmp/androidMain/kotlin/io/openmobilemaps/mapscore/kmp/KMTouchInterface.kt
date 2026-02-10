@@ -175,4 +175,4 @@ internal fun KMTouchInterface.asPlatform(): TouchInterface = when (this) {
     is KMTouchInterfacePlatformWrapper -> this.nativeHandle
     else -> KMTouchInterfacePlatformProxy(this)
 }
-internal fun TouchInterface.asKmp(): KMTouchInterface = KMTouchInterfacePlatformWrapper(this)
+public fun TouchInterface.asKmp(): KMTouchInterface = KMTouchInterfacePlatformWrapper(this)

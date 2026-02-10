@@ -22,7 +22,7 @@ internal fun KMGeoJsonLine.asPlatform(): MapCoreSharedModule.MCGeoJsonLine = Map
     points = ArrayList(points.map { it.asPlatform() }),
     featureInfo = featureInfo.asPlatform(),
 )
-internal fun MapCoreSharedModule.MCGeoJsonLine.asKmp(): KMGeoJsonLine = KMGeoJsonLine(
+public fun MapCoreSharedModule.MCGeoJsonLine.asKmp(): KMGeoJsonLine = KMGeoJsonLine(
     points = ArrayList(((this.points as? List<*>)?.map { (it as MapCoreSharedModule.MCCoord).asKmp() } ?: (0 until (this.points as platform.Foundation.NSArray).count.toInt()).map { idx -> ((this.points as platform.Foundation.NSArray).objectAtIndex(idx.toULong()) as MapCoreSharedModule.MCCoord).asKmp() })),
     featureInfo = (this.featureInfo as MapCoreSharedModule.MCVectorLayerFeatureInfo).asKmp(),
 )

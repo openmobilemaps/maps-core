@@ -22,4 +22,4 @@ actual class KMLineFactory actual public constructor(
 }
 
 internal fun KMLineFactory.asPlatform(): LineFactory = nativeHandle as LineFactory
-internal fun LineFactory.asKmp(): KMLineFactory = KMLineFactory(this)
+public fun LineFactory.asKmp(): KMLineFactory = KMLineFactory(this)

@@ -22,7 +22,7 @@ internal fun KMVec2I.asPlatform(): MapCoreSharedModule.MCVec2I = MapCoreSharedMo
     x = x,
     y = y,
 )
-internal fun MapCoreSharedModule.MCVec2I.asKmp(): KMVec2I = KMVec2I(
+public fun MapCoreSharedModule.MCVec2I.asKmp(): KMVec2I = KMVec2I(
     x = this.x,
     y = this.y,
 )

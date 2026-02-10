@@ -18,4 +18,4 @@ actual class KMElevationInterpolationShaderInterface actual public constructor(
 }
 
 internal fun KMElevationInterpolationShaderInterface.asPlatform(): ElevationInterpolationShaderInterface = nativeHandle as ElevationInterpolationShaderInterface
-internal fun ElevationInterpolationShaderInterface.asKmp(): KMElevationInterpolationShaderInterface = KMElevationInterpolationShaderInterface(this)
+public fun ElevationInterpolationShaderInterface.asKmp(): KMElevationInterpolationShaderInterface = KMElevationInterpolationShaderInterface(this)

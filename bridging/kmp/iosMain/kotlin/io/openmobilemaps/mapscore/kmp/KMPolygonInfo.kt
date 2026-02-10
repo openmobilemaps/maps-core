@@ -28,7 +28,7 @@ internal fun KMPolygonInfo.asPlatform(): MapCoreSharedModule.MCPolygonInfo = Map
     color = color.asPlatform(),
     highlightColor = highlightColor.asPlatform(),
 )
-internal fun MapCoreSharedModule.MCPolygonInfo.asKmp(): KMPolygonInfo = KMPolygonInfo(
+public fun MapCoreSharedModule.MCPolygonInfo.asKmp(): KMPolygonInfo = KMPolygonInfo(
     identifier = this.identifier,
     coordinates = (this.coordinates as MapCoreSharedModule.MCPolygonCoord).asKmp(),
     color = (this.color as MapCoreSharedModule.MCColor).asKmp(),

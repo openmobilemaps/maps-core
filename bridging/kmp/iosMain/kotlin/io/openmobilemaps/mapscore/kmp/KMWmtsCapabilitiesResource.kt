@@ -72,4 +72,4 @@ actual class KMWmtsCapabilitiesResource actual public constructor(
 }
 
 internal fun KMWmtsCapabilitiesResource.asPlatform(): MapCoreSharedModule.MCWmtsCapabilitiesResource = nativeHandle as MapCoreSharedModule.MCWmtsCapabilitiesResource
-internal fun MapCoreSharedModule.MCWmtsCapabilitiesResource.asKmp(): KMWmtsCapabilitiesResource = KMWmtsCapabilitiesResource(this)
+public fun MapCoreSharedModule.MCWmtsCapabilitiesResource.asKmp(): KMWmtsCapabilitiesResource = KMWmtsCapabilitiesResource(this)

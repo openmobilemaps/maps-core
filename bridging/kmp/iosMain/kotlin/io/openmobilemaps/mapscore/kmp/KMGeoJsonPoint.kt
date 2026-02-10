@@ -22,7 +22,7 @@ internal fun KMGeoJsonPoint.asPlatform(): MapCoreSharedModule.MCGeoJsonPoint = M
     point = point.asPlatform(),
     featureInfo = featureInfo.asPlatform(),
 )
-internal fun MapCoreSharedModule.MCGeoJsonPoint.asKmp(): KMGeoJsonPoint = KMGeoJsonPoint(
+public fun MapCoreSharedModule.MCGeoJsonPoint.asKmp(): KMGeoJsonPoint = KMGeoJsonPoint(
     point = (this.point as MapCoreSharedModule.MCCoord).asKmp(),
     featureInfo = (this.featureInfo as MapCoreSharedModule.MCVectorLayerFeatureInfo).asKmp(),
 )

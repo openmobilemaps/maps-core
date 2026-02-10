@@ -31,4 +31,4 @@ internal fun KMComputeObjectInterface.asPlatform(): ComputeObjectInterface = whe
     is KMComputeObjectInterfacePlatformWrapper -> this.nativeHandle
     else -> KMComputeObjectInterfacePlatformProxy(this)
 }
-internal fun ComputeObjectInterface.asKmp(): KMComputeObjectInterface = KMComputeObjectInterfacePlatformWrapper(this)
+public fun ComputeObjectInterface.asKmp(): KMComputeObjectInterface = KMComputeObjectInterfacePlatformWrapper(this)

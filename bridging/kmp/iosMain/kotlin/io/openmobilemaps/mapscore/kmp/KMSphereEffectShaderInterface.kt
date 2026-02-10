@@ -27,4 +27,4 @@ actual class KMSphereEffectShaderInterface actual public constructor(
 }
 
 internal fun KMSphereEffectShaderInterface.asPlatform(): MapCoreSharedModule.MCSphereEffectShaderInterfaceProtocol = nativeHandle as MapCoreSharedModule.MCSphereEffectShaderInterfaceProtocol
-internal fun MapCoreSharedModule.MCSphereEffectShaderInterfaceProtocol.asKmp(): KMSphereEffectShaderInterface = KMSphereEffectShaderInterface(this)
+public fun MapCoreSharedModule.MCSphereEffectShaderInterfaceProtocol.asKmp(): KMSphereEffectShaderInterface = KMSphereEffectShaderInterface(this)

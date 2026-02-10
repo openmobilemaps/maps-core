@@ -6,4 +6,4 @@ package io.openmobilemaps.mapscore.kmp
 actual typealias KMCoord = io.openmobilemaps.mapscore.shared.map.coordinates.Coord
 
 internal fun KMCoord.asPlatform(): io.openmobilemaps.mapscore.shared.map.coordinates.Coord = this
-internal fun io.openmobilemaps.mapscore.shared.map.coordinates.Coord.asKmp(): KMCoord = this
+public fun io.openmobilemaps.mapscore.shared.map.coordinates.Coord.asKmp(): KMCoord = this

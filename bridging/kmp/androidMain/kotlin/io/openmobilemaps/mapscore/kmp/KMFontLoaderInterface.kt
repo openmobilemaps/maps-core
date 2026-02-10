@@ -33,4 +33,4 @@ internal fun KMFontLoaderInterface.asPlatform(): FontLoaderInterface = when (thi
     is KMFontLoaderInterfacePlatformWrapper -> this.nativeHandle
     else -> KMFontLoaderInterfacePlatformProxy(this)
 }
-internal fun FontLoaderInterface.asKmp(): KMFontLoaderInterface = KMFontLoaderInterfacePlatformWrapper(this)
+public fun FontLoaderInterface.asKmp(): KMFontLoaderInterface = KMFontLoaderInterfacePlatformWrapper(this)

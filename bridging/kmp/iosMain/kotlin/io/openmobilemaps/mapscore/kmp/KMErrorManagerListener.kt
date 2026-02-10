@@ -37,4 +37,4 @@ internal fun KMErrorManagerListener.asPlatform(): MapCoreSharedModule.MCErrorMan
     is KMErrorManagerListenerPlatformWrapper -> this.nativeHandle
     else -> KMErrorManagerListenerPlatformProxy(this)
 }
-internal fun MapCoreSharedModule.MCErrorManagerListenerProtocol.asKmp(): KMErrorManagerListener = KMErrorManagerListenerPlatformWrapper(this)
+public fun MapCoreSharedModule.MCErrorManagerListenerProtocol.asKmp(): KMErrorManagerListener = KMErrorManagerListenerPlatformWrapper(this)

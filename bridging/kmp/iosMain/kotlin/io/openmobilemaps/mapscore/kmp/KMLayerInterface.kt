@@ -215,4 +215,4 @@ internal fun KMLayerInterface.asPlatform(): MapCoreSharedModule.MCLayerInterface
     is KMLayerInterfacePlatformWrapper -> this.nativeHandle
     else -> KMLayerInterfacePlatformProxy(this)
 }
-internal fun MapCoreSharedModule.MCLayerInterfaceProtocol.asKmp(): KMLayerInterface = KMLayerInterfacePlatformWrapper(this)
+public fun MapCoreSharedModule.MCLayerInterfaceProtocol.asKmp(): KMLayerInterface = KMLayerInterfacePlatformWrapper(this)

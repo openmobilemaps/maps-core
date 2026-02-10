@@ -31,4 +31,4 @@ internal fun KMExceptionLoggerDelegateInterface.asPlatform(): ExceptionLoggerDel
     is KMExceptionLoggerDelegateInterfacePlatformWrapper -> this.nativeHandle
     else -> KMExceptionLoggerDelegateInterfacePlatformProxy(this)
 }
-internal fun ExceptionLoggerDelegateInterface.asKmp(): KMExceptionLoggerDelegateInterface = KMExceptionLoggerDelegateInterfacePlatformWrapper(this)
+public fun ExceptionLoggerDelegateInterface.asKmp(): KMExceptionLoggerDelegateInterface = KMExceptionLoggerDelegateInterfacePlatformWrapper(this)

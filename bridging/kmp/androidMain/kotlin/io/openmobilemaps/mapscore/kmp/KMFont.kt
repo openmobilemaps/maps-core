@@ -6,4 +6,4 @@ package io.openmobilemaps.mapscore.kmp
 actual typealias KMFont = io.openmobilemaps.mapscore.shared.map.loader.Font
 
 internal fun KMFont.asPlatform(): io.openmobilemaps.mapscore.shared.map.loader.Font = this
-internal fun io.openmobilemaps.mapscore.shared.map.loader.Font.asKmp(): KMFont = this
+public fun io.openmobilemaps.mapscore.shared.map.loader.Font.asKmp(): KMFont = this

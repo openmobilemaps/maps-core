@@ -27,4 +27,4 @@ actual class KMIconFactory actual public constructor(
 }
 
 internal fun KMIconFactory.asPlatform(): IconFactory = nativeHandle as IconFactory
-internal fun IconFactory.asKmp(): KMIconFactory = KMIconFactory(this)
+public fun IconFactory.asKmp(): KMIconFactory = KMIconFactory(this)

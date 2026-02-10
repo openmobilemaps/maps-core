@@ -43,7 +43,7 @@ internal fun KMLoggerData.asPlatform(): MapCoreSharedModule.MCLoggerData = MapCo
     variance = variance,
     stdDeviation = stdDeviation,
 )
-internal fun MapCoreSharedModule.MCLoggerData.asKmp(): KMLoggerData = KMLoggerData(
+public fun MapCoreSharedModule.MCLoggerData.asKmp(): KMLoggerData = KMLoggerData(
     id = this.id,
     buckets = ArrayList(((this.buckets as? List<*>)?.map { (it as platform.Foundation.NSNumber).longLongValue } ?: (0 until (this.buckets as platform.Foundation.NSArray).count.toInt()).map { idx -> ((this.buckets as platform.Foundation.NSArray).objectAtIndex(idx.toULong()) as platform.Foundation.NSNumber).longLongValue })),
     bucketSizeMs = this.bucketSizeMs,

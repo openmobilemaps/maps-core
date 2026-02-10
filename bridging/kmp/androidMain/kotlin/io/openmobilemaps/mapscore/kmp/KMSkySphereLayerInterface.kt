@@ -31,4 +31,4 @@ actual class KMSkySphereLayerInterface actual public constructor(
 }
 
 internal fun KMSkySphereLayerInterface.asPlatform(): SkySphereLayerInterface = nativeHandle as SkySphereLayerInterface
-internal fun SkySphereLayerInterface.asKmp(): KMSkySphereLayerInterface = KMSkySphereLayerInterface(this)
+public fun SkySphereLayerInterface.asKmp(): KMSkySphereLayerInterface = KMSkySphereLayerInterface(this)

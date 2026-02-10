@@ -23,4 +23,4 @@ actual class KMRenderConfigInterface actual public constructor(
 }
 
 internal fun KMRenderConfigInterface.asPlatform(): RenderConfigInterface = nativeHandle as RenderConfigInterface
-internal fun RenderConfigInterface.asKmp(): KMRenderConfigInterface = KMRenderConfigInterface(this)
+public fun RenderConfigInterface.asKmp(): KMRenderConfigInterface = KMRenderConfigInterface(this)

@@ -22,7 +22,7 @@ internal fun KMTiled2dMapVectorAssetInfo.asPlatform(): MapCoreSharedModule.MCTil
     featureIdentifiersUv = HashMap(featureIdentifiersUv.map { it.key to it.value.asPlatform() }.toMap()),
     texture = texture?.let { it.asPlatform() },
 )
-internal fun MapCoreSharedModule.MCTiled2dMapVectorAssetInfo.asKmp(): KMTiled2dMapVectorAssetInfo = KMTiled2dMapVectorAssetInfo(
+public fun MapCoreSharedModule.MCTiled2dMapVectorAssetInfo.asKmp(): KMTiled2dMapVectorAssetInfo = KMTiled2dMapVectorAssetInfo(
     featureIdentifiersUv = HashMap(((this.featureIdentifiersUv as? Map<*, *>)?.map { (it.key as String) to (it.value as MapCoreSharedModule.MCRectI).asKmp() }?.toMap() ?: run { val e = (this.featureIdentifiersUv as platform.Foundation.NSDictionary).keyEnumerator(); generateSequence { e.nextObject() }.associate { key -> (key as String) to ((this.featureIdentifiersUv as platform.Foundation.NSDictionary).objectForKey(key) as MapCoreSharedModule.MCRectI).asKmp() } })),
     texture = this.texture?.let { (it as MapCoreSharedModule.MCTextureHolderInterfaceProtocol).asKmp() },
 )

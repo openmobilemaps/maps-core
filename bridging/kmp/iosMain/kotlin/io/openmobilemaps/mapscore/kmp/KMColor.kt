@@ -28,7 +28,7 @@ internal fun KMColor.asPlatform(): MapCoreSharedModule.MCColor = MapCoreSharedMo
     b = b,
     a = a,
 )
-internal fun MapCoreSharedModule.MCColor.asKmp(): KMColor = KMColor(
+public fun MapCoreSharedModule.MCColor.asKmp(): KMColor = KMColor(
     r = this.r,
     g = this.g,
     b = this.b,

@@ -45,4 +45,4 @@ internal fun KMPolygonLayerCallbackInterface.asPlatform(): PolygonLayerCallbackI
     is KMPolygonLayerCallbackInterfacePlatformWrapper -> this.nativeHandle
     else -> KMPolygonLayerCallbackInterfacePlatformProxy(this)
 }
-internal fun PolygonLayerCallbackInterface.asKmp(): KMPolygonLayerCallbackInterface = KMPolygonLayerCallbackInterfacePlatformWrapper(this)
+public fun PolygonLayerCallbackInterface.asKmp(): KMPolygonLayerCallbackInterface = KMPolygonLayerCallbackInterfacePlatformWrapper(this)

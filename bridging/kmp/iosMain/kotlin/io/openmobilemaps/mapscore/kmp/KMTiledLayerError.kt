@@ -34,7 +34,7 @@ internal fun KMTiledLayerError.asPlatform(): MapCoreSharedModule.MCTiledLayerErr
     isRecoverable = isRecoverable,
     bounds = bounds?.let { it.asPlatform() },
 )
-internal fun MapCoreSharedModule.MCTiledLayerError.asKmp(): KMTiledLayerError = KMTiledLayerError(
+public fun MapCoreSharedModule.MCTiledLayerError.asKmp(): KMTiledLayerError = KMTiledLayerError(
     status = KMLoaderStatus.fromPlatform((this.status as MapCoreSharedModule.MCLoaderStatus)),
     errorCode = this.errorCode?.let { (it as String) },
     layerName = this.layerName,

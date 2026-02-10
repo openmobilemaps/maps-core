@@ -6,4 +6,4 @@ package io.openmobilemaps.mapscore.kmp
 actual typealias KMStretchShaderInfo = io.openmobilemaps.mapscore.shared.graphics.shader.StretchShaderInfo
 
 internal fun KMStretchShaderInfo.asPlatform(): io.openmobilemaps.mapscore.shared.graphics.shader.StretchShaderInfo = this
-internal fun io.openmobilemaps.mapscore.shared.graphics.shader.StretchShaderInfo.asKmp(): KMStretchShaderInfo = this
+public fun io.openmobilemaps.mapscore.shared.graphics.shader.StretchShaderInfo.asKmp(): KMStretchShaderInfo = this

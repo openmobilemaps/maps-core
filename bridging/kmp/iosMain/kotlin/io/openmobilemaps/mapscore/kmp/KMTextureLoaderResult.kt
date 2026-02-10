@@ -28,7 +28,7 @@ internal fun KMTextureLoaderResult.asPlatform(): MapCoreSharedModule.MCTextureLo
     status = status.asPlatform(),
     errorCode = errorCode?.let { it },
 )
-internal fun MapCoreSharedModule.MCTextureLoaderResult.asKmp(): KMTextureLoaderResult = KMTextureLoaderResult(
+public fun MapCoreSharedModule.MCTextureLoaderResult.asKmp(): KMTextureLoaderResult = KMTextureLoaderResult(
     data = this.data?.let { (it as MapCoreSharedModule.MCTextureHolderInterfaceProtocol).asKmp() },
     etag = this.etag?.let { (it as String) },
     status = KMLoaderStatus.fromPlatform((this.status as MapCoreSharedModule.MCLoaderStatus)),

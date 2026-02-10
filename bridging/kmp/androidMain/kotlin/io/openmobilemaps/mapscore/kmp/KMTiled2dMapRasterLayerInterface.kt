@@ -111,4 +111,4 @@ actual class KMTiled2dMapRasterLayerInterface actual public constructor(
 }
 
 internal fun KMTiled2dMapRasterLayerInterface.asPlatform(): Tiled2dMapRasterLayerInterface = nativeHandle as Tiled2dMapRasterLayerInterface
-internal fun Tiled2dMapRasterLayerInterface.asKmp(): KMTiled2dMapRasterLayerInterface = KMTiled2dMapRasterLayerInterface(this)
+public fun Tiled2dMapRasterLayerInterface.asKmp(): KMTiled2dMapRasterLayerInterface = KMTiled2dMapRasterLayerInterface(this)

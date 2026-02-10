@@ -19,6 +19,6 @@ actual class KMCameraInterpolation actual public constructor(
 internal fun KMCameraInterpolation.asPlatform(): MapCoreSharedModule.MCCameraInterpolation = MapCoreSharedModule.MCCameraInterpolation(
     stops = ArrayList(stops.map { it.asPlatform() }),
 )
-internal fun MapCoreSharedModule.MCCameraInterpolation.asKmp(): KMCameraInterpolation = KMCameraInterpolation(
+public fun MapCoreSharedModule.MCCameraInterpolation.asKmp(): KMCameraInterpolation = KMCameraInterpolation(
     stops = ArrayList(((this.stops as? List<*>)?.map { (it as MapCoreSharedModule.MCCameraInterpolationValue).asKmp() } ?: (0 until (this.stops as platform.Foundation.NSArray).count.toInt()).map { idx -> ((this.stops as platform.Foundation.NSArray).objectAtIndex(idx.toULong()) as MapCoreSharedModule.MCCameraInterpolationValue).asKmp() })),
 )

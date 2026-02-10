@@ -6,4 +6,4 @@ package io.openmobilemaps.mapscore.kmp
 actual typealias KMWmtsLayerDimension = io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.wmts.WmtsLayerDimension
 
 internal fun KMWmtsLayerDimension.asPlatform(): io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.wmts.WmtsLayerDimension = this
-internal fun io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.wmts.WmtsLayerDimension.asKmp(): KMWmtsLayerDimension = this
+public fun io.openmobilemaps.mapscore.shared.map.layers.tiled.raster.wmts.WmtsLayerDimension.asKmp(): KMWmtsLayerDimension = this

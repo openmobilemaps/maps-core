@@ -40,4 +40,4 @@ actual class KMPolygonMaskObjectInterface actual public constructor(
 }
 
 internal fun KMPolygonMaskObjectInterface.asPlatform(): MapCoreSharedModule.MCPolygonMaskObjectInterface = nativeHandle as MapCoreSharedModule.MCPolygonMaskObjectInterface
-internal fun MapCoreSharedModule.MCPolygonMaskObjectInterface.asKmp(): KMPolygonMaskObjectInterface = KMPolygonMaskObjectInterface(this)
+public fun MapCoreSharedModule.MCPolygonMaskObjectInterface.asKmp(): KMPolygonMaskObjectInterface = KMPolygonMaskObjectInterface(this)

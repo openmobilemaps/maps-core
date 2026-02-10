@@ -6,4 +6,4 @@ package io.openmobilemaps.mapscore.kmp
 actual typealias KMLineCapType = io.openmobilemaps.mapscore.shared.map.layers.line.LineCapType
 
 internal fun KMLineCapType.asPlatform(): io.openmobilemaps.mapscore.shared.map.layers.line.LineCapType = this
-internal fun io.openmobilemaps.mapscore.shared.map.layers.line.LineCapType.asKmp(): KMLineCapType = this
+public fun io.openmobilemaps.mapscore.shared.map.layers.line.LineCapType.asKmp(): KMLineCapType = this

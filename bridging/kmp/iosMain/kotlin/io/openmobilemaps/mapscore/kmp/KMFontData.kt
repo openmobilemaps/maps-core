@@ -22,7 +22,7 @@ internal fun KMFontData.asPlatform(): MapCoreSharedModule.MCFontData = MapCoreSh
     info = info.asPlatform(),
     glyphs = ArrayList(glyphs.map { it.asPlatform() }),
 )
-internal fun MapCoreSharedModule.MCFontData.asKmp(): KMFontData = KMFontData(
+public fun MapCoreSharedModule.MCFontData.asKmp(): KMFontData = KMFontData(
     info = (this.info as MapCoreSharedModule.MCFontWrapper).asKmp(),
     glyphs = ArrayList(((this.glyphs as? List<*>)?.map { (it as MapCoreSharedModule.MCFontGlyph).asKmp() } ?: (0 until (this.glyphs as platform.Foundation.NSArray).count.toInt()).map { idx -> ((this.glyphs as platform.Foundation.NSArray).objectAtIndex(idx.toULong()) as MapCoreSharedModule.MCFontGlyph).asKmp() })),
 )

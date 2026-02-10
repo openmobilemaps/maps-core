@@ -40,4 +40,4 @@ actual class KMShaderProgramInterface actual public constructor(
 }
 
 internal fun KMShaderProgramInterface.asPlatform(): MapCoreSharedModule.MCShaderProgramInterfaceProtocol = nativeHandle as MapCoreSharedModule.MCShaderProgramInterfaceProtocol
-internal fun MapCoreSharedModule.MCShaderProgramInterfaceProtocol.asKmp(): KMShaderProgramInterface = KMShaderProgramInterface(this)
+public fun MapCoreSharedModule.MCShaderProgramInterfaceProtocol.asKmp(): KMShaderProgramInterface = KMShaderProgramInterface(this)

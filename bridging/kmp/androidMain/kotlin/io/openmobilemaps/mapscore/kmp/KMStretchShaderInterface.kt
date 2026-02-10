@@ -26,4 +26,4 @@ actual class KMStretchShaderInterface actual public constructor(
 }
 
 internal fun KMStretchShaderInterface.asPlatform(): StretchShaderInterface = nativeHandle as StretchShaderInterface
-internal fun StretchShaderInterface.asKmp(): KMStretchShaderInterface = KMStretchShaderInterface(this)
+public fun StretchShaderInterface.asKmp(): KMStretchShaderInterface = KMStretchShaderInterface(this)

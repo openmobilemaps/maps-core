@@ -6,4 +6,4 @@ package io.openmobilemaps.mapscore.kmp
 actual typealias KMTextSymbolPlacement = io.openmobilemaps.mapscore.shared.map.layers.text.TextSymbolPlacement
 
 internal fun KMTextSymbolPlacement.asPlatform(): io.openmobilemaps.mapscore.shared.map.layers.text.TextSymbolPlacement = this
-internal fun io.openmobilemaps.mapscore.shared.map.layers.text.TextSymbolPlacement.asKmp(): KMTextSymbolPlacement = this
+public fun io.openmobilemaps.mapscore.shared.map.layers.text.TextSymbolPlacement.asKmp(): KMTextSymbolPlacement = this

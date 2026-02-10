@@ -151,4 +151,4 @@ internal fun KMQuad2dStretchedInstancedInterface.asPlatform(): MapCoreSharedModu
     is KMQuad2dStretchedInstancedInterfacePlatformWrapper -> this.nativeHandle
     else -> KMQuad2dStretchedInstancedInterfacePlatformProxy(this)
 }
-internal fun MapCoreSharedModule.MCQuad2dStretchedInstancedInterfaceProtocol.asKmp(): KMQuad2dStretchedInstancedInterface = KMQuad2dStretchedInstancedInterfacePlatformWrapper(this)
+public fun MapCoreSharedModule.MCQuad2dStretchedInstancedInterfaceProtocol.asKmp(): KMQuad2dStretchedInstancedInterface = KMQuad2dStretchedInstancedInterfacePlatformWrapper(this)

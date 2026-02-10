@@ -237,4 +237,4 @@ actual class KMMapCameraInterface actual public constructor(
 }
 
 internal fun KMMapCameraInterface.asPlatform(): MapCameraInterface = nativeHandle as MapCameraInterface
-internal fun MapCameraInterface.asKmp(): KMMapCameraInterface = KMMapCameraInterface(this)
+public fun MapCameraInterface.asKmp(): KMMapCameraInterface = KMMapCameraInterface(this)

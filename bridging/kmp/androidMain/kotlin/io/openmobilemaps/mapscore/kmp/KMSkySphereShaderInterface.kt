@@ -22,4 +22,4 @@ actual class KMSkySphereShaderInterface actual public constructor(
 }
 
 internal fun KMSkySphereShaderInterface.asPlatform(): SkySphereShaderInterface = nativeHandle as SkySphereShaderInterface
-internal fun SkySphereShaderInterface.asKmp(): KMSkySphereShaderInterface = KMSkySphereShaderInterface(this)
+public fun SkySphereShaderInterface.asKmp(): KMSkySphereShaderInterface = KMSkySphereShaderInterface(this)

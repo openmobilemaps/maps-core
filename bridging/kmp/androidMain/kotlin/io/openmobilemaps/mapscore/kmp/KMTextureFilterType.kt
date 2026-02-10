@@ -6,4 +6,4 @@ package io.openmobilemaps.mapscore.kmp
 actual typealias KMTextureFilterType = io.openmobilemaps.mapscore.shared.graphics.objects.TextureFilterType
 
 internal fun KMTextureFilterType.asPlatform(): io.openmobilemaps.mapscore.shared.graphics.objects.TextureFilterType = this
-internal fun io.openmobilemaps.mapscore.shared.graphics.objects.TextureFilterType.asKmp(): KMTextureFilterType = this
+public fun io.openmobilemaps.mapscore.shared.graphics.objects.TextureFilterType.asKmp(): KMTextureFilterType = this

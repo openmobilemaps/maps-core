@@ -27,4 +27,4 @@ actual class KMMapsCoreSharedModule actual public constructor(
 }
 
 internal fun KMMapsCoreSharedModule.asPlatform(): MapCoreSharedModule.MCMapsCoreSharedModule = nativeHandle as MapCoreSharedModule.MCMapsCoreSharedModule
-internal fun MapCoreSharedModule.MCMapsCoreSharedModule.asKmp(): KMMapsCoreSharedModule = KMMapsCoreSharedModule(this)
+public fun MapCoreSharedModule.MCMapsCoreSharedModule.asKmp(): KMMapsCoreSharedModule = KMMapsCoreSharedModule(this)

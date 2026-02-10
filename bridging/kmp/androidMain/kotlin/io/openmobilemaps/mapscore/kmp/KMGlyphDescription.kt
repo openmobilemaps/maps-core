@@ -6,4 +6,4 @@ package io.openmobilemaps.mapscore.kmp
 actual typealias KMGlyphDescription = io.openmobilemaps.mapscore.shared.graphics.objects.GlyphDescription
 
 internal fun KMGlyphDescription.asPlatform(): io.openmobilemaps.mapscore.shared.graphics.objects.GlyphDescription = this
-internal fun io.openmobilemaps.mapscore.shared.graphics.objects.GlyphDescription.asKmp(): KMGlyphDescription = this
+public fun io.openmobilemaps.mapscore.shared.graphics.objects.GlyphDescription.asKmp(): KMGlyphDescription = this

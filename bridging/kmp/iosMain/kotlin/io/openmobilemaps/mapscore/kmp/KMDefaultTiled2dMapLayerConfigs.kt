@@ -42,4 +42,4 @@ actual class KMDefaultTiled2dMapLayerConfigs actual public constructor(
 }
 
 internal fun KMDefaultTiled2dMapLayerConfigs.asPlatform(): MapCoreSharedModule.MCDefaultTiled2dMapLayerConfigs = nativeHandle as MapCoreSharedModule.MCDefaultTiled2dMapLayerConfigs
-internal fun MapCoreSharedModule.MCDefaultTiled2dMapLayerConfigs.asKmp(): KMDefaultTiled2dMapLayerConfigs = KMDefaultTiled2dMapLayerConfigs(this)
+public fun MapCoreSharedModule.MCDefaultTiled2dMapLayerConfigs.asKmp(): KMDefaultTiled2dMapLayerConfigs = KMDefaultTiled2dMapLayerConfigs(this)

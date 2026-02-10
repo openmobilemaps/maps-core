@@ -25,7 +25,7 @@ internal fun KMWmtsLayerDimension.asPlatform(): MapCoreSharedModule.MCWmtsLayerD
     defaultValue = defaultValue,
     values = ArrayList(values.map { it }),
 )
-internal fun MapCoreSharedModule.MCWmtsLayerDimension.asKmp(): KMWmtsLayerDimension = KMWmtsLayerDimension(
+public fun MapCoreSharedModule.MCWmtsLayerDimension.asKmp(): KMWmtsLayerDimension = KMWmtsLayerDimension(
     identifier = this.identifier,
     defaultValue = this.defaultValue,
     values = ArrayList(((this.values as? List<*>)?.map { (it as String) } ?: (0 until (this.values as platform.Foundation.NSArray).count.toInt()).map { idx -> ((this.values as platform.Foundation.NSArray).objectAtIndex(idx.toULong()) as String) })),

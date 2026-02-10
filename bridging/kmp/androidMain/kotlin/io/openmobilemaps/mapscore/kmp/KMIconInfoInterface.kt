@@ -60,4 +60,4 @@ actual class KMIconInfoInterface actual public constructor(
 }
 
 internal fun KMIconInfoInterface.asPlatform(): IconInfoInterface = nativeHandle as IconInfoInterface
-internal fun IconInfoInterface.asKmp(): KMIconInfoInterface = KMIconInfoInterface(this)
+public fun IconInfoInterface.asKmp(): KMIconInfoInterface = KMIconInfoInterface(this)

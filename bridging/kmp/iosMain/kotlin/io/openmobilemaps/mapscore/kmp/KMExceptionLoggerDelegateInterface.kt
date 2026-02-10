@@ -37,4 +37,4 @@ internal fun KMExceptionLoggerDelegateInterface.asPlatform(): MapCoreSharedModul
     is KMExceptionLoggerDelegateInterfacePlatformWrapper -> this.nativeHandle
     else -> KMExceptionLoggerDelegateInterfacePlatformProxy(this)
 }
-internal fun MapCoreSharedModule.MCExceptionLoggerDelegateInterfaceProtocol.asKmp(): KMExceptionLoggerDelegateInterface = KMExceptionLoggerDelegateInterfacePlatformWrapper(this)
+public fun MapCoreSharedModule.MCExceptionLoggerDelegateInterfaceProtocol.asKmp(): KMExceptionLoggerDelegateInterface = KMExceptionLoggerDelegateInterfacePlatformWrapper(this)

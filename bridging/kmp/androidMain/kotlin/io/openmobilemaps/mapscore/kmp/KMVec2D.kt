@@ -6,4 +6,4 @@ package io.openmobilemaps.mapscore.kmp
 actual typealias KMVec2D = io.openmobilemaps.mapscore.shared.graphics.common.Vec2D
 
 internal fun KMVec2D.asPlatform(): io.openmobilemaps.mapscore.shared.graphics.common.Vec2D = this
-internal fun io.openmobilemaps.mapscore.shared.graphics.common.Vec2D.asKmp(): KMVec2D = this
+public fun io.openmobilemaps.mapscore.shared.graphics.common.Vec2D.asKmp(): KMVec2D = this

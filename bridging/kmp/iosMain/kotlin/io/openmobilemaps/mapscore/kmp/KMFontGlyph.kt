@@ -31,7 +31,7 @@ internal fun KMFontGlyph.asPlatform(): MapCoreSharedModule.MCFontGlyph = MapCore
     bearing = bearing.asPlatform(),
     uv = uv.asPlatform(),
 )
-internal fun MapCoreSharedModule.MCFontGlyph.asKmp(): KMFontGlyph = KMFontGlyph(
+public fun MapCoreSharedModule.MCFontGlyph.asKmp(): KMFontGlyph = KMFontGlyph(
     charCode = this.charCode,
     advance = (this.advance as MapCoreSharedModule.MCVec2D).asKmp(),
     boundingBoxSize = (this.boundingBoxSize as MapCoreSharedModule.MCVec2D).asKmp(),

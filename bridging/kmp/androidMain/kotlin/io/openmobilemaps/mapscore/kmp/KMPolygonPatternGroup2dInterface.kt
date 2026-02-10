@@ -103,4 +103,4 @@ internal fun KMPolygonPatternGroup2dInterface.asPlatform(): PolygonPatternGroup2
     is KMPolygonPatternGroup2dInterfacePlatformWrapper -> this.nativeHandle
     else -> KMPolygonPatternGroup2dInterfacePlatformProxy(this)
 }
-internal fun PolygonPatternGroup2dInterface.asKmp(): KMPolygonPatternGroup2dInterface = KMPolygonPatternGroup2dInterfacePlatformWrapper(this)
+public fun PolygonPatternGroup2dInterface.asKmp(): KMPolygonPatternGroup2dInterface = KMPolygonPatternGroup2dInterfacePlatformWrapper(this)

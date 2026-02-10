@@ -43,4 +43,4 @@ internal fun KMIcosahedronInterface.asPlatform(): IcosahedronInterface = when (t
     is KMIcosahedronInterfacePlatformWrapper -> this.nativeHandle
     else -> KMIcosahedronInterfacePlatformProxy(this)
 }
-internal fun IcosahedronInterface.asKmp(): KMIcosahedronInterface = KMIcosahedronInterfacePlatformWrapper(this)
+public fun IcosahedronInterface.asKmp(): KMIcosahedronInterface = KMIcosahedronInterfacePlatformWrapper(this)

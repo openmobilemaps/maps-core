@@ -36,4 +36,4 @@ actual class KMSkySphereLayerInterface actual public constructor(
 }
 
 internal fun KMSkySphereLayerInterface.asPlatform(): MapCoreSharedModule.MCSkySphereLayerInterface = nativeHandle as MapCoreSharedModule.MCSkySphereLayerInterface
-internal fun MapCoreSharedModule.MCSkySphereLayerInterface.asKmp(): KMSkySphereLayerInterface = KMSkySphereLayerInterface(this)
+public fun MapCoreSharedModule.MCSkySphereLayerInterface.asKmp(): KMSkySphereLayerInterface = KMSkySphereLayerInterface(this)

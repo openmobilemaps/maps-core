@@ -32,4 +32,4 @@ actual class KMCpuPerformanceLoggerInterface actual public constructor(
 }
 
 internal fun KMCpuPerformanceLoggerInterface.asPlatform(): CpuPerformanceLoggerInterface = nativeHandle as CpuPerformanceLoggerInterface
-internal fun CpuPerformanceLoggerInterface.asKmp(): KMCpuPerformanceLoggerInterface = KMCpuPerformanceLoggerInterface(this)
+public fun CpuPerformanceLoggerInterface.asKmp(): KMCpuPerformanceLoggerInterface = KMCpuPerformanceLoggerInterface(this)

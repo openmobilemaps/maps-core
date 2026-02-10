@@ -45,4 +45,4 @@ internal fun KMIconLayerCallbackInterface.asPlatform(): IconLayerCallbackInterfa
     is KMIconLayerCallbackInterfacePlatformWrapper -> this.nativeHandle
     else -> KMIconLayerCallbackInterfacePlatformProxy(this)
 }
-internal fun IconLayerCallbackInterface.asKmp(): KMIconLayerCallbackInterface = KMIconLayerCallbackInterfacePlatformWrapper(this)
+public fun IconLayerCallbackInterface.asKmp(): KMIconLayerCallbackInterface = KMIconLayerCallbackInterfacePlatformWrapper(this)

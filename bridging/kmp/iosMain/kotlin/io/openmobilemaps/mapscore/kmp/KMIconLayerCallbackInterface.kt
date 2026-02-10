@@ -51,4 +51,4 @@ internal fun KMIconLayerCallbackInterface.asPlatform(): MapCoreSharedModule.MCIc
     is KMIconLayerCallbackInterfacePlatformWrapper -> this.nativeHandle
     else -> KMIconLayerCallbackInterfacePlatformProxy(this)
 }
-internal fun MapCoreSharedModule.MCIconLayerCallbackInterfaceProtocol.asKmp(): KMIconLayerCallbackInterface = KMIconLayerCallbackInterfacePlatformWrapper(this)
+public fun MapCoreSharedModule.MCIconLayerCallbackInterfaceProtocol.asKmp(): KMIconLayerCallbackInterface = KMIconLayerCallbackInterfacePlatformWrapper(this)

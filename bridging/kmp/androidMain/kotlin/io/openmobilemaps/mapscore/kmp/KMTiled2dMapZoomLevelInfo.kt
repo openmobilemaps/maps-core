@@ -6,4 +6,4 @@ package io.openmobilemaps.mapscore.kmp
 actual typealias KMTiled2dMapZoomLevelInfo = io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapZoomLevelInfo
 
 internal fun KMTiled2dMapZoomLevelInfo.asPlatform(): io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapZoomLevelInfo = this
-internal fun io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapZoomLevelInfo.asKmp(): KMTiled2dMapZoomLevelInfo = this
+public fun io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapZoomLevelInfo.asKmp(): KMTiled2dMapZoomLevelInfo = this

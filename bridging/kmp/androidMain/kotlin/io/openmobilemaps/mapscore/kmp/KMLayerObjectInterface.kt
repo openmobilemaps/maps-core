@@ -22,4 +22,4 @@ actual class KMLayerObjectInterface actual public constructor(
 }
 
 internal fun KMLayerObjectInterface.asPlatform(): LayerObjectInterface = nativeHandle as LayerObjectInterface
-internal fun LayerObjectInterface.asKmp(): KMLayerObjectInterface = KMLayerObjectInterface(this)
+public fun LayerObjectInterface.asKmp(): KMLayerObjectInterface = KMLayerObjectInterface(this)

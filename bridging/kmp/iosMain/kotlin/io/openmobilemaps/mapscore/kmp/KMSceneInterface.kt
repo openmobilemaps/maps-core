@@ -85,4 +85,4 @@ actual class KMSceneInterface actual public constructor(
 }
 
 internal fun KMSceneInterface.asPlatform(): MapCoreSharedModule.MCSceneInterface = nativeHandle as MapCoreSharedModule.MCSceneInterface
-internal fun MapCoreSharedModule.MCSceneInterface.asKmp(): KMSceneInterface = KMSceneInterface(this)
+public fun MapCoreSharedModule.MCSceneInterface.asKmp(): KMSceneInterface = KMSceneInterface(this)

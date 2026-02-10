@@ -31,4 +31,4 @@ internal fun KMSceneCallbackInterface.asPlatform(): SceneCallbackInterface = whe
     is KMSceneCallbackInterfacePlatformWrapper -> this.nativeHandle
     else -> KMSceneCallbackInterfacePlatformProxy(this)
 }
-internal fun SceneCallbackInterface.asKmp(): KMSceneCallbackInterface = KMSceneCallbackInterfacePlatformWrapper(this)
+public fun SceneCallbackInterface.asKmp(): KMSceneCallbackInterface = KMSceneCallbackInterfacePlatformWrapper(this)

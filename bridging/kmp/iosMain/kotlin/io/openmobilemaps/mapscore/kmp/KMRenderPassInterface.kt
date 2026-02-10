@@ -85,4 +85,4 @@ internal fun KMRenderPassInterface.asPlatform(): MapCoreSharedModule.MCRenderPas
     is KMRenderPassInterfacePlatformWrapper -> this.nativeHandle
     else -> KMRenderPassInterfacePlatformProxy(this)
 }
-internal fun MapCoreSharedModule.MCRenderPassInterfaceProtocol.asKmp(): KMRenderPassInterface = KMRenderPassInterfacePlatformWrapper(this)
+public fun MapCoreSharedModule.MCRenderPassInterfaceProtocol.asKmp(): KMRenderPassInterface = KMRenderPassInterfacePlatformWrapper(this)

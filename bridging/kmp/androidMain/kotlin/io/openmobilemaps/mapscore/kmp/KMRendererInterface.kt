@@ -61,4 +61,4 @@ internal fun KMRendererInterface.asPlatform(): RendererInterface = when (this) {
     is KMRendererInterfacePlatformWrapper -> this.nativeHandle
     else -> KMRendererInterfacePlatformProxy(this)
 }
-internal fun RendererInterface.asKmp(): KMRendererInterface = KMRendererInterfacePlatformWrapper(this)
+public fun RendererInterface.asKmp(): KMRendererInterface = KMRendererInterfacePlatformWrapper(this)

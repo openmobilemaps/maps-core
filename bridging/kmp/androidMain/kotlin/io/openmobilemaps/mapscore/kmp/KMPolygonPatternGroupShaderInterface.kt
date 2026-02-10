@@ -18,4 +18,4 @@ actual class KMPolygonPatternGroupShaderInterface actual public constructor(
 }
 
 internal fun KMPolygonPatternGroupShaderInterface.asPlatform(): PolygonPatternGroupShaderInterface = nativeHandle as PolygonPatternGroupShaderInterface
-internal fun PolygonPatternGroupShaderInterface.asKmp(): KMPolygonPatternGroupShaderInterface = KMPolygonPatternGroupShaderInterface(this)
+public fun PolygonPatternGroupShaderInterface.asKmp(): KMPolygonPatternGroupShaderInterface = KMPolygonPatternGroupShaderInterface(this)

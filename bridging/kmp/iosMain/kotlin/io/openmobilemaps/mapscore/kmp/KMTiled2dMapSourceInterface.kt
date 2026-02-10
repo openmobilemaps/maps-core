@@ -69,4 +69,4 @@ actual class KMTiled2dMapSourceInterface actual public constructor(
 }
 
 internal fun KMTiled2dMapSourceInterface.asPlatform(): MapCoreSharedModule.MCTiled2dMapSourceInterface = nativeHandle as MapCoreSharedModule.MCTiled2dMapSourceInterface
-internal fun MapCoreSharedModule.MCTiled2dMapSourceInterface.asKmp(): KMTiled2dMapSourceInterface = KMTiled2dMapSourceInterface(this)
+public fun MapCoreSharedModule.MCTiled2dMapSourceInterface.asKmp(): KMTiled2dMapSourceInterface = KMTiled2dMapSourceInterface(this)

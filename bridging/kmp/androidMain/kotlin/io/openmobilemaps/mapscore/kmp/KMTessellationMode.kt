@@ -6,4 +6,4 @@ package io.openmobilemaps.mapscore.kmp
 actual typealias KMTessellationMode = io.openmobilemaps.mapscore.shared.graphics.shader.TessellationMode
 
 internal fun KMTessellationMode.asPlatform(): io.openmobilemaps.mapscore.shared.graphics.shader.TessellationMode = this
-internal fun io.openmobilemaps.mapscore.shared.graphics.shader.TessellationMode.asKmp(): KMTessellationMode = this
+public fun io.openmobilemaps.mapscore.shared.graphics.shader.TessellationMode.asKmp(): KMTessellationMode = this

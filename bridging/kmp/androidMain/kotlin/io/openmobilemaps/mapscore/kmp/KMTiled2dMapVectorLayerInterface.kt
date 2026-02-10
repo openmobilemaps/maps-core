@@ -88,4 +88,4 @@ actual class KMTiled2dMapVectorLayerInterface actual public constructor(
 }
 
 internal fun KMTiled2dMapVectorLayerInterface.asPlatform(): Tiled2dMapVectorLayerInterface = nativeHandle as Tiled2dMapVectorLayerInterface
-internal fun Tiled2dMapVectorLayerInterface.asKmp(): KMTiled2dMapVectorLayerInterface = KMTiled2dMapVectorLayerInterface(this)
+public fun Tiled2dMapVectorLayerInterface.asKmp(): KMTiled2dMapVectorLayerInterface = KMTiled2dMapVectorLayerInterface(this)

@@ -27,4 +27,4 @@ actual class KMCamera3dConfigFactory actual public constructor(
 }
 
 internal fun KMCamera3dConfigFactory.asPlatform(): Camera3dConfigFactory = nativeHandle as Camera3dConfigFactory
-internal fun Camera3dConfigFactory.asKmp(): KMCamera3dConfigFactory = KMCamera3dConfigFactory(this)
+public fun Camera3dConfigFactory.asKmp(): KMCamera3dConfigFactory = KMCamera3dConfigFactory(this)

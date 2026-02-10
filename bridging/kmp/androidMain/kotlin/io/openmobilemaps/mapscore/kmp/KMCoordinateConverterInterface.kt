@@ -57,4 +57,4 @@ internal fun KMCoordinateConverterInterface.asPlatform(): CoordinateConverterInt
     is KMCoordinateConverterInterfacePlatformWrapper -> this.nativeHandle
     else -> KMCoordinateConverterInterfacePlatformProxy(this)
 }
-internal fun CoordinateConverterInterface.asKmp(): KMCoordinateConverterInterface = KMCoordinateConverterInterfacePlatformWrapper(this)
+public fun CoordinateConverterInterface.asKmp(): KMCoordinateConverterInterface = KMCoordinateConverterInterfacePlatformWrapper(this)

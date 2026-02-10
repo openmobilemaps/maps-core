@@ -6,4 +6,4 @@ package io.openmobilemaps.mapscore.kmp
 actual typealias KMCameraInterpolation = io.openmobilemaps.mapscore.shared.map.CameraInterpolation
 
 internal fun KMCameraInterpolation.asPlatform(): io.openmobilemaps.mapscore.shared.map.CameraInterpolation = this
-internal fun io.openmobilemaps.mapscore.shared.map.CameraInterpolation.asKmp(): KMCameraInterpolation = this
+public fun io.openmobilemaps.mapscore.shared.map.CameraInterpolation.asKmp(): KMCameraInterpolation = this

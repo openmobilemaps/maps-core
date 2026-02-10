@@ -6,4 +6,4 @@ package io.openmobilemaps.mapscore.kmp
 actual typealias KMTiled2dMapVectorSettings = io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapVectorSettings
 
 internal fun KMTiled2dMapVectorSettings.asPlatform(): io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapVectorSettings = this
-internal fun io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapVectorSettings.asKmp(): KMTiled2dMapVectorSettings = this
+public fun io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapVectorSettings.asKmp(): KMTiled2dMapVectorSettings = this

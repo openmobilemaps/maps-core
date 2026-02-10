@@ -6,4 +6,4 @@ package io.openmobilemaps.mapscore.kmp
 actual typealias KMSymbolAlignment = io.openmobilemaps.mapscore.shared.map.layers.text.SymbolAlignment
 
 internal fun KMSymbolAlignment.asPlatform(): io.openmobilemaps.mapscore.shared.map.layers.text.SymbolAlignment = this
-internal fun io.openmobilemaps.mapscore.shared.map.layers.text.SymbolAlignment.asKmp(): KMSymbolAlignment = this
+public fun io.openmobilemaps.mapscore.shared.map.layers.text.SymbolAlignment.asKmp(): KMSymbolAlignment = this

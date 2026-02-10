@@ -32,4 +32,4 @@ actual class KMSphereEffectLayerInterface actual public constructor(
 }
 
 internal fun KMSphereEffectLayerInterface.asPlatform(): MapCoreSharedModule.MCSphereEffectLayerInterface = nativeHandle as MapCoreSharedModule.MCSphereEffectLayerInterface
-internal fun MapCoreSharedModule.MCSphereEffectLayerInterface.asKmp(): KMSphereEffectLayerInterface = KMSphereEffectLayerInterface(this)
+public fun MapCoreSharedModule.MCSphereEffectLayerInterface.asKmp(): KMSphereEffectLayerInterface = KMSphereEffectLayerInterface(this)

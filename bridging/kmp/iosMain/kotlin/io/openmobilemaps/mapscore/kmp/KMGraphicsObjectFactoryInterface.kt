@@ -207,4 +207,4 @@ internal fun KMGraphicsObjectFactoryInterface.asPlatform(): MapCoreSharedModule.
     is KMGraphicsObjectFactoryInterfacePlatformWrapper -> this.nativeHandle
     else -> KMGraphicsObjectFactoryInterfacePlatformProxy(this)
 }
-internal fun MapCoreSharedModule.MCGraphicsObjectFactoryInterfaceProtocol.asKmp(): KMGraphicsObjectFactoryInterface = KMGraphicsObjectFactoryInterfacePlatformWrapper(this)
+public fun MapCoreSharedModule.MCGraphicsObjectFactoryInterfaceProtocol.asKmp(): KMGraphicsObjectFactoryInterface = KMGraphicsObjectFactoryInterfacePlatformWrapper(this)

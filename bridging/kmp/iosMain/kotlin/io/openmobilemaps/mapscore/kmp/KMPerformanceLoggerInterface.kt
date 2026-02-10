@@ -103,4 +103,4 @@ internal fun KMPerformanceLoggerInterface.asPlatform(): MapCoreSharedModule.MCPe
     is KMPerformanceLoggerInterfacePlatformWrapper -> this.nativeHandle
     else -> KMPerformanceLoggerInterfacePlatformProxy(this)
 }
-internal fun MapCoreSharedModule.MCPerformanceLoggerInterfaceProtocol.asKmp(): KMPerformanceLoggerInterface = KMPerformanceLoggerInterfacePlatformWrapper(this)
+public fun MapCoreSharedModule.MCPerformanceLoggerInterfaceProtocol.asKmp(): KMPerformanceLoggerInterface = KMPerformanceLoggerInterfacePlatformWrapper(this)

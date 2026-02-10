@@ -28,7 +28,7 @@ internal fun KMQuadCoord.asPlatform(): MapCoreSharedModule.MCQuadCoord = MapCore
     bottomRight = bottomRight.asPlatform(),
     bottomLeft = bottomLeft.asPlatform(),
 )
-internal fun MapCoreSharedModule.MCQuadCoord.asKmp(): KMQuadCoord = KMQuadCoord(
+public fun MapCoreSharedModule.MCQuadCoord.asKmp(): KMQuadCoord = KMQuadCoord(
     topLeft = (this.topLeft as MapCoreSharedModule.MCCoord).asKmp(),
     topRight = (this.topRight as MapCoreSharedModule.MCCoord).asKmp(),
     bottomRight = (this.bottomRight as MapCoreSharedModule.MCCoord).asKmp(),

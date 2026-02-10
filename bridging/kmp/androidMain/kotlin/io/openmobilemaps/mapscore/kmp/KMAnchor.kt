@@ -6,4 +6,4 @@ package io.openmobilemaps.mapscore.kmp
 actual typealias KMAnchor = io.openmobilemaps.mapscore.shared.map.layers.text.Anchor
 
 internal fun KMAnchor.asPlatform(): io.openmobilemaps.mapscore.shared.map.layers.text.Anchor = this
-internal fun io.openmobilemaps.mapscore.shared.map.layers.text.Anchor.asKmp(): KMAnchor = this
+public fun io.openmobilemaps.mapscore.shared.map.layers.text.Anchor.asKmp(): KMAnchor = this

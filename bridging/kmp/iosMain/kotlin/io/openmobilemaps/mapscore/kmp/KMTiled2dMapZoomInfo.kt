@@ -37,7 +37,7 @@ internal fun KMTiled2dMapZoomInfo.asPlatform(): MapCoreSharedModule.MCTiled2dMap
     underzoom = underzoom,
     overzoom = overzoom,
 )
-internal fun MapCoreSharedModule.MCTiled2dMapZoomInfo.asKmp(): KMTiled2dMapZoomInfo = KMTiled2dMapZoomInfo(
+public fun MapCoreSharedModule.MCTiled2dMapZoomInfo.asKmp(): KMTiled2dMapZoomInfo = KMTiled2dMapZoomInfo(
     zoomLevelScaleFactor = this.zoomLevelScaleFactor,
     numDrawPreviousLayers = this.numDrawPreviousLayers,
     numDrawPreviousOrLaterTLayers = this.numDrawPreviousOrLaterTLayers,

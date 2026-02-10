@@ -6,4 +6,4 @@ package io.openmobilemaps.mapscore.kmp
 actual typealias KMTaskConfig = io.openmobilemaps.mapscore.shared.map.scheduling.TaskConfig
 
 internal fun KMTaskConfig.asPlatform(): io.openmobilemaps.mapscore.shared.map.scheduling.TaskConfig = this
-internal fun io.openmobilemaps.mapscore.shared.map.scheduling.TaskConfig.asKmp(): KMTaskConfig = this
+public fun io.openmobilemaps.mapscore.shared.map.scheduling.TaskConfig.asKmp(): KMTaskConfig = this
