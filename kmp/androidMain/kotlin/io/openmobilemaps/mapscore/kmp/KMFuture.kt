@@ -21,6 +21,16 @@ actual class KMPromise<T> {
         promise.setValue(value)
     }
 
+    @Suppress("UNCHECKED_CAST")
+    actual fun setDataLoaderResult(value: KMDataLoaderResult) {
+        promise.setValue(value.asPlatform() as T)
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    actual fun setTextureLoaderResult(value: KMTextureLoaderResult) {
+        promise.setValue(value.asPlatform() as T)
+    }
+
     actual fun future(): KMFuture<T> = promise.future.asKmp()
 }
 

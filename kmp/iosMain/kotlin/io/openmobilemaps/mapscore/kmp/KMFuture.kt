@@ -27,6 +27,14 @@ actual class KMPromise<T> {
         promise.setValue(value.asPlatform())
     }
 
+    actual fun setDataLoaderResult(value: KMDataLoaderResult) {
+        setValue(value)
+    }
+
+    actual fun setTextureLoaderResult(value: KMTextureLoaderResult) {
+        setValue(value)
+    }
+
     actual fun future(): KMFuture<T> = promise.getFuture().asKmp()
 }
 
