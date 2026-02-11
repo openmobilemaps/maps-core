@@ -62,7 +62,7 @@ android {
 		externalNativeBuild {
 			cmake {
 				arguments "-DANDROID_STL=c++_shared", "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON"
-				cppFlags "-std=c++17 -frtti -fexceptions -O2"
+				cppFlags "-std=c++17 -frtti -fexceptions"
 			}
 		}
 	}
@@ -102,14 +102,16 @@ android {
 		debug {
 			externalNativeBuild {
 				cmake {
-					cppFlags "-DDEBUG"
+					arguments "-DCMAKE_BUILD_TYPE=Debug"
+					cppFlags "-DDEBUG -O0 -g"
 				}
 			}
 		}
 		release {
 			externalNativeBuild {
 				cmake {
-					cppFlags "-DNDEBUG"
+					arguments "-DCMAKE_BUILD_TYPE=Release"
+					cppFlags "-DNDEBUG -O2 -g0"
 				}
 			}
 			ndk {
