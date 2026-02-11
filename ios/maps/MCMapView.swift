@@ -13,6 +13,7 @@ import Foundation
 @preconcurrency import MetalKit
 import os
 
+@objcMembers
 open class MCMapView: MTKView {
     public let mapInterface: MCMapInterface
     private let renderingContext: RenderingContext
@@ -70,6 +71,11 @@ open class MCMapView: MTKView {
         self.pan = UIPanGestureRecognizer(
             target: self, action: #selector(panned))
         setup()
+    }
+
+    @objc(initWithMapConfig:pixelsPerInch:is3D:)
+    public convenience init(mapConfig: MCMapConfig, pixelsPerInch: NSNumber?, is3D: Bool) {
+        self.init(mapConfig: mapConfig, pixelsPerInch: pixelsPerInch?.floatValue, is3D: is3D)
     }
 
     @available(*, unavailable)
