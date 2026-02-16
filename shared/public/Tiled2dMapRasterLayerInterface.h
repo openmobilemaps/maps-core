@@ -32,6 +32,9 @@ public:
     /** the loaders are tried in their respective order, if the first loader returns the error code NOOP the second will be tried and so on */
     static /*not-null*/ std::shared_ptr<Tiled2dMapRasterLayerInterface> create(const /*not-null*/ std::shared_ptr<::Tiled2dMapLayerConfig> & layerConfig, const std::vector</*not-null*/ std::shared_ptr<::LoaderInterface>> & loaders);
 
+    /** the loaders are tried in their respective order, if the first loader returns the error code NOOP the second will be tried and so on */
+    static /*not-null*/ std::shared_ptr<Tiled2dMapRasterLayerInterface> createDisplaced(const /*not-null*/ std::shared_ptr<::Tiled2dMapLayerConfig> & layerConfig, const /*not-null*/ std::shared_ptr<::Tiled2dMapLayerConfig> & elevationConfig, const std::vector</*not-null*/ std::shared_ptr<::LoaderInterface>> & loaders);
+
     virtual /*not-null*/ std::shared_ptr<::LayerInterface> asLayerInterface() = 0;
 
     virtual void setCallbackHandler(const /*not-null*/ std::shared_ptr<Tiled2dMapRasterLayerCallbackInterface> & handler) = 0;
