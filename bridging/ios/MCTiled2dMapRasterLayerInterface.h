@@ -31,6 +31,11 @@
 + (nullable MCTiled2dMapRasterLayerInterface *)create:(nullable id<MCTiled2dMapLayerConfig>)layerConfig
                                               loaders:(nonnull NSArray<id<MCLoaderInterface>> *)loaders;
 
+/** the loaders are tried in their respective order, if the first loader returns the error code NOOP the second will be tried and so on */
++ (nullable MCTiled2dMapRasterLayerInterface *)createDisplaced:(nullable id<MCTiled2dMapLayerConfig>)layerConfig
+                                               elevationConfig:(nullable id<MCTiled2dMapLayerConfig>)elevationConfig
+                                                       loaders:(nonnull NSArray<id<MCLoaderInterface>> *)loaders;
+
 - (nullable id<MCLayerInterface>)asLayerInterface;
 
 - (void)setCallbackHandler:(nullable id<MCTiled2dMapRasterLayerCallbackInterface>)handler;
