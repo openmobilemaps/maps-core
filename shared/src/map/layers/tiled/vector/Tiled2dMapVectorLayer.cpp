@@ -19,7 +19,6 @@
 #include "BackgroundVectorLayerDescription.h"
 #include "VectorTileGeometryHandler.h"
 #include "Tiled2dMapVectorBackgroundSubLayer.h"
-#include "Tiled2dMapVectorRasterSubLayerConfig.h"
 #include "Polygon2dInterface.h"
 #include "MapCameraInterface.h"
 #include "QuadMaskObject.h"
@@ -45,9 +44,13 @@
 #include "Tiled2dMapVectorReadyManager.h"
 #include "Tiled2dVectorGeoJsonSource.h"
 #include "Tiled2dMapVectorStyleParser.h"
-#include "Tiled2dMapVectorGeoJSONLayerConfig.h"
 #include "GeoJsonVTFactory.h"
 #include "VectorLayerFeatureCoordInfo.h"
+
+#include "Epsg2056Tiled2dMapLayerConfig.h"
+#include "Epsg21781Tiled2dMapLayerConfig.h"
+#include "Epsg3857Tiled2dMapLayerConfig.h"
+#include "Epsg4326Tiled2dMapLayerConfig.h"
 
 Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
                                              const std::optional<std::string> &remoteStyleJsonUrl,
@@ -237,14 +240,26 @@ Tiled2dMapVectorLayer::getLayerConfig(const std::shared_ptr<VectorMapSourceDescr
     if (!mapInterface) {
         return nullptr;
     }
-    return customZoomInfo.has_value() ? std::make_shared<Tiled2dMapVectorLayerConfig>(source, *customZoomInfo)
-                                      : std::make_shared<Tiled2dMapVectorLayerConfig>(source, mapInterface->is3d());
+    const std::optional<int32_t> crs = source->coordinateReferenceSystem;
+    const auto &zoomInfo = customZoomInfo.has_value() ? *customZoomInfo : source->getZoomInfo(mapInterface->is3d());
+    if(!crs.has_value() || *crs == CoordinateSystemIdentifiers::EPSG3857()) {
+        return std::make_shared<Epsg3857Tiled2dMapLayerConfig>(source->identifier, source->vectorUrl, source->bounds, zoomInfo, source->getZoomLevels());
+    } else if(*crs == CoordinateSystemIdentifiers::EPSG4326()){
+        return std::make_shared<Epsg4326Tiled2dMapLayerConfig>(source->identifier, source->vectorUrl, source->bounds, zoomInfo, source->getZoomLevels());
+    } else if(*crs == CoordinateSystemIdentifiers::EPSG2056()){
+        return std::static_pointer_cast<Tiled2dMapVectorLayerConfig>(std::make_shared<Epsg2056Tiled2dMapLayerConfig>(source->identifier, source->vectorUrl, source->bounds, zoomInfo, source->getZoomLevels()));
+    } else if(*crs == CoordinateSystemIdentifiers::EPSG21781()){
+        return std::make_shared<Epsg21781Tiled2dMapLayerConfig>(source->identifier, source->vectorUrl, source->bounds, zoomInfo, source->getZoomLevels());
+	}
+	// layer will be ignored
+    return nullptr;
 }
 
 std::shared_ptr<Tiled2dMapVectorLayerConfig>
 Tiled2dMapVectorLayer::getGeoJSONLayerConfig(const std::string &sourceName, const std::shared_ptr<GeoJSONVTInterface> &source) {
-    return customZoomInfo.has_value() ? std::make_shared<Tiled2dMapVectorGeoJSONLayerConfig>(sourceName, source, *customZoomInfo)
-                                      : std::make_shared<Tiled2dMapVectorGeoJSONLayerConfig>(sourceName, source);
+	  const auto levels = Tiled2dMapVectorLayerConfig::generateLevelsFromMinMax(source->getMinZoom(), source->getMaxZoom());
+    auto zoomInfo = customZoomInfo.has_value() ? *customZoomInfo : Tiled2dMapZoomInfo(1.0, 0, 0, false, true, false, true);
+   	return std::make_shared<Epsg3857Tiled2dMapLayerConfig>(sourceName, "", std::nullopt, zoomInfo, levels);
 }
 
 void Tiled2dMapVectorLayer::setMapDescription(const std::shared_ptr<VectorMapDescription> &mapDescription) {
@@ -296,7 +311,6 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
     if (!mapInterface) {
         return;
     }
-    bool is3d = mapInterface->is3d();
     
     std::shared_ptr<Mailbox> selfMailbox = mailbox;
     if (!mailbox) {
@@ -332,10 +346,7 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
                 break;
             }
             case raster: {
-                auto rasterSubLayerConfig = customZoomInfo.has_value() ? std::make_shared<Tiled2dMapVectorRasterSubLayerConfig>(
-                        std::static_pointer_cast<RasterVectorLayerDescription>(layerDesc), is3d,*customZoomInfo)
-                                                                       : std::make_shared<Tiled2dMapVectorRasterSubLayerConfig>(
-                                std::static_pointer_cast<RasterVectorLayerDescription>(layerDesc), is3d);
+                auto rasterSubLayerConfig = getLayerConfig(std::dynamic_pointer_cast<RasterVectorLayerDescription>(layerDesc)->source);
 
                 auto sourceMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
                 auto sourceActor = Actor<Tiled2dMapRasterSource>(sourceMailbox,

@@ -10,23 +10,23 @@
 
 #pragma once
 
-#include "RegularTiled2dMapLayerConfig.h"
+#include "IrregularTiled2dMapLayerConfig.h"
 #include "Tiled2dMapZoomInfo.h"
 
-class Epsg4326Tiled2dMapLayerConfig : public RegularTiled2dMapLayerConfig {
+class Epsg2056Tiled2dMapLayerConfig : public IrregularTiled2dMapLayerConfig {
 public:
-    Epsg4326Tiled2dMapLayerConfig(
+    Epsg2056Tiled2dMapLayerConfig(
         std::string layerName,
         std::string urlFormat
     );
 
-    Epsg4326Tiled2dMapLayerConfig(
+    Epsg2056Tiled2dMapLayerConfig(
         std::string layerName,
         std::string urlFormat,
         const std::optional<RectCoord> &bounds,
         const Tiled2dMapZoomInfo &zoomInfo,
         const std::vector<int> &levels
     );
-private:
-    const static double BASE_ZOOM;
+
+    static std::vector<Tiled2dMapZoomLevelInfo> swisstopoZoomLevelInfos();
 };

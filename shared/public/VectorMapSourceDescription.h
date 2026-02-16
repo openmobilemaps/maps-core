@@ -10,10 +10,11 @@
 
 #pragma once
 
-#include "VectorLayerDescription.h"
-#include "Color.h"
 #include "GeoJsonTypes.h"
 #include "RectCoord.h"
+#include "Tiled2dMapVectorLayerConfig.h"
+#include "Tiled2dMapZoomInfo.h"
+#include "VectorLayerDescription.h"
 
 class VectorMapSourceDescription {
 public:
@@ -28,6 +29,7 @@ public:
     std::optional<bool> underzoom;
     std::optional<bool> overzoom;
     std::optional<std::vector<int>> levels;
+    std::optional<int32_t> coordinateReferenceSystem;
 
     VectorMapSourceDescription(std::string identifier,
                                std::string vectorUrl,
@@ -39,10 +41,31 @@ public:
                                std::optional<int> numDrawPreviousLayers,
                                std::optional<bool> underzoom,
                                std::optional<bool> overzoom,
-                               std::optional<std::vector<int>> levels) :
+                               std::optional<std::vector<int>> levels,
+                               std::optional<int32_t> coordinateReferenceSystem) :
             identifier(identifier), vectorUrl(vectorUrl), minZoom(minZoom), maxZoom(maxZoom), bounds(bounds),
             adaptScaleToScreen(adaptScaleToScreen), numDrawPreviousLayers(numDrawPreviousLayers),
-            zoomLevelScaleFactor(zoomLevelScaleFactor), underzoom(underzoom), overzoom(overzoom), levels(levels) {}
+            zoomLevelScaleFactor(zoomLevelScaleFactor), underzoom(underzoom), overzoom(overzoom), levels(levels),
+            coordinateReferenceSystem(coordinateReferenceSystem) {}
+
+    virtual Tiled2dMapZoomInfo getZoomInfo(bool is3d) const {
+        return Tiled2dMapZoomInfo(
+                zoomLevelScaleFactor ? *zoomLevelScaleFactor : (is3d ? 0.75 : 1.0),
+                numDrawPreviousLayers ? *numDrawPreviousLayers : 0,
+                0,
+                adaptScaleToScreen ? *adaptScaleToScreen : false,
+                true,
+                underzoom ? *underzoom : false,
+                overzoom ? *overzoom : true);
+    };
+
+		std::vector<int> getZoomLevels() {
+				if(levels) {
+						return *levels;
+				} else {
+						return Tiled2dMapVectorLayerConfig::generateLevelsFromMinMax(minZoom, maxZoom);
+				}
+		}
 };
 
 struct SpriteSourceDescription {
