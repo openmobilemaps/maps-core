@@ -26,6 +26,15 @@ public:
     void setupTiles() override;
 
 protected:
+    std::shared_ptr<Quad2dInterface> createQuadForTile(
+        const std::shared_ptr<GraphicsObjectFactoryInterface> &graphicsFactory,
+        const std::shared_ptr<RasterShaderInterface> &rasterShader,
+        bool is3D) override;
+
+    void loadTileTextures(const std::shared_ptr<Quad2dInterface> &quad,
+                          const std::shared_ptr<RenderingContextInterface> &renderingContext,
+                          const Tiled2dMapRasterTileInfo &tileInfo) override;
+
     const std::shared_ptr<Tiled2dMapLayerConfig> elevationConfig;
 
     Actor<TiledDisplacedRasterSource> rasterSource;

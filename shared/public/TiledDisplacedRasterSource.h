@@ -11,6 +11,8 @@
 #pragma once
 
 #include "Tiled2dMapRasterSource.h"
+#include <mutex>
+#include <unordered_map>
 
 class TiledDisplacedRasterSource : public Tiled2dMapRasterSource {
 public:
@@ -25,11 +27,14 @@ public:
                                std::string layerName);
 
 protected:
+    void notifyTilesUpdates() override;
+
     void cancelLoad(Tiled2dMapTileInfo tile, size_t loaderIndex) override;
 
     ::djinni::Future<std::shared_ptr<TextureLoaderResult>> loadDataAsync(Tiled2dMapTileInfo tile, size_t loaderIndex) override;
 
 protected:
     const std::shared_ptr<Tiled2dMapLayerConfig> elevationConfig;
-    const std::vector<std::shared_ptr<::LoaderInterface>> loaders;
+    std::unordered_map<Tiled2dMapTileInfo, std::shared_ptr<TextureHolderInterface>> elevationTextureHolders;
+    std::mutex elevationTextureHoldersMutex;
 };

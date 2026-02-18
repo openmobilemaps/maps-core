@@ -44,7 +44,7 @@ class Tiled2dMapRasterSource
                                                                       Tiled2dMapTileInfo tile) override;
 
 
-  private:
+  protected:
     const std::vector<std::shared_ptr<::LoaderInterface>> loaders;
         
     const WeakActor<Tiled2dMapRasterSourceListener> rasterLayerActor;

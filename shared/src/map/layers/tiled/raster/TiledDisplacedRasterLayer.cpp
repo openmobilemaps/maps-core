@@ -93,7 +93,7 @@ void TiledDisplacedRasterLayer::setupTiles() {
             tileObject->getGraphicsObject()->setup(renderingContext);
 
             if (tileInfo.textureHolder) {
-                tileObject->getQuadObject()->loadTexture(renderingContext, tileInfo.textureHolder, nullptr);
+                loadTileTextures(tileObject->getQuadObject(), renderingContext, tileInfo);
             }
             tilesReady.push_back(tileInfo.tileInfo);
         }
@@ -117,4 +117,19 @@ void TiledDisplacedRasterLayer::setupTiles() {
     updateReadyStateListenerIfNeeded();
 
     mapInterface->invalidate();
+}
+
+std::shared_ptr<Quad2dInterface> TiledDisplacedRasterLayer::createQuadForTile(
+    const std::shared_ptr<GraphicsObjectFactoryInterface> &graphicsFactory,
+    const std::shared_ptr<RasterShaderInterface> &rasterShader,
+    bool is3D) {
+    (void)rasterShader;
+    (void)is3D;
+    return graphicsFactory->createQuadTessellatedDisplaced();
+}
+
+void TiledDisplacedRasterLayer::loadTileTextures(const std::shared_ptr<Quad2dInterface> &quad,
+                                                 const std::shared_ptr<RenderingContextInterface> &renderingContext,
+                                                 const Tiled2dMapRasterTileInfo &tileInfo) {
+    quad->loadTexture(renderingContext, tileInfo.textureHolder, tileInfo.elevationTextureHolder);
 }

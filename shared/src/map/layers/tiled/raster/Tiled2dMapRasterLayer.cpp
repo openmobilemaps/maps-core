@@ -156,7 +156,7 @@ void Tiled2dMapRasterLayer::resume() {
         if (tileObject.second) {
             tileObject.second->getGraphicsObject()->setup(renderingContext);
             auto rectangle = tileObject.second->getQuadObject();
-            rectangle->loadTexture(renderingContext, tileObject.first.textureHolder, nullptr);
+            loadTileTextures(rectangle, renderingContext, tileObject.first);
         }
     }
     for (const auto &tileMask : tileMaskMap) {
@@ -306,10 +306,10 @@ std::vector<Tiled2dMapRasterTileInfo> sortedTileInfos(currentTileInfos.begin(), 
                                     
                 #ifdef HARDWARE_TESSELLATION_SUPPORTED
                     auto rasterShader = is3D ? shaderFactory->createQuadTessellatedShader() : shaderFactory->createRasterShader();
-                    auto quad = is3D ? graphicsFactory->createQuadTessellated(rasterShader->asShaderProgramInterface()) : graphicsFactory->createQuad(rasterShader->asShaderProgramInterface());
+                    auto quad = createQuadForTile(graphicsFactory, rasterShader, is3D);
                 #else
                     auto rasterShader = is3D ? shaderFactory->createUnitSphereRasterShader() : shaderFactory->createRasterShader();
-                    auto quad = graphicsFactory->createQuad(rasterShader->asShaderProgramInterface());
+                    auto quad = createQuadForTile(graphicsFactory, rasterShader, is3D);
                 #endif
                     
                     rasterShader->asShaderProgramInterface()->setBlendMode(blendMode);
@@ -431,7 +431,7 @@ void Tiled2dMapRasterLayer::setupTiles() {
             tileObject->getGraphicsObject()->setup(renderingContext);
 
             if (tileInfo.textureHolder) {
-                tileObject->getQuadObject()->loadTexture(renderingContext, tileInfo.textureHolder, nullptr);
+                loadTileTextures(tileObject->getQuadObject(), renderingContext, tileInfo);
             }
             // the texture holder can be empty, some tileserver serve 0 byte textures
             tilesReady.push_back(tileInfo.tileInfo);
@@ -663,4 +663,22 @@ void Tiled2dMapRasterLayer::setBlendMode(::BlendMode blendMode) {
 
 void Tiled2dMapRasterLayer::setMinMagFilter(TextureFilterType filterType) {
     textureFilterType = filterType;
+}
+
+std::shared_ptr<Quad2dInterface> Tiled2dMapRasterLayer::createQuadForTile(
+    const std::shared_ptr<GraphicsObjectFactoryInterface> &graphicsFactory,
+    const std::shared_ptr<RasterShaderInterface> &rasterShader,
+    bool is3D) {
+#ifdef HARDWARE_TESSELLATION_SUPPORTED
+    return is3D ? graphicsFactory->createQuadTessellated(rasterShader->asShaderProgramInterface())
+                : graphicsFactory->createQuad(rasterShader->asShaderProgramInterface());
+#else
+    return graphicsFactory->createQuad(rasterShader->asShaderProgramInterface());
+#endif
+}
+
+void Tiled2dMapRasterLayer::loadTileTextures(const std::shared_ptr<Quad2dInterface> &quad,
+                                             const std::shared_ptr<RenderingContextInterface> &renderingContext,
+                                             const Tiled2dMapRasterTileInfo &tileInfo) {
+    quad->loadTexture(renderingContext, tileInfo.textureHolder, nullptr);
 }
