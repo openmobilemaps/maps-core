@@ -14,7 +14,7 @@ abstract class Quad2dInterface {
 
     abstract fun setMinMagFilter(filterType: TextureFilterType)
 
-    abstract fun loadTexture(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, textureHolder: TextureHolderInterface)
+    abstract fun loadTexture(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, textureHolder: TextureHolderInterface, elevationHolder: TextureHolderInterface?)
 
     abstract fun removeTexture()
 
@@ -55,11 +55,11 @@ abstract class Quad2dInterface {
         }
         private external fun native_setMinMagFilter(_nativeRef: Long, filterType: TextureFilterType)
 
-        override fun loadTexture(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, textureHolder: TextureHolderInterface) {
+        override fun loadTexture(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, textureHolder: TextureHolderInterface, elevationHolder: TextureHolderInterface?) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_loadTexture(this.nativeRef, context, textureHolder)
+            native_loadTexture(this.nativeRef, context, textureHolder, elevationHolder)
         }
-        private external fun native_loadTexture(_nativeRef: Long, context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, textureHolder: TextureHolderInterface)
+        private external fun native_loadTexture(_nativeRef: Long, context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, textureHolder: TextureHolderInterface, elevationHolder: TextureHolderInterface?)
 
         override fun removeTexture() {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

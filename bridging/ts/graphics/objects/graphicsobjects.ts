@@ -35,6 +35,7 @@ export interface ComputeObjectInterface {
 export interface GraphicsObjectFactoryInterface {
     createQuad(shader: ShaderProgramInterface): Quad2dInterface;
     createQuadTessellated(shader: ShaderProgramInterface): Quad2dInterface;
+    createQuadTessellatedDisplaced(): Quad2dInterface;
     createPolygon(shader: ShaderProgramInterface): Polygon2dInterface;
     createPolygonTessellated(shader: ShaderProgramInterface): Polygon2dInterface;
     createIcosahedronObject(shader: ShaderProgramInterface): IcosahedronInterface;
@@ -54,7 +55,7 @@ export interface Quad2dInterface {
     setFrame(frame: Quad3dD, textureCoordinates: RectD, origin: Vec3D, is3d: boolean): void;
     setSubdivisionFactor(factor: number): void;
     setMinMagFilter(filterType: TextureFilterType): void;
-    loadTexture(context: RenderingContextInterface, textureHolder: TextureHolderInterface): void;
+    loadTexture(context: RenderingContextInterface, textureHolder: TextureHolderInterface, elevationHolder: TextureHolderInterface | undefined): void;
     removeTexture(): void;
     asGraphicsObject(): GraphicsObjectInterface;
     asMaskingObject(): MaskingObjectInterface;

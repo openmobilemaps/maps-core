@@ -20,6 +20,7 @@ em::val NativeGraphicsObjectFactoryInterface::cppProxyMethods() {
     static const em::val methods = em::val::array(std::vector<std::string> {
         "createQuad",
         "createQuadTessellated",
+        "createQuadTessellatedDisplaced",
         "createPolygon",
         "createPolygonTessellated",
         "createIcosahedronObject",
@@ -49,6 +50,15 @@ em::val NativeGraphicsObjectFactoryInterface::createQuad(const CppType& self, co
 em::val NativeGraphicsObjectFactoryInterface::createQuadTessellated(const CppType& self, const em::val& w_shader) {
     try {
         auto r = self->createQuadTessellated(::djinni_generated::NativeShaderProgramInterface::toCpp(w_shader));
+        return ::djinni_generated::NativeQuad2dInterface::fromCpp(r);
+    }
+    catch(const std::exception& e) {
+        return ::djinni::ExceptionHandlingTraits<::djinni_generated::NativeQuad2dInterface>::handleNativeException(e);
+    }
+}
+em::val NativeGraphicsObjectFactoryInterface::createQuadTessellatedDisplaced(const CppType& self) {
+    try {
+        auto r = self->createQuadTessellatedDisplaced();
         return ::djinni_generated::NativeQuad2dInterface::fromCpp(r);
     }
     catch(const std::exception& e) {
@@ -179,6 +189,7 @@ EMSCRIPTEN_BINDINGS(_graphics_object_factory_interface) {
         .function("nativeDestroy", &NativeGraphicsObjectFactoryInterface::nativeDestroy)
         .function("createQuad", NativeGraphicsObjectFactoryInterface::createQuad)
         .function("createQuadTessellated", NativeGraphicsObjectFactoryInterface::createQuadTessellated)
+        .function("createQuadTessellatedDisplaced", NativeGraphicsObjectFactoryInterface::createQuadTessellatedDisplaced)
         .function("createPolygon", NativeGraphicsObjectFactoryInterface::createPolygon)
         .function("createPolygonTessellated", NativeGraphicsObjectFactoryInterface::createPolygonTessellated)
         .function("createIcosahedronObject", NativeGraphicsObjectFactoryInterface::createIcosahedronObject)

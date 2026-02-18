@@ -64,10 +64,12 @@ textureCoordinates:(nonnull MCRectD *)textureCoordinates
 }
 
 - (void)loadTexture:(nullable id<MCRenderingContextInterface>)context
-      textureHolder:(nullable id<MCTextureHolderInterface>)textureHolder {
+      textureHolder:(nullable id<MCTextureHolderInterface>)textureHolder
+    elevationHolder:(nullable id<MCTextureHolderInterface>)elevationHolder {
     try {
         _cppRefHandle.get()->loadTexture(::djinni_generated::RenderingContextInterface::toCpp(context),
-                                         ::djinni_generated::TextureHolderInterface::toCpp(textureHolder));
+                                         ::djinni_generated::TextureHolderInterface::toCpp(textureHolder),
+                                         ::djinni::Optional<std::optional, ::djinni_generated::TextureHolderInterface>::toCpp(elevationHolder));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -121,11 +123,12 @@ public:
             [djinni_private_get_proxied_objc_object() setMinMagFilter:(::djinni::Enum<::TextureFilterType, MCTextureFilterType>::fromCpp(c_filterType))];
         }
     }
-    void loadTexture(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & c_context, const /*not-null*/ std::shared_ptr<::TextureHolderInterface> & c_textureHolder) override
+    void loadTexture(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & c_context, const /*not-null*/ std::shared_ptr<::TextureHolderInterface> & c_textureHolder, const /*nullable*/ std::shared_ptr<::TextureHolderInterface> & c_elevationHolder) override
     {
         @autoreleasepool {
             [djinni_private_get_proxied_objc_object() loadTexture:(::djinni_generated::RenderingContextInterface::fromCpp(c_context))
-                                                    textureHolder:(::djinni_generated::TextureHolderInterface::fromCpp(c_textureHolder))];
+                                                    textureHolder:(::djinni_generated::TextureHolderInterface::fromCpp(c_textureHolder))
+                                                  elevationHolder:(::djinni::Optional<std::optional, ::djinni_generated::TextureHolderInterface>::fromCpp(c_elevationHolder))];
         }
     }
     void removeTexture() override

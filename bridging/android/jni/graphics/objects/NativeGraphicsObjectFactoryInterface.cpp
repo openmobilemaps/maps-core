@@ -43,6 +43,14 @@ NativeGraphicsObjectFactoryInterface::JavaProxy::~JavaProxy() = default;
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni_generated::NativeQuad2dInterface::toCpp(jniEnv, jret);
 }
+/*not-null*/ std::shared_ptr<::Quad2dInterface> NativeGraphicsObjectFactoryInterface::JavaProxy::createQuadTessellatedDisplaced() {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeGraphicsObjectFactoryInterface>::get();
+    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_createQuadTessellatedDisplaced);
+    ::djinni::jniExceptionCheck(jniEnv);
+    return ::djinni_generated::NativeQuad2dInterface::toCpp(jniEnv, jret);
+}
 /*not-null*/ std::shared_ptr<::Polygon2dInterface> NativeGraphicsObjectFactoryInterface::JavaProxy::createPolygon(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & c_shader) {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
@@ -182,6 +190,15 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objec
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::GraphicsObjectFactoryInterface>(nativeRef);
         auto r = ref->createQuadTessellated(::djinni_generated::NativeShaderProgramInterface::toCpp(jniEnv, j_shader));
+        return ::djinni::release(::djinni_generated::NativeQuad2dInterface::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_GraphicsObjectFactoryInterface_00024CppProxy_native_1createQuadTessellatedDisplaced(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::GraphicsObjectFactoryInterface>(nativeRef);
+        auto r = ref->createQuadTessellatedDisplaced();
         return ::djinni::release(::djinni_generated::NativeQuad2dInterface::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }

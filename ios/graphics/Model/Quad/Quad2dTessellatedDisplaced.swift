@@ -14,7 +14,7 @@ import MapCoreSharedModule
 import UIKit
 import simd
 
-final class Quad2dTessellated: BaseGraphicsObject, @unchecked Sendable {
+final class Quad2dTessellatedDisplaced: BaseGraphicsObject, @unchecked Sendable {
     private var verticesBuffer: MTLBuffer?
     
     private var tessellationFactorsBuffer: MTLBuffer?
@@ -24,6 +24,7 @@ final class Quad2dTessellated: BaseGraphicsObject, @unchecked Sendable {
     private var subdivisionFactor: Int32 = 0
 
     private var texture: MTLTexture?
+    private var elevationTexture: MTLTexture?
 
     private var shader: MCShaderProgramInterface
 
@@ -180,12 +181,18 @@ final class Quad2dTessellated: BaseGraphicsObject, @unchecked Sendable {
 
         if samplerToUse == .magNearest {
             encoder.setFragmentSamplerState(nearestSampler, index: 0)
+            encoder.setVertexSamplerState(nearestSampler, index: 0)
         } else {
             encoder.setFragmentSamplerState(sampler, index: 0)
+            encoder.setVertexSamplerState(sampler, index: 0)
         }
 
         if let texture {
             encoder.setFragmentTexture(texture, index: 0)
+        }
+        
+        if let elevationTexture {
+            encoder.setVertexTexture(elevationTexture, index: 0)
         }
         
         let originBuffer = originBuffers.getNextBuffer(context)
@@ -238,7 +245,7 @@ final class Quad2dTessellated: BaseGraphicsObject, @unchecked Sendable {
     }
 }
 
-extension Quad2dTessellated: MCMaskingObjectInterface {
+extension Quad2dTessellatedDisplaced: MCMaskingObjectInterface {
     func render(
         asMask context: MCRenderingContextInterface?,
         renderPass: MCRenderPassConfig,
@@ -268,7 +275,7 @@ extension Quad2dTessellated: MCMaskingObjectInterface {
     }
 }
 
-extension Quad2dTessellated: MCQuad2dInterface {
+extension Quad2dTessellatedDisplaced: MCQuad2dInterface {
     func setMinMagFilter(_ filterType: MCTextureFilterType) {
         switch filterType {
             case .NEAREST:
@@ -368,19 +375,22 @@ extension Quad2dTessellated: MCQuad2dInterface {
     func loadTexture(
         _ context: MCRenderingContextInterface?,
         textureHolder: MCTextureHolderInterface?,
-        elevationHolder: MCTextureHolderInterface?,
+        elevationHolder: MCTextureHolderInterface?
     ) {
         guard let textureHolder = textureHolder as? TextureHolder else {
             fatalError("unexpected TextureHolder")
         }
+        let elevationHolder = elevationHolder as? TextureHolder
         lock.withCritical {
             texture = textureHolder.texture
+            elevationTexture = elevationHolder?.texture
         }
     }
 
     func removeTexture() {
         lock.withCritical {
             texture = nil
+            elevationTexture = nil
         }
     }
 

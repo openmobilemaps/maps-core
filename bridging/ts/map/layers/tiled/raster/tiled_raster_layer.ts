@@ -35,6 +35,8 @@ export interface Tiled2dMapRasterLayerInterface_statics {
     createWithShader(layerConfig: Tiled2dMapLayerConfig, loaders: Array<LoaderInterface>, shader: ShaderProgramInterface): Tiled2dMapRasterLayerInterface;
     /** the loaders are tried in their respective order, if the first loader returns the error code NOOP the second will be tried and so on */
     create(layerConfig: Tiled2dMapLayerConfig, loaders: Array<LoaderInterface>): Tiled2dMapRasterLayerInterface;
+    /** the loaders are tried in their respective order, if the first loader returns the error code NOOP the second will be tried and so on */
+    createDisplaced(layerConfig: Tiled2dMapLayerConfig, elevationConfig: Tiled2dMapLayerConfig, loaders: Array<LoaderInterface>): Tiled2dMapRasterLayerInterface;
 }
 
 export interface Tiled2dMapRasterLayerCallbackInterface {

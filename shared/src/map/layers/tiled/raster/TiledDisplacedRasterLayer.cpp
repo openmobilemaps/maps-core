@@ -93,7 +93,7 @@ void TiledDisplacedRasterLayer::setupTiles() {
             tileObject->getGraphicsObject()->setup(renderingContext);
 
             if (tileInfo.textureHolder) {
-                tileObject->getQuadObject()->loadTexture(renderingContext, tileInfo.textureHolder);
+                tileObject->getQuadObject()->loadTexture(renderingContext, tileInfo.textureHolder, nullptr);
             }
             tilesReady.push_back(tileInfo.tileInfo);
         }

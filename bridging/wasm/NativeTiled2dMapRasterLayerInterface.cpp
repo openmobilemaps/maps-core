@@ -71,6 +71,17 @@ em::val NativeTiled2dMapRasterLayerInterface::create(const em::val& w_layerConfi
         return ::djinni::ExceptionHandlingTraits<::djinni_generated::NativeTiled2dMapRasterLayerInterface>::handleNativeException(e);
     }
 }
+em::val NativeTiled2dMapRasterLayerInterface::createDisplaced(const em::val& w_layerConfig,const em::val& w_elevationConfig,const em::val& w_loaders) {
+    try {
+        auto r = ::Tiled2dMapRasterLayerInterface::createDisplaced(::djinni_generated::NativeTiled2dMapLayerConfig::toCpp(w_layerConfig),
+                        ::djinni_generated::NativeTiled2dMapLayerConfig::toCpp(w_elevationConfig),
+                        ::djinni::List<::djinni_generated::NativeLoaderInterface>::toCpp(w_loaders));
+        return ::djinni_generated::NativeTiled2dMapRasterLayerInterface::fromCpp(r);
+    }
+    catch(const std::exception& e) {
+        return ::djinni::ExceptionHandlingTraits<::djinni_generated::NativeTiled2dMapRasterLayerInterface>::handleNativeException(e);
+    }
+}
 em::val NativeTiled2dMapRasterLayerInterface::asLayerInterface(const CppType& self) {
     try {
         auto r = self->asLayerInterface();
@@ -230,6 +241,7 @@ EMSCRIPTEN_BINDINGS(_tiled_2d_map_raster_layer_interface) {
         .class_function("createWithMask", NativeTiled2dMapRasterLayerInterface::createWithMask)
         .class_function("createWithShader", NativeTiled2dMapRasterLayerInterface::createWithShader)
         .class_function("create", NativeTiled2dMapRasterLayerInterface::create)
+        .class_function("createDisplaced", NativeTiled2dMapRasterLayerInterface::createDisplaced)
         .function("asLayerInterface", NativeTiled2dMapRasterLayerInterface::asLayerInterface)
         .function("setCallbackHandler", NativeTiled2dMapRasterLayerInterface::setCallbackHandler)
         .function("getCallbackHandler", NativeTiled2dMapRasterLayerInterface::getCallbackHandler)

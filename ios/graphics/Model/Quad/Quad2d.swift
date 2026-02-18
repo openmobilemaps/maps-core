@@ -383,7 +383,8 @@ extension Quad2d: MCQuad2dInterface {
 
     func loadTexture(
         _ context: MCRenderingContextInterface?,
-        textureHolder: MCTextureHolderInterface?
+        textureHolder: MCTextureHolderInterface?,
+        elevationHolder: MCTextureHolderInterface?,
     ) {
         guard let textureHolder = textureHolder as? TextureHolder else {
             fatalError("unexpected TextureHolder")

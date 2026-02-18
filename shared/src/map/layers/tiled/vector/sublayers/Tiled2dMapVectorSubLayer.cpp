@@ -121,5 +121,5 @@ void Tiled2dMapVectorSubLayer::setupGraphicsObject(const std::shared_ptr<Texture
         object->getGraphicsObject()->setup(renderingContext);
     }
 
-    object->getQuadObject()->loadTexture(renderingContext, texture);
+    object->getQuadObject()->loadTexture(renderingContext, texture, nullptr);
 }

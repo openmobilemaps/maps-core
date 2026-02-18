@@ -25,6 +25,8 @@ public:
 
     virtual /*not-null*/ std::shared_ptr<Quad2dInterface> createQuadTessellated(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & shader) = 0;
 
+    virtual /*not-null*/ std::shared_ptr<Quad2dInterface> createQuadTessellatedDisplaced() = 0;
+
     virtual /*not-null*/ std::shared_ptr<Polygon2dInterface> createPolygon(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & shader) = 0;
 
     virtual /*not-null*/ std::shared_ptr<Polygon2dInterface> createPolygonTessellated(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & shader) = 0;
