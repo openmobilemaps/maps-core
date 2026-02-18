@@ -14,7 +14,11 @@
 Camera3dConfig Camera3dConfigFactory::getBasicConfig() {
     static constexpr float minZoom = 200000000;
     static constexpr float maxZoom = 5000000;
-    return Camera3dConfig("basic_config", true, std::nullopt, 300, minZoom, maxZoom, CameraInterpolation({}), CameraInterpolation({}));
+    return Camera3dConfig("basic_config", true, std::nullopt, 300, minZoom, maxZoom, CameraInterpolation({
+        //{0.0f, 65.0f}
+    }), CameraInterpolation({
+        //{0.0f, 0.5f},
+    }));
 }
 
 Camera3dConfig Camera3dConfigFactory::getRestorConfig() {

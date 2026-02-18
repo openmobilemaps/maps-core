@@ -142,10 +142,10 @@ quadTessellationDisplacementVertexShader(const patch_control_point<Vertex3DTextu
         float blend = saturate(length(originOffset) * BlendScale - BlendOffset);
         position = mix(position, bent, blend);
         
+        float3 normal = normalize(transform(frameCoord, float4(0, 0, 0, 0)).xyz);
         float elevation = decodeElevation(elevationTexture0.sample(sampler0, uv).rgb);
-        float3 surfaceNormal = normalize(position.xyz + originOffset.xyz);
-        const float ElevationScale = 1.0 / 300000.0;
-        position.xyz += surfaceNormal * elevation * ElevationScale;
+        const float ElevationScale = 1.0 / 30000.0;
+        position.xyz += normal * elevation * ElevationScale;
     }
     
     VertexOut out {

@@ -20,13 +20,20 @@
 struct Tiled2dMapRasterTileInfo {
     Tiled2dMapVersionedTileInfo tileInfo;
     std::shared_ptr<TextureHolderInterface> textureHolder;
+    std::shared_ptr<TextureHolderInterface> elevationTextureHolder;
     std::vector<::PolygonCoord> masks;
     TileState state;
     int tessellationFactor;
 
-    Tiled2dMapRasterTileInfo(Tiled2dMapVersionedTileInfo tileInfo, const std::shared_ptr<TextureHolderInterface> textureHolder, const std::vector<::PolygonCoord> masks, const TileState state, int tessellationFactor)
+    Tiled2dMapRasterTileInfo(Tiled2dMapVersionedTileInfo tileInfo,
+                             const std::shared_ptr<TextureHolderInterface> textureHolder,
+                             const std::vector<::PolygonCoord> masks,
+                             const TileState state,
+                             int tessellationFactor,
+                             const std::shared_ptr<TextureHolderInterface> elevationTextureHolder = nullptr)
         : tileInfo(tileInfo)
         , textureHolder(textureHolder)
+        , elevationTextureHolder(elevationTextureHolder)
         , masks(masks)
         , state(state)
         , tessellationFactor(tessellationFactor) {}

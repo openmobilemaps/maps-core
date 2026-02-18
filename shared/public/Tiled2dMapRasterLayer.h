@@ -28,6 +28,10 @@
 #include "Actor.h"
 #include "VectorSet.h"
 
+class GraphicsObjectFactoryInterface;
+class RasterShaderInterface;
+class RenderingContextInterface;
+
 
 class Tiled2dMapRasterLayer : public Tiled2dMapLayer,
                               public SimpleTouchInterface,
@@ -121,6 +125,15 @@ private:
     virtual LayerReadyState isReadyToRenderOffscreen() override;
 
 protected:
+    virtual std::shared_ptr<Quad2dInterface> createQuadForTile(
+        const std::shared_ptr<GraphicsObjectFactoryInterface> &graphicsFactory,
+        const std::shared_ptr<RasterShaderInterface> &rasterShader,
+        bool is3D);
+
+    virtual void loadTileTextures(const std::shared_ptr<Quad2dInterface> &quad,
+                                  const std::shared_ptr<RenderingContextInterface> &renderingContext,
+                                  const Tiled2dMapRasterTileInfo &tileInfo);
+
     const std::shared_ptr<Tiled2dMapLayerConfig> layerConfig;
 
     std::optional<::RectI> scissorRect = std::nullopt;
