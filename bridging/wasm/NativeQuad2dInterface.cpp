@@ -53,10 +53,11 @@ void NativeQuad2dInterface::setMinMagFilter(const CppType& self, int32_t w_filte
         return ::djinni::ExceptionHandlingTraits<void>::handleNativeException(e);
     }
 }
-void NativeQuad2dInterface::loadTexture(const CppType& self, const em::val& w_context,const em::val& w_textureHolder) {
+void NativeQuad2dInterface::loadTexture(const CppType& self, const em::val& w_context,const em::val& w_textureHolder,const em::val& w_elevationHolder) {
     try {
         self->loadTexture(::djinni_generated::NativeRenderingContextInterface::toCpp(w_context),
-                    ::djinni_generated::NativeTextureHolderInterface::toCpp(w_textureHolder));
+                    ::djinni_generated::NativeTextureHolderInterface::toCpp(w_textureHolder),
+                    ::djinni::Optional<std::optional, ::djinni_generated::NativeTextureHolderInterface>::toCpp(w_elevationHolder));
     }
     catch(const std::exception& e) {
         return ::djinni::ExceptionHandlingTraits<void>::handleNativeException(e);

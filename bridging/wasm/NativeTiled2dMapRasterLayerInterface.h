@@ -26,6 +26,7 @@ struct NativeTiled2dMapRasterLayerInterface : ::djinni::JsInterface<::Tiled2dMap
     static em::val createWithMask(const em::val& w_layerConfig,const em::val& w_loaders,const em::val& w_mask);
     static em::val createWithShader(const em::val& w_layerConfig,const em::val& w_loaders,const em::val& w_shader);
     static em::val create(const em::val& w_layerConfig,const em::val& w_loaders);
+    static em::val createDisplaced(const em::val& w_layerConfig,const em::val& w_elevationConfig,const em::val& w_loaders);
     static em::val asLayerInterface(const CppType& self);
     static void setCallbackHandler(const CppType& self, const em::val& w_handler);
     static em::val getCallbackHandler(const CppType& self);

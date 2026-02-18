@@ -25,6 +25,7 @@ struct NativeGraphicsObjectFactoryInterface : ::djinni::JsInterface<::GraphicsOb
 
     static em::val createQuad(const CppType& self, const em::val& w_shader);
     static em::val createQuadTessellated(const CppType& self, const em::val& w_shader);
+    static em::val createQuadTessellatedDisplaced(const CppType& self);
     static em::val createPolygon(const CppType& self, const em::val& w_shader);
     static em::val createPolygonTessellated(const CppType& self, const em::val& w_shader);
     static em::val createIcosahedronObject(const CppType& self, const em::val& w_shader);

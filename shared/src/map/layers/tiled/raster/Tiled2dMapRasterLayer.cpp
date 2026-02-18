@@ -156,7 +156,7 @@ void Tiled2dMapRasterLayer::resume() {
         if (tileObject.second) {
             tileObject.second->getGraphicsObject()->setup(renderingContext);
             auto rectangle = tileObject.second->getQuadObject();
-            rectangle->loadTexture(renderingContext, tileObject.first.textureHolder);
+            rectangle->loadTexture(renderingContext, tileObject.first.textureHolder, nullptr);
         }
     }
     for (const auto &tileMask : tileMaskMap) {
@@ -431,7 +431,7 @@ void Tiled2dMapRasterLayer::setupTiles() {
             tileObject->getGraphicsObject()->setup(renderingContext);
 
             if (tileInfo.textureHolder) {
-                tileObject->getQuadObject()->loadTexture(renderingContext, tileInfo.textureHolder);
+                tileObject->getQuadObject()->loadTexture(renderingContext, tileInfo.textureHolder, nullptr);
             }
             // the texture holder can be empty, some tileserver serve 0 byte textures
             tilesReady.push_back(tileInfo.tileInfo);

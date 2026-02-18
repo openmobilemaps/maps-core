@@ -24,7 +24,8 @@ textureCoordinates:(nonnull MCRectD *)textureCoordinates
 - (void)setMinMagFilter:(MCTextureFilterType)filterType;
 
 - (void)loadTexture:(nullable id<MCRenderingContextInterface>)context
-      textureHolder:(nullable id<MCTextureHolderInterface>)textureHolder;
+      textureHolder:(nullable id<MCTextureHolderInterface>)textureHolder
+    elevationHolder:(nullable id<MCTextureHolderInterface>)elevationHolder;
 
 - (void)removeTexture;
 

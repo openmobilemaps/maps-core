@@ -168,6 +168,7 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
     case rasterShader
     case quadTessellatedShader
     case quadTessellatedWireframeShader
+    case quadTessellatedDisplaced
     case stretchShader
     case stretchInstancedShader
     case unitSphereAlphaShader
@@ -202,6 +203,7 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
             case .rasterShader: return "Raster shader"
             case .quadTessellatedShader: return "Quad Tessellated shader"
             case .quadTessellatedWireframeShader: return "Quad Tessellated Wireframe shader"
+            case .quadTessellatedDisplaced: return "Quad Tessellated Displaced shader"
             case .stretchShader: return "Stretch shader"
             case .stretchInstancedShader: return "Stretch Instanced shader"
             case .unitSphereAlphaShader: return "Unit Sphere Alpha shader with texture"
@@ -219,6 +221,7 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
             case .rasterShader,
                 .quadTessellatedShader,
                 .quadTessellatedWireframeShader,
+                .quadTessellatedDisplaced,
                 .roundColorShader,
                 .unitSphereRoundColorShader,
                 .alphaShader,
@@ -256,6 +259,7 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
             case .rasterShader: return "baseVertexShaderModel"
             case .quadTessellatedShader: return "quadTessellationVertexShader"
             case .quadTessellatedWireframeShader: return "quadTessellationVertexShader"
+            case .quadTessellatedDisplaced: return "quadTessellationDisplacementVertexShader"
             case .stretchShader: return "stretchVertexShader"
             case .stretchInstancedShader: return "stretchInstancedVertexShader"
             case .unitSphereAlphaShader: return "baseVertexShader"
@@ -292,6 +296,7 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
             case .rasterShader: return "rasterFragmentShader"
             case .quadTessellatedShader: return "rasterFragmentShader"
             case .quadTessellatedWireframeShader: return "wireframeFragmentShader"
+            case .quadTessellatedDisplaced: return "rasterFragmentShader"
             case .stretchShader: return "stretchFragmentShader"
             case .stretchInstancedShader: return "stretchInstancedFragmentShader"
             case .unitSphereAlphaShader: return "baseFragmentShader"
@@ -331,7 +336,8 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
                 .polygonTessellatedWireframeShader:
                 return Vertex3DTessellated.descriptor
             case .quadTessellatedShader,
-                .quadTessellatedWireframeShader:
+                .quadTessellatedWireframeShader,
+                .quadTessellatedDisplaced:
                 return Vertex3DTextureTessellated.descriptor
             default:
                 return Vertex.descriptor
@@ -340,14 +346,14 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
     
     var tessellation: MCTessellationMode {
         switch self {
-            case .quadTessellatedShader:
+            case .quadTessellatedShader,
+                .quadTessellatedWireframeShader,
+                .quadTessellatedDisplaced:
                 return MCTessellationMode.QUAD
             case .maskTessellatedShader,
                 .polygonTessellatedShader,
                 .polygonTessellatedWireframeShader:
                return MCTessellationMode.TRIANGLE
-            case .quadTessellatedWireframeShader:
-                return MCTessellationMode.QUAD
             default:
                 return MCTessellationMode.NONE
         }

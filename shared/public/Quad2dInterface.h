@@ -9,6 +9,7 @@
 #include "Vec3D.h"
 #include <cstdint>
 #include <memory>
+#include <optional>
 
 class GraphicsObjectInterface;
 class MaskingObjectInterface;
@@ -25,7 +26,7 @@ public:
 
     virtual void setMinMagFilter(TextureFilterType filterType) = 0;
 
-    virtual void loadTexture(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & context, const /*not-null*/ std::shared_ptr<TextureHolderInterface> & textureHolder) = 0;
+    virtual void loadTexture(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & context, const /*not-null*/ std::shared_ptr<TextureHolderInterface> & textureHolder, const /*nullable*/ std::shared_ptr<TextureHolderInterface> & elevationHolder) = 0;
 
     virtual void removeTexture() = 0;
 
