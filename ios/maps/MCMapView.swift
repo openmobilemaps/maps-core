@@ -40,6 +40,8 @@ open class MCMapView: MTKView {
     public weak var sizeDelegate: MCMapSizeDelegate?
 
     public var renderTargetTextures: [RenderTargetTexture] = []
+    private var depthTextures: [MTLTexture] = []
+    private var depthTextureSize: CGSize = .zero
 
     public init(
         mapConfig: MCMapConfig = MCMapConfig(
@@ -103,7 +105,7 @@ open class MCMapView: MTKView {
 
         delegate = self
 
-        depthStencilPixelFormat = .stencil8
+        depthStencilPixelFormat = MetalContext.depthPixelFormat
 
         if #available(iOS 16.0, *) {
             depthStencilStorageMode = .memoryless
@@ -268,9 +270,14 @@ extension MCMapView: MTKViewDelegate {
             computeEncoder.endEncoding()
         }
 
-        guard let renderPassDescriptor = renderToImage ? getToImageRenderpass() : view.currentRenderPassDescriptor,
-            let renderEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor)
-        else {
+        guard let renderPassDescriptor = renderToImage ? getToImageRenderpass() : view.currentRenderPassDescriptor else {
+            self.renderSemaphore.signal()
+            return
+        }
+
+        ensureMainDepthAttachment(renderPassDescriptor, drawableSize: view.drawableSize)
+
+        guard let renderEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor) else {
             self.renderSemaphore.signal()
             return
         }
@@ -311,6 +318,57 @@ extension MCMapView: MTKViewDelegate {
         }
 
         return self.renderToImageRenderPass?.getRenderpass(size: self.drawableSize)
+    }
+
+    private func ensureMainDepthAttachment(
+        _ renderPassDescriptor: MTLRenderPassDescriptor,
+        drawableSize: CGSize
+    ) {
+        guard !renderToImage else { return }
+        guard let depthTexture = depthTexture(
+            for: drawableSize, bufferIndex: renderingContext.currentBufferIndex)
+        else { return }
+
+        renderPassDescriptor.depthAttachment.texture = depthTexture
+        renderPassDescriptor.depthAttachment.loadAction = .clear
+        renderPassDescriptor.depthAttachment.storeAction = .dontCare
+        renderPassDescriptor.depthAttachment.clearDepth = 1.0
+        renderPassDescriptor.stencilAttachment.texture = depthTexture
+        renderPassDescriptor.stencilAttachment.loadAction = .clear
+        renderPassDescriptor.stencilAttachment.storeAction = .dontCare
+        renderPassDescriptor.stencilAttachment.clearStencil = 0
+    }
+
+    private func depthTexture(for size: CGSize, bufferIndex: Int) -> MTLTexture? {
+        let width = max(Int(size.width), 1)
+        let height = max(Int(size.height), 1)
+        let normalizedSize = CGSize(width: width, height: height)
+
+        if depthTextureSize != normalizedSize || depthTextures.count != RenderingContext.bufferCount {
+            depthTextures.removeAll(keepingCapacity: true)
+            for _ in 0..<RenderingContext.bufferCount {
+                guard let texture = makeDepthTexture(width: width, height: height) else {
+                    depthTextures.removeAll(keepingCapacity: false)
+                    return nil
+                }
+                depthTextures.append(texture)
+            }
+            depthTextureSize = normalizedSize
+        }
+
+        return depthTextures.indices.contains(bufferIndex) ? depthTextures[bufferIndex] : nil
+    }
+
+    private func makeDepthTexture(width: Int, height: Int) -> MTLTexture? {
+        let descriptor = MTLTextureDescriptor.texture2DDescriptor(
+            pixelFormat: MetalContext.depthPixelFormat,
+            width: width,
+            height: height,
+            mipmapped: false
+        )
+        descriptor.storageMode = .private
+        descriptor.usage = [.renderTarget]
+        return MetalContext.current.device.makeTexture(descriptor: descriptor)
     }
 
     public func renderToImage(

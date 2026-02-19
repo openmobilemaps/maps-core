@@ -33,6 +33,7 @@ public final class MetalContext: Sendable {
     public let library: MTLLibrary
 
     static let colorPixelFormat: MTLPixelFormat = .bgra8Unorm
+    static let depthPixelFormat: MTLPixelFormat = .depth32Float_stencil8
     let textureLoader: MTKTextureLoader
 
     public let pipelineLibrary: PipelineLibrary

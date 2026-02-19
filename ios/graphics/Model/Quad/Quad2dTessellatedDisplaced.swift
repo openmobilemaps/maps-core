@@ -28,8 +28,10 @@ final class Quad2dTessellatedDisplaced: BaseGraphicsObject, @unchecked Sendable 
 
     private var shader: MCShaderProgramInterface
 
-    private var stencilState: MTLDepthStencilState?
-    private var renderPassStencilState: MTLDepthStencilState?
+    private var maskedDepthStencilState: MTLDepthStencilState?
+    private var renderAsMaskDepthStencilState: MTLDepthStencilState?
+    private var renderPassDepthStencilState: MTLDepthStencilState?
+    private var defaultDepthStencilState: MTLDepthStencilState?
 
     private var renderAsMask = false
 
@@ -69,20 +71,46 @@ final class Quad2dTessellatedDisplaced: BaseGraphicsObject, @unchecked Sendable 
             device: device)
     }
 
-    private func setupStencilStates() {
-        let ss2 = MTLStencilDescriptor()
-        ss2.stencilCompareFunction = .equal
-        ss2.stencilFailureOperation = .zero
-        ss2.depthFailureOperation = .keep
-        ss2.depthStencilPassOperation = .keep
-        ss2.readMask = 0b1111_1111
-        ss2.writeMask = 0b0000_0000
+    private func setupDepthStencilStates() {
+        let maskedStencil = MTLStencilDescriptor()
+        maskedStencil.stencilCompareFunction = .equal
+        maskedStencil.stencilFailureOperation = .zero
+        maskedStencil.depthFailureOperation = .keep
+        maskedStencil.depthStencilPassOperation = .keep
+        maskedStencil.readMask = 0b1111_1111
+        maskedStencil.writeMask = 0b0000_0000
+        maskedDepthStencilState = makeDepthStencilState(stencil: maskedStencil)
 
-        let s2 = MTLDepthStencilDescriptor()
-        s2.frontFaceStencil = ss2
-        s2.backFaceStencil = ss2
+        let renderAsMaskStencil = MTLStencilDescriptor()
+        renderAsMaskStencil.stencilCompareFunction = .always
+        renderAsMaskStencil.stencilFailureOperation = .keep
+        renderAsMaskStencil.depthFailureOperation = .keep
+        renderAsMaskStencil.depthStencilPassOperation = .replace
+        renderAsMaskStencil.writeMask = 0b1100_0000
+        renderAsMaskDepthStencilState = makeDepthStencilState(stencil: renderAsMaskStencil)
 
-        stencilState = device.makeDepthStencilState(descriptor: s2)
+        let renderPassStencil = MTLStencilDescriptor()
+        renderPassStencil.stencilCompareFunction = .equal
+        renderPassStencil.stencilFailureOperation = .keep
+        renderPassStencil.depthFailureOperation = .keep
+        renderPassStencil.depthStencilPassOperation = .incrementWrap
+        renderPassStencil.readMask = 0b1111_1111
+        renderPassStencil.writeMask = 0b0000_0001
+        renderPassDepthStencilState = makeDepthStencilState(stencil: renderPassStencil)
+
+        let defaultStencil = MTLStencilDescriptor()
+        defaultStencil.stencilCompareFunction = .equal
+        defaultStencil.depthStencilPassOperation = .keep
+        defaultDepthStencilState = makeDepthStencilState(stencil: defaultStencil)
+    }
+
+    private func makeDepthStencilState(stencil: MTLStencilDescriptor) -> MTLDepthStencilState? {
+        let descriptor = MTLDepthStencilDescriptor()
+        //descriptor.depthCompareFunction = .lessEqual
+        descriptor.isDepthWriteEnabled = true
+        descriptor.frontFaceStencil = stencil
+        descriptor.backFaceStencil = stencil
+        return device.makeDepthStencilState(descriptor: descriptor)
     }
 
     override func isReady() -> Bool {
@@ -128,24 +156,21 @@ final class Quad2dTessellatedDisplaced: BaseGraphicsObject, @unchecked Sendable 
             }
         #endif
 
+        if maskedDepthStencilState == nil {
+            setupDepthStencilStates()
+        }
+
         if isMasked {
-            if stencilState == nil {
-                setupStencilStates()
-            }
-            encoder.setDepthStencilState(stencilState)
+            encoder.setDepthStencilState(maskedDepthStencilState)
             encoder.setStencilReferenceValue(0b1100_0000)
-        } else if let mask = context.mask, renderAsMask {
-            encoder.setDepthStencilState(mask)
+        } else if renderAsMask {
+            encoder.setDepthStencilState(renderAsMaskDepthStencilState)
             encoder.setStencilReferenceValue(0b1100_0000)
         } else if renderPass.isPassMasked {
-            if renderPassStencilState == nil {
-                renderPassStencilState = self.renderPassMaskStencilState()
-            }
-
-            encoder.setDepthStencilState(renderPassStencilState)
+            encoder.setDepthStencilState(renderPassDepthStencilState)
             encoder.setStencilReferenceValue(0b0000_0000)
         } else {
-            encoder.setDepthStencilState(context.defaultMask)
+            encoder.setDepthStencilState(defaultDepthStencilState)
         }
 
         shader.setupProgram(context)

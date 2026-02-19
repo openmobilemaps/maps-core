@@ -31,7 +31,7 @@ rasterFragmentShader(VertexOut in [[stage_in]],
     half4 color = texture0.sample(textureSampler, in.uv);
 
     if (color.a == 0.0 || styling[0].opacity == 0.0) {
-        return half4(0.0);
+        discard_fragment();
     }
     
     half3 rgb = color.rgb;
