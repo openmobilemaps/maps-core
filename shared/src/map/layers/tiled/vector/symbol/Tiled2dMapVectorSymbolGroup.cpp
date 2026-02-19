@@ -152,13 +152,15 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
         if (hasImageFromCustomProvider) {
             hasIconPotentially = true;
         } else if (!hasImageFromCustomProviderRequested && layerDescription->style.iconImageEvaluator.getValue()) {
-            // Attempt to evaluate without zoom and state
-            const auto zoomAndStateIndependentEvalCtx = EvaluationContext(dpFactor, context.get(), nullptr);
-            const auto value = layerDescription->style.iconImageEvaluator.getValue();
-            const auto res = value->evaluate(zoomAndStateIndependentEvalCtx);
-            const std::string *iconImage = std::get_if<std::string>(&res);
-            // if this succeeded returns empty, there is no icon image for any zoom level.
-            hasIconPotentially = (iconImage != nullptr && !iconImage->empty());
+            const auto iconImageUsedKeys = layerDescription->style.iconImageEvaluator.getValue()->getUsedKeys();
+            if (iconImageUsedKeys.isStateDependant() ||
+                iconImageUsedKeys.containsUsedKey(ValueKeys::ZOOM)) {
+                hasIconPotentially = true;
+            } else {
+                // Expression independent of zoom/state, so we can evaluate to see if there is an icon for this feature.
+                const auto iconImage = layerDescription->style.getIconImage(evalContext);
+                hasIconPotentially = !iconImage.value.empty();
+            }
         } else {
             hasIconPotentially = false;
         }
