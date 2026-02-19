@@ -12,7 +12,7 @@ import Foundation
 import MapCoreSharedModule
 
 class GraphicsFactory: MCGraphicsObjectFactoryInterface {
-    
+
     func createQuadMask(_ is3d: Bool) -> (any MCQuad2dInterface)? {
         let shader = ColorShader(shader: .colorShader)
         return Quad2d(shader: shader, metalContext: .current)
@@ -22,7 +22,7 @@ class GraphicsFactory: MCGraphicsObjectFactoryInterface {
         let shader = MaskShader()
         return Polygon2d(shader: shader, metalContext: .current)
     }
-    
+
     func createPolygonMaskTessellated(_ is3d: Bool) -> (any MCPolygon2dInterface)? {
         let shader = MaskShader(shader: .maskTessellatedShader)
         return Polygon2dTessellated(shader: shader, metalContext: .current)
@@ -42,7 +42,7 @@ class GraphicsFactory: MCGraphicsObjectFactoryInterface {
         guard let shader else { fatalError("No Shader provided") }
         return Quad2d(shader: shader, metalContext: .current)
     }
-    
+
     func createQuadTessellated(_ shader: MCShaderProgramInterface?) -> MCQuad2dInterface? {
         guard let shader else { fatalError("No Shader provided") }
         return Quad2dTessellated(shader: shader, metalContext: .current)
@@ -67,7 +67,7 @@ class GraphicsFactory: MCGraphicsObjectFactoryInterface {
         guard let shader else { fatalError("No Shader provided") }
         return Polygon2d(shader: shader, metalContext: .current)
     }
-    
+
     func createPolygonTessellated(_ shader: MCShaderProgramInterface?) -> MCPolygon2dInterface? {
         guard let shader else { fatalError("No Shader provided") }
         return Polygon2dTessellated(shader: shader, metalContext: .current)
