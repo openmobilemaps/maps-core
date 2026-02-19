@@ -54,7 +54,8 @@ public enum PipelineDescriptorFactory {
                 fatalError("blendMode not implemented")
         }
 
-        pipelineDescriptor.stencilAttachmentPixelFormat = .stencil8
+        pipelineDescriptor.stencilAttachmentPixelFormat = MetalContext.depthPixelFormat
+        pipelineDescriptor.depthAttachmentPixelFormat = MetalContext.depthPixelFormat
         pipelineDescriptor.label = label
 
         if let constants = constants {

@@ -21,7 +21,7 @@ import UIKit
 open class RenderTargetTexture: Identifiable, Equatable, MCRenderTargetInterface {
     public let name: String
 
-    private var textures: [(color: MTLTexture, stencilDepth: MTLTexture)] = []
+    private var textures: [(color: MTLTexture, depthStencil: MTLTexture)] = []
 
     public init(name: String = UUID().uuidString) {
         self.name = name
@@ -39,11 +39,17 @@ open class RenderTargetTexture: Identifiable, Equatable, MCRenderTargetInterface
         renderPassDescriptor.colorAttachments[0]?.loadAction = .clear
         renderPassDescriptor.colorAttachments[0]?.clearColor = .init(red: 0, green: 0, blue: 0.0, alpha: 0.0)
         renderPassDescriptor.colorAttachments[0]?.storeAction = .store
+        renderPassDescriptor.depthAttachment.loadAction = .clear
+        renderPassDescriptor.depthAttachment.storeAction = .dontCare
+        renderPassDescriptor.depthAttachment.clearDepth = 1.0
+        renderPassDescriptor.stencilAttachment.loadAction = .clear
         renderPassDescriptor.stencilAttachment.storeAction = .dontCare
+        renderPassDescriptor.stencilAttachment.clearStencil = 0
 
         renderPassDescriptor
             .colorAttachments[0].texture = textures[context.currentBufferIndex].color
-        renderPassDescriptor.stencilAttachment.texture = textures[context.currentBufferIndex].stencilDepth
+        renderPassDescriptor.depthAttachment.texture = textures[context.currentBufferIndex].depthStencil
+        renderPassDescriptor.stencilAttachment.texture = textures[context.currentBufferIndex].depthStencil
 
         if let renderEncoder = commandBuffer?.makeRenderCommandEncoder(descriptor: renderPassDescriptor) {
             renderEncoder.label = "Offscreen Encoder (\(name))"
@@ -61,23 +67,34 @@ open class RenderTargetTexture: Identifiable, Equatable, MCRenderTargetInterface
         }
         lastSize = newSize
 
-        let texDescriptor = MTLTextureDescriptor()
-        texDescriptor.textureType = .type2D
-        texDescriptor.usage = [.renderTarget, .shaderRead]
-        texDescriptor.storageMode = .private
-        texDescriptor.width = Int(newSize.x)
-        texDescriptor.height = Int(newSize.y)
+        textures.removeAll(keepingCapacity: true)
+
+        let colorDescriptor = MTLTextureDescriptor()
+        colorDescriptor.textureType = .type2D
+        colorDescriptor.usage = [.renderTarget, .shaderRead]
+        colorDescriptor.storageMode = .private
+        colorDescriptor.width = Int(newSize.x)
+        colorDescriptor.height = Int(newSize.y)
+        colorDescriptor.pixelFormat = MetalContext.colorPixelFormat
+
+        let depthStencilDescriptor = MTLTextureDescriptor()
+        depthStencilDescriptor.textureType = .type2D
+        depthStencilDescriptor.usage = [.renderTarget]
+        depthStencilDescriptor.storageMode = .private
+        depthStencilDescriptor.width = Int(newSize.x)
+        depthStencilDescriptor.height = Int(newSize.y)
+        depthStencilDescriptor.pixelFormat = MetalContext.depthPixelFormat
 
         for _ in 0..<RenderingContext.bufferCount {
-            texDescriptor.pixelFormat = MetalContext.colorPixelFormat
-            guard let texture = MetalContext.current.device.makeTexture(descriptor: texDescriptor) else {
-                continue
+            guard
+                let texture = MetalContext.current.device.makeTexture(descriptor: colorDescriptor),
+                let depthStencilTexture = MetalContext.current.device.makeTexture(descriptor: depthStencilDescriptor)
+            else {
+                textures.removeAll(keepingCapacity: false)
+                return
             }
 
-            texDescriptor.pixelFormat = .stencil8
-            let stencilTexture = MetalContext.current.device.makeTexture(descriptor: texDescriptor)!
-
-            textures.append((color: texture, stencilDepth: stencilTexture))
+            textures.append((color: texture, depthStencil: depthStencilTexture))
         }
     }
 

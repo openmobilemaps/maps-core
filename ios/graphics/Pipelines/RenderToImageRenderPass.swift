@@ -49,7 +49,7 @@ class RenderToImageRenderPass {
 
     private func getOfflineRenderPass(size: CGSize) -> MTLRenderPassDescriptor? {
         guard let texture = makeTexture(size: size),
-            let stencil = makeStencilTexture(size: size)
+            let depthStencil = makeDepthStencilTexture(size: size)
         else { return nil }
 
         let passDescriptor = MTLRenderPassDescriptor()
@@ -58,9 +58,15 @@ class RenderToImageRenderPass {
         passDescriptor.colorAttachments[0].storeAction = .store
         passDescriptor.colorAttachments[0].clearColor = MTLClearColorMake(0, 0, 0, 1)
         // Stencil
-        passDescriptor.stencilAttachment.texture = stencil
+        passDescriptor.stencilAttachment.texture = depthStencil
         passDescriptor.stencilAttachment.loadAction = .clear
         passDescriptor.stencilAttachment.storeAction = .dontCare
+        passDescriptor.stencilAttachment.clearStencil = 0
+        // Depth
+        passDescriptor.depthAttachment.texture = depthStencil
+        passDescriptor.depthAttachment.loadAction = .clear
+        passDescriptor.depthAttachment.storeAction = .dontCare
+        passDescriptor.depthAttachment.clearDepth = 1.0
         return passDescriptor
     }
 
@@ -75,14 +81,13 @@ class RenderToImageRenderPass {
         return device.makeTexture(descriptor: descriptor)
     }
 
-    private func makeStencilTexture(size: CGSize) -> MTLTexture? {
+    private func makeDepthStencilTexture(size: CGSize) -> MTLTexture? {
         let descriptor = MTLTextureDescriptor.texture2DDescriptor(
-            pixelFormat: .stencil8,
+            pixelFormat: MetalContext.depthPixelFormat,
             width: Int(size.width),
             height: Int(size.height),
             mipmapped: false
         )
-
         descriptor.storageMode = .private
         descriptor.usage = [.renderTarget]
         return device.makeTexture(descriptor: descriptor)
