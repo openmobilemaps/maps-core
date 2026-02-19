@@ -117,9 +117,8 @@ float decodeElevation(float3 rgbaAltitude) {
             rgbaAltitude.b * 255.0) / 10.0 - 10000.0;
 }
 
-[[patch(quad, 4)]] vertex VertexOut
-quadTessellationDisplacementVertexShader(const patch_control_point<Vertex3DTextureTessellatedIn> controlPoints [[stage_in]],
-                                         const float2 positionInPatch [[position_in_patch]],
+vertex VertexOut
+quadTessellationDisplacementVertexShader(const Vertex3DTextureIn vertexIn [[stage_in]],
                                          constant float4x4 &vpMatrix [[buffer(1)]],
                                          constant float4x4 &mMatrix [[buffer(2)]],
                                          constant float4 &originOffset [[buffer(3)]],
@@ -128,25 +127,13 @@ quadTessellationDisplacementVertexShader(const patch_control_point<Vertex3DTextu
                                          texture2d<float> elevationTexture0 [[ texture(0)]],
                                          sampler sampler0 [[sampler(0)]])
 {
-    Vertex3DTextureTessellatedIn vA = controlPoints[0];
-    Vertex3DTextureTessellatedIn vB = controlPoints[1];
-    Vertex3DTextureTessellatedIn vC = controlPoints[2];
-    Vertex3DTextureTessellatedIn vD = controlPoints[3];
-    half2 p = half2(positionInPatch);
+    float4 position = vertexIn.position;
+    float2 uv = vertexIn.uv;
     
-    float4 position = bilerp_fast(vA.position, vB.position, vC.position, vD.position, p);
-    float2 uv = bilerp_fast(vA.uv, vB.uv, vC.uv, vD.uv, p);
-    if (is3d) {
-        float2 frameCoord = bilerp_fast(vA.frameCoord, vB.frameCoord, vC.frameCoord, vD.frameCoord, p);
-        float4 bent = transform(frameCoord, origin) - originOffset;
-        float blend = saturate(length(originOffset) * BlendScale - BlendOffset);
-        position = mix(position, bent, blend);
-        
-        float3 normal = normalize(transform(frameCoord, float4(0, 0, 0, 0)).xyz);
-        float elevation = decodeElevation(elevationTexture0.sample(sampler0, uv).rgb);
-        const float ElevationScale = 1.0 / 30000.0;
-        position.xyz += normal * elevation * ElevationScale;
-    }
+    float3 normal = normalize(position.xyz + origin.xyz + originOffset.xyz);
+    float elevation = decodeElevation(elevationTexture0.sample(sampler0, uv).rgb);
+    const float ElevationScale = 1.0 / 30000.0;
+    position.xyz += normal * elevation * ElevationScale;
     
     VertexOut out {
         .position = vpMatrix * ((mMatrix * float4(position.xyz, 1)) + originOffset),

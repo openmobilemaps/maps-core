@@ -330,15 +330,15 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
                 .sphereEffectShader,
                 .skySphereShader,
                 .roundColorShader,
-                .elevationInterpolation:
+                .elevationInterpolation,
+                .quadTessellatedDisplaced:
                 return Vertex3DTexture.descriptor
             case .maskTessellatedShader,
                 .polygonTessellatedShader,
                 .polygonTessellatedWireframeShader:
                 return Vertex3DTessellated.descriptor
             case .quadTessellatedShader,
-                .quadTessellatedWireframeShader,
-                .quadTessellatedDisplaced:
+                .quadTessellatedWireframeShader:
                 return Vertex3DTextureTessellated.descriptor
             default:
                 return Vertex.descriptor
@@ -348,8 +348,7 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
     var tessellation: MCTessellationMode {
         switch self {
             case .quadTessellatedShader,
-                .quadTessellatedWireframeShader,
-                .quadTessellatedDisplaced:
+                .quadTessellatedWireframeShader:
                 return MCTessellationMode.QUAD
             case .maskTessellatedShader,
                 .polygonTessellatedShader,
