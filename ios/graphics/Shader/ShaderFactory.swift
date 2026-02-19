@@ -23,7 +23,7 @@ class ShaderFactory: MCShaderFactoryInterface {
     func createUnitSphereRasterShader() -> MCRasterShaderInterface? {
         RasterShader()
     }
-    
+
     func createQuadTessellatedShader() -> MCRasterShaderInterface? {
         RasterShader(shader: .quadTessellatedShader)
     }
@@ -87,7 +87,7 @@ class ShaderFactory: MCShaderFactoryInterface {
     func createColorShader() -> MCColorShaderInterface? {
         ColorShader()
     }
-    
+
     func createPolygonTessellatedShader(_ unitSphere: Bool) -> MCColorShaderInterface? {
         ColorShader(shader: .polygonTessellatedShader)
     }

@@ -30,7 +30,7 @@ public struct Vertex3DTextureTessellated: Equatable {
         vertexDescriptor.attributes[0].format = .float3
         vertexDescriptor.attributes[0].offset = offset
         offset += MemoryLayout<SIMD3<Float>>.stride
-        
+
         // Frame Coord (2D coord to project onto unit sphere)
         vertexDescriptor.attributes[1].bufferIndex = bufferIndex
         vertexDescriptor.attributes[1].format = .float2
@@ -42,7 +42,7 @@ public struct Vertex3DTextureTessellated: Equatable {
         vertexDescriptor.attributes[2].format = .float2
         vertexDescriptor.attributes[2].offset = offset
         offset += MemoryLayout<SIMD2<Float>>.stride
-        
+
         vertexDescriptor.layouts[0].stride = MemoryLayout<Vertex3DTextureTessellated>.stride
         vertexDescriptor.layouts[0].stepRate = 1
         vertexDescriptor.layouts[0].stepFunction = .perPatchControlPoint

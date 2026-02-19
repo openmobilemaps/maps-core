@@ -16,10 +16,10 @@ import simd
 
 final class Quad2dTessellated: BaseGraphicsObject, @unchecked Sendable {
     private var verticesBuffer: MTLBuffer?
-    
+
     private var tessellationFactorsBuffer: MTLBuffer?
     private var originBuffers: MultiBuffer<simd_float4>
-    
+
     private var is3d = false
     private var subdivisionFactor: Int32 = 0
 
@@ -53,15 +53,14 @@ final class Quad2dTessellated: BaseGraphicsObject, @unchecked Sendable {
                 sampler: metalContext.samplerLibrary.value(
                     Sampler.magLinear.rawValue)!,
                 label: label)
-        
-        
-        let factorH = Half(pow(2, Float(self.subdivisionFactor))).bits;
-        
+
+        let factorH = Half(pow(2, Float(self.subdivisionFactor))).bits
+
         var tessellationFactors = MTLQuadTessellationFactorsHalf(
             edgeTessellationFactor: (factorH, factorH, factorH, factorH),
             insideTessellationFactor: (factorH, factorH)
-        );
-            
+        )
+
         self.tessellationFactorsBuffer.copyOrCreate(
             bytes: &tessellationFactors,
             length: MemoryLayout<MTLQuadTessellationFactorsHalf>.stride,
@@ -187,7 +186,7 @@ final class Quad2dTessellated: BaseGraphicsObject, @unchecked Sendable {
         if let texture {
             encoder.setFragmentTexture(texture, index: 0)
         }
-        
+
         let originBuffer = originBuffers.getNextBuffer(context)
         if let bufferPointer = originBuffer?.contents()
             .assumingMemoryBound(
@@ -200,33 +199,33 @@ final class Quad2dTessellated: BaseGraphicsObject, @unchecked Sendable {
             fatalError()
         }
         encoder.setVertexBuffer(originBuffer, offset: 0, index: 4)
-        
+
         encoder.setVertexBytes(&self.is3d, length: MemoryLayout<Bool>.stride, index: 5)
-        
+
         encoder.setTessellationFactorBuffer(tessellationFactorsBuffer, offset: 0, instanceStride: 0)
-        
+
         #if HARDWARE_TESSELLATION_WIREFRAME_METAL
-        let wireframePipeline = MetalContext.current.pipelineLibrary.value(
-            Pipeline(
-                type: .quadTessellatedWireframeShader,
-                blendMode: (shader as? BaseShader)?.blendMode ?? .NORMAL)
-        )
-        if let wireframePipeline {
-            context.setRenderPipelineStateIfNeeded(wireframePipeline)
-        }
-        encoder.setTriangleFillMode(.lines)
-        encoder.drawPatches(
-            numberOfPatchControlPoints: 4,
-            patchStart: 0,
-            patchCount: 1,
-            patchIndexBuffer: nil,
-            patchIndexBufferOffset: 0,
-            instanceCount: 1,
-            baseInstance: 0)
-        encoder.setTriangleFillMode(.fill)
-        shader.preRender(context, isScreenSpaceCoords: isScreenSpaceCoords)
+            let wireframePipeline = MetalContext.current.pipelineLibrary.value(
+                Pipeline(
+                    type: .quadTessellatedWireframeShader,
+                    blendMode: (shader as? BaseShader)?.blendMode ?? .NORMAL)
+            )
+            if let wireframePipeline {
+                context.setRenderPipelineStateIfNeeded(wireframePipeline)
+            }
+            encoder.setTriangleFillMode(.lines)
+            encoder.drawPatches(
+                numberOfPatchControlPoints: 4,
+                patchStart: 0,
+                patchCount: 1,
+                patchIndexBuffer: nil,
+                patchIndexBufferOffset: 0,
+                instanceCount: 1,
+                baseInstance: 0)
+            encoder.setTriangleFillMode(.fill)
+            shader.preRender(context, isScreenSpaceCoords: isScreenSpaceCoords)
         #endif
-        
+
         encoder.drawPatches(
             numberOfPatchControlPoints: 4,
             patchStart: 0,
@@ -284,14 +283,14 @@ extension Quad2dTessellated: MCQuad2dInterface {
         lock.withCritical {
             if self.subdivisionFactor != factor {
                 self.subdivisionFactor = factor
-                
-                let factorH = Half(pow(2, Float(self.subdivisionFactor))).bits;
-                
+
+                let factorH = Half(pow(2, Float(self.subdivisionFactor))).bits
+
                 var tessellationFactors = MTLQuadTessellationFactorsHalf(
                     edgeTessellationFactor: (factorH, factorH, factorH, factorH),
                     insideTessellationFactor: (factorH, factorH)
-                );
-                    
+                )
+
                 self.tessellationFactorsBuffer.copyOrCreate(
                     bytes: &tessellationFactors,
                     length: MemoryLayout<MTLQuadTessellationFactorsHalf>.stride,
@@ -317,7 +316,7 @@ extension Quad2dTessellated: MCQuad2dInterface {
                 return MCVec3D(x: x, y: y, z: 0)
             }
         }
-        
+
         /*
          The quad is made out of 4 vertices as following
          B----C
@@ -352,7 +351,7 @@ extension Quad2dTessellated: MCQuad2dInterface {
                 textureU: textureCoordinates.xF + textureCoordinates.widthF,
                 textureV: textureCoordinates.yF + textureCoordinates.heightF),  // D
         ]
-    
+
         lock.withCritical {
             self.is3d = is3d
             self.originOffset = origin
