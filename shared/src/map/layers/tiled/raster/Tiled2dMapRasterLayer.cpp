@@ -19,7 +19,7 @@
 #include <Logger.h>
 #include <chrono>
 #include <map>
-#include "Tiled2dMapVectorLayerConstants.h"
+#include "TessellationSettings.h"
 
 struct TileInfoHasherIgnoringT {
     std::size_t operator()(const Tiled2dMapTileInfo& info) const {
@@ -304,7 +304,7 @@ std::vector<Tiled2dMapRasterTileInfo> sortedTileInfos(currentTileInfos.begin(), 
                     tileObject = std::make_shared<Textured2dLayerObject>(quad, mapInterface, is3D);
                 } else {
                                     
-                #ifdef HARDWARE_TESSELLATION_SUPPORTED
+                #if HARDWARE_TESSELLATION_SUPPORTED
                     auto rasterShader = is3D ? shaderFactory->createQuadTessellatedShader() : shaderFactory->createRasterShader();
                     auto quad = is3D ? graphicsFactory->createQuadTessellated(rasterShader->asShaderProgramInterface()) : graphicsFactory->createQuad(rasterShader->asShaderProgramInterface());
                 #else

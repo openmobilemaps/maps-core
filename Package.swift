@@ -188,6 +188,7 @@ let package = Package(
                 // Warnings, needs Swift 6.2:
                 // .treatAllWarnings(as: .error),
                 // .enableWarning("unused"),
+                // .enableWarning("undef"),
                 // .disableWarning("deprecated-declarations"),
                 // .disableWarning("reorder"),
             ]

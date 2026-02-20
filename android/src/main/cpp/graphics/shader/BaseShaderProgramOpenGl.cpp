@@ -167,7 +167,7 @@ void BaseShaderProgramOpenGl::preRender(const std::shared_ptr<::RenderingContext
         if (frameUniformsBufferBlockIdx == GL_INVALID_INDEX) {
             frameUniformsBufferBlockIdx = glGetUniformBlockIndex(program, "FrameUniforms");
             if (frameUniformsBufferBlockIdx == GL_INVALID_INDEX) {
-#if DEBUG
+#ifdef DEBUG
                 LogInfo << "Uniform block FrameUniforms not found in shader " << getProgramName() <<= " - update shader to use the frame-wide uniform values.";
 #endif
                 frameUniformsBufferBlockIdx = -2;

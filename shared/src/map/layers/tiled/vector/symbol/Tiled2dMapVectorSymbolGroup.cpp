@@ -404,7 +404,7 @@ void Tiled2dMapVectorSymbolGroup::initialize(std::weak_ptr<std::vector<Tiled2dMa
             shader->setBlendMode(
                     layerDescription->style.getBlendMode(EvaluationContext(0.0, dpFactor, std::make_shared<FeatureContext>(), featureStateManager)));
             auto textInstancedObject = strongMapInterface->getGraphicsObjectFactory()->createTextInstanced(shader);
-#if DEBUG
+#ifdef DEBUG
             textInstancedObject->asGraphicsObject()->setDebugLabel(layerDescription->identifier + "_" + tileInfo.tileInfo.to_string_short());
 #endif
             auto textStyleCount = std::get<0>(styleTextCharactersCounts);
@@ -598,7 +598,7 @@ bool Tiled2dMapVectorSymbolGroup::prepareIconObject(SpriteIconDescriptor &sprite
                  : strongMapInterface->getShaderFactory()->createAlphaInstancedShader()->asShaderProgramInterface();
         alphaInstancedShader->setBlendMode(layerBlendMode);
         spriteDescriptor.iconInstancedObject = strongMapInterface->getGraphicsObjectFactory()->createQuadInstanced(alphaInstancedShader);
-#if DEBUG
+#ifdef DEBUG
         spriteDescriptor.iconInstancedObject->asGraphicsObject()->setDebugLabel(layerDescription->identifier + "_" + tileInfo.tileInfo.to_string_short());
 #endif
         spriteDescriptor.iconInstancedObject->setFrame(Quad2dD(Vec2D(-0.5, 0.5), Vec2D(0.5, 0.5), Vec2D(0.5, -0.5), Vec2D(-0.5, -0.5)), tileOrigin, is3d);
@@ -614,7 +614,7 @@ bool Tiled2dMapVectorSymbolGroup::prepareIconObject(SpriteIconDescriptor &sprite
         auto shader = strongMapInterface->getShaderFactory()->createStretchInstancedShader(is3d)->asShaderProgramInterface();
         shader->setBlendMode(layerBlendMode);
         spriteDescriptor.stretchedInstancedObject = strongMapInterface->getGraphicsObjectFactory()->createQuadStretchedInstanced(shader);
-#if DEBUG
+#ifdef DEBUG
         spriteDescriptor.stretchedInstancedObject->asGraphicsObject()->setDebugLabel(layerDescription->identifier + "_" + tileInfo.tileInfo.to_string_short());
 #endif
 

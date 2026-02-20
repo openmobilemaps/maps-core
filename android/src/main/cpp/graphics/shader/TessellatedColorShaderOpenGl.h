@@ -12,7 +12,7 @@
 
 #include "ColorShaderOpenGl.h"
 #include "RenderingContextInterface.h"
-#include "Tiled2dMapVectorLayerConstants.h"
+#include "TessellationSettings.h"
 
 class TessellatedColorShaderOpenGl : public ColorShaderOpenGl {
 public:

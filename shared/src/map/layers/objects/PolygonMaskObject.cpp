@@ -12,7 +12,7 @@
 #include "EarcutVec2D.h"
 #include "PolygonHelper.h"
 #include <unordered_map>
-#include "Tiled2dMapVectorLayerConstants.h"
+#include "TessellationSettings.h"
 
 std::shared_ptr<PolygonMaskObjectInterface>
 PolygonMaskObjectInterface::create(const std::shared_ptr<::GraphicsObjectFactoryInterface> &graphicsObjectFactory,
@@ -25,7 +25,7 @@ PolygonMaskObject::PolygonMaskObject(const std::shared_ptr<GraphicsObjectFactory
                                      const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                                      bool is3D)
     : conversionHelper(conversionHelper)
-#ifdef HARDWARE_TESSELLATION_SUPPORTED
+#if HARDWARE_TESSELLATION_SUPPORTED
     , polygon(is3D ? graphicsObjectFactory->createPolygonMaskTessellated(is3D) : graphicsObjectFactory->createPolygonMask(is3D))
 #else
     , polygon(graphicsObjectFactory->createPolygonMask(is3D))
@@ -86,7 +86,7 @@ void PolygonMaskObject::setPolygons(const std::vector<::PolygonCoord> &polygons,
         }
     }
     
-#ifndef HARDWARE_TESSELLATION_SUPPORTED
+#if !HARDWARE_TESSELLATION_SUPPORTED
     if (subdivisionFactor) {
         PolygonHelper::subdivision(vecVertices, indices, *subdivisionFactor);
     }
@@ -109,7 +109,7 @@ void PolygonMaskObject::setPolygons(const std::vector<::PolygonCoord> &polygons,
         vertices.push_back(0.0f);
     #endif
         
-    #ifdef HARDWARE_TESSELLATION_SUPPORTED
+    #if HARDWARE_TESSELLATION_SUPPORTED
         if (subdivisionFactor) {
             // Frame Coord
             vertices.push_back(v.x);
@@ -122,7 +122,7 @@ void PolygonMaskObject::setPolygons(const std::vector<::PolygonCoord> &polygons,
     auto ind = SharedBytes((int64_t)indices.data(), (int32_t)indices.size(), (int32_t)sizeof(uint16_t));
     polygon->setVertices(attr, ind, origin, is3D);
     
-#ifdef HARDWARE_TESSELLATION_SUPPORTED
+#if HARDWARE_TESSELLATION_SUPPORTED
     if (subdivisionFactor) {
         polygon->setSubdivisionFactor((int32_t)(subdivisionFactor.value_or(0.0f)));
     }

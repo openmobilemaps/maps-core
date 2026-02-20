@@ -13,18 +13,20 @@
 #define POLYGON_SUBDIVISION_FACTOR 4
 #define POLYGON_MASK_SUBDIVISION_FACTOR 4
 
-#if defined(__ANDROID__)
-    #define HARDWARE_TESSELLATION_SUPPORTED
-#endif
-
-#if defined(__APPLE__)
-    #include <TargetConditionals.h>
-    #if !TARGET_OS_SIMULATOR
-        #define HARDWARE_TESSELLATION_SUPPORTED
+#ifndef HARDWARE_TESSELLATION_SUPPORTED
+    #if defined(__ANDROID__)
+        #define HARDWARE_TESSELLATION_SUPPORTED 1
+    #elif defined(__APPLE__)
+        #include <TargetConditionals.h>
+        #define HARDWARE_TESSELLATION_SUPPORTED !TARGET_OS_SIMULATOR
+    #else
+        #define HARDWARE_TESSELLATION_SUPPORTED 0
     #endif
 #endif
 
 // OpenGL wireframe overlay (set to 1 to enable).
-#define HARDWARE_TESSELLATION_WIREFRAME_OPENGL 0
+#ifndef HARDWARE_TESSELLATION_WIREFRAME_OPENGL
+    #define HARDWARE_TESSELLATION_WIREFRAME_OPENGL 0
+#endif
 // Metal wireframe overlay is controlled by Swift build settings in:
 // maps-core/Package.swift (swiftSettings). Define HARDWARE_TESSELLATION_WIREFRAME_METAL.

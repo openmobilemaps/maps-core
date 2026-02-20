@@ -11,7 +11,7 @@
 #include "Tiled2dMapVectorSourceRasterTileDataManager.h"
 #include "PolygonCompare.h"
 #include "Tiled2dMapVectorLayer.h"
-#include "Tiled2dMapVectorLayerConstants.h"
+#include "TessellationSettings.h"
 #include "Tiled2dMapVectorTile.h"
 
 Tiled2dMapVectorSourceRasterTileDataManager::Tiled2dMapVectorSourceRasterTileDataManager(const WeakActor<Tiled2dMapVectorLayer> &vectorLayer,
@@ -107,7 +107,7 @@ void Tiled2dMapVectorSourceRasterTileDataManager::onRasterTilesUpdated(const std
 
                     Vec3D origin(rx, ry, rz);
                     
-                #ifdef HARDWARE_TESSELLATION_SUPPORTED
+                #if HARDWARE_TESSELLATION_SUPPORTED
                     std::optional<float> subdivisionFactor = std::nullopt;
                     if (is3D) {
                         subdivisionFactor = std::optional<float>(float(POLYGON_MASK_SUBDIVISION_FACTOR));

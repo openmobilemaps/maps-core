@@ -106,7 +106,7 @@ endif()
 target_compile_features(mapscore PRIVATE cxx_std_20)
 # -Wmno-deprecated-declarations: djinni uses some deprecated functions in its cpp support library headers. 
 #   Clang thinks that its important enough to warn about (certain) deprecations even in system headers.
-target_compile_options(mapscore PRIVATE -Werror -Wunused -Wno-deprecated-declarations -Wno-reorder -fPIC) # fPIC so we can "embed" into shared mapscore_jni
+target_compile_options(mapscore PRIVATE -Werror -Wunused -Wundef -Wno-deprecated-declarations -Wno-reorder -fPIC) # fPIC so we can "embed" into shared mapscore_jni
 target_link_libraries(mapscore ${OPENGL_LIBRARIES})
 
 add_subdirectory(shared/test)

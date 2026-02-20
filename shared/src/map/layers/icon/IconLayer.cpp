@@ -158,7 +158,7 @@ void IconLayer::addIcons(const std::vector<std::shared_ptr<IconInfoInterface>> &
         //int32_t subdivisionFactor = is3D ? SUBDIVISION_FACTOR_3D_DEFAULT : 0;
         //quadObject->setSubdivisionFactor(subdivisionFactor);
 
-#if DEBUG
+#ifdef DEBUG
         quadObject->asGraphicsObject()->setDebugLabel("IconLayerID:" + icon->getIdentifier());
 #endif
 

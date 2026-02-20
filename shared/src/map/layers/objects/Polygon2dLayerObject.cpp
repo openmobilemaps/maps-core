@@ -16,7 +16,7 @@
 #include "CoordinatesUtil.h"
 #include "TrigonometryLUT.h"
 #include <cmath>
-#include "Tiled2dMapVectorLayerConstants.h"
+#include "TessellationSettings.h"
 
 Polygon2dLayerObject::Polygon2dLayerObject(const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
                                            const std::shared_ptr<Polygon2dInterface> &polygon,
@@ -97,7 +97,7 @@ void Polygon2dLayerObject::setPolygons(const std::vector<PolygonCoord> &polygons
     double ry = is3D ? 1.0 * cos(avgY) : avgY;
     double rz = is3D ? -1.0 * sin(avgY) * sin(avgX) : 0.0;
 
-#ifndef HARDWARE_TESSELLATION_SUPPORTED
+#if !HARDWARE_TESSELLATION_SUPPORTED
     if (is3D) {
         auto bboxSize = bbox.getMax() - bbox.getMin();
         double threshold = std::max(std::max(bboxSize.x, bboxSize.y), bboxSize.z) / std::pow(2, SUBDIVISION_FACTOR_3D_DEFAULT);
@@ -125,7 +125,7 @@ void Polygon2dLayerObject::setPolygons(const std::vector<PolygonCoord> &polygons
         vertices.push_back(0.0f);
     #endif
     
-    #ifdef HARDWARE_TESSELLATION_SUPPORTED
+    #if HARDWARE_TESSELLATION_SUPPORTED
         if(is3D) {
             // Frame Coord
             vertices.push_back(v.x);
@@ -138,7 +138,7 @@ void Polygon2dLayerObject::setPolygons(const std::vector<PolygonCoord> &polygons
     auto ind = SharedBytes((int64_t)indices.data(), (int32_t)indices.size(), (int32_t)sizeof(uint16_t));
     polygon->setVertices(attr, ind, Vec3D(rx, ry, rz), is3D);
     
-#ifdef HARDWARE_TESSELLATION_SUPPORTED
+#if HARDWARE_TESSELLATION_SUPPORTED
     if(is3D) {
         int32_t subdivisionFactor = SUBDIVISION_FACTOR_3D_DEFAULT;
         polygon->setSubdivisionFactor(subdivisionFactor);

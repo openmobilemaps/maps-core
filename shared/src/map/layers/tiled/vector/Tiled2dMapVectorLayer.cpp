@@ -500,7 +500,7 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
     }
 
     
-#if DEBUG
+#ifdef DEBUG
     bool use3xSprites = true;
     if (mapDescription->use3xSprites.has_value()) {
         use3xSprites = mapDescription->use3xSprites.value();
@@ -969,7 +969,7 @@ void Tiled2dMapVectorLayer::loadSpriteData(SpriteSourceDescription spriteSource,
         auto jsonResultStatus = context->jsonResult->status;
         auto textureResultStatus = context->textureResult->status;
         
-#if DEBUG
+#ifdef DEBUG
         auto self = weakSelf.lock();
         if (self) {
             if (scale == 3 && self->mapDescription->use3xSprites.has_value() == false && (jsonResultStatus != LoaderStatus::OK || textureResultStatus != LoaderStatus::OK)) {
@@ -986,7 +986,7 @@ void Tiled2dMapVectorLayer::loadSpriteData(SpriteSourceDescription spriteSource,
         std::shared_ptr<::TextureHolderInterface> spriteTexture;
         
         if (jsonResultStatus == LoaderStatus::OK) {
-#if DEBUG
+#ifdef DEBUG
             auto self = weakSelf.lock();
             if (self) {
                 if (scale == 3 && self->mapDescription->use3xSprites.has_value() == false) {

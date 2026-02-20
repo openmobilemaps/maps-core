@@ -10,7 +10,7 @@
 
 #include "TessellatedRasterShaderOpenGl.h"
 #include "OpenGlContext.h"
-#include "Tiled2dMapVectorLayerConstants.h"
+#include "TessellationSettings.h"
 
 TessellatedRasterShaderOpenGl::TessellatedRasterShaderOpenGl(bool projectOntoUnitSphere)
         : RasterShaderOpenGl(projectOntoUnitSphere ? "UBMAP_TessellatedRasterShaderUnitSphereOpenGl" : "UBMAP_TessellatedRasterShaderOpenGl")
@@ -52,7 +52,7 @@ void TessellatedRasterShaderOpenGl::setupProgram(const std::shared_ptr<::Renderi
 }
 
 std::string TessellatedRasterShaderOpenGl::getVertexShader() {
-    return OMMVersionedGlesShaderCodeWithFrameUBO(320 es,
+    return OMMVersionedGlesShaderCodeWithFrameUBO(320 es, 300 es,
                                         in vec4 vPosition;
                                         in vec2 vFrameCoord;
                                         in vec2 texCoordinate;
@@ -68,7 +68,7 @@ std::string TessellatedRasterShaderOpenGl::getVertexShader() {
 }
 
 std::string TessellatedRasterShaderOpenGl::getControlShader() {
-    return OMMVersionedGlesShaderCodeWithFrameUBO(320 es,
+    return OMMVersionedGlesShaderCodeWithFrameUBO(320 es, 300 es,
                                         layout (vertices = 4) out;
 
                                         uniform int uSubdivisionFactor;
@@ -101,7 +101,7 @@ std::string TessellatedRasterShaderOpenGl::getControlShader() {
 }
 
 std::string TessellatedRasterShaderOpenGl::getEvaluationShader() {
-    return OMMVersionedGlesShaderCodeWithFrameUBO(320 es,
+    return OMMVersionedGlesShaderCodeWithFrameUBO(320 es, 300 es,
                                         layout(quads, equal_spacing, cw) in;
 
                                         uniform mat4 umMatrix;
@@ -177,7 +177,7 @@ std::string TessellatedRasterShaderOpenGl::getEvaluationShader() {
 
 #if HARDWARE_TESSELLATION_WIREFRAME_OPENGL
 std::string TessellatedRasterShaderOpenGl::getGeometryShader() {
-    return OMMVersionedGlesShaderCodeWithFrameUBO(320 es,
+    return OMMVersionedGlesShaderCodeWithFrameUBO(320 es, 300 es,
                                         layout(triangles) in;
                                         layout(line_strip, max_vertices = 6) out;
 
