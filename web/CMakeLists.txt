@@ -28,10 +28,15 @@ file(GLOB webmapsdk_SRC CONFIGURE_DEPENDS
 
 add_executable(webmapsdk ${mapscore_SRC} ${webmapsdk_SRC})
 
-target_include_directories(webmapsdk PRIVATE
+target_include_directories(webmapsdk SYSTEM PRIVATE
+  ../external/earcut/earcut/include/mapbox/
   ../external/protozero/protozero/include/
   ../external/vtzero/vtzero/include/
-  ../external/earcut/earcut/include/mapbox/
+  ../external/djinni/support-lib/
+  ../external/djinni/support-lib/cpp
+  ../external/djinni/support-lib/wasm
+)
+target_include_directories(webmapsdk PRIVATE
   ../shared/src
   ../shared/src/external/pugixml
   ../shared/src/external/gpc
@@ -77,9 +82,6 @@ target_include_directories(webmapsdk PRIVATE
   ../android/src/main/cpp/utils
   ../shared/public
   ../bridging/wasm
-  ../external/djinni/support-lib/
-  ../external/djinni/support-lib/cpp
-  ../external/djinni/support-lib/wasm
 )
 set_property(
   SOURCE maps-core/shared/src/logger/Logger.cpp
@@ -91,7 +93,7 @@ set_property(
 target_compile_definitions(webmapsdk PRIVATE OPENMOBILEMAPS_GL=1)
 
 target_compile_features(webmapsdk PRIVATE cxx_std_20)
-target_compile_options(webmapsdk PRIVATE -sUSE_PTHREADS=1 -Werror -Wno-deprecated -Wno-reorder)
+target_compile_options(webmapsdk PRIVATE -sUSE_PTHREADS=1 -Werror -Wunused -Wundef -Wno-deprecated -Wno-reorder)
 
 target_link_libraries(webmapsdk PRIVATE)
 target_link_options(webmapsdk PRIVATE

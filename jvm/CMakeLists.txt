@@ -46,7 +46,7 @@ target_include_directories(mapscore_jni SYSTEM PRIVATE
 )
 
 target_compile_features(mapscore_jni PRIVATE cxx_std_20)
-target_compile_options(mapscore_jni PRIVATE -Werror -Wunused -Wno-deprecated-declarations)
+target_compile_options(mapscore_jni PRIVATE -Werror -Wunused -Wundef -Wno-deprecated-declarations)
 target_link_libraries(mapscore_jni mapscore ${OSMESA_LIBRARIES})
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")

@@ -122,7 +122,7 @@ target_include_directories(mapscore SYSTEM PUBLIC
 )
 
 target_compile_definitions(mapscore PRIVATE OPENMOBILEMAPS_GL=1)
-target_compile_options(mapscore PRIVATE -Werror -Wunused -Wno-reorder)
+target_compile_options(mapscore PRIVATE -Werror -Wunused -Wundef -Wno-reorder)
 
 # Disable warnings in djinni support lib
 set_property(

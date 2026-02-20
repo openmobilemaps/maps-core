@@ -17,7 +17,7 @@
 #include "PolygonHelper.h"
 #include "CoordinateSystemIdentifiers.h"
 #include "Tiled2dMapVectorStyleParser.h"
-#include "Tiled2dMapVectorLayerConstants.h"
+#include "TessellationSettings.h"
 
 #include "TrigonometryLUT.h"
 
@@ -365,7 +365,7 @@ void Tiled2dMapVectorPolygonTile::addPolygons(const std::vector<std::vector<Obje
         const auto &shader = shaders.at(styleGroupIndex);
         for (const auto &polygonDesc: styleGroupNewPolygonsVector[styleGroupIndex]) {
             const auto polygonObject = objectFactory->createPolygonGroup(shader->asShaderProgramInterface());
-#if DEBUG
+#ifdef DEBUG
             polygonObject->asGraphicsObject()->setDebugLabel(description->identifier + "_" + tileInfo.tileInfo.to_string_short());
 #endif
 

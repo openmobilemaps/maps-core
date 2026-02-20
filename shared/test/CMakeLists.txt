@@ -37,7 +37,7 @@ target_compile_definitions(tests PRIVATE
   OPENMOBILEMAPS_TESTDATA_DIR=${TESTDATA_DIR}
 )
 target_compile_features(tests PRIVATE cxx_std_20)
-target_compile_options(tests PRIVATE -Werror -Wunused -Wno-deprecated-declarations)
+target_compile_options(tests PRIVATE -Werror -Wunused -Wundef -Wno-deprecated-declarations)
 
 # Test via CTest 
 enable_testing()

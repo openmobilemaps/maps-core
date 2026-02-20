@@ -12,7 +12,7 @@
 
 #include "RasterShaderOpenGl.h"
 #include "RenderingContextInterface.h"
-#include "Tiled2dMapVectorLayerConstants.h"
+#include "TessellationSettings.h"
 
 class TessellatedRasterShaderOpenGl : public RasterShaderOpenGl {
 public:
