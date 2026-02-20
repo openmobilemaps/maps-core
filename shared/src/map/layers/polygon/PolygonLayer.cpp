@@ -212,13 +212,13 @@ void PolygonLayer::pause() {
     for (const auto &polygon : polygons) {
         for (auto &p : polygon.second) {
             if (p.second->getPolygonObject()->isReady()) {
-                p.second->getPolygonObject()->clear();
+                p.second->getPolygonObject()->pause();
             }
         }
     }
     if (mask) {
         if (mask->asGraphicsObject()->isReady())
-            mask->asGraphicsObject()->clear();
+            mask->asGraphicsObject()->pause();
     }
 }
 
@@ -231,12 +231,12 @@ void PolygonLayer::resume() {
     std::lock_guard<std::recursive_mutex> overlayLock(polygonsMutex);
     for (const auto &polygon : polygons) {
         for (auto &p : polygon.second) {
-            std::get<1>(p)->getPolygonObject()->setup(renderingContext);
+            std::get<1>(p)->getPolygonObject()->resume(renderingContext);
         }
     }
     if (mask) {
         if (!mask->asGraphicsObject()->isReady())
-            mask->asGraphicsObject()->setup(renderingContext);
+            mask->asGraphicsObject()->resume(renderingContext);
     }
 }
 

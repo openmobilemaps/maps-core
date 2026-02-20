@@ -32,8 +32,10 @@ public:
     virtual std::vector<std::shared_ptr<RenderObjectInterface>> generateRenderObjects() override;
 
     void clear() override;
-
     void setup() override;
+
+    void pause() override;
+    void resume() override;
 
     void setAlpha(float alpha) override;
 

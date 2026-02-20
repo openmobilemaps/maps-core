@@ -30,6 +30,26 @@ void Text2dOpenGl::clear() {
     }
     ready = false;
 }
+void Text2dOpenGl::pause() {
+    if (!clearOnPause) {
+        return;
+    }
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
+    removeGlBuffers();
+    if (textureHolder) {
+        textureHolder->clearFromGraphics();
+        texturePointer = -1;
+    }
+    ready = false;
+}
+
+void Text2dOpenGl::resume(const std::shared_ptr<::RenderingContextInterface> &context) {
+    if (!clearOnPause) {
+        return;
+    }
+    loadTexture(context, textureHolder);
+    setup(context);
+}
 
 void Text2dOpenGl::setIsInverseMasked(bool inversed) { isMaskInversed = inversed; }
 

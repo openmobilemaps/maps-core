@@ -10,6 +10,7 @@
 
 #pragma once
 
+#include "BaseGraphicsObjectOpenGl.h"
 #include "GraphicsObjectInterface.h"
 #include "LineGroup2dInterface.h"
 #include "OpenGlContext.h"
@@ -20,7 +21,7 @@
 #include "opengl_wrapper.h"
 #include <mutex>
 
-class LineGroup2dOpenGl : public GraphicsObjectInterface,
+class LineGroup2dOpenGl : public BaseGraphicsObjectOpenGl,
                           public LineGroup2dInterface,
                           public std::enable_shared_from_this<GraphicsObjectInterface> {
   public:

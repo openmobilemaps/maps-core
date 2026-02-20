@@ -169,6 +169,26 @@ void Tiled2dMapVectorPolygonTile::setup() {
 
 }
 
+void Tiled2dMapVectorPolygonTile::pause() {
+    for (auto const &polygon: polygons) {
+        if (polygon->getPolygonObject()->isReady()) polygon->getPolygonObject()->pause();
+    }
+}
+
+void Tiled2dMapVectorPolygonTile::resume() {
+    auto mapInterface = this->mapInterface.lock();
+    if (!mapInterface) {
+        return;
+    }
+    const auto &context = mapInterface->getRenderingContext();
+    for (auto const &polygon: polygons) {
+        if (!polygon->getPolygonObject()->isReady()) polygon->getPolygonObject()->resume(context);
+    }
+    
+    auto selfActor = WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this());
+    tileCallbackInterface.message(MFN(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsReady), tileInfo, description->identifier, selfActor);
+}
+
 void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDataVector &tileData) {
     auto mapInterface = this->mapInterface.lock();
     const auto &shaderFactory = mapInterface ? mapInterface->getShaderFactory() : nullptr;

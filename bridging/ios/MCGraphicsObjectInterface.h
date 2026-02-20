@@ -19,6 +19,15 @@
 - (void)clear;
 
 /**
+ * Pause/Resume clear and re-setup the object from the render context. 
+ * This can be equivalent to clear/setup, but can be a no-op on some platforms.
+ */
+- (void)pause;
+
+/** Ensure calling on graphics thread */
+- (void)resume:(nullable id<MCRenderingContextInterface>)context;
+
+/**
  * by defaults objects if masked are only rendered where the mask is set
  * if setting this flag the masked is applied inversly
  */

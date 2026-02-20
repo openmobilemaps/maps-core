@@ -88,14 +88,14 @@ void Tiled2dMapVectorSourceTileDataManager::pause() {
     for (const auto &tileMask: tileMaskMap) {
         if (tileMask.second.getGraphicsObject() &&
             tileMask.second.getGraphicsObject()->isReady()) {
-            tileMask.second.getGraphicsObject()->clear();
+            tileMask.second.getGraphicsObject()->pause();
         }
     }
 
     for (const auto &[tileInfo, subTiles] : tiles) {
         for (const auto &[index, identifier, tile]: subTiles) {
             tile.syncAccess([](const auto &tile) {
-                tile->clear();
+                tile->pause();
             });
         }
     }
@@ -127,7 +127,7 @@ void Tiled2dMapVectorSourceTileDataManager::resume() {
         for (const auto &[index, identifier, tile]: subTiles) {
             controlSet.insert(index);
             tile.syncAccess([](const auto &tile) {
-                tile->setup();
+                tile->resume();
             });
         }
 

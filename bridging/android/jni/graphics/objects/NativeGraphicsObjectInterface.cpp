@@ -40,6 +40,21 @@ void NativeGraphicsObjectInterface::JavaProxy::clear() {
     jniEnv->CallVoidMethod(Handle::get().get(), data.method_clear);
     ::djinni::jniExceptionCheck(jniEnv);
 }
+void NativeGraphicsObjectInterface::JavaProxy::pause() {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeGraphicsObjectInterface>::get();
+    jniEnv->CallVoidMethod(Handle::get().get(), data.method_pause);
+    ::djinni::jniExceptionCheck(jniEnv);
+}
+void NativeGraphicsObjectInterface::JavaProxy::resume(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & c_context) {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeGraphicsObjectInterface>::get();
+    jniEnv->CallVoidMethod(Handle::get().get(), data.method_resume,
+                           ::djinni::get(::djinni_generated::NativeRenderingContextInterface::fromCpp(jniEnv, c_context)));
+    ::djinni::jniExceptionCheck(jniEnv);
+}
 void NativeGraphicsObjectInterface::JavaProxy::setIsInverseMasked(bool c_inversed) {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
@@ -101,6 +116,22 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::GraphicsObjectInterface>(nativeRef);
         ref->clear();
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_GraphicsObjectInterface_00024CppProxy_native_1pause(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::GraphicsObjectInterface>(nativeRef);
+        ref->pause();
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_GraphicsObjectInterface_00024CppProxy_native_1resume(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeRenderingContextInterface::JniType j_context)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::GraphicsObjectInterface>(nativeRef);
+        ref->resume(::djinni_generated::NativeRenderingContextInterface::toCpp(jniEnv, j_context));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

@@ -38,6 +38,31 @@ void Quad2dInstancedOpenGl::clear() {
     ready = false;
 }
 
+void Quad2dInstancedOpenGl::pause() {
+    if (!clearOnPause) {
+        return;
+    }
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
+    if (ready) {
+        removeGlBuffers();
+        buffersNotReady = buffersNotReadyResetValue;
+    }
+    removeTextureCoordsGlBuffers();
+    if (textureHolder) {
+        textureHolder->clearFromGraphics();
+        texturePointer = -1;
+    }
+    ready = false;
+}
+
+void Quad2dInstancedOpenGl::resume(const std::shared_ptr<::RenderingContextInterface> &context) {
+    if (!clearOnPause) {
+        return;
+    }
+    loadTexture(context, textureHolder);
+    setup(context);
+}
+
 void Quad2dInstancedOpenGl::setIsInverseMasked(bool inversed) { isMaskInversed = inversed; }
 
 void Quad2dInstancedOpenGl::setFrame(const Quad2dD &frame, const Vec3D &origin, bool is3d) {

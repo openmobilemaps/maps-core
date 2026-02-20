@@ -300,6 +300,7 @@ void Tiled2dMapVectorLineTile::update() {
 
 void Tiled2dMapVectorLineTile::clear() {
     for (auto const &line: lines) {
+        LogError <<= "Tiled2dMapVectorLineTile::clear()";
         if (line->getLineObject()->isReady()) line->getLineObject()->clear();
     }
 }
@@ -313,6 +314,27 @@ void Tiled2dMapVectorLineTile::setup() {
     for (auto const &line: lines) {
         auto const &lineObject = line->getLineObject();
         if (!lineObject->isReady()) lineObject->setup(context);
+    }
+    auto selfActor = WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this());
+    tileCallbackInterface.message(MFN(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsReady), tileInfo, description->identifier, selfActor);
+}
+
+void Tiled2dMapVectorLineTile::pause() {
+    for (auto const &line: lines) {
+        LogError <<= "Tiled2dMapVectorLineTile::pause()";
+        if (line->getLineObject()->isReady()) line->getLineObject()->pause();
+    }
+}
+
+void Tiled2dMapVectorLineTile::resume() {
+    auto mapInterface = this->mapInterface.lock();
+    if (!mapInterface) {
+        return;
+    }
+    const auto &context = mapInterface->getRenderingContext();
+    for (auto const &line: lines) {
+        auto const &lineObject = line->getLineObject();
+        if (!lineObject->isReady()) lineObject->resume(context);
     }
     auto selfActor = WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this());
     tileCallbackInterface.message(MFN(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsReady), tileInfo, description->identifier, selfActor);

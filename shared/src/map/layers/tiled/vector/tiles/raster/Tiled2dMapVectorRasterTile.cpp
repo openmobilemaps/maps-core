@@ -123,6 +123,22 @@ void Tiled2dMapVectorRasterTile::setup() {
     tileCallbackInterface.message(MFN(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsReady), tileInfo, description->identifier, selfActor);
 }
 
+void Tiled2dMapVectorRasterTile::pause() {
+    tileObject->getGraphicsObject()->pause();
+}
+
+void Tiled2dMapVectorRasterTile::resume() {
+    auto mapInterface = this->mapInterface.lock();
+    const auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
+    if (!renderingContext) {
+        return;
+    }
+    tileObject->getGraphicsObject()->resume(renderingContext);
+    
+    auto selfActor = WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this());
+    tileCallbackInterface.message(MFN(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsReady), tileInfo, description->identifier, selfActor);
+}
+
 void Tiled2dMapVectorRasterTile::setAlpha(float alpha) {
     Tiled2dMapVectorTile::setAlpha(alpha);
 }

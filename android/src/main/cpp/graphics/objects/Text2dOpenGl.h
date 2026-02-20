@@ -10,6 +10,7 @@
 
 #pragma once
 
+#include "BaseGraphicsObjectOpenGl.h"
 #include "GlyphDescription.h"
 #include "GraphicsObjectInterface.h"
 #include "MaskingObjectInterface.h"
@@ -22,7 +23,7 @@
 #include <mutex>
 #include <vector>
 
-class Text2dOpenGl : public GraphicsObjectInterface,
+class Text2dOpenGl : public BaseGraphicsObjectOpenGl,
                      public MaskingObjectInterface,
                      public TextInterface,
                      public std::enable_shared_from_this<Text2dOpenGl> {
@@ -34,8 +35,10 @@ class Text2dOpenGl : public GraphicsObjectInterface,
     virtual bool isReady() override;
 
     virtual void setup(const std::shared_ptr<::RenderingContextInterface> &context) override;
-
     virtual void clear() override;
+
+    virtual void pause() override;
+    virtual void resume(const std::shared_ptr<::RenderingContextInterface> &context) override;
 
     virtual void renderAsMask(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
                               int64_t vpMatrix, int64_t mMatrix, const ::Vec3D & origin, double screenPixelAsRealMeterFactor,

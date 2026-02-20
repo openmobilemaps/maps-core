@@ -18,6 +18,11 @@ graphics_object_interface = interface +c +j +o {
     setup(context: rendering_context_interface);
     # Clear graphics object and invalidate isReady
     clear();
+    # Pause/Resume clear and re-setup the object from the render context. 
+    # This can be equivalent to clear/setup, but can be a no-op on some platforms.
+    pause();
+    # Ensure calling on graphics thread
+    resume(context: rendering_context_interface);
     # by defaults objects if masked are only rendered where the mask is set
     # if setting this flag the masked is applied inversly
     set_is_inverse_masked(inversed: bool);

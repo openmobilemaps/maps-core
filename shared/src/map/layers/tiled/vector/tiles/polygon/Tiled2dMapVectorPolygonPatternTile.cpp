@@ -161,6 +161,32 @@ void Tiled2dMapVectorPolygonPatternTile::setup() {
     tileCallbackInterface.message(MFN(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsReady), tileInfo, description->identifier, selfActor);
 }
 
+void Tiled2dMapVectorPolygonPatternTile::pause() {
+    for (const auto &[styleGroupId, polygons] : styleGroupPolygonsMap) {
+        for (const auto &polygon: polygons) {
+            if (polygon->getPolygonObject()->isReady()) polygon->getPolygonObject()->pause();
+        }
+    }
+}
+
+void Tiled2dMapVectorPolygonPatternTile::resume() {
+    auto mapInterface = this->mapInterface.lock();
+    if (!mapInterface) {
+        return;
+    }
+    const auto context = mapInterface->getRenderingContext();
+    for (const auto &[styleGroupId, polygons] : styleGroupPolygonsMap) {
+        for (const auto &polygon: polygons) {
+            if (!polygon->getPolygonObject()->isReady()) {
+                polygon->getPolygonObject()->resume(context);
+            }
+        }
+    }
+
+    auto selfActor = WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this());
+    tileCallbackInterface.message(MFN(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsReady), tileInfo, description->identifier, selfActor);
+}
+
 void Tiled2dMapVectorPolygonPatternTile::setVectorTileData(const Tiled2dMapVectorTileDataVector &tileData) {
     auto mapInterface = this->mapInterface.lock();
     const auto &shaderFactory = mapInterface ? mapInterface->getShaderFactory() : nullptr;

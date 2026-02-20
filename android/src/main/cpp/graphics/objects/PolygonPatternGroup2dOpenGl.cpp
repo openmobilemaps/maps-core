@@ -115,6 +115,29 @@ void PolygonPatternGroup2dOpenGl::clear() {
     ready = false;
 }
 
+void PolygonPatternGroup2dOpenGl::pause() {
+    if (!clearOnPause) {
+        return;
+    }
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
+    if (ready) {
+        removeGlBuffers();
+    }
+    if (textureHolder) {
+        textureHolder->clearFromGraphics();
+        texturePointer = -1;
+    }
+    ready = false;
+}
+
+void PolygonPatternGroup2dOpenGl::resume(const std::shared_ptr<::RenderingContextInterface> &context) {
+    if (!clearOnPause) {
+        return;
+    }
+    loadTexture(context, textureHolder);
+    setup(context);
+}
+
 void PolygonPatternGroup2dOpenGl::removeGlBuffers() {
     if (glDataBuffersGenerated) {
         glDeleteBuffers(1, &vertexBuffer);

@@ -14,6 +14,13 @@ export interface GraphicsObjectInterface {
     /** Clear graphics object and invalidate isReady */
     clear(): void;
     /**
+     * Pause/Resume clear and re-setup the object from the render context. 
+     * This can be equivalent to clear/setup, but can be a no-op on some platforms.
+     */
+    pause(): void;
+    /** Ensure calling on graphics thread */
+    resume(context: RenderingContextInterface): void;
+    /**
      * by defaults objects if masked are only rendered where the mask is set
      * if setting this flag the masked is applied inversly
      */

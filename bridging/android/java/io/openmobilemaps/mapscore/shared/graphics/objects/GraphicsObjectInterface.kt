@@ -18,6 +18,15 @@ abstract class GraphicsObjectInterface {
     abstract fun clear()
 
     /**
+     * Pause/Resume clear and re-setup the object from the render context. 
+     * This can be equivalent to clear/setup, but can be a no-op on some platforms.
+     */
+    abstract fun pause()
+
+    /** Ensure calling on graphics thread */
+    abstract fun resume(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface)
+
+    /**
      * by defaults objects if masked are only rendered where the mask is set
      * if setting this flag the masked is applied inversly
      */
@@ -60,6 +69,18 @@ abstract class GraphicsObjectInterface {
             native_clear(this.nativeRef)
         }
         private external fun native_clear(_nativeRef: Long)
+
+        override fun pause() {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_pause(this.nativeRef)
+        }
+        private external fun native_pause(_nativeRef: Long)
+
+        override fun resume(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_resume(this.nativeRef, context)
+        }
+        private external fun native_resume(_nativeRef: Long, context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface)
 
         override fun setIsInverseMasked(inversed: Boolean) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

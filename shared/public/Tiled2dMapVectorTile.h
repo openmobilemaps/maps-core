@@ -52,8 +52,10 @@ public:
     virtual std::vector<std::shared_ptr<RenderObjectInterface>> generateRenderObjects() = 0;
 
     virtual void clear() = 0;
-
     virtual void setup() = 0;
+    
+    virtual void pause() = 0;
+    virtual void resume() = 0;
 
     virtual void setAlpha(float alpha);
 

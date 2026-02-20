@@ -37,6 +37,28 @@ void Quad2dTessellatedOpenGl::clear() {
     ready = false;
 }
 
+void Quad2dTessellatedOpenGl::pause() {
+    if (!clearOnPause) {
+        return;
+    }
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
+    removeGlBuffers();
+    removeTextureCoordsGlBuffers();
+    if (textureHolder) {
+        textureHolder->clearFromGraphics();
+        texturePointer = -1;
+    }
+    ready = false;
+}
+
+void Quad2dTessellatedOpenGl::resume(const std::shared_ptr<::RenderingContextInterface> &context) {
+    if (!clearOnPause) {
+        return;
+    }
+    loadTexture(context, textureHolder);
+    setup(context);
+}
+
 void Quad2dTessellatedOpenGl::setIsInverseMasked(bool inversed) { isMaskInversed = inversed; }
 
 void Quad2dTessellatedOpenGl::setFrame(const Quad3dD &frame, const RectD &textureCoordinates, const Vec3D &origin, bool is3d) {

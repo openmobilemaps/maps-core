@@ -282,7 +282,7 @@ void LineLayer::onRemoved() {
 void LineLayer::pause() {
     std::lock_guard<std::recursive_mutex> overlayLock(linesMutex);
     for (const auto &line : lines) {
-        line.second->getLineObject()->clear();
+        line.second->getLineObject()->pause();
     }
     if (mask) {
         if (mask->asGraphicsObject()->isReady())
@@ -298,7 +298,7 @@ void LineLayer::resume() {
     }
     std::lock_guard<std::recursive_mutex> overlayLock(linesMutex);
     for (const auto &line : lines) {
-        line.second->getLineObject()->setup(renderingContext);
+        line.second->getLineObject()->resume(renderingContext);
     }
     if (maskGraphicsObject && !maskGraphicsObject->isReady()) {
         maskGraphicsObject->setup(renderingContext);

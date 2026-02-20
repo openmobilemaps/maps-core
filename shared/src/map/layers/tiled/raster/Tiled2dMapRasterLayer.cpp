@@ -124,18 +124,17 @@ void Tiled2dMapRasterLayer::pause() {
     Tiled2dMapLayer::pause();
     if (mask) {
         if (mask->asGraphicsObject()->isReady())
-            mask->asGraphicsObject()->clear();
+            mask->asGraphicsObject()->pause();
     }
     std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
     for (const auto &tileObject : tileObjectMap) {
         if (tileObject.second && tileObject.second->getGraphicsObject()->isReady()) {
-            tileObject.second->getGraphicsObject()->clear();
+            tileObject.second->getGraphicsObject()->pause();
         }
-        tileObject.second->getQuadObject()->removeTexture();
     }
     for (const auto &tileMask : tileMaskMap) {
         if (tileMask.second.getGraphicsObject() && tileMask.second.getGraphicsObject()->isReady())
-            tileMask.second.getGraphicsObject()->clear();
+            tileMask.second.getGraphicsObject()->pause();
     }
 }
 
@@ -149,19 +148,17 @@ void Tiled2dMapRasterLayer::resume() {
 
     if (mask) {
         if (!mask->asGraphicsObject()->isReady())
-            mask->asGraphicsObject()->setup(renderingContext);
+            mask->asGraphicsObject()->resume(renderingContext);
     }
     std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
     for (const auto &tileObject : tileObjectMap) {
         if (tileObject.second) {
-            tileObject.second->getGraphicsObject()->setup(renderingContext);
-            auto rectangle = tileObject.second->getQuadObject();
-            rectangle->loadTexture(renderingContext, tileObject.first.textureHolder);
+            tileObject.second->getGraphicsObject()->resume(renderingContext);
         }
     }
     for (const auto &tileMask : tileMaskMap) {
         if (tileMask.second.getGraphicsObject()) {
-            tileMask.second.getGraphicsObject()->setup(renderingContext);
+            tileMask.second.getGraphicsObject()->resume(renderingContext);
         }
     }
 

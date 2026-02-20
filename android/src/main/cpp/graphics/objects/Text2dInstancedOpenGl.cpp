@@ -37,6 +37,29 @@ void Text2dInstancedOpenGl::clear() {
     ready = false;
 }
 
+void Text2dInstancedOpenGl::pause() {
+    if (!clearOnPause) {
+        return;
+    }
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
+    removeGlBuffers();
+    buffersNotReady = buffersNotReadyResetValue;
+    removeTextureCoordsGlBuffers();
+    if (textureHolder) {
+        textureHolder->clearFromGraphics();
+        texturePointer = -1;
+    }
+    ready = false;
+}
+
+void Text2dInstancedOpenGl::resume(const std::shared_ptr<::RenderingContextInterface> &context) {
+    if (!clearOnPause) {
+        return;
+    }
+    loadTexture(textureHolder);
+    setup(context);
+}
+
 void Text2dInstancedOpenGl::setIsInverseMasked(bool inversed) { isMaskInversed = inversed; }
 
 void Text2dInstancedOpenGl::setFrame(const Quad2dD &frame, const Vec3D &origin, bool is3d) {
@@ -237,7 +260,11 @@ void Text2dInstancedOpenGl::loadFont(const std::shared_ptr<::RenderingContextInt
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
 
     distanceRange = fontData.info.distanceRange;
+    loadTexture(textureHolder);
+}
 
+void Text2dInstancedOpenGl::loadTexture(const std::shared_ptr<TextureHolderInterface> &textureHolder) {
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
     removeTexture();
 
     if (textureHolder != nullptr) {

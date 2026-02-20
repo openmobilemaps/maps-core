@@ -76,6 +76,14 @@ extension BaseGraphicsObject: MCGraphicsObjectInterface {
     public func clear() {
         self.ready = false
     }
+    
+    public func pause() {
+        // no-op
+    }
+
+    public func resume(_ context: MCRenderingContextInterface?) {
+        // no-op
+    }
 
     open func isReady() -> Bool { ready }
 

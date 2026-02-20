@@ -10,6 +10,7 @@
 
 #pragma once
 
+#include "BaseGraphicsObjectOpenGl.h"
 #include "GraphicsObjectInterface.h"
 #include "OpenGlContext.h"
 #include "TextInstancedInterface.h"
@@ -20,7 +21,7 @@
 #include <vector>
 #include <RectD.h>
 
-class Text2dInstancedOpenGl : public GraphicsObjectInterface,
+class Text2dInstancedOpenGl : public BaseGraphicsObjectOpenGl,
                               public TextInstancedInterface,
                               public std::enable_shared_from_this<Text2dInstancedOpenGl> {
 public:
@@ -31,8 +32,10 @@ public:
     virtual bool isReady() override;
 
     virtual void setup(const std::shared_ptr<::RenderingContextInterface> &context) override;
-
     virtual void clear() override;
+    
+    virtual void pause() override;
+    virtual void resume(const std::shared_ptr<::RenderingContextInterface> &context) override;
 
     virtual void render(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
                         int64_t vpMatrix, int64_t mMatrix, const ::Vec3D & origin, bool isMasked,
@@ -81,6 +84,8 @@ protected:
     void removeGlBuffers();
 
     void removeTextureCoordsGlBuffers();
+    
+    void loadTexture(const std::shared_ptr<TextureHolderInterface> &textureHolder);
 
     bool is3d = false;
     std::shared_ptr<BaseShaderProgramOpenGl> shaderProgram;

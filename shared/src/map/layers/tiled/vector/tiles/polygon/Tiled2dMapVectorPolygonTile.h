@@ -36,8 +36,10 @@ public:
     virtual std::vector<std::shared_ptr<RenderObjectInterface>> generateRenderObjects() override;
 
     virtual void clear() override;
-
     virtual void setup() override;
+    
+    virtual void pause() override;
+    virtual void resume() override;
 
     virtual void setVectorTileData(const Tiled2dMapVectorTileDataVector &tileData) override;
 

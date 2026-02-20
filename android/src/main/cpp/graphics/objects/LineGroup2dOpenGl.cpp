@@ -69,6 +69,10 @@ void LineGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface>
     }
     glBindBuffer(GL_ARRAY_BUFFER, vertexAttribBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * lineAttributesSize, lineAttributes.get(), GL_STATIC_DRAW);
+    if (!clearOnPause) {
+        lineAttributes.reset();
+        dataReady = false;
+    }
 
     size_t floatSize = sizeof(GLfloat);
     size_t dimensionality = is3d ? 3 : 2;
@@ -106,6 +110,10 @@ void LineGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface>
     }
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * lineIndicesSize, lineIndices.get(), GL_STATIC_DRAW);
+    if (!clearOnPause) {
+        lineIndices.reset();
+        dataReady = false;
+    }
 
     glBindVertexArray(0);
 

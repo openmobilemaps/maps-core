@@ -154,10 +154,10 @@ void Tiled2dMapVectorBackgroundSubLayer::onRemoved() {
 void Tiled2dMapVectorBackgroundSubLayer::pause() {
     Tiled2dMapVectorSubLayer::pause();
     if (polygonObject) {
-        polygonObject->getPolygonObject()->clear();
+        polygonObject->getPolygonObject()->pause();
     }
     if (patternObject) {
-        patternObject->getPolygonObject()->clear();
+        patternObject->getPolygonObject()->pause();
     }
 }
 
@@ -171,13 +171,10 @@ void Tiled2dMapVectorBackgroundSubLayer::resume() {
     }
 
     if (polygonObject && !polygonObject->getPolygonObject()->isReady()) {
-        polygonObject->getPolygonObject()->setup(renderingContext);
+        polygonObject->getPolygonObject()->resume(renderingContext);
     }
     if (patternObject && !patternObject->getPolygonObject()->isReady()) {
-        patternObject->getPolygonObject()->setup(renderingContext);
-        if (spriteTexture) {
-            patternObject->loadTexture(renderingContext, spriteTexture);
-        }
+        patternObject->getPolygonObject()->resume(renderingContext);
     }
 }
 

@@ -401,19 +401,35 @@ void IconLayer::onRemoved() {
 void IconLayer::pause() {
     {
         std::lock_guard<std::recursive_mutex> lock(iconsMutex);
-        clearSync(icons);
+        for (const auto &icon : icons) {
+            if (icon.second->getGraphicsObject()->isReady()) {
+                icon.second->getGraphicsObject()->pause();
+            }
+        }
     }
 
     if (mask) {
         if (mask->asGraphicsObject()->isReady())
-            mask->asGraphicsObject()->clear();
+            mask->asGraphicsObject()->pause();
     }
 }
 
 void IconLayer::resume() {
+    auto mapInterface = this->mapInterface;
+    if (!mapInterface) {
+        return;
+    }
+    auto renderingContext = mapInterface->getRenderingContext();
     {
         std::lock_guard<std::recursive_mutex> lock(iconsMutex);
-        setupIconObjects(icons);
+        for (const auto &icon : icons) {
+            if (!icon.second->getGraphicsObject()->isReady()) {
+                icon.second->getGraphicsObject()->resume(renderingContext);
+            }
+        }
+    }
+    if (mask && !mask->asGraphicsObject()->isReady()) {
+        mask->asGraphicsObject()->resume(renderingContext);
     }
 }
 
