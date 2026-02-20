@@ -68,6 +68,7 @@ protected:
     GLuint attribBuffer;
     std::vector<GLfloat> polygonAttributes;
     GLuint indexBuffer;
+    size_t polygonIndicesSize;
     std::vector<GLushort> polygonIndices;
     bool glDataBuffersGenerated = false;
     Vec3D polygonOrigin = Vec3D(0.0, 0.0, 0.0);

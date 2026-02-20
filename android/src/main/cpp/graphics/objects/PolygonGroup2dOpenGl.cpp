@@ -9,7 +9,6 @@
  */
 
 #include "PolygonGroup2dOpenGl.h"
-#include "RenderVerticesDescription.h"
 #include <cmath>
 #include <cstring>
 
@@ -26,6 +25,7 @@ PolygonGroup2dOpenGl::setVertices(const ::SharedBytes & vertices, const ::Shared
     ready = false;
     dataReady = false;
 
+    polygonIndicesSize = indices.elementCount;
     polygonIndices.resize(indices.elementCount);
     polygonAttributes.resize(vertices.elementCount);
     polygonOrigin = origin;
@@ -69,6 +69,10 @@ void PolygonGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterfa
     }
     glBindBuffer(GL_ARRAY_BUFFER, attribBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * polygonAttributes.size(), &polygonAttributes[0], GL_STATIC_DRAW);
+    if (!clearOnPause) {
+        polygonAttributes = {};
+        dataReady = false;
+    }
 
     size_t floatSize = sizeof(GLfloat);
     size_t stride = 4 * floatSize;
@@ -84,6 +88,10 @@ void PolygonGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterfa
     }
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort) * polygonIndices.size(), &polygonIndices[0], GL_STATIC_DRAW);
+    if (!clearOnPause) {
+        polygonIndices = {};
+        dataReady = false;
+    }
 
     glBindVertexArray(0);
 
@@ -164,7 +172,7 @@ void PolygonGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterf
 
     shaderProgram->preRender(context, isScreenSpaceCoords);
 
-    glDrawElements(GL_TRIANGLES, polygonIndices.size(), GL_UNSIGNED_SHORT, nullptr);
+    glDrawElements(GL_TRIANGLES, polygonIndicesSize, GL_UNSIGNED_SHORT, nullptr);
 
     glBindVertexArray(0);
 

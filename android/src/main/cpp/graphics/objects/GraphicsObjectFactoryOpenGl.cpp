@@ -8,7 +8,6 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
-#include "Tiled2dMapVectorLayerConstants.h"
 #include "GraphicsObjectFactoryOpenGl.h"
 #include "TessellationSettings.h"
 #include "ColorShaderOpenGl.h"
