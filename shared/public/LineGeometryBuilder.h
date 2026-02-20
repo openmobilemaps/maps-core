@@ -9,6 +9,8 @@
 #include "LineGroup2dInterface.h"
 #include "LineCapType.h"
 #include "LineJoinType.h"
+#include "ReleasableAllocator.h"
+#include "OwnedBytesHelper.h"
 
 class LineGeometryBuilder {
   public:
@@ -21,8 +23,8 @@ class LineGeometryBuilder {
             capType = LineCapType::ROUND; // Force round cap for dot optimization
         }
 
-        std::vector<float> lineAttributes;
-        std::vector<uint32_t> lineIndices;
+        std::vector<float, ReleasableAllocator<float>> lineAttributes;
+        std::vector<uint32_t, ReleasableAllocator<uint32_t>> lineIndices;
         reserveEstimatedNumVertices(lines, defaultJoinType, capType, is3d, lineAttributes, lineIndices);
 
         uint32_t vertexCount = 0;
@@ -113,7 +115,7 @@ class LineGeometryBuilder {
                             cosHalfAngle = extrude.x * normal.x + extrude.y * normal.y;
                             turnDirection = (lastNormal.x * normal.y - lastNormal.y * normal.x); // 2D cross product
                         }
-                        
+
                         extrudeScale = cosHalfAngle != 0 ? std::abs(1.0 / cosHalfAngle) : 1.0;
 
                         if (extrudeScale > 2.0) {
@@ -295,15 +297,15 @@ class LineGeometryBuilder {
             }
         }
 
-        auto attributes = SharedBytes((int64_t)lineAttributes.data(), (int32_t)lineAttributes.size(), (int32_t)sizeof(float));
-        auto indices = SharedBytes((int64_t)lineIndices.data(), (int32_t)lineIndices.size(), (int32_t)sizeof(uint32_t));
-        line->setLines(attributes, indices, origin, is3d);
+        line->setLines(OwnedBytesHelper::fromVector(std::move(lineAttributes)), OwnedBytesHelper::fromVector(std::move(lineIndices)), origin, is3d);
     }
 
     static void pushLineVertex(const Vec3D &p, const Vec3D &extrude, const float extrudeScale, const float side,
                                const float prefixTotalLineLength, const float prefixCorrection, const int lineStyleIndex, const bool addTriangle,
                                const bool reverse, uint32_t &vertexCount, int32_t &prePreIndex, int32_t &preIndex,
-                               std::vector<float> &lineAttributes, std::vector<uint32_t> &lineIndices, bool is3d) {
+                               std::vector<float, ReleasableAllocator<float>> &lineAttributes,
+                               std::vector<uint32_t, ReleasableAllocator<uint32_t>> &lineIndices,
+                               bool is3d) {
 
         lineAttributes.push_back(p.x);
         lineAttributes.push_back(p.y);
@@ -366,7 +368,8 @@ class LineGeometryBuilder {
 
     static void reserveEstimatedNumVertices(const std::vector<std::tuple<std::vector<Vec3D>, int>> &lines,
                                             LineJoinType joinType, LineCapType capType, bool is3d,
-                                            std::vector<float> &lineAttributes, std::vector<uint32_t> &lineIndices)
+                                            std::vector<float, ReleasableAllocator<float>> &lineAttributes,
+                                            std::vector<uint32_t, ReleasableAllocator<uint32_t>> &lineIndices)
     {
         const int64_t capVertices = capType == LineCapType::ROUND ? roundCapVertexCount : 0;
         const int64_t capTriangles = capType == LineCapType::ROUND ? roundCapVertexCount : 0;

@@ -101,5 +101,22 @@ export interface /*record*/ SharedBytes {
     bytesPerElement: number;
 }
 
+/**
+ * Pass ownership over byte buffer to callee.
+ * The new owner must ensure to call owned_bytes_destructor.free() or equivalent eventually.
+ */
+export interface /*record*/ OwnedBytes {
+    address: bigint;
+    elementCount: number;
+    bytesPerElement: number;
+}
+
+export interface OwnedBytesDestructor {
+}
+export interface OwnedBytesDestructor_statics {
+    free(bytes: OwnedBytes): void;
+}
+
 export interface Common_statics {
+    OwnedBytesDestructor: OwnedBytesDestructor_statics;
 }
