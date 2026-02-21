@@ -11,14 +11,17 @@ let package = Package(
     products: [
         .library(
             name: "MapCore",
+            type: .dynamic,
             targets: ["MapCore"]
         ),
         .library(
             name: "MapCoreSharedModule",
+            type: .static,
             targets: ["MapCoreSharedModule"]
         ),
         .library(
             name: "MapCoreSharedModuleCpp",
+            type: .static,
             targets: ["MapCoreSharedModuleCpp"]
         ),
     ],
@@ -131,7 +134,12 @@ let package = Package(
                 "MapCoreSharedModuleCpp"
             ],
             path: "bridging/ios",
-            publicHeadersPath: ""
+            publicHeadersPath: "",
+            linkerSettings: [
+                .linkedFramework("Foundation"),
+                .linkedFramework("CoreFoundation"),
+                .linkedLibrary("objc"),
+            ]
         ),
         .target(
             name: "MapCoreSharedModuleCpp",
@@ -146,6 +154,7 @@ let package = Package(
             cxxSettings: [
                 .headerSearchPath("public"),
                 .headerSearchPath("src"),
+                .headerSearchPath("../external/djinni/support-lib/objc"),
                 .headerSearchPath("src/external/pugixml"),
                 .headerSearchPath("src/external/gpc"),
                 .headerSearchPath("src/logger"),

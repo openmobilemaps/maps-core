@@ -14,6 +14,7 @@ while [ -h "$loc" ]; do
   fi
 done
 base_dir=$(cd "$(dirname "$loc")" && pwd)
+cd "$base_dir"
 
 JAVA_PACKAGE="io.openmobilemaps.mapscore.shared"
 PROJECT_PREFIX="MC"
@@ -30,6 +31,12 @@ JNI_OUT="$DJINNI_OUT_DIR/android/jni"
 WASM_OUT="$DJINNI_OUT_DIR/wasm"
 TS_OUT="$DJINNI_OUT_DIR/ts"
 YAML_OUT="${base_dir}/yaml"
+KMP_COMMON_OUT="$base_dir/../bridging/kmp/commonMain/kotlin/io/openmobilemaps/mapscore/kmp"
+KMP_ANDROID_OUT="$base_dir/../bridging/kmp/androidMain/kotlin/io/openmobilemaps/mapscore/kmp"
+KMP_IOS_OUT="$base_dir/../bridging/kmp/iosMain/kotlin/io/openmobilemaps/mapscore/kmp"
+KMP_PACKAGE="io.openmobilemaps.mapscore.kmp"
+KMP_IOS_MODULE="MapCoreSharedModule"
+KMP_BRIDGE_PREFIX="KM"
 
 CPP_OUT="${base_dir}/../shared/public"
 HPP_EXT="h"
@@ -41,7 +48,7 @@ IDENT_CPP_METHOD="fooBar"
 IDENT_JNI_CLASS="NativeFooBar"
 IDENT_JAVA="fooBar"
 
-for dir in "$OBJCPP_OUT" "$OBJC_OUT" "$JNI_OUT" "$KOTLIN_OUT" "$WASM_OUT" "$TS_OUT"; do
+for dir in "$OBJCPP_OUT" "$OBJC_OUT" "$JNI_OUT" "$KOTLIN_OUT" "$WASM_OUT" "$TS_OUT" "$KMP_COMMON_OUT" "$KMP_ANDROID_OUT" "$KMP_IOS_OUT"; do
   if [ -e "$dir" ]; then
     echo "Deleting \"$dir\"..."
     rm -r "$dir"
@@ -85,6 +92,14 @@ for file in $(git ls-files "*.djinni"); do
     --java-package "$JAVA_PACKAGE$SUBPOINT" \
     --ident-java-field "$IDENT_JAVA" \
     --ident-java-enum "$IDENT_CPP_ENUM" \
+    \
+	--kotlin-kmp-common-out "$KMP_COMMON_OUT" \
+    --kotlin-kmp-android-out "$KMP_ANDROID_OUT" \
+    --kotlin-kmp-ios-out "$KMP_IOS_OUT" \
+    --kotlin-kmp-package "$KMP_PACKAGE" \
+    --kotlin-kmp-ios-module "$KMP_IOS_MODULE" \
+    --kotlin-kmp-bridge-prefix "$KMP_BRIDGE_PREFIX" \
+    --kotlin-kmp-objc-name-prefix "$KMP_BRIDGE_PREFIX" \
     \
     --cpp-out "$CPP_OUT" \
     --hpp-ext "$HPP_EXT" \

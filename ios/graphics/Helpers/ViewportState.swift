@@ -11,6 +11,7 @@
 import Atomics
 
 final class ViewportState {
+
     private let packedViewport = ManagedAtomic<UInt64>(0)
 
     // MARK: - Writing

@@ -16,7 +16,8 @@ import UIKit
 @available(iOS 14.0, *)
 private let logger = Logger(subsystem: "maps-core", category: "MCTextureLoader")
 
-open class MCTextureLoader: MCLoaderInterface, @unchecked Sendable {
+@objcMembers
+open class MCTextureLoader: NSObject, MCLoaderInterface, @unchecked Sendable {
     public let session: URLSession
 
     public var isRasterDebugModeEnabled: Bool
@@ -37,6 +38,7 @@ open class MCTextureLoader: MCLoaderInterface, @unchecked Sendable {
         }
 
         isRasterDebugModeEnabled = UserDefaults.standard.bool(forKey: "io.openmobilemaps.debug.rastertiles.enabled")
+        super.init()
     }
 
     open func loadTexture(_ url: String, etag: String?) -> MCTextureLoaderResult {
