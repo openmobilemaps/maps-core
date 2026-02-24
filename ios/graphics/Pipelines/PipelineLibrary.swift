@@ -297,7 +297,7 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
             case .rasterShader: return "rasterFragmentShader"
             case .quadTessellatedShader: return "rasterFragmentShader"
             case .quadTessellatedWireframeShader: return "wireframeFragmentShader"
-            case .quadTessellatedDisplaced: return "rasterFragmentShader"
+            case .quadTessellatedDisplaced: return "rasterDisplacedFragmentShader"
             case .stretchShader: return "stretchFragmentShader"
             case .stretchInstancedShader: return "stretchInstancedFragmentShader"
             case .unitSphereAlphaShader: return "baseFragmentShader"

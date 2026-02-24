@@ -465,8 +465,8 @@ std::optional<std::tuple<std::vector<double>, std::vector<double>, Vec3D>> MapCa
         cameraDistance = minCameraDistance;
     }
 
-    const double maxD = cameraDistance + 1.0;
-    const double minD = cameraDistance - 1.0;
+    const double maxD = cameraDistance + 0.5;
+    double minD = std::max(0.05, cameraDistance - 0.4);
 
     // aspect ratio
     const double vpr = (double)sizeViewport.x / (double)sizeViewport.y;

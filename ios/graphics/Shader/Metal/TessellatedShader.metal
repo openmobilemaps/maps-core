@@ -117,7 +117,7 @@ float decodeElevation(float3 rgbaAltitude) {
             rgbaAltitude.b * 255.0) / 10.0 - 10000.0;
 }
 
-[[patch(quad, 4)]] vertex VertexOut
+[[patch(quad, 4)]] vertex VertexOutDisplaced
 quadTessellationDisplacementVertexShader(const patch_control_point<Vertex3DTextureTessellatedIn> controlPoints [[stage_in]],
                                          const float2 positionInPatch [[position_in_patch]],
                                          constant float4x4 &vpMatrix [[buffer(1)]],
@@ -134,9 +134,10 @@ quadTessellationDisplacementVertexShader(const patch_control_point<Vertex3DTextu
     Vertex3DTextureTessellatedIn vC = controlPoints[2];
     Vertex3DTextureTessellatedIn vD = controlPoints[3];
     half2 p = half2(positionInPatch);
-    
+
     float4 position = bilerp_fast(vA.position, vB.position, vC.position, vD.position, p);
     float2 uv = bilerp_fast(vA.uv, vB.uv, vC.uv, vD.uv, p);
+
     if (is3d) {
         float2 frameCoord = bilerp_fast(vA.frameCoord, vB.frameCoord, vC.frameCoord, vD.frameCoord, p);
         float4 bent = transform(frameCoord, origin) - originOffset;
@@ -146,15 +147,18 @@ quadTessellationDisplacementVertexShader(const patch_control_point<Vertex3DTextu
         if (hasElevationTexture) {
             float3 normal = normalize(transform(frameCoord, float4(0, 0, 0, 0)).xyz);
             float elevation = decodeElevation(elevationTexture0.sample(sampler0, uv).rgb);
-            const float ElevationScale = 1.0 / 30000.0;
+            const float ElevationScale = 1.0 / 60000.0;
             position.xyz += normal * elevation * ElevationScale;
         }
     }
     
-    VertexOut out {
-        .position = vpMatrix * ((mMatrix * float4(position.xyz, 1)) + originOffset),
-        .uv = uv
+    float3 worldPosition = ((mMatrix * float4(position.xyz, 1)) + originOffset).xyz;
+
+    VertexOutDisplaced out {
+        .position = vpMatrix * float4(worldPosition, 1),
+        .uv = uv,
+        .worldPosition = worldPosition
     };
-  
+
     return out;
 }

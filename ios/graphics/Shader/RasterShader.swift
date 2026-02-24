@@ -35,11 +35,13 @@ struct RasterShaderStyle: Equatable {
 open class RasterShader: BaseShader, @unchecked Sendable {
     private var rasterStyleBuffer: MTLBuffer
     private var rasterStyleBufferContents: UnsafeMutablePointer<RasterShaderStyle>
+    private var cameraPositionBuffer: MultiBuffer<SIMD4<Float>>
 
     override public init(shader: PipelineType = .rasterShader) {
         guard let buffer = MetalContext.current.device.makeBuffer(length: MemoryLayout<RasterShaderStyle>.stride, options: []) else { fatalError("Could not create buffer") }
         self.rasterStyleBuffer = buffer
         self.rasterStyleBufferContents = self.rasterStyleBuffer.contents().bindMemory(to: RasterShaderStyle.self, capacity: 1)
+        self.cameraPositionBuffer = .init(device: MetalContext.current.device)
         self.rasterStyleBufferContents[0] = RasterShaderStyle(style: .default())
         super.init(shader: shader)
     }
@@ -55,6 +57,16 @@ open class RasterShader: BaseShader, @unchecked Sendable {
 
         context.setRenderPipelineStateIfNeeded(pipeline)
         encoder.setFragmentBuffer(rasterStyleBuffer, offset: 0, index: 1)
+
+        if let buffer = cameraPositionBuffer.getNextBuffer(context) {
+            let pointer = buffer.contents().assumingMemoryBound(to: SIMD4<Float>.self)
+            if let cam = context.sceneView?.camera.getLastCameraPosition() {
+                pointer.pointee = SIMD4<Float>(cam.xF, cam.yF, cam.zF, 1.0)
+            } else {
+                pointer.pointee = SIMD4<Float>(0.0, 0.0, 0.0, 1.0)
+            }
+            encoder.setFragmentBuffer(buffer, offset: 0, index: 2)
+        }
     }
 }
 

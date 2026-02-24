@@ -42,3 +42,9 @@ struct VertexOut {
     float4 position [[ position ]];
     float2 uv;
 };
+
+struct VertexOutDisplaced {
+    float4 position [[ position ]];
+    float2 uv;
+    float3 worldPosition;
+};

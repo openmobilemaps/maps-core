@@ -22,6 +22,25 @@ struct RasterStyle {
     float brightnessShift;
 };
 
+inline half4 applyRasterStyle(half4 color, constant RasterStyle &style) {
+    half3 rgb = color.rgb;
+
+    rgb = clamp(rgb + style.brightnessShift, half3(0.0), half3(1.0));
+
+    float average = (color.r + color.g + color.b) / 3.0;
+    rgb += (average - rgb) * style.saturation;
+
+    rgb = clamp((rgb - 0.5) * style.contrast + 0.5, half3(0.0), half3(1.0));
+
+    half3 brightnessMin = half3(style.brightnessMin, style.brightnessMin, style.brightnessMin);
+    half3 brightnessMax = half3(style.brightnessMax, style.brightnessMax, style.brightnessMax);
+
+    float gamma = style.gamma;
+    rgb = pow(rgb, (1.0 / gamma));
+    rgb = mix(brightnessMin, brightnessMax, min(rgb / color.a, half3(1.0)));
+    return half4(rgb * color.a, color.a) * style.opacity;
+}
+
 fragment half4
 rasterFragmentShader(VertexOut in [[stage_in]],
                    constant RasterStyle *styling [[buffer(1)]],
@@ -33,22 +52,31 @@ rasterFragmentShader(VertexOut in [[stage_in]],
     if (color.a == 0.0 || styling[0].opacity == 0.0) {
         discard_fragment();
     }
-    
-    half3 rgb = color.rgb;
 
-    rgb = clamp(rgb + styling[0].brightnessShift, half3(0.0), half3(1.0));
+    return applyRasterStyle(color, styling[0]);
+}
 
-    float average = (color.r + color.g + color.b) / 3.0;
-    
-    rgb += (average - rgb) * styling[0].saturation;
-    
-    rgb = clamp((rgb - 0.5) * styling[0].contrast + 0.5, half3(0.0), half3(1.0));
+fragment half4
+rasterDisplacedFragmentShader(VertexOutDisplaced in [[stage_in]],
+                              constant RasterStyle *styling [[buffer(1)]],
+                              constant float4 &cameraPosition [[buffer(2)]],
+                              texture2d<half> texture0 [[ texture(0)]],
+                              sampler textureSampler [[sampler(0)]])
+{
+    half4 color = texture0.sample(textureSampler, in.uv);
 
-    half3 brightnessMin = half3(styling[0].brightnessMin, styling[0].brightnessMin, styling[0].brightnessMin);
-    half3 brightnessMax = half3(styling[0].brightnessMax, styling[0].brightnessMax, styling[0].brightnessMax);
+    if (color.a == 0.0 || styling[0].opacity == 0.0) {
+        discard_fragment();
+    }
 
-    float gamma = styling[0].gamma;
-    rgb = pow(rgb, (1.0 / (gamma)));
-    rgb = mix(brightnessMin, brightnessMax, min(rgb / color.a, half3(1.0)));
-    return half4(rgb * color.a, color.a) * styling[0].opacity;
+    float3 dpdx = dfdx(in.worldPosition);
+    float3 dpdy = dfdy(in.worldPosition);
+    float3 n = normalize(cross(dpdx, dpdy));
+
+    float3 viewDirection = normalize(in.worldPosition - cameraPosition.xyz);
+    if (dot(n, viewDirection) < 0.0) {
+        discard_fragment();
+    }
+
+    return applyRasterStyle(color, styling[0]);
 }
