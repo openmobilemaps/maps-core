@@ -106,7 +106,7 @@ final class Quad2dTessellatedDisplaced: BaseGraphicsObject, @unchecked Sendable 
 
     private func makeDepthStencilState(stencil: MTLStencilDescriptor) -> MTLDepthStencilState? {
         let descriptor = MTLDepthStencilDescriptor()
-        //descriptor.depthCompareFunction = .lessEqual
+        descriptor.depthCompareFunction = .lessEqual
         descriptor.isDepthWriteEnabled = true
         descriptor.frontFaceStencil = stencil
         descriptor.backFaceStencil = stencil
@@ -173,6 +173,8 @@ final class Quad2dTessellatedDisplaced: BaseGraphicsObject, @unchecked Sendable 
             encoder.setDepthStencilState(defaultDepthStencilState)
         }
 
+        encoder.setCullMode(.none)
+
         shader.setupProgram(context)
         shader.preRender(context, isScreenSpaceCoords: isScreenSpaceCoords)
 
@@ -216,9 +218,7 @@ final class Quad2dTessellatedDisplaced: BaseGraphicsObject, @unchecked Sendable 
             encoder.setFragmentTexture(texture, index: 0)
         }
         
-        if let elevationTexture {
-            encoder.setVertexTexture(elevationTexture, index: 0)
-        }
+        encoder.setVertexTexture(elevationTexture, index: 0)
         
         let originBuffer = originBuffers.getNextBuffer(context)
         if let bufferPointer = originBuffer?.contents()
@@ -234,6 +234,8 @@ final class Quad2dTessellatedDisplaced: BaseGraphicsObject, @unchecked Sendable 
         encoder.setVertexBuffer(originBuffer, offset: 0, index: 4)
         
         encoder.setVertexBytes(&self.is3d, length: MemoryLayout<Bool>.stride, index: 5)
+        var hasElevationTexture = elevationTexture != nil
+        encoder.setVertexBytes(&hasElevationTexture, length: MemoryLayout<Bool>.stride, index: 6)
         
         encoder.setTessellationFactorBuffer(tessellationFactorsBuffer, offset: 0, instanceStride: 0)
         

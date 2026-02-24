@@ -25,6 +25,8 @@ public:
 
     void setupTiles() override;
 
+    void onTilesUpdated(const std::string &layerName, VectorSet<Tiled2dMapRasterTileInfo> currentTileInfos) override;
+
 protected:
     std::shared_ptr<Quad2dInterface> createQuadForTile(
         const std::shared_ptr<GraphicsObjectFactoryInterface> &graphicsFactory,

@@ -86,11 +86,13 @@ void TiledDisplacedRasterLayer::setupTiles() {
         for (const auto &tile : tilesToSetup) {
             const auto &tileInfo = tile.first;
             const auto &tileObject = tile.second;
-            if (!tileObject || tileObject->getGraphicsObject()->isReady()) {
+            if (!tileObject) {
                 continue;
             }
 
-            tileObject->getGraphicsObject()->setup(renderingContext);
+            if (!tileObject->getGraphicsObject()->isReady()) {
+                tileObject->getGraphicsObject()->setup(renderingContext);
+            }
 
             if (tileInfo.textureHolder) {
                 loadTileTextures(tileObject->getQuadObject(), renderingContext, tileInfo);

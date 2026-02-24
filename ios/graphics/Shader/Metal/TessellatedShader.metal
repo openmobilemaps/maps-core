@@ -125,6 +125,7 @@ quadTessellationDisplacementVertexShader(const patch_control_point<Vertex3DTextu
                                          constant float4 &originOffset [[buffer(3)]],
                                          constant float4 &origin [[buffer(4)]],
                                          constant bool &is3d [[buffer(5)]],
+                                         constant bool &hasElevationTexture [[buffer(6)]],
                                          texture2d<float> elevationTexture0 [[ texture(0)]],
                                          sampler sampler0 [[sampler(0)]])
 {
@@ -141,11 +142,13 @@ quadTessellationDisplacementVertexShader(const patch_control_point<Vertex3DTextu
         float4 bent = transform(frameCoord, origin) - originOffset;
         float blend = saturate(length(originOffset) * BlendScale - BlendOffset);
         position = mix(position, bent, blend);
-        
-        float3 normal = normalize(transform(frameCoord, float4(0, 0, 0, 0)).xyz);
-        float elevation = decodeElevation(elevationTexture0.sample(sampler0, uv).rgb);
-        const float ElevationScale = 1.0 / 30000.0;
-        position.xyz += normal * elevation * ElevationScale;
+
+        if (hasElevationTexture) {
+            float3 normal = normalize(transform(frameCoord, float4(0, 0, 0, 0)).xyz);
+            float elevation = decodeElevation(elevationTexture0.sample(sampler0, uv).rgb);
+            const float ElevationScale = 1.0 / 30000.0;
+            position.xyz += normal * elevation * ElevationScale;
+        }
     }
     
     VertexOut out {

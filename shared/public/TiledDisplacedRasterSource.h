@@ -33,6 +33,8 @@ protected:
 
     ::djinni::Future<std::shared_ptr<TextureLoaderResult>> loadDataAsync(Tiled2dMapTileInfo tile, size_t loaderIndex) override;
 
+    void onVisibleTilesChanged(const std::vector<VisibleTilesLayer> &pyramid, bool keepMultipleLevels, int keepZoomLevelOffset = 0) override;
+
 protected:
     const std::shared_ptr<Tiled2dMapLayerConfig> elevationConfig;
     std::unordered_map<Tiled2dMapTileInfo, std::shared_ptr<TextureHolderInterface>> elevationTextureHolders;

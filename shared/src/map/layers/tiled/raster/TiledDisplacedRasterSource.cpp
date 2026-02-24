@@ -11,7 +11,6 @@
 #include "TiledDisplacedRasterSource.h"
 #include <functional>
 #include <mutex>
-#include <unordered_set>
 
 namespace {
     struct DualTileLoadState {
@@ -92,28 +91,29 @@ void TiledDisplacedRasterSource::cancelLoad(Tiled2dMapTileInfo tile, size_t load
             std::lock_guard<std::mutex> lock(elevationTextureHoldersMutex);
             if (rasterResult.status == LoaderStatus::OK && elevationResult.status == LoaderStatus::OK) {
                 elevationTextureHolders[tile] = elevationResult.data;
-            } else {
-                elevationTextureHolders.erase(tile);
             }
         });
 
     loaders[loaderIndex]->loadTextureAsync(rasterUrl, std::nullopt).then(
-        [state](::djinni::Future<::TextureLoaderResult> result) { state->complete(result.get(), false); });
+        [state](::djinni::Future<::TextureLoaderResult> result) {
+            state->complete(result.get(), false);
+        });
+
     loaders[loaderIndex]->loadTextureAsync(elevationUrl, std::nullopt).then(
-        [state](::djinni::Future<::TextureLoaderResult> result) { state->complete(result.get(), true); });
+        [state](::djinni::Future<::TextureLoaderResult> result) {
+            state->complete(result.get(), true);
+        });
 
     return promise->getFuture();
 }
 
 void TiledDisplacedRasterSource::notifyTilesUpdates() {
-    std::unordered_set<Tiled2dMapTileInfo> currentTileKeys;
     VectorSet<Tiled2dMapRasterTileInfo> currentTileInfos;
     currentTileInfos.reserve(currentTiles.size());
 
     std::lock_guard<std::mutex> lock(elevationTextureHoldersMutex);
     for (auto it = currentTiles.rbegin(); it != currentTiles.rend(); it++) {
         const auto &[tileInfo, tileWrapper] = *it;
-        currentTileKeys.insert(tileInfo);
 
         auto elevationHolderIt = elevationTextureHolders.find(tileInfo);
         auto elevationHolder = elevationHolderIt != elevationTextureHolders.end() ? elevationHolderIt->second : nullptr;
@@ -123,14 +123,21 @@ void TiledDisplacedRasterSource::notifyTilesUpdates() {
                                                          tileWrapper.tessellationFactor, elevationHolder));
     }
 
+    rasterLayerActor.message(MailboxDuplicationStrategy::replaceNewest, MFN(&Tiled2dMapRasterSourceListener::onTilesUpdated),
+                             layerConfig->getLayerName(), std::move(currentTileInfos));
+}
+
+void TiledDisplacedRasterSource::onVisibleTilesChanged(const std::vector<VisibleTilesLayer> &pyramid, bool keepMultipleLevels, int keepZoomLevelOffset) {
+    Tiled2dMapRasterSource::onVisibleTilesChanged(pyramid, keepMultipleLevels, keepZoomLevelOffset);
+
+    std::lock_guard<std::mutex> lock(elevationTextureHoldersMutex);
+
     for (auto it = elevationTextureHolders.begin(); it != elevationTextureHolders.end();) {
-        if (currentTileKeys.count(it->first) == 0) {
+        if (currentTiles.find(it->first) == currentTiles.end() &&
+            currentlyLoading.find(it->first) == currentlyLoading.end()) {
             it = elevationTextureHolders.erase(it);
         } else {
             ++it;
         }
     }
-
-    rasterLayerActor.message(MailboxDuplicationStrategy::replaceNewest, MFN(&Tiled2dMapRasterSourceListener::onTilesUpdated),
-                             layerConfig->getLayerName(), std::move(currentTileInfos));
 }

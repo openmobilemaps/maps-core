@@ -227,7 +227,7 @@ class Tiled2dMapSource : public Tiled2dMapSourceInterface,
 
     size_t lastVisibleTilesHash = -1;
 
-    void onVisibleTilesChanged(const std::vector<VisibleTilesLayer> &pyramid, bool keepMultipleLevels, int keepZoomLevelOffset = 0);
+    virtual void onVisibleTilesChanged(const std::vector<VisibleTilesLayer> &pyramid, bool keepMultipleLevels, int keepZoomLevelOffset = 0);
 
   protected:
     void scheduleFixedNumberOfLoadingTasks();
