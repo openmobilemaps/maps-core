@@ -6,6 +6,7 @@
 
 #include "GeoJsonTypes.h"
 #include "GeoJsonParser.h"
+#include "GeobufParser.h"
 
 #include "LoaderInterface.h"
 #include "LoaderHelper.h"
@@ -39,6 +40,11 @@ struct Options : TileOptions {
     uint32_t indexMaxPoints = 100000;
 };
 
+enum class GeoDataFormat {
+    GeoJson,
+    Geobuf
+};
+
 inline uint64_t toID(uint8_t z, uint32_t x, uint32_t y) {
     return (((1ull << z) * y + x) * 32) + z;
 }
@@ -57,6 +63,7 @@ public:
               const Options &options_ = Options())
         : options(options_)
         , loadingResult(DataLoaderResult(std::nullopt, std::nullopt, LoaderStatus::OK, std::nullopt))
+        , dataFormat(GeoDataFormat::GeoJson)
         , stringTable(stringTable) {
         initialize(geoJson);
     }
@@ -65,16 +72,19 @@ public:
               const std::vector<std::shared_ptr<::LoaderInterface>> &loaders,
               const std::shared_ptr<Tiled2dMapVectorLayerLocalDataProviderInterface> &localDataProvider,
               const std::shared_ptr<StringInterner> &stringTable,
+              GeoDataFormat dataFormat,
               const Options &options_ = Options())
         : options(options_)
         , sourceName(sourceName)
         , geoJsonUrl(geoJsonUrl)
         , loaders(loaders)
         , localDataProvider(localDataProvider)
+        , dataFormat(dataFormat)
         , stringTable(stringTable) {}
 
     const std::string sourceName;
     const std::string geoJsonUrl;
+    const GeoDataFormat dataFormat;
     std::vector<std::shared_ptr<::LoaderInterface>> loaders;
     std::shared_ptr<Tiled2dMapVectorLayerLocalDataProviderInterface> localDataProvider;
     std::recursive_mutex mutex;
@@ -113,28 +123,39 @@ public:
                     self->delegate.message(MFN(&GeoJSONTileDelegate::failedToLoad));
                 }
             } else {
-                auto string = std::string((char*)result.data->buf(), result.data->len());
-                nlohmann::json json;
-                try {
-                    json = nlohmann::json::parse(string, nullptr, true, true);
-                    auto geoJson = GeoJsonParser::getGeoJson(json, *strongStringTable);
-                    if (geoJson) {
-                        self->initialize(geoJson);
+                std::shared_ptr<GeoJson> geoJson;
+                if (self->dataFormat == GeoDataFormat::GeoJson) {
+                    auto string = std::string((char *)result.data->buf(), result.data->len());
+                    try {
+                        auto json = nlohmann::json::parse(string, nullptr, true, true);
+                        geoJson = GeoJsonParser::getGeoJson(json, *strongStringTable);
+                    } catch (nlohmann::json::exception &ex) {
                         std::lock_guard<std::recursive_mutex> lock(self->mutex);
-                        self->loadingResult = DataLoaderResult(std::nullopt, std::nullopt, result.status, result.errorCode);
-
-                        if (self->delegate) {
-                            // avoid call to null-delegate
-                            // setting the delegate will call didLoad, result won't be lost
-                            self->delegate.message(MFN(&GeoJSONTileDelegate::didLoad), self->options.maxZoom);
-                        }
+                        self->loadingResult = DataLoaderResult(std::nullopt, std::nullopt, LoaderStatus::ERROR_OTHER, "parse error");
+                        LogError << "Unable to parse geoJson: " <<= ex.what();
+                        return;
+                    }
+                } else {
+                    try {
+                        geoJson = GeobufParser::getGeoJson(*result.data, *strongStringTable);
+                    } catch (std::exception &ex) {
+                        std::lock_guard<std::recursive_mutex> lock(self->mutex);
+                        self->loadingResult = DataLoaderResult(std::nullopt, std::nullopt, LoaderStatus::ERROR_OTHER, "parse error");
+                        LogError << "Unable to parse geobuf: " <<= ex.what();
+                        return;
                     }
                 }
-                catch (nlohmann::json::parse_error &ex) {
+
+                if (geoJson) {
+                    self->initialize(geoJson);
                     std::lock_guard<std::recursive_mutex> lock(self->mutex);
-                    self->loadingResult = DataLoaderResult(std::nullopt, std::nullopt, LoaderStatus::ERROR_OTHER, "parse error");
-                    LogError <<= "Unable to parse geoJson";
-                    return;
+                    self->loadingResult = DataLoaderResult(std::nullopt, std::nullopt, result.status, result.errorCode);
+
+                    if (self->delegate) {
+                        // avoid call to null-delegate
+                        // setting the delegate will call didLoad, result won't be lost
+                        self->delegate.message(MFN(&GeoJSONTileDelegate::didLoad), self->options.maxZoom);
+                    }
                 }
             }
             self->loaders.clear();

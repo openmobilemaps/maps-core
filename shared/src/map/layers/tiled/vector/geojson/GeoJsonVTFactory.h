@@ -25,8 +25,10 @@ public:
                                                             const std::string &geoJsonUrl,
                                                             const std::vector<std::shared_ptr<::LoaderInterface>> &loaders, const std::shared_ptr<Tiled2dMapVectorLayerLocalDataProviderInterface> &localDataProvider,
                                                             const std::shared_ptr<StringInterner> &stringTable,
+                                                            GeoDataFormat dataFormat,
                                                             const Options& options = Options()) {
-        std::shared_ptr<GeoJSONVT> vt = std::make_shared<GeoJSONVT>(sourceName, geoJsonUrl, loaders, localDataProvider, stringTable, options);
+        std::shared_ptr<GeoJSONVT> vt =
+            std::make_shared<GeoJSONVT>(sourceName, geoJsonUrl, loaders, localDataProvider, stringTable, dataFormat, options);
         vt->load();
         return vt;
     }

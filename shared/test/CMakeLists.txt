@@ -9,6 +9,7 @@ FetchContent_MakeAvailable(Catch2)
 
 add_executable(tests 
   "TestActor.cpp"
+  "TestGeobufParser.cpp"
   "TestGeoJsonParser.cpp"
   "TestSymbolAnimationCoordinatorMap.cpp"
   "TestTileSource.cpp"
