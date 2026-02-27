@@ -28,6 +28,48 @@
 #include "GeoJsonVTFactory.h"
 #include "InternedString.h"
 
+#include <algorithm>
+#include <array>
+#include <cctype>
+
+namespace {
+
+VectorTileSourceFormat parseVectorTileSourceFormat(const nlohmann::json &tileJson) {
+    auto parseFormatString = [](std::string value) -> std::optional<VectorTileSourceFormat> {
+        std::transform(value.begin(), value.end(), value.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+        if (value == "mlt" || value == "maplibre" || value == "maplibre_tile" || value == "maplibre-tile") {
+            return VectorTileSourceFormat::MLT;
+        }
+        if (value == "mvt" || value == "pbf" || value == "mapbox" || value == "vector") {
+            return VectorTileSourceFormat::MVT;
+        }
+        return std::nullopt;
+    };
+
+    const std::array<std::string, 4> formatKeys = {"encoding", "format", "tileEncoding", "tileFormat"};
+    for (const auto &key : formatKeys) {
+        if (tileJson.contains(key) && tileJson[key].is_string()) {
+            auto parsedFormat = parseFormatString(tileJson[key].get<std::string>());
+            if (parsedFormat.has_value()) {
+                return *parsedFormat;
+            }
+        }
+    }
+
+    if (tileJson.contains("tiles") && tileJson["tiles"].is_array() && !tileJson["tiles"].empty() && tileJson["tiles"][0].is_string()) {
+        auto url = tileJson["tiles"][0].get<std::string>();
+        auto lowerUrl = url;
+        std::transform(lowerUrl.begin(), lowerUrl.end(), lowerUrl.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+        if (lowerUrl.find(".mlt") != std::string::npos) {
+            return VectorTileSourceFormat::MLT;
+        }
+    }
+
+    return VectorTileSourceFormat::MVT;
+}
+
+} // namespace
+
 
 Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromUrl(const std::string &layerName,
                                                         const std::string &styleJsonUrl,
@@ -287,7 +329,8 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                                                                                   numDrawPreviousLayers,
                                                                                   underzoom,
                                                                                   overzoom,
-                                                                                  levels));
+                                                                                  levels,
+                                                                                  parseVectorTileSourceFormat(tileJson)));
     }
 
 

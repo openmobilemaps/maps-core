@@ -297,6 +297,11 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
         return;
     }
     bool is3d = mapInterface->is3d();
+
+    std::unordered_map<std::string, VectorTileSourceFormat> sourceFormats;
+    for (const auto &sourceDescription : mapDescription->vectorSources) {
+        sourceFormats[sourceDescription->identifier] = sourceDescription->format;
+    }
     
     std::shared_ptr<Mailbox> selfMailbox = mailbox;
     if (!mailbox) {
@@ -393,6 +398,8 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
         auto sourceMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
 
         Actor<Tiled2dMapVectorSource> vectorSource;
+        auto sourceFormatIt = sourceFormats.find(source);
+        auto sourceFormat = sourceFormatIt != sourceFormats.end() ? sourceFormatIt->second : VectorTileSourceFormat::MVT;
         auto geoJsonSourceIt = mapDescription->geoJsonSources.find(source);
         if (geoJsonSourceIt != mapDescription->geoJsonSources.end()) {
             auto geoJsonSource = Actor<Tiled2dVectorGeoJsonSource>(sourceMailbox,
@@ -423,6 +430,7 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
                                                               selfVectorActor,
                                                               layers,
                                                               source,
+                                                              sourceFormat,
                                                               mapInterface->getCamera()->getScreenDensityPpi(),
                                                               layerName);
         }

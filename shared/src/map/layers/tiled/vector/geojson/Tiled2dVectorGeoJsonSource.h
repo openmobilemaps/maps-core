@@ -41,6 +41,7 @@ public:
                                // fake loader entry so that Tiled2dMapSource sees one loader; loadDataAsync in this class does not use loader.
                                std::vector<std::shared_ptr<LoaderInterface>>{nullptr},
                                listener, layersToDecode, sourceName,
+                               VectorTileSourceFormat::MVT,
                                screenDensityPpi, layerName)
       , geoJson(geoJson)
       , camera(camera) {}

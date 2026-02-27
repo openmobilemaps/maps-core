@@ -103,6 +103,45 @@ TEST_CASE("TestStyleParser", "[Multi Sprite]") {
     REQUIRE_THAT(result.mapDescription->sprites, Catch::Matchers::UnorderedRangeEquals(expectedSprites, equalSpriteSource));
 }
 
+TEST_CASE("TestStyleParser", "[Vector Source Format Default]") {
+    auto styleJson = R"STYLE({
+      "version": 8,
+      "sources": {
+        "test-source": {
+          "type": "vector",
+          "tiles": ["https://example.com/{z}/{x}/{y}.pbf"]
+        }
+      },
+      "layers": []
+    })STYLE";
+
+    std::shared_ptr<StringInterner> stringTable = std::make_shared<StringInterner>(ValueKeys::newStringInterner());
+    auto result = Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromString("test", styleJson, nullptr, {}, stringTable, {});
+    REQUIRE(result.mapDescription != nullptr);
+    REQUIRE(result.mapDescription->vectorSources.size() == 1);
+    REQUIRE(result.mapDescription->vectorSources[0]->format == VectorTileSourceFormat::MVT);
+}
+
+TEST_CASE("TestStyleParser", "[Vector Source Format MLT]") {
+    auto styleJson = R"STYLE({
+      "version": 8,
+      "sources": {
+        "test-source": {
+          "type": "vector",
+          "encoding": "mlt",
+          "tiles": ["https://example.com/{z}/{x}/{y}.mlt"]
+        }
+      },
+      "layers": []
+    })STYLE";
+
+    std::shared_ptr<StringInterner> stringTable = std::make_shared<StringInterner>(ValueKeys::newStringInterner());
+    auto result = Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromString("test", styleJson, nullptr, {}, stringTable, {});
+    REQUIRE(result.mapDescription != nullptr);
+    REQUIRE(result.mapDescription->vectorSources.size() == 1);
+    REQUIRE(result.mapDescription->vectorSources[0]->format == VectorTileSourceFormat::MLT);
+}
+
 TEST_CASE("String interpolation expressions") {
     struct TestCase {
         nlohmann::json expression;

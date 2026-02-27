@@ -17,6 +17,7 @@
 #include "StringInterner.h"
 #include "Tiled2dMapVectorTileInfo.h"
 #include "Tiled2dMapVectorSourceListener.h"
+#include "VectorTileSourceFormat.h"
 #include <vector>
 
 class Tiled2dMapVectorLayer;
@@ -33,6 +34,7 @@ public:
                            const WeakActor<Tiled2dMapVectorSourceListener> &listener,
                            const std::unordered_set<std::string> &layersToDecode,
                            const std::string &sourceName,
+                           VectorTileSourceFormat sourceFormat,
                            float screenDensityPpi,
                            std::string layerName);
 
@@ -61,6 +63,7 @@ protected:
     const WeakActor<Tiled2dMapVectorSourceListener> listener;
     
     const std::string sourceName;
+    const VectorTileSourceFormat sourceFormat;
 
     const std::weak_ptr<StringInterner> stringTable;
 };

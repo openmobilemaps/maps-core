@@ -240,6 +240,14 @@ public:
         return polygons;
     }
 
+    Vec2D convertTileCoordinate(double x, double y, bool renderSystem) const {
+        return coordinateFromTilePoint(x, y, renderSystem);
+    }
+
+    void addTriangulatedPolygon(std::vector<Vec2D> &&polygonCoordinates, std::vector<uint16_t> &&polygonIndices) {
+        polygons.emplace_back(std::move(polygonCoordinates), std::move(polygonIndices));
+    }
+
     const std::vector<std::vector<::Vec2D>> &getPointCoordinates() const {
         return coordinates;
     }
@@ -279,9 +287,9 @@ public:
     }
 
 private:
-    inline Vec2D coordinateFromPoint(const vtzero::point &point, bool renderSystem) {
-        auto tx = point.x / extent;
-        auto ty = point.y / extent;
+    inline Vec2D coordinateFromTilePoint(double x, double y, bool renderSystem) const {
+        auto tx = x / extent;
+        auto ty = y / extent;
 
         switch(origin) {
             case Tiled2dMapVectorTileOrigin::TOP_LEFT: {
@@ -298,15 +306,19 @@ private:
             }
         }
 
-        const auto x = tileCoords.topLeft.x * (1.0 - tx) + tileCoords.bottomRight.x * tx;
-        const auto y = tileCoords.topLeft.y * (1.0 - ty) + tileCoords.bottomRight.y * ty;
+        const auto mappedX = tileCoords.topLeft.x * (1.0 - tx) + tileCoords.bottomRight.x * tx;
+        const auto mappedY = tileCoords.topLeft.y * (1.0 - ty) + tileCoords.bottomRight.y * ty;
 
         if (renderSystem) {
-            const auto coord = conversionHelper->convertToRenderSystem(Coord(tileCoords.topLeft.systemIdentifier, x, y, 0.0));
+            const auto coord = conversionHelper->convertToRenderSystem(Coord(tileCoords.topLeft.systemIdentifier, mappedX, mappedY, 0.0));
             return Vec2D(coord.x, coord.y);
         } else {
-            return Vec2D(x, y);
+            return Vec2D(mappedX, mappedY);
         }
+    }
+
+    inline Vec2D coordinateFromPoint(const vtzero::point &point, bool renderSystem) {
+        return coordinateFromTilePoint(point.x, point.y, renderSystem);
     }
 
     inline Vec2D vecFromPoint(const vtzero::point &point) {

@@ -14,6 +14,7 @@
 #include "Color.h"
 #include "GeoJsonTypes.h"
 #include "RectCoord.h"
+#include "VectorTileSourceFormat.h"
 
 class VectorMapSourceDescription {
 public:
@@ -28,6 +29,7 @@ public:
     std::optional<bool> underzoom;
     std::optional<bool> overzoom;
     std::optional<std::vector<int>> levels;
+    VectorTileSourceFormat format;
 
     VectorMapSourceDescription(std::string identifier,
                                std::string vectorUrl,
@@ -39,10 +41,11 @@ public:
                                std::optional<int> numDrawPreviousLayers,
                                std::optional<bool> underzoom,
                                std::optional<bool> overzoom,
-                               std::optional<std::vector<int>> levels) :
+                               std::optional<std::vector<int>> levels,
+                               VectorTileSourceFormat format = VectorTileSourceFormat::MVT) :
             identifier(identifier), vectorUrl(vectorUrl), minZoom(minZoom), maxZoom(maxZoom), bounds(bounds),
             adaptScaleToScreen(adaptScaleToScreen), numDrawPreviousLayers(numDrawPreviousLayers),
-            zoomLevelScaleFactor(zoomLevelScaleFactor), underzoom(underzoom), overzoom(overzoom), levels(levels) {}
+            zoomLevelScaleFactor(zoomLevelScaleFactor), underzoom(underzoom), overzoom(overzoom), levels(levels), format(format) {}
 };
 
 struct SpriteSourceDescription {

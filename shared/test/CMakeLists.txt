@@ -14,6 +14,7 @@ add_executable(tests
   "TestTileSource.cpp"
   "TestGeometryHandler.cpp"
   "TestStyleParser.cpp"
+  "TestVectorTileDataParser.cpp"
   "TestValueEvaluate.cpp"
   "TestVectorSet.cpp"
   "TestStyleParser.cpp"

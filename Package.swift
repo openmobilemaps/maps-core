@@ -138,6 +138,7 @@ let package = Package(
             dependencies: [
                 "vtzero",
                 "earcut",
+                "MapLibreTileSpecCpp",
                 .product(name: "DjinniSupport", package: "djinni"),
             ],
             path: "shared",
@@ -193,6 +194,17 @@ let package = Package(
                 // .disableWarning("reorder"),
             ]
         ),
+        .target(
+            name: "MapLibreTileSpecCpp",
+            path: "external/maplibre-tile-spec-cpp",
+            sources: ["src/mlt"],
+            publicHeadersPath: "include",
+            cxxSettings: [
+                .headerSearchPath("include"),
+                .headerSearchPath("src"),
+                .define("MLT_WITH_FASTPFOR", to: "0"),
+            ]
+        ),
     ],
-    cxxLanguageStandard: .cxx17
+    cxxLanguageStandard: .cxx20
 )
