@@ -25,7 +25,6 @@ import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinAndroidTarget
 import org.jetbrains.kotlin.gradle.tasks.CInteropProcess
-import java.io.ByteArrayOutputStream
 import javax.inject.Inject
 
 group = "io.openmobilemaps.mapscore"
@@ -178,35 +177,6 @@ android {
     compileSdk = 36
     defaultConfig {
         minSdk = 28
-    }
-}
-
-abstract class CheckMapCoreGitTagTask : DefaultTask() {
-    @get:Internal
-    abstract val repoDir: DirectoryProperty
-
-    @get:Inject
-    abstract val execOperations: ExecOperations
-
-    @TaskAction
-    fun run() {
-        val stderr = ByteArrayOutputStream()
-        val result =
-            execOperations.exec {
-                workingDir(repoDir.get().asFile)
-                commandLine("git", "describe", "--tags", "--exact-match", "HEAD")
-                isIgnoreExitValue = true
-                errorOutput = stderr
-            }
-        if (result.exitValue == 0) return
-        val errorText = stderr.toString().trim()
-        val detail = if (errorText.isNotBlank()) ": $errorText" else ""
-        val warningMessage =
-            "MapCore KMP build: current commit is not tagged. " +
-                "Please use a release-tagged version of maps-core. " +
-                "(git describe --tags --exact-match HEAD failed$detail)"
-        val buildFilePath = project.layout.projectDirectory.file("build.gradle.kts").asFile.absolutePath
-        println("$buildFilePath:1: warning: $warningMessage")
     }
 }
 
@@ -363,19 +333,6 @@ abstract class CopyDirectoryContentsIfExistsTask : DefaultTask() {
     }
 }
 
-val checkMapCoreGitTag = tasks.register<CheckMapCoreGitTagTask>("checkMapCoreGitTag") {
-    group = "verification"
-    description = "Warn if the current maps-core commit does not have a tag."
-    repoDir.set(project.layout.projectDirectory)
-}
-
-tasks.matching { it.name.startsWith("compileKotlin") }
-    .configureEach { dependsOn(checkMapCoreGitTag) }
-tasks
-    .matching { it.name.startsWith("SwiftPackageConfigAppleMapCoreKmpCompileSwiftPackage") }
-    .configureEach { dependsOn(checkMapCoreGitTag) }
-tasks.matching { it.name == "build" || it.name == "assemble" }
-    .configureEach { dependsOn(checkMapCoreGitTag) }
 tasks.matching { it.name == "kmpPartiallyResolvedDependenciesChecker" }
     .configureEach {
         enabled = !isIosOnlyInvocation
