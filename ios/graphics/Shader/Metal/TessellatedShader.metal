@@ -145,9 +145,9 @@ quadTessellationDisplacementVertexShader(const patch_control_point<Vertex3DTextu
         position = mix(position, bent, blend);
 
         if (hasElevationTexture) {
-            float3 normal = normalize(transform(frameCoord, float4(0, 0, 0, 0)).xyz);
-            float elevation = decodeElevation(elevationTexture0.sample(sampler0, uv).rgb);
-            const float ElevationScale = 1.0 / 60000.0;
+          float3 normal = normalize(position.xyz + origin.xyz + originOffset.xyz);
+          float elevation = decodeElevation(elevationTexture0.sample(sampler0, uv).rgb);
+            const float ElevationScale = 1.0 / 4000000.0;
             position.xyz += normal * elevation * ElevationScale;
         }
     }

@@ -90,12 +90,6 @@ final class Quad2dTessellatedDisplaced: BaseGraphicsObject, @unchecked Sendable 
         renderAsMaskDepthStencilState = makeDepthStencilState(stencil: renderAsMaskStencil)
 
         let renderPassStencil = MTLStencilDescriptor()
-        renderPassStencil.stencilCompareFunction = .equal
-        renderPassStencil.stencilFailureOperation = .keep
-        renderPassStencil.depthFailureOperation = .keep
-        renderPassStencil.depthStencilPassOperation = .incrementWrap
-        renderPassStencil.readMask = 0b1111_1111
-        renderPassStencil.writeMask = 0b0000_0001
         renderPassDepthStencilState = makeDepthStencilState(stencil: renderPassStencil)
 
         let defaultStencil = MTLStencilDescriptor()
@@ -217,9 +211,11 @@ final class Quad2dTessellatedDisplaced: BaseGraphicsObject, @unchecked Sendable 
         if let texture {
             encoder.setFragmentTexture(texture, index: 0)
         }
-        
-        encoder.setVertexTexture(elevationTexture, index: 0)
-        
+
+        if let elevationTexture {
+            encoder.setVertexTexture(elevationTexture, index: 0)
+        }
+
         let originBuffer = originBuffers.getNextBuffer(context)
         if let bufferPointer = originBuffer?.contents()
             .assumingMemoryBound(
