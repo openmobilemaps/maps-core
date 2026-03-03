@@ -75,7 +75,14 @@ final class Polygon2dTessellated: BaseGraphicsObject, @unchecked Sendable {
             }
         #endif
 
-        if isMasked {
+        if pass.isPassMasked {
+            if renderPassStencilState == nil {
+                renderPassStencilState = self.renderPassMaskStencilState()
+            }
+
+            encoder.setDepthStencilState(renderPassStencilState)
+            encoder.setStencilReferenceValue(0b0000_0000)
+        } else if isMasked {
             if stencilState == nil {
                 setupStencilStates()
             }
@@ -85,15 +92,8 @@ final class Polygon2dTessellated: BaseGraphicsObject, @unchecked Sendable {
             } else {
                 encoder.setStencilReferenceValue(0b1100_0000)
             }
-        }
-
-        if pass.isPassMasked {
-            if renderPassStencilState == nil {
-                renderPassStencilState = self.renderPassMaskStencilState()
-            }
-
-            encoder.setDepthStencilState(renderPassStencilState)
-            encoder.setStencilReferenceValue(0b0000_0000)
+        } else {
+            encoder.setDepthStencilState(context.defaultMask)
         }
         
         renderMain(
@@ -210,6 +210,8 @@ final class Polygon2dTessellated: BaseGraphicsObject, @unchecked Sendable {
         ss2.writeMask = 0b0000_0000
 
         let s2 = MTLDepthStencilDescriptor()
+        s2.depthCompareFunction = .lessEqual
+        s2.isDepthWriteEnabled = true
         s2.frontFaceStencil = ss2
         s2.backFaceStencil = ss2
 

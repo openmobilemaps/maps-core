@@ -77,15 +77,6 @@ final class PolygonPatternGroup2d: BaseGraphicsObject, @unchecked Sendable {
             }
         #endif
 
-        if isMasked {
-            if stencilState == nil {
-                self.stencilState = self.maskStencilState()
-            }
-
-            encoder.setDepthStencilState(stencilState)
-            encoder.setStencilReferenceValue(0b1100_0000)
-        }
-
         if pass.isPassMasked {
             if renderPassStencilState == nil {
                 renderPassStencilState = self.renderPassMaskStencilState()
@@ -97,6 +88,15 @@ final class PolygonPatternGroup2d: BaseGraphicsObject, @unchecked Sendable {
             } else {
                 encoder.setStencilReferenceValue(0b0000_0000)
             }
+        } else if isMasked {
+            if stencilState == nil {
+                self.stencilState = self.maskStencilState()
+            }
+
+            encoder.setDepthStencilState(stencilState)
+            encoder.setStencilReferenceValue(0b1100_0000)
+        } else {
+            encoder.setDepthStencilState(context.defaultMask)
         }
 
         shader.setupProgram(context)

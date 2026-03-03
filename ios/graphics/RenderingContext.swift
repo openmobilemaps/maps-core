@@ -44,6 +44,8 @@ public class RenderingContext: NSObject, @unchecked Sendable {
         descriptor.depthStencilPassOperation = .replace
         descriptor.writeMask = 0b1100_0000
         let depthStencilDescriptor = MTLDepthStencilDescriptor()
+        depthStencilDescriptor.depthCompareFunction = .always
+        depthStencilDescriptor.isDepthWriteEnabled = false
         depthStencilDescriptor.frontFaceStencil = descriptor
         depthStencilDescriptor.backFaceStencil = descriptor
         return MetalContext.current.device.makeDepthStencilState(
@@ -58,6 +60,8 @@ public class RenderingContext: NSObject, @unchecked Sendable {
         descriptor.depthStencilPassOperation = .replace
         descriptor.writeMask = 0b1100_0000
         let depthStencilDescriptor = MTLDepthStencilDescriptor()
+        depthStencilDescriptor.depthCompareFunction = .always
+        depthStencilDescriptor.isDepthWriteEnabled = false
         depthStencilDescriptor.frontFaceStencil = descriptor
         depthStencilDescriptor.backFaceStencil = descriptor
         return MetalContext.current.device.makeDepthStencilState(
@@ -69,6 +73,8 @@ public class RenderingContext: NSObject, @unchecked Sendable {
         descriptor.stencilCompareFunction = .always
         descriptor.depthStencilPassOperation = .keep
         let depthStencilDescriptor = MTLDepthStencilDescriptor()
+        depthStencilDescriptor.depthCompareFunction = .lessEqual
+        depthStencilDescriptor.isDepthWriteEnabled = true
         depthStencilDescriptor.frontFaceStencil = descriptor
         depthStencilDescriptor.backFaceStencil = descriptor
         return MetalContext.current.device.makeDepthStencilState(

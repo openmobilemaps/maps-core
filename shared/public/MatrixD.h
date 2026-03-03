@@ -48,6 +48,7 @@ public:
                          double far);
 
     static void perspectiveM(std::vector<double> &m, int offset, double fovy, double aspect, double zNear, double zFar);
+    static void perspectiveMMetal(std::vector<double> &m, int offset, double fovy, double aspect, double zNear, double zFar);
 
     static double length(double x, double y, double z);
 

@@ -170,7 +170,7 @@ protected:
     std::shared_ptr<::Tiled2dMapReadyStateListener> readyStateListener;
 
 private:
-    const static int32_t SUBDIVISION_FACTOR_3D_DEFAULT = 3;
+    const static int32_t SUBDIVISION_FACTOR_3D_DEFAULT = 10;
 
     int32_t subdivisionFactor = SUBDIVISION_FACTOR_3D_DEFAULT;
 

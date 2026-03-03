@@ -21,6 +21,8 @@ final class Icosahedron: BaseGraphicsObject, @unchecked Sendable {
     private var indicesBuffer: MTLBuffer?
 
     private var indicesCount: Int = 0
+    
+    private var stencilState: MTLDepthStencilState?
 
     init(shader: MCShaderProgramInterface, metalContext: MetalContext, label: String = "Icosahedron") {
         self.shader = shader
@@ -64,11 +66,17 @@ final class Icosahedron: BaseGraphicsObject, @unchecked Sendable {
         #endif
 
         if isMasked {
+            if stencilState == nil {
+                stencilState = self.maskStencilState()
+            }
+            encoder.setDepthStencilState(stencilState)
             if maskInverse {
                 encoder.setStencilReferenceValue(0b0000_0000)
             } else {
                 encoder.setStencilReferenceValue(0b1100_0000)
             }
+        } else {
+            encoder.setDepthStencilState(context.defaultMask)
         }
 
         shader.setupProgram(context)

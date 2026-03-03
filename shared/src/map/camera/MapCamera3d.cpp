@@ -474,7 +474,13 @@ std::optional<std::tuple<std::vector<double>, std::vector<double>, Vec3D>> MapCa
 
     // initial perspective projection
     std::vector<double> basicProjectionMatrix(16, 0.0);
-    MatrixD::perspectiveM(basicProjectionMatrix, 0, fovy, vpr, minD, maxD);
+    const auto renderingContext = mapInterface ? mapInterface->getRenderingContext() : nullptr;
+    const bool usesOpenGlClipDepth = renderingContext && renderingContext->asOpenGlRenderingContext();
+    if (usesOpenGlClipDepth) {
+        MatrixD::perspectiveM(basicProjectionMatrix, 0, fovy, vpr, minD, maxD);
+    } else {
+        MatrixD::perspectiveMMetal(basicProjectionMatrix, 0, fovy, vpr, minD, maxD);
+    }
 
     // modify projection
     // translate anchor point based on padding and vertical displacement

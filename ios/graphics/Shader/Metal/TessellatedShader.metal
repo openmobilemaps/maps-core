@@ -132,7 +132,7 @@ quadTessellationDisplacementVertexShader(const Vertex3DTextureIn vertexIn [[stag
     
     float3 normal = normalize(position.xyz + origin.xyz + originOffset.xyz);
     float elevation = decodeElevation(elevationTexture0.sample(sampler0, uv).rgb);
-    const float ElevationScale = 1.0 / 30000.0;
+    const float ElevationScale = 1.0 / 4000000.0;
     position.xyz += normal * elevation * ElevationScale;
     
     VertexOut out {
