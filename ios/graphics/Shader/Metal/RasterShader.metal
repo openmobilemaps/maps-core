@@ -77,6 +77,10 @@ rasterDisplacedFragmentShader(VertexOutDisplaced in [[stage_in]],
     if (dot(n, viewDirection) < 0.0) {
         discard_fragment();
     }
-
+    
+    //color.xyz = color.xyz * (max(dot(normalize(in.worldNormal), normalize(float3(1, 0.5, 0.5))), 0.0) * 0.75 + 0.25);
+    //color.xyz = half3(1, 1, 1) * max(dot(normalize(in.worldNormal), normalize(float3(1, 0.5, 0.5))), 0.0);
+    //color.xyz = half3(normalize(in.worldNormal) * 0.5 + 0.5);
+    
     return applyRasterStyle(color, styling[0]);
 }

@@ -47,4 +47,5 @@ struct VertexOutDisplaced {
     float4 position [[ position ]];
     float2 uv;
     float3 worldPosition;
+    float3 worldNormal;
 };
