@@ -33,10 +33,16 @@ protected:
 
     ::djinni::Future<std::shared_ptr<TextureLoaderResult>> loadDataAsync(Tiled2dMapTileInfo tile, size_t loaderIndex) override;
     bool shouldKeepSeedLevelIn3dPyramid() const override { return false; }
+    double get3dCullingElevationOffsetMin() const override { return kDisplacedElevationOffsetMin; }
+    double get3dCullingElevationOffsetMax() const override { return kDisplacedElevationOffsetMax; }
 
     void onVisibleTilesChanged(const std::vector<VisibleTilesLayer> &pyramid, bool keepMultipleLevels, int keepZoomLevelOffset = 0) override;
 
 protected:
+    // Conservative defaults to prevent premature culling of displaced terrain tiles.
+    static constexpr double kDisplacedElevationOffsetMin = -10000.0;
+    static constexpr double kDisplacedElevationOffsetMax = 10000.0;
+
     const std::shared_ptr<Tiled2dMapLayerConfig> elevationConfig;
     std::unordered_map<Tiled2dMapTileInfo, std::shared_ptr<TextureHolderInterface>> elevationTextureHolders;
     std::mutex elevationTextureHoldersMutex;

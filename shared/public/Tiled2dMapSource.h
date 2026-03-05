@@ -182,6 +182,8 @@ class Tiled2dMapSource : public Tiled2dMapSourceInterface,
 
     virtual R postLoadingTask(L loadedData, Tiled2dMapTileInfo tile) = 0;
     virtual bool shouldKeepSeedLevelIn3dPyramid() const { return true; }
+    virtual double get3dCullingElevationOffsetMin() const { return -500.0; }
+    virtual double get3dCullingElevationOffsetMax() const { return 0.0; }
 
     ::Vec3D transformToView(const ::Coord &position, const std::vector<float> &vpMatrix, const Vec3D &origin);
     ::Vec3D projectToScreen(const ::Vec3D &point, const std::vector<float> &vpMatrix);

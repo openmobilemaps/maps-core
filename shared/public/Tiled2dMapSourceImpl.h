@@ -233,14 +233,18 @@ void Tiled2dMapSource<L, R>::onCameraChange(const std::vector<float> &viewMatrix
         const double boundsLeft = layerBounds.topLeft.x;
         const double boundsTop = layerBounds.topLeft.y;
 
-        const double heightRange = 1000;
+        const double cullingElevationOffsetMin = get3dCullingElevationOffsetMin();
+        const double cullingElevationOffsetMax = get3dCullingElevationOffsetMax();
 
         const Coord topLeft = Coord(layerSystemId, candidate.x * tileWidthAdj + boundsLeft, candidate.y * tileHeightAdj + boundsTop,
-                                    focusPointAltitude);
-        const Coord topRight = Coord(layerSystemId, topLeft.x + tileWidthAdj, topLeft.y, focusPointAltitude - heightRange / 2.0);
-        const Coord bottomLeft = Coord(layerSystemId, topLeft.x, topLeft.y + tileHeightAdj, focusPointAltitude - heightRange / 2.0);
+                                    focusPointAltitude + cullingElevationOffsetMax);
+        const Coord topRight = Coord(layerSystemId, topLeft.x + tileWidthAdj, topLeft.y,
+                                     focusPointAltitude + cullingElevationOffsetMax);
+        const Coord bottomLeft = Coord(layerSystemId, topLeft.x, topLeft.y + tileHeightAdj,
+                                       focusPointAltitude + cullingElevationOffsetMin);
         const Coord bottomRight =
-            Coord(layerSystemId, topLeft.x + tileWidthAdj, topLeft.y + tileHeightAdj, focusPointAltitude - heightRange / 2.0);
+            Coord(layerSystemId, topLeft.x + tileWidthAdj, topLeft.y + tileHeightAdj,
+                  focusPointAltitude + cullingElevationOffsetMin);
 
         const Coord tileCenter = Coord(layerSystemId, topLeft.x * 0.5 + bottomRight.x * 0.5, topLeft.y * 0.5 + bottomRight.y * 0.5,
                                        topLeft.z * 0.5 + bottomRight.z * 0.5);

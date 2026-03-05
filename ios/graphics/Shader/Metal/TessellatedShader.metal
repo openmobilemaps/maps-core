@@ -141,7 +141,7 @@ inline float3 displacedLocalPosition(const Vertex3DTextureTessellatedIn vA,
             float2 uv = bilerp_fast(vA.uv, vB.uv, vC.uv, vD.uv, p);
             float3 radialNormal = normalize(position.xyz + origin + originOffset);
             float elevation = decodeElevation(elevationTexture0.sample(sampler0, uv).rgb);
-            const float ElevationScale = 1.0 / 4000000.0;
+            const float ElevationScale = 1.0 / 5000000.0;
             position.xyz += radialNormal * elevation * ElevationScale;
         }
     }
