@@ -32,6 +32,7 @@ protected:
     void cancelLoad(Tiled2dMapTileInfo tile, size_t loaderIndex) override;
 
     ::djinni::Future<std::shared_ptr<TextureLoaderResult>> loadDataAsync(Tiled2dMapTileInfo tile, size_t loaderIndex) override;
+    bool shouldKeepSeedLevelIn3dPyramid() const override { return false; }
 
     void onVisibleTilesChanged(const std::vector<VisibleTilesLayer> &pyramid, bool keepMultipleLevels, int keepZoomLevelOffset = 0) override;
 

@@ -181,6 +181,7 @@ class Tiled2dMapSource : public Tiled2dMapSourceInterface,
     virtual bool hasExpensivePostLoadingTask() = 0;
 
     virtual R postLoadingTask(L loadedData, Tiled2dMapTileInfo tile) = 0;
+    virtual bool shouldKeepSeedLevelIn3dPyramid() const { return true; }
 
     ::Vec3D transformToView(const ::Coord &position, const std::vector<float> &vpMatrix, const Vec3D &origin);
     ::Vec3D projectToScreen(const ::Vec3D &point, const std::vector<float> &vpMatrix);

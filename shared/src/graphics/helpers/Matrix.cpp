@@ -249,6 +249,13 @@ void Matrix::perspectiveM(std::vector<float> &m, int offset, float fovy, float a
     m[offset + 13] = 0.0f;
     m[offset + 14] = 2.0f * zFar * zNear * rangeReciprocal;
     m[offset + 15] = 0.0f;
+
+#ifdef __APPLE__
+    // Metal uses NDC z in [0, 1], while OpenGL uses [-1, 1].
+    // Convert the projection's z mapping to the Metal convention.
+    m[offset + 10] = zFar * rangeReciprocal;
+    m[offset + 14] = zFar * zNear * rangeReciprocal;
+#endif
 }
 
 /**

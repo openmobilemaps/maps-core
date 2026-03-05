@@ -303,7 +303,7 @@ void Tiled2dMapSource<L, R>::onCameraChange(const std::vector<float> &viewMatrix
         auto diffCenterViewLeftCenter = leftCenterView - earthCenterView;
         auto diffCenterViewRightCenter = rightCenterView - earthCenterView;
 
-        bool isKeptLevel = candidate.levelIndex == minZoomLevelIndex;
+        bool isKeptLevel = shouldKeepSeedLevelIn3dPyramid() && candidate.levelIndex == minZoomLevelIndex;
 
         if (!isKeptLevel && diffCenterViewTopLeft.z < 0.0 && diffCenterViewTopRight.z < 0.0 && diffCenterViewBottomLeft.z < 0.0 &&
             diffCenterViewBottomRight.z < 0.0) {

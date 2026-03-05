@@ -17,7 +17,7 @@ Camera3dConfig Camera3dConfigFactory::getBasicConfig() {
     return Camera3dConfig("basic_config", true, std::nullopt, 300, minZoom, maxZoom, CameraInterpolation({
         {0.0f, 80.0f}
     }), CameraInterpolation({
-        {0.0f, 0.7f},
+        //{0.0f, 0.7f},
     }));
 }
 
