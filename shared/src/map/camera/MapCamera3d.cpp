@@ -499,21 +499,6 @@ std::optional<std::tuple<std::vector<double>, std::vector<double>, Vec3D>> MapCa
 
     MatrixD::multiplyMM(newProjectionMatrix, 0, paddingMatrix, 0, basicProjectionMatrix, 0);
 
-    // view matrix
-    // remember: read from bottom to top as camera movement relative to fixed globe
-    //           read from top to bottom as vertex movement relative to fixed camera
-    MatrixD::setIdentityM(newViewMatrix, 0);
-
-    MatrixD::translateM(newViewMatrix, 0, 0.0, 0, -cameraDistance);
-    MatrixD::rotateM(newViewMatrix, 0, -cameraPitch, 1.0, 0.0, 0.0);
-    MatrixD::rotateM(newViewMatrix, 0, -angle, 0.0, 0.0, 1.0);
-
-    MatrixD::translateM(newViewMatrix, 0, 0, 0, -1 - focusPointAltitude / R);
-
-    MatrixD::rotateM(newViewMatrix, 0.0, latitude, 1.0, 0.0, 0.0);
-    MatrixD::rotateM(newViewMatrix, 0.0, -longitude, 0.0, 1.0, 0.0);
-    MatrixD::rotateM(newViewMatrix, 0.0, -90, 0.0, 1.0, 0.0); // zero longitude in London
-
     const double lo = (longitude - 180.0) * M_PI / 180.0; // [-2 * pi, 0) X
     const double la = (latitude - 90.0) * M_PI / 180.0;   // [0, -pi] Y
     const double x = (1.0 * sin(la) * cos(lo));
@@ -522,7 +507,25 @@ std::optional<std::tuple<std::vector<double>, std::vector<double>, Vec3D>> MapCa
 
     const Vec3D newOrigin = Vec3D(x, y, z);
 
-    MatrixD::translateM(newViewMatrix, 0, x, y, z);
+    if (customViewMatrixEnabled && customViewMatrix.size() == 16) {
+        newViewMatrix = customViewMatrix;
+    } else {
+        // view matrix
+        // remember: read from bottom to top as camera movement relative to fixed globe
+        //           read from top to bottom as vertex movement relative to fixed camera
+        MatrixD::setIdentityM(newViewMatrix, 0);
+
+        MatrixD::translateM(newViewMatrix, 0, 0.0, 0, -cameraDistance);
+        MatrixD::rotateM(newViewMatrix, 0, -cameraPitch, 1.0, 0.0, 0.0);
+        MatrixD::rotateM(newViewMatrix, 0, -angle, 0.0, 0.0, 1.0);
+
+        MatrixD::translateM(newViewMatrix, 0, 0, 0, -1 - focusPointAltitude / R);
+
+        MatrixD::rotateM(newViewMatrix, 0.0, latitude, 1.0, 0.0, 0.0);
+        MatrixD::rotateM(newViewMatrix, 0.0, -longitude, 0.0, 1.0, 0.0);
+        MatrixD::rotateM(newViewMatrix, 0.0, -90, 0.0, 1.0, 0.0); // zero longitude in London
+        MatrixD::translateM(newViewMatrix, 0, x, y, z);
+    }
 
     std::vector<double> newVpMatrix(16, 0.0);
     MatrixD::multiplyMM(newVpMatrix, 0, newProjectionMatrix, 0, newViewMatrix, 0);
@@ -1813,6 +1816,39 @@ void MapCamera3d::setCameraConfig(const Camera3dConfig &config, std::optional<fl
 }
 
 Camera3dConfig MapCamera3d::getCameraConfig() { return cameraZoomConfig; }
+
+void MapCamera3d::setCustomViewMatrix(const std::vector<float> &viewMatrix) {
+    if (viewMatrix.size() != 16) {
+        return;
+    }
+
+    {
+        std::lock_guard<std::recursive_mutex> lock(paramMutex);
+        customViewMatrixEnabled = true;
+        customViewMatrix.assign(viewMatrix.begin(), viewMatrix.end());
+        validVpMatrix = false;
+    }
+
+    auto mapInterface = this->mapInterface;
+    if (mapInterface) {
+        mapInterface->invalidate();
+    }
+    notifyListeners(ListenerType::BOUNDS);
+}
+
+void MapCamera3d::clearCustomViewMatrix() {
+    {
+        std::lock_guard<std::recursive_mutex> lock(paramMutex);
+        customViewMatrixEnabled = false;
+        validVpMatrix = false;
+    }
+
+    auto mapInterface = this->mapInterface;
+    if (mapInterface) {
+        mapInterface->invalidate();
+    }
+    notifyListeners(ListenerType::BOUNDS);
+}
 
 void MapCamera3d::notifyListenerBoundsChange() { notifyListeners(ListenerType::BOUNDS); }
 

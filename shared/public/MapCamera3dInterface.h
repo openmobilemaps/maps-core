@@ -5,6 +5,7 @@
 
 #include "Coord.h"
 #include <optional>
+#include <vector>
 
 struct Camera3dConfig;
 
@@ -15,4 +16,8 @@ public:
     virtual Camera3dConfig getCameraConfig() = 0;
 
     virtual void setCameraConfig(const Camera3dConfig & config, std::optional<float> durationSeconds, std::optional<float> targetZoom, const std::optional<::Coord> & targetCoordinate) = 0;
+
+    virtual void setCustomViewMatrix(const std::vector<float> &viewMatrix) = 0;
+
+    virtual void clearCustomViewMatrix() = 0;
 };

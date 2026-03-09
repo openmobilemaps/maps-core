@@ -15,4 +15,8 @@
              targetZoom:(nullable NSNumber *)targetZoom
        targetCoordinate:(nullable MCCoord *)targetCoordinate;
 
+- (void)setCustomViewMatrix:(nonnull NSArray<NSNumber *> *)viewMatrix;
+
+- (void)clearCustomViewMatrix;
+
 @end
