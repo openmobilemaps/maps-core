@@ -507,6 +507,10 @@ std::optional<std::tuple<std::vector<double>, std::vector<double>, Vec3D>> MapCa
 
     const Vec3D newOrigin = Vec3D(x, y, z);
 
+    if (customProjectionMatrixEnabled && customProjectionMatrix.size() == 16) {
+        newProjectionMatrix = customProjectionMatrix;
+    }
+
     if (customViewMatrixEnabled && customViewMatrix.size() == 16) {
         newViewMatrix = customViewMatrix;
     } else {
@@ -1840,6 +1844,39 @@ void MapCamera3d::clearCustomViewMatrix() {
     {
         std::lock_guard<std::recursive_mutex> lock(paramMutex);
         customViewMatrixEnabled = false;
+        validVpMatrix = false;
+    }
+
+    notifyListeners(ListenerType::BOUNDS | ListenerType::MAP_INTERACTION);
+    auto mapInterface = this->mapInterface;
+    if (mapInterface) {
+        mapInterface->invalidate();
+    }
+}
+
+void MapCamera3d::setCustomProjectionMatrix(const std::vector<float> &projectionMatrix) {
+    if (projectionMatrix.size() != 16) {
+        return;
+    }
+
+    {
+        std::lock_guard<std::recursive_mutex> lock(paramMutex);
+        customProjectionMatrixEnabled = true;
+        customProjectionMatrix.assign(projectionMatrix.begin(), projectionMatrix.end());
+        validVpMatrix = false;
+    }
+
+    notifyListeners(ListenerType::BOUNDS | ListenerType::MAP_INTERACTION);
+    auto mapInterface = this->mapInterface;
+    if (mapInterface) {
+        mapInterface->invalidate();
+    }
+}
+
+void MapCamera3d::clearCustomProjectionMatrix() {
+    {
+        std::lock_guard<std::recursive_mutex> lock(paramMutex);
+        customProjectionMatrixEnabled = false;
         validVpMatrix = false;
     }
 

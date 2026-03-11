@@ -167,8 +167,6 @@ final class Quad2dTessellatedDisplaced: BaseGraphicsObject, @unchecked Sendable 
             encoder.setDepthStencilState(defaultDepthStencilState)
         }
 
-        encoder.setCullMode(.none)
-
         shader.setupProgram(context)
         shader.preRender(context, isScreenSpaceCoords: isScreenSpaceCoords)
 

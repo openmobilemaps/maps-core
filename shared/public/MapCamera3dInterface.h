@@ -20,4 +20,8 @@ public:
     virtual void setCustomViewMatrix(const std::vector<float> &viewMatrix) = 0;
 
     virtual void clearCustomViewMatrix() = 0;
+
+    virtual void setCustomProjectionMatrix(const std::vector<float> &projectionMatrix) = 0;
+
+    virtual void clearCustomProjectionMatrix() = 0;
 };

@@ -177,6 +177,10 @@ class MapCamera3d : public MapCameraInterface,
 
     void clearCustomViewMatrix() override;
 
+    void setCustomProjectionMatrix(const std::vector<float> &projectionMatrix) override;
+
+    void clearCustomProjectionMatrix() override;
+
     void notifyListenerBoundsChange() override;
 
     void computeEllipseCoefficients(std::vector<double>& coefficients);
@@ -303,6 +307,8 @@ class MapCamera3d : public MapCameraInterface,
 
     bool customViewMatrixEnabled = false;
     std::vector<double> customViewMatrix = std::vector<double>(16, 0.0);
+    bool customProjectionMatrixEnabled = false;
+    std::vector<double> customProjectionMatrix = std::vector<double>(16, 0.0);
     Vec3D cameraPosition = Vec3D(0.0, 0.0, 0.0);
     Vec3D origin;
     float verticalFov;

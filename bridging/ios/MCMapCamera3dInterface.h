@@ -19,4 +19,8 @@
 
 - (void)clearCustomViewMatrix;
 
+- (void)setCustomProjectionMatrix:(nonnull NSArray<NSNumber *> *)projectionMatrix;
+
+- (void)clearCustomProjectionMatrix;
+
 @end
