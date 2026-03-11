@@ -19,6 +19,7 @@
 #include "gpc.h"
 
 #include <algorithm>
+#include <array>
 #include <queue>
 
 struct VisibleTileCandidate {
@@ -236,15 +237,19 @@ void Tiled2dMapSource<L, R>::onCameraChange(const std::vector<float> &viewMatrix
         const double cullingElevationOffsetMin = get3dCullingElevationOffsetMin();
         const double cullingElevationOffsetMax = get3dCullingElevationOffsetMax();
 
-        const Coord topLeft = Coord(layerSystemId, candidate.x * tileWidthAdj + boundsLeft, candidate.y * tileHeightAdj + boundsTop,
-                                    focusPointAltitude + cullingElevationOffsetMax);
-        const Coord topRight = Coord(layerSystemId, topLeft.x + tileWidthAdj, topLeft.y,
-                                     focusPointAltitude + cullingElevationOffsetMax);
-        const Coord bottomLeft = Coord(layerSystemId, topLeft.x, topLeft.y + tileHeightAdj,
-                                       focusPointAltitude + cullingElevationOffsetMin);
-        const Coord bottomRight =
-            Coord(layerSystemId, topLeft.x + tileWidthAdj, topLeft.y + tileHeightAdj,
-                  focusPointAltitude + cullingElevationOffsetMin);
+        const double zMin = focusPointAltitude + cullingElevationOffsetMin;
+        const double zMax = focusPointAltitude + cullingElevationOffsetMax;
+
+        const Coord topLeft = Coord(layerSystemId, candidate.x * tileWidthAdj + boundsLeft, candidate.y * tileHeightAdj + boundsTop, zMax);
+        const Coord topRight = Coord(layerSystemId, topLeft.x + tileWidthAdj, topLeft.y, zMax);
+        const Coord bottomLeft = Coord(layerSystemId, topLeft.x, topLeft.y + tileHeightAdj, zMin);
+        const Coord bottomRight = Coord(layerSystemId, topLeft.x + tileWidthAdj, topLeft.y + tileHeightAdj, zMin);
+
+        // Evaluate culling against both displacement extremes (zMin/zMax) for each XY sample.
+        const Coord topLeftMin = Coord(layerSystemId, topLeft.x, topLeft.y, zMin);
+        const Coord topRightMin = Coord(layerSystemId, topRight.x, topRight.y, zMin);
+        const Coord bottomLeftMax = Coord(layerSystemId, bottomLeft.x, bottomLeft.y, zMax);
+        const Coord bottomRightMax = Coord(layerSystemId, bottomRight.x, bottomRight.y, zMax);
 
         const Coord tileCenter = Coord(layerSystemId, topLeft.x * 0.5 + bottomRight.x * 0.5, topLeft.y * 0.5 + bottomRight.y * 0.5,
                                        topLeft.z * 0.5 + bottomRight.z * 0.5);
@@ -272,10 +277,15 @@ void Tiled2dMapSource<L, R>::onCameraChange(const std::vector<float> &viewMatrix
             Coord(layerSystemId, focusPointClampedToTile.x,
                   focusPointClampedToTile.y + (toTop ? -tileHeightAdj : tileHeightAdj) * sampleSize, focusPointClampedToTile.z);
 
-        const Coord topCenter = Coord(layerSystemId, topLeft.x * 0.5 + topRight.x * 0.5, topLeft.y, topLeft.z);
-        const Coord bottomCenter = Coord(layerSystemId, bottomLeft.x * 0.5 + bottomRight.x * 0.5, bottomLeft.y, bottomLeft.z);
-        const Coord leftCenter = Coord(layerSystemId, topLeft.x, bottomLeft.y * 0.5 + topLeft.y * 0.5, topLeft.z);
-        const Coord rightCenter = Coord(layerSystemId, topRight.x, bottomRight.y * 0.5 + topRight.y * 0.5, topRight.z);
+        const Coord topCenter = Coord(layerSystemId, topLeft.x * 0.5 + topRight.x * 0.5, topLeft.y, zMax);
+        const Coord bottomCenter = Coord(layerSystemId, bottomLeft.x * 0.5 + bottomRight.x * 0.5, bottomLeft.y, zMin);
+        const Coord leftCenter = Coord(layerSystemId, topLeft.x, bottomLeft.y * 0.5 + topLeft.y * 0.5, zMax);
+        const Coord rightCenter = Coord(layerSystemId, topRight.x, bottomRight.y * 0.5 + topRight.y * 0.5, zMax);
+
+        const Coord topCenterMin = Coord(layerSystemId, topCenter.x, topCenter.y, zMin);
+        const Coord bottomCenterMax = Coord(layerSystemId, bottomCenter.x, bottomCenter.y, zMax);
+        const Coord leftCenterMin = Coord(layerSystemId, leftCenter.x, leftCenter.y, zMin);
+        const Coord rightCenterMin = Coord(layerSystemId, rightCenter.x, rightCenter.y, zMin);
 
         auto topLeftView = transformToView(topLeft, viewMatrix, origin);
         auto topRightView = transformToView(topRight, viewMatrix, origin);
@@ -294,23 +304,27 @@ void Tiled2dMapSource<L, R>::onCameraChange(const std::vector<float> &viewMatrix
         auto bottomCenterView = transformToView(bottomCenter, viewMatrix, origin);
         auto leftCenterView = transformToView(leftCenter, viewMatrix, origin);
         auto rightCenterView = transformToView(rightCenter, viewMatrix, origin);
+        auto topLeftMinView = transformToView(topLeftMin, viewMatrix, origin);
+        auto topRightMinView = transformToView(topRightMin, viewMatrix, origin);
+        auto bottomLeftMaxView = transformToView(bottomLeftMax, viewMatrix, origin);
+        auto bottomRightMaxView = transformToView(bottomRightMax, viewMatrix, origin);
+        auto topCenterMinView = transformToView(topCenterMin, viewMatrix, origin);
+        auto bottomCenterMaxView = transformToView(bottomCenterMax, viewMatrix, origin);
+        auto leftCenterMinView = transformToView(leftCenterMin, viewMatrix, origin);
+        auto rightCenterMinView = transformToView(rightCenterMin, viewMatrix, origin);
 
         float centerZ = (topLeftView.z + topRightView.z + bottomLeftView.z + bottomRightView.z) / 4.0;
 
-        auto diffCenterViewTopLeft = topLeftView - earthCenterView;
-        auto diffCenterViewTopRight = topRightView - earthCenterView;
-        auto diffCenterViewBottomLeft = bottomLeftView - earthCenterView;
-        auto diffCenterViewBottomRight = bottomRightView - earthCenterView;
-
-        auto diffCenterViewTopCenter = topCenterView - earthCenterView;
-        auto diffCenterViewBottomCenter = bottomCenterView - earthCenterView;
-        auto diffCenterViewLeftCenter = leftCenterView - earthCenterView;
-        auto diffCenterViewRightCenter = rightCenterView - earthCenterView;
-
         bool isKeptLevel = shouldKeepSeedLevelIn3dPyramid() && candidate.levelIndex == minZoomLevelIndex;
 
-        if (!isKeptLevel && diffCenterViewTopLeft.z < 0.0 && diffCenterViewTopRight.z < 0.0 && diffCenterViewBottomLeft.z < 0.0 &&
-            diffCenterViewBottomRight.z < 0.0) {
+        const std::array<Vec3D, 16> cullingViews = {topLeftView,        topRightView,        bottomLeftView,      bottomRightView,
+                                                    topCenterView,      bottomCenterView,     leftCenterView,      rightCenterView,
+                                                    topLeftMinView,     topRightMinView,      bottomLeftMaxView,   bottomRightMaxView,
+                                                    topCenterMinView,   bottomCenterMaxView,  leftCenterMinView,   rightCenterMinView};
+
+        auto isFacingAway = [&](const Vec3D &viewPos) { return (viewPos - earthCenterView).z < 0.0; };
+
+        if (!isKeptLevel && std::all_of(cullingViews.begin(), cullingViews.end(), isFacingAway)) {
             clipAndFreeLambda(currentTilePolygon);
             // LogDebug << "UBCM: dropping tile (all facing away) " << candidate.levelIndex << "/" << candidate.x << "/" <<=
             // candidate.y; Tile is facing away from the camera
@@ -321,24 +335,6 @@ void Tiled2dMapSource<L, R>::onCameraChange(const std::vector<float> &viewMatrix
                              samplePointOriginViewScreen.y < -1.0 || samplePointOriginViewScreen.y > 1.0)) {
             if (mapConfig.mapCoordinateSystem.identifier == CoordinateSystemIdentifiers::UnitSphere()) {
                 // v(0,0,+1) = unit-vector out of screen
-                float topLeftHA = 180.0 / M_PI * atan2(topLeftView.x, -topLeftView.z);
-                float topLeftVA = 180.0 / M_PI * atan2(topLeftView.y, -topLeftView.z);
-                float topRightHA = 180.0 / M_PI * atan2(topRightView.x, -topRightView.z);
-                float topRightVA = 180.0 / M_PI * atan2(topRightView.y, -topRightView.z);
-                float bottomLeftHA = 180.0 / M_PI * atan2(bottomLeftView.x, -bottomLeftView.z);
-                float bottomLeftVA = 180.0 / M_PI * atan2(bottomLeftView.y, -bottomLeftView.z);
-                float bottomRightHA = 180.0 / M_PI * atan2(bottomRightView.x, -bottomRightView.z);
-                float bottomRightVA = 180.0 / M_PI * atan2(bottomRightView.y, -bottomRightView.z);
-
-                float topCenterHA = 180.0 / M_PI * atan2(topCenterView.x, -topCenterView.z);
-                float topCenterVA = 180.0 / M_PI * atan2(topCenterView.y, -topCenterView.z);
-                float bottomCenterHA = 180.0 / M_PI * atan2(bottomCenterView.x, -bottomCenterView.z);
-                float bottomCenterVA = 180.0 / M_PI * atan2(bottomCenterView.y, -bottomCenterView.z);
-                float leftCenterHA = 180.0 / M_PI * atan2(leftCenterView.x, -leftCenterView.z);
-                float leftCenterVA = 180.0 / M_PI * atan2(leftCenterView.y, -leftCenterView.z);
-                float rightCenterHA = 180.0 / M_PI * atan2(rightCenterView.x, -rightCenterView.z);
-                float rightCenterVA = 180.0 / M_PI * atan2(rightCenterView.y, -rightCenterView.z);
-
                 // 0.5: half of view on each side of center
                 // 1.1: increase angle with padding
                 float fovFactor = 0.5 * 1.1;
@@ -348,74 +344,66 @@ void Tiled2dMapSource<L, R>::onCameraChange(const std::vector<float> &viewMatrix
                 float top = verticalFov * fovFactor;
                 float bottom = -verticalFov * fovFactor;
 
-                if ((topLeftVA < bottom || diffCenterViewTopLeft.z < 0.0) &&
-                    (topRightVA < bottom || diffCenterViewTopRight.z < 0.0) &&
-                    (bottomLeftVA < bottom || diffCenterViewBottomLeft.z < 0.0) &&
-                    (bottomRightVA < bottom || diffCenterViewBottomRight.z < 0.0) &&
-                    (topCenterVA < bottom || diffCenterViewTopCenter.z < 0.0) &&
-                    (bottomCenterVA < bottom || diffCenterViewBottomCenter.z < 0.0) &&
-                    (leftCenterVA < bottom || diffCenterViewLeftCenter.z < 0.0) &&
-                    (rightCenterVA < bottom || diffCenterViewRightCenter.z < 0.0)) {
+                auto allCameraFacingPointsPass = [&](const auto &predicate) {
+                    bool anyCameraFacing = false;
+                    for (const auto &viewPos : cullingViews) {
+                        if (isFacingAway(viewPos)) {
+                            continue;
+                        }
+                        anyCameraFacing = true;
+                        if (!predicate(viewPos)) {
+                            return false;
+                        }
+                    }
+                    return anyCameraFacing;
+                };
+
+                if (allCameraFacingPointsPass([&](const Vec3D &viewPos) {
+                        return 180.0 / M_PI * atan2(viewPos.y, -viewPos.z) < bottom;
+                    })) {
                     clipAndFreeLambda(currentTilePolygon);
                     // LogDebug << "UBCM: dropping tile (below) " << candidate.levelIndex << "/" << candidate.x << "/" <<=
                     // candidate.y;
                     continue; // All camera-facing corners are BELOW the viewport
                 }
-                if ((topLeftHA < left || diffCenterViewTopLeft.z < 0.0) && (topRightHA < left || diffCenterViewTopRight.z < 0.0) &&
-                    (bottomLeftHA < left || diffCenterViewBottomLeft.z < 0.0) &&
-                    (bottomRightHA < left || diffCenterViewBottomRight.z < 0.0) &&
-                    (topCenterHA < left || diffCenterViewTopCenter.z < 0.0) &&
-                    (bottomCenterHA < left || diffCenterViewBottomCenter.z < 0.0) &&
-                    (leftCenterHA < left || diffCenterViewLeftCenter.z < 0.0) &&
-                    (rightCenterHA < left || diffCenterViewRightCenter.z < 0.0)) {
+                if (allCameraFacingPointsPass([&](const Vec3D &viewPos) {
+                        return 180.0 / M_PI * atan2(viewPos.x, -viewPos.z) < left;
+                    })) {
                     clipAndFreeLambda(currentTilePolygon);
                     // LogDebug << "UBCM: dropping tile (left) " << candidate.levelIndex << "/" << candidate.x << "/" <<=
                     // candidate.y;
                     continue; // All camera-facing corners are TO THE LEFT of the viewport
                 }
-                if ((topLeftVA > top || diffCenterViewTopLeft.z < 0.0) && (topRightVA > top || diffCenterViewTopRight.z < 0.0) &&
-                    (bottomLeftVA > top || diffCenterViewBottomLeft.z < 0.0) &&
-                    (bottomRightVA > top || diffCenterViewBottomRight.z < 0.0) &&
-                    (topCenterVA > top || diffCenterViewTopCenter.z < 0.0) &&
-                    (bottomCenterVA > top || diffCenterViewBottomCenter.z < 0.0) &&
-                    (leftCenterVA > top || diffCenterViewLeftCenter.z < 0.0) &&
-                    (rightCenterVA > top || diffCenterViewRightCenter.z < 0.0)) {
+                if (allCameraFacingPointsPass([&](const Vec3D &viewPos) {
+                        return 180.0 / M_PI * atan2(viewPos.y, -viewPos.z) > top;
+                    })) {
                     clipAndFreeLambda(currentTilePolygon);
                     // LogDebug << "UBCM: dropping tile (above) " << candidate.levelIndex << "/" << candidate.x << "/" <<=
                     // candidate.y;
                     continue; // All camera-facing corners are ABOVE the viewport
                 }
-                if ((topLeftHA > right || diffCenterViewTopLeft.z < 0.0) &&
-                    (topRightHA > right || diffCenterViewTopRight.z < 0.0) &&
-                    (bottomLeftHA > right || diffCenterViewBottomLeft.z < 0.0) &&
-                    (bottomRightHA > right || diffCenterViewBottomRight.z < 0.0) &&
-                    (topCenterHA > right || diffCenterViewTopCenter.z < 0.0) &&
-                    (bottomCenterHA > right || diffCenterViewBottomCenter.z < 0.0) &&
-                    (leftCenterHA > right || diffCenterViewLeftCenter.z < 0.0) &&
-                    (rightCenterHA > right || diffCenterViewRightCenter.z < 0.0)) {
+                if (allCameraFacingPointsPass([&](const Vec3D &viewPos) {
+                        return 180.0 / M_PI * atan2(viewPos.x, -viewPos.z) > right;
+                    })) {
                     clipAndFreeLambda(currentTilePolygon);
                     // LogDebug << "UBCM: dropping tile (right) " << candidate.levelIndex << "/" << candidate.x << "/" <<=
                     // candidate.y;
                     continue; // All camera-facing corners are TO THE RIGHT of the viewport
                 }
             } else {
-                if (topLeftView.x < -width / 2.0 && topRightView.x < -width / 2.0 && bottomLeftView.x < -width / 2.0 &&
-                    bottomRightView.x < -width / 2.0) {
+                if (std::all_of(cullingViews.begin(), cullingViews.end(), [&](const Vec3D &viewPos) { return viewPos.x < -width / 2.0; })) {
                     clipAndFreeLambda(currentTilePolygon);
                     continue;
                 }
-                if (topLeftView.y < -height / 2.0 && topRightView.y < -height / 2.0 && bottomLeftView.y < -height / 2.0 &&
-                    bottomRightView.y < -height / 2.0) {
+                if (std::all_of(cullingViews.begin(), cullingViews.end(), [&](const Vec3D &viewPos) { return viewPos.y < -height / 2.0; })) {
                     clipAndFreeLambda(currentTilePolygon);
                     continue;
                 }
-                if (topLeftView.x > width / 2.0 && topRightView.x > width / 2.0 && bottomLeftView.x > width / 2.0 &&
-                    bottomRightView.x > width / 2.0) {
+                if (std::all_of(cullingViews.begin(), cullingViews.end(), [&](const Vec3D &viewPos) { return viewPos.x > width / 2.0; })) {
                     clipAndFreeLambda(currentTilePolygon);
                     continue;
                 }
-                if (topLeftView.y > height / 2.0 && topRightView.y > height / 2.0 && bottomLeftView.y > height / 2.0 &&
-                    bottomRightView.y > height / 2.0) {
+                if (std::all_of(cullingViews.begin(), cullingViews.end(), [&](const Vec3D &viewPos) { return viewPos.y > height / 2.0; })) {
                     clipAndFreeLambda(currentTilePolygon);
                     continue;
                 }

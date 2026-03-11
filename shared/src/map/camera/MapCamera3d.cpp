@@ -1829,11 +1829,11 @@ void MapCamera3d::setCustomViewMatrix(const std::vector<float> &viewMatrix) {
         validVpMatrix = false;
     }
 
+    notifyListeners(ListenerType::BOUNDS | ListenerType::MAP_INTERACTION);
     auto mapInterface = this->mapInterface;
     if (mapInterface) {
         mapInterface->invalidate();
     }
-    notifyListeners(ListenerType::BOUNDS);
 }
 
 void MapCamera3d::clearCustomViewMatrix() {
@@ -1843,11 +1843,11 @@ void MapCamera3d::clearCustomViewMatrix() {
         validVpMatrix = false;
     }
 
+    notifyListeners(ListenerType::BOUNDS | ListenerType::MAP_INTERACTION);
     auto mapInterface = this->mapInterface;
     if (mapInterface) {
         mapInterface->invalidate();
     }
-    notifyListeners(ListenerType::BOUNDS);
 }
 
 void MapCamera3d::notifyListenerBoundsChange() { notifyListeners(ListenerType::BOUNDS); }
