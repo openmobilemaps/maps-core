@@ -15,6 +15,22 @@
              targetZoom:(nullable NSNumber *)targetZoom
        targetCoordinate:(nullable MCCoord *)targetCoordinate;
 
+- (int32_t)getCameraMode;
+
+- (void)setCameraMode:(int32_t)mode;
+
+- (BOOL)isPoseCameraActive;
+
+- (void)setPoseCamera:(nonnull MCCoord *)position
+           yawDegrees:(float)yawDegrees
+         pitchDegrees:(float)pitchDegrees
+          rollDegrees:(float)rollDegrees
+   verticalFovDegrees:(float)verticalFovDegrees
+      nearPlaneMeters:(float)nearPlaneMeters
+       farPlaneMeters:(float)farPlaneMeters;
+
+- (void)clearPoseCamera;
+
 - (void)setCustomViewMatrix:(nonnull NSArray<NSNumber *> *)viewMatrix;
 
 - (void)clearCustomViewMatrix;

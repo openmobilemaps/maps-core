@@ -15,6 +15,7 @@
 #include "CameraInterpolation.h"
 #include "Coord.h"
 #include "CoordAnimation.h"
+#include "CoordinateSystemIdentifiers.h"
 #include "CoordinateConversionHelperInterface.h"
 #include "DoubleAnimation.h"
 #include "MapCamera3dInterface.h"
@@ -27,6 +28,7 @@
 #include "Vec2I.h"
 #include "Vec3D.h"
 #include "Vec4D.h"
+#include <cstdint>
 #include <mutex>
 #include <optional>
 #include <set>
@@ -173,6 +175,17 @@ class MapCamera3d : public MapCameraInterface,
 
     Camera3dConfig getCameraConfig() override;
 
+    int32_t getCameraMode() override;
+
+    void setCameraMode(int32_t mode) override;
+
+    bool isPoseCameraActive() override;
+
+    void setPoseCamera(const ::Coord &position, float yawDegrees, float pitchDegrees, float rollDegrees, float verticalFovDegrees,
+                       float nearPlaneMeters, float farPlaneMeters) override;
+
+    void clearPoseCamera() override;
+
     void setCustomViewMatrix(const std::vector<float> &viewMatrix) override;
 
     void clearCustomViewMatrix() override;
@@ -189,7 +202,28 @@ class MapCamera3d : public MapCameraInterface,
 
     Vec2F screenPosFromCartesianCoord(const Vec3D &coord, const Vec2I &sizeViewport);
 
-  protected:
+    enum class CameraMode { ORBIT = 0, POSE = 1 };
+
+    struct PoseCameraState {
+        Coord position = Coord(CoordinateSystemIdentifiers::EPSG4326(), 0.0, 0.0, 0.0);
+        float yawDegrees = 0.0f;
+        float pitchDegrees = 0.0f;
+        float rollDegrees = 0.0f;
+        float verticalFovDegrees = 60.0f;
+        float nearPlaneMeters = 0.5f;
+        float farPlaneMeters = 50000.0f;
+    };
+
+    Coord getPoseCenterPosition(const Vec2I &sizeViewport);
+    double getPoseDerivedZoom(const Vec2I &sizeViewport);
+    RectCoord getPoseRectFromViewport(const Vec2I &sizeViewport, float insetLeft, float insetTop, float insetRight, float insetBottom);
+    Vec3D cartesianFromCoord(const Coord &coord) const;
+    Vec3D rotateVectorAroundAxis(const Vec3D &vector, const Vec3D &axis, double degrees) const;
+    void getPoseBasis(const Coord &coord, Vec3D &east, Vec3D &north, Vec3D &up) const;
+    Coord coordFromScreenPosition(const std::vector<double> &inverseVPMatrix, const ::Vec2F &posScreen, const Vec3D &origin,
+                                  double sphereRadius);
+
+    protected:
     virtual ::Coord coordFromScreenPosition(const std::vector<double> &inverseVPMatrix, const ::Vec2F &posScreen);
 
     virtual ::Coord coordFromScreenPosition(const std::vector<double> &inverseVPMatrix, const ::Vec2F &posScreen,
@@ -304,6 +338,9 @@ class MapCamera3d : public MapCameraInterface,
     std::vector<double> inverseVPMatrix = std::vector<double>(16, 0.0);
     std::vector<float> viewMatrix = std::vector<float>(16, 0.0);
     std::vector<float> projectionMatrix = std::vector<float>(16, 0.0);
+
+    CameraMode cameraMode = CameraMode::ORBIT;
+    PoseCameraState poseCameraState;
 
     bool customViewMatrixEnabled = false;
     std::vector<double> customViewMatrix = std::vector<double>(16, 0.0);

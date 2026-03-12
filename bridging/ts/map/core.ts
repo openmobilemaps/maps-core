@@ -166,6 +166,11 @@ export interface MapCameraInterface_statics {
 export interface MapCamera3dInterface {
     getCameraConfig(): Camera3dConfig;
     setCameraConfig(config: Camera3dConfig, durationSeconds: number | undefined, targetZoom: number | undefined, targetCoordinate: Coord | undefined): void;
+    getCameraMode(): number;
+    setCameraMode(mode: number): void;
+    isPoseCameraActive(): boolean;
+    setPoseCamera(position: Coord, yawDegrees: number, pitchDegrees: number, rollDegrees: number, verticalFovDegrees: number, nearPlaneMeters: number, farPlaneMeters: number): void;
+    clearPoseCamera(): void;
 }
 
 export interface /*record*/ CameraInterpolation {

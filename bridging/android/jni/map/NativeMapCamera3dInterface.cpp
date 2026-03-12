@@ -40,4 +40,52 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera3dIn
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
+CJNIEXPORT jint JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera3dInterface_00024CppProxy_native_1getCameraMode(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::MapCamera3dInterface>(nativeRef);
+        auto r = ref->getCameraMode();
+        return ::djinni::release(::djinni::I32::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera3dInterface_00024CppProxy_native_1setCameraMode(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jint j_mode)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::MapCamera3dInterface>(nativeRef);
+        ref->setCameraMode(::djinni::I32::toCpp(jniEnv, j_mode));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT jboolean JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera3dInterface_00024CppProxy_native_1isPoseCameraActive(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::MapCamera3dInterface>(nativeRef);
+        auto r = ref->isPoseCameraActive();
+        return ::djinni::release(::djinni::Bool::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera3dInterface_00024CppProxy_native_1setPoseCamera(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeCoord::JniType j_position, jfloat j_yawDegrees, jfloat j_pitchDegrees, jfloat j_rollDegrees, jfloat j_verticalFovDegrees, jfloat j_nearPlaneMeters, jfloat j_farPlaneMeters)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::MapCamera3dInterface>(nativeRef);
+        ref->setPoseCamera(::djinni_generated::NativeCoord::toCpp(jniEnv, j_position),
+                           ::djinni::F32::toCpp(jniEnv, j_yawDegrees),
+                           ::djinni::F32::toCpp(jniEnv, j_pitchDegrees),
+                           ::djinni::F32::toCpp(jniEnv, j_rollDegrees),
+                           ::djinni::F32::toCpp(jniEnv, j_verticalFovDegrees),
+                           ::djinni::F32::toCpp(jniEnv, j_nearPlaneMeters),
+                           ::djinni::F32::toCpp(jniEnv, j_farPlaneMeters));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCamera3dInterface_00024CppProxy_native_1clearPoseCamera(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::MapCamera3dInterface>(nativeRef);
+        ref->clearPoseCamera();
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
 } // namespace djinni_generated

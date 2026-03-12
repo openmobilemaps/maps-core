@@ -469,7 +469,7 @@ void Tiled2dMapRasterLayer::generateRenderPasses() {
     const bool is3D = mapInterface->is3d();
 
     std::vector<std::shared_ptr<RenderPassInterface>> newRenderPasses;
-    std::vector<std::shared_ptr<::RenderObjectInterface>> renderObjects;
+    std::vector<std::pair<Tiled2dMapRasterTileInfo, std::shared_ptr<::RenderObjectInterface>>> rasterEntries;
 
     {
         std::lock_guard<std::recursive_mutex> overlayLock(updateMutex);
@@ -507,13 +507,26 @@ void Tiled2dMapRasterLayer::generateRenderPasses() {
                 renderPass->setScissoringRect(scissorRect);
                 newRenderPasses.push_back(renderPass);
             } else {
-                renderObjects.push_back(renderObject);
+                rasterEntries.emplace_back(entry.first, renderObject);
             }
         }
 
-        if (!renderObjects.empty()) {
+        if (!rasterEntries.empty()) {
             if (is3D) {
-                std::reverse(renderObjects.begin(), renderObjects.end());
+                std::sort(rasterEntries.begin(), rasterEntries.end(), [](const auto &lhs, const auto &rhs) {
+                    const auto &leftInfo = lhs.first.tileInfo.tileInfo;
+                    const auto &rightInfo = rhs.first.tileInfo.tileInfo;
+                    if (leftInfo.zoomIdentifier != rightInfo.zoomIdentifier) {
+                        return leftInfo.zoomIdentifier < rightInfo.zoomIdentifier;
+                    }
+                    return lhs.first.tileInfo < rhs.first.tileInfo;
+                });
+            }
+
+            std::vector<std::shared_ptr<::RenderObjectInterface>> renderObjects;
+            renderObjects.reserve(rasterEntries.size());
+            for (const auto &entry : rasterEntries) {
+                renderObjects.push_back(entry.second);
             }
 
             auto config = RenderPassConfig(0, is3D, renderTarget);

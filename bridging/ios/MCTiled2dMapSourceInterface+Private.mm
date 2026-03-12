@@ -54,7 +54,9 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
                 height:(float)height
     focusPointAltitude:(float)focusPointAltitude
     focusPointPosition:(nonnull MCCoord *)focusPointPosition
-                  zoom:(float)zoom {
+                  zoom:(float)zoom
+         cameraPosition:(nullable MCVec3D *)cameraPosition
+             cameraMode:(int32_t)cameraMode {
     try {
         _cppRefHandle.get()->onCameraChange(::djinni::List<::djinni::F32>::toCpp(viewMatrix),
                                             ::djinni::List<::djinni::F32>::toCpp(projectionMatrix),
@@ -65,7 +67,9 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
                                             ::djinni::F32::toCpp(height),
                                             ::djinni::F32::toCpp(focusPointAltitude),
                                             ::djinni_generated::Coord::toCpp(focusPointPosition),
-                                            ::djinni::F32::toCpp(zoom));
+                                            ::djinni::F32::toCpp(zoom),
+                                            ::djinni::Optional<std::optional, ::djinni_generated::Vec3D>::toCpp(cameraPosition),
+                                            ::djinni::I32::toCpp(cameraMode));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

@@ -35,6 +35,7 @@
 #include <cmath>
 #include <map>
 #include <mutex>
+#include <limits>
 #include <set>
 #include <unordered_map>
 #include <unordered_set>
@@ -138,7 +139,8 @@ class Tiled2dMapSource : public Tiled2dMapSourceInterface,
 
     virtual void onCameraChange(const std::vector<float> &viewMatrix, const std::vector<float> &projectionMatrix,
                                 const ::Vec3D &origin, float verticalFov, float horizontalFov, float width, float height,
-                                float focusPointAltitude, const ::Coord &focusPointPosition, float zoom) override;
+                                float focusPointAltitude, const ::Coord &focusPointPosition, float zoom, std::optional<::Vec3D> cameraPosition,
+                                int32_t cameraMode) override;
 
     virtual bool isTileVisible(const Tiled2dMapTileInfo &tileInfo);
 

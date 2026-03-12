@@ -222,6 +222,11 @@ map_camera_3d_interface = interface +c {
     get_camera_config(): camera_3d_config;
 
     set_camera_config(config: camera_3d_config, durationSeconds: optional<f32>, target_zoom: optional<f32>, target_coordinate: optional<coord>);
+    get_camera_mode(): i32;
+    set_camera_mode(mode: i32);
+    is_pose_camera_active(): bool;
+    set_pose_camera(position: coord, yaw_degrees: f32, pitch_degrees: f32, roll_degrees: f32, vertical_fov_degrees: f32, near_plane_meters: f32, far_plane_meters: f32);
+    clear_pose_camera();
 }
 
 camera_interpolation = record {

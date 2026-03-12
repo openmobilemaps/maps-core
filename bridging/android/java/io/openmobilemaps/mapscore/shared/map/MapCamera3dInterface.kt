@@ -12,6 +12,16 @@ abstract class MapCamera3dInterface {
 
     abstract fun setCameraConfig(config: Camera3dConfig, durationSeconds: Float?, targetZoom: Float?, targetCoordinate: io.openmobilemaps.mapscore.shared.map.coordinates.Coord?)
 
+    abstract fun getCameraMode(): Int
+
+    abstract fun setCameraMode(mode: Int)
+
+    abstract fun isPoseCameraActive(): Boolean
+
+    abstract fun setPoseCamera(position: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, yawDegrees: Float, pitchDegrees: Float, rollDegrees: Float, verticalFovDegrees: Float, nearPlaneMeters: Float, farPlaneMeters: Float)
+
+    abstract fun clearPoseCamera()
+
     public class CppProxy : MapCamera3dInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -38,5 +48,35 @@ abstract class MapCamera3dInterface {
             native_setCameraConfig(this.nativeRef, config, durationSeconds, targetZoom, targetCoordinate)
         }
         private external fun native_setCameraConfig(_nativeRef: Long, config: Camera3dConfig, durationSeconds: Float?, targetZoom: Float?, targetCoordinate: io.openmobilemaps.mapscore.shared.map.coordinates.Coord?)
+
+        override fun getCameraMode(): Int {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getCameraMode(this.nativeRef)
+        }
+        private external fun native_getCameraMode(_nativeRef: Long): Int
+
+        override fun setCameraMode(mode: Int) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setCameraMode(this.nativeRef, mode)
+        }
+        private external fun native_setCameraMode(_nativeRef: Long, mode: Int)
+
+        override fun isPoseCameraActive(): Boolean {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_isPoseCameraActive(this.nativeRef)
+        }
+        private external fun native_isPoseCameraActive(_nativeRef: Long): Boolean
+
+        override fun setPoseCamera(position: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, yawDegrees: Float, pitchDegrees: Float, rollDegrees: Float, verticalFovDegrees: Float, nearPlaneMeters: Float, farPlaneMeters: Float) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setPoseCamera(this.nativeRef, position, yawDegrees, pitchDegrees, rollDegrees, verticalFovDegrees, nearPlaneMeters, farPlaneMeters)
+        }
+        private external fun native_setPoseCamera(_nativeRef: Long, position: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, yawDegrees: Float, pitchDegrees: Float, rollDegrees: Float, verticalFovDegrees: Float, nearPlaneMeters: Float, farPlaneMeters: Float)
+
+        override fun clearPoseCamera() {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_clearPoseCamera(this.nativeRef)
+        }
+        private external fun native_clearPoseCamera(_nativeRef: Long)
     }
 }

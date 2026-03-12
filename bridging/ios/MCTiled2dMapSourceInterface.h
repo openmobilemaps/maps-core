@@ -24,7 +24,9 @@
                 height:(float)height
     focusPointAltitude:(float)focusPointAltitude
     focusPointPosition:(nonnull MCCoord *)focusPointPosition
-                  zoom:(float)zoom;
+                  zoom:(float)zoom
+         cameraPosition:(nullable MCVec3D *)cameraPosition
+             cameraMode:(int32_t)cameraMode;
 
 - (void)setMinZoomLevelIdentifier:(nullable NSNumber *)value;
 

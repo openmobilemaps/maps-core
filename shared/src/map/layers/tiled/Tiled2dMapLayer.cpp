@@ -9,6 +9,7 @@
  */
 
 #include "Tiled2dMapLayer.h"
+#include "MapCamera3dInterface.h"
 #include "MapCameraInterface.h"
 #include "CoordinateSystemIdentifiers.h"
 
@@ -115,10 +116,19 @@ void Tiled2dMapLayer::onVisibleBoundsChanged(const ::RectCoord &visibleBounds, d
 
 void Tiled2dMapLayer::onCameraChange(const std::vector<float> &viewMatrix, const std::vector<float> &projectionMatrix, const ::Vec3D & origin, float verticalFov, float horizontalFov, float width, float height, float focusPointAltitude, const ::Coord & focusPointPosition, float zoom) {
     std::lock_guard<std::recursive_mutex> lock(sourcesMutex);
+    auto camera = mapInterface ? std::dynamic_pointer_cast<MapCameraInterface>(mapInterface->getCamera()) : nullptr;
+    auto cameraPosition = camera ? camera->getLastCameraPosition() : std::nullopt;
+    int32_t cameraMode = 0;
+    if (camera) {
+        auto camera3d = camera->asMapCamera3d();
+        if (camera3d) {
+            cameraMode = camera3d->getCameraMode();
+        }
+    }
 
     for (const auto &sourceInterface: sourceInterfaces) {
         sourceInterface.message(MailboxDuplicationStrategy::replaceNewest, MFN(&Tiled2dMapSourceInterface::onCameraChange),
-                                viewMatrix, projectionMatrix, origin, verticalFov, horizontalFov, width, height, focusPointAltitude, focusPointPosition, zoom);
+                                viewMatrix, projectionMatrix, origin, verticalFov, horizontalFov, width, height, focusPointAltitude, focusPointPosition, zoom, cameraPosition, cameraMode);
     }
 }
 

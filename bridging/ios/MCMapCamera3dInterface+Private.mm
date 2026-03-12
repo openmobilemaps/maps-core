@@ -51,6 +51,50 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (int32_t)getCameraMode {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getCameraMode();
+        return ::djinni::I32::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)setCameraMode:(int32_t)mode {
+    try {
+        _cppRefHandle.get()->setCameraMode(::djinni::I32::toCpp(mode));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (BOOL)isPoseCameraActive {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->isPoseCameraActive();
+        return ::djinni::Bool::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)setPoseCamera:(nonnull MCCoord *)position
+           yawDegrees:(float)yawDegrees
+         pitchDegrees:(float)pitchDegrees
+          rollDegrees:(float)rollDegrees
+   verticalFovDegrees:(float)verticalFovDegrees
+      nearPlaneMeters:(float)nearPlaneMeters
+       farPlaneMeters:(float)farPlaneMeters {
+    try {
+        _cppRefHandle.get()->setPoseCamera(::djinni_generated::Coord::toCpp(position),
+                                           ::djinni::F32::toCpp(yawDegrees),
+                                           ::djinni::F32::toCpp(pitchDegrees),
+                                           ::djinni::F32::toCpp(rollDegrees),
+                                           ::djinni::F32::toCpp(verticalFovDegrees),
+                                           ::djinni::F32::toCpp(nearPlaneMeters),
+                                           ::djinni::F32::toCpp(farPlaneMeters));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)clearPoseCamera {
+    try {
+        _cppRefHandle.get()->clearPoseCamera();
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (void)setCustomViewMatrix:(nonnull NSArray<NSNumber *> *)viewMatrix {
     try {
         _cppRefHandle.get()->setCustomViewMatrix(::djinni::List<::djinni::F32>::toCpp(viewMatrix));
