@@ -146,7 +146,10 @@ public:
     void initialize(const std::shared_ptr<GeoJson> &geoJson) {
         // If the GeoJSON contains only points, there is no need to split it into smaller tiles,
         // as there are no opportunities for simplification, merging, or meaningful point reduction.
-        if (geoJson->hasOnlyPoints) {
+        // Keep point-only sources on a single zoom level only if minZoom is explicitly configured (> 0).
+        // For the default minZoom=0 case, collapsing to z0 creates very large matching tolerances and can
+        // hide unrelated points due to symbol ownership deduplication.
+        if (geoJson->hasOnlyPoints && options.minZoom > 0) {
             options.maxZoom = options.minZoom;
         }
 
@@ -183,9 +186,8 @@ public:
     }
 
     void reload(const std::shared_ptr<GeoJson> &geoJson) override {
-        // If the GeoJSON contains only points, there is no need to split it into smaller tiles,
-        // as there are no opportunities for simplification, merging, or meaningful point reduction.
-        if (geoJson->hasOnlyPoints) {
+        // Keep behavior consistent with initialize().
+        if (geoJson->hasOnlyPoints && options.minZoom > 0) {
             options.maxZoom = options.minZoom;
         }
 
