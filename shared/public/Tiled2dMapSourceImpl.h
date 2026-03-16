@@ -205,19 +205,8 @@ void Tiled2dMapSource<L, R>::onCameraChange(const std::vector<float> &viewMatrix
 
     constexpr int32_t poseCameraMode = 1;
     const bool isPoseCameraActive = cameraMode == poseCameraMode && cameraPosition.has_value();
-    const int maxCandidateChecks = isPoseCameraActive ? 10000 : 1000;
-    Coord focusPointForHierarchy = focusPointPosition;
-    double focusAltitudeForHierarchy = focusPointAltitude;
-    if (isPoseCameraActive) {
-        auto cameraSurface = Vec3DHelper::normalize(*cameraPosition);
-        double longitude = std::atan2(cameraSurface.x, cameraSurface.z) * 180.0 / M_PI - 90.0;
-        if (longitude < -180.0) longitude += 360.0;
-        if (longitude > 180.0) longitude -= 360.0;
-        const double latitude = std::asin(std::clamp(cameraSurface.y, -1.0, 1.0)) * 180.0 / M_PI;
-        focusPointForHierarchy = Coord(CoordinateSystemIdentifiers::EPSG4326(), longitude, latitude, 0.0);
-        focusAltitudeForHierarchy = 0.0;
-    }
-    auto focusPointInLayerCoords = conversionHelper->convert(layerSystemId, focusPointForHierarchy);
+    const int maxCandidateChecks = 1000;
+    auto focusPointInLayerCoords = conversionHelper->convert(layerSystemId, focusPointPosition);
 
     auto earthCenterView = transformToView(Coord(CoordinateSystemIdentifiers::UnitSphere(), 0, 0, 0), viewMatrix, origin);
 
@@ -256,8 +245,8 @@ void Tiled2dMapSource<L, R>::onCameraChange(const std::vector<float> &viewMatrix
         const double cullingElevationOffsetMin = get3dCullingElevationOffsetMin();
         const double cullingElevationOffsetMax = get3dCullingElevationOffsetMax();
 
-        const double zMin = focusAltitudeForHierarchy + cullingElevationOffsetMin;
-        const double zMax = focusAltitudeForHierarchy + cullingElevationOffsetMax;
+        const double zMin = focusPointAltitude + cullingElevationOffsetMin;
+        const double zMax = focusPointAltitude + cullingElevationOffsetMax;
 
         const Coord topLeft = Coord(layerSystemId, candidate.x * tileWidthAdj + boundsLeft, candidate.y * tileHeightAdj + boundsTop, zMax);
         const Coord topRight = Coord(layerSystemId, topLeft.x + tileWidthAdj, topLeft.y, zMax);
@@ -282,7 +271,7 @@ void Tiled2dMapSource<L, R>::onCameraChange(const std::vector<float> &viewMatrix
                                          : std::clamp(focusPointInLayerCoords.x, topRight.x, topLeft.x),
                   topLeft.y < bottomLeft.y ? std::clamp(focusPointInLayerCoords.y, topLeft.y, bottomLeft.y)
                                            : std::clamp(focusPointInLayerCoords.y, bottomLeft.y, topLeft.y),
-                  focusAltitudeForHierarchy);
+                  focusPointAltitude);
 
         auto toRight = focusPointClampedToTile.x < tileCenter.x;
         auto toTop = focusPointClampedToTile.y < tileCenter.y;
@@ -342,8 +331,6 @@ void Tiled2dMapSource<L, R>::onCameraChange(const std::vector<float> &viewMatrix
                                                     topCenterMinView,   bottomCenterMaxView,  leftCenterMinView,   rightCenterMinView};
 
         auto isFacingAway = [&](const Vec3D &viewPos) { return (viewPos - earthCenterView).z < 0.0; };
-        const bool isPoseCamera = isPoseCameraActive;
-
         bool anyPosePointInFront = false;
         bool anyPosePointProjected = false;
         double poseMinScreenX = std::numeric_limits<double>::infinity();
@@ -351,7 +338,7 @@ void Tiled2dMapSource<L, R>::onCameraChange(const std::vector<float> &viewMatrix
         double poseMinScreenY = std::numeric_limits<double>::infinity();
         double poseMaxScreenY = -std::numeric_limits<double>::infinity();
 
-        if (isPoseCamera) {
+        if (isPoseCameraActive) {
             for (const auto &viewPos : cullingViews) {
                 if (viewPos.z >= 0.0) {
                     continue;
@@ -369,14 +356,14 @@ void Tiled2dMapSource<L, R>::onCameraChange(const std::vector<float> &viewMatrix
             }
         }
 
-        if (isPoseCamera) {
+        if (isPoseCameraActive) {
             const bool tileCenterInFront = tileCenterView.z < 0.0;
             if (!isKeptLevel && !anyPosePointInFront && !tileCenterInFront) {
                 clipAndFreeLambda(currentTilePolygon);
                 continue;
             }
 
-            constexpr double poseScreenCullMargin = 0.25;
+            constexpr double poseScreenCullMargin = 0.1;
             if (anyPosePointProjected &&
                 (poseMaxScreenX < -1.0 - poseScreenCullMargin || poseMinScreenX > 1.0 + poseScreenCullMargin ||
                  poseMaxScreenY < -1.0 - poseScreenCullMargin || poseMinScreenY > 1.0 + poseScreenCullMargin)) {
@@ -390,7 +377,7 @@ void Tiled2dMapSource<L, R>::onCameraChange(const std::vector<float> &viewMatrix
             continue;
         }
         auto samplePointOriginViewScreen = projectToScreen(focusPointClampedView, projectionMatrix);
-        if (!isPoseCamera && !isKeptLevel && (samplePointOriginViewScreen.x < -1.0 || samplePointOriginViewScreen.x > 1.0 ||
+        if (!isPoseCameraActive && !isKeptLevel && (samplePointOriginViewScreen.x < -1.0 || samplePointOriginViewScreen.x > 1.0 ||
                              samplePointOriginViewScreen.y < -1.0 || samplePointOriginViewScreen.y > 1.0)) {
             if (mapConfig.mapCoordinateSystem.identifier == CoordinateSystemIdentifiers::UnitSphere()) {
                 // v(0,0,+1) = unit-vector out of screen
@@ -492,47 +479,19 @@ void Tiled2dMapSource<L, R>::onCameraChange(const std::vector<float> &viewMatrix
         updateBounds(viewBoundsBottomLeft.y, bottomLeft.y, !topToBottom);
 
         bool lastLevel = candidate.levelIndex == maxLevelAvailable;
-        bool preciseEnough = false;
+        auto samplePointYViewScreen = projectToScreen(focusPointSampleYView, projectionMatrix);
+        auto samplePointXViewScreen = projectToScreen(focusPointSampleXView, projectionMatrix);
 
-        if (cameraMode == poseCameraMode && cameraPosition) {
-            const double tileWorldWidth = Vec3DHelper::distance(topLeftView, topRightView);
-            const double tileWorldHeight = Vec3DHelper::distance(topLeftView, bottomLeftView);
-            const double tileWorldSize = std::max(tileWorldWidth, tileWorldHeight);
-            const double cameraDistanceToTile = std::max(1.0, Vec3DHelper::length(tileCenterView));
-            const double tileAngularSize = 2.0 * std::atan2(tileWorldSize * 0.5, cameraDistanceToTile);
-            const double targetAngularSize = std::max(verticalFov, horizontalFov) * M_PI / 180.0 / 18.0;
-            const double tileCenterFocusDistance = std::sqrt(std::pow(tileCenter.x - focusPointInLayerCoords.x, 2.0) +
-                                                             std::pow(tileCenter.y - focusPointInLayerCoords.y, 2.0));
-            const double poseCameraRefineDistance = std::max(tileWidth, tileHeight) * 2.5;
+        Vec2D samplePointOriginViewScreenPx(samplePointOriginViewScreen.x * (width / 2.0),
+                                            samplePointOriginViewScreen.y * (height / 2.0));
+        Vec2D samplePointYViewScreenPx(samplePointYViewScreen.x * (width / 2.0), samplePointYViewScreen.y * (height / 2.0));
+        Vec2D samplePointXViewScreenPx(samplePointXViewScreen.x * (width / 2.0), samplePointXViewScreen.y * (height / 2.0));
 
-            if (anyPosePointProjected) {
-                const double projectedTileWidthPx = (poseMaxScreenX - poseMinScreenX) * (width * 0.5);
-                const double projectedTileHeightPx = (poseMaxScreenY - poseMinScreenY) * (height * 0.5);
-                const double projectedTileSizePx = std::max(projectedTileWidthPx, projectedTileHeightPx);
-                const double poseTargetProjectedSizePx = std::max(24.0, std::min(width, height) * 0.08);
-                preciseEnough = projectedTileSizePx <= poseTargetProjectedSizePx && tileAngularSize <= targetAngularSize;
-            } else {
-                preciseEnough = false;
-            }
+        double xLengthPx = Vec2DHelper::distance(samplePointOriginViewScreenPx, samplePointXViewScreenPx);
+        double yLengthPx = Vec2DHelper::distance(samplePointOriginViewScreenPx, samplePointYViewScreenPx);
 
-            if (tileCenterFocusDistance <= poseCameraRefineDistance && !lastLevel) {
-                preciseEnough = false;
-            }
-        } else {
-            auto samplePointYViewScreen = projectToScreen(focusPointSampleYView, projectionMatrix);
-            auto samplePointXViewScreen = projectToScreen(focusPointSampleXView, projectionMatrix);
-
-            Vec2D samplePointOriginViewScreenPx(samplePointOriginViewScreen.x * (width / 2.0),
-                                                samplePointOriginViewScreen.y * (height / 2.0));
-            Vec2D samplePointYViewScreenPx(samplePointYViewScreen.x * (width / 2.0), samplePointYViewScreen.y * (height / 2.0));
-            Vec2D samplePointXViewScreenPx(samplePointXViewScreen.x * (width / 2.0), samplePointXViewScreen.y * (height / 2.0));
-
-            double xLengthPx = Vec2DHelper::distance(samplePointOriginViewScreenPx, samplePointXViewScreenPx);
-            double yLengthPx = Vec2DHelper::distance(samplePointOriginViewScreenPx, samplePointYViewScreenPx);
-
-            double maxLength = sampleSize * (std::min(width, height) * 0.5 / zoomInfo.zoomLevelScaleFactor);
-            preciseEnough = xLengthPx <= maxLength || yLengthPx <= maxLength;
-        }
+        double maxLength = sampleSize * (std::min(width, height) * 0.5 / zoomInfo.zoomLevelScaleFactor);
+        bool preciseEnough = xLengthPx <= maxLength || yLengthPx <= maxLength;
 
         bool isVirtual = topMostZoomLevel > zoomLevelInfo.zoomLevelIdentifier;
 
@@ -701,9 +660,9 @@ void Tiled2dMapSource<L, R>::onCameraChange(const std::vector<float> &viewMatrix
                 parent.y = floor((tile.second.tileInfo.bounds.topLeft.y - boundsTop) / tileHeightAdj);
 
                 const Coord topLeft = Coord(layerSystemId, parent.x * tileWidthAdj + boundsLeft,
-                                            parent.y * tileHeightAdj + boundsTop, focusAltitudeForHierarchy);
+                                            parent.y * tileHeightAdj + boundsTop, focusPointAltitude);
                 const Coord bottomRight =
-                    Coord(layerSystemId, topLeft.x + tileWidthAdj, topLeft.y + tileHeightAdj, focusAltitudeForHierarchy);
+                    Coord(layerSystemId, topLeft.x + tileWidthAdj, topLeft.y + tileHeightAdj, focusPointAltitude);
 
                 const RectCoord rect(topLeft, bottomRight);
                 int t = 0;

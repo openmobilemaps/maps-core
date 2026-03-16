@@ -849,7 +849,7 @@ void MapCamera3d::notifyListeners(const int &listenerType) {
             projectionMatrix = this->projectionMatrix;
             horizontalFov = this->horizontalFov;
             verticalFov = this->verticalFov;
-            focusPointPosition = cameraMode == CameraMode::POSE ? getPoseCenterPosition(mapInterface->getRenderingContext()->getViewportSize())
+            focusPointPosition = cameraMode == CameraMode::POSE ? getPoseSurfacePosition()
                                                                 : this->focusPointPosition;
             focusPointAltitude = focusPointPosition.z;
         }
@@ -1494,24 +1494,24 @@ void MapCamera3d::getPoseBasis(const Coord &coord, Vec3D &east, Vec3D &north, Ve
 }
 
 Coord MapCamera3d::getPoseCenterPosition(const Vec2I &sizeViewport) {
-    auto poseNadir = [&]() {
-        const auto cameraWorld = cartesianFromCoord(poseCameraState.position);
-        const auto up = Vec3DHelper::normalize(cameraWorld);
-        double longitude = std::atan2(up.x, up.z) * 180.0 / M_PI - 90.0;
-        if (longitude < -180.0) longitude += 360.0;
-        if (longitude > 180.0) longitude -= 360.0;
-        const double latitude = std::asin(std::clamp(up.y, -1.0, 1.0)) * 180.0 / M_PI;
-        return Coord(CoordinateSystemIdentifiers::EPSG4326(), longitude, latitude, 0.0);
-    };
-
     if (sizeViewport.x <= 0 || sizeViewport.y <= 0) {
-        return poseNadir();
+        return getPoseSurfacePosition();
     }
 
     const auto center = Vec2F(sizeViewport.x * 0.5f, sizeViewport.y * 0.5f);
     std::lock_guard<std::recursive_mutex> lock(matrixMutex);
     auto centerCoord = coordFromScreenPosition(inverseVPMatrix, center, origin);
-    return centerCoord.systemIdentifier == -1 ? poseNadir() : centerCoord;
+    return centerCoord.systemIdentifier == -1 ? getPoseSurfacePosition() : centerCoord;
+}
+
+Coord MapCamera3d::getPoseSurfacePosition() const {
+    const auto cameraWorld = cartesianFromCoord(poseCameraState.position);
+    const auto up = Vec3DHelper::normalize(cameraWorld);
+    double longitude = std::atan2(up.x, up.z) * 180.0 / M_PI - 90.0;
+    if (longitude < -180.0) longitude += 360.0;
+    if (longitude > 180.0) longitude -= 360.0;
+    const double latitude = std::asin(std::clamp(up.y, -1.0, 1.0)) * 180.0 / M_PI;
+    return Coord(CoordinateSystemIdentifiers::EPSG4326(), longitude, latitude, 0.0);
 }
 
 double MapCamera3d::getPoseDerivedZoom(const Vec2I &sizeViewport) {

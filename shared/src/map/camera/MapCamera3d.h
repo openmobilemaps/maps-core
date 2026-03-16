@@ -214,6 +214,7 @@ class MapCamera3d : public MapCameraInterface,
         float farPlaneMeters = 50000.0f;
     };
 
+    Coord getPoseSurfacePosition() const;
     Coord getPoseCenterPosition(const Vec2I &sizeViewport);
     double getPoseDerivedZoom(const Vec2I &sizeViewport);
     RectCoord getPoseRectFromViewport(const Vec2I &sizeViewport, float insetLeft, float insetTop, float insetRight, float insetBottom);
