@@ -217,6 +217,7 @@ class Tiled2dMapSource : public Tiled2dMapSourceInterface,
     double curZoom;
 
     std::unordered_set<Tiled2dMapTileInfo> currentVisibleTiles;
+    std::unordered_set<Tiled2dMapTileInfo> retainedFallbackTiles;
 
     std::vector<VisibleTilesLayer> currentPyramid;
     int currentKeepZoomLevelOffset;
@@ -235,6 +236,9 @@ class Tiled2dMapSource : public Tiled2dMapSourceInterface,
     virtual void onVisibleTilesChanged(const std::vector<VisibleTilesLayer> &pyramid, bool keepMultipleLevels, int keepZoomLevelOffset = 0);
 
   protected:
+    bool shouldRetainTileUntilReplacementReady(const Tiled2dMapTileInfo &tileInfo,
+                                               const std::vector<VisibleTilesLayer> &pyramid) const;
+    void pruneRetainedFallbackTiles();
     void scheduleFixedNumberOfLoadingTasks();
     void performLoadingTask(Tiled2dMapTileInfo tile, size_t loaderIndex);
 

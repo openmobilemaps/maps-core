@@ -1045,6 +1045,12 @@ void Tiled2dMapSource<L, R>::onVisibleTilesChanged(const std::vector<VisibleTile
             }
         }
 
+        if (!found && shouldRetainTileUntilReplacementReady(tileInfo, pyramid)) {
+            retainedFallbackTiles.insert(tileInfo);
+            continue;
+        }
+
+        retainedFallbackTiles.erase(tileInfo);
         if (!found) {
             toRemove.push_back(tileInfo);
         }
@@ -1053,6 +1059,7 @@ void Tiled2dMapSource<L, R>::onVisibleTilesChanged(const std::vector<VisibleTile
     for (const auto &removedTile : toRemove) {
         currentTiles.erase(removedTile);
         currentlyLoading.erase(removedTile);
+        retainedFallbackTiles.erase(removedTile);
 
         readyTiles.erase(removedTile);
 
@@ -1125,6 +1132,66 @@ void Tiled2dMapSource<L, R>::onVisibleTilesChanged(const std::vector<VisibleTile
     // if we removed tiles, we potentially need to update the tilemasks - also if no new tile is loaded
     updateTileMasks();
 
+    notifyTilesUpdates();
+}
+
+template <class L, class R>
+bool Tiled2dMapSource<L, R>::shouldRetainTileUntilReplacementReady(const Tiled2dMapTileInfo &tileInfo,
+                                                                   const std::vector<VisibleTilesLayer> &pyramid) const {
+    auto rectsIntersect = [](const RectCoord &lhs, const RectCoord &rhs) {
+        const double lhsMinX = std::min(lhs.topLeft.x, lhs.bottomRight.x);
+        const double lhsMaxX = std::max(lhs.topLeft.x, lhs.bottomRight.x);
+        const double lhsMinY = std::min(lhs.topLeft.y, lhs.bottomRight.y);
+        const double lhsMaxY = std::max(lhs.topLeft.y, lhs.bottomRight.y);
+        const double rhsMinX = std::min(rhs.topLeft.x, rhs.bottomRight.x);
+        const double rhsMaxX = std::max(rhs.topLeft.x, rhs.bottomRight.x);
+        const double rhsMinY = std::min(rhs.topLeft.y, rhs.bottomRight.y);
+        const double rhsMaxY = std::max(rhs.topLeft.y, rhs.bottomRight.y);
+
+        return lhsMinX < rhsMaxX && lhsMaxX > rhsMinX && lhsMinY < rhsMaxY && lhsMaxY > rhsMinY;
+    };
+
+    for (const auto &layer : pyramid) {
+        for (const auto &visibleTile : layer.visibleTiles) {
+            const auto &visibleTileInfo = visibleTile.tileInfo;
+            if (!rectsIntersect(tileInfo.bounds, visibleTileInfo.bounds)) {
+                continue;
+            }
+
+            const bool replacementReady = currentTiles.count(visibleTileInfo) != 0 && readyTiles.count(visibleTileInfo) != 0;
+            if (!replacementReady) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+template <class L, class R>
+void Tiled2dMapSource<L, R>::pruneRetainedFallbackTiles() {
+    std::vector<Tiled2dMapTileInfo> toRemove;
+    for (const auto &tileInfo : retainedFallbackTiles) {
+        if (!shouldRetainTileUntilReplacementReady(tileInfo, currentPyramid)) {
+            toRemove.push_back(tileInfo);
+        }
+    }
+
+    if (toRemove.empty()) {
+        return;
+    }
+
+    for (const auto &tileInfo : toRemove) {
+        retainedFallbackTiles.erase(tileInfo);
+        currentTiles.erase(tileInfo);
+        readyTiles.erase(tileInfo);
+
+        if (errorManager) {
+            errorManager->removeError(layerConfig->getTileUrl(tileInfo.x, tileInfo.y, tileInfo.t, tileInfo.zoomIdentifier));
+        }
+    }
+
+    updateTileMasks();
     notifyTilesUpdates();
 }
 
@@ -1480,6 +1547,7 @@ template <class L, class R> void Tiled2dMapSource<L, R>::setTileReady(const Tile
         return;
     }
 
+    pruneRetainedFallbackTiles();
     updateTileMasks();
 
     notifyTilesUpdates();
@@ -1507,6 +1575,7 @@ void Tiled2dMapSource<L, R>::setTilesReady(const std::vector<Tiled2dMapVersioned
         return;
     }
 
+    pruneRetainedFallbackTiles();
     updateTileMasks();
     notifyTilesUpdates();
 }
@@ -1587,6 +1656,7 @@ template <class L, class R> void Tiled2dMapSource<L, R>::forceReload() {
 template <class L, class R> void Tiled2dMapSource<L, R>::reloadTiles() {
     outdatedTiles.clear();
     outdatedTiles.swap(currentTiles);
+    retainedFallbackTiles.clear();
     readyTiles.clear();
 
     for (auto it = currentlyLoading.begin(); it != currentlyLoading.end(); ++it) {
