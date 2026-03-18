@@ -332,27 +332,48 @@ void Tiled2dMapSource<L, R>::onCameraChange(const std::vector<float> &viewMatrix
 
         auto isFacingAway = [&](const Vec3D &viewPos) { return (viewPos - earthCenterView).z < 0.0; };
         bool anyPosePointInFront = false;
-        bool anyPosePointProjected = false;
-        double poseMinScreenX = std::numeric_limits<double>::infinity();
-        double poseMaxScreenX = -std::numeric_limits<double>::infinity();
-        double poseMinScreenY = std::numeric_limits<double>::infinity();
-        double poseMaxScreenY = -std::numeric_limits<double>::infinity();
+        bool poseOutsideLeft = true;
+        bool poseOutsideRight = true;
+        bool poseOutsideBottom = true;
+        bool poseOutsideTop = true;
+        bool poseOutsideNear = true;
+        bool poseOutsideFar = true;
 
         if (isPoseCameraActive) {
-            for (const auto &viewPos : cullingViews) {
-                if (viewPos.z >= 0.0) {
+            std::vector<Vec3D> poseCullingViews;
+            poseCullingViews.reserve(cullingViews.size() + 50);
+            poseCullingViews.insert(poseCullingViews.end(), cullingViews.begin(), cullingViews.end());
+
+            // Sample the whole tile footprint at both displacement extremes so pose-mode culling
+            // stays conservative when the frustum only intersects the interior of a displaced tile.
+            const std::array<double, 5> poseSampleFractions = {0.0, 0.25, 0.5, 0.75, 1.0};
+            for (const auto xFraction : poseSampleFractions) {
+                for (const auto yFraction : poseSampleFractions) {
+                    const double sampleX = topLeft.x + (bottomRight.x - topLeft.x) * xFraction;
+                    const double sampleY = topLeft.y + (bottomRight.y - topLeft.y) * yFraction;
+                    poseCullingViews.push_back(transformToView(Coord(layerSystemId, sampleX, sampleY, zMin), viewMatrix, origin));
+                    poseCullingViews.push_back(transformToView(Coord(layerSystemId, sampleX, sampleY, zMax), viewMatrix, origin));
+                }
+            }
+
+            const double tanHalfHorizontalFov = projectionMatrix[0] != 0.0f ? 1.0 / projectionMatrix[0] : std::numeric_limits<double>::infinity();
+            const double tanHalfVerticalFov = projectionMatrix[5] != 0.0f ? 1.0 / projectionMatrix[5] : std::numeric_limits<double>::infinity();
+            const double poseNearPlane = projectionMatrix[14] / (projectionMatrix[10] - 1.0f);
+            const double poseFarPlane = projectionMatrix[14] / (projectionMatrix[10] + 1.0f);
+
+            for (const auto &viewPos : poseCullingViews) {
+                if (!std::isfinite(viewPos.x) || !std::isfinite(viewPos.y) || !std::isfinite(viewPos.z)) {
                     continue;
                 }
-                anyPosePointInFront = true;
-                const auto screenPos = projectToScreen(viewPos, projectionMatrix);
-                if (!std::isfinite(screenPos.x) || !std::isfinite(screenPos.y)) {
-                    continue;
-                }
-                anyPosePointProjected = true;
-                poseMinScreenX = std::min(poseMinScreenX, static_cast<double>(screenPos.x));
-                poseMaxScreenX = std::max(poseMaxScreenX, static_cast<double>(screenPos.x));
-                poseMinScreenY = std::min(poseMinScreenY, static_cast<double>(screenPos.y));
-                poseMaxScreenY = std::max(poseMaxScreenY, static_cast<double>(screenPos.y));
+
+                anyPosePointInFront = anyPosePointInFront || viewPos.z < 0.0;
+
+                poseOutsideLeft = poseOutsideLeft && (viewPos.x < viewPos.z * tanHalfHorizontalFov);
+                poseOutsideRight = poseOutsideRight && (viewPos.x > -viewPos.z * tanHalfHorizontalFov);
+                poseOutsideBottom = poseOutsideBottom && (viewPos.y < viewPos.z * tanHalfVerticalFov);
+                poseOutsideTop = poseOutsideTop && (viewPos.y > -viewPos.z * tanHalfVerticalFov);
+                poseOutsideNear = poseOutsideNear && (viewPos.z > -poseNearPlane);
+                poseOutsideFar = poseOutsideFar && (viewPos.z < -poseFarPlane);
             }
         }
 
@@ -363,10 +384,7 @@ void Tiled2dMapSource<L, R>::onCameraChange(const std::vector<float> &viewMatrix
                 continue;
             }
 
-            constexpr double poseScreenCullMargin = 0.1;
-            if (anyPosePointProjected &&
-                (poseMaxScreenX < -1.0 - poseScreenCullMargin || poseMinScreenX > 1.0 + poseScreenCullMargin ||
-                 poseMaxScreenY < -1.0 - poseScreenCullMargin || poseMinScreenY > 1.0 + poseScreenCullMargin)) {
+            if (poseOutsideLeft || poseOutsideRight || poseOutsideBottom || poseOutsideTop || poseOutsideNear || poseOutsideFar) {
                 clipAndFreeLambda(currentTilePolygon);
                 continue;
             }
