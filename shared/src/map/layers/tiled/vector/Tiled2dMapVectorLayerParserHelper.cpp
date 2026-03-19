@@ -111,7 +111,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                 minZoom = val.value("minzoom", 0);
                 maxZoom = val.value("maxzoom", 22);
             }
-            
+
             std::optional<::RectCoord> bounds;
             std::optional<std::string> coordinateReferenceSystem;
 
@@ -214,7 +214,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
             tileJsons[key] = val;
         } else if (type == "geojson") {
             nlohmann::json geojson;
-            Options options;
+            GeoJSONVT::Options options;
 
             if (val["minzoom"].is_number_integer()) {
                 options.minZoom = val["minzoom"].get<uint8_t>();
@@ -302,7 +302,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
         metadata = json["metadata"].dump();
         globalIsInteractable = parser.parseValue(json["metadata"]["interactable"]);
         persistingSymbolPlacement = json["metadata"].value("persistingSymbolPlacement", false);
-        
+
         // XXX: make this a per sprite option?
         if (json["metadata"].contains("use3xSprites")) {
             use3xSprites = json["metadata"]["use3xSprites"].get<bool>();

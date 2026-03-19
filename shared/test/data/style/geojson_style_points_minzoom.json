@@ -1,0 +1,30 @@
+{
+  "version": 8,
+  "name": "s",
+  "sources": {
+    "wsource": {
+      "type": "geojson",
+      "minzoom": 5,
+      "data": {
+        "type": "Point",
+        "coordinates": [102.0, 0.5]
+      }
+    }
+  },
+  "sprite": "localdata-sprites",
+  "layers": [
+    {
+      "id": "w",
+      "type": "fill",
+      "metadata": {
+        "blend-mode": "multiply"
+      },
+      "minzoom": 0,
+      "maxzoom": 6,
+      "source": "wsource",
+      "paint": {
+        "fill-color": "rgb(202, 154, 255)"
+      }
+    }
+  ]
+}
