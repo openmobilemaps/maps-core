@@ -260,4 +260,14 @@ public:
             return RectD {originX, originY, std::abs(width), std::abs(height)};
         }
     }
+
+    static bool checkProjectedCirclesCollision(const std::vector<CircleD> &circles, const CircleD &circle2, CollisionEnvironment &env, int32_t addSpacing = 0) {
+        for (const auto &circle : circles) {
+            auto projectedCircle = getProjectedCircle(CollisionCircleD(circle.x, circle.y, circle.radius), env);
+            if (projectedCircle && checkCircleCollision(*projectedCircle, circle2, addSpacing)) {
+                return true;
+            }
+        }
+        return false;
+    }
 };

@@ -1055,18 +1055,8 @@ std::optional<std::tuple<Coord, VectorLayerFeatureInfo>> Tiled2dMapVectorSymbolO
         }
 
     } else {
-        const bool hasLabelCircles = labelObject && labelObject->boundingBoxCircles.has_value();
-        std::vector<CircleD> projectedLabelCircles;
-        if (hasLabelCircles) {
-            projectedLabelCircles.reserve(labelObject->boundingBoxCircles->size());
-            for (const auto &circle : *labelObject->boundingBoxCircles) {
-                auto projectedCircle = CollisionUtil::getProjectedCircle(CollisionCircleD(circle.x, circle.y, circle.radius), collisionEnvironment);
-                if (projectedCircle) {
-                    projectedLabelCircles.push_back(*projectedCircle);
-                }
-            }
-        }
-        const bool labelHit = !projectedLabelCircles.empty() && CollisionUtil::checkCirclesCollision(projectedLabelCircles, clickHitCircle);
+        const bool labelHit = labelObject && labelObject->boundingBoxCircles.has_value() &&
+                              CollisionUtil::checkProjectedCirclesCollision(*labelObject->boundingBoxCircles, clickHitCircle, collisionEnvironment);
         const bool iconHit = iconBoundingBoxViewportAligned.width != 0 && CollisionUtil::checkRectCircleCollision(iconBoundingBoxViewportAligned, clickHitCircle);
         const bool stretchIconHit = stretchIconBoundingBoxViewportAligned.width != 0 && CollisionUtil::checkRectCircleCollision(stretchIconBoundingBoxViewportAligned, clickHitCircle);
         if (labelHit || iconHit || stretchIconHit) {
