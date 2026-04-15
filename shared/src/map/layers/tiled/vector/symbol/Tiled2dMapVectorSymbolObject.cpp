@@ -1055,9 +1055,21 @@ std::optional<std::tuple<Coord, VectorLayerFeatureInfo>> Tiled2dMapVectorSymbolO
         }
 
     } else {
-        if ((labelObject && labelObject->boundingBoxCircles.has_value() && CollisionUtil::checkCirclesCollision(*labelObject->boundingBoxCircles, clickHitCircle))
-        || (iconBoundingBoxViewportAligned.width != 0 && CollisionUtil::checkRectCircleCollision(iconBoundingBoxViewportAligned, clickHitCircle))
-        || (stretchIconBoundingBoxViewportAligned.width != 0 && CollisionUtil::checkRectCircleCollision(stretchIconBoundingBoxViewportAligned, clickHitCircle))) {
+        const bool hasLabelCircles = labelObject && labelObject->boundingBoxCircles.has_value();
+        std::vector<CircleD> projectedLabelCircles;
+        if (hasLabelCircles) {
+            projectedLabelCircles.reserve(labelObject->boundingBoxCircles->size());
+            for (const auto &circle : *labelObject->boundingBoxCircles) {
+                auto projectedCircle = CollisionUtil::getProjectedCircle(CollisionCircleD(circle.x, circle.y, circle.radius), collisionEnvironment);
+                if (projectedCircle) {
+                    projectedLabelCircles.push_back(*projectedCircle);
+                }
+            }
+        }
+        const bool labelHit = !projectedLabelCircles.empty() && CollisionUtil::checkCirclesCollision(projectedLabelCircles, clickHitCircle);
+        const bool iconHit = iconBoundingBoxViewportAligned.width != 0 && CollisionUtil::checkRectCircleCollision(iconBoundingBoxViewportAligned, clickHitCircle);
+        const bool stretchIconHit = stretchIconBoundingBoxViewportAligned.width != 0 && CollisionUtil::checkRectCircleCollision(stretchIconBoundingBoxViewportAligned, clickHitCircle);
+        if (labelHit || iconHit || stretchIconHit) {
             return std::make_tuple(Coord(systemIdentifier, coordinate.x, coordinate.y, 0.0), featureContext->getFeatureInfo(stringTable));
         }
     }
