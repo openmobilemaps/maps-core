@@ -106,7 +106,7 @@ public:
         {}
     };
 
-    static std::optional<CircleD> getProjectedCircle(const CollisionCircleD &circle, CollisionEnvironment &env) {
+    static std::optional<CircleD> getProjectedCircle(double x, double y, double radius, CollisionEnvironment &env) {
         if (env.is3d) {
             // Earth center
             env.temp2.x = 0 - env.origin.x;
@@ -119,8 +119,8 @@ public:
             double earthCenterZ = env.temp1.z / env.temp1.w;
 
             double sinX, cosX, sinY, cosY;
-            lut::sincos(circle.y, sinY, cosY);
-            lut::sincos(circle.x, sinX, cosX);
+            lut::sincos(y, sinY, cosY);
+            lut::sincos(x, sinX, cosX);
 
             env.temp2.x = 1.0 * sinY * cosX - env.origin.x;
             env.temp2.y = 1.0 * cosY - env.origin.y;
@@ -143,10 +143,10 @@ public:
             double originX = env.temp1.x * env.halfWidth + env.halfWidth;
             double originY = env.temp1.y * env.halfHeight + env.halfHeight;
 
-            return CircleD {originX, originY, circle.radius};
+            return CircleD {originX, originY, radius};
         } else {
-            env.temp2.x = circle.x - env.origin.x;
-            env.temp2.y = circle.y - env.origin.y;
+            env.temp2.x = x - env.origin.x;
+            env.temp2.y = y - env.origin.y;
             env.temp2.z = 0.0;
             env.temp2.w = 1.0;
 
@@ -155,8 +155,8 @@ public:
             double originX = (env.temp1.x / env.temp1.w) * env.halfWidth + env.halfWidth;
             double originY = (env.temp1.y / env.temp1.w) * env.halfHeight + env.halfHeight;
 
-            env.temp2.x = circle.radius;
-            env.temp2.y = circle.radius;
+            env.temp2.x = radius;
+            env.temp2.y = radius;
             env.temp2.z = 0.0;
             env.temp2.w = 0.0;
 
@@ -167,6 +167,10 @@ public:
             double iRadius = std::sqrt(env.temp1.x * env.temp1.x + env.temp1.y * env.temp1.y);
             return CircleD {originX, originY, iRadius};
         }
+    }
+
+    static std::optional<CircleD> getProjectedCircle(const CollisionCircleD &circle, CollisionEnvironment &env) {
+        return getProjectedCircle(circle.x, circle.y, circle.radius, env);
     }
 
     static std::optional<RectD> getProjectedRectangle(const CollisionRectD &rectangle, CollisionEnvironment &env) {
@@ -263,7 +267,7 @@ public:
 
     static bool checkProjectedCirclesCollision(const std::vector<CircleD> &circles, const CircleD &circle2, CollisionEnvironment &env, int32_t addSpacing = 0) {
         for (const auto &circle : circles) {
-            auto projectedCircle = getProjectedCircle(CollisionCircleD(circle.x, circle.y, circle.radius), env);
+            const auto &projectedCircle = getProjectedCircle(circle.x, circle.y, circle.radius, env);
             if (projectedCircle && checkCircleCollision(*projectedCircle, circle2, addSpacing)) {
                 return true;
             }
