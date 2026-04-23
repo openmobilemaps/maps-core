@@ -14,48 +14,59 @@
 #include <cmath>
 #include <unordered_map>
 
-struct TileOptions {
-    // simplification tolerance (higher means simpler)
-    double tolerance = 1.0;
-
-    // tile extent
-    uint32_t extent = 4096;
-
-    // tile buffer on each side
-    uint32_t buffer = 64;
-};
-
-struct Options : TileOptions {
-    // min zoom to will be visible
-    uint8_t minZoom = 0;
-
-    // max zoom to preserve detail on
-    uint8_t maxZoom = 18;
-
-    // max zoom in the tile index
-    uint8_t indexMaxZoom = 5;
-
-    // max number of points per tile in the tile index
-    uint32_t indexMaxPoints = 100000;
-};
-
-inline uint64_t toID(uint8_t z, uint32_t x, uint32_t y) {
-    return (((1ull << z) * y + x) * 32) + z;
-}
-
 class GeoJSONVT: public GeoJSONVTInterface, public std::enable_shared_from_this<GeoJSONVT> {
+private:
+    struct TileOptions {
+        // simplification tolerance (higher means simpler)
+        double tolerance = 1.0;
+
+        // tile extent
+        uint32_t extent = 4096;
+
+        // tile buffer on each side
+        uint32_t buffer = 64;
+
+        // min zoom to will be visible
+        uint8_t minZoom = 0;
+
+        // max zoom to preserve detail on
+        uint8_t maxZoom = 18;
+
+        // max zoom in the tile index
+        uint8_t indexMaxZoom = 5;
+
+        // max number of points per tile in the tile index
+        uint32_t indexMaxPoints = 100000;
+    };
+
+    inline uint64_t toID(uint8_t z, uint32_t x, uint32_t y) {
+        return (((1ull << z) * y + x) * 32) + z;
+    }
+
+
+public:
+    struct Options {
+        std::optional<uint8_t> minZoom;
+        std::optional<uint8_t> maxZoom;
+        std::optional<uint32_t> extent;
+    };
+
 private:
     std::weak_ptr<StringInterner> stringTable;
 
-public:
-    Options options;
+    // effective parameter values for tile generation
+    TileOptions options;
+
+    // parameters as configured in style
+    Options configuredOptions;
 
     const Tile emptyTile = Tile();
 
+public:
     GeoJSONVT(const std::shared_ptr<GeoJson> &geoJson,
               const std::shared_ptr<StringInterner> &stringTable,
-              const Options &options_ = Options())
-        : options(options_)
+              Options _config = Options())
+        : configuredOptions(_config)
         , loadingResult(DataLoaderResult(std::nullopt, std::nullopt, LoaderStatus::OK, std::nullopt))
         , stringTable(stringTable) {
         initialize(geoJson);
@@ -65,8 +76,8 @@ public:
               const std::vector<std::shared_ptr<::LoaderInterface>> &loaders,
               const std::shared_ptr<Tiled2dMapVectorLayerLocalDataProviderInterface> &localDataProvider,
               const std::shared_ptr<StringInterner> &stringTable,
-              const Options &options_ = Options())
-        : options(options_)
+              Options configurationOptions = Options())
+        : configuredOptions(configurationOptions)
         , sourceName(sourceName)
         , geoJsonUrl(geoJsonUrl)
         , loaders(loaders)
@@ -144,14 +155,7 @@ public:
     }
 
     void initialize(const std::shared_ptr<GeoJson> &geoJson) {
-        // If the GeoJSON contains only points, there is no need to split it into smaller tiles,
-        // as there are no opportunities for simplification, merging, or meaningful point reduction.
-        // Keep point-only sources on a single zoom level only if minZoom is explicitly configured (> 0).
-        // For the default minZoom=0 case, collapsing to z0 creates very large matching tolerances and can
-        // hide unrelated points due to symbol ownership deduplication.
-        if (geoJson->hasOnlyPoints && options.minZoom > 0) {
-            options.maxZoom = options.minZoom;
-        }
+        options = getEffectiveOptions(configuredOptions, geoJson->hasOnlyPoints);
 
         const uint32_t z2 = 1u << options.maxZoom;
 
@@ -186,10 +190,7 @@ public:
     }
 
     void reload(const std::shared_ptr<GeoJson> &geoJson) override {
-        // Keep behavior consistent with initialize().
-        if (geoJson->hasOnlyPoints && options.minZoom > 0) {
-            options.maxZoom = options.minZoom;
-        }
+        options = getEffectiveOptions(configuredOptions, geoJson->hasOnlyPoints);
 
         const uint32_t z2 = 1u << options.maxZoom;
 
@@ -357,4 +358,36 @@ private:
         }
         waitingPromises.clear();
     }
+
+    static TileOptions getEffectiveOptions(const Options &config, bool hasOnlyPoints) {
+        TileOptions options; // initialize with defaults.
+        if (config.extent.has_value()) {
+            options.extent = *config.extent;
+        }
+        // If the GeoJSON contains only points, there is no need to split it into smaller tiles,
+        // as there are no opportunities for simplification, merging, or meaningful point reduction.
+        // Keep point-only sources on a single zoom level, unless minZoom and
+        // maxZoom are explicitly configured.
+        if (hasOnlyPoints && !(config.minZoom.has_value() && config.maxZoom.has_value())) {
+            if(config.minZoom.has_value()) {
+                options.minZoom = *config.minZoom;
+                options.maxZoom = *config.minZoom;
+            } else if (config.maxZoom.has_value()) {
+                options.minZoom = *config.maxZoom;
+                options.maxZoom = *config.maxZoom;
+            } else {
+                options.minZoom = 0;
+                options.maxZoom = 0;
+            }
+        } else {
+            if(config.minZoom.has_value()) {
+                options.minZoom = *config.minZoom;
+            }
+            if(config.maxZoom.has_value()) {
+                options.maxZoom = *config.maxZoom;
+            }
+        }
+        return options;
+    }
+
 };

@@ -17,7 +17,7 @@ class GeoJsonVTFactory {
 public:
     static std::shared_ptr<GeoJSONVTInterface> getGeoJsonVt(const std::shared_ptr<GeoJson> &geoJson,
                                                             const std::shared_ptr<StringInterner> &stringTable,
-                                                            const Options& options = Options()) {
+                                                            const GeoJSONVT::Options& options = GeoJSONVT::Options()) {
         return std::static_pointer_cast<GeoJSONVTInterface>(std::make_shared<GeoJSONVT>(geoJson, stringTable, options));
     }
 
@@ -25,7 +25,7 @@ public:
                                                             const std::string &geoJsonUrl,
                                                             const std::vector<std::shared_ptr<::LoaderInterface>> &loaders, const std::shared_ptr<Tiled2dMapVectorLayerLocalDataProviderInterface> &localDataProvider,
                                                             const std::shared_ptr<StringInterner> &stringTable,
-                                                            const Options& options = Options()) {
+                                                            const GeoJSONVT::Options& options = GeoJSONVT::Options()) {
         std::shared_ptr<GeoJSONVT> vt = std::make_shared<GeoJSONVT>(sourceName, geoJsonUrl, loaders, localDataProvider, stringTable, options);
         vt->load();
         return vt;

@@ -1,0 +1,51 @@
+{
+  "version": 8,
+  "name": "s",
+  "sources": {
+    "wsource": {
+      "type": "geojson",
+      "data": {
+        "type": "FeatureCollection",
+        "features": [
+          {
+            "type": "Feature",
+            "geometry": {
+              "type": "Point",
+              "coordinates":
+                [8.5, 46.8]
+
+            }
+          },
+          {
+            "type": "Feature",
+            "geometry": {
+              "type": "LineString",
+              "coordinates": [
+                [102.0, 0.0],
+                [103.0, 1.0],
+                [104.0, 0.0],
+                [105.0, 1.0]
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "sprite": "localdata-sprites",
+  "layers": [
+    {
+      "id": "w",
+      "type": "fill",
+      "metadata": {
+        "blend-mode": "multiply"
+      },
+      "minzoom": 0,
+      "maxzoom": 6,
+      "source": "wsource",
+      "paint": {
+        "fill-color": "rgb(202, 154, 255)"
+      }
+    }
+  ]
+}

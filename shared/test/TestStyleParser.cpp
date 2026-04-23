@@ -21,24 +21,48 @@ class TestGeoJSONTileDelegate : public GeoJSONTileDelegate, public ActorObject {
     void failedToLoad() override { failedToLoadCalled = true; }
 };
 
-TEST_CASE("TestStyleParser", "[GeoJson inline]") {
-    auto jsonString = TestData::readFileToString("style/geojson_style_inline.json");
+static void testGeojsonInlineParse(const char* filename, int expectedMinZoom, int expectedMaxZoom) {
+    auto jsonString = TestData::readFileToString(filename);
     std::shared_ptr<StringInterner> stringTable = std::make_shared<StringInterner>(ValueKeys::newStringInterner());
     auto result = Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromString("test", jsonString, nullptr, {}, stringTable, {});
     REQUIRE(result.mapDescription != nullptr);
     REQUIRE(!result.mapDescription->geoJsonSources.empty());
 
     std::shared_ptr<GeoJSONVTInterface> geojsonSource = result.mapDescription->geoJsonSources.begin()->second;
-    REQUIRE(geojsonSource->getMinZoom() == 0);
-    REQUIRE(geojsonSource->getMaxZoom() == 0);
+    REQUIRE(geojsonSource->getMinZoom() == expectedMinZoom);
+    REQUIRE(geojsonSource->getMaxZoom() == expectedMaxZoom);
+    REQUIRE(result.mapDescription->layers[0]->sourceMinZoom == expectedMinZoom);
+    REQUIRE(result.mapDescription->layers[0]->sourceMaxZoom == expectedMaxZoom);
 
-    REQUIRE(result.mapDescription->layers[0]->sourceMinZoom == 0);
-    REQUIRE(result.mapDescription->layers[0]->sourceMaxZoom == 0);
     REQUIRE_NOTHROW(geojsonSource->getTile(0, 0, 0));
-    REQUIRE_THROWS(geojsonSource->getTile(6, 33, 22));
+    if(expectedMaxZoom >= 6) {
+        REQUIRE_NOTHROW(geojsonSource->getTile(6, 33, 22));
+    } else {
+        REQUIRE_THROWS(geojsonSource->getTile(6, 33, 22));
+    }
 }
 
-TEST_CASE("TestStyleParser", "[GeoJson local provider]") {
+TEST_CASE("GeoJson inline points min and maxzoom", "[TestStyleParser]") {
+    testGeojsonInlineParse("style/geojson_style_points_minmaxzoom.json", 0, 25);
+}
+
+TEST_CASE("GeoJson inline points no min/maxzoom", "[TestStyleParser]") {
+    testGeojsonInlineParse("style/geojson_style_points_nominmaxzoom.json", 0, 0);
+};
+
+TEST_CASE("GeoJson inline points minzoom", "[TestStyleParser]") {
+    testGeojsonInlineParse("style/geojson_style_points_minzoom.json", 5, 5);
+};
+
+TEST_CASE("GeoJson inline points maxzoom", "[TestStyleParser]") {
+    testGeojsonInlineParse("style/geojson_style_points_maxzoom.json", 25, 25);
+};
+
+TEST_CASE("GeoJson inline mixed no min/maxzoom", "[TestStyleParser]") {
+    testGeojsonInlineParse("style/geojson_style_mixed_nominmaxzoom.json", 0, 18);
+};
+
+TEST_CASE("GeoJson local provider", "[TestStyleParser]") {
     auto jsonString = TestData::readFileToString("style/geojson_style_provider.json");
     auto provider =
         std::make_shared<TestLocalDataProvider>(std::unordered_map<std::string, std::string>{{"wsource", "geojson.geojson"}});
