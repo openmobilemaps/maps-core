@@ -485,7 +485,7 @@ open class TouchHandler: MCTouchInterface {
     open func onTwoFingerMoveComplete() -> Bool {
         false
     }
-    
+
     open func onScroll(_ posScreen: MCVec2F, scrollDelta: Float) -> Bool {
         false
     }

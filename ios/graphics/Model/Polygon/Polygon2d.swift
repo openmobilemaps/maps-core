@@ -215,7 +215,7 @@ extension Polygon2d: MCMaskingObjectInterface {
 
 extension Polygon2d: MCPolygon2dInterface {
     func setSubdivisionFactor(_ factor: Int32) {}
-    
+
     func setVertices(
         _ vertices: MCSharedBytes, indices: MCSharedBytes, origin: MCVec3D, is3d: Bool
     ) {
