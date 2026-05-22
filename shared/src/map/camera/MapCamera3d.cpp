@@ -73,6 +73,14 @@ void MapCamera3d::viewportSizeChanged() {
         updateZoom(zoom);
     }
 
+    // Apply pending bounding box if viewport size is now known
+    if (pendingBoundingBox.has_value() && viewportSize.x > 0 && viewportSize.y > 0) {
+        auto pending = pendingBoundingBox.value();
+        pendingBoundingBox = std::nullopt;
+        moveToBoundingBox(pending.boundingBox, pending.paddingPc, pending.animated, 
+                         pending.minZoom, pending.maxZoom);
+    }
+
     updateMatrices();
 
     notifyListeners(ListenerType::BOUNDS);
@@ -241,6 +249,15 @@ void MapCamera3d::moveToBoundingBox(const RectCoord &boundingBox, float paddingP
     assert(boundingBox.topLeft.systemIdentifier == 4326);
 
     Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
+    
+    if (sizeViewport.x == 0 && sizeViewport.y == 0) {
+        // Viewport size not yet known, store parameters for later
+        pendingBoundingBox = PendingBoundingBox(boundingBox, paddingPc, animated, minZoom, maxZoom);
+        return;
+    }
+
+    // Clear any pending bounding box since we're applying it now
+    pendingBoundingBox = std::nullopt;
 
     auto distance =
         calculateDistance(boundingBox.topLeft.y, boundingBox.topLeft.x, boundingBox.bottomRight.y, boundingBox.bottomRight.x);
