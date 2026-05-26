@@ -706,14 +706,20 @@ void Tiled2dMapVectorSymbolObject::updateStretchIconProperties(VectorModificatio
         bottomPadding = (spriteDesc.height - contentBox[3]) * scale;
     }
 
+    const auto scaledBaseSpriteWidth = spriteWidth * iconSize.value;
+    const auto scaledBaseSpriteHeight = spriteHeight * iconSize.value;
+
     auto scaleX = 1.0;
     auto scaleY = 1.0;
-    if (labelObject) {
+    if (labelObject && scaledBaseSpriteWidth > 0.0 && scaledBaseSpriteHeight > 0.0) {
         const double textWidth = labelObject->dimensions.x + (leftPadding + rightPadding);
         const double textHeight = labelObject->dimensions.y + (topPadding + bottomPadding);
-        scaleX = std::max(1.0, textWidth / (spriteWidth * iconSize.value));
-        scaleY = std::max(1.0, textHeight / (spriteHeight * iconSize.value));
+        scaleX = std::max(1.0, textWidth / scaledBaseSpriteWidth);
+        scaleY = std::max(1.0, textHeight / scaledBaseSpriteHeight);
     }
+
+    spriteWidth = scaledBaseSpriteWidth;
+    spriteHeight = scaledBaseSpriteHeight;
 
     if (iconTextFit == IconTextFit::WIDTH || iconTextFit == IconTextFit::BOTH) {
         spriteWidth *= scaleX;
