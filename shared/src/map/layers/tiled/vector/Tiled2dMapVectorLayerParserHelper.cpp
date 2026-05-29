@@ -212,9 +212,9 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
 
         } else if (type == "vector" && val["tiles"].is_array()) {
             tileJsons[key] = val;
-        } else if (type == "geojson") {
-            nlohmann::json geojson;
+        } else if (type == "geojson" || type == "geobuf") {
             Options options;
+            const auto sourceDataFormat = type == "geobuf" ? GeoDataFormat::Geobuf : GeoDataFormat::GeoJson;
 
             if (val["minzoom"].is_number_integer()) {
                 options.minZoom = val["minzoom"].get<uint8_t>();
@@ -226,7 +226,14 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                 options.extent = val["extent"].get<uint32_t>();
             }
             if (val["data"].is_string()) {
-                geojsonSources[key] = GeoJsonVTFactory::getGeoJsonVt(key, replaceUrlParams(val["data"].get<std::string>(), sourceUrlParams), loaders, localDataProvider, stringTable, options);
+                geojsonSources[key] = GeoJsonVTFactory::getGeoJsonVt(
+                    key,
+                    replaceUrlParams(val["data"].get<std::string>(), sourceUrlParams),
+                    loaders,
+                    localDataProvider,
+                    stringTable,
+                    sourceDataFormat,
+                    options);
             } else {
                 try {
                     geojsonSources[key] = GeoJsonVTFactory::getGeoJsonVt(GeoJsonParser::getGeoJson(val["data"], *stringTable), stringTable, options);

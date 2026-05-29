@@ -21,6 +21,36 @@ class TestGeoJSONTileDelegate : public GeoJSONTileDelegate, public ActorObject {
     void failedToLoad() override { failedToLoadCalled = true; }
 };
 
+class TestGeobufLocalDataProvider : public Tiled2dMapVectorLayerLocalDataProviderInterface {
+  public:
+    explicit TestGeobufLocalDataProvider(std::vector<char> geobufData)
+        : geobufData(std::move(geobufData)) {}
+
+    djinni::Future<DataLoaderResult> loadGeojson(const std::string &sourceName, const std::string &url) override {
+        auto promise = ::djinni::Promise<DataLoaderResult>();
+        promise.setValue(
+            DataLoaderResult(::djinni::DataRef(geobufData.data(), geobufData.size()), std::nullopt, LoaderStatus::OK, std::nullopt));
+        return promise.getFuture();
+    }
+
+    std::optional<std::string> getStyleJson() override { return std::nullopt; }
+
+    djinni::Future<TextureLoaderResult> loadSpriteAsync(const std::string &spriteId, const std::string &url, int32_t scale) override {
+        auto promise = ::djinni::Promise<TextureLoaderResult>();
+        promise.setValue(TextureLoaderResult(nullptr, std::nullopt, LoaderStatus::ERROR_404, std::nullopt));
+        return promise.getFuture();
+    }
+
+    djinni::Future<DataLoaderResult> loadSpriteJsonAsync(const std::string &spriteId, const std::string &url, int32_t scale) override {
+        auto promise = ::djinni::Promise<DataLoaderResult>();
+        promise.setValue(DataLoaderResult(std::nullopt, std::nullopt, LoaderStatus::ERROR_404, std::nullopt));
+        return promise.getFuture();
+    }
+
+  private:
+    std::vector<char> geobufData;
+};
+
 TEST_CASE("TestStyleParser", "[GeoJson inline]") {
     auto jsonString = TestData::readFileToString("style/geojson_style_inline.json");
     std::shared_ptr<StringInterner> stringTable = std::make_shared<StringInterner>(ValueKeys::newStringInterner());
@@ -70,6 +100,66 @@ TEST_CASE("TestStyleParser", "[GeoJson local provider]") {
 
     const auto &tile = geojsonSource->getTile(6, 33, 22);
 
+    REQUIRE(!tile.getFeatures().empty());
+}
+
+TEST_CASE("TestStyleParser", "[Geobuf local provider]") {
+    auto jsonString = R"GEOBUF_STYLE({
+  "version": 8,
+  "name": "s",
+  "sources": {
+    "wsource": {
+      "type": "geobuf",
+      "minzoom": 0,
+      "maxzoom": 25,
+      "data": "localdata-url"
+    }
+  },
+  "sprite": "localdata-sprites",
+  "layers": [
+    {
+      "id": "w",
+      "type": "fill",
+      "metadata": {
+        "blend-mode": "multiply"
+      },
+      "minzoom": 0,
+      "maxzoom": 6,
+      "source": "wsource",
+      "paint": {
+        "fill-color": "rgb(202, 154, 255)"
+      }
+    }
+  ]
+})GEOBUF_STYLE";
+    auto provider = std::make_shared<TestGeobufLocalDataProvider>(TestData::readFileToBuffer("geobuf/featurecollection_point_line.pbf"));
+    std::shared_ptr<StringInterner> stringTable = std::make_shared<StringInterner>(ValueKeys::newStringInterner());
+    auto result = Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromString("test", jsonString, provider, {}, stringTable, {});
+    REQUIRE(result.mapDescription != nullptr);
+    REQUIRE(!result.mapDescription->geoJsonSources.empty());
+
+    std::shared_ptr<GeoJSONVTInterface> geobufSource = result.mapDescription->geoJsonSources.begin()->second;
+
+    auto scheduler = std::make_shared<TestScheduler>();
+    auto delegate =
+        Actor<TestGeoJSONTileDelegate>(std::make_shared<Mailbox>(scheduler), std::make_shared<TestGeoJSONTileDelegate>());
+
+    geobufSource->setDelegate(delegate.weakActor<GeoJSONTileDelegate>());
+
+    REQUIRE(!delegate.unsafe()->didLoadCalled);
+
+    auto promise = std::make_shared<::djinni::Promise<std::shared_ptr<DataLoaderResult>>>();
+    geobufSource->waitIfNotLoaded(promise);
+    promise->getFuture().wait();
+
+    scheduler->drain();
+
+    REQUIRE(delegate.unsafe()->didLoadCalled);
+
+    REQUIRE(geobufSource->getMinZoom() == 0);
+    REQUIRE(geobufSource->getMaxZoom() == 25);
+
+    const auto &tile = geobufSource->getTile(6, 33, 22);
     REQUIRE(!tile.getFeatures().empty());
 }
 
