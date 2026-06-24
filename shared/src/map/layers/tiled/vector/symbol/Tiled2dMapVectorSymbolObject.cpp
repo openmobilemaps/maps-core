@@ -137,7 +137,6 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
         }
 
         if (fontResult && fontResult->status == LoaderStatus::OK) {
-            auto textOffset = description->style.getTextOffset(evalContext);
             const auto textRadialOffset = description->style.getTextRadialOffset(evalContext);
             const auto letterSpacing = description->style.getTextLetterSpacing(evalContext);
 
@@ -145,7 +144,7 @@ Tiled2dMapVectorSymbolObject::Tiled2dMapVectorSymbolObject(const std::weak_ptr<M
             boundingBoxRotationAlignment = labelRotationAlignment;
             labelObject = std::make_shared<Tiled2dMapVectorSymbolLabelObject>(converter, featureContext, description, text, fullText,
                                                                               coordinate, lineCoordinates, textAnchor,
-                                                                              textJustify, fontResult, textOffset, textRadialOffset,
+                                                                              textJustify, fontResult, textRadialOffset,
                                                                               description->style.getTextLineHeight(evalContext),
                                                                               letterSpacing,
                                                                               description->style.getTextMaxWidth(evalContext),

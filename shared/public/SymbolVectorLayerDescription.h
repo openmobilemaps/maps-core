@@ -224,9 +224,9 @@ public:
         return textTransformEvaluator.getResult(context, defaultValue).value;
     }
 
-    Vec2F getTextOffset(const EvaluationContext &context) {
+    FeatureValueEvaluationResult<Vec2F> getTextOffset(const EvaluationContext &context) {
         static const Vec2F defaultValue(0.0, 0.0);
-        return textOffsetEvaluator.getResult(context, defaultValue).value;
+        return textOffsetEvaluator.getResult(context, defaultValue);
     }
 
     double getTextRadialOffset(const EvaluationContext &context) {
