@@ -53,7 +53,6 @@ public:
                                       const Anchor &textAnchor,
                                       const TextJustify &textJustify,
                                       const std::shared_ptr<FontLoaderResult> fontResult,
-                                      const Vec2F &offset,
                                       const double radialOffset,
                                       const double lineHeight,
                                       const double letterSpacing,
@@ -190,7 +189,6 @@ private:
     const SymbolAlignment rotationAlignment;
     TextJustify textJustify;
     const Anchor textAnchor;
-    const Vec2F offset;
     const double radialOffset;
 
     float spaceAdvance = 0.0f;
@@ -230,6 +228,7 @@ private:
     DistanceIndex currentReferencePointIndex = DistanceIndex(0, 0.0);
 
     FeatureValueEvaluationResult<double> textSize = 0.0;
+    FeatureValueEvaluationResult<Vec2F> textOffset = Vec2F(0.0, 0.0);
     FeatureValueEvaluationResult<double> textRotate = 0.0;
     FeatureValueEvaluationResult<double> textPadding = 0.0;
     FeatureValueEvaluationResult<SymbolAlignment> textAlignment = SymbolAlignment::AUTO;

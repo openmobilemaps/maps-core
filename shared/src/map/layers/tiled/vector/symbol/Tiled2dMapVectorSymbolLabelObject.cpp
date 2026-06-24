@@ -31,7 +31,6 @@ Tiled2dMapVectorSymbolLabelObject::Tiled2dMapVectorSymbolLabelObject(const std::
                                                                      const Anchor &textAnchor,
                                                                      const TextJustify &textJustify,
                                                                      const std::shared_ptr<FontLoaderResult> fontResult,
-                                                                     const Vec2F &offset,
                                                                      const double radialOffset,
                                                                      const double lineHeight,
                                                                      const double letterSpacing,
@@ -55,7 +54,6 @@ Tiled2dMapVectorSymbolLabelObject::Tiled2dMapVectorSymbolLabelObject(const std::
           maxCharacterAngle(maxCharacterAngle),
           textAnchor(textAnchor),
           textJustify(textJustify),
-          offset(offset),
           radialOffset(radialOffset),
           fontResult(fontResult),
           fullText(fullText),
@@ -285,6 +283,7 @@ void Tiled2dMapVectorSymbolLabelObject::updateLayerDescription(const std::shared
     lastZoomEvaluation = -1;
 
     textSize.invalidate();
+    textOffset.invalidate();
     textRotate.invalidate();
     textPadding.invalidate();
     textAlignment.invalidate();
@@ -338,6 +337,10 @@ void Tiled2dMapVectorSymbolLabelObject::evaluateStyleProperties(const double zoo
 
     if(textSize.isReevaluationNeeded(evalContext)) {
         textSize = description->style.getTextSize(evalContext);
+    }
+
+    if(textOffset.isReevaluationNeeded(evalContext)) {
+        textOffset = description->style.getTextOffset(evalContext);
     }
 
     if(textAlignment.isReevaluationNeeded(evalContext)) {
@@ -576,31 +579,31 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(VectorModification
     }
 
     // TODO: currently only shifting to top right
-    Vec2D textOffset(0.0, 0.0);
+    Vec2D appliedTextOffset(0.0, 0.0);
     if (radialOffset != 0) {
         // Text offset is ignored when radial offset is set
-        textOffset.x = radialOffset;
-        textOffset.y = -radialOffset;
+        appliedTextOffset.x = radialOffset;
+        appliedTextOffset.y = -radialOffset;
     } else {
-        textOffset.x = offset.x;
-        textOffset.y = offset.y;
+        appliedTextOffset.x = textOffset.value.x;
+        appliedTextOffset.y = textOffset.value.y;
     }
 
     switch (textAnchor) {
         case Anchor::CENTER:
         case Anchor::TOP:
         case Anchor::BOTTOM:
-            anchorOffset.x -= size.x / 2.0 - textOffset.x * fontSize;
+            anchorOffset.x -= size.x / 2.0 - appliedTextOffset.x * fontSize;
             break;
         case Anchor::LEFT:
         case Anchor::TOP_LEFT:
         case Anchor::BOTTOM_LEFT:
-            anchorOffset.x += textOffset.x * fontSize;
+            anchorOffset.x += appliedTextOffset.x * fontSize;
             break;
         case Anchor::RIGHT:
         case Anchor::TOP_RIGHT:
         case Anchor::BOTTOM_RIGHT:
-            anchorOffset.x -= size.x - textOffset.x * fontSize;
+            anchorOffset.x -= size.x - appliedTextOffset.x * fontSize;
             break;
         default:
             break;
@@ -611,21 +614,21 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(VectorModification
         case Anchor::LEFT:
         case Anchor::RIGHT:
             anchorOffset.y = -size.y * 0.5;
-            anchorOffset.y += textOffset.y * fontSize + yOffset;
+            anchorOffset.y += appliedTextOffset.y * fontSize + yOffset;
             break;
         case Anchor::TOP:
         case Anchor::TOP_LEFT:
         case Anchor::TOP_RIGHT:
-            anchorOffset.y += textOffset.y * fontSize + yOffset;
+            anchorOffset.y += appliedTextOffset.y * fontSize + yOffset;
             break;
         case Anchor::BOTTOM:
         case Anchor::BOTTOM_LEFT:
         case Anchor::BOTTOM_RIGHT:
             if (radialOffset != 0.0) {
-                anchorOffset.y -= (lineHeight - fontResult->fontData->info.lineHeight + 1.0 - textOffset.y) * fontSize;
+                anchorOffset.y -= (lineHeight - fontResult->fontData->info.lineHeight + 1.0 - appliedTextOffset.y) * fontSize;
             } else {
                 anchorOffset.y = -1 * size.y;
-                anchorOffset.y -= ((fontResult->fontData->info.lineHeight - fontResult->fontData->info.base) * lineHeight - textOffset.y) * fontSize + yOffset;
+                anchorOffset.y -= ((fontResult->fontData->info.lineHeight - fontResult->fontData->info.base) * lineHeight - appliedTextOffset.y) * fontSize + yOffset;
             }
             break;
         default:
@@ -782,7 +785,7 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(VectorModificatio
             break;
     }
     
-    auto yOffset = offset.y * fontSize;
+    auto yOffset = textOffset.value.y * fontSize;
 
     if (wasReversed) {
         yOffset *= -1;
