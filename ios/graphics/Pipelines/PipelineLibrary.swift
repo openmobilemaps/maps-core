@@ -19,6 +19,7 @@ public enum PipelineDescriptorFactory {
         vertexShader: String,
         fragmentShader: String,
         blendMode: MCBlendMode,
+        device: MTLDevice,
         library: MTLLibrary,
         constants: MTLFunctionConstantValues? = nil,
         tessellation: MCTessellationMode = MCTessellationMode.NONE
@@ -59,7 +60,7 @@ public enum PipelineDescriptorFactory {
 
         if let constants = constants {
             guard let vertexFunction = try? library.makeFunction(name: vertexShader, constantValues: constants),
-                let fragmentFunction = try? library.makeFunction(name: fragmentShader, constantValues: constants)
+                  let fragmentFunction = try? library.makeFunction(name: fragmentShader, constantValues: constants)
             else {
                 fatalError("Cannot locate the shaders for \(label)")
             }
@@ -68,7 +69,7 @@ public enum PipelineDescriptorFactory {
             pipelineDescriptor.fragmentFunction = fragmentFunction
         } else {
             guard let vertexFunction = library.makeFunction(name: vertexShader),
-                let fragmentFunction = library.makeFunction(name: fragmentShader)
+                  let fragmentFunction = library.makeFunction(name: fragmentShader)
             else {
                 fatalError("Cannot locate the shaders for \(label)")
             }
@@ -76,16 +77,16 @@ public enum PipelineDescriptorFactory {
             pipelineDescriptor.vertexFunction = vertexFunction
             pipelineDescriptor.fragmentFunction = fragmentFunction
         }
-        
+
         if tessellation != MCTessellationMode.NONE {
-            pipelineDescriptor.maxTessellationFactor = 64
+            pipelineDescriptor.maxTessellationFactor = maxSupportedTessellationFactor(for: device)
             pipelineDescriptor.tessellationPartitionMode = .pow2
             pipelineDescriptor.tessellationFactorFormat = .half
             pipelineDescriptor.tessellationFactorStepFunction = .constant
             pipelineDescriptor.tessellationOutputWindingOrder = .clockwise
             pipelineDescriptor.tessellationControlPointIndexType = .none
             pipelineDescriptor.isTessellationFactorScaleEnabled = false
-            
+
             if tessellation == MCTessellationMode.TRIANGLE {
                 pipelineDescriptor.tessellationOutputWindingOrder = .counterClockwise
                 pipelineDescriptor.tessellationControlPointIndexType = .uint16
@@ -93,16 +94,26 @@ public enum PipelineDescriptorFactory {
         }
         return pipelineDescriptor
     }
+
+    private static func maxSupportedTessellationFactor(for device: MTLDevice) -> Int {
+        if #available(iOS 13.0, macOS 10.15, tvOS 13.0, *) {
+            if device.supportsFamily(.apple5) || device.supportsFamily(.mac2) {
+                return 64
+            }
+        }
+        return 16
+    }
 }
 
 extension PipelineDescriptorFactory {
-    static func pipelineDescriptor(pipeline: Pipeline, library: MTLLibrary) -> MTLRenderPipelineDescriptor {
+    static func pipelineDescriptor(pipeline: Pipeline, device: MTLDevice, library: MTLLibrary) -> MTLRenderPipelineDescriptor {
         pipelineDescriptor(
             vertexDescriptor: pipeline.type.vertexDescriptor,
             label: pipeline.type.label,
             vertexShader: pipeline.type.vertexShader,
             fragmentShader: pipeline.type.fragmentShader,
             blendMode: pipeline.blendMode,
+            device: device,
             library: library,
             tessellation: pipeline.type.tessellation
         )
@@ -363,7 +374,7 @@ extension PipelineLibrary {
                 Pipeline.allCases.map(\.self)
             ) { pipeline -> MTLRenderPipelineState in
                 do {
-                    let pipelineDescriptor = PipelineDescriptorFactory.pipelineDescriptor(pipeline: pipeline, library: library)
+                    let pipelineDescriptor = PipelineDescriptorFactory.pipelineDescriptor(pipeline: pipeline, device: device, library: library)
                     return try device.makeRenderPipelineState(descriptor: pipelineDescriptor)
                 } catch {
                     // Log the JSON (key) and the error
