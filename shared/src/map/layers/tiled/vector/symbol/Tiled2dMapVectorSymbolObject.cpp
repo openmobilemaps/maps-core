@@ -538,9 +538,8 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(VectorModificationWrappe
         iconBoundingBoxViewportAligned.x = (-iconWidth * 0.5) - scaledIconPadding + offsets[2 * countOffset] * viewPortSize.x * 0.5;
         iconBoundingBoxViewportAligned.y = (-iconHeight * 0.5) - scaledIconPadding - offsets[2 * countOffset + 1] * viewPortSize.y * 0.5;
 
-        const double f = 2.0 / dpFactor;
-        offsets[2 * countOffset] += iconOffset.value.x * iconWidth * f / viewPortSize.x;
-        offsets[2 * countOffset + 1] += iconOffset.value.y * iconHeight * f / viewPortSize.y;
+        offsets[2 * countOffset] += iconOffset.value.x * iconSize.value * 1.0 / viewPortSize.x;
+        offsets[2 * countOffset + 1] += iconOffset.value.y * iconSize.value * 1.0 / viewPortSize.y;
     } else {
         renderCoordinate = getRenderCoordinates(iconAnchor, -rotations[countOffset], iconWidth, iconHeight);
     }
@@ -553,9 +552,8 @@ void Tiled2dMapVectorSymbolObject::updateIconProperties(VectorModificationWrappe
         double sin, cos;
         lut::sincos(a, sin, cos);
 
-        const double iconOffsetX = iconOffset.value.x * iconWidth / dpFactor;
-        const double iconOffsetY = iconOffset.value.y * iconHeight / dpFactor;
-
+        const double iconOffsetX = iconOffset.value.x * iconSize.value * scaleFactor;
+        const double iconOffsetY = iconOffset.value.y * iconSize.value * scaleFactor;
         // add rotation offset
         x += iconOffsetX * cos - iconOffsetY * sin;
         y += iconOffsetX * sin + iconOffsetY * cos;
